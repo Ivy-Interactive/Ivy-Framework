@@ -1,14 +1,14 @@
 export const inputStyles = {
   invalid:
-    "bg-destructive border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive",
+    'bg-destructive border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive',
   invalidInput:
-    "border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive",
+    'border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive',
 };
 
 export const getWidth = (width?: string): React.CSSProperties => {
   if (!width) return {};
 
-  const [wantedWidth, minWidth, maxWidth] = width.split(",");
+  const [wantedWidth, minWidth, maxWidth] = width.split(',');
 
   return {
     ..._getWantedWidth(wantedWidth),
@@ -19,34 +19,34 @@ export const getWidth = (width?: string): React.CSSProperties => {
 
 const _getWantedWidth = (width?: string): React.CSSProperties => {
   if (!width) return {};
-  const [sizeType, value] = width.split(":");
+  const [sizeType, value] = width.split(':');
   const remValue = parseFloat(value) * 0.25;
   switch (sizeType.toLowerCase()) {
-    case "units":
+    case 'units':
       return { width: `${remValue}rem`, maxWidth: `${remValue}rem` };
-    case "px":
+    case 'px':
       return { width: `${value}px` };
-    case "rem":
+    case 'rem':
       return { width: `${value}rem` };
-    case "fraction":
+    case 'fraction':
       return {
         width: `${parseFloat(value) * 100}%`,
       };
-    case "full":
-      return { width: "100%" };
-    case "fit":
-      return { width: "fit-content" };
-    case "screen":
-      return { width: "100vw" };
-    case "mincontent":
-      return { width: "min-content" };
-    case "maxcontent":
-      return { width: "max-content" };
-    case "auto":
-      return { width: "auto" };
-    case "grow":
+    case 'full':
+      return { width: '100%' };
+    case 'fit':
+      return { width: 'fit-content' };
+    case 'screen':
+      return { width: '100vw' };
+    case 'mincontent':
+      return { width: 'min-content' };
+    case 'maxcontent':
+      return { width: 'max-content' };
+    case 'auto':
+      return { width: 'auto' };
+    case 'grow':
       return { flexGrow: parseFloat(value) || 1, minWidth: 0 };
-    case "shrink":
+    case 'shrink':
       return { flexShrink: parseFloat(value) || 1 };
     default:
       console.warn(`Unknown size type: ${sizeType}`);
@@ -56,30 +56,30 @@ const _getWantedWidth = (width?: string): React.CSSProperties => {
 
 const _getMinWidth = (width?: string): React.CSSProperties => {
   if (!width) return {};
-  const [sizeType, value] = width.split(":");
+  const [sizeType, value] = width.split(':');
   switch (sizeType.toLowerCase()) {
-    case "units":
+    case 'units':
       return { minWidth: `${parseFloat(value) * 0.25}rem` };
-    case "px":
+    case 'px':
       return { minWidth: `${value}px` };
-    case "rem":
+    case 'rem':
       return { minWidth: `${value}rem` };
-    case "fraction":
+    case 'fraction':
       return {
         minWidth: `${parseFloat(value) * 100}%`,
       };
-    case "full":
-      return { minWidth: "100%" };
-    case "fit":
-      return { minWidth: "fit-content" };
-    case "screen":
-      return { minWidth: "100vw" };
-    case "mincontent":
-      return { minWidth: "min-content" };
-    case "maxcontent":
-      return { minWidth: "max-content" };
-    case "auto":
-      return { minWidth: "auto" };
+    case 'full':
+      return { minWidth: '100%' };
+    case 'fit':
+      return { minWidth: 'fit-content' };
+    case 'screen':
+      return { minWidth: '100vw' };
+    case 'mincontent':
+      return { minWidth: 'min-content' };
+    case 'maxcontent':
+      return { minWidth: 'max-content' };
+    case 'auto':
+      return { minWidth: 'auto' };
     default:
       console.warn(`Unknown size type: ${sizeType}`);
       return {};
@@ -88,30 +88,30 @@ const _getMinWidth = (width?: string): React.CSSProperties => {
 
 const _getMaxWidth = (width?: string): React.CSSProperties => {
   if (!width) return {};
-  const [sizeType, value] = width.split(":");
+  const [sizeType, value] = width.split(':');
   switch (sizeType.toLowerCase()) {
-    case "units":
+    case 'units':
       return { maxWidth: `${parseFloat(value) * 0.25}rem` };
-    case "px":
+    case 'px':
       return { maxWidth: `${value}px` };
-    case "rem":
+    case 'rem':
       return { maxWidth: `${value}rem` };
-    case "fraction":
+    case 'fraction':
       return {
         maxWidth: `${parseFloat(value) * 100}%`,
       };
-    case "full":
-      return { maxWidth: "100%" };
-    case "fit":
-      return { maxWidth: "fit-content" };
-    case "screen":
-      return { maxWidth: "100vw" };
-    case "mincontent":
-      return { maxWidth: "min-content" };
-    case "maxcontent":
-      return { maxWidth: "max-content" };
-    case "auto":
-      return { maxWidth: "auto" };
+    case 'full':
+      return { maxWidth: '100%' };
+    case 'fit':
+      return { maxWidth: 'fit-content' };
+    case 'screen':
+      return { maxWidth: '100vw' };
+    case 'mincontent':
+      return { maxWidth: 'min-content' };
+    case 'maxcontent':
+      return { maxWidth: 'max-content' };
+    case 'auto':
+      return { maxWidth: 'auto' };
     default:
       console.warn(`Unknown size type: ${sizeType}`);
       return {};
@@ -126,7 +126,7 @@ export const getAspectRatio = (aspectRatio?: number): React.CSSProperties => {
 export const getHeight = (height?: string): React.CSSProperties => {
   if (!height) return {};
 
-  const [wantedHeight, minHeight, maxHeight] = height.split(",");
+  const [wantedHeight, minHeight, maxHeight] = height.split(',');
 
   return {
     ..._getWantedHeight(wantedHeight),
@@ -138,47 +138,47 @@ export const getHeight = (height?: string): React.CSSProperties => {
 const _getWantedHeight = (height?: string): React.CSSProperties => {
   if (!height) return {};
 
-  const [sizeType, value] = height.split(":");
+  const [sizeType, value] = height.split(':');
 
   switch (sizeType.toLowerCase()) {
-    case "units": {
+    case 'units': {
       const units = parseFloat(value);
       return { height: `${units * 0.25}rem` };
     }
 
-    case "px":
+    case 'px':
       return { height: `${value}px` };
 
-    case "rem":
+    case 'rem':
       return { height: `${value}rem` };
 
-    case "fraction": {
+    case 'fraction': {
       const fraction = parseFloat(value);
       return { height: `${fraction * 100}%` };
     }
 
-    case "full":
-      return { height: "100%" };
+    case 'full':
+      return { height: '100%' };
 
-    case "fit":
-      return { height: "fit-content" };
+    case 'fit':
+      return { height: 'fit-content' };
 
-    case "screen":
-      return { height: "100vh" };
+    case 'screen':
+      return { height: '100vh' };
 
-    case "mincontent":
-      return { height: "min-content" };
+    case 'mincontent':
+      return { height: 'min-content' };
 
-    case "maxcontent":
-      return { height: "max-content" };
+    case 'maxcontent':
+      return { height: 'max-content' };
 
-    case "auto":
-      return { height: "auto" };
+    case 'auto':
+      return { height: 'auto' };
 
-    case "grow":
+    case 'grow':
       return { flexGrow: parseFloat(value) || 1 };
 
-    case "shrink":
+    case 'shrink':
       return { flexShrink: parseFloat(value) || 1 };
 
     default:
@@ -190,28 +190,28 @@ const _getWantedHeight = (height?: string): React.CSSProperties => {
 const _getMinHeight = (height?: string): React.CSSProperties => {
   if (!height) return {};
 
-  const [sizeType, value] = height.split(":");
+  const [sizeType, value] = height.split(':');
   switch (sizeType.toLowerCase()) {
-    case "units":
+    case 'units':
       return { minHeight: `${parseFloat(value) * 0.25}rem` };
-    case "px":
+    case 'px':
       return { minHeight: `${value}px` };
-    case "rem":
+    case 'rem':
       return { minHeight: `${value}rem` };
-    case "fraction":
+    case 'fraction':
       return { minHeight: `${parseFloat(value) * 100}%` };
-    case "full":
-      return { minHeight: "100%" };
-    case "fit":
-      return { minHeight: "fit-content" };
-    case "screen":
-      return { minHeight: "100vh" };
-    case "mincontent":
-      return { minHeight: "min-content" };
-    case "maxcontent":
-      return { minHeight: "max-content" };
-    case "auto":
-      return { minHeight: "auto" };
+    case 'full':
+      return { minHeight: '100%' };
+    case 'fit':
+      return { minHeight: 'fit-content' };
+    case 'screen':
+      return { minHeight: '100vh' };
+    case 'mincontent':
+      return { minHeight: 'min-content' };
+    case 'maxcontent':
+      return { minHeight: 'max-content' };
+    case 'auto':
+      return { minHeight: 'auto' };
     default:
       console.warn(`Unknown size type: ${sizeType}`);
       return {};
@@ -221,49 +221,56 @@ const _getMinHeight = (height?: string): React.CSSProperties => {
 const _getMaxHeight = (height?: string): React.CSSProperties => {
   if (!height) return {};
 
-  const [sizeType, value] = height.split(":");
+  const [sizeType, value] = height.split(':');
   switch (sizeType.toLowerCase()) {
-    case "units":
+    case 'units':
       return { maxHeight: `${parseFloat(value) * 0.25}rem` };
-    case "px":
+    case 'px':
       return { maxHeight: `${value}px` };
-    case "rem":
+    case 'rem':
       return { maxHeight: `${value}rem` };
-    case "fraction":
+    case 'fraction':
       return { maxHeight: `${parseFloat(value) * 100}%` };
-    case "full":
-      return { maxHeight: "100%" };
-    case "fit":
-      return { maxHeight: "fit-content" };
-    case "screen":
-      return { maxHeight: "100vh" };
-    case "mincontent":
-      return { maxHeight: "min-content" };
-    case "maxcontent":
-      return { maxHeight: "max-content" };
-    case "auto":
-      return { maxHeight: "auto" };
+    case 'full':
+      return { maxHeight: '100%' };
+    case 'fit':
+      return { maxHeight: 'fit-content' };
+    case 'screen':
+      return { maxHeight: '100vh' };
+    case 'mincontent':
+      return { maxHeight: 'min-content' };
+    case 'maxcontent':
+      return { maxHeight: 'max-content' };
+    case 'auto':
+      return { maxHeight: 'auto' };
     default:
       console.warn(`Unknown size type: ${sizeType}`);
       return {};
   }
 };
 
-export type BorderStyle = "None" | "Solid" | "Dashed" | "Dotted";
+export type BorderStyle = 'None' | 'Solid' | 'Dashed' | 'Dotted';
 
-export const getBorderStyle = (borderStyle: BorderStyle): React.CSSProperties => {
+export const getBorderStyle = (
+  borderStyle: BorderStyle
+): React.CSSProperties => {
   return {
     borderStyle: borderStyle.toLowerCase(),
   };
 };
 
-export const getBorderThickness = (getBorderThickness?: string): React.CSSProperties => {
+export const getBorderThickness = (
+  getBorderThickness?: string
+): React.CSSProperties => {
   if (!getBorderThickness) return {};
 
-  if (typeof getBorderThickness === "string" && getBorderThickness.indexOf(",") > -1) {
+  if (
+    typeof getBorderThickness === 'string' &&
+    getBorderThickness.indexOf(',') > -1
+  ) {
     const [left, top, right, bottom] = getBorderThickness
-      .split(",")
-      .map((val) => (val ? `${parseFloat(val)}px` : "0"));
+      .split(',')
+      .map(val => (val ? `${parseFloat(val)}px` : '0'));
 
     return {
       borderWidth: left,
@@ -278,38 +285,38 @@ export const getBorderThickness = (getBorderThickness?: string): React.CSSProper
   };
 };
 
-export type BorderRadius = "None" | "Rounded" | "Full";
+export type BorderRadius = 'None' | 'Rounded' | 'Full';
 
 // Border radius helpers backed by theme CSS variables.
 // These match the three semantic buckets we expose from the backend theme:
 // boxes (cards, sheets), fields (inputs, buttons) and selectors (badges, toggles).
 
 export const getBoxRadius = (): React.CSSProperties => ({
-  borderRadius: "var(--radius-boxes)",
+  borderRadius: 'var(--radius-boxes)',
 });
 
 export const getFieldRadius = (): React.CSSProperties => ({
-  borderRadius: "var(--radius-fields)",
+  borderRadius: 'var(--radius-fields)',
 });
 
 export const getSelectorRadius = (): React.CSSProperties => ({
-  borderRadius: "var(--radius-selectors)",
+  borderRadius: 'var(--radius-selectors)',
 });
 
 // Back‑compat helper used by older widgets.
 // Prefer passing useSemanticRadius when possible so we stay aligned with the theme tokens.
 export const getBorderRadius = (
   borderRadius?: BorderRadius,
-  useSemanticRadius?: "box" | "field" | "selector",
+  useSemanticRadius?: 'box' | 'field' | 'selector'
 ): React.CSSProperties => {
   // If semantic radius is specified, use CSS variable
   if (useSemanticRadius) {
     switch (useSemanticRadius) {
-      case "box":
+      case 'box':
         return getBoxRadius();
-      case "field":
+      case 'field':
         return getFieldRadius();
-      case "selector":
+      case 'selector':
         return getSelectorRadius();
     }
   }
@@ -317,17 +324,22 @@ export const getBorderRadius = (
   // Legacy behavior: use hardcoded values
   if (!borderRadius) return {};
   return {
-    borderRadius: borderRadius === "Rounded" ? "0.5rem" : borderRadius === "Full" ? "9999px" : "0",
+    borderRadius:
+      borderRadius === 'Rounded'
+        ? '0.5rem'
+        : borderRadius === 'Full'
+          ? '9999px'
+          : '0',
   };
 };
 
 export const getPadding = (padding?: string): React.CSSProperties => {
   if (!padding) return {};
 
-  if (typeof padding === "string" && padding.indexOf(",") > -1) {
+  if (typeof padding === 'string' && padding.indexOf(',') > -1) {
     const [left, top, right, bottom] = padding
-      .split(",")
-      .map((val) => (val ? `${parseFloat(val) * 0.25}rem` : "0"));
+      .split(',')
+      .map(val => (val ? `${parseFloat(val) * 0.25}rem` : '0'));
 
     return {
       paddingLeft: left,
@@ -344,10 +356,10 @@ export const getPadding = (padding?: string): React.CSSProperties => {
 export const getMargin = (margin?: string): React.CSSProperties => {
   if (!margin) return {};
 
-  if (typeof margin === "string" && margin.indexOf(",") > -1) {
+  if (typeof margin === 'string' && margin.indexOf(',') > -1) {
     const [left, top, right, bottom] = margin
-      .split(",")
-      .map((val) => (val ? `${parseFloat(val) * 0.25}rem` : "0"));
+      .split(',')
+      .map(val => (val ? `${parseFloat(val) * 0.25}rem` : '0'));
 
     return {
       marginLeft: left,
@@ -386,55 +398,55 @@ export const getAlignSelf = (alignSelf?: Align): React.CSSProperties => {
   if (!alignSelf) return {};
 
   switch (alignSelf) {
-    case "TopLeft":
-    case "TopCenter":
-    case "TopRight":
-      return { alignSelf: "flex-start" };
-    case "BottomLeft":
-    case "BottomCenter":
-    case "BottomRight":
-      return { alignSelf: "flex-end" };
-    case "Left":
-      return { alignSelf: "flex-start" };
-    case "Right":
-      return { alignSelf: "flex-end" };
-    case "Center":
-      return { alignSelf: "center" };
-    case "Stretch":
-      return { alignSelf: "stretch" };
+    case 'TopLeft':
+    case 'TopCenter':
+    case 'TopRight':
+      return { alignSelf: 'flex-start' };
+    case 'BottomLeft':
+    case 'BottomCenter':
+    case 'BottomRight':
+      return { alignSelf: 'flex-end' };
+    case 'Left':
+      return { alignSelf: 'flex-start' };
+    case 'Right':
+      return { alignSelf: 'flex-end' };
+    case 'Center':
+      return { alignSelf: 'center' };
+    case 'Stretch':
+      return { alignSelf: 'stretch' };
     default:
       return {};
   }
 };
 
-export type Overflow = "Clip" | "Ellipsis" | "Auto" | "Visible" | "Scroll";
+export type Overflow = 'Clip' | 'Ellipsis' | 'Auto' | 'Visible' | 'Scroll';
 
 export const getOverflow = (overflow?: Overflow): React.CSSProperties => {
   if (!overflow) return {};
 
-  if (overflow === "Clip") {
+  if (overflow === 'Clip') {
     return {
-      overflow: "hidden",
+      overflow: 'hidden',
     };
   }
 
-  if (overflow === "Ellipsis") {
+  if (overflow === 'Ellipsis') {
     return {
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
     };
   }
 
-  if (overflow === "Visible") {
+  if (overflow === 'Visible') {
     return {
-      overflow: "visible",
+      overflow: 'visible',
     };
   }
 
-  if (overflow === "Scroll") {
+  if (overflow === 'Scroll') {
     return {
-      overflow: "scroll",
+      overflow: 'scroll',
     };
   }
 
@@ -445,135 +457,138 @@ export const getOverflow = (overflow?: Overflow): React.CSSProperties => {
 
 export const gridCellOverflow = {
   ellipsis:
-    "[&>*:not(:has(*))]:min-w-0 [&>*:not(:has(*))]:overflow-hidden [&>*:not(:has(*))]:text-ellipsis [&>*:not(:has(*))]:whitespace-nowrap hover:[&>*:not(:has(*))]:overflow-visible hover:[&>*:not(:has(*))]:whitespace-normal hover:[&>*:not(:has(*))]:relative hover:[&>*:not(:has(*))]:z-10",
+    '[&>*:not(:has(*))]:min-w-0 [&>*:not(:has(*))]:overflow-hidden [&>*:not(:has(*))]:text-ellipsis [&>*:not(:has(*))]:whitespace-nowrap hover:[&>*:not(:has(*))]:overflow-visible hover:[&>*:not(:has(*))]:whitespace-normal hover:[&>*:not(:has(*))]:relative hover:[&>*:not(:has(*))]:z-10',
 };
-export type Orientation = "Horizontal" | "Vertical";
+export type Orientation = 'Horizontal' | 'Vertical';
 
 export type Align =
-  | "TopLeft"
-  | "TopRight"
-  | "TopCenter"
-  | "BottomLeft"
-  | "BottomRight"
-  | "BottomCenter"
-  | "Left"
-  | "Right"
-  | "Center"
-  | "Stretch"
-  | "SpaceBetween"
-  | "SpaceAround"
-  | "SpaceEvenly";
+  | 'TopLeft'
+  | 'TopRight'
+  | 'TopCenter'
+  | 'BottomLeft'
+  | 'BottomRight'
+  | 'BottomCenter'
+  | 'Left'
+  | 'Right'
+  | 'Center'
+  | 'Stretch'
+  | 'SpaceBetween'
+  | 'SpaceAround'
+  | 'SpaceEvenly';
 
-export const getAlign = (orientation: Orientation, align?: Align): React.CSSProperties => {
+export const getAlign = (
+  orientation: Orientation,
+  align?: Align
+): React.CSSProperties => {
   const styles: React.CSSProperties = {
-    display: "flex",
+    display: 'flex',
   };
 
-  styles.flexDirection = orientation === "Horizontal" ? "row" : "column";
+  styles.flexDirection = orientation === 'Horizontal' ? 'row' : 'column';
 
   // Prevent wrapping in horizontal layouts so that fractional widths (e.g., flex: 1, width: 50%) correctly share available space; wrapping would break the intended distribution.
-  if (orientation === "Horizontal") {
-    styles.flexWrap = "nowrap";
-    styles.width = "100%";
+  if (orientation === 'Horizontal') {
+    styles.flexWrap = 'nowrap';
+    styles.width = '100%';
     // Default to flex-start for horizontal layouts so fractional widths work properly
     if (!align) {
-      styles.justifyContent = "flex-start";
+      styles.justifyContent = 'flex-start';
     }
   }
 
   // Handle space distribution alignments (work the same for both orientations)
   switch (align) {
-    case "SpaceBetween":
-      styles.justifyContent = "space-between";
+    case 'SpaceBetween':
+      styles.justifyContent = 'space-between';
       return styles;
-    case "SpaceAround":
-      styles.justifyContent = "space-around";
+    case 'SpaceAround':
+      styles.justifyContent = 'space-around';
       return styles;
-    case "SpaceEvenly":
-      styles.justifyContent = "space-evenly";
+    case 'SpaceEvenly':
+      styles.justifyContent = 'space-evenly';
       return styles;
   }
 
-  if (orientation === "Horizontal") {
+  if (orientation === 'Horizontal') {
     // Horizontal layout alignment
     switch (align) {
-      case "TopLeft":
-      case "TopCenter":
-      case "TopRight":
-        styles.alignItems = "flex-start";
+      case 'TopLeft':
+      case 'TopCenter':
+      case 'TopRight':
+        styles.alignItems = 'flex-start';
         break;
-      case "BottomLeft":
-      case "BottomCenter":
-      case "BottomRight":
-        styles.alignItems = "flex-end";
+      case 'BottomLeft':
+      case 'BottomCenter':
+      case 'BottomRight':
+        styles.alignItems = 'flex-end';
         break;
-      case "Left":
-      case "Right":
-      case "Center":
-        styles.alignItems = "center";
+      case 'Left':
+      case 'Right':
+      case 'Center':
+        styles.alignItems = 'center';
         break;
-      case "Stretch":
-        styles.alignItems = "stretch !important";
+      case 'Stretch':
+        styles.alignItems = 'stretch !important';
         break;
     }
 
     switch (align) {
-      case "TopLeft":
-      case "Left":
-      case "BottomLeft":
-        styles.justifyContent = "flex-start";
+      case 'TopLeft':
+      case 'Left':
+      case 'BottomLeft':
+        styles.justifyContent = 'flex-start';
         break;
-      case "TopRight":
-      case "Right":
-      case "BottomRight":
-        styles.justifyContent = "flex-end";
+      case 'TopRight':
+      case 'Right':
+      case 'BottomRight':
+        styles.justifyContent = 'flex-end';
         break;
-      case "TopCenter":
-      case "Center":
-      case "BottomCenter":
-        styles.justifyContent = "center";
+      case 'TopCenter':
+      case 'Center':
+      case 'BottomCenter':
+        styles.justifyContent = 'center';
         break;
     }
   } else {
     // Vertical layout alignment
     // Set horizontal alignment (Left/Center/Right)
     switch (align) {
-      case "TopLeft":
-      case "Left":
-      case "BottomLeft":
-        styles.alignItems = "flex-start";
+      case 'TopLeft':
+      case 'Left':
+      case 'BottomLeft':
+        styles.alignItems = 'flex-start';
         break;
-      case "TopRight":
-      case "Right":
-      case "BottomRight":
-        styles.alignItems = "flex-end";
+      case 'TopRight':
+      case 'Right':
+      case 'BottomRight':
+        styles.alignItems = 'flex-end';
         break;
-      case "TopCenter":
-      case "Center":
-      case "BottomCenter":
-        styles.alignItems = "center";
+      case 'TopCenter':
+      case 'Center':
+      case 'BottomCenter':
+        styles.alignItems = 'center';
         break;
-      case "Stretch":
-        styles.alignItems = "stretch !important";
+      case 'Stretch':
+        styles.alignItems = 'stretch !important';
         break;
     }
 
     // Set vertical alignment (Top/Center/Bottom)
     switch (align) {
-      case "TopLeft":
-      case "TopCenter":
-      case "TopRight":
-        styles.justifyContent = "flex-start";
+      case 'TopLeft':
+      case 'TopCenter':
+      case 'TopRight':
+        styles.justifyContent = 'flex-start';
         break;
-      case "Left":
-      case "Center":
-      case "Right":
-        styles.justifyContent = "center";
+      case 'Left':
+      case 'Center':
+      case 'Right':
+        styles.justifyContent = 'center';
         break;
-      case "BottomLeft":
-      case "BottomCenter":
-      case "BottomRight":
-        styles.justifyContent = "flex-end";
+      case 'BottomLeft':
+      case 'BottomCenter':
+      case 'BottomRight':
+        styles.justifyContent = 'flex-end';
         break;
     }
   }
@@ -583,9 +598,9 @@ export const getAlign = (orientation: Orientation, align?: Align): React.CSSProp
 
 export const getColor = (
   color?: string,
-  cssProperty: "color" | "backgroundColor" | "borderColor" = "color",
-  role: "background" | "foreground" = "background",
-  percentage: number | undefined = undefined,
+  cssProperty: 'color' | 'backgroundColor' | 'borderColor' = 'color',
+  role: 'background' | 'foreground' = 'background',
+  percentage: number | undefined = undefined
 ) => {
   if (!color) return {};
 
@@ -595,20 +610,26 @@ export const getColor = (
   // it should map to its foreground variant (muted-foreground) to ensure readability,
   // because the base variable (var(--muted)) is designed as a background layer.
   // We DO NOT include brand/state colors like primary, secondary, destructive since their base variable IS the intended text color.
-  const surfaceThemeColors = ["background", "card", "popover", "muted", "accent"];
+  const surfaceThemeColors = [
+    'background',
+    'card',
+    'popover',
+    'muted',
+    'accent',
+  ];
 
-  if (cssProperty === "color" && surfaceThemeColors.includes(lowerColor)) {
-    role = "foreground";
+  if (cssProperty === 'color' && surfaceThemeColors.includes(lowerColor)) {
+    role = 'foreground';
   }
 
-  const varName = lowerColor + (role === "background" ? "" : "-foreground");
+  const varName = lowerColor + (role === 'background' ? '' : '-foreground');
   if (percentage && percentage > -100 && percentage < 100) {
     return {
       [cssProperty]: `color-mix(in srgb, var(--${varName}), var(--background) ${Math.abs(percentage)}%)`,
     };
   }
   return {
-    [cssProperty]: "var(--" + varName + ")",
+    [cssProperty]: 'var(--' + varName + ')',
   };
 };
 
@@ -617,41 +638,41 @@ export const getColor = (
  * Example: "Px:100" -> "100px", "Fraction:1" -> "1fr"
  */
 export const convertSizeToGridValue = (size?: string): string => {
-  if (!size) return "minmax(0, 1fr)";
+  if (!size) return 'minmax(0, 1fr)';
 
-  const [sizeType, value] = size.split(":");
+  const [sizeType, value] = size.split(':');
 
   switch (sizeType.toLowerCase()) {
-    case "px":
+    case 'px':
       return `${value}px`;
 
-    case "rem":
+    case 'rem':
       return `${value}rem`;
 
-    case "units":
+    case 'units':
       return `${parseFloat(value) * 0.25}rem`;
 
-    case "fraction":
+    case 'fraction':
       return `${value}fr`;
 
-    case "full":
-      return "100%";
+    case 'full':
+      return '100%';
 
-    case "fit":
-      return "fit-content";
+    case 'fit':
+      return 'fit-content';
 
-    case "mincontent":
-      return "min-content";
+    case 'mincontent':
+      return 'min-content';
 
-    case "maxcontent":
-      return "max-content";
+    case 'maxcontent':
+      return 'max-content';
 
-    case "auto":
-      return "auto";
+    case 'auto':
+      return 'auto';
 
     default:
       console.warn(`Unknown size type for grid: ${sizeType}`);
-      return "minmax(0, 1fr)";
+      return 'minmax(0, 1fr)';
   }
 };
 
@@ -668,47 +689,47 @@ export const typography: Record<string, string> = {
   // Body
   p: `text-base scroll-m-20`,
   lead: `text-muted-foreground`,
-  strong: "font-semibold",
-  em: "italic",
+  strong: 'font-semibold',
+  em: 'italic',
 
   // Size variants
-  large: "text-lg font-semibold",
-  small: "text-large-body leading-none",
-  muted: "text-base text-muted-foreground",
+  large: 'text-lg font-semibold',
+  small: 'text-large-body leading-none',
+  muted: 'text-base text-muted-foreground',
 
   // Semantic variants
-  danger: "text-large-body text-destructive font-semibold",
-  warning: "text-large-body text-amber font-semibold",
-  success: "text-large-body text-green font-semibold",
+  danger: 'text-large-body text-destructive font-semibold',
+  warning: 'text-large-body text-amber font-semibold',
+  success: 'text-large-body text-green font-semibold',
 
   // UI variants
-  display: "text-3xl font-medium",
-  label: "text-large-label font-medium leading-none flex items-center",
-  block: "flex items-center min-w-0",
+  display: 'text-3xl font-medium',
+  label: 'text-large-label font-medium leading-none flex items-center',
+  block: 'flex items-center min-w-0',
 
   // Lists
-  ul: "list-disc ml-6",
-  ol: "list-decimal ml-6",
+  ul: 'list-disc ml-6',
+  ol: 'list-decimal ml-6',
 
   // Links
-  a: "text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100",
+  a: 'text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100',
 
   // Blockquote
-  blockquote: "border-l-2 pl-6 italic",
+  blockquote: 'border-l-2 pl-6 italic',
 
   // Code
-  code: "relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono text-sm font-semibold h-fit",
+  code: 'relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono text-sm font-semibold h-fit',
 
   // Table
-  table: "w-full border-collapse border border-border",
-  thead: "bg-muted",
-  tr: "border border-border",
-  th: "border border-border px-4 py-2 text-left font-bold text-sm",
-  td: "border border-border px-4 py-2 text-sm",
+  table: 'w-full border-collapse border border-border',
+  thead: 'bg-muted',
+  tr: 'border border-border',
+  th: 'border border-border px-4 py-2 text-left font-bold text-sm',
+  td: 'border border-border px-4 py-2 text-sm',
 
   // Media
-  img: "max-w-full h-auto cursor-zoom-in",
-  hr: "border-t border-border",
+  img: 'max-w-full h-auto cursor-zoom-in',
+  hr: 'border-t border-border',
 };
 
 export const articleTypography: Record<string, string> = {

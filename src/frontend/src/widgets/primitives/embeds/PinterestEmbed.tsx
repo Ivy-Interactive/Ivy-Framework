@@ -1,7 +1,7 @@
-import React from "react";
-import { sanitizeUrl } from "./shared";
-import EmbedCard from "./EmbedCard";
-import EmbedErrorFallback from "./EmbedErrorFallback";
+import React from 'react';
+import { sanitizeUrl } from './shared';
+import EmbedCard from './EmbedCard';
+import EmbedErrorFallback from './EmbedErrorFallback';
 
 interface PinterestEmbedProps {
   url: string;

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { sanitizeUrl, sanitizeId, loadScript } from "./shared";
-import EmbedErrorFallback from "./EmbedErrorFallback";
+import React, { useEffect, useState } from 'react';
+import { sanitizeUrl, sanitizeId, loadScript } from './shared';
+import EmbedErrorFallback from './EmbedErrorFallback';
 
 interface InstagramEmbedProps {
   url: string;
@@ -18,7 +18,7 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
 
   useEffect(() => {
     if (postId) {
-      loadScript("https://www.instagram.com/embed.js")
+      loadScript('https://www.instagram.com/embed.js')
         .then(() => {
           setScriptLoaded(true);
         })
@@ -42,7 +42,7 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
         data-instgrm-version="14"
       >
         <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer">
-          {scriptLoaded ? "Loading Instagram post..." : "Loading script..."}
+          {scriptLoaded ? 'Loading Instagram post...' : 'Loading script...'}
         </a>
       </blockquote>
     </div>

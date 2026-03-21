@@ -4,28 +4,22 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vp dev",
-    "build": "tsc && vp build",
-    "preview": "vp preview"
-  },
-  "dependencies": {
-    "html2canvas-pro": "1.6.7"
-  },
-  "devDependencies": {
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
-    "typescript": "5.9.3",
-    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.13",
-    "vite-plus": "0.1.13",
-    "@vitejs/plugin-react": "6.0.1"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "peerDependencies": {
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
-  "overrides": {
-    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.13",
-    "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.13"
+  "dependencies": {
+    "html2canvas-pro": "^1.5.8"
   },
-  "packageManager": "pnpm@10.32.1"
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
 }

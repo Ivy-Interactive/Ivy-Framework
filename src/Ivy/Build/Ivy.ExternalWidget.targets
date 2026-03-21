@@ -3,21 +3,21 @@
   <ItemGroup Condition="Exists('frontend/package.json')">
     <FrontendSourceFiles Include="frontend\src\**\*" />
     <FrontendSourceFiles Include="frontend\package.json" />
-    <FrontendSourceFiles Include="frontend\pnpm-lock.yaml" Condition="Exists('frontend\pnpm-lock.yaml')" />
+    <FrontendSourceFiles Include="frontend\package-lock.json" Condition="Exists('frontend\package-lock.json')" />
     <FrontendSourceFiles Include="frontend\tsconfig.json" Condition="Exists('frontend\tsconfig.json')" />
     <FrontendSourceFiles Include="frontend\vite.config.*" Condition="Exists('frontend\vite.config.ts') Or Exists('frontend\vite.config.js')" />
   </ItemGroup>
 
   <Target Name="NpmInstall" BeforeTargets="BuildFrontend" Condition="Exists('frontend/package.json')"
-          Inputs="frontend\package.json;frontend\pnpm-lock.yaml"
-          Outputs="frontend\node_modules\.modules.yaml">
-    <Exec Command="npx -y pnpm@10.32.1 install" WorkingDirectory="frontend" />
+          Inputs="frontend\package.json;frontend\package-lock.json"
+          Outputs="frontend\node_modules\.package-lock.json">
+    <Exec Command="npm install" WorkingDirectory="frontend" />
   </Target>
 
   <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths" Condition="Exists('frontend/package.json')"
           Inputs="@(FrontendSourceFiles)"
           Outputs="frontend\dist\.build-stamp">
-    <Exec Command="npx -y pnpm@10.32.1 run build" WorkingDirectory="frontend" />
+    <Exec Command="npm run build" WorkingDirectory="frontend" />
     <Touch Files="frontend\dist\.build-stamp" AlwaysCreate="true" />
   </Target>
 

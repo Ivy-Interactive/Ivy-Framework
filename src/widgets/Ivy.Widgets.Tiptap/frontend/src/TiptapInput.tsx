@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import "./tiptap.css";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import './tiptap.css';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
 import {
   LuBold,
   LuItalic,
@@ -18,9 +18,9 @@ import {
   LuMinus,
   LuUndo2,
   LuRedo2,
-} from "react-icons/lu";
-import { getWidth, getHeight } from "./styles";
-import { EventHandler } from "./types";
+} from 'react-icons/lu';
+import { getWidth, getHeight } from './styles';
+import { EventHandler } from './types';
 
 interface TiptapInputProps {
   id: string;
@@ -58,34 +58,38 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
     disabled={disabled}
     title={title}
     className={`p-1.5 rounded transition-colors ${
-      isActive ? "bg-secondary text-secondary-foreground" : "hover:bg-muted text-foreground"
-    } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+      isActive
+        ? 'bg-secondary text-secondary-foreground'
+        : 'hover:bg-muted text-foreground'
+    } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
   >
     {children}
   </button>
 );
 
-const ToolbarDivider: React.FC = () => <div className="w-px h-6 bg-border mx-1" />;
+const ToolbarDivider: React.FC = () => (
+  <div className="w-px h-6 bg-border mx-1" />
+);
 
 export const TiptapInput: React.FC<TiptapInputProps> = ({
   id,
-  value = "",
+  value = '',
   placeholder,
   disabled = false,
   editable = true,
   autoFocus = false,
-  width = "Full",
-  height = "Full",
+  width = 'Full',
+  height = 'Full',
   showToolbar = true,
   events = [],
   eventHandler,
 }) => {
-  const hasChangeHandler = events.includes("OnChange");
-  const hasFocusHandler = events.includes("OnFocus");
-  const hasBlurHandler = events.includes("OnBlur");
+  const hasChangeHandler = events.includes('OnChange');
+  const hasFocusHandler = events.includes('OnFocus');
+  const hasBlurHandler = events.includes('OnBlur');
 
   // Local state for immediate updates (like CodeInputWidget pattern)
-  const [localValue, setLocalValue] = useState(value || "");
+  const [localValue, setLocalValue] = useState(value || '');
   const [isFocused, setIsFocused] = useState(false);
   const localValueRef = useRef(localValue);
 
@@ -95,7 +99,7 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
   // Update local value when server value changes and control is not focused
   useEffect(() => {
     if (!isFocused && value !== localValueRef.current) {
-      queueMicrotask(() => setLocalValue(value || ""));
+      queueMicrotask(() => setLocalValue(value || ''));
     }
   }, [value, isFocused]);
 
@@ -108,7 +112,7 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: placeholder ?? "Start typing...",
+        placeholder: placeholder ?? 'Start typing...',
       }),
     ],
     content: localValue,
@@ -118,19 +122,19 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
       const html = editor.getHTML();
       setLocalValue(html);
       if (hasChangeHandler && eventHandler) {
-        eventHandler("OnChange", id, [html]);
+        eventHandler('OnChange', id, [html]);
       }
     },
     onFocus: () => {
       setIsFocused(true);
       if (hasFocusHandler && eventHandler) {
-        eventHandler("OnFocus", id, []);
+        eventHandler('OnFocus', id, []);
       }
     },
     onBlur: () => {
       setIsFocused(false);
       if (hasBlurHandler && eventHandler) {
-        eventHandler("OnBlur", id, []);
+        eventHandler('OnBlur', id, []);
       }
     },
   });
@@ -154,16 +158,13 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
       command();
       editor?.chain().focus().run();
     },
-    [editor],
+    [editor]
   );
 
-  const containerStyle = useMemo<React.CSSProperties>(
-    () => ({
-      ...getWidth(width),
-      ...getHeight(height),
-    }),
-    [width, height],
-  );
+  const containerStyle = useMemo<React.CSSProperties>(() => ({
+    ...getWidth(width),
+    ...getHeight(height),
+  }), [width, height]);
 
   if (!editor) {
     return null;
@@ -171,7 +172,7 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
 
   return (
     <div
-      className={`rounded-lg border bg-card shadow-sm flex flex-col ${disabled ? "opacity-60" : ""}`}
+      className={`rounded-lg border bg-card shadow-sm flex flex-col ${disabled ? 'opacity-60' : ''}`}
       style={containerStyle}
     >
       {showToolbar && isEditable && (
@@ -179,28 +180,28 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
           {/* Text formatting */}
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleBold().run())}
-            isActive={editor.isActive("bold")}
+            isActive={editor.isActive('bold')}
             title="Bold (Ctrl+B)"
           >
             <LuBold size={16} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleItalic().run())}
-            isActive={editor.isActive("italic")}
+            isActive={editor.isActive('italic')}
             title="Italic (Ctrl+I)"
           >
             <LuItalic size={16} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleStrike().run())}
-            isActive={editor.isActive("strike")}
+            isActive={editor.isActive('strike')}
             title="Strikethrough"
           >
             <LuStrikethrough size={16} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleCode().run())}
-            isActive={editor.isActive("code")}
+            isActive={editor.isActive('code')}
             title="Inline code"
           >
             <LuCode size={16} />
@@ -211,21 +212,21 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
           {/* Headings */}
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleHeading({ level: 1 }).run())}
-            isActive={editor.isActive("heading", { level: 1 })}
+            isActive={editor.isActive('heading', { level: 1 })}
             title="Heading 1"
           >
             <LuHeading1 size={16} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleHeading({ level: 2 }).run())}
-            isActive={editor.isActive("heading", { level: 2 })}
+            isActive={editor.isActive('heading', { level: 2 })}
             title="Heading 2"
           >
             <LuHeading2 size={16} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleHeading({ level: 3 }).run())}
-            isActive={editor.isActive("heading", { level: 3 })}
+            isActive={editor.isActive('heading', { level: 3 })}
             title="Heading 3"
           >
             <LuHeading3 size={16} />
@@ -236,14 +237,14 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
           {/* Lists */}
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleBulletList().run())}
-            isActive={editor.isActive("bulletList")}
+            isActive={editor.isActive('bulletList')}
             title="Bullet list"
           >
             <LuList size={16} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleOrderedList().run())}
-            isActive={editor.isActive("orderedList")}
+            isActive={editor.isActive('orderedList')}
             title="Numbered list"
           >
             <LuListOrdered size={16} />
@@ -254,14 +255,14 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
           {/* Block elements */}
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleBlockquote().run())}
-            isActive={editor.isActive("blockquote")}
+            isActive={editor.isActive('blockquote')}
             title="Quote"
           >
             <LuQuote size={16} />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => runCommand(() => editor.chain().toggleCodeBlock().run())}
-            isActive={editor.isActive("codeBlock")}
+            isActive={editor.isActive('codeBlock')}
             title="Code block"
           >
             <LuSquareCode size={16} />

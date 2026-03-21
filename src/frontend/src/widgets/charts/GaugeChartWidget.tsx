@@ -1,11 +1,11 @@
-import React, { useMemo } from "react";
-import { getHeight, getWidth } from "@/lib/styles";
-import { useThemeWithMonitoring } from "@/components/theme-provider";
-import ReactECharts from "echarts-for-react";
-import { generateTextStyle } from "./sharedUtils";
-import { getChartThemeColors } from "./styles";
-import { getColors } from "./sharedUtils";
-import type { GaugeChartWidgetProps } from "./chartTypes";
+import React, { useMemo } from 'react';
+import { getHeight, getWidth } from '@/lib/styles';
+import { useThemeWithMonitoring } from '@/components/theme-provider';
+import ReactECharts from 'echarts-for-react';
+import { generateTextStyle } from './sharedUtils';
+import { getChartThemeColors } from './styles';
+import { getColors } from './sharedUtils';
+import type { GaugeChartWidgetProps } from './chartTypes';
 
 const GAUGE_DEFAULTS = {
   min: 0,
@@ -14,9 +14,9 @@ const GAUGE_DEFAULTS = {
   endAngle: -45,
   animated: true,
   pointer: {
-    style: "Arrow",
+    style: 'Arrow',
     width: 6,
-    length: "60%",
+    length: '60%',
   },
 };
 
@@ -30,85 +30,101 @@ const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
   thresholds = [],
   pointer,
   animated = GAUGE_DEFAULTS.animated,
-  colorScheme = "Default",
-  width = "Full",
-  height = "Full",
+  colorScheme = 'Default',
+  width = 'Full',
+  height = 'Full',
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
     monitorDOM: false,
     monitorSystem: true,
   });
 
-  const themeColors = useMemo(() => getChartThemeColors(colors, isDark), [colors, isDark]);
+  const themeColors = useMemo(
+    () => getChartThemeColors(colors, isDark),
+    [colors, isDark]
+  );
 
-  const chartColors = useMemo(() => getColors(colorScheme, colors), [colorScheme, colors]);
+  const chartColors = useMemo(
+    () => getColors(colorScheme, colors),
+    [colorScheme, colors]
+  );
 
   const heightStyle = height ? getHeight(height) : {};
-  const isFull = height?.toLowerCase().startsWith("full");
+  const isFull = height?.toLowerCase().startsWith('full');
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    position: "relative",
-    ...(isFull ? { display: "flex", flexDirection: "column", height: "100%" } : {}),
+    position: 'relative',
+    ...(isFull
+      ? { display: 'flex', flexDirection: 'column', height: '100%' }
+      : {}),
   };
 
   const chartStyles: React.CSSProperties = {
-    ...(isFull ? { flex: 1, minHeight: "200px" } : { ...heightStyle, minHeight: "200px" }),
-    width: "100%",
+    ...(isFull
+      ? { flex: 1, minHeight: '200px' }
+      : { ...heightStyle, minHeight: '200px' }),
+    width: '100%',
   };
 
   // Build ECharts axis line color stops from thresholds
   const axisLineColors = useMemo(() => {
     if (thresholds.length === 0) {
       // Default: use first chart color
-      return [[1, chartColors[0] ?? "#5470c6"]];
+      return [[1, chartColors[0] ?? '#5470c6']];
     }
 
     // Sort thresholds by value and normalize to 0-1 range
     const range = max - min;
-    if (range <= 0) return [[1, chartColors[0] ?? "#5470c6"]];
+    if (range <= 0) return [[1, chartColors[0] ?? '#5470c6']];
 
     const sorted = [...thresholds].sort((a, b) => a.value - b.value);
-    return sorted.map((t) => [Math.min(Math.max((t.value - min) / range, 0), 1), t.color]);
+    return sorted.map(t => [
+      Math.min(Math.max((t.value - min) / range, 0), 1),
+      t.color,
+    ]);
   }, [thresholds, min, max, chartColors]);
 
   // Resolve pointer config
   const resolvedPointer = useMemo(() => {
     const p = pointer ?? GAUGE_DEFAULTS.pointer;
-    const style = (p.style ?? "Arrow") as string;
+    const style = (p.style ?? 'Arrow') as string;
 
     // Map pointer styles to ECharts pointer config
     switch (style) {
-      case "Line":
+      case 'Line':
         return {
-          icon: "rect",
+          icon: 'rect',
           width: Math.max(p.width ?? 6, 2) / 2,
-          length: p.length ?? "60%",
-          itemStyle: { color: "auto" },
+          length: p.length ?? '60%',
+          itemStyle: { color: 'auto' },
         };
-      case "Rounded":
+      case 'Rounded':
         return {
-          icon: "circle",
+          icon: 'circle',
           width: p.width ?? 6,
-          length: p.length ?? "60%",
-          itemStyle: { color: "auto", borderWidth: 0 },
+          length: p.length ?? '60%',
+          itemStyle: { color: 'auto', borderWidth: 0 },
         };
-      case "Arrow":
+      case 'Arrow':
       default:
         return {
           width: p.width ?? 6,
-          length: p.length ?? "60%",
-          itemStyle: { color: "auto" },
+          length: p.length ?? '60%',
+          itemStyle: { color: 'auto' },
         };
     }
   }, [pointer]);
 
   const option = useMemo(() => {
     return {
-      textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
+      textStyle: generateTextStyle(
+        themeColors.foreground,
+        themeColors.fontSans
+      ),
       series: [
         {
-          type: "gauge",
+          type: 'gauge',
           startAngle,
           endAngle,
           min,
@@ -166,21 +182,21 @@ const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
             fontSize: 14,
             color: themeColors.foreground,
             fontFamily: themeColors.fontSans,
-            offsetCenter: [0, "70%"],
+            offsetCenter: [0, '70%'],
           },
           detail: {
             valueAnimation: animated,
             fontSize: 24,
-            fontWeight: "bold",
+            fontWeight: 'bold',
             color: themeColors.foreground,
             fontFamily: themeColors.fontSans,
-            offsetCenter: [0, "50%"],
-            formatter: "{value}",
+            offsetCenter: [0, '50%'],
+            formatter: '{value}',
           },
           data: [
             {
               value,
-              name: label ?? "",
+              name: label ?? '',
             },
           ],
         },
@@ -202,7 +218,12 @@ const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
 
   return (
     <div style={styles}>
-      <ReactECharts option={option} style={chartStyles} notMerge={true} lazyUpdate={true} />
+      <ReactECharts
+        option={option}
+        style={chartStyles}
+        notMerge={true}
+        lazyUpdate={true}
+      />
     </div>
   );
 };

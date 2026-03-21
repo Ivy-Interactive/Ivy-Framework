@@ -6,12 +6,14 @@
  * Get computed CSS variable value and optionally convert to hex
  */
 export function getCSSVariable(variable: string): string {
-  if (typeof document === "undefined") return "";
+  if (typeof document === 'undefined') return '';
 
-  const value = getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(variable)
+    .trim();
 
   // If it's already a hex color, return it
-  if (value.startsWith("#")) return value;
+  if (value.startsWith('#')) return value;
 
   return value;
 }
@@ -20,16 +22,18 @@ export function getCSSVariable(variable: string): string {
  * Check if the document is in dark mode
  */
 export function isDarkMode(): boolean {
-  if (typeof document === "undefined") return false;
-  return document.documentElement.classList.contains("dark");
+  if (typeof document === 'undefined') return false;
+  return document.documentElement.classList.contains('dark');
 }
 
 /**
  * Check system preference for dark mode
  */
-export function getSystemThemePreference(): "light" | "dark" {
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+export function getSystemThemePreference(): 'light' | 'dark' {
+  if (typeof window === 'undefined') return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
 }
 
 /**
@@ -60,25 +64,25 @@ export interface ThemeColors {
 
 export function getThemeColors(): ThemeColors {
   return {
-    background: getCSSVariable("--background"),
-    foreground: getCSSVariable("--foreground"),
-    card: getCSSVariable("--card"),
-    cardForeground: getCSSVariable("--card-foreground"),
-    popover: getCSSVariable("--popover"),
-    popoverForeground: getCSSVariable("--popover-foreground"),
-    primary: getCSSVariable("--primary"),
-    primaryForeground: getCSSVariable("--primary-foreground"),
-    secondary: getCSSVariable("--secondary"),
-    secondaryForeground: getCSSVariable("--secondary-foreground"),
-    muted: getCSSVariable("--muted"),
-    mutedForeground: getCSSVariable("--muted-foreground"),
-    accent: getCSSVariable("--accent"),
-    accentForeground: getCSSVariable("--accent-foreground"),
-    destructive: getCSSVariable("--destructive"),
-    destructiveForeground: getCSSVariable("--destructive-foreground"),
-    border: getCSSVariable("--border"),
-    input: getCSSVariable("--input"),
-    ring: getCSSVariable("--ring"),
-    radius: getCSSVariable("--radius"),
+    background: getCSSVariable('--background'),
+    foreground: getCSSVariable('--foreground'),
+    card: getCSSVariable('--card'),
+    cardForeground: getCSSVariable('--card-foreground'),
+    popover: getCSSVariable('--popover'),
+    popoverForeground: getCSSVariable('--popover-foreground'),
+    primary: getCSSVariable('--primary'),
+    primaryForeground: getCSSVariable('--primary-foreground'),
+    secondary: getCSSVariable('--secondary'),
+    secondaryForeground: getCSSVariable('--secondary-foreground'),
+    muted: getCSSVariable('--muted'),
+    mutedForeground: getCSSVariable('--muted-foreground'),
+    accent: getCSSVariable('--accent'),
+    accentForeground: getCSSVariable('--accent-foreground'),
+    destructive: getCSSVariable('--destructive'),
+    destructiveForeground: getCSSVariable('--destructive-foreground'),
+    border: getCSSVariable('--border'),
+    input: getCSSVariable('--input'),
+    ring: getCSSVariable('--ring'),
+    radius: getCSSVariable('--radius'),
   };
 }

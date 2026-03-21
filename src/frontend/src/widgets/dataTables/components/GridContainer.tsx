@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import DataEditor, {
   CustomRenderer,
   DataEditorRef,
@@ -10,10 +10,10 @@ import DataEditor, {
   Item,
   SpriteMap,
   Theme,
-} from "@glideapps/glide-data-grid";
-import { tableStyles } from "../styles/style";
-import { RowActionButtons } from "../dataTableRowAction/rowActionButtons";
-import { MenuItem } from "@/types/widgets";
+} from '@glideapps/glide-data-grid';
+import { tableStyles } from '../styles/style';
+import { RowActionButtons } from '../dataTableRowAction/rowActionButtons';
+import { MenuItem } from '@/types/widgets';
 
 interface GridContainerProps {
   gridRef: React.RefObject<DataEditorRef | null>;
@@ -25,29 +25,39 @@ interface GridContainerProps {
   customRenderers: readonly CustomRenderer[];
   headerIcons: SpriteMap;
   onColumnResize?: (column: GridColumn, newSize: number) => void;
-  onVisibleRegionChanged: (range: { x: number; y: number; width: number; height: number }) => void;
+  onVisibleRegionChanged: (range: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }) => void;
   onHeaderClicked?: (col: number) => void;
   theme: Partial<Theme> | undefined;
   rowHeight: number;
   headerHeight: number;
   freezeColumns: number;
   getCellsForSelection: true | undefined;
-  rowSelect: "none" | "multi" | "single";
-  columnSelect: "none" | "multi" | "single";
-  rangeSelect: "none" | "cell" | "rect" | "multi-cell" | "multi-rect";
+  rowSelect: 'none' | 'multi' | 'single';
+  columnSelect: 'none' | 'multi' | 'single';
+  rangeSelect: 'none' | 'cell' | 'rect' | 'multi-cell' | 'multi-rect';
   gridSelection: GridSelection;
   onGridSelectionChange: (newSelection: GridSelection) => void;
   width: number;
-  rowMarkers: "number" | "checkbox" | "both" | "none";
+  rowMarkers: 'number' | 'checkbox' | 'both' | 'none';
   onColumnMoved?: (startIndex: number, endIndex: number) => void;
   groupHeaderHeight?: number;
   onCellClicked: (cell: Item, args: GridMouseEventArgs) => void;
   onCellActivated: (cell: Item) => void;
-  onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
+  onGroupHeaderClicked?: (
+    colIndex: number,
+    event: GroupHeaderClickedEventArgs
+  ) => void;
   showSearch: boolean;
   onSearchClose: () => void;
   onItemHovered?: (args: GridMouseEventArgs) => void;
-  getRowThemeOverride?: ((row: number) => Partial<Theme> | undefined) | undefined;
+  getRowThemeOverride?:
+    | ((row: number) => Partial<Theme> | undefined)
+    | undefined;
   rowActions?: MenuItem[];
   actionButtonsTop: number;
   hoverRow: number | undefined;
@@ -108,7 +118,7 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   return (
     <div
       ref={containerRef}
-      style={{ ...containerStyle, position: "relative" }}
+      style={{ ...containerStyle, position: 'relative' }}
       data-has-empty-rows={hasEmptyRows || undefined}
     >
       <DataEditor

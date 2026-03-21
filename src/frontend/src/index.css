@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "@ivy-interactive/ivy-design-system/css/fonts";
+@import 'tailwindcss';
+@import '@ivy-interactive/ivy-design-system/css/fonts';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -18,9 +18,9 @@ ivy-widget {
 @layer base {
   :root {
     /* Fonts */
-    --font-sans: "Geist";
-    --font-serif: "Geist";
-    --font-mono: "Geist Mono";
+    --font-sans: 'Geist';
+    --font-serif: 'Geist';
+    --font-mono: 'Geist Mono';
 
     /* Additional variables not in design system yet */
     --toolbox: #38363a;
@@ -163,11 +163,11 @@ ivy-widget {
   }
 
   /* Ensure sidebar icons and logo use primary brand color */
-  [data-sidebar="sidebar"] .text-primary {
+  [data-sidebar='sidebar'] .text-primary {
     color: var(--primary) !important;
   }
 
-  [data-sidebar="sidebar"] svg[fill="currentColor"] {
+  [data-sidebar='sidebar'] svg[fill='currentColor'] {
     color: var(--primary);
   }
 }
@@ -179,14 +179,20 @@ ivy-widget {
   }
 
   to {
-    height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height));
+    height: var(
+      --radix-accordion-content-height,
+      var(--radix-collapsible-content-height)
+    );
     opacity: 1;
   }
 }
 
 @keyframes accordion-up {
   from {
-    height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height));
+    height: var(
+      --radix-accordion-content-height,
+      var(--radix-collapsible-content-height)
+    );
     opacity: 1;
   }
 
@@ -231,7 +237,7 @@ ivy-widget {
 }
 
 /* Radix UI toast animations using data attributes */
-[data-radix-toast-root][data-state="open"] {
+[data-radix-toast-root][data-state='open'] {
   animation: toastSlideIn 300ms ease-out;
 }
 
@@ -316,7 +322,9 @@ ivy-widget {
 :has(> ivy-widget > .remove-parent-padding),
 :has(> ivy-widget > ivy-widget > .remove-parent-padding),
 :has(> ivy-widget > ivy-widget > ivy-widget > .remove-parent-padding),
-:has(> ivy-widget > ivy-widget > ivy-widget > ivy-widget > .remove-parent-padding) {
+:has(
+  > ivy-widget > ivy-widget > ivy-widget > ivy-widget > .remove-parent-padding
+) {
   padding: 0 !important;
 }
 

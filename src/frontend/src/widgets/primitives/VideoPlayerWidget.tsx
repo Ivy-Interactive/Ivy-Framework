@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { getHeight, getWidth } from "@/lib/styles";
-import { getIvyHost } from "@/lib/utils";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { getHeight, getWidth } from '@/lib/styles';
+import { getIvyHost } from '@/lib/utils';
 import {
   validateVideoUrl,
   validateImageUrl,
   isFullUrl,
   normalizeRelativePath,
   validateEmbedUrl,
-} from "@/lib/url";
-import { useEventHandler } from "@/components/event-handler";
+} from '@/lib/url';
+import { useEventHandler } from '@/components/event-handler';
 
 interface VideoPlayerWidgetProps {
   id: string;
@@ -18,7 +18,7 @@ interface VideoPlayerWidgetProps {
   autoplay?: boolean;
   loop?: boolean;
   muted?: boolean;
-  preload?: "none" | "metadata" | "auto";
+  preload?: 'none' | 'metadata' | 'auto';
   controls?: boolean;
   poster?: string; // optional preview image before playback
   volume?: number; // 0.0 to 1.0
@@ -50,7 +50,7 @@ const getVideoUrl = (url: string | undefined | null): string | null => {
 
 const isYouTube = (url: string): boolean => {
   // Use validateEmbedUrl to properly validate hostname (prevents substring/subdomain attacks)
-  return validateEmbedUrl(url) === "youtube";
+  return validateEmbedUrl(url) === 'youtube';
 };
 
 export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
@@ -61,7 +61,7 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
   autoplay = false,
   loop = false,
   muted = false,
-  preload = "metadata",
+  preload = 'metadata',
   controls = true,
   poster,
   volume,
@@ -73,21 +73,21 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
   const [hasError, setHasError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const handleEvent = useEventHandler();
-  const hasOnPlay = Array.isArray(events) && events.includes("OnPlay");
-  const hasOnPause = Array.isArray(events) && events.includes("OnPause");
-  const hasOnEnded = Array.isArray(events) && events.includes("OnEnded");
-  const hasOnLoaded = Array.isArray(events) && events.includes("OnLoaded");
+  const hasOnPlay = Array.isArray(events) && events.includes('OnPlay');
+  const hasOnPause = Array.isArray(events) && events.includes('OnPause');
+  const hasOnEnded = Array.isArray(events) && events.includes('OnEnded');
+  const hasOnLoaded = Array.isArray(events) && events.includes('OnLoaded');
 
   const handlePlayEvent = useCallback(() => {
-    if (hasOnPlay) handleEvent("OnPlay", id, []);
+    if (hasOnPlay) handleEvent('OnPlay', id, []);
   }, [hasOnPlay, handleEvent, id]);
 
   const handlePauseEvent = useCallback(() => {
-    if (hasOnPause) handleEvent("OnPause", id, []);
+    if (hasOnPause) handleEvent('OnPause', id, []);
   }, [hasOnPause, handleEvent, id]);
 
   const handleEndedEvent = useCallback(() => {
-    if (hasOnEnded) handleEvent("OnEnded", id, []);
+    if (hasOnEnded) handleEvent('OnEnded', id, []);
   }, [hasOnEnded, handleEvent, id]);
 
   const handleLoadedEvent = useCallback(() => {
@@ -95,7 +95,7 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
     if (videoRef.current && playbackRate != null) {
       videoRef.current.playbackRate = Math.max(0.25, playbackRate);
     }
-    if (hasOnLoaded) handleEvent("OnLoaded", id, []);
+    if (hasOnLoaded) handleEvent('OnLoaded', id, []);
   }, [hasOnLoaded, handleEvent, id, playbackRate]);
 
   useEffect(() => {
@@ -148,7 +148,7 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
         aria-label="Invalid video URL"
       >
         <span className="text-sm">
-          {!source ? "No video source provided" : "Invalid video URL"}
+          {!source ? 'No video source provided' : 'Invalid video URL'}
         </span>
       </div>
     );
@@ -173,19 +173,21 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
 
   if (isYouTube(validatedVideoSrc)) {
     const url = new URL(validatedVideoSrc);
-    const videoId = url.searchParams.get("v") ?? url.pathname.split("/").filter(Boolean).pop();
-    const timeParam = parseInt(url.searchParams.get("t") ?? "", 10);
+    const videoId =
+      url.searchParams.get('v') ??
+      url.pathname.split('/').filter(Boolean).pop();
+    const timeParam = parseInt(url.searchParams.get('t') ?? '', 10);
     const embedUrl = `https://www.youtube.com/embed/${videoId}`;
     const params = new URLSearchParams();
     const effectiveStart = startTime ?? (isNaN(timeParam) ? 0 : timeParam);
-    params.append("start", effectiveStart.toString());
+    params.append('start', effectiveStart.toString());
     if (endTime != null) {
-      params.append("end", endTime.toString());
+      params.append('end', endTime.toString());
     }
-    params.append("autoplay", autoplay ? "1" : "0");
-    params.append("loop", loop ? "1" : "0");
-    params.append("muted", muted ? "1" : "0");
-    params.append("controls", controls ? "1" : "0");
+    params.append('autoplay', autoplay ? '1' : '0');
+    params.append('loop', loop ? '1' : '0');
+    params.append('muted', muted ? '1' : '0');
+    params.append('controls', controls ? '1' : '0');
     return (
       <iframe
         id={id}

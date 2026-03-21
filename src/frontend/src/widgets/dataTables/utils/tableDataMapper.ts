@@ -1,10 +1,10 @@
-import * as arrow from "apache-arrow";
-import { DataColumn, DataRow, ColType } from "../types/types";
+import * as arrow from 'apache-arrow';
+import { DataColumn, DataRow, ColType } from '../types/types';
 
 function calculateColumnWidth(
   columnName: string,
   columnData: arrow.Vector,
-  maxSampleSize = 100,
+  maxSampleSize = 100
 ): number {
   const minWidth = 80;
   const maxWidth = 400;
@@ -34,18 +34,18 @@ function calculateColumnWidth(
 function mapArrowTypeToColType(arrowType: string): ColType {
   const lowerType = arrowType.toLowerCase();
   if (
-    lowerType.includes("int") ||
-    lowerType.includes("float") ||
-    lowerType.includes("double") ||
-    lowerType.includes("decimal")
+    lowerType.includes('int') ||
+    lowerType.includes('float') ||
+    lowerType.includes('double') ||
+    lowerType.includes('decimal')
   ) {
     return ColType.Number;
   }
-  if (lowerType.includes("bool")) {
+  if (lowerType.includes('bool')) {
     return ColType.Boolean;
   }
-  if (lowerType.includes("date") || lowerType.includes("timestamp")) {
-    return lowerType.includes("timestamp") ? ColType.DateTime : ColType.Date;
+  if (lowerType.includes('date') || lowerType.includes('timestamp')) {
+    return lowerType.includes('timestamp') ? ColType.DateTime : ColType.Date;
   }
   // Default to Text for strings and unknown types
   return ColType.Text;
@@ -53,19 +53,23 @@ function mapArrowTypeToColType(arrowType: string): ColType {
 
 export function convertArrowTableToData(
   table: arrow.Table,
-  requestedCount: number,
+  requestedCount: number
 ): {
   columns: DataColumn[];
   rows: DataRow[];
   hasMore: boolean;
 } {
   const columns: DataColumn[] = table.schema.fields
-    .filter((field: arrow.Field) => field.name !== "_hiddenKey")
+    .filter((field: arrow.Field) => field.name !== '_hiddenKey')
     .map((field: arrow.Field) => {
       // Find the actual index in the original table (accounting for filtered _hiddenKey)
-      const originalIndex = table.schema.fields.findIndex((f) => f.name === field.name);
+      const originalIndex = table.schema.fields.findIndex(
+        f => f.name === field.name
+      );
       const columnData = table.getChildAt(originalIndex);
-      const width = columnData ? calculateColumnWidth(field.name, columnData) : 150;
+      const width = columnData
+        ? calculateColumnWidth(field.name, columnData)
+        : 150;
 
       // Infer type from Arrow field type (no metadata parsing)
       const type = mapArrowTypeToColType(field.type.toString());
@@ -82,7 +86,7 @@ export function convertArrowTableToData(
   const decimalScales = new Map<number, number>();
   for (let j = 0; j < table.schema.fields.length; j++) {
     const field = table.schema.fields[j];
-    if (field.type.toString().toLowerCase().includes("decimal")) {
+    if (field.type.toString().toLowerCase().includes('decimal')) {
       const scale = (field.type as arrow.Decimal).scale;
       decimalScales.set(j, scale);
     }
@@ -98,7 +102,7 @@ export function convertArrowTableToData(
         // Arrow Decimal128 values are DecimalBigNum objects containing unscaled integers.
         // We must pass the column's scale to valueOf() so it divides correctly.
         const scale = decimalScales.get(j);
-        if (scale !== undefined && value != null && typeof value === "object") {
+        if (scale !== undefined && value != null && typeof value === 'object') {
           value = value.valueOf(scale);
         }
         values.push(value);

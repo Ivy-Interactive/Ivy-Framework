@@ -1,48 +1,48 @@
-import { ChatBubble, ChatBubbleMessage } from "@/components/ChatBubble";
-import { ChatInput } from "@/components/ChatInput";
-import { ChatMessageList } from "@/components/ChatMessageList";
-import { useEventHandler } from "@/components/event-handler";
-import { MessageLoading } from "@/components/MessageLoading";
-import { Button } from "@/components/ui/button";
-import { CornerDownLeft, Square } from "lucide-react";
-import React, { FormEvent, useState, KeyboardEvent, ReactNode } from "react";
-import { User, LucideStars } from "lucide-react";
-import { TextShimmer } from "@/components/TextShimmer";
-import { getHeight, getWidth } from "@/lib/styles";
+import { ChatBubble, ChatBubbleMessage } from '@/components/ChatBubble';
+import { ChatInput } from '@/components/ChatInput';
+import { ChatMessageList } from '@/components/ChatMessageList';
+import { useEventHandler } from '@/components/event-handler';
+import { MessageLoading } from '@/components/MessageLoading';
+import { Button } from '@/components/ui/button';
+import { CornerDownLeft, Square } from 'lucide-react';
+import React, { FormEvent, useState, KeyboardEvent, ReactNode } from 'react';
+import { User, LucideStars } from 'lucide-react';
+import { TextShimmer } from '@/components/TextShimmer';
+import { getHeight, getWidth } from '@/lib/styles';
 
 interface ChatMessageWidgetProps {
   id: number;
   children?: ReactNode[];
-  sender: "User" | "Assistant";
+  sender: 'User' | 'Assistant';
 }
 
 export const ChatMessageWidget: React.FC<ChatMessageWidgetProps> = ({
   id,
-  sender = "User",
+  sender = 'User',
   children,
 }) => {
   return (
-    <ChatBubble key={id} variant={sender === "User" ? "sent" : "received"}>
-      {sender == "Assistant" && (
+    <ChatBubble key={id} variant={sender === 'User' ? 'sent' : 'received'}>
+      {sender == 'Assistant' && (
         <div className="bg-muted p-2 rounded-full h-9 w-9 flex items-center justify-center">
           <LucideStars />
         </div>
       )}
 
-      {sender == "User" && (
+      {sender == 'User' && (
         <div className="bg-muted p-2 rounded-full h-9 w-9 flex items-center justify-center">
           <User />
         </div>
       )}
 
-      <ChatBubbleMessage variant={sender === "User" ? "sent" : "received"}>
+      <ChatBubbleMessage variant={sender === 'User' ? 'sent' : 'received'}>
         <div>{children}</div>
       </ChatBubbleMessage>
     </ChatBubble>
   );
 };
 
-ChatMessageWidget.displayName = "ChatMessageWidget";
+ChatMessageWidget.displayName = 'ChatMessageWidget';
 
 interface ChatWidgetProps {
   id: string;
@@ -56,24 +56,27 @@ interface ChatWidgetProps {
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
   id,
   children,
-  placeholder = "Type a message...",
+  placeholder = 'Type a message...',
   streaming = false,
-  width = "Full",
-  height = "Full",
+  width = 'Full',
+  height = 'Full',
 }) => {
   const eventHandler = useEventHandler();
 
-  const messageWidgets = React.Children.toArray(children).filter((child) => {
+  const messageWidgets = React.Children.toArray(children).filter(child => {
     if (!React.isValidElement(child)) return false;
 
     // Direct component check
-    if ((child.type as React.ComponentType<unknown>)?.displayName === "ChatMessageWidget") {
+    if (
+      (child.type as React.ComponentType<unknown>)?.displayName ===
+      'ChatMessageWidget'
+    ) {
       return true;
     }
 
     // MemoizedWidget check - look at node.type prop
     const props = child.props as { node?: { type?: string } };
-    if (props.node?.type === "Ivy.ChatMessage") {
+    if (props.node?.type === 'Ivy.ChatMessage') {
       return true;
     }
 
@@ -81,22 +84,24 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   });
 
   // Check if any ChatMessage contains ChatLoading as its child
-  const hasLoadingWidget = React.Children.toArray(children).some((child) => {
+  const hasLoadingWidget = React.Children.toArray(children).some(child => {
     if (
       React.isValidElement(child) &&
-      (child.type as React.ComponentType<unknown>)?.displayName === "ChatMessageWidget" &&
+      (child.type as React.ComponentType<unknown>)?.displayName ===
+        'ChatMessageWidget' &&
       child.props &&
-      typeof child.props === "object" &&
-      "children" in child.props
+      typeof child.props === 'object' &&
+      'children' in child.props
     ) {
       // Check children of ChatMessage for ChatLoadingWidget
       const messageChildren = React.Children.toArray(
-        (child.props as { children?: ReactNode }).children,
+        (child.props as { children?: ReactNode }).children
       );
       return messageChildren.some(
-        (msgChild) =>
+        msgChild =>
           React.isValidElement(msgChild) &&
-          (msgChild.type as React.ComponentType<unknown>)?.displayName === "ChatLoadingWidget",
+          (msgChild.type as React.ComponentType<unknown>)?.displayName ===
+            'ChatLoadingWidget'
       );
     }
     return false;
@@ -104,22 +109,22 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
 
   const isLoading = hasLoadingWidget || streaming;
 
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    setInput("");
-    eventHandler("OnSend", id, [input.trim()]);
+    setInput('');
+    eventHandler('OnSend', id, [input.trim()]);
   };
 
   const handleCancel = (e: React.MouseEvent) => {
     e.preventDefault();
-    eventHandler("OnCancel", id, []);
+    eventHandler('OnCancel', id, []);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e as unknown as FormEvent);
     }
@@ -143,7 +148,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
         >
           <ChatInput
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             className="min-h-12 resize-none rounded-box bg-background border-0 p-3 shadow-none focus-visible:ring-0"
@@ -178,7 +183,7 @@ export const ChatLoadingWidget: React.FC<ChatLoadingWidgetProps> = () => {
   return <MessageLoading />;
 };
 
-ChatLoadingWidget.displayName = "ChatLoadingWidget";
+ChatLoadingWidget.displayName = 'ChatLoadingWidget';
 
 interface ChatStatusWidgetProps {
   text: string;

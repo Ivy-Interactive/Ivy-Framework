@@ -1,8 +1,8 @@
-import React from "react";
-import { Table, TableBody } from "@/components/ui/table";
-import { getWidth } from "@/lib/styles";
-import { Densities } from "@/types/density";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { Table, TableBody } from '@/components/ui/table';
+import { getWidth } from '@/lib/styles';
+import { Densities } from '@/types/density';
+import { cn } from '@/lib/utils';
 
 interface TableWidgetProps {
   id: string;
@@ -16,17 +16,17 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
   width,
   density = Densities.Medium,
 }) => {
-  const widthStyles = getWidth(width || "Full");
+  const widthStyles = getWidth(width || 'Full');
 
   return (
     <Table
       density={density}
-      className={cn("w-full caption-bottom")}
+      className={cn('w-full caption-bottom')}
       style={{
         ...widthStyles,
-        ...(widthStyles.width === "100%"
-          ? { maxWidth: "100%", tableLayout: "fixed" as const }
-          : { tableLayout: "auto" as const }),
+        ...(widthStyles.width === '100%'
+          ? { maxWidth: '100%', tableLayout: 'fixed' as const }
+          : { tableLayout: 'auto' as const }),
       }}
     >
       <TableBody>{children}</TableBody>

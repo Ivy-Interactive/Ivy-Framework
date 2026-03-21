@@ -1,1 +1,1 @@
-export * from "./ButtonWidget";
+export * from './ButtonWidget';

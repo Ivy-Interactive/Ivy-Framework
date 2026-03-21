@@ -1,19 +1,19 @@
-import React from "react";
-import type { TabsLayoutWidgetProps } from "./types";
+import React from 'react';
+import type { TabsLayoutWidgetProps } from './types';
 import {
   filterTabWidgets,
   orderTabWidgets,
   extractTabIds,
   swapTabsInOrder,
   createReorderMapping,
-} from "./utils/tabUtils";
-import { TabContentRenderer } from "./components/TabContent";
-import { TabsDropdownMenu } from "./components/DropdownMenu";
-import { ContentVariant, TabsVariant } from "./components/Variants";
-import { useAnimation } from "./hooks/useAnimation";
-import { useTabManagement } from "./hooks/useTabManagement";
-import { useTabCalculation } from "./hooks/useTabCalculation";
-import { useDrag } from "./hooks/useDrag";
+} from './utils/tabUtils';
+import { TabContentRenderer } from './components/TabContent';
+import { TabsDropdownMenu } from './components/DropdownMenu';
+import { ContentVariant, TabsVariant } from './components/Variants';
+import { useAnimation } from './hooks/useAnimation';
+import { useTabManagement } from './hooks/useTabManagement';
+import { useTabCalculation } from './hooks/useTabCalculation';
+import { useDrag } from './hooks/useDrag';
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -23,12 +23,15 @@ export const TabsLayoutWidget = ({
   events = EMPTY_ARRAY,
   selectedIndex,
   removeParentPadding = false,
-  variant = "Content",
-  padding = "4,4,4,4",
-  width = "Full",
+  variant = 'Content',
+  padding = '4,4,4,4',
+  width = 'Full',
   addButtonText,
 }: TabsLayoutWidgetProps) => {
-  const tabWidgets = React.useMemo(() => filterTabWidgets(children), [children]);
+  const tabWidgets = React.useMemo(
+    () => filterTabWidgets(children),
+    [children]
+  );
 
   // Centralized state management (includes synchronization logic)
   const {
@@ -64,7 +67,7 @@ export const TabsLayoutWidget = ({
     activeIndex,
     tabOrder,
     visibleTabs,
-    tabRefs,
+    tabRefs
   );
 
   // Calculate which tabs fit and which don't - handles responsive overflow
@@ -81,7 +84,7 @@ export const TabsLayoutWidget = ({
     tabMeasurementsRef,
     setVisibleTabs,
     setHiddenTabs,
-    tabWidgets,
+    tabWidgets
   );
 
   // Event handlers
@@ -104,19 +107,19 @@ export const TabsLayoutWidget = ({
       const originalTabOrder = extractTabIds(tabWidgets);
       const reorderMapping = createReorderMapping(newOrder, originalTabOrder);
       isUserInitiatedChangeRef.current = true;
-      safeEvent("OnReorder", [reorderMapping]);
+      safeEvent('OnReorder', [reorderMapping]);
     }
 
     // Update activeIndex for Content variant animation (use new order if swapped)
     const newIndex = effectiveTabOrder.indexOf(tabId);
     setActiveIndex(newIndex);
-    if (events?.includes("OnSelect")) safeEvent("OnSelect", [newIndex]);
+    if (events?.includes('OnSelect')) safeEvent('OnSelect', [newIndex]);
   };
 
   const handleMouseDown = (e: React.MouseEvent, index: number) => {
     if (e.button === 1) {
       e.preventDefault();
-      safeEvent("OnClose", [index]);
+      safeEvent('OnClose', [index]);
     }
   };
 
@@ -133,16 +136,17 @@ export const TabsLayoutWidget = ({
     isUserInitiatedChangeRef,
     setTabOrder,
     setActiveIndex,
-    safeEvent,
+    safeEvent
   );
-  const showClose = events.includes("OnClose");
-  const showRefresh = events.includes("OnRefresh");
+  const showClose = events.includes('OnClose');
+  const showRefresh = events.includes('OnRefresh');
   const orderedTabWidgets = React.useMemo(
     () => orderTabWidgets(tabOrder, tabWidgets),
-    [tabOrder, tabWidgets],
+    [tabOrder, tabWidgets]
   );
 
-  if (tabWidgets.length === 0) return <div className="remove-parent-padding"></div>;
+  if (tabWidgets.length === 0)
+    return <div className="remove-parent-padding"></div>;
 
   const renderTabContent = (tabWidget: React.ReactElement) => (
     <TabContentRenderer
@@ -174,7 +178,7 @@ export const TabsLayoutWidget = ({
   );
 
   // Custom tab bar for 'Content' variant
-  if (variant === "Content") {
+  if (variant === 'Content') {
     return (
       <ContentVariant
         removeParentPadding={removeParentPadding}

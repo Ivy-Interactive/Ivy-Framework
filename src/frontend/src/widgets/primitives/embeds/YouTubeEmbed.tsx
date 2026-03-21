@@ -1,6 +1,6 @@
-import React from "react";
-import { sanitizeId } from "./shared";
-import EmbedErrorFallback from "./EmbedErrorFallback";
+import React from 'react';
+import { sanitizeId } from './shared';
+import EmbedErrorFallback from './EmbedErrorFallback';
 
 interface YouTubeEmbedProps {
   url: string;

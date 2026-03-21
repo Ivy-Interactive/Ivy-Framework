@@ -1,5 +1,5 @@
-import React, { ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import React, { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 /**
  * Simple header component that wraps table options
@@ -10,8 +10,11 @@ export interface DataTableHeaderProps {
   className?: string;
 }
 
-export const DataTableHeader: React.FC<DataTableHeaderProps> = ({ children, className }) => {
-  return <div className={cn("w-full", className)}>{children}</div>;
+export const DataTableHeader: React.FC<DataTableHeaderProps> = ({
+  children,
+  className,
+}) => {
+  return <div className={cn('w-full', className)}>{children}</div>;
 };
 
 /**

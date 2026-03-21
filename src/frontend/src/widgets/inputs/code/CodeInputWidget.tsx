@@ -1,28 +1,33 @@
-import React, { useState, useCallback, useMemo } from "react";
-import { useOptimisticValue } from "../shared/useOptimisticValue";
-import CodeMirror from "@uiw/react-codemirror";
-import { javascript } from "@codemirror/lang-javascript";
-import { python } from "@codemirror/lang-python";
-import { sql } from "@codemirror/lang-sql";
-import { html } from "@codemirror/lang-html";
-import { css } from "@codemirror/lang-css";
-import { json } from "@codemirror/lang-json";
-import { markdown } from "@codemirror/lang-markdown";
-import { yaml } from "@codemirror/lang-yaml";
-import { useEventHandler } from "@/components/event-handler";
-import { cn } from "@/lib/utils";
-import { getHeight, getWidth, inputStyles } from "@/lib/styles";
-import { InvalidIcon } from "@/components/InvalidIcon";
-import { cpp } from "@codemirror/lang-cpp";
-import { dbml } from "./dbml-language";
-import { createIvyCodeTheme } from "./theme";
-import { Densities } from "@/types/density";
-import { X, Copy } from "lucide-react";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
-import { keymap, EditorView, lineNumbers, highlightActiveLine } from "@codemirror/view";
-import { history } from "@codemirror/commands";
+import React, { useState, useCallback, useMemo } from 'react';
+import { useOptimisticValue } from '../shared/useOptimisticValue';
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { python } from '@codemirror/lang-python';
+import { sql } from '@codemirror/lang-sql';
+import { html } from '@codemirror/lang-html';
+import { css } from '@codemirror/lang-css';
+import { json } from '@codemirror/lang-json';
+import { markdown } from '@codemirror/lang-markdown';
+import { yaml } from '@codemirror/lang-yaml';
+import { useEventHandler } from '@/components/event-handler';
+import { cn } from '@/lib/utils';
+import { getHeight, getWidth, inputStyles } from '@/lib/styles';
+import { InvalidIcon } from '@/components/InvalidIcon';
+import { cpp } from '@codemirror/lang-cpp';
+import { dbml } from './dbml-language';
+import { createIvyCodeTheme } from './theme';
+import { Densities } from '@/types/density';
+import { X, Copy } from 'lucide-react';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
+import {
+  keymap,
+  EditorView,
+  lineNumbers,
+  highlightActiveLine,
+} from '@codemirror/view';
+import { history } from '@codemirror/commands';
 
-import { useDebouncedCallback } from "use-debounce";
+import { useDebouncedCallback } from 'use-debounce';
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -73,12 +78,15 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   const eventHandler = useEventHandler();
   const [isFocused, setIsFocused] = useState(false);
 
-  const serverValue = value || "";
-  const [localValue, setLocalValue] = useOptimisticValue(serverValue, isFocused);
+  const serverValue = value || '';
+  const [localValue, setLocalValue] = useOptimisticValue(
+    serverValue,
+    isFocused
+  );
 
   const debouncedOnChange = useDebouncedCallback((value: string) => {
-    if (events.includes("OnChange")) {
-      eventHandler("OnChange", id, [value]);
+    if (events.includes('OnChange')) {
+      eventHandler('OnChange', id, [value]);
     }
   }, 300);
 
@@ -87,12 +95,12 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       setLocalValue(value);
       debouncedOnChange(value);
     },
-    [debouncedOnChange, setLocalValue],
+    [debouncedOnChange, setLocalValue]
   );
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
-    if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+    if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
   }, [eventHandler, id, events]);
 
   const handleFocus = useCallback(() => {
@@ -103,17 +111,17 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!events.includes("OnChange")) return;
+      if (!events.includes('OnChange')) return;
       if (disabled) return;
       // For nullable inputs, set to null; otherwise set to empty string
-      const clearedValue = nullable ? null : "";
-      setLocalValue(clearedValue ?? "");
-      eventHandler("OnChange", id, [clearedValue]);
+      const clearedValue = nullable ? null : '';
+      setLocalValue(clearedValue ?? '');
+      eventHandler('OnChange', id, [clearedValue]);
     },
-    [eventHandler, id, events, disabled, nullable, setLocalValue],
+    [eventHandler, id, events, disabled, nullable, setLocalValue]
   );
 
-  const hasValue = localValue && localValue.toString().trim() !== "";
+  const hasValue = localValue && localValue.toString().trim() !== '';
   const showClear = nullable && !disabled && hasValue;
   // Copy button always shows when there's a value (doesn't depend on showCopyButton prop)
   const showCopy = hasValue;
@@ -133,8 +141,8 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       highlightActiveLine(),
       history(),
       keymap.of([
-        { key: "Ctrl-d", run: () => false },
-        { key: "Ctrl-Shift-l", run: () => false },
+        { key: 'Ctrl-d', run: () => false },
+        { key: 'Ctrl-Shift-l', run: () => false },
       ]),
       EditorView.theme({}),
     ];
@@ -144,7 +152,9 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     const lang = language
       ? languageExtensions[language as keyof typeof languageExtensions]
       : undefined;
-    const langExtension = lang ? [typeof lang === "function" ? lang() : lang] : [];
+    const langExtension = lang
+      ? [typeof lang === 'function' ? lang() : lang]
+      : [];
     return [...langExtension, minimalSetup, themeExtension];
   }, [language, minimalSetup, themeExtension]);
 
@@ -174,7 +184,12 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
             </button>
           )}
           {/* Invalid icon - rightmost */}
-          {invalid && <InvalidIcon message={invalid} className="pointer-events-auto p-1" />}
+          {invalid && (
+            <InvalidIcon
+              message={invalid}
+              className="pointer-events-auto p-1"
+            />
+          )}
         </div>
       )}
       <CodeMirror
@@ -187,10 +202,10 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         editable={!disabled}
         data-gramm="false"
         className={cn(
-          "h-full",
-          "border",
+          'h-full',
+          'border',
           invalid && inputStyles.invalid,
-          disabled && "opacity-50 cursor-not-allowed",
+          disabled && 'opacity-50 cursor-not-allowed'
         )}
         height="100%"
         basicSetup={false}

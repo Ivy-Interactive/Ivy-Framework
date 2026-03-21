@@ -1,6 +1,9 @@
-import { ComponentPropsWithoutRef } from "react";
+import { ComponentPropsWithoutRef } from 'react';
 
-export default function IvyLogo({ className, ...props }: ComponentPropsWithoutRef<"svg">) {
+export default function IvyLogo({
+  className,
+  ...props
+}: ComponentPropsWithoutRef<'svg'>) {
   return (
     <svg
       viewBox="0 0 2076 1661"

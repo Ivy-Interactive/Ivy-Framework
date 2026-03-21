@@ -1,7 +1,7 @@
-import { useCallback } from "react";
-import { GridCell, GridCellKind, Item } from "@glideapps/glide-data-grid";
-import { getCellContent as getCellContentUtil } from "../../utils/cellContent";
-import { DataColumn, DataRow } from "../../types/types";
+import { useCallback } from 'react';
+import { GridCell, GridCellKind, Item } from '@glideapps/glide-data-grid';
+import { getCellContent as getCellContentUtil } from '../../utils/cellContent';
+import { DataColumn, DataRow } from '../../types/types';
 
 interface UseCellContentProps {
   columns: DataColumn[];
@@ -28,14 +28,20 @@ export const useCellContent = ({
       if (row >= visibleRows) {
         return {
           kind: GridCellKind.Text,
-          data: "",
-          displayData: "",
+          data: '',
+          displayData: '',
           allowOverlay: false,
         };
       }
-      return getCellContentUtil(cell, columns, columnOrder, editable, getRowData);
+      return getCellContentUtil(
+        cell,
+        columns,
+        columnOrder,
+        editable,
+        getRowData
+      );
     },
-    [columns, columnOrder, editable, visibleRows, getRowData],
+    [columns, columnOrder, editable, visibleRows, getRowData]
   );
 
   return { getCellContent };

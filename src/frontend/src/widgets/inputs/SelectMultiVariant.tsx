@@ -1,18 +1,21 @@
-import React, { useMemo, useCallback } from "react";
-import { cn } from "@/lib/utils";
-import { MultipleSelector, Option as MultiSelectOption } from "@/components/ui/multiselect";
-import { Loader2, X } from "lucide-react";
-import { InvalidIcon } from "@/components/InvalidIcon";
-import { logger } from "@/lib/logger";
-import { selectIconContainerVariant } from "@/components/ui/select/variant";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
-import { SelectInputWidgetProps, Option } from "./select-types";
-import { convertValuesToOriginalType } from "./select-utils";
-import { getWidth } from "@/lib/styles";
+import React, { useMemo, useCallback } from 'react';
+import { cn } from '@/lib/utils';
+import {
+  MultipleSelector,
+  Option as MultiSelectOption,
+} from '@/components/ui/multiselect';
+import { Loader2, X } from 'lucide-react';
+import { InvalidIcon } from '@/components/InvalidIcon';
+import { logger } from '@/lib/logger';
+import { selectIconContainerVariant } from '@/components/ui/select/variant';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
+import { SelectInputWidgetProps, Option } from './select-types';
+import { convertValuesToOriginalType } from './select-utils';
+import { getWidth } from '@/lib/styles';
 
 export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
   id,
-  placeholder = "",
+  placeholder = '',
   value,
   disabled = false,
   invalid,
@@ -24,31 +27,32 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
   loading = false,
   ghost = false,
   density,
-  "data-testid": dataTestId,
+  'data-testid': dataTestId,
   width,
 }) => {
   const validOptions = options.filter(
-    (option) => option.value != null && option.value.toString().trim() !== "",
+    option => option.value != null && option.value.toString().trim() !== ''
   );
 
   const selectedValues = useMemo(() => {
     let values: string[] = [];
     if (value != null) {
       if (Array.isArray(value)) {
-        values = (value as (string | number)[]).map((v) => v.toString());
+        values = (value as (string | number)[]).map(v => v.toString());
       } else {
         values = value
           .toString()
-          .split(",")
-          .map((v) => v.trim());
+          .split(',')
+          .map(v => v.trim());
       }
     }
     return values;
   }, [value]);
 
   const multiSelectOptions: MultiSelectOption[] = useMemo(() => {
-    const isAtMax = maxSelections != null && selectedValues.length >= maxSelections;
-    return validOptions.map((option) => ({
+    const isAtMax =
+      maxSelections != null && selectedValues.length >= maxSelections;
+    return validOptions.map(option => ({
       label: option.label || option.value.toString(),
       value: option.value.toString(),
       disable:
@@ -61,7 +65,7 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
 
   const optionsLookup = useMemo(() => {
     const map = new Map<string, Option>();
-    validOptions.forEach((option) => {
+    validOptions.forEach(option => {
       map.set(option.value.toString(), option);
     });
     return map;
@@ -69,7 +73,7 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
 
   const selectedMultiSelectOptions: MultiSelectOption[] = useMemo(
     () =>
-      selectedValues.map((val) => {
+      selectedValues.map(val => {
         const option = optionsLookup.get(val.toString());
         return {
           label: option?.label || val.toString(),
@@ -77,7 +81,7 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
           disable: false,
         };
       }),
-    [selectedValues, optionsLookup],
+    [selectedValues, optionsLookup]
   );
 
   const handleMultiSelectChange = useCallback(
@@ -90,16 +94,24 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
         return;
       }
 
-      const newValues = newSelectedOptions.map((opt) => opt.value);
+      const newValues = newSelectedOptions.map(opt => opt.value);
       const convertedValue = convertValuesToOriginalType(
         newValues,
         value,
         validOptions,
-        selectMany,
+        selectMany
       );
-      eventHandler("OnChange", id, [convertedValue]);
+      eventHandler('OnChange', id, [convertedValue]);
     },
-    [minSelections, selectedValues.length, value, validOptions, selectMany, eventHandler, id],
+    [
+      minSelections,
+      selectedValues.length,
+      value,
+      validOptions,
+      selectMany,
+      eventHandler,
+      id,
+    ]
   );
 
   const styles = getWidth(width);
@@ -113,15 +125,20 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
           onValueChange={handleMultiSelectChange}
           placeholder={placeholder}
           disabled={disabled || loading}
-          className={cn("w-full", ghost && "ghost")}
+          className={cn('w-full', ghost && 'ghost')}
           invalid={!!invalid}
           hidePlaceholderWhenSelected
           density={density}
           ghost={ghost}
           data-testid={dataTestId}
         />
-        {(selectedMultiSelectOptions.length > 0 && !disabled) || invalid || loading ? (
-          <div className={selectIconContainerVariant({ density })} style={{ zIndex: 2 }}>
+        {(selectedMultiSelectOptions.length > 0 && !disabled) ||
+        invalid ||
+        loading ? (
+          <div
+            className={selectIconContainerVariant({ density })}
+            style={{ zIndex: 2 }}
+          >
             {loading && (
               <div className="pointer-events-auto flex items-center h-6 p-1">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
@@ -132,17 +149,20 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
                 type="button"
                 tabIndex={-1}
                 aria-label="Clear All"
-                onClick={(e) => {
+                onClick={e => {
                   e.preventDefault();
                   e.stopPropagation();
-                  logger.debug("Select input clear button clicked (MultiSelect)", { id });
-                  eventHandler("OnChange", id, [null]);
+                  logger.debug(
+                    'Select input clear button clicked (MultiSelect)',
+                    { id }
+                  );
+                  eventHandler('OnChange', id, [null]);
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     e.stopPropagation();
-                    eventHandler("OnChange", id, [null]);
+                    eventHandler('OnChange', id, [null]);
                   }
                 }}
                 className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"

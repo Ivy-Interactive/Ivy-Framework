@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 interface ScriptWidgetProps {
   id: string;
@@ -29,7 +29,7 @@ const ScriptWidget: React.FC<ScriptWidgetProps> = ({
       scriptRef.current = null;
     }
 
-    const script = document.createElement("script");
+    const script = document.createElement('script');
 
     if (src) {
       script.src = src;
@@ -41,7 +41,7 @@ const ScriptWidget: React.FC<ScriptWidgetProps> = ({
     if (isDefer) script.defer = true;
     if (crossOrigin) script.crossOrigin = crossOrigin;
     if (integrity) script.integrity = integrity;
-    if (referrerPolicy) script.setAttribute("referrerpolicy", referrerPolicy);
+    if (referrerPolicy) script.setAttribute('referrerpolicy', referrerPolicy);
 
     script.dataset.ivyWidgetId = id;
     document.head.appendChild(script);
@@ -53,7 +53,16 @@ const ScriptWidget: React.FC<ScriptWidgetProps> = ({
         scriptRef.current = null;
       }
     };
-  }, [id, src, inlineCode, isAsync, isDefer, crossOrigin, integrity, referrerPolicy]);
+  }, [
+    id,
+    src,
+    inlineCode,
+    isAsync,
+    isDefer,
+    crossOrigin,
+    integrity,
+    referrerPolicy,
+  ]);
 
   return null;
 };

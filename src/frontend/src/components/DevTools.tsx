@@ -1,15 +1,15 @@
-import { useState, useEffect, useCallback, useRef, useReducer } from "react";
-import "./devtools.css";
-import { CallSite } from "@/types/widgets";
+import { useState, useEffect, useCallback, useRef, useReducer } from 'react';
+import './devtools.css';
+import { CallSite } from '@/types/widgets';
 import {
   widgetCallSiteRegistry,
   setWidgetContentOverride,
   clearWidgetContentOverride,
-} from "@/widgets/widgetRenderer";
-import { LuTrash2, LuTextCursor, LuSend, LuPlus } from "react-icons/lu";
-import { FaMagic } from "react-icons/fa";
+} from '@/widgets/widgetRenderer';
+import { LuTrash2, LuTextCursor, LuSend, LuPlus } from 'react-icons/lu';
+import { FaMagic } from 'react-icons/fa';
 
-type DialogAction = "modify" | "delete" | "text-edit";
+type DialogAction = 'modify' | 'delete' | 'text-edit';
 
 interface WidgetInfo {
   id: string;
@@ -19,7 +19,7 @@ interface WidgetInfo {
   callSite?: CallSite;
 }
 
-const TEXT_EDITABLE_TYPES = ["Ivy.TextBlock", "Ivy.Markdown"];
+const TEXT_EDITABLE_TYPES = ['Ivy.TextBlock', 'Ivy.Markdown'];
 
 function getWidgetBounds(wrapperElement: HTMLElement): DOMRect {
   const children = wrapperElement.children;
@@ -44,7 +44,7 @@ function getWidgetBounds(wrapperElement: HTMLElement): DOMRect {
 }
 
 function formatWidgetType(type: string): string {
-  return type.replace(/^Ivy\./, "");
+  return type.replace(/^Ivy\./, '');
 }
 
 function getDialogPosition(clickPos: { x: number; y: number }) {
@@ -56,12 +56,17 @@ function getDialogPosition(clickPos: { x: number; y: number }) {
   };
 }
 
-function getTextContent(element: HTMLElement, widgetType: string): string | undefined {
+function getTextContent(
+  element: HTMLElement,
+  widgetType: string
+): string | undefined {
   if (!TEXT_EDITABLE_TYPES.includes(widgetType)) return undefined;
-  const content = element.getAttribute("data-content") || element.textContent || "";
+  const content =
+    element.getAttribute('data-content') || element.textContent || '';
   if (!content) return undefined;
   const trimmed = content.trim();
-  if (trimmed.length > 50) return trimmed.substring(0, 50).trim() + " (truncated)";
+  if (trimmed.length > 50)
+    return trimmed.substring(0, 50).trim() + ' (truncated)';
   return trimmed;
 }
 
@@ -70,12 +75,12 @@ export function DevTools() {
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
-      if (e.data?.type === "DEVTOOLS_SET_ENABLED") {
-        setEnabled(e.data.token === "true");
+      if (e.data?.type === 'DEVTOOLS_SET_ENABLED') {
+        setEnabled(e.data.token === 'true');
       }
     };
-    window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
   }, []);
 
   const [devState, dispatchDev] = useReducer(
@@ -88,41 +93,49 @@ export function DevTools() {
         dialogText: string;
         clickPosition: { x: number; y: number };
       },
-      action: Partial<typeof state> | ((prev: typeof state) => Partial<typeof state>),
+      action:
+        | Partial<typeof state>
+        | ((prev: typeof state) => Partial<typeof state>)
     ) => {
-      const updates = typeof action === "function" ? action(state) : action;
+      const updates = typeof action === 'function' ? action(state) : action;
       return { ...state, ...updates };
     },
     {
       highlightedWidget: null,
       widgetStack: [],
       dialogWidget: null,
-      dialogAction: "modify",
-      dialogText: "",
+      dialogAction: 'modify',
+      dialogText: '',
       clickPosition: { x: 0, y: 0 },
-    },
+    }
   );
-  const { highlightedWidget, widgetStack, dialogWidget, dialogAction, dialogText, clickPosition } =
-    devState;
+  const {
+    highlightedWidget,
+    widgetStack,
+    dialogWidget,
+    dialogAction,
+    dialogText,
+    clickPosition,
+  } = devState;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const getWidgetInfo = useCallback((element: HTMLElement): WidgetInfo => {
-    const widgetId = element.getAttribute("id")!;
-    const widgetType = element.getAttribute("type")!;
+    const widgetId = element.getAttribute('id')!;
+    const widgetType = element.getAttribute('type')!;
     const bounds = getWidgetBounds(element);
     const callSite = widgetCallSiteRegistry.get(widgetId);
     return { id: widgetId, type: widgetType, element, bounds, callSite };
   }, []);
 
   const closeDialog = useCallback(() => {
-    if (dialogWidget && dialogAction === "text-edit") {
+    if (dialogWidget && dialogAction === 'text-edit') {
       clearWidgetContentOverride(dialogWidget.id);
     }
     dispatchDev({
       dialogWidget: null,
-      dialogText: "",
-      dialogAction: "modify",
+      dialogText: '',
+      dialogAction: 'modify',
       highlightedWidget: null,
     });
   }, [dialogWidget, dialogAction, dispatchDev]);
@@ -133,7 +146,9 @@ export function DevTools() {
       const finalText = dialogText;
 
       const prompt =
-        dialogAction === "delete" ? finalText.trim() || "Delete this widget" : finalText.trim();
+        dialogAction === 'delete'
+          ? finalText.trim() || 'Delete this widget'
+          : finalText.trim();
 
       if (!prompt) {
         closeDialog();
@@ -147,15 +162,21 @@ export function DevTools() {
           prompt,
           callSite: dialogWidget.callSite,
           action: dialogAction,
-          currentContent: getTextContent(dialogWidget.element, dialogWidget.type),
+          currentContent: getTextContent(
+            dialogWidget.element,
+            dialogWidget.type
+          ),
           forward,
         },
       ];
 
-      window.parent.postMessage({ type: "DEVTOOLS_APPLY_CHANGES", payload, forward }, "*");
+      window.parent.postMessage(
+        { type: 'DEVTOOLS_APPLY_CHANGES', payload, forward },
+        '*'
+      );
       closeDialog();
     },
-    [dialogWidget, dialogAction, dialogText, closeDialog],
+    [dialogWidget, dialogAction, dialogText, closeDialog]
   );
 
   const handleAdd = useCallback(() => postChange(false), [postChange]);
@@ -165,36 +186,36 @@ export function DevTools() {
     (action: DialogAction) => {
       if (!dialogWidget) return;
 
-      if (dialogAction === "text-edit" && action !== "text-edit") {
+      if (dialogAction === 'text-edit' && action !== 'text-edit') {
         clearWidgetContentOverride(dialogWidget.id);
       }
 
-      if (action === "text-edit") {
+      if (action === 'text-edit') {
         const text =
-          dialogWidget.element.getAttribute("data-content") ||
+          dialogWidget.element.getAttribute('data-content') ||
           dialogWidget.element.textContent ||
-          "";
+          '';
         dispatchDev({ dialogText: text });
         setWidgetContentOverride(dialogWidget.id, text);
       } else if (dialogAction === action) {
         return;
       } else {
-        dispatchDev({ dialogText: "" });
+        dispatchDev({ dialogText: '' });
       }
 
       dispatchDev({ dialogAction: action });
     },
-    [dialogWidget, dialogAction, dispatchDev],
+    [dialogWidget, dialogAction, dispatchDev]
   );
 
   const handleTextChange = useCallback(
     (value: string) => {
       dispatchDev({ dialogText: value });
-      if (dialogAction === "text-edit" && dialogWidget) {
+      if (dialogAction === 'text-edit' && dialogWidget) {
         setWidgetContentOverride(dialogWidget.id, value);
       }
     },
-    [dialogAction, dialogWidget, dispatchDev],
+    [dialogAction, dialogWidget, dispatchDev]
   );
 
   const handleMouseOver = useCallback(
@@ -202,11 +223,11 @@ export function DevTools() {
       if (dialogWidget) return;
 
       const target = e.target as HTMLElement;
-      if (target.closest(".ivy-devtools")) return;
+      if (target.closest('.ivy-devtools')) return;
 
       e.stopPropagation();
 
-      const widgetWrapper = target.closest("ivy-widget") as HTMLElement | null;
+      const widgetWrapper = target.closest('ivy-widget') as HTMLElement | null;
       if (!widgetWrapper) {
         dispatchDev({ highlightedWidget: null, widgetStack: [] });
         return;
@@ -216,14 +237,16 @@ export function DevTools() {
       let current: HTMLElement | null = widgetWrapper;
       while (current) {
         stack.push(current);
-        current = current.parentElement?.closest("ivy-widget") as HTMLElement | null;
+        current = current.parentElement?.closest(
+          'ivy-widget'
+        ) as HTMLElement | null;
       }
       dispatchDev({
         widgetStack: stack,
         highlightedWidget: getWidgetInfo(widgetWrapper),
       });
     },
-    [dialogWidget, getWidgetInfo, dispatchDev],
+    [dialogWidget, getWidgetInfo, dispatchDev]
   );
 
   const handleWheel = useCallback(
@@ -231,12 +254,14 @@ export function DevTools() {
       if (widgetStack.length === 0 || dialogWidget) return;
 
       const target = e.target as HTMLElement;
-      if (target.closest(".ivy-devtools")) return;
+      if (target.closest('.ivy-devtools')) return;
 
       e.stopPropagation();
       e.stopPropagation();
 
-      const currentIndex = widgetStack.findIndex((el) => el === highlightedWidget?.element);
+      const currentIndex = widgetStack.findIndex(
+        el => el === highlightedWidget?.element
+      );
       if (currentIndex === -1) return;
 
       let newIndex = currentIndex;
@@ -252,7 +277,7 @@ export function DevTools() {
         });
       }
     },
-    [widgetStack, highlightedWidget, dialogWidget, getWidgetInfo, dispatchDev],
+    [widgetStack, highlightedWidget, dialogWidget, getWidgetInfo, dispatchDev]
   );
 
   const handleClick = useCallback(
@@ -260,7 +285,7 @@ export function DevTools() {
       if (dialogWidget) return;
 
       const target = e.target as HTMLElement;
-      if (target.closest(".ivy-devtools")) return;
+      if (target.closest('.ivy-devtools')) return;
 
       e.preventDefault();
       e.stopPropagation();
@@ -270,50 +295,57 @@ export function DevTools() {
       dispatchDev({
         clickPosition: { x: e.clientX, y: e.clientY },
         dialogWidget: highlightedWidget,
-        dialogAction: "modify",
-        dialogText: "",
+        dialogAction: 'modify',
+        dialogText: '',
       });
       setTimeout(() => textareaRef.current?.focus(), 0);
     },
-    [highlightedWidget, dialogWidget, dispatchDev],
+    [highlightedWidget, dialogWidget, dispatchDev]
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape" && dialogWidget) {
+      if (e.key === 'Escape' && dialogWidget) {
         closeDialog();
       }
-      if (e.key === "Enter" && e.ctrlKey && dialogWidget) {
+      if (e.key === 'Enter' && e.ctrlKey && dialogWidget) {
         e.preventDefault();
         handleAdd();
       }
     },
-    [dialogWidget, closeDialog, handleAdd],
+    [dialogWidget, closeDialog, handleAdd]
   );
 
   useEffect(() => {
     if (!enabled) return;
 
     if (!dialogWidget) {
-      document.addEventListener("mouseover", handleMouseOver, true);
-      document.addEventListener("click", handleClick, true);
-      document.addEventListener("wheel", handleWheel, {
+      document.addEventListener('mouseover', handleMouseOver, true);
+      document.addEventListener('click', handleClick, true);
+      document.addEventListener('wheel', handleWheel, {
         passive: true,
         capture: true,
       });
-      document.body.style.cursor = "crosshair";
+      document.body.style.cursor = 'crosshair';
     }
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.removeEventListener("mouseover", handleMouseOver, true);
-      document.removeEventListener("click", handleClick, true);
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("wheel", handleWheel, true);
-      document.body.style.cursor = "";
+      document.removeEventListener('mouseover', handleMouseOver, true);
+      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('wheel', handleWheel, true);
+      document.body.style.cursor = '';
     };
-  }, [enabled, dialogWidget, handleMouseOver, handleClick, handleKeyDown, handleWheel]);
+  }, [
+    enabled,
+    dialogWidget,
+    handleMouseOver,
+    handleClick,
+    handleKeyDown,
+    handleWheel,
+  ]);
 
   useEffect(() => {
     if (!enabled || !highlightedWidget || dialogWidget) return;
@@ -321,8 +353,8 @@ export function DevTools() {
     const { bounds, type } = highlightedWidget;
     if (bounds.width === 0 && bounds.height === 0) return;
 
-    const overlay = document.createElement("div");
-    overlay.className = "ivy-devtools ivy-devtools-overlay";
+    const overlay = document.createElement('div');
+    overlay.className = 'ivy-devtools ivy-devtools-overlay';
     Object.assign(overlay.style, {
       top: `${bounds.top}px`,
       left: `${bounds.left}px`,
@@ -330,8 +362,8 @@ export function DevTools() {
       height: `${bounds.height}px`,
     });
 
-    const label = document.createElement("div");
-    label.className = "ivy-devtools-label";
+    const label = document.createElement('div');
+    label.className = 'ivy-devtools-label';
     label.innerHTML = `<div class="ivy-devtools-label-type">${formatWidgetType(type)}</div>`;
     overlay.appendChild(label);
     document.body.appendChild(overlay);
@@ -346,25 +378,28 @@ export function DevTools() {
   return (
     <div className="ivy-devtools-container">
       {dialogWidget && (
-        <div className="ivy-devtools ivy-devtools-dialog" style={getDialogPosition(clickPosition)}>
+        <div
+          className="ivy-devtools ivy-devtools-dialog"
+          style={getDialogPosition(clickPosition)}
+        >
           <div className="ivy-devtools-dialog-toggles">
             <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === "modify" ? "ivy-devtools-toggle-active" : ""}`}
-              onClick={() => handleActionChange("modify")}
+              className={`ivy-devtools-toggle-btn ${dialogAction === 'modify' ? 'ivy-devtools-toggle-active' : ''}`}
+              onClick={() => handleActionChange('modify')}
             >
               <FaMagic size={12} />
               Change
             </button>
             <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === "text-edit" ? "ivy-devtools-toggle-active" : ""}`}
-              onClick={() => handleActionChange("text-edit")}
+              className={`ivy-devtools-toggle-btn ${dialogAction === 'text-edit' ? 'ivy-devtools-toggle-active' : ''}`}
+              onClick={() => handleActionChange('text-edit')}
             >
               <LuTextCursor size={14} />
               Edit Text
             </button>
             <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === "delete" ? "ivy-devtools-toggle-active" : ""}`}
-              onClick={() => handleActionChange("delete")}
+              className={`ivy-devtools-toggle-btn ${dialogAction === 'delete' ? 'ivy-devtools-toggle-active' : ''}`}
+              onClick={() => handleActionChange('delete')}
             >
               <LuTrash2 size={14} />
               Delete
@@ -374,17 +409,23 @@ export function DevTools() {
             <textarea
               ref={textareaRef}
               value={displayValue}
-              onChange={(e) => handleTextChange(e.target.value)}
+              onChange={e => handleTextChange(e.target.value)}
               placeholder="Write anything..."
               className="ivy-devtools-textarea"
             />
           </div>
           <div className="ivy-devtools-dialog-actions">
-            <button onClick={handleAdd} className="ivy-devtools-btn ivy-devtools-btn-muted">
+            <button
+              onClick={handleAdd}
+              className="ivy-devtools-btn ivy-devtools-btn-muted"
+            >
               <LuPlus size={14} />
               Add To Prompt
             </button>
-            <button onClick={handleSend} className="ivy-devtools-btn ivy-devtools-btn-outlined">
+            <button
+              onClick={handleSend}
+              className="ivy-devtools-btn ivy-devtools-btn-outlined"
+            >
               <LuSend size={14} />
               Send direct
             </button>

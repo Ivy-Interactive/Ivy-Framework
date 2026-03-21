@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   format,
   startOfMonth,
@@ -19,12 +19,12 @@ import {
   isWithinInterval,
   max,
   min,
-} from "date-fns";
-import { getWidth, getHeight } from "@/lib/styles";
-import { useCalendarData } from "./useCalendarData";
-import { useCalendarHandlers } from "./useCalendarHandlers";
-import type { CalendarWidgetProps, CalendarView, CalendarEvent } from "./types";
-import { cn } from "@/lib/utils";
+} from 'date-fns';
+import { getWidth, getHeight } from '@/lib/styles';
+import { useCalendarData } from './useCalendarData';
+import { useCalendarHandlers } from './useCalendarHandlers';
+import type { CalendarWidgetProps, CalendarView, CalendarEvent } from './types';
+import { cn } from '@/lib/utils';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const HOUR_HEIGHT = 60; // px per hour in time grid views
@@ -34,57 +34,62 @@ const HOUR_HEIGHT = 60; // px per hour in time grid views
 interface ToolbarProps {
   currentDate: Date;
   view: CalendarView;
-  onNavigate: (action: "prev" | "next" | "today") => void;
+  onNavigate: (action: 'prev' | 'next' | 'today') => void;
   onViewChange: (view: CalendarView) => void;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ currentDate, view, onNavigate, onViewChange }) => {
+const Toolbar: React.FC<ToolbarProps> = ({
+  currentDate,
+  view,
+  onNavigate,
+  onViewChange,
+}) => {
   const label = useMemo(() => {
     switch (view) {
-      case "month":
-        return format(currentDate, "MMMM yyyy");
-      case "week": {
+      case 'month':
+        return format(currentDate, 'MMMM yyyy');
+      case 'week': {
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
         const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
         if (weekStart.getMonth() === weekEnd.getMonth()) {
-          return `${format(weekStart, "MMM d")} - ${format(weekEnd, "d, yyyy")}`;
+          return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'd, yyyy')}`;
         }
-        return `${format(weekStart, "MMM d")} - ${format(weekEnd, "MMM d, yyyy")}`;
+        return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
       }
-      case "day":
-        return format(currentDate, "EEEE, MMMM d, yyyy");
-      case "agenda":
-        return format(currentDate, "MMMM yyyy");
+      case 'day':
+        return format(currentDate, 'EEEE, MMMM d, yyyy');
+      case 'agenda':
+        return format(currentDate, 'MMMM yyyy');
       default:
-        return "";
+        return '';
     }
   }, [currentDate, view]);
 
   const views: { key: CalendarView; label: string }[] = [
-    { key: "month", label: "Month" },
-    { key: "week", label: "Week" },
-    { key: "day", label: "Day" },
-    { key: "agenda", label: "Agenda" },
+    { key: 'month', label: 'Month' },
+    { key: 'week', label: 'Week' },
+    { key: 'day', label: 'Day' },
+    { key: 'agenda', label: 'Agenda' },
   ];
 
   return (
     <div className="flex items-center justify-between px-2 py-2 border-b border-border">
       <div className="flex items-center gap-1">
         <button
-          onClick={() => onNavigate("today")}
+          onClick={() => onNavigate('today')}
           className="px-3 py-1.5 text-sm font-medium rounded-md border border-border bg-background hover:bg-accent transition-colors"
         >
           Today
         </button>
         <button
-          onClick={() => onNavigate("prev")}
+          onClick={() => onNavigate('prev')}
           className="p-1.5 rounded-md hover:bg-accent transition-colors"
           aria-label="Previous"
         >
           <ChevronLeft />
         </button>
         <button
-          onClick={() => onNavigate("next")}
+          onClick={() => onNavigate('next')}
           className="p-1.5 rounded-md hover:bg-accent transition-colors"
           aria-label="Next"
         >
@@ -93,15 +98,15 @@ const Toolbar: React.FC<ToolbarProps> = ({ currentDate, view, onNavigate, onView
         <span className="ml-2 text-base font-semibold">{label}</span>
       </div>
       <div className="flex items-center rounded-md border border-border overflow-hidden">
-        {views.map((v) => (
+        {views.map(v => (
           <button
             key={v.key}
             onClick={() => onViewChange(v.key)}
             className={cn(
-              "px-3 py-1.5 text-sm font-medium transition-colors",
+              'px-3 py-1.5 text-sm font-medium transition-colors',
               view === v.key
-                ? "bg-primary text-primary-foreground"
-                : "bg-background hover:bg-accent",
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-background hover:bg-accent'
             )}
           >
             {v.label}
@@ -163,29 +168,29 @@ const EventPill: React.FC<EventPillProps> = ({
 }) => {
   const bgColor = event.color
     ? `var(--${event.color.toLowerCase()}, var(--primary))`
-    : "var(--primary)";
-  const fgColor = "var(--primary-foreground)";
+    : 'var(--primary)';
+  const fgColor = 'var(--primary-foreground)';
 
   return (
     <button
-      onClick={(e) => {
+      onClick={e => {
         e.stopPropagation();
         onClick?.(event.id);
       }}
       draggable={draggable}
       onDragStart={
         draggable
-          ? (e) => {
-              e.dataTransfer.setData("text/plain", event.id);
-              e.dataTransfer.effectAllowed = "move";
+          ? e => {
+              e.dataTransfer.setData('text/plain', event.id);
+              e.dataTransfer.effectAllowed = 'move';
               onDragStart?.();
             }
           : undefined
       }
       className={cn(
-        "w-full text-left rounded px-1.5 truncate cursor-pointer transition-opacity hover:opacity-80",
-        compact ? "text-[11px] py-px leading-snug" : "text-xs py-0.5",
-        draggable && "cursor-grab active:cursor-grabbing",
+        'w-full text-left rounded px-1.5 truncate cursor-pointer transition-opacity hover:opacity-80',
+        compact ? 'text-[11px] py-px leading-snug' : 'text-xs py-0.5',
+        draggable && 'cursor-grab active:cursor-grabbing'
       )}
       style={{
         backgroundColor: bgColor,
@@ -198,7 +203,9 @@ const EventPill: React.FC<EventPillProps> = ({
       ) : (
         <>
           {!compact && !event.allDay && (
-            <span className="mr-1 opacity-80">{format(event.start, "HH:mm")}</span>
+            <span className="mr-1 opacity-80">
+              {format(event.start, 'HH:mm')}
+            </span>
           )}
           {event.title}
         </>
@@ -248,11 +255,11 @@ const MonthView: React.FC<MonthViewProps> = ({
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
-    events.forEach((event) => {
+    events.forEach(event => {
       let day = startOfDay(event.start);
       const eventEnd = startOfDay(event.end);
       while (day <= eventEnd) {
-        const key = format(day, "yyyy-MM-dd");
+        const key = format(day, 'yyyy-MM-dd');
         if (!map.has(key)) map.set(key, []);
         map.get(key)!.push(event);
         day = addDays(day, 1);
@@ -263,26 +270,37 @@ const MonthView: React.FC<MonthViewProps> = ({
 
   const dayNames = useMemo(() => {
     const start = startOfWeek(new Date(), { weekStartsOn: 1 });
-    return Array.from({ length: 7 }, (_, i) => format(addDays(start, i), "EEE"));
+    return Array.from({ length: 7 }, (_, i) =>
+      format(addDays(start, i), 'EEE')
+    );
   }, []);
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       {/* Day headers */}
       <div className="grid grid-cols-7 border-b border-border">
-        {dayNames.map((name) => (
-          <div key={name} className="py-1.5 text-center text-xs font-medium text-muted-foreground">
+        {dayNames.map(name => (
+          <div
+            key={name}
+            className="py-1.5 text-center text-xs font-medium text-muted-foreground"
+          >
             {name}
           </div>
         ))}
       </div>
 
       {/* Weeks */}
-      <div className="grid flex-1" style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}>
+      <div
+        className="grid flex-1"
+        style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}
+      >
         {weeks.map((week, wi) => (
-          <div key={wi} className="grid grid-cols-7 border-b border-border last:border-b-0">
-            {week.map((day) => {
-              const key = format(day, "yyyy-MM-dd");
+          <div
+            key={wi}
+            className="grid grid-cols-7 border-b border-border last:border-b-0"
+          >
+            {week.map(day => {
+              const key = format(day, 'yyyy-MM-dd');
               const dayEvents = eventsByDay.get(key) || [];
               const inMonth = isSameMonth(day, currentDate);
               const today = isToday(day);
@@ -292,47 +310,59 @@ const MonthView: React.FC<MonthViewProps> = ({
                 <div
                   key={key}
                   className={cn(
-                    "border-r border-border last:border-r-0 p-1 overflow-hidden cursor-pointer hover:bg-accent/30 transition-colors min-h-[4.5rem]",
-                    !inMonth && "bg-muted/30",
-                    draggedEventId && "hover:bg-primary/10",
+                    'border-r border-border last:border-r-0 p-1 overflow-hidden cursor-pointer hover:bg-accent/30 transition-colors min-h-[4.5rem]',
+                    !inMonth && 'bg-muted/30',
+                    draggedEventId && 'hover:bg-primary/10'
                   )}
                   onClick={() => {
                     const dayStart = startOfDay(day);
-                    onSelectSlot(dayStart.toISOString(), endOfDay(day).toISOString());
+                    onSelectSlot(
+                      dayStart.toISOString(),
+                      endOfDay(day).toISOString()
+                    );
                   }}
                   onDragOver={
                     enableDragDrop
-                      ? (e) => {
+                      ? e => {
                           e.preventDefault();
-                          e.currentTarget.classList.add("bg-primary/10");
+                          e.currentTarget.classList.add('bg-primary/10');
                         }
                       : undefined
                   }
                   onDragLeave={
                     enableDragDrop
-                      ? (e) => {
-                          e.currentTarget.classList.remove("bg-primary/10");
+                      ? e => {
+                          e.currentTarget.classList.remove('bg-primary/10');
                         }
                       : undefined
                   }
                   onDrop={
                     enableDragDrop
-                      ? (e) => {
+                      ? e => {
                           e.preventDefault();
-                          e.currentTarget.classList.remove("bg-primary/10");
-                          const eventId = e.dataTransfer.getData("text/plain");
+                          e.currentTarget.classList.remove('bg-primary/10');
+                          const eventId = e.dataTransfer.getData('text/plain');
                           if (eventId && onEventMove) {
-                            const droppedEvent = events.find((ev) => ev.id === eventId);
+                            const droppedEvent = events.find(
+                              ev => ev.id === eventId
+                            );
                             if (droppedEvent) {
                               const duration =
-                                droppedEvent.end.getTime() - droppedEvent.start.getTime();
+                                droppedEvent.end.getTime() -
+                                droppedEvent.start.getTime();
                               const newStart = new Date(day);
                               newStart.setHours(
                                 droppedEvent.start.getHours(),
-                                droppedEvent.start.getMinutes(),
+                                droppedEvent.start.getMinutes()
                               );
-                              const newEnd = new Date(newStart.getTime() + duration);
-                              onEventMove(eventId, newStart.toISOString(), newEnd.toISOString());
+                              const newEnd = new Date(
+                                newStart.getTime() + duration
+                              );
+                              onEventMove(
+                                eventId,
+                                newStart.toISOString(),
+                                newEnd.toISOString()
+                              );
                             }
                           }
                           setDraggedEventId(null);
@@ -343,23 +373,27 @@ const MonthView: React.FC<MonthViewProps> = ({
                   <div className="flex justify-end mb-0.5">
                     <span
                       className={cn(
-                        "text-xs w-6 h-6 flex items-center justify-center rounded-full",
-                        today && "bg-primary text-primary-foreground font-bold",
-                        !inMonth && !today && "text-muted-foreground/50",
+                        'text-xs w-6 h-6 flex items-center justify-center rounded-full',
+                        today && 'bg-primary text-primary-foreground font-bold',
+                        !inMonth && !today && 'text-muted-foreground/50'
                       )}
                     >
-                      {format(day, "d")}
+                      {format(day, 'd')}
                     </span>
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    {dayEvents.slice(0, MAX_VISIBLE).map((event) => (
+                    {dayEvents.slice(0, MAX_VISIBLE).map(event => (
                       <EventPill
                         key={event.id}
                         event={event}
                         onClick={onEventClick}
                         compact
                         draggable={enableDragDrop}
-                        onDragStart={enableDragDrop ? () => setDraggedEventId(event.id) : undefined}
+                        onDragStart={
+                          enableDragDrop
+                            ? () => setDraggedEventId(event.id)
+                            : undefined
+                        }
                       />
                     ))}
                     {dayEvents.length > MAX_VISIBLE && (
@@ -402,43 +436,50 @@ const TimeGrid: React.FC<TimeGridProps> = ({
     (day: Date) => {
       const dayStart = startOfDay(day);
       const dayEnd = endOfDay(day);
-      return events.filter((e) => !e.allDay && e.start < dayEnd && e.end > dayStart);
+      return events.filter(
+        e => !e.allDay && e.start < dayEnd && e.end > dayStart
+      );
     },
-    [events],
+    [events]
   );
 
   // All-day events for header
   const getAllDayEvents = useCallback(
     (day: Date) => {
       return events.filter(
-        (e) =>
+        e =>
           e.allDay &&
           isWithinInterval(startOfDay(day), {
             start: startOfDay(e.start),
             end: startOfDay(e.end),
-          }),
+          })
       );
     },
-    [events],
+    [events]
   );
 
-  const hasAnyAllDay = days.some((d) => getAllDayEvents(d).length > 0);
+  const hasAnyAllDay = days.some(d => getAllDayEvents(d).length > 0);
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       {/* Header: day names */}
       <div className="flex border-b border-border flex-shrink-0">
         <div className="w-16 flex-shrink-0" />
-        {days.map((day) => (
-          <div key={day.toISOString()} className="flex-1 text-center py-1.5 border-l border-border">
-            <div className="text-xs text-muted-foreground">{format(day, "EEE")}</div>
+        {days.map(day => (
+          <div
+            key={day.toISOString()}
+            className="flex-1 text-center py-1.5 border-l border-border"
+          >
+            <div className="text-xs text-muted-foreground">
+              {format(day, 'EEE')}
+            </div>
             <div
               className={cn(
-                "text-lg font-semibold mx-auto w-8 h-8 flex items-center justify-center rounded-full",
-                isToday(day) && "bg-primary text-primary-foreground",
+                'text-lg font-semibold mx-auto w-8 h-8 flex items-center justify-center rounded-full',
+                isToday(day) && 'bg-primary text-primary-foreground'
               )}
             >
-              {format(day, "d")}
+              {format(day, 'd')}
             </div>
           </div>
         ))}
@@ -450,15 +491,20 @@ const TimeGrid: React.FC<TimeGridProps> = ({
           <div className="w-16 flex-shrink-0 flex items-center justify-end pr-2">
             <span className="text-[10px] text-muted-foreground">all-day</span>
           </div>
-          {days.map((day) => {
+          {days.map(day => {
             const allDayEvts = getAllDayEvents(day);
             return (
               <div
                 key={day.toISOString()}
                 className="flex-1 border-l border-border p-0.5 flex flex-col gap-0.5"
               >
-                {allDayEvts.map((event) => (
-                  <EventPill key={event.id} event={event} onClick={onEventClick} compact />
+                {allDayEvts.map(event => (
+                  <EventPill
+                    key={event.id}
+                    event={event}
+                    onClick={onEventClick}
+                    compact
+                  />
                 ))}
               </div>
             );
@@ -468,29 +514,35 @@ const TimeGrid: React.FC<TimeGridProps> = ({
 
       {/* Time grid body */}
       <div className="flex-1 overflow-y-auto">
-        <div className="flex relative" style={{ height: HOURS.length * HOUR_HEIGHT }}>
+        <div
+          className="flex relative"
+          style={{ height: HOURS.length * HOUR_HEIGHT }}
+        >
           {/* Time labels */}
           <div className="w-16 flex-shrink-0 relative">
-            {HOURS.map((hour) => (
+            {HOURS.map(hour => (
               <div
                 key={hour}
                 className="absolute right-2 text-xs text-muted-foreground"
                 style={{ top: hour * HOUR_HEIGHT - 6 }}
               >
-                {hour === 0 ? "" : format(new Date(2000, 0, 1, hour), "HH:mm")}
+                {hour === 0 ? '' : format(new Date(2000, 0, 1, hour), 'HH:mm')}
               </div>
             ))}
           </div>
 
           {/* Day columns */}
-          {days.map((day) => {
+          {days.map(day => {
             const dayEvents = getEventsForDay(day);
             const dayStart = startOfDay(day);
 
             return (
-              <div key={day.toISOString()} className="flex-1 border-l border-border relative">
+              <div
+                key={day.toISOString()}
+                className="flex-1 border-l border-border relative"
+              >
                 {/* Hour grid lines */}
-                {HOURS.map((hour) => (
+                {HOURS.map(hour => (
                   <div
                     key={hour}
                     className="absolute w-full border-t border-border/50 cursor-pointer hover:bg-accent/20"
@@ -503,38 +555,51 @@ const TimeGrid: React.FC<TimeGridProps> = ({
                       slotStart.setHours(hour, 0, 0, 0);
                       const slotEnd = new Date(day);
                       slotEnd.setHours(hour + 1, 0, 0, 0);
-                      onSelectSlot(slotStart.toISOString(), slotEnd.toISOString());
+                      onSelectSlot(
+                        slotStart.toISOString(),
+                        slotEnd.toISOString()
+                      );
                     }}
                     onDragOver={
                       enableDragDrop
-                        ? (e) => {
+                        ? e => {
                             e.preventDefault();
-                            e.currentTarget.classList.add("bg-primary/10");
+                            e.currentTarget.classList.add('bg-primary/10');
                           }
                         : undefined
                     }
                     onDragLeave={
                       enableDragDrop
-                        ? (e) => {
-                            e.currentTarget.classList.remove("bg-primary/10");
+                        ? e => {
+                            e.currentTarget.classList.remove('bg-primary/10');
                           }
                         : undefined
                     }
                     onDrop={
                       enableDragDrop
-                        ? (e) => {
+                        ? e => {
                             e.preventDefault();
-                            e.currentTarget.classList.remove("bg-primary/10");
-                            const eventId = e.dataTransfer.getData("text/plain");
+                            e.currentTarget.classList.remove('bg-primary/10');
+                            const eventId =
+                              e.dataTransfer.getData('text/plain');
                             if (eventId && onEventMove) {
-                              const droppedEvent = events.find((ev) => ev.id === eventId);
+                              const droppedEvent = events.find(
+                                ev => ev.id === eventId
+                              );
                               if (droppedEvent) {
                                 const duration =
-                                  droppedEvent.end.getTime() - droppedEvent.start.getTime();
+                                  droppedEvent.end.getTime() -
+                                  droppedEvent.start.getTime();
                                 const newStart = new Date(day);
                                 newStart.setHours(hour, 0, 0, 0);
-                                const newEnd = new Date(newStart.getTime() + duration);
-                                onEventMove(eventId, newStart.toISOString(), newEnd.toISOString());
+                                const newEnd = new Date(
+                                  newStart.getTime() + duration
+                                );
+                                onEventMove(
+                                  eventId,
+                                  newStart.toISOString(),
+                                  newEnd.toISOString()
+                                );
                               }
                             }
                           }
@@ -544,18 +609,21 @@ const TimeGrid: React.FC<TimeGridProps> = ({
                 ))}
 
                 {/* Events */}
-                {dayEvents.map((event) => {
+                {dayEvents.map(event => {
                   const evtStart = max([event.start, dayStart]);
                   const evtEnd = min([event.end, endOfDay(day)]);
                   const startMin = differenceInMinutes(evtStart, dayStart);
-                  const durationMin = Math.max(differenceInMinutes(evtEnd, evtStart), 30);
+                  const durationMin = Math.max(
+                    differenceInMinutes(evtEnd, evtStart),
+                    30
+                  );
                   const topPx = (startMin / 60) * HOUR_HEIGHT;
                   const heightPx = (durationMin / 60) * HOUR_HEIGHT;
 
                   const bgColor = event.color
                     ? `var(--${event.color.toLowerCase()}, var(--primary))`
-                    : "var(--primary)";
-                  const fgColor = "var(--primary-foreground)";
+                    : 'var(--primary)';
+                  const fgColor = 'var(--primary-foreground)';
 
                   return (
                     <button
@@ -563,15 +631,15 @@ const TimeGrid: React.FC<TimeGridProps> = ({
                       draggable={enableDragDrop}
                       onDragStart={
                         enableDragDrop
-                          ? (e) => {
-                              e.dataTransfer.setData("text/plain", event.id);
-                              e.dataTransfer.effectAllowed = "move";
+                          ? e => {
+                              e.dataTransfer.setData('text/plain', event.id);
+                              e.dataTransfer.effectAllowed = 'move';
                             }
                           : undefined
                       }
                       className={cn(
-                        "absolute left-0.5 right-1 rounded px-1.5 py-0.5 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity text-left",
-                        enableDragDrop && "cursor-grab active:cursor-grabbing",
+                        'absolute left-0.5 right-1 rounded px-1.5 py-0.5 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity text-left',
+                        enableDragDrop && 'cursor-grab active:cursor-grabbing'
                       )}
                       style={{
                         top: topPx,
@@ -580,20 +648,25 @@ const TimeGrid: React.FC<TimeGridProps> = ({
                         color: fgColor,
                         zIndex: 1,
                       }}
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         onEventClick(event.id);
                       }}
                       title={event.title}
                     >
                       {event.content ? (
-                        <div className="w-full h-full overflow-hidden">{event.content}</div>
+                        <div className="w-full h-full overflow-hidden">
+                          {event.content}
+                        </div>
                       ) : (
                         <>
-                          <div className="font-medium truncate">{event.title}</div>
+                          <div className="font-medium truncate">
+                            {event.title}
+                          </div>
                           {heightPx > 30 && (
                             <div className="opacity-80 truncate">
-                              {format(event.start, "HH:mm")} - {format(event.end, "HH:mm")}
+                              {format(event.start, 'HH:mm')} -{' '}
+                              {format(event.end, 'HH:mm')}
                             </div>
                           )}
                         </>
@@ -621,7 +694,7 @@ interface WeekViewProps {
   enableDragDrop?: boolean;
 }
 
-const WeekView: React.FC<WeekViewProps> = (props) => {
+const WeekView: React.FC<WeekViewProps> = props => {
   const days = useMemo(() => {
     const weekStart = startOfWeek(props.currentDate, { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -650,7 +723,7 @@ interface DayViewProps {
   enableDragDrop?: boolean;
 }
 
-const DayView: React.FC<DayViewProps> = (props) => {
+const DayView: React.FC<DayViewProps> = props => {
   const days = useMemo(() => [props.currentDate], [props.currentDate]);
 
   return (
@@ -673,21 +746,25 @@ interface AgendaViewProps {
   onEventClick: (eventId: string) => void;
 }
 
-const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, events, onEventClick }) => {
+const AgendaView: React.FC<AgendaViewProps> = ({
+  currentDate,
+  events,
+  onEventClick,
+}) => {
   // Show events for the next 30 days from current date
   const filteredEvents = useMemo(() => {
     const rangeStart = startOfDay(currentDate);
     const rangeEnd = addDays(rangeStart, 30);
     return events
-      .filter((e) => e.start < rangeEnd && e.end > rangeStart)
+      .filter(e => e.start < rangeEnd && e.end > rangeStart)
       .sort((a, b) => a.start.getTime() - b.start.getTime());
   }, [currentDate, events]);
 
   // Group events by date
   const grouped = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
-    filteredEvents.forEach((event) => {
-      const key = format(event.start, "yyyy-MM-dd");
+    filteredEvents.forEach(event => {
+      const key = format(event.start, 'yyyy-MM-dd');
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(event);
     });
@@ -711,19 +788,28 @@ const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, events, onEventCli
             <div className="flex">
               {/* Date column */}
               <div className="w-32 flex-shrink-0 py-3 px-3 border-r border-border">
-                <div className="text-sm font-semibold">{format(date, "EEE")}</div>
-                <div className={cn("text-2xl font-bold", isToday(date) && "text-primary")}>
-                  {format(date, "d")}
+                <div className="text-sm font-semibold">
+                  {format(date, 'EEE')}
                 </div>
-                <div className="text-xs text-muted-foreground">{format(date, "MMM yyyy")}</div>
+                <div
+                  className={cn(
+                    'text-2xl font-bold',
+                    isToday(date) && 'text-primary'
+                  )}
+                >
+                  {format(date, 'd')}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {format(date, 'MMM yyyy')}
+                </div>
               </div>
 
               {/* Events column */}
               <div className="flex-1 py-2 px-2 flex flex-col gap-1">
-                {dayEvents.map((event) => {
+                {dayEvents.map(event => {
                   const bgColor = event.color
                     ? `var(--${event.color.toLowerCase()}, var(--primary))`
-                    : "var(--primary)";
+                    : 'var(--primary)';
 
                   return (
                     <button
@@ -736,11 +822,13 @@ const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, events, onEventCli
                         style={{ backgroundColor: bgColor }}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{event.title}</div>
+                        <div className="text-sm font-medium truncate">
+                          {event.title}
+                        </div>
                         <div className="text-xs text-muted-foreground">
                           {event.allDay
-                            ? "All day"
-                            : `${format(event.start, "HH:mm")} - ${format(event.end, "HH:mm")}`}
+                            ? 'All day'
+                            : `${format(event.start, 'HH:mm')} - ${format(event.end, 'HH:mm')}`}
                         </div>
                       </div>
                     </button>
@@ -759,7 +847,7 @@ const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, events, onEventCli
 
 export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   id,
-  defaultView = "month",
+  defaultView = 'month',
   defaultDate,
   enableDragDrop = false,
   showToolbar = true,
@@ -780,42 +868,43 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
     return new Date();
   });
   const [view, setView] = useState<CalendarView>(
-    (defaultView?.toLowerCase() as CalendarView) || "month",
+    (defaultView?.toLowerCase() as CalendarView) || 'month'
   );
 
   const calendarEvents = useCalendarData(slots, widgetNodeChildren);
-  const { handleEventClick, handleSelectSlot, handleEventMove } = useCalendarHandlers(id);
+  const { handleEventClick, handleSelectSlot, handleEventMove } =
+    useCalendarHandlers(id);
 
   const onNavigate = useCallback(
-    (action: "prev" | "next" | "today") => {
-      setCurrentDate((prev) => {
-        if (action === "today") return new Date();
-        const delta = action === "next" ? 1 : -1;
+    (action: 'prev' | 'next' | 'today') => {
+      setCurrentDate(prev => {
+        if (action === 'today') return new Date();
+        const delta = action === 'next' ? 1 : -1;
         switch (view) {
-          case "month":
+          case 'month':
             return delta > 0 ? addMonths(prev, 1) : subMonths(prev, 1);
-          case "week":
+          case 'week':
             return delta > 0 ? addWeeks(prev, 1) : subWeeks(prev, 1);
-          case "day":
-          case "agenda":
+          case 'day':
+          case 'agenda':
             return delta > 0 ? addDays(prev, 1) : subDays(prev, 1);
           default:
             return prev;
         }
       });
     },
-    [view],
+    [view]
   );
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    boxSizing: "border-box",
+    boxSizing: 'border-box',
   };
 
   // If no explicit height set, default to a reasonable size
   if (!height) {
-    styles.height = "600px";
+    styles.height = '600px';
   }
 
   return (
@@ -832,7 +921,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
         />
       ) : null}
 
-      {view === "month" && (
+      {view === 'month' && (
         <MonthView
           currentDate={currentDate}
           events={calendarEvents}
@@ -842,7 +931,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
           enableDragDrop={enableDragDrop}
         />
       )}
-      {view === "week" && (
+      {view === 'week' && (
         <WeekView
           currentDate={currentDate}
           events={calendarEvents}
@@ -852,7 +941,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
           enableDragDrop={enableDragDrop}
         />
       )}
-      {view === "day" && (
+      {view === 'day' && (
         <DayView
           currentDate={currentDate}
           events={calendarEvents}
@@ -862,7 +951,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
           enableDragDrop={enableDragDrop}
         />
       )}
-      {view === "agenda" && (
+      {view === 'agenda' && (
         <AgendaView
           currentDate={currentDate}
           events={calendarEvents}

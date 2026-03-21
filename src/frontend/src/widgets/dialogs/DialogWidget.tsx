@@ -1,8 +1,8 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import React from "react";
-import { useEventHandler } from "@/components/event-handler";
-import { getWidth } from "@/lib/styles";
-import { cn } from "@/lib/utils";
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import React from 'react';
+import { useEventHandler } from '@/components/event-handler';
+import { getWidth } from '@/lib/styles';
+import { cn } from '@/lib/utils';
 
 interface DialogWidgetProps {
   id: string;
@@ -10,7 +10,11 @@ interface DialogWidgetProps {
   width?: string;
 }
 
-export const DialogWidget: React.FC<DialogWidgetProps> = ({ id, children, width }) => {
+export const DialogWidget: React.FC<DialogWidgetProps> = ({
+  id,
+  children,
+  width,
+}) => {
   const eventHandler = useEventHandler();
   const isVisible = true;
 
@@ -19,8 +23,11 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({ id, children, width 
   };
 
   return (
-    <Dialog open={true} onOpenChange={() => eventHandler("OnClose", id, [])}>
-      <DialogContent style={styles} className={cn(isVisible && "alert-animate-enter")}>
+    <Dialog open={true} onOpenChange={() => eventHandler('OnClose', id, [])}>
+      <DialogContent
+        style={styles}
+        className={cn(isVisible && 'alert-animate-enter')}
+      >
         {children}
       </DialogContent>
     </Dialog>

@@ -1,2 +1,2 @@
-export { Badge } from "./badge";
-export { badgeVariant } from "./variant";
+export { Badge } from './badge';
+export { badgeVariant } from './variant';

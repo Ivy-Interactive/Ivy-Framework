@@ -1,5 +1,5 @@
-import { Input } from "@/components/ui/input";
-import { Densities } from "@/types/density";
+import { Input } from '@/components/ui/input';
+import { Densities } from '@/types/density';
 import React, {
   useState,
   useCallback,
@@ -9,7 +9,7 @@ import React, {
   FocusEvent,
   WheelEvent,
   MouseEvent as ReactMouseEvent,
-} from "react";
+} from 'react';
 
 interface NumberInputProps {
   min?: number;
@@ -24,7 +24,7 @@ interface NumberInputProps {
   allowNegative?: boolean;
   className?: string;
   density?: Densities;
-  "data-testid"?: string;
+  'data-testid'?: string;
 }
 
 interface DragState {
@@ -41,52 +41,55 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       max,
       step = 1,
       disabled = false,
-      placeholder = "",
+      placeholder = '',
       value = null,
       onChange,
       onBlur,
       format = {
-        style: "decimal",
+        style: 'decimal',
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
         useGrouping: true,
-        notation: "standard",
+        notation: 'standard',
       },
       allowNegative = true,
-      className = "",
+      className = '',
       density = Densities.Medium,
-      "data-testid": dataTestId,
+      'data-testid': dataTestId,
       ...props
     },
-    ref,
+    ref
   ) => {
-    const [displayValue, setDisplayValue] = useState<string>("");
+    const [displayValue, setDisplayValue] = useState<string>('');
     const [isFocused, setIsFocused] = useState(false);
     const [isValid, setIsValid] = useState(true);
     const [dragState, setDragState] = useState<DragState | null>(null);
     const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-    const formatter = useMemo(() => new Intl.NumberFormat(undefined, format), [format]);
+    const formatter = useMemo(
+      () => new Intl.NumberFormat(undefined, format),
+      [format]
+    );
 
     const formatValue = useCallback(
       (num: number | null): string => {
-        if (num === null) return "";
+        if (num === null) return '';
         try {
           return isFocused ? num.toString() : formatter.format(num);
         } catch {
           return num.toString();
         }
       },
-      [formatter, isFocused],
+      [formatter, isFocused]
     );
 
     const parseValue = useCallback(
       (input: string, shouldRound = true): number | null => {
         if (!input) return null;
 
-        const cleaned = input.replace(/[^\d.-]/g, "");
-        const parts = cleaned.split(".");
-        const sanitized = parts[0] + (parts.length > 1 ? "." + parts[1] : "");
+        const cleaned = input.replace(/[^\d.-]/g, '');
+        const parts = cleaned.split('.');
+        const sanitized = parts[0] + (parts.length > 1 ? '.' + parts[1] : '');
         const parsed = parseFloat(sanitized);
 
         if (isNaN(parsed)) return null;
@@ -101,7 +104,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 
         return parsed;
       },
-      [min, max, step, allowNegative],
+      [min, max, step, allowNegative]
     );
 
     const handleStep = useCallback(
@@ -109,7 +112,10 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         if (disabled) return;
 
         const current = value ?? 0;
-        const newValue = parseValue((current + step * multiplier).toString(), true);
+        const newValue = parseValue(
+          (current + step * multiplier).toString(),
+          true
+        );
 
         if (newValue !== null) {
           if (max !== undefined && newValue > max) return;
@@ -119,7 +125,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           setDisplayValue(formatValue(newValue));
         }
       },
-      [value, step, parseValue, onChange, formatValue, disabled, min, max],
+      [value, step, parseValue, onChange, formatValue, disabled, min, max]
     );
 
     const calculateDragValue = useCallback(
@@ -133,10 +139,11 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         if (absoluteDistance > 200) multiplier = 10;
         if (absoluteDistance > 300) multiplier = 20;
 
-        const stepChange = Math.floor(absoluteDistance / 5) * direction * step * multiplier;
+        const stepChange =
+          Math.floor(absoluteDistance / 5) * direction * step * multiplier;
         return parseValue((startValue + stepChange).toString(), true);
       },
-      [parseValue, step],
+      [parseValue, step]
     );
 
     const handleMouseDown = useCallback(
@@ -153,11 +160,11 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 
         e.preventDefault();
 
-        document.body.style.cursor = "ew-resize";
+        document.body.style.cursor = 'ew-resize';
 
         inputRef.current.focus();
       },
-      [disabled, value],
+      [disabled, value]
     );
 
     useEffect(() => {
@@ -166,11 +173,17 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       const handleMouseMove = (e: globalThis.MouseEvent) => {
         if (!dragState) return;
 
-        const newValue = calculateDragValue(e.clientX, dragState.startX, dragState.startValue);
+        const newValue = calculateDragValue(
+          e.clientX,
+          dragState.startX,
+          dragState.startValue
+        );
 
         if (newValue !== null && newValue !== dragState.lastValue) {
           setDisplayValue(formatValue(newValue));
-          setDragState((prev) => (prev ? { ...prev, lastValue: newValue } : null));
+          setDragState(prev =>
+            prev ? { ...prev, lastValue: newValue } : null
+          );
         }
       };
 
@@ -180,15 +193,15 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           onChange?.(dragState.lastValue);
         }
         setDragState(null);
-        document.body.style.cursor = "";
+        document.body.style.cursor = '';
       };
 
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
 
       return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
       };
     }, [dragState, calculateDragValue, onChange, formatValue]);
 
@@ -197,17 +210,17 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         if (disabled) return;
 
         switch (e.key) {
-          case "ArrowUp":
+          case 'ArrowUp':
             e.preventDefault();
             handleStep(1);
             break;
-          case "ArrowDown":
+          case 'ArrowDown':
             e.preventDefault();
             handleStep(-1);
             break;
         }
       },
-      [disabled, handleStep],
+      [disabled, handleStep]
     );
 
     const handleWheel = useCallback(
@@ -218,14 +231,14 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         const delta = -Math.sign(e.deltaY);
         handleStep(delta);
       },
-      [isFocused, disabled, handleStep],
+      [isFocused, disabled, handleStep]
     );
 
     const handleChange = useCallback(
       (e: ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
-        if (inputValue === "") {
-          setDisplayValue("");
+        if (inputValue === '') {
+          setDisplayValue('');
           setIsValid(true);
           onChange?.(null);
           return;
@@ -239,25 +252,25 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           onChange?.(newValue);
         }
       },
-      [parseValue, onChange],
+      [parseValue, onChange]
     );
 
     const handleFocus = useCallback(() => {
       setIsFocused(true);
-      setDisplayValue(value?.toString() ?? "");
+      setDisplayValue(value?.toString() ?? '');
     }, [value]);
 
     const handleBlur = useCallback(
       (e: FocusEvent<HTMLInputElement>) => {
         setIsFocused(false);
         if (value === null) {
-          setDisplayValue("");
+          setDisplayValue('');
         } else {
           setDisplayValue(formatValue(value));
         }
         onBlur?.(e);
       },
-      [formatValue, value, onBlur],
+      [formatValue, value, onBlur]
     );
 
     // Update display value when not focused and value changes
@@ -266,9 +279,9 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     return (
       <div className="relative">
         <Input
-          ref={(node) => {
+          ref={node => {
             inputRef.current = node;
-            if (typeof ref === "function") {
+            if (typeof ref === 'function') {
               ref(node);
             } else if (ref) {
               ref.current = node;
@@ -290,16 +303,16 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           placeholder={placeholder}
           density={density}
           className={`${className} ${
-            !isValid ? "border-[var(--color-destructive)]" : ""
-          } ${dragState?.isDragging ? "select-none" : ""} cursor-pointer`}
+            !isValid ? 'border-[var(--color-destructive)]' : ''
+          } ${dragState?.isDragging ? 'select-none' : ''} cursor-pointer`}
           data-testid={dataTestId}
           {...props}
         />
       </div>
     );
-  },
+  }
 );
 
-NumberInput.displayName = "NumberInput";
+NumberInput.displayName = 'NumberInput';
 
 export default NumberInput;

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from 'react';
 import {
   MapContainer,
   TileLayer,
@@ -10,17 +10,24 @@ import {
   Circle,
   useMapEvents,
   useMap,
-} from "react-leaflet";
-import L from "leaflet";
-import type { EventHandler, LatLng, MapMarker, MapPolyline, MapPolygon, MapCircle } from "./types";
-import { getWidth, getHeight } from "./styles";
-import { injectLeafletStyles } from "./leaflet-styles";
+} from 'react-leaflet';
+import L from 'leaflet';
+import type {
+  EventHandler,
+  LatLng,
+  MapMarker,
+  MapPolyline,
+  MapPolygon,
+  MapCircle,
+} from './types';
+import { getWidth, getHeight } from './styles';
+import { injectLeafletStyles } from './leaflet-styles';
 
 // Fix for default marker icons in Leaflet with bundlers
 const defaultIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -80,25 +87,25 @@ const MapEventHandler: React.FC<{
 }> = ({ id, eventHandler, events }) => {
   useMapEvents({
     click: (e) => {
-      if (events.includes("OnMapClick")) {
-        eventHandler("OnMapClick", id, [{ position: { lat: e.latlng.lat, lng: e.latlng.lng } }]);
+      if (events.includes('OnMapClick')) {
+        eventHandler('OnMapClick', id, [{ position: { lat: e.latlng.lat, lng: e.latlng.lng } }]);
       }
     },
     zoomend: (e) => {
-      if (events.includes("OnZoomChange")) {
+      if (events.includes('OnZoomChange')) {
         const map = e.target;
-        eventHandler("OnZoomChange", id, [{ zoom: map.getZoom() }]);
+        eventHandler('OnZoomChange', id, [{ zoom: map.getZoom() }]);
       }
     },
     moveend: (e) => {
       const map = e.target;
       const center = map.getCenter();
       const bounds = map.getBounds();
-      if (events.includes("OnCenterChange")) {
-        eventHandler("OnCenterChange", id, [{ center: { lat: center.lat, lng: center.lng } }]);
+      if (events.includes('OnCenterChange')) {
+        eventHandler('OnCenterChange', id, [{ center: { lat: center.lat, lng: center.lng } }]);
       }
-      if (events.includes("OnBoundsChange")) {
-        eventHandler("OnBoundsChange", id, [
+      if (events.includes('OnBoundsChange')) {
+        eventHandler('OnBoundsChange', id, [
           {
             southWest: { lat: bounds.getSouthWest().lat, lng: bounds.getSouthWest().lng },
             northEast: { lat: bounds.getNorthEast().lat, lng: bounds.getNorthEast().lng },
@@ -151,8 +158,8 @@ const DraggableMarker: React.FC<{
   const markerRef = useRef<L.Marker>(null);
 
   const handleClick = () => {
-    if (events.includes("OnMarkerClick")) {
-      eventHandler("OnMarkerClick", widgetId, [
+    if (events.includes('OnMarkerClick')) {
+      eventHandler('OnMarkerClick', widgetId, [
         {
           markerId: marker.id,
           position: { lat: marker.position.lat, lng: marker.position.lng },
@@ -162,11 +169,11 @@ const DraggableMarker: React.FC<{
   };
 
   const handleDragEnd = () => {
-    if (events.includes("OnMarkerDrag")) {
+    if (events.includes('OnMarkerDrag')) {
       const m = markerRef.current;
       if (m) {
         const newPos = m.getLatLng();
-        eventHandler("OnMarkerDrag", widgetId, [
+        eventHandler('OnMarkerDrag', widgetId, [
           {
             markerId: marker.id,
             oldPosition: { lat: marker.position.lat, lng: marker.position.lng },
@@ -195,8 +202,8 @@ const DraggableMarker: React.FC<{
 
 export const Map: React.FC<MapProps> = ({
   id,
-  width = "Full",
-  height = "Full",
+  width = 'Full',
+  height = 'Full',
   eventHandler,
   events = [],
   center = { lat: 51.505, lng: -0.09 },
@@ -207,7 +214,7 @@ export const Map: React.FC<MapProps> = ({
   polylines = [],
   polygons = [],
   circles = [],
-  tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   tileAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   zoomControl = true,
   scrollWheelZoom = true,
@@ -226,8 +233,8 @@ export const Map: React.FC<MapProps> = ({
 
   // If no height specified, use a default height
   const mapStyle: React.CSSProperties = {
-    width: "100%",
-    height: height ? "100%" : "400px",
+    width: '100%',
+    height: height ? '100%' : '400px',
   };
 
   return (

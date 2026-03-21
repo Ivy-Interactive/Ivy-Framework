@@ -1,5 +1,5 @@
-import { MenuItem } from "@/types/widgets";
-import { Align } from "@/lib/styles";
+import { MenuItem } from '@/types/widgets';
+import { Align } from '@/lib/styles';
 export type { Align };
 
 export interface DataRow {
@@ -7,20 +7,20 @@ export interface DataRow {
 }
 
 export enum ColType {
-  Number = "Number",
-  Text = "Text",
-  Boolean = "Boolean",
-  Date = "Date",
-  DateTime = "DateTime",
-  Icon = "Icon",
-  Labels = "Labels",
-  Link = "Link",
+  Number = 'Number',
+  Text = 'Text',
+  Boolean = 'Boolean',
+  Date = 'Date',
+  DateTime = 'DateTime',
+  Icon = 'Icon',
+  Labels = 'Labels',
+  Link = 'Link',
 }
 
 export enum SortDirection {
-  Ascending = "Ascending",
-  Descending = "Descending",
-  None = "None",
+  Ascending = 'Ascending',
+  Descending = 'Descending',
+  None = 'None',
 }
 
 export interface DataColumn {
@@ -37,7 +37,7 @@ export interface DataColumn {
   order?: number;
   icon?: string | null;
   help?: string | null;
-  iconSet?: "lucide" | "custom";
+  iconSet?: 'lucide' | 'custom';
 }
 
 export interface DataTableConnection {
@@ -80,18 +80,18 @@ export interface TableProps {
   height?: string;
   rowActions?: MenuItem[];
   onCellUpdate?: (row: number, col: number, value: unknown) => void;
-  "data-testid"?: string;
+  'data-testid'?: string;
 }
 
 export enum FilterTypes {
-  List = "List",
-  Query = "Query",
+  List = 'List',
+  Query = 'Query',
 }
 
 export enum SelectionModes {
-  Cells = "Cells",
-  Rows = "Rows",
-  Columns = "Columns",
+  Cells = 'Cells',
+  Rows = 'Rows',
+  Columns = 'Columns',
 }
 
 /**

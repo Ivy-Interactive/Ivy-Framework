@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 /**
  * Props for the TabWidget component
@@ -16,7 +16,7 @@ export interface TabWidgetProps {
  */
 export interface TabsLayoutWidgetProps {
   id: string;
-  variant?: "Tabs" | "Content";
+  variant?: 'Tabs' | 'Content';
   removeParentPadding?: boolean;
   selectedIndex: number;
   children: React.ReactElement<TabWidgetProps>[];

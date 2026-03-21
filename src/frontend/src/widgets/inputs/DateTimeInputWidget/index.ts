@@ -1,4 +1,4 @@
-export { DateTimeInputWidget } from "./DateTimeInputWidget";
+export { DateTimeInputWidget } from './DateTimeInputWidget';
 export type {
   DateTimeInputWidgetProps,
   VariantType,
@@ -9,4 +9,4 @@ export type {
   MonthVariantProps,
   WeekVariantProps,
   YearVariantProps,
-} from "./types";
+} from './types';

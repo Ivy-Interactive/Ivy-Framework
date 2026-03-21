@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Loading } from "./Loading";
+import { useEffect, useState } from 'react';
+import { Loading } from './Loading';
 
 export const LoadingScreen = () => {
   const [showAnimation, setShowAnimation] = useState(false);
@@ -13,6 +13,8 @@ export const LoadingScreen = () => {
   }, []);
 
   return (
-    <div className="flex items-center justify-center h-screen">{showAnimation && <Loading />}</div>
+    <div className="flex items-center justify-center h-screen">
+      {showAnimation && <Loading />}
+    </div>
   );
 };

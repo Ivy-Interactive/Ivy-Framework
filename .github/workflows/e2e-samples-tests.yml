@@ -14,15 +14,17 @@ jobs:
       - uses: actions/checkout@v4
 
       # Setup Node.js and frontend first
-      - uses: voidzero-dev/setup-vp@v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
 
       - name: Install frontend dependencies
         working-directory: ./src/frontend
-        run: vp install
+        run: npm ci
 
       - name: Build frontend
         working-directory: ./src/frontend
-        run: vp build
+        run: npm run build
 
       # Setup .NET and build backend (now with frontend assets available)
       - name: Setup .NET

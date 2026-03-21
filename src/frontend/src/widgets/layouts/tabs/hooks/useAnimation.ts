@@ -1,24 +1,24 @@
-import React from "react";
+import React from 'react';
 
 /**
  * Hook to manage the animated underline for Content variant tabs
  * Returns the active style (left position and width) for the underline indicator
  */
 export function useAnimation(
-  variant: "Tabs" | "Content",
+  variant: 'Tabs' | 'Content',
   activeIndex: number,
   tabOrder: string[],
   visibleTabs: string[],
-  tabRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>,
+  tabRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>
 ) {
   const [activeStyle, setActiveStyle] = React.useState({
-    left: "0px",
-    width: "0px",
+    left: '0px',
+    width: '0px',
   });
   const [isInitialRender, setIsInitialRender] = React.useState(true);
 
   React.useEffect(() => {
-    if (variant !== "Content") return;
+    if (variant !== 'Content') return;
     const activeElement = tabRefs.current[activeIndex];
     if (activeElement) {
       const { offsetLeft, offsetWidth } = activeElement;

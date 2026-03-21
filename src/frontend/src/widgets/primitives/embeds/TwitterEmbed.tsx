@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { sanitizeUrl, sanitizeId, loadScript } from "./shared";
-import EmbedErrorFallback from "./EmbedErrorFallback";
+import React, { useEffect, useState } from 'react';
+import { sanitizeUrl, sanitizeId, loadScript } from './shared';
+import EmbedErrorFallback from './EmbedErrorFallback';
 
 interface TwitterEmbedProps {
   url: string;
@@ -18,7 +18,7 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
 
   useEffect(() => {
     if (tweetId) {
-      loadScript("https://platform.twitter.com/widgets.js")
+      loadScript('https://platform.twitter.com/widgets.js')
         .then(() => {
           setScriptLoaded(true);
         })
@@ -35,9 +35,13 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
 
   return (
     <div className="twitter-embed w-full">
-      <blockquote className="twitter-tweet w-full" data-tweet-id={tweetId} data-theme="light">
+      <blockquote
+        className="twitter-tweet w-full"
+        data-tweet-id={tweetId}
+        data-theme="light"
+      >
         <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer">
-          {scriptLoaded ? "Loading Twitter post..." : "Loading script..."}
+          {scriptLoaded ? 'Loading Twitter post...' : 'Loading script...'}
         </a>
       </blockquote>
     </div>

@@ -1,7 +1,7 @@
-import React from "react";
-import Icon from "@/components/Icon";
-import { MenuItem } from "@/types/widgets";
-import { ACTION_BUTTON_CLASSES } from "./utils";
+import React from 'react';
+import Icon from '@/components/Icon';
+import { MenuItem } from '@/types/widgets';
+import { ACTION_BUTTON_CLASSES } from './utils';
 
 interface ActionButtonProps {
   action: MenuItem;
@@ -12,7 +12,11 @@ interface ActionButtonProps {
 /**
  * Action button component used in both dropdown triggers and regular buttons
  */
-export const ActionButton: React.FC<ActionButtonProps> = ({ action, actionId, onClick }) => {
+export const ActionButton: React.FC<ActionButtonProps> = ({
+  action,
+  actionId,
+  onClick,
+}) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     // Always stop propagation to prevent grid interactions
     e.stopPropagation();
@@ -35,7 +39,13 @@ export const ActionButton: React.FC<ActionButtonProps> = ({ action, actionId, on
       title={action.tooltip}
       type="button"
     >
-      {action.icon && <Icon name={action.icon} size={16} className="text-(--color-foreground)" />}
+      {action.icon && (
+        <Icon
+          name={action.icon}
+          size={16}
+          className="text-(--color-foreground)"
+        />
+      )}
     </button>
   );
 };

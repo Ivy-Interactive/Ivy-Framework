@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const EmbedLoadingFallback: React.FC = () => (
   <div className="embed-loading border rounded-lg p-4 bg-card shadow-sm">

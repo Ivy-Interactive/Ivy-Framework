@@ -1,7 +1,7 @@
-import { useMemo } from "react";
-import { convertToGridColumns } from "../../utils/columnHelpers";
-import { useColumnGroups } from "../../hooks/useColumnGroups";
-import { DataColumn } from "../../types/types";
+import { useMemo } from 'react';
+import { convertToGridColumns } from '../../utils/columnHelpers';
+import { useColumnGroups } from '../../hooks/useColumnGroups';
+import { DataColumn } from '../../types/types';
 
 interface UseGridColumnsProps {
   columns: DataColumn[];
@@ -33,9 +33,16 @@ export const useGridColumns = ({
         columnWidths,
         containerWidth,
         showGroups,
-        showColumnTypeIcons,
+        showColumnTypeIcons
       ),
-    [columns, columnOrder, columnWidths, containerWidth, showGroups, showColumnTypeIcons],
+    [
+      columns,
+      columnOrder,
+      columnWidths,
+      containerWidth,
+      showGroups,
+      showColumnTypeIcons,
+    ]
   );
 
   // Use column groups hook when showGroups is enabled
@@ -43,7 +50,9 @@ export const useGridColumns = ({
   const shouldUseColumnGroups = showGroups;
 
   // Use grouped columns if showGroups is enabled, otherwise use regular columns
-  const finalColumns = shouldUseColumnGroups ? columnGroupsHook.columns : gridColumns;
+  const finalColumns = shouldUseColumnGroups
+    ? columnGroupsHook.columns
+    : gridColumns;
 
   return {
     columns: finalColumns,

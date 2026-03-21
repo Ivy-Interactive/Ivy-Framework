@@ -1,24 +1,28 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { MessageLoading } from "@/components/MessageLoading";
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { MessageLoading } from '@/components/MessageLoading';
 
 interface ChatBubbleProps {
-  variant?: "sent" | "received";
-  layout?: "default" | "ai";
+  variant?: 'sent' | 'received';
+  layout?: 'default' | 'ai';
   className?: string;
   children: React.ReactNode;
 }
 
-export function ChatBubble({ variant = "received", className, children }: ChatBubbleProps) {
+export function ChatBubble({
+  variant = 'received',
+  className,
+  children,
+}: ChatBubbleProps) {
   return (
     <div
       className={cn(
-        "flex items-start gap-2 mb-4",
-        variant === "sent" && "flex-row-reverse",
-        className,
+        'flex items-start gap-2 mb-4',
+        variant === 'sent' && 'flex-row-reverse',
+        className
       )}
     >
       {children}
@@ -27,14 +31,14 @@ export function ChatBubble({ variant = "received", className, children }: ChatBu
 }
 
 interface ChatBubbleMessageProps {
-  variant?: "sent" | "received";
+  variant?: 'sent' | 'received';
   isLoading?: boolean;
   className?: string;
   children?: React.ReactNode;
 }
 
 export function ChatBubbleMessage({
-  variant = "received",
+  variant = 'received',
   isLoading,
   className,
   children,
@@ -42,9 +46,9 @@ export function ChatBubbleMessage({
   return (
     <div
       className={cn(
-        "rounded-box p-3 text-large-body",
-        variant === "sent" ? "bg-primary text-primary-foreground" : "bg-muted",
-        className,
+        'rounded-box p-3 text-large-body',
+        variant === 'sent' ? 'bg-primary text-primary-foreground' : 'bg-muted',
+        className
       )}
     >
       {isLoading ? (
@@ -64,9 +68,18 @@ interface ChatBubbleActionProps {
   className?: string;
 }
 
-export function ChatBubbleAction({ icon, onClick, className }: ChatBubbleActionProps) {
+export function ChatBubbleAction({
+  icon,
+  onClick,
+  className,
+}: ChatBubbleActionProps) {
   return (
-    <Button variant="ghost" size="icon" className={cn("h-6 w-6", className)} onClick={onClick}>
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn('h-6 w-6', className)}
+      onClick={onClick}
+    >
       {icon}
     </Button>
   );
@@ -79,5 +92,9 @@ export function ChatBubbleActionWrapper({
   className?: string;
   children: React.ReactNode;
 }) {
-  return <div className={cn("flex items-center gap-1 mt-2", className)}>{children}</div>;
+  return (
+    <div className={cn('flex items-center gap-1 mt-2', className)}>
+      {children}
+    </div>
+  );
 }

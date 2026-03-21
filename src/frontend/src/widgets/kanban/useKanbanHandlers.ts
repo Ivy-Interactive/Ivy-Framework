@@ -1,4 +1,4 @@
-import { useEventHandler } from "@/components/event-handler";
+import { useEventHandler } from '@/components/event-handler';
 
 export function useKanbanHandlers(widgetId: string) {
   const eventHandler = useEventHandler();
@@ -7,9 +7,9 @@ export function useKanbanHandlers(widgetId: string) {
     cardId: string,
     _fromColumn: string,
     toColumn: string,
-    targetIndex?: number,
+    targetIndex?: number
   ) => {
-    eventHandler("OnCardMove", widgetId, [cardId, toColumn, targetIndex]);
+    eventHandler('OnCardMove', widgetId, [cardId, toColumn, targetIndex]);
   };
 
   return {

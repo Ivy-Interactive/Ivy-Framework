@@ -1,8 +1,8 @@
-import { useCallback, useState } from "react";
-import { DataEditorRef, GridMouseEventArgs } from "@glideapps/glide-data-grid";
-import { useEventHandler } from "@/components/event-handler";
-import { MenuItem } from "@/types/widgets";
-import * as arrow from "apache-arrow";
+import { useCallback, useState } from 'react';
+import { DataEditorRef, GridMouseEventArgs } from '@glideapps/glide-data-grid';
+import { useEventHandler } from '@/components/event-handler';
+import { MenuItem } from '@/types/widgets';
+import * as arrow from 'apache-arrow';
 
 interface UseRowHoverProps {
   widgetId: string;
@@ -44,7 +44,7 @@ export const useRowHover = ({
       let hiddenKeyIndex = -1;
       for (let i = 0; i < schema.fields.length; i++) {
         const field = schema.fields[i];
-        if (field && field.name === "_hiddenKey") {
+        if (field && field.name === '_hiddenKey') {
           hiddenKeyIndex = i;
           break;
         }
@@ -58,13 +58,13 @@ export const useRowHover = ({
 
       // Get the value for this row
       const value = column.get(rowIndex);
-      if (value === null || value === undefined || value === "") {
+      if (value === null || value === undefined || value === '') {
         return null;
       }
 
       return String(value);
     },
-    [arrowTableRef],
+    [arrowTableRef]
   );
 
   // Handle row hover
@@ -73,11 +73,11 @@ export const useRowHover = ({
       if (!(enableRowHover ?? false)) return;
       const [col, row] = args.location;
       // Don't allow hover on empty filler rows
-      if (args.kind === "cell" && row >= visibleRows) {
+      if (args.kind === 'cell' && row >= visibleRows) {
         setHoverRow(undefined);
         return;
       }
-      const newHoverRow = args.kind !== "cell" ? undefined : row;
+      const newHoverRow = args.kind !== 'cell' ? undefined : row;
       setHoverRow(newHoverRow);
 
       // Calculate action buttons position if row actions are configured
@@ -96,12 +96,17 @@ export const useRowHover = ({
           // Position button in the center of the row using the actual bounds
           // Subtract container offset to get position relative to container
           const buttonHeight = 24;
-          const buttonTop = bounds.y - containerRect.top + bounds.height / 2 - buttonHeight / 2 - 5;
+          const buttonTop =
+            bounds.y -
+            containerRect.top +
+            bounds.height / 2 -
+            buttonHeight / 2 -
+            5;
           setActionButtonsTop(buttonTop);
         }
       }
     },
-    [enableRowHover, rowActions, visibleRows, gridRef, containerRef],
+    [enableRowHover, rowActions, visibleRows, gridRef, containerRef]
   );
 
   // Handle row action button click
@@ -113,14 +118,14 @@ export const useRowHover = ({
       const rowId = getHiddenKeyValue(hoverRow);
 
       // Send event to backend's OnRowAction event with row ID and menu item tag
-      eventHandler("OnRowAction", widgetId, [
+      eventHandler('OnRowAction', widgetId, [
         {
           id: rowId !== null ? rowId : hoverRow,
           tag: action.tag ?? null,
         },
       ]);
     },
-    [hoverRow, eventHandler, widgetId, getHiddenKeyValue],
+    [hoverRow, eventHandler, widgetId, getHiddenKeyValue]
   );
 
   return {

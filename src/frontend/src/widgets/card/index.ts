@@ -1,1 +1,1 @@
-export { CardWidget } from "./CardWidget";
+export { CardWidget } from './CardWidget';

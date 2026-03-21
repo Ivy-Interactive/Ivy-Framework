@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { getHeight, getWidth } from "@/lib/styles";
-import { getIvyHost } from "@/lib/utils";
-import { validateAudioUrl, isFullUrl, normalizeRelativePath } from "@/lib/url";
+import React, { useState } from 'react';
+import { getHeight, getWidth } from '@/lib/styles';
+import { getIvyHost } from '@/lib/utils';
+import { validateAudioUrl, isFullUrl, normalizeRelativePath } from '@/lib/url';
 
 interface AudioPlayerWidgetProps {
   id: string;
@@ -11,9 +11,9 @@ interface AudioPlayerWidgetProps {
   autoplay?: boolean;
   loop?: boolean;
   muted?: boolean;
-  preload?: "none" | "metadata" | "auto";
+  preload?: 'none' | 'metadata' | 'auto';
   controls?: boolean;
-  "data-testid"?: string;
+  'data-testid'?: string;
 }
 
 const getAudioUrl = (url: string | undefined | null): string | null => {
@@ -44,14 +44,17 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
   autoplay = false,
   loop = false,
   muted = false,
-  preload = "metadata",
+  preload = 'metadata',
   controls = true,
-  "data-testid": dataTestId,
+  'data-testid': dataTestId,
 }) => {
   const [hasError, setHasError] = useState(false);
 
   // Normalize preload to lowercase for HTML5 compliance
-  const normalizedPreload = preload?.toLowerCase() as "none" | "metadata" | "auto";
+  const normalizedPreload = preload?.toLowerCase() as
+    | 'none'
+    | 'metadata'
+    | 'auto';
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -70,7 +73,9 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
         role="alert"
         aria-label="Invalid audio URL"
       >
-        <span className="text-sm">{!src ? "No audio source provided" : "Invalid audio URL"}</span>
+        <span className="text-sm">
+          {!src ? 'No audio source provided' : 'Invalid audio URL'}
+        </span>
       </div>
     );
   }

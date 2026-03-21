@@ -1,20 +1,23 @@
-import React, { useEffect, useRef, useCallback, useMemo } from "react";
-import confetti from "canvas-confetti";
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
+import confetti from 'canvas-confetti';
 
 interface ConfettiWidgetProps {
   children: React.ReactNode;
-  trigger?: "Auto" | "Click" | "Hover";
+  trigger?: 'Auto' | 'Click' | 'Hover';
 }
 
-const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = "Auto" }) => {
+const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({
+  children,
+  trigger = 'Auto',
+}) => {
   const elementRef = useRef<HTMLDivElement>(null);
 
   const quadrant = useMemo(
     () =>
       confetti.shapeFromPath({
-        path: "M47 0H0V47.0222C25.9234 47.0222 47 25.9801 47 0Z",
+        path: 'M47 0H0V47.0222C25.9234 47.0222 47 25.9801 47 0Z',
       }),
-    [],
+    []
   );
 
   const confettiConfig = useMemo(
@@ -22,9 +25,9 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = "Au
       particleCount: 100,
       spread: 70,
       shapes: [quadrant],
-      colors: ["#00CC92", "#0D4A2F"],
+      colors: ['#00CC92', '#0D4A2F'],
     }),
-    [quadrant],
+    [quadrant]
   );
 
   const triggerConfetti = useCallback(
@@ -34,11 +37,11 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = "Au
         origin: { x, y },
       });
     },
-    [confettiConfig],
+    [confettiConfig]
   );
 
   const handleClick = (e: React.MouseEvent) => {
-    if (trigger !== "Click") return;
+    if (trigger !== 'Click') return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (rect.left + rect.width / 2) / window.innerWidth;
     const y = (rect.top + rect.height / 2) / window.innerHeight;
@@ -46,7 +49,7 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = "Au
   };
 
   const handleMouseEnter = (e: React.MouseEvent) => {
-    if (trigger !== "Hover") return;
+    if (trigger !== 'Hover') return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (rect.left + rect.width / 2) / window.innerWidth;
     const y = (rect.top + rect.height / 2) / window.innerHeight;
@@ -54,7 +57,7 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = "Au
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (trigger === "Click" && (e.key === "Enter" || e.key === " ")) {
+    if (trigger === 'Click' && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
       const rect = elementRef.current?.getBoundingClientRect();
       if (!rect) return;
@@ -65,7 +68,7 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = "Au
   };
 
   useEffect(() => {
-    if (trigger === "Auto" && elementRef.current) {
+    if (trigger === 'Auto' && elementRef.current) {
       const rect = elementRef.current.getBoundingClientRect();
       const x = (rect.left + rect.width / 2) / window.innerWidth;
       const y = (rect.top + rect.height / 2) / window.innerHeight;
@@ -76,7 +79,7 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = "Au
     }
   }, [trigger, confettiConfig]);
 
-  if (trigger === "Click") {
+  if (trigger === 'Click') {
     return (
       <div
         ref={elementRef}

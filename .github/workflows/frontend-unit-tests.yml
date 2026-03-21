@@ -13,12 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: voidzero-dev/setup-vp@v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
 
       - name: Install dependencies
         working-directory: ./src/frontend
-        run: vp install
+        run: npm ci
 
       - name: Run unit tests
         working-directory: ./src/frontend
-        run: vp test
+        run: npm run test

@@ -1,9 +1,9 @@
-import ErrorBoundary from "@/components/ErrorBoundary";
-import React, { useRef, useEffect } from "react";
-import { loadingState, renderWidgetTree } from "../widgetRenderer";
-import { useBackend } from "@/hooks/use-backend";
-import { EventHandlerProvider } from "@/components/event-handler";
-import { StreamHandlerProvider } from "@/components/stream-handler";
+import ErrorBoundary from '@/components/ErrorBoundary';
+import React, { useRef, useEffect } from 'react';
+import { loadingState, renderWidgetTree } from '../widgetRenderer';
+import { useBackend } from '@/hooks/use-backend';
+import { EventHandlerProvider } from '@/components/event-handler';
+import { StreamHandlerProvider } from '@/components/stream-handler';
 
 interface AppHostWidgetProps {
   id: string;
@@ -12,12 +12,16 @@ interface AppHostWidgetProps {
   parentId: string | null;
 }
 
-export const AppHostWidget: React.FC<AppHostWidgetProps> = ({ appId, appArgs, parentId }) => {
+export const AppHostWidget: React.FC<AppHostWidgetProps> = ({
+  appId,
+  appArgs,
+  parentId,
+}) => {
   const { widgetTree, eventHandler, subscribeToStream } = useBackend(
     appId,
     appArgs,
     parentId,
-    false,
+    false
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const previousAppIdRef = useRef<string>(appId);

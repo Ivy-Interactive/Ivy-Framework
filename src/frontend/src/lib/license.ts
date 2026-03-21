@@ -1,19 +1,25 @@
-import { jwtVerify, JWTPayload } from "jose";
+import { jwtVerify, JWTPayload } from 'jose';
 
-const publicKeyPem = "%IVY_LICENSE_PUBLIC_KEY%";
+const publicKeyPem = '%IVY_LICENSE_PUBLIC_KEY%';
 
 function pemToUint8Array(pem: string) {
-  const b64 = pem.replace(/-----.*?-----/g, "").replace(/\s+/g, "");
-  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  const b64 = pem.replace(/-----.*?-----/g, '').replace(/\s+/g, '');
+  return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
 }
 
 function getIvyLicense(): string | null {
-  return document.querySelector('meta[name="ivy-license"]')?.getAttribute("content") ?? null;
+  return (
+    document
+      .querySelector('meta[name="ivy-license"]')
+      ?.getAttribute('content') ?? null
+  );
 }
 
 function getIvyLicensePublicKey(): string | null {
   return (
-    document.querySelector('meta[name="ivy-license-public-key"]')?.getAttribute("content") ?? null
+    document
+      .querySelector('meta[name="ivy-license-public-key"]')
+      ?.getAttribute('content') ?? null
   );
 }
 
@@ -23,11 +29,11 @@ let keyPromise: Promise<CryptoKey> | null = null;
 async function getPublicKey(publicKeyPem: string): Promise<CryptoKey> {
   if (!keyPromise) {
     keyPromise = crypto.subtle.importKey(
-      "spki",
+      'spki',
       pemToUint8Array(publicKeyPem),
-      { name: "ECDSA", namedCurve: "P-256" },
+      { name: 'ECDSA', namedCurve: 'P-256' },
       true,
-      ["verify"],
+      ['verify']
     );
   }
   return keyPromise;
@@ -36,7 +42,7 @@ async function getPublicKey(publicKeyPem: string): Promise<CryptoKey> {
 export async function hasLicensedFeature(hasFeature: string): Promise<boolean> {
   try {
     let _publicKeyPem = publicKeyPem;
-    if (!_publicKeyPem || _publicKeyPem.includes("IVY_LICENSE_PUBLIC_KEY")) {
+    if (!_publicKeyPem || _publicKeyPem.includes('IVY_LICENSE_PUBLIC_KEY')) {
       if (import.meta.env.DEV) {
         const publicKey = getIvyLicensePublicKey(); // dev only: read from meta tag
         if (!publicKey) return false;
@@ -56,10 +62,10 @@ export async function hasLicensedFeature(hasFeature: string): Promise<boolean> {
 
     const features = licensePayload.features;
 
-    if (typeof features === "string") {
+    if (typeof features === 'string') {
       return features
-        .split(";")
-        .map((s) => s.trim())
+        .split(';')
+        .map(s => s.trim())
         .includes(hasFeature);
     }
     if (Array.isArray(features)) {
@@ -68,7 +74,7 @@ export async function hasLicensedFeature(hasFeature: string): Promise<boolean> {
 
     return false;
   } catch (error) {
-    console.error("License validation failed", error);
+    console.error('License validation failed', error);
     return false;
   }
 }

@@ -1,5 +1,5 @@
-import { ErrorDisplay } from "@/components/ErrorDisplay";
-import React from "react";
+import { ErrorDisplay } from '@/components/ErrorDisplay';
+import React from 'react';
 
 interface ErrorWidgetProps {
   title?: string | null;
@@ -7,6 +7,8 @@ interface ErrorWidgetProps {
   stackTrace?: string | null;
 }
 
-export const ErrorWidget: React.FC<ErrorWidgetProps> = ({ title, message, stackTrace }) => (
-  <ErrorDisplay title={title} message={message} stackTrace={stackTrace} />
-);
+export const ErrorWidget: React.FC<ErrorWidgetProps> = ({
+  title,
+  message,
+  stackTrace,
+}) => <ErrorDisplay title={title} message={message} stackTrace={stackTrace} />;

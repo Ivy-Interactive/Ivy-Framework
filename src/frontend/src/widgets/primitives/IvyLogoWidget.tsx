@@ -1,5 +1,5 @@
-import IvyLogo from "@/components/IvyLogo";
-import { getColor, getHeight, getWidth } from "@/lib/styles";
+import IvyLogo from '@/components/IvyLogo';
+import { getColor, getHeight, getWidth } from '@/lib/styles';
 
 interface IvyLogoWidgetProps {
   width?: string;
@@ -8,14 +8,14 @@ interface IvyLogoWidgetProps {
 }
 
 export const IvyLogoWidget: React.FC<IvyLogoWidgetProps> = ({
-  width = "Units:25",
-  height = "Auto",
+  width = 'Units:25',
+  height = 'Auto',
   color,
 }) => {
   const styles = {
     ...getWidth(width),
     ...getHeight(height),
-    ...getColor(color || "primary", "color", "background"),
+    ...getColor(color || 'primary', 'color', 'background'),
   };
 
   return <IvyLogo style={styles} className="text-primary" />;

@@ -1,16 +1,27 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, useReducer } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  useReducer,
+} from 'react';
 
-import Icon from "@/components/Icon";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { MenuItem, WidgetEventHandlerType } from "@/types/widgets";
-import { useFocusable } from "@/hooks/use-focus-management";
-import { sidebarMenuRef } from "./sidebar-refs";
-import { useEventHandler } from "@/components/event-handler";
-import { cn, getAppId } from "@/lib/utils";
-import { getWidth } from "@/lib/styles";
-import { Separator } from "@/components/ui/separator";
+import Icon from '@/components/Icon';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ChevronRight, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { MenuItem, WidgetEventHandlerType } from '@/types/widgets';
+import { useFocusable } from '@/hooks/use-focus-management';
+import { sidebarMenuRef } from './sidebar-refs';
+import { useEventHandler } from '@/components/event-handler';
+import { cn, getAppId } from '@/lib/utils';
+import { getWidth } from '@/lib/styles';
+import { Separator } from '@/components/ui/separator';
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -29,19 +40,22 @@ interface SidebarLayoutWidgetProps {
 }
 
 // Helper to parse a Size string to pixels
-const parseSizeToPixels = (sizeStr: string | undefined, defaultPx: number): number => {
+const parseSizeToPixels = (
+  sizeStr: string | undefined,
+  defaultPx: number
+): number => {
   if (!sizeStr) return defaultPx;
-  const [sizeType, value] = sizeStr.split(":");
+  const [sizeType, value] = sizeStr.split(':');
   const numValue = parseFloat(value);
   if (isNaN(numValue)) return defaultPx;
 
   switch (sizeType.toLowerCase()) {
-    case "px":
+    case 'px':
       return numValue;
-    case "rem":
+    case 'rem':
       // Assume 16px base font size
       return numValue * 16;
-    case "units":
+    case 'units':
       // Units are 0.25rem = 4px
       return numValue * 4;
     default:
@@ -54,10 +68,10 @@ const parseSizeToPixels = (sizeStr: string | undefined, defaultPx: number): numb
 const hasContent = (slot?: React.ReactNode[]): boolean => {
   if (!slot || slot.length === 0) return false;
 
-  return slot.some((node) => {
+  return slot.some(node => {
     if (node === null || node === undefined) return false;
-    if (typeof node === "string") return node.trim().length > 0;
-    if (typeof node === "number") return true;
+    if (typeof node === 'string') return node.trim().length > 0;
+    if (typeof node === 'number') return true;
     if (React.isValidElement(node)) {
       const props = node.props as {
         children?: React.ReactNode;
@@ -69,7 +83,8 @@ const hasContent = (slot?: React.ReactNode[]): boolean => {
       }
       // Legacy check for direct children
       if (props.children === null || props.children === undefined) return false;
-      if (typeof props.children === "string") return props.children.trim().length > 0;
+      if (typeof props.children === 'string')
+        return props.children.trim().length > 0;
       if (Array.isArray(props.children)) return props.children.length > 0;
       return true;
     }
@@ -88,7 +103,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   resizable = false,
 }) => {
   // Parse Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue"
-  const [wantedWidth, minWidthStr, maxWidthStr] = (width ?? "").split(",");
+  const [wantedWidth, minWidthStr, maxWidthStr] = (width ?? '').split(',');
 
   // Get sidebar width from the width prop (default set in backend)
   const sidebarWidth = getWidth(width).width as string;
@@ -104,7 +119,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     if (!openProp) return false;
 
     // Check if we're in a browser environment
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       return window.innerWidth >= autoCollapseThreshold;
     }
 
@@ -120,9 +135,11 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         isResizing: boolean;
         prevInitialWidthPx: number;
       },
-      action: Partial<typeof state> | ((prev: typeof state) => Partial<typeof state>),
+      action:
+        | Partial<typeof state>
+        | ((prev: typeof state) => Partial<typeof state>)
     ) => {
-      const updates = typeof action === "function" ? action(state) : action;
+      const updates = typeof action === 'function' ? action(state) : action;
       return { ...state, ...updates };
     },
     {
@@ -131,10 +148,15 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       currentWidth: initialWidthPx,
       isResizing: false,
       prevInitialWidthPx: initialWidthPx,
-    },
+    }
   );
-  const { isSidebarOpen, isManuallyToggled, currentWidth, isResizing, prevInitialWidthPx } =
-    sidebarState;
+  const {
+    isSidebarOpen,
+    isManuallyToggled,
+    currentWidth,
+    isResizing,
+    prevInitialWidthPx,
+  } = sidebarState;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -154,30 +176,43 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       e.preventDefault();
       dispatchSidebar({ isResizing: true });
 
-      const startX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const startWidth = currentWidth;
 
       const handleMove = (moveEvent: MouseEvent | TouchEvent) => {
-        const clientX = "touches" in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX;
+        const clientX =
+          'touches' in moveEvent
+            ? moveEvent.touches[0].clientX
+            : moveEvent.clientX;
         const delta = clientX - startX;
-        const newWidth = Math.min(maxWidthPx, Math.max(minWidthPx, startWidth + delta));
+        const newWidth = Math.min(
+          maxWidthPx,
+          Math.max(minWidthPx, startWidth + delta)
+        );
         dispatchSidebar({ currentWidth: newWidth });
       };
 
       const handleEnd = () => {
         dispatchSidebar({ isResizing: false });
-        document.removeEventListener("mousemove", handleMove);
-        document.removeEventListener("mouseup", handleEnd);
-        document.removeEventListener("touchmove", handleMove);
-        document.removeEventListener("touchend", handleEnd);
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('mouseup', handleEnd);
+        document.removeEventListener('touchmove', handleMove);
+        document.removeEventListener('touchend', handleEnd);
       };
 
-      document.addEventListener("mousemove", handleMove);
-      document.addEventListener("mouseup", handleEnd);
-      document.addEventListener("touchmove", handleMove, { passive: true });
-      document.addEventListener("touchend", handleEnd, { passive: true });
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleEnd);
+      document.addEventListener('touchmove', handleMove, { passive: true });
+      document.addEventListener('touchend', handleEnd, { passive: true });
     },
-    [resizable, isSidebarOpen, currentWidth, minWidthPx, maxWidthPx, dispatchSidebar],
+    [
+      resizable,
+      isSidebarOpen,
+      currentWidth,
+      minWidthPx,
+      maxWidthPx,
+      dispatchSidebar,
+    ]
   );
 
   // Get the effective sidebar width (use currentWidth when resizable)
@@ -185,7 +220,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
-    dispatchSidebar((prev) => ({ isSidebarOpen: !prev.isSidebarOpen }));
+    dispatchSidebar(prev => ({ isSidebarOpen: !prev.isSidebarOpen }));
     dispatchSidebar({ isManuallyToggled: true });
   }, [dispatchSidebar]);
 
@@ -203,29 +238,41 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     handleMediaChange(mql);
 
-    mql.addEventListener("change", handleMediaChange);
-    return () => mql.removeEventListener("change", handleMediaChange);
-  }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar, openProp, dispatchSidebar]);
+    mql.addEventListener('change', handleMediaChange);
+    return () => mql.removeEventListener('change', handleMediaChange);
+  }, [
+    autoCollapseThreshold,
+    isManuallyToggled,
+    mainAppSidebar,
+    openProp,
+    dispatchSidebar,
+  ]);
 
   return (
     <div
       ref={containerRef}
       className="grid h-full w-full remove-parent-padding"
       style={{
-        gridTemplateColumns: isSidebarOpen ? `${effectiveSidebarWidth} 1fr` : "0 1fr",
-        transition: isResizing ? "none" : "grid-template-columns 300ms ease-in-out",
+        gridTemplateColumns: isSidebarOpen
+          ? `${effectiveSidebarWidth} 1fr`
+          : '0 1fr',
+        transition: isResizing
+          ? 'none'
+          : 'grid-template-columns 300ms ease-in-out',
       }}
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
         ref={sidebarRef}
         className={`flex h-full flex-col bg-background text-foreground border-r border-border relative overflow-hidden ${
-          isResizing ? "" : "transition-transform duration-300 ease-in-out"
-        } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+          isResizing ? '' : 'transition-transform duration-300 ease-in-out'
+        } ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ width: effectiveSidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
-          <div className="flex flex-col shrink-0 p-2 space-y-4">{slots?.SidebarHeader}</div>
+          <div className="flex flex-col shrink-0 p-2 space-y-4">
+            {slots?.SidebarHeader}
+          </div>
         )}
         {slots?.SidebarContent && (
           <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
@@ -236,26 +283,30 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         )}
         {hasContent(slots?.SidebarFooter) && (
           <div className="flex flex-col shrink-0">
-            <div className="flex flex-col p-2 gap-4 min-h-0">{slots?.SidebarFooter}</div>
+            <div className="flex flex-col p-2 gap-4 min-h-0">
+              {slots?.SidebarFooter}
+            </div>
           </div>
         )}
         {/* Resize Handle */}
         {resizable && isSidebarOpen && (
           <div
-            className={cn("absolute top-0 right-0 w-1 h-full cursor-ew-resize group")}
+            className={cn(
+              'absolute top-0 right-0 w-1 h-full cursor-ew-resize group'
+            )}
             onMouseDown={handleResizeStart}
             onTouchStart={handleResizeStart}
             role="separator"
             aria-orientation="vertical"
             aria-label="Resize sidebar"
             tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowLeft") {
-                dispatchSidebar((prev) => ({
+            onKeyDown={e => {
+              if (e.key === 'ArrowLeft') {
+                dispatchSidebar(prev => ({
                   currentWidth: Math.max(minWidthPx, prev.currentWidth - 10),
                 }));
-              } else if (e.key === "ArrowRight") {
-                dispatchSidebar((prev) => ({
+              } else if (e.key === 'ArrowRight') {
+                dispatchSidebar(prev => ({
                   currentWidth: Math.min(maxWidthPx, prev.currentWidth + 10),
                 }));
               }
@@ -263,9 +314,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           >
             <div
               className={cn(
-                "absolute top-1/2 -translate-y-1/2 right-0 w-1 h-8 rounded-full bg-border",
-                "opacity-0 group-hover:opacity-100 transition-opacity",
-                isResizing && "opacity-100",
+                'absolute top-1/2 -translate-y-1/2 right-0 w-1 h-8 rounded-full bg-border',
+                'opacity-0 group-hover:opacity-100 transition-opacity',
+                isResizing && 'opacity-100'
               )}
             />
           </div>
@@ -276,7 +327,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       <div
         className={cn(
           `relative h-full overflow-auto`,
-          !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : "",
+          !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : ''
         )}
       >
         {/* Toggle Button - Only show for main app sidebar */}
@@ -284,8 +335,8 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           <button
             onClick={handleManualToggle}
             className="absolute top-0 left-1 z-50 p-2 rounded-selector bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
-            style={{ marginTop: "3px" }}
-            aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+            style={{ marginTop: '3px' }}
+            aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
           >
             {isSidebarOpen ? (
               <PanelLeftClose className="h-4 w-4" />
@@ -312,16 +363,21 @@ const getFlatItemsInSearchRenderOrder = (items: MenuItem[]): MenuItem[] => {
   const result: MenuItem[] = [];
   for (const item of items) {
     if (item.children && item.children.length > 0) {
-      const groupsMap = item.children.reduce<Record<string, MenuItem[]>>((acc, child) => {
-        const path = child.path ?? "";
-        (acc[path] ??= []).push(child);
-        return acc;
-      }, {});
-      const groupsOrdered = Object.entries(groupsMap).sort(([pathA], [pathB]) => {
-        if (!pathA) return 1;
-        if (!pathB) return -1;
-        return 0;
-      });
+      const groupsMap = item.children.reduce<Record<string, MenuItem[]>>(
+        (acc, child) => {
+          const path = child.path ?? '';
+          (acc[path] ??= []).push(child);
+          return acc;
+        },
+        {}
+      );
+      const groupsOrdered = Object.entries(groupsMap).sort(
+        ([pathA], [pathB]) => {
+          if (!pathA) return 1;
+          if (!pathB) return -1;
+          return 0;
+        }
+      );
       for (const [, pathItems] of groupsOrdered) {
         result.push(...pathItems);
       }
@@ -353,7 +409,8 @@ const CollapsibleMenuItem: React.FC<{
   pathKey,
 }) => {
   // Derive the open state from expandedSections or item.expanded
-  const shouldBeOpen = expandedSections.has(pathKey) || (item.expanded ?? false);
+  const shouldBeOpen =
+    expandedSections.has(pathKey) || (item.expanded ?? false);
   const [isOpen, setIsOpen] = useState(shouldBeOpen);
   const [prevShouldBeOpen, setPrevShouldBeOpen] = useState(shouldBeOpen);
   const itemRef = useRef<HTMLLIElement>(null);
@@ -371,13 +428,13 @@ const CollapsibleMenuItem: React.FC<{
 
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
-    eventHandler("OnSelect", widgetId, [item.tag]);
+    eventHandler('OnSelect', widgetId, [item.tag]);
   };
 
   const onCtrlRightMouseClick = (e: React.MouseEvent, item: MenuItem) => {
     if (e.ctrlKey && e.button === 2 && !!item.tag) {
       e.preventDefault();
-      eventHandler("OnCtrlRightClickSelect", widgetId, [item.tag]);
+      eventHandler('OnCtrlRightClickSelect', widgetId, [item.tag]);
     }
   };
 
@@ -386,12 +443,16 @@ const CollapsibleMenuItem: React.FC<{
   if (item.children && item.children.length > 0) {
     return (
       <Collapsible open={isOpen} onOpenChange={handleOpenChange}>
-        <li className="relative" ref={itemRef} data-menu-item={item.tag || item.label}>
+        <li
+          className="relative"
+          ref={itemRef}
+          data-menu-item={item.tag || item.label}
+        >
           <CollapsibleTrigger asChild>
             <button
               className={cn(
-                "group flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-                isActive && "bg-accent text-accent-foreground",
+                'group flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                isActive && 'bg-accent text-accent-foreground'
               )}
               onClick={() => {
                 // For items with children, toggle the collapsible state
@@ -400,7 +461,7 @@ const CollapsibleMenuItem: React.FC<{
                   onItemClick(item);
                 }
               }}
-              onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
+              onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
               <Icon name={item.icon} size={16} />
               <span className="text-sm">{item.label}</span>
@@ -418,7 +479,7 @@ const CollapsibleMenuItem: React.FC<{
                   activeTag,
                   expandedSections,
                   onExpandChange,
-                  pathKey,
+                  pathKey
                 )}
             </ul>
           </CollapsibleContent>
@@ -427,14 +488,18 @@ const CollapsibleMenuItem: React.FC<{
     );
   } else {
     return (
-      <li key={item.label} ref={itemRef} data-menu-item={item.tag || item.label}>
+      <li
+        key={item.label}
+        ref={itemRef}
+        data-menu-item={item.tag || item.label}
+      >
         <button
           className={cn(
-            "flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-            isActive && "bg-accent text-accent-foreground",
+            'flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+            isActive && 'bg-accent text-accent-foreground'
           )}
           onClick={() => onItemClick(item)}
-          onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
+          onMouseDown={e => onCtrlRightMouseClick(e, item)}
         >
           <Icon name={item.icon} size={16} />
           <span className="text-sm">{item.label}</span>
@@ -452,23 +517,25 @@ const renderMenuItems = (
   activeTag?: string | null,
   expandedSections: Set<string> = new Set(),
   onExpandChange: (pathKey: string, expanded: boolean) => void = () => {},
-  parentPathKey: string = "",
+  parentPathKey: string = ''
 ) => {
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
-    eventHandler("OnSelect", widgetId, [item.tag]);
+    eventHandler('OnSelect', widgetId, [item.tag]);
   };
 
   const onCtrlRightMouseClick = (e: React.MouseEvent, item: MenuItem) => {
     if (e.ctrlKey && e.button === 2 && !!item.tag) {
       e.preventDefault();
-      eventHandler("OnCtrlRightClickSelect", widgetId, [item.tag]);
+      eventHandler('OnCtrlRightClickSelect', widgetId, [item.tag]);
     }
   };
 
-  return items.map((item) => {
-    const itemPathKey = parentPathKey ? `${parentPathKey}/${item.label}` : item.label;
-    if ("children" in item) {
+  return items.map(item => {
+    const itemPathKey = parentPathKey
+      ? `${parentPathKey}/${item.label}`
+      : item.label;
+    if ('children' in item) {
       if (level === 0) {
         return (
           <div key={itemPathKey} className="space-y-1 mt-6 first:mt-0">
@@ -485,7 +552,7 @@ const renderMenuItems = (
                   activeTag,
                   expandedSections,
                   onExpandChange,
-                  itemPathKey,
+                  itemPathKey
                 )}
             </ul>
           </div>
@@ -515,11 +582,11 @@ const renderMenuItems = (
           <li key={item.tag} data-menu-item={item.tag}>
             <button
               className={cn(
-                "flex w-full items-center gap-2 rounded-selector p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-                isActive && "bg-accent text-accent-foreground",
+                'flex w-full items-center gap-2 rounded-selector p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                isActive && 'bg-accent text-accent-foreground'
               )}
               onClick={() => onItemClick(item)}
-              onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
+              onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
               <Icon name={item.icon} size={16} />
               <span className="text-sm">{item.label}</span>
@@ -531,11 +598,11 @@ const renderMenuItems = (
           <li key={item.tag} data-menu-item={item.tag}>
             <button
               className={cn(
-                "flex w-full items-center gap-2 rounded-selector p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-                isActive && "bg-accent text-accent-foreground",
+                'flex w-full items-center gap-2 rounded-selector p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left',
+                isActive && 'bg-accent text-accent-foreground'
               )}
               onClick={() => onItemClick(item)}
-              onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
+              onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
               <Icon name={item.icon} size={16} />
               <span className="text-sm">{item.label}</span>
@@ -556,7 +623,9 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const prevSearchActiveRef = React.useRef(searchActive);
 
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set()
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
 
@@ -565,7 +634,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   const prevActiveTagRef = useRef(activeTag);
 
   // Register only the sidebar menu container with useFocusable
-  const { ref: focusRef } = useFocusable("sidebar-navigation", 1);
+  const { ref: focusRef } = useFocusable('sidebar-navigation', 1);
 
   const flatItems: MenuItem[] = useMemo(() => {
     return searchActive ? getFlatItemsInSearchRenderOrder(items) : [];
@@ -582,7 +651,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   useEffect(() => {
     if (!searchActive || flatItems.length === 0) return;
     const el = containerRef.current?.querySelector<HTMLElement>(
-      `[data-sidebar-result-index="${selectedIndex}"]`,
+      `[data-sidebar-result-index="${selectedIndex}"]`
     );
     if (!el) return;
 
@@ -591,11 +660,13 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     while (p) {
       const { overflowY } = getComputedStyle(p);
       if (
-        (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") &&
+        (overflowY === 'auto' ||
+          overflowY === 'scroll' ||
+          overflowY === 'overlay') &&
         p.scrollHeight > p.clientHeight
       ) {
         if (selectedIndex === 0) {
-          p.scrollTo({ top: 0, behavior: "smooth" });
+          p.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
         const elRect = el.getBoundingClientRect();
@@ -603,10 +674,12 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         const isAbove = elRect.top < portRect.top;
         const isBelow = elRect.bottom > portRect.bottom;
         if (isAbove || isBelow) {
-          const delta = isAbove ? elRect.top - portRect.top : elRect.bottom - portRect.bottom;
+          const delta = isAbove
+            ? elRect.top - portRect.top
+            : elRect.bottom - portRect.bottom;
           p.scrollTo({
             top: Math.max(0, p.scrollTop + delta),
-            behavior: "smooth",
+            behavior: 'smooth',
           });
         }
         return;
@@ -621,19 +694,21 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       items: MenuItem[],
       targetTag: string,
       currentPathKeys: string[] = [],
-      parentPathKey: string = "",
+      parentPathKey: string = ''
     ): string[] | null => {
       for (const item of items) {
         if (item.tag === targetTag) {
           return currentPathKeys;
         }
         if (item.children && item.children.length > 0) {
-          const itemPathKey = parentPathKey ? `${parentPathKey}/${item.label}` : item.label;
+          const itemPathKey = parentPathKey
+            ? `${parentPathKey}/${item.label}`
+            : item.label;
           const result = findPathToTag(
             item.children,
             targetTag,
             [...currentPathKeys, itemPathKey],
-            itemPathKey,
+            itemPathKey
           );
           if (result) {
             return result;
@@ -642,7 +717,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       }
       return null;
     },
-    [],
+    []
   );
 
   // Expand sections and scroll to active item when activeTag changes
@@ -664,17 +739,17 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         setTimeout(() => {
           try {
             const activeElement = containerRef.current?.querySelector(
-              `[data-menu-item="${activeTag}"]`,
+              `[data-menu-item="${activeTag}"]`
             );
             if (activeElement) {
               activeElement.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-                inline: "nearest",
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'nearest',
               });
             }
           } catch (error) {
-            console.warn("Failed to scroll to active menu item:", error);
+            console.warn('Failed to scroll to active menu item:', error);
           }
         }, COLLAPSIBLE_ANIMATION_DURATION);
 
@@ -685,59 +760,66 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     prevActiveTagRef.current = activeTag;
   }, [activeTag, items, searchActive, findPathToTag]);
 
-  const handleExpandChange = useCallback((pathKey: string, expanded: boolean) => {
-    setExpandedSections((prev) => {
-      const next = new Set(prev);
-      if (expanded) {
-        next.add(pathKey);
-      } else {
-        next.delete(pathKey);
-      }
-      return next;
-    });
-  }, []);
+  const handleExpandChange = useCallback(
+    (pathKey: string, expanded: boolean) => {
+      setExpandedSections(prev => {
+        const next = new Set(prev);
+        if (expanded) {
+          next.add(pathKey);
+        } else {
+          next.delete(pathKey);
+        }
+        return next;
+      });
+    },
+    []
+  );
 
   const handleMenuKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (!searchActive || flatItems.length === 0) return;
-      if (e.key === "ArrowDown") {
-        setSelectedIndex((idx) => Math.min(idx + 1, flatItems.length - 1));
+      if (e.key === 'ArrowDown') {
+        setSelectedIndex(idx => Math.min(idx + 1, flatItems.length - 1));
         e.preventDefault();
-      } else if (e.key === "ArrowUp") {
-        setSelectedIndex((idx) => Math.max(idx - 1, 0));
+      } else if (e.key === 'ArrowUp') {
+        setSelectedIndex(idx => Math.max(idx - 1, 0));
         e.preventDefault();
-      } else if (e.key === "Enter") {
+      } else if (e.key === 'Enter') {
         const item = flatItems[selectedIndex];
         if (item && item.tag) {
-          eventHandler("OnSelect", id, [item.tag]);
+          eventHandler('OnSelect', id, [item.tag]);
         }
         e.preventDefault();
       }
     },
-    [searchActive, flatItems, selectedIndex, eventHandler, id],
+    [searchActive, flatItems, selectedIndex, eventHandler, id]
   );
 
   const renderMenuItemsWithHighlight = (items: MenuItem[]) => {
     const onCtrlRightMouseClick = (e: React.MouseEvent, item: MenuItem) => {
       if (e.ctrlKey && e.button === 2 && !!item.tag) {
         e.preventDefault();
-        eventHandler("OnCtrlRightClickSelect", id, [item.tag]);
+        eventHandler('OnCtrlRightClickSelect', id, [item.tag]);
       }
     };
 
     const renderResultItem = (item: MenuItem, showPath: boolean) => {
-      const flatIdx = flatItems.findIndex((flatItem) => flatItem.tag === item.tag);
+      const flatIdx = flatItems.findIndex(
+        flatItem => flatItem.tag === item.tag
+      );
       const isHovered = searchActive && flatIdx === selectedIndex;
       const isActivePage = item.tag === activeTag;
       return (
         <li key={item.tag}>
           <button
-            {...(flatIdx >= 0 && { "data-sidebar-result-index": flatIdx })}
+            {...(flatIdx >= 0 && { 'data-sidebar-result-index': flatIdx })}
             className={cn(
-              "flex w-full rounded-selector p-2 text-sm hover:bg-accent/50 cursor-pointer min-h-8 text-left",
-              showPath && item.path ? "flex-col items-start gap-1" : "items-center gap-2",
-              isHovered && !isActivePage && "bg-accent/30",
-              isActivePage && "bg-accent text-accent-foreground hover:bg-accent",
+              'flex w-full rounded-selector p-2 text-sm hover:bg-accent/50 cursor-pointer min-h-8 text-left',
+              showPath && item.path
+                ? 'flex-col items-start gap-1'
+                : 'items-center gap-2',
+              isHovered && !isActivePage && 'bg-accent/30',
+              isActivePage && 'bg-accent text-accent-foreground hover:bg-accent'
             )}
             tabIndex={-1}
             onClick={() => {
@@ -745,10 +827,10 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
                 if (searchActive && flatIdx !== -1) {
                   setSelectedIndex(flatIdx);
                 }
-                eventHandler("OnSelect", id, [item.tag]);
+                eventHandler('OnSelect', id, [item.tag]);
               }
             }}
-            onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
+            onMouseDown={e => onCtrlRightMouseClick(e, item)}
             onMouseEnter={() => {
               if (searchActive) {
                 setSelectedIndex(flatIdx);
@@ -756,7 +838,9 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
             }}
           >
             {showPath && item.path && (
-              <span className="text-xs text-muted-foreground truncate w-full">{item.path}</span>
+              <span className="text-xs text-muted-foreground truncate w-full">
+                {item.path}
+              </span>
             )}
             <div className="flex w-full items-center gap-2 min-w-0">
               <Icon name={item.icon} size={16} className="shrink-0" />
@@ -767,14 +851,17 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       );
     };
 
-    return items.map((item) => {
+    return items.map(item => {
       if (item.children && item.children.length > 0) {
         const children = item.children;
-        const groupsMap = children.reduce<Record<string, MenuItem[]>>((acc, child) => {
-          const path = child.path ?? "";
-          (acc[path] ??= []).push(child);
-          return acc;
-        }, {});
+        const groupsMap = children.reduce<Record<string, MenuItem[]>>(
+          (acc, child) => {
+            const path = child.path ?? '';
+            (acc[path] ??= []).push(child);
+            return acc;
+          },
+          {}
+        );
         const groups = Object.entries(groupsMap);
         const groupsOrdered = groups.sort(([pathA], [pathB]) => {
           if (!pathA) return 1;
@@ -789,7 +876,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
             </h4>
             <ul className="space-y-1">
               {groupsOrdered.map(([path, pathItems], index) => (
-                <React.Fragment key={path || "__none__"}>
+                <React.Fragment key={path || '__none__'}>
                   {index > 0 && (
                     <li className="list-none py-2" aria-hidden>
                       <Separator orientation="horizontal" />
@@ -802,7 +889,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
                       </div>
                     )}
                     <ul className="space-y-1">
-                      {pathItems.map((child) => renderResultItem(child, false))}
+                      {pathItems.map(child => renderResultItem(child, false))}
                     </ul>
                   </li>
                 </React.Fragment>
@@ -818,9 +905,11 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
 
   return (
     <div
-      ref={(el) => {
+      ref={el => {
         focusRef(el);
-        (sidebarMenuRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+        (
+          sidebarMenuRef as React.MutableRefObject<HTMLDivElement | null>
+        ).current = el;
         containerRef.current = el;
       }}
       role="menu"
@@ -829,7 +918,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         if (searchActive && flatItems.length > 0) setSelectedIndex(0);
       }}
       onKeyDown={handleMenuKeyDown}
-      style={{ outline: "none" }}
+      style={{ outline: 'none' }}
       data-sidebar-menu-widget
     >
       {searchActive ? (
@@ -841,7 +930,15 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           </div>
         )
       ) : (
-        renderMenuItems(items, eventHandler, id, 0, activeTag, expandedSections, handleExpandChange)
+        renderMenuItems(
+          items,
+          eventHandler,
+          id,
+          0,
+          activeTag,
+          expandedSections,
+          handleExpandChange
+        )
       )}
     </div>
   );

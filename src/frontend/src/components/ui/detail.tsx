@@ -1,20 +1,19 @@
-import React from "react";
-import type { VariantProps } from "class-variance-authority";
+import React from 'react';
+import type { VariantProps } from 'class-variance-authority';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 import {
   detailLabelSizeVariant,
   detailValueSizeVariant,
   detailValueMultiLinePaddingVariant,
   detailsSizeVariant,
-} from "./detail/detail-variant";
-import { DetailProvider } from "./detail/DetailContext";
-import { useDetailScale } from "./detail/useDetailScale";
-import { Densities } from "@/types/density";
+} from './detail/detail-variant';
+import { DetailProvider } from './detail/DetailContext';
+import { useDetailScale } from './detail/useDetailScale';
+import { Densities } from '@/types/density';
 
 export interface DetailsProps
-  extends
-    Omit<React.HTMLAttributes<HTMLDivElement>, "size">,
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'size'>,
     VariantProps<typeof detailsSizeVariant> {}
 
 const Details = React.forwardRef<HTMLDivElement, DetailsProps>(
@@ -24,23 +23,31 @@ const Details = React.forwardRef<HTMLDivElement, DetailsProps>(
 
     return (
       <DetailProvider density={density as Densities}>
-        <div ref={ref} className={cn("w-full [&>:last-child]:border-0", className)} {...props}>
+        <div
+          ref={ref}
+          className={cn('w-full [&>:last-child]:border-0', className)}
+          {...props}
+        >
           {children}
         </div>
       </DetailProvider>
     );
-  },
+  }
 );
-Details.displayName = "Details";
+Details.displayName = 'Details';
 
-export interface DetailItemProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "size"> {
+export interface DetailItemProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'size'> {
   label: string;
   multiline?: boolean;
   density?: Densities;
 }
 
 const DetailItem = React.forwardRef<HTMLDivElement, DetailItemProps>(
-  ({ className, label, multiline, density: propDensity, children, ...props }, ref) => {
+  (
+    { className, label, multiline, density: propDensity, children, ...props },
+    ref
+  ) => {
     const contextDensity = useDetailScale();
     const density = propDensity ?? contextDensity;
 
@@ -48,10 +55,10 @@ const DetailItem = React.forwardRef<HTMLDivElement, DetailItemProps>(
       <div
         ref={ref}
         className={cn(
-          "border-b flex",
-          multiline && "flex-col",
-          !multiline && "items-center",
-          className,
+          'border-b flex',
+          multiline && 'flex-col',
+          !multiline && 'items-center',
+          className
         )}
         {...props}
       >
@@ -61,18 +68,18 @@ const DetailItem = React.forwardRef<HTMLDivElement, DetailItemProps>(
             detailValueSizeVariant({ density }),
             multiline
               ? cn(
-                  "whitespace-normal break-words text-left",
-                  detailValueMultiLinePaddingVariant({ density }),
+                  'whitespace-normal break-words text-left',
+                  detailValueMultiLinePaddingVariant({ density })
                 )
-              : "truncate text-right ml-auto",
+              : 'truncate text-right ml-auto'
           )}
         >
           {children}
         </div>
       </div>
     );
-  },
+  }
 );
-DetailItem.displayName = "DetailItem";
+DetailItem.displayName = 'DetailItem';
 
 export { Details, DetailItem };

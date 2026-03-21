@@ -1,20 +1,24 @@
-import * as React from "react";
-import { useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { inputStyles } from "@/lib/styles";
-import { Densities } from "@/types/density";
+import * as React from 'react';
+import { useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { inputStyles } from '@/lib/styles';
+import { Densities } from '@/types/density';
 import {
   dateTimeInputVariant,
   dateTimeInputIconVariant,
   dateTimeInputTextVariant,
-} from "@/components/ui/input/date-time-input-variant";
-import { DateVariantProps } from "./types";
-import { ClearAndInvalidIcons } from "./shared";
+} from '@/components/ui/input/date-time-input-variant';
+import { DateVariantProps } from './types';
+import { ClearAndInvalidIcons } from './shared';
 
 export const DateVariant: React.FC<DateVariantProps> = ({
   value,
@@ -26,11 +30,11 @@ export const DateVariant: React.FC<DateVariantProps> = ({
   format: formatProp,
   firstDayOfWeek,
   density = Densities.Medium,
-  "data-testid": dataTestId,
+  'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
   const date = value ? new Date(value) : undefined;
-  const showClear = nullable && !disabled && value != null && value !== "";
+  const showClear = nullable && !disabled && value != null && value !== '';
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -43,7 +47,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
       onDateChange(selectedDate);
       setOpen(false);
     },
-    [onDateChange],
+    [onDateChange]
   );
 
   return (
@@ -56,23 +60,34 @@ export const DateVariant: React.FC<DateVariantProps> = ({
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),
-              "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
-              !date && "text-muted-foreground",
+              'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
+              !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
-              disabled && "cursor-not-allowed",
-              showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
+              disabled && 'cursor-not-allowed',
+              showClear && invalid
+                ? 'pr-16'
+                : showClear || invalid
+                  ? 'pr-8'
+                  : ''
             )}
             data-testid={dataTestId}
           >
-            <CalendarIcon className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
+            <CalendarIcon
+              className={cn(
+                'mr-2 shrink-0',
+                dateTimeInputIconVariant({ density })
+              )}
+            />
             <span
               className={cn(
-                "truncate",
+                'truncate',
                 dateTimeInputTextVariant({ density }),
-                !date && "text-muted-foreground",
+                !date && 'text-muted-foreground'
               )}
             >
-              {date ? format(date, formatProp || "yyyy-MM-dd") : placeholder || "Pick a date"}
+              {date
+                ? format(date, formatProp || 'yyyy-MM-dd')
+                : placeholder || 'Pick a date'}
             </span>
           </Button>
         </PopoverTrigger>

@@ -1,19 +1,23 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fetchTableData } from "./tableDataFetcher";
-import { getIvyHost } from "@/lib/utils";
-import { getGrpcTableService, type Filter, type SortOrder } from "@/services/grpcTableService";
-import { convertArrowTableToData } from "./tableDataMapper";
-import * as arrow from "apache-arrow";
-import type { DataTableConnection } from "../types/types";
-import { ColType } from "../types/types";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { fetchTableData } from './tableDataFetcher';
+import { getIvyHost } from '@/lib/utils';
+import {
+  getGrpcTableService,
+  type Filter,
+  type SortOrder,
+} from '@/services/grpcTableService';
+import { convertArrowTableToData } from './tableDataMapper';
+import * as arrow from 'apache-arrow';
+import type { DataTableConnection } from '../types/types';
+import { ColType } from '../types/types';
 
 // Mock dependencies
-vi.mock("@/lib/utils");
-vi.mock("@/services/grpcTableService", () => ({
+vi.mock('@/lib/utils');
+vi.mock('@/services/grpcTableService', () => ({
   getGrpcTableService: vi.fn(),
 }));
-vi.mock("./tableDataMapper");
-vi.mock("apache-arrow");
+vi.mock('./tableDataMapper');
+vi.mock('apache-arrow');
 
 const mockGetIvyHost = vi.mocked(getIvyHost);
 const mockGetGrpcTableService = vi.mocked(getGrpcTableService);
@@ -28,30 +32,30 @@ const mockGrpcService = {
   parseFilter: mockParseFilter,
 };
 
-describe("tableDataFetcher", () => {
+describe('tableDataFetcher', () => {
   const mockConnection: DataTableConnection = {
     port: 8080,
-    path: "/test",
-    connectionId: "conn-123",
-    sourceId: "source-456",
+    path: '/test',
+    connectionId: 'conn-123',
+    sourceId: 'source-456',
   };
 
   const mockColumns = [
-    { name: "id", type: ColType.Number, width: 150 },
-    { name: "name", type: ColType.Text, width: 150 },
+    { name: 'id', type: ColType.Number, width: 150 },
+    { name: 'name', type: ColType.Text, width: 150 },
   ];
 
-  const mockRows = [{ values: [1, "Alice"] }, { values: [2, "Bob"] }];
+  const mockRows = [{ values: [1, 'Alice'] }, { values: [2, 'Bob'] }];
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetIvyHost.mockReturnValue("https://localhost:3000");
+    mockGetIvyHost.mockReturnValue('https://localhost:3000');
     // Setup getGrpcTableService to return our mock service
     mockGetGrpcTableService.mockReturnValue(mockGrpcService as never);
   });
 
-  describe("fetchTableData", () => {
-    it("should fetch table data successfully", async () => {
+  describe('fetchTableData', () => {
+    it('should fetch table data successfully', async () => {
       const mockArrowTable = {} as arrow.Table;
       const mockResult = {
         arrow_ipc_stream: new Uint8Array([1, 2, 3]),
@@ -71,17 +75,22 @@ describe("tableDataFetcher", () => {
       const result = await fetchTableData(mockConnection, 0, 10);
 
       expect(mockQueryTable).toHaveBeenCalledWith({
-        serverUrl: "https://localhost:3000",
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
           offset: 0,
-          connectionId: "conn-123",
-          sourceId: "source-456",
+          connectionId: 'conn-123',
+          sourceId: 'source-456',
         },
       });
 
-      expect(mockArrow.tableFromIPC).toHaveBeenCalledWith(mockResult.arrow_ipc_stream);
-      expect(mockConvertArrowTableToData).toHaveBeenCalledWith(mockArrowTable, 10);
+      expect(mockArrow.tableFromIPC).toHaveBeenCalledWith(
+        mockResult.arrow_ipc_stream
+      );
+      expect(mockConvertArrowTableToData).toHaveBeenCalledWith(
+        mockArrowTable,
+        10
+      );
 
       expect(result).toEqual({
         columns: mockColumns,
@@ -91,12 +100,12 @@ describe("tableDataFetcher", () => {
       });
     });
 
-    it("should include filter in query when provided", async () => {
+    it('should include filter in query when provided', async () => {
       const mockFilter: Filter = {
         condition: {
-          column: "name",
-          function: "equals",
-          args: ["Alice"],
+          column: 'name',
+          function: 'equals',
+          args: ['Alice'],
         },
       };
 
@@ -117,19 +126,19 @@ describe("tableDataFetcher", () => {
       await fetchTableData(mockConnection, 0, 10, mockFilter);
 
       expect(mockQueryTable).toHaveBeenCalledWith({
-        serverUrl: "https://localhost:3000",
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
           offset: 0,
-          connectionId: "conn-123",
-          sourceId: "source-456",
+          connectionId: 'conn-123',
+          sourceId: 'source-456',
           filter: mockFilter,
         },
       });
     });
 
-    it("should include sort in query when provided", async () => {
-      const mockSort: SortOrder[] = [{ column: "name", direction: "ASC" }];
+    it('should include sort in query when provided', async () => {
+      const mockSort: SortOrder[] = [{ column: 'name', direction: 'ASC' }];
 
       const mockResult = {
         arrow_ipc_stream: new Uint8Array([1, 2, 3]),
@@ -148,26 +157,26 @@ describe("tableDataFetcher", () => {
       await fetchTableData(mockConnection, 0, 10, null, mockSort);
 
       expect(mockQueryTable).toHaveBeenCalledWith({
-        serverUrl: "https://localhost:3000",
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
           offset: 0,
-          connectionId: "conn-123",
-          sourceId: "source-456",
+          connectionId: 'conn-123',
+          sourceId: 'source-456',
           sort: mockSort,
         },
       });
     });
 
-    it("should include both filter and sort when provided", async () => {
+    it('should include both filter and sort when provided', async () => {
       const mockFilter: Filter = {
         condition: {
-          column: "name",
-          function: "contains",
-          args: ["A"],
+          column: 'name',
+          function: 'contains',
+          args: ['A'],
         },
       };
-      const mockSort: SortOrder[] = [{ column: "id", direction: "DESC" }];
+      const mockSort: SortOrder[] = [{ column: 'id', direction: 'DESC' }];
 
       const mockResult = {
         arrow_ipc_stream: new Uint8Array([1, 2, 3]),
@@ -186,19 +195,19 @@ describe("tableDataFetcher", () => {
       await fetchTableData(mockConnection, 5, 20, mockFilter, mockSort);
 
       expect(mockQueryTable).toHaveBeenCalledWith({
-        serverUrl: "https://localhost:3000",
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 20,
           offset: 5,
-          connectionId: "conn-123",
-          sourceId: "source-456",
+          connectionId: 'conn-123',
+          sourceId: 'source-456',
           filter: mockFilter,
           sort: mockSort,
         },
       });
     });
 
-    it("should return empty data when arrow_ipc_stream is empty", async () => {
+    it('should return empty data when arrow_ipc_stream is empty', async () => {
       // Create a mock result where arrow_ipc_stream is undefined (falsy)
       const mockResult = {
         arrow_ipc_stream: undefined as unknown as Uint8Array,
@@ -221,8 +230,8 @@ describe("tableDataFetcher", () => {
       expect(mockConvertArrowTableToData).not.toHaveBeenCalled();
     });
 
-    it("should handle different host URLs correctly", async () => {
-      mockGetIvyHost.mockReturnValue("http://example.com:9000/path");
+    it('should handle different host URLs correctly', async () => {
+      mockGetIvyHost.mockReturnValue('http://example.com:9000/path');
 
       const mockResult = {
         arrow_ipc_stream: new Uint8Array([1, 2, 3]),
@@ -241,25 +250,32 @@ describe("tableDataFetcher", () => {
       await fetchTableData(mockConnection, 0, 10);
 
       expect(mockQueryTable).toHaveBeenCalledWith({
-        serverUrl: "http://example.com:9000/path",
+        serverUrl: 'http://example.com:9000/path',
         query: expect.any(Object),
       });
     });
 
-    it("should throw error when grpcTableService fails", async () => {
-      const mockError = new Error("gRPC service failed");
+    it('should throw error when grpcTableService fails', async () => {
+      const mockError = new Error('gRPC service failed');
       mockQueryTable.mockRejectedValue(mockError);
 
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
-      await expect(fetchTableData(mockConnection, 0, 10)).rejects.toThrow("gRPC service failed");
+      await expect(fetchTableData(mockConnection, 0, 10)).rejects.toThrow(
+        'gRPC service failed'
+      );
 
-      expect(consoleSpy).toHaveBeenCalledWith("Failed to fetch table data:", mockError);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to fetch table data:',
+        mockError
+      );
 
       consoleSpy.mockRestore();
     });
 
-    it("should use serverUrl from getIvyHost regardless of connection port", async () => {
+    it('should use serverUrl from getIvyHost regardless of connection port', async () => {
       const customConnection: DataTableConnection = {
         ...mockConnection,
         port: 9999,
@@ -283,12 +299,12 @@ describe("tableDataFetcher", () => {
 
       // Should use getIvyHost() return value, not connection.port
       expect(mockQueryTable).toHaveBeenCalledWith({
-        serverUrl: "https://localhost:3000",
+        serverUrl: 'https://localhost:3000',
         query: expect.any(Object),
       });
     });
 
-    it("should handle null filter and sort parameters", async () => {
+    it('should handle null filter and sort parameters', async () => {
       const mockResult = {
         arrow_ipc_stream: new Uint8Array([1, 2, 3]),
         offset: 0,
@@ -306,19 +322,19 @@ describe("tableDataFetcher", () => {
       await fetchTableData(mockConnection, 0, 10, null, null);
 
       expect(mockQueryTable).toHaveBeenCalledWith({
-        serverUrl: "https://localhost:3000",
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
           offset: 0,
-          connectionId: "conn-123",
-          sourceId: "source-456",
+          connectionId: 'conn-123',
+          sourceId: 'source-456',
         },
       });
     });
 
-    it("should use serverUrl from getIvyHost regardless of NODE_ENV", async () => {
+    it('should use serverUrl from getIvyHost regardless of NODE_ENV', async () => {
       // Set NODE_ENV to development (this should not affect the behavior anymore)
-      process.env.NODE_ENV = "development";
+      process.env.NODE_ENV = 'development';
 
       const mockResult = {
         arrow_ipc_stream: new Uint8Array([1, 2, 3]),
@@ -338,12 +354,12 @@ describe("tableDataFetcher", () => {
 
       // Should use getIvyHost() return value, NODE_ENV should not affect it
       expect(mockQueryTable).toHaveBeenCalledWith({
-        serverUrl: "https://localhost:3000",
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
           offset: 0,
-          connectionId: "conn-123",
-          sourceId: "source-456",
+          connectionId: 'conn-123',
+          sourceId: 'source-456',
         },
       });
 

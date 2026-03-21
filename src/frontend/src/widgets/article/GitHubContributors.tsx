@@ -1,5 +1,5 @@
-import { Users, ExternalLink } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { Users, ExternalLink } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface Contributor {
   login: string;
@@ -33,44 +33,47 @@ interface GitHubContributorsProps {
 }
 
 // Ivy team members with their roles and display names
-const IVY_TEAM_MEMBERS: Record<string, { role: string; displayName?: string }> = {
-  ArtemKhvorostianyi: { role: "Engineer" },
-  rorychatt: { role: "Founding Engineer" },
-  nielsbosma: { role: "Founder", displayName: "Niels Bosma" },
-  zachwolfe: { role: "Software Developer" },
-};
+const IVY_TEAM_MEMBERS: Record<string, { role: string; displayName?: string }> =
+  {
+    ArtemKhvorostianyi: { role: 'Engineer' },
+    rorychatt: { role: 'Founding Engineer' },
+    nielsbosma: { role: 'Founder', displayName: 'Niels Bosma' },
+    zachwolfe: { role: 'Software Developer' },
+  };
 
 // Helper function to generate correct commits URL for main branch
 const getCommitsUrl = (githubUrl: string): string => {
   try {
     const url = new URL(githubUrl);
-    const pathParts = url.pathname.split("/");
+    const pathParts = url.pathname.split('/');
 
     // Expected format: /owner/repo/blob/branch/path/to/file
-    if (pathParts.length >= 6 && pathParts[3] === "blob") {
+    if (pathParts.length >= 6 && pathParts[3] === 'blob') {
       const owner = pathParts[1];
       const repo = pathParts[2];
-      const filePath = pathParts.slice(5).join("/");
+      const filePath = pathParts.slice(5).join('/');
 
       // Generate commits URL for main branch with specific file path
       return `https://github.com/${owner}/${repo}/commits/main/${filePath}`;
     }
   } catch (error) {
     // If URL parsing fails, return the original URL as fallback
-    console.warn("Failed to parse GitHub URL for commits link:", error);
+    console.warn('Failed to parse GitHub URL for commits link:', error);
   }
 
   // Fallback to original behavior if parsing fails
-  return githubUrl.replace("/blob/", "/commits/");
+  return githubUrl.replace('/blob/', '/commits/');
 };
 
 const fetchGitHubCommits = async (apiUrl: string) => {
   const response = await fetch(apiUrl);
   if (!response.ok) {
     if (response.status === 403) {
-      throw new Error("GitHub API rate limit exceeded. Please try again later.");
+      throw new Error(
+        'GitHub API rate limit exceeded. Please try again later.'
+      );
     } else if (response.status === 404) {
-      throw new Error("Repository or file not found.");
+      throw new Error('Repository or file not found.');
     } else {
       throw new Error(`GitHub API error: ${response.status}`);
     }
@@ -96,16 +99,16 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
     const getApiUrl = (githubUrl: string): string | null => {
       try {
         const url = new URL(githubUrl);
-        const pathParts = url.pathname.split("/");
+        const pathParts = url.pathname.split('/');
 
         // Expected format: /owner/repo/blob/branch/path/to/file
-        if (pathParts.length < 6 || pathParts[3] !== "blob") {
+        if (pathParts.length < 6 || pathParts[3] !== 'blob') {
           return null;
         }
 
         const owner = pathParts[1];
         const repo = pathParts[2];
-        const filePath = pathParts.slice(5).join("/");
+        const filePath = pathParts.slice(5).join('/');
 
         // Always fetch contributors from the main branch, regardless of the source URL branch
         return `https://api.github.com/repos/${owner}/${repo}/commits?path=${encodeURIComponent(filePath)}&sha=main&per_page=20`;
@@ -127,7 +130,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
         setError(null);
         const contributorMap = new Map<string, Contributor>();
 
-        commits.forEach((commit) => {
+        commits.forEach(commit => {
           if (commit.author) {
             const login = commit.author.login;
             const existing = contributorMap.get(login);
@@ -139,14 +142,16 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
                 login,
                 name:
                   teamMember?.displayName ||
-                  (commit.commit.author.name !== login ? commit.commit.author.name : undefined),
+                  (commit.commit.author.name !== login
+                    ? commit.commit.author.name
+                    : undefined),
                 avatar_url: commit.author.avatar_url,
                 html_url: commit.author.html_url,
                 contributions: 1,
                 role:
                   login in IVY_TEAM_MEMBERS
                     ? IVY_TEAM_MEMBERS[login].role
-                    : "Open Source Contributor",
+                    : 'Open Source Contributor',
                 isIvyMember: login in IVY_TEAM_MEMBERS,
               });
             }
@@ -154,16 +159,18 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
         });
 
         setContributors(
-          Array.from(contributorMap.values()).sort((a, b) => b.contributions - a.contributions),
+          Array.from(contributorMap.values()).sort(
+            (a, b) => b.contributions - a.contributions
+          )
         );
       })
-      .catch((err) => {
-        console.error("Failed to fetch contributors:", err);
+      .catch(err => {
+        console.error('Failed to fetch contributors:', err);
         // Don't show error for rate limiting - just hide the component
-        if (err.message && err.message.includes("rate limit exceeded")) {
+        if (err.message && err.message.includes('rate limit exceeded')) {
           setError(null);
         } else {
-          setError(err.message || "Failed to load contributors");
+          setError(err.message || 'Failed to load contributors');
         }
       })
       .finally(() => {
@@ -200,7 +207,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
           {/* Contributors list*/}
           <div className="h-full pr-2">
             <div className="space-y-3">
-              {displayedContributors.map((contributor) => (
+              {displayedContributors.map(contributor => (
                 <a
                   key={contributor.login}
                   href={contributor.html_url}
@@ -217,7 +224,9 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
                     <div className="text-sm font-medium truncate group-hover:text-primary transition-colors">
                       {contributor.name || contributor.login}
                     </div>
-                    <div className="text-xs text-muted-foreground">{contributor.role}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {contributor.role}
+                    </div>
                   </div>
                   <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                 </a>

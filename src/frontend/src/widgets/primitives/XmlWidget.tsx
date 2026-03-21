@@ -1,5 +1,5 @@
-import { XmlRenderer } from "@/components/XmlRenderer";
-import React from "react";
+import { XmlRenderer } from '@/components/XmlRenderer';
+import React from 'react';
 
 interface XmlWidgetProps {
   id: string;

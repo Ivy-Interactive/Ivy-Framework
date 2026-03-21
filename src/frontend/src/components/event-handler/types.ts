@@ -1,4 +1,4 @@
-import { WidgetEventHandlerType } from "@/types/widgets";
+import { WidgetEventHandlerType } from '@/types/widgets';
 
 export interface EventHandlerContextProps {
   eventHandler: WidgetEventHandlerType;

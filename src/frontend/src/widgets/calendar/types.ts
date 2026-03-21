@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-export type CalendarView = "month" | "week" | "day" | "agenda";
+export type CalendarView = 'month' | 'week' | 'day' | 'agenda';
 
 export interface CalendarEvent {
   id: string;

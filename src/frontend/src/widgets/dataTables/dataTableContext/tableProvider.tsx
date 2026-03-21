@@ -1,9 +1,14 @@
-import React, { useMemo, useRef, useState } from "react";
-import * as arrow from "apache-arrow";
-import { Filter } from "@/services/grpcTableService";
-import { TableContext } from "./tableContext";
-import { TableProviderProps, TableContextType } from "./types";
-import { useDataLoading, useColumnManagement, useSorting, useRowData } from "./hooks";
+import React, { useMemo, useRef, useState } from 'react';
+import * as arrow from 'apache-arrow';
+import { Filter } from '@/services/grpcTableService';
+import { TableContext } from './tableContext';
+import { TableProviderProps, TableContextType } from './types';
+import {
+  useDataLoading,
+  useColumnManagement,
+  useSorting,
+  useRowData,
+} from './hooks';
 
 export const TableProvider: React.FC<TableProviderProps> = ({
   children,
@@ -106,5 +111,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     handleColumnReorder,
   ]);
 
-  return <TableContext.Provider value={value}>{children}</TableContext.Provider>;
+  return (
+    <TableContext.Provider value={value}>{children}</TableContext.Provider>
+  );
 };

@@ -1,1 +1,1 @@
-export * from "./SlotWidget";
+export * from './SlotWidget';

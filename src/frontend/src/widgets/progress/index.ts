@@ -1,1 +1,1 @@
-export * from "./ProgressWidget";
+export * from './ProgressWidget';

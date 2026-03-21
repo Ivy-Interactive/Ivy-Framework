@@ -1,6 +1,6 @@
-import React from "react";
-import { TableRow } from "@/components/ui/table";
-import { Densities } from "@/types/density";
+import React from 'react';
+import { TableRow } from '@/components/ui/table';
+import { Densities } from '@/types/density';
 
 interface TableRowWidgetProps {
   id: string;
@@ -10,6 +10,11 @@ interface TableRowWidgetProps {
   children?: React.ReactNode;
 }
 
-export const TableRowWidget: React.FC<TableRowWidgetProps> = ({ children, isHeader = false }) => (
-  <TableRow className={`${isHeader ? "font-medium bg-background" : ""}`}>{children}</TableRow>
+export const TableRowWidget: React.FC<TableRowWidgetProps> = ({
+  children,
+  isHeader = false,
+}) => (
+  <TableRow className={`${isHeader ? 'font-medium bg-background' : ''}`}>
+    {children}
+  </TableRow>
 );

@@ -1,40 +1,39 @@
-import { defineConfig } from "vite-plus";
-import react from "@vitejs/plugin-react";
-import { resolve } from "path";
-
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      // Use classic JSX transform (React.createElement) instead of automatic (jsx-runtime)
+      // This allows external widgets to use the global React without needing jsx-runtime
+      jsxRuntime: 'classic',
+    }),
   ],
   define: {
     // Define process.env.NODE_ENV for libraries that check it
-    "process.env.NODE_ENV": JSON.stringify("production"),
+    'process.env.NODE_ENV': JSON.stringify('production'),
   },
   build: {
     lib: {
       // Entry point for the library
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: resolve(__dirname, 'src/index.ts'),
       // Use IIFE format for browser globals compatibility
-      formats: ["iife"],
+      formats: ['iife'],
       // Output filename
-      fileName: () => "TiptapInput.js",
+      fileName: () => 'TiptapInput.js',
       // Global variable name for the library (must match C# class name)
-      name: "Ivy_Widgets_Tiptap",
+      name: 'Ivy_Widgets_Tiptap',
     },
-    rolldownOptions: {
+    rollupOptions: {
       // Externalize React - the host app provides these via globals
-      external: ["react", "react-dom"],
+      external: ['react', 'react-dom'],
       output: {
         // Global variable names for externals
         globals: {
-          react: "React",
-          "react-dom": "ReactDOM",
+          react: 'React',
+          'react-dom': 'ReactDOM',
         },
         // Use extend: false to create a proper global variable
         // (extend: true uses 'this' which is undefined in strict mode)
@@ -42,7 +41,7 @@ export default defineConfig({
       },
     },
     // Output to dist folder
-    outDir: "dist",
+    outDir: 'dist',
     // Don't empty the output directory (in case of multiple builds)
     emptyOutDir: true,
     // Generate sourcemaps for debugging

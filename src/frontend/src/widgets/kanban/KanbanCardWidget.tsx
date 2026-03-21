@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 
 interface KanbanCardWidgetProps {
   id: string;
@@ -15,7 +15,9 @@ interface KanbanCardWidgetProps {
   children?: React.ReactNode;
 }
 
-export const KanbanCardWidget: React.FC<KanbanCardWidgetProps> = ({ children }) => {
+export const KanbanCardWidget: React.FC<KanbanCardWidgetProps> = ({
+  children,
+}) => {
   // KanbanCardWidget just wraps the Card widget content from backend
   // Render children (Card widget) as-is
   return <>{children}</>;

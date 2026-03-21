@@ -4,30 +4,30 @@ export const sanitizeUrl = (url: string): string | null => {
     const urlObj = new URL(url);
 
     // Only allow http and https protocols
-    if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
       return null;
     }
 
     // Validate hostname for known embed providers
     const allowedHosts = [
-      "youtube.com",
-      "youtu.be",
-      "twitter.com",
-      "x.com",
-      "facebook.com",
-      "instagram.com",
-      "linkedin.com",
-      "pinterest.com",
-      "pin.it",
-      "github.com",
-      "gist.github.com",
-      "reddit.com",
-      "tiktok.com",
+      'youtube.com',
+      'youtu.be',
+      'twitter.com',
+      'x.com',
+      'facebook.com',
+      'instagram.com',
+      'linkedin.com',
+      'pinterest.com',
+      'pin.it',
+      'github.com',
+      'gist.github.com',
+      'reddit.com',
+      'tiktok.com',
     ];
 
     const hostname = urlObj.hostname.toLowerCase();
     const isAllowed = allowedHosts.some(
-      (host) => hostname === host || hostname.endsWith("." + host),
+      host => hostname === host || hostname.endsWith('.' + host)
     );
 
     if (!isAllowed) {
@@ -41,11 +41,11 @@ export const sanitizeUrl = (url: string): string | null => {
 };
 
 export const sanitizeText = (text: string): string => {
-  return text.replace(/[^a-zA-Z0-9\s-_]/g, "").trim();
+  return text.replace(/[^a-zA-Z0-9\s-_]/g, '').trim();
 };
 
 export const sanitizeId = (id: string): string => {
-  return id.replace(/[^a-zA-Z0-9-_]/g, "");
+  return id.replace(/[^a-zA-Z0-9-_]/g, '');
 };
 
 export const isValidUrl = (url: string): boolean => {
@@ -77,7 +77,7 @@ export const loadScript = (src: string): Promise<void> => {
     }
 
     // Create and load new script
-    const script = document.createElement("script");
+    const script = document.createElement('script');
     script.src = src;
     script.async = true;
     script.onload = () => {

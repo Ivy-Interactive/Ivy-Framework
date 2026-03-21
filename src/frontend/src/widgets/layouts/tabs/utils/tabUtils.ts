@@ -1,5 +1,5 @@
-import React from "react";
-import type { TabWidgetProps } from "../types";
+import React from 'react';
+import type { TabWidgetProps } from '../types';
 
 // ====================
 // Props Extraction Helpers
@@ -10,19 +10,22 @@ import type { TabWidgetProps } from "../types";
  * @param element - React element (TabWidget or MemoizedWidget)
  * @returns The tab widget props, or undefined if not a valid tab
  */
-export function getTabProps(element: React.ReactElement): TabWidgetProps | undefined {
+export function getTabProps(
+  element: React.ReactElement
+): TabWidgetProps | undefined {
   const directProps = element.props as TabWidgetProps;
 
   // Check if it's a MemoizedWidget wrapping a tab
   const memoProps = element.props as {
     node?: TabWidgetProps & { type?: string };
   };
-  if (memoProps.node?.type === "Ivy.Tab") {
+  if (memoProps.node?.type === 'Ivy.Tab') {
     // Extract props from the node, mapping widget node structure to TabWidgetProps
     const node = memoProps.node;
     return {
       id: node.id,
-      title: (node as unknown as { props?: { title?: string } }).props?.title ?? "",
+      title:
+        (node as unknown as { props?: { title?: string } }).props?.title ?? '',
       icon: (node as unknown as { props?: { icon?: string } }).props?.icon,
       badge: (node as unknown as { props?: { badge?: string } }).props?.badge,
       children: node.children,
@@ -48,18 +51,18 @@ export function getTabProps(element: React.ReactElement): TabWidgetProps | undef
  * @returns Array of valid TabWidget elements
  */
 export function filterTabWidgets(
-  children: React.ReactNode[],
+  children: React.ReactNode[]
 ): React.ReactElement<TabWidgetProps>[] {
-  return React.Children.toArray(children).filter((child) => {
+  return React.Children.toArray(children).filter(child => {
     if (!React.isValidElement(child)) return false;
 
     // Direct TabWidget check
     const componentType = child.type as React.ComponentType<TabWidgetProps>;
-    if (componentType?.displayName === "TabWidget") return true;
+    if (componentType?.displayName === 'TabWidget') return true;
 
     // MemoizedWidget wrapping a Tab - check the node.type prop
     const props = child.props as { node?: { type?: string } };
-    if (props.node?.type === "Ivy.Tab") return true;
+    if (props.node?.type === 'Ivy.Tab') return true;
 
     return false;
   }) as React.ReactElement<TabWidgetProps>[];
@@ -73,14 +76,14 @@ export function filterTabWidgets(
  */
 export function orderTabWidgets(
   tabOrder: string[],
-  tabWidgets: React.ReactElement<TabWidgetProps>[],
+  tabWidgets: React.ReactElement<TabWidgetProps>[]
 ): React.ReactElement<TabWidgetProps>[] {
   return tabOrder
-    .map((id) =>
-      tabWidgets.find((tab) => {
+    .map(id =>
+      tabWidgets.find(tab => {
         const props = getTabProps(tab);
         return props?.id === id;
-      }),
+      })
     )
     .filter(Boolean) as React.ReactElement<TabWidgetProps>[];
 }
@@ -90,9 +93,11 @@ export function orderTabWidgets(
  * @param tabWidgets - Array of tab widget elements
  * @returns Array of tab IDs
  */
-export function extractTabIds(tabWidgets: React.ReactElement<TabWidgetProps>[]): string[] {
+export function extractTabIds(
+  tabWidgets: React.ReactElement<TabWidgetProps>[]
+): string[] {
   return tabWidgets
-    .map((tab) => getTabProps(tab)?.id)
+    .map(tab => getTabProps(tab)?.id)
     .filter((id): id is string => id !== undefined);
 }
 
@@ -103,7 +108,11 @@ export function extractTabIds(tabWidgets: React.ReactElement<TabWidgetProps>[]):
  * @param tabId2 - Second tab ID
  * @returns New tab order with swapped tabs, or original if tabs not found
  */
-export function swapTabsInOrder(tabOrder: string[], tabId1: string, tabId2: string): string[] {
+export function swapTabsInOrder(
+  tabOrder: string[],
+  tabId1: string,
+  tabId2: string
+): string[] {
   const index1 = tabOrder.indexOf(tabId1);
   const index2 = tabOrder.indexOf(tabId2);
 
@@ -126,8 +135,11 @@ export function swapTabsInOrder(tabOrder: string[], tabId1: string, tabId2: stri
  * @param originalOrder - Original tab order
  * @returns Array of indices mapping new positions to original positions
  */
-export function createReorderMapping(newOrder: string[], originalOrder: string[]): number[] {
-  return newOrder.map((id) => originalOrder.indexOf(id));
+export function createReorderMapping(
+  newOrder: string[],
+  originalOrder: string[]
+): number[] {
+  return newOrder.map(id => originalOrder.indexOf(id));
 }
 
 // ====================
@@ -148,12 +160,12 @@ export function estimateTabWidth(
   icon: string | undefined,
   badge: string | undefined,
   hasButtons: boolean,
-  variant: "Tabs" | "Content",
+  variant: 'Tabs' | 'Content'
 ): number {
   const avgCharWidth = 7.5; // Average character width in typical fonts
   let estimatedWidth = 0;
 
-  if (variant === "Tabs") {
+  if (variant === 'Tabs') {
     // Base padding (px-3 = 12px * 2)
     estimatedWidth += 24;
 
@@ -200,8 +212,8 @@ export function estimateTabWidth(
  */
 export function calculateButtonCount(events: string[]): number {
   let count = 0;
-  if (events.includes("OnClose")) count++;
-  if (events.includes("OnRefresh")) count++;
+  if (events.includes('OnClose')) count++;
+  if (events.includes('OnRefresh')) count++;
   return count;
 }
 
@@ -214,8 +226,8 @@ export function measureTabsFromDOM(tabsList: HTMLElement): Map<string, number> {
   const measurements = new Map<string, number>();
   const allTabElements = tabsList.querySelectorAll('[role="tab"]');
 
-  allTabElements.forEach((element) => {
-    const tabId = element.getAttribute("value");
+  allTabElements.forEach(element => {
+    const tabId = element.getAttribute('value');
     if (tabId && element instanceof HTMLElement) {
       const rect = element.getBoundingClientRect();
       const styles = window.getComputedStyle(element);
@@ -243,16 +255,16 @@ export function estimateUnrenderedTabWidths(
   tabWidgets: React.ReactElement<TabWidgetProps>[],
   measurements: Map<string, number>,
   events: string[],
-  variant: "Tabs" | "Content",
+  variant: 'Tabs' | 'Content'
 ): Map<string, number> {
   const estimatedWidths = new Map<string, number>();
-  const hasButtons = events.includes("OnClose") || events.includes("OnRefresh");
+  const hasButtons = events.includes('OnClose') || events.includes('OnRefresh');
 
   for (const tabId of tabOrder) {
     // Skip if we already have a measurement
     if (measurements.has(tabId)) continue;
 
-    const tabWidget = tabWidgets.find((tab) => {
+    const tabWidget = tabWidgets.find(tab => {
       const props = getTabProps(tab);
       return props?.id === tabId;
     });
@@ -262,7 +274,13 @@ export function estimateUnrenderedTabWidths(
     if (!tabProps) continue;
 
     const { title, icon, badge } = tabProps;
-    const estimatedWidth = estimateTabWidth(title, icon, badge, hasButtons, variant);
+    const estimatedWidth = estimateTabWidth(
+      title,
+      icon,
+      badge,
+      hasButtons,
+      variant
+    );
     estimatedWidths.set(tabId, estimatedWidth);
   }
 

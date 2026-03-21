@@ -1,18 +1,18 @@
-import { useEventHandler } from "@/components/event-handler";
-import { InvalidIcon } from "@/components/InvalidIcon";
-import { inputStyles } from "@/lib/styles";
-import { Input } from "@/components/ui/input";
-import { X, Check } from "lucide-react";
-import React, { useMemo, useState } from "react";
-import { useOptimisticValue } from "./shared/useOptimisticValue";
-import { logger } from "@/lib/logger";
-import { cn } from "@/lib/utils";
+import { useEventHandler } from '@/components/event-handler';
+import { InvalidIcon } from '@/components/InvalidIcon';
+import { inputStyles } from '@/lib/styles';
+import { Input } from '@/components/ui/input';
+import { X, Check } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { useOptimisticValue } from './shared/useOptimisticValue';
+import { logger } from '@/lib/logger';
+import { cn } from '@/lib/utils';
 import {
   colorInputVariant,
   colorInputPickerVariant,
-} from "@/components/ui/input/color-input-variant";
-import { Densities } from "@/types/density";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+} from '@/components/ui/input/color-input-variant';
+import { Densities } from '@/types/density';
+import { xIconVariant } from '@/components/ui/input/text-input-variant';
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -25,7 +25,7 @@ interface ColorInputWidgetProps {
   placeholder?: string;
   nullable?: boolean;
   events?: string[];
-  variant?: "Text" | "Picker" | "TextAndPicker" | "Swatch";
+  variant?: 'Text' | 'Picker' | 'TextAndPicker' | 'Swatch';
   density?: Densities;
   foreground?: boolean;
   ghost?: boolean;
@@ -34,37 +34,37 @@ interface ColorInputWidgetProps {
 
 // Hoisted color map for backend Colors enum
 const enumColorsToCssVar: Record<string, string> = {
-  black: "var(--color-black)",
-  white: "var(--color-white)",
-  slate: "var(--color-slate)",
-  gray: "var(--color-gray)",
-  zinc: "var(--color-zinc)",
-  neutral: "var(--color-neutral)",
-  stone: "var(--color-stone)",
-  red: "var(--color-red)",
-  orange: "var(--color-orange)",
-  amber: "var(--color-amber)",
-  yellow: "var(--color-yellow)",
-  lime: "var(--color-lime)",
-  green: "var(--color-green)",
-  emerald: "var(--color-emerald)",
-  teal: "var(--color-teal)",
-  cyan: "var(--color-cyan)",
-  sky: "var(--color-sky)",
-  blue: "var(--color-blue)",
-  indigo: "var(--color-indigo)",
-  violet: "var(--color-violet)",
-  purple: "var(--color-purple)",
-  fuchsia: "var(--color-fuchsia)",
-  pink: "var(--color-pink)",
-  rose: "var(--color-rose)",
-  primary: "var(--color-primary)",
-  secondary: "var(--color-secondary)",
-  destructive: "var(--color-destructive)",
-  success: "var(--color-success)",
-  warning: "var(--color-warning)",
-  info: "var(--color-info)",
-  muted: "var(--color-muted)",
+  black: 'var(--color-black)',
+  white: 'var(--color-white)',
+  slate: 'var(--color-slate)',
+  gray: 'var(--color-gray)',
+  zinc: 'var(--color-zinc)',
+  neutral: 'var(--color-neutral)',
+  stone: 'var(--color-stone)',
+  red: 'var(--color-red)',
+  orange: 'var(--color-orange)',
+  amber: 'var(--color-amber)',
+  yellow: 'var(--color-yellow)',
+  lime: 'var(--color-lime)',
+  green: 'var(--color-green)',
+  emerald: 'var(--color-emerald)',
+  teal: 'var(--color-teal)',
+  cyan: 'var(--color-cyan)',
+  sky: 'var(--color-sky)',
+  blue: 'var(--color-blue)',
+  indigo: 'var(--color-indigo)',
+  violet: 'var(--color-violet)',
+  purple: 'var(--color-purple)',
+  fuchsia: 'var(--color-fuchsia)',
+  pink: 'var(--color-pink)',
+  rose: 'var(--color-rose)',
+  primary: 'var(--color-primary)',
+  secondary: 'var(--color-secondary)',
+  destructive: 'var(--color-destructive)',
+  success: 'var(--color-success)',
+  warning: 'var(--color-warning)',
+  info: 'var(--color-info)',
+  muted: 'var(--color-muted)',
 };
 
 interface ColorSwatchGridProps {
@@ -83,7 +83,7 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
 
   return (
     <div className="grid grid-cols-6 gap-1 p-1">
-      {colorNames.map((colorName) => {
+      {colorNames.map(colorName => {
         const isSelected = normalizedSelected === colorName;
         const cssVar = enumColorsToCssVar[colorName];
 
@@ -94,10 +94,12 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
             disabled={disabled}
             onClick={() => onColorSelect(colorName)}
             className={cn(
-              "w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center",
-              "hover:scale-110 hover:z-10",
-              isSelected ? "border-foreground ring-2 ring-foreground/30" : "border-transparent",
-              disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+              'w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center',
+              'hover:scale-110 hover:z-10',
+              isSelected
+                ? 'border-foreground ring-2 ring-foreground/30'
+                : 'border-transparent',
+              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
             )}
             style={{ backgroundColor: cssVar }}
             title={colorName}
@@ -106,10 +108,12 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
             {isSelected && (
               <Check
                 className={cn(
-                  "w-4 h-4",
-                  ["white", "yellow", "lime", "amber", "cyan"].includes(colorName)
-                    ? "text-black"
-                    : "text-white",
+                  'w-4 h-4',
+                  ['white', 'yellow', 'lime', 'amber', 'cyan'].includes(
+                    colorName
+                  )
+                    ? 'text-black'
+                    : 'text-white'
                 )}
               />
             )}
@@ -121,22 +125,23 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
 };
 
 function parseHexAlpha(hex: string): { rgb: string; alpha: number } {
-  if (!hex || !hex.startsWith("#")) return { rgb: hex || "#000000", alpha: 255 };
+  if (!hex || !hex.startsWith('#'))
+    return { rgb: hex || '#000000', alpha: 255 };
   const clean = hex.slice(1);
   if (clean.length === 8) {
     return {
-      rgb: "#" + clean.slice(0, 6),
+      rgb: '#' + clean.slice(0, 6),
       alpha: parseInt(clean.slice(6, 8), 16),
     };
   }
-  return { rgb: hex.length === 7 ? hex : "#000000", alpha: 255 };
+  return { rgb: hex.length === 7 ? hex : '#000000', alpha: 255 };
 }
 
 function combineHexAlpha(rgb: string, alpha: number): string {
-  const base = rgb.startsWith("#") ? rgb : "#" + rgb;
-  const hex6 = base.length === 7 ? base : "#000000";
+  const base = rgb.startsWith('#') ? rgb : '#' + rgb;
+  const hex6 = base.length === 7 ? base : '#000000';
   if (alpha >= 255) return hex6; // fully opaque → keep 6-char hex
-  const aa = Math.max(0, Math.min(255, alpha)).toString(16).padStart(2, "0");
+  const aa = Math.max(0, Math.min(255, alpha)).toString(16).padStart(2, '0');
   return hex6 + aa;
 }
 
@@ -160,14 +165,15 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
     setLocalAlpha(null);
   }
   const displayAlpha = localAlpha ?? alpha;
-  const height = density === Densities.Small ? 24 : density === Densities.Large ? 36 : 30;
+  const height =
+    density === Densities.Small ? 24 : density === Densities.Large ? 36 : 30;
   const percentage = Math.round((displayAlpha / 255) * 100);
 
   const gradientStyle: React.CSSProperties = useMemo(
     () => ({
       background: `linear-gradient(to right, transparent, ${color})`,
     }),
-    [color],
+    [color]
   );
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,8 +190,8 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
     <div className="flex items-center gap-1.5">
       <div
         className={cn(
-          "relative rounded-md overflow-hidden border border-input",
-          disabled && "opacity-50 cursor-not-allowed",
+          'relative rounded-md overflow-hidden border border-input',
+          disabled && 'opacity-50 cursor-not-allowed'
         )}
         style={{ width: 100, height }}
       >
@@ -193,8 +199,8 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
           className="absolute inset-0"
           style={{
             backgroundImage:
-              "repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%)",
-            backgroundSize: "12px 12px",
+              'repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%)',
+            backgroundSize: '12px 12px',
           }}
         />
         <div className="absolute inset-0" style={gradientStyle} />
@@ -243,21 +249,22 @@ const CustomColorPicker: React.FC<CustomColorPickerProps> = ({
   <div
     className={cn(
       colorInputPickerVariant({ density }),
-      "relative shrink-0 rounded-md overflow-hidden bg-transparent border",
-      disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
-      invalid ? inputStyles.invalidInput : "border-input shadow-sm",
+      'relative shrink-0 rounded-md overflow-hidden bg-transparent border',
+      disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+      invalid ? inputStyles.invalidInput : 'border-input shadow-sm'
     )}
   >
     <div
       className="absolute inset-0 pointer-events-none"
       style={{
-        backgroundImage: "repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%)",
-        backgroundSize: "12px 12px",
+        backgroundImage:
+          'repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%)',
+        backgroundSize: '12px 12px',
       }}
     />
     <div
       className="absolute inset-0 pointer-events-none"
-      style={{ backgroundColor: actualColor || "transparent" }}
+      style={{ backgroundColor: actualColor || 'transparent' }}
     />
     <input
       type="color"
@@ -278,7 +285,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   placeholder,
   nullable = false,
   events = EMPTY_ARRAY,
-  variant = "TextAndPicker",
+  variant = 'TextAndPicker',
   density = Densities.Medium,
   ghost = false,
   allowAlpha = false,
@@ -288,12 +295,14 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   const [localValue, setLocalColorValue] = useOptimisticValue(value, false);
 
   // Use derived state for display and input values
-  const displayValue = localValue ?? "";
-  const inputValue = localValue ?? "";
+  const displayValue = localValue ?? '';
+  const inputValue = localValue ?? '';
 
   const getThemeColorHex = (cssVar: string): string | undefined => {
-    if (typeof window === "undefined") return undefined;
-    const value = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+    if (typeof window === 'undefined') return undefined;
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue(cssVar)
+      .trim();
     if (/^#[0-9a-fA-F]{6}$/.test(value)) return value;
     return undefined;
   };
@@ -304,18 +313,20 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
    * Unsupported formats: oklch() - returns fallback color (#000000)
    */
   const convertToHex = (colorValue: string): string => {
-    if (!colorValue) return "";
-    if (colorValue.startsWith("#")) {
+    if (!colorValue) return '';
+    if (colorValue.startsWith('#')) {
       return colorValue;
     }
-    const rgbaMatch = colorValue.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
+    const rgbaMatch = colorValue.match(
+      /rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/
+    );
     if (rgbaMatch) {
       const r = parseInt(rgbaMatch[1]);
       const g = parseInt(rgbaMatch[2]);
       const b = parseInt(rgbaMatch[3]);
       const a = Math.round(parseFloat(rgbaMatch[4]) * 255);
-      const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-      if (a < 255) return hex + a.toString(16).padStart(2, "0");
+      const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      if (a < 255) return hex + a.toString(16).padStart(2, '0');
       return hex;
     }
     const rgbMatch = colorValue.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
@@ -323,9 +334,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
       const r = parseInt(rgbMatch[1]);
       const g = parseInt(rgbMatch[2]);
       const b = parseInt(rgbMatch[3]);
-      return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+      return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
-    const hslMatch = colorValue.match(/hsla?\((\d+),\s*(\d+)%?,\s*(\d+)%?(?:,\s*[\d.]+)?\)/);
+    const hslMatch = colorValue.match(
+      /hsla?\((\d+),\s*(\d+)%?,\s*(\d+)%?(?:,\s*[\d.]+)?\)/
+    );
     if (hslMatch) {
       const h = parseInt(hslMatch[1]) / 360;
       const s = parseInt(hslMatch[2]) / 100;
@@ -350,7 +363,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
       }
       const toHex = (x: number) => {
         const hex = Math.round(x * 255).toString(16);
-        return hex.length === 1 ? "0" + hex : hex;
+        return hex.length === 1 ? '0' + hex : hex;
       };
       return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
     }
@@ -358,12 +371,14 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     const isOklch = /^oklch\s*\(/i.test(colorValue.trim());
     if (isOklch) {
       logger.warn(`OKLCH color format not supported: ${colorValue}`);
-      return "#000000"; // Default fallback
+      return '#000000'; // Default fallback
     }
     // Use theme color if available
     const lowerValue = colorValue.toLowerCase();
     if (enumColorsToCssVar[lowerValue]) {
-      const cssVar = enumColorsToCssVar[lowerValue].replace("var(", "").replace(")", "");
+      const cssVar = enumColorsToCssVar[lowerValue]
+        .replace('var(', '')
+        .replace(')', '');
       const themeHex = getThemeColorHex(cssVar);
       if (themeHex) return themeHex;
     }
@@ -371,20 +386,22 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   };
 
   const getDisplayColor = (): string => {
-    if (!displayValue) return "#000000";
+    if (!displayValue) return '#000000';
     const hexValue = convertToHex(displayValue);
-    if (hexValue.startsWith("var(")) return "#000000";
-    if (hexValue.startsWith("#") && hexValue.length === 9) {
+    if (hexValue.startsWith('var(')) return '#000000';
+    if (hexValue.startsWith('#') && hexValue.length === 9) {
       return hexValue.slice(0, 7);
     }
-    return hexValue.startsWith("#") ? hexValue : "#000000";
+    return hexValue.startsWith('#') ? hexValue : '#000000';
   };
 
-  const currentAlpha = displayValue ? parseHexAlpha(convertToHex(displayValue)).alpha : 255;
+  const currentAlpha = displayValue
+    ? parseHexAlpha(convertToHex(displayValue)).alpha
+    : 255;
 
   const fireColorChange = (newColor: string | null) => {
     setLocalColorValue(newColor);
-    eventHandler("OnChange", id, [newColor]);
+    eventHandler('OnChange', id, [newColor]);
   };
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -409,11 +426,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   const handleInputBlur = () => {
     const convertedValue = convertToHex(inputValue);
     fireColorChange(convertedValue);
-    if (events.includes("OnBlur")) eventHandler("OnBlur", id, [convertedValue]);
+    if (events.includes('OnBlur')) eventHandler('OnBlur', id, [convertedValue]);
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       handleInputBlur();
     }
   };
@@ -423,7 +440,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   };
 
   // --- Variant rendering logic ---
-  if (variant === "Text") {
+  if (variant === 'Text') {
     return (
       <div className="flex items-center space-x-2">
         <div className="relative">
@@ -434,15 +451,17 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
             placeholder={
-              placeholder || (allowAlpha ? "Enter color (e.g. #FF0000CC)" : "Enter color")
+              placeholder ||
+              (allowAlpha ? 'Enter color (e.g. #FF0000CC)' : 'Enter color')
             }
             disabled={disabled}
             className={cn(
               colorInputVariant({ density }),
               ghost &&
-                "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+                'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
               invalid && inputStyles.invalidInput,
-              (invalid || (nullable && localValue !== null && !disabled)) && "pr-8",
+              (invalid || (nullable && localValue !== null && !disabled)) &&
+                'pr-8'
             )}
           />
           {(invalid || (nullable && localValue !== null && !disabled)) && (
@@ -482,7 +501,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     );
   }
 
-  if (variant === "Swatch") {
+  if (variant === 'Swatch') {
     const handleSwatchSelect = (colorName: string) => {
       fireColorChange(colorName);
     };
@@ -499,7 +518,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     );
   }
 
-  if (variant === "Picker") {
+  if (variant === 'Picker') {
     return (
       <div className="flex items-center space-x-2">
         <CustomColorPicker
@@ -541,14 +560,18 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onKeyDown={handleInputKeyDown}
-          placeholder={placeholder || (allowAlpha ? "Enter color (e.g. #FF0000CC)" : "Enter color")}
+          placeholder={
+            placeholder ||
+            (allowAlpha ? 'Enter color (e.g. #FF0000CC)' : 'Enter color')
+          }
           disabled={disabled}
           className={cn(
             colorInputVariant({ density }),
             ghost &&
-              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+              'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent',
             invalid && inputStyles.invalidInput,
-            (invalid || (nullable && localValue !== null && !disabled)) && "pr-8",
+            (invalid || (nullable && localValue !== null && !disabled)) &&
+              'pr-8'
           )}
         />
         {(invalid || (nullable && localValue !== null && !disabled)) && (
@@ -557,7 +580,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             style={{ zIndex: 2 }}
           >
             {/* Invalid icon - rightmost */}
-            {invalid && <InvalidIcon message={invalid} className="pointer-events-auto" />}
+            {invalid && (
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
+            )}
             {nullable && localValue !== null && !disabled && (
               <button
                 type="button"

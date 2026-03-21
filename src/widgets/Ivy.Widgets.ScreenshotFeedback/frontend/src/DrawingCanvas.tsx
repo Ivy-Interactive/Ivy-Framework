@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
-import { DrawingTool, Shape, Point } from "./types";
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { DrawingTool, Shape, Point } from './types';
 
 interface DrawingCanvasProps {
   screenshotCanvas: HTMLCanvasElement | null;
@@ -14,34 +14,18 @@ function drawArrowhead(ctx: CanvasRenderingContext2D, from: Point, to: Point, he
   const angle = Math.atan2(to.y - from.y, to.x - from.x);
   ctx.beginPath();
   ctx.moveTo(to.x, to.y);
-  ctx.lineTo(
-    to.x - headLen * Math.cos(angle - Math.PI / 6),
-    to.y - headLen * Math.sin(angle - Math.PI / 6),
-  );
+  ctx.lineTo(to.x - headLen * Math.cos(angle - Math.PI / 6), to.y - headLen * Math.sin(angle - Math.PI / 6));
   ctx.moveTo(to.x, to.y);
-  ctx.lineTo(
-    to.x - headLen * Math.cos(angle + Math.PI / 6),
-    to.y - headLen * Math.sin(angle + Math.PI / 6),
-  );
+  ctx.lineTo(to.x - headLen * Math.cos(angle + Math.PI / 6), to.y - headLen * Math.sin(angle + Math.PI / 6));
   ctx.stroke();
 }
 
-function drawCallout(
-  ctx: CanvasRenderingContext2D,
-  anchor: Point,
-  label: Point,
-  number: number,
-  text: string,
-  color: string,
-  lw: number,
-  fontSize: number = 14,
-  circleRadius: number = 14,
-) {
+function drawCallout(ctx: CanvasRenderingContext2D, anchor: Point, label: Point, number: number, text: string, color: string, lw: number, fontSize: number = 14, circleRadius: number = 14) {
   const r = circleRadius;
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
   ctx.lineWidth = lw;
-  ctx.lineCap = "round";
+  ctx.lineCap = 'round';
 
   // Line from label to anchor
   ctx.beginPath();
@@ -59,33 +43,26 @@ function drawCallout(
   ctx.fill();
 
   // Number
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = '#fff';
   ctx.font = `bold ${fontSize}px sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
   ctx.fillText(String(number), label.x, label.y);
 
   // Text
   if (text) {
     ctx.fillStyle = color;
     ctx.font = `${fontSize}px sans-serif`;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
     ctx.fillText(text, label.x + r + 6, label.y + fontSize * 0.05);
   }
 
-  ctx.textAlign = "start";
-  ctx.textBaseline = "alphabetic";
+  ctx.textAlign = 'start';
+  ctx.textBaseline = 'alphabetic';
 }
 
-function drawCensor(
-  ctx: CanvasRenderingContext2D,
-  start: Point,
-  end: Point,
-  _color: string,
-  _lw: number,
-  srcCanvas?: HTMLCanvasElement | null,
-) {
+function drawCensor(ctx: CanvasRenderingContext2D, start: Point, end: Point, _color: string, _lw: number, srcCanvas?: HTMLCanvasElement | null) {
   const x = Math.min(start.x, end.x);
   const y = Math.min(start.y, end.y);
   const w = Math.abs(end.x - start.x);
@@ -96,15 +73,15 @@ function drawCensor(
   const blurSize = 16;
 
   if (srcCanvas) {
-    const srcCtx = srcCanvas.getContext("2d");
+    const srcCtx = srcCanvas.getContext('2d');
     if (srcCtx) {
       // Create tiny canvas for heavy downscale
-      const tiny = document.createElement("canvas");
+      const tiny = document.createElement('canvas');
       const tw = Math.max(1, Math.ceil(w / blurSize));
       const th = Math.max(1, Math.ceil(h / blurSize));
       tiny.width = tw;
       tiny.height = th;
-      const tCtx = tiny.getContext("2d");
+      const tCtx = tiny.getContext('2d');
       if (tCtx) {
         // Draw region scaled down (browser averages pixels)
         tCtx.drawImage(srcCanvas, x, y, w, h, 0, 0, tw, th);
@@ -123,34 +100,20 @@ function drawCensor(
   }
 
   // Fallback: solid dark fill
-  ctx.fillStyle = "#222";
+  ctx.fillStyle = '#222';
   ctx.fillRect(x, y, w, h);
 }
 
-function drawShape(
-  ctx: CanvasRenderingContext2D,
-  shape: Shape,
-  _srcCanvas?: HTMLCanvasElement | null,
-) {
+function drawShape(ctx: CanvasRenderingContext2D, shape: Shape, _srcCanvas?: HTMLCanvasElement | null) {
   ctx.strokeStyle = shape.color;
   ctx.fillStyle = shape.color;
   ctx.lineWidth = shape.lineWidth;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
 
   switch (shape.tool) {
     case DrawingTool.Callout:
-      drawCallout(
-        ctx,
-        shape.anchor,
-        shape.label,
-        shape.number,
-        shape.text,
-        shape.color,
-        shape.lineWidth,
-        shape.fontSize,
-        Math.round(shape.fontSize * 0.9),
-      );
+      drawCallout(ctx, shape.anchor, shape.label, shape.number, shape.text, shape.color, shape.lineWidth, shape.fontSize, Math.round(shape.fontSize * 0.9));
       break;
     case DrawingTool.Freehand: {
       if (shape.points.length < 2) return;
@@ -196,7 +159,7 @@ function drawShape(
       break;
     case DrawingTool.Text: {
       ctx.font = `${shape.fontSize}px sans-serif`;
-      ctx.textBaseline = "top";
+      ctx.textBaseline = 'top';
       ctx.fillText(shape.text, shape.position.x, shape.position.y + shape.fontSize * 0.05);
       break;
     }
@@ -220,18 +183,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   const [calloutAnchor, setCalloutAnchor] = useState<Point | null>(null);
   const [calloutHover, setCalloutHover] = useState<Point | null>(null);
 
-  const [textInput, setTextInput] = useState<{
-    position: Point;
-    visible: boolean;
-    mode: "text" | "callout";
-    canvasAnchor?: Point;
-    canvasLabel?: Point;
-  }>({
+  const [textInput, setTextInput] = useState<{ position: Point; visible: boolean; mode: 'text' | 'callout'; canvasAnchor?: Point; canvasLabel?: Point }>({
     position: { x: 0, y: 0 },
     visible: false,
-    mode: "text",
+    mode: 'text',
   });
-  const [textValue, setTextValue] = useState("");
+  const [textValue, setTextValue] = useState('');
   const textInputRef = useRef<HTMLInputElement>(null);
 
   const nextCalloutNumber = shapes.filter((s) => s.tool === DrawingTool.Callout).length + 1;
@@ -244,7 +201,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
 
-      if ("touches" in e) {
+      if ('touches' in e) {
         const touch = e.touches[0] || e.changedTouches[0];
         return {
           x: (touch.clientX - rect.left) * scaleX,
@@ -256,14 +213,14 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         y: (e.clientY - rect.top) * scaleY,
       };
     },
-    [],
+    []
   );
 
   // Redraw
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     shapes.forEach((shape) => drawShape(ctx, shape, screenshotCanvas));
@@ -275,38 +232,13 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     const cRadius = Math.round(cFontSize * 0.9);
 
     // Draw pending callout while text input is visible
-    if (
-      textInput.visible &&
-      textInput.mode === "callout" &&
-      textInput.canvasAnchor &&
-      textInput.canvasLabel
-    ) {
-      drawCallout(
-        ctx,
-        textInput.canvasAnchor,
-        textInput.canvasLabel,
-        nextCalloutNumber,
-        "",
-        color,
-        lineWidth,
-        cFontSize,
-        cRadius,
-      );
+    if (textInput.visible && textInput.mode === 'callout' && textInput.canvasAnchor && textInput.canvasLabel) {
+      drawCallout(ctx, textInput.canvasAnchor, textInput.canvasLabel, nextCalloutNumber, '', color, lineWidth, cFontSize, cRadius);
     }
 
     // Draw callout preview (first click placed, hovering for second click)
     if (calloutAnchor && calloutHover && !textInput.visible) {
-      drawCallout(
-        ctx,
-        calloutAnchor,
-        calloutHover,
-        nextCalloutNumber,
-        "",
-        color,
-        lineWidth,
-        cFontSize,
-        cRadius,
-      );
+      drawCallout(ctx, calloutAnchor, calloutHover, nextCalloutNumber, '', color, lineWidth, cFontSize, cRadius);
     }
   }, [shapes, textInput, nextCalloutNumber, color, lineWidth, calloutAnchor, calloutHover]);
 
@@ -315,7 +247,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     (currentPoint: Point) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -324,8 +256,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
       ctx.lineWidth = lineWidth;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
       if (activeTool === DrawingTool.Freehand && currentPoints.length > 1) {
         ctx.beginPath();
@@ -373,7 +305,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         }
       }
     },
-    [shapes, color, lineWidth, activeTool, currentPoints, startPoint, screenshotCanvas],
+    [shapes, color, lineWidth, activeTool, currentPoints, startPoint, screenshotCanvas]
   );
 
   const handlePointerDown = useCallback(
@@ -396,11 +328,11 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           setTextInput({
             position: { x: point.x / scaleX + 22, y: point.y / scaleY - 8 },
             visible: true,
-            mode: "callout",
+            mode: 'callout',
             canvasAnchor: calloutAnchor,
             canvasLabel: point,
           });
-          setTextValue("");
+          setTextValue('');
           setCalloutHover(null);
           setTimeout(() => textInputRef.current?.focus(), 0);
         }
@@ -414,9 +346,9 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         setTextInput({
           position: { x: e.clientX - rect.left, y: e.clientY - rect.top },
           visible: true,
-          mode: "text",
+          mode: 'text',
         });
-        setTextValue("");
+        setTextValue('');
         setTimeout(() => textInputRef.current?.focus(), 0);
         return;
       }
@@ -427,7 +359,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         setCurrentPoints([point]);
       }
     },
-    [activeTool, getCanvasPoint, calloutAnchor, textInput.visible],
+    [activeTool, getCanvasPoint, calloutAnchor, textInput.visible]
   );
 
   const handlePointerMove = useCallback(
@@ -446,7 +378,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       }
       drawPreview(point);
     },
-    [isDrawing, activeTool, getCanvasPoint, drawPreview, calloutAnchor, textInput.visible],
+    [isDrawing, activeTool, getCanvasPoint, drawPreview, calloutAnchor, textInput.visible]
   );
 
   const finalizeShape = useCallback(
@@ -455,64 +387,29 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
       switch (activeTool) {
         case DrawingTool.Freehand:
-          onShapeAdd({
-            tool: DrawingTool.Freehand,
-            color,
-            lineWidth,
-            points: [...currentPoints, endPoint],
-          });
+          onShapeAdd({ tool: DrawingTool.Freehand, color, lineWidth, points: [...currentPoints, endPoint] });
           break;
         case DrawingTool.Arrow:
-          onShapeAdd({
-            tool: DrawingTool.Arrow,
-            color,
-            lineWidth,
-            start: startPoint,
-            end: endPoint,
-          });
+          onShapeAdd({ tool: DrawingTool.Arrow, color, lineWidth, start: startPoint, end: endPoint });
           break;
         case DrawingTool.Line:
-          onShapeAdd({
-            tool: DrawingTool.Line,
-            color,
-            lineWidth,
-            start: startPoint,
-            end: endPoint,
-          });
+          onShapeAdd({ tool: DrawingTool.Line, color, lineWidth, start: startPoint, end: endPoint });
           break;
         case DrawingTool.Rectangle:
-          onShapeAdd({
-            tool: DrawingTool.Rectangle,
-            color,
-            lineWidth,
-            start: startPoint,
-            end: endPoint,
-          });
+          onShapeAdd({ tool: DrawingTool.Rectangle, color, lineWidth, start: startPoint, end: endPoint });
           break;
         case DrawingTool.Circle: {
           const dx = endPoint.x - startPoint.x;
           const dy = endPoint.y - startPoint.y;
-          onShapeAdd({
-            tool: DrawingTool.Circle,
-            color,
-            lineWidth,
-            center: startPoint,
-            radius: Math.sqrt(dx * dx + dy * dy),
-          });
+          onShapeAdd({ tool: DrawingTool.Circle, color, lineWidth, center: startPoint, radius: Math.sqrt(dx * dx + dy * dy) });
           break;
         }
         case DrawingTool.Censor:
-          onShapeAdd({
-            tool: DrawingTool.Censor,
-            color,
-            lineWidth,
-            start: startPoint,
-            end: endPoint,
-          });
+          onShapeAdd({ tool: DrawingTool.Censor, color, lineWidth, start: startPoint, end: endPoint });
           break;
       }
     },
-    [startPoint, activeTool, color, lineWidth, currentPoints, onShapeAdd],
+    [startPoint, activeTool, color, lineWidth, currentPoints, onShapeAdd]
   );
 
   const handlePointerUp = useCallback(
@@ -527,7 +424,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       setStartPoint(null);
       setCurrentPoints([]);
     },
-    [isDrawing, startPoint, getCanvasPoint, finalizeShape, activeTool],
+    [isDrawing, startPoint, getCanvasPoint, finalizeShape, activeTool]
   );
 
   const handleTouchStart = useCallback(
@@ -541,7 +438,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         setCurrentPoints([point]);
       }
     },
-    [activeTool, getCanvasPoint],
+    [activeTool, getCanvasPoint]
   );
 
   const handleTouchMove = useCallback(
@@ -554,7 +451,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       }
       drawPreview(point);
     },
-    [isDrawing, activeTool, getCanvasPoint, drawPreview],
+    [isDrawing, activeTool, getCanvasPoint, drawPreview]
   );
 
   const handleTouchEnd = useCallback(
@@ -569,7 +466,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       setStartPoint(null);
       setCurrentPoints([]);
     },
-    [isDrawing, startPoint, getCanvasPoint, finalizeShape],
+    [isDrawing, startPoint, getCanvasPoint, finalizeShape]
   );
 
   const handleTextSubmit = useCallback(() => {
@@ -582,7 +479,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
-    if (textInput.mode === "callout") {
+    if (textInput.mode === 'callout') {
       if (textInput.canvasAnchor && textInput.canvasLabel) {
         const rect = canvas.getBoundingClientRect();
         const cScale = canvas.width / (rect.width || 1);
@@ -599,7 +496,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         });
       }
       setTextInput((prev) => ({ ...prev, visible: false }));
-      setTextValue("");
+      setTextValue('');
       setCalloutAnchor(null);
       setCalloutHover(null);
       return;
@@ -620,7 +517,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       fontSize,
     });
     setTextInput((prev) => ({ ...prev, visible: false }));
-    setTextValue("");
+    setTextValue('');
   }, [textValue, textInput, color, lineWidth, onShapeAdd, nextCalloutNumber]);
 
   const width = screenshotCanvas?.width ?? 0;
@@ -638,7 +535,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         <canvas
           ref={(el) => {
             if (el && screenshotCanvas) {
-              const ctx = el.getContext("2d");
+              const ctx = el.getContext('2d');
               if (ctx) {
                 el.width = screenshotCanvas.width;
                 el.height = screenshotCanvas.height;
@@ -646,7 +543,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
               }
             }
           }}
-          style={{ width: displayWidth, height: displayHeight, display: "block" }}
+          style={{ width: displayWidth, height: displayHeight, display: 'block' }}
         />
       )}
       <canvas
@@ -654,12 +551,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         width={width}
         height={height}
         style={{
-          position: "absolute",
+          position: 'absolute',
           top: 0,
           left: 0,
           width: displayWidth,
           height: displayHeight,
-          cursor: activeTool === DrawingTool.Text ? "text" : "crosshair",
+          cursor: activeTool === DrawingTool.Text ? 'text' : 'crosshair',
         }}
         onMouseDown={handlePointerDown}
         onMouseMove={handlePointerMove}
@@ -683,21 +580,21 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             left: textInput.position.x,
             top: textInput.position.y,
             color: color,
-            fontSize: "16px",
-            fontFamily: "sans-serif",
+            fontSize: '16px',
+            fontFamily: 'sans-serif',
           }}
-          placeholder={textInput.mode === "callout" ? "Add note..." : ""}
+          placeholder={textInput.mode === 'callout' ? 'Add note...' : ''}
           value={textValue}
           onChange={(e) => setTextValue(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === 'Enter') {
               e.preventDefault();
               handleTextSubmit();
             }
-            if (e.key === "Escape") {
+            if (e.key === 'Escape') {
               e.stopPropagation();
               setTextInput((prev) => ({ ...prev, visible: false }));
-              setTextValue("");
+              setTextValue('');
               setCalloutAnchor(null);
               setCalloutHover(null);
             }

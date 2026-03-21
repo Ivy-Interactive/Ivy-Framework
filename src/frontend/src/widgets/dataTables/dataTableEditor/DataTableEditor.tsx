@@ -1,9 +1,9 @@
-import React, { useMemo, useRef } from "react";
-import { CustomRenderer, DataEditorRef } from "@glideapps/glide-data-grid";
-import { useTable } from "../dataTableContext";
-import { getSelectionProps } from "../utils/selectionModes";
-import { iconCellRenderer, linkCellRenderer } from "../utils/customRenderers";
-import { generateHeaderIcons, addStandardIcons } from "../utils/headerIcons";
+import React, { useMemo, useRef } from 'react';
+import { CustomRenderer, DataEditorRef } from '@glideapps/glide-data-grid';
+import { useTable } from '../dataTableContext';
+import { getSelectionProps } from '../utils/selectionModes';
+import { iconCellRenderer, linkCellRenderer } from '../utils/customRenderers';
+import { generateHeaderIcons, addStandardIcons } from '../utils/headerIcons';
 import {
   useContainerSize,
   useSearch,
@@ -13,11 +13,11 @@ import {
   useRowHover,
   useEmptyRows,
   useDataLoading,
-} from "../hooks";
-import { GridContainer } from "../components/GridContainer";
-import { MenuItem } from "@/types/widgets";
-import { ROW_HEIGHT, GROUP_HEADER_HEIGHT } from "./constants";
-import { useCellContent, useGridColumns, useHeaderMenu } from "./hooks";
+} from '../hooks';
+import { GridContainer } from '../components/GridContainer';
+import { MenuItem } from '@/types/widgets';
+import { ROW_HEIGHT, GROUP_HEADER_HEIGHT } from './constants';
+import { useCellContent, useGridColumns, useHeaderMenu } from './hooks';
 
 interface TableEditorProps {
   widgetId: string;
@@ -67,8 +67,12 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
   const selectionProps = getSelectionProps(selectionMode);
 
-  const { containerRef, containerWidth, containerHeight, scrollContainerHeight } =
-    useContainerSize();
+  const {
+    containerRef,
+    containerWidth,
+    containerHeight,
+    scrollContainerHeight,
+  } = useContainerSize();
 
   // Search functionality
   const { showSearch, setShowSearch } = useSearch(showSearchConfig ?? false);
@@ -101,15 +105,16 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   });
 
   // Row hover and actions
-  const { hoverRow, actionButtonsTop, onItemHovered, handleRowActionClick } = useRowHover({
-    widgetId,
-    visibleRows,
-    enableRowHover: enableRowHover ?? false,
-    rowActions,
-    gridRef,
-    containerRef,
-    arrowTableRef,
-  });
+  const { hoverRow, actionButtonsTop, onItemHovered, handleRowActionClick } =
+    useRowHover({
+      widgetId,
+      visibleRows,
+      enableRowHover: enableRowHover ?? false,
+      rowActions,
+      gridRef,
+      containerRef,
+      arrowTableRef,
+    });
 
   // Table theme
   const { tableTheme, getRowThemeOverride } = useTableTheme({
@@ -177,7 +182,12 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       columns={finalColumns}
       rows={totalRows}
       getCellContent={getCellContent}
-      customRenderers={[iconCellRenderer, linkCellRenderer] as unknown as readonly CustomRenderer[]}
+      customRenderers={
+        [
+          iconCellRenderer,
+          linkCellRenderer,
+        ] as unknown as readonly CustomRenderer[]
+      }
       headerIcons={headerIcons}
       onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
       onVisibleRegionChanged={handleVisibleRegionChanged}
@@ -194,16 +204,20 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       onGridSelectionChange={handleGridSelectionChange}
       width={containerWidth}
       height={containerHeight > 0 ? containerHeight : undefined}
-      rowMarkers={showIndexColumn ? "number" : "none"}
+      rowMarkers={showIndexColumn ? 'number' : 'none'}
       onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
       groupHeaderHeight={showGroups ? GROUP_HEADER_HEIGHT : undefined}
       onCellClicked={handleCellClicked}
       onCellActivated={handleCellActivated}
-      onGroupHeaderClicked={shouldUseColumnGroups ? onGroupHeaderClicked : undefined}
+      onGroupHeaderClicked={
+        shouldUseColumnGroups ? onGroupHeaderClicked : undefined
+      }
       showSearch={showSearchConfig ? showSearch : false}
       onSearchClose={() => setShowSearch(false)}
       onItemHovered={enableRowHover ? onItemHovered : undefined}
-      getRowThemeOverride={enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined}
+      getRowThemeOverride={
+        enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined
+      }
       rowActions={rowActions}
       actionButtonsTop={actionButtonsTop}
       hoverRow={hoverRow}

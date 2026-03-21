@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect } from 'react';
 
 interface UseDataLoadingProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -49,7 +49,7 @@ export const useDataLoading = ({
         loadMoreData();
       }
     },
-    [visibleRows, hasMore, loadMoreData, isLoading],
+    [visibleRows, hasMore, loadMoreData, isLoading]
   );
 
   return {

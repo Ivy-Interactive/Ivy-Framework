@@ -1,12 +1,13 @@
-import { useContext, useEffect, useState, useCallback, useMemo } from "react";
-import { ThemeProviderContext } from "./context";
-import { getThemeColors, isDarkMode, ThemeColors } from "@/lib/theme";
-import type { Theme } from "@glideapps/glide-data-grid";
+import { useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import { ThemeProviderContext } from './context';
+import { getThemeColors, isDarkMode, ThemeColors } from '@/lib/theme';
+import type { Theme } from '@glideapps/glide-data-grid';
 
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
 
-  if (context === undefined) throw new Error("useTheme must be used within a ThemeProvider");
+  if (context === undefined)
+    throw new Error('useTheme must be used within a ThemeProvider');
 
   return context;
 };
@@ -33,19 +34,22 @@ export interface ThemeMonitorOptions {
   /**
    * Custom theme generator function
    */
-  customThemeGenerator?: (colors: ThemeColors, isDark: boolean) => Partial<Theme>;
+  customThemeGenerator?: (
+    colors: ThemeColors,
+    isDark: boolean
+  ) => Partial<Theme>;
 }
 
 export interface ThemeMonitorResult<T = ThemeColors> {
   /**
    * Current theme mode from context
    */
-  theme: "light" | "dark" | "system";
+  theme: 'light' | 'dark' | 'system';
 
   /**
    * Function to set theme mode
    */
-  setTheme: (theme: "light" | "dark" | "system") => void;
+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
 
   /**
    * Whether dark mode is currently active
@@ -72,7 +76,7 @@ export interface ThemeMonitorResult<T = ThemeColors> {
  * Enhanced theme hook with DOM monitoring and custom theme support
  */
 export function useThemeWithMonitoring<T = Partial<Theme>>(
-  options: ThemeMonitorOptions = {},
+  options: ThemeMonitorOptions = {}
 ): ThemeMonitorResult<T> {
   const {
     monitorDOM = true,
@@ -117,10 +121,13 @@ export function useThemeWithMonitoring<T = Partial<Theme>>(
     const cleanupFunctions: (() => void)[] = [];
 
     // Monitor DOM changes
-    if (monitorDOM && typeof document !== "undefined") {
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === "attributes" && mutation.attributeName === "class") {
+    if (monitorDOM && typeof document !== 'undefined') {
+      const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          if (
+            mutation.type === 'attributes' &&
+            mutation.attributeName === 'class'
+          ) {
             updateThemeState();
           }
         });
@@ -128,35 +135,39 @@ export function useThemeWithMonitoring<T = Partial<Theme>>(
 
       observer.observe(document.documentElement, {
         attributes: true,
-        attributeFilter: ["class"],
+        attributeFilter: ['class'],
       });
 
       cleanupFunctions.push(() => observer.disconnect());
     }
 
     // Monitor system theme preference
-    if (monitorSystem && typeof window !== "undefined") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    if (monitorSystem && typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
       const handleMediaChange = () => {
-        if (theme === "system") {
+        if (theme === 'system') {
           updateThemeState();
         }
       };
 
       if (mediaQuery.addEventListener) {
-        mediaQuery.addEventListener("change", handleMediaChange);
-        cleanupFunctions.push(() => mediaQuery.removeEventListener("change", handleMediaChange));
+        mediaQuery.addEventListener('change', handleMediaChange);
+        cleanupFunctions.push(() =>
+          mediaQuery.removeEventListener('change', handleMediaChange)
+        );
       } else {
         // Fallback for older browsers
         mediaQuery.addListener(handleMediaChange);
-        cleanupFunctions.push(() => mediaQuery.removeListener(handleMediaChange));
+        cleanupFunctions.push(() =>
+          mediaQuery.removeListener(handleMediaChange)
+        );
       }
     }
 
     // Cleanup
     return () => {
-      cleanupFunctions.forEach((cleanup) => cleanup());
+      cleanupFunctions.forEach(cleanup => cleanup());
     };
   }, [theme, monitorDOM, monitorSystem, updateThemeState]);
 

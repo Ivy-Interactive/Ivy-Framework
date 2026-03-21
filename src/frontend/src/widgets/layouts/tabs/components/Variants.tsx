@@ -1,11 +1,11 @@
-import React from "react";
-import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
-import { getPadding, getWidth } from "@/lib/styles";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import { SortableContext } from "@dnd-kit/sortable";
-import { SortableTabTrigger } from "./Sortable";
-import { getTabProps } from "../utils/tabUtils";
+import React from 'react';
+import { Tabs, TabsList, TabsContent } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
+import { getPadding, getWidth } from '@/lib/styles';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext } from '@dnd-kit/sortable';
+import { SortableTabTrigger } from './Sortable';
+import { getTabProps } from '../utils/tabUtils';
 
 interface ContentVariantProps {
   removeParentPadding?: boolean;
@@ -28,8 +28,13 @@ interface ContentVariantProps {
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   setActiveTabId: React.Dispatch<React.SetStateAction<string | null>>;
   safeEvent: (
-    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
-    args: unknown[],
+    name:
+      | 'OnSelect'
+      | 'OnClose'
+      | 'OnRefresh'
+      | 'OnReorder'
+      | 'OnAddButtonClick',
+    args: unknown[]
   ) => void;
   dropdownMenu: React.ReactNode;
 }
@@ -38,7 +43,7 @@ interface TabsVariantProps {
   removeParentPadding?: boolean;
   width?: string;
   padding?: string;
-  variant: "Tabs" | "Content";
+  variant: 'Tabs' | 'Content';
   activeTabId: string | null;
   tabOrder: string[];
   events: string[];
@@ -49,7 +54,7 @@ interface TabsVariantProps {
   orderedTabWidgets: React.ReactElement[];
   tabWidgets: React.ReactElement[];
   loadedTabs: Set<string>;
-  sensors: ReturnType<typeof import("@dnd-kit/core").useSensors>;
+  sensors: ReturnType<typeof import('@dnd-kit/core').useSensors>;
   handleDragStart: () => void;
   handleDragEnd: (event: {
     active: { id: string | number };
@@ -60,8 +65,13 @@ interface TabsVariantProps {
   isUserInitiatedChangeRef: React.MutableRefObject<boolean>;
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   safeEvent: (
-    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
-    args: unknown[],
+    name:
+      | 'OnSelect'
+      | 'OnClose'
+      | 'OnRefresh'
+      | 'OnReorder'
+      | 'OnAddButtonClick',
+    args: unknown[]
   ) => void;
   renderTabContent: (tabWidget: React.ReactElement) => React.ReactNode;
   dropdownMenu: React.ReactNode;
@@ -96,30 +106,37 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
 }) => {
   return (
     <div
-      className={cn("flex flex-col h-full w-full", removeParentPadding && "remove-parent-padding")}
+      className={cn(
+        'flex flex-col h-full w-full',
+        removeParentPadding && 'remove-parent-padding'
+      )}
     >
-      <div ref={containerRef} className="relative pb-[6px] w-full" style={getWidth(width)}>
+      <div
+        ref={containerRef}
+        className="relative pb-[6px] w-full"
+        style={getWidth(width)}
+      >
         {/* Hover Highlight */}
         <div
           className="absolute h-[26px] transition-all duration-300 ease-out bg-accent/20 rounded-[6px] flex items-center"
           style={{
             opacity: activeIndex !== null ? 1 : 0,
-            pointerEvents: "none",
+            pointerEvents: 'none',
           }}
         />
         {/* Active Indicator */}
         <div
           className={cn(
-            "absolute bottom-0 h-[2px] bg-foreground",
-            !isInitialRender && "transition-all duration-300 ease-out",
-            activeTabId && !visibleTabs.includes(activeTabId) && "opacity-0",
+            'absolute bottom-0 h-[2px] bg-foreground',
+            !isInitialRender && 'transition-all duration-300 ease-out',
+            activeTabId && !visibleTabs.includes(activeTabId) && 'opacity-0'
           )}
           style={activeStyle}
         />
         {/* Tabs */}
         <div
           ref={tabsListRef}
-          className={"relative flex space-x-[6px] gap-y-[20px] items-center"}
+          className={'relative flex space-x-[6px] gap-y-[20px] items-center'}
           role="tablist"
         >
           {orderedTabWidgets.map((tabWidget, index) => {
@@ -134,7 +151,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
             return (
               <button
                 key={id}
-                ref={(el) => {
+                ref={el => {
                   tabRefs.current[index] = el;
                 }}
                 role="tab"
@@ -142,8 +159,10 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
                 aria-selected={index === activeIndex}
                 tabIndex={0}
                 className={cn(
-                  "px-3 py-1.5 cursor-pointer transition-colors duration-300 h-[26px]",
-                  index === activeIndex ? "text-foreground" : "text-muted-foreground",
+                  'px-3 py-1.5 cursor-pointer transition-colors duration-300 h-[26px]',
+                  index === activeIndex
+                    ? 'text-foreground'
+                    : 'text-muted-foreground'
                 )}
                 onClick={() => {
                   // Mark as user-initiated for Content variant
@@ -152,7 +171,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
                   addToLoadedTabs(tabId);
                   setActiveIndex(index);
                   setActiveTabId(tabId);
-                  safeEvent("OnSelect", [index]);
+                  safeEvent('OnSelect', [index]);
                 }}
               >
                 <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center h-full">
@@ -163,7 +182,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
           })}
           {addButtonText && (
             <button
-              onClick={() => safeEvent("OnAddButtonClick", [0])}
+              onClick={() => safeEvent('OnAddButtonClick', [0])}
               className="px-3 py-1.5 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:muted-foreground rounded-[6px] flex items-center justify-center aspect-square border-none ml-2"
             >
               <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
@@ -175,7 +194,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
         </div>
       </div>
       <div className="flex-1 overflow-hidden relative">
-        {orderedTabWidgets.map((tabWidget) => {
+        {orderedTabWidgets.map(tabWidget => {
           if (!React.isValidElement(tabWidget)) return null;
           const props = getTabProps(tabWidget);
           if (!props?.id) return null;
@@ -189,10 +208,10 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
               role="tabpanel"
               aria-hidden={!isActive}
               className={cn(
-                "overflow-auto border-none",
+                'overflow-auto border-none',
                 isActive
-                  ? "relative h-full visible z-[1]"
-                  : "absolute inset-0 invisible opacity-0 z-0",
+                  ? 'relative h-full visible z-[1]'
+                  : 'absolute inset-0 invisible opacity-0 z-0'
               )}
               style={paddingStyle}
             >
@@ -235,12 +254,12 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
   renderTabContent,
   dropdownMenu,
 }) => {
-  const useRadix = (variant as string) === "Content";
+  const useRadix = (variant as string) === 'Content';
 
   return (
     <Tabs
       value={activeTabId ?? undefined}
-      onValueChange={(value) => {
+      onValueChange={value => {
         if (!useRadix) {
           handleTabSelect(value);
         } else {
@@ -248,11 +267,14 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
           isUserInitiatedChangeRef.current = true;
           const newIndex = tabOrder.indexOf(value);
           setActiveIndex(newIndex);
-          if (events?.includes("OnSelect")) safeEvent("OnSelect", [newIndex]);
+          if (events?.includes('OnSelect')) safeEvent('OnSelect', [newIndex]);
         }
       }}
       useRadix={useRadix}
-      className={cn(removeParentPadding && "remove-parent-padding", "flex flex-col h-full")}
+      className={cn(
+        removeParentPadding && 'remove-parent-padding',
+        'flex flex-col h-full'
+      )}
     >
       <div className="flex-shrink-0" style={getWidth(width)}>
         <div
@@ -271,7 +293,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                 useRadix={useRadix}
                 className="relative h-auto w-full bg-transparent p-0 flex justify-start flex-nowrap"
               >
-                {orderedTabWidgets.map((tabWidget) => {
+                {orderedTabWidgets.map(tabWidget => {
                   if (!React.isValidElement(tabWidget)) return null;
                   const props = getTabProps(tabWidget);
                   if (!props?.id) return null;
@@ -295,13 +317,13 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                         handleMouseDown(e, tabOrder.indexOf(id))
                       }
                       className={cn(
-                        "group overflow-hidden h-full data-[state=active]:z-10 data-[state=active]:shadow-none border-x border-t border-b border-border flex-shrink-0",
+                        'group overflow-hidden h-full data-[state=active]:z-10 data-[state=active]:shadow-none border-x border-t border-b border-border flex-shrink-0',
                         // Inactive tab styling - pure black in dark mode
-                        "bg-background hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/20",
+                        'bg-background hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/20',
                         // Active tab styling (overrides inactive)
-                        "data-[state=active]:bg-background data-[state=active]:hover:bg-card",
-                        (variant as string) === "Content" &&
-                          "border-b-2 border-b-transparent data-[state=active]:border-b-primary",
+                        'data-[state=active]:bg-background data-[state=active]:hover:bg-card',
+                        (variant as string) === 'Content' &&
+                          'border-b-2 border-b-transparent data-[state=active]:border-b-primary'
                       )}
                     >
                       {renderTabContent(tabWidget)}
@@ -310,7 +332,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                 })}
                 {addButtonText && (
                   <button
-                    onClick={() => safeEvent("OnAddButtonClick", [0])}
+                    onClick={() => safeEvent('OnAddButtonClick', [0])}
                     className="py-2 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:bg-gray-200/20 rounded-[6px] flex-shrink-0 flex items-center justify-center aspect-square px-3 border-none ml-2"
                   >
                     <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
@@ -327,7 +349,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
 
       <div className="flex-1 overflow-hidden relative">
         {React.useMemo(() => {
-          return tabWidgets.map((tabWidget) => {
+          return tabWidgets.map(tabWidget => {
             if (!React.isValidElement(tabWidget)) return null;
             const props = getTabProps(tabWidget);
             if (!props?.id) return null;
@@ -344,7 +366,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                   key={id}
                   value={id}
                   useRadix={useRadix}
-                  className={cn("h-full overflow-auto border-none mt-0")}
+                  className={cn('h-full overflow-auto border-none mt-0')}
                   style={paddingStyle}
                 >
                   {tabWidget}
@@ -357,10 +379,10 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
               <div
                 key={id}
                 className={cn(
-                  "overflow-auto",
+                  'overflow-auto',
                   activeTabId === id
-                    ? "relative h-full visible z-[1]"
-                    : "absolute inset-0 invisible opacity-0 z-0",
+                    ? 'relative h-full visible z-[1]'
+                    : 'absolute inset-0 invisible opacity-0 z-0'
                 )}
                 style={paddingStyle}
               >

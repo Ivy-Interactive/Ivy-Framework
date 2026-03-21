@@ -1,13 +1,13 @@
-import React, { memo, useMemo, useCallback } from "react";
-import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
-import remarkGfm from "remark-gfm";
-import remarkGemoji from "remark-gemoji";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import rehypeRaw from "rehype-raw";
-import rehypeSlug from "rehype-slug";
-import "katex/dist/katex.min.css";
-import { cn, getIvyHost, convertAppUrlToPath } from "@/lib/utils";
+import React, { memo, useMemo, useCallback } from 'react';
+import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkGemoji from 'remark-gemoji';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import rehypeRaw from 'rehype-raw';
+import rehypeSlug from 'rehype-slug';
+import 'katex/dist/katex.min.css';
+import { cn, getIvyHost, convertAppUrlToPath } from '@/lib/utils';
 import {
   validateLinkUrl,
   validateImageUrl,
@@ -17,14 +17,14 @@ import {
   isRelativePath,
   isStandardUrl,
   extractAnchorId,
-} from "@/lib/url";
-import { useTypography } from "@/contexts/TypographyContext";
-import { CustomEmoji } from "./custom-emojis/CustomEmoji";
-import { remarkCustomEmojiPlugin } from "./custom-emojis/remarkCustomEmojiPlugin";
+} from '@/lib/url';
+import { useTypography } from '@/contexts/TypographyContext';
+import { CustomEmoji } from './custom-emojis/CustomEmoji';
+import { remarkCustomEmojiPlugin } from './custom-emojis/remarkCustomEmojiPlugin';
 
-import { ImageOverlay } from "./markdown/ImageOverlay";
-import { CodeBlock } from "./markdown/CodeBlock";
-import { Components } from "react-markdown";
+import { ImageOverlay } from './markdown/ImageOverlay';
+import { CodeBlock } from './markdown/CodeBlock';
+import { Components } from 'react-markdown';
 
 interface MarkdownRendererProps {
   content: string;
@@ -35,7 +35,10 @@ const hasContentFeature = (content: string, feature: RegExp): boolean => {
   return feature.test(content);
 };
 
-const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClick }) => {
+const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
+  content,
+  onLinkClick,
+}) => {
   const typography = useTypography();
   const contentFeatures = useMemo(
     () => ({
@@ -43,15 +46,17 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
       hasCodeBlocks: hasContentFeature(content, /```/),
       hasMermaid: hasContentFeature(content, /```mermaid/),
     }),
-    [content],
+    [content]
   );
 
   const plugins = useMemo(() => {
     const remarkPlugins = [remarkGfm, remarkGemoji, remarkCustomEmojiPlugin];
-    if (contentFeatures.hasMath) remarkPlugins.push(remarkMath as typeof remarkGfm);
+    if (contentFeatures.hasMath)
+      remarkPlugins.push(remarkMath as typeof remarkGfm);
 
     const rehypePlugins = [rehypeRaw, rehypeSlug];
-    if (contentFeatures.hasMath) rehypePlugins.push(rehypeKatex as unknown as typeof rehypeRaw);
+    if (contentFeatures.hasMath)
+      rehypePlugins.push(rehypeKatex as unknown as typeof rehypeRaw);
 
     return { remarkPlugins, rehypePlugins };
   }, [contentFeatures.hasMath]);
@@ -61,7 +66,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
       // Validate URL to prevent open redirect vulnerabilities
       // validateLinkUrl always returns a string ('#' for invalid URLs)
       const validatedHref = validateLinkUrl(href);
-      if (validatedHref === "#") {
+      if (validatedHref === '#') {
         event.preventDefault();
         return;
       }
@@ -75,42 +80,54 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
         onLinkClick(validatedHref);
       }
     },
-    [onLinkClick],
+    [onLinkClick]
   );
 
   // Memoize static components separately (they don't need handleLinkClick)
   const staticComponents = useMemo(
     () => ({
-      h1: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h1 className={typography.h1} {...props}>
-          {children}
-        </h1>
-      )),
-      h2: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h2 className={typography.h2} {...props}>
-          {children}
-        </h2>
-      )),
-      h3: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h3 className={typography.h3} {...props}>
-          {children}
-        </h3>
-      )),
-      h4: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h4 className={typography.h4} {...props}>
-          {children}
-        </h4>
-      )),
-      h5: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h5 className={typography.h5} {...props}>
-          {children}
-        </h5>
-      )),
-      h6: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h6 className={typography.h6} {...props}>
-          {children}
-        </h6>
-      )),
+      h1: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h1 className={typography.h1} {...props}>
+            {children}
+          </h1>
+        )
+      ),
+      h2: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h2 className={typography.h2} {...props}>
+            {children}
+          </h2>
+        )
+      ),
+      h3: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h3 className={typography.h3} {...props}>
+            {children}
+          </h3>
+        )
+      ),
+      h4: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h4 className={typography.h4} {...props}>
+            {children}
+          </h4>
+        )
+      ),
+      h5: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h5 className={typography.h5} {...props}>
+            {children}
+          </h5>
+        )
+      ),
+      h6: memo(
+        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+          <h6 className={typography.h6} {...props}>
+            {children}
+          </h6>
+        )
+      ),
       p: memo(({ children }: { children: React.ReactNode }) => (
         <p className={typography.p}>{children}</p>
       )),
@@ -129,10 +146,14 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
       em: memo(({ children }: { children: React.ReactNode }) => (
         <em className={typography.em}>{children}</em>
       )),
-      pre: memo(({ children }: { children: React.ReactNode }) => <>{children}</>),
-      blockquote: memo(({ children }: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
-        <blockquote className={typography.blockquote}>{children}</blockquote>
+      pre: memo(({ children }: { children: React.ReactNode }) => (
+        <>{children}</>
       )),
+      blockquote: memo(
+        ({ children }: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
+          <blockquote className={typography.blockquote}>{children}</blockquote>
+        )
+      ),
       table: memo(({ children }: { children: React.ReactNode }) => (
         <table className={typography.table}>{children}</table>
       )),
@@ -154,7 +175,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
           const src = props.src;
 
           // Early validation: if src is missing or invalid, don't render anything
-          if (!src || typeof src !== "string") {
+          if (!src || typeof src !== 'string') {
             return null;
           }
 
@@ -166,13 +187,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
           }
 
           // Construct the final image source URL
-          const imageSrc = validatedSrc.match(/^(https?:\/\/|data:|blob:|app:)/i)
+          const imageSrc = validatedSrc.match(
+            /^(https?:\/\/|data:|blob:|app:)/i
+          )
             ? validatedSrc
             : (() => {
-                const normalizedSrc = validatedSrc.startsWith("/")
+                const normalizedSrc = validatedSrc.startsWith('/')
                   ? validatedSrc
                   : `/${validatedSrc}`;
-                const prefixedSrc = normalizedSrc.startsWith("/ivy/")
+                const prefixedSrc = normalizedSrc.startsWith('/ivy/')
                   ? normalizedSrc
                   : `/ivy${normalizedSrc}`;
                 return `${getIvyHost()}${prefixedSrc}`;
@@ -183,11 +206,11 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
               <img
                 {...props}
                 src={imageSrc}
-                alt={props.alt || ""}
-                className={cn(typography.img, "cursor-zoom-in")}
+                alt={props.alt || ''}
+                className={cn(typography.img, 'cursor-zoom-in')}
                 loading="lazy"
                 onClick={() => setShowOverlay(true)}
-                onKeyDown={(e) => e.key === "Enter" && setShowOverlay(true)}
+                onKeyDown={e => e.key === 'Enter' && setShowOverlay(true)}
                 role="button"
                 tabIndex={0}
               />
@@ -202,7 +225,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
           );
         },
         (prevProps, nextProps) =>
-          prevProps.src === nextProps.src && prevProps.alt === nextProps.alt,
+          prevProps.src === nextProps.src && prevProps.alt === nextProps.alt
       ),
       hr: memo((props: React.HTMLAttributes<HTMLHRElement>) => (
         <hr className={typography.hr} {...props} />
@@ -227,92 +250,105 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
       typography.th,
       typography.img,
       typography.hr,
-    ],
+    ]
   );
 
   // Memoize code component separately (depends on contentFeatures.hasCodeBlocks and hasMermaid)
   const codeComponent = useMemo(
     () => ({
-      code: memo((props: React.ComponentProps<"code"> & { inline?: boolean }) => {
-        const { children, className, inline } = props;
-        return (
-          <CodeBlock
-            className={className}
-            inline={inline}
-            hasCodeBlocks={contentFeatures.hasCodeBlocks}
-            hasMermaid={contentFeatures.hasMermaid}
-          >
-            {children}
-          </CodeBlock>
-        );
-      }),
+      code: memo(
+        (props: React.ComponentProps<'code'> & { inline?: boolean }) => {
+          const { children, className, inline } = props;
+          return (
+            <CodeBlock
+              className={className}
+              inline={inline}
+              hasCodeBlocks={contentFeatures.hasCodeBlocks}
+              hasMermaid={contentFeatures.hasMermaid}
+            >
+              {children}
+            </CodeBlock>
+          );
+        }
+      ),
     }),
-    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid],
+    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid]
   );
 
   // Memoize link component separately (depends on handleLinkClick)
   const linkComponent = useMemo(
     () => ({
-      a: memo(({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-        // Validate URL to prevent open redirect vulnerabilities
-        // validateLinkUrl always returns a string ('#' for invalid URLs)
-        const safeHref = validateLinkUrl(href);
-        if (safeHref === "#") {
-          return <span {...props}>{children}</span>;
-        }
+      a: memo(
+        ({
+          children,
+          href,
+          ...props
+        }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+          // Validate URL to prevent open redirect vulnerabilities
+          // validateLinkUrl always returns a string ('#' for invalid URLs)
+          const safeHref = validateLinkUrl(href);
+          if (safeHref === '#') {
+            return <span {...props}>{children}</span>;
+          }
 
-        // Use helper functions for URL type detection
-        const isExternalLink = isExternalUrl(safeHref);
-        const isAnchor = isAnchorLink(safeHref);
-        const isApp = isAppProtocol(safeHref);
-        const isRelative = isRelativePath(safeHref);
+          // Use helper functions for URL type detection
+          const isExternalLink = isExternalUrl(safeHref);
+          const isAnchor = isAnchorLink(safeHref);
+          const isApp = isAppProtocol(safeHref);
+          const isRelative = isRelativePath(safeHref);
 
-        // Convert app:// URLs to regular paths for href attribute
-        let hrefForNavigation = safeHref;
-        if (isApp) {
-          // Use the utility function to convert app:// URLs, preserving chrome=false
-          hrefForNavigation = convertAppUrlToPath(safeHref);
-        }
+          // Convert app:// URLs to regular paths for href attribute
+          let hrefForNavigation = safeHref;
+          if (isApp) {
+            // Use the utility function to convert app:// URLs, preserving chrome=false
+            hrefForNavigation = convertAppUrlToPath(safeHref);
+          }
 
-        return (
-          <a
-            {...props}
-            className="text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100"
-            href={hrefForNavigation}
-            target={isExternalLink ? "_blank" : undefined}
-            rel={isExternalLink ? "noopener noreferrer" : undefined}
-            onClick={
-              isAnchor
-                ? (e) => {
-                    e.preventDefault();
-                    // Extract anchor ID by removing the '#' prefix
-                    const targetId = extractAnchorId(safeHref);
-                    if (targetId) {
-                      // Small delay to ensure content is rendered
-                      requestAnimationFrame(() => {
-                        const targetElement = document.getElementById(targetId);
-                        if (targetElement) {
-                          targetElement.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                          });
-                          // Update URL hash
-                          window.history.replaceState(null, "", `#${targetId}`);
-                        }
-                      });
+          return (
+            <a
+              {...props}
+              className="text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100"
+              href={hrefForNavigation}
+              target={isExternalLink ? '_blank' : undefined}
+              rel={isExternalLink ? 'noopener noreferrer' : undefined}
+              onClick={
+                isAnchor
+                  ? e => {
+                      e.preventDefault();
+                      // Extract anchor ID by removing the '#' prefix
+                      const targetId = extractAnchorId(safeHref);
+                      if (targetId) {
+                        // Small delay to ensure content is rendered
+                        requestAnimationFrame(() => {
+                          const targetElement =
+                            document.getElementById(targetId);
+                          if (targetElement) {
+                            targetElement.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'start',
+                            });
+                            // Update URL hash
+                            window.history.replaceState(
+                              null,
+                              '',
+                              `#${targetId}`
+                            );
+                          }
+                        });
+                      }
                     }
-                  }
-                : isApp || isRelative
-                  ? undefined // Let browser handle navigation naturally
-                  : (e) => handleLinkClick(safeHref, e)
-            }
-          >
-            {children}
-          </a>
-        );
-      }),
+                  : isApp || isRelative
+                    ? undefined // Let browser handle navigation naturally
+                    : e => handleLinkClick(safeHref, e)
+              }
+            >
+              {children}
+            </a>
+          );
+        }
+      ),
     }),
-    [handleLinkClick],
+    [handleLinkClick]
   );
 
   const components = useMemo(
@@ -321,7 +357,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
       ...codeComponent,
       ...linkComponent,
     }),
-    [staticComponents, codeComponent, linkComponent],
+    [staticComponents, codeComponent, linkComponent]
   );
   // This is useful to declare emoji as a new type of valid markdown component
   type MarkdownComponents = Components & {
@@ -330,14 +366,14 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
 
   // add the components that use memo and the ones that don't in a single variable of the extended type we just created
   const componentsParams: MarkdownComponents = {
-    ...(components as React.ComponentProps<typeof ReactMarkdown>["components"]),
+    ...(components as React.ComponentProps<typeof ReactMarkdown>['components']),
 
     // ReactMarkdown will execute this when he finds an image node with hName emoji
     emoji: ({ name }: { name: string }) => <CustomEmoji name={name} />,
   };
 
   const urlTransform = useCallback((url: string) => {
-    if (url.startsWith("app://")) {
+    if (url.startsWith('app://')) {
       return url;
     }
     // Validate URL before transforming to prevent open redirect vulnerabilities

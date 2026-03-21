@@ -1,2 +1,2 @@
-export { KanbanWidget } from "./KanbanWidget";
-export { KanbanCardWidget } from "./KanbanCardWidget";
+export { KanbanWidget } from './KanbanWidget';
+export { KanbanCardWidget } from './KanbanCardWidget';

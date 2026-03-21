@@ -1,2 +1,2 @@
-export { CalendarWidget } from "./CalendarWidget";
-export { CalendarEventWidget } from "./CalendarEventWidget";
+export { CalendarWidget } from './CalendarWidget';
+export { CalendarEventWidget } from './CalendarEventWidget';

@@ -1,6 +1,6 @@
-import { icons } from "lucide-react";
-import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { icons } from 'lucide-react';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 // Cache for SVG strings
 const svgCache = new Map<string, string>();
@@ -24,9 +24,9 @@ export function getIconSVG(
     size?: number;
     color?: string;
     strokeWidth?: number;
-  } = {},
+  } = {}
 ): string | null {
-  const { size = 20, color = "#666", strokeWidth = 2 } = options;
+  const { size = 20, color = '#666', strokeWidth = 2 } = options;
   const cacheKey = `${iconName}-${size}-${color}-${strokeWidth}`;
 
   // Check cache first
@@ -78,9 +78,9 @@ export function getIconImage(
     size?: number;
     color?: string;
     strokeWidth?: number;
-  } = {},
+  } = {}
 ): HTMLImageElement | null {
-  const { size = 20, color = "#666", strokeWidth = 2 } = options;
+  const { size = 20, color = '#666', strokeWidth = 2 } = options;
   const cacheKey = `${iconName}-${size}-${color}-${strokeWidth}`;
 
   // Check cache first
@@ -115,7 +115,7 @@ export async function loadIconImage(
     size?: number;
     color?: string;
     strokeWidth?: number;
-  } = {},
+  } = {}
 ): Promise<HTMLImageElement | null> {
   const img = getIconImage(iconName, options);
 
@@ -144,9 +144,9 @@ export async function preloadIcons(
     size?: number;
     color?: string;
     strokeWidth?: number;
-  },
+  }
 ): Promise<void> {
-  await Promise.all(iconNames.map((name) => loadIconImage(name, options)));
+  await Promise.all(iconNames.map(name => loadIconImage(name, options)));
 }
 
 /**

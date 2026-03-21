@@ -8,7 +8,7 @@
 }
 
 /* Style the checkbox to match Ivy's design */
-.dvn-scroller .gdg-boolean-cell input[type="checkbox"] {
+.dvn-scroller .gdg-boolean-cell input[type='checkbox'] {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -23,29 +23,29 @@
   transition: all 0.2s;
 }
 
-.dvn-scroller .gdg-boolean-cell input[type="checkbox"]:hover:not(:disabled) {
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:hover:not(:disabled) {
   border-color: hsl(var(--border));
   opacity: 0.9;
 }
 
-.dvn-scroller .gdg-boolean-cell input[type="checkbox"]:focus-visible {
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:focus-visible {
   outline: none;
   box-shadow: 0 0 0 1px hsl(var(--ring));
 }
 
-.dvn-scroller .gdg-boolean-cell input[type="checkbox"]:disabled {
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-.dvn-scroller .gdg-boolean-cell input[type="checkbox"]:checked {
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:checked {
   background-color: hsl(var(--primary));
   border-color: hsl(var(--primary));
 }
 
 /* Add checkmark icon for checked state */
-.dvn-scroller .gdg-boolean-cell input[type="checkbox"]:checked::after {
-  content: "";
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:checked::after {
+  content: '';
   position: absolute;
   left: 50%;
   top: 50%;
@@ -57,16 +57,16 @@
 }
 
 /* Remove default focus outline */
-.dvn-scroller .gdg-boolean-cell input[type="checkbox"]:focus {
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:focus {
   outline: none;
 }
 
 /* Adjust header icon and text positioning if rendered via DOM */
-.dvn-scroller [class*="header"] {
+.dvn-scroller [class*='header'] {
   padding-left: 8px !important;
 }
 
-.dvn-scroller [class*="gdg-header"] {
+.dvn-scroller [class*='gdg-header'] {
   padding-left: 8px !important;
 }
 

@@ -1,5 +1,5 @@
-import { JsonRenderer } from "@/components/JsonRenderer";
-import React from "react";
+import { JsonRenderer } from '@/components/JsonRenderer';
+import React from 'react';
 
 interface JsonWidgetProps {
   id: string;

@@ -84,7 +84,15 @@ const ToolIcon: React.FC<{ tool: DrawingTool }> = ({ tool }) => {
     case DrawingTool.Censor:
       return (
         <svg {...props}>
-          <rect x="2" y="8" width="20" height="8" rx="1" fill="currentColor" stroke="none" />
+          <rect
+            x="2"
+            y="8"
+            width="20"
+            height="8"
+            rx="1"
+            fill="currentColor"
+            stroke="none"
+          />
           <line x1="4" y1="5" x2="12" y2="5" strokeWidth={1.5} />
           <line x1="8" y1="19" x2="18" y2="19" strokeWidth={1.5} />
         </svg>

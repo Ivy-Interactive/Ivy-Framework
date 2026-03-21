@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
-import React, { useEffect, useRef } from "react";
+import { cn } from '@/lib/utils';
+import React, { useEffect, useRef } from 'react';
 
 type HeadingNode = { id: string; text: string; level: number; offset?: number };
 
@@ -19,7 +19,9 @@ function getScrollParent(el: HTMLElement | null): HTMLElement | Window {
   while (parent) {
     const { overflowY } = getComputedStyle(parent);
     if (
-      (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") &&
+      (overflowY === 'auto' ||
+        overflowY === 'scroll' ||
+        overflowY === 'overlay') &&
       parent.scrollHeight > parent.clientHeight
     ) {
       return parent;
@@ -38,15 +40,15 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   const [navState, dispatchNav] = React.useReducer(
     (
       state: { activeId: string; isUserNavigating: boolean },
-      action: Partial<{ activeId: string; isUserNavigating: boolean }>,
+      action: Partial<{ activeId: string; isUserNavigating: boolean }>
     ) => ({ ...state, ...action }),
-    { activeId: "", isUserNavigating: false },
+    { activeId: '', isUserNavigating: false }
   );
   const { activeId, isUserNavigating } = navState;
   const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const scrollUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isUserNavigatingRef = useRef(isUserNavigating);
-  const computeActiveIdRef = useRef<() => string>(() => "");
+  const computeActiveIdRef = useRef<() => string>(() => '');
 
   // Notify parent about loading state (always loaded since we use props)
   useEffect(() => {
@@ -57,11 +59,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      const link = target.closest("a");
+      const link = target.closest('a');
 
-      if (link && link.getAttribute("href")?.startsWith("#")) {
-        const targetId = link.getAttribute("href")?.substring(1);
-        const isTocLink = link.closest("[data-toc-container]");
+      if (link && link.getAttribute('href')?.startsWith('#')) {
+        const targetId = link.getAttribute('href')?.substring(1);
+        const isTocLink = link.closest('[data-toc-container]');
 
         if (targetId && !isTocLink) {
           // This is a regular section link (not from TOC)
@@ -88,8 +90,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       }
     };
 
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
   }, []);
 
   // Compute active heading from current scroll position (used after debounce)
@@ -101,7 +103,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         if (top <= 100) return headings[i].id;
       }
     }
-    return headings[0]?.id ?? "";
+    return headings[0]?.id ?? '';
   }, [headings]);
 
   useEffect(() => {
@@ -129,20 +131,20 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     };
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) scheduleScrollUpdate();
+      entries => {
+        if (entries.some(e => e.isIntersecting)) scheduleScrollUpdate();
       },
-      { rootMargin: "0px 0px -80% 0px" },
+      { rootMargin: '0px 0px -80% 0px' }
     );
 
-    headings.forEach((heading) => {
+    headings.forEach(heading => {
       const element = document.getElementById(heading.id);
       if (element) observer.observe(element);
     });
 
     // Listen on the actual scroll container (main content div), not window
     const scrollTarget = getScrollParent(articleRef.current);
-    scrollTarget.addEventListener("scroll", scheduleScrollUpdate, {
+    scrollTarget.addEventListener('scroll', scheduleScrollUpdate, {
       passive: true,
     });
 
@@ -151,7 +153,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
     return () => {
       observer.disconnect();
-      scrollTarget.removeEventListener("scroll", scheduleScrollUpdate);
+      scrollTarget.removeEventListener('scroll', scheduleScrollUpdate);
       if (scrollUpdateTimeoutRef.current) {
         clearTimeout(scrollUpdateTimeoutRef.current);
         scrollUpdateTimeoutRef.current = null;
@@ -163,11 +165,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   useEffect(() => {
     if (!activeId) return;
 
-    const tocContainer = document.querySelector("[data-toc-container]");
+    const tocContainer = document.querySelector('[data-toc-container]');
     if (!tocContainer) return;
 
     const activeButton = tocContainer.querySelector(
-      `[data-toc-link][data-heading-id="${activeId}"]`,
+      `[data-toc-link][data-heading-id="${activeId}"]`
     ) as HTMLElement | null;
     if (!activeButton) return;
 
@@ -175,23 +177,26 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       const containerRect = tocContainer.getBoundingClientRect();
       const elementRect = activeButton.getBoundingClientRect();
       const isVisible =
-        elementRect.top >= containerRect.top && elementRect.bottom <= containerRect.bottom;
+        elementRect.top >= containerRect.top &&
+        elementRect.bottom <= containerRect.bottom;
 
       if (!isVisible) {
         activeButton.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
+          behavior: 'smooth',
+          block: 'nearest',
         });
       }
     } catch (error) {
-      console.error("TableOfContents: Error during TOC auto-scroll:", error);
+      console.error('TableOfContents: Error during TOC auto-scroll:', error);
     }
   }, [activeId]);
 
   if (!show) return null;
 
   if (headings.length === 0) {
-    return <div className="text-sm text-muted-foreground">No headings found</div>;
+    return (
+      <div className="text-sm text-muted-foreground">No headings found</div>
+    );
   }
 
   return (
@@ -200,26 +205,28 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       data-toc-container
     >
       <nav className="relative pr-2">
-        {headings.map((heading) => (
+        {headings.map(heading => (
           <button
             key={heading.id}
             type="button"
             data-toc-link
             data-heading-id={heading.id}
             className={cn(
-              "block text-sm py-1 hover:text-foreground transition-colors w-full text-left",
+              'block text-sm py-1 hover:text-foreground transition-colors w-full text-left',
               heading.level === 1
-                ? "pl-0"
+                ? 'pl-0'
                 : heading.level === 2
-                  ? "pl-2"
+                  ? 'pl-2'
                   : heading.level === 3
-                    ? "pl-4"
+                    ? 'pl-4'
                     : heading.level === 4
-                      ? "pl-6"
+                      ? 'pl-6'
                       : heading.level === 5
-                        ? "pl-8"
-                        : "pl-10",
-              activeId === heading.id ? "text-foreground" : "text-muted-foreground",
+                        ? 'pl-8'
+                        : 'pl-10',
+              activeId === heading.id
+                ? 'text-foreground'
+                : 'text-muted-foreground'
             )}
             onClick={() => {
               // Clear any existing navigation timeout
@@ -239,11 +246,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
               const targetElement = document.getElementById(heading.id);
               if (targetElement) {
                 targetElement.scrollIntoView({
-                  behavior: "smooth",
+                  behavior: 'smooth',
                 });
               } else {
                 console.warn(
-                  `TableOfContents: Target element with id "${heading.id}" not found for TOC navigation`,
+                  `TableOfContents: Target element with id "${heading.id}" not found for TOC navigation`
                 );
               }
             }}

@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { GridColumn } from "@glideapps/glide-data-grid";
-import { DataColumn } from "../../types/types";
-import { parseSize } from "../utils/parseSize";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { GridColumn } from '@glideapps/glide-data-grid';
+import { DataColumn } from '../../types/types';
+import { parseSize } from '../utils/parseSize';
 
 interface UseColumnManagementProps {
   columnsProp: DataColumn[];
@@ -39,7 +39,7 @@ export const useColumnManagement = ({
       // Same structure, just update metadata without resetting order
       setColumns(columnsProp);
     }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnsProp]);
 
   // Reset column widths when connection changes
@@ -54,12 +54,12 @@ export const useColumnManagement = ({
         setColumnOrder(mergedColumns.map((_, index) => index));
       }
     },
-    [columnOrder.length],
+    [columnOrder.length]
   );
 
   // Initialize column widths only if not already set (first load)
   const initializeColumnWidths = useCallback((mergedColumns: DataColumn[]) => {
-    setColumnWidths((prevWidths) => {
+    setColumnWidths(prevWidths => {
       // If we already have column widths, preserve them
       if (Object.keys(prevWidths).length > 0) {
         return prevWidths;
@@ -81,16 +81,18 @@ export const useColumnManagement = ({
       if (!allowColumnResizing) return;
 
       // Find the column by matching title (which is col.header || col.name)
-      const columnIndex = columns.findIndex((col) => (col.header || col.name) === column.title);
+      const columnIndex = columns.findIndex(
+        col => (col.header || col.name) === column.title
+      );
 
       if (columnIndex !== -1) {
-        setColumnWidths((prev) => ({
+        setColumnWidths(prev => ({
           ...prev,
           [columnIndex.toString()]: newSize,
         }));
       }
     },
-    [columns, allowColumnResizing],
+    [columns, allowColumnResizing]
   );
 
   // Handle column reorder
@@ -99,12 +101,12 @@ export const useColumnManagement = ({
       // Set flag to prevent column updates during reordering
       isReorderingRef.current = true;
 
-      setColumnOrder((prevOrder) => {
+      setColumnOrder(prevOrder => {
         // prevOrder contains indices into the full columns array
         // startIndex and endIndex are positions in the VISIBLE columns
 
         // Get the visible column indices (filtering out hidden ones)
-        const visibleIndices = prevOrder.filter((idx) => !columns[idx]?.hidden);
+        const visibleIndices = prevOrder.filter(idx => !columns[idx]?.hidden);
 
         // Reorder just the visible indices
         const newVisibleIndices = [...visibleIndices];
@@ -130,7 +132,7 @@ export const useColumnManagement = ({
         return newOrder;
       });
     },
-    [columns],
+    [columns]
   );
 
   return {

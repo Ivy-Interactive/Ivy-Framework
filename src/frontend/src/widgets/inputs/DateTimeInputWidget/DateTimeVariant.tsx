@@ -1,21 +1,25 @@
-import * as React from "react";
-import { useState, useCallback, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Clock } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { inputStyles } from "@/lib/styles";
-import { Densities } from "@/types/density";
+import * as React from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { inputStyles } from '@/lib/styles';
+import { Densities } from '@/types/density';
 import {
   dateTimeInputVariant,
   dateTimeInputIconVariant,
   dateTimeInputTextVariant,
-} from "@/components/ui/input/date-time-input-variant";
-import { DateTimeVariantProps } from "./types";
-import { ClearAndInvalidIcons } from "./shared";
+} from '@/components/ui/input/date-time-input-variant';
+import { DateTimeVariantProps } from './types';
+import { ClearAndInvalidIcons } from './shared';
 
 export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   value,
@@ -28,11 +32,11 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   format: formatProp,
   firstDayOfWeek,
   density = Densities.Medium,
-  "data-testid": dataTestId,
+  'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
-  const showClear = nullable && !disabled && value != null && value !== "";
+  const showClear = nullable && !disabled && value != null && value !== '';
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -43,9 +47,9 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   // Use local state for the time input to make it uncontrolled
   const [localTimeValue, setLocalTimeValue] = useState(() => {
     if (date) {
-      return format(date, formatProp || "HH:mm:ss");
+      return format(date, formatProp || 'HH:mm:ss');
     }
-    return "00:00:00";
+    return '00:00:00';
   });
 
   // Track if user is actively editing the time input
@@ -55,13 +59,13 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   React.useEffect(() => {
     if (!isEditingTime) {
       if (date) {
-        const newTimeValue = format(date, formatProp || "HH:mm:ss");
+        const newTimeValue = format(date, formatProp || 'HH:mm:ss');
         setLocalTimeValue(newTimeValue);
       } else if (nullable) {
         // When nullable and no date, keep input empty instead of defaulting to '00:00:00'
-        setLocalTimeValue("");
+        setLocalTimeValue('');
       } else {
-        setLocalTimeValue("00:00:00");
+        setLocalTimeValue('00:00:00');
       }
     }
   }, [date, formatProp, isEditingTime, nullable]);
@@ -75,7 +79,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
         newDateTime.setHours(
           currentTime.getHours(),
           currentTime.getMinutes(),
-          currentTime.getSeconds(),
+          currentTime.getSeconds()
         );
         onDateChange(newDateTime);
       } else {
@@ -83,26 +87,29 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
       }
       // Do not close the popover here, allow user to pick time
     },
-    [date, onDateChange],
+    [date, onDateChange]
   );
 
-  const handleTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTimeValue = e.target.value;
-    setLocalTimeValue(newTimeValue);
-    setIsEditingTime(true);
-  }, []);
+  const handleTimeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newTimeValue = e.target.value;
+      setLocalTimeValue(newTimeValue);
+      setIsEditingTime(true);
+    },
+    []
+  );
 
   const handleTimeBlur = useCallback(() => {
     setIsEditingTime(false);
     // When time input loses focus, update the parent
     if (date && localTimeValue) {
-      const [hours, minutes, seconds] = localTimeValue.split(":").map(Number);
+      const [hours, minutes, seconds] = localTimeValue.split(':').map(Number);
       const newDateTime = new Date(date);
       newDateTime.setHours(hours, minutes, seconds);
       onDateChange(newDateTime);
     } else if (localTimeValue) {
       // If no date is selected, create a new date with the selected time
-      const [hours, minutes, seconds] = localTimeValue.split(":").map(Number);
+      const [hours, minutes, seconds] = localTimeValue.split(':').map(Number);
       const newDateTime = new Date();
       newDateTime.setHours(hours, minutes, seconds);
       onDateChange(newDateTime);
@@ -113,16 +120,20 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   const handleTimeKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       // When user presses Enter, update the parent
-      if (e.key === "Enter") {
+      if (e.key === 'Enter') {
         setIsEditingTime(false);
         if (date && localTimeValue) {
-          const [hours, minutes, seconds] = localTimeValue.split(":").map(Number);
+          const [hours, minutes, seconds] = localTimeValue
+            .split(':')
+            .map(Number);
           const newDateTime = new Date(date);
           newDateTime.setHours(hours, minutes, seconds);
           onDateChange(newDateTime);
         } else if (localTimeValue) {
           // If no date is selected, create a new date with the selected time
-          const [hours, minutes, seconds] = localTimeValue.split(":").map(Number);
+          const [hours, minutes, seconds] = localTimeValue
+            .split(':')
+            .map(Number);
           const newDateTime = new Date();
           newDateTime.setHours(hours, minutes, seconds);
           onDateChange(newDateTime);
@@ -130,7 +141,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
         onTimeChange(localTimeValue);
       }
     },
-    [date, localTimeValue, onDateChange, onTimeChange],
+    [date, localTimeValue, onDateChange, onTimeChange]
   );
 
   const handleTimeFocus = useCallback(() => {
@@ -147,26 +158,40 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),
-              "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
-              !date && "text-muted-foreground",
+              'dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10',
+              !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
-              disabled && "cursor-not-allowed",
-              showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
+              disabled && 'cursor-not-allowed',
+              showClear && invalid
+                ? 'pr-16'
+                : showClear || invalid
+                  ? 'pr-8'
+                  : ''
             )}
             data-testid={dataTestId}
           >
-            <CalendarIcon className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
-            <Clock className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
+            <CalendarIcon
+              className={cn(
+                'mr-2 shrink-0',
+                dateTimeInputIconVariant({ density })
+              )}
+            />
+            <Clock
+              className={cn(
+                'mr-2 shrink-0',
+                dateTimeInputIconVariant({ density })
+              )}
+            />
             <span
               className={cn(
-                "truncate",
+                'truncate',
                 dateTimeInputTextVariant({ density }),
-                !date && "text-muted-foreground",
+                !date && 'text-muted-foreground'
               )}
             >
               {date
-                ? format(date, formatProp || "yyyy-MM-dd")
-                : placeholder || "Pick a date & time"}
+                ? format(date, formatProp || 'yyyy-MM-dd')
+                : placeholder || 'Pick a date & time'}
             </span>
           </Button>
         </PopoverTrigger>
@@ -182,7 +207,10 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             />
             <div className="flex items-center gap-2">
               <Clock
-                className={cn(dateTimeInputIconVariant({ density }), "text-muted-foreground")}
+                className={cn(
+                  dateTimeInputIconVariant({ density }),
+                  'text-muted-foreground'
+                )}
               />
               <Input
                 type="time"
@@ -194,9 +222,9 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                 onKeyDown={handleTimeKeyDown}
                 disabled={disabled}
                 className={cn(
-                  "bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden",
+                  'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden',
                   dateTimeInputTextVariant({ density }),
-                  invalid && inputStyles.invalidInput,
+                  invalid && inputStyles.invalidInput
                 )}
                 data-testid={dataTestId ? `${dataTestId}-time` : undefined}
               />

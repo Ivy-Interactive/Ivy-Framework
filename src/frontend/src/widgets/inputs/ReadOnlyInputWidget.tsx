@@ -1,5 +1,5 @@
-import CopyToClipboardButton from "@/components/CopyToClipboardButton";
-import React from "react";
+import CopyToClipboardButton from '@/components/CopyToClipboardButton';
+import React from 'react';
 
 interface ReadOnlyInputWidgetProps {
   id: string;
@@ -13,9 +13,17 @@ export const ReadOnlyInputWidget: React.FC<ReadOnlyInputWidgetProps> = ({
   showCopyButton = true,
 }) => {
   return (
-    <div key={id} className="text-body text-muted-foreground flex flex-row items-center w-full">
-      <div className="flex-1">{value != null && value !== "" ? String(value) : "-"}</div>
-      {showCopyButton && <CopyToClipboardButton textToCopy={String(value || "")} label="" />}
+    <div
+      key={id}
+      className="text-body text-muted-foreground flex flex-row items-center w-full"
+    >
+      <div className="flex-1">
+        {value && value}
+        {!value && '-'}
+      </div>
+      {showCopyButton && (
+        <CopyToClipboardButton textToCopy={String(value || '')} label="" />
+      )}
     </div>
   );
 };

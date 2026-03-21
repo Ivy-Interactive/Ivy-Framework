@@ -1,13 +1,17 @@
-import React, { ReactNode, useState, useRef } from "react";
-import { LucideIcon } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import React, { ReactNode, useState, useRef } from 'react';
+import { LucideIcon } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 /**
  * Display modes for DataTableOption
  */
-export type OptionDisplayMode = "popover" | "inline";
-export type InlineDirection = "right" | "left" | "below";
+export type OptionDisplayMode = 'popover' | 'inline';
+export type InlineDirection = 'right' | 'left' | 'below';
 
 /**
  * Props for DataTableOption component
@@ -24,8 +28,8 @@ export interface DataTableOptionProps {
   displayMode?: OptionDisplayMode;
 
   // Popover specific props
-  align?: "start" | "center" | "end";
-  side?: "top" | "right" | "bottom" | "left";
+  align?: 'start' | 'center' | 'end';
+  side?: 'top' | 'right' | 'bottom' | 'left';
   sideOffset?: number;
   contentWidth?: string;
 
@@ -48,12 +52,12 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   children,
   className,
   contentClassName,
-  displayMode = "inline",
-  align = "start",
-  side = "bottom",
+  displayMode = 'inline',
+  align = 'start',
+  side = 'bottom',
   sideOffset = 8,
-  contentWidth = "w-[400px]",
-  inlineDirection = "right",
+  contentWidth = 'w-[400px]',
+  inlineDirection = 'right',
   defaultExpanded = false,
   showLabel = true,
 }) => {
@@ -80,18 +84,18 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   // }, [expanded, displayMode]);
 
   // Popover mode - uses default button styling
-  if (displayMode === "popover") {
+  if (displayMode === 'popover') {
     return (
       <Popover>
         <PopoverTrigger asChild>
           <button
             className={cn(
-              "inline-flex items-center justify-center rounded-md text-sm font-medium",
-              "h-9 px-3 gap-2 cursor-pointer",
-              "bg-transparent hover:bg-accent hover:text-accent-foreground",
-              "border border-input",
-              "transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-              className,
+              'inline-flex items-center justify-center rounded-md text-sm font-medium',
+              'h-9 px-3 gap-2 cursor-pointer',
+              'bg-transparent hover:bg-accent hover:text-accent-foreground',
+              'border border-input',
+              'transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+              className
             )}
             title={tooltip || label}
           >
@@ -103,7 +107,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
           align={align}
           side={side}
           sideOffset={sideOffset}
-          className={cn(contentWidth, "p-0", contentClassName)}
+          className={cn(contentWidth, 'p-0', contentClassName)}
         >
           {children}
         </PopoverContent>
@@ -119,27 +123,27 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
     </>
   );
 
-  if (inlineDirection === "right") {
+  if (inlineDirection === 'right') {
     return (
       <div
         ref={containerRef}
         className={cn(
-          "inline-flex items-center mb-3",
-          "border rounded-field",
-          "bg-transparent border-input",
-          "transition-all duration-300 ease-in-out",
-          className,
+          'inline-flex items-center mb-3',
+          'border rounded-field',
+          'bg-transparent border-input',
+          'transition-all duration-300 ease-in-out',
+          className
         )}
       >
         <button
           className={cn(
-            "inline-flex items-center justify-center text-sm font-medium",
-            "h-9 w-9 gap-2 cursor-pointer flex-shrink-0",
-            "bg-transparent rounded-l-[var(--radius-fields)]",
-            "transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+            'inline-flex items-center justify-center text-sm font-medium',
+            'h-9 w-9 gap-2 cursor-pointer flex-shrink-0',
+            'bg-transparent rounded-l-[var(--radius-fields)]',
+            'transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
             expanded
-              ? "bg-accent hover:bg-accent hover:text-accent-foreground"
-              : "hover:bg-accent hover:text-accent-foreground",
+              ? 'bg-accent hover:bg-accent hover:text-accent-foreground'
+              : 'hover:bg-accent hover:text-accent-foreground'
           )}
           onClick={() => setExpanded(!expanded)}
           title={tooltip || label}
@@ -150,18 +154,24 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         {/* Content container - fixed dimensions when expanded */}
         <div
           className={cn(
-            "border-l h-9",
-            "transition-all duration-300 ease-in-out",
+            'border-l h-9',
+            'transition-all duration-300 ease-in-out',
             expanded
-              ? "w-[450px] opacity-100 border-input/30" // Fixed width when expanded
-              : "w-0 opacity-0 border-transparent",
+              ? 'w-[450px] opacity-100 border-input/30' // Fixed width when expanded
+              : 'w-0 opacity-0 border-transparent'
           )}
         >
-          <div className={cn("h-full w-[450px] flex items-center ", contentClassName)}>
+          <div
+            className={cn(
+              'h-full w-[450px] flex items-center ',
+              contentClassName
+            )}
+          >
             {React.isValidElement(children)
-              ? React.cloneElement(children as React.ReactElement<{ isExpanded?: boolean }>, {
-                  isExpanded: expanded,
-                })
+              ? React.cloneElement(
+                  children as React.ReactElement<{ isExpanded?: boolean }>,
+                  { isExpanded: expanded }
+                )
               : children}
           </div>
         </div>
@@ -169,45 +179,46 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
     );
   }
 
-  if (inlineDirection === "left") {
+  if (inlineDirection === 'left') {
     return (
       <div
         ref={containerRef}
         className={cn(
-          "inline-flex items-center mb-3",
-          "border rounded-field",
-          "transition-all duration-300 ease-in-out",
-          "bg-transparent",
-          expanded ? "border-input" : "border-input hover:bg-accent",
-          className,
+          'inline-flex items-center mb-3',
+          'border rounded-field',
+          'transition-all duration-300 ease-in-out',
+          'bg-transparent',
+          expanded ? 'border-input' : 'border-input hover:bg-accent',
+          className
         )}
       >
         {/* Sliding content container */}
         <div
           className={cn(
-            "transition-all duration-300 ease-in-out",
-            "border-r",
+            'transition-all duration-300 ease-in-out',
+            'border-r',
             expanded
-              ? "max-w-[800px] opacity-100 border-input/30"
-              : "max-w-0 opacity-0 border-transparent",
+              ? 'max-w-[800px] opacity-100 border-input/30'
+              : 'max-w-0 opacity-0 border-transparent'
           )}
         >
-          <div className={cn("h-9 flex items-center", contentClassName)}>
+          <div className={cn('h-9 flex items-center', contentClassName)}>
             {React.isValidElement(children)
-              ? React.cloneElement(children as React.ReactElement<{ isExpanded?: boolean }>, {
-                  isExpanded: expanded,
-                })
+              ? React.cloneElement(
+                  children as React.ReactElement<{ isExpanded?: boolean }>,
+                  { isExpanded: expanded }
+                )
               : children}
           </div>
         </div>
 
         <button
           className={cn(
-            "inline-flex items-center justify-center text-sm font-medium",
-            "h-9 px-3 gap-2 cursor-pointer",
-            "bg-transparent hover:bg-accent hover:text-accent-foreground rounded-r-md",
-            "transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-            expanded && "bg-accent",
+            'inline-flex items-center justify-center text-sm font-medium',
+            'h-9 px-3 gap-2 cursor-pointer',
+            'bg-transparent hover:bg-accent hover:text-accent-foreground rounded-r-md',
+            'transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+            expanded && 'bg-accent'
           )}
           onClick={() => setExpanded(!expanded)}
           title={tooltip || label}
@@ -223,21 +234,21 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
     <div
       ref={containerRef}
       className={cn(
-        "inline-flex flex-col mb-3",
-        "border rounded-field",
-        "transition-all duration-300 ease-in-out",
-        "bg-transparent",
-        expanded ? "border-input" : "border-input hover:bg-accent",
-        className,
+        'inline-flex flex-col mb-3',
+        'border rounded-field',
+        'transition-all duration-300 ease-in-out',
+        'bg-transparent',
+        expanded ? 'border-input' : 'border-input hover:bg-accent',
+        className
       )}
     >
       <button
         className={cn(
-          "inline-flex items-center justify-center text-sm font-medium",
-          "h-9 px-3 gap-2 w-full cursor-pointer",
-          "bg-transparent hover:bg-accent hover:text-accent-foreground",
-          "transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-          expanded && "bg-accent border-b border-input/30 rounded-t-md",
+          'inline-flex items-center justify-center text-sm font-medium',
+          'h-9 px-3 gap-2 w-full cursor-pointer',
+          'bg-transparent hover:bg-accent hover:text-accent-foreground',
+          'transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+          expanded && 'bg-accent border-b border-input/30 rounded-t-md'
         )}
         onClick={() => setExpanded(!expanded)}
         title={tooltip || label}
@@ -247,15 +258,16 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
 
       <div
         className={cn(
-          "transition-all duration-300 ease-in-out",
-          expanded ? "max-h-[200px] opacity-100" : "max-h-0 opacity-0",
+          'transition-all duration-300 ease-in-out',
+          expanded ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'
         )}
       >
-        <div className={cn("p-2", contentClassName)}>
+        <div className={cn('p-2', contentClassName)}>
           {React.isValidElement(children)
-            ? React.cloneElement(children as React.ReactElement<{ isExpanded?: boolean }>, {
-                isExpanded: expanded,
-              })
+            ? React.cloneElement(
+                children as React.ReactElement<{ isExpanded?: boolean }>,
+                { isExpanded: expanded }
+              )
             : children}
         </div>
       </div>

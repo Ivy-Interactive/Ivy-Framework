@@ -1,4 +1,4 @@
-import { Task } from "@/components/ui/shadcn-io/kanban";
+import { Task } from '@/components/ui/shadcn-io/kanban';
 
 export interface Column {
   id: string;

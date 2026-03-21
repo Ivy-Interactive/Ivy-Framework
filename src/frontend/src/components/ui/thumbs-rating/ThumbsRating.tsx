@@ -1,8 +1,8 @@
-import { ThumbsUp, ThumbsDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { InvalidIcon } from "@/components/InvalidIcon";
-import { ThumbsEnum } from "./types";
-import { Densities } from "@/types/density";
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { InvalidIcon } from '@/components/InvalidIcon';
+import { ThumbsEnum } from './types';
+import { Densities } from '@/types/density';
 
 interface ThumbsRatingProps {
   value?: number;
@@ -34,31 +34,37 @@ const ThumbsRating = ({
 
   return (
     <div className="flex items-center gap-2">
-      <div className={cn("flex gap-1 items-center", disabled && "opacity-50", className)}>
+      <div
+        className={cn(
+          'flex gap-1 items-center',
+          disabled && 'opacity-50',
+          className
+        )}
+      >
         <button
           onClick={() => handleClick(ThumbsEnum.Down)}
           disabled={disabled}
           className={cn(
-            "p-2 rounded-full transition-all cursor-pointer",
-            "hover:bg-destructive/20",
-            "focus-visible:outline-none focus-visible:ring-2",
-            "focus-visible:ring-ring focus-visible:ring-offset-2",
+            'p-2 rounded-full transition-all cursor-pointer',
+            'hover:bg-destructive/20',
+            'focus-visible:outline-none focus-visible:ring-2',
+            'focus-visible:ring-ring focus-visible:ring-offset-2',
             value === ThumbsEnum.Down &&
               (invalid
-                ? "bg-destructive/20 border-destructive text-destructive"
-                : "bg-destructive text-destructive-foreground"),
-            disabled && "cursor-not-allowed hover:bg-transparent",
+                ? 'bg-destructive/20 border-destructive text-destructive'
+                : 'bg-destructive text-destructive-foreground'),
+            disabled && 'cursor-not-allowed hover:bg-transparent'
           )}
         >
           <ThumbsDown
             size={iconScales[density]}
             className={cn(
-              "transition-colors",
+              'transition-colors',
               value === ThumbsEnum.Down
                 ? invalid
-                  ? "text-destructive"
-                  : "text-destructive-foreground"
-                : "text-muted-foreground",
+                  ? 'text-destructive'
+                  : 'text-destructive-foreground'
+                : 'text-muted-foreground'
             )}
           />
         </button>
@@ -67,26 +73,26 @@ const ThumbsRating = ({
           onClick={() => handleClick(ThumbsEnum.Up)}
           disabled={disabled}
           className={cn(
-            "p-2 rounded-full transition-all cursor-pointer",
-            "hover:bg-primary/20",
-            "focus-visible:outline-none focus-visible:ring-2",
-            "focus-visible:ring-ring focus-visible:ring-offset-2",
+            'p-2 rounded-full transition-all cursor-pointer',
+            'hover:bg-primary/20',
+            'focus-visible:outline-none focus-visible:ring-2',
+            'focus-visible:ring-ring focus-visible:ring-offset-2',
             value === ThumbsEnum.Up &&
               (invalid
-                ? "bg-primary/20 border-primary text-primary"
-                : "bg-primary text-primary-foreground"),
-            disabled && "cursor-not-allowed hover:bg-transparent",
+                ? 'bg-primary/20 border-primary text-primary'
+                : 'bg-primary text-primary-foreground'),
+            disabled && 'cursor-not-allowed hover:bg-transparent'
           )}
         >
           <ThumbsUp
             size={iconScales[density]}
             className={cn(
-              "transition-colors",
+              'transition-colors',
               value === ThumbsEnum.Up
                 ? invalid
-                  ? "text-muted-foreground"
-                  : "text-primary-foreground"
-                : "text-muted-foreground",
+                  ? 'text-muted-foreground'
+                  : 'text-primary-foreground'
+                : 'text-muted-foreground'
             )}
           />
         </button>

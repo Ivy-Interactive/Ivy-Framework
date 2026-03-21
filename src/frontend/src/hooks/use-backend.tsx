@@ -1,15 +1,18 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import * as signalR from "@microsoft/signalr";
-import { WidgetEventHandlerType, WidgetNode } from "@/types/widgets";
-import { useToast } from "@/hooks/use-toast";
-import { showError } from "@/hooks/use-error-sheet";
-import { getIvyHost, getMachineId } from "@/lib/utils";
-import { validateRedirectUrl, validateLinkUrl } from "@/lib/url";
-import { logger } from "@/lib/logger";
-import { applyPatch, Operation } from "fast-json-patch";
-import { ToastAction } from "@/components/ui/toast";
-import { setThemeGlobal } from "@/components/theme-provider";
-import { setExternalWidgetRegistry, ExternalWidgetInfo } from "@/widgets/externalWidgetLoader";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import * as signalR from '@microsoft/signalr';
+import { WidgetEventHandlerType, WidgetNode } from '@/types/widgets';
+import { useToast } from '@/hooks/use-toast';
+import { showError } from '@/hooks/use-error-sheet';
+import { getIvyHost, getMachineId } from '@/lib/utils';
+import { validateRedirectUrl, validateLinkUrl } from '@/lib/url';
+import { logger } from '@/lib/logger';
+import { applyPatch, Operation } from 'fast-json-patch';
+import { ToastAction } from '@/components/ui/toast';
+import { setThemeGlobal } from '@/components/theme-provider';
+import {
+  setExternalWidgetRegistry,
+  ExternalWidgetInfo,
+} from '@/widgets/externalWidgetLoader';
 
 type UpdateMessage = Array<{
   iteration: number;
@@ -75,7 +78,7 @@ type StreamHandler = (data: unknown) => void;
 type StreamSubscriber = (streamId: string, onData: StreamHandler) => () => void;
 
 const widgetTreeToXml = (node: WidgetNode) => {
-  const tagName = node.type.replace("Ivy.", "");
+  const tagName = node.type.replace('Ivy.', '');
   const attributes: string[] = [`Id="${escapeXml(node.id)}"`];
   if (node.props) {
     for (const [key, value] of Object.entries(node.props)) {
@@ -83,17 +86,18 @@ const widgetTreeToXml = (node: WidgetNode) => {
       attributes.push(`${pascalCaseKey}="${escapeXml(String(value))}"`);
     }
   }
-  let childrenXml = "";
+  let childrenXml = '';
   if (node.children && node.children.length > 0) {
-    childrenXml = node.children.map((child) => widgetTreeToXml(child)).join("");
-    return `<${tagName} ${attributes.join(" ")}>${childrenXml}</${tagName}>`;
+    childrenXml = node.children.map(child => widgetTreeToXml(child)).join('');
+    return `<${tagName} ${attributes.join(' ')}>${childrenXml}</${tagName}>`;
   } else {
-    return `<${tagName} ${attributes.join(" ")} />`;
+    return `<${tagName} ${attributes.join(' ')} />`;
   }
 };
 
 const calculateTreeSignature = (node: WidgetNode): string => {
-  const children = node.children?.map((c) => calculateTreeSignature(c)).join(",") ?? "";
+  const children =
+    node.children?.map(c => calculateTreeSignature(c)).join(',') ?? '';
   return `${node.id}:${node.type}[${children}]`;
 };
 
@@ -103,7 +107,7 @@ const hashString = (str: string): string => {
   for (let i = 0; i < str.length; i++) {
     hash = (hash * 33) ^ str.charCodeAt(i);
   }
-  return (hash >>> 0).toString(16).padStart(8, "0");
+  return (hash >>> 0).toString(16).padStart(8, '0');
 };
 
 const calculateTreeHash = (node: WidgetNode): string => {
@@ -113,11 +117,11 @@ const calculateTreeHash = (node: WidgetNode): string => {
 
 const escapeXml = (str: string) => {
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 };
 
 /**
@@ -152,7 +156,7 @@ function deepCloneNode(node: WidgetNode): WidgetNode {
  */
 function clonePathToTarget(
   tree: WidgetNode,
-  indices: number[],
+  indices: number[]
 ): { newTree: WidgetNode; parent: WidgetNode; targetIndex: number } | null {
   if (indices.length === 0) {
     // No path - return a shallow clone of root with cloned children array
@@ -169,7 +173,7 @@ function clonePathToTarget(
     const index = indices[i];
 
     if (!current.children) {
-      logger.error("No children found while cloning path", {
+      logger.error('No children found while cloning path', {
         nodeId: current.id,
         nodeType: current.type,
         pathIndex: i,
@@ -179,7 +183,7 @@ function clonePathToTarget(
     }
 
     if (index >= current.children.length) {
-      logger.error("Index out of bounds while cloning path", {
+      logger.error('Index out of bounds while cloning path', {
         index,
         childrenLength: current.children.length,
         pathIndex: i,
@@ -190,7 +194,7 @@ function clonePathToTarget(
 
     const child = current.children[index];
     if (!child) {
-      logger.error("Child at index is null/undefined", {
+      logger.error('Child at index is null/undefined', {
         index,
         childrenLength: current.children.length,
         parentType: current.type,
@@ -207,7 +211,7 @@ function clonePathToTarget(
   // Validate final parent has children
   const targetIndex = indices[indices.length - 1];
   if (!current.children) {
-    logger.error("No children found at final parent", {
+    logger.error('No children found at final parent', {
       nodeId: current.id,
       nodeType: current.type,
       targetIndex,
@@ -216,7 +220,7 @@ function clonePathToTarget(
   }
 
   if (targetIndex >= current.children.length) {
-    logger.error("Target index out of bounds", {
+    logger.error('Target index out of bounds', {
       targetIndex,
       childrenLength: current.children.length,
       parentId: current.id,
@@ -234,13 +238,18 @@ function clonePathToTarget(
  *
  * Safe for React Strict Mode double-invocation.
  */
-function applyUpdateMessage(tree: WidgetNode, updates: UpdateMessage): WidgetNode | null {
+function applyUpdateMessage(
+  tree: WidgetNode,
+  updates: UpdateMessage
+): WidgetNode | null {
   let newTree = tree;
 
   for (const update of updates) {
     const firstPatch = update.patch[0];
     const isFullReplacement =
-      update.patch.length === 1 && firstPatch.op === "replace" && firstPatch.path === "";
+      update.patch.length === 1 &&
+      firstPatch.op === 'replace' &&
+      firstPatch.path === '';
 
     if (isFullReplacement) {
       // Full node replacement - just swap in the new value
@@ -269,7 +278,9 @@ function applyUpdateMessage(tree: WidgetNode, updates: UpdateMessage): WidgetNod
         newTree = result.newTree;
 
         // Deep clone the target node before applying patch (patch mutates in place)
-        const targetClone = deepCloneNode(result.parent.children![result.targetIndex]);
+        const targetClone = deepCloneNode(
+          result.parent.children![result.targetIndex]
+        );
         result.parent.children![result.targetIndex] = targetClone;
         applyPatch(targetClone, update.patch);
       }
@@ -279,7 +290,7 @@ function applyUpdateMessage(tree: WidgetNode, updates: UpdateMessage): WidgetNod
       // Verify tree integrity in DEBUG mode
       const frontendHash = calculateTreeHash(newTree);
       if (frontendHash !== update.treeHash) {
-        logger.error("Tree hash mismatch after update", {
+        logger.error('Tree hash mismatch after update', {
           iteration: update.iteration,
           viewId: update.viewId,
           backendHash: update.treeHash,
@@ -292,26 +303,28 @@ function applyUpdateMessage(tree: WidgetNode, updates: UpdateMessage): WidgetNod
   return newTree;
 }
 
-async function refreshAuthFromCookies(connectionId: string | null): Promise<void> {
+async function refreshAuthFromCookies(
+  connectionId: string | null
+): Promise<void> {
   try {
     const response = await fetch(`${getIvyHost()}/ivy/auth/refresh-session`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "X-Connection-Id": connectionId ?? "",
-        "X-Machine-Id": getMachineId(),
+        'Content-Type': 'application/json',
+        'X-Connection-Id': connectionId ?? '',
+        'X-Machine-Id': getMachineId(),
       },
-      credentials: "include",
+      credentials: 'include',
     });
     if (!response.ok) {
-      logger.error("Failed to refresh auth from cookies, reloading page", {
+      logger.error('Failed to refresh auth from cookies, reloading page', {
         status: response.status,
         statusText: response.statusText,
       });
       window.location.reload();
     }
   } catch (error) {
-    logger.error("Error refreshing auth from cookies, reloading page", error);
+    logger.error('Error refreshing auth from cookies, reloading page', error);
     window.location.reload();
   }
 }
@@ -320,9 +333,11 @@ export const useBackend = (
   appId: string | null,
   appArgs: string | null,
   parentId: string | null,
-  chrome: boolean,
+  chrome: boolean
 ) => {
-  const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
+  const [connection, setConnection] = useState<signalR.HubConnection | null>(
+    null
+  );
   const [widgetTree, setWidgetTree] = useState<WidgetNode | null>(null);
   const [disconnected, setDisconnected] = useState(false);
   const { toast } = useToast();
@@ -372,7 +387,8 @@ export const useBackend = (
 
     const rootAppId = rootAppIdRef.current;
     const shouldReconnect =
-      !rootAppId || (rootAppId === "$chrome" ? chrome === false : appId !== rootAppId);
+      !rootAppId ||
+      (rootAppId === '$chrome' ? chrome === false : appId !== rootAppId);
 
     if (shouldReconnect) {
       setStableAppId(appId);
@@ -387,17 +403,17 @@ export const useBackend = (
       try {
         const xmlString = widgetTreeToXml(widgetTree);
         if (!xmlString) {
-          logger.warn("Empty XML string generated from widget tree");
+          logger.warn('Empty XML string generated from widget tree');
           return;
         }
-        xml = parser.parseFromString(xmlString, "application/xml");
-        const parserError = xml.querySelector("parsererror");
+        xml = parser.parseFromString(xmlString, 'application/xml');
+        const parserError = xml.querySelector('parsererror');
         if (parserError) {
-          logger.error("XML parsing error", { error: parserError.textContent });
+          logger.error('XML parsing error', { error: parserError.textContent });
           return;
         }
       } catch (error) {
-        logger.error("Error converting widget tree to XML", { error });
+        logger.error('Error converting widget tree to XML', { error });
         return;
       }
       logger.debug(`[${connectionId}]`, xml);
@@ -418,7 +434,7 @@ export const useBackend = (
 
   const handleUpdateMessage = useCallback((message: UpdateMessage) => {
     const lastSeen = lastIterationRef.current;
-    const newUpdates = message.filter((u) => u.iteration > lastSeen);
+    const newUpdates = message.filter(u => u.iteration > lastSeen);
 
     if (newUpdates.length === 0) {
       return;
@@ -426,19 +442,19 @@ export const useBackend = (
 
     // Check for lost iterations
     const expectedNext = lastSeen + 1;
-    const firstNew = Math.min(...newUpdates.map((u) => u.iteration));
+    const firstNew = Math.min(...newUpdates.map(u => u.iteration));
     if (lastSeen >= 0 && firstNew > expectedNext) {
-      logger.error("Lost iteration(s) detected", {
+      logger.error('Lost iteration(s) detected', {
         lastIteration: lastSeen,
         receivedIteration: firstNew,
       });
     }
-    const maxIteration = Math.max(...newUpdates.map((u) => u.iteration));
+    const maxIteration = Math.max(...newUpdates.map(u => u.iteration));
     lastIterationRef.current = maxIteration;
 
-    setWidgetTree((currentTree) => {
+    setWidgetTree(currentTree => {
       if (!currentTree) {
-        logger.warn("No current widget tree available for update");
+        logger.warn('No current widget tree available for update');
         return null;
       }
       return applyUpdateMessage(currentTree, newUpdates);
@@ -446,43 +462,50 @@ export const useBackend = (
   }, []);
 
   const handleHotReloadMessage = useCallback(() => {
-    logger.debug("Sending HotReload message");
-    connection?.invoke("HotReload").catch((err) => {
-      logger.error("SignalR Error when sending HotReload:", err);
+    logger.debug('Sending HotReload message');
+    connection?.invoke('HotReload').catch(err => {
+      logger.error('SignalR Error when sending HotReload:', err);
     });
   }, [connection]);
 
-  const handleSetAuthCookies = useCallback(async (message: SetAuthCookiesMessage) => {
-    const currentConnectionId = latestConnectionRef.current?.connectionId;
-    // logger.debug('Processing SetAuthCookies request', {
-    //   hasAuthToken: !!message.cookieJarId,
-    //   connectionId: currentConnectionId,
-    // });
-    const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-cookies`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Machine-Id": getMachineId(),
-      },
-      body: JSON.stringify({
-        cookieJarId: message.cookieJarId,
-        connectionId: currentConnectionId ?? null,
-        triggerMachineReload: message.triggerMachineReload,
-        triggerMachineBrokeredRefresh: message.triggerMachineBrokeredRefresh,
-      }),
-      credentials: "include",
-    });
-    if (!response.ok) {
-      logger.error("Failed to set auth cookies", {
-        status: response.status,
-        statusText: response.statusText,
-      });
-    }
+  const handleSetAuthCookies = useCallback(
+    async (message: SetAuthCookiesMessage) => {
+      const currentConnectionId = latestConnectionRef.current?.connectionId;
+      // logger.debug('Processing SetAuthCookies request', {
+      //   hasAuthToken: !!message.cookieJarId,
+      //   connectionId: currentConnectionId,
+      // });
+      const response = await fetch(
+        `${getIvyHost()}/ivy/auth/set-auth-cookies`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Machine-Id': getMachineId(),
+          },
+          body: JSON.stringify({
+            cookieJarId: message.cookieJarId,
+            connectionId: currentConnectionId ?? null,
+            triggerMachineReload: message.triggerMachineReload,
+            triggerMachineBrokeredRefresh:
+              message.triggerMachineBrokeredRefresh,
+          }),
+          credentials: 'include',
+        }
+      );
+      if (!response.ok) {
+        logger.error('Failed to set auth cookies', {
+          status: response.status,
+          statusText: response.statusText,
+        });
+      }
 
-    if (message.reloadPage) {
-      window.location.reload();
-    }
-  }, []);
+      if (message.reloadPage) {
+        window.location.reload();
+      }
+    },
+    []
+  );
 
   const handleRedirect = useCallback((message: RedirectMessage) => {
     //logger.debug('Processing Redirect request', message);
@@ -492,16 +515,16 @@ export const useBackend = (
     // For redirects, only allow relative paths or same-origin URLs
     const validatedUrl = validateRedirectUrl(url, false);
     if (!validatedUrl) {
-      logger.warn("Invalid redirect URL rejected", { url });
+      logger.warn('Invalid redirect URL rejected', { url });
       return;
     }
 
-    if (validatedUrl.startsWith("/")) {
+    if (validatedUrl.startsWith('/')) {
       // For path-based redirects, update the pathname
       if (replaceHistory) {
-        window.history.replaceState(message.state, "", validatedUrl);
+        window.history.replaceState(message.state, '', validatedUrl);
       } else {
-        window.history.pushState(message.state, "", validatedUrl);
+        window.history.pushState(message.state, '', validatedUrl);
       }
     } else {
       // For full URL redirects (same-origin only)
@@ -512,11 +535,11 @@ export const useBackend = (
   const handleSetTheme = useCallback((theme: string) => {
     // logger.debug('Processing SetTheme request', { theme });
     const normalizedTheme = theme.toLowerCase();
-    if (["dark", "light", "system"].includes(normalizedTheme)) {
-      logger.info("Setting theme globally", { theme: normalizedTheme });
-      setThemeGlobal(normalizedTheme as "dark" | "light" | "system");
+    if (['dark', 'light', 'system'].includes(normalizedTheme)) {
+      logger.info('Setting theme globally', { theme: normalizedTheme });
+      setThemeGlobal(normalizedTheme as 'dark' | 'light' | 'system');
     } else {
-      logger.error("Invalid theme value received", { theme });
+      logger.error('Invalid theme value received', { theme });
     }
   }, []);
 
@@ -532,17 +555,17 @@ export const useBackend = (
         const headers = new Headers();
         if (request.headers) {
           Object.entries(request.headers).forEach(([key, values]) => {
-            values.forEach((value) => headers.append(key, value));
+            values.forEach(value => headers.append(key, value));
           });
         }
         if (request.contentType) {
-          headers.set("Content-Type", request.contentType);
+          headers.set('Content-Type', request.contentType);
         }
 
         const fetchOptions: RequestInit = {
           method: request.method,
           headers,
-          credentials: "include",
+          credentials: 'include',
         };
 
         if (request.body) {
@@ -559,11 +582,11 @@ export const useBackend = (
 
         // Read response body
         const responseBytes = new Uint8Array(await response.arrayBuffer());
-        let responseBody = "";
+        let responseBody = '';
         if (responseBytes.length > 0) {
           const binaryString = Array.from(responseBytes)
-            .map((b) => String.fromCharCode(b))
-            .join("");
+            .map(b => String.fromCharCode(b))
+            .join('');
           responseBody = btoa(binaryString);
         }
 
@@ -581,64 +604,71 @@ export const useBackend = (
           statusCode: response.status,
           headers: responseHeaders,
           body: responseBody || undefined,
-          contentType: response.headers.get("Content-Type") || undefined,
+          contentType: response.headers.get('Content-Type') || undefined,
         };
 
-        const httpResponse = await fetch(`${getIvyHost()}/ivy/http-tunnel/response`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Connection-Id": connection?.connectionId ?? "",
-          },
-          body: JSON.stringify(tunnelResponse),
-        });
+        const httpResponse = await fetch(
+          `${getIvyHost()}/ivy/http-tunnel/response`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Connection-Id': connection?.connectionId ?? '',
+            },
+            body: JSON.stringify(tunnelResponse),
+          }
+        );
 
         if (!httpResponse.ok) {
-          logger.error("Failed to send HttpResponse via HTTP", {
+          logger.error('Failed to send HttpResponse via HTTP', {
             status: httpResponse.status,
             statusText: httpResponse.statusText,
           });
         } else {
-          logger.debug("Sent HttpResponse back to backend via HTTP", {
+          logger.debug('Sent HttpResponse back to backend via HTTP', {
             requestId: request.requestId,
           });
         }
       } catch (error) {
-        logger.error("Error processing HttpRequest:", error);
+        logger.error('Error processing HttpRequest:', error);
 
         const errorResponse: HttpTunnelResponseMessage = {
           requestId: request.requestId,
           statusCode: 0,
-          errorMessage: error instanceof Error ? error.message : "Unknown error",
+          errorMessage:
+            error instanceof Error ? error.message : 'Unknown error',
         };
 
-        const httpResponse = await fetch(`${getIvyHost()}/ivy/http-tunnel/response`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Connection-Id": connection?.connectionId ?? "",
-          },
-          body: JSON.stringify(errorResponse),
-        }).catch((err) => {
-          logger.error("Failed to send error HttpResponse via HTTP:", err);
+        const httpResponse = await fetch(
+          `${getIvyHost()}/ivy/http-tunnel/response`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Connection-Id': connection?.connectionId ?? '',
+            },
+            body: JSON.stringify(errorResponse),
+          }
+        ).catch(err => {
+          logger.error('Failed to send error HttpResponse via HTTP:', err);
           return null;
         });
 
         if (httpResponse) {
           if (!httpResponse.ok) {
-            logger.error("Failed to send error HttpResponse via HTTP", {
+            logger.error('Failed to send error HttpResponse via HTTP', {
               status: httpResponse.status,
               statusText: httpResponse.statusText,
             });
           } else {
-            logger.debug("Sent error HttpResponse back to backend via HTTP", {
+            logger.debug('Sent error HttpResponse back to backend via HTTP', {
               requestId: request.requestId,
             });
           }
         }
       }
     },
-    [connection],
+    [connection]
   );
 
   const handleError = useCallback(
@@ -646,7 +676,7 @@ export const useBackend = (
       toast({
         title: error.title,
         description: error.description,
-        variant: "destructive",
+        variant: 'destructive',
         action: (
           <ToastAction
             altText="View error details"
@@ -663,30 +693,30 @@ export const useBackend = (
         ),
       });
     },
-    [toast],
+    [toast]
   );
 
   useEffect(() => {
     if (currentConnectionRef.current) {
-      currentConnectionRef.current.stop().catch((err) => {
-        logger.warn("Error stopping previous SignalR connection:", err);
+      currentConnectionRef.current.stop().catch(err => {
+        logger.warn('Error stopping previous SignalR connection:', err);
       });
     }
 
     // Check if this is an OAuth login redirect
     const pageParams = new URLSearchParams(window.location.search);
-    const oauthLogin = pageParams.get("oauthLogin");
+    const oauthLogin = pageParams.get('oauthLogin');
 
     // Build SignalR connection URL
-    let signalRUrl = `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ""}&appArgs=${appArgs ?? ""}&machineId=${machineId}&parentId=${parentId ?? ""}&chrome=${latestChromeRef.current}`;
+    let signalRUrl = `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${latestChromeRef.current}`;
     if (oauthLogin) {
       signalRUrl += `&oauthLogin=${oauthLogin}`;
       // Clean up the URL by removing the oauthLogin parameter
-      pageParams.delete("oauthLogin");
+      pageParams.delete('oauthLogin');
       const newUrl = pageParams.toString()
         ? `${window.location.pathname}?${pageParams.toString()}`
         : window.location.pathname;
-      window.history.replaceState({}, "", newUrl);
+      window.history.replaceState({}, '', newUrl);
     }
 
     const newConnection = new signalR.HubConnectionBuilder()
@@ -699,8 +729,8 @@ export const useBackend = (
 
     return () => {
       if (currentConnectionRef.current === newConnection) {
-        newConnection.stop().catch((err) => {
-          logger.warn("Error stopping SignalR connection during unmount:", err);
+        newConnection.stop().catch(err => {
+          logger.warn('Error stopping SignalR connection during unmount:', err);
         });
         currentConnectionRef.current = null;
       }
@@ -709,134 +739,159 @@ export const useBackend = (
         rootAppIdRef.current = undefined;
       }
     };
-  }, [appArgs, stableAppId, machineId, parentId, stableChrome, isRootConnection]);
+  }, [
+    appArgs,
+    stableAppId,
+    machineId,
+    parentId,
+    stableChrome,
+    isRootConnection,
+  ]);
 
   useEffect(() => {
-    if (connection && connection.state === signalR.HubConnectionState.Disconnected) {
+    if (
+      connection &&
+      connection.state === signalR.HubConnectionState.Disconnected
+    ) {
       isStoppingRef.current = false;
       connection
         .start()
         .then(() => {
-          logger.info("✅ WebSocket connection established for:", {
+          logger.info('✅ WebSocket connection established for:', {
             appId: latestAppIdRef.current,
             parentId,
             connectionId: connection.connectionId,
           });
 
-          connection.on("Refresh", (message) => {
+          connection.on('Refresh', message => {
             logger.debug(`[${connection.connectionId}] Refresh`, message);
             handleRefreshMessage(message);
           });
 
-          connection.on("Update", (message) => {
+          connection.on('Update', message => {
             logger.debug(`[${connection.connectionId}] Update`, message);
             handleUpdateMessage(message);
           });
 
           connection.on(
-            "Toast",
-            (message: { title?: string; description?: string; variant?: string | number }) => {
+            'Toast',
+            (message: {
+              title?: string;
+              description?: string;
+              variant?: string | number;
+            }) => {
               logger.debug(`[${connection.connectionId}] Toast`, message);
 
               const { variant, ...rest } = message;
-              let variantStr = "default";
+              let variantStr = 'default';
 
-              if (typeof variant === "string") {
+              if (typeof variant === 'string') {
                 variantStr = variant.toLowerCase();
-              } else if (typeof variant === "number") {
-                const variantMap = ["default", "destructive", "success", "warning", "info"];
-                variantStr = variantMap[variant] || "default";
+              } else if (typeof variant === 'number') {
+                const variantMap = [
+                  'default',
+                  'destructive',
+                  'success',
+                  'warning',
+                  'info',
+                ];
+                variantStr = variantMap[variant] || 'default';
               }
 
               toast({
                 ...rest,
-                variant: variantStr as "default" | "destructive" | "success" | "warning" | "info",
+                variant: variantStr as
+                  | 'default'
+                  | 'destructive'
+                  | 'success'
+                  | 'warning'
+                  | 'info',
               });
-            },
+            }
           );
 
-          connection.on("Error", (message) => {
+          connection.on('Error', message => {
             logger.debug(`[${connection.connectionId}] Error`, message);
             handleError(message);
           });
 
-          connection.on("SetAuthCookies", (message) => {
+          connection.on('SetAuthCookies', message => {
             logger.debug(`[${connection.connectionId}] SetAuthCookies`);
             handleSetAuthCookies(message);
           });
 
-          connection.on("SetRootAppId", (message: { rootAppId: string }) => {
+          connection.on('SetRootAppId', (message: { rootAppId: string }) => {
             logger.debug(`[${connection.connectionId}] SetRootAppId`, {
               rootAppId: message.rootAppId,
             });
             rootAppIdRef.current = message.rootAppId;
           });
 
-          connection.on("SetTheme", (theme) => {
+          connection.on('SetTheme', theme => {
             logger.debug(`[${connection.connectionId}] SetTheme`, { theme });
             handleSetTheme(theme);
           });
 
-          connection.on("SetTitle", (title: string) => {
+          connection.on('SetTitle', (title: string) => {
             logger.debug(`[${connection.connectionId}] SetTitle`, { title });
             document.title = title;
           });
 
-          connection.on("CopyToClipboard", (text: string) => {
+          connection.on('CopyToClipboard', (text: string) => {
             logger.debug(`[${connection.connectionId}] CopyToClipboard`);
             navigator.clipboard.writeText(text);
           });
 
-          connection.on("OpenUrl", (url: string) => {
+          connection.on('OpenUrl', (url: string) => {
             logger.debug(`[${connection.connectionId}] OpenUrl`, { url });
             // Validate URL to prevent open redirect vulnerabilities
             const validatedUrl = validateLinkUrl(url);
-            if (validatedUrl !== "#") {
-              window.open(validatedUrl, "_blank", "noopener,noreferrer");
+            if (validatedUrl !== '#') {
+              window.open(validatedUrl, '_blank', 'noopener,noreferrer');
             } else {
-              logger.warn("Invalid OpenUrl request rejected", { url });
+              logger.warn('Invalid OpenUrl request rejected', { url });
             }
           });
 
-          connection.on("Redirect", (message) => {
+          connection.on('Redirect', message => {
             logger.debug(`[${connection.connectionId}] Redirect`, message);
             handleRedirect(message);
           });
 
-          connection.on("ApplyTheme", (css: string) => {
+          connection.on('ApplyTheme', (css: string) => {
             logger.debug(`[${connection.connectionId}] ApplyTheme`);
 
             // Remove existing custom theme style if any
-            const existingStyle = document.getElementById("ivy-custom-theme");
+            const existingStyle = document.getElementById('ivy-custom-theme');
             if (existingStyle) {
               existingStyle.remove();
             }
 
             // Create and inject the new style element
-            const styleElement = document.createElement("style");
-            styleElement.id = "ivy-custom-theme";
+            const styleElement = document.createElement('style');
+            styleElement.id = 'ivy-custom-theme';
             styleElement.innerHTML = css
-              .replace('<style id="ivy-custom-theme">', "")
-              .replace("</style>", "");
+              .replace('<style id="ivy-custom-theme">', '')
+              .replace('</style>', '');
             document.head.appendChild(styleElement);
           });
 
-          connection.on("HotReload", () => {
+          connection.on('HotReload', () => {
             logger.debug(`[${connection.connectionId}] HotReload`);
             handleHotReloadMessage();
           });
 
-          connection.on("ReloadPage", () => {
+          connection.on('ReloadPage', () => {
             logger.debug(`[${connection.connectionId}] ReloadPage`);
             window.location.reload();
           });
 
-          connection.on("RefreshAuthFromCookies", () => {
+          connection.on('RefreshAuthFromCookies', () => {
             logger.debug(`[${connection.connectionId}] RefreshAuthFromCookies`);
             refreshAuthFromCookies(connection.connectionId);
           });
 
-          connection.on("HttpRequest", (message) => {
+          connection.on('HttpRequest', message => {
             logger.debug(`[${connection.connectionId}] HttpRequest`, {
               requestId: message.requestId,
               method: message.method,
@@ -845,7 +900,7 @@ export const useBackend = (
             handleHttpRequest(message);
           });
 
-          connection.on("StreamData", (message: StreamDataMessage) => {
+          connection.on('StreamData', (message: StreamDataMessage) => {
             const handler = streamRegistryRef.current.get(message.streamId);
             if (handler) {
               handler(message.data);
@@ -877,37 +932,40 @@ export const useBackend = (
             setDisconnected(true);
           });
         })
-        .catch((e) => {
-          logger.error("SignalR connection failed:", e);
+        .catch(e => {
+          logger.error('SignalR connection failed:', e);
         });
 
       return () => {
         isStoppingRef.current = true;
 
-        connection.off("Refresh");
-        connection.off("Update");
-        connection.off("Toast");
-        connection.off("Error");
-        connection.off("CopyToClipboard");
-        connection.off("HotReload");
-        connection.off("ReloadPage");
-        connection.off("HttpRequest");
-        connection.off("StreamData");
-        connection.off("SetAuthCookies");
-        connection.off("SetRootAppId");
-        connection.off("SetTheme");
-        connection.off("SetTitle");
-        connection.off("OpenUrl");
-        connection.off("Redirect");
-        connection.off("ApplyTheme");
-        connection.off("reconnecting");
-        connection.off("reconnected");
-        connection.off("close");
+        connection.off('Refresh');
+        connection.off('Update');
+        connection.off('Toast');
+        connection.off('Error');
+        connection.off('CopyToClipboard');
+        connection.off('HotReload');
+        connection.off('ReloadPage');
+        connection.off('HttpRequest');
+        connection.off('StreamData');
+        connection.off('SetAuthCookies');
+        connection.off('SetRootAppId');
+        connection.off('SetTheme');
+        connection.off('SetTitle');
+        connection.off('OpenUrl');
+        connection.off('Redirect');
+        connection.off('ApplyTheme');
+        connection.off('reconnecting');
+        connection.off('reconnected');
+        connection.off('close');
 
         // Stop and dispose the connection when the component unmounts or connection changes
         if (connection.state !== signalR.HubConnectionState.Disconnected) {
-          connection.stop().catch((err) => {
-            logger.warn("Error stopping SignalR connection during cleanup:", err);
+          connection.stop().catch(err => {
+            logger.warn(
+              'Error stopping SignalR connection during cleanup:',
+              err
+            );
           });
         }
       };
@@ -929,29 +987,29 @@ export const useBackend = (
 
   const eventHandler: WidgetEventHandlerType = useCallback(
     (eventName, widgetId, args) => {
-      logger.info("[Event] Sending:", { eventName, widgetId, args });
+      logger.info('[Event] Sending:', { eventName, widgetId, args });
       logger.debug(`[${connectionId}] Event: ${eventName}`, { widgetId, args });
       if (!connection) {
-        logger.warn("[Event] No SignalR connection available for event:", {
+        logger.warn('[Event] No SignalR connection available for event:', {
           eventName,
           widgetId,
         });
         return;
       }
       connection
-        .invoke("Event", eventName, widgetId, args)
+        .invoke('Event', eventName, widgetId, args)
         .then(() => {
-          logger.debug("[Event] Invoke succeeded:", { eventName, widgetId });
+          logger.debug('[Event] Invoke succeeded:', { eventName, widgetId });
         })
-        .catch((err) => {
-          logger.error("[Event] Invoke failed:", {
+        .catch(err => {
+          logger.error('[Event] Invoke failed:', {
             eventName,
             widgetId,
             error: err,
           });
         });
     },
-    [connection, connectionId],
+    [connection, connectionId]
   );
 
   const subscribeToStream: StreamSubscriber = useCallback(
@@ -968,14 +1026,16 @@ export const useBackend = (
       }
 
       // Notify backend that we're subscribed so it can flush any buffered data
-      latestConnectionRef.current?.invoke("StreamSubscribe", streamId).catch((err) => {
-        logger.error("Failed to notify stream subscription:", err);
-      });
+      latestConnectionRef.current
+        ?.invoke('StreamSubscribe', streamId)
+        .catch(err => {
+          logger.error('Failed to notify stream subscription:', err);
+        });
       return () => {
         streamRegistryRef.current.delete(streamId);
       };
     },
-    [],
+    []
   );
 
   return {

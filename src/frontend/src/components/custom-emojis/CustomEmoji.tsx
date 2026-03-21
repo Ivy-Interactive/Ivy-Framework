@@ -1,5 +1,5 @@
-import { memo } from "react";
-import { emojiMap } from "./emojiMap";
+import { memo } from 'react';
+import { emojiMap } from './emojiMap';
 
 export const CustomEmoji = memo(({ name }: { name: string }) => {
   // Check if emoji exists in map
@@ -14,10 +14,10 @@ export const CustomEmoji = memo(({ name }: { name: string }) => {
       src={emoji.src}
       alt={name}
       style={{
-        width: "18px",
-        height: "18px",
-        verticalAlign: "text-top",
-        display: "inline-block",
+        width: '18px',
+        height: '18px',
+        verticalAlign: 'text-top',
+        display: 'inline-block',
       }}
     />
   );

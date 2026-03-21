@@ -1,1 +1,1 @@
-export * from "./DropDownMenuWidget";
+export * from './DropDownMenuWidget';

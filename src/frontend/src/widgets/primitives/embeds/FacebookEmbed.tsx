@@ -1,7 +1,7 @@
-import React from "react";
-import { sanitizeUrl, sanitizeText } from "./shared";
-import EmbedCard from "./EmbedCard";
-import EmbedErrorFallback from "./EmbedErrorFallback";
+import React from 'react';
+import { sanitizeUrl, sanitizeText } from './shared';
+import EmbedCard from './EmbedCard';
+import EmbedErrorFallback from './EmbedErrorFallback';
 
 interface FacebookEmbedProps {
   url: string;
@@ -19,7 +19,7 @@ const FacebookEmbed: React.FC<FacebookEmbedProps> = ({ url }) => {
     if (match) {
       return sanitizeText(match[1]);
     }
-    return "Facebook";
+    return 'Facebook';
   };
 
   const pageName = extractPageName(url);

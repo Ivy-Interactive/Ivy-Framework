@@ -5,7 +5,7 @@
  */
 function extractAppProtocolContent(url: string): string {
   const match = url.match(/^app:\/\/(.+)$/);
-  return match ? match[1] : "";
+  return match ? match[1] : '';
 }
 
 /**
@@ -15,7 +15,7 @@ function extractAppProtocolContent(url: string): string {
  */
 export function extractAnchorId(url: string): string {
   const match = url.match(/^#(.+)$/);
-  return match ? match[1] : "";
+  return match ? match[1] : '';
 }
 
 /**
@@ -23,8 +23,8 @@ export function extractAnchorId(url: string): string {
  * Exported for testing purposes - can be mocked in tests.
  */
 export function getCurrentOrigin(): string {
-  if (typeof window === "undefined" || !window.location) {
-    return "";
+  if (typeof window === 'undefined' || !window.location) {
+    return '';
   }
   return window.location.origin;
 }
@@ -47,7 +47,9 @@ function normalizeOrigin(origin: string): string {
 
   try {
     // Ensure the origin has a protocol for parsing
-    const originWithProtocol = origin.includes("://") ? origin : `https://${origin}`;
+    const originWithProtocol = origin.includes('://')
+      ? origin
+      : `https://${origin}`;
 
     const url = new URL(originWithProtocol);
     // url.origin already excludes default ports (443 for https, 80 for http)
@@ -62,15 +64,15 @@ function normalizeOrigin(origin: string): string {
  * URL type detection helpers
  */
 export function isExternalUrl(url: string): boolean {
-  return url.startsWith("http://") || url.startsWith("https://");
+  return url.startsWith('http://') || url.startsWith('https://');
 }
 
 export function isAnchorLink(url: string): boolean {
-  return url.startsWith("#");
+  return /^#/.test(url);
 }
 
 export function isAppProtocol(url: string): boolean {
-  return url.startsWith("app://");
+  return /^app:\/\//.test(url);
 }
 
 export function isMailtoUrl(url: string): boolean {
@@ -78,15 +80,15 @@ export function isMailtoUrl(url: string): boolean {
 }
 
 export function isRelativePath(url: string): boolean {
-  return url.startsWith("/");
+  return url.startsWith('/');
 }
 
 export function isDataUrl(url: string): boolean {
-  return url.startsWith("data:");
+  return url.startsWith('data:');
 }
 
 export function isBlobUrl(url: string): boolean {
-  return url.startsWith("blob:");
+  return url.startsWith('blob:');
 }
 
 /**
@@ -94,7 +96,12 @@ export function isBlobUrl(url: string): boolean {
  * (external http/https, anchor links, app://, or relative paths)
  */
 export function isStandardUrl(url: string): boolean {
-  return isExternalUrl(url) || isAnchorLink(url) || isAppProtocol(url) || isRelativePath(url);
+  return (
+    isExternalUrl(url) ||
+    isAnchorLink(url) ||
+    isAppProtocol(url) ||
+    isRelativePath(url)
+  );
 }
 
 /**
@@ -109,7 +116,7 @@ export function isFullUrl(url: string): boolean {
  * Normalizes a relative path by ensuring it starts with a leading slash
  */
 export function normalizeRelativePath(path: string): string {
-  return path.startsWith("/") ? path : `/${path}`;
+  return path.startsWith('/') ? path : `/${path}`;
 }
 
 /**
@@ -123,9 +130,9 @@ export function normalizeRelativePath(path: string): string {
  */
 export function validateRedirectUrl(
   url: string | null | undefined,
-  allowExternal: boolean = false,
+  allowExternal: boolean = false
 ): string | null {
-  if (!url || typeof url !== "string") {
+  if (!url || typeof url !== 'string') {
     return null;
   }
 
@@ -133,7 +140,7 @@ export function validateRedirectUrl(
   url = url.trim();
 
   // Allow relative paths (starting with /)
-  if (url.startsWith("/")) {
+  if (url.startsWith('/')) {
     // Validate it's a safe relative path (no protocol, no javascript:, etc.)
     if (!/^\/[^:]*$/.test(url)) {
       return null;
@@ -146,7 +153,7 @@ export function validateRedirectUrl(
     const urlObj = new URL(url);
 
     // Only allow http and https protocols
-    if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
       return null;
     }
 
@@ -175,16 +182,16 @@ export function validateRedirectUrl(
  * @returns The sanitized URL if valid, '#' otherwise
  */
 export function validateLinkUrl(url: string | null | undefined): string {
-  if (!url || typeof url !== "string") {
-    return "#";
+  if (!url || typeof url !== 'string') {
+    return '#';
   }
 
   // Trim whitespace
   url = url.trim();
 
   // Handle empty string after trimming
-  if (url === "") {
-    return "#";
+  if (url === '') {
+    return '#';
   }
 
   // Allow mailto: URLs for email links
@@ -192,59 +199,59 @@ export function validateLinkUrl(url: string | null | undefined): string {
     // Basic validation: must have at least one character after mailto:
     // and should not contain dangerous characters or protocol injection
     const afterProtocol = url.substring(7); // After "mailto:"
-    if (!afterProtocol || afterProtocol.trim() === "") {
-      return "#";
+    if (!afterProtocol || afterProtocol.trim() === '') {
+      return '#';
     }
     // Check for protocol injection
-    if (afterProtocol.includes("://")) {
-      return "#";
+    if (afterProtocol.includes('://')) {
+      return '#';
     }
     // Validate mailto format: mailto:email@domain.com[?subject=...&body=...]
     // Allow query parameters for subject, body, cc, bcc but disallow fragments
     if (!/^mailto:[^#]+$/i.test(url)) {
-      return "#";
+      return '#';
     }
     return url;
   }
 
   // Allow app:// URLs (Ivy internal navigation)
-  if (url.startsWith("app://")) {
+  if (/^app:\/\//.test(url)) {
     // Validate app:// URLs don't contain dangerous characters
     // Pattern: app://[app-id][?query-params] where app-id has no colons/hashes, query-params have no #
     if (!/^app:\/\/[^:#]*(\?[^#]*)?$/.test(url)) {
-      return "#";
+      return '#';
     }
     // Additional check: prevent protocol injection attempts
     // Catches '://' in query params and colons that could be used for protocol injection
     const afterProtocol = extractAppProtocolContent(url);
-    if (afterProtocol.includes("://") || afterProtocol.match(/:[^?&/]/)) {
-      return "#";
+    if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
+      return '#';
     }
     return url;
   }
 
   // Allow anchor links (starting with #)
   // Use inline regex pattern matching
-  if (url.startsWith("#")) {
+  if (/^#/.test(url)) {
     // Validate anchor links are safe
     // Allow colons in anchor IDs (HTML5 allows this), but prevent query params and fragments
     // Pattern: #[anchor-id] where anchor-id can contain colons but not ? or &
     if (!/^#[^?&]*$/.test(url)) {
-      return "#";
+      return '#';
     }
     // Additional check: prevent protocol injection attempts
     const afterHash = extractAnchorId(url);
-    if (afterHash.includes("://")) {
-      return "#";
+    if (afterHash.includes('://')) {
+      return '#';
     }
     return url;
   }
 
   // Allow relative paths (starting with /)
-  if (url.startsWith("/")) {
+  if (url.startsWith('/')) {
     // Validate it's a safe relative path
     if (!/^\/[^:]*$/.test(url)) {
-      return "#";
+      return '#';
     }
     return url;
   }
@@ -254,18 +261,18 @@ export function validateLinkUrl(url: string | null | undefined): string {
     const urlObj = new URL(url);
 
     // Only allow http and https protocols (prevent javascript:, data:, etc.)
-    if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
-      return "#";
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return '#';
     }
 
     return urlObj.toString();
   } catch {
     // Invalid URL format - treat as relative if it doesn't contain colons
-    if (!url.includes(":")) {
+    if (!url.includes(':')) {
       // Might be a relative path without leading slash
-      return url.startsWith("/") ? url : `/${url}`;
+      return url.startsWith('/') ? url : `/${url}`;
     }
-    return "#";
+    return '#';
   }
 }
 
@@ -277,7 +284,7 @@ export interface ValidateMediaUrlOptions {
    * Media type for data URL validation (e.g., 'image', 'audio', 'video')
    * If not specified, data URLs are rejected
    */
-  mediaType?: "image" | "audio" | "video";
+  mediaType?: 'image' | 'audio' | 'video';
   /**
    * Allowed protocols (default: ['http:', 'https:', 'data:', 'blob:', 'app:'])
    */
@@ -298,9 +305,9 @@ export interface ValidateMediaUrlOptions {
  */
 export function validateMediaUrl(
   url: string | null | undefined,
-  options: ValidateMediaUrlOptions = {},
+  options: ValidateMediaUrlOptions = {}
 ): string | null {
-  if (!url || typeof url !== "string") {
+  if (!url || typeof url !== 'string') {
     return null;
   }
 
@@ -308,21 +315,21 @@ export function validateMediaUrl(
   url = url.trim();
 
   // Handle empty string after trimming
-  if (url === "") {
+  if (url === '') {
     return null;
   }
 
   const {
     mediaType,
-    allowedProtocols = ["http:", "https:", "data:", "blob:", "app:"],
+    allowedProtocols = ['http:', 'https:', 'data:', 'blob:', 'app:'],
     allowExternal = true,
   } = options;
 
   // Allow data: URLs (for base64 encoded media)
-  if (url.startsWith("data:")) {
+  if (url.startsWith('data:')) {
     // If mediaType is specified, validate that it matches
     if (mediaType) {
-      const dataUrlPattern = new RegExp(`^data:${mediaType}/`, "i");
+      const dataUrlPattern = new RegExp(`^data:${mediaType}/`, 'i');
       if (!dataUrlPattern.test(url)) {
         return null;
       }
@@ -334,7 +341,7 @@ export function validateMediaUrl(
   }
 
   // Allow blob: URLs (for client-side generated media)
-  if (url.startsWith("blob:")) {
+  if (url.startsWith('blob:')) {
     // Additional validation: ensure blob URL's origin matches current origin
     // This prevents attacks like blob:https://attacker.com/uuid
     // Blob URLs have format: blob:<origin>/<uuid>
@@ -353,7 +360,7 @@ export function validateMediaUrl(
       const blobUrlWithoutPrefix = url.substring(5); // Remove "blob:"
 
       // Find the protocol separator "://"
-      const protocolIndex = blobUrlWithoutPrefix.indexOf("://");
+      const protocolIndex = blobUrlWithoutPrefix.indexOf('://');
       if (protocolIndex === -1) {
         // Invalid blob URL format (no protocol)
         return null;
@@ -362,7 +369,7 @@ export function validateMediaUrl(
       // Find the first "/" after the protocol and hostname
       // The origin ends at the first "/" that comes after "://"
       const afterProtocol = blobUrlWithoutPrefix.substring(protocolIndex + 3);
-      const firstSlashIndex = afterProtocol.indexOf("/");
+      const firstSlashIndex = afterProtocol.indexOf('/');
 
       if (firstSlashIndex === -1) {
         // Invalid blob URL format (no slash after origin)
@@ -370,7 +377,10 @@ export function validateMediaUrl(
       }
 
       // Extract origin: protocol + "://" + hostname (and optional port)
-      const blobOrigin = blobUrlWithoutPrefix.substring(0, protocolIndex + 3 + firstSlashIndex);
+      const blobOrigin = blobUrlWithoutPrefix.substring(
+        0,
+        protocolIndex + 3 + firstSlashIndex
+      );
 
       // Normalize origins for comparison (handle default ports)
       const normalizedBlobOrigin = normalizeOrigin(blobOrigin);
@@ -386,7 +396,7 @@ export function validateMediaUrl(
   }
 
   // Allow app:// URLs (Ivy internal navigation)
-  if (url.startsWith("app://")) {
+  if (/^app:\/\//.test(url)) {
     // Validate app:// URLs don't contain dangerous characters
     // Pattern: app://[app-id][?query-params] where app-id has no colons/hashes, query-params have no #
     if (!/^app:\/\/[^:#]*(\?[^#]*)?$/.test(url)) {
@@ -395,14 +405,14 @@ export function validateMediaUrl(
     // Additional check: prevent protocol injection attempts
     // Catches '://' in query params and colons that could be used for protocol injection
     const afterProtocol = extractAppProtocolContent(url);
-    if (afterProtocol.includes("://") || afterProtocol.match(/:[^?&/]/)) {
+    if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
       return null;
     }
     return url;
   }
 
   // Allow relative paths (starting with /)
-  if (url.startsWith("/")) {
+  if (url.startsWith('/')) {
     // Validate it's a safe relative path (no protocol, no javascript:, etc.)
     if (!/^\/[^:]*$/.test(url)) {
       return null;
@@ -420,7 +430,10 @@ export function validateMediaUrl(
     }
 
     // If external URLs are not allowed, only allow same-origin
-    if (!allowExternal && (urlObj.protocol === "http:" || urlObj.protocol === "https:")) {
+    if (
+      !allowExternal &&
+      (urlObj.protocol === 'http:' || urlObj.protocol === 'https:')
+    ) {
       const currentOrigin = _getCurrentOriginRef.getCurrentOrigin();
       if (!currentOrigin || urlObj.origin !== currentOrigin) {
         return null;
@@ -430,9 +443,9 @@ export function validateMediaUrl(
     return urlObj.toString();
   } catch {
     // Invalid URL format - treat as relative if it doesn't contain colons
-    if (!url.includes(":")) {
+    if (!url.includes(':')) {
       // Might be a relative path without leading slash
-      return url.startsWith("/") ? url : `/${url}`;
+      return url.startsWith('/') ? url : `/${url}`;
     }
     return null;
   }
@@ -444,8 +457,10 @@ export function validateMediaUrl(
  * @param url - The image URL to validate
  * @returns The sanitized URL if valid, null otherwise
  */
-export function validateImageUrl(url: string | null | undefined): string | null {
-  return validateMediaUrl(url, { mediaType: "image" });
+export function validateImageUrl(
+  url: string | null | undefined
+): string | null {
+  return validateMediaUrl(url, { mediaType: 'image' });
 }
 
 /**
@@ -455,8 +470,10 @@ export function validateImageUrl(url: string | null | undefined): string | null 
  * @param url - The audio URL to validate
  * @returns The sanitized URL if valid, null otherwise
  */
-export function validateAudioUrl(url: string | null | undefined): string | null {
-  return validateMediaUrl(url, { mediaType: "audio" });
+export function validateAudioUrl(
+  url: string | null | undefined
+): string | null {
+  return validateMediaUrl(url, { mediaType: 'audio' });
 }
 
 /**
@@ -467,8 +484,10 @@ export function validateAudioUrl(url: string | null | undefined): string | null 
  * @param url - The video URL to validate
  * @returns The sanitized URL if valid, null otherwise
  */
-export function validateVideoUrl(url: string | null | undefined): string | null {
-  return validateMediaUrl(url, { mediaType: "video" });
+export function validateVideoUrl(
+  url: string | null | undefined
+): string | null {
+  return validateMediaUrl(url, { mediaType: 'video' });
 }
 
 /**
@@ -478,19 +497,19 @@ export function validateVideoUrl(url: string | null | undefined): string | null 
  * - https://youtube.com.evil.com (subdomain attacks)
  */
 const EMBED_HOST_TO_PLATFORM: Record<string, string> = {
-  "youtube.com": "youtube",
-  "youtu.be": "youtube",
-  "twitter.com": "twitter",
-  "x.com": "twitter",
-  "facebook.com": "facebook",
-  "instagram.com": "instagram",
-  "linkedin.com": "linkedin",
-  "pinterest.com": "pinterest",
-  "pin.it": "pinterest",
-  "github.com": "github",
-  "gist.github.com": "github",
-  "reddit.com": "reddit",
-  "tiktok.com": "tiktok",
+  'youtube.com': 'youtube',
+  'youtu.be': 'youtube',
+  'twitter.com': 'twitter',
+  'x.com': 'twitter',
+  'facebook.com': 'facebook',
+  'instagram.com': 'instagram',
+  'linkedin.com': 'linkedin',
+  'pinterest.com': 'pinterest',
+  'pin.it': 'pinterest',
+  'github.com': 'github',
+  'gist.github.com': 'github',
+  'reddit.com': 'reddit',
+  'tiktok.com': 'tiktok',
 };
 
 /**
@@ -502,8 +521,10 @@ const EMBED_HOST_TO_PLATFORM: Record<string, string> = {
  * @param url - The embed URL to validate
  * @returns The platform name if valid, null otherwise
  */
-export function validateEmbedUrl(url: string | null | undefined): string | null {
-  if (!url || typeof url !== "string") {
+export function validateEmbedUrl(
+  url: string | null | undefined
+): string | null {
+  if (!url || typeof url !== 'string') {
     return null;
   }
 
@@ -511,7 +532,7 @@ export function validateEmbedUrl(url: string | null | undefined): string | null 
   url = url.trim();
 
   // Handle empty string after trimming
-  if (url === "") {
+  if (url === '') {
     return null;
   }
 
@@ -519,7 +540,7 @@ export function validateEmbedUrl(url: string | null | undefined): string | null 
     const urlObj = new URL(url);
 
     // Only allow http and https protocols
-    if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
       return null;
     }
 
@@ -527,8 +548,10 @@ export function validateEmbedUrl(url: string | null | undefined): string | null 
     const hostname = urlObj.hostname.toLowerCase();
 
     // Check if hostname matches any allowed host (exact match or subdomain)
-    for (const [allowedHost, platform] of Object.entries(EMBED_HOST_TO_PLATFORM)) {
-      if (hostname === allowedHost || hostname.endsWith("." + allowedHost)) {
+    for (const [allowedHost, platform] of Object.entries(
+      EMBED_HOST_TO_PLATFORM
+    )) {
+      if (hostname === allowedHost || hostname.endsWith('.' + allowedHost)) {
         return platform;
       }
     }

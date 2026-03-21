@@ -4,7 +4,7 @@
  */
 
 // Local storage key for developer options
-const DEVELOPER_OPTIONS_KEY = "ivy-developer-options";
+const DEVELOPER_OPTIONS_KEY = 'ivy-developer-options';
 
 // Global developer options state (cached from localStorage)
 let developerOptions = {
@@ -19,7 +19,7 @@ const getDeveloperOptionsFromStorage = () => {
       return JSON.parse(stored);
     }
   } catch (error) {
-    console.warn("Failed to parse developer options from localStorage:", error);
+    console.warn('Failed to parse developer options from localStorage:', error);
   }
   return { showDetailedLogging: false };
 };
@@ -30,7 +30,9 @@ const initializeDeveloperOptions = () => {
 };
 
 // Function to update developer options in localStorage and update cached state
-export const setDeveloperOptions = (options: { showDetailedLogging: boolean }) => {
+export const setDeveloperOptions = (options: {
+  showDetailedLogging: boolean;
+}) => {
   try {
     const currentOptions = getDeveloperOptionsFromStorage();
     const newOptions = { ...currentOptions, ...options };
@@ -39,9 +41,9 @@ export const setDeveloperOptions = (options: { showDetailedLogging: boolean }) =
     // Update cached state
     developerOptions = newOptions;
 
-    console.info("Developer options updated:", newOptions);
+    console.info('Developer options updated:', newOptions);
   } catch (error) {
-    console.warn("Failed to save developer options to localStorage:", error);
+    console.warn('Failed to save developer options to localStorage:', error);
   }
 };
 
@@ -54,18 +56,18 @@ export const getCurrentDeveloperOptions = () => {
 export const toggleDeveloperLogging = () => {
   const newValue = !developerOptions.showDetailedLogging;
   setDeveloperOptions({ showDetailedLogging: newValue });
-  console.info(`Developer logging ${newValue ? "enabled" : "disabled"}`);
+  console.info(`Developer logging ${newValue ? 'enabled' : 'disabled'}`);
   return newValue;
 };
 
 // Make it available globally for console access
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   // Initialize on first load
   initializeDeveloperOptions();
 
-  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).toggleDeveloperLogging = toggleDeveloperLogging;
-  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).getDeveloperOptions = getCurrentDeveloperOptions;
 }
 
@@ -75,10 +77,10 @@ class Logger {
    */
   private formatTime(): string {
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
 
     return `${hours}:${minutes}:${seconds}:${milliseconds}`;
   }

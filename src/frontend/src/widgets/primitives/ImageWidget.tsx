@@ -1,5 +1,5 @@
-import { getHeight, getWidth } from "@/lib/styles";
-import { getIvyHost, convertAppUrlToPath } from "@/lib/utils";
+import { getHeight, getWidth } from '@/lib/styles';
+import { getIvyHost, convertAppUrlToPath } from '@/lib/utils';
 import {
   validateImageUrl,
   isFullUrl,
@@ -7,9 +7,9 @@ import {
   validateLinkUrl,
   isExternalUrl,
   isAppProtocol,
-} from "@/lib/url";
-import { useEventHandler } from "@/components/event-handler";
-import React, { useCallback } from "react";
+} from '@/lib/url';
+import { useEventHandler } from '@/components/event-handler';
+import React, { useCallback } from 'react';
 
 interface ImageWidgetProps {
   id: string;
@@ -17,7 +17,7 @@ interface ImageWidgetProps {
   alt?: string;
   caption?: string;
   link?: string;
-  objectFit?: "Cover" | "Contain" | "Fill" | "None" | "ScaleDown";
+  objectFit?: 'Cover' | 'Contain' | 'Fill' | 'None' | 'ScaleDown';
   events?: string[];
   width?: string;
   height?: string;
@@ -43,9 +43,11 @@ const getImageUrl = (url: string | undefined | null): string | null => {
   return `${getIvyHost()}${relativePath}`;
 };
 
-const getLinkProps = (link: string): { href: string; target?: string; rel?: string } | null => {
+const getLinkProps = (
+  link: string
+): { href: string; target?: string; rel?: string } | null => {
   const validatedUrl = validateLinkUrl(link);
-  if (validatedUrl === "#") return null;
+  if (validatedUrl === '#') return null;
 
   if (isAppProtocol(validatedUrl)) {
     return { href: convertAppUrlToPath(validatedUrl) };
@@ -54,8 +56,8 @@ const getLinkProps = (link: string): { href: string; target?: string; rel?: stri
   if (isExternalUrl(validatedUrl)) {
     return {
       href: validatedUrl,
-      target: "_blank",
-      rel: "noopener noreferrer",
+      target: '_blank',
+      rel: 'noopener noreferrer',
     };
   }
 
@@ -64,12 +66,12 @@ const getLinkProps = (link: string): { href: string; target?: string; rel?: stri
   return { href: `${getIvyHost()}${relativePath}` };
 };
 
-const objectFitMap: Record<string, React.CSSProperties["objectFit"]> = {
-  Cover: "cover",
-  Contain: "contain",
-  Fill: "fill",
-  None: "none",
-  ScaleDown: "scale-down",
+const objectFitMap: Record<string, React.CSSProperties['objectFit']> = {
+  Cover: 'cover',
+  Contain: 'contain',
+  Fill: 'fill',
+  None: 'none',
+  ScaleDown: 'scale-down',
 };
 
 export const ImageWidget: React.FC<ImageWidgetProps> = ({
@@ -80,14 +82,14 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
   link,
   objectFit,
   events,
-  width = "MinContent",
-  height = "MinContent",
+  width = 'MinContent',
+  height = 'MinContent',
 }) => {
   const eventHandler = useEventHandler();
-  const hasOnClick = events?.includes("OnClick") ?? false;
+  const hasOnClick = events?.includes('OnClick') ?? false;
 
   const handleClick = useCallback(() => {
-    if (hasOnClick) eventHandler("OnClick", id, []);
+    if (hasOnClick) eventHandler('OnClick', id, []);
   }, [id, eventHandler, hasOnClick]);
 
   const styles: React.CSSProperties = {
@@ -108,7 +110,9 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
         role="alert"
         aria-label="Invalid image URL"
       >
-        <span className="text-sm">{!src ? "No image source provided" : "Invalid image URL"}</span>
+        <span className="text-sm">
+          {!src ? 'No image source provided' : 'Invalid image URL'}
+        </span>
       </div>
     );
   }
@@ -116,26 +120,31 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
   // OnClick takes precedence over Link
   const linkProps = !hasOnClick && link ? getLinkProps(link) : null;
 
-  const altText = alt ?? caption ?? "";
+  const altText = alt ?? caption ?? '';
 
   const clickProps = hasOnClick
-    ? { onClick: handleClick, style: { cursor: "pointer" as const } }
+    ? { onClick: handleClick, style: { cursor: 'pointer' as const } }
     : {};
 
   const imgStyles: React.CSSProperties = objectFit
     ? {
-        width: "100%",
-        height: "100%",
+        width: '100%',
+        height: '100%',
         objectFit: objectFitMap[objectFit],
       }
     : {};
 
   const imgElement = (
-    <img src={validatedImageSrc} alt={altText} style={imgStyles} {...clickProps} />
+    <img
+      src={validatedImageSrc}
+      alt={altText}
+      style={imgStyles}
+      {...clickProps}
+    />
   );
 
   const wrappedImg = linkProps ? (
-    <a {...linkProps} style={{ cursor: "pointer" }}>
+    <a {...linkProps} style={{ cursor: 'pointer' }}>
       {imgElement}
     </a>
   ) : (
@@ -146,14 +155,16 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
     return (
       <figure key={id} style={styles} className="flex flex-col items-center">
         {wrappedImg}
-        <figcaption className="text-sm text-muted-foreground mt-1">{caption}</figcaption>
+        <figcaption className="text-sm text-muted-foreground mt-1">
+          {caption}
+        </figcaption>
       </figure>
     );
   }
 
   if (linkProps) {
     return (
-      <a key={id} {...linkProps} style={{ ...styles, cursor: "pointer" }}>
+      <a key={id} {...linkProps} style={{ ...styles, cursor: 'pointer' }}>
         <img src={validatedImageSrc} alt={altText} style={imgStyles} />
       </a>
     );
@@ -163,7 +174,7 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
     <img
       src={validatedImageSrc}
       key={id}
-      style={{ ...styles, ...(hasOnClick ? { cursor: "pointer" } : {}) }}
+      style={{ ...styles, ...(hasOnClick ? { cursor: 'pointer' } : {}) }}
       alt={altText}
       onClick={hasOnClick ? handleClick : undefined}
     />

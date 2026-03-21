@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { sanitizeUrl, sanitizeId, loadScript } from "./shared";
-import EmbedErrorFallback from "./EmbedErrorFallback";
+import React, { useEffect, useState } from 'react';
+import { sanitizeUrl, sanitizeId, loadScript } from './shared';
+import EmbedErrorFallback from './EmbedErrorFallback';
 
 interface TikTokEmbedProps {
   url: string;
@@ -18,7 +18,7 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
 
   useEffect(() => {
     if (videoId) {
-      loadScript("https://www.tiktok.com/embed.js")
+      loadScript('https://www.tiktok.com/embed.js')
         .then(() => {
           setScriptLoaded(true);
         })
@@ -39,11 +39,16 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
         className="tiktok-embed w-full h-96 sm:h-[500px] md:h-[600px] border-0 rounded-lg shadow-md"
         cite={sanitizedUrl}
         data-video-id={videoId}
-        style={{ maxWidth: "605px", minWidth: "325px" }}
+        style={{ maxWidth: '605px', minWidth: '325px' }}
       >
         <section>
-          <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer" title="@tiktok">
-            {scriptLoaded ? "Loading TikTok video..." : "Loading script..."}
+          <a
+            href={sanitizedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="@tiktok"
+          >
+            {scriptLoaded ? 'Loading TikTok video...' : 'Loading script...'}
           </a>
         </section>
       </blockquote>

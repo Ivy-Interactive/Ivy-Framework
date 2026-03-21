@@ -19,21 +19,23 @@ jobs:
       - uses: actions/checkout@v4
 
       # Setup Node.js
-      - uses: voidzero-dev/setup-vp@v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
 
       - name: Install dependencies
         working-directory: ./src/frontend
-        run: vp install
+        run: npm ci
 
       # Frontend code quality checks
       - name: Check code formatting
         working-directory: ./src/frontend
-        run: vp fmt --check .
+        run: npm run format:check
 
       - name: Check linting
         working-directory: ./src/frontend
-        run: vp lint .
+        run: npm run lint
 
       - name: Check frontend build
         working-directory: ./src/frontend
-        run: vp build
+        run: npm run build
