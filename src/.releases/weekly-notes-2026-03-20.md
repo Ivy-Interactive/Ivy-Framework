@@ -654,42 +654,6 @@ return new AudioPlayer(downloadUrl.Value);
 
 Use stream-based downloads for any large file where loading the entire content into a `byte[]` would be wasteful or impractical. The range request support is particularly valuable for media files where users expect to seek/scrub through content.
 
-### Form Submit Strategy and Enter Key Support
-
-The **Form Builder** now supports configurable submit strategies with the new `SubmitStrategy()` method. Set your form to `FormSubmitStrategy.OnSubmit` to enable Enter key submission and use the new `OnSubmit()` callback to handle form submissions directly in the builder chain.
-
-**Basic usage with OnSubmit callback:**
-
-```csharp
-var credentials = UseState(new LoginFormModel());
-
-var formBuilder = credentials.ToForm("Login")
-    .Required(m => m.User, m => m.Password)
-    .Label(m => m.User, "User")
-    .Label(m => m.Password, "Password")
-    .Builder(m => m.User, state => state.ToTextInput())
-    .Builder(m => m.Password, state => state.ToPasswordInput())
-    .SubmitStrategy(FormSubmitStrategy.OnSubmit)
-    .SubmitTitle("Login")
-    .OnSubmit(async model =>
-    {
-        // Handle form submission here
-        // model contains validated form data
-        await auth.LoginAsync(model.User, model.Password);
-    });
-
-var (submitForm, formView, _, submitting) = formBuilder.UseForm(this.Context);
-```
-
-**What this enables:**
-
-- **Enter key submission** - Users can press Enter in any field to submit the form
-- **Cleaner code** - Handle submission logic directly in the form builder instead of in button click handlers
-- **Submit button title** - Configure the submit button text with `SubmitTitle()`
-- **Model parameter** - The `OnSubmit` callback receives the validated model, eliminating the need to read from state
-
-When `SubmitStrategy.OnSubmit` is configured, calling `submitForm()` will automatically run validation, update field errors, and invoke your `OnSubmit` callback if validation passes.
-
 ## Documentation
 
 ### Chat Tutorial Updated to Microsoft.Extensions.AI
