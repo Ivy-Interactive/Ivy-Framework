@@ -18,21 +18,6 @@ public static partial class MarkdownConverter
     private static readonly Regex SummaryStartRegex = SummaryRegex();
     private static readonly Regex BodyStartRegex = BodyRegex();
 
-    private static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
-        .UseAdvancedExtensions()
-        .UsePreciseSourceLocation()
-        .UseYamlFrontMatter()
-        .Build();
-
-    private static readonly MarkdownPipeline BodyPipeline = new MarkdownPipelineBuilder()
-        .UseAdvancedExtensions()
-        .UsePreciseSourceLocation()
-        .Build();
-
-    private static readonly IDeserializer YamlDeserializer = new DeserializerBuilder()
-        .WithNamingConvention(CamelCaseNamingConvention.Instance)
-        .Build();
-
     public class AppMeta
     {
         public string? Icon { get; set; }
@@ -49,7 +34,12 @@ public static partial class MarkdownConverter
     static AppMeta ParseYamlAppMeta(string yaml)
     {
         string withoutDashes = RemoveFirstAndLastLine(yaml);
-        return YamlDeserializer.Deserialize<AppMeta>(withoutDashes);
+
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .Build();
+
+        return deserializer.Deserialize<AppMeta>(withoutDashes);
     }
 
     public static async Task ConvertAsync(string name, string relativePath, string absolutePath, string outputFile, string @namespace, bool skipIfNotChanged,
@@ -71,9 +61,15 @@ public static partial class MarkdownConverter
             }
         }
 
-        // Console.WriteLine("Converting {0} to {1}", absolutePath, outputFile);
+        Console.WriteLine("Converting {0} to {1}", absolutePath, outputFile);
 
-        var document = Markdig.Markdown.Parse(markdownContent, Pipeline);
+        var pipeline = new MarkdownPipelineBuilder()
+            .UseAdvancedExtensions()
+            .UsePreciseSourceLocation()
+            .UseYamlFrontMatter()
+            .Build();
+
+        var document = Markdig.Markdown.Parse(markdownContent, pipeline);
 
         var documentSource = Utils.GetGitFileUrl(absolutePath);
 
@@ -421,7 +417,12 @@ public static partial class MarkdownConverter
         string bodyContent = htmlContent[bodyContentStart..bodyEnd].Trim();
 
         // Process the body content through the full markdown pipeline
-        var bodyDocument = Markdig.Markdown.Parse(bodyContent, BodyPipeline);
+        var pipeline = new MarkdownPipelineBuilder()
+            .UseAdvancedExtensions()
+            .UsePreciseSourceLocation()
+            .Build();
+
+        var bodyDocument = Markdig.Markdown.Parse(bodyContent, pipeline);
 
         // Create a temporary builder for the body content
         var bodyCodeBuilder = new StringBuilder();

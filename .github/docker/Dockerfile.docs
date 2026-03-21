@@ -6,10 +6,10 @@ WORKDIR /app
 EXPOSE 5010
 
 # Build frontend (Ivy embeds frontend/dist)
-FROM node:24-bookworm-slim AS frontend
+FROM node:20-alpine AS frontend
 WORKDIR /src
 COPY ["src/frontend/package.json", "src/frontend/pnpm-lock.yaml", "src/frontend/"]
-RUN apt-get update && apt-get install -y curl bash && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache curl bash
 RUN curl -fsSL https://vite.plus | bash
 ENV PATH="/root/.local/share/vite/bin:${PATH}"
 RUN cd src/frontend && vp install

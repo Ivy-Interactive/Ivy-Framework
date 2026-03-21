@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -282,12 +282,6 @@ public static class Utils
         return newRoot.NormalizeWhitespace().ToFullString();
     }
 
-    private static string? _cachedRemoteUrl = null;
-    private static string? _cachedRepoRoot = null;
-    private static string? _cachedBranch = null;
-    private static bool _gitInfoCached = false;
-    private static readonly object _gitInfoLock = new();
-
     public static string? GetGitFileUrl(string localFilePath)
     {
         try
@@ -296,44 +290,42 @@ public static class Utils
             if (!File.Exists(localFilePath))
                 return null;
 
-            if (!_gitInfoCached)
-            {
-                lock (_gitInfoLock)
-                {
-                    if (!_gitInfoCached)
-                    {
-                        // Get the directory containing the file
-                        string directory = Path.GetDirectoryName(localFilePath)!;
+            // Get the directory containing the file
+            string directory = Path.GetDirectoryName(localFilePath)!;
 
-                        // Get the repository remote URL
-                        string remoteUrl = RunGitCommand("config --get remote.origin.url", directory);
-                        if (string.IsNullOrEmpty(remoteUrl))
-                            throw new Exception("No remote origin found for this Git repository.");
+            // Change to the directory
+            string currentDirectory = Directory.GetCurrentDirectory();
+            Directory.SetCurrentDirectory(directory);
 
-                        _cachedRemoteUrl = ConvertToHttpsUrl(remoteUrl.Trim());
-                        _cachedRepoRoot = RunGitCommand("rev-parse --show-toplevel", directory).Trim();
-                        _cachedBranch = RunGitCommand("rev-parse --abbrev-ref HEAD", directory).Trim();
+            // Get the repository remote URL
+            string remoteUrl = RunGitCommand("config --get remote.origin.url");
+            if (string.IsNullOrEmpty(remoteUrl))
+                throw new Exception("No remote origin found for this Git repository.");
 
-                        _gitInfoCached = true;
-                    }
-                }
-            }
+            // Clean up the remote URL (convert SSH to HTTPS if needed)
+            remoteUrl = ConvertToHttpsUrl(remoteUrl.Trim());
 
-            if (string.IsNullOrEmpty(_cachedRemoteUrl) || string.IsNullOrEmpty(_cachedRepoRoot) || string.IsNullOrEmpty(_cachedBranch))
-                return null;
+            // Get the repository root directory
+            string repoRoot = RunGitCommand("rev-parse --show-toplevel").Trim();
+
+            // Get the current branch name
+            string branch = RunGitCommand("rev-parse --abbrev-ref HEAD").Trim();
 
             // Get the relative path of the file within the repo
             string relativePath = localFilePath;
-            if (!string.IsNullOrEmpty(_cachedRepoRoot))
+            if (!string.IsNullOrEmpty(repoRoot))
             {
-                relativePath = Path.GetRelativePath(_cachedRepoRoot, localFilePath);
+                relativePath = Path.GetRelativePath(repoRoot, localFilePath);
             }
 
             // Replace backslashes with forward slashes for URL
             relativePath = relativePath.Replace('\\', '/');
 
             // Construct the URL
-            string fileUrl = $"{_cachedRemoteUrl}/blob/{_cachedBranch}/{relativePath}";
+            string fileUrl = $"{remoteUrl}/blob/{branch}/{relativePath}";
+
+            // Restore the original directory
+            Directory.SetCurrentDirectory(currentDirectory);
 
             return fileUrl;
         }
@@ -343,7 +335,7 @@ public static class Utils
         }
     }
 
-    private static string RunGitCommand(string arguments, string? workingDirectory = null)
+    private static string RunGitCommand(string arguments)
     {
         using Process process = new Process();
         process.StartInfo.FileName = "git";
@@ -352,9 +344,6 @@ public static class Utils
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
         process.StartInfo.CreateNoWindow = true;
-
-        if (workingDirectory != null)
-            process.StartInfo.WorkingDirectory = workingDirectory;
 
         process.Start();
         string output = process.StandardOutput.ReadToEnd();
