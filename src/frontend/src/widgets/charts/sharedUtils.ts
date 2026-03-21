@@ -30,26 +30,26 @@ export { getChartColors as getColors } from "./styles/colors";
 export { generateTextStyle, generateAxisLabelStyle, type ChartThemeColors };
 
 export const getAxisDomainBound = (
-  type: 'min' | 'max',
+  type: "min" | "max",
   rawValue: unknown,
   allowDataOverflow: boolean,
-  transform: (v: number) => number = v => v
+  transform: (v: number) => number = (v) => v,
 ) => {
   if (rawValue == null) return undefined;
 
   const extractDomainValue = (val: unknown) => {
-    if (val && typeof val === 'object') {
-      if ('value' in val) return (val as Record<string, unknown>).value;
-      if ('Value' in val) return (val as Record<string, unknown>).Value;
+    if (val && typeof val === "object") {
+      if ("value" in val) return (val as Record<string, unknown>).value;
+      if ("Value" in val) return (val as Record<string, unknown>).Value;
     }
     return val;
   };
 
   const extracted = extractDomainValue(rawValue);
-  if (extracted === 'auto' || extracted == null) return undefined; // Let ECharts auto-scale
+  if (extracted === "auto" || extracted == null) return undefined; // Let ECharts auto-scale
 
   const parseVal = (v: unknown) => {
-    if (v === 'dataMin' || v === 'dataMax') return v;
+    if (v === "dataMin" || v === "dataMax") return v;
     const num = Number(v);
     return isNaN(num) ? undefined : transform(num);
   };
@@ -60,52 +60,49 @@ export const getAxisDomainBound = (
   if (allowDataOverflow === true) return parsedValue;
 
   return (value: { min: number; max: number }) => {
-    if (parsedValue === 'dataMin') return value.min;
-    if (parsedValue === 'dataMax') return value.max;
-    return type === 'min'
+    if (parsedValue === "dataMin") return value.min;
+    if (parsedValue === "dataMax") return value.max;
+    return type === "min"
       ? Math.min(parsedValue as number, value.min)
       : Math.max(parsedValue as number, value.max);
   };
 };
 
-export const formatTickLabel = (
-  value: number | string,
-  formatter?: string | null
-) => {
+export const formatTickLabel = (value: number | string, formatter?: string | null) => {
   if (!formatter) return String(value);
 
-  if (formatter.startsWith('C')) {
+  if (formatter.startsWith("C")) {
     const fractionDigits = parseInt(formatter.substring(1));
     return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency: 'USD',
+      style: "currency",
+      currency: "USD",
       maximumFractionDigits: isNaN(fractionDigits) ? 0 : fractionDigits,
     }).format(Number(value));
   }
-  if (formatter.startsWith('P')) {
+  if (formatter.startsWith("P")) {
     const fractionDigits = parseInt(formatter.substring(1));
     return new Intl.NumberFormat(undefined, {
-      style: 'percent',
+      style: "percent",
       maximumFractionDigits: isNaN(fractionDigits) ? 0 : fractionDigits,
     }).format(Number(value));
   }
-  if (formatter.startsWith('N') || formatter.startsWith('F')) {
+  if (formatter.startsWith("N") || formatter.startsWith("F")) {
     const fractionDigits = parseInt(formatter.substring(1));
     return new Intl.NumberFormat(undefined, {
       maximumFractionDigits: isNaN(fractionDigits) ? 2 : fractionDigits,
     }).format(Number(value));
   }
-  if (formatter === 'MMM yyyy') {
+  if (formatter === "MMM yyyy") {
     return new Intl.DateTimeFormat(undefined, {
-      month: 'short',
-      year: 'numeric',
+      month: "short",
+      year: "numeric",
     }).format(new Date(value));
   }
-  if (formatter === '#,##0,,M') {
-    return (Number(value) / 1000000).toFixed(0) + 'M';
+  if (formatter === "#,##0,,M") {
+    return (Number(value) / 1000000).toFixed(0) + "M";
   }
-  if (formatter === '#,##0,K') {
-    return (Number(value) / 1000).toFixed(0) + 'K';
+  if (formatter === "#,##0,K") {
+    return (Number(value) / 1000).toFixed(0) + "K";
   }
   return String(value);
 };
@@ -384,18 +381,8 @@ export const generateYAxis = (
   const axis = yAxis?.[0] || ({} as Partial<YAxisProps>);
   const allowDataOverflow = axis.allowDataOverflow ?? false;
 
-  let minOpt = getAxisDomainBound(
-    'min',
-    axis.domainMin,
-    allowDataOverflow,
-    safeTransform
-  );
-  let maxOpt = getAxisDomainBound(
-    'max',
-    axis.domainMax,
-    allowDataOverflow,
-    safeTransform
-  );
+  let minOpt = getAxisDomainBound("min", axis.domainMin, allowDataOverflow, safeTransform);
+  let maxOpt = getAxisDomainBound("max", axis.domainMax, allowDataOverflow, safeTransform);
 
   if (largeSpread) {
     if (minOpt === undefined) minOpt = safeTransform(minValue);
