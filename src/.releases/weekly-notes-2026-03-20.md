@@ -52,77 +52,29 @@ public class SignatureDemo : ViewBase
 
 ### GaugeChart Widget
 
-Ivy now includes a **GaugeChart** widget for displaying KPI values in a circular gauge/dial format. Perfect for dashboards showing progress, completion rates, system load, or any metric that benefits from visual representation on a gauge. The widget provides smooth animations, customizable thresholds with color zones, and flexible pointer styles.
+Ivy now includes **GaugeChart** for KPI-style circular gauges (progress, load, completion). Configure **Min/Max**, **Label**, **StartAngle/EndAngle** (semicircle or custom arcs), **Thresholds** for color zones, **Pointer** (Line, Arrow, Rounded via `GaugePointerStyle`), **Animated**, and **ColorScheme** for theming. Labels and ticks scale with the arc.
 
-**Basic usage:**
-
-```csharp
-// Simple gauge with a value
-new GaugeChart(75)
-    .Label("CPU Usage")
-```
-
-**Configure range and styling:**
+**Note:** Pointer styles include Line, Arrow, and Rounded; use `.Animated(false)` to freeze value transitions.
 
 ```csharp
-// Custom range with thresholds
-new GaugeChart(42)
-    .Min(0)
-    .Max(100)
-    .Label("Progress")
-    .Thresholds(
-        new GaugeThreshold(30, "#10b981"),  // Green zone
-        new GaugeThreshold(60, "#f59e0b"),  // Yellow zone
-        new GaugeThreshold(100, "#ef4444")  // Red zone
-    )
-```
-
-**Customize the pointer:**
-
-```csharp
-// Different pointer styles
-new GaugeChart(85)
-    .Label("Temperature")
-    .Pointer(new GaugePointer()
-        .Style(GaugePointerStyle.Arrow)
-        .Width(8)
-        .Length("70%"))
-
-// Simple pointer with defaults
-new GaugeChart(50)
-    .Pointer()
-    .Label("Load")
-```
-
-**Advanced configuration:**
-
-```csharp
-// Full customization
 new GaugeChart(67)
-    .Min(0)
-    .Max(100)
-    .Label("System Health")
-    .StartAngle(180)
-    .EndAngle(0)
-    .Animated(true)
-    .ColorScheme(ColorScheme.Primary)
+    .Min(0)  // range
+    .Max(100)  // range
+    .Label("System Health")  // caption
+    .StartAngle(180)  // arc start (degrees)
+    .EndAngle(0)  // arc end (degrees)
+    .Animated(true)  // animate value changes
+    .ColorScheme(ColorScheme.Rainbow)  // theme (Default | Rainbow)
     .Thresholds(
-        new GaugeThreshold(33, "#10b981"),
+        new GaugeThreshold(33, "#10b981"),  // zone (value, color)
         new GaugeThreshold(66, "#f59e0b"),
-        new GaugeThreshold(100, "#ef4444")
-    )
+        new GaugeThreshold(100, "#ef4444"))
+    .Pointer(new GaugePointer()
+        .Style(GaugePointerStyle.Arrow)  // Line | Arrow | Rounded
+        .Width(8)
+        .Length("70%"))  // pointer appearance
+    .Height(Size.Px(250));  // layout
 ```
-
-**Features:**
-
-- **Configurable range** with Min/Max values
-- **Color thresholds** for visual zones (green/yellow/red or custom colors)
-- **Pointer styles**: Line, Arrow, or Rounded
-- **Smooth animations** for value changes (can be disabled)
-- **Flexible angles** to create half-circle or custom arc gauges
-- **Color scheme support** for consistent theming
-
-The gauge automatically scales labels, ticks, and positioning to fit the configured angle range, making it easy to create anything from traditional semicircle gauges to full circular displays.
 
 ### Native File Dialog Hooks
 
