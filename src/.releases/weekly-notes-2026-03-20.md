@@ -654,66 +654,6 @@ return new AudioPlayer(downloadUrl.Value);
 
 Use stream-based downloads for any large file where loading the entire content into a `byte[]` would be wasteful or impractical. The range request support is particularly valuable for media files where users expect to seek/scrub through content.
 
-## Documentation
-
-### Chat Tutorial Updated to Microsoft.Extensions.AI
-
-The **Chat Tutorial** has been updated to use `Microsoft.Extensions.AI.IChatClient` instead of Semantic Kernel, reflecting the modern .NET approach for AI integration. The tutorial now shows how to build AI-powered chat applications using the `IChatClient` interface, which is becoming the standard abstraction for chat completions in .NET.
-
-**What changed:**
-
-The tutorial demonstrates registering an `IChatClient` in your services:
-
-```csharp
-var openAiClient = new OpenAIClient(new ApiKeyCredential(apiKey));
-server.Services.AddSingleton<IChatClient>(
-    openAiClient.GetChatClient("gpt-4o").AsIChatClient());
-```
-
-And using it in your agent implementation:
-
-```csharp
-public class LucideIconAgent(IChatClient chatClient)
-{
-    public async Task<string?> SuggestIconAsync(string appDescription)
-    {
-        var messages = new List<Microsoft.Extensions.AI.ChatMessage>
-        {
-            new(ChatRole.System, "Your prompt..."),
-            new(ChatRole.User, appDescription)
-        };
-
-        var result = await chatClient.GetResponseAsync(messages);
-        return result.Text;
-    }
-}
-```
-
-The tutorial also includes a new FAQ entry in the **UseStream** hook documentation showing how to stream `IChatClient` responses to the UI with `UseStream<TextRun>`.
-
-### New Documentation FAQ Entries
-
-Several widgets now include helpful FAQ entries for common questions:
-
-- **TextBlock**: Why text wraps vertically in horizontal layouts and how to fix with `.NoWrap()`
-- **Button**: How to handle async operations in button click handlers (use `async` directly, no special hooks needed)
-- **UseStream**: How to stream IChatClient responses with `UseStream<TextRun>` and `GetStreamingResponseAsync()`
-
-## CLI Improvements
-
-### CLI Command Discovery with 'explain'
-
-The Ivy CLI now documents **`ivy cli explain`** as the preferred method for discovering available commands. This command provides a complete structural breakdown of all CLI commands and their options, powered by Spectre.Console.Cli.
-
-**Usage:**
-
-```bash
-# Get a structural breakdown of all available CLI commands
-ivy cli explain
-```
-
-This is now the recommended approach for command discovery, providing a reliable built-in way to explore what the CLI can do. You can still use `ivy --help` for general help or `ivy [command] --help` for specific command details, but `explain` gives you the full picture in one view.
-
 ## Breaking Changes
 
 ### IConnection API Changes
