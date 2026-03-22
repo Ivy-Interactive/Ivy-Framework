@@ -120,43 +120,24 @@ return new Button("Copy greeting", _ => copyToClipboard("Hello, World!"));
 
 ### Children() Extension Method for All Widgets
 
-All Ivy widgets now support a generic **Children()** extension method for replacing widget children in a fluent manner. This provides an alternative to the pipe operator when you need to set all children at once.
-
-**Basic usage:**
+Every widget can use **`Children(...)`** to **replace** all child content in one call (generic on **`AbstractWidget`**, chainable return type). Use the **`|`** operator when you want to **append** children step by step.
 
 ```csharp
-// Replace all children on any widget
 new Card().Children(
     Text.H3("Title"),
     Text.P("Description"),
-    new Button("Action")
-)
+    new Button("Action"))  // Card, Box, GridView, …
 
-// Works on GridView
 new GridView(columns: 8).Children(widget1, widget2, widget3)
 
-// Works on any AbstractWidget
 new Box().Children(content1, content2)
+
+new Card().Children(child1, child2, child3)  // replaces entire child list
+
+new Card()  // append with |
+    | child1
+    | child2
 ```
-
-**When to use Children() vs pipe operator:**
-
-```csharp
-// Use Children() when setting all children at once
-var card = new Card().Children(child1, child2, child3);
-
-// Use pipe operator when appending children incrementally
-var card = new Card();
-card | child1 | child2;
-```
-
-**What changed:**
-
-- **Generic extension** - `Children<T>()` works on any `AbstractWidget` subclass
-- **Replaces children** - Sets all children at once (doesn't append)
-- **Type-safe** - Returns the same widget type for method chaining
-
-This resolves a common AI hallucination where agents would naturally expect methods like `Card.Children()` or `GridView.Children()` to exist. Now they do!
 
 ### Optional Secrets for Flexible Configuration
 
@@ -173,55 +154,16 @@ public class MyConnection : IHaveSecrets
         {
             new Secret("API_KEY"),                        // Required by default
             new Secret("WEBHOOK_URL", Optional: true),    // Optional - won't block startup
-            new Secret("DEBUG_TOKEN", Optional: true)     // Optional - nice to have
         };
     }
 }
 ```
-
-**Common use cases:**
-
-```csharp
-// Email service with optional SMTP credentials for dev environments
-public class EmailConnection : IHaveSecrets
-{
-    public Secret[] GetSecrets()
-    {
-        return new[]
-        {
-            new Secret("SMTP_HOST", Optional: true),
-            new Secret("SMTP_PASSWORD", Optional: true)
-        };
-    }
-}
-
-// Analytics integration that degrades gracefully without credentials
-public class AnalyticsConnection : IHaveSecrets
-{
-    public Secret[] GetSecrets()
-    {
-        return new[]
-        {
-            new Secret("ANALYTICS_API_KEY", Optional: true),
-            new Secret("ANALYTICS_TRACKING_ID", Optional: true)
-        };
-    }
-}
-```
-
-This is particularly useful for:
-
-- **Development environments** where certain integrations aren't needed
-- **Graceful degradation** scenarios where features can work with reduced functionality
-- **Third-party integrations** that enhance but aren't critical to your application
 
 By default, secrets remain required (`Optional = false`), so existing code behavior is unchanged.
 
 ### DateRangeInput Min and Max Constraints
 
 The **DateRangeInput** widget now supports date range constraints with `Min` and `Max` properties. Restrict selectable dates to specific ranges—perfect for booking systems, date filters with valid time windows, or any scenario requiring date boundaries. Dates outside the valid range are automatically disabled in the picker.
-
-**Basic usage:**
 
 ```csharp
 var bookingRange = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
@@ -231,26 +173,6 @@ return bookingRange.ToDateRangeInput()
     .Max(new DateOnly(2026, 12, 31))
     .Placeholder("Select dates within 2026");
 ```
-
-**Booking system with future dates only:**
-
-```csharp
-var checkInOut = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
-
-return checkInOut.ToDateRangeInput()
-    .Min(DateOnly.FromDateTime(DateTime.Today))
-    .Max(DateOnly.FromDateTime(DateTime.Today.AddYears(1)))
-    .Placeholder("Select check-in and check-out dates")
-    .Format("MMM dd, yyyy");
-```
-
-**Features:**
-
-- **Visual feedback** - Dates outside the range appear disabled in the date picker
-- **Flexible constraints** - Set Min only, Max only, or both to define your valid range
-- **Works with all formats** - Constraints apply regardless of your chosen date format
-
-Use Min/Max constraints to guide users toward valid date selections and prevent invalid date ranges at the input level.
 
 ### Improved Error Display System
 
@@ -323,18 +245,11 @@ return people.ToDataTable(e => e.Id)
     .Height(Size.Units(100));
 ```
 
-**What you get:**
-
-- **Automatic empty detection** - Server-side `Count()` query detects empty tables
-- **No loading flicker** - Empty state shows immediately instead of "Loading..." when data doesn't exist
-- **Full widget tree** - Use Layout.Vertical(), Card, Button, or any other Ivy widgets to design your empty state
-- **Context access** - The factory function receives `IViewContext`, so you can use hooks like UseState or UseService if needed
-
 The `Empty()` method accepts a `FuncViewBuilder` (which is `Func<IViewContext, object?>`), giving you complete flexibility to build engaging empty states that guide users toward their next action.
 
 ### Form-Level Disabled State
 
-The **FormBuilder** now supports disabling entire forms with a single method call. Use the new `Disabled()` method to disable all input fields and the submit button at once—perfect for read-only modes, pending operations, or conditional form access based on permissions.
+The **FormBuilder** now supports disabling entire forms with a single method call.
 
 **Disable the entire form:**
 
@@ -364,12 +279,6 @@ return Layout.Vertical()
     | formView
     | new Button("Edit").OnClick(_ => isEditing.Set(true));
 ```
-
-**What changed:**
-
-- **New API**: `Disabled()` method disables all form fields and the submit button
-- **Bug fix**: Per-field disabled state now properly applies to inputs (previously stored but not applied)
-- **Bug fix**: Default disabled value for fields corrected from `true` to `false`
 
 The form-level disabled state works alongside per-field disabled configuration—individual field disabled states are OR'd with the form-level state, so either can disable a field.
 
@@ -406,13 +315,6 @@ var downloadUrl = UseDownload(
 // Use in AudioPlayer with seeking support
 return new AudioPlayer(downloadUrl.Value);
 ```
-
-**What you get:**
-
-- **Memory efficient** - Files are streamed directly to the client without loading into memory
-- **Range request support** - HTTP 206 partial content enables seeking in audio/video players
-- **Automatic cleanup** - Streams are automatically disposed after download completes
-- **Same API surface** - Works just like the byte array overload, but with Stream instead
 
 Use stream-based downloads for any large file where loading the entire content into a `byte[]` would be wasteful or impractical. The range request support is particularly valuable for media files where users expect to seek/scrub through content.
 
