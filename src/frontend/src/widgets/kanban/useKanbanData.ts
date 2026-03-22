@@ -1,11 +1,6 @@
 import React from "react";
 import { Task } from "@/components/ui/shadcn-io/kanban";
-import type {
-  Column,
-  TaskWithWidgetId,
-  CardData,
-  ExtractedKanbanData,
-} from "./types";
+import type { Column, TaskWithWidgetId, CardData, ExtractedKanbanData } from "./types";
 
 interface WidgetNodeChild {
   type: string;
@@ -94,32 +89,28 @@ export function useKanbanData(
 
         const finalColumnKeys = sortColumnKeysByBackendOrder(allColumnKeys);
 
-        const extractedColumns: Column[] = finalColumnKeys.map(
-          (key, index) => ({
-            id: key,
-            name: columnNameMap.get(key) ?? key,
-            color: "",
-            order: index,
-          }),
-        );
+        const extractedColumns: Column[] = finalColumnKeys.map((key, index) => ({
+          id: key,
+          name: columnNameMap.get(key) ?? key,
+          color: "",
+          order: index,
+        }));
 
-        const extractedTasks: TaskWithWidgetId[] = extractedCards.map(
-          (card) => {
-            const column = card.columnKey || "Default";
-            const columnIndex = finalColumnKeys.indexOf(column);
+        const extractedTasks: TaskWithWidgetId[] = extractedCards.map((card) => {
+          const column = card.columnKey || "Default";
+          const columnIndex = finalColumnKeys.indexOf(column);
 
-            return {
-              id: card.cardId,
-              title: "",
-              status: column,
-              statusOrder: columnIndex >= 0 ? columnIndex : 0,
-              priority: card.priority || 0,
-              description: "",
-              assignee: "",
-              widgetId: card.widgetId,
-            };
-          },
-        );
+          return {
+            id: card.cardId,
+            title: "",
+            status: column,
+            statusOrder: columnIndex >= 0 ? columnIndex : 0,
+            priority: card.priority || 0,
+            description: "",
+            assignee: "",
+            widgetId: card.widgetId,
+          };
+        });
 
         return {
           tasks: extractedTasks,

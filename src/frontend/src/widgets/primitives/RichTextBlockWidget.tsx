@@ -198,7 +198,7 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
       r.lineBreak ||
       r.horizontalRule ||
       r.heading ||
-      r.codeBlock !== undefined ||
+      r.codeBlock != null ||
       r.blockquote ||
       r.bulletItem ||
       r.orderedItem ||
