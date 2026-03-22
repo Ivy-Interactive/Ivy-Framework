@@ -1,6 +1,4 @@
-using System.Linq;
 using Ivy.Core;
-using Microsoft.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -27,16 +25,6 @@ public class DataTableView(
             return null;
         }
 
-        // Check if query returned empty results and render empty state if configured
-        if (emptyViewFactory != null)
-        {
-            var isEmpty = queryable.Cast<object>().Count() == 0;
-            if (isEmpty)
-            {
-                return emptyViewFactory(Context);
-            }
-        }
-
         var table = new DataTable(connection, width, height, columns, config)
         {
             OnCellClick = onCellClick.ToEventHandler(),
@@ -44,6 +32,14 @@ public class DataTableView(
             RowActions = rowActions,
             OnRowAction = onRowAction.ToEventHandler()
         };
+
+        // Pass the empty view as a slot so the frontend can render it when TotalRows == 0,
+        // avoiding a synchronous .Count() query on the DbContext during the render cycle.
+        if (emptyViewFactory != null)
+        {
+            var emptyView = emptyViewFactory(Context);
+            table = table with { Children = [new Slot("EmptyView", emptyView)] };
+        }
 
         return table;
     }

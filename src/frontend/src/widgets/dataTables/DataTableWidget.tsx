@@ -17,20 +17,32 @@ import { applyConfigDefaults, applyColumnsDefaults } from "./DataTableDefaults";
 
 interface TableLayoutProps {
   children?: React.ReactNode;
+  emptyView?: React.ReactNode[];
 }
 
-const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
-  const { error, columns } = useTable();
+const TableLayout: React.FC<TableLayoutProps> = ({ children, emptyView }) => {
+  const { error, columns, visibleRows, isLoading } = useTable();
   const showTableEditor = columns.length > 0;
 
   if (error) {
     return <ErrorDisplay title="Table Error" message={error} />;
   }
 
+  // Show empty view when data has loaded, there are no rows, and an empty view slot was provided
+  if (showTableEditor && !isLoading && visibleRows === 0 && emptyView && emptyView.length > 0) {
+    return <div style={tableStyles.table.container}>{emptyView}</div>;
+  }
+
   return <div style={tableStyles.table.container}>{showTableEditor ? children : <Loading />}</div>;
 };
 
-export const DataTable: React.FC<TableProps> = ({
+interface DataTableWidgetProps extends TableProps {
+  slots?: {
+    EmptyView?: React.ReactNode[];
+  };
+}
+
+export const DataTable: React.FC<DataTableWidgetProps> = ({
   id,
   columns,
   connection,
@@ -39,6 +51,7 @@ export const DataTable: React.FC<TableProps> = ({
   width = "Full",
   height = "Full",
   rowActions,
+  slots,
   "data-testid": dataTestId,
 }) => {
   const finalConfig = useMemo(
@@ -74,7 +87,7 @@ export const DataTable: React.FC<TableProps> = ({
         config={finalConfig}
         editable={editable}
       >
-        <TableLayout>
+        <TableLayout emptyView={slots?.EmptyView}>
           <DataTableHeader>
             {finalConfig.allowFiltering && (
               <DataTableOption
