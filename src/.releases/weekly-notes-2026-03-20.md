@@ -1,10 +1,13 @@
 # Ivy Framework Weekly Notes - Week of 2026-03-20
 
+> [!NOTE]
+> We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
+
 ## New Features
 
 ### VideoPlayer: time range, events, and playback speed
 
-The **VideoPlayer** widget now supports **time range** (`StartTime` / `EndTime` in seconds), **playback events** (`HandlePlay`, `HandlePause`, `HandleEnded`, `HandleLoaded`—each with async, sync-with-event, and parameterless overloads), and **playback speed** (`PlaybackRate`, minimum 0.25×).
+The [**VideoPlayer**](https://docs.ivy.app/widgets/primitives/video-player) widget now supports **time range** (`StartTime` / `EndTime` in seconds), **playback events** (`HandlePlay`, `HandlePause`, `HandleEnded`, `HandleLoaded`—each with async, sync-with-event, and parameterless overloads), and **playback speed** (`PlaybackRate`, minimum 0.25×).
 
 **Note:** Time ranges use Media Fragments (HTML5) and embed parameters (YouTube). `PlaybackRate` applies to native HTML5 video only; YouTube embeds do not change speed.
 
@@ -25,7 +28,7 @@ var video = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
 
 ### SignatureInput Widget
 
-Ivy now includes **SignatureInput** for handwritten signatures in the browser (delivery confirmations, contracts, approvals). Canvas drawing supports mouse and touch; data is **PNG** as `byte[]`. Use **`.WithField()`** / **`.Label()`** for forms and **`.Pen()`** / **`.PenThickness()`** (and optional background) to match your UI.
+Ivy now includes [**SignatureInput**](https://docs.ivy.app/widgets/inputs/signature-input) for handwritten signatures in the browser (delivery confirmations, contracts, approvals). Canvas drawing supports mouse and touch; data is **PNG** as `byte[]`. Use **`.WithField()`** / **`.Label()`** for forms and **`.Pen()`** / **`.PenThickness()`** (and optional background) to match your UI.
 
 **Note:** A built-in clear control appears once the user has drawn something. Forms can use disabled/invalid states like other inputs.
 
@@ -52,7 +55,7 @@ public class SignatureDemo : ViewBase
 
 ### GaugeChart Widget
 
-Ivy now includes **GaugeChart** for KPI-style circular gauges (progress, load, completion). Configure **Min/Max**, **Label**, **StartAngle/EndAngle** (semicircle or custom arcs), **Thresholds** for color zones, **Pointer** (Line, Arrow, Rounded via `GaugePointerStyle`), **Animated**, and **ColorScheme** for theming. Labels and ticks scale with the arc.
+Ivy now includes [**GaugeChart**](https://docs.ivy.app/widgets/charts/gauge-chart) for KPI-style circular gauges (progress, load, completion). Configure **Min/Max**, **Label**, **StartAngle/EndAngle** (semicircle or custom arcs), **Thresholds** for color zones, **Pointer** (Line, Arrow, Rounded via `GaugePointerStyle`), **Animated**, and **ColorScheme** for theming. Labels and ticks scale with the arc.
 
 **Note:** Pointer styles include Line, Arrow, and Rounded; use `.Animated(false)` to freeze value transitions.
 
@@ -78,7 +81,7 @@ new GaugeChart(67)
 
 ### Native File Dialog Hooks
 
-**UseFileDialog** (PathOnly or upload via `IUploadHandler`), **UseSaveDialog** (byte factory + MIME + suggested name), and **UseFolderDialog** each return `(dialogView, show…)` — render every `dialogView` in the tree, then call `show…(callback)` when the user should see the dialog (same pattern as `UseAlert`).
+[File dialog hooks](https://docs.ivy.app/hooks/core/use-file-dialog) — **UseFileDialog** (PathOnly or upload via `IUploadHandler`), **UseSaveDialog**, and **UseFolderDialog** — each return `(dialogView, show…)`; render every `dialogView` in the tree, then call `show…(callback)` when the user should see the dialog (same pattern as [`UseAlert`](https://docs.ivy.app/onboarding/concepts/alerts)).
 
 **Note:** PathOnly `UseFileDialog(accept?, multiple?)` — omit `accept` for any file type; filter with `"image/*"` or `".pdf,.txt"`. Upload mode uses `MemoryStreamUploadHandler.Create(state)`. Avoid `accept: "*/*"` on older clients. `UseSaveDialog` callback receives **`SaveDialogResult`**; folder callback receives **`FolderDialogEntry[]`**.
 
@@ -110,7 +113,7 @@ return Layout.Vertical()
 
 ### UseClipboard Hook
 
-**UseClipboard** returns **`Action<string>`** — call it with the text to copy. It wraps `IClientProvider.CopyToClipboard()` for a smaller API. **Write-only** (no read-from-clipboard).
+[**UseClipboard**](https://docs.ivy.app/hooks/core/use-clipboard) returns **`Action<string>`** — call it with the text to copy. It wraps [`IClientProvider`](https://docs.ivy.app/onboarding/concepts/clients) copy APIs for a smaller surface. **Write-only** (no read-from-clipboard).
 
 ```csharp
 var copyToClipboard = UseClipboard();  // Action<string>
@@ -120,7 +123,7 @@ return new Button("Copy greeting", _ => copyToClipboard("Hello, World!"));
 
 ### Children() Extension Method for All Widgets
 
-Every widget can use **`Children(...)`** to **replace** all child content in one call (generic on **`AbstractWidget`**, chainable return type). Use the **`|`** operator when you want to **append** children step by step.
+Every [widget](https://docs.ivy.app/onboarding/concepts/widgets) can use **`Children(...)`** to **replace** all child content in one call (generic on **`AbstractWidget`**, chainable return type). Use the **`|`** operator when you want to **append** children step by step (see [layouts](https://docs.ivy.app/onboarding/concepts/layout)).
 
 ```csharp
 new Card().Children(
@@ -141,7 +144,7 @@ new Card()  // append with |
 
 ### Optional Secrets
 
-The **Secret** record now supports an `Optional` parameter, allowing you to declare secrets that are useful but not required for application startup. When a secret is marked as optional, Ivy will skip it during the missing configuration check, preventing startup failures when the secret isn't provided.
+The **Secret** record (see [Secrets](https://docs.ivy.app/onboarding/concepts/secrets)) now supports an `Optional` parameter, allowing you to declare secrets that are useful but not required for application startup. When a secret is marked as optional, Ivy will skip it during the missing configuration check, preventing startup failures when the secret isn't provided.
 
 ```csharp
 public class MyConnection : IHaveSecrets
@@ -161,7 +164,7 @@ By default, secrets remain required (`Optional = false`), so existing code behav
 
 ### DateRangeInput Min and Max Constraints
 
-The **DateRangeInput** widget now supports date range constraints with `Min` and `Max` properties. Restrict selectable dates to specific ranges—perfect for booking systems, date filters with valid time windows, or any scenario requiring date boundaries. Dates outside the valid range are automatically disabled in the picker.
+The [**DateRangeInput**](https://docs.ivy.app/widgets/inputs/date-range-input) widget now supports date range constraints with `Min` and `Max` properties. Restrict selectable dates to specific ranges—perfect for booking systems, date filters with valid time windows, or any scenario requiring date boundaries. Dates outside the valid range are automatically disabled in the picker.
 
 ```csharp
 var bookingRange = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
@@ -174,14 +177,14 @@ return bookingRange.ToDateRangeInput()
 
 ### Improved Error Display System
 
-Ivy now features a completely redesigned error page system that provides clearer, more actionable error messages with optional technical details. The new system replaces the simple "Ouch! :|" page with a comprehensive error display that adapts to different error scenarios (not found, server errors, unauthorized access, etc.) and includes a "View details" button for debugging information.
+Ivy now features a completely redesigned **server error page** system that provides clearer, more actionable error messages with optional technical details—aligned with the same UX goals as the [`Error`](https://docs.ivy.app/widgets/primitives/error) widget for in-app failures. The new system replaces the simple "Ouch! :|" page with a comprehensive error display that adapts to different error scenarios (not found, server errors, unauthorized access, etc.) and includes a "View details" button for debugging information.
 
 **What users will see:**
 
 - **Context-aware error messages** - Different error types (NotFound, NoApps, ServerError, Unauthorized, Forbidden) show appropriate messages and styling
 - **Technical details on demand** - A "View details" button appears for errors with additional context (stack traces, server responses)
 - **Cleaner browser history** - Error pages no longer pollute your browser history, so the back button works as expected
-- **Better download error handling** - Failed or expired downloads now redirect to friendly error pages instead of showing raw exceptions
+- **Better download error handling** - Failed or expired [`UseDownload`](https://docs.ivy.app/hooks/core/use-download) links now redirect to friendly error pages instead of showing raw exceptions
 
 **For framework developers:**
 
@@ -213,7 +216,7 @@ The framework automatically handles common scenarios like 404s, authentication f
 
 ### DataTable Empty State Customization
 
-The **DataTable** now supports custom empty states when no data is available. Instead of showing just a loading spinner or blank table, you can now configure exactly what users see when the table is empty.
+The [**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) now supports custom empty states when no data is available. Instead of showing just a loading spinner or blank table, you can now configure exactly what users see when the table is empty.
 
 **Basic usage with default empty state:**
 
@@ -247,7 +250,7 @@ The `Empty()` method accepts a `FuncViewBuilder` (which is `Func<IViewContext, o
 
 ### Form-Level Disabled State
 
-The **FormBuilder** now supports disabling entire forms with a single method call.
+The [**FormBuilder**](https://docs.ivy.app/onboarding/concepts/forms) now supports disabling entire forms with a single method call.
 
 **Disable the entire form:**
 
@@ -282,7 +285,7 @@ The form-level disabled state works alongside per-field disabled configuration�
 
 ### Stream-Based UseDownload for Large Files
 
-The **UseDownload** hook now supports stream-based downloads with new overloads that accept `Func<Stream>` and `Func<Task<Stream>>` factories. This enables memory-efficient downloads of large files (audio, video, PDFs) without loading them entirely into memory. Stream downloads automatically support HTTP range requests (206 partial content), enabling features like seeking in audio and video players.
+The [**UseDownload**](https://docs.ivy.app/hooks/core/use-download) hook now supports stream-based downloads with new overloads that accept `Func<Stream>` and `Func<Task<Stream>>` factories. This enables memory-efficient downloads of large files (audio, video, PDFs) without loading them entirely into memory. Stream downloads automatically support HTTP range requests (206 partial content), enabling features like seeking in audio and video players.
 
 **Basic usage with sync factory:**
 
@@ -314,13 +317,13 @@ var downloadUrl = UseDownload(
 return new AudioPlayer(downloadUrl.Value);
 ```
 
-Use stream-based downloads for any large file where loading the entire content into a `byte[]` would be wasteful or impractical. The range request support is particularly valuable for media files where users expect to seek/scrub through content.
+Use stream-based downloads for any large file where loading the entire content into a `byte[]` would be wasteful or impractical. The range request support is particularly valuable for media files where users expect to seek/scrub through content—for example with [`AudioPlayer`](https://docs.ivy.app/widgets/primitives/audio-player).
 
 ## Breaking Changes
 
 ### IConnection API Changes
 
-The **IConnection** interface has been updated with two important changes that will require updates to any custom connection implementations:
+The **[IConnection](https://docs.ivy.app/onboarding/concepts/connections)** interface has been updated with two important changes that will require updates to any custom connection implementations:
 
 **1. RegisterServices now accepts Server instead of IServiceCollection:**
 
@@ -363,11 +366,9 @@ public Task<(bool ok, string? message)> TestConnection(IConfiguration config)
 3. Replace references to `services` with `server.Services` inside the method
 4. Add the `TestConnection` method implementation
 
-The framework includes a detailed refactor guide at `src/.releases/Refactors/Upcoming/IConnection-API.md` with additional migration information.
+### AppAttribute Parameter Renamed: path  group
 
-### AppAttribute Parameter Renamed: path - group
-
-The `[App]` attribute parameter `path` has been renamed to `group` for better clarity. If you're using the `[App]` attribute to register views in your application, you'll need to update the parameter name.
+The `[App]` attribute parameter `path` has been renamed to `group` for better clarity (see the **group** parameter in the docs). If you're using `[App]` to register views, update the parameter name.
 
 **Before:**
 
