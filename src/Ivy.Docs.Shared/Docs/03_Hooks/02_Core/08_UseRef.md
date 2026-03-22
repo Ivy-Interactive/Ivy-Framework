@@ -32,6 +32,10 @@ Key characteristics of `UseRef`:
 `UseRef` is ideal for storing mutable references that don't affect rendering, such as timers, subscriptions, DOM references, or previous [state](./03_UseState.md) values for comparison.
 </Callout>
 
+<Callout type="Warning">
+**Common Pitfall:** Do not use `UseRef` + `UseEffect` for data loading or async initialization. Setting `ref.Value` inside `UseEffect` will **not** trigger a re-render, leaving your component stuck on its initial state (e.g., a loading skeleton). Use [`UseState`](./03_UseState.md) when the value change should update the UI, or [`UseQuery`](./09_UseQuery.md) for data fetching.
+</Callout>
+
 ## Basic Usage
 
 ```csharp demo-below
@@ -115,6 +119,10 @@ var count = UseRef(0); // Won't trigger re-render!
 
 // Bad: Computed value - use UseMemo instead
 var total = UseRef(items.Sum()); // Won't update when items change!
+
+// Bad: Async initialization - use UseQuery or UseState instead
+var dbRef = UseRef<MyDbContext?>();
+UseEffect(() => { dbRef.Value = new MyDbContext(); }); // Won't re-render!
 ```
 
 ## See Also
