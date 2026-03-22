@@ -173,6 +173,17 @@ public class RichTextMarkdownParserTests
     }
 
     [Fact]
+    public void Should_Parse_SingleNewline_As_Paragraphs()
+    {
+        var runs = ParseAll("line1\nline2");
+        // Single newline in markdown separates paragraphs, not a line break
+        var paragraphs = runs.Where(r => r.Paragraph).ToList();
+        Assert.True(paragraphs.Count >= 1);
+        Assert.Contains(runs, r => r.Content.Contains("line1"));
+        Assert.Contains(runs, r => r.Content.Contains("line2"));
+    }
+
+    [Fact]
     public void Should_Flush_Remaining_On_End()
     {
         var parser = new RichTextMarkdownParser();
