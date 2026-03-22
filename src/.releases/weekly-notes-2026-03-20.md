@@ -4,7 +4,7 @@
 
 ### VideoPlayer: time range, events, and playback speed
 
-The **VideoPlayer** widget now supports **time range** (`StartTime` / `EndTime` in seconds), **playback events** (`HandlePlay`, `HandlePause`, `HandleEnded`, `HandleLoaded`—each with async, sync-with-event, and parameterless overloads), and **playback speed** (`PlaybackRate`, minimum 0.25×). Use time ranges for clips and tutorials, events for analytics and coordinated UI, and speed for review or fast-forward on HTML5 sources.
+The **VideoPlayer** widget now supports **time range** (`StartTime` / `EndTime` in seconds), **playback events** (`HandlePlay`, `HandlePause`, `HandleEnded`, `HandleLoaded`—each with async, sync-with-event, and parameterless overloads), and **playback speed** (`PlaybackRate`, minimum 0.25×).
 
 **Note:** Time ranges use Media Fragments (HTML5) and embed parameters (YouTube). `PlaybackRate` applies to native HTML5 video only; YouTube embeds do not change speed.
 
@@ -139,11 +139,9 @@ new Card()  // append with |
     | child2
 ```
 
-### Optional Secrets for Flexible Configuration
+### Optional Secrets
 
 The **Secret** record now supports an `Optional` parameter, allowing you to declare secrets that are useful but not required for application startup. When a secret is marked as optional, Ivy will skip it during the missing configuration check, preventing startup failures when the secret isn't provided.
-
-**Mark a secret as optional:**
 
 ```csharp
 public class MyConnection : IHaveSecrets
@@ -215,7 +213,7 @@ The framework automatically handles common scenarios like 404s, authentication f
 
 ### DataTable Empty State Customization
 
-The **DataTable** now supports custom empty states when no data is available. Instead of showing just a loading spinner or blank table, you can now configure exactly what users see when the table is empty—perfect for adding helpful messaging, call-to-action buttons, or onboarding guidance.
+The **DataTable** now supports custom empty states when no data is available. Instead of showing just a loading spinner or blank table, you can now configure exactly what users see when the table is empty.
 
 **Basic usage with default empty state:**
 
@@ -367,7 +365,7 @@ public Task<(bool ok, string? message)> TestConnection(IConfiguration config)
 
 The framework includes a detailed refactor guide at `src/.releases/Refactors/Upcoming/IConnection-API.md` with additional migration information.
 
-### AppAttribute Parameter Renamed: path → group
+### AppAttribute Parameter Renamed: path - group
 
 The `[App]` attribute parameter `path` has been renamed to `group` for better clarity. If you're using the `[App]` attribute to register views in your application, you'll need to update the parameter name.
 
