@@ -103,7 +103,16 @@ export function useAutoScroll(options: UseAutoScrollOptions = {}) {
       }
     });
 
+    // Observe the scroll container itself (handles window resizes)
     resizeObserver.observe(element);
+
+    // Also observe the content wrapper so streaming content
+    // (e.g. RichTextBlock runs added via WriteStream) triggers auto-scroll
+    const contentChild = element.firstElementChild;
+    if (contentChild) {
+      resizeObserver.observe(contentChild);
+    }
+
     return () => resizeObserver.disconnect();
   }, [scrollState.autoScrollEnabled, scrollToBottom]);
 
