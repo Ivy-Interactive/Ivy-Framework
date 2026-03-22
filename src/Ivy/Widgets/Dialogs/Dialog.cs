@@ -89,7 +89,7 @@ public static class DialogExtensions
                 ),
                 new DialogFooter(
                     validationView,
-                    new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Density(formBuilder._density),
+                    new Baton("Cancel", _ => isOpen.Value = false, variant: BatonVariant.Outline).Density(formBuilder._density),
                     FormBuilder<TModel>.DefaultSubmitBuilder(submitTitle ?? "Save")(isLoading)
                         .OnClick(_ => HandleSubmitAndClose())
                         .Density(formBuilder._density)

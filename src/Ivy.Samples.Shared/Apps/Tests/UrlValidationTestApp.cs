@@ -3,50 +3,50 @@ namespace Ivy.Samples.Shared.Apps.Tests;
 [App(group: ["Tests"], isVisible: false, searchHints: ["url", "validation", "security", "redirect", "link", "button", "markdown", "xss", "phishing"])]
 public class UrlValidationTestApp : SampleBase
 {
-    private static Button SafeButtonWithUrl(string label, string url, ButtonVariant variant = ButtonVariant.Link)
+    private static Baton SafeBatonWithUrl(string label, string url, BatonVariant variant = BatonVariant.Link)
     {
         try
         {
-            return new Button(label, variant: variant).Url(url);
+            return new Baton(label, variant: variant).Url(url);
         }
         catch (ArgumentException)
         {
-            return new Button($"{label} (blocked)", variant: variant).Disabled(true);
+            return new Baton($"{label} (blocked)", variant: variant).Disabled(true);
         }
     }
 
     protected override object? BuildSample()
     {
-        var validButtons = Layout.Vertical().Gap(8)
-            | new Button("HTTPS URL", variant: ButtonVariant.Link)
+        var validBatons = Layout.Vertical().Gap(8)
+            | new Baton("HTTPS URL", variant: BatonVariant.Link)
                 .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
-            | new Button("HTTP URL", variant: ButtonVariant.Link)
+            | new Baton("HTTP URL", variant: BatonVariant.Link)
                 .Url("http://example.com")
-            | new Button("Relative Path", variant: ButtonVariant.Link)
+            | new Baton("Relative Path", variant: BatonVariant.Link)
                 .Url("/path/to/page")
-            | new Button("Relative Path with Query", variant: ButtonVariant.Link)
+            | new Baton("Relative Path with Query", variant: BatonVariant.Link)
                 .Url("/search?q=test")
-            | new Button("App Protocol", variant: ButtonVariant.Link)
+            | new Baton("App Protocol", variant: BatonVariant.Link)
                 .Url("app://MyApp")
-            | new Button("App Protocol with Query", variant: ButtonVariant.Link)
+            | new Baton("App Protocol with Query", variant: BatonVariant.Link)
                 .Url("app://MyApp?param=value")
-            | new Button("Anchor Link", variant: ButtonVariant.Link)
+            | new Baton("Anchor Link", variant: BatonVariant.Link)
                 .Url("#section")
-            | new Button("Anchor with Colon", variant: ButtonVariant.Link)
+            | new Baton("Anchor with Colon", variant: BatonVariant.Link)
                 .Url("#section:value")
-            | new Button("External URL with Path", variant: ButtonVariant.Link)
+            | new Baton("External URL with Path", variant: BatonVariant.Link)
                 .Url("https://example.com/path/to/resource")
-            | new Button("URL with Query & Fragment", variant: ButtonVariant.Link)
+            | new Baton("URL with Query & Fragment", variant: BatonVariant.Link)
                 .Url("https://example.com/search?q=test&sort=date#results");
 
-        var invalidButtons = Layout.Vertical().Gap(8)
-            | SafeButtonWithUrl("JavaScript Protocol", "javascript:alert('XSS')")
-            | SafeButtonWithUrl("Data Protocol", "data:text/html,<script>alert('XSS')</script>")
-            | SafeButtonWithUrl("VBScript Protocol", "vbscript:msgbox('XSS')")
-            | SafeButtonWithUrl("File Protocol", "file:///etc/passwd")
-            | SafeButtonWithUrl("Malformed URL", "https://example.com:javascript:alert('XSS')")
-            | SafeButtonWithUrl("App Protocol with Fragment", "app://MyApp#fragment")
-            | SafeButtonWithUrl("Relative Path with Colon", "/path:javascript:alert('XSS')");
+        var invalidBatons = Layout.Vertical().Gap(8)
+            | SafeBatonWithUrl("JavaScript Protocol", "javascript:alert('XSS')")
+            | SafeBatonWithUrl("Data Protocol", "data:text/html,<script>alert('XSS')</script>")
+            | SafeBatonWithUrl("VBScript Protocol", "vbscript:msgbox('XSS')")
+            | SafeBatonWithUrl("File Protocol", "file:///etc/passwd")
+            | SafeBatonWithUrl("Malformed URL", "https://example.com:javascript:alert('XSS')")
+            | SafeBatonWithUrl("App Protocol with Fragment", "app://MyApp#fragment")
+            | SafeBatonWithUrl("Relative Path with Colon", "/path:javascript:alert('XSS')");
 
         var validMarkdown = """
 - [HTTPS Link](https://github.com/Ivy-Interactive/Ivy-Framework)
@@ -76,8 +76,8 @@ public class UrlValidationTestApp : SampleBase
                | Text.Markdown("Testing URL validation for button links and markdown links. Valid URLs work normally, invalid URLs are blocked or sanitized.")
 
                | Layout.Grid().Columns(2).Gap(16)
-                   | new Card(validButtons).Title("Valid URLs - Button Links")
-                   | new Card(invalidButtons).Title("Invalid URLs - Button Links")
+                   | new Card(validBatons).Title("Valid URLs - Baton Links")
+                   | new Card(invalidBatons).Title("Invalid URLs - Baton Links")
 
                | Layout.Grid().Columns(2).Gap(16)
                    | new Card(new Markdown(validMarkdown)).Title("Valid URLs - Markdown Links")

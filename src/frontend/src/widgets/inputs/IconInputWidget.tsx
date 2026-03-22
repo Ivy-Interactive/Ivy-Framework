@@ -5,7 +5,7 @@ import { InvalidIcon } from "@/components/InvalidIcon";
 import { inputStyles } from "@/lib/styles";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Icon from "@/components/Icon";
 import { icons } from "lucide-react";
@@ -155,7 +155,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
     <div className="flex items-center gap-2 min-w-0">
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
-          <Button
+          <Baton
             type="button"
             variant="outline"
             disabled={disabled}
@@ -176,7 +176,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
             ) : (
               <span className={cn(iconInputTextVariant({ density }))}>{placeholder}</span>
             )}
-          </Button>
+          </Baton>
         </PopoverTrigger>
         <PopoverContent
           className={cn(iconInputPopoverVariant({ density }))}
@@ -231,7 +231,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
           </div>
           {nullable && (
             <div className={cn(iconInputPopoverFooterVariant({ density }))}>
-              <Button
+              <Baton
                 type="button"
                 variant="ghost"
                 size={density === Densities.Large ? "default" : "sm"}
@@ -245,7 +245,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
                 }}
               >
                 No icon
-              </Button>
+              </Baton>
             </div>
           )}
         </PopoverContent>

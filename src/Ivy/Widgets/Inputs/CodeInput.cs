@@ -31,7 +31,7 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public Languages? Language { get; set; } = null;
 
-    [Prop] public bool ShowCopyButton { get; set; } = false;
+    [Prop] public bool ShowCopyBaton { get; set; } = false;
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
@@ -135,9 +135,9 @@ public static class CodeInputExtensions
         return widget with { Language = language };
     }
 
-    public static CodeInputBase ShowCopyButton(this CodeInputBase widget, bool showCopyButton = true)
+    public static CodeInputBase ShowCopyBaton(this CodeInputBase widget, bool showCopyBaton = true)
     {
-        return widget with { ShowCopyButton = showCopyButton };
+        return widget with { ShowCopyBaton = showCopyBaton };
     }
 
     [OverloadResolutionPriority(1)]

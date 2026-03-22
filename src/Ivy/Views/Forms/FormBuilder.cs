@@ -17,7 +17,7 @@ public class FormBuilder<TModel> : ViewBase
 
     internal bool _formDisabled = false;
     internal Density _density = Ivy.Density.Medium;
-    internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
+    internal Func<bool, Baton> _submitBuilder = DefaultSubmitBuilder("Save");
     internal FormValidationStrategy _validationStrategy;
     internal FormSubmitStrategy _submitStrategy;
     internal Func<TModel, Task>? _onSubmit;
@@ -35,9 +35,9 @@ public class FormBuilder<TModel> : ViewBase
         _submitStrategy = submitStrategy;
     }
 
-    internal static Func<bool, Button> DefaultSubmitBuilder(string title) => (isLoading) => new Button(title).Loading(isLoading).Disabled(isLoading);
+    internal static Func<bool, Baton> DefaultSubmitBuilder(string title) => (isLoading) => new Baton(title).Loading(isLoading).Disabled(isLoading);
 
-    public FormBuilder<TModel> SubmitBuilder(Func<bool, Button> builder)
+    public FormBuilder<TModel> SubmitBuilder(Func<bool, Baton> builder)
     {
         _submitBuilder = builder;
         return this;

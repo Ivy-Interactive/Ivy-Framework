@@ -33,7 +33,7 @@ export interface DataTableOptionProps {
   inlineDirection?: InlineDirection;
   defaultExpanded?: boolean;
 
-  // Button configuration
+  // Baton configuration
   showLabel?: boolean;
 }
 

@@ -2,18 +2,18 @@
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
 [App(icon: Icons.SquareChevronRight, group: ["Widgets"], searchHints: ["click", "action", "submit", "cta", "interactive", "control"])]
-public class ButtonApp() : SampleBase
+public class BatonApp() : SampleBase
 {
-    private static readonly ButtonVariant[] Variants = [
-        ButtonVariant.Primary,
-        ButtonVariant.Destructive,
-        ButtonVariant.Secondary,
-        ButtonVariant.Success,
-        ButtonVariant.Warning,
-        ButtonVariant.Info,
-        ButtonVariant.Outline,
-        ButtonVariant.Ghost,
-        ButtonVariant.Link,
+    private static readonly BatonVariant[] Variants = [
+        BatonVariant.Primary,
+        BatonVariant.Destructive,
+        BatonVariant.Secondary,
+        BatonVariant.Success,
+        BatonVariant.Warning,
+        BatonVariant.Info,
+        BatonVariant.Outline,
+        BatonVariant.Ghost,
+        BatonVariant.Link,
     ];
 
     private static readonly string[] VariantNames = [
@@ -32,20 +32,20 @@ public class ButtonApp() : SampleBase
     {
         var label = UseState("Click a button");
 
-        var eventHandler = (Event<Button> e) =>
+        var eventHandler = (Event<Baton> e) =>
         {
-            label.Set($"Button {e.Sender.Title} was clicked.");
+            label.Set($"Baton {e.Sender.Title} was clicked.");
         };
 
-        var createButtonRow = (Func<ButtonVariant, Button> buttonFactory) =>
+        var createBatonRow = (Func<BatonVariant, Baton> buttonFactory) =>
             Layout.Grid().Columns(Variants.Length)
             | VariantNames.Select(name => Text.Block(name)).ToArray()
             | Variants.Select(buttonFactory).ToArray();
 
         return Layout.Vertical()
-               | Text.H1("Buttons")
+               | Text.H1("Batons")
                | Text.H2("Variants")
-               | createButtonRow(variant => new Button(VariantNames[Array.IndexOf(Variants, variant)], eventHandler, variant: variant))
+               | createBatonRow(variant => new Baton(VariantNames[Array.IndexOf(Variants, variant)], eventHandler, variant: variant))
 
                | Text.H2("States")
                | (Layout.Wrap().Gap(16)
@@ -53,9 +53,9 @@ public class ButtonApp() : SampleBase
                       Layout.Vertical()
                       .Width(Size.MinContent())
                  | Text.Block(VariantNames[idx])
-                 | new Button(VariantNames[idx], eventHandler, variant: variant)                     // Normal
-                 | new Button(VariantNames[idx], eventHandler, variant: variant).Disabled()          // Disabled
-                 | new Button(VariantNames[idx], eventHandler, variant: variant).Loading()           // Loading
+                 | new Baton(VariantNames[idx], eventHandler, variant: variant)                     // Normal
+                 | new Baton(VariantNames[idx], eventHandler, variant: variant).Disabled()          // Disabled
+                 | new Baton(VariantNames[idx], eventHandler, variant: variant).Loading()           // Loading
                   ).ToArray()
 )
 
@@ -64,13 +64,13 @@ public class ButtonApp() : SampleBase
                   | VariantNames.Select(name => Text.Block(name)).ToArray()
 
                   // Small
-                  | Variants.Select(variant => new Button("Small", eventHandler, variant: variant).Small()).ToArray()
+                  | Variants.Select(variant => new Baton("Small", eventHandler, variant: variant).Small()).ToArray()
 
                   // Medium
-                  | Variants.Select(variant => new Button("Medium", eventHandler, variant: variant)).ToArray()
+                  | Variants.Select(variant => new Baton("Medium", eventHandler, variant: variant)).ToArray()
 
                   // Large
-                  | Variants.Select(variant => new Button("Large", eventHandler, variant: variant).Large()).ToArray()
+                  | Variants.Select(variant => new Baton("Large", eventHandler, variant: variant).Large()).ToArray()
                )
 
                | Text.H2("With Icons")
@@ -79,8 +79,8 @@ public class ButtonApp() : SampleBase
                     Layout.Vertical()
                     .Width(Size.MinContent())
                | Text.Block(VariantNames[idx])
-               | new Button("Button With Icon", eventHandler, variant: variant, icon: Icons.MessageSquareX)
-               | new Button("Button With Icon", eventHandler, variant: variant, icon: Icons.MessageSquareX).Icon(Icons.MessageSquareX, Align.Right)
+               | new Baton("Baton With Icon", eventHandler, variant: variant, icon: Icons.MessageSquareX)
+               | new Baton("Baton With Icon", eventHandler, variant: variant, icon: Icons.MessageSquareX).Icon(Icons.MessageSquareX, Align.Right)
                 ).ToArray()
 )
 
@@ -90,47 +90,47 @@ public class ButtonApp() : SampleBase
                   | VariantNames.Select(name => Text.Block(name)).ToArray()
 
                   // Rounded
-                  | Variants.Select(variant => new Button("Rounded", eventHandler, variant: variant).BorderRadius(BorderRadius.Rounded)).ToArray()
+                  | Variants.Select(variant => new Baton("Rounded", eventHandler, variant: variant).BorderRadius(BorderRadius.Rounded)).ToArray()
 
                   // Full
-                  | Variants.Select(variant => new Button("Full", eventHandler, variant: variant).BorderRadius(BorderRadius.Full)).ToArray()
+                  | Variants.Select(variant => new Baton("Full", eventHandler, variant: variant).BorderRadius(BorderRadius.Full)).ToArray()
 
                   // With Tooltip
-                  | Variants.Select(variant => new Button("With Tooltip", eventHandler, variant: variant).Tooltip("This is a tooltip!")).ToArray()
+                  | Variants.Select(variant => new Baton("With Tooltip", eventHandler, variant: variant).Tooltip("This is a tooltip!")).ToArray()
                )
 
                | Text.H2("Icon Only")
                | Layout.Horizontal(
-                   Icons.MessageSquareX.ToButton(eventHandler),
-                   Icons.Heart.ToButton(eventHandler, ButtonVariant.Destructive),
-                   Icons.Star.ToButton(eventHandler, ButtonVariant.Outline)
+                   Icons.MessageSquareX.ToBaton(eventHandler),
+                   Icons.Heart.ToBaton(eventHandler, BatonVariant.Destructive),
+                   Icons.Star.ToBaton(eventHandler, BatonVariant.Outline)
                )
                | Layout.Horizontal(
-                   Icons.MessageSquareX.ToButton(eventHandler).Small(),
-                   Icons.Heart.ToButton(eventHandler, ButtonVariant.Destructive).Small(),
-                   Icons.Star.ToButton(eventHandler, ButtonVariant.Outline).Small()
+                   Icons.MessageSquareX.ToBaton(eventHandler).Small(),
+                   Icons.Heart.ToBaton(eventHandler, BatonVariant.Destructive).Small(),
+                   Icons.Star.ToBaton(eventHandler, BatonVariant.Outline).Small()
                )
 
-               | Text.H2("Buttons with URLs")
+               | Text.H2("Batons with URLs")
                | (Layout.Horizontal().Gap(8)
-                   | new Button("Visit Ivy GitHub", variant: ButtonVariant.Primary)
+                   | new Baton("Visit Ivy GitHub", variant: BatonVariant.Primary)
                        .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
-                   | new Button("External Link", variant: ButtonVariant.Secondary)
+                   | new Baton("External Link", variant: BatonVariant.Secondary)
                        .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
                        .Icon(Icons.ExternalLink, Align.Right)
-                   | new Button("Link Style", variant: ButtonVariant.Link)
+                   | new Baton("Link Style", variant: BatonVariant.Link)
                        .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
                )
 
-               | Text.H2("AI Button")
+               | Text.H2("AI Baton")
                | (Layout.Horizontal().Gap(8)
-                   | new Button("AI Button", eventHandler, variant: ButtonVariant.Ai)
-                   | new Button("With Icon", eventHandler, variant: ButtonVariant.Ai).Icon(Icons.Sparkles)
+                   | new Baton("AI Baton", eventHandler, variant: BatonVariant.Ai)
+                   | new Baton("With Icon", eventHandler, variant: BatonVariant.Ai).Icon(Icons.Sparkles)
                )
                | (Layout.Horizontal().Gap(8)
-                   | new Button("Small", eventHandler, variant: ButtonVariant.Ai).Small()
-                   | new Button("Large", eventHandler, variant: ButtonVariant.Ai).Large()
-                   | new Button("Full Rounded", eventHandler, variant: ButtonVariant.Ai).BorderRadius(BorderRadius.Full)
+                   | new Baton("Small", eventHandler, variant: BatonVariant.Ai).Small()
+                   | new Baton("Large", eventHandler, variant: BatonVariant.Ai).Large()
+                   | new Baton("Full Rounded", eventHandler, variant: BatonVariant.Ai).BorderRadius(BorderRadius.Full)
                )
 
                | Text.H2("Interactive Demo")

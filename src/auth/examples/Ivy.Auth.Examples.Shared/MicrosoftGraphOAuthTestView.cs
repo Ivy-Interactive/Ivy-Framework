@@ -19,7 +19,7 @@ public class MicrosoftGraphOAuthTestView : ViewBase
         return Layout.Vertical(
             Text.H4("Microsoft Graph API Test"),
             Layout.Horizontal(
-                new Button("Get Profile", async () =>
+                new Baton("Get Profile", async () =>
                 {
                     using var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Authorization =
@@ -35,8 +35,8 @@ public class MicrosoftGraphOAuthTestView : ViewBase
                     {
                         apiResponse.Set($"{{\"error\": \"{ex.Message}\"}}");
                     }
-                }, variant: ButtonVariant.Primary),
-                new Button("List OneDrive Files", async () =>
+                }, variant: BatonVariant.Primary),
+                new Baton("List OneDrive Files", async () =>
                 {
                     using var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Authorization =
@@ -52,7 +52,7 @@ public class MicrosoftGraphOAuthTestView : ViewBase
                     {
                         apiResponse.Set($"{{\"error\": \"{ex.Message}\"}}");
                     }
-                }, variant: ButtonVariant.Outline)
+                }, variant: BatonVariant.Outline)
             ).Gap(10),
             apiResponse.Value != null
                 ? Text.Json(apiResponse.Value)

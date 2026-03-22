@@ -63,7 +63,7 @@ public class DepartmentsListBlade : ViewBase
         });
 
         var createBtn = Icons.Plus
-            .ToButton(_ =>
+            .ToBaton(_ =>
             {
                 blades.Pop(this);
             })
@@ -160,7 +160,7 @@ public class DepartmentDetailsBlade(Guid departmentId) : ViewBase
 
         var department = departmentQuery.Value;
 
-        var deleteBtn = new Button("Delete", onClick: async _ =>
+        var deleteBtn = new Baton("Delete", onClick: async _ =>
             {
                 blades.Pop(refresh: true);
                 await DeleteAsync(factory);
@@ -168,13 +168,13 @@ public class DepartmentDetailsBlade(Guid departmentId) : ViewBase
                 queryService.RevalidateByTag(typeof(ProductListRecord[]));
                 queryService.RevalidateByTag(nameof(ProductHelpers.UseDepartmentOptions));
             })
-            .Variant(ButtonVariant.Destructive)
+            .Variant(BatonVariant.Destructive)
             .Icon(Icons.Trash)
             .Width(Size.Grow())
             .WithConfirm($"Are you sure you want to delete department '{department.Name}'?", "Delete Department", confirmLabel: "Delete", destructive: true);
 
-        var editBtn = new Button("Edit")
-            .Variant(ButtonVariant.Outline)
+        var editBtn = new Baton("Edit")
+            .Variant(BatonVariant.Outline)
             .Icon(Icons.Pencil)
             .Width(Size.Grow())
             .ToTrigger((isOpen) => new DepartmentEditSheet(isOpen, departmentId));

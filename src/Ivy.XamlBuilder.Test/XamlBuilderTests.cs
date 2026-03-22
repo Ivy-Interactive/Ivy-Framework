@@ -18,10 +18,10 @@ public class XamlBuilderTests
     }
 
     [Fact]
-    public void Build_Button()
+    public void Build_Baton()
     {
-        var widget = _builder.Build("<Button />");
-        Assert.IsType<Button>(widget);
+        var widget = _builder.Build("<Baton />");
+        Assert.IsType<Baton>(widget);
     }
 
     [Fact]
@@ -66,8 +66,8 @@ public class XamlBuilderTests
     [Fact]
     public void Build_BoolProp()
     {
-        var widget = _builder.Build("<Button Disabled=\"true\" />");
-        var button = Assert.IsType<Button>(widget);
+        var widget = _builder.Build("<Baton Disabled=\"true\" />");
+        var button = Assert.IsType<Baton>(widget);
         Assert.True(button.Disabled);
     }
 
@@ -138,12 +138,12 @@ public class XamlBuilderTests
     public void Build_PropsAndChildren()
     {
         var widget = _builder.Build(
-            "<StackLayout RowGap=\"12\"><Badge Title=\"A\" /><Button Disabled=\"true\" /></StackLayout>");
+            "<StackLayout RowGap=\"12\"><Badge Title=\"A\" /><Baton Disabled=\"true\" /></StackLayout>");
         var stack = Assert.IsType<StackLayout>(widget);
         Assert.Equal(12, stack.RowGap);
         Assert.Equal(2, stack.Children.Length);
         Assert.Equal("A", Assert.IsType<Badge>(stack.Children[0]).Title);
-        Assert.True(Assert.IsType<Button>(stack.Children[1]).Disabled);
+        Assert.True(Assert.IsType<Baton>(stack.Children[1]).Disabled);
     }
 
     // --- Property element syntax: single objects ---

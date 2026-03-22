@@ -3,7 +3,7 @@ import { ChatInput } from "@/components/ChatInput";
 import { ChatMessageList } from "@/components/ChatMessageList";
 import { useEventHandler } from "@/components/event-handler";
 import { MessageLoading } from "@/components/MessageLoading";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { CornerDownLeft, Square } from "lucide-react";
 import React, { FormEvent, useState, KeyboardEvent, ReactNode } from "react";
 import { User, LucideStars } from "lucide-react";
@@ -150,7 +150,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
           />
           <div className="flex items-center p-3 pt-0 justify-between">
             {isLoading ? (
-              <Button
+              <Baton
                 type="button"
                 onClick={handleCancel}
                 variant="destructive"
@@ -158,12 +158,12 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
               >
                 Cancel Request
                 <Square className="size-3.5 fill-black" />
-              </Button>
+              </Baton>
             ) : (
-              <Button type="submit" className="ml-auto gap-1.5">
+              <Baton type="submit" className="ml-auto gap-1.5">
                 Send Message
                 <CornerDownLeft className="size-3.5" />
-              </Button>
+              </Baton>
             )}
           </div>
         </form>

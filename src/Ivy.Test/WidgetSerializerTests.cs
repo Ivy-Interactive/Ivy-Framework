@@ -28,7 +28,7 @@ public class WidgetSerializerTests(ITestOutputHelper output)
     [Fact]
     public void Serialize_DefaultValues_AreNotSerialized()
     {
-        var widget = new Button("Click me");
+        var widget = new Baton("Click me");
         widget.Id = Guid.NewGuid().ToString();
 
         var result = WidgetSerializer.Serialize(widget);
@@ -52,9 +52,9 @@ public class WidgetSerializerTests(ITestOutputHelper output)
     [Fact]
     public void Serialize_NonDefaultValues_AreSerialized()
     {
-        var widget = new Button("Delete")
+        var widget = new Baton("Delete")
         {
-            Variant = ButtonVariant.Destructive,
+            Variant = BatonVariant.Destructive,
             Disabled = true,
             Loading = true
         };
@@ -121,7 +121,7 @@ public class WidgetSerializerTests(ITestOutputHelper output)
     public void Serialize_NestedProps_DefaultValuesNotSerialized()
     {
         // Size is serialized as a string representation
-        var widget = new Button("Sized") { Width = Size.Units(100) };
+        var widget = new Baton("Sized") { Width = Size.Units(100) };
         widget.Id = Guid.NewGuid().ToString();
 
         var result = WidgetSerializer.Serialize(widget);

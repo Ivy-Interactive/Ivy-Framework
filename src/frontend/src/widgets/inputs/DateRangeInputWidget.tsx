@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useOptimisticValue } from "./shared/useOptimisticValue";
 import { DateRange } from "react-day-picker";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -173,7 +173,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
     <div className="relative w-full select-none">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button
+          <Baton
             variant="outline"
             disabled={disabled}
             data-testid={dataTestId}
@@ -225,7 +225,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                 {placeholder}
               </span>
             )}
-          </Button>
+          </Baton>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <div className="rounded-box">

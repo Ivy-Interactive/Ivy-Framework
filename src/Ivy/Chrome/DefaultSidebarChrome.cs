@@ -427,7 +427,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         DropDownMenu? footer;
         if (user.Value != null)
         {
-            var trigger = new Button().Variant(ButtonVariant.Ghost)
+            var trigger = new Baton().Variant(BatonVariant.Ghost)
                 .Content(
                     Layout.Horizontal().Align(Align.Left).Width(Size.Full())
                         | new Avatar(user.Value.Initials, user.Value.AvatarUrl)
@@ -451,13 +451,13 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         }
         else
         {
-            var trigger = new Button("Settings")
+            var trigger = new Baton("Settings")
                 .Content(
                     Layout.Horizontal().Align(Align.Left)
                         | Icons.Settings.ToIcon()
                         | Text.P("Settings").Small().Muted()
                     )
-                    .Variant(ButtonVariant.Ghost).Width(Size.Full());
+                    .Variant(BatonVariant.Ghost).Width(Size.Full());
 
             var footerMenuItems = isLoggedIn
                 ? [.. commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).OnSelect(onLogout)]

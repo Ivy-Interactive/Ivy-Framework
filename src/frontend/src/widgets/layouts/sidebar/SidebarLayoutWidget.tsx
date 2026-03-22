@@ -19,7 +19,7 @@ interface SidebarLayoutWidgetProps {
     SidebarFooter?: React.ReactNode[];
     MainContent: React.ReactNode[];
   };
-  showToggleButton?: boolean;
+  showToggleBaton?: boolean;
   autoCollapseThreshold?: number; // Width threshold for auto-collapse (default: 768px)
   mainAppSidebar?: boolean;
   mainContentPadding?: number; // Padding for main content area (default: 2)
@@ -79,7 +79,7 @@ const hasContent = (slot?: React.ReactNode[]): boolean => {
 
 export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   slots,
-  showToggleButton = true,
+  showToggleBaton = true,
   autoCollapseThreshold = 768,
   mainAppSidebar = false,
   mainContentPadding,
@@ -279,8 +279,8 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : "",
         )}
       >
-        {/* Toggle Button - Only show for main app sidebar */}
-        {showToggleButton && mainAppSidebar && (
+        {/* Toggle Baton - Only show for main app sidebar */}
+        {showToggleBaton && mainAppSidebar && (
           <button
             onClick={handleManualToggle}
             className="absolute top-0 left-1 z-50 p-2 rounded-selector bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"

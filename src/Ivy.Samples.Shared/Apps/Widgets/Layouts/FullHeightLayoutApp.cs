@@ -33,7 +33,7 @@ public class FullHeightLayoutView : ViewBase
         var footer = Layout.Horizontal().Align(Align.Center)
             | Text.Muted("30 items")
             | new Spacer()
-            | new Button("Export").Variant(ButtonVariant.Outline).Icon(Icons.Download);
+            | new Baton("Export").Variant(BatonVariant.Outline).Icon(Icons.Download);
 
         return Layout.Vertical().Height(Size.Full())
             | header

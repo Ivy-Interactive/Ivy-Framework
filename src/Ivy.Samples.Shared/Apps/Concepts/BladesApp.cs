@@ -17,22 +17,22 @@ public class RootView(string someId) : ViewBase
         var bladeController = UseContext<IBladeService>();
         var index = bladeController.GetIndex(this);
 
-        void OnClick(Event<Button> @event)
+        void OnClick(Event<Baton> @event)
         {
             bladeController.Push(this, new RootView(@event.Sender.Tag?.ToString() ?? "?"), $"Blade {index + 1}");
         }
 
-        void OnClickWithError(Event<Button> @event)
+        void OnClickWithError(Event<Baton> @event)
         {
             bladeController.Push(this, new BladeWithError(), "Blade With Error");
         }
 
-        void OnClickWideTable(Event<Button> @event)
+        void OnClickWideTable(Event<Baton> @event)
         {
             bladeController.Push(this, new WideTableBlade(), "Wide Table");
         }
 
-        void OnClickLongContentTable(Event<Button> @event)
+        void OnClickLongContentTable(Event<Baton> @event)
         {
             bladeController.Push(this, new LongContentTableBlade(), "Long Content Table");
         }
@@ -41,12 +41,12 @@ public class RootView(string someId) : ViewBase
             $"This is blade {index}",
             DateTime.Now.Ticks,
             someId,
-            new Button("Push A", OnClick).Tag("A"),
-            new Button("Push B", OnClick).Tag("B"),
-            new Button("Push C", OnClick).Tag("C"),
-            new Button("Blade With Error", OnClickWithError),
-            new Button("Wide Table", OnClickWideTable),
-            new Button("Long Content Table", OnClickLongContentTable)
+            new Baton("Push A", OnClick).Tag("A"),
+            new Baton("Push B", OnClick).Tag("B"),
+            new Baton("Push C", OnClick).Tag("C"),
+            new Baton("Blade With Error", OnClickWithError),
+            new Baton("Wide Table", OnClickWideTable),
+            new Baton("Long Content Table", OnClickLongContentTable)
         );
     }
 }

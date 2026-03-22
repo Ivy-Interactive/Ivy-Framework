@@ -17,11 +17,11 @@ public class CopyToClipboardBuilder<TModel> : IBuilder<TModel>
             var client = context.UseService<IClientProvider>();
             return Layout.Horizontal().Gap(1).Align(Align.Center)
                    | value
-                   | Icons.ClipboardCopy.ToButton(@event =>
+                   | Icons.ClipboardCopy.ToBaton(@event =>
                    {
                        client.CopyToClipboard(value.ToString()!);
                        client.Toast($"Copied '{value}' to clipboard", "Value Copied");
-                   }).Variant(ButtonVariant.Ghost);
+                   }).Variant(BatonVariant.Ghost);
         });
     }
 }

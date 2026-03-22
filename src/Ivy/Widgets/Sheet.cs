@@ -74,7 +74,7 @@ public static class SheetExtensions
 {
     public static Sheet Side(this Sheet sheet, SheetSide side) => sheet with { Side = side };
 
-    public static IView WithSheet(this Button trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
+    public static IView WithSheet(this Baton trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
     {
         return new WithSheetView(trigger, contentFactory, title, description, width, side);
     }
@@ -129,7 +129,7 @@ public static class SheetExtensions
                 | FormBuilder<TModel>.DefaultSubmitBuilder(submitTitle ?? "Save")(isLoading)
                     .OnClick(_ => HandleSubmitAndClose())
                     .Density(formBuilder._density)
-                | new Button("Cancel").Variant(ButtonVariant.Outline).OnClick(_ => isOpen.Set(false))
+                | new Baton("Cancel").Variant(BatonVariant.Outline).OnClick(_ => isOpen.Set(false))
                     .Density(formBuilder._density)
                 | validationView,
                 formView
@@ -151,7 +151,7 @@ public static class SheetExtensions
     }
 }
 
-public class WithSheetView(Button trigger, Func<object> contentFactory, string? title, string? description, Size? width, SheetSide side = SheetSide.Right) : ViewBase
+public class WithSheetView(Baton trigger, Func<object> contentFactory, string? title, string? description, Size? width, SheetSide side = SheetSide.Right) : ViewBase
 {
     public override object? Build()
     {

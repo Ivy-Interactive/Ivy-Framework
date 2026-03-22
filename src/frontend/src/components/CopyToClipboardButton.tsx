@@ -17,7 +17,7 @@ const copyIconVariant = cva("", {
   },
 });
 
-const copyButtonSizeVariant = cva(
+const copyBatonSizeVariant = cva(
   "p-2 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center",
   {
     variants: {
@@ -33,7 +33,7 @@ const copyButtonSizeVariant = cva(
   },
 );
 
-interface CopyToClipboardButtonProps {
+interface CopyToClipboardBatonProps {
   textToCopy?: string;
   label?: string;
   "aria-label"?: string;
@@ -41,7 +41,7 @@ interface CopyToClipboardButtonProps {
   className?: string;
 }
 
-const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
+const CopyToClipboardBaton: React.FC<CopyToClipboardBatonProps> = ({
   textToCopy = "",
   label = "",
   "aria-label": ariaLabel,
@@ -68,7 +68,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
       aria-label={ariaLabel || "Copy to clipboard"}
       className={cn(
         isIconOnly
-          ? cn(copyButtonSizeVariant({ density }), copied && "bg-primary text-primary-foreground")
+          ? cn(copyBatonSizeVariant({ density }), copied && "bg-primary text-primary-foreground")
           : "flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer hover:bg-accent hover:shadow-sm border-0",
         !isIconOnly &&
           (copied
@@ -104,4 +104,4 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
   );
 };
 
-export default CopyToClipboardButton;
+export default CopyToClipboardBaton;

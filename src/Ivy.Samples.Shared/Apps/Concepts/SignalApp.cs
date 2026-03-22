@@ -12,14 +12,14 @@ public class SignalApp : SampleBase
 
         return
             Layout.Vertical()
-            | new Button("Send Signal", OnClick)
+            | new Baton("Send Signal", OnClick)
             | (Layout.Horizontal()
                | new ChildView()
                | new ChildView())
             | output
             ;
 
-        async void OnClick(Event<Button> _)
+        async void OnClick(Event<Baton> _)
         {
             var results = await signal.Send(1);
             output.Set(string.Join(';', results));
@@ -43,11 +43,11 @@ public class ChildView : ViewBase
         return new Card(
             Layout.Vertical(
                 (Layout.Horizontal()
-                    | Icons.Plus.ToButton(_ =>
+                    | Icons.Plus.ToBaton(_ =>
                     {
                         counter.Set(counter.Value + 1);
                     })
-                    | Icons.Minus.ToButton(_ =>
+                    | Icons.Minus.ToBaton(_ =>
                     {
                         counter.Set(counter.Value - 1);
                     })

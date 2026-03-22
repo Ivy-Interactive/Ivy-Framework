@@ -194,7 +194,7 @@ public class ColumnWidthsExample : ViewBase
                 .ColumnWidth(e => e.Contact, Size.Fraction(0.6f))
                 .ColumnWidth(e => e.Views, Size.Fraction(0.4f))
 
-            | Text.Label("Test 7: With Action Buttons Column (like DeckLinksBlade)")
+            | Text.Label("Test 7: With Action Batons Column (like DeckLinksBlade)")
             | Text.P("Width: Size.Units(100), Reference: Fraction(0.5), Contact: Fraction(0.5), Actions: Fit()")
             | records
                 .Select(dl => new
@@ -204,14 +204,14 @@ public class ColumnWidthsExample : ViewBase
                     dl.Views,
                     Actions = Layout.Horizontal().Gap(1)
                         | Icons.Ellipsis
-                            .ToButton()
+                            .ToBaton()
                             .Ghost()
                             .WithDropDown(
                                 MenuItem.Default("Edit").Icon(Icons.Pencil).OnSelect(() => { }),
                                 MenuItem.Default("Delete").Icon(Icons.Trash).OnSelect(() => { })
                             )
                         | Icons.Clipboard
-                            .ToButton()
+                            .ToBaton()
                             .Outline()
                             .Tooltip("Copy Link")
                             .OnClick(() => { })

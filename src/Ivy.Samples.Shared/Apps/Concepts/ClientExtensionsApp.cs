@@ -8,7 +8,7 @@ public class ClientExtensionsApp : SampleBase
         var client = UseService<IClientProvider>();
 
         return Layout.Vertical(
-            new Button("OpenUrl", _ => client.OpenUrl("https://google.com"))
+            new Baton("OpenUrl", _ => client.OpenUrl("https://google.com"))
         );
     }
 }

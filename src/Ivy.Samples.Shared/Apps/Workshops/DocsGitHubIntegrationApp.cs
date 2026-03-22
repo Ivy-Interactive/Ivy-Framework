@@ -128,7 +128,7 @@ public class DocsGitHubIntegrationApp : SampleBase
                 **Frontend Enhancement:**
                 ```typescript
                 // Add to MarkdownRenderer.tsx
-                const LLMCopyButton = ({ content, source }: { content: string, source?: string }) => {
+                const LLMCopyBaton = ({ content, source }: { content: string, source?: string }) => {
                   const copyForLLM = () => {
                     const cleanContent = stripNavigationElements(content);
                     const attribution = source ? `\n\nSource: ${source}` : '';
@@ -240,7 +240,7 @@ public class DocsGitHubIntegrationApp : SampleBase
                 - Information: Avatar, name, contribution count, last contribution date
                 - Interaction: Click avatar -> open GitHub profile in new tab
 
-                ### LLM Copy Button  
+                ### LLM Copy Baton  
                 - Position: Top-right corner of markdown content blocks
                 - Design: Subtle button similar to existing code copy buttons
                 - Functionality: Copy clean markdown + attribution

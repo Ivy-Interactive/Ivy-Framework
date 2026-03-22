@@ -141,7 +141,7 @@ public class LongSidebarTestApp : SampleBase
                 : Text.Muted("Preview available for SVG format only"),
 
             // Download button
-            new Button("Download Banner", onClick: _ =>
+            new Baton("Download Banner", onClick: _ =>
                 {
                     // Generate download URL with current parameters
                     var downloadUrl = GetBannerUrl(endpoint.Value, text.Value, width.Value, height.Value,
@@ -152,7 +152,7 @@ public class LongSidebarTestApp : SampleBase
                     // Open URL in new tab for download
                     client.OpenUrl(downloadUrl);
                 }
-            ).Icon(Icons.Download).Variant(ButtonVariant.Primary)
+            ).Icon(Icons.Download).Variant(BatonVariant.Primary)
 
         ).Gap(6);
 

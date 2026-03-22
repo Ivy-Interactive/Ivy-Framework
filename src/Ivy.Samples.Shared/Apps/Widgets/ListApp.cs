@@ -49,14 +49,14 @@ public class ListBlade : ViewBase
             .Disabled()
             .Badge("Locked"));
 
-        var onCreate = new Action<Event<Button>>(e =>
+        var onCreate = new Action<Event<Baton>>(e =>
         {
             client.Toast("Create button clicked");
         });
 
         var header = Layout.Horizontal(
             searchString.ToSearchInput().Placeholder("Search..."),
-            new Button(icon: Icons.Plus, onClick: onCreate, variant: ButtonVariant.Outline)
+            new Baton(icon: Icons.Plus, onClick: onCreate, variant: BatonVariant.Outline)
         ).Gap(1);
 
         return new Fragment()

@@ -12,7 +12,7 @@ import DataEditor, {
   Theme,
 } from "@glideapps/glide-data-grid";
 import { tableStyles } from "../styles/style";
-import { RowActionButtons } from "../dataTableRowAction/rowActionButtons";
+import { RowActionBatons } from "../dataTableRowAction/rowActionBatons";
 import { MenuItem } from "@/types/widgets";
 
 interface GridContainerProps {
@@ -49,7 +49,7 @@ interface GridContainerProps {
   onItemHovered?: (args: GridMouseEventArgs) => void;
   getRowThemeOverride?: ((row: number) => Partial<Theme> | undefined) | undefined;
   rowActions?: MenuItem[];
-  actionButtonsTop: number;
+  actionBatonsTop: number;
   hoverRow: number | undefined;
   onRowActionClick: (action: MenuItem) => void;
   footer?: React.ReactNode;
@@ -94,7 +94,7 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   onItemHovered,
   getRowThemeOverride,
   rowActions,
-  actionButtonsTop,
+  actionBatonsTop,
   hoverRow,
   onRowActionClick,
   footer,
@@ -151,9 +151,9 @@ export const GridContainer: React.FC<GridContainerProps> = ({
 
       {/* Row action buttons overlay */}
       {rowActions && rowActions.length > 0 && (
-        <RowActionButtons
+        <RowActionBatons
           actions={rowActions}
-          top={actionButtonsTop}
+          top={actionBatonsTop}
           visible={hoverRow !== undefined}
           onActionClick={onRowActionClick}
         />

@@ -59,8 +59,8 @@ public class AudioApp : SampleBase
                     | Text.H4("Audio Without Controls")
                     | Text.P("Audio element without browser controls for programmatic control scenarios.")
                     | noControlsAudio
-                    | new Button("Toggle Play/Pause", _ => client.Toast("In a real app, this would control the audio programmatically"))
-                        .Variant(ButtonVariant.Outline)
+                    | new Baton("Toggle Play/Pause", _ => client.Toast("In a real app, this would control the audio programmatically"))
+                        .Variant(BatonVariant.Outline)
                 ).Title("Programmatic Control"))
                 | (new Card(
                     Layout.Vertical().Gap(4)

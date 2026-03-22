@@ -6,6 +6,6 @@ public class TooltipApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return new Tooltip(new Button("Hoover Me"), "Hello World!");
+        return new Tooltip(new Baton("Hoover Me"), "Hello World!");
     }
 }

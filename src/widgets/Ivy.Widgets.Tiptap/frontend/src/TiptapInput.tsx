@@ -37,7 +37,7 @@ interface TiptapInputProps {
   eventHandler?: EventHandler;
 }
 
-interface ToolbarButtonProps {
+interface ToolbarBatonProps {
   onClick: () => void;
   isActive?: boolean;
   disabled?: boolean;
@@ -45,7 +45,7 @@ interface ToolbarButtonProps {
   children: React.ReactNode;
 }
 
-const ToolbarButton: React.FC<ToolbarButtonProps> = ({
+const ToolbarBaton: React.FC<ToolbarBatonProps> = ({
   onClick,
   isActive,
   disabled,
@@ -177,119 +177,119 @@ export const TiptapInput: React.FC<TiptapInputProps> = ({
       {showToolbar && isEditable && (
         <div className="flex flex-wrap items-center gap-0.5 p-2 border-b bg-muted/30 shrink-0">
           {/* Text formatting */}
-          <ToolbarButton
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleBold().run())}
             isActive={editor.isActive("bold")}
             title="Bold (Ctrl+B)"
           >
             <LuBold size={16} />
-          </ToolbarButton>
-          <ToolbarButton
+          </ToolbarBaton>
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleItalic().run())}
             isActive={editor.isActive("italic")}
             title="Italic (Ctrl+I)"
           >
             <LuItalic size={16} />
-          </ToolbarButton>
-          <ToolbarButton
+          </ToolbarBaton>
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleStrike().run())}
             isActive={editor.isActive("strike")}
             title="Strikethrough"
           >
             <LuStrikethrough size={16} />
-          </ToolbarButton>
-          <ToolbarButton
+          </ToolbarBaton>
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleCode().run())}
             isActive={editor.isActive("code")}
             title="Inline code"
           >
             <LuCode size={16} />
-          </ToolbarButton>
+          </ToolbarBaton>
 
           <ToolbarDivider />
 
           {/* Headings */}
-          <ToolbarButton
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleHeading({ level: 1 }).run())}
             isActive={editor.isActive("heading", { level: 1 })}
             title="Heading 1"
           >
             <LuHeading1 size={16} />
-          </ToolbarButton>
-          <ToolbarButton
+          </ToolbarBaton>
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleHeading({ level: 2 }).run())}
             isActive={editor.isActive("heading", { level: 2 })}
             title="Heading 2"
           >
             <LuHeading2 size={16} />
-          </ToolbarButton>
-          <ToolbarButton
+          </ToolbarBaton>
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleHeading({ level: 3 }).run())}
             isActive={editor.isActive("heading", { level: 3 })}
             title="Heading 3"
           >
             <LuHeading3 size={16} />
-          </ToolbarButton>
+          </ToolbarBaton>
 
           <ToolbarDivider />
 
           {/* Lists */}
-          <ToolbarButton
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleBulletList().run())}
             isActive={editor.isActive("bulletList")}
             title="Bullet list"
           >
             <LuList size={16} />
-          </ToolbarButton>
-          <ToolbarButton
+          </ToolbarBaton>
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleOrderedList().run())}
             isActive={editor.isActive("orderedList")}
             title="Numbered list"
           >
             <LuListOrdered size={16} />
-          </ToolbarButton>
+          </ToolbarBaton>
 
           <ToolbarDivider />
 
           {/* Block elements */}
-          <ToolbarButton
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleBlockquote().run())}
             isActive={editor.isActive("blockquote")}
             title="Quote"
           >
             <LuQuote size={16} />
-          </ToolbarButton>
-          <ToolbarButton
+          </ToolbarBaton>
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().toggleCodeBlock().run())}
             isActive={editor.isActive("codeBlock")}
             title="Code block"
           >
             <LuSquareCode size={16} />
-          </ToolbarButton>
-          <ToolbarButton
+          </ToolbarBaton>
+          <ToolbarBaton
             onClick={() => runCommand(() => editor.chain().setHorizontalRule().run())}
             title="Horizontal rule"
           >
             <LuMinus size={16} />
-          </ToolbarButton>
+          </ToolbarBaton>
 
           <ToolbarDivider />
 
           {/* History */}
-          <ToolbarButton
+          <ToolbarBaton
             onClick={() => editor.chain().undo().run()}
             disabled={!editor.can().undo()}
             title="Undo (Ctrl+Z)"
           >
             <LuUndo2 size={16} />
-          </ToolbarButton>
-          <ToolbarButton
+          </ToolbarBaton>
+          <ToolbarBaton
             onClick={() => editor.chain().redo().run()}
             disabled={!editor.can().redo()}
             title="Redo (Ctrl+Y)"
           >
             <LuRedo2 size={16} />
-          </ToolbarButton>
+          </ToolbarBaton>
         </div>
       )}
       <EditorContent

@@ -3,7 +3,7 @@ import Icon from "@/components/Icon";
 import { MenuItem } from "@/types/widgets";
 import { ACTION_BUTTON_CLASSES } from "./utils";
 
-interface ActionButtonProps {
+interface ActionBatonProps {
   action: MenuItem;
   actionId: string;
   onClick?: () => void;
@@ -12,8 +12,8 @@ interface ActionButtonProps {
 /**
  * Action button component used in both dropdown triggers and regular buttons
  */
-export const ActionButton: React.FC<ActionButtonProps> = ({ action, actionId, onClick }) => {
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+export const ActionBaton: React.FC<ActionBatonProps> = ({ action, actionId, onClick }) => {
+  const handleClick = (e: React.MouseEvent<HTMLBatonElement>) => {
     // Always stop propagation to prevent grid interactions
     e.stopPropagation();
     // Only call onClick if provided (for regular buttons)
@@ -21,7 +21,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({ action, actionId, on
     onClick?.();
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLBatonElement>) => {
     // Always stop propagation to prevent grid from handling mousedown
     e.stopPropagation();
   };

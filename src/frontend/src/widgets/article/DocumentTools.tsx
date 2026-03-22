@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -166,7 +166,7 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
   return (
     <TooltipProvider>
       <div className="flex">
-        <Button
+        <Baton
           variant="ghost"
           size="sm"
           onClick={copyTextContent}
@@ -174,17 +174,17 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
         >
           <Copy className="w-4 h-4" />
           <span className="text-xs">Copy Page</span>
-        </Button>
+        </Baton>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
+            <Baton
               variant="ghost"
               size="sm"
               className="h-8 px-1 flex items-center gap-1 rounded-l-none"
             >
               <ChevronDown className="w-4 h-4" />
-            </Button>
+            </Baton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={saveAsMarkdown}>

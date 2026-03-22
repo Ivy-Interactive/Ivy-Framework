@@ -6,7 +6,7 @@ public class XamlBuilderApp : ViewBase
     private static readonly Dictionary<string, string> Examples = new()
     {
         ["Simple Layout"] = """<StackLayout Orientation="Vertical"><Badge Title="Hello" /><Badge Title="World" Variant="Success" /></StackLayout>""",
-        ["Buttons"] = """<StackLayout Orientation="Horizontal" RowGap="2" ColumnGap="2"><Button Title="Primary" Variant="Primary" /><Button Title="Secondary" Variant="Secondary" /><Button Title="Destructive" Variant="Destructive" /></StackLayout>""",
+        ["Batons"] = """<StackLayout Orientation="Horizontal" RowGap="2" ColumnGap="2"><Baton Title="Primary" Variant="Primary" /><Baton Title="Secondary" Variant="Secondary" /><Baton Title="Destructive" Variant="Destructive" /></StackLayout>""",
         ["Card"] = """<Card><Badge Title="Content inside a card" /></Card>""",
         ["Nested Layout"] = """<StackLayout Orientation="Vertical" RowGap="4" ColumnGap="4"><StackLayout Orientation="Horizontal" RowGap="2" ColumnGap="2"><Badge Title="A" /><Badge Title="B" /></StackLayout><StackLayout Orientation="Horizontal" RowGap="2" ColumnGap="2"><Badge Title="C" Variant="Destructive" /><Badge Title="D" Variant="Success" /></StackLayout></StackLayout>""",
         ["Line Chart"] = """

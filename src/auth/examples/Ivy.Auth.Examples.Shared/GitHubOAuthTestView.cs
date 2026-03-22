@@ -46,7 +46,7 @@ public class GitHubOAuthTestView : ViewBase
         return Layout.Vertical(
             Text.H4("GitHub OAuth Test"),
             Layout.Horizontal(
-                new Button("Get GitHub User", async () =>
+                new Baton("Get GitHub User", async () =>
                 {
                     using var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Authorization =
@@ -88,8 +88,8 @@ public class GitHubOAuthTestView : ViewBase
                         userInfo.Set((GitHubUser?)null);
                         reposList.Set((List<GitHubRepo>?)null);
                     }
-                }, variant: ButtonVariant.Primary),
-                new Button("Fetch My Repositories", async () =>
+                }, variant: BatonVariant.Primary),
+                new Baton("Fetch My Repositories", async () =>
                 {
                     using var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Authorization =
@@ -124,7 +124,7 @@ public class GitHubOAuthTestView : ViewBase
                         reposList.Set((List<GitHubRepo>?)null);
                         userInfo.Set((GitHubUser?)null);
                     }
-                }, variant: ButtonVariant.Outline)
+                }, variant: BatonVariant.Outline)
             ).Gap(10),
             userInfo.Value != null
                 ? Layout.Horizontal(
@@ -144,7 +144,7 @@ public class GitHubOAuthTestView : ViewBase
                             Text.P($"👥 {userInfo.Value.Followers} followers"),
                             Text.P($"👤 {userInfo.Value.Following} following")
                         ).Gap(10),
-                        new Button("View on GitHub").Url(userInfo.Value.HtmlUrl).Link().OpenInNewTab()
+                        new Baton("View on GitHub").Url(userInfo.Value.HtmlUrl).Link().OpenInNewTab()
                     ).Gap(5)
                 ).Gap(20).Align(Align.Left)
                 : null,
@@ -161,7 +161,7 @@ public class GitHubOAuthTestView : ViewBase
                                     repo.Language != null ? Text.P($"💻 {repo.Language}") : null,
                                     Text.P(repo.IsPrivate ? "🔒 Private" : "🌐 Public")
                                 ).Gap(10),
-                                new Button("View on GitHub").Url(repo.HtmlUrl).Link().OpenInNewTab()
+                                new Baton("View on GitHub").Url(repo.HtmlUrl).Link().OpenInNewTab()
                             ).Gap(5)
                         )
                     ).ToArray()

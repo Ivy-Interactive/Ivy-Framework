@@ -194,7 +194,7 @@ public class CodeBlockApp : SampleBase
                 Layout.Vertical()
                     | Text.Label(language.ToString()).Bold()
                     | new CodeBlock(code, language)
-                    .ShowCopyButton(true)
+                    .ShowCopyBaton(true)
                     .Height(Size.Units(60))
             );
         }
@@ -233,8 +233,8 @@ public class CodeBlockApp : SampleBase
                 | Text.Monospaced("Starting Line Number")
                 | new CodeBlock(sampleCode, Languages.Csharp).ShowLineNumbers(true).StartingLineNumber(42),
             Layout.Vertical()
-                | Text.Monospaced("No Copy Button")
-                | new CodeBlock(sampleCode, Languages.Csharp).ShowCopyButton(false),
+                | Text.Monospaced("No Copy Baton")
+                | new CodeBlock(sampleCode, Languages.Csharp).ShowCopyBaton(false),
             Layout.Vertical()
                 | Text.Monospaced("No Border")
                 | new CodeBlock(sampleCode, Languages.Csharp).ShowBorder(false),

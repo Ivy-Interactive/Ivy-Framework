@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,7 +88,7 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
   return (
     <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
       <DropdownMenuTrigger asChild>
-        <Button
+        <Baton
           variant="ghost"
           size="icon"
           className={cn(
@@ -98,7 +98,7 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
           aria-label="Show more tabs"
         >
           <ChevronDown className="w-5 h-5" />
-        </Button>
+        </Baton>
       </DropdownMenuTrigger>
       {menuContent}
     </DropdownMenu>

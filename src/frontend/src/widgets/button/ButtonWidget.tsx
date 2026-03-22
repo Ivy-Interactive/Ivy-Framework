@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { m, LazyMotion, domAnimation } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import Icon from "@/components/Icon";
 import { cn, getIvyHost, camelCase } from "@/lib/utils";
 import {
@@ -17,9 +17,9 @@ import { Loader2 } from "lucide-react";
 import { BorderRadius, getColor, getWidth } from "@/lib/styles";
 import { Densities } from "@/types/density";
 
-const ButtonWithTooltip = withTooltip(Button);
+const BatonWithTooltip = withTooltip(Baton);
 
-interface ButtonWidgetProps {
+interface BatonWidgetProps {
   id: string;
   title: string;
   icon?: string;
@@ -81,7 +81,7 @@ const getUrl = (url: string): { url: string; isValid: boolean; isAnchorLink: boo
   };
 };
 
-export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
+export const BatonWidget: React.FC<BatonWidgetProps> = ({
   id,
   title,
   icon,
@@ -270,7 +270,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
             }}
           />
         </LazyMotion>
-        <ButtonWithTooltip
+        <BatonWithTooltip
           asChild={hasUrl}
           size={buttonSize}
           onClick={hasUrl ? undefined : handleClick}
@@ -302,13 +302,13 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           ) : (
             buttonContent
           )}
-        </ButtonWithTooltip>
+        </BatonWithTooltip>
       </div>
     );
   }
 
   return (
-    <ButtonWithTooltip
+    <BatonWithTooltip
       asChild={hasUrl}
       style={styles}
       size={buttonSize}
@@ -349,6 +349,6 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       ) : (
         buttonContent
       )}
-    </ButtonWithTooltip>
+    </BatonWithTooltip>
   );
 };

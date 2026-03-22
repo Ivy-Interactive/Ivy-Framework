@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { dateRangeInputTextVariant } from "@/components/ui/input/date-range-input-variant";
 import { Densities } from "@/types/density";
@@ -84,7 +84,7 @@ export const DateRangePresets: React.FC<DateRangePresetsProps> = ({ density, onS
   return (
     <div className="flex flex-col px-2">
       {presets.map((preset) => (
-        <Button
+        <Baton
           key={preset.label}
           variant="ghost"
           size="sm"
@@ -95,7 +95,7 @@ export const DateRangePresets: React.FC<DateRangePresetsProps> = ({ density, onS
           onClick={() => onSelect(preset.range, preset.leftMonth, preset.rightMonth)}
         >
           {preset.label}
-        </Button>
+        </Baton>
       ))}
     </div>
   );

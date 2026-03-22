@@ -29,8 +29,8 @@ public class DeleteDialogExample : ViewBase
                        | Icons.Trash2
                        | Text.H3("Delete Confirmation")
                    | Text.P("Confirm destructive actions with a clear warning dialog.")
-                   | new Button("Delete Item", _ => isOpen.Set(true))
-                       .Variant(ButtonVariant.Destructive)
+                   | new Baton("Delete Item", _ => isOpen.Set(true))
+                       .Variant(BatonVariant.Destructive)
                        .Icon(Icons.Trash2)
                )
                | (isOpen.Value
@@ -52,12 +52,12 @@ public class DeleteDialogExample : ViewBase
                                }.ToDetails())
                        ),
                        new DialogFooter(
-                           new Button("Cancel", _ => isOpen.Set(false), variant: ButtonVariant.Outline),
-                           new Button("Delete", _ =>
+                           new Baton("Cancel", _ => isOpen.Set(false), variant: BatonVariant.Outline),
+                           new Baton("Delete", _ =>
                            {
                                isOpen.Set(false);
                                client.Toast("Item deleted successfully!");
-                           }, variant: ButtonVariant.Destructive)
+                           }, variant: BatonVariant.Destructive)
                        )
                    )
                    : null);
@@ -88,7 +88,7 @@ public class CreateDialogExample : ViewBase
                        | Icons.Plus
                        | Text.H3("Create New Item")
                    | Text.P("Use forms in dialogs to collect information when creating new items.")
-                   | new Button("Create Item", _ => isOpen.Set(true))
+                   | new Baton("Create Item", _ => isOpen.Set(true))
                        .Primary()
                        .Icon(Icons.Plus)
                )
@@ -117,12 +117,12 @@ public class ExitCommentDialogExample : ViewBase
                        | Icons.MessageSquare
                        | Text.H3("Exit Comment")
                    | Text.P("Request feedback or comments when users leave or exit a workflow.")
-                   | new Button("Leave Feedback", _ =>
+                   | new Baton("Leave Feedback", _ =>
                    {
                        comment.Set("");
                        isOpen.Set(true);
                    })
-                       .Variant(ButtonVariant.Outline)
+                       .Variant(BatonVariant.Outline)
                        .Icon(Icons.MessageSquare)
                )
                | (isOpen.Value
@@ -137,8 +137,8 @@ public class ExitCommentDialogExample : ViewBase
                                .Height(Size.Units(100))
                        ),
                        new DialogFooter(
-                           new Button("Skip", _ => isOpen.Set(false), variant: ButtonVariant.Outline),
-                           new Button("Submit", _ =>
+                           new Baton("Skip", _ => isOpen.Set(false), variant: BatonVariant.Outline),
+                           new Baton("Submit", _ =>
                            {
                                if (string.IsNullOrWhiteSpace(comment.Value))
                                {

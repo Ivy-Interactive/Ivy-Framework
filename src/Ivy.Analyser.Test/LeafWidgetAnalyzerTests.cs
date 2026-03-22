@@ -16,9 +16,9 @@ namespace Ivy
         public static AbstractWidget operator |(AbstractWidget widget, object child) => widget;
     }
 
-    public class Button : AbstractWidget
+    public class Baton : AbstractWidget
     {
-        public Button(string text) { }
+        public Baton(string text) { }
     }
 
     public class Badge : AbstractWidget
@@ -77,14 +77,14 @@ namespace Ivy
     // ── IVYCHILD001: Leaf widget errors ──
 
     [Fact]
-    public async Task Button_WithChild_ReportsError()
+    public async Task Baton_WithChild_ReportsError()
     {
         var test = Stubs + @"
 public class Test
 {
     public void M()
     {
-        var result = {|IVYCHILD001:new Ivy.Button(""Click"") | ""child""|};
+        var result = {|IVYCHILD001:new Ivy.Baton(""Click"") | ""child""|};
     }
 }
 ";
@@ -426,14 +426,14 @@ public class Test
     }
 
     [Fact]
-    public async Task ButtonVariable_WithChild_ReportsError()
+    public async Task BatonVariable_WithChild_ReportsError()
     {
         var test = Stubs + @"
 public class Test
 {
     public void M()
     {
-        var btn = new Ivy.Button(""x"");
+        var btn = new Ivy.Baton(""x"");
         var result = {|IVYCHILD001:btn | ""child""|};
     }
 }
@@ -463,9 +463,9 @@ public class Test
         var test = Stubs + @"
 namespace Ivy
 {
-    public class PrimaryButton : Button
+    public class PrimaryBaton : Baton
     {
-        public PrimaryButton() : base(""primary"") { }
+        public PrimaryBaton() : base(""primary"") { }
     }
 }
 
@@ -473,7 +473,7 @@ public class Test
 {
     public void M()
     {
-        var result = {|IVYCHILD001:new Ivy.PrimaryButton() | ""child""|};
+        var result = {|IVYCHILD001:new Ivy.PrimaryBaton() | ""child""|};
     }
 }
 ";
@@ -622,16 +622,16 @@ public class Test
     // ── Method return and chained expressions ──
 
     [Fact]
-    public async Task ButtonFromMethodReturn_WithChild_ReportsError()
+    public async Task BatonFromMethodReturn_WithChild_ReportsError()
     {
         var test = Stubs + @"
 public class Test
 {
-    private Ivy.Button CreateButton() => new Ivy.Button(""x"");
+    private Ivy.Baton CreateBaton() => new Ivy.Baton(""x"");
 
     public void M()
     {
-        var result = {|IVYCHILD001:CreateButton() | ""child""|};
+        var result = {|IVYCHILD001:CreateBaton() | ""child""|};
     }
 }
 ";

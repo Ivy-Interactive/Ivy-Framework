@@ -1,8 +1,8 @@
 import React from "react";
 import { MenuItem } from "@/types/widgets";
-import { ActionButton } from "./actionButton";
+import { ActionBaton } from "./actionBaton";
 
-interface ActionButtonItemProps {
+interface ActionBatonItemProps {
   action: MenuItem;
   actionId: string;
   onActionClick: (action: MenuItem) => void;
@@ -11,13 +11,13 @@ interface ActionButtonItemProps {
 /**
  * Regular button action (no children)
  */
-export const ActionButtonItem: React.FC<ActionButtonItemProps> = ({
+export const ActionBatonItem: React.FC<ActionBatonItemProps> = ({
   action,
   actionId,
   onActionClick,
 }) => {
   return (
-    <ActionButton
+    <ActionBaton
       key={actionId}
       action={action}
       actionId={actionId}

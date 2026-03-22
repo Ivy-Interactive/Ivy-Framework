@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import CopyToClipboardButton from "@/components/CopyToClipboardButton";
+import CopyToClipboardBaton from "@/components/CopyToClipboardBaton";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -13,14 +13,14 @@ export interface TerminalWidgetProps {
   lines: TerminalLine[];
   title?: string;
   showHeader?: boolean;
-  showCopyButton?: boolean;
+  showCopyBaton?: boolean;
 }
 
 const TerminalWidget = ({
   lines = EMPTY_ARRAY,
   title,
   showHeader = true,
-  showCopyButton = true,
+  showCopyBaton = true,
 }: TerminalWidgetProps) => {
   const commandColor = "text-white";
   const outputColor = "text-muted-foreground";
@@ -47,9 +47,9 @@ const TerminalWidget = ({
         </div>
       )}
       <div className="relative">
-        {showCopyButton && hasCommands && (
+        {showCopyBaton && hasCommands && (
           <div className="absolute top-2 right-2 z-50">
-            <CopyToClipboardButton
+            <CopyToClipboardBaton
               textToCopy={commandsText}
               className="bg-zinc-800 text-white hover:bg-zinc-700"
             />

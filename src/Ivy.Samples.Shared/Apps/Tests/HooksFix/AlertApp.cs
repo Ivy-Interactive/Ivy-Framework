@@ -9,16 +9,16 @@ public class AlertApp : ViewBase
 
         var body = Layout.Vertical()
                    | DateTime.Now.Ticks
-                   | new Button("Show Alert", () => showAlert("Hello", (x) =>
+                   | new Baton("Show Alert", () => showAlert("Hello", (x) =>
                    {
 
                    }))
-                   | new Button("WithConfirm").WithConfirm("Are you sure?")
-                   | new Button("WithPrompt").WithPrompt<int>((result) =>
+                   | new Baton("WithConfirm").WithConfirm("Are you sure?")
+                   | new Baton("WithPrompt").WithPrompt<int>((result) =>
                    {
 
                    }, defaultValue: 42)
-                   | new Button("WithSheet").WithSheet(() => new FooView(99), "", "")
+                   | new Baton("WithSheet").WithSheet(() => new FooView(99), "", "")
             ;
 
         return Layout.Vertical()

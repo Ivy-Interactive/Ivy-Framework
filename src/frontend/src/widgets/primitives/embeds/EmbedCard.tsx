@@ -31,7 +31,7 @@ const EmbedCard: React.FC<EmbedCardProps> = ({
     <div
       className={`${platform.toLowerCase()}-embed border rounded-box bg-card shadow-sm w-full @container`}
     >
-      {/* Button layout - shown when container is wide enough */}
+      {/* Baton layout - shown when container is wide enough */}
       <div className="@[30rem]:flex hidden items-center gap-3 p-2">
         <div className="flex-shrink-0">
           <Icon name={iconName} size={32} className={iconColor} />

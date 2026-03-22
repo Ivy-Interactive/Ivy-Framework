@@ -18,14 +18,14 @@ public class TodosApp : SampleBase
                 Layout.Vertical(
                     Layout.Horizontal(
                         newTitle.ToTextInput(placeholder: "New todo...").Width(Size.Grow()),
-                        new Button("Add", onClick: _ =>
+                        new Baton("Add", onClick: _ =>
                             {
                                 var title = newTitle.Value;
                                 todos.Set(todos.Value.Add(new Todo(title, false)));
                                 client.Toast($"New '{title}' todo added.", "Todos");
                                 newTitle.Set("");
                             }
-                        ).Icon(Icons.Plus).Variant(ButtonVariant.Primary)
+                        ).Icon(Icons.Plus).Variant(BatonVariant.Primary)
                     ).Width(Size.Full()),
                     Layout.Vertical(
                         todos.Value.Select(todo => new TodoItem(todo,
@@ -65,10 +65,10 @@ public class TodoItem(Todo todo, Action deleteTodo, Action toggleTodo) : ViewBas
             Layout.Horizontal(
                 doneState.ToBoolInput(),
                 todo.Done ? Text.Muted(todo.Title).StrikeThrough().Width(Size.Grow()) : Text.Literal(todo.Title).Width(Size.Grow()),
-                new Button(null, _ =>
+                new Baton(null, _ =>
                 {
                     deleteTodo();
-                }).Icon(Icons.Trash).Variant(ButtonVariant.Outline)
+                }).Icon(Icons.Trash).Variant(BatonVariant.Outline)
             ).Align(Align.Center).Width(Size.Full()),
             new Separator()
         );

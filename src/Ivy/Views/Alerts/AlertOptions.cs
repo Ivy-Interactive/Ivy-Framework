@@ -3,53 +3,53 @@ namespace Ivy;
 
 public class AlertOptions
 {
-    public AlertOptions(string? title, string? message, AlertButtonSet buttonSet = AlertButtonSet.Ok)
+    public AlertOptions(string? title, string? message, AlertBatonSet buttonSet = AlertBatonSet.Ok)
     {
         Title = title;
         Message = message;
-        Buttons = AlertOptionHelpers.GetButtons(buttonSet);
+        Batons = AlertOptionHelpers.GetBatons(buttonSet);
     }
     public string? Title { get; init; }
     public string? Message { get; init; }
-    public AlertButton[] Buttons { get; set; }
+    public AlertBaton[] Batons { get; set; }
 }
 
 public static class AlertOptionHelpers
 {
-    public static AlertButton[] GetButtons(AlertButtonSet buttonSet)
+    public static AlertBaton[] GetBatons(AlertBatonSet buttonSet)
     {
         return buttonSet switch
         {
-            AlertButtonSet.Ok =>
+            AlertBatonSet.Ok =>
             [
-                new AlertButton("Ok", AlertResult.Ok)
+                new AlertBaton("Ok", AlertResult.Ok)
             ],
-            AlertButtonSet.OkCancel =>
+            AlertBatonSet.OkCancel =>
             [
-                new AlertButton("Cancel", AlertResult.Cancel, ButtonVariant.Secondary),
-                new AlertButton("Ok", AlertResult.Ok)
+                new AlertBaton("Cancel", AlertResult.Cancel, BatonVariant.Secondary),
+                new AlertBaton("Ok", AlertResult.Ok)
             ],
-            AlertButtonSet.YesNo =>
+            AlertBatonSet.YesNo =>
             [
-                new AlertButton("No", AlertResult.No, ButtonVariant.Secondary),
-                new AlertButton("Yes", AlertResult.Yes)
+                new AlertBaton("No", AlertResult.No, BatonVariant.Secondary),
+                new AlertBaton("Yes", AlertResult.Yes)
             ],
-            AlertButtonSet.YesNoCancel =>
+            AlertBatonSet.YesNoCancel =>
             [
-                new AlertButton("Cancel", AlertResult.Cancel, ButtonVariant.Secondary),
-                new AlertButton("No", AlertResult.No),
-                new AlertButton("Yes", AlertResult.Yes)
+                new AlertBaton("Cancel", AlertResult.Cancel, BatonVariant.Secondary),
+                new AlertBaton("No", AlertResult.No),
+                new AlertBaton("Yes", AlertResult.Yes)
             ],
             _ => throw new ArgumentOutOfRangeException(nameof(buttonSet), buttonSet, null)
         };
     }
 }
 
-public class AlertButton(string label, AlertResult result, ButtonVariant variant = ButtonVariant.Primary)
+public class AlertBaton(string label, AlertResult result, BatonVariant variant = BatonVariant.Primary)
 {
     public string Label { get; init; } = label;
     public AlertResult Result { get; init; } = result;
-    public ButtonVariant Variant { get; init; } = variant;
+    public BatonVariant Variant { get; init; } = variant;
 }
 
 public enum AlertResult
@@ -66,7 +66,7 @@ public static class AlertResultExtensions
     public static bool IsOk(this AlertResult result) => result == AlertResult.Ok;
 }
 
-public enum AlertButtonSet
+public enum AlertBatonSet
 {
     Ok,
     OkCancel,

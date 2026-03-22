@@ -54,7 +54,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   }, [stringValue, validOptions]);
 
   const selectedLabel = selectedOption?.label;
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLBatonElement>(null);
   const [isEllipsed, setIsEllipsed] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);

@@ -101,7 +101,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   });
 
   // Row hover and actions
-  const { hoverRow, actionButtonsTop, onItemHovered, handleRowActionClick } = useRowHover({
+  const { hoverRow, actionBatonsTop, onItemHovered, handleRowActionClick } = useRowHover({
     widgetId,
     visibleRows,
     enableRowHover: enableRowHover ?? false,
@@ -205,7 +205,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       onItemHovered={enableRowHover ? onItemHovered : undefined}
       getRowThemeOverride={enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined}
       rowActions={rowActions}
-      actionButtonsTop={actionButtonsTop}
+      actionBatonsTop={actionBatonsTop}
       hoverRow={hoverRow}
       onRowActionClick={handleRowActionClick}
       footer={footer}

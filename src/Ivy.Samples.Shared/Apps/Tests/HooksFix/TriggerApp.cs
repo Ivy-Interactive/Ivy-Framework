@@ -9,9 +9,9 @@ public class TriggerApp : ViewBase
 
         var body = Layout.Vertical()
                    | DateTime.Now.Ticks
-                   | new Button("Show Trigger 1", () => showTrigger(1))
-                   | new Button("Show Trigger 2", () => showTrigger(2))
-                   | new Button("Show Trigger Null", () => showTrigger(default))
+                   | new Baton("Show Trigger 1", () => showTrigger(1))
+                   | new Baton("Show Trigger 2", () => showTrigger(2))
+                   | new Baton("Show Trigger Null", () => showTrigger(default))
             ;
 
         return Layout.Vertical()
@@ -27,7 +27,7 @@ public class TriggerApp : ViewBase
 
             return Layout.Vertical()
                    | DateTime.Now.Ticks
-                   | new Button("Close", () => show.Set(false))
+                   | new Baton("Close", () => show.Set(false))
                    | someId
                    | "Hello";
         }

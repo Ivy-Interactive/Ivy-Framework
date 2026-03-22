@@ -26,7 +26,7 @@ export const TabsLayoutWidget = ({
   variant = "Content",
   padding = "4,4,4,4",
   width = "Full",
-  addButtonText,
+  addBatonText,
 }: TabsLayoutWidgetProps) => {
   const tabWidgets = React.useMemo(() => filterTabWidgets(children), [children]);
 
@@ -191,7 +191,7 @@ export const TabsLayoutWidget = ({
         orderedTabWidgets={orderedTabWidgets}
         tabOrder={tabOrder}
         loadedTabs={loadedTabs}
-        addButtonText={addButtonText}
+        addBatonText={addBatonText}
         isUserInitiatedChangeRef={isUserInitiatedChangeRef}
         addToLoadedTabs={addToLoadedTabs}
         setActiveIndex={setActiveIndex}
@@ -211,7 +211,7 @@ export const TabsLayoutWidget = ({
       activeTabId={activeTabId}
       tabOrder={tabOrder}
       events={events}
-      addButtonText={addButtonText}
+      addBatonText={addBatonText}
       containerRef={containerRef}
       tabsListRef={tabsListRef}
       visibleTabs={visibleTabs}

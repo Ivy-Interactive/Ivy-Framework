@@ -50,7 +50,7 @@ public class ThemeCustomizer : SampleBase
 
         // Sidebar Footer
         var sidebarFooter = Layout.Vertical()
-            | new Button("Copy Configuration")
+            | new Baton("Copy Configuration")
                 .Primary()
                 .Icon(Icons.Copy)
                 .OnClick(() => isExportOpen.Set(true))
@@ -71,7 +71,7 @@ public class ThemeCustomizer : SampleBase
                             Layout.Vertical()
                                 | Text.P("Copy this C# configuration into your server setup.").Small()
                                 | new CodeBlock(GenerateCSharpCode(editingTheme.Value), Languages.Csharp)
-                                | new Button("Copy C# Code")
+                                | new Baton("Copy C# Code")
                                     .Primary()
                                     .Icon(Icons.ClipboardCopy, Align.Right)
                                     .OnClick(() =>
@@ -88,7 +88,7 @@ public class ThemeCustomizer : SampleBase
                                         editingTheme.Value,
                                         new System.Text.Json.JsonSerializerOptions { WriteIndented = true }),
                                     Languages.Json)
-                                | new Button("Copy JSON")
+                                | new Baton("Copy JSON")
                                     .Primary()
                                     .Icon(Icons.ClipboardCopy, Align.Right)
                                     .OnClick(() =>
@@ -103,7 +103,7 @@ public class ThemeCustomizer : SampleBase
                     )
                 ),
                 new DialogFooter(
-                    new Button("Close", _ => isExportOpen.Set(false), variant: ButtonVariant.Secondary)
+                    new Baton("Close", _ => isExportOpen.Set(false), variant: BatonVariant.Secondary)
                 )
             ).Width(Size.Units(150))
             : null;
@@ -225,8 +225,8 @@ public class ThemeCustomizer : SampleBase
                 // Mode toggle
                 | Text.H3("Theme Mode").Small()
                 | (Layout.Horizontal()
-                    | new Button("Light")
-                        .Variant(selectedMode.Value == "light" ? ButtonVariant.Primary : ButtonVariant.Outline)
+                    | new Baton("Light")
+                        .Variant(selectedMode.Value == "light" ? BatonVariant.Primary : BatonVariant.Outline)
                         .Icon(Icons.Sun)
                         .OnClick(() =>
                         {
@@ -234,8 +234,8 @@ public class ThemeCustomizer : SampleBase
                             client.SetThemeMode(ThemeMode.Light);
                         })
                         .Width(Size.Full())
-                    | new Button("Dark")
-                        .Variant(selectedMode.Value == "dark" ? ButtonVariant.Primary : ButtonVariant.Outline)
+                    | new Baton("Dark")
+                        .Variant(selectedMode.Value == "dark" ? BatonVariant.Primary : BatonVariant.Outline)
                         .Icon(Icons.Moon)
                         .OnClick(() =>
                         {
@@ -524,7 +524,7 @@ public class ThemeCustomizer : SampleBase
             var selectedCategory = UseState<string?>("Primary");
             var badgeVariant = UseState(new[] { "Success", "Warning", "Info" });
             var buttonVariant = UseState(new[] { "Primary" });
-            var disableButtons = UseState(false);
+            var disableBatons = UseState(false);
             var disableInputs = UseState(false);
             var dateTimeState = UseState(DateTime.Now);
             var dateRangeState = UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
@@ -567,7 +567,7 @@ public class ThemeCustomizer : SampleBase
 
             // Build Ivy Form from the payment state
             var paymentForm = payment.ToForm("Submit payment")
-                .SubmitBuilder(isLoading => new Button("Submit payment").Loading(isLoading).Disabled(isLoading || disableButtons.Value))
+                .SubmitBuilder(isLoading => new Baton("Submit payment").Loading(isLoading).Disabled(isLoading || disableBatons.Value))
                 .Clear()
                 .Place(m => m.NameOnCard)
                 .Place(m => m.CardNumber)
@@ -612,15 +612,15 @@ public class ThemeCustomizer : SampleBase
                     fetcher: ct => Task.FromResult(category != null ? new Option<string>(category) : null));
             }
 
-            Button CreateLoadingButton(string name, ButtonVariant variant) =>
-                new Button(name, variant: variant)
+            Baton CreateLoadingBaton(string name, BatonVariant variant) =>
+                new Baton(name, variant: variant)
                 {
                     OnClick = new(_ =>
                     {
                         client.Toast($"{name} button clicked", "Action");
                         return ValueTask.CompletedTask;
                     })
-                }.Width(Size.Full()).Disabled(disableButtons.Value);
+                }.Width(Size.Full()).Disabled(disableBatons.Value);
 
             static object GetPaginationContent(int page, int total) =>
                 new Card(
@@ -648,14 +648,14 @@ public class ThemeCustomizer : SampleBase
                         | selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, placeholder: "Select Category").Disabled(disableInputs.Value)
                         | (selectedCategory.Value switch
                         {
-                            "Primary" => CreateLoadingButton("Primary", ButtonVariant.Primary),
-                            "Secondary" => CreateLoadingButton("Secondary", ButtonVariant.Secondary),
-                            "Outline" => CreateLoadingButton("Outline", ButtonVariant.Outline),
-                            "Destructive" => CreateLoadingButton("Destructive", ButtonVariant.Destructive),
-                            "Success" => CreateLoadingButton("Success", ButtonVariant.Success),
-                            "Warning" => CreateLoadingButton("Warning", ButtonVariant.Warning),
-                            "Info" => CreateLoadingButton("Info", ButtonVariant.Info),
-                            _ => CreateLoadingButton("Primary", ButtonVariant.Primary)
+                            "Primary" => CreateLoadingBaton("Primary", BatonVariant.Primary),
+                            "Secondary" => CreateLoadingBaton("Secondary", BatonVariant.Secondary),
+                            "Outline" => CreateLoadingBaton("Outline", BatonVariant.Outline),
+                            "Destructive" => CreateLoadingBaton("Destructive", BatonVariant.Destructive),
+                            "Success" => CreateLoadingBaton("Success", BatonVariant.Success),
+                            "Warning" => CreateLoadingBaton("Warning", BatonVariant.Warning),
+                            "Info" => CreateLoadingBaton("Info", BatonVariant.Info),
+                            _ => CreateLoadingBaton("Primary", BatonVariant.Primary)
                         }));
 
             object BuildSecondColumn() =>
@@ -698,11 +698,11 @@ public class ThemeCustomizer : SampleBase
                             }).Disabled(disableInputs.Value)
                     )
                     | new Card(Layout.Vertical()
-                        | Text.Block("Buttons & Actions").Bold()
+                        | Text.Block("Batons & Actions").Bold()
                         | (Layout.Horizontal().Height(Size.Fit())
-                            | CreateLoadingButton("Primary", ButtonVariant.Primary).Loading()
-                            | CreateLoadingButton("Secondary", ButtonVariant.Secondary).Loading()
-                            | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
+                            | CreateLoadingBaton("Primary", BatonVariant.Primary).Loading()
+                            | CreateLoadingBaton("Secondary", BatonVariant.Secondary).Loading()
+                            | CreateLoadingBaton("Outline", BatonVariant.Outline).Loading())
                         | (Layout.Horizontal().Width(Size.Full())
                             | (Layout.Vertical().Align(Align.Left)
                                 | themeSatisfaction.ToFeedbackInput().Stars().Disabled(disableInputs.Value))
@@ -715,7 +715,7 @@ public class ThemeCustomizer : SampleBase
                         | (Layout.Horizontal().Height(Size.Fit())
                             | (Layout.Vertical() | new Box((Layout.Horizontal()
                                     | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all buttons"))
-                                    | disableButtons.ToSwitchInput())))
+                                    | disableBatons.ToSwitchInput())))
                             | (Layout.Vertical() | new Box((Layout.Horizontal()
                                 | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all inputs"))
                                 | disableInputs.ToSwitchInput()))))

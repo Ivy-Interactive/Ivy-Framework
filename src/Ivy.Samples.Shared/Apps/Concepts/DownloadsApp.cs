@@ -16,9 +16,9 @@ public class DownloadsApp : SampleBase
 
         return Layout.Vertical()
             | new Image(imageUrl.Value)
-            | new Button("Download Image (byte[])").Url(imageUrl.Value)
+            | new Baton("Download Image (byte[])").Url(imageUrl.Value)
             | (streamUrl.Value is not null
-                ? new Button("Download Stream").Url(streamUrl.Value)
+                ? new Baton("Download Stream").Url(streamUrl.Value)
                 : null);
     }
 

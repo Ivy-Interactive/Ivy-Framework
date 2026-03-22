@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Mic, Square } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getWidth } from "@/lib/styles";
 import { logger } from "@/lib/logger";
@@ -281,7 +281,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
             transition: "height 50ms",
           }}
         />
-        <Button
+        <Baton
           type="button"
           variant="ghost"
           size="icon"
@@ -292,7 +292,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
           ) : (
             <Mic className={iconSizeVariant({ density })} />
           )}
-        </Button>
+        </Baton>
         <SecondsCounter start={recordingStartedAt} stopped={recordingStoppedAt} density={density} />
         {(label || recordingLabel) && (
           <p className={cn("text-center mt-1 text-muted-foreground", textSizeVariant({ density }))}>

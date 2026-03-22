@@ -22,8 +22,8 @@ public abstract class SampleBase : ViewBase
 
         return new Fragment(
             BuildSample(),
-            _showCodePosition != null ? new FloatingPanel(new Button("Show Code")
-                .Variant(ButtonVariant.Outline)
+            _showCodePosition != null ? new FloatingPanel(new Baton("Show Code")
+                .Variant(BatonVariant.Outline)
                 .Icon(Icons.Code)
                 .Large()
                 .BorderRadius(BorderRadius.Full)

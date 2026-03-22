@@ -228,7 +228,7 @@ public class DisplayConfig
 public class Theme
 {
     [JsonPropertyName("buttons")]
-    public ThemeButtons Buttons { get; set; } = new();
+    public ThemeBatons Batons { get; set; } = new();
 
     [JsonPropertyName("general")]
     public ThemeGeneral General { get; set; } = new();
@@ -237,7 +237,7 @@ public class Theme
     public ThemeAccounts Accounts { get; set; } = new();
 }
 
-public class ThemeButtons
+public class ThemeBatons
 {
     [JsonPropertyName("font_color")]
     public string FontColor { get; set; } = string.Empty;
@@ -470,7 +470,7 @@ public class PasskeySettings
     public bool AllowAutofill { get; set; }
 
     [JsonPropertyName("show_sign_in_button")]
-    public bool ShowSignInButton { get; set; }
+    public bool ShowSignInBaton { get; set; }
 }
 
 public class SocialProviderSettings

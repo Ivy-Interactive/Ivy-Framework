@@ -18,7 +18,7 @@ public class GoogleOAuthTestView : ViewBase
 
         return Layout.Vertical(
             Text.H4("Google OAuth Test"),
-            new Button("Get Google Profile", async () =>
+            new Baton("Get Google Profile", async () =>
             {
                 using var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Authorization =
@@ -34,7 +34,7 @@ public class GoogleOAuthTestView : ViewBase
                 {
                     apiResponse.Set($"{{\"error\": \"{ex.Message}\"}}");
                 }
-            }, variant: ButtonVariant.Primary),
+            }, variant: BatonVariant.Primary),
             apiResponse.Value != null
                 ? Text.Json(apiResponse.Value)
                 : null

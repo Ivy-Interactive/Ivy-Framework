@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { createPrismTheme } from "@/lib/prismTheme";
 import { useTypography } from "@/contexts/TypographyContext";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import CopyToClipboardButton from "@/components/CopyToClipboardButton";
+import CopyToClipboardBaton from "@/components/CopyToClipboardBaton";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const SyntaxHighlighter = lazy(() =>
@@ -63,7 +63,7 @@ export const CodeBlock = memo(
         return (
           <div className="relative">
             <div className="absolute top-2 right-2 z-10">
-              <CopyToClipboardButton textToCopy={cleanContent} />
+              <CopyToClipboardBaton textToCopy={cleanContent} />
             </div>
             <ScrollArea className="w-full">
               <pre
@@ -110,7 +110,7 @@ export const CodeBlock = memo(
         >
           <div className="relative">
             <div className="absolute top-2 right-2 z-10">
-              <CopyToClipboardButton textToCopy={content} />
+              <CopyToClipboardBaton textToCopy={content} />
             </div>
             <ScrollArea className="w-full border border-border rounded-md">
               <SyntaxHighlighter

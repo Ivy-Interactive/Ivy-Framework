@@ -15,7 +15,7 @@ interface ActionDropdownProps {
   onActionClick: (action: MenuItem) => void;
 }
 
-interface TriggerButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TriggerBatonProps extends React.BatonHTMLAttributes<HTMLBatonElement> {
   action: MenuItem;
   actionId: string;
 }
@@ -23,9 +23,9 @@ interface TriggerButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 /**
  * Custom trigger button that stops propagation but allows dropdown to work
  */
-const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
+const TriggerBaton = React.forwardRef<HTMLBatonElement, TriggerBatonProps>(
   ({ action, actionId, ...props }, ref) => {
-    const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleMouseDown = (e: React.MouseEvent<HTMLBatonElement>) => {
       // Stop propagation to prevent grid interactions
       e.stopPropagation();
       props.onMouseDown?.(e);
@@ -46,7 +46,7 @@ const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
     );
   },
 );
-TriggerButton.displayName = "TriggerButton";
+TriggerBaton.displayName = "TriggerBaton";
 
 /**
  * Dropdown menu action with nested children
@@ -61,7 +61,7 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
   return (
     <DropdownMenu key={actionId}>
       <DropdownMenuTrigger asChild>
-        <TriggerButton action={action} actionId={actionId} />
+        <TriggerBaton action={action} actionId={actionId} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
         {validChildren.map((childAction) => {

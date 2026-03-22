@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { MessageLoading } from "@/components/MessageLoading";
 
 interface ChatBubbleProps {
@@ -66,9 +66,9 @@ interface ChatBubbleActionProps {
 
 export function ChatBubbleAction({ icon, onClick, className }: ChatBubbleActionProps) {
   return (
-    <Button variant="ghost" size="icon" className={cn("h-6 w-6", className)} onClick={onClick}>
+    <Baton variant="ghost" size="icon" className={cn("h-6 w-6", className)} onClick={onClick}>
       {icon}
-    </Button>
+    </Baton>
   );
 }
 

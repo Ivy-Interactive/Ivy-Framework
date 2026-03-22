@@ -7,7 +7,7 @@ namespace Ivy;
 public class FilteredListView<T>(
     Func<string, Task<T[]>> fetchRecords,
     Func<T, ListItem> createItem,
-    object? toolButtons = null,
+    object? toolBatons = null,
     TimeSpan? throttle = null,
     Action<string>? onFilterChanged = null
 ) : ViewBase
@@ -35,7 +35,7 @@ public class FilteredListView<T>(
 
         var header = Layout.Horizontal().Gap(1)
                       | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
-                      | toolButtons;
+                      | toolBatons;
 
         return new Fragment()
                | new BladeHeader(header)

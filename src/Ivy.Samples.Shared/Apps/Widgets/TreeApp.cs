@@ -23,7 +23,7 @@ public class TreeApp : SampleBase
                             .Icon(Icons.Folder)
                             .Expanded()
                             .Children(
-                                new MenuItem("Button.tsx").Icon(Icons.Code).Tag("Button.tsx"),
+                                new MenuItem("Baton.tsx").Icon(Icons.Code).Tag("Baton.tsx"),
                                 new MenuItem("Card.tsx").Icon(Icons.Code).Tag("Card.tsx"),
                                 new MenuItem("Dialog.tsx").Icon(Icons.Code).Tag("Dialog.tsx")
                             ),

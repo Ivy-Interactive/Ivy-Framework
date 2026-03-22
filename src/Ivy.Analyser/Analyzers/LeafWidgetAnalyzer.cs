@@ -46,7 +46,7 @@ namespace Ivy.Analyser.Analyzers
 
         private static readonly HashSet<string> LeafWidgetTypes =
         [
-            "Ivy.Button",
+            "Ivy.Baton",
             "Ivy.Badge",
             "Ivy.Progress",
             "Ivy.Field",

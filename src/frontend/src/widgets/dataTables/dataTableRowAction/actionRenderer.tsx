@@ -1,7 +1,7 @@
 import React from "react";
 import { MenuItem } from "@/types/widgets";
 import { ActionDropdown } from "./actionDropdown";
-import { ActionButtonItem } from "./actionButtonItem";
+import { ActionBatonItem } from "./actionBatonItem";
 import { getActionId } from "./utils";
 
 interface ActionRendererProps {
@@ -26,5 +26,5 @@ export const ActionRenderer: React.FC<ActionRendererProps> = ({ action, onAction
   }
 
   // Otherwise, render as regular button
-  return <ActionButtonItem action={action} actionId={actionId} onActionClick={onActionClick} />;
+  return <ActionBatonItem action={action} actionId={actionId} onActionClick={onActionClick} />;
 };

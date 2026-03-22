@@ -1,4 +1,4 @@
-import CopyToClipboardButton from "@/components/CopyToClipboardButton";
+import CopyToClipboardBaton from "@/components/CopyToClipboardBaton";
 import { getHeight, getWidth } from "@/lib/styles";
 import React, { CSSProperties, useMemo, memo, lazy, Suspense } from "react";
 const SyntaxHighlighter = lazy(() =>
@@ -8,13 +8,13 @@ import { createPrismTheme } from "@/lib/prismTheme";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
-import { codeCopyButtonVariant } from "@/components/ui/code-variant";
+import { codeCopyBatonVariant } from "@/components/ui/code-variant";
 
 interface CodeWidgetProps {
   id: string;
   content: string;
   language: string;
-  showCopyButton?: boolean;
+  showCopyBaton?: boolean;
   showLineNumbers?: boolean;
   startingLineNumber?: number;
   showBorder?: boolean;
@@ -50,10 +50,10 @@ const mapLanguageToPrism = (language: string): string | undefined => {
   return result === "text" ? undefined : result;
 };
 
-const MemoizedCopyButton = memo(
+const MemoizedCopyBaton = memo(
   ({ textToCopy, density }: { textToCopy: string; density: Densities }) => (
-    <div className={codeCopyButtonVariant({ density })}>
-      <CopyToClipboardButton textToCopy={textToCopy} density={density} />
+    <div className={codeCopyBatonVariant({ density })}>
+      <CopyToClipboardBaton textToCopy={textToCopy} density={density} />
     </div>
   ),
 );
@@ -63,7 +63,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     id,
     content = "",
     language = "Csharp",
-    showCopyButton = true,
+    showCopyBaton = true,
     showLineNumbers = false,
     startingLineNumber = 1,
     showBorder = true,
@@ -161,7 +161,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
 
     return (
       <div className="relative" style={containerStyles}>
-        {showCopyButton && <MemoizedCopyButton textToCopy={content} density={density} />}
+        {showCopyBaton && <MemoizedCopyBaton textToCopy={content} density={density} />}
         <ScrollArea
           className={cn(
             "w-full",

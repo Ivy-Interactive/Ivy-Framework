@@ -7,28 +7,28 @@ public class SheetApp : SampleBase
     protected override object? BuildSample()
     {
         return Layout.Horizontal().Gap(2)
-            | new Button("Right (Default)").WithSheet(
+            | new Baton("Right (Default)").WithSheet(
                 () => new SheetView(),
                 title: "Right Sheet",
                 description: "This sheet slides in from the right side.",
                 width: Size.Rem(24),
                 side: SheetSide.Right
             )
-            | new Button("Left").WithSheet(
+            | new Baton("Left").WithSheet(
                 () => new SheetView(),
                 title: "Left Sheet",
                 description: "This sheet slides in from the left side. Great for navigation panels.",
                 width: Size.Rem(24),
                 side: SheetSide.Left
             )
-            | new Button("Top").WithSheet(
+            | new Baton("Top").WithSheet(
                 () => new SheetView(),
                 title: "Top Sheet",
                 description: "This sheet slides in from the top.",
                 width: Size.Rem(16),
                 side: SheetSide.Top
             )
-            | new Button("Bottom").WithSheet(
+            | new Baton("Bottom").WithSheet(
                 () => new SheetView(),
                 title: "Bottom Sheet",
                 description: "This sheet slides in from the bottom. Common for mobile action menus.",
@@ -46,7 +46,7 @@ public class SheetView : ViewBase
         var feedbackState = UseState(0);
 
         return new FooterLayout(
-            new Button("Save", onClick: _ => client.Toast("Sheet Saved")),
+            new Baton("Save", onClick: _ => client.Toast("Sheet Saved")),
             feedbackState.ToFeedbackInput()
         );
     }

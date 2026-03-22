@@ -83,7 +83,7 @@ public class IconDisplayRenderer : IDataTableColumnRenderer
     public ColType ColType => ColType.Icon;
 }
 
-public class ButtonDisplayRenderer : IDataTableColumnRenderer
+public class BatonDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
     public ColType ColType => ColType.Text;
@@ -114,7 +114,7 @@ public enum LinkDisplayType
     Url,
     Email,
     Phone,
-    Button
+    Baton
 }
 
 public class ProgressDisplayRenderer : IDataTableColumnRenderer

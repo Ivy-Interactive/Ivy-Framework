@@ -16,7 +16,7 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({ slots }) => {
     );
   }
 
-  // asChild + span: we need a single DOM node that receives ref/handlers (slot widgets like ButtonWidget don't forward ref).
+  // asChild + span: we need a single DOM node that receives ref/handlers (slot widgets like BatonWidget don't forward ref).
   // A span wrapper avoids TooltipTrigger's default <button> so we don't get invalid button-in-button.
   return (
     <TooltipProvider>

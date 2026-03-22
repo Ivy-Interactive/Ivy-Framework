@@ -7,7 +7,7 @@ import { getHeight, getWidth } from "@/lib/styles";
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef } from "react";
 
-function getSmartSearchListButtons(root: HTMLElement): HTMLButtonElement[] {
+function getSmartSearchListBatons(root: HTMLElement): HTMLBatonElement[] {
   // We only want the list items, not the "Ask Agent" button in the footer or the dialog close 'X'
   // Since list items are rendered using Ivy.ListItem, we can explicitly query for those wrappers
   const listContainer = root.querySelector("[data-smart-search-list]");
@@ -16,19 +16,19 @@ function getSmartSearchListButtons(root: HTMLElement): HTMLButtonElement[] {
     listContainer.querySelectorAll(
       'ivy-widget[type="Ivy.ListItem"] > button, ivy-widget[type="Ivy.ListItem"] > a',
     ),
-  ) as HTMLButtonElement[];
+  ) as HTMLBatonElement[];
 }
 
 interface SmartSearchSlots {
   SearchInput?: React.ReactNode[];
-  AskButton?: React.ReactNode[];
-  ClearInputButton?: React.ReactNode[];
+  AskBaton?: React.ReactNode[];
+  ClearInputBaton?: React.ReactNode[];
   OpenTrigger?: React.ReactNode[];
   CloseOverlay?: React.ReactNode[];
   OverlayPanel?: React.ReactNode[];
   ResultsHeader?: React.ReactNode[];
   ResultsContent?: React.ReactNode[];
-  ClearButton?: React.ReactNode[];
+  ClearBaton?: React.ReactNode[];
   FollowUpChat?: React.ReactNode[];
 }
 
@@ -43,7 +43,7 @@ export interface SmartSearchProps {
 /** Opens the smart search overlay by triggering the backend (clicks OpenTrigger so backend sends overlay as Sheet). */
 function openSmartSearchOverlay(): void {
   document
-    .querySelector<HTMLButtonElement>('[data-testid="docs-smart-search-open-trigger"]')
+    .querySelector<HTMLBatonElement>('[data-testid="docs-smart-search-open-trigger"]')
     ?.click();
 }
 
@@ -61,7 +61,7 @@ export const SmartSearch: React.FC<SmartSearchProps> = ({
   };
 
   const slots = slotsProp ?? {};
-  const clearInputButton = slots.ClearInputButton;
+  const clearInputBaton = slots.ClearInputBaton;
   const openTrigger = slots.OpenTrigger;
   const overlayPanel = slots.OverlayPanel;
   const dialogContentRef = useRef<HTMLDivElement>(null);
@@ -119,7 +119,7 @@ export const SmartSearch: React.FC<SmartSearchProps> = ({
         requestAnimationFrame(attemptHighlight);
         return;
       }
-      const buttons = getSmartSearchListButtons(root);
+      const buttons = getSmartSearchListBatons(root);
       if (buttons.length === 0) return;
 
       buttons.forEach((btn, i) => {
@@ -184,7 +184,7 @@ export const SmartSearch: React.FC<SmartSearchProps> = ({
       // If there is no overlay rendering, we cannot handle Arrow/Enter for SmartSearch results
       if (!overlayRoot) return;
 
-      const buttons = getSmartSearchListButtons(overlayRoot);
+      const buttons = getSmartSearchListBatons(overlayRoot);
 
       if (buttons.length === 0 && e.key === "Enter") {
         if (isSearchInput) {
@@ -240,7 +240,7 @@ export const SmartSearch: React.FC<SmartSearchProps> = ({
 
   const closeOverlay = () => {
     document
-      .querySelector<HTMLButtonElement>('[data-testid="docs-smart-search-close-overlay"]')
+      .querySelector<HTMLBatonElement>('[data-testid="docs-smart-search-close-overlay"]')
       ?.click();
   };
 
@@ -318,7 +318,7 @@ export const SmartSearch: React.FC<SmartSearchProps> = ({
         data-testid={dataTestId}
       >
         <div className="sr-only" aria-hidden>
-          {clearInputButton}
+          {clearInputBaton}
         </div>
         <div className="sr-only" aria-hidden>
           {openTrigger}

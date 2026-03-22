@@ -11,7 +11,7 @@ public class CardApp : SampleBase
         var card1 = new Card()
             .Header(Text.H4("Card App"))
             .Content("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc")
-            .Footer(new Button("Sign Me Up", _ => client.Toast("You have signed up!")).TestId("card-app-signup-button"))
+            .Footer(new Baton("Sign Me Up", _ => client.Toast("You have signed up!")).TestId("card-app-signup-button"))
             .TestId("card-app");
 
         var card4 = new Card()

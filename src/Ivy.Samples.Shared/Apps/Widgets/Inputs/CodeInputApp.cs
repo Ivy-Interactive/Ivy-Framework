@@ -117,32 +117,32 @@ public class CodeInputApp : SampleBase
                | null!
                | Text.Monospaced("With Placeholder")
                | Text.Monospaced("Empty State")
-               | Text.Monospaced("With Copy Button")
+               | Text.Monospaced("With Copy Baton")
 
                | Text.Monospaced("C#")
                | csharpCode.ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
                | emptyCsharpState.ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
-               | csharpCode.ToCodeInput().Language(Languages.Csharp).ShowCopyButton()
+               | csharpCode.ToCodeInput().Language(Languages.Csharp).ShowCopyBaton()
 
                | Text.Monospaced("JSON")
                | jsonCode.ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
                | emptyJsonState.ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
-               | jsonCode.ToCodeInput().Language(Languages.Json).ShowCopyButton()
+               | jsonCode.ToCodeInput().Language(Languages.Json).ShowCopyBaton()
 
                | Text.Monospaced("SQL")
                | sqlCode.ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
                | emptySqlState.ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
-               | sqlCode.ToCodeInput().Language(Languages.Sql).ShowCopyButton()
+               | sqlCode.ToCodeInput().Language(Languages.Sql).ShowCopyBaton()
 
                | Text.Monospaced("HTML")
                | htmlCode.ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
                | emptyHtmlState.ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
-               | htmlCode.ToCodeInput().Language(Languages.Html).ShowCopyButton()
+               | htmlCode.ToCodeInput().Language(Languages.Html).ShowCopyBaton()
 
                | Text.Monospaced("YAML")
                | yamlCode.ToCodeInput().Language(Languages.Yaml).Placeholder("Enter YAML here...")
                | emptyYamlState.ToCodeInput().Language(Languages.Yaml).Placeholder("Enter YAML here...")
-               | yamlCode.ToCodeInput().Language(Languages.Yaml).ShowCopyButton()
+               | yamlCode.ToCodeInput().Language(Languages.Yaml).ShowCopyBaton()
             ;
 
         var thirdGrid = Layout.Grid().Columns(4)
@@ -152,27 +152,27 @@ public class CodeInputApp : SampleBase
                | null!
 
                | Text.Monospaced("C#")
-               | csharpCode.ToCodeInput().Language(Languages.Csharp).Invalid("Invalid code").ShowCopyButton()
+               | csharpCode.ToCodeInput().Language(Languages.Csharp).Invalid("Invalid code").ShowCopyBaton()
                | null!
                | null!
 
                | Text.Monospaced("JSON")
-               | jsonCode.ToCodeInput().Language(Languages.Json).Invalid("Invalid JSON").ShowCopyButton()
+               | jsonCode.ToCodeInput().Language(Languages.Json).Invalid("Invalid JSON").ShowCopyBaton()
                | null!
                | null!
 
                | Text.Monospaced("SQL")
-               | sqlCode.ToCodeInput().Language(Languages.Sql).Invalid("Invalid SQL").ShowCopyButton()
+               | sqlCode.ToCodeInput().Language(Languages.Sql).Invalid("Invalid SQL").ShowCopyBaton()
                | null!
                | null!
 
                | Text.Monospaced("HTML")
-               | htmlCode.ToCodeInput().Language(Languages.Html).Invalid("Invalid HTML").ShowCopyButton()
+               | htmlCode.ToCodeInput().Language(Languages.Html).Invalid("Invalid HTML").ShowCopyBaton()
                | null!
                | null!
 
                | Text.Monospaced("YAML")
-               | yamlCode.ToCodeInput().Language(Languages.Yaml).Invalid("Invalid YAML").ShowCopyButton()
+               | yamlCode.ToCodeInput().Language(Languages.Yaml).Invalid("Invalid YAML").ShowCopyBaton()
                | null!
                | null!
             ;
@@ -225,7 +225,7 @@ public class CodeInputApp : SampleBase
             """;
 
         var socialMediaLinks = new Card(
-            new CodeBlock(socialMediaLinksContent, Languages.Text).ShowCopyButton().ShowBorder(false)
+            new CodeBlock(socialMediaLinksContent, Languages.Text).ShowCopyBaton().ShowBorder(false)
         );
 
         return Layout.Vertical()
@@ -240,7 +240,7 @@ public class CodeInputApp : SampleBase
                | dataBinding
                | Text.H2("CodeInput in Card")
                | new Card(
-                   cardCode.ToCodeInput().Language(Languages.Csharp).ShowCopyButton().Height(Size.Auto())
+                   cardCode.ToCodeInput().Language(Languages.Csharp).ShowCopyBaton().Height(Size.Auto())
                ).Title("Code Example").Description("Testing copy button visibility with card background")
                | socialMediaLinks
                ;
@@ -321,7 +321,7 @@ public class CodeInputDataBindings : ViewBase
         return Layout.Vertical()
                | anyState.ToCodeInput()
                | anyState.ToCodeInput().Language(Languages.Csharp)
-               | anyState.ToCodeInput().Language(Languages.Csharp).ShowCopyButton();
+               | anyState.ToCodeInput().Language(Languages.Csharp).ShowCopyBaton();
     }
 
     private object FormatStateValue(string typeName, object? value, bool isNullable)

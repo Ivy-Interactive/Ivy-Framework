@@ -7,7 +7,7 @@ public class ShouldFailWithAnalyser : ViewBase
     public override object? Build()
     {
         // Direct UseState call that should trigger analyzer error
-        var handler = (Event<Button> e) =>
+        var handler = (Event<Baton> e) =>
         {
             UseState(false);
         };
@@ -21,7 +21,7 @@ public class ShouldFailWithAnalyser : ViewBase
 #pragma warning restore CS8321
 
         // This code is intentionally incorrect to demonstrate the analyzer's functionality.
-        return new Button().OnClick(handler);
+        return new Baton().OnClick(handler);
     }
 
 }

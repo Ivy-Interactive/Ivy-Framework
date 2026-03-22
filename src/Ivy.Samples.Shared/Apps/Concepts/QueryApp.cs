@@ -149,26 +149,26 @@ public class TagInvalidationExample : ViewBase
         return Layout.Vertical().Gap(4)
                | Text.H3("Revalidate by Tag")
                | (Layout.Horizontal().Gap(2)
-                  | new Button("Revalidate All (dashboard)", _ => queryManager.RevalidateByTag("dashboard"))
-                        .Variant(ButtonVariant.Primary)
+                  | new Baton("Revalidate All (dashboard)", _ => queryManager.RevalidateByTag("dashboard"))
+                        .Variant(BatonVariant.Primary)
                         .Icon(Icons.RefreshCw)
-                  | new Button("Revalidate Users", _ => queryManager.RevalidateByTag("users"))
-                        .Variant(ButtonVariant.Outline)
-                  | new Button("Revalidate Orders", _ => queryManager.RevalidateByTag("orders"))
-                        .Variant(ButtonVariant.Outline)
-                  | new Button("Revalidate Revenue", _ => queryManager.RevalidateByTag("revenue"))
-                        .Variant(ButtonVariant.Outline))
+                  | new Baton("Revalidate Users", _ => queryManager.RevalidateByTag("users"))
+                        .Variant(BatonVariant.Outline)
+                  | new Baton("Revalidate Orders", _ => queryManager.RevalidateByTag("orders"))
+                        .Variant(BatonVariant.Outline)
+                  | new Baton("Revalidate Revenue", _ => queryManager.RevalidateByTag("revenue"))
+                        .Variant(BatonVariant.Outline))
                | Text.H3("Invalidate by Tag")
                | (Layout.Horizontal().Gap(2)
-                  | new Button("Invalidate All (dashboard)", _ => queryManager.InvalidateByTag("dashboard"))
-                        .Variant(ButtonVariant.Destructive)
+                  | new Baton("Invalidate All (dashboard)", _ => queryManager.InvalidateByTag("dashboard"))
+                        .Variant(BatonVariant.Destructive)
                         .Icon(Icons.Trash)
-                  | new Button("Invalidate Users", _ => queryManager.InvalidateByTag("users"))
-                        .Variant(ButtonVariant.Outline)
-                  | new Button("Invalidate Orders", _ => queryManager.InvalidateByTag("orders"))
-                        .Variant(ButtonVariant.Outline)
-                  | new Button("Invalidate Revenue", _ => queryManager.InvalidateByTag("revenue"))
-                        .Variant(ButtonVariant.Outline))
+                  | new Baton("Invalidate Users", _ => queryManager.InvalidateByTag("users"))
+                        .Variant(BatonVariant.Outline)
+                  | new Baton("Invalidate Orders", _ => queryManager.InvalidateByTag("orders"))
+                        .Variant(BatonVariant.Outline)
+                  | new Baton("Invalidate Revenue", _ => queryManager.InvalidateByTag("revenue"))
+                        .Variant(BatonVariant.Outline))
                | Text.H3("Dashboard Data")
                | (Layout.Vertical().Gap(2)
                   | QueryCard("Users", usersQuery)
@@ -232,7 +232,7 @@ public class ErrorHandlingExample : ViewBase
                        : Text.Literal(query.Value ?? "No data"))
                | (query.Validating ? Text.Muted("Revalidating...") : null!)
                | (Layout.Horizontal()
-                  | new Button("Retry", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline))
+                  | new Baton("Retry", _ => query.Mutator.Revalidate()).Variant(BatonVariant.Outline))
             ;
     }
 }
@@ -253,8 +253,8 @@ public class BasicQueryExample : ViewBase
                | query
                | Text.Literal(query.Value ?? "No data")
                | (Layout.Horizontal()
-                  | new Button("Revalidate", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline)
-                  | new Button("Invalidate", _ => query.Mutator.Invalidate()).Variant(ButtonVariant.Destructive))
+                  | new Baton("Revalidate", _ => query.Mutator.Revalidate()).Variant(BatonVariant.Outline)
+                  | new Baton("Invalidate", _ => query.Mutator.Invalidate()).Variant(BatonVariant.Destructive))
             ;
     }
 }
@@ -378,8 +378,8 @@ public class DependentFetchExample : ViewBase
                        ? Text.Muted("  Loading projects...")
                        : projectsList.Aggregate(Layout.Vertical(), (layout, item) => layout | item))
                | (Layout.Horizontal()
-                  | new Button("Reload User", _ => user.Mutator.Invalidate()).Variant(ButtonVariant.Outline)
-                  | new Button("Reload Projects", _ => projects.Mutator.Invalidate()).Variant(ButtonVariant.Outline))
+                  | new Baton("Reload User", _ => user.Mutator.Invalidate()).Variant(BatonVariant.Outline)
+                  | new Baton("Reload Projects", _ => projects.Mutator.Invalidate()).Variant(BatonVariant.Outline))
                | Text.Muted("Projects only fetch after user loads. Reload user to see the cascade.")
             ;
     }
@@ -406,12 +406,12 @@ public class MutationExample : ViewBase
                | Text.Literal($"Value: {query.Value}")
                | (query.Validating ? Text.Muted("Syncing...") : null!)
                | (Layout.Horizontal()
-                  | new Button("Optimistic +10", _ => query.Mutator.Mutate(query.Value + 10, true))
-                        .Variant(ButtonVariant.Primary)
-                  | new Button("Set to 999 (No Revalidate)", _ => query.Mutator.Mutate(999, false))
-                        .Variant(ButtonVariant.Secondary)
-                  | new Button("Refresh", _ => query.Mutator.Revalidate())
-                        .Variant(ButtonVariant.Outline))
+                  | new Baton("Optimistic +10", _ => query.Mutator.Mutate(query.Value + 10, true))
+                        .Variant(BatonVariant.Primary)
+                  | new Baton("Set to 999 (No Revalidate)", _ => query.Mutator.Mutate(999, false))
+                        .Variant(BatonVariant.Secondary)
+                  | new Baton("Refresh", _ => query.Mutator.Revalidate())
+                        .Variant(BatonVariant.Outline))
             ;
     }
 }
@@ -460,10 +460,10 @@ public class SharedQueryControls : ViewBase
         var mutator = UseMutation("shared-query");
 
         return Layout.Horizontal().Gap(2)
-               | new Button("Revalidate Shared Query", _ => mutator.Revalidate())
-                     .Variant(ButtonVariant.Outline)
-               | new Button("Invalidate", _ => mutator.Invalidate())
-                     .Variant(ButtonVariant.Destructive)
+               | new Baton("Revalidate Shared Query", _ => mutator.Revalidate())
+                     .Variant(BatonVariant.Outline)
+               | new Baton("Invalidate", _ => mutator.Invalidate())
+                     .Variant(BatonVariant.Destructive)
             ;
     }
 }
@@ -489,8 +489,8 @@ public class AutoKeyedQueryExample : ViewBase
                | (query.Validating ? Text.Muted("Revalidating...") : null!)
                | Text.Muted("Query key is derived from the call site (file and line number).")
                | (Layout.Horizontal()
-                  | new Button("Revalidate", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline)
-                  | new Button("Invalidate", _ => query.Mutator.Invalidate()).Variant(ButtonVariant.Destructive))
+                  | new Baton("Revalidate", _ => query.Mutator.Revalidate()).Variant(BatonVariant.Outline)
+                  | new Baton("Invalidate", _ => query.Mutator.Invalidate()).Variant(BatonVariant.Destructive))
             ;
     }
 }
@@ -568,8 +568,8 @@ public class ProductListExample : ViewBase
 
         return Layout.Vertical()
                | (Layout.Horizontal()
-                  | new Button("Revalidate List", _ => products.Mutator.Revalidate()).Variant(ButtonVariant.Outline)
-                  | new Button("Invalidate List", _ => products.Mutator.Invalidate()).Variant(ButtonVariant.Destructive))
+                  | new Baton("Revalidate List", _ => products.Mutator.Revalidate()).Variant(BatonVariant.Outline)
+                  | new Baton("Invalidate List", _ => products.Mutator.Invalidate()).Variant(BatonVariant.Destructive))
                | (products.Validating ? Text.Muted("Refreshing product list...") : null!)
                | productViews
                ;
@@ -604,18 +604,18 @@ public class ProductDetailView(Product initialProduct) : ViewBase
                | Text.Literal($"Price: ${p.Price}")
                | (product.Validating ? Text.Muted("Refreshing...") : null!)
                | (Layout.Horizontal()
-                  | new Button("Increase Price 10%", async _ =>
+                  | new Baton("Increase Price 10%", async _ =>
                     {
                         var newPrice = Math.Round(p.Price * 1.10m, 2);
                         var updated = await ProductDatabase.UpdateAsync(p.Id, p.Name, newPrice);
                         product.Mutator.Mutate(updated, revalidate: false);
-                    }).Variant(ButtonVariant.Primary)
-                  | new Button("Delete", async _ =>
+                    }).Variant(BatonVariant.Primary)
+                  | new Baton("Delete", async _ =>
                     {
                         await ProductDatabase.DeleteAsync(p.Id);
                         product.Mutator.Mutate(null, revalidate: false);
-                    }).Variant(ButtonVariant.Destructive)
-                  | new Button("Revalidate", _ => product.Mutator.Revalidate()).Variant(ButtonVariant.Outline))
+                    }).Variant(BatonVariant.Destructive)
+                  | new Baton("Revalidate", _ => product.Mutator.Revalidate()).Variant(BatonVariant.Outline))
                | new Separator()
             ;
     }
@@ -674,13 +674,13 @@ public class PaginationExample : ViewBase
 
                // Pagination controls
                | (Layout.Horizontal().Gap(2)
-                  | new Button("â† Previous", _ => page.Set(p => p - 1))
+                  | new Baton("â† Previous", _ => page.Set(p => p - 1))
                         .Disabled(page.Value <= 1 || itemsQuery.Loading)
-                        .Variant(ButtonVariant.Outline)
+                        .Variant(BatonVariant.Outline)
                   | Text.Literal($"{page.Value} / {totalPages}")
-                  | new Button("Next â†’", _ => page.Set(p => p + 1))
+                  | new Baton("Next â†’", _ => page.Set(p => p + 1))
                         .Disabled(page.Value >= totalPages || itemsQuery.Loading)
-                        .Variant(ButtonVariant.Outline))
+                        .Variant(BatonVariant.Outline))
 
                | Text.Muted("Notice how the previous page's items remain visible while the next page loads.")
             ;
@@ -695,11 +695,11 @@ public class PaginationComparisonExample : ViewBase
 
         return Layout.Vertical().Gap(4)
                | (Layout.Horizontal().Gap(2)
-                  | new Button("â† Prev", _ => page.Set(p => Math.Max(1, p - 1)))
-                        .Variant(ButtonVariant.Outline)
+                  | new Baton("â† Prev", _ => page.Set(p => Math.Max(1, p - 1)))
+                        .Variant(BatonVariant.Outline)
                   | Text.Literal($"Page {page.Value}")
-                  | new Button("Next â†’", _ => page.Set(p => Math.Min(5, p + 1)))
-                        .Variant(ButtonVariant.Outline))
+                  | new Baton("Next â†’", _ => page.Set(p => Math.Min(5, p + 1)))
+                        .Variant(BatonVariant.Outline))
                | (Layout.Grid(2).Gap(4)
                   | new Card(new ComparisonPanelWithKeepPrevious(page.Value)).Title("With KeepPrevious")
                   | new Card(new ComparisonPanelWithoutKeepPrevious(page.Value)).Title("Without KeepPrevious"))
@@ -825,30 +825,30 @@ public class CacheClearExample : ViewBase
                | Text.H3("Clear by Tag")
                | Text.Muted("Invalidate specific queries by their tag. Queries with active subscribers will re-fetch.")
                | (Layout.Horizontal().Gap(2)
-                  | new Button("Clear Users", _ => queryManager.InvalidateByTag("users"))
-                        .Variant(ButtonVariant.Outline).Icon(Icons.Users)
-                  | new Button("Clear Orders", _ => queryManager.InvalidateByTag("orders"))
-                        .Variant(ButtonVariant.Outline).Icon(Icons.ShoppingCart)
-                  | new Button("Clear Settings", _ => queryManager.InvalidateByTag("settings"))
-                        .Variant(ButtonVariant.Outline).Icon(Icons.Settings))
+                  | new Baton("Clear Users", _ => queryManager.InvalidateByTag("users"))
+                        .Variant(BatonVariant.Outline).Icon(Icons.Users)
+                  | new Baton("Clear Orders", _ => queryManager.InvalidateByTag("orders"))
+                        .Variant(BatonVariant.Outline).Icon(Icons.ShoppingCart)
+                  | new Baton("Clear Settings", _ => queryManager.InvalidateByTag("settings"))
+                        .Variant(BatonVariant.Outline).Icon(Icons.Settings))
 
                | new Separator()
 
                | Text.H3("Clear Everything")
                | Text.Muted("Invalidate all queries in the cache. Use with caution in production.")
                | (Layout.Horizontal().Gap(2)
-                  | new Button("Clear All (by tag)", _ => queryManager.InvalidateByTag("cache-demo"))
-                        .Variant(ButtonVariant.Destructive).Icon(Icons.Trash2)
-                  | new Button("Clear Entire Cache", _ => queryManager.Clear())
-                        .Variant(ButtonVariant.Destructive).Icon(Icons.Trash))
+                  | new Baton("Clear All (by tag)", _ => queryManager.InvalidateByTag("cache-demo"))
+                        .Variant(BatonVariant.Destructive).Icon(Icons.Trash2)
+                  | new Baton("Clear Entire Cache", _ => queryManager.Clear())
+                        .Variant(BatonVariant.Destructive).Icon(Icons.Trash))
 
                | new Separator()
 
                | Text.H3("Revalidate (Background Refresh)")
                | Text.Muted("Revalidate keeps current data visible while fetching fresh data in the background.")
                | (Layout.Horizontal().Gap(2)
-                  | new Button("Revalidate All", _ => queryManager.RevalidateByTag("cache-demo"))
-                        .Variant(ButtonVariant.Primary).Icon(Icons.RefreshCw))
+                  | new Baton("Revalidate All", _ => queryManager.RevalidateByTag("cache-demo"))
+                        .Variant(BatonVariant.Primary).Icon(Icons.RefreshCw))
             ;
     }
 
@@ -930,27 +930,27 @@ public class PredicateInvalidationExample : ViewBase
                | Text.H3("Invalidate by Predicate")
                | Text.Muted("Use a predicate function to match keys and invalidate matching queries.")
                | (Layout.Horizontal().Gap(2)
-                  | new Button("Invalidate Electronics", _ =>
+                  | new Baton("Invalidate Electronics", _ =>
                         queryManager.Invalidate(key => key is ProductKey { Category: "electronics" }))
-                        .Variant(ButtonVariant.Destructive).Icon(Icons.Laptop)
-                  | new Button("Invalidate Clothing", _ =>
+                        .Variant(BatonVariant.Destructive).Icon(Icons.Laptop)
+                  | new Baton("Invalidate Clothing", _ =>
                         queryManager.Invalidate(key => key is ProductKey { Category: "clothing" }))
-                        .Variant(ButtonVariant.Destructive).Icon(Icons.Shirt)
-                  | new Button("Invalidate Id=1", _ =>
+                        .Variant(BatonVariant.Destructive).Icon(Icons.Shirt)
+                  | new Baton("Invalidate Id=1", _ =>
                         queryManager.Invalidate(key => key is ProductKey { Id: 1 }))
-                        .Variant(ButtonVariant.Destructive).Icon(Icons.Hash))
+                        .Variant(BatonVariant.Destructive).Icon(Icons.Hash))
 
                | new Separator()
 
                | Text.H3("Revalidate by Predicate")
                | Text.Muted("Revalidate keeps current data visible while fetching fresh data in the background.")
                | (Layout.Horizontal().Gap(2)
-                  | new Button("Revalidate Electronics", _ =>
+                  | new Baton("Revalidate Electronics", _ =>
                         queryManager.Revalidate(key => key is ProductKey { Category: "electronics" }))
-                        .Variant(ButtonVariant.Primary).Icon(Icons.RefreshCw)
-                  | new Button("Revalidate All Products", _ =>
+                        .Variant(BatonVariant.Primary).Icon(Icons.RefreshCw)
+                  | new Baton("Revalidate All Products", _ =>
                         queryManager.Revalidate(key => key is ProductKey))
-                        .Variant(ButtonVariant.Primary).Icon(Icons.RefreshCw))
+                        .Variant(BatonVariant.Primary).Icon(Icons.RefreshCw))
             ;
     }
 
@@ -1022,8 +1022,8 @@ public class RefreshIntervalExample : ViewBase
                             | Text.Literal($"Fetch count: {liveData.Value?.FetchCount}")
                             | Text.Muted($"Last updated: {liveData.Value?.Timestamp:HH:mm:ss}"))))
                   | (Layout.Vertical().Gap(2)
-                     | new Button("Force Refresh", _ => liveData.Mutator.Revalidate())
-                           .Variant(ButtonVariant.Outline).Icon(Icons.RefreshCw)))
+                     | new Baton("Force Refresh", _ => liveData.Mutator.Revalidate())
+                           .Variant(BatonVariant.Outline).Icon(Icons.RefreshCw)))
 
                | Text.Muted("The refresh timer only runs while there are active subscribers. Navigate away to stop polling.")
             ;
@@ -1072,9 +1072,9 @@ public class QueryEffectTriggerExample : ViewBase
                | query
                | Text.Literal(query.Value ?? "No data")
                | (Layout.Horizontal().Gap(2)
-                  | new Button("Revalidate", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline)
-                  | new Button("Invalidate", _ => query.Mutator.Invalidate()).Variant(ButtonVariant.Destructive)
-                  | new Button("Clear Log", _ => effectLog.Set([])).Variant(ButtonVariant.Ghost))
+                  | new Baton("Revalidate", _ => query.Mutator.Revalidate()).Variant(BatonVariant.Outline)
+                  | new Baton("Invalidate", _ => query.Mutator.Invalidate()).Variant(BatonVariant.Destructive)
+                  | new Baton("Clear Log", _ => effectLog.Set([])).Variant(BatonVariant.Ghost))
                | Text.H3("Effect Log (last 10)")
                | Text.Muted("Each entry below was logged by a UseEffect triggered by the query:")
                | logEntries

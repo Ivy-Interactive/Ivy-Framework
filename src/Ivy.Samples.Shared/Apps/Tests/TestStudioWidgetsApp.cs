@@ -5,8 +5,8 @@ public class SingleAnswerQuestion(string question, Action<bool>? onAnswer = null
     public override object? Build()
     {
         var buttons = Layout.Horizontal().Gap(2)
-            | new Button(yesText, () => onAnswer?.Invoke(true)).Small().Icon(Icons.Waypoints)
-            | new Button(noText, () => onAnswer?.Invoke(false)).Outline().Small();
+            | new Baton(yesText, () => onAnswer?.Invoke(true)).Small().Icon(Icons.Waypoints)
+            | new Baton(noText, () => onAnswer?.Invoke(false)).Outline().Small();
 
         return new ChatBox(question, buttons);
     }
@@ -55,11 +55,11 @@ public class TestStudioWidgetsApp : SampleBase
             | new FloatingBox(
                 Layout.Horizontal().Gap(1).Align(Align.Center)
                 | (Layout.Horizontal().Gap(1).Grow()
-                    | Icons.Citrus.ToButton().BorderRadius(BorderRadius.Full)
-                    | Icons.Waypoints.ToButton().BorderRadius(BorderRadius.Full).Ghost()
-                    | Icons.Code.ToButton().BorderRadius(BorderRadius.Full).Ghost())
+                    | Icons.Citrus.ToBaton().BorderRadius(BorderRadius.Full)
+                    | Icons.Waypoints.ToBaton().BorderRadius(BorderRadius.Full).Ghost()
+                    | Icons.Code.ToBaton().BorderRadius(BorderRadius.Full).Ghost())
                 | (Layout.Horizontal().Gap(2).Align(Align.Right)
-                    | new Button("Action")
+                    | new Baton("Action")
                     | new Avatar("JD")))
 
             | Text.H2("ChatBox")
@@ -70,19 +70,19 @@ public class TestStudioWidgetsApp : SampleBase
                 "What is your name?",
                 name.ToTextInput().Placeholder("Enter your name..."))
 
-            | Text.H3("With Custom Buttons")
+            | Text.H3("With Custom Batons")
             | new ChatBox(
                 "Choose an action:",
                 Layout.Horizontal().Gap(2)
-                | new Button("Save", () => { }).Primary().Small()
-                | new Button("Export", () => { }).Secondary().Small()
-                | new Button("Delete", () => { }).Destructive().Small())
+                | new Baton("Save", () => { }).Primary().Small()
+                | new Baton("Export", () => { }).Secondary().Small()
+                | new Baton("Delete", () => { }).Destructive().Small())
 
             | Text.H3("Without Title")
             | new ChatBox(
                 content: Layout.Vertical().Gap(2)
                 | Text.P("This ChatBox has no title, only content.")
-                | new Button("Got it!", () => { }).Outline().Small())
+                | new Baton("Got it!", () => { }).Outline().Small())
 
             | Text.H3("SingleAnswerQuestion")
             | new SingleAnswerQuestion(

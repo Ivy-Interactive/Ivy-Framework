@@ -19,7 +19,7 @@ public class LinkBuilderTests
     [Theory]
     [InlineData("https://example.com/page")]
     [InlineData("http://example.com/page")]
-    public void LinkBuilder_ValidAbsoluteUrl_CreatesEnabledButton(string url)
+    public void LinkBuilder_ValidAbsoluteUrl_CreatesEnabledBaton(string url)
     {
         // Arrange
         var builder = new LinkBuilder<object>(url, "Link Text");
@@ -31,7 +31,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.False(button.Disabled);
         Assert.Equal("Link Text", button.Title);
         // URL may be normalized (e.g., trailing slash added)
@@ -44,7 +44,7 @@ public class LinkBuilderTests
     [InlineData("/users/profile")]
     [InlineData("app://dashboard")]
     [InlineData("#section1")]
-    public void LinkBuilder_ValidRelativeOrSpecialUrl_CreatesEnabledButton(string url)
+    public void LinkBuilder_ValidRelativeOrSpecialUrl_CreatesEnabledBaton(string url)
     {
         // Arrange
         var builder = new LinkBuilder<object>(url, "Link Text");
@@ -55,7 +55,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.False(button.Disabled);
         Assert.Equal("Link Text", button.Title);
         Assert.Equal(url, button.Url);
@@ -76,7 +76,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.Equal(label, button.Title);
         // URL may be normalized for absolute URLs
         if (url.StartsWith("http://") || url.StartsWith("https://"))
@@ -102,7 +102,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.Equal("Link Text", button.Title);
         Assert.Equal(value, button.Url);
     }
@@ -119,7 +119,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.Equal(value, button.Title);
         Assert.Equal(value, button.Url);
     }
@@ -140,7 +140,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.False(button.Disabled);
         // URL may be normalized, so check that it contains the key parts
         Assert.NotNull(button.Url);
@@ -163,7 +163,7 @@ public class LinkBuilderTests
     [InlineData("data:text/html,<script>alert(\"xss\")</script>")]
     [InlineData("file:///etc/passwd")]
     [InlineData("vbscript:msgbox(\"xss\")")]
-    public void LinkBuilder_DangerousUrl_CreatesDisabledButton(string dangerousUrl)
+    public void LinkBuilder_DangerousUrl_CreatesDisabledBaton(string dangerousUrl)
     {
         // Arrange
         var builder = new LinkBuilder<object>(dangerousUrl, "Dangerous Link");
@@ -174,7 +174,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.True(button.Disabled, "Dangerous URLs should result in disabled buttons");
         Assert.Equal("Dangerous Link", button.Title);
         // URL should be null or empty for disabled buttons
@@ -184,7 +184,7 @@ public class LinkBuilderTests
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void LinkBuilder_InvalidUrl_CreatesDisabledButton(string invalidUrl)
+    public void LinkBuilder_InvalidUrl_CreatesDisabledBaton(string invalidUrl)
     {
         // Arrange
         var builder = new LinkBuilder<object>(invalidUrl, "Invalid Link");
@@ -195,7 +195,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.True(button.Disabled, "Invalid URLs should result in disabled buttons");
         Assert.Equal("Invalid Link", button.Title);
     }
@@ -228,7 +228,7 @@ public class LinkBuilderTests
     }
 
     [Fact]
-    public void LinkBuilder_DangerousUrlFromValue_CreatesDisabledButton()
+    public void LinkBuilder_DangerousUrlFromValue_CreatesDisabledBaton()
     {
         // Arrange
         var builder = new LinkBuilder<object>(label: "Link");
@@ -239,7 +239,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.True(button.Disabled, "Dangerous URLs from value should result in disabled buttons");
         Assert.Equal("Link", button.Title); // Uses the label when provided
         Assert.Null(button.Url);
@@ -250,7 +250,7 @@ public class LinkBuilderTests
     [InlineData("http://")]
     [InlineData("https://")]
     [InlineData("invalid://protocol")]
-    public void LinkBuilder_MalformedUrl_CreatesDisabledButton(string malformedUrl)
+    public void LinkBuilder_MalformedUrl_CreatesDisabledBaton(string malformedUrl)
     {
         // Arrange
         var builder = new LinkBuilder<object>(malformedUrl, "Malformed Link");
@@ -261,7 +261,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         // Malformed URLs should result in disabled buttons
         Assert.True(button.Disabled);
     }
@@ -278,7 +278,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.True(button.Disabled);
         // Invalid URLs should always use safe default label to avoid displaying potentially dangerous content
         Assert.Equal("Invalid Link", button.Title);
@@ -296,7 +296,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         Assert.True(button.Disabled);
         // All invalid URLs use safe default, regardless of whether they're dangerous
         Assert.Equal("Invalid Link", button.Title);
@@ -318,7 +318,7 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
+        var button = Assert.IsType<Baton>(result);
         // URL parameter takes precedence, may be normalized with trailing slash
         Assert.NotNull(button.Url);
         Assert.Contains("https://example.com", button.Url);
@@ -326,7 +326,7 @@ public class LinkBuilderTests
     }
 
     [Fact]
-    public void LinkBuilder_ButtonVariant_IsAlwaysInline()
+    public void LinkBuilder_BatonVariant_IsAlwaysInline()
     {
         // Arrange
         var builder = new LinkBuilder<object>("https://example.com", "Link");
@@ -337,8 +337,8 @@ public class LinkBuilderTests
 
         // Assert
         Assert.NotNull(result);
-        var button = Assert.IsType<Button>(result);
-        Assert.Equal(ButtonVariant.Inline, button.Variant);
+        var button = Assert.IsType<Baton>(result);
+        Assert.Equal(BatonVariant.Inline, button.Variant);
     }
 
     [Fact]
@@ -355,7 +355,7 @@ public class LinkBuilderTests
             var builder = new LinkBuilder<object>(url, "Link");
             var result = builder.Build(dummyValue, new object());
             Assert.NotNull(result);
-            var button = Assert.IsType<Button>(result);
+            var button = Assert.IsType<Baton>(result);
             Assert.False(button.Disabled, $"Valid URL {url} should create enabled button");
         }
 
@@ -365,7 +365,7 @@ public class LinkBuilderTests
             var builder = new LinkBuilder<object>(url, "Link");
             var result = builder.Build(dummyValue, new object());
             Assert.NotNull(result);
-            var button = Assert.IsType<Button>(result);
+            var button = Assert.IsType<Baton>(result);
             Assert.True(button.Disabled, $"Invalid URL {url} should create disabled button");
         }
     }

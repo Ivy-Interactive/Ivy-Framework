@@ -26,7 +26,7 @@ public class IconsApp : SampleBase
             loadingState.Set(false);
         }, [searchState.Throttle(TimeSpan.FromMilliseconds(500)).ToTrigger()]);
 
-        Action<Event<Button>> onIconClick = e =>
+        Action<Event<Baton>> onIconClick = e =>
         {
             client.CopyToClipboard(e.Sender.Icon.ToString() ?? "");
             client.Toast($"Copied '{e.Sender.Icon.ToString()}' to clipboard", "Icon Copied");
@@ -36,7 +36,7 @@ public class IconsApp : SampleBase
             Layout.Vertical()
                 | searchState.ToInput("Search")
                 | (loadingState.Value ? "Loading..." : Layout.Wrap(
-                    iconsState.Value.Select(e => new Button(null, onIconClick, icon: e, variant: ButtonVariant.Outline).WithTooltip(e.ToString()))))
+                    iconsState.Value.Select(e => new Baton(null, onIconClick, icon: e, variant: BatonVariant.Outline).WithTooltip(e.ToString()))))
                 ;
     }
 }

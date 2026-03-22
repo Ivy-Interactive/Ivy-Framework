@@ -128,8 +128,8 @@ public class GaugeChart7View : ViewBase
                     .Pointer()
                     .Height(Size.Px(200)))
                 | (Layout.Horizontal()
-                    | new Button("-10", _ => value.Set(Math.Max(0, value.Value - 10)))
-                    | new Button("+10", _ => value.Set(Math.Min(100, value.Value + 10)))));
+                    | new Baton("-10", _ => value.Set(Math.Max(0, value.Value - 10)))
+                    | new Baton("+10", _ => value.Set(Math.Min(100, value.Value + 10)))));
     }
 }
 

@@ -166,19 +166,19 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     const tocContainer = document.querySelector("[data-toc-container]");
     if (!tocContainer) return;
 
-    const activeButton = tocContainer.querySelector(
+    const activeBaton = tocContainer.querySelector(
       `[data-toc-link][data-heading-id="${activeId}"]`,
     ) as HTMLElement | null;
-    if (!activeButton) return;
+    if (!activeBaton) return;
 
     try {
       const containerRect = tocContainer.getBoundingClientRect();
-      const elementRect = activeButton.getBoundingClientRect();
+      const elementRect = activeBaton.getBoundingClientRect();
       const isVisible =
         elementRect.top >= containerRect.top && elementRect.bottom <= containerRect.bottom;
 
       if (!isVisible) {
-        activeButton.scrollIntoView({
+        activeBaton.scrollIntoView({
           behavior: "smooth",
           block: "nearest",
         });

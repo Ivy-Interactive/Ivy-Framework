@@ -63,7 +63,7 @@ public class CategoriesListBlade : ViewBase
         });
 
         var createBtn = Icons.Plus
-            .ToButton(_ =>
+            .ToBaton(_ =>
             {
                 blades.Pop(this);
             })
@@ -160,20 +160,20 @@ public class CategoryDetailsBlade(Guid categoryId) : ViewBase
 
         var category = categoryQuery.Value;
 
-        var deleteBtn = new Button("Delete", onClick: async _ =>
+        var deleteBtn = new Baton("Delete", onClick: async _ =>
             {
                 blades.Pop(refresh: true);
                 await DeleteAsync(factory);
                 queryService.RevalidateByTag(typeof(CategoryListRecord[]));
                 queryService.RevalidateByTag(nameof(ProductHelpers.UseCategoryOptions));
             })
-            .Variant(ButtonVariant.Destructive)
+            .Variant(BatonVariant.Destructive)
             .Icon(Icons.Trash)
             .Width(Size.Grow())
             .WithConfirm($"Are you sure you want to delete category '{category.Name}'?", "Delete Category", confirmLabel: "Delete", destructive: true);
 
-        var editBtn = new Button("Edit")
-            .Variant(ButtonVariant.Outline)
+        var editBtn = new Baton("Edit")
+            .Variant(BatonVariant.Outline)
             .Icon(Icons.Pencil)
             .Width(Size.Grow())
             .ToTrigger((isOpen) => new CategoryEditSheet(isOpen, categoryId));

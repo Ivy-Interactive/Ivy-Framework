@@ -18,7 +18,7 @@ public record Terminal : WidgetBase<Terminal>
 
     [Prop] public bool ShowHeader { get; init; } = true;
 
-    [Prop] public bool ShowCopyButton { get; init; } = true;
+    [Prop] public bool ShowCopyBaton { get; init; } = true;
 }
 
 public static class TerminalExtensions
@@ -43,8 +43,8 @@ public static class TerminalExtensions
         return terminal with { Title = title };
     }
 
-    public static Terminal ShowCopyButton(this Terminal terminal, bool show = true)
+    public static Terminal ShowCopyBaton(this Terminal terminal, bool show = true)
     {
-        return terminal with { ShowCopyButton = show };
+        return terminal with { ShowCopyBaton = show };
     }
 }

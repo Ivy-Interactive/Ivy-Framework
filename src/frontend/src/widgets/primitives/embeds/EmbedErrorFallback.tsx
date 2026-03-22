@@ -32,7 +32,7 @@ const EmbedErrorFallback: React.FC<EmbedErrorFallbackProps> = ({ url, platform }
 
   return (
     <div className="embed-error border rounded-lg bg-card shadow-sm w-full @container">
-      {/* Button layout - shown when container is wide enough */}
+      {/* Baton layout - shown when container is wide enough */}
       <div className="@[30rem]:flex hidden items-center gap-3 p-2">
         <div className="flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center">

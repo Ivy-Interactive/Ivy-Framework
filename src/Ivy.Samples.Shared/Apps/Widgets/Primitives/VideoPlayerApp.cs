@@ -103,8 +103,8 @@ public class VideoPlayerApp : SampleBase
                     | withControls
                     | Text.P("Video without controls (programmatic control only).").Small()
                     | withoutControls
-                    | new Button("Toggle Play/Pause", _ => client.Toast("In a real app, this would control the video programmatically"))
-                        .Variant(ButtonVariant.Outline)
+                    | new Baton("Toggle Play/Pause", _ => client.Toast("In a real app, this would control the video programmatically"))
+                        .Variant(BatonVariant.Outline)
                 ).Title("Controls Example"))
 
                 // Volume Control

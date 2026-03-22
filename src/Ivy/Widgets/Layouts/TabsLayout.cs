@@ -52,7 +52,7 @@ public record TabsLayout : WidgetBase<TabsLayout>
 
     [Prop] public Thickness? Padding { get; set; } = new Thickness(4);
 
-    [Prop] public string? AddButtonText { get; set; }
+    [Prop] public string? AddBatonText { get; set; }
 
     [Event] public EventHandler<Event<TabsLayout, int>>? OnSelect { get; set; }
 
@@ -62,7 +62,7 @@ public record TabsLayout : WidgetBase<TabsLayout>
 
     [Event] public EventHandler<Event<TabsLayout, int[]>>? OnReorder { get; set; }
 
-    [Event] public EventHandler<Event<TabsLayout, int>>? OnAddButtonClick { get; set; }
+    [Event] public EventHandler<Event<TabsLayout, int>>? OnAddBatonClick { get; set; }
 }
 
 public static class TabsLayoutExtensions
@@ -97,17 +97,17 @@ public static class TabsLayoutExtensions
         return tabsLayout with { Padding = new Thickness(left, top, right, bottom) };
     }
 
-    public static TabsLayout AddButton(this TabsLayout tabsLayout, string? addButtonText, Func<Event<TabsLayout, int>, ValueTask>? onAddButtonClick = null)
+    public static TabsLayout AddBaton(this TabsLayout tabsLayout, string? addBatonText, Func<Event<TabsLayout, int>, ValueTask>? onAddBatonClick = null)
     {
-        return tabsLayout with { AddButtonText = addButtonText, OnAddButtonClick = onAddButtonClick.ToEventHandler() };
+        return tabsLayout with { AddBatonText = addBatonText, OnAddBatonClick = onAddBatonClick.ToEventHandler() };
     }
 
-    public static TabsLayout AddButton(this TabsLayout tabsLayout, string? addButtonText, Action<Event<TabsLayout, int>>? onAddButtonClick)
+    public static TabsLayout AddBaton(this TabsLayout tabsLayout, string? addBatonText, Action<Event<TabsLayout, int>>? onAddBatonClick)
     {
         return tabsLayout with
         {
-            AddButtonText = addButtonText,
-            OnAddButtonClick = onAddButtonClick.ToEventHandler()
+            AddBatonText = addBatonText,
+            OnAddBatonClick = onAddBatonClick.ToEventHandler()
         };
     }
 }

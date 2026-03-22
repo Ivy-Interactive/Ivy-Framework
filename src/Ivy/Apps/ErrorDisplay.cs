@@ -55,8 +55,8 @@ internal static class ErrorDisplay
         var content = sheetContent != null
             ? (Layout.Vertical().Center()
                 | callout
-                | new Button("View details")
-                    .Variant(ButtonVariant.Outline)
+                | new Baton("View details")
+                    .Variant(BatonVariant.Outline)
                     .Icon(Icons.FileCode)
                     .WithSheet(sheetContent, title: SheetTitle, description: SheetDescription))
             : (object)(Layout.Vertical().Center() | callout);

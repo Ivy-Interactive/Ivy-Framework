@@ -32,7 +32,7 @@ public class TabsApp : SampleBase
             tabs.Set(tabs.Value.RemoveAt(@event.Value));
         }
 
-        void OnAddButtonClick(Event<TabsLayout, int> @event)
+        void OnAddBatonClick(Event<TabsLayout, int> @event)
         {
             tabs.Set(tabs.Value.Add(new Tab($"Tab {tabs.Value.Length + 1}", $"Tab {tabs.Value.Length + 1}")));
         }
@@ -45,10 +45,10 @@ public class TabsApp : SampleBase
             | Text.H3("Tabs variant")
             | new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedIndex.Value,
                 tabs.Value.ToArray()
-            ).Variant(TabsVariant.Tabs).Width(Size.Fraction((float)width.Value)).AddButton("+", OnAddButtonClick)
+            ).Variant(TabsVariant.Tabs).Width(Size.Fraction((float)width.Value)).AddBaton("+", OnAddBatonClick)
             | Text.H3("Content variant")
             | new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedIndex.Value,
                 tabs.Value.ToArray()
-            ).Variant(TabsVariant.Content).Width(Size.Fraction((float)width.Value)).AddButton("+", OnAddButtonClick);
+            ).Variant(TabsVariant.Content).Width(Size.Fraction((float)width.Value)).AddBaton("+", OnAddBatonClick);
     }
 }

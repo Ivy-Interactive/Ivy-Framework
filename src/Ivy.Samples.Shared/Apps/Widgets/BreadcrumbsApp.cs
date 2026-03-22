@@ -43,9 +43,9 @@ public class BreadcrumbsApp : SampleBase
             | new Breadcrumbs(items).Disabled()
             | Text.P($"Current page: {currentPage.Value}").Muted()
             | (Layout.Horizontal().Gap(2)
-                | new Button("Navigate to Products", () => currentPage.Set("Products")).Secondary()
-                | new Button("Navigate to Details", () => currentPage.Set("Details")).Secondary()
-                | new Button("Back to Home", () => currentPage.Set("Home")).Outline()
+                | new Baton("Navigate to Products", () => currentPage.Set("Products")).Secondary()
+                | new Baton("Navigate to Details", () => currentPage.Set("Details")).Secondary()
+                | new Baton("Back to Home", () => currentPage.Set("Home")).Outline()
             );
     }
 }

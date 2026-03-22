@@ -80,12 +80,12 @@ const TabsList = React.forwardRef<
 TabsList.displayName = "TabsList";
 
 // Custom TabsTrigger that works independently
-interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TabsTriggerProps extends React.BatonHTMLAttributes<HTMLBatonElement> {
   value: string;
   useRadix?: boolean;
 }
 
-const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
+const TabsTrigger = React.forwardRef<HTMLBatonElement, TabsTriggerProps>(
   ({ className, value, useRadix = false, onClick, ...props }, ref) => {
     const context = React.useContext(TabsContext);
     const isActive = context.value === value;
@@ -106,7 +106,7 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
       );
     }
 
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (e: React.MouseEvent<HTMLBatonElement>) => {
       context.onValueChange?.(value);
       onClick?.(e);
     };

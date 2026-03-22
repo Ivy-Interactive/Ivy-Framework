@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useCallback, useMemo } from "react";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
@@ -67,7 +67,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
     <div className="relative w-full select-none">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
+          <Baton
             disabled={disabled}
             variant="outline"
             data-slot="calendar"
@@ -91,32 +91,32 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
             >
               {date ? format(date, formatProp || "MMM yyyy") : placeholder || "Pick a month"}
             </span>
-          </Button>
+          </Baton>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <div className="p-3 w-[280px]">
             <div className="flex items-center justify-between mb-3">
-              <Button
+              <Baton
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
                 onClick={() => setViewYear((y) => y - 1)}
               >
                 <ChevronLeft className="h-4 w-4" />
-              </Button>
+              </Baton>
               <span className="text-sm font-medium select-none">{viewYear}</span>
-              <Button
+              <Baton
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
                 onClick={() => setViewYear((y) => y + 1)}
               >
                 <ChevronRight className="h-4 w-4" />
-              </Button>
+              </Baton>
             </div>
             <div className="grid grid-cols-4 gap-1">
               {MONTHS.map((month, i) => (
-                <Button
+                <Baton
                   key={month}
                   variant="ghost"
                   size="sm"
@@ -129,7 +129,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
                   onClick={() => handleMonthSelect(i)}
                 >
                   {month}
-                </Button>
+                </Baton>
               ))}
             </div>
           </div>

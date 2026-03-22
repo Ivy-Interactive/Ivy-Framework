@@ -15,7 +15,7 @@ public class LoginForm(IState<LoginData> login) : SampleBase
             username.ToTextInput(),
             password.ToTextInput().Variant(TextInputVariant.Password),
             rememberMe.ToBoolInput().Label("Remember me"),
-            new Button("Login", _ =>
+            new Baton("Login", _ =>
             {
                 login.Set(login.Value with { Username = username.Value, Password = password.Value, DidLogin = true, RememberMe = rememberMe.Value });
             })

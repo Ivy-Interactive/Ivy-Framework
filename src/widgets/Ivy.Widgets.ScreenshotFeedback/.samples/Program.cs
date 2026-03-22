@@ -17,7 +17,7 @@ class ScreenshotFeedbackApp : ViewBase
         return Layout.Vertical().Gap(4)
                | Text.H1("Screenshot Feedback Demo")
                | Text.P("Click the button below to capture a screenshot, annotate it, and upload.")
-               | new Button("Take Screenshot", () => isOpen.Set(true), icon: Icons.Camera)
+               | new Baton("Take Screenshot", () => isOpen.Set(true), icon: Icons.Camera)
                | new ScreenshotFeedback()
                    .UploadUrl(uploadCtx.Value.UploadUrl)
                    .Open(isOpen.Value)

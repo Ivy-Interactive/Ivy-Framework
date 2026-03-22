@@ -3,7 +3,7 @@ import { MenuItem } from "@/types/widgets";
 import { ActionRenderer } from "./actionRenderer";
 import { getActionId } from "./utils";
 
-interface RowActionButtonsProps {
+interface RowActionBatonsProps {
   /**
    * Array of action configurations
    */
@@ -33,7 +33,7 @@ interface RowActionButtonsProps {
 /**
  * Row action buttons that appear on hover at the right edge of the data table
  */
-export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
+export const RowActionBatons: React.FC<RowActionBatonsProps> = ({
   actions,
   top,
   visible,

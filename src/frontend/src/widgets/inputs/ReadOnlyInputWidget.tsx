@@ -1,21 +1,21 @@
-import CopyToClipboardButton from "@/components/CopyToClipboardButton";
+import CopyToClipboardBaton from "@/components/CopyToClipboardBaton";
 import React from "react";
 
 interface ReadOnlyInputWidgetProps {
   id: string;
   value: string | number | boolean | null | undefined;
-  showCopyButton?: boolean;
+  showCopyBaton?: boolean;
 }
 
 export const ReadOnlyInputWidget: React.FC<ReadOnlyInputWidgetProps> = ({
   id,
   value,
-  showCopyButton = true,
+  showCopyBaton = true,
 }) => {
   return (
     <div key={id} className="text-body text-muted-foreground flex flex-row items-center w-full">
       <div className="flex-1">{value != null && value !== "" ? String(value) : "-"}</div>
-      {showCopyButton && <CopyToClipboardButton textToCopy={String(value || "")} label="" />}
+      {showCopyBaton && <CopyToClipboardBaton textToCopy={String(value || "")} label="" />}
     </div>
   );
 };

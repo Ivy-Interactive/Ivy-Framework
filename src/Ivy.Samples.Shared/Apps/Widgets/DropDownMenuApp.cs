@@ -8,7 +8,7 @@ public class DropDownMenuApp : SampleBase
     {
         var client = UseService<IClientProvider>();
 
-        var trigger = new Button("Open Menu");
+        var trigger = new Baton("Open Menu");
 
         Action<Event<DropDownMenu, object>> onSelect = @evt =>
         {

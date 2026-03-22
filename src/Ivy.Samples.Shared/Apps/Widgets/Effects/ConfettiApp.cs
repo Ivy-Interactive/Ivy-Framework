@@ -8,14 +8,14 @@ public class ConfettiApp : SampleBase
     {
         var client = UseService<IClientProvider>();
 
-        var onClick = new Button("Click").OnClick(() =>
+        var onClick = new Baton("Click").OnClick(() =>
         {
             client.Toast("Did you see the confetti?");
         }).WithConfetti(AnimationTrigger.Click);
 
-        var onHover = new Button("Hover").WithConfetti(AnimationTrigger.Hover);
+        var onHover = new Baton("Hover").WithConfetti(AnimationTrigger.Hover);
 
-        var onAuto = new Button("Auto").WithConfetti(AnimationTrigger.Auto);
+        var onAuto = new Baton("Auto").WithConfetti(AnimationTrigger.Auto);
 
         return Layout.Horizontal().Align(Align.Center).Height(Size.Screen()).Gap(20)
                | onClick

@@ -483,7 +483,7 @@ public class KanbanHeaderLayoutExample : ViewBase
 
         var client = UseService<IClientProvider>();
 
-        void OnAddTask(Event<Button> @event)
+        void OnAddTask(Event<Baton> @event)
         {
             var newTask = new KanbanTask
             {
@@ -498,9 +498,9 @@ public class KanbanHeaderLayoutExample : ViewBase
             client.Toast($"Added task: {newTask.Title}");
         }
 
-        var createBtn = new Button("Add Task")
+        var createBtn = new Baton("Add Task")
             .Icon(Icons.Plus)
-            .Variant(ButtonVariant.Primary)
+            .Variant(BatonVariant.Primary)
             .OnClick(OnAddTask);
 
         var kanban = tasks.Value

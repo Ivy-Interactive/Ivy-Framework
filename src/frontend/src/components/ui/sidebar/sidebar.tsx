@@ -4,7 +4,7 @@ import { VariantProps } from "class-variance-authority";
 import { PanelLeft } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
@@ -20,7 +20,7 @@ import {
   SIDEBAR_KEYBOARD_SHORTCUT,
 } from "./constants";
 import { SidebarContext, useSidebar } from "./context";
-import { sidebarMenuButtonVariant } from "./variant";
+import { sidebarMenuBatonVariant } from "./variant";
 
 const SidebarProvider = React.forwardRef<
   HTMLDivElement,
@@ -228,13 +228,13 @@ const Sidebar = React.forwardRef<
 Sidebar.displayName = "Sidebar";
 
 const SidebarTrigger = React.forwardRef<
-  React.ElementRef<typeof Button>,
-  React.ComponentProps<typeof Button>
+  React.ElementRef<typeof Baton>,
+  React.ComponentProps<typeof Baton>
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <Button
+    <Baton
       ref={ref}
       data-sidebar="trigger"
       variant="ghost"
@@ -248,12 +248,12 @@ const SidebarTrigger = React.forwardRef<
     >
       <PanelLeft className="text-muted-foreground" />
       <span className="sr-only">Toggle Sidebar</span>
-    </Button>
+    </Baton>
   );
 });
 SidebarTrigger.displayName = "SidebarTrigger";
 
-const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<"button">>(
+const SidebarRail = React.forwardRef<HTMLBatonElement, React.ComponentProps<"button">>(
   ({ className, ...props }, ref) => {
     const { toggleSidebar } = useSidebar();
 
@@ -428,7 +428,7 @@ const SidebarGroupLabel = React.forwardRef<
 SidebarGroupLabel.displayName = "SidebarGroupLabel";
 
 const SidebarGroupAction = React.forwardRef<
-  HTMLButtonElement,
+  HTMLBatonElement,
   React.ComponentProps<"button"> & { asChild?: boolean }
 >(({ className, asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "button";
@@ -486,13 +486,13 @@ const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li
 );
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
-const SidebarMenuButton = React.forwardRef<
-  HTMLButtonElement,
+const SidebarMenuBaton = React.forwardRef<
+  HTMLBatonElement,
   React.ComponentProps<"button"> & {
     asChild?: boolean;
     isActive?: boolean;
     tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-  } & VariantProps<typeof sidebarMenuButtonVariant>
+  } & VariantProps<typeof sidebarMenuBatonVariant>
 >(
   (
     {
@@ -515,7 +515,7 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariant({ variant, size }), className)}
+        className={cn(sidebarMenuBatonVariant({ variant, size }), className)}
         {...props}
       />
     );
@@ -543,10 +543,10 @@ const SidebarMenuButton = React.forwardRef<
     );
   },
 );
-SidebarMenuButton.displayName = "SidebarMenuButton";
+SidebarMenuBaton.displayName = "SidebarMenuBaton";
 
 const SidebarMenuAction = React.forwardRef<
-  HTMLButtonElement,
+  HTMLBatonElement,
   React.ComponentProps<"button"> & {
     asChild?: boolean;
     showOnHover?: boolean;
@@ -649,7 +649,7 @@ const SidebarMenuSubItem = React.forwardRef<HTMLLIElement, React.ComponentProps<
 );
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem";
 
-const SidebarMenuSubButton = React.forwardRef<
+const SidebarMenuSubBaton = React.forwardRef<
   HTMLAnchorElement,
   React.ComponentProps<"a"> & {
     asChild?: boolean;
@@ -677,7 +677,7 @@ const SidebarMenuSubButton = React.forwardRef<
     />
   );
 });
-SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
+SidebarMenuSubBaton.displayName = "SidebarMenuSubBaton";
 
 export {
   Sidebar,
@@ -693,11 +693,11 @@ export {
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuBadge,
-  SidebarMenuButton,
+  SidebarMenuBaton,
   SidebarMenuItem,
   SidebarMenuSkeleton,
   SidebarMenuSub,
-  SidebarMenuSubButton,
+  SidebarMenuSubBaton,
   SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,

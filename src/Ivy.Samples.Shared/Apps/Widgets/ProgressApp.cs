@@ -19,10 +19,10 @@ public class ProgressApp : SampleBase
             | Text.H2("Basic Progress")
             | new Progress(progress1.Value)
             | Layout.Horizontal(
-                new Button("-10", _ => progress1.Set(Math.Max(0, (progress1.Value ?? 0) - 10))),
-                new Button("-1", _ => progress1.Set(Math.Max(0, (progress1.Value ?? 0) - 1))),
-                new Button("+1", _ => progress1.Set(Math.Min(100, (progress1.Value ?? 0) + 1))),
-                new Button("+10", _ => progress1.Set(Math.Min(100, (progress1.Value ?? 0) + 10)))
+                new Baton("-10", _ => progress1.Set(Math.Max(0, (progress1.Value ?? 0) - 10))),
+                new Baton("-1", _ => progress1.Set(Math.Max(0, (progress1.Value ?? 0) - 1))),
+                new Baton("+1", _ => progress1.Set(Math.Min(100, (progress1.Value ?? 0) + 1))),
+                new Baton("+10", _ => progress1.Set(Math.Min(100, (progress1.Value ?? 0) + 10)))
             )
 
             | Text.H2("Colors")
@@ -64,8 +64,8 @@ public class ProgressApp : SampleBase
                 .Indeterminate(isLoading.Value)
                 .Goal(isLoading.Value ? "Waiting for server..." : $"{progress.Value}% Complete")
             | Layout.Horizontal(
-                new Button(isLoading.Value ? "Stop Loading" : "Start Loading", _ => isLoading.Set(!isLoading.Value)),
-                new Button("+10%", _ => progress.Set(Math.Min(100, progress.Value + 10)))
+                new Baton(isLoading.Value ? "Stop Loading" : "Start Loading", _ => isLoading.Set(!isLoading.Value)),
+                new Baton("+10%", _ => progress.Set(Math.Min(100, progress.Value + 10)))
             )
         ;
     }

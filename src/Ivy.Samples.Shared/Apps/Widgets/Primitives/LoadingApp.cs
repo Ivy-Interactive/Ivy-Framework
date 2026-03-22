@@ -18,7 +18,7 @@ public class LoadingApp : SampleBase
         // }, [isLoading]);
         //
         // return new Fragment()
-        //        | Layout.Vertical() | new Button("Show Loading", () => isLoading.Set(true))
+        //        | Layout.Vertical() | new Baton("Show Loading", () => isLoading.Set(true))
         //        | isLoading.True(() => new Loading())!;
     }
 }

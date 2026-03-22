@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useCallback, useMemo } from "react";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
@@ -72,7 +72,7 @@ export const YearVariant: React.FC<YearVariantProps> = ({
     <div className="relative w-full select-none">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
+          <Baton
             disabled={disabled}
             variant="outline"
             data-slot="calendar"
@@ -96,36 +96,36 @@ export const YearVariant: React.FC<YearVariantProps> = ({
             >
               {date ? format(date, formatProp || "yyyy") : placeholder || "Pick a year"}
             </span>
-          </Button>
+          </Baton>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <div className="p-3 w-[280px]">
             <div className="flex items-center justify-between mb-3">
-              <Button
+              <Baton
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
                 onClick={() => setDecadeStart((d) => d - 10)}
               >
                 <ChevronLeft className="h-4 w-4" />
-              </Button>
+              </Baton>
               <span className="text-sm font-medium select-none">
                 {decadeStart} – {decadeStart + 9}
               </span>
-              <Button
+              <Baton
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
                 onClick={() => setDecadeStart((d) => d + 10)}
               >
                 <ChevronRight className="h-4 w-4" />
-              </Button>
+              </Baton>
             </div>
             <div className="grid grid-cols-4 gap-1">
               {years.map((year) => {
                 const isOutside = year < decadeStart || year > decadeStart + 9;
                 return (
-                  <Button
+                  <Baton
                     key={year}
                     variant="ghost"
                     size="sm"
@@ -141,7 +141,7 @@ export const YearVariant: React.FC<YearVariantProps> = ({
                     onClick={() => handleYearSelect(year)}
                   >
                     {year}
-                  </Button>
+                  </Baton>
                 );
               })}
             </div>

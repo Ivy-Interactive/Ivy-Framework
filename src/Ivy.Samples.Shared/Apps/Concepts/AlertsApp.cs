@@ -11,10 +11,10 @@ public class AlertsApp : SampleBase
         var client = UseService<IClientProvider>();
 
         return Layout.Vertical(
-            new Button("YesNoCancel", _ => showAlert("Hello, World!", result =>
+            new Baton("YesNoCancel", _ => showAlert("Hello, World!", result =>
             {
                 client.Toast(result.ToString());
-            }, "Alert Title", AlertButtonSet.YesNoCancel)),
+            }, "Alert Title", AlertBatonSet.YesNoCancel)),
             alertView
         );
     }

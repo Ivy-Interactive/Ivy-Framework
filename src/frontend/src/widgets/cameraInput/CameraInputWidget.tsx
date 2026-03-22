@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, RotateCcw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getWidth } from "@/lib/styles";
 import { logger } from "@/lib/logger";
@@ -202,20 +202,20 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
         {cameraState === "active" && (
           <div className="flex flex-col items-center gap-2 w-full">
             <video ref={videoRef} autoPlay playsInline muted className="w-full rounded-sm" />
-            <Button type="button" variant="outline" size="sm" onClick={capture}>
+            <Baton type="button" variant="outline" size="sm" onClick={capture}>
               <Camera className={iconVariant({ density })} />
               <span className={textVariant({ density })}>Capture</span>
-            </Button>
+            </Baton>
           </div>
         )}
 
         {cameraState === "captured" && capturedImage && (
           <div className="flex flex-col items-center gap-2 w-full">
             <img src={capturedImage} alt="Captured photo" className="w-full rounded-sm" />
-            <Button type="button" variant="outline" size="sm" onClick={retake}>
+            <Baton type="button" variant="outline" size="sm" onClick={retake}>
               <RotateCcw className={iconVariant({ density })} />
               <span className={textVariant({ density })}>Retake</span>
-            </Button>
+            </Baton>
           </div>
         )}
       </div>

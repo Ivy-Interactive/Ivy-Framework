@@ -13,7 +13,7 @@ interface TabContentRendererProps {
   tabOrder: string[];
   isUserInitiatedChangeRef: React.MutableRefObject<boolean>;
   safeEvent: (
-    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddBatonClick",
     args: unknown[],
   ) => void;
 }

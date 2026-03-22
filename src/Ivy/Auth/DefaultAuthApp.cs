@@ -125,7 +125,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
         return Layout.Vertical().Gap(12)
                | formView
-               | new Button("Login")
+               | new Baton("Login")
                    .OnClick(HandleSubmit)
                    .Loading(isBusy)
                    .Disabled(isBusy)
@@ -149,7 +149,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
         {
             Query = $"optionId={Uri.EscapeDataString(option.Id ?? "")}&callbackId={Uri.EscapeDataString(state.Value)}&connectionId={Uri.EscapeDataString(args.ConnectionId)}"
         };
-        return new Button(option.Name)
+        return new Baton(option.Name)
             .Secondary()
             .Icon(option.Icon)
             .Width(Size.Full())

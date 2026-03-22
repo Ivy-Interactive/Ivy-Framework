@@ -11,8 +11,8 @@ public class MemoizationApp : SampleBase
 
         return Layout.Vertical(
             Layout.Horizontal(
-                new Button("Add", _ => list.Set(list.Value.Add(list.Value.Length + 1))),
-                new Button("Remove", _ => list.Set(list.Value.RemoveAt(list.Value.Length - 1)))
+                new Baton("Add", _ => list.Set(list.Value.Add(list.Value.Length + 1))),
+                new Baton("Remove", _ => list.Set(list.Value.RemoveAt(list.Value.Length - 1)))
             ),
             new Separator(),
             Layout.Vertical(
@@ -44,14 +44,14 @@ public class ListItem(int value, int index, Action moveUp, Action moveDown) : Vi
         return
             Layout.Vertical(
                 Layout.Horizontal(
-                    new Button("", _ =>
+                    new Baton("", _ =>
                     {
                         moveUp();
-                    }, icon: Icons.ArrowBigUp, variant: ButtonVariant.Secondary),
-                    new Button("", _ =>
+                    }, icon: Icons.ArrowBigUp, variant: BatonVariant.Secondary),
+                    new Baton("", _ =>
                     {
                         moveDown();
-                    }, icon: Icons.ArrowBigDown, variant: ButtonVariant.Secondary),
+                    }, icon: Icons.ArrowBigDown, variant: BatonVariant.Secondary),
                     Text.Block(this.Value + ":" + DateTime.Now.Ticks)
                 ).Align(Align.Center),
                 new Separator()

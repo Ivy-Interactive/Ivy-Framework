@@ -46,7 +46,7 @@ public record CodeBlock : WidgetBase<CodeBlock>
 
     [Prop] public int StartingLineNumber { get; set; } = 1;
 
-    [Prop] public bool ShowCopyButton { get; set; } = true;
+    [Prop] public bool ShowCopyBaton { get; set; } = true;
 
     [Prop] public bool ShowBorder { get; set; } = true;
 
@@ -76,9 +76,9 @@ public static class CodeBlockExtensions
         return code with { StartingLineNumber = startingLineNumber };
     }
 
-    public static CodeBlock ShowCopyButton(this CodeBlock code, bool showCopyButton = true)
+    public static CodeBlock ShowCopyBaton(this CodeBlock code, bool showCopyBaton = true)
     {
-        return code with { ShowCopyButton = showCopyButton };
+        return code with { ShowCopyBaton = showCopyBaton };
     }
 
     public static CodeBlock ShowBorder(this CodeBlock code, bool showBorder = true)

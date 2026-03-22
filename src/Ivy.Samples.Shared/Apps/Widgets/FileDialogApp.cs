@@ -43,7 +43,7 @@ public class DropdownMenuDemo : ViewBase
                 .Height(Size.Units(80));
         }
 
-        var trigger = new Button("Actions", icon: Icons.Image, variant: ButtonVariant.Outline);
+        var trigger = new Baton("Actions", icon: Icons.Image, variant: BatonVariant.Outline);
 
         var menu = new DropDownMenu(DropDownMenu.DefaultSelectHandler(), trigger)
                    | MenuItem.Default("Select File…", tag: "select-file")
@@ -51,7 +51,7 @@ public class DropdownMenuDemo : ViewBase
                        .OnSelect(() => showFileDialog(_ => { }));
 
         return Layout.Vertical()
-               | Text.H2("Icon Button with Dropdown Menu")
+               | Text.H2("Icon Baton with Dropdown Menu")
                | Text.P("Click the button, then choose 'Select File…' to open the native file dialog.")
                | fileDialogView
                | menu
@@ -83,7 +83,7 @@ public class UploadModeDemo : ViewBase
                | Text.H2("Upload Mode")
                | Text.P("Opens a native file dialog, uploads the file, and displays the image.")
                | fileDialogView
-               | new Button("Pick Image", _ => showFileDialog(files =>
+               | new Baton("Pick Image", _ => showFileDialog(files =>
                {
                    // Upload is handled by the handler; callback receives metadata
                }), icon: Icons.Image)
@@ -103,7 +103,7 @@ public class PathOnlyModeDemo : ViewBase
                | Text.H2("PathOnly Mode")
                | Text.P("Opens the native file dialog and returns file metadata without uploading.")
                | fileDialogView
-               | new Button("Select File", _ => showFileDialog(files =>
+               | new Baton("Select File", _ => showFileDialog(files =>
                {
                    var file = files.FirstOrDefault();
                    if (file != null)
@@ -127,7 +127,7 @@ public class MultipleFilesDemo : ViewBase
                | Text.H2("Multiple File Selection")
                | Text.P("Select multiple files at once. Restricted to .pdf, .docx, .txt files.")
                | fileDialogView
-               | new Button("Select Files", _ => showFileDialog(files =>
+               | new Baton("Select Files", _ => showFileDialog(files =>
                {
                    fileNames.Set(files.Select(f => $"{f.FileName} ({f.Size} bytes)").ToArray());
                }))
@@ -152,7 +152,7 @@ public class SaveDialogDemo : ViewBase
                | Text.H2("Save Dialog")
                | Text.P("Opens the native save dialog to save generated content to a file.")
                | saveDialogView
-               | new Button("Save File", _ => showSaveDialog(result =>
+               | new Baton("Save File", _ => showSaveDialog(result =>
                {
                    saveResult.Set(result.Success ? $"Saved as {result.FileName}" : "Save cancelled");
                }), icon: Icons.Download)
@@ -172,7 +172,7 @@ public class FolderPickerDemo : ViewBase
                | Text.H2("Folder Picker")
                | Text.P("Opens the native folder picker and lists the entries found in the selected folder.")
                | folderDialogView
-               | new Button("Browse Folder", _ => showFolderDialog(selected =>
+               | new Baton("Browse Folder", _ => showFolderDialog(selected =>
                {
                    entries.Set(selected);
                }), icon: Icons.Folder)

@@ -70,13 +70,13 @@ public static class TypeUtils
         if (_apps.TryGetValue(type, out var app))
         {
             var name = type.FullName.EatLeft("Ivy.").EatLeft("Shared.");
-            return new Button(name + (isNullable ? "?" : "")).Inline()
+            return new Baton(name + (isNullable ? "?" : "")).Inline()
                 .WithSheet(() => app, width: Size.Units(150));
         }
 
         if (type.IsEnum)
         {
-            return new Button(type.Name + (isNullable ? "?" : "")).Inline()
+            return new Baton(type.Name + (isNullable ? "?" : "")).Inline()
                 .WithSheet(() => new EnumValuesView(type), width: Size.Units(150));
         }
 
@@ -176,7 +176,7 @@ public static class TypeUtils
                 var defaultValue = prop.GetValue(defaultValueProvider);
                 var literal = CSharpLiteralGenerator.ToCSharpLiteral(defaultValue);
                 literal = literal?.EatLeft("Ivy.").EatLeft("Shared.");
-                return literal != null ? new CodeBlock(literal, Languages.Csharp).ShowCopyButton(false).ShowBorder(false) : defaultValue.ToString();
+                return literal != null ? new CodeBlock(literal, Languages.Csharp).ShowCopyBaton(false).ShowBorder(false) : defaultValue.ToString();
             }
             catch (Exception)
             {
@@ -191,7 +191,7 @@ public static class TypeUtils
             var extensions = TypeUtils.GetExtensionMethods(prop, baseType, extensionsTypes);
             if (!string.IsNullOrEmpty(extensions))
             {
-                return new CodeBlock(extensions, Languages.Csharp).ShowCopyButton(false).ShowBorder(false);
+                return new CodeBlock(extensions, Languages.Csharp).ShowCopyBaton(false).ShowBorder(false);
             }
             return null;
         }
@@ -208,7 +208,7 @@ public static class TypeUtils
             var extensions = TypeUtils.GetExtensionMethods(prop, baseType, extensionsTypes);
             if (!string.IsNullOrEmpty(extensions))
             {
-                return new CodeBlock(extensions, Languages.Csharp).ShowCopyButton(false).ShowBorder(false);
+                return new CodeBlock(extensions, Languages.Csharp).ShowCopyBaton(false).ShowBorder(false);
             }
             return null;
         }
@@ -272,12 +272,12 @@ public static class TypeUtils
 
     public static SignatureRecord GetSignatureRecord(ConstructorInfo constructor)
     {
-        return new SignatureRecord(new CodeBlock(GetCSharpSignature(constructor)).ShowCopyButton(false).ShowBorder(false));
+        return new SignatureRecord(new CodeBlock(GetCSharpSignature(constructor)).ShowCopyBaton(false).ShowBorder(false));
     }
 
     public static SignatureRecord GetSignatureRecord(MethodInfo constructor)
     {
-        return new SignatureRecord(new CodeBlock(GetCSharpSignature(constructor)).ShowCopyButton(false).ShowBorder(false));
+        return new SignatureRecord(new CodeBlock(GetCSharpSignature(constructor)).ShowCopyBaton(false).ShowBorder(false));
     }
 
     private static string GetCSharpSignature(ConstructorInfo constructor)

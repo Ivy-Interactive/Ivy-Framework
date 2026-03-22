@@ -37,8 +37,8 @@ public class UsernamePrompt(Action<string> onUsernameSet) : ViewBase
                   | Text.Muted("Enter your username to join the conversation.")
                   | inputValue.ToTextInput()
                         .Placeholder("Username")
-                  | new Button("Join Chat", _ => HandleSubmit())
-                        .Variant(ButtonVariant.Primary)
+                  | new Baton("Join Chat", _ => HandleSubmit())
+                        .Variant(BatonVariant.Primary)
                         .Icon(Icons.LogIn)
                         .Disabled(string.IsNullOrWhiteSpace(inputValue.Value)));
     }

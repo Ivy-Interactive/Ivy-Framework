@@ -48,11 +48,11 @@ public class CalloutClosableExample : ViewBase
                 ? null
                 : Layout.Vertical().Gap(4)
                     | Text.P("All banners dismissed.").Muted()
-                    | new Button("Show callouts again", () =>
+                    | new Baton("Show callouts again", () =>
                         {
                             showUpdateBanner.Set(true);
                             showTrialBanner.Set(true);
                         })
-                        .Variant(ButtonVariant.Secondary));
+                        .Variant(BatonVariant.Secondary));
     }
 }

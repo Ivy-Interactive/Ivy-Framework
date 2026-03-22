@@ -17,20 +17,20 @@ public class HeaderLayoutView : ViewBase
         var searchText = UseState("");
         var client = UseService<IClientProvider>();
 
-        void OnAddItem(Event<Button> @event)
+        void OnAddItem(Event<Baton> @event)
         {
             counter.Set(counter.Value + 1);
             client.Toast($"Added item {counter.Value + 1}");
         }
 
-        void OnClearItems(Event<Button> @event)
+        void OnClearItems(Event<Baton> @event)
         {
             counter.Set(0);
             searchText.Set("");
             client.Toast("Cleared all items");
         }
 
-        void OnExport(Event<Button> @event)
+        void OnExport(Event<Baton> @event)
         {
             client.Toast("Exporting data...");
         }
@@ -41,17 +41,17 @@ public class HeaderLayoutView : ViewBase
                 | searchText.ToTextInput()
                     .Placeholder("Search items...")
                     .Variant(TextInputVariant.Search)
-                | new Button("Add Item")
+                | new Baton("Add Item")
                     .Icon(Icons.Plus)
-                    .Variant(ButtonVariant.Primary)
+                    .Variant(BatonVariant.Primary)
                     .OnClick(OnAddItem)
-                | new Button("Clear All")
+                | new Baton("Clear All")
                     .Icon(Icons.Trash)
-                    .Variant(ButtonVariant.Outline)
+                    .Variant(BatonVariant.Outline)
                     .OnClick(OnClearItems)
-                | new Button("Export")
+                | new Baton("Export")
                     .Icon(Icons.Download)
-                    .Variant(ButtonVariant.Ghost)
+                    .Variant(BatonVariant.Ghost)
                     .OnClick(OnExport)
         );
 
@@ -85,7 +85,7 @@ public class HeaderLayoutView : ViewBase
                 .Description("Notice how the toolbar stays at the top while this content scrolls. This is perfect for data tables, lists, and dashboards."),
 
             new Card("Interactive Actions")
-                .Title("Test the Buttons")
+                .Title("Test the Batons")
                 .Description("Try clicking 'Add Item' to see more content appear, or 'Clear All' to reset everything."),
 
             new Card("Real-world Usage")

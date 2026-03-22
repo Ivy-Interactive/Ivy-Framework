@@ -13,7 +13,7 @@ interface ContentVariantProps {
   padding?: string;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   tabsListRef: React.MutableRefObject<HTMLDivElement | null>;
-  tabRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>;
+  tabRefs: React.MutableRefObject<(HTMLBatonElement | null)[]>;
   activeIndex: number;
   isInitialRender: boolean;
   activeStyle: React.CSSProperties;
@@ -22,13 +22,13 @@ interface ContentVariantProps {
   orderedTabWidgets: React.ReactElement[];
   tabOrder: string[];
   loadedTabs: Set<string>;
-  addButtonText?: string;
+  addBatonText?: string;
   isUserInitiatedChangeRef: React.MutableRefObject<boolean>;
   addToLoadedTabs: (tabId: string) => void;
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   setActiveTabId: React.Dispatch<React.SetStateAction<string | null>>;
   safeEvent: (
-    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddBatonClick",
     args: unknown[],
   ) => void;
   dropdownMenu: React.ReactNode;
@@ -42,7 +42,7 @@ interface TabsVariantProps {
   activeTabId: string | null;
   tabOrder: string[];
   events: string[];
-  addButtonText?: string;
+  addBatonText?: string;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   tabsListRef: React.MutableRefObject<HTMLDivElement | null>;
   visibleTabs: string[];
@@ -60,7 +60,7 @@ interface TabsVariantProps {
   isUserInitiatedChangeRef: React.MutableRefObject<boolean>;
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   safeEvent: (
-    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddBatonClick",
     args: unknown[],
   ) => void;
   renderTabContent: (tabWidget: React.ReactElement) => React.ReactNode;
@@ -86,7 +86,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
   orderedTabWidgets,
   tabOrder,
   loadedTabs,
-  addButtonText,
+  addBatonText,
   isUserInitiatedChangeRef,
   addToLoadedTabs,
   setActiveIndex,
@@ -161,13 +161,13 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
               </button>
             );
           })}
-          {addButtonText && (
+          {addBatonText && (
             <button
-              onClick={() => safeEvent("OnAddButtonClick", [0])}
+              onClick={() => safeEvent("OnAddBatonClick", [0])}
               className="px-3 py-1.5 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:muted-foreground rounded-[6px] flex items-center justify-center aspect-square border-none ml-2"
             >
               <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
-                {addButtonText}
+                {addBatonText}
               </div>
             </button>
           )}
@@ -217,7 +217,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
   activeTabId,
   tabOrder,
   events,
-  addButtonText,
+  addBatonText,
   containerRef,
   tabsListRef,
   visibleTabs,
@@ -308,13 +308,13 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                     </SortableTabTrigger>
                   );
                 })}
-                {addButtonText && (
+                {addBatonText && (
                   <button
-                    onClick={() => safeEvent("OnAddButtonClick", [0])}
+                    onClick={() => safeEvent("OnAddBatonClick", [0])}
                     className="py-2 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:bg-gray-200/20 rounded-[6px] flex-shrink-0 flex items-center justify-center aspect-square px-3 border-none ml-2"
                   >
                     <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
-                      {addButtonText}
+                      {addBatonText}
                     </div>
                   </button>
                 )}

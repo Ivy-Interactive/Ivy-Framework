@@ -24,7 +24,7 @@ public class TestView : ViewBase
         var reference = UseRef<string>();
         var context = UseContext<MyContext>();
         var callback = UseCallback(() => { });
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -39,7 +39,7 @@ public abstract class ViewBase
     protected Action UseCallback(Action callback) => default!;
 }
 
-public class Button { }
+public class Baton { }
 public class MyContext { }
 public class Ref<T> { }
 ";
@@ -57,11 +57,11 @@ public class TestView : ViewBase
 {
     public override object? Build()
     {
-        var handler = (Event<Button> e) =>
+        var handler = (Event<Baton> e) =>
         {
             var s = {|IVYHOOK001B:UseState(false)|};
         };
-        return new Button().OnClick(handler);
+        return new Baton().OnClick(handler);
     }
 }
 
@@ -71,9 +71,9 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button 
+public class Baton 
 {
-    public Button OnClick(Action<Event<Button>> handler) => this;
+    public Baton OnClick(Action<Event<Baton>> handler) => this;
 }
 public class Event<T> { }
 ";
@@ -97,7 +97,7 @@ public class TestView : ViewBase
         }
         
         LocalFunction();
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -107,7 +107,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -124,7 +124,7 @@ public class TestView : ViewBase
     public override object? Build()
     {
         Initialize();
-        return new Button();
+        return new Baton();
     }
     
     private void Initialize()
@@ -139,7 +139,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -160,7 +160,7 @@ public class TestView : ViewBase
             var s = {|IVYHOOK001B:UseState(false)|};
         };
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -170,7 +170,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -213,7 +213,7 @@ public class TestView : ViewBase
             var state3 = {|IVYHOOK002:UseState(true)|};
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -223,7 +223,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -242,7 +242,7 @@ public class TestView : ViewBase
         var condition = true;
         var result = condition ? {|IVYHOOK002:UseState(0)|} : {|IVYHOOK002:UseState(1)|};
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -252,7 +252,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -273,7 +273,7 @@ public class TestView : ViewBase
             var state = {|IVYHOOK003:UseState(i)|};
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -283,7 +283,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -307,7 +307,7 @@ public class TestView : ViewBase
             var state = {|IVYHOOK003:UseState(item)|};
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -317,7 +317,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -341,7 +341,7 @@ public class TestView : ViewBase
             condition = false;
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -351,7 +351,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -375,7 +375,7 @@ public class TestView : ViewBase
             condition = false;
         } while (condition);
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -385,7 +385,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -410,7 +410,7 @@ public class TestView : ViewBase
                 break;
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -420,7 +420,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -440,7 +440,7 @@ public class TestView : ViewBase
         var state2 = UseState(""hello"");
         var state3 = UseState(true);
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -450,7 +450,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -468,7 +468,7 @@ public class TestView : ViewBase
     {
         var state = this.UseState(false);
         base.UseEffect(() => { });
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -479,7 +479,7 @@ public abstract class ViewBase
     protected void UseEffect(Action effect) { }
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -506,7 +506,7 @@ public class TestView : ViewBase
         var trigger = UseTrigger<int>((open, value) => null);
         var service = UseService<MyService>();
         var args = UseArgs<MyArgs>();
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -524,7 +524,7 @@ public abstract class ViewBase
     protected T? UseArgs<T>() where T : class => default!;
 }
 
-public class Button { }
+public class Baton { }
 public class MySignal { }
 public class MyService { }
 public class MyArgs { }
@@ -548,7 +548,7 @@ public class TestView : ViewBase
         var state1 = UseState(() => new ExpensiveObject());
         var state2 = UseState(() => 42);
         var memo = UseMemo(() => ComputeValue());
-        return new Button();
+        return new Baton();
     }
 
     private int ComputeValue() => 42;
@@ -561,7 +561,7 @@ public abstract class ViewBase
     protected T UseMemo<T>(Func<T> factory) => default!;
 }
 
-public class Button { }
+public class Baton { }
 public class ExpensiveObject { }
 ";
 
@@ -588,7 +588,7 @@ public class TestView : ViewBase
             var value = state1;
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -598,7 +598,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -624,7 +624,7 @@ public class TestView : ViewBase
             var value = item;
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -634,7 +634,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -655,7 +655,7 @@ public class TestView : ViewBase
         UseEffect(() => { });
         var value = state1.Value;
         var count = state2.Value + 5;
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -667,7 +667,7 @@ public abstract class ViewBase
 }
 
 public interface IState<T> { T Value { get; } }
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -694,7 +694,7 @@ public class TestView : ViewBase
             var state2 = {|IVYHOOK002:UseState(1)|};
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -704,7 +704,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -729,7 +729,7 @@ public class TestView : ViewBase
             var state2 = {|IVYHOOK002:UseState(1)|};
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -739,7 +739,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -763,7 +763,7 @@ public class TestView : ViewBase
             }
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -773,7 +773,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -797,7 +797,7 @@ public class TestView : ViewBase
             }
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -807,7 +807,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -838,7 +838,7 @@ public class TestView : ViewBase
                 break;
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -848,7 +848,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -881,7 +881,7 @@ public class TestView : ViewBase
                 break;
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -891,7 +891,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -916,7 +916,7 @@ public class TestView : ViewBase
             var state2 = {|IVYHOOK002:UseState(1)|};
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -926,7 +926,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -947,7 +947,7 @@ public class TestView : ViewBase
             var state = {|IVYHOOK002:UseState(0)|};
         }
         
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -957,7 +957,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 public class MyDisposable : IDisposable
 {
     public void Dispose() { }
@@ -985,7 +985,7 @@ public class TestView : ViewBase
             };
         }
 
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -995,7 +995,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1013,7 +1013,7 @@ public class TestView : ViewBase
     {
         var x = SomeMethod();
         var state = {|IVYHOOK005:UseState(0)|};
-        return new Button();
+        return new Baton();
     }
 
     private int SomeMethod() => 42;
@@ -1025,7 +1025,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1043,10 +1043,10 @@ public class TestView : ViewBase
     {
         if (true)
         {
-            return new Button();
+            return new Baton();
         }
         var state = {|IVYHOOK005:UseState(0)|};
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -1056,7 +1056,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1078,7 +1078,7 @@ public class TestView : ViewBase
         var memo = UseMemo(() => 42);
         
         var x = SomeMethod();
-        return new Button();
+        return new Baton();
     }
 
     private int SomeMethod() => 42;
@@ -1092,7 +1092,7 @@ public abstract class ViewBase
     protected T UseMemo<T>(Func<T> factory) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1111,7 +1111,7 @@ public class TestView : ViewBase
     public override object? Build()
     {
         _count = {|IVYHOOK006:UseState(0)|};
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -1121,7 +1121,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1140,7 +1140,7 @@ public class TestView : ViewBase
     public override object? Build()
     {
         this._count = {|IVYHOOK006:UseState(0)|};
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -1150,7 +1150,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1169,7 +1169,7 @@ public class TestView : ViewBase
     public override object? Build()
     {
         Count = {|IVYHOOK006:UseState(0)|};
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -1179,7 +1179,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1198,7 +1198,7 @@ public class TestView : ViewBase
     public override object? Build()
     {
         _count ??= {|IVYHOOK006:UseState(0)|};
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -1208,7 +1208,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1499,7 +1499,7 @@ public class TestView : ViewBase
     public override object? Build()
     {
         var local = UseState(0);
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -1509,7 +1509,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1526,7 +1526,7 @@ public class TestView : ViewBase
     public override object? Build()
     {
         UseState(0);
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -1536,7 +1536,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1554,7 +1554,7 @@ public class TestView : ViewBase
     {
         int x = 10;
         var state = {|IVYHOOK005:UseState(0)|};
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -1564,7 +1564,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1691,7 +1691,7 @@ public class TestView : ViewBase
     public override object? Build()
     {
         var x = UseState(0);
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -1701,7 +1701,7 @@ public abstract class ViewBase
     protected T UseState<T>(T initialValue) => default!;
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);
@@ -1718,7 +1718,7 @@ public class TestView : ViewBase
     public override object? Build()
     {
         UseEffect(() => { });
-        return new Button();
+        return new Baton();
     }
 }
 
@@ -1728,7 +1728,7 @@ public abstract class ViewBase
     protected void UseEffect(Action effect) { }
 }
 
-public class Button { }
+public class Baton { }
 ";
 
             await VerifyCS.VerifyAnalyzerAsync(test);

@@ -4,15 +4,15 @@ using Xunit;
 namespace Ivy.Test;
 
 /// <summary>
-/// Tests for Button.Url() extension method URL validation.
+/// Tests for Baton.Url() extension method URL validation.
 /// 
-/// This test file verifies that Button.Url() correctly validates URLs
+/// This test file verifies that Baton.Url() correctly validates URLs
 /// using Utils.ValidateLinkUrl, ensuring that:
 /// 1. Safe URLs are validated and set correctly
 /// 2. Dangerous URLs throw ArgumentException
 /// 3. Invalid URLs throw ArgumentException
 /// </summary>
-public class ButtonUrlValidationTests
+public class BatonUrlValidationTests
 {
     #region Happy Path Tests
 
@@ -23,10 +23,10 @@ public class ButtonUrlValidationTests
     [InlineData("/users/profile")]
     [InlineData("app://dashboard")]
     [InlineData("#section1")]
-    public void Button_Url_ValidUrl_SetsUrl(string url)
+    public void Baton_Url_ValidUrl_SetsUrl(string url)
     {
         // Arrange
-        var button = new Button("Click Me");
+        var button = new Baton("Click Me");
 
         // Act
         var result = button.Url(url);
@@ -41,10 +41,10 @@ public class ButtonUrlValidationTests
     [InlineData("/dashboard?tab=settings")]
     [InlineData("https://example.com/page#section")]
     [InlineData("/page#section")]
-    public void Button_Url_ValidUrlWithQueryOrFragment_SetsUrl(string url)
+    public void Baton_Url_ValidUrlWithQueryOrFragment_SetsUrl(string url)
     {
         // Arrange
-        var button = new Button("Click Me");
+        var button = new Baton("Click Me");
 
         // Act
         var result = button.Url(url);
@@ -63,21 +63,21 @@ public class ButtonUrlValidationTests
     }
 
     [Fact]
-    public void Button_Url_CanBeChained()
+    public void Baton_Url_CanBeChained()
     {
         // Arrange
-        var button = new Button("Click Me");
+        var button = new Baton("Click Me");
 
         // Act
         var result = button
             .Url("https://example.com")
-            .Variant(ButtonVariant.Link)
+            .Variant(BatonVariant.Link)
             .Disabled(false);
 
         // Assert
         Assert.NotNull(result);
         Assert.Contains("https://example.com", result.Url);
-        Assert.Equal(ButtonVariant.Link, result.Variant);
+        Assert.Equal(BatonVariant.Link, result.Variant);
         Assert.False(result.Disabled);
     }
 
@@ -90,10 +90,10 @@ public class ButtonUrlValidationTests
     [InlineData("data:text/html,<script>alert(\"xss\")</script>")]
     [InlineData("file:///etc/passwd")]
     [InlineData("vbscript:msgbox(\"xss\")")]
-    public void Button_Url_DangerousUrl_ThrowsArgumentException(string dangerousUrl)
+    public void Baton_Url_DangerousUrl_ThrowsArgumentException(string dangerousUrl)
     {
         // Arrange
-        var button = new Button("Click Me");
+        var button = new Baton("Click Me");
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => button.Url(dangerousUrl));
@@ -108,10 +108,10 @@ public class ButtonUrlValidationTests
     [InlineData("http://")]
     [InlineData("https://")]
     [InlineData("invalid://protocol")]
-    public void Button_Url_InvalidUrl_ThrowsArgumentException(string invalidUrl)
+    public void Baton_Url_InvalidUrl_ThrowsArgumentException(string invalidUrl)
     {
         // Arrange
-        var button = new Button("Click Me");
+        var button = new Baton("Click Me");
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => button.Url(invalidUrl));
@@ -120,10 +120,10 @@ public class ButtonUrlValidationTests
     }
 
     [Fact]
-    public void Button_Url_NullUrl_ThrowsArgumentException()
+    public void Baton_Url_NullUrl_ThrowsArgumentException()
     {
         // Arrange
-        var button = new Button("Click Me");
+        var button = new Baton("Click Me");
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => button.Url(null!));
@@ -132,10 +132,10 @@ public class ButtonUrlValidationTests
     }
 
     [Fact]
-    public void Button_Url_WithLinkVariant_ValidatesUrl()
+    public void Baton_Url_WithLinkVariant_ValidatesUrl()
     {
         // Arrange
-        var button = new Button("Link Button", variant: ButtonVariant.Link);
+        var button = new Baton("Link Baton", variant: BatonVariant.Link);
 
         // Act
         var result = button.Url("https://example.com");
@@ -143,14 +143,14 @@ public class ButtonUrlValidationTests
         // Assert
         Assert.NotNull(result);
         Assert.Contains("https://example.com", result.Url);
-        Assert.Equal(ButtonVariant.Link, result.Variant);
+        Assert.Equal(BatonVariant.Link, result.Variant);
     }
 
     [Fact]
-    public void Button_Url_WithLinkVariant_DangerousUrl_ThrowsException()
+    public void Baton_Url_WithLinkVariant_DangerousUrl_ThrowsException()
     {
         // Arrange
-        var button = new Button("Link Button", variant: ButtonVariant.Link);
+        var button = new Baton("Link Baton", variant: BatonVariant.Link);
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => button.Url("javascript:alert(\"xss\")"));
@@ -162,10 +162,10 @@ public class ButtonUrlValidationTests
     #region Integration Tests
 
     [Fact]
-    public void Button_Url_ValidatesBeforeSetting()
+    public void Baton_Url_ValidatesBeforeSetting()
     {
         // Arrange
-        var button = new Button("Click Me");
+        var button = new Baton("Click Me");
 
         // Act - Valid URL
         var validResult = button.Url("/dashboard");
@@ -178,7 +178,7 @@ public class ButtonUrlValidationTests
     }
 
     [Fact]
-    public void Button_Url_MultipleValidUrls_AllWork()
+    public void Baton_Url_MultipleValidUrls_AllWork()
     {
         // Arrange
         var validUrls = new[]
@@ -191,7 +191,7 @@ public class ButtonUrlValidationTests
 
         foreach (var url in validUrls)
         {
-            var button = new Button("Click Me");
+            var button = new Baton("Click Me");
 
             // Act
             var result = button.Url(url);

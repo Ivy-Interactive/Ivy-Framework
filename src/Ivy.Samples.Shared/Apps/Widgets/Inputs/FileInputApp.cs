@@ -452,7 +452,7 @@ public class DialogFileUploadExample : ViewBase
             return ValueTask.CompletedTask;
         }
 
-        var openButton = new Button("Open Dialog", _ =>
+        var openBaton = new Baton("Open Dialog", _ =>
         {
             dialogFile.Reset();
             isOpen.Value = true;
@@ -469,12 +469,12 @@ public class DialogFileUploadExample : ViewBase
                             .Placeholder("Choose a file to upload")
                 ),
                 new DialogFooter(
-                    new Button("Cancel", _ =>
+                    new Baton("Cancel", _ =>
                     {
                         isOpen.Value = false;
                         dialogFile.Reset();
-                    }, variant: ButtonVariant.Outline),
-                    new Button("Ok", _ =>
+                    }, variant: BatonVariant.Outline),
+                    new Baton("Ok", _ =>
                     {
                         if (dialogFile.Value != null)
                         {
@@ -489,7 +489,7 @@ public class DialogFileUploadExample : ViewBase
 
         return Layout.Vertical()
                | Text.P("Upload files through a dialog interface, allowing users to select files in a modal window.")
-               | openButton
+               | openBaton
                | (selectedFile.Value != null
                     ? selectedFile.ToDetails()
                     : Text.P("No file selected"))

@@ -121,7 +121,7 @@ public class ClickableBadgesExample : ViewBase
                     new DialogHeader("Badge Action"),
                     new DialogBody(Text.P(popupMessage.Value)),
                     new DialogFooter(
-                        new Button("Close", _ => isOpen.Set(false))
+                        new Baton("Close", _ => isOpen.Set(false))
                     )
                 )
                 : null);

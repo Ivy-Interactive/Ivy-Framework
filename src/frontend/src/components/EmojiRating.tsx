@@ -49,7 +49,7 @@ export function EmojiRating({
   const [hover, setHover] = useState(0);
 
   const getHalfValue = useCallback(
-    (rating: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    (rating: number, e: React.MouseEvent<HTMLBatonElement>) => {
       if (!allowHalf) return rating;
       const rect = e.currentTarget.getBoundingClientRect();
       const isLeftHalf = e.clientX - rect.left < rect.width / 2;
@@ -59,7 +59,7 @@ export function EmojiRating({
   );
 
   const handleRating = useCallback(
-    (rating: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    (rating: number, e: React.MouseEvent<HTMLBatonElement>) => {
       if (disabled) return;
       const val = getHalfValue(rating, e);
       onRate?.(value === val ? 0 : val);
@@ -68,7 +68,7 @@ export function EmojiRating({
   );
 
   const handleMouseMove = useCallback(
-    (rating: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    (rating: number, e: React.MouseEvent<HTMLBatonElement>) => {
       if (disabled) return;
       setHover(getHalfValue(rating, e));
     },

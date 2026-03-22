@@ -236,7 +236,7 @@ public class NullableInputsApp : SampleBase
                 | (nullablePassword.Value == null ? Text.Monospaced("null") : Text.Block("***"))
 
                 | Text.Block("Code Input (string?)")
-                | nullableCode.ToCodeInput().Placeholder("Enter code...").Nullable().ShowCopyButton(true)
+                | nullableCode.ToCodeInput().Placeholder("Enter code...").Nullable().ShowCopyBaton(true)
                 | (nullableCode.Value == null ? Text.Monospaced("null") : Text.Block(nullableCode.Value ?? ""))
              )
 

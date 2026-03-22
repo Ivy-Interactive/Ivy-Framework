@@ -1,13 +1,13 @@
 import * as React from "react";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { DayButton, DayPicker, useDayPicker, getDefaultClassNames } from "react-day-picker";
+import { DayBaton, DayPicker, useDayPicker, getDefaultClassNames } from "react-day-picker";
 import { parse } from "date-fns";
 
 import { cn } from "@/lib/utils";
-import { Button, buttonVariant as buttonVariantStyles } from "@/components/ui/button";
+import { Baton, buttonVariant as buttonVariantStyles } from "@/components/ui/button";
 import {
   calendarVariant,
-  calendarButtonVariant,
+  calendarBatonVariant,
   calendarCaptionVariant,
   calendarWeekdayVariant,
   calendarDayVariant,
@@ -25,7 +25,7 @@ export function Calendar({
   density = Densities.Medium,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
-  buttonVariant?: React.ComponentProps<typeof Button>["variant"];
+  buttonVariant?: React.ComponentProps<typeof Baton>["variant"];
   density?: Densities;
 }) {
   const defaultClassNames = getDefaultClassNames();
@@ -54,13 +54,13 @@ export function Calendar({
         ),
         button_previous: cn(
           buttonVariantStyles({ variant: buttonVariant }),
-          calendarButtonVariant({ density }),
+          calendarBatonVariant({ density }),
           "pointer-events-auto",
           defaultClassNames.button_previous,
         ),
         button_next: cn(
           buttonVariantStyles({ variant: buttonVariant }),
-          calendarButtonVariant({ density }),
+          calendarBatonVariant({ density }),
           "pointer-events-auto",
           defaultClassNames.button_next,
         ),
@@ -124,7 +124,7 @@ export function Calendar({
 
           return <ChevronDownIcon className={cn("size-4", className)} {...props} />;
         },
-        DayButton: (props) => <CalendarDayButton {...props} density={density} />,
+        DayBaton: (props) => <CalendarDayBaton {...props} density={density} />,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -209,24 +209,24 @@ function MonthYearInput({ displayMonth, title }: { displayMonth?: Date; title?: 
   );
 }
 
-function CalendarDayButton({
+function CalendarDayBaton({
   className,
   day,
   modifiers,
   density = Densities.Medium,
   ...props
-}: React.ComponentProps<typeof DayButton> & {
+}: React.ComponentProps<typeof DayBaton> & {
   density?: Densities;
 }) {
   const defaultClassNames = getDefaultClassNames();
 
-  const ref = React.useRef<HTMLButtonElement>(null);
+  const ref = React.useRef<HTMLBatonElement>(null);
   React.useEffect(() => {
     if (modifiers.focused) ref.current?.focus();
   }, [modifiers.focused]);
 
   return (
-    <Button
+    <Baton
       ref={ref}
       variant="ghost"
       size="icon"

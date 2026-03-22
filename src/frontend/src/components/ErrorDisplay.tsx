@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button } from "./ui/button";
+import { Baton } from "./ui/button";
 import { ClipboardCopy, Check } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { createPrismTheme } from "@/lib/prismTheme";
@@ -59,14 +59,14 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ title, message, stac
         </div>
       )}
 
-      <Button onClick={copyToClipboard} className="mt-4 flex items-center gap-2" variant="outline">
+      <Baton onClick={copyToClipboard} className="mt-4 flex items-center gap-2" variant="outline">
         {copied ? (
           <Check className="h-4 w-4 text-primary animate-in fade-in duration-500" />
         ) : (
           <ClipboardCopy className="h-4 w-4" />
         )}
         Copy Details
-      </Button>
+      </Baton>
     </div>
   );
 };

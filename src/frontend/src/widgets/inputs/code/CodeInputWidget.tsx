@@ -115,7 +115,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
 
   const hasValue = localValue && localValue.toString().trim() !== "";
   const showClear = nullable && !disabled && hasValue;
-  // Copy button always shows when there's a value (doesn't depend on showCopyButton prop)
+  // Copy button always shows when there's a value (doesn't depend on showCopyBaton prop)
   const showCopy = hasValue;
 
   const styles: React.CSSProperties = {

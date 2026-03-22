@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { Densities } from "@/types/density";
-import CopyToClipboardButton from "@/components/CopyToClipboardButton";
+import CopyToClipboardBaton from "@/components/CopyToClipboardBaton";
 
 interface ThemeColorPickerWidgetProps {
   id: string;
@@ -459,7 +459,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
           {Math.round((displayAlpha / 255) * 100)}%
         </span>
       )}
-      <CopyToClipboardButton textToCopy={localInputValue} className="h-8 w-8 px-0" />
+      <CopyToClipboardBaton textToCopy={localInputValue} className="h-8 w-8 px-0" />
       <div
         className="w-8 h-8 rounded-md border border-input shadow-sm shrink-0"
         style={{

@@ -6,12 +6,12 @@ namespace Ivy;
 
 public static class AlertExtensions
 {
-    public static IView WithConfirm(this Button button, string message, string? title = null, string? confirmLabel = null, bool destructive = false)
+    public static IView WithConfirm(this Baton button, string message, string? title = null, string? confirmLabel = null, bool destructive = false)
     {
         return new WithConfirmView(button, message, title, confirmLabel, destructive);
     }
 
-    public static IView WithPrompt<T>(this Button button, Action<T> handleResult, T? defaultValue = default(T), string? title = null, string? message = null)
+    public static IView WithPrompt<T>(this Baton button, Action<T> handleResult, T? defaultValue = default(T), string? title = null, string? message = null)
     {
         return new WithPromptView<T>(button, handleResult, defaultValue, message, title);
     }
@@ -19,7 +19,7 @@ public static class AlertExtensions
 
 public record PromptValueTypeWrapper<T>([Required] T? Value);
 
-public class WithPromptView<T>(Button button, Action<T> handleResult, T? defaultValue = default(T), string? message = null, string? title = null) : ViewBase
+public class WithPromptView<T>(Baton button, Action<T> handleResult, T? defaultValue = default(T), string? message = null, string? title = null) : ViewBase
 {
     public override object? Build()
     {
@@ -46,13 +46,13 @@ public class WithPromptView<T>(Button button, Action<T> handleResult, T? default
     }
 }
 
-public class WithConfirmView(Button button, string message, string? title = null, string? confirmLabel = null, bool destructive = false) : ViewBase
+public class WithConfirmView(Baton button, string message, string? title = null, string? confirmLabel = null, bool destructive = false) : ViewBase
 {
     public override object? Build()
     {
         var isOpen = UseState(false);
 
-        var clonedButton = button with
+        var clonedBaton = button with
         {
             OnClick = new(_ =>
             {
@@ -62,18 +62,18 @@ public class WithConfirmView(Button button, string message, string? title = null
         };
 
         return new Fragment(
-            clonedButton,
+            clonedBaton,
             isOpen.Value ? new Dialog(
                 _ => isOpen.Set(false),
                 new DialogHeader(title ?? ""),
                 new DialogBody(message),
                 new DialogFooter(
-                    new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline),
-                    new Button(confirmLabel ?? "Ok", async @event =>
+                    new Baton("Cancel", _ => isOpen.Value = false, variant: BatonVariant.Outline),
+                    new Baton(confirmLabel ?? "Ok", async @event =>
                     {
                         isOpen.Set(false);
                         if (button.OnClick != null) await button.OnClick.Invoke(@event);
-                    }, variant: destructive ? ButtonVariant.Destructive : ButtonVariant.Primary)
+                    }, variant: destructive ? BatonVariant.Destructive : BatonVariant.Primary)
                 )
             ) : null
         );

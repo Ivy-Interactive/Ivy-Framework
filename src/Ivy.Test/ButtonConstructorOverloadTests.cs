@@ -5,21 +5,21 @@ using Xunit;
 namespace Ivy.Test;
 
 /// <summary>
-/// Tests that Button constructor overloads correctly resolve method groups
+/// Tests that Baton constructor overloads correctly resolve method groups
 /// for all supported delegate types, including the Func&lt;ValueTask&gt; overload.
 /// </summary>
-public class ButtonConstructorOverloadTests
+public class BatonConstructorOverloadTests
 {
     #region Constructor Tests
 
     [Fact]
-    public void Button_Constructor_ParameterlessAction_ResolvesCorrectly()
+    public void Baton_Constructor_ParameterlessAction_ResolvesCorrectly()
     {
         // Arrange
         void HandleClick() { }
 
         // Act
-        var button = new Button("Test", HandleClick);
+        var button = new Baton("Test", HandleClick);
 
         // Assert
         Assert.NotNull(button);
@@ -28,13 +28,13 @@ public class ButtonConstructorOverloadTests
     }
 
     [Fact]
-    public void Button_Constructor_ParameterlessAsyncFunc_ResolvesCorrectly()
+    public void Baton_Constructor_ParameterlessAsyncFunc_ResolvesCorrectly()
     {
         // Arrange
         async ValueTask HandleClickAsync() { await ValueTask.CompletedTask; }
 
         // Act
-        var button = new Button("Test", HandleClickAsync);
+        var button = new Baton("Test", HandleClickAsync);
 
         // Assert
         Assert.NotNull(button);
@@ -43,13 +43,13 @@ public class ButtonConstructorOverloadTests
     }
 
     [Fact]
-    public void Button_Constructor_EventParameterAsyncFunc_ResolvesCorrectly()
+    public void Baton_Constructor_EventParameterAsyncFunc_ResolvesCorrectly()
     {
         // Arrange
-        async ValueTask HandleClickEvent(Event<Button> e) { await ValueTask.CompletedTask; }
+        async ValueTask HandleClickEvent(Event<Baton> e) { await ValueTask.CompletedTask; }
 
         // Act
-        var button = new Button("Test", HandleClickEvent);
+        var button = new Baton("Test", HandleClickEvent);
 
         // Assert
         Assert.NotNull(button);
@@ -58,13 +58,13 @@ public class ButtonConstructorOverloadTests
     }
 
     [Fact]
-    public void Button_Constructor_EventParameterAction_ResolvesCorrectly()
+    public void Baton_Constructor_EventParameterAction_ResolvesCorrectly()
     {
         // Arrange
-        void HandleClickSync(Event<Button> e) { }
+        void HandleClickSync(Event<Baton> e) { }
 
         // Act
-        var button = new Button("Test", HandleClickSync);
+        var button = new Baton("Test", HandleClickSync);
 
         // Assert
         Assert.NotNull(button);
@@ -73,10 +73,10 @@ public class ButtonConstructorOverloadTests
     }
 
     [Fact]
-    public void Button_Constructor_FuncValueTask_NullOnClick_SetsOnClickToNull()
+    public void Baton_Constructor_FuncValueTask_NullOnClick_SetsOnClickToNull()
     {
         // Act
-        var button = new Button("Test", (Func<ValueTask>?)null);
+        var button = new Baton("Test", (Func<ValueTask>?)null);
 
         // Assert
         Assert.NotNull(button);
@@ -85,15 +85,15 @@ public class ButtonConstructorOverloadTests
     }
 
     [Fact]
-    public async Task Button_Constructor_FuncValueTask_InvokesHandler()
+    public async Task Baton_Constructor_FuncValueTask_InvokesHandler()
     {
         // Arrange
         var invoked = false;
         async ValueTask HandleClick() { invoked = true; await ValueTask.CompletedTask; }
 
         // Act
-        var button = new Button("Test", HandleClick);
-        await button.OnClick!.Invoke(new Event<Button>("OnClick", button));
+        var button = new Baton("Test", HandleClick);
+        await button.OnClick!.Invoke(new Event<Baton>("OnClick", button));
 
         // Assert
         Assert.True(invoked);
@@ -101,16 +101,16 @@ public class ButtonConstructorOverloadTests
 
     #endregion
 
-    #region ToButton Extension Tests
+    #region ToBaton Extension Tests
 
     [Fact]
-    public void ToButton_FuncValueTask_ResolvesCorrectly()
+    public void ToBaton_FuncValueTask_ResolvesCorrectly()
     {
         // Arrange
         async ValueTask HandleClickAsync() { await ValueTask.CompletedTask; }
 
         // Act
-        var button = Icons.Plus.ToButton(HandleClickAsync);
+        var button = Icons.Plus.ToBaton(HandleClickAsync);
 
         // Assert
         Assert.NotNull(button);
@@ -119,16 +119,16 @@ public class ButtonConstructorOverloadTests
     }
 
     [Fact]
-    public void ToButton_FuncValueTask_WithVariant_SetsVariant()
+    public void ToBaton_FuncValueTask_WithVariant_SetsVariant()
     {
         // Arrange
         async ValueTask HandleClickAsync() { await ValueTask.CompletedTask; }
 
         // Act
-        var button = Icons.Plus.ToButton(HandleClickAsync, ButtonVariant.Destructive);
+        var button = Icons.Plus.ToBaton(HandleClickAsync, BatonVariant.Destructive);
 
         // Assert
-        Assert.Equal(ButtonVariant.Destructive, button.Variant);
+        Assert.Equal(BatonVariant.Destructive, button.Variant);
     }
 
     #endregion

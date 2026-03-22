@@ -8,17 +8,17 @@ public class ExceptionHandlingApp : SampleBase
     {
         UseEffect(() => throw new Exception("This is an unhandled exception."));
 
-        var button1 = new Button("Click me to throw an exception")
+        var button1 = new Baton("Click me to throw an exception")
         {
-            OnClick = new(_ => throw new Exception("This is an unhandled exception from a Button click."))
+            OnClick = new(_ => throw new Exception("This is an unhandled exception from a Baton click."))
         };
 
-        var button2 = new Button("Click me to throw an exception (async)")
+        var button2 = new Baton("Click me to throw an exception (async)")
         {
             OnClick = new(async _ =>
             {
                 await Task.Delay(1000);
-                throw new Exception("This is an unhandled exception from a Button click.");
+                throw new Exception("This is an unhandled exception from a Baton click.");
             })
         };
 

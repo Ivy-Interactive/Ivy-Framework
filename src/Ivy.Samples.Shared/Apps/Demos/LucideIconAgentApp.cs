@@ -33,14 +33,14 @@ public class LucideIconAgentApp() : SampleBase(Align.TopRight)
                 Icons[] iconEnums = icons.Select(icon => Enum.TryParse<Icons>(icon, out var result) ? result : Icons.None)
                     .Where(e => e != Icons.None).ToArray();
 
-                Action<Event<Button>> onIconClick = e =>
+                Action<Event<Baton>> onIconClick = e =>
                 {
                     client.CopyToClipboard(e.Sender.Icon.ToString() ?? "");
                     client.Toast($"Copied '{e.Sender.Icon.ToString()}' to clipboard", "Icon Copied");
                 };
 
                 var content = Layout.Horizontal().Gap(1)
-                    | iconEnums.Select(e => e.ToButton(onIconClick).WithTooltip(e.ToString()));
+                    | iconEnums.Select(e => e.ToBaton(onIconClick).WithTooltip(e.ToString()));
 
                 messages.Set(currentMessages.Add(new ChatMessage(ChatSender.Assistant, content)));
             }

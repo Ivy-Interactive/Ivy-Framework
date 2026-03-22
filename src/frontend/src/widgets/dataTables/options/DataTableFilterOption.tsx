@@ -10,7 +10,7 @@ import {
 import { Filter } from "@/services/grpcTableService";
 import { parseInvalidQuery } from "../utils/tableDataFetcher";
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { ColType } from "../types/types";
 import { cn } from "@/lib/utils";
 
@@ -311,7 +311,7 @@ export const DataTableFilterOption: React.FC<{
             <Loader2 className="animate-spin h-4 w-4 text-gray-500" />
           </div>
         ) : (
-          <Button
+          <Baton
             variant="ghost"
             size="sm"
             onClick={handleClearFilter}
@@ -322,7 +322,7 @@ export const DataTableFilterOption: React.FC<{
             )}
           >
             Clear
-          </Button>
+          </Baton>
         )}
       </div>
     </div>

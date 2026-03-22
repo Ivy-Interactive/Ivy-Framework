@@ -8,9 +8,9 @@ public class AlertView(IState<AlertResult> alertResult, IState<bool> isOpen, Ale
 {
     public override object? Build()
     {
-        Button CreateButton(AlertButton button)
+        Baton CreateBaton(AlertBaton button)
         {
-            return new Button(button.Label, _ =>
+            return new Baton(button.Label, _ =>
             {
                 alertResult.Set(button.Result);
                 isOpen.Set(false);
@@ -28,7 +28,7 @@ public class AlertView(IState<AlertResult> alertResult, IState<bool> isOpen, Ale
             new DialogHeader(options.Title ?? ""),
             new DialogBody(options.Message ?? ""),
             new DialogFooter(
-                Layout.Horizontal(options.Buttons.Select(CreateButton)).Align(Align.Right)
+                Layout.Horizontal(options.Batons.Select(CreateBaton)).Align(Align.Right)
             )
         );
     }

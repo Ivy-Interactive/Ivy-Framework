@@ -46,7 +46,7 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
 
     [Prop] public string? Invalid { get; set; }
 
-    [Prop] public bool ShowCopyButton { get; set; } = true;
+    [Prop] public bool ShowCopyBaton { get; set; } = true;
 
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput    
     [Prop] public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
@@ -112,9 +112,9 @@ public static class ReadOnlyInputExtensions
         return widget;
     }
 
-    public static IAnyReadOnlyInput ShowCopyButton(this IAnyReadOnlyInput widget, bool show = true)
+    public static IAnyReadOnlyInput ShowCopyBaton(this IAnyReadOnlyInput widget, bool show = true)
     {
-        var property = widget.GetType().GetProperty("ShowCopyButton");
+        var property = widget.GetType().GetProperty("ShowCopyBaton");
         if (property != null && property.CanWrite)
         {
             property.SetValue(widget, show);

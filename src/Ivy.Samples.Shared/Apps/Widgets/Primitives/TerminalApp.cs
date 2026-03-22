@@ -13,6 +13,6 @@ public class TerminalApp : SampleBase
             .AddOutput("You can use the following command to install Ivy globally.")
             .AddCommand("ivy init --namespace Acme.InternalProject")
             .AddOutput("Initializing project structure...")
-            .ShowCopyButton(true);
+            .ShowCopyBaton(true);
     }
 }

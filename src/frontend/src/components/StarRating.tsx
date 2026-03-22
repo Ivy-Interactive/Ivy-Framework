@@ -31,7 +31,7 @@ export function StarRating({
   const [hover, setHover] = useState(0);
 
   const getHalfValue = useCallback(
-    (star: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    (star: number, e: React.MouseEvent<HTMLBatonElement>) => {
       if (!allowHalf) return star;
       const rect = e.currentTarget.getBoundingClientRect();
       const isLeftHalf = e.clientX - rect.left < rect.width / 2;
@@ -41,7 +41,7 @@ export function StarRating({
   );
 
   const handleRating = useCallback(
-    (star: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    (star: number, e: React.MouseEvent<HTMLBatonElement>) => {
       if (disabled) return;
       const rating = getHalfValue(star, e);
       onRate?.(value === rating ? 0 : rating);
@@ -50,7 +50,7 @@ export function StarRating({
   );
 
   const handleMouseMove = useCallback(
-    (star: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    (star: number, e: React.MouseEvent<HTMLBatonElement>) => {
       if (disabled) return;
       setHover(getHalfValue(star, e));
     },

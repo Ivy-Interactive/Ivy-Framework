@@ -118,7 +118,7 @@ public class SmartSearchView : ViewBase
             {
                 resultsContent = Layout.Vertical()
                     | Callout.Error(err.Message)
-                    | new Button("Retry", _ => query.Mutator.Revalidate()).Variant(ButtonVariant.Outline);
+                    | new Baton("Retry", _ => query.Mutator.Revalidate()).Variant(BatonVariant.Outline);
             }
             else if (query.Value is { } result)
             {
@@ -136,13 +136,13 @@ public class SmartSearchView : ViewBase
 
         var searchInput = inputState.ToSearchInput()
             .Placeholder("Search...");
-        var askButton = new Button("Get an answer from Ivy Agent", SubmitQuestion)
-            .Variant(ButtonVariant.Ai)
+        var askBaton = new Baton("Get an answer from Ivy Agent", SubmitQuestion)
+            .Variant(BatonVariant.Ai)
             .Small()
             .TestId("docs-smart-search-ask");
 
-        var clearInputButton = new Button("", _ => inputState.Set(""));
-        var openTrigger = new Button("", _ =>
+        var clearInputBaton = new Baton("", _ => inputState.Set(""));
+        var openTrigger = new Baton("", _ =>
         {
             inputState.Set("");
             queryQuestion.Set(_ => (string?)null);
@@ -187,13 +187,13 @@ public class SmartSearchView : ViewBase
         var overlayContent = Layout.Vertical().Gap(4)
             | overlayListOrPlaceholder;
 
-        var footer = new DialogFooter(askButton);
+        var footer = new DialogFooter(askBaton);
 
         var baseSlots = new List<object>
         {
             new Slot("SearchInput", searchInput),
-            new Slot("AskButton", askButton),
-            new Slot("ClearInputButton", clearInputButton),
+            new Slot("AskBaton", askBaton),
+            new Slot("ClearInputBaton", clearInputBaton),
             new Slot("OpenTrigger", openTrigger)
         };
 
@@ -203,7 +203,7 @@ public class SmartSearchView : ViewBase
                 return new SmartSearch(baseSlots.ToArray());
             baseSlots.Add(new Slot(
                 "CloseOverlay",
-                new Button("", _ => overlayOpen.Set(false))
+                new Baton("", _ => overlayOpen.Set(false))
                     .TestId("docs-smart-search-close-overlay")));
             baseSlots.Add(new Slot(
                 "OverlayPanel",

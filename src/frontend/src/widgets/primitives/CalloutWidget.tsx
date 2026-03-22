@@ -57,7 +57,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
-  const showCloseButton = events.includes("OnClose");
+  const showCloseBaton = events.includes("OnClose");
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -86,7 +86,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
         {title && <div className="font-medium leading-none mb-1">{title}</div>}
         {children && <div className="text-sm opacity-90 [&_p]:text-sm [&_p]:mb-0">{children}</div>}
       </div>
-      {showCloseButton && (
+      {showCloseBaton && (
         <button
           type="button"
           onClick={() => eventHandler("OnClose", id, [])}

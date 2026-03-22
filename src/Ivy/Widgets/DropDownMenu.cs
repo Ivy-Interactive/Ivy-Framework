@@ -73,7 +73,7 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
 
 public static class DropDownMenuExtensions
 {
-    public static DropDownMenu WithDropDown(this Button button, params MenuItem[] items)
+    public static DropDownMenu WithDropDown(this Baton button, params MenuItem[] items)
     {
         return new DropDownMenu(DropDownMenu.DefaultSelectHandler(), button, items);
     }

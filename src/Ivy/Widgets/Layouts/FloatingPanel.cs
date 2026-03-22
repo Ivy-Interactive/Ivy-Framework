@@ -32,15 +32,15 @@ public record FloatingPanel : WidgetBase<FloatingPanel>
 
 public static class FloatingLayerExtensions
 {
-    public static FloatingPanel Align(this FloatingPanel floatingButton, Align align) => floatingButton with { Align = align };
+    public static FloatingPanel Align(this FloatingPanel floatingBaton, Align align) => floatingBaton with { Align = align };
 
-    public static FloatingPanel Offset(this FloatingPanel floatingButton, Thickness? offset) => floatingButton with { Offset = offset };
+    public static FloatingPanel Offset(this FloatingPanel floatingBaton, Thickness? offset) => floatingBaton with { Offset = offset };
 
-    public static FloatingPanel OffsetLeft(this FloatingPanel floatingButton, int offset) => floatingButton with { Offset = new Thickness(offset, 0, 0, 0) };
+    public static FloatingPanel OffsetLeft(this FloatingPanel floatingBaton, int offset) => floatingBaton with { Offset = new Thickness(offset, 0, 0, 0) };
 
-    public static FloatingPanel OffsetTop(this FloatingPanel floatingButton, int offset) => floatingButton with { Offset = new Thickness(0, offset, 0, 0) };
+    public static FloatingPanel OffsetTop(this FloatingPanel floatingBaton, int offset) => floatingBaton with { Offset = new Thickness(0, offset, 0, 0) };
 
-    public static FloatingPanel OffsetRight(this FloatingPanel floatingButton, int offset) => floatingButton with { Offset = new Thickness(0, 0, offset, 0) };
+    public static FloatingPanel OffsetRight(this FloatingPanel floatingBaton, int offset) => floatingBaton with { Offset = new Thickness(0, 0, offset, 0) };
 
-    public static FloatingPanel OffsetBottom(this FloatingPanel floatingButton, int offset) => floatingButton with { Offset = new Thickness(0, 0, 0, offset) };
+    public static FloatingPanel OffsetBottom(this FloatingPanel floatingBaton, int offset) => floatingBaton with { Offset = new Thickness(0, 0, 0, offset) };
 }

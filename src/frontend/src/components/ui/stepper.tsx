@@ -133,11 +133,11 @@ const StepperItem = React.forwardRef<HTMLDivElement, StepperItemProps>(
 StepperItem.displayName = "StepperItem";
 
 // StepperTrigger
-interface StepperTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface StepperTriggerProps extends React.BatonHTMLAttributes<HTMLBatonElement> {
   asChild?: boolean;
 }
 
-const StepperTrigger = React.forwardRef<HTMLButtonElement, StepperTriggerProps>(
+const StepperTrigger = React.forwardRef<HTMLBatonElement, StepperTriggerProps>(
   ({ asChild = false, className, children, ...props }, ref) => {
     const { setActiveStep } = useStepper();
     const { step, isDisabled } = useStepItem();

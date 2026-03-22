@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useCallback, useMemo } from "react";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, startOfISOWeek, getISOWeek } from "date-fns";
@@ -82,7 +82,7 @@ export const WeekVariant: React.FC<WeekVariantProps> = ({
     <div className="relative w-full select-none">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
+          <Baton
             disabled={disabled}
             variant="outline"
             data-slot="calendar"
@@ -106,7 +106,7 @@ export const WeekVariant: React.FC<WeekVariantProps> = ({
             >
               {date ? formatWeekDisplay(date, formatProp) : placeholder || "Pick a week"}
             </span>
-          </Button>
+          </Baton>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar

@@ -64,7 +64,7 @@ public class ProductsListBlade : ViewBase
         });
 
         var createBtn = Icons.Plus
-            .ToButton(_ =>
+            .ToBaton(_ =>
             {
                 blades.Pop(this); // make sure only the current blade is visible
             })
@@ -164,19 +164,19 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
 
         var product = productQuery.Value;
 
-        var deleteBtn = new Button("Delete", onClick: async _ =>
+        var deleteBtn = new Baton("Delete", onClick: async _ =>
             {
                 blades.Pop(refresh: true);
                 await DeleteAsync(factory);
                 queryService.RevalidateByTag(typeof(ProductListRecord[]));
             })
-            .Variant(ButtonVariant.Destructive)
+            .Variant(BatonVariant.Destructive)
             .Icon(Icons.Trash)
             .Width(Size.Grow())
             .WithConfirm($"Are you sure you want to delete product '{product.Name}'?", "Delete Product", confirmLabel: "Delete", destructive: true);
 
-        var editBtn = new Button("Edit")
-            .Variant(ButtonVariant.Outline)
+        var editBtn = new Baton("Edit")
+            .Variant(BatonVariant.Outline)
             .Icon(Icons.Pencil)
             .Width(Size.Grow())
             .ToTrigger((isOpen) => new ProductEditSheet(isOpen, productId));

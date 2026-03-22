@@ -1,5 +1,5 @@
 import { memo, useRef, useState, useEffect, useCallback } from "react";
-import CopyToClipboardButton from "./CopyToClipboardButton";
+import CopyToClipboardBaton from "./CopyToClipboardBaton";
 import { logger } from "@/lib/logger";
 
 interface MermaidRendererProps {
@@ -258,7 +258,7 @@ const MermaidRenderer = memo(({ content }: MermaidRendererProps) => {
   return (
     <div className="relative">
       <div className="absolute top-2 right-2 z-10">
-        <CopyToClipboardButton textToCopy={content} />
+        <CopyToClipboardBaton textToCopy={content} />
       </div>
       <div className="mermaid-container rounded-md border bg-background p-4 overflow-x-auto">
         {isLoading && (

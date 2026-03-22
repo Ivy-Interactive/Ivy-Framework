@@ -30,20 +30,20 @@ public class BladeContent : ViewBase
     {
         var bladeController = UseContext<IBladeService>();
 
-        void PushNoWidth(Event<Button> e) => bladeController.Push(this, new BladeTableNoWidth(), "No Width");
-        void PushFull(Event<Button> e) => bladeController.Push(this, new BladeTableFull(), "Width: Full");
-        void PushUnits(Event<Button> e) => bladeController.Push(this, new BladeTableUnits(), "Width: Units(80)");
-        void PushPx(Event<Button> e) => bladeController.Push(this, new BladeTablePx(), "Width: Px(400)");
-        void PushFit(Event<Button> e) => bladeController.Push(this, new BladeTableFit(), "Width: Fit");
+        void PushNoWidth(Event<Baton> e) => bladeController.Push(this, new BladeTableNoWidth(), "No Width");
+        void PushFull(Event<Baton> e) => bladeController.Push(this, new BladeTableFull(), "Width: Full");
+        void PushUnits(Event<Baton> e) => bladeController.Push(this, new BladeTableUnits(), "Width: Units(80)");
+        void PushPx(Event<Baton> e) => bladeController.Push(this, new BladeTablePx(), "Width: Px(400)");
+        void PushFit(Event<Baton> e) => bladeController.Push(this, new BladeTableFit(), "Width: Fit");
 
         return Layout.Vertical()
             | Text.H3("Tables in Blades")
             | Text.P("Click buttons to open blades with different table widths")
-            | new Button("No Width Set", PushNoWidth)
-            | new Button("Width: Full", PushFull)
-            | new Button("Width: Units(80)", PushUnits)
-            | new Button("Width: Px(400)", PushPx)
-            | new Button("Width: Fit", PushFit);
+            | new Baton("No Width Set", PushNoWidth)
+            | new Baton("Width: Full", PushFull)
+            | new Baton("Width: Units(80)", PushUnits)
+            | new Baton("Width: Px(400)", PushPx)
+            | new Baton("Width: Fit", PushFit);
     }
 }
 
@@ -167,11 +167,11 @@ public class SheetsTest : ViewBase
                 | Text.H3("Tables in Sheets")
                 | Text.P("Click buttons to open sheets with different table widths")
                 | Layout.Horizontal(
-                    new Button("No Width", _ => sheetNoWidth.Set(true)),
-                    new Button("Width: Full", _ => sheetFull.Set(true)),
-                    new Button("Width: Units(80)", _ => sheetUnits.Set(true)),
-                    new Button("Width: Px(400)", _ => sheetPx.Set(true)),
-                    new Button("Width: Fit", _ => sheetFit.Set(true))
+                    new Baton("No Width", _ => sheetNoWidth.Set(true)),
+                    new Baton("Width: Full", _ => sheetFull.Set(true)),
+                    new Baton("Width: Units(80)", _ => sheetUnits.Set(true)),
+                    new Baton("Width: Px(400)", _ => sheetPx.Set(true)),
+                    new Baton("Width: Fit", _ => sheetFit.Set(true))
                 ).Gap(4),
 
             sheetNoWidth.Value ? new Sheet(

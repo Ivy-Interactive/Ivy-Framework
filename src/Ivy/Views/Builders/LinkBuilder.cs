@@ -20,9 +20,9 @@ public class LinkBuilder<TModel>(string? url = null, string? label = null) : IBu
         {
             // Invalid URL, return button with disabled state
             // Always use safe default label for invalid URLs to avoid displaying potentially dangerous content
-            return new Button(label ?? "Invalid Link", variant: ButtonVariant.Inline).Disabled(true);
+            return new Baton(label ?? "Invalid Link", variant: BatonVariant.Inline).Disabled(true);
         }
 
-        return new Button(label ?? validatedUrl, variant: ButtonVariant.Inline).Url(validatedUrl);
+        return new Baton(label ?? validatedUrl, variant: BatonVariant.Inline).Url(validatedUrl);
     }
 }

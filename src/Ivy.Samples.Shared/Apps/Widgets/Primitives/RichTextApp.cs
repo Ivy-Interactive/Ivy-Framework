@@ -44,7 +44,7 @@ public class RichTextApp : SampleBase
             | Text.Rich()
                 .Bold("🤖 ")
                 .UseStream(stream)
-            | new Button("Generate response").OnClick(async () =>
+            | new Baton("Generate response").OnClick(async () =>
             {
                 await cts.CancelAsync();
                 cts = new CancellationTokenSource();

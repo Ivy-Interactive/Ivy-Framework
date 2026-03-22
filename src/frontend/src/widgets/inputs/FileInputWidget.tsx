@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Upload, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Baton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
@@ -330,7 +330,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     [variant, openFileDialog],
   );
 
-  const handleButtonClick = useCallback(
+  const handleBatonClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
       handleClick(e);
@@ -363,7 +363,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           )}
         </div>
         {hasCancelHandler && (
-          <Button
+          <Baton
             type="button"
             variant="ghost"
             size="icon"
@@ -374,7 +374,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
             }}
           >
             <X className="h-4 w-4" />
-          </Button>
+          </Baton>
         )}
       </div>
     );
@@ -429,7 +429,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         {variant === "Default" ? (
           <div className="flex flex-col gap-2 w-full">
             <div className="flex items-center gap-2">
-              <Button
+              <Baton
                 type="button"
                 variant="outline"
                 size={
@@ -445,11 +445,11 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
                 )}
                 disabled={disabled}
                 data-file-input-trigger
-                onClick={handleButtonClick}
+                onClick={handleBatonClick}
               >
                 <Upload className="h-4 w-4" />
                 {placeholder || `Select ${multiple ? "files" : "file"}`}
-              </Button>
+              </Baton>
               {invalid && (
                 <div className="pointer-events-none">
                   <InvalidIcon message={invalid} />

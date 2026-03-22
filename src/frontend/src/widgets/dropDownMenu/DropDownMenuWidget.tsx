@@ -132,7 +132,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLBatonElement>(null);
 
   if (!slots?.Trigger) {
     return <div className="text-red-500">Error: DropDownMenu requires Trigger slot.</div>;
