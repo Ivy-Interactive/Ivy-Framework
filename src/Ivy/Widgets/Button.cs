@@ -7,7 +7,7 @@ using Ivy.Core.Hooks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum ButtonVariant
+public enum BatonVariant
 {
     Primary,
     Destructive,
@@ -31,12 +31,12 @@ public enum LinkTarget
 /// <summary>
 /// An interactive element for triggering actions or navigation.
 /// </summary>
-public record Button : WidgetBase<Button>
+public record Baton : WidgetBase<Baton>
 {
-    internal Button() { }
+    internal Baton() { }
 
     [OverloadResolutionPriority(1)]
-    public Button(string? title = null, Func<Event<Button>, ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons? icon = null)
+    public Baton(string? title = null, Func<Event<Baton>, ValueTask>? onClick = null, BatonVariant variant = BatonVariant.Primary, Icons? icon = null)
     {
         Title = title;
         Variant = variant;
@@ -44,7 +44,7 @@ public record Button : WidgetBase<Button>
         OnClick = onClick.ToEventHandler();
     }
 
-    public Button(string? title = null, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons? icon = null)
+    public Baton(string? title = null, Action<Event<Baton>>? onClick = null, BatonVariant variant = BatonVariant.Primary, Icons? icon = null)
     {
         Title = title;
         Variant = variant;
@@ -52,7 +52,7 @@ public record Button : WidgetBase<Button>
         OnClick = onClick.ToEventHandler();
     }
 
-    public Button(string? title = null, Action? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons? icon = null)
+    public Baton(string? title = null, Action? onClick = null, BatonVariant variant = BatonVariant.Primary, Icons? icon = null)
     {
         Title = title;
         Variant = variant;
@@ -60,7 +60,7 @@ public record Button : WidgetBase<Button>
         OnClick = onClick == null ? null : new(_ => { onClick(); return ValueTask.CompletedTask; });
     }
 
-    public Button(string? title = null, Func<ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons? icon = null)
+    public Baton(string? title = null, Func<ValueTask>? onClick = null, BatonVariant variant = BatonVariant.Primary, Icons? icon = null)
     {
         Title = title;
         Variant = variant;
@@ -70,7 +70,7 @@ public record Button : WidgetBase<Button>
 
     [Prop] public string? Title { get; set; }
 
-    [Prop] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
+    [Prop] public BatonVariant Variant { get; set; } = BatonVariant.Primary;
 
     [Prop] public Icons? Icon { get; set; }
 
@@ -90,35 +90,35 @@ public record Button : WidgetBase<Button>
 
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
 
-    [Event] public EventHandler<Event<Button>>? OnClick { get; set; }
+    [Event] public EventHandler<Event<Baton>>? OnClick { get; set; }
 
     public object? Tag { get; set; } //not a prop!
 
-    public static Button operator |(Button widget, object child)
+    public static Baton operator |(Baton widget, object child)
     {
-        throw new NotSupportedException("Button does not support children.");
+        throw new NotSupportedException("Baton does not support children.");
     }
 }
 
-public static class ButtonExtensions
+public static class BatonExtensions
 {
     [OverloadResolutionPriority(1)]
-    public static Button ToButton(this Icons icon, Func<Event<Button>, ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary)
+    public static Baton ToBaton(this Icons icon, Func<Event<Baton>, ValueTask>? onClick = null, BatonVariant variant = BatonVariant.Primary)
     {
-        return new Button(null, onClick, icon: icon, variant: variant);
+        return new Baton(null, onClick, icon: icon, variant: variant);
     }
 
-    public static Button ToButton(this Icons icon, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary)
+    public static Baton ToBaton(this Icons icon, Action<Event<Baton>>? onClick = null, BatonVariant variant = BatonVariant.Primary)
     {
-        return new Button(null, onClick, icon: icon, variant: variant);
+        return new Baton(null, onClick, icon: icon, variant: variant);
     }
 
-    public static Button ToButton(this Icons icon, Func<ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary)
+    public static Baton ToBaton(this Icons icon, Func<ValueTask>? onClick = null, BatonVariant variant = BatonVariant.Primary)
     {
-        return new Button(null, onClick, icon: icon, variant: variant);
+        return new Baton(null, onClick, icon: icon, variant: variant);
     }
 
-    public static IView ToTrigger(this Button trigger, Func<IState<bool>, object> action)
+    public static IView ToTrigger(this Baton trigger, Func<IState<bool>, object> action)
     {
         return new FuncView((context) =>
             {
@@ -142,12 +142,12 @@ public static class ButtonExtensions
         );
     }
 
-    public static Button Title(this Button button, string title)
+    public static Baton Title(this Baton button, string title)
     {
         return button with { Title = title };
     }
 
-    public static Button Url(this Button button, string url)
+    public static Baton Url(this Baton button, string url)
     {
         // Validate URL to prevent open redirect vulnerabilities
         var validatedUrl = ValidationHelper.ValidateLinkUrl(url);
@@ -158,70 +158,70 @@ public static class ButtonExtensions
         return button with { Url = validatedUrl };
     }
 
-    public static Button Disabled(this Button button, bool disabled = true) => button with { Disabled = disabled };
+    public static Baton Disabled(this Baton button, bool disabled = true) => button with { Disabled = disabled };
 
-    public static Button Icon(this Button button, Icons? icon, Align position = Align.Left) => button with { Icon = icon, IconPosition = position };
+    public static Baton Icon(this Baton button, Icons? icon, Align position = Align.Left) => button with { Icon = icon, IconPosition = position };
 
-    public static Button Variant(this Button button, ButtonVariant variant) => button with { Variant = variant };
+    public static Baton Variant(this Baton button, BatonVariant variant) => button with { Variant = variant };
 
-    public static Button Foreground(this Button button, Colors color) => button with { Foreground = color };
+    public static Baton Foreground(this Baton button, Colors color) => button with { Foreground = color };
 
-    public static Button Tooltip(this Button button, string tooltip) => button with { Tooltip = tooltip };
+    public static Baton Tooltip(this Baton button, string tooltip) => button with { Tooltip = tooltip };
 
-    public static Button Loading(this Button button, bool loading = true) => button with { Loading = loading };
+    public static Baton Loading(this Baton button, bool loading = true) => button with { Loading = loading };
 
-    public static Button Loading(this Button button, IState<bool> loading) => button.Loading(loading.Value);
+    public static Baton Loading(this Baton button, IState<bool> loading) => button.Loading(loading.Value);
 
-    public static Button OnClick(this Button button, Func<Event<Button>, ValueTask> onClick) => button with { OnClick = new(onClick) };
+    public static Baton OnClick(this Baton button, Func<Event<Baton>, ValueTask> onClick) => button with { OnClick = new(onClick) };
 
-    public static Button OnClick(this Button button, Action<Event<Button>> onClick) => button with { OnClick = new(onClick.ToValueTask()) };
+    public static Baton OnClick(this Baton button, Action<Event<Baton>> onClick) => button with { OnClick = new(onClick.ToValueTask()) };
 
-    public static Button OnClick(this Button button, Action onClick) => button with { OnClick = new(_ => { onClick(); return ValueTask.CompletedTask; }) };
+    public static Baton OnClick(this Baton button, Action onClick) => button with { OnClick = new(_ => { onClick(); return ValueTask.CompletedTask; }) };
 
-    public static Button OnClick(this Button button, Func<ValueTask> onClick) => button with { OnClick = new(_ => onClick()) };
+    public static Baton OnClick(this Baton button, Func<ValueTask> onClick) => button with { OnClick = new(_ => onClick()) };
 
-    public static Button Tag(this Button button, object tag) => button with { Tag = tag };
+    public static Baton Tag(this Baton button, object tag) => button with { Tag = tag };
 
-    public static Button Content(this Button button, object child) => button with { Children = [child] };
+    public static Baton Content(this Baton button, object child) => button with { Children = [child] };
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Primary(this Button button) => button.Variant(ButtonVariant.Primary);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Primary(this Baton button) => button.Variant(BatonVariant.Primary);
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Secondary(this Button button) => button.Variant(ButtonVariant.Secondary);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Secondary(this Baton button) => button.Variant(BatonVariant.Secondary);
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Outline(this Button button) => button.Variant(ButtonVariant.Outline);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Outline(this Baton button) => button.Variant(BatonVariant.Outline);
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Destructive(this Button button) => button.Variant(ButtonVariant.Destructive);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Destructive(this Baton button) => button.Variant(BatonVariant.Destructive);
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Ghost(this Button button) => button.Variant(ButtonVariant.Ghost);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Ghost(this Baton button) => button.Variant(BatonVariant.Ghost);
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Link(this Button button) => button.Variant(ButtonVariant.Link);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Link(this Baton button) => button.Variant(BatonVariant.Link);
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Inline(this Button button) => button.Variant(ButtonVariant.Inline);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Inline(this Baton button) => button.Variant(BatonVariant.Inline);
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Ai(this Button button) => button.Variant(ButtonVariant.Ai);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Ai(this Baton button) => button.Variant(BatonVariant.Ai);
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Success(this Button button) => button.Variant(ButtonVariant.Success);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Success(this Baton button) => button.Variant(BatonVariant.Success);
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Warning(this Button button) => button.Variant(ButtonVariant.Warning);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Warning(this Baton button) => button.Variant(BatonVariant.Warning);
 
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button Info(this Button button) => button.Variant(ButtonVariant.Info);
+    [RelatedTo(nameof(Baton.Variant))]
+    public static Baton Info(this Baton button) => button.Variant(BatonVariant.Info);
 
-    public static Button BorderRadius(this Button button, BorderRadius radius) => button with { BorderRadius = radius };
+    public static Baton BorderRadius(this Baton button, BorderRadius radius) => button with { BorderRadius = radius };
 
-    [RelatedTo(nameof(Button.Target))]
-    public static Button Target(this Button button, LinkTarget target) => button with { Target = target };
+    [RelatedTo(nameof(Baton.Target))]
+    public static Baton Target(this Baton button, LinkTarget target) => button with { Target = target };
 
-    [RelatedTo(nameof(Button.Target))]
-    public static Button OpenInNewTab(this Button button, bool openInNewTab = true) => button with { Target = openInNewTab ? LinkTarget.Blank : LinkTarget.Self };
+    [RelatedTo(nameof(Baton.Target))]
+    public static Baton OpenInNewTab(this Baton button, bool openInNewTab = true) => button with { Target = openInNewTab ? LinkTarget.Blank : LinkTarget.Self };
 }
