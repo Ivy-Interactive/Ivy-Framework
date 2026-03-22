@@ -1,7 +1,7 @@
-import { InternalLink } from '@/types/widgets';
-import { Github } from 'lucide-react';
-import React from 'react';
-import { convertAppUrlToPath, getChromeParam } from '@/lib/utils';
+import { InternalLink } from "@/types/widgets";
+import { Github } from "lucide-react";
+import React from "react";
+import { convertAppUrlToPath, getChromeParam } from "@/lib/utils";
 
 interface ArticleFooterProps {
   id: string;
@@ -18,10 +18,7 @@ export const ArticleFooter: React.FC<ArticleFooterProps> = ({
   documentSource,
   onLinkClick,
 }) => {
-  const handleLinkClick = (
-    appId: string,
-    event: React.MouseEvent<HTMLAnchorElement>
-  ) => {
+  const handleLinkClick = (appId: string, event: React.MouseEvent<HTMLAnchorElement>) => {
     // When chrome is disabled, use browser navigation
     if (!getChromeParam()) {
       return;
@@ -29,7 +26,7 @@ export const ArticleFooter: React.FC<ArticleFooterProps> = ({
 
     // When chrome is enabled, use the backend event handler
     event.preventDefault();
-    onLinkClick('OnLinkClick', id, ['app://' + appId]);
+    onLinkClick("OnLinkClick", id, ["app://" + appId]);
   };
 
   return (
@@ -39,28 +36,24 @@ export const ArticleFooter: React.FC<ArticleFooterProps> = ({
           <div className="flex-1">
             {previous && (
               <a
-                onClick={e => handleLinkClick(previous.appId, e)}
-                href={convertAppUrlToPath('app://' + previous.appId)}
+                onClick={(e) => handleLinkClick(previous.appId, e)}
+                href={convertAppUrlToPath("app://" + previous.appId)}
                 className="group flex flex-col gap-2 hover:text-primary transition-colors"
               >
                 <div className="text-body">← Previous</div>
-                <div className="text-body text-muted-foreground">
-                  {previous.title}
-                </div>
+                <div className="text-body text-muted-foreground">{previous.title}</div>
               </a>
             )}
           </div>
           <div className="flex-1 flex justify-end">
             {next && (
               <a
-                onClick={e => handleLinkClick(next.appId, e)}
-                href={convertAppUrlToPath('app://' + next.appId)}
+                onClick={(e) => handleLinkClick(next.appId, e)}
+                href={convertAppUrlToPath("app://" + next.appId)}
                 className="group flex flex-col text-right gap-2 hover:text-primary transition-colors"
               >
                 <div className="text-body">Next →</div>
-                <div className="text-body text-muted-foreground">
-                  {next.title}
-                </div>
+                <div className="text-body text-muted-foreground">{next.title}</div>
               </a>
             )}
           </div>

@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import { useEventHandler } from '@/components/event-handler';
-import { hasSaveFilePicker } from './browserSupport';
-import { getFullUrl, acceptToPickerTypes } from './shared';
+import React, { useCallback, useEffect, useRef } from "react";
+import { useEventHandler } from "@/components/event-handler";
+import { hasSaveFilePicker } from "./browserSupport";
+import { getFullUrl, acceptToPickerTypes } from "./shared";
 
 interface SaveDialogWidgetProps {
   id: string;
@@ -23,8 +23,8 @@ export const SaveDialogWidget: React.FC<SaveDialogWidgetProps> = ({
   const handleEvent = useEventHandler();
   const lastTriggerRef = useRef(0);
 
-  const hasOnCancel = Array.isArray(events) && events.includes('OnCancel');
-  const hasOnSaved = Array.isArray(events) && events.includes('OnSaved');
+  const hasOnCancel = Array.isArray(events) && events.includes("OnCancel");
+  const hasOnSaved = Array.isArray(events) && events.includes("OnSaved");
 
   const fetchContent = useCallback(async (): Promise<Blob | null> => {
     if (!downloadUrl) return null;
@@ -35,7 +35,7 @@ export const SaveDialogWidget: React.FC<SaveDialogWidgetProps> = ({
       }
       return await response.blob();
     } catch (error) {
-      console.error('Download error:', error);
+      console.error("Download error:", error);
       return null;
     }
   }, [downloadUrl]);
@@ -60,35 +60,27 @@ export const SaveDialogWidget: React.FC<SaveDialogWidgetProps> = ({
       await writable.close();
 
       if (hasOnSaved) {
-        handleEvent('OnSaved', id, [{ success: true, fileName: handle.name }]);
+        handleEvent("OnSaved", id, [{ success: true, fileName: handle.name }]);
       }
     } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
+      if (err instanceof DOMException && err.name === "AbortError") {
         if (hasOnCancel) {
-          handleEvent('OnCancel', id, []);
+          handleEvent("OnCancel", id, []);
         }
       } else {
-        console.error('Save dialog error:', err);
+        console.error("Save dialog error:", err);
       }
     }
-  }, [
-    fetchContent,
-    suggestedName,
-    accept,
-    hasOnSaved,
-    hasOnCancel,
-    handleEvent,
-    id,
-  ]);
+  }, [fetchContent, suggestedName, accept, hasOnSaved, hasOnCancel, handleEvent, id]);
 
   const saveFallback = useCallback(async () => {
     const blob = await fetchContent();
     if (!blob) return;
 
     const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = blobUrl;
-    a.download = suggestedName || 'download';
+    a.download = suggestedName || "download";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -96,9 +88,7 @@ export const SaveDialogWidget: React.FC<SaveDialogWidgetProps> = ({
 
     // In fallback mode we can't detect cancel, so always report success
     if (hasOnSaved) {
-      handleEvent('OnSaved', id, [
-        { success: true, fileName: suggestedName || 'download' },
-      ]);
+      handleEvent("OnSaved", id, [{ success: true, fileName: suggestedName || "download" }]);
     }
   }, [fetchContent, suggestedName, hasOnSaved, handleEvent, id]);
 

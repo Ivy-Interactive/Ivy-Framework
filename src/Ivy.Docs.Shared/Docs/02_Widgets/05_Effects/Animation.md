@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - animation
   - motion
   - transition
   - effects

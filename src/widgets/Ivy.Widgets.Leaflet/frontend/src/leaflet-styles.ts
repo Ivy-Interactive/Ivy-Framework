@@ -730,11 +730,11 @@ let stylesInjected = false;
  * This is called automatically when the Map component mounts.
  */
 export function injectLeafletStyles(): void {
-  if (stylesInjected || typeof document === 'undefined') {
+  if (stylesInjected || typeof document === "undefined") {
     return;
   }
 
-  const styleId = 'ivy-leaflet-styles';
+  const styleId = "ivy-leaflet-styles";
 
   // Check if styles are already injected
   if (document.getElementById(styleId)) {
@@ -742,7 +742,7 @@ export function injectLeafletStyles(): void {
     return;
   }
 
-  const styleElement = document.createElement('style');
+  const styleElement = document.createElement("style");
   styleElement.id = styleId;
   styleElement.textContent = LEAFLET_CSS;
   document.head.appendChild(styleElement);

@@ -1,27 +1,27 @@
-import React, { useMemo } from 'react';
-import { getHeight, getWidth } from '@/lib/styles';
-import { useThemeWithMonitoring } from '@/components/theme-provider';
-import ReactECharts from 'echarts-for-react';
+import React, { useMemo } from "react";
+import { getHeight, getWidth } from "@/lib/styles";
+import { useThemeWithMonitoring } from "@/components/theme-provider";
+import ReactECharts from "echarts-for-react";
 import {
   getColors,
   generateTextStyle,
   generateEChartToolbox,
   generateTooltip,
   generateEChartLegend,
-} from './sharedUtils';
-import { SankeyChartWidgetProps } from './chartTypes';
-import { getChartThemeColors } from './styles';
+} from "./sharedUtils";
+import { SankeyChartWidgetProps } from "./chartTypes";
+import { getChartThemeColors } from "./styles";
 
 const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
   data,
-  width = 'Full',
-  height = 'Full',
-  colorScheme = 'Default',
+  width = "Full",
+  height = "Full",
+  colorScheme = "Default",
   nodeWidth = 20,
   nodeGap = 8,
   curvature = 0.5,
   layoutIterations = 32,
-  nodeAlign = 'Justify',
+  nodeAlign = "Justify",
   tooltip,
   legend,
   toolbox,
@@ -31,41 +31,28 @@ const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
     monitorSystem: true,
   });
 
-  const themeColors = useMemo(
-    () => getChartThemeColors(colors, isDark),
-    [colors, isDark]
-  );
+  const themeColors = useMemo(() => getChartThemeColors(colors, isDark), [colors, isDark]);
 
   const heightStyle = height ? getHeight(height) : {};
-  const isFull = height?.toLowerCase().startsWith('full');
+  const isFull = height?.toLowerCase().startsWith("full");
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    position: 'relative',
-    ...(isFull
-      ? { display: 'flex', flexDirection: 'column', height: '100%' }
-      : {}),
+    position: "relative",
+    ...(isFull ? { display: "flex", flexDirection: "column", height: "100%" } : {}),
   };
 
   const chartStyles: React.CSSProperties = {
-    ...(isFull
-      ? { flex: 1, minHeight: '200px' }
-      : { ...heightStyle, minHeight: '200px' }),
-    width: '100%',
+    ...(isFull ? { flex: 1, minHeight: "200px" } : { ...heightStyle, minHeight: "200px" }),
+    width: "100%",
   };
 
-  const chartColors = useMemo(
-    () => getColors(colorScheme, colors),
-    [colorScheme, colors]
-  );
+  const chartColors = useMemo(() => getColors(colorScheme, colors), [colorScheme, colors]);
 
   const option = useMemo(
     () => ({
       color: chartColors,
-      textStyle: generateTextStyle(
-        themeColors.foreground,
-        themeColors.fontSans
-      ),
+      textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
       tooltip: {
         ...generateTooltip(tooltip, undefined, {
           foreground: themeColors.foreground,
@@ -73,13 +60,13 @@ const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
           background: themeColors.background,
           mutedForeground: themeColors.mutedForeground,
         }),
-        trigger: 'item',
+        trigger: "item",
         formatter: (params: {
           dataType: string;
           data: { source: string; target: string; value: number };
           name: string;
         }) => {
-          if (params.dataType === 'edge') {
+          if (params.dataType === "edge") {
             const sourceName = params.data.source;
             const targetName = params.data.target;
             const value = params.data.value;
@@ -94,9 +81,9 @@ const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
       }),
       series: [
         {
-          type: 'sankey',
+          type: "sankey",
           data: data?.nodes || [],
-          links: (data?.links || []).map(link => ({
+          links: (data?.links || []).map((link) => ({
             ...link,
             source: data?.nodes?.[link.source]?.name ?? link.source,
             target: data?.nodes?.[link.target]?.name ?? link.target,
@@ -104,13 +91,13 @@ const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
           nodeWidth: nodeWidth,
           nodeGap: nodeGap,
           layoutIterations: layoutIterations,
-          orient: 'horizontal',
+          orient: "horizontal",
           nodeAlign: nodeAlign.toLowerCase(),
           emphasis: {
-            focus: 'adjacency',
+            focus: "adjacency",
           },
           lineStyle: {
-            color: 'gradient',
+            color: "gradient",
             curveness: curvature,
           },
           label: {
@@ -119,9 +106,7 @@ const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
           },
         },
       ],
-      toolbox: generateEChartToolbox(
-        toolbox && { ...toolbox, magicType: false }
-      ),
+      toolbox: generateEChartToolbox(toolbox && { ...toolbox, magicType: false }),
     }),
     [
       chartColors,
@@ -135,17 +120,12 @@ const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
       themeColors,
       tooltip,
       toolbox,
-    ]
+    ],
   );
 
   return (
     <div style={styles}>
-      <ReactECharts
-        option={option}
-        style={chartStyles}
-        notMerge={true}
-        lazyUpdate={true}
-      />
+      <ReactECharts option={option} style={chartStyles} notMerge={true} lazyUpdate={true} />
     </div>
   );
 };

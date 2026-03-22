@@ -1,13 +1,7 @@
-import { EventHandler } from '@/components/event-handler';
-import { Densities } from '@/types/density';
+import { EventHandler } from "@/components/event-handler";
+import { Densities } from "@/types/density";
 
-export type NullableSelectValue =
-  | string
-  | number
-  | string[]
-  | number[]
-  | null
-  | undefined;
+export type NullableSelectValue = string | number | string[] | number[] | null | undefined;
 
 export interface Option {
   value: string | number;
@@ -22,7 +16,7 @@ export interface SelectInputWidgetProps {
   id: string;
   placeholder?: string;
   value?: NullableSelectValue;
-  variant?: 'Select' | 'List' | 'Toggle' | 'Slider' | 'Radio';
+  variant?: "Select" | "List" | "Toggle" | "Slider" | "Radio";
   nullable?: boolean;
   disabled?: boolean;
   invalid?: string;
@@ -33,11 +27,11 @@ export interface SelectInputWidgetProps {
   maxSelections?: number;
   minSelections?: number;
   searchable?: boolean;
-  searchMode?: 'CaseInsensitive' | 'CaseSensitive' | 'Fuzzy';
+  searchMode?: "CaseInsensitive" | "CaseSensitive" | "Fuzzy";
   emptyMessage?: string;
   loading?: boolean;
   ghost?: boolean;
-  'data-testid'?: string;
+  "data-testid"?: string;
   density?: Densities;
   width?: string;
 }

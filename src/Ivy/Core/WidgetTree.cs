@@ -105,13 +105,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
     public void RefreshView(string viewId)
     {
-        // if(!_nodes.TryGetValue(viewId, out var node))
-        //     throw new NotSupportedException($"Node '{viewId}' not found.");
-        //         
-        // if(!node.IsView)
-        //     throw new NotSupportedException($"Node '{viewId}' is not a view.");
-        //
-        // node.ShouldRebuild = true;
         _buildRequestedSubject.OnNext(viewId);
     }
 
@@ -120,35 +113,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         await _buildRequestedSemaphore.WaitAsync(); //ensure only one refresh operation at a time
         try
         {
-            //todo: if the node A is a child of node B, both are request but there's a memoized node 
-            //in between, we need to rebuild them both.
-
-            // List<string[]> paths = new();
-            // foreach (var viewId in requestedViewIds)
-            // {
-            //     if (!_nodes.TryGetValue(viewId, out var node))
-            //         throw new NotSupportedException($"Node '{viewId}' not found.");
-            //
-            //     if (!node.IsView)
-            //         throw new NotSupportedException($"Node '{viewId}' is not a view.");
-            //
-            //     //if (node.ShouldRebuild) //this might have changed since we requested the build
-            //     {
-            //         var path = new List<string>();
-            //         var current = node;
-            //         path.Add(node.Id);
-            //         while (_parents.TryGetValue(current.Id, out var parentId))
-            //         {
-            //             current = _nodes[parentId];
-            //             path.Add(current.Id);
-            //         }
-            //         path.Reverse();
-            //         paths.Add(path.ToArray());
-            //     }
-            // }
-
-            //var nodesToRebuild = TreeRebuildSolver.FindMinimalRebuildNodes(paths.ToArray());
-
             var nodesToRebuild = requestedViewIds;
 
             List<WidgetTreeChanged> changes = new();
@@ -163,7 +127,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             {
                 if (_nodes.TryGetValue(nodeId, out var node))
                 {
-                    //node.CancelRebuild();
                     var changed = _RefreshView(node.Id, false);
                     if (changed != null)
                     {
@@ -319,14 +282,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         IViewContext? context = previousNode?.Context;
         if (!memoized || isHotReload || isRefreshingView || previousNode == null || previousNode.MemoizedHashCode != memoizedHashCode)
         {
-            // if (!isHotReload && !isRefreshingView && previousNode != null)
-            // {
-            //     previousNode.Dispose();
-            //     _nodes.Remove(previousNode.Id);
-            //     _parents.Remove(previousNode.Id);
-            //     previousNode = null;
-            // }
-
             if (view is IStateless)
             {
                 //Small optimization for stateless views to skip context creation - not sure this really matters
@@ -507,8 +462,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
     private void PrintDebug()
     {
-        //Console.WriteLine($"Nodes:{_nodes.Count}");
-        //PrintTree(NodeTree, 0);
     }
 
     private void PrintTree(WidgetTreeNode? node, int i)
@@ -517,7 +470,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         Console.Write(new string(' ', i));
         Console.Write($"{node.Id}:{(node.Widget == null ? "View" : "Widget")}:");
         Console.Write($"{(node.Widget?.GetType().Name ?? node.View?.GetType().Name)}");
-        //Console.Write($":{node.Path}");
         Console.WriteLine();
 
         foreach (var child in node.Children)

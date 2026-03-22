@@ -1,9 +1,9 @@
-import { ThemeColors } from '@/lib/theme';
+import { ThemeColors } from "@/lib/theme";
 
 /**
  * Chart color schemes
  */
-export type ColorScheme = 'Default' | 'Rainbow';
+export type ColorScheme = "Default" | "Rainbow";
 
 /**
  * Default color scheme variables from index.css
@@ -11,39 +11,39 @@ export type ColorScheme = 'Default' | 'Rainbow';
  * Uses existing chromatic colors for better consistency
  */
 const defaultColorVars = [
-  'emerald', // Green-cyan, high visibility
-  'red', // Red, high contrast
-  'teal', // Blue, distinct
-  'purple', // Purple, good contrast
-  'orange', // Orange, warm accent
-  'green', // Pure green
-  'cyan', // Cyan-blue, cool
-  'pink', // Pink, soft accent
-  'amber', // Yellow-orange, warm
-  'indigo', // Deep blue, distinct
+  "emerald", // Green-cyan, high visibility
+  "red", // Red, high contrast
+  "teal", // Blue, distinct
+  "purple", // Purple, good contrast
+  "orange", // Orange, warm accent
+  "green", // Pure green
+  "cyan", // Cyan-blue, cool
+  "pink", // Pink, soft accent
+  "amber", // Yellow-orange, warm
+  "indigo", // Deep blue, distinct
 ];
 
 /**
  * Rainbow color variables from index.css
  */
 const rainbowColorVars = [
-  'blue',
-  'cyan',
-  'yellow',
-  'red',
-  'orange',
-  'purple',
-  'lime',
-  'indigo',
-  'rose',
-  'green',
-  'pink',
-  'teal',
-  'amber',
-  'violet',
-  'emerald',
-  'fuchsia',
-  'sky',
+  "blue",
+  "cyan",
+  "yellow",
+  "red",
+  "orange",
+  "purple",
+  "lime",
+  "indigo",
+  "rose",
+  "green",
+  "pink",
+  "teal",
+  "amber",
+  "violet",
+  "emerald",
+  "fuchsia",
+  "sky",
 ];
 
 /**
@@ -54,12 +54,9 @@ const rainbowColorVars = [
  * @param themeColors - Theme colors (used as fallback if CSS variables unavailable)
  * @returns Array of hex color values from CSS variables
  */
-export const getChartColors = (
-  scheme: ColorScheme,
-  themeColors: ThemeColors
-): string[] => {
+export const getChartColors = (scheme: ColorScheme, themeColors: ThemeColors): string[] => {
   // SSR protection
-  if (typeof document === 'undefined') {
+  if (typeof document === "undefined") {
     return [themeColors.primary];
   }
 
@@ -67,7 +64,7 @@ export const getChartColors = (
     // Select color variables based on scheme
     let colorVars: string[];
 
-    if (scheme === 'Rainbow') {
+    if (scheme === "Rainbow") {
       // Use rainbow color variables: --blue, --cyan, --yellow, etc.
       colorVars = rainbowColorVars;
     } else {
@@ -76,17 +73,15 @@ export const getChartColors = (
     }
 
     const colors = colorVars
-      .map(name =>
-        getComputedStyle(document.documentElement)
-          .getPropertyValue(`--${name}`)
-          .trim()
+      .map((name) =>
+        getComputedStyle(document.documentElement).getPropertyValue(`--${name}`).trim(),
       )
       .filter(Boolean);
 
     // Fallback to primary color if no chart colors found
     return colors.length > 0 ? colors : [themeColors.primary];
   } catch (error) {
-    console.warn('Failed to read chart colors from CSS:', error);
+    console.warn("Failed to read chart colors from CSS:", error);
     return [themeColors.primary];
   }
 };
@@ -98,16 +93,16 @@ export const getChartColors = (
  * @returns Array of gradient configurations for ECharts
  */
 export const generateGradientColors = (colors: string[], opacity = 0.4) => {
-  return colors.map(color => ({
+  return colors.map((color) => ({
     opacity,
-    type: 'linear' as const,
+    type: "linear" as const,
     x: 0,
     y: 0,
     x2: 0,
     y2: 1,
     colorStops: [
       { offset: 0, color },
-      { offset: 1, color: 'transparent' },
+      { offset: 1, color: "transparent" },
     ],
   }));
 };

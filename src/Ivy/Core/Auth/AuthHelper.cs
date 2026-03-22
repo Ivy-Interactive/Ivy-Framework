@@ -1,9 +1,9 @@
 using System.Net;
 using System.Text.Json;
 using Grpc.Core;
-using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Server;
+using Ivy.Core.HttpTunneling;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
@@ -13,15 +13,15 @@ namespace Ivy.Core.Auth;
 
 public static class AuthHelper
 {
-    public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler)
-    => GetAuthCookies(context) is (var authToken, var extRefreshToken, var authSessionData)
-        ? GetAuthSession(authToken, extRefreshToken, authSessionData, httpMessageHandler)
-        : new AuthSession(httpMessageHandler);
+    public static AuthSession GetAuthSession(HttpContext context, TunneledHttpMessageHandler? httpMessageHandler)
+    => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var brokeredSessions)
+        ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, brokeredSessions, httpMessageHandler)
+        : new AuthSession(httpMessageHandler: httpMessageHandler);
 
-    public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler)
-    => GetAuthCookies(context) is (var authToken, var extRefreshToken, var authSessionData)
-        ? GetAuthSession(authToken, extRefreshToken, authSessionData, httpMessageHandler)
-        : new AuthSession(httpMessageHandler);
+    public static AuthSession GetAuthSession(ServerCallContext context, TunneledHttpMessageHandler? httpMessageHandler)
+    => GetAuthCookies(context) is (var accessToken, var refreshToken, var tag, var authSessionData, var brokeredSessions)
+        ? GetAuthSession(accessToken, refreshToken, tag, authSessionData, brokeredSessions, httpMessageHandler)
+        : new AuthSession(httpMessageHandler: httpMessageHandler);
 
     public static async Task ValidateAuthIfRequired(global::Ivy.Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
     {
@@ -44,7 +44,7 @@ public static class AuthHelper
 
         var serviceProvider = session.AppServices;
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
-        var httpMessageHandler = serviceProvider.GetRequiredService<HttpMessageHandler>();
+        var httpMessageHandler = serviceProvider.GetService<TunneledHttpMessageHandler>();
         var authSession = GetAuthSession(context, httpMessageHandler);
         try
         {
@@ -83,7 +83,7 @@ public static class AuthHelper
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
         try
         {
-            var httpMessageHandler = serviceProvider.GetRequiredService<HttpMessageHandler>();
+            var httpMessageHandler = serviceProvider.GetService<TunneledHttpMessageHandler>();
             var authSession = GetAuthSession(controller.HttpContext, httpMessageHandler);
             await ValidateAuth(serviceProvider, authSession, controller.HttpContext.RequestAborted);
         }
@@ -140,21 +140,25 @@ public static class AuthHelper
         }
     }
 
-    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(HttpContext context)
+    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<string, IAuthTokenHandlerSession> BrokeredSessions) GetAuthCookies(HttpContext context)
     {
         var cookies = context.Request.Cookies;
-        var authTokenValue = cookies["auth_token"].NullIfEmpty();
-        var extRefreshTokenValue = cookies["auth_ext_refresh_token"].NullIfEmpty();
+        var accessToken = cookies["access_token"].NullIfEmpty();
+        var refreshToken = cookies["refresh_token"].NullIfEmpty();
+        var tag = cookies["auth_tag"].NullIfEmpty();
         var authSessionDataValue = cookies["auth_session_data"].NullIfEmpty();
-        return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
+
+        var brokeredSessions = ExtractBrokeredSessionsFromCookies(cookies);
+
+        return (accessToken, refreshToken, tag, authSessionDataValue, brokeredSessions);
     }
 
-    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(ServerCallContext context)
+    private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<string, IAuthTokenHandlerSession> BrokeredSessions) GetAuthCookies(ServerCallContext context)
     {
         var cookies = context.RequestHeaders.GetValue("cookie") ?? string.Empty;
         if (string.IsNullOrEmpty(cookies))
         {
-            return (null, null, null);
+            return (null, null, null, null, new Dictionary<string, IAuthTokenHandlerSession>());
         }
 
         var cookieHeader = CookieHeaderValue.ParseList([cookies]).ToList();
@@ -168,39 +172,105 @@ public static class AuthHelper
                 : null;
         }
 
-        var authTokenValue = GetCookie("auth_token");
-        var extRefreshTokenValue = GetCookie("auth_ext_refresh_token");
+        var accessToken = GetCookie("access_token");
+        var refreshToken = GetCookie("refresh_token");
+        var tag = GetCookie("auth_tag");
         var authSessionDataValue = GetCookie("auth_session_data");
 
-        return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
+        var brokeredSessions = ExtractBrokeredSessionsFromCookieHeader(cookieHeader);
+
+        return (accessToken, refreshToken, tag, authSessionDataValue, brokeredSessions);
     }
 
-    private static AuthSession GetAuthSession(string? authTokenValue, string? extRefreshTokenValue, string? authSessionDataValue, HttpMessageHandler httpMessageHandler)
+    private static AuthSession GetAuthSession(string? accessToken, string? refreshToken, string? tag, string? authSessionDataValue, Dictionary<string, IAuthTokenHandlerSession> brokeredSessions, TunneledHttpMessageHandler? httpMessageHandler)
     {
-        if (authTokenValue == null)
+        if (accessToken == null)
         {
-            return new(httpMessageHandler, authSessionData: authSessionDataValue);
+            return new(null, authSessionDataValue, httpMessageHandler, brokeredSessions);
         }
 
         try
         {
-            var token = JsonSerializer.Deserialize<AuthToken>(authTokenValue, JsonHelper.DefaultOptions);
-            if (token == null)
-            {
-                return new(httpMessageHandler, authSessionData: authSessionDataValue);
-            }
-
-            // Check if refresh token is in a separate cookie
-            if (token.RefreshToken == null)
-            {
-                token = token with { RefreshToken = extRefreshTokenValue };
-            }
-
-            return new(httpMessageHandler, token, authSessionDataValue);
+            var token = new AuthToken(accessToken, refreshToken, tag);
+            return new(token, authSessionDataValue, httpMessageHandler, brokeredSessions);
         }
         catch (Exception)
         {
-            return new(httpMessageHandler, authSessionData: authSessionDataValue);
+            return new(null, authSessionDataValue, httpMessageHandler, brokeredSessions);
         }
+    }
+
+    private static Dictionary<string, IAuthTokenHandlerSession> ExtractBrokeredSessionsFromCookies(IRequestCookieCollection cookies)
+    {
+        var brokeredSessions = new Dictionary<string, IAuthTokenHandlerSession>();
+
+        // Discover OAuth provider cookies by scanning for the pattern: {provider}_access_token
+        var accessTokenCookies = cookies.Keys
+            .Where(key => key.EndsWith("_access_token") && key != "access_token")
+            .ToList();
+
+        foreach (var accessTokenName in accessTokenCookies)
+        {
+            var provider = accessTokenName[..^"_access_token".Length];
+            var refreshTokenName = $"{provider}_refresh_token";
+            var tagName = $"{provider}_auth_tag";
+
+            var accessToken = cookies[accessTokenName].NullIfEmpty();
+            if (accessToken == null)
+            {
+                continue;
+            }
+
+            var refreshToken = cookies[refreshTokenName].NullIfEmpty();
+            var tag = cookies[tagName].NullIfEmpty();
+
+            var authToken = new AuthToken(accessToken, refreshToken, tag);
+            var session = new AuthTokenHandlerSession(authToken: authToken);
+            brokeredSessions[provider] = session;
+        }
+
+        return brokeredSessions;
+    }
+
+    private static Dictionary<string, IAuthTokenHandlerSession> ExtractBrokeredSessionsFromCookieHeader(List<CookieHeaderValue> cookieHeader)
+    {
+        var brokeredSessions = new Dictionary<string, IAuthTokenHandlerSession>();
+
+        string? GetCookie(string name)
+        {
+            var rawValue = cookieHeader
+                .FirstOrDefault(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Value.Value;
+            return !string.IsNullOrEmpty(rawValue)
+                ? WebUtility.UrlDecode(rawValue)
+                : null;
+        }
+
+        // Discover OAuth provider cookies by scanning for the pattern: {provider}_access_token
+        var accessTokenCookies = cookieHeader
+            .Where(c => c.Name.Value != null && c.Name.Value.EndsWith("_access_token") && c.Name.Value != "access_token")
+            .Select(c => c.Name.Value!)
+            .ToList();
+
+        foreach (var accessTokenName in accessTokenCookies)
+        {
+            var provider = accessTokenName[..^"_access_token".Length];
+            var refreshTokenName = $"{provider}_refresh_token";
+            var tagName = $"{provider}_auth_tag";
+
+            var accessToken = GetCookie(accessTokenName);
+            if (accessToken == null)
+            {
+                continue;
+            }
+
+            var refreshToken = GetCookie(refreshTokenName);
+            var tag = GetCookie(tagName);
+
+            var authToken = new AuthToken(accessToken, refreshToken, tag);
+            var session = new AuthTokenHandlerSession(authToken: authToken);
+            brokeredSessions[provider] = session;
+        }
+
+        return brokeredSessions;
     }
 }

@@ -1,11 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState } from "react";
 import {
   CompactSelection,
   GridCell,
   GridCellKind,
   GridSelection,
   Item,
-} from '@glideapps/glide-data-grid';
+} from "@glideapps/glide-data-grid";
 
 interface UseGridSelectionProps {
   visibleRows: number;
@@ -15,10 +15,7 @@ interface UseGridSelectionProps {
 /**
  * Hook to manage grid selection state and changes
  */
-export const useGridSelection = ({
-  visibleRows,
-  getCellContent,
-}: UseGridSelectionProps) => {
+export const useGridSelection = ({ visibleRows, getCellContent }: UseGridSelectionProps) => {
   const [gridSelection, setGridSelection] = useState<GridSelection>({
     columns: CompactSelection.empty(),
     rows: CompactSelection.empty(),
@@ -43,7 +40,7 @@ export const useGridSelection = ({
         // If it's a link cell, don't allow it to be selected (prevents fuzzy effect)
         if (
           cellContent.kind === GridCellKind.Custom &&
-          (cellContent.data as { kind?: string })?.kind === 'link-cell'
+          (cellContent.data as { kind?: string })?.kind === "link-cell"
         ) {
           // Clear the selection for link cells
           setGridSelection({
@@ -56,7 +53,7 @@ export const useGridSelection = ({
 
       setGridSelection(newSelection);
     },
-    [getCellContent, visibleRows]
+    [getCellContent, visibleRows],
   );
 
   return {

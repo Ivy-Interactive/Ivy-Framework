@@ -195,6 +195,77 @@ exports.onExecutePostLogin = async (event, api) => {
 
 The user information email, name and picture will now be added to the JWT and consumed by Ivy in the `GetUserInfoAsync` function.
 
+### Step 7: Enable Management API Access (Optional)
+
+If you need to access brokered sessions (e.g., to call Google APIs directly using the Google OAuth token), you must authorize your application to access the Auth0 Management API. For more information about brokered sessions, see [Authentication Overview](01_AuthenticationOverview.md#brokered-sessions).
+
+#### Why You Need This
+
+When users authenticate via OAuth providers like Google or GitHub, Auth0 manages the OAuth flow and stores the provider's access tokens. By default, your application cannot access these tokens. Enabling Management API access allows you to retrieve these tokens programmatically.
+
+#### Configuration Steps
+
+1. **Go to Applications > APIs** in the Auth0 Dashboard
+2. **Click on "Auth0 Management API"**
+3. **Select the "Application Access" tab**
+4. **Find your application** in the list of applications
+5. **Click "Edit"**
+6. **Select the "Client Access" tab if it isn't already selected**
+7. **Toggle the switch to "Authorized"**
+8. **Grant the following scopes**:
+   - `read:users` - Required to fetch user information
+   - `read:user_idp_tokens` - Required to access OAuth provider tokens
+9. **Click "Update"**
+
+#### Register Token Handlers
+
+In addition to enabling Management API access, you must have a registered token handler for each OAuth provider you want to use. Without a registered handler, the provider won't appear in brokered sessions.
+
+**Built-in handlers** - Add the NuGet package to your project:
+- `Ivy.Auth.Google` - For Google OAuth tokens (requires `Google:ClientId` and `Google:ClientSecret` configuration)
+- `Ivy.Auth.GitHub` - For GitHub OAuth tokens
+
+> **Note:** The Google token handler requires your Google OAuth credentials (`Google:ClientId` and `Google:ClientSecret`) to refresh tokens. These are the same credentials you configured in Auth0 for Google social login.
+
+**Custom handlers** - For other providers (Microsoft, Apple, Twitter), implement a custom `IAuthTokenHandler` and register it in `Program.cs`:
+
+```csharp
+server.RegisterAuthTokenHandler<MyTwitterTokenHandler>(OAuthProviders.Twitter);
+```
+
+See [Authentication Overview](01_AuthenticationOverview.md#registering-token-handlers) for details on implementing custom token handlers.
+
+#### Using Brokered Sessions
+
+Once configured, you can access OAuth provider tokens in your Ivy application:
+
+```csharp
+var authService = UseService<IAuthService>();
+
+// Get all brokered sessions
+var result = await authService.GetBrokeredSessionsAsync();
+
+if (result.Sessions?.TryGetValue(OAuthProviders.Google, out var googleSession) == true)
+{
+    // Use the Google OAuth token to call Google APIs
+    using var httpClient = new HttpClient();
+    httpClient.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", googleSession.AuthToken?.AccessToken);
+
+    var response = await httpClient.GetAsync("https://www.googleapis.com/drive/v3/files");
+    // Process response...
+}
+```
+
+**Available OAuth Providers:**
+- `OAuthProviders.Google` - Google
+- `OAuthProviders.GitHub` - GitHub
+- `OAuthProviders.Twitter` - Twitter
+- `OAuthProviders.Apple` - Apple
+- `OAuthProviders.Microsoft` - Microsoft
+
+> **Note:** If Management API access is not configured, `GetBrokeredSessionsAsync()` will throw an exception.
+
 ## Adding Authentication
 
 To set up Auth0 Authentication with Ivy, run the following command and choose `Auth0` when asked to select an auth provider:

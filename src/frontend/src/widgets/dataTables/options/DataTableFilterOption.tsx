@@ -1,24 +1,18 @@
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  useEffect,
-  useRef,
-} from 'react';
-import { useTable } from '../dataTableContext';
-import { tableStyles } from '../styles/style';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useTable } from "../dataTableContext";
+import { tableStyles } from "../styles/style";
 import {
   QueryEditor,
   QueryEditorChangeEvent,
   parseQuery,
   useDropdownState,
-} from 'filter-query-editor';
-import { Filter } from '@/services/grpcTableService';
-import { parseInvalidQuery } from '../utils/tableDataFetcher';
-import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ColType } from '../types/types';
-import { cn } from '@/lib/utils';
+} from "filter-query-editor";
+import { Filter } from "@/services/grpcTableService";
+import { parseInvalidQuery } from "../utils/tableDataFetcher";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ColType } from "../types/types";
+import { cn } from "@/lib/utils";
 
 /**
  * DataTableFilterOption - The content component for the filter option
@@ -28,7 +22,7 @@ export const DataTableFilterOption: React.FC<{
   allowLlmFiltering?: boolean;
   isExpanded?: boolean;
 }> = ({ allowLlmFiltering = true, isExpanded = true }) => {
-  const [query, setQuery] = useState<string>('');
+  const [query, setQuery] = useState<string>("");
   const [pendingFilter, setPendingFilter] = useState<Filter | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [isQueryValid, setIsQueryValid] = useState(true);
@@ -44,9 +38,7 @@ export const DataTableFilterOption: React.FC<{
    */
   useEffect(() => {
     const observer = new MutationObserver(() => {
-      const autocompleteTooltip = document.querySelector(
-        '.cm-tooltip-autocomplete'
-      );
+      const autocompleteTooltip = document.querySelector(".cm-tooltip-autocomplete");
       dropdownState.setIsOpen(!!autocompleteTooltip);
     });
 
@@ -71,12 +63,12 @@ export const DataTableFilterOption: React.FC<{
     const container = editorContainerRef.current;
 
     // Use focusin/focusout which bubble (unlike focus/blur)
-    container.addEventListener('focusin', handleFocusIn);
-    container.addEventListener('focusout', handleFocusOut);
+    container.addEventListener("focusin", handleFocusIn);
+    container.addEventListener("focusout", handleFocusOut);
 
     return () => {
-      container.removeEventListener('focusin', handleFocusIn);
-      container.removeEventListener('focusout', handleFocusOut);
+      container.removeEventListener("focusin", handleFocusIn);
+      container.removeEventListener("focusout", handleFocusOut);
     };
   }, []);
 
@@ -84,23 +76,23 @@ export const DataTableFilterOption: React.FC<{
   const queryEditorColumns = useMemo(
     () =>
       columns
-        .filter(col => col.filterable ?? true)
-        .map(col => {
+        .filter((col) => col.filterable ?? true)
+        .map((col) => {
           // Map column types to filter-query-editor supported types
           // Default to 'text' if type is undefined (shouldn't happen but defensive)
           let editorType = (col.type ?? ColType.Text).toLowerCase();
           // DateTime should be treated as date for filtering purposes
-          if (editorType === 'datetime') {
-            editorType = 'date';
+          if (editorType === "datetime") {
+            editorType = "date";
           }
 
           return {
             name: col.name,
             type: editorType,
-            width: typeof col.width === 'number' ? col.width : 150,
+            width: typeof col.width === "number" ? col.width : 150,
           };
         }),
-    [columns]
+    [columns],
   );
 
   /**
@@ -111,7 +103,7 @@ export const DataTableFilterOption: React.FC<{
       setQuery(event.text);
       setIsQueryValid(event.isValid);
 
-      if (event.text.trim() === '') {
+      if (event.text.trim() === "") {
         setPendingFilter(null);
         setActiveFilter(null);
       } else if (event.isValid && event.filters) {
@@ -120,7 +112,7 @@ export const DataTableFilterOption: React.FC<{
         setPendingFilter(null);
       }
     },
-    [setActiveFilter]
+    [setActiveFilter],
   );
 
   /**
@@ -163,7 +155,7 @@ export const DataTableFilterOption: React.FC<{
    * Handle Enter key press
    */
   const handleEnterKey = useCallback(async () => {
-    if (query.trim() === '') {
+    if (query.trim() === "") {
       setActiveFilter(null);
       return;
     }
@@ -177,20 +169,13 @@ export const DataTableFilterOption: React.FC<{
       await handleInvalidQuery();
       return;
     }
-  }, [
-    query,
-    isQueryValid,
-    pendingFilter,
-    setActiveFilter,
-    allowLlmFiltering,
-    handleInvalidQuery,
-  ]);
+  }, [query, isQueryValid, pendingFilter, setActiveFilter, allowLlmFiltering, handleInvalidQuery]);
 
   /**
    * Handle clear filter
    */
   const handleClearFilter = useCallback(() => {
-    setQuery('');
+    setQuery("");
     setPendingFilter(null);
     setIsQueryValid(true);
     setActiveFilter(null);
@@ -202,9 +187,7 @@ export const DataTableFilterOption: React.FC<{
   const handleContainerClick = useCallback(() => {
     if (editorContainerRef.current) {
       // Find the CodeMirror content element and focus it
-      const cmContent = editorContainerRef.current.querySelector(
-        '.cm-content'
-      ) as HTMLElement;
+      const cmContent = editorContainerRef.current.querySelector(".cm-content") as HTMLElement;
       if (cmContent) {
         cmContent.focus();
       }
@@ -217,23 +200,18 @@ export const DataTableFilterOption: React.FC<{
    */
   const handleKeyDownCapture = useCallback(
     (event: React.KeyboardEvent) => {
-      if (
-        event.key === 'Enter' &&
-        (event.metaKey || event.ctrlKey || !event.shiftKey)
-      ) {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey || !event.shiftKey)) {
         // In capture phase, check if autocomplete is open
-        const autocompleteInDOM = document.querySelector(
-          '.cm-tooltip-autocomplete'
-        );
+        const autocompleteInDOM = document.querySelector(".cm-tooltip-autocomplete");
 
         if (autocompleteInDOM || dropdownState.stateRef.current) {
           // Mark this event so bubble phase knows to ignore it
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // oxlint-disable-next-line @typescript-eslint/no-explicit-any
           (event.nativeEvent as any).__skipFilterTrigger = true;
         }
       }
     },
-    [dropdownState.stateRef]
+    [dropdownState.stateRef],
   );
 
   /**
@@ -242,12 +220,9 @@ export const DataTableFilterOption: React.FC<{
    */
   const handleKeyDown = useCallback(
     async (event: React.KeyboardEvent) => {
-      if (
-        event.key === 'Enter' &&
-        (event.metaKey || event.ctrlKey || !event.shiftKey)
-      ) {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey || !event.shiftKey)) {
         // Check if capture phase marked this to skip
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // oxlint-disable-next-line @typescript-eslint/no-explicit-any
         if ((event.nativeEvent as any).__skipFilterTrigger) {
           return;
         }
@@ -256,12 +231,12 @@ export const DataTableFilterOption: React.FC<{
         await handleEnterKey();
       }
     },
-    [handleEnterKey]
+    [handleEnterKey],
   );
 
   // Generate dynamic placeholder
   const placeholderText = useMemo(() => {
-    if (columns.length === 0) return 'No columns available';
+    if (columns.length === 0) return "No columns available";
 
     const firstColumn = columns[0];
     const secondColumn = columns[1];
@@ -269,10 +244,7 @@ export const DataTableFilterOption: React.FC<{
     const getColumnExample = (column: typeof firstColumn) => {
       if (column.type === ColType.Number) {
         return `[${column.name}] > 100`;
-      } else if (
-        column.type === ColType.Date ||
-        column.type === ColType.DateTime
-      ) {
+      } else if (column.type === ColType.Date || column.type === ColType.DateTime) {
         return `[${column.name}] >= "2024-01-01"`;
       } else {
         return `[${column.name}] = "value"`;
@@ -287,7 +259,7 @@ export const DataTableFilterOption: React.FC<{
       return `e.g., ${getColumnExample(firstColumn)}`;
     }
 
-    return 'Enter filter expression';
+    return "Enter filter expression";
   }, [columns]);
 
   if (columns.length === 0) {
@@ -298,8 +270,8 @@ export const DataTableFilterOption: React.FC<{
     <div
       ref={editorContainerRef}
       onClick={handleContainerClick}
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') {
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleContainerClick();
         }
@@ -307,10 +279,10 @@ export const DataTableFilterOption: React.FC<{
       role="button"
       tabIndex={0}
       className={cn(
-        'flex items-center w-full h-full justify-between',
-        'rounded-tr-md rounded-br-md border transition-colors',
-        isFocused ? 'border-border' : 'border-transparent',
-        isExpanded ? 'cursor-text' : 'pointer-events-none'
+        "flex items-center w-full h-full justify-between",
+        "rounded-tr-md rounded-br-md border transition-colors",
+        isFocused ? "border-border" : "border-transparent",
+        isExpanded ? "cursor-text" : "pointer-events-none",
       )}
     >
       <div
@@ -345,10 +317,8 @@ export const DataTableFilterOption: React.FC<{
             onClick={handleClearFilter}
             disabled={!query}
             className={cn(
-              'h-9 px-3 text-sm hover:bg-muted/50 transition-all',
-              query
-                ? 'opacity-100 visible'
-                : 'opacity-0 invisible pointer-events-none'
+              "h-9 px-3 text-sm hover:bg-muted/50 transition-all",
+              query ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none",
             )}
           >
             Clear

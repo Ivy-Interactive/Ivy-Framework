@@ -6,12 +6,15 @@ WORKDIR /app
 EXPOSE 5010
 
 # Build frontend (Ivy embeds frontend/dist)
-FROM node:20-alpine AS frontend
+FROM node:24-bookworm-slim AS frontend
 WORKDIR /src
-COPY ["src/frontend/package.json", "src/frontend/package-lock.json", "src/frontend/"]
-RUN cd src/frontend && npm ci
+COPY ["src/frontend/package.json", "src/frontend/pnpm-lock.yaml", "src/frontend/"]
+RUN apt-get update && apt-get install -y curl bash && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL https://vite.plus | bash
+ENV PATH="/root/.vite-plus/bin:${PATH}"
+RUN cd src/frontend && vp install
 COPY ["src/frontend/", "src/frontend/"]
-RUN cd src/frontend && npm run build
+RUN cd src/frontend && vp build
 
 # Build .NET from source (no IVY_PACKAGE_VERSION = use ProjectReference, your changes apply)
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build

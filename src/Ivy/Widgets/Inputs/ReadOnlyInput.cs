@@ -40,7 +40,7 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
         Value = default!;
     }
 
-    [Prop] public TValue Value { get; init; }
+    [Prop(AlwaysSerialize = true)] public TValue Value { get; init; }
 
     [Prop] public bool Disabled { get; set; }
 

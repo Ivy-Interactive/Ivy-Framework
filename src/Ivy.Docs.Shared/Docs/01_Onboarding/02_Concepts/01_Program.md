@@ -62,6 +62,7 @@ var server = new Server(new ServerArgs
 | `DefaultAppId` | `string?` | `null` | Set the default app to load |
 | `MetaTitle` | `string?` | `null` | HTML meta title |
 | `MetaDescription` | `string?` | `null` | HTML meta description |
+| `MetaGitHubUrl` | `string?` | `null` | GitHub repository URL meta tag |
 
 ## Adding Applications
 
@@ -191,6 +192,7 @@ Set HTML metadata for SEO:
 ```csharp
 server.SetMetaTitle("My Ivy Application");
 server.SetMetaDescription("A powerful web application built with Ivy");
+server.SetMetaGitHubUrl("https://github.com/user/repo");
 ```
 
 ## Complete Examples

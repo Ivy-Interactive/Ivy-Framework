@@ -8,6 +8,7 @@ public sealed class EventDispatchQueue : IDisposable
     private readonly Channel<Func<Task>> _channel;
     private readonly CancellationTokenSource _cts;
     private readonly Task _worker;
+    private volatile bool _disposed;
 
     public EventDispatchQueue(CancellationToken externalCancellation)
     {
@@ -45,25 +46,28 @@ public sealed class EventDispatchQueue : IDisposable
 
     public void Enqueue(Action action)
     {
+        if (_disposed) return;
         // Wrap synchronous action in a Task-returning function
         if (!_channel.Writer.TryWrite(() => { action(); return Task.CompletedTask; }))
         {
-            // Fallback to best-effort
+            if (_disposed) return;
             _ = _channel.Writer.WriteAsync(() => { action(); return Task.CompletedTask; }, _cts.Token);
         }
     }
 
     public void Enqueue(Func<Task> asyncAction)
     {
+        if (_disposed) return;
         if (!_channel.Writer.TryWrite(asyncAction))
         {
-            // Fallback to best-effort
+            if (_disposed) return;
             _ = _channel.Writer.WriteAsync(asyncAction, _cts.Token);
         }
     }
 
     public void Dispose()
     {
+        _disposed = true;
         try
         {
             _cts.Cancel();

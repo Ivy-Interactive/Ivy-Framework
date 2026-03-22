@@ -85,7 +85,7 @@ public record SignatureInput<TValue> : SignatureInputBase, IInput<TValue>, IAnyS
         Height = Size.Units(40);
     }
 
-    [Prop] public TValue Value { get; } = default!;
+    [Prop(AlwaysSerialize = true)] public TValue Value { get; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 

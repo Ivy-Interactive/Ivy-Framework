@@ -89,7 +89,7 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 
     internal DateTimeInput() { }
 
-    [Prop] public TDate Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TDate Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TDate) == typeof(DateTime?) || typeof(TDate) == typeof(DateTimeOffset?) || typeof(TDate) == typeof(DateOnly?) || typeof(TDate) == typeof(TimeOnly?);
 

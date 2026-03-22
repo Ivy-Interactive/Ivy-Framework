@@ -26,6 +26,7 @@ When a browser requests your Ivy application, the server serves an `index.html` 
 | **LicenseFilter** | `<meta name="ivy-license">` tag from `Ivy:License` configuration |
 | **DevToolsFilter** | `<meta name="ivy-enable-dev-tools">` when `EnableDevTools` is true |
 | **MetaDescriptionFilter** | `<meta name="description">` from `ServerArgs.MetaDescription` |
+| **MetaGitHubUrlFilter** | `<meta name="github-url">` from `ServerArgs.MetaGitHubUrl` |
 | **TitleFilter** | Updates the existing `<title>` element with `ServerArgs.MetaTitle` |
 | **ThemeFilter** | Injects theme CSS `<style>` and `<meta name="ivy-theme">` from `IThemeService` |
 | **ManifestFilter** | `<link rel="manifest" href="/manifest.json">` when `ManifestOptions` is registered |

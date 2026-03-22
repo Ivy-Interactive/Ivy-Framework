@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /**
  * Generic optimistic value hook for input widgets.
@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react';
 export function useOptimisticValue<T>(
   serverValue: T,
   isActive: boolean,
-  isEqual?: (a: T, b: T) => boolean
+  isEqual?: (a: T, b: T) => boolean,
 ): [T, (value: T) => void] {
   const [localValue, setLocalValue] = useState<T>(serverValue);
   const eq = isEqual ?? ((a: T, b: T) => a === b);
@@ -21,7 +21,7 @@ export function useOptimisticValue<T>(
     if (!isActive && !eq(serverValue, localValue)) {
       queueMicrotask(() => setLocalValue(serverValue));
     }
-  }, [serverValue, isActive]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [serverValue, isActive]); // oxlint-disable-line react-hooks/exhaustive-deps
 
   return [localValue, setLocalValue];
 }

@@ -1,51 +1,46 @@
-import React from 'react';
-import { useEventHandler } from '@/components/event-handler';
-import { cn } from '@/lib/utils';
-import { ChevronRight } from 'lucide-react';
-import { inputStyles } from '@/lib/styles';
-import { InvalidIcon } from '@/components/InvalidIcon';
-import {
-  Tooltip,
-  TooltipProvider,
-  TooltipTrigger,
-  TooltipContent,
-} from '@/components/ui/tooltip';
-import { useRef, useEffect, useState } from 'react';
-import { Densities } from '@/types/density';
-import { cva } from 'class-variance-authority';
+import React from "react";
+import { useEventHandler } from "@/components/event-handler";
+import { cn } from "@/lib/utils";
+import { ChevronRight } from "lucide-react";
+import { inputStyles } from "@/lib/styles";
+import { InvalidIcon } from "@/components/InvalidIcon";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { useRef, useEffect, useState } from "react";
+import { Densities } from "@/types/density";
+import { cva } from "class-variance-authority";
 
 const asyncSelectContainerVariant = cva(
-  'hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex text-left w-full items-center rounded-field border border-input bg-transparent shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer relative dark:border-white/10',
+  "hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex text-left w-full items-center rounded-field border border-input bg-transparent shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer relative dark:border-white/10",
   {
     variants: {
       density: {
-        Small: 'h-7 px-2 py-1 pr-7',
-        Medium: 'h-9 px-3 py-2 pr-9',
-        Large: 'h-11 px-4 py-3 pr-11',
+        Small: "h-7 px-2 py-1 pr-7",
+        Medium: "h-9 px-3 py-2 pr-9",
+        Large: "h-11 px-4 py-3 pr-11",
       },
     },
     defaultVariants: {
-      density: 'Medium',
+      density: "Medium",
     },
-  }
+  },
 );
 
 const asyncSelectTextVariant = {
-  Small: 'text-xs',
-  Medium: 'text-sm',
-  Large: 'text-base',
+  Small: "text-xs",
+  Medium: "text-sm",
+  Large: "text-base",
 };
 
 const asyncSelectIconContainerVariant = {
-  Small: 'w-7 right-0 px-2',
-  Medium: 'w-8 right-0 px-2',
-  Large: 'w-10 right-0 px-2',
+  Small: "w-7 right-0 px-2",
+  Medium: "w-8 right-0 px-2",
+  Large: "w-10 right-0 px-2",
 };
 
 const asyncSelectIconVariant = {
-  Small: 'h-3 w-3',
-  Medium: 'h-4 w-4',
-  Large: 'h-5 w-5',
+  Small: "h-3 w-3",
+  Medium: "h-4 w-4",
+  Large: "h-5 w-5",
 };
 
 interface AsyncSelectInputWidgetProps {
@@ -72,7 +67,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   const eventHandler = useEventHandler();
 
   const handleSelect = () => {
-    eventHandler('OnSelect', id, []);
+    eventHandler("OnSelect", id, []);
   };
 
   // Create ref for the display value span
@@ -92,10 +87,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
       if (!displayValueRef?.current) {
         return;
       }
-      setIsEllipsed(
-        displayValueRef.current.scrollWidth >
-          displayValueRef.current.clientWidth
-      );
+      setIsEllipsed(displayValueRef.current.scrollWidth > displayValueRef.current.clientWidth);
     };
 
     // Check after render
@@ -107,11 +99,11 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(checkEllipsis, 150);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       clearTimeout(resizeTimeout);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [displayValue]);
 
@@ -119,10 +111,10 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
     <span
       ref={displayValueRef}
       className={cn(
-        'grow overflow-hidden text-ellipsis whitespace-nowrap',
+        "grow overflow-hidden text-ellipsis whitespace-nowrap",
         asyncSelectTextVariant[density],
-        !loading && 'text-primary font-semibold underline',
-        loading && 'text-muted-foreground'
+        !loading && "text-primary font-semibold underline",
+        loading && "text-muted-foreground",
       )}
     >
       {displayValue}
@@ -136,9 +128,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
       <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>{displayValueSpan}</TooltipTrigger>
         <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-          <div className="whitespace-pre-wrap wrap-break-word">
-            {displayValue}
-          </div>
+          <div className="whitespace-pre-wrap wrap-break-word">{displayValue}</div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -156,17 +146,12 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
           asyncSelectContainerVariant({ density }),
           invalid && inputStyles.invalidInput,
           ghost &&
-            'border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent'
+            "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
         )}
       >
         {wrappedDisplayValue}
         {!displayValue && (
-          <span
-            className={cn(
-              'grow text-muted-foreground',
-              asyncSelectTextVariant[density]
-            )}
-          >
+          <span className={cn("grow text-muted-foreground", asyncSelectTextVariant[density])}>
             {placeholder}
           </span>
         )}
@@ -177,16 +162,11 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         )}
         <div
           className={cn(
-            'absolute top-0 bottom-0 border-l flex items-center justify-center',
-            asyncSelectIconContainerVariant[density]
+            "absolute top-0 bottom-0 border-l flex items-center justify-center",
+            asyncSelectIconContainerVariant[density],
           )}
         >
-          <ChevronRight
-            className={cn(
-              'opacity-50 shrink-0',
-              asyncSelectIconVariant[density]
-            )}
-          />
+          <ChevronRight className={cn("opacity-50 shrink-0", asyncSelectIconVariant[density])} />
         </div>
       </button>
     </div>

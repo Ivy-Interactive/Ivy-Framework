@@ -20,12 +20,9 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
   events = [],
   eventHandler,
 }) => {
-  const [screenshotCanvas, setScreenshotCanvas] =
-    useState<HTMLCanvasElement | null>(null);
+  const [screenshotCanvas, setScreenshotCanvas] = useState<HTMLCanvasElement | null>(null);
   const [shapes, setShapes] = useState<Shape[]>([]);
-  const [activeTool, setActiveTool] = useState<DrawingTool>(
-    DrawingTool.Callout,
-  );
+  const [activeTool, setActiveTool] = useState<DrawingTool>(DrawingTool.Callout);
   const [color, setColor] = useState("#ef4444");
   const [lineWidth, setLineWidth] = useState(4);
   const [capturing, setCapturing] = useState(false);
@@ -150,22 +147,23 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
     }
 
     // Then fire the event (upload is now complete, C# handler can read the content)
-    console.log("[ScreenshotFeedback] Upload complete, firing OnSave event", {
-      hasEvents: events.includes("OnSave"),
+    const hasOnSave = events.includes("OnSave");
+    console.log(
+      "[ScreenshotFeedback] Upload complete. events:",
+      JSON.stringify(events),
+      "hasOnSave:",
+      hasOnSave,
+      "id:",
       id,
-      uploadUrl,
-    });
-    if (events.includes("OnSave")) {
+    );
+    if (hasOnSave) {
+      console.log("[ScreenshotFeedback] Calling eventHandler now...");
       eventHandler("OnSave", id, [buildAnnotationData()]);
+      console.log("[ScreenshotFeedback] eventHandler called.");
+    } else {
+      console.error("[ScreenshotFeedback] OnSave NOT in events array! Events received:", events);
     }
-  }, [
-    screenshotCanvas,
-    uploadUrl,
-    events,
-    eventHandler,
-    id,
-    buildAnnotationData,
-  ]);
+  }, [screenshotCanvas, uploadUrl, events, eventHandler, id, buildAnnotationData]);
 
   const onCancel = useCallback(() => {
     if (events.includes("OnCancel")) {
@@ -221,11 +219,7 @@ export const ScreenshotFeedback: React.FC<ScreenshotFeedbackProps> = ({
   }
 
   return (
-    <div
-      className="screenshot-overlay"
-      ref={overlayRef}
-      data-screenshot-overlay="true"
-    >
+    <div className="screenshot-overlay" ref={overlayRef} data-screenshot-overlay="true">
       <Toolbar
         activeTool={activeTool}
         color={color}

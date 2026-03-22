@@ -1,5 +1,4 @@
 using Ivy;
-using Ivy.Auth.GitHub;
 
 var server = new Server();
 

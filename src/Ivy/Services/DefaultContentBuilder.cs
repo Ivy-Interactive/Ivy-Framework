@@ -152,6 +152,11 @@ public class DefaultContentBuilder : IContentBuilder
             return new TextBlock(dateOnly.ToString(DateFormat), TextVariant.Block);
         }
 
+        if (content is object[] array)
+        {
+            return new Fragment(array);
+        }
+
         if (content is IEnumerable enumerable)
         {
             //todo: zero items?

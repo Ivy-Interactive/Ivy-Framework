@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Pagination,
   PaginationContent,
@@ -7,9 +7,9 @@ import {
   PaginationLink,
   PaginationEllipsis,
   PaginationNext,
-} from '@/components/ui/pagination';
-import { useEventHandler } from '@/components/event-handler';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/pagination";
+import { useEventHandler } from "@/components/event-handler";
+import { cn } from "@/lib/utils";
 
 interface PaginationWidgetProps {
   id: string;
@@ -35,7 +35,7 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
     if (p < boundaries || p >= numPages - boundaries) {
       // This is a boundary
       showPages.push(p + 1);
-    } else if (typeof page === 'number') {
+    } else if (typeof page === "number") {
       // The page "p" should be shown if Math.abs(p - (page - 1)) <= siblings. But to prevent the
       // component from shrinking when the page is near the start or the end, we need to clamp the
       // (page - 1) part.
@@ -45,10 +45,7 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
         leftClamp += 1;
         rightClamp -= 1;
       }
-      if (
-        Math.abs(p - Math.min(Math.max(page - 1, leftClamp), rightClamp)) <=
-        siblings
-      ) {
+      if (Math.abs(p - Math.min(Math.max(page - 1, leftClamp), rightClamp)) <= siblings) {
         // This is a sibling
         showPages.push(p + 1);
       }
@@ -62,15 +59,11 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
           <PaginationPrevious
             aria-disabled={disabled || !page || page === 1}
             className={cn(
-              'select-none',
-              disabled || !page || page === 1
-                ? 'pointer-events-none opacity-50'
-                : null
+              "select-none",
+              disabled || !page || page === 1 ? "pointer-events-none opacity-50" : null,
             )}
             onClick={
-              !page || page === 1
-                ? undefined
-                : () => eventHandler('OnChange', id, [page - 1])
+              !page || page === 1 ? undefined : () => eventHandler("OnChange", id, [page - 1])
             }
           />
         </PaginationItem>
@@ -84,13 +77,9 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
                   <PaginationItem>
                     <PaginationLink
                       aria-disabled={disabled}
-                      className={
-                        disabled ? 'pointer-events-none opacity-50' : undefined
-                      }
+                      className={disabled ? "pointer-events-none opacity-50" : undefined}
                       onClick={
-                        p - 1 === page
-                          ? undefined
-                          : () => eventHandler('OnChange', id, [p - 1])
+                        p - 1 === page ? undefined : () => eventHandler("OnChange", id, [p - 1])
                       }
                       isActive={p - 1 === page}
                     >
@@ -105,14 +94,8 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
               <PaginationItem>
                 <PaginationLink
                   aria-disabled={disabled}
-                  className={
-                    disabled ? 'pointer-events-none opacity-50' : undefined
-                  }
-                  onClick={
-                    p === page
-                      ? undefined
-                      : () => eventHandler('OnChange', id, [p])
-                  }
+                  className={disabled ? "pointer-events-none opacity-50" : undefined}
+                  onClick={p === page ? undefined : () => eventHandler("OnChange", id, [p])}
                   isActive={p === page}
                 >
                   {p}
@@ -125,15 +108,13 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
           <PaginationNext
             aria-disabled={disabled || !page || page === numPages}
             className={cn(
-              'select-none',
-              disabled || !page || page === numPages
-                ? 'pointer-events-none opacity-50'
-                : null
+              "select-none",
+              disabled || !page || page === numPages ? "pointer-events-none opacity-50" : null,
             )}
             onClick={
               !page || page === numPages
                 ? undefined
-                : () => eventHandler('OnChange', id, [page + 1])
+                : () => eventHandler("OnChange", id, [page + 1])
             }
           />
         </PaginationItem>

@@ -135,32 +135,24 @@ export const Terminal: React.FC<TerminalProps> = ({
 
   const handleData = useCallback(
     (data: string) => {
-      if (
-        !isReadOnlyRef.current &&
-        typeof eventHandlerRef.current === "function"
-      ) {
+      if (!isReadOnlyRef.current && typeof eventHandlerRef.current === "function") {
         try {
           eventHandlerRef.current("OnInput", id, [data]);
         } catch {}
       }
     },
-    [id]
+    [id],
   );
 
   const handleResize = useCallback(
     (size: { cols: number; rows: number }) => {
-      if (
-        eventsRef.current.includes("OnResize") &&
-        typeof eventHandlerRef.current === "function"
-      ) {
+      if (eventsRef.current.includes("OnResize") && typeof eventHandlerRef.current === "function") {
         try {
-          eventHandlerRef.current("OnResize", id, [
-            { cols: size.cols, rows: size.rows },
-          ]);
+          eventHandlerRef.current("OnResize", id, [{ cols: size.cols, rows: size.rows }]);
         } catch {}
       }
     },
-    [id]
+    [id],
   );
 
   const handleLinkClick = useCallback(
@@ -178,7 +170,7 @@ export const Terminal: React.FC<TerminalProps> = ({
         window.open(uri, "_blank", "noopener,noreferrer");
       }
     },
-    [id]
+    [id],
   );
 
   // Initialize Shadow DOM and terminal
@@ -393,9 +385,7 @@ export const Terminal: React.FC<TerminalProps> = ({
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.options.disableStdin = isReadOnly;
-      terminalRef.current.options.cursorBlink = isReadOnly
-        ? false
-        : cursorBlinkRef.current;
+      terminalRef.current.options.cursorBlink = isReadOnly ? false : cursorBlinkRef.current;
       // Hide/show cursor using ANSI escape sequences
       if (isReadOnly) {
         terminalRef.current.write("\x1b[?25l"); // Hide cursor

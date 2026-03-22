@@ -1,35 +1,31 @@
-import React, { useMemo } from 'react';
-import { getHeight, getWidth } from '@/lib/styles';
-import { useThemeWithMonitoring } from '@/components/theme-provider';
-import ReactECharts from 'echarts-for-react';
+import React, { useMemo } from "react";
+import { getHeight, getWidth } from "@/lib/styles";
+import { useThemeWithMonitoring } from "@/components/theme-provider";
+import ReactECharts from "echarts-for-react";
 import {
   getColors,
   generateTextStyle,
   generateEChartToolbox,
   generateTooltip,
-} from './sharedUtils';
-import { ChartType, FunnelChartWidgetProps } from './chartTypes';
-import { generateDataProps } from './sharedUtils';
-import { getChartThemeColors } from './styles';
-import {
-  FUNNEL_DEFAULTS,
-  FUNNEL_LEGEND_DEFAULTS,
-  applyDefaults,
-} from './chartDefaults';
+} from "./sharedUtils";
+import { ChartType, FunnelChartWidgetProps } from "./chartTypes";
+import { generateDataProps } from "./sharedUtils";
+import { getChartThemeColors } from "./styles";
+import { FUNNEL_DEFAULTS, FUNNEL_LEGEND_DEFAULTS, applyDefaults } from "./chartDefaults";
 
-import { EMPTY_ARRAY } from '@/lib/constants';
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
   data = EMPTY_ARRAY,
-  width = 'Full',
-  height = 'Full',
+  width = "Full",
+  height = "Full",
   funnels = EMPTY_ARRAY,
   tooltip,
   toolbox,
   legend,
-  colorScheme = 'Default',
-  sort = 'Descending',
-  orientation = 'Vertical',
+  colorScheme = "Default",
+  sort = "Descending",
+  orientation = "Vertical",
   gap = 0,
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
@@ -37,50 +33,38 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
     monitorSystem: true,
   });
 
-  const themeColors = useMemo(
-    () => getChartThemeColors(colors, isDark),
-    [colors, isDark]
-  );
+  const themeColors = useMemo(() => getChartThemeColors(colors, isDark), [colors, isDark]);
 
   const heightStyle = height ? getHeight(height) : {};
-  const isFull = height?.toLowerCase().startsWith('full');
+  const isFull = height?.toLowerCase().startsWith("full");
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    position: 'relative',
-    ...(isFull
-      ? { display: 'flex', flexDirection: 'column', height: '100%' }
-      : {}),
+    position: "relative",
+    ...(isFull ? { display: "flex", flexDirection: "column", height: "100%" } : {}),
   };
 
   const chartStyles: React.CSSProperties = {
-    ...(isFull
-      ? { flex: 1, minHeight: '200px' }
-      : { ...heightStyle, minHeight: '200px' }),
-    width: '100%',
+    ...(isFull ? { flex: 1, minHeight: "200px" } : { ...heightStyle, minHeight: "200px" }),
+    width: "100%",
   };
 
   const { valueKeys } = generateDataProps(data);
 
-  const chartColors = useMemo(
-    () => getColors(colorScheme, colors),
-    [colorScheme, colors]
-  );
+  const chartColors = useMemo(() => getColors(colorScheme, colors), [colorScheme, colors]);
 
   const funnelData = useMemo(() => {
     // Determine the value and name keys from the first funnel config,
     // falling back to the standard PieChartData property names
     const firstFunnel = funnels?.[0];
     const valKey = firstFunnel?.dataKey
-      ? firstFunnel.dataKey.charAt(0).toLowerCase() +
-        firstFunnel.dataKey.slice(1)
-      : 'measure';
+      ? firstFunnel.dataKey.charAt(0).toLowerCase() + firstFunnel.dataKey.slice(1)
+      : "measure";
     const nameKey = firstFunnel?.nameKey
-      ? firstFunnel.nameKey.charAt(0).toLowerCase() +
-        firstFunnel.nameKey.slice(1)
-      : 'dimension';
+      ? firstFunnel.nameKey.charAt(0).toLowerCase() + firstFunnel.nameKey.slice(1)
+      : "dimension";
 
-    return data.map(d => {
+    return data.map((d) => {
       const record = d as Record<string, unknown>;
       return {
         value: record[valKey] ?? d.measure,
@@ -91,28 +75,24 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
 
   const echartsSort = useMemo(() => {
     switch (sort?.toLowerCase()) {
-      case 'ascending':
-        return 'ascending';
-      case 'none':
-        return 'none';
-      case 'descending':
+      case "ascending":
+        return "ascending";
+      case "none":
+        return "none";
+      case "descending":
       default:
-        return 'descending';
+        return "descending";
     }
   }, [sort]);
 
   const echartsOrient = useMemo(() => {
-    return orientation?.toLowerCase() === 'horizontal'
-      ? 'horizontal'
-      : 'vertical';
+    return orientation?.toLowerCase() === "horizontal" ? "horizontal" : "vertical";
   }, [orientation]);
 
   const series = useMemo(
     () =>
-      valueKeys.map(key => {
-        const rawFunnelConfig = funnels?.find(
-          f => f.dataKey.toLowerCase() === key
-        );
+      valueKeys.map((key) => {
+        const rawFunnelConfig = funnels?.find((f) => f.dataKey.toLowerCase() === key);
         const funnelConfig = rawFunnelConfig
           ? applyDefaults(rawFunnelConfig, FUNNEL_DEFAULTS)
           : FUNNEL_DEFAULTS;
@@ -123,18 +103,18 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
           sort: echartsSort,
           orient: echartsOrient,
           gap: gap ?? 0,
-          left: '10%',
-          right: '10%',
-          top: '10%',
-          bottom: '10%',
+          left: "10%",
+          right: "10%",
+          top: "10%",
+          bottom: "10%",
           min: 0,
-          max: Math.max(...funnelData.map(d => d.value as number), 100),
-          minSize: funnelConfig.minSize ?? '0%',
-          maxSize: funnelConfig.maxSize ?? '100%',
+          max: Math.max(...funnelData.map((d) => d.value as number), 100),
+          minSize: funnelConfig.minSize ?? "0%",
+          maxSize: funnelConfig.maxSize ?? "100%",
           animation: funnelConfig.animated ?? FUNNEL_DEFAULTS.animated,
           label: {
             show: true,
-            position: 'inside' as const,
+            position: "inside" as const,
             color: themeColors.foreground,
             fontFamily: themeColors.fontSans,
           },
@@ -145,8 +125,7 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
             color: funnelConfig.fill ?? undefined,
             opacity: funnelConfig.fillOpacity ?? undefined,
             borderColor: funnelConfig.stroke ?? undefined,
-            borderWidth:
-              funnelConfig.strokeWidth ?? FUNNEL_DEFAULTS.strokeWidth,
+            borderWidth: funnelConfig.strokeWidth ?? FUNNEL_DEFAULTS.strokeWidth,
           },
           emphasis: {
             label: {
@@ -156,15 +135,7 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
           data: funnelData,
         };
       }),
-    [
-      valueKeys,
-      funnels,
-      funnelData,
-      echartsSort,
-      echartsOrient,
-      gap,
-      themeColors,
-    ]
+    [valueKeys, funnels, funnelData, echartsSort, echartsOrient, gap, themeColors],
   );
 
   const option = useMemo(() => {
@@ -174,36 +145,27 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
       color: chartColors,
       ...(leg && {
         legend: {
-          orient:
-            leg.layout?.toLowerCase() === 'vertical'
-              ? 'vertical'
-              : 'horizontal',
+          orient: leg.layout?.toLowerCase() === "vertical" ? "vertical" : "horizontal",
           left:
-            leg.align?.toLowerCase() === 'left'
-              ? 'left'
-              : leg.align?.toLowerCase() === 'right'
-                ? 'right'
-                : 'center',
+            leg.align?.toLowerCase() === "left"
+              ? "left"
+              : leg.align?.toLowerCase() === "right"
+                ? "right"
+                : "center",
           top:
-            leg.verticalAlign?.toLowerCase() === 'top'
-              ? 'top'
-              : leg.verticalAlign?.toLowerCase() === 'middle'
-                ? 'middle'
-                : 'bottom',
-          icon: leg.iconType ?? 'circle',
+            leg.verticalAlign?.toLowerCase() === "top"
+              ? "top"
+              : leg.verticalAlign?.toLowerCase() === "middle"
+                ? "middle"
+                : "bottom",
+          icon: leg.iconType ?? "circle",
           itemWidth: leg.iconSize ?? FUNNEL_LEGEND_DEFAULTS.iconSize,
           itemHeight: leg.iconSize ?? FUNNEL_LEGEND_DEFAULTS.iconSize,
-          type: 'scroll',
-          textStyle: generateTextStyle(
-            themeColors.foreground,
-            themeColors.fontSans
-          ),
+          type: "scroll",
+          textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
         },
       }),
-      textStyle: generateTextStyle(
-        themeColors.foreground,
-        themeColors.fontSans
-      ),
+      textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
       tooltip: {
         ...generateTooltip(tooltip, undefined, {
           foreground: themeColors.foreground,
@@ -211,31 +173,19 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
           background: themeColors.background,
           mutedForeground: themeColors.mutedForeground,
         }),
-        trigger: 'item' as const,
-        formatter: (params: {
-          name: string;
-          value: number;
-          percent: number;
-          marker: string;
-        }) => {
+        trigger: "item" as const,
+        formatter: (params: { name: string; value: number; percent: number; marker: string }) => {
           return `${params.marker} ${params.name}<br/><strong>${params.value.toLocaleString()}</strong> (${params.percent}%)`;
         },
       },
       series: series,
-      toolbox: generateEChartToolbox(
-        toolbox && { ...toolbox, magicType: false }
-      ),
+      toolbox: generateEChartToolbox(toolbox && { ...toolbox, magicType: false }),
     };
   }, [chartColors, legend, themeColors, tooltip, series, toolbox]);
 
   return (
     <div style={styles}>
-      <ReactECharts
-        option={option}
-        style={chartStyles}
-        notMerge={true}
-        lazyUpdate={true}
-      />
+      <ReactECharts option={option} style={chartStyles} notMerge={true} lazyUpdate={true} />
     </div>
   );
 };

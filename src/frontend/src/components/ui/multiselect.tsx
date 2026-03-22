@@ -1,42 +1,42 @@
-import * as React from 'react';
-import { X, ChevronDown } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Command, CommandGroup, CommandItem } from '@/components/ui/command';
-import { Command as CommandPrimitive } from 'cmdk';
-import { cn } from '@/lib/utils';
-import { cva } from 'class-variance-authority';
-import { Densities } from '@/types/density';
-import { xIconVariant } from '@/components/ui/input/text-input-variant';
-import { selectTriggerVariant } from '@/components/ui/select/variant';
+import * as React from "react";
+import { X, ChevronDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { Command as CommandPrimitive } from "cmdk";
+import { cn } from "@/lib/utils";
+import { cva } from "class-variance-authority";
+import { Densities } from "@/types/density";
+import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import { selectTriggerVariant } from "@/components/ui/select/variant";
 
 // Variants for MultipleSelector - matches selectTriggerVariant exactly
 const multipleSelectorVariant = selectTriggerVariant;
 
 // Variants for menu items
-const menuItemVariant = cva('cursor-pointer', {
+const menuItemVariant = cva("cursor-pointer", {
   variants: {
     density: {
-      Small: 'px-2 py-1 text-xs',
-      Medium: 'px-3 py-2 text-sm',
-      Large: 'px-4 py-3 text-base',
+      Small: "px-2 py-1 text-xs",
+      Medium: "px-3 py-2 text-sm",
+      Large: "px-4 py-3 text-base",
     },
   },
   defaultVariants: {
-    density: 'Medium',
+    density: "Medium",
   },
 });
 
 // Variants for Badge components
-const badgeVariant = cva('hover:bg-secondary', {
+const badgeVariant = cva("hover:bg-secondary", {
   variants: {
     density: {
-      Small: 'text-xs',
-      Medium: 'text-sm',
-      Large: 'text-base',
+      Small: "text-xs",
+      Medium: "text-sm",
+      Large: "text-base",
     },
   },
   defaultVariants: {
-    density: 'Medium',
+    density: "Medium",
   },
 });
 
@@ -73,7 +73,7 @@ const MultipleSelector = React.forwardRef<
       value = [],
       defaultOptions = [],
       onValueChange,
-      placeholder = 'Select options...',
+      placeholder = "Select options...",
       disabled = false,
       className,
       commandProps,
@@ -84,7 +84,7 @@ const MultipleSelector = React.forwardRef<
       maxVisibleBadges,
       ghost = false,
     },
-    ref
+    ref,
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     const containerRef = React.useRef<HTMLSpanElement>(null);
@@ -92,11 +92,9 @@ const MultipleSelector = React.forwardRef<
     const dropdownRef = React.useRef<HTMLDivElement>(null);
     const [open, setOpen] = React.useState(false);
     const [openUpward, setOpenUpward] = React.useState(false);
-    const [inputValue, setInputValue] = React.useState('');
+    const [inputValue, setInputValue] = React.useState("");
     const measureRef = React.useRef<HTMLDivElement>(null);
-    const [visibleCount, setVisibleCount] = React.useState(
-      maxVisibleBadges ?? 1
-    );
+    const [visibleCount, setVisibleCount] = React.useState(maxVisibleBadges ?? 1);
 
     React.useEffect(() => {
       if (open && triggerWrapperRef.current) {
@@ -128,7 +126,7 @@ const MultipleSelector = React.forwardRef<
       if (!container || !measureContainer) return;
 
       const gap = parseFloat(getComputedStyle(container).gap) || 4;
-      const input = container.querySelector('input');
+      const input = container.querySelector("input");
       const inputReserve = input
         ? (parseFloat(getComputedStyle(input).minWidth) || 0) +
           (parseFloat(getComputedStyle(input).marginLeft) || 0)
@@ -147,9 +145,7 @@ const MultipleSelector = React.forwardRef<
         }
 
         const overflowBadge = badges[value.length];
-        const overflowBadgeWidth = overflowBadge
-          ? overflowBadge.offsetWidth
-          : 40;
+        const overflowBadgeWidth = overflowBadge ? overflowBadge.offsetWidth : 40;
 
         let usedWidth = 0;
         let count = 0;
@@ -184,32 +180,32 @@ const MultipleSelector = React.forwardRef<
 
     const handleUnselect = React.useCallback(
       (option: Option) => {
-        onValueChange?.(value.filter(item => item.value !== option.value));
+        onValueChange?.(value.filter((item) => item.value !== option.value));
       },
-      [onValueChange, value]
+      [onValueChange, value],
     );
 
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent<HTMLDivElement>) => {
         const input = inputRef.current;
         if (input) {
-          if (e.key === 'Delete' || e.key === 'Backspace') {
-            if (input.value === '' && value.length > 0) {
+          if (e.key === "Delete" || e.key === "Backspace") {
+            if (input.value === "" && value.length > 0) {
               const lastValue = value[value.length - 1];
               handleUnselect(lastValue);
             }
           }
-          if (e.key === 'Escape') {
+          if (e.key === "Escape") {
             input.blur();
           }
         }
       },
-      [value, handleUnselect]
+      [value, handleUnselect],
     );
 
     const isSelected = React.useCallback(
-      (option: Option) => value.some(item => item.value === option.value),
-      [value]
+      (option: Option) => value.some((item) => item.value === option.value),
+      [value],
     );
 
     const toggleOption = React.useCallback(
@@ -220,7 +216,7 @@ const MultipleSelector = React.forwardRef<
           onValueChange?.([...value, option]);
         }
       },
-      [isSelected, handleUnselect, onValueChange, value]
+      [isSelected, handleUnselect, onValueChange, value],
     );
 
     return (
@@ -228,8 +224,8 @@ const MultipleSelector = React.forwardRef<
         ref={ref}
         onKeyDown={handleKeyDown}
         className={cn(
-          'overflow-visible bg-transparent h-auto flex-row rounded-none border-0 shadow-none p-0',
-          className
+          "overflow-visible bg-transparent h-auto flex-row rounded-none border-0 shadow-none p-0",
+          className,
         )}
         {...commandProps}
       >
@@ -239,36 +235,30 @@ const MultipleSelector = React.forwardRef<
               ref={measureRef}
               aria-hidden="true"
               style={{
-                position: 'absolute',
-                visibility: 'hidden',
-                pointerEvents: 'none',
-                display: 'flex',
-                gap: '4px',
+                position: "absolute",
+                visibility: "hidden",
+                pointerEvents: "none",
+                display: "flex",
+                gap: "4px",
                 top: 0,
                 left: 0,
               }}
             >
-              {value.map(option => (
+              {value.map((option) => (
                 <Badge
                   key={`measure-${option.value}`}
                   variant="secondary"
-                  className={cn(badgeVariant({ density }), 'shrink-0')}
+                  className={cn(badgeVariant({ density }), "shrink-0")}
                 >
                   {option.label}
-                  <span
-                    className="ml-1 p-1 h-3"
-                    style={{ display: 'inline-flex' }}
-                  >
+                  <span className="ml-1 p-1 h-3" style={{ display: "inline-flex" }}>
                     <X className={xIconVariant({ density })} />
                   </span>
                 </Badge>
               ))}
               <Badge
                 variant="outline"
-                className={cn(
-                  badgeVariant({ density }),
-                  'bg-muted text-muted-foreground shrink-0'
-                )}
+                className={cn(badgeVariant({ density }), "bg-muted text-muted-foreground shrink-0")}
               >
                 +{Math.max(1, value.length - 1)}
               </Badge>
@@ -277,28 +267,27 @@ const MultipleSelector = React.forwardRef<
           <div
             className={cn(
               multipleSelectorVariant({ density }),
-              disabled && 'cursor-not-allowed opacity-50',
-              (!value || value.length === 0) && 'text-muted-foreground',
+              disabled && "cursor-not-allowed opacity-50",
+              (!value || value.length === 0) && "text-muted-foreground",
               invalid
-                ? 'border-destructive text-destructive-foreground focus-within:ring-destructive focus-within:border-destructive'
+                ? "border-destructive text-destructive-foreground focus-within:ring-destructive focus-within:border-destructive"
                 : undefined,
               ghost &&
-                'border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground'
+                "border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground",
             )}
           >
             <span
               ref={containerRef}
               className="flex gap-1 items-center flex-1 min-w-0 overflow-hidden"
             >
-              {value.slice(0, visibleCount).map(option => (
+              {value.slice(0, visibleCount).map((option) => (
                 <Badge
                   key={option.value}
                   variant="secondary"
                   className={cn(
                     badgeVariant({ density }),
-                    'shrink-0',
-                    invalid &&
-                      'bg-destructive/10 border-destructive text-destructive'
+                    "shrink-0",
+                    invalid && "bg-destructive/10 border-destructive text-destructive",
                   )}
                 >
                   {option.label}
@@ -307,13 +296,13 @@ const MultipleSelector = React.forwardRef<
                     tabIndex={-1}
                     aria-label="Remove"
                     className="ml-1 p-0.5 rounded-sm hover:bg-black/10 dark:hover:bg-white/10 focus:outline-none cursor-pointer flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity"
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
                         handleUnselect(option);
                       }
                     }}
-                    onMouseDown={e => {
+                    onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                     }}
@@ -328,7 +317,7 @@ const MultipleSelector = React.forwardRef<
                   variant="outline"
                   className={cn(
                     badgeVariant({ density }),
-                    'bg-muted text-muted-foreground shrink-0'
+                    "bg-muted text-muted-foreground shrink-0",
                   )}
                 >
                   +{value.length - visibleCount}
@@ -344,11 +333,16 @@ const MultipleSelector = React.forwardRef<
                     containerRef.current.scrollLeft = 0;
                   }
                 }}
-                onFocus={() => setOpen(true)}
+                onFocus={() => {
+                  setOpen(true);
+                  requestAnimationFrame(() => {
+                    if (containerRef.current) {
+                      containerRef.current.scrollLeft = 0;
+                    }
+                  });
+                }}
                 placeholder={
-                  hidePlaceholderWhenSelected && value.length > 0
-                    ? undefined
-                    : placeholder
+                  hidePlaceholderWhenSelected && value.length > 0 ? undefined : placeholder
                 }
                 disabled={disabled}
                 readOnly={!open}
@@ -357,10 +351,10 @@ const MultipleSelector = React.forwardRef<
             </span>
             <ChevronDown
               className={cn(
-                'h-4 w-4 ml-2 opacity-50 shrink-0 cursor-pointer',
-                disabled && 'cursor-not-allowed opacity-50'
+                "h-4 w-4 ml-2 opacity-50 shrink-0 cursor-pointer",
+                disabled && "cursor-not-allowed opacity-50",
               )}
-              onClick={e => {
+              onClick={(e) => {
                 if (disabled) return;
                 e.preventDefault();
                 e.stopPropagation();
@@ -372,9 +366,9 @@ const MultipleSelector = React.forwardRef<
                   }
                 }
               }}
-              onKeyDown={e => {
+              onKeyDown={(e) => {
                 if (disabled) return;
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   e.stopPropagation();
                   if (inputRef.current) {
@@ -395,27 +389,27 @@ const MultipleSelector = React.forwardRef<
             <div
               ref={dropdownRef}
               className={cn(
-                'absolute w-full z-50 rounded-box border bg-popover text-popover-foreground shadow-md outline-none animate-in',
-                openUpward ? 'bottom-full mb-1' : 'top-full mt-1'
+                "absolute w-full z-50 rounded-box border bg-popover text-popover-foreground shadow-md outline-none animate-in",
+                openUpward ? "bottom-full mb-1" : "top-full mt-1",
               )}
             >
               <CommandGroup className="h-full overflow-auto max-h-[300px]">
-                {defaultOptions.map(option => {
+                {defaultOptions.map((option) => {
                   const selected = isSelected(option);
                   return (
                     <CommandItem
                       key={option.value}
-                      onMouseDown={e => {
+                      onMouseDown={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                       }}
                       onSelect={() => {
-                        setInputValue('');
+                        setInputValue("");
                         toggleOption(option);
                       }}
                       className={cn(
                         menuItemVariant({ density }),
-                        'flex items-center justify-between'
+                        "flex items-center justify-between",
                       )}
                       disabled={option.disable}
                     >
@@ -424,7 +418,7 @@ const MultipleSelector = React.forwardRef<
                         <X
                           className={cn(
                             xIconVariant({ density }),
-                            'text-muted-foreground hover:text-foreground'
+                            "text-muted-foreground hover:text-foreground",
                           )}
                         />
                       )}
@@ -437,8 +431,8 @@ const MultipleSelector = React.forwardRef<
           {open && defaultOptions.length === 0 && emptyIndicator && (
             <div
               className={cn(
-                'absolute w-full z-50 rounded-box border bg-popover text-popover-foreground shadow-md outline-none p-2',
-                openUpward ? 'bottom-full mb-1' : 'top-full mt-1'
+                "absolute w-full z-50 rounded-box border bg-popover text-popover-foreground shadow-md outline-none p-2",
+                openUpward ? "bottom-full mb-1" : "top-full mt-1",
               )}
             >
               {emptyIndicator}
@@ -447,9 +441,9 @@ const MultipleSelector = React.forwardRef<
         </div>
       </Command>
     );
-  }
+  },
 );
 
-MultipleSelector.displayName = 'MultipleSelector';
+MultipleSelector.displayName = "MultipleSelector";
 
 export { MultipleSelector };

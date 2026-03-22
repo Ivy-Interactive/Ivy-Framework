@@ -1,6 +1,4 @@
-import { createContext } from 'react';
-import { EventHandlerContextProps } from './types';
+import { createContext } from "react";
+import { EventHandlerContextProps } from "./types";
 
-export const EventHandlerContext = createContext<
-  EventHandlerContextProps | undefined
->(undefined);
+export const EventHandlerContext = createContext<EventHandlerContextProps | undefined>(undefined);

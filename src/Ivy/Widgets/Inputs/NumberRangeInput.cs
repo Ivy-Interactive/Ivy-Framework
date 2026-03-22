@@ -105,7 +105,7 @@ public record NumberRangeInput<TNumber> : NumberRangeInputBase, IInput<(TNumber,
 
     internal NumberRangeInput() { }
 
-    [Prop] public (TNumber, TNumber) Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public (TNumber, TNumber) Value { get; init; } = default!;
 
     [Prop] public TNumber LowerValue => Value.Item1;
 

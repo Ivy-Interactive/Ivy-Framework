@@ -172,80 +172,74 @@ namespace Ivy.Analyser.Analyzers
 
             var methodName = GetMethodName(invocation);
             if (methodName == null || !IsHookName(methodName))
-            {
                 return;
-            }
 
             if (!IsHookInvocation(invocation))
-            {
                 return;
-            }
 
             var hookUsage = CheckHookUsage(invocation);
             if (hookUsage != HookUsageResult.Valid)
             {
-                if (hookUsage == HookUsageResult.OutsideBuildMethod)
-                {
-                    var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation(), methodName);
-                    context.ReportDiagnostic(diagnostic);
-                }
-                else
-                {
-                    var closureKind = hookUsage switch
-                    {
-                        HookUsageResult.NestedInLambda => "lambda",
-                        HookUsageResult.NestedInLocalFunction => "local function",
-                        HookUsageResult.NestedInAnonymousMethod => "anonymous method",
-                        _ => "closure"
-                    };
-                    var diagnostic = Diagnostic.Create(RuleNestedClosure, invocation.GetLocation(), methodName, closureKind);
-                    context.ReportDiagnostic(diagnostic);
-                }
+                ReportInvalidPlacement(context, invocation, methodName, hookUsage);
                 return;
             }
 
             if (IsStoredInClassMember(invocation, context))
+                context.ReportDiagnostic(Diagnostic.Create(RuleFieldStorage, invocation.GetLocation(), methodName));
+
+            ReportControlFlowViolations(context, invocation, methodName);
+        }
+
+        private static void ReportInvalidPlacement(
+            SyntaxNodeAnalysisContext context,
+            InvocationExpressionSyntax invocation,
+            string methodName,
+            HookUsageResult hookUsage)
+        {
+            if (hookUsage == HookUsageResult.OutsideBuildMethod)
             {
-                var diagnostic = Diagnostic.Create(RuleFieldStorage, invocation.GetLocation(), methodName);
-                context.ReportDiagnostic(diagnostic);
+                context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation(), methodName));
+                return;
             }
 
-            // Cache results to avoid redundant syntax tree traversals
+            var closureKind = hookUsage switch
+            {
+                HookUsageResult.NestedInLambda => "lambda",
+                HookUsageResult.NestedInLocalFunction => "local function",
+                HookUsageResult.NestedInAnonymousMethod => "anonymous method",
+                _ => "closure"
+            };
+            context.ReportDiagnostic(Diagnostic.Create(RuleNestedClosure, invocation.GetLocation(), methodName, closureKind));
+        }
+
+        private static void ReportControlFlowViolations(
+            SyntaxNodeAnalysisContext context,
+            InvocationExpressionSyntax invocation,
+            string methodName)
+        {
             var isInConditional = IsInConditionalStatement(invocation);
             var isInLoop = IsInLoop(invocation);
             var isInSwitch = IsInSwitchStatement(invocation);
 
             if (isInConditional)
-            {
-                var diagnostic = Diagnostic.Create(RuleConditional, invocation.GetLocation(), methodName);
-                context.ReportDiagnostic(diagnostic);
-            }
+                context.ReportDiagnostic(Diagnostic.Create(RuleConditional, invocation.GetLocation(), methodName));
 
             if (isInLoop)
-            {
-                var diagnostic = Diagnostic.Create(RuleLoop, invocation.GetLocation(), methodName);
-                context.ReportDiagnostic(diagnostic);
-            }
+                context.ReportDiagnostic(Diagnostic.Create(RuleLoop, invocation.GetLocation(), methodName));
 
             if (isInSwitch)
-            {
-                var diagnostic = Diagnostic.Create(RuleSwitch, invocation.GetLocation(), methodName);
-                context.ReportDiagnostic(diagnostic);
-            }
+                context.ReportDiagnostic(Diagnostic.Create(RuleSwitch, invocation.GetLocation(), methodName));
 
-            // Only check for inline expressions when the hook isn't already flagged by
-            // conditional/loop/switch rules (those are more specific diagnostics)
-            if (!isInConditional && !isInLoop && !isInSwitch && IsInlineExpression(invocation))
-            {
-                var diagnostic = Diagnostic.Create(RuleInlineExpression, invocation.GetLocation(), methodName);
-                context.ReportDiagnostic(diagnostic);
-            }
+            // Only check inline/position when the hook isn't already flagged by control flow rules
+            var isInControlFlow = isInConditional || isInLoop || isInSwitch;
+            if (isInControlFlow)
+                return;
 
-            if (!isInConditional && !isInLoop && !isInSwitch && IsNotAtTopOfMethod(invocation))
-            {
-                var diagnostic = Diagnostic.Create(RuleNotAtTop, invocation.GetLocation(), methodName);
-                context.ReportDiagnostic(diagnostic);
-            }
+            if (IsInlineExpression(invocation))
+                context.ReportDiagnostic(Diagnostic.Create(RuleInlineExpression, invocation.GetLocation(), methodName));
+
+            if (IsNotAtTopOfMethod(invocation))
+                context.ReportDiagnostic(Diagnostic.Create(RuleNotAtTop, invocation.GetLocation(), methodName));
         }
 
         private static string? GetMethodName(InvocationExpressionSyntax invocation)
@@ -345,30 +339,19 @@ namespace Ivy.Analyser.Analyzers
             return false;
         }
 
-        private static bool IsInConditionalStatement(InvocationExpressionSyntax invocation)
+        private static bool HasAncestorInBuildScope(
+            InvocationExpressionSyntax invocation,
+            System.Func<SyntaxNode, bool> predicate)
         {
             var current = invocation.Parent;
 
             while (current != null)
             {
-                if (current is IfStatementSyntax ||
-                    current is ConditionalExpressionSyntax ||
-                    current is TryStatementSyntax ||
-                    current is CatchClauseSyntax ||
-                    current is UsingStatementSyntax)
-                {
+                if (predicate(current))
                     return true;
-                }
 
-                if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
-                {
+                if (IsBuildMethodBoundary(current))
                     return false;
-                }
-
-                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
-                {
-                    return false;
-                }
 
                 current = current.Parent;
             }
@@ -376,125 +359,75 @@ namespace Ivy.Analyser.Analyzers
             return false;
         }
 
-        private static bool IsInLoop(InvocationExpressionSyntax invocation)
-        {
-            var current = invocation.Parent;
+        private static bool IsBuildMethodBoundary(SyntaxNode node) =>
+            (node is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text)) ||
+            (node is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda));
 
-            while (current != null)
-            {
-                if (current is ForStatementSyntax ||
-                    current is ForEachStatementSyntax ||
-                    current is WhileStatementSyntax ||
-                    current is DoStatementSyntax)
-                {
-                    return true;
-                }
+        private static bool IsInConditionalStatement(InvocationExpressionSyntax invocation) =>
+            HasAncestorInBuildScope(invocation, node =>
+                node is IfStatementSyntax or ConditionalExpressionSyntax
+                    or TryStatementSyntax or CatchClauseSyntax or UsingStatementSyntax);
 
-                if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
-                {
-                    return false;
-                }
+        private static bool IsInLoop(InvocationExpressionSyntax invocation) =>
+            HasAncestorInBuildScope(invocation, node =>
+                node is ForStatementSyntax or ForEachStatementSyntax
+                    or WhileStatementSyntax or DoStatementSyntax);
 
-                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
-                {
-                    return false;
-                }
-
-                current = current.Parent;
-            }
-
-            return false;
-        }
-
-        private static bool IsInSwitchStatement(InvocationExpressionSyntax invocation)
-        {
-            var current = invocation.Parent;
-
-            while (current != null)
-            {
-                if (current is SwitchStatementSyntax)
-                {
-                    return true;
-                }
-
-                if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
-                {
-                    return false;
-                }
-
-                if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
-                {
-                    return false;
-                }
-
-                current = current.Parent;
-            }
-
-            return false;
-        }
+        private static bool IsInSwitchStatement(InvocationExpressionSyntax invocation) =>
+            HasAncestorInBuildScope(invocation, node => node is SwitchStatementSyntax);
 
         private static bool IsNotAtTopOfMethod(InvocationExpressionSyntax invocation)
         {
+            var statements = GetBuildMethodStatements(invocation);
+            return statements != null && CheckNotAtTop(invocation, statements.Value);
+        }
+
+        private static SyntaxList<StatementSyntax>? GetBuildMethodStatements(InvocationExpressionSyntax invocation)
+        {
             var current = invocation.Parent;
 
             while (current != null)
             {
                 if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
-                {
-                    return method.Body != null && CheckNotAtTop(invocation, method.Body.Statements);
-                }
+                    return method.Body?.Statements;
 
                 if (current is LambdaExpressionSyntax lambda && IsFuncViewBuilderLambda(lambda))
-                {
-                    if (lambda.Body is BlockSyntax lambdaBlock)
-                    {
-                        return CheckNotAtTop(invocation, lambdaBlock.Statements);
-                    }
-                    return false;
-                }
+                    return (lambda.Body as BlockSyntax)?.Statements;
 
                 current = current.Parent;
             }
 
-            return false;
+            return null;
         }
 
         private static bool CheckNotAtTop(InvocationExpressionSyntax invocation, SyntaxList<StatementSyntax> statements)
         {
             var invocationSpan = invocation.Span;
-            var statementIndex = -1;
-
-            for (int i = 0; i < statements.Count; i++)
-            {
-                if (statements[i].Span.Contains(invocationSpan))
-                {
-                    statementIndex = i;
-                    break;
-                }
-            }
+            var statementIndex = FindContainingStatementIndex(statements, invocationSpan);
 
             if (statementIndex < 0)
-            {
                 return false;
-            }
 
             for (int i = 0; i < statementIndex; i++)
             {
-                var statement = statements[i];
-
-                if (statement is ReturnStatementSyntax)
-                {
-                    // If a return statement appears before the hook, the hook is unreachable
+                if (statements[i] is ReturnStatementSyntax)
                     return false;
-                }
 
-                if (!IsHookStatement(statement))
-                {
+                if (!IsHookStatement(statements[i]))
                     return true;
-                }
             }
 
             return false;
+        }
+
+        private static int FindContainingStatementIndex(SyntaxList<StatementSyntax> statements, Microsoft.CodeAnalysis.Text.TextSpan span)
+        {
+            for (int i = 0; i < statements.Count; i++)
+            {
+                if (statements[i].Span.Contains(span))
+                    return i;
+            }
+            return -1;
         }
 
 
@@ -502,30 +435,34 @@ namespace Ivy.Analyser.Analyzers
         private static bool IsHookStatement(StatementSyntax statement)
         {
             if (statement is LocalDeclarationStatementSyntax localDecl)
-            {
-                // Use LINQ for cleaner filtering — unwrap null-forgiving operator (!)
-                if (localDecl.Declaration.Variables
-                    .Where(v => v.Initializer != null && UnwrapSuppression(v.Initializer.Value) is InvocationExpressionSyntax)
-                    .Any(v =>
-                    {
-                        var invocation = (InvocationExpressionSyntax)UnwrapSuppression(v.Initializer!.Value);
-                        var methodName = GetMethodName(invocation);
-                        return methodName != null && IsHookName(methodName);
-                    }))
-                {
-                    return true;
-                }
-            }
-            else if (statement is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax invocation })
-            {
-                var methodName = GetMethodName(invocation);
-                if (methodName != null && IsHookName(methodName))
-                {
-                    return true;
-                }
-            }
+                return HasHookInitializer(localDecl) || ContainsHookInvocation(statement);
+
+            if (statement is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax invocation })
+                return IsHookCall(invocation) || ContainsHookInvocation(statement);
 
             return ContainsHookInvocation(statement);
+        }
+
+        private static bool HasHookInitializer(LocalDeclarationStatementSyntax localDecl)
+        {
+            foreach (var variable in localDecl.Declaration.Variables)
+            {
+                if (variable.Initializer == null)
+                    continue;
+
+                if (UnwrapSuppression(variable.Initializer.Value) is InvocationExpressionSyntax invocation
+                    && IsHookCall(invocation))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool IsHookCall(InvocationExpressionSyntax invocation)
+        {
+            var methodName = GetMethodName(invocation);
+            return methodName != null && IsHookName(methodName);
         }
 
         private static bool IsStoredInClassMember(InvocationExpressionSyntax invocation, SyntaxNodeAnalysisContext context)
@@ -590,59 +527,54 @@ namespace Ivy.Analyser.Analyzers
 
         private static bool IsInlineExpression(InvocationExpressionSyntax invocation)
         {
-            // Walk up from the invocation to find the containing statement
             var current = (SyntaxNode)invocation;
 
             while (current != null)
             {
                 if (current.Parent is LocalDeclarationStatementSyntax localDecl)
-                {
-                    // Check if the hook invocation is the direct initializer of the variable
-                    // e.g., var x = UseState(0); → OK
-                    // e.g., var x = UseArgs<T>()!; → OK (null-forgiving wrapper)
-                    // but var x = UseState(0).Value; → inline
-                    foreach (var variable in localDecl.Declaration.Variables)
-                    {
-                        if (variable.Initializer?.Value == invocation)
-                        {
-                            return false; // Direct initializer — allowed
-                        }
-                        // Handle null-forgiving operator: var x = UseHook()!;
-                        if (variable.Initializer != null && UnwrapSuppression(variable.Initializer.Value) == invocation)
-                        {
-                            return false; // Direct initializer with ! — allowed
-                        }
-                    }
-                    return true; // Hook is nested inside the initializer expression
-                }
+                    return !IsDirectInitializer(invocation, localDecl);
 
                 if (current.Parent is ExpressionStatementSyntax)
-                {
-                    // Check if the hook invocation is the entire expression
-                    // e.g., UseEffect(() => {}); → OK
-                    if (current == invocation)
-                    {
-                        return false; // Standalone expression — allowed
-                    }
+                    return !IsAllowedExpressionStatement(invocation, current);
 
-                    // Check if the hook is the direct RHS of an assignment expression
-                    // e.g., _field = UseState(0); → allowed (caught by IVYHOOK006 instead)
-                    if (current is AssignmentExpressionSyntax assignment && assignment.Right == invocation)
-                    {
-                        return false;
-                    }
-
-                    return true; // Hook is nested inside another expression
-                }
-
-                // If we reach a statement without matching the above, the hook is inline
                 if (current.Parent is StatementSyntax)
-                {
                     return true;
-                }
 
                 current = current.Parent;
             }
+
+            return false;
+        }
+
+        private static bool IsDirectInitializer(
+            InvocationExpressionSyntax invocation,
+            LocalDeclarationStatementSyntax localDecl)
+        {
+            foreach (var variable in localDecl.Declaration.Variables)
+            {
+                if (variable.Initializer == null)
+                    continue;
+
+                if (variable.Initializer.Value == invocation)
+                    return true;
+
+                if (UnwrapSuppression(variable.Initializer.Value) == invocation)
+                    return true;
+            }
+            return false;
+        }
+
+        private static bool IsAllowedExpressionStatement(
+            InvocationExpressionSyntax invocation,
+            SyntaxNode current)
+        {
+            // Standalone expression: UseEffect(() => {});
+            if (current == invocation)
+                return true;
+
+            // Direct RHS of assignment: _field = UseState(0); (caught by IVYHOOK006)
+            if (current is AssignmentExpressionSyntax assignment && assignment.Right == invocation)
+                return true;
 
             return false;
         }
@@ -656,26 +588,19 @@ namespace Ivy.Analyser.Analyzers
             {
                 var current = stack.Pop();
 
-                if (current is InvocationExpressionSyntax invocation)
-                {
-                    var methodName = GetMethodName(invocation);
-                    if (methodName != null && IsHookName(methodName))
-                    {
-                        return true;
-                    }
-                }
+                if (current is InvocationExpressionSyntax invocation && IsHookCall(invocation))
+                    return true;
 
-                if (current is LambdaExpressionSyntax ||
-                    current is LocalFunctionStatementSyntax ||
-                    current is AnonymousMethodExpressionSyntax)
+                // Don't descend into closures — they have their own scope
+                if (current is LambdaExpressionSyntax
+                    or LocalFunctionStatementSyntax
+                    or AnonymousMethodExpressionSyntax)
                 {
                     continue;
                 }
 
                 foreach (var child in current.ChildNodes())
-                {
                     stack.Push(child);
-                }
             }
 
             return false;

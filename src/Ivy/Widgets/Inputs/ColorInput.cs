@@ -82,7 +82,7 @@ public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
 
     internal ColorInput() { }
 
-    [Prop] public TColor Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TColor Value { get; init; } = default!;
 
     [Event] public EventHandler<Event<IInput<TColor>, TColor>>? OnChange { get; }
 }

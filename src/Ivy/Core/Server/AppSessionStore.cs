@@ -82,8 +82,9 @@ public class AppSessionStore : IDisposable
         {
             return session.AppDescriptor.IsChrome ? session : null;
         }
-        var parent = Sessions.Values.FirstOrDefault(s => s.ConnectionId == session.ParentId);
-        return parent == null ? null : FindChrome(parent!);
+        if (!Sessions.TryGetValue(session.ParentId, out var parent))
+            return null;
+        return FindChrome(parent);
     }
 
     public void Dump()

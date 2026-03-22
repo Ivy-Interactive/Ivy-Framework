@@ -33,11 +33,17 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 
     [Prop] public FeedbackInputVariant Variant { get; set; } = FeedbackInputVariant.Stars;
 
+    [Prop] public bool AllowHalf { get; set; }
+
+    [Prop] public int Max { get; set; } = 5;
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [
         typeof(bool), typeof(bool?),
         typeof(int), typeof(int?),
+        typeof(decimal), typeof(decimal?),
+        typeof(double), typeof(double?),
     ];
 }
 
@@ -79,7 +85,7 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 
     internal FeedbackInput() { }
 
-    [Prop] public TNumber Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TNumber Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
@@ -106,6 +112,10 @@ public static class FeedbackInputExtensions
 
     public static FeedbackInputBase Invalid(this FeedbackInputBase widget, string invalid) => widget with { Invalid = invalid };
     public static FeedbackInputBase Nullable(this FeedbackInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
+
+    public static FeedbackInputBase AllowHalf(this FeedbackInputBase widget, bool allowHalf = true) => widget with { AllowHalf = allowHalf };
+
+    public static FeedbackInputBase Max(this FeedbackInputBase widget, int max) => widget with { Max = max };
 
     [OverloadResolutionPriority(1)]
     public static FeedbackInputBase OnBlur(this FeedbackInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

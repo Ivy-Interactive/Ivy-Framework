@@ -292,7 +292,7 @@ public class DataTableBuilder<TModel>(
 
     public override object? Build()
     {
-        var chatClient = UseService<IChatClient?>();
+        Context.TryUseService<IChatClient>(out var chatClient);
 
         var columns = _columns.Values.Where(e => !e.Removed).OrderBy(c => c.Column.Order).Select(e => e.Column)
             .ToArray();

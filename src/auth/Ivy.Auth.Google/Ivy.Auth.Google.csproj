@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../../../Ivy/Directory.Build.props" Condition="Exists('../../../../Ivy/Directory.Build.props')" />
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>CS1591</NoWarn>
+    <PackageId>Ivy.Auth.Google</PackageId>
+    <Company>Ivy Interactive</Company>
+    <Description>Google OAuth token handler for Ivy Framework</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Ivy/Ivy.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CI Condition="'$(GITHUB_ACTIONS)' == 'true'">true</CI>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+</Project>

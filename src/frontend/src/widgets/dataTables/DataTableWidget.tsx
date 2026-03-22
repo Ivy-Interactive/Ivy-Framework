@@ -1,19 +1,19 @@
-import '@glideapps/glide-data-grid/dist/index.css';
-import './styles/checkbox.css';
-import React, { useMemo } from 'react';
-import { TableProvider } from './dataTableContext';
-import { useTable } from './dataTableContext';
-import { ErrorDisplay } from '@/components/ErrorDisplay';
-import { Loading } from '@/components/Loading';
-import { DataTableEditor } from './dataTableEditor';
-import { DataTableHeader } from './DataTableHeader';
-import { DataTableOption } from './DataTableOption';
-import { DataTableFilterOption } from './options/DataTableFilterOption';
-import { Filter as FilterIcon } from 'lucide-react';
-import { tableStyles } from './styles/style';
-import { TableProps } from './types/types';
-import { getWidth, getHeight } from '@/lib/styles';
-import { applyConfigDefaults, applyColumnsDefaults } from './DataTableDefaults';
+import "@glideapps/glide-data-grid/dist/index.css";
+import "./styles/checkbox.css";
+import React, { useMemo } from "react";
+import { TableProvider } from "./dataTableContext";
+import { useTable } from "./dataTableContext";
+import { ErrorDisplay } from "@/components/ErrorDisplay";
+import { Loading } from "@/components/Loading";
+import { DataTableEditor } from "./dataTableEditor";
+import { DataTableHeader } from "./DataTableHeader";
+import { DataTableOption } from "./DataTableOption";
+import { DataTableFilterOption } from "./options/DataTableFilterOption";
+import { Filter as FilterIcon } from "lucide-react";
+import { tableStyles } from "./styles/style";
+import { TableProps } from "./types/types";
+import { getWidth, getHeight } from "@/lib/styles";
+import { applyConfigDefaults, applyColumnsDefaults } from "./DataTableDefaults";
 
 interface TableLayoutProps {
   children?: React.ReactNode;
@@ -27,11 +27,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
     return <ErrorDisplay title="Table Error" message={error} />;
   }
 
-  return (
-    <div style={tableStyles.table.container}>
-      {showTableEditor ? children : <Loading />}
-    </div>
-  );
+  return <div style={tableStyles.table.container}>{showTableEditor ? children : <Loading />}</div>;
 };
 
 export const DataTable: React.FC<TableProps> = ({
@@ -40,10 +36,10 @@ export const DataTable: React.FC<TableProps> = ({
   connection,
   config = {},
   editable = false,
-  width = 'Full',
-  height = 'Full',
+  width = "Full",
+  height = "Full",
   rowActions,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
   const finalConfig = useMemo(
     () => ({
@@ -52,7 +48,7 @@ export const DataTable: React.FC<TableProps> = ({
       filterType: config.filterType,
       enableRowHover: config.enableRowHover ?? true,
     }),
-    [config]
+    [config],
   );
 
   const finalColumns = useMemo(() => applyColumnsDefaults(columns), [columns]);
@@ -65,7 +61,7 @@ export const DataTable: React.FC<TableProps> = ({
 
   // If height is Full, ensure it can shrink and grow properly within a flex container
   // to avoid "infinite growth" when no height constraint is provided by the parent.
-  if (height === 'Full') {
+  if (height === "Full") {
     containerStyle.flexGrow = 1;
     containerStyle.minHeight = 0;
   }
@@ -89,9 +85,7 @@ export const DataTable: React.FC<TableProps> = ({
                 inlineDirection="right"
                 showLabel={false}
               >
-                <DataTableFilterOption
-                  allowLlmFiltering={finalConfig.allowLlmFiltering}
-                />
+                <DataTableFilterOption allowLlmFiltering={finalConfig.allowLlmFiltering} />
               </DataTableOption>
             )}
           </DataTableHeader>

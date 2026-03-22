@@ -101,7 +101,7 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 
     internal BoolInput() { }
 
-    [Prop] public TBool Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TBool Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TBool) == typeof(bool?);
 

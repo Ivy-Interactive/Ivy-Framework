@@ -125,7 +125,7 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
 
     internal NumberInput() { }
 
-    [Prop] public TNumber Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TNumber Value { get; init; } = default!;
 
     [Prop(AlwaysSerialize = true)] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 

@@ -18,7 +18,7 @@ public class ClerkAuthConnection : IConnection, IHaveSecrets
 
     public void RegisterServices(Server server)
     {
-        server.UseAuth<ClerkAuthProvider>(c => c.UseEmailPassword().UseGoogle());
+        server.UseAuth<ClerkAuthProvider>(c => c.UseEmailPassword().UseGoogle().UseGithub());
     }
 
     public Secret[] GetSecrets() =>

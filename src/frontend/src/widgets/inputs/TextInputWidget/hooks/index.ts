@@ -4,6 +4,6 @@ export {
   usePasteHandler,
   parseShortcut,
   formatShortcutForDisplay,
-} from './useTextInput';
+} from "./useTextInput";
 
-export { useShortcutKey } from './useShortcutKey';
+export { useShortcutKey } from "./useShortcutKey";

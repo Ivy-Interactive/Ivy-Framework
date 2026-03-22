@@ -1,8 +1,8 @@
-import { useEventHandler } from '@/components/event-handler';
-import { ArticleFooter } from '@/widgets/article/ArticleFooter';
-import { ArticleSidebar } from '@/widgets/article/ArticleSidebar';
-import { InternalLink } from '@/types/widgets';
-import React, { useRef } from 'react';
+import { useEventHandler } from "@/components/event-handler";
+import { ArticleFooter } from "@/widgets/article/ArticleFooter";
+import { ArticleSidebar } from "@/widgets/article/ArticleSidebar";
+import { InternalLink } from "@/types/widgets";
+import React, { useRef } from "react";
 
 interface ArticleWidgetProps {
   id: string;
@@ -17,8 +17,8 @@ interface ArticleWidgetProps {
   gap?: number;
 }
 
-import { TypographyContext } from '@/contexts/TypographyContext';
-import { articleTypography } from '@/lib/styles';
+import { TypographyContext } from "@/contexts/TypographyContext";
+import { articleTypography } from "@/lib/styles";
 
 const EMPTY_ARRAY: never[] = [];
 

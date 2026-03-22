@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import { useEventHandler } from '@/components/event-handler';
-import { hasDirectoryPicker } from './browserSupport';
+import React, { useCallback, useEffect, useRef } from "react";
+import { useEventHandler } from "@/components/event-handler";
+import { hasDirectoryPicker } from "./browserSupport";
 
 interface FolderDialogEntry {
   name: string;
@@ -24,9 +24,8 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
   const lastTriggerRef = useRef(0);
   const pendingDialogRef = useRef(false);
 
-  const hasOnCancel = Array.isArray(events) && events.includes('OnCancel');
-  const hasOnFolderSelected =
-    Array.isArray(events) && events.includes('OnFolderSelected');
+  const hasOnCancel = Array.isArray(events) && events.includes("OnCancel");
+  const hasOnFolderSelected = Array.isArray(events) && events.includes("OnFolderSelected");
 
   const openModernDialog = useCallback(async () => {
     try {
@@ -42,15 +41,15 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
       }
 
       if (hasOnFolderSelected) {
-        handleEvent('OnFolderSelected', id, [entries]);
+        handleEvent("OnFolderSelected", id, [entries]);
       }
     } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
+      if (err instanceof DOMException && err.name === "AbortError") {
         if (hasOnCancel) {
-          handleEvent('OnCancel', id, []);
+          handleEvent("OnCancel", id, []);
         }
       } else {
-        console.error('Folder dialog error:', err);
+        console.error("Folder dialog error:", err);
       }
     }
   }, [hasOnFolderSelected, hasOnCancel, handleEvent, id]);
@@ -65,13 +64,13 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
         if (pendingDialogRef.current) {
           pendingDialogRef.current = false;
           if (hasOnCancel) {
-            handleEvent('OnCancel', id, []);
+            handleEvent("OnCancel", id, []);
           }
         }
       }, 300);
-      window.removeEventListener('focus', onFocus);
+      window.removeEventListener("focus", onFocus);
     };
-    window.addEventListener('focus', onFocus);
+    window.addEventListener("focus", onFocus);
 
     inputRef.current.click();
   }, [hasOnCancel, handleEvent, id]);
@@ -88,24 +87,23 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
 
       for (const file of files) {
         const relativePath =
-          (file as File & { webkitRelativePath?: string }).webkitRelativePath ||
-          file.name;
+          (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
 
         // Add the file entry
         entryMap.set(relativePath, {
           name: file.name,
-          kind: 'file',
+          kind: "file",
           relativePath,
         });
 
         // Extract and add parent directory entries
-        const parts = relativePath.split('/');
+        const parts = relativePath.split("/");
         for (let i = 1; i < parts.length; i++) {
-          const dirPath = parts.slice(0, i).join('/');
+          const dirPath = parts.slice(0, i).join("/");
           if (!entryMap.has(dirPath)) {
             entryMap.set(dirPath, {
               name: parts[i - 1],
-              kind: 'directory',
+              kind: "directory",
               relativePath: dirPath,
             });
           }
@@ -113,13 +111,13 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
       }
 
       if (hasOnFolderSelected) {
-        handleEvent('OnFolderSelected', id, [Array.from(entryMap.values())]);
+        handleEvent("OnFolderSelected", id, [Array.from(entryMap.values())]);
       }
 
       // Reset input
-      e.target.value = '';
+      e.target.value = "";
     },
-    [hasOnFolderSelected, handleEvent, id]
+    [hasOnFolderSelected, handleEvent, id],
   );
 
   // Watch triggerCount for changes to open dialog
@@ -144,7 +142,7 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
         // @ts-expect-error webkitdirectory is non-standard but widely supported
         webkitdirectory=""
         onChange={handleInputChange}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
     );
   }
