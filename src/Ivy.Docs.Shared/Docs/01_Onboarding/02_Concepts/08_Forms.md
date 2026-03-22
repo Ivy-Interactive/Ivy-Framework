@@ -9,6 +9,9 @@ searchHints:
   - form
   - builder
   - useform
+  - UseForm hook
+  - form hook
+  - custom form layout
   - form-builder
   - form-submission
   - form-handling
