@@ -37,6 +37,14 @@ public class ExpressionNameHelper
 
     private static string SuggestNameFromMethodCall(MethodCallExpression call)
     {
+        // When the source of an aggregate is a .Where() call (e.g. e.Where(f => f.FlowType == "Capital Call").Sum(f => f.Amount)),
+        // extract the filter literal value as the series name instead of the aggregate property name.
+        var filterLiterals = ExtractWhereFilterLiterals(call);
+        if (filterLiterals.Count > 0)
+        {
+            return string.Join(" ", filterLiterals.Select(StringHelper.ToTitleCase));
+        }
+
         // Example: for a call like e.Sum(f => f.X to f.Y)
         // we check if one of the arguments is a lambda that produces two member accesses.
         foreach (var arg in call.Arguments)
@@ -67,6 +75,52 @@ public class ExpressionNameHelper
         }
         // Fallback: return the method name itself.
         return call.Method.Name;
+    }
+
+    /// <summary>
+    /// Walks the expression tree to find .Where() calls and extracts string literal values
+    /// from equality comparisons (e.g. f => f.FlowType == "Capital Call" yields "Capital Call").
+    /// </summary>
+    private static List<string> ExtractWhereFilterLiterals(MethodCallExpression call)
+    {
+        var literals = new List<string>();
+
+        // For extension methods, Arguments[0] is the source expression.
+        // Walk the chain looking for .Where() calls.
+        var current = call.Arguments.Count > 0 ? call.Arguments[0] : null;
+
+        while (current is MethodCallExpression sourceCall)
+        {
+            if (sourceCall.Method.Name == "Where")
+            {
+                foreach (var arg in sourceCall.Arguments)
+                {
+                    var lambda = GetLambda(arg);
+                    if (lambda == null) continue;
+
+                    var body = RemoveConversion(lambda.Body);
+                    if (body is BinaryExpression { NodeType: ExpressionType.Equal } eq)
+                    {
+                        var literal = GetStringConstant(eq.Right) ?? GetStringConstant(eq.Left);
+                        if (literal != null)
+                            literals.Add(literal);
+                    }
+                }
+            }
+
+            // Continue walking the chain (e.g. .Where().Where().Sum())
+            current = sourceCall.Arguments.Count > 0 ? sourceCall.Arguments[0] : null;
+        }
+
+        return literals;
+    }
+
+    private static string? GetStringConstant(Expression expr)
+    {
+        expr = RemoveConversion(expr);
+        if (expr is ConstantExpression { Value: string s })
+            return s;
+        return null;
     }
 
     private static LambdaExpression? GetLambda(Expression expr)
