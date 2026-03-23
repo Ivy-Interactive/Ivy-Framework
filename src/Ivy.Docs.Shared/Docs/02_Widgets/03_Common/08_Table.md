@@ -177,8 +177,8 @@ public class PivotTableExample : ViewBase
     {
         var rawData = new[]
         {
-            new SalesData("Chrome", "North", 150, 4500m),
-            new SalesData("Chrome", "South", 120, 3600m),
+            new SalesData("Desktop", "North", 150, 4500m),
+            new SalesData("Desktop", "South", 120, 3600m),
             new SalesData("Firefox", "North", 80, 2400m),
             new SalesData("Firefox", "South", 60, 1800m),
             new SalesData("Safari", "North", 50, 1500m),
