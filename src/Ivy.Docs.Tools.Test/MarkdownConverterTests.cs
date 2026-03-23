@@ -12,7 +12,7 @@ public class MarkdownConverterTests
         // This test replicates a potential edge case where markdown content 
         // ends exactly at the end of a block, which might cause Substring issues
         // if Markdig spans are slightly off or if we don't check bounds.
-        
+
         string markdown = @"# Test
 <Details>
 <Summary>Details</Summary>
@@ -28,10 +28,10 @@ var x = 1;
         try
         {
             await File.WriteAllTextAsync(tempFile, markdown);
-            
+
             // Should not throw ArgumentOutOfRangeException
             await MarkdownConverter.ConvertAsync("Test", "test", tempFile, outputFile, "TestNamespace", false, 0);
-            
+
             Assert.True(File.Exists(outputFile));
         }
         finally
