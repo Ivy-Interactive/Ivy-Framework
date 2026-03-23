@@ -92,8 +92,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
         // DateTime variant: merge time into current date so we don't overwrite with today
         if (!time?.trim()) return;
         const parts = time.split(":").map(Number);
-        const [hours, minutes, seconds] =
-          parts.length >= 3 ? [parts[0], parts[1], parts[2]] : [0, 0, 0];
+        const [hours, minutes, seconds] = [parts[0] || 0, parts[1] || 0, parts[2] || 0];
         let baseDate: Date;
         if (localValue && typeof localValue === "string") {
           const parsed = new Date(localValue);

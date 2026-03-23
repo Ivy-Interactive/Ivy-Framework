@@ -34,43 +34,37 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
 }) => {
   // Use local state for the input value to make it uncontrolled
   const [localTimeValue, setLocalTimeValue] = useState(() => {
-    if (value) {
-      // Parse the value to get time in HH:mm:ss format
-      try {
-        const date = new Date(value);
-        if (!isNaN(date.getTime())) {
-          return format(date, "HH:mm:ss");
-        }
-      } catch {
-        // If parsing fails, try to use the value directly if it looks like a time
-        if (typeof value === "string" && /^\d{1,2}:\d{2}(:\d{2})?$/.test(value)) {
-          return value.length <= 5 ? value + ":00" : value;
-        }
+    if (value && typeof value === "string") {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        return format(date, "HH:mm:ss");
+      }
+      // Fallback for simple time strings that new Date() might fail on
+      if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(value)) {
+        return value.split(":").length === 2 ? value + ":00" : value;
       }
     }
     // When nullable and no value, return empty string to show placeholder
-    return nullable ? "" : "00:00:00";
+    return nullable && (value === undefined || value === null || value === "") ? "" : "00:00:00";
   });
 
   // Update local state when value prop changes (from parent)
   React.useEffect(() => {
-    if (value) {
-      try {
-        const date = new Date(value);
-        if (!isNaN(date.getTime())) {
-          const newTimeValue = format(date, "HH:mm:ss");
-          setLocalTimeValue(newTimeValue);
-        }
-      } catch {
-        // If parsing fails, try to use the value directly if it looks like a time
-        if (typeof value === "string" && /^\d{1,2}:\d{2}(:\d{2})?$/.test(value)) {
-          const newTimeValue = value.length <= 5 ? value + ":00" : value;
-          setLocalTimeValue(newTimeValue);
-        }
+    if (value && typeof value === "string") {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        const newTimeValue = format(date, "HH:mm:ss");
+        setLocalTimeValue(newTimeValue);
+      } else if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(value)) {
+        // Handle direct time strings
+        const newTimeValue = value.split(":").length === 2 ? value + ":00" : value;
+        setLocalTimeValue(newTimeValue);
       }
+    } else if (nullable && (value === undefined || value === null || value === "")) {
+      setLocalTimeValue("");
     } else {
-      // When nullable and no value, keep input empty instead of defaulting to '00:00:00'
-      setLocalTimeValue(nullable ? "" : "00:00:00");
+      // When not nullable and no value, default to '00:00:00'
+      setLocalTimeValue("00:00:00");
     }
   }, [value, nullable]);
 
