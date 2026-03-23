@@ -137,14 +137,22 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         whiteSpace: wrapLines ? "pre-wrap" : "pre",
         fontSize: currentScale.fontSize,
         lineHeight: currentScale.lineHeight,
+        ...(showLineNumbers && { display: "table" }),
       }),
-      [currentScale, wrapLines],
+      [currentScale, wrapLines, showLineNumbers],
     );
 
     const highlighterKey = useMemo(
       () =>
         `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}-${wrapLines}`,
-      [id, language, showLineNumbers, showBorder, startingLineNumber, wrapLines],
+      [
+        id,
+        language,
+        showLineNumbers,
+        showBorder,
+        startingLineNumber,
+        wrapLines,
+      ],
     );
 
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
@@ -161,7 +169,9 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
 
     return (
       <div className="relative" style={containerStyles}>
-        {showCopyButton && <MemoizedCopyButton textToCopy={content} density={density} />}
+        {showCopyButton && (
+          <MemoizedCopyButton textToCopy={content} density={density} />
+        )}
         <ScrollArea
           className={cn(
             "w-full",
@@ -189,7 +199,11 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
               wrapLongLines={wrapLines}
               key={highlighterKey}
               codeTagProps={{ style: codeTagStyle }}
-              lineProps={showLineNumbers ? { style: { display: "table-row" } } : undefined}
+              lineProps={
+                showLineNumbers
+                  ? { style: { display: "table-row" } }
+                  : undefined
+              }
               lineNumberStyle={
                 showLineNumbers
                   ? {
