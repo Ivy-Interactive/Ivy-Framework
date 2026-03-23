@@ -151,7 +151,7 @@ You can leverage a footer-menu items transformer to conditionally show or hide l
 ### Role-Based Filtering
 
 ```csharp
-var chromeSettings = ChromeSettings.Default()
+var appShellSettings = AppShellSettings.Default()
     .UseFooterMenuItemsTransformer((items, navigator) =>
     {
         var user = AuthContext.CurrentUser;
