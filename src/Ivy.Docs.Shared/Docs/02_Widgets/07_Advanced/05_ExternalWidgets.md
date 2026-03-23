@@ -288,7 +288,7 @@ The host’s entry point should set:
 (window as any).ReactDOM = ReactDOM; // or createRoot etc.
 ```
 
-Ivy’s standard host (e.g. [Chrome](../../01_Onboarding/02_Concepts/11_Chrome.md)) does this. If you see “Global not found” or React-related errors, ensure the host app exposes these globals before any external widget script runs.
+Ivy’s standard host (e.g. [AppShell](../../01_Onboarding/02_Concepts/11_AppShell.md)) does this. If you see “Global not found” or React-related errors, ensure the host app exposes these globals before any external widget script runs.
 
 ## Troubleshooting
 

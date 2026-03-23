@@ -270,7 +270,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
         // Convert app:// URLs to regular paths for href attribute
         let hrefForNavigation = safeHref;
         if (isApp) {
-          // Use the utility function to convert app:// URLs, preserving chrome=false
+          // Use the utility function to convert app:// URLs, preserving appshell=false
           hrefForNavigation = convertAppUrlToPath(safeHref);
         }
 

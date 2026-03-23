@@ -9,7 +9,7 @@ import { DevTools } from "./DevTools";
 import {
   getAppArgs,
   getAppId,
-  getChromeParam,
+  getAppShellParam,
   getParentId,
   wrapAppContent,
   isDevToolsEnabled,
@@ -24,13 +24,13 @@ export function App() {
   const appId = getAppId();
   const appArgs = getAppArgs();
   const parentId = getParentId();
-  const chrome = getChromeParam();
+  const appShell = getAppShellParam();
 
   const { connection, widgetTree, eventHandler, subscribeToStream, disconnected } = useBackend(
     appId,
     appArgs,
     parentId,
-    chrome,
+    appShell,
   );
   const [removeBranding, setRemoveBranding] = useState(true);
 
@@ -40,8 +40,8 @@ export function App() {
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      const chrome = getChromeParam();
-      if (chrome) {
+      const appShell = getAppShellParam();
+      if (appShell) {
         const newAppId = getAppId();
         connection?.invoke("Navigate", newAppId, event.state).catch((err) => {
           console.error("SignalR Error when sending Navigate:", err);

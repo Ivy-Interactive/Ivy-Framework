@@ -1,6 +1,6 @@
 using Ivy.Core;
 using Ivy.Core.Apps;
-using Ivy.Core.Chrome;
+using Ivy.Core.AppShell;
 using Ivy.Core.Server;
 using Ivy.Widgets.Internal;
 using System.Collections.Immutable;
@@ -10,9 +10,9 @@ using AppContext = Ivy.AppContext;
 namespace Ivy;
 
 [App(isVisible: false)]
-public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
+public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
 {
-    internal ChromeSettings Settings => settings;
+    internal AppShellSettings Settings => settings;
 
     private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)
     {
@@ -77,7 +77,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             {
                 var result = appRepository.GetMenuItems()
                     .FlattenWithPath()
-                    .Select(x => new { x.Item, x.Path, Score = ChromeUtils.ItemMatchScore(x.Item, search.Value) })
+                    .Select(x => new { x.Item, x.Path, Score = AppShellUtils.ItemMatchScore(x.Item, search.Value) })
                     .Where(x => x.Score > 0)
                     .OrderByDescending(x => x.Score)
                     .ThenBy(x => x.Item.Label)
@@ -106,7 +106,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
         void OpenApp(NavigateArgs navigateArgs, bool replaceHistory = false)
         {
-            if (settings.Navigation == ChromeNavigation.Pages)
+            if (settings.Navigation == AppShellNavigation.Pages)
             {
                 var previousApp = currentApp.Value?.AppId;
 
@@ -251,7 +251,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         {
             if (@event.Value is string appId)
             {
-                client.OpenUrl(new NavigateArgs(appId, Chrome: false).GetUrl());
+                client.OpenUrl(new NavigateArgs(appId, AppShell: false).GetUrl());
             }
             return ValueTask.CompletedTask;
         }
@@ -362,7 +362,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
         object? body;
 
-        if (settings.Navigation == ChromeNavigation.Pages)
+        if (settings.Navigation == AppShellNavigation.Pages)
         {
             body = currentApp.Value;
         }

@@ -204,27 +204,27 @@ public class Server
         return this;
     }
 
-    public Server UseChrome(ChromeSettings settings)
+    public Server UseAppShell(AppShellSettings settings)
     {
-        return UseChrome(() => new DefaultSidebarChrome(settings));
+        return UseAppShell(() => new DefaultSidebarAppShell(settings));
     }
 
-    public Server UseChrome<T>() where T : ViewBase, new()
+    public Server UseAppShell<T>() where T : ViewBase, new()
     {
-        return UseChrome((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
+        return UseAppShell((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
     }
 
-    public Server UseChrome(Func<ViewBase>? viewFactory = null)
+    public Server UseAppShell(Func<ViewBase>? viewFactory = null)
     {
         AddApp(new AppDescriptor
         {
-            Id = AppIds.Chrome,
-            Title = "Chrome",
-            ViewFactory = viewFactory ?? (() => new DefaultSidebarChrome(ChromeSettings.Default())),
+            Id = AppIds.AppShell,
+            Title = "AppShell",
+            ViewFactory = viewFactory ?? (() => new DefaultSidebarAppShell(AppShellSettings.Default())),
             Group = [],
             IsVisible = false
         });
-        DefaultAppId = AppIds.Chrome;
+        DefaultAppId = AppIds.AppShell;
         return this;
     }
 

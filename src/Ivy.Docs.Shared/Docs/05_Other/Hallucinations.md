@@ -51,7 +51,7 @@ c9185561-51f5-4c76-ae5b-7448f5a68a0f
 [App(group: ["Tests"])]
 ```
 
-The `path` parameter was renamed to `group` in v1.2.18 to better reflect that it defines the organizational group/folder in the sidebar, not a URL path. This applies to both the `[App]` attribute and the `AppDescriptor` class (`Path` property → `Group` property).
+The `path` parameter was renamed to `group` in v1.2.18 to better reflect that it defines the organizational group/folder in the sidebar, not a URL path. This applies to both the `[App]` attribute and the `AppDescriptor` class (`Path` property → `Group` property). (Note: This was part of a broader refactoring to rename "Chrome" to "AppShell").
 
 **Found In:**
 Ivy-Framework#2612
@@ -347,14 +347,14 @@ c06ba6f6-2583-4fcc-81dc-f8da652471c6
 
 **Hallucinated API:**
 ```csharp
-[App(Icon = Icons.Bot, Group = "Apps", Chrome = UseDefaultAppChrome)]
+[App(icon: Icons.Bot, group: new[] { "Apps" }, appShell: UseDefaultAppShell)]
 [App(Icon = Icons.Waves)]
 ```
 
 **Errors:**
 - `CS0655: 'Icon' is not a valid named attribute argument` — PascalCase property used instead of constructor parameter
 - `CS0246: The type or namespace name 'Group' could not be found` — parameter doesn't exist
-- `CS0246: The type or namespace name 'Chrome' could not be found` — parameter doesn't exist
+- `CS0246: The type or namespace name 'AppShell' could not be found` — parameter doesn't exist
 
 **Correct API:**
 ```csharp
@@ -363,7 +363,7 @@ c06ba6f6-2583-4fcc-81dc-f8da652471c6
 
 The `AppAttribute` uses **lowercase named constructor parameters**, not PascalCase named properties. C# attributes with nullable property types cause CS0655 when accessed via `PropertyName = value` syntax. Use `parameterName: value` syntax instead.
 
-Available parameters: `id`, `title`, `icon`, `description`, `group`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`. There is NO `chrome` parameter — configure chrome in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`.
+Available parameters: `id`, `title`, `icon`, `description`, `group`, `isVisible`, `order`, `groupExpanded`, `documentSource`, `searchHints`. There is NO `appShell` parameter — configure app shell in `Program.cs` via `server.UseAppShell()`.
 
 Note: `path` was renamed to `group` in v1.2.18 (Ivy-Framework#2587). See the `AppAttribute.path` entries above for details.
 
@@ -2207,7 +2207,7 @@ All `Handle*` event handler extension methods were renamed to `On*` in v1.2.17 (
 | Hallucinated API | Correct API |
 |-----------------|-------------|
 | `server.UseSingleApp()` | `server.UseDefaultApp(typeof(AppType))` |
-| `server.UseNoChrome()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseChrome()` instead |
+| `server.UseNoAppShell()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseAppShell()` instead |
 | `server.UseDefaultApp<T>()` | `server.UseDefaultApp(typeof(T))` — takes Type, not generic |
 
 ## UseService vs UseContext — blade/context services
