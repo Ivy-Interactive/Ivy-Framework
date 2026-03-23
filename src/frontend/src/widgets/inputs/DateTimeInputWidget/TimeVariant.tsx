@@ -1,23 +1,23 @@
-import * as React from 'react';
-import { useState, useCallback, useMemo } from 'react';
-import { Input } from '@/components/ui/input';
-import { format } from 'date-fns';
-import { Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { inputStyles } from '@/lib/styles';
-import { Densities } from '@/types/density';
+import * as React from "react";
+import { useState, useCallback, useMemo } from "react";
+import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
+import { Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { inputStyles } from "@/lib/styles";
+import { Densities } from "@/types/density";
 import {
   dateTimeInputIconVariant,
   dateTimeInputTextVariant,
-} from '@/components/ui/input/date-time-input-variant';
-import { TimeVariantProps } from './types';
-import { ClearAndInvalidIcons } from './shared';
+} from "@/components/ui/input/date-time-input-variant";
+import { TimeVariantProps } from "./types";
+import { ClearAndInvalidIcons } from "./shared";
 import {
   formatSecondsToHms,
   parseLocalTimeToSeconds,
   parseTimeSpanStepToSeconds,
   snapLocalTimeSeconds,
-} from './timeStepSnap';
+} from "./timeStepSnap";
 
 export const TimeVariant: React.FC<TimeVariantProps> = ({
   value,
@@ -74,16 +74,13 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     }
   }, [value, nullable]);
 
-  const timeStepSeconds = useMemo(
-    () => parseTimeSpanStepToSeconds(step),
-    [step]
-  );
+  const timeStepSeconds = useMemo(() => parseTimeSpanStepToSeconds(step), [step]);
 
   const timeMin = useMemo(() => {
     if (!min) return undefined;
     try {
       const d = new Date(min);
-      if (!isNaN(d.getTime())) return format(d, 'HH:mm:ss');
+      if (!isNaN(d.getTime())) return format(d, "HH:mm:ss");
     } catch {
       /* ignore */
     }
@@ -94,14 +91,14 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     if (!max) return undefined;
     try {
       const d = new Date(max);
-      if (!isNaN(d.getTime())) return format(d, 'HH:mm:ss');
+      if (!isNaN(d.getTime())) return format(d, "HH:mm:ss");
     } catch {
       /* ignore */
     }
     return undefined;
   }, [max]);
 
-  const showClear = nullable && !disabled && value != null && value !== '';
+  const showClear = nullable && !disabled && value != null && value !== "";
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -116,8 +113,8 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
 
   const commitSnappedTime = useCallback(() => {
     const stepSec = parseTimeSpanStepToSeconds(step);
-    if (nullable && localTimeValue.trim() === '') {
-      onTimeChange('');
+    if (nullable && localTimeValue.trim() === "") {
+      onTimeChange("");
       return;
     }
     const parsed = parseLocalTimeToSeconds(localTimeValue);
@@ -126,12 +123,8 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
       return;
     }
 
-    const minSec = timeMin
-      ? (parseLocalTimeToSeconds(timeMin) ?? undefined)
-      : undefined;
-    const maxSec = timeMax
-      ? (parseLocalTimeToSeconds(timeMax) ?? undefined)
-      : undefined;
+    const minSec = timeMin ? (parseLocalTimeToSeconds(timeMin) ?? undefined) : undefined;
+    const maxSec = timeMax ? (parseLocalTimeToSeconds(timeMax) ?? undefined) : undefined;
     const snapped = snapLocalTimeSeconds(parsed, stepSec, minSec, maxSec);
     const out = formatSecondsToHms(snapped);
     setLocalTimeValue(out);
@@ -142,21 +135,12 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     commitSnappedTime();
   }, [commitSnappedTime]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        e.currentTarget.blur();
-      }
-    },
-    []
-      // When user presses Enter, update the parent
-      if (e.key === "Enter") {
-        onTimeChange(localTimeValue);
-      }
-    },
-    [localTimeValue, onTimeChange],
-  );
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.currentTarget.blur();
+    }
+  }, []);
 
   return (
     <div className="relative w-full select-none" data-testid={dataTestId}>

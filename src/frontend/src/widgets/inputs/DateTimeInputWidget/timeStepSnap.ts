@@ -11,7 +11,7 @@ export function parseTimeSpanStepToSeconds(step: string | undefined): number {
     daySeconds = (parseInt(dotMatch[1], 10) || 0) * 86400;
     rest = dotMatch[2];
   }
-  const parts = rest.split(':');
+  const parts = rest.split(":");
   if (parts.length >= 3) {
     const h = parseInt(parts[0], 10) || 0;
     const m = parseInt(parts[1], 10) || 0;
@@ -41,7 +41,7 @@ export function formatSecondsToHms(total: number): string {
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
-  const pad = (n: number) => n.toString().padStart(2, '0');
+  const pad = (n: number) => n.toString().padStart(2, "0");
   return `${pad(h)}:${pad(m)}:${pad(sec)}`;
 }
 
@@ -54,7 +54,7 @@ export function snapLocalTimeSeconds(
   valueSec: number,
   stepSec: number,
   minSec?: number | null,
-  maxSec?: number | null
+  maxSec?: number | null,
 ): number {
   if (stepSec <= 0 || !Number.isFinite(stepSec)) return valueSec;
 
@@ -69,8 +69,7 @@ export function snapLocalTimeSeconds(
   const n = Math.round(offset / stepSec);
   let snapped = base + n * stepSec;
 
-  const lastOnGrid =
-    base + Math.floor((effectiveMax - base) / stepSec) * stepSec;
+  const lastOnGrid = base + Math.floor((effectiveMax - base) / stepSec) * stepSec;
   const firstOnGrid = base;
 
   snapped = Math.min(snapped, lastOnGrid);

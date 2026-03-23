@@ -91,11 +91,11 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       } else {
         // DateTime variant: merge time into current date so we don't overwrite with today
         if (!time?.trim()) return;
-        const parts = time.split(':').map(Number);
+        const parts = time.split(":").map(Number);
         const [hours, minutes, seconds] =
           parts.length >= 3 ? [parts[0], parts[1], parts[2]] : [0, 0, 0];
         let baseDate: Date;
-        if (localValue && typeof localValue === 'string') {
+        if (localValue && typeof localValue === "string") {
           const parsed = new Date(localValue);
           baseDate = !isNaN(parsed.getTime()) ? parsed : new Date();
         } else {
@@ -107,7 +107,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
         eventHandler("OnChange", id, [isoString]);
       }
     },
-    [disabled, eventHandler, id, variant, localValue, setLocalValue]
+    [disabled, eventHandler, id, variant, localValue, setLocalValue],
   );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);

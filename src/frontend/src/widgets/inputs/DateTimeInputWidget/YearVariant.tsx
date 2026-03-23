@@ -149,8 +149,8 @@ export const YearVariant: React.FC<YearVariantProps> = ({
                         "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
                       year !== selectedYear &&
                         year === currentYear &&
-                        'bg-accent text-accent-foreground',
-                      yearDisabled && 'opacity-50 cursor-not-allowed'
+                        "bg-accent text-accent-foreground",
+                      yearDisabled && "opacity-50 cursor-not-allowed",
                     )}
                     onClick={() => handleYearSelect(year)}
                   >

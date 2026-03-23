@@ -135,13 +135,11 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
                     size="sm"
                     disabled={monthDisabled}
                     className={cn(
-                      'h-9 w-full text-sm font-normal',
+                      "h-9 w-full text-sm font-normal",
                       isSelected(i) &&
-                        'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
-                      !isSelected(i) &&
-                        isCurrentMonth(i) &&
-                        'bg-accent text-accent-foreground',
-                      monthDisabled && 'opacity-50 cursor-not-allowed'
+                        "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                      !isSelected(i) && isCurrentMonth(i) && "bg-accent text-accent-foreground",
+                      monthDisabled && "opacity-50 cursor-not-allowed",
                     )}
                     onClick={() => handleMonthSelect(i)}
                   >

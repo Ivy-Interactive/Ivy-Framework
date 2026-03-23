@@ -51,7 +51,7 @@ export const WeekVariant: React.FC<WeekVariantProps> = ({
     return matchers;
   }, [minDate, maxDate]);
 
-  const showClear = nullable && !disabled && value != null && value !== '';
+  const showClear = nullable && !disabled && value != null && value !== "";
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
