@@ -41,6 +41,38 @@ ce144de9-0688-490a-bef6-b2766e323154
 c9185561-51f5-4c76-ae5b-7448f5a68a0f
 8b576f86-85cc-43b8-97e2-358bae83464a
 
+## Callout constructor — wrong constructor + invented enum / wrong argument order
+
+**Hallucinated API:**
+
+```csharp
+// Variant 1: Invented enum (CalloutType does not exist)
+new Callout("No to-do items.", CalloutType.Info)
+
+// Variant 2: Correct enum but wrong argument position (CalloutVariant as 2nd arg instead of 3rd)
+new Callout("Warning!", CalloutVariant.Destructive)
+```
+
+**Error:** `The type or namespace 'CalloutType' could not be found` (variant 1) or `CS1503: Argument 2: cannot convert from 'Ivy.CalloutVariant' to 'string?'` (variant 2)
+
+**Correct API:**
+
+```csharp
+// Preferred: static factory methods
+Callout.Info("No to-do items.")
+
+// Constructor: (description, title, variant, icon) — title is the 2nd parameter, not variant
+new Callout("Warning!", "Title", CalloutVariant.Warning, Icons.AlertTriangle)
+```
+
+`Callout` uses static factory methods: `Callout.Info()`, `Callout.Warning()`, `Callout.Error()`, `Callout.Success()`, `Callout.Destructive()`. The `CalloutType` enum does not exist. Valid `CalloutVariant` values are `Info`, `Warning`, `Error`, `Success`, `Destructive`. `Destructive` was added to match agent expectations (previously hallucinated due to confusion with `BadgeVariant.Destructive`). It is styled identically to `Error`. When using the constructor directly, the parameter order is `(description, title, variant, icon)` — agents frequently put `CalloutVariant` as the 2nd argument where `title` (string) should be.
+
+**Found In:**
+bd5f45ac-569d-4be8-8ef8-882451e608a1
+0c7c0b33-a500-45c2-911b-b33ca1f9662e
+cdf77a72-658e-45df-9bdb-9bf7c79100b2
+4874e3a3-c6d8-4be5-b1b3-bc4209408343
+
 ## AppAttribute.path — renamed to group
 
 **Hallucinated API:**
@@ -151,37 +183,6 @@ Valid `BorderRadius` values: `None`, `Rounded`, `Full`. The agent hallucinates T
 050136ca-9275-4e1d-9740-e393b544c1b5
 8a776329-6dc7-474f-aa4d-c8b4da753a25 (BorderRadius.Large)
 4e59e443-3579-4df9-af4b-765b7b7d61c8 (BorderRadius.Small — via IvyMcp hallucination)
-
-## Callout constructor — wrong constructor + invented enum / wrong argument order
-
-**Hallucinated API:**
-
-```csharp
-// Variant 1: Invented enum (CalloutType does not exist)
-new Callout("No to-do items.", CalloutType.Info)
-
-// Variant 2: Correct enum but wrong argument position (CalloutVariant as 2nd arg instead of 3rd)
-new Callout("Warning!", CalloutVariant.Destructive)
-```
-
-**Error:** `The type or namespace 'CalloutType' could not be found` (variant 1) or `CS1503: Argument 2: cannot convert from 'Ivy.CalloutVariant' to 'string?'` (variant 2)
-
-**Correct API:**
-
-```csharp
-// Preferred: static factory methods
-Callout.Info("No to-do items.")
-
-// Constructor: (description, title, variant, icon) — title is the 2nd parameter, not variant
-new Callout("Warning!", "Title", CalloutVariant.Destructive, Icons.AlertTriangle)
-```
-
-`Callout` uses static factory methods: `Callout.Info()`, `Callout.Warning()`, `Callout.Error()`, `Callout.Success()`. The `CalloutType` enum does not exist. When using the constructor directly, the parameter order is `(description, title, variant, icon)` — agents frequently put `CalloutVariant` as the 2nd argument where `title` (string) should be.
-
-**Found In:**
-bd5f45ac-569d-4be8-8ef8-882451e608a1
-0c7c0b33-a500-45c2-911b-b33ca1f9662e
-cdf77a72-658e-45df-9bdb-9bf7c79100b2
 
 ## Details() — empty constructor instead of passing items
 
@@ -346,6 +347,34 @@ client.Error("Something went wrong.");       // error toast
 8b576f86-85cc-43b8-97e2-358bae83464a
 a8076804-1223-469e-a689-2af23d259566
 5ba11e91-7b05-49e1-8a0f-5ea01235b192
+
+## Button onClick — wrong callback signature (method group)
+
+**Hallucinated API:**
+
+```csharp
+async Task GenerateEmbedding() { ... }
+new Button("Generate Embedding", GenerateEmbedding)
+```
+
+**Error:** `Argument 2: cannot convert from 'method group' to 'System.Func<Ivy.Event<Ivy.Button>, System.Threading.Tasks.ValueTask>?'`
+
+**Correct API:**
+
+```csharp
+async ValueTask GenerateEmbedding(Event<Button> e) { ... }
+new Button("Generate Embedding", GenerateEmbedding)
+
+// Or inline:
+new Button("Generate", async (e) => { await DoWork(); })
+```
+
+The `Button` onClick parameter is `Func<Event<Button>, ValueTask>?`. The callback must: (1) accept `Event<Button>` as parameter, (2) return `ValueTask` (not `Task` or `void`). A method group with wrong signature (e.g., `async Task Foo()`) will fail with CS1503.
+
+**Found In:**
+55eafb82-2cc2-48ba-9a66-cd2ed8d38d67
+6ee57156-8185-4cdd-97b1-fdb53b45383a
+4874e3a3-c6d8-4be5-b1b3-bc4209408343
 
 ## UseAlert().ShowInfo() — wrong API usage
 
@@ -547,32 +576,6 @@ There is no `.Lines()` method. Use `ToTextareaInput()` or `ToTextInput().Multili
 **Found In:**
 857de09c-ab87-49a5-aac4-394f7d0aa207
 edd92ecc-6378-440a-b9cf-bb8e1cb29de9
-
-## Button onClick — wrong callback signature (method group)
-
-**Hallucinated API:**
-
-```csharp
-async Task GenerateEmbedding() { ... }
-new Button("Generate Embedding", GenerateEmbedding)
-```
-
-**Error:** `Argument 2: cannot convert from 'method group' to 'System.Func<Ivy.Event<Ivy.Button>, System.Threading.Tasks.ValueTask>?'`
-
-**Correct API:**
-
-```csharp
-async ValueTask GenerateEmbedding(Event<Button> e) { ... }
-new Button("Generate Embedding", GenerateEmbedding)
-
-// Or inline:
-new Button("Generate", async (e) => { await DoWork(); })
-```
-
-The `Button` onClick parameter is `Func<Event<Button>, ValueTask>?`. The callback must: (1) accept `Event<Button>` as parameter, (2) return `ValueTask` (not `Task` or `void`). A method group with wrong signature (e.g., `async Task Foo()`) will fail with CS1503.
-
-**Found In:**
-55eafb82-2cc2-48ba-9a66-cd2ed8d38d67
 
 ## LayoutView.MaxWidth() — non-existent method
 
