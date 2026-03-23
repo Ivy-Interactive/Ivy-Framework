@@ -27,7 +27,7 @@ public static class SamplesServer
             )
             .DefaultApp<HelloApp>()
             .UseTabs(preventDuplicates: true);
-        server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
+        server.UseAppShell(() => new DefaultSidebarAppShell(appShellSettings));
 
         server.Services.AddSingleton<SampleDbContextFactory>();
         server.Services.AddSingleton<Apps.Widgets.MockEmployeeService>();

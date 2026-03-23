@@ -59,9 +59,9 @@ export function getParentId(): string | null {
   return urlParams.get("parentId");
 }
 
-export function getChromeParam(): boolean {
+export function getAppShellParam(): boolean {
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("chrome")?.toLowerCase() !== "false";
+  return urlParams.get("appshell")?.toLowerCase() !== "false";
 }
 
 export function wrapAppContent(content: React.ReactNode): React.ReactNode {
@@ -70,10 +70,10 @@ export function wrapAppContent(content: React.ReactNode): React.ReactNode {
 
 /**
  * Converts an app:// URL to a regular browser path.
- * Preserves query parameters from the current URL (especially chrome=false) when in chrome=false mode.
+ * Preserves query parameters from the current URL (especially appshell=false) when in appshell=false mode.
  *
  * @param appUrl - The app:// URL to convert (e.g., "app://MyApp" or "app://MyApp?param=value")
- * @returns The converted path (e.g., "/MyApp" or "/MyApp?param=value&chrome=false")
+ * @returns The converted path (e.g., "/MyApp" or "/MyApp?param=value&appshell=false")
  */
 /**
  * Extracts the content after the app:// protocol prefix using regex.
@@ -96,15 +96,15 @@ export function convertAppUrlToPath(appUrl: string): string {
   // Build the path
   let path = `/${appPath}`;
 
-  // Preserve chrome=false if we're currently in chrome=false mode
-  const isChromeFalse = !getChromeParam();
+  // Preserve appshell=false if we're currently in appshell=false mode
+  const isAppShellFalse = !getAppShellParam();
   const queryParams = new URLSearchParams(existingQueryString || "");
 
-  if (isChromeFalse && !queryParams.has("chrome")) {
-    queryParams.set("chrome", "false");
+  if (isAppShellFalse && !queryParams.has("appshell")) {
+    queryParams.set("appshell", "false");
   }
 
-  // Combine existing query params with chrome param
+  // Combine existing query params with appshell param
   const finalQueryString = queryParams.toString();
   if (finalQueryString) {
     path += `?${finalQueryString}`;

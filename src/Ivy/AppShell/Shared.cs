@@ -8,58 +8,58 @@ using Ivy.Core.Server;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum ChromeNavigation
+public enum AppShellNavigation
 {
     Tabs,
     Pages
 }
 
-public record ChromeSettings
+public record AppShellSettings
 {
     public object? Header { get; init; }
     public object? Footer { get; init; }
     public string? DefaultAppId { get; init; }
     public string? WallpaperAppId { get; init; }
     public bool PreventTabDuplicates { get; init; }
-    public ChromeNavigation Navigation { get; init; }
+    public AppShellNavigation Navigation { get; init; }
     public Size? Width { get; init; }
     public bool SidebarOpen { get; init; } = true;
     public Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> FooterMenuItemsTransformer { get; init; } = (items, _) => items;
 
-    public static ChromeSettings Default() => new()
+    public static AppShellSettings Default() => new()
     {
-        Navigation = ChromeNavigation.Tabs,
+        Navigation = AppShellNavigation.Tabs,
         PreventTabDuplicates = false
     };
 }
 
-public static class ChromeSettingsExtensions
+public static class AppShellSettingsExtensions
 {
-    public static ChromeSettings Header(this ChromeSettings settings, object? header) => settings with { Header = header };
-    public static ChromeSettings Footer(this ChromeSettings settings, object? footer) => settings with { Footer = footer };
-    public static ChromeSettings DefaultAppId(this ChromeSettings settings, string? defaultAppId) => settings with { DefaultAppId = defaultAppId };
-    public static ChromeSettings DefaultApp<T>(this ChromeSettings settings)
+    public static AppShellSettings Header(this AppShellSettings settings, object? header) => settings with { Header = header };
+    public static AppShellSettings Footer(this AppShellSettings settings, object? footer) => settings with { Footer = footer };
+    public static AppShellSettings DefaultAppId(this AppShellSettings settings, string? defaultAppId) => settings with { DefaultAppId = defaultAppId };
+    public static AppShellSettings DefaultApp<T>(this AppShellSettings settings)
     {
         var type = typeof(T);
         var descriptor = AppHelpers.GetApp(type);
         return settings with { DefaultAppId = descriptor.Id };
     }
-    public static ChromeSettings WallpaperAppId(this ChromeSettings settings, string? wallpaperAppId) => settings with { WallpaperAppId = wallpaperAppId };
-    public static ChromeSettings WallpaperApp<T>(this ChromeSettings settings)
+    public static AppShellSettings WallpaperAppId(this AppShellSettings settings, string? wallpaperAppId) => settings with { WallpaperAppId = wallpaperAppId };
+    public static AppShellSettings WallpaperApp<T>(this AppShellSettings settings)
     {
         var type = typeof(T);
         var descriptor = AppHelpers.GetApp(type);
         return settings with { WallpaperAppId = descriptor.Id };
     }
-    public static ChromeSettings Navigation(this ChromeSettings settings, ChromeNavigation navigation) => settings with { Navigation = navigation };
-    public static ChromeSettings UseTabs(this ChromeSettings settings, bool preventDuplicates = false) => settings with { Navigation = ChromeNavigation.Tabs, PreventTabDuplicates = preventDuplicates };
-    public static ChromeSettings UsePages(this ChromeSettings settings) => settings with { Navigation = ChromeNavigation.Pages };
-    public static ChromeSettings UseFooterMenuItemsTransformer(this ChromeSettings settings, Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer) => settings with { FooterMenuItemsTransformer = transformer };
-    public static ChromeSettings Width(this ChromeSettings settings, Size width) => settings with { Width = width };
-    public static ChromeSettings SidebarOpen(this ChromeSettings settings, bool open) => settings with { SidebarOpen = open };
+    public static AppShellSettings Navigation(this AppShellSettings settings, AppShellNavigation navigation) => settings with { Navigation = navigation };
+    public static AppShellSettings UseTabs(this AppShellSettings settings, bool preventDuplicates = false) => settings with { Navigation = AppShellNavigation.Tabs, PreventTabDuplicates = preventDuplicates };
+    public static AppShellSettings UsePages(this AppShellSettings settings) => settings with { Navigation = AppShellNavigation.Pages };
+    public static AppShellSettings UseFooterMenuItemsTransformer(this AppShellSettings settings, Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer) => settings with { FooterMenuItemsTransformer = transformer };
+    public static AppShellSettings Width(this AppShellSettings settings, Size width) => settings with { Width = width };
+    public static AppShellSettings SidebarOpen(this AppShellSettings settings, bool open) => settings with { SidebarOpen = open };
 }
 
-[Signal(BroadcastType.Chrome)]
+[Signal(BroadcastType.AppShell)]
 public class NavigateSignal : AbstractSignal<NavigateArgs, Unit> { }
 
 public enum HistoryOp
@@ -68,7 +68,7 @@ public enum HistoryOp
     Pop,
 }
 
-public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId = null, HistoryOp HistoryOp = HistoryOp.Push, bool Chrome = true)
+public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId = null, HistoryOp HistoryOp = HistoryOp.Push, bool AppShell = true)
 {
     public AppHost ToAppHost(string? parentId = null)
     {
@@ -106,9 +106,9 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
             queryParams.Add($"appArgs={encodedArgs}");
         }
 
-        if (!this.Chrome)
+        if (!this.AppShell)
         {
-            queryParams.Add("chrome=false");
+            queryParams.Add("appshell=false");
         }
 
         if (queryParams.Any())
