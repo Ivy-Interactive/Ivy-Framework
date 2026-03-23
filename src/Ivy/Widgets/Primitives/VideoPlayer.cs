@@ -3,6 +3,12 @@
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+public record SubtitleTrack
+{
+    public string Source { get; set; } = "";
+    public string? Label { get; set; }
+}
+
 /// <summary>
 /// Plays video files.
 /// </summary>
@@ -57,6 +63,8 @@ public record VideoPlayer : WidgetBase<VideoPlayer>
 
     [Prop] public double? PlaybackRate { get; set; }
 
+    [Prop] public List<SubtitleTrack>? Subtitles { get; set; }
+
     [Event] public EventHandler<Event<VideoPlayer>>? OnPlay { get; set; }
 
     [Event] public EventHandler<Event<VideoPlayer>>? OnPause { get; set; }
@@ -88,6 +96,13 @@ public static class VideoPlayerExtensions
     public static VideoPlayer EndTime(this VideoPlayer widget, int? endTime = null) => widget with { EndTime = endTime };
 
     public static VideoPlayer PlaybackRate(this VideoPlayer widget, double rate) => widget with { PlaybackRate = Math.Max(0.25, rate) };
+
+    public static VideoPlayer Subtitles(this VideoPlayer widget, string source, string? label = null)
+    {
+        var tracks = widget.Subtitles ?? new List<SubtitleTrack>();
+        tracks.Add(new SubtitleTrack { Source = source, Label = label });
+        return widget with { Subtitles = tracks };
+    }
 
     public static VideoPlayer Id(this VideoPlayer widget, string id) => widget with { Id = id };
 

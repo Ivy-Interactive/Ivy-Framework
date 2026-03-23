@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using Apache.Arrow;
@@ -61,6 +62,16 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
     private static readonly ConcurrentDictionary<(MethodInfo, Type, Type), MethodInfo> s_genericMethodCache = new();
 
+    // Synchronization guards for EF Core-backed queryables to prevent concurrent DbContext access.
+    // Keyed by the IQueryProvider instance so different DbContexts can execute concurrently.
+    private static readonly ConditionalWeakTable<IQueryProvider, SemaphoreSlim> s_providerSemaphores = new();
+
+    private static bool IsEfCoreProvider(IQueryable queryable)
+        => queryable.Provider.GetType().FullName?.Contains("EntityFrameworkCore") == true;
+
+    private static SemaphoreSlim GetProviderSemaphore(IQueryable queryable)
+        => s_providerSemaphores.GetValue(queryable.Provider, _ => new SemaphoreSlim(1, 1));
+
     private static MethodInfo GetGenericMethod(MethodInfo openMethod, params Type[] typeArgs)
         => s_genericMethodCache.GetOrAdd(
             (openMethod, typeArgs[0], typeArgs.Length > 1 ? typeArgs[1] : typeof(void)),
@@ -105,25 +116,38 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
                 processedQuery = ApplySort(processedQuery, query.Sort);
             }
 
-            // Get total count before pagination
-            var totalRows = processedQuery.Cast<object>().Count();
-            logger?.LogDebug("Total rows before pagination: {TotalRows}", totalRows);
-
-            // Apply pagination
-            if (query.Offset > 0)
+            // Serialize count + data queries for EF Core providers to prevent concurrent DbContext access.
+            var useGuard = IsEfCoreProvider(queryable);
+            var semaphore = useGuard ? GetProviderSemaphore(queryable) : null;
+            if (semaphore != null) semaphore.Wait();
+            int totalRows;
+            List<object> results;
+            try
             {
-                var skipMethod = GetGenericMethod(s_skipMethod, queryable.ElementType);
-                processedQuery = (IQueryable)skipMethod.Invoke(null, new object[] { processedQuery, query.Offset })!;
+                // Get total count before pagination
+                totalRows = processedQuery.Cast<object>().Count();
+                logger?.LogDebug("Total rows before pagination: {TotalRows}", totalRows);
+
+                // Apply pagination
+                if (query.Offset > 0)
+                {
+                    var skipMethod = GetGenericMethod(s_skipMethod, queryable.ElementType);
+                    processedQuery = (IQueryable)skipMethod.Invoke(null, new object[] { processedQuery, query.Offset })!;
+                }
+
+                // Apply limit - always apply if specified, even if 0
+                var takeMethod = GetGenericMethod(s_takeMethod, queryable.ElementType);
+                processedQuery = (IQueryable)takeMethod.Invoke(null, new object[] { processedQuery, query.Limit })!;
+
+                // Execute query and get results
+                logger?.LogDebug("Executing query");
+                results = processedQuery.Cast<object>().ToList();
+                logger?.LogInformation("Query executed, got {ResultCount} results", results.Count);
             }
-
-            // Apply limit - always apply if specified, even if 0
-            var takeMethod = GetGenericMethod(s_takeMethod, queryable.ElementType);
-            processedQuery = (IQueryable)takeMethod.Invoke(null, new object[] { processedQuery, query.Limit })!;
-
-            // Execute query and get results
-            logger?.LogDebug("Executing query");
-            var results = processedQuery.Cast<object>().ToList();
-            logger?.LogInformation("Query executed, got {ResultCount} results", results.Count);
+            finally
+            {
+                semaphore?.Release();
+            }
 
             // Convert to Arrow table
             logger?.LogDebug("Converting to Arrow table");
@@ -1030,10 +1054,22 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             var orderLambda = System.Linq.Expressions.Expression.Lambda(orderParameter, orderParameter);
             projectedQuery = (IQueryable)orderByMethod.Invoke(null, new object[] { projectedQuery, orderLambda })!;
 
-            // Execute query and convert to strings
-            var rawValues = projectedQuery.Cast<object>()
-                .Where(v => v != null)
-                .ToList();
+            // Serialize DB execution for EF Core providers to prevent concurrent DbContext access.
+            var useGuard = IsEfCoreProvider(queryable);
+            var semaphore = useGuard ? GetProviderSemaphore(queryable) : null;
+            if (semaphore != null) semaphore.Wait();
+            List<object> rawValues;
+            try
+            {
+                // Execute query and convert to strings
+                rawValues = projectedQuery.Cast<object>()
+                    .Where(v => v != null)
+                    .ToList();
+            }
+            finally
+            {
+                semaphore?.Release();
+            }
 
             // Handle string arrays - explode them into individual values
             List<string> values;

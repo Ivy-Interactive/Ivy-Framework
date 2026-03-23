@@ -21,6 +21,7 @@ public class KanbanBuilder<TModel, TGroupKey>(
     private bool _cardOrderDescending;
     private Func<TModel, object>? _customCardRenderer;
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
+    private Func<TGroupKey, string>? _columnHeaderSelector;
     private object? _empty;
     private Size? _width = Size.Full();
     private Size? _height = Size.Full();
@@ -106,6 +107,20 @@ public class KanbanBuilder<TModel, TGroupKey>(
         return this;
     }
 
+    public KanbanBuilder<TModel, TGroupKey> ColumnHeader(Func<TGroupKey, string> headerSelector)
+    {
+        _columnHeaderSelector = headerSelector;
+        return this;
+    }
+
+    private static string HumanizeGroupKey(TGroupKey key)
+    {
+        if (key is Enum enumValue)
+            return enumValue.GetDescription();
+
+        return StringHelper.SplitPascalCase(key.ToString()) ?? key.ToString() ?? "";
+    }
+
     public override object? Build()
     {
         if (!records.Any())
@@ -183,7 +198,13 @@ public class KanbanBuilder<TModel, TGroupKey>(
             if (priority != null)
                 card = card with { Priority = priority };
 
-            card = card with { Column = groupKey };
+            card = card with
+            {
+                Column = groupKey,
+                ColumnName = _columnHeaderSelector != null
+                    ? _columnHeaderSelector(groupKey)
+                    : HumanizeGroupKey(groupKey)
+            };
 
             return card;
         }).ToArray();

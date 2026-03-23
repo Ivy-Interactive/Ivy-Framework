@@ -20,6 +20,10 @@ searchHints:
   - cards
   - drag
   - drop
+  - drag and drop
+  - dnd
+  - move cards
+  - reorder
   - project management
   - workflow
   - agile

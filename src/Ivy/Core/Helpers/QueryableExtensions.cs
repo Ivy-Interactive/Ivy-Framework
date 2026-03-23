@@ -82,12 +82,35 @@ public static class QueryableExtensions
         }
         else
         {
-            // Fallback to default constructor with member initialization
-            var bindings = availableProperties.Select(prop =>
-                Expression.Bind(prop, Expression.MakeMemberAccess(parameter, prop))
-            ).ToList();
+            // Try to find the primary constructor (e.g., for positional records without a parameterless constructor)
+            var primaryCtor = constructors
+                .OrderByDescending(c => c.GetParameters().Length)
+                .FirstOrDefault(c => c.GetParameters().Length > 0);
 
-            newExpression = Expression.MemberInit(Expression.New(type), bindings);
+            if (primaryCtor != null && type.GetConstructor(Type.EmptyTypes) == null)
+            {
+                var ctorParams = primaryCtor.GetParameters();
+                var ctorArgs = ctorParams.Select(p =>
+                {
+                    var prop = availableProperties.FirstOrDefault(
+                        ap => ap.Name.Equals(p.Name, StringComparison.OrdinalIgnoreCase)
+                    );
+                    return prop != null
+                        ? (Expression)Expression.MakeMemberAccess(parameter, prop)
+                        : Expression.Default(p.ParameterType);
+                }).ToArray();
+
+                newExpression = Expression.New(primaryCtor, ctorArgs);
+            }
+            else
+            {
+                // Fallback to default constructor with member initialization
+                var bindings = availableProperties.Select(prop =>
+                    Expression.Bind(prop, Expression.MakeMemberAccess(parameter, prop))
+                ).ToList();
+
+                newExpression = Expression.MemberInit(Expression.New(type), bindings);
+            }
         }
 
         var lambda = Expression.Lambda<Func<TModel, TModel>>(newExpression, parameter);
