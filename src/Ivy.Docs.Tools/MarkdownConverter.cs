@@ -314,7 +314,9 @@ public static partial class MarkdownConverter
 
                 if (!isInsideDetailsBlock)
                 {
-                    string rawMarkdown = markdownContent.Substring(mBlock.Span.Start, mBlock.Span.Length).Trim();
+                    int start = Math.Max(0, mBlock.Span.Start);
+                    int length = Math.Min(mBlock.Span.Length, markdownContent.Length - start);
+                    string rawMarkdown = markdownContent.Substring(start, length).Trim();
                     sectionBuilder.AppendLine().AppendLine(rawMarkdown);
                 }
             }
@@ -329,7 +331,9 @@ public static partial class MarkdownConverter
 
     private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder, StringBuilder viewBuilder, HashSet<string> usedClassNames, LinkConverter linkConverter, HashSet<string> referencedApps, List<(string Id, string Text, int Level)>? headings)
     {
-        string htmlContent = markdownContent.Substring(htmlBlock.Span.Start, htmlBlock.Span.Length).Trim();
+        int start = Math.Max(0, htmlBlock.Span.Start);
+        int length = Math.Min(htmlBlock.Span.Length, markdownContent.Length - start);
+        string htmlContent = markdownContent.Substring(start, length).Trim();
 
         // Check if it's a Details block first (before XML parsing since it may contain markdown)
         // Note: Must be case-sensitive to distinguish from HTML <details> element
@@ -388,7 +392,9 @@ public static partial class MarkdownConverter
     private static void HandleDetailsBlock(StringBuilder codeBuilder, XElement? xml, string markdownContent, HtmlBlock htmlBlock, StringBuilder viewBuilder, HashSet<string> usedClassNames)
     {
         // Get the raw HTML content
-        string htmlContent = markdownContent.Substring(htmlBlock.Span.Start, htmlBlock.Span.Length);
+        int start = Math.Max(0, htmlBlock.Span.Start);
+        int length = Math.Min(htmlBlock.Span.Length, markdownContent.Length - start);
+        string htmlContent = markdownContent.Substring(start, length);
         HandleDetailsBlockDirect(codeBuilder, htmlContent, viewBuilder, usedClassNames);
     }
 
@@ -543,7 +549,9 @@ public static partial class MarkdownConverter
 StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent = false, int baseIndentLevel = 3)
     {
         string language = codeBlock.Info ?? "csharp";
-        string codeContent = markdownContent.Substring(codeBlock.Span.Start, codeBlock.Span.Length).Trim();
+        int start = Math.Max(0, codeBlock.Span.Start);
+        int length = Math.Min(codeBlock.Span.Length, markdownContent.Length - start);
+        string codeContent = markdownContent.Substring(start, length).Trim();
         codeContent = RemoveFirstAndLastLine(codeContent);
         if (language == "csharp" && (codeBlock.Arguments?.Trim().StartsWith("demo", StringComparison.InvariantCultureIgnoreCase) ?? false))
         {
