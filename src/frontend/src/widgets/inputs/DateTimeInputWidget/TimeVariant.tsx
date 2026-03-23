@@ -173,7 +173,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
             "bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0",
             dateTimeInputTextVariant({ density }),
             invalid && inputStyles.invalidInput,
-            disabled && "cursor-not-allowed",
+            disabled && "cursor-not-allowed opacity-50 text-muted-foreground",
             showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
           )}
         />
