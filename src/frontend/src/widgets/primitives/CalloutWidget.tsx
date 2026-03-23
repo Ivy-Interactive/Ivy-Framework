@@ -11,7 +11,7 @@ interface CalloutWidgetProps {
   id: string;
   title?: string;
   children?: React.ReactNode;
-  variant?: "Info" | "Success" | "Warning" | "Error";
+  variant?: "Info" | "Success" | "Warning" | "Error" | "Destructive";
   width?: string;
   height?: string;
   icon?: string;
@@ -20,21 +20,26 @@ interface CalloutWidgetProps {
 
 const calloutVariant = {
   Info: {
-    container: "border-cyan/20 bg-cyan/5 text-foreground dark:border-cyan/30 dark:bg-cyan/10",
+    container: "border-cyan/20 bg-cyan/10 text-foreground dark:border-cyan/30 dark:bg-cyan/10",
     icon: "",
   },
   Success: {
     container:
-      "border-emerald/20 bg-emerald/5 text-foreground dark:border-emerald/30 dark:bg-emerald/10",
+      "border-emerald/20 bg-emerald/10 text-foreground dark:border-emerald/30 dark:bg-emerald/10",
     icon: "text-emerald dark:text-emerald-light",
   },
   Warning: {
-    container: "border-amber/20 bg-amber/5 text-foreground dark:border-amber/30 dark:bg-amber/10",
+    container: "border-amber/20 bg-amber/10 text-foreground dark:border-amber/30 dark:bg-amber/10",
     icon: "text-amber dark:text-amber-light",
   },
   Error: {
     container:
-      "border-destructive/20 bg-destructive/5 text-foreground dark:border-destructive/30 dark:bg-destructive/10",
+      "border-destructive/20 bg-destructive/10 text-foreground dark:border-destructive/30 dark:bg-destructive/10",
+    icon: "text-destructive dark:text-destructive-light",
+  },
+  Destructive: {
+    container:
+      "border-destructive/20 bg-destructive/10 text-foreground dark:border-destructive/30 dark:bg-destructive/10",
     icon: "text-destructive dark:text-destructive-light",
   },
 };
@@ -44,6 +49,7 @@ const defaultIcons = {
   Success: "CircleCheck",
   Warning: "CircleAlert",
   Error: "CircleAlert",
+  Destructive: "CircleAlert",
 };
 
 export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
