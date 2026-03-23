@@ -23,8 +23,8 @@
     z-index: 10;
   }
   .ivy-textarea-wrapper::after {
-    width: 8px;
-    bottom: 8px;
+    width: 6px;
+    bottom: 7px;
     right: 2px;
   }
   .ivy-textarea-wrapper:has(.resize-none)::before,
