@@ -59,6 +59,9 @@ public record TextRun
 
     /// <summary>When set, contains raw markdown table text to render via the markdown renderer.</summary>
     [Prop] public string? Table { get; set; }
+
+    /// <summary>When set, contains LaTeX math content to render. "inline" for inline math, "display" for display math.</summary>
+    [Prop] public string? Math { get; set; }
 }
 
 /// <summary>

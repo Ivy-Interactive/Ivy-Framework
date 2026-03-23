@@ -18,6 +18,9 @@ public class RichTextMarkdownParser
     private bool _inTable;
     private readonly StringBuilder _tableBuffer = new();
     private bool _isFirstBlock = true;
+    private bool _inMathBlock;
+    private string _mathBlockType = ""; // "display" for display math
+    private readonly StringBuilder _mathBlockContent = new();
 
     /// <summary>
     /// Append a new text token (from a streaming LLM response) and return
@@ -46,6 +49,29 @@ public class RichTextMarkdownParser
                     else
                     {
                         _codeBlockContent.Append(line);
+                    }
+                }
+                continue;
+            }
+
+            if (_inMathBlock)
+            {
+                _lineBuffer.Append(ch);
+                if (ch == '\n')
+                {
+                    var line = _lineBuffer.ToString();
+                    _lineBuffer.Clear();
+                    var trimmed = line.TrimEnd();
+                    if (trimmed == "$$" || trimmed == "\\]")
+                    {
+                        runs.Add(new TextRun(_mathBlockContent.ToString()) { Math = _mathBlockType });
+                        _mathBlockContent.Clear();
+                        _inMathBlock = false;
+                        _mathBlockType = "";
+                    }
+                    else
+                    {
+                        _mathBlockContent.Append(line);
                     }
                 }
                 continue;
@@ -80,6 +106,16 @@ public class RichTextMarkdownParser
             runs.Add(new TextRun(_codeBlockContent.ToString()) { CodeBlock = _codeBlockLang });
             _codeBlockContent.Clear();
             _inCodeBlock = false;
+            return runs;
+        }
+
+        if (_inMathBlock)
+        {
+            _mathBlockContent.Append(_lineBuffer);
+            _lineBuffer.Clear();
+            runs.Add(new TextRun(_mathBlockContent.ToString()) { Math = _mathBlockType });
+            _mathBlockContent.Clear();
+            _inMathBlock = false;
             return runs;
         }
 
@@ -144,6 +180,25 @@ public class RichTextMarkdownParser
             runs.Add(new TextRun { Table = _tableBuffer.ToString().TrimEnd() });
             _tableBuffer.Clear();
             _inTable = false;
+        }
+
+        // Display math detection ($$...$$)
+        var trimmedLine = line.TrimStart();
+        if (trimmedLine.StartsWith("$$"))
+        {
+            _inMathBlock = true;
+            _mathBlockType = "display";
+            _mathBlockContent.Clear();
+            return runs;
+        }
+
+        // Display math detection (\[...\])
+        if (trimmedLine.StartsWith("\\["))
+        {
+            _inMathBlock = true;
+            _mathBlockType = "display";
+            _mathBlockContent.Clear();
+            return runs;
         }
 
         // Code fence detection
@@ -258,6 +313,42 @@ public class RichTextMarkdownParser
 
         while (i < text.Length)
         {
+            // Inline math \(...\)
+            if (i + 1 < text.Length && text[i] == '\\' && text[i + 1] == '(')
+            {
+                FlushText(runs, sb);
+                i += 2;
+                var mathContent = new StringBuilder();
+                while (i < text.Length)
+                {
+                    if (i + 1 < text.Length && text[i] == '\\' && text[i + 1] == ')')
+                    {
+                        i += 2;
+                        break;
+                    }
+                    mathContent.Append(text[i]);
+                    i++;
+                }
+                runs.Add(new TextRun(mathContent.ToString()) { Math = "inline" });
+                continue;
+            }
+
+            // Inline math $...$
+            if (text[i] == '$')
+            {
+                FlushText(runs, sb);
+                i++;
+                var mathContent = new StringBuilder();
+                while (i < text.Length && text[i] != '$')
+                {
+                    mathContent.Append(text[i]);
+                    i++;
+                }
+                if (i < text.Length) i++; // skip closing $
+                runs.Add(new TextRun(mathContent.ToString()) { Math = "inline" });
+                continue;
+            }
+
             // Inline code
             if (text[i] == '`')
             {

@@ -138,7 +138,7 @@
     "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.13"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "src/**/*.{js,jsx,ts,tsx}": [
       "vp lint --fix",
       "vp fmt"
     ],

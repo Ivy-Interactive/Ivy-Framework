@@ -1,5 +1,4 @@
 import path from "path";
-import { type Plugin } from "vite";
 import { defineConfig } from "vite-plus";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -9,7 +8,7 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-function transferMeta(htmlServer: string, htmlLocal: string): string {
+function transferMeta(htmlServer, htmlLocal) {
   const titleMatch = htmlServer.match(/<title[^>]*>(.*?)<\/title>/i);
   const serverTitle = titleMatch ? titleMatch[1] : null;
 
@@ -46,10 +45,10 @@ function transferMeta(htmlServer: string, htmlLocal: string): string {
   return result;
 }
 
-const injectMeta = (mode: string): Plugin => {
+const injectMeta = (mode) => {
   return {
     name: "inject-ivy-meta",
-    async transformIndexHtml(localHtml: string) {
+    async transformIndexHtml(localHtml) {
       if (mode === "development") {
         const host = process.env.IVY_HOST || "http://localhost:5010";
         const serverHtml = await fetch(`${host}`).then((res) => res.text());
@@ -64,8 +63,7 @@ const injectMeta = (mode: string): Plugin => {
 
 const mode = process.env.NODE_ENV || "development";
 export default defineConfig({
-  lint: { options: { typeCheck: false } },
-  plugins: [react(), tailwindcss(), injectMeta(mode)] as Plugin[],
+  plugins: [react(), tailwindcss(), injectMeta(mode)],
   server: {
     proxy: {
       "^/(.*\\.md|llms\\.txt)$": {
@@ -74,7 +72,6 @@ export default defineConfig({
       },
     },
   },
-  oxc: {},
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

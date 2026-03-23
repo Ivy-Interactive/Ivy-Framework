@@ -7,6 +7,8 @@ import { useEventHandler } from "@/components/event-handler/hooks";
 import { Densities } from "@/types/density";
 import { TextAlignment } from "@/types/textAlignment";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import katex from "katex";
+import "katex/dist/katex.min.css";
 
 interface TextRun {
   content: string;
@@ -28,6 +30,7 @@ interface TextRun {
   codeBlock?: string;
   blockquote?: boolean;
   table?: string;
+  math?: string;
 }
 
 interface RichTextBlockWidgetProps {
@@ -123,6 +126,30 @@ function renderInlineContent(
     );
   }
 
+  if (run.math) {
+    try {
+      const html = katex.renderToString(run.content, {
+        throwOnError: false,
+        displayMode: run.math === "display",
+      });
+      return (
+        <span
+          key={`run-${index}`}
+          className={className}
+          style={runStyles}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      );
+    } catch (e) {
+      // If KaTeX rendering fails, display raw content
+      return (
+        <span key={`run-${index}`} className={className} style={runStyles}>
+          {run.content}
+        </span>
+      );
+    }
+  }
+
   return (
     <span key={`run-${index}`} className={className} style={runStyles}>
       {content}
@@ -203,7 +230,8 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
       r.bulletItem ||
       r.orderedItem ||
       r.paragraph ||
-      r.table,
+      r.table ||
+      r.math === "display",
   );
 
   // If no block-level runs, use original simple rendering
@@ -294,6 +322,29 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
 
           if (run.table) {
             return <MarkdownRenderer key={`run-${index}`} content={run.table} />;
+          }
+
+          if (run.math === "display") {
+            try {
+              const html = katex.renderToString(run.content, {
+                throwOnError: false,
+                displayMode: true,
+              });
+              return (
+                <div
+                  key={`run-${index}`}
+                  className="my-4"
+                  dangerouslySetInnerHTML={{ __html: html }}
+                />
+              );
+            } catch (e) {
+              // If KaTeX rendering fails, display raw content
+              return (
+                <div key={`run-${index}`} className="my-4">
+                  {run.content}
+                </div>
+              );
+            }
           }
 
           if (run.paragraph) {
