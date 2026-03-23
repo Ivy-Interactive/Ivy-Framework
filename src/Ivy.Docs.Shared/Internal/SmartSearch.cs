@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Ivy.Core.Apps;
-using Ivy.Core.Chrome;
+using Ivy.Core.AppShell;
 using Ivy.Docs.Shared.Services;
 
 namespace Ivy.Docs.Shared.Internal;
@@ -157,7 +157,7 @@ public class SmartSearchView : ViewBase
         var suggestionItems = string.IsNullOrEmpty(windowQuery)
             ? flattened.Take(10).Select(x => x.Item with { Path = string.IsNullOrEmpty(x.Path) ? null : x.Path }).ToList()
             : flattened
-                .Select(x => new { x.Item, x.Path, Score = ChromeUtils.ItemMatchScore(x.Item, windowQuery) })
+                .Select(x => new { x.Item, x.Path, Score = AppShellUtils.ItemMatchScore(x.Item, windowQuery) })
                 .Where(x => x.Score > 0)
                 .OrderByDescending(x => x.Score)
                 .ThenBy(x => x.Item.Label)

@@ -16,12 +16,7 @@ import {
 } from "@/components/ui/input/date-time-input-variant";
 import { DateTimeVariantProps } from "./types";
 import { ClearAndInvalidIcons } from "./shared";
-import {
-  formatSecondsToHms,
-  parseLocalTimeToSeconds,
-  parseTimeSpanStepToSeconds,
-  snapLocalTimeSeconds,
-} from "./timeStepSnap";
+import { useTimeConstraints } from "./useTimeConstraints";
 
 export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   value,
@@ -52,29 +47,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
     return matchers;
   }, [minDate, maxDate]);
 
-  const timeStepSeconds = useMemo(() => parseTimeSpanStepToSeconds(step), [step]);
-
-  const timeMin = useMemo(() => {
-    if (!min) return undefined;
-    try {
-      const d = new Date(min);
-      if (!isNaN(d.getTime())) return format(d, "HH:mm:ss");
-    } catch {
-      /* ignore */
-    }
-    return undefined;
-  }, [min]);
-
-  const timeMax = useMemo(() => {
-    if (!max) return undefined;
-    try {
-      const d = new Date(max);
-      if (!isNaN(d.getTime())) return format(d, "HH:mm:ss");
-    } catch {
-      /* ignore */
-    }
-    return undefined;
-  }, [max]);
+  const { timeStepSeconds, timeMin, timeMax, getSnappedTime } = useTimeConstraints(min, max, step);
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -135,32 +108,21 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   }, []);
 
   const commitSnappedTime = useCallback(() => {
-    const trimmed = localTimeValue.trim();
-    const stepSec = parseTimeSpanStepToSeconds(step);
-    const parsed = parseLocalTimeToSeconds(trimmed);
-    if (parsed === null) {
-      onTimeChange(trimmed);
-      return;
-    }
-
-    const minSec = timeMin ? (parseLocalTimeToSeconds(timeMin) ?? undefined) : undefined;
-    const maxSec = timeMax ? (parseLocalTimeToSeconds(timeMax) ?? undefined) : undefined;
-    const snapped = snapLocalTimeSeconds(parsed, stepSec, minSec, maxSec);
-    const out = formatSecondsToHms(snapped);
+    const out = getSnappedTime(localTimeValue);
     setLocalTimeValue(out);
 
-    const [hours, minutes, seconds] = out.split(":").map(Number);
-    if (date) {
-      const newDateTime = new Date(date);
-      newDateTime.setHours(hours, minutes, seconds);
-      onDateChange(newDateTime);
-    } else {
-      const newDateTime = new Date();
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(out)) {
+      const parts = out.split(":").map(Number);
+      const hours = parts[0];
+      const minutes = parts[1];
+      const seconds = parts[2] || 0;
+
+      const newDateTime = date ? new Date(date) : new Date();
       newDateTime.setHours(hours, minutes, seconds);
       onDateChange(newDateTime);
     }
     onTimeChange(out);
-  }, [localTimeValue, step, timeMin, timeMax, date, onDateChange, onTimeChange]);
+  }, [getSnappedTime, localTimeValue, date, onDateChange, onTimeChange]);
 
   const flushTimeInput = useCallback(() => {
     setIsEditingTime(false);

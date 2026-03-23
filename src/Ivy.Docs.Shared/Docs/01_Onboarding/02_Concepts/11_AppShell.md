@@ -1,6 +1,6 @@
 ---
 searchHints:
-  - chrome
+  - appshell
   - sidebar
   - header
   - footer
@@ -13,16 +13,16 @@ searchHints:
   - menu
 ---
 
-# Chrome Configuration
+# AppShell Configuration
 
 <Ingress>
-Configure the application chrome ([sidebar](../../02_Widgets/02_Layouts/06_SidebarLayout.md), header, footer) using ChromeSettings to customize [navigation](./09_Navigation.md), branding, and layout behavior.
+Configure the application shell ([sidebar](../../02_Widgets/02_Layouts/06_SidebarLayout.md), header, footer) using AppShellSettings to customize [navigation](./09_Navigation.md), branding, and layout behavior.
 </Ingress>
 
-You can add custom elements to both the header and footer sections of the sidebar using `ChromeSettings`. The example uses [Layout](./04_Layout.md), [Button](../../02_Widgets/03_Common/01_Button.md), and [Text](../../02_Widgets/01_Primitives/01_TextBlock.md) widgets:
+You can add custom elements to both the header and footer sections of the sidebar using `AppShellSettings`. The example uses [Layout](./04_Layout.md), [Button](../../02_Widgets/03_Common/01_Button.md), and [Text](../../02_Widgets/01_Primitives/01_TextBlock.md) widgets:
 
 ```csharp
-var chromeSettings = new ChromeSettings()
+var appShellSettings = new AppShellSettings()
     .Header(
         Layout.Vertical().Gap(2)
         | new IvyLogo()
@@ -39,10 +39,10 @@ var chromeSettings = new ChromeSettings()
     .UseTabs(preventDuplicates: true)
     .SidebarOpen(false); // Start with sidebar collapsed
 
-server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
+server.UseAppShell(() => new DefaultSidebarAppShell(appShellSettings));
 ```
 
-## ChromeSettings Options
+## AppShellSettings Options
 
 - **DefaultAppId(string? appId)** - Sets the default app to load by ID.
 
@@ -59,31 +59,31 @@ server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 - **SidebarOpen(bool open)** - Controls whether the sidebar is initially expanded or collapsed. Defaults to `true`.
 
 <Callout Type="tip">
-Use `server.UseDefaultApp(typeof(AppName))` instead of `UseChrome()` for single-purpose applications, embedded views, or minimal interfaces where sidebar navigation isn't needed.
+Use `server.UseDefaultApp(typeof(AppName))` instead of `UseAppShell()` for single-purpose applications, embedded views, or minimal interfaces where sidebar navigation isn't needed.
 </Callout>
 
 ## Wallpaper
 
 Configure a dedicated background *app* that appears when no other tabs are open. Perfect for welcome screens, dashboards or branded imagery.
 
-The **Wallpaper** is just another [app](./10_Apps.md) rendered full-screen by the Chrome host whenever the tab area is empty. This keeps your UI visually engaging instead of showing an empty canvas.
+The **Wallpaper** is just another [app](./10_Apps.md) rendered full-screen by the AppShell host whenever the tab area is empty. This keeps your UI visually engaging instead of showing an empty canvas.
 
 ### Configuration
 
-The wallpaper is selected through `ChromeSettings.WallpaperAppId`. Two helper extensions make this convenient:
+The wallpaper is selected through `AppShellSettings.WallpaperAppId`. Two helper extensions make this convenient:
 
 ```csharp
 // Explicit id
-var chromeSettings = ChromeSettings.Default()
+var appShellSettings = AppShellSettings.Default()
     .WallpaperAppId("welcome-screen");
 
 // Or using a type – compile-time safety
-chromeSettings = chromeSettings.WallpaperApp<WelcomeScreenApp>();
+appShellSettings = appShellSettings.WallpaperApp<WelcomeScreenApp>();
 ```
 
 1. Implement a normal Ivy app (derive from [ViewBase](./02_Views.md)).
 2. Register it like any other [app](./10_Apps.md) (`server.AddApp<WelcomeScreenApp>()`).
-3. Reference it in `ChromeSettings` with one of the helpers above.
+3. Reference it in `AppShellSettings` with one of the helpers above.
 
 ### Full Example
 
@@ -100,11 +100,11 @@ public class WelcomeScreenApp : ViewBase
 var server = new Server();
 server.AddAppsFromAssembly();
 
-var chromeSettings = ChromeSettings.Default()
+var appShellSettings = AppShellSettings.Default()
     .WallpaperApp<WelcomeScreenApp>()
     .UseTabs();
 
-server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
+server.UseAppShell(() => new DefaultSidebarAppShell(appShellSettings));
 await server.RunAsync();
 ```
 
@@ -112,7 +112,7 @@ await server.RunAsync();
 
 Dynamically customize the list of links shown at the very bottom of the sidebar by providing a transformation function with `UseFooterMenuItemsTransformer`.
 
-`ChromeSettings.UseFooterMenuItemsTransformer` accepts a delegate with the following signature:
+`AppShellSettings.UseFooterMenuItemsTransformer` accepts a delegate with the following signature:
 
 ```csharp
 Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>
@@ -125,7 +125,7 @@ Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>
 ### Usage Example
 
 ```csharp
-var chromeSettings = ChromeSettings.Default()
+var appShellSettings = AppShellSettings.Default()
     .UseFooterMenuItemsTransformer((items, navigator) =>
     {
         // Convert to list for easier manipulation
@@ -151,7 +151,7 @@ You can leverage a footer-menu items transformer to conditionally show or hide l
 ### Role-Based Filtering
 
 ```csharp
-var chromeSettings = ChromeSettings.Default()
+var appShellSettings = AppShellSettings.Default()
     .UseFooterMenuItemsTransformer((items, navigator) =>
     {
         var user = AuthContext.CurrentUser;

@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
 
-namespace Ivy.Core.Chrome;
+namespace Ivy.Core.AppShell;
 
-public static class ChromeUtils
+public static class AppShellUtils
 {
     private static string NormalizeForSearch(string s)
     {

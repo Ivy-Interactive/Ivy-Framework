@@ -7,7 +7,7 @@ searchHints:
   - apps
   - deeplink
   - urls
-  - chrome
+  - appshell
   - navigation-args
   - route
   - hyperlink
@@ -30,7 +30,7 @@ Navigation in Ivy is handled through the `UseNavigation()` hook, which returns a
 - **Deep Linking** - Navigate to specific apps with deep linking parameters and [arguments](../../03_Hooks/02_Core/13_UseArgs.md)
 - **Type-Safe Navigation** - Navigate using strongly-typed app classes
 
-The navigation system is built on top of Ivy's [signal system](../../03_Hooks/02_Core/10_UseSignal.md) and integrates seamlessly with the [Chrome](./11_Chrome.md) framework for managing app lifecycle and routing.
+The navigation system is built on top of Ivy's [signal system](../../03_Hooks/02_Core/10_UseSignal.md) and integrates seamlessly with the [AppShell](./11_AppShell.md) framework for managing app lifecycle and routing.
 
 ## How UseNavigation Works
 
@@ -42,7 +42,7 @@ flowchart TD
     D -->|Type-Safe| E[Navigate by Type]
     D -->|URI-Based| F[Navigate by URI]
     D -->|External| G[Open External URL]
-    E --> H[Chrome System]
+    E --> H[AppShell System]
     F --> H
     G --> I[Browser/External Handler]
     H --> J[Target App]
@@ -183,9 +183,9 @@ var navigateToLink = UseLinks();
 var goBack = UseBackNavigation();
 ```
 
-### Integration with Chrome Settings
+### Integration with AppShell Settings
 
-Navigation behavior can be configured through [Chrome](./11_Chrome.md) settings in your [Program](./01_Program.md):
+Navigation behavior can be configured through [AppShell](./11_AppShell.md) settings in your [Program](./01_Program.md):
 
 ```csharp
 public class Program
@@ -194,7 +194,7 @@ public class Program
     {
         IvyApp.Run(args, app =>
         {
-            app.UseChrome(ChromeSettings.Default()
+            app.UseAppShell(AppShellSettings.Default()
                 .UseTabs(preventDuplicates: true) // Prevent duplicate tabs
                 .DefaultApp<DashboardApp>()       // Set default app
             );
@@ -294,7 +294,7 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 - **Memoize Navigation Callbacks**: Use [UseMemo](../../03_Hooks/02_Core/05_UseMemo.md) to memoize navigation handlers
 - **Lazy App Loading**: Apps are loaded on-demand when navigated to
 - **State Cleanup**: Navigation automatically handles cleanup of previous app [state](../../03_Hooks/02_Core/03_UseState.md)
-- **Memory Management**: The [Chrome](./11_Chrome.md) system manages app lifecycle and memory usage
+- **Memory Management**: The [AppShell](./11_AppShell.md) system manages app lifecycle and memory usage
 
 ## UseNavigation
 
@@ -413,7 +413,7 @@ nav.Navigate("https://example.com");      // external URL
 
 ## See Also
 
-- [Chrome](./11_Chrome.md)
+- [AppShell](./11_AppShell.md)
 - [Apps](./10_Apps.md)
 - [UseArgs](../../03_Hooks/02_Core/13_UseArgs.md)
 - [Views](./02_Views.md)

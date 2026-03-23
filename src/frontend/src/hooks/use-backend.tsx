@@ -320,7 +320,7 @@ export const useBackend = (
   appId: string | null,
   appArgs: string | null,
   parentId: string | null,
-  chrome: boolean,
+  appShell: boolean,
 ) => {
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
   const [widgetTree, setWidgetTree] = useState<WidgetNode | null>(null);
@@ -340,19 +340,19 @@ export const useBackend = (
 
   // Stable values used in dependency arrays - only updated when we want to reconnect
   const [stableAppId, setStableAppId] = useState(appId);
-  const [stableChrome, setStableChrome] = useState(chrome);
+  const [stableAppShell, setStableAppShell] = useState(appShell);
 
   // Refs to always have latest values in callbacks, without needing to add them to dependency arrays
   const latestAppIdRef = useRef(appId);
-  const latestChromeRef = useRef(chrome);
+  const latestAppShellRef = useRef(appShell);
 
   useEffect(() => {
     latestAppIdRef.current = appId;
   }, [appId]);
 
   useEffect(() => {
-    latestChromeRef.current = chrome;
-  }, [chrome]);
+    latestAppShellRef.current = appShell;
+  }, [appShell]);
 
   const rootAppIdRef = useRef<string | undefined>(undefined);
 
@@ -366,19 +366,19 @@ export const useBackend = (
     if (!isRootConnection) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setStableAppId(appId);
-      setStableChrome(chrome);
+      setStableAppShell(appShell);
       return;
     }
 
     const rootAppId = rootAppIdRef.current;
     const shouldReconnect =
-      !rootAppId || (rootAppId === "$chrome" ? chrome === false : appId !== rootAppId);
+      !rootAppId || (rootAppId === "$chrome" ? appShell === false : appId !== rootAppId);
 
     if (shouldReconnect) {
       setStableAppId(appId);
-      setStableChrome(chrome);
+      setStableAppShell(appShell);
     }
-  }, [appId, chrome, isRootConnection]);
+  }, [appId, appShell, isRootConnection]);
 
   useEffect(() => {
     if (import.meta.env.DEV && widgetTree) {
@@ -678,7 +678,7 @@ export const useBackend = (
     const oauthLogin = pageParams.get("oauthLogin");
 
     // Build SignalR connection URL
-    let signalRUrl = `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ""}&appArgs=${appArgs ?? ""}&machineId=${machineId}&parentId=${parentId ?? ""}&chrome=${latestChromeRef.current}`;
+    let signalRUrl = `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ""}&appArgs=${appArgs ?? ""}&machineId=${machineId}&parentId=${parentId ?? ""}&appshell=${latestAppShellRef.current}`;
     if (oauthLogin) {
       signalRUrl += `&oauthLogin=${oauthLogin}`;
       // Clean up the URL by removing the oauthLogin parameter
@@ -709,7 +709,7 @@ export const useBackend = (
         rootAppIdRef.current = undefined;
       }
     };
-  }, [appArgs, stableAppId, machineId, parentId, stableChrome, isRootConnection]);
+  }, [appArgs, stableAppId, machineId, parentId, stableAppShell, isRootConnection]);
 
   useEffect(() => {
     if (connection && connection.state === signalR.HubConnectionState.Disconnected) {
