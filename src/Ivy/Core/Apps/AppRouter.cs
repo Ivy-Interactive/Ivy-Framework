@@ -190,8 +190,7 @@ public class AppRouter(global::Ivy.Server server)
                     appDescriptor,
                     scopedRepository,
                     appShell,
-                    (int)HttpStatusCode.NotFound,
-                    notFoundArgs
+                    null
                 );
             }
         }
