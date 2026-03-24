@@ -27,6 +27,7 @@ export interface MenuItem {
   children?: MenuItem[];
   variant: "Default" | "Separator" | "Checkbox" | "Radio" | "Group";
   checked: boolean;
+  destructive?: boolean;
   disabled: boolean;
   shortcut?: string;
   expanded: boolean;
