@@ -983,7 +983,41 @@ public static class WebApplicationExtensions
             return Results.Json(manifest.ToManifest());
         });
 
+
+        // In local development, prefer serving from the physical disk for faster updates and easier debugging
+#if DEBUG
+        try
+        {
+            var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "src", "frontend", "dist");
+            if (!Directory.Exists(physicalPath))
+            {
+                // Try cases where we are already in src or running from a sample project subfolder
+                physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "frontend", "dist");
+            }
+            if (!Directory.Exists(physicalPath))
+            {
+                 physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "frontend", "dist");
+            }
+
+            if (Directory.Exists(physicalPath))
+            {
+                Console.WriteLine($"[DEBUG] Serving frontend assets from physical path: {Path.GetFullPath(physicalPath)}");
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(Path.GetFullPath(physicalPath)),
+                    RequestPath = ""
+                });
+            }
+            else
+            {
+                Console.WriteLine($"[DEBUG] Frontend physical path NOT FOUND: {Path.GetFullPath(physicalPath)} (CWD: {Directory.GetCurrentDirectory()})");
+            }
+        }
+        catch { /* fallback to embedded resources */ }
+#endif
+
         app.UseStaticFiles(GetStaticFileOptions("", embeddedProvider, assembly));
+
 
         return app;
     }
