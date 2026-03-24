@@ -68,7 +68,7 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 {
     [OverloadResolutionPriority(1)]
-    internal BoolInput(IAnyState state, string? label = null, bool disabled = false,
+    public BoolInput(IAnyState state, string? label = null, bool disabled = false,
         BoolInputVariant variant = BoolInputVariant.Checkbox)
         : this(label, disabled, variant)
     {
@@ -78,34 +78,34 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
     }
 
     [OverloadResolutionPriority(1)]
-    internal BoolInput(TBool value, Func<Event<IInput<TBool>, TBool>, ValueTask> onChange, string? label = null,
+    public BoolInput(TBool value, Func<Event<IInput<TBool>, TBool>, ValueTask> onChange, string? label = null,
         bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox) : this(label, disabled, variant)
     {
         OnChange = new(onChange);
         Value = value;
     }
 
-    internal BoolInput(TBool value, Action<Event<IInput<TBool>, TBool>> onChange, string? label = null,
+    public BoolInput(TBool value, Action<Event<IInput<TBool>, TBool>> onChange, string? label = null,
         bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox) : this(label, disabled, variant)
     {
         OnChange = new(onChange.ToValueTask());
         Value = value;
     }
 
-    internal BoolInput(string? label = null, bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
+    public BoolInput(string? label = null, bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
     {
         Label = label;
         Disabled = disabled;
         Variant = variant;
     }
 
-    internal BoolInput() { }
+    public BoolInput() { }
 
     [Prop(AlwaysSerialize = true)] public TBool Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TBool) == typeof(bool?);
 
-    [Event] public EventHandler<Event<IInput<TBool>, TBool>>? OnChange { get; }
+    [Event] public EventHandler<Event<IInput<TBool>, TBool>>? OnChange { get; set; }
 }
 
 /// <summary>
@@ -114,26 +114,26 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 public record BoolInput : BoolInput<bool>
 {
     [OverloadResolutionPriority(1)]
-    internal BoolInput(IAnyState state, string? label = null, bool disabled = false,
+    public BoolInput(IAnyState state, string? label = null, bool disabled = false,
         BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(state, label, disabled, variant)
     {
     }
 
     [OverloadResolutionPriority(1)]
-    internal BoolInput(bool value, Func<Event<IInput<bool>, bool>, ValueTask> onChange, string? label = null,
+    public BoolInput(bool value, Func<Event<IInput<bool>, bool>, ValueTask> onChange, string? label = null,
         bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(value, onChange, label, disabled, variant)
     {
     }
 
-    internal BoolInput(bool value, Action<Event<IInput<bool>, bool>> onChange, string? label = null,
+    public BoolInput(bool value, Action<Event<IInput<bool>, bool>> onChange, string? label = null,
         bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(value, onChange, label, disabled, variant)
     {
     }
 
-    internal BoolInput(string? label = null, bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
+    public BoolInput(string? label = null, bool disabled = false, BoolInputVariant variant = BoolInputVariant.Checkbox)
         : base(label, disabled, variant)
     {
     }
@@ -310,5 +310,33 @@ public static class BoolInputExtensions
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
+    public static BoolInput<TBool> OnChange<TBool>(this BoolInput<TBool> widget, Func<Event<IInput<TBool>, TBool>, ValueTask> onChange)
+    {
+        return widget with { OnChange = new(onChange) };
+    }
 
+    public static BoolInput<TBool> OnChange<TBool>(this BoolInput<TBool> widget, Action<Event<IInput<TBool>, TBool>> onChange)
+    {
+        return widget with { OnChange = new(onChange.ToValueTask()) };
+    }
+
+    public static BoolInput<TBool> OnChange<TBool>(this BoolInput<TBool> widget, Action<TBool> onChange)
+    {
+        return widget with { OnChange = new(e => { onChange(e.Value); return ValueTask.CompletedTask; }) };
+    }
+
+    public static BoolInput OnChange(this BoolInput widget, Func<Event<IInput<bool>, bool>, ValueTask> onChange)
+    {
+        return widget with { OnChange = new(onChange) };
+    }
+
+    public static BoolInput OnChange(this BoolInput widget, Action<Event<IInput<bool>, bool>> onChange)
+    {
+        return widget with { OnChange = new(onChange.ToValueTask()) };
+    }
+
+    public static BoolInput OnChange(this BoolInput widget, Action<bool> onChange)
+    {
+        return widget with { OnChange = new(e => { onChange(e.Value); return ValueTask.CompletedTask; }) };
+    }
 }
