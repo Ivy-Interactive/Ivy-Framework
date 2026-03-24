@@ -26,8 +26,7 @@ public record MenuItem(
     string? Tooltip = null,
     EventHandler<MenuItem>? OnSelect = null,
     string[]? SearchHints = null,
-    string? Path = null,
-    bool Destructive = false)
+    string? Path = null)
 {
 
     public static MenuItem Separator() => new(Variant: MenuItemVariant.Separator);
@@ -191,10 +190,5 @@ public static class MenuItemExtensions
     public static MenuItem Path(this MenuItem menuItem, string? path)
     {
         return menuItem with { Path = path };
-    }
-
-    public static MenuItem Destructive(this MenuItem menuItem, bool destructive = true)
-    {
-        return menuItem with { Destructive = destructive };
     }
 }

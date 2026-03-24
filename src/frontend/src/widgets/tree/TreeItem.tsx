@@ -10,6 +10,7 @@ interface TreeItemWidgetProps {
   item: MenuItem;
   rowActions?: MenuItem[];
   hasSiblingWithChildren?: boolean;
+  isNested?: boolean;
   onItemClick: (item: MenuItem) => void;
   onRowActionClick?: (item: MenuItem, action: MenuItem) => void;
 }
@@ -18,6 +19,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   item,
   rowActions,
   hasSiblingWithChildren,
+  isNested,
   onItemClick,
   onRowActionClick,
 }) => {
@@ -128,6 +130,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
                 hasSiblingWithChildren={item.children!.some(
                   (c) => c.children && c.children.length > 0,
                 )}
+                isNested
                 onRowActionClick={onRowActionClick}
               />
             ))}
@@ -150,7 +153,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
       onKeyDown={handleKeyDown}
       onClick={handleClick}
     >
-      {hasSiblingWithChildren && <span className="h-5 w-5 shrink-0" />}
+      {hasSiblingWithChildren && !isNested && <span className="h-5 w-5 shrink-0" />}
       {item.icon && item.icon !== "None" && (
         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" name={item.icon} />
       )}
