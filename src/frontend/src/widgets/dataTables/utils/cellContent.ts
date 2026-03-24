@@ -1,21 +1,21 @@
-import { GridCell, GridCellKind, Item } from '@glideapps/glide-data-grid';
-import { Align, DataColumn, DataRow } from '../types/types';
+import { GridCell, GridCellKind, Item } from "@glideapps/glide-data-grid";
+import { Align, DataColumn, DataRow } from "../types/types";
 
 /**
  * Converts Align enum to contentAlign value for GridCell
  */
-export function getContentAlign(align?: Align): 'left' | 'center' | 'right' {
-  if (!align) return 'left';
+export function getContentAlign(align?: Align): "left" | "center" | "right" {
+  if (!align) return "left";
 
   switch (align) {
-    case 'Left':
-      return 'left';
-    case 'Center':
-      return 'center';
-    case 'Right':
-      return 'right';
+    case "Left":
+      return "left";
+    case "Center":
+      return "center";
+    case "Right":
+      return "right";
     default:
-      return 'left';
+      return "left";
   }
 }
 
@@ -25,8 +25,8 @@ export function getContentAlign(align?: Align): 'left' | 'center' | 'right' {
 export function createEmptyCell(): GridCell {
   return {
     kind: GridCellKind.Text,
-    data: '',
-    displayData: '',
+    data: "",
+    displayData: "",
     allowOverlay: false,
     readonly: true,
   };
@@ -38,11 +38,11 @@ export function createEmptyCell(): GridCell {
 export function createNullCell(editable: boolean): GridCell {
   return {
     kind: GridCellKind.Text,
-    data: '',
-    displayData: '', // Show empty instead of "null" text
+    data: "",
+    displayData: "", // Show empty instead of "null" text
     allowOverlay: editable,
     readonly: !editable,
-    style: 'faded',
+    style: "faded",
   };
 }
 
@@ -52,10 +52,10 @@ export function createNullCell(editable: boolean): GridCell {
  */
 export function isProbablyIconValue(value: unknown): boolean {
   return (
-    typeof value === 'string' &&
+    typeof value === "string" &&
     /^[A-Z][a-zA-Z0-9]*$/.test(value) &&
     value.length > 2 &&
-    !value.includes(' ')
+    !value.includes(" ")
   );
 }
 
@@ -69,7 +69,7 @@ export function createIconCell(iconName: string, align?: Align): GridCell {
     readonly: true,
     copyData: iconName,
     data: {
-      kind: 'icon-cell',
+      kind: "icon-cell",
       iconName,
       align: align ? getContentAlign(align) : undefined,
     },
@@ -80,7 +80,7 @@ export function createIconCell(iconName: string, align?: Align): GridCell {
  * Checks if a column type represents a date/timestamp
  */
 export function isDateColumnType(columnType: string): boolean {
-  return columnType.includes('date') || columnType.includes('timestamp');
+  return columnType.includes("date") || columnType.includes("timestamp");
 }
 
 /**
@@ -88,11 +88,11 @@ export function isDateColumnType(columnType: string): boolean {
  */
 export function isNumericColumnType(columnType: string): boolean {
   return (
-    columnType.includes('int') ||
-    columnType.includes('float') ||
-    columnType.includes('double') ||
-    columnType.includes('decimal') ||
-    columnType.includes('number')
+    columnType.includes("int") ||
+    columnType.includes("float") ||
+    columnType.includes("double") ||
+    columnType.includes("decimal") ||
+    columnType.includes("number")
   );
 }
 
@@ -101,8 +101,8 @@ export function isNumericColumnType(columnType: string): boolean {
  */
 export function formatDateValue(dateValue: Date, columnType: string): string {
   const hasTime =
-    columnType.includes('datetime') ||
-    columnType.includes('timestamp') ||
+    columnType.includes("datetime") ||
+    columnType.includes("timestamp") ||
     dateValue.getHours() !== 0 ||
     dateValue.getMinutes() !== 0 ||
     dateValue.getSeconds() !== 0;
@@ -119,12 +119,12 @@ export function parseDateValue(cellValue: unknown): Date | null {
     return !isNaN(cellValue.getTime()) ? cellValue : null;
   }
 
-  if (typeof cellValue === 'number') {
+  if (typeof cellValue === "number") {
     const date = new Date(cellValue);
     return !isNaN(date.getTime()) ? date : null;
   }
 
-  if (typeof cellValue === 'string') {
+  if (typeof cellValue === "string") {
     const date = new Date(cellValue);
     return !isNaN(date.getTime()) ? date : null;
   }
@@ -139,7 +139,7 @@ export function createDateCell(
   cellValue: unknown,
   columnType: string,
   editable: boolean,
-  align?: Align
+  align?: Align,
 ): GridCell | null {
   const dateValue = parseDateValue(cellValue);
 
@@ -169,11 +169,7 @@ export function formatNumberValue(value: number): string {
 /**
  * Creates a numeric cell
  */
-export function createNumberCell(
-  cellValue: number,
-  editable: boolean,
-  align?: Align
-): GridCell {
+export function createNumberCell(cellValue: number, editable: boolean, align?: Align): GridCell {
   const displayData = formatNumberValue(cellValue);
 
   return {
@@ -189,11 +185,7 @@ export function createNumberCell(
 /**
  * Creates a boolean cell
  */
-export function createBooleanCell(
-  cellValue: boolean,
-  editable: boolean,
-  align?: Align
-): GridCell {
+export function createBooleanCell(cellValue: boolean, editable: boolean, align?: Align): GridCell {
   return {
     kind: GridCellKind.Boolean,
     data: cellValue,
@@ -206,11 +198,7 @@ export function createBooleanCell(
 /**
  * Creates a text cell
  */
-export function createTextCell(
-  cellValue: unknown,
-  editable: boolean,
-  align?: Align
-): GridCell {
+export function createTextCell(cellValue: unknown, editable: boolean, align?: Align): GridCell {
   const stringValue = String(cellValue);
 
   return {
@@ -231,26 +219,26 @@ export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
   let labels: readonly string[];
 
   if (Array.isArray(cellValue)) {
-    labels = cellValue.filter(item => item != null).map(String);
-  } else if (typeof cellValue === 'string') {
+    labels = cellValue.filter((item) => item != null).map(String);
+  } else if (typeof cellValue === "string") {
     // Try to parse as JSON first (from backend serialization)
     try {
       const parsed = JSON.parse(cellValue);
       if (Array.isArray(parsed)) {
-        labels = parsed.filter(item => item != null).map(String);
+        labels = parsed.filter((item) => item != null).map(String);
       } else {
         // Fallback to comma-separated if JSON parsing doesn't yield an array
         labels = cellValue
-          .split(',')
-          .map(s => s.trim())
-          .filter(s => s.length > 0);
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
       }
     } catch {
       // Not JSON, treat as comma-separated string
       labels = cellValue
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
     }
   } else if (cellValue != null) {
     labels = [String(cellValue)];
@@ -272,32 +260,27 @@ export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
 export function createLinkCell(
   url: string,
   _editable: boolean, // Intentionally unused - links are always readonly
-  align?: Align
+  align?: Align,
 ): GridCell {
   return {
     kind: GridCellKind.Custom,
     data: {
-      kind: 'link-cell',
+      kind: "link-cell",
       url: url,
-      align: align?.toLowerCase() as 'left' | 'center' | 'right' | undefined,
+      align: align?.toLowerCase() as "left" | "center" | "right" | undefined,
     },
     copyData: url,
     allowOverlay: false,
     readonly: true,
-    cursor: 'pointer',
+    cursor: "pointer",
   };
 }
 
 /**
  * Gets the ordered columns based on columnOrder array
  */
-export function getOrderedColumns(
-  columns: DataColumn[],
-  columnOrder: number[]
-): DataColumn[] {
-  return columnOrder.length === columns.length
-    ? columnOrder.map(idx => columns[idx])
-    : columns;
+export function getOrderedColumns(columns: DataColumn[], columnOrder: number[]): DataColumn[] {
+  return columnOrder.length === columns.length ? columnOrder.map((idx) => columns[idx]) : columns;
 }
 
 /**
@@ -310,7 +293,7 @@ export function getCellContent(
   columns: DataColumn[],
   columnOrder: number[],
   editable: boolean,
-  getRowData: (rowIndex: number) => DataRow | null
+  getRowData: (rowIndex: number) => DataRow | null,
 ): GridCell {
   const [col, row] = cell;
 
@@ -318,12 +301,10 @@ export function getCellContent(
   let orderedCols: DataColumn[];
   if (columnOrder.length === columns.length) {
     // Map using columnOrder indices, then filter hidden
-    orderedCols = columnOrder
-      .map(idx => columns[idx])
-      .filter(col => !col.hidden);
+    orderedCols = columnOrder.map((idx) => columns[idx]).filter((col) => !col.hidden);
   } else {
     // No reordering, just filter hidden columns
-    orderedCols = columns.filter(col => !col.hidden);
+    orderedCols = columns.filter((col) => !col.hidden);
   }
 
   // Get row data from Arrow table via getRowData
@@ -336,7 +317,7 @@ export function getCellContent(
   const column = orderedCols[col];
   const originalColumnIndex = columns.indexOf(column);
   const cellValue = rowData.values[originalColumnIndex];
-  const columnType = column.type?.toLowerCase() || 'text';
+  const columnType = column.type?.toLowerCase() || "text";
   const align = column.align;
 
   // Handle null/undefined values
@@ -345,17 +326,17 @@ export function getCellContent(
   }
 
   // Handle explicit icon type from backend metadata
-  if (column.type === 'Icon' && typeof cellValue === 'string') {
+  if (column.type === "Icon" && typeof cellValue === "string") {
     return createIconCell(cellValue, align);
   }
 
   // Handle Labels type - supports arrays or comma-separated strings
-  if (column.type === 'Labels') {
+  if (column.type === "Labels") {
     return createLabelsCell(cellValue, align);
   }
 
   // Handle explicit link type from backend metadata
-  if (column.type === 'Link' && typeof cellValue === 'string') {
+  if (column.type === "Link" && typeof cellValue === "string") {
     return createLinkCell(cellValue, editable, align);
   }
 
@@ -368,12 +349,12 @@ export function getCellContent(
   }
 
   // Handle numeric types
-  if (typeof cellValue === 'number' && isNumericColumnType(columnType)) {
+  if (typeof cellValue === "number" && isNumericColumnType(columnType)) {
     return createNumberCell(cellValue, editable, align);
   }
 
   // Handle boolean types
-  if (typeof cellValue === 'boolean') {
+  if (typeof cellValue === "boolean") {
     return createBooleanCell(cellValue, editable, align);
   }
 

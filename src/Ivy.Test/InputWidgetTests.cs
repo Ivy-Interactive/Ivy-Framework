@@ -31,6 +31,7 @@ public class InputWidgetTests
         public IDisposable SubscribeAny(Action action) => _subject.Subscribe(_ => action());
         public IDisposable SubscribeAny(Action<object?> action) => _subject.Subscribe(x => action(x));
         public IEffectTrigger ToTrigger() => EffectTrigger.OnStateChange(this);
+        public object? GetValueAsObject() => Value;
     }
 
 

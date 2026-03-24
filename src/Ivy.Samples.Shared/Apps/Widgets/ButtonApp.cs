@@ -133,6 +133,14 @@ public class ButtonApp() : SampleBase
                    | new Button("Full Rounded", eventHandler, variant: ButtonVariant.Ai).BorderRadius(BorderRadius.Full)
                )
 
+               | Text.H2("Keyboard Shortcuts")
+               | (Layout.Horizontal().Gap(8)
+                   | new Button("Search", eventHandler, variant: ButtonVariant.Primary).ShortcutKey("Ctrl+K")
+                   | new Button("Save", eventHandler, variant: ButtonVariant.Secondary).ShortcutKey("Ctrl+S")
+                   | new Button("Delete", eventHandler, variant: ButtonVariant.Destructive).ShortcutKey("Delete")
+                   | new Button("Submit", eventHandler, variant: ButtonVariant.Success).ShortcutKey("Ctrl+Enter")
+               )
+
                | Text.H2("Interactive Demo")
                | Text.Literal(label.Value)
             ;

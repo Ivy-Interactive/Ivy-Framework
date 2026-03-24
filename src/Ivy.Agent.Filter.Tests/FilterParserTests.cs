@@ -158,7 +158,7 @@ public class FilterParserTests
 
         // Assert
         Assert.True(result.HasErrors, $"Filter '{filter}' should fail ({expectedErrorType})");
-        Assert.NotEmpty(result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error));
+        Assert.Contains(result.Diagnostics, d => d.Severity == DiagnosticSeverity.Error);
     }
 
     [Theory]

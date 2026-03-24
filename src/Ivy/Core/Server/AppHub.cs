@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json.Nodes;
 using Ivy.Core;
 using Ivy.Core.Apps;
@@ -63,7 +64,7 @@ public class AppHub(
             appServices.AddSingleton<IUploadService>(new UploadService(Context.ConnectionId, clientProvider));
 
             var tunneledHttpHandler = new TunneledHttpMessageHandler(clientProvider, Context.ConnectionId);
-            appServices.AddSingleton<HttpMessageHandler>(tunneledHttpHandler);
+            appServices.AddSingleton(tunneledHttpHandler);
 
             var request = httpContext.Request;
             var requestScheme = request.Scheme;
@@ -71,6 +72,8 @@ public class AppHub(
             {
                 requestScheme = forwardedProto.ToString();
             }
+
+            var machineId = AppRouter.GetMachineId(httpContext);
 
             // Resolve route before auth so we can avoid reload loop on error page (skip LogoutAsync) and avoid overriding to Auth app
             var appRouter = new AppRouter(server);
@@ -85,7 +88,8 @@ public class AppHub(
 #endif
 
                 var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
-                var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore);
+                var authServiceLogger = server.ServiceProvider?.GetService<ILoggerFactory>()?.CreateLogger<AuthService>();
+                var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore, machineId, server.ServiceProvider, authServiceLogger);
 
                 var oldSession = authSession.TakeSnapshot();
                 await TimeoutHelper.WithTimeoutAsync(
@@ -146,14 +150,12 @@ public class AppHub(
                 }
             }
 
-            if (routeResult.AppDescriptor.Title is { } title && routeResult.AppId != AppIds.Chrome && parentId == null)
+            if (routeResult.AppDescriptor.Title is { } title && routeResult.AppId != AppIds.AppShell && parentId == null)
             {
-                clientProvider.SetTitle(title, server.Args.MetaTitle);
+                clientProvider.SetTitle(title, server.Args.Metadata.Title);
             }
 
             appServices.AddSingleton(routeResult.AppRepository);
-
-            var machineId = AppRouter.GetMachineId(httpContext);
 
             var appArgs = GetAppArgs(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
             if (routeResult.ArgsJson != null)
@@ -197,9 +199,9 @@ public class AppHub(
                 clientProvider.SetRootAppId(routeResult.AppId);
                 bool isNotFoundPage = routeResult.AppDescriptor.Id == AppIds.ErrorNotFound;
 
-                if (routeResult.AppId != AppIds.Chrome && !isNotFoundPage)
+                if (routeResult.AppId != AppIds.AppShell && !isNotFoundPage)
                 {
-                    var navigateArgs = new NavigateArgs(routeResult.AppId, Chrome: routeResult.ShowChrome);
+                    var navigateArgs = new NavigateArgs(routeResult.AppId, AppShell: routeResult.ShowAppShell);
                     clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
                 }
             }
@@ -220,6 +222,19 @@ public class AppHub(
             appState.TrackDisposable(widgetTree.Subscribe(OnWidgetTreeChanged));
 
             sessionStore.Sessions[Context.ConnectionId] = appState;
+
+            // Trigger reload for other tabs on this machine after OAuth login
+            if (parentId == null &&
+                httpContext.Request.Query.ContainsKey("oauthLogin") &&
+                serviceProvider.GetService<IAuthService>()?.GetCurrentToken() != null)
+            {
+                var oauthConnectionId = Context.ConnectionId;
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(100); // Small delay to ensure cookies are processed
+                    AuthController.TriggerMachineReload(sessionStore, machineId, oauthConnectionId);
+                });
+            }
 
             var connectionId = Context.ConnectionId;
 
@@ -252,9 +267,75 @@ public class AppHub(
                 }, cancellationToken: connectionAborted);
             }
 
-            if (server.AuthProviderType != null && routeResult.AppId != AppIds.Auth)
+            if (server.AuthProviderType != null && routeResult.AppId != AppIds.Auth && routeResult.AppId != AppIds.AppShell)
             {
                 _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted), connectionAborted);
+
+                // Start a refresh loop for each brokered auth session
+                var authService = appState.AppServices.GetService<IAuthService>();
+                if (authService != null)
+                {
+                    var authSession = authService.GetAuthSession();
+                    var brokeredSessions = authSession.BrokeredSessions.Keys.ToList();
+
+                    // Track active brokered refresh loops and their cancellation tokens on the session
+                    var activeProviders = new HashSet<string>();
+                    var cancellations = new ConcurrentDictionary<string, CancellationTokenSource>();
+                    appState.ActiveBrokeredRefreshLoops = activeProviders;
+                    appState.BrokeredRefreshCancellations = cancellations;
+
+                    void AddProvider(string provider)
+                    {
+                        lock (activeProviders)
+                        {
+                            if (activeProviders.Add(provider))
+                            {
+                                var cts = CancellationTokenSource.CreateLinkedTokenSource(connectionAborted);
+                                cancellations[provider] = cts;
+                                _ = Task.Run(() => BrokeredTokenRefreshLoopAsync(connectionId, provider, cts.Token), connectionAborted);
+                            }
+                        }
+                    }
+
+                    foreach (var brokeredSession in brokeredSessions)
+                    {
+                        AddProvider(brokeredSession);
+                    }
+
+                    // Subscribe to new brokered auth sessions being added
+                    Action<string> addedHandler = provider =>
+                    {
+                        // Check if connection is still active
+                        if (!sessionStore.Sessions.ContainsKey(connectionId))
+                        {
+                            return;
+                        }
+
+                        AddProvider(provider);
+                    };
+
+                    // Subscribe to brokered auth sessions being removed
+                    Action<string> removedHandler = provider =>
+                    {
+                        logger.LogInformation("Cancelling brokered token refresh loop for removed provider {Provider} on connection {ConnectionId}", provider, connectionId);
+
+                        if (cancellations.TryRemove(provider, out var cts))
+                        {
+                            cts.Cancel();
+                            cts.Dispose();
+                        }
+
+                        lock (activeProviders)
+                        {
+                            activeProviders.Remove(provider);
+                        }
+                    };
+
+                    appState.BrokeredTokenAddedHandler = addedHandler;
+                    appState.BrokeredTokenRemovedHandler = removedHandler;
+                    authSession.BrokeredSessionAdded += addedHandler;
+                    authSession.BrokeredSessionRemoved += removedHandler;
+                }
             }
         }
         catch (Exception ex)
@@ -301,7 +382,42 @@ public class AppHub(
             {
                 try
                 {
-                    // Dispose app state first (stops EventDispatchQueue, cleans up widget tree)
+                    // Clean up brokered session event subscriptions
+                    if (appState.BrokeredTokenAddedHandler != null || appState.BrokeredTokenRemovedHandler != null)
+                    {
+                        var authService = appState.AppServices.GetService<IAuthService>();
+                        if (authService != null)
+                        {
+                            var authSession = authService.GetAuthSession();
+                            if (appState.BrokeredTokenAddedHandler != null)
+                            {
+                                authSession.BrokeredSessionAdded -= appState.BrokeredTokenAddedHandler;
+                            }
+                            if (appState.BrokeredTokenRemovedHandler != null)
+                            {
+                                authSession.BrokeredSessionRemoved -= appState.BrokeredTokenRemovedHandler;
+                            }
+                        }
+                    }
+
+                    // Cancel and dispose all brokered token refresh loop cancellation tokens
+                    if (appState.BrokeredRefreshCancellations != null)
+                    {
+                        foreach (var kvp in appState.BrokeredRefreshCancellations)
+                        {
+                            try
+                            {
+                                kvp.Value.Cancel();
+                                kvp.Value.Dispose();
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.LogWarning(ex, "Error cancelling brokered token refresh loop for provider {Provider} on connection {ConnectionId}", kvp.Key, Context.ConnectionId);
+                            }
+                        }
+                    }
+
+                    // Dispose app state (stops EventDispatchQueue, cleans up widget tree)
                     // so in-flight event handlers finish before the sender is torn down.
                     await appState.DisposeAsync();
 
@@ -332,7 +448,7 @@ public class AppHub(
         }
     }
 
-    enum AuthRefreshState
+    enum TokenRefreshState
     {
         Initial,
         HasToken,
@@ -341,73 +457,69 @@ public class AppHub(
         TokenInvalid,
     }
 
-    async Task AbandonConnection(string connectionId, bool resetTokenAndReload)
+    private async Task TokenRefreshLoopAsync(
+        ITokenRefreshStrategy strategy,
+        string connectionId,
+        CancellationToken cancellationToken)
     {
-        var session = sessionStore.Sessions[connectionId];
-        await SessionHelpers.AbandonSessionAsync(sessionStore, session, contentBuilder, resetTokenAndReload, triggerMachineReload: true, logger, "AuthRefreshLoop");
-    }
-
-    private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
-    {
-        var state = AuthRefreshState.Initial;
+        var state = TokenRefreshState.Initial;
         var consecutiveErrors = 0;
+        DateTimeOffset? lastRefreshTime = null;
 
         while (true)
         {
             try
             {
-                var session = sessionStore.Sessions[connectionId];
-                var authService = session.AppServices.GetRequiredService<IAuthService>();
-                var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
-
-                var authSession = authService.GetAuthSession();
-
                 switch (state)
                 {
-                    case AuthRefreshState.Initial:
-                        logger.LogInformation("AuthRefreshLoop: Initialized for {ConnectionId}.", connectionId);
-                        state = authSession.AuthToken == null
-                            ? AuthRefreshState.HasNoToken
-                            : AuthRefreshState.HasToken;
+                    case TokenRefreshState.Initial:
+                        logger.LogInformation("{StrategyName}RefreshLoop: Initialized for {ConnectionId}.", strategy.LoggingName, connectionId);
+                        state = strategy.HasToken()
+                            ? TokenRefreshState.HasToken
+                            : TokenRefreshState.HasNoToken;
                         break;
 
-                    case AuthRefreshState.HasNoToken:
-                        if (authSession.AuthToken != null)
+                    case TokenRefreshState.HasNoToken:
+                        if (strategy.HasToken())
                         {
-                            state = AuthRefreshState.HasToken;
+                            state = TokenRefreshState.HasToken;
                         }
                         else
                         {
-                            logger.LogInformation("AuthRefreshLoop: No token for {ConnectionId}, waiting 5 minutes.", connectionId);
+                            logger.LogInformation("{StrategyName}RefreshLoop: No token for {ConnectionId}, waiting 5 minutes.", strategy.LoggingName, connectionId);
                             await Task.Delay(TimeSpan.FromMinutes(5), cancellationToken);
                         }
                         break;
 
-                    case AuthRefreshState.HasToken:
+                    case TokenRefreshState.HasToken:
                         {
-                            if (authSession.AuthToken == null)
+                            if (!strategy.HasToken())
                             {
-                                logger.LogError("AuthRefreshLoop: Token lost for {ConnectionId}.", connectionId);
-                                await AbandonConnection(connectionId, resetTokenAndReload: true);
-                                return;
+                                logger.LogError("{StrategyName}RefreshLoop: Token lost for {ConnectionId}.", strategy.LoggingName, connectionId);
+                                var shouldContinue = await strategy.OnTokenLostAsync();
+                                if (!shouldContinue)
+                                {
+                                    return;
+                                }
                             }
 
-                            var isValid = await TimeoutHelper.WithTimeoutAsync(
-                                ct => authProvider.ValidateAccessTokenAsync(authSession, ct),
-                                cancellationToken);
+                            var isValid = await strategy.ValidateTokenAsync(cancellationToken);
 
                             if (!isValid)
                             {
-                                state = AuthRefreshState.TokenInvalid;
+                                state = TokenRefreshState.TokenInvalid;
                             }
                             else
                             {
-                                var lifetime = await TimeoutHelper.WithTimeoutAsync(
-                                    ct => authProvider.GetAccessTokenLifetimeAsync(authSession, ct),
-                                    cancellationToken);
+                                var lifetime = await strategy.GetTokenLifetimeAsync(cancellationToken);
+
+                                // Use NotBefore from token, or fall back to lastRefreshTime if we recently refreshed
+                                var effectiveNotBefore = lifetime?.NotBefore ?? lastRefreshTime;
 
                                 TimeSpan renewalMargin;
-                                if (lifetime != null && lifetime.NotBefore != null && lifetime.Expires != null && lifetime.Expires - lifetime.NotBefore is { } duration && duration < TimeSpan.FromMinutes(3))
+                                if (lifetime?.Expires != null && effectiveNotBefore != null &&
+                                    lifetime.Expires - effectiveNotBefore is { } duration &&
+                                    duration < TimeSpan.FromMinutes(3))
                                 {
                                     renewalMargin = duration / 6;
                                 }
@@ -418,7 +530,7 @@ public class AppHub(
 
                                 if (lifetime?.Expires != null && lifetime.Expires - renewalMargin < DateTimeOffset.UtcNow)
                                 {
-                                    state = AuthRefreshState.TokenExpired;
+                                    state = TokenRefreshState.TokenExpired;
                                 }
                                 else
                                 {
@@ -426,67 +538,163 @@ public class AppHub(
                                     var waitUntil = (lifetime?.Expires ?? DateTimeOffset.UtcNow.AddMinutes(15)) - renewalMargin;
                                     var delay = waitUntil - DateTimeOffset.UtcNow;
 
-                                    // Don't wait more than `maxDelay`
+                                    // Don't wait more than maxDelay
                                     var maxDelay = TimeSpan.FromHours(2);
                                     if (delay > maxDelay)
                                     {
                                         delay = maxDelay;
                                     }
-                                    logger.LogInformation("AuthRefreshLoop: Token valid for {ConnectionId}, next check at {NextCheck}.", connectionId, DateTimeOffset.UtcNow + delay);
+
+                                    logger.LogInformation("{StrategyName}RefreshLoop: Token valid for {ConnectionId}, next check at {NextCheck}.", strategy.LoggingName, connectionId, DateTimeOffset.UtcNow + delay);
                                     await Task.Delay(delay, cancellationToken);
                                 }
                             }
                         }
                         break;
 
-                    case AuthRefreshState.TokenExpired:
-                    case AuthRefreshState.TokenInvalid:
+                    case TokenRefreshState.TokenExpired:
+                    case TokenRefreshState.TokenInvalid:
                         {
-                            var oldSession = authSession.TakeSnapshot();
-                            await authService.RefreshAccessTokenAsync(cancellationToken);
-                            if (state == AuthRefreshState.TokenInvalid && authSession.AuthToken == oldSession.AuthToken)
+                            var refreshSucceeded = await strategy.RefreshTokenAsync(cancellationToken);
+
+                            if (refreshSucceeded)
                             {
-                                // This case should only ever happen if the auth provider implementation is bad (i.e. it returns the same invalid token on refresh).
-                                // It is still good to handle it here to avoid an infinite loop.
-                                logger.LogError("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
-                                await authService.LogoutAsync(cancellationToken);
-                            }
-                            if (authSession.AuthToken == null)
-                            {
-                                logger.LogError("AuthRefreshLoop: Token refresh failed for {ConnectionId}, aborting connection.", connectionId);
-                                // Setting the token and reloading will have already happened above if null.
-                                await AbandonConnection(connectionId, resetTokenAndReload: false);
-                                return;
+                                logger.LogInformation("{StrategyName}RefreshLoop: Token refreshed successfully for {ConnectionId}.", strategy.LoggingName, connectionId);
+                                state = TokenRefreshState.HasToken;
+                                lastRefreshTime = DateTimeOffset.UtcNow;
                             }
                             else
                             {
-                                state = AuthRefreshState.HasToken;
+                                logger.LogError("{StrategyName}RefreshLoop: Token refresh failed for {ConnectionId}.", strategy.LoggingName, connectionId);
+                                var shouldContinue = await strategy.OnRefreshFailedAsync();
+                                if (!shouldContinue)
+                                {
+                                    return;
+                                }
                             }
                         }
                         break;
                 }
+
+                consecutiveErrors = 0;
             }
             catch (TaskCanceledException)
             {
-                logger.LogInformation("AuthRefreshLoop: cancelled for {ConnectionId}", connectionId);
+                logger.LogInformation("{StrategyName}RefreshLoop: cancelled for {ConnectionId}", strategy.LoggingName, connectionId);
                 return;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "AuthRefreshLoop: Error during auth refresh loop for {ConnectionId}", connectionId);
+                logger.LogError(ex, "{StrategyName}RefreshLoop: Error during token refresh loop for {ConnectionId}", strategy.LoggingName, connectionId);
                 consecutiveErrors++;
                 if (consecutiveErrors >= 5)
                 {
-                    logger.LogError("AuthRefreshLoop: Too many consecutive errors, abandoning connection {ConnectionId}", connectionId);
-                    await AbandonConnection(connectionId, resetTokenAndReload: true);
+                    logger.LogError("{StrategyName}RefreshLoop: Too many consecutive errors for {ConnectionId}, exiting loop", strategy.LoggingName, connectionId);
                     return;
                 }
-                logger.LogInformation("AuthRefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", connectionId);
+                logger.LogInformation("{StrategyName}RefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", strategy.LoggingName, connectionId);
                 await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
                 continue;
             }
+        }
+    }
 
-            consecutiveErrors = 0;
+    private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
+    {
+        var session = sessionStore.Sessions[connectionId];
+        var authService = session.AppServices.GetRequiredService<IAuthService>();
+        var authSession = authService.GetAuthSession();
+
+        var strategy = new MainAuthTokenRefreshStrategy(
+            authService,
+            authSession,
+            session,
+            contentBuilder,
+            logger);
+
+        await TokenRefreshLoopAsync(strategy, connectionId, cancellationToken);
+    }
+
+    private async Task BrokeredTokenRefreshLoopAsync(string connectionId, string provider, CancellationToken cancellationToken)
+    {
+        if (!sessionStore.Sessions.TryGetValue(connectionId, out var session))
+        {
+            logger.LogWarning("BrokeredTokenRefreshLoop[{Provider}]: Session not found for {ConnectionId}, exiting loop.", provider, connectionId);
+            return;
+        }
+
+        try
+        {
+            var handler = server.ServiceProvider!.GetKeyedService<IAuthTokenHandler>(provider);
+            if (handler == null)
+            {
+                logger.LogError("BrokeredTokenRefreshLoop[{Provider}]: No handler registered for {ConnectionId}, exiting loop.", provider, connectionId);
+                return;
+            }
+
+#if DEBUG
+            handler = new Ivy.Core.Auth.CheckedAuthTokenHandler(handler);
+#endif
+
+            var authService = session.AppServices.GetRequiredService<IAuthService>();
+            var authSession = authService.GetAuthSession();
+
+            // Get the provider's session
+            if (!authSession.BrokeredSessions.TryGetValue(provider, out var providerSession))
+            {
+                logger.LogError("BrokeredTokenRefreshLoop[{Provider}]: No session found for {ConnectionId}, exiting loop.", provider, connectionId);
+                return;
+            }
+
+            // Initialize the token handler using AppContext (not Hub.Context which can be disposed)
+            var appContext = session.AppServices.GetService<AppContext>();
+            if (appContext != null)
+            {
+                await handler.InitializeAsync(providerSession, appContext.Scheme, appContext.Host, cancellationToken);
+            }
+
+            var client = session.AppServices.GetRequiredService<IClientProvider>();
+            var brokeredLogger = session.AppServices.GetRequiredService<ILoggerFactory>()
+                .CreateLogger<AuthTokenHandlerService>();
+
+            // Create a service instance for this provider
+            var tokenService = new AuthTokenHandlerService(
+                handler,
+                providerSession,
+                client,
+                sessionStore,
+                session.MachineId,
+                brokeredLogger);
+
+            var strategy = new BrokeredTokenRefreshStrategy(
+                connectionId,
+                provider,
+                tokenService,
+                authSession,
+                client,
+                authService,
+                sessionStore,
+                contentBuilder,
+                brokeredLogger);
+
+            await TokenRefreshLoopAsync(strategy, connectionId, cancellationToken);
+        }
+        finally
+        {
+            // Clean up: remove provider from active set when loop exits
+            if (session.ActiveBrokeredRefreshLoops != null)
+            {
+                lock (session.ActiveBrokeredRefreshLoops)
+                {
+                    session.ActiveBrokeredRefreshLoops.Remove(provider);
+                }
+            }
+
+            // Clean up: dispose the cancellation token source
+            if (session.BrokeredRefreshCancellations?.TryRemove(provider, out var cts) == true)
+            {
+                cts.Dispose();
+            }
         }
     }
 
@@ -513,10 +721,10 @@ public class AppHub(
 
     public Task Event(string eventName, string widgetId, JsonArray? args)
     {
-        logger.LogWarning("Event RECEIVED: {EventName} {WidgetId} ConnectionId={ConnectionId}", eventName, widgetId, Context.ConnectionId);
+        logger.LogDebug("Event: {EventName} {WidgetId} ConnectionId={ConnectionId}", eventName, widgetId, Context.ConnectionId);
         if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
         {
-            logger.LogWarning("Event: {EventName} {WidgetId} [AppSession Not Found]", eventName, widgetId);
+            logger.LogDebug("Event: {EventName} {WidgetId} [AppSession Not Found] ConnectionId={ConnectionId}", eventName, widgetId, Context.ConnectionId);
             return Task.CompletedTask;
         }
 
@@ -557,23 +765,23 @@ public class AppHub(
     {
         logger.LogInformation("Navigate: {ConnectionId} to [{AppId}] with tab ID {TabId}", Context.ConnectionId, appId, state?.TabId);
 
-        // Find the Chrome session for this connection
+        // Find the AppShell session for this connection
         if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
         {
             logger.LogWarning("Navigate: {ConnectionId} [{AppId}] [AppSession not found]", Context.ConnectionId, appId);
             return;
         }
 
-        var chromeSession = sessionStore.FindChrome(appSession);
-        if (chromeSession == null)
+        var appShellSession = sessionStore.FindAppShell(appSession);
+        if (appShellSession == null)
         {
-            logger.LogWarning("Navigate: {ConnectionId} [{AppId}] [Chrome session not found]", Context.ConnectionId, appId);
+            logger.LogWarning("Navigate: {ConnectionId} [{AppId}] [AppShell session not found]", Context.ConnectionId, appId);
             return;
         }
 
         try
         {
-            var navigateSignal = (NavigateSignal)chromeSession.Signals.GetOrAdd(
+            var navigateSignal = (NavigateSignal)appShellSession.Signals.GetOrAdd(
                 typeof(NavigateSignal),
                 _ => new NavigateSignal()
             );

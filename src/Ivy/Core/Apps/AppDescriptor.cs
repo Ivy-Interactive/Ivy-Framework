@@ -10,12 +10,12 @@ public static class AppIds
     internal static readonly string[] ShouldNotBeAutoDefaultApps =
     [
         Auth,
-        Chrome, //only default if we use chrome 
+        AppShell, //only default if we use app shell
         ErrorNotFound
     ];
 
     public const string Auth = "$auth";
-    public const string Chrome = "$chrome";
+    public const string AppShell = "$chrome";
     public const string Default = "$default";
     public const string ErrorNotFound = "$error-not-found";
 }
@@ -47,7 +47,7 @@ public class AppDescriptor : IAppRepositoryNode
 
     public bool IsIndex { get; set; } = false;
 
-    public bool IsChrome => Id == AppIds.Chrome;
+    public bool IsAppShell => Id == AppIds.AppShell;
 
     public bool GroupExpanded { get; set; }
 

@@ -1,22 +1,22 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from "react";
 import {
   ColorScheme,
   generateTooltip,
   generateTextStyle,
   generateXAxis,
   generateYAxis,
-} from './sharedUtils';
+} from "./sharedUtils";
 import {
   generateDataProps,
   generateEChartGrid,
   generateEChartLegend,
   generateEChartToolbox,
   getColors,
-} from './sharedUtils';
-import { useThemeWithMonitoring } from '@/components/theme-provider';
-import { getHeight, getWidth } from '@/lib/styles';
-import ReactECharts from 'echarts-for-react';
-import { getChartThemeColors } from './styles';
+} from "./sharedUtils";
+import { useThemeWithMonitoring } from "@/components/theme-provider";
+import { getHeight, getWidth } from "@/lib/styles";
+import ReactECharts from "echarts-for-react";
+import { getChartThemeColors } from "./styles";
 import {
   BarProps,
   CartesianGridProps,
@@ -29,13 +29,9 @@ import {
   ToolboxProps,
   XAxisProps,
   YAxisProps,
-} from './chartTypes';
-import { ChartData } from './chartTypes';
-import {
-  BAR_DEFAULTS,
-  REFERENCE_LINE_DEFAULTS,
-  applyDefaults,
-} from './chartDefaults';
+} from "./chartTypes";
+import { ChartData } from "./chartTypes";
+import { BAR_DEFAULTS, REFERENCE_LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -59,13 +55,13 @@ interface BarChartWidgetProps {
   barCategoryGap?: number | string;
   maxBarSize?: number;
   reverseStackOrder?: boolean;
-  layout?: 'Horizontal' | 'Vertical';
+  layout?: "Horizontal" | "Vertical";
 }
 
 const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   data = EMPTY_ARRAY,
-  width = 'Full',
-  height = 'Full',
+  width = "Full",
+  height = "Full",
   bars,
   cartesianGrid,
   xAxis = EMPTY_ARRAY,
@@ -76,13 +72,13 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   referenceLines = EMPTY_ARRAY,
   referenceAreas = EMPTY_ARRAY,
   referenceDots = EMPTY_ARRAY,
-  colorScheme = 'Default',
+  colorScheme = "Default",
   //stackOffset,
   barGap = 4,
-  barCategoryGap = '10%',
+  barCategoryGap = "10%",
   maxBarSize,
   reverseStackOrder,
-  layout = 'Vertical',
+  layout = "Vertical",
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -91,38 +87,28 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   });
 
   // Extract chart-specific theme colors
-  const themeColors = useMemo(
-    () => getChartThemeColors(colors, isDark),
-    [colors, isDark]
-  );
+  const themeColors = useMemo(() => getChartThemeColors(colors, isDark), [colors, isDark]);
 
   // When height is Full (100%), use flex to expand. Otherwise use explicit height.
   const heightStyle = height ? getHeight(height) : {};
-  const isFull = height?.toLowerCase().startsWith('full');
+  const isFull = height?.toLowerCase().startsWith("full");
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    position: 'relative',
-    ...(isFull
-      ? { display: 'flex', flexDirection: 'column', height: '100%' }
-      : {}),
+    position: "relative",
+    ...(isFull ? { display: "flex", flexDirection: "column", height: "100%" } : {}),
   };
 
   const chartStyles: React.CSSProperties = {
-    ...(isFull
-      ? { flex: 1, minHeight: '200px' }
-      : { ...heightStyle, minHeight: '200px' }),
-    width: '100%',
+    ...(isFull ? { flex: 1, minHeight: "200px" } : { ...heightStyle, minHeight: "200px" }),
+    width: "100%",
   };
 
   const { categories, valueKeys, transform, largeSpread, minValue, maxValue } =
     generateDataProps(data);
 
   // Chart colors depend on theme (chromatic colors automatically adapt to light/dark mode)
-  const chartColors = useMemo(
-    () => getColors(colorScheme, colors),
-    [colorScheme, colors]
-  );
+  const chartColors = useMemo(() => getColors(colorScheme, colors), [colorScheme, colors]);
 
   // Convert ReferenceDot[] to ECharts markPoint format
   const markPoint = useMemo(
@@ -130,13 +116,13 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
       referenceDots.length > 0
         ? {
             label: { show: true },
-            data: referenceDots.map(d => ({
+            data: referenceDots.map((d) => ({
               coord: [d.x, d.y],
               name: d.label,
             })),
           }
         : { label: { show: false } },
-    [referenceDots]
+    [referenceDots],
   );
 
   // Merge MarkLine[] into single markLine config with C# defaults
@@ -146,15 +132,13 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         ? {
             ...referenceLines[0],
             lineStyle: {
-              width:
-                referenceLines[0]?.lineStyle?.width ??
-                REFERENCE_LINE_DEFAULTS.strokeWidth,
+              width: referenceLines[0]?.lineStyle?.width ?? REFERENCE_LINE_DEFAULTS.strokeWidth,
               ...referenceLines[0]?.lineStyle,
             },
-            data: referenceLines.flatMap(ml => ml.data),
+            data: referenceLines.flatMap((ml) => ml.data),
           }
         : {},
-    [referenceLines]
+    [referenceLines],
   );
 
   // Merge MarkArea[] into single markArea config
@@ -163,43 +147,38 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
       referenceAreas.length > 0
         ? {
             ...referenceAreas[0],
-            data: referenceAreas.flatMap(ma => ma.data),
+            data: referenceAreas.flatMap((ma) => ma.data),
           }
         : {},
-    [referenceAreas]
+    [referenceAreas],
   );
 
   // When explicit series are configured, only plot those data keys
-  const configuredBarKeys = (bars || []).map(b => b.dataKey).filter(Boolean);
+  const configuredBarKeys = (bars || []).map((b) => b.dataKey).filter(Boolean);
   const barKeysToPlot =
     configuredBarKeys.length > 0
-      ? valueKeys.filter(k => configuredBarKeys.includes(k))
+      ? valueKeys.filter((k) => configuredBarKeys.includes(k))
       : valueKeys;
 
   // Memoize series configuration
   const series = useMemo(
     () =>
-      barKeysToPlot.map(key => {
-        const rawBarConfig = bars?.find(b => b.dataKey === key);
+      barKeysToPlot.map((key) => {
+        const rawBarConfig = bars?.find((b) => b.dataKey === key);
         // Apply C# defaults for bar config
-        const barConfig = rawBarConfig
-          ? applyDefaults(rawBarConfig, BAR_DEFAULTS)
-          : BAR_DEFAULTS;
+        const barConfig = rawBarConfig ? applyDefaults(rawBarConfig, BAR_DEFAULTS) : BAR_DEFAULTS;
 
         return {
           name: barConfig.name || key,
           type: ChartType.Bar,
           legendHoverLink: true,
           showBackground: false,
-          data: data.map(d => d[key]),
-          stack:
-            barConfig.stackId !== undefined
-              ? String(barConfig.stackId)
-              : undefined,
-          barGap: barGap ? `${barGap}%` : '4%',
-          barCategoryGap: barCategoryGap ? `${barCategoryGap}%` : '10%',
+          data: data.map((d) => d[key]),
+          stack: barConfig.stackId !== undefined ? String(barConfig.stackId) : undefined,
+          barGap: barGap ? `${barGap}%` : "4%",
+          barCategoryGap: barCategoryGap ? `${barCategoryGap}%` : "10%",
           barMaxWidth: maxBarSize,
-          stackOrder: reverseStackOrder ? 'seriesDesc' : 'seriesAsc',
+          stackOrder: reverseStackOrder ? "seriesDesc" : "seriesAsc",
           itemStyle: {
             borderRadius: barConfig.radius ?? BAR_DEFAULTS.radius,
             borderColor: barConfig.stroke ?? undefined,
@@ -223,23 +202,17 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
       markPoint,
       markLine,
       markAreaConfig,
-    ]
+    ],
   );
 
-  const isVertical = layout?.toLowerCase() === 'vertical';
+  const isVertical = layout?.toLowerCase() === "vertical";
 
   // Memoize option configuration
   const option = useMemo(
     () => ({
-      grid: generateEChartGrid(
-        cartesianGrid,
-        !!toolbox && toolbox.enabled !== false
-      ),
+      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false),
       color: chartColors,
-      textStyle: generateTextStyle(
-        themeColors.foreground,
-        themeColors.fontSans
-      ),
+      textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
       xAxis: generateXAxis(
         ChartType.Bar,
         categories,
@@ -249,7 +222,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
           mutedForeground: themeColors.mutedForeground,
           fontSans: themeColors.fontSans,
         },
-        cartesianGrid
+        cartesianGrid,
       ),
       yAxis: generateYAxis(
         largeSpread,
@@ -263,14 +236,14 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
           mutedForeground: themeColors.mutedForeground,
           fontSans: themeColors.fontSans,
         },
-        cartesianGrid
+        cartesianGrid,
       ),
       series,
       legend: generateEChartLegend(legend, {
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
       }),
-      tooltip: generateTooltip(tooltip, 'shadow', {
+      tooltip: generateTooltip(tooltip, "shadow", {
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
         background: themeColors.background,
@@ -294,16 +267,22 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
       legend,
       tooltip,
       toolbox,
-    ]
+    ],
   );
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleChartReady = useCallback(() => {
+    containerRef.current?.setAttribute("data-chart-rendered", "true");
+  }, []);
+
   return (
-    <div style={styles}>
+    <div ref={containerRef} style={styles}>
       <ReactECharts
         option={option}
         style={chartStyles}
         notMerge={true} // Merge changes instead of full rebuild for better performance
         lazyUpdate={true}
+        onChartReady={handleChartReady}
       />
     </div>
   );

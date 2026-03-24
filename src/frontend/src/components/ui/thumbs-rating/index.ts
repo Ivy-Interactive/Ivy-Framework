@@ -1,2 +1,2 @@
-export { ThumbsRating } from './ThumbsRating';
-export { ThumbsEnum } from './types';
+export { ThumbsRating } from "./ThumbsRating";
+export { ThumbsEnum } from "./types";

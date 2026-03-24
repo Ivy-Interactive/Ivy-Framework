@@ -4,6 +4,7 @@ using Ivy.Samples.Shared.Apps.Demos;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using OpenAI;
+using Ivy;
 
 namespace Ivy.Samples.Shared;
 
@@ -19,7 +20,7 @@ public static class SamplesServer
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
         server.SetMetaTitle($"Ivy Samples {version}");
 
-        var chromeSettings = new ChromeSettings()
+        var appShellSettings = new AppShellSettings()
             .Header(
                 Layout.Vertical().Padding(2)
                 | new IvyLogo()
@@ -27,7 +28,7 @@ public static class SamplesServer
             )
             .DefaultApp<HelloApp>()
             .UseTabs(preventDuplicates: true);
-        server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
+        server.UseAppShell(() => new DefaultSidebarAppShell(appShellSettings));
 
         server.Services.AddSingleton<SampleDbContextFactory>();
         server.Services.AddSingleton<Apps.Widgets.MockEmployeeService>();

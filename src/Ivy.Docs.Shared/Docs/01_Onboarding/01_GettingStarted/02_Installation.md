@@ -80,12 +80,12 @@ using Ivy;
 var server = new Server();
 server.UseHotReload();
 server.AddAppsFromAssembly();
-server.UseChrome();
+server.UseAppShell();
 
 await server.RunAsync();
 ```
 
-This configuration creates a Server instance, enables hot reload for development, automatically discovers apps in the current assembly, uses default chrome (sidebar navigation), and starts the server.
+This configuration creates a Server instance, enables hot reload for development, automatically discovers apps in the current assembly, uses default app shell (sidebar navigation), and starts the server.
 
 ### Project File Configuration
 

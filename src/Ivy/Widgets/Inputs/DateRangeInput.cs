@@ -80,7 +80,7 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
 
     internal DateRangeInput() { }
 
-    [Prop] public TDateRange Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TDateRange Value { get; init; } = default!;
 
     [Event] public EventHandler<Event<IInput<TDateRange>, TDateRange>>? OnChange { get; set; }
 }

@@ -85,7 +85,7 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 
     internal FeedbackInput() { }
 
-    [Prop] public TNumber Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TNumber Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 

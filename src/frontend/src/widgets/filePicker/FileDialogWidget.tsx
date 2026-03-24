@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import { useEventHandler } from '@/components/event-handler';
-import { hasFileSystemAccess } from './browserSupport';
-import { validateFile, uploadFile, acceptToPickerTypes } from './shared';
+import React, { useCallback, useEffect, useRef } from "react";
+import { useEventHandler } from "@/components/event-handler";
+import { hasFileSystemAccess } from "./browserSupport";
+import { validateFile, uploadFile, acceptToPickerTypes } from "./shared";
 
 interface FileDialogFileInfo {
   fileName: string;
@@ -16,7 +16,7 @@ interface FileDialogWidgetProps {
   multiple?: boolean;
   maxFileSize?: number;
   minFileSize?: number;
-  mode: 'Upload' | 'PathOnly';
+  mode: "Upload" | "PathOnly";
   uploadUrl?: string;
   events: string[];
 }
@@ -28,7 +28,7 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
   multiple = false,
   maxFileSize,
   minFileSize,
-  mode = 'Upload',
+  mode = "Upload",
   uploadUrl,
   events = [],
 }) => {
@@ -37,9 +37,8 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
   const lastTriggerRef = useRef(0);
   const pendingDialogRef = useRef(false);
 
-  const hasOnCancel = Array.isArray(events) && events.includes('OnCancel');
-  const hasOnFilesSelected =
-    Array.isArray(events) && events.includes('OnFilesSelected');
+  const hasOnCancel = Array.isArray(events) && events.includes("OnCancel");
+  const hasOnFilesSelected = Array.isArray(events) && events.includes("OnFilesSelected");
 
   const fileToInfo = (file: File): FileDialogFileInfo => ({
     fileName: file.name,
@@ -50,40 +49,29 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
   const handleFiles = useCallback(
     async (files: File[]) => {
       // Validate all files
-      const validFiles = files.filter(f =>
-        validateFile(f, accept, maxFileSize, minFileSize)
-      );
+      const validFiles = files.filter((f) => validateFile(f, accept, maxFileSize, minFileSize));
       if (validFiles.length === 0) return;
 
-      if (mode === 'Upload' && uploadUrl) {
+      if (mode === "Upload" && uploadUrl) {
         // Upload files then fire event
         try {
           for (const file of validFiles) {
             await uploadFile(uploadUrl, file);
           }
           if (hasOnFilesSelected) {
-            handleEvent('OnFilesSelected', id, [validFiles.map(fileToInfo)]);
+            handleEvent("OnFilesSelected", id, [validFiles.map(fileToInfo)]);
           }
         } catch (error) {
-          console.error('File upload error:', error);
+          console.error("File upload error:", error);
         }
       } else {
         // PathOnly mode - just fire event with metadata
         if (hasOnFilesSelected) {
-          handleEvent('OnFilesSelected', id, [validFiles.map(fileToInfo)]);
+          handleEvent("OnFilesSelected", id, [validFiles.map(fileToInfo)]);
         }
       }
     },
-    [
-      accept,
-      maxFileSize,
-      minFileSize,
-      mode,
-      uploadUrl,
-      hasOnFilesSelected,
-      handleEvent,
-      id,
-    ]
+    [accept, maxFileSize, minFileSize, mode, uploadUrl, hasOnFilesSelected, handleEvent, id],
   );
 
   const openModernDialog = useCallback(async () => {
@@ -105,13 +93,13 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
         await handleFiles(files);
       }
     } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
+      if (err instanceof DOMException && err.name === "AbortError") {
         // User cancelled
         if (hasOnCancel) {
-          handleEvent('OnCancel', id, []);
+          handleEvent("OnCancel", id, []);
         }
       } else {
-        console.error('File dialog error:', err);
+        console.error("File dialog error:", err);
       }
     }
   }, [multiple, accept, handleFiles, hasOnCancel, handleEvent, id]);
@@ -128,13 +116,13 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
         if (pendingDialogRef.current) {
           pendingDialogRef.current = false;
           if (hasOnCancel) {
-            handleEvent('OnCancel', id, []);
+            handleEvent("OnCancel", id, []);
           }
         }
       }, 300);
-      window.removeEventListener('focus', onFocus);
+      window.removeEventListener("focus", onFocus);
     };
-    window.addEventListener('focus', onFocus);
+    window.addEventListener("focus", onFocus);
 
     inputRef.current.click();
   }, [hasOnCancel, handleEvent, id]);
@@ -149,9 +137,9 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
       await handleFiles(files);
 
       // Reset input so same file can be re-selected
-      e.target.value = '';
+      e.target.value = "";
     },
-    [handleFiles]
+    [handleFiles],
   );
 
   // Watch triggerCount for changes to open dialog
@@ -176,7 +164,7 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
         accept={accept}
         multiple={multiple}
         onChange={handleInputChange}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
     );
   }

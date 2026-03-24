@@ -3,7 +3,7 @@
  * If input is already a number, returns it as-is
  */
 export function parseSize(size: number | string | undefined): number {
-  if (typeof size === 'number') return size;
+  if (typeof size === "number") return size;
   if (!size) return 150; // default width
 
   // Parse "Px:200" or "Rem:10" format
@@ -12,7 +12,7 @@ export function parseSize(size: number | string | undefined): number {
     const [, unit, value] = match;
     const numValue = parseFloat(value);
     // For Rem, convert to pixels (assuming 16px = 1rem)
-    return unit === 'Rem' ? numValue * 16 : numValue;
+    return unit === "Rem" ? numValue * 16 : numValue;
   }
 
   return 150; // fallback to default

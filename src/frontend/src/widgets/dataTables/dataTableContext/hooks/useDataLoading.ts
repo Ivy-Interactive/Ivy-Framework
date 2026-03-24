@@ -1,13 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import * as arrow from 'apache-arrow';
-import { Filter, SortOrder } from '@/services/grpcTableService';
-import {
-  DataColumn,
-  DataTableConnection,
-  DataTableConfig,
-} from '../../types/types';
-import { fetchTableData } from '../../utils/tableDataFetcher';
-import { parseSize } from '../utils/parseSize';
+import { useCallback, useEffect, useRef, useState } from "react";
+import * as arrow from "apache-arrow";
+import { Filter, SortOrder } from "@/services/grpcTableService";
+import { DataColumn, DataTableConnection, DataTableConfig } from "../../types/types";
+import { fetchTableData } from "../../utils/tableDataFetcher";
+import { parseSize } from "../utils/parseSize";
 
 interface UseDataLoadingProps {
   connection: DataTableConnection;
@@ -48,7 +44,7 @@ export const useDataLoading = ({
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
   const batchSize = config.batchSize ?? 20;
-  const connectionKey = `${connection.connectionId}-${connection.sourceId}-${connection.versionToken || ''}`;
+  const connectionKey = `${connection.connectionId}-${connection.sourceId}-${connection.versionToken || ""}`;
   const dataIdentityKey = `${connection.connectionId}-${connection.sourceId}`;
 
   // Reset currentRowCountRef when filter or sort changes
@@ -64,7 +60,7 @@ export const useDataLoading = ({
   useEffect(() => {
     const loadInitialData = async () => {
       if (!connection.port || !connection.path) {
-        setError('Connection configuration is required');
+        setError("Connection configuration is required");
         return;
       }
 
@@ -82,18 +78,12 @@ export const useDataLoading = ({
             ? currentRowCountRef.current
             : batchSize;
 
-        const result = await fetchTableData(
-          connection,
-          0,
-          rowsToFetch,
-          activeFilter,
-          activeSort
-        );
+        const result = await fetchTableData(connection, 0, rowsToFetch, activeFilter, activeSort);
 
         // Merge Arrow columns with columnsProp (columnsProp has all metadata)
         // Arrow columns only provide name and calculated width (type inference is unreliable)
-        const mergedColumns = columnsProp.map(propCol => {
-          const arrowCol = result.columns.find(ac => ac.name === propCol.name);
+        const mergedColumns = columnsProp.map((propCol) => {
+          const arrowCol = result.columns.find((ac) => ac.name === propCol.name);
           // Parse width from Size string format to numeric pixels
           const parsedWidth = parseSize(propCol.width);
           return {
@@ -129,8 +119,7 @@ export const useDataLoading = ({
         // Initialize column widths only if not already set (first load)
         initializeColumnWidths(mergedColumns);
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to load data';
+        const errorMessage = err instanceof Error ? err.message : "Failed to load data";
         setError(errorMessage);
       } finally {
         setIsLoading(false);
@@ -169,17 +158,14 @@ export const useDataLoading = ({
         currentRowCount,
         batchSize,
         activeFilter,
-        activeSort
+        activeSort,
       );
 
       if (result.arrowTable && result.arrowTable.numRows > 0) {
         // Concatenate Arrow tables for efficient columnar storage
         if (arrowTableRef.current) {
           // Use RecordBatch.concat to combine tables
-          const batches = [
-            ...arrowTableRef.current.batches,
-            ...result.arrowTable.batches,
-          ];
+          const batches = [...arrowTableRef.current.batches, ...result.arrowTable.batches];
           arrowTableRef.current = new arrow.Table(batches);
         } else {
           arrowTableRef.current = result.arrowTable;
@@ -191,8 +177,7 @@ export const useDataLoading = ({
 
       setHasMoreState(result.hasMore);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load more data';
+      const errorMessage = err instanceof Error ? err.message : "Failed to load more data";
       setError(errorMessage);
     } finally {
       setIsLoading(false);

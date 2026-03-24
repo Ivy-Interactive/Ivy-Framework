@@ -1,20 +1,20 @@
-import { useEventHandler } from '@/components/event-handler';
+import { useEventHandler } from "@/components/event-handler";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet';
-import { getHeight, getWidth } from '@/lib/styles';
-import { cn } from '@/lib/utils';
-import React, { useState } from 'react';
-import './sheet.css';
+} from "@/components/ui/sheet";
+import { getHeight, getWidth } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import React, { useState } from "react";
+import "./sheet.css";
 
-type SheetSide = 'left' | 'right' | 'top' | 'bottom';
+type SheetSide = "left" | "right" | "top" | "bottom";
 
 const normalizeSide = (side?: string): SheetSide => {
-  if (!side) return 'right';
+  if (!side) return "right";
   return side.toLowerCase() as SheetSide;
 };
 
@@ -35,7 +35,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
   description,
   id,
   width,
-  side = 'right',
+  side = "right",
 }) => {
   const eventHandler = useEventHandler();
   const [isOpen, setIsOpen] = useState(true);
@@ -43,19 +43,17 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
   const handleClose = () => {
     setIsOpen(false);
     // Delay the event handler to allow animation to complete
-    setTimeout(() => eventHandler('OnClose', id, []), 300);
+    setTimeout(() => eventHandler("OnClose", id, []), 300);
   };
 
   if (!slots?.Content) {
     return (
-      <div className="text-destructive">
-        Error: Sheet requires both Trigger and Content slots.
-      </div>
+      <div className="text-destructive">Error: Sheet requires both Trigger and Content slots.</div>
     );
   }
 
   const normalizedSide = normalizeSide(side);
-  const isHorizontal = normalizedSide === 'left' || normalizedSide === 'right';
+  const isHorizontal = normalizedSide === "left" || normalizedSide === "right";
 
   const styles: React.CSSProperties = isHorizontal
     ? { ...getWidth(width) }
@@ -66,21 +64,17 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
       <SheetContent
         side={normalizedSide}
         style={styles}
-        className={cn('flex flex-col p-0 gap-0', isHorizontal && 'h-full')}
+        className={cn("flex flex-col p-0 gap-0", isHorizontal && "h-full")}
         data-sheet-side={normalizedSide}
-        onOpenAutoFocus={e => {
+        onOpenAutoFocus={(e) => {
           e.preventDefault();
         }}
       >
-        {(title || description) && true && (
-          <SheetHeader className="p-4 pb-0">
-            {title && <SheetTitle>{title}</SheetTitle>}
-            {description && <SheetDescription>{description}</SheetDescription>}
-          </SheetHeader>
-        )}
-        <div className="flex-1 pb-4 pt-1 pl-4 pr-4 mt-4 overflow-y-auto">
-          {slots.Content}
-        </div>
+        <SheetHeader className={cn("p-4 pb-0", !title && !description && "sr-only")}>
+          <SheetTitle className={cn(!title && "sr-only")}>{title || "Sheet"}</SheetTitle>
+          {description && <SheetDescription>{description}</SheetDescription>}
+        </SheetHeader>
+        <div className="flex-1 pb-4 pt-1 pl-4 pr-4 mt-4 overflow-y-auto">{slots.Content}</div>
       </SheetContent>
     </Sheet>
   );

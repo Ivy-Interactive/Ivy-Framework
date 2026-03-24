@@ -31,14 +31,14 @@ public class MyView : ViewBase
 
 The topmost view in an Ivy application is called an [App](https://docs.ivy.app/onboarding/concepts/apps.md) and is decorated with the `[App]` attribute. The attribute uses **named constructor parameters** (lowercase):
 
-[App(title: "Customers", icon: Icons.Rocket, path: new[] { "CRM" })]
+[App(title: "Customers", icon: Icons.Rocket, group: new[] { "CRM" })]
 public class CustomersApp : ViewBase
 
 - `title` is optional — if omitted, it is derived from the class name (e.g. `CustomersApp` → "Customers").
 - `icon` uses the `Icons` enum — these are Lucide icons in PascalCase (e.g. `Icons.Link`, `Icons.Settings`, `Icons.Rocket`).
-- `path` groups the app in the navigation sidebar (e.g. `path: new[] { "Apps" }`).
-- There is no `group` or `chrome` parameter. Chrome is configured in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`.
-- Use **lowercase** parameter names (`icon:`, `path:`), NOT PascalCase property names (`Icon =`, `Path =`) — PascalCase causes CS0655.
+- `group` groups the app in the navigation sidebar (e.g. `group: new[] { "Apps" }`).
+- There is no `chrome` parameter. Chrome is configured in `Program.cs` via `server.UseDefaultApp(typeof(MyApp))`. Always ensure `server.AddAppsFromAssembly()` is called before `UseDefaultApp` — without it, `[App]`-attributed classes are not registered and the server throws at runtime.
+- Use **lowercase** parameter names (`icon:`, `group:`), NOT PascalCase property names (`Icon =`, `Group =`) — PascalCase causes CS0655.
 
 An app is built into a tree of widgets. This is what's rendered to the screen.
 

@@ -1,4 +1,4 @@
-import { TextShimmer } from './TextShimmer';
+import { TextShimmer } from "./TextShimmer";
 
 export function ConnectionModal() {
   return (

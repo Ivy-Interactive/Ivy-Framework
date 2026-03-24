@@ -29,7 +29,7 @@ var server = new Server();
 server.UseCulture("en-US");
 server.UseHotReload();
 server.AddAppsFromAssembly();
-server.UseChrome();
+server.UseAppShell();
 await server.RunAsync();
 ```
 
@@ -60,8 +60,14 @@ var server = new Server(new ServerArgs
 | `Browse` | `bool` | `false` | Automatically open browser on startup |
 | `Silent` | `bool` | `false` | Suppress startup messages |
 | `DefaultAppId` | `string?` | `null` | Set the default app to load |
-| `MetaTitle` | `string?` | `null` | HTML meta title |
-| `MetaDescription` | `string?` | `null` | HTML meta description |
+| `Metadata.Title` | `string?` | `null` | HTML meta title |
+| `Metadata.Description` | `string?` | `null` | HTML meta description |
+| `Metadata.GitHubUrl` | `string?` | `null` | GitHub repository URL meta tag |
+| `Metadata.OgImage` | `string?` | `null` (auto from GitHub URL) | Open Graph image URL. Auto-generated from `Metadata.GitHubUrl` + title when not set. |
+| `Metadata.OgSiteName` | `string?` | `null` (auto from assembly) | Site name for `og:site_name`. Auto-derived from entry assembly name when not set. |
+| `Metadata.OgType` | `string?` | `"website"` | Open Graph type |
+| `Metadata.OgLocale` | `string?` | `"en_US"` | Open Graph locale |
+| `Metadata.TwitterCard` | `string?` | `"summary_large_image"` | Twitter card type |
 
 ## Adding Applications
 
@@ -109,7 +115,7 @@ server.UseHotReload();
 
 This automatically refreshes the browser when C# code changes during development.
 
-For more information about configuring the application chrome (sidebar, header, footer), see [Chrome](./11_Chrome.md).
+For more information about configuring the application shell (sidebar, header, footer), see [AppShell](./11_AppShell.md).
 
 ## Authentication
 
@@ -191,26 +197,27 @@ Set HTML metadata for SEO:
 ```csharp
 server.SetMetaTitle("My Ivy Application");
 server.SetMetaDescription("A powerful web application built with Ivy");
+server.SetMetaGitHubUrl("https://github.com/user/repo");
 ```
 
 ## Complete Examples
 
 ### Simple Application
 
-A minimal setup for development with hot reload enabled and basic chrome configuration.
+A minimal setup for development with hot reload enabled and basic app shell configuration.
 
 ```csharp
 var server = new Server();
 server.UseCulture("en-US");
 server.UseHotReload();
 server.AddAppsFromAssembly();
-server.UseChrome();
+server.UseAppShell();
 await server.RunAsync();
 ```
 
 ### Documentation Server
 
-A specialized configuration for documentation sites with custom chrome, version display, and page-based navigation.
+A specialized configuration for documentation sites with custom app shell, version display, and page-based navigation.
 
 ```csharp
 var server = new Server();
@@ -221,7 +228,7 @@ server.UseHotReload();
 var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
 server.SetMetaTitle($"Ivy Docs {version}");
 
-var chromeSettings = new ChromeSettings()
+var appShellSettings = new AppShellSettings()
     .Header(
         Layout.Vertical().Padding(2)
         | new IvyLogo()
@@ -230,7 +237,7 @@ var chromeSettings = new ChromeSettings()
     .DefaultApp<IntroductionApp>()
     .UsePages();
 
-server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
+server.UseAppShell(() => new DefaultSidebarAppShell(appShellSettings));
 await server.RunAsync();
 ```
 
@@ -243,7 +250,7 @@ var server = new Server();
 server.UseCulture("en-US");
 server.UseHotReload();
 server.AddAppsFromAssembly();
-server.UseChrome();
+server.UseAppShell();
 server.UseAuth<SupabaseAuthProvider>(c =>
     c.UseEmailPassword().UseGoogle());
 await server.RunAsync();
@@ -266,7 +273,7 @@ server.UseHotReload();
 #endif
 
 server.AddAppsFromAssembly();
-server.UseChrome();
+server.UseAppShell();
 
 server.SetMetaTitle("My Production App");
 server.SetMetaDescription("Enterprise application built with Ivy");

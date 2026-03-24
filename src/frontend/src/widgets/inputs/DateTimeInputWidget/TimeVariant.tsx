@@ -1,17 +1,18 @@
-import * as React from 'react';
-import { useState, useCallback } from 'react';
-import { Input } from '@/components/ui/input';
-import { format } from 'date-fns';
-import { Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { inputStyles } from '@/lib/styles';
-import { Densities } from '@/types/density';
+import * as React from "react";
+import { useState, useCallback } from "react";
+import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
+import { Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { inputStyles } from "@/lib/styles";
+import { Densities } from "@/types/density";
 import {
   dateTimeInputIconVariant,
   dateTimeInputTextVariant,
-} from '@/components/ui/input/date-time-input-variant';
-import { TimeVariantProps } from './types';
-import { ClearAndInvalidIcons } from './shared';
+} from "@/components/ui/input/date-time-input-variant";
+import { TimeVariantProps } from "./types";
+import { ClearAndInvalidIcons } from "./shared";
+import { useTimeConstraints } from "./useTimeConstraints";
 
 export const TimeVariant: React.FC<TimeVariantProps> = ({
   value,
@@ -20,119 +21,118 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
   nullable,
   invalid,
   onTimeChange,
+  min,
+  max,
+  step,
   density = Densities.Medium,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
   // Use local state for the input value to make it uncontrolled
   const [localTimeValue, setLocalTimeValue] = useState(() => {
-    if (value) {
-      // Parse the value to get time in HH:mm:ss format
-      try {
-        const date = new Date(value);
-        if (!isNaN(date.getTime())) {
-          return format(date, 'HH:mm:ss');
-        }
-      } catch {
-        // If parsing fails, try to use the value directly if it looks like a time
-        if (
-          typeof value === 'string' &&
-          /^\d{1,2}:\d{2}(:\d{2})?$/.test(value)
-        ) {
-          return value.length <= 5 ? value + ':00' : value;
-        }
+    if (value && typeof value === "string") {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        return format(date, "HH:mm:ss");
+      }
+      // Fallback for simple time strings that new Date() might fail on
+      if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(value)) {
+        return value.split(":").length === 2 ? value + ":00" : value;
       }
     }
     // When nullable and no value, return empty string to show placeholder
-    return nullable ? '' : '00:00:00';
+    return nullable && (value === undefined || value === null || value === "") ? "" : "00:00:00";
   });
 
   // Update local state when value prop changes (from parent)
   React.useEffect(() => {
-    if (value) {
-      try {
-        const date = new Date(value);
-        if (!isNaN(date.getTime())) {
-          const newTimeValue = format(date, 'HH:mm:ss');
-          setLocalTimeValue(newTimeValue);
-        }
-      } catch {
-        // If parsing fails, try to use the value directly if it looks like a time
-        if (
-          typeof value === 'string' &&
-          /^\d{1,2}:\d{2}(:\d{2})?$/.test(value)
-        ) {
-          const newTimeValue = value.length <= 5 ? value + ':00' : value;
-          setLocalTimeValue(newTimeValue);
-        }
+    if (value && typeof value === "string") {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        const newTimeValue = format(date, "HH:mm:ss");
+        setLocalTimeValue(newTimeValue);
+      } else if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(value)) {
+        // Handle direct time strings
+        const newTimeValue = value.split(":").length === 2 ? value + ":00" : value;
+        setLocalTimeValue(newTimeValue);
       }
+    } else if (nullable && (value === undefined || value === null || value === "")) {
+      setLocalTimeValue("");
     } else {
-      // When nullable and no value, keep input empty instead of defaulting to '00:00:00'
-      setLocalTimeValue(nullable ? '' : '00:00:00');
+      // When not nullable and no value, default to '00:00:00'
+      setLocalTimeValue("00:00:00");
     }
   }, [value, nullable]);
 
-  const showClear = nullable && !disabled && value != null && value !== '';
+  const { timeStepSeconds, timeMin, timeMax, getSnappedTime } = useTimeConstraints(min, max, step);
+
+  const showClear = nullable && !disabled && value != null && value !== "";
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
-    onTimeChange('');
+    onTimeChange("");
   };
 
-  const handleTimeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newTimeValue = e.target.value;
-      setLocalTimeValue(newTimeValue);
-    },
-    []
-  );
+  const handleTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTimeValue = e.target.value;
+    setLocalTimeValue(newTimeValue);
+  }, []);
+
+  const commitSnappedTime = useCallback(() => {
+    if (nullable && localTimeValue.trim() === "") {
+      onTimeChange("");
+      return;
+    }
+
+    const out = getSnappedTime(localTimeValue);
+    setLocalTimeValue(out);
+    onTimeChange(out);
+  }, [nullable, localTimeValue, getSnappedTime, onTimeChange]);
 
   const handleTimeBlur = useCallback(() => {
-    // When input loses focus, update the parent
-    onTimeChange(localTimeValue);
-  }, [localTimeValue, onTimeChange]);
+    commitSnappedTime();
+  }, [commitSnappedTime]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      // When user presses Enter, update the parent
-      if (e.key === 'Enter') {
-        onTimeChange(localTimeValue);
-      }
-    },
-    [localTimeValue, onTimeChange]
-  );
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.currentTarget.blur();
+    }
+  }, []);
 
   return (
     <div className="relative w-full select-none" data-testid={dataTestId}>
       <div
         className={cn(
-          'relative flex items-center rounded-md border border-input bg-transparent shadow-sm focus-within:ring-1 focus-within:ring-ring dark:bg-white/5 dark:border-white/10',
-          invalid && inputStyles.invalidInput
+          "relative flex items-center rounded-md border border-input bg-transparent shadow-sm focus-within:ring-1 focus-within:ring-ring dark:bg-white/5 dark:border-white/10",
+          invalid && inputStyles.invalidInput,
         )}
       >
         <Clock
           className={cn(
-            'ml-3 shrink-0',
+            "ml-3 shrink-0",
             dateTimeInputIconVariant({ density }),
-            disabled && 'opacity-50'
+            disabled && "opacity-50",
           )}
         />
         <Input
           type="time"
-          step="1"
+          step={timeStepSeconds}
+          min={timeMin}
+          max={timeMax}
           density={density}
           value={localTimeValue}
           onChange={handleTimeChange}
           onBlur={handleTimeBlur}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          placeholder={placeholder || 'Select time'}
+          placeholder={placeholder || "Select time"}
           className={cn(
-            'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0',
+            "bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0",
             dateTimeInputTextVariant({ density }),
             invalid && inputStyles.invalidInput,
-            disabled && 'cursor-not-allowed',
-            showClear && invalid ? 'pr-16' : showClear || invalid ? 'pr-8' : ''
+            disabled && "cursor-not-allowed opacity-50 text-muted-foreground",
+            showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
           )}
         />
       </div>

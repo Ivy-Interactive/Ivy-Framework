@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { validateLinkUrl } from '@/lib/url';
+import { describe, it, expect } from "vitest";
+import { validateLinkUrl } from "@/lib/url";
 
 /**
  * Tests for ButtonWidget URL validation, especially for Link variant.
@@ -14,195 +14,192 @@ import { validateLinkUrl } from '@/lib/url';
 
 // Mock the getUrl helper function logic (it's internal to ButtonWidget)
 // We'll test the validation logic that ButtonWidget uses
-const mockGetUrl = (url: string, mockHost: string = 'https://example.com') => {
+const mockGetUrl = (url: string, mockHost: string = "https://example.com") => {
   // Validate the URL first to prevent open redirect vulnerabilities
   const validatedUrl = validateLinkUrl(url);
-  if (validatedUrl === '#') {
+  if (validatedUrl === "#") {
     // Invalid URL, return safe fallback
-    return '#';
+    return "#";
   }
 
   // If it's already a full URL (http/https), return it
-  if (
-    validatedUrl.startsWith('http://') ||
-    validatedUrl.startsWith('https://')
-  ) {
+  if (validatedUrl.startsWith("http://") || validatedUrl.startsWith("https://")) {
     return validatedUrl;
   }
 
   // app:// and anchor links should not be prefixed with host
-  if (validatedUrl.startsWith('app://') || validatedUrl.startsWith('#')) {
+  if (validatedUrl.startsWith("app://") || validatedUrl.startsWith("#")) {
     return validatedUrl;
   }
 
   // Otherwise, construct relative URL with Ivy host
-  return `${mockHost}${validatedUrl.startsWith('/') ? '' : '/'}${validatedUrl}`;
+  return `${mockHost}${validatedUrl.startsWith("/") ? "" : "/"}${validatedUrl}`;
 };
 
-describe('ButtonWidget URL validation', () => {
-  const mockHost = 'https://example.com';
+describe("ButtonWidget URL validation", () => {
+  const mockHost = "https://example.com";
 
-  describe('Link variant URL validation', () => {
-    it('should validate safe http URLs for Link variant buttons', () => {
-      const url = 'http://example.com/page';
+  describe("Link variant URL validation", () => {
+    it("should validate safe http URLs for Link variant buttons", () => {
+      const url = "http://example.com/page";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('http://example.com/page');
+      expect(result).toBe("http://example.com/page");
     });
 
-    it('should validate safe https URLs for Link variant buttons', () => {
-      const url = 'https://example.com/page';
+    it("should validate safe https URLs for Link variant buttons", () => {
+      const url = "https://example.com/page";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('https://example.com/page');
+      expect(result).toBe("https://example.com/page");
     });
 
-    it('should validate relative paths for Link variant buttons', () => {
-      const url = '/dashboard';
+    it("should validate relative paths for Link variant buttons", () => {
+      const url = "/dashboard";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('https://example.com/dashboard');
+      expect(result).toBe("https://example.com/dashboard");
     });
 
-    it('should add leading slash to relative paths without it', () => {
-      const url = 'dashboard';
+    it("should add leading slash to relative paths without it", () => {
+      const url = "dashboard";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('https://example.com/dashboard');
+      expect(result).toBe("https://example.com/dashboard");
     });
 
-    it('should validate app:// URLs for Link variant buttons', () => {
-      const url = 'app://dashboard';
+    it("should validate app:// URLs for Link variant buttons", () => {
+      const url = "app://dashboard";
       const result = mockGetUrl(url, mockHost);
       // app:// URLs should be validated but not prefixed with host
-      expect(result).toBe('app://dashboard');
+      expect(result).toBe("app://dashboard");
     });
 
-    it('should validate anchor links for Link variant buttons', () => {
-      const url = '#section1';
+    it("should validate anchor links for Link variant buttons", () => {
+      const url = "#section1";
       const result = mockGetUrl(url, mockHost);
       // Anchor links should be validated but not prefixed with host
-      expect(result).toBe('#section1');
+      expect(result).toBe("#section1");
     });
   });
 
-  describe('dangerous URLs in Link variant buttons (sad path)', () => {
-    it('should sanitize javascript: protocol in Link variant buttons', () => {
+  describe("dangerous URLs in Link variant buttons (sad path)", () => {
+    it("should sanitize javascript: protocol in Link variant buttons", () => {
       const url = 'javascript:alert("xss")';
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('#');
+      expect(result).toBe("#");
     });
 
-    it('should sanitize data: protocol in Link variant buttons', () => {
+    it("should sanitize data: protocol in Link variant buttons", () => {
       const url = 'data:text/html,<script>alert("xss")</script>';
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('#');
+      expect(result).toBe("#");
     });
 
-    it('should sanitize file: protocol in Link variant buttons', () => {
-      const url = 'file:///etc/passwd';
+    it("should sanitize file: protocol in Link variant buttons", () => {
+      const url = "file:///etc/passwd";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('#');
+      expect(result).toBe("#");
     });
 
-    it('should sanitize vbscript: protocol in Link variant buttons', () => {
+    it("should sanitize vbscript: protocol in Link variant buttons", () => {
       const url = 'vbscript:msgbox("xss")';
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('#');
+      expect(result).toBe("#");
     });
 
-    it('should sanitize mixed case dangerous protocols', () => {
+    it("should sanitize mixed case dangerous protocols", () => {
       const dangerousUrls = [
         'JAVASCRIPT:alert("xss")',
-        'Data:text/html,<script>',
-        'FILE:///etc/passwd',
+        "Data:text/html,<script>",
+        "FILE:///etc/passwd",
       ];
-      dangerousUrls.forEach(url => {
+      dangerousUrls.forEach((url) => {
         const result = mockGetUrl(url, mockHost);
-        expect(result).toBe('#');
+        expect(result).toBe("#");
       });
     });
 
-    it('should sanitize URLs attempting protocol injection', () => {
+    it("should sanitize URLs attempting protocol injection", () => {
       const maliciousUrls = [
         'javascript:alert("xss")',
         'data:text/html,<script>alert("xss")</script>',
-        'file:///etc/passwd',
+        "file:///etc/passwd",
       ];
-      maliciousUrls.forEach(url => {
+      maliciousUrls.forEach((url) => {
         const result = mockGetUrl(url, mockHost);
-        expect(result).toBe('#');
+        expect(result).toBe("#");
       });
     });
   });
 
-  describe('URL construction for Link variant buttons', () => {
-    it('should construct full URL for relative paths', () => {
-      const url = '/users/profile';
+  describe("URL construction for Link variant buttons", () => {
+    it("should construct full URL for relative paths", () => {
+      const url = "/users/profile";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('https://example.com/users/profile');
+      expect(result).toBe("https://example.com/users/profile");
     });
 
-    it('should not modify absolute http URLs', () => {
-      const url = 'http://external.com/page';
+    it("should not modify absolute http URLs", () => {
+      const url = "http://external.com/page";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('http://external.com/page');
+      expect(result).toBe("http://external.com/page");
     });
 
-    it('should not modify absolute https URLs', () => {
-      const url = 'https://external.com/page';
+    it("should not modify absolute https URLs", () => {
+      const url = "https://external.com/page";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('https://external.com/page');
+      expect(result).toBe("https://external.com/page");
     });
 
-    it('should handle URLs with query parameters', () => {
-      const url = '/dashboard?tab=settings';
+    it("should handle URLs with query parameters", () => {
+      const url = "/dashboard?tab=settings";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('https://example.com/dashboard?tab=settings');
+      expect(result).toBe("https://example.com/dashboard?tab=settings");
     });
 
-    it('should handle URLs with fragments', () => {
-      const url = '/page#section';
+    it("should handle URLs with fragments", () => {
+      const url = "/page#section";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('https://example.com/page#section');
+      expect(result).toBe("https://example.com/page#section");
     });
   });
 
-  describe('edge cases for Link variant buttons (sad path)', () => {
-    it('should handle null URL', () => {
+  describe("edge cases for Link variant buttons (sad path)", () => {
+    it("should handle null URL", () => {
       // In ButtonWidget, null URLs wouldn't call getUrl, but if they did:
       const url: string | null = null;
       const validatedUrl = validateLinkUrl(url);
-      expect(validatedUrl).toBe('#');
+      expect(validatedUrl).toBe("#");
     });
 
-    it('should handle undefined URL', () => {
+    it("should handle undefined URL", () => {
       // In ButtonWidget, undefined URLs wouldn't call getUrl, but if they did:
       const url: string | undefined = undefined;
       const validatedUrl = validateLinkUrl(url);
-      expect(validatedUrl).toBe('#');
+      expect(validatedUrl).toBe("#");
     });
 
-    it('should handle empty string URL', () => {
-      const url = '';
+    it("should handle empty string URL", () => {
+      const url = "";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('#');
+      expect(result).toBe("#");
     });
 
-    it('should handle whitespace-only URL', () => {
-      const url = '   ';
+    it("should handle whitespace-only URL", () => {
+      const url = "   ";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('#');
+      expect(result).toBe("#");
     });
 
-    it('should handle malformed URLs', () => {
+    it("should handle malformed URLs", () => {
       // Truly malformed URLs should be rejected
-      const malformedUrls = ['://malformed', 'http://', 'https://'];
-      malformedUrls.forEach(url => {
+      const malformedUrls = ["://malformed", "http://", "https://"];
+      malformedUrls.forEach((url) => {
         const result = mockGetUrl(url, mockHost);
         // Should return safe fallback for truly malformed URLs
-        expect(result).toBe('#');
+        expect(result).toBe("#");
       });
 
       // URLs without protocol are treated as relative paths (safe behavior)
-      const relativePathUrls = ['not-a-url', 'some-path'];
-      relativePathUrls.forEach(url => {
+      const relativePathUrls = ["not-a-url", "some-path"];
+      relativePathUrls.forEach((url) => {
         const result = mockGetUrl(url, mockHost);
         // These are treated as relative paths and prefixed with host (safe)
         expect(result).toContain(mockHost);
@@ -210,88 +207,78 @@ describe('ButtonWidget URL validation', () => {
       });
     });
 
-    it('should handle URLs with newlines and tabs', () => {
-      const urls = [
-        'https://example.com\n',
-        'https://example.com\t',
-        '\n/dashboard',
-      ];
-      urls.forEach(url => {
+    it("should handle URLs with newlines and tabs", () => {
+      const urls = ["https://example.com\n", "https://example.com\t", "\n/dashboard"];
+      urls.forEach((url) => {
         const result = mockGetUrl(url, mockHost);
         // Should sanitize or return safe fallback
-        expect(result).not.toContain('\n');
-        expect(result).not.toContain('\t');
+        expect(result).not.toContain("\n");
+        expect(result).not.toContain("\t");
       });
     });
 
-    it('should trim whitespace from URLs', () => {
-      const url = '  /dashboard  ';
+    it("should trim whitespace from URLs", () => {
+      const url = "  /dashboard  ";
       const result = mockGetUrl(url, mockHost);
-      expect(result).toBe('https://example.com/dashboard');
+      expect(result).toBe("https://example.com/dashboard");
     });
   });
 
-  describe('Link variant with different URL types', () => {
-    it('should handle external URLs correctly', () => {
+  describe("Link variant with different URL types", () => {
+    it("should handle external URLs correctly", () => {
       const externalUrls = [
-        { input: 'https://github.com', expected: 'https://github.com/' },
-        { input: 'http://example.org', expected: 'http://example.org/' },
+        { input: "https://github.com", expected: "https://github.com/" },
+        { input: "http://example.org", expected: "http://example.org/" },
         {
-          input: 'https://subdomain.example.com/path',
-          expected: 'https://subdomain.example.com/path',
+          input: "https://subdomain.example.com/path",
+          expected: "https://subdomain.example.com/path",
         },
       ];
 
       externalUrls.forEach(({ input }) => {
         const result = mockGetUrl(input, mockHost);
         // URL normalization may add trailing slash
-        expect(result).toContain(
-          input.split('/')[0] + '//' + input.split('/')[2]
-        );
+        expect(result).toContain(input.split("/")[0] + "//" + input.split("/")[2]);
       });
     });
 
-    it('should handle internal relative URLs correctly', () => {
-      const internalUrls = ['/dashboard', '/users/profile', '/app/settings'];
+    it("should handle internal relative URLs correctly", () => {
+      const internalUrls = ["/dashboard", "/users/profile", "/app/settings"];
 
-      internalUrls.forEach(url => {
+      internalUrls.forEach((url) => {
         const result = mockGetUrl(url, mockHost);
         expect(result).toBe(`${mockHost}${url}`);
       });
     });
 
-    it('should handle app:// URLs correctly', () => {
-      const appUrls = [
-        'app://dashboard',
-        'app://users/profile',
-        'app://my-app',
-      ];
+    it("should handle app:// URLs correctly", () => {
+      const appUrls = ["app://dashboard", "app://users/profile", "app://my-app"];
 
-      appUrls.forEach(url => {
+      appUrls.forEach((url) => {
         const result = mockGetUrl(url, mockHost);
         expect(result).toBe(url);
       });
     });
   });
 
-  describe('Link variant URL validation integration', () => {
-    it('should validate and construct URLs for Link variant buttons', () => {
+  describe("Link variant URL validation integration", () => {
+    it("should validate and construct URLs for Link variant buttons", () => {
       const testCases = [
         {
-          input: 'https://example.com/page',
-          expected: 'https://example.com/page',
+          input: "https://example.com/page",
+          expected: "https://example.com/page",
         },
         {
-          input: '/dashboard',
-          expected: 'https://example.com/dashboard',
+          input: "/dashboard",
+          expected: "https://example.com/dashboard",
         },
         {
-          input: 'app://dashboard',
-          expected: 'app://dashboard',
+          input: "app://dashboard",
+          expected: "app://dashboard",
         },
         {
-          input: '#section1',
-          expected: '#section1',
+          input: "#section1",
+          expected: "#section1",
         },
       ];
 
@@ -301,17 +288,17 @@ describe('ButtonWidget URL validation', () => {
       });
     });
 
-    it('should sanitize dangerous URLs to safe fallback', () => {
+    it("should sanitize dangerous URLs to safe fallback", () => {
       const dangerousUrls = [
         'javascript:alert("xss")',
         'data:text/html,<script>alert("xss")</script>',
-        'file:///etc/passwd',
+        "file:///etc/passwd",
         'vbscript:msgbox("xss")',
       ];
 
-      dangerousUrls.forEach(url => {
+      dangerousUrls.forEach((url) => {
         const result = mockGetUrl(url, mockHost);
-        expect(result).toBe('#');
+        expect(result).toBe("#");
       });
     });
   });

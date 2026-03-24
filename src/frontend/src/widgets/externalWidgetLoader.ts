@@ -1,6 +1,6 @@
-import React from 'react';
-import { logger } from '@/lib/logger';
-import { getIvyHost } from '@/lib/utils';
+import React from "react";
+import { logger } from "@/lib/logger";
+import { getIvyHost } from "@/lib/utils";
 
 /**
  * External widget registration info received from the backend.
@@ -16,18 +16,12 @@ export interface ExternalWidgetInfo {
 /**
  * Cache for loaded external widget components.
  */
-const loadedComponents = new Map<
-  string,
-  React.ComponentType<Record<string, unknown>>
->();
+const loadedComponents = new Map<string, React.ComponentType<Record<string, unknown>>>();
 
 /**
  * Cache for in-flight loading promises to prevent duplicate loads.
  */
-const loadingPromises = new Map<
-  string,
-  Promise<React.ComponentType<Record<string, unknown>>>
->();
+const loadingPromises = new Map<string, Promise<React.ComponentType<Record<string, unknown>>>>();
 
 /**
  * Set of stylesheets that have been loaded.
@@ -43,11 +37,11 @@ let externalWidgetRegistry: Map<string, ExternalWidgetInfo> = new Map();
  * Updates the external widget registry with new data from the backend.
  */
 export const setExternalWidgetRegistry = (
-  widgets: ExternalWidgetInfo[] | null | undefined
+  widgets: ExternalWidgetInfo[] | null | undefined,
 ): void => {
   if (!widgets) return;
 
-  externalWidgetRegistry = new Map(widgets.map(w => [w.typeName, w]));
+  externalWidgetRegistry = new Map(widgets.map((w) => [w.typeName, w]));
   // logger.info('External widget registry updated', {
   //   count: widgets.length,
   //   widgets: widgets.map(w => w.typeName),
@@ -57,10 +51,7 @@ export const setExternalWidgetRegistry = (
 /**
  * Gets the external widget registry.
  */
-export const getExternalWidgetRegistry = (): Map<
-  string,
-  ExternalWidgetInfo
-> => {
+export const getExternalWidgetRegistry = (): Map<string, ExternalWidgetInfo> => {
   return externalWidgetRegistry;
 };
 
@@ -74,9 +65,7 @@ export const isExternalWidget = (typeName: string): boolean => {
 /**
  * Gets info about an external widget.
  */
-export const getExternalWidgetInfo = (
-  typeName: string
-): ExternalWidgetInfo | undefined => {
+export const getExternalWidgetInfo = (typeName: string): ExternalWidgetInfo | undefined => {
   return externalWidgetRegistry.get(typeName);
 };
 
@@ -95,7 +84,7 @@ const loadScript = (url: string): Promise<void> => {
   }
 
   const promise = new Promise<void>((resolve, reject) => {
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.src = url;
     script.async = true;
 
@@ -122,8 +111,8 @@ const loadScript = (url: string): Promise<void> => {
 const loadStylesheet = (url: string): void => {
   if (loadedStylesheets.has(url)) return;
 
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
   link.href = url;
   document.head.appendChild(link);
   loadedStylesheets.add(url);
@@ -136,7 +125,7 @@ const loadStylesheet = (url: string): void => {
  * Returns a cached component if already loaded.
  */
 export const loadExternalWidget = async (
-  typeName: string
+  typeName: string,
 ): Promise<React.ComponentType<Record<string, unknown>>> => {
   // Return cached component if available
   const cached = loadedComponents.get(typeName);
@@ -178,11 +167,10 @@ export const loadExternalWidget = async (
       // Get the component from the global variable
       // The IIFE exports to window[globalName] where globalName is specified in the widget attribute
       // Falls back to the widget's class name (last part of typeName) for backwards compatibility
-      const globalName =
-        widgetInfo.globalName ?? typeName.split('.').pop() ?? typeName;
-      const globalModule = (
-        window as unknown as Record<string, Record<string, unknown>>
-      )[globalName];
+      const globalName = widgetInfo.globalName ?? typeName.split(".").pop() ?? typeName;
+      const globalModule = (window as unknown as Record<string, Record<string, unknown>>)[
+        globalName
+      ];
 
       // logger.info('External widget lookup', {
       //   typeName,
@@ -193,21 +181,19 @@ export const loadExternalWidget = async (
       // });
 
       if (!globalModule) {
-        throw new Error(
-          `Global '${globalName}' not found after loading external widget script`
-        );
+        throw new Error(`Global '${globalName}' not found after loading external widget script`);
       }
 
       // Get the exported component
       const Component = (
-        widgetInfo.exportName === 'default'
+        widgetInfo.exportName === "default"
           ? (globalModule.default ?? globalModule[globalName])
           : globalModule[widgetInfo.exportName]
       ) as React.ComponentType<Record<string, unknown>> | undefined;
 
       if (!Component) {
         throw new Error(
-          `Export '${widgetInfo.exportName}' not found in external widget module '${typeName}'. Available exports: ${Object.keys(globalModule).join(', ')}`
+          `Export '${widgetInfo.exportName}' not found in external widget module '${typeName}'. Available exports: ${Object.keys(globalModule).join(", ")}`,
         );
       }
 
@@ -218,7 +204,7 @@ export const loadExternalWidget = async (
 
       return Component as React.ComponentType<Record<string, unknown>>;
     } catch (error) {
-      logger.error('Failed to load external widget', { typeName, error });
+      logger.error("Failed to load external widget", { typeName, error });
       throw error;
     } finally {
       // Clean up loading promise
@@ -234,7 +220,7 @@ export const loadExternalWidget = async (
  * Gets a cached external widget component, or null if not loaded.
  */
 export const getCachedExternalWidget = (
-  typeName: string
+  typeName: string,
 ): React.ComponentType<Record<string, unknown>> | null => {
   return loadedComponents.get(typeName) ?? null;
 };
@@ -253,12 +239,14 @@ const lazyComponents = new Map<
  * Caches the lazy wrapper to maintain component identity across renders.
  */
 export const createLazyExternalWidget = (
-  typeName: string
+  typeName: string,
 ): React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>> => {
   let lazy = lazyComponents.get(typeName);
   if (!lazy) {
     lazy = React.lazy(() =>
-      loadExternalWidget(typeName).then(Component => ({ default: Component }))
+      loadExternalWidget(typeName).then((Component) => ({
+        default: Component,
+      })),
     );
     lazyComponents.set(typeName, lazy);
   }

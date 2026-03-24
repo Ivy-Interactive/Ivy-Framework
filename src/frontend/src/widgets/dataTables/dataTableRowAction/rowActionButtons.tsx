@@ -1,7 +1,7 @@
-import React from 'react';
-import { MenuItem } from '@/types/widgets';
-import { ActionRenderer } from './actionRenderer';
-import { getActionId } from './utils';
+import React from "react";
+import { MenuItem } from "@/types/widgets";
+import { ActionRenderer } from "./actionRenderer";
+import { getActionId } from "./utils";
 
 interface RowActionButtonsProps {
   /**
@@ -48,19 +48,15 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
       className="absolute z-50 flex flex-row gap-1"
       style={{
         top: `${top}px`,
-        right: '8px',
+        right: "8px",
         opacity: visible ? 1 : 0,
-        pointerEvents: visible ? 'auto' : 'none',
+        pointerEvents: visible ? "auto" : "none",
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {actions.map(action => (
-        <ActionRenderer
-          key={getActionId(action)}
-          action={action}
-          onActionClick={onActionClick}
-        />
+      {actions.map((action) => (
+        <ActionRenderer key={getActionId(action)} action={action} onActionClick={onActionClick} />
       ))}
     </div>
   );

@@ -1,19 +1,19 @@
-import { logger } from '@/lib/logger';
-import { cn } from '@/lib/utils';
-import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
-import { Check, Minus } from 'lucide-react';
-import * as React from 'react';
-import { Densities } from '@/types/density';
+import { logger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import { Check, Minus } from "lucide-react";
+import * as React from "react";
+import { Densities } from "@/types/density";
 export type NullableBoolean = boolean | null | undefined;
 
 const getSizeClasses = (density?: Densities): string => {
   switch (density) {
     case Densities.Small:
-      return 'h-3 w-3';
+      return "h-3 w-3";
     case Densities.Large:
-      return 'h-5 w-5';
+      return "h-5 w-5";
     default:
-      return 'h-4 w-4';
+      return "h-4 w-4";
   }
 };
 
@@ -38,28 +38,20 @@ const Checkbox = React.forwardRef<
       onCheckedChange,
       disabled,
       nullable = false,
-      className = '',
+      className = "",
       density = Densities.Medium,
       ...props
     },
-    ref
+    ref,
   ) => {
     // Map undefined to null when nullable, then null to 'indeterminate' for Radix
-    const normalizedChecked =
-      nullable && checked === undefined ? null : checked;
+    const normalizedChecked = nullable && checked === undefined ? null : checked;
     const uiChecked =
-      nullable && normalizedChecked === null
-        ? 'indeterminate'
-        : !!normalizedChecked;
+      nullable && normalizedChecked === null ? "indeterminate" : !!normalizedChecked;
 
     // Cycle: null -> true -> false -> null (if nullable)
     const handleCheckedChange = (next: boolean) => {
-      logger.debug(
-        'Checkbox clicked, next:',
-        next,
-        'current checked:',
-        normalizedChecked
-      );
+      logger.debug("Checkbox clicked, next:", next, "current checked:", normalizedChecked);
       if (nullable) {
         if (normalizedChecked === null) onCheckedChange(true);
         else if (normalizedChecked === true) onCheckedChange(false);
@@ -70,8 +62,8 @@ const Checkbox = React.forwardRef<
     };
 
     const baseClass = `peer ${getSizeClasses(density)} shrink-0 rounded-checkbox border border-border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary dark:border-white/10`;
-    const finalClass = className?.includes('bg-red-50')
-      ? baseClass.replace('data-[state=checked]:bg-primary', '')
+    const finalClass = className?.includes("bg-red-50")
+      ? baseClass.replace("data-[state=checked]:bg-primary", "")
       : baseClass;
 
     return (
@@ -85,9 +77,9 @@ const Checkbox = React.forwardRef<
         {...props}
       >
         <CheckboxPrimitive.Indicator
-          className={cn('flex items-center justify-center text-current')}
+          className={cn("flex items-center justify-center text-current")}
         >
-          {uiChecked === 'indeterminate' ? (
+          {uiChecked === "indeterminate" ? (
             <Minus className={getSizeClasses(density)} />
           ) : (
             <Check className={getSizeClasses(density)} />
@@ -95,8 +87,8 @@ const Checkbox = React.forwardRef<
         </CheckboxPrimitive.Indicator>
       </CheckboxPrimitive.Root>
     );
-  }
+  },
 );
-Checkbox.displayName = 'AppCheckbox';
+Checkbox.displayName = "AppCheckbox";
 
 export { Checkbox };

@@ -20,9 +20,19 @@ Memoization helps Ivy [applications](../../../01_Onboarding/02_Concepts/10_Apps.
 Memoization in Ivy provides several powerful tools to optimize performance:
 
 - **[`UseMemo`](#usememo-hook)** - Caches the result of expensive computations (including callback functions)
+- **[`UseCallback`](#callback-memoization)** - Convenience wrapper over `UseMemo` for memoizing callback functions
 - **`IMemoized`** - Interface for component-level memoization
 
 These [hooks](../02_RulesOfHooks.md) work similarly to React's `useMemo` but are designed specifically for Ivy's architecture.
+
+## Why UseMemo in Ivy?
+
+Ivy follows the same declarative render-loop model as React: every time [state](./03_UseState.md) changes, `Build()` re-executes from top to bottom, producing a new [widget](../../../01_Onboarding/02_Concepts/03_Widgets.md) tree. Without memoization, every expensive computation (filtering lists, sorting, deriving aggregate stats) would re-run on every single state change, even when the inputs haven't changed.
+
+In frameworks like React, memoization is split between `useMemo` (for values) and `useCallback` (for functions). Ivy consolidates both into `UseMemo`, and provides `UseCallback` as syntactic sugar:
+
+- **Value memoization**: Cache expensive computations like filtering, sorting, or data transformations
+- **Callback memoization**: Create stable delegate references with [`UseCallback`](#callback-memoization) (or `UseMemo` directly)
 
 ## Basic Usage
 
@@ -45,6 +55,13 @@ public class ExpensiveCalculationView : ViewBase
     }
 }
 ```
+
+<Callout type="Tip">
+When passing state as a dependency, `.Value` is recommended for clarity:
+`UseMemo(() => compute(myState.Value), myState.Value)` — recommended.
+`UseMemo(() => compute(myState.Value), myState)` — also works (auto-unwrapped), but less explicit.
+The factory function always needs `.Value` to read the current value.
+</Callout>
 
 ## Choosing the Right Memoization Approach
 
@@ -74,32 +91,31 @@ The `UseMemo` [hook](../02_RulesOfHooks.md) caches the result of a computation a
 sequenceDiagram
     participant C as Component
     participant M as UseMemo Hook
-    participant S as UseState Storage
-    
-    Note over C,S: First Render
-    C->>M: UseMemo(() => expensiveCalc(), [dep1, dep2])
-    M->>S: UseState(() => new MemoRef(result, deps))
-    S-->>M: Create new MemoRef with initial value
+    participant R as UseRef Storage
+
+    Note over C,R: First Render
+    C->>M: UseMemo(() => expensiveCalc(), dep1, dep2)
+    M->>R: UseRef(valueRef), UseRef(prevDepsRef), UseRef(hasComputedRef)
+    M->>M: UnwrapDeps (auto-unwrap any IAnyState to .Value)
+    M->>M: hasComputed = false → deps changed
     M->>M: Execute factory function
-    M->>S: Store MemoRef(result, [dep1, dep2])
+    M->>R: Store value, unwrapped deps, hasComputed = true
     M-->>C: Return computed value
-    
-    Note over C,S: Subsequent Render (deps unchanged)
-    C->>M: UseMemo(() => expensiveCalc(), [dep1, dep2])
-    M->>S: Get stored MemoRef
-    S-->>M: Return MemoRef(cachedResult, [dep1, dep2])
-    M->>M: AreDependenciesEqual([dep1, dep2], [dep1, dep2])
+
+    Note over C,R: Subsequent Render (deps unchanged)
+    C->>M: UseMemo(() => expensiveCalc(), dep1, dep2)
+    M->>R: Read valueRef, prevDepsRef, hasComputedRef
+    M->>M: UnwrapDeps → DepsEqual(prevDeps, currentDeps)
     Note right of M: Dependencies equal!<br/>Skip computation
     M-->>C: Return cached value (no computation)
-    
-    Note over C,S: Subsequent Render (deps changed)
-    C->>M: UseMemo(() => expensiveCalc(), [dep1_new, dep2])
-    M->>S: Get stored MemoRef
-    S-->>M: Return MemoRef(oldResult, [dep1, dep2])
-    M->>M: AreDependenciesEqual([dep1, dep2], [dep1_new, dep2])
+
+    Note over C,R: Subsequent Render (deps changed)
+    C->>M: UseMemo(() => expensiveCalc(), dep1_new, dep2)
+    M->>R: Read valueRef, prevDepsRef, hasComputedRef
+    M->>M: UnwrapDeps → DepsEqual(prevDeps, currentDeps)
     Note right of M: Dependencies changed!<br/>Need recomputation
     M->>M: Execute factory function
-    M->>S: Update MemoRef(newResult, [dep1_new, dep2])
+    M->>R: Update valueRef, prevDepsRef
     M-->>C: Return new computed value
 ```
 
@@ -110,7 +126,7 @@ Use memoization when:
 - You have expensive computations that don't need to be redone on every render
 - You want to prevent unnecessary re-renders of [child components](../../../01_Onboarding/02_Concepts/03_Widgets.md)
 - You're dealing with complex data transformations that depend on [state](./03_UseState.md) changes
-- You need stable function references for [`UseEffect`](./04_UseEffect.md) dependencies
+- You need stable function references for [`UseEffect`](./04_UseEffect.md) dependencies (see [Callback Memoization](#callback-memoization))
 
 ## Component Memoization with IMemoized
 
@@ -240,20 +256,31 @@ stateDiagram-v2
 var result = UseMemo(() => ProcessData(data.Value), data.Value, new[] { "option1", "option2" });
 ```
 
-**Solution**: Use stable references with [UseRef](./08_UseRef.md)
+**Solution**: Use stable references with [UseRef](./08_UseRef.md), and don't include constant refs in the dependency array
 
 ```csharp
-// Good: Stable dependency
+// Good: Constant options stored in a ref, not included in deps since they never change
 var options = UseRef(new[] { "option1", "option2" });
-var result = UseMemo(() => ProcessData(data.Value), data.Value, options);
+var result = UseMemo(() => ProcessData(data.Value, options.Value), data.Value);
+```
+
+If the options themselves can change, use [UseState](./03_UseState.md) instead:
+
+```csharp
+// Good: Options stored in state, dependency changes when options change
+var options = UseState(new[] { "option1", "option2" });
+var result = UseMemo(() => ProcessData(data.Value, options.Value), data.Value, options.Value);
 ```
 
 ### Callback Memoization
 
-You can use `UseMemo` to memoize callback functions when you need a stable delegate reference:
+You can memoize callbacks using `UseCallback` (recommended) or `UseMemo` with an explicit delegate cast:
 
 ```csharp
-// Memoize a callback using UseMemo
+// Using UseCallback (recommended — cleaner syntax)
+var onSubmit = UseCallback((string value) => Save(value), dependency);
+
+// Using UseMemo (equivalent — explicit cast required)
 var onSubmit = UseMemo(() => (Action<string>)(value => Save(value)), dependency);
 ```
 
@@ -261,8 +288,8 @@ When memoizing callbacks, keep the dependency list minimal and split into smalle
 
 ```csharp
 // Good: Separate callbacks with minimal dependencies
-var handleDataAction = UseMemo(() => (Action)(() => DoSomethingWithData(data.Value)), data);
-var handleFilterAction = UseMemo(() => (Action)(() => ApplyFilter(filter.Value)), filter);
+var handleDataAction = UseCallback(() => DoSomethingWithData(data.Value), data.Value);
+var handleFilterAction = UseCallback(() => ApplyFilter(filter.Value), filter.Value);
 ```
 
 ## Best Practices

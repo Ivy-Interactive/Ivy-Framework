@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
-import { Folder, icons } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { Folder, icons } from "lucide-react";
 import {
   FaGoogle,
   FaAmazon,
@@ -18,11 +18,11 @@ import {
   FaApple,
   FaGithub,
   FaPinterest,
-} from 'react-icons/fa';
-import { FaXTwitter } from 'react-icons/fa6';
-import { IconType } from 'react-icons';
-import { VscAzure } from 'react-icons/vsc';
-import { SiNotion } from 'react-icons/si';
+} from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import { IconType } from "react-icons";
+import { VscAzure } from "react-icons/vsc";
+import { SiNotion } from "react-icons/si";
 
 interface IconProps {
   name?: string;
@@ -42,27 +42,17 @@ const IvyCornerIcon = ({ size, color, style, className }: IconProps) => (
     style={style}
     className={className}
   >
-    <path
-      d="M11 1H1V11C6.47368 11 11 6.47368 11 1Z"
-      fill={color || 'currentColor'}
-    />
+    <path d="M11 1H1V11C6.47368 11 11 6.47368 11 1Z" fill={color || "currentColor"} />
   </svg>
 );
 
 const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
-  if (name === 'None') {
+  if (name === "None") {
     return <Folder className="invisible" size={size} />;
   }
 
-  if (name === 'IvyCorner') {
-    return (
-      <IvyCornerIcon
-        size={size}
-        color={color}
-        style={style}
-        className={cn(className)}
-      />
-    );
+  if (name === "IvyCorner") {
+    return <IvyCornerIcon size={size} color={color} style={style} className={cn(className)} />;
   }
 
   // Handle react-icons
@@ -91,14 +81,7 @@ const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
 
   if (name && name in reactIcons) {
     const ReactIcon = reactIcons[name];
-    return (
-      <ReactIcon
-        style={style}
-        color={color}
-        size={size}
-        className={cn(className)}
-      />
-    );
+    return <ReactIcon style={style} color={color} size={size} className={cn(className)} />;
   }
 
   if (!name || !(name in icons)) {
@@ -106,14 +89,7 @@ const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
   }
 
   const LucideIcon = icons[name as keyof typeof icons];
-  return (
-    <LucideIcon
-      style={style}
-      color={color}
-      size={size}
-      className={cn(className)}
-    />
-  );
+  return <LucideIcon style={style} color={color} size={size} className={cn(className)} />;
 };
 
 export default Icon;

@@ -1,25 +1,20 @@
-import React, { useCallback } from 'react';
-import { useEventHandler } from '@/components/event-handler';
-import Icon from '@/components/Icon';
-import { camelCase } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { Densities } from '@/types/density';
+import React, { useCallback } from "react";
+import { useEventHandler } from "@/components/event-handler";
+import Icon from "@/components/Icon";
+import { camelCase } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { getColor } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
 interface BadgeWidgetProps {
   title: string;
   icon?: string;
-  iconPosition?: 'Left' | 'Right';
-  variant?:
-    | 'Primary'
-    | 'Destructive'
-    | 'Outline'
-    | 'Secondary'
-    | 'Success'
-    | 'Warning'
-    | 'Info';
+  iconPosition?: "Left" | "Right";
+  variant?: "Primary" | "Destructive" | "Outline" | "Secondary" | "Success" | "Warning" | "Info";
+  color?: string;
   density?: Densities;
   id: string;
   events?: string[];
@@ -28,18 +23,19 @@ interface BadgeWidgetProps {
 export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   title,
   icon = undefined,
-  iconPosition = 'Left',
-  variant = 'Primary',
+  iconPosition = "Left",
+  variant = "Primary",
+  color,
   density = Densities.Medium,
   id,
   events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
-  const isClickable = events.includes('OnClick');
+  const isClickable = events.includes("OnClick");
 
   const handleClick = useCallback(() => {
     if (isClickable) {
-      eventHandler('OnClick', id, []);
+      eventHandler("OnClick", id, []);
     }
   }, [id, isClickable, eventHandler]);
   let iconSize: number = 4;
@@ -63,65 +59,65 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   // Map backend variant names to frontend badge variants
   const getBadgeVariant = (variant: string) => {
     switch (variant) {
-      case 'Primary':
-        return 'primary';
-      case 'Destructive':
-        return 'destructive';
-      case 'Outline':
-        return 'outline';
-      case 'Secondary':
-        return 'secondary';
-      case 'Success':
-        return 'success';
-      case 'Warning':
-        return 'warning';
-      case 'Info':
-        return 'info';
+      case "Primary":
+        return "primary";
+      case "Destructive":
+        return "destructive";
+      case "Outline":
+        return "outline";
+      case "Secondary":
+        return "secondary";
+      case "Success":
+        return "success";
+      case "Warning":
+        return "warning";
+      case "Info":
+        return "info";
       default:
         return camelCase(variant) as
-          | 'primary'
-          | 'destructive'
-          | 'outline'
-          | 'secondary'
-          | 'success'
-          | 'warning'
-          | 'info';
+          | "primary"
+          | "destructive"
+          | "outline"
+          | "secondary"
+          | "success"
+          | "warning"
+          | "info";
     }
   };
 
-  const hasIcon = icon && icon !== 'None';
+  const hasIcon = icon && icon !== "None";
+
+  const colorStyles: React.CSSProperties = color
+    ? {
+        ...getColor(color, "backgroundColor", "background"),
+        ...getColor(color, "color", "foreground"),
+      }
+    : {};
 
   return (
     <Badge
       variant={getBadgeVariant(variant)}
-      density={density.toLowerCase() as 'small' | 'medium' | 'large'}
+      density={density.toLowerCase() as "small" | "medium" | "large"}
+      style={color ? colorStyles : undefined}
       className={cn(
-        'w-min whitespace-nowrap gap-1',
+        "w-min whitespace-nowrap gap-1",
         hasIcon &&
           title &&
-          iconPosition === 'Left' &&
-          (density === Densities.Small
-            ? 'pl-1'
-            : density === Densities.Large
-              ? 'pl-2'
-              : 'pl-1.5'),
+          iconPosition === "Left" &&
+          (density === Densities.Small ? "pl-1" : density === Densities.Large ? "pl-2" : "pl-1.5"),
         hasIcon &&
           title &&
-          iconPosition === 'Right' &&
-          (density === Densities.Small
-            ? 'pr-1'
-            : density === Densities.Large
-              ? 'pr-2'
-              : 'pr-1.5'),
-        isClickable && 'cursor-pointer hover:opacity-80 transition-opacity'
+          iconPosition === "Right" &&
+          (density === Densities.Small ? "pr-1" : density === Densities.Large ? "pr-2" : "pr-1.5"),
+        isClickable && "cursor-pointer hover:opacity-80 transition-opacity",
       )}
       onClick={isClickable ? handleClick : undefined}
     >
-      {iconPosition === 'Left' && icon && icon !== 'None' && (
+      {iconPosition === "Left" && icon && icon !== "None" && (
         <Icon style={iconStyles} name={icon} />
       )}
       {title}
-      {iconPosition === 'Right' && icon && icon !== 'None' && (
+      {iconPosition === "Right" && icon && icon !== "None" && (
         <Icon style={iconStyles} name={icon} />
       )}
     </Badge>

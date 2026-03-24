@@ -94,7 +94,10 @@ Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/
             .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
 ```
 
-## Faq
+
+<WidgetDocs Type="Ivy.Button" ExtensionTypes="Ivy.ButtonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Button.cs"/>
+
+## Examples
 
 <Details>
 <Summary>
@@ -148,4 +151,22 @@ There is no `UseAsync` hook. For data fetching with automatic loading/error stat
 </Body>
 </Details>
 
-<WidgetDocs Type="Ivy.Button" ExtensionTypes="Ivy.ButtonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Button.cs"/>
+<Details>
+<Summary>
+How do I associate keyboard shortcuts with a button?
+</Summary>
+<Body>
+
+The `ShortcutKey` method allows you to associate a keyboard shortcut (like `Ctrl+K`, `Ctrl+S`, or `Ctrl+Enter`) with a button. The action will be triggered whenever the shortcut is pressed, regardless of whether the button is focused.
+
+```csharp demo
+Layout.Horizontal().Gap(8)
+    | new Button("Search", _ => client.Toast("Searching...")).Primary().ShortcutKey("Ctrl+K")
+    | new Button("Save", _ => client.Toast("Saved!")).Secondary().ShortcutKey("Ctrl+S")
+    | new Button("GitHub").Url("https://github.com/Ivy-Interactive/Ivy-Framework").ShortcutKey("Ctrl+G")
+```
+
+The shortcut listener is registered globally on the window, so the button doesn't need to be focused to trigger the action.
+
+</Body>
+</Details>

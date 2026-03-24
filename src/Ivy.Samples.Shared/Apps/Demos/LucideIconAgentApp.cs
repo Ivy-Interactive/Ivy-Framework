@@ -8,11 +8,10 @@ public class LucideIconAgentApp() : SampleBase(Align.TopRight)
 {
     protected override object? BuildSample()
     {
-        var client = UseService<IClientProvider>();
-        var chatClient = UseService<IChatClient?>();
-
         var messages = UseState(ImmutableArray.Create<ChatMessage>(new ChatMessage(ChatSender.Assistant,
             "Hello! I'm the Lucide Icon Agent. I can help you find icons for your app. Please describe your application.")));
+        var client = UseService<IClientProvider>();
+        Context.TryUseService<IChatClient>(out var chatClient);
 
         if (chatClient == null)
         {

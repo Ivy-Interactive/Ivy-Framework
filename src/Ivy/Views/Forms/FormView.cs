@@ -56,7 +56,8 @@ public class FormFieldView(
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
     Density density = Density.Medium,
     FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit,
-    bool disabled = false)
+    bool disabled = false,
+    LabelPosition? labelPosition = null)
     : ViewBase, IFormFieldView
 {
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
@@ -167,7 +168,12 @@ public class FormFieldView(
             WidgetBaseExtensions.SetDensityViaReflection(input, density);
         }
 
-        return visibleState.Value ? new Field(input, label, description, required, help, density) : null;
+        var field = new Field(input, label, description, required, help, density);
+        if (labelPosition.HasValue)
+        {
+            field = field with { LabelPosition = labelPosition.Value };
+        }
+        return visibleState.Value ? field : null;
     }
 }
 
@@ -190,13 +196,14 @@ public class FormFieldBinding<TModel>(
     string? help = null,
     string? placeholder = null,
     FormSubmitStrategy submitStrategy = FormSubmitStrategy.OnSubmit,
-    bool disabled = false
+    bool disabled = false,
+    LabelPosition? labelPosition = null
     ) : IFormFieldBinding<TModel>
 {
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, formValidationSignal, formSubmitSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, density, submitStrategy, disabled);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, formValidationSignal, formSubmitSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, density, submitStrategy, disabled, labelPosition);
         return (fieldView, disposable);
     }
 }

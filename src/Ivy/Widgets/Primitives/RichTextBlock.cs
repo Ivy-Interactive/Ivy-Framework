@@ -29,6 +29,39 @@ public record TextRun
     [Prop] public bool Word { get; set; }
     [Prop] public string? Link { get; set; }
     [Prop] public LinkTarget LinkTarget { get; set; } = LinkTarget.Self;
+
+    /// <summary>When true, renders as a line break.</summary>
+    [Prop] public bool LineBreak { get; set; }
+
+    /// <summary>When true, renders content in monospace/code style.</summary>
+    [Prop] public bool Code { get; set; }
+
+    /// <summary>Heading level (1-6). When set, renders as a heading element.</summary>
+    [Prop] public int Heading { get; set; }
+
+    /// <summary>When true, this run starts a new paragraph.</summary>
+    [Prop] public bool Paragraph { get; set; }
+
+    /// <summary>Bullet list item nesting level (1+). When greater than 0, renders as a bullet point.</summary>
+    [Prop] public int BulletItem { get; set; }
+
+    /// <summary>Ordered list item number. When greater than 0, renders as a numbered list item.</summary>
+    [Prop] public int OrderedItem { get; set; }
+
+    /// <summary>When true, renders as a horizontal rule.</summary>
+    [Prop] public bool HorizontalRule { get; set; }
+
+    /// <summary>When set, renders content as a fenced code block with the given language.</summary>
+    [Prop] public string? CodeBlock { get; set; }
+
+    /// <summary>When true, renders as a blockquote.</summary>
+    [Prop] public bool Blockquote { get; set; }
+
+    /// <summary>When set, contains raw markdown table text to render via the markdown renderer.</summary>
+    [Prop] public string? Table { get; set; }
+
+    /// <summary>When set, contains LaTeX math content to render. "inline" for inline math, "display" for display math.</summary>
+    [Prop] public string? Math { get; set; }
 }
 
 /// <summary>

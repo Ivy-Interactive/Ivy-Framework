@@ -180,6 +180,21 @@ public class VideoPlayerApp : SampleBase
                         .PlaybackRate(2.0)
                 ).Title("Playback Rate"))
 
+                // Subtitles
+                | (new Card(
+                    Layout.Vertical().Gap(4)
+                    | Text.H4("Single Subtitle Track")
+                    | Text.P("Video with a single English subtitle track.").Small()
+                    | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+                        .Subtitles("https://example.com/subs_en.vtt", "English")
+                    | Text.H4("Multiple Subtitle Tracks")
+                    | Text.P("Video with multiple subtitle tracks for different languages.").Small()
+                    | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
+                        .Subtitles("https://example.com/subs_en.vtt", "English")
+                        .Subtitles("https://example.com/subs_es.vtt", "Spanish")
+                        .Subtitles("https://example.com/subs_fr.vtt", "French")
+                ).Title("Subtitles"))
+
                 // YouTube
                 | (new Card(
                     Layout.Vertical().Gap(4)

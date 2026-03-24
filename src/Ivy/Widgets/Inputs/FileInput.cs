@@ -134,7 +134,7 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
         Height = Size.Units(50);
     }
 
-    [Prop] public TValue Value { get; } = default!;
+    [Prop(AlwaysSerialize = true)] public TValue Value { get; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 

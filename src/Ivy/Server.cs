@@ -23,6 +23,18 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy;
 
+public record ServerMetadata
+{
+    public string? Title { get; set; } = null;
+    public string? Description { get; set; } = null;
+    public string? GitHubUrl { get; set; } = null;
+    public string? OgImage { get; set; } = null;
+    public string? OgSiteName { get; set; } = null;
+    public string? OgType { get; set; } = "website";
+    public string? OgLocale { get; set; } = "en_US";
+    public string? TwitterCard { get; set; } = "summary_large_image";
+}
+
 public record ServerArgs
 {
     public const int DefaultPort = 5010;
@@ -36,8 +48,7 @@ public record ServerArgs
     public bool Describe { get; set; } = false;
     public string? DescribeConnection { get; set; } = null;
     public string? TestConnection { get; set; } = null;
-    public string? MetaTitle { get; set; } = null;
-    public string? MetaDescription { get; set; } = null;
+    public ServerMetadata Metadata { get; set; } = new();
     public Assembly? AssetAssembly { get; set; } = null;
     public bool EnableDevTools { get; set; } = false;
 #if DEBUG
@@ -204,27 +215,27 @@ public class Server
         return this;
     }
 
-    public Server UseChrome(ChromeSettings settings)
+    public Server UseAppShell(AppShellSettings settings)
     {
-        return UseChrome(() => new DefaultSidebarChrome(settings));
+        return UseAppShell(() => new DefaultSidebarAppShell(settings));
     }
 
-    public Server UseChrome<T>() where T : ViewBase, new()
+    public Server UseAppShell<T>() where T : ViewBase, new()
     {
-        return UseChrome((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
+        return UseAppShell((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
     }
 
-    public Server UseChrome(Func<ViewBase>? viewFactory = null)
+    public Server UseAppShell(Func<ViewBase>? viewFactory = null)
     {
         AddApp(new AppDescriptor
         {
-            Id = AppIds.Chrome,
-            Title = "Chrome",
-            ViewFactory = viewFactory ?? (() => new DefaultSidebarChrome(ChromeSettings.Default())),
+            Id = AppIds.AppShell,
+            Title = "AppShell",
+            ViewFactory = viewFactory ?? (() => new DefaultSidebarAppShell(AppShellSettings.Default())),
             Group = [],
             IsVisible = false
         });
-        DefaultAppId = AppIds.Chrome;
+        DefaultAppId = AppIds.AppShell;
         return this;
     }
 
@@ -238,6 +249,8 @@ public class Server
             return provider;
         });
 
+        DiscoverAndRegisterOAuthTokenHandlers();
+
         AddApp(new AppDescriptor
         {
             Id = AppIds.Auth,
@@ -248,6 +261,89 @@ public class Server
         });
         AuthProviderType = typeof(T);
         return this;
+    }
+
+    public Server RegisterAuthTokenHandler<T>(string provider) where T : class, IAuthTokenHandler
+    {
+        Services.AddKeyedSingleton<IAuthTokenHandler, T>(provider);
+        return this;
+    }
+
+    private void DiscoverAndRegisterOAuthTokenHandlers()
+    {
+        try
+        {
+            // Load all "Ivy.Auth.*" assemblies eagerly to ensure their handlers are registered in the DI container
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly?.Location != null)
+            {
+                var assemblyDirectory = Path.GetDirectoryName(entryAssembly.Location);
+                if (assemblyDirectory != null)
+                {
+                    var authAssemblyFiles = Directory.GetFiles(assemblyDirectory, "Ivy.Auth.*.dll");
+
+                    foreach (var assemblyFile in authAssemblyFiles)
+                    {
+                        try
+                        {
+                            Assembly.LoadFrom(assemblyFile);
+                        }
+                        catch
+                        {
+                            // Continue if we can't load an assembly
+                        }
+                    }
+                }
+            }
+
+            // Now get all loaded assemblies
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblies)
+            {
+                try
+                {
+                    // Skip system assemblies for performance
+                    var assemblyName = assembly.GetName().Name ?? "";
+                    if (assemblyName.StartsWith("System.") ||
+                        assemblyName.StartsWith("Microsoft.") ||
+                        assemblyName == "netstandard" ||
+                        assemblyName == "mscorlib")
+                    {
+                        continue;
+                    }
+
+                    // Find all types with OAuthTokenHandlerAttribute
+                    var handlerTypes = assembly.GetTypes()
+                        .Where(t => t.IsClass && !t.IsAbstract && typeof(IAuthTokenHandler).IsAssignableFrom(t))
+                        .Where(t => t.GetCustomAttribute<OAuthTokenHandlerAttribute>() != null)
+                        .ToList();
+
+                    foreach (var handlerType in handlerTypes)
+                    {
+                        var attribute = handlerType.GetCustomAttribute<OAuthTokenHandlerAttribute>();
+                        if (attribute == null)
+                            continue;
+
+                        try
+                        {
+                            Services.AddKeyedSingleton(typeof(IAuthTokenHandler), attribute.Provider, handlerType);
+                        }
+                        catch
+                        {
+                            // Continue if we can't register a handler
+                        }
+                    }
+                }
+                catch
+                {
+                    // Continue loading types from an assembly fails
+                }
+            }
+        }
+        catch
+        {
+            // Continue if discovery completely fails, just continue with no handlers
+        }
     }
 
     public Server UseDefaultApp(Type appType)
@@ -306,13 +402,19 @@ public class Server
 
     public Server SetMetaTitle(string title)
     {
-        _args.MetaTitle = title;
+        _args.Metadata.Title = title;
         return this;
     }
 
     public Server SetMetaDescription(string description)
     {
-        _args.MetaDescription = description;
+        _args.Metadata.Description = description;
+        return this;
+    }
+
+    public Server SetMetaGitHubUrl(string url)
+    {
+        _args.Metadata.GitHubUrl = url;
         return this;
     }
 
@@ -945,9 +1047,11 @@ public static class WebApplicationExtensions
                     .Use<LicenseFilter>()
                     .Use<DevToolsFilter>()
                     .Use<MetaDescriptionFilter>()
+                    .Use<MetaGitHubUrlFilter>()
                     .Use<TitleFilter>()
                     .Use<ThemeFilter>()
-                    .Use<ManifestFilter>();
+                    .Use<ManifestFilter>()
+                    .Use<OpenGraphFilter>();
 
                 foreach (var filter in server.GetCustomFilters())
                     pipeline.Use(filter);

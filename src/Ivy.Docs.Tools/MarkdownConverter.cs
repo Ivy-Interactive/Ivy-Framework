@@ -18,6 +18,21 @@ public static partial class MarkdownConverter
     private static readonly Regex SummaryStartRegex = SummaryRegex();
     private static readonly Regex BodyStartRegex = BodyRegex();
 
+    private static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
+        .UseAdvancedExtensions()
+        .UsePreciseSourceLocation()
+        .UseYamlFrontMatter()
+        .Build();
+
+    private static readonly MarkdownPipeline BodyPipeline = new MarkdownPipelineBuilder()
+        .UseAdvancedExtensions()
+        .UsePreciseSourceLocation()
+        .Build();
+
+    private static readonly IDeserializer YamlDeserializer = new DeserializerBuilder()
+        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+        .Build();
+
     public class AppMeta
     {
         public string? Icon { get; set; }
@@ -29,17 +44,13 @@ public static partial class MarkdownConverter
         public List<string>? SearchHints { get; set; }
         public List<string>? Imports { get; set; }
         public string? Description { get; set; }
+        public bool Hidden { get; set; } = false;
     }
 
     static AppMeta ParseYamlAppMeta(string yaml)
     {
         string withoutDashes = RemoveFirstAndLastLine(yaml);
-
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-
-        return deserializer.Deserialize<AppMeta>(withoutDashes);
+        return YamlDeserializer.Deserialize<AppMeta>(withoutDashes);
     }
 
     public static async Task ConvertAsync(string name, string relativePath, string absolutePath, string outputFile, string @namespace, bool skipIfNotChanged,
@@ -61,15 +72,9 @@ public static partial class MarkdownConverter
             }
         }
 
-        Console.WriteLine("Converting {0} to {1}", absolutePath, outputFile);
+        // Console.WriteLine("Converting {0} to {1}", absolutePath, outputFile);
 
-        var pipeline = new MarkdownPipelineBuilder()
-            .UseAdvancedExtensions()
-            .UsePreciseSourceLocation()
-            .UseYamlFrontMatter()
-            .Build();
-
-        var document = Markdig.Markdown.Parse(markdownContent, pipeline);
+        var document = Markdig.Markdown.Parse(markdownContent, Pipeline);
 
         var documentSource = Utils.GetGitFileUrl(absolutePath);
 
@@ -111,6 +116,10 @@ public static partial class MarkdownConverter
         codeBuilder.Append(appMeta.Icon != null ? $", icon:Icons.{appMeta.Icon}" : "");
         codeBuilder.Append(appMeta.Title != null ? $", title:{FormatLiteral(appMeta.Title)}" : "");
         codeBuilder.Append(appMeta.GroupExpanded ? ", groupExpanded:true" : "");
+        if (appMeta.Hidden)
+        {
+            codeBuilder.Append(", isVisible:false");
+        }
         codeBuilder.Append(documentSource != null ? $", documentSource:{FormatLiteral(documentSource)}" : "");
         if (appMeta.SearchHints != null && appMeta.SearchHints.Count > 0)
         {
@@ -417,12 +426,7 @@ public static partial class MarkdownConverter
         string bodyContent = htmlContent[bodyContentStart..bodyEnd].Trim();
 
         // Process the body content through the full markdown pipeline
-        var pipeline = new MarkdownPipelineBuilder()
-            .UseAdvancedExtensions()
-            .UsePreciseSourceLocation()
-            .Build();
-
-        var bodyDocument = Markdig.Markdown.Parse(bodyContent, pipeline);
+        var bodyDocument = Markdig.Markdown.Parse(bodyContent, BodyPipeline);
 
         // Create a temporary builder for the body content
         var bodyCodeBuilder = new StringBuilder();

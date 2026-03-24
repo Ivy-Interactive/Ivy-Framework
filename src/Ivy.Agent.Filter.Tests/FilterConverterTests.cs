@@ -197,7 +197,8 @@ public class FilterConverterTests
 
         // Act
         var result = _converter.ConvertToModel(leaf);
-        var options = new JsonSerializerOptions {
+        var options = new JsonSerializerOptions
+        {
             WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
@@ -254,7 +255,7 @@ public class FilterConverterTests
         }
         else
         {
-            Assert.True(false, $"Expected ColumnFilterModel for negatable operator {original}, got {result.GetType().Name}");
+            Assert.Fail($"Expected ColumnFilterModel for negatable operator {original}, got {result.GetType().Name}");
         }
     }
 }

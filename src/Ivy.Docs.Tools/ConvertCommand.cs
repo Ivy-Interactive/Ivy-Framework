@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Xml.Linq;
 using Spectre.Console.Cli;
 
@@ -106,7 +106,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             }
         }
 
-        Console.WriteLine("Generating {0}", outputFile);
+        // Console.WriteLine("Generating {0}", outputFile);
 
         string outputContent = await LlmMarkdownGenerator.GenerateAsync(markdownContent, inputFile);
 

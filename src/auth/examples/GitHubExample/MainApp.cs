@@ -1,5 +1,5 @@
 using Ivy;
-using Microsoft.AspNetCore.Mvc;
+using Ivy.Auth.Examples.Shared;
 
 namespace GitHubExample;
 
@@ -35,8 +35,9 @@ public class MainApp : ViewBase
                      Text.H3(user.FullName ?? "User"),
                      Text.Muted(user.Email)
                  ).Gap(4).Align(Align.Center)
-            ).Gap(20).Align(Align.Center)
+            ).Gap(20).Align(Align.Center),
 
+            new OAuthProviderTestView(OAuthProviders.GitHub, auth.GetAuthSession())
         ).Gap(40).Padding(50).Align(Align.Center).Height(Size.Full());
     }
 }

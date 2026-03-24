@@ -69,7 +69,7 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
 
     internal IconInput() { }
 
-    [Prop] public TIcon Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TIcon Value { get; init; } = default!;
 
     [Event] public EventHandler<Event<IInput<TIcon>, TIcon>>? OnChange { get; }
 }

@@ -1,6 +1,6 @@
-import { Skeleton } from '@/components/ui/skeleton';
-import { getHeight, getWidth } from '@/lib/styles';
-import React from 'react';
+import { Skeleton } from "@/components/ui/skeleton";
+import { getHeight, getWidth } from "@/lib/styles";
+import React from "react";
 
 interface SkeletonWidgetProps {
   id: string;
@@ -9,8 +9,8 @@ interface SkeletonWidgetProps {
 }
 
 export const SkeletonWidget: React.FC<SkeletonWidgetProps> = ({
-  width = 'Full',
-  height = 'Full',
+  width = "Full",
+  height = "Full",
 }) => {
   const styles = {
     ...getWidth(width),

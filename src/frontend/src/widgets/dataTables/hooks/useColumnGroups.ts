@@ -1,8 +1,5 @@
-import { useState, useCallback, useMemo } from 'react';
-import {
-  GridColumn,
-  GroupHeaderClickedEventArgs,
-} from '@glideapps/glide-data-grid';
+import { useState, useCallback, useMemo } from "react";
+import { GridColumn, GroupHeaderClickedEventArgs } from "@glideapps/glide-data-grid";
 
 /**
  * Hook to enable column groups in DataTable
@@ -12,14 +9,12 @@ import {
  */
 export function useColumnGroups(columns: GridColumn[]) {
   // Track which groups are collapsed
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
-    new Set()
-  );
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
   // Get unique groups from columns
   const groups = useMemo(() => {
     const uniqueGroups = new Set<string>();
-    columns.forEach(col => {
+    columns.forEach((col) => {
       if (col.group) {
         uniqueGroups.add(col.group);
       }
@@ -31,7 +26,7 @@ export function useColumnGroups(columns: GridColumn[]) {
   const adjustedColumns = useMemo(() => {
     // Group columns by their group name
     const columnsByGroup = new Map<string, GridColumn[]>();
-    columns.forEach(col => {
+    columns.forEach((col) => {
       if (col.group) {
         const group = columnsByGroup.get(col.group) || [];
         group.push(col);
@@ -39,7 +34,7 @@ export function useColumnGroups(columns: GridColumn[]) {
       }
     });
 
-    return columns.map(col => {
+    return columns.map((col) => {
       // If column has no group, return as-is
       if (!col.group) return col;
 
@@ -53,14 +48,14 @@ export function useColumnGroups(columns: GridColumn[]) {
           return {
             ...col,
             width: 60, // Slightly wider for the first column
-            title: '▶', // Show collapse indicator
+            title: "▶", // Show collapse indicator
           };
         } else {
           // Other columns in collapsed group are hidden (width 0)
           return {
             ...col,
             width: 0,
-            title: '',
+            title: "",
           };
         }
       }
@@ -81,7 +76,7 @@ export function useColumnGroups(columns: GridColumn[]) {
       if (!groupName) return;
 
       // Toggle the collapsed state
-      setCollapsedGroups(prev => {
+      setCollapsedGroups((prev) => {
         const newSet = new Set(prev);
         if (newSet.has(groupName)) {
           newSet.delete(groupName);
@@ -91,12 +86,12 @@ export function useColumnGroups(columns: GridColumn[]) {
         return newSet;
       });
     },
-    []
+    [],
   );
 
   // Helper function to toggle a specific group
   const toggleGroup = useCallback((groupName: string) => {
-    setCollapsedGroups(prev => {
+    setCollapsedGroups((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(groupName)) {
         newSet.delete(groupName);
@@ -122,7 +117,7 @@ export function useColumnGroups(columns: GridColumn[]) {
     (groupName: string) => {
       return collapsedGroups.has(groupName);
     },
-    [collapsedGroups]
+    [collapsedGroups],
   );
 
   return {
@@ -141,7 +136,7 @@ export function useColumnGroups(columns: GridColumn[]) {
     totalColumns: columns.length,
     visibleColumnCount: adjustedColumns.length,
     collapsedColumnCount: adjustedColumns.filter(
-      col => col.group && collapsedGroups.has(col.group)
+      (col) => col.group && collapsedGroups.has(col.group),
     ).length,
   };
 }

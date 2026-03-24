@@ -1,10 +1,10 @@
-import Icon from '@/components/Icon';
-import * as React from 'react';
-import * as SwitchPrimitives from '@radix-ui/react-switch';
-import type { VariantProps } from 'class-variance-authority';
+import Icon from "@/components/Icon";
+import * as React from "react";
+import * as SwitchPrimitives from "@radix-ui/react-switch";
+import type { VariantProps } from "class-variance-authority";
 
-import { cn } from '@/lib/utils';
-import { switchVariant, switchThumbVariant } from './input/switch-variant';
+import { cn } from "@/lib/utils";
+import { switchVariant, switchThumbVariant } from "./input/switch-variant";
 
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
@@ -14,15 +14,11 @@ const Switch = React.forwardRef<
     }
 >(({ className, density, icon, ...props }, ref) => {
   const baseClass = switchVariant({ density });
-  const finalClass = className?.includes('bg-red-50')
-    ? baseClass.replace('data-[state=checked]:bg-primary', '')
+  const finalClass = className?.includes("bg-red-50")
+    ? baseClass.replace("data-[state=checked]:bg-primary", "")
     : baseClass;
   return (
-    <SwitchPrimitives.Root
-      className={cn(finalClass, className)}
-      {...props}
-      ref={ref}
-    >
+    <SwitchPrimitives.Root className={cn(finalClass, className)} {...props} ref={ref}>
       <SwitchPrimitives.Thumb className={cn(switchThumbVariant({ density }))}>
         {icon && (
           <div className="flex items-center justify-center w-full h-full">

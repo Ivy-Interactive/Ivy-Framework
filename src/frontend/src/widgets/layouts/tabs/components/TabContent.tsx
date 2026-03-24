@@ -1,9 +1,9 @@
-import React from 'react';
-import Icon from '@/components/Icon';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { RotateCw, X } from 'lucide-react';
-import { getTabProps } from '../utils/tabUtils';
+import React from "react";
+import Icon from "@/components/Icon";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { RotateCw, X } from "lucide-react";
+import { getTabProps } from "../utils/tabUtils";
 
 interface TabContentRendererProps {
   tabWidget: React.ReactElement;
@@ -13,13 +13,8 @@ interface TabContentRendererProps {
   tabOrder: string[];
   isUserInitiatedChangeRef: React.MutableRefObject<boolean>;
   safeEvent: (
-    name:
-      | 'OnSelect'
-      | 'OnClose'
-      | 'OnRefresh'
-      | 'OnReorder'
-      | 'OnAddButtonClick',
-    args: unknown[]
+    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+    args: unknown[],
   ) => void;
 }
 
@@ -46,9 +41,7 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
 
   return (
     <>
-      {icon && (
-        <Icon name={icon} className="-ms-0.5 me-1.5 opacity-60" size={16} />
-      )}
+      {icon && <Icon name={icon} className="-ms-0.5 me-1.5 opacity-60" size={16} />}
       <span>{title}</span>
       {badge && (
         <Badge variant="primary" className="ml-2 w-min whitespace-nowrap">
@@ -59,10 +52,10 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
         {isActive && showRefresh && (
           <button
             type="button"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               isUserInitiatedChangeRef.current = true;
-              safeEvent('OnRefresh', [tabOrder.indexOf(tabId)]);
+              safeEvent("OnRefresh", [tabOrder.indexOf(tabId)]);
             }}
             className="opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
           >
@@ -72,14 +65,14 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
         {showClose && (
           <button
             type="button"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               isUserInitiatedChangeRef.current = true;
-              safeEvent('OnClose', [tabOrder.indexOf(tabId)]);
+              safeEvent("OnClose", [tabOrder.indexOf(tabId)]);
             }}
             className={cn(
-              'opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer',
-              !isActive && 'invisible group-hover:visible'
+              "opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer",
+              !isActive && "invisible group-hover:visible",
             )}
           >
             <X className="w-3 h-3" />

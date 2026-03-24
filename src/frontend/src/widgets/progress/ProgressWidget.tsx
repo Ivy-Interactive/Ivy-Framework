@@ -1,9 +1,9 @@
-import React from 'react';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Check, Target } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { getWidth } from '@/lib/styles';
+import React from "react";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Check, Target } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { getWidth } from "@/lib/styles";
 
 interface ProgressWidgetProps {
   id: string;
@@ -46,17 +46,16 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   value,
   goal,
   color,
-  width = 'Full',
+  width = "Full",
   indeterminate = false,
 }) => {
-  const isIndeterminate =
-    indeterminate || value === null || value === undefined;
+  const isIndeterminate = indeterminate || value === null || value === undefined;
   const isCompleted = !isIndeterminate && value && value >= 100;
 
   const containerStyles: React.CSSProperties = {
     ...getWidth(width),
-    ...(color && color.toLowerCase() !== 'primary'
-      ? { '--primary': `var(--${color.toLowerCase()})` }
+    ...(color && color.toLowerCase() !== "primary"
+      ? { "--primary": `var(--${color.toLowerCase()})` }
       : {}),
   };
 
@@ -68,21 +67,14 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
           <Badge
             variant="secondary"
             className={cn(
-              'px-2 py-1.5 text-sm absolute bottom-full right-0 mb-2 transition-opacity pointer-events-none font-medium',
-              'opacity-0 group-hover:opacity-100'
+              "px-2 py-1.5 text-sm absolute bottom-full right-0 mb-2 transition-opacity pointer-events-none font-medium",
+              "opacity-0 group-hover:opacity-100",
             )}
           >
-            {!isCompleted && (
-              <Target size={14} className="mr-1" strokeWidth={1.5} />
-            )}
+            {!isCompleted && <Target size={14} className="mr-1" strokeWidth={1.5} />}
             {goal}
             {isCompleted && (
-              <Check
-                size={16}
-                className="ml-1"
-                strokeWidth={4}
-                color="var(--primary)"
-              />
+              <Check size={16} className="ml-1" strokeWidth={4} color="var(--primary)" />
             )}
           </Badge>
         )}

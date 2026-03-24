@@ -1,17 +1,15 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from "react";
 
-export { parseShortcut, formatShortcutForDisplay } from '../utils/shortcut';
+export { parseShortcut, formatShortcutForDisplay } from "../utils/shortcut";
 
 export const useCursorPosition = (
   value?: string,
-  externalRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>
+  externalRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>,
 ): {
   elementRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   savePosition: () => void;
 } => {
-  const internalRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(
-    null
-  );
+  const internalRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const elementRefRef = externalRef || internalRef;
   const cursorPositionRef = useRef<number | null>(null);
 
@@ -23,10 +21,7 @@ export const useCursorPosition = (
 
   useEffect(() => {
     if (elementRefRef.current && cursorPositionRef.current !== null) {
-      elementRefRef.current.setSelectionRange(
-        cursorPositionRef.current,
-        cursorPositionRef.current
-      );
+      elementRefRef.current.setSelectionRange(cursorPositionRef.current, cursorPositionRef.current);
     }
   }, [value, elementRefRef]);
 
@@ -34,19 +29,17 @@ export const useCursorPosition = (
 };
 
 export const useEnterKeyBlur = (
-  onSubmit?: () => void
-): ((
-  e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
-) => void) => {
+  onSubmit?: () => void,
+): ((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void) => {
   return useCallback(
     (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      if (e.key === 'Enter') {
+      if (e.key === "Enter") {
         onSubmit?.();
         e.currentTarget.blur();
         e.preventDefault();
       }
     },
-    [onSubmit]
+    [onSubmit],
   );
 };
 
@@ -56,16 +49,14 @@ export const useEnterKeyBlur = (
  */
 export const usePasteHandler = (
   maxLength?: number,
-  onChange?: (value: string) => void
-): ((
-  e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>
-) => void) => {
+  onChange?: (value: string) => void,
+): ((e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void) => {
   return useCallback(
     (e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       if (!maxLength) return;
 
       const target = e.currentTarget;
-      const pastedText = e.clipboardData.getData('text');
+      const pastedText = e.clipboardData.getData("text");
 
       // Get current value, selection start and end
       const currentValue = target.value;
@@ -82,8 +73,7 @@ export const usePasteHandler = (
         e.preventDefault();
 
         // Truncate the pasted text to fit within maxLength
-        const availableSpace =
-          maxLength - beforeSelection.length - afterSelection.length;
+        const availableSpace = maxLength - beforeSelection.length - afterSelection.length;
         const truncatedPaste = pastedText.slice(0, Math.max(0, availableSpace));
         const finalValue = beforeSelection + truncatedPaste + afterSelection;
 
@@ -100,6 +90,6 @@ export const usePasteHandler = (
         }
       }
     },
-    [maxLength, onChange]
+    [maxLength, onChange],
   );
 };
