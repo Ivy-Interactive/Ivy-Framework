@@ -248,5 +248,34 @@ public class SimpleFlightBooking : ViewBase
 }
 ```
 
+<Details>
+<Summary>
+How do I use BoolInput with OnChange event handler when constructing directly?
+</Summary>
+<Body>
+
+When you create a `BoolInput` directly (instead of using `ToBoolInput()` on a state), you can attach an `OnChange` handler using the fluent `.OnChange()` extension method:
+
+```csharp
+new BoolInput(true)
+    .Label("Accept Terms")
+    .OnChange(value => {
+        Console.WriteLine($"Value changed to: {value}");
+    })
+```
+
+You can also use the full event argument if you need access to the widget instance:
+
+```csharp
+new BoolInput(false)
+    .OnChange(e => {
+        var widget = e.Sender;
+        var newValue = e.Value;
+        // Handle change
+    })
+```
+
+Note: If you are using state, it is recommended to use `state.ToBoolInput()` which handles the value synchronization automatically.
+
 </Body>
 </Details>

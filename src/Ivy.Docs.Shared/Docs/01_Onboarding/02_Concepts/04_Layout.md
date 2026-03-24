@@ -260,6 +260,35 @@ Layout.Horizontal([widget1, widget2, widget3]);
 Layout.Vertical([widget1, widget2, widget3]);
 ```
 
+<Details>
+<Summary>
+How do I center a layout or widget horizontally?
+</Summary>
+<Body>
+
+In Ivy, centering is typically handled by the parent layout using `.Center()`, `.Align(Align.Center)`, or on the widget itself using `.AlignSelf(Align.Center)`.
+
+Unlike CSS, Ivy's `Margin` does not support `Auto` values. Instead, use the parent's alignment methods:
+
+```csharp
+// Center all children in a vertical layout
+Layout.Vertical().Center()
+    | new Box().Width(Size.Units(40))
+
+// Center a specific child using AlignSelf
+Layout.Vertical().Width(Size.Full())
+    | new Box().Width(Size.Units(40)).AlignSelf(Align.Center)
+
+// Center content horizontally and vertically on screen
+Layout.Center()
+    | new Box("Centered Content")
+```
+
+See [Alignment](#alignment) section for more details.
+
+</Body>
+</Details>
+
 </Body>
 </Details>
 
