@@ -101,4 +101,16 @@ public class AvatarAsFoodIcon : ViewBase
 
 ```
 
+## Colors
+
+Avatars support custom colors using the `.Color()` and `.Background()` extension methods.
+
+```csharp demo-tabs
+Layout.Horizontal()
+    | new Avatar("Niels Bosma").Color(Colors.Primary)
+    | new Avatar("Mikael Rinne").Background(Colors.Destructive)
+    | new Avatar("Renco Smeding").Color(Colors.Info)
+    | new Avatar("Jesper").Background(Colors.Warning)
+```
+
 <WidgetDocs Type="Ivy.Avatar" ExtensionTypes="Ivy.AvatarExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Avatar.cs"/>
