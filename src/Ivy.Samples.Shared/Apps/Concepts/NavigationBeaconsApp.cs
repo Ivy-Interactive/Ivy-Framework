@@ -9,12 +9,12 @@ public class Order { public int Id { get; set; } public int CustomerId { get; se
 public record CustomerDetailsArgs(int CustomerId);
 
 // App that registers a beacon for Customer entities
-[App(icon: Icons.Users)]
+[App(icon: Icons.Users, isVisible: false)]
 [NavigationBeacon(typeof(Customer), nameof(GetCustomerBeacon))]
-public class CustomerDetailsApp : ViewBase
+public class BeaconCustomerDetailsApp : ViewBase
 {
     public static NavigationBeacon<Customer> GetCustomerBeacon() => new(
-        AppId: "concepts/customer-details",
+        AppId: "concepts/beacon-customer-details",
         ArgsBuilder: customer => new CustomerDetailsArgs(customer.Id)
     );
 
@@ -34,12 +34,12 @@ public class CustomerDetailsApp : ViewBase
 public record OrderDetailsArgs(int OrderId, int CustomerId);
 
 // App that registers a beacon for Order entities
-[App(icon: Icons.ShoppingCart)]
+[App(icon: Icons.ShoppingCart, isVisible: false)]
 [NavigationBeacon(typeof(Order), nameof(GetOrderBeacon))]
-public class OrderDetailsApp : ViewBase
+public class BeaconOrderDetailsApp : ViewBase
 {
     public static NavigationBeacon<Order> GetOrderBeacon() => new(
-        AppId: "concepts/order-details",
+        AppId: "concepts/beacon-order-details",
         ArgsBuilder: order => new OrderDetailsArgs(order.Id, order.CustomerId)
     );
 
@@ -66,8 +66,19 @@ public class OrderDetailsApp : ViewBase
 }
 
 // Demo app that shows navigation beacon usage
-[App(icon: Icons.Navigation)]
-public class NavigationBeaconsApp : ViewBase
+[App("concepts/navigation-beacons", "Navigation Beacon Demo", icon: Icons.Navigation)]
+public class NavigationBeaconDemoApp : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Tabs(
+            new Tab("Interactive Demo", new BeaconInteractiveDemo()),
+            new Tab("Overview", new BeaconOverview())
+        ).Variant(TabsVariant.Content);
+    }
+}
+
+public class BeaconInteractiveDemo : ViewBase
 {
     public override object? Build()
     {
@@ -88,13 +99,13 @@ public class NavigationBeaconsApp : ViewBase
         };
 
         return Layout.Vertical(
-            Text.H1("Navigation Beacons Demo"),
+            Text.H2("Navigation Beacons Demo"),
             Text.P("Apps can advertise their ability to handle entity types using Navigation Beacons."),
 
             new Card(Layout.Vertical(
                 Text.H2("Customer Beacon"),
                 Text.P(customerBeacon != null
-                    ? "✓ Available (CustomerDetailsApp registered)"
+                    ? "✓ Available (BeaconCustomerDetailsApp registered)"
                     : "✗ Not available"),
 
                 Layout.Horizontal(
@@ -113,7 +124,7 @@ public class NavigationBeaconsApp : ViewBase
             new Card(Layout.Vertical(
                 Text.H2("Order Beacon"),
                 Text.P(orderBeacon != null
-                    ? "✓ Available (OrderDetailsApp registered)"
+                    ? "✓ Available (BeaconOrderDetailsApp registered)"
                     : "✗ Not available"),
 
                 Layout.Horizontal(
@@ -127,6 +138,20 @@ public class NavigationBeaconsApp : ViewBase
                             })
                     )
                 )
+            ))
+        );
+    }
+}
+
+public class BeaconOverview : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical(
+            new Card(Layout.Vertical(
+                Text.H2("What are Beacons?"),
+                Text.P("Navigation Beacons provide a type-safe way to navigate between apps without hardcoding App IDs."),
+                Text.P("By registering a beacon for an entity type, an app essentially says: 'I know how to show details for this type of object'.")
             )),
 
             new Card(Layout.Vertical(
