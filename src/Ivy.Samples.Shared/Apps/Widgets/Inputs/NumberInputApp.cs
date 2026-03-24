@@ -10,6 +10,7 @@ public class NumberInputApp : SampleBase
         var intValue = UseState(12345);
         var onChangedState = UseState(0);
         var onChangeLabel = UseState("");
+        UseEffect(() => { onChangeLabel.Set("Changed"); }, onChangedState);
         var onBlurState = UseState(0);
         var onBlurLabel = UseState("");
         var usdValue = UseState(1234.56m);
@@ -18,64 +19,46 @@ public class NumberInputApp : SampleBase
         var jpyValue = UseState(12345m);
         var nullCurrencyValue = UseState<decimal?>(() => null);
         var nullIntInvalid = UseState<int?>();
-
-        // New format style examples
-        var compactValue = UseState(1_234_567.0);
-        var scientificValue = UseState(1_234_567.0);
-        var engineeringValue = UseState(1_234_567.0);
-        var accountingValue = UseState(-1234.56m);
-        var bytesValue = UseState(5_242_880.0);
-
-        // Create a currency value for size examples
         var sizeExampleCurrency = UseState(1234.56m);
-
-        // Prefix and Suffix examples
         var priceValue = UseState(99.99m);
         var weightValue = UseState(5.5);
         var temperatureValue = UseState(22);
         var percentValue = UseState(0.75);
 
-        // Numeric type test states
         var shortState = UseState((short)0);
-        var shortNullableState = UseState((short?)null);
-        var intState = UseState(0);
-        var intNullableState = UseState((int?)null);
+        var shortNullState = UseState((short?)null);
+        var intVariantState = UseState(0);
+        var intNullVariantState = UseState((int?)null);
         var longState = UseState((long)0);
-        var longNullableState = UseState((long?)null);
+        var longNullState = UseState((long?)null);
         var byteState = UseState((byte)0);
-        var byteNullableState = UseState((byte?)null);
+        var byteNullState = UseState((byte?)null);
         var floatState = UseState(0.0f);
-        var floatNullableState = UseState((float?)null);
+        var floatNullState = UseState((float?)null);
         var doubleState = UseState(0.0);
-        var doubleNullableState = UseState((double?)null);
+        var doubleNullState = UseState((double?)null);
         var decimalState = UseState((decimal)0);
-        var decimalNullableState = UseState((decimal?)null);
+        var decimalNullState = UseState((decimal?)null);
 
-        UseEffect(() => { onChangeLabel.Set("Changed"); }, onChangedState);
-
-        // Moved from CreateNumericTypeTests
+        // Numeric type test states
         var numericTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
             // Signed integer types
-            ("short", shortState, shortNullableState),
-            ("int", intState, intNullableState),
-            ("long", longState, longNullableState),
+            ("short", shortState, shortNullState),
+            ("int", intVariantState, intNullVariantState),
+            ("long", longState, longNullState),
 
             // Unsigned integer types
-            ("byte", byteState, byteNullableState),
+            ("byte", byteState, byteNullState),
 
             // Floating-point types
-            ("float", floatState, floatNullableState),
-            ("double", doubleState, doubleNullableState),
-            ("decimal", decimalState, decimalNullableState)
+            ("float", floatState, floatNullState),
+            ("double", doubleState, doubleNullState),
+            ("decimal", decimalState, decimalNullState)
         };
 
         var dataBinding = CreateNumericTypeTests(numericTypes);
-
-        var currencyExamples = CreateCurrencyExamples((IState<decimal>)usdValue, (IState<decimal>)eurValue, (IState<decimal>)gbpValue, (IState<decimal>)jpyValue, (IState<decimal?>)nullCurrencyValue,
-            compactValue, scientificValue, engineeringValue, (IState<decimal>)accountingValue, bytesValue);
-
-
+        var currencyExamples = CreateCurrencyExamples((IState<decimal>)usdValue, (IState<decimal>)eurValue, (IState<decimal>)gbpValue, (IState<decimal>)jpyValue, (IState<decimal?>)nullCurrencyValue);
 
 
 
@@ -237,12 +220,7 @@ public class NumberInputApp : SampleBase
         IState<decimal> eurValue,
         IState<decimal> gbpValue,
         IState<decimal> jpyValue,
-        IState<decimal?> nullCurrencyValue,
-        IState<double> compactValue,
-        IState<double> scientificValue,
-        IState<double> engineeringValue,
-        IState<decimal> accountingValue,
-        IState<double> bytesValue)
+        IState<decimal?> nullCurrencyValue)
     {
 
         return Layout.Vertical()
@@ -333,59 +311,6 @@ public class NumberInputApp : SampleBase
                   | usdValue
                     .ToSliderInput()
                     .FormatStyle(NumberFormatStyle.Percent)
-
-                  | Text.Block("Compact")
-                  | Text.Block("1.2M")
-                  | compactValue
-                    .ToNumberInput()
-                    .FormatStyle(NumberFormatStyle.Compact)
-                    .Precision(1)
-                  | compactValue
-                    .ToSliderInput()
-                    .FormatStyle(NumberFormatStyle.Compact)
-                    .Precision(1)
-
-                  | Text.Block("Scientific")
-                  | Text.Block("1.23E6")
-                  | scientificValue
-                    .ToNumberInput()
-                    .FormatStyle(NumberFormatStyle.Scientific)
-                    .Precision(2)
-                  | scientificValue
-                    .ToSliderInput()
-                    .FormatStyle(NumberFormatStyle.Scientific)
-                    .Precision(2)
-
-                  | Text.Block("Engineering")
-                  | Text.Block("1.23E6")
-                  | engineeringValue
-                    .ToNumberInput()
-                    .FormatStyle(NumberFormatStyle.Engineering)
-                    .Precision(2)
-                  | engineeringValue
-                    .ToSliderInput()
-                    .FormatStyle(NumberFormatStyle.Engineering)
-                    .Precision(2)
-
-                  | Text.Block("Accounting")
-                  | Text.Block("($1,234.56)")
-                  | accountingValue
-                    .ToNumberInput()
-                    .FormatStyle(NumberFormatStyle.Accounting)
-                    .Currency("USD")
-                  | accountingValue
-                    .ToSliderInput()
-                    .FormatStyle(NumberFormatStyle.Accounting)
-                    .Currency("USD")
-
-                  | Text.Block("Bytes")
-                  | Text.Block("5 MB")
-                  | bytesValue
-                    .ToNumberInput()
-                    .FormatStyle(NumberFormatStyle.Bytes)
-                  | bytesValue
-                    .ToSliderInput()
-                    .FormatStyle(NumberFormatStyle.Bytes)
                )
 
                | Text.H3("Currency with Constraints")

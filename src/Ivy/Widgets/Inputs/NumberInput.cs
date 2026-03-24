@@ -19,12 +19,7 @@ public enum NumberFormatStyle
 {
     Decimal,
     Currency,
-    Percent,
-    Compact,
-    Scientific,
-    Engineering,
-    Accounting,
-    Bytes
+    Percent
 }
 
 public interface IAnyNumberInput : IAnyInput
@@ -168,7 +163,7 @@ public static class NumberInputExtensions
 
         input.TargetType = GetTargetTypeName(type);
 
-        if ((input.FormatStyle == NumberFormatStyle.Currency || input.FormatStyle == NumberFormatStyle.Accounting) && string.IsNullOrEmpty(input.Currency))
+        if (input.FormatStyle == NumberFormatStyle.Currency && string.IsNullOrEmpty(input.Currency))
         {
             input.Currency = "USD";
         }
@@ -226,7 +221,7 @@ public static class NumberInputExtensions
     public static NumberInputBase FormatStyle(this NumberInputBase widget, NumberFormatStyle formatStyle)
     {
         var result = widget with { FormatStyle = formatStyle };
-        if ((formatStyle == NumberFormatStyle.Currency || formatStyle == NumberFormatStyle.Accounting) && string.IsNullOrEmpty(result.Currency))
+        if (formatStyle == NumberFormatStyle.Currency && string.IsNullOrEmpty(result.Currency))
         {
             result = result with { Currency = "USD" };
         }

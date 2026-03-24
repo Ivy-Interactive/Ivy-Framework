@@ -536,7 +536,6 @@ export const getAlign = (orientation: Orientation, align?: Align): React.CSSProp
     }
   } else {
     // Vertical layout alignment
-    styles.width = "100%";
     // Set horizontal alignment (Left/Center/Right)
     switch (align) {
       case "TopLeft":
