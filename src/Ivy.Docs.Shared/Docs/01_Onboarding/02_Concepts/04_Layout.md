@@ -260,6 +260,9 @@ Layout.Horizontal([widget1, widget2, widget3]);
 Layout.Vertical([widget1, widget2, widget3]);
 ```
 
+</Body>
+</Details>
+
 <Details>
 <Summary>
 How do I center a layout or widget horizontally?
@@ -285,9 +288,6 @@ Layout.Center()
 ```
 
 See [Alignment](#alignment) section for more details.
-
-</Body>
-</Details>
 
 </Body>
 </Details>

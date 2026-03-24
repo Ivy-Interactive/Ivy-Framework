@@ -248,6 +248,10 @@ public class SimpleFlightBooking : ViewBase
 }
 ```
 
+
+</Body>
+</Details>
+
 <Details>
 <Summary>
 How do I use BoolInput with OnChange event handler when constructing directly?
