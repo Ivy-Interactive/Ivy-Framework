@@ -29,7 +29,11 @@ public class PlansApp : ViewBase
 
         return new SidebarLayout(
             mainContent: new ContentView(selectedPlanState.Value, plans, selectedPlanState, planService, RefreshPlans),
-            sidebarContent: new SidebarView(plans, selectedPlanState, queueFilter, levelFilter)
+            sidebarContent: new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, description =>
+            {
+                planService.CreatePlan(description);
+                RefreshPlans();
+            })
         );
     }
 }

@@ -8,21 +8,27 @@ public class SidebarView : ViewBase
     private readonly IState<PlanFile?> _selectedPlanState;
     private readonly IState<string?> _queueFilter;
     private readonly IState<string?> _levelFilter;
+    private readonly Action<string> _onCreatePlan;
 
     public SidebarView(
         List<PlanFile> plans,
         IState<PlanFile?> selectedPlanState,
         IState<string?> queueFilter,
-        IState<string?> levelFilter)
+        IState<string?> levelFilter,
+        Action<string> onCreatePlan)
     {
         _plans = plans;
         _selectedPlanState = selectedPlanState;
         _queueFilter = queueFilter;
         _levelFilter = levelFilter;
+        _onCreatePlan = onCreatePlan;
     }
 
     public override object Build()
     {
+        var createDialogOpen = UseState(false);
+        var createPlanText = UseState("");
+
         var levelOptions = new[] { "CRITICAL", "NICETOHAVE", "NITPICK" };
 
         // Apply level filter first to get the base set for queue counting
@@ -42,7 +48,13 @@ public class SidebarView : ViewBase
         if (_queueFilter.Value is { } queue)
             filteredPlans = filteredPlans.Where(p => p.Queue == queue);
 
+        var createButton = new Button("+ Create Plan")
+            .Success()
+            .Icon(Icons.Plus)
+            .OnClick(() => createDialogOpen.Set(true));
+
         var header = Layout.Vertical().Padding(2)
+            | createButton
             | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().Small().WithField().Label("Queue")
             | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().Small().WithField().Label("Level");
 
@@ -56,6 +68,36 @@ public class SidebarView : ViewBase
                 .OnClick(() => _selectedPlanState.Set(clickablePlan));
         }));
 
-        return new HeaderLayout(header, content).Height(Size.Full());
+        var elements = new List<object>
+        {
+            new HeaderLayout(header, content).Height(Size.Full())
+        };
+
+        if (createDialogOpen.Value)
+        {
+            elements.Add(new Dialog(
+                _ => createDialogOpen.Set(false),
+                new DialogHeader("Create New Plan"),
+                new DialogBody(
+                    Layout.Vertical()
+                        | Text.P("Describe the task for the new plan.")
+                        | createPlanText.ToTextareaInput("Enter task description...").Rows(6)
+                ),
+                new DialogFooter(
+                    new Button("Cancel").Outline().OnClick(() => createDialogOpen.Set(false)),
+                    new Button("Create").Success().OnClick(() =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(createPlanText.Value))
+                        {
+                            _onCreatePlan(createPlanText.Value);
+                            createPlanText.Set("");
+                            createDialogOpen.Set(false);
+                        }
+                    })
+                )
+            ).Width(Size.Rem(30)));
+        }
+
+        return new Fragment(elements.ToArray());
     }
 }
