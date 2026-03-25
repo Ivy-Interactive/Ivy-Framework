@@ -2,6 +2,7 @@ using Ivy;
 using Microsoft.Extensions.DependencyInjection;
 using Ivy.Tendril;
 using Ivy.Tendril.Apps.Plans;
+using Ivy.Tendril.Apps.Tasks;
 
 var server = new Server();
 server.UseCulture("en-US");
@@ -10,6 +11,7 @@ server.UseHotReload();
 #endif
 server.Services.AddSingleton<ConfigService>();
 server.Services.AddSingleton<PlanReaderService>();
+server.Services.AddSingleton<MockTaskDataService>();
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
 server.UseAppShell(new AppShellSettings().UseTabs(preventDuplicates: true));
