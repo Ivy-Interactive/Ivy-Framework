@@ -90,14 +90,9 @@ public class TasksApp : ViewBase
                 return ValueTask.CompletedTask;
             });
 
-        var header = Text.Block("Background Tasks").Bold();
-
         var elements = new List<object>
         {
-            new HeaderLayout(
-                header: header,
-                content: dataTable.Height(Size.Units(100))
-            ).Height(Size.Full())
+            dataTable
         };
 
         if (dialogMode.Value != null && selectedTaskId.Value is { } taskId)
