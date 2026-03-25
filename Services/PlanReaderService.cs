@@ -46,6 +46,15 @@ public class PlanReaderService
         File.Move(source, dest);
     }
 
+    public void ExpandPlan(string fileName)
+    {
+        var source = Path.Combine(PlansDirectory, fileName);
+        var expandingDir = Path.Combine(PlansDirectory, "expanding");
+        Directory.CreateDirectory(expandingDir);
+        var dest = Path.Combine(expandingDir, fileName);
+        File.Move(source, dest);
+    }
+
     public void SkipPlan(string fileName)
     {
         var source = Path.Combine(PlansDirectory, fileName);

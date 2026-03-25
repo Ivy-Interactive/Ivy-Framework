@@ -31,7 +31,6 @@ public class ContentView : ViewBase
     {
         var updateDialogOpen = UseState(false);
         var splitDialogOpen = UseState(false);
-        var expandDialogOpen = UseState(false);
         var skipDialogOpen = UseState(false);
         var createIssueDialogOpen = UseState(false);
         var selectedRepoState = UseState<string?>(null);
@@ -40,8 +39,6 @@ public class ContentView : ViewBase
 
         var updateText = UseState("");
         var splitText = UseState("");
-        var expandText = UseState("");
-
         var isEditing = UseState(false);
         var editContent = UseState("");
 
@@ -104,7 +101,11 @@ public class ContentView : ViewBase
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
             | new Button("Update").Icon(Icons.Pencil).Outline().OnClick(() => updateDialogOpen.Set(true))
             | new Button("Split").Icon(Icons.GitBranch).Outline().OnClick(() => splitDialogOpen.Set(true))
-            | new Button("Expand").Icon(Icons.Maximize).Outline().OnClick(() => expandDialogOpen.Set(true))
+            | new Button("Expand").Icon(Icons.Maximize).Outline().OnClick(() =>
+            {
+                _planService.ExpandPlan(_selectedPlan.FileName);
+                _refreshPlans();
+            })
             | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => skipDialogOpen.Set(true))
             | new Button("Create Issue").Icon(Icons.Github).Outline().OnClick(() => createIssueDialogOpen.Set(true))
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious())
@@ -131,7 +132,6 @@ public class ContentView : ViewBase
             mainLayout,
             new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan),
             new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan),
-            new ExpandPlanDialog(expandDialogOpen, expandText, _selectedPlan),
             new SkipPlanDialog(skipDialogOpen, _selectedPlan, _planService, _refreshPlans),
             new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, _selectedPlan)
         };
