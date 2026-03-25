@@ -13,6 +13,7 @@ public class PlansApp : ViewBase
         var selectedPlanState = UseState<PlanFile?>(null);
         var queueFilter = UseState<string?>(null);
         var levelFilter = UseState<string?>(null);
+        var textFilter = UseState<string?>("");
         var refreshToken = UseState(0);
 
         var plans = planService.GetPlans();
@@ -30,7 +31,7 @@ public class PlansApp : ViewBase
 
         return new SidebarLayout(
             mainContent: new ContentView(selectedPlanState.Value, plans, selectedPlanState, planService, RefreshPlans),
-            sidebarContent: new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, description =>
+            sidebarContent: new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter, description =>
             {
                 planService.CreatePlan(description);
                 RefreshPlans();

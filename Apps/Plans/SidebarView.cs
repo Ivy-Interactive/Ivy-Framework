@@ -9,6 +9,7 @@ public class SidebarView : ViewBase
     private readonly IState<PlanFile?> _selectedPlanState;
     private readonly IState<string?> _queueFilter;
     private readonly IState<string?> _levelFilter;
+    private readonly IState<string?> _textFilter;
     private readonly Action<string> _onCreatePlan;
 
     public SidebarView(
@@ -16,12 +17,14 @@ public class SidebarView : ViewBase
         IState<PlanFile?> selectedPlanState,
         IState<string?> queueFilter,
         IState<string?> levelFilter,
+        IState<string?> textFilter,
         Action<string> onCreatePlan)
     {
         _plans = plans;
         _selectedPlanState = selectedPlanState;
         _queueFilter = queueFilter;
         _levelFilter = levelFilter;
+        _textFilter = textFilter;
         _onCreatePlan = onCreatePlan;
     }
 
@@ -48,6 +51,16 @@ public class SidebarView : ViewBase
         if (_queueFilter.Value is { } queue)
             filteredPlans = filteredPlans.Where(p => p.Queue == queue);
 
+        // Apply text filter
+        if (!string.IsNullOrWhiteSpace(_textFilter.Value))
+        {
+            var search = _textFilter.Value.ToLowerInvariant();
+            filteredPlans = filteredPlans.Where(p =>
+                p.Title.ToLowerInvariant().Contains(search) ||
+                p.Id.ToString().Contains(search) ||
+                p.Queue.ToLowerInvariant().Contains(search));
+        }
+
         var createButton = new Button("Create Plan")
             .Primary()
             .Width(Size.Full())
@@ -56,6 +69,7 @@ public class SidebarView : ViewBase
 
         var header = Layout.Vertical().Padding(2)
             | createButton
+            | _textFilter.ToTextInput().Placeholder("Search plans...").Small().WithField().Label("Search")
             | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().Small().WithField().Label("Queue")
             | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().Small().WithField().Label("Level");
 
