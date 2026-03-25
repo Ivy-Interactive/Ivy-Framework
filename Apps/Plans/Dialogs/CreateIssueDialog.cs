@@ -24,17 +24,13 @@ public class CreateIssueDialog : ViewBase
 
     public override object? Build()
     {
-        if (!_dialogOpen.Value) return null;
-
         var githubService = UseService<GithubService>();
-        var repos = githubService.GetRepos();
-        var repositoryOptions = repos.Select(r => r.DisplayName).ToArray();
-
-        var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == _selectedRepoState.Value);
-        var assigneesQuery = UseQuery<string[], string?>(
-            _selectedRepoState.Value,
+        var assigneesQuery = UseQuery<string[], string>(
+            _selectedRepoState.Value ?? "",
             async (_, ct) =>
             {
+                var repos = githubService.GetRepos();
+                var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == _selectedRepoState.Value);
                 if (selectedRepo is null) return Array.Empty<string>();
                 var result = await githubService.GetAssigneesAsync(selectedRepo.Owner, selectedRepo.Name);
                 return result.ToArray();
@@ -42,6 +38,10 @@ public class CreateIssueDialog : ViewBase
             initialValue: Array.Empty<string>()
         );
 
+        if (!_dialogOpen.Value) return null;
+
+        var repos = githubService.GetRepos();
+        var repositoryOptions = repos.Select(r => r.DisplayName).ToArray();
         var assignees = assigneesQuery.Value ?? Array.Empty<string>();
 
         return new Dialog(
