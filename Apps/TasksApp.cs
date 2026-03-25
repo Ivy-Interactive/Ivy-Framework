@@ -42,26 +42,50 @@ public class TasksApp : ViewBase
             .Hidden(t => t.Id)
             .Config(c =>
             {
-                c.AllowSorting = true;
-                c.AllowFiltering = true;
-                c.ShowSearch = true;
-                c.SelectionMode = SelectionModes.Rows;
+                c.AllowSorting = false;
+                c.AllowFiltering = false;
+                c.ShowSearch = false;
+                c.SelectionMode = SelectionModes.None;
                 c.ShowIndexColumn = false;
                 c.BatchSize = 50;
             })
             .RowActions(
                 new MenuItem(Label: "View Output", Icon: Icons.Terminal, Tag: "view-output"),
-                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan")
+                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan"),
+                new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-task"),
+                new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-task")
             )
             .OnRowAction(e =>
             {
                 var tag = e.Value.Tag?.ToString();
                 var id = e.Value.Id?.ToString();
                 var task = tasks.FirstOrDefault(t => t.Id == id);
+
                 if (task != null)
                 {
-                    selectedTaskId.Set(task.Id);
-                    dialogMode.Set(tag);
+                    if (tag == "stop-task")
+                    {
+                        // Only allow stopping running tasks
+                        if (task.Status == "Running")
+                        {
+                            taskService.StopTask(task.Id);
+                            refreshToken.Refresh();
+                        }
+                    }
+                    else if (tag == "delete-task")
+                    {
+                        // Only allow deleting non-running tasks
+                        if (task.Status != "Running")
+                        {
+                            taskService.DeleteTask(task.Id);
+                            refreshToken.Refresh();
+                        }
+                    }
+                    else
+                    {
+                        selectedTaskId.Set(task.Id);
+                        dialogMode.Set(tag);
+                    }
                 }
                 return ValueTask.CompletedTask;
             });

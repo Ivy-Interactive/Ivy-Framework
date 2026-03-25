@@ -51,6 +51,22 @@ public class TaskService
             task.DurationSeconds = (int)(task.CompletedAt.Value - task.StartedAt.Value).TotalSeconds;
     }
 
+    public void StopTask(string id)
+    {
+        if (!_tasks.TryGetValue(id, out var task)) return;
+
+        task.CancellationRequested = true;
+        task.Status = "Stopped";
+        task.CompletedAt = DateTime.UtcNow;
+        if (task.StartedAt.HasValue)
+            task.DurationSeconds = (int)(task.CompletedAt.Value - task.StartedAt.Value).TotalSeconds;
+    }
+
+    public void DeleteTask(string id)
+    {
+        _tasks.TryRemove(id, out _);
+    }
+
     public List<TaskItem> GetTasks()
     {
         return _tasks.Values.OrderByDescending(t => t.StartedAt ?? DateTime.MinValue).ToList();

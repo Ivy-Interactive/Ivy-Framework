@@ -12,6 +12,7 @@ public record TaskItem
     public int? DurationSeconds { get; set; }
     public string ScriptPath { get; init; } = "";
     public string[] Args { get; init; } = [];
+    public bool CancellationRequested { get; set; }
 }
 
 public record TaskItemRow
