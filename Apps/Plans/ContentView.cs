@@ -1,3 +1,4 @@
+using System.Drawing;
 using Ivy;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
@@ -36,6 +37,7 @@ public class ContentView : ViewBase
         var createIssueDialogOpen = UseState(false);
         var selectedRepoState = UseState<string?>(null);
         var issueAssigneeState = UseState<string?>(null);
+        var issueLabelsState = UseState<string[]>(Array.Empty<string>());
 
         var updateText = UseState("");
         var splitText = UseState("");
@@ -49,7 +51,7 @@ public class ContentView : ViewBase
 
         var currentIndex = _allPlans.FindIndex(p => p.FileName == _selectedPlan.FileName);
 
-        var header = Layout.Horizontal().Align(Align.Left)
+        var header = Layout.Horizontal().Width(Size.Full())
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
             | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Info)
             | new Badge(_selectedPlan.Level).Variant(BadgeVariant.Warning)
@@ -63,11 +65,10 @@ public class ContentView : ViewBase
             | new Button("Update").Icon(Icons.Pencil).Outline().OnClick(() => updateDialogOpen.Set(true))
             | new Button("Split").Icon(Icons.GitBranch).Outline().OnClick(() => splitDialogOpen.Set(true))
             | new Button("Expand").Icon(Icons.Maximize).Outline().OnClick(() => expandDialogOpen.Set(true))
-            | new Button("Skip").Icon(Icons.SkipForward).Outline().OnClick(() => skipDialogOpen.Set(true))
+            | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => skipDialogOpen.Set(true))
             | new Button("Create Issue").Icon(Icons.Github).Outline().OnClick(() => createIssueDialogOpen.Set(true))
-            | new Spacer()
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious())
-            | new Button("Next").Icon(Icons.ChevronRight).Outline().OnClick(() => GoToNext())
+            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext())
             | new Button("Approve").Icon(Icons.Check).Primary().OnClick(() => approveDialogOpen.Set(true));
 
         var mainContent = Layout.Vertical()
@@ -77,17 +78,20 @@ public class ContentView : ViewBase
             header: header,
             content: new FooterLayout(
                 footer: actionBar,
-                content: mainContent
-            )
+                content: "hello"
+            ).Size(Size.Full())
         ).Size(Size.Full());
 
-        var elements = new List<object> { mainLayout };
-        elements.Add(new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan));
-        elements.Add(new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan));
-        elements.Add(new ExpandPlanDialog(expandDialogOpen, expandText, _selectedPlan));
-        elements.Add(new SkipPlanDialog(skipDialogOpen, _selectedPlan, _planService, _refreshPlans));
-        elements.Add(new ApprovePlanDialog(approveDialogOpen, _selectedPlan, _planService, _refreshPlans));
-        elements.Add(new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, _selectedPlan));
+        var elements = new List<object>
+        {
+            mainLayout,
+            new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan),
+            new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan),
+            new ExpandPlanDialog(expandDialogOpen, expandText, _selectedPlan),
+            new SkipPlanDialog(skipDialogOpen, _selectedPlan, _planService, _refreshPlans),
+            new ApprovePlanDialog(approveDialogOpen, _selectedPlan, _planService, _refreshPlans),
+            new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, _selectedPlan)
+        };
 
         return new Fragment(elements.ToArray());
     }

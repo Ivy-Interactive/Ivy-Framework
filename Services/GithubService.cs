@@ -6,6 +6,7 @@ public class GithubService
 {
     private readonly ConfigService _config;
     private readonly Dictionary<string, List<string>> _assigneeCache = new();
+    private readonly Dictionary<string, List<string>> _labelCache = new();
 
     public GithubService(ConfigService config)
     {
@@ -23,6 +24,47 @@ public class GithubService
         var assignees = await FetchAssigneesFromGhCliAsync(owner, repo);
         _assigneeCache[key] = assignees;
         return assignees;
+    }
+
+    public async Task<List<string>> GetLabelsAsync(string owner, string repo)
+    {
+        var key = $"{owner}/{repo}";
+        if (_labelCache.TryGetValue(key, out var cached))
+            return cached;
+
+        var labels = await FetchLabelsFromGhCliAsync(owner, repo);
+        _labelCache[key] = labels;
+        return labels;
+    }
+
+    private static async Task<List<string>> FetchLabelsFromGhCliAsync(string owner, string repo)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo("gh", $"api repos/{owner}/{repo}/labels --jq \".[].name\"")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(psi);
+            if (process is null) return new();
+
+            var output = await process.StandardOutput.ReadToEndAsync();
+            await process.WaitForExitAsync();
+
+            if (process.ExitCode != 0) return new();
+
+            return output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .OrderBy(x => x)
+                .ToList();
+        }
+        catch
+        {
+            return new();
+        }
     }
 
     private static async Task<List<string>> FetchAssigneesFromGhCliAsync(string owner, string repo)
