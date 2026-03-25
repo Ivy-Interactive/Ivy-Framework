@@ -4,7 +4,14 @@ namespace Ivy.Tendril.Apps.Plans;
 
 public class PlanReaderService
 {
-    public const string PlansDirectory = @"D:\Repos\_Ivy\.plans\";
+    private readonly ConfigService _config;
+
+    public PlanReaderService(ConfigService config)
+    {
+        _config = config;
+    }
+
+    private string PlansDirectory => _config.PlanFolder;
 
     private static readonly Regex FileNameRegex = new(@"^(\d+)-([^-]+)-([^-]+)-(.+)\.md$", RegexOptions.Compiled);
     private static readonly Regex CamelCaseRegex = new(@"(?<=\p{Ll})(?=\p{Lu})", RegexOptions.Compiled);
