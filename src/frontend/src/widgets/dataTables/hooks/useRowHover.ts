@@ -84,12 +84,21 @@ export const useRowHover = ({
         const container = containerRef.current;
         const containerRect = container.getBoundingClientRect();
 
+        // Get precision border width (clientTop is always an integer, which is inaccurate at zoom)
+        const style = window.getComputedStyle(container);
+        const borderTop = parseFloat(style.borderTopWidth) || 0;
+
         // Convert grid viewport coords -> overlay container padding-box coords.
-        const overlayTop = bounds.y - containerRect.top - container.clientTop;
+        const overlayTop = bounds.y - containerRect.top - borderTop;
         const overlayHeight = bounds.height;
 
-        setActionButtonsTop(Math.round(overlayTop));
-        setActionButtonsHeight(overlayHeight);
+        // Pixel-perfect snapping using devicePixelRatio.
+        // This ensures the overlay aligns perfectly with physical pixels even at non-standard zoom levels.
+        const dpr = window.devicePixelRatio;
+        const snap = (val: number) => Math.round(val * dpr) / dpr;
+
+        setActionButtonsTop(snap(overlayTop));
+        setActionButtonsHeight(snap(overlayHeight));
       }
     },
     [enableRowHover, rowActions, visibleRows, containerRef],
