@@ -80,7 +80,16 @@ public static class WidgetSerializer
             if (property.Get == null)
                 continue;
 
-            var defaultValue = property.Get(defaultInstance);
+            object? defaultValue;
+            try
+            {
+                defaultValue = property.Get(defaultInstance);
+            }
+            catch
+            {
+                continue;
+            }
+
             property.ShouldSerialize = (_, currentValue) => !ValuesAreEqual(currentValue, defaultValue);
         }
     }
