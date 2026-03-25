@@ -75,6 +75,33 @@ export function reorderColumns(
 }
 
 /**
+ * Visible data columns in grid display order (same ordering as convertToGridColumns).
+ */
+export function getOrderedVisibleDataColumns(
+  columns: DataColumn[],
+  columnOrder: number[],
+): DataColumn[] {
+  const visibleColumns = columns.filter((col) => !col.hidden);
+
+  let orderedColumns = visibleColumns;
+
+  if (columnOrder.length === columns.length) {
+    orderedColumns = columnOrder.map((idx) => columns[idx]).filter((col) => !col.hidden);
+  } else {
+    const hasOrderProperty = visibleColumns.some((col) => col.order !== undefined);
+    if (hasOrderProperty) {
+      orderedColumns = [...visibleColumns].sort((a, b) => {
+        const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+      });
+    }
+  }
+
+  return orderedColumns;
+}
+
+/**
  * Converts data columns to GridColumn format with proper widths and groups
  * Filters out hidden columns and applies column ordering
  */
@@ -86,27 +113,7 @@ export function convertToGridColumns(
   showGroups: boolean,
   showColumnTypeIcons: boolean = true,
 ): GridColumn[] {
-  // Filter out hidden columns first
-  const visibleColumns = columns.filter((col) => !col.hidden);
-
-  // Apply column order if available
-  let orderedColumns = visibleColumns;
-
-  // User reordering (columnOrder array) takes precedence over backend order property
-  if (columnOrder.length === columns.length) {
-    // Use the columnOrder array (from user reordering)
-    orderedColumns = columnOrder.map((idx) => columns[idx]).filter((col) => !col.hidden);
-  } else {
-    // Fall back to explicit order property if no user reordering has happened
-    const hasOrderProperty = visibleColumns.some((col) => col.order !== undefined);
-    if (hasOrderProperty) {
-      orderedColumns = [...visibleColumns].sort((a, b) => {
-        const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
-        const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
-        return orderA - orderB;
-      });
-    }
-  }
+  const orderedColumns = getOrderedVisibleDataColumns(columns, columnOrder);
 
   return orderedColumns.map((col, index) => {
     const originalIndex = columns.indexOf(col);

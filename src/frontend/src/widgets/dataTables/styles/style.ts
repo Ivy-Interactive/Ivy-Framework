@@ -60,7 +60,7 @@ export const tableStyles = {
       zIndex: 1,
       backgroundColor: "var(--background)",
       borderTop: "1px solid var(--border)",
-      padding: "8px 12px",
+      padding: "8px 0 0 0",
       pointerEvents: "auto",
     } as React.CSSProperties,
   },

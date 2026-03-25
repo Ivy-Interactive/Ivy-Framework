@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { tableStyles } from "./styles/style";
 import { DataColumn } from "./types/types";
 import { ChevronDown } from "lucide-react";
+import type { FooterColumnLayout } from "./hooks/useFooterColumnLayout";
 
 const footerStyles = {
   row: {
@@ -10,8 +11,23 @@ const footerStyles = {
     gap: "8px",
     alignItems: "flex-start",
   } as React.CSSProperties,
+  rowGrid: {
+    display: "grid",
+    minWidth: "min-content",
+  } as React.CSSProperties,
+  rowGridScroll: {
+    overflowX: "auto",
+    overflowY: "hidden",
+    scrollbarWidth: "none",
+  } as React.CSSProperties,
   cell: {
     flex: 1,
+    minWidth: 0,
+    fontSize: "12px",
+    fontWeight: 600,
+    color: "var(--foreground)",
+  } as React.CSSProperties,
+  cellGrid: {
     minWidth: 0,
     fontSize: "12px",
     fontWeight: 600,
@@ -62,7 +78,8 @@ export const DataTableFooter: React.FC<DataTableFooterProps> = ({ children, clas
 const FooterCell: React.FC<{
   values: string[];
   align?: string;
-}> = ({ values, align }) => {
+  cellStyle: React.CSSProperties;
+}> = ({ values, align, cellStyle }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -83,7 +100,7 @@ const FooterCell: React.FC<{
   // Single value — no dropdown
   if (values.length === 1) {
     return (
-      <div style={{ ...footerStyles.cell, textAlign }}>
+      <div style={{ ...cellStyle, textAlign }}>
         <div style={footerStyles.value}>{values[0]}</div>
       </div>
     );
@@ -91,7 +108,7 @@ const FooterCell: React.FC<{
 
   // Multiple values — dropdown selector
   return (
-    <div ref={ref} style={{ ...footerStyles.cell, textAlign, position: "relative" }}>
+    <div ref={ref} style={{ ...cellStyle, textAlign, position: "relative" }}>
       <div
         className={cn(
           "inline-flex max-w-full min-w-0 items-center gap-0.5 rounded px-1 -mx-1 cursor-pointer transition-colors",
@@ -146,11 +163,62 @@ const FooterCell: React.FC<{
  */
 export interface AggregateFooterProps {
   columns: DataColumn[];
+  layout?: FooterColumnLayout;
+  footerScrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-export const AggregateFooter: React.FC<AggregateFooterProps> = ({ columns }) => {
+export const AggregateFooter: React.FC<AggregateFooterProps> = ({
+  columns,
+  layout,
+  footerScrollRef,
+}) => {
   const hasFooter = columns.some((col) => col.footer && col.footer.length > 0);
   if (!hasFooter) return null;
+
+  const useGridLayout =
+    layout != null &&
+    layout.columnWidths.length === columns.length &&
+    layout.columnWidths.length > 0;
+
+  const gridTemplateColumns = useGridLayout
+    ? `${layout.markerWidth}px ${layout.columnWidths.map((w) => `${w}px`).join(" ")}`
+    : undefined;
+
+  const cellStyle = useGridLayout ? footerStyles.cellGrid : footerStyles.cell;
+
+  if (useGridLayout && gridTemplateColumns && footerScrollRef) {
+    return (
+      <DataTableFooter>
+        <div
+          ref={footerScrollRef}
+          className="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ ...footerStyles.rowGridScroll }}
+        >
+          <div style={{ ...footerStyles.rowGrid, gridTemplateColumns }}>
+            <div style={{ ...footerStyles.cellGrid, minHeight: "1em" }} aria-hidden />
+            {columns.map((col) => {
+              const footerValues = col.footer;
+              if (!footerValues || footerValues.length === 0) {
+                return (
+                  <div key={col.name} style={footerStyles.cellGrid}>
+                    &nbsp;
+                  </div>
+                );
+              }
+              return (
+                <FooterCell
+                  key={col.name}
+                  values={footerValues}
+                  align={col.align}
+                  cellStyle={cellStyle}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </DataTableFooter>
+    );
+  }
 
   return (
     <DataTableFooter>
@@ -164,9 +232,18 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({ columns }) => 
               </div>
             );
           }
-          return <FooterCell key={col.name} values={footerValues} align={col.align} />;
+          return (
+            <FooterCell
+              key={col.name}
+              values={footerValues}
+              align={col.align}
+              cellStyle={cellStyle}
+            />
+          );
         })}
       </div>
     </DataTableFooter>
   );
 };
+
+export type { FooterColumnLayout };
