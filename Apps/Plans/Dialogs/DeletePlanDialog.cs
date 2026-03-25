@@ -40,7 +40,13 @@ public class DeletePlanDialog : ViewBase
                     _refreshPlans();
                     _dialogOpen.Set(false);
                 }),
-                new Button("Delete").Danger().OnClick(() =>
+                new Button("Move to Icebox").Outline().OnClick(() =>
+                {
+                    _planService.IceboxPlan(_selectedPlan.FileName);
+                    _refreshPlans();
+                    _dialogOpen.Set(false);
+                }),
+                new Button("Delete").Destructive().OnClick(() =>
                 {
                     _planService.DeletePlan(_selectedPlan.FileName);
                     _refreshPlans();

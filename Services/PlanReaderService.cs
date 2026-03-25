@@ -64,6 +64,15 @@ public class PlanReaderService
         File.Move(source, dest);
     }
 
+    public void IceboxPlan(string fileName)
+    {
+        var source = Path.Combine(PlansDirectory, fileName);
+        var iceboxDir = Path.Combine(PlansDirectory, "icebox");
+        Directory.CreateDirectory(iceboxDir);
+        var dest = Path.Combine(iceboxDir, fileName);
+        File.Move(source, dest);
+    }
+
     public void DeletePlan(string fileName)
     {
         var filePath = Path.Combine(PlansDirectory, fileName);
