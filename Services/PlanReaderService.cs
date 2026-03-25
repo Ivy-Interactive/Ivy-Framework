@@ -65,7 +65,7 @@ public class PlanReaderService
         var safeTitle = description.Length > 40 ? description.Substring(0, 40) : description;
         safeTitle = Regex.Replace(safeTitle, @"[^a-zA-Z0-9]+", "-").Trim('-');
 
-        var fileName = $"{id:D3}-General-NICETOHAVE-{safeTitle}.md";
+        var fileName = $"{id:D3}-General-NiceToHave-{safeTitle}.md";
         var content = $"# {description}\n\n## Problem\n\n{description}\n\n## Solution\n\n## Tests\n\n## Finish\n\nCommit!\n";
         File.WriteAllText(Path.Combine(PlansDirectory, fileName), content);
     }
@@ -83,7 +83,7 @@ public class PlanReaderService
 
             var id = int.Parse(match.Groups[1].Value);
             var queue = match.Groups[2].Value;
-            var level = match.Groups[3].Value;
+            var level = NormalizeLevel(match.Groups[3].Value);
             var title = CamelCaseRegex.Replace(match.Groups[4].Value.Replace("-", " "), " ");
 
             var content = File.ReadAllText(file);
@@ -95,6 +95,17 @@ public class PlanReaderService
         }
 
         return plans;
+    }
+
+    private static string NormalizeLevel(string level)
+    {
+        return level.ToUpperInvariant() switch
+        {
+            "CRITICAL" => "Critical",
+            "NICETOHAVE" => "NiceToHave",
+            "NITPICK" => "Nitpick",
+            _ => level
+        };
     }
 
     private static string ExtractFrontmatter(string content)
