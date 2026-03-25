@@ -87,6 +87,7 @@ public static class UseLoadingExtensions
 
                     open.Set(false);
                     cts.Set((CancellationTokenSource?)null);
+                    tokenSource.Dispose();
                 }
             });
         });
