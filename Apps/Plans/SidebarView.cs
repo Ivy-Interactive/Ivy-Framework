@@ -27,7 +27,6 @@ public class SidebarView : ViewBase
     public override object Build()
     {
         var createDialogOpen = UseState(false);
-        var createPlanText = UseState("");
 
         var levelOptions = new[] { "CRITICAL", "NICETOHAVE", "NITPICK" };
 
@@ -48,8 +47,9 @@ public class SidebarView : ViewBase
         if (_queueFilter.Value is { } queue)
             filteredPlans = filteredPlans.Where(p => p.Queue == queue);
 
-        var createButton = new Button("+ Create Plan")
-            .Success()
+        var createButton = new Button("Create Plan")
+            .Primary()
+            .Width(Size.Full())
             .Icon(Icons.Plus)
             .OnClick(() => createDialogOpen.Set(true));
 
@@ -75,27 +75,10 @@ public class SidebarView : ViewBase
 
         if (createDialogOpen.Value)
         {
-            elements.Add(new Dialog(
-                _ => createDialogOpen.Set(false),
-                new DialogHeader("Create New Plan"),
-                new DialogBody(
-                    Layout.Vertical()
-                        | Text.P("Describe the task for the new plan.")
-                        | createPlanText.ToTextareaInput("Enter task description...").Rows(6)
-                ),
-                new DialogFooter(
-                    new Button("Cancel").Outline().OnClick(() => createDialogOpen.Set(false)),
-                    new Button("Create").Success().OnClick(() =>
-                    {
-                        if (!string.IsNullOrWhiteSpace(createPlanText.Value))
-                        {
-                            _onCreatePlan(createPlanText.Value);
-                            createPlanText.Set("");
-                            createDialogOpen.Set(false);
-                        }
-                    })
-                )
-            ).Width(Size.Rem(30)));
+            elements.Add(new CreatePlanDialogView(
+                onCreatePlan: _onCreatePlan,
+                onClose: () => createDialogOpen.Set(false)
+            ));
         }
 
         return new Fragment(elements.ToArray());
