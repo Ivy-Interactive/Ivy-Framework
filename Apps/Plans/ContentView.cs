@@ -78,9 +78,9 @@ public class ContentView : ViewBase
             header: header,
             content: new FooterLayout(
                 footer: actionBar,
-                content: "hello"
+                content: mainContent
             ).Size(Size.Full())
-        ).Size(Size.Full());
+        ).Scroll(Scroll.None).Size(Size.Full());
 
         var elements = new List<object>
         {
