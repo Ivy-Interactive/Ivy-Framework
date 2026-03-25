@@ -119,7 +119,6 @@ data.ToDataTable()
 - Calculate aggregates across the full dataset (not just visible rows)
 - Common patterns: `.Sum()`, `.Average()`, `.Count()`, `.Min()`, `.Max()`
 - Supports single or multiple aggregates per column
-- Footer row is sticky at the bottom of the table
 
 ## Advanced Configuration
 
