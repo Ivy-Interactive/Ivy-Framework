@@ -1,9 +1,7 @@
-import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 interface DialogHeaderWidgetProps {
   id: string;
@@ -18,14 +16,12 @@ export const DialogHeaderWidget: React.FC<DialogHeaderWidgetProps> = ({
 }) => (
   <div
     className={cn(
-      'sticky top-0 z-10 bg-background p-4 shrink-0 flex items-center justify-between',
-      'flex gap-2'
+      "sticky top-0 z-10 bg-background p-4 shrink-0 flex items-center justify-between",
+      "flex gap-2",
     )}
   >
     <div className="flex-1">
-      <DialogPrimitive.Title
-        className={cn('text-base font-semibold leading-none tracking-tight')}
-      >
+      <DialogPrimitive.Title className={cn("text-base font-semibold leading-none tracking-tight")}>
         {title}
       </DialogPrimitive.Title>
     </div>

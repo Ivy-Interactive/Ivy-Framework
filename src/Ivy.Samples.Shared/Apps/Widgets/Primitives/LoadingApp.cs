@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Loader, path: ["Widgets", "Primitives"], searchHints: ["spinner", "loader", "waiting", "progress", "loading", "busy", "UseLoading", "cancellation"])]
+[App(icon: Icons.Loader, group: ["Widgets", "Primitives"], searchHints: ["spinner", "loader", "waiting", "progress", "loading", "busy", "UseLoading", "cancellation"])]
 public class LoadingApp : SampleBase
 {
     protected override object? BuildSample()
