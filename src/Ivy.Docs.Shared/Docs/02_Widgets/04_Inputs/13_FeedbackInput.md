@@ -96,6 +96,40 @@ public class FeedbackHandling: ViewBase
 }
 ```
 
+## Half-value Ratings
+
+The `AllowHalf` property enables users to select half-star or half-emoji ratings by clicking on the left or right side of a rating item. This is particularly useful for star ratings where 3.5 or 4.5 stars provide more granular feedback.
+
+```csharp demo-below
+public class HalfValueFeedbackDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var rating = UseState(3.5m);
+        return rating.ToFeedbackInput().AllowHalf();
+    }
+}
+```
+
+## Custom Maximum Rating
+
+By default, `FeedbackInput` shows 5 rating items (stars, emojis, etc.). You can customize this using the `Max` property.
+
+```csharp demo-below
+public class CustomMaxFeedbackDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var rating = UseState(0);
+        return Layout.Vertical()
+                | Text.Block("Rate out of 3:")
+                | rating.ToFeedbackInput().Max(3)
+                | Text.Block("Rate out of 10:")
+                | rating.ToFeedbackInput().Max(10);
+    }
+}
+```
+
 ## Styling and Customization
 
 `FeedbackInput`s can be customized with various styling options, including `Disabled` and `Invalid` states:

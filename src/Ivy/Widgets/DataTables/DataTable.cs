@@ -61,7 +61,7 @@ public record DataTable : WidgetBase<DataTable>
 
     public static Detail operator |(DataTable widget, object child)
     {
-        throw new NotSupportedException("DataTable does not support children.");
+        throw new NotSupportedException("DataTable does not support children via the | operator.");
     }
 }
 

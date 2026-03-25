@@ -47,9 +47,13 @@ public static class BoxExtensions
 
     public static Box Background(this Box box, Colors color, float opacity) => box with { Background = color, Opacity = (1.0f - opacity) * 100 };
 
+    public static Box Opacity(this Box box, float opacity) => box with { Opacity = opacity };
+
     public static Box BorderColor(this Box box, Colors color) => box with { BorderColor = color };
 
     public static Box BorderColor(this Box box, Colors color, float opacity) => box with { BorderColor = color, BorderOpacity = (1.0f - opacity) * 100 };
+
+    public static Box BorderOpacity(this Box box, float opacity) => box with { BorderOpacity = opacity };
 
     public static Box BorderThickness(this Box box, int thickness) => box with { BorderThickness = new(thickness) };
 

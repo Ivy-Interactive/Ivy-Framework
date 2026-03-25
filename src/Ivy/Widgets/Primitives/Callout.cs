@@ -10,7 +10,8 @@ public enum CalloutVariant
     Info,
     Warning,
     Error,
-    Success
+    Success,
+    Destructive
 }
 
 /// <summary>
@@ -53,6 +54,8 @@ public record Callout : WidgetBase<Callout>
     public static Callout Error(string? description = null, string? title = null) => new(description, title, CalloutVariant.Error);
 
     public static Callout Success(string? description = null, string? title = null) => new(description, title, CalloutVariant.Success);
+
+    public static Callout Destructive(string? description = null, string? title = null) => new(description, title, CalloutVariant.Destructive);
 }
 
 public static class CalloutExtensions

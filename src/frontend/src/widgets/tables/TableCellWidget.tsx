@@ -1,14 +1,9 @@
-import React from 'react';
-import { TableCell } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
-import { Align, getWidth } from '@/lib/styles';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import './table.css';
+import React from "react";
+import { TableCell } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { Align, getWidth } from "@/lib/styles";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import "./table.css";
 
 interface TableCellWidgetProps {
   id: string;
@@ -24,20 +19,20 @@ interface TableCellWidgetProps {
 const getTextAlign = (align: Align): React.CSSProperties => {
   // Extract horizontal alignment from the Align enum
   switch (align) {
-    case 'TopLeft':
-    case 'Left':
-    case 'BottomLeft':
-      return { textAlign: 'left' };
-    case 'TopRight':
-    case 'Right':
-    case 'BottomRight':
-      return { textAlign: 'right' };
-    case 'TopCenter':
-    case 'Center':
-    case 'BottomCenter':
-      return { textAlign: 'center' };
+    case "TopLeft":
+    case "Left":
+    case "BottomLeft":
+      return { textAlign: "left" };
+    case "TopRight":
+    case "Right":
+    case "BottomRight":
+      return { textAlign: "right" };
+    case "TopCenter":
+    case "Center":
+    case "BottomCenter":
+      return { textAlign: "center" };
     default:
-      return { textAlign: 'left' };
+      return { textAlign: "left" };
   }
 };
 
@@ -58,9 +53,9 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   const content = (
     <div
       className={cn(
-        'align-middle force-text-inherit',
-        multiline && 'whitespace-normal wrap-break-word',
-        !multiline && 'min-w-0'
+        "align-middle force-text-inherit",
+        multiline && "whitespace-normal wrap-break-word",
+        !multiline && "min-w-0",
       )}
       style={textAlignStyle}
     >
@@ -85,13 +80,12 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
 
   // Only show tooltip for string/number children to avoid "[object Object]" issues
   const shouldShowTooltip =
-    !multiline &&
-    (typeof children === 'string' || typeof children === 'number');
+    !multiline && (typeof children === "string" || typeof children === "number");
 
-  const cellClasses = cn('border-border force-text-inherit', {
-    'header-cell bg-muted font-semibold': isHeader,
-    'footer-cell bg-muted font-semibold': isFooter,
-    'max-w-0 overflow-hidden': shouldTruncate,
+  const cellClasses = cn("border-border force-text-inherit", {
+    "header-cell bg-muted font-semibold": isHeader,
+    "footer-cell bg-muted font-semibold": isFooter,
+    "max-w-0 overflow-hidden": shouldTruncate,
   });
 
   return (

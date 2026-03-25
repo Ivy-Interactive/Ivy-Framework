@@ -192,8 +192,12 @@ public class ExternalWidgetRegistry
             if (IsSystemAssemblyName(fileName))
                 continue;
 
-            // Skip already scanned
-            if (scannedAssemblies.Any(s => s.Contains(fileName)))
+            // Skip already scanned (compare simple assembly names, not substrings)
+            if (scannedAssemblies.Any(s =>
+            {
+                var scannedSimpleName = s.Contains(',') ? s[..s.IndexOf(',')] : s;
+                return scannedSimpleName.Equals(fileName, StringComparison.OrdinalIgnoreCase);
+            }))
                 continue;
 
             try
@@ -369,10 +373,7 @@ public class ExternalWidgetRegistry
 
     private static bool IsSystemAssembly(Assembly assembly)
     {
-        var name = assembly.FullName ?? "";
-        return name.StartsWith("System.") ||
-               name.StartsWith("Microsoft.") ||
-               name.StartsWith("netstandard") ||
-               name.StartsWith("mscorlib");
+        var name = assembly.GetName().Name;
+        return IsSystemAssemblyName(name);
     }
 }

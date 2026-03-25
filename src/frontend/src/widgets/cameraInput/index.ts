@@ -1,1 +1,1 @@
-export { default } from './CameraInputWidget';
+export { default } from "./CameraInputWidget";

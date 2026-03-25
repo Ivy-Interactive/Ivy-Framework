@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.CloudAlert, path: ["Widgets", "Primitives"], searchHints: ["alert", "notice", "warning", "info", "banner", "message"])]
+[App(icon: Icons.CloudAlert, group: ["Widgets", "Primitives"], searchHints: ["alert", "notice", "warning", "info", "banner", "message"])]
 public class CalloutApp : SampleBase
 {
     protected override object? BuildSample()

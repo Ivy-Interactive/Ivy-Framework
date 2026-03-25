@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { sanitizeUrl, loadScript } from './shared';
-import EmbedErrorFallback from './EmbedErrorFallback';
+import React, { useEffect, useState } from "react";
+import { sanitizeUrl, loadScript } from "./shared";
+import EmbedErrorFallback from "./EmbedErrorFallback";
 
 interface LinkedInEmbedProps {
   url: string;
@@ -33,7 +33,7 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
 
   useEffect(() => {
     if (postId) {
-      loadScript('https://platform.linkedin.com/in.js')
+      loadScript("https://platform.linkedin.com/in.js")
         .then(() => {
           // LinkedIn script loaded
         })

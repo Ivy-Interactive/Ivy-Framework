@@ -1,14 +1,11 @@
-import React, { useId } from 'react';
+import React, { useId } from "react";
 
 interface DialogBodyWidgetProps {
   id: string;
   children?: React.ReactNode;
 }
 
-export const DialogBodyWidget: React.FC<DialogBodyWidgetProps> = ({
-  id,
-  children,
-}) => {
+export const DialogBodyWidget: React.FC<DialogBodyWidgetProps> = ({ id, children }) => {
   const descriptionId = useId();
 
   return (

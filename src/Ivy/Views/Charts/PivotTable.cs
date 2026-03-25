@@ -61,7 +61,15 @@ public class PivotTable<T>
                 foreach (var measure in Measures)
                 {
                     var aggregator = measure.Aggregator.Compile();
-                    row[measure.Name] = aggregator(group.AsQueryable());
+                    try
+                    {
+                        row[measure.Name] = aggregator(group.AsQueryable());
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // Empty sequence - return default value (0 for numeric aggregations)
+                        row[measure.Name] = 0;
+                    }
                 }
 
                 result.Add(row);
@@ -96,7 +104,15 @@ public class PivotTable<T>
                 foreach (var measure in Measures)
                 {
                     var aggregator = measure.Aggregator.Compile();
-                    row[measure.Name] = aggregator(group.AsQueryable());
+                    try
+                    {
+                        row[measure.Name] = aggregator(group.AsQueryable());
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // Empty sequence - return default value (0 for numeric aggregations)
+                        row[measure.Name] = 0;
+                    }
                 }
 
                 result.Add(row);

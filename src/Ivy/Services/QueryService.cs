@@ -448,7 +448,7 @@ public class QueryService : IQueryService, IDisposable, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Fetch failed for query key {Key}", entry.SerializedScopedKey);
+            _logger.LogWarning(ex, "Fetch failed for query key {Key}", entry.SerializedScopedKey);
 
             await entry.Lock.WaitAsync(CancellationToken.None);
             try

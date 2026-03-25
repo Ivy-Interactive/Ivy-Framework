@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { GROUP_HEADER_HEIGHT } from '../dataTableEditor/constants';
+import { useMemo } from "react";
+import { GROUP_HEADER_HEIGHT } from "../dataTableEditor/constants";
 
 interface UseEmptyRowsProps {
   scrollContainerHeight: number;
@@ -23,8 +23,7 @@ export const useEmptyRows = ({
   const whitespaceHeight = useMemo(() => {
     if (hasMore || scrollContainerHeight === 0 || visibleRows === 0) return 0;
 
-    const totalHeaderHeight =
-      rowHeight + (showGroups ? GROUP_HEADER_HEIGHT : 0);
+    const totalHeaderHeight = rowHeight + (showGroups ? GROUP_HEADER_HEIGHT : 0);
     const rowsHeight = visibleRows * rowHeight;
     const safeHeight = Math.floor(scrollContainerHeight);
 

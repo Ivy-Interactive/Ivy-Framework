@@ -20,7 +20,11 @@ public enum NumberFormatStyle
     Decimal,
     Currency,
     Percent,
-    Accounting
+    Compact,
+    Scientific,
+    Engineering,
+    Accounting,
+    Bytes
 }
 
 public interface IAnyNumberInput : IAnyInput
@@ -126,9 +130,9 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
 
     internal NumberInput() { }
 
-    [Prop] public TNumber Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TNumber Value { get; init; } = default!;
 
-    [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
+    [Prop(AlwaysSerialize = true)] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
     [Event] public EventHandler<Event<IInput<TNumber>, TNumber>>? OnChange { get; }
 }
@@ -164,7 +168,7 @@ public static class NumberInputExtensions
 
         input.TargetType = GetTargetTypeName(type);
 
-        if (input.FormatStyle == NumberFormatStyle.Currency && string.IsNullOrEmpty(input.Currency))
+        if ((input.FormatStyle == NumberFormatStyle.Currency || input.FormatStyle == NumberFormatStyle.Accounting) && string.IsNullOrEmpty(input.Currency))
         {
             input.Currency = "USD";
         }
@@ -222,7 +226,7 @@ public static class NumberInputExtensions
     public static NumberInputBase FormatStyle(this NumberInputBase widget, NumberFormatStyle formatStyle)
     {
         var result = widget with { FormatStyle = formatStyle };
-        if (formatStyle == NumberFormatStyle.Currency && string.IsNullOrEmpty(result.Currency))
+        if ((formatStyle == NumberFormatStyle.Currency || formatStyle == NumberFormatStyle.Accounting) && string.IsNullOrEmpty(result.Currency))
         {
             result = result with { Currency = "USD" };
         }

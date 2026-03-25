@@ -318,7 +318,7 @@ public class AllowedValuesFormApp : ViewBase
     }
 }
 
-[App(icon: Icons.Clipboard, path: ["Concepts"], searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls", "scaffolding", "forms", "allowed-values", "select", "dropdown"])]
+[App(icon: Icons.Clipboard, group: ["Concepts"], searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls", "scaffolding", "forms", "allowed-values", "select", "dropdown"])]
 public class FormApp : SampleBase
 {
     protected override object? BuildSample()

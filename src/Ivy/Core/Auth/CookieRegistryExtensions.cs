@@ -1,6 +1,3 @@
-using System.Net;
-using System.Text.Json;
-using Ivy.Core.Helpers;
 using Ivy.Core.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,11 +18,39 @@ public static class CookieRegistryExtensions
         return null;
     }
 
-    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession)
+    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession, IEnumerable<string>? providersToDelete = null)
     {
         var cookies = new CookieJar();
-        cookies.AddCookiesForAuthToken(authSession.AuthToken);
+        cookies.AddCookiesForAuthToken(authSession.AuthToken, providersToDelete);
         cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData);
+
+        // Filter out brokered session providers that have been globally removed (if machineId is provided)
+        IReadOnlyDictionary<string, IAuthTokenHandlerSession> sessionsToWrite = authSession.BrokeredSessions;
+        HashSet<string>? removedProviders = providersToDelete != null
+            ? new(providersToDelete)
+            : null;
+
+        if (removedProviders != null && removedProviders.Count > 0)
+        {
+            sessionsToWrite = authSession.BrokeredSessions
+                .Where(kvp => !removedProviders.Contains(kvp.Key))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        }
+
+        cookies.AddCookiesForBrokeredSessions(sessionsToWrite);
+
+        // Also delete cookies for removed providers
+        if (removedProviders != null && removedProviders.Count > 0)
+        {
+            var cookieOptions = CreateAuthCookieOptions();
+            foreach (var provider in removedProviders)
+            {
+                cookies.Delete($"{provider}_access_token", cookieOptions);
+                cookies.Delete($"{provider}_refresh_token", cookieOptions);
+                cookies.Delete($"{provider}_auth_tag", cookieOptions);
+            }
+        }
+
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
@@ -43,61 +68,119 @@ public static class CookieRegistryExtensions
         return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken)
+    public static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken, IEnumerable<string>? sessionsToDelete = null)
     {
+        var authTokenName = "access_token";
+        var refreshTokenName = "refresh_token";
+        var tagName = "auth_tag";
+
         if (string.IsNullOrEmpty(authToken?.AccessToken))
         {
-            cookies.Delete("auth_token", CreateAuthCookieOptions());
-            cookies.Delete("auth_ext_refresh_token", CreateAuthCookieOptions());
+            cookies.Delete(authTokenName, CreateAuthCookieOptions());
+            cookies.Delete(refreshTokenName, CreateAuthCookieOptions());
+            cookies.Delete(tagName, CreateAuthCookieOptions());
+
+            // Delete brokered auth session cookies
+            if (sessionsToDelete != null)
+            {
+                var cookieOptions = CreateAuthCookieOptions();
+                foreach (var provider in sessionsToDelete)
+                {
+                    cookies.Delete($"{provider}_access_token", cookieOptions);
+                    cookies.Delete($"{provider}_refresh_token", cookieOptions);
+                    cookies.Delete($"{provider}_auth_tag", cookieOptions);
+                }
+            }
         }
         else
         {
             var cookieOptions = CreateAuthCookieOptions();
 
-            var tokenJson = JsonSerializer.Serialize(authToken, JsonHelper.DefaultOptions);
+            cookies.Append(authTokenName, authToken.AccessToken, cookieOptions);
 
-            // Calculate url-encoded token length
-            var tokenJsonLength = WebUtility.UrlEncode(tokenJson).Length;
-            var refreshTokenLength = authToken.RefreshToken != null
-                ? WebUtility.UrlEncode(authToken.RefreshToken).Length
-                : 0;
-
-            // If the token is too big, try putting the refresh token into its own cookie.
-            // I'm not trying to be overly precise here.
-            const int CookieSizeLimit = 4000;
-
-            if (tokenJsonLength > CookieSizeLimit && tokenJsonLength - refreshTokenLength < CookieSizeLimit)
+            if (!string.IsNullOrEmpty(authToken.RefreshToken))
             {
-                var refreshToken = authToken.RefreshToken!; // non-nullness implied by condition above
-                var modifiedToken = authToken with { RefreshToken = null };
-                tokenJson = JsonSerializer.Serialize(modifiedToken, JsonHelper.DefaultOptions);
-                cookies.Append("auth_ext_refresh_token", refreshToken, cookieOptions);
+                cookies.Append(refreshTokenName, authToken.RefreshToken, cookieOptions);
             }
             else
             {
-                cookies.Delete("auth_ext_refresh_token", CreateAuthCookieOptions());
+                cookies.Delete(refreshTokenName, CreateAuthCookieOptions());
             }
-            cookies.Append("auth_token", tokenJson, cookieOptions);
+
+            if (authToken.Tag != null)
+            {
+                cookies.Append(tagName, authToken.Tag, cookieOptions);
+            }
+            else
+            {
+                cookies.Delete(tagName, CreateAuthCookieOptions());
+            }
         }
     }
 
-    private static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData)
+    public static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData)
     {
+        var authSessionDataName = "auth_session_data";
+
         if (authSessionData == null)
         {
-            cookies.Delete("auth_session_data", CreateAuthCookieOptions());
+            cookies.Delete(authSessionDataName, CreateAuthCookieOptions());
         }
         else
         {
             var cookieOptions = CreateAuthCookieOptions();
 
-            cookies.Append("auth_session_data", authSessionData, cookieOptions);
+            cookies.Append(authSessionDataName, authSessionData, cookieOptions);
+        }
+    }
+
+    public static void AddCookiesForBrokeredSessions(this CookieJar cookies, IReadOnlyDictionary<string, IAuthTokenHandlerSession> brokeredSessions)
+    {
+        var cookieOptions = CreateAuthCookieOptions();
+
+        foreach (var (provider, session) in brokeredSessions)
+        {
+            var accessTokenName = $"{provider}_access_token";
+            var refreshTokenName = $"{provider}_refresh_token";
+            var tagName = $"{provider}_auth_tag";
+
+            // Store access token
+            if (!string.IsNullOrEmpty(session.AuthToken?.AccessToken))
+            {
+                cookies.Append(accessTokenName, session.AuthToken.AccessToken, cookieOptions);
+            }
+            else
+            {
+                cookies.Delete(accessTokenName, CreateAuthCookieOptions());
+            }
+
+            // Store refresh token if present
+            if (!string.IsNullOrEmpty(session.AuthToken?.RefreshToken))
+            {
+                cookies.Append(refreshTokenName, session.AuthToken.RefreshToken, cookieOptions);
+            }
+            else
+            {
+                cookies.Delete(refreshTokenName, CreateAuthCookieOptions());
+            }
+
+            // Store tag if present
+            if (session.AuthToken?.Tag != null)
+            {
+                cookies.Append(tagName, session.AuthToken.Tag, cookieOptions);
+            }
+            else
+            {
+                cookies.Delete(tagName, CreateAuthCookieOptions());
+            }
         }
     }
 
     private static CookieOptions CreateAuthCookieOptions()
     {
-        var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
+        // Continue to check ASPNETCORE_ENVIRONMENT to avoid silently making cookies insecure for existing users who set that variable to "Production"
+        // See also https://github.com/Ivy-Interactive/Ivy-Framework/issues/2466
+        var isProduction = ProcessHelper.IsProduction() || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,

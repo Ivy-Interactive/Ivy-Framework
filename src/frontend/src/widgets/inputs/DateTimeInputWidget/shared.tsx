@@ -1,9 +1,9 @@
-import * as React from 'react';
-import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { InvalidIcon } from '@/components/InvalidIcon';
-import { dateTimeInputIconVariant } from '@/components/ui/input/date-time-input-variant';
-import { Densities } from '@/types/density';
+import * as React from "react";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { InvalidIcon } from "@/components/InvalidIcon";
+import { dateTimeInputIconVariant } from "@/components/ui/input/date-time-input-variant";
+import { Densities } from "@/types/density";
 
 interface ClearAndInvalidIconsProps {
   showClear?: boolean;
@@ -35,15 +35,13 @@ export const ClearAndInvalidIcons: React.FC<ClearAndInvalidIconsProps> = ({
           <X
             className={cn(
               dateTimeInputIconVariant({ density }),
-              'text-muted-foreground hover:text-foreground'
+              "text-muted-foreground hover:text-foreground",
             )}
           />
         </button>
       )}
       {/* Invalid icon - rightmost */}
-      {invalid && (
-        <InvalidIcon message={invalid} className="pointer-events-auto" />
-      )}
+      {invalid && <InvalidIcon message={invalid} className="pointer-events-auto" />}
     </div>
   );
 };

@@ -283,6 +283,41 @@ public class SelectionLimitsDemo : ViewBase
 }
 ```
 
+### Option Tooltips
+
+Add hover tooltips to individual options using the `tooltip` parameter on `Option<T>`. Tooltips provide contextual help for technical terms, abbreviations, or disabled options:
+
+```csharp demo-tabs
+public class OptionTooltipsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var strategy = UseState("lru");
+        var strategies = UseState<string[]>([]);
+
+        var options = new IAnyOption[]
+        {
+            new Option<string>("LRU", "lru", tooltip: "Least Recently Used — evicts the oldest accessed entry first"),
+            new Option<string>("LFU", "lfu", tooltip: "Least Frequently Used — evicts the least accessed entry first"),
+            new Option<string>("FIFO", "fifo", tooltip: "First In, First Out — evicts entries in insertion order"),
+        };
+
+        return Layout.Vertical()
+            | Text.Monospaced("Select Variant")
+            | strategy.ToSelectInput(options)
+                .Placeholder("Select a cache strategy...")
+
+            | Text.Monospaced("Toggle Variant")
+            | strategies.ToSelectInput(options)
+                .Variant(SelectInputVariant.Toggle)
+
+            | Text.Monospaced("List Variant")
+            | strategies.ToSelectInput(options)
+                .Variant(SelectInputVariant.List);
+    }
+}
+```
+
 ### Disabled Options
 
 Individual options can be disabled using the fluent `.Disabled()` method on `Option<T>`. Disabled options appear greyed out and cannot be selected, but remain visible in the list:

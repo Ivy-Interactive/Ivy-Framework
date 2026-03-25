@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - bool
   - checkbox
   - switch
   - toggle

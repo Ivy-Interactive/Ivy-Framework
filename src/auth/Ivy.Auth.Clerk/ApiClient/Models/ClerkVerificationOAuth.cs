@@ -21,4 +21,7 @@ public class ClerkVerificationOAuth
 
     [JsonPropertyName("external_verification_redirect_url")]
     public string? ExternalVerificationRedirectUrl { get; init; }
+
+    [JsonPropertyName("error")]
+    public ClerkVerificationError? Error { get; init; }
 }

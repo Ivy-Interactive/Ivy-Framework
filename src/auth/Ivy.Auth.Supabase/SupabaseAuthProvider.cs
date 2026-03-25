@@ -20,52 +20,20 @@ public class SupabaseOAuthException(string? error, string? errorCode, string? er
     public string? ErrorDescription { get; } = errorDescription;
 }
 
-public class SupabaseAuthProvider : IAuthProvider
+public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
 {
-    private readonly global::Supabase.Client _client;
-    private readonly HttpClient _httpClient;
-    private readonly string _jwksUrl;
-    private readonly string _issuer;
-    private readonly SymmetricSecurityKey? _legacyJwtKey = null;
-
     private readonly List<AuthOption> _authOptions = new();
 
     private string? _pkceCodeVerifier = null;
 
-    private JsonWebKeySet? _cachedJwks = null;
-    private DateTime _jwksCacheExpiry = DateTime.MinValue;
-
     public SupabaseAuthProvider(IConfiguration configuration)
+        : base(configuration)
     {
-        var url = configuration.GetValue<string>("Supabase:Url") ?? throw new Exception("Supabase:Url is required");
-        var apiKey = configuration.GetValue<string>("Supabase:ApiKey") ?? throw new Exception("Supabase:ApiKey is required");
-        var legacyJwtSecret = configuration.GetValue<string?>("Supabase:LegacyJwtSecret");
-        if (!string.IsNullOrEmpty(legacyJwtSecret))
-        {
-            var keyBytes = Encoding.UTF8.GetBytes(legacyJwtSecret);
-            _legacyJwtKey = new SymmetricSecurityKey(keyBytes);
-        }
-
-        var options = new SupabaseOptions
-        {
-            AutoRefreshToken = false,
-            AutoConnectRealtime = false
-        };
-
-        _client = new global::Supabase.Client(url, apiKey, options);
-
-        var userAgent = AuthProviderHelpers.GetUserAgent(configuration, "Supabase:UserAgent");
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
-
-        // Setup JWKS URL
-        _issuer = new Uri(new Uri(url), "auth/v1").ToString();
-        _jwksUrl = $"{_issuer}/.well-known/jwks.json";
     }
 
     public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
     {
-        var session = await _client.Auth.SignIn(email, password)
+        var session = await Client.Auth.SignIn(email, password)
             .WaitAsync(cancellationToken);
         var authToken = MakeAuthToken(session);
         return authToken;
@@ -116,8 +84,17 @@ public class SupabaseAuthProvider : IAuthProvider
                 ["connection"] = connectionId,
             };
         }
+        else if (provider == GotrueConstants.Provider.Google)
+        {
+            // These parameters are needed to get a refresh token from Google.
+            signInOptions.QueryParams = new()
+            {
+                ["access_type"] = "offline",
+                ["prompt"] = "consent",
+            };
+        }
 
-        var providerAuthState = await _client.Auth.SignIn(provider, signInOptions)
+        var providerAuthState = await Client.Auth.SignIn(provider, signInOptions)
             .WaitAsync(cancellationToken);
         _pkceCodeVerifier = providerAuthState.PKCEVerifier;
 
@@ -144,8 +121,11 @@ public class SupabaseAuthProvider : IAuthProvider
 
         try
         {
-            var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier, code)
+            var session = await Client.Auth.ExchangeCodeForSession(_pkceCodeVerifier, code)
                 .WaitAsync(cancellationToken);
+
+            ExtractAndStoreBrokeredTokens(session, authSession);
+
             return MakeAuthToken(session);
         }
         catch (Exception ex)
@@ -156,97 +136,13 @@ public class SupabaseAuthProvider : IAuthProvider
 
     public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        await _client.Auth.SignOut()
+        await Client.Auth.SignOut()
             .WaitAsync(cancellationToken);
-    }
-
-    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        if (authSession.AuthToken is not { } token || token.RefreshToken == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            var session = await _client.Auth.SetSession(token.AccessToken, token.RefreshToken, forceAccessTokenRefresh: true)
-                .WaitAsync(cancellationToken);
-            var authToken = MakeAuthToken(session);
-            return authToken;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        return await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not null;
-    }
-
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
-        {
-            return null;
-        }
-
-        var userId = claims.FindFirst("sub")?.Value;
-        var email = claims.FindFirst("email")?.Value;
-        string? name = null, avatarUrl = null;
-
-        var metadataJson = claims.FindFirst("user_metadata")?.Value;
-        try
-        {
-            if (!string.IsNullOrEmpty(metadataJson))
-            {
-                using var doc = JsonDocument.Parse(metadataJson);
-                var root = doc.RootElement;
-
-                if (root.TryGetProperty("full_name", out var fullNameProperty))
-                {
-                    name = fullNameProperty.GetString();
-                }
-                if (root.TryGetProperty("avatar_url", out var avatarUrlProperty))
-                {
-                    avatarUrl = avatarUrlProperty.GetString();
-                }
-            }
-        }
-        catch (JsonException)
-        {
-            // Ignore JSON parsing errors
-        }
-
-        if (userId == null || email == null)
-        {
-            return null;
-        }
-
-        return new UserInfo(
-            userId,
-            email,
-            name,
-            avatarUrl
-        );
     }
 
     public AuthOption[] GetAuthOptions()
     {
         return _authOptions.ToArray();
-    }
-
-    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
-    {
-        if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is var (_, expiration))
-        {
-            return new TokenLifetime(expiration);
-        }
-        else
-        {
-            return null;
-        }
     }
 
     public SupabaseAuthProvider UseEmailPassword()
@@ -321,66 +217,77 @@ public class SupabaseAuthProvider : IAuthProvider
         return this;
     }
 
-    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string? jwt, CancellationToken cancellationToken)
+    private static void ExtractAndStoreBrokeredTokens(Session? session, IAuthSession authSession)
     {
-        if (string.IsNullOrEmpty(jwt))
+        if (session?.User?.AppMetadata == null || string.IsNullOrEmpty(session.ProviderToken))
         {
-            return null;
+            return;
         }
 
-        try
+        if (!session.User.UserMetadata.TryGetValue("provider_id", out var providerIdObj) || providerIdObj is not string providerId)
         {
-            var handler = new JwtSecurityTokenHandler
-            {
-                InboundClaimTypeMap = new Dictionary<string, string>()
-            };
+            return;
+        }
 
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = _issuer,
-                ValidateAudience = true,
-                ValidAudience = "authenticated",
-                ValidateIssuerSigningKey = true,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(2),
-            };
+        string? oauthProvider = null;
 
-            var parsedToken = handler.ReadJwtToken(jwt);
-            if (parsedToken.Header.Alg == SecurityAlgorithms.HmacSha256)
+        foreach (var identity in session.User.Identities)
+        {
+            if (string.IsNullOrEmpty(identity.Id) || identity.Id != providerId)
             {
-                tokenValidationParameters.IssuerSigningKey = _legacyJwtKey;
-            }
-            else
-            {
-                // Check cache first
-                if (_cachedJwks == null || DateTime.UtcNow >= _jwksCacheExpiry)
-                {
-                    var jwksJson = await _httpClient.GetStringAsync(_jwksUrl, cancellationToken);
-                    _cachedJwks = new JsonWebKeySet(jwksJson);
-                    _jwksCacheExpiry = DateTime.UtcNow.AddHours(24);
-                }
-
-                if (_cachedJwks.Keys.Count == 0)
-                {
-                    return null;
-                }
-
-                tokenValidationParameters.IssuerSigningKeys = _cachedJwks.Keys;
+                continue;
             }
 
-            var claims = handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
-            return (claims, validatedToken.ValidTo);
+            oauthProvider = identity.Provider?.ToLowerInvariant() switch
+            {
+                "google" => OAuthProviders.Google,
+                "github" => OAuthProviders.GitHub,
+                "apple" => OAuthProviders.Apple,
+                "microsoft" => OAuthProviders.Microsoft,
+                "twitter" => OAuthProviders.Twitter,
+                "discord" => OAuthProviders.Discord,
+                "twitch" => OAuthProviders.Twitch,
+                "figma" => OAuthProviders.Figma,
+                "notion" => OAuthProviders.Notion,
+                "azure" => OAuthProviders.Azure,
+                "workos" => OAuthProviders.WorkOS,
+                "gitlab" => OAuthProviders.GitLab,
+                "bitbucket" => OAuthProviders.Bitbucket,
+                _ => null
+            };
+
+            if (oauthProvider != null)
+            {
+                break;
+            }
         }
-        catch (Exception)
+
+        if (oauthProvider == null)
         {
-            return null;
+            return;
         }
+
+        var providerAuthToken = new AuthToken(
+            session.ProviderToken,
+            session.ProviderRefreshToken);
+
+        var providerSession = new AuthTokenHandlerSession(authToken: providerAuthToken);
+        authSession.AddBrokeredSession(oauthProvider, providerSession);
     }
 
-    private AuthToken? MakeAuthToken(Session? session) =>
-        session?.AccessToken != null
-            ? new AuthToken(session.AccessToken, session.RefreshToken)
-            : null;
+    public Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    {
+        // Return stored sessions if available and not skipping cache
+        if (!skipCache && authSession.BrokeredSessions.Count > 0)
+        {
+            return Task.FromResult(BrokeredSessionsResult.Success(
+                new Dictionary<string, IAuthTokenHandlerSession>(authSession.BrokeredSessions)));
+        }
+
+        // Supabase does not provide a way to get the provider tokens outside of the initial authentication flow, so we rely on storing them when we first receive them.
+        // If we're here (either skipCache=true or no cached sessions), there's no way to refetch, so signal that retrying won't help.
+        // This should lead to an immediate logout so that we can hopefully recover a valid session on the next login.
+        return Task.FromResult(BrokeredSessionsResult.Failure(canRetry: false));
+    }
 
 }

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Button } from './ui/button';
-import { ClipboardCopy, Check } from 'lucide-react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { createPrismTheme } from '@/lib/prismTheme';
+import React, { useState } from "react";
+import { Button } from "./ui/button";
+import { ClipboardCopy, Check } from "lucide-react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { createPrismTheme } from "@/lib/prismTheme";
 
 interface ErrorDisplayProps {
   title?: string | null;
@@ -10,11 +10,7 @@ interface ErrorDisplayProps {
   stackTrace?: string | null;
 }
 
-export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
-  title,
-  message,
-  stackTrace,
-}) => {
+export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ title, message, stackTrace }) => {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {
@@ -24,7 +20,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       stackTrace && `Stack Trace:\n${stackTrace}`,
     ]
       .filter(Boolean)
-      .join('\n\n');
+      .join("\n\n");
 
     navigator.clipboard.writeText(errorDetails);
     setCopied(true);
@@ -63,11 +59,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         </div>
       )}
 
-      <Button
-        onClick={copyToClipboard}
-        className="mt-4 flex items-center gap-2"
-        variant="outline"
-      >
+      <Button onClick={copyToClipboard} className="mt-4 flex items-center gap-2" variant="outline">
         {copied ? (
           <Check className="h-4 w-4 text-primary animate-in fade-in duration-500" />
         ) : (

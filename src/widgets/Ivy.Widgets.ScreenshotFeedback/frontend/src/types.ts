@@ -1,14 +1,14 @@
 export type EventHandler = (event: string, id: string, args: unknown[]) => void;
 
 export enum DrawingTool {
-  Callout = 'callout',
-  Freehand = 'freehand',
-  Arrow = 'arrow',
-  Line = 'line',
-  Rectangle = 'rectangle',
-  Circle = 'circle',
-  Censor = 'censor',
-  Text = 'text',
+  Callout = "callout",
+  Freehand = "freehand",
+  Arrow = "arrow",
+  Line = "line",
+  Rectangle = "rectangle",
+  Circle = "circle",
+  Censor = "censor",
+  Text = "text",
 }
 
 export interface Point {
@@ -73,7 +73,15 @@ export interface CensorShape extends BaseShape {
   end: Point;
 }
 
-export type Shape = CalloutShape | FreehandShape | ArrowShape | LineShape | RectangleShape | CircleShape | CensorShape | TextShape;
+export type Shape =
+  | CalloutShape
+  | FreehandShape
+  | ArrowShape
+  | LineShape
+  | RectangleShape
+  | CircleShape
+  | CensorShape
+  | TextShape;
 
 export interface AnnotationData {
   shapes: Shape[];

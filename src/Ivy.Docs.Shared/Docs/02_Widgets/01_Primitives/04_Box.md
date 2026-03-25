@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - box
   - container
   - div
   - wrapper

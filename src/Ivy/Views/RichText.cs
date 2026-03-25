@@ -74,6 +74,13 @@ public class RichTextBuilder : ViewBase, IStateless
         => Run(content, bold: bold, italic: italic, strikeThrough: strikeThrough,
             color: color, highlightColor: highlightColor, word: word, link: url, linkTarget: linkTarget);
 
+    /// <summary>Add a line break run.</summary>
+    public RichTextBuilder LineBreak()
+    {
+        _runs.Add(new TextRun { LineBreak = true });
+        return this;
+    }
+
     // --- Block-level styling ---
 
     /// <summary>Prevent text from wrapping.</summary>

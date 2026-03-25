@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { sanitizeUrl, sanitizeId, loadScript } from './shared';
-import EmbedErrorFallback from './EmbedErrorFallback';
+import React, { useEffect, useState } from "react";
+import { sanitizeUrl, sanitizeId, loadScript } from "./shared";
+import EmbedErrorFallback from "./EmbedErrorFallback";
 
 interface RedditEmbedProps {
   url: string;
@@ -17,7 +17,7 @@ const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
 
   useEffect(() => {
     if (postId) {
-      loadScript('https://embed.redditmedia.com/widgets/platform.js')
+      loadScript("https://embed.redditmedia.com/widgets/platform.js")
         .then(() => {
           setScriptLoaded(true);
         })
@@ -37,7 +37,7 @@ const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
       <blockquote className="reddit-card">
         <a href={sanitizedUrl}>
           <p>Posted by u/reddit</p>
-          <p>{scriptLoaded ? 'Loading Reddit post...' : 'Loading script...'}</p>
+          <p>{scriptLoaded ? "Loading Reddit post..." : "Loading script..."}</p>
         </a>
       </blockquote>
     </div>

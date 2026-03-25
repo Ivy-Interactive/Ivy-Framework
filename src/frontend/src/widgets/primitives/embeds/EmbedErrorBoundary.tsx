@@ -1,4 +1,4 @@
-import { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from "react";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -10,10 +10,7 @@ interface ErrorBoundaryProps {
   fallback: ReactNode;
 }
 
-class EmbedErrorBoundary extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+class EmbedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -25,8 +22,8 @@ class EmbedErrorBoundary extends Component<
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error for debugging (in development)
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Embed Error Boundary caught an error:', error, errorInfo);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Embed Error Boundary caught an error:", error, errorInfo);
     }
   }
 

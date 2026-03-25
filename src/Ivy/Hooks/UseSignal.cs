@@ -96,7 +96,7 @@ public enum BroadcastType
     Server,
     User,
     App,
-    Chrome
+    AppShell
 }
 
 public class SignalAttribute(BroadcastType broadcastTypeType) : Attribute
@@ -164,8 +164,8 @@ public class SignalRouter(AppSessionStore sessionStore)
                     store.Sessions.Values.Where(s => !s.IsDisposed() && s.MachineId == store.Sessions[session.ConnectionId].MachineId).ToList(),
                 BroadcastType.App =>
                     store.Sessions.Values.Where(s => !s.IsDisposed() && s.AppId == store.Sessions[session.ConnectionId].AppId).ToList(),
-                BroadcastType.Chrome =>
-                    store.FindChrome(session) is { } chrome ? [chrome] : [],
+                BroadcastType.AppShell =>
+                    store.FindAppShell(session) is { } appShell ? [appShell] : [],
                 _ => []
             };
         }

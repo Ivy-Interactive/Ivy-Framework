@@ -1,25 +1,25 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { EyeIcon, EyeOffIcon, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { getWidth, inputStyles } from '@/lib/styles';
-import { InvalidIcon } from '@/components/InvalidIcon';
-import { Densities } from '@/types/density';
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { EyeIcon, EyeOffIcon, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { getWidth, inputStyles } from "@/lib/styles";
+import { InvalidIcon } from "@/components/InvalidIcon";
+import { Densities } from "@/types/density";
 import {
   textInputSizeVariant,
   eyeIconVariant,
   xIconVariant,
-} from '@/components/ui/input/text-input-variant';
-import { TextInputWidgetProps } from '../types';
+} from "@/components/ui/input/text-input-variant";
+import { TextInputWidgetProps } from "../types";
 import {
   useCursorPosition,
   useEnterKeyBlur,
   usePasteHandler,
   formatShortcutForDisplay,
-} from '../hooks';
+} from "../hooks";
 
 interface PasswordVariantProps {
-  props: Omit<TextInputWidgetProps, 'variant'>;
+  props: Omit<TextInputWidgetProps, "variant">;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -42,16 +42,13 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [hasLastPass, setHasLastPass] = useState(false);
-  const { elementRef: elementRefGeneric, savePosition } = useCursorPosition(
-    props.value,
-    inputRef
-  );
+  const { elementRef: elementRefGeneric, savePosition } = useCursorPosition(props.value, inputRef);
   const elementRef = elementRefGeneric as React.RefObject<HTMLInputElement>;
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (containerRef.current?.querySelector('[data-lastpass-icon-root]')) {
+      if (containerRef.current?.querySelector("[data-lastpass-icon-root]")) {
         setHasLastPass(true);
         clearInterval(interval);
       }
@@ -60,7 +57,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
   }, []);
 
   const togglePassword = useCallback(() => {
-    setShowPassword(prev => !prev);
+    setShowPassword((prev) => !prev);
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,7 +65,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
     onChange(e);
   };
 
-  const handlePaste = usePasteHandler(props.maxLength, value => {
+  const handlePaste = usePasteHandler(props.maxLength, (value) => {
     const syntheticEvent = {
       target: { value },
       currentTarget: { value },
@@ -83,22 +80,18 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
-  const hasValue = props.value && props.value.toString().trim() !== '';
+  const hasValue = props.value && props.value.toString().trim() !== "";
   const showClear = props.nullable && !props.disabled && hasValue;
 
   return (
-    <div
-      className="relative w-full select-none"
-      style={styles}
-      ref={containerRef}
-    >
+    <div className="relative w-full select-none" style={styles} ref={containerRef}>
       <div className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
         <Input
           ref={elementRef}
           id={props.id}
           placeholder={props.placeholder}
           value={props.value}
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           disabled={props.disabled}
           maxLength={props.maxLength}
           minLength={props.minLength}
@@ -110,20 +103,21 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           onPaste={handlePaste}
           className={cn(
             textInputSizeVariant({ density }),
-            'border-0 shadow-none dark:bg-transparent',
+            "border-0 shadow-none dark:bg-transparent",
+            "[&::-ms-reveal]:hidden [&::-ms-clear]:hidden",
             props.invalid && inputStyles.invalidInput,
-            props.invalid || showClear ? 'pr-14' : 'pr-8',
-            hasLastPass && 'pr-3',
+            props.invalid || showClear ? "pr-14" : "pr-8",
+            hasLastPass && "pr-3",
             props.shortcutKey &&
               !hasLastPass &&
               !hasValue &&
               !showClear &&
               !props.invalid &&
-              'pr-24',
-            showClear && props.invalid && !hasLastPass && 'pr-20',
-            !hasValue && props.nullable && 'placeholder:text-muted-foreground'
+              "pr-24",
+            showClear && props.invalid && !hasLastPass && "pr-20",
+            !hasValue && props.nullable && "placeholder:text-muted-foreground",
           )}
-          data-testid={props['data-testid']}
+          data-testid={props["data-testid"]}
         />
       </div>
       {!hasLastPass && (
@@ -131,13 +125,14 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           <div className="pointer-events-auto flex items-center h-6">
             <button
               type="button"
-              className={eyeIconVariant({ density })}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center"
               onClick={togglePassword}
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
-                <EyeOffIcon className={eyeIconVariant({ density })} />
+                <EyeOffIcon className={cn("text-muted-foreground", eyeIconVariant({ density }))} />
               ) : (
-                <EyeIcon className={eyeIconVariant({ density })} />
+                <EyeIcon className={cn("text-muted-foreground", eyeIconVariant({ density }))} />
               )}
             </button>
           </div>

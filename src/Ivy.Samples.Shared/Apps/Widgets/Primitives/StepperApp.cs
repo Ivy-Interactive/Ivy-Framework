@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.ListOrdered, path: ["Widgets", "Primitives"], searchHints: ["stepper", "steps", "wizard", "progress", "sequence"])]
+[App(icon: Icons.ListOrdered, group: ["Widgets", "Primitives"], searchHints: ["stepper", "steps", "wizard", "progress", "sequence"])]
 public class StepperApp : SampleBase
 {
     StepperItem[] GetItems(int selectedIndex) =>

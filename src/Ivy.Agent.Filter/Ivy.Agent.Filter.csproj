@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="../../../Ivy/Directory.Build.props" Condition="Exists('../../../Ivy/Directory.Build.props')" />
 
@@ -36,9 +36,9 @@
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
     <PackageReference Include="Antlr4BuildTasks" Version="12.11.0" />
     <PackageReference Include="Google.Protobuf" Version="3.33.2" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="10.1.1" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.1" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 

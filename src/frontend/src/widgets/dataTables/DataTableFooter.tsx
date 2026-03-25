@@ -13,10 +13,7 @@ export interface DataTableFooterProps {
   className?: string;
 }
 
-export const DataTableFooter: React.FC<DataTableFooterProps> = ({
-  children,
-  className,
-}) => {
+export const DataTableFooter: React.FC<DataTableFooterProps> = ({ children, className }) => {
   return (
     <div className={cn(className)} style={tableStyles.tableEditor.footer}>
       {children}

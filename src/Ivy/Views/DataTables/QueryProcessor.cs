@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using Apache.Arrow;
@@ -31,6 +33,50 @@ public class ValuesResult
 
 public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributedCache? cache = null)
 {
+    private static readonly MethodInfo s_skipMethod = typeof(Queryable).GetMethods()
+        .First(m => m.Name == "Skip" && m.GetParameters().Length == 2);
+
+    private static readonly MethodInfo s_takeMethod = typeof(Queryable).GetMethods()
+        .First(m => m.Name == "Take" && m.GetParameters().Length == 2);
+
+    private static readonly MethodInfo s_whereMethod = typeof(Queryable).GetMethods()
+        .First(m => m.Name == "Where" && m.GetParameters().Length == 2);
+
+    private static readonly MethodInfo s_orderByMethod = typeof(Queryable).GetMethods()
+        .First(m => m.Name == "OrderBy" && m.GetParameters().Length == 2);
+
+    private static readonly MethodInfo s_orderByDescendingMethod = typeof(Queryable).GetMethods()
+        .First(m => m.Name == "OrderByDescending" && m.GetParameters().Length == 2);
+
+    private static readonly MethodInfo s_thenByMethod = typeof(Queryable).GetMethods()
+        .First(m => m.Name == "ThenBy" && m.GetParameters().Length == 2);
+
+    private static readonly MethodInfo s_thenByDescendingMethod = typeof(Queryable).GetMethods()
+        .First(m => m.Name == "ThenByDescending" && m.GetParameters().Length == 2);
+
+    private static readonly MethodInfo s_selectMethod = typeof(Queryable).GetMethods()
+        .First(m => m.Name == "Select" && m.GetParameters().Length == 2);
+
+    private static readonly MethodInfo s_distinctMethod = typeof(Queryable).GetMethods()
+        .First(m => m.Name == "Distinct" && m.GetParameters().Length == 1);
+
+    private static readonly ConcurrentDictionary<(MethodInfo, Type, Type), MethodInfo> s_genericMethodCache = new();
+
+    // Synchronization guards for EF Core-backed queryables to prevent concurrent DbContext access.
+    // Keyed by the IQueryProvider instance so different DbContexts can execute concurrently.
+    private static readonly ConditionalWeakTable<IQueryProvider, SemaphoreSlim> s_providerSemaphores = new();
+
+    private static bool IsEfCoreProvider(IQueryable queryable)
+        => queryable.Provider.GetType().FullName?.Contains("EntityFrameworkCore") == true;
+
+    private static SemaphoreSlim GetProviderSemaphore(IQueryable queryable)
+        => s_providerSemaphores.GetValue(queryable.Provider, _ => new SemaphoreSlim(1, 1));
+
+    private static MethodInfo GetGenericMethod(MethodInfo openMethod, params Type[] typeArgs)
+        => s_genericMethodCache.GetOrAdd(
+            (openMethod, typeArgs[0], typeArgs.Length > 1 ? typeArgs[1] : typeof(void)),
+            _ => openMethod.MakeGenericMethod(typeArgs));
+
     public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query, Func<object, object?>? idSelector = null)
     {
         try
@@ -70,37 +116,38 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
                 processedQuery = ApplySort(processedQuery, query.Sort);
             }
 
-            // Get total count before pagination
-            var totalRows = processedQuery.Cast<object>().Count();
-            logger?.LogDebug("Total rows before pagination: {TotalRows}", totalRows);
-
-            // Apply pagination
-            if (query.Offset > 0)
+            // Serialize count + data queries for EF Core providers to prevent concurrent DbContext access.
+            var useGuard = IsEfCoreProvider(queryable);
+            var semaphore = useGuard ? GetProviderSemaphore(queryable) : null;
+            if (semaphore != null) semaphore.Wait();
+            int totalRows;
+            List<object> results;
+            try
             {
-                var skipMethod = typeof(Queryable).GetMethods()
-                    .FirstOrDefault(m => m.Name == "Skip" && m.GetParameters().Length == 2)?
-                    .MakeGenericMethod(queryable.ElementType);
+                // Get total count before pagination
+                totalRows = processedQuery.Cast<object>().Count();
+                logger?.LogDebug("Total rows before pagination: {TotalRows}", totalRows);
 
-                if (skipMethod != null)
+                // Apply pagination
+                if (query.Offset > 0)
                 {
+                    var skipMethod = GetGenericMethod(s_skipMethod, queryable.ElementType);
                     processedQuery = (IQueryable)skipMethod.Invoke(null, new object[] { processedQuery, query.Offset })!;
                 }
-            }
 
-            // Apply limit - always apply if specified, even if 0
-            var takeMethod = typeof(Queryable).GetMethods()
-                .FirstOrDefault(m => m.Name == "Take" && m.GetParameters().Length == 2)?
-                .MakeGenericMethod(queryable.ElementType);
-
-            if (takeMethod != null)
-            {
+                // Apply limit - always apply if specified, even if 0
+                var takeMethod = GetGenericMethod(s_takeMethod, queryable.ElementType);
                 processedQuery = (IQueryable)takeMethod.Invoke(null, new object[] { processedQuery, query.Limit })!;
-            }
 
-            // Execute query and get results
-            logger?.LogDebug("Executing query");
-            var results = processedQuery.Cast<object>().ToList();
-            logger?.LogInformation("Query executed, got {ResultCount} results", results.Count);
+                // Execute query and get results
+                logger?.LogDebug("Executing query");
+                results = processedQuery.Cast<object>().ToList();
+                logger?.LogInformation("Query executed, got {ResultCount} results", results.Count);
+            }
+            finally
+            {
+                semaphore?.Release();
+            }
 
             // Convert to Arrow table
             logger?.LogDebug("Converting to Arrow table");
@@ -211,24 +258,18 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
             // For the first sort, use OrderBy/OrderByDescending
             // For subsequent sorts, use ThenBy/ThenByDescending
-            string methodName;
+            MethodInfo openMethod;
             if (i == 0)
             {
-                methodName = sortOrder.Direction == Ivy.Protos.DataTable.SortDirection.Asc ? "OrderBy" : "OrderByDescending";
+                openMethod = sortOrder.Direction == Ivy.Protos.DataTable.SortDirection.Asc ? s_orderByMethod : s_orderByDescendingMethod;
             }
             else
             {
-                methodName = sortOrder.Direction == Ivy.Protos.DataTable.SortDirection.Asc ? "ThenBy" : "ThenByDescending";
+                openMethod = sortOrder.Direction == Ivy.Protos.DataTable.SortDirection.Asc ? s_thenByMethod : s_thenByDescendingMethod;
             }
 
-            var method = typeof(Queryable).GetMethods()
-                .FirstOrDefault(m => m.Name == methodName && m.GetParameters().Length == 2)?
-                .MakeGenericMethod(elementType, sortType);
-
-            if (method != null)
-            {
-                query = (IQueryable)method.Invoke(null, new object[] { query, lambda })!;
-            }
+            var method = GetGenericMethod(openMethod, elementType, sortType);
+            query = (IQueryable)method.Invoke(null, new object[] { query, lambda })!;
         }
 
         return query;
@@ -256,20 +297,11 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             var lambda = System.Linq.Expressions.Expression.Lambda(predicate, parameter);
 
             logger?.LogDebug("Getting Where method");
-            var whereMethod = typeof(Queryable).GetMethods()
-                .FirstOrDefault(m => m.Name == "Where" && m.GetParameters().Length == 2)?
-                .MakeGenericMethod(elementType);
+            var whereMethod = GetGenericMethod(s_whereMethod, elementType);
 
-            if (whereMethod != null)
-            {
-                logger?.LogDebug("Invoking Where method");
-                query = (IQueryable)whereMethod.Invoke(null, [query, lambda])!;
-                logger?.LogDebug("Filter applied successfully");
-            }
-            else
-            {
-                logger?.LogWarning("Could not find Where method");
-            }
+            logger?.LogDebug("Invoking Where method");
+            query = (IQueryable)whereMethod.Invoke(null, [query, lambda])!;
+            logger?.LogDebug("Filter applied successfully");
 
             return query;
         }
@@ -968,26 +1000,12 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             var lambda = System.Linq.Expressions.Expression.Lambda(property, parameter);
 
             // Use Select to project to the column
-            var selectMethod = typeof(Queryable).GetMethods()
-                .FirstOrDefault(m => m.Name == "Select" && m.GetParameters().Length == 2)?
-                .MakeGenericMethod(elementType, propertyInfo.PropertyType);
-
-            if (selectMethod == null)
-            {
-                throw new InvalidOperationException("Could not find Select method");
-            }
-
+            var selectMethod = GetGenericMethod(s_selectMethod, elementType, propertyInfo.PropertyType);
             var projectedQuery = (IQueryable)selectMethod.Invoke(null, new object[] { queryable, lambda })!;
 
             // Get distinct values
-            var distinctMethod = typeof(Queryable).GetMethods()
-                .FirstOrDefault(m => m.Name == "Distinct" && m.GetParameters().Length == 1)?
-                .MakeGenericMethod(propertyInfo.PropertyType);
-
-            if (distinctMethod != null)
-            {
-                projectedQuery = (IQueryable)distinctMethod.Invoke(null, new object[] { projectedQuery })!;
-            }
+            var distinctMethod = GetGenericMethod(s_distinctMethod, propertyInfo.PropertyType);
+            projectedQuery = (IQueryable)distinctMethod.Invoke(null, new object[] { projectedQuery })!;
 
             // Apply search filter if provided
             if (!string.IsNullOrEmpty(query.Search))
@@ -1025,33 +1043,33 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
                     var searchLambda = System.Linq.Expressions.Expression.Lambda(searchExpression, searchParameter);
 
-                    var whereMethod = typeof(Queryable).GetMethods()
-                        .FirstOrDefault(m => m.Name == "Where" && m.GetParameters().Length == 2)?
-                        .MakeGenericMethod(propertyInfo.PropertyType);
-
-                    if (whereMethod != null)
-                    {
-                        projectedQuery = (IQueryable)whereMethod.Invoke(null, new object[] { projectedQuery, searchLambda })!;
-                    }
+                    var whereMethod = GetGenericMethod(s_whereMethod, propertyInfo.PropertyType);
+                    projectedQuery = (IQueryable)whereMethod.Invoke(null, new object[] { projectedQuery, searchLambda })!;
                 }
             }
 
             // Order by the column value
-            var orderByMethod = typeof(Queryable).GetMethods()
-                .FirstOrDefault(m => m.Name == "OrderBy" && m.GetParameters().Length == 2)?
-                .MakeGenericMethod(propertyInfo.PropertyType, propertyInfo.PropertyType);
+            var orderByMethod = GetGenericMethod(s_orderByMethod, propertyInfo.PropertyType, propertyInfo.PropertyType);
+            var orderParameter = System.Linq.Expressions.Expression.Parameter(propertyInfo.PropertyType, "v");
+            var orderLambda = System.Linq.Expressions.Expression.Lambda(orderParameter, orderParameter);
+            projectedQuery = (IQueryable)orderByMethod.Invoke(null, new object[] { projectedQuery, orderLambda })!;
 
-            if (orderByMethod != null)
+            // Serialize DB execution for EF Core providers to prevent concurrent DbContext access.
+            var useGuard = IsEfCoreProvider(queryable);
+            var semaphore = useGuard ? GetProviderSemaphore(queryable) : null;
+            if (semaphore != null) semaphore.Wait();
+            List<object> rawValues;
+            try
             {
-                var orderParameter = System.Linq.Expressions.Expression.Parameter(propertyInfo.PropertyType, "v");
-                var orderLambda = System.Linq.Expressions.Expression.Lambda(orderParameter, orderParameter);
-                projectedQuery = (IQueryable)orderByMethod.Invoke(null, new object[] { projectedQuery, orderLambda })!;
+                // Execute query and convert to strings
+                rawValues = projectedQuery.Cast<object>()
+                    .Where(v => v != null)
+                    .ToList();
             }
-
-            // Execute query and convert to strings
-            var rawValues = projectedQuery.Cast<object>()
-                .Where(v => v != null)
-                .ToList();
+            finally
+            {
+                semaphore?.Release();
+            }
 
             // Handle string arrays - explode them into individual values
             List<string> values;

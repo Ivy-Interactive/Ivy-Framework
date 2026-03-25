@@ -244,7 +244,11 @@ The Layout class provides the following factory methods:
 
 ## Faq
 
-### Does Ivy have Row and Column widgets?
+<Details>
+<Summary>
+Does Ivy have Row and Column widgets
+</Summary>
+<Body>
 
 No. Ivy uses `Layout.Horizontal()` for horizontal layouts (similar to Row) and `Layout.Vertical()` for vertical layouts (similar to Column). Usage of traditional `new StackLayout([...])` constructor is not recommended and should be avoided in favor of Fluent API.
 
@@ -255,4 +259,7 @@ Layout.Horizontal([widget1, widget2, widget3]);
 // Vertical layout (like "Column")
 Layout.Vertical([widget1, widget2, widget3]);
 ```
+
+</Body>
+</Details>
 

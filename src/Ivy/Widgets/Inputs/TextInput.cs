@@ -115,7 +115,7 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
 
     internal TextInput() { }
 
-    [Prop] public TString Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TString Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 

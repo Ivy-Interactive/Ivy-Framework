@@ -2,7 +2,7 @@ using System.Text.Json.Nodes;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Braces, path: ["Widgets", "Primitives"], searchHints: ["data", "format", "json", "syntax", "structure", "object"])]
+[App(icon: Icons.Braces, group: ["Widgets", "Primitives"], searchHints: ["data", "format", "json", "syntax", "structure", "object"])]
 public class JsonApp : SampleBase
 {
     protected override object? BuildSample()

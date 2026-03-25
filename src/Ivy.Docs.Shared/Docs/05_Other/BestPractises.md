@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # Best Practises
 
 ## Use UseQuery for Data Fetching

@@ -1,10 +1,7 @@
-import React from 'react';
-import { useDebounce } from '@/hooks/use-debounce';
-import {
-  measureTabsFromDOM,
-  estimateUnrenderedTabWidths,
-} from '../utils/tabUtils';
-import type { TabWidgetProps } from '../types';
+import React from "react";
+import { useDebounce } from "@/hooks/use-debounce";
+import { measureTabsFromDOM, estimateUnrenderedTabWidths } from "../utils/tabUtils";
+import type { TabWidgetProps } from "../types";
 
 /**
  * Hook to calculate which tabs are visible vs hidden in dropdown
@@ -17,14 +14,14 @@ export function useTabCalculation(
   visibleTabs: string[],
   hiddenTabs: string[],
   events: string[],
-  variant: 'Tabs' | 'Content',
+  variant: "Tabs" | "Content",
   containerRef: React.MutableRefObject<HTMLDivElement | null>,
   tabsListRef: React.MutableRefObject<HTMLDivElement | null>,
   tabWidgetsRef: React.MutableRefObject<React.ReactElement[]>,
   tabMeasurementsRef: React.MutableRefObject<Map<string, number>>,
   setVisibleTabs: React.Dispatch<React.SetStateAction<string[]>>,
   setHiddenTabs: React.Dispatch<React.SetStateAction<string[]>>,
-  tabWidgets: React.ReactElement[]
+  tabWidgets: React.ReactElement[],
 ) {
   // Main calculation function
   const calculateVisibleTabs = React.useCallback(() => {
@@ -36,9 +33,7 @@ export function useTabCalculation(
     if (dropdownOpen) return;
 
     // Use tabsList width in TabsVariant, container width in ContentVariant
-    const referenceElement = tabsList.classList.contains('w-full')
-      ? tabsList
-      : container;
+    const referenceElement = tabsList.classList.contains("w-full") ? tabsList : container;
     const elementComputedStyle = getComputedStyle(referenceElement);
     const elementPadding =
       parseFloat(elementComputedStyle.paddingLeft) +
@@ -57,8 +52,8 @@ export function useTabCalculation(
     // Calculate width of non-tab elements (add button, dropdown)
     let nonTabElementsWidth = 0;
     const allChildren = Array.from(tabsList.children);
-    allChildren.forEach(child => {
-      if (child instanceof HTMLElement && !child.hasAttribute('role')) {
+    allChildren.forEach((child) => {
+      if (child instanceof HTMLElement && !child.hasAttribute("role")) {
         const rect = child.getBoundingClientRect();
         const styles = window.getComputedStyle(child);
         const marginLeft = parseFloat(styles.marginLeft) || 0;
@@ -76,12 +71,11 @@ export function useTabCalculation(
       tabWidgetsRef.current as React.ReactElement<TabWidgetProps>[],
       measurements,
       events,
-      variant
+      variant,
     );
 
     for (const tabId of tabOrder) {
-      const tabWidth =
-        measurements.get(tabId) || estimatedWidths.get(tabId) || 0;
+      const tabWidth = measurements.get(tabId) || estimatedWidths.get(tabId) || 0;
       totalRequiredWidth += tabWidth;
     }
 
@@ -91,8 +85,7 @@ export function useTabCalculation(
       availableWidth -= dropdownButtonWidth;
     }
     for (const tabId of tabOrder) {
-      const tabWidth =
-        measurements.get(tabId) || estimatedWidths.get(tabId) || 0;
+      const tabWidth = measurements.get(tabId) || estimatedWidths.get(tabId) || 0;
 
       // Check if this tab fits in the remaining space
       if (currentWidth + tabWidth <= availableWidth) {
@@ -139,9 +132,7 @@ export function useTabCalculation(
 
   // Debounce the calculation
   const debouncedCalculateVisibleTabs = useDebounce(calculateVisibleTabs, 100);
-  const debouncedCalculateVisibleTabsRef = React.useRef(
-    debouncedCalculateVisibleTabs
-  );
+  const debouncedCalculateVisibleTabsRef = React.useRef(debouncedCalculateVisibleTabs);
   const calculateVisibleTabsRef = React.useRef(calculateVisibleTabs);
 
   // Update refs
@@ -157,9 +148,9 @@ export function useTabCalculation(
   React.useEffect(() => {
     calculateVisibleTabsRef.current();
     const handleResize = () => debouncedCalculateVisibleTabsRef.current();
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -196,11 +187,7 @@ export function useTabCalculation(
   // Force initial calculation
   React.useEffect(() => {
     // Only set initial state if we haven't calculated yet
-    if (
-      visibleTabs.length === 0 &&
-      hiddenTabs.length === 0 &&
-      tabOrder.length > 0
-    ) {
+    if (visibleTabs.length === 0 && hiddenTabs.length === 0 && tabOrder.length > 0) {
       setVisibleTabs(tabOrder);
       setHiddenTabs([]);
     }
@@ -211,25 +198,19 @@ export function useTabCalculation(
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [
-    hiddenTabs.length,
-    tabOrder,
-    visibleTabs.length,
-    setVisibleTabs,
-    setHiddenTabs,
-  ]);
+  }, [hiddenTabs.length, tabOrder, visibleTabs.length, setVisibleTabs, setHiddenTabs]);
 
   // MutationObserver for dynamic content changes
   React.useEffect(() => {
     if (!tabsListRef.current) return;
 
-    const observer = new MutationObserver(mutations => {
+    const observer = new MutationObserver((mutations) => {
       // Check if any mutation affects tab content
-      const shouldRecalculate = mutations.some(mutation => {
+      const shouldRecalculate = mutations.some((mutation) => {
         return (
-          mutation.type === 'childList' ||
-          mutation.type === 'characterData' ||
-          (mutation.type === 'attributes' && mutation.attributeName === 'class')
+          mutation.type === "childList" ||
+          mutation.type === "characterData" ||
+          (mutation.type === "attributes" && mutation.attributeName === "class")
         );
       });
 
@@ -243,7 +224,7 @@ export function useTabCalculation(
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['class'],
+      attributeFilter: ["class"],
     });
 
     return () => observer.disconnect();

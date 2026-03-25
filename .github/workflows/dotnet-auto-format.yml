@@ -1,0 +1,40 @@
+name: Auto Format C#
+permissions:
+  contents: write
+on:
+  push:
+    branches: [main, master]
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history so we can push back cleanly
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Update .NET workloads
+        run: dotnet workload update
+
+      - name: Restore packages
+        run: dotnet restore
+
+      - name: Apply dotnet format
+        run: dotnet format
+
+      - name: Commit formatted code
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-format C# code"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_options: "--no-verify"

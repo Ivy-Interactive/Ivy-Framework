@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.CodeXml, path: ["Widgets", "Primitives"], searchHints: ["markup", "xml", "data", "format", "structure", "syntax"])]
+[App(icon: Icons.CodeXml, group: ["Widgets", "Primitives"], searchHints: ["markup", "xml", "data", "format", "structure", "syntax"])]
 public class XmlApp : SampleBase
 {
     protected override object? BuildSample()

@@ -1,23 +1,23 @@
-import { cva } from 'class-variance-authority';
+import { cva } from "class-variance-authority";
 
 export const toggleVariant = cva(
-  'inline-flex items-center justify-center gap-2 rounded-selector text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0',
+  "inline-flex items-center justify-center gap-2 rounded-selector text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: 'bg-transparent',
+        default: "bg-transparent",
         outline:
-          'border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground',
+          "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground",
       },
       density: {
-        Small: 'h-8 px-1.5 min-w-8 [&_svg]:size-3',
-        Medium: 'h-9 px-2 min-w-9 [&_svg]:size-4',
-        Large: 'h-10 px-2.5 min-w-10 [&_svg]:size-5',
+        Small: "h-8 px-1.5 min-w-8 [&_svg]:size-3",
+        Medium: "h-9 px-2 min-w-9 [&_svg]:size-4",
+        Large: "h-10 px-2.5 min-w-10 [&_svg]:size-5",
       },
     },
     defaultVariants: {
-      variant: 'default',
-      density: 'Medium',
+      variant: "default",
+      density: "Medium",
     },
-  }
+  },
 );

@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Volume2, path: ["Widgets"], searchHints: ["sound", "playback", "media", "mp3", "music", "audio"])]
+[App(icon: Icons.Volume2, group: ["Widgets"], searchHints: ["sound", "playback", "media", "mp3", "music", "audio"])]
 public class AudioPlayerApp : SampleBase
 {
     protected override object? BuildSample()

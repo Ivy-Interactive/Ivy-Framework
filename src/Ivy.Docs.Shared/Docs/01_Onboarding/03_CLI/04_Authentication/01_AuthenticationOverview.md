@@ -143,6 +143,115 @@ var user = await auth.GetUserInfoAsync();
 await auth.LogoutAsync();
 ```
 
+## Brokered Sessions
+
+When users authenticate via OAuth providers (Google, GitHub, etc.) through your identity provider, the provider may store the OAuth provider's access tokens. Brokered sessions allow you to retrieve these tokens to call external APIs directly—for example, accessing Google Drive or calling the GitHub API using the user's credentials.
+
+### Retrieving Brokered Sessions
+
+Use `GetBrokeredSessionsAsync()` to retrieve brokered OAuth tokens:
+
+```csharp
+var authService = UseService<IAuthService>();
+var result = await authService.GetBrokeredSessionsAsync();
+
+if (result.Sessions?.TryGetValue(OAuthProviders.Google, out var googleSession) == true)
+{
+    // Use the Google OAuth token to call Google APIs
+    using var httpClient = new HttpClient();
+    httpClient.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", googleSession.AuthToken?.AccessToken);
+
+    var response = await httpClient.GetAsync("https://www.googleapis.com/drive/v3/files");
+    // Process response...
+}
+```
+
+### Available OAuth Providers
+
+The `OAuthProviders` class provides constants for supported providers:
+
+- `OAuthProviders.Google` - Google
+- `OAuthProviders.GitHub` - GitHub
+- `OAuthProviders.Microsoft` - Microsoft
+- `OAuthProviders.Apple` - Apple
+- `OAuthProviders.Twitter` - Twitter
+- `OAuthProviders.Discord` - Discord
+- `OAuthProviders.Twitch` - Twitch
+- `OAuthProviders.Figma` - Figma
+- `OAuthProviders.Notion` - Notion
+- `OAuthProviders.GitLab` - GitLab
+- `OAuthProviders.Bitbucket` - Bitbucket
+
+### Registering Token Handlers
+
+For an OAuth provider to appear in the brokered sessions dictionary, there must be a registered `IAuthTokenHandler` for that provider. Token handlers manage token refresh, validation, and user info retrieval for brokered tokens.
+
+**Built-in Handlers**
+
+Ivy provides pre-built token handlers for Google and GitHub. Simply add the NuGet package to your project:
+
+- `Ivy.Auth.Google` - Provides `GoogleAuthTokenHandler`
+- `Ivy.Auth.GitHub` - Provides `GitHubAuthTokenHandler`
+
+**Configuration for Google Token Handler**
+
+The Google token handler requires your Google OAuth credentials to refresh tokens. Add these to your configuration (via [user secrets](../../02_Concepts/14_Secrets.md) or environment variables):
+
+- **Google:ClientId**: Required. Your Google OAuth client ID.
+- **Google:ClientSecret**: Required. Your Google OAuth client secret.
+
+These are the same credentials you configured when setting up Google as a social login provider in your identity provider (Auth0, Clerk, Supabase, etc.).
+
+**Custom Handlers**
+
+For other OAuth providers, implement your own `IAuthTokenHandler` and register it:
+
+```csharp
+public class MyTwitterTokenHandler : IAuthTokenHandler
+{
+    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
+    {
+        // Implement token refresh logic
+    }
+
+    public Task<bool> ValidateAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
+    {
+        // Implement token validation logic
+    }
+
+    public Task<UserInfo?> GetUserInfoAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
+    {
+        // Implement user info retrieval
+    }
+
+    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)
+    {
+        // Implement token lifetime retrieval
+    }
+}
+```
+
+Register your handler in `Program.cs`:
+
+```csharp
+server.RegisterAuthTokenHandler<MyTwitterTokenHandler>(OAuthProviders.Twitter);
+```
+
+> **Note:** Without a registered token handler, the provider's tokens will not appear in `GetBrokeredSessionsAsync()` results even if the identity provider has them.
+
+### Provider Support
+
+Not all authentication providers support brokered sessions in the same way:
+
+| Provider | Brokered Sessions Support |
+|----------|--------------------------|
+| Auth0 | Requires Management API access (see [Auth0 docs](02_Auth0.md)) |
+| Clerk | Supported via Backend API |
+| Supabase | Tokens captured at OAuth callback only |
+
+See each provider's documentation for specific configuration requirements.
+
 ## Supported Authentication Providers
 
 Ivy supports the following authentication providers. Click on any provider for detailed setup instructions:
@@ -207,7 +316,7 @@ By default, Ivy authentication cookies are configured with:
 To override these defaults, set `Server.ConfigureAuthCookieOptions` in your `Program.cs` before calling `server.RunAsync()`:
 
 ```csharp
-Server.ConfigureAuthCookieOptions = options => 
+Server.ConfigureAuthCookieOptions = options =>
 {
     options.Expires = DateTimeOffset.UtcNow.AddDays(30);
 };

@@ -1,12 +1,11 @@
-using Ivy.Core;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Ivy.Auth;
+using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-
 
 namespace Ivy.Auth.Sliplane;
 
@@ -22,37 +21,12 @@ public class SliplaneOAuthException(string? error, string? errorDescription)
 /// Sliplane OAuth2 authentication provider for Ivy applications.
 /// Implements the OAuth2 authorization code flow using the Sliplane API.
 /// </summary>
-public class SliplaneAuthProvider : IAuthProvider
+public class SliplaneAuthProvider : SliplaneAuthTokenHandler, IAuthProvider
 {
-    private readonly string _clientId;
-    private readonly string _clientSecret;
-    private readonly string _authorizationUrl;
-    private readonly string _tokenUrl;
-    private readonly string _scope;
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<SliplaneAuthProvider>? _logger;
-
     /// <summary>Initialize Sliplane auth provider from configuration</summary>
-    public SliplaneAuthProvider(IConfiguration configuration, ILogger<SliplaneAuthProvider>? logger = null)
+    public SliplaneAuthProvider(IConfiguration configuration, ILogger<SliplaneAuthTokenHandler>? logger = null)
+        : base(configuration, logger)
     {
-        _clientId = configuration.GetValue<string>("Sliplane:ClientId")
-            ?? throw new InvalidOperationException(
-                "Missing required configuration: 'Sliplane:ClientId'. Please set this value in your environment variables or user secrets.");
-
-        _clientSecret = configuration.GetValue<string>("Sliplane:ClientSecret")
-            ?? throw new InvalidOperationException(
-                "Missing required configuration: 'Sliplane:ClientSecret'. Please set this value in your environment variables or user secrets.");
-
-        _authorizationUrl = configuration.GetValue<string>("Sliplane:AuthorizationUrl")
-            ?? "https://api.sliplane.io/web/oauth/authorize";
-
-        _tokenUrl = configuration.GetValue<string>("Sliplane:TokenUrl")
-            ?? "https://api.sliplane.io/web/oauth/token";
-
-        _scope = configuration.GetValue<string>("Sliplane:Scope") ?? "full";
-
-        _httpClient = new HttpClient();
-        _logger = logger;
     }
 
     /// <summary>Not supported — Sliplane only supports OAuth flow</summary>
@@ -67,140 +41,7 @@ public class SliplaneAuthProvider : IAuthProvider
         return Task.CompletedTask;
     }
 
-    /// <summary>Refresh the access token using the stored refresh token</summary>
-    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        var token = authSession.AuthToken;
-        if (token?.RefreshToken == null)
-        {
-            return null;
-        }
 
-        try
-        {
-            using var content = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string, string>("grant_type", "refresh_token"),
-                new KeyValuePair<string, string>("refresh_token", token.RefreshToken),
-                new KeyValuePair<string, string>("client_id", _clientId),
-                new KeyValuePair<string, string>("client_secret", _clientSecret),
-            });
-
-            var response = await _httpClient.PostAsync(_tokenUrl, content, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger?.LogError("Failed to refresh Sliplane token. Status: {StatusCode}, Response: {Response}",
-                    response.StatusCode, errorContent);
-                return null;
-            }
-
-            var json = await response.Content.ReadAsStringAsync(cancellationToken);
-            var tokenResponse = JsonSerializer.Deserialize<SliplaneTokenResponse>(json);
-
-            if (tokenResponse == null || string.IsNullOrWhiteSpace(tokenResponse.AccessToken))
-            {
-                return null;
-            }
-
-            return new AuthToken(
-                tokenResponse.AccessToken,
-                tokenResponse.RefreshToken ?? token.RefreshToken
-            );
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "Failed to refresh Sliplane token");
-            return null;
-        }
-    }
-
-    /// <summary>Validate the access token by calling the Sliplane API</summary>
-    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        var token = authSession.AuthToken?.AccessToken;
-        if (string.IsNullOrWhiteSpace(token))
-            return false;
-
-        try
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Get, "https://ctrl.sliplane.io/v0/projects");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.SendAsync(request, cancellationToken);
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-        {
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Get user info from Sliplane using the /v0/me endpoint.
-    /// </summary>
-    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        var token = authSession.AuthToken?.AccessToken;
-        if (string.IsNullOrWhiteSpace(token))
-            return null;
-
-        try
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Get, "https://ctrl.sliplane.io/v0/me");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.SendAsync(request, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-                return null;
-
-            var json = await response.Content.ReadAsStringAsync(cancellationToken);
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            if (root.ValueKind != JsonValueKind.Object ||
-                !root.TryGetProperty("user", out var user) ||
-                user.ValueKind != JsonValueKind.Object)
-            {
-                _logger?.LogWarning("Sliplane /v0/me response did not contain a 'user' object. Raw response: {Json}", json);
-                return null;
-            }
-
-            var id = user.TryGetProperty("id", out var idProp) && idProp.ValueKind == JsonValueKind.String
-                ? idProp.GetString()
-                : null;
-
-            var email = user.TryGetProperty("email", out var emailProp) && emailProp.ValueKind == JsonValueKind.String
-                ? emailProp.GetString()
-                : null;
-
-            var name = user.TryGetProperty("name", out var nameProp) && nameProp.ValueKind == JsonValueKind.String
-                ? nameProp.GetString()
-                : null;
-
-            var avatarUrl = user.TryGetProperty("avatarUrl", out var avatarProp) && avatarProp.ValueKind == JsonValueKind.String
-                ? avatarProp.GetString()
-                : null;
-
-            if (string.IsNullOrWhiteSpace(id) && string.IsNullOrWhiteSpace(email))
-            {
-                _logger?.LogWarning("Sliplane /v0/me user object did not contain id or email. Raw response: {Json}", json);
-                return null;
-            }
-
-            return new UserInfo(
-                Id: id ?? email ?? string.Empty,
-                Email: email ?? string.Empty,
-                FullName: name,
-                AvatarUrl: avatarUrl
-            );
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-        {
-            _logger?.LogError(ex, "Failed to get Sliplane user info");
-            return null;
-        }
-    }
 
     /// <summary>Returns the Sliplane OAuth auth option</summary>
     public AuthOption[] GetAuthOptions() =>
@@ -216,14 +57,14 @@ public class SliplaneAuthProvider : IAuthProvider
 
         var callbackUri = callback.GetUri(includeIdInPath: false);
 
-        var authUrl = new UriBuilder(_authorizationUrl)
+        var authUrl = new UriBuilder(AuthorizationUrl)
         {
             Query = string.Join("&", new[]
             {
-                $"client_id={Uri.EscapeDataString(_clientId)}",
+                $"client_id={Uri.EscapeDataString(ClientId)}",
                 $"redirect_uri={Uri.EscapeDataString(callbackUri.ToString())}",
                 $"response_type=code",
-                $"scope={Uri.EscapeDataString(_scope)}",
+                $"scope={Uri.EscapeDataString(Scope)}",
                 $"state={Uri.EscapeDataString(callback.Id)}",
             })
         };
@@ -260,18 +101,16 @@ public class SliplaneAuthProvider : IAuthProvider
             {
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
                 new KeyValuePair<string, string>("code", code),
-                new KeyValuePair<string, string>("client_id", _clientId),
-                new KeyValuePair<string, string>("client_secret", _clientSecret),
+                new KeyValuePair<string, string>("client_id", ClientId),
+                new KeyValuePair<string, string>("client_secret", ClientSecret),
                 new KeyValuePair<string, string>("redirect_uri", redirectUri),
             });
 
-            var response = await _httpClient.PostAsync(_tokenUrl, content, cancellationToken);
+            var response = await HttpClient.PostAsync(TokenUrl, content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger?.LogError("Failed to exchange Sliplane code for token. Status: {StatusCode}, Response: {Response}",
-                    response.StatusCode, errorContent);
                 throw new HttpRequestException(
                     $"Sliplane token exchange failed with status {(int)response.StatusCode}: {errorContent}",
                     null,
@@ -294,32 +133,7 @@ public class SliplaneAuthProvider : IAuthProvider
         }
         catch (Exception ex) when (ex is not SliplaneOAuthException and not HttpRequestException)
         {
-            _logger?.LogError(ex, "Unexpected error during Sliplane OAuth callback");
             throw new InvalidOperationException($"Unexpected error during Sliplane OAuth token exchange: {ex.Message}", ex);
         }
-    }
-
-    /// <summary>Sliplane tokens do not carry expiration info — returns null</summary>
-    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult<TokenLifetime?>(null);
-    }
-
-    private class SliplaneTokenResponse
-    {
-        [JsonPropertyName("access_token")]
-        public string AccessToken { get; set; } = string.Empty;
-
-        [JsonPropertyName("token_type")]
-        public string? TokenType { get; set; }
-
-        [JsonPropertyName("expires_in")]
-        public int ExpiresIn { get; set; }
-
-        [JsonPropertyName("refresh_token")]
-        public string? RefreshToken { get; set; }
-
-        [JsonPropertyName("scope")]
-        public string? Scope { get; set; }
     }
 }

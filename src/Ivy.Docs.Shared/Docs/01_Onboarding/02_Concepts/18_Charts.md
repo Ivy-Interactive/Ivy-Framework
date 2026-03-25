@@ -180,7 +180,11 @@ All Cartesian charts (Line, Bar, Area) share these methods:
 
 ## Faq
 
-### How do I pass data to a chart?
+<Details>
+<Summary>
+How do I pass data to a chart
+</Summary>
+<Body>
 
 Always use the builder pattern extension methods (`.ToLineChart()`, `.ToBarChart()`, `.ToAreaChart()`, `.ToPieChart()`) on your data collection. Do NOT construct charts manually with `List<dynamic>`. Anonymous types work correctly with the builder pattern:
 
@@ -190,4 +194,7 @@ return data.ToLineChart()
     .Dimension("Month", e => e.Month)
     .Measure("Sales", e => e.Sum(f => f.Sales));
 ```
+
+</Body>
+</Details>
 

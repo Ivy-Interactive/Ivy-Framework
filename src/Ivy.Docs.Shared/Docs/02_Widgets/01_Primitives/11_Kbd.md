@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - kbd
   - keyboard
   - shortcut
   - key

@@ -80,7 +80,7 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
         Height = Size.Units(25);
     }
 
-    [Prop] public TString Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TString Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 

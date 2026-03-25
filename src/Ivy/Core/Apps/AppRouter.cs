@@ -1,5 +1,6 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
+using Ivy;
 
 namespace Ivy.Core.Apps;
 
@@ -8,36 +9,37 @@ public record AppRouteResult(
     string? NavigationAppId,
     AppDescriptor AppDescriptor,
     IAppRepository AppRepository,
-    bool ShowChrome,
-    int? HttpStatusCode
+    bool ShowAppShell,
+    int? HttpStatusCode,
+    string? ArgsJson = null
 );
 
 public class AppRouter(global::Ivy.Server server)
 {
     public AppRouteResult Resolve(HttpContext httpContext)
     {
-        var chrome = GetChrome(httpContext);
+        var appShell = GetAppShell(httpContext);
         var parentId = GetParentId(httpContext);
-        var (appId, navigationAppId) = GetAppId(httpContext, chrome);
+        var (appId, navigationAppId) = GetAppId(httpContext, appShell);
 
-        return Resolve(appId, navigationAppId, parentId, chrome);
+        return Resolve(appId, navigationAppId, parentId, appShell);
     }
 
-    private AppRouteResult Resolve(string? appId, string? navigationAppId, string? parentId, bool chrome)
+    private AppRouteResult Resolve(string? appId, string? navigationAppId, string? parentId, bool appShell)
     {
         if (string.IsNullOrEmpty(appId))
         {
-            return ResolveDefaultApp(navigationAppId, parentId, chrome);
+            return ResolveDefaultApp(navigationAppId, parentId, appShell);
         }
 
-        return ResolveExplicitApp(appId, chrome);
+        return ResolveExplicitApp(appId, appShell);
     }
 
-    private static bool GetChrome(HttpContext httpContext)
+    private static bool GetAppShell(HttpContext httpContext)
     {
-        if (httpContext.Request.Query.TryGetValue("chrome", out var chromeParam))
+        if (httpContext.Request.Query.TryGetValue("shell", out var appShellParam))
         {
-            return !chromeParam.ToString().Equals("false", StringComparison.OrdinalIgnoreCase);
+            return !appShellParam.ToString().Equals("false", StringComparison.OrdinalIgnoreCase);
         }
 
         return true;
@@ -54,20 +56,20 @@ public class AppRouter(global::Ivy.Server server)
         return null;
     }
 
-    private static (string? AppId, string? NavigationAppId) GetAppId(HttpContext httpContext, bool chrome)
+    private static (string? AppId, string? NavigationAppId) GetAppId(HttpContext httpContext, bool appShell)
     {
         string? appId = null;
         string? navigationAppId = null;
 
         if (httpContext.Request.Query.TryGetValue("appId", out var appIdParam))
         {
-            var id = appIdParam.ToString();
-            if (string.IsNullOrEmpty(id) || id == AppIds.Chrome || id == AppIds.Auth || id == AppIds.Default)
+            var id = appIdParam.ToString().TrimEnd('/');
+            if (string.IsNullOrEmpty(id) || id == AppIds.AppShell || id == AppIds.Auth || id == AppIds.Default)
             {
                 id = null;
             }
 
-            if (chrome)
+            if (appShell)
             {
                 navigationAppId = id;
             }
@@ -94,30 +96,53 @@ public class AppRouter(global::Ivy.Server server)
         throw new InvalidOperationException("Missing machineId in request.");
     }
 
-    private AppRouteResult ResolveDefaultApp(string? navigationAppId, string? parentId, bool chrome)
+    private AppRouteResult ResolveDefaultApp(string? navigationAppId, string? parentId, bool appShell)
     {
-        var appId = server.DefaultAppId ?? server.AppRepository.GetAppOrDefault(null).Id;
-        var chromeApp = server.AppRepository.GetAppOrDefault(AppIds.Chrome);
+        AppDescriptor defaultAppDescriptor;
+        string? appId;
+        try
+        {
+            defaultAppDescriptor = server.AppRepository.GetAppOrDefault(null);
+            appId = server.DefaultAppId ?? defaultAppDescriptor.Id;
+        }
+        catch (InvalidOperationException)
+        {
+            var errorApp = server.AppRepository.GetApp(AppIds.ErrorNotFound);
+            if (errorApp == null)
+                throw;
+            var noAppsArgs = ErrorAppArgs.ToArgsJson(ErrorAppArgs.ForNoApps());
+            return new AppRouteResult(
+                AppIds.ErrorNotFound,
+                null,
+                errorApp,
+                server.AppRepository,
+                appShell,
+                (int)HttpStatusCode.NotFound,
+                noAppsArgs
+            );
+        }
+
+        var appShellApp = server.AppRepository.GetAppOrDefault(AppIds.AppShell);
 
         string? resolvedNavigationAppId = navigationAppId;
 
-        if (chromeApp?.Id == AppIds.Chrome)
+        if (appShellApp?.Id == AppIds.AppShell)
         {
-            string? chromeDefaultAppId = GetChromeDefaultAppId(chromeApp);
+            string? appShellDefaultAppId = GetAppShellDefaultAppId(appShellApp);
 
-            if (appId == AppIds.Chrome && (parentId != null || !chrome))
+            if (appId == AppIds.AppShell && (parentId != null || !appShell))
             {
-                appId = chromeDefaultAppId;
+                appId = appShellDefaultAppId;
             }
-            else if (chrome && navigationAppId == null)
+            else if (appShell && navigationAppId == null)
             {
-                resolvedNavigationAppId = chromeDefaultAppId;
+                resolvedNavigationAppId = appShellDefaultAppId;
             }
         }
 
         if (!string.IsNullOrEmpty(resolvedNavigationAppId))
         {
-            return ResolveNavigationApp(appId, resolvedNavigationAppId, chromeApp, chrome);
+            return ResolveNavigationApp(appId, resolvedNavigationAppId, appShellApp, appShell);
         }
 
         var appDescriptor = server.GetApp(appId ?? AppIds.Default);
@@ -127,12 +152,12 @@ public class AppRouter(global::Ivy.Server server)
             resolvedNavigationAppId,
             appDescriptor,
             server.AppRepository,
-            chrome,
+            appShell,
             null
         );
     }
 
-    private AppRouteResult ResolveNavigationApp(string? appId, string navigationAppId, AppDescriptor? chromeApp, bool chrome)
+    private AppRouteResult ResolveNavigationApp(string? appId, string navigationAppId, AppDescriptor? appShellApp, bool appShell)
     {
         var resolvedApp = server.AppRepository.GetAppOrDefault(navigationAppId);
 
@@ -143,16 +168,18 @@ public class AppRouter(global::Ivy.Server server)
             if (notFoundApp.Id == AppIds.ErrorNotFound)
             {
                 var scopedRepository = new ScopedAppRepository(server.AppRepository, navigationAppId, notFoundApp);
+                var notFoundArgs = ErrorAppArgs.ToArgsJson(ErrorAppArgs.ForNotFound());
 
-                if (chromeApp?.Id != AppIds.Chrome)
+                if (appShellApp?.Id != AppIds.AppShell)
                 {
                     return new AppRouteResult(
                         appId ?? AppIds.Default,
                         navigationAppId,
                         notFoundApp,
                         scopedRepository,
-                        chrome,
-                        (int)HttpStatusCode.NotFound
+                        appShell,
+                        (int)HttpStatusCode.NotFound,
+                        notFoundArgs
                     );
                 }
 
@@ -162,8 +189,9 @@ public class AppRouter(global::Ivy.Server server)
                     navigationAppId,
                     appDescriptor,
                     scopedRepository,
-                    chrome,
-                    (int)HttpStatusCode.NotFound
+                    appShell,
+                    (int)HttpStatusCode.NotFound,
+                    notFoundArgs
                 );
             }
         }
@@ -174,12 +202,12 @@ public class AppRouter(global::Ivy.Server server)
             navigationAppId,
             descriptor,
             server.AppRepository,
-            chrome,
+            appShell,
             null
         );
     }
 
-    private AppRouteResult ResolveExplicitApp(string appId, bool chrome)
+    private AppRouteResult ResolveExplicitApp(string appId, bool appShell)
     {
         var resolvedApp = server.AppRepository.GetAppOrDefault(appId);
 
@@ -190,13 +218,15 @@ public class AppRouter(global::Ivy.Server server)
             if (notFoundApp.Id == AppIds.ErrorNotFound)
             {
                 var scopedRepository = new ScopedAppRepository(server.AppRepository, appId, notFoundApp);
+                var notFoundArgs = ErrorAppArgs.ToArgsJson(ErrorAppArgs.ForNotFound());
                 return new AppRouteResult(
                     appId,
                     null,
                     notFoundApp,
                     scopedRepository,
-                    chrome,
-                    (int)HttpStatusCode.NotFound
+                    appShell,
+                    (int)HttpStatusCode.NotFound,
+                    notFoundArgs
                 );
             }
         }
@@ -206,16 +236,16 @@ public class AppRouter(global::Ivy.Server server)
             null,
             resolvedApp,
             server.AppRepository,
-            chrome,
+            appShell,
             null
         );
     }
 
-    private static string? GetChromeDefaultAppId(AppDescriptor chromeApp)
+    private static string? GetAppShellDefaultAppId(AppDescriptor appShellApp)
     {
-        if (chromeApp.CreateApp() is DefaultSidebarChrome chromeView)
+        if (appShellApp.CreateApp() is DefaultSidebarAppShell appShellView)
         {
-            return chromeView.Settings.DefaultAppId;
+            return appShellView.Settings.DefaultAppId;
         }
         return null;
     }

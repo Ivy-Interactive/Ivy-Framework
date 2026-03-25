@@ -54,7 +54,7 @@ public class HtmlPipelineTests
     public void TitleFilter_ReplacesExistingTitle()
     {
         var pipeline = new HtmlPipeline().Use<TitleFilter>();
-        var context = CreateContext(new ServerArgs { MetaTitle = "My App" });
+        var context = CreateContext(new ServerArgs { Metadata = new ServerMetadata { Title = "My App" } });
 
         var result = pipeline.Process(context, SampleHtml);
 
@@ -77,7 +77,7 @@ public class HtmlPipelineTests
     public void MetaDescriptionFilter_AddsMetaTag()
     {
         var pipeline = new HtmlPipeline().Use<MetaDescriptionFilter>();
-        var context = CreateContext(new ServerArgs { MetaDescription = "A cool app" });
+        var context = CreateContext(new ServerArgs { Metadata = new ServerMetadata { Description = "A cool app" } });
 
         var result = pipeline.Process(context, SampleHtml);
 
@@ -139,7 +139,7 @@ public class HtmlPipelineTests
 
         Assert.Empty(pipeline.Filters);
 
-        var context = CreateContext(new ServerArgs { MetaTitle = "Changed", MetaDescription = "Desc" });
+        var context = CreateContext(new ServerArgs { Metadata = new ServerMetadata { Title = "Changed", Description = "Desc" } });
         var result = pipeline.Process(context, SampleHtml);
 
         // No filters ran, so title should be unchanged

@@ -410,7 +410,11 @@ public class UserContentView : ViewBase
 
 ## Faq
 
-### How to apply background styling with CSS gradients?
+<Details>
+<Summary>
+How to apply background styling with CSS gradients
+</Summary>
+<Body>
 
 The `Html` widget in safe mode strips inline `style` attributes. To render custom CSS (including gradients, box-shadows, or positioned elements), you must chain `.DangerouslyAllowScripts()`:
 
@@ -423,5 +427,8 @@ return new Html("""
 ```
 
 Alternatively, use native Ivy styling with `Layout.Background(Colors.X)` — but this only supports solid `Colors` enum values, not CSS gradients.
+
+</Body>
+</Details>
 
 <WidgetDocs Type="Ivy.Html" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/Html.cs"/>

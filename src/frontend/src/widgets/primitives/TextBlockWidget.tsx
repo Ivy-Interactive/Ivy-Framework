@@ -1,42 +1,34 @@
-import { getColor, getOverflow, getWidth, Overflow } from '@/lib/styles';
-import { cn } from '@/lib/utils';
-import React, { useState, useEffect } from 'react';
-import { typography } from '../../lib/styles';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
-import {
-  widgetContentOverrides,
-  subscribeToContentOverride,
-} from '@/widgets/widgetRenderer';
-import { Densities } from '@/types/density';
-import { TextAlignment } from '@/types/textAlignment';
+import { getColor, getOverflow, getWidth, Overflow } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import React, { useState, useEffect } from "react";
+import { typography } from "../../lib/styles";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
+import { widgetContentOverrides, subscribeToContentOverride } from "@/widgets/widgetRenderer";
+import { Densities } from "@/types/density";
+import { TextAlignment } from "@/types/textAlignment";
 
 type TextBlockVariant =
-  | 'Literal'
-  | 'H1'
-  | 'H2'
-  | 'H3'
-  | 'H4'
-  | 'H5'
-  | 'H6'
-  | 'P'
-  | 'Inline'
-  | 'Block'
-  | 'Blockquote'
-  | 'Monospaced'
-  | 'Lead'
-  | 'Muted'
-  | 'Danger'
-  | 'Warning'
-  | 'Success'
-  | 'Label'
-  | 'Strong'
-  | 'Display';
+  | "Literal"
+  | "H1"
+  | "H2"
+  | "H3"
+  | "H4"
+  | "H5"
+  | "H6"
+  | "P"
+  | "Inline"
+  | "Block"
+  | "Blockquote"
+  | "Monospaced"
+  | "Lead"
+  | "Muted"
+  | "Danger"
+  | "Warning"
+  | "Success"
+  | "Label"
+  | "Strong"
+  | "Display";
 
 interface TextBlockWidgetProps {
   id: string;
@@ -111,9 +103,9 @@ const variantMap: VariantMap = {
         }
       };
       checkTruncation();
-      window.addEventListener('resize', checkTruncation);
+      window.addEventListener("resize", checkTruncation);
       return () => {
-        window.removeEventListener('resize', checkTruncation);
+        window.removeEventListener("resize", checkTruncation);
       };
     }, [children, style]);
     return (
@@ -130,7 +122,7 @@ const variantMap: VariantMap = {
                 {children}
               </span>
             </TooltipTrigger>
-            {showTooltip && isTruncated && typeof children === 'string' && (
+            {showTooltip && isTruncated && typeof children === "string" && (
               <TooltipContent className="bg-popover text-popover-foreground shadow-md">
                 {children}
               </TooltipContent>
@@ -204,8 +196,8 @@ const variantMap: VariantMap = {
 
 export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   id,
-  content = '',
-  variant = 'Literal',
+  content = "",
+  variant = "Literal",
   width,
   color,
   strikeThrough,
@@ -222,7 +214,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
 
   // Subscribe to content override changes
   useEffect(() => {
-    return subscribeToContentOverride(id, () => forceUpdate(n => n + 1));
+    return subscribeToContentOverride(id, () => forceUpdate((n) => n + 1));
   }, [id]);
 
   // Use override content if available, otherwise use prop
@@ -230,13 +222,12 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    ...getColor(color, 'color', 'background'),
+    ...getColor(color, "color", "background"),
     ...getOverflow(overflow),
-    wordBreak: 'normal',
-    overflowWrap: 'break-word',
+    wordBreak: "normal",
+    overflowWrap: "break-word",
     ...(textAlignment && {
-      textAlign:
-        textAlignment.toLowerCase() as React.CSSProperties['textAlign'],
+      textAlign: textAlignment.toLowerCase() as React.CSSProperties["textAlign"],
     }),
   };
 
@@ -251,12 +242,12 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
       id={anchor}
       style={styles}
       className={cn(
-        strikeThrough && 'line-through',
-        noWrap && 'whitespace-nowrap',
-        bold && 'font-semibold',
-        italic && 'italic',
-        muted && 'text-muted-foreground',
-        density && scaleClasses[density]
+        strikeThrough && "line-through",
+        noWrap && "whitespace-nowrap",
+        bold && "font-semibold",
+        italic && "italic",
+        muted && "text-muted-foreground",
+        density && scaleClasses[density],
       )}
     >
       {displayContent}
