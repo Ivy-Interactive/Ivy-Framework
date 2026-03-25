@@ -49,7 +49,12 @@ const DialogContent = React.forwardRef<
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-const DialogHeader = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+type DialogHeaderProps = React.HTMLAttributes<HTMLDivElement> & {
+  /** When true, the Radix close control is not rendered (e.g. Ivy DialogHeader.HideCloseButton). */
+  hideCloseButton?: boolean;
+};
+
+const DialogHeader = ({ className, children, hideCloseButton, ...props }: DialogHeaderProps) => (
   <div
     className={cn(
       "sticky top-0 z-10 bg-background p-4 flex-shrink-0 flex items-center justify-between",
@@ -58,10 +63,12 @@ const DialogHeader = ({ className, children, ...props }: React.HTMLAttributes<HT
     {...props}
   >
     <div className="flex-1">{children}</div>
-    <DialogPrimitive.Close className="p-1 rounded-selector hover:bg-accent focus:outline-none cursor-pointer">
-      <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-      <span className="sr-only">Close</span>
-    </DialogPrimitive.Close>
+    {!hideCloseButton && (
+      <DialogPrimitive.Close className="p-1 rounded-selector hover:bg-accent focus:outline-none cursor-pointer">
+        <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    )}
   </div>
 );
 DialogHeader.displayName = "DialogHeader";
