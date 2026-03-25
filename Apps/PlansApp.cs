@@ -17,12 +17,31 @@ public class PlansApp : ViewBase
         var textFilter = UseState<string?>("");
         var refreshToken = UseState(0);
 
+        // Store previous plans list to track position
+        var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
+
         var plans = planService.GetPlans();
 
+        // Handle removed plan - auto-select next
         if (selectedPlanState.Value is { } selected && !plans.Any(p => p.FileName == selected.FileName))
         {
-            selectedPlanState.Set(null);
+            // Find position of removed plan in old list
+            var oldIndex = previousPlans.Value.FindIndex(p => p.FileName == selected.FileName);
+
+            if (plans.Count > 0 && oldIndex >= 0)
+            {
+                // Select plan at same position (or last plan if index out of bounds)
+                var newIndex = Math.Min(oldIndex, plans.Count - 1);
+                selectedPlanState.Set(plans[newIndex]);
+            }
+            else
+            {
+                selectedPlanState.Set(null);
+            }
         }
+
+        // Update stored plans for next comparison
+        previousPlans.Value = plans;
 
         void RefreshPlans()
         {
@@ -32,11 +51,7 @@ public class PlansApp : ViewBase
 
         return new SidebarLayout(
             mainContent: new ContentView(selectedPlanState.Value, plans, selectedPlanState, planService, taskService, RefreshPlans),
-            sidebarContent: new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter, description =>
-            {
-                taskService.StartTask("MakePlan", description);
-                RefreshPlans();
-            })
+            sidebarContent: new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter)
         );
     }
 }
