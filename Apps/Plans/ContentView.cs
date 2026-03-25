@@ -47,14 +47,17 @@ public class ContentView : ViewBase
         var isEditingPrev = UseState(false);
         var lastPlanId = UseState(_selectedPlan?.Id ?? -1);
 
+        var selectedPlanRef = UseRef(_selectedPlan);
+
         UseEffect(() =>
         {
+            var plan = selectedPlanRef.Value;
             if (isEditing.Value && !isEditingPrev.Value)
             {
                 // Entering edit mode - load content
-                if (_selectedPlan != null)
+                if (plan != null)
                 {
-                    editContent.Set(_planService.ReadRawPlan(_selectedPlan.FileName));
+                    editContent.Set(_planService.ReadRawPlan(plan.FileName));
                 }
                 else
                 {
@@ -64,14 +67,16 @@ public class ContentView : ViewBase
             else if (!isEditing.Value && isEditingPrev.Value)
             {
                 // Leaving edit mode - save content
-                if (_selectedPlan != null)
+                if (plan != null)
                 {
-                    _planService.SavePlan(_selectedPlan.FileName, editContent.Value);
+                    _planService.SavePlan(plan.FileName, editContent.Value);
                     _refreshPlans();
                 }
             }
             isEditingPrev.Set(isEditing.Value);
         }, isEditing);
+
+        selectedPlanRef.Value = _selectedPlan;
 
         if (lastPlanId.Value != (_selectedPlan?.Id ?? -1))
         {
@@ -87,13 +92,16 @@ public class ContentView : ViewBase
 
         var currentIndex = _allPlans.FindIndex(p => p.FileName == _selectedPlan.FileName);
 
-        var header = Layout.Horizontal().Align(Align.Stretch).Width(Size.Full()).Padding(1).Gap(2)
+        var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
             | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Info)
             | new Badge(_selectedPlan.Level).Variant(BadgeVariant.Warning)
             | isEditing.ToSwitchInput(Icons.Pencil).Label("Edit")
             | new Spacer().Width(Size.Grow())
-            | Text.Muted($"{currentIndex + 1} / {_allPlans.Count} plans");
+            | Text.Rich()
+                .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
+                .Bold("plans", word: true)
+            ;
 
         var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)));
 
@@ -104,8 +112,12 @@ public class ContentView : ViewBase
                 .Height(Size.Full())
                 .OnBlur(() =>
                 {
-                    _planService.SavePlan(_selectedPlan.FileName, editContent.Value);
-                    _refreshPlans();
+                    var plan = selectedPlanRef.Value;
+                    if (plan != null)
+                    {
+                        _planService.SavePlan(plan.FileName, editContent.Value);
+                        _refreshPlans();
+                    }
                 });
         }
         else
