@@ -66,10 +66,7 @@ public class TasksApp : ViewBase
                 return ValueTask.CompletedTask;
             });
 
-        var header = Layout.Horizontal()
-            | Text.Block("Background Tasks").Bold()
-            | new Button("Refresh").Icon(Icons.RefreshCw).Ghost()
-                .OnClick(() => refreshToken.Refresh());
+        var header = Text.Block("Background Tasks").Bold();
 
         var elements = new List<object>
         {
