@@ -13,7 +13,7 @@ public interface ILoadingContext
     CancellationToken CancellationToken { get; }
 }
 
-public delegate void ShowLoadingDelegate(Func<ILoadingContext, Task> work, bool cancellable = false);
+public delegate void ShowLoadingDelegate(Func<ILoadingContext, Task> work, bool cancellable = false, LoadingOptions? options = null);
 
 public static class UseLoadingExtensions
 {
@@ -44,15 +44,12 @@ public static class UseLoadingExtensions
                 : null;
         });
 
-        var showLoading = new ShowLoadingDelegate((work, cancellable) =>
+        var showLoading = new ShowLoadingDelegate((work, cancellable, options) =>
         {
             var tokenSource = new CancellationTokenSource();
             cts.Set(tokenSource);
 
-            loadingOptions.Set(new LoadingOptions
-            {
-                Cancellable = cancellable
-            });
+            loadingOptions.Set((options ?? new LoadingOptions()) with { Cancellable = cancellable });
             open.Set(true);
 
             _ = Task.Run(async () =>
@@ -75,14 +72,17 @@ public static class UseLoadingExtensions
                 {
                     if (wasCancelled)
                     {
+                        var cancellingDuration = loadingOptions.Value?.CancellingDisplayDuration
+                            ?? new LoadingOptions().CancellingDisplayDuration;
                         loadingOptions.Set(new LoadingOptions
                         {
                             Message = "Cancelling...",
                             Indeterminate = true,
                             Cancellable = false,
-                            IsCancelling = true
+                            IsCancelling = true,
+                            CancellingDisplayDuration = cancellingDuration
                         });
-                        await Task.Delay(800).ConfigureAwait(false);
+                        await Task.Delay(cancellingDuration).ConfigureAwait(false);
                     }
 
                     open.Set(false);

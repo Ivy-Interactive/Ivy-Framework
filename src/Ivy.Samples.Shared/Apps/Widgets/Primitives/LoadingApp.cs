@@ -15,54 +15,97 @@ public class LoadingApp : SampleBase
         return new Fragment(
             loadingView,
             Layout.Vertical()
-            | Text.H2("Loading widget")
-            | Text.P("Static indeterminate progress bar.")
+            | Text.H2("Loading")
+            | Text.P("The Loading widget is a static indeterminate progress bar for inline use.")
             | new Loading()
             | Text.H2("UseLoading")
-            | Text.P("Programmatic modal with optional cancellation. Pass cancellable: true and use ILoadingContext.CancellationToken in async work (e.g. Task.Delay(..., ct)). showLoading is non-blocking so the dialog can receive close/cancel while work runs.")
-            | Layout.Horizontal().Gap(2)
-            | new Button("Cancellable (30s, respects cancel)", () =>
-            {
-                Append("Started cancellable job");
-                showLoading(async ctx =>
+            | Text.P(
+                "Opens a modal while async work runs. The handler is void and schedules work in the background so cancel/close events are not blocked by the serial UI event queue. Pass cancellable: true and observe ILoadingContext.CancellationToken (e.g. Task.Delay(..., ct)). Optional third argument: LoadingOptions — set CancellingDisplayDuration to control how long the \"Cancelling…\" state is shown before the dialog closes (default 800ms)."
+            )
+            | new Card(
+                Layout.Vertical()
+                | Text.H3("Cancellable")
+                | Text.P("Default options. After cancel, \"Cancelling…\" shows for 800ms (see LoadingOptions.CancellingDisplayDuration).")
+                | new Button("Run (~12s, cancel anytime)", () =>
                 {
-                    try
+                    Append("Started: cancellable (default)");
+                    showLoading(async ctx =>
                     {
-                        ctx.Message("Working…");
-                        ctx.Status("Try the header close control or overlay");
-                        for (var i = 0; i < 30; i++)
+                        try
                         {
-                            ctx.CancellationToken.ThrowIfCancellationRequested();
-                            ctx.Message($"Step {i + 1} / 30");
-                            ctx.Progress(i * 100 / 30);
-                            await Task.Delay(1000, ctx.CancellationToken);
+                            ctx.Message("Working…");
+                            ctx.Status("Close control or overlay cancels");
+                            for (var i = 0; i < 12; i++)
+                            {
+                                ctx.CancellationToken.ThrowIfCancellationRequested();
+                                ctx.Message($"Step {i + 1} / 12");
+                                ctx.Progress(i * 100 / 12);
+                                await Task.Delay(1000, ctx.CancellationToken);
+                            }
                         }
-                    }
-                    finally
-                    {
-                        Append("Cancellable job ended (completed or cancelled)");
-                    }
-                }, cancellable: true);
-            })
-            | new Button("Non-cancellable (10s)", () =>
-            {
-                Append("Started non-cancellable job");
-                showLoading(async ctx =>
+                        finally
+                        {
+                            Append("Ended: cancellable (default)");
+                        }
+                    }, cancellable: true);
+                })
+            ).Title("Default cancellable")
+            | new Card(
+                Layout.Vertical()
+                | Text.H3("Custom cancelling delay")
+                | Text.P("CancellingDisplayDuration is 300ms — the closing message is brief.")
+                | new Button("Run with 300ms cancelling delay", () =>
                 {
-                    try
+                    Append("Started: custom CancellingDisplayDuration");
+                    showLoading(
+                        async ctx =>
+                        {
+                            try
+                            {
+                                ctx.Message("Working…");
+                                ctx.Status("Cancel to see a short \"Cancelling…\" phase");
+                                for (var i = 0; i < 30; i++)
+                                {
+                                    ctx.CancellationToken.ThrowIfCancellationRequested();
+                                    ctx.Message($"Step {i + 1} / 30");
+                                    ctx.Progress(i * 100 / 30);
+                                    await Task.Delay(1000, ctx.CancellationToken);
+                                }
+                            }
+                            finally
+                            {
+                                Append("Ended: custom delay");
+                            }
+                        },
+                        cancellable: true,
+                        options: new LoadingOptions { CancellingDisplayDuration = TimeSpan.FromMilliseconds(300) }
+                    );
+                })
+            ).Title("Configurable LoadingOptions")
+            | new Card(
+                Layout.Vertical()
+                | Text.H3("Non-cancellable")
+                | Text.P("Close control is hidden; overlay/Escape do not cancel the token.")
+                | new Button("Run (8s)", () =>
+                {
+                    Append("Started: non-cancellable");
+                    showLoading(async ctx =>
                     {
-                        ctx.Message("Please wait");
-                        ctx.Status("Close control is hidden");
-                        ctx.Progress(null);
-                        await Task.Delay(10000);
-                    }
-                    finally
-                    {
-                        Append("Non-cancellable job ended");
-                    }
-                }, cancellable: false);
-            })
-            | (log.Value.Length > 0 ? new Card(Text.Monospaced(log.Value)) : null)
+                        try
+                        {
+                            ctx.Message("Please wait");
+                            ctx.Status("No close control");
+                            ctx.Progress(null);
+                            await Task.Delay(8000);
+                        }
+                        finally
+                        {
+                            Append("Ended: non-cancellable");
+                        }
+                    }, cancellable: false);
+                })
+            ).Title("No cancel")
+            | (log.Value.Length > 0 ? new Card(Text.Monospaced(log.Value)).Title("Log") : null)
         );
     }
 }

@@ -9,4 +9,5 @@ public record LoadingOptions
     public bool Indeterminate { get; init; } = true;
     public bool Cancellable { get; init; }
     public bool IsCancelling { get; init; }
+    public TimeSpan CancellingDisplayDuration { get; init; } = TimeSpan.FromMilliseconds(800);
 }
