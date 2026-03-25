@@ -41,8 +41,28 @@ public class ContentView : ViewBase
         var splitText = UseState("");
         var isEditing = UseState(false);
         var editContent = UseState("");
-
+        var isEditingPrev = UseState(false);
         var lastPlanId = UseState(_selectedPlan?.Id ?? -1);
+
+        UseEffect(() =>
+        {
+            if (isEditing.Value && !isEditingPrev.Value)
+            {
+                // Entering edit mode - load content
+                editContent.Set(_planService.ReadRawPlan(_selectedPlan!.FileName));
+            }
+            else if (!isEditing.Value && isEditingPrev.Value)
+            {
+                // Leaving edit mode - save content
+                if (_selectedPlan != null)
+                {
+                    _planService.SavePlan(_selectedPlan.FileName, editContent.Value);
+                    _refreshPlans();
+                }
+            }
+            isEditingPrev.Set(isEditing.Value);
+        }, isEditing);
+
         if (lastPlanId.Value != (_selectedPlan?.Id ?? -1))
         {
             lastPlanId.Set(_selectedPlan?.Id ?? -1);
@@ -61,22 +81,7 @@ public class ContentView : ViewBase
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
             | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Info)
             | new Badge(_selectedPlan.Level).Variant(BadgeVariant.Warning)
-            | new Button(isEditing.Value ? "Preview" : "Edit")
-                .Icon(isEditing.Value ? Icons.Eye : Icons.Pencil)
-                .Outline()
-                .OnClick(() =>
-                {
-                    if (isEditing.Value)
-                    {
-                        _planService.SavePlan(_selectedPlan.FileName, editContent.Value);
-                        _refreshPlans();
-                    }
-                    else
-                    {
-                        editContent.Set(_planService.ReadRawPlan(_selectedPlan.FileName));
-                    }
-                    isEditing.Set(!isEditing.Value);
-                })
+            | isEditing.ToSwitchInput(Icons.Pencil).Label("Edit")
             | new Spacer().Width(Size.Grow())
             | Text.Muted($"{currentIndex + 1} / {_allPlans.Count} plans");
 
