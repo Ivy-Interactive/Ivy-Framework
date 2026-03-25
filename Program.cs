@@ -10,6 +10,7 @@ server.UseCulture("en-US");
 server.UseHotReload();
 #endif
 server.Services.AddSingleton<ConfigService>();
+server.Services.AddSingleton<GithubService>();
 server.Services.AddSingleton<PlanReaderService>();
 server.Services.AddSingleton<MockTaskDataService>();
 server.AddAppsFromAssembly();

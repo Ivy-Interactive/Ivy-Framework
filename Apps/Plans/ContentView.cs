@@ -49,12 +49,12 @@ public class ContentView : ViewBase
 
         var currentIndex = _allPlans.FindIndex(p => p.FileName == _selectedPlan.FileName);
 
-        var header = Layout.Horizontal().Align(Align.Left).Gap(2)
+        var header = Layout.Horizontal().Align(Align.Left)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
-            | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Info).Small()
-            | new Badge(_selectedPlan.Level).Variant(BadgeVariant.Warning).Small()
+            | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Info)
+            | new Badge(_selectedPlan.Level).Variant(BadgeVariant.Warning)
             | new Spacer()
-            | Text.Muted($"{currentIndex + 1} / {_allPlans.Count} plans").Small();
+            | Text.Muted($"{currentIndex + 1} / {_allPlans.Count} plans");
 
         var scrollableContent = Layout.Vertical()
             | new Markdown(_selectedPlan.Content);

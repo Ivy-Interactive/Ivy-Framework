@@ -3,9 +3,18 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Ivy.Tendril;
 
+public record RepoConfig
+{
+    public string Owner { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string FullName => $"{Owner}/{Name}";
+    public string DisplayName => Name;
+}
+
 public class TendrilSettings
 {
     public string PlanFolder { get; set; } = @".plans";
+    public List<RepoConfig> Repos { get; set; } = new();
 }
 
 public class ConfigService

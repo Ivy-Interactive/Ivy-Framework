@@ -1,4 +1,5 @@
 using Ivy;
+using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
 
@@ -25,8 +26,23 @@ public class CreateIssueDialog : ViewBase
     {
         if (!_dialogOpen.Value) return null;
 
-        var repositoryOptions = new[] { "Ivy-Framework", "Ivy-Agent", "Ivy-Mcp", "Ivy" };
-        var assignees = new[] { "Alice", "Bob", "Charlie", "Diana", "Eve" };
+        var githubService = UseService<GithubService>();
+        var repos = githubService.GetRepos();
+        var repositoryOptions = repos.Select(r => r.DisplayName).ToArray();
+
+        var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == _selectedRepoState.Value);
+        var assigneesQuery = UseQuery<string[], string?>(
+            _selectedRepoState.Value,
+            async (_, ct) =>
+            {
+                if (selectedRepo is null) return Array.Empty<string>();
+                var result = await githubService.GetAssigneesAsync(selectedRepo.Owner, selectedRepo.Name);
+                return result.ToArray();
+            },
+            initialValue: Array.Empty<string>()
+        );
+
+        var assignees = assigneesQuery.Value ?? Array.Empty<string>();
 
         return new Dialog(
             _ => _dialogOpen.Set(false),
