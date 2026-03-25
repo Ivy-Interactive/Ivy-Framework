@@ -1,5 +1,6 @@
 using System.Drawing;
 using Ivy;
+using Ivy.Core;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 
@@ -100,7 +101,7 @@ public class ContentView : ViewBase
             | new Spacer().Width(Size.Grow())
             | Text.Rich()
                 .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
-                .Bold("plans", word: true)
+                .Muted("plans", word: true)
             ;
 
         var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)));
@@ -109,7 +110,7 @@ public class ContentView : ViewBase
         {
             scrollableContent |= editContent.ToCodeInput()
                 .Language(Languages.Markdown)
-                .Height(Size.Full())
+                .Width(Size.Full())
                 .OnBlur(() =>
                 {
                     var plan = selectedPlanRef.Value;
@@ -153,7 +154,7 @@ public class ContentView : ViewBase
                 footer: actionBar,
                 content: mainContent
             ).Size(Size.Full())
-        ).Scroll(Scroll.None).Size(Size.Full());
+        ).Scroll(Scroll.None).Size(Size.Full()).Key(_selectedPlan.Id);
 
         var elements = new List<object>
         {
