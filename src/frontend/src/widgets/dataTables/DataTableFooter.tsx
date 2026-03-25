@@ -4,6 +4,41 @@ import { tableStyles } from "./styles/style";
 import { DataColumn } from "./types/types";
 import { ChevronDown } from "lucide-react";
 
+const footerStyles = {
+  row: {
+    display: "flex",
+    gap: "8px",
+    alignItems: "flex-start",
+  } as React.CSSProperties,
+  cell: {
+    flex: 1,
+    minWidth: 0,
+    fontSize: "12px",
+    fontWeight: 600,
+    color: "var(--foreground)",
+  } as React.CSSProperties,
+  value: {
+    lineHeight: "1.4",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  } as React.CSSProperties,
+  dropdownMenu: {
+    position: "absolute",
+    bottom: "100%",
+    marginBottom: "2px",
+    background: "var(--popover)",
+    border: "1px solid var(--border)",
+    borderRadius: "6px",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+    zIndex: 50,
+    minWidth: "80px",
+    overflow: "hidden",
+  } as React.CSSProperties,
+  dropdownMenuAnchorLeft: { left: 0 } as React.CSSProperties,
+  dropdownMenuAnchorRight: { right: 0 } as React.CSSProperties,
+};
+
 /**
  * Footer component that overlaps the bottom of the DataTableEditor
  * Horizontal scrollbars from the editor will appear on top of this footer
@@ -58,50 +93,31 @@ const FooterCell: React.FC<{
   return (
     <div ref={ref} style={{ ...footerStyles.cell, textAlign, position: "relative" }}>
       <div
-        style={{
-          ...footerStyles.value,
-          cursor: "pointer",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "2px",
-          borderRadius: "4px",
-          padding: "0 4px",
-          margin: "0 -4px",
-          transition: "background 0.15s",
-          background: open ? "var(--accent)" : "transparent",
-        }}
+        className={cn(
+          "inline-flex max-w-full min-w-0 items-center gap-0.5 rounded px-1 -mx-1 cursor-pointer transition-colors",
+          "hover:bg-accent hover:text-accent-foreground",
+          open && "bg-accent text-accent-foreground",
+        )}
         onClick={() => setOpen(!open)}
-        onMouseEnter={(e) => {
-          if (!open) e.currentTarget.style.background = "var(--accent)";
-        }}
-        onMouseLeave={(e) => {
-          if (!open) e.currentTarget.style.background = "transparent";
-        }}
       >
-        {values[selectedIndex]}
+        <span className="min-w-0 truncate" style={footerStyles.value}>
+          {values[selectedIndex]}
+        </span>
         <ChevronDown
           size={10}
-          style={{
-            opacity: 0.5,
-            transform: open ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.15s",
-          }}
+          className={cn(
+            "shrink-0 opacity-50 transition-transform duration-150",
+            open && "rotate-180",
+          )}
         />
       </div>
       {open && (
         <div
           style={{
-            position: "absolute",
-            bottom: "100%",
-            [textAlign === "right" ? "right" : "left"]: 0,
-            marginBottom: "2px",
-            background: "var(--popover)",
-            border: "1px solid var(--border)",
-            borderRadius: "6px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-            zIndex: 50,
-            minWidth: "80px",
-            overflow: "hidden",
+            ...footerStyles.dropdownMenu,
+            ...(textAlign === "right"
+              ? footerStyles.dropdownMenuAnchorRight
+              : footerStyles.dropdownMenuAnchorLeft),
           }}
         >
           {values.map((value, i) => (
@@ -111,20 +127,10 @@ const FooterCell: React.FC<{
                 setSelectedIndex(i);
                 setOpen(false);
               }}
-              style={{
-                padding: "4px 8px",
-                fontSize: "12px",
-                cursor: "pointer",
-                fontWeight: i === selectedIndex ? 700 : 400,
-                background: i === selectedIndex ? "var(--accent)" : "transparent",
-                whiteSpace: "nowrap",
-              }}
-              onMouseEnter={(e) => {
-                if (i !== selectedIndex) e.currentTarget.style.background = "var(--accent)";
-              }}
-              onMouseLeave={(e) => {
-                if (i !== selectedIndex) e.currentTarget.style.background = "transparent";
-              }}
+              className={cn(
+                "px-2 py-1 text-xs cursor-pointer whitespace-nowrap transition-colors",
+                i === selectedIndex ? "bg-accent font-bold" : "font-normal hover:bg-accent",
+              )}
             >
               {value}
             </div>
@@ -163,25 +169,4 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({ columns }) => 
       </div>
     </DataTableFooter>
   );
-};
-
-const footerStyles = {
-  row: {
-    display: "flex",
-    gap: "8px",
-    alignItems: "flex-start",
-  } as React.CSSProperties,
-  cell: {
-    flex: 1,
-    minWidth: 0,
-    fontSize: "12px",
-    fontWeight: 600,
-    color: "var(--foreground)",
-  } as React.CSSProperties,
-  value: {
-    lineHeight: "1.4",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-  } as React.CSSProperties,
 };
