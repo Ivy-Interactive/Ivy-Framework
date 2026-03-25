@@ -23,6 +23,7 @@ public class DataTableBuilder<TModel>(
     private readonly Dictionary<string, EventHandler<object>> _cellActions = [];
     private RefreshToken? _refreshToken;
     private FuncViewBuilder? _emptyViewFactory;
+    private Dictionary<string, object>? _footerValuesByColumn;
 
     private readonly string? _idColumnName =
         idSelector != null ? TypeHelper.GetNameFromMemberExpression(idSelector.Body) : null;
@@ -177,7 +178,7 @@ public class DataTableBuilder<TModel>(
     {
         var column = GetColumn(field);
         var selector = field.Compile();
-        var values = queryable.Select(selector).ToList();
+        var values = GetOrCreateFooterValueList(field, selector);
         var result = aggregateFunc(values);
         var footerText = $"{label}: {result}";
         column.Column.Footer ??= [];
@@ -191,13 +192,27 @@ public class DataTableBuilder<TModel>(
     {
         var column = GetColumn(field);
         var selector = field.Compile();
-        var values = queryable.Select(selector).ToList();
+        var values = GetOrCreateFooterValueList(field, selector);
         var footerValues = aggregates
             .Select(agg => $"{agg.Label}: {agg.AggregateFunc(values)}")
             .ToList();
         column.Column.Footer ??= [];
         column.Column.Footer.AddRange(footerValues);
         return this;
+    }
+
+    private List<TValue> GetOrCreateFooterValueList<TValue>(
+        Expression<Func<TModel, TValue>> field,
+        Func<TModel, TValue> compiledSelector)
+    {
+        var columnName = TypeHelper.GetNameFromMemberExpression(field.Body);
+        if (_footerValuesByColumn?.TryGetValue(columnName, out var cached) == true && cached is List<TValue> list)
+            return list;
+
+        var values = queryable.Select(compiledSelector).ToList();
+        _footerValuesByColumn ??= new Dictionary<string, object>(StringComparer.Ordinal);
+        _footerValuesByColumn[columnName] = values;
+        return values;
     }
 
     public DataTableBuilder<TModel> Format(Expression<Func<TModel, object>> field, NumberFormatStyle formatStyle, int? precision = null, string? currency = null)
@@ -403,8 +418,19 @@ public class DataTableBuilder<TModel>(
             idSelectorForView = obj => _idSelectorFunc((TModel)obj);
         }
 
-        return new DataTableView(queryable1, width, _height, columns, configuration, onCellClick, _onCellActivated,
-            _menuItemRowActions, _onRowAction, idSelectorForView, _refreshToken, _emptyViewFactory);
+        return new DataTableView(
+            queryable1,
+            width,
+            _height,
+            columns,
+            configuration,
+            onCellClick: onCellClick,
+            onCellActivated: _onCellActivated,
+            rowActions: _menuItemRowActions,
+            onRowAction: _onRowAction,
+            idSelector: idSelectorForView,
+            refreshToken: _refreshToken,
+            emptyViewFactory: _emptyViewFactory);
     }
 
     public object[] GetMemoValues()
