@@ -79,6 +79,31 @@ public class PlanReaderService
         File.Delete(filePath);
     }
 
+    public List<PlanFile> GetIceboxPlans()
+    {
+        try
+        {
+            var iceboxDir = Path.Combine(PlansDirectory, "icebox");
+            if (!Directory.Exists(iceboxDir))
+                return new List<PlanFile>();
+
+            return ParseDirectory(iceboxDir, PlanStatus.Draft)
+                .OrderBy(p => p.Id)
+                .ToList();
+        }
+        catch
+        {
+            return new List<PlanFile>();
+        }
+    }
+
+    public void ThawPlan(string fileName)
+    {
+        var source = Path.Combine(PlansDirectory, "icebox", fileName);
+        var dest = Path.Combine(PlansDirectory, fileName);
+        File.Move(source, dest);
+    }
+
     public void SavePlan(string fileName, string fullFileContent)
     {
         var path = Path.Combine(PlansDirectory, fileName);
