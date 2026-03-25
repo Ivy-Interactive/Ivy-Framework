@@ -26,8 +26,7 @@ public class LoadingView(LoadingOptions options, CancellationTokenSource? cts) :
                 Layout.Vertical()
                 | (!options.IsCancelling && options.Status != null ? Text.P(options.Status).Muted() : null)!
                 | progressWidget
-            ),
-            new DialogFooter()
+            )
         );
     }
 }
