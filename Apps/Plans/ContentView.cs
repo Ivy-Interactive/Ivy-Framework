@@ -1,4 +1,5 @@
 using Ivy;
+using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans;
@@ -46,8 +47,6 @@ public class ContentView : ViewBase
                 | Text.Muted("Select a plan from the sidebar");
         }
 
-        var assignees = new[] { "Alice", "Bob", "Charlie", "Diana", "Eve" };
-
         var currentIndex = _allPlans.FindIndex(p => p.FileName == _selectedPlan.FileName);
 
         var header = Layout.Horizontal().Align(Align.Left).Gap(2)
@@ -83,120 +82,12 @@ public class ContentView : ViewBase
         ).Size(Size.Full());
 
         var elements = new List<object> { mainLayout };
-
-        if (updateDialogOpen.Value)
-        {
-            elements.Add(new Dialog(
-                _ => updateDialogOpen.Set(false),
-                new DialogHeader($"Update Plan #{_selectedPlan.Id}"),
-                new DialogBody(
-                    Layout.Vertical()
-                        | Text.P("Provide instructions for updating this plan.")
-                        | updateText.ToTextareaInput("Enter update instructions...").Rows(6)
-                ),
-                new DialogFooter(
-                    new Button("Cancel").Outline().OnClick(() => updateDialogOpen.Set(false)),
-                    new Button("Submit Update").Primary().OnClick(() => updateDialogOpen.Set(false))
-                )
-            ).Width(Size.Rem(30)));
-        }
-
-        if (splitDialogOpen.Value)
-        {
-            elements.Add(new Dialog(
-                _ => splitDialogOpen.Set(false),
-                new DialogHeader($"Split Plan #{_selectedPlan.Id}"),
-                new DialogBody(
-                    Layout.Vertical()
-                        | Text.P("Describe how to split this plan into multiple plans.")
-                        | splitText.ToTextareaInput("Enter split instructions...").Rows(6)
-                ),
-                new DialogFooter(
-                    new Button("Cancel").Outline().OnClick(() => splitDialogOpen.Set(false)),
-                    new Button("Split Plan").Primary().OnClick(() => splitDialogOpen.Set(false))
-                )
-            ).Width(Size.Rem(30)));
-        }
-
-        if (expandDialogOpen.Value)
-        {
-            elements.Add(new Dialog(
-                _ => expandDialogOpen.Set(false),
-                new DialogHeader($"Expand Plan #{_selectedPlan.Id}"),
-                new DialogBody(
-                    Layout.Vertical()
-                        | Text.P("Provide instructions for expanding this plan.")
-                        | expandText.ToTextareaInput("Enter expansion instructions...").Rows(6)
-                ),
-                new DialogFooter(
-                    new Button("Cancel").Outline().OnClick(() => expandDialogOpen.Set(false)),
-                    new Button("Expand Plan").Primary().OnClick(() => expandDialogOpen.Set(false))
-                )
-            ).Width(Size.Rem(30)));
-        }
-
-        if (skipDialogOpen.Value)
-        {
-            elements.Add(new Dialog(
-                _ => skipDialogOpen.Set(false),
-                new DialogHeader("Skip Plan"),
-                new DialogBody(
-                    Text.P($"Move plan #{_selectedPlan.Id} to skipped/ directory?")
-                ),
-                new DialogFooter(
-                    new Button("Cancel").Outline().OnClick(() => skipDialogOpen.Set(false)),
-                    new Button("Skip").Primary().OnClick(() =>
-                    {
-                        _planService.SkipPlan(_selectedPlan.FileName);
-                        _refreshPlans();
-                        skipDialogOpen.Set(false);
-                    })
-                )
-            ).Width(Size.Rem(30)));
-        }
-
-        if (approveDialogOpen.Value)
-        {
-            elements.Add(new Dialog(
-                _ => approveDialogOpen.Set(false),
-                new DialogHeader("Approve Plan"),
-                new DialogBody(
-                    Text.P($"Approve plan #{_selectedPlan.Id} and move to approved/?")
-                ),
-                new DialogFooter(
-                    new Button("Cancel").Outline().OnClick(() => approveDialogOpen.Set(false)),
-                    new Button("Approve").Primary().OnClick(() =>
-                    {
-                        _planService.ApprovePlan(_selectedPlan.FileName);
-                        _refreshPlans();
-                        approveDialogOpen.Set(false);
-                    })
-                )
-            ).Width(Size.Rem(30)));
-        }
-
-        if (createIssueDialogOpen.Value)
-        {
-            var repositoryOptions = new[] { "Ivy-Framework", "Ivy-Agent", "Ivy-Mcp", "Ivy" };
-
-            elements.Add(new Dialog(
-                _ => createIssueDialogOpen.Set(false),
-                new DialogHeader("Create GitHub Issue"),
-                new DialogBody(
-                    Layout.Vertical().Gap(3)
-                        | Text.P($"Create a GitHub issue for plan #{_selectedPlan.Id}.")
-                        | Text.Muted("Labels will be added automatically based on the plan metadata.")
-                        | selectedRepoState.ToSelectInput(repositoryOptions.ToOptions())
-                            .WithField().Label("Repository")
-                        | issueAssigneeState.ToSelectInput(assignees.ToOptions())
-                            .Nullable().WithField().Label("Assignee (optional)")
-                ),
-                new DialogFooter(
-                    new Button("Cancel").Outline().OnClick(() => createIssueDialogOpen.Set(false)),
-                    new Button("Create Issue").Primary().OnClick(() => createIssueDialogOpen.Set(false))
-                )
-            ).Width(Size.Rem(30)));
-        }
+        elements.Add(new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan));
+        elements.Add(new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan));
+        elements.Add(new ExpandPlanDialog(expandDialogOpen, expandText, _selectedPlan));
+        elements.Add(new SkipPlanDialog(skipDialogOpen, _selectedPlan, _planService, _refreshPlans));
+        elements.Add(new ApprovePlanDialog(approveDialogOpen, _selectedPlan, _planService, _refreshPlans));
+        elements.Add(new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, _selectedPlan));
 
         return new Fragment(elements.ToArray());
     }
