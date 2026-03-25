@@ -35,7 +35,7 @@ public class ContentView : ViewBase
     {
         var updateDialogOpen = UseState(false);
         var splitDialogOpen = UseState(false);
-        var skipDialogOpen = UseState(false);
+        var deleteDialogOpen = UseState(false);
         var createIssueDialogOpen = UseState(false);
         var selectedRepoState = UseState<string?>(null);
         var issueAssigneeState = UseState<string?>(null);
@@ -135,7 +135,7 @@ public class ContentView : ViewBase
                 _taskService.StartTask("ExpandPlan", planPath);
                 _refreshPlans();
             })
-            | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => skipDialogOpen.Set(true))
+            | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => deleteDialogOpen.Set(true))
             | new Button("Create Issue").Icon(Icons.Github).Outline().OnClick(() => createIssueDialogOpen.Set(true))
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious())
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext())
@@ -161,7 +161,7 @@ public class ContentView : ViewBase
             mainLayout,
             new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan, _taskService, _planService.PlansDirectory),
             new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan, _taskService, _planService.PlansDirectory),
-            new SkipPlanDialog(skipDialogOpen, _selectedPlan, _planService, _refreshPlans),
+            new DeletePlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans),
             new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, _selectedPlan)
         };
 

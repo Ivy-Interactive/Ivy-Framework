@@ -29,7 +29,7 @@ public class PlanReaderService
                 plans.AddRange(ParseDirectory(PlansDirectory, PlanStatus.Draft));
             }
 
-            return plans;
+            return plans.OrderBy(p => p.Id).ToList();
         }
         catch
         {
@@ -62,6 +62,12 @@ public class PlanReaderService
         Directory.CreateDirectory(skippedDir);
         var dest = Path.Combine(skippedDir, fileName);
         File.Move(source, dest);
+    }
+
+    public void DeletePlan(string fileName)
+    {
+        var filePath = Path.Combine(PlansDirectory, fileName);
+        File.Delete(filePath);
     }
 
     public void SavePlan(string fileName, string fullFileContent)

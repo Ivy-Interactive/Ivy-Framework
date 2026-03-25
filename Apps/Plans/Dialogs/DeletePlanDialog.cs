@@ -3,14 +3,14 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
 
-public class SkipPlanDialog : ViewBase
+public class DeletePlanDialog : ViewBase
 {
     private readonly IState<bool> _dialogOpen;
     private readonly PlanFile _selectedPlan;
     private readonly PlanReaderService _planService;
     private readonly Action _refreshPlans;
 
-    public SkipPlanDialog(
+    public DeletePlanDialog(
         IState<bool> dialogOpen,
         PlanFile selectedPlan,
         PlanReaderService planService,
@@ -28,15 +28,21 @@ public class SkipPlanDialog : ViewBase
 
         return new Dialog(
             _ => _dialogOpen.Set(false),
-            new DialogHeader("Skip Plan"),
+            new DialogHeader("Delete Plan"),
             new DialogBody(
-                Text.P($"Move plan #{_selectedPlan.Id} to skipped/ directory?")
+                Text.P($"What would you like to do with plan #{_selectedPlan.Id}?")
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
-                new Button("Skip").Primary().OnClick(() =>
+                new Button("Move to Skipped").Outline().OnClick(() =>
                 {
                     _planService.SkipPlan(_selectedPlan.FileName);
+                    _refreshPlans();
+                    _dialogOpen.Set(false);
+                }),
+                new Button("Delete").Danger().OnClick(() =>
+                {
+                    _planService.DeletePlan(_selectedPlan.FileName);
                     _refreshPlans();
                     _dialogOpen.Set(false);
                 })
