@@ -45,7 +45,6 @@ public class PlansApp : ViewBase
 
         void RefreshPlans()
         {
-            selectedPlanState.Set(null);
             refreshToken.Set(refreshToken.Value + 1);
         }
 
