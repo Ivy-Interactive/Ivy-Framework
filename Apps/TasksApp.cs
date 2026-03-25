@@ -1,5 +1,6 @@
 using Ivy;
 using Ivy.Tendril.Apps.Tasks;
+using Ivy.Tendril.Apps.Tasks.Dialogs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
@@ -74,7 +75,7 @@ public class TasksApp : ViewBase
         {
             new HeaderLayout(
                 header: header,
-                content: dataTable.Height(Size.Full())
+                content: dataTable.Height(Size.Units(100))
             ).Height(Size.Full())
         };
 
@@ -91,34 +92,11 @@ public class TasksApp : ViewBase
 
                 if (dialogMode.Value == "view-output" && !string.IsNullOrEmpty(task.ScriptPath))
                 {
-                    elements.Add(new Dialog(
-                        _ => { CloseDialog(); return ValueTask.CompletedTask; },
-                        new DialogHeader($"Task {task.Id} - {task.Type}"),
-                        new DialogBody(
-                            new TaskDetailView(task, taskService)
-                        ),
-                        new DialogFooter(
-                            new Button("Close").Outline().OnClick(CloseDialog)
-                        )
-                    ).Width(Size.Rem(60)).Height(Size.Rem(40)));
+                    elements.Add(new TaskOutputDialog(true, task, taskService, CloseDialog));
                 }
                 else
                 {
-                    var planPath = Path.Combine(@"D:\Repos\_Ivy\.plans", task.PlanFile);
-                    var planContent = File.Exists(planPath)
-                        ? File.ReadAllText(planPath)
-                        : $"Plan file not found: {task.PlanFile}";
-
-                    elements.Add(new Dialog(
-                        _ => { CloseDialog(); return ValueTask.CompletedTask; },
-                        new DialogHeader(task.PlanFile),
-                        new DialogBody(
-                            Text.Code(planContent)
-                        ),
-                        new DialogFooter(
-                            new Button("Close").Outline().OnClick(CloseDialog)
-                        )
-                    ).Width(Size.Rem(50)));
+                    elements.Add(new TaskPlanDialog(true, task, CloseDialog));
                 }
             }
         }
