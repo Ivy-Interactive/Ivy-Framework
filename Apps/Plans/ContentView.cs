@@ -87,7 +87,7 @@ public class ContentView : ViewBase
 
         var currentIndex = _allPlans.FindIndex(p => p.FileName == _selectedPlan.FileName);
 
-        var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
+        var header = Layout.Horizontal().Align(Align.Stretch).Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
             | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Info)
             | new Badge(_selectedPlan.Level).Variant(BadgeVariant.Warning)
@@ -115,8 +115,8 @@ public class ContentView : ViewBase
 
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
             | new Button("Update").Icon(Icons.Pencil).Outline().OnClick(() => updateDialogOpen.Set(true))
-            | new Button("Split").Icon(Icons.GitBranch).Outline().OnClick(() => splitDialogOpen.Set(true))
-            | new Button("Expand").Icon(Icons.Maximize).Outline().OnClick(() =>
+            | new Button("Split").Icon(Icons.Scissors).Outline().OnClick(() => splitDialogOpen.Set(true))
+            | new Button("Expand").Icon(Icons.UnfoldVertical).Outline().OnClick(() =>
             {
                 var planPath = Path.Combine(_planService.PlansDirectory, _selectedPlan.FileName);
                 _taskService.StartTask("ExpandPlan", planPath);
