@@ -38,7 +38,7 @@ export interface DataColumn {
   icon?: string | null;
   help?: string | null;
   footer?: string[] | null;
-  iconSet?: 'lucide' | 'custom';
+  iconSet?: "lucide" | "custom";
 }
 
 export interface DataTableConnection {

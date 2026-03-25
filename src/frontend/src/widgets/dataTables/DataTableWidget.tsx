@@ -1,20 +1,20 @@
-import '@glideapps/glide-data-grid/dist/index.css';
-import './styles/checkbox.css';
-import React, { useMemo } from 'react';
-import { TableProvider } from './dataTableContext';
-import { useTable } from './dataTableContext';
-import { ErrorDisplay } from '@/components/ErrorDisplay';
-import { Loading } from '@/components/Loading';
-import { DataTableEditor } from './dataTableEditor';
-import { DataTableHeader } from './DataTableHeader';
-import { DataTableOption } from './DataTableOption';
-import { DataTableFilterOption } from './options/DataTableFilterOption';
-import { AggregateFooter } from './DataTableFooter';
-import { Filter as FilterIcon } from 'lucide-react';
-import { tableStyles } from './styles/style';
-import { TableProps } from './types/types';
-import { getWidth, getHeight } from '@/lib/styles';
-import { applyConfigDefaults, applyColumnsDefaults } from './DataTableDefaults';
+import "@glideapps/glide-data-grid/dist/index.css";
+import "./styles/checkbox.css";
+import React, { useMemo } from "react";
+import { TableProvider } from "./dataTableContext";
+import { useTable } from "./dataTableContext";
+import { ErrorDisplay } from "@/components/ErrorDisplay";
+import { Loading } from "@/components/Loading";
+import { DataTableEditor } from "./dataTableEditor";
+import { DataTableHeader } from "./DataTableHeader";
+import { DataTableOption } from "./DataTableOption";
+import { DataTableFilterOption } from "./options/DataTableFilterOption";
+import { AggregateFooter } from "./DataTableFooter";
+import { Filter as FilterIcon } from "lucide-react";
+import { tableStyles } from "./styles/style";
+import { TableProps } from "./types/types";
+import { getWidth, getHeight } from "@/lib/styles";
+import { applyConfigDefaults, applyColumnsDefaults } from "./DataTableDefaults";
 
 interface TableLayoutProps {
   children?: React.ReactNode;
@@ -68,13 +68,13 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
   const finalColumns = useMemo(() => applyColumnsDefaults(columns), [columns]);
 
   const hasFooter = useMemo(
-    () => finalColumns.some(col => col.footer && col.footer.length > 0),
-    [finalColumns]
+    () => finalColumns.some((col) => col.footer && col.footer.length > 0),
+    [finalColumns],
   );
 
   const footerElement = useMemo(
     () => (hasFooter ? <AggregateFooter columns={finalColumns} /> : undefined),
-    [hasFooter, finalColumns]
+    [hasFooter, finalColumns],
   );
 
   // Create styles object with width and height if provided

@@ -1,8 +1,8 @@
-import React, { ReactNode, useState, useRef, useEffect } from 'react';
-import { cn } from '@/lib/utils';
-import { tableStyles } from './styles/style';
-import { DataColumn } from './types/types';
-import { ChevronDown } from 'lucide-react';
+import React, { ReactNode, useState, useRef, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { tableStyles } from "./styles/style";
+import { DataColumn } from "./types/types";
+import { ChevronDown } from "lucide-react";
 
 /**
  * Footer component that overlaps the bottom of the DataTableEditor
@@ -39,12 +39,11 @@ const FooterCell: React.FC<{
         setOpen(false);
       }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const textAlign =
-    align === 'Right' ? 'right' : align === 'Center' ? 'center' : 'left';
+  const textAlign = align === "Right" ? "right" : align === "Center" ? "center" : "left";
 
   // Single value — no dropdown
   if (values.length === 1) {
@@ -57,29 +56,26 @@ const FooterCell: React.FC<{
 
   // Multiple values — dropdown selector
   return (
-    <div
-      ref={ref}
-      style={{ ...footerStyles.cell, textAlign, position: 'relative' }}
-    >
+    <div ref={ref} style={{ ...footerStyles.cell, textAlign, position: "relative" }}>
       <div
         style={{
           ...footerStyles.value,
-          cursor: 'pointer',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '2px',
-          borderRadius: '4px',
-          padding: '0 4px',
-          margin: '0 -4px',
-          transition: 'background 0.15s',
-          background: open ? 'var(--accent)' : 'transparent',
+          cursor: "pointer",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "2px",
+          borderRadius: "4px",
+          padding: "0 4px",
+          margin: "0 -4px",
+          transition: "background 0.15s",
+          background: open ? "var(--accent)" : "transparent",
         }}
         onClick={() => setOpen(!open)}
-        onMouseEnter={e => {
-          if (!open) e.currentTarget.style.background = 'var(--accent)';
+        onMouseEnter={(e) => {
+          if (!open) e.currentTarget.style.background = "var(--accent)";
         }}
-        onMouseLeave={e => {
-          if (!open) e.currentTarget.style.background = 'transparent';
+        onMouseLeave={(e) => {
+          if (!open) e.currentTarget.style.background = "transparent";
         }}
       >
         {values[selectedIndex]}
@@ -87,25 +83,25 @@ const FooterCell: React.FC<{
           size={10}
           style={{
             opacity: 0.5,
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.15s',
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.15s",
           }}
         />
       </div>
       {open && (
         <div
           style={{
-            position: 'absolute',
-            bottom: '100%',
-            [textAlign === 'right' ? 'right' : 'left']: 0,
-            marginBottom: '2px',
-            background: 'var(--popover)',
-            border: '1px solid var(--border)',
-            borderRadius: '6px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+            position: "absolute",
+            bottom: "100%",
+            [textAlign === "right" ? "right" : "left"]: 0,
+            marginBottom: "2px",
+            background: "var(--popover)",
+            border: "1px solid var(--border)",
+            borderRadius: "6px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
             zIndex: 50,
-            minWidth: '80px',
-            overflow: 'hidden',
+            minWidth: "80px",
+            overflow: "hidden",
           }}
         >
           {values.map((value, i) => (
@@ -116,21 +112,18 @@ const FooterCell: React.FC<{
                 setOpen(false);
               }}
               style={{
-                padding: '4px 8px',
-                fontSize: '12px',
-                cursor: 'pointer',
+                padding: "4px 8px",
+                fontSize: "12px",
+                cursor: "pointer",
                 fontWeight: i === selectedIndex ? 700 : 400,
-                background:
-                  i === selectedIndex ? 'var(--accent)' : 'transparent',
-                whiteSpace: 'nowrap',
+                background: i === selectedIndex ? "var(--accent)" : "transparent",
+                whiteSpace: "nowrap",
               }}
-              onMouseEnter={e => {
-                if (i !== selectedIndex)
-                  e.currentTarget.style.background = 'var(--accent)';
+              onMouseEnter={(e) => {
+                if (i !== selectedIndex) e.currentTarget.style.background = "var(--accent)";
               }}
-              onMouseLeave={e => {
-                if (i !== selectedIndex)
-                  e.currentTarget.style.background = 'transparent';
+              onMouseLeave={(e) => {
+                if (i !== selectedIndex) e.currentTarget.style.background = "transparent";
               }}
             >
               {value}
@@ -149,16 +142,14 @@ export interface AggregateFooterProps {
   columns: DataColumn[];
 }
 
-export const AggregateFooter: React.FC<AggregateFooterProps> = ({
-  columns,
-}) => {
-  const hasFooter = columns.some(col => col.footer && col.footer.length > 0);
+export const AggregateFooter: React.FC<AggregateFooterProps> = ({ columns }) => {
+  const hasFooter = columns.some((col) => col.footer && col.footer.length > 0);
   if (!hasFooter) return null;
 
   return (
     <DataTableFooter>
       <div style={footerStyles.row}>
-        {columns.map(col => {
+        {columns.map((col) => {
           const footerValues = col.footer;
           if (!footerValues || footerValues.length === 0) {
             return (
@@ -167,13 +158,7 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({
               </div>
             );
           }
-          return (
-            <FooterCell
-              key={col.name}
-              values={footerValues}
-              align={col.align}
-            />
-          );
+          return <FooterCell key={col.name} values={footerValues} align={col.align} />;
         })}
       </div>
     </DataTableFooter>
@@ -182,21 +167,21 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({
 
 const footerStyles = {
   row: {
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'flex-start',
+    display: "flex",
+    gap: "8px",
+    alignItems: "flex-start",
   } as React.CSSProperties,
   cell: {
     flex: 1,
     minWidth: 0,
-    fontSize: '12px',
+    fontSize: "12px",
     fontWeight: 600,
-    color: 'var(--foreground)',
+    color: "var(--foreground)",
   } as React.CSSProperties,
   value: {
-    lineHeight: '1.4',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    lineHeight: "1.4",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   } as React.CSSProperties,
 };
