@@ -77,7 +77,9 @@ public class ContentView : ViewBase
             isEditingPrev.Set(isEditing.Value);
         }, isEditing);
 
+#pragma warning disable CS8601
         selectedPlanRef.Value = _selectedPlan;
+#pragma warning restore CS8601
 
         if (lastPlanId.Value != (_selectedPlan?.Id ?? -1))
         {
@@ -137,8 +139,8 @@ public class ContentView : ViewBase
             })
             | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => deleteDialogOpen.Set(true))
             | new Button("Create Issue").Icon(Icons.Github).Outline().OnClick(() => createIssueDialogOpen.Set(true))
-            | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious())
-            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext())
+            | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
+            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Button("Approve").Icon(Icons.Check).Primary().OnClick(() =>
             {
                 _planService.ApprovePlan(_selectedPlan.FileName);
