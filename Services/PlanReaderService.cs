@@ -26,7 +26,7 @@ public class PlanReaderService
 
             if (Directory.Exists(PlansDirectory))
             {
-                plans.AddRange(ParseDirectory(PlansDirectory, PlanStatus.Draft));
+                plans.AddRange(ParseDirectory(PlansDirectory, PlanStatus.Draft, ""));
             }
 
             return plans.OrderBy(p => p.Id).ToList();
@@ -87,7 +87,7 @@ public class PlanReaderService
             if (!Directory.Exists(iceboxDir))
                 return new List<PlanFile>();
 
-            return ParseDirectory(iceboxDir, PlanStatus.Draft)
+            return ParseDirectory(iceboxDir, PlanStatus.Draft, "icebox")
                 .OrderBy(p => p.Id)
                 .ToList();
         }
@@ -131,7 +131,7 @@ public class PlanReaderService
         File.WriteAllText(Path.Combine(PlansDirectory, fileName), content);
     }
 
-    private List<PlanFile> ParseDirectory(string directory, PlanStatus status)
+    private List<PlanFile> ParseDirectory(string directory, PlanStatus status, string subdirectory)
     {
         var plans = new List<PlanFile>();
         var files = Directory.GetFiles(directory, "*.md");
@@ -151,8 +151,13 @@ public class PlanReaderService
             var rawFrontmatter = ExtractFrontmatter(content);
             var contentWithoutFrontmatter = RemoveFrontmatter(content);
 
+            // Include subdirectory in fileName if present
+            var fullFileName = string.IsNullOrEmpty(subdirectory)
+                ? fileName
+                : Path.Combine(subdirectory, fileName).Replace("\\", "/");
+
             var metadata = new PlanMetadata(id, queue, level, title);
-            plans.Add(new PlanFile(metadata, contentWithoutFrontmatter, rawFrontmatter, fileName, status));
+            plans.Add(new PlanFile(metadata, contentWithoutFrontmatter, rawFrontmatter, fullFileName, status));
         }
 
         return plans;
