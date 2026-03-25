@@ -1,10 +1,10 @@
 using Ivy;
-using Ivy.Tendril.Apps.PlanReviewer;
+using Ivy.Tendril.Apps.Plans;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Plan Reviewer", icon: Icons.ClipboardList, group: new[] { "Tools" })]
-public class PlanReviewerApp : ViewBase
+[App(title: "Plans", icon: Icons.ClipboardList, group: new[] { "Tools" })]
+public class PlansApp : ViewBase
 {
     public override object? Build()
     {

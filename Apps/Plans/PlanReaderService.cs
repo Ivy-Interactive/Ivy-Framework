@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Ivy.Tendril.Apps.PlanReviewer;
+namespace Ivy.Tendril.Apps.Plans;
 
 public class PlanReaderService
 {

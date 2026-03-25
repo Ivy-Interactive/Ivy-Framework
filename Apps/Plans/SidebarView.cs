@@ -1,6 +1,6 @@
 using Ivy;
 
-namespace Ivy.Tendril.Apps.PlanReviewer;
+namespace Ivy.Tendril.Apps.Plans;
 
 public class SidebarView : ViewBase
 {
@@ -42,21 +42,20 @@ public class SidebarView : ViewBase
         if (_queueFilter.Value is { } queue)
             filteredPlans = filteredPlans.Where(p => p.Queue == queue);
 
-        return Layout.Vertical().Height(Size.Full())
-            | (Layout.Vertical().Padding(2)
-                | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().Small().WithField().Label("Queue")
-                | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().Small().WithField().Label("Level")
-                | new Separator()
-                | Text.Muted("Plans").Small())
-            | new List(filteredPlans.Select(plan =>
-                {
-                    var clickablePlan = plan;
+        var header = Layout.Vertical().Padding(2)
+            | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().Small().WithField().Label("Queue")
+            | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().Small().WithField().Label("Level");
 
-                    return new ListItem($"#{plan.Id} {plan.Title}")
-                        .Content(Layout.Horizontal().Gap(1)
-                            | new Badge(plan.Queue).Variant(BadgeVariant.Info).Small()
-                            | new Badge(plan.Level).Variant(BadgeVariant.Warning).Small())
-                        .OnClick(() => _selectedPlanState.Set(clickablePlan));
-                })).Height(Size.Full());
+        var content = new List(filteredPlans.Select(plan =>
+        {
+            var clickablePlan = plan;
+            return new ListItem($"#{plan.Id} {plan.Title}")
+                .Content(Layout.Horizontal().Gap(1)
+                    | new Badge(plan.Queue).Variant(BadgeVariant.Info).Small()
+                    | new Badge(plan.Level).Variant(BadgeVariant.Warning).Small())
+                .OnClick(() => _selectedPlanState.Set(clickablePlan));
+        }));
+
+        return new HeaderLayout(header, content).Height(Size.Full());
     }
 }

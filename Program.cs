@@ -1,6 +1,6 @@
 using Ivy;
 using Microsoft.Extensions.DependencyInjection;
-using Ivy.Tendril.Apps.PlanReviewer;
+using Ivy.Tendril.Apps.Plans;
 
 var server = new Server();
 server.UseCulture("en-US");

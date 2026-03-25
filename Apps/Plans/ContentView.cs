@@ -1,6 +1,6 @@
 using Ivy;
 
-namespace Ivy.Tendril.Apps.PlanReviewer;
+namespace Ivy.Tendril.Apps.Plans;
 
 public class ContentView : ViewBase
 {
