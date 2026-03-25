@@ -1,4 +1,5 @@
 using Ivy;
+using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans;
 
@@ -26,9 +27,6 @@ public class ContentView : ViewBase
 
     public override object? Build()
     {
-        var tokenStrategyState = UseState<string?>(null);
-        var securityFeaturesState = UseState<string[]>(Array.Empty<string>());
-
         var updateDialogOpen = UseState(false);
         var splitDialogOpen = UseState(false);
         var expandDialogOpen = UseState(false);
@@ -48,8 +46,6 @@ public class ContentView : ViewBase
                 | Text.Muted("Select a plan from the sidebar");
         }
 
-        var tokenStrategyOptions = new[] { "In-Memory Cache", "Encrypted Database", "Secure Cookie" };
-        var securityFeaturesOptions = new[] { "Rate Limiting", "CORS Policy", "Input Validation", "Audit Logging" };
         var assignees = new[] { "Alice", "Bob", "Charlie", "Diana", "Eve" };
 
         var currentIndex = _allPlans.FindIndex(p => p.FileName == _selectedPlan.FileName);
@@ -64,16 +60,6 @@ public class ContentView : ViewBase
         var scrollableContent = Layout.Vertical()
             | new Markdown(_selectedPlan.Content);
 
-        var aiPanel = new Expandable("AI Detected Options",
-            Layout.Vertical().Gap(2).Padding(4).Background(Colors.Info).BorderRadius(BorderRadius.Rounded)
-                | tokenStrategyState.ToSelectInput(tokenStrategyOptions.ToOptions())
-                    .Variant(SelectInputVariant.Radio)
-                    .WithField().Label("Token Storage Strategy")
-                | securityFeaturesState.ToSelectInput(securityFeaturesOptions.ToOptions())
-                    .Variant(SelectInputVariant.List)
-                    .WithField().Label("Additional Security Features")
-        ).Icon(Icons.Sparkles);
-
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(2).BorderRadius(BorderRadius.Rounded)
             | new Button("Update").Icon(Icons.Pencil).Outline().OnClick(() => updateDialogOpen.Set(true))
             | new Button("Split").Icon(Icons.GitBranch).Outline().OnClick(() => splitDialogOpen.Set(true))
@@ -86,8 +72,7 @@ public class ContentView : ViewBase
             | new Button("Approve").Icon(Icons.Check).Primary().OnClick(() => approveDialogOpen.Set(true));
 
         var mainContent = Layout.Vertical()
-            | scrollableContent
-            | aiPanel;
+            | scrollableContent;
 
         var mainLayout = new HeaderLayout(
             header: header,
@@ -95,7 +80,7 @@ public class ContentView : ViewBase
                 footer: actionBar,
                 content: mainContent
             )
-        ).Height(Size.Full()).Width(Size.Full().Max(Size.Units(300)));
+        ).Size(Size.Full());
 
         var elements = new List<object> { mainLayout };
 
