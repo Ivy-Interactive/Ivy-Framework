@@ -92,4 +92,26 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+  <!-- Frontend source files for incremental build detection -->
+  <ItemGroup>
+    <FrontendSourceFiles Include="..\frontend\src\**\*" />
+    <FrontendSourceFiles Include="..\frontend\package.json" />
+    <FrontendSourceFiles Include="..\frontend\pnpm-lock.yaml" Condition="Exists('..\frontend\pnpm-lock.yaml')" />
+    <FrontendSourceFiles Include="..\frontend\tsconfig.json" Condition="Exists('..\frontend\tsconfig.json')" />
+    <FrontendSourceFiles Include="..\frontend\vite.config.*" Condition="Exists('..\frontend\vite.config.ts') Or Exists('..\frontend\vite.config.js') Or Exists('..\frontend\vite.config.mjs')" />
+  </ItemGroup>
+
+  <Target Name="NpmInstall" BeforeTargets="BuildFrontend"
+          Inputs="..\frontend\package.json;..\frontend\pnpm-lock.yaml"
+          Outputs="..\frontend\node_modules\.modules.yaml">
+    <Exec Command="npx -y pnpm@10.32.1 install" WorkingDirectory="../frontend" />
+  </Target>
+
+  <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths"
+          Inputs="@(FrontendSourceFiles)"
+          Outputs="..\frontend\dist\.build-stamp">
+    <Exec Command="npx -y pnpm@10.32.1 run build" WorkingDirectory="../frontend" />
+    <Touch Files="..\frontend\dist\.build-stamp" AlwaysCreate="true" />
+  </Target>
+
 </Project>
