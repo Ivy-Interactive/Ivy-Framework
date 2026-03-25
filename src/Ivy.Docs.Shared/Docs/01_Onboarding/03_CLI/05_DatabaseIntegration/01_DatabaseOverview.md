@@ -156,9 +156,15 @@ public class MyDatabaseConnection : IConnection
             .ToArray();
     }
 
-    public void RegisterServices(IServiceCollection services)
+    public void RegisterServices(Server server)
     {
-        services.AddSingleton<MyDatabaseContextFactory>();
+        server.Services.AddSingleton<MyDatabaseContextFactory>();
+    }
+
+    public Task<(bool ok, string? message)> TestConnection(IConfiguration config)
+    {
+        // Implementation for testing connection goes here
+        return Task.FromResult((true, (string?)null));
     }
 }
 ```

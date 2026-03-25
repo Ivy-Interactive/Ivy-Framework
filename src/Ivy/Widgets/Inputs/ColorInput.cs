@@ -40,6 +40,7 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
     [Prop] public ColorInputVariant Variant { get; set; } = ColorInputVariant.TextAndPicker;
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() => [
         typeof(string),
@@ -82,7 +83,7 @@ public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
 
     internal ColorInput() { }
 
-    [Prop] public TColor Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TColor Value { get; init; } = default!;
 
     [Event] public EventHandler<Event<IInput<TColor>, TColor>>? OnChange { get; }
 }
@@ -210,6 +211,22 @@ public static class ColorInputExtensions
     public static ColorInputBase OnBlur(this ColorInputBase widget, Action onBlur)
     {
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static ColorInputBase OnFocus(this ColorInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static ColorInputBase OnFocus(this ColorInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget.OnFocus(onFocus.ToValueTask());
+    }
+
+    public static ColorInputBase OnFocus(this ColorInputBase widget, Action onFocus)
+    {
+        return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
     }
 
 

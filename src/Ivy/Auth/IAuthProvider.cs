@@ -18,22 +18,11 @@ public static class AuthProviderHelpers
     }
 }
 
-public interface IAuthProvider
+public interface IAuthProvider : IAuthTokenHandler
 {
-    Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
-    {
-        return Task.CompletedTask;
-    }
-
     Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default);
 
     Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
-
-    Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
-
-    Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
-
-    Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
 
     AuthOption[] GetAuthOptions();
 
@@ -41,7 +30,10 @@ public interface IAuthProvider
 
     Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default);
 
-    Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
+    Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(IAuthSession authSession, bool skipCache = false, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(BrokeredSessionsResult.Failure(canRetry: false));
+    }
 
     bool OpenOAuthLoginInNewTab => false;
 }

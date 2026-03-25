@@ -1,13 +1,13 @@
-import React from 'react';
-import Icon from '@/components/Icon';
-import { MenuItem } from '@/types/widgets';
+import React from "react";
+import Icon from "@/components/Icon";
+import { MenuItem } from "@/types/widgets";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { getActionId, ACTION_BUTTON_CLASSES } from './utils';
+} from "@/components/ui/dropdown-menu";
+import { getActionId, ACTION_BUTTON_CLASSES } from "./utils";
 
 interface ActionDropdownProps {
   action: MenuItem;
@@ -15,8 +15,7 @@ interface ActionDropdownProps {
   onActionClick: (action: MenuItem) => void;
 }
 
-interface TriggerButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TriggerButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   action: MenuItem;
   actionId: string;
 }
@@ -42,18 +41,12 @@ const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
         title={action.tooltip}
         type="button"
       >
-        {action.icon && (
-          <Icon
-            name={action.icon}
-            size={16}
-            className="text-(--color-foreground)"
-          />
-        )}
+        {action.icon && <Icon name={action.icon} size={16} className="text-(--color-foreground)" />}
       </button>
     );
-  }
+  },
 );
-TriggerButton.displayName = 'TriggerButton';
+TriggerButton.displayName = "TriggerButton";
 
 /**
  * Dropdown menu action with nested children
@@ -63,24 +56,20 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
   actionId,
   onActionClick,
 }) => {
-  const validChildren =
-    action.children?.filter(child => child.variant !== 'Separator') || [];
+  const validChildren = action.children?.filter((child) => child.variant !== "Separator") || [];
 
   return (
     <DropdownMenu key={actionId}>
       <DropdownMenuTrigger asChild>
         <TriggerButton action={action} actionId={actionId} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        onCloseAutoFocus={e => e.preventDefault()}
-      >
-        {validChildren.map(childAction => {
+      <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
+        {validChildren.map((childAction) => {
           const childId = getActionId(childAction);
           return (
             <DropdownMenuItem
               key={childId}
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 onActionClick(childAction);
               }}

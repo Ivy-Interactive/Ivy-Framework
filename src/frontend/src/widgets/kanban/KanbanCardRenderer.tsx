@@ -1,7 +1,7 @@
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import type { Task } from '@/components/ui/shadcn-io/kanban';
-import type { CardData } from './types';
+import React from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import type { Task } from "@/components/ui/shadcn-io/kanban";
+import type { CardData } from "./types";
 
 interface KanbanCardRendererProps {
   task: Task;
@@ -34,7 +34,7 @@ export const KanbanCardRenderer: React.FC<KanbanCardRendererProps> = ({
           <CardHeader className="flex-none pb-2">
             <KanbanHeader>
               <CardTitle className="text-sm leading-tight line-clamp-2">
-                <p>{task.title || 'Untitled Task'}</p>
+                <p>{task.title || "Untitled Task"}</p>
               </CardTitle>
             </KanbanHeader>
           </CardHeader>

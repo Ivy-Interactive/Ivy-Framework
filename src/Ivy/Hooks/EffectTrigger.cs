@@ -63,6 +63,11 @@ public static class EffectExtensions
         {
             return typeof(T);
         }
+
+        public object? GetValueAsObject()
+        {
+            return null;
+        }
     }
 
     public static IEffectTrigger ToTrigger<T>(this IObservable<T> observable)

@@ -1,9 +1,8 @@
-import React from 'react';
+import React from "react";
 
 /** Detects if the current platform is Mac/iOS */
 export const isMac =
-  typeof navigator !== 'undefined' &&
-  /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+  typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 
 export interface ParsedShortcut {
   ctrl: boolean;
@@ -19,16 +18,16 @@ export interface ParsedShortcut {
  */
 export const parseShortcut = (shortcutStr?: string): ParsedShortcut | null => {
   if (!shortcutStr) return null;
-  const parts = shortcutStr.toLowerCase().split('+');
+  const parts = shortcutStr.toLowerCase().split("+");
   return {
-    ctrl: !isMac && parts.includes('ctrl'),
-    shift: parts.includes('shift'),
-    alt: parts.includes('alt'),
+    ctrl: !isMac && parts.includes("ctrl"),
+    shift: parts.includes("shift"),
+    alt: parts.includes("alt"),
     meta: isMac
-      ? parts.includes('ctrl') ||
-        parts.includes('meta') ||
-        parts.includes('cmd') ||
-        parts.includes('command')
+      ? parts.includes("ctrl") ||
+        parts.includes("meta") ||
+        parts.includes("cmd") ||
+        parts.includes("command")
       : false,
     key: parts[parts.length - 1],
   };
@@ -38,37 +37,35 @@ export const parseShortcut = (shortcutStr?: string): ParsedShortcut | null => {
  * Formats a shortcut string for display as React nodes.
  * Converts modifier keys to platform-appropriate symbols (e.g., ⌘ on Mac).
  */
-export const formatShortcutForDisplay = (
-  shortcutStr?: string
-): React.ReactNode[] => {
+export const formatShortcutForDisplay = (shortcutStr?: string): React.ReactNode[] => {
   if (!shortcutStr) return [];
-  const parts = shortcutStr.split('+').map(p => p.trim());
+  const parts = shortcutStr.split("+").map((p) => p.trim());
   const result: React.ReactNode[] = [];
 
   parts.forEach((part, index) => {
     if (index > 0) {
-      result.push('+');
+      result.push("+");
     }
 
     if (
       isMac &&
-      (part.toLowerCase() === 'ctrl' ||
-        part.toLowerCase() === 'cmd' ||
-        part.toLowerCase() === 'command' ||
-        part.toLowerCase() === 'meta')
+      (part.toLowerCase() === "ctrl" ||
+        part.toLowerCase() === "cmd" ||
+        part.toLowerCase() === "command" ||
+        part.toLowerCase() === "meta")
     ) {
       result.push(
         React.createElement(
-          'span',
+          "span",
           {
             key: `meta-${index}`,
-            className: 'inline-flex items-center justify-center',
+            className: "inline-flex items-center justify-center",
           },
-          '⌘'
-        )
+          "⌘",
+        ),
       );
-    } else if (!isMac && part.toLowerCase() === 'ctrl') {
-      result.push('Ctrl');
+    } else if (!isMac && part.toLowerCase() === "ctrl") {
+      result.push("Ctrl");
     } else {
       result.push(part.charAt(0).toUpperCase() + part.slice(1));
     }

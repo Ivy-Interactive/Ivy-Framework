@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.Gauge, path: ["Widgets"], searchHints: ["loading", "percentage", "bar", "indicator", "status", "completion"])]
+[App(icon: Icons.Gauge, group: ["Widgets"], searchHints: ["loading", "percentage", "bar", "indicator", "status", "completion"])]
 public class ProgressApp : SampleBase
 {
     protected override object? BuildSample()

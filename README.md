@@ -74,8 +74,6 @@ The Ivy.Console CLI provides a suite of tools to streamline your development wor
 - **Deployment Management:** Manage deployments to Azure, AWS, Google Cloud, or Sliplane with ease.
 - **Secrets Management:** Securely manage sensitive information within your applications.
 
-**[See Demo Video](https://www.youtube.com/watch?v=krH7sBLjUrM)** →
-
 ## Usage
 
 ### Quick Start

@@ -1,12 +1,11 @@
-import * as React from 'react';
-import type { VariantProps } from 'class-variance-authority';
+import * as React from "react";
+import type { VariantProps } from "class-variance-authority";
 
-import { cn } from '@/lib/utils';
-import { inputVariant } from './input/variant';
+import { cn } from "@/lib/utils";
+import { inputVariant } from "./input/variant";
 
 export interface InputProps
-  extends Omit<React.ComponentProps<'input'>, 'size'>,
-    VariantProps<typeof inputVariant> {}
+  extends Omit<React.ComponentProps<"input">, "size">, VariantProps<typeof inputVariant> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, density, ...props }, ref) => {
@@ -20,8 +19,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {...props}
       />
     );
-  }
+  },
 );
-Input.displayName = 'Input';
+Input.displayName = "Input";
 
 export { Input };

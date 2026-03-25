@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Minus, path: ["Widgets", "Primitives"], searchHints: ["divider", "line", "horizontal", "vertical", "separator", "hr"])]
+[App(icon: Icons.Minus, group: ["Widgets", "Primitives"], searchHints: ["divider", "line", "horizontal", "vertical", "separator", "hr"])]
 public class SeparatorApp : SampleBase
 {
     protected override object? BuildSample()

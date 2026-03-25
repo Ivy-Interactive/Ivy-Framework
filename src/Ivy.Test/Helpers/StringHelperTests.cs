@@ -15,6 +15,19 @@ public class StringHelperTests
     }
 
     [Theory]
+    [InlineData("capital call", "Capital Call")]
+    [InlineData("CAPITAL CALL", "Capital Call")]
+    [InlineData("management fee", "Management Fee")]
+    [InlineData("distribution", "Distribution")]
+    [InlineData("cash-flow", "Cash-Flow")]
+    [InlineData("", "")]
+    [InlineData(null, "")]
+    public void ToTitleCase_ReturnsExpected(string? input, string expected)
+    {
+        Assert.Equal(expected, StringHelper.ToTitleCase(input));
+    }
+
+    [Theory]
     [InlineData("FooBar", "fooBar")]
     [InlineData("A", "a")]
     [InlineData("", "")]

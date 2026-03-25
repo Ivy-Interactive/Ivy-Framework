@@ -40,7 +40,7 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
         Value = default!;
     }
 
-    [Prop] public TValue Value { get; init; }
+    [Prop(AlwaysSerialize = true)] public TValue Value { get; init; }
 
     [Prop] public bool Disabled { get; set; }
 
@@ -54,6 +54,7 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
     [Event] public EventHandler<Event<IInput<TValue>, TValue>>? OnChange { get; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() => [typeof(object)];
 }
@@ -101,6 +102,16 @@ public static class ReadOnlyInputExtensions
         throw new InvalidOperationException($"Widget is not of expected type ReadOnlyInput<{typeof(T).Name}>");
     }
 
+    [OverloadResolutionPriority(1)]
+    public static IAnyReadOnlyInput OnFocus<T>(this IAnyReadOnlyInput widget, Func<Event<IAnyInput>, ValueTask> onFocus) where T : notnull
+    {
+        if (widget is ReadOnlyInput<T> typedWidget)
+        {
+            return typedWidget with { OnFocus = new(onFocus) };
+        }
+        throw new InvalidOperationException($"Widget is not of expected type ReadOnlyInput<{typeof(T).Name}>");
+    }
+
     public static IAnyReadOnlyInput Nullable(this IAnyReadOnlyInput widget, bool? nullable = true)
     {
         // Use reflection to set the property since we don't know the generic type at compile time
@@ -140,6 +151,16 @@ public static class ReadOnlyInputExtensions
     public static IAnyReadOnlyInput OnBlur<T>(this IAnyReadOnlyInput widget, Action onBlur) where T : notnull
     {
         return widget.OnBlur<T>(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    public static IAnyReadOnlyInput OnFocus<T>(this IAnyReadOnlyInput widget, Action<Event<IAnyInput>> onFocus) where T : notnull
+    {
+        return widget.OnFocus<T>(onFocus.ToValueTask());
+    }
+
+    public static IAnyReadOnlyInput OnFocus<T>(this IAnyReadOnlyInput widget, Action onFocus) where T : notnull
+    {
+        return widget.OnFocus<T>(_ => { onFocus(); return ValueTask.CompletedTask; });
     }
 
 

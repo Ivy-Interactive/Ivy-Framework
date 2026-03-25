@@ -278,7 +278,11 @@ public class UseStateEffectsDemo : ViewBase
 
 ## Faq
 
-### Should I use UseState to store a prop or parameter value?
+<Details>
+<Summary>
+Should I use UseState to store a prop or parameter value
+</Summary>
+<Body>
 
 No. UseState captures its initial value on the first render and does not update when props change.
 
@@ -302,3 +306,6 @@ return responseJson.ToCodeInput();
 ```
 
 UseState is for user-owned state (form inputs, toggles, selections). If you just need to display a value from a prop, use the prop directly.
+
+</Body>
+</Details>

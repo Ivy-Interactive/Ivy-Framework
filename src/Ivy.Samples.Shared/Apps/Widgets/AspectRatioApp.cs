@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.RectangleHorizontal, path: ["Widgets"], searchHints: ["aspect", "ratio", "proportion", "size", "responsive"])]
+[App(icon: Icons.RectangleHorizontal, group: ["Widgets"], searchHints: ["aspect", "ratio", "proportion", "size", "responsive"])]
 public class AspectRatioApp : SampleBase
 {
     protected override object? BuildSample()

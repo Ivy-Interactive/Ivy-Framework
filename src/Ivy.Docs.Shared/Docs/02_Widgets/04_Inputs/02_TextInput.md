@@ -35,7 +35,7 @@ public class BasicUsageDemo : ViewBase
 ```
 
 <Callout Type="tip">
-The TextInput class now defaults to `string` type, so you can use `new TextInput(...)` instead of `new TextInput&lt;string&gt;(...)`. The generic version is still available if you need to work with other string-compatible types.
+The TextInput class now defaults to `string` type, so you can use `state.ToTextInput()` instead of `new TextInput&lt;string&gt;(...)`. The generic version is still available if you need to work with other string-compatible types.
 </Callout>
 
 ## Variants

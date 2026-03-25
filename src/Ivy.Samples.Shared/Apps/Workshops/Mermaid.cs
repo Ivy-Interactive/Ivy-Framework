@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Workshops;
 
-[App(icon: Icons.Workflow, path: ["Workshops"], isVisible: false, title: "Mermaid Workshop", searchHints: ["diagrams", "mermaid", "flowchart", "workshop", "requirements", "visualization"])]
+[App(icon: Icons.Workflow, group: ["Workshops"], isVisible: false, title: "Mermaid Workshop", searchHints: ["diagrams", "mermaid", "flowchart", "workshop", "requirements", "visualization"])]
 public class MermaidMarkdownRequirementsApp : SampleBase
 {
     protected override object? BuildSample()

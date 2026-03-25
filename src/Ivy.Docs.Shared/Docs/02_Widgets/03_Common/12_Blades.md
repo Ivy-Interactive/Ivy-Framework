@@ -228,3 +228,46 @@ In most cases, you'll use `UseBlades()` directly in your views. The hook manages
 
 
 <WidgetDocs Type="Ivy.Blade" ExtensionTypes="Ivy.UseBladesExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Views/Blades/UseBlades.cs"/>
+
+## Faq
+
+### When should I use Blades?
+
+Blades are optimized for **CRUD applications** and **master-detail workflows** — interfaces where users navigate from a list to a detail view, then drill deeper into sub-details. Each new view slides in from the right as a blade, creating a stacked navigation experience.
+
+**Use Blades when:**
+- Building CRUD apps (list → detail → edit)
+- Master-detail interfaces with drill-down navigation
+- Wizards or multi-step flows where context from previous steps stays visible
+- Any app where stacked, sliding panels make sense
+
+**Don't use Blades when:**
+- Building dashboards, admin panels, or data-heavy layouts that need full screen width
+- Building single-page apps with a centered content area
+- The app doesn't need stacked navigation
+
+### Why is my BladeHeader content invisible?
+
+The BladeHeader slot container has no implicit width or flex-grow. Content inside it must manage its own sizing:
+
+**For list blades with search:**
+```csharp
+var header = Layout.Horizontal().Gap(1)
+    | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
+    | Icons.Plus.ToButton(_ => Create()).Ghost();
+return new Fragment() | new BladeHeader(header) | list;
+```
+
+**For detail blades with a title:**
+```csharp
+return new Fragment() | new BladeHeader(Text.Literal(entity.Name)) | details;
+```
+
+Key rules:
+- Always use `.Width(Size.Grow())` on search inputs inside BladeHeader
+- Use `Text.Literal()` for blade titles, not `Text.H3()`
+- Place action buttons inside the `Layout.Horizontal()` with `.Ghost()` styling
+
+### Why does UseService<IBladeService>() return null?
+
+`IBladeService` is not registered in the DI container. It is a context service provided by `UseBlades()`. Use `UseContext<IBladeService>()` instead. `UseService<T>()` is only for application-registered DI services like database factories or HTTP clients.

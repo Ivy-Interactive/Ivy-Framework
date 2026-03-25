@@ -1,5 +1,10 @@
 ---
 searchHints:
+  - sheet
+  - sheet constructor
+  - create sheet
+  - new Sheet
+  - side panel constructor
   - sidebar
   - drawer
   - panel

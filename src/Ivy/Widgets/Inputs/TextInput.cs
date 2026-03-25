@@ -72,6 +72,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
     [Prop] public bool Nullable { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnSubmit { get; set; }
 
@@ -115,7 +116,7 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
 
     internal TextInput() { }
 
-    [Prop] public TString Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TString Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
@@ -297,6 +298,22 @@ public static class TextInputExtensions
     public static TextInputBase OnBlur(this TextInputBase widget, Action onBlur)
     {
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static TextInputBase OnFocus(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static TextInputBase OnFocus(this TextInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus.ToValueTask()) };
+    }
+
+    public static TextInputBase OnFocus(this TextInputBase widget, Action onFocus)
+    {
+        return widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
     }
 
 

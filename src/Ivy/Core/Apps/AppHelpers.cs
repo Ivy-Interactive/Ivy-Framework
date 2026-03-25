@@ -2,6 +2,8 @@ using System.Reflection;
 
 namespace Ivy.Core.Apps;
 
+using Ivy;
+
 public static class AppHelpers
 {
     public static AppDescriptor[] GetApps(Assembly? assembly = null)
@@ -25,7 +27,7 @@ public static class AppHelpers
         var appAttribute = type.GetCustomAttribute<AppAttribute>();
         if (appAttribute != null)
         {
-            var path = appAttribute.Path ?? GetPathFromNamespace(type) ?? ["Apps"];
+            var group = appAttribute.Group ?? GetGroupFromNamespace(type) ?? ["Apps"];
 
             string GetId()
             {
@@ -46,7 +48,7 @@ public static class AppHelpers
             {
                 if (type.Name is "_Index" or "_IndexApp")
                 {
-                    return path[^1];
+                    return group[^1];
                 }
                 return global::Ivy.StringHelper.TitleCaseToReadable(type.Name); //DatePickerApp => Date Picker
             }
@@ -58,7 +60,7 @@ public static class AppHelpers
                 Icon = appAttribute.Icon == Icons.None ? null : appAttribute.Icon,
                 Description = appAttribute.Description,
                 Type = type,
-                Path = path,
+                Group = group,
                 IsVisible = !type.Name.StartsWith("_") && appAttribute.IsVisible,
                 IsIndex = type.Name is "_Index" or "_IndexApp",
                 Order = appAttribute.Order,
@@ -70,7 +72,7 @@ public static class AppHelpers
         throw new InvalidOperationException($"Type '{type.FullName}' is missing the [App] attribute.");
     }
 
-    private static string[]? GetPathFromNamespace(Type type)
+    private static string[]? GetGroupFromNamespace(Type type)
     {
         //Check that the namespace is in the form of *.Apps.* and return the parts after Apps
         //Ivy.Apps.Widgets.DatePickerApp => [ "Widgets", "DatePickerApp" ]
@@ -83,5 +85,33 @@ public static class AppHelpers
             return null;
 
         return parts[(index + 1)..].Select(global::Ivy.StringHelper.TitleCaseToReadable).ToArray();
+    }
+
+    public static void RegisterBeacons(Assembly assembly, NavigationBeaconRegistry registry)
+    {
+        foreach (var type in assembly.GetLoadableTypes())
+        {
+            var appAttr = type.GetCustomAttribute<AppAttribute>();
+            if (appAttr == null) continue;
+
+            var beaconAttrs = type.GetCustomAttributes<NavigationBeaconAttribute>();
+            foreach (var attr in beaconAttrs)
+            {
+                var method = type.GetMethod(attr.FactoryMethodName,
+                    BindingFlags.Public | BindingFlags.Static);
+                if (method == null)
+                    throw new InvalidOperationException(
+                        $"Static method '{attr.FactoryMethodName}' not found on '{type.FullName}'.");
+
+                var beacon = method.Invoke(null, null)
+                    ?? throw new InvalidOperationException(
+                        $"Beacon factory '{attr.FactoryMethodName}' on '{type.FullName}' returned null.");
+
+                var registerMethod = typeof(NavigationBeaconRegistry)
+                    .GetMethod(nameof(NavigationBeaconRegistry.Register))!
+                    .MakeGenericMethod(attr.EntityType);
+                registerMethod.Invoke(registry, [beacon]);
+            }
+        }
     }
 }

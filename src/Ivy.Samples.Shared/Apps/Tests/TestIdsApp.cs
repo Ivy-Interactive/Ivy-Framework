@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Code, path: ["Tests"], isVisible: false, searchHints: ["testid", "test-id", "e2e"])]
+[App(icon: Icons.Code, group: ["Tests"], isVisible: false, searchHints: ["testid", "test-id", "e2e"])]
 public class TestIdsApp : ViewBase
 {
     public override object? Build()
@@ -25,3 +25,4 @@ public class TestIdsApp : ViewBase
         ).TestId("root-layout");
     }
 }
+

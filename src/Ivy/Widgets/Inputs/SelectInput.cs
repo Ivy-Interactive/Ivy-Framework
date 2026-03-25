@@ -62,6 +62,7 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
     [Prop] public bool Ghost { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
@@ -208,6 +209,22 @@ public static class SelectInputExtensions
     public static SelectInputBase OnBlur(this SelectInputBase widget, Action onBlur)
     {
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static SelectInputBase OnFocus(this SelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static SelectInputBase OnFocus(this SelectInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus.ToValueTask()) };
+    }
+
+    public static SelectInputBase OnFocus(this SelectInputBase widget, Action onFocus)
+    {
+        return widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
     }
 
     public static SelectInput<string> Options(this SelectInput<string> widget, IEnumerable<string> options)

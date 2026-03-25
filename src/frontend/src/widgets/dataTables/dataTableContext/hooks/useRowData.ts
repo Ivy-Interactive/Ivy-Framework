@@ -1,13 +1,11 @@
-import { useCallback } from 'react';
-import * as arrow from 'apache-arrow';
-import { DataRow } from '../../types/types';
+import { useCallback } from "react";
+import * as arrow from "apache-arrow";
+import { DataRow } from "../../types/types";
 
 /**
  * Hook for accessing row data from Arrow table
  */
-export const useRowData = (
-  arrowTableRef: React.RefObject<arrow.Table | null>
-) => {
+export const useRowData = (arrowTableRef: React.RefObject<arrow.Table | null>) => {
   const getRowData = useCallback(
     (rowIndex: number): DataRow | null => {
       const table = arrowTableRef.current;
@@ -25,7 +23,7 @@ export const useRowData = (
       }
       return { values };
     },
-    [arrowTableRef]
+    [arrowTableRef],
   );
 
   return { getRowData };

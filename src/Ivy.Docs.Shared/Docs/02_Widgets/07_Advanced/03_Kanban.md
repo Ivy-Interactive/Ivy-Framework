@@ -14,11 +14,16 @@ prepare: |
       new { Id = "10", Title = "User Training", Status = "Done", Priority = 3, Description = "Train users on new features", Assignee = "Alice" },
   };
 searchHints:
+  - kanban
   - board
   - columns
   - cards
   - drag
   - drop
+  - drag and drop
+  - dnd
+  - move cards
+  - reorder
   - project management
   - workflow
   - agile

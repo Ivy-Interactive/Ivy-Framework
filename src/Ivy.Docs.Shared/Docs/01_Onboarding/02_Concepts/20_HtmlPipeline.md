@@ -26,9 +26,11 @@ When a browser requests your Ivy application, the server serves an `index.html` 
 | **LicenseFilter** | `<meta name="ivy-license">` tag from `Ivy:License` configuration |
 | **DevToolsFilter** | `<meta name="ivy-enable-dev-tools">` when `EnableDevTools` is true |
 | **MetaDescriptionFilter** | `<meta name="description">` from `ServerArgs.MetaDescription` |
+| **MetaGitHubUrlFilter** | `<meta name="github-url">` from `ServerArgs.MetaGitHubUrl` |
 | **TitleFilter** | Updates the existing `<title>` element with `ServerArgs.MetaTitle` |
 | **ThemeFilter** | Injects theme CSS `<style>` and `<meta name="ivy-theme">` from `IThemeService` |
 | **ManifestFilter** | `<link rel="manifest" href="/manifest.json">` when `ManifestOptions` is registered |
+| **OpenGraphFilter** | `og:*` and `twitter:*` meta tags. Auto-derives image from `Metadata.GitHubUrl` + title, and site name from assembly name. Override via `ServerMetadata.OgImage` / `.OgSiteName`. |
 
 ## Creating a Custom Filter
 
@@ -38,7 +40,7 @@ Implement the `IHtmlFilter` interface. Filters receive a parsed `XDocument` and 
 using System.Xml.Linq;
 using Ivy.Core.Server.HtmlPipeline;
 
-public class OpenGraphFilter : IHtmlFilter
+public class RobotsFilter : IHtmlFilter
 {
     public void Process(HtmlPipelineContext context, XDocument document)
     {
@@ -46,12 +48,8 @@ public class OpenGraphFilter : IHtmlFilter
         if (head == null) return;
 
         head.Add(new XElement("meta",
-            new XAttribute("property", "og:title"),
-            new XAttribute("content", "My App")));
-
-        head.Add(new XElement("meta",
-            new XAttribute("property", "og:description"),
-            new XAttribute("content", "Built with Ivy")));
+            new XAttribute("name", "robots"),
+            new XAttribute("content", "index, follow")));
     }
 }
 ```
@@ -64,7 +62,7 @@ Use `Server.UseHtmlFilter()` to add a filter after all built-in filters:
 
 ```csharp
 var server = new Server();
-server.UseHtmlFilter(new OpenGraphFilter());
+server.UseHtmlFilter(new RobotsFilter());
 await server.RunAsync();
 ```
 
@@ -77,7 +75,7 @@ Use `Server.UseHtmlPipeline()` to access the full pipeline. You can clear, reord
 server.UseHtmlPipeline(pipeline =>
 {
     pipeline.Clear();
-    pipeline.Use<OpenGraphFilter>();
+    pipeline.Use<RobotsFilter>();
 });
 ```
 
@@ -85,7 +83,7 @@ server.UseHtmlPipeline(pipeline =>
 // Append additional filters via the pipeline configurator
 server.UseHtmlPipeline(pipeline =>
 {
-    pipeline.Use<OpenGraphFilter>();
+    pipeline.Use<RobotsFilter>();
 });
 ```
 

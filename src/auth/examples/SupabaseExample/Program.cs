@@ -1,5 +1,4 @@
 using Ivy;
-using Ivy.Auth.Supabase;
 
 var server = new Server();
 
@@ -8,11 +7,11 @@ server.UseHotReload();
 server.AddConnectionsFromAssembly();
 server.AddAppsFromAssembly();
 
-var settings = new ChromeSettings()
+var settings = new AppShellSettings()
     .UseTabs(preventDuplicates: true)
     .DefaultApp<SupabaseExample.MainApp>();
 
-server.UseChrome(settings);
+server.UseAppShell(settings);
 
 server.SetMetaTitle("Supabase Example");
 

@@ -84,15 +84,13 @@ Build an IIFE so the host can load one script and get a global. The `name` in `b
 
 ```typescript
 // vite.config.ts
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vite-plus';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [
-    react({
-      jsxRuntime: 'classic', // Use global React; required for Ivy host
-    }),
+    react(),
   ],
   build: {
     lib: {
@@ -101,16 +99,18 @@ export default defineConfig({
       fileName: () => 'ExternalWidget.js',
       formats: ['iife'],
     },
-    rollupOptions: {
-      external: ['react', 'react-dom'],
+    rolldownOptions: {
+      external: ['react', 'react-dom', 'react-dom/client'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
+          'react-dom/client': 'ReactDOM',
         },
         extend: false,
       },
     },
+    cssCodeSplit: false,
   },
 });
 ```
@@ -226,8 +226,8 @@ In the `.csproj`:
 </ItemGroup>
 
 <Target Name="BuildFrontend" BeforeTargets="Build" Condition="Exists('frontend/package.json')">
-  <Exec Command="npm install" WorkingDirectory="frontend" />
-  <Exec Command="npm run build" WorkingDirectory="frontend" />
+  <Exec Command="npx -y pnpm install" WorkingDirectory="frontend" />
+  <Exec Command="npx -y pnpm run build" WorkingDirectory="frontend" />
 </Target>
 ```
 
@@ -249,7 +249,7 @@ When the widget lives inside the host app (e.g. `HostApp/Widgets/MyWidget/`), ad
 
 You can ship **several widgets from one frontend project**: one Vite build produces a single JS bundle, and multiple C# widget records point to that same script. Each widget type is resolved by `ExportName` from the same global object. The backend serves the same embedded file for all of them; the browser may cache it per URL.
 
-- **One frontend** — one `frontend/` project, one `npm run build`, one output file (e.g. `ExternalWidgets.js`).
+- **One frontend** — one `frontend/` project, one `pnpm run build`, one output file (e.g. `ExternalWidgets.js`).
 - **Same script path and GlobalName** — every C# widget uses the same `[ExternalWidget("frontend/dist/ExternalWidgets.js", ..., GlobalName = "MyProject_Widgets")]` so they all use the same global object.
 - **Different ExportName** — each C# record must specify the React component name explicitly: `ExportName = "MyWidget"`, `ExportName = "AnotherWidget"`, etc. Do not rely on `"default"` for multi-widget bundles.
 
@@ -288,16 +288,16 @@ The host’s entry point should set:
 (window as any).ReactDOM = ReactDOM; // or createRoot etc.
 ```
 
-Ivy’s standard host (e.g. [Chrome](../../01_Onboarding/02_Concepts/11_Chrome.md)) does this. If you see “Global not found” or React-related errors, ensure the host app exposes these globals before any external widget script runs.
+Ivy’s standard host (e.g. [AppShell](../../01_Onboarding/02_Concepts/11_AppShell.md)) does this. If you see “Global not found” or React-related errors, ensure the host app exposes these globals before any external widget script runs.
 
 ## Troubleshooting
 
 | Issue | What to check |
 | ----- | ------------- |
 | **Script resource not found** | Path in `[ExternalWidget]` must match the embedded path (project-relative, e.g. `frontend/dist/ExternalWidget.js`). Resource name is assembly name + path with `/` → `.`. After changing `fileName` in Vite, run `dotnet clean` then `dotnet build`. |
-| **Global not found** | `GlobalName` in C# must equal Vite `build.lib.name`. In `src/index.ts`, assign the export to `window[GlobalName]`. Use `jsxRuntime: 'classic'` so the bundle uses the global React. |
+| **Global not found** | `GlobalName` in C# must equal Vite `build.lib.name`. In `src/index.ts`, assign the export to `window[GlobalName]`. |
 | **Duplicate type / CS0579** | Widget project is under the host app and the host is compiling its files. Exclude the widget directory in the host's `.csproj` so only the widget project builds it (see below). |
-| **Invalid hook call / multiple React** | Widget must not bundle React when the host provides it. Keep `react` and `react-dom` in `external` and `globals` in Vite, and use `jsxRuntime: 'classic'`. |
+| **Invalid hook call / multiple React** | Widget must not bundle React when the host provides it. Keep `react`, `react-dom` and `react-dom/client` in `external` and `globals` in Vite `rolldownOptions`. |
 | **Wrong filename (.iife.js)** | Set `fileName: () => 'ExternalWidget.js'` in `vite.config.ts` so the output name has no extra suffix. |
 
 **Excluding the widget folder (integrated pattern):** When the widget project lives inside the host app directory, exclude it from the host’s compilation so the host does not compile the widget’s sources. In the host’s `.csproj`:

@@ -20,11 +20,12 @@ public enum BadgeVariant
 /// </summary>
 public record Badge : WidgetBase<Badge>
 {
-    public Badge(string? title = null, BadgeVariant variant = BadgeVariant.Primary, Icons? icon = null)
+    public Badge(string? title = null, BadgeVariant variant = BadgeVariant.Primary, Icons? icon = null, Colors? color = null)
     {
         Title = title;
         Variant = variant;
         Icon = icon;
+        Color = color;
     }
 
     internal Badge() { }
@@ -34,6 +35,8 @@ public record Badge : WidgetBase<Badge>
     [Prop] public BadgeVariant Variant { get; set; } = BadgeVariant.Primary;
 
     [Prop] public Icons? Icon { get; set; }
+
+    [Prop] public Colors? Color { get; set; }
 
     [Prop] public Align IconPosition { get; set; } = Align.Left;
 
@@ -55,6 +58,12 @@ public static class BadgeExtensions
     public static Badge Variant(this Badge badge, BadgeVariant variant)
     {
         return badge with { Variant = variant };
+    }
+
+    [RelatedTo(nameof(Badge.Color))]
+    public static Badge Color(this Badge badge, Colors color)
+    {
+        return badge with { Color = color };
     }
 
     [RelatedTo(nameof(Badge.Variant))]

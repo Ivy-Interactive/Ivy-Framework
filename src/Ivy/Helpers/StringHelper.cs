@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -7,6 +8,14 @@ namespace Ivy;
 public static class StringHelper
 {
     public static string? NullIfEmpty(this string? input) => string.IsNullOrWhiteSpace(input) ? null : input;
+
+    public static string ToTitleCase(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLower());
+    }
 
     public static string TitleCaseToCamelCase(string titleCase)
     {
@@ -32,7 +41,7 @@ public static class StringHelper
     {
         if (input == null) return null;
         string[] words = Regex
-            .Matches(input, "([A-Z]+[a-z]+|[0-9]+|[a-z]+|[A-Z]+)")
+            .Matches(input, "([A-Z]+(?=[A-Z][a-z])|[A-Z][a-z]+|[A-Z]+$|[0-9]+|[a-z]+)")
             .Select(m => char.ToUpper(m.Value[0]) + m.Value[1..])
             .ToArray();
         return string.Join(" ", words);

@@ -1,27 +1,24 @@
-import React, { useCallback, useMemo } from 'react';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Toggle } from '@/components/ui/toggle';
-import Icon from '@/components/Icon';
-import { useEventHandler } from '@/components/event-handler';
-import { inputStyles } from '@/lib/styles';
-import { cn } from '@/lib/utils';
-import { Checkbox, NullableBoolean } from '@/components/ui/checkbox';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { Loader2 } from 'lucide-react';
-import { Densities } from '@/types/density';
+import React, { useCallback, useMemo } from "react";
+import { useOptimisticValue } from "./shared/useOptimisticValue";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Toggle } from "@/components/ui/toggle";
+import Icon from "@/components/Icon";
+import { useEventHandler } from "@/components/event-handler";
+import { inputStyles } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import { Checkbox, NullableBoolean } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Loader2 } from "lucide-react";
+import { Densities } from "@/types/density";
 import {
   labelSizeVariant,
   descriptionSizeVariant,
   boolInputRowMinHeightVariant,
-} from '@/components/ui/input/bool-input-variant';
+} from "@/components/ui/input/bool-input-variant";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
-type VariantType = 'Checkbox' | 'Switch' | 'Toggle';
+type VariantType = "Checkbox" | "Switch" | "Toggle";
 
 interface BoolInputWidgetProps {
   id: string;
@@ -35,7 +32,8 @@ interface BoolInputWidgetProps {
   variant: VariantType;
   icon?: string;
   density?: Densities;
-  'data-testid'?: string;
+  events?: string[];
+  "data-testid"?: string;
 }
 
 interface BaseVariantProps {
@@ -48,7 +46,7 @@ interface BaseVariantProps {
   disabled: boolean;
   loading: boolean;
   density?: Densities;
-  'data-testid'?: string;
+  "data-testid"?: string;
 }
 
 interface CheckboxVariantProps extends BaseVariantProps {
@@ -81,9 +79,7 @@ const InputLabel: React.FC<{
           {label}
         </Label>
       )}
-      {description && (
-        <p className={descriptionSizeVariant({ density })}>{description}</p>
-      )}
+      {description && <p className={descriptionSizeVariant({ density })}>{description}</p>}
     </div>
   );
 });
@@ -105,22 +101,16 @@ const withTooltip = (content: React.ReactNode, invalid?: string) => {
 
 const LoadingOverlay: React.FC<{
   density?: Densities;
-  'data-testid'?: string;
-}> = ({ density = Densities.Medium, 'data-testid': dataTestId }) => {
+  "data-testid"?: string;
+}> = ({ density = Densities.Medium, "data-testid": dataTestId }) => {
   const sizeClass =
-    density === Densities.Small
-      ? 'h-4 w-4'
-      : density === Densities.Large
-        ? 'h-5 w-5'
-        : 'h-4 w-4';
+    density === Densities.Small ? "h-4 w-4" : density === Densities.Large ? "h-5 w-5" : "h-4 w-4";
   return (
     <div
       className="absolute inset-0 flex items-center justify-center rounded-md bg-background/80"
       data-testid={dataTestId ? `${dataTestId}-loading` : undefined}
     >
-      <Loader2
-        className={cn(sizeClass, 'animate-spin text-muted-foreground')}
-      />
+      <Loader2 className={cn(sizeClass, "animate-spin text-muted-foreground")} />
     </div>
   );
 };
@@ -138,7 +128,7 @@ const VariantComponents = {
       invalid,
       density = Densities.Medium,
       onCheckedChange,
-      'data-testid': dataTestId,
+      "data-testid": dataTestId,
     }: CheckboxVariantProps) => {
       const checkboxElement = (
         <div className="relative flex shrink-0">
@@ -158,14 +148,14 @@ const VariantComponents = {
       const content = (
         <div
           className={cn(
-            'flex gap-2 items-center',
+            "flex gap-2 items-center",
             boolInputRowMinHeightVariant({ density }),
-            description && 'items-start'
+            description && "items-start",
           )}
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
           role="presentation"
         >
-          <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
+          <div className={cn(description && "mt-1.5", "flex shrink-0")}>
             {withTooltip(checkboxElement, invalid)}
           </div>
           <InputLabel id={id} label={label} description={description} />
@@ -173,7 +163,7 @@ const VariantComponents = {
       );
 
       return content;
-    }
+    },
   ),
 
   Switch: React.memo(
@@ -188,7 +178,7 @@ const VariantComponents = {
       density = Densities.Medium,
       icon,
       onCheckedChange,
-      'data-testid': dataTestId,
+      "data-testid": dataTestId,
     }: SwitchVariantProps) => {
       const switchElement = (
         <div className="relative flex shrink-0">
@@ -208,14 +198,14 @@ const VariantComponents = {
       const content = (
         <div
           className={cn(
-            'flex gap-2 items-center',
+            "flex gap-2 items-center",
             boolInputRowMinHeightVariant({ density }),
-            description && 'items-start'
+            description && "items-start",
           )}
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
           role="presentation"
         >
-          <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
+          <div className={cn(description && "mt-1.5", "flex shrink-0")}>
             {withTooltip(switchElement, invalid)}
           </div>
           <InputLabel id={id} label={label} description={description} />
@@ -223,7 +213,7 @@ const VariantComponents = {
       );
 
       return content;
-    }
+    },
   ),
 
   Toggle: React.memo(
@@ -238,7 +228,7 @@ const VariantComponents = {
       invalid,
       density = Densities.Medium,
       onPressedChange,
-      'data-testid': dataTestId,
+      "data-testid": dataTestId,
     }: ToggleVariantProps) => {
       const toggleElement = (
         <div className="relative flex shrink-0">
@@ -260,14 +250,14 @@ const VariantComponents = {
       const content = (
         <div
           className={cn(
-            'flex space-x-2 items-center',
+            "flex space-x-2 items-center",
             boolInputRowMinHeightVariant({ density }),
-            description && 'items-start'
+            description && "items-start",
           )}
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
           role="presentation"
         >
-          <div className={cn(description && 'mt-1.5', 'flex shrink-0')}>
+          <div className={cn(description && "mt-1.5", "flex shrink-0")}>
             {withTooltip(toggleElement, invalid)}
           </div>
           <InputLabel id={id} label={label} description={description} />
@@ -275,7 +265,7 @@ const VariantComponents = {
       );
 
       return content;
-    }
+    },
   ),
 };
 
@@ -288,42 +278,59 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   loading = false,
   invalid,
   nullable = false,
-  variant = 'Checkbox',
+  variant = "Checkbox",
   icon,
   density = Densities.Medium,
-  'data-testid': dataTestId,
+  events = EMPTY_ARRAY,
+  "data-testid": dataTestId,
 }) => {
   const eventHandler = useEventHandler();
 
   // Normalize undefined to null when nullable
   const normalizedValue = nullable && value === undefined ? null : value;
 
+  const [localValue, setLocalValue] = useOptimisticValue(normalizedValue, false);
+
   const handleChange = useCallback(
     (newValue: boolean | null) => {
       if (disabled || loading) return;
-      eventHandler('OnChange', id, [newValue]);
+      setLocalValue(newValue);
+      eventHandler("OnChange", id, [newValue]);
     },
-    [disabled, loading, eventHandler, id]
+    [disabled, loading, eventHandler, id, setLocalValue],
   );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);
 
   return (
-    <VariantComponent
-      id={id}
-      label={label}
-      description={description}
-      value={normalizedValue}
-      disabled={disabled}
-      loading={loading}
-      nullable={nullable}
-      icon={icon}
-      invalid={invalid}
-      density={density}
-      onCheckedChange={handleChange}
-      onPressedChange={handleChange}
-      data-testid={dataTestId}
-    />
+    <div
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+        }
+      }}
+      onFocus={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+        }
+      }}
+    >
+      <VariantComponent
+        id={id}
+        label={label}
+        description={description}
+        value={localValue}
+        disabled={disabled}
+        loading={loading}
+        nullable={nullable}
+        icon={icon}
+        invalid={invalid}
+        density={density}
+        onCheckedChange={handleChange}
+        onPressedChange={handleChange}
+        data-testid={dataTestId}
+      />
+    </div>
   );
 };
 

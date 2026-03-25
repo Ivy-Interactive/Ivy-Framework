@@ -1,7 +1,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.Check, path: ["Widgets", "Inputs"], searchHints: ["checkbox", "switch", "toggle", "boolean", "true-false", "option"])]
+[App(icon: Icons.Check, group: ["Widgets", "Inputs"], searchHints: ["checkbox", "switch", "toggle", "boolean", "true-false", "option"])]
 public class BoolInputApp : SampleBase
 {
     protected override object? BuildSample()
@@ -10,6 +10,10 @@ public class BoolInputApp : SampleBase
         var trueState = UseState(true);
         var nullState = UseState((bool?)null);
         var loadingState = UseState(true);
+        var onBlurState = UseState(false);
+        var onBlurLabel = UseState("");
+        var onFocusState = UseState(false);
+        var onFocusLabel = UseState("");
 
         var variants = Layout.Grid().Columns(7)
                        | null!
@@ -193,7 +197,7 @@ public class BoolInputApp : SampleBase
             ;
 
         return Layout.Vertical()
-               | Text.H1("BoolInput")
+               | Text.H1("Bool Input")
                | Text.H2("Sizes")
                | new BoolInputSizes()
                | Text.H2("Icons")
@@ -202,6 +206,25 @@ public class BoolInputApp : SampleBase
                | variants
                | Text.H2("Data Binding")
                | new BoolInputDataBinding()
+               | Text.H2("Events")
+               | (Layout.Vertical()
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The blur event fires when the checkbox loses focus.").Small()
+                           | onBlurState.ToBoolInput().Label("Label").OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                           | (onBlurLabel.Value != ""
+                               ? Callout.Success(onBlurLabel.Value)
+                               : Callout.Info("Interact then click away to see blur events"))
+                   ).Title("OnBlur Handler")
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The focus event fires when you click on or tab into the checkbox.").Small()
+                           | onFocusState.ToBoolInput().Label("Label").OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                           | (onFocusLabel.Value != ""
+                               ? Callout.Success(onFocusLabel.Value)
+                               : Callout.Info("Click or tab into the input to see focus events"))
+                   ).Title("OnFocus Handler")
+               )
             ;
     }
 

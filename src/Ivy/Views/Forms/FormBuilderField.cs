@@ -23,7 +23,7 @@ public class FormBuilderField<TModel>(
 
     public Type Type => (FieldInfo?.FieldType ?? PropertyInfo?.PropertyType)!;
 
-    public bool Disabled { get; set; } = true;
+    public bool Disabled { get; set; } = false;
 
     public int Order { get; set; } = order;
 
@@ -46,6 +46,8 @@ public class FormBuilderField<TModel>(
     public bool Removed { get; set; }
 
     public bool Required { get; set; } = required;
+
+    public LabelPosition? LabelPosition { get; set; }
 
     public List<Func<object?, (bool, string)>> Validators { get; set; } = new();
 }

@@ -1,1 +1,1 @@
-export * from './PaginationWidget';
+export * from "./PaginationWidget";

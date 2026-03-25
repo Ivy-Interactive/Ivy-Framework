@@ -266,7 +266,7 @@ public class AppSignal : AbstractSignal<string, Unit> { }
 - **`App`** - All sessions running the same application
 - **`Server`** - All active sessions on the server
 - **`Machine`** - All sessions on the same physical machine
-- **`Chrome`** - Parent [Chrome](../../../01_Onboarding/02_Concepts/16_Chrome.md) session (for embedded apps)
+- **`AppShell`** - Parent [AppShell](../../../01_Onboarding/02_Concepts/11_AppShell.md) session (for embedded apps)
 
 ```csharp
 [Signal(BroadcastType.App)]

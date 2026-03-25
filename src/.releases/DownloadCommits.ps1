@@ -1,18 +1,18 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$Repo,
     
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$OutputFolder,
     
-    [Parameter(ParameterSetName='DateRange')]
+    [Parameter(ParameterSetName = 'DateRange')]
     [datetime]$FromDate,
     
-    [Parameter(ParameterSetName='DateRange')]
+    [Parameter(ParameterSetName = 'DateRange')]
     [datetime]$ToDate,
     
-    [Parameter(ParameterSetName='LastDays')]
+    [Parameter(ParameterSetName = 'LastDays')]
     [int]$LastDays,
     
     [Parameter()]
@@ -29,16 +29,18 @@ if ($PSCmdlet.ParameterSetName -eq 'DateRange') {
         Write-Error "FromDate must be before ToDate"
         exit 1
     }
-} elseif ($PSCmdlet.ParameterSetName -eq 'LastDays') {
+}
+elseif ($PSCmdlet.ParameterSetName -eq 'LastDays') {
     if ($LastDays -le 0) {
         Write-Error "LastDays must be a positive number"
         exit 1
     }
     # Calculate date range from LastDays
     $ToDate = Get-Date
-    $FromDate = $ToDate.AddDays(-($LastDays - 1)).Date
+    $FromDate = $ToDate.AddDays( - ($LastDays - 1)).Date
     $ToDate = $ToDate.Date.AddDays(1).AddSeconds(-1) # End of today
-} else {
+}
+else {
     Write-Error "Either specify FromDate and ToDate, or LastDays"
     exit 1
 }
@@ -107,7 +109,8 @@ try {
             $owner = $Matches[1]
             $repoName = $Matches[2]
             $baseUrl = "https://github.com/$owner/$repoName"
-        } else {
+        }
+        else {
             $baseUrl = $Repo.TrimEnd('/', '.git')
         }
         
@@ -120,7 +123,8 @@ try {
                 # Use raw.githubusercontent.com for direct file access
                 if ($Repo -match "github\.com[/:]([^/]+)/([^/\.]+)") {
                     $fileUrl = "https://raw.githubusercontent.com/$owner/$repoName/$commitHash/$file"
-                } else {
+                }
+                else {
                     $fileUrl = "$baseUrl/blob/$commitHash/$file"
                 }
                 $filesList += "- [$file]($fileUrl)`n"
@@ -143,7 +147,8 @@ $diff
         $numericPrefix = "{0:D5}" -f $processed
         if ($Prefix) {
             $fileName = "$Prefix-$numericPrefix-$shortHash.md"
-        } else {
+        }
+        else {
             $fileName = "$numericPrefix-$shortHash.md"
         }
         $filePath = Join-Path $OutputFolder $fileName
@@ -158,10 +163,12 @@ $diff
     # Clear the terminal
     Clear-Host
     
-} catch {
+}
+catch {
     Write-Error "Error: $_"
     exit 1
-} finally {
+}
+finally {
     Pop-Location
     if (Test-Path $tempDir) {
         Remove-Item -Path $tempDir -Recurse -Force

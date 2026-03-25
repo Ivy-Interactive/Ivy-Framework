@@ -1,4 +1,4 @@
-import { Theme } from './types';
+import { Theme } from "./types";
 
 // Create a global reference that can be accessed from anywhere
 // This solves the closure issue with useBackend

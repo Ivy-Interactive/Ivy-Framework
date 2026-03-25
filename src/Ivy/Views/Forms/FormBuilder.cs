@@ -15,7 +15,9 @@ public class FormBuilder<TModel> : ViewBase
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
+    internal bool _formDisabled = false;
     internal Density _density = Ivy.Density.Medium;
+    internal LabelPosition? _labelPosition;
     internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
     internal FormValidationStrategy _validationStrategy;
     internal FormSubmitStrategy _submitStrategy;
@@ -276,6 +278,15 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
+    /// <summary>
+    /// Disables the entire form - all input fields and the submit button.
+    /// </summary>
+    public FormBuilder<TModel> Disabled(bool disabled = true)
+    {
+        _formDisabled = disabled;
+        return this;
+    }
+
     public FormBuilder<TModel> Disabled(bool disabled, params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var expr in fields)
@@ -314,6 +325,19 @@ public class FormBuilder<TModel> : ViewBase
     public FormBuilder<TModel> Medium() => Density(Ivy.Density.Medium);
     public FormBuilder<TModel> Large() => Density(Ivy.Density.Large);
 
+    public FormBuilder<TModel> LabelPosition(LabelPosition position)
+    {
+        _labelPosition = position;
+        return this;
+    }
+
+    public FormBuilder<TModel> LabelPosition(Expression<Func<TModel, object>> field, LabelPosition position)
+    {
+        var hint = GetField(field);
+        hint.LabelPosition = position;
+        return this;
+    }
+
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
         var name = TypeHelper.GetNameFromMemberExpression(field.Body);
@@ -342,6 +366,7 @@ public class FormBuilder<TModel> : ViewBase
             .Where(e => e is { Removed: false, InputFactory: not null })
             .Select(e =>
             {
+                var effectiveLabelPosition = e.LabelPosition ?? _labelPosition;
                 IFormFieldBinding<TModel> binding = new FormFieldBinding<TModel>(
                     CreateSelector(e.Name),
                     e.InputFactory!,
@@ -358,7 +383,9 @@ public class FormBuilder<TModel> : ViewBase
                     _density,
                     e.Help,
                     e.Placeholder,
-                    _submitStrategy
+                    _submitStrategy,
+                    e.Disabled || _formDisabled,
+                    effectiveLabelPosition
                 );
                 return binding;
             })
@@ -450,7 +477,7 @@ public class FormBuilder<TModel> : ViewBase
         return Layout.Vertical().Gap(buttonGap)
                | formView
                | Layout.Horizontal(
-                   _submitBuilder(submitting || isUploading).OnClick(_ => handleSubmit()).Density(_density),
+                   _submitBuilder(submitting || isUploading).OnClick(_ => handleSubmit()).Density(_density).Disabled(_formDisabled || submitting || isUploading),
                    validationView
                 );
     }

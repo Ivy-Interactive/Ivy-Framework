@@ -10,6 +10,7 @@
     <Project Path="auth/examples/BasicAuthExample/BasicAuthExample.csproj" />
     <Project Path="auth/examples/ClerkExample/ClerkExample.csproj" />
     <Project Path="auth/examples/GitHubExample/GitHubExample.csproj" />
+    <Project Path="auth/examples/Ivy.Auth.Examples.Shared/Ivy.Auth.Examples.Shared.csproj" />
     <Project Path="auth/examples/MicrosoftEntraExample/MicrosoftEntraExample.csproj" />
     <Project Path="auth/examples/SupabaseExample/SupabaseExample.csproj" />
   </Folder>
@@ -25,6 +26,7 @@
     <Project Path="auth/Ivy.Auth.Authelia/Ivy.Auth.Authelia.csproj" />
     <Project Path="auth/Ivy.Auth.Clerk/Ivy.Auth.Clerk.csproj" />
     <Project Path="auth/Ivy.Auth.GitHub/Ivy.Auth.GitHub.csproj" />
+    <Project Path="auth/Ivy.Auth.Google/Ivy.Auth.Google.csproj" />
     <Project Path="auth/Ivy.Auth.MicrosoftEntra/Ivy.Auth.MicrosoftEntra.csproj" />
     <Project Path="auth/Ivy.Auth.Sliplane/Ivy.Auth.Sliplane.csproj" />
     <Project Path="auth/Ivy.Auth.Supabase/Ivy.Auth.Supabase.csproj" />

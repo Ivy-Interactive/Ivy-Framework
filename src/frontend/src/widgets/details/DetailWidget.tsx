@@ -1,5 +1,5 @@
-import React from 'react';
-import { DetailItem } from '@/components/ui/detail';
+import React from "react";
+import { DetailItem } from "@/components/ui/detail";
 
 interface DetailWidgetProps {
   id: string;
@@ -8,12 +8,7 @@ interface DetailWidgetProps {
   children?: React.ReactNode[];
 }
 
-export const DetailWidget: React.FC<DetailWidgetProps> = ({
-  id,
-  label,
-  children,
-  multiline,
-}) => {
+export const DetailWidget: React.FC<DetailWidgetProps> = ({ id, label, children, multiline }) => {
   return (
     <DetailItem label={label} multiline={multiline} key={id}>
       {children}

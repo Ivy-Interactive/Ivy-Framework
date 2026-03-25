@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
@@ -6,7 +7,7 @@ namespace Ivy;
 /// <summary>
 /// Allows users to record audio directly from the browser.
 /// </summary>
-public record AudioInput : WidgetBase<AudioInput>
+public record AudioInput : WidgetBase<AudioInput>, IAnyInput
 {
     public AudioInput(UploadContext upload, string? label = null, string? recordingLabel = null, string mimeType = "audio/webm", int? chunkInterval = null, int? sampleRate = null, bool disabled = false)
     {
@@ -34,6 +35,15 @@ public record AudioInput : WidgetBase<AudioInput>
     [Prop] public int? SampleRate { get; set; }
 
     [Prop] public string? UploadUrl { get; set; }
+
+    [Prop] public string? Placeholder { get; set; }
+    [Prop] public string? Invalid { get; set; }
+    [Prop] public bool Nullable { get; set; }
+
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
+
+    public Type[] SupportedStateTypes() => [];
 }
 
 public static class AudioInputExtensions
@@ -71,5 +81,37 @@ public static class AudioInputExtensions
     public static AudioInput UploadUrl(this AudioInput widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static AudioInput OnBlur(this AudioInput widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    {
+        return widget with { OnBlur = new(onBlur) };
+    }
+
+    public static AudioInput OnBlur(this AudioInput widget, Action<Event<IAnyInput>> onBlur)
+    {
+        return widget with { OnBlur = new(onBlur.ToValueTask()) };
+    }
+
+    public static AudioInput OnBlur(this AudioInput widget, Action onBlur)
+    {
+        return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static AudioInput OnFocus(this AudioInput widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static AudioInput OnFocus(this AudioInput widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus.ToValueTask()) };
+    }
+
+    public static AudioInput OnFocus(this AudioInput widget, Action onFocus)
+    {
+        return widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
     }
 }

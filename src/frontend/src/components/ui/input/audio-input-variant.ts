@@ -1,60 +1,60 @@
-import { cva } from 'class-variance-authority';
+import { cva } from "class-variance-authority";
 
 // Size variants for AudioInputWidget
 export const audioInputVariant = cva(
-  'relative rounded-field border-dashed transition-colors border-muted-foreground/25',
+  "relative rounded-field border-dashed transition-colors border-muted-foreground/25",
   {
     variants: {
       density: {
-        Small: 'p-3 w-24 border-2',
-        Medium: 'p-4 w-28 border-2',
-        Large: 'p-5 w-36 border-3',
+        Small: "p-3 w-24 border-2",
+        Medium: "p-4 w-28 border-2",
+        Large: "p-5 w-36 border-3",
       },
     },
     defaultVariants: {
-      density: 'Medium',
+      density: "Medium",
     },
-  }
+  },
 );
 
 // Size variants for text
-export const textSizeVariant = cva('', {
+export const textSizeVariant = cva("", {
   variants: {
     density: {
-      Small: 'text-xs',
-      Medium: 'text-sm',
-      Large: 'text-base',
+      Small: "text-xs",
+      Medium: "text-sm",
+      Large: "text-base",
     },
   },
   defaultVariants: {
-    density: 'Medium',
+    density: "Medium",
   },
 });
 
 // Size variants for timer
-export const timerSizeVariant = cva('', {
+export const timerSizeVariant = cva("", {
   variants: {
     density: {
-      Small: 'text-sm',
-      Medium: 'text-base',
-      Large: 'text-lg',
+      Small: "text-sm",
+      Medium: "text-base",
+      Large: "text-lg",
     },
   },
   defaultVariants: {
-    density: 'Medium',
+    density: "Medium",
   },
 });
 
 // Size variants for icons
-export const iconSizeVariant = cva('', {
+export const iconSizeVariant = cva("", {
   variants: {
     density: {
-      Small: '!size-4',
-      Medium: '!size-5',
-      Large: '!size-6',
+      Small: "!size-4",
+      Medium: "!size-5",
+      Large: "!size-6",
     },
   },
   defaultVariants: {
-    density: 'Medium',
+    density: "Medium",
   },
 });

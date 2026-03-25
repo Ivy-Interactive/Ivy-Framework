@@ -1,11 +1,11 @@
-import React from 'react';
-import { Kanban, type Task } from '@/components/ui/shadcn-io/kanban';
-import { getWidth, getHeight } from '@/lib/styles';
-import { useKanbanData } from './useKanbanData';
-import { useKanbanHandlers } from './useKanbanHandlers';
-import { KanbanEmptyState } from './KanbanEmptyState';
-import { KanbanCardRenderer } from './KanbanCardRenderer';
-import type { KanbanWidgetProps } from './types';
+import React from "react";
+import { Kanban, type Task } from "@/components/ui/shadcn-io/kanban";
+import { getWidth, getHeight } from "@/lib/styles";
+import { useKanbanData } from "./useKanbanData";
+import { useKanbanHandlers } from "./useKanbanHandlers";
+import { KanbanEmptyState } from "./KanbanEmptyState";
+import { KanbanCardRenderer } from "./KanbanCardRenderer";
+import type { KanbanWidgetProps } from "./types";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -20,12 +20,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   slots,
   widgetNodeChildren,
 }) => {
-  const extractedData = useKanbanData(
-    slots,
-    tasks,
-    columns,
-    widgetNodeChildren
-  );
+  const extractedData = useKanbanData(slots, tasks, columns, widgetNodeChildren);
   const { handleCardMove } = useKanbanHandlers(id);
 
   const sortedColumns = React.useMemo(() => {
@@ -43,10 +38,10 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   const styles = {
     ...getWidth(width),
     ...getHeight(height),
-    overflowY: 'hidden' as const,
-    overflowX: 'auto' as const,
-    maxWidth: '100%',
-    boxSizing: 'border-box' as const,
+    overflowY: "hidden" as const,
+    overflowX: "auto" as const,
+    maxWidth: "100%",
+    boxSizing: "border-box" as const,
   };
 
   return (
@@ -66,7 +61,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
           KanbanCardContent,
         }) => (
           <KanbanBoard>
-            {sortedColumns.map(column => (
+            {sortedColumns.map((column) => (
               <KanbanColumn
                 key={column.id}
                 id={column.id}
@@ -76,9 +71,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
               >
                 <KanbanCards id={column.id}>
                   {(task: Task, index: number) => {
-                    const card = extractedData.cards.find(
-                      c => c.cardId === task.id
-                    );
+                    const card = extractedData.cards.find((c) => c.cardId === task.id);
 
                     return (
                       <KanbanCardRenderer

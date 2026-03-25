@@ -38,6 +38,12 @@ public class AppSession : IAsyncDisposable
 
     public EventDispatchQueue? EventQueue { get; set; }
 
+    // Brokered auth session state
+    internal Action<string>? BrokeredTokenAddedHandler { get; set; }
+    internal Action<string>? BrokeredTokenRemovedHandler { get; set; }
+    internal HashSet<string>? ActiveBrokeredRefreshLoops { get; set; }
+    internal ConcurrentDictionary<string, CancellationTokenSource>? BrokeredRefreshCancellations { get; set; }
+
     public async ValueTask DisposeAsync()
     {
         _isDisposed = true;

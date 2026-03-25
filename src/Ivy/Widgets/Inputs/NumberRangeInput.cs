@@ -56,6 +56,7 @@ public abstract record NumberRangeInputBase : WidgetBase<NumberRangeInputBase>, 
     [Prop] public Affix? Suffix { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() => [
         typeof((short, short)), typeof((short?, short?)),
@@ -105,7 +106,7 @@ public record NumberRangeInput<TNumber> : NumberRangeInputBase, IInput<(TNumber,
 
     internal NumberRangeInput() { }
 
-    [Prop] public (TNumber, TNumber) Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public (TNumber, TNumber) Value { get; init; } = default!;
 
     [Prop] public TNumber LowerValue => Value.Item1;
 
@@ -248,5 +249,21 @@ public static class NumberRangeInputExtensions
     public static NumberRangeInputBase OnBlur(this NumberRangeInputBase widget, Action onBlur)
     {
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static NumberRangeInputBase OnFocus(this NumberRangeInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static NumberRangeInputBase OnFocus(this NumberRangeInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus.ToValueTask()) };
+    }
+
+    public static NumberRangeInputBase OnFocus(this NumberRangeInputBase widget, Action onFocus)
+    {
+        return widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
     }
 }

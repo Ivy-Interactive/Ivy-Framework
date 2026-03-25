@@ -39,7 +39,12 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 
     [Prop] public DayOfWeek? FirstDayOfWeek { get; set; }
 
+    [Prop] public DateTime? Min { get; set; }
+    [Prop] public DateTime? Max { get; set; }
+    [Prop] public TimeSpan? Step { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() =>
 [
@@ -60,19 +65,19 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
     {
         var typedState = state.As<TDate>();
         Value = typedState.Value;
-        OnChange = new(e => { typedState.Set(e.Value); return ValueTask.CompletedTask; });
+        OnChange = new(e => { typedState.Set(Clamp(e.Value)); return ValueTask.CompletedTask; });
     }
 
     [OverloadResolutionPriority(1)]
     internal DateTimeInput(TDate value, Func<Event<IInput<TDate>, TDate>, ValueTask> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
     {
-        OnChange = onChange.ToEventHandler();
+        OnChange = new(e => onChange(new Event<IInput<TDate>, TDate>(e.EventName, e.Sender, Clamp(e.Value))));
         Value = value;
     }
 
     internal DateTimeInput(TDate value, Action<Event<IInput<TDate>, TDate>> onChange, string? placeholder = null, bool disabled = false, DateTimeInputVariant variant = DateTimeInputVariant.Date) : this(placeholder, disabled, variant)
     {
-        OnChange = new(e => { onChange(e); return ValueTask.CompletedTask; });
+        OnChange = new(e => { onChange(new Event<IInput<TDate>, TDate>(e.EventName, e.Sender, Clamp(e.Value))); return ValueTask.CompletedTask; });
         Value = value;
     }
 
@@ -85,11 +90,37 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 
     internal DateTimeInput() { }
 
-    [Prop] public TDate Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TDate Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TDate) == typeof(DateTime?) || typeof(TDate) == typeof(DateTimeOffset?) || typeof(TDate) == typeof(DateOnly?) || typeof(TDate) == typeof(TimeOnly?);
 
     [Event] public EventHandler<Event<IInput<TDate>, TDate>>? OnChange { get; set; }
+
+    private TDate Clamp(TDate value)
+    {
+        if (Min == null && Max == null) return value;
+
+        try
+        {
+            DateTime dtValue = value switch
+            {
+                DateTime dt => dt,
+                DateTimeOffset dto => dto.DateTime,
+                DateOnly d => d.ToDateTime(TimeOnly.MinValue),
+                TimeOnly t => DateTime.Today.Add(t.ToTimeSpan()),
+                _ => (DateTime)(Core.Utils.BestGuessConvert(value, typeof(DateTime)) ?? DateTime.Now)
+            };
+
+            if (Min.HasValue && dtValue < Min.Value) return (TDate)Core.Utils.BestGuessConvert(Min.Value, typeof(TDate))!;
+            if (Max.HasValue && dtValue > Max.Value) return (TDate)Core.Utils.BestGuessConvert(Max.Value, typeof(TDate))!;
+        }
+        catch
+        {
+            // If conversion fails, just return the value as is
+        }
+
+        return value;
+    }
 }
 
 public static class DateTimeInputExtensions
@@ -229,33 +260,51 @@ public static class DateTimeInputExtensions
         return input;
     }
 
-    public static DateTimeInputBase Disabled(this DateTimeInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
+    public static T Disabled<T>(this T widget, bool disabled = true) where T : DateTimeInputBase => widget with { Disabled = disabled };
 
-    public static DateTimeInputBase Variant(this DateTimeInputBase widget, DateTimeInputVariant variant) => widget with { Variant = variant };
+    public static T Variant<T>(this T widget, DateTimeInputVariant variant) where T : DateTimeInputBase => widget with { Variant = variant };
 
-    public static DateTimeInputBase Placeholder(this DateTimeInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
+    public static T Placeholder<T>(this T widget, string placeholder) where T : DateTimeInputBase => widget with { Placeholder = placeholder };
 
-    public static DateTimeInputBase Format(this DateTimeInputBase widget, string format) => widget with { Format = format };
+    public static T Format<T>(this T widget, string format) where T : DateTimeInputBase => widget with { Format = format };
 
-    public static DateTimeInputBase Invalid(this DateTimeInputBase widget, string? invalid) => widget with { Invalid = invalid };
-    public static DateTimeInputBase FirstDayOfWeek(this DateTimeInputBase widget, DayOfWeek day) => widget with { FirstDayOfWeek = day };
-    public static DateTimeInputBase Nullable(this DateTimeInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
+    public static T Invalid<T>(this T widget, string? invalid) where T : DateTimeInputBase => widget with { Invalid = invalid };
+    public static T FirstDayOfWeek<T>(this T widget, DayOfWeek day) where T : DateTimeInputBase => widget with { FirstDayOfWeek = day };
+    public static T Nullable<T>(this T widget, bool? nullable = true) where T : DateTimeInputBase => widget with { Nullable = nullable ?? true };
+
+    public static T Min<T>(this T widget, DateTime min) where T : DateTimeInputBase => widget with { Min = min };
+    public static T Max<T>(this T widget, DateTime max) where T : DateTimeInputBase => widget with { Max = max };
+    public static T Step<T>(this T widget, TimeSpan step) where T : DateTimeInputBase => widget with { Step = step };
 
     [OverloadResolutionPriority(1)]
-    public static DateTimeInputBase OnBlur(this DateTimeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static T OnBlur<T>(this T widget, Func<Event<IAnyInput>, ValueTask> onBlur) where T : DateTimeInputBase
     {
         return widget with { OnBlur = new(onBlur) };
     }
 
-    public static DateTimeInputBase OnBlur(this DateTimeInputBase widget, Action<Event<IAnyInput>> onBlur)
+    public static T OnBlur<T>(this T widget, Action<Event<IAnyInput>> onBlur) where T : DateTimeInputBase
     {
         return widget.OnBlur(onBlur.ToValueTask());
     }
 
-    public static DateTimeInputBase OnBlur(this DateTimeInputBase widget, Action onBlur)
+    public static T OnBlur<T>(this T widget, Action onBlur) where T : DateTimeInputBase
     {
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
+    [OverloadResolutionPriority(1)]
+    public static DateTimeInputBase OnFocus(this DateTimeInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
 
+    public static DateTimeInputBase OnFocus(this DateTimeInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget.OnFocus(onFocus.ToValueTask());
+    }
+
+    public static DateTimeInputBase OnFocus(this DateTimeInputBase widget, Action onFocus)
+    {
+        return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
+    }
 }

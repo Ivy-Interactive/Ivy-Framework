@@ -281,5 +281,7 @@ public class TextInputTests
         {
             return EffectTrigger.OnStateChange(this);
         }
+
+        public object? GetValueAsObject() => Value;
     }
 }

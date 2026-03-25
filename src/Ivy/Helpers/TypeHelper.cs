@@ -226,6 +226,10 @@ public static class TypeHelper
                 case UnaryExpression unaryExpression:
                     expression = unaryExpression.Operand;
                     continue;
+                case MethodCallExpression methodCall when methodCall.Method.Name == "get_Item"
+                    && methodCall.Arguments.Count == 1
+                    && methodCall.Arguments[0] is ConstantExpression constant:
+                    return constant.Value?.ToString() ?? throw new ArgumentException("Invalid expression.");
             }
 
             throw new ArgumentException("Invalid expression.");

@@ -177,8 +177,8 @@ public class PivotTableExample : ViewBase
     {
         var rawData = new[]
         {
-            new SalesData("Chrome", "North", 150, 4500m),
-            new SalesData("Chrome", "South", 120, 3600m),
+            new SalesData("Desktop", "North", 150, 4500m),
+            new SalesData("Desktop", "South", 120, 3600m),
             new SalesData("Firefox", "North", 80, 2400m),
             new SalesData("Firefox", "South", 60, 1800m),
             new SalesData("Safari", "North", 50, 1500m),
@@ -469,6 +469,43 @@ new Table(
 ```
 
 **Important:** `Table` takes `TableRow[]`, NOT `string[]`. There is no `.Row()` method. For data-heavy tables with sorting, filtering, and pagination, use `.ToDataTable()` on `IQueryable<T>` instead.
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+When should I use DataTable instead of Table?
+</Summary>
+<Body>
+
+`Table` is for simple, static layouts. For **interactive data grids** with sorting, filtering, search, and large datasets, use [DataTable](../07_Advanced/01_DataTable.md) instead.
+
+**Use DataTable when you need:**
+- Sorting and filtering
+- Search functionality
+- Pagination or incremental loading
+- Row actions (edit, delete)
+- Large datasets (100+ rows)
+- Performance with IQueryable (Apache Arrow backend)
+
+```csharp
+// Use DataTable for interactive data:
+employees.AsQueryable().ToDataTable()
+    .Header(e => e.Name, "Employee")
+    .Config(c => {
+        c.AllowSorting = true;
+        c.ShowSearch = true;
+    })
+
+// Use Table for simple layouts:
+new[] {
+    new { Label = "Status", Value = "Active" },
+    new { Label = "Count", Value = "42" }
+}.ToTable()
+```
+
+See [DataTable](../07_Advanced/01_DataTable.md) for full grid capabilities.
 
 </Body>
 </Details>

@@ -1,13 +1,8 @@
-import React from 'react';
-import * as arrow from 'apache-arrow';
-import { Filter, SortOrder } from '@/services/grpcTableService';
-import { GridColumn } from '@glideapps/glide-data-grid';
-import {
-  DataColumn,
-  DataRow,
-  DataTableConfig,
-  DataTableConnection,
-} from '../types/types';
+import React from "react";
+import * as arrow from "apache-arrow";
+import { Filter, SortOrder } from "@/services/grpcTableService";
+import { GridColumn } from "@glideapps/glide-data-grid";
+import { DataColumn, DataRow, DataTableConfig, DataTableConnection } from "../types/types";
 
 export interface TableContextType {
   // State

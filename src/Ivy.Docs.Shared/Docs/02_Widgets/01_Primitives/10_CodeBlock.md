@@ -1,5 +1,6 @@
 ---
 searchHints:
+  - codeblock
   - syntax
   - highlighting
   - code-block
@@ -61,6 +62,34 @@ Layout.Vertical()
       .WrapLines()
       .Language(Languages.Csharp)
 ```
+
+## Supported Languages
+
+<Details>
+<Summary>
+Detailed language support
+</Summary>
+<Body>
+
+The `CodeBlock` widget supports syntax highlighting and formatting for the following languages via the `Languages` enum:
+
+- `Csharp`
+- `Javascript`
+- `Typescript`
+- `Python`
+- `Sql`
+- `Html`
+- `Css`
+- `Json`
+- `Dbml`
+- `Markdown` (standard markdown with code block support)
+- `Text` (plain text with monospaced font)
+- `Xml`
+- `Yaml`
+- `Csv`
+
+</Body>
+</Details>
 
 <WidgetDocs Type="Ivy.CodeBlock" ExtensionTypes="Ivy.CodeBlockExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Primitives/CodeBlock.cs"/>
 

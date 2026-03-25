@@ -8,6 +8,7 @@ public enum CardHoverVariant
     None,
     Pointer,
     PointerAndTranslate,
+    Shadow,
 }
 
 

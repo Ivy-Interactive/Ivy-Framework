@@ -34,6 +34,7 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
     [Prop] public bool ShowCopyButton { get; set; } = false;
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() => [typeof(string)];
 }
@@ -80,7 +81,7 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
         Height = Size.Units(25);
     }
 
-    [Prop] public TString Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TString Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
@@ -154,6 +155,22 @@ public static class CodeInputExtensions
     public static CodeInputBase OnBlur(this CodeInputBase widget, Action onBlur)
     {
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static CodeInputBase OnFocus(this CodeInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static CodeInputBase OnFocus(this CodeInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget.OnFocus(onFocus.ToValueTask());
+    }
+
+    public static CodeInputBase OnFocus(this CodeInputBase widget, Action onFocus)
+    {
+        return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
     }
 
 

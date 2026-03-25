@@ -1,11 +1,11 @@
 param(
-    [Parameter(Mandatory=$true, Position=0)]
+    [Parameter(Mandatory = $true, Position = 0)]
     [string]$FileGlob,
     
-    [Parameter(Mandatory=$true, ParameterSetName="Prompt")]
+    [Parameter(Mandatory = $true, ParameterSetName = "Prompt")]
     [string]$Prompt,
     
-    [Parameter(Mandatory=$true, ParameterSetName="PromptFile")]
+    [Parameter(Mandatory = $true, ParameterSetName = "PromptFile")]
     [string]$PromptFile,
     
     [Parameter()]
@@ -28,7 +28,8 @@ $spectreAvailable = $false
 try {
     Import-Module PwshSpectreConsole -ErrorAction Stop
     $spectreAvailable = $true
-} catch {
+}
+catch {
     # Spectre.Console not available, will fall back to standard output
 }
 
@@ -48,7 +49,8 @@ function Write-ColoredMessage {
             default { 'white' }
         }
         Write-SpectreHost "[$spectreColor]$Message[/]"
-    } else {
+    }
+    else {
         Write-Host $Message -ForegroundColor $Color
     }
 }
@@ -77,7 +79,7 @@ function Select-Files {
             $dir = Split-Path $Files[$i] -Parent
             $choices += @{
                 Display = "$fileName [grey]($dir)[/]"
-                Value = $Files[$i]
+                Value   = $Files[$i]
             }
         }
         
@@ -89,7 +91,8 @@ function Select-Files {
         }
         
         return $selected | ForEach-Object { $_.Value }
-    } else {
+    }
+    else {
         # Fallback to original selection method
         Write-Host ""
         for ($i = 0; $i -lt $Files.Count; $i++) {
@@ -102,7 +105,8 @@ function Select-Files {
         
         if ($selection -eq 'all' -or $selection -eq 'ALL') {
             return $Files
-        } else {
+        }
+        else {
             $selectedIndices = @()
             foreach ($num in ($selection -split ',')) {
                 $num = $num.Trim()
@@ -110,10 +114,12 @@ function Select-Files {
                     $index = [int]$num - 1
                     if ($index -ge 0 -and $index -lt $Files.Count) {
                         $selectedIndices += $index
-                    } else {
+                    }
+                    else {
                         Write-ColoredMessage "Warning: Ignoring invalid selection: $num (out of range)" -Color Yellow
                     }
-                } else {
+                }
+                else {
                     Write-ColoredMessage "Warning: Ignoring invalid selection: $num (not a number)" -Color Yellow
                 }
             }
@@ -135,7 +141,8 @@ function Select-Files {
 if ($spectreAvailable) {
     Write-SpectreRule "[cyan]Searching for files[/]"
     Write-SpectreHost "Pattern: [yellow]$FileGlob[/]"
-} else {
+}
+else {
     Write-ColoredMessage "Searching for files matching: $FileGlob" -Color Cyan
 }
 
@@ -164,13 +171,15 @@ if ($Select) {
             $dir = Split-Path $_ -Parent
             Write-SpectreHost "  [white]•[/] $fileName [grey]($dir)[/]"
         }
-    } else {
+    }
+    else {
         Write-ColoredMessage "`nSelected $($matchedFiles.Count) file(s) for processing:" -Color Green
         foreach ($file in $matchedFiles) {
             Write-Host "  - $file"
         }
     }
-} else {
+}
+else {
     # Original behavior - show first 5 files
     if ($spectreAvailable) {
         Write-SpectreRule "[green]Files to process[/]"
@@ -181,7 +190,8 @@ if ($Select) {
         if ($matchedFiles.Count -gt 5) {
             Write-SpectreHost "  [grey]+ $($matchedFiles.Count - 5) more...[/]"
         }
-    } else {
+    }
+    else {
         $displayCount = [Math]::Min(5, $matchedFiles.Count)
         for ($i = 0; $i -lt $displayCount; $i++) {
             Write-Host "  $($i + 1). $($matchedFiles[$i])"
@@ -201,7 +211,8 @@ if (-not $YesToAll) {
             Write-ColoredMessage "Operation cancelled." -Color Yellow
             exit 0
         }
-    } else {
+    }
+    else {
         $confirmation = Read-Host "Do you want to proceed? (Y/N)"
         if ($confirmation -ne 'Y' -and $confirmation -ne 'y') {
             Write-ColoredMessage "Operation cancelled." -Color Yellow
@@ -217,7 +228,8 @@ if ($PSCmdlet.ParameterSetName -eq "PromptFile") {
         exit 1
     }
     $promptTemplate = Get-Content $PromptFile -Raw
-} else {
+}
+else {
     $promptTemplate = $Prompt
 }
 
@@ -290,24 +302,25 @@ $scriptBlock = {
             Remove-Item -Path $errFile -ErrorAction SilentlyContinue
             
             $result = $output
-        } else {
+        }
+        else {
             $result = & claude --dangerously-skip-permissions -p $PromptText 2>&1 | Out-String
             $exitCode = $LASTEXITCODE
         }
         
         return @{
             FilePath = $FilePath
-            Success = $exitCode -eq 0
-            Output = $result
-            Error = if ($exitCode -ne 0) { "Command failed with exit code: $exitCode. Output: $result" } else { $null }
+            Success  = $exitCode -eq 0
+            Output   = $result
+            Error    = if ($exitCode -ne 0) { "Command failed with exit code: $exitCode. Output: $result" } else { $null }
         }
     }
     catch {
         return @{
             FilePath = $FilePath
-            Success = $false
-            Output = ""
-            Error = $_.Exception.Message
+            Success  = $false
+            Output   = ""
+            Error    = $_.Exception.Message
         }
     }
 }
@@ -320,7 +333,8 @@ if ($spectreAvailable) {
         Write-SpectreHost "[grey]Verbose mode enabled - Claude will print details of its work[/]"
     }
     Write-Host ""
-} else {
+}
+else {
     Write-ColoredMessage "`nProcessing $totalJobs file(s) with max $Parallel parallel jobs..." -Color Cyan
     if ($VerboseOutput) {
         Write-ColoredMessage "Verbose mode enabled - Claude will print details of its work" -Color DarkGray
@@ -360,7 +374,8 @@ if ($VerboseOutput) {
         if ($exitCode -eq 0) {
             Write-ColoredMessage "`n[[OK]] Completed: $file" -Color Green
             $results[$file] = @{ Success = $true; Error = $null }
-        } else {
+        }
+        else {
             Write-ColoredMessage "`n[[FAILED]] Failed: $file" -Color Red
             Write-ColoredMessage "  Exit code: $exitCode" -Color DarkRed
             $results[$file] = @{ Success = $false; Error = "Command failed with exit code: $exitCode" }
@@ -372,7 +387,8 @@ if ($VerboseOutput) {
     # Skip the parallel processing section
     $runspacePool.Close()
     $runspacePool.Dispose()
-} else {
+}
+else {
     # Original parallel processing code
     $jobIndex = 0
     foreach ($file in $matchedFiles) {
@@ -389,9 +405,9 @@ if ($VerboseOutput) {
         
         $jobs += [PSCustomObject]@{
             PowerShell = $powershell
-            Handle = $handle
-            File = $file
-            JobIndex = $jobIndex
+            Handle     = $handle
+            File       = $file
+            JobIndex   = $jobIndex
         }
         
         $jobIndex++
@@ -414,7 +430,8 @@ if ($VerboseOutput) {
                 
                 if ($result.Success) {
                     Write-ColoredMessage "[[OK]] Completed: $($job.File)" -Color Green
-                } else {
+                }
+                else {
                     Write-ColoredMessage "[[FAILED]] Failed: $($job.File)" -Color Red
                     if ($result.Error) {
                         Write-ColoredMessage "  Error: $($result.Error)" -Color DarkRed
@@ -445,7 +462,8 @@ if (-not $VerboseOutput) {
             
             if ($result.Success) {
                 Write-ColoredMessage "[[OK]] Completed: $($job.File)" -Color Green
-            } else {
+            }
+            else {
                 Write-ColoredMessage "[[FAILED]] Failed: $($job.File)" -Color Red
                 if ($result.Error) {
                     Write-ColoredMessage "  Error: $($result.Error)" -Color DarkRed
@@ -503,7 +521,8 @@ if ($spectreAvailable) {
         Write-Host ""
         $rerunConfirm = if ($YesToAll) { 
             $false  # Don't automatically rerun failed files even with YesToAll
-        } else {
+        }
+        else {
             Read-SpectreConfirm -Prompt "[yellow]Would you like to rerun the failed files?[/]" -DefaultAnswer "n"
         }
         if ($rerunConfirm) {
@@ -545,9 +564,9 @@ if ($spectreAvailable) {
                 
                 $rerunJobs += [PSCustomObject]@{
                     PowerShell = $powershell
-                    Handle = $handle
-                    File = $file
-                    JobIndex = $jobIndex
+                    Handle     = $handle
+                    File       = $file
+                    JobIndex   = $jobIndex
                 }
                 
                 $jobIndex++
@@ -570,7 +589,8 @@ if ($spectreAvailable) {
                         
                         if ($result.Success) {
                             Write-ColoredMessage "[[RETRY OK]] Completed: $($job.File)" -Color Green
-                        } else {
+                        }
+                        else {
                             Write-ColoredMessage "[[RETRY FAILED]] Still failing: $($job.File)" -Color Red
                             if ($result.Error) {
                                 Write-ColoredMessage "  Error: $($result.Error)" -Color DarkRed
@@ -599,7 +619,8 @@ if ($spectreAvailable) {
                     
                     if ($result.Success) {
                         Write-ColoredMessage "[[RETRY OK]] Completed: $($job.File)" -Color Green
-                    } else {
+                    }
+                    else {
                         Write-ColoredMessage "[[RETRY FAILED]] Still failing: $($job.File)" -Color Red
                         if ($result.Error) {
                             Write-ColoredMessage "  Error: $($result.Error)" -Color DarkRed
@@ -649,7 +670,8 @@ if ($spectreAvailable) {
     }
     
     Write-SpectreHost '[green]Operation completed[/]'
-} else {
+}
+else {
     Write-Host ""
     Write-ColoredMessage '========== Summary ==========' -Color Cyan
     $summaryMsg = 'Total: {0} | Success: {1} | Failed: {2}' -f $totalJobs, $successCount, $failCount
@@ -673,7 +695,8 @@ if ($spectreAvailable) {
             Write-Host ""
             Write-ColoredMessage "Would you like to rerun the failed files? (Y/N)" -Color Yellow
             $rerunConfirmation = Read-Host "Rerun"
-        } else {
+        }
+        else {
             $rerunConfirmation = 'N'  # Don't automatically rerun failed files even with YesToAll
         }
         
@@ -717,9 +740,9 @@ if ($spectreAvailable) {
                 
                 $rerunJobs += [PSCustomObject]@{
                     PowerShell = $powershell
-                    Handle = $handle
-                    File = $file
-                    JobIndex = $jobIndex
+                    Handle     = $handle
+                    File       = $file
+                    JobIndex   = $jobIndex
                 }
                 
                 $jobIndex++
@@ -742,7 +765,8 @@ if ($spectreAvailable) {
                         
                         if ($result.Success) {
                             Write-ColoredMessage "[[RETRY OK]] Completed: $($job.File)" -Color Green
-                        } else {
+                        }
+                        else {
                             Write-ColoredMessage "[[RETRY FAILED]] Still failing: $($job.File)" -Color Red
                             if ($result.Error) {
                                 Write-ColoredMessage "  Error: $($result.Error)" -Color DarkRed
@@ -771,7 +795,8 @@ if ($spectreAvailable) {
                     
                     if ($result.Success) {
                         Write-ColoredMessage "[[RETRY OK]] Completed: $($job.File)" -Color Green
-                    } else {
+                    }
+                    else {
                         Write-ColoredMessage "[[RETRY FAILED]] Still failing: $($job.File)" -Color Red
                         if ($result.Error) {
                             Write-ColoredMessage "  Error: $($result.Error)" -Color DarkRed

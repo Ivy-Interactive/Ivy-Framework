@@ -34,6 +34,7 @@ public class LayoutView : ViewBase, IStateless
     private Ivy.BorderStyle _borderStyle = Ivy.BorderStyle.None;
     private Thickness _borderThickness = new(0);
     private string? _testId = null;
+    private GridView? _activeGrid = null;
 
     public LayoutView Gap(bool gap)
     {
@@ -429,19 +430,35 @@ public class LayoutView : ViewBase, IStateless
         return layout;
     }
 
+    public static LayoutView operator |(LayoutView view, GridView child)
+    {
+        view.Add(child);
+        view._activeGrid = child;
+        return view;
+    }
+
     public static LayoutView operator |(LayoutView view, object? child)
     {
         switch (child)
         {
             case null:
+                view._activeGrid = null;
                 return view;
             case object[] array:
+                view._activeGrid = null;
                 view.Add(array);
                 return view;
             case IEnumerable<object> enumerable:
+                view._activeGrid = null;
                 view.Add(enumerable);
                 return view;
             default:
+                if (view._activeGrid != null && child is not ViewBase)
+                {
+                    view._activeGrid.Add(child);
+                    return view;
+                }
+                view._activeGrid = null;
                 view.Add(child);
                 return view;
         }

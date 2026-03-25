@@ -1,4 +1,4 @@
-import { Task } from '@/components/ui/shadcn-io/kanban';
+import { Task } from "@/components/ui/shadcn-io/kanban";
 
 export interface Column {
   id: string;
@@ -17,6 +17,7 @@ export interface CardData {
   widgetId: string;
   content: React.ReactNode;
   columnKey?: string; // Column/group key from backend Column prop
+  columnName?: string; // Human-friendly display name from backend ColumnName prop
 }
 
 export interface ExtractedKanbanData {

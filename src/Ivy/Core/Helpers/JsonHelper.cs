@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
 namespace Ivy.Core.Helpers;
@@ -24,5 +25,13 @@ public static class JsonHelper
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+    };
+
+    /// <summary>
+    /// JsonSerializerOptions with camelCase naming, reflection-based serialization, and ignoring null values.
+    /// </summary>
+    public static JsonSerializerOptions IgnoreNullOptions { get; } = new(CamelCaseOptions)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 }

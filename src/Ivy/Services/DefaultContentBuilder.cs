@@ -54,7 +54,7 @@ public class DefaultContentBuilder : IContentBuilder
 
         if (content is Exception e)
         {
-            return new ErrorView(e);
+            return new ExceptionErrorView(e);
         }
 
         if (content is IWidget widget)
@@ -150,6 +150,11 @@ public class DefaultContentBuilder : IContentBuilder
         if (content is DateOnly dateOnly)
         {
             return new TextBlock(dateOnly.ToString(DateFormat), TextVariant.Block);
+        }
+
+        if (content is object[] array)
+        {
+            return new Fragment(array);
         }
 
         if (content is IEnumerable enumerable)

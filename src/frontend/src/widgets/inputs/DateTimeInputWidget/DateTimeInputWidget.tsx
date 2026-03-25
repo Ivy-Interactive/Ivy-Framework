@@ -1,7 +1,8 @@
-import * as React from 'react';
-import { useCallback, useMemo } from 'react';
-import { useEventHandler } from '@/components/event-handler';
-import { Densities } from '@/types/density';
+import * as React from "react";
+import { useCallback, useMemo } from "react";
+import { useEventHandler } from "@/components/event-handler";
+import { useOptimisticValue } from "../shared/useOptimisticValue";
+import { Densities } from "@/types/density";
 import {
   DateTimeInputWidgetProps,
   BaseVariantProps,
@@ -9,13 +10,14 @@ import {
   TimeChangeProp,
   VariantType,
   WeekDay,
-} from './types';
-import { DateVariant } from './DateVariant';
-import { DateTimeVariant } from './DateTimeVariant';
-import { TimeVariant } from './TimeVariant';
-import { MonthVariant } from './MonthVariant';
-import { WeekVariant } from './WeekVariant';
-import { YearVariant } from './YearVariant';
+} from "./types";
+import { DateVariant } from "./DateVariant";
+import { DateTimeVariant } from "./DateTimeVariant";
+import { TimeVariant } from "./TimeVariant";
+import { MonthVariant } from "./MonthVariant";
+import { WeekVariant } from "./WeekVariant";
+import { YearVariant } from "./YearVariant";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 const VariantComponents: Record<
   VariantType,
@@ -41,7 +43,7 @@ const dayOfWeekMap: Record<string, WeekDay> = {
 
 function resolveDayOfWeek(value?: WeekDay | string): WeekDay | undefined {
   if (value == null) return undefined;
-  if (typeof value === 'number') return value as WeekDay;
+  if (typeof value === "number") return value as WeekDay;
   return dayOfWeekMap[value];
 }
 
@@ -50,13 +52,17 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   value,
   placeholder,
   disabled = false,
-  variant = 'Date',
+  variant = "Date",
   nullable = false,
   invalid,
   format: formatProp,
   firstDayOfWeek: firstDayOfWeekRaw,
+  min,
+  max,
+  step,
   density = Densities.Medium,
-  'data-testid': dataTestId,
+  events = EMPTY_ARRAY,
+  "data-testid": dataTestId,
 }) => {
   const eventHandler = useEventHandler();
   const firstDayOfWeek = resolveDayOfWeek(firstDayOfWeekRaw);
@@ -64,13 +70,16 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   // Normalize undefined to null when nullable
   const normalizedValue = nullable && value === undefined ? undefined : value;
 
+  const [localValue, setLocalValue] = useOptimisticValue(normalizedValue, false);
+
   const handleDateChange = useCallback(
     (selectedDate: Date | undefined) => {
       if (disabled) return;
       const isoString = selectedDate?.toISOString();
-      eventHandler('OnChange', id, [isoString]);
+      setLocalValue(isoString);
+      eventHandler("OnChange", id, [isoString]);
     },
-    [disabled, eventHandler, id]
+    [disabled, eventHandler, id, setLocalValue],
   );
 
   const handleTimeChange = useCallback(
@@ -78,36 +87,64 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       if (disabled) return;
 
       // For Time variant, send the time string directly
-      if (variant === 'Time') {
-        eventHandler('OnChange', id, [time]);
+      if (variant === "Time") {
+        setLocalValue(time);
+        eventHandler("OnChange", id, [time]);
       } else {
-        // For other variants, create a date with the selected time
-        const [hours, minutes, seconds] = time.split(':').map(Number);
-        const newDateTime = new Date();
-        newDateTime.setHours(hours, minutes, seconds);
-
-        eventHandler('OnChange', id, [newDateTime.toISOString()]);
+        // DateTime variant: merge time into current date so we don't overwrite with today
+        if (!time?.trim()) return;
+        const parts = time.split(":").map(Number);
+        const [hours, minutes, seconds] = [parts[0] || 0, parts[1] || 0, parts[2] || 0];
+        let baseDate: Date;
+        if (localValue && typeof localValue === "string") {
+          const parsed = new Date(localValue);
+          baseDate = !isNaN(parsed.getTime()) ? parsed : new Date();
+        } else {
+          baseDate = new Date();
+        }
+        baseDate.setHours(hours, minutes, seconds);
+        const isoString = baseDate.toISOString();
+        setLocalValue(isoString);
+        eventHandler("OnChange", id, [isoString]);
       }
     },
-    [disabled, eventHandler, id, variant]
+    [disabled, eventHandler, id, variant, localValue, setLocalValue],
   );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);
 
+  const handleFocusChange = useCallback(
+    (focused: boolean) => {
+      if (disabled) return;
+      if (focused) {
+        if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+      } else {
+        if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+      }
+    },
+    [disabled, events, eventHandler, id],
+  );
+
   return (
-    <VariantComponent
-      id={id}
-      value={normalizedValue}
-      placeholder={placeholder}
-      disabled={disabled}
-      nullable={nullable}
-      invalid={invalid}
-      format={formatProp}
-      firstDayOfWeek={firstDayOfWeek}
-      density={density}
-      onDateChange={handleDateChange}
-      onTimeChange={handleTimeChange}
-      data-testid={dataTestId}
-    />
+    <div className="relative w-full">
+      <VariantComponent
+        id={id}
+        value={localValue}
+        placeholder={placeholder}
+        disabled={disabled}
+        nullable={nullable}
+        invalid={invalid}
+        format={formatProp}
+        firstDayOfWeek={firstDayOfWeek}
+        min={min}
+        max={max}
+        step={step}
+        density={density}
+        onDateChange={handleDateChange}
+        onTimeChange={handleTimeChange}
+        onFocusChange={handleFocusChange}
+        data-testid={dataTestId}
+      />
+    </div>
   );
 };

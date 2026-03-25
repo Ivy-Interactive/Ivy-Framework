@@ -1,15 +1,10 @@
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from '@/components/ui/card';
-import { getAspectRatio, getHeight, getWidth } from '@/lib/styles';
-import { cn } from '@/lib/utils';
-import { useEventHandler } from '@/components/event-handler';
-import React, { useCallback } from 'react';
-import { Densities } from '@/types/density';
-import { cardStyles, getSizeClasses } from './styles';
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { getAspectRatio, getHeight, getWidth } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import { useEventHandler } from "@/components/event-handler";
+import React, { useCallback } from "react";
+import { Densities } from "@/types/density";
+import { cardStyles, getSizeClasses } from "./styles";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -19,10 +14,10 @@ interface CardWidgetProps {
   width?: string;
   height?: string;
   aspectRatio?: number;
-  hoverVariant?: 'None' | 'Pointer' | 'PointerAndTranslate';
+  hoverVariant?: "None" | "Pointer" | "PointerAndTranslate" | "Shadow";
   density?: Densities;
   disabled?: boolean;
-  'data-testid'?: string;
+  "data-testid"?: string;
   slots?: {
     Header?: React.ReactNode[];
     Content?: React.ReactNode[];
@@ -33,14 +28,14 @@ interface CardWidgetProps {
 export const CardWidget: React.FC<CardWidgetProps> = ({
   id,
   events = EMPTY_ARRAY,
-  width = 'Full',
+  width = "Full",
   height,
   aspectRatio,
-  hoverVariant = 'None',
+  hoverVariant = "None",
   density = Densities.Medium,
   disabled,
   slots,
-  'data-testid': testId,
+  "data-testid": testId,
 }) => {
   const eventHandler = useEventHandler();
   const sizeClasses = getSizeClasses(density);
@@ -56,15 +51,17 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
 
   const handleClick = useCallback(() => {
     if (disabled) return;
-    if (events.includes('OnClick')) eventHandler('OnClick', id, []);
+    if (events.includes("OnClick")) eventHandler("OnClick", id, []);
   }, [id, eventHandler, events, disabled]);
 
   const hoverClass =
-    hoverVariant === 'None' || disabled
+    hoverVariant === "None" || disabled
       ? cardStyles.hover.none
-      : hoverVariant === 'Pointer'
+      : hoverVariant === "Pointer"
         ? cardStyles.hover.pointer
-        : cardStyles.hover.pointerAndTranslate;
+        : hoverVariant === "Shadow"
+          ? cardStyles.hover.shadow
+          : cardStyles.hover.pointerAndTranslate;
 
   return (
     <Card
@@ -86,7 +83,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
         className={cn(
           cardStyles.content.base,
           sizeClasses.content,
-          headerIsEmpty && sizeClasses.contentNoHeader
+          headerIsEmpty && sizeClasses.contentNoHeader,
         )}
       >
         {slots?.Content}

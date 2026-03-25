@@ -11,7 +11,7 @@ public record CalendarMeeting
     public required string Category { get; set; }
 }
 
-[App(icon: Icons.Calendar, path: ["Widgets"], searchHints: ["calendar", "events", "schedule"])]
+[App(icon: Icons.Calendar, group: ["Widgets"], searchHints: ["calendar", "events", "schedule"])]
 public class CalendarApp : SampleBase
 {
     protected override object? BuildSample()

@@ -14,6 +14,7 @@ public interface IAnyInput
     [Prop] public bool Nullable { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes();
 }
@@ -59,6 +60,25 @@ public static class AnyInputExtensions
     public static IAnyInput OnBlur(this IAnyInput input, Action onBlur)
     {
         input.OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; });
+        return input;
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static IAnyInput OnFocus(this IAnyInput input, Func<Event<IAnyInput>, ValueTask>? onFocus)
+    {
+        input.OnFocus = onFocus.ToEventHandler();
+        return input;
+    }
+
+    public static IAnyInput OnFocus(this IAnyInput input, Action<Event<IAnyInput>> onFocus)
+    {
+        input.OnFocus = new(onFocus.ToValueTask());
+        return input;
+    }
+
+    public static IAnyInput OnFocus(this IAnyInput input, Action onFocus)
+    {
+        input.OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; });
         return input;
     }
 }

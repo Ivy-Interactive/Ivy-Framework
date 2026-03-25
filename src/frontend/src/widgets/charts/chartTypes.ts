@@ -1,11 +1,11 @@
-export type ColorScheme = 'Default' | 'Rainbow';
+export type ColorScheme = "Default" | "Rainbow";
 
 export enum ChartType {
-  Bar = 'bar',
-  Line = 'line',
-  Pie = 'pie',
-  Scatter = 'scatter',
-  Funnel = 'funnel',
+  Bar = "bar",
+  Line = "line",
+  Pie = "pie",
+  Scatter = "scatter",
+  Funnel = "funnel",
 }
 
 export interface ChartData {
@@ -52,8 +52,8 @@ export type YAxisProps = {
   angle: number;
   axisLine: boolean;
   dataKey: string;
-  domainStart: 'auto' | number;
-  domainEnd: 'auto' | number;
+  domainStart: "auto" | number;
+  domainEnd: "auto" | number;
   hide: boolean;
   includeHidden: boolean;
   label: null;
@@ -78,8 +78,8 @@ export interface XAxisProps {
   angle?: number;
   axisLine?: boolean;
   dataKey?: string;
-  domainStart?: number | 'auto';
-  domainEnd?: number | 'auto';
+  domainStart?: number | "auto";
+  domainEnd?: number | "auto";
   height?: number;
   hide?: boolean;
   includeHidden?: boolean;
@@ -87,13 +87,13 @@ export interface XAxisProps {
   minTickGap?: number;
   mirror?: boolean;
   name?: string | null;
-  orientation?: 'Top' | 'Bottom';
+  orientation?: "Top" | "Bottom";
   reversed?: boolean;
-  scale?: 'Auto' | 'Linear' | 'Log' | 'Time' | 'Ordinal';
+  scale?: "Auto" | "Linear" | "Log" | "Time" | "Ordinal";
   tickCount?: number;
   tickLine?: boolean;
   tickSize?: number;
-  type?: 'Category' | 'Number' | 'Time';
+  type?: "Category" | "Number" | "Time";
   unit?: string | null;
 }
 
@@ -111,11 +111,11 @@ export type CartesianGridProps = {
 };
 
 export type LegendProps = {
-  align?: 'Left' | 'Center' | 'Right';
+  align?: "Left" | "Center" | "Right";
   iconSize?: number;
   iconType?: string | null;
-  layout?: 'Horizontal' | 'Vertical';
-  verticalAlign?: 'Top' | 'Middle' | 'Bottom';
+  layout?: "Horizontal" | "Vertical";
+  verticalAlign?: "Top" | "Middle" | "Bottom";
 };
 
 type ToolboxFeatureDataView = {
@@ -138,9 +138,9 @@ export type ToolboxFeatures = {
 
 export type ToolboxProps = {
   enabled?: boolean;
-  orientation?: 'Horizontal' | 'Vertical';
-  align?: 'Left' | 'Center' | 'Right';
-  verticalAlign?: 'Top' | 'Middle' | 'Bottom';
+  orientation?: "Horizontal" | "Vertical";
+  align?: "Left" | "Center" | "Right";
+  verticalAlign?: "Top" | "Middle" | "Bottom";
   saveAsImage?: boolean;
   restore?: boolean;
   dataView?: boolean;
@@ -155,8 +155,8 @@ export interface MarkLine {
   precision?: number;
   label?: {
     show?: boolean;
-    position?: 'start' | 'middle' | 'end';
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    position?: "start" | "middle" | "end";
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     formatter?: string | ((params: any) => string);
     color?: string;
     fontSize?: number;
@@ -165,20 +165,20 @@ export interface MarkLine {
   lineStyle?: {
     color?: string;
     width?: number;
-    type?: 'solid' | 'dashed' | 'dotted';
+    type?: "solid" | "dashed" | "dotted";
     opacity?: number;
   };
   emphasis?: {
     disabled?: boolean;
-    label?: Partial<MarkLine['label']>;
-    lineStyle?: Partial<MarkLine['lineStyle']>;
+    label?: Partial<MarkLine["label"]>;
+    lineStyle?: Partial<MarkLine["lineStyle"]>;
   };
   blur?: {
-    label?: Partial<MarkLine['label']>;
-    lineStyle?: Partial<MarkLine['lineStyle']>;
+    label?: Partial<MarkLine["label"]>;
+    lineStyle?: Partial<MarkLine["lineStyle"]>;
   };
   data: Array<{
-    type?: 'min' | 'max' | 'average';
+    type?: "min" | "max" | "average";
     name?: string;
     xAxis?: number | string;
     yAxis?: number;
@@ -197,19 +197,19 @@ export interface MarkLine {
 }
 
 type LabelPosition =
-  | 'inside'
-  | 'insideTop'
-  | 'insideBottom'
-  | 'insideLeft'
-  | 'insideRight'
-  | 'insideTopLeft'
-  | 'insideTopRight'
-  | 'insideBottomLeft'
-  | 'insideBottomRight'
-  | 'top'
-  | 'bottom'
-  | 'left'
-  | 'right';
+  | "inside"
+  | "insideTop"
+  | "insideBottom"
+  | "insideLeft"
+  | "insideRight"
+  | "insideTopLeft"
+  | "insideTopRight"
+  | "insideBottomLeft"
+  | "insideBottomRight"
+  | "top"
+  | "bottom"
+  | "left"
+  | "right";
 
 export interface MarkArea {
   zlevel?: number;
@@ -226,7 +226,7 @@ export interface MarkArea {
   label?: {
     show?: boolean;
     position?: LabelPosition;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     formatter?: string | ((params: any) => string);
     color?: string;
     fontSize?: number;
@@ -317,16 +317,9 @@ export interface PieLegendProps {
   verticalAlign?: string;
 }
 
-export type ScatterShape =
-  | 'Circle'
-  | 'Square'
-  | 'Cross'
-  | 'Diamond'
-  | 'Star'
-  | 'Triangle'
-  | 'Wye';
+export type ScatterShape = "Circle" | "Square" | "Cross" | "Diamond" | "Star" | "Triangle" | "Wye";
 
-export type ScatterLineType = 'Joint' | 'Fitting';
+export type ScatterLineType = "Joint" | "Fitting";
 
 export interface ZAxisProps {
   dataKey?: string;
@@ -372,7 +365,7 @@ export interface ScatterChartWidgetProps {
   colorScheme: ColorScheme;
 }
 
-export type PolarGridTypes = 'Polygon' | 'Circle';
+export type PolarGridTypes = "Polygon" | "Circle";
 
 export interface PolarGridProps {
   gridType?: PolarGridTypes;
@@ -424,7 +417,7 @@ export interface RadarChartWidgetProps {
   legend?: LegendProps;
   toolbox?: ToolboxProps;
   colorScheme: ColorScheme;
-  shape?: 'Polygon' | 'Circle';
+  shape?: "Polygon" | "Circle";
   cx?: string | number;
   cy?: string | number;
   radius?: string | number;
@@ -449,7 +442,7 @@ export interface SankeyData {
   links: SankeyLink[];
 }
 
-export type SankeyAlign = 'Justify' | 'Left';
+export type SankeyAlign = "Justify" | "Left";
 
 export interface SankeyChartWidgetProps {
   id: string;
@@ -506,8 +499,8 @@ export interface FunnelChartWidgetProps {
   legend?: PieLegendProps;
   toolbox?: ToolboxProps;
   colorScheme: ColorScheme;
-  sort?: 'Descending' | 'Ascending' | 'None';
-  orientation?: 'Vertical' | 'Horizontal';
+  sort?: "Descending" | "Ascending" | "None";
+  orientation?: "Vertical" | "Horizontal";
   gap?: number;
 }
 
@@ -524,3 +517,30 @@ export type FunnelProps = {
   strokeWidth?: number;
   labelLists?: string[];
 };
+
+export interface GaugeThresholdProps {
+  value: number;
+  color: string;
+}
+
+export interface GaugePointerProps {
+  style?: "Line" | "Arrow" | "Rounded";
+  width?: number;
+  length?: string;
+}
+
+export interface GaugeChartWidgetProps {
+  id: string;
+  value: number;
+  min?: number;
+  max?: number;
+  label?: string;
+  startAngle?: number;
+  endAngle?: number;
+  thresholds?: GaugeThresholdProps[];
+  pointer?: GaugePointerProps;
+  animated?: boolean;
+  colorScheme?: ColorScheme;
+  width?: string;
+  height?: string;
+}

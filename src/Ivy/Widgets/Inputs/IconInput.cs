@@ -22,6 +22,7 @@ public abstract record IconInputBase : WidgetBase<IconInputBase>, IAnyInput
     [Prop] public bool Nullable { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() => [typeof(Icons), typeof(Icons?)];
 }
@@ -69,7 +70,7 @@ public record IconInput<TIcon> : IconInputBase, IInput<TIcon>
 
     internal IconInput() { }
 
-    [Prop] public TIcon Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TIcon Value { get; init; } = default!;
 
     [Event] public EventHandler<Event<IInput<TIcon>, TIcon>>? OnChange { get; }
 }
@@ -109,6 +110,20 @@ public static class IconInputExtensions
         widget.OnBlur(_ =>
         {
             onBlur();
+            return ValueTask.CompletedTask;
+        });
+
+    [OverloadResolutionPriority(1)]
+    public static IconInputBase OnFocus(this IconInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus) =>
+        widget with { OnFocus = new(onFocus) };
+
+    public static IconInputBase OnFocus(this IconInputBase widget, Action<Event<IAnyInput>> onFocus) =>
+        widget.OnFocus(onFocus.ToValueTask());
+
+    public static IconInputBase OnFocus(this IconInputBase widget, Action onFocus) =>
+        widget.OnFocus(_ =>
+        {
+            onFocus();
             return ValueTask.CompletedTask;
         });
 
