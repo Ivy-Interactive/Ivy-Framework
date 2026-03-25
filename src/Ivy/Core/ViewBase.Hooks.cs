@@ -194,6 +194,9 @@ public abstract partial class ViewBase
     protected (IView? alertView, ShowAlertDelegate showAlert) UseAlert() =>
         this.Context.UseAlert();
 
+    protected (IView? loadingView, ShowLoadingDelegate showLoading) UseLoading() =>
+        this.Context.UseLoading();
+
     protected IWriteStream<T> UseStream<T>() =>
         this.Context.UseStream<T>();
 

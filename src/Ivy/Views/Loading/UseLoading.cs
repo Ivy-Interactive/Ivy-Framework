@@ -1,4 +1,5 @@
 using Ivy.Core;
+using Ivy.Core.Exceptions;
 using Ivy.Core.Hooks;
 
 // ReSharper disable once CheckNamespace
@@ -12,7 +13,7 @@ public interface ILoadingContext
     CancellationToken CancellationToken { get; }
 }
 
-public delegate Task ShowLoadingDelegate(Func<ILoadingContext, Task> work, bool cancellable = false);
+public delegate void ShowLoadingDelegate(Func<ILoadingContext, Task> work, bool cancellable = false);
 
 public static class UseLoadingExtensions
 {
@@ -21,6 +22,7 @@ public static class UseLoadingExtensions
         var open = context.UseRef(false);
         var loadingOptions = context.UseRef<LoadingOptions?>();
         var cts = context.UseRef<CancellationTokenSource?>();
+        var exceptionHandler = context.UseService<IExceptionHandler>();
 
         var view = new FuncView(context2 =>
         {
@@ -42,7 +44,7 @@ public static class UseLoadingExtensions
                 : null;
         });
 
-        var showLoading = new ShowLoadingDelegate(async (work, cancellable) =>
+        var showLoading = new ShowLoadingDelegate((work, cancellable) =>
         {
             var tokenSource = new CancellationTokenSource();
             cts.Set(tokenSource);
@@ -53,35 +55,40 @@ public static class UseLoadingExtensions
             });
             open.Set(true);
 
-            var loadingContext = new LoadingContext(loadingOptions, tokenSource.Token);
-            var wasCancelled = false;
-
-            try
+            _ = Task.Run(async () =>
             {
-                await work(loadingContext);
-            }
-            catch (OperationCanceledException)
-            {
-                wasCancelled = true;
-            }
-            finally
-            {
-                if (wasCancelled)
+                var loadingContext = new LoadingContext(loadingOptions, tokenSource.Token);
+                var wasCancelled = false;
+                try
                 {
-                    // Show "Cancelling..." briefly before closing
-                    loadingOptions.Set(new LoadingOptions
-                    {
-                        Message = "Cancelling...",
-                        Indeterminate = true,
-                        Cancellable = false,
-                        IsCancelling = true
-                    });
-                    await Task.Delay(800);
+                    await work(loadingContext).ConfigureAwait(false);
                 }
+                catch (OperationCanceledException)
+                {
+                    wasCancelled = true;
+                }
+                catch (Exception ex)
+                {
+                    exceptionHandler?.HandleException(ex);
+                }
+                finally
+                {
+                    if (wasCancelled)
+                    {
+                        loadingOptions.Set(new LoadingOptions
+                        {
+                            Message = "Cancelling...",
+                            Indeterminate = true,
+                            Cancellable = false,
+                            IsCancelling = true
+                        });
+                        await Task.Delay(800).ConfigureAwait(false);
+                    }
 
-                open.Set(false);
-                cts.Set((CancellationTokenSource?)null);
-            }
+                    open.Set(false);
+                    cts.Set((CancellationTokenSource?)null);
+                }
+            });
         });
 
         return (view, showLoading);
