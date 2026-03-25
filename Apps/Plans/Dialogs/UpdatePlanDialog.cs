@@ -1,4 +1,5 @@
 using Ivy;
+using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
 
@@ -7,12 +8,21 @@ public class UpdatePlanDialog : ViewBase
     private readonly IState<bool> _dialogOpen;
     private readonly IState<string> _updateText;
     private readonly PlanFile _selectedPlan;
+    private readonly TaskService _taskService;
+    private readonly string _plansDirectory;
 
-    public UpdatePlanDialog(IState<bool> dialogOpen, IState<string> updateText, PlanFile selectedPlan)
+    public UpdatePlanDialog(
+        IState<bool> dialogOpen,
+        IState<string> updateText,
+        PlanFile selectedPlan,
+        TaskService taskService,
+        string plansDirectory)
     {
         _dialogOpen = dialogOpen;
         _updateText = updateText;
         _selectedPlan = selectedPlan;
+        _taskService = taskService;
+        _plansDirectory = plansDirectory;
     }
 
     public override object? Build()
@@ -29,7 +39,12 @@ public class UpdatePlanDialog : ViewBase
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
-                new Button("Submit Update").Primary().OnClick(() => _dialogOpen.Set(false))
+                new Button("Submit Update").Primary().OnClick(() =>
+                {
+                    var planPath = Path.Combine(_plansDirectory, _selectedPlan.FileName);
+                    _taskService.StartTask("UpdatePlan", planPath);
+                    _dialogOpen.Set(false);
+                })
             )
         ).Width(Size.Rem(30));
     }

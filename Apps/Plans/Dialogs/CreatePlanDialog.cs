@@ -32,7 +32,6 @@ public class CreatePlanDialog : ViewBase
                     if (!string.IsNullOrWhiteSpace(createPlanText.Value))
                     {
                         _onCreatePlan(createPlanText.Value);
-                        createPlanText.Set("");
                         _onClose();
                     }
                 })

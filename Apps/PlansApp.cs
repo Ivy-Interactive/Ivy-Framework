@@ -10,6 +10,7 @@ public class PlansApp : ViewBase
     public override object? Build()
     {
         var planService = UseService<PlanReaderService>();
+        var taskService = UseService<TaskService>();
         var selectedPlanState = UseState<PlanFile?>(null);
         var queueFilter = UseState<string?>(null);
         var levelFilter = UseState<string?>(null);
@@ -30,10 +31,10 @@ public class PlansApp : ViewBase
         }
 
         return new SidebarLayout(
-            mainContent: new ContentView(selectedPlanState.Value, plans, selectedPlanState, planService, RefreshPlans),
+            mainContent: new ContentView(selectedPlanState.Value, plans, selectedPlanState, planService, taskService, RefreshPlans),
             sidebarContent: new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter, description =>
             {
-                planService.CreatePlan(description);
+                taskService.StartTask("MakePlan", description);
                 RefreshPlans();
             })
         );

@@ -13,7 +13,7 @@ public class PlanReaderService
         _config = config;
     }
 
-    private string PlansDirectory => _config.PlanFolder;
+    public string PlansDirectory => _config.PlanFolder;
 
     private static readonly Regex FileNameRegex = new(@"^(\d+)-([^-]+)-([^-]+)-(.+)\.md$", RegexOptions.Compiled);
     private static readonly Regex CamelCaseRegex = new(@"(?<=\p{Ll})(?=\p{Lu})", RegexOptions.Compiled);

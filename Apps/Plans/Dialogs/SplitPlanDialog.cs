@@ -1,4 +1,5 @@
 using Ivy;
+using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
 
@@ -7,12 +8,21 @@ public class SplitPlanDialog : ViewBase
     private readonly IState<bool> _dialogOpen;
     private readonly IState<string> _splitText;
     private readonly PlanFile _selectedPlan;
+    private readonly TaskService _taskService;
+    private readonly string _plansDirectory;
 
-    public SplitPlanDialog(IState<bool> dialogOpen, IState<string> splitText, PlanFile selectedPlan)
+    public SplitPlanDialog(
+        IState<bool> dialogOpen,
+        IState<string> splitText,
+        PlanFile selectedPlan,
+        TaskService taskService,
+        string plansDirectory)
     {
         _dialogOpen = dialogOpen;
         _splitText = splitText;
         _selectedPlan = selectedPlan;
+        _taskService = taskService;
+        _plansDirectory = plansDirectory;
     }
 
     public override object? Build()
@@ -29,7 +39,12 @@ public class SplitPlanDialog : ViewBase
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
-                new Button("Split Plan").Primary().OnClick(() => _dialogOpen.Set(false))
+                new Button("Split Plan").Primary().OnClick(() =>
+                {
+                    var planPath = Path.Combine(_plansDirectory, _selectedPlan.FileName);
+                    _taskService.StartTask("SplitPlan", planPath);
+                    _dialogOpen.Set(false);
+                })
             )
         ).Width(Size.Rem(30));
     }

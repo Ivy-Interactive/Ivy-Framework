@@ -11,6 +11,7 @@ public class ContentView : ViewBase
     private readonly List<PlanFile> _allPlans;
     private readonly IState<PlanFile?> _selectedPlanState;
     private readonly PlanReaderService _planService;
+    private readonly TaskService _taskService;
     private readonly Action _refreshPlans;
 
     public ContentView(
@@ -18,12 +19,14 @@ public class ContentView : ViewBase
         List<PlanFile> allPlans,
         IState<PlanFile?> selectedPlanState,
         PlanReaderService planService,
+        TaskService taskService,
         Action refreshPlans)
     {
         _selectedPlan = selectedPlan;
         _allPlans = allPlans;
         _selectedPlanState = selectedPlanState;
         _planService = planService;
+        _taskService = taskService;
         _refreshPlans = refreshPlans;
     }
 
@@ -49,7 +52,14 @@ public class ContentView : ViewBase
             if (isEditing.Value && !isEditingPrev.Value)
             {
                 // Entering edit mode - load content
-                editContent.Set(_planService.ReadRawPlan(_selectedPlan!.FileName));
+                if (_selectedPlan != null)
+                {
+                    editContent.Set(_planService.ReadRawPlan(_selectedPlan.FileName));
+                }
+                else
+                {
+                    isEditing.Set(false);
+                }
             }
             else if (!isEditing.Value && isEditingPrev.Value)
             {
@@ -108,7 +118,8 @@ public class ContentView : ViewBase
             | new Button("Split").Icon(Icons.GitBranch).Outline().OnClick(() => splitDialogOpen.Set(true))
             | new Button("Expand").Icon(Icons.Maximize).Outline().OnClick(() =>
             {
-                _planService.ExpandPlan(_selectedPlan.FileName);
+                var planPath = Path.Combine(_planService.PlansDirectory, _selectedPlan.FileName);
+                _taskService.StartTask("ExpandPlan", planPath);
                 _refreshPlans();
             })
             | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => skipDialogOpen.Set(true))
@@ -135,8 +146,8 @@ public class ContentView : ViewBase
         var elements = new List<object>
         {
             mainLayout,
-            new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan),
-            new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan),
+            new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan, _taskService, _planService.PlansDirectory),
+            new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan, _taskService, _planService.PlansDirectory),
             new SkipPlanDialog(skipDialogOpen, _selectedPlan, _planService, _refreshPlans),
             new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, _selectedPlan)
         };

@@ -1,5 +1,6 @@
 using Ivy;
 using Ivy.Tendril.Apps.Tasks;
+using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
@@ -8,14 +9,14 @@ public class TasksApp : ViewBase
 {
     public override object? Build()
     {
-        var mockService = UseService<MockTaskDataService>();
+        var taskService = UseService<TaskService>();
         var refreshToken = UseRefreshToken();
-        var selectedTask = UseState<TaskItem?>(null);
-        var dialogOpen = UseState(false);
+        var selectedTaskId = UseState<string?>(null);
+        var dialogMode = UseState<string?>(null);
 
         UseInterval(() => refreshToken.Refresh(), TimeSpan.FromSeconds(5));
 
-        var tasks = mockService.GetTasks();
+        var tasks = taskService.GetTasks();
         var rows = tasks.Select(t => new TaskItemRow
         {
             Id = t.Id,
@@ -48,29 +49,24 @@ public class TasksApp : ViewBase
                 c.BatchSize = 50;
             })
             .RowActions(
+                new MenuItem(Label: "View Output", Icon: Icons.Terminal, Tag: "view-output"),
                 new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan")
             )
             .OnRowAction(e =>
             {
                 var tag = e.Value.Tag?.ToString();
                 var id = e.Value.Id?.ToString();
-                if (tag == "view-plan")
+                var task = tasks.FirstOrDefault(t => t.Id == id);
+                if (task != null)
                 {
-                    var task = tasks.FirstOrDefault(t => t.Id == id);
-                    if (task != null)
-                    {
-                        selectedTask.Set(task);
-                        dialogOpen.Set(true);
-                    }
+                    selectedTaskId.Set(task.Id);
+                    dialogMode.Set(tag);
                 }
                 return ValueTask.CompletedTask;
             });
 
         var header = Layout.Horizontal()
-            .Align(Align.Left)
-            .Gap(2)
             | Text.Block("Background Tasks").Bold()
-            | new Spacer()
             | new Button("Refresh").Icon(Icons.RefreshCw).Ghost()
                 .OnClick(() => refreshToken.Refresh());
 
@@ -78,28 +74,53 @@ public class TasksApp : ViewBase
         {
             new HeaderLayout(
                 header: header,
-                content: dataTable
+                content: dataTable.Height(Size.Full())
             ).Height(Size.Full())
         };
 
-        if (dialogOpen.Value && selectedTask.Value != null)
+        if (dialogMode.Value != null && selectedTaskId.Value is { } taskId)
         {
-            var plan = selectedTask.Value;
-            var planPath = Path.Combine(@"D:\Repos\_Ivy\.plans", plan.PlanFile);
-            var planContent = File.Exists(planPath)
-                ? File.ReadAllText(planPath)
-                : $"Plan file not found: {plan.PlanFile}";
+            var task = taskService.GetTask(taskId);
+            if (task != null)
+            {
+                void CloseDialog()
+                {
+                    dialogMode.Set(null);
+                    selectedTaskId.Set(null);
+                }
 
-            elements.Add(new Dialog(
-                _ => { dialogOpen.Set(false); return ValueTask.CompletedTask; },
-                new DialogHeader(plan.PlanFile),
-                new DialogBody(
-                    Text.Code(planContent)
-                ),
-                new DialogFooter(
-                    new Button("Close").Outline().OnClick(() => dialogOpen.Set(false))
-                )
-            ).Width(Size.Rem(50)));
+                if (dialogMode.Value == "view-output" && !string.IsNullOrEmpty(task.ScriptPath))
+                {
+                    elements.Add(new Dialog(
+                        _ => { CloseDialog(); return ValueTask.CompletedTask; },
+                        new DialogHeader($"Task {task.Id} - {task.Type}"),
+                        new DialogBody(
+                            new TaskDetailView(task, taskService)
+                        ),
+                        new DialogFooter(
+                            new Button("Close").Outline().OnClick(CloseDialog)
+                        )
+                    ).Width(Size.Rem(60)).Height(Size.Rem(40)));
+                }
+                else
+                {
+                    var planPath = Path.Combine(@"D:\Repos\_Ivy\.plans", task.PlanFile);
+                    var planContent = File.Exists(planPath)
+                        ? File.ReadAllText(planPath)
+                        : $"Plan file not found: {task.PlanFile}";
+
+                    elements.Add(new Dialog(
+                        _ => { CloseDialog(); return ValueTask.CompletedTask; },
+                        new DialogHeader(task.PlanFile),
+                        new DialogBody(
+                            Text.Code(planContent)
+                        ),
+                        new DialogFooter(
+                            new Button("Close").Outline().OnClick(CloseDialog)
+                        )
+                    ).Width(Size.Rem(50)));
+                }
+            }
         }
 
         return new Fragment(elements.ToArray());
