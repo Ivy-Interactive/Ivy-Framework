@@ -57,8 +57,12 @@ public class SidebarView : ViewBase
 
         var header = Layout.Vertical()
             | _textFilter.ToSearchInput().Placeholder("Search plans...")
-            | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().WithField().Label("Queue")
-            | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().WithField().Label("Level");
+            | new Expandable(
+                header: "Filters",
+                content: Layout.Vertical()
+                    | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().WithField().Label("Queue")
+                    | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().WithField().Label("Level")
+            ).Open(true);
 
         var content = new List(filteredPlans.Select(plan =>
         {
