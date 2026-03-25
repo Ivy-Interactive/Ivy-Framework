@@ -1,4 +1,5 @@
 using Ivy;
+using Ivy.Tendril.Apps.Plans.Dialogs;
 
 namespace Ivy.Tendril.Apps.Plans;
 
@@ -28,7 +29,7 @@ public class SidebarView : ViewBase
     {
         var createDialogOpen = UseState(false);
 
-        var levelOptions = new[] { "CRITICAL", "NICETOHAVE", "NITPICK" };
+        var levelOptions = new[] { "Critical", "NiceToHave", "Nitpick" };
 
         // Apply level filter first to get the base set for queue counting
         var levelFilteredPlans = _plans.AsEnumerable();
@@ -75,7 +76,7 @@ public class SidebarView : ViewBase
 
         if (createDialogOpen.Value)
         {
-            elements.Add(new CreatePlanDialogView(
+            elements.Add(new CreatePlanDialog(
                 onCreatePlan: _onCreatePlan,
                 onClose: () => createDialogOpen.Set(false)
             ));

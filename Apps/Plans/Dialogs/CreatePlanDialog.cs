@@ -1,13 +1,13 @@
 using Ivy;
 
-namespace Ivy.Tendril.Apps.Plans;
+namespace Ivy.Tendril.Apps.Plans.Dialogs;
 
-public class CreatePlanDialogView : ViewBase
+public class CreatePlanDialog : ViewBase
 {
     private readonly Action<string> _onCreatePlan;
     private readonly Action _onClose;
 
-    public CreatePlanDialogView(Action<string> onCreatePlan, Action onClose)
+    public CreatePlanDialog(Action<string> onCreatePlan, Action onClose)
     {
         _onCreatePlan = onCreatePlan;
         _onClose = onClose;
