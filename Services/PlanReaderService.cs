@@ -55,6 +55,18 @@ public class PlanReaderService
         File.Move(source, dest);
     }
 
+    public void SavePlan(string fileName, string fullFileContent)
+    {
+        var path = Path.Combine(PlansDirectory, fileName);
+        File.WriteAllText(path, fullFileContent);
+    }
+
+    public string ReadRawPlan(string fileName)
+    {
+        var path = Path.Combine(PlansDirectory, fileName);
+        return File.ReadAllText(path);
+    }
+
     public void CreatePlan(string description)
     {
         var counterFile = Path.Combine(PlansDirectory, ".counter");

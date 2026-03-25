@@ -42,6 +42,16 @@ public class ContentView : ViewBase
         var splitText = UseState("");
         var expandText = UseState("");
 
+        var isEditing = UseState(false);
+        var editContent = UseState("");
+
+        var lastPlanId = UseState(_selectedPlan?.Id ?? -1);
+        if (lastPlanId.Value != (_selectedPlan?.Id ?? -1))
+        {
+            lastPlanId.Set(_selectedPlan?.Id ?? -1);
+            isEditing.Set(false);
+        }
+
         if (_selectedPlan is null)
         {
             return Layout.Vertical().Align(Align.Center).Height(Size.Full())
@@ -54,11 +64,42 @@ public class ContentView : ViewBase
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
             | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Info)
             | new Badge(_selectedPlan.Level).Variant(BadgeVariant.Warning)
+            | new Button(isEditing.Value ? "Preview" : "Edit")
+                .Icon(isEditing.Value ? Icons.Eye : Icons.Pencil)
+                .Outline()
+                .OnClick(() =>
+                {
+                    if (isEditing.Value)
+                    {
+                        _planService.SavePlan(_selectedPlan.FileName, editContent.Value);
+                        _refreshPlans();
+                    }
+                    else
+                    {
+                        editContent.Set(_planService.ReadRawPlan(_selectedPlan.FileName));
+                    }
+                    isEditing.Set(!isEditing.Value);
+                })
             | new Spacer().Width(Size.Grow())
             | Text.Muted($"{currentIndex + 1} / {_allPlans.Count} plans");
 
-        var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)))
-            | new Markdown(_selectedPlan.Content);
+        var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)));
+
+        if (isEditing.Value)
+        {
+            scrollableContent |= editContent.ToCodeInput()
+                .Language(Languages.Markdown)
+                .Height(Size.Full())
+                .OnBlur(() =>
+                {
+                    _planService.SavePlan(_selectedPlan.FileName, editContent.Value);
+                    _refreshPlans();
+                });
+        }
+        else
+        {
+            scrollableContent |= new Markdown(_selectedPlan.Content);
+        }
 
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
             | new Button("Update").Icon(Icons.Pencil).Outline().OnClick(() => updateDialogOpen.Set(true))
