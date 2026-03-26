@@ -1,7 +1,7 @@
 using Ivy;
 using Microsoft.Extensions.DependencyInjection;
 using Ivy.Tendril;
-using Ivy.Tendril.Apps;
+using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 
 var server = new Server();
@@ -24,11 +24,30 @@ public class NewPlanFooterButton : ViewBase
 {
     public override object? Build()
     {
-        var navigator = UseNavigation();
-        return new Button("New Plan")
-            .Icon(Icons.Plus)
-            .Width(Size.Full())
-            .Variant(ButtonVariant.Outline)
-            .OnClick(() => navigator.Navigate<PlansApp>());
+        var taskService = UseService<TaskService>();
+        var dialogOpen = UseState(false);
+
+        var elements = new List<object>
+        {
+            new Button("Make Plan")
+                .Icon(Icons.Plus)
+                .Width(Size.Full())
+                .Variant(ButtonVariant.Outline)
+                .OnClick(() => dialogOpen.Set(true))
+                .ShortcutKey("CTRL+ALT+M")
+        };
+
+        if (dialogOpen.Value)
+        {
+            elements.Add(new CreatePlanDialog(
+                onCreatePlan: description =>
+                {
+                    taskService.StartTask("MakePlan", description);
+                },
+                onClose: () => dialogOpen.Set(false)
+            ));
+        }
+
+        return new Fragment(elements.ToArray());
     }
 }
