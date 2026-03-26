@@ -85,8 +85,8 @@ public class ContentView(
 
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
-            | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Info)
-            | new Badge(_selectedPlan.Level).Variant(BadgeVariant.Warning)
+            | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Outline)
+            | new Badge(_selectedPlan.Level).Variant(_selectedPlan.Level == "Critical" ? BadgeVariant.Warning : BadgeVariant.Outline)
             | isEditing.ToSwitchInput(Icons.Pencil).Label("Edit")
             | new Spacer().Width(Size.Grow())
             | Text.Rich()

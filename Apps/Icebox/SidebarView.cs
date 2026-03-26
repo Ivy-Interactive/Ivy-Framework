@@ -53,8 +53,8 @@ public class SidebarView(
             var clickablePlan = plan;
             return new ListItem($"#{plan.Id} {plan.Title}")
                 .Content(Layout.Horizontal().Gap(1)
-                    | new Badge(plan.Queue).Variant(BadgeVariant.Info).Small()
-                    | new Badge(plan.Level).Variant(BadgeVariant.Warning).Small())
+                    | new Badge(plan.Queue).Variant(BadgeVariant.Outline).Small()
+                    | new Badge(plan.Level).Variant(plan.Level == "Critical" ? BadgeVariant.Warning : BadgeVariant.Outline).Small())
                 .OnClick(() => _selectedPlanState.Set(clickablePlan));
         }));
     }

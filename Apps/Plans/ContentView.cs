@@ -91,9 +91,9 @@ public class ContentView(
 
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
-            | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Info)
-            | new Badge(_selectedPlan.Level).Variant(BadgeVariant.Warning)
-            | isEditing.ToSwitchInput(Icons.Pencil).Label("Edit")
+            | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Outline)
+            | new Badge(_selectedPlan.Level).Variant(_selectedPlan.Level == "Critical" ? BadgeVariant.Warning : BadgeVariant.Outline)
+            | isEditing.ToSwitchInput(Icons.Pencil)
             | new Spacer().Width(Size.Grow())
             | Text.Rich()
                 .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
@@ -139,7 +139,6 @@ public class ContentView(
             | new Button("Create Issue").Icon(Icons.Github).Outline().OnClick(() => createIssueDialogOpen.Set(true))
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
-            | new Spacer().Width(Size.Grow())
             | new Button("Download").Icon(Icons.Download).Outline().Url(downloadUrl.Value ?? "")
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
