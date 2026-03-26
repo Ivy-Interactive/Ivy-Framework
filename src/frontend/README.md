@@ -13,8 +13,18 @@ If you are simply cloning the repository and running `dotnet build` (or opening 
 If you want to explicitly work on the frontend in isolation (using HMR for widgets), you must manually run:
 
 ```bash
+# Install vp (Vite+)
+# macOS / Linux
+curl -fsSL https://vite.plus | bash
+
+# Windows (PowerShell)
+irm https://vite.plus/ps1 | iex
+
+# After installation, restart your terminal and run:
 vp i
 ```
+
+For more information, see the [Vite+ Installation Guide](https://viteplus.dev/guide/#install-vp).
 
 or
 
