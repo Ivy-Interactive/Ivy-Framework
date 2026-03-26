@@ -1,13 +1,14 @@
 using Ivy;
 using Ivy.Core;
 using Ivy.Core.Hooks;
+using Ivy.Samples.Shared.Apps;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
 public record Plan(int Id, string Title, string Queue, string Level);
 
-[App(icon: Icons.Bug, isVisible: false)]
-public class ReproUiBugApp : ViewBase
+[App(id: "repro", icon: Icons.Bug, isVisible: false)]
+public class ReproUiBugApp : SampleBase
 {
     private List<Plan> _allPlans = [
         new Plan(1, "Premium Plan", "Standard", "Level 1"),
@@ -18,7 +19,7 @@ public class ReproUiBugApp : ViewBase
     private Plan _selectedPlan => _allPlans[0];
     private int currentIndex = 0;
 
-    public override object? Build()
+    protected override object? BuildSample()
     {
         var isEditing = UseState(false);
 
