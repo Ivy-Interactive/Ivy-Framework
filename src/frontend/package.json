@@ -12,7 +12,6 @@
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
     "preview": "vp preview",
-    "prepare": "cd ../.. && husky src/frontend/.husky",
     "test": "vp test",
     "e2e": "playwright test",
     "e2e:docs": "playwright test e2e/docs",
@@ -117,22 +116,11 @@
     "@vitejs/plugin-react": "6.0.1",
     "canvas-confetti": "1.9.4",
     "happy-dom": "20.0.10",
-    "husky": "9.1.7",
-    "lint-staged": "16.2.6",
     "tailwindcss": "4.1.16",
     "typescript": "5.9.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.1.13",
     "vite-plus": "0.1.13",
     "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.13"
-  },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx}": [
-      "vp lint --fix",
-      "vp fmt"
-    ],
-    "*.{json,css,md,html}": [
-      "vp fmt"
-    ]
   },
   "packageManager": "pnpm@10.32.1",
   "pnpm": {
