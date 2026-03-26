@@ -17,6 +17,9 @@ jobs:
           # Fetch full history so we can push back cleanly
           fetch-depth: 0
 
+      # Setup Node.js (needed for integrated frontend build if triggered)
+      - uses: voidzero-dev/setup-vp@v1
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:

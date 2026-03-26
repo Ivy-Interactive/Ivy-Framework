@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo "Running Vite+ linter and formatter..."
+cd src/frontend
+vp exec lint-staged

@@ -13,18 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Setup Node.js and frontend first
+      # Setup Node.js (needed for integrated frontend build in dotnet build)
       - uses: voidzero-dev/setup-vp@v1
 
-      - name: Install frontend dependencies
-        working-directory: ./src/frontend
-        run: vp install
-
-      - name: Build frontend
-        working-directory: ./src/frontend
-        run: vp build
-
-      # Setup .NET and build backend (now with frontend assets available)
+      # Setup .NET and build backend (triggers frontend build automatically)
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:

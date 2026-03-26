@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "dev": "vp dev",
     "build": "tsc -b && vp build",
     "lint": "vp lint .",
@@ -122,7 +121,16 @@
     "vite-plus": "0.1.13",
     "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.13"
   },
-  "packageManager": "pnpm@10.32.1",
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": [
+      "vp lint --fix",
+      "vp fmt"
+    ],
+    "*.{json,css,md,html}": [
+      "vp fmt"
+    ]
+  },
+  "packageManager": "pnpm@10.33.0",
   "pnpm": {
     "overrides": {
       "@swc/helpers": "0.5.17",
