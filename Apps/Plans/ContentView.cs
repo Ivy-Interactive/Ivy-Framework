@@ -125,7 +125,7 @@ public class ContentView : ViewBase
         }
         else
         {
-            scrollableContent |= new Markdown(_selectedPlan.Content);
+            scrollableContent |= new Markdown(_selectedPlan.Content).DangerouslyAllowLocalFiles();
         }
 
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
