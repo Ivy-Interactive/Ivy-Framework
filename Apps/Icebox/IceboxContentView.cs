@@ -1,6 +1,7 @@
 using System.Drawing;
 using Ivy;
 using Ivy.Core;
+using Ivy.Tendril.Apps.Icebox.Dialogs;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
@@ -145,7 +146,7 @@ public class IceboxContentView : ViewBase
         var elements = new List<object>
         {
             mainLayout,
-            new DeletePlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans)
+            new DeleteIceboxPlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans)
         };
 
         return new Fragment(elements.ToArray());
