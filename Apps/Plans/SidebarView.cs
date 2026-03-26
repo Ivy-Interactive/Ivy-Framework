@@ -41,7 +41,7 @@ public class SidebarView(
             ).Open(false).Ghost();
     }
 
-    public object BuildContent()
+    public override object Build()
     {
         // Apply all filters
         var filteredPlans = PlanFilters.ApplyFilters(_plans, _queueFilter.Value, _levelFilter.Value, _textFilter.Value);
@@ -55,11 +55,5 @@ public class SidebarView(
                     | new Badge(plan.Level).Variant(BadgeVariant.Warning).Small())
                 .OnClick(() => _selectedPlanState.Set(clickablePlan));
         }));
-    }
-
-    public override object Build()
-    {
-        // For backward compatibility, return content
-        return BuildContent();
     }
 }
