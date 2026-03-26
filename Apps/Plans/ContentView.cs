@@ -104,7 +104,11 @@ public class ContentView : ViewBase
             | Text.Rich()
                 .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
                 .Muted("plans", word: true)
-            ;
+            | new Button("Approve").Icon(Icons.Check).Primary().OnClick(() =>
+            {
+                _planService.ApprovePlan(_selectedPlan.FileName);
+                _refreshPlans();
+            });
 
         var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)));
 
@@ -140,12 +144,7 @@ public class ContentView : ViewBase
             | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => deleteDialogOpen.Set(true))
             | new Button("Create Issue").Icon(Icons.Github).Outline().OnClick(() => createIssueDialogOpen.Set(true))
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
-            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
-            | new Button("Approve").Icon(Icons.Check).Primary().OnClick(() =>
-            {
-                _planService.ApprovePlan(_selectedPlan.FileName);
-                _refreshPlans();
-            });
+            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n");
 
         var mainContent = Layout.Vertical()
             | scrollableContent;
