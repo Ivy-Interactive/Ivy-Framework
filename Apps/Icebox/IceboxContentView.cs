@@ -36,6 +36,7 @@ public class IceboxContentView : ViewBase
 
     public override object? Build()
     {
+        var downloadUrl = PlanDownloadHelper.UsePlanDownload(this, _planService, _selectedPlan);
         var copyToClipboard = UseClipboard();
         var deleteDialogOpen = UseState(false);
 
@@ -134,6 +135,7 @@ public class IceboxContentView : ViewBase
                 _refreshPlans();
             })
             | new Spacer().Width(Size.Grow())
+            | new Button("Download").Icon(Icons.Download).Outline().Url(downloadUrl.Value ?? "")
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
                 {

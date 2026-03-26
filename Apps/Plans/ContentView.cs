@@ -34,6 +34,7 @@ public class ContentView : ViewBase
 
     public override object? Build()
     {
+        var downloadUrl = PlanDownloadHelper.UsePlanDownload(this, _planService, _selectedPlan);
         var copyToClipboard = UseClipboard();
         var updateDialogOpen = UseState(false);
         var splitDialogOpen = UseState(false);
@@ -148,6 +149,7 @@ public class ContentView : ViewBase
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Spacer().Width(Size.Grow())
+            | new Button("Download").Icon(Icons.Download).Outline().Url(downloadUrl.Value ?? "")
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
                 {
