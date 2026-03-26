@@ -20,7 +20,7 @@ server.UseConfiguration(config =>
 {
     if (ProcessHelper.IsProduction())
     {
-        var secretsPath = Environment.GetEnvironmentVariable("CLERK_SECRETS_PATH");
+        var secretsPath = Environment.GetEnvironmentVariable("IVY_CLERK_SECRETS_PATH");
         if (!string.IsNullOrEmpty(secretsPath))
         {
             config.AddJsonFile(secretsPath, optional: true);
