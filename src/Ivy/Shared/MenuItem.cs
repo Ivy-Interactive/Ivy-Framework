@@ -239,3 +239,4 @@ public static class MenuItemExtensions
         return menuItem with { Color = color };
     }
 }
+// test
