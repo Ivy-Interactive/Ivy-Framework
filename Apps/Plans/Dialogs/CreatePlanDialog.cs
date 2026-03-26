@@ -13,10 +13,10 @@ public class CreatePlanDialog(Action<string> onCreatePlan, Action onClose) : Vie
 
         return new Dialog(
             _ => _onClose(),
-            new DialogHeader("Create New Plan"),
+            new DialogHeader("Create New Idea"),
             new DialogBody(
                 Layout.Vertical()
-                    | Text.P("Describe the task for the new plan.")
+                    | Text.P("Describe the task for the new idea.")
                     | createPlanText.ToTextareaInput("Enter task description...").Rows(6)
             ),
             new DialogFooter(
