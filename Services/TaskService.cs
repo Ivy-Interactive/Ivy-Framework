@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using Ivy;
+using Ivy.Hooks.Pty;
 using Ivy.Tendril.Apps.Tasks;
 
 namespace Ivy.Tendril.Services;
@@ -75,5 +77,25 @@ public class TaskService
     public TaskItem? GetTask(string id)
     {
         return _tasks.GetValueOrDefault(id);
+    }
+
+    public void InitializePty(string id, PtyHandle ptyHandle)
+    {
+        if (!_tasks.TryGetValue(id, out var task)) return;
+
+        task.PtyStream = ptyHandle.Stream;
+        task.PtyHandleInput = ptyHandle.HandleInput;
+        task.PtyHandleResize = ptyHandle.HandleResize;
+        task.PtyKill = ptyHandle.Kill;
+        task.PtyClosed = ptyHandle.Closed;
+        task.PtyExitCode = ptyHandle.ExitCode;
+    }
+
+    public void UpdatePtyState(string id, bool closed, int? exitCode)
+    {
+        if (!_tasks.TryGetValue(id, out var task)) return;
+
+        task.PtyClosed = closed;
+        task.PtyExitCode = exitCode;
     }
 }

@@ -26,15 +26,18 @@ public class TaskOutputDialog : ViewBase
     {
         if (!_isOpen) return null;
 
-        return new Dialog(
-            _ => { _onClose(); return ValueTask.CompletedTask; },
-            new DialogHeader($"Task {_task.Id} - {_task.Type}"),
-            new DialogBody(
-                new TaskDetailView(_task, _taskService)
-            ),
-            new DialogFooter(
-                new Button("Close").Outline().OnClick(_onClose)
-            )
-        ).Width(Size.Units(100)).Height(Size.Rem(40));
+        var content = Layout.Vertical().Gap(2)
+            | new TaskDetailView(_task, _taskService)
+            | Layout.Horizontal().Gap(2).Right()
+                | new Button("Close").Outline().OnClick(_onClose);
+
+        return new Sheet(
+            _onClose,
+            content,
+            title: $"Task {_task.Id} - {_task.Type}"
+        )
+        .Side(SheetSide.Right)
+        .Width(Size.Percent(90))
+        .Height(Size.Full());
     }
 }

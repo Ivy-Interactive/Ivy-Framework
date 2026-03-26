@@ -1,3 +1,5 @@
+using Ivy;
+
 namespace Ivy.Tendril.Apps.Tasks;
 
 public record TaskItem
@@ -13,6 +15,14 @@ public record TaskItem
     public string ScriptPath { get; init; } = "";
     public string[] Args { get; init; } = [];
     public bool CancellationRequested { get; set; }
+
+    // PTY state for persistent terminal sessions
+    public IWriteStream<byte[]>? PtyStream { get; set; }
+    public Action<string>? PtyHandleInput { get; set; }
+    public Action<int, int>? PtyHandleResize { get; set; }
+    public Action? PtyKill { get; set; }
+    public bool PtyClosed { get; set; }
+    public int? PtyExitCode { get; set; }
 }
 
 public record TaskItemRow
