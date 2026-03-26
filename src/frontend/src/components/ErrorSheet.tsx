@@ -1,7 +1,13 @@
 "use client";
 
 import { useErrorSheet } from "@/hooks/use-error-sheet";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
 
 export function ErrorSheet() {
@@ -26,6 +32,9 @@ export function ErrorSheet() {
           >
             <SheetHeader>
               <SheetTitle>Oops! Something went wrong</SheetTitle>
+              <SheetDescription>
+                An error occurred in the application. Details are shown below.
+              </SheetDescription>
             </SheetHeader>
             <div className="flex-1 min-h-0 overflow-y-auto">
               <ErrorDisplay title={title} message={message} stackTrace={stackTrace} />

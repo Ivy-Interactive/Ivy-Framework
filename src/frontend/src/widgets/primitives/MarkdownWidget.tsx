@@ -11,6 +11,7 @@ interface MarkdownWidgetProps {
   content: string;
   density?: Densities;
   textAlignment?: TextAlignment;
+  dangerouslyAllowLocalFiles?: boolean;
 }
 
 const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
@@ -18,6 +19,7 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   content = "",
   density = Densities.Medium,
   textAlignment,
+  dangerouslyAllowLocalFiles = false,
 }) => {
   const eventHandler = useEventHandler();
   const [, forceUpdate] = useState(0);
@@ -68,7 +70,12 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
 
   return (
     <div className="markdown-widget w-full" style={styles}>
-      <MarkdownRenderer key={id} content={displayContent} onLinkClick={handleLinkClick} />
+      <MarkdownRenderer
+        key={id}
+        content={displayContent}
+        onLinkClick={handleLinkClick}
+        dangerouslyAllowLocalFiles={dangerouslyAllowLocalFiles}
+      />
     </div>
   );
 };

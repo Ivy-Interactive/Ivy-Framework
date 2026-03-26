@@ -3,7 +3,7 @@ import * as signalR from "@microsoft/signalr";
 import { WidgetEventHandlerType, WidgetNode } from "@/types/widgets";
 import { useToast } from "@/hooks/use-toast";
 import { showError } from "@/hooks/use-error-sheet";
-import { getIvyHost, getMachineId } from "@/lib/utils";
+import { getIvyHost, getIvyBasePath, getMachineId } from "@/lib/utils";
 import { validateRedirectUrl, validateLinkUrl } from "@/lib/url";
 import { logger } from "@/lib/logger";
 import { applyPatch, Operation } from "fast-json-patch";
@@ -497,11 +497,16 @@ export const useBackend = (
     }
 
     if (validatedUrl.startsWith("/")) {
-      // For path-based redirects, update the pathname
+      // For path-based redirects, prepend the path base so the URL stays
+      // within the proxy's sub-path (e.g. /test/studio/$auth not /$auth).
+      const basePath = getIvyBasePath();
+      const prefixedUrl =
+        basePath && !validatedUrl.startsWith(basePath) ? basePath + validatedUrl : validatedUrl;
+
       if (replaceHistory) {
-        window.history.replaceState(message.state, "", validatedUrl);
+        window.history.replaceState(message.state, "", prefixedUrl);
       } else {
-        window.history.pushState(message.state, "", validatedUrl);
+        window.history.pushState(message.state, "", prefixedUrl);
       }
     } else {
       // For full URL redirects (same-origin only)

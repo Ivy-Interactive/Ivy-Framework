@@ -18,6 +18,7 @@ interface ExpandableWidgetProps {
   open?: boolean;
   density?: Densities;
   icon?: string;
+  ghost?: boolean;
   slots?: {
     Header: React.ReactNode;
     Content: React.ReactNode;
@@ -30,6 +31,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   open = false,
   density = Densities.Medium,
   icon = undefined,
+  ghost = false,
   slots,
 }) => {
   let iconSize: number = 4;
@@ -99,7 +101,10 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       open={isOpen}
       onOpenChange={handleOpenChange}
       className={cn(
-        "w-full rounded-box border border-border shadow-sm data-[disabled=true]:cursor-not-allowed",
+        "w-full data-[disabled=true]:cursor-not-allowed",
+        ghost
+          ? "border-none shadow-none bg-transparent"
+          : "rounded-box border border-border shadow-sm",
         "p-0",
       )}
       data-disabled={disabled}
@@ -110,6 +115,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
           className={cn(
             expandableTriggerVariant({ density }),
             "relative cursor-pointer data-[disabled=true]:cursor-not-allowed",
+            ghost && "px-0 py-0 h-auto hover:bg-transparent",
           )}
           onClick={handleTriggerClick}
           data-collapsible-trigger
@@ -135,7 +141,11 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
             {slots?.Header}
           </div>
           <span
-            className={cn(expandableChevronContainerVariant({ density }), disabled && "opacity-50")}
+            className={cn(
+              expandableChevronContainerVariant({ density }),
+              disabled && "opacity-50",
+              ghost && "relative w-auto right-auto",
+            )}
             aria-hidden="true"
           >
             <ChevronRight
@@ -148,7 +158,9 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className={expandableContentVariant({ density })}>{slots?.Content}</div>
+        <div className={cn(expandableContentVariant({ density }), ghost && "px-0")}>
+          {slots?.Content}
+        </div>
       </CollapsibleContent>
     </Collapsible>
   );

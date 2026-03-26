@@ -2695,6 +2695,34 @@ Layout.Vertical().Padding(16)
 
 `TextBuilder` does not have `.Padding()`. Padding is available on container widgets (`Box`, `LayoutView`, `TabView`, `GridView`). To add padding around text, wrap it in a `Box` or layout. This is a variant of the `TextBuilder.AlignCenter()` and `TextBuilder.Style()` hallucinations — the agent applies container-level styling to text elements.
 
+## SelectInput.Items() — DropDownMenu extension called on SelectInput
+
+**Hallucinated API:**
+
+```csharp
+currencySelect.ToSelectInput()
+    .Items(new[] {
+        new Option<string>("USD", "US Dollar"),
+        new Option<string>("EUR", "Euro")
+    })
+```
+
+**Error:** `CS1929: 'SelectInput<string>' does not contain a definition for 'Items' and the best extension method overload 'DropDownMenuExtensions.Items(DropDownMenu, IEnumerable<MenuItem>)' requires a receiver of type 'Ivy.DropDownMenu'`
+
+**Correct API:**
+
+```csharp
+currencySelect.ToSelectInput(new[] {
+    new Option<string>("USD", "US Dollar"),
+    new Option<string>("EUR", "Euro")
+})
+```
+
+`.Items()` is an extension method for `DropDownMenu`, not `SelectInput`. Options must be passed as the first parameter to `ToSelectInput()`, not chained via a `.Items()` method. The agent confused the DropDownMenu API with the SelectInput API. For string arrays, use `.ToOptions()` to convert: `["USD", "EUR"].ToOptions()`. For enums, call `ToSelectInput()` without arguments — options are inferred from the enum type.
+
+**Found In:**
+84cbe3b9-5764-4352-99d3-dd685c397a68
+
 ## HandleSubmit / Handle* — renamed event handler methods
 
 **Hallucinated API:**

@@ -5,6 +5,11 @@ import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Command as CommandPrimitive } from "cmdk";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import {
+  computeClearAllValues,
+  computeSelectAllValues,
+  filterOptionsLikeCmdk,
+} from "@/widgets/inputs/select-utils";
 import { cva } from "class-variance-authority";
 import { Densities } from "@/types/density";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
@@ -66,6 +71,10 @@ interface MultipleSelectorProps {
   ghost?: boolean;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  showActions?: boolean;
+  maxSelections?: number;
+  minSelections?: number;
+  onNullableClear?: () => void;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -89,6 +98,10 @@ const MultipleSelector = React.forwardRef<
       ghost = false,
       onBlur,
       onFocus,
+      showActions = false,
+      maxSelections,
+      minSelections,
+      onNullableClear,
     },
     ref,
   ) => {
@@ -235,6 +248,63 @@ const MultipleSelector = React.forwardRef<
       },
       [isSelected, handleUnselect, onValueChange, value],
     );
+
+    const selectedValueStrings = React.useMemo(() => value.map((v) => v.value), [value]);
+
+    const filteredForBulk = React.useMemo(() => {
+      const labeled = defaultOptions.map((o) => ({
+        label: o.label,
+        value: o.value,
+      }));
+      return filterOptionsLikeCmdk(labeled, inputValue);
+    }, [defaultOptions, inputValue]);
+
+    const visibleEnabledForBulk = React.useMemo(() => {
+      const set = new Set(filteredForBulk.map((f) => f.value));
+      return defaultOptions.filter((o) => set.has(o.value) && !o.disable);
+    }, [defaultOptions, filteredForBulk]);
+
+    const bulkSelectAllDisabled =
+      visibleEnabledForBulk.length === 0 ||
+      visibleEnabledForBulk.every((o) => selectedValueStrings.includes(o.value));
+
+    const bulkClearAllDisabled = selectedValueStrings.length <= (minSelections ?? 0);
+
+    const handleBulkSelectAll = React.useCallback(() => {
+      const merged = computeSelectAllValues(
+        selectedValueStrings,
+        visibleEnabledForBulk.map((o) => ({ value: o.value, disabled: !!o.disable })),
+        maxSelections,
+      );
+      const newOptions: Option[] = merged.map((v) => {
+        const s = v.toString();
+        const o = defaultOptions.find((d) => d.value === s);
+        return o ?? { label: s, value: s };
+      });
+      onValueChange?.(newOptions);
+    }, [selectedValueStrings, visibleEnabledForBulk, maxSelections, defaultOptions, onValueChange]);
+
+    const handleBulkClearAll = React.useCallback(() => {
+      const cleared = computeClearAllValues(selectedValueStrings, minSelections);
+      if (cleared.length === 0 && onNullableClear) {
+        onNullableClear();
+        return;
+      }
+      const newOptions: Option[] = cleared.map((v) => {
+        const s = v.toString();
+        const existing = value.find((item) => item.value === s);
+        const o = defaultOptions.find((d) => d.value === s);
+        return existing ?? o ?? { label: s, value: s };
+      });
+      onValueChange?.(newOptions);
+    }, [
+      selectedValueStrings,
+      minSelections,
+      onNullableClear,
+      value,
+      defaultOptions,
+      onValueChange,
+    ]);
 
     return (
       <Command
@@ -468,6 +538,32 @@ const MultipleSelector = React.forwardRef<
                   );
                 })}
               </CommandGroup>
+              {showActions && (
+                <div
+                  className="border-t border-border px-2 py-2 flex justify-between items-center gap-2 text-sm shrink-0"
+                  role="group"
+                  aria-label="Bulk selection"
+                >
+                  <button
+                    type="button"
+                    className="text-primary hover:underline underline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm px-0.5"
+                    disabled={bulkSelectAllDisabled || disabled}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleBulkSelectAll()}
+                  >
+                    Select All
+                  </button>
+                  <button
+                    type="button"
+                    className="text-primary hover:underline underline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm px-0.5"
+                    disabled={bulkClearAllDisabled || disabled}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleBulkClearAll()}
+                  >
+                    Clear All
+                  </button>
+                </div>
+              )}
             </div>
           )}
           {open && defaultOptions.length === 0 && emptyIndicator && (

@@ -426,6 +426,20 @@ public class SelectInputAdvancedPropsExample : ViewBase
 {
     private enum Frameworks { React, Angular, Vue, Svelte, Ember, Backbone, Preact, Lit, Solid, Alpine }
 
+    private enum DemoOption
+    {
+        Alpha,
+        Bravo,
+        Charlie,
+        Delta,
+        Echo,
+        Foxtrot,
+        Golf,
+        Hotel,
+        India,
+        Juliet,
+    }
+
     public override object? Build()
     {
         var fwSingle = UseState(Frameworks.React);
@@ -440,7 +454,15 @@ public class SelectInputAdvancedPropsExample : ViewBase
         var isLoading = UseState(false);
         var isSearchable = UseState(true);
 
-        var options = typeof(Frameworks).ToOptions();
+        var multiSelect = UseState<DemoOption[]>([]);
+        var multiList = UseState<DemoOption[]>([]);
+        var multiToggle = UseState<DemoOption[]>([]);
+        var nullableMultiSelect = UseState<DemoOption[]?>(() => null);
+        var nullableMultiList = UseState<DemoOption[]?>(() => null);
+        var nullableMultiToggle = UseState<DemoOption[]?>(() => null);
+
+        var frameworkOptions = typeof(Frameworks).ToOptions();
+        var demoOptions = typeof(DemoOption).ToOptions();
 
         return Layout.Vertical()
             | Text.H3("Advanced properties")
@@ -451,31 +473,55 @@ public class SelectInputAdvancedPropsExample : ViewBase
                 | (Layout.Vertical()
                     | Text.H4("Select (Single)")
                     | (Layout.Horizontal()
-                        | fwSingle.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                        | fwSingle.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Select)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).EmptyMessage("No frameworks found").SearchMode(SearchMode.Fuzzy).Width(Size.Grow())
-                        | fwNullableSingle.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                        | fwNullableSingle.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Select)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).EmptyMessage("No frameworks found").SearchMode(SearchMode.Fuzzy).Width(Size.Grow()).Nullable(true)))
                 | (Layout.Vertical()
                     | Text.H4("Select (Multi, Min=1, Max=3)")
                     | (Layout.Horizontal()
-                        | fwMultiSelect.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                        | fwMultiSelect.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Select)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow())
-                        | fwNullableMultiSelect.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                        | fwNullableMultiSelect.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Select)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow()).Nullable(true)))
                 | (Layout.Vertical()
                     | Text.H4("List (Multi, Min=1, Max=3)")
                     | (Layout.Horizontal()
-                        | fwMultiList.ToSelectInput(options).Variant(SelectInputVariant.List)
+                        | fwMultiList.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.List)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow())
-                        | fwNullableMultiList.ToSelectInput(options).Variant(SelectInputVariant.List)
+                        | fwNullableMultiList.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.List)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow()).Nullable(true)))
                 | (Layout.Vertical()
                     | Text.H4("Toggle (Multi, Min=1, Max=3)")
                     | (Layout.Horizontal()
-                        | fwMultiToggle.ToSelectInput(options).Variant(SelectInputVariant.Toggle)
+                        | fwMultiToggle.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Toggle)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow())
-                        | fwNullableMultiToggle.ToSelectInput(options).Variant(SelectInputVariant.Toggle)
-                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow()).Nullable(true)));
+                        | fwNullableMultiToggle.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Toggle)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow()).Nullable(true)))
+            | Text.H3("ShowActions")
+            | Text.P("Multi-select inputs can show a footer with Select All and Clear All. ")
+            | Layout.Grid().Columns(2)
+                | (Layout.Vertical()
+                    | Text.H4("Select (multi)")
+                    | (Layout.Horizontal()
+                        | multiSelect.ToSelectInput(demoOptions).Variant(SelectInputVariant.Select)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).ShowActions()
+                        | nullableMultiSelect.ToSelectInput(demoOptions).Variant(SelectInputVariant.Select)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).Nullable(true).ShowActions()))
+                | (Layout.Vertical()
+                    | Text.H4("List (multi)")
+                    | (Layout.Horizontal()
+                        | multiList.ToSelectInput(demoOptions).Variant(SelectInputVariant.List)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).ShowActions()
+                        | nullableMultiList.ToSelectInput(demoOptions).Variant(SelectInputVariant.List)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).Nullable(true).ShowActions()))
+                | (Layout.Vertical()
+                    | Text.H4("Toggle (multi)")
+                    | (Layout.Horizontal()
+                        | multiToggle.ToSelectInput(demoOptions).Variant(SelectInputVariant.Toggle)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).ShowActions()
+                        | nullableMultiToggle.ToSelectInput(demoOptions).Variant(SelectInputVariant.Toggle)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).Nullable(true).ShowActions()));
     }
 }
 

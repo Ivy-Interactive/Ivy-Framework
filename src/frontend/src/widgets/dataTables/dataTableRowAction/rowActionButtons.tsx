@@ -9,9 +9,13 @@ interface RowActionButtonsProps {
    */
   actions: MenuItem[];
   /**
-   * Y position of the button group (should center within row)
+   * Y position of the overlay container (row top)
    */
   top: number;
+  /**
+   * Height of the overlay container (should match the grid row bounds)
+   */
+  height: number;
   /**
    * Whether buttons are visible
    */
@@ -36,6 +40,7 @@ interface RowActionButtonsProps {
 export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
   actions,
   top,
+  height,
   visible,
   onActionClick,
   onMouseEnter,
@@ -45,9 +50,10 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
 
   return (
     <div
-      className="absolute z-50 flex flex-row gap-1"
+      className="absolute z-50 flex flex-row gap-1 items-center"
       style={{
         top: `${top}px`,
+        height: `${height}px`,
         right: "8px",
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? "auto" : "none",

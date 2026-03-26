@@ -7,15 +7,13 @@ import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import "katex/dist/katex.min.css";
-import { cn, getIvyHost, convertAppUrlToPath } from "@/lib/utils";
+import { cn, getIvyHost, convertAppUrlToPath, isLocalFilesEnabled } from "@/lib/utils";
 import {
   validateLinkUrl,
-  validateImageUrl,
+  validateMediaUrl,
   isExternalUrl,
   isAnchorLink,
   isAppProtocol,
-  isRelativePath,
-  isStandardUrl,
   extractAnchorId,
 } from "@/lib/url";
 import { useTypography } from "@/contexts/TypographyContext";
@@ -29,13 +27,18 @@ import { Components } from "react-markdown";
 interface MarkdownRendererProps {
   content: string;
   onLinkClick?: (url: string) => void;
+  dangerouslyAllowLocalFiles?: boolean;
 }
 
 const hasContentFeature = (content: string, feature: RegExp): boolean => {
   return feature.test(content);
 };
 
-const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClick }) => {
+const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
+  content,
+  onLinkClick,
+  dangerouslyAllowLocalFiles = false,
+}) => {
   const typography = useTypography();
   const contentFeatures = useMemo(
     () => ({
@@ -66,11 +69,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
         return;
       }
 
-      // Only call backend handler for custom link handling scenarios
-      // validateLinkUrl already handles external links, anchor links, app:// URLs, and relative paths safely
-      // If the URL is one of these standard types, the browser will handle it naturally
-      // Only call onLinkClick for non-standard URLs that need custom handling
-      if (!isStandardUrl(validatedHref) && onLinkClick) {
+      // When onLinkClick is registered, intercept ALL link clicks
+      // This allows the backend handler to decide how to handle the URL
+      if (onLinkClick) {
         event.preventDefault();
         onLinkClick(validatedHref);
       }
@@ -158,14 +159,18 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
             return null;
           }
 
-          // Validate and sanitize image URL to prevent open redirect vulnerabilities
-          const validatedSrc = validateImageUrl(src);
+          // Validate and sanitize image URL with optional local file support
+          const validatedSrc = validateMediaUrl(src, {
+            mediaType: "image",
+            dangerouslyAllowLocalFiles,
+          });
           if (!validatedSrc) {
-            // Invalid URL, don't render image (return null to prevent any rendering)
+            // Invalid URL, don't render image
             return null;
           }
 
           // Construct the final image source URL
+          // For file:// URLs, use them directly (no Ivy host prefix)
           const imageSrc = validatedSrc.match(/^(https?:\/\/|data:|blob:|app:)/i)
             ? validatedSrc
             : (() => {
@@ -249,6 +254,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
       typography.hr,
       typography.details,
       typography.summary,
+      dangerouslyAllowLocalFiles,
     ],
   );
 
@@ -287,7 +293,6 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
         const isExternalLink = isExternalUrl(safeHref);
         const isAnchor = isAnchorLink(safeHref);
         const isApp = isAppProtocol(safeHref);
-        const isRelative = isRelativePath(safeHref);
 
         // Convert app:// URLs to regular paths for href attribute
         let hrefForNavigation = safeHref;
@@ -301,8 +306,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
             {...props}
             className="text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100"
             href={hrefForNavigation}
-            target={isExternalLink ? "_blank" : undefined}
-            rel={isExternalLink ? "noopener noreferrer" : undefined}
+            target={isExternalLink && !onLinkClick ? "_blank" : undefined}
+            rel={isExternalLink && !onLinkClick ? "noopener noreferrer" : undefined}
             onClick={
               isAnchor
                 ? (e) => {
@@ -324,9 +329,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
                       });
                     }
                   }
-                : isApp || isRelative
-                  ? undefined // Let browser handle navigation naturally
-                  : (e) => handleLinkClick(safeHref, e)
+                : onLinkClick
+                  ? (e) => handleLinkClick(safeHref, e)
+                  : undefined
             }
           >
             {children}
@@ -358,16 +363,43 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
     emoji: ({ name }: { name: string }) => <CustomEmoji name={name} />,
   };
 
-  const urlTransform = useCallback((url: string) => {
-    if (url.startsWith("app://")) {
-      return url;
-    }
-    // Validate URL before transforming to prevent open redirect vulnerabilities
-    // validateLinkUrl always returns a string ('#' for invalid URLs)
-    const validatedUrl = validateLinkUrl(url);
-    // defaultUrlTransform handles all valid URLs, and '#' for invalid URLs
-    return defaultUrlTransform(validatedUrl);
-  }, []);
+  const urlTransform = useCallback(
+    (url: string) => {
+      if (url.startsWith("app://")) {
+        return url;
+      }
+      // Allow file:// URLs and Windows paths when local files are enabled
+      if (
+        dangerouslyAllowLocalFiles &&
+        (url.startsWith("file://") || /^[a-zA-Z]:[\\/]/.test(url))
+      ) {
+        if (isLocalFilesEnabled()) {
+          // Server supports local file proxy - use /ivy/local-file endpoint
+          let filePath: string;
+          if (url.startsWith("file:///")) {
+            filePath = decodeURIComponent(url.slice(8));
+          } else if (url.startsWith("file://")) {
+            filePath = decodeURIComponent(url.slice(7));
+          } else {
+            filePath = url.replace(/\\/g, "/");
+          }
+          return `/ivy/local-file?path=${encodeURIComponent(filePath)}`;
+        }
+        // Fallback: pass file:// URL through (browser will likely block it)
+        if (/^[a-zA-Z]:[\\/]/.test(url)) {
+          const normalized = url.replace(/\\/g, "/");
+          return `file:///${normalized}`;
+        }
+        return url;
+      }
+      // Validate URL before transforming to prevent open redirect vulnerabilities
+      // validateLinkUrl always returns a string ('#' for invalid URLs)
+      const validatedUrl = validateLinkUrl(url);
+      // defaultUrlTransform handles all valid URLs, and '#' for invalid URLs
+      return defaultUrlTransform(validatedUrl);
+    },
+    [dangerouslyAllowLocalFiles],
+  );
 
   return (
     <>

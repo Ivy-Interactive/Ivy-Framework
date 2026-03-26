@@ -41,6 +41,48 @@ public class BasicChartExample : ViewBase
 }
 ```
 
+## Array-Based API
+
+For concise chart creation with pre-styled charts, use the array-based API by passing parameters directly to `ToLineChart()` or `ToBarChart()`:
+
+```csharp demo-below
+public class ArrayBasedChartExample : ViewBase
+{
+    public override object? Build()
+    {
+        var salesData = new[]
+        {
+            new { Month = "Jan", Sales = 186 },
+            new { Month = "Feb", Sales = 305 },
+            new { Month = "Mar", Sales = 237 },
+            new { Month = "Apr", Sales = 289 }
+        };
+
+        // ToLineChart(dimension, measures[], style?)
+        return salesData.ToLineChart(
+            e => e.Month,
+            [e => e.Sum(f => f.Sales)],
+            LineChartStyles.Dashboard);
+    }
+}
+```
+
+**Parameter order for LineChart and BarChart:**
+
+1. **dimension** — Expression for X-axis grouping (e.g., `e => e.Month`)
+2. **measures[]** — Array of aggregation expressions (e.g., `[e => e.Sum(f => f.Sales)]`)
+3. **style** (optional) — Pre-defined styling (e.g., `LineChartStyles.Dashboard`, `BarChartStyles.Dashboard`)
+
+```csharp
+// ✅ CORRECT - style comes AFTER measures array
+data.ToLineChart(e => e.Date, [e => e.Sum(f => f.Amount)], LineChartStyles.Dashboard)
+
+// ❌ WRONG - style before measures causes CS1503 error
+data.ToLineChart(e => e.Date, LineChartStyles.Dashboard, [e => e.Sum(f => f.Amount)])
+```
+
+Use this API when you want pre-styled charts with minimal configuration. For custom styling and additional configuration (sorting, toolbox, etc.), use the fluent API shown in "Basic Usage" above.
+
 Ivy supports four chart types — each optimized for different visualization needs:
 
 | Chart | Best For | Builder Method |

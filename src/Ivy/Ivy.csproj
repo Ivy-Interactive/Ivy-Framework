@@ -46,7 +46,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Protobuf Include="Protos\datatable.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos/datatable.proto" GrpcServices="Server" />
   </ItemGroup>
   
   <ItemGroup>
@@ -83,13 +83,35 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Ivy.Agent.Filter\Ivy.Agent.Filter.csproj" />
+    <ProjectReference Include="../Ivy.Agent.Filter/Ivy.Agent.Filter.csproj" />
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="Core\Apps\" />
-    <Folder Include="Core\Auth\" />
-    <Folder Include="Properties\" />
+    <Folder Include="Core/Apps/" />
+    <Folder Include="Core/Auth/" />
+    <Folder Include="Properties/" />
   </ItemGroup>
+
+  <!-- Frontend source files for incremental build detection -->
+  <ItemGroup>
+    <FrontendSourceFiles Include="../frontend/src/**/*" />
+    <FrontendSourceFiles Include="../frontend/package.json" />
+    <FrontendSourceFiles Include="../frontend/pnpm-lock.yaml" Condition="Exists('../frontend/pnpm-lock.yaml')" />
+    <FrontendSourceFiles Include="../frontend/tsconfig.json" Condition="Exists('../frontend/tsconfig.json')" />
+    <FrontendSourceFiles Include="../frontend/vite.config.*" />
+  </ItemGroup>
+
+  <Target Name="NpmInstall" BeforeTargets="BuildFrontend"
+          Inputs="../frontend/package.json;../frontend/pnpm-lock.yaml"
+          Outputs="../frontend/node_modules/.modules.yaml">
+    <Exec Command="vp install" WorkingDirectory="../frontend" />
+  </Target>
+
+  <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths"
+          Inputs="@(FrontendSourceFiles)"
+          Outputs="../frontend/dist/.build-stamp">
+    <Exec Command="vp run build" WorkingDirectory="../frontend" />
+    <Touch Files="../frontend/dist/.build-stamp" AlwaysCreate="true" />
+  </Target>
 
 </Project>

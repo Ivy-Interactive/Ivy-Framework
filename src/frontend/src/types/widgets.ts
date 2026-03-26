@@ -28,9 +28,11 @@ export interface MenuItem {
   variant: "Default" | "Separator" | "Checkbox" | "Radio" | "Group";
   checked: boolean;
   disabled: boolean;
+  color?: "Default" | "Destructive" | "Primary" | "Secondary" | "Success" | "Warning" | "Info";
   shortcut?: string;
   expanded: boolean;
   path?: string;
+  onSelect?: (item: MenuItem) => void;
 }
 
 export interface InternalLink {

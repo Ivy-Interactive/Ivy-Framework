@@ -189,6 +189,63 @@ public class SheetView : ViewBase
 }
 ```
 
+## Closing Sheets Programmatically
+
+When using `WithSheet`, content inside the sheet can programmatically close it by using a close callback. Pass a `Func<Action, object>` to `WithSheet` instead of `Func<object>`. The `Action` parameter is a callback that closes the sheet when called:
+
+```csharp demo-tabs
+public class SheetWithProgrammaticClose : ViewBase
+{
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+
+        return new Button("Add Item").WithSheet(
+            close => new SheetFormView(close, client),
+            title: "Add New Item",
+            description: "Fill out the form below",
+            width: Size.Fraction(1/3f)
+        );
+    }
+}
+
+public class SheetFormView : ViewBase
+{
+    private readonly Action _close;
+    private readonly IClientProvider _client;
+
+    public SheetFormView(Action close, IClientProvider client)
+    {
+        _close = close;
+        _client = client;
+    }
+
+    public override object? Build()
+    {
+        var itemName = UseState("");
+
+        async ValueTask HandleSubmit()
+        {
+            // Simulate saving...
+            await Task.Delay(500);
+            _client.Toast($"Item '{itemName.Value}' added successfully!").Success();
+            _close(); // Close the sheet after successful submission
+        }
+
+        return new FooterLayout(
+            Layout.Horizontal().Gap(2)
+                | new Button("Submit").OnClick(_ => HandleSubmit())
+                | new Button("Cancel").Variant(ButtonVariant.Outline).OnClick(_ => _close()),
+            new Card(
+                itemName.ToTextInput("Item Name")
+            ).Title("Item Details")
+        );
+    }
+}
+```
+
+This pattern is particularly useful for forms inside sheets, where the sheet should automatically close after a successful submission.
+
 <WidgetDocs Type="Ivy.Sheet" ExtensionTypes="Ivy.SheetExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Sheet.cs"/>
 
 ## Examples

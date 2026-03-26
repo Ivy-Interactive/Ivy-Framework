@@ -103,6 +103,13 @@ public class ExpandableApp : SampleBase
             Text.Block("This is the content for Project Users")
         ).Disabled(true);
 
+        var ghostExpandable = new Expandable("Ghost Expandable", "This expandable uses the Ghost variant — minimal border, no shadow.")
+            .Ghost();
+
+        var ghostWithIconExpandable = new Expandable("Ghost with Icon", "Ghost variant combined with an icon.")
+            .Ghost()
+            .Icon(Icons.Ghost);
+
         return Layout.Vertical()
             | Text.H2("Original Basic Expandable")
             | basicExpandable
@@ -123,6 +130,9 @@ public class ExpandableApp : SampleBase
             | switchInHeaderExpandable1
             | switchInHeaderExpandable2
             | switchInHeaderExpandable3
-            | switchInHeaderExpandable4;
+            | switchInHeaderExpandable4
+            | Text.H2("Ghost Variant")
+            | ghostExpandable
+            | ghostWithIconExpandable;
     }
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateLinkUrl } from "@/lib/url";
+import { validateLinkUrl, validateMediaUrl } from "@/lib/url";
 
 /**
  * Tests for URL validation in markdown links.
@@ -255,5 +255,30 @@ describe("Markdown link URL validation", () => {
         expect(result).toBe("#");
       });
     });
+  });
+});
+
+describe("Markdown image URL validation with local files", () => {
+  it("should validate file: protocol in markdown images when dangerouslyAllowLocalFiles is enabled", () => {
+    const url = "file:///C:/Users/test/image.png";
+    const result = validateMediaUrl(url, { mediaType: "image", dangerouslyAllowLocalFiles: true });
+    expect(result).toBe("file:///C:/Users/test/image.png");
+  });
+
+  it("should handle Windows absolute paths in markdown images when enabled", () => {
+    const windowsPaths = ["C:\\Foo\\bar.png", "D:\\Screenshots\\test.jpg", "C:/Foo/bar.png"];
+    windowsPaths.forEach((path) => {
+      const result = validateMediaUrl(path, {
+        mediaType: "image",
+        dangerouslyAllowLocalFiles: true,
+      });
+      expect(result).toBeTruthy();
+      expect(result).toContain("file:///");
+    });
+  });
+
+  it("should reject local files by default for security", () => {
+    expect(validateMediaUrl("file:///C:/Users/test/image.png", { mediaType: "image" })).toBeNull();
+    expect(validateMediaUrl("C:\\Foo\\bar.png", { mediaType: "image" })).toBeNull();
   });
 });

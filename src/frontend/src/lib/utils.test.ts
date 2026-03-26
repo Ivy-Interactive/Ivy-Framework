@@ -8,6 +8,7 @@ import {
   validateImageUrl,
   validateAudioUrl,
   validateVideoUrl,
+  validateMediaUrl,
 } from "./url";
 
 describe("validateRedirectUrl", () => {
@@ -1172,6 +1173,37 @@ describe.each(mediaValidationCases)("$name", ({ validate, validDataUrl, invalidD
 
   it("coerces colon-free relative strings into rooted paths", () => {
     expect(validate("images/resource.ext")).toBe("/images/resource.ext");
+  });
+
+  it("rejects file: protocol by default for security", () => {
+    expect(validate("file:///C:/Users/test/image.png")).toBeNull();
+    expect(validate("file:///D:/Screenshots/screenshot.png")).toBeNull();
+  });
+
+  it("accepts file: protocol when dangerouslyAllowLocalFiles is enabled", () => {
+    const validateWithLocalFiles = (url: string) =>
+      validateMediaUrl(url, { mediaType: "image", dangerouslyAllowLocalFiles: true });
+
+    expect(validateWithLocalFiles("file:///C:/Users/test/image.png")).toBe(
+      "file:///C:/Users/test/image.png",
+    );
+    expect(validateWithLocalFiles("file:///D:/Screenshots/screenshot.png")).toBe(
+      "file:///D:/Screenshots/screenshot.png",
+    );
+  });
+
+  it("accepts Windows absolute paths when dangerouslyAllowLocalFiles is enabled", () => {
+    const validateWithLocalFiles = (url: string) =>
+      validateMediaUrl(url, { mediaType: "image", dangerouslyAllowLocalFiles: true });
+
+    expect(validateWithLocalFiles("C:\\Foo\\bar.png")).toBe("file:///C:/Foo/bar.png");
+    expect(validateWithLocalFiles("D:\\Images\\test.jpg")).toBe("file:///D:/Images/test.jpg");
+    expect(validateWithLocalFiles("C:/Foo/bar.png")).toBe("file:///C:/Foo/bar.png");
+  });
+
+  it("rejects Windows absolute paths by default for security", () => {
+    expect(validate("C:\\Foo\\bar.png")).toBeNull();
+    expect(validate("D:\\Images\\test.jpg")).toBeNull();
   });
 });
 

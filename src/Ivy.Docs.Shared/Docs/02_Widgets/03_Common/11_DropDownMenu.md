@@ -117,6 +117,22 @@ new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value),
         )
 ```
 
+## Semantic Colors
+
+You can apply semantic colors to menu items to provide visual cues about their action or status. These colors align with the standard Ivy design system:
+
+```csharp demo-tabs
+new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+    new Button("Semantic Colors"),
+    MenuItem.Default("Primary").Primary(),
+    MenuItem.Default("Secondary").Secondary(),
+    MenuItem.Default("Success").Success(),
+    MenuItem.Default("Warning").Warning(),
+    MenuItem.Default("Info").Info(),
+    MenuItem.Separator(),
+    MenuItem.Default("Delete").Destructive())
+```
+
 ## Positioning
 
 Control which side of the trigger the menu appears on:

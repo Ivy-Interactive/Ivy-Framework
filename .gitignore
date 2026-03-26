@@ -1,8 +1,0 @@
-.claude/
-*.log
-
-# Ivy session debug logs
-.ivy/
-
-# Temporary output directories
-tmp_out/

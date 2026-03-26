@@ -121,6 +121,8 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         fontSize: currentScale.fontSize,
         padding: currentScale.padding,
         lineHeight: currentScale.lineHeight,
+        // Ensure empty code blocks have at least one line of height
+        minHeight: `calc(${currentScale.fontSize} * ${currentScale.lineHeight} + ${currentScale.padding} * 2)`,
       };
       if (!showBorder) {
         style.border = "none";
