@@ -51,7 +51,7 @@ public class IceboxSidebarView : ViewBase
                 content: Layout.Vertical()
                     | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().WithField().Label("Queue")
                     | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().WithField().Label("Level")
-            ).Open(true);
+            ).Open(false);
 
         var content = new List(filteredPlans.Select(plan =>
         {
