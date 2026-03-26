@@ -88,7 +88,14 @@ Make sure you have the [.NET 10 SDK installed](https://dotnet.microsoft.com/en-u
    dotnet tool install -g Ivy.Console
    ```
 
-2. **Create a new project**:
+2. **Install Vite+ CLI**:
+   Ivy uses the `vp` (Vite+) CLI for frontend orchestration. Install it globally:
+
+   ```bash
+   npm install -g vite-plus
+   ```
+
+3. **Create a new project**:
 
    ```bash
     ivy init --hello

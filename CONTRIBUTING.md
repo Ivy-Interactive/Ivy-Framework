@@ -35,7 +35,7 @@ This project and everyone participating in it is governed by our [Code of Conduc
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
-- [Node.js 22.12+ & npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+- [Node.js 22.12+ & vp CLI](https://github.com/voidzero-dev/vite-plus)
 - **Ivy Console Tool** (for development):
 
   ```bash
@@ -78,31 +78,31 @@ Ivy Framework uses multiple testing approaches to ensure code quality:
 ### Unit Testing
 
 - **Backend (C#)**: Run `dotnet test` in the root directory
-- **Frontend (TypeScript)**: Run `npm run test` in the `src/frontend/` directory
+- **Frontend (TypeScript)**: Run `vp test` in the `src/frontend/` directory
 
 ### End-to-End Testing
 
-E2E tests are written using Playwright and are located in `src/frontend/e2e/`. We provide npm scripts for running these tests:
+E2E tests are written using Playwright and are located in `src/frontend/e2e/`. We provide `vp` scripts for running these tests:
 
 ```bash
 # Run all E2E tests
-npm run e2e
+vp run e2e
 
 # Run only Ivy.Docs E2E tests
-npm run e2e:docs
+vp run e2e:docs
 
 # Run only Ivy.Samples E2E tests
-npm run e2e:samples
+vp run e2e:samples
 ```
 
-**Important**: Always use the npm scripts (`npm run e2e*`) instead of `npx playwright test` to ensure consistent usage of the locally installed Playwright version and avoid version conflicts.
+**Important**: Always use the `vp` scripts (`vp run e2e*`) instead of `npx playwright test` to ensure consistent usage of the locally installed Playwright version and avoid version conflicts.
 
 Additional Playwright options can be passed after `--`:
 
 ```bash
-npm run e2e -- --headed  # Run tests in headed mode
-npm run e2e -- --debug   # Run tests in debug mode
-npm run e2e:samples -- --project=chromium  # Run samples tests in Chrome only
+vp run e2e -- --headed  # Run tests in headed mode
+vp run e2e -- --debug   # Run tests in debug mode
+vp run e2e:samples -- --project=chromium  # Run samples tests in Chrome only
 ```
 
 ## Contributing Guidelines
@@ -260,15 +260,15 @@ Before submitting your code, ensure it follows the project's linting and formatt
 
 #### Frontend (TypeScript/React)
 
-- Use `npm run lint:fix` to automatically fix ESLint issues
-- Use `npm run format` to format code with Prettier
+- Use `vp lint --fix .` to automatically fix ESLint issues
+- Use `vp fmt .` to format code with Oxfmt
 - These commands should be run from the `src/frontend/` directory
 
 #### Pre-commit Hooks
 
 The project uses pre-commit hooks that will automatically run linting and formatting on staged files. Make sure your code passes these checks before committing. More details how pre-commit hooks are being set up can be found in `src/frontend/README.md`
 
-TL;DR, if you have run `npm install` in the `src/frontend`, most likely all pre-commit hooks will be working for you, that cover linting and formatting for Ivy-Framework.
+TL;DR, if you have run `vp install` in the `src/frontend`, most likely all pre-commit hooks will be working for you, that cover linting and formatting for Ivy-Framework.
 
 ### C# Guidelines
 
@@ -336,15 +336,15 @@ dotnet test src/Ivy.Test
 
 # Run frontend unit tests
 cd src/frontend
-npm run test
+vp test
 
 # Run all frontend E2E tests
 cd src/frontend
-npm run e2e
+vp run e2e
 
 # Run specific E2E test suites
-npm run e2e:docs      # Ivy.Docs tests only
-npm run e2e:samples   # Ivy.Samples tests only
+vp run e2e:docs      # Ivy.Docs tests only
+vp run e2e:samples   # Ivy.Samples tests only
 ```
 
 ### Writing Tests

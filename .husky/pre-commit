@@ -2,4 +2,4 @@
 
 echo "Running Vite+ linter and formatter..."
 cd src/frontend
-pnpm exec lint-staged
+vp exec lint-staged
