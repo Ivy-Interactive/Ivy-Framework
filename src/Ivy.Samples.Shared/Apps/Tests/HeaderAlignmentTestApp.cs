@@ -3,12 +3,12 @@ using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Samples.Shared.Apps;
 
-namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
+namespace Ivy.Samples.Shared.Apps.Tests;
 
 public record Plan(int Id, string Title, string Queue, string Level);
 
-[App(id: "repro-ui-bug", title: "Reproduction UI Bug", icon: Icons.Bug, isVisible: false)]
-public class ReproUiBugApp : SampleBase
+[App(id: "header-alignment-test", title: "Header Alignment Test", icon: Icons.LayoutPanelTop, isVisible: false)]
+public class HeaderAlignmentTestApp : SampleBase
 {
     private List<Plan> _allPlans = [
         new Plan(1, "Premium Plan", "Standard", "Level 1"),
@@ -35,7 +35,7 @@ public class ReproUiBugApp : SampleBase
             ;
 
         return Layout.Vertical().Padding(5)
-            | Text.H1("Reproduction of UI Bug")
+            | Text.H1("Header Alignment Test")
             | header
             | (isEditing.Value ? "Editing mode is ON" : "Editing mode is OFF")
             ;
