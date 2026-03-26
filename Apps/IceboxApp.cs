@@ -20,15 +20,16 @@ public class IceboxApp : ViewBase
 
         var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
         var plans = planService.GetIceboxPlans();
+        var filteredPlans = PlanFilters.ApplyFilters(plans, queueFilter.Value, levelFilter.Value, textFilter.Value).ToList();
 
         // Handle removed plan - auto-select next
-        if (selectedPlanState.Value is { } selected && !plans.Any(p => p.FileName == selected.FileName))
+        if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FileName == selected.FileName))
         {
             var oldIndex = previousPlans.Value.FindIndex(p => p.FileName == selected.FileName);
-            if (plans.Count > 0 && oldIndex >= 0)
+            if (filteredPlans.Count > 0 && oldIndex >= 0)
             {
-                var newIndex = Math.Min(oldIndex, plans.Count - 1);
-                selectedPlanState.Set(plans[newIndex]);
+                var newIndex = Math.Min(oldIndex, filteredPlans.Count - 1);
+                selectedPlanState.Set(filteredPlans[newIndex]);
             }
             else
             {
@@ -36,7 +37,7 @@ public class IceboxApp : ViewBase
             }
         }
 
-        previousPlans.Value = plans;
+        previousPlans.Value = filteredPlans;
 
         void RefreshPlans()
         {
@@ -44,7 +45,7 @@ public class IceboxApp : ViewBase
         }
 
         return new SidebarLayout(
-            mainContent: new IceboxContentView(selectedPlanState.Value, plans, selectedPlanState, planService, taskService, RefreshPlans),
+            mainContent: new IceboxContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, taskService, RefreshPlans),
             sidebarContent: new IceboxSidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter)
         );
     }

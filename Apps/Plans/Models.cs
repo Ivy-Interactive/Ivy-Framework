@@ -17,3 +17,35 @@ public record PlanFile(PlanMetadata Metadata, string Content, string RawFrontmat
     public string Queue => Metadata.Queue;
     public string Level => Metadata.Level;
 }
+
+public static class PlanFilters
+{
+    public static IEnumerable<PlanFile> ApplyFilters(
+        IEnumerable<PlanFile> plans,
+        string? queueFilter,
+        string? levelFilter,
+        string? textFilter)
+    {
+        var filtered = plans;
+
+        // Apply level filter
+        if (levelFilter is { } level)
+            filtered = filtered.Where(p => p.Level == level);
+
+        // Apply queue filter
+        if (queueFilter is { } queue)
+            filtered = filtered.Where(p => p.Queue == queue);
+
+        // Apply text filter
+        if (!string.IsNullOrWhiteSpace(textFilter))
+        {
+            var search = textFilter.ToLowerInvariant();
+            filtered = filtered.Where(p =>
+                p.Title.ToLowerInvariant().Contains(search) ||
+                p.Id.ToString().Contains(search) ||
+                p.Queue.ToLowerInvariant().Contains(search));
+        }
+
+        return filtered;
+    }
+}

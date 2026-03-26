@@ -40,20 +40,8 @@ public class SidebarView : ViewBase
             .Select(g => new Option<string>($"{g.Key} ({g.Count()})", g.Key))
             .ToArray<IAnyOption>();
 
-        // Apply queue filter for the final list
-        var filteredPlans = levelFilteredPlans;
-        if (_queueFilter.Value is { } queue)
-            filteredPlans = filteredPlans.Where(p => p.Queue == queue);
-
-        // Apply text filter
-        if (!string.IsNullOrWhiteSpace(_textFilter.Value))
-        {
-            var search = _textFilter.Value.ToLowerInvariant();
-            filteredPlans = filteredPlans.Where(p =>
-                p.Title.ToLowerInvariant().Contains(search) ||
-                p.Id.ToString().Contains(search) ||
-                p.Queue.ToLowerInvariant().Contains(search));
-        }
+        // Apply all filters
+        var filteredPlans = PlanFilters.ApplyFilters(_plans, _queueFilter.Value, _levelFilter.Value, _textFilter.Value);
 
         var header = Layout.Vertical()
             | _textFilter.ToSearchInput().Placeholder("Search plans...")
