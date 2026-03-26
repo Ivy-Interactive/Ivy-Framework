@@ -98,19 +98,19 @@
     <FrontendSourceFiles Include="../frontend/package.json" />
     <FrontendSourceFiles Include="../frontend/pnpm-lock.yaml" Condition="Exists('../frontend/pnpm-lock.yaml')" />
     <FrontendSourceFiles Include="../frontend/tsconfig.json" Condition="Exists('../frontend/tsconfig.json')" />
-    <FrontendSourceFiles Include="../frontend/vite.config.*" Condition="Exists('../frontend/vite.config.ts') Or Exists('../frontend/vite.config.js') Or Exists('../frontend/vite.config.mjs')" />
+    <FrontendSourceFiles Include="../frontend/vite.config.*" />
   </ItemGroup>
 
   <Target Name="NpmInstall" BeforeTargets="BuildFrontend"
           Inputs="../frontend/package.json;../frontend/pnpm-lock.yaml"
           Outputs="../frontend/node_modules/.modules.yaml">
-    <Exec Command="npx -y vite-plus@0.1.13 install" WorkingDirectory="../frontend" />
+    <Exec Command="vp install" WorkingDirectory="../frontend" />
   </Target>
 
   <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths"
           Inputs="@(FrontendSourceFiles)"
           Outputs="../frontend/dist/.build-stamp">
-    <Exec Command="npx -y vite-plus@0.1.13 run build" WorkingDirectory="../frontend" />
+    <Exec Command="vp run build" WorkingDirectory="../frontend" />
     <Touch Files="../frontend/dist/.build-stamp" AlwaysCreate="true" />
   </Target>
 
