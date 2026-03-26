@@ -23,7 +23,12 @@ server.UseConfiguration(config =>
         var secretsPath = Environment.GetEnvironmentVariable("IVY_CLERK_SECRETS_PATH");
         if (!string.IsNullOrEmpty(secretsPath))
         {
-            config.AddJsonFile(secretsPath, optional: true);
+            if (!File.Exists(secretsPath))
+            {
+                throw new FileNotFoundException(
+                    $"Clerk secrets file not found at path specified by IVY_CLERK_SECRETS_PATH: '{secretsPath}'");
+            }
+            config.AddJsonFile(secretsPath, optional: false);
         }
     }
 });
