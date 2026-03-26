@@ -2,13 +2,13 @@ using Ivy;
 
 namespace Ivy.Tendril.Apps.Tasks.Dialogs;
 
-public class TaskPlanDialog : ViewBase
+public class ViewTaskPlanDialog : ViewBase
 {
     private readonly bool _isOpen;
     private readonly TaskItem _task;
     private readonly Action _onClose;
 
-    public TaskPlanDialog(
+    public ViewTaskPlanDialog(
         bool isOpen,
         TaskItem task,
         Action onClose)

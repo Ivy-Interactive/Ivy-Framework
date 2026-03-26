@@ -108,11 +108,11 @@ public class TasksApp : ViewBase
 
                 if (dialogMode.Value == "view-output" && !string.IsNullOrEmpty(task.ScriptPath))
                 {
-                    elements.Add(new TaskOutputDialog(true, task, taskService, CloseDialog));
+                    elements.Add(new ViewTaskOutputDialog(true, task, taskService, CloseDialog));
                 }
                 else
                 {
-                    elements.Add(new TaskPlanDialog(true, task, CloseDialog));
+                    elements.Add(new ViewTaskPlanDialog(true, task, CloseDialog));
                 }
             }
         }

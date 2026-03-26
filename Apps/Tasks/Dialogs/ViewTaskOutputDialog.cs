@@ -3,14 +3,14 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Tasks.Dialogs;
 
-public class TaskOutputDialog : ViewBase
+public class ViewTaskOutputDialog : ViewBase
 {
     private readonly bool _isOpen;
     private readonly TaskItem _task;
     private readonly TaskService _taskService;
     private readonly Action _onClose;
 
-    public TaskOutputDialog(
+    public ViewTaskOutputDialog(
         bool isOpen,
         TaskItem task,
         TaskService taskService,
@@ -27,7 +27,7 @@ public class TaskOutputDialog : ViewBase
         if (!_isOpen) return null;
 
         var content = Layout.Vertical().Gap(2)
-            | new TaskDetailView(_task, _taskService)
+            | new TaskDetailDialogView(_task, _taskService)
             | Layout.Horizontal().Gap(2).Right()
                 | new Button("Close").Outline().OnClick(_onClose);
 

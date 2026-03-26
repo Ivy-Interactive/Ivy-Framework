@@ -4,14 +4,14 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Icebox.Dialogs;
 
-public class DeleteIceboxPlanDialog : ViewBase
+public class DeletePlanDialog : ViewBase
 {
     private readonly IState<bool> _dialogOpen;
     private readonly PlanFile _selectedPlan;
     private readonly PlanReaderService _planService;
     private readonly Action _refreshPlans;
 
-    public DeleteIceboxPlanDialog(
+    public DeletePlanDialog(
         IState<bool> dialogOpen,
         PlanFile selectedPlan,
         PlanReaderService planService,

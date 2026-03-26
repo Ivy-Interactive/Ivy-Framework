@@ -160,7 +160,7 @@ public class ContentView : ViewBase
         var elements = new List<object>
         {
             mainLayout,
-            new DeleteIceboxPlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans)
+            new Icebox.Dialogs.DeletePlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans)
         };
 
         return new Fragment(elements.ToArray());
