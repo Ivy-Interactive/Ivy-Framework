@@ -66,9 +66,11 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
       <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
         {validChildren.map((childAction) => {
           const childId = getActionId(childAction);
+          const isDestructive = childAction.color === "Destructive";
           return (
             <DropdownMenuItem
               key={childId}
+              className={isDestructive ? "text-destructive focus:text-destructive" : undefined}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick(childAction);
@@ -78,7 +80,9 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
                 <Icon
                   name={childAction.icon}
                   size={16}
-                  className="mr-2 text-(--color-foreground)"
+                  className={
+                    isDestructive ? "mr-2 text-destructive" : "mr-2 text-(--color-foreground)"
+                  }
                 />
               )}
               {childAction.label || childId}

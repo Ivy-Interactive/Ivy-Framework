@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { DataEditorRef, GridMouseEventArgs } from "@glideapps/glide-data-grid";
+import { GridMouseCellEventArgs, GridMouseEventArgs } from "@glideapps/glide-data-grid";
 import { useEventHandler } from "@/components/event-handler";
 import { MenuItem } from "@/types/widgets";
 import * as arrow from "apache-arrow";
@@ -9,7 +9,6 @@ interface UseRowHoverProps {
   visibleRows: number;
   enableRowHover: boolean | undefined;
   rowActions?: MenuItem[];
-  gridRef: React.RefObject<DataEditorRef | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   arrowTableRef: React.RefObject<arrow.Table | null>;
 }
@@ -22,12 +21,12 @@ export const useRowHover = ({
   visibleRows,
   enableRowHover,
   rowActions,
-  gridRef,
   containerRef,
   arrowTableRef,
 }: UseRowHoverProps) => {
   const [hoverRow, setHoverRow] = useState<number | undefined>(undefined);
   const [actionButtonsTop, setActionButtonsTop] = useState<number>(0);
+  const [actionButtonsHeight, setActionButtonsHeight] = useState<number>(0);
   const eventHandler = useEventHandler();
 
   // Extract _hiddenKey value directly from Arrow table
@@ -71,7 +70,7 @@ export const useRowHover = ({
   const onItemHovered = useCallback(
     (args: GridMouseEventArgs) => {
       if (!(enableRowHover ?? false)) return;
-      const [col, row] = args.location;
+      const [, row] = args.location;
       // Don't allow hover on empty filler rows
       if (args.kind === "cell" && row >= visibleRows) {
         setHoverRow(undefined);
@@ -80,28 +79,29 @@ export const useRowHover = ({
       const newHoverRow = args.kind !== "cell" ? undefined : row;
       setHoverRow(newHoverRow);
 
-      // Calculate action buttons position if row actions are configured
-      if (
-        rowActions &&
-        rowActions.length > 0 &&
-        newHoverRow !== undefined &&
-        gridRef.current &&
-        containerRef.current
-      ) {
-        // Use getBounds to get the actual cell position from the grid
-        const bounds = gridRef.current.getBounds(col, newHoverRow);
-        const containerRect = containerRef.current.getBoundingClientRect();
+      if (rowActions?.length && newHoverRow !== undefined && containerRef.current) {
+        const { bounds } = args as GridMouseCellEventArgs;
+        const container = containerRef.current;
+        const containerRect = container.getBoundingClientRect();
 
-        if (bounds) {
-          // Position button in the center of the row using the actual bounds
-          // Subtract container offset to get position relative to container
-          const buttonHeight = 24;
-          const buttonTop = bounds.y - containerRect.top + bounds.height / 2 - buttonHeight / 2 - 5;
-          setActionButtonsTop(buttonTop);
-        }
+        // Get precision border width (clientTop is always an integer, which is inaccurate at zoom)
+        const style = window.getComputedStyle(container);
+        const borderTop = parseFloat(style.borderTopWidth) || 0;
+
+        // Convert grid viewport coords -> overlay container padding-box coords.
+        const overlayTop = bounds.y - containerRect.top - borderTop;
+        const overlayHeight = bounds.height;
+
+        // Pixel-perfect snapping using devicePixelRatio.
+        // This ensures the overlay aligns perfectly with physical pixels even at non-standard zoom levels.
+        const dpr = window.devicePixelRatio;
+        const snap = (val: number) => Math.round(val * dpr) / dpr;
+
+        setActionButtonsTop(snap(overlayTop));
+        setActionButtonsHeight(snap(overlayHeight));
       }
     },
-    [enableRowHover, rowActions, visibleRows, gridRef, containerRef],
+    [enableRowHover, rowActions, visibleRows, containerRef],
   );
 
   // Handle row action button click
@@ -126,6 +126,7 @@ export const useRowHover = ({
   return {
     hoverRow,
     actionButtonsTop,
+    actionButtonsHeight,
     onItemHovered,
     handleRowActionClick,
   };

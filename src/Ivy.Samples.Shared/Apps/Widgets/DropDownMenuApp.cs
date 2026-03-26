@@ -21,6 +21,12 @@ public class DropDownMenuApp : SampleBase
                    )
                    .Bottom()
                | MenuItem.Separator()
+               | MenuItem.Default("Primary Item").Primary()
+               | MenuItem.Default("Secondary Item").Secondary()
+               | MenuItem.Default("Success Item").Success()
+               | MenuItem.Default("Warning Item").Warning()
+               | MenuItem.Default("Info Item").Info()
+               | MenuItem.Separator()
                | MenuItem.Default("Ivy Github").Icon(Icons.Github)
                | MenuItem.Default("Theme")
                    .Icon(Icons.SunMoon)
@@ -29,6 +35,7 @@ public class DropDownMenuApp : SampleBase
                        MenuItem.Checkbox("Light").Icon(Icons.Sun),
                        MenuItem.Checkbox("System").Icon(Icons.SunMoon)
                    )
+               | MenuItem.Default("Delete").Icon(Icons.Trash).Destructive()
                | MenuItem.Default("Logout").Icon(Icons.LogOut);
     }
 }

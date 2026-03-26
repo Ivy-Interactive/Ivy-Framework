@@ -117,7 +117,7 @@ vp lint --fix .
 ### Configuration Files
 
 - `vite.config.ts` - Contains Vite+ syntax formatting and linting preferences
-- `package.json` - Contains lint-staged configuration and execution scripts
+- `package.json` - Contains execution scripts
 
 ## Testing
 
