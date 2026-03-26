@@ -1,5 +1,6 @@
 import { GridColumn, GridColumnIcon } from "@glideapps/glide-data-grid";
 import type { DataColumn } from "../types/types";
+import { estimateHeaderWidth } from "../dataTableContext/utils/parseSize";
 
 /**
  * Maps column icon names or types to appropriate icons
@@ -121,9 +122,9 @@ export function convertToGridColumns(
     // Ensure width is always a number
     let numericBaseWidth = typeof baseWidth === "string" ? parseFloat(baseWidth) : baseWidth;
 
-    // Fix NaN width - default to 150 if parsing fails
+    // Fix NaN width - use header-based width if parsing fails
     if (isNaN(numericBaseWidth) || !numericBaseWidth) {
-      numericBaseWidth = 150;
+      numericBaseWidth = estimateHeaderWidth(col.header || col.name);
     }
 
     // Make the last column fill the remaining space using grow (avoids gap from

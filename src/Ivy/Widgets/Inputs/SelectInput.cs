@@ -53,6 +53,8 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public bool Searchable { get; set; }
 
+    [Prop] public bool ShowActions { get; set; }
+
     [Prop] public SearchMode SearchMode { get; set; } = SearchMode.CaseInsensitive;
 
     [Prop] public string? EmptyMessage { get; set; }
@@ -180,6 +182,8 @@ public static class SelectInputExtensions
     public static SelectInputBase MinSelections(this SelectInputBase widget, int min) => widget with { MinSelections = min };
 
     public static SelectInputBase Searchable(this SelectInputBase widget, bool searchable = true) => widget with { Searchable = searchable };
+
+    public static SelectInputBase ShowActions(this SelectInputBase widget, bool showActions = true) => widget with { ShowActions = showActions };
 
     public static SelectInputBase SearchMode(this SelectInputBase widget, SearchMode mode) => widget with { SearchMode = mode };
 

@@ -154,17 +154,21 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   );
 
   // When explicit series are configured, only plot those data keys
+  // Use case-insensitive matching because backend serializes data keys as camelCase
+  // but Bar.dataKey preserves the original PascalCase measure name
   const configuredBarKeys = (bars || []).map((b) => b.dataKey).filter(Boolean);
   const barKeysToPlot =
     configuredBarKeys.length > 0
-      ? valueKeys.filter((k) => configuredBarKeys.includes(k))
+      ? valueKeys.filter((k) =>
+          configuredBarKeys.some((ck) => ck.toLowerCase() === k.toLowerCase()),
+        )
       : valueKeys;
 
   // Memoize series configuration
   const series = useMemo(
     () =>
       barKeysToPlot.map((key) => {
-        const rawBarConfig = bars?.find((b) => b.dataKey === key);
+        const rawBarConfig = bars?.find((b) => b.dataKey?.toLowerCase() === key.toLowerCase());
         // Apply C# defaults for bar config
         const barConfig = rawBarConfig ? applyDefaults(rawBarConfig, BAR_DEFAULTS) : BAR_DEFAULTS;
 
@@ -175,8 +179,9 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
           showBackground: false,
           data: data.map((d) => d[key]),
           stack: barConfig.stackId !== undefined ? String(barConfig.stackId) : undefined,
-          barGap: barGap ? `${barGap}%` : "4%",
-          barCategoryGap: barCategoryGap ? `${barCategoryGap}%` : "10%",
+          barGap: typeof barGap === "number" ? `${barGap}%` : barGap || "4%",
+          barCategoryGap:
+            typeof barCategoryGap === "number" ? `${barCategoryGap}%` : barCategoryGap || "10%",
           barMaxWidth: maxBarSize,
           stackOrder: reverseStackOrder ? "seriesDesc" : "seriesAsc",
           itemStyle: {

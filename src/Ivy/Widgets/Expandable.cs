@@ -20,6 +20,8 @@ public record Expandable : WidgetBase<Expandable>
     [Prop] public bool Open { get; set; } = false;
 
     [Prop] public Icons? Icon { get; set; }
+
+    [Prop] public bool Ghost { get; set; } = false;
 }
 
 public static class ExpandableExtensions
@@ -39,6 +41,12 @@ public static class ExpandableExtensions
     public static Expandable Icon(this Expandable widget, Icons? icon)
     {
         widget.Icon = icon;
+        return widget;
+    }
+
+    public static Expandable Ghost(this Expandable widget, bool ghost = true)
+    {
+        widget.Ghost = ghost;
         return widget;
     }
 }

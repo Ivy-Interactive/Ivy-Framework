@@ -32,6 +32,7 @@ export interface MenuItem {
   shortcut?: string;
   expanded: boolean;
   path?: string;
+  onSelect?: (item: MenuItem) => void;
 }
 
 export interface InternalLink {

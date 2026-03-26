@@ -226,6 +226,29 @@ public class HtmlAndLinksView : ViewBase
 }
 ```
 
+### Local Images
+
+Display images from the local filesystem by enabling local file support on both the server and the widget. Use forward slashes (`C:/...`) or `file:///` URLs — backslash paths (`C:\...`) don't work because the markdown parser interprets backslashes as escape characters.
+
+```csharp demo-tabs
+public class LocalImagesView : ViewBase
+{
+    public override object? Build()
+    {
+        var markdownContent =
+            """
+            ![Photo](C:/Users/me/Photos/landscape.png)
+            ![Screenshot](file:///C:/Screenshots/capture.png)
+            """;
+
+        return new Markdown(markdownContent)
+            .DangerouslyAllowLocalFiles();
+    }
+}
+```
+
+> **Note:** The server must also opt in via `server.DangerouslyAllowLocalFiles()` in `Program.cs`. Images are served through a proxy endpoint (`/ivy/local-file`) — the browser never accesses `file://` URLs directly.
+
 ### Complete Example
 
 This comprehensive example showcases multiple Markdown features working together in a single widget. It demonstrates how different elements can be combined to create rich, interactive content with proper link handling.

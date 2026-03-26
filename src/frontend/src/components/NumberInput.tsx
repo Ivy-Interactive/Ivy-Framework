@@ -271,6 +271,13 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       [formatValue, value, onBlur],
     );
 
+    // Synchronize displayValue with external value changes when not focused
+    useEffect(() => {
+      if (!isFocused) {
+        setDisplayValue(formatValue(value));
+      }
+    }, [value, isFocused, formatValue]);
+
     // Update display value when not focused and value changes
     const displayValueToUse = isFocused ? displayValue : formatValue(value);
 

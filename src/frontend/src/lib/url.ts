@@ -270,6 +270,23 @@ export function validateLinkUrl(url: string | null | undefined): string {
 }
 
 /**
+ * Checks if a string is a Windows absolute path
+ */
+export function isWindowsAbsolutePath(path: string): boolean {
+  return /^[a-zA-Z]:[\\/]/.test(path);
+}
+
+/**
+ * Converts a Windows absolute path to a file:// URL
+ */
+export function windowsPathToFileUrl(path: string): string {
+  // Normalize backslashes to forward slashes
+  const normalized = path.replace(/\\/g, "/");
+  // Ensure proper file:// URL format
+  return `file:///${normalized}`;
+}
+
+/**
  * Options for URL validation
  */
 export interface ValidateMediaUrlOptions {
@@ -286,6 +303,12 @@ export interface ValidateMediaUrlOptions {
    * Whether to allow external URLs (default: true for media URLs)
    */
   allowExternal?: boolean;
+  /**
+   * DANGEROUS: Allow file:// protocol URLs for local file access.
+   * Only enable this in trusted contexts (e.g., local development/testing).
+   * Default: false
+   */
+  dangerouslyAllowLocalFiles?: boolean;
 }
 
 /**
@@ -316,6 +339,7 @@ export function validateMediaUrl(
     mediaType,
     allowedProtocols = ["http:", "https:", "data:", "blob:", "app:"],
     allowExternal = true,
+    dangerouslyAllowLocalFiles = false,
   } = options;
 
   // Allow data: URLs (for base64 encoded media)
@@ -383,6 +407,31 @@ export function validateMediaUrl(
       return null;
     }
     return url;
+  }
+
+  // Allow file:// URLs only if explicitly enabled (security-sensitive)
+  if (url.startsWith("file://") || isWindowsAbsolutePath(url)) {
+    // Only allow if dangerouslyAllowLocalFiles is explicitly set to true
+    if (!dangerouslyAllowLocalFiles) {
+      return null;
+    }
+
+    // Convert Windows paths to file:// URLs
+    let fileUrl = url;
+    if (isWindowsAbsolutePath(url)) {
+      fileUrl = windowsPathToFileUrl(url);
+    }
+
+    // Basic validation: ensure it's a proper file URL
+    try {
+      const urlObj = new URL(fileUrl);
+      if (urlObj.protocol !== "file:") {
+        return null;
+      }
+      return fileUrl;
+    } catch {
+      return null;
+    }
   }
 
   // Allow app:// URLs (Ivy internal navigation)

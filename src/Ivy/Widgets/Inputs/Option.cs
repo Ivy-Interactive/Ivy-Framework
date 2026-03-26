@@ -70,7 +70,13 @@ public static class OptionExtensions
 {
     public static Option<TValue>[] ToOptions<TValue>(this IEnumerable<TValue> options)
     {
-        return options.Select(e => new Option<TValue>(e)).ToArray();
+        return options.Select(e =>
+        {
+            var label = e is Enum enumValue
+                ? enumValue.GetDescription()
+                : e?.ToString() ?? "?";
+            return new Option<TValue>(label, e);
+        }).ToArray();
     }
 
     public static IAnyOption[] ToOptions(this Type enumType)

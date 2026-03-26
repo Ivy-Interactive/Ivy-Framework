@@ -51,6 +51,7 @@ public record ServerArgs
     public ServerMetadata Metadata { get; set; } = new();
     public Assembly? AssetAssembly { get; set; } = null;
     public bool EnableDevTools { get; set; } = false;
+    public bool DangerouslyAllowLocalFiles { get; set; } = false;
 #if DEBUG
     public bool FindAvailablePort { get; set; } = true;
 #else
@@ -467,6 +468,12 @@ public class Server
         _manifestOptions = new ManifestOptions();
         configure?.Invoke(_manifestOptions);
         Services.AddSingleton(_manifestOptions);
+        return this;
+    }
+
+    public Server DangerouslyAllowLocalFiles()
+    {
+        _args = _args with { DangerouslyAllowLocalFiles = true };
         return this;
     }
 
@@ -1046,6 +1053,7 @@ public static class WebApplicationExtensions
                 var pipeline = new HtmlPipeline()
                     .Use<LicenseFilter>()
                     .Use<DevToolsFilter>()
+                    .Use<LocalFilesFilter>()
                     .Use<MetaDescriptionFilter>()
                     .Use<MetaGitHubUrlFilter>()
                     .Use<TitleFilter>()

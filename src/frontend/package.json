@@ -14,7 +14,8 @@
     "test": "vp test",
     "e2e": "playwright test",
     "e2e:docs": "playwright test e2e/docs",
-    "e2e:samples": "playwright test e2e/samples"
+    "e2e:samples": "playwright test e2e/samples",
+    "prepare": "cd ../.. && node src/frontend/node_modules/husky/bin.js src/frontend/.husky"
   },
   "dependencies": {
     "@codemirror/commands": "6.10.3",
@@ -115,6 +116,8 @@
     "@vitejs/plugin-react": "6.0.1",
     "canvas-confetti": "1.9.4",
     "happy-dom": "20.0.10",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "tailwindcss": "4.1.16",
     "typescript": "5.9.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.1.13",
