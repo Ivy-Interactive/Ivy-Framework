@@ -283,6 +283,30 @@ public class SelectionLimitsDemo : ViewBase
 }
 ```
 
+### Selection Actions
+
+For multi-select variants, you can enable a "Select All" and "Clear All" footer action using the `.ShowActions()` modifier. This provides users with a quick way to manage bulk selections:
+
+```csharp demo-below
+public class SelectActionsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selected = UseState<string[]>([]);
+        var options = new[] { "C#", "Java", "Python", "JavaScript", "Go", "Rust", "F#", "Kotlin", "TypeScript" }.ToOptions();
+        
+        return selected.ToSelectInput(options)
+            .Variant(SelectInputVariant.Select)
+            .ShowActions()
+            .Searchable(true)
+            .Placeholder("Select languages...")
+            .WithField()
+            .Label("Languages")
+            .Width(Size.Full());
+    }
+}
+```
+
 ### Option Tooltips
 
 Add hover tooltips to individual options using the `tooltip` parameter on `Option<T>`. Tooltips provide contextual help for technical terms, abbreviations, or disabled options:
