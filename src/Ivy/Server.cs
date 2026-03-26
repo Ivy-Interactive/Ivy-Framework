@@ -206,12 +206,14 @@ public class Server
     public Server UseConfiguration(IConfiguration configuration)
     {
         Configuration = configuration;
+        Services.AddSingleton(Configuration);
         return this;
     }
 
     public Server UseConfiguration(Action<IConfigurationBuilder> configure)
     {
         Configuration = ServerUtils.GetConfiguration(configure);
+        Services.AddSingleton(Configuration);
         return this;
     }
 
