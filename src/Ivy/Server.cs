@@ -116,7 +116,8 @@ public class Server
         };
 
         Services.AddSingleton(_args);
-        Services.AddSingleton(Configuration);
+        // capture the latest Configuration instance at resolution time in case it gets replaced by UseConfiguration()
+        Services.AddSingleton(_ => Configuration);
 
         AddDefaultApps();
     }
@@ -209,14 +210,12 @@ public class Server
     public Server UseConfiguration(IConfiguration configuration)
     {
         Configuration = configuration;
-        Services.AddSingleton(Configuration);
         return this;
     }
 
     public Server UseConfiguration(Action<IConfigurationBuilder> configure)
     {
         Configuration = ServerUtils.GetConfiguration(configure);
-        Services.AddSingleton(Configuration);
         return this;
     }
 
