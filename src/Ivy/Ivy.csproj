@@ -104,13 +104,13 @@
   <Target Name="NpmInstall" BeforeTargets="BuildFrontend"
           Inputs="../frontend/package.json;../frontend/pnpm-lock.yaml"
           Outputs="../frontend/node_modules/.modules.yaml">
-    <Exec Command="vp install" WorkingDirectory="../frontend" />
+    <Exec Command="npx -y --package vite-plus@0.1.13 vp install" WorkingDirectory="../frontend" />
   </Target>
 
   <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths"
           Inputs="@(FrontendSourceFiles)"
           Outputs="../frontend/dist/.build-stamp">
-    <Exec Command="vp run build" WorkingDirectory="../frontend" />
+    <Exec Command="npx -y --package vite-plus@0.1.13 vp run build" WorkingDirectory="../frontend" />
     <Touch Files="../frontend/dist/.build-stamp" AlwaysCreate="true" />
   </Target>
 
