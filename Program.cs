@@ -1,6 +1,5 @@
 using Ivy;
 using Microsoft.Extensions.DependencyInjection;
-using Ivy.Tendril;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 

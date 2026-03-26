@@ -1,7 +1,7 @@
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Ivy.Tendril;
+namespace Ivy.Tendril.Services;
 
 public record RepoConfig
 {
