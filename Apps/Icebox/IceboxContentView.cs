@@ -124,8 +124,8 @@ public class IceboxContentView : ViewBase
 
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
             | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => deleteDialogOpen.Set(true))
-            | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious())
-            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext())
+            | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
+            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Button("Thaw").Icon(Icons.Flame).Primary().OnClick(() =>
             {
                 _planService.ThawPlan(_selectedPlan.FileName);
