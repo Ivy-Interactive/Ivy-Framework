@@ -52,7 +52,7 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
     [Prop] public int? MinSelections { get; set; }
 
     [Prop] public bool Searchable { get; set; }
-    
+
     [Prop] public bool ShowActions { get; set; }
 
     [Prop] public SearchMode SearchMode { get; set; } = SearchMode.CaseInsensitive;
