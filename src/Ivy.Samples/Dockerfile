@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 5010
@@ -8,6 +8,11 @@ ARG BUILD_CONFIGURATION=Release
 ARG IVY_PACKAGE_VERSION
 RUN test -n "$IVY_PACKAGE_VERSION" || (echo "IVY_PACKAGE_VERSION build-arg is required" && exit 1)
 WORKDIR /src
+RUN apt-get update && apt-get install -y curl gnupg && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g pnpm@10.33.0 vite-plus@0.1.14 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY ["src/Ivy.Samples/Ivy.Samples.csproj", "src/Ivy.Samples/"]
 COPY ["src/Ivy.Samples.Shared/Ivy.Samples.Shared.csproj", "src/Ivy.Samples.Shared/"]
 RUN dotnet restore "src/Ivy.Samples.Shared/Ivy.Samples.Shared.csproj" -p:IvyPackageVersion=$IVY_PACKAGE_VERSION
