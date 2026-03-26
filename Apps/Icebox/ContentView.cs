@@ -9,7 +9,7 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Icebox;
 
-public class IceboxContentView : ViewBase
+public class ContentView : ViewBase
 {
     private readonly PlanFile? _selectedPlan;
     private readonly List<PlanFile> _allPlans;
@@ -18,7 +18,7 @@ public class IceboxContentView : ViewBase
     private readonly TaskService _taskService;
     private readonly Action _refreshPlans;
 
-    public IceboxContentView(
+    public ContentView(
         PlanFile? selectedPlan,
         List<PlanFile> allPlans,
         IState<PlanFile?> selectedPlanState,

@@ -3,7 +3,7 @@ using Ivy.Tendril.Apps.Plans;
 
 namespace Ivy.Tendril.Apps.Icebox;
 
-public class IceboxSidebarView : ViewBase
+public class SidebarView : ViewBase
 {
     private readonly List<PlanFile> _plans;
     private readonly IState<PlanFile?> _selectedPlanState;
@@ -11,7 +11,7 @@ public class IceboxSidebarView : ViewBase
     private readonly IState<string?> _levelFilter;
     private readonly IState<string?> _textFilter;
 
-    public IceboxSidebarView(
+    public SidebarView(
         List<PlanFile> plans,
         IState<PlanFile?> selectedPlanState,
         IState<string?> queueFilter,
@@ -48,7 +48,8 @@ public class IceboxSidebarView : ViewBase
                 content: Layout.Vertical()
                     | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().WithField().Label("Queue")
                     | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().WithField().Label("Level")
-            ).Open(false);
+            ).Open(false).Ghost()
+            ;
     }
 
     public object BuildContent()
