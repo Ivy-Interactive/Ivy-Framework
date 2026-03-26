@@ -34,6 +34,11 @@
     <Folder Include="Connections" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="Ivy.Tendril.Test\**" />
+    <EmbeddedResource Remove="Ivy.Tendril.Test\**" />
+    <None Remove="Ivy.Tendril.Test\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="config.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

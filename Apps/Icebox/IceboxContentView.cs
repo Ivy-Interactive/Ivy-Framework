@@ -36,7 +36,7 @@ public class IceboxContentView : ViewBase
 
     public override object? Build()
     {
-        var downloadUrl = PlanDownloadHelper.UsePlanDownload(this, _planService, _selectedPlan);
+        var downloadUrl = PlanDownloadHelper.UsePlanDownload(Context, _planService, _selectedPlan);
         var client = UseService<IClientProvider>();
         var deleteDialogOpen = UseState(false);
 
