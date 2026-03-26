@@ -60,6 +60,11 @@ public record ServerArgs
     public string? Host { get; set; } = null;
 
     /// <summary>
+    /// Base path for the application when running behind a reverse proxy (e.g., "/myapp").
+    /// </summary>
+    public string? BasePath { get; set; } = null;
+
+    /// <summary>
     /// True when the process is running a CLI-only command (--describe, --describe-connection, --test-connection)
     /// that needs DI but should not bind a real port.
     /// </summary>
@@ -106,6 +111,11 @@ public class Server
         if (_args.Host == null && Environment.GetEnvironmentVariable("HOST") is { } host)
         {
             _args = _args with { Host = host };
+        }
+
+        if (_args.BasePath == null && Environment.GetEnvironmentVariable("BASE_PATH") is { } basePath)
+        {
+            _args = _args with { BasePath = basePath };
         }
 
         _args = _args with
@@ -763,6 +773,11 @@ public class Server
         if (_useHttpRedirection)
         {
             app.UseHttpsRedirection();
+        }
+
+        if (!string.IsNullOrEmpty(_args.BasePath))
+        {
+            app.UsePathBase(_args.BasePath);
         }
 
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
