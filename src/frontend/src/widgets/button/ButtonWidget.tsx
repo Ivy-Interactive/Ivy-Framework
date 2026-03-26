@@ -293,10 +293,10 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
 
     // Determine container height based on button size
     const getContainerHeight = () => {
-      if (buttonSize === "icon") return { container: "h-10", button: "h-9" };
-      if (buttonSize === "sm") return { container: "h-9", button: "h-[35px]" };
+      if (buttonSize === "icon") return { container: "h-9", button: "h-8" };
+      if (buttonSize === "sm") return { container: "h-7", button: "h-6" };
       if (buttonSize === "lg") return { container: "h-11", button: "h-10" };
-      return { container: "h-10", button: "h-9" };
+      return { container: "h-9", button: "h-8" };
     };
 
     return (

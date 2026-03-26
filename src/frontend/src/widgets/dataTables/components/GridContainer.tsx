@@ -50,6 +50,7 @@ interface GridContainerProps {
   getRowThemeOverride?: ((row: number) => Partial<Theme> | undefined) | undefined;
   rowActions?: MenuItem[];
   actionButtonsTop: number;
+  actionButtonsHeight: number;
   hoverRow: number | undefined;
   onRowActionClick: (action: MenuItem) => void;
   footer?: React.ReactNode;
@@ -95,6 +96,7 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   getRowThemeOverride,
   rowActions,
   actionButtonsTop,
+  actionButtonsHeight,
   hoverRow,
   onRowActionClick,
   footer,
@@ -154,6 +156,7 @@ export const GridContainer: React.FC<GridContainerProps> = ({
         <RowActionButtons
           actions={rowActions}
           top={actionButtonsTop}
+          height={actionButtonsHeight}
           visible={hoverRow !== undefined}
           onActionClick={onRowActionClick}
         />

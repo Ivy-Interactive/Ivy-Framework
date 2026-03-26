@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
+import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
@@ -16,19 +17,36 @@ const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
+const menuItemVariants = cva(
+  "relative flex cursor-pointer select-none items-center gap-2 rounded-selector px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        default: "",
+        destructive: "text-destructive focus:bg-destructive focus:text-destructive-foreground",
+        primary: "text-primary focus:bg-primary focus:text-primary-foreground",
+        secondary: "text-secondary focus:bg-secondary focus:text-secondary-foreground",
+        success: "text-success focus:bg-success focus:text-success-foreground",
+        warning: "text-warning focus:bg-warning focus:text-warning-foreground",
+        info: "text-info focus:bg-info focus:text-info-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
+
 const DropdownMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
-    inset?: boolean;
-  }
->(({ className, inset, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> &
+    VariantProps<typeof menuItemVariants> & {
+      inset?: boolean;
+    }
+>(({ className, inset, children, variant, ...props }, ref) => (
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
-    className={cn(
-      "flex cursor-pointer gap-2 select-none items-center rounded-selector px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-      inset && "pl-8",
-      className,
-    )}
+    className={cn(menuItemVariants({ variant }), inset && "pl-8", className)}
     {...props}
   >
     {children}
@@ -72,17 +90,14 @@ DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
-    inset?: boolean;
-  }
->(({ className, inset, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> &
+    VariantProps<typeof menuItemVariants> & {
+      inset?: boolean;
+    }
+>(({ className, inset, variant, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
     ref={ref}
-    className={cn(
-      "relative flex cursor-pointer select-none items-center gap-2 rounded-selector px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
-      inset && "pl-8",
-      className,
-    )}
+    className={cn(menuItemVariants({ variant }), inset && "pl-8", className)}
     {...props}
   />
 ));

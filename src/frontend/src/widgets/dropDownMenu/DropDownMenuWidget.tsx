@@ -59,13 +59,13 @@ const DropDownMenuItemGroup = ({ items, onItemClick }: DropDownMenuItemGroupProp
       return <DropdownMenuSeparator key={sepKey} />;
     }
 
-    // Handle checkbox variant
     if (item.variant === "Checkbox") {
       return (
         <DropdownMenuItem
           key={item.label}
           onClick={() => onItemClick(item)}
           disabled={item.disabled}
+          variant={(item.color?.toLowerCase() as any) || "default"}
           className={item.checked ? "bg-accent" : ""}
         >
           {item.icon && <Icon name={item.icon} size={14} />}
@@ -76,13 +76,13 @@ const DropDownMenuItemGroup = ({ items, onItemClick }: DropDownMenuItemGroupProp
       );
     }
 
-    // Handle radio variant
     if (item.variant === "Radio") {
       return (
         <DropdownMenuItem
           key={item.label}
           onClick={() => onItemClick(item)}
           disabled={item.disabled}
+          variant={(item.color?.toLowerCase() as any) || "default"}
           className={item.checked ? "bg-accent" : ""}
         >
           {item.icon && <Icon name={item.icon} size={14} />}
@@ -97,7 +97,10 @@ const DropDownMenuItemGroup = ({ items, onItemClick }: DropDownMenuItemGroupProp
     if (item.children && item.children.length > 0) {
       return (
         <DropdownMenuSub key={item.label}>
-          <DropdownMenuSubTrigger disabled={item.disabled}>
+          <DropdownMenuSubTrigger
+            disabled={item.disabled}
+            variant={(item.color?.toLowerCase() as any) || "default"}
+          >
             {item.icon && <Icon name={item.icon} size={14} />}
             {item.label}
             {item.shortcut && <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>}
@@ -113,7 +116,12 @@ const DropDownMenuItemGroup = ({ items, onItemClick }: DropDownMenuItemGroupProp
 
     // Default menu item
     return (
-      <DropdownMenuItem key={item.label} onClick={() => onItemClick(item)} disabled={item.disabled}>
+      <DropdownMenuItem
+        key={item.label}
+        onClick={() => onItemClick(item)}
+        disabled={item.disabled}
+        variant={(item.color?.toLowerCase() as any) || "default"}
+      >
         {item.icon && <Icon name={item.icon} size={14} />}
         {item.label}
         {item.shortcut && <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>}
