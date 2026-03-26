@@ -7,7 +7,7 @@ namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
 public record Plan(int Id, string Title, string Queue, string Level);
 
-[App(id: "repro", icon: Icons.Bug, isVisible: false)]
+[App(id: "repro-ui-bug", title: "Reproduction UI Bug", icon: Icons.Bug, isVisible: false)]
 public class ReproUiBugApp : SampleBase
 {
     private List<Plan> _allPlans = [
