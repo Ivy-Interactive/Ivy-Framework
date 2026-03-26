@@ -1,6 +1,7 @@
 using System.Drawing;
 using Ivy;
 using Ivy.Core;
+using Ivy.Hooks;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 
@@ -33,6 +34,7 @@ public class ContentView : ViewBase
 
     public override object? Build()
     {
+        var copyToClipboard = UseClipboard();
         var updateDialogOpen = UseState(false);
         var splitDialogOpen = UseState(false);
         var deleteDialogOpen = UseState(false);
@@ -144,7 +146,15 @@ public class ContentView : ViewBase
             | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => deleteDialogOpen.Set(true))
             | new Button("Create Issue").Icon(Icons.Github).Outline().OnClick(() => createIssueDialogOpen.Set(true))
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
-            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n");
+            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
+            | new Spacer().Width(Size.Grow())
+            | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
+                {
+                    var planPath = Path.Combine(_planService.PlansDirectory, _selectedPlan.FileName);
+                    copyToClipboard(planPath);
+                })
+            );
 
         var mainContent = Layout.Vertical()
             | scrollableContent;

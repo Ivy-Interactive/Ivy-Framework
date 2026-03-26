@@ -1,6 +1,7 @@
 using System.Drawing;
 using Ivy;
 using Ivy.Core;
+using Ivy.Hooks;
 using Ivy.Tendril.Apps.Icebox.Dialogs;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Apps.Plans.Dialogs;
@@ -35,6 +36,7 @@ public class IceboxContentView : ViewBase
 
     public override object? Build()
     {
+        var copyToClipboard = UseClipboard();
         var deleteDialogOpen = UseState(false);
 
         var isEditing = UseState(false);
@@ -130,7 +132,15 @@ public class IceboxContentView : ViewBase
             {
                 _planService.ThawPlan(_selectedPlan.FileName);
                 _refreshPlans();
-            });
+            })
+            | new Spacer().Width(Size.Grow())
+            | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
+                {
+                    var planPath = Path.Combine(_planService.PlansDirectory, _selectedPlan.FileName);
+                    copyToClipboard(planPath);
+                })
+            );
 
         var mainContent = Layout.Vertical()
             | scrollableContent;
