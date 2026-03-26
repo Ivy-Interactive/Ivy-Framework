@@ -8,20 +8,20 @@ public class UpdatePlanDialog : ViewBase
     private readonly IState<bool> _dialogOpen;
     private readonly IState<string> _updateText;
     private readonly PlanFile _selectedPlan;
-    private readonly TaskService _taskService;
+    private readonly JobService _jobService;
     private readonly string _plansDirectory;
 
     public UpdatePlanDialog(
         IState<bool> dialogOpen,
         IState<string> updateText,
         PlanFile selectedPlan,
-        TaskService taskService,
+        JobService jobService,
         string plansDirectory)
     {
         _dialogOpen = dialogOpen;
         _updateText = updateText;
         _selectedPlan = selectedPlan;
-        _taskService = taskService;
+        _jobService = jobService;
         _plansDirectory = plansDirectory;
     }
 
@@ -42,7 +42,7 @@ public class UpdatePlanDialog : ViewBase
                 new Button("Submit Update").Primary().OnClick(() =>
                 {
                     var planPath = Path.Combine(_plansDirectory, _selectedPlan.FileName);
-                    _taskService.StartTask("UpdatePlan", planPath);
+                    _jobService.StartJob("UpdatePlan", planPath);
                     _dialogOpen.Set(false);
                 })
             )

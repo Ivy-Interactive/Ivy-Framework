@@ -8,20 +8,20 @@ public class SplitPlanDialog : ViewBase
     private readonly IState<bool> _dialogOpen;
     private readonly IState<string> _splitText;
     private readonly PlanFile _selectedPlan;
-    private readonly TaskService _taskService;
+    private readonly JobService _jobService;
     private readonly string _plansDirectory;
 
     public SplitPlanDialog(
         IState<bool> dialogOpen,
         IState<string> splitText,
         PlanFile selectedPlan,
-        TaskService taskService,
+        JobService jobService,
         string plansDirectory)
     {
         _dialogOpen = dialogOpen;
         _splitText = splitText;
         _selectedPlan = selectedPlan;
-        _taskService = taskService;
+        _jobService = jobService;
         _plansDirectory = plansDirectory;
     }
 
@@ -42,7 +42,7 @@ public class SplitPlanDialog : ViewBase
                 new Button("Split Plan").Primary().OnClick(() =>
                 {
                     var planPath = Path.Combine(_plansDirectory, _selectedPlan.FileName);
-                    _taskService.StartTask("SplitPlan", planPath);
+                    _jobService.StartJob("SplitPlan", planPath);
                     _dialogOpen.Set(false);
                 })
             )

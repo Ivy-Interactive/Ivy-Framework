@@ -2,25 +2,25 @@ using Ivy;
 using Ivy.Hooks.Pty;
 using Ivy.Tendril.Services;
 
-namespace Ivy.Tendril.Apps.Tasks;
+namespace Ivy.Tendril.Apps.Jobs;
 
-public class TaskDetailView : ViewBase
+public class JobDetailView : ViewBase
 {
-    private readonly TaskItem _task;
-    private readonly TaskService _taskService;
+    private readonly JobItem _job;
+    private readonly JobService _jobService;
 
-    public TaskDetailView(TaskItem task, TaskService taskService)
+    public JobDetailView(JobItem job, JobService jobService)
     {
-        _task = task;
-        _taskService = taskService;
+        _job = job;
+        _jobService = jobService;
     }
 
     public override object Build()
     {
         var completed = UseState(false);
 
-        var args = new List<string> { "-NoProfile", "-File", _task.ScriptPath };
-        args.AddRange(_task.Args);
+        var args = new List<string> { "-NoProfile", "-File", _job.ScriptPath };
+        args.AddRange(_job.Args);
 
         var workingDirectory = Path.GetFullPath(
             Path.Combine(System.AppContext.BaseDirectory, "..", "..", ".."));
@@ -34,7 +34,7 @@ public class TaskDetailView : ViewBase
         if (pty.Closed && !completed.Value)
         {
             completed.Set(true);
-            _taskService.CompleteTask(_task.Id, pty.ExitCode);
+            _jobService.CompleteJob(_job.Id, pty.ExitCode);
         }
 
         var terminal = new Ivy.Widgets.Xterm.Terminal() with { Stream = pty.Stream };

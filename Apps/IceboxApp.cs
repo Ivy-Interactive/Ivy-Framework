@@ -11,7 +11,7 @@ public class IceboxApp : ViewBase
     public override object? Build()
     {
         var planService = UseService<PlanReaderService>();
-        var taskService = UseService<TaskService>();
+        var jobService = UseService<JobService>();
         var selectedPlanState = UseState<PlanFile?>(null);
         var queueFilter = UseState<string?>(null);
         var levelFilter = UseState<string?>(null);
@@ -47,7 +47,7 @@ public class IceboxApp : ViewBase
         var sidebar = new Icebox.SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter);
 
         return new SidebarLayout(
-            mainContent: new Icebox.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, taskService, RefreshPlans),
+            mainContent: new Icebox.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans),
             sidebarContent: sidebar.BuildContent(),
             sidebarHeader: sidebar.BuildHeader()
         );

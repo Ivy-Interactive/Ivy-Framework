@@ -15,7 +15,7 @@ public class ContentView : ViewBase
     private readonly List<PlanFile> _allPlans;
     private readonly IState<PlanFile?> _selectedPlanState;
     private readonly PlanReaderService _planService;
-    private readonly TaskService _taskService;
+    private readonly JobService _jobService;
     private readonly Action _refreshPlans;
 
     public ContentView(
@@ -23,14 +23,14 @@ public class ContentView : ViewBase
         List<PlanFile> allPlans,
         IState<PlanFile?> selectedPlanState,
         PlanReaderService planService,
-        TaskService taskService,
+        JobService jobService,
         Action refreshPlans)
     {
         _selectedPlan = selectedPlan;
         _allPlans = allPlans;
         _selectedPlanState = selectedPlanState;
         _planService = planService;
-        _taskService = taskService;
+        _jobService = jobService;
         _refreshPlans = refreshPlans;
     }
 

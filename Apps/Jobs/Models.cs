@@ -1,8 +1,8 @@
 using Ivy;
 
-namespace Ivy.Tendril.Apps.Tasks;
+namespace Ivy.Tendril.Apps.Jobs;
 
-public record TaskItem
+public record JobItem
 {
     public string Id { get; init; } = "";
     public string Type { get; init; } = "";
@@ -25,7 +25,7 @@ public record TaskItem
     public int? PtyExitCode { get; set; }
 }
 
-public record TaskItemRow
+public record JobItemRow
 {
     public string Id { get; init; } = "";
     public string Status { get; init; } = "";

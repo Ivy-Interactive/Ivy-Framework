@@ -1,31 +1,31 @@
 using Ivy;
-using Ivy.Tendril.Apps.Tasks;
-using Ivy.Tendril.Apps.Tasks.Dialogs;
+using Ivy.Tendril.Apps.Jobs;
+using Ivy.Tendril.Apps.Jobs.Dialogs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Tasks", icon: Icons.Activity, group: new[] { "Tools" }, order: 20)]
-public class TasksApp : ViewBase
+[App(title: "Jobs", icon: Icons.Activity, group: new[] { "Tools" }, order: 20)]
+public class JobsApp : ViewBase
 {
     public override object? Build()
     {
-        var taskService = UseService<TaskService>();
+        var jobService = UseService<JobService>();
         var refreshToken = UseRefreshToken();
-        var selectedTaskId = UseState<string?>(null);
+        var selectedJobId = UseState<string?>(null);
         var dialogMode = UseState<string?>(null);
 
         UseInterval(() => refreshToken.Refresh(), TimeSpan.FromSeconds(5));
 
-        var tasks = taskService.GetTasks();
-        var rows = tasks.Select(t => new TaskItemRow
+        var jobs = jobService.GetJobs();
+        var rows = jobs.Select(j => new JobItemRow
         {
-            Id = t.Id,
-            Status = t.Status,
-            Plan = t.PlanFile,
-            Type = t.Type,
-            Queue = t.Queue,
-            Timer = FormatTimer(t)
+            Id = j.Id,
+            Status = j.Status,
+            Plan = j.PlanFile,
+            Type = j.Type,
+            Queue = j.Queue,
+            Timer = FormatTimer(j)
         }).ToList();
 
         var dataTable = rows.AsQueryable()
@@ -52,38 +52,38 @@ public class TasksApp : ViewBase
             .RowActions(
                 new MenuItem(Label: "View Output", Icon: Icons.Terminal, Tag: "view-output"),
                 new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan"),
-                new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-task"),
-                new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-task")
+                new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job"),
+                new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job")
             )
             .OnRowAction(e =>
             {
                 var tag = e.Value.Tag?.ToString();
                 var id = e.Value.Id?.ToString();
-                var task = tasks.FirstOrDefault(t => t.Id == id);
+                var job = jobs.FirstOrDefault(j => j.Id == id);
 
-                if (task != null)
+                if (job != null)
                 {
-                    if (tag == "stop-task")
+                    if (tag == "stop-job")
                     {
-                        // Only allow stopping running tasks
-                        if (task.Status == "Running")
+                        // Only allow stopping running jobs
+                        if (job.Status == "Running")
                         {
-                            taskService.StopTask(task.Id);
+                            jobService.StopJob(job.Id);
                             refreshToken.Refresh();
                         }
                     }
-                    else if (tag == "delete-task")
+                    else if (tag == "delete-job")
                     {
-                        // Only allow deleting non-running tasks
-                        if (task.Status != "Running")
+                        // Only allow deleting non-running jobs
+                        if (job.Status != "Running")
                         {
-                            taskService.DeleteTask(task.Id);
+                            jobService.DeleteJob(job.Id);
                             refreshToken.Refresh();
                         }
                     }
                     else
                     {
-                        selectedTaskId.Set(task.Id);
+                        selectedJobId.Set(job.Id);
                         dialogMode.Set(tag);
                     }
                 }
@@ -95,24 +95,24 @@ public class TasksApp : ViewBase
             dataTable
         };
 
-        if (dialogMode.Value != null && selectedTaskId.Value is { } taskId)
+        if (dialogMode.Value != null && selectedJobId.Value is { } jobId)
         {
-            var task = taskService.GetTask(taskId);
-            if (task != null)
+            var job = jobService.GetJob(jobId);
+            if (job != null)
             {
                 void CloseDialog()
                 {
                     dialogMode.Set(null);
-                    selectedTaskId.Set(null);
+                    selectedJobId.Set(null);
                 }
 
-                if (dialogMode.Value == "view-output" && !string.IsNullOrEmpty(task.ScriptPath))
+                if (dialogMode.Value == "view-output" && !string.IsNullOrEmpty(job.ScriptPath))
                 {
-                    elements.Add(new ViewTaskOutputDialog(true, task, taskService, CloseDialog));
+                    elements.Add(new ViewJobOutputDialog(true, job, jobService, CloseDialog));
                 }
                 else
                 {
-                    elements.Add(new ViewTaskPlanDialog(true, task, CloseDialog));
+                    elements.Add(new ViewJobPlanDialog(true, job, CloseDialog));
                 }
             }
         }
@@ -120,17 +120,17 @@ public class TasksApp : ViewBase
         return new Fragment(elements.ToArray());
     }
 
-    private static string FormatTimer(TaskItem task)
+    private static string FormatTimer(JobItem job)
     {
-        if (task.Status == "Running" && task.StartedAt.HasValue)
+        if (job.Status == "Running" && job.StartedAt.HasValue)
         {
-            var elapsed = DateTime.UtcNow - task.StartedAt.Value;
+            var elapsed = DateTime.UtcNow - job.StartedAt.Value;
             return FormatTimeSpan(elapsed);
         }
 
-        if ((task.Status == "Completed" || task.Status == "Failed") && task.DurationSeconds.HasValue)
+        if ((job.Status == "Completed" || job.Status == "Failed") && job.DurationSeconds.HasValue)
         {
-            return FormatTimeSpan(TimeSpan.FromSeconds(task.DurationSeconds.Value));
+            return FormatTimeSpan(TimeSpan.FromSeconds(job.DurationSeconds.Value));
         }
 
         return "-";

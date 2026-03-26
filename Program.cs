@@ -3,18 +3,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 
-// Set QuestPDF license for non-production/community usage
-QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
-
 var server = new Server();
+server.DangerouslyAllowLocalFiles();
 server.UseCulture("en-US");
 #if DEBUG
 server.UseHotReload();
 #endif
+server.SetMetaTitle("Ivy Tendril");
 server.Services.AddSingleton<ConfigService>();
 server.Services.AddSingleton<GithubService>();
 server.Services.AddSingleton<PlanReaderService>();
-server.Services.AddSingleton<TaskService>();
+server.Services.AddSingleton<JobService>();
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
 server.UseAppShell(new AppShellSettings()
@@ -26,7 +25,7 @@ public class NewPlanFooterButton : ViewBase
 {
     public override object? Build()
     {
-        var taskService = UseService<TaskService>();
+        var jobService = UseService<JobService>();
         var dialogOpen = UseState(false);
 
         var elements = new List<object>
@@ -44,7 +43,7 @@ public class NewPlanFooterButton : ViewBase
             elements.Add(new CreatePlanDialog(
                 onCreatePlan: description =>
                 {
-                    taskService.StartTask("MakePlan", description);
+                    jobService.StartJob("MakePlan", description);
                 },
                 onClose: () => dialogOpen.Set(false)
             ));

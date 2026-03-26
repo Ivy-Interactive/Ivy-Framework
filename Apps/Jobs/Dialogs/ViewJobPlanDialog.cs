@@ -1,20 +1,20 @@
 using Ivy;
 
-namespace Ivy.Tendril.Apps.Tasks.Dialogs;
+namespace Ivy.Tendril.Apps.Jobs.Dialogs;
 
-public class ViewTaskPlanDialog : ViewBase
+public class ViewJobPlanDialog : ViewBase
 {
     private readonly bool _isOpen;
-    private readonly TaskItem _task;
+    private readonly JobItem _job;
     private readonly Action _onClose;
 
-    public ViewTaskPlanDialog(
+    public ViewJobPlanDialog(
         bool isOpen,
-        TaskItem task,
+        JobItem job,
         Action onClose)
     {
         _isOpen = isOpen;
-        _task = task;
+        _job = job;
         _onClose = onClose;
     }
 
@@ -22,14 +22,14 @@ public class ViewTaskPlanDialog : ViewBase
     {
         if (!_isOpen) return null;
 
-        var planPath = Path.Combine(@"D:\Repos\_Ivy\.plans", _task.PlanFile);
+        var planPath = Path.Combine(@"D:\Repos\_Ivy\.plans", _job.PlanFile);
         var planContent = File.Exists(planPath)
             ? File.ReadAllText(planPath)
-            : $"Plan file not found: {_task.PlanFile}";
+            : $"Plan file not found: {_job.PlanFile}";
 
         return new Dialog(
             _ => { _onClose(); return ValueTask.CompletedTask; },
-            new DialogHeader(_task.PlanFile),
+            new DialogHeader(_job.PlanFile),
             new DialogBody(
                 Text.Code(planContent)
             ),

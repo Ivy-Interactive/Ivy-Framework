@@ -1,24 +1,24 @@
 using Ivy;
 using Ivy.Tendril.Services;
 
-namespace Ivy.Tendril.Apps.Tasks.Dialogs;
+namespace Ivy.Tendril.Apps.Jobs.Dialogs;
 
-public class ViewTaskOutputDialog : ViewBase
+public class ViewJobOutputDialog : ViewBase
 {
     private readonly bool _isOpen;
-    private readonly TaskItem _task;
-    private readonly TaskService _taskService;
+    private readonly JobItem _job;
+    private readonly JobService _jobService;
     private readonly Action _onClose;
 
-    public ViewTaskOutputDialog(
+    public ViewJobOutputDialog(
         bool isOpen,
-        TaskItem task,
-        TaskService taskService,
+        JobItem job,
+        JobService jobService,
         Action onClose)
     {
         _isOpen = isOpen;
-        _task = task;
-        _taskService = taskService;
+        _job = job;
+        _jobService = jobService;
         _onClose = onClose;
     }
 
@@ -27,14 +27,14 @@ public class ViewTaskOutputDialog : ViewBase
         if (!_isOpen) return null;
 
         var content = Layout.Vertical().Gap(2)
-            | new TaskDetailDialogView(_task, _taskService)
+            | new JobDetailDialogView(_job, _jobService)
             | Layout.Horizontal().Gap(2).Right()
                 | new Button("Close").Outline().OnClick(_onClose);
 
         return new Sheet(
             _onClose,
             content,
-            title: $"Task {_task.Id} - {_task.Type}"
+            title: $"Job {_job.Id} - {_job.Type}"
         )
         .Side(SheetSide.Right)
         .Width(Size.Percent(90))
