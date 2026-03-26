@@ -226,8 +226,8 @@ In the `.csproj`:
 </ItemGroup>
 
 <Target Name="BuildFrontend" BeforeTargets="Build" Condition="Exists('frontend/package.json')">
-  <Exec Command="npx -y pnpm install" WorkingDirectory="frontend" />
-  <Exec Command="npx -y pnpm run build" WorkingDirectory="frontend" />
+  <Exec Command="vp install" WorkingDirectory="frontend" />
+  <Exec Command="vp run build" WorkingDirectory="frontend" />
 </Target>
 ```
 
@@ -249,7 +249,7 @@ When the widget lives inside the host app (e.g. `HostApp/Widgets/MyWidget/`), ad
 
 You can ship **several widgets from one frontend project**: one Vite build produces a single JS bundle, and multiple C# widget records point to that same script. Each widget type is resolved by `ExportName` from the same global object. The backend serves the same embedded file for all of them; the browser may cache it per URL.
 
-- **One frontend** — one `frontend/` project, one `pnpm run build`, one output file (e.g. `ExternalWidgets.js`).
+- **One frontend** — one `frontend/` project, one `vp run build`, one output file (e.g. `ExternalWidgets.js`).
 - **Same script path and GlobalName** — every C# widget uses the same `[ExternalWidget("frontend/dist/ExternalWidgets.js", ..., GlobalName = "MyProject_Widgets")]` so they all use the same global object.
 - **Different ExportName** — each C# record must specify the React component name explicitly: `ExportName = "MyWidget"`, `ExportName = "AnotherWidget"`, etc. Do not rely on `"default"` for multi-widget bundles.
 
