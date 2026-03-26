@@ -13,12 +13,12 @@ public class NewPlanFooterButton : ViewBase
 
         var elements = new List<object>
         {
-            new Button("Make Plan")
+            new Button("New Idea")
                 .Icon(Icons.Plus)
                 .Width(Size.Full())
                 .Variant(ButtonVariant.Outline)
                 .OnClick(() => dialogOpen.Set(true))
-                .ShortcutKey("CTRL+ALT+M")
+                .ShortcutKey("CTRL+ALT+1")
         };
 
         if (dialogOpen.Value)
