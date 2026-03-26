@@ -1,4 +1,3 @@
-using System.Text;
 using Ivy;
 using Ivy.Tendril.Apps.Plans;
 
@@ -10,12 +9,15 @@ public static class PlanDownloadHelper
     {
         // Always call UseDownload to maintain consistent hook count.
         // Pass a no-op factory when plan is null.
-        var fileName = plan != null ? Path.GetFileName(plan.FileName) : "empty.md";
+        var pdfService = new PlanPdfService();
+        var fileName = plan != null
+            ? Path.GetFileNameWithoutExtension(plan.FileName) + ".pdf"
+            : "empty.pdf";
         return context.UseDownload(
             () => plan != null
-                ? Task.FromResult(Encoding.UTF8.GetBytes(planService.ReadRawPlan(plan.FileName)))
+                ? Task.FromResult(pdfService.GeneratePdf(plan.Title, plan.Id, planService.ReadRawPlan(plan.FileName)))
                 : Task.FromResult(Array.Empty<byte>()),
-            "text/markdown",
+            "application/pdf",
             fileName
         );
     }

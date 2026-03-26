@@ -4,6 +4,9 @@ using Ivy.Tendril;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 
+// Set QuestPDF license for non-production/community usage
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 var server = new Server();
 server.UseCulture("en-US");
 #if DEBUG
