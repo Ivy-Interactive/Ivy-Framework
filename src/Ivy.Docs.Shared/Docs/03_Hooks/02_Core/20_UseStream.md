@@ -126,6 +126,7 @@ builder.Services.AddSingleton<IChatClient>(sp =>
 ## See Also
 
 - [RichTextBlock — Streaming](../../../02_Widgets/01_Primitives/24_RichTextBlock.md) — Main use case: streaming `TextRun` with `Text.Rich().UseStream(stream)`
+- [AutoScroll](../../../02_Widgets/01_Primitives/26_AutoScroll.md) — Optional scroll container that pins to the bottom as content grows (not used by Chat; useful for logs and custom layouts around streamed content)
 - [Rules of Hooks](../02_RulesOfHooks.md) — Hook rules and best practices
 - [UseState](./03_UseState.md) — For reactive state that triggers re-renders
 - [UseSignal](./10_UseSignal.md) — For cross-component messaging
