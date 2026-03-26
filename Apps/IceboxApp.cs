@@ -44,9 +44,12 @@ public class IceboxApp : ViewBase
             refreshToken.Set(refreshToken.Value + 1);
         }
 
+        var sidebar = new IceboxSidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter);
+
         return new SidebarLayout(
             mainContent: new IceboxContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, taskService, RefreshPlans),
-            sidebarContent: new IceboxSidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter)
+            sidebarContent: sidebar.BuildContent(),
+            sidebarHeader: sidebar.BuildHeader()
         );
     }
 }

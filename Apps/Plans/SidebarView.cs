@@ -24,7 +24,7 @@ public class SidebarView : ViewBase
         _textFilter = textFilter;
     }
 
-    public override object Build()
+    public object BuildHeader()
     {
         var levelOptions = new[] { "Critical", "NiceToHave", "Nitpick" };
 
@@ -40,10 +40,7 @@ public class SidebarView : ViewBase
             .Select(g => new Option<string>($"{g.Key} ({g.Count()})", g.Key))
             .ToArray<IAnyOption>();
 
-        // Apply all filters
-        var filteredPlans = PlanFilters.ApplyFilters(_plans, _queueFilter.Value, _levelFilter.Value, _textFilter.Value);
-
-        var header = Layout.Vertical()
+        return Layout.Vertical()
             | _textFilter.ToSearchInput().Placeholder("Search plans...")
             | new Expandable(
                 header: "Filters",
@@ -51,8 +48,14 @@ public class SidebarView : ViewBase
                     | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().WithField().Label("Queue")
                     | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().WithField().Label("Level")
             ).Open(false);
+    }
 
-        var content = new List(filteredPlans.Select(plan =>
+    public object BuildContent()
+    {
+        // Apply all filters
+        var filteredPlans = PlanFilters.ApplyFilters(_plans, _queueFilter.Value, _levelFilter.Value, _textFilter.Value);
+
+        return new List(filteredPlans.Select(plan =>
         {
             var clickablePlan = plan;
             return new ListItem($"#{plan.Id} {plan.Title}")
@@ -61,7 +64,11 @@ public class SidebarView : ViewBase
                     | new Badge(plan.Level).Variant(BadgeVariant.Warning).Small())
                 .OnClick(() => _selectedPlanState.Set(clickablePlan));
         }));
+    }
 
-        return new HeaderLayout(header, content).Height(Size.Full());
+    public override object Build()
+    {
+        // For backward compatibility, return content
+        return BuildContent();
     }
 }

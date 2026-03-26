@@ -49,9 +49,12 @@ public class PlansApp : ViewBase
             refreshToken.Set(refreshToken.Value + 1);
         }
 
+        var sidebar = new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter);
+
         return new SidebarLayout(
             mainContent: new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, taskService, RefreshPlans),
-            sidebarContent: new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter)
+            sidebarContent: sidebar.BuildContent(),
+            sidebarHeader: sidebar.BuildHeader()
         );
     }
 }
