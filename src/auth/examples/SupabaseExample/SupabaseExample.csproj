@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>SupabaseExample</RootNamespace>
+    <UserSecretsId>ivy-auth-supabase-example</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

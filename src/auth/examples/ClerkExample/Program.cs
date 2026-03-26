@@ -1,4 +1,5 @@
 using Ivy;
+using Microsoft.Extensions.Configuration;
 
 var server = new Server();
 
@@ -14,5 +15,17 @@ var settings = new AppShellSettings()
 server.UseAppShell(settings);
 
 server.SetMetaTitle("Clerk Example");
+
+server.UseConfiguration(config =>
+{
+    if (ProcessHelper.IsProduction())
+    {
+        var secretsPath = Environment.GetEnvironmentVariable("CLERK_SECRETS_PATH");
+        if (!string.IsNullOrEmpty(secretsPath))
+        {
+            config.AddJsonFile(secretsPath, optional: true);
+        }
+    }
+});
 
 await server.RunAsync();
