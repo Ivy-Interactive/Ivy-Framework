@@ -4,24 +4,16 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Icebox.Dialogs;
 
-public class DeletePlanDialog : ViewBase
+public class DeletePlanDialog(
+    IState<bool> dialogOpen,
+    PlanFile selectedPlan,
+    PlanReaderService planService,
+    Action refreshPlans) : ViewBase
 {
-    private readonly IState<bool> _dialogOpen;
-    private readonly PlanFile _selectedPlan;
-    private readonly PlanReaderService _planService;
-    private readonly Action _refreshPlans;
-
-    public DeletePlanDialog(
-        IState<bool> dialogOpen,
-        PlanFile selectedPlan,
-        PlanReaderService planService,
-        Action refreshPlans)
-    {
-        _dialogOpen = dialogOpen;
-        _selectedPlan = selectedPlan;
-        _planService = planService;
-        _refreshPlans = refreshPlans;
-    }
+    private readonly IState<bool> _dialogOpen = dialogOpen;
+    private readonly PlanFile _selectedPlan = selectedPlan;
+    private readonly PlanReaderService _planService = planService;
+    private readonly Action _refreshPlans = refreshPlans;
 
     public override object? Build()
     {

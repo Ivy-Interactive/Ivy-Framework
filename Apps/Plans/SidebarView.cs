@@ -2,27 +2,18 @@ using Ivy;
 
 namespace Ivy.Tendril.Apps.Plans;
 
-public class SidebarView : ViewBase
+public class SidebarView(
+    List<PlanFile> plans,
+    IState<PlanFile?> selectedPlanState,
+    IState<string?> queueFilter,
+    IState<string?> levelFilter,
+    IState<string?> textFilter) : ViewBase
 {
-    private readonly List<PlanFile> _plans;
-    private readonly IState<PlanFile?> _selectedPlanState;
-    private readonly IState<string?> _queueFilter;
-    private readonly IState<string?> _levelFilter;
-    private readonly IState<string?> _textFilter;
-
-    public SidebarView(
-        List<PlanFile> plans,
-        IState<PlanFile?> selectedPlanState,
-        IState<string?> queueFilter,
-        IState<string?> levelFilter,
-        IState<string?> textFilter)
-    {
-        _plans = plans;
-        _selectedPlanState = selectedPlanState;
-        _queueFilter = queueFilter;
-        _levelFilter = levelFilter;
-        _textFilter = textFilter;
-    }
+    private readonly List<PlanFile> _plans = plans;
+    private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
+    private readonly IState<string?> _queueFilter = queueFilter;
+    private readonly IState<string?> _levelFilter = levelFilter;
+    private readonly IState<string?> _textFilter = textFilter;
 
     public object BuildHeader()
     {
@@ -47,7 +38,7 @@ public class SidebarView : ViewBase
                 content: Layout.Vertical()
                     | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().WithField().Label("Queue")
                     | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().WithField().Label("Level")
-            ).Open(false);
+            ).Open(false).Ghost();
     }
 
     public object BuildContent()

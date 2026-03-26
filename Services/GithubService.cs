@@ -2,16 +2,11 @@ using System.Diagnostics;
 
 namespace Ivy.Tendril.Services;
 
-public class GithubService
+public class GithubService(ConfigService config)
 {
-    private readonly ConfigService _config;
+    private readonly ConfigService _config = config;
     private readonly Dictionary<string, List<string>> _assigneeCache = new();
     private readonly Dictionary<string, List<string>> _labelCache = new();
-
-    public GithubService(ConfigService config)
-    {
-        _config = config;
-    }
 
     public List<RepoConfig> GetRepos() => _config.Settings.Repos;
 

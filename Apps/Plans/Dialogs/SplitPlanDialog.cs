@@ -3,27 +3,18 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
 
-public class SplitPlanDialog : ViewBase
+public class SplitPlanDialog(
+    IState<bool> dialogOpen,
+    IState<string> splitText,
+    PlanFile selectedPlan,
+    JobService jobService,
+    string plansDirectory) : ViewBase
 {
-    private readonly IState<bool> _dialogOpen;
-    private readonly IState<string> _splitText;
-    private readonly PlanFile _selectedPlan;
-    private readonly JobService _jobService;
-    private readonly string _plansDirectory;
-
-    public SplitPlanDialog(
-        IState<bool> dialogOpen,
-        IState<string> splitText,
-        PlanFile selectedPlan,
-        JobService jobService,
-        string plansDirectory)
-    {
-        _dialogOpen = dialogOpen;
-        _splitText = splitText;
-        _selectedPlan = selectedPlan;
-        _jobService = jobService;
-        _plansDirectory = plansDirectory;
-    }
+    private readonly IState<bool> _dialogOpen = dialogOpen;
+    private readonly IState<string> _splitText = splitText;
+    private readonly PlanFile _selectedPlan = selectedPlan;
+    private readonly JobService _jobService = jobService;
+    private readonly string _plansDirectory = plansDirectory;
 
     public override object? Build()
     {

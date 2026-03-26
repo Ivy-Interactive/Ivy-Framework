@@ -3,27 +3,18 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
 
-public class CreateIssueDialog : ViewBase
+public class CreateIssueDialog(
+    IState<bool> dialogOpen,
+    IState<string?> selectedRepoState,
+    IState<string?> issueAssigneeState,
+    IState<string[]> issueLabelsState,
+    PlanFile selectedPlan) : ViewBase
 {
-    private readonly IState<bool> _dialogOpen;
-    private readonly IState<string?> _selectedRepoState;
-    private readonly IState<string?> _issueAssigneeState;
-    private readonly IState<string[]> _issueLabelsState;
-    private readonly PlanFile _selectedPlan;
-
-    public CreateIssueDialog(
-        IState<bool> dialogOpen,
-        IState<string?> selectedRepoState,
-        IState<string?> issueAssigneeState,
-        IState<string[]> issueLabelsState,
-        PlanFile selectedPlan)
-    {
-        _dialogOpen = dialogOpen;
-        _selectedRepoState = selectedRepoState;
-        _issueAssigneeState = issueAssigneeState;
-        _issueLabelsState = issueLabelsState;
-        _selectedPlan = selectedPlan;
-    }
+    private readonly IState<bool> _dialogOpen = dialogOpen;
+    private readonly IState<string?> _selectedRepoState = selectedRepoState;
+    private readonly IState<string?> _issueAssigneeState = issueAssigneeState;
+    private readonly IState<string[]> _issueLabelsState = issueLabelsState;
+    private readonly PlanFile _selectedPlan = selectedPlan;
 
     public override object? Build()
     {

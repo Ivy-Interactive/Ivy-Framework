@@ -4,14 +4,9 @@ using Ivy.Tendril.Apps.Plans;
 
 namespace Ivy.Tendril.Services;
 
-public class PlanReaderService
+public class PlanReaderService(ConfigService config)
 {
-    private readonly ConfigService _config;
-
-    public PlanReaderService(ConfigService config)
-    {
-        _config = config;
-    }
+    private readonly ConfigService _config = config;
 
     public string PlansDirectory => _config.PlanFolder;
 

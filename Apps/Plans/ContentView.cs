@@ -7,30 +7,20 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans;
 
-public class ContentView : ViewBase
+public class ContentView(
+    PlanFile? selectedPlan,
+    List<PlanFile> allPlans,
+    IState<PlanFile?> selectedPlanState,
+    PlanReaderService planService,
+    JobService jobService,
+    Action refreshPlans) : ViewBase
 {
-    private readonly PlanFile? _selectedPlan;
-    private readonly List<PlanFile> _allPlans;
-    private readonly IState<PlanFile?> _selectedPlanState;
-    private readonly PlanReaderService _planService;
-    private readonly JobService _jobService;
-    private readonly Action _refreshPlans;
-
-    public ContentView(
-        PlanFile? selectedPlan,
-        List<PlanFile> allPlans,
-        IState<PlanFile?> selectedPlanState,
-        PlanReaderService planService,
-        JobService jobService,
-        Action refreshPlans)
-    {
-        _selectedPlan = selectedPlan;
-        _allPlans = allPlans;
-        _selectedPlanState = selectedPlanState;
-        _planService = planService;
-        _jobService = jobService;
-        _refreshPlans = refreshPlans;
-    }
+    private readonly PlanFile? _selectedPlan = selectedPlan;
+    private readonly List<PlanFile> _allPlans = allPlans;
+    private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
+    private readonly PlanReaderService _planService = planService;
+    private readonly JobService _jobService = jobService;
+    private readonly Action _refreshPlans = refreshPlans;
 
     public override object? Build()
     {

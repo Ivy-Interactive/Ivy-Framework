@@ -2,21 +2,14 @@ using Ivy;
 
 namespace Ivy.Tendril.Apps.Jobs.Dialogs;
 
-public class ViewJobPlanDialog : ViewBase
+public class ViewJobPlanDialog(
+    bool isOpen,
+    JobItem job,
+    Action onClose) : ViewBase
 {
-    private readonly bool _isOpen;
-    private readonly JobItem _job;
-    private readonly Action _onClose;
-
-    public ViewJobPlanDialog(
-        bool isOpen,
-        JobItem job,
-        Action onClose)
-    {
-        _isOpen = isOpen;
-        _job = job;
-        _onClose = onClose;
-    }
+    private readonly bool _isOpen = isOpen;
+    private readonly JobItem _job = job;
+    private readonly Action _onClose = onClose;
 
     public override object? Build()
     {

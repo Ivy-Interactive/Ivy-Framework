@@ -3,24 +3,16 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Jobs.Dialogs;
 
-public class ViewJobOutputDialog : ViewBase
+public class ViewJobOutputDialog(
+    bool isOpen,
+    JobItem job,
+    JobService jobService,
+    Action onClose) : ViewBase
 {
-    private readonly bool _isOpen;
-    private readonly JobItem _job;
-    private readonly JobService _jobService;
-    private readonly Action _onClose;
-
-    public ViewJobOutputDialog(
-        bool isOpen,
-        JobItem job,
-        JobService jobService,
-        Action onClose)
-    {
-        _isOpen = isOpen;
-        _job = job;
-        _jobService = jobService;
-        _onClose = onClose;
-    }
+    private readonly bool _isOpen = isOpen;
+    private readonly JobItem _job = job;
+    private readonly JobService _jobService = jobService;
+    private readonly Action _onClose = onClose;
 
     public override object? Build()
     {

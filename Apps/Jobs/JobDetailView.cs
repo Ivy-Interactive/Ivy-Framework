@@ -4,16 +4,10 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Jobs;
 
-public class JobDetailView : ViewBase
+public class JobDetailView(JobItem job, JobService jobService) : ViewBase
 {
-    private readonly JobItem _job;
-    private readonly JobService _jobService;
-
-    public JobDetailView(JobItem job, JobService jobService)
-    {
-        _job = job;
-        _jobService = jobService;
-    }
+    private readonly JobItem _job = job;
+    private readonly JobService _jobService = jobService;
 
     public override object Build()
     {

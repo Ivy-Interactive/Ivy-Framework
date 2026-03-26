@@ -3,27 +3,18 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
 
-public class UpdatePlanDialog : ViewBase
+public class UpdatePlanDialog(
+    IState<bool> dialogOpen,
+    IState<string> updateText,
+    PlanFile selectedPlan,
+    JobService jobService,
+    string plansDirectory) : ViewBase
 {
-    private readonly IState<bool> _dialogOpen;
-    private readonly IState<string> _updateText;
-    private readonly PlanFile _selectedPlan;
-    private readonly JobService _jobService;
-    private readonly string _plansDirectory;
-
-    public UpdatePlanDialog(
-        IState<bool> dialogOpen,
-        IState<string> updateText,
-        PlanFile selectedPlan,
-        JobService jobService,
-        string plansDirectory)
-    {
-        _dialogOpen = dialogOpen;
-        _updateText = updateText;
-        _selectedPlan = selectedPlan;
-        _jobService = jobService;
-        _plansDirectory = plansDirectory;
-    }
+    private readonly IState<bool> _dialogOpen = dialogOpen;
+    private readonly IState<string> _updateText = updateText;
+    private readonly PlanFile _selectedPlan = selectedPlan;
+    private readonly JobService _jobService = jobService;
+    private readonly string _plansDirectory = plansDirectory;
 
     public override object? Build()
     {
