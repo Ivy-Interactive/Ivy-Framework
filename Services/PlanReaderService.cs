@@ -99,8 +99,8 @@ public class PlanReaderService
 
     public void ThawPlan(string fileName)
     {
-        var source = Path.Combine(PlansDirectory, "icebox", fileName);
-        var dest = Path.Combine(PlansDirectory, fileName);
+        var source = Path.Combine(PlansDirectory, fileName);
+        var dest = Path.Combine(PlansDirectory, Path.GetFileName(fileName));
         File.Move(source, dest);
     }
 
