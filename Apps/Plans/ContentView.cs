@@ -36,6 +36,7 @@ public class ContentView : ViewBase
     {
         var downloadUrl = PlanDownloadHelper.UsePlanDownload(Context, _planService, _selectedPlan);
         var client = UseService<IClientProvider>();
+        var copyToClipboard = UseClipboard();
         var updateDialogOpen = UseState(false);
         var splitDialogOpen = UseState(false);
         var deleteDialogOpen = UseState(false);
@@ -154,8 +155,8 @@ public class ContentView : ViewBase
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
                 {
                     var planPath = Path.Combine(_planService.PlansDirectory, _selectedPlan.FileName);
-                    client.CopyToClipboard(planPath);
-                    client.Toast($"Copied path to clipboard", "Path Copied");
+                    copyToClipboard(planPath);
+                    client.Toast("Copied path to clipboard", "Path Copied");
                 })
             );
 

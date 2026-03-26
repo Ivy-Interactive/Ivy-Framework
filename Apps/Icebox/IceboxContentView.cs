@@ -38,6 +38,7 @@ public class IceboxContentView : ViewBase
     {
         var downloadUrl = PlanDownloadHelper.UsePlanDownload(Context, _planService, _selectedPlan);
         var client = UseService<IClientProvider>();
+        var copyToClipboard = UseClipboard();
         var deleteDialogOpen = UseState(false);
 
         var isEditing = UseState(false);
@@ -140,8 +141,8 @@ public class IceboxContentView : ViewBase
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
                 {
                     var planPath = Path.Combine(_planService.PlansDirectory, _selectedPlan.FileName);
-                    client.CopyToClipboard(planPath);
-                    client.Toast($"Copied path to clipboard", "Path Copied");
+                    copyToClipboard(planPath);
+                    client.Toast("Copied path to clipboard", "Path Copied");
                 })
             );
 
