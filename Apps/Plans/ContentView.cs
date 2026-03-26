@@ -35,7 +35,7 @@ public class ContentView : ViewBase
     public override object? Build()
     {
         var downloadUrl = PlanDownloadHelper.UsePlanDownload(this, _planService, _selectedPlan);
-        var copyToClipboard = UseClipboard();
+        var client = UseService<IClientProvider>();
         var updateDialogOpen = UseState(false);
         var splitDialogOpen = UseState(false);
         var deleteDialogOpen = UseState(false);
@@ -154,7 +154,8 @@ public class ContentView : ViewBase
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
                 {
                     var planPath = Path.Combine(_planService.PlansDirectory, _selectedPlan.FileName);
-                    copyToClipboard(planPath);
+                    client.CopyToClipboard(planPath);
+                    client.Toast($"Copied path to clipboard", "Path Copied");
                 })
             );
 

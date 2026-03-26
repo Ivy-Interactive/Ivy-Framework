@@ -37,7 +37,7 @@ public class IceboxContentView : ViewBase
     public override object? Build()
     {
         var downloadUrl = PlanDownloadHelper.UsePlanDownload(this, _planService, _selectedPlan);
-        var copyToClipboard = UseClipboard();
+        var client = UseService<IClientProvider>();
         var deleteDialogOpen = UseState(false);
 
         var isEditing = UseState(false);
@@ -140,7 +140,8 @@ public class IceboxContentView : ViewBase
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
                 {
                     var planPath = Path.Combine(_planService.PlansDirectory, _selectedPlan.FileName);
-                    copyToClipboard(planPath);
+                    client.CopyToClipboard(planPath);
+                    client.Toast($"Copied path to clipboard", "Path Copied");
                 })
             );
 
