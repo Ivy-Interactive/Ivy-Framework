@@ -122,14 +122,13 @@ public static class CookieRegistryExtensions
     {
         var authSessionDataName = "auth_session_data";
 
+        var cookieOptions = CreateAuthCookieOptions(forceLaxSameSite: true);
         if (authSessionData == null)
         {
-            cookies.Delete(authSessionDataName, CreateAuthCookieOptions());
+            cookies.Delete(authSessionDataName, cookieOptions);
         }
         else
         {
-            var cookieOptions = CreateAuthCookieOptions();
-
             cookies.Append(authSessionDataName, authSessionData, cookieOptions);
         }
     }
@@ -176,7 +175,7 @@ public static class CookieRegistryExtensions
         }
     }
 
-    private static CookieOptions CreateAuthCookieOptions()
+    private static CookieOptions CreateAuthCookieOptions(bool forceLaxSameSite = false)
     {
         // Continue to check ASPNETCORE_ENVIRONMENT to avoid silently making cookies insecure for existing users who set that variable to "Production"
         // See also https://github.com/Ivy-Interactive/Ivy-Framework/issues/2466
@@ -185,7 +184,7 @@ public static class CookieRegistryExtensions
         {
             HttpOnly = true,
             Secure = isProduction,
-            SameSite = SameSiteMode.Lax,
+            SameSite = forceLaxSameSite ? SameSiteMode.Lax : SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddYears(1),
             Path = "/",
         };
