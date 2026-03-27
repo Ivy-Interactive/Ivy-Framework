@@ -136,7 +136,7 @@ public class TreePath
                 h >>= 5;
             }
         });
-        
+
         return _cachedId;
     }
 }
