@@ -20,19 +20,62 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy;
 
+[StructLayout(LayoutKind.Sequential)]
+public struct CServerArgs
+{
+    public int Port;
+    public int Verbose;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public struct FfiWidget
+{
+    public IntPtr Id;           // *const c_char
+    public int TypeId;          // i32
+    public int ParentIndex;     // i32
+    public IntPtr TextVal;      // *const c_char
+    public double NumberVal;    // f64
+}
+
 /// <summary>
 /// A new Rust-based server implementation designed to replace the original Server class.
 /// Currently interoperates with a cdylib Rust library using FFI.
 /// </summary>
-public class RustyServer
+public class RustyServer : IDisposable
 {
     private const string RustLib = "rustserver";
 
     [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
-    private static extern IntPtr rustserver_say_hello();
+    private static extern IntPtr rustserver_create(ref CServerArgs args);
 
     [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void rustserver_free_string(IntPtr ptr);
+    private static extern void rustserver_run(IntPtr ptr);
+
+    [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
+    private static extern void rustserver_free(IntPtr ptr);
+
+    [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
+    private static extern void rustserver_render_tree(IntPtr state_ptr, IntPtr widgets_ptr, int widgets_len);
+
+    private IntPtr _rustServerPtr = IntPtr.Zero;
+
+    // Internal hook to trigger the DOM diffing loop in Rust
+    public void RenderFlatTree(FfiWidget[] widgets)
+    {
+        if (_rustServerPtr == IntPtr.Zero || widgets == null || widgets.Length == 0) 
+            return;
+            
+        // Pin the array so the GC doesn't move it while Rust reads the contiguous memory
+        var handle = GCHandle.Alloc(widgets, GCHandleType.Pinned);
+        try
+        {
+            rustserver_render_tree(_rustServerPtr, handle.AddrOfPinnedObject(), widgets.Length);
+        }
+        finally
+        {
+            handle.Free();
+        }
+    }
 
     // Initial properties mirroring Server.cs
     public IReadOnlySet<string> ReservedPaths => throw new NotImplementedException("Rust port");
@@ -50,21 +93,35 @@ public class RustyServer
     {
         Args = args ?? ServerUtils.GetArgs();
         
-        // Example FFI test
+        var cArgs = new CServerArgs
+        {
+            Port = Args.Port,
+            Verbose = Args.Verbose ? 1 : 0
+        };
+
         try
         {
-            IntPtr ptr = rustserver_say_hello();
-            if (ptr != IntPtr.Zero)
-            {
-                string? greeting = Marshal.PtrToStringAnsi(ptr);
-                Console.WriteLine($"[RustyServer] Initialized: {greeting}");
-                rustserver_free_string(ptr);
-            }
+            _rustServerPtr = rustserver_create(ref cArgs);
         }
         catch (DllNotFoundException ex)
         {
             Console.WriteLine($"[RustyServer] Failed to load rust lib: {ex.Message}");
         }
+    }
+
+    public void Dispose()
+    {
+        if (_rustServerPtr != IntPtr.Zero)
+        {
+            rustserver_free(_rustServerPtr);
+            _rustServerPtr = IntPtr.Zero;
+        }
+        GC.SuppressFinalize(this);
+    }
+
+    ~RustyServer()
+    {
+        Dispose();
     }
 
     public RustyServer(FuncViewBuilder viewFactory) : this()
@@ -113,9 +170,19 @@ public class RustyServer
     public RustyServer UseHtmlFilter(IHtmlFilter filter) => this;
     public RustyServer UseHtmlPipeline(Action<HtmlPipeline> configure) => this;
 
-    public async Task RunAsync(CancellationTokenSource? cts = null)
+    public Task RunAsync(CancellationTokenSource? cts = null)
     {
-        Console.WriteLine("[RustyServer] Handling state and lifecycle in Rust magically...");
-        await Task.CompletedTask;
+        if (_rustServerPtr != IntPtr.Zero)
+        {
+            return Task.Run(() =>
+            {
+                rustserver_run(_rustServerPtr);
+            });
+        }
+        else
+        {
+            Console.WriteLine("[RustyServer] Cannot run: Rust state failed to initialize.");
+            return Task.CompletedTask;
+        }
     }
 }
