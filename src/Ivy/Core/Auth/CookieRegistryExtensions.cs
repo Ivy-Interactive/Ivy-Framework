@@ -177,13 +177,10 @@ public static class CookieRegistryExtensions
 
     private static CookieOptions CreateAuthCookieOptions(bool forceLaxSameSite = false)
     {
-        // Continue to check ASPNETCORE_ENVIRONMENT to avoid silently making cookies insecure for existing users who set that variable to "Production"
-        // See also https://github.com/Ivy-Interactive/Ivy-Framework/issues/2466
-        var isProduction = ProcessHelper.IsProduction() || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = isProduction,
+            Secure = true,
             SameSite = forceLaxSameSite ? SameSiteMode.Lax : SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddYears(1),
             Path = "/",
