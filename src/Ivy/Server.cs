@@ -656,8 +656,23 @@ public class Server
         var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
         var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
         var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
-        var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://{host}:{_args.Port}";
-        builder.WebHost.UseUrls(bindUrl);
+        var isLocalDev = !isContainer && !hasPortEnv && !_args.IsCliCommand;
+
+        if (_args.IsCliCommand)
+        {
+            builder.WebHost.UseUrls("http://localhost:0");
+        }
+        else if (isLocalDev)
+        {
+            // Local development: HTTPS only using the ASP.NET Core dev certificate.
+            // Run `dotnet dev-certs https --trust` if the certificate is not yet trusted.
+            builder.WebHost.UseUrls($"https://{host}:{_args.Port}");
+        }
+        else
+        {
+            // Containers / hosted environments: HTTP only (reverse proxy handles TLS).
+            builder.WebHost.UseUrls($"http://{host}:{_args.Port}");
+        }
 
         builder.Services.AddSignalR(options =>
         {
@@ -828,8 +843,8 @@ public class Server
         app.Lifetime.ApplicationStarted.Register(() =>
         {
             var url = app.Urls.FirstOrDefault() ?? "unknown";
-            var port = new Uri(url).Port;
-            var localUrl = $"http://localhost:{port}";
+            var uri = new Uri(url);
+            var localUrl = $"{uri.Scheme}://localhost:{uri.Port}";
             if (!_args.Silent)
             {
                 Console.WriteLine($@"Ivy is running on {localUrl} [{Process.GetCurrentProcess().Id}]. Press Ctrl+C to stop.");
