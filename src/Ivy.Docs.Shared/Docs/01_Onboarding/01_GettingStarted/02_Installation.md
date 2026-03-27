@@ -51,6 +51,14 @@ This will create a new Ivy project with the necessary structure and configuratio
 
 Ivy Framework requires .NET 10.0 as the target framework. All Ivy projects and packages are built against this version.
 
+Ivy serves over HTTPS in local development. On macOS and Windows, run the following once to trust the development certificate:
+
+```terminal
+>dotnet dev-certs https --trust
+```
+
+On Linux, additional manual steps are required — see [HTTPS in Development](../03_CLI/04_Authentication/01_AuthenticationOverview.md#https-in-development) for details.
+
 ## Manual Setup: Creating Your First Project
 
 If you prefer to set up a project manually, follow these steps:
@@ -176,3 +184,4 @@ The server automatically optimizes its behavior based on the current environment
 | **Caching** | Disabled for immediate changes | Aggressive ETag & compression |
 | **Logging** | Debug & Information | Warning & Error only |
 | **Port Management** | Conflict detection & auto-shift | Strict port binding |
+| **HTTPS** | Dev certificate (`dotnet dev-certs https --trust`) | Reverse proxy handles TLS |
