@@ -12,6 +12,9 @@ public class Program
             return;
         }
 
-        BenchmarkRunner.Run(typeof(Program).Assembly);
+        var config = BenchmarkDotNet.Configs.ManualConfig.Create(BenchmarkDotNet.Configs.DefaultConfig.Instance)
+            .AddJob(BenchmarkDotNet.Jobs.Job.ShortRun);
+
+        BenchmarkRunner.Run(typeof(Program).Assembly, config);
     }
 }
