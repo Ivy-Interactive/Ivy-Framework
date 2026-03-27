@@ -16,12 +16,18 @@ pub struct CServerArgs {
 }
 
 #[repr(C)]
+pub struct FfiWidgetProps {
+    pub keys: *const *const c_char,
+    pub values: *const *const c_char,
+    pub count: i32,
+}
+
+#[repr(C)]
 pub struct FfiWidget {
     pub id: *const c_char,
-    pub type_id: i32,
+    pub component_type: *const c_char,
     pub parent_index: i32,
-    pub text_val: *const c_char,
-    pub number_val: f64,
+    pub props: FfiWidgetProps,
 }
 
 pub struct ServerState {
@@ -46,17 +52,26 @@ pub extern "C" fn rustserver_create(args: *const CServerArgs) -> *mut ServerStat
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn rustserver_render_tree(
+pub extern "C" fn rustserver_render_json_tree(
     _state_ptr: *mut ServerState,
-    _widgets_ptr: *const FfiWidget,
-    widgets_len: i32,
+    json_utf8_ptr: *const u8,
+    json_len: i32,
 ) {
-    // In the future: Read the pointer length, reconstruct the `FfiWidget` slice.
-    // Box the elements and process the virtual DOM diffing logic.
-    println!(
-        "[RustyServer Core] Received C# Tree Sync: {} nodes.",
-        widgets_len
-    );
+    if json_utf8_ptr.is_null() || json_len == 0 {
+        return;
+    }
+    
+    // Safely convert the pointer buffer to a Rust slice without copying
+    let json_bytes = unsafe { std::slice::from_raw_parts(json_utf8_ptr, json_len as usize) };
+    
+    // Parse the high-speed JSON buffer coming from C#
+    match serde_json::from_slice::<serde_json::Value>(json_bytes) {
+        Ok(tree) => {
+            println!("[RustyServer Core] Fast-Parsed C# Tree! Size: {} bytes. Commencing Virtual DOM diffing...", json_len);
+            // TODO: Execute Virtual DOM Diff and queue MessagePack broadcast to Axum WebSockets
+        }
+        Err(e) => eprintln!("[RustyServer] Failed to parse UI payload from C#: {}", e),
+    }
 }
 
 #[unsafe(no_mangle)]

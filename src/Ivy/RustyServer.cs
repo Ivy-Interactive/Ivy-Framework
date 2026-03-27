@@ -28,13 +28,20 @@ public struct CServerArgs
 }
 
 [StructLayout(LayoutKind.Sequential)]
+public struct FfiWidgetProps
+{
+    public IntPtr Keys;   // *const *const c_char (String array pointer)
+    public IntPtr Values; // *const *const c_char (String array pointer)
+    public int Count;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 public struct FfiWidget
 {
-    public IntPtr Id;           // *const c_char
-    public int TypeId;          // i32
-    public int ParentIndex;     // i32
-    public IntPtr TextVal;      // *const c_char
-    public double NumberVal;    // f64
+    public IntPtr Id;             // *const c_char
+    public IntPtr ComponentType;  // *const c_char
+    public int ParentIndex;       // i32
+    public FfiWidgetProps Props;  // FfiWidgetProps
 }
 
 /// <summary>
@@ -55,21 +62,21 @@ public class RustyServer : IDisposable
     private static extern void rustserver_free(IntPtr ptr);
 
     [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void rustserver_render_tree(IntPtr state_ptr, IntPtr widgets_ptr, int widgets_len);
+    private static extern void rustserver_render_json_tree(IntPtr state_ptr, IntPtr json_utf8_ptr, int json_len);
 
     private IntPtr _rustServerPtr = IntPtr.Zero;
 
-    // Internal hook to trigger the DOM diffing loop in Rust
-    public void RenderFlatTree(FfiWidget[] widgets)
+    // Internal hook to trigger the DOM diffing loop in Rust securely
+    public void RenderFlatTree(byte[] utf8JsonTree)
     {
-        if (_rustServerPtr == IntPtr.Zero || widgets == null || widgets.Length == 0) 
+        if (_rustServerPtr == IntPtr.Zero || utf8JsonTree == null || utf8JsonTree.Length == 0) 
             return;
             
-        // Pin the array so the GC doesn't move it while Rust reads the contiguous memory
-        var handle = GCHandle.Alloc(widgets, GCHandleType.Pinned);
+        // Pin the massive byte array safely so the GC doesn't move it while Rust reads it instantly
+        var handle = GCHandle.Alloc(utf8JsonTree, GCHandleType.Pinned);
         try
         {
-            rustserver_render_tree(_rustServerPtr, handle.AddrOfPinnedObject(), widgets.Length);
+            rustserver_render_json_tree(_rustServerPtr, handle.AddrOfPinnedObject(), utf8JsonTree.Length);
         }
         finally
         {
@@ -174,6 +181,26 @@ public class RustyServer : IDisposable
     {
         if (_rustServerPtr != IntPtr.Zero)
         {
+            // Spin up an example C# background task that simulates C# hook-based UI components 
+            // constantly diffing and pushing their new states to the Rust engine!
+            Task.Run(async () => {
+                while(true) {
+                    await Task.Delay(2000);
+                    try {
+                        var payload = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new {
+                            action = "full_render",
+                            viewId = "main_app",
+                            widgets = new[] { 
+                                new { id = "btn1", type = "Button", label = $"Server Tick: {DateTime.Now.Second}" } 
+                            }
+                        });
+                        this.RenderFlatTree(payload);
+                    } catch (Exception e) {
+                        Console.WriteLine($"[RustyServer] Simulation loop fault: {e.Message}");
+                    }
+                }
+            });
+
             return Task.Run(() =>
             {
                 rustserver_run(_rustServerPtr);
