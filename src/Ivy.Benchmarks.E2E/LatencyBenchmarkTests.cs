@@ -71,8 +71,8 @@ public class LatencyBenchmarkTests : PageTest
         var legacyLatency = await MeasureLatencyAsync("http://localhost:5011/hello");
 
         Console.WriteLine("\n--- E2E WebSocket Latency (JSON-Patch Render Cycle) ---");
-        Console.WriteLine($"[1.2.27 Legacy] Typing 'banana' took: {legacyLatency} ms on average.");
-        Console.WriteLine($"[Rusty-Server] Typing 'banana' took: {nativeLatency} ms on average.");
+        Console.WriteLine($"[1.2.27 Legacy] Typing 'x' took: {legacyLatency} ms on average.");
+        Console.WriteLine($"[Rusty-Server] Typing 'x' took: {nativeLatency} ms on average.");
         Console.WriteLine($"Difference: {(legacyLatency - nativeLatency):F2} ms ({(1 - (nativeLatency / legacyLatency)) * 100:F1}% Faster)");
         Console.WriteLine("-------------------------------------------------------\n");
 
@@ -84,12 +84,14 @@ public class LatencyBenchmarkTests : PageTest
         var latencies = new List<double>();
         IWebSocket? ws = null;
 
-        Page.WebSocket += (_, webSocket) =>
+        var runPage = await Context.NewPageAsync();
+
+        runPage.WebSocket += (_, webSocket) =>
         {
             ws = webSocket;
         };
 
-        await Page.GotoAsync(url);
+        await runPage.GotoAsync(url);
 
         // Wait for websocket to connect
         while (ws == null) { await Task.Delay(100); }
@@ -102,7 +104,7 @@ public class LatencyBenchmarkTests : PageTest
         {
             var text = frame.Text;
             Console.WriteLine($"[TX] {text}");
-            if (text != null && text.Contains("banana"))
+            if (text != null && text.Contains("x"))
             {
                 sentTime = Stopwatch.GetTimestamp();
             }
@@ -122,22 +124,30 @@ public class LatencyBenchmarkTests : PageTest
         };
 #nullable enable
 
-        // Type banana into input natively!
-        var input = Page.Locator("input");
+        // Type into input natively!
+        var input = runPage.Locator("input");
         await input.WaitForAsync();
         
         // Wait for SignalR to fully connect handshake
         await Task.Delay(1000);
         
-        await input.FillAsync("banana");
+        // Warmup: type 'a' to trigger JIT and FFI loading
+        await input.FillAsync("a");
+        await Task.Delay(500);
+        
+        // Reset metrics
+        latencies.Clear();
+        sentTime = 0;
+
+        // Actual timed keystroke
+        await input.FillAsync("x");
 
         // Let trailing frames settle
         await Task.Delay(1000);
         
-        if (latencies.Count == 0) {
-            latencies.Add(0.0); // Fallback so test doesn't crash, but I can inspect console
-        }
+        Assert.That(latencies, Is.Not.Empty, "No latency measurements were captured");
 
+        await runPage.CloseAsync();
 
         return latencies.Average();
     }

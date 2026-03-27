@@ -59,7 +59,9 @@ public class JsonPatchBenchmark
     [Benchmark(Baseline = true)]
     public JsonNode? LegacyCSharpMath_JsonDiffPatch()
     {
-        return _oldNode.Diff(_newNode, new JsonPatchDeltaFormatter(), WidgetTree.JsonDiffOptions);
+        var oldParsed = JsonNode.Parse(_oldBytes)!;
+        var newParsed = JsonNode.Parse(_newBytes)!;
+        return oldParsed.Diff(newParsed, new JsonPatchDeltaFormatter(), WidgetTree.JsonDiffOptions);
     }
 
     [Benchmark]

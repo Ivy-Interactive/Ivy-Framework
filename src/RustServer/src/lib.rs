@@ -36,12 +36,18 @@ pub extern "C" fn rustserver_diff_trees(
     
     let old_tree: serde_json::Value = match serde_json::from_slice(old_bytes) {
         Ok(t) => t,
-        Err(_) => return std::ptr::null_mut(),
+        Err(_) => {
+            if !out_len.is_null() { unsafe { *out_len = 0; } }
+            return std::ptr::null_mut();
+        }
     };
     
     let new_tree: serde_json::Value = match serde_json::from_slice(new_bytes) {
         Ok(t) => t,
-        Err(_) => return std::ptr::null_mut(),
+        Err(_) => {
+            if !out_len.is_null() { unsafe { *out_len = 0; } }
+            return std::ptr::null_mut();
+        }
     };
             
     // Fast RFC6902 JSON Diff mathematically independent of state

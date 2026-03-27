@@ -79,9 +79,12 @@ public class TreePath
     }
 
     private static readonly char[] Base32Chars = "abcdefghijklmnopqrstuvwxyz234567".ToCharArray();
+    private string? _cachedId;
 
     public string GenerateId()
     {
+        if (_cachedId != null) return _cachedId;
+
         // Use XxHash64 - extremely fast with excellent distribution
         // 64-bit hash gives collision probability of ~1 in 10^19 for random inputs
         // Even with birthday paradox, 1M items = ~0.000003% collision chance
@@ -125,7 +128,7 @@ public class TreePath
         ulong hashValue = hash.GetCurrentHashAsUInt64();
 
         // Convert to 10-char base32 string (50 bits of entropy, plenty for uniqueness)
-        return string.Create(10, hashValue, static (span, h) =>
+        _cachedId = string.Create(10, hashValue, static (span, h) =>
         {
             for (int i = 0; i < 10; i++)
             {
@@ -133,5 +136,7 @@ public class TreePath
                 h >>= 5;
             }
         });
+        
+        return _cachedId;
     }
 }

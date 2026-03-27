@@ -50,7 +50,7 @@ public static class RustyServer
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[RustyServer API] Math Compute Error: {ex.Message}");
+            Console.WriteLine($"[ERROR] RustyServer: {ex.Message}");
             return null;
         }
         finally
