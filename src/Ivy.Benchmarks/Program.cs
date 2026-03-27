@@ -6,6 +6,12 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        if (args.Length > 0 && args[0].ToLower() == "analyze")
+        {
+            PayloadSizeAnalyzer.Run(100);
+            return;
+        }
+
         BenchmarkRunner.Run(typeof(Program).Assembly);
     }
 }
