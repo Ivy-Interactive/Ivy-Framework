@@ -1,13 +1,18 @@
 use axum::{
     Router,
-    extract::ws::{Message, WebSocket, WebSocketUpgrade},
+    extract::{
+        State,
+        ws::{Message, WebSocket, WebSocketUpgrade},
+    },
     response::IntoResponse,
     routing::get,
 };
-use futures_util::{SinkExt, StreamExt};
+use futures_util::StreamExt;
 use std::net::SocketAddr;
 use std::os::raw::c_char;
+use std::sync::Mutex;
 use tokio::runtime::Runtime;
+use tokio::sync::broadcast;
 
 #[repr(C)]
 pub struct CServerArgs {
@@ -33,6 +38,8 @@ pub struct FfiWidget {
 pub struct ServerState {
     args: CServerArgs,
     rt: Runtime,
+    vdom: Mutex<serde_json::Value>,
+    tx: broadcast::Sender<String>,
 }
 
 #[unsafe(no_mangle)]
@@ -47,30 +54,55 @@ pub extern "C" fn rustserver_create(args: *const CServerArgs) -> *mut ServerStat
         .build()
         .unwrap();
 
-    let state = Box::new(ServerState { args: args_val, rt });
+    let (tx, _rx) = broadcast::channel(100);
+
+    let state = Box::new(ServerState {
+        args: args_val,
+        rt,
+        vdom: Mutex::new(serde_json::json!({})),
+        tx,
+    });
     Box::into_raw(state)
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn rustserver_render_json_tree(
-    _state_ptr: *mut ServerState,
+    state_ptr: *mut ServerState,
     json_utf8_ptr: *const u8,
     json_len: i32,
 ) {
-    if json_utf8_ptr.is_null() || json_len == 0 {
+    if state_ptr.is_null() || json_utf8_ptr.is_null() || json_len == 0 {
         return;
     }
-    
-    // Safely convert the pointer buffer to a Rust slice without copying
+
+    let state = unsafe { &*state_ptr };
     let json_bytes = unsafe { std::slice::from_raw_parts(json_utf8_ptr, json_len as usize) };
-    
-    // Parse the high-speed JSON buffer coming from C#
+
     match serde_json::from_slice::<serde_json::Value>(json_bytes) {
-        Ok(tree) => {
-            println!("[RustyServer Core] Fast-Parsed C# Tree! Size: {} bytes. Commencing Virtual DOM diffing...", json_len);
-            // TODO: Execute Virtual DOM Diff and queue MessagePack broadcast to Axum WebSockets
+        Ok(new_tree) => {
+            let mut vdom_guard = state.vdom.lock().unwrap();
+            let old_tree = &*vdom_guard;
+
+            // Core: Lightning Fast Rust JSON Differ
+            let patch = json_patch::diff(old_tree, &new_tree);
+
+            // Only broadcast if there is a difference or if it's the first tree
+            let patch_payload = serde_json::to_string(&patch).unwrap();
+
+            if !patch.is_empty() {
+                // Broadcast binary MessagePack or plain text JSON patch to all Axum WebSocket listeners
+                // For optimal speed, JS `diffpatch` logic requires the `patch` RFC array
+                println!(
+                    "[RustyServer Differ] Diff calculated exactly! Emitting {} ops.",
+                    patch.len()
+                );
+                let _ = state.tx.send(patch_payload);
+            }
+
+            // Update the stored Virtual DOM state
+            *vdom_guard = new_tree;
         }
-        Err(e) => eprintln!("[RustyServer] Failed to parse UI payload from C#: {}", e),
+        Err(e) => eprintln!("[RustyServer Core] Failed to fast-parse UI payload: {}", e),
     }
 }
 
@@ -83,12 +115,17 @@ pub extern "C" fn rustserver_run(state_ptr: *mut ServerState) {
 
     let port = state.args.port as u16;
     let verbose = state.args.verbose != 0;
+    
+    // Clone the broadcast sender securely before relinquishing the borrow
+    let tx = state.tx.clone();
 
     state.rt.block_on(async move {
         // Build the Axum router with a WebSockets route for real-time frontend connection
+        // We inject the tx clone as App State so handlers can access the broadcast channel
         let app = Router::new()
-            .route("/", get(|| async { "Hello from Rusty Axum!" }))
-            .route("/ws", get(ws_handler));
+            .route("/", get(|| async { "Hello from Rusty Axum Protocol!" }))
+            .route("/ws", get(ws_handler))
+            .with_state(tx);
 
         let addr = SocketAddr::from(([0, 0, 0, 0], port));
         if verbose {
@@ -106,17 +143,32 @@ pub extern "C" fn rustserver_run(state_ptr: *mut ServerState) {
 }
 
 // Axum WebSocket Connection Upgrade
-async fn ws_handler(ws: WebSocketUpgrade) -> impl IntoResponse {
-    ws.on_upgrade(handle_socket)
+async fn ws_handler(
+    ws: WebSocketUpgrade,
+    State(tx): State<broadcast::Sender<String>>,
+) -> impl IntoResponse {
+    ws.on_upgrade(move |socket| handle_socket(socket, tx))
 }
 
 // Websocket logic
-async fn handle_socket(mut socket: WebSocket) {
-    // We can stream MessagePack binary diff patches to `socket.send` here based on Virtual DOM reconciliation.
-    while let Some(Ok(msg)) = socket.next().await {
-        if let Message::Text(text) = msg {
-            println!("[RustyServer WS] Frontend JS Says: {}", text);
-            let _ = socket.send(Message::Text("Ack from Rust".into())).await;
+async fn handle_socket(mut socket: WebSocket, tx: broadcast::Sender<String>) {
+    let mut rx = tx.subscribe();
+
+    println!("[RustyServer WS] New Web Client Connected!");
+
+    loop {
+        tokio::select! {
+            // Receive patches pushed from C# FFI loop
+            Ok(patch) = rx.recv() => {
+                let _ = socket.send(Message::Text(patch.into())).await;
+            }
+            // Listen to browser messages
+            Some(Ok(msg)) = socket.next() => {
+                if let Message::Text(text) = msg {
+                    println!("[RustyServer WS] Frontend Request: {}", text);
+                }
+            }
+            else => break, // Disconnected
         }
     }
 }

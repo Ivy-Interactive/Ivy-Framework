@@ -66,6 +66,10 @@ public class RustyServer : IDisposable
 
     private IntPtr _rustServerPtr = IntPtr.Zero;
 
+    // A static channel to allow any C# WidgetTree diffing cycle to blindly push into the Rusty Server 
+    // without needing complex decoupled DI refactors immediately.
+    public static Action<byte[]>? GlobalRenderTree;
+
     // Internal hook to trigger the DOM diffing loop in Rust securely
     public void RenderFlatTree(byte[] utf8JsonTree)
     {
@@ -114,6 +118,9 @@ public class RustyServer : IDisposable
         {
             Console.WriteLine($"[RustyServer] Failed to load rust lib: {ex.Message}");
         }
+        
+        // Globally redirect all C# widget diffings directly into RustyServer's ultra-fast FFI sync
+        GlobalRenderTree = RenderFlatTree;
     }
 
     public void Dispose()

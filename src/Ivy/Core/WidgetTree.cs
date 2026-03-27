@@ -209,6 +209,16 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         {
             var update = partial.GetSerializedWidgetTree();
 
+            // RUST DIFFER BYPASS
+            // If the RustyServer engine is active, we immediately ship the un-diffed new state 
+            // over to Rust via byte-array memory pointer, completely bypassing slow C# diff computations!
+            if (Ivy.RustyServer.GlobalRenderTree != null && update != null) 
+            {
+                var payload = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(update);
+                Ivy.RustyServer.GlobalRenderTree.Invoke(payload);
+                return null!; // Rust handles the web-socket patch directly
+            }
+
             var previousId = previous?["id"]?.GetValue<string>();
             var updateId = update?["id"]?.GetValue<string>();
 
