@@ -21,7 +21,7 @@ public static class Program
         Console.WriteLine("==========================================================");
 
         var server = new Server(new ServerArgs { Port = 5255 });
-        server.AddAppsFromAssembly(typeof(Program).Assembly);
+        server.AddAppsFromAssembly(typeof(MyBenchmark.MassiveFormsApp).Assembly);
         await server.RunAsync();
     }
 }
