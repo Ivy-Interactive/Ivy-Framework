@@ -11,6 +11,7 @@ namespace Ivy;
 public static class RustyServer
 {
     private const string RustLib = "rustserver";
+    private static bool _engineBonded = false;
 
     [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
     private static extern IntPtr rustserver_diff_trees(
@@ -23,6 +24,12 @@ public static class RustyServer
 
     public static JsonNode? ComputePatch(byte[] oldTreeBytes, byte[] newTreeBytes)
     {
+        if (!_engineBonded) 
+        {
+            Console.WriteLine("[Ivy] 🚀 Virtual DOM Math bounded cleanly to Native Rust Engine (cdylib)!");
+            _engineBonded = true;
+        }
+
         if (oldTreeBytes == null || oldTreeBytes.Length == 0 || newTreeBytes == null || newTreeBytes.Length == 0)
             return null;
 

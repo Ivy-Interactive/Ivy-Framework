@@ -1,6 +1,5 @@
 use std::ffi::CString;
 use std::os::raw::c_char;
-use std::sync::Mutex;
 
 // Removed ServerState entirely because C# manages its own view caching perfectly.
 // We provide purely memory-safe stateless math computations.
