@@ -14,6 +14,9 @@ use std::sync::Mutex;
 use tokio::runtime::Runtime;
 use tokio::sync::broadcast;
 
+// Function pointer typedef for Rust -> C# callbacks
+pub type CSharpEventCallback = unsafe extern "C" fn(*const u8, i32);
+
 #[repr(C)]
 pub struct CServerArgs {
     pub port: i32,
@@ -40,6 +43,8 @@ pub struct ServerState {
     rt: Runtime,
     vdom: Mutex<serde_json::Value>,
     tx: broadcast::Sender<String>,
+    // Store the global C# function pointer to invoke when frontend events arrive
+    c_event_callback: Mutex<Option<CSharpEventCallback>>,
 }
 
 #[unsafe(no_mangle)]
@@ -61,8 +66,24 @@ pub extern "C" fn rustserver_create(args: *const CServerArgs) -> *mut ServerStat
         rt,
         vdom: Mutex::new(serde_json::json!({})),
         tx,
+        c_event_callback: Mutex::new(None),
     });
     Box::into_raw(state)
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn rustserver_register_callback(
+    state_ptr: *mut ServerState,
+    callback: Option<CSharpEventCallback>,
+) {
+    if state_ptr.is_null() {
+        return;
+    }
+    let state = unsafe { &*state_ptr };
+    if let Ok(mut guard) = state.c_event_callback.lock() {
+        *guard = callback;
+        println!("[RustyServer Core] Secured C# Native Callback Pointer!");
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -118,14 +139,20 @@ pub extern "C" fn rustserver_run(state_ptr: *mut ServerState) {
     
     // Clone the broadcast sender securely before relinquishing the borrow
     let tx = state.tx.clone();
+    
+    // We snapshot the current C# callback pointer into an Arc, so we can move it
+    let callback_guard = state.c_event_callback.lock().unwrap();
+    let c_callback_arc = std::sync::Arc::new(callback_guard.clone());
 
     state.rt.block_on(async move {
         // Build the Axum router with a WebSockets route for real-time frontend connection
-        // We inject the tx clone as App State so handlers can access the broadcast channel
+        // We inject a tuple of (tx, callback) as App State so handlers can access both
+        let app_state = (tx, c_callback_arc);
+        
         let app = Router::new()
             .route("/", get(|| async { "Hello from Rusty Axum Protocol!" }))
             .route("/ws", get(ws_handler))
-            .with_state(tx);
+            .with_state(app_state);
 
         let addr = SocketAddr::from(([0, 0, 0, 0], port));
         if verbose {
@@ -145,30 +172,40 @@ pub extern "C" fn rustserver_run(state_ptr: *mut ServerState) {
 // Axum WebSocket Connection Upgrade
 async fn ws_handler(
     ws: WebSocketUpgrade,
-    State(tx): State<broadcast::Sender<String>>,
+    State(app_state): State<(broadcast::Sender<String>, std::sync::Arc<Option<CSharpEventCallback>>)>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_socket(socket, tx))
+    ws.on_upgrade(move |socket| handle_socket(socket, app_state.0, app_state.1))
 }
 
 // Websocket logic
-async fn handle_socket(mut socket: WebSocket, tx: broadcast::Sender<String>) {
+async fn handle_socket(
+    mut socket: WebSocket, 
+    tx: broadcast::Sender<String>, 
+    c_callback: std::sync::Arc<Option<CSharpEventCallback>>
+) {
     let mut rx = tx.subscribe();
-
+    
     println!("[RustyServer WS] New Web Client Connected!");
-
+    
     loop {
         tokio::select! {
-            // Receive patches pushed from C# FFI loop
             Ok(patch) = rx.recv() => {
                 let _ = socket.send(Message::Text(patch.into())).await;
             }
-            // Listen to browser messages
             Some(Ok(msg)) = socket.next() => {
                 if let Message::Text(text) = msg {
-                    println!("[RustyServer WS] Frontend Request: {}", text);
+                    // Instantly bounce the incoming frontend JSON event back to C#
+                    if let Some(callback) = *c_callback {
+                        let bytes = text.as_bytes();
+                        unsafe {
+                            callback(bytes.as_ptr(), bytes.len() as i32);
+                        }
+                    } else {
+                        println!("[RustyServer WS] Warning: Received '{}' but no C# Callback pointer is registered!", text);
+                    }
                 }
             }
-            else => break, // Disconnected
+            else => break,
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -64,7 +65,33 @@ public class RustyServer : IDisposable
     [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
     private static extern void rustserver_render_json_tree(IntPtr state_ptr, IntPtr json_utf8_ptr, int json_len);
 
+    [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
+    private static extern void rustserver_register_callback(IntPtr state_ptr, IntPtr callback_ptr);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void FfiEventCallback(IntPtr json_utf8_ptr, int json_len);
+
+    private static FfiEventCallback? _callbackInstance; // Required to keep GC from reclaiming the callback pointer
+
     private IntPtr _rustServerPtr = IntPtr.Zero;
+
+    private static void OnFrontendEventReceived(IntPtr json_utf8_ptr, int json_len)
+    {
+        unsafe 
+        {
+            try 
+            {
+                var span = new ReadOnlySpan<byte>(json_utf8_ptr.ToPointer(), json_len);
+                var jsonString = Encoding.UTF8.GetString(span);
+                Console.WriteLine($"[RustyServer C#] 🚀 BROWSER EVENT RECEIVED: {jsonString}");
+                // In Phase 6, we deserialize this and call GlobalWidgetTree.TriggerEventAsync(widgetId, eventName, args)
+            } 
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"[RustyServer Bridge] Error decoding event from Rust: {ex.Message}");
+            }
+        }
+    }
 
     // A static channel to allow any C# WidgetTree diffing cycle to blindly push into the Rusty Server 
     // without needing complex decoupled DI refactors immediately.
@@ -113,6 +140,14 @@ public class RustyServer : IDisposable
         try
         {
             _rustServerPtr = rustserver_create(ref cArgs);
+            
+            // Wire the reverse data bridge so C# listens to Rust WebSocket events
+            if (_rustServerPtr != IntPtr.Zero)
+            {
+                _callbackInstance = OnFrontendEventReceived;
+                var callbackPtr = Marshal.GetFunctionPointerForDelegate(_callbackInstance);
+                rustserver_register_callback(_rustServerPtr, callbackPtr);
+            }
         }
         catch (DllNotFoundException ex)
         {
