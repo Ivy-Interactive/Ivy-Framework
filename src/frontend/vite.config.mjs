@@ -50,7 +50,7 @@ const injectMeta = (mode) => {
     name: "inject-ivy-meta",
     async transformIndexHtml(localHtml) {
       if (mode === "development") {
-        const host = process.env.IVY_HOST || "http://localhost:5010";
+        const host = process.env.IVY_HOST || "https://localhost:5010";
         const serverHtml = await fetch(`${host}`).then((res) => res.text());
         const transformedHtml = transferMeta(serverHtml, localHtml);
         const ivyHostTag = `<meta name="ivy-host" content="${host}" />`;
@@ -73,7 +73,7 @@ export default defineConfig({
   server: {
     proxy: {
       "^/(.*\\.md|llms\\.txt)$": {
-        target: process.env.IVY_HOST || "http://localhost:5010",
+        target: process.env.IVY_HOST || "https://localhost:5010",
         changeOrigin: true,
       },
     },

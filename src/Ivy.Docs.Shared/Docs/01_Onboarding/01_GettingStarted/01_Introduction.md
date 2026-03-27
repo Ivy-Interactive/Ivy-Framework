@@ -129,7 +129,7 @@ Ivy uses a fluent API and the pipe operator (`|`) to compose layouts and widgets
 >dotnet run HelloWorldApp.cs
 ```
 
-Ivy will start a local server at `http://localhost:5010`. Open it in your browser to see your interactive "Hello" app!
+Ivy will start a local server at `https://localhost:5010`. Open it in your browser to see your interactive "Hello" app!
 
 ---
 
