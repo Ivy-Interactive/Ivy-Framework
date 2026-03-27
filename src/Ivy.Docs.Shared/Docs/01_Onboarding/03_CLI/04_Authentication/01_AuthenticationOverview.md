@@ -340,17 +340,7 @@ After this, your app will be accessible at `https://localhost:5010`.
 
 ### Linux
 
-Linux distributions do not support `--trust` directly. You must manually trust the certificate with your browser or OS certificate store. First, generate the certificate:
-
-```terminal
->dotnet dev-certs https
-```
-
-Then follow the steps for your distribution to trust the generated certificate. See [Microsoft's documentation on HTTPS in Linux](https://learn.microsoft.com/en-us/aspnet/core/security/enforcing-ssl#trust-the-aspnet-core-https-development-certificate-on-linux) for detailed instructions.
-
-<Callout Type="warning">
-If you skip this step, your browser will show a certificate warning and authentication cookies will not work. You must trust the dev certificate for auth to function in local development.
-</Callout>
+Linux requires additional manual steps to trust the development certificate — see [Installation](../../01_GettingStarted/02_Installation.md#prerequisites) for details.
 
 ## Best Practices
 

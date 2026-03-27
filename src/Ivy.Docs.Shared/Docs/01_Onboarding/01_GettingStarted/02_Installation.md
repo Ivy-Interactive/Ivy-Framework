@@ -57,7 +57,17 @@ Ivy serves over HTTPS in local development. On macOS and Windows, run the follow
 >dotnet dev-certs https --trust
 ```
 
-On Linux, additional manual steps are required — see [HTTPS in Development](../03_CLI/04_Authentication/01_AuthenticationOverview.md#https-in-development) for details.
+On Linux, `--trust` is not supported directly. You must manually trust the certificate with your browser or OS certificate store. First, generate the certificate:
+
+```terminal
+>dotnet dev-certs https
+```
+
+Then follow the steps for your distribution to trust the generated certificate. See [Microsoft's documentation on HTTPS in Linux](https://learn.microsoft.com/en-us/aspnet/core/security/enforcing-ssl#linux-specific-considerations) for detailed instructions.
+
+<Callout Type="warning">
+If you skip this step, your browser will show a certificate warning and authentication cookies will not work. You must trust the dev certificate for auth to function in local development.
+</Callout>
 
 ## Manual Setup: Creating Your First Project
 
