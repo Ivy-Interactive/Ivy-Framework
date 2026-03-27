@@ -15,6 +15,6 @@ public class Program
         var config = BenchmarkDotNet.Configs.ManualConfig.Create(BenchmarkDotNet.Configs.DefaultConfig.Instance)
             .AddJob(BenchmarkDotNet.Jobs.Job.ShortRun);
 
-        BenchmarkRunner.Run<ConnectionScalingBenchmark>(config);
+        BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
     }
 }

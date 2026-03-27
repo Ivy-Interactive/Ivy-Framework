@@ -14,7 +14,7 @@ public readonly record struct PathSegment(string Type, string? Key, int Index, b
 }
 
 [DebuggerDisplay("{ToString()}")]
-public class TreePath 
+public class TreePath
 {
     public PathSegment Segment { get; }
     public TreePath? Parent { get; }

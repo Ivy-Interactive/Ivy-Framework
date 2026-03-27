@@ -14,8 +14,8 @@ public static class RustyServer
 
     [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
     private static extern IntPtr rustserver_diff_trees(
-        IntPtr old_json_ptr, int old_len, 
-        IntPtr new_json_ptr, int new_len, 
+        IntPtr old_json_ptr, int old_len,
+        IntPtr new_json_ptr, int new_len,
         out int out_len);
 
     [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
@@ -28,7 +28,7 @@ public static class RustyServer
 
         var handleOld = GCHandle.Alloc(oldTreeBytes, GCHandleType.Pinned);
         var handleNew = GCHandle.Alloc(newTreeBytes, GCHandleType.Pinned);
-        
+
         try
         {
             IntPtr cstr = rustserver_diff_trees(
@@ -36,22 +36,22 @@ public static class RustyServer
                 handleNew.AddrOfPinnedObject(), newTreeBytes.Length,
                 out int patchLen
             );
-            
-            if (cstr == IntPtr.Zero || patchLen == 0) 
+
+            if (cstr == IntPtr.Zero || patchLen == 0)
                 return null;
 
             // Instantly decode the math string back from Rust FFI memory
             string patchStr = Marshal.PtrToStringUTF8(cstr, patchLen);
-            
+
             // Demand Rust drop the CString allocation frame-per-frame
             rustserver_free_string(cstr);
-            
+
             return JsonNode.Parse(patchStr);
         }
         catch (Exception ex)
         {
-             Console.WriteLine($"[RustyServer API] Math Compute Error: {ex.Message}");
-             return null;
+            Console.WriteLine($"[RustyServer API] Math Compute Error: {ex.Message}");
+            return null;
         }
         finally
         {
