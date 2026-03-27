@@ -116,10 +116,16 @@
 
   <Target Name="BuildRustServer" BeforeTargets="BeforeBuild">
     <Exec Command="cargo build --release" WorkingDirectory="../RustServer" />
+  </Target>
+
+  <Target Name="AddRustBinariesToContent" BeforeTargets="AssignTargetPaths" DependsOnTargets="BuildRustServer">
     <ItemGroup>
-      <RustBinary Include="../RustServer/target/release/*rustserver*" />
+      <Content Include="../RustServer/target/release/*rustserver*">
+        <Link>%(Filename)%(Extension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Visible>false</Visible>
+      </Content>
     </ItemGroup>
-    <Copy SourceFiles="@(RustBinary)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
