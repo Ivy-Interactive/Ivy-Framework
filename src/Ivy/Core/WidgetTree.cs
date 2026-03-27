@@ -209,15 +209,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         {
             var update = partial.GetSerializedWidgetTree();
 
-            // RUST DIFFER BYPASS
-            // If the RustyServer engine is active, we immediately ship the un-diffed new state 
-            // over to Rust via byte-array memory pointer, completely bypassing slow C# diff computations!
-            if (Ivy.RustyServer.GlobalRenderTree != null && update != null) 
-            {
-                var payload = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(update);
-                Ivy.RustyServer.GlobalRenderTree.Invoke(payload);
-                return null!; // Rust handles the web-socket patch directly
-            }
+
 
             var previousId = previous?["id"]?.GetValue<string>();
             var updateId = update?["id"]?.GetValue<string>();
@@ -233,12 +225,19 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                     ["value"] = update?.DeepClone()
                 });
             }
+            else if (update != null && previous != null)
+            {
+                // [RustyServer Integration] Execute mathematically independent zero-allocation diffing via C/Rust!
+                var oldBytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(previous);
+                var newBytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(update);
+                patch = RustyServer.ComputePatch(oldBytes, newBytes);
+            }
             else
             {
-                patch = previous.Diff(update, new JsonPatchDeltaFormatter(), JsonDiffOptions);
+                patch = null;
             }
 
-            if (patch == null || patch.IsEmptyArray())
+            if (patch == null || patch.AsArray().Count == 0)
             {
                 return null!;
             }

@@ -1,250 +1,62 @@
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Ivy.Core;
-using Ivy.Core.Apps;
-using Ivy.Core.Auth;
-using Ivy.Core.ExternalWidgets;
-using Ivy.Core.Server;
-using Ivy.Core.Server.HtmlPipeline;
-using Ivy.Core.Server.HtmlPipeline.Filters;
-using Ivy.Core.Server.Middleware;
-using Ivy.Themes;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json.Nodes;
 
 namespace Ivy;
 
-[StructLayout(LayoutKind.Sequential)]
-public struct CServerArgs
-{
-    public int Port;
-    public int Verbose;
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public struct FfiWidgetProps
-{
-    public IntPtr Keys;   // *const *const c_char (String array pointer)
-    public IntPtr Values; // *const *const c_char (String array pointer)
-    public int Count;
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public struct FfiWidget
-{
-    public IntPtr Id;             // *const c_char
-    public IntPtr ComponentType;  // *const c_char
-    public int ParentIndex;       // i32
-    public FfiWidgetProps Props;  // FfiWidgetProps
-}
-
 /// <summary>
-/// A new Rust-based server implementation designed to replace the original Server class.
-/// Currently interoperates with a cdylib Rust library using FFI.
+/// A zero-allocation, stateless FFI wrapper that calculates massive JSON-patch
+/// differences purely using Rust cdylib math, destroying the C# execution bottlenecks!
 /// </summary>
-public class RustyServer : IDisposable
+public static class RustyServer
 {
     private const string RustLib = "rustserver";
 
     [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
-    private static extern IntPtr rustserver_create(ref CServerArgs args);
+    private static extern IntPtr rustserver_diff_trees(
+        IntPtr old_json_ptr, int old_len, 
+        IntPtr new_json_ptr, int new_len, 
+        out int out_len);
 
     [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void rustserver_run(IntPtr ptr);
+    private static extern void rustserver_free_string(IntPtr s);
 
-    [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void rustserver_free(IntPtr ptr);
-
-    [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void rustserver_render_json_tree(IntPtr state_ptr, IntPtr json_utf8_ptr, int json_len);
-
-    [DllImport(RustLib, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void rustserver_register_callback(IntPtr state_ptr, IntPtr callback_ptr);
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void FfiEventCallback(IntPtr json_utf8_ptr, int json_len);
-
-    private static FfiEventCallback? _callbackInstance; // Required to keep GC from reclaiming the callback pointer
-
-    private IntPtr _rustServerPtr = IntPtr.Zero;
-
-    private static void OnFrontendEventReceived(IntPtr json_utf8_ptr, int json_len)
+    public static JsonNode? ComputePatch(byte[] oldTreeBytes, byte[] newTreeBytes)
     {
-        try 
-        {
-            var bytes = new byte[json_len];
-            Marshal.Copy(json_utf8_ptr, bytes, 0, json_len);
-            
-            using var doc = System.Text.Json.JsonDocument.Parse(new ReadOnlyMemory<byte>(bytes));
-            var root = doc.RootElement;
-            
-            string action = root.GetProperty("action").GetString() ?? "";
-            if (action == "event")
-            {
-                string viewId = root.GetProperty("viewId").GetString() ?? "";
-                string widgetId = root.GetProperty("widgetId").GetString() ?? "";
-                string eventName = root.GetProperty("eventName").GetString() ?? "";
-                
-                Console.WriteLine($"[RustyServer API] Triggering C# Hook for Widget '{widgetId}', Event: '{eventName}'");
-            }
-            else
-            {
-                Console.WriteLine($"[RustyServer API] 🚀 SYSTEM EVENT RECEIVED: {root.GetRawText()}");
-            }
-        } 
-        catch (Exception ex) 
-        {
-            Console.WriteLine($"[RustyServer Bridge] Error decoding event from Rust: {ex.Message}");
-        }
-    }
+        if (oldTreeBytes == null || oldTreeBytes.Length == 0 || newTreeBytes == null || newTreeBytes.Length == 0)
+            return null;
 
-    // A static channel to allow any C# WidgetTree diffing cycle to blindly push into the Rusty Server 
-    // without needing complex decoupled DI refactors immediately.
-    public static Action<byte[]>? GlobalRenderTree;
-
-    // Internal hook to trigger the DOM diffing loop in Rust securely
-    public void RenderFlatTree(byte[] utf8JsonTree)
-    {
-        if (_rustServerPtr == IntPtr.Zero || utf8JsonTree == null || utf8JsonTree.Length == 0) 
-            return;
-            
-        // Pin the massive byte array safely so the GC doesn't move it while Rust reads it instantly
-        var handle = GCHandle.Alloc(utf8JsonTree, GCHandleType.Pinned);
+        var handleOld = GCHandle.Alloc(oldTreeBytes, GCHandleType.Pinned);
+        var handleNew = GCHandle.Alloc(newTreeBytes, GCHandleType.Pinned);
+        
         try
         {
-            rustserver_render_json_tree(_rustServerPtr, handle.AddrOfPinnedObject(), utf8JsonTree.Length);
+            IntPtr cstr = rustserver_diff_trees(
+                handleOld.AddrOfPinnedObject(), oldTreeBytes.Length,
+                handleNew.AddrOfPinnedObject(), newTreeBytes.Length,
+                out int patchLen
+            );
+            
+            if (cstr == IntPtr.Zero || patchLen == 0) 
+                return null;
+
+            // Instantly decode the math string back from Rust FFI memory
+            string patchStr = Marshal.PtrToStringUTF8(cstr, patchLen);
+            
+            // Demand Rust drop the CString allocation frame-per-frame
+            rustserver_free_string(cstr);
+            
+            return JsonNode.Parse(patchStr);
+        }
+        catch (Exception ex)
+        {
+             Console.WriteLine($"[RustyServer API] Math Compute Error: {ex.Message}");
+             return null;
         }
         finally
         {
-            handle.Free();
-        }
-    }
-
-    // Initial properties mirroring Server.cs
-    public IReadOnlySet<string> ReservedPaths => throw new NotImplementedException("Rust port");
-    public string? DefaultAppId { get; private set; }
-    public AppRepository AppRepository { get; } = new();
-    public NavigationBeaconRegistry NavigationBeaconRegistry { get; } = new();
-    public IServiceCollection Services { get; } = new ServiceCollection();
-    public IConfiguration Configuration { get; private set; } = null!;
-    public Type? AuthProviderType { get; private set; } = null;
-    public ServerArgs Args { get; }
-
-    public static Action<CookieOptions>? ConfigureAuthCookieOptions { get; set; }
-
-    public RustyServer(ServerArgs? args = null)
-    {
-        Args = args ?? ServerUtils.GetArgs();
-        
-        var cArgs = new CServerArgs
-        {
-            Port = Args.Port,
-            Verbose = Args.Verbose ? 1 : 0
-        };
-
-        try
-        {
-            _rustServerPtr = rustserver_create(ref cArgs);
-            
-            // Wire the reverse data bridge so C# listens to Rust WebSocket events
-            if (_rustServerPtr != IntPtr.Zero)
-            {
-                _callbackInstance = OnFrontendEventReceived;
-                var callbackPtr = Marshal.GetFunctionPointerForDelegate(_callbackInstance);
-                rustserver_register_callback(_rustServerPtr, callbackPtr);
-            }
-        }
-        catch (DllNotFoundException ex)
-        {
-            Console.WriteLine($"[RustyServer] Failed to load rust lib: {ex.Message}");
-        }
-        
-        // Globally redirect all C# widget diffings directly into RustyServer's ultra-fast FFI sync
-        GlobalRenderTree = RenderFlatTree;
-    }
-
-    public void Dispose()
-    {
-        if (_rustServerPtr != IntPtr.Zero)
-        {
-            rustserver_free(_rustServerPtr);
-            _rustServerPtr = IntPtr.Zero;
-        }
-        GC.SuppressFinalize(this);
-    }
-
-    ~RustyServer()
-    {
-        Dispose();
-    }
-
-    public RustyServer(FuncViewBuilder viewFactory) : this()
-    {
-    }
-
-    public void AddApp<T>(bool isDefault = false) => throw new NotImplementedException("Rust port");
-    public void AddApp(Type appType, bool isDefault = false) => throw new NotImplementedException("Rust port");
-    public void AddApp(AppDescriptor appDescriptor) => throw new NotImplementedException("Rust port");
-    public void AddAppsFromAssembly(Assembly? assembly = null) => throw new NotImplementedException("Rust port");
-    public void AddConnectionsFromAssembly(Assembly? assembly = null) => throw new NotImplementedException("Rust port");
-    public AppDescriptor GetApp(string id) => throw new NotImplementedException("Rust port");
-
-    public RustyServer UseContentBuilder(IContentBuilder contentBuilder) => this;
-    public RustyServer UseHotReload() => this;
-    public RustyServer UseHttpRedirection() => this;
-    public RustyServer UseCulture(string cultureName) => this;
-    public RustyServer UseConfiguration(IConfiguration configuration) => this;
-    public RustyServer UseConfiguration(Action<IConfigurationBuilder> configure) => this;
-    
-    public RustyServer UseAppShell(AppShellSettings settings) => this;
-    public RustyServer UseAppShell<T>() where T : ViewBase, new() => this;
-    public RustyServer UseAppShell(Func<ViewBase>? viewFactory = null) => this;
-    
-    public RustyServer UseAuth<T>(Action<T>? config = null, Func<ViewBase>? viewFactory = null) where T : class, IAuthProvider => this;
-    public RustyServer RegisterAuthTokenHandler<T>(string provider) where T : class, IAuthTokenHandler => this;
-    
-    public RustyServer UseDefaultApp(Type appType) => this;
-    public RustyServer UseErrorNotFound<T>() where T : ViewBase, new() => this;
-    public RustyServer UseErrorNotFound(Func<ViewBase>? viewFactory = null) => this;
-    
-    public RustyServer UseWebApplicationBuilder(Action<WebApplicationBuilder> modify) => this;
-    public RustyServer UseWebApplication(Action<WebApplication> modify) => this;
-    
-    public RustyServer ReservePaths(params string[] paths) => this;
-    public RustyServer SetMetaTitle(string title) => this;
-    public RustyServer SetMetaDescription(string description) => this;
-    public RustyServer SetMetaGitHubUrl(string url) => this;
-    
-    public RustyServer UseTheme(Theme theme) => this;
-    public RustyServer UseTheme(Func<Theme> themeFactory) => this;
-    public RustyServer UseTheme(Action<Theme> configureTheme) => this;
-    public RustyServer UseManifest(Action<ManifestOptions>? configure = null) => this;
-    
-    public RustyServer DangerouslyAllowLocalFiles() => this;
-    public RustyServer UseHtmlFilter(IHtmlFilter filter) => this;
-    public RustyServer UseHtmlPipeline(Action<HtmlPipeline> configure) => this;
-
-    public Task RunAsync(CancellationTokenSource? cts = null)
-    {
-        if (_rustServerPtr != IntPtr.Zero)
-        {
-            Console.WriteLine("[RustyServer API] Starting Axum WebSocket Engine inside Rust.");
-            return Task.Run(() =>
-            {
-                rustserver_run(_rustServerPtr);
-            });
-        }
-        else
-        {
-            Console.WriteLine("[RustyServer API] Cannot run: Rust API boundary failed to initialize.");
-            return Task.CompletedTask;
+            handleOld.Free();
+            handleNew.Free();
         }
     }
 }
