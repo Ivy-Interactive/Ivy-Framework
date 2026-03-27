@@ -77,19 +77,31 @@ public class RustyServer : IDisposable
 
     private static void OnFrontendEventReceived(IntPtr json_utf8_ptr, int json_len)
     {
-        unsafe 
+        try 
         {
-            try 
+            var bytes = new byte[json_len];
+            Marshal.Copy(json_utf8_ptr, bytes, 0, json_len);
+            
+            using var doc = System.Text.Json.JsonDocument.Parse(new ReadOnlyMemory<byte>(bytes));
+            var root = doc.RootElement;
+            
+            string action = root.GetProperty("action").GetString() ?? "";
+            if (action == "event")
             {
-                var span = new ReadOnlySpan<byte>(json_utf8_ptr.ToPointer(), json_len);
-                var jsonString = Encoding.UTF8.GetString(span);
-                Console.WriteLine($"[RustyServer C#] 🚀 BROWSER EVENT RECEIVED: {jsonString}");
-                // In Phase 6, we deserialize this and call GlobalWidgetTree.TriggerEventAsync(widgetId, eventName, args)
-            } 
-            catch (Exception ex) 
-            {
-                Console.WriteLine($"[RustyServer Bridge] Error decoding event from Rust: {ex.Message}");
+                string viewId = root.GetProperty("viewId").GetString() ?? "";
+                string widgetId = root.GetProperty("widgetId").GetString() ?? "";
+                string eventName = root.GetProperty("eventName").GetString() ?? "";
+                
+                Console.WriteLine($"[RustyServer API] Triggering C# Hook for Widget '{widgetId}', Event: '{eventName}'");
             }
+            else
+            {
+                Console.WriteLine($"[RustyServer API] 🚀 SYSTEM EVENT RECEIVED: {root.GetRawText()}");
+            }
+        } 
+        catch (Exception ex) 
+        {
+            Console.WriteLine($"[RustyServer Bridge] Error decoding event from Rust: {ex.Message}");
         }
     }
 
@@ -223,26 +235,7 @@ public class RustyServer : IDisposable
     {
         if (_rustServerPtr != IntPtr.Zero)
         {
-            // Spin up an example C# background task that simulates C# hook-based UI components 
-            // constantly diffing and pushing their new states to the Rust engine!
-            Task.Run(async () => {
-                while(true) {
-                    await Task.Delay(2000);
-                    try {
-                        var payload = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new {
-                            action = "full_render",
-                            viewId = "main_app",
-                            widgets = new[] { 
-                                new { id = "btn1", type = "Button", label = $"Server Tick: {DateTime.Now.Second}" } 
-                            }
-                        });
-                        this.RenderFlatTree(payload);
-                    } catch (Exception e) {
-                        Console.WriteLine($"[RustyServer] Simulation loop fault: {e.Message}");
-                    }
-                }
-            });
-
+            Console.WriteLine("[RustyServer API] Starting Axum WebSocket Engine inside Rust.");
             return Task.Run(() =>
             {
                 rustserver_run(_rustServerPtr);
@@ -250,7 +243,7 @@ public class RustyServer : IDisposable
         }
         else
         {
-            Console.WriteLine("[RustyServer] Cannot run: Rust state failed to initialize.");
+            Console.WriteLine("[RustyServer API] Cannot run: Rust API boundary failed to initialize.");
             return Task.CompletedTask;
         }
     }
