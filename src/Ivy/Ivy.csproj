@@ -114,4 +114,12 @@
     <Touch Files="../frontend/dist/.build-stamp" AlwaysCreate="true" />
   </Target>
 
+  <Target Name="BuildRustServer" BeforeTargets="BeforeBuild">
+    <Exec Command="cargo build --release" WorkingDirectory="../RustServer" />
+    <ItemGroup>
+      <RustBinary Include="../RustServer/target/release/*rustserver*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(RustBinary)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

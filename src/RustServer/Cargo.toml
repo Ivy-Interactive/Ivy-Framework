@@ -1,0 +1,10 @@
+[package]
+name = "rustserver"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "rustserver"
+crate-type = ["cdylib"]
+
+[dependencies]
