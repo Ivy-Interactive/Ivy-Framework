@@ -22,6 +22,9 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Generate HTTPS dev certificate
+        run: dotnet dev-certs https
+
       - name: Build backend
         run: dotnet build src/Ivy.Samples/Ivy.Samples.csproj
 
@@ -30,7 +33,7 @@ jobs:
           dotnet run --project src/Ivy.Samples/Ivy.Samples.csproj -- --port 5010 --silent &
           echo $! > backend.pid
           # Wait for server to be ready
-          timeout 30 bash -c 'until curl -f https://localhost:5010/ > /dev/null 2>&1; do sleep 1; done'
+          timeout 30 bash -c 'until curl -fk https://localhost:5010/ > /dev/null 2>&1; do sleep 1; done'
 
       - name: Install Playwright Browsers
         working-directory: ./src/frontend
