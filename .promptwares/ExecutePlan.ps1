@@ -24,8 +24,8 @@ $planYamlContent = Get-Content $planYamlPath -Raw
 $stateMatch = [regex]::Match($planYamlContent, '(?m)^state:\s*(.+)$')
 $currentState = if ($stateMatch.Success) { $stateMatch.Groups[1].Value.Trim() } else { "Unknown" }
 
-if ($currentState -ne "Approved") {
-    Write-Host "Plan is not in Approved state (current: $currentState): $PlanPath" -ForegroundColor Red
+if ($currentState -ne "Building") {
+    Write-Host "Plan is not in Building state (current: $currentState): $PlanPath" -ForegroundColor Red
     exit 1
 }
 

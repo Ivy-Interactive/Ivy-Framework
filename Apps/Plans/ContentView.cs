@@ -99,9 +99,11 @@ public class ContentView(
             | Text.Rich()
                 .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
                 .Muted("plans", word: true)
-            | new Button("Ready for Review").Icon(Icons.Check).Primary().OnClick(() =>
+            | new Button("Build").Icon(Icons.Hammer).Primary().OnClick(() =>
             {
-                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.ReadyForReview);
+                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
+                var planPath = _selectedPlan.FolderPath;
+                _jobService.StartJob("ExecutePlan", planPath);
                 _refreshPlans();
             });
 

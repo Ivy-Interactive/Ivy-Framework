@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Ivy;
-using Ivy.Hooks.Pty;
 using Ivy.Tendril.Apps.Jobs;
 
 namespace Ivy.Tendril.Services;
@@ -20,6 +19,7 @@ public class JobService
         ["UpdatePlan"] = Path.Combine(PromptsRoot, "UpdatePlan.ps1"),
         ["SplitPlan"] = Path.Combine(PromptsRoot, "SplitPlan.ps1"),
         ["ExpandPlan"] = Path.Combine(PromptsRoot, "ExpandPlan.ps1"),
+        ["ExecutePlan"] = Path.Combine(PromptsRoot, "ExecutePlan.ps1"),
     };
 
     public void SetPlanReaderService(PlanReaderService planReaderService)
@@ -46,6 +46,55 @@ public class JobService
         };
 
         _jobs[id] = job;
+
+        // Launch process
+        var processArgs = new List<string> { "-NoProfile", "-File", scriptPath };
+        processArgs.AddRange(args);
+
+        var workingDirectory = Path.GetFullPath(
+            Path.Combine(System.AppContext.BaseDirectory, "..", "..", ".."));
+
+        var psi = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "pwsh",
+            Arguments = string.Join(" ", processArgs.Select(a => $"\"{a}\"")),
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        var process = new System.Diagnostics.Process { StartInfo = psi };
+        process.OutputDataReceived += (_, e) =>
+        {
+            if (e.Data != null)
+            {
+                job.OutputLines.Add(e.Data);
+                job.LastOutputAt = DateTime.UtcNow;
+            }
+        };
+        process.ErrorDataReceived += (_, e) =>
+        {
+            if (e.Data != null)
+            {
+                job.OutputLines.Add($"[stderr] {e.Data}");
+                job.LastOutputAt = DateTime.UtcNow;
+            }
+        };
+
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+        job.Process = process;
+
+        // Monitor for completion in background
+        Task.Run(async () =>
+        {
+            await process.WaitForExitAsync();
+            CompleteJob(id, process.ExitCode);
+        });
+
         return id;
     }
 
@@ -66,6 +115,7 @@ public class JobService
         if (!_jobs.TryGetValue(id, out var job)) return;
 
         job.CancellationRequested = true;
+        try { job.Process?.Kill(entireProcessTree: true); } catch { }
         job.Status = "Stopped";
         job.CompletedAt = DateTime.UtcNow;
         if (job.StartedAt.HasValue)
@@ -85,26 +135,6 @@ public class JobService
     public JobItem? GetJob(string id)
     {
         return _jobs.GetValueOrDefault(id);
-    }
-
-    public void InitializePty(string id, PtyHandle ptyHandle)
-    {
-        if (!_jobs.TryGetValue(id, out var job)) return;
-
-        job.PtyStream = ptyHandle.Stream;
-        job.PtyHandleInput = ptyHandle.HandleInput;
-        job.PtyHandleResize = ptyHandle.HandleResize;
-        job.PtyKill = ptyHandle.Kill;
-        job.PtyClosed = ptyHandle.Closed;
-        job.PtyExitCode = ptyHandle.ExitCode;
-    }
-
-    public void UpdatePtyState(string id, bool closed, int? exitCode)
-    {
-        if (!_jobs.TryGetValue(id, out var job)) return;
-
-        job.PtyClosed = closed;
-        job.PtyExitCode = exitCode;
     }
 
     private void WriteJobLog(JobItem job)
