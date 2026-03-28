@@ -1,6 +1,6 @@
 # Ivy Framework Weekly Notes - Week of 2026-03-26
 
-## Features
+## New Features
 
 ### DataTable Footer Aggregates
 
@@ -32,7 +32,7 @@ salesData.ToDataTable()
         })
 ```
 
-When multiple aggregates are present, a dropdown selector appears in the footer cell, letting users switch between views. Footer widths automatically sync with column widths, and the footer scrolls horizontally along with the table content.
+When multiple aggregates are present, a dropdown selector appears in the footer cell, letting users switch between views.
 
 **Format numeric values** with the `.Format()` method to control how numbers display in both column cells and footers:
 
@@ -46,27 +46,6 @@ salesData.ToDataTable()
 ```
 
 Available format styles: `Decimal`, `Currency`, `Accounting`, and `Percent`. Currency and Accounting formats default to USD if no currency is specified.
-
-### URL Query Parameters Now Work with UseArgs
-
-You can now pass arguments to your Ivy app directly through URL query parameters. Previously, `UseArgs<T>()` only worked with a pre-serialized `appArgs` query parameter. Now, individual query parameters are automatically collected and made available to your app.
-
-```csharp
-// Define your args model
-public class MyArgs
-{
-    public string? NoteId { get; set; }
-    public int? PageNumber { get; set; }
-}
-
-// In your app
-var args = UseArgs<MyArgs>();
-// Accessing: /myapp?noteId=abc123&pageNumber=5
-// args.NoteId will be "abc123"
-// args.PageNumber will be 5
-```
-
-Reserved parameters (`appId`, `machineId`, `parentId`, `shell`, `appArgs`, `oauthLogin`, `id`) are excluded from automatic arg parsing.
 
 ### New Skeleton Loading Variants
 
@@ -83,54 +62,7 @@ Skeleton.DataTable(rows: 5)  // Default is 5 rows
 Skeleton.Feed(items: 3)  // Default is 3 items, includes avatar + text layout
 ```
 
-**Best Practice Example with UseQuery:**
-
-```csharp
-var query = UseQuery("key", async ct => await FetchData(ct));
-
-if (query.Loading)
-    return Skeleton.DataTable(); // Or Skeleton.Text(), Skeleton.Feed(), etc.
-
-if (query.Error is { } error)
-    return Layout.Vertical()
-        | Callout.Error($"Failed to load: {error.Message}")
-        | new Button("Retry", _ => query.Mutator.Revalidate());
-
-return new Card(query.Value);
-```
-
 Use these skeleton placeholders instead of plain "Loading..." text to maintain visual layout and provide better user experience during data fetching.
-
-### Local File Images in Markdown
-
-The Markdown widget can now display images from local file paths - useful for desktop applications or development scenarios where you need to reference files on disk. This feature requires a two-layer opt-in for security:
-
-```csharp
-// 1. Enable on the server in Program.cs
-var server = new Server()
-    .DangerouslyAllowLocalFiles();
-
-// 2. Enable on the widget
-var markdown = new Markdown("""
-    # Documentation
-
-    ![Screenshot](C:/Screenshots/example.png)
-    ![Diagram](file:///Users/me/diagrams/architecture.png)
-    """)
-    .DangerouslyAllowLocalFiles();
-```
-
-**Supported file formats:** The local file endpoint now properly handles modern image formats (WebP, AVIF), video formats (WebM), markdown files (`.md`), and JSONL data files. Files are served with proper Content-Disposition headers so they display with their actual filename rather than a generic proxy URL.
-
-**Supported path formats:**
-- Forward slash paths: `C:/Screenshots/example.png`
-- File URL protocol: `file:///Users/me/diagrams/architecture.png`
-
-**Note:** Backslash paths (`C:\Screenshots\example.png`) don't work because the markdown parser interprets backslashes as escape characters. Always use forward slashes in your image paths, even on Windows.
-
-**Important notes:**
-- Images are served through a proxy endpoint (`/ivy/local-file`) rather than directly accessing `file://` URLs, which browsers block from HTTP pages
-- Local file access is disabled by default. Only enable it in trusted contexts like desktop apps or development tools where displaying local images is the intended behavior. Don't enable this for web applications that render user-provided markdown.
 
 ### Programmatic Sheet Closing
 
@@ -216,7 +148,206 @@ new Toolbar(
 )
 ```
 
-The Toolbar supports icon-only buttons (always provide tooltips for accessibility), active/checked state for toggle buttons, and disabled state for the entire toolbar or individual items. Perfect for text editors, image editors, or any interface that needs organized action buttons.
+The Toolbar supports icon-only buttons (always provide tooltips for accessibility), active/checked state for toggle buttons, and disabled state for the entire toolbar or individual items.
+
+### Semantic Colors for MenuItem
+
+MenuItem now supports semantic color styles beyond the basic Default and Destructive options. You can now use Primary, Secondary, Success, Warning, and Info colors to better communicate the meaning and importance of menu items:
+
+```csharp
+DropDownMenu.Default()
+    .Trigger(new Button("Actions"))
+    .Items(
+        MenuItem.Default("Save").Primary()
+        | MenuItem.Default("Draft").Secondary()
+        | MenuItem.Default("Publish").Success()
+        | MenuItem.Default("Review").Warning()
+        | MenuItem.Default("Info").Info()
+        | MenuItem.Default("Delete").Destructive()
+    )
+```
+
+### SelectInput Bulk Selection Actions
+
+Multi-select inputs now support bulk actions with the `.ShowActions()` modifier. This adds "Select All" and "Clear All" buttons in the dropdown footer, making it easy to manage large lists:
+
+```csharp
+var languages = UseState<string[]>([]);
+var options = new[] { "C#", "Java", "Python", "JavaScript", "Go", "Rust" }.ToOptions();
+
+languages.ToSelectInput(options)
+    .Variant(SelectInputVariant.Select)
+    .ShowActions()
+    .Searchable(true)
+    .Placeholder("Select languages...")
+```
+
+The actions work with all multi-select variants (Select, List, Toggle) and respect your selection constraints:
+
+- "Select All" is disabled when all visible options are already selected
+- "Clear All" respects `MinSelections` constraints and won't clear below the minimum
+- When searching, "Select All" only selects matching filtered options
+- For nullable inputs, "Clear All" can clear to null when at zero selections
+
+### Automatic Enum Formatting in SelectInput
+
+Enums now display with readable, space-separated names in SelectInput dropdowns. PascalCase enum values are automatically formatted with spaces, so `BlueToRed` displays as "Blue To Red" and `LeastRecentlyUsed` displays as "Least Recently Used":
+
+```csharp
+// Define your enum
+public enum CacheStrategy
+{
+    LeastRecentlyUsed,      // Displays as "Least Recently Used"
+    LeastFrequentlyUsed,    // Displays as "Least Frequently Used"
+
+    [Description("FIFO")]   // Custom display name
+    FirstInFirstOut         // Without attribute: "First In First Out"
+}
+
+// Use in SelectInput - formatting happens automatically
+var strategy = UseState(CacheStrategy.LeastRecentlyUsed);
+return strategy.ToSelectInput()
+    .WithField()
+    .Label("Cache Strategy");
+```
+
+The formatting applies to all enums passed through `.ToOptions()`. You can override the automatic formatting by adding a `[Description]` attribute from `System.ComponentModel` to any enum value that needs precise control over its display name.
+
+### RichText.Muted() Convenience Method
+
+Added a new `.Muted()` method to `RichTextBuilder` for easily creating secondary/muted colored text. This convenience method saves you from manually specifying `Colors.Muted` each time:
+
+```csharp
+Text.Rich()
+    .Text("Status: ")
+    .Success("Active")
+    .Text(" • ")
+    .Muted("Last updated 5 minutes ago")
+```
+
+The method supports all standard text formatting options including `bold`, `italic`, `strikeThrough`, `highlightColor`, and `link`.
+
+### Callout Density Control
+
+Callouts now support three density levels to match your layout needs.
+
+```csharp
+Layout.Vertical()
+    | Callout.Info("Compact callout for tight layouts").Small()
+    | Callout.Warning("Standard callout with default spacing").Medium()
+    | Callout.Error("High-impact callout for critical messages").Large()
+```
+
+### Ghost Variant for Expandable Widget
+
+The Expandable widget now supports a Ghost variant for an ultra-minimal, understated appearance. Use `.Ghost()` to create expandables with no border, transparent background, and no shadow.
+
+```csharp
+var notes = new Expandable("Additional Notes", notesContent)
+    .Ghost();
+
+// Works great with icons too
+var advancedOptions = new Expandable("Advanced Settings", settingsContent)
+    .Ghost()
+    .Icon(Icons.Settings);
+```
+
+### Concise Chart Creation with Array-Based API
+
+For quick, pre-styled chart creation, `ToLineChart()` and `ToBarChart()` support a concise array-based syntax where you pass parameters directly instead of using the fluent API:
+
+```csharp
+var salesData = new[]
+{
+    new { Month = "Jan", Sales = 186 },
+    new { Month = "Feb", Sales = 305 },
+    new { Month = "Mar", Sales = 237 }
+};
+
+// ToLineChart(dimension, measures[], style?)
+return salesData.ToLineChart(
+    e => e.Month,
+    [e => e.Sum(f => f.Sales)],
+    LineChartStyles.Dashboard);
+```
+
+**Important:** The parameter order matters - the optional style parameter must come *after* the measures array, not before it. Use this syntax when you want pre-styled charts with minimal configuration. For custom styling and additional options like sorting or toolbox configuration, continue using the fluent API.
+
+### Charts Support Non-String Dimension Values
+
+Line, Area, Bar, Pie, Radar, and Funnel charts render correctly when the dimension column is numeric or dates, not only strings. String-typed keys are preferred; otherwise the first column is used. Values stringify for display.
+
+```csharp
+var salesByYear = new[]
+{
+    new { Year = 2022, Revenue = 100000 },
+    new { Year = 2023, Revenue = 150000 },
+    new { Year = 2024, Revenue = 180000 }
+};
+
+salesByYear.ToLineChart()
+    .Dimension(x => x.Year)
+    .Value(x => x.Revenue, "Revenue");
+```
+
+### Case-Insensitive Series Keys in Line and Bar Charts
+
+LineCharts and BarCharts use case-insensitive `dataKey` matching so series align when JSON camelCase keys (e.g. `"count"`) differ from PascalCase measure names (e.g. `Count`). Behavior matches Area, Pie, and Funnel charts.
+
+```csharp
+data.ToLineChart()
+    .Dimension(x => x.Month)
+    .Value(x => x.Sales, "Sales")
+    .Value(x => x.Target, "Target");
+```
+
+### Local File Images in Markdown
+
+The Markdown widget can now display images from local file paths. This feature requires a two-layer opt-in for security:
+
+```csharp
+// 1. Enable on the server in Program.cs
+var server = new Server()
+    .DangerouslyAllowLocalFiles();
+
+// 2. Enable on the widget
+var markdown = new Markdown("""
+    # Documentation
+
+    ![Screenshot](C:/Screenshots/example.png)
+    ![Diagram](file:///Users/me/diagrams/architecture.png)
+    """)
+    .DangerouslyAllowLocalFiles();
+```
+
+**Supported file formats:** The local file endpoint now properly handles modern image formats (WebP, AVIF), video formats (WebM), markdown files (`.md`), and JSONL data files. Files are served with proper Content-Disposition headers so they display with their actual filename rather than a generic proxy URL.
+
+**Supported path formats:**
+
+- Forward slash paths: `C:/Screenshots/example.png`
+- File URL protocol: `file:///Users/me/diagrams/architecture.png`
+
+**Important notes:**
+
+- Backslash paths (`C:\Screenshots\example.png`) don't work because the markdown parser interprets backslashes as escape characters. Always use forward slashes in your image paths, even on Windows
+- Images are served through a proxy endpoint (`/ivy/local-file`) rather than directly accessing `file://` URLs, which browsers block from HTTP pages
+- Local file access is disabled by default. Only enable it in trusted contexts like desktop apps or development tools where displaying local images is the intended behavior. Don't enable this for web applications that render user-provided markdown.
+
+### Markdown OnLinkClick Intercepts All Links
+
+When you register `OnLinkClick`, it runs for http/https and custom schemes so you can intercept all link navigation. Previously only non-standard URLs invoked the handler.
+
+```csharp
+var markdown = new Markdown("""
+    [Internal Page](/docs/guide)
+    [External Site](https://example.com)
+    """)
+    .OnLinkClick(url => {
+        if (url.StartsWith("http"))
+            UseToast().Show($"Opening: {url}", ToastType.Info);
+        UseNavigation().NavigateTo(url);
+    });
+```
 
 ### Navigation Beacons for Type-Safe App Navigation
 
@@ -286,13 +417,57 @@ else
 }
 ```
 
-**Key benefits:**
-- Apps don't need to know each other's IDs
-- Type-safe navigation with compile-time checking
-- Dynamic discovery of navigation capabilities
-- Graceful handling when target app is unavailable
-
 **Important:** Only one app can register a beacon for each entity type. Use meaningful entity classes rather than reusing primitives.
+
+### URL Query Parameters Now Work with UseArgs
+
+You can now pass arguments to your Ivy app directly through URL query parameters. Previously, `UseArgs<T>()` only worked with a pre-serialized `appArgs` query parameter. Now, individual query parameters are automatically collected and made available to your app.
+
+```csharp
+// Define your args model
+public class MyArgs
+{
+    public string? NoteId { get; set; }
+    public int? PageNumber { get; set; }
+}
+
+// In your app
+var args = UseArgs<MyArgs>();
+// Accessing: /myapp?noteId=abc123&pageNumber=5
+// args.NoteId will be "abc123"
+// args.PageNumber will be 5
+```
+
+Reserved parameters (`appId`, `machineId`, `parentId`, `shell`, `appArgs`, `oauthLogin`, `id`) are excluded from automatic arg parsing.
+
+### BaseUrl Now Includes Base Path
+
+`AppContext.BaseUrl` now automatically includes the base path when your app is deployed behind a reverse proxy with a path prefix. Previously, you needed to manually append the base path when constructing URLs. Now it's handled automatically:
+
+```csharp
+// When deployed at https://example.com/myapp/
+var context = GetAppContext();
+var url = context.BaseUrl;
+// Returns: "https://example.com/myapp/" (includes trailing slash)
+```
+
+This simplifies URL construction for OAuth callbacks, webhooks, and shareable links in reverse proxy deployments.
+
+### Contextual Hints in Error Dialogs
+
+Error dialogs now include helpful troubleshooting hints for common .NET exceptions. When an error occurs, Ivy automatically detects the exception type and displays an info callout with actionable guidance specific to that error:
+
+```csharp
+// When a NullReferenceException occurs in your app, users will see:
+// Error message + helpful hint like:
+// "An object reference was not set. In Ivy apps, common causes:
+//  - Accessing UseState<T>().Value before it has been initialized
+//  - Calling UseArgs<T>() when no args were passed to the view
+//  - A UseQuery result accessed before loading completes (check .Loading first)
+//  - A service not registered in Program.cs"
+```
+
+The framework provides contextual hints for common exceptions including `NullReferenceException`, `BadImageFormatException`, `FileNotFoundException`, `TypeLoadException`, `TimeoutException`, and `InvalidOperationException`. Each hint includes Ivy-specific causes and remediation steps, helping you debug issues faster without leaving your application.
 
 ## Breaking Changes
 
@@ -311,210 +486,6 @@ var path = context.BasePath;
 ```
 
 The CLI flag `--path-base` remains unchanged.
-
-## Improvements
-
-### Contextual Hints in Error Dialogs
-
-Error dialogs now include helpful troubleshooting hints for common .NET exceptions. When an error occurs, Ivy automatically detects the exception type and displays an info callout with actionable guidance specific to that error:
-
-```csharp
-// When a NullReferenceException occurs in your app, users will see:
-// Error message + helpful hint like:
-// "An object reference was not set. In Ivy apps, common causes:
-//  - Accessing UseState<T>().Value before it has been initialized
-//  - Calling UseArgs<T>() when no args were passed to the view
-//  - A UseQuery result accessed before loading completes (check .Loading first)
-//  - A service not registered in Program.cs"
-```
-
-The framework provides contextual hints for common exceptions including `NullReferenceException`, `BadImageFormatException`, `FileNotFoundException`, `TypeLoadException`, `TimeoutException`, and `InvalidOperationException`. Each hint includes Ivy-specific causes and remediation steps, helping you debug issues faster without leaving your application.
-
-### SelectInput Bulk Selection Actions
-
-Multi-select inputs now support bulk actions with the `.ShowActions()` modifier. This adds "Select All" and "Clear All" buttons in the dropdown footer, making it easy to manage large lists:
-
-```csharp
-var languages = UseState<string[]>([]);
-var options = new[] { "C#", "Java", "Python", "JavaScript", "Go", "Rust" }.ToOptions();
-
-languages.ToSelectInput(options)
-    .Variant(SelectInputVariant.Select)
-    .ShowActions()
-    .Searchable(true)
-    .Placeholder("Select languages...")
-```
-
-The actions work with all multi-select variants (Select, List, Toggle) and respect your selection constraints:
-- "Select All" is disabled when all visible options are already selected
-- "Clear All" respects `MinSelections` constraints and won't clear below the minimum
-- When searching, "Select All" only selects matching filtered options
-- For nullable inputs, "Clear All" can clear to null when at zero selections
-
-### RichText.Muted() Convenience Method
-
-Added a new `.Muted()` method to `RichTextBuilder` for easily creating secondary/muted colored text. This convenience method saves you from manually specifying `Colors.Muted` each time:
-
-```csharp
-Text.Rich()
-    .Text("Status: ")
-    .Success("Active")
-    .Text(" • ")
-    .Muted("Last updated 5 minutes ago")
-```
-
-The method supports all standard text formatting options including `bold`, `italic`, `strikeThrough`, `highlightColor`, and `link`.
-
-### BaseUrl Now Includes Base Path
-
-`AppContext.BaseUrl` now automatically includes the base path when your app is deployed behind a reverse proxy with a path prefix. Previously, you needed to manually append the base path when constructing URLs. Now it's handled automatically:
-
-```csharp
-// When deployed at https://example.com/myapp/
-var context = GetAppContext();
-var url = context.BaseUrl;
-// Returns: "https://example.com/myapp/" (includes trailing slash)
-```
-
-This simplifies URL construction for OAuth callbacks, webhooks, and shareable links in reverse proxy deployments.
-
-### Semantic Colors for MenuItem
-
-MenuItem now supports semantic color styles beyond the basic Default and Destructive options. You can now use Primary, Secondary, Success, Warning, and Info colors to better communicate the meaning and importance of menu items:
-
-```csharp
-DropDownMenu.Default()
-    .Trigger(new Button("Actions"))
-    .Items(
-        MenuItem.Default("Save").Primary()
-        | MenuItem.Default("Draft").Secondary()
-        | MenuItem.Default("Publish").Success()
-        | MenuItem.Default("Review").Warning()
-        | MenuItem.Default("Info").Info()
-        | MenuItem.Separator()
-        | MenuItem.Default("Delete").Destructive()
-    )
-```
-
-Each semantic color applies consistent styling that matches the rest of the Ivy design system, making it easier to create visually cohesive menus that clearly indicate the purpose of each action.
-
-### Automatic Enum Formatting in SelectInput
-
-Enums now display with readable, space-separated names in SelectInput dropdowns. PascalCase enum values are automatically formatted with spaces, so `BlueToRed` displays as "Blue To Red" and `LeastRecentlyUsed` displays as "Least Recently Used":
-
-```csharp
-// Define your enum
-public enum CacheStrategy
-{
-    LeastRecentlyUsed,      // Displays as "Least Recently Used"
-    LeastFrequentlyUsed,    // Displays as "Least Frequently Used"
-
-    [Description("FIFO")]   // Custom display name
-    FirstInFirstOut         // Without attribute: "First In First Out"
-}
-
-// Use in SelectInput - formatting happens automatically
-var strategy = UseState(CacheStrategy.LeastRecentlyUsed);
-return strategy.ToSelectInput()
-    .WithField()
-    .Label("Cache Strategy");
-```
-
-The formatting applies to all enums passed through `.ToOptions()`. You can override the automatic formatting by adding a `[Description]` attribute from `System.ComponentModel` to any enum value that needs precise control over its display name.
-
-### Callout Density Control
-
-Callouts now support three density levels to match your layout needs. Use `.Small()` for compact layouts, `.Medium()` (default) for standard spacing, or `.Large()` for high-impact messages:
-
-```csharp
-Layout.Vertical().Gap(4)
-    | Callout.Info("Compact callout for tight layouts").Small()
-    | Callout.Warning("Standard callout with default spacing").Medium()
-    | Callout.Error("High-impact callout for critical messages").Large()
-```
-
-Density controls icon size (20px/24px/28px), padding, and vertical alignment automatically. Small callouts work well in sidebars or lists, while large callouts are ideal for prominent notifications or error states. Icons now align perfectly with text content across all densities, with refined spacing and line height for optimal readability.
-
-### Ghost Variant for Expandable Widget
-
-The Expandable widget now supports a Ghost variant for an ultra-minimal, understated appearance. Use `.Ghost()` to create expandables with no border, transparent background, and no shadow - perfect for secondary or less prominent collapsible sections:
-
-```csharp
-var notes = new Expandable("Additional Notes", notesContent)
-    .Ghost();
-
-// Works great with icons too
-var advancedOptions = new Expandable("Advanced Settings", settingsContent)
-    .Ghost()
-    .Icon(Icons.Settings);
-```
-
-The Ghost variant reduces visual chrome to the absolute minimum (no border, transparent background, no shadow, minimal padding) while maintaining full expandable functionality. This provides the lightest possible visual weight that won't compete with primary content on your page.
-
-### Concise Chart Creation with Array-Based API
-
-For quick, pre-styled chart creation, `ToLineChart()` and `ToBarChart()` support a concise array-based syntax where you pass parameters directly instead of using the fluent API:
-
-```csharp
-var salesData = new[]
-{
-    new { Month = "Jan", Sales = 186 },
-    new { Month = "Feb", Sales = 305 },
-    new { Month = "Mar", Sales = 237 }
-};
-
-// ToLineChart(dimension, measures[], style?)
-return salesData.ToLineChart(
-    e => e.Month,
-    [e => e.Sum(f => f.Sales)],
-    LineChartStyles.Dashboard);
-```
-
-**Important:** The parameter order matters - the optional style parameter must come *after* the measures array, not before it. Use this syntax when you want pre-styled charts with minimal configuration. For custom styling and additional options like sorting or toolbox configuration, continue using the fluent API.
-
-### Charts Support Non-String Dimension Values
-
-Line, Area, Bar, Pie, Radar, and Funnel charts render correctly when the dimension column is numeric or dates, not only strings. String-typed keys are preferred; otherwise the first column is used. Values stringify for display.
-
-```csharp
-var salesByYear = new[]
-{
-    new { Year = 2022, Revenue = 100000 },
-    new { Year = 2023, Revenue = 150000 },
-    new { Year = 2024, Revenue = 180000 }
-};
-
-salesByYear.ToLineChart()
-    .Dimension(x => x.Year)
-    .Value(x => x.Revenue, "Revenue");
-```
-
-### Case-Insensitive Series Keys in Line and Bar Charts
-
-LineCharts and BarCharts use case-insensitive `dataKey` matching so series align when JSON camelCase keys (e.g. `"count"`) differ from PascalCase measure names (e.g. `Count`). Behavior matches Area, Pie, and Funnel charts.
-
-```csharp
-data.ToLineChart()
-    .Dimension(x => x.Month)
-    .Value(x => x.Sales, "Sales")
-    .Value(x => x.Target, "Target");
-```
-
-### Markdown OnLinkClick Intercepts All Links
-
-When you register `OnLinkClick`, it runs for http/https and custom schemes so you can intercept all link navigation. Previously only non-standard URLs invoked the handler.
-
-```csharp
-var markdown = new Markdown("""
-    [Internal Page](/docs/guide)
-    [External Site](https://example.com)
-    """)
-    .OnLinkClick(url => {
-        if (url.StartsWith("http"))
-            UseToast().Show($"Opening: {url}", ToastType.Info);
-        UseNavigation().NavigateTo(url);
-    });
-```
 
 ## Bug Fixes
 
