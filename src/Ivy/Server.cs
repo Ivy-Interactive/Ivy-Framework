@@ -676,7 +676,7 @@ public class Server
         {
             options.SerializerOptions = MessagePackSerializerOptions.Standard.WithResolver(
                 CompositeResolver.Create(
-                    new IMessagePackFormatter[] { 
+                    new IMessagePackFormatter[] {
                         new JsonNodeMessagePackFormatter(),
                         new JsonObjectMessagePackFormatter(),
                         new JsonArrayMessagePackFormatter(),

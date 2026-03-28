@@ -123,11 +123,11 @@ public sealed class JsonNodeMessagePackFormatter : IMessagePackFormatter<JsonNod
                 return JsonValue.Create(reader.ReadString());
 
             case MessagePackType.Integer:
-                try 
+                try
                 {
                     return JsonValue.Create(reader.ReadInt64());
-                } 
-                catch 
+                }
+                catch
                 {
                     return JsonValue.Create(reader.ReadUInt64());
                 }
