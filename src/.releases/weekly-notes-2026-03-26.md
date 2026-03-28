@@ -7,7 +7,7 @@
 
 ### DataTable Footer Aggregates
 
-Display aggregate calculations (sum, average, count, etc.) directly in your DataTable footers. The new `.Footer()` method lets you add calculated summaries at the bottom of columns:
+Display aggregate calculations (sum, average, count, etc.) directly in your [**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) footers. The new `.Footer()` method lets you add calculated summaries at the bottom of columns:
 
 ```csharp
 var invoiceLines = GetInvoiceLines();
@@ -260,7 +260,7 @@ var markdown = new Markdown("""
 
 ### Markdown OnLinkClick Intercepts All Links
 
-When you register `OnLinkClick` on the Markdown widget, it runs for http/https and custom schemes so you can intercept all link navigation. Previously only non-standard URLs invoked the handler.
+When you register `OnLinkClick` on the Markdown widget, it runs for http/https and custom schemes so you can intercept all link navigation. Previously only non-standard URLs invoked the handler. See the [**Markdown**](https://docs.ivy.app/widgets/primitives/markdown) widget documentation for details.
 
 ```csharp
 var markdown = new Markdown("""
