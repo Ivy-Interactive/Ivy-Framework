@@ -518,54 +518,11 @@ return salesData.ToLineChart(
 
 **Important:** The parameter order matters - the optional style parameter must come *after* the measures array, not before it. Use this syntax when you want pre-styled charts with minimal configuration. For custom styling and additional options like sorting or toolbox configuration, continue using the fluent API.
 
-## Bug Fixes
+### Charts Support Non-String Dimension Values
 
-### Fixed Asset Loading Behind Reverse Proxies
-
-Ivy apps now load correctly when deployed behind a reverse proxy with a path prefix (e.g., `/test/studio/`). Previously, Vite would generate absolute asset paths (`/assets/...`) that didn't respect the base path, causing 404 errors. The Vite config now uses relative paths (`./`) which work correctly with the `BasePathFilter.cs` in all deployment contexts.
-
-### Improved Focus/Blur Event Handling for SelectInput
-
-The `SelectInput` widget now handles `OnFocus` and `OnBlur` events more accurately. These events now only fire when focus truly enters or leaves the select component, rather than when focus moves between internal elements. Additionally, disabled select inputs no longer fire these events.
-
-### Fixed Shell-less Mode to Auto-Select First App
-
-When using `?shell=false` to bypass the AppShell, Ivy now automatically selects the first visible app if no default app is configured. Previously, this would result in no app being loaded. The framework now intelligently selects the first available app based on order and title.
-
-### Fixed Accessibility Warning in Sheet Components
-
-All Sheet components now include the required `SheetDescription` element to satisfy accessibility requirements. Radix UI Dialog (which Sheet is built on) requires both Title and Description for proper accessibility compliance. Previously, sheets without a description would generate a browser console warning about a missing `aria-describedby` reference. The framework now always renders a SheetDescription element - either with the provided description text, or with a screen reader-only fallback ("Sheet content") to ensure accessibility compliance.
-
-### Fixed UseDownload Method Overload Ambiguity
-
-Resolved a compiler ambiguity error (CS0121) that could occur when calling `UseDownload` with synchronous factory methods. The framework now properly prioritizes the synchronous overloads, preventing ambiguous method call errors.
-
-### Fixed SignalR Connection Parameter Handling
-
-Ivy apps using SignalR now properly maintain their `BaseUrl` and `ProjectDirectory` properties. Previously, SignalR's internal `id` query parameter could interfere with app argument handling, causing these values to be empty.
-
-### Fixed Decimal Value Rendering in DataTable Columns
-
-DataTable columns displaying decimal and currency values now render correctly. Previously, decimal columns could display as long strings of zeros (e.g., "00000000000000000000") instead of properly formatted numbers (e.g., "129.99" or "$129.99"). The framework now properly handles Arrow Decimal128 objects by converting bigint and string representations to JavaScript numbers with correct decimal scaling.
-
-### Fixed .NET 10 Compatibility Issue
-
-Resolved a runtime error affecting .NET 10 applications where `FileNotFoundException` would be thrown for `Microsoft.Extensions.Configuration.Abstractions`. The framework now includes an explicit package reference to this assembly, ensuring it's available at runtime. Previously, Ivy relied on a transitive dependency that wasn't automatically copied to consuming applications in .NET 10.
-
-### Fixed Callout Icon Alignment for Multi-line Content
-
-The Callout widget icon now aligns to the top of the content instead of being vertically centered. This provides better visual consistency when callouts contain multiple lines of text, keeping the icon positioned with the first line rather than floating in the middle of longer messages. Additionally, callouts without titles now have pixel-perfect icon and text alignment across all density sizes (small, medium, large).
-
-### Fixed SpacerWidget to Grow by Default
-
-The `SpacerWidget` now properly grows to fill available space in flex layouts. Previously, spacers would not expand automatically, requiring manual sizing. Now spacers will naturally fill remaining space in horizontal and vertical layouts, making it easier to create balanced layouts and push elements apart without explicitly calculating dimensions.
-
-### Fixed Charts with Non-String Dimension Values
-
-Charts (Line, Area, Bar, Pie, Radar, Funnel) now render correctly when using non-string dimension values like integer years or dates. Previously, charts would display empty when the dimension column contained numeric values instead of strings:
+Line, Area, Bar, Pie, Radar, and Funnel charts render correctly when the dimension column is numeric or dates, not only strings. String-typed keys are preferred; otherwise the first column is used. Values stringify for display.
 
 ```csharp
-// This now works correctly - years as integers
 var salesByYear = new[]
 {
     new { Year = 2022, Revenue = 100000 },
@@ -578,29 +535,20 @@ salesByYear.ToLineChart()
     .Value(x => x.Revenue, "Revenue");
 ```
 
-The framework now intelligently detects dimension columns by prioritizing string-typed keys but falling back to the first available key when no string columns exist. All dimension values are automatically converted to strings for display, ensuring charts work with any data type in the dimension column.
+### Case-Insensitive Series Keys in Line and Bar Charts
 
-### Fixed Case-Sensitive Matching in LineChart and BarChart Series
-
-LineCharts and BarCharts now correctly display data when using explicitly configured series. Previously, charts would show axes but no data lines due to a case sensitivity mismatch - the JSON serializer camelCased data keys (e.g., "count") while the chart configuration preserved PascalCase measure names (e.g., "Count"). The framework now uses case-insensitive matching for dataKey configuration:
+LineCharts and BarCharts use case-insensitive `dataKey` matching so series align when JSON camelCase keys (e.g. `"count"`) differ from PascalCase measure names (e.g. `Count`). Behavior matches Area, Pie, and Funnel charts.
 
 ```csharp
-// This now works correctly regardless of casing
 data.ToLineChart()
     .Dimension(x => x.Month)
-    .Value(x => x.Sales, "Sales")    // Works with "Sales", "sales", or any casing
-    .Value(x => x.Target, "Target");  // Works with "Target", "target", or any casing
+    .Value(x => x.Sales, "Sales")
+    .Value(x => x.Target, "Target");
 ```
 
-This fix aligns LineChart and BarChart behavior with other chart types (AreaChart, PieChart, FunnelChart) which already used case-insensitive matching.
+### Markdown OnLinkClick Intercepts All Links
 
-### Fixed NumberInput Display with Programmatic Value Changes
-
-NumberInput now correctly displays values when they are set programmatically from code. Previously, changing a NumberInput's value via state binding or code could result in malformed display values (e.g., "20,001,503,000" instead of "2000") because the internal display state wasn't syncing with external value changes. The component now properly updates its display formatting whenever the bound value changes while the input is not focused.
-
-### Fixed Markdown OnLinkClick to Intercept All URLs
-
-The Markdown widget's `OnLinkClick` handler now fires for all link clicks, including standard http/https URLs. Previously, `OnLinkClick` would only be called for non-standard URLs, while standard web links would open directly in the browser. Now when you register an `OnLinkClick` handler, it intercepts all link clicks, giving you complete control over link navigation:
+When you register `OnLinkClick`, it runs for http/https and custom schemes so you can intercept all link navigation. Previously only non-standard URLs invoked the handler.
 
 ```csharp
 var markdown = new Markdown("""
@@ -608,26 +556,25 @@ var markdown = new Markdown("""
     [External Site](https://example.com)
     """)
     .OnLinkClick(url => {
-        // This now fires for both internal AND external URLs
         if (url.StartsWith("http"))
-        {
-            // Handle external links your way
             UseToast().Show($"Opening: {url}", ToastType.Info);
-        }
         UseNavigation().NavigateTo(url);
     });
 ```
 
-This fix ensures consistent behavior across all link types and allows you to implement custom routing, analytics tracking, or confirmation dialogs for external links.
+## Bug Fixes
 
-### Fixed BarChart Gap Property Double-Percent Bug
-
-BarCharts now correctly handle `barGap` and `barCategoryGap` properties when set to string values. Previously, the framework would unconditionally append '%' to gap values, causing string values like `"10%"` to become invalid `"10%%"` values. The framework now checks the value type - if numeric, it appends '%'; if already a string, it uses the value as-is. This ensures both numeric gap values (e.g., `10`) and pre-formatted string values (e.g., `"10%"`) work correctly.
-
-### Fixed Empty CodeBlock Minimum Height
-
-CodeBlock widgets now render with proper minimum height even when they contain no content. Previously, empty code blocks could collapse to zero height, making them invisible or difficult to interact with. The framework now calculates a minimum height based on font size, line height, and padding to ensure empty code blocks always display at least one line of visible space.
-
-### Fixed Badge Widget Flexbox Layout
-
-Badge widgets now render correctly in all layout contexts. Previously, badges used `inline-flex` with `w-min` (minimum width) constraints that could cause layout issues in certain flex containers. The framework now uses standard `flex` display without width constraints, ensuring badges layout properly within any parent container while maintaining their compact, content-hugging appearance.
+- **Vite / reverse proxy**: Ivy apps load correctly behind a path-prefixed reverse proxy (e.g. `/test/studio/`). Vite now emits relative asset paths (`./`) instead of absolute `/assets/...`, matching `BasePathFilter` and fixing 404s.
+- **SelectInput**: `OnFocus` / `OnBlur` fire only when focus enters or leaves the control (not when moving between internal parts); disabled selects no longer fire these events.
+- **`?shell=false`**: With no default app configured, Ivy auto-selects the first visible app (order and title) instead of loading nothing.
+- **Sheet / a11y**: Every Sheet includes `SheetDescription` or a screen-reader-only fallback ("Sheet content") so Radix Dialog satisfies `aria-describedby` and console warnings are gone.
+- **UseDownload**: CS0121 ambiguity when passing synchronous factories is resolved; the synchronous overloads are chosen correctly.
+- **SignalR**: `BaseUrl` and `ProjectDirectory` stay set; SignalR's internal `id` query parameter no longer clears app argument handling.
+- **DataTable / decimals**: Decimal and currency columns render correctly; Arrow Decimal128 maps to JavaScript numbers with correct scaling (no long zero strings).
+- **.NET 10**: Explicit reference to `Microsoft.Extensions.Configuration.Abstractions` fixes `FileNotFoundException` when the transitive assembly was not copied into consuming apps on .NET 10.
+- **Callout**: Icon aligns to the top for multi-line content; titleless callouts get aligned icon and text at all densities.
+- **SpacerWidget**: Grows by default in flex layouts to fill remaining space (horizontal and vertical).
+- **NumberInput**: Display stays in sync when the bound value changes programmatically while unfocused (fixes malformed grouped-digit strings).
+- **BarChart gaps**: `barGap` / `barCategoryGap` append `%` only for numeric values; string values like `"10%"` are no longer doubled to `"10%%"`.
+- **CodeBlock**: Empty blocks get a minimum height from font size, line height, and padding so they stay visible and usable.
+- **Badge**: Uses `flex` without `w-min` so badges lay out reliably inside flex parents while staying compact.
