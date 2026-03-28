@@ -102,11 +102,11 @@ class Program
         });
 
         if (process == null) throw new Exception("Failed to start process");
-        
+
         // Discard output so buffer doesn't fill
         string stdOut = process.StandardOutput.ReadToEnd();
         string stdErr = process.StandardError.ReadToEnd();
-        
+
         process.WaitForExit();
         if (process.ExitCode != 0)
         {

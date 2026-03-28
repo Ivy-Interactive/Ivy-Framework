@@ -47,7 +47,7 @@ pub fn convert_async(
     namespace: &str,
     skip_if_not_changed: bool,
     order: Option<i32>
-) {
+) -> Result<(), String> {
     let class_name = format!("{}App", name);
     let markdown_content = fs::read_to_string(absolute_path).expect("Failed to read");
     let hash = utils::get_short_hash(&markdown_content);
@@ -55,7 +55,7 @@ pub fn convert_async(
     if output_file.exists() && skip_if_not_changed {
         if let Some(old_hash) = file_hash::read_hash(output_file) {
             if old_hash == hash {
-                return;
+                return Ok(());
             }
         }
     }
@@ -73,9 +73,8 @@ pub fn convert_async(
     parse_options.constructs.frontmatter = true;
     
     let ast_result = to_mdast(&markdown_content, &parse_options);
-    if ast_result.is_err() {
-        println!("Failed to parse markdown: {:?}", absolute_path);
-        return;
+    if let Err(e) = ast_result {
+        return Err(format!("Failed to parse markdown: {:?} - {}", absolute_path, e));
     }
     let ast = ast_result.unwrap();
 
@@ -175,6 +174,7 @@ pub fn convert_async(
 
     fs::write(output_file, code_builder).expect("Failed to write to file");
     file_hash::write_hash(output_file, &hash);
+    Ok(())
 }
 
 fn handle_blocks(

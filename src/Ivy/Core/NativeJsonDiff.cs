@@ -50,8 +50,7 @@ public static class NativeJsonDiff
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] NativeJsonDiff: {ex.Message}");
-            return null;
+            throw new InvalidOperationException($"[NativeJsonDiff Error] Failed to compute patch from FFI layer.", ex);
         }
         finally
         {

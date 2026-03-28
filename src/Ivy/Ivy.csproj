@@ -120,7 +120,7 @@
 
   <Target Name="AddRustBinariesToContent" BeforeTargets="AssignTargetPaths" DependsOnTargets="BuildRustServer">
     <ItemGroup>
-      <Content Include="../RustServer/target/release/*rustserver*">
+      <Content Include="../RustServer/target/release/*rustserver*.dll;../RustServer/target/release/*rustserver*.so;../RustServer/target/release/*rustserver*.dylib">
         <Link>%(Filename)%(Extension)</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <Visible>false</Visible>

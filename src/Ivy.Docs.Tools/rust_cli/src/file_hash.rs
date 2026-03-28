@@ -8,6 +8,7 @@ pub fn write_hash(file_path: &Path, hash: &str) {
 
 #[cfg(windows)]
 pub fn write_hash(file_path: &Path, hash: &str) {
+    use std::fs;
     // Windows ADS
     if let Some(path_str) = file_path.to_str() {
         let ads_path = format!("{}:hash", path_str);
@@ -26,6 +27,7 @@ pub fn read_hash(file_path: &Path) -> Option<String> {
 
 #[cfg(windows)]
 pub fn read_hash(file_path: &Path) -> Option<String> {
+    use std::fs;
     if let Some(path_str) = file_path.to_str() {
         let ads_path = format!("{}:hash", path_str);
         if Path::new(&ads_path).exists() {

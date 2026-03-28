@@ -147,7 +147,7 @@ fn main() {
                     format!("{}.Apps.{}", root_namespace, namespace_suffix)
                 };
                 
-                converter::convert_async(
+                if let Err(e) = converter::convert_async(
                     &name,
                     &relative_input_path_str,
                     absolute_input_path,
@@ -155,7 +155,9 @@ fn main() {
                     &namespace,
                     skip_if_not_changed,
                     order
-                );
+                ) {
+                    println!("Error converting {}: {}", name, e);
+                }
             });
         }
     }
