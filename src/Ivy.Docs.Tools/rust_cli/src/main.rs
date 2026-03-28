@@ -1,5 +1,4 @@
 use clap::{Parser, Subcommand};
-use glob::glob;
 use rayon::prelude::*;
 use std::fs;
 use std::path::{Path, PathBuf};

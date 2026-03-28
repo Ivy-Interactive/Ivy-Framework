@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use regex::Regex;
 use std::process::Command;
 use std::sync::Mutex;
@@ -39,7 +39,7 @@ pub fn format_literal(literal: &str) -> String {
 
 pub fn is_view(code: &str) -> Option<String> {
     let class_re = Regex::new(r"class\s+([A-Za-z0-9_]+)\s*:\s*(?:[^\{]*?)ViewBase").unwrap();
-    let build_re = Regex::new(r"override[\s\w\?]+Build\s*\(").unwrap();
+    let build_re = Regex::new(r"override[\s\w\?<>\.]+Build\s*\(").unwrap();
     if let Some(caps) = class_re.captures(code) {
         if build_re.is_match(code) { return Some(caps[1].to_string()); }
     }

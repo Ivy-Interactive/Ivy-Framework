@@ -27,7 +27,6 @@ pub struct AppMeta {
     pub group_expanded: bool,
     pub search_hints: Option<Vec<String>>,
     pub imports: Option<Vec<String>>,
-    pub description: Option<String>,
     #[serde(default)]
     pub hidden: bool,
 }
@@ -63,7 +62,10 @@ pub fn convert_async(
 
     let document_source = utils::get_git_file_url(absolute_path);
     
-    let mut app_meta = AppMeta::default();
+    let mut app_meta = AppMeta {
+        view_base: "ViewBase".to_string(),
+        ..Default::default()
+    };
     
     // The markdown crate natively parses YAML into a Node::Yaml object, but it's easier
     // to manually slice it out just like C# does for parsing AppMeta.
@@ -83,6 +85,10 @@ pub fn convert_async(
                 app_meta = meta;
             }
         }
+    }
+
+    if app_meta.view_base.is_empty() {
+        app_meta.view_base = "ViewBase".to_string();
     }
 
     if let Some(o) = order { app_meta.order = o; }
@@ -185,7 +191,7 @@ fn handle_blocks(
 ) {
     let mut section_builder = String::new();
     
-    let mut write_section = |section: &mut String, code_builder: &mut String, referenced_apps: &mut HashSet<String>, remove_bottom_margin: bool| {
+    let write_section = |section: &mut String, code_builder: &mut String, referenced_apps: &mut HashSet<String>, _remove_bottom_margin: bool| {
         let trimmed = section.trim();
         if !trimmed.is_empty() {
             let (types, converted) = link_converter.convert(trimmed);
@@ -315,7 +321,7 @@ fn handle_details_direct(
     view_builder: &mut String,
     used_class_names: &mut HashSet<String>,
     referenced_apps: &mut HashSet<String>,
-    link_converter: &LinkConverter,
+    _link_converter: &LinkConverter,
     base_indent: usize,
 ) {
     let summary_match = SUMMARY_START.find(html_content).expect("Details block missing <Summary>");
@@ -411,7 +417,7 @@ fn handle_demo_code_block(
     let parts: Vec<&str> = arguments.split_whitespace().collect();
     let layout = if parts.is_empty() { "demo" } else { parts[0] };
 
-    let mut append_demo_content = |cb: &mut String, tabs: usize, insert: &str| {
+    let append_demo_content = |cb: &mut String, tabs: usize, insert: &str| {
         cb.push_str(&format!("{}{}new Box().Content({})\n", "    ".repeat(tabs), if is_nested_content { ", " } else { "| " }, insert));
     };
 
@@ -527,17 +533,10 @@ fn map_language_to_enum(lang: &str) -> &'static str {
     }
 }
 
-fn remove_first_last_line(input: &str) -> String {
-    let lines: Vec<&str> = input.lines().collect();
-    if lines.len() <= 2 {
-        return String::new();
-    }
-    lines[1..lines.len()-1].join("\n")
-}
 
 fn handle_code_block(
     code_node: &markdown::mdast::Code,
-    markdown_content: &str,
+    _markdown_content: &str,
     code_builder: &mut String,
     view_builder: &mut String,
     used_class_names: &mut HashSet<String>,
@@ -549,7 +548,7 @@ fn handle_code_block(
     // In markdown crate, code_node.value is just the parsed string context WITHOUT the delimiters!
     // But `MarkdownConverter.cs` executes `RemoveFirstAndLastLine()` because Markdig gave the raw ```!
     // So with `markdown` crate, we DO NOT DO `RemoveFirstAndLastLine()` !!
-    let mut code_content = code_node.value.trim().to_string();
+    let code_content = code_node.value.trim().to_string();
 
     let meta = code_node.meta.as_deref().unwrap_or("").trim().to_lowercase();
 
