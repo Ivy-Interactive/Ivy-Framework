@@ -80,7 +80,9 @@ The Ivy.Console CLI provides a suite of tools to streamline your development wor
 
 > ⚠️ **Note:** Ivy.Console is still in beta, and the agentic features require an account. [Register](https://ivy.app/auth/sign-up) for a free account to be among the first to try these features.
 
-Make sure you have the [.NET 10 SDK installed](https://dotnet.microsoft.com/en-us/download/dotnet/10.0).
+Make sure you have the following prerequisites installed:
+- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+- [Rust Toolchain](https://rustup.rs/) (latest stable via `rustup`)
 
 1. **Install Ivy CLI**:
 

@@ -49,7 +49,11 @@ This will create a new Ivy project with the necessary structure and configuratio
 
 ## Prerequisites
 
-Ivy Framework requires .NET 10.0 as the target framework. All Ivy projects and packages are built against this version.
+Ivy Framework strictly requires the following toolchains to develop applications:
+
+- **.NET 10.0 SDK**: All Ivy projects and packages are built against this target framework.
+- **Rust Toolchain**: Required for the underlying high-performance JSON-diffing engine. Ensure you have the latest stable compiler installed via [rustup](https://rustup.rs/).
+- **vp CLI (Vite+)**: Required for frontend orchestration. Install globally via `npm install -g vite-plus`.
 
 ## Manual Setup: Creating Your First Project
 
