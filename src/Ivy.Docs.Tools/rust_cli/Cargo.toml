@@ -16,5 +16,4 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_yaml = "0.9.34"
 sha2 = "0.11.0"
 walkdir = "2.5.0"
-[target.'cfg(unix)'.dependencies]
-xattr = "1.6.1"
+
