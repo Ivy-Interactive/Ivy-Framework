@@ -22,13 +22,17 @@ public class TendrilSettings
 {
     public string PlanFolder { get; set; } = @".plans";
     public string AgentCommand { get; set; } = "claude";
-    public List<RepoConfig> Repos { get; set; } = new();
     public List<ProjectConfig> Projects { get; set; } = new();
 }
 
 public class ConfigService
 {
     private readonly TendrilSettings _settings;
+
+    internal ConfigService(TendrilSettings settings)
+    {
+        _settings = settings;
+    }
 
     public ConfigService()
     {

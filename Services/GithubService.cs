@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace Ivy.Tendril.Services;
 
@@ -7,8 +8,69 @@ public class GithubService(ConfigService config)
     private readonly ConfigService _config = config;
     private readonly Dictionary<string, List<string>> _assigneeCache = new();
     private readonly Dictionary<string, List<string>> _labelCache = new();
+    private List<RepoConfig>? _repoCache;
 
-    public List<RepoConfig> GetRepos() => _config.Settings.Repos;
+    public List<RepoConfig> GetRepos()
+    {
+        if (_repoCache is not null)
+            return _repoCache;
+
+        var uniquePaths = _config.Settings.Projects
+            .SelectMany(p => p.Repos)
+            .Distinct()
+            .ToList();
+
+        var repos = new List<RepoConfig>();
+        foreach (var repoPath in uniquePaths)
+        {
+            var repoConfig = GetRepoConfigFromPath(repoPath);
+            if (repoConfig is not null)
+                repos.Add(repoConfig);
+        }
+
+        _repoCache = repos;
+        return repos;
+    }
+
+    internal static RepoConfig? GetRepoConfigFromPath(string repoPath)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo("git", "remote get-url origin")
+            {
+                WorkingDirectory = repoPath,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(psi);
+            if (process is null) return null;
+
+            var url = process.StandardOutput.ReadToEnd().Trim();
+            process.WaitForExit();
+            if (process.ExitCode != 0) return null;
+
+            return ParseRepoConfigFromUrl(url);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    internal static RepoConfig? ParseRepoConfigFromUrl(string url)
+    {
+        var match = Regex.Match(url, @"[/:](?<owner>[^/]+)/(?<name>[^/]+?)(?:\.git)?$");
+        if (!match.Success) return null;
+
+        return new RepoConfig
+        {
+            Owner = match.Groups["owner"].Value,
+            Name = match.Groups["name"].Value
+        };
+    }
 
     public async Task<List<string>> GetAssigneesAsync(string owner, string repo)
     {

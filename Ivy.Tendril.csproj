@@ -8,6 +8,9 @@
     <RootNamespace>Ivy.Tendril</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Ivy.Tendril.Test" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Assets/**/*" />
   </ItemGroup>
   <ItemGroup>

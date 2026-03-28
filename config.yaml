@@ -1,14 +1,5 @@
 planFolder: D:\Plans\
 agentCommand: claude
-repos:
-  - owner: Ivy-Interactive
-    name: Ivy-Framework
-  - owner: Ivy-Interactive
-    name: Ivy-Agent
-  - owner: Ivy-Interactive
-    name: Ivy-Mcp
-  - owner: Ivy-Interactive
-    name: Ivy
 
 projects:
   - name: IvyFramework
@@ -55,7 +46,7 @@ projects:
       - AF2/ — promptwares (MakePlan, IvyAgentDebug, etc.)
       - AF2/.vscode-extensions/ — VS Code extensions (installed via symlinks)
 
-  - name: Tendril
+  - name: IvyTendril
     repos:
       - D:\Repos\_Ivy\Ivy-Tendril
     context: |

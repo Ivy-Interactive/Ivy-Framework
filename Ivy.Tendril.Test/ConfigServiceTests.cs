@@ -20,9 +20,6 @@ public class ConfigServiceTests
     {
         var yaml = @"
 planFolder: D:\Plans\
-repos:
-  - owner: Test
-    name: Test-Repo
 
 projects:
   - name: TestProject
@@ -64,9 +61,6 @@ projects:
     {
         var yaml = @"
 planFolder: D:\Plans\
-repos:
-  - owner: Test
-    name: Test-Repo
 ";
 
         var deserializer = new DeserializerBuilder()
@@ -84,7 +78,6 @@ repos:
     {
         var yaml = @"
 planFolder: D:\Plans\
-repos: []
 
 projects:
   - name: IvyFramework
