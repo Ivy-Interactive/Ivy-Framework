@@ -11,10 +11,19 @@ public record RepoConfig
     public string DisplayName => Name;
 }
 
+public record ProjectConfig
+{
+    public string Name { get; set; } = "";
+    public List<string> Repos { get; set; } = new();
+    public string Context { get; set; } = "";
+}
+
 public class TendrilSettings
 {
     public string PlanFolder { get; set; } = @".plans";
+    public string AgentCommand { get; set; } = "claude";
     public List<RepoConfig> Repos { get; set; } = new();
+    public List<ProjectConfig> Projects { get; set; } = new();
 }
 
 public class ConfigService
@@ -48,4 +57,6 @@ public class ConfigService
 
     public TendrilSettings Settings => _settings;
     public string PlanFolder => _settings.PlanFolder;
+    public List<ProjectConfig> Projects => _settings.Projects;
+    public ProjectConfig? GetProject(string name) => _settings.Projects.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 }

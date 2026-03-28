@@ -1,0 +1,65 @@
+planFolder: D:\Plans\
+agentCommand: claude
+repos:
+  - owner: Ivy-Interactive
+    name: Ivy-Framework
+  - owner: Ivy-Interactive
+    name: Ivy-Agent
+  - owner: Ivy-Interactive
+    name: Ivy-Mcp
+  - owner: Ivy-Interactive
+    name: Ivy
+
+projects:
+  - name: IvyFramework
+    repos:
+      - D:\Repos\_Ivy\Ivy-Framework
+    context: |
+      Ivy Framework is the core UI framework. Key folders:
+      - src/Ivy/Widgets/ — backend widget classes
+      - src/frontend/src/widgets/ — React widget components
+      - src/Ivy.Docs.Shared/Docs/ — documentation
+      - src/Ivy.Samples.Shared/ — sample apps
+      Instructions: See D:\Repos\_Ivy\Ivy-Framework\AGENTS.md
+
+  - name: IvyAgent
+    repos:
+      - D:\Repos\_Ivy\Ivy-Agent
+      - D:\Repos\_Ivy\Ivy
+    context: |
+      Ivy Agent is the AI agent server and client. Key folders:
+      - Ivy.Agent.Server/ — agent server
+      - Ivy.Agent/Agents/Personas/Prompts/ — persona prompts
+      - Ivy.Internals/Workflows/ — workflow definitions
+      - Ivy.Agent/Tools/ — tool implementations
+
+  - name: IvyMcp
+    repos:
+      - D:\Repos\_Ivy\Ivy-Mcp
+    context: |
+      MCP service for IvyQuestions and IvyDocs.
+
+  - name: IvyConsole
+    repos:
+      - D:\Repos\_Ivy\Ivy
+    context: |
+      Console/TUI client. Key folders:
+      - Ivy.Console/ — desktop client
+      - Ivy.Internals/ — shared internals
+
+  - name: Scripts
+    repos:
+      - D:\Repos\_Personal\Scripts
+    context: |
+      Personal scripts and agentic applications.
+      - AF2/ — promptwares (MakePlan, IvyAgentDebug, etc.)
+      - AF2/.vscode-extensions/ — VS Code extensions (installed via symlinks)
+
+  - name: Tendril
+    repos:
+      - D:\Repos\_Ivy\Ivy-Tendril
+    context: |
+      Plan management TUI. Key folders:
+      - Services/ — ConfigService, PlanReaderService, JobService
+      - Apps/ — PlansApp, JobsApp UI
+      - .promptwares/ — MakePlan, UpdatePlan, SplitPlan, ExpandPlan

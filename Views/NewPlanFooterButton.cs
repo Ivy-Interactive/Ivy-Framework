@@ -9,7 +9,10 @@ public class NewPlanFooterButton : ViewBase
     public override object? Build()
     {
         var jobService = UseService<JobService>();
+        var configService = UseService<ConfigService>();
         var dialogOpen = UseState(false);
+
+        var projectNames = configService.Projects.Select(p => p.Name).ToList();
 
         var elements = new List<object>
         {
@@ -24,9 +27,16 @@ public class NewPlanFooterButton : ViewBase
         if (dialogOpen.Value)
         {
             elements.Add(new CreatePlanDialog(
-                onCreatePlan: description =>
+                projectNames: projectNames,
+                onCreatePlan: (description, project) =>
                 {
-                    jobService.StartJob("MakePlan", description);
+                    var args = new List<string> { description };
+                    if (project != "[Auto]")
+                    {
+                        args.Add("-Project");
+                        args.Add(project);
+                    }
+                    jobService.StartJob("MakePlan", args.ToArray());
                 },
                 onClose: () => dialogOpen.Set(false)
             ));

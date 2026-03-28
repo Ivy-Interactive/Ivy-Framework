@@ -18,6 +18,31 @@ Args contains the user's task description. If it references related plans with `
 
 **Extract Criticality Level**: Look for a criticality or priority level indicator in Args (e.g., "How critical is this fix:" followed by Critical, NiceToHave, or Nitpick). If not specified, default to NiceToHave.
 
+### 1.5. Load Project Context
+
+Check the firmware header for `Project:` field.
+
+**If `Project` is set to a specific project name** (not `[Auto]` or `General`):
+- Read `project-context.md` from the PlanFolder (if it exists)
+- Use the repos and context from that file to scope your research
+- The project's repos are the working directories for this plan
+- Use this context to inform queue selection and file paths
+
+**If `Project: [Auto]` or no project specified**:
+- Analyze the task description to infer the correct project
+- Read `D:\Repos\_Ivy\Ivy-Tendril\config.yaml` to understand available projects
+- Match based on keywords, repo paths, or component names in the description
+- Once you determine the project, update the `project` field in the plan.yaml file created later
+- Use the project context to scope your research
+
+Available projects and their primary indicators:
+- **IvyFramework**: Widget, UI, frontend, docs, samples
+- **IvyAgent**: Agent server, personas, workflows, tools, analyzers
+- **IvyConsole**: Console, TUI client
+- **IvyMcp**: MCP service, IvyQuestions, IvyDocs
+- **Scripts**: Personal scripts, promptwares, AF2 tools
+- **Tendril**: Plan management, job service, config service
+
 ### 2. Allocate Plan ID
 
 - Read the counter from `D:\Repos\_Ivy\.plans\.counter` (default 200 if missing)
