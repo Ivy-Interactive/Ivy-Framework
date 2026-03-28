@@ -23,36 +23,9 @@ invoiceLines.ToDataTable()
     .Height(Size.Units(80))
 ```
 
-**Multiple aggregates per column** are supported with an array syntax:
-
-```csharp
-salesData.ToDataTable()
-    .Header(x => x.Sales, "Actual Sales")
-        .Footer(x => x.Sales, new[]
-        {
-            ("Total", (Func<IEnumerable<decimal>, object>)(values => values.Sum())),
-            ("Avg", (Func<IEnumerable<decimal>, object>)(values => values.Average()))
-        })
-```
-
-When multiple aggregates are present, a dropdown selector appears in the footer cell, letting users switch between views.
-
-**Format numeric values** with the `.Format()` method to control how numbers display in both column cells and footers:
-
-```csharp
-salesData.ToDataTable()
-    .Header(x => x.Revenue, "Revenue")
-        .Format(x => x.Revenue, NumberFormatStyle.Currency, precision: 2, currency: "USD")
-        .Footer(x => x.Revenue, "Total", values => values.Sum())
-    .Header(x => x.GrowthRate, "Growth %")
-        .Format(x => x.GrowthRate, NumberFormatStyle.Percent, precision: 1)
-```
-
-Available format styles: `Decimal`, `Currency`, `Accounting`, and `Percent`. Currency and Accounting formats default to USD if no currency is specified. Full API details are in the [**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) documentation.
-
 ### New Skeleton Loading Variants
 
-Added three new [**Skeleton**](https://docs.ivy.app/widgets/primitives/skeleton) placeholder methods to improve loading UX in your apps. Previously, only `Skeleton.Card()` and `Skeleton.Form()` were available. Now you can also use:
+Added three new [**Skeleton**](https://docs.ivy.app/widgets/primitives/skeleton) placeholder methods.
 
 ```csharp
 // Show a text skeleton with multiple lines
@@ -64,8 +37,6 @@ Skeleton.DataTable(rows: 5)  // Default is 5 rows
 // Show a feed/list skeleton with avatar and content
 Skeleton.Feed(items: 3)  // Default is 3 items, includes avatar + text layout
 ```
-
-Use these skeleton placeholders instead of plain "Loading..." text to maintain visual layout and provide better user experience during data fetching.
 
 ### Programmatic Sheet Closing
 
@@ -100,11 +71,9 @@ return new Button("Add Item").WithSheet(
 );
 ```
 
-This pattern eliminates the need for manual sheet state management in common scenarios like form submissions, creating a smoother user experience where sheets dismiss automatically after successful actions.
-
 ### Toolbar Widget for Action Buttons and Controls
 
-A new [**Toolbar**](https://docs.ivy.app/widgets/common/toolbar) widget provides a flexible way to organize action buttons, editor controls, and floating action bars. The widget uses `MenuItem` objects for toolbar items and supports grouping, separators, and active states:
+A new [**Toolbar**](https://docs.ivy.app/widgets/common/toolbar) widget provides a way to organize action buttons, editor controls, and floating action bars.
 
 ```csharp
 var client = UseService<IClientProvider>();
@@ -120,42 +89,9 @@ new Toolbar()
         .OnSelect(_ => client.Toast("Zoom In"))
 ```
 
-**Group related actions** using `MenuItem` with `MenuItemVariant.Group`:
-
-```csharp
-var isBold = UseState(false);
-var isItalic = UseState(false);
-
-new Toolbar(
-    new MenuItem(
-        Variant: MenuItemVariant.Group,
-        Children: [
-            MenuItem.Default(Icons.Bold, tag: "bold")
-                .Tooltip("Bold")
-                .Checked(isBold.Value)
-                .OnSelect(_ => isBold.Set(!isBold.Value)),
-            MenuItem.Default(Icons.Italic, tag: "italic")
-                .Tooltip("Italic")
-                .Checked(isItalic.Value)
-                .OnSelect(_ => isItalic.Set(!isItalic.Value))
-        ]
-    ),
-    MenuItem.Separator(),
-    new MenuItem(
-        Variant: MenuItemVariant.Group,
-        Children: [
-            MenuItem.Default(Icons.AlignLeft, tag: "left").Tooltip("Left"),
-            MenuItem.Default(Icons.AlignCenter, tag: "center").Tooltip("Center")
-        ]
-    )
-)
-```
-
-The toolbar supports icon-only buttons (always provide tooltips for accessibility), active/checked state for toggle buttons, and disabled state for the entire toolbar or individual items.
-
 ### Semantic Colors for MenuItem
 
-[**DropDownMenu**](https://docs.ivy.app/widgets/common/drop-down-menu) items (including `MenuItem`) now support semantic color styles beyond the basic Default and Destructive options. You can use Primary, Secondary, Success, Warning, and Info colors to better communicate the meaning and importance of menu items:
+[**DropDownMenu**](https://docs.ivy.app/widgets/common/drop-down-menu) items (including `MenuItem`) now support semantic color styles beyond the basic Default and Destructive options.
 
 ```csharp
 DropDownMenu.Default()
@@ -185,13 +121,6 @@ languages.ToSelectInput(options)
     .Placeholder("Select languages...")
 ```
 
-The actions work with all multi-select variants (Select, List, Toggle) and respect your selection constraints:
-
-- "Select All" is disabled when all visible options are already selected
-- "Clear All" respects `MinSelections` constraints and won't clear below the minimum
-- When searching, "Select All" only selects matching filtered options
-- For nullable inputs, "Clear All" can clear to null when at zero selections
-
 ### Automatic Enum Formatting in SelectInput
 
 Enums now display with readable, space-separated names in SelectInput dropdowns. PascalCase enum values are automatically formatted with spaces, so `BlueToRed` displays as "Blue To Red" and `LeastRecentlyUsed` displays as "Least Recently Used":
@@ -214,11 +143,9 @@ return strategy.ToSelectInput()
     .Label("Cache Strategy");
 ```
 
-The formatting applies to all enums passed through `.ToOptions()`. You can override the automatic formatting by adding a `[Description]` attribute from `System.ComponentModel` to any enum value that needs precise control over its display name.
-
 ### RichText.Muted() Convenience Method
 
-Added a new `.Muted()` method to `RichTextBuilder` ([**RichTextBlock**](https://docs.ivy.app/widgets/primitives/rich-text-block) / `Text.Rich()`) for easily creating secondary/muted colored text. This convenience method saves you from manually specifying `Colors.Muted` each time:
+Added a new `.Muted()` method to `RichTextBuilder` ([**RichTextBlock**](https://docs.ivy.app/widgets/primitives/rich-text-block) / `Text.Rich()`) for easily creating secondary/muted colored text.
 
 ```csharp
 Text.Rich()
@@ -228,11 +155,9 @@ Text.Rich()
     .Muted("Last updated 5 minutes ago")
 ```
 
-The method supports all standard text formatting options including `bold`, `italic`, `strikeThrough`, `highlightColor`, and `link`.
-
 ### Callout Density Control
 
-[**Callout**](https://docs.ivy.app/widgets/primitives/callout) widgets now support three density levels to match your layout needs.
+[**Callout**](https://docs.ivy.app/widgets/primitives/callout) widgets now support three density levels.
 
 ```csharp
 Layout.Vertical()
@@ -243,7 +168,7 @@ Layout.Vertical()
 
 ### Ghost Variant for Expandable Widget
 
-The [**Expandable**](https://docs.ivy.app/widgets/common/expandable) widget now supports a Ghost variant for an ultra-minimal, understated appearance. Use `.Ghost()` to create expandables with no border, transparent background, and no shadow.
+The [**Expandable**](https://docs.ivy.app/widgets/common/expandable) widget now supports a Ghost variant.
 
 ```csharp
 var notes = new Expandable("Additional Notes", notesContent)
@@ -274,11 +199,9 @@ return salesData.ToLineChart(
     LineChartStyles.Dashboard);
 ```
 
-**Important:** The parameter order matters - the optional style parameter must come *after* the measures array, not before it. Use this syntax when you want pre-styled charts with minimal configuration. For custom styling and additional options like sorting or toolbox configuration, continue using the fluent API.
-
 ### Charts Support Non-String Dimension Values
 
-Line, Area, Bar, Pie, Radar, and Funnel charts render correctly when the dimension column is numeric or dates, not only strings—see [**chart widgets**](https://docs.ivy.app/widgets/charts/bar-chart). String-typed keys are preferred; otherwise the first column is used. Values stringify for display.
+Line, Area, Bar, Pie, Radar, and Funnel charts render correctly when the dimension column is numeric or dates, not only strings—see [**chart widgets**](https://docs.ivy.app/widgets/charts/bar-chart).
 
 ```csharp
 var salesByYear = new[]
@@ -295,7 +218,7 @@ salesByYear.ToLineChart()
 
 ### Case-Insensitive Series Keys in Line and Bar Charts
 
-[**Line chart**](https://docs.ivy.app/widgets/charts/line-chart) and [**Bar chart**](https://docs.ivy.app/widgets/charts/bar-chart) widgets use case-insensitive `dataKey` matching so series align when JSON camelCase keys (e.g. `"count"`) differ from PascalCase measure names (e.g. `Count`). Behavior matches Area, Pie, and Funnel charts.
+[**Line chart**](https://docs.ivy.app/widgets/charts/line-chart) and [**Bar chart**](https://docs.ivy.app/widgets/charts/bar-chart) widgets use case-insensitive `dataKey` matching so series align when JSON camelCase keys (e.g. `"count"`) differ from PascalCase measure names (e.g. `Count`).
 
 ```csharp
 data.ToLineChart()
@@ -323,7 +246,7 @@ var markdown = new Markdown("""
     .DangerouslyAllowLocalFiles();
 ```
 
-**Supported file formats:** The local file endpoint now properly handles modern image formats (WebP, AVIF), video formats (WebM), markdown files (`.md`), and JSONL data files. Files are served with proper Content-Disposition headers so they display with their actual filename rather than a generic proxy URL.
+**Supported file formats:** The local file endpoint now properly handles modern image formats (WebP, AVIF), video formats (WebM), markdown files (`.md`), and JSONL data files.
 
 **Supported path formats:**
 
@@ -332,9 +255,8 @@ var markdown = new Markdown("""
 
 **Important notes:**
 
-- Backslash paths (`C:\Screenshots\example.png`) don't work because the markdown parser interprets backslashes as escape characters. Always use forward slashes in your image paths, even on Windows
 - Images are served through a proxy endpoint (`/ivy/local-file`) rather than directly accessing `file://` URLs, which browsers block from HTTP pages
-- Local file access is disabled by default. Only enable it in trusted contexts like desktop apps or development tools where displaying local images is the intended behavior. Don't enable this for web applications that render user-provided markdown.
+- Local file access is disabled by default.
 
 ### Markdown OnLinkClick Intercepts All Links
 
@@ -378,53 +300,9 @@ public class ProductDetailsApp : ViewBase
 }
 ```
 
-**Navigate using beacons** without knowing the target app's ID:
-
-```csharp
-public class ProductListApp : ViewBase
-{
-    public override object? Build()
-    {
-        var navigator = UseNavigation();
-        var productBeacon = UseNavigationBeacon<Product>();
-
-        var products = GetProducts();
-
-        return Layout.Vertical(
-            products.Select(product =>
-                new Button($"View Product {product.Id}")
-                    .OnClick(() => {
-                        if (productBeacon != null)
-                            navigator.Navigate(productBeacon, product);
-                    })
-            )
-        );
-    }
-}
-```
-
-**Check beacon availability** before navigating:
-
-```csharp
-var productBeacon = UseNavigationBeacon<Product>();
-
-if (productBeacon != null)
-{
-    // Product detail app is available
-    navigator.Navigate(productBeacon, product);
-}
-else
-{
-    // No app handles Product entities
-    UseToast().Show("Product details not available", ToastType.Warning);
-}
-```
-
-**Important:** Only one app can register a beacon for each entity type. Use meaningful entity classes rather than reusing primitives.
-
 ### URL Query Parameters Now Work with UseArgs
 
-You can now pass arguments to your Ivy app directly through URL query parameters. Previously, `UseArgs<T>()` only worked with a pre-serialized `appArgs` query parameter. Now, individual query parameters are automatically collected and made available to your app.
+You can now pass arguments to your Ivy app directly through URL query parameters.
 
 ```csharp
 // Define your args model
@@ -441,11 +319,11 @@ var args = UseArgs<MyArgs>();
 // args.PageNumber will be 5
 ```
 
-Reserved parameters (`appId`, `machineId`, `parentId`, `shell`, `appArgs`, `oauthLogin`, `id`) are excluded from automatic arg parsing. More examples are in the [**UseArgs**](https://docs.ivy.app/hooks/core/use-args) documentation.
+More examples are in the [**UseArgs**](https://docs.ivy.app/hooks/core/use-args) documentation.
 
 ### BaseUrl Now Includes Base Path
 
-`AppContext.BaseUrl` from your [server configuration](https://docs.ivy.app/onboarding/concepts/program) now automatically includes the base path when your app is deployed behind a reverse proxy with a path prefix. Previously, you needed to manually append the base path when constructing URLs. Now it's handled automatically:
+`AppContext.BaseUrl` from your [server configuration](https://docs.ivy.app/onboarding/concepts/program) now automatically includes the base path when your app is deployed behind a reverse proxy with a path prefix.
 
 ```csharp
 // When deployed at https://example.com/myapp/
@@ -454,11 +332,9 @@ var url = context.BaseUrl;
 // Returns: "https://example.com/myapp/" (includes trailing slash)
 ```
 
-This simplifies URL construction for OAuth callbacks, webhooks, and shareable links in reverse proxy deployments.
-
 ### Contextual Hints in Error Dialogs
 
-Error dialogs now include helpful troubleshooting hints for common .NET exceptions. When an error occurs, Ivy automatically detects the exception type and displays an info callout with actionable guidance specific to that error:
+Error dialogs now include helpful troubleshooting hints for common .NET exceptions.
 
 ```csharp
 // When a NullReferenceException occurs in your app, users will see:
@@ -469,8 +345,6 @@ Error dialogs now include helpful troubleshooting hints for common .NET exceptio
 //  - A UseQuery result accessed before loading completes (check .Loading first)
 //  - A service not registered in Program.cs"
 ```
-
-See the [**Error**](https://docs.ivy.app/widgets/primitives/error) widget for standard error presentation. The framework provides contextual hints for common exceptions including `NullReferenceException`, `BadImageFormatException`, `FileNotFoundException`, `TypeLoadException`, `TimeoutException`, and `InvalidOperationException`. Each hint includes Ivy-specific causes and remediation steps, helping you debug issues faster without leaving your application.
 
 ## Breaking Changes
 
