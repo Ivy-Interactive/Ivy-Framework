@@ -19,12 +19,10 @@ public class SidebarView(
     {
         var levelOptions = new[] { "Critical", "NiceToHave", "Nitpick" };
 
-        // Apply level filter first to get the base set for queue counting
         var levelFilteredPlans = _plans.AsEnumerable();
         if (_levelFilter.Value is { } level)
             levelFilteredPlans = levelFilteredPlans.Where(p => p.Level == level);
 
-        // Build dynamic queue options with counts from level-filtered plans
         var queueCounts = levelFilteredPlans
             .GroupBy(p => p.Queue)
             .OrderByDescending(g => g.Count())
@@ -36,21 +34,28 @@ public class SidebarView(
             | new Expandable(
                 header: "Filters",
                 content: Layout.Vertical()
-                    | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().WithField().Label("Queue")
+                    | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Projects").Nullable().WithField().Label("Project")
                     | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().WithField().Label("Level")
             ).Open(false).Ghost();
     }
 
     public override object Build()
     {
-        // Apply all filters
         var filteredPlans = PlanFilters.ApplyFilters(_plans, _queueFilter.Value, _levelFilter.Value, _textFilter.Value);
 
         return new List(filteredPlans.Select(plan =>
         {
             var clickablePlan = plan;
+            var stateBadgeVariant = plan.Status switch
+            {
+                PlanStatus.Building or PlanStatus.Updating => BadgeVariant.Info,
+                PlanStatus.ReadyForReview => BadgeVariant.Success,
+                _ => BadgeVariant.Outline
+            };
+
             return new ListItem($"#{plan.Id} {plan.Title}")
                 .Content(Layout.Horizontal().Gap(1)
+                    | new Badge(plan.Status.ToString()).Variant(stateBadgeVariant).Small()
                     | new Badge(plan.Queue).Variant(BadgeVariant.Outline).Small()
                     | new Badge(plan.Level).Variant(plan.Level == "Critical" ? BadgeVariant.Warning : BadgeVariant.Outline).Small())
                 .OnClick(() => _selectedPlanState.Set(clickablePlan));

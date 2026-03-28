@@ -43,10 +43,9 @@ public class ContentView(
             var plan = selectedPlanRef.Value;
             if (isEditing.Value && !isEditingPrev.Value)
             {
-                // Entering edit mode - load content
                 if (plan != null)
                 {
-                    editContent.Set(_planService.ReadRawPlan(plan.FileName));
+                    editContent.Set(_planService.ReadRawPlan(plan.FolderName));
                 }
                 else
                 {
@@ -55,10 +54,9 @@ public class ContentView(
             }
             else if (!isEditing.Value && isEditingPrev.Value)
             {
-                // Leaving edit mode - save content
                 if (plan != null)
                 {
-                    _planService.SavePlan(plan.FileName, editContent.Value);
+                    _planService.SavePlan(plan.FolderName, editContent.Value);
                     _refreshPlans();
                 }
             }
@@ -81,7 +79,7 @@ public class ContentView(
                 | Text.Muted("Select a plan from the sidebar");
         }
 
-        var currentIndex = _allPlans.FindIndex(p => p.FileName == _selectedPlan.FileName);
+        var currentIndex = _allPlans.FindIndex(p => p.FolderName == _selectedPlan.FolderName);
 
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
@@ -106,14 +104,14 @@ public class ContentView(
                     var plan = selectedPlanRef.Value;
                     if (plan != null)
                     {
-                        _planService.SavePlan(plan.FileName, editContent.Value);
+                        _planService.SavePlan(plan.FolderName, editContent.Value);
                         _refreshPlans();
                     }
                 });
         }
         else
         {
-            scrollableContent |= new Markdown(_selectedPlan.Content).DangerouslyAllowLocalFiles();
+            scrollableContent |= new Markdown(_selectedPlan.LatestRevisionContent).DangerouslyAllowLocalFiles();
         }
 
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
@@ -122,7 +120,7 @@ public class ContentView(
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Button("Thaw").Icon(Icons.Flame).Primary().OnClick(() =>
             {
-                _planService.ThawPlan(_selectedPlan.FileName);
+                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Draft);
                 _refreshPlans();
             })
             | new Spacer().Width(Size.Grow())
@@ -130,8 +128,7 @@ public class ContentView(
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
                 {
-                    var planPath = Path.Combine(_planService.PlansDirectory, _selectedPlan.FileName);
-                    copyToClipboard(planPath);
+                    copyToClipboard(_selectedPlan.FolderPath);
                     client.Toast("Copied path to clipboard", "Path Copied");
                 })
             );
@@ -159,7 +156,7 @@ public class ContentView(
     private void GoToNext()
     {
         if (_allPlans.Count == 0) return;
-        var currentIndex = _allPlans.FindIndex(p => p.FileName == _selectedPlan?.FileName);
+        var currentIndex = _allPlans.FindIndex(p => p.FolderName == _selectedPlan?.FolderName);
         var nextIndex = (currentIndex + 1) % _allPlans.Count;
         _selectedPlanState.Set(_allPlans[nextIndex]);
     }
@@ -167,7 +164,7 @@ public class ContentView(
     private void GoToPrevious()
     {
         if (_allPlans.Count == 0) return;
-        var currentIndex = _allPlans.FindIndex(p => p.FileName == _selectedPlan?.FileName);
+        var currentIndex = _allPlans.FindIndex(p => p.FolderName == _selectedPlan?.FolderName);
         var prevIndex = (currentIndex - 1 + _allPlans.Count) % _allPlans.Count;
         _selectedPlanState.Set(_allPlans[prevIndex]);
     }

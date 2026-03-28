@@ -8,13 +8,13 @@ public class SplitPlanDialog(
     IState<string> splitText,
     PlanFile selectedPlan,
     JobService jobService,
-    string plansDirectory) : ViewBase
+    PlanReaderService planService) : ViewBase
 {
     private readonly IState<bool> _dialogOpen = dialogOpen;
     private readonly IState<string> _splitText = splitText;
     private readonly PlanFile _selectedPlan = selectedPlan;
     private readonly JobService _jobService = jobService;
-    private readonly string _plansDirectory = plansDirectory;
+    private readonly PlanReaderService _planService = planService;
 
     public override object? Build()
     {
@@ -32,8 +32,8 @@ public class SplitPlanDialog(
                 new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
                 new Button("Split Plan").Primary().OnClick(() =>
                 {
-                    var planPath = Path.Combine(_plansDirectory, _selectedPlan.FileName);
-                    _jobService.StartJob("SplitPlan", planPath);
+                    _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Updating);
+                    _jobService.StartJob("SplitPlan", _selectedPlan.FolderPath);
                     _dialogOpen.Set(false);
                 })
             )

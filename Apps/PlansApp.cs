@@ -17,21 +17,19 @@ public class PlansApp : ViewBase
         var textFilter = UseState<string?>("");
         var refreshToken = UseState(0);
 
-        // Store previous plans list to track position
         var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
 
-        var plans = planService.GetPlans();
+        var plans = planService.GetPlans()
+            .Where(p => p.Status != PlanStatus.Icebox && p.Status != PlanStatus.Skipped)
+            .ToList();
         var filteredPlans = PlanFilters.ApplyFilters(plans, queueFilter.Value, levelFilter.Value, textFilter.Value).ToList();
 
-        // Handle removed plan - auto-select next
-        if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FileName == selected.FileName))
+        if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
-            // Find position of removed plan in old list
-            var oldIndex = previousPlans.Value.FindIndex(p => p.FileName == selected.FileName);
+            var oldIndex = previousPlans.Value.FindIndex(p => p.FolderName == selected.FolderName);
 
             if (filteredPlans.Count > 0 && oldIndex >= 0)
             {
-                // Select plan at same position (or last plan if index out of bounds)
                 var newIndex = Math.Min(oldIndex, filteredPlans.Count - 1);
                 selectedPlanState.Set(filteredPlans[newIndex]);
             }
@@ -41,7 +39,6 @@ public class PlansApp : ViewBase
             }
         }
 
-        // Update stored plans for next comparison
         previousPlans.Value = filteredPlans;
 
         void RefreshPlans()

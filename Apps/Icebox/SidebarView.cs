@@ -20,12 +20,10 @@ public class SidebarView(
     {
         var levelOptions = new[] { "Critical", "NiceToHave", "Nitpick" };
 
-        // Apply level filter first to get the base set for queue counting
         var levelFilteredPlans = _plans.AsEnumerable();
         if (_levelFilter.Value is { } level)
             levelFilteredPlans = levelFilteredPlans.Where(p => p.Level == level);
 
-        // Build dynamic queue options with counts from level-filtered plans
         var queueCounts = levelFilteredPlans
             .GroupBy(p => p.Queue)
             .OrderByDescending(g => g.Count())
@@ -37,7 +35,7 @@ public class SidebarView(
             | new Expandable(
                 header: "Filters",
                 content: Layout.Vertical()
-                    | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Queues").Nullable().WithField().Label("Queue")
+                    | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Projects").Nullable().WithField().Label("Project")
                     | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().WithField().Label("Level")
             ).Open(false).Ghost()
             ;
@@ -45,7 +43,6 @@ public class SidebarView(
 
     public object BuildContent()
     {
-        // Apply all filters
         var filteredPlans = PlanFilters.ApplyFilters(_plans, _queueFilter.Value, _levelFilter.Value, _textFilter.Value);
 
         return new List(filteredPlans.Select(plan =>
@@ -61,7 +58,6 @@ public class SidebarView(
 
     public override object Build()
     {
-        // For backward compatibility, return content
         return BuildContent();
     }
 }

@@ -29,7 +29,7 @@ public class DeletePlanDialog(
                 new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
                 new Button("Delete").Destructive().OnClick(() =>
                 {
-                    _planService.DeletePlan(_selectedPlan.FileName);
+                    _planService.DeletePlan(_selectedPlan.FolderName);
                     _refreshPlans();
                     _dialogOpen.Set(false);
                 })

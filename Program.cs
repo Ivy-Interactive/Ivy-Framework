@@ -14,7 +14,17 @@ server.SetMetaTitle("Ivy Tendril");
 server.Services.AddSingleton<ConfigService>();
 server.Services.AddSingleton<GithubService>();
 server.Services.AddSingleton<PlanReaderService>();
-server.Services.AddSingleton<JobService>();
+server.Services.AddSingleton<JobService>(sp =>
+{
+    var jobService = new JobService();
+    jobService.SetPlanReaderService(sp.GetRequiredService<PlanReaderService>());
+    return jobService;
+});
+server.Services.AddSingleton<PlanWatcherService>(sp =>
+{
+    var config = sp.GetRequiredService<ConfigService>();
+    return new PlanWatcherService(config);
+});
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
 server.UseAppShell(new AppShellSettings()

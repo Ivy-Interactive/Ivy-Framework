@@ -19,13 +19,12 @@ public class IceboxApp : ViewBase
         var refreshToken = UseState(0);
 
         var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
-        var plans = planService.GetIceboxPlans();
+        var plans = planService.GetPlans(PlanStatus.Icebox);
         var filteredPlans = PlanFilters.ApplyFilters(plans, queueFilter.Value, levelFilter.Value, textFilter.Value).ToList();
 
-        // Handle removed plan - auto-select next
-        if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FileName == selected.FileName))
+        if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
-            var oldIndex = previousPlans.Value.FindIndex(p => p.FileName == selected.FileName);
+            var oldIndex = previousPlans.Value.FindIndex(p => p.FolderName == selected.FolderName);
             if (filteredPlans.Count > 0 && oldIndex >= 0)
             {
                 var newIndex = Math.Min(oldIndex, filteredPlans.Count - 1);

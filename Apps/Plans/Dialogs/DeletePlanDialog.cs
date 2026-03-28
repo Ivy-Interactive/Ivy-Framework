@@ -28,19 +28,19 @@ public class DeletePlanDialog(
                 new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
                 new Button("Move to Skipped").Outline().OnClick(() =>
                 {
-                    _planService.SkipPlan(_selectedPlan.FileName);
+                    _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Skipped);
                     _refreshPlans();
                     _dialogOpen.Set(false);
                 }),
                 new Button("Move to Icebox").Outline().OnClick(() =>
                 {
-                    _planService.IceboxPlan(_selectedPlan.FileName);
+                    _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Icebox);
                     _refreshPlans();
                     _dialogOpen.Set(false);
                 }),
                 new Button("Delete").Destructive().OnClick(() =>
                 {
-                    _planService.DeletePlan(_selectedPlan.FileName);
+                    _planService.DeletePlan(_selectedPlan.FolderName);
                     _refreshPlans();
                     _dialogOpen.Set(false);
                 })

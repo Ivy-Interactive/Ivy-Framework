@@ -3,19 +3,28 @@ namespace Ivy.Tendril.Apps.Plans;
 public enum PlanStatus
 {
     Draft,
-    Review,
-    Approved,
-    Skipped
+    Building,
+    Updating,
+    ReadyForReview,
+    Skipped,
+    Icebox
 }
 
-public record PlanMetadata(int Id, string Queue, string Level, string Title);
+public record PlanMetadata(int Id, string Project, string Level, string Title, PlanStatus State);
 
-public record PlanFile(PlanMetadata Metadata, string Content, string RawFrontmatter, string FileName, PlanStatus Status)
+public record PlanFile(
+    PlanMetadata Metadata,
+    string LatestRevisionContent,
+    string FolderPath,
+    string PlanYamlRaw
+)
 {
     public int Id => Metadata.Id;
     public string Title => Metadata.Title;
-    public string Queue => Metadata.Queue;
+    public string Queue => Metadata.Project;
     public string Level => Metadata.Level;
+    public PlanStatus Status => Metadata.State;
+    public string FolderName => Path.GetFileName(FolderPath);
 }
 
 public static class PlanFilters
@@ -28,15 +37,12 @@ public static class PlanFilters
     {
         var filtered = plans;
 
-        // Apply level filter
         if (levelFilter is { } level)
             filtered = filtered.Where(p => p.Level == level);
 
-        // Apply queue filter
         if (queueFilter is { } queue)
             filtered = filtered.Where(p => p.Queue == queue);
 
-        // Apply text filter
         if (!string.IsNullOrWhiteSpace(textFilter))
         {
             var search = textFilter.ToLowerInvariant();

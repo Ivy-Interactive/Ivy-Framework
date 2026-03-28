@@ -13,13 +13,16 @@ public class PlanDownloadHelperTests
 {
     private static (ViewContext, string) CreateTestEnvironment()
     {
-        // Create a temporary directory for test plans
         var tempDir = Path.Combine(Path.GetTempPath(), $"ivy-test-{Guid.NewGuid()}");
         Directory.CreateDirectory(tempDir);
 
-        // Create a test plan file
-        var testPlanPath = Path.Combine(tempDir, "test.md");
-        File.WriteAllText(testPlanPath, "# Test Plan\n\nTest content");
+        // Create a test plan folder structure
+        var planFolder = Path.Combine(tempDir, "00001-TestPlan");
+        Directory.CreateDirectory(planFolder);
+        Directory.CreateDirectory(Path.Combine(planFolder, "revisions"));
+        File.WriteAllText(Path.Combine(planFolder, "revisions", "001.md"), "# Test Plan\n\nTest content");
+        File.WriteAllText(Path.Combine(planFolder, "plan.yaml"), "state: Draft\nproject: Test\nlevel: Test\ntitle: Test Plan\nrepos: []\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\ninitialPrompt: test\nprs: []\ncommits: []\n");
+        File.WriteAllText(Path.Combine(tempDir, ".counter"), "2");
 
         var services = new ServiceCollection();
         services.AddSingleton<IExceptionHandler>(new StubExceptionHandler());
@@ -35,32 +38,23 @@ public class PlanDownloadHelperTests
     [Fact]
     public void UsePlanDownload_ShouldNotThrow_WhenPlanChangesFromNullToNonNull()
     {
-        // This test verifies that UsePlanDownload maintains consistent hook ordering
-        // when transitioning from null plan to non-null plan.
-        // Before the fix, conditional hooks caused InvalidOperationException: State type mismatch.
-
         var (ctx, tempDir) = CreateTestEnvironment();
         try
         {
             var planService = ctx.UseService<PlanReaderService>();
 
-            // First render: call with null plan
             var result1 = PlanDownloadHelper.UsePlanDownload(ctx, planService, null);
             Assert.NotNull(result1);
 
-            // Simulate re-render with state change (null -> non-null plan)
             ctx.Reset();
-            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan");
-            var testPlan = new PlanFile(metadata, "", "", "test.md", PlanStatus.Draft);
+            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft);
+            var testPlan = new PlanFile(metadata, "", Path.Combine(tempDir, "00001-TestPlan"), "");
 
-            // Second render: call with non-null plan
-            // This should NOT throw InvalidOperationException
             var result2 = PlanDownloadHelper.UsePlanDownload(ctx, planService, testPlan);
             Assert.NotNull(result2);
         }
         finally
         {
-            // Clean up temp directory
             if (Directory.Exists(tempDir))
                 Directory.Delete(tempDir, true);
         }
@@ -93,8 +87,8 @@ public class PlanDownloadHelperTests
         try
         {
             var planService = ctx.UseService<PlanReaderService>();
-            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan");
-            var testPlan = new PlanFile(metadata, "", "", "test.md", PlanStatus.Draft);
+            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft);
+            var testPlan = new PlanFile(metadata, "", Path.Combine(tempDir, "00001-TestPlan"), "");
 
             var result = PlanDownloadHelper.UsePlanDownload(ctx, planService, testPlan);
 
