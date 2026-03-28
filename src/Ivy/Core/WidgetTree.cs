@@ -59,7 +59,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             await RefreshRequested(requestedViewIds);
 
         var subscription = _buildRequestedSubject
-            .Buffer(TimeSpan.FromMilliseconds(100)) //33 = 30fps
+            .Buffer(TimeSpan.FromMilliseconds(16)) // 16ms = ~60fps rendering frame limit!
             .Select(batch => batch.Distinct().ToArray())
             .Where(batch => batch.Length > 0)
             .Subscribe(OnNext);

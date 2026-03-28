@@ -115,7 +115,6 @@ public class LatencyBenchmarkTests : PageTest
             var text = frame.Text;
             if (text != null && text.Contains("replace") && sentTime > 0)
             {
-                Console.WriteLine($"[RX] {text.Substring(0, Math.Min(100, text.Length))}...");
                 var receiveTime = Stopwatch.GetTimestamp();
                 var elapsedMs = (receiveTime - sentTime) / (double)Stopwatch.Frequency * 1000.0;
                 latencies.Add(elapsedMs);
