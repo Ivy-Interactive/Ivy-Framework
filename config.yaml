@@ -1,5 +1,5 @@
 planFolder: D:\Plans\
-agentCommand: claude
+agentCommand: claude --print --output-format stream-json --dangerously-skip-permissions
 
 projects:
   - name: IvyFramework

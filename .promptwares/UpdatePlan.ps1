@@ -44,11 +44,11 @@ $project = if ($projectMatch.Success) { $projectMatch.Groups[1].Value.Trim() } e
 
 $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{ Args = $PlanPath; WorkDir = (Get-Location).Path; PlanFolder = $PlanPath; Project = $project }
 
-$agentCommand = GetAgentCommandFromConfig
+$agent = GetAgentCommandFromConfig
 
 Write-Host "Starting Agent..."
 Push-Location $programFolder
-& $agentCommand --print --output-format stream-json --dangerously-skip-permissions -- (Get-Content $promptFile -Raw)
+& $agent.Executable @($agent.Args) -- (Get-Content $promptFile -Raw)
 Pop-Location
 
 # Write log and transition state back to Draft

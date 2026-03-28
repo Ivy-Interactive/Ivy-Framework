@@ -22,11 +22,15 @@ $sessionId = [guid]::NewGuid().ToString()
 
 $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{ Args = $args; WorkDir = (Get-Location).Path; ClaudeSessionId = $sessionId; PlanFolder = $planFolder; Project = $Project }
 
-$agentCommand = GetAgentCommandFromConfig
+$agent = GetAgentCommandFromConfig
 
 Write-Host "Starting Agent..."
 Push-Location $programFolder
-& $agentCommand --print --output-format stream-json --dangerously-skip-permissions --session-id $sessionId -- (Get-Content $promptFile -Raw)
+$extraArgs = @()
+if ($agent.Executable -eq "claude") {
+    $extraArgs += @("--session-id", $sessionId)
+}
+& $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw)
 Pop-Location
 
 # Write log to plan's logs folder

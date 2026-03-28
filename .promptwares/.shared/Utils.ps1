@@ -6,6 +6,8 @@ if (Test-Path $claudeDir) {
     }
 }
 
+# Canonical plans directory - must match config.yaml planFolder setting
+# All promptware documentation should reference this same path
 $script:PlansDir = "D:\Plans"
 
 function GetProgramFolder {
@@ -118,9 +120,8 @@ $content
     $firmware = Get-Content $PromptFile -Raw
     Remove-Item $PromptFile
 
-    $env:CLAUDECODE = $null
-    $env:CLAUDE_CODE_ENTRYPOINT = $null
-    claude --dangerously-skip-permissions @ExtraClaudeArgs -- $firmware
+    $agent = GetAgentCommandFromConfig
+    & $agent.Executable @($agent.Args) @ExtraClaudeArgs -- $firmware
 
     Pop-Location
     return $false
@@ -314,22 +315,26 @@ function GetProjectContextFromConfig {
 
 function GetAgentCommandFromConfig {
     $configPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
-    if (-not (Test-Path $configPath)) {
-        return "claude"
-    }
+    $raw = "claude --print --output-format stream-json --dangerously-skip-permissions"
 
-    try {
-        $yaml = Get-Content $configPath -Raw
-        $pattern = "(?m)^agentCommand:\s*(.+)$"
-        $match = [regex]::Match($yaml, $pattern)
-
-        if ($match.Success) {
-            return $match.Groups[1].Value.Trim()
+    if (Test-Path $configPath) {
+        try {
+            $yaml = Get-Content $configPath -Raw
+            $pattern = "(?m)^agentCommand:\s*(.+)$"
+            $match = [regex]::Match($yaml, $pattern)
+            if ($match.Success) {
+                $raw = $match.Groups[1].Value.Trim()
+            }
+        }
+        catch {
+            Write-Host "Warning: Could not parse agentCommand from config.yaml" -ForegroundColor Yellow
         }
     }
-    catch {
-        Write-Host "Warning: Could not parse agentCommand from config.yaml, using 'claude'" -ForegroundColor Yellow
-    }
 
-    return "claude"
+    # Split into executable and args
+    $parts = $raw -split '\s+', 2
+    return @{
+        Executable = $parts[0]
+        Args = if ($parts.Length -gt 1) { $parts[1] -split '\s+' } else { @() }
+    }
 }
