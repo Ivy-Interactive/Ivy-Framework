@@ -11,6 +11,7 @@ public class PlansApp : ViewBase
     {
         var planService = UseService<PlanReaderService>();
         var jobService = UseService<JobService>();
+        var configService = UseService<ConfigService>();
         var selectedPlanState = UseState<PlanFile?>(null);
         var queueFilter = UseState<string?>(null);
         var levelFilter = UseState<string?>(null);
@@ -46,10 +47,10 @@ public class PlansApp : ViewBase
             refreshToken.Set(refreshToken.Value + 1);
         }
 
-        var sidebar = new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter);
+        var sidebar = new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter, configService);
 
         return new SidebarLayout(
-            mainContent: new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans),
+            mainContent: new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
             sidebarContent: sidebar,
             sidebarHeader: sidebar.BuildHeader()
         );

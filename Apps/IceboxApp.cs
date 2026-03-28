@@ -12,6 +12,7 @@ public class IceboxApp : ViewBase
     {
         var planService = UseService<PlanReaderService>();
         var jobService = UseService<JobService>();
+        var configService = UseService<ConfigService>();
         var selectedPlanState = UseState<PlanFile?>(null);
         var queueFilter = UseState<string?>(null);
         var levelFilter = UseState<string?>(null);
@@ -43,10 +44,10 @@ public class IceboxApp : ViewBase
             refreshToken.Set(refreshToken.Value + 1);
         }
 
-        var sidebar = new Icebox.SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter);
+        var sidebar = new Icebox.SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter, configService);
 
         return new SidebarLayout(
-            mainContent: new Icebox.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans),
+            mainContent: new Icebox.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
             sidebarContent: sidebar.BuildContent(),
             sidebarHeader: sidebar.BuildHeader()
         );

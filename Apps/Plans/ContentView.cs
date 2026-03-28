@@ -13,7 +13,8 @@ public class ContentView(
     IState<PlanFile?> selectedPlanState,
     PlanReaderService planService,
     JobService jobService,
-    Action refreshPlans) : ViewBase
+    Action refreshPlans,
+    ConfigService config) : ViewBase
 {
     private readonly PlanFile? _selectedPlan = selectedPlan;
     private readonly List<PlanFile> _allPlans = allPlans;
@@ -21,6 +22,7 @@ public class ContentView(
     private readonly PlanReaderService _planService = planService;
     private readonly JobService _jobService = jobService;
     private readonly Action _refreshPlans = refreshPlans;
+    private readonly ConfigService _config = config;
 
     public override object? Build()
     {
@@ -91,7 +93,7 @@ public class ContentView(
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
             | new Badge(_selectedPlan.Status.ToString()).Variant(BadgeVariant.Outline)
             | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Outline)
-            | new Badge(_selectedPlan.Level).Variant(_selectedPlan.Level == "Critical" ? BadgeVariant.Warning : BadgeVariant.Outline)
+            | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
             | isEditing.ToSwitchInput(Icons.Pencil)
             | new Spacer().Width(Size.Grow())
             | Text.Rich()

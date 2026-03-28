@@ -1,3 +1,4 @@
+using Ivy;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -18,11 +19,24 @@ public record ProjectConfig
     public string Context { get; set; } = "";
 }
 
+public record LevelConfig
+{
+    public string Name { get; set; } = "";
+    public string Badge { get; set; } = "Outline";
+}
+
 public class TendrilSettings
 {
     public string PlanFolder { get; set; } = @".plans";
     public string AgentCommand { get; set; } = "claude";
     public List<ProjectConfig> Projects { get; set; } = new();
+    public List<LevelConfig> Levels { get; set; } = new()
+    {
+        new() { Name = "Critical", Badge = "Warning" },
+        new() { Name = "Bug", Badge = "Destructive" },
+        new() { Name = "NiceToHave", Badge = "Outline" },
+        new() { Name = "Epic", Badge = "Info" }
+    };
 }
 
 public class ConfigService
@@ -62,5 +76,10 @@ public class ConfigService
     public TendrilSettings Settings => _settings;
     public string PlanFolder => _settings.PlanFolder;
     public List<ProjectConfig> Projects => _settings.Projects;
+    public List<LevelConfig> Levels => _settings.Levels;
+    public string[] LevelNames => _settings.Levels.Select(l => l.Name).ToArray();
     public ProjectConfig? GetProject(string name) => _settings.Projects.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+    public BadgeVariant GetBadgeVariant(string level) =>
+        Enum.TryParse<BadgeVariant>(_settings.Levels.FirstOrDefault(l => l.Name == level)?.Badge ?? "Outline", out var v) ? v : BadgeVariant.Outline;
 }

@@ -1,4 +1,5 @@
 using Ivy;
+using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans;
 
@@ -7,17 +8,19 @@ public class SidebarView(
     IState<PlanFile?> selectedPlanState,
     IState<string?> queueFilter,
     IState<string?> levelFilter,
-    IState<string?> textFilter) : ViewBase
+    IState<string?> textFilter,
+    ConfigService config) : ViewBase
 {
     private readonly List<PlanFile> _plans = plans;
     private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
     private readonly IState<string?> _queueFilter = queueFilter;
     private readonly IState<string?> _levelFilter = levelFilter;
     private readonly IState<string?> _textFilter = textFilter;
+    private readonly ConfigService _config = config;
 
     public object BuildHeader()
     {
-        var levelOptions = new[] { "Critical", "NiceToHave", "Nitpick" };
+        var levelOptions = _config.LevelNames;
 
         var levelFilteredPlans = _plans.AsEnumerable();
         if (_levelFilter.Value is { } level)
@@ -57,7 +60,7 @@ public class SidebarView(
                 .Content(Layout.Horizontal().Gap(1)
                     | new Badge(plan.Status.ToString()).Variant(stateBadgeVariant).Small()
                     | new Badge(plan.Queue).Variant(BadgeVariant.Outline).Small()
-                    | new Badge(plan.Level).Variant(plan.Level == "Critical" ? BadgeVariant.Warning : BadgeVariant.Outline).Small())
+                    | new Badge(plan.Level).Variant(_config.GetBadgeVariant(plan.Level)).Small())
                 .OnClick(() => _selectedPlanState.Set(clickablePlan));
         }));
     }

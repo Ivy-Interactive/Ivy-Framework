@@ -1,6 +1,16 @@
 planFolder: D:\Plans\
 agentCommand: claude --print --output-format stream-json --dangerously-skip-permissions
 
+levels:
+  - name: Critical
+    badge: Warning
+  - name: Bug
+    badge: Destructive
+  - name: NiceToHave
+    badge: Outline
+  - name: Epic
+    badge: Info
+
 projects:
   - name: IvyFramework
     repos:
