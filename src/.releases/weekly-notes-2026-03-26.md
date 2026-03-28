@@ -365,30 +365,6 @@ Text.Rich()
 
 The method supports all standard text formatting options including `bold`, `italic`, `strikeThrough`, `highlightColor`, and `link`.
 
-### Better List Spacing in Markdown Content
-
-Markdown lists now render with improved vertical spacing between items and nested lists. Lists (`ul` and `ol` elements) automatically include consistent gaps between items, and nested lists within list items now have proper top margin spacing for better readability throughout your Ivy apps.
-
-### Cleaner Code Block Comment Styling
-
-Comments in code blocks now render in regular font instead of italic. This improves readability and provides a cleaner, more modern appearance for syntax-highlighted code throughout the framework.
-
-### Smoother DataTable Refresh Experience
-
-DataTables no longer flicker or show loading indicators during background data refreshes. After the initial load, subsequent refreshes happen seamlessly without resetting the view state, providing a much smoother user experience when working with live or frequently updated data.
-
-### Better DataTable Row Action Button Alignment
-
-Row action buttons in DataTables now align perfectly with their rows at any zoom level. The framework uses device pixel ratio and precise border calculations to ensure pixel-perfect positioning, eliminating any visual misalignment or jitter when hovering over rows with action buttons.
-
-### Smarter DataTable Column Width Auto-Sizing
-
-DataTable columns without explicit widths now auto-size based on header text length instead of defaulting to 150px. This prevents header text from being truncated with ellipsis, ensuring your column headers display fully. The framework estimates the minimum width needed (approximately 8 pixels per character plus padding for icons and sort indicators), with a minimum of 60px and a maximum auto-width of 300px to prevent excessively wide columns.
-
-### Wider Dialog Layout
-
-Dialogs now have a maximum width of 576px (up from 512px), providing more comfortable spacing for content and buttons. This gives your dialog layouts more breathing room without feeling cramped, especially when working with multiple buttons or form fields.
-
 ### BaseUrl Now Includes Base Path
 
 `AppContext.BaseUrl` now automatically includes the base path when your app is deployed behind a reverse proxy with a path prefix. Previously, you needed to manually append the base path when constructing URLs. Now it's handled automatically:
@@ -474,28 +450,6 @@ var advancedOptions = new Expandable("Advanced Settings", settingsContent)
 ```
 
 The Ghost variant reduces visual chrome to the absolute minimum (no border, transparent background, no shadow, minimal padding) while maintaining full expandable functionality. This provides the lightest possible visual weight that won't compete with primary content on your page.
-
-### Horizontal Layouts Now Center Children by Default
-
-Horizontal layouts (`Layout.Horizontal()`) now automatically vertically center their child elements. Previously, children would align to the top of the container. This new default provides better visual alignment when combining elements of different heights:
-
-```csharp
-// Text, badges, and buttons now align nicely without extra styling
-Layout.Horizontal().Gap(2)
-    | Text.Block("Premium Plan").Bold()
-    | new Badge("Active").Variant(BadgeVariant.Success)
-    | new Button("Edit", Icons.Pencil)
-```
-
-This applies when no explicit alignment is specified. You can still override this behavior using `.Align()` if needed.
-
-### Automatic Frontend Build with `dotnet build`
-
-If you're working with the Ivy Framework source code, `dotnet build` now automatically handles frontend compilation. MSBuild targets detect when frontend source files change and trigger incremental builds - no manual commands needed. This streamlines the development workflow when contributing to the framework.
-
-### Vite+ CLI Migration
-
-The Ivy Framework has migrated from `pnpm` to the Vite+ CLI (`vp`) for frontend tooling. Contributors working with the Ivy source code should install it globally with `npm install -g vite-plus`. Common commands: `vp install`, `vp dev`, `vp run build`, `vp test`. This change only affects framework contributors - if you're building apps with Ivy, your workflow remains unchanged.
 
 ### Concise Chart Creation with Array-Based API
 
