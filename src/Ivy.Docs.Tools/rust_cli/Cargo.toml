@@ -1,4 +1,3 @@
-cargo-features = ["edition2024"]
 
 [package]
 name = "rust_cli"

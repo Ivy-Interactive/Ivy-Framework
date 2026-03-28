@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Ivy.Core;
 using Ivy.Core.Auth;
 
@@ -18,8 +20,15 @@ public static class ClientExtensions
 
     public class ToasterMessage
     {
+        [DataMember(Name = "title")]
         public string? Title { get; set; }
+        [DataMember(Name = "description")]
         public string? Description { get; set; }
+
+        [DataMember(Name = "variant")]
+        public string VariantString => Variant.ToString().ToLower();
+
+        [IgnoreDataMember]
         public ToastVariant Variant { get; set; } = ToastVariant.Default;
 
         public ToasterMessage Default() { Variant = ToastVariant.Default; return this; }
@@ -31,33 +40,45 @@ public static class ClientExtensions
 
     public class ErrorMessage
     {
+        [DataMember(Name = "title")]
         public required string Title { get; set; }
+        [DataMember(Name = "description")]
         public required string Description { get; set; }
+        [DataMember(Name = "stackTrace")]
         public string? StackTrace { get; set; }
     }
 
     public class HistoryState
     {
+        [DataMember(Name = "tabId")]
         public string? TabId { get; set; }
     }
 
     public class RedirectMessage
     {
+        [DataMember(Name = "url")]
         public string? Url { get; set; }
+        [DataMember(Name = "replaceHistory")]
         public bool ReplaceHistory { get; set; }
+        [DataMember(Name = "state")]
         public HistoryState? State { get; set; }
     }
 
     public class SetAuthCookiesMessage
     {
+        [DataMember(Name = "cookieJarId")]
         public required string CookieJarId { get; set; }
+        [DataMember(Name = "reloadPage")]
         public required bool ReloadPage { get; set; }
+        [DataMember(Name = "triggerMachineReload")]
         public required bool TriggerMachineReload { get; set; }
+        [DataMember(Name = "triggerMachineBrokeredRefresh")]
         public required bool TriggerMachineBrokeredRefresh { get; set; }
     }
 
     public class SetRootAppIdMessage
     {
+        [DataMember(Name = "rootAppId")]
         public required string RootAppId { get; set; }
     }
 
@@ -98,11 +119,11 @@ public static class ClientExtensions
         }
         client.Sender.Send(
             "Redirect",
-            new RedirectMessage
+            new Dictionary<string, object?>
             {
-                Url = validatedUrl,
-                ReplaceHistory = replaceHistory,
-                State = new HistoryState { TabId = tabId }
+                ["url"] = validatedUrl,
+                ["replaceHistory"] = replaceHistory,
+                ["state"] = new Dictionary<string, object?> { ["tabId"] = tabId }
             });
     }
 
@@ -129,28 +150,28 @@ public static class ClientExtensions
     {
         client.Sender.Send(
             "SetAuthCookies",
-            new SetAuthCookiesMessage
+            new Dictionary<string, object?>
             {
-                CookieJarId = cookieJarId.Value,
-                ReloadPage = reloadPage,
-                TriggerMachineReload = triggerMachineReload ?? reloadPage,
-                TriggerMachineBrokeredRefresh = triggerMachineBrokeredRefresh
+                ["cookieJarId"] = cookieJarId.Value,
+                ["reloadPage"] = reloadPage,
+                ["triggerMachineReload"] = triggerMachineReload ?? reloadPage,
+                ["triggerMachineBrokeredRefresh"] = triggerMachineBrokeredRefresh
             });
     }
 
     public static void ReloadPage(this IClientProvider client)
     {
-        client.Sender.Send("ReloadPage", new { });
+        client.Sender.Send("ReloadPage", new Dictionary<string, object?>());
     }
 
     public static void RefreshAuthFromCookies(this IClientProvider client)
     {
-        client.Sender.Send("RefreshAuthFromCookies", new { });
+        client.Sender.Send("RefreshAuthFromCookies", new Dictionary<string, object?>());
     }
 
     public static void SetRootAppId(this IClientProvider client, string rootAppId)
     {
-        client.Sender.Send("SetRootAppId", new SetRootAppIdMessage { RootAppId = rootAppId });
+        client.Sender.Send("SetRootAppId", new Dictionary<string, object?> { ["rootAppId"] = rootAppId });
     }
 
     public static void SetThemeMode(this IClientProvider client, ThemeMode themeMode)
@@ -166,7 +187,7 @@ public static class ClientExtensions
     public static ToasterMessage Toast(this IClientProvider client, string description, string? title = null, ToastVariant variant = ToastVariant.Default)
     {
         var message = new ToasterMessage { Description = description, Title = title, Variant = variant };
-        client.Sender.Send("Toast", message);
+        client.Sender.Send("Toast", new Dictionary<string, object?> { ["title"] = message.Title, ["description"] = message.Description, ["variant"] = message.Variant.ToString().ToLower() });
         return message;
     }
 
@@ -174,19 +195,18 @@ public static class ClientExtensions
     {
         var innerException = ExceptionHelper.GetInnerMostException(ex);
         var message = new ToasterMessage { Description = innerException.Message, Title = "Failed", Variant = variant };
-        client.Sender.Send("Toast", message);
+        client.Sender.Send("Toast", new Dictionary<string, object?> { ["title"] = message.Title, ["description"] = message.Description, ["variant"] = message.Variant.ToString().ToLower() });
         return message;
     }
 
     public static void Error(this IClientProvider client, Exception ex)
     {
         var innerException = ExceptionHelper.GetInnerMostException(ex);
-        var notification = new ErrorMessage
+        client.Sender.Send("Error", new Dictionary<string, object?>
         {
-            Description = innerException.Message,
-            Title = innerException.GetType().Name,
-            StackTrace = innerException.StackTrace
-        };
-        client.Sender.Send("Error", notification);
+            ["description"] = innerException.Message,
+            ["title"] = innerException.GetType().Name,
+            ["stackTrace"] = innerException.StackTrace
+        });
     }
 }

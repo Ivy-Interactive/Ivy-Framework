@@ -76,8 +76,11 @@ importers:
         specifier: 1.2.3
         version: 1.2.3
       '@microsoft/signalr':
-        specifier: 9.0.6
-        version: 9.0.6
+        specifier: 10.0.0
+        version: 10.0.0
+      '@microsoft/signalr-protocol-msgpack':
+        specifier: 10.0.0
+        version: 10.0.0
       '@radix-ui/react-accordion':
         specifier: 1.2.12
         version: 1.2.12(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -554,8 +557,15 @@ packages:
   '@mermaid-js/parser@0.6.3':
     resolution: {integrity: sha512-lnjOhe7zyHjc+If7yT4zoedx2vo4sHaTmtkl1+or8BRTnCtDmcTpAjpzDSfCZrshM5bCoz0GyidzadJAH1xobA==}
 
-  '@microsoft/signalr@9.0.6':
-    resolution: {integrity: sha512-DrhgzFWI9JE4RPTsHYRxh4yr+OhnwKz8bnJe7eIi7mLLjqhJpEb62CiUy/YbFvLqLzcGzlzz1QWgVAW0zyipMQ==}
+  '@microsoft/signalr-protocol-msgpack@10.0.0':
+    resolution: {integrity: sha512-N4h4BD+y9kw/iszpDaDaIRJpxaRSA5uBtveM6HUIwmwkeJIPOoMrPNvmj77UrjZHAsbVwa/acLiWnPDfffO3yQ==}
+
+  '@microsoft/signalr@10.0.0':
+    resolution: {integrity: sha512-0BRqz/uCx3JdrOqiqgFhih/+hfTERaUfCZXFB52uMaZJrKaPRzHzMuqVsJC/V3pt7NozcNXGspjKiQEK+X7P2w==}
+
+  '@msgpack/msgpack@2.8.0':
+    resolution: {integrity: sha512-h9u4u/jiIRKbq25PM+zymTyW6bhTzELvOoUd+AvYriWOAKpLGnIamaET3pnHYoI5iYphAHBI4ayx0MehR+VVPQ==}
+    engines: {node: '>= 10'}
 
   '@oxc-project/runtime@0.120.0':
     resolution: {integrity: sha512-7fvACzS46TkHuzA+Tag8ac40qfwURXRTdc4AtyItF59AoNPOO/QjPMqPyvJH8CaUdGu0ntWDX1CCUNyLMxxX5g==}
@@ -3924,7 +3934,16 @@ snapshots:
     dependencies:
       langium: 3.3.1
 
-  '@microsoft/signalr@9.0.6':
+  '@microsoft/signalr-protocol-msgpack@10.0.0':
+    dependencies:
+      '@microsoft/signalr': 10.0.0
+      '@msgpack/msgpack': 2.8.0
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - utf-8-validate
+
+  '@microsoft/signalr@10.0.0':
     dependencies:
       abort-controller: 3.0.0
       eventsource: 2.0.2
@@ -3935,6 +3954,8 @@ snapshots:
       - bufferutil
       - encoding
       - utf-8-validate
+
+  '@msgpack/msgpack@2.8.0': {}
 
   '@oxc-project/runtime@0.120.0': {}
 

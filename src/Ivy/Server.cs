@@ -9,6 +9,10 @@ using Ivy.Core.Server;
 using Ivy.Core.Server.HtmlPipeline;
 using Ivy.Core.Server.HtmlPipeline.Filters;
 using Ivy.Core.Server.Middleware;
+using Ivy.Core.Server.Formatters;
+using MessagePack;
+using MessagePack.Resolvers;
+using MessagePack.Formatters;
 using Ivy.Themes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -662,9 +666,25 @@ public class Server
         builder.Services.AddSignalR(options =>
         {
             options.EnableDetailedErrors = _args.Verbose;
+            options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
+            options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+            options.MaximumReceiveMessageSize = 1048576; // 1MB
         }).AddJsonProtocol(options =>
         {
             options.PayloadSerializerOptions.TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver();
+        }).AddMessagePackProtocol(options =>
+        {
+            options.SerializerOptions = MessagePackSerializerOptions.Standard.WithResolver(
+                CompositeResolver.Create(
+                    new IMessagePackFormatter[] { 
+                        new JsonNodeMessagePackFormatter(),
+                        new JsonObjectMessagePackFormatter(),
+                        new JsonArrayMessagePackFormatter(),
+                        new JsonValueMessagePackFormatter()
+                    },
+                    new IFormatterResolver[] { ContractlessStandardResolver.Instance }
+                )
+            );
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
