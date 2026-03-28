@@ -59,7 +59,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             await RefreshRequested(requestedViewIds);
 
         var subscription = _buildRequestedSubject
-            .Buffer(TimeSpan.FromMilliseconds(16)) // 16ms = ~60fps rendering frame limit!
+            .Buffer(TimeSpan.FromMilliseconds(16))
             .Select(batch => batch.Distinct().ToArray())
             .Where(batch => batch.Length > 0)
             .Subscribe(OnNext);
@@ -226,10 +226,10 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             }
             else if (update != null && previous != null)
             {
-                // [RustyServer Integration] Execute mathematically independent zero-allocation diffing via C/Rust!
+                // [Native Patch Integration] Execute mathematically independent zero-allocation diffing via C/Rust!
                 var oldBytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(previous);
                 var newBytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(update);
-                patch = RustyServer.ComputePatch(oldBytes, newBytes);
+                patch = NativeJsonDiff.ComputePatch(oldBytes, newBytes);
             }
             else
             {

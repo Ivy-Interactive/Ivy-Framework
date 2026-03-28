@@ -65,8 +65,8 @@ public class JsonPatchBenchmark
     }
 
     [Benchmark]
-    public JsonNode? RustyNativeDiff()
+    public JsonNode? NativeJsonDiff_ComputePatch()
     {
-        return RustyServer.ComputePatch(_oldBytes, _newBytes);
+        return NativeJsonDiff.ComputePatch(_oldBytes, _newBytes);
     }
 }

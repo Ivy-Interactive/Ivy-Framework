@@ -23,7 +23,7 @@ public static class PayloadSizeAnalyzer
         var csPatch = oldNode.Diff(newNode, new JsonPatchDeltaFormatter(), WidgetTree.JsonDiffOptions);
         var csPayload = csPatch!.ToJsonString();
         
-        var rustPatch = RustyServer.ComputePatch(oldBytes, newBytes);
+        var rustPatch = NativeJsonDiff.ComputePatch(oldBytes, newBytes);
         var rustPayload = rustPatch?.ToJsonString() ?? "NULL";
 
         Console.WriteLine($"\n[C# Original String]: {csPayload.Length} chars");

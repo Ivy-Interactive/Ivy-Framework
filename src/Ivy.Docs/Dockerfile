@@ -8,7 +8,7 @@ ARG BUILD_CONFIGURATION=Release
 ARG IVY_PACKAGE_VERSION
 RUN test -n "$IVY_PACKAGE_VERSION" || (echo "IVY_PACKAGE_VERSION build-arg is required" && exit 1)
 WORKDIR /src
-RUN apt-get update && apt-get install -y curl gnupg && \
+RUN apt-get update && apt-get install -y curl gnupg cargo rustc && \
     curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs && \
     npm install -g pnpm@10.33.0 vite-plus@0.1.14 && \

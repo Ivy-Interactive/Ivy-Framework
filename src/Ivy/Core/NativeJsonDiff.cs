@@ -2,13 +2,13 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text.Json.Nodes;
 
-namespace Ivy;
+namespace Ivy.Core;
 
 /// <summary>
 /// A zero-allocation, stateless FFI wrapper that calculates massive JSON-patch
 /// differences purely using Rust cdylib math, destroying the C# execution bottlenecks!
 /// </summary>
-public static class RustyServer
+public static class NativeJsonDiff
 {
     private const string RustLib = "rustserver";
 
@@ -50,7 +50,7 @@ public static class RustyServer
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] RustyServer: {ex.Message}");
+            Console.WriteLine($"[ERROR] NativeJsonDiff: {ex.Message}");
             return null;
         }
         finally

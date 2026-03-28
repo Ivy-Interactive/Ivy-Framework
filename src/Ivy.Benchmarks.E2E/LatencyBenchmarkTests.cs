@@ -70,11 +70,11 @@ public class LatencyBenchmarkTests : PageTest
         var nativeLatency = await MeasureLatencyAsync("http://localhost:5010/hello");
         var legacyLatency = await MeasureLatencyAsync("http://localhost:5011/hello");
 
-        Console.WriteLine("\n--- E2E WebSocket Latency (JSON-Patch Render Cycle) ---");
-        Console.WriteLine($"[1.2.27 Legacy] Typing 'x' took: {legacyLatency} ms on average.");
-        Console.WriteLine($"[Rusty-Server] Typing 'x' took: {nativeLatency} ms on average.");
-        Console.WriteLine($"Difference: {(legacyLatency - nativeLatency):F2} ms ({(1 - (nativeLatency / legacyLatency)) * 100:F1}% Faster)");
-        Console.WriteLine("-------------------------------------------------------\n");
+        TestContext.Progress.WriteLine($"--- E2E WebSocket Latency (JSON-Patch Render Cycle) ---");
+        TestContext.Progress.WriteLine($"[1.2.27 Legacy] Typing 'x' took: {legacyLatency:F2} ms on average.");
+        TestContext.Progress.WriteLine($"[Native-Ivy] Typing 'x' took: {nativeLatency:F2} ms on average.");
+        TestContext.Progress.WriteLine($"Difference: {(legacyLatency - nativeLatency):F2} ms ({(1 - (nativeLatency / legacyLatency)) * 100:F1}% Faster)");
+        TestContext.Progress.WriteLine($"-------------------------------------------------------");
 
         Assert.That(nativeLatency, Is.LessThan(legacyLatency), "Native Rust engine should be faster than Legacy engine.");
     }
@@ -103,7 +103,6 @@ public class LatencyBenchmarkTests : PageTest
         socket.FrameSent += (_, frame) =>
         {
             var text = frame.Text;
-            Console.WriteLine($"[TX] {text}");
             if (text != null && text.Contains("x"))
             {
                 sentTime = Stopwatch.GetTimestamp();
