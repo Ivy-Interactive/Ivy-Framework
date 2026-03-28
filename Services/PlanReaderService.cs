@@ -80,49 +80,6 @@ public class PlanReaderService(ConfigService config)
         File.WriteAllText(planYamlPath, YamlSerializer.Serialize(planYaml));
     }
 
-    public string CreatePlan(string description, string project = "General", string level = "NiceToHave")
-    {
-        Directory.CreateDirectory(PlansDirectory);
-
-        var counterFile = Path.Combine(PlansDirectory, ".counter");
-        var counter = File.Exists(counterFile) ? int.Parse(File.ReadAllText(counterFile).Trim()) : 1087;
-        var id = counter;
-        File.WriteAllText(counterFile, (counter + 1).ToString());
-
-        var safeTitle = description.Length > 60 ? description.Substring(0, 60) : description;
-        safeTitle = Regex.Replace(safeTitle, @"[^a-zA-Z0-9]+", "").Trim();
-        if (string.IsNullOrEmpty(safeTitle)) safeTitle = "Untitled";
-
-        var folderName = $"{id:D5}-{safeTitle}";
-        var folderPath = Path.Combine(PlansDirectory, folderName);
-        Directory.CreateDirectory(folderPath);
-        Directory.CreateDirectory(Path.Combine(folderPath, "revisions"));
-        Directory.CreateDirectory(Path.Combine(folderPath, "logs"));
-        Directory.CreateDirectory(Path.Combine(folderPath, "worktrees"));
-        Directory.CreateDirectory(Path.Combine(folderPath, "artifacts"));
-
-        var planYaml = new PlanYaml
-        {
-            State = "Draft",
-            Project = project,
-            Level = level,
-            Title = description,
-            Created = DateTime.UtcNow,
-            Updated = DateTime.UtcNow,
-            InitialPrompt = description,
-        };
-
-        File.WriteAllText(
-            Path.Combine(folderPath, "plan.yaml"),
-            YamlSerializer.Serialize(planYaml)
-        );
-
-        var content = $"# {description}\n\n## Problem\n\n{description}\n\n## Solution\n\n## Tests\n\n## Finish\n\nCommit!\n";
-        SaveRevision(folderName, content);
-
-        return folderName;
-    }
-
     public void SaveRevision(string folderName, string content)
     {
         var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
