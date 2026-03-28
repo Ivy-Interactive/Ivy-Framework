@@ -1,5 +1,8 @@
 # Ivy Framework Weekly Notes - Week of 2026-03-26
 
+> [!NOTE]
+> We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
+
 ## New Features
 
 ### DataTable Footer Aggregates
@@ -45,11 +48,11 @@ salesData.ToDataTable()
         .Format(x => x.GrowthRate, NumberFormatStyle.Percent, precision: 1)
 ```
 
-Available format styles: `Decimal`, `Currency`, `Accounting`, and `Percent`. Currency and Accounting formats default to USD if no currency is specified.
+Available format styles: `Decimal`, `Currency`, `Accounting`, and `Percent`. Currency and Accounting formats default to USD if no currency is specified. Full API details are in the [**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) documentation.
 
 ### New Skeleton Loading Variants
 
-Added three new skeleton placeholder methods to improve loading UX in your apps. Previously, only `Skeleton.Card()` and `Skeleton.Form()` were available. Now you can also use:
+Added three new [**Skeleton**](https://docs.ivy.app/widgets/primitives/skeleton) placeholder methods to improve loading UX in your apps. Previously, only `Skeleton.Card()` and `Skeleton.Form()` were available. Now you can also use:
 
 ```csharp
 // Show a text skeleton with multiple lines
@@ -66,7 +69,7 @@ Use these skeleton placeholders instead of plain "Loading..." text to maintain v
 
 ### Programmatic Sheet Closing
 
-Sheets can now be closed programmatically from within their content using a close callback. The `WithSheet` method now supports an overload where the content factory receives a close action, enabling forms and actions within sheets to automatically close after completion:
+The [**Sheet**](https://docs.ivy.app/widgets/advanced/sheet) widget can now be closed programmatically from within its content using a close callback. `WithSheet` supports an overload where the content factory receives a close action, enabling forms and actions within sheets to automatically close after completion:
 
 ```csharp
 var client = UseService<IClientProvider>();
@@ -101,7 +104,7 @@ This pattern eliminates the need for manual sheet state management in common sce
 
 ### Toolbar Widget for Action Buttons and Controls
 
-A new Toolbar widget provides a flexible way to organize action buttons, editor controls, and floating action bars. The widget uses `MenuItem` objects for toolbar items and supports grouping, separators, and active states:
+A new [**Toolbar**](https://docs.ivy.app/widgets/common/toolbar) widget provides a flexible way to organize action buttons, editor controls, and floating action bars. The widget uses `MenuItem` objects for toolbar items and supports grouping, separators, and active states:
 
 ```csharp
 var client = UseService<IClientProvider>();
@@ -148,11 +151,11 @@ new Toolbar(
 )
 ```
 
-The Toolbar supports icon-only buttons (always provide tooltips for accessibility), active/checked state for toggle buttons, and disabled state for the entire toolbar or individual items.
+The toolbar supports icon-only buttons (always provide tooltips for accessibility), active/checked state for toggle buttons, and disabled state for the entire toolbar or individual items.
 
 ### Semantic Colors for MenuItem
 
-MenuItem now supports semantic color styles beyond the basic Default and Destructive options. You can now use Primary, Secondary, Success, Warning, and Info colors to better communicate the meaning and importance of menu items:
+[**DropDownMenu**](https://docs.ivy.app/widgets/common/drop-down-menu) items (including `MenuItem`) now support semantic color styles beyond the basic Default and Destructive options. You can use Primary, Secondary, Success, Warning, and Info colors to better communicate the meaning and importance of menu items:
 
 ```csharp
 DropDownMenu.Default()
@@ -169,7 +172,7 @@ DropDownMenu.Default()
 
 ### SelectInput Bulk Selection Actions
 
-Multi-select inputs now support bulk actions with the `.ShowActions()` modifier. This adds "Select All" and "Clear All" buttons in the dropdown footer, making it easy to manage large lists:
+[**SelectInput**](https://docs.ivy.app/widgets/inputs/select-input) multi-select variants now support bulk actions with the `.ShowActions()` modifier. This adds "Select All" and "Clear All" buttons in the dropdown footer, making it easy to manage large lists:
 
 ```csharp
 var languages = UseState<string[]>([]);
@@ -215,7 +218,7 @@ The formatting applies to all enums passed through `.ToOptions()`. You can overr
 
 ### RichText.Muted() Convenience Method
 
-Added a new `.Muted()` method to `RichTextBuilder` for easily creating secondary/muted colored text. This convenience method saves you from manually specifying `Colors.Muted` each time:
+Added a new `.Muted()` method to `RichTextBuilder` ([**RichTextBlock**](https://docs.ivy.app/widgets/primitives/rich-text-block) / `Text.Rich()`) for easily creating secondary/muted colored text. This convenience method saves you from manually specifying `Colors.Muted` each time:
 
 ```csharp
 Text.Rich()
@@ -229,7 +232,7 @@ The method supports all standard text formatting options including `bold`, `ital
 
 ### Callout Density Control
 
-Callouts now support three density levels to match your layout needs.
+[**Callout**](https://docs.ivy.app/widgets/primitives/callout) widgets now support three density levels to match your layout needs.
 
 ```csharp
 Layout.Vertical()
@@ -240,7 +243,7 @@ Layout.Vertical()
 
 ### Ghost Variant for Expandable Widget
 
-The Expandable widget now supports a Ghost variant for an ultra-minimal, understated appearance. Use `.Ghost()` to create expandables with no border, transparent background, and no shadow.
+The [**Expandable**](https://docs.ivy.app/widgets/common/expandable) widget now supports a Ghost variant for an ultra-minimal, understated appearance. Use `.Ghost()` to create expandables with no border, transparent background, and no shadow.
 
 ```csharp
 var notes = new Expandable("Additional Notes", notesContent)
@@ -254,7 +257,7 @@ var advancedOptions = new Expandable("Advanced Settings", settingsContent)
 
 ### Concise Chart Creation with Array-Based API
 
-For quick, pre-styled chart creation, `ToLineChart()` and `ToBarChart()` support a concise array-based syntax where you pass parameters directly instead of using the fluent API:
+For quick, pre-styled chart creation, `ToLineChart()` and `ToBarChart()` support a concise array-based syntax where you pass parameters directly instead of using the fluent API—see the [**Line chart**](https://docs.ivy.app/widgets/charts/line-chart) and [**Bar chart**](https://docs.ivy.app/widgets/charts/bar-chart) docs:
 
 ```csharp
 var salesData = new[]
@@ -275,7 +278,7 @@ return salesData.ToLineChart(
 
 ### Charts Support Non-String Dimension Values
 
-Line, Area, Bar, Pie, Radar, and Funnel charts render correctly when the dimension column is numeric or dates, not only strings. String-typed keys are preferred; otherwise the first column is used. Values stringify for display.
+Line, Area, Bar, Pie, Radar, and Funnel charts render correctly when the dimension column is numeric or dates, not only strings—see [**chart widgets**](https://docs.ivy.app/widgets/charts/bar-chart). String-typed keys are preferred; otherwise the first column is used. Values stringify for display.
 
 ```csharp
 var salesByYear = new[]
@@ -292,7 +295,7 @@ salesByYear.ToLineChart()
 
 ### Case-Insensitive Series Keys in Line and Bar Charts
 
-LineCharts and BarCharts use case-insensitive `dataKey` matching so series align when JSON camelCase keys (e.g. `"count"`) differ from PascalCase measure names (e.g. `Count`). Behavior matches Area, Pie, and Funnel charts.
+[**Line chart**](https://docs.ivy.app/widgets/charts/line-chart) and [**Bar chart**](https://docs.ivy.app/widgets/charts/bar-chart) widgets use case-insensitive `dataKey` matching so series align when JSON camelCase keys (e.g. `"count"`) differ from PascalCase measure names (e.g. `Count`). Behavior matches Area, Pie, and Funnel charts.
 
 ```csharp
 data.ToLineChart()
@@ -303,7 +306,7 @@ data.ToLineChart()
 
 ### Local File Images in Markdown
 
-The Markdown widget can now display images from local file paths. This feature requires a two-layer opt-in for security:
+The [**Markdown**](https://docs.ivy.app/widgets/primitives/markdown) widget can now display images from local file paths. This feature requires a two-layer opt-in for security:
 
 ```csharp
 // 1. Enable on the server in Program.cs
@@ -335,7 +338,7 @@ var markdown = new Markdown("""
 
 ### Markdown OnLinkClick Intercepts All Links
 
-When you register `OnLinkClick`, it runs for http/https and custom schemes so you can intercept all link navigation. Previously only non-standard URLs invoked the handler.
+When you register `OnLinkClick` on the Markdown widget, it runs for http/https and custom schemes so you can intercept all link navigation. Previously only non-standard URLs invoked the handler.
 
 ```csharp
 var markdown = new Markdown("""
@@ -351,7 +354,7 @@ var markdown = new Markdown("""
 
 ### Navigation Beacons for Type-Safe App Navigation
 
-Navigate between apps without hard-coding app IDs using the Navigation Beacon system. Apps can advertise their ability to handle specific entity types, enabling dynamic discovery and type-safe contextual navigation.
+Navigate between apps without hard-coding app IDs using the Navigation Beacon system ([**Navigation**](https://docs.ivy.app/onboarding/concepts/navigation)). Apps can advertise their ability to handle specific entity types, enabling dynamic discovery and type-safe contextual navigation.
 
 **Register a beacon** using the `[NavigationBeacon]` attribute and a static factory method:
 
@@ -438,11 +441,11 @@ var args = UseArgs<MyArgs>();
 // args.PageNumber will be 5
 ```
 
-Reserved parameters (`appId`, `machineId`, `parentId`, `shell`, `appArgs`, `oauthLogin`, `id`) are excluded from automatic arg parsing.
+Reserved parameters (`appId`, `machineId`, `parentId`, `shell`, `appArgs`, `oauthLogin`, `id`) are excluded from automatic arg parsing. More examples are in the [**UseArgs**](https://docs.ivy.app/hooks/core/use-args) documentation.
 
 ### BaseUrl Now Includes Base Path
 
-`AppContext.BaseUrl` now automatically includes the base path when your app is deployed behind a reverse proxy with a path prefix. Previously, you needed to manually append the base path when constructing URLs. Now it's handled automatically:
+`AppContext.BaseUrl` from your [server configuration](https://docs.ivy.app/onboarding/concepts/program) now automatically includes the base path when your app is deployed behind a reverse proxy with a path prefix. Previously, you needed to manually append the base path when constructing URLs. Now it's handled automatically:
 
 ```csharp
 // When deployed at https://example.com/myapp/
@@ -467,7 +470,7 @@ Error dialogs now include helpful troubleshooting hints for common .NET exceptio
 //  - A service not registered in Program.cs"
 ```
 
-The framework provides contextual hints for common exceptions including `NullReferenceException`, `BadImageFormatException`, `FileNotFoundException`, `TypeLoadException`, `TimeoutException`, and `InvalidOperationException`. Each hint includes Ivy-specific causes and remediation steps, helping you debug issues faster without leaving your application.
+See the [**Error**](https://docs.ivy.app/widgets/primitives/error) widget for standard error presentation. The framework provides contextual hints for common exceptions including `NullReferenceException`, `BadImageFormatException`, `FileNotFoundException`, `TypeLoadException`, `TimeoutException`, and `InvalidOperationException`. Each hint includes Ivy-specific causes and remediation steps, helping you debug issues faster without leaving your application.
 
 ## Breaking Changes
 
