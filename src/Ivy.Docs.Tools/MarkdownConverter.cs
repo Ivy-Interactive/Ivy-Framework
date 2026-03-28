@@ -171,7 +171,7 @@ public static partial class MarkdownConverter
             if (referencedApps.Count > 0)
             {
                 codeBuilder.AppendTab(2).AppendLine("// Build errors here indicates that one or more referenced apps don't exist. Check markdown links.");
-                codeBuilder.AppendTab(2).Append("Type[] _ = [").Append(string.Join(", ", referencedApps.Select(e => "typeof(" + e + ")").ToArray())).AppendLine("]; ");
+                codeBuilder.AppendTab(2).Append("Type[] _ = [").Append(string.Join(", ", referencedApps.OrderBy(x => x, StringComparer.Ordinal).Select(e => "typeof(" + e + ")").ToArray())).AppendLine("]; ");
             }
 
             codeBuilder.AppendTab(2).AppendLine("return article;");
@@ -240,7 +240,7 @@ public static partial class MarkdownConverter
                     if (detailsMatch != null)
                     {
                         // Handle the complete Details block directly
-                        HandleDetailsBlockDirect(codeBuilder, detailsMatch.Value, viewBuilder, usedClassNames);
+                        HandleDetailsBlockDirect(codeBuilder, detailsMatch.Value, viewBuilder, usedClassNames, referencedApps);
                         continue;
                     }
                 }
@@ -340,7 +340,7 @@ public static partial class MarkdownConverter
         // Note: Must be case-sensitive to distinguish from HTML <details> element
         if (htmlContent.StartsWith("<Details>"))
         {
-            HandleDetailsBlock(codeBuilder, null, markdownContent, htmlBlock, viewBuilder, usedClassNames);
+            HandleDetailsBlock(codeBuilder, null, markdownContent, htmlBlock, viewBuilder, usedClassNames, referencedApps);
             return;
         }
 
@@ -378,7 +378,7 @@ public static partial class MarkdownConverter
         }
         else if (xml.Name.LocalName == "Details")
         {
-            HandleDetailsBlock(codeBuilder, xml, markdownContent, htmlBlock, viewBuilder, usedClassNames);
+            HandleDetailsBlock(codeBuilder, xml, markdownContent, htmlBlock, viewBuilder, usedClassNames, referencedApps);
         }
         else if (xml.Name.LocalName == "Ingress")
         {
@@ -390,14 +390,14 @@ public static partial class MarkdownConverter
         }
     }
 
-    private static void HandleDetailsBlock(StringBuilder codeBuilder, XElement? xml, string markdownContent, HtmlBlock htmlBlock, StringBuilder viewBuilder, HashSet<string> usedClassNames)
+    private static void HandleDetailsBlock(StringBuilder codeBuilder, XElement? xml, string markdownContent, HtmlBlock htmlBlock, StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps)
     {
         // Get the raw HTML content
         string htmlContent = markdownContent.Substring(htmlBlock.Span.Start, htmlBlock.Span.Length);
-        HandleDetailsBlockDirect(codeBuilder, htmlContent, viewBuilder, usedClassNames);
+        HandleDetailsBlockDirect(codeBuilder, htmlContent, viewBuilder, usedClassNames, referencedApps);
     }
 
-    private static void HandleDetailsBlockDirect(StringBuilder codeBuilder, string htmlContent, StringBuilder viewBuilder, HashSet<string> usedClassNames)
+    private static void HandleDetailsBlockDirect(StringBuilder codeBuilder, string htmlContent, StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps)
     {
         // Extract Summary content
         var summaryStartMatch = SummaryStartRegex.Match(htmlContent);
@@ -430,11 +430,10 @@ public static partial class MarkdownConverter
 
         // Create a temporary builder for the body content
         var bodyCodeBuilder = new StringBuilder();
-        var bodyReferencedApps = new HashSet<string>();
         var bodyLinkConverter = new LinkConverter("");
 
         // Process the body through HandleBlocks
-        HandleBlocks(bodyDocument, bodyCodeBuilder, bodyContent, viewBuilder, usedClassNames, bodyReferencedApps, bodyLinkConverter, false, 4, headings: null);
+        HandleBlocks(bodyDocument, bodyCodeBuilder, bodyContent, viewBuilder, usedClassNames, referencedApps, bodyLinkConverter, false, 4, headings: null);
 
         // Get the generated body content
         var bodyOutput = bodyCodeBuilder.ToString().TrimEnd();
