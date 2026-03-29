@@ -7,33 +7,24 @@ namespace Ivy.Tendril.Apps.Review;
 public class SidebarView(
     List<PlanFile> plans,
     IState<PlanFile?> selectedPlanState,
-    IState<string?> queueFilter,
     IState<string?> textFilter,
     ConfigService config) : ViewBase
 {
     private readonly List<PlanFile> _plans = plans;
     private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
-    private readonly IState<string?> _queueFilter = queueFilter;
     private readonly IState<string?> _textFilter = textFilter;
     private readonly ConfigService _config = config;
 
     public object BuildHeader()
     {
-        var queueCounts = _plans
-            .GroupBy(p => p.Queue)
-            .OrderByDescending(g => g.Count())
-            .Select(g => new Option<string>($"{g.Key} ({g.Count()})", g.Key))
-            .ToArray<IAnyOption>();
-
         return Layout.Vertical()
             | _textFilter.ToSearchInput().Placeholder("Search plans...")
-            | _queueFilter.ToSelectInput(queueCounts).Placeholder("All Projects").Nullable()
             ;
     }
 
     public object BuildContent()
     {
-        var filteredPlans = PlanFilters.ApplyFilters(_plans, _queueFilter.Value, null, _textFilter.Value);
+        var filteredPlans = PlanFilters.ApplyFilters(_plans, null, null, _textFilter.Value);
 
         return new List(filteredPlans.Select(plan =>
         {
