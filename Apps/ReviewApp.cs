@@ -14,7 +14,6 @@ public class ReviewApp : ViewBase
         var jobService = UseService<JobService>();
         var configService = UseService<ConfigService>();
         var selectedPlanState = UseState<PlanFile?>(null);
-        var queueFilter = UseState<string?>(null);
         var textFilter = UseState<string?>("");
         var refreshToken = UseState(0);
 
@@ -23,7 +22,7 @@ public class ReviewApp : ViewBase
         var plans = planService.GetPlans()
             .Where(p => p.Status is PlanStatus.ReadyForReview or PlanStatus.Failed)
             .ToList();
-        var filteredPlans = PlanFilters.ApplyFilters(plans, queueFilter.Value, null, textFilter.Value).ToList();
+        var filteredPlans = PlanFilters.ApplyFilters(plans, null, null, textFilter.Value).ToList();
 
         if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
@@ -46,7 +45,7 @@ public class ReviewApp : ViewBase
             refreshToken.Set(refreshToken.Value + 1);
         }
 
-        var sidebar = new Review.SidebarView(plans, selectedPlanState, queueFilter, textFilter, configService);
+        var sidebar = new Review.SidebarView(plans, selectedPlanState, textFilter, configService);
 
         return new SidebarLayout(
             mainContent: new Review.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
