@@ -231,7 +231,11 @@ public class DataTableMultiAggSample : ViewBase
             new { Region = "West", Sales = 71000m, Target = 70000m }
         }.AsQueryable();
 
-        return salesData.ToDataTable()
+        return Layout.Vertical()
+            | Text.P(
+                "Sales and Target each define two footer aggregates (Total and Avg). The grid shows one at a time; click the footer or the chevron to switch.")
+                .Muted()
+            | salesData.ToDataTable()
             .Header(x => x.Region, "Sales Region")
             .Header(x => x.Sales, "Actual Sales")
                 .Footer(x => x.Sales, new[]

@@ -1,4 +1,5 @@
-import React, { ReactNode, useState, useRef, useEffect } from "react";
+import React, { ReactNode, useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { tableStyles } from "./styles/style";
 import { DataColumn } from "./types/types";
@@ -40,25 +41,16 @@ const footerStyles = {
     textOverflow: "ellipsis",
   } as React.CSSProperties,
   dropdownMenu: {
-    position: "absolute",
-    bottom: "100%",
-    marginBottom: "2px",
     background: "var(--popover)",
     border: "1px solid var(--border)",
     borderRadius: "6px",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
-    zIndex: 50,
     minWidth: "80px",
     overflow: "hidden",
   } as React.CSSProperties,
-  dropdownMenuAnchorLeft: { left: 0 } as React.CSSProperties,
-  dropdownMenuAnchorRight: { right: 0 } as React.CSSProperties,
 };
 
-/**
- * Footer component that overlaps the bottom of the DataTableEditor
- * Horizontal scrollbars from the editor will appear on top of this footer
- */
+/** Aggregate footer row below the grid (flex layout in GridContainer — not overlaid). */
 export interface DataTableFooterProps {
   children?: ReactNode;
   className?: string;
@@ -82,20 +74,66 @@ const FooterCell: React.FC<{
 }> = ({ values, align, cellStyle }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [menuPos, setMenuPos] = useState<{
+    left?: number;
+    right?: number;
+    top: number;
+    minWidth: number;
+  } | null>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const textAlign = align === "Right" ? "right" : align === "Center" ? "center" : "left";
+
+  const updateMenuPosition = useCallback(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const minWidth = Math.max(80, rect.width);
+    if (textAlign === "right") {
+      setMenuPos({
+        right: window.innerWidth - rect.right,
+        top: rect.top,
+        minWidth,
+      });
+    } else {
+      setMenuPos({
+        left: rect.left,
+        top: rect.top,
+        minWidth,
+      });
+    }
+  }, [textAlign]);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuPos(null);
+      return;
+    }
+    updateMenuPosition();
+  }, [open, updateMenuPosition, selectedIndex, values]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onScrollOrResize = () => updateMenuPosition();
+    window.addEventListener("resize", onScrollOrResize);
+    window.addEventListener("scroll", onScrollOrResize, true);
+    return () => {
+      window.removeEventListener("resize", onScrollOrResize);
+      window.removeEventListener("scroll", onScrollOrResize, true);
+    };
+  }, [open, updateMenuPosition]);
 
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      const t = e.target as Node;
+      if (triggerRef.current?.contains(t) || menuRef.current?.contains(t)) return;
+      setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
-
-  const textAlign = align === "Right" ? "right" : align === "Center" ? "center" : "left";
 
   // Single value — no dropdown
   if (values.length === 1) {
@@ -106,16 +144,57 @@ const FooterCell: React.FC<{
     );
   }
 
-  // Multiple values — dropdown selector
-  return (
-    <div ref={ref} style={{ ...cellStyle, textAlign, position: "relative" }}>
+  const menuPortal =
+    open &&
+    menuPos &&
+    typeof document !== "undefined" &&
+    createPortal(
       <div
+        ref={menuRef}
+        style={{
+          ...footerStyles.dropdownMenu,
+          position: "fixed",
+          zIndex: 10,
+          top: menuPos.top,
+          left: menuPos.left,
+          right: menuPos.right,
+          minWidth: menuPos.minWidth,
+          transform: "translateY(calc(-100% - 2px))",
+        }}
+      >
+        {values.map((value, i) => (
+          <div
+            key={i}
+            role="option"
+            aria-selected={i === selectedIndex}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              setSelectedIndex(i);
+              setOpen(false);
+            }}
+            className={cn(
+              "px-2 py-1 text-xs cursor-pointer whitespace-nowrap transition-colors",
+              i === selectedIndex ? "bg-accent font-bold" : "font-normal hover:bg-accent",
+            )}
+          >
+            {value}
+          </div>
+        ))}
+      </div>,
+      document.body,
+    );
+
+  // Multiple values — dropdown selector (menu portaled so it is not clipped by overflow:hidden)
+  return (
+    <div style={{ ...cellStyle, textAlign, position: "relative" }}>
+      <div
+        ref={triggerRef}
         className={cn(
           "inline-flex max-w-full min-w-0 items-center gap-0.5 rounded px-1 -mx-1 cursor-pointer transition-colors",
           "hover:bg-accent hover:text-accent-foreground",
           open && "bg-accent text-accent-foreground",
         )}
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((v) => !v)}
       >
         <span className="min-w-0 truncate" style={footerStyles.value}>
           {values[selectedIndex]}
@@ -128,32 +207,7 @@ const FooterCell: React.FC<{
           )}
         />
       </div>
-      {open && (
-        <div
-          style={{
-            ...footerStyles.dropdownMenu,
-            ...(textAlign === "right"
-              ? footerStyles.dropdownMenuAnchorRight
-              : footerStyles.dropdownMenuAnchorLeft),
-          }}
-        >
-          {values.map((value, i) => (
-            <div
-              key={i}
-              onClick={() => {
-                setSelectedIndex(i);
-                setOpen(false);
-              }}
-              className={cn(
-                "px-2 py-1 text-xs cursor-pointer whitespace-nowrap transition-colors",
-                i === selectedIndex ? "bg-accent font-bold" : "font-normal hover:bg-accent",
-              )}
-            >
-              {value}
-            </div>
-          ))}
-        </div>
-      )}
+      {menuPortal}
     </div>
   );
 };
