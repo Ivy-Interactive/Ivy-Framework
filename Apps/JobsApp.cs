@@ -32,7 +32,8 @@ public class JobsApp : ViewBase
             Plan = j.PlanFile,
             Type = j.Type,
             Project = j.Project,
-            Timer = FormatTimer(j)
+            Timer = FormatTimer(j),
+            StatusMessage = j.StatusMessage ?? ""
         }).ToList();
 
         var dataTable = rows.AsQueryable()
@@ -45,6 +46,7 @@ public class JobsApp : ViewBase
             .Header(t => t.Type, "Type")
             .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
+            .Header(t => t.StatusMessage, "Status Message")
             .Renderer(t => t.Status, new LabelsDisplayRenderer())
             .Hidden(t => t.Id)
             .Config(c =>

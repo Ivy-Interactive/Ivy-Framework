@@ -99,6 +99,9 @@ public class JobService
             UseShellExecute = false,
             CreateNoWindow = true,
         };
+        psi.Environment["TENDRIL_JOB_ID"] = id;
+        psi.Environment["TENDRIL_URL"] = "http://localhost:5010";
+
         foreach (var arg in processArgs)
             psi.ArgumentList.Add(arg);
 
@@ -140,6 +143,7 @@ public class JobService
         if (!_jobs.TryGetValue(id, out var job)) return;
 
         var success = exitCode == 0;
+        job.StatusMessage = null;
         job.Status = success ? "Completed" : "Failed";
         job.CompletedAt = DateTime.UtcNow;
         if (job.StartedAt.HasValue)
