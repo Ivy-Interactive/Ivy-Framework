@@ -95,7 +95,7 @@ public class ContentView(
             | new Badge(_selectedPlan.Status.ToString()).Variant(BadgeVariant.Outline)
             | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline)
             | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
-            | new Badge($"rev#{_selectedPlan.RevisionCount}").Variant(BadgeVariant.Outline)
+            | new Badge($"rev:{_selectedPlan.RevisionCount}").Variant(BadgeVariant.Outline)
             | isEditing.ToSwitchInput(Icons.Code)
             | new Spacer().Width(Size.Grow())
             | Text.Rich()
