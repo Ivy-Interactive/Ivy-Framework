@@ -149,11 +149,15 @@ public class ContentView(
                 _refreshPlans();
             })
             | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => deleteDialogOpen.Set(true))
-            | new Button("Create Issue").Icon(Icons.Github).Outline().OnClick(() => createIssueDialogOpen.Set(true))
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
-            | new Button("Download").Icon(Icons.Download).Outline().Url(downloadUrl.Value ?? "")
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                new MenuItem("Create Issue", Icon: Icons.Github).OnSelect(() => createIssueDialogOpen.Set(true)),
+                new MenuItem("Download", Icon: Icons.Download).OnSelect(() =>
+                {
+                    var url = downloadUrl.Value;
+                    if (!string.IsNullOrEmpty(url)) client.OpenUrl(url);
+                }),
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
                 {
                     copyToClipboard(_selectedPlan.FolderPath);
