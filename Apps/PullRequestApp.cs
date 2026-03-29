@@ -21,6 +21,7 @@ public class PullRequestApp : ViewBase
         var rows = plans.SelectMany(plan => plan.Prs.Select((pr, i) => new PrRow
         {
             Id = $"{plan.Id}-{i}",
+            PlanId = $"{plan.Id:D5}",
             Repository = ExtractRepo(pr),
             Pr = pr,
             Plan = $"#{plan.Id:D5} {plan.Title}",
@@ -32,6 +33,7 @@ public class PullRequestApp : ViewBase
             .RefreshToken(refreshToken)
             .Width(Size.Full())
             .Height(Size.Full())
+            .Header(t => t.PlanId, "Plan ID")
             .Header(t => t.Repository, "Repository")
             .Header(t => t.Pr, "PR")
             .Header(t => t.Plan, "Plan")
