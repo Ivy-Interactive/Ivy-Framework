@@ -63,43 +63,61 @@ public class ContentView(
         // Verifications section
         if (_selectedPlan.Verifications.Count > 0)
         {
-            var verificationsLayout = Layout.Vertical().Gap(1);
-            verificationsLayout |= Text.Block("Verifications").Bold();
-            foreach (var v in _selectedPlan.Verifications)
-            {
-                var variant = v.Status switch
+            content |= Text.Block("Verifications").Bold();
+            content |= _selectedPlan.Verifications.AsQueryable()
+                .ToDataTable(v => v.Name)
+                .Header(v => v.Status, "Status")
+                .Header(v => v.Name, "Name")
+                .Renderer(v => v.Status, new LabelsDisplayRenderer())
+                .Config(c =>
                 {
-                    "Pass" => BadgeVariant.Success,
-                    "Fail" => BadgeVariant.Destructive,
-                    _ => BadgeVariant.Outline
-                };
-                verificationsLayout |= Layout.Horizontal().Gap(2)
-                    | new Badge(v.Status).Variant(variant).Small()
-                    | Text.Block(v.Name);
-            }
-            content |= verificationsLayout;
+                    c.AllowSorting = false;
+                    c.AllowFiltering = false;
+                    c.ShowSearch = false;
+                    c.SelectionMode = SelectionModes.None;
+                    c.ShowIndexColumn = false;
+                });
         }
 
         // Commits section
         if (_selectedPlan.Commits.Count > 0)
         {
-            var commitsLayout = Layout.Vertical().Gap(1);
-            commitsLayout |= Text.Block("Commits").Bold();
+            content |= Text.Block("Commits").Bold();
             var repoPaths = _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
-            foreach (var commit in _selectedPlan.Commits)
+            var commitRows = _selectedPlan.Commits.Select(commit =>
             {
                 var title = repoPaths
                     .Select(repo => _gitService.GetCommitTitle(repo, commit))
-                    .FirstOrDefault(t => t != null);
+                    .FirstOrDefault(t => t != null) ?? "";
                 var shortHash = commit.Length > 7 ? commit[..7] : commit;
-                var commitCapture = commit;
-                var row = Layout.Horizontal().Gap(2)
-                    | new Button(shortHash).Ghost().Small().OnClick(() =>
-                        navigator.Navigate<CommitApp>(new CommitAppArgs(commitCapture, _selectedPlan.Project)))
-                    | Text.Block(title != null ? $"— {title}" : "");
-                commitsLayout |= row;
-            }
-            content |= commitsLayout;
+                return new CommitRow(commit, shortHash, title);
+            }).ToList();
+
+            content |= commitRows.AsQueryable()
+                .ToDataTable(c => c.Hash)
+                .Header(c => c.ShortHash, "Commit")
+                .Header(c => c.Title, "Message")
+                .Hidden(c => c.Hash)
+                .Config(c =>
+                {
+                    c.AllowSorting = false;
+                    c.AllowFiltering = false;
+                    c.ShowSearch = false;
+                    c.SelectionMode = SelectionModes.None;
+                    c.ShowIndexColumn = false;
+                })
+                .RowActions(
+                    new MenuItem(Label: "View Commit", Icon: Icons.GitCommitHorizontal, Tag: "view-commit")
+                )
+                .OnRowAction(e =>
+                {
+                    var hash = e.Value.Id?.ToString();
+                    if (hash != null)
+                    {
+                        navigator.Navigate<CommitApp>(new CommitAppArgs(hash, _selectedPlan.Project));
+                    }
+                    return ValueTask.CompletedTask;
+                });
         }
 
         // PRs section
@@ -237,4 +255,6 @@ public class ContentView(
         var prevIndex = (currentIndex - 1 + _allPlans.Count) % _allPlans.Count;
         _selectedPlanState.Set(_allPlans[prevIndex]);
     }
+
+    private record CommitRow(string Hash, string ShortHash, string Title);
 }
