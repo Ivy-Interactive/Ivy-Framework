@@ -31,6 +31,7 @@ public class ContentView(
         var downloadUrl = PlanDownloadHelper.UsePlanDownload(Context, _planService, _selectedPlan);
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
+        var navigator = UseNavigation();
         var deleteDialogOpen = UseState(false);
 
         var isEditing = UseState(false);
@@ -113,7 +114,16 @@ public class ContentView(
         }
         else
         {
-            scrollableContent |= new Markdown(_selectedPlan.LatestRevisionContent).DangerouslyAllowLocalFiles();
+            scrollableContent |= new Markdown(_selectedPlan.LatestRevisionContent)
+                .DangerouslyAllowLocalFiles()
+                .OnLinkClick(url =>
+                {
+                    if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var filePath = url.Substring("file:///".Length);
+                        navigator.Navigate<FileApp>(new FileAppArgs(filePath));
+                    }
+                });
         }
 
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
