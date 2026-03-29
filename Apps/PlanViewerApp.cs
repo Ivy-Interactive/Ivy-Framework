@@ -14,6 +14,7 @@ public class PlanViewerApp : ViewBase
         var args = UseArgs<PlanViewerAppArgs>();
         var planService = UseService<PlanReaderService>();
         var config = UseService<ConfigService>();
+        var navigator = UseNavigation();
 
         if (args?.PlanFolderPath is not { } folderPath || string.IsNullOrWhiteSpace(folderPath))
             return Text.P("No plan path provided.");
@@ -36,6 +37,14 @@ public class PlanViewerApp : ViewBase
         return new HeaderLayout(
             header: header,
             content: new Markdown(content).DangerouslyAllowLocalFiles()
+                .OnLinkClick(url =>
+                {
+                    if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var filePath = url.Substring("file:///".Length);
+                        navigator.Navigate<FileApp>(new FileAppArgs(filePath));
+                    }
+                })
         ).Scroll(Scroll.None).Size(Size.Full());
     }
 }
