@@ -71,7 +71,9 @@ const FooterCell: React.FC<{
   values: string[];
   align?: string;
   cellStyle: React.CSSProperties;
-}> = ({ values, align, cellStyle }) => {
+  /** When footer column widths / marker change (e.g. grid column resize), menu anchor must update. */
+  layoutSyncKey?: string;
+}> = ({ values, align, cellStyle, layoutSyncKey = "" }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{
@@ -111,7 +113,7 @@ const FooterCell: React.FC<{
       return;
     }
     updateMenuPosition();
-  }, [open, updateMenuPosition, selectedIndex, values]);
+  }, [open, updateMenuPosition, selectedIndex, values, layoutSyncKey]);
 
   useEffect(() => {
     if (!open) return;
@@ -123,6 +125,16 @@ const FooterCell: React.FC<{
       window.removeEventListener("scroll", onScrollOrResize, true);
     };
   }, [open, updateMenuPosition]);
+
+  /** Footer strip scroll (synced to grid) moves cells without window scroll — reposition menu. */
+  useEffect(() => {
+    if (!open) return;
+    const scrollRoot = triggerRef.current?.closest("[data-footer-scroll]");
+    if (!scrollRoot) return;
+    const onScroll = () => updateMenuPosition();
+    scrollRoot.addEventListener("scroll", onScroll, { passive: true });
+    return () => scrollRoot.removeEventListener("scroll", onScroll);
+  }, [open, updateMenuPosition, layoutSyncKey]);
 
   useEffect(() => {
     if (!open) return;
@@ -240,11 +252,15 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({
 
   const cellStyle = useGridLayout ? footerStyles.cellGrid : footerStyles.cell;
 
+  const layoutSyncKey =
+    useGridLayout && layout ? `${layout.markerWidth}:${layout.columnWidths.join(",")}` : "";
+
   if (useGridLayout && gridTemplateColumns && footerScrollRef) {
     return (
       <DataTableFooter>
         <div
           ref={footerScrollRef}
+          data-footer-scroll
           className="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{ ...footerStyles.rowGridScroll }}
         >
@@ -265,6 +281,7 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({
                   values={footerValues}
                   align={col.align}
                   cellStyle={cellStyle}
+                  layoutSyncKey={layoutSyncKey}
                 />
               );
             })}
@@ -292,6 +309,7 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({
               values={footerValues}
               align={col.align}
               cellStyle={cellStyle}
+              layoutSyncKey={layoutSyncKey}
             />
           );
         })}
