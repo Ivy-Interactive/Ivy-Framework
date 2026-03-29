@@ -13,7 +13,7 @@ public class PlansApp : ViewBase
         var jobService = UseService<JobService>();
         var configService = UseService<ConfigService>();
         var selectedPlanState = UseState<PlanFile?>(null);
-        var queueFilter = UseState<string?>(null);
+        var projectFilter = UseState<string?>(null);
         var levelFilter = UseState<string?>(null);
         var textFilter = UseState<string?>("");
         var refreshToken = UseState(0);
@@ -23,7 +23,7 @@ public class PlansApp : ViewBase
         var plans = planService.GetPlans()
             .Where(p => p.Status == PlanStatus.Draft)
             .ToList();
-        var filteredPlans = PlanFilters.ApplyFilters(plans, queueFilter.Value, levelFilter.Value, textFilter.Value).ToList();
+        var filteredPlans = PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value).ToList();
 
         if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
@@ -47,7 +47,7 @@ public class PlansApp : ViewBase
             refreshToken.Set(refreshToken.Value + 1);
         }
 
-        var sidebar = new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter, configService);
+        var sidebar = new SidebarView(plans, selectedPlanState, projectFilter, levelFilter, textFilter, configService);
 
         return new SidebarLayout(
             mainContent: new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),

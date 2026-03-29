@@ -39,9 +39,9 @@ public class JobService
         var id = $"job-{Interlocked.Increment(ref _counter):D3}";
         var scriptPath = ScriptPaths.GetValueOrDefault(type, "");
 
-        // Extract plan folder and queue from args
+        // Extract plan folder and project from args
         var planFile = "";
-        var queue = "General";
+        var project = "General";
 
         // For MakePlan: args are named params like -Description "..." -Project "..."
         // For others: args[0] is the plan folder path
@@ -50,8 +50,8 @@ public class JobService
             planFile = GetNamedArg(args, "-Description") is { } desc
                 ? (desc.Length > 40 ? desc[..40] + "..." : desc)
                 : "New Plan";
-            queue = GetNamedArg(args, "-Project") ?? "General";
-            if (queue == "[Auto]") queue = "General";
+            project = GetNamedArg(args, "-Project") ?? "General";
+            if (project == "[Auto]") project = "General";
         }
         else
         {
@@ -64,7 +64,7 @@ public class JobService
                 {
                     var yaml = File.ReadAllText(planYamlPath);
                     var match = System.Text.RegularExpressions.Regex.Match(yaml, @"(?m)^project:\s*(.+)$");
-                    if (match.Success) queue = match.Groups[1].Value.Trim();
+                    if (match.Success) project = match.Groups[1].Value.Trim();
                 }
             }
         }
@@ -74,7 +74,7 @@ public class JobService
             Id = id,
             Type = type,
             PlanFile = planFile,
-            Queue = queue,
+            Project = project,
             Status = "Running",
             StartedAt = DateTime.UtcNow,
             ScriptPath = scriptPath,

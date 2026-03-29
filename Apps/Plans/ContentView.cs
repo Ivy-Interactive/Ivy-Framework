@@ -93,7 +93,7 @@ public class ContentView(
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
             | new Badge(_selectedPlan.Status.ToString()).Variant(BadgeVariant.Outline)
-            | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Outline)
+            | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline)
             | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
             | isEditing.ToSwitchInput(Icons.Code)
             | new Spacer().Width(Size.Grow())

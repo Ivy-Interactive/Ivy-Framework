@@ -31,7 +31,7 @@ public class JobsApp : ViewBase
             Status = j.Status,
             Plan = j.PlanFile,
             Type = j.Type,
-            Queue = j.Queue,
+            Project = j.Project,
             Timer = FormatTimer(j)
         }).ToList();
 
@@ -43,7 +43,7 @@ public class JobsApp : ViewBase
             .Header(t => t.Status, "Status")
             .Header(t => t.Plan, "Plan")
             .Header(t => t.Type, "Type")
-            .Header(t => t.Queue, "Queue")
+            .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
             .Renderer(t => t.Status, new LabelsDisplayRenderer())
             .Hidden(t => t.Id)

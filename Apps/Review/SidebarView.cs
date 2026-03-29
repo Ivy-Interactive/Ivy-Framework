@@ -35,7 +35,7 @@ public class SidebarView(
             return new ListItem($"#{plan.Id} {plan.Title}")
                 .Content(Layout.Horizontal().Gap(1)
                     | new Badge(plan.Status.ToString()).Variant(statusVariant).Small()
-                    | new Badge(plan.Queue).Variant(BadgeVariant.Outline).Small()
+                    | new Badge(plan.Project).Variant(BadgeVariant.Outline).Small()
                     | (verificationsPassed
                         ? new Badge("Verified").Variant(BadgeVariant.Success).Small()
                         : new Badge("Unverified").Variant(BadgeVariant.Warning).Small())
