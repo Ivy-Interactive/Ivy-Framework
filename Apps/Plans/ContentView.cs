@@ -100,7 +100,7 @@ public class ContentView(
             | Text.Rich()
                 .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
                 .Muted("plans", word: true)
-            | new Button("Execute").Icon(Icons.Hammer).Primary().OnClick(() =>
+            | new Button("Execute").Icon(Icons.Hammer).Primary().ShortcutKey("e").OnClick(() =>
             {
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
                 _jobService.StartJob("ExecutePlan", _selectedPlan.FolderPath);
@@ -139,16 +139,16 @@ public class ContentView(
         }
 
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
-            | new Button("Update").Icon(Icons.Pencil).Outline().OnClick(() => updateDialogOpen.Set(true))
-            | new Button("Split").Icon(Icons.Scissors).Outline().OnClick(() => splitDialogOpen.Set(true))
-            | new Button("Expand").Icon(Icons.UnfoldVertical).Outline().OnClick(() =>
+            | new Button("Update").Icon(Icons.Pencil).Outline().ShortcutKey("u").OnClick(() => updateDialogOpen.Set(true))
+            | new Button("Split").Icon(Icons.Scissors).Outline().ShortcutKey("s").OnClick(() => splitDialogOpen.Set(true))
+            | new Button("Expand").Icon(Icons.UnfoldVertical).Outline().ShortcutKey("x").OnClick(() =>
             {
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
                 var planPath = _selectedPlan.FolderPath;
                 _jobService.StartJob("ExpandPlan", planPath);
                 _refreshPlans();
             })
-            | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => deleteDialogOpen.Set(true))
+            | new Button("Delete").Icon(Icons.Trash).Outline().ShortcutKey("Delete").OnClick(() => deleteDialogOpen.Set(true))
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
