@@ -124,11 +124,12 @@ Create a `verification/` directory in the plan folder if it doesn't exist.
 Check the `## Verification` section in the plan revision for checked items (`- [x]`). Skip unchecked items (`- [ ]`).
 
 For each checked verification:
-1. Look up its `prompt` in the `verifications` list in `config.yaml`
-2. Execute the prompt in the worktree directory
-3. If it fails: diagnose, fix the issue, **commit the fix** (e.g. `[01105] Fix lint errors from DotnetBuild`), and re-run. Repeat until it passes (fail the plan after 3+ failed attempts).
-4. Document all fix commits in `plan.yaml` just like implementation commits.
-5. Update the verification's `status` in `plan.yaml` to `Pass` or `Fail`.
+1. Send a status message: `Invoke-RestMethod -Uri "$env:TENDRIL_URL/api/jobs/$env:TENDRIL_JOB_ID/status" -Method Post -Body ('{"message":"Verifying: <Name>"}') -ContentType "application/json" -ErrorAction SilentlyContinue`
+2. Look up its `prompt` in the `verifications` list in `config.yaml`
+3. Execute the prompt in the worktree directory
+4. If it fails: diagnose, fix the issue, **commit the fix** (e.g. `[01105] Fix lint errors from DotnetBuild`), and re-run. Repeat until it passes (fail the plan after 3+ failed attempts).
+5. Document all fix commits in `plan.yaml` just like implementation commits.
+6. Update the verification's `status` in `plan.yaml` to `Pass` or `Fail`.
 
 **!IMPORTANT: Every verification MUST produce a report** at `<PlanFolder>/verification/<VerificationName>.md`:
 

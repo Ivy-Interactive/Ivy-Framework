@@ -6,18 +6,29 @@ if (Test-Path $claudeDir) {
     }
 }
 
-# Read planFolder from config.yaml
-$script:PlansDir = "D:\Plans"  # fallback
+# Read plans directory from config.yaml
 $script:ConfigPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
+$script:PlansDir = $null
 if (Test-Path $script:ConfigPath) {
     try {
         $configYaml = Get-Content $script:ConfigPath -Raw
+        # First check explicit planFolder
         $pfMatch = [regex]::Match($configYaml, '(?m)^planFolder:\s*(.+)$')
         if ($pfMatch.Success) {
             $script:PlansDir = $pfMatch.Groups[1].Value.Trim().TrimEnd('\', '/')
         }
+        # Otherwise derive from tendrilData
+        if (-not $script:PlansDir) {
+            $tdMatch = [regex]::Match($configYaml, '(?m)^tendrilData:\s*(.+)$')
+            if ($tdMatch.Success) {
+                $script:PlansDir = Join-Path $tdMatch.Groups[1].Value.Trim().TrimEnd('\', '/') "Plans"
+            }
+        }
     }
     catch { }
+}
+if (-not $script:PlansDir) {
+    $script:PlansDir = "D:\Plans"  # fallback
 }
 
 function GetProgramFolder {

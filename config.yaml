@@ -1,4 +1,4 @@
-planFolder: D:\Plans\
+tendrilData: D:\Tendril
 agentCommand: claude --print --verbose --output-format stream-json --dangerously-skip-permissions
 
 levels:
@@ -115,20 +115,6 @@ projects:
       This project uses the Ivy Framework - there's CLI helper methods you can use: 
       ivy docs AGENTS.md 
       ivy question "How do I make a button in Ivy?"
-
-  - name: FooTest
-    repos:
-      - path: D:\Temp\FooTest
-        prRule: yolo
-    verifications:
-      - name: DotnetBuild
-        required: true
-      - name: DotnetFormat
-        required: true
-      - name: DotnetTest
-        required: false
-    context: |
-      Dummy test project. Simple .NET 10 console app at D:\Temp\FooTest.
 
 verifications:
   - name: DotnetBuild
