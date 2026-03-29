@@ -4,11 +4,15 @@ using Ivy.Tendril.Apps.Jobs;
 
 namespace Ivy.Tendril.Services;
 
+public record JobNotification(string Title, string Message, bool IsSuccess);
+
 public class JobService
 {
     private readonly ConcurrentDictionary<string, JobItem> _jobs = new();
     private int _counter;
     private PlanReaderService? _planReaderService;
+
+    public ConcurrentQueue<JobNotification> PendingNotifications { get; } = new();
 
     private static readonly string PromptsRoot =
         Path.GetFullPath(Path.Combine(System.AppContext.BaseDirectory, "..", "..", "..", ".promptwares"));
@@ -135,10 +139,17 @@ public class JobService
     {
         if (!_jobs.TryGetValue(id, out var job)) return;
 
-        job.Status = exitCode == 0 ? "Completed" : "Failed";
+        var success = exitCode == 0;
+        job.Status = success ? "Completed" : "Failed";
         job.CompletedAt = DateTime.UtcNow;
         if (job.StartedAt.HasValue)
             job.DurationSeconds = (int)(job.CompletedAt.Value - job.StartedAt.Value).TotalSeconds;
+
+        var title = success ? "Job Completed" : "Job Failed";
+        var message = success
+            ? $"Job completed: {job.PlanFile}"
+            : $"Job failed: {job.PlanFile}";
+        PendingNotifications.Enqueue(new JobNotification(title, message, success));
 
         WriteJobLog(job);
     }

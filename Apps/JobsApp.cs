@@ -10,8 +10,19 @@ public class JobsApp : ViewBase
     public override object? Build()
     {
         var jobService = UseService<JobService>();
+        var client = UseService<IClientProvider>();
         var refreshToken = UseRefreshToken();
-        UseInterval(() => refreshToken.Refresh(), TimeSpan.FromSeconds(5));
+        UseInterval(() =>
+        {
+            while (jobService.PendingNotifications.TryDequeue(out var notification))
+            {
+                if (notification.IsSuccess)
+                    client.Toast(notification.Message, notification.Title).Success();
+                else
+                    client.Toast(notification.Message, notification.Title).Destructive();
+            }
+            refreshToken.Refresh();
+        }, TimeSpan.FromSeconds(5));
 
         var jobs = jobService.GetJobs();
         var rows = jobs.Select(j => new JobItemRow
