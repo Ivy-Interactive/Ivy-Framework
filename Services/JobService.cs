@@ -151,6 +151,9 @@ public class JobService
             : $"Job failed: {job.PlanFile}";
         PendingNotifications.Enqueue(new JobNotification(title, message, success));
 
+        if (job.Status == "Failed")
+            ResetPlanState(job);
+
         WriteJobLog(job);
     }
 
@@ -189,6 +192,27 @@ public class JobService
                 return args[i + 1];
         }
         return null;
+    }
+
+    private void ResetPlanState(JobItem job)
+    {
+        try
+        {
+            if (job.Type == "MakePlan") return;
+
+            var planFolder = job.Args.Length > 0 ? job.Args[0] : "";
+            var planYamlPath = Path.Combine(planFolder, "plan.yaml");
+            if (!File.Exists(planYamlPath)) return;
+
+            var content = File.ReadAllText(planYamlPath);
+            var newState = job.Type == "ExecutePlan" ? "Failed" : "Draft";
+            content = System.Text.RegularExpressions.Regex.Replace(
+                content, @"(?m)^state:\s*.*$", $"state: {newState}");
+            content = System.Text.RegularExpressions.Regex.Replace(
+                content, @"(?m)^updated:\s*.*$", $"updated: {DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}");
+            File.WriteAllText(planYamlPath, content);
+        }
+        catch { /* Don't let state reset failures crash job completion */ }
     }
 
     private void WriteJobLog(JobItem job)
