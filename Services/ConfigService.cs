@@ -16,6 +16,7 @@ public record ProjectConfig
 {
     public string Name { get; set; } = "";
     public List<string> Repos { get; set; } = new();
+    public List<ProjectVerificationRef> Verifications { get; set; } = new();
     public string Context { get; set; } = "";
 }
 
@@ -25,11 +26,25 @@ public record LevelConfig
     public string Badge { get; set; } = "Outline";
 }
 
+public record VerificationConfig
+{
+    public string Name { get; set; } = "";
+    public string Prompt { get; set; } = "";
+}
+
+public record ProjectVerificationRef
+{
+    public string Name { get; set; } = "";
+    public bool Required { get; set; }
+}
+
 public class TendrilSettings
 {
     public string PlanFolder { get; set; } = @".plans";
     public string AgentCommand { get; set; } = "claude";
     public List<ProjectConfig> Projects { get; set; } = new();
+    public List<VerificationConfig> Verifications { get; set; } = new();
+    public string PlanTemplate { get; set; } = "";
     public List<LevelConfig> Levels { get; set; } = new()
     {
         new() { Name = "Critical", Badge = "Warning" },

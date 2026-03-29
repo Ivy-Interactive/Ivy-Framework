@@ -99,11 +99,10 @@ public class ContentView(
             | Text.Rich()
                 .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
                 .Muted("plans", word: true)
-            | new Button("Build").Icon(Icons.Hammer).Primary().OnClick(() =>
+            | new Button("Execute").Icon(Icons.Hammer).Primary().OnClick(() =>
             {
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
-                var planPath = _selectedPlan.FolderPath;
-                _jobService.StartJob("ExecutePlan", planPath);
+                _jobService.StartJob("ExecutePlan", _selectedPlan.FolderPath);
                 _refreshPlans();
             });
 
@@ -141,6 +140,10 @@ public class ContentView(
             })
             | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => deleteDialogOpen.Set(true))
             | new Button("Create Issue").Icon(Icons.Github).Outline().OnClick(() => createIssueDialogOpen.Set(true))
+            | new Button("Make PR").Icon(Icons.GitPullRequest).Outline().OnClick(() =>
+            {
+                _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
+            })
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Button("Download").Icon(Icons.Download).Outline().Url(downloadUrl.Value ?? "")
@@ -169,7 +172,7 @@ public class ContentView(
             new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan, _jobService, _planService),
             new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan, _jobService, _planService),
             new DeletePlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans),
-            new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, _selectedPlan)
+            new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, _selectedPlan, _jobService)
         };
 
         return new Fragment(elements.ToArray());

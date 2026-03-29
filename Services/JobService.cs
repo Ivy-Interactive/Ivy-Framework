@@ -20,6 +20,9 @@ public class JobService
         ["SplitPlan"] = Path.Combine(PromptsRoot, "SplitPlan.ps1"),
         ["ExpandPlan"] = Path.Combine(PromptsRoot, "ExpandPlan.ps1"),
         ["ExecutePlan"] = Path.Combine(PromptsRoot, "ExecutePlan.ps1"),
+        ["IvyFrameworkVerification"] = Path.Combine(PromptsRoot, "IvyFrameworkVerification.ps1"),
+        ["MakePr"] = Path.Combine(PromptsRoot, "MakePr.ps1"),
+        ["CreateIssue"] = Path.Combine(PromptsRoot, "CreateIssue.ps1"),
     };
 
     public void SetPlanReaderService(PlanReaderService planReaderService)
@@ -31,14 +34,43 @@ public class JobService
     {
         var id = $"job-{Interlocked.Increment(ref _counter):D3}";
         var scriptPath = ScriptPaths.GetValueOrDefault(type, "");
-        var planFolder = args.Length > 0 ? args[0] : "";
+
+        // Extract plan folder and queue from args
+        var planFile = "";
+        var queue = "General";
+
+        // For MakePlan: args are named params like -Description "..." -Project "..."
+        // For others: args[0] is the plan folder path
+        if (type == "MakePlan")
+        {
+            planFile = GetNamedArg(args, "-Description") is { } desc
+                ? (desc.Length > 40 ? desc[..40] + "..." : desc)
+                : "New Plan";
+            queue = GetNamedArg(args, "-Project") ?? "General";
+            if (queue == "[Auto]") queue = "General";
+        }
+        else
+        {
+            var planFolder = args.Length > 0 ? args[0] : "";
+            planFile = Path.GetFileName(planFolder);
+            if (Directory.Exists(planFolder))
+            {
+                var planYamlPath = Path.Combine(planFolder, "plan.yaml");
+                if (File.Exists(planYamlPath))
+                {
+                    var yaml = File.ReadAllText(planYamlPath);
+                    var match = System.Text.RegularExpressions.Regex.Match(yaml, @"(?m)^project:\s*(.+)$");
+                    if (match.Success) queue = match.Groups[1].Value.Trim();
+                }
+            }
+        }
 
         var job = new JobItem
         {
             Id = id,
             Type = type,
-            PlanFile = Path.GetFileName(planFolder),
-            Queue = "Tendril",
+            PlanFile = planFile,
+            Queue = queue,
             Status = "Running",
             StartedAt = DateTime.UtcNow,
             ScriptPath = scriptPath,
@@ -57,13 +89,14 @@ public class JobService
         var psi = new System.Diagnostics.ProcessStartInfo
         {
             FileName = "pwsh",
-            Arguments = string.Join(" ", processArgs.Select(a => $"\"{a}\"")),
             WorkingDirectory = workingDirectory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true,
         };
+        foreach (var arg in processArgs)
+            psi.ArgumentList.Add(arg);
 
         var process = new System.Diagnostics.Process { StartInfo = psi };
         process.OutputDataReceived += (_, e) =>
@@ -135,6 +168,16 @@ public class JobService
     public JobItem? GetJob(string id)
     {
         return _jobs.GetValueOrDefault(id);
+    }
+
+    private static string? GetNamedArg(string[] args, string name)
+    {
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (args[i].Equals(name, StringComparison.OrdinalIgnoreCase))
+                return args[i + 1];
+        }
+        return null;
     }
 
     private void WriteJobLog(JobItem job)

@@ -1,11 +1,12 @@
 using Ivy;
 using Ivy.Tendril.Apps.Plans;
+using Ivy.Tendril.Apps.Review;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Plans", icon: Icons.ClipboardList, group: new[] { "Tools" }, order: 10)]
-public class PlansApp : ViewBase
+[App(title: "Review", icon: Icons.FileText, group: new[] { "Tools" }, order: 25)]
+public class ReviewApp : ViewBase
 {
     public override object? Build()
     {
@@ -14,21 +15,19 @@ public class PlansApp : ViewBase
         var configService = UseService<ConfigService>();
         var selectedPlanState = UseState<PlanFile?>(null);
         var queueFilter = UseState<string?>(null);
-        var levelFilter = UseState<string?>(null);
         var textFilter = UseState<string?>("");
         var refreshToken = UseState(0);
 
         var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
 
         var plans = planService.GetPlans()
-            .Where(p => p.Status == PlanStatus.Draft)
+            .Where(p => p.Status is PlanStatus.ReadyForReview or PlanStatus.Failed)
             .ToList();
-        var filteredPlans = PlanFilters.ApplyFilters(plans, queueFilter.Value, levelFilter.Value, textFilter.Value).ToList();
+        var filteredPlans = PlanFilters.ApplyFilters(plans, queueFilter.Value, null, textFilter.Value).ToList();
 
         if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
             var oldIndex = previousPlans.Value.FindIndex(p => p.FolderName == selected.FolderName);
-
             if (filteredPlans.Count > 0 && oldIndex >= 0)
             {
                 var newIndex = Math.Min(oldIndex, filteredPlans.Count - 1);
@@ -47,11 +46,11 @@ public class PlansApp : ViewBase
             refreshToken.Set(refreshToken.Value + 1);
         }
 
-        var sidebar = new SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter, configService);
+        var sidebar = new Review.SidebarView(plans, selectedPlanState, queueFilter, textFilter, configService);
 
         return new SidebarLayout(
-            mainContent: new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
-            sidebarContent: sidebar,
+            mainContent: new Review.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
+            sidebarContent: sidebar.BuildContent(),
             sidebarHeader: sidebar.BuildHeader()
         );
     }
