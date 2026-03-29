@@ -13,10 +13,12 @@ $Description | Set-Content $logFile
 Write-Host "Log file: $logFile"
 
 $sessionId = [guid]::NewGuid().ToString()
+$planId = AllocatePlanId
 
 $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
     Args = $Description
     ClaudeSessionId = $sessionId
+    PlanId = ("{0:D5}" -f $planId)
     PlansDirectory = $script:PlansDir
     Project = $Project
 }

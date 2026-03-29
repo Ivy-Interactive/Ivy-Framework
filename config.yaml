@@ -14,7 +14,8 @@ levels:
 projects:
   - name: Framework
     repos:
-      - D:\Repos\_Ivy\Ivy-Framework
+      - path: D:\Repos\_Ivy\Ivy-Framework
+        prRule: yolo
     verifications:
       - name: DotnetBuild
         required: true
@@ -38,8 +39,10 @@ projects:
 
   - name: Agent
     repos:
-      - D:\Repos\_Ivy\Ivy-Agent
-      - D:\Repos\_Ivy\Ivy
+      - path: D:\Repos\_Ivy\Ivy-Agent
+        prRule: yolo
+      - path: D:\Repos\_Ivy\Ivy
+        prRule: yolo
     verifications:
       - name: DotnetBuild
         required: true
@@ -56,7 +59,8 @@ projects:
 
   - name: Mcp
     repos:
-      - D:\Repos\_Ivy\Ivy-Mcp
+      - path: D:\Repos\_Ivy\Ivy-Mcp
+        prRule: yolo
     verifications:
       - name: DotnetBuild
         required: true
@@ -69,7 +73,8 @@ projects:
 
   - name: Console
     repos:
-      - D:\Repos\_Ivy\Ivy
+      - path: D:\Repos\_Ivy\Ivy
+        prRule: yolo
     verifications:
       - name: DotnetBuild
         required: true
@@ -84,7 +89,8 @@ projects:
 
   - name: Scripts
     repos:
-      - D:\Repos\_Personal\Scripts
+      - path: D:\Repos\_Personal\Scripts
+        prRule: yolo
     context: |
       Personal scripts and agentic applications.
       - AF2/ — promptwares (MakePlan, IvyAgentDebug, etc.)
@@ -92,7 +98,8 @@ projects:
 
   - name: Tendril
     repos:
-      - D:\Repos\_Ivy\Ivy-Tendril
+      - path: D:\Repos\_Ivy\Ivy-Tendril
+        prRule: yolo
     verifications:
       - name: DotnetBuild
         required: true
@@ -111,7 +118,8 @@ projects:
 
   - name: FooTest
     repos:
-      - D:\Temp\FooTest
+      - path: D:\Temp\FooTest
+        prRule: yolo
     verifications:
       - name: DotnetBuild
         required: true

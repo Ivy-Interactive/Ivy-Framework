@@ -7,6 +7,7 @@ Create an implementation plan for a task described in args.
 ## Context
 
 The firmware header contains these key values:
+- **PlanId** — pre-allocated 5-digit plan ID (e.g. `01127`). Use this — do NOT read `.counter`.
 - **PlansDirectory** — where plan folders are created
 - **ConfigPath** — absolute path to config.yaml (projects, repos, context)
 - **Project** — selected project name, or `[Auto]` if not specified
@@ -40,11 +41,9 @@ Read `config.yaml` (at the path from the firmware header) to understand all avai
 - If no project matches, use `General`
 - Use the matched project's context to scope your research
 
-### 2. Allocate Plan ID
+### 2. Plan ID
 
-- Read the counter from `PlansDirectory\.counter` (default 200 if missing)
-- Reserve the next ID and increment the counter
-- Format as 5-digit zero-padded (e.g. `01205`)
+The plan ID is pre-allocated by the launcher script and provided in the firmware header as `PlanId`. Use it directly — do NOT read or modify `.counter`.
 
 ### 3. Research
 

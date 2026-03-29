@@ -33,9 +33,22 @@ public class PlanWatcherService : IDisposable
         _watcher.Renamed += (_, _) => ScheduleDebounce();
     }
 
+    private static readonly HashSet<string> WatchedFiles = new(StringComparer.OrdinalIgnoreCase)
+        { "plan.yaml" };
+
+    private static readonly HashSet<string> WatchedFolders = new(StringComparer.OrdinalIgnoreCase)
+        { "revisions", "logs", "verification" };
+
     private void OnFileEvent(object sender, FileSystemEventArgs e)
     {
-        ScheduleDebounce();
+        // Only react to plan metadata and revision changes, not worktree/temp/artifact churn
+        var fileName = Path.GetFileName(e.FullPath);
+        var parentFolder = Path.GetFileName(Path.GetDirectoryName(e.FullPath) ?? "");
+
+        if (WatchedFiles.Contains(fileName) || WatchedFolders.Contains(parentFolder))
+        {
+            ScheduleDebounce();
+        }
     }
 
     private void ScheduleDebounce()

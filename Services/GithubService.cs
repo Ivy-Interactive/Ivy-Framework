@@ -16,7 +16,7 @@ public class GithubService(ConfigService config)
             return _repoCache;
 
         var uniquePaths = _config.Settings.Projects
-            .SelectMany(p => p.Repos)
+            .SelectMany(p => p.RepoPaths)
             .Distinct()
             .ToList();
 

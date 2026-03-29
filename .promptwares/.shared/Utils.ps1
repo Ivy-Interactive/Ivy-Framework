@@ -79,6 +79,40 @@ function PrepareFirmware {
     return $promptFile
 }
 
+function AllocatePlanId {
+    $counterFile = Join-Path $script:PlansDir ".counter"
+    if (-not (Test-Path $script:PlansDir)) {
+        New-Item -ItemType Directory -Path $script:PlansDir | Out-Null
+    }
+
+    # Use a lock file to prevent concurrent access
+    $lockFile = Join-Path $script:PlansDir ".counter.lock"
+    $lock = $null
+    try {
+        # Retry acquiring lock for up to 10 seconds
+        for ($i = 0; $i -lt 20; $i++) {
+            try {
+                $lock = [System.IO.File]::Open($lockFile, [System.IO.FileMode]::OpenOrCreate, [System.IO.FileAccess]::ReadWrite, [System.IO.FileShare]::None)
+                break
+            } catch {
+                Start-Sleep -Milliseconds 500
+            }
+        }
+        if (-not $lock) {
+            Write-Host "Error: Could not acquire counter lock" -ForegroundColor Red
+            exit 1
+        }
+
+        $counter = if (Test-Path $counterFile) { [int](Get-Content $counterFile).Trim() } else { 1087 }
+        $id = $counter
+        Set-Content -Path $counterFile -Value ($counter + 1).ToString()
+        return $id
+    }
+    finally {
+        if ($lock) { $lock.Close() }
+    }
+}
+
 function UpdatePlanState {
     param(
         [string]$PlanFolderPath,
@@ -185,10 +219,16 @@ function GetProjectWorkDir {
     if (Test-Path $script:ConfigPath) {
         try {
             $yaml = Get-Content $script:ConfigPath -Raw
-            # Match the project block and extract its first repo
-            $pattern = "(?s)- name:\s*$([regex]::Escape($Project))\s+repos:\s*\n((?:\s+-\s*.+\n?)+)"
+            # Match the project block and extract the first repo path
+            $pattern = "(?s)- name:\s*$([regex]::Escape($Project))\s+repos:\s*\n((?:\s+-.+\n?)+)"
             $match = [regex]::Match($yaml, $pattern)
             if ($match.Success) {
+                # Try new format: - path: D:\...
+                $pathLine = [regex]::Match($match.Groups[1].Value, '(?m)path:\s*(.+)$')
+                if ($pathLine.Success) {
+                    return $pathLine.Groups[1].Value.Trim()
+                }
+                # Fallback: old format - D:\...
                 $repoLine = [regex]::Match($match.Groups[1].Value, '^\s+-\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Multiline)
                 if ($repoLine.Success) {
                     return $repoLine.Groups[1].Value.Trim()

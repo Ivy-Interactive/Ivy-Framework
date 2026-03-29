@@ -25,8 +25,9 @@ The plans directory path can be derived from the plan folder's parent directory.
 ### 2. Allocate Plan IDs
 
 - Read the counter from `.counter` in the plans directory
-- Reserve one ID per new plan and increment the counter
+- Reserve one ID per new plan and increment the counter atomically (read → reserve all needed IDs at once → write new value)
 - Format as 5-digit zero-padded (e.g. `01205`)
+- **Important:** Read and write the counter in a single operation to avoid race conditions with concurrent runs
 
 ### 3. Create Split Plans
 

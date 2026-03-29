@@ -12,12 +12,19 @@ public record RepoConfig
     public string DisplayName => Name;
 }
 
+public record RepoRef
+{
+    public string Path { get; set; } = "";
+    public string PrRule { get; set; } = "default";
+}
+
 public record ProjectConfig
 {
     public string Name { get; set; } = "";
-    public List<string> Repos { get; set; } = new();
+    public List<RepoRef> Repos { get; set; } = new();
     public List<ProjectVerificationRef> Verifications { get; set; } = new();
     public string Context { get; set; } = "";
+    public List<string> RepoPaths => Repos.Select(r => r.Path).ToList();
 }
 
 public record LevelConfig
