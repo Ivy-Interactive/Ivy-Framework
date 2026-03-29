@@ -75,18 +75,16 @@ Append each PR URL to the `prs` list in `plan.yaml`.
 **!MANDATORY** — this step must always run, even if there are no screenshots.
 
 ```bash
-notify slack done-by-niels --json '{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":"*Title:* <plan-title>\n*Project:* <project>\n*PR:* <pr-link>"}}]}'
+notify slack done-by-niels --message "*Title:* <plan-title>
+*Project:* <project>
+*PR:* <pr-link>"
 ```
 
 - Replace `<plan-title>` with the plan title
 - Replace `<project>` with the project from plan.yaml
 - Replace `<pr-link>` with `<url|owner/repo#number>` for each PR
 
-If screenshots exist in `<PlanFolder>/artifacts/screenshots/`, upload them and add image blocks:
-
-```bash
-notify slack done-by-niels --json '{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":"*Title:* <plan-title>\n*Project:* <project>\n*PR:* <pr-link>"}},{"type":"image","image_url":"<screenshot-url>","alt_text":"screenshot"}]}'
-```
+Note: The `notify slack` command uses `--message` (not `--json`). Use Slack mrkdwn formatting in the message string.
 
 ### Rules
 

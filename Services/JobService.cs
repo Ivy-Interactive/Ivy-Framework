@@ -220,6 +220,11 @@ public class JobService
         if (_planReaderService == null || string.IsNullOrEmpty(job.PlanFile))
             return;
 
+        // MakePlan jobs use the description as PlanFile (no folder exists yet) —
+        // the agent writes its own logs inside the properly-named plan folder.
+        if (job.Type == "MakePlan")
+            return;
+
         try
         {
             var duration = job.DurationSeconds.HasValue ? $"{job.DurationSeconds}s" : "unknown";
