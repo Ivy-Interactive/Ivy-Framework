@@ -152,13 +152,13 @@ public class ContentView(
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
-                new MenuItem("Create Issue", Icon: Icons.Github).OnSelect(() => createIssueDialogOpen.Set(true)),
-                new MenuItem("Download", Icon: Icons.Download).OnSelect(() =>
+                new MenuItem("Create Issue", Icon: Icons.Github, Tag: "CreateIssue").OnSelect(() => createIssueDialogOpen.Set(true)),
+                new MenuItem("Download", Icon: Icons.Download, Tag: "Download").OnSelect(() =>
                 {
                     var url = downloadUrl.Value;
                     if (!string.IsNullOrEmpty(url)) client.OpenUrl(url);
                 }),
-                new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
+                new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath").OnSelect(() =>
                 {
                     copyToClipboard(_selectedPlan.FolderPath);
                     client.Toast("Copied path to clipboard", "Path Copied");
