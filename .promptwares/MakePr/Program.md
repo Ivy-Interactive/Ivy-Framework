@@ -1,6 +1,8 @@
 # MakePr
 
-Create GitHub pull requests from the commits in a plan's worktrees.
+Create GitHub pull requests, apply PR rules, and notify Slack.
+
+**!CRITICAL: ALL steps are mandatory. Do not skip Slack notification or PR rule application.**
 
 ## Context
 
@@ -12,11 +14,10 @@ The firmware header contains:
 Read the plan structure in `../.shared/Plans.md`.
 Read `config.yaml` (from `ConfigPath`) for project repos and their `prRule` setting.
 
-## PR Rules
+## PR Rules (from config.yaml per repo)
 
-Each repo in config.yaml has a `prRule`:
 - **`default`** — Create the PR and stop
-- **`yolo`** — Create PR, auto-approve with `--admin`, merge, delete remote branch, then pull the default branch into the original local repo so the code is available locally
+- **`yolo`** — Create PR → auto-merge with `--admin` → delete remote branch → pull default branch into the original local repo
 
 ## Execution Steps
 
@@ -32,30 +33,29 @@ Check `<PlanFolder>/worktrees/` for each repo worktree.
 
 For each worktree:
 
-1. Determine the GitHub remote: `git remote get-url origin` (from the original repo, not the worktree)
+1. `git remote get-url origin` (from the worktree) to get the GitHub remote
 2. Extract `owner/repo` from the remote URL
-3. Get the worktree branch name: `git rev-parse --abbrev-ref HEAD`
-4. Push the branch to origin: `git push -u origin <branch>`
+3. `git rev-parse --abbrev-ref HEAD` to get the branch name
+4. `git push -u origin <branch>`
 
 ### 3. Create PR
 
-For each pushed branch, create a PR using `gh`:
+For each pushed branch:
 
 ```bash
-gh pr create --repo <owner/repo> --base <default-branch> --head <branch> --title "<title>" --body "<body>"
+gh pr create --repo <owner/repo> --base <default-branch> --head <branch> --title "<title>" --body "$(cat <<'EOF'
+<body content>
+EOF
+)"
 ```
 
-- **Base branch:** Detect with `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`
-- **Title:** Plan title with plan ID, e.g. `[01111] Add --greeting flag to CLI`
-- **Body:**
-  - Summary from the plan's Problem + Solution sections
-  - List of commits
-  - **Screenshots:** Check `<PlanFolder>/artifacts/screenshots/` for images. If found, upload 1-2 of the most descriptive ones and embed with `![screenshot](url)`
-  - **Video:** Check `<PlanFolder>/artifacts/videos/` for recordings. If found, upload and embed or link
+- **Base branch:** `gh repo view --repo <owner/repo> --json defaultBranchRef -q .defaultBranchRef.name`
+- **Title:** `[<planId>] <plan title>`
+- **Body:** Summary from Problem + Solution sections, list of commits. Check `<PlanFolder>/artifacts/screenshots/` and `<PlanFolder>/artifacts/videos/` — if any exist, embed them in the body.
 
 ### 4. Apply PR Rule
 
-Look up the `prRule` for this repo from config.yaml.
+**!MANDATORY** — look up the `prRule` for this repo in config.yaml under the project's repos list.
 
 **If `yolo`:**
 ```bash
@@ -64,36 +64,33 @@ cd <original-repo-path>
 git pull origin <default-branch>
 ```
 
-This auto-merges the PR, deletes the remote branch, and pulls the merged code into the local repo.
-
-**If `default`:** Do nothing — PR stays open for manual review.
+**If `default`:** PR stays open for manual review.
 
 ### 5. Update plan.yaml
 
-Append each PR URL to the `prs` list in `plan.yaml`:
-
-```yaml
-prs:
-  - https://github.com/owner/repo/pull/42
-```
+Append each PR URL to the `prs` list in `plan.yaml`.
 
 ### 6. Notify Slack
 
-Post a notification to the `done-by-niels` Slack channel using Block Kit formatting:
+**!MANDATORY** — this step must always run, even if there are no screenshots.
 
 ```bash
-notify slack done-by-niels --json '{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":"*Title:* <plan-title>\n*Project:* <project>\n*PR:* <pr-links>"}}]}'
+notify slack done-by-niels --json '{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":"*Title:* <plan-title>\n*Project:* <project>\n*PR:* <pr-link>"}}]}'
 ```
 
-- **Title:** Plan title
-- **Project:** From plan.yaml
-- **PR:** One line per PR, formatted as `<url|owner/repo#number>`
+- Replace `<plan-title>` with the plan title
+- Replace `<project>` with the project from plan.yaml
+- Replace `<pr-link>` with `<url|owner/repo#number>` for each PR
 
-If screenshots or videos exist in `<PlanFolder>/artifacts/`, upload them and include image URLs in the Slack message blocks.
+If screenshots exist in `<PlanFolder>/artifacts/screenshots/`, upload them and add image blocks:
+
+```bash
+notify slack done-by-niels --json '{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":"*Title:* <plan-title>\n*Project:* <project>\n*PR:* <pr-link>"}},{"type":"image","image_url":"<screenshot-url>","alt_text":"screenshot"}]}'
+```
 
 ### Rules
 
+- **ALL 6 steps are mandatory** — do not stop after creating the PR
 - One PR per repo worktree that has commits
 - Skip worktrees with no commits ahead of the base branch
-- Do NOT modify any source code — only push existing commits and create PRs
 - Use `gh` CLI for all GitHub operations

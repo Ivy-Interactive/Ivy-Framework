@@ -34,6 +34,15 @@ public class UpdatePlanDialog(
                 new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
                 new Button("Submit Update").Primary().OnClick(() =>
                 {
+                    if (!string.IsNullOrWhiteSpace(_updateText.Value))
+                    {
+                        // Append >> comments to the latest revision so UpdatePlan can process them
+                        var currentContent = _planService.ReadLatestRevision(_selectedPlan.FolderName);
+                        var comments = string.Join("\n", _updateText.Value
+                            .Split('\n')
+                            .Select(line => $">> {line}"));
+                        _planService.SavePlan(_selectedPlan.FolderName, currentContent + "\n\n" + comments + "\n");
+                    }
                     _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Updating);
                     _jobService.StartJob("UpdatePlan", _selectedPlan.FolderPath);
                     _refreshPlans();

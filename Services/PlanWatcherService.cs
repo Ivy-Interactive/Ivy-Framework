@@ -41,10 +41,18 @@ public class PlanWatcherService : IDisposable
 
     private void OnFileEvent(object sender, FileSystemEventArgs e)
     {
-        // Only react to plan metadata and revision changes, not worktree/temp/artifact churn
+        // Only react to plan-relevant changes, not worktree/temp/artifact churn
         var fileName = Path.GetFileName(e.FullPath);
         var parentFolder = Path.GetFileName(Path.GetDirectoryName(e.FullPath) ?? "");
 
+        // New plan folder created at top level
+        if (e.ChangeType == WatcherChangeTypes.Created && parentFolder == Path.GetFileName(_watcher!.Path))
+        {
+            ScheduleDebounce();
+            return;
+        }
+
+        // plan.yaml changed, or files in revisions/logs/verification
         if (WatchedFiles.Contains(fileName) || WatchedFolders.Contains(parentFolder))
         {
             ScheduleDebounce();
