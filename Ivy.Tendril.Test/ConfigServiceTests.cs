@@ -19,7 +19,7 @@ public class ConfigServiceTests
     public void Should_Parse_Projects_From_Config()
     {
         var yaml = @"
-planFolder: D:\Plans\
+tendrilData: D:\Tendril
 
 projects:
   - name: TestProject
@@ -60,7 +60,7 @@ projects:
     public void Should_Return_Empty_Projects_When_No_Section()
     {
         var yaml = @"
-planFolder: D:\Plans\
+tendrilData: D:\Tendril
 ";
 
         var deserializer = new DeserializerBuilder()
@@ -77,7 +77,7 @@ planFolder: D:\Plans\
     public void Should_Find_Project_By_Name()
     {
         var yaml = @"
-planFolder: D:\Plans\
+tendrilData: D:\Tendril
 
 projects:
   - name: IvyFramework

@@ -31,6 +31,12 @@ server.Services.AddSingleton<PlanWatcherService>(sp =>
     var config = sp.GetRequiredService<ConfigService>();
     return new PlanWatcherService(config);
 });
+server.Services.AddSingleton<InboxWatcherService>(sp =>
+{
+    var config = sp.GetRequiredService<ConfigService>();
+    var jobService = sp.GetRequiredService<JobService>();
+    return new InboxWatcherService(config, jobService);
+});
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
 server.UseAppShell(new AppShellSettings()

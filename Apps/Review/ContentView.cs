@@ -95,7 +95,7 @@ public class ContentView(
                 var commitCapture = commit;
                 var row = Layout.Horizontal().Gap(2)
                     | new Button(shortHash).Ghost().Small().OnClick(() =>
-                        navigator.Navigate<CommitApp>(new CommitAppArgs(commitCapture, _selectedPlan.Queue)))
+                        navigator.Navigate<CommitApp>(new CommitAppArgs(commitCapture, _selectedPlan.Project)))
                     | Text.Block(title != null ? $"— {title}" : "");
                 commitsLayout |= row;
             }

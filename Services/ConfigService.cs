@@ -47,7 +47,8 @@ public record ProjectVerificationRef
 
 public class TendrilSettings
 {
-    public string PlanFolder { get; set; } = @".plans";
+    public string TendrilData { get; set; } = "";
+    public string PlanFolder { get; set; } = "";
     public string AgentCommand { get; set; } = "claude";
     public List<ProjectConfig> Projects { get; set; } = new();
     public List<VerificationConfig> Verifications { get; set; } = new();
@@ -86,16 +87,29 @@ public class ConfigService
             _settings = new TendrilSettings();
         }
 
-        // Resolve relative paths against the Tendril project root.
-        // System.AppContext.BaseDirectory is typically bin/Debug/net10.0/, so go up 3 levels.
-        if (!Path.IsPathRooted(_settings.PlanFolder))
+        var tendrilRoot = Path.GetFullPath(Path.Combine(System.AppContext.BaseDirectory, "..", "..", ".."));
+
+        // Resolve tendrilData path
+        if (!string.IsNullOrEmpty(_settings.TendrilData) && !Path.IsPathRooted(_settings.TendrilData))
         {
-            var tendrilRoot = Path.GetFullPath(Path.Combine(System.AppContext.BaseDirectory, "..", "..", ".."));
+            _settings.TendrilData = Path.GetFullPath(Path.Combine(tendrilRoot, _settings.TendrilData));
+        }
+
+        // Derive planFolder from tendrilData if not explicitly set
+        if (string.IsNullOrEmpty(_settings.PlanFolder))
+        {
+            _settings.PlanFolder = !string.IsNullOrEmpty(_settings.TendrilData)
+                ? Path.Combine(_settings.TendrilData, "Plans")
+                : Path.Combine(tendrilRoot, ".plans");
+        }
+        else if (!Path.IsPathRooted(_settings.PlanFolder))
+        {
             _settings.PlanFolder = Path.GetFullPath(Path.Combine(tendrilRoot, _settings.PlanFolder));
         }
     }
 
     public TendrilSettings Settings => _settings;
+    public string TendrilData => _settings.TendrilData;
     public string PlanFolder => _settings.PlanFolder;
     public List<ProjectConfig> Projects => _settings.Projects;
     public List<LevelConfig> Levels => _settings.Levels;
