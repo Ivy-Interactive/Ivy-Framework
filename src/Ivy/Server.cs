@@ -59,7 +59,6 @@ public record ServerArgs
     public bool FindAvailablePort { get; set; } = false;
 #endif
     public string? Host { get; set; } = null;
-    public string? BasePath { get; set; } = null;
 
     /// <summary>
     /// Base path for the application when running behind a reverse proxy (e.g., "/myapp").
@@ -775,11 +774,6 @@ public class Server
         if (_useHttpRedirection)
         {
             app.UseHttpsRedirection();
-        }
-
-        if (!string.IsNullOrEmpty(_args.BasePath))
-        {
-            app.UsePathBase(_args.BasePath);
         }
 
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
