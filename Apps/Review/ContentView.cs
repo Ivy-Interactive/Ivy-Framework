@@ -52,7 +52,6 @@ public class ContentView(
             | new Spacer().Width(Size.Grow())
             | new Button("Make PR").Icon(Icons.GitPullRequest).Primary().OnClick(() =>
             {
-                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
                 _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
                 _refreshPlans();
                 client.Toast("PR job started", "Make PR");

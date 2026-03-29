@@ -202,7 +202,7 @@ public class JobService
     {
         try
         {
-            if (job.Type == "MakePlan") return;
+            if (job.Type == "MakePlan" || job.Type == "MakePr") return;
 
             var planFolder = job.Args.Length > 0 ? job.Args[0] : "";
             var planYamlPath = Path.Combine(planFolder, "plan.yaml");
