@@ -5,7 +5,8 @@ import React from "react";
 interface AutoScrollWidgetProps {
   id: string;
   children?: React.ReactNode;
-  enabled?: boolean;
+  /** When true, auto-follow is off and the user scrolls manually (default false). */
+  disabled?: boolean;
   width?: string;
   height?: string;
 }
@@ -13,13 +14,14 @@ interface AutoScrollWidgetProps {
 export const AutoScrollWidget: React.FC<AutoScrollWidgetProps> = ({
   id,
   children,
-  enabled = true,
+  disabled = false,
   width,
   height,
 }) => {
+  const autoFollow = !disabled;
   const { scrollRef, disableAutoScroll } = useAutoScroll({
     content: children,
-    enabled,
+    enabled: autoFollow,
     smooth: false,
   });
 
@@ -32,8 +34,8 @@ export const AutoScrollWidget: React.FC<AutoScrollWidgetProps> = ({
       <div
         ref={scrollRef}
         className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto"
-        onWheel={enabled ? disableAutoScroll : undefined}
-        onTouchMove={enabled ? disableAutoScroll : undefined}
+        onWheel={autoFollow ? disableAutoScroll : undefined}
+        onTouchMove={autoFollow ? disableAutoScroll : undefined}
       >
         <div className="flex min-w-0 flex-col">{children}</div>
       </div>

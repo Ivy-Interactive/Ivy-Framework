@@ -1,3 +1,4 @@
+using System.Linq;
 using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
@@ -15,14 +16,26 @@ public record AutoScroll : WidgetBase<AutoScroll>
     internal AutoScroll()
     {
     }
-    [Prop] public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// Builds an <see cref="AutoScroll"/> from a sequence of child widgets so callers do not need
+    /// <c>ToArray&lt;object&gt;()</c> (C# does not treat <c>T[]</c> as <c>object[]</c> for <c>params</c>).
+    /// </summary>
+    public static AutoScroll FromChildren<T>(IEnumerable<T> children)
+        where T : class =>
+        new(children.Cast<object>().ToArray());
+
+    /// <summary>
+    /// When <c>false</c> (default), new content keeps the view pinned to the bottom. When <c>true</c>, the user scrolls manually and the view does not jump on updates.
+    /// </summary>
+    [Prop] public bool Disabled { get; set; }
 }
 
 public static class AutoScrollExtensions
 {
-    public static AutoScroll Enabled(this AutoScroll auto, bool enabled)
+    public static AutoScroll Disabled(this AutoScroll auto, bool disabled = true)
     {
-        auto.Enabled = enabled;
+        auto.Disabled = disabled;
         return auto;
     }
 }
