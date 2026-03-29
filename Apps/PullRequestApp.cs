@@ -15,6 +15,7 @@ public class PullRequestApp : ViewBase
 
         var plans = planService.GetPlans()
             .Where(p => p.Prs.Count > 0)
+            .OrderByDescending(p => p.Id)
             .ToList();
 
         var rows = plans.SelectMany(plan => plan.Prs.Select((pr, i) => new PrRow
