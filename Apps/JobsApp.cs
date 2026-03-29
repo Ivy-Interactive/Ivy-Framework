@@ -1,6 +1,5 @@
 using Ivy;
 using Ivy.Tendril.Apps.Jobs;
-using Ivy.Tendril.Apps.Jobs.Dialogs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
@@ -12,9 +11,6 @@ public class JobsApp : ViewBase
     {
         var jobService = UseService<JobService>();
         var refreshToken = UseRefreshToken();
-        var selectedJobId = UseState<string?>(null);
-        var dialogMode = UseState<string?>(null);
-
         UseInterval(() => refreshToken.Refresh(), TimeSpan.FromSeconds(5));
 
         var jobs = jobService.GetJobs();
@@ -50,8 +46,6 @@ public class JobsApp : ViewBase
                 c.BatchSize = 50;
             })
             .RowActions(
-                new MenuItem(Label: "View Output", Icon: Icons.Terminal, Tag: "view-output"),
-                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan"),
                 new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job"),
                 new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job")
             )
@@ -65,7 +59,6 @@ public class JobsApp : ViewBase
                 {
                     if (tag == "stop-job")
                     {
-                        // Only allow stopping running jobs
                         if (job.Status == "Running")
                         {
                             jobService.StopJob(job.Id);
@@ -74,50 +67,17 @@ public class JobsApp : ViewBase
                     }
                     else if (tag == "delete-job")
                     {
-                        // Only allow deleting non-running jobs
                         if (job.Status != "Running")
                         {
                             jobService.DeleteJob(job.Id);
                             refreshToken.Refresh();
                         }
                     }
-                    else
-                    {
-                        selectedJobId.Set(job.Id);
-                        dialogMode.Set(tag);
-                    }
                 }
                 return ValueTask.CompletedTask;
             });
 
-        var elements = new List<object>
-        {
-            dataTable
-        };
-
-        if (dialogMode.Value != null && selectedJobId.Value is { } jobId)
-        {
-            var job = jobService.GetJob(jobId);
-            if (job != null)
-            {
-                void CloseDialog()
-                {
-                    dialogMode.Set(null);
-                    selectedJobId.Set(null);
-                }
-
-                if (dialogMode.Value == "view-output" && !string.IsNullOrEmpty(job.ScriptPath))
-                {
-                    elements.Add(new ViewJobOutputDialog(true, job, jobService, CloseDialog));
-                }
-                else
-                {
-                    elements.Add(new ViewJobPlanDialog(true, job, CloseDialog));
-                }
-            }
-        }
-
-        return new Fragment(elements.ToArray());
+        return dataTable;
     }
 
     private static string FormatTimer(JobItem job)
