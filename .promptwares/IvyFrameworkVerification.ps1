@@ -22,6 +22,9 @@ foreach ($dir in @($verificationDir, "$artifactsDir\tests", "$artifactsDir\scree
     }
 }
 
+# Set ARTIFACTS_DIR so Playwright tests can write directly to plan artifacts
+$env:ARTIFACTS_DIR = $artifactsDir
+
 InvokePromptwareAgent $PSScriptRoot $programFolder $logFile @{
     Args = $PlanPath
     PlanFolder = $PlanPath

@@ -99,27 +99,28 @@ Create `.ivy/tests/` directory with:
 
 **package.json** — minimal, with `@playwright/test` dependency
 
-**playwright.config.ts** — Chromium only, single worker, no retries, viewport `{ width: 1920, height: 1920 }` (set in both `use` and `projects[0].use`), uses `process.env.APP_PORT`, video recording: `video: { mode: 'on', dir: './videos' }` in both `use` and `projects[0].use`
+**playwright.config.ts** — Chromium only, single worker, no retries, viewport `{ width: 1920, height: 1920 }` (set in both `use` and `projects[0].use`), uses `process.env.APP_PORT`, video recording: `video: { mode: 'on', dir: '<ArtifactsDir>/videos' }` in both `use` and `projects[0].use`
+
+**IMPORTANT:** Screenshots and videos must be written directly to the plan's `ArtifactsDir` (from the firmware header), NOT to the temp project. This ensures artifacts are always available in the plan folder even if the agent fails mid-way.
 
 **One `.spec.ts` per app:**
 - `beforeAll`: find free port, spawn `dotnet run -- --port <port>`, wait for HTTP 200
 - `afterAll`: kill process
 - Test each app at `http://localhost:<port>/<app-id>?shell=false`
-- Take screenshots at every key step
-- Use global screenshot counter with descriptive names
-- Capture browser console logs → `.ivy/tests/console.log`
-- Capture backend stdout/stderr → `.ivy/tests/backend.log`
+- Take screenshots directly to `<ArtifactsDir>/screenshots/` with descriptive names
+- Capture browser console logs → `<ArtifactsDir>/tests/console.log`
+- Capture backend stdout/stderr → `<ArtifactsDir>/tests/backend.log`
 
 **Videos:**
-- Playwright records video per test via config
-- After each test, save video with descriptive name:
+- Playwright records video per test via config (dir set to `<ArtifactsDir>/videos/`)
+- After each test, rename video with descriptive name:
   ```typescript
   test.afterEach(async ({ page }, testInfo) => {
     const video = page.video();
     if (video) {
       const videoPath = await video.path();
       const targetName = testInfo.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
-      const targetPath = path.join(__dirname, 'videos', `${targetName}.webm`);
+      const targetPath = path.join(process.env.ARTIFACTS_DIR!, 'videos', `${targetName}.webm`);
       await fs.promises.mkdir(path.dirname(targetPath), { recursive: true });
       await fs.promises.copyFile(videoPath, targetPath);
     }
@@ -163,14 +164,12 @@ If tests fail, logs have errors, or screenshots show issues:
 2. Apply fixes and re-run
 3. Track each fix round
 
-### 10. Copy Artifacts to Plan
+### 10. Copy Sample Code to Plan
 
-Copy all evidence to the plan's artifacts directory (`ArtifactsDir`):
+Screenshots, videos, and logs are already written directly to `ArtifactsDir` by the tests. Copy remaining evidence:
 
-- `screenshots/` — all screenshots from `.ivy/tests/screenshots/`
-- `videos/` — all videos from `.ivy/tests/videos/`
-- `sample/` — the demo app `.cs` files
-- `tests/` — the test `.spec.ts` files, console.log, backend.log
+- `sample/` — copy the demo app `.cs` files to `<ArtifactsDir>/sample/`
+- `tests/` — copy the `.spec.ts` test files to `<ArtifactsDir>/tests/`
 
 ### 11. Write Verification Report
 
