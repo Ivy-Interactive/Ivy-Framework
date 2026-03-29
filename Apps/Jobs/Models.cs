@@ -16,13 +16,10 @@ public record JobItem
     public string[] Args { get; init; } = [];
     public bool CancellationRequested { get; set; }
 
-    // PTY state for persistent terminal sessions
-    public IWriteStream<byte[]>? PtyStream { get; set; }
-    public Action<string>? PtyHandleInput { get; set; }
-    public Action<int, int>? PtyHandleResize { get; set; }
-    public Action? PtyKill { get; set; }
-    public bool PtyClosed { get; set; }
-    public int? PtyExitCode { get; set; }
+    // Process handle for non-interactive execution
+    public System.Diagnostics.Process? Process { get; set; }
+    public List<string> OutputLines { get; set; } = new();
+    public DateTime? LastOutputAt { get; set; }
 }
 
 public record JobItemRow
@@ -33,4 +30,5 @@ public record JobItemRow
     public string Type { get; init; } = "";
     public string Queue { get; init; } = "";
     public string Timer { get; init; } = "";
+    public string LastOutput { get; init; } = "";
 }

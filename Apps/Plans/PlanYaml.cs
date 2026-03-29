@@ -2,6 +2,12 @@ using YamlDotNet.Serialization;
 
 namespace Ivy.Tendril.Apps.Plans;
 
+public class PlanVerificationEntry
+{
+    public string Name { get; set; } = "";
+    public string Status { get; set; } = "Pending";
+}
+
 public class PlanYaml
 {
     public string State { get; set; } = "Draft";
@@ -14,4 +20,6 @@ public class PlanYaml
     public string InitialPrompt { get; set; } = "";
     public List<string> Prs { get; set; } = new();
     public List<string> Commits { get; set; } = new();
+    public List<PlanVerificationEntry> Verifications { get; set; } = new();
+    public List<string> RelatedPlans { get; set; } = new();
 }

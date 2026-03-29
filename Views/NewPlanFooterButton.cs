@@ -11,6 +11,7 @@ public class NewPlanFooterButton : ViewBase
         var jobService = UseService<JobService>();
         var configService = UseService<ConfigService>();
         var dialogOpen = UseState(false);
+        var lastSelectedProject = UseState("[Auto]");
 
         var projectNames = configService.Projects.Select(p => p.Name).ToList();
 
@@ -30,15 +31,11 @@ public class NewPlanFooterButton : ViewBase
                 projectNames: projectNames,
                 onCreatePlan: (description, project) =>
                 {
-                    var args = new List<string> { description };
-                    if (project != "[Auto]")
-                    {
-                        args.Add("-Project");
-                        args.Add(project);
-                    }
-                    jobService.StartJob("MakePlan", args.ToArray());
+                    lastSelectedProject.Set(project);
+                    jobService.StartJob("MakePlan", "-Description", description, "-Project", project);
                 },
-                onClose: () => dialogOpen.Set(false)
+                onClose: () => dialogOpen.Set(false),
+                defaultProject: lastSelectedProject.Value
             ));
         }
 

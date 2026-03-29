@@ -8,13 +8,15 @@ public class CreateIssueDialog(
     IState<string?> selectedRepoState,
     IState<string?> issueAssigneeState,
     IState<string[]> issueLabelsState,
-    PlanFile selectedPlan) : ViewBase
+    PlanFile selectedPlan,
+    JobService jobService) : ViewBase
 {
     private readonly IState<bool> _dialogOpen = dialogOpen;
     private readonly IState<string?> _selectedRepoState = selectedRepoState;
     private readonly IState<string?> _issueAssigneeState = issueAssigneeState;
     private readonly IState<string[]> _issueLabelsState = issueLabelsState;
     private readonly PlanFile _selectedPlan = selectedPlan;
+    private readonly JobService _jobService = jobService;
 
     public override object? Build()
     {
@@ -66,7 +68,21 @@ public class CreateIssueDialog(
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
-                new Button("Create Issue").Primary().OnClick(() => _dialogOpen.Set(false))
+                new Button("Create Issue").Primary().OnClick(() =>
+                {
+                    if (_selectedRepoState.Value is { } repo)
+                    {
+                        var repos = githubService.GetRepos();
+                        var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == repo);
+                        if (selectedRepo != null)
+                        {
+                            var repoPath = selectedRepo.FullName;
+                            var assignee = _issueAssigneeState.Value ?? "";
+                            _jobService.StartJob("CreateIssue", _selectedPlan.FolderPath, "-Repo", repoPath, "-Assignee", assignee);
+                        }
+                    }
+                    _dialogOpen.Set(false);
+                })
             )
         ).Width(Size.Rem(30));
     }

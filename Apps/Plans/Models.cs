@@ -5,12 +5,15 @@ public enum PlanStatus
     Draft,
     Building,
     Updating,
+    Executing,
+    Completed,
+    Failed,
     ReadyForReview,
     Skipped,
     Icebox
 }
 
-public record PlanMetadata(int Id, string Project, string Level, string Title, PlanStatus State);
+public record PlanMetadata(int Id, string Project, string Level, string Title, PlanStatus State, List<string> Commits, List<string> Prs, List<PlanVerificationEntry> Verifications, List<string> RelatedPlans);
 
 public record PlanFile(
     PlanMetadata Metadata,
@@ -24,6 +27,10 @@ public record PlanFile(
     public string Queue => Metadata.Project;
     public string Level => Metadata.Level;
     public PlanStatus Status => Metadata.State;
+    public List<string> Commits => Metadata.Commits;
+    public List<string> Prs => Metadata.Prs;
+    public List<PlanVerificationEntry> Verifications => Metadata.Verifications;
+    public List<string> RelatedPlans => Metadata.RelatedPlans;
     public string FolderName => Path.GetFileName(FolderPath);
 }
 
