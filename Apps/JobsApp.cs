@@ -32,7 +32,8 @@ public class JobsApp : ViewBase
             Plan = j.PlanFile,
             Type = j.Type,
             Project = j.Project,
-            Timer = FormatTimer(j)
+            Timer = FormatTimer(j),
+            LastOutput = FormatLastOutput(j)
         }).ToList();
 
         var dataTable = rows.AsQueryable()
@@ -45,6 +46,7 @@ public class JobsApp : ViewBase
             .Header(t => t.Type, "Type")
             .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
+            .Header(t => t.LastOutput, "Last Output")
             .Renderer(t => t.Status, new LabelsDisplayRenderer())
             .Hidden(t => t.Id)
             .Config(c =>
@@ -89,6 +91,16 @@ public class JobsApp : ViewBase
             });
 
         return dataTable;
+    }
+
+    private static string FormatLastOutput(JobItem job)
+    {
+        if (job.LastOutputAt.HasValue && job.Status == "Running")
+        {
+            var elapsed = DateTime.UtcNow - job.LastOutputAt.Value;
+            return FormatTimeSpan(elapsed);
+        }
+        return "-";
     }
 
     private static string FormatTimer(JobItem job)
