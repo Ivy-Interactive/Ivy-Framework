@@ -128,7 +128,7 @@ public class ContentView(
             | new Spacer().Width(Size.Grow())
             | new Button("Download").Icon(Icons.Download).Outline().Url(downloadUrl.Value ?? "")
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
-                new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
+                new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath").OnSelect(() =>
                 {
                     copyToClipboard(_selectedPlan.FolderPath);
                     client.Toast("Copied path to clipboard", "Path Copied");
