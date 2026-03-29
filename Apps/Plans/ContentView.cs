@@ -94,7 +94,7 @@ public class ContentView(
             | new Badge(_selectedPlan.Status.ToString()).Variant(BadgeVariant.Outline)
             | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Outline)
             | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
-            | isEditing.ToSwitchInput(Icons.Pencil)
+            | isEditing.ToSwitchInput(Icons.Code)
             | new Spacer().Width(Size.Grow())
             | Text.Rich()
                 .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
