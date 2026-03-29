@@ -33,7 +33,8 @@ public class JobsApp : ViewBase
             Type = j.Type,
             Project = j.Project,
             Timer = FormatTimer(j),
-            LastOutput = FormatLastOutput(j)
+            LastOutput = FormatLastOutput(j),
+            StatusMessage = j.StatusMessage ?? ""
         }).ToList();
 
         var dataTable = rows.AsQueryable()
@@ -47,6 +48,7 @@ public class JobsApp : ViewBase
             .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
             .Header(t => t.LastOutput, "Last Output")
+            .Header(t => t.StatusMessage, "Status Message")
             .Renderer(t => t.Status, new LabelsDisplayRenderer())
             .Hidden(t => t.Id)
             .Config(c =>

@@ -285,6 +285,19 @@ function InvokePromptwareAgent {
     Remove-Item $promptFile -ErrorAction SilentlyContinue
 }
 
+function SendStatusMessage {
+    param([string]$Message)
+
+    $jobId = $env:TENDRIL_JOB_ID
+    $url = $env:TENDRIL_URL
+    if (-not $jobId -or -not $url) { return }
+
+    try {
+        $body = @{ message = $Message } | ConvertTo-Json
+        Invoke-RestMethod -Uri "$url/api/jobs/$jobId/status" -Method Post -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
+    } catch { }
+}
+
 function GetAgentCommandFromConfig {
     $configPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
     $raw = "claude --print --verbose --output-format stream-json --dangerously-skip-permissions"

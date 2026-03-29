@@ -18,6 +18,7 @@ public record JobItem
 
     // Process handle for non-interactive execution
     public System.Diagnostics.Process? Process { get; set; }
+    public string? StatusMessage { get; set; }
     public List<string> OutputLines { get; set; } = new();
     public DateTime? LastOutputAt { get; set; }
 }
@@ -30,5 +31,5 @@ public record JobItemRow
     public string Type { get; init; } = "";
     public string Project { get; init; } = "";
     public string Timer { get; init; } = "";
-    public string LastOutput { get; init; } = "";
+    public string StatusMessage { get; init; } = "";
 }
