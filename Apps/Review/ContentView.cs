@@ -142,6 +142,28 @@ public class ContentView(
 
             foreach (var (category, files) in artifacts.OrderBy(kv => kv.Key))
             {
+                if (category == "sample")
+                {
+                    var sampleDir = Path.Combine(_selectedPlan.FolderPath, "artifacts", "sample");
+                    var csproj = Directory.GetFiles(sampleDir, "*.csproj", SearchOption.AllDirectories).FirstOrDefault();
+                    if (csproj != null)
+                    {
+                        var projectDir = Path.GetDirectoryName(csproj)!;
+                        artifactsLayout |= new Button("Run Sample").Icon(Icons.Play).Outline().OnClick(() =>
+                        {
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = "cmd.exe",
+                                Arguments = $"/k dotnet run --browse --find-available-port",
+                                WorkingDirectory = projectDir,
+                                UseShellExecute = true,
+                                CreateNoWindow = false
+                            });
+                        });
+                    }
+                    continue;
+                }
+
                 artifactsLayout |= Text.Block($"  {category}/").Bold();
                 foreach (var file in files)
                 {
