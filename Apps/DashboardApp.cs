@@ -34,9 +34,9 @@ public class DashboardApp : ViewBase
             | BuildStatCard(completedCount, "Completed")
             | BuildStatCard(failedCount, "Failed");
 
-        // Daily activity table - last 14 days
+        // Daily activity table - last 7 days
         var today = DateTime.UtcNow.Date;
-        var days = Enumerable.Range(0, 14).Select(i => today.AddDays(-i)).ToList();
+        var days = Enumerable.Range(0, 7).Select(i => today.AddDays(-i)).ToList();
 
         var rows = days.Select(day =>
         {
@@ -78,7 +78,7 @@ public class DashboardApp : ViewBase
                 c.ShowSearch = false;
                 c.SelectionMode = SelectionModes.None;
                 c.ShowIndexColumn = false;
-                c.BatchSize = 14;
+                c.BatchSize = 7;
             });
 
         // Per-project breakdown
