@@ -222,7 +222,7 @@ public class PlanReaderService(ConfigService config)
             if (!Enum.TryParse<PlanStatus>(planYaml.State, ignoreCase: true, out var status))
                 status = PlanStatus.Draft;
 
-            var metadata = new PlanMetadata(id, planYaml.Project, planYaml.Level, planYaml.Title, status, planYaml.Commits, planYaml.Prs, planYaml.Verifications, planYaml.RelatedPlans);
+            var metadata = new PlanMetadata(id, planYaml.Project, planYaml.Level, planYaml.Title, status, planYaml.Commits, planYaml.Prs, planYaml.Verifications, planYaml.RelatedPlans, planYaml.Created, planYaml.Updated);
             var latestContent = ReadLatestRevision(folderName);
 
             return new PlanFile(metadata, latestContent, folderPath, yamlContent);
