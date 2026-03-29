@@ -1,0 +1,10 @@
+planFolder: ..\.plans
+repos:
+  - owner: Ivy-Interactive
+    name: Ivy-Framework
+  - owner: Ivy-Interactive
+    name: Ivy-Agent
+  - owner: Ivy-Interactive
+    name: Ivy-Mcp
+  - owner: Ivy-Interactive
+    name: Ivy
