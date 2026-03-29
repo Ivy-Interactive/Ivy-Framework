@@ -73,7 +73,7 @@ public static class UseLoadingExtensions
                     if (wasCancelled)
                     {
                         var cancellingDuration = loadingOptions.Value?.CancellingDisplayDuration
-                            ?? new LoadingOptions().CancellingDisplayDuration;
+                            ?? LoadingOptions.DefaultCancellingDisplayDuration;
                         loadingOptions.Set(new LoadingOptions
                         {
                             Message = "Cancelling...",
