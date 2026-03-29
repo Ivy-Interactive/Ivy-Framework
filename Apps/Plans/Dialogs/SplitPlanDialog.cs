@@ -8,13 +8,15 @@ public class SplitPlanDialog(
     IState<string> splitText,
     PlanFile selectedPlan,
     JobService jobService,
-    PlanReaderService planService) : ViewBase
+    PlanReaderService planService,
+    Action refreshPlans) : ViewBase
 {
     private readonly IState<bool> _dialogOpen = dialogOpen;
     private readonly IState<string> _splitText = splitText;
     private readonly PlanFile _selectedPlan = selectedPlan;
     private readonly JobService _jobService = jobService;
     private readonly PlanReaderService _planService = planService;
+    private readonly Action _refreshPlans = refreshPlans;
 
     public override object? Build()
     {
@@ -34,6 +36,7 @@ public class SplitPlanDialog(
                 {
                     _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Updating);
                     _jobService.StartJob("SplitPlan", _selectedPlan.FolderPath);
+                    _refreshPlans();
                     _dialogOpen.Set(false);
                 })
             )

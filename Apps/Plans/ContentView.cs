@@ -165,8 +165,8 @@ public class ContentView(
         var elements = new List<object>
         {
             mainLayout,
-            new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan, _jobService, _planService),
-            new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan, _jobService, _planService),
+            new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan, _jobService, _planService, _refreshPlans),
+            new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan, _jobService, _planService, _refreshPlans),
             new DeletePlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans),
             new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, _selectedPlan, _jobService)
         };
