@@ -27,6 +27,7 @@ public class ContentView(
     public override object? Build()
     {
         var downloadUrl = PlanDownloadHelper.UsePlanDownload(Context, _planService, _selectedPlan);
+        var navigator = UseNavigation();
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
         var updateDialogOpen = UseState(false);
@@ -125,7 +126,16 @@ public class ContentView(
         }
         else
         {
-            scrollableContent |= new Markdown(_selectedPlan.LatestRevisionContent).DangerouslyAllowLocalFiles();
+            scrollableContent |= new Markdown(_selectedPlan.LatestRevisionContent)
+                .DangerouslyAllowLocalFiles()
+                .OnLinkClick(url =>
+                {
+                    if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var filePath = url.Substring("file:///".Length);
+                        navigator.Navigate<FileApp>(new FileAppArgs(filePath));
+                    }
+                });
         }
 
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)

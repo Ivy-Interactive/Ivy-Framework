@@ -25,6 +25,7 @@ public class ContentView(
 
     public override object? Build()
     {
+        var navigator = UseNavigation();
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
 
@@ -97,7 +98,16 @@ public class ContentView(
 
         // Plan content
         content |= Text.Block("Plan").Bold();
-        content |= new Markdown(_selectedPlan.LatestRevisionContent).DangerouslyAllowLocalFiles();
+        content |= new Markdown(_selectedPlan.LatestRevisionContent)
+            .DangerouslyAllowLocalFiles()
+            .OnLinkClick(url =>
+            {
+                if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+                {
+                    var filePath = url.Substring("file:///".Length);
+                    navigator.Navigate<FileApp>(new FileAppArgs(filePath));
+                }
+            });
 
         // Action bar
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
