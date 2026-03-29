@@ -17,7 +17,7 @@ public class JobsApp : ViewBase
             while (jobService.PendingNotifications.TryDequeue(out var notification))
             {
                 if (notification.IsSuccess)
-                    client.Toast(notification.Message, notification.Title).Success();
+                    client.Toast(notification.Message, notification.Title);
                 else
                     client.Toast(notification.Message, notification.Title).Destructive();
             }
