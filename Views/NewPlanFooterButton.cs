@@ -22,7 +22,7 @@ public class NewPlanFooterButton : ViewBase
                 .Width(Size.Full())
                 .Variant(ButtonVariant.Outline)
                 .OnClick(() => dialogOpen.Set(true))
-                .ShortcutKey("CTRL+ALT+1")
+                .ShortcutKey("CTRL+ALT+I")
         };
 
         if (dialogOpen.Value)
