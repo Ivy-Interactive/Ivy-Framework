@@ -56,8 +56,22 @@ try {
 
     if ($exitCode -eq 0) {
         WritePlanLog $PlanPath "ExecutePlan" $summary
-        UpdatePlanState $PlanPath "ReadyForReview"
-        Write-Host "Plan execution completed - ready for review" -ForegroundColor Green
+
+        # Check verification statuses before transitioning
+        $planYaml = Get-Content (Join-Path $PlanPath "plan.yaml") -Raw
+        $verificationStatuses = [regex]::Matches($planYaml, '(?m)^\s+status:\s*(.+)$') |
+            ForEach-Object { $_.Groups[1].Value.Trim() }
+
+        $hasFailed = $verificationStatuses | Where-Object { $_ -eq "Fail" }
+        $hasPending = $verificationStatuses | Where-Object { $_ -eq "Pending" }
+
+        if ($hasFailed -or $hasPending) {
+            UpdatePlanState $PlanPath "Failed"
+            Write-Host "Plan has incomplete or failed verifications" -ForegroundColor Red
+        } else {
+            UpdatePlanState $PlanPath "ReadyForReview"
+            Write-Host "Plan execution completed - ready for review" -ForegroundColor Green
+        }
     } else {
         WritePlanLog $PlanPath "ExecutePlan-Failed" $summary
         UpdatePlanState $PlanPath "Failed"
