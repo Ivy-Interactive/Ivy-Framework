@@ -24,7 +24,7 @@ public record PlanFile(
 {
     public int Id => Metadata.Id;
     public string Title => Metadata.Title;
-    public string Queue => Metadata.Project;
+    public string Project => Metadata.Project;
     public string Level => Metadata.Level;
     public PlanStatus Status => Metadata.State;
     public List<string> Commits => Metadata.Commits;
@@ -38,7 +38,7 @@ public static class PlanFilters
 {
     public static IEnumerable<PlanFile> ApplyFilters(
         IEnumerable<PlanFile> plans,
-        string? queueFilter,
+        string? projectFilter,
         string? levelFilter,
         string? textFilter)
     {
@@ -47,8 +47,8 @@ public static class PlanFilters
         if (levelFilter is { } level)
             filtered = filtered.Where(p => p.Level == level);
 
-        if (queueFilter is { } queue)
-            filtered = filtered.Where(p => p.Queue == queue);
+        if (projectFilter is { } project)
+            filtered = filtered.Where(p => p.Project == project);
 
         if (!string.IsNullOrWhiteSpace(textFilter))
         {
@@ -56,7 +56,7 @@ public static class PlanFilters
             filtered = filtered.Where(p =>
                 p.Title.ToLowerInvariant().Contains(search) ||
                 p.Id.ToString().Contains(search) ||
-                p.Queue.ToLowerInvariant().Contains(search));
+                p.Project.ToLowerInvariant().Contains(search));
         }
 
         return filtered;

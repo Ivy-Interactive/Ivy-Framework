@@ -14,14 +14,14 @@ public class IceboxApp : ViewBase
         var jobService = UseService<JobService>();
         var configService = UseService<ConfigService>();
         var selectedPlanState = UseState<PlanFile?>(null);
-        var queueFilter = UseState<string?>(null);
+        var projectFilter = UseState<string?>(null);
         var levelFilter = UseState<string?>(null);
         var textFilter = UseState<string?>("");
         var refreshToken = UseState(0);
 
         var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
         var plans = planService.GetPlans(PlanStatus.Icebox);
-        var filteredPlans = PlanFilters.ApplyFilters(plans, queueFilter.Value, levelFilter.Value, textFilter.Value).ToList();
+        var filteredPlans = PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value).ToList();
 
         if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
@@ -44,7 +44,7 @@ public class IceboxApp : ViewBase
             refreshToken.Set(refreshToken.Value + 1);
         }
 
-        var sidebar = new Icebox.SidebarView(plans, selectedPlanState, queueFilter, levelFilter, textFilter, configService);
+        var sidebar = new Icebox.SidebarView(plans, selectedPlanState, projectFilter, levelFilter, textFilter, configService);
 
         return new SidebarLayout(
             mainContent: new Icebox.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),

@@ -44,7 +44,7 @@ public class ContentView(
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
             | new Badge(_selectedPlan.Status.ToString()).Variant(statusVariant)
-            | new Badge(_selectedPlan.Queue).Variant(BadgeVariant.Outline)
+            | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline)
             | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
             | new Spacer().Width(Size.Grow())
             | Text.Rich()
@@ -79,7 +79,7 @@ public class ContentView(
         {
             var commitsLayout = Layout.Vertical().Gap(1);
             commitsLayout |= Text.Block("Commits").Bold();
-            var repoPaths = _config.GetProject(_selectedPlan.Queue)?.RepoPaths ?? [];
+            var repoPaths = _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
             foreach (var commit in _selectedPlan.Commits)
             {
                 var title = repoPaths

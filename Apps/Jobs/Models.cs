@@ -7,7 +7,7 @@ public record JobItem
     public string Id { get; init; } = "";
     public string Type { get; init; } = "";
     public string PlanFile { get; init; } = "";
-    public string Queue { get; init; } = "";
+    public string Project { get; init; } = "";
     public string Status { get; set; } = "Pending";
     public DateTime? StartedAt { get; init; }
     public DateTime? CompletedAt { get; set; }
@@ -28,7 +28,7 @@ public record JobItemRow
     public string Status { get; init; } = "";
     public string Plan { get; init; } = "";
     public string Type { get; init; } = "";
-    public string Queue { get; init; } = "";
+    public string Project { get; init; } = "";
     public string Timer { get; init; } = "";
     public string LastOutput { get; init; } = "";
 }

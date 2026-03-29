@@ -30,7 +30,7 @@ public class PlanViewerApp : ViewBase
 
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{plan?.Id} {title}").Bold()
-            | new Badge(plan?.Queue ?? "").Variant(BadgeVariant.Outline)
+            | new Badge(plan?.Project ?? "").Variant(BadgeVariant.Outline)
             | new Badge(plan?.Level ?? "").Variant(config.GetBadgeVariant(plan?.Level ?? ""));
 
         return new HeaderLayout(
