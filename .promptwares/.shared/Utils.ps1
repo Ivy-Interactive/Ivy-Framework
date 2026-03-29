@@ -7,7 +7,7 @@ if (Test-Path $claudeDir) {
 }
 
 # Read plans directory from config.yaml
-$script:ConfigPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
+$script:ConfigPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "config.yaml"
 $script:PlansDir = $null
 if (Test-Path $script:ConfigPath) {
     try {
