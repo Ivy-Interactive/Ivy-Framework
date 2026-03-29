@@ -140,7 +140,7 @@ verifications:
   - name: FrontendLint
     prompt: "Run `cd src/frontend && npm run lint && npm run format:check` and verify no errors."
   - name: IvyFrameworkVerification
-    prompt: "Run the IvyFrameworkVerification promptware to visually verify UI changes. Execute: `pwsh -NoProfile -File .promptwares/IvyFrameworkVerification.ps1 -PlanPath <PlanFolder>`. This launches IvyFeatureTester.ps1 which creates a worktree, builds the samples app, and produces screenshots/artifacts for verification. Write the verification report to <PlanFolder>/verification/IvyFrameworkVerification.md."
+    prompt: "Run the IvyFrameworkVerification promptware to visually verify UI changes. Execute: `pwsh -NoProfile -File .promptwares/IvyFrameworkVerification.ps1 -PlanPath <PlanFolder>`. Creates a temp project with demo apps, runs Playwright tests, and copies artifacts to <PlanFolder>/artifacts/. Write the verification report to <PlanFolder>/verification/IvyFrameworkVerification.md."
   - name: NewWidgetChecklist
     prompt: |
       Verify all 6 required elements exist for any new widget created by this plan:

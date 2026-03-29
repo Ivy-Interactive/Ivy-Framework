@@ -61,41 +61,7 @@ Add this as the final step in the Tests section:
 2. Run manual tests as needed (e.g., navigate to sample app, verify behavior)
 3. Verify documentation renders correctly (if applicable)
 
-### Visual Verification (REQUIRED)
-
-**You MUST run IvyFeatureTester.ps1 to verify this change visually before committing.**
-
-Execute the following command and wait for completion:
-
-\```powershell
-cd D:\Repos\_Ivy
-D:\Repos\_Personal\Scripts\AF2\IvyFeatureTester.ps1 "Commit <COMMIT_ID>: <description of what to test>. Test with <specific test scenario>."
-\```
-
-Replace `<COMMIT_ID>` with the actual commit hash. The script will:
-- Create a worktree at D:\Temp\IvyFeatureTester
-- Set up the testing environment
-- Launch the Ivy samples app for manual verification
-
-Wait for the visual verification to complete and confirm the test passed before proceeding to commit.
 ```
-
-The prompt should describe the expected behavior and suggest a concrete test scenario appropriate for the change.
-
-### If Tests Find Issues
-
-If the IvyFeatureTester discovers problems during verification, it should **automatically create a new implementation plan** to fix the discovered issues:
-
-1. Create a new plan file in D:\Plans\ with a descriptive name (e.g., 417-IvyFramework-Critical-RadialBarChart-FollowUpFix.md)
-2. The plan should include:
-   - Clear problem description from test results
-   - Root cause analysis if identifiable
-   - Proposed solution steps
-   - Test verification steps
-   - Reference back to this original plan (417)
-3. Queue the new plan for execution by adding it to the appropriate queue file
-
-This ensures any issues discovered during testing have a tracked resolution path.
 
 ### Rules
 
