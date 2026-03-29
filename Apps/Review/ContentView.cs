@@ -46,6 +46,9 @@ public class ContentView(
             | new Badge(_selectedPlan.Status.ToString()).Variant(statusVariant)
             | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline)
             | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
+            | Text.Rich()
+                .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
+                .Muted("plans", word: true)
             | new Spacer().Width(Size.Grow())
             | new Button("Make PR").Icon(Icons.GitPullRequest).Primary().OnClick(() =>
             {
@@ -53,10 +56,7 @@ public class ContentView(
                 _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
                 _refreshPlans();
                 client.Toast("PR job started", "Make PR");
-            })
-            | Text.Rich()
-                .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
-                .Muted("plans", word: true);
+            });
 
         // Content sections
         var content = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200))).Gap(4);
