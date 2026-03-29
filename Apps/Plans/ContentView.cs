@@ -140,10 +140,6 @@ public class ContentView(
             })
             | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => deleteDialogOpen.Set(true))
             | new Button("Create Issue").Icon(Icons.Github).Outline().OnClick(() => createIssueDialogOpen.Set(true))
-            | new Button("Make PR").Icon(Icons.GitPullRequest).Outline().OnClick(() =>
-            {
-                _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
-            })
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Button("Download").Icon(Icons.Download).Outline().Url(downloadUrl.Value ?? "")
