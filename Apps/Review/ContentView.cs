@@ -111,13 +111,6 @@ public class ContentView(
 
         // Action bar
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
-            | new Button("Make PR").Icon(Icons.GitPullRequest).Primary().OnClick(() =>
-            {
-                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
-                _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
-                _refreshPlans();
-                client.Toast("PR job started", "Make PR");
-            })
             | new Button("Back to Draft").Icon(Icons.Pencil).Outline().OnClick(() =>
             {
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Draft);
@@ -131,6 +124,13 @@ public class ContentView(
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Spacer().Width(Size.Grow())
+            | new Button("Make PR").Icon(Icons.GitPullRequest).Primary().OnClick(() =>
+            {
+                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
+                _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
+                _refreshPlans();
+                client.Toast("PR job started", "Make PR");
+            })
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy).OnSelect(() =>
                 {
