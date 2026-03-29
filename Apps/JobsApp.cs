@@ -33,6 +33,7 @@ public class JobsApp : ViewBase
             Type = j.Type,
             Project = j.Project,
             Timer = FormatTimer(j),
+            LastOutput = FormatLastOutput(j),
             StatusMessage = j.StatusMessage ?? ""
         }).ToList();
 
@@ -46,6 +47,7 @@ public class JobsApp : ViewBase
             .Header(t => t.Type, "Type")
             .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
+            .Header(t => t.LastOutput, "Last Output")
             .Header(t => t.StatusMessage, "Status Message")
             .Renderer(t => t.Status, new LabelsDisplayRenderer())
             .Hidden(t => t.Id)
@@ -91,6 +93,16 @@ public class JobsApp : ViewBase
             });
 
         return dataTable;
+    }
+
+    private static string FormatLastOutput(JobItem job)
+    {
+        if (job.LastOutputAt.HasValue && job.Status == "Running")
+        {
+            var elapsed = DateTime.UtcNow - job.LastOutputAt.Value;
+            return FormatTimeSpan(elapsed);
+        }
+        return "-";
     }
 
     private static string FormatTimer(JobItem job)
