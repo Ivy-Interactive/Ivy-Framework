@@ -110,6 +110,41 @@ public class ContentView(
             content |= prsLayout;
         }
 
+        // Artifacts section
+        var artifacts = GetArtifacts(_selectedPlan.FolderPath);
+        if (artifacts.Count > 0)
+        {
+            var artifactsLayout = Layout.Vertical().Gap(1);
+            artifactsLayout |= Text.Block("Artifacts").Bold();
+
+            foreach (var (category, files) in artifacts.OrderBy(kv => kv.Key))
+            {
+                artifactsLayout |= Text.Block($"  {category}/").Bold();
+                foreach (var file in files)
+                {
+                    var fileName = Path.GetFileName(file);
+                    var ext = Path.GetExtension(file).ToLowerInvariant();
+                    var isImage = new[] { ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp" }.Contains(ext);
+
+                    if (isImage)
+                    {
+                        artifactsLayout |= Layout.Horizontal().Gap(2)
+                            | new Image(file) { ObjectFit = ImageFit.Contain, Alt = fileName }
+                                .Height(Size.Units(20)).Width(Size.Units(30))
+                            | new Button(fileName).Ghost().OnClick(() =>
+                                navigator.Navigate<FileApp>(new FileAppArgs(file)));
+                    }
+                    else
+                    {
+                        artifactsLayout |= Layout.Horizontal().Gap(2)
+                            | new Button(fileName).Ghost().OnClick(() =>
+                                navigator.Navigate<FileApp>(new FileAppArgs(file)));
+                    }
+                }
+            }
+            content |= artifactsLayout;
+        }
+
         // Plan content
         content |= Text.Block("Plan").Bold();
         content |= new Markdown(_selectedPlan.LatestRevisionContent)
@@ -153,6 +188,27 @@ public class ContentView(
                 content: content
             ).Size(Size.Full())
         ).Scroll(Scroll.None).Size(Size.Full()).Key(_selectedPlan.Id);
+    }
+
+    private static Dictionary<string, List<string>> GetArtifacts(string folderPath)
+    {
+        var artifactsDir = Path.Combine(folderPath, "artifacts");
+        var result = new Dictionary<string, List<string>>();
+        if (!Directory.Exists(artifactsDir)) return result;
+
+        foreach (var subDir in Directory.GetDirectories(artifactsDir))
+        {
+            var category = Path.GetFileName(subDir);
+            var files = Directory.GetFiles(subDir, "*", SearchOption.AllDirectories).ToList();
+            if (files.Count > 0)
+                result[category] = files;
+        }
+
+        var rootFiles = Directory.GetFiles(artifactsDir).ToList();
+        if (rootFiles.Count > 0)
+            result["other"] = rootFiles;
+
+        return result;
     }
 
     private void GoToNext()
