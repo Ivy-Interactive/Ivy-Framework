@@ -64,6 +64,7 @@ public class DashboardApp : ViewBase
             .ToDataTable(idSelector: t => t.Date)
             .RefreshToken(refreshToken)
             .Width(Size.Full())
+            .Height(Size.Px(500))
             .Header(t => t.Date, "Date")
             .Header(t => t.Created, "Created")
             .Header(t => t.Completed, "Completed")
