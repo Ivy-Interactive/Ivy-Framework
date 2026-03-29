@@ -140,13 +140,22 @@ export const useSelectValueHandler = (
   options: Option[],
   eventHandler: EventHandler,
   selectMany: boolean = false,
+  nullable: boolean = false,
 ) => {
   return useCallback(
     (newValue: string | string[]) => {
+      // Radix ToggleGroup type="single" sends "" on deselect
+      if (!selectMany && newValue === "") {
+        if (nullable) {
+          eventHandler("OnChange", id, [null]);
+        }
+        // Non-nullable: ignore deselect, keep current value
+        return;
+      }
       const stringValues = Array.isArray(newValue) ? newValue : [newValue];
       const convertedValue = convertValuesToOriginalType(stringValues, value, options, selectMany);
       eventHandler("OnChange", id, [convertedValue]);
     },
-    [id, value, options, eventHandler, selectMany],
+    [id, value, options, eventHandler, selectMany, nullable],
   );
 };

@@ -63,10 +63,12 @@ const injectMeta = (mode) => {
 
 const mode = process.env.NODE_ENV || "development";
 export default defineConfig({
+  base: "./",
   staged: {
     "src/**/*.{ts,tsx,js,jsx}": "vp check --fix",
     "../**/*.cs": "dotnet format ../Ivy-Framework.slnx --include",
   },
+
   plugins: [react(), tailwindcss(), injectMeta(mode)],
   server: {
     proxy: {

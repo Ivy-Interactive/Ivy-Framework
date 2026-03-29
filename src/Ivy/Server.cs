@@ -13,6 +13,7 @@ using Ivy.Themes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,6 +59,7 @@ public record ServerArgs
     public bool FindAvailablePort { get; set; } = false;
 #endif
     public string? Host { get; set; } = null;
+    public string? BasePath { get; set; } = null;
 
     /// <summary>
     /// Base path for the application when running behind a reverse proxy (e.g., "/myapp").
@@ -725,7 +727,7 @@ public class Server
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
 
-        builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Debug);
+        builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Information);
 
         // Suppress hosting startup errors when not verbose (we handle IOException with a friendly message)
         if (!_args.Verbose)
@@ -782,6 +784,23 @@ public class Server
 
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
+        // Configure ForwardedHeaders middleware to process X-Forwarded-* headers from reverse proxies
+        var forwardedHeadersOptions = new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                | ForwardedHeaders.XForwardedProto
+                | ForwardedHeaders.XForwardedHost
+                | ForwardedHeaders.XForwardedPrefix,
+        };
+        forwardedHeadersOptions.KnownIPNetworks.Clear();
+        forwardedHeadersOptions.KnownProxies.Clear();
+        app.UseForwardedHeaders(forwardedHeadersOptions);
+
+        if (!string.IsNullOrEmpty(_args.BasePath))
+        {
+            Console.WriteLine($"Using base path: {_args.BasePath}");
+            app.UsePathBase(_args.BasePath);
+        }
 
         app.UseRouting(); // First routing pass - match explicit routes (gRPC, controllers)
         app.UsePathToAppId(); // Rewrite path to appId if no endpoint matched
@@ -1048,60 +1067,12 @@ public static class WebApplicationExtensions
         );
         var resourceName = $"{assembly.GetName().Name}.index.html";
         app.MapGet("/", async context =>
-        {
-            var version = assembly.GetName().Version?.ToString();
-            if (!string.IsNullOrEmpty(version))
-            {
-                context.Response.Headers["ivy-version"] = version;
-            }
+            await ServeIndexHtml(context, app, serverArgs, assembly, resourceName));
 
-            // Determine HTTP status code based on app routing
-            var server = app.Services.GetRequiredService<Server>();
-            var httpStatusCode = GetHttpStatusCodeForRequest(server, context);
-
-            await using var stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream != null)
-            {
-                using var reader = new StreamReader(stream);
-                var html = await reader.ReadToEndAsync();
-
-                var pipeline = new HtmlPipeline()
-                    .Use<LicenseFilter>()
-                    .Use<DevToolsFilter>()
-                    .Use<LocalFilesFilter>()
-                    .Use<MetaDescriptionFilter>()
-                    .Use<MetaGitHubUrlFilter>()
-                    .Use<TitleFilter>()
-                    .Use<ThemeFilter>()
-                    .Use<ManifestFilter>()
-                    .Use<OpenGraphFilter>();
-
-                foreach (var filter in server.GetCustomFilters())
-                    pipeline.Use(filter);
-
-                server.GetPipelineConfigurator()?.Invoke(pipeline);
-
-                var pipelineContext = new HtmlPipelineContext
-                {
-                    Services = app.Services,
-                    ServerArgs = serverArgs
-                };
-
-
-                html = pipeline.Process(pipelineContext, html);
-
-                context.Response.ContentType = "text/html";
-                context.Response.StatusCode = httpStatusCode;
-                var bytes = Encoding.UTF8.GetBytes(html);
-                await context.Response.Body.WriteAsync(bytes);
-            }
-            else
-            {
-                context.Response.StatusCode = 500;
-                context.Response.ContentType = "text/plain";
-                await context.Response.WriteAsync($"Error: {resourceName} not found.");
-            }
-        });
+        // SPA fallback: serve index.html for any path not matched by other routes
+        // (enables client-side routing for /sign-in, /foo/bar/sign-in, etc.)
+        app.MapFallback(async context =>
+            await ServeIndexHtml(context, app, serverArgs, assembly, resourceName));
 
         app.MapGet("/manifest.json", () =>
         {
@@ -1152,6 +1123,63 @@ public static class WebApplicationExtensions
 
 
         return app;
+    }
+
+    private static async Task ServeIndexHtml(HttpContext context, WebApplication app, ServerArgs serverArgs, Assembly assembly, string resourceName)
+    {
+        var version = assembly.GetName().Version?.ToString();
+        if (!string.IsNullOrEmpty(version))
+        {
+            context.Response.Headers["ivy-version"] = version;
+        }
+
+        // Determine HTTP status code based on app routing
+        var server = app.Services.GetRequiredService<Server>();
+        var httpStatusCode = GetHttpStatusCodeForRequest(server, context);
+
+        await using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream != null)
+        {
+            using var reader = new StreamReader(stream);
+            var html = await reader.ReadToEndAsync();
+
+            var pipeline = new HtmlPipeline()
+                .Use<LicenseFilter>()
+                .Use<DevToolsFilter>()
+                .Use<LocalFilesFilter>()
+                .Use<MetaDescriptionFilter>()
+                .Use<MetaGitHubUrlFilter>()
+                .Use<TitleFilter>()
+                .Use<ThemeFilter>()
+                .Use<ManifestFilter>()
+                .Use<OpenGraphFilter>()
+                .Use<BasePathFilter>();
+
+            foreach (var filter in server.GetCustomFilters())
+                pipeline.Use(filter);
+
+            server.GetPipelineConfigurator()?.Invoke(pipeline);
+
+            var pipelineContext = new HtmlPipelineContext
+            {
+                Services = app.Services,
+                ServerArgs = serverArgs
+            };
+
+
+            html = pipeline.Process(pipelineContext, html);
+
+            context.Response.ContentType = "text/html";
+            context.Response.StatusCode = httpStatusCode;
+            var bytes = Encoding.UTF8.GetBytes(html);
+            await context.Response.Body.WriteAsync(bytes);
+        }
+        else
+        {
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "text/plain";
+            await context.Response.WriteAsync($"Error: {resourceName} not found.");
+        }
     }
 
     public static WebApplication UseAssets(this WebApplication app, ServerArgs args, ILogger<Server> logger,

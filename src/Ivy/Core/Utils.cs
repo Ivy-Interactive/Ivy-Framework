@@ -99,7 +99,11 @@ public static class Utils
         }
 
         if (t.IsEnum && jsonNode is JsonValue enumVal && enumVal.TryGetValue(out string? enumStr))
+        {
+            if (string.IsNullOrEmpty(enumStr))
+                return Nullable.GetUnderlyingType(valueType) != null ? null : default;
             return Enum.Parse(t, enumStr, true);
+        }
 
         if (t == typeof(bool) && jsonNode is JsonValue boolVal)
         {
