@@ -1,0 +1,178 @@
+# ExecutePlan
+
+Execute an approved plan in isolated git worktrees.
+
+## Context
+
+The firmware header contains:
+- **Args** / **PlanFolder** — path to the plan folder
+- **ConfigPath** — absolute path to config.yaml
+- **CurrentTime** — current UTC timestamp
+
+Read the plan structure in `../.shared/Plans.md`.
+Read `config.yaml` (from `ConfigPath`) for project repos and context.
+
+The launcher script sets the working directory to the project's primary repo.
+
+## Execution Steps
+
+### 1. Read Plan
+
+- Read `plan.yaml` from the plan folder (project, repos, title)
+- Read the latest revision from `revisions/` (highest numbered .md file)
+- Extract the plan ID from the folder name (e.g. `01105` from `01105-TestPlan`)
+
+### 2. Create Worktrees
+
+For each repo listed in `plan.yaml` `repos` (or the project's repos from `config.yaml` if empty):
+
+1. Fetch latest from remote: `git fetch origin`
+2. Detect the default branch: `git symbolic-ref refs/remotes/origin/HEAD | sed 's|refs/remotes/origin/||'` (usually `master` or `main`)
+3. Create worktree branching from the remote default branch:
+
+```bash
+cd <original-repo-path>
+git fetch origin
+git worktree add "<PlanFolder>/worktrees/<repo-folder-name>" -b "plan-<planId>-<repo-folder-name>" "origin/<default-branch>"
+```
+
+Example:
+```bash
+cd D:\Repos\_Ivy\Ivy-Tendril
+git fetch origin
+git worktree add "D:\Plans\01105-TestPlan\worktrees\Ivy-Tendril" -b "plan-01105-Ivy-Tendril" origin/master
+```
+
+**Important:** Always branch from `origin/<default-branch>`, not local HEAD. This ensures the PR only contains the plan's commits, not any unpushed local work.
+
+### 3. Handle Cross-Repo References
+
+Projects may reference other repos via absolute paths in `.csproj` files (e.g. `<ProjectReference Include="D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Ivy.csproj" />`).
+
+These paths point to the original repos, not the worktree copies. Since we only modify files in the worktree, this is usually fine — the build references the original (stable) code.
+
+**Do NOT modify project reference paths.** If a build fails because of cross-repo references, work around it by building from the worktree directory which inherits the original's references.
+
+### 4. Implement
+
+Work exclusively in the worktree directories. Follow the plan's latest revision:
+
+1. **Problem** — Understand what needs to be done
+2. **Solution** — Execute the implementation steps in the worktree
+3. **Tests** — Write and run all tests specified in the plan
+
+### 5. Commit
+
+Make logically grouped commits in the worktree(s). Each commit should be a coherent unit of work.
+
+Before each commit, run formatting/linting:
+
+**Frontend files** (under `src/frontend/`):
+```bash
+cd src/frontend && npm run format && npm run lint:fix && cd ../..
+```
+
+**C# files**:
+```bash
+dotnet format
+```
+
+Commit messages should reference the plan ID:
+```
+[01105] Add settings app with config display
+```
+
+After all commits, verify no uncommitted files remain:
+```bash
+git status
+```
+If there are uncommitted changes, either commit them or discard them with a clear reason. The worktree must be clean.
+
+### 6. Document Commits
+
+Update `plan.yaml` in the plan folder (NOT in the worktree). Use the Edit tool on the original `plan.yaml` at the `PlanFolder` path.
+
+Append each commit hash to the `commits` list:
+
+```yaml
+commits:
+  - abc1234
+  - def5678
+```
+
+Also populate the `verifications` list with each checked verification from the plan revision, initially set to `Pending`:
+
+```yaml
+verifications:
+  - name: DotnetBuild
+    status: Pending
+  - name: DotnetTest
+    status: Pending
+```
+
+If the plan references other plans (e.g. split-from, follow-up), add them to `relatedPlans`:
+
+```yaml
+relatedPlans:
+  - D:\Plans\01100-OriginalPlan
+```
+
+### 7. Run Verifications
+
+Create a `verification/` directory in the plan folder if it doesn't exist.
+
+Check the `## Verification` section in the plan revision for checked items (`- [x]`). Skip unchecked items (`- [ ]`).
+
+For each checked verification:
+1. Look up its `prompt` in the `verifications` list in `config.yaml`
+2. Execute the prompt in the worktree directory
+3. If it fails: diagnose, fix the issue, **commit the fix** (e.g. `[01105] Fix lint errors from DotnetBuild`), and re-run. Repeat until it passes (fail the plan after 3+ failed attempts).
+4. Document all fix commits in `plan.yaml` just like implementation commits.
+5. Update the verification's `status` in `plan.yaml` to `Pass` or `Fail`.
+
+**!IMPORTANT: Every verification MUST produce a report** at `<PlanFolder>/verification/<VerificationName>.md`:
+
+```markdown
+# <VerificationName>
+
+- **Date:** <CurrentTime>
+- **Result:** Pass / Fail
+- **Attempts:** <number>
+
+## Output
+
+<command output or summary>
+
+## Fixes Applied
+
+<list of fix commits made during this verification, or "None">
+
+## Issues Found
+
+<any remaining issues, or "None">
+```
+
+A verification is not complete without its report. If the report file does not exist after running a verification, the plan should fail.
+
+### 8. Final Clean Check
+
+After all verifications pass, run `git status` in every worktree. If there are any uncommitted files (from verification fixes, generated files, etc.), commit or discard them. The worktrees must be completely clean before finishing.
+
+### 9. Plan State
+
+The launcher script handles state transitions (Completed/Failed) based on exit code.
+
+### Ambiguity Handling
+
+You are running in non-interactive mode and CANNOT ask questions. If you are unsure about requirements, encounter conflicting instructions, or cannot find referenced files — STOP and fail with a clear message explaining what needs clarification. Do NOT guess when uncertain.
+
+### Rules
+
+- All work happens in worktree directories, never in the original repos
+- Make logically grouped commits — not one giant commit
+- Worktrees must be clean (no uncommitted files) when finished
+- Document all commit hashes in `plan.yaml`
+- Follow the plan instructions exactly as written
+- Do NOT skip tests or pre-commit formatting
+- Commit messages must reference the plan ID
+- All `file:///` paths in plans should be converted to Windows paths when needed

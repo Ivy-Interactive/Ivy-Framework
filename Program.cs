@@ -13,7 +13,12 @@ server.UseHotReload();
 server.SetMetaTitle("Ivy Tendril");
 server.Services.AddSingleton<ConfigService>();
 server.Services.AddSingleton<GithubService>();
-server.Services.AddSingleton<PlanReaderService>();
+server.Services.AddSingleton<PlanReaderService>(sp =>
+{
+    var planService = new PlanReaderService(sp.GetRequiredService<ConfigService>());
+    planService.RecoverStuckPlans();
+    return planService;
+});
 server.Services.AddSingleton<JobService>(sp =>
 {
     var jobService = new JobService();

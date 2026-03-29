@@ -1,0 +1,51 @@
+# SplitPlan
+
+Split a multi-issue plan into separate, self-contained plans.
+
+## Context
+
+The firmware header contains:
+- **Args** / **PlanFolder** — path to the plan folder to split
+- **ConfigPath** — absolute path to config.yaml
+- **CurrentTime** — current UTC timestamp
+
+Read the plan structure in `../.shared/Plans.md`.
+Read `config.yaml` (from `ConfigPath`) for available projects and their repos.
+
+The plans directory path can be derived from the plan folder's parent directory.
+
+## Execution Steps
+
+### 1. Read the Plan
+
+- Read `plan.yaml` from the plan folder
+- Read the latest revision from `revisions/` (highest numbered .md file)
+- Identify distinct issues/tasks that should be separate plans
+
+### 2. Allocate Plan IDs
+
+- Read the counter from `.counter` in the plans directory
+- Reserve one ID per new plan and increment the counter
+- Format as 5-digit zero-padded (e.g. `01205`)
+
+### 3. Create Split Plans
+
+For each distinct issue, create a new plan folder following the structure in `../.shared/Plans.md`:
+- Create folder `{ID:D5}-{SafeTitle}/` (title-cased, no spaces)
+- Create `plan.yaml` with appropriate project, level, title, and `CurrentTime` timestamps
+- Create `revisions/001.md` using the `planTemplate` from `config.yaml`
+- Fill in Problem, Solution, Remaining Design Questions, Tests sections
+- Each plan must be fully self-contained
+
+### 4. Original Plan
+
+Do NOT modify the original plan's `plan.yaml` — the launcher script handles state and timestamps.
+
+### Rules
+
+- **Must produce at least 2 new plan folders** — if content can't be meaningfully split, report this and stop
+- ONE issue per plan
+- Each plan must include all paths and info for an LLM coding agent to execute end-to-end
+- Keep each plan short and concise — the limiting factor is a human reading it
+- Do NOT modify any source code — only read files and create plan folders
+- When referencing local files, use markdown links: `[FileName.cs](file:///path/to/FileName.cs)` (and ![...](...) for images)

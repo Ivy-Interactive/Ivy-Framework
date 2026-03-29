@@ -1,5 +1,5 @@
 planFolder: D:\Plans\
-agentCommand: claude --print --output-format stream-json --dangerously-skip-permissions
+agentCommand: claude --print --verbose --output-format stream-json --dangerously-skip-permissions
 
 levels:
   - name: Critical
@@ -12,9 +12,22 @@ levels:
     badge: Info
 
 projects:
-  - name: IvyFramework
+  - name: Framework
     repos:
       - D:\Repos\_Ivy\Ivy-Framework
+    verifications:
+      - name: DotnetBuild
+        required: true
+      - name: DotnetFormat
+        required: true
+      - name: DotnetTest
+        required: true
+      - name: FrontendLint
+        required: true
+      - name: IvyFrameworkVerification
+        required: true
+      - name: NewWidgetChecklist
+        required: false
     context: |
       Ivy Framework is the core UI framework. Key folders:
       - src/Ivy/Widgets/ — backend widget classes
@@ -23,10 +36,17 @@ projects:
       - src/Ivy.Samples.Shared/ — sample apps
       Instructions: See D:\Repos\_Ivy\Ivy-Framework\AGENTS.md
 
-  - name: IvyAgent
+  - name: Agent
     repos:
       - D:\Repos\_Ivy\Ivy-Agent
       - D:\Repos\_Ivy\Ivy
+    verifications:
+      - name: DotnetBuild
+        required: true
+      - name: DotnetFormat
+        required: true
+      - name: DotnetTest
+        required: true
     context: |
       Ivy Agent is the AI agent server and client. Key folders:
       - Ivy.Agent.Server/ — agent server
@@ -34,15 +54,29 @@ projects:
       - Ivy.Internals/Workflows/ — workflow definitions
       - Ivy.Agent/Tools/ — tool implementations
 
-  - name: IvyMcp
+  - name: Mcp
     repos:
       - D:\Repos\_Ivy\Ivy-Mcp
+    verifications:
+      - name: DotnetBuild
+        required: true
+      - name: DotnetFormat
+        required: true
+      - name: DotnetTest
+        required: true
     context: |
       MCP service for IvyQuestions and IvyDocs.
 
-  - name: IvyConsole
+  - name: Console
     repos:
       - D:\Repos\_Ivy\Ivy
+    verifications:
+      - name: DotnetBuild
+        required: true
+      - name: DotnetFormat
+        required: true
+      - name: DotnetTest
+        required: true
     context: |
       Console/TUI client. Key folders:
       - Ivy.Console/ — desktop client
@@ -56,11 +90,78 @@ projects:
       - AF2/ — promptwares (MakePlan, IvyAgentDebug, etc.)
       - AF2/.vscode-extensions/ — VS Code extensions (installed via symlinks)
 
-  - name: IvyTendril
+  - name: Tendril
     repos:
       - D:\Repos\_Ivy\Ivy-Tendril
+    verifications:
+      - name: DotnetBuild
+        required: true
+      - name: DotnetFormat
+        required: true
+      - name: DotnetTest
+        required: false
     context: |
       Plan management TUI. Key folders:
       - Services/ — ConfigService, PlanReaderService, JobService
       - Apps/ — PlansApp, JobsApp UI
       - .promptwares/ — MakePlan, UpdatePlan, SplitPlan, ExpandPlan
+      This project uses the Ivy Framework - there's CLI helper methods you can use: 
+      ivy docs AGENTS.md 
+      ivy question "How do I make a button in Ivy?"
+
+  - name: FooTest
+    repos:
+      - D:\Temp\FooTest
+    verifications:
+      - name: DotnetBuild
+        required: true
+      - name: DotnetFormat
+        required: true
+      - name: DotnetTest
+        required: false
+    context: |
+      Dummy test project. Simple .NET 10 console app at D:\Temp\FooTest.
+
+verifications:
+  - name: DotnetBuild
+    prompt: "Run `dotnet build --warnaserror` in the project repo and verify it succeeds with zero errors and zero warnings."
+  - name: DotnetTest
+    prompt: "Run `dotnet test` in the project repo and verify all tests pass."
+  - name: DotnetFormat
+    prompt: "Run `dotnet format` in the project repo. If it modifies any files, stage and commit them."
+  - name: FrontendLint
+    prompt: "Run `cd src/frontend && npm run lint && npm run format:check` and verify no errors."
+  - name: IvyFrameworkVerification
+    prompt: "Run the IvyFrameworkVerification promptware to visually verify UI changes. Execute: `pwsh -NoProfile -File .promptwares/IvyFrameworkVerification.ps1 -PlanPath <PlanFolder>`. This launches IvyFeatureTester.ps1 which creates a worktree, builds the samples app, and produces screenshots/artifacts for verification. Write the verification report to <PlanFolder>/verification/IvyFrameworkVerification.md."
+  - name: NewWidgetChecklist
+    prompt: |
+      Verify all 6 required elements exist for any new widget created by this plan:
+      1. Backend widget class — src/Ivy/Widgets/<WidgetName>.cs with [Prop]/[Event] attributes, [JsonIgnore] on delegates, Has* booleans
+      2. Frontend React component — src/frontend/src/widgets/<widgetName>/<WidgetName>Widget.tsx
+      3. Index export — src/frontend/src/widgets/<widgetName>/index.ts
+      4. Widget map registration — import + entry in src/frontend/src/widgets/widgetMap.ts
+      5. Sample app — src/Ivy.Samples.Shared/Apps/Widgets/<WidgetName>App.cs
+      6. Documentation page — src/Ivy.Docs.Shared/Docs/02_Widgets/<category>/<WidgetName>.md
+      Check each file exists and follows conventions. Report which elements are present vs missing.
+
+planTemplate: |
+  # {title}
+
+  ## Questions
+
+  (this is where the agent can communicate with the user)
+
+  <details>
+  <summary>Question</summary>
+  Answer
+  </details>
+
+  ## Problem
+
+  ## Solution
+
+  ## Tests
+
+  (specify all tests we need to write to ensure new functionality)
+
+  ## Verification

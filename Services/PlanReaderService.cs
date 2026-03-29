@@ -24,6 +24,38 @@ public class PlanReaderService(ConfigService config)
 
     public string PlansDirectory => _config.PlanFolder;
 
+    /// <summary>
+    /// On startup, reset any plans stuck in transient states (Building, Executing, Updating)
+    /// back to Failed. These are leftovers from a previous Tendril shutdown.
+    /// </summary>
+    public void RecoverStuckPlans()
+    {
+        var stuckStates = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "Building", "Executing", "Updating" };
+
+        try
+        {
+            if (!Directory.Exists(PlansDirectory)) return;
+
+            foreach (var dir in Directory.GetDirectories(PlansDirectory))
+            {
+                var planYamlPath = Path.Combine(dir, "plan.yaml");
+                if (!File.Exists(planYamlPath)) continue;
+
+                var yaml = File.ReadAllText(planYamlPath);
+                var stateMatch = System.Text.RegularExpressions.Regex.Match(yaml, @"(?m)^state:\s*(.+)$");
+                if (!stateMatch.Success) continue;
+
+                var state = stateMatch.Groups[1].Value.Trim();
+                if (stuckStates.Contains(state))
+                {
+                    TransitionState(Path.GetFileName(dir), PlanStatus.Failed);
+                }
+            }
+        }
+        catch { }
+    }
+
     public List<PlanFile> GetPlans(PlanStatus? statusFilter = null)
     {
         try

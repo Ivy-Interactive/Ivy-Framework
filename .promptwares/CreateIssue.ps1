@@ -1,6 +1,9 @@
 param(
     [Parameter(Mandatory=$true)]
-    [string]$PlanPath
+    [string]$PlanPath,
+    [Parameter(Mandatory=$true)]
+    [string]$Repo,
+    [string]$Assignee = ""
 )
 
 . "$PSScriptRoot\.shared\Utils.ps1"
@@ -9,12 +12,14 @@ $programFolder = GetProgramFolder $PSCommandPath
 $planYamlPath = ValidatePlanPath $PlanPath
 $planInfo = ReadPlanProject $planYamlPath
 
-UpdatePlanState $PlanPath "Updating"
-
 $logFile = GetNextLogFile $programFolder
 $PlanPath | Set-Content $logFile
 Write-Host "Log file: $logFile"
 
 InvokePromptwareAgent $PSScriptRoot $programFolder $logFile @{
-    Args = $PlanPath; PlanFolder = $PlanPath; Project = $planInfo.Project
-} -PlanPath $PlanPath -Action "SplitPlan" -FinalState "Skipped"
+    Args = $PlanPath
+    PlanFolder = $PlanPath
+    Project = $planInfo.Project
+    Repo = $Repo
+    Assignee = $Assignee
+} -PlanPath $PlanPath -Action "CreateIssue"

@@ -6,9 +6,19 @@ if (Test-Path $claudeDir) {
     }
 }
 
-# Canonical plans directory - must match config.yaml planFolder setting
-# All promptware documentation should reference this same path
-$script:PlansDir = "D:\Plans"
+# Read planFolder from config.yaml
+$script:PlansDir = "D:\Plans"  # fallback
+$script:ConfigPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
+if (Test-Path $script:ConfigPath) {
+    try {
+        $configYaml = Get-Content $script:ConfigPath -Raw
+        $pfMatch = [regex]::Match($configYaml, '(?m)^planFolder:\s*(.+)$')
+        if ($pfMatch.Success) {
+            $script:PlansDir = $pfMatch.Groups[1].Value.Trim().TrimEnd('\', '/')
+        }
+    }
+    catch { }
+}
 
 function GetProgramFolder {
     param([string]$ScriptPath)
@@ -47,6 +57,14 @@ function PrepareFirmware {
         [hashtable]$Values = @{}
     )
 
+    # Auto-inject common values
+    if (-not $Values.ContainsKey("CurrentTime")) {
+        $Values["CurrentTime"] = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    }
+    if (-not $Values.ContainsKey("ConfigPath")) {
+        $Values["ConfigPath"] = $script:ConfigPath
+    }
+
     $header = ($Values.GetEnumerator() | Sort-Object Name | ForEach-Object { "$($_.Key): $($_.Value)" }) -join "`n"
 
     $sharedFolder = Join-Path $ScriptRoot ".shared"
@@ -59,145 +77,6 @@ function PrepareFirmware {
     $promptFile = [System.IO.Path]::GetTempFileName()
     Set-Content -Path $promptFile -Value $firmware -NoNewline
     return $promptFile
-}
-
-function GetLatestSessionId {
-    param([string]$Path = (Join-Path (Get-Location).Path ".ivy\session.ldjson"))
-
-    if (-not (Test-Path $Path)) {
-        Write-Host "Error: $Path not found." -ForegroundColor Red
-        Read-Host "Press Enter to exit"
-        exit 1
-    }
-
-    $lastLine = (Get-Content $Path -Tail 1).Trim()
-    if ($lastLine -eq "") {
-        Write-Host "Error: $Path is empty." -ForegroundColor Red
-        Read-Host "Press Enter to exit"
-        exit 1
-    }
-
-    return ($lastLine | ConvertFrom-Json).sessionId
-}
-
-function InvokeOrOutputPrompt {
-    param(
-        [string]$ProgramFolder,
-        [string]$PromptFile,
-        [string]$Prompt,
-        [string]$LogFile,
-        [switch]$GetPrompt,
-        [switch]$GetTaskPrompt,
-        [string[]]$ExtraClaudeArgs = @()
-    )
-
-    if ($GetPrompt) {
-        Get-Content $PromptFile -Raw
-        Remove-Item $PromptFile
-        return
-    }
-
-    if ($GetTaskPrompt) {
-        $programMd = Join-Path $ProgramFolder "Program.md"
-        $content = if (Test-Path $programMd) { Get-Content $programMd -Raw } else { "(No Program.md found)" }
-        Remove-Item $PromptFile
-        Write-Output @"
-## Task: $([System.IO.Path]::GetFileName($ProgramFolder))
-
-**Working Directory:** $ProgramFolder
-**Log File:** $LogFile
-**Args:** $Prompt
-
-$content
-"@
-        return
-    }
-
-    Write-Host "Log file: $LogFile"
-    Write-Host "Starting Agent..."
-    Push-Location $ProgramFolder
-
-    $firmware = Get-Content $PromptFile -Raw
-    Remove-Item $PromptFile
-
-    $agent = GetAgentCommandFromConfig
-    & $agent.Executable @($agent.Args) @ExtraClaudeArgs -- $firmware
-
-    Pop-Location
-    return $false
-}
-
-function CreatePlanFolder {
-    param(
-        [string]$Description,
-        [string]$Project = "General",
-        [string]$ProjectContext = ""
-    )
-
-    $counterFile = Join-Path $script:PlansDir ".counter"
-    if (-not (Test-Path $script:PlansDir)) {
-        New-Item -ItemType Directory -Path $script:PlansDir | Out-Null
-    }
-
-    $counter = if (Test-Path $counterFile) { [int](Get-Content $counterFile).Trim() } else { 1087 }
-    $id = $counter
-    Set-Content -Path $counterFile -Value ($counter + 1).ToString()
-
-    $safeTitle = $Description
-    if ($safeTitle.Length -gt 60) { $safeTitle = $safeTitle.Substring(0, 60) }
-    $safeTitle = $safeTitle -replace '[^a-zA-Z0-9]', ''
-    if ($safeTitle -eq '') { $safeTitle = 'Untitled' }
-
-    $folderName = "{0:D5}-{1}" -f $id, $safeTitle
-    $folderPath = Join-Path $script:PlansDir $folderName
-
-    New-Item -ItemType Directory -Path $folderPath -Force | Out-Null
-    New-Item -ItemType Directory -Path (Join-Path $folderPath "revisions") -Force | Out-Null
-    New-Item -ItemType Directory -Path (Join-Path $folderPath "logs") -Force | Out-Null
-    New-Item -ItemType Directory -Path (Join-Path $folderPath "worktrees") -Force | Out-Null
-    New-Item -ItemType Directory -Path (Join-Path $folderPath "artifacts") -Force | Out-Null
-
-    $now = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-    $yamlContent = @"
-state: Draft
-project: $Project
-level: NiceToHave
-title: "$Description"
-repos: []
-created: $now
-updated: $now
-initialPrompt: "$Description"
-prs: []
-commits: []
-"@
-
-    Set-Content -Path (Join-Path $folderPath "plan.yaml") -Value $yamlContent
-
-    # Write project context if provided
-    if ($ProjectContext) {
-        Set-Content -Path (Join-Path $folderPath "project-context.md") -Value $ProjectContext
-    }
-
-    $revisionContent = @"
-# $Description
-
-## Problem
-
-$Description
-
-## Solution
-
-## Tests
-
-## Finish
-
-Commit!
-"@
-
-    Set-Content -Path (Join-Path $folderPath "revisions" "001.md") -Value $revisionContent
-
-    Write-Host "Created plan folder: $folderPath" -ForegroundColor Green
-    return $folderPath
 }
 
 function UpdatePlanState {
@@ -223,7 +102,8 @@ function UpdatePlanState {
 function WritePlanLog {
     param(
         [string]$PlanFolderPath,
-        [string]$Action
+        [string]$Action,
+        [string]$Summary = ""
     )
 
     $logsDir = Join-Path $PlanFolderPath "logs"
@@ -243,12 +123,10 @@ function WritePlanLog {
     $logPath = Join-Path $logsDir ("{0:D3}-{1}.md" -f $next, $Action)
 
     $now = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-    $logContent = @"
-# $Action
-
-- **Completed:** $now
-- **Status:** Completed
-"@
+    $logContent = "# $Action`n`n- **Completed:** $now`n- **Status:** Completed"
+    if ($Summary) {
+        $logContent += "`n`n$Summary"
+    }
 
     Set-Content -Path $logPath -Value $logContent
     Write-Host "Log written: $logPath" -ForegroundColor Green
@@ -268,54 +146,108 @@ function CollectArgs {
     }
 
     if ($joined -eq "") {
-        $tempFile = [System.IO.Path]::GetTempFileName()
-        Write-Host "No arguments provided. Opening Notepad - save the file and close it to continue."
-        Start-Process -FilePath "notepad.exe" -ArgumentList $tempFile -Wait
-        $joined = ((Get-Content $tempFile) -join " ").Trim()
-        Remove-Item $tempFile
-    }
-
-    if ($joined -eq "") {
-        Write-Host "No arguments provided. Exiting."
-        exit
+        Write-Host "Error: No arguments provided." -ForegroundColor Red
+        exit 1
     }
 
     return $joined
 }
 
-function GetProjectContextFromConfig {
-    param([string]$ProjectName)
+function ValidatePlanPath {
+    param([string]$PlanPath)
 
-    if ($ProjectName -eq "[Auto]" -or $ProjectName -eq "General" -or $ProjectName -eq "") {
-        return ""
+    if (-not (Test-Path $PlanPath)) {
+        Write-Host "Plan folder not found: $PlanPath" -ForegroundColor Red
+        exit 1
     }
 
-    $configPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
-    if (-not (Test-Path $configPath)) {
-        return ""
+    $planYamlPath = Join-Path $PlanPath "plan.yaml"
+    if (-not (Test-Path $planYamlPath)) {
+        Write-Host "plan.yaml not found in: $PlanPath" -ForegroundColor Red
+        exit 1
     }
 
-    try {
-        $yaml = Get-Content $configPath -Raw
+    return $planYamlPath
+}
 
-        # Simple regex-based extraction of project context
-        $pattern = "(?s)- name:\s*$([regex]::Escape($ProjectName))\s+repos:.*?context:\s*\|\s*(.*?)(?=\n\s{0,2}\S|\z)"
-        $match = [regex]::Match($yaml, $pattern)
+function ReadPlanProject {
+    param([string]$PlanYamlPath)
 
-        if ($match.Success) {
-            return $match.Groups[1].Value.Trim()
+    $content = Get-Content $PlanYamlPath -Raw
+    $match = [regex]::Match($content, '(?m)^project:\s*(.+)$')
+    $project = if ($match.Success) { $match.Groups[1].Value.Trim() } else { "General" }
+    return @{ Content = $content; Project = $project }
+}
+
+function GetProjectWorkDir {
+    param([string]$Project)
+
+    if (Test-Path $script:ConfigPath) {
+        try {
+            $yaml = Get-Content $script:ConfigPath -Raw
+            # Match the project block and extract its first repo
+            $pattern = "(?s)- name:\s*$([regex]::Escape($Project))\s+repos:\s*\n((?:\s+-\s*.+\n?)+)"
+            $match = [regex]::Match($yaml, $pattern)
+            if ($match.Success) {
+                $repoLine = [regex]::Match($match.Groups[1].Value, '^\s+-\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Multiline)
+                if ($repoLine.Success) {
+                    return $repoLine.Groups[1].Value.Trim()
+                }
+            }
+        }
+        catch { }
+    }
+
+    return (Get-Location).Path
+}
+
+function InvokePromptwareAgent {
+    param(
+        [string]$ScriptRoot,
+        [string]$ProgramFolder,
+        [string]$LogFile,
+        [hashtable]$FirmwareValues,
+        [string]$WorkDir = $ProgramFolder,
+        [string]$PlanPath = $null,
+        [string]$Action = $null,
+        [string]$FinalState = $null,
+        [string[]]$ExtraAgentArgs = @()
+    )
+
+    $promptFile = PrepareFirmware $ScriptRoot $LogFile $ProgramFolder $FirmwareValues
+    $agent = GetAgentCommandFromConfig
+
+    Write-Host "Starting Agent..."
+    Push-Location $WorkDir
+    $output = & $agent.Executable @($agent.Args) @ExtraAgentArgs -- (Get-Content $promptFile -Raw)
+    $output | Write-Output
+    Pop-Location
+
+    # Extract summary from agent's stream-json result
+    $summary = ""
+    if ($output) {
+        $resultLine = ($output | Select-String '"type":"result"' | Select-Object -Last 1)
+        if ($resultLine) {
+            try {
+                $resultJson = $resultLine.Line | ConvertFrom-Json
+                $summary = $resultJson.result
+            } catch { }
         }
     }
-    catch {
-        Write-Host "Warning: Could not parse project context from config.yaml" -ForegroundColor Yellow
+
+    if ($PlanPath -and $Action) {
+        WritePlanLog $PlanPath $Action $summary
+    }
+    if ($PlanPath -and $FinalState) {
+        UpdatePlanState $PlanPath $FinalState
     }
 
-    return ""
+    Remove-Item $promptFile -ErrorAction SilentlyContinue
 }
 
 function GetAgentCommandFromConfig {
     $configPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
-    $raw = "claude --print --output-format stream-json --dangerously-skip-permissions"
+    $raw = "claude --print --verbose --output-format stream-json --dangerously-skip-permissions"
 
     if (Test-Path $configPath) {
         try {

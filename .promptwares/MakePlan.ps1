@@ -1,4 +1,6 @@
 param(
+    [Parameter(Mandatory=$true)]
+    [string]$Description,
     [string]$Project = "[Auto]"
 )
 
@@ -6,21 +8,18 @@ param(
 
 $programFolder = GetProgramFolder $PSCommandPath
 
-$args = CollectArgs $args
-
-# Get project context from config if a specific project is selected
-$projectContext = GetProjectContextFromConfig $Project
-
-# Create plan folder structure with project
-$planFolder = CreatePlanFolder $args $Project $projectContext
-
 $logFile = GetNextLogFile $programFolder
-$args | Set-Content $logFile
+$Description | Set-Content $logFile
 Write-Host "Log file: $logFile"
 
 $sessionId = [guid]::NewGuid().ToString()
 
-$promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{ Args = $args; WorkDir = (Get-Location).Path; ClaudeSessionId = $sessionId; PlanFolder = $planFolder; Project = $Project }
+$promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
+    Args = $Description
+    ClaudeSessionId = $sessionId
+    PlansDirectory = $script:PlansDir
+    Project = $Project
+}
 
 $agent = GetAgentCommandFromConfig
 
@@ -32,8 +31,5 @@ if ($agent.Executable -eq "claude") {
 }
 & $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw)
 Pop-Location
-
-# Write log to plan's logs folder
-WritePlanLog $planFolder "MakePlan"
 
 Remove-Item $promptFile
