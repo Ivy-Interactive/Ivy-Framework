@@ -13,6 +13,7 @@ public class ReviewApp : ViewBase
         var planService = UseService<PlanReaderService>();
         var jobService = UseService<JobService>();
         var configService = UseService<ConfigService>();
+        var gitService = UseService<GitService>();
         var selectedPlanState = UseState<PlanFile?>(null);
         var textFilter = UseState<string?>("");
         var refreshToken = UseState(0);
@@ -48,7 +49,7 @@ public class ReviewApp : ViewBase
         var sidebar = new Review.SidebarView(plans, selectedPlanState, textFilter, configService);
 
         return new SidebarLayout(
-            mainContent: new Review.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
+            mainContent: new Review.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService, gitService),
             sidebarContent: sidebar.BuildContent(),
             sidebarHeader: sidebar.BuildHeader()
         );

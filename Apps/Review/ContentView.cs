@@ -13,7 +13,8 @@ public class ContentView(
     PlanReaderService planService,
     JobService jobService,
     Action refreshPlans,
-    ConfigService config) : ViewBase
+    ConfigService config,
+    GitService gitService) : ViewBase
 {
     private readonly PlanFile? _selectedPlan = selectedPlan;
     private readonly List<PlanFile> _allPlans = allPlans;
@@ -22,6 +23,7 @@ public class ContentView(
     private readonly JobService _jobService = jobService;
     private readonly Action _refreshPlans = refreshPlans;
     private readonly ConfigService _config = config;
+    private readonly GitService _gitService = gitService;
 
     public override object? Build()
     {
@@ -77,9 +79,14 @@ public class ContentView(
         {
             var commitsLayout = Layout.Vertical().Gap(1);
             commitsLayout |= Text.Block("Commits").Bold();
+            var repoPaths = _config.GetProject(_selectedPlan.Queue)?.RepoPaths ?? [];
             foreach (var commit in _selectedPlan.Commits)
             {
-                commitsLayout |= Text.Block($"  {commit}");
+                var title = repoPaths
+                    .Select(repo => _gitService.GetCommitTitle(repo, commit))
+                    .FirstOrDefault(t => t != null);
+                var display = title != null ? $"  {commit} — {title}" : $"  {commit}";
+                commitsLayout |= Text.Block(display);
             }
             content |= commitsLayout;
         }
