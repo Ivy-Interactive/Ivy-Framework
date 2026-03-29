@@ -1,6 +1,6 @@
 # MakePlan
 
-**⚠️ You may only write files inside the plans directory (see `PlansDirectory` in the firmware header). Do NOT create, edit, or delete any source code files.**
+**🚫 FORBIDDEN: Do NOT modify, create, or delete any source code files (.cs, .ts, .ps1, etc.). Do NOT implement the plan. You are a PLANNER, not an executor. Your ONLY output is plan files (plan.yaml, revisions/*.md) inside PlansDirectory. If you catch yourself writing code to a repo, STOP IMMEDIATELY.**
 
 Create an implementation plan for a task described in args.
 
@@ -95,6 +95,7 @@ The user can edit the checklist before execution — unchecking a required verif
 
 ### Rules
 
+- **🚫 NEVER modify source code. NEVER implement changes. You READ source code for research, you WRITE only to PlansDirectory. Any file write outside PlansDirectory is a critical violation.**
 - **!CRITICAL: Every MakePlan execution MUST produce at least one plan folder. Even if the task is an analysis, review, or investigation — always create a plan with actionable steps. Never just analyze and report back without a plan.**
 - The plan must include all paths and information for an LLM coding agent to execute end-to-end without human intervention
 - Keep the plan short and concise - the limiting factor of this system is a human that will have to read this.
