@@ -92,8 +92,13 @@ public class ContentView(
                 var title = repoPaths
                     .Select(repo => _gitService.GetCommitTitle(repo, commit))
                     .FirstOrDefault(t => t != null);
-                var display = title != null ? $"  {commit} — {title}" : $"  {commit}";
-                commitsLayout |= Text.Block(display);
+                var shortHash = commit.Length > 7 ? commit[..7] : commit;
+                var commitCapture = commit;
+                var row = Layout.Horizontal().Gap(2)
+                    | new Button(shortHash).Ghost().Small().OnClick(() =>
+                        navigator.Navigate<CommitApp>(new CommitAppArgs(commitCapture, _selectedPlan.Queue)))
+                    | Text.Block(title != null ? $"— {title}" : "");
+                commitsLayout |= row;
             }
             content |= commitsLayout;
         }
