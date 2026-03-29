@@ -138,13 +138,13 @@ const FooterCell: React.FC<{
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
+    const handler = (e: PointerEvent) => {
       const t = e.target as Node;
       if (triggerRef.current?.contains(t) || menuRef.current?.contains(t)) return;
       setOpen(false);
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("pointerdown", handler);
+    return () => document.removeEventListener("pointerdown", handler);
   }, [open]);
 
   // Single value — no dropdown
@@ -206,6 +206,28 @@ const FooterCell: React.FC<{
           "hover:bg-accent hover:text-accent-foreground",
           open && "bg-accent text-accent-foreground",
         )}
+        role="button"
+        tabIndex={0}
+        onPointerDown={() => {
+          // Ensure focus is on the trigger so `onBlur` can close the dropdown.
+          triggerRef.current?.focus();
+        }}
+        onBlur={(e) => {
+          const next = e.relatedTarget as Node | null;
+          if (!next) {
+            setOpen(false);
+            return;
+          }
+          if (triggerRef.current?.contains(next) || menuRef.current?.contains(next)) return;
+          setOpen(false);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen((v) => !v);
+          }
+        }}
         onClick={() => setOpen((v) => !v)}
       >
         <span className="min-w-0 truncate" style={footerStyles.value}>
