@@ -27,7 +27,7 @@ public class CreatePlanDialog(List<string> projectNames, Action<string, string> 
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _onClose()),
-                new Button("Create").Primary().OnClick(() =>
+                new Button("Create").Primary().ShortcutKey("Ctrl+Enter").OnClick(() =>
                 {
                     if (!string.IsNullOrWhiteSpace(createPlanText.Value))
                     {
