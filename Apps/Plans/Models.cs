@@ -19,7 +19,8 @@ public record PlanFile(
     PlanMetadata Metadata,
     string LatestRevisionContent,
     string FolderPath,
-    string PlanYamlRaw
+    string PlanYamlRaw,
+    int RevisionCount = 1
 )
 {
     public int Id => Metadata.Id;

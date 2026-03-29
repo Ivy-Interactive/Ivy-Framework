@@ -225,7 +225,13 @@ public class PlanReaderService(ConfigService config)
             var metadata = new PlanMetadata(id, planYaml.Project, planYaml.Level, planYaml.Title, status, planYaml.Commits, planYaml.Prs, planYaml.Verifications, planYaml.RelatedPlans, planYaml.Created, planYaml.Updated);
             var latestContent = ReadLatestRevision(folderName);
 
-            return new PlanFile(metadata, latestContent, folderPath, yamlContent);
+            var revisionsDir = Path.Combine(folderPath, "revisions");
+            var revisionCount = Directory.Exists(revisionsDir)
+                ? Directory.GetFiles(revisionsDir, "*.md").Length
+                : 1;
+            if (revisionCount == 0) revisionCount = 1;
+
+            return new PlanFile(metadata, latestContent, folderPath, yamlContent, revisionCount);
         }
         catch
         {
