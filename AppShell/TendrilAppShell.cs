@@ -512,40 +512,42 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 ),
                 settings.Width
             ).Open(sidebarOpen.Value).MainAppSidebar(true),
-            new ScreenshotFeedback()
-                .UploadUrl(feedbackUploadCtx.Value.UploadUrl)
-                .Open(feedbackOpen.Value)
-                .OnSave((data) =>
-                {
-                    feedbackOpen.Set(false);
-
-                    if (feedbackScreenshot.Value?.Content != null)
+            ScreenshotFeedbackExtensions.OnCancel(
+                ScreenshotFeedbackExtensions.OnSave(
+                    new ScreenshotFeedback()
+                        .UploadUrl(feedbackUploadCtx.Value.UploadUrl)
+                        .Open(feedbackOpen.Value),
+                    data =>
                     {
-                        var tempPath = Path.Combine(Path.GetTempPath(), $"tendril-feedback-{DateTime.UtcNow:yyyyMMdd-HHmmss}.png");
-                        File.WriteAllBytes(tempPath, feedbackScreenshot.Value.Content);
+                        feedbackOpen.Set(false);
 
-                        var texts = data.Shapes
-                            .Select(s => s switch
-                            {
-                                CalloutAnnotation c => $"[{c.Number}] {c.Text}",
-                                TextAnnotation t => t.Text,
-                                _ => null
-                            })
-                            .Where(t => !string.IsNullOrWhiteSpace(t))
-                            .ToList();
+                        if (feedbackScreenshot.Value?.Content != null)
+                        {
+                            var tempPath = Path.Combine(Path.GetTempPath(), $"tendril-feedback-{DateTime.UtcNow:yyyyMMdd-HHmmss}.png");
+                            File.WriteAllBytes(tempPath, feedbackScreenshot.Value.Content);
 
-                        var description = string.Join("\n", texts);
-                        if (string.IsNullOrWhiteSpace(description))
-                            description = "Visual feedback";
+                            var texts = data.Shapes
+                                .Select(s => s switch
+                                {
+                                    CalloutAnnotation c => $"[{c.Number}] {c.Text}",
+                                    TextAnnotation t => t.Text,
+                                    _ => null
+                                })
+                                .Where(t => !string.IsNullOrWhiteSpace(t))
+                                .ToList();
 
-                        description = $"Screenshot feedback:\n\n{description}\n\nScreenshot: {tempPath}";
+                            var description = string.Join("\n", texts);
+                            if (string.IsNullOrWhiteSpace(description))
+                                description = "Visual feedback";
 
-                        jobService.StartJob("MakePlan", "-Description", description, "-Project", "Tendril");
-                    }
+                            description = $"Screenshot feedback:\n\n{description}\n\nScreenshot: {tempPath}";
 
-                    feedbackScreenshot.Set(null);
-                })
-                .OnCancel(() => feedbackOpen.Set(false))
+                            jobService.StartJob("MakePlan", "-Description", description, "-Project", "Tendril");
+                        }
+
+                        feedbackScreenshot.Set(null);
+                    }),
+                () => feedbackOpen.Set(false))
         );
     }
 }
