@@ -32,6 +32,8 @@ public class ContentView(
         var appRepository = UseService<IAppRepository>();
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
+        var overlayImage = UseState<string?>(null);
+        var overlayOpen = UseState(false);
 
         void NavigateNewTab<T>(object? appArgs = null) where T : class
         {
@@ -169,6 +171,7 @@ public class ContentView(
                 }
 
                 artifactsLayout |= Text.Block($"  {category}/").Bold();
+                var imageFiles = new List<(string file, string fileName)>();
                 foreach (var file in files)
                 {
                     var fileName = Path.GetFileName(file);
@@ -177,11 +180,7 @@ public class ContentView(
 
                     if (isImage)
                     {
-                        artifactsLayout |= Layout.Horizontal().Gap(2)
-                            | new Image(file) { ObjectFit = ImageFit.Contain, Alt = fileName }
-                                .Height(Size.Units(20)).Width(Size.Units(30))
-                            | new Button(fileName).Ghost().OnClick(() =>
-                                NavigateNewTab<FileApp>(new FileAppArgs(file)));
+                        imageFiles.Add((file, fileName));
                     }
                     else
                     {
@@ -189,6 +188,22 @@ public class ContentView(
                             | new Button(fileName).Ghost().OnClick(() =>
                                 NavigateNewTab<FileApp>(new FileAppArgs(file)));
                     }
+                }
+                if (imageFiles.Count > 0)
+                {
+                    var thumbnailsLayout = Layout.Wrap().Gap(1);
+                    foreach (var (file, fileName) in imageFiles)
+                    {
+                        var imageUrl = file;
+                        thumbnailsLayout |= new Image(imageUrl) { ObjectFit = ImageFit.Cover, Alt = fileName }
+                            .OnClick(() =>
+                            {
+                                overlayImage.Set(imageUrl);
+                                overlayOpen.Set(true);
+                            })
+                            .Height(Size.Units(8)).Width(Size.Units(12));
+                    }
+                    artifactsLayout |= thumbnailsLayout;
                 }
             }
             content |= artifactsLayout;
@@ -236,6 +251,13 @@ public class ContentView(
                     client.Toast("Copied path to clipboard", "Path Copied");
                 })
             );
+
+        if (overlayImage.Value != null)
+        {
+            content |= new Image(overlayImage.Value) { ObjectFit = ImageFit.Contain }
+                .Height(Size.Percent(80)).Width(Size.Full())
+                .ToDialog(overlayOpen, width: Size.Percent(90));
+        }
 
         return new HeaderLayout(
             header: header,
