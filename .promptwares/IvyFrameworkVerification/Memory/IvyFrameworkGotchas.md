@@ -551,6 +551,19 @@ await page.evaluate((id) => {
 ✅ **Fix**: Added default value `mode = 'Upload'` in `FileDialogWidget.tsx` destructuring
 📝 **Why**: This is another instance of the WidgetSerializer stripping default enum values (same as DataTable `ColType.Number`). Any new widget with enum props that have value 0 as the "active" mode will hit this bug.
 
+## ColorInput TestId Not Rendered in DOM
+
+### `.TestId()` on ColorInput does NOT produce `data-testid` attribute
+❌ **`page.getByTestId('my-color')`** — element not found, `data-testid` is not rendered for ColorInput widgets
+✅ **Use `input[type='color']` locator** — `page.locator("input[type='color']")` finds the native color picker
+✅ **Use DOM traversal from headings** — find the heading, walk siblings to find the row, then locate the color input container via `.closest(".flex.items-center")`
+📝 **Why**: Similar to Badge, ColorInput's widget wrapper does not render `data-testid` in the DOM. Only the internal `<input type="color">` and `<input type="text">` elements are in the DOM without testid attributes.
+
+### `ivy-widget` custom elements have height 0
+❌ **`el.closest("ivy-widget")?.getBoundingClientRect().height`** — always returns 0
+✅ **Measure the content div inside ivy-widget** — `iw.querySelector(":scope > div")?.children[0]?.getBoundingClientRect()`
+📝 **Why**: `ivy-widget` is a custom element without explicit `display: block` styling, so it collapses to 0 height. The actual rendered content is in child divs.
+
 ## NumberInput TestId and Clear Button DOM Structure
 
 ### TestId is on the `<input>` element, NOT a wrapper
@@ -585,6 +598,44 @@ await page.evaluate(() => {
 ✅ **Use `!className` to detect inline code** — inline code has no `className` (no language), while code blocks have `className="language-xxx"`
 ✅ **Alternative**: Check if the `<code>` element is inside a `<pre>` element: `if (!el.closest('pre'))`
 📝 **Why**: react-markdown v9+ changed how inline code vs code blocks are distinguished. In v8, `inline: true` was passed. In v10, inline code is simply a `<code>` element without a `<pre>` wrapper and without a `className`. The project uses react-markdown v10.1.0.
+
+## Badge Renders as `<div>`, Not `<span>`
+
+### Playwright badge locator must target `<div>` elements
+❌ **`document.querySelectorAll("span")` for badges** — Badge component renders as `<div>`, not `<span>`
+✅ **Use `document.querySelectorAll("div")` or `document.querySelectorAll("td div")`** for badge detection in tables
+📝 **Why**: `Badge.tsx` renders `<div className={cn(badgeVariant(...), className)} ...>` — it's an `HTMLDivElement`, not a span.
+
+### CSS `inline-flex` blockified in flex context
+❌ **Asserting `computedStyle.display === "inline-flex"` for badges inside `Layout.Horizontal()`** — CSS spec blockifies `inline-flex` to `flex` when element is a flex item
+✅ **Assert `inline-flex` only for badges in block context** (e.g., table cells). In flex containers, check the `className` attribute contains "inline-flex" instead of checking computed style
+📝 **Why**: CSS Display Level 3 spec: "If a block-level or inline-level box has a flex inner display type, it computes to flex/inline-flex based on outer context."
+
+## TableBuilder `.Builder()` Uses `.Func<TIn>()`, Not `.Custom()`
+
+### No `.Custom()` method on `IBuilderFactory`
+❌ **`.Builder(x => x.Prop, f => f.Custom(val => widget))`** — `Custom()` does not exist
+✅ **`.Builder(x => x.Prop, f => f.Func((string val) => (object)widget))`** — use `Func<TIn>` with explicit type parameter
+📝 **Available methods**: `Default()`, `Text()`, `Link()`, `CopyToClipboard()`, `Func<TIn>()`, `Progress()`
+
+## Layout.Horizontal().Gap() Accepts `bool`, Not `Size`
+
+### Gap parameter type mismatch
+❌ **`Layout.Horizontal().Gap(Size.Units(1))`** — CS1503: cannot convert from `Ivy.Size` to `bool`
+✅ **`Layout.Horizontal()`** — omit Gap or use `Layout.Horizontal().Gap(true)` / `Layout.Horizontal().Gap(false)` for default gap toggle
+
+## DiffView OnLineClick Extension Method CS1660
+
+### Same pattern as ScreenshotFeedback OnSave/OnCancel
+❌ **`.OnLineClick(line => state.Set(line))`** — causes CS1660: "Cannot convert lambda expression to type 'Event<DiffView, int>'"
+✅ **Use `with` expression:**
+```csharp
+new DiffView().Diff(diff) with
+{
+    OnLineClick = e => { state.Set(e.Value); return ValueTask.CompletedTask; }
+}
+```
+📝 **Why**: Same root cause as ScreenshotFeedback — the `OnLineClick` property is `Func<Event<DiffView, int>, ValueTask>?`. C# resolves property getter + delegate invocation before extension methods.
 
 ## Future Gotchas to Document
 

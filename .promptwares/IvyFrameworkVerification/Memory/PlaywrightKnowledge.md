@@ -823,38 +823,29 @@ In headless mode with File System Access API disabled, the save dialog uses `<a 
 - 11 tests, 2 fix rounds (icon names + stale cache), all tests pass (verify current behavior including the bug), logs clean
 - **Project location**: `D:\Temp\IvyVerification\2026-03-29\IconsXMarkdown\`
 
-## Empty Screenshot Detection
+### 2026-03-30 — Badge inline-flex Fix in Tables (CSS variant.ts)
+- **Change**: Badge CVA base class changed from `flex` to `inline-flex` in `variant.ts`
+- **Badge renders as `<div>`**: Badge.tsx renders `<div>`, not `<span>` — Playwright selectors must target `<div>` elements
+- **CSS blockification**: `inline-flex` on flex items (e.g., badges inside `Layout.Horizontal()`) computes to `flex` — this is CSS spec behavior, not a bug. Only assert `inline-flex` computed style for badges in block contexts (table cells)
+- **TableBuilder `.Func<TIn>()` not `.Custom()`**: `IBuilderFactory` has `Func<TIn>`, `Text`, `Link`, `CopyToClipboard`, `Progress` — no `Custom` method
+- **`Layout.Horizontal().Gap()` takes `bool`**: Not `Size` — use `Gap(true)` or omit
+- 12 tests, 4 fix rounds (icon names, Builder API, Gap type, DOM selectors), all passed, logs clean
+- **Project location**: `D:\Tendril\Plans\01167-BadgesRenderWeirdlyInTable\artifacts\sample\`
 
-Many Ivy pages take a few seconds to render. Taking screenshots before the page has meaningful content produces empty white images (sometimes with just the Ivy loading indicator in the corner). Use this helper to skip empty screenshots:
+### 2026-03-30 — NumberInput/ColorInput Height Alignment (CSS color-input-variant.ts)
+- **Change**: Aligned `colorInputVariant` (h-8→h-7, h-10→h-11) and `colorInputPickerVariant` (w-8→w-7, w-10→w-9, w-12→w-11) with standard `inputVariant` heights
+- **ColorInput TestId not rendered**: `.TestId()` on ColorInput does NOT produce `data-testid` — use `input[type='color']` locator or DOM traversal from headings
+- **`ivy-widget` height is 0**: Custom element has no display:block — measure content via `iw.querySelector(":scope > div")?.children[0]?.getBoundingClientRect()`
+- **Layout `|` operator is left-associative**: `Layout.Vertical() | Layout.Horizontal() | a | b` adds a,b to vertical, not horizontal. Must use parens: `(Layout.Horizontal() | a | b)`
+- **Height measurement approach**: Find headings, walk siblings to find row with inputs, measure `div.flex.items-center` (color) vs `div.relative` (number) containers
+- 14 tests, 6 fix rounds (all test locator fixes), all passed, logs clean
+- **Project location**: `D:\Tendril\Plans\01181-NumberInputColorInputHeightMismatch\artifacts\sample\`
 
-```typescript
-async function takeScreenshotIfNotEmpty(
-  page: Page,
-  screenshotPath: string,
-  options?: { fullPage?: boolean }
-) {
-  const hasContent = await page.evaluate(() => {
-    const text = document.body.innerText.trim();
-    const visibleElements = document.querySelectorAll(
-      'div, span, button, input, table, img, svg, canvas, h1, h2, h3, p'
-    );
-    let meaningfulCount = 0;
-    visibleElements.forEach(el => {
-      const rect = el.getBoundingClientRect();
-      const style = window.getComputedStyle(el);
-      if (rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none') {
-        meaningfulCount++;
-      }
-    });
-    return text.length > 20 || meaningfulCount > 5;
-  });
-
-  if (hasContent) {
-    await page.screenshot({ path: screenshotPath, fullPage: options?.fullPage ?? true });
-  } else {
-    console.log(`Skipped empty screenshot: ${screenshotPath}`);
-  }
-}
-```
-
-Use `takeScreenshotIfNotEmpty()` instead of raw `page.screenshot()` to avoid cluttering artifacts with blank images.
+### 2026-03-30 — DiffView External Widget JSX Runtime Fix
+- **External widget testing requires TWO frontend rebuilds**: (1) host app frontend (`src/frontend/`) to expose React globals, AND (2) the external widget frontend (`src/widgets/Ivy.Widgets.DiffView/frontend/`) to pick up config changes
+- **Worktree-aware testing**: When the fix commit is on a feature branch already checked out in a worktree, use the worktree path for all ProjectReferences and builds. The main repo checkout can't switch to that branch.
+- **DiffView OnLineClick has CS1660**: Same as ScreenshotFeedback — use `with { OnLineClick = e => ... }` expression instead of `.OnLineClick(lambda)`
+- **External widget renders correctly**: DiffView shows unified and split diffs with proper color-coded added/removed lines, line numbers, revision headers
+- **No "Unknown component type" error**: With both frontends rebuilt, the external widget loads and renders correctly via the ExternalWidgetRegistry
+- 11 tests, 0 fix rounds (clean first pass excluding 2 compilation fixes: icon name + CS1660), all passed, logs clean
+- **Project location**: `D:\Tendril\Plans\01177-FixDiffViewJsxRuntimeErrorInExternalWidget\artifacts\sample\`
