@@ -34,6 +34,7 @@ public class ContentView(
         var copyToClipboard = UseClipboard();
         var openVerification = UseState<string?>(null);
         var openArtifact = UseState<string?>(null);
+        var openFile = UseState<string?>(null);
         var showPlan = UseState(false);
 
         void NavigateNewTab<T>(object? appArgs = null) where T : class
@@ -271,7 +272,7 @@ public class ContentView(
                             if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
                             {
                                 var filePath = url.Substring("file:///".Length);
-                                NavigateNewTab<FileApp>(new FileAppArgs(filePath));
+                                openFile.Set(filePath);
                             }
                         }),
                     title: "Original Plan"
@@ -288,9 +289,34 @@ public class ContentView(
                     if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
                     {
                         var filePath = url.Substring("file:///".Length);
-                        NavigateNewTab<FileApp>(new FileAppArgs(filePath));
+                        openFile.Set(filePath);
                     }
                 });
+        }
+
+        // File viewer sheet
+        if (openFile.Value is { } filePath2)
+        {
+            var ext = Path.GetExtension(filePath2);
+            var imageExts = new[] { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
+            object sheetContent;
+            if (imageExts.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            {
+                var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(filePath2)}";
+                sheetContent = new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(filePath2) };
+            }
+            else
+            {
+                var fileContent = File.Exists(filePath2) ? File.ReadAllText(filePath2) : "File not found.";
+                var language = FileApp.GetLanguage(Path.GetExtension(filePath2));
+                sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
+            }
+
+            content |= new Sheet(
+                onClose: () => openFile.Set(null),
+                content: sheetContent,
+                title: Path.GetFileName(filePath2)
+            );
         }
 
         // Action bar
