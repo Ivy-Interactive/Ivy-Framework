@@ -38,6 +38,17 @@ For each distinct issue, create a new plan folder following the structure in `..
 - Fill in Problem, Solution, Remaining Design Questions, Tests sections
 - Each plan must be fully self-contained
 
+#### 3.1 Project Assignment
+
+Each new plan may belong to a different project than the original. For each split plan:
+- Analyze which project(s) from `config.yaml` are relevant based on the files/repos involved
+- Set `project` in `plan.yaml` to the matching project name
+- Set `repos` from that project's repo list in `config.yaml`
+- Populate `verifications` from that project's verification list (all set to `Pending`)
+- Generate the `## Verification` checklist using that project's required/optional verifications
+
+If a sub-plan spans multiple projects, prefer the primary project (where most changes occur).
+
 ### 4. Original Plan
 
 Do NOT modify the original plan's `plan.yaml` — the launcher script handles state and timestamps.
