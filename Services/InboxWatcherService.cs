@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace Ivy.Tendril.Services;
 
 public class InboxWatcherService : IDisposable
@@ -5,6 +7,8 @@ public class InboxWatcherService : IDisposable
     private readonly JobService _jobService;
     private readonly FileSystemWatcher? _watcher;
     private readonly string _inboxPath;
+    private readonly Timer _pollTimer;
+    private readonly ConcurrentDictionary<string, byte> _processing = new();
 
     public InboxWatcherService(ConfigService config, JobService jobService)
     {
@@ -14,11 +18,7 @@ public class InboxWatcherService : IDisposable
         if (!Directory.Exists(_inboxPath))
             Directory.CreateDirectory(_inboxPath);
 
-        // Process any files already in the inbox
-        foreach (var file in Directory.GetFiles(_inboxPath, "*.md"))
-        {
-            _ = Task.Run(() => ProcessFileAsync(file));
-        }
+        ProcessExistingFiles();
 
         _watcher = new FileSystemWatcher(_inboxPath, "*.md")
         {
@@ -27,10 +27,26 @@ public class InboxWatcherService : IDisposable
         };
 
         _watcher.Created += (_, e) => _ = Task.Run(() => ProcessFileAsync(e.FullPath));
+
+        _pollTimer = new Timer(_ => ProcessExistingFiles(), null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+    }
+
+    internal void ProcessExistingFiles()
+    {
+        if (!Directory.Exists(_inboxPath))
+            return;
+
+        foreach (var file in Directory.GetFiles(_inboxPath, "*.md"))
+        {
+            _ = Task.Run(() => ProcessFileAsync(file));
+        }
     }
 
     private async Task ProcessFileAsync(string filePath)
     {
+        if (!_processing.TryAdd(filePath, 0))
+            return;
+
         try
         {
             // Wait briefly for the file to be fully written
@@ -64,8 +80,12 @@ public class InboxWatcherService : IDisposable
             }
             catch
             {
-                // Give up — file will be picked up on next startup
+                // Give up — file will be picked up on next poll
             }
+        }
+        finally
+        {
+            _processing.TryRemove(filePath, out _);
         }
     }
 
@@ -99,6 +119,7 @@ public class InboxWatcherService : IDisposable
 
     public void Dispose()
     {
+        _pollTimer.Dispose();
         _watcher?.Dispose();
     }
 }
