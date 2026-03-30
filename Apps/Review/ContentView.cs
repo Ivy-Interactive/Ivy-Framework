@@ -237,7 +237,7 @@ public class ContentView(
             {
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Draft);
                 _refreshPlans();
-            })
+            }).ShortcutKey("d")
             | new Button("Discard").Icon(Icons.Trash).Outline().OnClick(() =>
             {
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Skipped);
