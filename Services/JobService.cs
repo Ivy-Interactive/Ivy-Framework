@@ -157,6 +157,8 @@ public class JobService
 
         if (job.Status == "Failed")
             ResetPlanState(job);
+        else if (success && job.Type == "ExecutePlan")
+            EnsurePlanStateTransitioned(job);
 
         WriteJobLog(job);
         JobsChanged?.Invoke();
@@ -199,6 +201,31 @@ public class JobService
                 return args[i + 1];
         }
         return null;
+    }
+
+    private void EnsurePlanStateTransitioned(JobItem job)
+    {
+        try
+        {
+            var planFolder = job.Args.Length > 0 ? job.Args[0] : "";
+            var planYamlPath = Path.Combine(planFolder, "plan.yaml");
+            if (!File.Exists(planYamlPath)) return;
+
+            var content = File.ReadAllText(planYamlPath);
+            var stateMatch = System.Text.RegularExpressions.Regex.Match(content, @"(?m)^state:\s*(.+)$");
+            if (!stateMatch.Success) return;
+
+            var currentState = stateMatch.Groups[1].Value.Trim();
+            if (currentState is "Executing" or "Building")
+            {
+                content = System.Text.RegularExpressions.Regex.Replace(
+                    content, @"(?m)^state:\s*.*$", "state: ReadyForReview");
+                content = System.Text.RegularExpressions.Regex.Replace(
+                    content, @"(?m)^updated:\s*.*$", $"updated: {DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}");
+                File.WriteAllText(planYamlPath, content);
+            }
+        }
+        catch { /* Don't let state transition failures crash job completion */ }
     }
 
     private void ResetPlanState(JobItem job)
