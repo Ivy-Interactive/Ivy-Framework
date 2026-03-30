@@ -13,7 +13,7 @@ public enum PlanStatus
     Icebox
 }
 
-public record PlanMetadata(int Id, string Project, string Level, string Title, PlanStatus State, List<string> Commits, List<string> Prs, List<PlanVerificationEntry> Verifications, List<string> RelatedPlans, DateTime Created, DateTime Updated);
+public record PlanMetadata(int Id, string Project, string Level, string Title, PlanStatus State, List<string> Repos, List<string> Commits, List<string> Prs, List<PlanVerificationEntry> Verifications, List<string> RelatedPlans, DateTime Created, DateTime Updated);
 
 public record PlanFile(
     PlanMetadata Metadata,
@@ -28,6 +28,7 @@ public record PlanFile(
     public string Project => Metadata.Project;
     public string Level => Metadata.Level;
     public PlanStatus Status => Metadata.State;
+    public List<string> Repos => Metadata.Repos;
     public List<string> Commits => Metadata.Commits;
     public List<string> Prs => Metadata.Prs;
     public List<PlanVerificationEntry> Verifications => Metadata.Verifications;

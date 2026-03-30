@@ -99,7 +99,9 @@ public class ContentView(
         if (_selectedPlan.Commits.Count > 0)
         {
             content |= Text.Block("Commits").Bold();
-            var repoPaths = _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
+            var repoPaths = _selectedPlan.Repos.Count > 0
+                ? _selectedPlan.Repos
+                : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
             var commitRows = _selectedPlan.Commits.Select(commit =>
             {
                 var title = repoPaths
@@ -120,7 +122,7 @@ public class ContentView(
             {
                 commitsTable |= new TableRow(
                     new TableCell(new Button(row.ShortHash).Ghost().OnClick(() =>
-                        NavigateNewTab<CommitApp>(new CommitAppArgs(row.Hash, _selectedPlan.Project)))),
+                        NavigateNewTab<CommitApp>(new CommitAppArgs(row.Hash, _selectedPlan.Project, repoPaths.ToList())))),
                     new TableCell(row.Title)
                 );
             }
