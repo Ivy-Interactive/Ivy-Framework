@@ -25,20 +25,20 @@ public class DeletePlanDialog(
                 Text.P($"What would you like to do with plan #{_selectedPlan.Id}?")
             ),
             new DialogFooter(
-                new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
-                new Button("Move to Skipped").Outline().OnClick(() =>
+                new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() => _dialogOpen.Set(false)),
+                new Button("Move to Skipped").Outline().ShortcutKey("s").OnClick(() =>
                 {
                     _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Skipped);
                     _refreshPlans();
                     _dialogOpen.Set(false);
                 }),
-                new Button("Move to Icebox").Outline().OnClick(() =>
+                new Button("Move to Icebox").Outline().ShortcutKey("1").OnClick(() =>
                 {
                     _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Icebox);
                     _refreshPlans();
                     _dialogOpen.Set(false);
                 }),
-                new Button("Delete").Destructive().OnClick(() =>
+                new Button("Delete").Destructive().ShortcutKey("Enter").OnClick(() =>
                 {
                     _planService.DeletePlan(_selectedPlan.FolderName);
                     _refreshPlans();
