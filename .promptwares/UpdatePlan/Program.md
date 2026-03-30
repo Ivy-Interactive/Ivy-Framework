@@ -37,7 +37,14 @@ For each question in the `>>` lines:
 
 - Create a new revision file (next sequential number, e.g. `002.md`)
 - Incorporate the intent of each `>>` instruction into the updated plan
-- Answer questions inline in a `## Questions` section with answers
+- Answer questions in the `## Questions` section using `<details>` tags from the plan template:
+  ```html
+  <details>
+  <summary>Question</summary>
+  Answer
+  </details>
+  ```
+  Each `>>` question becomes a new `<details>` block. Preserve any existing `<details>` blocks from prior revisions.
 - Remove all `>>` lines — they've been processed
 - Preserve the plan template structure 
 - The updated plan must be at least as comprehensive as the original
