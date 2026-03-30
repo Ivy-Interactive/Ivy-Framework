@@ -99,6 +99,8 @@ public class JobService
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true,
+            StandardOutputEncoding = System.Text.Encoding.UTF8,
+            StandardErrorEncoding = System.Text.Encoding.UTF8,
         };
         psi.Environment["TENDRIL_JOB_ID"] = id;
         psi.Environment["TENDRIL_URL"] = "http://localhost:5010";

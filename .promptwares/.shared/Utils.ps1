@@ -86,7 +86,7 @@ function PrepareFirmware {
     $firmware = $firmware.Replace("[SHAREDFOLDER]", $sharedFolder)
 
     $promptFile = [System.IO.Path]::GetTempFileName()
-    Set-Content -Path $promptFile -Value $firmware -NoNewline
+    Set-Content -Path $promptFile -Value $firmware -NoNewline -Encoding UTF8
     return $promptFile
 }
 
@@ -116,7 +116,7 @@ function AllocatePlanId {
 
         $counter = if (Test-Path $counterFile) { [int](Get-Content $counterFile).Trim() } else { 1087 }
         $id = $counter
-        Set-Content -Path $counterFile -Value ($counter + 1).ToString()
+        Set-Content -Path $counterFile -Value ($counter + 1).ToString() -Encoding UTF8
         return $id
     }
     finally {
@@ -140,7 +140,7 @@ function UpdatePlanState {
     $now = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     $content = $content -replace '(?m)^state:\s*.*$', "state: $NewState"
     $content = $content -replace '(?m)^updated:\s*.*$', "updated: $now"
-    Set-Content -Path $planYamlPath -Value $content
+    Set-Content -Path $planYamlPath -Value $content -Encoding UTF8
     Write-Host "Plan state updated to: $NewState" -ForegroundColor Cyan
 }
 
@@ -173,7 +173,7 @@ function WritePlanLog {
         $logContent += "`n`n$Summary"
     }
 
-    Set-Content -Path $logPath -Value $logContent
+    Set-Content -Path $logPath -Value $logContent -Encoding UTF8
     Write-Host "Log written: $logPath" -ForegroundColor Green
 }
 
