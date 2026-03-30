@@ -34,6 +34,6 @@ public class DeletePlanDialog(
                     _dialogOpen.Set(false);
                 })
             )
-        ).Width(Size.Rem(30));
+        ).Width(Size.Rem(40));
     }
 }
