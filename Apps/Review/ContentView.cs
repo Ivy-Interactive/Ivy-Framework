@@ -1,4 +1,5 @@
 using Ivy;
+using Ivy.AppShell;
 using Ivy.Core;
 using Ivy.Hooks;
 using Ivy.Tendril.Apps.Plans;
@@ -27,9 +28,17 @@ public class ContentView(
 
     public override object? Build()
     {
-        var navigator = UseNavigation();
+        var navigateSignal = UseSignal<NavigateSignal, NavigateArgs, Unit>();
+        var appRepository = UseService<IAppRepository>();
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
+
+        void NavigateNewTab<T>(object? appArgs = null) where T : class
+        {
+            var appId = appRepository.GetApp(typeof(T))?.Id;
+            if (appId != null)
+                navigateSignal.Send(new NavigateArgs(appId, appArgs, TabId: Guid.NewGuid().ToString()));
+        }
 
         if (_selectedPlan is null)
         {
@@ -110,7 +119,7 @@ public class ContentView(
             {
                 commitsTable |= new TableRow(
                     new TableCell(new Button(row.ShortHash).Ghost().OnClick(() =>
-                        navigator.Navigate<CommitApp>(new CommitAppArgs(row.Hash, _selectedPlan.Project)))),
+                        NavigateNewTab<CommitApp>(new CommitAppArgs(row.Hash, _selectedPlan.Project)))),
                     new TableCell(row.Title)
                 );
             }
@@ -173,13 +182,13 @@ public class ContentView(
                             | new Image(file) { ObjectFit = ImageFit.Contain, Alt = fileName }
                                 .Height(Size.Units(20)).Width(Size.Units(30))
                             | new Button(fileName).Ghost().OnClick(() =>
-                                navigator.Navigate<FileApp>(new FileAppArgs(file)));
+                                NavigateNewTab<FileApp>(new FileAppArgs(file)));
                     }
                     else
                     {
                         artifactsLayout |= Layout.Horizontal().Gap(2)
                             | new Button(fileName).Ghost().OnClick(() =>
-                                navigator.Navigate<FileApp>(new FileAppArgs(file)));
+                                NavigateNewTab<FileApp>(new FileAppArgs(file)));
                     }
                 }
             }
@@ -195,7 +204,7 @@ public class ContentView(
                 if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
                 {
                     var filePath = url.Substring("file:///".Length);
-                    navigator.Navigate<FileApp>(new FileAppArgs(filePath));
+                    NavigateNewTab<FileApp>(new FileAppArgs(filePath));
                 }
             });
 
