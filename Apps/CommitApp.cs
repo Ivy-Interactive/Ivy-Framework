@@ -1,5 +1,6 @@
 using Ivy;
 using Ivy.Tendril.Services;
+using Ivy.Widgets.DiffView;
 
 namespace Ivy.Tendril.Apps;
 
@@ -75,9 +76,9 @@ public class CommitApp : ViewBase
         if (!string.IsNullOrWhiteSpace(diff))
         {
             content |= Text.Block("Diff").Bold();
-            content |= new CodeBlock(diff, Languages.Text)
-                .ShowLineNumbers(false)
-                .WrapLines();
+            content |= new DiffView()
+                .Diff(diff)
+                .Split();
         }
 
         return content;
