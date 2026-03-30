@@ -256,7 +256,6 @@ public class ContentView(
         if (File.Exists(summaryPath))
         {
             var summaryContent = File.ReadAllText(summaryPath);
-            content |= Text.Block("Summary").Bold();
             content |= new Markdown(summaryContent).DangerouslyAllowLocalFiles();
             content |= new Button("View Original Plan").Ghost().Icon(Icons.FileText).OnClick(() => showPlan.Set(true));
 
