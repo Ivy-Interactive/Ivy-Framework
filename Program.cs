@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Ivy.Tendril.AppShell;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
-using Ivy.Tendril.Views;
+
 
 var server = new Server();
 server.DangerouslyAllowLocalFiles();
@@ -48,6 +48,5 @@ server.UseWebApplication(app =>
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
 server.UseAppShell(() => new TendrilAppShell(new AppShellSettings()
-    .UseTabs(preventDuplicates: true)
-    .Footer(new NewPlanFooterButton())));
+    .UseTabs(preventDuplicates: true)));
 await server.RunAsync();

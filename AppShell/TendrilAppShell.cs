@@ -10,6 +10,7 @@ using Ivy.Widgets.Internal;
 using Ivy.Widgets.ScreenshotFeedback;
 using System.Collections.Immutable;
 using System.Reactive.Disposables;
+using Ivy.Tendril.Views;
 using AppContext = Ivy.AppContext;
 
 namespace Ivy.Tendril.AppShell;
@@ -519,6 +520,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 Layout.Vertical().Gap(2)
                     | settings.Header
                     | searchInput
+                    | new NewPlanFooterButton()
                 ,
                 Layout.Vertical(
                     settings.Footer,
