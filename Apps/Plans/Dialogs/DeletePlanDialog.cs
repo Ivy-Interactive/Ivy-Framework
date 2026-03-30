@@ -32,7 +32,7 @@ public class DeletePlanDialog(
                     _refreshPlans();
                     _dialogOpen.Set(false);
                 }),
-                new Button("Move to Icebox").Outline().ShortcutKey("1").OnClick(() =>
+                new Button("Move to Icebox").Outline().ShortcutKey("b").OnClick(() =>
                 {
                     _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Icebox);
                     _refreshPlans();
