@@ -35,6 +35,7 @@ $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
 $agent = GetAgentCommandFromConfig
 
 Write-Host "Starting Agent in $workDir..."
+SendStatusMessage "Executing plan..."
 Push-Location $workDir
 
 try {
@@ -55,6 +56,7 @@ try {
     }
 
     if ($exitCode -eq 0) {
+        SendStatusMessage "Checking verifications..."
         WritePlanLog $PlanPath "ExecutePlan" $summary
 
         # Check verification statuses before transitioning
@@ -73,6 +75,7 @@ try {
             Write-Host "Plan execution completed - ready for review" -ForegroundColor Green
         }
     } else {
+        SendStatusMessage "Execution failed (exit code: $exitCode)"
         WritePlanLog $PlanPath "ExecutePlan-Failed" $summary
         UpdatePlanState $PlanPath "Failed"
         Write-Host "Plan execution failed with exit code: $exitCode" -ForegroundColor Red
