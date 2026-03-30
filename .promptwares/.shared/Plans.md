@@ -150,13 +150,13 @@ Each plan revision has a `## Verification` section with a checklist of verificat
 ```markdown
 ## Verification
 
-[x] DotnetBuild
-[x] DotnetTest
-[ ] FrontendLint
+- [x] DotnetBuild
+- [x] DotnetTest
+- [ ] FrontendLint
 ```
 
-- `[x]` = will be run by ExecutePlan after committing
-- `[ ]` = skipped
+- `- [x]` = will be run by ExecutePlan after committing
+- `- [ ]` = skipped
 
 Required verifications are pre-checked by MakePlan based on the project's config. The user can edit the checklist before execution.
 
