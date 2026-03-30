@@ -15,6 +15,7 @@ public record JobItem
     public string ScriptPath { get; init; } = "";
     public string[] Args { get; init; } = [];
     public bool CancellationRequested { get; set; }
+    public decimal? Cost { get; set; }
 
     // Process handle for non-interactive execution
     public System.Diagnostics.Process? Process { get; set; }
@@ -32,5 +33,6 @@ public record JobItemRow
     public string Project { get; init; } = "";
     public string Timer { get; init; } = "";
     public string LastOutput { get; init; } = "";
+    public string Cost { get; init; } = "";
     public string StatusMessage { get; init; } = "";
 }
