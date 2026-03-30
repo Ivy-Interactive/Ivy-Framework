@@ -55,7 +55,7 @@ public class GithubServiceTests
         {
             var settings = new TendrilSettings
             {
-                Projects = [new ProjectConfig { Name = "TestProject", Repos = [tempDir] }]
+                Projects = [new ProjectConfig { Name = "TestProject", Repos = [new RepoRef { Path = tempDir }] }]
             };
             var configService = new ConfigService(settings);
             var githubService = new GithubService(configService);
@@ -82,8 +82,8 @@ public class GithubServiceTests
             {
                 Projects =
                 [
-                    new ProjectConfig { Name = "Project1", Repos = [tempDir] },
-                    new ProjectConfig { Name = "Project2", Repos = [tempDir] }
+                    new ProjectConfig { Name = "Project1", Repos = [new RepoRef { Path = tempDir }] },
+                    new ProjectConfig { Name = "Project2", Repos = [new RepoRef { Path = tempDir }] }
                 ]
             };
             var configService = new ConfigService(settings);
