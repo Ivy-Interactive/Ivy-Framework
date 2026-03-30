@@ -208,8 +208,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         {
             var update = partial.GetSerializedWidgetTree();
 
-
-
             var previousId = previous?["id"]?.GetValue<string>();
             var updateId = update?["id"]?.GetValue<string>();
 

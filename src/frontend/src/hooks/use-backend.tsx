@@ -708,10 +708,7 @@ export const useBackend = (
     };
 
     const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl(signalRUrl, {
-        skipNegotiation: true,
-        transport: signalR.HttpTransportType.WebSockets,
-      })
+      .withUrl(signalRUrl)
       .withHubProtocol(new MessagePackHubProtocol())
       .withAutomaticReconnect(retryPolicy)
       .build();
@@ -918,6 +915,16 @@ export const useBackend = (
         })
         .catch((e) => {
           logger.error("SignalR connection failed:", e);
+          if (!isStoppingRef.current) {
+            toast({
+              title: "Connection Failed",
+              description:
+                "Could not establish connection to the backend. Please check your network or try refreshing.",
+              variant: "destructive",
+            });
+            setConnectionState("disconnected");
+            setDisconnected(true);
+          }
         });
 
       return () => {
