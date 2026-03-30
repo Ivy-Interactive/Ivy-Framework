@@ -26,7 +26,7 @@ $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
 $agent = GetAgentCommandFromConfig
 
 Write-Host "Starting Agent..."
-SendStatusMessage "Creating plan..."
+SendStatusMessage "Creating Plan"
 Push-Location $programFolder
 $extraArgs = @()
 if ($agent.Executable -eq "claude") {
