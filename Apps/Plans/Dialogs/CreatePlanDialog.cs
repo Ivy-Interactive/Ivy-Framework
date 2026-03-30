@@ -19,11 +19,11 @@ public class CreatePlanDialog(List<string> projectNames, Action<string, string> 
 
         return new Dialog(
             _ => _onClose(),
-            new DialogHeader("Create New Idea"),
+            new DialogHeader("Create New Draft"),
             new DialogBody(
                 Layout.Vertical()
                     | selectedProject.ToSelectInput(options).WithLabel("Select project")
-                    | createPlanText.ToTextareaInput("Enter task description...").Rows(6).WithLabel("Describe the task for the new idea")
+                    | createPlanText.ToTextareaInput("Enter task description...").Rows(6).WithLabel("Describe the task for the new draft")
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _onClose()),

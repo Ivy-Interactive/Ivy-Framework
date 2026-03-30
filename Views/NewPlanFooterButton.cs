@@ -17,7 +17,7 @@ public class NewPlanFooterButton : ViewBase
 
         var elements = new List<object>
         {
-            new Button("New Idea")
+            new Button("New Draft")
                 .Icon(Icons.Plus)
                 .Width(Size.Full())
                 .Variant(ButtonVariant.Primary)
