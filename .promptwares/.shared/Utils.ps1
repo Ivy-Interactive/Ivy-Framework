@@ -269,6 +269,7 @@ function InvokePromptwareAgent {
     $agent = GetAgentCommandFromConfig
 
     Write-Host "Starting Agent..."
+    if ($Action) { SendStatusMessage "Running $Action..." }
     Push-Location $WorkDir
     $output = & $agent.Executable @($agent.Args) @ExtraAgentArgs -- (Get-Content $promptFile -Raw)
     $output | Write-Output
@@ -285,6 +286,8 @@ function InvokePromptwareAgent {
             } catch { }
         }
     }
+
+    if ($Action) { SendStatusMessage "$Action completed" }
 
     if ($PlanPath -and $Action) {
         WritePlanLog $PlanPath $Action $summary
