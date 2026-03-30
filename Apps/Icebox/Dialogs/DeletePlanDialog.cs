@@ -26,8 +26,8 @@ public class DeletePlanDialog(
                 Text.P($"Are you sure you want to permanently delete plan #{_selectedPlan.Id}?")
             ),
             new DialogFooter(
-                new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
-                new Button("Delete").Destructive().OnClick(() =>
+                new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() => _dialogOpen.Set(false)),
+                new Button("Delete").Destructive().ShortcutKey("Enter").OnClick(() =>
                 {
                     _planService.DeletePlan(_selectedPlan.FolderName);
                     _refreshPlans();
