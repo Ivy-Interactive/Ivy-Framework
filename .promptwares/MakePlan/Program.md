@@ -75,18 +75,18 @@ If the plan references other plans (from `[number]` syntax in args), add them to
 In the `## Verification` section of the plan revision, generate a checklist from the project's `verifications` in `config.yaml`.
 
 For each verification assigned to the project:
-- **Required** (`required: true`) → `- [x] VerificationName`
-- **Optional** (`required: false`) → `- [ ] VerificationName`
+- **Required** (`required: true`) → `[x] VerificationName`
+- **Optional** (`required: false`) → `[ ] VerificationName`
 
 Example for a Framework project plan:
 ```markdown
 ## Verification
 
-- [x] DotnetBuild
-- [x] DotnetFormat
-- [x] DotnetTest
-- [x] FrontendLint
-- [x] IvyFrameworkVerification
+[x] DotnetBuild
+[x] DotnetFormat
+[x] DotnetTest
+[x] FrontendLint
+[x] IvyFrameworkVerification
 ```
 
 If the project has no verifications (e.g. `General`), leave the section empty or omit it.
