@@ -13,7 +13,8 @@ public class GitService
                 WorkingDirectory = repoPath,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8,
             };
             using var process = Process.Start(psi);
             var title = process?.StandardOutput.ReadLine();
@@ -32,7 +33,8 @@ public class GitService
                 WorkingDirectory = repoPath,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8,
             };
             using var process = Process.Start(psi);
             var output = process?.StandardOutput.ReadToEnd();
@@ -51,7 +53,8 @@ public class GitService
                 WorkingDirectory = repoPath,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8,
             };
             using var process = Process.Start(psi);
             var output = process?.StandardOutput.ReadToEnd();
