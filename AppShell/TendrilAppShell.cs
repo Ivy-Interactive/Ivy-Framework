@@ -7,6 +7,7 @@ using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 using Ivy.Widgets.Internal;
+using Ivy.Widgets.ScreenshotFeedback;
 using System.Collections.Immutable;
 using AppContext = Ivy.AppContext;
 
@@ -53,6 +54,9 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         var serverArgs = UseService<ServerArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
         var navigator = UseNavigation();
+        var feedbackOpen = UseState(false);
+        var feedbackScreenshot = UseState<FileUpload<byte[]>?>();
+        var feedbackUploadCtx = UseUpload(MemoryStreamUploadHandler.Create(feedbackScreenshot));
 
         var planCounts = Context.UseQuery("plan-counts", async (ct) =>
         {
@@ -417,6 +421,10 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         var commonMenuItems = new[]
         {
+            MenuItem.Default("Tendril Feedback")
+                .Tag("$feedback")
+                .Icon(Icons.MessageSquare)
+                .OnSelect(() => feedbackOpen.Set(true)),
             MenuItem.Default("Theme")
                 .Tag("$theme")
                 .Icon(Icons.SunMoon)
@@ -490,18 +498,54 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 );
         }
 
-        return new SidebarLayout(
-            body ?? null!,
-            sidebarMenu,
-            Layout.Vertical().Gap(2)
-                | settings.Header
-                | searchInput
-            ,
-            Layout.Vertical(
-                settings.Footer,
-                footer
-            ),
-            settings.Width
-        ).Open(sidebarOpen.Value).MainAppSidebar(true);
+        return new Fragment(
+            new SidebarLayout(
+                body ?? null!,
+                sidebarMenu,
+                Layout.Vertical().Gap(2)
+                    | settings.Header
+                    | searchInput
+                ,
+                Layout.Vertical(
+                    settings.Footer,
+                    footer
+                ),
+                settings.Width
+            ).Open(sidebarOpen.Value).MainAppSidebar(true),
+            new ScreenshotFeedback()
+                .UploadUrl(feedbackUploadCtx.Value.UploadUrl)
+                .Open(feedbackOpen.Value)
+                .OnSave((data) =>
+                {
+                    feedbackOpen.Set(false);
+
+                    if (feedbackScreenshot.Value?.Content != null)
+                    {
+                        var tempPath = Path.Combine(Path.GetTempPath(), $"tendril-feedback-{DateTime.UtcNow:yyyyMMdd-HHmmss}.png");
+                        File.WriteAllBytes(tempPath, feedbackScreenshot.Value.Content);
+
+                        var texts = data.Shapes
+                            .Select(s => s switch
+                            {
+                                CalloutAnnotation c => $"[{c.Number}] {c.Text}",
+                                TextAnnotation t => t.Text,
+                                _ => null
+                            })
+                            .Where(t => !string.IsNullOrWhiteSpace(t))
+                            .ToList();
+
+                        var description = string.Join("\n", texts);
+                        if (string.IsNullOrWhiteSpace(description))
+                            description = "Visual feedback";
+
+                        description = $"Screenshot feedback:\n\n{description}\n\nScreenshot: {tempPath}";
+
+                        jobService.StartJob("MakePlan", "-Description", description, "-Project", "Tendril");
+                    }
+
+                    feedbackScreenshot.Set(null);
+                })
+                .OnCancel(() => feedbackOpen.Set(false))
+        );
     }
 }
