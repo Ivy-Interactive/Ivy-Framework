@@ -24,6 +24,7 @@
     <ProjectReference Include="D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Hooks.Pty\Ivy.Hooks.Pty.csproj" />
     <ProjectReference Include="D:\Repos\_Ivy\Ivy-Framework\src\widgets\Ivy.Widgets.Xterm\Ivy.Widgets.Xterm.csproj" />
     <ProjectReference Include="D:\Repos\_Ivy\Ivy-Framework\src\widgets\Ivy.Widgets.ScreenshotFeedback\Ivy.Widgets.ScreenshotFeedback.csproj" />
+    <ProjectReference Include="D:\Repos\_Ivy\Ivy-Framework\src\widgets\Ivy.Widgets.DiffView\Ivy.Widgets.DiffView.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Analyser\Ivy.Analyser.csproj">
