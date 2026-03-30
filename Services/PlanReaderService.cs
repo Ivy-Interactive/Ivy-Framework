@@ -73,9 +73,9 @@ public class PlanReaderService(ConfigService config)
 
                 var yaml = File.ReadAllText(planYamlPath);
 
-                // Fix structured repos (path: + prRule:) → plain path strings
+                // Fix structured repos (path: + optional prRule:) → plain path strings
                 var repaired = Regex.Replace(yaml,
-                    @"(?m)^(\s*)-\s+path:\s*(.+)\r?\n\s+prRule:\s*.+$",
+                    @"(?m)^(\s*)-\s+path:\s*(.+?)(?:\r?\n\s+prRule:\s*.+)?$",
                     "$1- $2");
 
                 if (repaired != yaml)
