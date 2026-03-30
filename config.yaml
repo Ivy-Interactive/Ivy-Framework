@@ -29,6 +29,8 @@ projects:
         required: true
       - name: NewWidgetChecklist
         required: false
+      - name: CheckResult
+        required: false
     context: |
       Ivy Framework is the core UI framework. Key folders:
       - src/Ivy/Widgets/ — backend widget classes
@@ -50,6 +52,8 @@ projects:
         required: true
       - name: DotnetTest
         required: true
+      - name: CheckResult
+        required: false
     context: |
       Ivy Agent is the AI agent server and client. Key folders:
       - Ivy.Agent.Server/ — agent server
@@ -68,6 +72,8 @@ projects:
         required: true
       - name: DotnetTest
         required: true
+      - name: CheckResult
+        required: false
     context: |
       MCP service for IvyQuestions and IvyDocs.
 
@@ -82,6 +88,8 @@ projects:
         required: true
       - name: DotnetTest
         required: true
+      - name: CheckResult
+        required: false
     context: |
       Console/TUI client. Key folders:
       - Ivy.Console/ — desktop client
@@ -107,6 +115,8 @@ projects:
         required: true
       - name: DotnetTest
         required: false
+      - name: CheckResult
+        required: false
     context: |
       Plan management TUI. Key folders:
       - Services/ — ConfigService, PlanReaderService, JobService
@@ -127,6 +137,50 @@ verifications:
     prompt: "Run `cd src/frontend && npm run lint && npm run format:check` and verify no errors."
   - name: IvyFrameworkVerification
     prompt: "Run the IvyFrameworkVerification promptware to visually verify UI changes. Execute: `pwsh -NoProfile -File D:\\Repos\\_Ivy\\Ivy-Tendril\\.promptwares\\IvyFrameworkVerification.ps1 -PlanPath <PlanFolder>`. Creates a temp project with demo apps, runs Playwright tests, and copies artifacts to <PlanFolder>/artifacts/. Write the verification report to <PlanFolder>/verification/IvyFrameworkVerification.md."
+  - name: CheckResult
+    prompt: |
+      Verify the implementation matches what was requested in the plan.
+
+      1. Read the plan revision from `<PlanFolder>/revisions/` (latest numbered .md file)
+      2. Read all commits made by this execution from `plan.yaml` `commits` list
+      3. For each commit, review the diff (`git show <hash>`) in the worktree
+      4. Compare the plan's **Problem** and **Solution** sections against the actual changes:
+         - Are all described changes present?
+         - Are there unexpected/unrelated changes?
+         - Do the changes solve the stated problem?
+      5. If the plan has a **Tests** section, verify those tests were actually written
+      6. Write the verification report to `<PlanFolder>/verification/CheckResult.md`
+
+      Report format:
+      ```
+      # CheckResult
+
+      - **Date:** <CurrentTime>
+      - **Result:** Pass / Fail
+      - **Attempts:** 1
+
+      ## Requested vs Delivered
+
+      | Requirement | Status | Notes |
+      |-------------|--------|-------|
+      | <from plan> | Done / Missing / Partial | <details> |
+
+      ## Unexpected Changes
+
+      <list any changes not described in the plan, or "None">
+
+      ## Output
+
+      <summary assessment>
+
+      ## Fixes Applied
+
+      None
+
+      ## Issues Found
+
+      <any gaps between plan and implementation, or "None">
+      ```
   - name: NewWidgetChecklist
     prompt: |
       Verify all 6 required elements exist for any new widget created by this plan:
