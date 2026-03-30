@@ -65,19 +65,24 @@ public class ContentView(
         if (_selectedPlan.Verifications.Count > 0)
         {
             content |= Text.Block("Verifications").Bold();
-            content |= _selectedPlan.Verifications.AsQueryable()
-                .ToDataTable(v => v.Name)
-                .Header(v => v.Status, "Status")
-                .Header(v => v.Name, "Name")
-                .Renderer(v => v.Status, new LabelsDisplayRenderer())
-                .Config(c =>
-                {
-                    c.AllowSorting = false;
-                    c.AllowFiltering = false;
-                    c.ShowSearch = false;
-                    c.SelectionMode = SelectionModes.None;
-                    c.ShowIndexColumn = false;
-                });
+            var verificationsTable = new Table(
+                new TableRow(
+                    new TableCell("Name").IsHeader(),
+                    new TableCell("Status").IsHeader()
+                )
+                { IsHeader = true }
+            );
+            foreach (var v in _selectedPlan.Verifications)
+            {
+                verificationsTable |= new TableRow(
+                    new TableCell(v.Name),
+                    new TableCell(new Badge(v.Status).Variant(
+                        v.Status == "Pass" ? BadgeVariant.Success
+                        : v.Status == "Fail" ? BadgeVariant.Destructive
+                        : BadgeVariant.Outline))
+                );
+            }
+            content |= verificationsTable;
         }
 
         // Commits section
@@ -94,31 +99,22 @@ public class ContentView(
                 return new CommitRow(commit, shortHash, title);
             }).ToList();
 
-            content |= commitRows.AsQueryable()
-                .ToDataTable(c => c.Hash)
-                .Header(c => c.ShortHash, "Commit")
-                .Header(c => c.Title, "Message")
-                .Hidden(c => c.Hash)
-                .Config(c =>
-                {
-                    c.AllowSorting = false;
-                    c.AllowFiltering = false;
-                    c.ShowSearch = false;
-                    c.SelectionMode = SelectionModes.None;
-                    c.ShowIndexColumn = false;
-                })
-                .RowActions(
-                    new MenuItem(Label: "View Commit", Icon: Icons.GitCommitHorizontal, Tag: "view-commit")
+            var commitsTable = new Table(
+                new TableRow(
+                    new TableCell("Commit").IsHeader(),
+                    new TableCell("Message").IsHeader()
                 )
-                .OnRowAction(e =>
-                {
-                    var hash = e.Value.Id?.ToString();
-                    if (hash != null)
-                    {
-                        navigator.Navigate<CommitApp>(new CommitAppArgs(hash, _selectedPlan.Project));
-                    }
-                    return ValueTask.CompletedTask;
-                });
+                { IsHeader = true }
+            );
+            foreach (var row in commitRows)
+            {
+                commitsTable |= new TableRow(
+                    new TableCell(new Button(row.ShortHash).Ghost().OnClick(() =>
+                        navigator.Navigate<CommitApp>(new CommitAppArgs(row.Hash, _selectedPlan.Project)))),
+                    new TableCell(row.Title)
+                );
+            }
+            content |= commitsTable;
         }
 
         // PRs section
