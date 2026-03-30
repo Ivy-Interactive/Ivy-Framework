@@ -196,7 +196,7 @@ public class ContentView(
         return new Fragment(elements.ToArray());
     }
 
-    private static object BuildFailureCallout(PlanFile plan)
+    internal static object BuildFailureCallout(PlanFile plan)
     {
         var verificationDir = Path.Combine(plan.FolderPath, "verification");
         var failedVerifications = plan.Verifications
@@ -252,6 +252,16 @@ public class ContentView(
                     logContent, @"## Summary\s*\n([\s\S]*?)(?=\n## |\z)");
                 if (summaryMatch.Success)
                     return Callout.Destructive(summaryMatch.Groups[1].Value.Trim(), "Execution Failed");
+
+                var statusMatch = System.Text.RegularExpressions.Regex.Match(
+                    logContent, @"\*\*Status:\*\*\s*(.+)");
+                if (statusMatch.Success)
+                {
+                    var status = statusMatch.Groups[1].Value.Trim();
+                    if (status == "Completed")
+                        return Callout.Warning("Execution reported as completed but plan is in Failed state. The process may have crashed during state transition.", "State Mismatch");
+                    return Callout.Destructive($"Last execution status: {status}", "Execution Failed");
+                }
             }
         }
 

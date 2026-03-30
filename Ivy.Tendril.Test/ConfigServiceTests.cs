@@ -24,14 +24,14 @@ tendrilData: D:\Tendril
 projects:
   - name: TestProject
     repos:
-      - D:\Repos\Test
+      - path: D:\Repos\Test
     context: |
       Test context for the project.
       Multiple lines supported.
   - name: AnotherProject
     repos:
-      - D:\Repos\Another
-      - D:\Repos\Another2
+      - path: D:\Repos\Another
+      - path: D:\Repos\Another2
     context: |
       Another test context.
 ";
@@ -47,7 +47,7 @@ projects:
         var project1 = settings.Projects[0];
         Assert.Equal("TestProject", project1.Name);
         Assert.Single(project1.Repos);
-        Assert.Equal(@"D:\Repos\Test", project1.Repos[0]);
+        Assert.Equal(@"D:\Repos\Test", project1.Repos[0].Path);
         Assert.Contains("Test context for the project", project1.Context);
 
         var project2 = settings.Projects[1];
@@ -82,11 +82,11 @@ tendrilData: D:\Tendril
 projects:
   - name: IvyFramework
     repos:
-      - D:\Repos\Ivy-Framework
+      - path: D:\Repos\Ivy-Framework
     context: Framework context
   - name: IvyAgent
     repos:
-      - D:\Repos\Ivy-Agent
+      - path: D:\Repos\Ivy-Agent
     context: Agent context
 ";
 
