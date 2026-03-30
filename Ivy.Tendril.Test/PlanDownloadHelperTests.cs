@@ -47,7 +47,7 @@ public class PlanDownloadHelperTests
             Assert.NotNull(result1);
 
             ctx.Reset();
-            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft);
+            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow);
             var testPlan = new PlanFile(metadata, "", Path.Combine(tempDir, "00001-TestPlan"), "");
 
             var result2 = PlanDownloadHelper.UsePlanDownload(ctx, planService, testPlan);
@@ -87,7 +87,7 @@ public class PlanDownloadHelperTests
         try
         {
             var planService = ctx.UseService<PlanReaderService>();
-            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft);
+            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow);
             var testPlan = new PlanFile(metadata, "", Path.Combine(tempDir, "00001-TestPlan"), "");
 
             var result = PlanDownloadHelper.UsePlanDownload(ctx, planService, testPlan);

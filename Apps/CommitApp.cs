@@ -3,7 +3,7 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-public record CommitAppArgs(string CommitHash, string? ProjectName = null);
+public record CommitAppArgs(string CommitHash, string? ProjectName = null, List<string>? RepoPaths = null);
 
 [App(title: "Commit", icon: Icons.GitCommitVertical, isVisible: false)]
 public class CommitApp : ViewBase
@@ -17,10 +17,12 @@ public class CommitApp : ViewBase
         if (args?.CommitHash is not { } commitHash || string.IsNullOrWhiteSpace(commitHash))
             return Text.P("No commit hash provided.");
 
-        // Determine which repos to search
-        var repoPaths = args.ProjectName != null
-            ? configService.GetProject(args.ProjectName)?.RepoPaths ?? []
-            : configService.Projects.SelectMany(p => p.RepoPaths).Distinct().ToList();
+        // Determine which repos to search — prefer explicit repo paths, then project config, then all repos
+        var repoPaths = args.RepoPaths is { Count: > 0 }
+            ? args.RepoPaths
+            : args.ProjectName != null
+                ? configService.GetProject(args.ProjectName)?.RepoPaths ?? []
+                : configService.Projects.SelectMany(p => p.RepoPaths).Distinct().ToList();
 
         // Find the commit across repos
         string? diff = null;
