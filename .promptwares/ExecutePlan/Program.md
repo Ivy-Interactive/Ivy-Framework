@@ -121,7 +121,7 @@ relatedPlans:
 
 Create a `verification/` directory in the plan folder if it doesn't exist.
 
-Check the `## Verification` section in the plan revision for checked items (`[x]`). Skip unchecked items (`[ ]`).
+Check the `## Verification` section in the plan revision for checked items (`- [x]`). Skip unchecked items (`- [ ]`).
 
 For each checked verification:
 1. Send a status message: `Invoke-RestMethod -Uri "$env:TENDRIL_URL/api/jobs/$env:TENDRIL_JOB_ID/status" -Method Post -Body ('{"message":"Verifying: <Name>"}') -ContentType "application/json" -ErrorAction SilentlyContinue`
