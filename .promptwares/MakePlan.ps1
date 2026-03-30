@@ -35,4 +35,5 @@ if ($agent.Executable -eq "claude") {
 & $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw)
 Pop-Location
 
+ReportSessionCost $sessionId
 Remove-Item $promptFile

@@ -22,6 +22,16 @@ public class StatusController : ControllerBase
         job.StatusMessage = request.Message;
         return Ok();
     }
+
+    [HttpPost("{jobId}/cost")]
+    public IActionResult PostCost(string jobId, [FromBody] CostRequest request)
+    {
+        var job = _jobService.GetJob(jobId);
+        if (job == null) return NotFound();
+        job.Cost = (job.Cost ?? 0) + request.Cost;
+        return Ok();
+    }
 }
 
 public record StatusRequest(string Message);
+public record CostRequest(decimal Cost);

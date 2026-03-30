@@ -33,6 +33,7 @@ public class JobsApp : ViewBase
             Type = j.Type,
             Project = j.Project,
             Timer = FormatTimer(j),
+            Cost = j.Cost.HasValue ? $"${j.Cost.Value:F2}" : "",
             LastOutput = FormatLastOutput(j),
             StatusMessage = j.StatusMessage ?? ""
         }).ToList();
@@ -47,6 +48,7 @@ public class JobsApp : ViewBase
             .Header(t => t.Type, "Type")
             .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
+            .Header(t => t.Cost, "Cost")
             .Header(t => t.LastOutput, "Last Output")
             .Header(t => t.StatusMessage, "Status Message")
             .Renderer(t => t.Status, new LabelsDisplayRenderer())
