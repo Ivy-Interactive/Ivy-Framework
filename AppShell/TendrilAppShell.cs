@@ -48,6 +48,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         var menuItems = UseState(() => appRepository.GetMenuItems());
         var planService = UseService<PlanReaderService>();
         var jobService = UseService<JobService>();
+        var planWatcher = UseService<PlanWatcherService>();
+        var refreshTrigger = UseState(0);
         var sidebarOpen = UseState(settings.SidebarOpen);
         var args = UseService<AppContext>();
         var serverArgs = UseService<ServerArgs>();
@@ -71,6 +73,18 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         {
             return jobService.GetJobs().Count(j => j.Status == "Running");
         }, new QueryOptions { RefreshInterval = TimeSpan.FromSeconds(3) });
+
+        UseEffect(() =>
+        {
+            void OnChanged() => refreshTrigger.Set(refreshTrigger.Value + 1);
+            planWatcher.PlansChanged += OnChanged;
+            jobService.JobsChanged += OnChanged;
+            return Disposable.Create(() =>
+            {
+                planWatcher.PlansChanged -= OnChanged;
+                jobService.JobsChanged -= OnChanged;
+            });
+        });
 
         UseEffect(() =>
         {
@@ -118,7 +132,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                     menuItems.Set([]);
                 }
             }
-        }, search, appRepository.Reloaded.ToTrigger(), planCounts.ToTrigger(), jobCount.ToTrigger());
+        }, search, appRepository.Reloaded.ToTrigger(), planCounts.ToTrigger(), jobCount.ToTrigger(), refreshTrigger);
 
         UseEffect(async () =>
         {

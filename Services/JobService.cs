@@ -12,6 +12,7 @@ public class JobService
     private int _counter;
     private PlanReaderService? _planReaderService;
 
+    public event Action? JobsChanged;
     public ConcurrentQueue<JobNotification> PendingNotifications { get; } = new();
 
     private static readonly string PromptsRoot =
@@ -135,6 +136,7 @@ public class JobService
             CompleteJob(id, process.ExitCode);
         });
 
+        JobsChanged?.Invoke();
         return id;
     }
 
@@ -157,6 +159,7 @@ public class JobService
             ResetPlanState(job);
 
         WriteJobLog(job);
+        JobsChanged?.Invoke();
     }
 
     public void StopJob(string id)
@@ -169,11 +172,13 @@ public class JobService
         job.CompletedAt = DateTime.UtcNow;
         if (job.StartedAt.HasValue)
             job.DurationSeconds = (int)(job.CompletedAt.Value - job.StartedAt.Value).TotalSeconds;
+        JobsChanged?.Invoke();
     }
 
     public void DeleteJob(string id)
     {
         _jobs.TryRemove(id, out _);
+        JobsChanged?.Invoke();
     }
 
     public List<JobItem> GetJobs()
