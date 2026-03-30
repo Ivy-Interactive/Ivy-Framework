@@ -88,7 +88,7 @@ public class ContentView(
                 var hasReport = File.Exists(verificationPath);
                 var nameCapture = v.Name;
                 object nameCell = hasReport
-                    ? new Button(v.Name).Ghost().OnClick(() => openVerification.Set(nameCapture))
+                    ? new Button(v.Name).Link().OnClick(() => openVerification.Set(nameCapture))
                     : (object)Text.Block(v.Name);
 
                 verificationsTable |= new TableRow(
@@ -141,7 +141,7 @@ public class ContentView(
             foreach (var row in commitRows)
             {
                 commitsTable |= new TableRow(
-                    new TableCell(new Button(row.ShortHash).Ghost().OnClick(() =>
+                    new TableCell(new Button(row.ShortHash).Link().OnClick(() =>
                         NavigateNewTab<CommitApp>(new CommitAppArgs(row.Hash, _selectedPlan.Project, repoPaths.ToList())))),
                     new TableCell(row.Title)
                 );
