@@ -37,6 +37,7 @@ export interface DataColumn {
   order?: number;
   icon?: string | null;
   help?: string | null;
+  footer?: string[] | null;
   iconSet?: "lucide" | "custom";
 }
 

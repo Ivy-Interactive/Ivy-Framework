@@ -10,6 +10,7 @@ interface TreeItemWidgetProps {
   item: MenuItem;
   rowActions?: MenuItem[];
   hasSiblingWithChildren?: boolean;
+  isNested?: boolean;
   onItemClick: (item: MenuItem) => void;
   onRowActionClick?: (item: MenuItem, action: MenuItem) => void;
 }
@@ -18,6 +19,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   item,
   rowActions,
   hasSiblingWithChildren,
+  isNested,
   onItemClick,
   onRowActionClick,
 }) => {
@@ -68,7 +70,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
       <Collapsible open={isOpen} onOpenChange={(val) => !item.disabled && setIsOpen(val)}>
         <div
           className={cn(
-            "ivy-tree-item group flex items-center gap-1 flex-1 rounded-sm py-1 px-1 text-sm cursor-pointer select-none outline-none",
+            "ivy-tree-item group flex items-center gap-1 flex-1 rounded-sm py-1 pr-1 text-sm cursor-pointer select-none outline-none",
             "hover:bg-accent/50 transition-colors focus-visible:ring-1 focus-visible:ring-ring",
             item.disabled && "opacity-50 cursor-not-allowed",
           )}
@@ -118,7 +120,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
           )}
         </div>
         <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-          <div className="ivy-tree-children pl-3 ml-2 border-l border-border/50">
+          <div className="ivy-tree-children pl-[1rem] ml-2 border-l border-border/50">
             {item.children!.map((child) => (
               <TreeItem
                 key={child.tag || child.label}
@@ -128,6 +130,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
                 hasSiblingWithChildren={item.children!.some(
                   (c) => c.children && c.children.length > 0,
                 )}
+                isNested
                 onRowActionClick={onRowActionClick}
               />
             ))}
@@ -140,7 +143,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   return (
     <div
       className={cn(
-        "ivy-tree-item group flex items-center flex-1 gap-1 rounded-sm py-1 px-1 text-sm cursor-pointer select-none outline-none",
+        "ivy-tree-item group flex items-center flex-1 gap-1 rounded-sm py-1 pr-1 text-sm cursor-pointer select-none outline-none",
         "hover:bg-accent/50 transition-colors focus-visible:ring-1 focus-visible:ring-ring",
         item.disabled && "opacity-50 cursor-not-allowed",
       )}
@@ -150,7 +153,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
       onKeyDown={handleKeyDown}
       onClick={handleClick}
     >
-      {hasSiblingWithChildren && <span className="h-5 w-5 shrink-0" />}
+      {hasSiblingWithChildren && !isNested && <span className="h-5 w-5 shrink-0" />}
       {item.icon && item.icon !== "None" && (
         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" name={item.icon} />
       )}

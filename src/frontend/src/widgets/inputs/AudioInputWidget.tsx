@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Mic, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getWidth } from "@/lib/styles";
+import { getWidth, inputStyles } from "@/lib/styles";
+import { useEventHandler } from "@/components/event-handler";
 import { logger } from "@/lib/logger";
 import { Densities } from "@/types/density";
 import {
@@ -11,8 +12,10 @@ import {
   timerSizeVariant,
   iconSizeVariant,
 } from "@/components/ui/input/audio-input-variant";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface AudioInputWidgetProps {
+  id: string;
   label?: string;
   recordingLabel?: string;
   mimeType: string;
@@ -23,6 +26,7 @@ interface AudioInputWidgetProps {
   chunkInterval: number;
   sampleRate?: number | null;
   density?: Densities;
+  invalid?: string;
 }
 
 const supportedMimeTypes = [
@@ -36,6 +40,7 @@ const supportedMimeTypes = [
 ];
 
 export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
+  id,
   label,
   recordingLabel,
   mimeType = "audio/webm",
@@ -45,7 +50,10 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
   chunkInterval = 1000,
   sampleRate,
   density = Densities.Medium,
+  events = EMPTY_ARRAY,
+  invalid,
 }) => {
+  const eventHandler = useEventHandler();
   const normalizedMimeTypes = useMemo(() => {
     const candidates: string[] = [];
     const addCandidate = (value?: string) => {
@@ -241,6 +249,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
       <div
         className={cn(
           audioInputVariant({ density }),
+          invalid && inputStyles.invalidInput,
           disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
         )}
         onClick={
@@ -258,6 +267,18 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
         }
         role="button"
         tabIndex={disabled ? -1 : 0}
+        onBlur={(e) => {
+          if (disabled) return;
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            if (events?.includes("OnBlur")) eventHandler("OnBlur", id, []);
+          }
+        }}
+        onFocus={(e) => {
+          if (disabled) return;
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            if (events?.includes("OnFocus")) eventHandler("OnFocus", id, []);
+          }
+        }}
         onKeyDown={(e) => {
           if (disabled) return;
           if (e.key === "Enter" || e.key === " ") {

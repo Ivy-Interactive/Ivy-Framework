@@ -3,6 +3,7 @@ import { useEventHandler } from "@/components/event-handler";
 import Icon from "@/components/Icon";
 import { camelCase } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { getColor } from "@/lib/styles";
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
 
@@ -13,6 +14,7 @@ interface BadgeWidgetProps {
   icon?: string;
   iconPosition?: "Left" | "Right";
   variant?: "Primary" | "Destructive" | "Outline" | "Secondary" | "Success" | "Warning" | "Info";
+  color?: string;
   density?: Densities;
   id: string;
   events?: string[];
@@ -23,6 +25,7 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   icon = undefined,
   iconPosition = "Left",
   variant = "Primary",
+  color,
   density = Densities.Medium,
   id,
   events = EMPTY_ARRAY,
@@ -84,12 +87,20 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
 
   const hasIcon = icon && icon !== "None";
 
+  const colorStyles: React.CSSProperties = color
+    ? {
+        ...getColor(color, "backgroundColor", "background"),
+        ...getColor(color, "color", "foreground"),
+      }
+    : {};
+
   return (
     <Badge
       variant={getBadgeVariant(variant)}
       density={density.toLowerCase() as "small" | "medium" | "large"}
+      style={color ? colorStyles : undefined}
       className={cn(
-        "w-min whitespace-nowrap gap-1",
+        "whitespace-nowrap gap-1",
         hasIcon &&
           title &&
           iconPosition === "Left" &&

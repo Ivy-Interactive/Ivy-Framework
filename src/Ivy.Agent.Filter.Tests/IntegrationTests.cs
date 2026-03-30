@@ -61,7 +61,7 @@ public class IntegrationTests
             Assert.NotNull(result.Model);
 
             var options = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FilterModel), options);
+            var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FilterModel), options);
 
             Assert.Contains("\"filterType\": \"number\"", json);
             Assert.Contains("\"colId\": \"orderTotal\"", json);

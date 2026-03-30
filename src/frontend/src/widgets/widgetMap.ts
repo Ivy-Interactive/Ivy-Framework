@@ -16,6 +16,7 @@ import {
   TooltipWidget,
   PaginationWidget,
 } from "@/widgets";
+import { ToolbarWidget } from "@/widgets/toolbar";
 import { BreadcrumbsWidget } from "@/widgets/breadcrumbs";
 import { FileDialogWidget, SaveDialogWidget, FolderDialogWidget } from "@/widgets/filePicker";
 import { BladeContainerWidget, BladeWidget } from "@/widgets/blades";
@@ -79,6 +80,7 @@ import {
   SpacerWidget,
   LoadingWidget,
   AppHostWidget,
+  AutoScrollWidget,
   AudioPlayerWidget,
   VideoPlayerWidget,
   RichTextBlockWidget,
@@ -118,6 +120,7 @@ export const widgetMap = {
   "Ivy.Spacer": SpacerWidget,
   "Ivy.Loading": LoadingWidget,
   "Ivy.AppHost": AppHostWidget,
+  "Ivy.AutoScroll": AutoScrollWidget,
   "Ivy.AudioPlayer": AudioPlayerWidget,
   "Ivy.VideoPlayer": VideoPlayerWidget,
   "Ivy.Stepper": React.lazy(() => import("@/widgets/primitives/StepperWidget")),
@@ -128,6 +131,7 @@ export const widgetMap = {
   "Ivy.Button": ButtonWidget,
   "Ivy.Progress": ProgressWidget,
   "Ivy.Tooltip": TooltipWidget,
+  "Ivy.Toolbar": ToolbarWidget,
   "Ivy.Slot": SlotWidget,
   "Ivy.Card": CardWidget,
   "Ivy.Sheet": SheetWidget,

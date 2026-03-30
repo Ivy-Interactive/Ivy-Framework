@@ -7,7 +7,7 @@ searchHints:
   - apps
   - deeplink
   - urls
-  - chrome
+  - appshell
   - navigation-args
   - route
   - hyperlink
@@ -30,7 +30,7 @@ Navigation in Ivy is handled through the `UseNavigation()` hook, which returns a
 - **Deep Linking** - Navigate to specific apps with deep linking parameters and [arguments](../../03_Hooks/02_Core/13_UseArgs.md)
 - **Type-Safe Navigation** - Navigate using strongly-typed app classes
 
-The navigation system is built on top of Ivy's [signal system](../../03_Hooks/02_Core/10_UseSignal.md) and integrates seamlessly with the [Chrome](./11_Chrome.md) framework for managing app lifecycle and routing.
+The navigation system is built on top of Ivy's [signal system](../../03_Hooks/02_Core/10_UseSignal.md) and integrates seamlessly with the [AppShell](./11_AppShell.md) framework for managing app lifecycle and routing.
 
 ## How UseNavigation Works
 
@@ -42,7 +42,7 @@ flowchart TD
     D -->|Type-Safe| E[Navigate by Type]
     D -->|URI-Based| F[Navigate by URI]
     D -->|External| G[Open External URL]
-    E --> H[Chrome System]
+    E --> H[AppShell System]
     F --> H
     G --> I[Browser/External Handler]
     H --> J[Target App]
@@ -183,9 +183,9 @@ var navigateToLink = UseLinks();
 var goBack = UseBackNavigation();
 ```
 
-### Integration with Chrome Settings
+### Integration with AppShell Settings
 
-Navigation behavior can be configured through [Chrome](./11_Chrome.md) settings in your [Program](./01_Program.md):
+Navigation behavior can be configured through [AppShell](./11_AppShell.md) settings in your [Program](./01_Program.md):
 
 ```csharp
 public class Program
@@ -194,7 +194,7 @@ public class Program
     {
         IvyApp.Run(args, app =>
         {
-            app.UseChrome(ChromeSettings.Default()
+            app.UseAppShell(AppShellSettings.Default()
                 .UseTabs(preventDuplicates: true) // Prevent duplicate tabs
                 .DefaultApp<DashboardApp>()       // Set default app
             );
@@ -208,6 +208,90 @@ public class Program
 - **Tabs Mode**: Each navigation creates a new tab (default)
 - **Pages Mode**: Navigation replaces the current view
 - **Prevent Duplicates**: Avoid opening multiple tabs for the same app
+
+## Navigation Beacons
+
+Navigation Beacons enable apps to advertise their ability to handle specific entity types, allowing dynamic discovery and type-safe contextual navigation without hard-coding app IDs.
+
+### Registering a Beacon
+
+Apps register beacons using the `[NavigationBeacon]` attribute and a static factory method:
+
+```csharp
+public class Product { public int Id { get; set; } }
+
+[App(icon: Icons.Package)]
+[NavigationBeacon(typeof(Product), nameof(GetProductBeacon))]
+public class ProductDetailsApp : ViewBase
+{
+    public static NavigationBeacon<Product> GetProductBeacon() => new(
+        AppId: "product-details",
+        ArgsBuilder: product => new { ProductId = product.Id }
+    );
+
+    public override object? Build()
+    {
+        var args = UseArgs<dynamic>();
+        return Text.Heading($"Product #{args?.ProductId}");
+    }
+}
+```
+
+### Using Beacons for Navigation
+
+Other apps can discover and navigate using beacons without knowing the target app's ID:
+
+```csharp
+public class ProductListApp : ViewBase
+{
+    public override object? Build()
+    {
+        var navigator = UseNavigation();
+        var productBeacon = UseNavigationBeacon<Product>();
+
+        var products = new[] {
+            new Product { Id = 1 },
+            new Product { Id = 2 }
+        };
+
+        return Layout.Vertical(
+            products.Select(product =>
+                new Button($"View Product {product.Id}")
+                    .OnClick(() => {
+                        if (productBeacon != null)
+                            navigator.Navigate(productBeacon, product);
+                    })
+            )
+        );
+    }
+}
+```
+
+### Checking Beacon Availability
+
+Use `UseNavigationBeacon<T>()` to check if a handler exists:
+
+```csharp
+var productBeacon = UseNavigationBeacon<Product>();
+
+if (productBeacon != null)
+{
+    // Product detail app is available
+    navigator.Navigate(productBeacon, product);
+}
+else
+{
+    // No app handles Product entities
+    UseToast().Show("Product details not available", ToastType.Warning);
+}
+```
+
+### Beacon Best Practices
+
+- **One beacon per entity type**: Only one app can register a beacon for each entity type
+- **Use meaningful entity types**: Define dedicated entity classes rather than reusing primitives
+- **Handle missing beacons gracefully**: Always check if beacon exists before navigating
+- **Keep ArgsBuilder simple**: Return anonymous objects with the minimum data needed for navigation
 
 ## Best Practices and Common Patterns
 
@@ -294,7 +378,7 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 - **Memoize Navigation Callbacks**: Use [UseMemo](../../03_Hooks/02_Core/05_UseMemo.md) to memoize navigation handlers
 - **Lazy App Loading**: Apps are loaded on-demand when navigated to
 - **State Cleanup**: Navigation automatically handles cleanup of previous app [state](../../03_Hooks/02_Core/03_UseState.md)
-- **Memory Management**: The [Chrome](./11_Chrome.md) system manages app lifecycle and memory usage
+- **Memory Management**: The [AppShell](./11_AppShell.md) system manages app lifecycle and memory usage
 
 ## UseNavigation
 
@@ -413,7 +497,7 @@ nav.Navigate("https://example.com");      // external URL
 
 ## See Also
 
-- [Chrome](./11_Chrome.md)
+- [AppShell](./11_AppShell.md)
 - [Apps](./10_Apps.md)
 - [UseArgs](../../03_Hooks/02_Core/13_UseArgs.md)
 - [Views](./02_Views.md)

@@ -19,7 +19,12 @@ public enum NumberFormatStyle
 {
     Decimal,
     Currency,
-    Percent
+    Percent,
+    Compact,
+    Scientific,
+    Engineering,
+    Accounting,
+    Bytes
 }
 
 public interface IAnyNumberInput : IAnyInput
@@ -74,6 +79,7 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
     [Prop] public Affix? Suffix { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() => [
     typeof(short), typeof(short?),
@@ -125,7 +131,7 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
 
     internal NumberInput() { }
 
-    [Prop] public TNumber Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TNumber Value { get; init; } = default!;
 
     [Prop(AlwaysSerialize = true)] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
@@ -163,7 +169,7 @@ public static class NumberInputExtensions
 
         input.TargetType = GetTargetTypeName(type);
 
-        if (input.FormatStyle == NumberFormatStyle.Currency && string.IsNullOrEmpty(input.Currency))
+        if ((input.FormatStyle == NumberFormatStyle.Currency || input.FormatStyle == NumberFormatStyle.Accounting) && string.IsNullOrEmpty(input.Currency))
         {
             input.Currency = "USD";
         }
@@ -221,7 +227,7 @@ public static class NumberInputExtensions
     public static NumberInputBase FormatStyle(this NumberInputBase widget, NumberFormatStyle formatStyle)
     {
         var result = widget with { FormatStyle = formatStyle };
-        if (formatStyle == NumberFormatStyle.Currency && string.IsNullOrEmpty(result.Currency))
+        if ((formatStyle == NumberFormatStyle.Currency || formatStyle == NumberFormatStyle.Accounting) && string.IsNullOrEmpty(result.Currency))
         {
             result = result with { Currency = "USD" };
         }
@@ -267,6 +273,22 @@ public static class NumberInputExtensions
     public static NumberInputBase OnBlur(this NumberInputBase widget, Action onBlur)
     {
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static NumberInputBase OnFocus(this NumberInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static NumberInputBase OnFocus(this NumberInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus.ToValueTask()) };
+    }
+
+    public static NumberInputBase OnFocus(this NumberInputBase widget, Action onFocus)
+    {
+        return widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
     }
 
 

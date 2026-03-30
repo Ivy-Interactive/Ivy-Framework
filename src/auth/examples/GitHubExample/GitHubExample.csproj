@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>GitHubExample</RootNamespace>
+    <UserSecretsId>ivy-auth-github-example</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

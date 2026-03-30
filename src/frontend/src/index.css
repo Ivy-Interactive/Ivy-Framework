@@ -368,6 +368,19 @@ ivy-widget {
   }
 }
 
+/* Details/Summary styling for markdown collapsible sections */
+details {
+  padding: 0 1rem 1rem 1rem;
+}
+details > summary {
+  margin: 0 -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+details:not([open]) {
+  padding-bottom: 0;
+}
+
 /* Prevent dialog from getting focus rings when elements inside are focused */
 @layer components {
   [data-radix-dialog-content] {

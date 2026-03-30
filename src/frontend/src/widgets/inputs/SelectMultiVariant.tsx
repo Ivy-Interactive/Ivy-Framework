@@ -9,6 +9,7 @@ import { xIconVariant } from "@/components/ui/input/text-input-variant";
 import { SelectInputWidgetProps, Option } from "./select-types";
 import { convertValuesToOriginalType } from "./select-utils";
 import { getWidth } from "@/lib/styles";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
   id,
@@ -16,16 +17,19 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  options = [],
+  options = EMPTY_ARRAY,
   eventHandler,
   selectMany = true,
   maxSelections,
   minSelections,
   loading = false,
   ghost = false,
+  showActions = false,
+  nullable = false,
   density,
   "data-testid": dataTestId,
   width,
+  events = EMPTY_ARRAY,
 }) => {
   const validOptions = options.filter(
     (option) => option.value != null && option.value.toString().trim() !== "",
@@ -51,6 +55,7 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
     return validOptions.map((option) => ({
       label: option.label || option.value.toString(),
       value: option.value.toString(),
+      tooltip: option.tooltip,
       disable:
         disabled ||
         loading ||
@@ -102,6 +107,14 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
     [minSelections, selectedValues.length, value, validOptions, selectMany, eventHandler, id],
   );
 
+  const handleBlur = () => {
+    if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+  };
+
+  const handleFocus = () => {
+    if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+  };
+
   const styles = getWidth(width);
 
   return (
@@ -118,7 +131,13 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
           hidePlaceholderWhenSelected
           density={density}
           ghost={ghost}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
           data-testid={dataTestId}
+          showActions={showActions && selectMany}
+          maxSelections={maxSelections}
+          minSelections={minSelections}
+          onNullableClear={nullable ? () => eventHandler("OnChange", id, [null]) : undefined}
         />
         {(selectedMultiSelectOptions.length > 0 && !disabled) || invalid || loading ? (
           <div className={selectIconContainerVariant({ density })} style={{ zIndex: 2 }}>

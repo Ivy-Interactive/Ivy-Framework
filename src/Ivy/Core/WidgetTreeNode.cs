@@ -1,19 +1,19 @@
-﻿using System.Text.Json.Nodes;
+using System.Text.Json.Nodes;
 using Ivy.Core.Hooks;
 
 namespace Ivy.Core;
 
-public class WidgetTreeNode(string id, int index, TreePath parentTreePath, WidgetTreeNode[] children, int? memoizedHashCode, IWidget? widget, IView? view, IViewContext? context, IViewContext? ancestorContext) : IAsyncDisposable
+public class WidgetTreeNode(string id, int index, TreePath parentTreePath, WidgetTreeNode[] children, int? memoizedHashCode, IWidget? widget, IView? view, IViewContext? context, IViewContext? ancestorContext, string? parentId) : IAsyncDisposable
 {
-    public static WidgetTreeNode FromWidget(IWidget widget, int index, TreePath treePath, WidgetTreeNode[] children, IViewContext? ancestorContext)
+    public static WidgetTreeNode FromWidget(IWidget widget, int index, TreePath treePath, WidgetTreeNode[] children, IViewContext? ancestorContext, string? parentId)
     {
-        return new WidgetTreeNode(widget.Id!, index, treePath, children, null, widget, null, null, ancestorContext);
+        return new WidgetTreeNode(widget.Id!, index, treePath, children, null, widget, null, null, ancestorContext, parentId);
     }
 
-    public static WidgetTreeNode FromView(IView view, int index, TreePath treePath, WidgetTreeNode? child, IViewContext? context, int? memoizedHashCode, IViewContext? ancestorContext)
+    public static WidgetTreeNode FromView(IView view, int index, TreePath treePath, WidgetTreeNode? child, IViewContext? context, int? memoizedHashCode, IViewContext? ancestorContext, string? parentId)
     {
         var children = child == null ? Array.Empty<WidgetTreeNode>() : [child];
-        return new WidgetTreeNode(view.Id!, index, treePath, children, memoizedHashCode, null, view, context, ancestorContext);
+        return new WidgetTreeNode(view.Id!, index, treePath, children, memoizedHashCode, null, view, context, ancestorContext, parentId);
     }
 
     // public bool ShouldRebuild { get; set; }
@@ -27,6 +27,7 @@ public class WidgetTreeNode(string id, int index, TreePath parentTreePath, Widge
     public IView? View { get; } = view;
     public IViewContext? Context { get; } = context;
     public IViewContext? AncestorContext { get; } = ancestorContext;
+    public string? ParentId { get; } = parentId;
     public Type NodeType => IsWidget ? Widget!.GetType() : View!.GetType();
     private JsonNode? _previousSerialization = null;
 
@@ -91,18 +92,19 @@ public class WidgetTreeNode(string id, int index, TreePath parentTreePath, Widge
         //We want get the indices as if the views has been removed and only the widgets remain
 
         var indices = new List<int>() { };
-        var path = this.ParentTreePath.Clone();
+        var node = this.ParentTreePath;
 
         var previousSegment = new PathSegment("", null, this.Index, this.IsWidget);
 
-        while (path.Count > 0)
+        while (node != null && node.Count > 0)
         {
-            var segment = path.Pop();
+            var segment = node.Segment;
             if (segment.IsWidget)
             {
                 indices.Add(previousSegment.Index);
             }
             previousSegment = segment;
+            node = node.Parent;
         }
 
         indices.Reverse();

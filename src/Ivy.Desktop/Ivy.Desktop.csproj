@@ -14,6 +14,7 @@
     <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <IsPackable>true</IsPackable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup>

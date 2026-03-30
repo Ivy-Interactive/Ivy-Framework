@@ -14,16 +14,20 @@ import {
   useEmptyRows,
   useDataLoading,
 } from "../hooks";
+import { useFooterColumnLayout } from "../hooks/useFooterColumnLayout";
 import { GridContainer } from "../components/GridContainer";
+import { AggregateFooter } from "../DataTableFooter";
 import { MenuItem } from "@/types/widgets";
 import { ROW_HEIGHT, GROUP_HEADER_HEIGHT } from "./constants";
 import { useCellContent, useGridColumns, useHeaderMenu } from "./hooks";
+import { getOrderedVisibleDataColumns } from "../utils/columnHelpers";
 
 interface TableEditorProps {
   widgetId: string;
   hasOptions?: boolean;
   rowActions?: MenuItem[];
   footer?: React.ReactNode;
+  showAggregateFooter?: boolean;
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
@@ -31,6 +35,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   hasOptions = false,
   rowActions,
   footer,
+  showAggregateFooter = false,
 }) => {
   const {
     columns,
@@ -101,15 +106,15 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   });
 
   // Row hover and actions
-  const { hoverRow, actionButtonsTop, onItemHovered, handleRowActionClick } = useRowHover({
-    widgetId,
-    visibleRows,
-    enableRowHover: enableRowHover ?? false,
-    rowActions,
-    gridRef,
-    containerRef,
-    arrowTableRef,
-  });
+  const { hoverRow, actionButtonsTop, actionButtonsHeight, onItemHovered, handleRowActionClick } =
+    useRowHover({
+      widgetId,
+      visibleRows,
+      enableRowHover: enableRowHover ?? false,
+      rowActions,
+      containerRef,
+      arrowTableRef,
+    });
 
   // Table theme
   const { tableTheme, getRowThemeOverride } = useTableTheme({
@@ -165,9 +170,39 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showColumnTypeIcons: showColumnTypeIcons ?? true,
   });
 
+  const orderedDataColumns = useMemo(
+    () => getOrderedVisibleDataColumns(columns, columnOrder),
+    [columns, columnOrder],
+  );
+
+  const wantAggregateFooter =
+    showAggregateFooter && orderedDataColumns.some((c) => c.footer && c.footer.length > 0);
+
+  const { layout, footerScrollRef } = useFooterColumnLayout(
+    containerRef,
+    finalColumns,
+    getCellContent,
+    totalRows,
+    containerWidth,
+    tableTheme,
+    showIndexColumn ?? false,
+    visibleRows,
+    wantAggregateFooter,
+  );
+
   if (finalColumns.length === 0) {
     return null;
   }
+
+  const footerNode = wantAggregateFooter ? (
+    <AggregateFooter
+      columns={orderedDataColumns}
+      layout={layout}
+      footerScrollRef={footerScrollRef}
+    />
+  ) : (
+    footer
+  );
 
   return (
     <GridContainer
@@ -206,9 +241,10 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       getRowThemeOverride={enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined}
       rowActions={rowActions}
       actionButtonsTop={actionButtonsTop}
+      actionButtonsHeight={actionButtonsHeight}
       hoverRow={hoverRow}
       onRowActionClick={handleRowActionClick}
-      footer={footer}
+      footer={footerNode}
       hasEmptyRows={emptyRowsCount > 0}
     />
   );

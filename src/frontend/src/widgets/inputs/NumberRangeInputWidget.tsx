@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import { useEventHandler, EventHandler } from "@/components/event-handler";
 import { useOptimisticValue } from "./shared/useOptimisticValue";
 import * as SliderPrimitive from "@radix-ui/react-slider";
@@ -6,9 +6,10 @@ import { cn } from "@/lib/utils";
 import { inputStyles } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { X } from "lucide-react";
-import React from "react";
 import { Densities } from "@/types/density";
 import Icon from "@/components/Icon";
+import { formatBytes } from "@/lib/formatters";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface Affix {
   icon?: string;
@@ -36,6 +37,11 @@ const formatStyleMap = {
   Decimal: "decimal",
   Currency: "currency",
   Percent: "percent",
+  Compact: "compact",
+  Scientific: "scientific",
+  Engineering: "engineering",
+  Accounting: "accounting",
+  Bytes: "bytes",
 } as const;
 
 type FormatStyle = keyof typeof formatStyleMap;
@@ -106,17 +112,34 @@ const formatNumber = (
 ): string => {
   if (value === null) return "";
 
+  if (formatStyle === "Bytes") {
+    return formatBytes(value, precision);
+  }
+
   try {
     const config: Intl.NumberFormatOptions = {
-      style: formatStyleMap[formatStyle],
       minimumFractionDigits: 0,
       maximumFractionDigits: precision,
       useGrouping: !(noGrouping ?? false),
       notation: "standard",
     };
 
-    if (formatStyle === "Currency" && currency) {
-      config.currency = currency;
+    if (formatStyle === "Compact") {
+      config.notation = "compact";
+      config.compactDisplay = "short";
+    } else if (formatStyle === "Scientific") {
+      config.notation = "scientific";
+    } else if (formatStyle === "Engineering") {
+      config.notation = "engineering";
+    } else if (formatStyle === "Accounting") {
+      config.style = "currency";
+      config.currencySign = "accounting";
+      config.currency = currency || "USD";
+    } else {
+      config.style = formatStyleMap[formatStyle] as Intl.NumberFormatOptions["style"];
+      if (formatStyle === "Currency" && currency) {
+        config.currency = currency;
+      }
     }
 
     return new Intl.NumberFormat("en-US", config).format(value);
@@ -167,7 +190,7 @@ export const NumberRangeInputWidget = memo(
     noGrouping,
     targetType,
     density = Densities.Medium,
-    events,
+    events = EMPTY_ARRAY,
     "data-testid": dataTestId,
   }: NumberRangeInputWidgetProps) => {
     const eventHandler = useEventHandler() as EventHandler;
@@ -187,23 +210,21 @@ export const NumberRangeInputWidget = memo(
 
     const [localRange, setLocalRange] = useOptimisticValue(serverRange, false, rangeEqual);
 
-    // Local state for live feedback during drag
-    const [localLower, setLocalLower] = React.useState<number>(localRange.lower);
-    const [localUpper, setLocalUpper] = React.useState<number>(localRange.upper);
-
-    React.useEffect(() => {
-      setLocalLower(localRange.lower);
-      setLocalUpper(localRange.upper);
-    }, [localRange.lower, localRange.upper]);
+    // Maintains local state for lower/upper for instant feedback
+    const [localLower, setLocalLower] = useOptimisticValue(localRange.lower, false);
+    const [localUpper, setLocalUpper] = useOptimisticValue(localRange.upper, false);
 
     // Only update local state on drag
-    const handleSliderChange = useCallback((values: number[]) => {
-      const [newLower, newUpper] = values;
-      if (typeof newLower === "number" && typeof newUpper === "number") {
-        setLocalLower(newLower);
-        setLocalUpper(newUpper);
-      }
-    }, []);
+    const handleSliderChange = useCallback(
+      (values: number[]) => {
+        const [newLower, newUpper] = values;
+        if (typeof newLower === "number" && typeof newUpper === "number") {
+          setLocalLower(newLower);
+          setLocalUpper(newUpper);
+        }
+      },
+      [setLocalLower, setLocalUpper],
+    );
 
     // Only call eventHandler when drag ends
     const handleSliderCommit = useCallback(
@@ -273,7 +294,25 @@ export const NumberRangeInputWidget = memo(
     const suffixContent = renderAffix(suffix);
 
     return (
-      <div className="relative w-full">
+      <div
+        className={cn(
+          "relative w-full px-3 py-2",
+          disabled && "opacity-50 cursor-not-allowed",
+          invalid && inputStyles.invalidInput,
+        )}
+        onBlur={(e) => {
+          if (disabled) return;
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+          }
+        }}
+        onFocus={(e) => {
+          if (disabled) return;
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+          }
+        }}
+      >
         {/* Prefix/Suffix labels */}
         {(prefixContent || suffixContent) && (
           <div className="flex items-center justify-between mb-2">

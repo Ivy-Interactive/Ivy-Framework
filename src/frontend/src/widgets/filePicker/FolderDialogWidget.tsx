@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { hasDirectoryPicker } from "./browserSupport";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface FolderDialogEntry {
   name: string;
@@ -17,7 +18,7 @@ interface FolderDialogWidgetProps {
 export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
   id,
   triggerCount,
-  events = [],
+  events = EMPTY_ARRAY,
 }) => {
   const handleEvent = useEventHandler();
   const inputRef = useRef<HTMLInputElement>(null);

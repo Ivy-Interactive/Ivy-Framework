@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GridColumn } from "@glideapps/glide-data-grid";
 import { DataColumn } from "../../types/types";
-import { parseSize } from "../utils/parseSize";
+import { parseSize, estimateHeaderWidth } from "../utils/parseSize";
 
 interface UseColumnManagementProps {
   columnsProp: DataColumn[];
@@ -68,7 +68,13 @@ export const useColumnManagement = ({
       // First time loading, initialize with default widths
       const widths: Record<string, number> = {};
       mergedColumns.forEach((col, index) => {
-        widths[index.toString()] = parseSize(col.width);
+        const explicitWidth = parseSize(col.width);
+        const headerMinWidth = estimateHeaderWidth(col.header || col.name);
+        // Use explicit width if set, otherwise use header-based width
+        // If explicit width is the default (150), use the larger of explicit and header-based
+        widths[index.toString()] = col.width
+          ? explicitWidth
+          : Math.max(explicitWidth, headerMinWidth);
       });
       return widths;
     });

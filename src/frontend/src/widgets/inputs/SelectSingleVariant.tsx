@@ -15,11 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Search, Loader2, X } from "lucide-react";
 import Icon from "@/components/Icon";
 import { InvalidIcon } from "@/components/InvalidIcon";
-import { selectIconContainerVariant } from "@/components/ui/select/variant";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
 import { getWidth, inputStyles } from "@/lib/styles";
 import { SelectInputWidgetProps } from "./select-types";
 import { useSelectValueHandler } from "./select-utils";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   id,
@@ -27,7 +27,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  options = [],
+  options = EMPTY_ARRAY,
   eventHandler,
   nullable = false,
   searchable = false,
@@ -38,12 +38,20 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   density,
   "data-testid": dataTestId,
   width,
+  events = EMPTY_ARRAY,
 }) => {
   const validOptions = options.filter(
     (option) => option.value != null && option.value.toString().trim() !== "",
   );
 
-  const handleValueChange = useSelectValueHandler(id, value, validOptions, eventHandler, false);
+  const handleValueChange = useSelectValueHandler(
+    id,
+    value,
+    validOptions,
+    eventHandler,
+    false,
+    nullable,
+  );
 
   const stringValue =
     value != null && value.toString().trim() !== "" ? value.toString() : undefined;
@@ -107,6 +115,23 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   const hasValue = stringValue !== undefined;
   const styles = getWidth(width);
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setIsOpen(newOpen);
+    if (newOpen) {
+      if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+    } else {
+      if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+    }
+  };
+
+  const handleTriggerFocus = () => {
+    if (!isOpen && events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+  };
+
+  const handleTriggerBlur = () => {
+    if (!isOpen && events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+  };
+
   const selectTriggerElement = (
     <SelectTrigger
       ref={triggerRef}
@@ -118,8 +143,50 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
           "border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground",
       )}
       density={density}
+      onBlur={handleTriggerBlur}
+      onFocus={handleTriggerFocus}
     >
       <SelectValue placeholder={placeholder} />
+      {((nullable && hasValue && !disabled) || invalid || loading) && (
+        <div className="flex items-center gap-1 px-1 ml-auto shrink-0 pointer-events-none">
+          {loading && (
+            <div className="flex items-center h-6 pointer-events-auto">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
+            </div>
+          )}
+          {nullable && hasValue && !disabled && (
+            <div
+              role="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                eventHandler("OnChange", id, [null]);
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  eventHandler("OnChange", id, [null]);
+                }
+              }}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6 pointer-events-auto"
+            >
+              <X className={xIconVariant({ density })} />
+            </div>
+          )}
+          {invalid && (
+            <div
+              className="flex items-center h-6 cursor-default pointer-events-auto"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <InvalidIcon message={invalid} />
+            </div>
+          )}
+        </div>
+      )}
     </SelectTrigger>
   );
 
@@ -132,7 +199,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
           value={stringValue}
           onValueChange={handleValueChange}
           open={isOpen}
-          onOpenChange={setIsOpen}
+          onOpenChange={handleOpenChange}
           data-testid={dataTestId}
         >
           {isEllipsed && selectedLabel ? (
@@ -187,12 +254,28 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
                         density={density}
                         disabled={disabled || loading || option.disabled}
                       >
-                        <div className="flex items-center gap-2">
-                          {option.icon && (
-                            <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
-                          )}
-                          {option.label}
-                        </div>
+                        {option.tooltip ? (
+                          <TooltipProvider>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center gap-2">
+                                  {option.icon && (
+                                    <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                                  )}
+                                  {option.label}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>{option.tooltip}</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            {option.icon && (
+                              <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                            )}
+                            {option.label}
+                          </div>
+                        )}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -201,42 +284,6 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
             )}
           </SelectContent>
         </Select>
-        {(nullable && hasValue && !disabled) || invalid || loading ? (
-          <div className={selectIconContainerVariant({ density })} style={{ zIndex: 2 }}>
-            {loading && (
-              <div className="pointer-events-auto flex items-center h-6 p-1">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
-              </div>
-            )}
-            {hasValue && !disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  eventHandler("OnChange", id, [null]);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    eventHandler("OnChange", id, [null]);
-                  }
-                }}
-                className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
-              >
-                <X className={xIconVariant({ density })} />
-              </button>
-            )}
-            {invalid && (
-              <div className="pointer-events-auto flex items-center h-6 p-1">
-                <InvalidIcon message={invalid} />
-              </div>
-            )}
-          </div>
-        ) : null}
       </div>
     </div>
   );

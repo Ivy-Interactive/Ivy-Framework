@@ -41,6 +41,7 @@ export const cardStyles = {
     pointer: "cursor-pointer",
     pointerAndTranslate:
       "cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition",
+    shadow: "cursor-pointer hover:shadow-lg active:shadow-md transition-shadow",
   },
 } as const;
 

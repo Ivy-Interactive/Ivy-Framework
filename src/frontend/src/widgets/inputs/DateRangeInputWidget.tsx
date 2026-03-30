@@ -23,6 +23,8 @@ import {
   dateRangeInputIconVariant,
   dateRangeInputTextVariant,
 } from "@/components/ui/input/date-range-input-variant";
+import { EMPTY_ARRAY } from "@/lib/constants";
+import { DateRangePresets } from "./DateRangePresets";
 
 interface DateRangeInputWidgetProps {
   id: string;
@@ -47,8 +49,6 @@ interface DateRangeInputWidgetProps {
 
 type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-const EMPTY_EVENTS: string[] = [];
-
 const dayOfWeekMap: Record<string, WeekDay> = {
   Sunday: 0,
   Monday: 1,
@@ -65,8 +65,6 @@ function resolveDayOfWeek(value?: WeekDay | string): WeekDay | undefined {
   return dayOfWeekMap[value];
 }
 
-import { DateRangePresets } from "./DateRangePresets";
-
 export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   id,
   value,
@@ -81,7 +79,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   min,
   max,
   density = Densities.Medium,
-  events = EMPTY_EVENTS,
+  events = EMPTY_ARRAY,
   "data-testid": dataTestId,
 }) => {
   const firstDayOfWeek = resolveDayOfWeek(firstDayOfWeekRaw);
@@ -163,6 +161,19 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
     }
   };
 
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (disabled) return;
+      setIsOpen(newOpen);
+      if (!newOpen) {
+        if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+      } else {
+        if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+      }
+    },
+    [disabled, eventHandler, id, events, setIsOpen],
+  );
+
   // Use custom format if provided, otherwise use default
   const displayFormat = formatProp || "LLL dd, y";
 
@@ -171,7 +182,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
 
   return (
     <div className="relative w-full select-none">
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover open={isOpen} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
@@ -185,6 +196,14 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
               invalid && "border-destructive focus-visible:ring-destructive",
               showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
             )}
+            onBlur={() => {
+              if (disabled) return;
+              if (events.includes("OnBlur") && !isOpen) eventHandler("OnBlur", id, []);
+            }}
+            onFocus={() => {
+              if (disabled) return;
+              if (events.includes("OnFocus") && !isOpen) eventHandler("OnFocus", id, []);
+            }}
           >
             <CalendarIcon className={cn("mr-2 shrink-0", dateRangeInputIconVariant({ density }))} />
             {date?.from ? (

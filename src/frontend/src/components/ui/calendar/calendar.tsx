@@ -83,15 +83,22 @@ export function Calendar({
         ),
         table: "w-full border-collapse",
         weekdays: cn("flex", defaultClassNames.weekdays),
-        weekday: cn(calendarWeekdayVariant({ density }), defaultClassNames.weekday),
-        week: cn("flex w-full mt-2", defaultClassNames.week),
-        week_number_header: cn("select-none w-(--cell-size)", defaultClassNames.week_number_header),
+        weekday: cn(
+          calendarWeekdayVariant({ density }),
+          "flex-1", // Ensure headers take equal space
+          defaultClassNames.weekday,
+        ),
+        week: cn("flex w-full mt-2 justify-between", defaultClassNames.week),
+        week_number_header: cn(
+          "select-none w-(--cell-size) flex-none",
+          defaultClassNames.week_number_header,
+        ),
         week_number: cn(
-          "text-[0.8rem] select-none text-muted-foreground",
+          "text-[0.8rem] select-none text-muted-foreground w-(--cell-size) flex-none",
           defaultClassNames.week_number,
         ),
         day: cn(
-          "relative w-full h-full p-0 text-center [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none",
+          "relative flex-1 h-full p-0 text-center [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none",
           defaultClassNames.day,
         ),
         range_start: cn("rounded-l-md bg-accent", defaultClassNames.range_start),
@@ -127,7 +134,7 @@ export function Calendar({
         DayButton: (props) => <CalendarDayButton {...props} density={density} />,
         WeekNumber: ({ children, ...props }) => {
           return (
-            <td {...props}>
+            <td {...props} className="flex-none">
               <div className="flex size-(--cell-size) items-center justify-center text-center">
                 {children}
               </div>

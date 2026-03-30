@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using Ivy.Core.Apps;
 using Ivy.Core.Auth;
@@ -76,14 +76,15 @@ public class AppSessionStore : IDisposable
         _cookieJarCleanupTimer?.Dispose();
     }
 
-    public AppSession? FindChrome(AppSession session)
+    public AppSession? FindAppShell(AppSession session)
     {
         if (session.ParentId == null)
         {
-            return session.AppDescriptor.IsChrome ? session : null;
+            return session.AppDescriptor.IsAppShell ? session : null;
         }
-        var parent = Sessions.Values.FirstOrDefault(s => s.ConnectionId == session.ParentId);
-        return parent == null ? null : FindChrome(parent!);
+        if (!Sessions.TryGetValue(session.ParentId, out var parent))
+            return null;
+        return FindAppShell(parent);
     }
 
     public void Dump()

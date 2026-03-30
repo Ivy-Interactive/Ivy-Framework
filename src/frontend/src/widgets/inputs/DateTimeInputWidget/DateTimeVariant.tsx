@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/input/date-time-input-variant";
 import { DateTimeVariantProps } from "./types";
 import { ClearAndInvalidIcons } from "./shared";
+import { useTimeConstraints } from "./useTimeConstraints";
 
 export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   value,
@@ -27,12 +28,27 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   onTimeChange,
   format: formatProp,
   firstDayOfWeek,
+  min,
+  max,
+  step,
   density = Densities.Medium,
   "data-testid": dataTestId,
+  onFocusChange,
 }) => {
   const [open, setOpen] = useState(false);
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
+  const minDate = useMemo(() => (min ? new Date(min) : undefined), [min]);
+  const maxDate = useMemo(() => (max ? new Date(max) : undefined), [max]);
   const showClear = nullable && !disabled && value != null && value !== "";
+
+  const disabledDays = useMemo(() => {
+    const matchers: Array<{ before: Date } | { after: Date }> = [];
+    if (minDate) matchers.push({ before: minDate });
+    if (maxDate) matchers.push({ after: maxDate });
+    return matchers;
+  }, [minDate, maxDate]);
+
+  const { timeStepSeconds, timeMin, timeMax, getSnappedTime } = useTimeConstraints(min, max, step);
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -92,46 +108,54 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
     setIsEditingTime(true);
   }, []);
 
-  const handleTimeBlur = useCallback(() => {
-    setIsEditingTime(false);
-    // When time input loses focus, update the parent
-    if (date && localTimeValue) {
-      const [hours, minutes, seconds] = localTimeValue.split(":").map(Number);
-      const newDateTime = new Date(date);
-      newDateTime.setHours(hours, minutes, seconds);
-      onDateChange(newDateTime);
-    } else if (localTimeValue) {
-      // If no date is selected, create a new date with the selected time
-      const [hours, minutes, seconds] = localTimeValue.split(":").map(Number);
-      const newDateTime = new Date();
+  const commitSnappedTime = useCallback(() => {
+    const out = getSnappedTime(localTimeValue);
+    setLocalTimeValue(out);
+
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(out)) {
+      const parts = out.split(":").map(Number);
+      const hours = parts[0];
+      const minutes = parts[1];
+      const seconds = parts[2] || 0;
+
+      const newDateTime = date ? new Date(date) : new Date();
       newDateTime.setHours(hours, minutes, seconds);
       onDateChange(newDateTime);
     }
-    onTimeChange(localTimeValue);
-  }, [date, localTimeValue, onDateChange, onTimeChange]);
+    onTimeChange(out);
+  }, [getSnappedTime, localTimeValue, date, onDateChange, onTimeChange]);
 
-  const handleTimeKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      // When user presses Enter, update the parent
-      if (e.key === "Enter") {
-        setIsEditingTime(false);
-        if (date && localTimeValue) {
-          const [hours, minutes, seconds] = localTimeValue.split(":").map(Number);
-          const newDateTime = new Date(date);
-          newDateTime.setHours(hours, minutes, seconds);
-          onDateChange(newDateTime);
-        } else if (localTimeValue) {
-          // If no date is selected, create a new date with the selected time
-          const [hours, minutes, seconds] = localTimeValue.split(":").map(Number);
-          const newDateTime = new Date();
-          newDateTime.setHours(hours, minutes, seconds);
-          onDateChange(newDateTime);
-        }
-        onTimeChange(localTimeValue);
+  const flushTimeInput = useCallback(() => {
+    setIsEditingTime(false);
+    if (!localTimeValue?.trim()) {
+      onTimeChange(localTimeValue ?? "");
+      return;
+    }
+    commitSnappedTime();
+  }, [localTimeValue, onTimeChange, commitSnappedTime]);
+
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen && open) {
+        // Dismissal often closes the popover without firing blur on the time field
+        flushTimeInput();
       }
+      setOpen(newOpen);
+      onFocusChange?.(newOpen);
     },
-    [date, localTimeValue, onDateChange, onTimeChange],
+    [open, flushTimeInput, onFocusChange],
   );
+
+  const handleTimeBlur = useCallback(() => {
+    flushTimeInput();
+  }, [flushTimeInput]);
+
+  const handleTimeKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.currentTarget.blur();
+    }
+  }, []);
 
   const handleTimeFocus = useCallback(() => {
     setIsEditingTime(true);
@@ -139,7 +163,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
 
   return (
     <div className="relative w-full select-none">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
             disabled={disabled}
@@ -154,6 +178,12 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
             )}
             data-testid={dataTestId}
+            onFocus={() => {
+              if (!open) onFocusChange?.(true);
+            }}
+            onBlur={() => {
+              if (!open) onFocusChange?.(false);
+            }}
           >
             <CalendarIcon className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
             <Clock className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
@@ -176,6 +206,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               mode="single"
               selected={date}
               onSelect={handleDateSelect}
+              disabled={disabledDays.length > 0 ? disabledDays : undefined}
               initialFocus
               weekStartsOn={firstDayOfWeek}
               density={density}
@@ -186,7 +217,9 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               />
               <Input
                 type="time"
-                step="1"
+                step={timeStepSeconds}
+                min={timeMin}
+                max={timeMax}
                 value={localTimeValue}
                 onChange={handleTimeChange}
                 onFocus={handleTimeFocus}

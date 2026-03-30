@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { getHeight, getWidth } from "@/lib/styles";
 import { camelCase } from "@/lib/utils";
 import { useThemeWithMonitoring } from "@/components/theme-provider";
@@ -171,13 +171,19 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
     };
   }, [chartColors, legend, themeColors, tooltip, series, toolbox]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleChartReady = useCallback(() => {
+    containerRef.current?.setAttribute("data-chart-rendered", "true");
+  }, []);
+
   return (
-    <div style={styles}>
+    <div ref={containerRef} style={styles}>
       <ReactECharts
         option={option}
         style={chartStyles}
         notMerge={true} // Merge changes instead of full rebuild for better performance
         lazyUpdate={true}
+        onChartReady={handleChartReady}
       />
     </div>
   );

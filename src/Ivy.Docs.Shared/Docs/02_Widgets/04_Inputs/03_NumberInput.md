@@ -178,7 +178,7 @@ public class MoneyPrecisionDemo : ViewBase
 
 ### FormatStyle
 
-There are three different kinds of formats that a `NumberInput` can have. The following shows these in action.
+`NumberInput` supports eight format styles for different use cases. The following shows the basic styles:
 
 ```csharp demo-below
 public class FormatStyleDemos : ViewBase
@@ -188,7 +188,7 @@ public class FormatStyleDemos : ViewBase
         var num = UseState(3.14);
         var amount = UseState(30.14);
         var passingPercentage = UseState(0.35);
-        
+
         return Layout.Vertical()
                 | num.ToNumberInput().FormatStyle(NumberFormatStyle.Decimal)
                 | amount.ToNumberInput().FormatStyle(NumberFormatStyle.Currency).Currency("GBP")
@@ -197,6 +197,60 @@ public class FormatStyleDemos : ViewBase
 }
 
 ```
+
+### Advanced Format Styles
+
+Additional format styles are available for domain-specific use cases:
+
+- **Compact** — abbreviated large numbers (`1.2K`, `3.5M`)
+- **Scientific** — scientific notation (`1.23E6`)
+- **Engineering** — engineering notation with exponents as multiples of 3
+- **Accounting** — negative values in parentheses (`($1,234.56)`)
+- **Bytes** — file sizes with binary units (`1.5 GB`, `256 KB`)
+
+```csharp demo-below
+public class AdvancedFormatStylesDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var followers = UseState(1_250_000.0);
+        var wavelength = UseState(0.000000532);
+        var fileSize = UseState(5_242_880.0);
+        var negativeBalance = UseState(-1234.56m);
+
+        return Layout.Vertical()
+                | followers.ToNumberInput()
+                    .FormatStyle(NumberFormatStyle.Compact)
+                    .Precision(1)
+                    .WithField()
+                    .Label("Social Media Followers")
+                | wavelength.ToNumberInput()
+                    .FormatStyle(NumberFormatStyle.Scientific)
+                    .Precision(2)
+                    .WithField()
+                    .Label("Wavelength (meters)")
+                | fileSize.ToNumberInput()
+                    .FormatStyle(NumberFormatStyle.Bytes)
+                    .WithField()
+                    .Label("File Size")
+                | negativeBalance.ToNumberInput()
+                    .FormatStyle(NumberFormatStyle.Accounting)
+                    .Currency("USD")
+                    .WithField()
+                    .Label("Account Balance");
+    }
+}
+```
+
+Available `NumberFormatStyle` values:
+- `Decimal` (default) — "1,234.56"
+- `Currency` — "$1,234.56"
+- `Percent` — "56%"
+- `Compact` — "1.2K", "3.5M", "1.1B"
+- `Scientific` — "1.23E6"
+- `Engineering` — "1.23E6" (exponents as multiples of 3)
+- `Accounting` — "($1,234.56)" for negatives
+- `Bytes` — "1.5 GB", "256 KB"
 
 ## Prefix and Suffix
 

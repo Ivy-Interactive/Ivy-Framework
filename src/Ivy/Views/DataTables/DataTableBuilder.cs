@@ -23,6 +23,7 @@ public class DataTableBuilder<TModel>(
     private readonly Dictionary<string, EventHandler<object>> _cellActions = [];
     private RefreshToken? _refreshToken;
     private FuncViewBuilder? _emptyViewFactory;
+    private Dictionary<string, object>? _footerValuesByColumn;
 
     private readonly string? _idColumnName =
         idSelector != null ? TypeHelper.GetNameFromMemberExpression(idSelector.Body) : null;
@@ -122,6 +123,12 @@ public class DataTableBuilder<TModel>(
         return _columns[name];
     }
 
+    private InternalColumn GetColumn<TValue>(Expression<Func<TModel, TValue>> field)
+    {
+        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
+        return _columns[name];
+    }
+
     public DataTableBuilder<TModel> Header(Expression<Func<TModel, object>> field, string label)
     {
         var column = GetColumn(field);
@@ -164,6 +171,63 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
+    public DataTableBuilder<TModel> Footer<TValue>(
+        Expression<Func<TModel, TValue>> field,
+        string label,
+        Func<IEnumerable<TValue>, object> aggregateFunc)
+    {
+        var column = GetColumn(field);
+        var selector = field.Compile();
+        var values = GetOrCreateFooterValueList(field, selector);
+        var result = aggregateFunc(values);
+        var footerText = $"{label}: {result}";
+        column.Column.Footer ??= [];
+        column.Column.Footer.Add(footerText);
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Footer<TValue>(
+        Expression<Func<TModel, TValue>> field,
+        IEnumerable<(string Label, Func<IEnumerable<TValue>, object> AggregateFunc)> aggregates)
+    {
+        var column = GetColumn(field);
+        var selector = field.Compile();
+        var values = GetOrCreateFooterValueList(field, selector);
+        var footerValues = aggregates
+            .Select(agg => $"{agg.Label}: {agg.AggregateFunc(values)}")
+            .ToList();
+        column.Column.Footer ??= [];
+        column.Column.Footer.AddRange(footerValues);
+        return this;
+    }
+
+    private List<TValue> GetOrCreateFooterValueList<TValue>(
+        Expression<Func<TModel, TValue>> field,
+        Func<TModel, TValue> compiledSelector)
+    {
+        var columnName = TypeHelper.GetNameFromMemberExpression(field.Body);
+        if (_footerValuesByColumn?.TryGetValue(columnName, out var cached) == true && cached is List<TValue> list)
+            return list;
+
+        var values = queryable.Select(compiledSelector).ToList();
+        _footerValuesByColumn ??= new Dictionary<string, object>(StringComparer.Ordinal);
+        _footerValuesByColumn[columnName] = values;
+        return values;
+    }
+
+    public DataTableBuilder<TModel> Format(Expression<Func<TModel, object>> field, NumberFormatStyle formatStyle, int? precision = null, string? currency = null)
+    {
+        var column = GetColumn(field);
+        column.Column.FormatStyle = formatStyle;
+        if (precision.HasValue) column.Column.Precision = precision;
+        if (currency != null) column.Column.Currency = currency;
+        if ((formatStyle == NumberFormatStyle.Currency || formatStyle == NumberFormatStyle.Accounting) && string.IsNullOrEmpty(column.Column.Currency))
+        {
+            column.Column.Currency = "USD";
+        }
+        return this;
+    }
+
     public DataTableBuilder<TModel> Group(Expression<Func<TModel, object>> field, string group)
     {
         var column = GetColumn(field);
@@ -183,6 +247,12 @@ public class DataTableBuilder<TModel>(
         var column = GetColumn(field);
         column.Column.Renderer = renderer;
         column.Column.ColType = renderer.ColType;
+        if (renderer is NumberDisplayRenderer numRenderer)
+        {
+            column.Column.FormatStyle = numRenderer.FormatStyle;
+            column.Column.Precision = numRenderer.Precision;
+            column.Column.Currency = numRenderer.Currency;
+        }
         return this;
     }
 
@@ -292,7 +362,7 @@ public class DataTableBuilder<TModel>(
 
     public override object? Build()
     {
-        var chatClient = UseService<IChatClient?>();
+        Context.TryUseService<IChatClient>(out var chatClient);
 
         var columns = _columns.Values.Where(e => !e.Removed).OrderBy(c => c.Column.Order).Select(e => e.Column)
             .ToArray();
@@ -348,8 +418,19 @@ public class DataTableBuilder<TModel>(
             idSelectorForView = obj => _idSelectorFunc((TModel)obj);
         }
 
-        return new DataTableView(queryable1, width, _height, columns, configuration, onCellClick, _onCellActivated,
-            _menuItemRowActions, _onRowAction, idSelectorForView, _refreshToken, _emptyViewFactory);
+        return new DataTableView(
+            queryable1,
+            width,
+            _height,
+            columns,
+            configuration,
+            onCellClick: onCellClick,
+            onCellActivated: _onCellActivated,
+            rowActions: _menuItemRowActions,
+            onRowAction: _onRowAction,
+            idSelector: idSelectorForView,
+            refreshToken: _refreshToken,
+            emptyViewFactory: _emptyViewFactory);
     }
 
     public object[] GetMemoValues()

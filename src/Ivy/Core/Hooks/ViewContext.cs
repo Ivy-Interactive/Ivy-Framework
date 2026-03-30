@@ -1,4 +1,5 @@
 using System.ComponentModel.Design;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Disposables;
 using Ivy.Core.Exceptions;
 using Ivy.Core.Helpers;
@@ -14,6 +15,7 @@ public class ViewContext : IViewContext
     private readonly AsyncDisposables _asyncDisposables = new();
     private readonly Dictionary<int, StateHook> _hooks = new();
     private readonly Dictionary<int, EffectHook> _effects = new();
+    private readonly Dictionary<int, ContextHook> _contextHooks = new();
     private readonly EffectQueue _effectQueue;
     private readonly IServiceContainer _services;
     private readonly HashSet<Type> _registeredServices;
@@ -150,16 +152,39 @@ public class ViewContext : IViewContext
     {
         ArgumentNullException.ThrowIfNull(factory);
 
+        var callingIndex = _callingIndex++;
         var type = typeof(T);
 
-        if (_registeredServices.Contains(type))
+        if (_contextHooks.TryGetValue(callingIndex, out var existingHook))
         {
-            return (T)_services.GetService(type)!;
+            // Re-evaluate factory to get fresh context with updated state
+            T newContext = factory()!;
+            existingHook.UpdateInstance(newContext);
+
+            // Update service container so UseContext finds the new instance
+            var services = (_services as ServiceContainer)!;
+            services.RemoveService(type);
+            services.AddService(type, newContext);
+
+            return newContext;
         }
 
+        // First call at this position - create new context hook
         T context = factory()!;
-        _services.AddService(type, context);
-        _registeredServices.Add(type);
+        var hook = new ContextHook(callingIndex, type, context);
+        _contextHooks[callingIndex] = hook;
+
+        if (!_registeredServices.Contains(type))
+        {
+            _services.AddService(type, context);
+            _registeredServices.Add(type);
+        }
+        else
+        {
+            var services = (_services as ServiceContainer)!;
+            services.RemoveService(type);
+            services.AddService(type, context);
+        }
 
         if (context is IDisposable disposable)
         {
@@ -172,10 +197,19 @@ public class ViewContext : IViewContext
     public T UseService<T>()
     {
         if (_appServices.GetService(typeof(T)) is T service)
-        {
             return service;
+        throw new InvalidOperationException($"Service of type '{typeof(T).FullName}' is not registered.");
+    }
+
+    public bool TryUseService<T>([MaybeNullWhen(false)] out T service)
+    {
+        if (_appServices.GetService(typeof(T)) is T found)
+        {
+            service = found;
+            return true;
         }
-        return default!;
+        service = default;
+        return false;
     }
 
     public object UseService(Type serviceType)
@@ -288,7 +322,12 @@ public class ViewContext : IViewContext
     {
         _disposables.Dispose();
         await _asyncDisposables.DisposeAsync();
+
+        foreach (var hook in _contextHooks.Values)
+            hook.Dispose();
+
         _hooks.Clear();
         _effects.Clear();
+        _contextHooks.Clear();
     }
 }

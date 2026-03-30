@@ -8,6 +8,7 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/comp
 import { useRef, useEffect, useState } from "react";
 import { Densities } from "@/types/density";
 import { cva } from "class-variance-authority";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 const asyncSelectContainerVariant = cva(
   "hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex text-left w-full items-center rounded-field border border-input bg-transparent shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer relative dark:border-white/10",
@@ -52,6 +53,7 @@ interface AsyncSelectInputWidgetProps {
   invalid?: string;
   density?: Densities;
   ghost?: boolean;
+  events?: string[];
 }
 
 export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
@@ -63,6 +65,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   loading,
   density = Densities.Medium,
   ghost = false,
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -142,6 +145,16 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         type="button"
         disabled={disabled}
         onClick={handleSelect}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+          }
+        }}
+        onFocus={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+          }
+        }}
         className={cn(
           asyncSelectContainerVariant({ density }),
           invalid && inputStyles.invalidInput,

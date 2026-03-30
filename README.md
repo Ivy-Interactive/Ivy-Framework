@@ -74,15 +74,15 @@ The Ivy.Console CLI provides a suite of tools to streamline your development wor
 - **Deployment Management:** Manage deployments to Azure, AWS, Google Cloud, or Sliplane with ease.
 - **Secrets Management:** Securely manage sensitive information within your applications.
 
-**[See Demo Video](https://www.youtube.com/watch?v=krH7sBLjUrM)** →
-
 ## Usage
 
 ### Quick Start
 
 > ⚠️ **Note:** Ivy.Console is still in beta, and the agentic features require an account. [Register](https://ivy.app/auth/sign-up) for a free account to be among the first to try these features.
 
-Make sure you have the [.NET 10 SDK installed](https://dotnet.microsoft.com/en-us/download/dotnet/10.0).
+Make sure you have the following prerequisites installed:
+- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+- [Rust Toolchain](https://rustup.rs/) (latest stable via `rustup`)
 
 1. **Install Ivy CLI**:
 
@@ -90,7 +90,14 @@ Make sure you have the [.NET 10 SDK installed](https://dotnet.microsoft.com/en-u
    dotnet tool install -g Ivy.Console
    ```
 
-2. **Create a new project**:
+2. **Install Vite+ CLI**:
+   Ivy uses the `vp` (Vite+) CLI for frontend orchestration. Install it globally:
+
+   ```bash
+   npm install -g vite-plus
+   ```
+
+3. **Create a new project**:
 
    ```bash
     ivy init --hello

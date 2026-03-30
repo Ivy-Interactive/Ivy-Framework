@@ -25,11 +25,25 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   invalid,
   onDateChange,
   format: formatProp,
+  min,
+  max,
   density = Densities.Medium,
   "data-testid": dataTestId,
+  onFocusChange,
 }) => {
   const [open, setOpen] = useState(false);
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
+
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      setOpen(newOpen);
+      onFocusChange?.(newOpen);
+    },
+    [onFocusChange],
+  );
+
+  const minDate = useMemo(() => (min ? new Date(min) : undefined), [min]);
+  const maxDate = useMemo(() => (max ? new Date(max) : undefined), [max]);
 
   const [viewYear, setViewYear] = useState(() =>
     date ? date.getFullYear() : new Date().getFullYear(),
@@ -40,6 +54,12 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   }, [date]);
 
   const showClear = nullable && !disabled && value != null && value !== "";
+
+  const isMonthDisabled = (monthIndex: number) => {
+    if (minDate && new Date(viewYear, monthIndex + 1, 0) < minDate) return true;
+    if (maxDate && new Date(viewYear, monthIndex, 1) > maxDate) return true;
+    return false;
+  };
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -65,7 +85,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
 
   return (
     <div className="relative w-full select-none">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
             disabled={disabled}
@@ -80,6 +100,12 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
               showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
             )}
             data-testid={dataTestId}
+            onFocus={() => {
+              if (!open) onFocusChange?.(true);
+            }}
+            onBlur={() => {
+              if (!open) onFocusChange?.(false);
+            }}
           >
             <CalendarIcon className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
             <span
@@ -115,22 +141,27 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
               </Button>
             </div>
             <div className="grid grid-cols-4 gap-1">
-              {MONTHS.map((month, i) => (
-                <Button
-                  key={month}
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "h-9 w-full text-sm font-normal",
-                    isSelected(i) &&
-                      "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-                    !isSelected(i) && isCurrentMonth(i) && "bg-accent text-accent-foreground",
-                  )}
-                  onClick={() => handleMonthSelect(i)}
-                >
-                  {month}
-                </Button>
-              ))}
+              {MONTHS.map((month, i) => {
+                const monthDisabled = isMonthDisabled(i);
+                return (
+                  <Button
+                    key={month}
+                    variant="ghost"
+                    size="sm"
+                    disabled={monthDisabled}
+                    className={cn(
+                      "h-9 w-full text-sm font-normal",
+                      isSelected(i) &&
+                        "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                      !isSelected(i) && isCurrentMonth(i) && "bg-accent text-accent-foreground",
+                      monthDisabled && "opacity-50 cursor-not-allowed",
+                    )}
+                    onClick={() => handleMonthSelect(i)}
+                  >
+                    {month}
+                  </Button>
+                );
+              })}
             </div>
           </div>
         </PopoverContent>

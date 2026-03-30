@@ -14,7 +14,7 @@ interface CardWidgetProps {
   width?: string;
   height?: string;
   aspectRatio?: number;
-  hoverVariant?: "None" | "Pointer" | "PointerAndTranslate";
+  hoverVariant?: "None" | "Pointer" | "PointerAndTranslate" | "Shadow";
   density?: Densities;
   disabled?: boolean;
   "data-testid"?: string;
@@ -59,7 +59,9 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       ? cardStyles.hover.none
       : hoverVariant === "Pointer"
         ? cardStyles.hover.pointer
-        : cardStyles.hover.pointerAndTranslate;
+        : hoverVariant === "Shadow"
+          ? cardStyles.hover.shadow
+          : cardStyles.hover.pointerAndTranslate;
 
   return (
     <Card

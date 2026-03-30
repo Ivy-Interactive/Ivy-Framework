@@ -26,8 +26,7 @@ import {
   iconInputSearchInputVariant,
   iconInputEmptyStateVariant,
 } from "@/components/ui/input/icon-input-variant";
-
-const EMPTY_ARRAY: never[] = [];
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 // Lucide icon names (PascalCase) - React components are typeof 'object', not 'function'
 const LUCIDE_ICON_NAMES = (Object.keys(icons) as string[]).filter(
@@ -89,10 +88,18 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
     if (events.includes("OnBlur")) eventHandler("OnBlur", id, [null]);
   }, [eventHandler, id, events, setLocalValue]);
 
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    setOpen(newOpen);
-    if (!newOpen) setSearch("");
-  }, []);
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      setOpen(newOpen);
+      if (!newOpen) {
+        setSearch("");
+        if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+      } else {
+        if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+      }
+    },
+    [eventHandler, id, events],
+  );
 
   const hasValue = localValue != null && localValue !== "" && localValue !== "None";
 
@@ -164,6 +171,12 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
               !hasValue && "text-muted-foreground",
               invalid && inputStyles.invalidInput,
             )}
+            onBlur={() => {
+              if (events.includes("OnBlur") && !open) eventHandler("OnBlur", id, []);
+            }}
+            onFocus={() => {
+              if (events.includes("OnFocus") && !open) eventHandler("OnFocus", id, []);
+            }}
           >
             {hasValue ? (
               <span className="flex items-center gap-2 min-w-0">

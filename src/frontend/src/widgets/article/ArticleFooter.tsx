@@ -1,7 +1,7 @@
 import { InternalLink } from "@/types/widgets";
 import { Github } from "lucide-react";
 import React from "react";
-import { convertAppUrlToPath, getChromeParam } from "@/lib/utils";
+import { convertAppUrlToPath, getShellParam } from "@/lib/utils";
 
 interface ArticleFooterProps {
   id: string;
@@ -19,12 +19,12 @@ export const ArticleFooter: React.FC<ArticleFooterProps> = ({
   onLinkClick,
 }) => {
   const handleLinkClick = (appId: string, event: React.MouseEvent<HTMLAnchorElement>) => {
-    // When chrome is disabled, use browser navigation
-    if (!getChromeParam()) {
+    // When appShell is disabled, use browser navigation
+    if (!getShellParam()) {
       return;
     }
 
-    // When chrome is enabled, use the backend event handler
+    // When appShell is enabled, use the backend event handler
     event.preventDefault();
     onLinkClick("OnLinkClick", id, ["app://" + appId]);
   };

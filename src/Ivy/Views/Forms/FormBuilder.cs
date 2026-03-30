@@ -17,6 +17,7 @@ public class FormBuilder<TModel> : ViewBase
 
     internal bool _formDisabled = false;
     internal Density _density = Ivy.Density.Medium;
+    internal LabelPosition? _labelPosition;
     internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
     internal FormValidationStrategy _validationStrategy;
     internal FormSubmitStrategy _submitStrategy;
@@ -324,6 +325,19 @@ public class FormBuilder<TModel> : ViewBase
     public FormBuilder<TModel> Medium() => Density(Ivy.Density.Medium);
     public FormBuilder<TModel> Large() => Density(Ivy.Density.Large);
 
+    public FormBuilder<TModel> LabelPosition(LabelPosition position)
+    {
+        _labelPosition = position;
+        return this;
+    }
+
+    public FormBuilder<TModel> LabelPosition(Expression<Func<TModel, object>> field, LabelPosition position)
+    {
+        var hint = GetField(field);
+        hint.LabelPosition = position;
+        return this;
+    }
+
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
         var name = TypeHelper.GetNameFromMemberExpression(field.Body);
@@ -352,6 +366,7 @@ public class FormBuilder<TModel> : ViewBase
             .Where(e => e is { Removed: false, InputFactory: not null })
             .Select(e =>
             {
+                var effectiveLabelPosition = e.LabelPosition ?? _labelPosition;
                 IFormFieldBinding<TModel> binding = new FormFieldBinding<TModel>(
                     CreateSelector(e.Name),
                     e.InputFactory!,
@@ -369,7 +384,8 @@ public class FormBuilder<TModel> : ViewBase
                     e.Help,
                     e.Placeholder,
                     _submitStrategy,
-                    e.Disabled || _formDisabled
+                    e.Disabled || _formDisabled,
+                    effectiveLabelPosition
                 );
                 return binding;
             })

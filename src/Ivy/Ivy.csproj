@@ -46,7 +46,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Protobuf Include="Protos\datatable.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos/datatable.proto" GrpcServices="Server" />
   </ItemGroup>
   
   <ItemGroup>
@@ -55,21 +55,23 @@
     <PackageReference Include="ExcelNumberFormat" Version="1.1.0" />
     <PackageReference Include="Google.Protobuf" Version="3.33.2" />
     <PackageReference Include="Grpc.AspNetCore.Web" Version="2.76.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.1.1" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.1" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.1.1-preview.1.25612.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.9" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5" />
     <PackageReference Include="Microsoft.OpenApi" Version="2.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
     <PackageReference Include="System.Reactive" Version="6.1.0" />
     <PackageReference Include="DeepCloner" Version="0.10.4" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="System.IO.Hashing" Version="10.0.1" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.5" />
     <PackageReference Include="Ivy.SystemTextJson.JsonDiffPatch" Version="2.0.4" />
 <PackageReference Include="Ivy.DesignSystem" Version="1.1.22" />
   </ItemGroup>
@@ -82,14 +84,49 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Ivy.Agent.Filter\Ivy.Agent.Filter.csproj" />
+    <ProjectReference Include="../Ivy.Agent.Filter/Ivy.Agent.Filter.csproj" />
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="Core\Apps\" />
-    <Folder Include="Core\Auth\" />
-    <Folder Include="Core\Chrome\" />
-    <Folder Include="Properties\" />
+    <Folder Include="Core/Apps/" />
+    <Folder Include="Core/Auth/" />
+    <Folder Include="Properties/" />
   </ItemGroup>
+
+  <!-- Frontend source files for incremental build detection -->
+  <ItemGroup>
+    <FrontendSourceFiles Include="../frontend/src/**/*" />
+    <FrontendSourceFiles Include="../frontend/package.json" />
+    <FrontendSourceFiles Include="../frontend/pnpm-lock.yaml" Condition="Exists('../frontend/pnpm-lock.yaml')" />
+    <FrontendSourceFiles Include="../frontend/tsconfig.json" Condition="Exists('../frontend/tsconfig.json')" />
+    <FrontendSourceFiles Include="../frontend/vite.config.*" />
+  </ItemGroup>
+
+  <Target Name="NpmInstall" BeforeTargets="BuildFrontend"
+          Inputs="../frontend/package.json;../frontend/pnpm-lock.yaml"
+          Outputs="../frontend/node_modules/.modules.yaml">
+    <Exec Command="vp install" WorkingDirectory="../frontend" />
+  </Target>
+
+  <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths"
+          Inputs="@(FrontendSourceFiles)"
+          Outputs="../frontend/dist/.build-stamp">
+    <Exec Command="vp run build" WorkingDirectory="../frontend" />
+    <Touch Files="../frontend/dist/.build-stamp" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="BuildRustServer" BeforeTargets="BeforeBuild">
+    <Exec Command="cargo build --release" WorkingDirectory="../RustServer" />
+  </Target>
+
+  <Target Name="AddRustBinariesToContent" BeforeTargets="AssignTargetPaths" DependsOnTargets="BuildRustServer">
+    <ItemGroup>
+      <Content Include="../RustServer/target/release/*rustserver*.dll;../RustServer/target/release/*rustserver*.so;../RustServer/target/release/*rustserver*.dylib">
+        <Link>%(Filename)%(Extension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Visible>false</Visible>
+      </Content>
+    </ItemGroup>
+  </Target>
 
 </Project>

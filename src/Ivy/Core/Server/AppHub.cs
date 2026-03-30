@@ -24,15 +24,56 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
+    private static readonly HashSet<string> ReservedQueryParams = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "appId", "machineId", "parentId", "shell", "appArgs", "oauthLogin", "id"
+    };
+
     private AppContext GetAppArgs(string connectionId, string machineId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
     {
         string? appArgs = null;
+
+        // First check for explicit appArgs parameter (takes precedence)
         if (httpContext.Request.Query.TryGetValue("appArgs", out var appArgsParam))
         {
             appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
-        return new AppContext(connectionId, machineId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, httpContext.Request.Host.Value!);
+        // If no explicit appArgs, build JSON from individual query parameters
+        if (appArgs == null && httpContext.Request.Query.Count > 0)
+        {
+            var argsDict = new Dictionary<string, string>();
+
+            foreach (var kvp in httpContext.Request.Query)
+            {
+                if (ReservedQueryParams.Contains(kvp.Key))
+                    continue;
+
+                var value = kvp.Value.FirstOrDefault();
+                if (value != null)
+                {
+                    argsDict[kvp.Key] = value;
+                }
+            }
+
+            if (argsDict.Count > 0)
+            {
+                appArgs = System.Text.Json.JsonSerializer.Serialize(argsDict, JsonHelper.DefaultOptions);
+            }
+        }
+
+        // Get base path from X-Forwarded-Prefix header (for reverse proxy), or fall back to server.Args
+        var basePath = server.Args?.BasePath;
+        if (httpContext.Request.Headers.TryGetValue("X-Forwarded-Prefix", out var forwardedPrefix) && !string.IsNullOrEmpty(forwardedPrefix.ToString()))
+        {
+            basePath = forwardedPrefix.ToString().Trim('/');
+        }
+
+        var requestHost = httpContext.Request.Host.Value!;
+        if (httpContext.Request.Headers.TryGetValue("X-Forwarded-Host", out var forwardedHost) && !string.IsNullOrEmpty(forwardedHost.ToString()))
+            requestHost = forwardedHost.ToString();
+
+        return new AppContext(connectionId, machineId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, requestHost, basePath);
     }
 
     public override async Task OnConnectedAsync()
@@ -150,9 +191,9 @@ public class AppHub(
                 }
             }
 
-            if (routeResult.AppDescriptor.Title is { } title && routeResult.AppId != AppIds.Chrome && parentId == null)
+            if (routeResult.AppDescriptor.Title is { } title && routeResult.AppId != AppIds.AppShell && parentId == null)
             {
-                clientProvider.SetTitle(title, server.Args.MetaTitle);
+                clientProvider.SetTitle(title, server.Args.Metadata.Title);
             }
 
             appServices.AddSingleton(routeResult.AppRepository);
@@ -160,7 +201,7 @@ public class AppHub(
             var appArgs = GetAppArgs(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
             if (routeResult.ArgsJson != null)
             {
-                appArgs = new AppContext(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, routeResult.ArgsJson, requestScheme, httpContext.Request.Host.Value!);
+                appArgs = new AppContext(Context.ConnectionId, machineId, routeResult.AppId, routeResult.NavigationAppId, routeResult.ArgsJson, requestScheme, appArgs.Host, appArgs.BasePath);
             }
 
             logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, routeResult.AppId);
@@ -199,9 +240,9 @@ public class AppHub(
                 clientProvider.SetRootAppId(routeResult.AppId);
                 bool isNotFoundPage = routeResult.AppDescriptor.Id == AppIds.ErrorNotFound;
 
-                if (routeResult.AppId != AppIds.Chrome && !isNotFoundPage)
+                if (routeResult.AppId != AppIds.AppShell && !isNotFoundPage)
                 {
-                    var navigateArgs = new NavigateArgs(routeResult.AppId, Chrome: routeResult.ShowChrome);
+                    var navigateArgs = new NavigateArgs(routeResult.AppId, AppShell: routeResult.ShowAppShell);
                     clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
                 }
             }
@@ -211,7 +252,15 @@ public class AppHub(
                 try
                 {
                     logger.LogDebug("> Update");
-                    clientProvider.Sender.Send("Update", changes);
+                    var payload = changes.Select(c => new Dictionary<string, object?>
+                    {
+                        ["viewId"] = c.ViewId,
+                        ["indices"] = c.Indices,
+                        ["patch"] = c.Patch,
+                        ["iteration"] = c.Iteration,
+                        ["treeHash"] = c.TreeHash
+                    }).ToArray();
+                    clientProvider.Sender.Send("Update", payload);
                 }
                 catch (Exception e)
                 {
@@ -250,24 +299,24 @@ public class AppHub(
                     ? ExternalWidgetRegistry.Instance.GetRegistryForFrontend()
                     : null;
 
-                await Clients.Caller.SendAsync("Refresh", new
+                await Clients.Caller.SendAsync("Refresh", new Dictionary<string, object?>
                 {
-                    Widgets = widgetTree.GetWidgets().Serialize(),
-                    ExternalWidgets = externalWidgets
+                    ["widgets"] = widgetTree.GetWidgets().Serialize(),
+                    ["externalWidgets"] = externalWidgets
                 }, cancellationToken: connectionAborted);
             }
             catch (Exception e)
             {
                 var tree = new WidgetTree(new ExceptionErrorView(e), contentBuilder, serviceProvider);
                 await tree.BuildAsync();
-                await Clients.Caller.SendAsync("Refresh", new
+                await Clients.Caller.SendAsync("Refresh", new Dictionary<string, object?>
                 {
-                    Widgets = tree.GetWidgets().Serialize(),
-                    ExternalWidgets = (object?)null
+                    ["widgets"] = tree.GetWidgets().Serialize(),
+                    ["externalWidgets"] = (object?)null
                 }, cancellationToken: connectionAborted);
             }
 
-            if (server.AuthProviderType != null && routeResult.AppId != AppIds.Auth)
+            if (server.AuthProviderType != null && routeResult.AppId != AppIds.Auth && routeResult.AppId != AppIds.AppShell)
             {
                 _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted), connectionAborted);
 
@@ -721,10 +770,10 @@ public class AppHub(
 
     public Task Event(string eventName, string widgetId, JsonArray? args)
     {
-        logger.LogWarning("Event RECEIVED: {EventName} {WidgetId} ConnectionId={ConnectionId}", eventName, widgetId, Context.ConnectionId);
+        logger.LogDebug("Event received: {EventName} {WidgetId} ConnectionId={ConnectionId}", eventName, widgetId, Context.ConnectionId);
         if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
         {
-            logger.LogWarning("Event: {EventName} {WidgetId} [AppSession Not Found]", eventName, widgetId);
+            logger.LogDebug("Event: {EventName} {WidgetId} [AppSession Not Found] ConnectionId={ConnectionId}", eventName, widgetId, Context.ConnectionId);
             return Task.CompletedTask;
         }
 
@@ -765,23 +814,23 @@ public class AppHub(
     {
         logger.LogInformation("Navigate: {ConnectionId} to [{AppId}] with tab ID {TabId}", Context.ConnectionId, appId, state?.TabId);
 
-        // Find the Chrome session for this connection
+        // Find the AppShell session for this connection
         if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
         {
             logger.LogWarning("Navigate: {ConnectionId} [{AppId}] [AppSession not found]", Context.ConnectionId, appId);
             return;
         }
 
-        var chromeSession = sessionStore.FindChrome(appSession);
-        if (chromeSession == null)
+        var appShellSession = sessionStore.FindAppShell(appSession);
+        if (appShellSession == null)
         {
-            logger.LogWarning("Navigate: {ConnectionId} [{AppId}] [Chrome session not found]", Context.ConnectionId, appId);
+            logger.LogWarning("Navigate: {ConnectionId} [{AppId}] [AppShell session not found]", Context.ConnectionId, appId);
             return;
         }
 
         try
         {
-            var navigateSignal = (NavigateSignal)chromeSession.Signals.GetOrAdd(
+            var navigateSignal = (NavigateSignal)appShellSession.Signals.GetOrAdd(
                 typeof(NavigateSignal),
                 _ => new NavigateSignal()
             );

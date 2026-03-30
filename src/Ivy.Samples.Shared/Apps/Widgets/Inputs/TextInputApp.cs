@@ -15,6 +15,8 @@ public class TextInputApp : SampleBase
         UseEffect(() => { onChangeLabel.Set(string.IsNullOrEmpty(onChangedState.Value) ? "" : "Changed"); }, onChangedState);
         var onBlurState = UseState("");
         var onBlurLabel = UseState("");
+        var onFocusState = UseState("");
+        var onFocusLabel = UseState("");
 
         var stringState = UseState("");
         var nullStringState = UseState<string?>();
@@ -41,7 +43,7 @@ public class TextInputApp : SampleBase
             ;
 
         return Layout.Vertical()
-               | Text.H1("Text Inputs")
+               | Text.H1("Text Input")
                | Text.H2("Sizes")
                | new TextInputSizes()
                | Text.H2("Variants")
@@ -96,10 +98,23 @@ public class TextInputApp : SampleBase
                    onChangedState.ToTextInput(),
                    onChangeLabel
                 )
-               | Text.H3("OnBlur")
-               | Layout.Horizontal(
-                   onBlurState.ToTextInput().OnBlur(e => onBlurLabel.Set("Blur")),
-                   onBlurLabel
+               | (Layout.Vertical()
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The blur event fires when the text input loses focus.").Small()
+                           | onBlurState.ToTextInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                           | (onBlurLabel.Value != ""
+                               ? Callout.Success(onBlurLabel.Value)
+                               : Callout.Info("Interact then click away to see blur events"))
+                   ).Title("OnBlur Handler")
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The focus event fires when you click on or tab into the text input.").Small()
+                           | onFocusState.ToTextInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                           | (onFocusLabel.Value != ""
+                               ? Callout.Success(onFocusLabel.Value)
+                               : Callout.Info("Click or tab into the input to see focus events"))
+                   ).Title("OnFocus Handler")
                )
                | Text.H3("OnSubmit (press Enter)")
                | new TextInputSubmitDemo()

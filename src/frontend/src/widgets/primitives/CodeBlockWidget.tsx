@@ -121,6 +121,8 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         fontSize: currentScale.fontSize,
         padding: currentScale.padding,
         lineHeight: currentScale.lineHeight,
+        // Ensure empty code blocks have at least one line of height
+        minHeight: `calc(${currentScale.fontSize} * ${currentScale.lineHeight} + ${currentScale.padding} * 2)`,
       };
       if (!showBorder) {
         style.border = "none";
@@ -137,8 +139,9 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         whiteSpace: wrapLines ? "pre-wrap" : "pre",
         fontSize: currentScale.fontSize,
         lineHeight: currentScale.lineHeight,
+        ...(showLineNumbers && { display: "table" }),
       }),
-      [currentScale, wrapLines],
+      [currentScale, wrapLines, showLineNumbers],
     );
 
     const highlighterKey = useMemo(

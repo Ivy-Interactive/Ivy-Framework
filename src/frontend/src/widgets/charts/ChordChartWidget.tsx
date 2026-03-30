@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { getHeight, getWidth } from "@/lib/styles";
 import { useThemeWithMonitoring } from "@/components/theme-provider";
 import ReactECharts from "echarts-for-react";
@@ -147,9 +147,20 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
     };
   }, [chartColors, data, sort, legend, themeColors, tooltip, toolbox]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleChartReady = useCallback(() => {
+    containerRef.current?.setAttribute("data-chart-rendered", "true");
+  }, []);
+
   return (
-    <div style={styles}>
-      <ReactECharts option={option} style={chartStyles} notMerge={true} lazyUpdate={true} />
+    <div ref={containerRef} style={styles}>
+      <ReactECharts
+        option={option}
+        style={chartStyles}
+        notMerge={true}
+        lazyUpdate={true}
+        onChartReady={handleChartReady}
+      />
     </div>
   );
 };

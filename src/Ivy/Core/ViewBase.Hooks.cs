@@ -131,12 +131,14 @@ public abstract partial class ViewBase
         where TKey : notnull =>
         this.Context.UseMutation<TValue, TKey>(key, options);
 
+    [OverloadResolutionPriority(1)]
     protected IState<string?> UseDownload(Func<byte[]> factory, string mimeType, string fileName) =>
         this.Context.UseDownload(() => Task.FromResult(factory()), mimeType, fileName);
 
     protected IState<string?> UseDownload(Func<Task<byte[]>> factory, string mimeType, string fileName) =>
         this.Context.UseDownload(factory, mimeType, fileName);
 
+    [OverloadResolutionPriority(1)]
     protected IState<string?> UseDownload(Func<Stream> factory, string mimeType, string fileName) =>
         this.Context.UseDownload(() => Task.FromResult(factory()), mimeType, fileName);
 
@@ -196,6 +198,9 @@ public abstract partial class ViewBase
 
     protected INavigator UseNavigation() =>
         this.Context.UseNavigation();
+
+    protected NavigationBeacon<T>? UseNavigationBeacon<T>() =>
+        this.Context.UseNavigationBeacon<T>();
 
     protected (IView? alertView, ShowAlertDelegate showAlert) UseAlert() =>
         this.Context.UseAlert();

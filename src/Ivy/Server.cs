@@ -9,10 +9,15 @@ using Ivy.Core.Server;
 using Ivy.Core.Server.HtmlPipeline;
 using Ivy.Core.Server.HtmlPipeline.Filters;
 using Ivy.Core.Server.Middleware;
+using Ivy.Core.Server.Formatters;
+using MessagePack;
+using MessagePack.Resolvers;
+using MessagePack.Formatters;
 using Ivy.Themes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +27,18 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy;
+
+public record ServerMetadata
+{
+    public string? Title { get; set; } = null;
+    public string? Description { get; set; } = null;
+    public string? GitHubUrl { get; set; } = null;
+    public string? OgImage { get; set; } = null;
+    public string? OgSiteName { get; set; } = null;
+    public string? OgType { get; set; } = "website";
+    public string? OgLocale { get; set; } = "en_US";
+    public string? TwitterCard { get; set; } = "summary_large_image";
+}
 
 public record ServerArgs
 {
@@ -36,16 +53,21 @@ public record ServerArgs
     public bool Describe { get; set; } = false;
     public string? DescribeConnection { get; set; } = null;
     public string? TestConnection { get; set; } = null;
-    public string? MetaTitle { get; set; } = null;
-    public string? MetaDescription { get; set; } = null;
+    public ServerMetadata Metadata { get; set; } = new();
     public Assembly? AssetAssembly { get; set; } = null;
     public bool EnableDevTools { get; set; } = false;
+    public bool DangerouslyAllowLocalFiles { get; set; } = false;
 #if DEBUG
     public bool FindAvailablePort { get; set; } = true;
 #else
     public bool FindAvailablePort { get; set; } = false;
 #endif
     public string? Host { get; set; } = null;
+
+    /// <summary>
+    /// Base path for the application when running behind a reverse proxy (e.g., "/myapp").
+    /// </summary>
+    public string? BasePath { get; set; } = null;
 
     /// <summary>
     /// True when the process is running a CLI-only command (--describe, --describe-connection, --test-connection)
@@ -59,6 +81,7 @@ public class Server
     public IReadOnlySet<string> ReservedPaths => _reservedPaths;
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
+    public NavigationBeaconRegistry NavigationBeaconRegistry { get; } = new();
     public IServiceCollection Services { get; } = new ServiceCollection();
     public IConfiguration Configuration { get; private set; } = ServerUtils.GetConfiguration();
     public Type? AuthProviderType { get; private set; } = null;
@@ -95,13 +118,19 @@ public class Server
             _args = _args with { Host = host };
         }
 
+        if (_args.BasePath == null && Environment.GetEnvironmentVariable("BASE_PATH") is { } basePath)
+        {
+            _args = _args with { BasePath = basePath };
+        }
+
         _args = _args with
         {
             AssetAssembly = _args.AssetAssembly ?? Assembly.GetCallingAssembly(),
         };
 
         Services.AddSingleton(_args);
-        Services.AddSingleton(Configuration);
+        // capture the latest Configuration value at resolution time in case it gets replaced by UseConfiguration()
+        Services.AddSingleton(_ => Configuration);
 
         AddDefaultApps();
     }
@@ -203,27 +232,27 @@ public class Server
         return this;
     }
 
-    public Server UseChrome(ChromeSettings settings)
+    public Server UseAppShell(AppShellSettings settings)
     {
-        return UseChrome(() => new DefaultSidebarChrome(settings));
+        return UseAppShell(() => new DefaultSidebarAppShell(settings));
     }
 
-    public Server UseChrome<T>() where T : ViewBase, new()
+    public Server UseAppShell<T>() where T : ViewBase, new()
     {
-        return UseChrome((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
+        return UseAppShell((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
     }
 
-    public Server UseChrome(Func<ViewBase>? viewFactory = null)
+    public Server UseAppShell(Func<ViewBase>? viewFactory = null)
     {
         AddApp(new AppDescriptor
         {
-            Id = AppIds.Chrome,
-            Title = "Chrome",
-            ViewFactory = viewFactory ?? (() => new DefaultSidebarChrome(ChromeSettings.Default())),
+            Id = AppIds.AppShell,
+            Title = "AppShell",
+            ViewFactory = viewFactory ?? (() => new DefaultSidebarAppShell(AppShellSettings.Default())),
             Group = [],
             IsVisible = false
         });
-        DefaultAppId = AppIds.Chrome;
+        DefaultAppId = AppIds.AppShell;
         return this;
     }
 
@@ -262,24 +291,20 @@ public class Server
         try
         {
             // Load all "Ivy.Auth.*" assemblies eagerly to ensure their handlers are registered in the DI container
-            var entryAssembly = Assembly.GetEntryAssembly();
-            if (entryAssembly?.Location != null)
+            var assemblyDirectory = System.AppContext.BaseDirectory;
+            if (!string.IsNullOrEmpty(assemblyDirectory))
             {
-                var assemblyDirectory = Path.GetDirectoryName(entryAssembly.Location);
-                if (assemblyDirectory != null)
-                {
-                    var authAssemblyFiles = Directory.GetFiles(assemblyDirectory, "Ivy.Auth.*.dll");
+                var authAssemblyFiles = Directory.GetFiles(assemblyDirectory, "Ivy.Auth.*.dll");
 
-                    foreach (var assemblyFile in authAssemblyFiles)
+                foreach (var assemblyFile in authAssemblyFiles)
+                {
+                    try
                     {
-                        try
-                        {
-                            Assembly.LoadFrom(assemblyFile);
-                        }
-                        catch
-                        {
-                            // Continue if we can't load an assembly
-                        }
+                        Assembly.LoadFrom(assemblyFile);
+                    }
+                    catch
+                    {
+                        // Continue if we can't load an assembly
                     }
                 }
             }
@@ -390,13 +415,19 @@ public class Server
 
     public Server SetMetaTitle(string title)
     {
-        _args.MetaTitle = title;
+        _args.Metadata.Title = title;
         return this;
     }
 
     public Server SetMetaDescription(string description)
     {
-        _args.MetaDescription = description;
+        _args.Metadata.Description = description;
+        return this;
+    }
+
+    public Server SetMetaGitHubUrl(string url)
+    {
+        _args.Metadata.GitHubUrl = url;
         return this;
     }
 
@@ -449,6 +480,12 @@ public class Server
         _manifestOptions = new ManifestOptions();
         configure?.Invoke(_manifestOptions);
         Services.AddSingleton(_manifestOptions);
+        return this;
+    }
+
+    public Server DangerouslyAllowLocalFiles()
+    {
+        _args = _args with { DangerouslyAllowLocalFiles = true };
         return this;
     }
 
@@ -587,6 +624,21 @@ public class Server
         // Initialize external widget registry by scanning loaded assemblies
         ExternalWidgetRegistry.Instance.Initialize();
 
+        // Register navigation beacons from all loaded assemblies
+        var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => !a.IsDynamic && a.GetLoadableTypes().Any());
+        foreach (var assembly in loadedAssemblies)
+        {
+            try
+            {
+                AppHelpers.RegisterBeacons(assembly, NavigationBeaconRegistry);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[WARNING] Failed to register beacons from {assembly.GetName().Name}: {ex.Message}");
+            }
+        }
+
         // Ensure sufficient ThreadPool workers to avoid heartbeat warnings under bursty loads
         try
         {
@@ -620,9 +672,25 @@ public class Server
         builder.Services.AddSignalR(options =>
         {
             options.EnableDetailedErrors = _args.Verbose;
+            options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
+            options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+            options.MaximumReceiveMessageSize = 1048576; // 1MB
         }).AddJsonProtocol(options =>
         {
             options.PayloadSerializerOptions.TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver();
+        }).AddMessagePackProtocol(options =>
+        {
+            options.SerializerOptions = MessagePackSerializerOptions.Standard.WithResolver(
+                CompositeResolver.Create(
+                    new IMessagePackFormatter[] {
+                        new JsonNodeMessagePackFormatter(),
+                        new JsonObjectMessagePackFormatter(),
+                        new JsonArrayMessagePackFormatter(),
+                        new JsonValueMessagePackFormatter()
+                    },
+                    new IFormatterResolver[] { ContractlessStandardResolver.Instance }
+                )
+            );
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
@@ -643,6 +711,9 @@ public class Server
         {
             Services.AddSingleton<IThemeService, ThemeService>();
         }
+
+        // Register NavigationBeaconRegistry as a singleton service
+        builder.Services.AddSingleton<INavigationBeaconRegistry>(NavigationBeaconRegistry);
 
         // Register all services from this server's Services collection
         foreach (var service in Services)
@@ -672,7 +743,7 @@ public class Server
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
 
-        builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Debug);
+        builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Information);
 
         // Suppress hosting startup errors when not verbose (we handle IOException with a friendly message)
         if (!_args.Verbose)
@@ -724,6 +795,23 @@ public class Server
 
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
+        // Configure ForwardedHeaders middleware to process X-Forwarded-* headers from reverse proxies
+        var forwardedHeadersOptions = new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                | ForwardedHeaders.XForwardedProto
+                | ForwardedHeaders.XForwardedHost
+                | ForwardedHeaders.XForwardedPrefix,
+        };
+        forwardedHeadersOptions.KnownIPNetworks.Clear();
+        forwardedHeadersOptions.KnownProxies.Clear();
+        app.UseForwardedHeaders(forwardedHeadersOptions);
+
+        if (!string.IsNullOrEmpty(_args.BasePath))
+        {
+            Console.WriteLine($"Using base path: {_args.BasePath}");
+            app.UsePathBase(_args.BasePath);
+        }
 
         app.UseRouting(); // First routing pass - match explicit routes (gRPC, controllers)
         app.UsePathToAppId(); // Rewrite path to appId if no endpoint matched
@@ -990,57 +1078,12 @@ public static class WebApplicationExtensions
         );
         var resourceName = $"{assembly.GetName().Name}.index.html";
         app.MapGet("/", async context =>
-        {
-            var version = assembly.GetName().Version?.ToString();
-            if (!string.IsNullOrEmpty(version))
-            {
-                context.Response.Headers["ivy-version"] = version;
-            }
+            await ServeIndexHtml(context, app, serverArgs, assembly, resourceName));
 
-            // Determine HTTP status code based on app routing
-            var server = app.Services.GetRequiredService<Server>();
-            var httpStatusCode = GetHttpStatusCodeForRequest(server, context);
-
-            await using var stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream != null)
-            {
-                using var reader = new StreamReader(stream);
-                var html = await reader.ReadToEndAsync();
-
-                var pipeline = new HtmlPipeline()
-                    .Use<LicenseFilter>()
-                    .Use<DevToolsFilter>()
-                    .Use<MetaDescriptionFilter>()
-                    .Use<TitleFilter>()
-                    .Use<ThemeFilter>()
-                    .Use<ManifestFilter>();
-
-                foreach (var filter in server.GetCustomFilters())
-                    pipeline.Use(filter);
-
-                server.GetPipelineConfigurator()?.Invoke(pipeline);
-
-                var pipelineContext = new HtmlPipelineContext
-                {
-                    Services = app.Services,
-                    ServerArgs = serverArgs
-                };
-
-
-                html = pipeline.Process(pipelineContext, html);
-
-                context.Response.ContentType = "text/html";
-                context.Response.StatusCode = httpStatusCode;
-                var bytes = Encoding.UTF8.GetBytes(html);
-                await context.Response.Body.WriteAsync(bytes);
-            }
-            else
-            {
-                context.Response.StatusCode = 500;
-                context.Response.ContentType = "text/plain";
-                await context.Response.WriteAsync($"Error: {resourceName} not found.");
-            }
-        });
+        // SPA fallback: serve index.html for any path not matched by other routes
+        // (enables client-side routing for /sign-in, /foo/bar/sign-in, etc.)
+        app.MapFallback(async context =>
+            await ServeIndexHtml(context, app, serverArgs, assembly, resourceName));
 
         app.MapGet("/manifest.json", () =>
         {
@@ -1049,9 +1092,105 @@ public static class WebApplicationExtensions
             return Results.Json(manifest.ToManifest());
         });
 
+
+        // In local development, prefer serving from the physical disk for faster updates and easier debugging
+#if DEBUG
+        try
+        {
+            var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "src", "frontend", "dist");
+            if (!Directory.Exists(physicalPath))
+            {
+                // Try cases where we are already in src or running from a sample project subfolder
+                physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "frontend", "dist");
+            }
+            if (!Directory.Exists(physicalPath))
+            {
+                physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "frontend", "dist");
+            }
+
+            if (Directory.Exists(physicalPath))
+            {
+                logger.LogDebug("Serving frontend assets from physical path: {PhysicalPath}", Path.GetFullPath(physicalPath));
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(Path.GetFullPath(physicalPath)),
+                    RequestPath = ""
+                });
+            }
+            else
+            {
+                // Only log if CWD looks like it's inside the Ivy-Framework tree
+                var cwd = Directory.GetCurrentDirectory();
+                if (cwd.Contains("Ivy-Framework", StringComparison.OrdinalIgnoreCase))
+                {
+                    logger.LogDebug("Frontend physical path not found: {PhysicalPath} (CWD: {Cwd})", Path.GetFullPath(physicalPath), cwd);
+                }
+            }
+        }
+        catch { /* fallback to embedded resources */ }
+#endif
+
         app.UseStaticFiles(GetStaticFileOptions("", embeddedProvider, assembly));
 
+
         return app;
+    }
+
+    private static async Task ServeIndexHtml(HttpContext context, WebApplication app, ServerArgs serverArgs, Assembly assembly, string resourceName)
+    {
+        var version = assembly.GetName().Version?.ToString();
+        if (!string.IsNullOrEmpty(version))
+        {
+            context.Response.Headers["ivy-version"] = version;
+        }
+
+        // Determine HTTP status code based on app routing
+        var server = app.Services.GetRequiredService<Server>();
+        var httpStatusCode = GetHttpStatusCodeForRequest(server, context);
+
+        await using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream != null)
+        {
+            using var reader = new StreamReader(stream);
+            var html = await reader.ReadToEndAsync();
+
+            var pipeline = new HtmlPipeline()
+                .Use<LicenseFilter>()
+                .Use<DevToolsFilter>()
+                .Use<LocalFilesFilter>()
+                .Use<MetaDescriptionFilter>()
+                .Use<MetaGitHubUrlFilter>()
+                .Use<TitleFilter>()
+                .Use<ThemeFilter>()
+                .Use<ManifestFilter>()
+                .Use<OpenGraphFilter>()
+                .Use<BasePathFilter>();
+
+            foreach (var filter in server.GetCustomFilters())
+                pipeline.Use(filter);
+
+            server.GetPipelineConfigurator()?.Invoke(pipeline);
+
+            var pipelineContext = new HtmlPipelineContext
+            {
+                Services = app.Services,
+                ServerArgs = serverArgs
+            };
+
+
+            html = pipeline.Process(pipelineContext, html);
+
+            context.Response.ContentType = "text/html";
+            context.Response.StatusCode = httpStatusCode;
+            var bytes = Encoding.UTF8.GetBytes(html);
+            await context.Response.Body.WriteAsync(bytes);
+        }
+        else
+        {
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "text/plain";
+            await context.Response.WriteAsync($"Error: {resourceName} not found.");
+        }
     }
 
     public static WebApplication UseAssets(this WebApplication app, ServerArgs args, ILogger<Server> logger,

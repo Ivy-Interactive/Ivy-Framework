@@ -7,13 +7,16 @@ export function useCalendarData(
   widgetNodeChildren?: WidgetNodeChild[],
 ): CalendarEvent[] {
   return React.useMemo(() => {
-    if (!widgetNodeChildren || widgetNodeChildren.length === 0) {
+    const calendarEventChildren = (widgetNodeChildren || []).filter(
+      (c) => c.type === "Ivy.CalendarEvent",
+    );
+    if (calendarEventChildren.length === 0) {
       return [];
     }
 
     const events: CalendarEvent[] = [];
 
-    widgetNodeChildren.forEach((widgetNode, index) => {
+    calendarEventChildren.forEach((widgetNode, index) => {
       if (widgetNode.type === "Ivy.CalendarEvent") {
         const eventId = (widgetNode.props.eventId as string) || widgetNode.id;
         const title = (widgetNode.props.title as string) || "";

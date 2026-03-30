@@ -4,9 +4,9 @@ public class MetaDescriptionFilter : IHtmlFilter
 {
     public string Process(HtmlPipelineContext context, string html)
     {
-        if (!string.IsNullOrEmpty(context.ServerArgs.MetaDescription))
+        if (!string.IsNullOrEmpty(context.ServerArgs.Metadata.Description))
         {
-            var metaDescriptionTag = $"<meta name=\"description\" content=\"{context.ServerArgs.MetaDescription}\" />";
+            var metaDescriptionTag = $"<meta name=\"description\" content=\"{context.ServerArgs.Metadata.Description}\" />";
             html = html.Replace("</head>", $"  {metaDescriptionTag}\n</head>");
         }
 

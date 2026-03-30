@@ -19,7 +19,7 @@ const createIvyPrismTheme = (): Record<string, CSSProperties> => ({
     // Remove border since it's now applied to ScrollArea container
     borderRadius: "0.5em",
   },
-  comment: { color: "var(--muted-foreground)", fontStyle: "italic" },
+  comment: { color: "var(--muted-foreground)" },
   string: { color: "var(--primary)" },
   number: { color: "var(--foreground)" },
   boolean: { color: "var(--cyan)" },

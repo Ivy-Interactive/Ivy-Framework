@@ -28,6 +28,11 @@ public class DataTableColumn
     public int Order { get; set; } = 0;
     public string? Icon { get; set; } = null;
     public string? Help { get; set; } = null;
+    public List<string>? Footer { get; set; } = null;
+
+    public NumberFormatStyle? FormatStyle { get; set; } = null;
+    public int? Precision { get; set; } = null;
+    public string? Currency { get; set; } = null;
 
     [JsonIgnore]
     public IDataTableColumnRenderer? Renderer { get; set; } = null;
@@ -66,7 +71,9 @@ public class TextDisplayRenderer : IDataTableColumnRenderer
 
 public class NumberDisplayRenderer : IDataTableColumnRenderer
 {
-    public string Format { get; set; } = "N2"; // Default format for numbers - should be based on Excel formatting!
+    public NumberFormatStyle FormatStyle { get; set; } = NumberFormatStyle.Decimal;
+    public int Precision { get; set; } = 2;
+    public string? Currency { get; set; }
     public bool IsEditable => false;
     public ColType ColType => ColType.Number;
 }

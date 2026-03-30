@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { hasFileSystemAccess } from "./browserSupport";
 import { validateFile, uploadFile, acceptToPickerTypes } from "./shared";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface FileDialogFileInfo {
   fileName: string;
@@ -30,7 +31,7 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
   minFileSize,
   mode = "Upload",
   uploadUrl,
-  events = [],
+  events = EMPTY_ARRAY,
 }) => {
   const handleEvent = useEventHandler();
   const inputRef = useRef<HTMLInputElement>(null);

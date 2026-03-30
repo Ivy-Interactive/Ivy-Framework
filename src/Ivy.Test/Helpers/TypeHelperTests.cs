@@ -149,6 +149,22 @@ public class TypeHelperTests
         Assert.Equal(int.MaxValue, typeof(int).SuggestMax());
     }
 
+    [Fact]
+    public void GetNameFromMemberExpression_DictionaryIndexer_ReturnsKey()
+    {
+        Expression<Func<Dictionary<string, string>, object>> expr = d => d["Name"];
+        var name = TypeHelper.GetNameFromMemberExpression(expr.Body);
+        Assert.Equal("Name", name);
+    }
+
+    [Fact]
+    public void GetNameFromMemberExpression_DictionaryIndexer_WithSpaces_ReturnsKey()
+    {
+        Expression<Func<Dictionary<string, object>, object>> expr = d => d["Column With Spaces"];
+        var name = TypeHelper.GetNameFromMemberExpression(expr.Body);
+        Assert.Equal("Column With Spaces", name);
+    }
+
     private class TestModel
     {
         public string Name { get; set; } = "";

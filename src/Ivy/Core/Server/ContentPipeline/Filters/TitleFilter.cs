@@ -6,9 +6,9 @@ public class TitleFilter : IHtmlFilter
 {
     public string Process(HtmlPipelineContext context, string html)
     {
-        if (!string.IsNullOrEmpty(context.ServerArgs.MetaTitle))
+        if (!string.IsNullOrEmpty(context.ServerArgs.Metadata.Title))
         {
-            var metaTitleTag = $"<title>{context.ServerArgs.MetaTitle}</title>";
+            var metaTitleTag = $"<title>{context.ServerArgs.Metadata.Title}</title>";
             html = Regex.Replace(html, "<title>.*?</title>", metaTitleTag, RegexOptions.Singleline);
         }
 

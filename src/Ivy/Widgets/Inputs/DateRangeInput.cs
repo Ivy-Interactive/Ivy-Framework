@@ -36,6 +36,7 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
     [Prop] public DateOnly? Max { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() =>
 [
@@ -80,7 +81,7 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
 
     internal DateRangeInput() { }
 
-    [Prop] public TDateRange Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TDateRange Value { get; init; } = default!;
 
     [Event] public EventHandler<Event<IInput<TDateRange>, TDateRange>>? OnChange { get; set; }
 }
@@ -165,6 +166,22 @@ public static class DateRangeInputExtensions
     public static DateRangeInputBase OnBlur(this DateRangeInputBase widget, Action onBlur)
     {
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static DateRangeInputBase OnFocus(this DateRangeInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static DateRangeInputBase OnFocus(this DateRangeInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget.OnFocus(onFocus.ToValueTask());
+    }
+
+    public static DateRangeInputBase OnFocus(this DateRangeInputBase widget, Action onFocus)
+    {
+        return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
     }
 
 

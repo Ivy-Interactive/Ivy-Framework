@@ -10,6 +10,7 @@ export interface Option {
   group?: string;
   icon?: string;
   disabled?: boolean;
+  tooltip?: string;
 }
 
 export interface SelectInputWidgetProps {
@@ -27,6 +28,7 @@ export interface SelectInputWidgetProps {
   maxSelections?: number;
   minSelections?: number;
   searchable?: boolean;
+  showActions?: boolean;
   searchMode?: "CaseInsensitive" | "CaseSensitive" | "Fuzzy";
   emptyMessage?: string;
   loading?: boolean;
@@ -34,4 +36,5 @@ export interface SelectInputWidgetProps {
   "data-testid"?: string;
   density?: Densities;
   width?: string;
+  events?: string[];
 }

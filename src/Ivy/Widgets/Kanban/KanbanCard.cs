@@ -19,4 +19,6 @@ public record KanbanCard : WidgetBase<KanbanCard>
     [Prop] public object? Priority { get; set; }
 
     [Prop] public object? Column { get; set; }
+
+    [Prop] public string? ColumnName { get; set; }
 }

@@ -10,6 +10,7 @@ import React, {
   WheelEvent,
   MouseEvent as ReactMouseEvent,
 } from "react";
+import { formatBytes } from "@/lib/formatters";
 
 interface NumberInputProps {
   min?: number;
@@ -20,7 +21,9 @@ interface NumberInputProps {
   value: number | null;
   onChange?: (value: number | null) => void;
   onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
+  onFocus?: (e: FocusEvent<HTMLInputElement>) => void;
   format?: Intl.NumberFormatOptions;
+  isBytesFormat?: boolean;
   allowNegative?: boolean;
   className?: string;
   density?: Densities;
@@ -45,6 +48,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       value = null,
       onChange,
       onBlur,
+      onFocus,
       format = {
         style: "decimal",
         minimumFractionDigits: 0,
@@ -52,6 +56,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         useGrouping: true,
         notation: "standard",
       },
+      isBytesFormat = false,
       allowNegative = true,
       className = "",
       density = Densities.Medium,
@@ -72,12 +77,14 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       (num: number | null): string => {
         if (num === null) return "";
         try {
-          return isFocused ? num.toString() : formatter.format(num);
+          if (isFocused) return num.toString();
+          if (isBytesFormat) return formatBytes(num, format.maximumFractionDigits ?? 2);
+          return formatter.format(num);
         } catch {
           return num.toString();
         }
       },
-      [formatter, isFocused],
+      [formatter, isFocused, isBytesFormat, format.maximumFractionDigits],
     );
 
     const parseValue = useCallback(
@@ -242,10 +249,14 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       [parseValue, onChange],
     );
 
-    const handleFocus = useCallback(() => {
-      setIsFocused(true);
-      setDisplayValue(value?.toString() ?? "");
-    }, [value]);
+    const handleFocus = useCallback(
+      (e: FocusEvent<HTMLInputElement>) => {
+        setIsFocused(true);
+        setDisplayValue(value?.toString() ?? "");
+        onFocus?.(e);
+      },
+      [value, onFocus],
+    );
 
     const handleBlur = useCallback(
       (e: FocusEvent<HTMLInputElement>) => {
@@ -259,6 +270,13 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       },
       [formatValue, value, onBlur],
     );
+
+    // Synchronize displayValue with external value changes when not focused
+    useEffect(() => {
+      if (!isFocused) {
+        setDisplayValue(formatValue(value));
+      }
+    }, [value, isFocused, formatValue]);
 
     // Update display value when not focused and value changes
     const displayValueToUse = isFocused ? displayValue : formatValue(value);

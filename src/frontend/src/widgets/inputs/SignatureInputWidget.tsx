@@ -4,6 +4,7 @@ import { inputStyles } from "@/lib/styles";
 import { cn } from "@/lib/utils";
 import { Eraser } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface Point {
   x: number;
@@ -68,7 +69,7 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  events = [],
+  events = EMPTY_ARRAY,
   pen,
   background,
   penThickness = 2,
@@ -78,6 +79,7 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
   const eventHandler = useEventHandler();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isFocusedRef = useRef(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<Point | null>(null);
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -210,11 +212,46 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
     eventHandler("OnChange", id, [null]);
   };
 
-  const handleBlur = () => {
-    if (events.includes("OnBlur")) {
-      eventHandler("OnBlur", id, []);
-    }
-  };
+  const handleBlur = useCallback(() => {
+    if (disabled) return;
+    if (!isFocusedRef.current) return;
+    if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+    isFocusedRef.current = false;
+  }, [disabled, events, eventHandler, id]);
+
+  const handleFocus = useCallback(() => {
+    if (disabled) return;
+    if (isFocusedRef.current) return;
+    if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+    isFocusedRef.current = true;
+  }, [disabled, events, eventHandler, id]);
+
+  // Ensure focus/blur are reliable even with a non-focusable canvas + drawing events.
+  useEffect(() => {
+    if (!events?.includes("OnBlur") && !events?.includes("OnFocus")) return;
+
+    const onPointerDown = (e: PointerEvent) => {
+      const el = containerRef.current;
+      if (!el) return;
+
+      const target = e.target as Node | null;
+      const clickedInside = !!target && el.contains(target);
+
+      if (clickedInside) {
+        el.focus();
+        handleFocus();
+        return;
+      }
+
+      // Clicked outside
+      if (isFocusedRef.current) {
+        handleBlur();
+      }
+    };
+
+    window.addEventListener("pointerdown", onPointerDown, true);
+    return () => window.removeEventListener("pointerdown", onPointerDown, true);
+  }, [events, handleBlur, handleFocus]);
 
   return (
     <div
@@ -225,7 +262,13 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
         invalid && inputStyles.invalidInput,
       )}
       onBlur={handleBlur}
-      tabIndex={0}
+      onFocus={handleFocus}
+      tabIndex={disabled ? -1 : 0}
+      onPointerDown={() => {
+        if (disabled) return;
+        containerRef.current?.focus();
+        handleFocus();
+      }}
       data-testid={dataTestId}
     >
       <canvas

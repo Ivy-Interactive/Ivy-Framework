@@ -478,6 +478,7 @@ export const getAlign = (orientation: Orientation, align?: Align): React.CSSProp
     // Default to flex-start for horizontal layouts so fractional widths work properly
     if (!align) {
       styles.justifyContent = "flex-start";
+      styles.alignItems = "center";
     }
   }
 
@@ -536,6 +537,7 @@ export const getAlign = (orientation: Orientation, align?: Align): React.CSSProp
     }
   } else {
     // Vertical layout alignment
+    styles.width = "100%";
     // Set horizontal alignment (Left/Center/Right)
     switch (align) {
       case "TopLeft":
@@ -687,8 +689,9 @@ export const typography: Record<string, string> = {
   block: "flex items-center min-w-0",
 
   // Lists
-  ul: "list-disc ml-6",
-  ol: "list-decimal ml-6",
+  ul: "list-disc ml-6 space-y-1.5 [&_li>ul]:mt-1.5 [&_li>ol]:mt-1.5",
+  ol: "list-decimal ml-6 space-y-1.5 [&_li>ul]:mt-1.5 [&_li>ol]:mt-1.5",
+  li: "",
 
   // Links
   a: "text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100",
@@ -709,6 +712,11 @@ export const typography: Record<string, string> = {
   // Media
   img: "max-w-full h-auto cursor-zoom-in",
   hr: "border-t border-border",
+
+  // Expandable sections
+  details: "my-4 rounded-lg border border-border bg-card shadow-sm overflow-hidden",
+  summary:
+    "cursor-pointer select-none px-4 py-3 font-medium hover:bg-accent/50 transition-colors list-none [&::-webkit-details-marker]:hidden",
 };
 
 export const articleTypography: Record<string, string> = {

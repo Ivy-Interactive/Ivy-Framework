@@ -68,4 +68,3 @@ public static class FieldExtensions
 
     public static Field WithField(this IAnyInput input) => new Field(input);
 }
-

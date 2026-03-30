@@ -1,10 +1,14 @@
 import React from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import routingConstants from "../routing-constants.json" assert { type: "json" };
+import routingConstants from "../routing-constants.json";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function getIvyBasePath(): string {
+  return document.querySelector('meta[name="ivy-path-base"]')?.getAttribute("content") ?? "";
 }
 
 export function getAppId(): string | null {
@@ -15,8 +19,15 @@ export function getAppId(): string | null {
   }
 
   // If no appId parameter, try to parse from path
-  const path = window.location.pathname.toLowerCase();
-  const originalPath = window.location.pathname;
+  // Strip the path base prefix so /foo/bar/my-app with base /foo/bar → /my-app
+  const basePath = getIvyBasePath(); // e.g. "/foo/bar"
+  let pathname = window.location.pathname;
+  if (basePath && pathname.startsWith(basePath)) {
+    pathname = pathname.slice(basePath.length) || "/";
+  }
+
+  const path = pathname.toLowerCase();
+  const originalPath = pathname;
 
   // Skip if path is empty or just "/"
   if (!path || path === "/") {
@@ -59,9 +70,9 @@ export function getParentId(): string | null {
   return urlParams.get("parentId");
 }
 
-export function getChromeParam(): boolean {
+export function getShellParam(): boolean {
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("chrome")?.toLowerCase() !== "false";
+  return urlParams.get("shell")?.toLowerCase() !== "false";
 }
 
 export function wrapAppContent(content: React.ReactNode): React.ReactNode {
@@ -70,10 +81,10 @@ export function wrapAppContent(content: React.ReactNode): React.ReactNode {
 
 /**
  * Converts an app:// URL to a regular browser path.
- * Preserves query parameters from the current URL (especially chrome=false) when in chrome=false mode.
+ * Preserves query parameters from the current URL (especially shell=false) when in shell=false mode.
  *
  * @param appUrl - The app:// URL to convert (e.g., "app://MyApp" or "app://MyApp?param=value")
- * @returns The converted path (e.g., "/MyApp" or "/MyApp?param=value&chrome=false")
+ * @returns The converted path (e.g., "/MyApp" or "/MyApp?param=value&shell=false")
  */
 /**
  * Extracts the content after the app:// protocol prefix using regex.
@@ -93,18 +104,19 @@ export function convertAppUrlToPath(appUrl: string): string {
   const appId = extractAppProtocolContent(appUrl);
   const [appPath, existingQueryString] = appId.split("?");
 
-  // Build the path
-  let path = `/${appPath}`;
+  // Build the path, prepending the path base if set
+  const basePath = getIvyBasePath(); // e.g. "/foo/bar"
+  let path = basePath ? `${basePath}/${appPath}` : `/${appPath}`;
 
-  // Preserve chrome=false if we're currently in chrome=false mode
-  const isChromeFalse = !getChromeParam();
+  // Preserve shell=false if we're currently in shell=false mode
+  const isShellFalse = !getShellParam();
   const queryParams = new URLSearchParams(existingQueryString || "");
 
-  if (isChromeFalse && !queryParams.has("chrome")) {
-    queryParams.set("chrome", "false");
+  if (isShellFalse && !queryParams.has("shell")) {
+    queryParams.set("shell", "false");
   }
 
-  // Combine existing query params with chrome param
+  // Combine existing query params with shell param
   const finalQueryString = queryParams.toString();
   if (finalQueryString) {
     path += `?${finalQueryString}`;
@@ -216,7 +228,7 @@ export function getIvyHost(): string {
       if (url.protocol === "https:" || url.protocol === "http:") {
         const metaOrigin = url.origin;
         if (isAllowedIvyHost(metaOrigin)) {
-          return metaOrigin;
+          return metaOrigin + getIvyBasePath();
         }
       }
     } catch {
@@ -224,7 +236,7 @@ export function getIvyHost(): string {
     }
   }
 
-  return window.location.origin;
+  return window.location.origin + getIvyBasePath();
 }
 
 export function camelCase(titleCase: unknown): unknown {
@@ -255,5 +267,10 @@ export function applyDefaults<T extends object>(
 
 export function isDevToolsEnabled(): boolean {
   const meta = document.querySelector('meta[name="ivy-enable-dev-tools"]');
+  return meta?.getAttribute("content") === "true";
+}
+
+export function isLocalFilesEnabled(): boolean {
+  const meta = document.querySelector('meta[name="ivy-dangerously-allow-local-files"]');
   return meta?.getAttribute("content") === "true";
 }

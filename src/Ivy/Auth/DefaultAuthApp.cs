@@ -16,7 +16,7 @@ public class DefaultAuthApp : ViewBase
         var auth = UseService<IAuthService>();
         var errorMessage = UseState<string?>();
         var serverArgs = UseService<ServerArgs>();
-        var appName = serverArgs.MetaTitle.NullIfEmpty()?.Trim() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
+        var appName = serverArgs.Metadata.Title.NullIfEmpty()?.Trim() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
 
         var options = auth.GetAuthOptions();
 

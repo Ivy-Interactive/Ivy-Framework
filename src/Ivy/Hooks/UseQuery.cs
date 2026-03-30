@@ -306,8 +306,10 @@ public static class UseQueryExtensions
                 },
                 () =>
                 {
+                    ctsRef.Value?.Cancel();
                     fetchVersionRef.Value++;
-                    resultState.Set(resultState.Value with { Validating = true });
+                    hasFetchedRef.Value = false;
+                    resultState.Set(resultState.Value with { Loading = true, Validating = true, Error = null });
                 },
                 () =>
                 {

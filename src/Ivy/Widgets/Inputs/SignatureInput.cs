@@ -37,6 +37,7 @@ public abstract record SignatureInputBase : WidgetBase<SignatureInputBase>, IAny
     [Prop] public int PenThickness { get; set; } = 2;
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 
@@ -85,7 +86,7 @@ public record SignatureInput<TValue> : SignatureInputBase, IInput<TValue>, IAnyS
         Height = Size.Units(40);
     }
 
-    [Prop] public TValue Value { get; } = default!;
+    [Prop(AlwaysSerialize = true)] public TValue Value { get; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
@@ -159,5 +160,21 @@ public static class SignatureInputExtensions
     public static SignatureInputBase OnBlur(this SignatureInputBase widget, Action onBlur)
     {
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static SignatureInputBase OnFocus(this SignatureInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static SignatureInputBase OnFocus(this SignatureInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget.OnFocus(onFocus.ToValueTask());
+    }
+
+    public static SignatureInputBase OnFocus(this SignatureInputBase widget, Action onFocus)
+    {
+        return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
     }
 }

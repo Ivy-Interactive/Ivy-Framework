@@ -47,6 +47,7 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
     [Prop] public bool Nullable { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() =>
     [
@@ -101,7 +102,7 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
 
     internal BoolInput() { }
 
-    [Prop] public TBool Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TBool Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TBool) == typeof(bool?);
 
@@ -308,6 +309,22 @@ public static class BoolInputExtensions
     public static BoolInputBase OnBlur(this BoolInputBase widget, Action onBlur)
     {
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static BoolInputBase OnFocus(this BoolInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static BoolInputBase OnFocus(this BoolInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus.ToValueTask()) };
+    }
+
+    public static BoolInputBase OnFocus(this BoolInputBase widget, Action onFocus)
+    {
+        return widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
     }
 
 

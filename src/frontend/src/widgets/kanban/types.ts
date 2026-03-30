@@ -17,6 +17,7 @@ export interface CardData {
   widgetId: string;
   content: React.ReactNode;
   columnKey?: string; // Column/group key from backend Column prop
+  columnName?: string; // Human-friendly display name from backend ColumnName prop
 }
 
 export interface ExtractedKanbanData {

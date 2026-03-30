@@ -14,13 +14,19 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({ id, children, width 
   const eventHandler = useEventHandler();
   const isVisible = true;
 
+  const widthStyles = getWidth(width);
   const styles = {
-    ...getWidth(width),
+    ...widthStyles,
+    ...(width && widthStyles.width && !widthStyles.maxWidth ? { maxWidth: widthStyles.width } : {}),
   };
 
   return (
     <Dialog open={true} onOpenChange={() => eventHandler("OnClose", id, [])}>
-      <DialogContent style={styles} className={cn(isVisible && "alert-animate-enter")}>
+      <DialogContent
+        style={styles}
+        className={cn(isVisible && "alert-animate-enter")}
+        aria-describedby={undefined}
+      >
         {children}
       </DialogContent>
     </Dialog>

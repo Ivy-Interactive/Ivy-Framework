@@ -3,10 +3,11 @@ import { useEventHandler } from "@/components/event-handler";
 import { StarRating } from "@/components/StarRating";
 import { ThumbsEnum, ThumbsRating } from "@/components/ui/thumbs-rating";
 import React, { useCallback, useMemo } from "react";
+import { inputStyles } from "@/lib/styles";
+import { cn } from "@/lib/utils";
 import { useOptimisticValue } from "./shared/useOptimisticValue";
 import { Densities } from "@/types/density";
-
-const EMPTY_ARRAY: never[] = [];
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface FeedbackInputWidgetProps {
   id: string;
@@ -125,43 +126,79 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
     ],
   );
 
-  if (variant === "Thumbs") {
-    return (
-      <ThumbsRating
-        disabled={disabled}
-        value={numericValue}
-        onRate={handleChange}
-        invalid={invalid}
-        density={density}
-      />
-    );
-  }
+  const handleBlur = useCallback(() => {
+    if (disabled) return;
+    if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+  }, [disabled, eventHandler, id, events]);
 
-  if (variant === "Emojis") {
-    return (
-      <EmojiRating
-        disabled={disabled}
-        value={numericValue}
-        onRate={handleChange}
-        invalid={invalid}
-        allowHalf={allowHalf}
-        totalEmojis={max}
-        density={density}
-      />
-    );
-  }
+  const handleFocus = useCallback(() => {
+    if (disabled) return;
+    if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+  }, [disabled, eventHandler, id, events]);
 
-  if (variant === "Stars") {
-    return (
-      <StarRating
-        disabled={disabled}
-        value={numericValue}
-        onRate={handleChange}
-        invalid={invalid}
-        allowHalf={allowHalf}
-        totalStars={max}
-        density={density}
-      />
-    );
-  }
+  const ratingComponent = useMemo(() => {
+    if (variant === "Thumbs") {
+      return (
+        <ThumbsRating
+          disabled={disabled}
+          value={numericValue}
+          onRate={handleChange}
+          invalid={invalid}
+          density={density}
+        />
+      );
+    }
+
+    if (variant === "Emojis") {
+      return (
+        <EmojiRating
+          disabled={disabled}
+          value={numericValue}
+          onRate={handleChange}
+          invalid={invalid}
+          allowHalf={allowHalf}
+          totalEmojis={max}
+          density={density}
+        />
+      );
+    }
+
+    if (variant === "Stars") {
+      return (
+        <StarRating
+          disabled={disabled}
+          value={numericValue}
+          onRate={handleChange}
+          invalid={invalid}
+          allowHalf={allowHalf}
+          totalStars={max}
+          density={density}
+        />
+      );
+    }
+    return null;
+  }, [variant, disabled, numericValue, handleChange, invalid, allowHalf, max, density]);
+
+  return (
+    <div
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          handleBlur();
+        }
+      }}
+      onFocus={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          handleFocus();
+        }
+      }}
+      tabIndex={disabled ? -1 : 0}
+      className={cn(
+        "outline-none focus:outline-none focus:ring-1 focus:ring-ring rounded-md p-1",
+        disabled && "opacity-50 cursor-not-allowed",
+        invalid && inputStyles.invalidInput,
+      )}
+    >
+      {ratingComponent}
+    </div>
+  );
 };

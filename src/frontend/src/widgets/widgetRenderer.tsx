@@ -5,6 +5,48 @@ import { widgetMap } from "@/widgets/widgetMap";
 import { Densities } from "@/types/density";
 import { isExternalWidget, createLazyExternalWidget } from "@/widgets/externalWidgetLoader";
 import { ExternalWidgetWrapper } from "@/widgets/ExternalWidgetWrapper";
+
+const processWidgetProps = (
+  node: WidgetNode,
+  inheritedScale?: Densities,
+): Record<string, unknown> => {
+  const props: Record<string, unknown> = {
+    ...node.props,
+    id: node.id,
+    events: node.events || [],
+  };
+  if (inheritedScale) props.density = inheritedScale;
+  if ("testId" in props && props.testId) {
+    props["data-testid"] = props.testId;
+    delete props.testId;
+  }
+  return props;
+};
+
+const processSlots = (
+  children: WidgetNode[],
+  scaleForChildren: Densities | undefined,
+): Record<string, React.ReactNode[]> => {
+  return children.reduce<Record<string, React.ReactNode[]>>((acc, child: WidgetNode) => {
+    if (child.type === "Ivy.Slot") {
+      const slotName = child.props.name as string;
+      acc[slotName] = (child.children || []).map((slotChild: WidgetNode) =>
+        renderWidgetTree(slotChild, scaleForChildren),
+      );
+    } else {
+      acc.default = acc.default || [];
+      acc.default.push(renderWidgetTree(child, scaleForChildren));
+    }
+    return acc;
+  }, {});
+};
+
+const registerCallSite = (node: WidgetNode) => {
+  if (node.callSite) {
+    widgetCallSiteRegistry.set(node.id, node.callSite);
+  }
+};
+
 export interface MemoizedWidgetProps {
   node: WidgetNode;
   inheritedScale?: Densities;
@@ -20,52 +62,14 @@ export const MemoizedWidget = React.memo(
       return <div>{`Unknown component type: ${node.type}`}</div>;
     }
 
-    const props: Record<string, unknown> = {
-      ...node.props,
-      id: node.id,
-      events: node.events || [],
-    };
-
-    if (inheritedScale) {
-      props.density = inheritedScale;
-    }
-
-    if ("testId" in props && props.testId) {
-      props["data-testid"] = props.testId;
-      delete props.testId;
-    }
-
+    const props = processWidgetProps(node, inheritedScale);
     const children = flattenChildren(node.children || []);
     const scaleForChildren = (props.density as Densities) || inheritedScale;
+    const slots = processSlots(children, scaleForChildren);
 
-    const slots = children.reduce<Record<string, React.ReactNode[]>>((acc, child: WidgetNode) => {
-      if (child.type === "Ivy.Slot") {
-        const slotName = child.props.name as string;
-        acc[slotName] = (child.children || []).map((slotChild: WidgetNode) =>
-          renderWidgetTree(slotChild, scaleForChildren),
-        );
-      } else {
-        acc.default = acc.default || [];
-        acc.default.push(renderWidgetTree(child, scaleForChildren));
-      }
-      return acc;
-    }, {});
+    props.widgetNodeChildren = children;
 
-    if (node.type === "Ivy.Kanban") {
-      props.widgetNodeChildren = children.filter(
-        (child: WidgetNode) => child.type === "Ivy.KanbanCard",
-      );
-    }
-
-    if (node.type === "Ivy.Calendar") {
-      props.widgetNodeChildren = children.filter(
-        (child: WidgetNode) => child.type === "Ivy.CalendarEvent",
-      );
-    }
-
-    if (node.callSite) {
-      widgetCallSiteRegistry.set(node.id, node.callSite);
-    }
+    registerCallSite(node);
 
     // Store raw content for text-editable widgets
     const isTextEditable = TEXT_EDITABLE_TYPES.includes(node.type);
@@ -169,54 +173,15 @@ export const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
 const renderExternalWidget = (node: WidgetNode, inheritedScale?: Densities): React.ReactNode => {
   const Component = createLazyExternalWidget(node.type);
 
-  const props: Record<string, unknown> = {
-    ...node.props,
-    id: node.id,
-    events: node.events || [],
-  };
-
-  if (inheritedScale) {
-    props.density = inheritedScale;
-  }
-
-  if ("testId" in props && props.testId) {
-    props["data-testid"] = props.testId;
-    delete props.testId;
-  }
+  const props = processWidgetProps(node, inheritedScale);
 
   const children = flattenChildren(node.children || []);
   const scaleForChildren = (props.density as Densities) || inheritedScale;
+  const slots = processSlots(children, scaleForChildren);
 
-  // Process children, grouping by Slot widgets
-  const slots = children.reduce<Record<string, React.ReactNode[]>>((acc, child: WidgetNode) => {
-    if (child.type === "Ivy.Slot") {
-      const slotName = child.props.name as string;
-      acc[slotName] = (child.children || []).map((slotChild: WidgetNode) =>
-        renderWidgetTree(slotChild, scaleForChildren),
-      );
-    } else {
-      acc.default = acc.default || [];
-      acc.default.push(renderWidgetTree(child, scaleForChildren));
-    }
-    return acc;
-  }, {});
+  props.widgetNodeChildren = children;
 
-  // For Kanban widget, pass widget node children for structured data extraction
-  if (node.type === "Ivy.Kanban") {
-    props.widgetNodeChildren = children.filter(
-      (child: WidgetNode) => child.type === "Ivy.KanbanCard",
-    );
-  }
-
-  if (node.type === "Ivy.Calendar") {
-    props.widgetNodeChildren = children.filter(
-      (child: WidgetNode) => child.type === "Ivy.CalendarEvent",
-    );
-  }
-
-  if (node.callSite) {
-    widgetCallSiteRegistry.set(node.id, node.callSite);
-  }
+  registerCallSite(node);
 
   const content = (
     <ivy-widget key={node.id} id={node.id} type={node.type}>

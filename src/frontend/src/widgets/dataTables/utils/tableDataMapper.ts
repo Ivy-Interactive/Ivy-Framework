@@ -99,7 +99,25 @@ export function convertArrowTableToData(
         // We must pass the column's scale to valueOf() so it divides correctly.
         const scale = decimalScales.get(j);
         if (scale !== undefined && value != null && typeof value === "object") {
-          value = value.valueOf(scale);
+          // Try calling valueOf with scale parameter
+          const convertedValue = typeof value.valueOf === "function" ? value.valueOf(scale) : value;
+
+          // Handle different return types from valueOf()
+          if (typeof convertedValue === "bigint") {
+            // Convert bigint to number by dividing by 10^scale
+            value = Number(convertedValue) / Math.pow(10, scale);
+          } else if (typeof convertedValue === "number") {
+            value = convertedValue;
+          } else {
+            // Fallback: parse string representation and convert
+            // This handles cases where valueOf() returns a string or doesn't work as expected
+            try {
+              const unscaledValue = BigInt(value.toString());
+              value = Number(unscaledValue) / Math.pow(10, scale);
+            } catch {
+              value = null; // Unable to convert, set to null
+            }
+          }
         }
         values.push(value);
       }

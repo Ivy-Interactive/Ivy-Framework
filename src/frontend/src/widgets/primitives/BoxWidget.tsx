@@ -19,7 +19,7 @@ import { useEventHandler } from "@/components/event-handler";
 
 const EMPTY_ARRAY: never[] = [];
 
-export type BoxHoverVariant = "None" | "Pointer" | "PointerAndTranslate";
+export type BoxHoverVariant = "None" | "Pointer" | "PointerAndTranslate" | "Shadow";
 
 interface BoxWidgetProps {
   id: string;
@@ -106,7 +106,9 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
       ? null
       : hoverVariant === "Pointer"
         ? "cursor-pointer"
-        : "cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition";
+        : hoverVariant === "Shadow"
+          ? "cursor-pointer hover:shadow-lg active:shadow-md transition-shadow"
+          : "cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition";
   if (isClickable) {
     return (
       <div

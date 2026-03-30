@@ -28,6 +28,8 @@ public record Markdown : WidgetBase<Markdown>
 
     [Prop] public string Content { get; set; } = string.Empty;
 
+    [Prop] public bool DangerouslyAllowLocalFiles { get; set; }
+
     [Prop] public TextAlignment? TextAlignment { get; set; }
 
     [Event] public EventHandler<Event<Markdown, string>>? OnLinkClick { get; set; }
@@ -75,5 +77,10 @@ public static class MarkdownExtensions
     public static Markdown Justify(this Markdown markdown)
     {
         return markdown with { TextAlignment = TextAlignment.Justify };
+    }
+
+    public static Markdown DangerouslyAllowLocalFiles(this Markdown markdown, bool allow = true)
+    {
+        return markdown with { DangerouslyAllowLocalFiles = allow };
     }
 }

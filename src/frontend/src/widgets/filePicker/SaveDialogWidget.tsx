@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { hasSaveFilePicker } from "./browserSupport";
 import { getFullUrl, acceptToPickerTypes } from "./shared";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface SaveDialogWidgetProps {
   id: string;
@@ -18,7 +19,7 @@ export const SaveDialogWidget: React.FC<SaveDialogWidgetProps> = ({
   suggestedName,
   accept,
   downloadUrl,
-  events = [],
+  events = EMPTY_ARRAY,
 }) => {
   const handleEvent = useEventHandler();
   const lastTriggerRef = useRef(0);

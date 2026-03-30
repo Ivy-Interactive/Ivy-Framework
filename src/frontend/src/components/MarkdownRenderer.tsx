@@ -7,15 +7,13 @@ import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import "katex/dist/katex.min.css";
-import { cn, getIvyHost, convertAppUrlToPath } from "@/lib/utils";
+import { cn, getIvyHost, convertAppUrlToPath, isLocalFilesEnabled } from "@/lib/utils";
 import {
   validateLinkUrl,
-  validateImageUrl,
+  validateMediaUrl,
   isExternalUrl,
   isAnchorLink,
   isAppProtocol,
-  isRelativePath,
-  isStandardUrl,
   extractAnchorId,
 } from "@/lib/url";
 import { useTypography } from "@/contexts/TypographyContext";
@@ -24,18 +22,24 @@ import { remarkCustomEmojiPlugin } from "./custom-emojis/remarkCustomEmojiPlugin
 
 import { ImageOverlay } from "./markdown/ImageOverlay";
 import { CodeBlock } from "./markdown/CodeBlock";
+import Icon from "@/components/Icon";
 import { Components } from "react-markdown";
 
 interface MarkdownRendererProps {
   content: string;
   onLinkClick?: (url: string) => void;
+  dangerouslyAllowLocalFiles?: boolean;
 }
 
 const hasContentFeature = (content: string, feature: RegExp): boolean => {
   return feature.test(content);
 };
 
-const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClick }) => {
+const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
+  content,
+  onLinkClick,
+  dangerouslyAllowLocalFiles = false,
+}) => {
   const typography = useTypography();
   const contentFeatures = useMemo(
     () => ({
@@ -58,6 +62,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
 
   const handleLinkClick = useCallback(
     (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
+      // When local files are enabled, pass file:// URLs directly to onLinkClick
+      if (dangerouslyAllowLocalFiles && href.startsWith("file:///")) {
+        if (onLinkClick) {
+          event.preventDefault();
+          onLinkClick(href);
+        }
+        return;
+      }
+
       // Validate URL to prevent open redirect vulnerabilities
       // validateLinkUrl always returns a string ('#' for invalid URLs)
       const validatedHref = validateLinkUrl(href);
@@ -66,16 +79,14 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
         return;
       }
 
-      // Only call backend handler for custom link handling scenarios
-      // validateLinkUrl already handles external links, anchor links, app:// URLs, and relative paths safely
-      // If the URL is one of these standard types, the browser will handle it naturally
-      // Only call onLinkClick for non-standard URLs that need custom handling
-      if (!isStandardUrl(validatedHref) && onLinkClick) {
+      // When onLinkClick is registered, intercept ALL link clicks
+      // This allows the backend handler to decide how to handle the URL
+      if (onLinkClick) {
         event.preventDefault();
         onLinkClick(validatedHref);
       }
     },
-    [onLinkClick],
+    [onLinkClick, dangerouslyAllowLocalFiles],
   );
 
   // Memoize static components separately (they don't need handleLinkClick)
@@ -120,9 +131,10 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
       ol: memo(({ children }: { children: React.ReactNode }) => (
         <ol className={typography.ol}>{children}</ol>
       )),
-      li: memo(({ children }: { children: React.ReactNode }) => (
-        <li className={typography.li}>{children}</li>
-      )),
+      li: memo(({ children, className }: { children: React.ReactNode; className?: string }) => {
+        const isTaskItem = className?.includes("task-list-item");
+        return <li className={cn(typography.li, isTaskItem && "list-none")}>{children}</li>;
+      }),
       strong: memo(({ children }: { children: React.ReactNode }) => (
         <strong className={typography.strong}>{children}</strong>
       )),
@@ -158,14 +170,18 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
             return null;
           }
 
-          // Validate and sanitize image URL to prevent open redirect vulnerabilities
-          const validatedSrc = validateImageUrl(src);
+          // Validate and sanitize image URL with optional local file support
+          const validatedSrc = validateMediaUrl(src, {
+            mediaType: "image",
+            dangerouslyAllowLocalFiles,
+          });
           if (!validatedSrc) {
-            // Invalid URL, don't render image (return null to prevent any rendering)
+            // Invalid URL, don't render image
             return null;
           }
 
           // Construct the final image source URL
+          // For file:// URLs, use them directly (no Ivy host prefix)
           const imageSrc = validatedSrc.match(/^(https?:\/\/|data:|blob:|app:)/i)
             ? validatedSrc
             : (() => {
@@ -207,6 +223,26 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
       hr: memo((props: React.HTMLAttributes<HTMLHRElement>) => (
         <hr className={typography.hr} {...props} />
       )),
+      details: memo(({ children, ...props }: React.DetailsHTMLAttributes<HTMLDetailsElement>) => (
+        <details className={cn(typography.details, "group")} {...props}>
+          {children}
+        </details>
+      )),
+      summary: memo(({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
+        <summary className={typography.summary} {...props}>
+          <div className="flex items-center gap-2">
+            <svg
+              className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            {children}
+          </div>
+        </summary>
+      )),
     }),
     [
       typography.h1,
@@ -227,14 +263,33 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
       typography.th,
       typography.img,
       typography.hr,
+      typography.details,
+      typography.summary,
+      dangerouslyAllowLocalFiles,
     ],
   );
 
   // Memoize code component separately (depends on contentFeatures.hasCodeBlocks and hasMermaid)
   const codeComponent = useMemo(
     () => ({
-      code: memo((props: React.ComponentProps<"code"> & { inline?: boolean }) => {
-        const { children, className, inline } = props;
+      code: memo((props: React.ComponentProps<"code">) => {
+        const { children, className } = props;
+        const inline = !className;
+
+        // Detect Icons.X pattern in inline code
+        if (inline) {
+          const text = String(children);
+          const iconMatch = text.match(/^Icons\.([A-Z][a-zA-Z0-9]*)$/);
+          if (iconMatch) {
+            return (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25em" }}>
+                <code className={typography.code}>{children}</code>
+                <Icon name={iconMatch[1]} size="1em" />
+              </span>
+            );
+          }
+        }
+
         return (
           <CodeBlock
             className={className}
@@ -247,16 +302,17 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
         );
       }),
     }),
-    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid],
+    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid, typography.code],
   );
 
   // Memoize link component separately (depends on handleLinkClick)
   const linkComponent = useMemo(
     () => ({
       a: memo(({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-        // Validate URL to prevent open redirect vulnerabilities
-        // validateLinkUrl always returns a string ('#' for invalid URLs)
-        const safeHref = validateLinkUrl(href);
+        // When local files are enabled, allow file:// URLs to render as clickable links
+        const isLocalFileUrl = dangerouslyAllowLocalFiles && href?.startsWith("file:///");
+
+        const safeHref = isLocalFileUrl ? href! : validateLinkUrl(href);
         if (safeHref === "#") {
           return <span {...props}>{children}</span>;
         }
@@ -265,12 +321,11 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
         const isExternalLink = isExternalUrl(safeHref);
         const isAnchor = isAnchorLink(safeHref);
         const isApp = isAppProtocol(safeHref);
-        const isRelative = isRelativePath(safeHref);
 
         // Convert app:// URLs to regular paths for href attribute
         let hrefForNavigation = safeHref;
         if (isApp) {
-          // Use the utility function to convert app:// URLs, preserving chrome=false
+          // Use the utility function to convert app:// URLs, preserving shell=false
           hrefForNavigation = convertAppUrlToPath(safeHref);
         }
 
@@ -279,8 +334,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
             {...props}
             className="text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100"
             href={hrefForNavigation}
-            target={isExternalLink ? "_blank" : undefined}
-            rel={isExternalLink ? "noopener noreferrer" : undefined}
+            target={isExternalLink && !onLinkClick ? "_blank" : undefined}
+            rel={isExternalLink && !onLinkClick ? "noopener noreferrer" : undefined}
             onClick={
               isAnchor
                 ? (e) => {
@@ -302,9 +357,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
                       });
                     }
                   }
-                : isApp || isRelative
-                  ? undefined // Let browser handle navigation naturally
-                  : (e) => handleLinkClick(safeHref, e)
+                : onLinkClick
+                  ? (e) => handleLinkClick(safeHref, e)
+                  : undefined
             }
           >
             {children}
@@ -312,7 +367,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
         );
       }),
     }),
-    [handleLinkClick],
+    [handleLinkClick, dangerouslyAllowLocalFiles],
   );
 
   const components = useMemo(
@@ -336,16 +391,52 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onLinkClic
     emoji: ({ name }: { name: string }) => <CustomEmoji name={name} />,
   };
 
-  const urlTransform = useCallback((url: string) => {
-    if (url.startsWith("app://")) {
-      return url;
-    }
-    // Validate URL before transforming to prevent open redirect vulnerabilities
-    // validateLinkUrl always returns a string ('#' for invalid URLs)
-    const validatedUrl = validateLinkUrl(url);
-    // defaultUrlTransform handles all valid URLs, and '#' for invalid URLs
-    return defaultUrlTransform(validatedUrl);
-  }, []);
+  const urlTransform = useCallback(
+    (url: string, key: string) => {
+      if (url.startsWith("app://")) {
+        return url;
+      }
+      // Allow file:// URLs and Windows paths when local files are enabled
+      if (
+        dangerouslyAllowLocalFiles &&
+        (url.startsWith("file://") || /^[a-zA-Z]:[\\/]/.test(url))
+      ) {
+        // For links (href), preserve file:// URL for onLinkClick to handle
+        if (key === "href") {
+          if (/^[a-zA-Z]:[\\/]/.test(url)) {
+            const normalized = url.replace(/\\/g, "/");
+            return `file:///${normalized}`;
+          }
+          return url;
+        }
+        // For images (src), use local-file proxy
+        if (isLocalFilesEnabled()) {
+          // Server supports local file proxy - use /ivy/local-file endpoint
+          let filePath: string;
+          if (url.startsWith("file:///")) {
+            filePath = decodeURIComponent(url.slice(8));
+          } else if (url.startsWith("file://")) {
+            filePath = decodeURIComponent(url.slice(7));
+          } else {
+            filePath = url.replace(/\\/g, "/");
+          }
+          return `/ivy/local-file?path=${encodeURIComponent(filePath)}`;
+        }
+        // Fallback: pass file:// URL through (browser will likely block it)
+        if (/^[a-zA-Z]:[\\/]/.test(url)) {
+          const normalized = url.replace(/\\/g, "/");
+          return `file:///${normalized}`;
+        }
+        return url;
+      }
+      // Validate URL before transforming to prevent open redirect vulnerabilities
+      // validateLinkUrl always returns a string ('#' for invalid URLs)
+      const validatedUrl = validateLinkUrl(url);
+      // defaultUrlTransform handles all valid URLs, and '#' for invalid URLs
+      return defaultUrlTransform(validatedUrl);
+    },
+    [dangerouslyAllowLocalFiles],
+  );
 
   return (
     <>

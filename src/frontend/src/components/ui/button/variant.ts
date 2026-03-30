@@ -19,10 +19,10 @@ export const buttonVariant = cva(
         ai: "bg-background  hover:bg-accent hover:text-accent-foreground",
       },
       size: {
-        default: "h-9 px-4 py-2 text-sm",
+        default: "h-8 px-4 py-2 text-sm",
         sm: "h-6 rounded-field px-3 text-xs",
         lg: "h-10 rounded-field px-8 text-base",
-        icon: "h-9 w-9 shrink-0",
+        icon: "h-8 w-8 shrink-0",
         "icon-sm": "h-6 w-6 shrink-0",
       },
     },

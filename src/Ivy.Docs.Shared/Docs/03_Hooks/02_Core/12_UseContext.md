@@ -325,12 +325,57 @@ public class ConditionalAuthView : ViewBase
 }
 ```
 
+## Reactive Context Pattern
+
+`CreateContext` re-evaluates the factory on every render, so child components automatically receive updated context when the parent re-renders:
+
+```csharp demo-below
+public class AuthContext
+{
+    public string UserName { get; set; } = "";
+    public bool IsLoggedIn { get; set; }
+}
+
+public class AuthProvider : ViewBase
+{
+    public override object? Build()
+    {
+        var currentUser = UseState("Guest");
+        var isLoggedIn = UseState(false);
+
+        // Factory captures state values — re-evaluated on each render
+        CreateContext(() => new AuthContext
+        {
+            UserName = currentUser.Value,
+            IsLoggedIn = isLoggedIn.Value
+        });
+
+        return Layout.Vertical()
+            | new Button(isLoggedIn.Value ? "Logout" : "Login", onClick: _ =>
+            {
+                isLoggedIn.Set(!isLoggedIn.Value);
+                currentUser.Set(isLoggedIn.Value ? "Guest" : "Alice");
+            })
+            | new AuthConsumer();
+    }
+}
+
+public class AuthConsumer : ViewBase
+{
+    public override object? Build()
+    {
+        var auth = UseContext<AuthContext>();
+        return Text.P($"User: {auth.UserName}, Logged in: {auth.IsLoggedIn}");
+    }
+}
+```
+
 ## Best Practices
 
 - **Use context for component-scoped data** - Use services for app-wide data
-- **Keep context values simple** - Data containers or lightweight services; use DI for heavy services
+- **Keep context values simple** - Data containers or lightweight services
 - **Use type safety** - Always use `UseContext<T>()` instead of runtime type checking
-- **Avoid frequently changing data** - Use [state](./03_UseState.md) for reactive updates
+- **Context automatically propagates state changes** - When parent re-renders, CreateContext factory runs again and children receive the updated context
 - **Document context dependencies** - Make it clear when a component requires a parent context
 
 ## See Also

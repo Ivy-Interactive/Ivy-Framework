@@ -18,6 +18,8 @@ public interface IAnyOption
     public Icons? Icon { get; set; }
 
     public bool Disabled { get; set; }
+
+    public string? Tooltip { get; set; }
 }
 
 public class Option<TValue> : IAnyOption
@@ -31,7 +33,7 @@ public class Option<TValue> : IAnyOption
         Value = null!;
     }
 
-    public Option(string? label, TValue value, string? group = null, string? description = null, Icons? icon = null, bool disabled = false)
+    public Option(string? label, TValue value, string? group = null, string? description = null, Icons? icon = null, bool disabled = false, string? tooltip = null)
     {
         Label = label;
         Description = description;
@@ -39,6 +41,7 @@ public class Option<TValue> : IAnyOption
         Group = group;
         Icon = icon;
         Disabled = disabled;
+        Tooltip = tooltip;
     }
 
     public Type GetOptionType()
@@ -59,13 +62,21 @@ public class Option<TValue> : IAnyOption
     public Icons? Icon { get; set; }
 
     public bool Disabled { get; set; }
+
+    public string? Tooltip { get; set; }
 }
 
 public static class OptionExtensions
 {
     public static Option<TValue>[] ToOptions<TValue>(this IEnumerable<TValue> options)
     {
-        return options.Select(e => new Option<TValue>(e)).ToArray();
+        return options.Select(e =>
+        {
+            var label = e is Enum enumValue
+                ? enumValue.GetDescription()
+                : e?.ToString() ?? "?";
+            return new Option<TValue>(label, e);
+        }).ToArray();
     }
 
     public static IAnyOption[] ToOptions(this Type enumType)
@@ -80,8 +91,8 @@ public static class OptionExtensions
             var label = ((Enum)e).GetDescription();
             var value = Convert.ChangeType(e, enumType);
 
-            // Pass all 6 parameters including optional ones (label, value, group, description, icon, disabled)
-            return (IAnyOption)Activator.CreateInstance(optionType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { label, value, null, null, null, false }, null)!;
+            // Pass all 7 parameters including optional ones (label, value, group, description, icon, disabled, tooltip)
+            return (IAnyOption)Activator.CreateInstance(optionType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new object?[] { label, value, null, null, null, false, null }, null)!;
         }
 
         return Enum.GetValues(enumType).Cast<object>().Select(MakeOption).ToArray();

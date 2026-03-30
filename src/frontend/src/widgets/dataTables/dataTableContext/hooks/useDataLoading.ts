@@ -43,6 +43,7 @@ export const useDataLoading = ({
   const [hasMore, setHasMoreState] = useState(true);
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
+  const hasLoadedOnceRef = useRef(false);
   const batchSize = config.batchSize ?? 20;
   const connectionKey = `${connection.connectionId}-${connection.sourceId}-${connection.versionToken || ""}`;
   const dataIdentityKey = `${connection.connectionId}-${connection.sourceId}`;
@@ -55,6 +56,7 @@ export const useDataLoading = ({
   // Reset row count only when connection identity changes (not on versionToken refresh)
   useEffect(() => {
     currentRowCountRef.current = 0;
+    hasLoadedOnceRef.current = false;
   }, [dataIdentityKey]);
 
   useEffect(() => {
@@ -64,7 +66,10 @@ export const useDataLoading = ({
         return;
       }
 
-      if (!arrowTableRef.current || arrowTableRef.current.numRows === 0) {
+      if (
+        (!arrowTableRef.current || arrowTableRef.current.numRows === 0) &&
+        !hasLoadedOnceRef.current
+      ) {
         setIsLoading(true);
       }
       setError(null);
@@ -103,6 +108,7 @@ export const useDataLoading = ({
           const rowCount = result.arrowTable.numRows;
           setVisibleRows(rowCount);
           currentRowCountRef.current = rowCount;
+          hasLoadedOnceRef.current = true;
         }
         setHasMoreState(result.hasMore);
 

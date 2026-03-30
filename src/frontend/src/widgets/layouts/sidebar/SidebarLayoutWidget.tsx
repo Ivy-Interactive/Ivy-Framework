@@ -11,6 +11,7 @@ import { useEventHandler } from "@/components/event-handler";
 import { cn, getAppId } from "@/lib/utils";
 import { getWidth } from "@/lib/styles";
 import { Separator } from "@/components/ui/separator";
+import { SidebarMenuBadge } from "@/components/ui/sidebar";
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -438,6 +439,7 @@ const CollapsibleMenuItem: React.FC<{
         >
           <Icon name={item.icon} size={16} />
           <span className="text-sm">{item.label}</span>
+          {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
         </button>
       </li>
     );
@@ -523,6 +525,7 @@ const renderMenuItems = (
             >
               <Icon name={item.icon} size={16} />
               <span className="text-sm">{item.label}</span>
+              {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
             </button>
           </li>
         );
@@ -539,6 +542,7 @@ const renderMenuItems = (
             >
               <Icon name={item.icon} size={16} />
               <span className="text-sm">{item.label}</span>
+              {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
             </button>
           </li>
         );

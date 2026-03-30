@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Auth0Example</RootNamespace>
+    <UserSecretsId>ivy-auth-auth0-example</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { m, LazyMotion, domAnimation } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/Icon";
@@ -16,6 +16,10 @@ import withTooltip from "@/hoc/withTooltip";
 import { Loader2 } from "lucide-react";
 import { BorderRadius, getColor, getWidth } from "@/lib/styles";
 import { Densities } from "@/types/density";
+import {
+  parseShortcut,
+  formatShortcutForDisplay,
+} from "@/widgets/inputs/TextInputWidget/utils/shortcut";
 
 const ButtonWithTooltip = withTooltip(Button);
 
@@ -42,6 +46,7 @@ interface ButtonWidgetProps {
   url?: string;
   target?: "Blank" | "Self";
   width?: string;
+  shortcutKey?: string;
   children?: React.ReactNode;
   borderRadius?: BorderRadius;
   "data-testid"?: string;
@@ -94,12 +99,14 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   target = "Self",
   loading = false,
   width,
+  shortcutKey,
   children,
   borderRadius = "Rounded",
   density = Densities.Medium,
   "data-testid": dataTestId,
 }) => {
   const eventHandler = useEventHandler();
+  const shortcutDisplay = formatShortcutForDisplay(shortcutKey);
 
   // For 'Rounded' (default), rely on the 'rounded-field' class from buttonVariant.
   // Only add inline style to override the class for 'None'/'Full'.
@@ -155,11 +162,10 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     [id, disabled, effectiveUrl, eventHandler],
   );
 
-  const hasChildren = !!children;
   const hasUrl = !!(effectiveUrl && !disabled);
 
   // Validate and sanitize URL to prevent open redirect vulnerabilities
-  const urlResult = effectiveUrl && !disabled ? getUrl(effectiveUrl) : null;
+  const urlResult = hasUrl ? getUrl(effectiveUrl!) : null;
   const validatedHref = urlResult?.isValid ? urlResult.url : null;
   const isInvalidUrl = urlResult && !urlResult.isValid;
 
@@ -168,6 +174,57 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
 
   // Check if URL is a mailto link (should not open in new tab)
   const isMailto = validatedHref ? isMailtoUrl(validatedHref) : false;
+
+  useEffect(() => {
+    if (!shortcutKey || disabled) return;
+
+    const shortcutObj = parseShortcut(shortcutKey);
+    if (!shortcutObj) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const eventTarget = event.target as HTMLElement;
+      if (
+        eventTarget.tagName === "INPUT" ||
+        eventTarget.tagName === "TEXTAREA" ||
+        eventTarget.isContentEditable
+      ) {
+        return; // Don't intercept shortcuts while typing
+      }
+
+      const modifierMatch =
+        (shortcutObj.meta && event.metaKey) ||
+        (shortcutObj.ctrl && event.ctrlKey) ||
+        (!shortcutObj.meta && !shortcutObj.ctrl && !event.metaKey && !event.ctrlKey);
+
+      const isShortcutPressed =
+        modifierMatch &&
+        event.shiftKey === shortcutObj.shift &&
+        event.altKey === shortcutObj.alt &&
+        event.key.toLowerCase() === shortcutObj.key.toLowerCase();
+
+      if (isShortcutPressed) {
+        event.preventDefault();
+        if (!effectiveUrl) {
+          eventHandler("OnClick", id, []);
+        } else if (validatedHref) {
+          if (isDownloadUrl || isMailto) {
+            window.location.href = validatedHref;
+          } else if (target === "Blank") {
+            window.open(validatedHref, "_blank", "noopener,noreferrer");
+          } else {
+            window.location.href = validatedHref;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [shortcutKey, disabled, id, effectiveUrl, eventHandler]);
+
+  const hasChildren = !!children;
 
   // Show error message for invalid URLs (standardized error handling)
   if (isInvalidUrl) {
@@ -198,6 +255,11 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
             <span className="truncate">{title}</span>
           ) : (
             title
+          )}
+          {shortcutKey && title && (
+            <kbd className="ml-1 px-1 py-0.5 text-[0.65rem] font-medium text-muted-foreground bg-muted border border-border rounded-selector">
+              {shortcutDisplay}
+            </kbd>
           )}
           {iconPosition == "Right" && loading && (
             <Loader2 className="animate-spin" style={iconStyles} />
@@ -231,10 +293,10 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
 
     // Determine container height based on button size
     const getContainerHeight = () => {
-      if (buttonSize === "icon") return { container: "h-10", button: "h-9" };
-      if (buttonSize === "sm") return { container: "h-9", button: "h-[35px]" };
+      if (buttonSize === "icon") return { container: "h-9", button: "h-8" };
+      if (buttonSize === "sm") return { container: "h-7", button: "h-6" };
       if (buttonSize === "lg") return { container: "h-11", button: "h-10" };
-      return { container: "h-10", button: "h-9" };
+      return { container: "h-9", button: "h-8" };
     };
 
     return (

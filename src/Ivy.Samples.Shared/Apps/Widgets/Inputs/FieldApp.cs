@@ -19,9 +19,13 @@ public class FieldApp : SampleBase
         var addressState = UseState<string>();
         var disabledState = UseState("Disabled value");
         var invalidState = UseState("abc");
+        var eventsState = UseState<string>();
+        var eventsOnBlurLabel = UseState("");
+        var eventsOnFocusLabel = UseState("");
         var options = new List<string>() { "I read the terms and conditions and I agree" };
 
         return Layout.Vertical().Center()
+            | Text.H1("Field")
             | (new Card(
                 Layout.Vertical().Gap(6).Padding(2)
                 | Text.H2("Field")
@@ -98,10 +102,22 @@ public class FieldApp : SampleBase
                     .WithField()
                     .Label("App Password")
                     .LabelPosition(LabelPosition.Left)
+                    | Text.H3("OnFocus/OnBlur")
+                    | eventsState.ToTextInput()
+                        .Placeholder("Click in, then click away")
+                        .OnFocus(_ => eventsOnFocusLabel.Set("Focus Event Triggered"))
+                        .OnBlur(_ => eventsOnBlurLabel.Set("Blur Event Triggered"))
+                        .WithField()
+                        .Label("Focusable field")
+                        .Description("Use mouse click or tab to trigger events")
+                    | (eventsOnFocusLabel.Value != ""
+                        ? Callout.Success(eventsOnFocusLabel.Value)
+                        : Callout.Info("Focus the field to see OnFocus"))
+                    | (eventsOnBlurLabel.Value != ""
+                        ? Callout.Success(eventsOnBlurLabel.Value)
+                        : Callout.Info("Blur the field to see OnBlur"))
             )
             .Width(Size.Units(120).Max(500))
-
-
         );
     }
 }

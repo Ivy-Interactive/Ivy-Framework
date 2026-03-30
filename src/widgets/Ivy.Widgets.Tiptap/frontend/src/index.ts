@@ -10,9 +10,7 @@ import { TiptapInput } from "./TiptapInput";
 if (typeof window !== "undefined") {
   (window as unknown as Record<string, unknown>).TiptapInput = {
     TiptapInput,
-    default: TiptapInput,
   };
 }
 
 export { TiptapInput };
-export { TiptapInput as default };

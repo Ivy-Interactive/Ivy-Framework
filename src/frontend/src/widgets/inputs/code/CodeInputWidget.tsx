@@ -23,8 +23,7 @@ import { keymap, EditorView, lineNumbers, highlightActiveLine } from "@codemirro
 import { history } from "@codemirror/commands";
 
 import { useDebouncedCallback } from "use-debounce";
-
-const EMPTY_ARRAY: never[] = [];
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface CodeInputWidgetProps {
   id: string;
@@ -97,7 +96,8 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
-  }, []);
+    if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+  }, [eventHandler, id, events]);
 
   const handleClear = useCallback(
     (e: React.MouseEvent) => {

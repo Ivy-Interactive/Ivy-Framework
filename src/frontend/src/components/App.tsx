@@ -9,7 +9,7 @@ import { DevTools } from "./DevTools";
 import {
   getAppArgs,
   getAppId,
-  getChromeParam,
+  getShellParam,
   getParentId,
   wrapAppContent,
   isDevToolsEnabled,
@@ -24,14 +24,10 @@ export function App() {
   const appId = getAppId();
   const appArgs = getAppArgs();
   const parentId = getParentId();
-  const chrome = getChromeParam();
+  const appShell = getShellParam();
 
-  const { connection, widgetTree, eventHandler, subscribeToStream, disconnected } = useBackend(
-    appId,
-    appArgs,
-    parentId,
-    chrome,
-  );
+  const { connection, widgetTree, eventHandler, subscribeToStream, disconnected, connectionState } =
+    useBackend(appId, appArgs, parentId, appShell);
   const [removeBranding, setRemoveBranding] = useState(true);
 
   useEffect(() => {
@@ -40,8 +36,8 @@ export function App() {
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      const chrome = getChromeParam();
-      if (chrome) {
+      const appShell = getShellParam();
+      if (appShell) {
         const newAppId = getAppId();
         connection?.invoke("Navigate", newAppId, event.state).catch((err) => {
           console.error("SignalR Error when sending Navigate:", err);
@@ -66,7 +62,7 @@ export function App() {
               {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
               <ErrorSheet />
               <Toaster />
-              {disconnected && <ConnectionModal />}
+              {(disconnected || connectionState === "reconnecting") && <ConnectionModal />}
             </>
           </StreamHandlerProvider>
         </EventHandlerProvider>

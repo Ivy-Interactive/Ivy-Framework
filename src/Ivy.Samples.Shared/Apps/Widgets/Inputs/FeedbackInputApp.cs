@@ -23,6 +23,10 @@ public class FeedbackInputApp : SampleBase
         var boolState = UseState(false);
         var nullableBoolState = UseState((bool?)null);
 
+        var onBlurState = UseState(0);
+        var onBlurLabel = UseState("");
+        var onFocusState = UseState(0);
+        var onFocusLabel = UseState("");
         var maxState3 = UseState(0);
         var maxState10 = UseState(0);
 
@@ -148,7 +152,7 @@ public class FeedbackInputApp : SampleBase
         ;
 
         return Layout.Vertical()
-               | Text.H1("Feedback Inputs")
+               | Text.H1("Feedback Input")
                | Text.H2("Variants")
                | variants
                | Text.H2("Size Examples")
@@ -159,6 +163,25 @@ public class FeedbackInputApp : SampleBase
                | allowHalfExamples
                | Text.H2("Data Binding")
                | dataBinding
+               | Text.H2("Events")
+               | (Layout.Vertical()
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The blur event fires when the feedback input loses focus.").Small()
+                           | onBlurState.ToFeedbackInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                           | (onBlurLabel.Value != ""
+                               ? Callout.Success(onBlurLabel.Value)
+                               : Callout.Info("Interact then click away to see blur events"))
+                   ).Title("OnBlur Handler")
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The focus event fires when you click on or tab into the feedback input.").Small()
+                           | onFocusState.ToFeedbackInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                           | (onFocusLabel.Value != ""
+                               ? Callout.Success(onFocusLabel.Value)
+                               : Callout.Info("Click or tab into the input to see focus events"))
+                   ).Title("OnFocus Handler")
+               )
 
             ;
 

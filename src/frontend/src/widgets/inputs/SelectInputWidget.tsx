@@ -11,7 +11,6 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/comp
 import Icon from "@/components/Icon";
 import { X, Search, Loader2 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { useOptimisticValue } from "./shared/useOptimisticValue";
 import { logger } from "@/lib/logger";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle";
 import { Slider } from "@/components/ui/slider";
@@ -19,8 +18,13 @@ import { Densities } from "@/types/density";
 import { cva } from "class-variance-authority";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
 
-import { NullableSelectValue, Option, SelectInputWidgetProps } from "./select-types";
-import { convertValuesToOriginalType, useSelectValueHandler } from "./select-utils";
+import { Option, SelectInputWidgetProps } from "./select-types";
+import {
+  computeClearAllValues,
+  computeSelectAllValues,
+  convertValuesToOriginalType,
+  useSelectValueHandler,
+} from "./select-utils";
 import { SelectMultiVariant } from "./SelectMultiVariant";
 import { SelectSingleVariant } from "./SelectSingleVariant";
 
@@ -52,6 +56,55 @@ const circleSizeVariant = {
   Small: "h-3 w-3",
   Medium: "h-4 w-4",
   Large: "h-5 w-5",
+};
+
+const SelectBulkActionsFooter: React.FC<{
+  density?: Densities;
+  onSelectAll: () => void;
+  onClearAll: () => void;
+  selectAllDisabled: boolean;
+  clearAllDisabled: boolean;
+}> = ({
+  density = Densities.Medium,
+  onSelectAll,
+  onClearAll,
+  selectAllDisabled,
+  clearAllDisabled,
+}) => {
+  const textSize = selectTextVariant[density];
+  return (
+    <div
+      className={cn(
+        "border-t border-border mt-2 pt-2 flex justify-between items-center gap-2 shrink-0",
+        textSize,
+      )}
+      role="group"
+      aria-label="Bulk selection"
+    >
+      <button
+        type="button"
+        className={cn(
+          "text-primary hover:underline underline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm px-0.5",
+          textSize,
+        )}
+        disabled={selectAllDisabled}
+        onClick={onSelectAll}
+      >
+        Select All
+      </button>
+      <button
+        type="button"
+        className={cn(
+          "text-primary hover:underline underline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm px-0.5",
+          textSize,
+        )}
+        disabled={clearAllDisabled}
+        onClick={onClearAll}
+      >
+        Clear All
+      </button>
+    </div>
+  );
 };
 
 // Helper component for ToggleGroupItem with validation
@@ -114,9 +167,20 @@ const ToggleOptionItem: React.FC<{
       <TooltipProvider key={option.value}>
         <Tooltip>
           <TooltipTrigger asChild>{toggleItem}</TooltipTrigger>
-          <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+          <TooltipContent>
             <div className="max-w-xs sm:max-w-sm">{invalid}</div>
           </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  if (option.tooltip) {
+    return (
+      <TooltipProvider key={option.value}>
+        <Tooltip>
+          <TooltipTrigger asChild>{toggleItem}</TooltipTrigger>
+          <TooltipContent>{option.tooltip}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
@@ -142,7 +206,9 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   emptyMessage,
   loading = false,
   ghost = false,
+  showActions = false,
   density = Densities.Medium,
+  events = EMPTY_ARRAY,
   "data-testid": dataTestId,
   width,
 }) => {
@@ -205,7 +271,65 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
     validOptions,
     eventHandler,
     selectMany,
+    nullable,
   );
+
+  const visibleEnabledForBulk = useMemo(
+    () => filteredOptions.filter((o) => !disabled && !loading && !o.disabled),
+    [filteredOptions, disabled, loading],
+  );
+
+  const bulkSelectAllDisabled =
+    !selectMany ||
+    visibleEnabledForBulk.length === 0 ||
+    visibleEnabledForBulk.every((o) => selectedValues.includes(o.value));
+
+  const bulkClearAllDisabled = !selectMany || selectedValues.length <= (minSelections ?? 0);
+
+  const handleBulkSelectAllToggle = useCallback(() => {
+    const merged = computeSelectAllValues(
+      selectedValues,
+      filteredOptions.map((o) => ({
+        value: o.value,
+        disabled: !!(disabled || loading || o.disabled),
+      })),
+      maxSelections,
+    );
+    const converted = convertValuesToOriginalType(
+      merged.map((v) => v.toString()),
+      value,
+      validOptions,
+      selectMany,
+    );
+    eventHandler("OnChange", id, [converted]);
+  }, [
+    selectedValues,
+    filteredOptions,
+    disabled,
+    loading,
+    maxSelections,
+    value,
+    validOptions,
+    selectMany,
+    eventHandler,
+    id,
+  ]);
+
+  const handleBulkClearAllToggle = useCallback(() => {
+    const cleared = computeClearAllValues(selectedValues, minSelections);
+    if (cleared.length === 0 && nullable) {
+      eventHandler("OnChange", id, [null]);
+      return;
+    }
+    const converted = convertValuesToOriginalType(
+      cleared.map((v) => v.toString()),
+      value,
+      validOptions,
+      selectMany,
+    );
+    eventHandler("OnChange", id, [converted]);
+  }, [selectedValues, minSelections, nullable, value, validOptions, selectMany, eventHandler, id]);
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
   };
@@ -219,6 +343,16 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
           "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
       )}
       style={styles}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+        }
+      }}
+      onFocus={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+        }
+      }}
     >
       <div className="flex items-center gap-2">
         <div className="flex-1">
@@ -303,31 +437,31 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
               })}
             </ToggleGroup>
           )}
+          {showActions && selectMany && !loading && filteredOptions.length > 0 && (
+            <SelectBulkActionsFooter
+              density={density}
+              onSelectAll={handleBulkSelectAllToggle}
+              onClearAll={handleBulkClearAllToggle}
+              selectAllDisabled={bulkSelectAllDisabled}
+              clearAllDisabled={bulkClearAllDisabled}
+            />
+          )}
         </div>
-        {((nullable && hasValue && !disabled) || invalid) && (
+        {((selectMany && nullable && hasValue && !disabled) || invalid) && (
           <div className="flex items-center gap-1">
-            {nullable && hasValue && !disabled && (
+            {selectMany && nullable && hasValue && !disabled && (
               <button
                 type="button"
                 tabIndex={-1}
-                aria-label={selectMany ? "Clear All" : "Clear"}
+                aria-label="Clear All"
                 onClick={() => {
-                  // For nullable inputs, send null; for non-nullable, send empty array for multi-select or null for single
-                  const clearedValue = nullable ? null : selectMany ? [] : null;
-                  logger.debug("Select input clear button clicked (ToggleVariant)", {
-                    id,
-                    selectMany,
-                    nullable,
-                    clearValue: clearedValue,
-                  });
-                  eventHandler("OnChange", id, [clearedValue]);
+                  eventHandler("OnChange", id, [null]);
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
                 <X className={xIconVariant({ density })} />
               </button>
             )}
-            {/* Invalid icon - rightmost */}
             {invalid && <InvalidIcon message={invalid} className="pointer-events-auto" />}
           </div>
         )}
@@ -348,6 +482,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   nullable = false,
   ghost = false,
   density = Densities.Medium,
+  events = EMPTY_ARRAY,
   "data-testid": dataTestId,
   width,
 }) => {
@@ -364,6 +499,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
     validOptions,
     eventHandler,
     false, // Always single select for RadioVariant
+    nullable,
   );
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -378,6 +514,16 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
           "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
       )}
       style={styles}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+        }
+      }}
+      onFocus={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+        }
+      }}
     >
       <div className="flex items-center gap-4">
         <div className="flex-1">
@@ -408,29 +554,64 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                       isOptionDisabled && "opacity-50 cursor-not-allowed",
                     )}
                   />
-                  <Label
-                    htmlFor={`${id}-${option.value}`}
-                    className={cn(
-                      "cursor-pointer leading-none flex items-center gap-2",
-                      selectTextVariant[density],
-                      stringValue === option.value.toString() && invalid
-                        ? inputStyles.invalidInput
-                        : undefined,
-                      isOptionDisabled && "opacity-50 cursor-not-allowed",
-                    )}
-                  >
-                    {option.icon && <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />}
-                    {option.description ? (
-                      <div className="flex flex-col">
-                        <span>{option.label}</span>
-                        <span className="text-xs text-muted-foreground mt-0.5 font-normal">
-                          {option.description}
-                        </span>
-                      </div>
-                    ) : (
-                      option.label
-                    )}
-                  </Label>
+                  {option.tooltip ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Label
+                            htmlFor={`${id}-${option.value}`}
+                            className={cn(
+                              "cursor-pointer leading-none flex items-center gap-2",
+                              selectTextVariant[density],
+                              stringValue === option.value.toString() && invalid
+                                ? inputStyles.invalidInput
+                                : undefined,
+                              isOptionDisabled && "opacity-50 cursor-not-allowed",
+                            )}
+                          >
+                            {option.icon && (
+                              <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                            )}
+                            {option.description ? (
+                              <div className="flex flex-col">
+                                <span>{option.label}</span>
+                                <span className="text-xs text-muted-foreground mt-0.5 font-normal">
+                                  {option.description}
+                                </span>
+                              </div>
+                            ) : (
+                              option.label
+                            )}
+                          </Label>
+                        </TooltipTrigger>
+                        <TooltipContent>{option.tooltip}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <Label
+                      htmlFor={`${id}-${option.value}`}
+                      className={cn(
+                        "cursor-pointer leading-none flex items-center gap-2",
+                        selectTextVariant[density],
+                        stringValue === option.value.toString() && invalid
+                          ? inputStyles.invalidInput
+                          : undefined,
+                        isOptionDisabled && "opacity-50 cursor-not-allowed",
+                      )}
+                    >
+                      {option.icon && <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />}
+                      {option.description ? (
+                        <div className="flex flex-col">
+                          <span>{option.label}</span>
+                          <span className="text-xs text-muted-foreground mt-0.5 font-normal">
+                            {option.description}
+                          </span>
+                        </div>
+                      ) : (
+                        option.label
+                      )}
+                    </Label>
+                  )}
                 </div>
               );
             })}
@@ -479,7 +660,9 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   emptyMessage,
   loading = false,
   ghost = false,
+  showActions = false,
   density = Densities.Medium,
+  events = EMPTY_ARRAY,
   "data-testid": dataTestId,
   width,
 }) => {
@@ -573,6 +756,60 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
     });
   }, [validOptions, searchable, searchTerm, searchMode]);
 
+  const visibleEnabledForBulkList = useMemo(
+    () => filteredOptions.filter((o) => !disabled && !loading && !o.disabled),
+    [filteredOptions, disabled, loading],
+  );
+
+  const bulkSelectAllDisabledList =
+    visibleEnabledForBulkList.length === 0 ||
+    visibleEnabledForBulkList.every((o) => selectedValues.includes(o.value));
+
+  const bulkClearAllDisabledList = selectedValues.length <= (minSelections ?? 0);
+
+  const handleBulkSelectAllCheckbox = useCallback(() => {
+    const merged = computeSelectAllValues(
+      selectedValues,
+      filteredOptions.map((o) => ({
+        value: o.value,
+        disabled: !!(disabled || loading || o.disabled),
+      })),
+      maxSelections,
+    );
+    const converted = convertValuesToOriginalType(
+      merged.map((v) => v.toString()),
+      value,
+      validOptions,
+      true,
+    );
+    eventHandler("OnChange", id, [converted]);
+  }, [
+    selectedValues,
+    filteredOptions,
+    disabled,
+    loading,
+    maxSelections,
+    value,
+    validOptions,
+    eventHandler,
+    id,
+  ]);
+
+  const handleBulkClearAllCheckbox = useCallback(() => {
+    const cleared = computeClearAllValues(selectedValues, minSelections);
+    if (cleared.length === 0 && nullable) {
+      eventHandler("OnChange", id, [null]);
+      return;
+    }
+    const converted = convertValuesToOriginalType(
+      cleared.map((v) => v.toString()),
+      value,
+      validOptions,
+      true,
+    );
+    eventHandler("OnChange", id, [converted]);
+  }, [selectedValues, minSelections, nullable, value, validOptions, eventHandler, id]);
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
   };
@@ -585,6 +822,16 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
           "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
       )}
       style={styles}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+        }
+      }}
+      onFocus={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+        }
+      }}
     >
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
@@ -610,90 +857,136 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
               {emptyMessage || "No options available"}
             </div>
           ) : (
-            <div
-              className={cn(
-                "flex flex-col gap-4",
-                filteredOptions.length > 6 ? "max-h-48 overflow-y-auto pr-2 -mr-2" : "",
-              )}
-              data-testid={dataTestId}
-            >
-              {filteredOptions.map((option) => {
-                const isSelected = selectedValues.includes(option.value);
-                const isInvalid = !!invalid && isSelected;
-                const isDisabled =
-                  disabled ||
-                  loading ||
-                  option.disabled ||
-                  (!isSelected && isAtMax) ||
-                  (isSelected && minSelections != null && selectedValues.length <= minSelections);
+            <React.Fragment>
+              <div
+                className={cn(
+                  "flex flex-col gap-4",
+                  filteredOptions.length > 6 ? "max-h-48 overflow-y-auto pr-2 -mr-2" : "",
+                )}
+                data-testid={dataTestId}
+              >
+                {filteredOptions.map((option) => {
+                  const isSelected = selectedValues.includes(option.value);
+                  const isInvalid = !!invalid && isSelected;
+                  const isDisabled =
+                    disabled ||
+                    loading ||
+                    option.disabled ||
+                    (!isSelected && isAtMax) ||
+                    (isSelected && minSelections != null && selectedValues.length <= minSelections);
 
-                return (
-                  <div key={option.value} className="flex items-center space-x-2">
-                    {isInvalid ? (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Checkbox
-                              id={`${id}-${option.value}`}
-                              checked={isSelected}
-                              onCheckedChange={(checked) =>
-                                handleCheckboxChange(option.value, checked === true)
-                              }
-                              disabled={isDisabled}
-                              className={cn(
-                                inputStyles.invalidInput,
-                                "bg-destructive/10 border-destructive text-destructive",
-                                selectTextVariant[density],
-                              )}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent className="bg-popover text-popover-foreground shadow-md">
-                            <div className="max-w-xs sm:max-w-sm">{invalid}</div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      <Checkbox
-                        id={`${id}-${option.value}`}
-                        checked={isSelected}
-                        onCheckedChange={(checked) =>
-                          handleCheckboxChange(option.value, checked === true)
-                        }
-                        disabled={isDisabled}
-                        className={cn(
-                          "data-[state=unchecked]:bg-transparent data-[state=unchecked]:border-border",
-                          selectTextVariant[density],
-                          isSelected
-                            ? "data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground"
-                            : undefined,
-                        )}
-                      />
-                    )}
-                    <Label
-                      htmlFor={`${id}-${option.value}`}
-                      className={cn(
-                        "flex-1 cursor-pointer flex items-center gap-2",
-                        selectTextVariant[density],
-                        isInvalid ? inputStyles.invalidInput : undefined,
-                        isDisabled && !isSelected ? "opacity-50" : undefined,
-                      )}
-                    >
-                      {option.icon && <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />}
-                      {option.description ? (
-                        <div className="flex flex-col">
-                          <span>{option.label}</span>
-                          <span className="text-xs text-muted-foreground mt-0.5 font-normal">
-                            {option.description}
-                          </span>
-                        </div>
+                  return (
+                    <div key={option.value} className="flex items-center space-x-2">
+                      {isInvalid ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Checkbox
+                                id={`${id}-${option.value}`}
+                                checked={isSelected}
+                                onCheckedChange={(checked) =>
+                                  handleCheckboxChange(option.value, checked === true)
+                                }
+                                disabled={isDisabled}
+                                className={cn(
+                                  inputStyles.invalidInput,
+                                  "bg-destructive/10 border-destructive text-destructive",
+                                  selectTextVariant[density],
+                                )}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+                              <div className="max-w-xs sm:max-w-sm">{invalid}</div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       ) : (
-                        option.label
+                        <Checkbox
+                          id={`${id}-${option.value}`}
+                          checked={isSelected}
+                          onCheckedChange={(checked) =>
+                            handleCheckboxChange(option.value, checked === true)
+                          }
+                          disabled={isDisabled}
+                          className={cn(
+                            "data-[state=unchecked]:bg-transparent data-[state=unchecked]:border-border",
+                            selectTextVariant[density],
+                            isSelected
+                              ? "data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground"
+                              : undefined,
+                          )}
+                        />
                       )}
-                    </Label>
-                  </div>
-                );
-              })}
-            </div>
+                      {option.tooltip ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Label
+                                htmlFor={`${id}-${option.value}`}
+                                className={cn(
+                                  "flex-1 cursor-pointer flex items-center gap-2",
+                                  selectTextVariant[density],
+                                  isInvalid ? inputStyles.invalidInput : undefined,
+                                  isDisabled && !isSelected ? "opacity-50" : undefined,
+                                )}
+                              >
+                                {option.icon && (
+                                  <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                                )}
+                                {option.description ? (
+                                  <div className="flex flex-col">
+                                    <span>{option.label}</span>
+                                    <span className="text-xs text-muted-foreground mt-0.5 font-normal">
+                                      {option.description}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  option.label
+                                )}
+                              </Label>
+                            </TooltipTrigger>
+                            <TooltipContent>{option.tooltip}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <Label
+                          htmlFor={`${id}-${option.value}`}
+                          className={cn(
+                            "flex-1 cursor-pointer flex items-center gap-2",
+                            selectTextVariant[density],
+                            isInvalid ? inputStyles.invalidInput : undefined,
+                            isDisabled && !isSelected ? "opacity-50" : undefined,
+                          )}
+                        >
+                          {option.icon && (
+                            <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                          )}
+                          {option.description ? (
+                            <div className="flex flex-col">
+                              <span>{option.label}</span>
+                              <span className="text-xs text-muted-foreground mt-0.5 font-normal">
+                                {option.description}
+                              </span>
+                            </div>
+                          ) : (
+                            option.label
+                          )}
+                        </Label>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {showActions && !loading && filteredOptions.length > 0 && (
+                <SelectBulkActionsFooter
+                  density={density}
+                  onSelectAll={handleBulkSelectAllCheckbox}
+                  onClearAll={handleBulkClearAllCheckbox}
+                  selectAllDisabled={bulkSelectAllDisabledList}
+                  clearAllDisabled={bulkClearAllDisabledList}
+                />
+              )}
+            </React.Fragment>
           )}
         </div>
         {((nullable && hasValues && !disabled) || invalid) && (
@@ -756,6 +1049,7 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
   density = Densities.Medium,
   "data-testid": dataTestId,
   width,
+  events = EMPTY_ARRAY,
 }) => {
   if (selectMany) {
     logger.warn(
@@ -816,9 +1110,23 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
       className={cn(
         "relative w-full flex-1 flex flex-col gap-1 pt-6 pb-2 my-auto justify-center",
         ghost && "border-transparent shadow-none",
+        disabled && "opacity-50 cursor-not-allowed",
       )}
       style={width ? getWidth(width) : undefined}
       data-testid={dataTestId}
+      onBlur={(e) => {
+        if (disabled) return;
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+        }
+      }}
+      onFocus={(e) => {
+        if (disabled) return;
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+        }
+      }}
+      tabIndex={disabled ? -1 : 0}
     >
       <div className="relative">
         <Slider
@@ -828,7 +1136,7 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
           value={[sliderValue]}
           disabled={disabled}
           density={density}
-          tooltipValue={currentLabel}
+          tooltipValue={validOptions[sliderValue]?.tooltip || currentLabel}
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderCommit}
           className={cn(invalid && inputStyles.invalidInput)}
@@ -875,39 +1183,13 @@ const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHand
   );
 };
 
-const selectValueEqual = (a: NullableSelectValue, b: NullableSelectValue): boolean => {
-  if (a === b) return true;
-  if (a == null || b == null) return a == b;
-  if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false;
-    return a.every((v, i) => v === b[i]);
-  }
-  return String(a) === String(b);
-};
-
 export const SelectInputWidget: React.FC<SelectInputWidgetProps> = (props) => {
   const eventHandler = useEventHandler();
 
   // Normalize undefined to null when nullable
-  const serverValue = props.nullable && props.value === undefined ? null : props.value;
-
-  const [localValue, setLocalValue] = useOptimisticValue(serverValue, false, selectValueEqual);
-
-  // Wrap eventHandler to intercept OnChange and apply optimistic update
-  const optimisticEventHandler: EventHandler = useCallback(
-    (event: string, id: string, args: unknown[]) => {
-      if (event === "OnChange") {
-        const newValue = args[0] as NullableSelectValue;
-        setLocalValue(newValue as NullableSelectValue & undefined);
-      }
-      eventHandler(event, id, args);
-    },
-    [eventHandler, setLocalValue],
-  );
-
   const normalizedProps = {
     ...props,
-    value: localValue,
+    value: props.nullable && props.value === undefined ? null : props.value,
     density: props.density ?? Densities.Medium,
     variant: props.variant ?? "Select",
     separator: props.separator ?? ";",
@@ -919,29 +1201,30 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = (props) => {
     emptyMessage: props.emptyMessage,
     loading: props.loading ?? false,
     ghost: props.ghost ?? false,
+    showActions: props.showActions ?? false,
   };
 
   switch (normalizedProps.variant) {
     case "List":
       return normalizedProps.selectMany ? (
-        <CheckboxVariant {...normalizedProps} eventHandler={optimisticEventHandler} />
+        <CheckboxVariant {...normalizedProps} eventHandler={eventHandler} />
       ) : (
-        <RadioVariant {...normalizedProps} eventHandler={optimisticEventHandler} />
+        <RadioVariant {...normalizedProps} eventHandler={eventHandler} />
       );
     case "Radio":
-      return <RadioVariant {...normalizedProps} eventHandler={optimisticEventHandler} />;
+      return <RadioVariant {...normalizedProps} eventHandler={eventHandler} />;
     case "Toggle":
-      return <ToggleVariant {...normalizedProps} eventHandler={optimisticEventHandler} />;
+      return <ToggleVariant {...normalizedProps} eventHandler={eventHandler} />;
     case "Slider":
       return (
         <SliderVariant
           key={normalizedProps.value?.toString() ?? "null"}
           {...normalizedProps}
-          eventHandler={optimisticEventHandler}
+          eventHandler={eventHandler}
         />
       );
     default:
-      return <SelectVariant {...normalizedProps} eventHandler={optimisticEventHandler} />;
+      return <SelectVariant {...normalizedProps} eventHandler={eventHandler} />;
   }
 };
 

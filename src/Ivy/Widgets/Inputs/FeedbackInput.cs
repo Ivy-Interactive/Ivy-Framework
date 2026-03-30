@@ -38,6 +38,7 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
     [Prop] public int Max { get; set; } = 5;
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() => [
         typeof(bool), typeof(bool?),
@@ -85,7 +86,7 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 
     internal FeedbackInput() { }
 
-    [Prop] public TNumber Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TNumber Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
@@ -131,6 +132,22 @@ public static class FeedbackInputExtensions
     public static FeedbackInputBase OnBlur(this FeedbackInputBase widget, Action onBlur)
     {
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static FeedbackInputBase OnFocus(this FeedbackInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static FeedbackInputBase OnFocus(this FeedbackInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget.OnFocus(onFocus.ToValueTask());
+    }
+
+    public static FeedbackInputBase OnFocus(this FeedbackInputBase widget, Action onFocus)
+    {
+        return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
     }
 
     public static FeedbackInputBase Stars(this FeedbackInputBase widget) => widget with { Variant = FeedbackInputVariant.Stars };

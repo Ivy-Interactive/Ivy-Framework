@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "dev": "vp dev",
     "build": "tsc -b && vp build",
     "lint": "vp lint .",
@@ -12,11 +11,11 @@
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
     "preview": "vp preview",
-    "prepare": "cd ../.. && husky src/frontend/.husky",
     "test": "vp test",
     "e2e": "playwright test",
     "e2e:docs": "playwright test e2e/docs",
-    "e2e:samples": "playwright test e2e/samples"
+    "e2e:samples": "playwright test e2e/samples",
+    "prepare": "cd ../.. && node src/frontend/node_modules/husky/bin.js src/frontend/.husky"
   },
   "dependencies": {
     "@codemirror/commands": "6.10.3",
@@ -38,7 +37,8 @@
     "@glideapps/glide-data-grid": "6.0.4-alpha24",
     "@ivy-interactive/ivy-design-system": "1.1.18",
     "@lezer/highlight": "1.2.3",
-    "@microsoft/signalr": "9.0.6",
+    "@microsoft/signalr": "10.0.0",
+    "@microsoft/signalr-protocol-msgpack": "10.0.0",
     "@radix-ui/react-accordion": "1.2.12",
     "@radix-ui/react-alert-dialog": "1.1.15",
     "@radix-ui/react-avatar": "1.1.10",
@@ -116,29 +116,17 @@
     "@types/wicg-file-system-access": "2023.10.7",
     "@vitejs/plugin-react": "6.0.1",
     "canvas-confetti": "1.9.4",
-    "happy-dom": "20.0.10",
-    "husky": "9.1.7",
-    "lint-staged": "16.2.6",
+    "happy-dom": "20.8.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "tailwindcss": "4.1.16",
     "typescript": "5.9.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.1.13",
     "vite-plus": "0.1.13",
     "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.13"
   },
-  "overrides": {
-    "@swc/helpers": "0.5.17",
-    "dompurify": "3.3.2",
-    "lodash-es": "4.17.23",
-    "minimatch": "9.0.7",
-    "remark-mermaid-plugin": {
-      "mermaid": "11.12.1"
-    },
-    "rollup": ">=4.59.0",
-    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.13",
-    "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.13"
-  },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "src/**/*.{js,jsx,ts,tsx}": [
       "vp lint --fix",
       "vp fmt"
     ],
@@ -146,5 +134,17 @@
       "vp fmt"
     ]
   },
-  "packageManager": "pnpm@10.32.1"
+  "packageManager": "pnpm@10.33.0",
+  "pnpm": {
+    "overrides": {
+      "@swc/helpers": "0.5.17",
+      "dompurify": "3.3.2",
+      "lodash-es": "4.17.23",
+      "minimatch": "9.0.7",
+      "remark-mermaid-plugin>mermaid": "11.12.1",
+      "rollup": ">=4.59.0",
+      "vite": "npm:@voidzero-dev/vite-plus-core@0.1.13",
+      "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.13"
+    }
+  }
 }

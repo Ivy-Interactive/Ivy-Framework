@@ -9,6 +9,7 @@ import {
   validateEmbedUrl,
 } from "@/lib/url";
 import { useEventHandler } from "@/components/event-handler";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface VideoPlayerWidgetProps {
   id: string;
@@ -25,6 +26,7 @@ interface VideoPlayerWidgetProps {
   startTime?: number; // playback start position in seconds
   endTime?: number; // playback stop position in seconds
   playbackRate?: number; // playback speed multiplier (0.25+)
+  subtitles?: Array<{ source: string; label?: string }>;
   events?: string[];
 }
 
@@ -53,6 +55,14 @@ const isYouTube = (url: string): boolean => {
   return validateEmbedUrl(url) === "youtube";
 };
 
+const getSubtitleUrl = (url: string): string => {
+  if (isFullUrl(url)) {
+    return url;
+  }
+  const relativePath = normalizeRelativePath(url);
+  return `${getIvyHost()}${relativePath}`;
+};
+
 export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
   id,
   source,
@@ -68,7 +78,8 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
   startTime,
   endTime,
   playbackRate,
-  events = [],
+  subtitles,
+  events = EMPTY_ARRAY,
 }) => {
   const [hasError, setHasError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -209,6 +220,8 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
     videoSrc = `${validatedVideoSrc}#t=0,${endTime}`;
   }
 
+  const hasSubtitles = subtitles && subtitles.length > 0;
+
   return (
     <video
       ref={videoRef}
@@ -221,6 +234,7 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
       preload={preload}
       controls={controls}
       poster={validatedPoster || undefined}
+      crossOrigin={hasSubtitles ? "anonymous" : undefined}
       className="w-full rounded"
       onError={() => setHasError(true)}
       onTimeUpdate={endTime != null ? handleTimeUpdate : undefined}
@@ -230,6 +244,16 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
       onLoadedData={handleLoadedEvent}
       aria-label="Video player"
     >
+      {hasSubtitles &&
+        subtitles.map((track, i) => (
+          <track
+            key={i}
+            kind="subtitles"
+            src={getSubtitleUrl(track.source)}
+            label={track.label || `Track ${i + 1}`}
+            default={i === 0}
+          />
+        ))}
       Your browser does not support the video element.
     </video>
   );

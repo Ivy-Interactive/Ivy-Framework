@@ -7,3 +7,5 @@ export {
 } from "./useTextInput";
 
 export { useShortcutKey } from "./useShortcutKey";
+
+export { useDictation } from "./useDictation";

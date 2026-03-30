@@ -148,12 +148,12 @@ server.UseHotReload();
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
 server.UseHotReload();
-var chromeSettings = new ChromeSettings().UseTabs(preventDuplicates: true);
-server.UseChrome(chromeSettings);
+var appShellSettings = new AppShellSettings().UseTabs(preventDuplicates: true);
+server.UseAppShell(appShellSettings);
 await server.RunAsync();
 ```
 
-The template configures [Chrome](../02_Concepts/11_Chrome.md) for the browser UI.
+The template configures [AppShell](../02_Concepts/11_AppShell.md) for the browser UI.
 
 ### Prerequisites
 

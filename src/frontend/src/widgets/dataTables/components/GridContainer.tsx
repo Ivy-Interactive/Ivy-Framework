@@ -50,6 +50,7 @@ interface GridContainerProps {
   getRowThemeOverride?: ((row: number) => Partial<Theme> | undefined) | undefined;
   rowActions?: MenuItem[];
   actionButtonsTop: number;
+  actionButtonsHeight: number;
   hoverRow: number | undefined;
   onRowActionClick: (action: MenuItem) => void;
   footer?: React.ReactNode;
@@ -95,6 +96,7 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   getRowThemeOverride,
   rowActions,
   actionButtonsTop,
+  actionButtonsHeight,
   hoverRow,
   onRowActionClick,
   footer,
@@ -107,59 +109,67 @@ export const GridContainer: React.FC<GridContainerProps> = ({
 
   return (
     <div
-      ref={containerRef}
-      style={{ ...containerStyle, position: "relative" }}
+      style={{
+        ...containerStyle,
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        overflow: "hidden",
+      }}
       data-has-empty-rows={hasEmptyRows || undefined}
     >
-      <DataEditor
-        ref={gridRef}
-        columns={columns}
-        rows={rows}
-        getCellContent={getCellContent}
-        customRenderers={customRenderers}
-        headerIcons={headerIcons}
-        onColumnResize={onColumnResize}
-        onVisibleRegionChanged={onVisibleRegionChanged}
-        onHeaderClicked={onHeaderClicked}
-        smoothScrollX={true}
-        smoothScrollY={true}
-        theme={theme}
-        rowHeight={rowHeight}
-        headerHeight={headerHeight}
-        freezeColumns={freezeColumns}
-        getCellsForSelection={getCellsForSelection}
-        keybindings={{ search: false }}
-        rowSelect={rowSelect}
-        columnSelect={columnSelect}
-        rangeSelect={rangeSelect}
-        gridSelection={gridSelection}
-        onGridSelectionChange={onGridSelectionChange}
-        width={width}
-        height={height}
-        rowMarkers={rowMarkers}
-        onColumnMoved={onColumnMoved}
-        groupHeaderHeight={groupHeaderHeight}
-        cellActivationBehavior="double-click"
-        onCellClicked={onCellClicked}
-        onCellActivated={onCellActivated}
-        onGroupHeaderClicked={onGroupHeaderClicked}
-        showSearch={showSearch}
-        onSearchClose={onSearchClose}
-        onItemHovered={onItemHovered}
-        getRowThemeOverride={getRowThemeOverride}
-      />
-
-      {/* Row action buttons overlay */}
-      {rowActions && rowActions.length > 0 && (
-        <RowActionButtons
-          actions={rowActions}
-          top={actionButtonsTop}
-          visible={hoverRow !== undefined}
-          onActionClick={onRowActionClick}
+      <div
+        ref={containerRef}
+        style={{ flex: 1, minHeight: 0, overflow: "hidden", position: "relative" }}
+      >
+        <DataEditor
+          ref={gridRef}
+          columns={columns}
+          rows={rows}
+          getCellContent={getCellContent}
+          customRenderers={customRenderers}
+          headerIcons={headerIcons}
+          onColumnResize={onColumnResize}
+          onVisibleRegionChanged={onVisibleRegionChanged}
+          onHeaderClicked={onHeaderClicked}
+          smoothScrollX={true}
+          smoothScrollY={true}
+          theme={theme}
+          rowHeight={rowHeight}
+          headerHeight={headerHeight}
+          freezeColumns={freezeColumns}
+          getCellsForSelection={getCellsForSelection}
+          keybindings={{ search: false }}
+          rowSelect={rowSelect}
+          columnSelect={columnSelect}
+          rangeSelect={rangeSelect}
+          gridSelection={gridSelection}
+          onGridSelectionChange={onGridSelectionChange}
+          width={width}
+          height={height}
+          rowMarkers={rowMarkers}
+          onColumnMoved={onColumnMoved}
+          groupHeaderHeight={groupHeaderHeight}
+          cellActivationBehavior="double-click"
+          onCellClicked={onCellClicked}
+          onCellActivated={onCellActivated}
+          onGroupHeaderClicked={onGroupHeaderClicked}
+          showSearch={showSearch}
+          onSearchClose={onSearchClose}
+          onItemHovered={onItemHovered}
+          getRowThemeOverride={getRowThemeOverride}
         />
-      )}
 
-      {/* Footer overlay */}
+        {rowActions && rowActions.length > 0 && (
+          <RowActionButtons
+            actions={rowActions}
+            top={actionButtonsTop}
+            height={actionButtonsHeight}
+            visible={hoverRow !== undefined}
+            onActionClick={onRowActionClick}
+          />
+        )}
+      </div>
       {footer}
     </div>
   );

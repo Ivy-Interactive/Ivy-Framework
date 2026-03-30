@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Ivy.Core.Hooks;
 
 // Resharper disable once CheckNamespace
@@ -38,6 +39,8 @@ public interface IViewContext : IAsyncDisposable
     object UseContext(Type serviceType);
 
     T UseService<T>();
+
+    bool TryUseService<T>([MaybeNullWhen(false)] out T service);
 
     object UseService(Type serviceType);
 }
