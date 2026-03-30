@@ -240,7 +240,7 @@ public class ContentView(
                 {
                     var fileContent = File.Exists(artifactPath) ? File.ReadAllText(artifactPath) : "File not found.";
                     var language = FileApp.GetLanguage(Path.GetExtension(artifactPath));
-                    sheetContent = new CodeInput(fileContent, language: language).Height(Size.Full());
+                    sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
                 }
 
                 content |= new Sheet(
