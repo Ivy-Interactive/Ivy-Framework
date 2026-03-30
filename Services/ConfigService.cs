@@ -106,6 +106,12 @@ public class ConfigService
         {
             _settings.PlanFolder = Path.GetFullPath(Path.Combine(tendrilRoot, _settings.PlanFolder));
         }
+
+        // Ensure Trash directory exists for discarded/duplicate requests
+        if (!string.IsNullOrEmpty(_settings.TendrilData))
+        {
+            Directory.CreateDirectory(Path.Combine(_settings.TendrilData, "Trash"));
+        }
     }
 
     public TendrilSettings Settings => _settings;

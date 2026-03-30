@@ -42,7 +42,26 @@ The plan ID is pre-allocated by the launcher script and provided in the firmware
 
 ### 3. Research
 
-- **Check for duplicate plans** first. List existing plan folders in `PlansDirectory` and scan their `plan.yaml` titles. If an existing plan already covers the same issue (same problem, same project), **STOP** — do not create a duplicate. Instead, write a short note to `<PlansDirectory>/<PlanId>-Duplicate/skip.md` explaining which existing plan covers it, then exit.
+- **Check for duplicate plans** first. List existing plan folders in `PlansDirectory` and scan their `plan.yaml` titles. If an existing plan already covers the same issue (same problem, same project), **STOP** — do not create a duplicate. Instead, write a file to `<tendrilData>/Trash/<PlanId>-<SafeTitle>.md` (where `<SafeTitle>` is the title with spaces replaced by hyphens and special characters removed) with the following format, then exit without creating a plan folder:
+
+  ```markdown
+  ---
+  date: <CurrentTime>
+  originalRequest: "<the args/request text>"
+  duplicateOf: "<existing plan folder name>"
+  project: "<project name>"
+  ---
+
+  # Duplicate Request
+
+  This request was identified as a duplicate of plan [<existing plan ID>](<path to existing plan>).
+
+  **Original request:** <args text>
+
+  **Reason:** <brief explanation of why it's a duplicate>
+  ```
+
+  The `tendrilData` path is available from `config.yaml`.
 - Read relevant source files to understand the codebase areas involved
 - **Search GitHub issues** before creating plans to avoid duplicates or workaround plans for features already being built. Example:
   ```bash
