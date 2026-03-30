@@ -220,7 +220,7 @@ function ReadPlanProject {
 
     $content = Get-Content $PlanYamlPath -Raw
     $match = [regex]::Match($content, '(?m)^project:\s*(.+)$')
-    $project = if ($match.Success) { $match.Groups[1].Value.Trim() } else { "General" }
+    $project = if ($match.Success) { $match.Groups[1].Value.Trim() } else { "[Auto]" }
     return @{ Content = $content; Project = $project }
 }
 

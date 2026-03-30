@@ -16,7 +16,6 @@ namespace Ivy.Tendril.AppShell;
 #pragma warning disable IVYAPP001
 #pragma warning disable IVYHOOK005
 
-[App(isVisible: false)]
 public class TendrilAppShell(AppShellSettings settings) : ViewBase
 {
     internal AppShellSettings Settings => settings;

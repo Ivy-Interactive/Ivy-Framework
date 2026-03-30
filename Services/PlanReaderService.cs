@@ -56,6 +56,35 @@ public class PlanReaderService(ConfigService config)
         catch { }
     }
 
+    /// <summary>
+    /// On startup, fix plan.yaml files that have structured repos (path: + prRule:)
+    /// by normalizing them to plain path strings.
+    /// </summary>
+    public void RepairPlans()
+    {
+        try
+        {
+            if (!Directory.Exists(PlansDirectory)) return;
+
+            foreach (var dir in Directory.GetDirectories(PlansDirectory))
+            {
+                var planYamlPath = Path.Combine(dir, "plan.yaml");
+                if (!File.Exists(planYamlPath)) continue;
+
+                var yaml = File.ReadAllText(planYamlPath);
+
+                // Fix structured repos (path: + prRule:) → plain path strings
+                var repaired = Regex.Replace(yaml,
+                    @"(?m)^(\s*)-\s+path:\s*(.+)\r?\n\s+prRule:\s*.+$",
+                    "$1- $2");
+
+                if (repaired != yaml)
+                    File.WriteAllText(planYamlPath, repaired);
+            }
+        }
+        catch { }
+    }
+
     public List<PlanFile> GetPlans(PlanStatus? statusFilter = null)
     {
         try

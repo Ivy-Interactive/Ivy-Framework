@@ -578,6 +578,14 @@ await page.evaluate(() => {
 ```
 📝 **Why**: NumberInput renders `data-testid` directly on the HTML `<input>` element (not an `<ivy-widget>` wrapper). The clear X icon is a sibling element at a higher DOM level (`<div class="relative">` > `<input>` + `<div class="absolute">` containing the SVG). The `<input>` has no children.
 
+## react-markdown v10 Removed `inline` Prop from Code Component
+
+### `inline` prop is always `undefined` in code component
+❌ **`if (inline)` in code component** — react-markdown v10 removed the `inline` prop from the `code` component. It is always `undefined`.
+✅ **Use `!className` to detect inline code** — inline code has no `className` (no language), while code blocks have `className="language-xxx"`
+✅ **Alternative**: Check if the `<code>` element is inside a `<pre>` element: `if (!el.closest('pre'))`
+📝 **Why**: react-markdown v9+ changed how inline code vs code blocks are distinguished. In v8, `inline: true` was passed. In v10, inline code is simply a `<code>` element without a `<pre>` wrapper and without a `className`. The project uses react-markdown v10.1.0.
+
 ## Future Gotchas to Document
 
 As we encounter more issues during feature testing, add them here with:

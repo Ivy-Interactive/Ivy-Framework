@@ -92,7 +92,7 @@ public class ContentView(
 
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
-            | new Badge(_selectedPlan.Status.ToString()).Variant(BadgeVariant.Outline)
+            | new Badge(_selectedPlan.Status.ToString()).Variant(_selectedPlan.Status == PlanStatus.Failed ? BadgeVariant.Destructive : BadgeVariant.Outline)
             | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline)
             | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
             | new Badge($"rev:{_selectedPlan.RevisionCount}").Variant(BadgeVariant.Outline)
@@ -109,6 +109,11 @@ public class ContentView(
             });
 
         var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)));
+
+        if (_selectedPlan.Status == PlanStatus.Failed)
+        {
+            scrollableContent |= BuildFailureCallout(_selectedPlan);
+        }
 
         if (isEditing.Value)
         {
@@ -187,6 +192,68 @@ public class ContentView(
         };
 
         return new Fragment(elements.ToArray());
+    }
+
+    private static object BuildFailureCallout(PlanFile plan)
+    {
+        var verificationDir = Path.Combine(plan.FolderPath, "verification");
+        var failedVerifications = plan.Verifications
+            .Where(v => v.Status is "Fail" or "Pending")
+            .ToList();
+
+        if (failedVerifications.Count > 0 && Directory.Exists(verificationDir))
+        {
+            var parts = new List<string>();
+            foreach (var v in failedVerifications)
+            {
+                var reportPath = Path.Combine(verificationDir, $"{v.Name}.md");
+                if (!File.Exists(reportPath))
+                {
+                    parts.Add($"**{v.Name}** — {v.Status}, no report generated");
+                    continue;
+                }
+
+                var report = File.ReadAllText(reportPath);
+
+                // Extract the Output section content
+                var outputMatch = System.Text.RegularExpressions.Regex.Match(
+                    report, @"## Output\s*\n([\s\S]*?)(?=\n## |\z)");
+                var output = outputMatch.Success
+                    ? outputMatch.Groups[1].Value.Trim()
+                    : null;
+
+                // Extract Issues Found section
+                var issuesMatch = System.Text.RegularExpressions.Regex.Match(
+                    report, @"## Issues Found\s*\n([\s\S]*?)(?=\n## |\z)");
+                var issues = issuesMatch.Success
+                    ? issuesMatch.Groups[1].Value.Trim()
+                    : null;
+
+                var detail = output ?? issues ?? "See verification report for details";
+                parts.Add($"**{v.Name}** — {detail}");
+            }
+
+            return Callout.Destructive(string.Join("\n\n", parts), "Execution Failed");
+        }
+
+        // Fall back to last execution log
+        var logsDir = Path.Combine(plan.FolderPath, "logs");
+        if (Directory.Exists(logsDir))
+        {
+            var lastLog = Directory.GetFiles(logsDir, "*.md")
+                .OrderByDescending(f => f)
+                .FirstOrDefault();
+            if (lastLog != null)
+            {
+                var logContent = File.ReadAllText(lastLog);
+                var summaryMatch = System.Text.RegularExpressions.Regex.Match(
+                    logContent, @"## Summary\s*\n([\s\S]*?)(?=\n## |\z)");
+                if (summaryMatch.Success)
+                    return Callout.Destructive(summaryMatch.Groups[1].Value.Trim(), "Execution Failed");
+            }
+        }
+
+        return Callout.Destructive("No details available. Check the logs folder.", "Execution Failed");
     }
 
     private void GoToNext()

@@ -100,14 +100,14 @@ commits:
   - def5678
 ```
 
-Also populate the `verifications` list with each checked verification from the plan revision, initially set to `Pending`:
+Also populate the `verifications` list from the plan revision. Set checked items (`- [x]`) to `Pending` and unchecked items (`- [ ]`) to `Skipped`:
 
 ```yaml
 verifications:
   - name: DotnetBuild
     status: Pending
   - name: DotnetTest
-    status: Pending
+    status: Skipped
 ```
 
 If the plan references other plans (e.g. split-from, follow-up), add them to `relatedPlans`:

@@ -21,7 +21,7 @@ public class PlansApp : ViewBase
         var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
 
         var plans = planService.GetPlans()
-            .Where(p => p.Status == PlanStatus.Draft)
+            .Where(p => p.Status is PlanStatus.Draft or PlanStatus.Failed)
             .ToList();
         var filteredPlans = PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value).ToList();
 

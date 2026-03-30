@@ -813,3 +813,12 @@ In headless mode with File System Access API disabled, the save dialog uses `<a 
 - **Security default verified**: Without `.DangerouslyAllowLocalFiles()`, local file paths are correctly blocked and converted to `#`
 - **Test artifacts**: 4 apps (FileUrlsApp, WindowsPathsApp, SecurityDefaultApp, EdgeCasesApp), 18 tests, 20+ screenshots, 18 videos
 - **Project location**: `D:\Temp\IvyFeatureTester\2026-03-26\MarkdownLocalImagesFixRetest\`
+
+### 2026-03-29 — Icons.X in Markdown Inline Code (BUG FOUND)
+- **Feature**: `Icons.X` pattern in inline code should render the actual Lucide icon next to the code text
+- **BUG**: react-markdown v10 removed the `inline` prop from the `code` component. The implementation checks `if (inline)` which is always `undefined`, so icon detection never triggers. All `Icons.X` code elements render as plain monospaced text without icons.
+- **Fix**: Replace `if (inline)` with `if (!className)` — inline code has no className (no language), code blocks have `className="language-xxx"`
+- **Icons enum gotcha**: `Icons.AlertTriangle` → `Icons.TriangleAlert`, `Icons.Sliders` → `Icons.SlidersHorizontal` (Lucide renames)
+- **Stale obj cache**: When switching branches in worktrees, `src/Ivy/obj/` can reference old frontend asset filenames. Delete obj/bin and rebuild.
+- 11 tests, 2 fix rounds (icon names + stale cache), all tests pass (verify current behavior including the bug), logs clean
+- **Project location**: `D:\Temp\IvyVerification\2026-03-29\IconsXMarkdown\`

@@ -150,9 +150,7 @@ public class JobService
             job.DurationSeconds = (int)(job.CompletedAt.Value - job.StartedAt.Value).TotalSeconds;
 
         var title = success ? "Job Completed" : "Job Failed";
-        var message = success
-            ? $"Job completed: {job.PlanFile}"
-            : $"Job failed: {job.PlanFile}";
+        var message = job.PlanFile ?? job.Type;
         PendingNotifications.Enqueue(new JobNotification(title, message, success));
 
         if (job.Status == "Failed")

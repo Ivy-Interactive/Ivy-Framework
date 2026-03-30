@@ -32,8 +32,6 @@ public class ContentView(
         var appRepository = UseService<IAppRepository>();
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
-        var overlayImage = UseState<string?>(null);
-        var overlayOpen = UseState(false);
 
         void NavigateNewTab<T>(object? appArgs = null) where T : class
         {
@@ -72,6 +70,7 @@ public class ContentView(
         var content = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200))).Gap(4);
 
         // Verifications section
+        var openVerification = UseState<string?>(null);
         if (_selectedPlan.Verifications.Count > 0)
         {
             content |= Text.Block("Verifications").Bold();
@@ -84,8 +83,15 @@ public class ContentView(
             );
             foreach (var v in _selectedPlan.Verifications)
             {
+                var verificationPath = Path.Combine(_selectedPlan.FolderPath, "verification", $"{v.Name}.md");
+                var hasReport = File.Exists(verificationPath);
+                var nameCapture = v.Name;
+                object nameCell = hasReport
+                    ? new Button(v.Name).Ghost().OnClick(() => openVerification.Set(nameCapture))
+                    : (object)Text.Block(v.Name);
+
                 verificationsTable |= new TableRow(
-                    new TableCell(v.Name),
+                    new TableCell(nameCell),
                     new TableCell(new Badge(v.Status).Variant(
                         v.Status == "Pass" ? BadgeVariant.Success
                         : v.Status == "Fail" ? BadgeVariant.Destructive
@@ -93,6 +99,19 @@ public class ContentView(
                 );
             }
             content |= verificationsTable;
+
+            if (openVerification.Value is { } verName)
+            {
+                var reportPath = Path.Combine(_selectedPlan.FolderPath, "verification", $"{verName}.md");
+                var reportContent = File.Exists(reportPath)
+                    ? File.ReadAllText(reportPath)
+                    : $"No report found for {verName}.";
+                content |= new Sheet(
+                    onClose: () => openVerification.Set(null),
+                    content: new Markdown(reportContent).DangerouslyAllowLocalFiles(),
+                    title: verName
+                );
+            }
         }
 
         // Commits section
@@ -173,7 +192,6 @@ public class ContentView(
                 }
 
                 artifactsLayout |= Text.Block($"  {category}/").Bold();
-                var imageFiles = new List<(string file, string fileName)>();
                 foreach (var file in files)
                 {
                     var fileName = Path.GetFileName(file);
@@ -182,7 +200,12 @@ public class ContentView(
 
                     if (isImage)
                     {
-                        imageFiles.Add((file, fileName));
+                        var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(file)}";
+                        artifactsLayout |= Layout.Horizontal().Gap(2)
+                            | new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = fileName }
+                                .Height(Size.Units(20)).Width(Size.Units(30))
+                            | new Button(fileName).Ghost().OnClick(() =>
+                                NavigateNewTab<FileApp>(new FileAppArgs(file)));
                     }
                     else
                     {
@@ -190,22 +213,6 @@ public class ContentView(
                             | new Button(fileName).Ghost().OnClick(() =>
                                 NavigateNewTab<FileApp>(new FileAppArgs(file)));
                     }
-                }
-                if (imageFiles.Count > 0)
-                {
-                    var thumbnailsLayout = Layout.Wrap().Gap(1);
-                    foreach (var (file, fileName) in imageFiles)
-                    {
-                        var imageUrl = file;
-                        thumbnailsLayout |= new Image(imageUrl) { ObjectFit = ImageFit.Cover, Alt = fileName }
-                            .OnClick(() =>
-                            {
-                                overlayImage.Set(imageUrl);
-                                overlayOpen.Set(true);
-                            })
-                            .Height(Size.Units(8)).Width(Size.Units(12));
-                    }
-                    artifactsLayout |= thumbnailsLayout;
                 }
             }
             content |= artifactsLayout;
@@ -253,13 +260,6 @@ public class ContentView(
                     client.Toast("Copied path to clipboard", "Path Copied");
                 })
             );
-
-        if (overlayImage.Value != null)
-        {
-            content |= new Image(overlayImage.Value) { ObjectFit = ImageFit.Contain }
-                .Height(Size.Percent(80)).Width(Size.Full())
-                .ToDialog(overlayOpen, width: Size.Percent(90));
-        }
 
         return new HeaderLayout(
             header: header,

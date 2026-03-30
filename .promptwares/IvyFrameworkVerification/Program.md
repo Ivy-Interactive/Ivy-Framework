@@ -38,11 +38,11 @@ If the feature is a **widget**, check that required companion artifacts exist:
 
 Record results for the report. Skip for non-widget features.
 
-### 4. Create Temp Project
+### 4. Create Sample Project
 
-Create folder: `D:\Temp\IvyVerification\<yyyy-MM-dd>\<FeatureName>\`
+Create everything directly in `<ArtifactsDir>/sample/` so the plan folder is self-contained and runnable.
 
-**`<FeatureName>.csproj`:**
+**`<ArtifactsDir>/sample/<FeatureName>.csproj`:**
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
@@ -58,7 +58,7 @@ Create folder: `D:\Temp\IvyVerification\<yyyy-MM-dd>\<FeatureName>\`
 </Project>
 ```
 
-**`Program.cs`:**
+**`<ArtifactsDir>/sample/Program.cs`:**
 ```csharp
 using Ivy;
 using System.Reflection;
@@ -86,6 +86,8 @@ Each app must:
 
 ### 6. Build and Verify
 
+From `<ArtifactsDir>/sample/`:
+
 ```bash
 dotnet build
 dotnet run --describe
@@ -95,13 +97,13 @@ Fix any compilation errors. Iterate until build succeeds.
 
 ### 7. Create Playwright Tests
 
-Create `.ivy/tests/` directory with:
+Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 
 **package.json** — minimal, with `@playwright/test` dependency
 
 **playwright.config.ts** — Chromium only, single worker, no retries, viewport `{ width: 1920, height: 1920 }` (set in both `use` and `projects[0].use`), uses `process.env.APP_PORT`, video recording: `video: { mode: 'on', dir: '<ArtifactsDir>/videos' }` in both `use` and `projects[0].use`
 
-**IMPORTANT:** Screenshots and videos must be written directly to the plan's `ArtifactsDir` (from the firmware header), NOT to the temp project. This ensures artifacts are always available in the plan folder even if the agent fails mid-way.
+**IMPORTANT:** Screenshots and videos must be written to `<ArtifactsDir>/screenshots/` and `<ArtifactsDir>/videos/` (sibling to `sample/`), not inside `sample/`.
 
 **One `.spec.ts` per app:**
 - `beforeAll`: find free port, spawn `dotnet run -- --port <port>`, wait for HTTP 200
@@ -147,7 +149,7 @@ Create `.ivy/tests/` directory with:
 ### 8. Install & Run Tests
 
 ```bash
-cd .ivy/tests
+cd <ArtifactsDir>/sample/.ivy/tests
 vp install
 npx playwright install chromium
 vp run test
@@ -164,12 +166,15 @@ If tests fail, logs have errors, or screenshots show issues:
 2. Apply fixes and re-run
 3. Track each fix round
 
-### 10. Copy Sample Code to Plan
+### 10. Verify Artifacts
 
-Screenshots, videos, and logs are already written directly to `ArtifactsDir` by the tests. Copy remaining evidence:
+Everything is already in place under `<ArtifactsDir>/`:
+- `sample/` — `.csproj`, `.cs` files, `.ivy/tests/` (runnable project)
+- `screenshots/` — Playwright screenshots
+- `videos/` — Playwright video recordings
+- `tests/` — `console.log`, `backend.log`
 
-- `sample/` — copy the demo app `.cs` files to `<ArtifactsDir>/sample/`
-- `tests/` — copy the `.spec.ts` test files to `<ArtifactsDir>/tests/`
+Confirm all expected files exist before writing the report.
 
 ### 11. Write Verification Report
 

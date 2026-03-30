@@ -27,18 +27,13 @@ Args contains the user's task description. If it references related plans with `
 
 Read `config.yaml` (at the path from the firmware header) to understand all available projects, their repos, and context.
 
-**If `Project` is set to a specific project name** (not `[Auto]` or `General`):
+**If `Project` is set to a specific project name** (not `[Auto]`):
 - Find that project in `config.yaml` and use its repos and context to scope your research
-
-**If `Project: General`**:
-- This is a project-agnostic plan (research, cross-cutting, ad-hoc tasks)
-- Do not scope to any specific repos — research broadly as needed
-- Set `project: General` in plan.yaml, leave `repos: []` empty
 
 **If `Project: [Auto]`**:
 - Analyze the task description to infer the correct project from `config.yaml`
 - Match based on keywords, repo paths, or component names in the description
-- If no project matches, use `General`
+- If no project matches, set `project: [Auto]` in plan.yaml and leave `repos: []` empty
 - Use the matched project's context to scope your research
 
 ### 2. Plan ID
@@ -47,6 +42,7 @@ The plan ID is pre-allocated by the launcher script and provided in the firmware
 
 ### 3. Research
 
+- **Check for duplicate plans** first. List existing plan folders in `PlansDirectory` and scan their `plan.yaml` titles. If an existing plan already covers the same issue (same problem, same project), **STOP** — do not create a duplicate. Instead, write a short note to `<PlansDirectory>/<PlanId>-Duplicate/skip.md` explaining which existing plan covers it, then exit.
 - Read relevant source files to understand the codebase areas involved
 - **Search GitHub issues** before creating plans to avoid duplicates or workaround plans for features already being built. Example:
   ```bash
@@ -89,7 +85,7 @@ Example for a Framework project plan:
 - [x] IvyFrameworkVerification
 ```
 
-If the project has no verifications (e.g. `General`), leave the section empty or omit it.
+If the project has no verifications (e.g. `[Auto]`), leave the section empty or omit it.
 
 The user can edit the checklist before execution — unchecking a required verification or checking an optional one. ExecutePlan will run only the checked items.
 

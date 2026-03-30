@@ -69,7 +69,7 @@ relatedPlans: []
 | `level`        | One of the levels defined in `config.yaml`       |
 | `title`        | Human-readable plan title                        |
 | `sessionId`    | Claude session ID from MakePlan (for `claude --resume`) |
-| `repos`        | Affected repository paths                        |
+| `repos`        | Affected repository paths (plain strings, e.g. `- D:\Repos\Foo` — NOT objects) |
 | `created`      | UTC timestamp when the plan was created (use `CurrentTime` from firmware header) |
 | `updated`      | UTC timestamp of last state change (use `CurrentTime` from firmware header)      |
 | `initialPrompt`| Original user description                        |
