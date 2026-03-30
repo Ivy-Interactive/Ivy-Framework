@@ -35,7 +35,7 @@ $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
 $agent = GetAgentCommandFromConfig
 
 Write-Host "Starting Agent in $workDir..."
-SendStatusMessage "Executing plan..."
+SendStatusMessage "Executing Plan"
 Push-Location $workDir
 
 try {
@@ -56,7 +56,7 @@ try {
     }
 
     if ($exitCode -eq 0) {
-        SendStatusMessage "Checking verifications..."
+        SendStatusMessage "Checking Verifications"
         WritePlanLog $PlanPath "ExecutePlan" $summary
 
         # Check verification statuses before transitioning
