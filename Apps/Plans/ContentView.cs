@@ -31,7 +31,6 @@ public class ContentView(
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
         var updateDialogOpen = UseState(false);
-        var splitDialogOpen = UseState(false);
         var deleteDialogOpen = UseState(false);
         var createIssueDialogOpen = UseState(false);
         var selectedRepoState = UseState<string?>(null);
@@ -39,7 +38,6 @@ public class ContentView(
         var issueLabelsState = UseState<string[]>(Array.Empty<string>());
 
         var updateText = UseState("");
-        var splitText = UseState("");
         var isEditing = UseState(false);
         var editContent = UseState("");
         var isEditingPrev = UseState(false);
@@ -146,7 +144,12 @@ public class ContentView(
 
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
             | new Button("Update").Icon(Icons.Pencil).Outline().ShortcutKey("u").OnClick(() => updateDialogOpen.Set(true))
-            | new Button("Split").Icon(Icons.Scissors).Outline().ShortcutKey("s").OnClick(() => splitDialogOpen.Set(true))
+            | new Button("Split").Icon(Icons.Scissors).Outline().ShortcutKey("s").OnClick(() =>
+            {
+                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Updating);
+                _jobService.StartJob("SplitPlan", _selectedPlan.FolderPath);
+                _refreshPlans();
+            })
             | new Button("Expand").Icon(Icons.UnfoldVertical).Outline().ShortcutKey("x").OnClick(() =>
             {
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
@@ -186,7 +189,6 @@ public class ContentView(
         {
             mainLayout,
             new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan, _jobService, _planService, _refreshPlans),
-            new SplitPlanDialog(splitDialogOpen, splitText, _selectedPlan, _jobService, _planService, _refreshPlans),
             new DeletePlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans),
             new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, _selectedPlan, _jobService)
         };
