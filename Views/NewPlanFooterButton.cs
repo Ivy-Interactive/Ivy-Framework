@@ -20,7 +20,7 @@ public class NewPlanFooterButton : ViewBase
             new Button("New Idea")
                 .Icon(Icons.Plus)
                 .Width(Size.Full())
-                .Variant(ButtonVariant.Outline)
+                .Variant(ButtonVariant.Primary)
                 .OnClick(() => dialogOpen.Set(true))
                 .ShortcutKey("CTRL+ALT+I")
         };
