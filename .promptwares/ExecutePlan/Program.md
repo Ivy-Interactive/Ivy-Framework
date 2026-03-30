@@ -88,6 +88,32 @@ git status
 ```
 If there are uncommitted changes, either commit them or discard them with a clear reason. The worktree must be clean.
 
+### 5.5. Generate Summary
+
+After all implementation commits are made, create `<PlanFolder>/artifacts/summary.md` summarizing what was done.
+
+The summary should follow this structure:
+
+~~~markdown
+# Summary
+
+## Changes
+
+<Brief description of what was implemented — 2-3 sentences max>
+
+## API Changes
+
+<List any new/changed/removed public APIs: classes, methods, properties, endpoints, CLI commands, config keys. Use code formatting. If no API changes, write "None.">
+
+## Files Modified
+
+<Bulleted list of key files changed, grouped by category. Don't list every file — focus on the important ones.>
+~~~
+
+Focus on **what changed** (past tense), not what the plan said to do. Emphasize API surface changes — new classes, renamed methods, added properties, changed signatures — since these affect consumers.
+
+Update the summary after verification fixes too — if verifications cause additional commits, append those changes to the summary.
+
 ### 6. Document Commits
 
 Update `plan.yaml` in the plan folder (NOT in the worktree). Use the Edit tool on the original `plan.yaml` at the `PlanFolder` path.

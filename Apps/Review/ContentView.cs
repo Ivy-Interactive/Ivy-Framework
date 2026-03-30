@@ -33,6 +33,7 @@ public class ContentView(
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
         var openVerification = UseState<string?>(null);
+        var showPlan = UseState(false);
 
         void NavigateNewTab<T>(object? appArgs = null) where T : class
         {
@@ -218,18 +219,47 @@ public class ContentView(
             content |= artifactsLayout;
         }
 
-        // Plan content
-        content |= Text.Block("Plan").Bold();
-        content |= new Markdown(_selectedPlan.LatestRevisionContent)
-            .DangerouslyAllowLocalFiles()
-            .OnLinkClick(url =>
+        // Summary or Plan content
+        var summaryPath = Path.Combine(_selectedPlan.FolderPath, "artifacts", "summary.md");
+        if (File.Exists(summaryPath))
+        {
+            var summaryContent = File.ReadAllText(summaryPath);
+            content |= Text.Block("Summary").Bold();
+            content |= new Markdown(summaryContent).DangerouslyAllowLocalFiles();
+            content |= new Button("View Original Plan").Ghost().Icon(Icons.FileText).OnClick(() => showPlan.Set(true));
+
+            if (showPlan.Value)
             {
-                if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+                content |= new Sheet(
+                    onClose: () => showPlan.Set(false),
+                    content: new Markdown(_selectedPlan.LatestRevisionContent)
+                        .DangerouslyAllowLocalFiles()
+                        .OnLinkClick(url =>
+                        {
+                            if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var filePath = url.Substring("file:///".Length);
+                                NavigateNewTab<FileApp>(new FileAppArgs(filePath));
+                            }
+                        }),
+                    title: "Original Plan"
+                );
+            }
+        }
+        else
+        {
+            content |= Text.Block("Plan").Bold();
+            content |= new Markdown(_selectedPlan.LatestRevisionContent)
+                .DangerouslyAllowLocalFiles()
+                .OnLinkClick(url =>
                 {
-                    var filePath = url.Substring("file:///".Length);
-                    NavigateNewTab<FileApp>(new FileAppArgs(filePath));
-                }
-            });
+                    if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var filePath = url.Substring("file:///".Length);
+                        NavigateNewTab<FileApp>(new FileAppArgs(filePath));
+                    }
+                });
+        }
 
         // Action bar
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)

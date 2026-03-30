@@ -51,7 +51,7 @@ EOF
 
 - **Base branch:** `gh repo view --repo <owner/repo> --json defaultBranchRef -q .defaultBranchRef.name`
 - **Title:** `[<planId>] <plan title>`
-- **Body:** Summary from Problem + Solution sections, list of commits. Check `<PlanFolder>/artifacts/screenshots/` and `<PlanFolder>/artifacts/videos/` — if any exist, embed them in the body.
+- **Body:** If `<PlanFolder>/artifacts/summary.md` exists, use its content as the PR body (followed by list of commits). Otherwise, fall back to summary from Problem + Solution sections. Always check `<PlanFolder>/artifacts/screenshots/` and `<PlanFolder>/artifacts/videos/` — if any exist, embed them in the body.
 
 ### 4. Apply PR Rule
 
