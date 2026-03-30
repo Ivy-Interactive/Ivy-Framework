@@ -1,5 +1,6 @@
 using Ivy;
 using Microsoft.Extensions.DependencyInjection;
+using Ivy.Tendril.AppShell;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 using Ivy.Tendril.Views;
@@ -39,7 +40,7 @@ server.Services.AddSingleton<InboxWatcherService>(sp =>
 });
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
-server.UseAppShell(new AppShellSettings()
+server.UseAppShell(() => new TendrilAppShell(new AppShellSettings()
     .UseTabs(preventDuplicates: true)
-    .Footer(new NewPlanFooterButton()));
+    .Footer(new NewPlanFooterButton())));
 await server.RunAsync();
