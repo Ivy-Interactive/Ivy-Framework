@@ -34,12 +34,25 @@ public class PlanPdfService
             };
 
             using var process = Process.Start(psi);
-            process?.WaitForExit(30000);
+            if (process == null)
+                throw new InvalidOperationException("Failed to start pandoc process");
 
-            if (process?.ExitCode != 0 || !File.Exists(outputPath))
+            // Read streams asynchronously to avoid deadlock when pipe buffer fills
+            var stderrTask = process.StandardError.ReadToEndAsync();
+            var stdoutTask = process.StandardOutput.ReadToEndAsync();
+
+            var exited = process.WaitForExit(30000);
+            if (!exited)
             {
-                var error = process?.StandardError.ReadToEnd() ?? "Unknown error";
-                throw new InvalidOperationException($"pandoc failed: {error}");
+                process.Kill();
+                throw new InvalidOperationException("pandoc timed out after 30 seconds");
+            }
+
+            var error = stderrTask.Result;
+
+            if (process.ExitCode != 0 || !File.Exists(outputPath))
+            {
+                throw new InvalidOperationException($"pandoc failed (exit {process.ExitCode}): {error}");
             }
 
             return File.ReadAllBytes(outputPath);
@@ -80,12 +93,25 @@ public class PlanPdfService
         };
 
         using var process = Process.Start(psi);
-        process?.WaitForExit(30000);
+        if (process == null)
+            throw new InvalidOperationException("Failed to start pandoc process");
 
-        if (process?.ExitCode != 0 || !File.Exists(outputPath))
+        // Read streams asynchronously to avoid deadlock when pipe buffer fills
+        var stderrTask = process.StandardError.ReadToEndAsync();
+        var stdoutTask = process.StandardOutput.ReadToEndAsync();
+
+        var exited = process.WaitForExit(30000);
+        if (!exited)
         {
-            var error = process?.StandardError.ReadToEnd() ?? "Unknown error";
-            throw new InvalidOperationException($"pandoc failed: {error}");
+            process.Kill();
+            throw new InvalidOperationException("pandoc timed out after 30 seconds");
+        }
+
+        var error = stderrTask.Result;
+
+        if (process.ExitCode != 0 || !File.Exists(outputPath))
+        {
+            throw new InvalidOperationException($"pandoc failed (exit {process.ExitCode}): {error}");
         }
 
         return File.ReadAllBytes(outputPath);
