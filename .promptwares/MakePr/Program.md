@@ -112,3 +112,4 @@ For both variants:
 - One PR per repo worktree that has commits
 - Skip worktrees with no commits ahead of the base branch
 - Use `gh` CLI for all GitHub operations
+- NEVER embed images via GitHub branch URLs (`github.com/blob/<branch>/...`) — these 404 after branch deletion. All screenshots/images in PR bodies must use storage URLs from Upload-Artifacts.ps1.
