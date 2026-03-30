@@ -40,7 +40,7 @@ Example:
 ```bash
 cd D:\Repos\_Ivy\Ivy-Tendril
 git fetch origin
-git worktree add "D:\Plans\01105-TestPlan\worktrees\Ivy-Tendril" -b "plan-01105-Ivy-Tendril" origin/master
+git worktree add "<PlanFolder>/worktrees/Ivy-Tendril" -b "plan-01105-Ivy-Tendril" origin/master
 ```
 
 **Important:** Always branch from `origin/<default-branch>`, not local HEAD. This ensures the PR only contains the plan's commits, not any unpushed local work.
@@ -114,7 +114,7 @@ If the plan references other plans (e.g. split-from, follow-up), add them to `re
 
 ```yaml
 relatedPlans:
-  - D:\Plans\01100-OriginalPlan
+  - <PlansDirectory>/01100-OriginalPlan
 ```
 
 ### 7. Run Verifications

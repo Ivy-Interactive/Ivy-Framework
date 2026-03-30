@@ -32,6 +32,7 @@ public class ContentView(
         var appRepository = UseService<IAppRepository>();
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
+        var openVerification = UseState<string?>(null);
 
         void NavigateNewTab<T>(object? appArgs = null) where T : class
         {
@@ -70,7 +71,6 @@ public class ContentView(
         var content = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200))).Gap(4);
 
         // Verifications section
-        var openVerification = UseState<string?>(null);
         if (_selectedPlan.Verifications.Count > 0)
         {
             content |= Text.Block("Verifications").Bold();
