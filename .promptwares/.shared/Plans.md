@@ -150,9 +150,9 @@ Each plan revision has a `## Verification` section with a checklist of verificat
 ```markdown
 ## Verification
 
-- [x] DotnetBuild
-- [x] DotnetTest
-- [ ] FrontendLint
+[x] DotnetBuild
+[x] DotnetTest
+[ ] FrontendLint
 ```
 
 - `[x]` = will be run by ExecutePlan after committing
