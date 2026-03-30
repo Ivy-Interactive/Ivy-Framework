@@ -12,6 +12,9 @@ using AppContext = Ivy.AppContext;
 
 namespace Ivy.Tendril.AppShell;
 
+#pragma warning disable IVYAPP001
+#pragma warning disable IVYHOOK005
+
 [App(isVisible: false)]
 public class TendrilAppShell(AppShellSettings settings) : ViewBase
 {
@@ -25,7 +28,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
     private static MenuItem AddBadge(MenuItem item, Dictionary<string, int> badges)
     {
         if (item.Tag is string tag && badges.TryGetValue(tag, out var count) && count > 0)
-            item = item with { Badge = count.ToString() };
+            item = item.Badge(count.ToString());
         if (item.Children is { Length: > 0 })
             item = item with { Children = item.Children.Select(c => AddBadge(c, badges)).ToArray() };
         return item;
@@ -33,6 +36,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
     public override object? Build()
     {
+        // All hooks must be at the top of Build()
         var tabs = UseState(ImmutableArray.Create<TabState>);
         var selectedIndex = UseState<int?>();
         var appRepository = UseService<IAppRepository>();
@@ -42,9 +46,13 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
         var menuItems = UseState(() => appRepository.GetMenuItems());
-
         var planService = UseService<PlanReaderService>();
         var jobService = UseService<JobService>();
+        var sidebarOpen = UseState(settings.SidebarOpen);
+        var args = UseService<AppContext>();
+        var serverArgs = UseService<ServerArgs>();
+        var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
+        var navigator = UseNavigation();
 
         var planCounts = Context.UseQuery("plan-counts", async (ct) =>
         {
@@ -61,33 +69,6 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             return jobService.GetJobs().Count(j => j.Status == "Running");
         }, new QueryOptions { RefreshInterval = TimeSpan.FromSeconds(3) });
 
-        // Auto-default: if there's exactly one visible app, select it and close sidebar
-        var visibleApps = appRepository.GetMenuItems().FlattenWithPath().ToArray();
-        if (visibleApps.Length == 1 && visibleApps[0].Item.Tag is string singleAppId)
-        {
-            settings = settings with
-            {
-                DefaultAppId = settings.DefaultAppId ?? singleAppId,
-                SidebarOpen = false
-            };
-        }
-
-        var sidebarOpen = UseState(settings.SidebarOpen);
-
-        var args = UseService<AppContext>();
-        var serverArgs = UseService<ServerArgs>();
-        var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
-        var navigator = UseNavigation();
-
-        void SetAppTitle(string appId)
-        {
-            var app = appRepository.GetAppOrDefault(appId);
-            if (app.Title is { } title)
-            {
-                client.SetTitle(title, serverArgs.Metadata.Title);
-            }
-        }
-
         UseEffect(() =>
         {
             return navigate.Receive(navigateArgs =>
@@ -100,12 +81,12 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         UseEffect(() =>
         {
             var badges = new Dictionary<string, int>();
-            if (planCounts.Value != null)
+            if (!planCounts.Loading && planCounts.Value != null)
             {
                 badges["plans"] = planCounts.Value.Draft;
                 badges["review"] = planCounts.Value.Review;
             }
-            if (jobCount.Value != null)
+            if (!jobCount.Loading)
             {
                 badges["jobs"] = jobCount.Value;
             }
@@ -136,6 +117,46 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             }
         }, search, appRepository.Reloaded.ToTrigger(), planCounts.ToTrigger(), jobCount.ToTrigger());
 
+        UseEffect(async () =>
+        {
+            if (auth != null)
+            {
+                var userInfo = await auth.GetUserInfoAsync();
+                user.Set(userInfo);
+            }
+
+            var initialAppId = args.NavigationAppId ?? settings.DefaultAppId;
+            if (!string.IsNullOrWhiteSpace(initialAppId))
+            {
+                var appArgs = args.GetArgs<object>();
+                OpenApp(new NavigateArgs(initialAppId, appArgs), replaceHistory: true);
+            }
+            else
+            {
+                client.Redirect("/", replaceHistory: true);
+            }
+        });
+
+        // Auto-default: if there's exactly one visible app, select it and close sidebar
+        var visibleApps = appRepository.GetMenuItems().FlattenWithPath().ToArray();
+        if (visibleApps.Length == 1 && visibleApps[0].Item.Tag is string singleAppId)
+        {
+            settings = settings with
+            {
+                DefaultAppId = settings.DefaultAppId ?? singleAppId,
+                SidebarOpen = false
+            };
+        }
+
+        void SetAppTitle(string appId)
+        {
+            var app = appRepository.GetAppOrDefault(appId);
+            if (app.Title is { } title)
+            {
+                client.SetTitle(title, serverArgs.Metadata.Title);
+            }
+        }
+
         bool IsErrorApp(string? appId) =>
             appId != null && appRepository.GetAppOrDefault(appId).Id == AppIds.ErrorNotFound;
 
@@ -162,7 +183,6 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
                 currentApp.Set(appHost);
 
-                // Set page title
                 if (navigateArgs.AppId != null)
                 {
                     SetAppTitle(navigateArgs.AppId);
@@ -177,13 +197,10 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             {
                 if (!string.IsNullOrEmpty(navigateArgs.TabId))
                 {
-                    // Try to find existing tab with the given TabId
                     var tabIndex = tabs.Value.ToList().FindIndex(t => t.Id == navigateArgs.TabId);
                     if (tabIndex >= 0)
                     {
                         selectedIndex.Set(tabIndex);
-
-                        // Set page title
                         var tab = tabs.Value[tabIndex];
                         SetAppTitle(tab.AppId);
 
@@ -203,7 +220,6 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
                 if (navigateArgs.AppId == null)
                 {
-                    // If there is no app ID or tab ID specified, do nothing.
                     return;
                 }
 
@@ -228,8 +244,6 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                         var previousSelectedIndex = selectedIndex.Value;
                         selectedIndex.Set(existingTabIndex);
                         tabId = tabs.Value[existingTabIndex].Id;
-
-                        // Set page title
                         SetAppTitle(appId);
 
                         if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
@@ -246,34 +260,11 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                     var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));
                     tabs.Set(newTabs);
                     selectedIndex.Set(newTabs.Length - 1);
-
-                    // Set page title
                     SetAppTitle(app.Id);
-
                     RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
                 }
             }
         }
-
-        UseEffect(async () =>
-        {
-            if (auth != null)
-            {
-                var userInfo = await auth.GetUserInfoAsync();
-                user.Set(userInfo);
-            }
-
-            var initialAppId = args.NavigationAppId ?? settings.DefaultAppId;
-            if (!string.IsNullOrWhiteSpace(initialAppId))
-            {
-                var appArgs = args.GetArgs<object>();
-                OpenApp(new NavigateArgs(initialAppId, appArgs), replaceHistory: true);
-            }
-            else
-            {
-                client.Redirect("/", replaceHistory: true);
-            }
-        });
 
         bool CheckTabExists(int tabId)
         {
@@ -304,15 +295,11 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 return;
             }
 
-            // Only update and redirect if the selected index actually changes
             if (selectedIndex.Value != @event.Value)
             {
                 selectedIndex.Set(@event.Value);
-
-                // Set page title
                 var tab = tabs.Value[@event.Value];
                 SetAppTitle(tab.AppId);
-
                 RedirectToAppIfNotError(new NavigateArgs(tab.AppId), tabId: tab.Id);
             }
         }
@@ -345,23 +332,17 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             }
             selectedIndex.Set(newIndex);
 
-            // Update browser URL when current tab was closed
             if (wasSelected)
             {
                 if (newIndex != null)
                 {
                     var tab = newTabs[newIndex.Value];
-
-                    // Set page title
                     SetAppTitle(tab.AppId);
-
                     RedirectToAppIfNotError(new NavigateArgs(tab.AppId), tabId: tab.Id);
                 }
                 else
                 {
-                    // Reset to default title when all tabs are closed
                     client.SetTitle(serverArgs.Metadata.Title);
-
                     client.Redirect("/");
                     sidebarOpen.Set(true);
                 }
@@ -385,11 +366,9 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         void OnTabReorder(Event<TabsLayout, int[]> @event)
         {
             var newOrder = @event.Value;
-            // Reorder tabs according to the new indices
             var reorderedTabs = newOrder.Select(index => tabs.Value[index]).ToArray();
             tabs.Set([.. reorderedTabs]);
 
-            // Update selected index to match the new position of the currently selected tab
             if (selectedIndex.Value.HasValue)
             {
                 var oldSelectedIndex = selectedIndex.Value.Value;
