@@ -31,8 +31,8 @@ public class ContentView(
         var downloadUrl = PlanDownloadHelper.UsePlanDownload(Context, _planService, _selectedPlan);
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
-        var navigator = UseNavigation();
         var deleteDialogOpen = UseState(false);
+        var openFile = UseState<string?>(null);
 
         var isEditing = UseState(false);
         var editContent = UseState("");
@@ -121,7 +121,7 @@ public class ContentView(
                     if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
                     {
                         var filePath = url.Substring("file:///".Length);
-                        navigator.Navigate<FileApp>(new FileAppArgs(filePath));
+                        openFile.Set(filePath);
                     }
                 });
         }
@@ -161,6 +161,30 @@ public class ContentView(
             mainLayout,
             new Icebox.Dialogs.DeletePlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans)
         };
+
+        if (openFile.Value is { } filePath2)
+        {
+            var ext = Path.GetExtension(filePath2);
+            var imageExts = new[] { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
+            object sheetContent;
+            if (imageExts.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            {
+                var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(filePath2)}";
+                sheetContent = new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(filePath2) };
+            }
+            else
+            {
+                var fileContent = File.Exists(filePath2) ? File.ReadAllText(filePath2) : "File not found.";
+                var language = FileApp.GetLanguage(ext);
+                sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
+            }
+
+            elements.Add(new Sheet(
+                onClose: () => openFile.Set(null),
+                content: sheetContent,
+                title: Path.GetFileName(filePath2)
+            ));
+        }
 
         return new Fragment(elements.ToArray());
     }

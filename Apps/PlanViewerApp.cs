@@ -14,7 +14,7 @@ public class PlanViewerApp : ViewBase
         var args = UseArgs<PlanViewerAppArgs>();
         var planService = UseService<PlanReaderService>();
         var config = UseService<ConfigService>();
-        var navigator = UseNavigation();
+        var openFile = UseState<string?>(null);
 
         if (args?.PlanFolderPath is not { } folderPath || string.IsNullOrWhiteSpace(folderPath))
             return Text.P("No plan path provided.");
@@ -34,7 +34,7 @@ public class PlanViewerApp : ViewBase
             | new Badge(plan?.Project ?? "").Variant(BadgeVariant.Outline)
             | new Badge(plan?.Level ?? "").Variant(config.GetBadgeVariant(plan?.Level ?? ""));
 
-        return new HeaderLayout(
+        var mainLayout = new HeaderLayout(
             header: header,
             content: new Markdown(content).DangerouslyAllowLocalFiles()
                 .OnLinkClick(url =>
@@ -42,9 +42,38 @@ public class PlanViewerApp : ViewBase
                     if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
                     {
                         var filePath = url.Substring("file:///".Length);
-                        navigator.Navigate<FileApp>(new FileAppArgs(filePath));
+                        openFile.Set(filePath);
                     }
                 })
         ).Scroll(Scroll.None).Size(Size.Full());
+
+        if (openFile.Value is { } filePath2)
+        {
+            var ext = Path.GetExtension(filePath2);
+            var imageExts = new[] { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
+            object sheetContent;
+            if (imageExts.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            {
+                var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(filePath2)}";
+                sheetContent = new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(filePath2) };
+            }
+            else
+            {
+                var fileContent = File.Exists(filePath2) ? File.ReadAllText(filePath2) : "File not found.";
+                var language = FileApp.GetLanguage(ext);
+                sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
+            }
+
+            return new Fragment(
+                mainLayout,
+                new Sheet(
+                    onClose: () => openFile.Set(null),
+                    content: sheetContent,
+                    title: Path.GetFileName(filePath2)
+                )
+            );
+        }
+
+        return mainLayout;
     }
 }
