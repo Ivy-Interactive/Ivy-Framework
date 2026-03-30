@@ -38,6 +38,9 @@ public class FileApp : ViewBase
         { ".sln", Languages.Text },
     };
 
+    public static Languages GetLanguage(string extension)
+        => LanguageMap.GetValueOrDefault(extension, Languages.Text);
+
     public override object? Build()
     {
         var args = UseArgs<FileAppArgs>();
@@ -82,7 +85,7 @@ public class FileApp : ViewBase
         }
 
         // Display code editor
-        var language = LanguageMap.GetValueOrDefault(extension, Languages.Text);
+        var language = GetLanguage(extension);
         return contentState.ToCodeInput(language: language)
             .Height(Size.Full());
     }
