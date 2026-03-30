@@ -33,6 +33,7 @@ public class ContentView(
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
         var openVerification = UseState<string?>(null);
+        var openArtifact = UseState<string?>(null);
         var showPlan = UseState(false);
 
         void NavigateNewTab<T>(object? appArgs = null) where T : class
@@ -198,6 +199,7 @@ public class ContentView(
                     var fileName = Path.GetFileName(file);
                     var ext = Path.GetExtension(file).ToLowerInvariant();
                     var isImage = new[] { ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp" }.Contains(ext);
+                    var fileCapture = file;
 
                     if (isImage)
                     {
@@ -206,17 +208,47 @@ public class ContentView(
                             | new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = fileName }
                                 .Height(Size.Units(20)).Width(Size.Units(30))
                             | new Button(fileName).Ghost().OnClick(() =>
-                                NavigateNewTab<FileApp>(new FileAppArgs(file)));
+                                openArtifact.Set(fileCapture));
                     }
                     else
                     {
                         artifactsLayout |= Layout.Horizontal().Gap(2)
                             | new Button(fileName).Ghost().OnClick(() =>
-                                NavigateNewTab<FileApp>(new FileAppArgs(file)));
+                                openArtifact.Set(fileCapture));
                     }
                 }
             }
             content |= artifactsLayout;
+
+            if (openArtifact.Value is { } artifactPath)
+            {
+                var ext = Path.GetExtension(artifactPath).ToLowerInvariant();
+                var isImg = new[] { ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp" }.Contains(ext);
+                var isVideo = new[] { ".webm", ".mp4", ".avi", ".mov" }.Contains(ext);
+
+                object sheetContent;
+                if (isImg)
+                {
+                    var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(artifactPath)}";
+                    sheetContent = new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(artifactPath) };
+                }
+                else if (isVideo)
+                {
+                    sheetContent = Text.Block($"Video file: {Path.GetFileName(artifactPath)}");
+                }
+                else
+                {
+                    var fileContent = File.Exists(artifactPath) ? File.ReadAllText(artifactPath) : "File not found.";
+                    var language = FileApp.GetLanguage(Path.GetExtension(artifactPath));
+                    sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
+                }
+
+                content |= new Sheet(
+                    onClose: () => openArtifact.Set(null),
+                    content: sheetContent,
+                    title: Path.GetFileName(artifactPath)
+                );
+            }
         }
 
         // Summary or Plan content
