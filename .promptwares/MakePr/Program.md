@@ -38,6 +38,16 @@ For each worktree:
 3. `git rev-parse --abbrev-ref HEAD` to get the branch name
 4. `git push -u origin <branch>`
 
+### 2.5. Upload Artifacts
+
+Run the `Upload-Artifacts.ps1` tool to upload screenshots and videos from `<PlanFolder>/artifacts/` to Azure storage:
+
+```powershell
+$artifactMarkdown = pwsh -NoProfile -File .promptwares/MakePr/Tools/Upload-Artifacts.ps1 -PlanFolder <PlanFolder>
+```
+
+Capture the returned markdown. If non-empty, it will be appended to the PR body under an `## Artifacts` heading in the next step.
+
 ### 3. Create PR
 
 For each pushed branch:
@@ -51,7 +61,7 @@ EOF
 
 - **Base branch:** `gh repo view --repo <owner/repo> --json defaultBranchRef -q .defaultBranchRef.name`
 - **Title:** `[<planId>] <plan title>`
-- **Body:** If `<PlanFolder>/artifacts/summary.md` exists, use its content as the PR body (followed by list of commits). Otherwise, fall back to summary from Problem + Solution sections. Always check `<PlanFolder>/artifacts/screenshots/` and `<PlanFolder>/artifacts/videos/` — if any exist, embed them in the body.
+- **Body:** If `<PlanFolder>/artifacts/summary.md` exists, use its content as the PR body (followed by list of commits). Otherwise, fall back to summary from Problem + Solution sections. If `$artifactMarkdown` from step 2.5 is non-empty, append it under an `## Artifacts` heading after the commits list.
 
 ### 4. Apply PR Rule
 
@@ -88,7 +98,7 @@ Note: The `notify slack` command uses `--message` (not `--json`). Use Slack mrkd
 
 ### Rules
 
-- **ALL 6 steps are mandatory** — do not stop after creating the PR
+- **ALL 7 steps are mandatory** (including 2.5) — do not stop after creating the PR
 - One PR per repo worktree that has commits
 - Skip worktrees with no commits ahead of the base branch
 - Use `gh` CLI for all GitHub operations
