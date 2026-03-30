@@ -75,7 +75,6 @@ public class ContentView(
         // Verifications section
         if (_selectedPlan.Verifications.Count > 0)
         {
-            content |= Text.Block("Verifications").Bold();
             var verificationsTable = new Table(
                 new TableRow(
                     new TableCell("Name").IsHeader(),
@@ -100,7 +99,10 @@ public class ContentView(
                         : BadgeVariant.Outline))
                 );
             }
-            content |= verificationsTable;
+            content |= new Expandable(
+                header: $"Verifications ({_selectedPlan.Verifications.Count})",
+                content: verificationsTable
+            ).Open(true);
 
             if (openVerification.Value is { } verName)
             {
@@ -119,7 +121,6 @@ public class ContentView(
         // Commits section
         if (_selectedPlan.Commits.Count > 0)
         {
-            content |= Text.Block("Commits").Bold();
             var repoPaths = _selectedPlan.Repos.Count > 0
                 ? _selectedPlan.Repos
                 : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
@@ -147,7 +148,10 @@ public class ContentView(
                     new TableCell(row.Title)
                 );
             }
-            content |= commitsTable;
+            content |= new Expandable(
+                header: $"Commits ({_selectedPlan.Commits.Count})",
+                content: commitsTable
+            ).Open(true);
         }
 
         // PRs section
@@ -167,7 +171,6 @@ public class ContentView(
         if (artifacts.Count > 0)
         {
             var artifactsLayout = Layout.Vertical().Gap(1);
-            artifactsLayout |= Text.Block("Artifacts").Bold();
 
             foreach (var (category, files) in artifacts.OrderBy(kv => kv.Key))
             {
@@ -218,7 +221,11 @@ public class ContentView(
                     }
                 }
             }
-            content |= artifactsLayout;
+            var totalArtifacts = artifacts.Sum(kv => kv.Value.Count);
+            content |= new Expandable(
+                header: $"Artifacts ({totalArtifacts})",
+                content: artifactsLayout
+            ).Open(true);
 
             if (openArtifact.Value is { } artifactPath)
             {
