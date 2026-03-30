@@ -58,4 +58,34 @@ public class InboxWatcherServiceTests
         Assert.Equal("[Auto]", project);
         Assert.Equal(content, description);
     }
+
+    [Fact]
+    public void ProcessExistingFiles_PicksUpFilesInInbox()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), $"inbox-test-{Guid.NewGuid():N}");
+        var inboxDir = Path.Combine(tempDir, "Inbox");
+        Directory.CreateDirectory(inboxDir);
+
+        try
+        {
+            // Place a file in the inbox before creating the service
+            File.WriteAllText(Path.Combine(inboxDir, "test-entry.md"), "Test inbox entry");
+
+            var config = new ConfigService(new TendrilSettings { TendrilData = tempDir });
+            var jobService = new JobService();
+            using var watcher = new InboxWatcherService(config, jobService);
+
+            // The constructor calls ProcessExistingFiles, which dispatches async processing.
+            // Wait briefly for the async task to pick up and delete the file.
+            Thread.Sleep(2000);
+
+            // The file should have been processed and deleted
+            Assert.Empty(Directory.GetFiles(inboxDir, "*.md"));
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+                Directory.Delete(tempDir, true);
+        }
+    }
 }
