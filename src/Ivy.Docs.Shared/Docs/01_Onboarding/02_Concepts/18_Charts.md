@@ -281,7 +281,7 @@ public class HideTickLabelsDemo : ViewBase
 }
 ```
 
-### Control Data Domain (Min/Max limits)
+#### Domain Bounds (Min/Max)
 
 You can explicitly restrict the visible boundaries of an axis using `.Domain()`. This is particularly useful for clipping extreme outlier values. Use `.AllowDataOverflow(true)` to strictly enforce the domain even if data exceeds it. Here is an **Area Chart** demonstrating domain clipping.
 
@@ -310,6 +310,14 @@ public class DomainAxisDemo : ViewBase
             .Tooltip();
     }
 }
+```
+
+You can also use symbolic bounds like `AxisDomain.Auto`, `AxisDomain.DataMin`, or `AxisDomain.DataMax`:
+
+```csharp
+// Clamp the bottom to zero but let the top auto-scale to data maximum
+.YAxis(new YAxis("Revenue")
+    .Domain(0, AxisDomain.DataMax))
 ```
 
 ## Faq

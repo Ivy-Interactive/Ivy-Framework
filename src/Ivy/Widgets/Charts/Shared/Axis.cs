@@ -28,17 +28,35 @@ public enum AxisTypes
     Number
 }
 
+public enum AxisDomain
+{
+    Auto,
+    DataMin,
+    DataMax
+}
+
 public record AxisDomainValue
 {
-    public static AxisDomainValue Auto => new() { Value = "auto" };
-    public static AxisDomainValue DataMin => new() { Value = "dataMin" };
-    public static AxisDomainValue DataMax => new() { Value = "dataMax" };
-    public static AxisDomainValue Of(double value) => new() { Value = value };
+    public AxisDomain? Symbol { get; init; }
+    public double? Number { get; init; }
 
-    public object Value { get; init; } = "auto";
+    public static AxisDomainValue Auto => AxisDomain.Auto;
+    public static AxisDomainValue DataMin => AxisDomain.DataMin;
+    public static AxisDomainValue DataMax => AxisDomain.DataMax;
+
+    public static AxisDomainValue Of(double value) => new() { Number = value };
+
+    public object Value => Symbol switch
+    {
+        AxisDomain.Auto => "auto",
+        AxisDomain.DataMin => "dataMin",
+        AxisDomain.DataMax => "dataMax",
+        _ => (object?)Number ?? "auto"
+    };
 
     public static implicit operator AxisDomainValue(double value) => Of(value);
     public static implicit operator AxisDomainValue(int value) => Of(value);
+    public static implicit operator AxisDomainValue(AxisDomain symbol) => new() { Symbol = symbol };
 }
 
 public abstract record AxisBase<T> where T : AxisBase<T>
