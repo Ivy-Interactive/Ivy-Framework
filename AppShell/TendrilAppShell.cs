@@ -9,6 +9,7 @@ using Ivy.Tendril.Services;
 using Ivy.Widgets.Internal;
 using Ivy.Widgets.ScreenshotFeedback;
 using System.Collections.Immutable;
+using System.Reactive.Disposables;
 using AppContext = Ivy.AppContext;
 
 namespace Ivy.Tendril.AppShell;
