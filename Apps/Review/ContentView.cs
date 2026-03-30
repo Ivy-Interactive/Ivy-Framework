@@ -1,6 +1,6 @@
 using Ivy;
-using Ivy.AppShell;
 using Ivy.Core;
+using Ivy.Core.Apps;
 using Ivy.Hooks;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
