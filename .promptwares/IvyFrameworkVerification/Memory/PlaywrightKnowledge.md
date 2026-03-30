@@ -822,3 +822,39 @@ In headless mode with File System Access API disabled, the save dialog uses `<a 
 - **Stale obj cache**: When switching branches in worktrees, `src/Ivy/obj/` can reference old frontend asset filenames. Delete obj/bin and rebuild.
 - 11 tests, 2 fix rounds (icon names + stale cache), all tests pass (verify current behavior including the bug), logs clean
 - **Project location**: `D:\Temp\IvyVerification\2026-03-29\IconsXMarkdown\`
+
+## Empty Screenshot Detection
+
+Many Ivy pages take a few seconds to render. Taking screenshots before the page has meaningful content produces empty white images (sometimes with just the Ivy loading indicator in the corner). Use this helper to skip empty screenshots:
+
+```typescript
+async function takeScreenshotIfNotEmpty(
+  page: Page,
+  screenshotPath: string,
+  options?: { fullPage?: boolean }
+) {
+  const hasContent = await page.evaluate(() => {
+    const text = document.body.innerText.trim();
+    const visibleElements = document.querySelectorAll(
+      'div, span, button, input, table, img, svg, canvas, h1, h2, h3, p'
+    );
+    let meaningfulCount = 0;
+    visibleElements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      if (rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none') {
+        meaningfulCount++;
+      }
+    });
+    return text.length > 20 || meaningfulCount > 5;
+  });
+
+  if (hasContent) {
+    await page.screenshot({ path: screenshotPath, fullPage: options?.fullPage ?? true });
+  } else {
+    console.log(`Skipped empty screenshot: ${screenshotPath}`);
+  }
+}
+```
+
+Use `takeScreenshotIfNotEmpty()` instead of raw `page.screenshot()` to avoid cluttering artifacts with blank images.
