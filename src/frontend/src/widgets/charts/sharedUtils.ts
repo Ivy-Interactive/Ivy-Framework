@@ -72,10 +72,12 @@ export const formatTickLabel = (value: number | string, formatter?: string | nul
   if (!formatter) return String(value);
 
   if (formatter.startsWith("C")) {
-    const fractionDigits = parseInt(formatter.substring(1));
+    const parts = formatter.split(":");
+    const currency = parts.length > 1 ? parts[1] : "USD";
+    const fractionDigits = parseInt(parts[0].substring(1));
     return new Intl.NumberFormat(undefined, {
       style: "currency",
-      currency: "USD",
+      currency,
       maximumFractionDigits: isNaN(fractionDigits) ? 0 : fractionDigits,
     }).format(Number(value));
   }
@@ -84,7 +86,7 @@ export const formatTickLabel = (value: number | string, formatter?: string | nul
     return new Intl.NumberFormat(undefined, {
       style: "percent",
       maximumFractionDigits: isNaN(fractionDigits) ? 0 : fractionDigits,
-    }).format(Number(value));
+    }).format(Number(value) / 100);
   }
   if (formatter.startsWith("N") || formatter.startsWith("F")) {
     const fractionDigits = parseInt(formatter.substring(1));

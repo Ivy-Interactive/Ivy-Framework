@@ -107,6 +107,8 @@ export const X_AXIS_DEFAULTS: Partial<XAxisProps> = {
   axisLine: true,
   minTickGap: 5,
   hide: false,
+  hideTickLabels: false,
+  tickFormatter: undefined,
   height: 30,
   orientation: "Bottom",
 };
@@ -130,6 +132,8 @@ export const Y_AXIS_DEFAULTS: Partial<YAxisProps> = {
   axisLine: true,
   minTickGap: 5,
   hide: false,
+  hideTickLabels: false,
+  tickFormatter: undefined,
   width: 60,
   orientation: "Left",
 };
