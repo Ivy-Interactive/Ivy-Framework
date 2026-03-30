@@ -99,7 +99,7 @@ public class ContentView(
             | Text.Rich()
                 .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
                 .Muted("plans", word: true)
-            | new Button("Execute").Icon(Icons.Hammer).Primary().ShortcutKey("e").OnClick(() =>
+            | new Button("Execute").Icon(Icons.Rocket).Primary().ShortcutKey("e").OnClick(() =>
             {
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
                 _jobService.StartJob("ExecutePlan", _selectedPlan.FolderPath);
