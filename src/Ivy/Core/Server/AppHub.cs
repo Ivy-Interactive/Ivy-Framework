@@ -252,7 +252,15 @@ public class AppHub(
                 try
                 {
                     logger.LogDebug("> Update");
-                    clientProvider.Sender.Send("Update", changes);
+                    var payload = changes.Select(c => new Dictionary<string, object?>
+                    {
+                        ["viewId"] = c.ViewId,
+                        ["indices"] = c.Indices,
+                        ["patch"] = c.Patch,
+                        ["iteration"] = c.Iteration,
+                        ["treeHash"] = c.TreeHash
+                    }).ToArray();
+                    clientProvider.Sender.Send("Update", payload);
                 }
                 catch (Exception e)
                 {
@@ -291,20 +299,20 @@ public class AppHub(
                     ? ExternalWidgetRegistry.Instance.GetRegistryForFrontend()
                     : null;
 
-                await Clients.Caller.SendAsync("Refresh", new
+                await Clients.Caller.SendAsync("Refresh", new Dictionary<string, object?>
                 {
-                    Widgets = widgetTree.GetWidgets().Serialize(),
-                    ExternalWidgets = externalWidgets
+                    ["widgets"] = widgetTree.GetWidgets().Serialize(),
+                    ["externalWidgets"] = externalWidgets
                 }, cancellationToken: connectionAborted);
             }
             catch (Exception e)
             {
                 var tree = new WidgetTree(new ExceptionErrorView(e), contentBuilder, serviceProvider);
                 await tree.BuildAsync();
-                await Clients.Caller.SendAsync("Refresh", new
+                await Clients.Caller.SendAsync("Refresh", new Dictionary<string, object?>
                 {
-                    Widgets = tree.GetWidgets().Serialize(),
-                    ExternalWidgets = (object?)null
+                    ["widgets"] = tree.GetWidgets().Serialize(),
+                    ["externalWidgets"] = (object?)null
                 }, cancellationToken: connectionAborted);
             }
 

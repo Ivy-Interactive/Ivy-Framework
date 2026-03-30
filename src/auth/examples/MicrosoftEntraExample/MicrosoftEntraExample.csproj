@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>MicrosoftEntraExample</RootNamespace>
+    <UserSecretsId>ivy-auth-microsoft-entra-example</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

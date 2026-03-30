@@ -127,7 +127,7 @@ public class ExternalWidgetRegistry
     /// <summary>
     /// Gets the registry data formatted for sending to the frontend.
     /// </summary>
-    public IEnumerable<ExternalWidgetRegistryDto> GetRegistryForFrontend()
+    public IEnumerable<object> GetRegistryForFrontend()
     {
         // Find canonical TypeNames for shared script and style resources
         var canonicalScripts = _widgets.Values
@@ -150,17 +150,17 @@ public class ExternalWidgetRegistry
                 canonicalStyleType = canonicalStyles[new { w.Assembly, StylePath = w.StylePath! }];
             }
 
-            return new ExternalWidgetRegistryDto
+            return new Dictionary<string, object?>
             {
-                TypeName = w.TypeName,
-                ScriptUrl = $"/ivy/external-widgets/{Uri.EscapeDataString(canonicalScriptType)}/script.js?v={version}",
-                StyleUrl = canonicalStyleType != null
+                ["typeName"] = w.TypeName,
+                ["scriptUrl"] = $"/ivy/external-widgets/{Uri.EscapeDataString(canonicalScriptType)}/script.js?v={version}",
+                ["styleUrl"] = canonicalStyleType != null
                     ? $"/ivy/external-widgets/{Uri.EscapeDataString(canonicalStyleType)}/style.css?v={version}"
                     : null,
-                ExportName = w.ExportName,
-                GlobalName = w.GlobalName
+                ["exportName"] = w.ExportName,
+                ["globalName"] = w.GlobalName
             };
-        });
+        }).ToArray();
     }
 
     private void ScanAssemblies()

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { validateImageUrl } from "@/lib/url";
 
 interface ImageOverlayProps {
@@ -60,7 +61,7 @@ export const ImageOverlay: React.FC<ImageOverlayProps> = ({ src, alt, onClose })
     return null;
   }
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 cursor-zoom-out"
@@ -80,6 +81,7 @@ export const ImageOverlay: React.FC<ImageOverlayProps> = ({ src, alt, onClose })
           ✕
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };

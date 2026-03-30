@@ -31,9 +31,6 @@ export const CodeBlock = memo(
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
     const typography = useTypography();
 
-    const shouldWrap = true;
-    const whiteSpaceStyle = shouldWrap ? { whiteSpace: "pre-wrap" } : {};
-
     if (!inline && match && hasCodeBlocks) {
       // Handle Mermaid diagrams
       if (isMermaid && hasMermaid) {
@@ -67,11 +64,8 @@ export const CodeBlock = memo(
             </div>
             <ScrollArea className="w-full">
               <pre
-                className={cn(
-                  "p-4 bg-muted rounded-md font-mono text-sm",
-                  shouldWrap && "whitespace-pre-wrap break-all",
-                )}
-                style={shouldWrap ? {} : { overflowX: "auto" }}
+                className="p-4 bg-muted rounded-md font-mono text-sm"
+                style={{ overflowX: "auto" }}
               >
                 {lines.map((line, i) => {
                   const lineKey = `md-term-line-${i}`;
@@ -96,11 +90,8 @@ export const CodeBlock = memo(
           fallback={
             <ScrollArea className="w-full border border-border rounded-md">
               <pre
-                className={cn(
-                  "p-4 bg-muted rounded-md font-mono text-sm",
-                  shouldWrap && "whitespace-pre-wrap break-all",
-                )}
-                style={shouldWrap ? {} : { overflowX: "auto" }}
+                className="p-4 bg-muted rounded-md font-mono text-sm"
+                style={{ overflowX: "auto" }}
               >
                 {content}
               </pre>
@@ -118,11 +109,10 @@ export const CodeBlock = memo(
                 style={dynamicTheme}
                 customStyle={{
                   margin: 0,
-                  ...whiteSpaceStyle,
                   wordBreak: "normal",
                   overflowWrap: "break-word",
                 }}
-                wrapLongLines={shouldWrap}
+                wrapLongLines={false}
               >
                 {content}
               </SyntaxHighlighter>
@@ -133,21 +123,7 @@ export const CodeBlock = memo(
       );
     }
 
-    // Apply styles to fallback blocks (no language) if it's a block (!inline)
-    const fallbackStyles =
-      !inline && shouldWrap
-        ? {
-            ...whiteSpaceStyle,
-            wordBreak: "normal" as const,
-            overflowWrap: "break-word" as const,
-          }
-        : {};
-
-    return (
-      <code className={cn(typography.code, className)} style={fallbackStyles}>
-        {children}
-      </code>
-    );
+    return <code className={cn(typography.code, className)}>{children}</code>;
   },
 );
 

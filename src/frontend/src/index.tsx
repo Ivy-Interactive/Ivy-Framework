@@ -1,6 +1,7 @@
 import React, { StrictMode } from "react";
 import * as ReactDOMClient from "react-dom/client";
 import * as ReactDOM from "react-dom";
+import * as ReactJsxRuntime from "react/jsx-runtime";
 import "./index.css";
 import { App } from "./components/App";
 
@@ -11,11 +12,13 @@ import { App } from "./components/App";
   ...ReactDOM,
   ...ReactDOMClient,
 };
+(window as unknown as Record<string, unknown>).ReactJsxRuntime = ReactJsxRuntime;
 
 // Polyfill require for Vite-Plus Rolldown CJS externals bug in IIFE widget bundles
 (window as any).require = (moduleName: string) => {
   if (moduleName === "react") return React;
   if (moduleName === "react-dom") return { ...ReactDOM, ...ReactDOMClient };
+  if (moduleName === "react/jsx-runtime") return ReactJsxRuntime;
   throw new Error(`Module '${moduleName}' not found in Ivy browser require polyfill`);
 };
 

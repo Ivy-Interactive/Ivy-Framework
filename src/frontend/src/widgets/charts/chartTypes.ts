@@ -52,8 +52,8 @@ export type YAxisProps = {
   angle: number;
   axisLine: boolean;
   dataKey: string;
-  domainStart: "auto" | number;
-  domainEnd: "auto" | number;
+  domainMin?: number | string | { value: number | string };
+  domainMax?: number | string | { value: number | string };
   hide: boolean;
   includeHidden: boolean;
   label: null;
@@ -69,6 +69,8 @@ export type YAxisProps = {
   type: string;
   unit: null;
   width: number;
+  hideTickLabels?: boolean;
+  tickFormatter?: string | null;
 };
 
 export interface XAxisProps {
@@ -78,8 +80,8 @@ export interface XAxisProps {
   angle?: number;
   axisLine?: boolean;
   dataKey?: string;
-  domainStart?: number | "auto";
-  domainEnd?: number | "auto";
+  domainMin?: number | string | { value: number | string };
+  domainMax?: number | string | { value: number | string };
   height?: number;
   hide?: boolean;
   includeHidden?: boolean;
@@ -95,6 +97,8 @@ export interface XAxisProps {
   tickSize?: number;
   type?: "Category" | "Number" | "Time";
   unit?: string | null;
+  hideTickLabels?: boolean;
+  tickFormatter?: string | null;
 }
 
 export type CartesianGridProps = {

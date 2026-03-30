@@ -30,6 +30,7 @@ export interface MenuItem {
   disabled: boolean;
   color?: "Default" | "Destructive" | "Primary" | "Secondary" | "Success" | "Warning" | "Info";
   shortcut?: string;
+  badge?: string;
   expanded: boolean;
   path?: string;
   onSelect?: (item: MenuItem) => void;

@@ -271,6 +271,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
     validOptions,
     eventHandler,
     selectMany,
+    nullable,
   );
 
   const visibleEnabledForBulk = useMemo(
@@ -446,30 +447,21 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
             />
           )}
         </div>
-        {((nullable && hasValue && !disabled) || invalid) && (
+        {((selectMany && nullable && hasValue && !disabled) || invalid) && (
           <div className="flex items-center gap-1">
-            {nullable && hasValue && !disabled && (
+            {selectMany && nullable && hasValue && !disabled && (
               <button
                 type="button"
                 tabIndex={-1}
-                aria-label={selectMany ? "Clear All" : "Clear"}
+                aria-label="Clear All"
                 onClick={() => {
-                  // For nullable inputs, send null; for non-nullable, send empty array for multi-select or null for single
-                  const clearedValue = nullable ? null : selectMany ? [] : null;
-                  logger.debug("Select input clear button clicked (ToggleVariant)", {
-                    id,
-                    selectMany,
-                    nullable,
-                    clearValue: clearedValue,
-                  });
-                  eventHandler("OnChange", id, [clearedValue]);
+                  eventHandler("OnChange", id, [null]);
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
                 <X className={xIconVariant({ density })} />
               </button>
             )}
-            {/* Invalid icon - rightmost */}
             {invalid && <InvalidIcon message={invalid} className="pointer-events-auto" />}
           </div>
         )}
@@ -507,6 +499,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
     validOptions,
     eventHandler,
     false, // Always single select for RadioVariant
+    nullable,
   );
   const styles: React.CSSProperties = {
     ...getWidth(width),

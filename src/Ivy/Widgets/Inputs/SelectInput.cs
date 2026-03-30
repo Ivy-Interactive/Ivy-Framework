@@ -111,7 +111,7 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>
 
     [Prop(AlwaysSerialize = true)] public TValue Value { get; init; } = default!;
 
-    [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
+    [Prop(AlwaysSerialize = true)] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
     [Prop] public IAnyOption[] Options { get; set; } = [];
 

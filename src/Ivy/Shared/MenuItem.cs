@@ -33,6 +33,7 @@ public record MenuItem(
     bool Checked = false,
     bool Disabled = false,
     string? Shortcut = null,
+    string? Badge = null,
     bool Expanded = false,
     string? Tooltip = null,
     EventHandler<MenuItem>? OnSelect = null,
@@ -172,6 +173,11 @@ public static class MenuItemExtensions
     public static MenuItem Tooltip(this MenuItem menuItem, string tooltip)
     {
         return menuItem with { Tooltip = tooltip };
+    }
+
+    public static MenuItem Badge(this MenuItem menuItem, string? badge)
+    {
+        return menuItem with { Badge = badge };
     }
 
     public static MenuItem Expanded(this MenuItem menuItem, bool expanded = true)

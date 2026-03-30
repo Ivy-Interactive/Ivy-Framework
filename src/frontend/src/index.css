@@ -369,17 +369,16 @@ ivy-widget {
 }
 
 /* Details/Summary styling for markdown collapsible sections */
-details > :not(summary) {
+details {
+  padding: 0 1rem 1rem 1rem;
+}
+details > summary {
+  margin: 0 -1rem;
   padding-left: 1rem;
   padding-right: 1rem;
 }
-
-details > :last-child {
-  padding-bottom: 1rem;
-}
-
-details[open] summary svg {
-  transform: rotate(90deg);
+details:not([open]) {
+  padding-bottom: 0;
 }
 
 /* Prevent dialog from getting focus rings when elements inside are focused */

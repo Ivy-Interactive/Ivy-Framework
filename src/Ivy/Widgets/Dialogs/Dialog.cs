@@ -15,6 +15,12 @@ public record Dialog : WidgetBase<Dialog>
     public static Size DefaultWidth => Size.Rem(24);
 
     [OverloadResolutionPriority(1)]
+    public Dialog(Func<Event<Dialog>, ValueTask> onClose, DialogHeader header, DialogBody body) : base([header, body])
+    {
+        OnClose = new(onClose);
+    }
+
+    [OverloadResolutionPriority(1)]
     public Dialog(Func<Event<Dialog>, ValueTask> onClose, DialogHeader header, DialogBody body, DialogFooter footer) : base([header, body, footer])
     {
         OnClose = new(onClose);
@@ -25,6 +31,11 @@ public record Dialog : WidgetBase<Dialog>
     public static Dialog operator |(Dialog dialog, object child)
     {
         throw new NotSupportedException("Dialog does not support children.");
+    }
+
+    public Dialog(Action<Event<Dialog>> onClose, DialogHeader header, DialogBody body)
+        : this(onClose.ToValueTask(), header, body)
+    {
     }
 
     public Dialog(Action<Event<Dialog>> onClose, DialogHeader header, DialogBody body, DialogFooter footer)
@@ -51,8 +62,7 @@ public static class DialogExtensions
                     Layout.Vertical()
                     | description!
                     | content
-                ),
-                new DialogFooter()
+                )
             ).Width(width ?? Dialog.DefaultWidth);
         });
     }

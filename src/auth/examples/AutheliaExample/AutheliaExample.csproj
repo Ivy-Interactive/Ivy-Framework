@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>AutheliaExample</RootNamespace>
+    <UserSecretsId>ivy-auth-authelia-example</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

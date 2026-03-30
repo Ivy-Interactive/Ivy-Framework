@@ -13,11 +13,15 @@ import {
   usePasteHandler,
   formatShortcutForDisplay,
 } from "../hooks";
-import { X } from "lucide-react";
+import { Mic, X } from "lucide-react";
 
 interface DefaultVariantProps {
   type: Lowercase<TextInputWidgetProps["variant"]>;
-  props: Omit<TextInputWidgetProps, "variant">;
+  props: Omit<TextInputWidgetProps, "variant"> & {
+    dictation?: boolean;
+    isRecording?: boolean;
+    onDictationToggle?: () => void;
+  };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -150,6 +154,26 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             </div>
           )}
         </div>
+
+        {/* Dictation mic button */}
+        {props.dictation && !props.disabled && (
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label={props.isRecording ? "Stop dictation" : "Start dictation"}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              props.onDictationToggle?.();
+            }}
+            className={cn(
+              "flex items-center justify-center px-2 border-l border-input hover:bg-accent focus:outline-none cursor-pointer transition-colors",
+              props.isRecording && "bg-destructive/10 text-destructive",
+            )}
+          >
+            <Mic className={cn("h-4 w-4", props.isRecording && "animate-pulse text-destructive")} />
+          </button>
+        )}
 
         {/* Suffix with background and separator */}
         {suffixContent && (

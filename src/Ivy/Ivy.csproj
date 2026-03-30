@@ -58,7 +58,8 @@
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.1" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.9" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.5" />
@@ -112,6 +113,20 @@
           Outputs="../frontend/dist/.build-stamp">
     <Exec Command="vp run build" WorkingDirectory="../frontend" />
     <Touch Files="../frontend/dist/.build-stamp" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="BuildRustServer" BeforeTargets="BeforeBuild">
+    <Exec Command="cargo build --release" WorkingDirectory="../RustServer" />
+  </Target>
+
+  <Target Name="AddRustBinariesToContent" BeforeTargets="AssignTargetPaths" DependsOnTargets="BuildRustServer">
+    <ItemGroup>
+      <Content Include="../RustServer/target/release/*rustserver*.dll;../RustServer/target/release/*rustserver*.so;../RustServer/target/release/*rustserver*.dylib">
+        <Link>%(Filename)%(Extension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Visible>false</Visible>
+      </Content>
+    </ItemGroup>
   </Target>
 
 </Project>

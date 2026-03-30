@@ -205,6 +205,8 @@ public abstract partial class ViewBase
     protected (IView? alertView, ShowAlertDelegate showAlert) UseAlert() =>
         this.Context.UseAlert();
 
+    protected (IView? loadingView, ShowLoadingDelegate showLoading) UseLoading() =>
+        this.Context.UseLoading();
     protected (object? dialogView, ShowFileDialogDelegate showFileDialog) UseFileDialog(
         IUploadHandler handler,
         string? accept = null,

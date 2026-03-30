@@ -222,3 +222,4 @@ Entry point: `Text.Rich()` returns a `RichTextBuilder`.
 
 - [TextBlock](./01_TextBlock.md) — for uniform text styling
 - [Markdown](./14_Markdown.md) — for rendering markdown content
+- [AutoScroll](./26_AutoScroll.md) — scroll container that follows new content to the bottom; wrap streamed rich text when you need a fixed viewport outside Chat

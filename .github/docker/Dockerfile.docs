@@ -20,7 +20,9 @@ RUN cd src/frontend && vp build
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-RUN apt-get update && apt-get install -y curl bash && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl bash build-essential && rm -rf /var/lib/apt/lists/*
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs
 RUN curl -fsSL https://vite.plus | bash
 ENV PATH="/root/.vite-plus/bin:${PATH}"

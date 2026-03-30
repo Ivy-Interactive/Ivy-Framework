@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>ClerkExample</RootNamespace>
+    <UserSecretsId>ivy-auth-clerk-example</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

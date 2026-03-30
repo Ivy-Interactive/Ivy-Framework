@@ -26,12 +26,8 @@ export function App() {
   const parentId = getParentId();
   const appShell = getShellParam();
 
-  const { connection, widgetTree, eventHandler, subscribeToStream, disconnected } = useBackend(
-    appId,
-    appArgs,
-    parentId,
-    appShell,
-  );
+  const { connection, widgetTree, eventHandler, subscribeToStream, disconnected, connectionState } =
+    useBackend(appId, appArgs, parentId, appShell);
   const [removeBranding, setRemoveBranding] = useState(true);
 
   useEffect(() => {
@@ -66,7 +62,7 @@ export function App() {
               {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
               <ErrorSheet />
               <Toaster />
-              {disconnected && <ConnectionModal />}
+              {(disconnected || connectionState === "reconnecting") && <ConnectionModal />}
             </>
           </StreamHandlerProvider>
         </EventHandlerProvider>

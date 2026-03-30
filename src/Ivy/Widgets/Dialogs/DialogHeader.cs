@@ -18,6 +18,9 @@ public record DialogHeader : WidgetBase<DialogHeader>
     [Prop]
     public string? Title { get; set; }
 
+    [Prop]
+    public bool HideCloseButton { get; set; }
+
     public static DialogHeader operator |(DialogHeader widget, object child)
     {
         throw new NotSupportedException("DialogHeader does not support children.");

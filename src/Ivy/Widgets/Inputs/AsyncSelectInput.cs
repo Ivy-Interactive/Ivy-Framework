@@ -17,8 +17,33 @@ public delegate QueryResult<Option<T>[]> AsyncSelectSearchDelegate<T>(IViewConte
 public delegate QueryResult<Option<T>?> AsyncSelectLookupDelegate<T>(IViewContext context, T id);
 
 /// <summary>
-/// A selection input that fetches options asynchronously.
+/// A selection input that fetches options asynchronously. Ideal for large datasets,
+/// foreign key lookups, or any scenario where options are loaded on-demand.
 /// </summary>
+/// <remarks>
+/// Requires two delegates: a <c>search</c> delegate that returns matching options for a query string,
+/// and a <c>lookup</c> delegate that resolves a single value back to its display option.
+/// <para>
+/// Options are created using <see cref="Option{TValue}"/> with the parameter order <c>(label, value)</c>:
+/// the label is displayed to the user, and the value is stored when selected.
+/// </para>
+/// <example>
+/// <code>
+/// var country = UseState&lt;string?&gt;(default(string));
+///
+/// QueryResult&lt;Option&lt;string&gt;[]&gt; SearchCountries(IViewContext ctx, string query) =&gt;
+///     ctx.UseQuery&lt;Option&lt;string&gt;[], (string, string)&gt;(
+///         key: ("countries", query),
+///         fetcher: ct =&gt; Task.FromResult(countries
+///             .Where(c =&gt; c.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+///             .Select(c =&gt; new Option&lt;string&gt;(c.Name, c.Code))  // label: Name, value: Code
+///             .ToArray()));
+///
+/// country.ToAsyncSelectInput(SearchCountries, LookupCountry, "Search countries...");
+/// </code>
+/// </example>
+/// </remarks>
+/// <typeparam name="TValue">The type of the selected value.</typeparam>
 public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, IInput<TValue>
 {
     public Type[] SupportedStateTypes() => [];

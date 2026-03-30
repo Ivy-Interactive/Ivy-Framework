@@ -220,6 +220,106 @@ All Cartesian charts (Line, Bar, Area) share these methods:
 | `.Toolbox()` | Add interactive toolbox |
 | `.Height()` / `.Width()` | Set chart dimensions |
 
+## Advanced Axis Configuration
+
+You can customize the appearance and behavior of X and Y axes using specialized methods.
+
+### Format Tick Labels
+
+Use `.TickFormatter()` to format numeric or date values on the axis using standard C# format strings. This example uses a **Line Chart** to show currency formatting on the Y-axis.
+
+```csharp demo-tabs
+public class TickFormatterDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Year = "2020", Revenue = 1500000 },
+            new { Year = "2021", Revenue = 2300000 },
+            new { Year = "2022", Revenue = 1800000 },
+            new { Year = "2023", Revenue = 3100000 }
+        };
+
+        return new LineChart(data)
+            .Line(new Line("Revenue"))
+            .CartesianGrid(new CartesianGrid().Horizontal())
+            .XAxis(new XAxis("Year").TickLine(false))
+            .YAxis(new YAxis("Revenue").TickFormatter("C0"))
+            .Tooltip();
+    }
+}
+```
+
+### Hide Tick Labels
+
+If you want a cleaner look but need to keep the grid lines and axis structure, use `.HideTickLabels()`. This example uses a **Bar Chart** where X-axis labels are hidden for a minimalist appearance.
+
+```csharp demo-tabs
+public class HideTickLabelsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Day = "Mon", Users = 420 },
+            new { Day = "Tue", Users = 480 },
+            new { Day = "Wed", Users = 510 },
+            new { Day = "Thu", Users = 490 },
+            new { Day = "Fri", Users = 550 },
+            new { Day = "Sat", Users = 620 },
+            new { Day = "Sun", Users = 590 }
+        };
+
+        return new BarChart(data)
+            .Bar(new Bar("Users").Radius(8))
+            .CartesianGrid(new CartesianGrid().Horizontal())
+            .XAxis(new XAxis("Day").HideTickLabels())
+            .YAxis(new YAxis("Users"))
+            .Tooltip();
+    }
+}
+```
+
+#### Domain Bounds (Min/Max)
+
+You can explicitly restrict the visible boundaries of an axis using `.Domain()`. This is particularly useful for clipping extreme outlier values. Use `.AllowDataOverflow(true)` to strictly enforce the domain even if data exceeds it. Here is an **Area Chart** demonstrating domain clipping.
+
+```csharp demo-tabs
+public class DomainAxisDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Time = "10:00", ServerLoad = 25 },
+            new { Time = "10:05", ServerLoad = 30 },
+            new { Time = "10:10", ServerLoad = 95 },
+            new { Time = "10:15", ServerLoad = 28 },
+            new { Time = "10:20", ServerLoad = 22 }
+        };
+
+        return new AreaChart(data)
+            .Area(new Area("ServerLoad"))
+            .CartesianGrid(new CartesianGrid().Horizontal())
+            .XAxis(new XAxis("Time"))
+            .YAxis(new YAxis("ServerLoad")
+                .Domain(0, 50) 
+                .AllowDataOverflow(true)
+            )
+            .Tooltip();
+    }
+}
+```
+
+You can also use symbolic bounds like `AxisDomain.Auto`, `AxisDomain.DataMin`, or `AxisDomain.DataMax`:
+
+```csharp
+// Clamp the bottom to zero but let the top auto-scale to data maximum
+.YAxis(new YAxis("Revenue")
+    .Domain(0, AxisDomain.DataMax))
+```
+
 ## Faq
 
 <Details>

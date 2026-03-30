@@ -5,9 +5,9 @@ export const colorInputVariant = cva(
   {
     variants: {
       density: {
-        Small: "h-8 py-1 text-xs",
+        Small: "h-7 py-1 text-xs",
         Medium: "h-9 py-1 text-sm",
-        Large: "h-10 py-2 text-base",
+        Large: "h-11 py-2 text-base",
       },
     },
     defaultVariants: {
@@ -19,9 +19,9 @@ export const colorInputVariant = cva(
 export const colorInputPickerVariant = cva("", {
   variants: {
     density: {
-      Small: "w-8 h-8",
-      Medium: "w-10 h-10",
-      Large: "w-12 h-12",
+      Small: "w-7 h-7",
+      Medium: "w-9 h-9",
+      Large: "w-11 h-11",
     },
   },
   defaultVariants: {

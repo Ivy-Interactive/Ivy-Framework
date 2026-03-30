@@ -14,8 +14,10 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({ id, children, width 
   const eventHandler = useEventHandler();
   const isVisible = true;
 
+  const widthStyles = getWidth(width);
   const styles = {
-    ...getWidth(width),
+    ...widthStyles,
+    ...(width && widthStyles.width && !widthStyles.maxWidth ? { maxWidth: widthStyles.width } : {}),
   };
 
   return (

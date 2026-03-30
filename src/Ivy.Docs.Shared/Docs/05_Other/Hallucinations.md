@@ -403,6 +403,31 @@ a9ee3993-1cfb-4cba-9322-80a60b56c8d2
 9f10ed3d-11bc-40ba-903a-f446ff496f21
 b321412b-3b6c-4b50-b027-bc323db8fe98
 
+## TextInputBase.Icon() — wrong receiver type
+
+**Hallucinated API:**
+
+```csharp
+searchState.ToTextInput().Icon(Icons.Search)
+```
+
+**Error:** `CS1929: 'TextInputBase' does not contain a definition for 'Icon' and the best extension method overload 'MenuItemExtensions.Icon(MenuItem, Icons)' requires a receiver of type 'Ivy.MenuItem'`
+
+**Correct API:**
+
+```csharp
+// Use .Prefix() or .Suffix() to add icons to text inputs:
+searchState.ToTextInput().Prefix(Icons.Search)
+searchState.ToTextInput().Suffix(Icons.ArrowRight)
+```
+
+`.Icon()` is a method for `Button` and `MenuItem`, not for input widgets like `TextInputBase`. Use `.Prefix(Icons)` or `.Suffix(Icons)` to add icons to text inputs.
+
+**Found In:**
+c496d3d8-c090-44b5-9551-4cdf3b0aca06
+f713bd0e-71ec-4f0d-8383-1d27712d71a8
+bc45eeb3-15c9-48c1-9f8f-8570a3522614
+
 ## Button.WithIcon() — non-existent fluent method
 
 **Hallucinated API:**
@@ -698,29 +723,27 @@ foreach (var fact in favorites)
 c496d3d8-c090-44b5-9551-4cdf3b0aca06
 4f66c0f1-5fc5-44aa-b62a-f3592bfec1dc
 
-## TextInputBase.Icon() — wrong receiver type
+## Align used where TextAlignment expected — type confusion
 
 **Hallucinated API:**
 
 ```csharp
-searchState.ToTextInput().Icon(Icons.Search)
+Text.H1("0").Align(Align.Right)  // passing Ivy.Align instead of Ivy.TextAlignment
 ```
 
-**Error:** `CS1929: 'TextInputBase' does not contain a definition for 'Icon' and the best extension method overload 'MenuItemExtensions.Icon(MenuItem, Icons)' requires a receiver of type 'Ivy.MenuItem'`
+**Error:** `CS1503: Argument 1: cannot convert from 'Ivy.Align' to 'Ivy.TextAlignment'`
 
 **Correct API:**
 
 ```csharp
-// Use .Prefix() or .Suffix() to add icons to text inputs:
-searchState.ToTextInput().Prefix(Icons.Search)
-searchState.ToTextInput().Suffix(Icons.ArrowRight)
+Text.H1("0").Align(TextAlignment.Right)
 ```
 
-`.Icon()` is a method for `Button` and `MenuItem`, not for input widgets like `TextInputBase`. Use `.Prefix(Icons)` or `.Suffix(Icons)` to add icons to text inputs.
+`Align` (layout alignment for positioning elements) and `TextAlignment` (text alignment within a text block) are two different enums. `Align` has values like `TopLeft`, `Center`, `Stretch`, etc. `TextAlignment` has values `Left`, `Center`, `Right`, `Justify`. Methods accepting text alignment require `TextAlignment`, not `Align`.
 
 **Found In:**
-c496d3d8-c090-44b5-9551-4cdf3b0aca06
-f713bd0e-71ec-4f0d-8383-1d27712d71a8
+2739aa95-7d5b-481b-a456-af895e6268df
+818a3388-f1c8-4206-a44c-303b0fa481fa
 
 ## FileInput.MaxFiles(n) on single-file state — runtime error
 
@@ -2502,27 +2525,6 @@ b.Func<PayrollRow, double>(row => new Text($"{row.TotalHours:F1}h"))
 **Found In:**
 8b576f86-85cc-43b8-97e2-358bae83464a
 
-## Align used where TextAlignment expected — type confusion
-
-**Hallucinated API:**
-
-```csharp
-Text.H1("0").Align(Align.Right)  // passing Ivy.Align instead of Ivy.TextAlignment
-```
-
-**Error:** `CS1503: Argument 1: cannot convert from 'Ivy.Align' to 'Ivy.TextAlignment'`
-
-**Correct API:**
-
-```csharp
-Text.H1("0").Align(TextAlignment.Right)
-```
-
-`Align` (layout alignment for positioning elements) and `TextAlignment` (text alignment within a text block) are two different enums. `Align` has values like `TopLeft`, `Center`, `Stretch`, etc. `TextAlignment` has values `Left`, `Center`, `Right`, `Justify`. Methods accepting text alignment require `TextAlignment`, not `Align`.
-
-**Found In:**
-2739aa95-7d5b-481b-a456-af895e6268df
-
 ## Separator() — constructor invoked without `new`
 
 **Hallucinated API:**
@@ -2623,6 +2625,88 @@ The `[Parameter]` attribute does not exist in Ivy. The agent likely confused Ivy
 **Found In:**
 4ae8e5f9-663b-4a34-9f84-9b6f7a1048c5
 
+## SelectInput.Items() — DropDownMenu extension called on SelectInput
+
+**Hallucinated API:**
+
+```csharp
+currencySelect.ToSelectInput()
+    .Items(new[] {
+        new Option<string>("USD", "US Dollar"),
+        new Option<string>("EUR", "Euro")
+    })
+```
+
+**Error:** `CS1929: 'SelectInput<string>' does not contain a definition for 'Items' and the best extension method overload 'DropDownMenuExtensions.Items(DropDownMenu, IEnumerable<MenuItem>)' requires a receiver of type 'Ivy.DropDownMenu'`
+
+**Correct API:**
+
+```csharp
+currencySelect.ToSelectInput(new[] {
+    new Option<string>("USD", "US Dollar"),
+    new Option<string>("EUR", "Euro")
+})
+```
+
+`.Items()` is an extension method for `DropDownMenu`, not `SelectInput`. Options must be passed as the first parameter to `ToSelectInput()`, not chained via a `.Items()` method. The agent confused the DropDownMenu API with the SelectInput API. For string arrays, use `.ToOptions()` to convert: `["USD", "EUR"].ToOptions()`. For enums, call `ToSelectInput()` without arguments — options are inferred from the enum type.
+
+**Found In:**
+84cbe3b9-5764-4352-99d3-dd685c397a68
+
+## Secret(IsRequired: true) — non-existent named parameter
+
+**Hallucinated API:**
+
+```csharp
+new Secret("ApiKey", IsRequired: true)
+new Secret("Model", IsRequired: false)
+```
+
+**Error:** `CS1739: The best overload for 'Secret' does not have a parameter named 'IsRequired'`
+
+**Correct API:**
+
+```csharp
+// Secret is a record: Secret(string Key, string? Preset = null, bool Optional = false)
+new Secret("ApiKey")                      // required by default (Optional = false)
+new Secret("Model", Optional: true)       // optional secret
+new Secret("Endpoint", Preset: "https://api.openai.com/v1", Optional: true)
+```
+
+The `Secret` record has no `IsRequired` parameter. By default, secrets are required (`Optional = false`). To make a secret optional, use `Optional: true`. The agent confused a hypothetical `IsRequired` with the actual `Optional` parameter (inverted logic).
+
+**Found In:**
+07a0cf7f-d297-4dd2-8fc4-883bb52aa305
+
+## Skeleton.List() — non-existent static method
+
+**Hallucinated API:**
+
+```csharp
+Skeleton.List(1)
+```
+
+**Error:** `No overload for method 'List' takes 1 arguments` (or similar — `List` does not exist on `Skeleton`)
+
+**Correct API:**
+
+```csharp
+// Available Skeleton static factory methods:
+Skeleton.Card()
+Skeleton.Text(lines: 3)
+Skeleton.DataTable(rows: 5)
+Skeleton.Feed(items: 3)
+Skeleton.Form()
+
+// Or use a plain Skeleton instance:
+new Skeleton()
+```
+
+`Skeleton` has no `List()` method. For a list-like loading placeholder, use `Skeleton.Feed(items)` which renders a vertical feed of skeleton items.
+
+**Found In:**
+9ed7f8e7-aa7c-4c8b-b6a0-8c5b389f1dc2
+
 ## TextInput.Grow() — Box-only extension called on TextInput
 
 **Hallucinated API:**
@@ -2694,34 +2778,6 @@ Layout.Vertical().Padding(16)
 ```
 
 `TextBuilder` does not have `.Padding()`. Padding is available on container widgets (`Box`, `LayoutView`, `TabView`, `GridView`). To add padding around text, wrap it in a `Box` or layout. This is a variant of the `TextBuilder.AlignCenter()` and `TextBuilder.Style()` hallucinations — the agent applies container-level styling to text elements.
-
-## SelectInput.Items() — DropDownMenu extension called on SelectInput
-
-**Hallucinated API:**
-
-```csharp
-currencySelect.ToSelectInput()
-    .Items(new[] {
-        new Option<string>("USD", "US Dollar"),
-        new Option<string>("EUR", "Euro")
-    })
-```
-
-**Error:** `CS1929: 'SelectInput<string>' does not contain a definition for 'Items' and the best extension method overload 'DropDownMenuExtensions.Items(DropDownMenu, IEnumerable<MenuItem>)' requires a receiver of type 'Ivy.DropDownMenu'`
-
-**Correct API:**
-
-```csharp
-currencySelect.ToSelectInput(new[] {
-    new Option<string>("USD", "US Dollar"),
-    new Option<string>("EUR", "Euro")
-})
-```
-
-`.Items()` is an extension method for `DropDownMenu`, not `SelectInput`. Options must be passed as the first parameter to `ToSelectInput()`, not chained via a `.Items()` method. The agent confused the DropDownMenu API with the SelectInput API. For string arrays, use `.ToOptions()` to convert: `["USD", "EUR"].ToOptions()`. For enums, call `ToSelectInput()` without arguments — options are inferred from the enum type.
-
-**Found In:**
-84cbe3b9-5764-4352-99d3-dd685c397a68
 
 ## HandleSubmit / Handle* — renamed event handler methods
 

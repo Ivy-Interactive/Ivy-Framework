@@ -258,6 +258,53 @@ describe("Markdown link URL validation", () => {
   });
 });
 
+describe("Markdown inline code icon detection", () => {
+  const iconPattern = /^Icons\.([A-Z][a-zA-Z0-9]*)$/;
+
+  it("should match Icons.ChevronDown pattern", () => {
+    const match = "Icons.ChevronDown".match(iconPattern);
+    expect(match).not.toBeNull();
+    expect(match![1]).toBe("ChevronDown");
+  });
+
+  it("should match Icons.Search pattern", () => {
+    const match = "Icons.Search".match(iconPattern);
+    expect(match).not.toBeNull();
+    expect(match![1]).toBe("Search");
+  });
+
+  it("should not match NotAnIcon.Foo", () => {
+    const match = "NotAnIcon.Foo".match(iconPattern);
+    expect(match).toBeNull();
+  });
+
+  it("should not match Icons. with no icon name", () => {
+    const match = "Icons.".match(iconPattern);
+    expect(match).toBeNull();
+  });
+
+  it("should not match Icons.lowercase (must start with uppercase)", () => {
+    const match = "Icons.chevronDown".match(iconPattern);
+    expect(match).toBeNull();
+  });
+
+  it("should not match Icon.X (singular, wrong prefix)", () => {
+    const match = "Icon.ChevronDown".match(iconPattern);
+    expect(match).toBeNull();
+  });
+
+  it("should not match code with extra text around Icons.X", () => {
+    const match = "use Icons.ChevronDown here".match(iconPattern);
+    expect(match).toBeNull();
+  });
+
+  it("should match Icons with numbers like Icons.H1", () => {
+    const match = "Icons.H1".match(iconPattern);
+    expect(match).not.toBeNull();
+    expect(match![1]).toBe("H1");
+  });
+});
+
 describe("Markdown image URL validation with local files", () => {
   it("should validate file: protocol in markdown images when dangerouslyAllowLocalFiles is enabled", () => {
     const url = "file:///C:/Users/test/image.png";

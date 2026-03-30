@@ -9,6 +9,10 @@ using Ivy.Core.Server;
 using Ivy.Core.Server.HtmlPipeline;
 using Ivy.Core.Server.HtmlPipeline.Filters;
 using Ivy.Core.Server.Middleware;
+using Ivy.Core.Server.Formatters;
+using MessagePack;
+using MessagePack.Resolvers;
+using MessagePack.Formatters;
 using Ivy.Themes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -59,6 +63,10 @@ public record ServerArgs
     public bool FindAvailablePort { get; set; } = false;
 #endif
     public string? Host { get; set; } = null;
+
+    /// <summary>
+    /// Base path for the application when running behind a reverse proxy (e.g., "/myapp").
+    /// </summary>
     public string? BasePath { get; set; } = null;
 
     /// <summary>
@@ -110,13 +118,19 @@ public class Server
             _args = _args with { Host = host };
         }
 
+        if (_args.BasePath == null && Environment.GetEnvironmentVariable("BASE_PATH") is { } basePath)
+        {
+            _args = _args with { BasePath = basePath };
+        }
+
         _args = _args with
         {
             AssetAssembly = _args.AssetAssembly ?? Assembly.GetCallingAssembly(),
         };
 
         Services.AddSingleton(_args);
-        Services.AddSingleton(Configuration);
+        // capture the latest Configuration value at resolution time in case it gets replaced by UseConfiguration()
+        Services.AddSingleton(_ => Configuration);
 
         AddDefaultApps();
     }
@@ -277,24 +291,20 @@ public class Server
         try
         {
             // Load all "Ivy.Auth.*" assemblies eagerly to ensure their handlers are registered in the DI container
-            var entryAssembly = Assembly.GetEntryAssembly();
-            if (entryAssembly?.Location != null)
+            var assemblyDirectory = System.AppContext.BaseDirectory;
+            if (!string.IsNullOrEmpty(assemblyDirectory))
             {
-                var assemblyDirectory = Path.GetDirectoryName(entryAssembly.Location);
-                if (assemblyDirectory != null)
-                {
-                    var authAssemblyFiles = Directory.GetFiles(assemblyDirectory, "Ivy.Auth.*.dll");
+                var authAssemblyFiles = Directory.GetFiles(assemblyDirectory, "Ivy.Auth.*.dll");
 
-                    foreach (var assemblyFile in authAssemblyFiles)
+                foreach (var assemblyFile in authAssemblyFiles)
+                {
+                    try
                     {
-                        try
-                        {
-                            Assembly.LoadFrom(assemblyFile);
-                        }
-                        catch
-                        {
-                            // Continue if we can't load an assembly
-                        }
+                        Assembly.LoadFrom(assemblyFile);
+                    }
+                    catch
+                    {
+                        // Continue if we can't load an assembly
                     }
                 }
             }
@@ -677,9 +687,25 @@ public class Server
         builder.Services.AddSignalR(options =>
         {
             options.EnableDetailedErrors = _args.Verbose;
+            options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
+            options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+            options.MaximumReceiveMessageSize = 1048576; // 1MB
         }).AddJsonProtocol(options =>
         {
             options.PayloadSerializerOptions.TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver();
+        }).AddMessagePackProtocol(options =>
+        {
+            options.SerializerOptions = MessagePackSerializerOptions.Standard.WithResolver(
+                CompositeResolver.Create(
+                    new IMessagePackFormatter[] {
+                        new JsonNodeMessagePackFormatter(),
+                        new JsonObjectMessagePackFormatter(),
+                        new JsonArrayMessagePackFormatter(),
+                        new JsonValueMessagePackFormatter()
+                    },
+                    new IFormatterResolver[] { ContractlessStandardResolver.Instance }
+                )
+            );
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();

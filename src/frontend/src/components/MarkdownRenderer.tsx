@@ -22,6 +22,7 @@ import { remarkCustomEmojiPlugin } from "./custom-emojis/remarkCustomEmojiPlugin
 
 import { ImageOverlay } from "./markdown/ImageOverlay";
 import { CodeBlock } from "./markdown/CodeBlock";
+import Icon from "@/components/Icon";
 import { Components } from "react-markdown";
 
 interface MarkdownRendererProps {
@@ -61,6 +62,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
   const handleLinkClick = useCallback(
     (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
+      // When local files are enabled, pass file:// URLs directly to onLinkClick
+      if (dangerouslyAllowLocalFiles && href.startsWith("file:///")) {
+        if (onLinkClick) {
+          event.preventDefault();
+          onLinkClick(href);
+        }
+        return;
+      }
+
       // Validate URL to prevent open redirect vulnerabilities
       // validateLinkUrl always returns a string ('#' for invalid URLs)
       const validatedHref = validateLinkUrl(href);
@@ -76,7 +86,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         onLinkClick(validatedHref);
       }
     },
-    [onLinkClick],
+    [onLinkClick, dangerouslyAllowLocalFiles],
   );
 
   // Memoize static components separately (they don't need handleLinkClick)
@@ -121,9 +131,10 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       ol: memo(({ children }: { children: React.ReactNode }) => (
         <ol className={typography.ol}>{children}</ol>
       )),
-      li: memo(({ children }: { children: React.ReactNode }) => (
-        <li className={typography.li}>{children}</li>
-      )),
+      li: memo(({ children, className }: { children: React.ReactNode; className?: string }) => {
+        const isTaskItem = className?.includes("task-list-item");
+        return <li className={cn(typography.li, isTaskItem && "list-none")}>{children}</li>;
+      }),
       strong: memo(({ children }: { children: React.ReactNode }) => (
         <strong className={typography.strong}>{children}</strong>
       )),
@@ -213,7 +224,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         <hr className={typography.hr} {...props} />
       )),
       details: memo(({ children, ...props }: React.DetailsHTMLAttributes<HTMLDetailsElement>) => (
-        <details className={typography.details} {...props}>
+        <details className={cn(typography.details, "group")} {...props}>
           {children}
         </details>
       )),
@@ -221,7 +232,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         <summary className={typography.summary} {...props}>
           <div className="flex items-center gap-2">
             <svg
-              className="h-4 w-4 shrink-0 transition-transform [[open]>summary_&]:rotate-90"
+              className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -261,8 +272,24 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   // Memoize code component separately (depends on contentFeatures.hasCodeBlocks and hasMermaid)
   const codeComponent = useMemo(
     () => ({
-      code: memo((props: React.ComponentProps<"code"> & { inline?: boolean }) => {
-        const { children, className, inline } = props;
+      code: memo((props: React.ComponentProps<"code">) => {
+        const { children, className } = props;
+        const inline = !className;
+
+        // Detect Icons.X pattern in inline code
+        if (inline) {
+          const text = String(children);
+          const iconMatch = text.match(/^Icons\.([A-Z][a-zA-Z0-9]*)$/);
+          if (iconMatch) {
+            return (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25em" }}>
+                <code className={typography.code}>{children}</code>
+                <Icon name={iconMatch[1]} size="1em" />
+              </span>
+            );
+          }
+        }
+
         return (
           <CodeBlock
             className={className}
@@ -275,16 +302,17 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         );
       }),
     }),
-    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid],
+    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid, typography.code],
   );
 
   // Memoize link component separately (depends on handleLinkClick)
   const linkComponent = useMemo(
     () => ({
       a: memo(({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-        // Validate URL to prevent open redirect vulnerabilities
-        // validateLinkUrl always returns a string ('#' for invalid URLs)
-        const safeHref = validateLinkUrl(href);
+        // When local files are enabled, allow file:// URLs to render as clickable links
+        const isLocalFileUrl = dangerouslyAllowLocalFiles && href?.startsWith("file:///");
+
+        const safeHref = isLocalFileUrl ? href! : validateLinkUrl(href);
         if (safeHref === "#") {
           return <span {...props}>{children}</span>;
         }
@@ -339,7 +367,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         );
       }),
     }),
-    [handleLinkClick],
+    [handleLinkClick, dangerouslyAllowLocalFiles],
   );
 
   const components = useMemo(
@@ -364,7 +392,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   };
 
   const urlTransform = useCallback(
-    (url: string) => {
+    (url: string, key: string) => {
       if (url.startsWith("app://")) {
         return url;
       }
@@ -373,6 +401,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         dangerouslyAllowLocalFiles &&
         (url.startsWith("file://") || /^[a-zA-Z]:[\\/]/.test(url))
       ) {
+        // For links (href), preserve file:// URL for onLinkClick to handle
+        if (key === "href") {
+          if (/^[a-zA-Z]:[\\/]/.test(url)) {
+            const normalized = url.replace(/\\/g, "/");
+            return `file:///${normalized}`;
+          }
+          return url;
+        }
+        // For images (src), use local-file proxy
         if (isLocalFilesEnabled()) {
           // Server supports local file proxy - use /ivy/local-file endpoint
           let filePath: string;

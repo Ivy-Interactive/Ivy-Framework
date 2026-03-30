@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef } from "react";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { Densities } from "@/types/density";
 import { TextInputWidgetProps, TextInputVariant } from "./types";
@@ -6,6 +6,7 @@ import { useShortcutKey } from "./hooks";
 import { useOptimisticValue } from "../shared/useOptimisticValue";
 import { DefaultVariant, TextareaVariant, PasswordVariant, SearchVariant } from "./variants";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { useDictation } from "./hooks/useDictation";
 
 export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   id,
@@ -26,6 +27,11 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   minLength,
   pattern,
   rows,
+  dictation,
+  dictationUploadUrl,
+  dictationLanguage: _dictationLanguage,
+  dictationTranscription,
+  dictationTranscriptionVersion,
   "data-testid": dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -50,6 +56,50 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     events,
     eventHandler,
   });
+
+  const { isRecording, startRecording, stopRecording } = useDictation({
+    dictationUploadUrl,
+    onTranscription: useCallback(
+      (text: string) => {
+        const current = localValue;
+        const separator = current.length > 0 && !current.endsWith(" ") ? " " : "";
+        const newValue = current + separator + text;
+        setLocalValue(newValue);
+        if (events.includes("OnChange")) eventHandler("OnChange", id, [newValue]);
+      },
+      [localValue, setLocalValue, events, eventHandler, id],
+    ),
+  });
+
+  // Handle transcription results pushed from the server
+  const lastVersionRef = useRef(dictationTranscriptionVersion ?? 0);
+  useEffect(() => {
+    const version = dictationTranscriptionVersion ?? 0;
+    if (version > lastVersionRef.current && dictationTranscription) {
+      lastVersionRef.current = version;
+      const current = localValue;
+      const separator = current.length > 0 && !current.endsWith(" ") ? " " : "";
+      const newValue = current + separator + dictationTranscription;
+      setLocalValue(newValue);
+      if (events.includes("OnChange")) eventHandler("OnChange", id, [newValue]);
+    }
+  }, [
+    dictationTranscriptionVersion,
+    dictationTranscription,
+    localValue,
+    setLocalValue,
+    events,
+    eventHandler,
+    id,
+  ]);
+
+  const handleDictationToggle = useCallback(() => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  }, [isRecording, startRecording, stopRecording]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -140,6 +190,9 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       minLength,
       pattern,
       rows,
+      dictation,
+      isRecording,
+      onDictationToggle: handleDictationToggle,
       "data-testid": dataTestId,
     }),
     [
@@ -160,6 +213,9 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       minLength,
       pattern,
       rows,
+      dictation,
+      isRecording,
+      handleDictationToggle,
       dataTestId,
     ],
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import * as signalR from "@microsoft/signalr";
+import { MessagePackHubProtocol } from "@microsoft/signalr-protocol-msgpack";
 import { WidgetEventHandlerType, WidgetNode } from "@/types/widgets";
 import { useToast } from "@/hooks/use-toast";
 import { showError } from "@/hooks/use-error-sheet";
@@ -325,6 +326,9 @@ export const useBackend = (
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
   const [widgetTree, setWidgetTree] = useState<WidgetNode | null>(null);
   const [disconnected, setDisconnected] = useState(false);
+  const [connectionState, setConnectionState] = useState<
+    "connected" | "reconnecting" | "disconnected"
+  >("disconnected");
   const { toast } = useToast();
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
@@ -694,10 +698,36 @@ export const useBackend = (
       window.history.replaceState({}, "", newUrl);
     }
 
+    const retryPolicy = {
+      nextRetryDelayInMilliseconds: (retryContext: signalR.RetryContext) => {
+        if (retryContext.previousRetryCount === 0) return 0;
+        if (retryContext.previousRetryCount === 1) return 2000;
+        if (retryContext.previousRetryCount === 2) return 10000;
+        return 10000; // Infinity retry every 10 seconds
+      },
+    };
+
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(signalRUrl)
-      .withAutomaticReconnect()
+      .withHubProtocol(new MessagePackHubProtocol())
+      .withAutomaticReconnect(retryPolicy)
       .build();
+
+    newConnection.onreconnecting((error) => {
+      logger.warn("SignalR reconnecting", error);
+      setConnectionState("reconnecting");
+    });
+
+    newConnection.onreconnected((connectionId) => {
+      logger.info("SignalR reconnected. New ID:", connectionId);
+      setConnectionState("connected");
+    });
+
+    newConnection.onclose((error) => {
+      logger.error("SignalR closed", error);
+      setConnectionState("disconnected");
+      setDisconnected(true);
+    });
 
     currentConnectionRef.current = newConnection;
     queueMicrotask(() => setConnection(newConnection));
@@ -722,6 +752,7 @@ export const useBackend = (
       connection
         .start()
         .then(() => {
+          setConnectionState("connected");
           logger.info("✅ WebSocket connection established for:", {
             appId: latestAppIdRef.current,
             parentId,
@@ -884,6 +915,16 @@ export const useBackend = (
         })
         .catch((e) => {
           logger.error("SignalR connection failed:", e);
+          if (!isStoppingRef.current) {
+            toast({
+              title: "Connection Failed",
+              description:
+                "Could not establish connection to the backend. Please check your network or try refreshing.",
+              variant: "destructive",
+            });
+            setConnectionState("disconnected");
+            setDisconnected(true);
+          }
         });
 
       return () => {
@@ -989,5 +1030,6 @@ export const useBackend = (
     eventHandler,
     subscribeToStream,
     disconnected,
+    connectionState,
   };
 };

@@ -53,15 +53,11 @@ export const tableStyles = {
       overflow: "hidden",
     },
     footer: {
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      right: 0,
-      zIndex: 1,
+      flexShrink: 0,
+      width: "100%",
       backgroundColor: "var(--background)",
       borderTop: "1px solid var(--border)",
       padding: "8px 0 0 0",
-      pointerEvents: "auto",
     } as React.CSSProperties,
   },
 

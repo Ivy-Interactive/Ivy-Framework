@@ -8,8 +8,11 @@ namespace Ivy.Core;
 
 public abstract record AbstractWidget : IWidget
 {
+    private readonly record struct CachedProperty(PropertyInfo? Value);
+
     private string? _id;
     private readonly ConcurrentDictionary<(Type, string), object?> _attachedProps = new();
+    private static readonly ConcurrentDictionary<(Type, string), CachedProperty> _eventPropertyCache = new();
 
 #if DEBUG
     /// <summary>
@@ -69,7 +72,10 @@ public abstract record AbstractWidget : IWidget
     public async Task<bool> InvokeEventAsync(string eventName, JsonArray args)
     {
         var type = GetType();
-        var property = type.GetProperty(eventName);
+        var property = _eventPropertyCache.GetOrAdd(
+            (type, eventName),
+            static key => new CachedProperty(key.Item1.GetProperty(key.Item2))
+        ).Value;
 
         if (property == null)
             return false;
