@@ -265,8 +265,17 @@ function InvokePromptwareAgent {
         [string[]]$ExtraAgentArgs = @()
     )
 
+    # Generate session-id for cost tracking
+    $sessionId = [guid]::NewGuid().ToString()
+    $FirmwareValues["ClaudeSessionId"] = $sessionId
+
     $promptFile = PrepareFirmware $ScriptRoot $LogFile $ProgramFolder $FirmwareValues
     $agent = GetAgentCommandFromConfig
+
+    # Pass --session-id when using claude CLI
+    if ($agent.Executable -eq "claude") {
+        $ExtraAgentArgs += @("--session-id", $sessionId)
+    }
 
     Write-Host "Starting Agent..."
     if ($Action) { SendStatusMessage "Running $Action" }
@@ -287,6 +296,9 @@ function InvokePromptwareAgent {
         }
     }
 
+    # Report cost for this session
+    ReportSessionCost $sessionId
+
     if ($Action) { SendStatusMessage "$Action Completed" }
 
     if ($PlanPath -and $Action) {
@@ -297,6 +309,68 @@ function InvokePromptwareAgent {
     }
 
     Remove-Item $promptFile -ErrorAction SilentlyContinue
+}
+
+function ReportSessionCost {
+    param([string]$SessionId)
+
+    $jobId = $env:TENDRIL_JOB_ID
+    $url = $env:TENDRIL_URL
+    if (-not $jobId -or -not $url -or -not $SessionId) { return }
+
+    try {
+        # Find session file
+        $claudeProjectsDir = Join-Path $env:USERPROFILE ".claude\projects"
+        $sessionFile = Get-ChildItem -Path $claudeProjectsDir -Recurse -Filter "$SessionId.jsonl" |
+            Where-Object { $_.FullName -notlike "*\subagents\*" } |
+            Select-Object -First 1
+
+        if (-not $sessionFile) { return }
+
+        # Token prices (per token) for Claude Opus 4
+        $priceInput = 15e-6
+        $priceOutput = 75e-6
+        $priceCache5m = 18.75e-6
+        $priceCache1h = 18.75e-6
+        $priceCacheRead = 1.5e-6
+
+        $totalCost = 0.0
+
+        # Parse session and calculate cost
+        $filesToParse = @($sessionFile.FullName)
+
+        # Add subagent sessions
+        $subagentDir = Join-Path ($sessionFile.FullName -replace '\.jsonl$', '') "subagents"
+        if (Test-Path $subagentDir) {
+            $filesToParse += (Get-ChildItem $subagentDir -Filter "*.jsonl").FullName
+        }
+
+        foreach ($filePath in $filesToParse) {
+            foreach ($line in (Get-Content $filePath)) {
+                if (-not $line.Trim()) { continue }
+                try {
+                    $obj = $line | ConvertFrom-Json
+                    if ($obj.type -eq "assistant" -and $obj.message.usage) {
+                        $u = $obj.message.usage
+                        $totalCost += ($u.input_tokens ?? 0) * $priceInput
+                        $totalCost += ($u.output_tokens ?? 0) * $priceOutput
+                        $totalCost += ($u.cache_read_input_tokens ?? 0) * $priceCacheRead
+                        if ($u.cache_creation) {
+                            $totalCost += ($u.cache_creation.ephemeral_5m_input_tokens ?? 0) * $priceCache5m
+                            $totalCost += ($u.cache_creation.ephemeral_1h_input_tokens ?? 0) * $priceCache1h
+                        } else {
+                            $totalCost += ($u.cache_creation_input_tokens ?? 0) * $priceCache5m
+                        }
+                    }
+                } catch { }
+            }
+        }
+
+        # Report to controller (accumulates)
+        $body = @{ cost = [math]::Round($totalCost, 2) } | ConvertTo-Json
+        Invoke-RestMethod -Uri "$url/api/jobs/$jobId/cost" -Method Post `
+            -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
+    } catch { }
 }
 
 function SendStatusMessage {
