@@ -23,7 +23,7 @@ public class UpdatePlanDialog(
         if (!_dialogOpen.Value) return null;
 
         return new Dialog(
-            _ => _dialogOpen.Set(false),
+            _ => { _updateText.Set(""); _dialogOpen.Set(false); },
             new DialogHeader($"Update Plan #{_selectedPlan.Id}"),
             new DialogBody(
                 Layout.Vertical()
@@ -31,7 +31,7 @@ public class UpdatePlanDialog(
                     | _updateText.ToTextareaInput("Enter update instructions...").Rows(6)
             ),
             new DialogFooter(
-                new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
+                new Button("Cancel").Outline().OnClick(() => { _updateText.Set(""); _dialogOpen.Set(false); }),
                 new Button("Submit Update").Primary().OnClick(() =>
                 {
                     if (!string.IsNullOrWhiteSpace(_updateText.Value))
@@ -46,6 +46,7 @@ public class UpdatePlanDialog(
                     _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Updating);
                     _jobService.StartJob("UpdatePlan", _selectedPlan.FolderPath);
                     _refreshPlans();
+                    _updateText.Set("");
                     _dialogOpen.Set(false);
                 })
             )
