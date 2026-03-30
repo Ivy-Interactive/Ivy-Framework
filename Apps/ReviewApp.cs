@@ -5,7 +5,7 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Review", icon: Icons.FileText, group: new[] { "Tools" }, order: 25)]
+[App(title: "Review", icon: Icons.Sparkles, group: new[] { "Tools" }, order: 25)]
 public class ReviewApp : ViewBase
 {
     public override object? Build()
