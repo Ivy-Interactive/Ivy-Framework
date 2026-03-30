@@ -135,9 +135,12 @@ public class ContentView(
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Draft);
                 _refreshPlans();
             })
-            | new Spacer().Width(Size.Grow())
-            | new Button("Download").Icon(Icons.Download).Outline().Url(downloadUrl.Value ?? "")
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                new MenuItem("Download", Icon: Icons.Download, Tag: "Download").OnSelect(() =>
+                {
+                    var url = downloadUrl.Value;
+                    if (!string.IsNullOrEmpty(url)) client.OpenUrl(url);
+                }),
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath").OnSelect(() =>
                 {
                     copyToClipboard(_selectedPlan.FolderPath);
