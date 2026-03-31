@@ -392,6 +392,11 @@ public class ContentView(
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                new MenuItem("Set Completed", Icon: Icons.CircleCheck, Tag: "SetCompleted").OnSelect(() =>
+                {
+                    _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
+                    _refreshPlans();
+                }),
                 new MenuItem("Open in Explorer", Icon: Icons.FolderOpen, Tag: "OpenInExplorer").OnSelect(() =>
                 {
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
