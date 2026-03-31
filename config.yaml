@@ -30,7 +30,7 @@ projects:
       - name: NewWidgetChecklist
         required: false
       - name: CheckResult
-        required: false
+        required: true
     context: |
       Ivy Framework is the core UI framework. Key folders:
       - src/Ivy/Widgets/ — backend widget classes
@@ -53,7 +53,7 @@ projects:
       - name: DotnetTest
         required: true
       - name: CheckResult
-        required: false
+        required: true
     context: |
       Ivy Agent is the AI agent server and client. Key folders:
       - Ivy.Agent.Server/ — agent server
@@ -73,7 +73,7 @@ projects:
       - name: DotnetTest
         required: true
       - name: CheckResult
-        required: false
+        required: true
     context: |
       Console/TUI client. Key folders:
       - Ivy.Console/ — desktop client
@@ -107,7 +107,7 @@ projects:
       - name: DotnetTest
         required: false
       - name: CheckResult
-        required: false
+        required: true
     context: |
       Plan management TUI. Key folders:
       - Services/ — ConfigService, PlanReaderService, JobService
@@ -129,7 +129,7 @@ projects:
       - name: DotnetTest
         required: true
       - name: CheckResult
-        required: false
+        required: true
     context: |
       MCP service for IvyQuestions and IvyDocs.
 
