@@ -225,58 +225,61 @@ public class ContentView(
         var artifacts = GetArtifacts(_selectedPlan.FolderPath);
         if (artifacts.Count > 0)
         {
-            var artifactsLayout = Layout.Vertical().Gap(1);
+            var artifactsLayout = Layout.Vertical().Gap(2);
 
-            foreach (var (category, files) in artifacts.OrderBy(kv => kv.Key))
+            // Run Sample button
+            if (artifacts.TryGetValue("sample", out var sampleFiles))
             {
-                if (category == "sample")
+                var sampleDir = Path.Combine(_selectedPlan.FolderPath, "artifacts", "sample");
+                var csproj = Directory.GetFiles(sampleDir, "*.csproj", SearchOption.AllDirectories).FirstOrDefault();
+                if (csproj != null)
                 {
-                    var sampleDir = Path.Combine(_selectedPlan.FolderPath, "artifacts", "sample");
-                    var csproj = Directory.GetFiles(sampleDir, "*.csproj", SearchOption.AllDirectories).FirstOrDefault();
-                    if (csproj != null)
+                    var projectDir = Path.GetDirectoryName(csproj)!;
+                    artifactsLayout |= new Button("Run Sample").Icon(Icons.Play).Outline().OnClick(() =>
                     {
-                        var projectDir = Path.GetDirectoryName(csproj)!;
-                        artifactsLayout |= new Button("Run Sample").Icon(Icons.Play).Outline().OnClick(() =>
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                         {
-                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                            {
-                                FileName = "cmd.exe",
-                                Arguments = $"/k dotnet run --browse --find-available-port",
-                                WorkingDirectory = projectDir,
-                                UseShellExecute = true,
-                                CreateNoWindow = false
-                            });
+                            FileName = "cmd.exe",
+                            Arguments = $"/k dotnet run --browse --find-available-port",
+                            WorkingDirectory = projectDir,
+                            UseShellExecute = true,
+                            CreateNoWindow = false
                         });
-                    }
-                    continue;
-                }
-
-                artifactsLayout |= Text.Block($"  {category}/").Bold();
-                foreach (var file in files)
-                {
-                    var fileName = Path.GetFileName(file);
-                    var ext = Path.GetExtension(file).ToLowerInvariant();
-                    var isImage = new[] { ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp" }.Contains(ext);
-                    var fileCapture = file;
-
-                    if (isImage)
-                    {
-                        var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(file)}";
-                        artifactsLayout |= Layout.Horizontal().Gap(2)
-                            | new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = fileName }
-                                .Height(Size.Units(20)).Width(Size.Units(30))
-                            | new Button(fileName).Ghost().OnClick(() =>
-                                openArtifact.Set(fileCapture));
-                    }
-                    else
-                    {
-                        artifactsLayout |= Layout.Horizontal().Gap(2)
-                            | new Button(fileName).Ghost().OnClick(() =>
-                                openArtifact.Set(fileCapture));
-                    }
+                    });
                 }
             }
-            var totalArtifacts = artifacts.Sum(kv => kv.Value.Count);
+
+            // Screenshots — horizontal thumbnail layout
+            if (artifacts.TryGetValue("screenshots", out var screenshotFiles))
+            {
+                var screenshotsLayout = Layout.Horizontal().Gap(2).Wrap(Wrap.Wrap);
+                foreach (var file in screenshotFiles)
+                {
+                    var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(file)}";
+                    var fileCapture = file;
+                    screenshotsLayout |= new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(file) }
+                        .Height(Size.Units(15)).Width(Size.Units(22))
+                        .OnClick(() => openArtifact.Set(fileCapture));
+                }
+                artifactsLayout |= screenshotsLayout;
+            }
+
+            // Videos — clickable buttons
+            if (artifacts.TryGetValue("videos", out var videoFiles))
+            {
+                var videosLayout = Layout.Horizontal().Gap(2).Wrap(Wrap.Wrap);
+                foreach (var file in videoFiles)
+                {
+                    var fileName = Path.GetFileName(file);
+                    var fileCapture = file;
+                    videosLayout |= new Button(fileName).Ghost().Icon(Icons.Play).OnClick(() =>
+                        openArtifact.Set(fileCapture));
+                }
+                artifactsLayout |= videosLayout;
+            }
+
+            var totalArtifacts = (artifacts.GetValueOrDefault("screenshots")?.Count ?? 0)
+                + (artifacts.GetValueOrDefault("videos")?.Count ?? 0);
             content |= new Expandable(
                 header: $"Artifacts ({totalArtifacts})",
                 content: artifactsLayout
