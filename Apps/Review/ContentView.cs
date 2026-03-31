@@ -317,18 +317,43 @@ public class ContentView(
             }
         }
 
-        // Plan content
-        content |= Text.Block("Plan").Bold();
-        content |= new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
-            .DangerouslyAllowLocalFiles()
-            .OnLinkClick(url =>
-            {
-                if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+        // Plan content — show summary if available, full plan as fallback
+        var summaryPath = Path.Combine(_selectedPlan.FolderPath, "artifacts", "summary.md");
+        var hasSummary = File.Exists(summaryPath);
+
+        if (hasSummary)
+        {
+            content |= Layout.Horizontal().Gap(2).Align(Align.Center)
+                | Text.Block("Summary").Bold()
+                | new Button("Show Plan").Icon(Icons.FileText).Ghost().OnClick(() => showPlan.Set(true));
+            content |= new Markdown(File.ReadAllText(summaryPath)).DangerouslyAllowLocalFiles();
+        }
+        else
+        {
+            content |= Layout.Horizontal().Gap(2).Align(Align.Center)
+                | Text.Block("Plan").Bold()
+                | new Button("Show Plan").Icon(Icons.FileText).Ghost().OnClick(() => showPlan.Set(true));
+            content |= new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
+                .DangerouslyAllowLocalFiles()
+                .OnLinkClick(url =>
                 {
-                    var filePath = url.Substring("file:///".Length);
-                    openFile.Set(filePath);
-                }
-            });
+                    if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var filePath = url.Substring("file:///".Length);
+                        openFile.Set(filePath);
+                    }
+                });
+        }
+
+        if (showPlan.Value)
+        {
+            content |= new Sheet(
+                onClose: () => showPlan.Set(false),
+                content: new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
+                    .DangerouslyAllowLocalFiles(),
+                title: "Plan"
+            ).Width(Size.Half());
+        }
 
         // File viewer sheet
         if (openFile.Value is { } filePath2)
