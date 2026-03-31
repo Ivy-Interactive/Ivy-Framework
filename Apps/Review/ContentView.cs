@@ -323,14 +323,14 @@ public class ContentView(
 
         if (hasSummary)
         {
-            content |= Layout.Horizontal().Gap(2).Align(Align.Center)
+            content |= Layout.Horizontal().Gap(2).Center()
                 | Text.Block("Summary").Bold()
                 | new Button("Show Plan").Icon(Icons.FileText).Ghost().OnClick(() => showPlan.Set(true));
             content |= new Markdown(File.ReadAllText(summaryPath)).DangerouslyAllowLocalFiles();
         }
         else
         {
-            content |= Layout.Horizontal().Gap(2).Align(Align.Center)
+            content |= Layout.Horizontal().Gap(2).Center()
                 | Text.Block("Plan").Bold()
                 | new Button("Show Plan").Icon(Icons.FileText).Ghost().OnClick(() => showPlan.Set(true));
             content |= new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
