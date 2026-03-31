@@ -239,7 +239,31 @@ public class PlanReaderService(ConfigService config)
 
     public void SavePlan(string folderName, string fullContent)
     {
-        SaveRevision(folderName, fullContent);
+        UpdateLatestRevision(folderName, fullContent);
+    }
+
+    public void UpdateLatestRevision(string folderName, string content)
+    {
+        var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
+        if (!Directory.Exists(revisionsDir)) return;
+
+        var latestFile = Directory.GetFiles(revisionsDir, "*.md")
+            .OrderByDescending(f => f)
+            .FirstOrDefault();
+
+        if (latestFile != null)
+        {
+            File.WriteAllText(latestFile, content);
+
+            var planYamlPath = Path.Combine(PlansDirectory, folderName, "plan.yaml");
+            if (File.Exists(planYamlPath))
+            {
+                var yaml = File.ReadAllText(planYamlPath);
+                var planYaml = YamlDeserializer.Deserialize<PlanYaml>(yaml) ?? new PlanYaml();
+                planYaml.Updated = DateTime.UtcNow;
+                File.WriteAllText(planYamlPath, YamlSerializer.Serialize(planYaml));
+            }
+        }
     }
 
     private PlanFile? ParsePlanFolder(string folderPath)
