@@ -91,7 +91,7 @@ public class ContentView(
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
             | new Badge(_selectedPlan.Status.ToString()).Variant(_selectedPlan.Status == PlanStatus.Failed ? BadgeVariant.Destructive : BadgeVariant.Outline)
-            | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline)
+            | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline).WithProjectColor(_config, _selectedPlan.Project)
             | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
             | new Badge($"rev:{_selectedPlan.RevisionCount}").Variant(BadgeVariant.Outline)
             | isEditing.ToSwitchInput(Icons.Code)

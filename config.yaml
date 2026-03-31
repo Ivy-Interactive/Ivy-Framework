@@ -13,6 +13,7 @@ levels:
 
 projects:
   - name: Framework
+    color: Blue
     repos:
       - path: D:\Repos\_Ivy\Ivy-Framework
         prRule: yolo
@@ -40,6 +41,7 @@ projects:
       Instructions: See D:\Repos\_Ivy\Ivy-Framework\AGENTS.md
 
   - name: Agent
+    color: Purple
     repos:
       - path: D:\Repos\_Ivy\Ivy-Agent
         prRule: yolo
@@ -62,6 +64,7 @@ projects:
       - Ivy.Agent/Tools/ — tool implementations
 
   - name: Console
+    color: Teal
     repos:
       - path: D:\Repos\_Ivy\Ivy
         prRule: yolo
@@ -80,6 +83,7 @@ projects:
       - Ivy.Internals/ — shared internals
 
   - name: MyPromptwares
+    color: Amber
     repos:
       - path: D:\Repos\_Personal\MyPromptwares
         prRule: yolo
@@ -87,6 +91,7 @@ projects:
       Personal promptwares.
 
   - name: Scripts
+    color: Slate
     repos:
       - path: D:\Repos\_Personal\Scripts
         prRule: yolo
@@ -96,6 +101,7 @@ projects:
       - AF2/.vscode-extensions/ — VS Code extensions (installed via symlinks)
 
   - name: Tendril
+    color: Emerald
     repos:
       - path: D:\Repos\_Ivy\Ivy-Tendril
         prRule: yolo
@@ -118,6 +124,7 @@ projects:
       ivy question "How do I make a button in Ivy?"
 
   - name: Mcp
+    color: Sky
     repos:
       - path: D:\Repos\_Ivy\Ivy-Mcp
         prRule: yolo
