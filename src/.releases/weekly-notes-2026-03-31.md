@@ -14,7 +14,7 @@ The framework core now leverages Rust for performance-critical operations includ
 
 ### DiffView Widget
 
-A new `DiffView` widget for displaying unified diffs (git diff output) in either unified or split view mode.
+A new [**DiffView**](https://docs.ivy.app/widgets/primitives/diff-view) widget for displaying unified diffs (git diff output) in either unified or split view mode.
 
 Install with `dotnet add package Ivy.Widgets.DiffView`. The widget accepts standard git diff output and supports syntax highlighting when you specify a language.
 
@@ -41,7 +41,7 @@ new DiffView()
 
 ### AutoScroll Container
 
-This container automatically scrolls to the bottom when its content grows.
+The [**AutoScroll**](https://docs.ivy.app/widgets/primitives/auto-scroll) container automatically scrolls to the bottom when its content grows.
 
 ```csharp
 var lines = UseState(ImmutableArray.Create("First line", "Second line"));
@@ -55,7 +55,7 @@ AutoScroll.FromChildren(lines.Value.Select(l => Text.Muted(l)))
 
 ### Text Widget Layout Control
 
-Text widgets now support `Height()` and `Grow()` methods for better layout control:
+[**Text**](https://docs.ivy.app/widgets/primitives/text-block) widgets now support `Height()` and `Grow()` methods for better layout control:
 
 ```csharp
 // Make a markdown widget grow to fill available space
@@ -66,7 +66,7 @@ Text.Markdown(documentation)
 
 ### Voice Dictation for TextInput Widgets
 
-TextInput widgets now support voice dictation, allowing users to speak their input instead of typing:
+[**TextInput**](https://docs.ivy.app/widgets/inputs/text-input) widgets now support voice dictation, allowing users to speak their input instead of typing:
 
 ```csharp
 var message = UseState("");
@@ -77,7 +77,7 @@ new TextInput()
     .Placeholder("Type or speak your message...")
 ```
 
-**Requirements:** Dictation requires an `IAudioTranscriptionService` to be registered. See the [Audio Transcription Service](#audio-transcription-service) section for setup instructions using Azure Speech Services.
+**Requirements:** Dictation requires an `IAudioTranscriptionService` to be registered—see [**Dictation**](https://docs.ivy.app/widgets/inputs/dictation) for Azure Speech setup and integration.
 
 ### Inline Icon Preview in Markdown
 
@@ -87,9 +87,11 @@ When documenting icon usage in markdown, you can now use the pattern `Icons.Icon
 Use `Icons.ChevronDown` for dropdown menus or `Icons.Search` for search fields.
 ```
 
+See the [**Markdown**](https://docs.ivy.app/widgets/primitives/markdown) widget documentation for formatting and rendering.
+
 ### Markdown Popover Links
 
-Markdown widgets now support popover links for inline supplementary information. Use the special syntax `[text](## "popover content")` to create clickable text that displays a popover instead of navigating to a URL:
+The Markdown widget now supports popover links for inline supplementary information. Use the special syntax `[text](## "popover content")` to create clickable text that displays a popover instead of navigating to a URL:
 
 ```csharp
 new Markdown()
@@ -103,7 +105,7 @@ Use the [UseState hook](## ""React-style state management for component data"") 
 
 ### DataTable Header Slots
 
-DataTable widgets now support custom content in the header area through two new slot methods: `HeaderLeft()` and `HeaderRight()`.
+[**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) widgets now support custom content in the header area through two new slot methods: `HeaderLeft()` and `HeaderRight()`.
 
 ```csharp
 products.ToDataTable()
@@ -117,7 +119,7 @@ products.ToDataTable()
 
 ### Menu Item and Button Badges
 
-You can add badges to sidebar menu items and buttons with the new `Badge()` extension method:
+You can add badges to sidebar [**Navigation**](https://docs.ivy.app/onboarding/concepts/navigation) menu items and [**Button**](https://docs.ivy.app/widgets/common/button) widgets with the new `Badge()` extension method:
 
 ```csharp
 new MenuItem("Tasks", Icons.CheckSquare).Badge("New");
@@ -126,7 +128,7 @@ new Button("Updates", eventHandler, variant: ButtonVariant.Outline).Badge("New")
 
 ### Image Widget Border and Hover Effects
 
-Image widgets now support borders, border opacity, and hover effects. Adding `OnClick` applies `PointerAndTranslate` by default; set `.Hover(...)` explicitly to use something else (for example `Shadow`). Available variants include `Pointer`, `Shadow`, and `PointerAndTranslate`.
+[**Image**](https://docs.ivy.app/widgets/primitives/image) widgets now support borders, border opacity, and hover effects. Adding `OnClick` applies `PointerAndTranslate` by default; set `.Hover(...)` explicitly to use something else (for example `Shadow`). Available variants include `Pointer`, `Shadow`, and `PointerAndTranslate`.
 
 ```csharp
 new Image("https://example.com/photo.jpg")
@@ -142,7 +144,7 @@ new Image("https://example.com/photo.jpg")
 
 ### Advanced Axis Configuration
 
-Chart axes now support extended configuration: format tick labels with `TickFormatter()` (currency `"C0"`, `"C2:EUR"`, percentage `"P0"`, numbers `"N2"`, etc.), hide labels with `HideTickLabels()`, and control domain with numeric bounds or symbols (`AxisDomain.Auto`, `DataMin`, `DataMax`).
+[**Line chart**](https://docs.ivy.app/widgets/charts/line-chart) axes (and other Cartesian charts such as Bar and Area) now support extended configuration: format tick labels with `TickFormatter()` (currency `"C0"`, `"C2:EUR"`, percentage `"P0"`, numbers `"N2"`, etc.), hide labels with `HideTickLabels()`, and control domain with numeric bounds or symbols (`AxisDomain.Auto`, `DataMin`, `DataMax`).
 
 ```csharp
 // Tick formatting (e.g. currency on Y)
@@ -168,7 +170,7 @@ new BarChart(salesData)
 
 ### UseLoading Hook
 
-A new `UseLoading` hook returns `(loadingView, showLoading)` for loading dialogs. The context exposes `Message`, `Status`, `Progress` (use `null` for indeterminate), and `CancellationToken` when `cancellable: true`. Pass `LoadingOptions.CancellingDisplayDuration` to override the default 800ms "Cancelling..." state. With `cancellable: false`, the close button is hidden and overlay clicks are ignored.
+A new `UseLoading` hook returns `(loadingView, showLoading)` for loading dialogs. The context exposes `Message`, `Status`, `Progress` (use `null` for indeterminate), and `CancellationToken` when `cancellable: true`. Pass `LoadingOptions.CancellingDisplayDuration` to override the default 800ms "Cancelling..." state. With `cancellable: false`, the close button is hidden and overlay clicks are ignored. See the [**Hooks**](https://docs.ivy.app/hooks/hook-introduction) documentation for general hook usage.
 
 ```csharp
 var (loadingView, showLoading) = UseLoading();
@@ -190,7 +192,7 @@ return new Fragment(
 
 ### IConfiguration Now Available via Dependency Injection
 
-`IConfiguration` is now registered in the dependency injection container and can be injected into your services:
+`IConfiguration` is now registered in the dependency injection container and can be injected into your services (see [**server configuration**](https://docs.ivy.app/onboarding/concepts/program)):
 
 ```csharp
 public class MyService
@@ -208,7 +210,7 @@ public class MyService
 
 ### Auth Examples Now Use .NET User Secrets
 
-Authentication example projects now use .NET user-secrets for local development instead of `appsettings.json` files:
+Authentication example projects now use .NET user-secrets for local development instead of `appsettings.json` files (see the [**Auth0**](https://docs.ivy.app/onboarding/cli/authentication/auth0) CLI guide for provider-specific setup):
 
 ```bash
 cd src/auth/examples/Auth0Example
@@ -223,9 +225,7 @@ This approach keeps sensitive credentials out of source control without needing 
 
 ### Audio Transcription Service
 
-A new `IAudioTranscriptionService` interface provides a standardized way to transcribe audio to text.
-
-Register `AddAzureSpeechToText` in DI, then inject `IAudioTranscriptionService`. The service supports WebM, Ogg, WAV, MP4, AAC, and optional language (defaults to `"en-US"`).
+A new `IAudioTranscriptionService` interface provides a standardized way to transcribe audio to text. Register `AddAzureSpeechToText` in DI, then inject `IAudioTranscriptionService`. The service supports WebM, Ogg, WAV, MP4, AAC, and optional language (defaults to `"en-US"`).
 
 ```csharp
 builder.Services.AddAzureSpeechToText(
@@ -258,7 +258,7 @@ Linux ARM64 support enables deployment on ARM-based servers like AWS Graviton in
 
 ### BASE_PATH Environment Variable Support
 
-You can now configure your application's base path using the `BASE_PATH` environment variable (same idea as `PORT`, `HOST`, and `VERBOSE`), or set `ServerArgs.BasePath` in code.
+You can now configure your application's base path using the `BASE_PATH` environment variable (same idea as `PORT`, `HOST`, and `VERBOSE`), or set `ServerArgs.BasePath` in code—see [**server configuration**](https://docs.ivy.app/onboarding/concepts/program).
 
 ```csharp
 // Env / Docker: BASE_PATH=/myapp (e.g. docker run -e BASE_PATH=/myapp -e PORT=5000 myivyapp)
@@ -270,7 +270,7 @@ var server = new Server(args => { args.BasePath = "/myapp"; });
 
 ### New CLI Documentation Commands
 
-The Ivy CLI now includes commands for browsing docs (`ivy docs list`, `ivy docs "<path>"`) and asking questions with semantic search (`ivy ask`, `ivy question`).
+The Ivy CLI now includes [**ivy docs**](https://docs.ivy.app/onboarding/cli/docs) for browsing documentation and [**ivy ask**](https://docs.ivy.app/onboarding/cli/question) (alias `ivy question`) for semantic search over the framework knowledge base.
 
 ```bash
 ivy docs list
@@ -283,7 +283,7 @@ ivy question "What is the command to create an auto-incrementing migration?"
 
 ### CardHoverVariant Renamed to HoverEffect
 
-The `CardHoverVariant` enum has been renamed to `HoverEffect`. This enum is used by Card, Box, and Image widgets to control hover interaction effects. Replace `CardHoverVariant` with `HoverEffect`; `.Hover(...)` signatures are unchanged and stay in the `Ivy` namespace.
+The `CardHoverVariant` enum has been renamed to `HoverEffect`. This enum is used by Card, [**Box**](https://docs.ivy.app/widgets/primitives/box), and Image widgets to control hover interaction effects. Replace `CardHoverVariant` with `HoverEffect`; `.Hover(...)` signatures are unchanged and stay in the `Ivy` namespace.
 
 ```csharp
 // Before
@@ -297,7 +297,7 @@ new Image("photo.jpg").Hover(HoverEffect.PointerAndTranslate);
 
 ### Layout Alignment API Renamed
 
-The `Align` method and property has been renamed to clarify its purpose across several widgets:
+The `Align` method and property has been renamed to clarify its purpose across several widgets (see [**Align**](https://docs.ivy.app/api-reference/ivy/align) values used throughout layouts and widgets):
 
 - **StackLayout.Align to AlignContent** — controls how children are aligned within the container
 - **TableCell.Align to AlignContent** — controls how content is aligned within the cell
