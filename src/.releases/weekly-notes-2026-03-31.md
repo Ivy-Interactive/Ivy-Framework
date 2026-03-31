@@ -66,7 +66,7 @@ Text.Markdown(documentation)
 
 ### Voice Dictation for TextInput Widgets
 
-TextInput widgets now support voice dictation, allowing users to speak their input instead of typing. Enable dictation with the `EnableDictation()` extension method:
+TextInput widgets now support voice dictation, allowing users to speak their input instead of typing:
 
 ```csharp
 var message = UseState("");
@@ -133,22 +133,9 @@ new Image("https://example.com/photo.jpg")
     .BorderStyle(BorderStyle.Solid)
     .BorderColor(Colors.Blue)
     .BorderThickness(2)
-    .BorderRadius(BorderRadius.Rounded);
-
-new Image("https://example.com/photo.jpg")
-    .BorderStyle(BorderStyle.Solid)
-    .BorderColor(Colors.Gray, opacity: 0.5f)
-    .BorderThickness(1)
-    .BorderRadius(BorderRadius.Full);
-
-// Hover only
-new Image("https://example.com/photo.jpg")
-    .Hover(HoverEffect.Shadow);
-
-// OnClick defaults to PointerAndTranslate unless you override:
-new Image("https://example.com/photo.jpg")
+    .BorderRadius(BorderRadius.Rounded)
     .Hover(HoverEffect.Shadow)
-    .OnClick(() => ShowFullSize());
+    .OnClick(() => ShowFullSize()); // OnClick defaults to PointerAndTranslate unless you override:
 ```
 
 ## Charts
@@ -219,8 +206,6 @@ public class MyService
 }
 ```
 
-This makes it easier to access configuration values throughout your application without passing the `Server.Configuration` property explicitly.
-
 ### Auth Examples Now Use .NET User Secrets
 
 Authentication example projects now use .NET user-secrets for local development instead of `appsettings.json` files:
@@ -238,7 +223,7 @@ This approach keeps sensitive credentials out of source control without needing 
 
 ### Audio Transcription Service
 
-A new `IAudioTranscriptionService` interface has been added to the framework, providing a standardized way to transcribe audio to text.
+A new `IAudioTranscriptionService` interface provides a standardized way to transcribe audio to text.
 
 Register `AddAzureSpeechToText` in DI, then inject `IAudioTranscriptionService`. The service supports WebM, Ogg, WAV, MP4, AAC, and optional language (defaults to `"en-US"`).
 
@@ -265,11 +250,11 @@ public class VoiceNoteService
 
 ### Multi-Platform Support
 
-The Ivy Framework now includes native binaries for all major platforms including Windows (x64 and ARM64), Linux (x64 and ARM64), and macOS (Intel x64 and Apple Silicon ARM64). The framework automatically selects the correct native libraries for your target platform - no configuration required.
+The Ivy Framework now includes native binaries for all major platforms including Windows (x64 and ARM64), Linux (x64 and ARM64), and macOS (Intel x64 and Apple Silicon ARM64).
 
-Linux ARM64 support enables deployment on ARM-based servers like AWS Graviton instances, Oracle Cloud Ampere, and other ARM64 infrastructure, providing cost-effective hosting options with the same performance optimizations available on other platforms.
+Linux ARM64 support enables deployment on ARM-based servers like AWS Graviton instances, Oracle Cloud Ampere, and other ARM64 infrastructure.
 
-**Alpine Linux Support:** The framework now detects and supports Alpine Linux (musl-based distributions), automatically loading the correct native libraries for musl environments. This is particularly useful for lightweight Docker containers built on Alpine Linux base images, which are popular for their minimal size and security benefits.
+**Alpine Linux Support:** The framework now detects and supports Alpine Linux (musl-based distributions), automatically loading the correct native libraries for musl environments. This is particularly useful for lightweight Docker containers built on Alpine Linux base images.
 
 ### BASE_PATH Environment Variable Support
 
@@ -298,7 +283,7 @@ ivy question "What is the command to create an auto-incrementing migration?"
 
 ### CardHoverVariant Renamed to HoverEffect
 
-The `CardHoverVariant` enum has been renamed to `HoverEffect` and moved to a shared location (`Ivy.Shared`). This enum is used by Card, Box, and Image widgets to control hover interaction effects. Replace `CardHoverVariant` with `HoverEffect`; `.Hover(...)` signatures are unchanged and stay in the `Ivy` namespace.
+The `CardHoverVariant` enum has been renamed to `HoverEffect`. This enum is used by Card, Box, and Image widgets to control hover interaction effects. Replace `CardHoverVariant` with `HoverEffect`; `.Hover(...)` signatures are unchanged and stay in the `Ivy` namespace.
 
 ```csharp
 // Before
@@ -317,8 +302,6 @@ The `Align` method and property has been renamed to clarify its purpose across s
 - **StackLayout.Align to AlignContent** — controls how children are aligned within the container
 - **TableCell.Align to AlignContent** — controls how content is aligned within the cell
 - **FloatingPanel.Align to AlignSelf** — controls how the panel positions itself within its parent
-
-This change makes the API more explicit about whether you're aligning children inside a container or positioning the widget itself.
 
 ```csharp
 // Before
