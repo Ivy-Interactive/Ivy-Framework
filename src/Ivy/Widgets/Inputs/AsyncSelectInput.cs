@@ -112,11 +112,12 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         {
             if (refreshToken.IsRefreshed)
             {
+                var newValue = (TValue)refreshToken.ReturnValue!;
                 open.Set(false);
-                currentValue.Set((TValue)refreshToken.ReturnValue!);
+                currentValue.Set(newValue);
                 if (OnChange != null)
                 {
-                    _ = OnChange.Invoke(new Event<IInput<TValue>, TValue>("OnChange", this, currentValue.Value));
+                    _ = OnChange.Invoke(new Event<IInput<TValue>, TValue>("OnChange", this, newValue));
                 }
             }
         }, [refreshToken]);

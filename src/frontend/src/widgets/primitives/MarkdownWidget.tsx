@@ -1,5 +1,6 @@
 import { useEventHandler } from "@/components/event-handler";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import { getWidth, getHeight } from "@/lib/styles";
 import React, { useCallback, useState, useEffect } from "react";
 import { widgetContentOverrides, subscribeToContentOverride } from "@/widgets/widgetRenderer";
 
@@ -12,6 +13,8 @@ interface MarkdownWidgetProps {
   density?: Densities;
   textAlignment?: TextAlignment;
   dangerouslyAllowLocalFiles?: boolean;
+  width?: string;
+  height?: string;
 }
 
 const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
@@ -20,6 +23,8 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   density = Densities.Medium,
   textAlignment,
   dangerouslyAllowLocalFiles = false,
+  width,
+  height,
 }) => {
   const eventHandler = useEventHandler();
   const [, forceUpdate] = useState(0);
@@ -66,6 +71,8 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
       textAlign: textAlignment.toLowerCase() as React.CSSProperties["textAlign"],
     }),
     ...getScaleStyle(density),
+    ...getWidth(width),
+    ...getHeight(height),
   };
 
   return (

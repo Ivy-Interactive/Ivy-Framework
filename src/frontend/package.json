@@ -116,7 +116,7 @@
     "@types/wicg-file-system-access": "2023.10.7",
     "@vitejs/plugin-react": "6.0.1",
     "canvas-confetti": "1.9.4",
-    "happy-dom": "20.8.8",
+    "happy-dom": "20.8.9",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "tailwindcss": "4.1.16",
