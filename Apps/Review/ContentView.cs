@@ -40,7 +40,7 @@ public class ContentView(
 
         if (_selectedPlan is null)
         {
-            return Layout.Vertical().Align(Align.Center).Height(Size.Full())
+            return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
                 | Text.Muted("Select a completed plan to review");
         }
 
@@ -404,7 +404,7 @@ public class ContentView(
         }
 
         // Action bar
-        var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
+        var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
             | new Button("Suggest Changes").Icon(Icons.MessageSquare).Outline().OnClick(() =>
             {
                 suggestChangesOpen.Set(true);

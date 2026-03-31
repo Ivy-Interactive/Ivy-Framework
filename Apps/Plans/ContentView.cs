@@ -82,7 +82,7 @@ public class ContentView(
 
         if (_selectedPlan is null)
         {
-            return Layout.Vertical().Align(Align.Center).Height(Size.Full())
+            return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
                 | Text.Muted("Select a plan from the sidebar");
         }
 
@@ -133,7 +133,7 @@ public class ContentView(
                 });
         }
 
-        var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
+        var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
             | new Button("Update").Icon(Icons.Pencil).Outline().ShortcutKey("u").OnClick(() => updateDialogOpen.Set(true))
             | new Button("Split").Icon(Icons.Scissors).Outline().ShortcutKey("s").OnClick(() =>
             {
