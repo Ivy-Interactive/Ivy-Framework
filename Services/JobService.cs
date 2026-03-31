@@ -11,6 +11,8 @@ public class JobService
     private readonly ConcurrentDictionary<string, JobItem> _jobs = new();
     private int _counter;
     private PlanReaderService? _planReaderService;
+    private readonly TimeSpan _jobTimeout;
+    private readonly TimeSpan _staleOutputTimeout;
 
     public event Action? JobsChanged;
     public ConcurrentQueue<JobNotification> PendingNotifications { get; } = new();
@@ -29,6 +31,18 @@ public class JobService
         ["MakePr"] = Path.Combine(PromptsRoot, "MakePr.ps1"),
         ["CreateIssue"] = Path.Combine(PromptsRoot, "CreateIssue.ps1"),
     };
+
+    public JobService(ConfigService configService)
+    {
+        _jobTimeout = TimeSpan.FromMinutes(configService.Settings.JobTimeout);
+        _staleOutputTimeout = TimeSpan.FromMinutes(configService.Settings.StaleOutputTimeout);
+    }
+
+    public JobService(TimeSpan jobTimeout, TimeSpan staleOutputTimeout)
+    {
+        _jobTimeout = jobTimeout;
+        _staleOutputTimeout = staleOutputTimeout;
+    }
 
     public void SetPlanReaderService(PlanReaderService planReaderService)
     {
@@ -131,35 +145,115 @@ public class JobService
         process.BeginErrorReadLine();
         job.Process = process;
 
-        // Monitor for completion in background
+        // Monitor for completion in background with timeout and stale output detection
+        var cts = new CancellationTokenSource(_jobTimeout);
+        job.TimeoutCts = cts;
+
         Task.Run(async () =>
         {
-            await process.WaitForExitAsync();
-            CompleteJob(id, process.ExitCode);
+            var timedOut = false;
+
+            try
+            {
+                // Wait for process exit or timeout
+                await process.WaitForExitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                timedOut = true;
+            }
+
+            if (!timedOut && !process.HasExited)
+            {
+                // Shouldn't happen, but guard against it
+                timedOut = true;
+            }
+
+            if (timedOut)
+            {
+                try { process.Kill(entireProcessTree: true); } catch { }
+                CompleteJob(id, exitCode: null, timedOut: true, staleOutput: false);
+                return;
+            }
+
+            CompleteJob(id, process.ExitCode, timedOut: false, staleOutput: false);
         });
+
+        // Start stale output watchdog
+        if (_staleOutputTimeout > TimeSpan.Zero)
+        {
+            _ = RunStaleOutputWatchdog(id, cts);
+        }
 
         JobsChanged?.Invoke();
         return id;
     }
 
-    public void CompleteJob(string id, int? exitCode)
+    private async Task RunStaleOutputWatchdog(string id, CancellationTokenSource timeoutCts)
+    {
+        var checkInterval = TimeSpan.FromSeconds(60);
+
+        while (!timeoutCts.Token.IsCancellationRequested)
+        {
+            try
+            {
+                await Task.Delay(checkInterval, timeoutCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+
+            if (!_jobs.TryGetValue(id, out var job) || job.Status != "Running")
+                break;
+
+            if (job.LastOutputAt.HasValue)
+            {
+                var sinceLastOutput = DateTime.UtcNow - job.LastOutputAt.Value;
+                if (sinceLastOutput >= _staleOutputTimeout)
+                {
+                    // Stale output detected — cancel the timeout CTS to trigger the main monitor
+                    job.StaleOutputDetected = true;
+                    try { job.Process?.Kill(entireProcessTree: true); } catch { }
+                    CompleteJob(id, exitCode: null, timedOut: true, staleOutput: true);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void CompleteJob(string id, int? exitCode, bool timedOut = false, bool staleOutput = false)
     {
         if (!_jobs.TryGetValue(id, out var job)) return;
+        if (job.Status != "Running") return;
 
-        var success = exitCode == 0;
-        job.StatusMessage = null;
-        job.Status = success ? "Completed" : "Failed";
+        if (timedOut)
+        {
+            job.Status = "Timeout";
+            var reason = staleOutput
+                ? $"No output for {(int)_staleOutputTimeout.TotalMinutes} minutes"
+                : $"Exceeded {(int)_jobTimeout.TotalMinutes} minute timeout";
+            job.StatusMessage = reason;
+        }
+        else
+        {
+            var success = exitCode == 0;
+            job.StatusMessage = null;
+            job.Status = success ? "Completed" : "Failed";
+        }
+
         job.CompletedAt = DateTime.UtcNow;
         if (job.StartedAt.HasValue)
             job.DurationSeconds = (int)(job.CompletedAt.Value - job.StartedAt.Value).TotalSeconds;
 
-        var title = success ? "Job Completed" : "Job Failed";
+        var isSuccess = job.Status == "Completed";
+        var title = job.Status == "Timeout" ? "Job Timed Out" : (isSuccess ? "Job Completed" : "Job Failed");
         var message = job.PlanFile ?? job.Type;
-        PendingNotifications.Enqueue(new JobNotification(title, message, success));
+        PendingNotifications.Enqueue(new JobNotification(title, message, isSuccess));
 
-        if (job.Status == "Failed")
+        if (job.Status is "Failed" or "Timeout")
             ResetPlanState(job);
-        else if (success && job.Type == "ExecutePlan")
+        else if (isSuccess && job.Type == "ExecutePlan")
             EnsurePlanStateTransitioned(job);
 
         WriteJobLog(job);
@@ -174,6 +268,7 @@ public class JobService
         if (!_jobs.TryGetValue(id, out var job)) return;
 
         job.CancellationRequested = true;
+        try { job.TimeoutCts?.Cancel(); } catch { }
         try { job.Process?.Kill(entireProcessTree: true); } catch { }
         job.Status = "Stopped";
         job.CompletedAt = DateTime.UtcNow;
@@ -262,7 +357,7 @@ public class JobService
             return;
 
         var completed = _jobs.Values.Count(j => j.Status == "Completed");
-        var failed = _jobs.Values.Count(j => j.Status == "Failed");
+        var failed = _jobs.Values.Count(j => j.Status is "Failed" or "Timeout");
         var title = "Tendril \u2014 All Jobs Finished";
         var body = failed > 0
             ? $"{completed} completed, {failed} failed"
@@ -303,6 +398,9 @@ public class JobService
                 $"- **Started:** {job.StartedAt:u}\n" +
                 $"- **Completed:** {job.CompletedAt:u}\n" +
                 $"- **Duration:** {duration}\n";
+
+            if (job.Status == "Timeout" && job.StatusMessage != null)
+                logContent += $"- **Timeout Reason:** {job.StatusMessage}\n";
 
             _planReaderService.AddLog(job.PlanFile, job.Type, logContent);
         }

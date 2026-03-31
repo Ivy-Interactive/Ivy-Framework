@@ -72,7 +72,7 @@ public class InboxWatcherServiceTests
             File.WriteAllText(Path.Combine(inboxDir, "test-entry.md"), "Test inbox entry");
 
             var config = new ConfigService(new TendrilSettings { TendrilData = tempDir });
-            var jobService = new JobService();
+            var jobService = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
             using var watcher = new InboxWatcherService(config, jobService);
 
             // The constructor calls ProcessExistingFiles, which dispatches async processing.

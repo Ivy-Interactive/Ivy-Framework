@@ -1,5 +1,7 @@
 tendrilData: D:\Tendril
 agentCommand: claude --print --verbose --output-format stream-json --dangerously-skip-permissions
+jobTimeout: 30
+staleOutputTimeout: 10
 
 levels:
   - name: Critical

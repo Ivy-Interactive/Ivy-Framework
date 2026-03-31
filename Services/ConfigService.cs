@@ -50,6 +50,8 @@ public class TendrilSettings
     public string TendrilData { get; set; } = "";
     public string PlanFolder { get; set; } = "";
     public string AgentCommand { get; set; } = "claude";
+    public int JobTimeout { get; set; } = 30;
+    public int StaleOutputTimeout { get; set; } = 10;
     public List<ProjectConfig> Projects { get; set; } = new();
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";

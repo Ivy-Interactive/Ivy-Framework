@@ -24,7 +24,7 @@ server.Services.AddSingleton<PlanReaderService>(sp =>
 });
 server.Services.AddSingleton<JobService>(sp =>
 {
-    var jobService = new JobService();
+    var jobService = new JobService(sp.GetRequiredService<ConfigService>());
     jobService.SetPlanReaderService(sp.GetRequiredService<PlanReaderService>());
     return jobService;
 });
