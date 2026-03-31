@@ -88,6 +88,12 @@ Each app must:
 
 From `<ArtifactsDir>/sample/`:
 
+Before building, kill any leftover processes from previous runs that may lock DLLs:
+
+```bash
+powershell.exe -NoProfile -Command "Get-Process | Where-Object { $_.Path -and $_.Path -like '*artifacts*sample*bin*' } | Stop-Process -Force -ErrorAction SilentlyContinue"
+```
+
 ```bash
 dotnet build
 dotnet run --describe

@@ -22,6 +22,19 @@ foreach ($dir in @($verificationDir, "$artifactsDir\tests", "$artifactsDir\scree
     }
 }
 
+# Kill any leftover sample processes that may lock DLLs
+$sampleBinDir = Join-Path $artifactsDir "sample" "bin"
+if (Test-Path $sampleBinDir) {
+    Get-Process | Where-Object {
+        $_.Path -and $_.Path.StartsWith($sampleBinDir, [StringComparison]::OrdinalIgnoreCase)
+    } | ForEach-Object {
+        Write-Host "Killing leftover process: $($_.ProcessName) ($($_.Id))" -ForegroundColor Yellow
+        $_ | Stop-Process -Force -ErrorAction SilentlyContinue
+    }
+    # Brief wait for file handles to release
+    Start-Sleep -Milliseconds 500
+}
+
 # Set ARTIFACTS_DIR so Playwright tests can write directly to plan artifacts
 $env:ARTIFACTS_DIR = $artifactsDir
 
