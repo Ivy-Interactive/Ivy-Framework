@@ -11,6 +11,13 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
     {
         var path = context.Request.Path.Value ?? "";
 
+        // Skip if path contains a dot (likely a static file, sitemap.xml, or markdown link)
+        if (path.Contains('.'))
+        {
+            await next(context);
+            return;
+        }
+
         // Skip if an endpoint has already been matched (e.g., MVC controller, gRPC service)
         if (context.GetEndpoint() != null)
         {
