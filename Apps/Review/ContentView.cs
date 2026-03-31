@@ -103,7 +103,7 @@ public class ContentView(
             content |= new Expandable(
                 header: $"Verifications ({_selectedPlan.Verifications.Count})",
                 content: verificationsTable
-            ).Open(true);
+            ).Open(false);
 
             if (openVerification.Value is { } verName)
             {
@@ -152,7 +152,7 @@ public class ContentView(
             content |= new Expandable(
                 header: $"Commits ({_selectedPlan.Commits.Count})",
                 content: commitsTable
-            ).Open(true);
+            ).Open(false);
         }
 
         // PRs section
@@ -226,7 +226,7 @@ public class ContentView(
             content |= new Expandable(
                 header: $"Artifacts ({totalArtifacts})",
                 content: artifactsLayout
-            ).Open(true);
+            ).Open(false);
 
             if (openArtifact.Value is { } artifactPath)
             {
