@@ -252,7 +252,7 @@ public class ContentView(
             // Screenshots — horizontal thumbnail layout
             if (artifacts.TryGetValue("screenshots", out var screenshotFiles))
             {
-                var screenshotsLayout = Layout.Horizontal().Gap(2).Wrap(Wrap.Wrap);
+                var screenshotsLayout = Layout.Horizontal().Gap(2).Wrap();
                 foreach (var file in screenshotFiles)
                 {
                     var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(file)}";
@@ -267,7 +267,7 @@ public class ContentView(
             // Videos — clickable buttons
             if (artifacts.TryGetValue("videos", out var videoFiles))
             {
-                var videosLayout = Layout.Horizontal().Gap(2).Wrap(Wrap.Wrap);
+                var videosLayout = Layout.Horizontal().Gap(2).Wrap();
                 foreach (var file in videoFiles)
                 {
                     var fileName = Path.GetFileName(file);
