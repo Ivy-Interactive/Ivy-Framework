@@ -60,7 +60,8 @@ public static class PlanFilters
             filtered = filtered.Where(p =>
                 p.Title.ToLowerInvariant().Contains(search) ||
                 p.Id.ToString().Contains(search) ||
-                p.Project.ToLowerInvariant().Contains(search));
+                p.Project.ToLowerInvariant().Contains(search) ||
+                p.LatestRevisionContent.ToLowerInvariant().Contains(search));
         }
 
         return filtered;
