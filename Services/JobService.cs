@@ -49,7 +49,7 @@ public class JobService
         if (type == "MakePlan")
         {
             planFile = GetNamedArg(args, "-Description") is { } desc
-                ? (desc.Length > 40 ? desc[..40] + "..." : desc)
+                ? (desc.Length > 80 ? desc[..80] + "..." : desc)
                 : "New Plan";
             project = GetNamedArg(args, "-Project") ?? "General";
             if (project == "[Auto]") project = "General";
