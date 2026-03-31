@@ -22,7 +22,7 @@ public class CreatePlanDialog(List<string> projectNames, Action<string, string> 
             new DialogHeader("Create New Draft"),
             new DialogBody(
                 Layout.Vertical()
-                    | selectedProject.ToSelectInput(options).WithLabel("Select project")
+                    | selectedProject.ToSelectInput(options).Toggle().WithLabel("Select project")
                     | createPlanText.ToTextareaInput("Enter task description...").Rows(6).WithLabel("Describe the task for the new draft")
             ),
             new DialogFooter(
