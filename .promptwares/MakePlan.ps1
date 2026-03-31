@@ -35,5 +35,9 @@ if ($agent.Executable -eq "claude") {
 & $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw)
 Pop-Location
 
-ReportSessionCost $sessionId
+$costData = ReportSessionCost $sessionId
+$planFolder = Get-ChildItem -Path $script:PlansDir -Directory -Filter ("{0:D5}-*" -f $planId) | Select-Object -First 1
+if ($costData -and $planFolder) {
+    LogPlanCost $planFolder.FullName "MakePlan" $costData.Tokens $costData.Cost
+}
 Remove-Item $promptFile
