@@ -1,12 +1,9 @@
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { TabsTrigger } from '@/components/ui/tabs';
-import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type {
-  SortableTabTriggerProps,
-  SortableDropdownMenuItemProps,
-} from '../types';
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { TabsTrigger } from "@/components/ui/tabs";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { SortableTabTriggerProps, SortableDropdownMenuItemProps } from "../types";
 
 /**
  * A draggable tab trigger component that integrates with dnd-kit
@@ -22,26 +19,19 @@ export function SortableTabTrigger({
   useRadix = false,
   ...props
 }: SortableTabTriggerProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
 
   return (
     <TabsTrigger
       ref={setNodeRef}
       style={{
-        transform: transform
-          ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-          : undefined,
-        transition: isDragging ? 'none' : transition,
+        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+        transition: isDragging ? "none" : transition,
         opacity: isDragging ? 0.7 : 1,
         zIndex: isDragging ? 100 : undefined,
-        cursor: isDragging ? 'grabbing' : 'grab',
+        cursor: isDragging ? "grabbing" : "grab",
       }}
       value={value}
       onClick={onClick}
@@ -52,9 +42,7 @@ export function SortableTabTrigger({
       {...listeners}
       {...props}
       role="tab"
-      aria-selected={
-        (props as Record<string, unknown>)['aria-selected'] === true
-      }
+      aria-selected={(props as Record<string, unknown>)["aria-selected"] === true}
     >
       {children}
     </TabsTrigger>
@@ -72,14 +60,9 @@ export function SortableDropdownMenuItem({
   isActive,
   showClose,
 }: SortableDropdownMenuItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
 
   return (
     <div
@@ -93,8 +76,8 @@ export function SortableDropdownMenuItem({
       {...attributes}
       {...listeners}
       onClick={onClick}
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') {
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onClick?.();
         }
@@ -102,8 +85,8 @@ export function SortableDropdownMenuItem({
       role="button"
       tabIndex={0}
       className={cn(
-        'group w-full flex items-center p-1 text-sm cursor-pointer select-none rounded-sm transition-colors hover:bg-accent',
-        isActive && 'bg-accent text-accent-foreground'
+        "group w-full flex items-center p-1 text-sm cursor-pointer select-none rounded-sm transition-colors hover:bg-accent",
+        isActive && "bg-accent text-accent-foreground",
       )}
     >
       <span className="truncate text-left">{children}</span>
@@ -111,11 +94,9 @@ export function SortableDropdownMenuItem({
         <button
           type="button"
           className="ml-auto opacity-60 p-1 hover:opacity-100 invisible group-hover:visible cursor-pointer"
-          onClick={e => {
+          onClick={(e) => {
             e.stopPropagation();
-            window.dispatchEvent(
-              new CustomEvent('tab-close', { detail: { id } })
-            );
+            window.dispatchEvent(new CustomEvent("tab-close", { detail: { id } }));
           }}
         >
           <X className="w-3 h-3" />

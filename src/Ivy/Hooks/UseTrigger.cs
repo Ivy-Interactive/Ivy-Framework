@@ -10,6 +10,7 @@ public static class UseTriggerExtensions
     {
         var open = context.UseRef(false);
         var triggerValue = context.UseRef<T?>();
+        var hasTriggered = context.UseRef(false);
 
         var view = new FuncView(context2 =>
         {
@@ -20,7 +21,7 @@ public static class UseTriggerExtensions
                 openInternal.Set(open.Value);
             }, open);
 
-            return openInternal.Value && triggerValue.Value != null ? factory(open, triggerValue.Value) : null!;
+            return openInternal.Value && hasTriggered.Value ? factory(open, triggerValue.Value!) : null!;
         });
 
         return (
@@ -31,6 +32,7 @@ public static class UseTriggerExtensions
         void Callback(T? value)
         {
             triggerValue.Set(value);
+            hasTriggered.Set(true);
             open.Set(true);
         }
     }

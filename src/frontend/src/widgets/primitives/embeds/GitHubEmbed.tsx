@@ -1,7 +1,7 @@
-import React from 'react';
-import { sanitizeUrl, sanitizeId } from './shared';
-import EmbedCard from './EmbedCard';
-import EmbedErrorFallback from './EmbedErrorFallback';
+import React from "react";
+import { sanitizeUrl, sanitizeId } from "./shared";
+import EmbedCard from "./EmbedCard";
+import EmbedErrorFallback from "./EmbedErrorFallback";
 
 interface GitHubEmbedProps {
   url: string;
@@ -11,22 +11,20 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
   const repoInfo = React.useMemo(() => {
     const parseGitHubUrl = (githubUrl: string) => {
       // Codespace: https://github.com/codespaces/new?repo=owner%2Frepo&ref=branch
-      let match = githubUrl.match(
-        /github\.com\/codespaces\/new\?.*repo=([^&]+)(?:&ref=([^&]+))?/
-      );
+      let match = githubUrl.match(/github\.com\/codespaces\/new\?.*repo=([^&]+)(?:&ref=([^&]+))?/);
       if (match) {
         try {
           const repoParam = match[1];
           const refParam = match[2];
           const decodedRepo = decodeURIComponent(repoParam);
-          const [owner, repo] = decodedRepo.split('/');
+          const [owner, repo] = decodedRepo.split("/");
 
           if (owner && repo) {
             return {
               owner: sanitizeId(owner),
               repo: sanitizeId(repo),
-              type: 'codespace',
-              ref: refParam ? sanitizeId(refParam) : 'main',
+              type: "codespace",
+              ref: refParam ? sanitizeId(refParam) : "main",
             };
           }
         } catch {
@@ -40,7 +38,7 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
         return {
           owner: sanitizeId(match[1]),
           repo: sanitizeId(match[2]),
-          type: 'issue',
+          type: "issue",
           number: match[3],
         };
       }
@@ -51,7 +49,7 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
         return {
           owner: sanitizeId(match[1]),
           repo: sanitizeId(match[2]),
-          type: 'pull',
+          type: "pull",
           number: match[3],
         };
       }
@@ -62,7 +60,7 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
         return {
           owner: sanitizeId(match[1]),
           repo: sanitizeId(match[2]),
-          type: 'repository',
+          type: "repository",
         };
       }
 
@@ -71,8 +69,8 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       if (match) {
         return {
           owner: sanitizeId(match[1]),
-          repo: 'gist',
-          type: 'gist',
+          repo: "gist",
+          type: "gist",
         };
       }
 
@@ -88,51 +86,51 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
   }
 
   const getTitle = () => {
-    if (repoInfo.type === 'codespace') {
+    if (repoInfo.type === "codespace") {
       return `${repoInfo.owner}/${repoInfo.repo}`;
     }
-    if (repoInfo.type === 'gist') {
+    if (repoInfo.type === "gist") {
       return `${repoInfo.owner}/gist`;
     }
-    if (repoInfo.type === 'issue') {
+    if (repoInfo.type === "issue") {
       return `${repoInfo.owner}/${repoInfo.repo} #${repoInfo.number}`;
     }
-    if (repoInfo.type === 'pull') {
+    if (repoInfo.type === "pull") {
       return `${repoInfo.owner}/${repoInfo.repo} #${repoInfo.number}`;
     }
     return `${repoInfo.owner}/${repoInfo.repo}`;
   };
 
   const getDescription = () => {
-    if (repoInfo.type === 'codespace') {
-      return `Open in GitHub Codespaces${repoInfo.ref ? ` (${repoInfo.ref})` : ''}`;
+    if (repoInfo.type === "codespace") {
+      return `Open in GitHub Codespaces${repoInfo.ref ? ` (${repoInfo.ref})` : ""}`;
     }
-    if (repoInfo.type === 'gist') {
-      return 'View gist on GitHub';
+    if (repoInfo.type === "gist") {
+      return "View gist on GitHub";
     }
-    if (repoInfo.type === 'issue') {
-      return 'View issue on GitHub';
+    if (repoInfo.type === "issue") {
+      return "View issue on GitHub";
     }
-    if (repoInfo.type === 'pull') {
-      return 'View pull request on GitHub';
+    if (repoInfo.type === "pull") {
+      return "View pull request on GitHub";
     }
-    return 'View repository on GitHub';
+    return "View repository on GitHub";
   };
 
   const getLinkText = () => {
-    if (repoInfo.type === 'codespace') {
-      return 'Open in Codespaces';
+    if (repoInfo.type === "codespace") {
+      return "Open in Codespaces";
     }
-    if (repoInfo.type === 'issue') {
-      return 'View Issue';
+    if (repoInfo.type === "issue") {
+      return "View Issue";
     }
-    if (repoInfo.type === 'pull') {
-      return 'View Pull Request';
+    if (repoInfo.type === "pull") {
+      return "View Pull Request";
     }
-    if (repoInfo.type === 'gist') {
-      return 'View Gist';
+    if (repoInfo.type === "gist") {
+      return "View Gist";
     }
-    return 'View Repository';
+    return "View Repository";
   };
 
   return (

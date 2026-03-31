@@ -13,12 +13,22 @@ public class FeedbackInputApp : SampleBase
         var sizeBoolState = UseState(true);
         var sizeIntState = UseState(2);
 
+        var decimalState = UseState(3.5m);
+        var nullableDecimalState = UseState((decimal?)null);
+
         var intState = UseState(0);
         var nullableIntState = UseState((int?)null);
         var floatState = UseState(0.0f);
         var nullableFloatState = UseState((float?)null);
         var boolState = UseState(false);
         var nullableBoolState = UseState((bool?)null);
+
+        var onBlurState = UseState(0);
+        var onBlurLabel = UseState("");
+        var onFocusState = UseState(0);
+        var onFocusLabel = UseState("");
+        var maxState3 = UseState(0);
+        var maxState10 = UseState(0);
 
         var variants = Layout.Grid().Columns(5)
                | Text.Monospaced("var")
@@ -101,14 +111,77 @@ public class FeedbackInputApp : SampleBase
                           | (nullableBoolState.Value == null ? Text.Monospaced("null") : (nullableBoolState.Value == false ? Text.Monospaced("false") : Text.Monospaced("true")))
         ;
 
+        var allowHalfExamples = Layout.Grid().Columns(3)
+                                | Text.Monospaced("Variant")
+                                | Text.Monospaced("rating")
+                                | Text.Monospaced("state")
+
+                                | Text.Monospaced("Stars (decimal)")
+                                | decimalState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).AllowHalf()
+                                | Text.Monospaced(decimalState.Value.ToString())
+
+                                | Text.Monospaced("Stars (decimal?)")
+                                | nullableDecimalState.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).AllowHalf()
+                                | (nullableDecimalState.Value == null ? Text.Monospaced("null") : Text.Monospaced(nullableDecimalState.Value.ToString() ?? "null"))
+
+                                | Text.Monospaced("Emojis (decimal)")
+                                | decimalState.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).AllowHalf()
+                                | Text.Monospaced(decimalState.Value.ToString())
+        ;
+
+        var maxExamples = Layout.Grid().Columns(3)
+                          | Text.Monospaced("Max")
+                          | Text.Monospaced("rating")
+                          | Text.Monospaced("state")
+
+                          | Text.Monospaced("Max(3) Stars")
+                          | maxState3.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Max(3)
+                          | Text.Monospaced(maxState3.Value.ToString())
+
+                          | Text.Monospaced("Max(10) Stars")
+                          | maxState10.ToFeedbackInput().Variant(FeedbackInputVariant.Stars).Max(10)
+                          | Text.Monospaced(maxState10.Value.ToString())
+
+                          | Text.Monospaced("Max(3) Emojis")
+                          | maxState3.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).Max(3)
+                          | Text.Monospaced(maxState3.Value.ToString())
+
+                          | Text.Monospaced("Max(10) Emojis")
+                          | maxState10.ToFeedbackInput().Variant(FeedbackInputVariant.Emojis).Max(10)
+                          | Text.Monospaced(maxState10.Value.ToString())
+        ;
+
         return Layout.Vertical()
-               | Text.H1("Feedback Inputs")
+               | Text.H1("Feedback Input")
                | Text.H2("Variants")
                | variants
                | Text.H2("Size Examples")
                | sizeExamples
+               | Text.H2("Custom Max")
+               | maxExamples
+               | Text.H2("Allow Half")
+               | allowHalfExamples
                | Text.H2("Data Binding")
                | dataBinding
+               | Text.H2("Events")
+               | (Layout.Vertical()
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The blur event fires when the feedback input loses focus.").Small()
+                           | onBlurState.ToFeedbackInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                           | (onBlurLabel.Value != ""
+                               ? Callout.Success(onBlurLabel.Value)
+                               : Callout.Info("Interact then click away to see blur events"))
+                   ).Title("OnBlur Handler")
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The focus event fires when you click on or tab into the feedback input.").Small()
+                           | onFocusState.ToFeedbackInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                           | (onFocusLabel.Value != ""
+                               ? Callout.Success(onFocusLabel.Value)
+                               : Callout.Info("Click or tab into the input to see focus events"))
+                   ).Title("OnFocus Handler")
+               )
 
             ;
 

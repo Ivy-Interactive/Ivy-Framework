@@ -78,6 +78,11 @@ public class IconInputDataBindings : ViewBase
         var iconsState = UseState<Icons>(Icons.ChevronDown);
         var nullableIconsState = UseState<Icons?>(Icons.User);
 
+        var onBlurState = UseState<Icons>(Icons.Check);
+        var onBlurLabel = UseState("");
+        var onFocusState = UseState<Icons>(Icons.Check);
+        var onFocusLabel = UseState("");
+
         return Layout.Vertical()
                | Text.H2("Data Binding")
                | Text.P("Icon inputs support Icons (non-nullable) and Icons? (nullable) state types. The selected value updates in real time.")
@@ -93,6 +98,25 @@ public class IconInputDataBindings : ViewBase
                      ? Layout.Horizontal().Gap(2)
                         | new Icon(nullableIconsState.Value!.Value)
                         | Text.Block(nullableIconsState.Value.ToString()!)
-                     : Text.Monospaced("null"));
+                     : Text.Monospaced("null"))
+                | Text.H2("Events")
+                | (Layout.Vertical()
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The blur event fires when the input loses focus.").Small()
+                           | onBlurState.ToIconInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                           | (onBlurLabel.Value != ""
+                               ? Callout.Success(onBlurLabel.Value)
+                               : Callout.Info("Interact then click away to see blur events"))
+                   ).Title("OnBlur Handler")
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The focus event fires when you click on or tab into the input.").Small()
+                           | onFocusState.ToIconInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                           | (onFocusLabel.Value != ""
+                               ? Callout.Success(onFocusLabel.Value)
+                               : Callout.Info("Click or tab into the input to see focus events"))
+                   ).Title("OnFocus Handler")
+                );
     }
 }

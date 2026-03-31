@@ -1,6 +1,6 @@
-import React from 'react';
-import Icon from '@/components/Icon';
-import { sanitizeUrl } from './shared';
+import React from "react";
+import Icon from "@/components/Icon";
+import { sanitizeUrl } from "./shared";
 
 interface EmbedCardProps {
   platform: string;
@@ -37,12 +37,8 @@ const EmbedCard: React.FC<EmbedCardProps> = ({
           <Icon name={iconName} size={32} className={iconColor} />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">
-            {title}
-          </h3>
-          <p className="text-sm text-muted-foreground line-clamp-1">
-            {description}
-          </p>
+          <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">{title}</h3>
+          <p className="text-sm text-muted-foreground line-clamp-1">{description}</p>
         </div>
         <div className="flex-shrink-0">
           <a
@@ -67,9 +63,7 @@ const EmbedCard: React.FC<EmbedCardProps> = ({
           <Icon name={iconName} size={24} className={iconColor} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-card-foreground line-clamp-2">
-            {linkText}
-          </div>
+          <div className="text-sm font-medium text-card-foreground line-clamp-2">{linkText}</div>
         </div>
       </a>
     </div>

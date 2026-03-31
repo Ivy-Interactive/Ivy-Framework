@@ -17,8 +17,33 @@ public delegate QueryResult<Option<T>[]> AsyncSelectSearchDelegate<T>(IViewConte
 public delegate QueryResult<Option<T>?> AsyncSelectLookupDelegate<T>(IViewContext context, T id);
 
 /// <summary>
-/// A selection input that fetches options asynchronously.
+/// A selection input that fetches options asynchronously. Ideal for large datasets,
+/// foreign key lookups, or any scenario where options are loaded on-demand.
 /// </summary>
+/// <remarks>
+/// Requires two delegates: a <c>search</c> delegate that returns matching options for a query string,
+/// and a <c>lookup</c> delegate that resolves a single value back to its display option.
+/// <para>
+/// Options are created using <see cref="Option{TValue}"/> with the parameter order <c>(label, value)</c>:
+/// the label is displayed to the user, and the value is stored when selected.
+/// </para>
+/// <example>
+/// <code>
+/// var country = UseState&lt;string?&gt;(default(string));
+///
+/// QueryResult&lt;Option&lt;string&gt;[]&gt; SearchCountries(IViewContext ctx, string query) =&gt;
+///     ctx.UseQuery&lt;Option&lt;string&gt;[], (string, string)&gt;(
+///         key: ("countries", query),
+///         fetcher: ct =&gt; Task.FromResult(countries
+///             .Where(c =&gt; c.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+///             .Select(c =&gt; new Option&lt;string&gt;(c.Name, c.Code))  // label: Name, value: Code
+///             .ToArray()));
+///
+/// country.ToAsyncSelectInput(SearchCountries, LookupCountry, "Search countries...");
+/// </code>
+/// </example>
+/// </remarks>
+/// <typeparam name="TValue">The type of the selected value.</typeparam>
 public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, IInput<TValue>
 {
     public Type[] SupportedStateTypes() => [];
@@ -67,6 +92,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     public EventHandler<Event<IInput<TValue>, TValue>>? OnChange { get; init; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public bool Disabled { get; set; }
 
@@ -88,11 +114,12 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         {
             if (refreshToken.IsRefreshed)
             {
+                var newValue = (TValue)refreshToken.ReturnValue!;
                 open.Set(false);
-                currentValue.Set((TValue)refreshToken.ReturnValue!);
+                currentValue.Set(newValue);
                 if (OnChange != null)
                 {
-                    _ = OnChange.Invoke(new Event<IInput<TValue>, TValue>("OnChange", this, currentValue.Value));
+                    _ = OnChange.Invoke(new Event<IInput<TValue>, TValue>("OnChange", this, newValue));
                 }
             }
         }, [refreshToken]);
@@ -118,12 +145,15 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                 Placeholder = Placeholder,
                 Disabled = Disabled,
                 Invalid = Invalid,
+                Nullable = Nullable,
                 DisplayValue = displayValue,
                 OnSelect = HandleSelect,
                 Loading = loading,
                 Density = Density,
                 Ghost = Ghost,
-                AutoFocus = AutoFocus
+                AutoFocus = AutoFocus,
+                OnBlur = OnBlur,
+                OnFocus = OnFocus
             },
             open.Value ? new Sheet(
                 OnClose,
@@ -251,6 +281,39 @@ public static class AsyncSelectInputViewExtensions
         return widget.OnBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
+    [OverloadResolutionPriority(1)]
+    public static IAnyAsyncSelectInputBase OnFocus(this IAnyAsyncSelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        if (widget is AsyncSelectInputView<object> typedWidget)
+        {
+            typedWidget.OnFocus = new(onFocus);
+            return typedWidget;
+        }
+
+        var widgetType = widget.GetType();
+        if (widgetType.IsGenericType && widgetType.GetGenericTypeDefinition() == typeof(AsyncSelectInputView<>))
+        {
+            var onFocusProperty = widgetType.GetProperty("OnFocus");
+            if (onFocusProperty != null)
+            {
+                onFocusProperty.SetValue(widget, new EventHandler<Event<IAnyInput>>(onFocus));
+                return widget;
+            }
+        }
+
+        throw new InvalidOperationException("Unable to set focus handler on async select input");
+    }
+
+    public static IAnyAsyncSelectInputBase OnFocus(this IAnyAsyncSelectInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget.OnFocus(onFocus.ToValueTask());
+    }
+
+    public static IAnyAsyncSelectInputBase OnFocus(this IAnyAsyncSelectInputBase widget, Action onFocus)
+    {
+        return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
+    }
+
     public static IAnyAsyncSelectInputBase Ghost(this IAnyAsyncSelectInputBase widget, bool ghost = true)
     {
         var widgetType = widget.GetType();
@@ -319,21 +382,28 @@ public static class AsyncSelectInputViewExtensions
 }
 
 
-internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
+internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>, IAnyInput
 {
-    [Prop] public string? Placeholder { get; init; }
+    [Prop] public bool Disabled { get; set; }
 
-    [Prop] public bool Disabled { get; init; }
+    [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public bool AutoFocus { get; init; }
+    [Prop] public bool AutoFocus { get; set; }
 
-    [Prop] public string? Invalid { get; init; }
+    [Prop] public string? Invalid { get; set; }
 
-    [Prop] public string? DisplayValue { get; init; }
+    [Prop] public bool Nullable { get; set; }
 
-    [Prop] public bool Loading { get; init; }
+    [Prop] public string? DisplayValue { get; set; }
 
-    [Prop] public bool Ghost { get; init; }
+    [Prop] public bool Loading { get; set; }
 
-    [Event] public Func<Event<AsyncSelectInput>, ValueTask>? OnSelect { get; init; }
+    [Prop] public bool Ghost { get; set; }
+
+    [Event] public Func<Event<AsyncSelectInput>, ValueTask>? OnSelect { get; set; }
+
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
+
+    public Type[] SupportedStateTypes() => [];
 }

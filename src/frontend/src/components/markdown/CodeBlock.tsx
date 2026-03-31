@@ -1,16 +1,16 @@
-import React, { memo, useMemo, lazy, Suspense } from 'react';
-import { cn } from '@/lib/utils';
-import { createPrismTheme } from '@/lib/prismTheme';
-import { useTypography } from '@/contexts/TypographyContext';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import CopyToClipboardButton from '@/components/CopyToClipboardButton';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import React, { memo, useMemo, lazy, Suspense } from "react";
+import { cn } from "@/lib/utils";
+import { createPrismTheme } from "@/lib/prismTheme";
+import { useTypography } from "@/contexts/TypographyContext";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import CopyToClipboardButton from "@/components/CopyToClipboardButton";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const SyntaxHighlighter = lazy(() =>
-  import('react-syntax-highlighter').then(mod => ({ default: mod.Prism }))
+  import("react-syntax-highlighter").then((mod) => ({ default: mod.Prism })),
 );
 
-const MermaidRenderer = lazy(() => import('../MermaidRenderer'));
+const MermaidRenderer = lazy(() => import("../MermaidRenderer"));
 
 interface CodeBlockProps {
   className?: string;
@@ -21,24 +21,15 @@ interface CodeBlockProps {
 }
 
 export const CodeBlock = memo(
-  ({
-    className,
-    children,
-    inline,
-    hasCodeBlocks,
-    hasMermaid,
-  }: CodeBlockProps) => {
-    const match = /language-(\w+)/.exec(className || '');
-    const content = String(children).replace(/\n$/, '');
-    const isTerminal = match && match[1] === 'terminal';
-    const isMermaid = match && match[1] === 'mermaid';
+  ({ className, children, inline, hasCodeBlocks, hasMermaid }: CodeBlockProps) => {
+    const match = /language-(\w+)/.exec(className || "");
+    const content = String(children).replace(/\n$/, "");
+    const isTerminal = match && match[1] === "terminal";
+    const isMermaid = match && match[1] === "mermaid";
 
     // Create dynamic theme that adapts to current CSS variables
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
     const typography = useTypography();
-
-    const shouldWrap = true;
-    const whiteSpaceStyle = shouldWrap ? { whiteSpace: 'pre-wrap' } : {};
 
     if (!inline && match && hasCodeBlocks) {
       // Handle Mermaid diagrams
@@ -63,8 +54,8 @@ export const CodeBlock = memo(
 
       if (isTerminal) {
         // Handle terminal blocks with prompt styling
-        const lines = content.split('\n').filter(line => line.trim());
-        const cleanContent = lines.join('\n'); // Remove any empty lines
+        const lines = content.split("\n").filter((line) => line.trim());
+        const cleanContent = lines.join("\n"); // Remove any empty lines
 
         return (
           <div className="relative">
@@ -73,18 +64,15 @@ export const CodeBlock = memo(
             </div>
             <ScrollArea className="w-full">
               <pre
-                className={cn(
-                  'p-4 bg-muted rounded-md font-mono text-sm',
-                  shouldWrap && 'whitespace-pre-wrap break-all'
-                )}
-                style={shouldWrap ? {} : { overflowX: 'auto' }}
+                className="p-4 bg-muted rounded-md font-mono text-sm"
+                style={{ overflowX: "auto" }}
               >
                 {lines.map((line, i) => {
                   const lineKey = `md-term-line-${i}`;
                   return (
                     <div key={lineKey} className="flex">
                       <span className="text-muted-foreground select-none pointer-events-none mr-2">
-                        {'> '}
+                        {"> "}
                       </span>
                       <span className="flex-1">{line}</span>
                     </div>
@@ -102,11 +90,8 @@ export const CodeBlock = memo(
           fallback={
             <ScrollArea className="w-full border border-border rounded-md">
               <pre
-                className={cn(
-                  'p-4 bg-muted rounded-md font-mono text-sm',
-                  shouldWrap && 'whitespace-pre-wrap break-all'
-                )}
-                style={shouldWrap ? {} : { overflowX: 'auto' }}
+                className="p-4 bg-muted rounded-md font-mono text-sm"
+                style={{ overflowX: "auto" }}
               >
                 {content}
               </pre>
@@ -124,11 +109,10 @@ export const CodeBlock = memo(
                 style={dynamicTheme}
                 customStyle={{
                   margin: 0,
-                  ...whiteSpaceStyle,
-                  wordBreak: 'normal',
-                  overflowWrap: 'break-word',
+                  wordBreak: "normal",
+                  overflowWrap: "break-word",
                 }}
-                wrapLongLines={shouldWrap}
+                wrapLongLines={false}
               >
                 {content}
               </SyntaxHighlighter>
@@ -139,22 +123,8 @@ export const CodeBlock = memo(
       );
     }
 
-    // Apply styles to fallback blocks (no language) if it's a block (!inline)
-    const fallbackStyles =
-      !inline && shouldWrap
-        ? {
-            ...whiteSpaceStyle,
-            wordBreak: 'normal' as const,
-            overflowWrap: 'break-word' as const,
-          }
-        : {};
-
-    return (
-      <code className={cn(typography.code, className)} style={fallbackStyles}>
-        {children}
-      </code>
-    );
-  }
+    return <code className={cn(typography.code, className)}>{children}</code>;
+  },
 );
 
-CodeBlock.displayName = 'CodeBlock';
+CodeBlock.displayName = "CodeBlock";

@@ -1,34 +1,118 @@
-import React, { memo, useMemo, useCallback } from 'react';
-import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import remarkGemoji from 'remark-gemoji';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import rehypeRaw from 'rehype-raw';
-import rehypeSlug from 'rehype-slug';
-import 'katex/dist/katex.min.css';
-import { cn, getIvyHost, convertAppUrlToPath } from '@/lib/utils';
+import React, { memo, useMemo, useCallback } from "react";
+import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkGemoji from "remark-gemoji";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import rehypeRaw from "rehype-raw";
+import rehypeSlug from "rehype-slug";
+import "katex/dist/katex.min.css";
+import { cn, getIvyHost, convertAppUrlToPath, isLocalFilesEnabled } from "@/lib/utils";
 import {
   validateLinkUrl,
-  validateImageUrl,
+  validateMediaUrl,
   isExternalUrl,
   isAnchorLink,
   isAppProtocol,
-  isRelativePath,
-  isStandardUrl,
   extractAnchorId,
-} from '@/lib/url';
-import { useTypography } from '@/contexts/TypographyContext';
-import { CustomEmoji } from './custom-emojis/CustomEmoji';
-import { remarkCustomEmojiPlugin } from './custom-emojis/remarkCustomEmojiPlugin';
+} from "@/lib/url";
+import { useTypography } from "@/contexts/TypographyContext";
+import { CustomEmoji } from "./custom-emojis/CustomEmoji";
+import { remarkCustomEmojiPlugin } from "./custom-emojis/remarkCustomEmojiPlugin";
 
-import { ImageOverlay } from './markdown/ImageOverlay';
-import { CodeBlock } from './markdown/CodeBlock';
-import { Components } from 'react-markdown';
+import { ImageOverlay } from "./markdown/ImageOverlay";
+import { CodeBlock } from "./markdown/CodeBlock";
+import { PopoverLink } from "./markdown/PopoverLink";
+import Icon from "@/components/Icon";
+import { Components } from "react-markdown";
 
 interface MarkdownRendererProps {
   content: string;
   onLinkClick?: (url: string) => void;
+  dangerouslyAllowLocalFiles?: boolean;
+}
+
+interface FenceBlock {
+  openLine: number;
+  closeLine: number;
+  indent: string;
+  infoString: string;
+  children: FenceBlock[];
+}
+
+/**
+ * Normalizes nested fenced code blocks so that outer fences use more backticks
+ * than inner fences. This fixes CommonMark rendering where nested fences of
+ * the same length cause the inner fence to prematurely close the outer one.
+ *
+ * For example, a markdown block containing a ```csharp block would have its
+ * outer fence increased to ```` so the inner ``` doesn't close it.
+ */
+export function normalizeNestedFences(content: string): string {
+  const lines = content.split("\n");
+  const fenceRegex = /^(\s{0,3})(`{3,})\s*(.*)/;
+
+  const stack: { line: number; indent: string; infoString: string; children: FenceBlock[] }[] = [];
+  const topLevel: FenceBlock[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(fenceRegex);
+    if (!match) continue;
+
+    const indent = match[1];
+    const infoString = match[3].trim();
+
+    if (stack.length === 0 || infoString) {
+      // Opening fence: either top-level or nested (has info string)
+      stack.push({ line: i, indent, infoString, children: [] });
+    } else {
+      // Closing fence (no info string, inside an open block)
+      const open = stack.pop()!;
+      const block: FenceBlock = {
+        openLine: open.line,
+        closeLine: i,
+        indent: open.indent,
+        infoString: open.infoString,
+        children: open.children,
+      };
+      if (stack.length > 0) {
+        stack[stack.length - 1].children.push(block);
+      } else {
+        topLevel.push(block);
+      }
+    }
+  }
+
+  // No nesting found — return content unchanged
+  if (topLevel.every((b) => b.children.length === 0)) {
+    return content;
+  }
+
+  function getRequiredBackticks(block: FenceBlock): number {
+    if (block.children.length === 0) return 3;
+    const maxChild = Math.max(...block.children.map(getRequiredBackticks));
+    return maxChild + 1;
+  }
+
+  function rewriteBlock(block: FenceBlock) {
+    const count = getRequiredBackticks(block);
+    const backticks = "`".repeat(count);
+
+    lines[block.openLine] = block.infoString
+      ? `${block.indent}${backticks}${block.infoString}`
+      : `${block.indent}${backticks}`;
+    lines[block.closeLine] = `${block.indent}${backticks}`;
+
+    for (const child of block.children) {
+      rewriteBlock(child);
+    }
+  }
+
+  for (const block of topLevel) {
+    rewriteBlock(block);
+  }
+
+  return lines.join("\n");
 }
 
 const hasContentFeature = (content: string, feature: RegExp): boolean => {
@@ -38,6 +122,7 @@ const hasContentFeature = (content: string, feature: RegExp): boolean => {
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   content,
   onLinkClick,
+  dangerouslyAllowLocalFiles = false,
 }) => {
   const typography = useTypography();
   const contentFeatures = useMemo(
@@ -46,88 +131,81 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       hasCodeBlocks: hasContentFeature(content, /```/),
       hasMermaid: hasContentFeature(content, /```mermaid/),
     }),
-    [content]
+    [content],
   );
 
   const plugins = useMemo(() => {
     const remarkPlugins = [remarkGfm, remarkGemoji, remarkCustomEmojiPlugin];
-    if (contentFeatures.hasMath)
-      remarkPlugins.push(remarkMath as typeof remarkGfm);
+    if (contentFeatures.hasMath) remarkPlugins.push(remarkMath as typeof remarkGfm);
 
     const rehypePlugins = [rehypeRaw, rehypeSlug];
-    if (contentFeatures.hasMath)
-      rehypePlugins.push(rehypeKatex as unknown as typeof rehypeRaw);
+    if (contentFeatures.hasMath) rehypePlugins.push(rehypeKatex as unknown as typeof rehypeRaw);
 
     return { remarkPlugins, rehypePlugins };
   }, [contentFeatures.hasMath]);
 
   const handleLinkClick = useCallback(
     (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
+      // When local files are enabled, pass file:// URLs directly to onLinkClick
+      if (dangerouslyAllowLocalFiles && href.startsWith("file:///")) {
+        if (onLinkClick) {
+          event.preventDefault();
+          onLinkClick(href);
+        }
+        return;
+      }
+
       // Validate URL to prevent open redirect vulnerabilities
       // validateLinkUrl always returns a string ('#' for invalid URLs)
       const validatedHref = validateLinkUrl(href);
-      if (validatedHref === '#') {
+      if (validatedHref === "#") {
         event.preventDefault();
         return;
       }
 
-      // Only call backend handler for custom link handling scenarios
-      // validateLinkUrl already handles external links, anchor links, app:// URLs, and relative paths safely
-      // If the URL is one of these standard types, the browser will handle it naturally
-      // Only call onLinkClick for non-standard URLs that need custom handling
-      if (!isStandardUrl(validatedHref) && onLinkClick) {
+      // When onLinkClick is registered, intercept ALL link clicks
+      // This allows the backend handler to decide how to handle the URL
+      if (onLinkClick) {
         event.preventDefault();
         onLinkClick(validatedHref);
       }
     },
-    [onLinkClick]
+    [onLinkClick, dangerouslyAllowLocalFiles],
   );
 
   // Memoize static components separately (they don't need handleLinkClick)
   const staticComponents = useMemo(
     () => ({
-      h1: memo(
-        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h1 className={typography.h1} {...props}>
-            {children}
-          </h1>
-        )
-      ),
-      h2: memo(
-        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h2 className={typography.h2} {...props}>
-            {children}
-          </h2>
-        )
-      ),
-      h3: memo(
-        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h3 className={typography.h3} {...props}>
-            {children}
-          </h3>
-        )
-      ),
-      h4: memo(
-        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h4 className={typography.h4} {...props}>
-            {children}
-          </h4>
-        )
-      ),
-      h5: memo(
-        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h5 className={typography.h5} {...props}>
-            {children}
-          </h5>
-        )
-      ),
-      h6: memo(
-        ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-          <h6 className={typography.h6} {...props}>
-            {children}
-          </h6>
-        )
-      ),
+      h1: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+        <h1 className={typography.h1} {...props}>
+          {children}
+        </h1>
+      )),
+      h2: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+        <h2 className={typography.h2} {...props}>
+          {children}
+        </h2>
+      )),
+      h3: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+        <h3 className={typography.h3} {...props}>
+          {children}
+        </h3>
+      )),
+      h4: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+        <h4 className={typography.h4} {...props}>
+          {children}
+        </h4>
+      )),
+      h5: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+        <h5 className={typography.h5} {...props}>
+          {children}
+        </h5>
+      )),
+      h6: memo(({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+        <h6 className={typography.h6} {...props}>
+          {children}
+        </h6>
+      )),
       p: memo(({ children }: { children: React.ReactNode }) => (
         <p className={typography.p}>{children}</p>
       )),
@@ -137,23 +215,20 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       ol: memo(({ children }: { children: React.ReactNode }) => (
         <ol className={typography.ol}>{children}</ol>
       )),
-      li: memo(({ children }: { children: React.ReactNode }) => (
-        <li className={typography.li}>{children}</li>
-      )),
+      li: memo(({ children, className }: { children: React.ReactNode; className?: string }) => {
+        const isTaskItem = className?.includes("task-list-item");
+        return <li className={cn(typography.li, isTaskItem && "list-none")}>{children}</li>;
+      }),
       strong: memo(({ children }: { children: React.ReactNode }) => (
         <strong className={typography.strong}>{children}</strong>
       )),
       em: memo(({ children }: { children: React.ReactNode }) => (
         <em className={typography.em}>{children}</em>
       )),
-      pre: memo(({ children }: { children: React.ReactNode }) => (
-        <>{children}</>
+      pre: memo(({ children }: { children: React.ReactNode }) => <>{children}</>),
+      blockquote: memo(({ children }: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
+        <blockquote className={typography.blockquote}>{children}</blockquote>
       )),
-      blockquote: memo(
-        ({ children }: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
-          <blockquote className={typography.blockquote}>{children}</blockquote>
-        )
-      ),
       table: memo(({ children }: { children: React.ReactNode }) => (
         <table className={typography.table}>{children}</table>
       )),
@@ -175,27 +250,29 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           const src = props.src;
 
           // Early validation: if src is missing or invalid, don't render anything
-          if (!src || typeof src !== 'string') {
+          if (!src || typeof src !== "string") {
             return null;
           }
 
-          // Validate and sanitize image URL to prevent open redirect vulnerabilities
-          const validatedSrc = validateImageUrl(src);
+          // Validate and sanitize image URL with optional local file support
+          const validatedSrc = validateMediaUrl(src, {
+            mediaType: "image",
+            dangerouslyAllowLocalFiles,
+          });
           if (!validatedSrc) {
-            // Invalid URL, don't render image (return null to prevent any rendering)
+            // Invalid URL, don't render image
             return null;
           }
 
           // Construct the final image source URL
-          const imageSrc = validatedSrc.match(
-            /^(https?:\/\/|data:|blob:|app:)/i
-          )
+          // For file:// URLs, use them directly (no Ivy host prefix)
+          const imageSrc = validatedSrc.match(/^(https?:\/\/|data:|blob:|app:)/i)
             ? validatedSrc
             : (() => {
-                const normalizedSrc = validatedSrc.startsWith('/')
+                const normalizedSrc = validatedSrc.startsWith("/")
                   ? validatedSrc
                   : `/${validatedSrc}`;
-                const prefixedSrc = normalizedSrc.startsWith('/ivy/')
+                const prefixedSrc = normalizedSrc.startsWith("/ivy/")
                   ? normalizedSrc
                   : `/ivy${normalizedSrc}`;
                 return `${getIvyHost()}${prefixedSrc}`;
@@ -206,11 +283,11 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               <img
                 {...props}
                 src={imageSrc}
-                alt={props.alt || ''}
-                className={cn(typography.img, 'cursor-zoom-in')}
+                alt={props.alt || ""}
+                className={cn(typography.img, "cursor-zoom-in")}
                 loading="lazy"
                 onClick={() => setShowOverlay(true)}
-                onKeyDown={e => e.key === 'Enter' && setShowOverlay(true)}
+                onKeyDown={(e) => e.key === "Enter" && setShowOverlay(true)}
                 role="button"
                 tabIndex={0}
               />
@@ -225,10 +302,30 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           );
         },
         (prevProps, nextProps) =>
-          prevProps.src === nextProps.src && prevProps.alt === nextProps.alt
+          prevProps.src === nextProps.src && prevProps.alt === nextProps.alt,
       ),
       hr: memo((props: React.HTMLAttributes<HTMLHRElement>) => (
         <hr className={typography.hr} {...props} />
+      )),
+      details: memo(({ children, ...props }: React.DetailsHTMLAttributes<HTMLDetailsElement>) => (
+        <details className={cn(typography.details, "group")} {...props}>
+          {children}
+        </details>
+      )),
+      summary: memo(({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
+        <summary className={typography.summary} {...props}>
+          <div className="flex items-center gap-2">
+            <svg
+              className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            {children}
+          </div>
+        </summary>
       )),
     }),
     [
@@ -250,44 +347,63 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       typography.th,
       typography.img,
       typography.hr,
-    ]
+      typography.details,
+      typography.summary,
+      dangerouslyAllowLocalFiles,
+    ],
   );
 
   // Memoize code component separately (depends on contentFeatures.hasCodeBlocks and hasMermaid)
   const codeComponent = useMemo(
     () => ({
-      code: memo(
-        (props: React.ComponentProps<'code'> & { inline?: boolean }) => {
-          const { children, className, inline } = props;
-          return (
-            <CodeBlock
-              className={className}
-              inline={inline}
-              hasCodeBlocks={contentFeatures.hasCodeBlocks}
-              hasMermaid={contentFeatures.hasMermaid}
-            >
-              {children}
-            </CodeBlock>
-          );
+      code: memo((props: React.ComponentProps<"code">) => {
+        const { children, className } = props;
+        const inline = !className;
+
+        // Detect Icons.X pattern in inline code
+        if (inline) {
+          const text = String(children);
+          const iconMatch = text.match(/^Icons\.([A-Z][a-zA-Z0-9]*)$/);
+          if (iconMatch) {
+            return (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25em" }}>
+                <code className={typography.code}>{children}</code>
+                <Icon name={iconMatch[1]} size="1em" />
+              </span>
+            );
+          }
         }
-      ),
+
+        return (
+          <CodeBlock
+            className={className}
+            inline={inline}
+            hasCodeBlocks={contentFeatures.hasCodeBlocks}
+            hasMermaid={contentFeatures.hasMermaid}
+          >
+            {children}
+          </CodeBlock>
+        );
+      }),
     }),
-    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid]
+    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid, typography.code],
   );
 
   // Memoize link component separately (depends on handleLinkClick)
   const linkComponent = useMemo(
     () => ({
       a: memo(
-        ({
-          children,
-          href,
-          ...props
-        }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-          // Validate URL to prevent open redirect vulnerabilities
-          // validateLinkUrl always returns a string ('#' for invalid URLs)
-          const safeHref = validateLinkUrl(href);
-          if (safeHref === '#') {
+        ({ children, href, title, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+          // Popover links: [text](## "popover content")
+          if (href === "##" && title) {
+            return <PopoverLink content={title}>{children}</PopoverLink>;
+          }
+
+          // When local files are enabled, allow file:// URLs to render as clickable links
+          const isLocalFileUrl = dangerouslyAllowLocalFiles && href?.startsWith("file:///");
+
+          const safeHref = isLocalFileUrl ? href! : validateLinkUrl(href);
+          if (safeHref === "#") {
             return <span {...props}>{children}</span>;
           }
 
@@ -295,12 +411,11 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           const isExternalLink = isExternalUrl(safeHref);
           const isAnchor = isAnchorLink(safeHref);
           const isApp = isAppProtocol(safeHref);
-          const isRelative = isRelativePath(safeHref);
 
           // Convert app:// URLs to regular paths for href attribute
           let hrefForNavigation = safeHref;
           if (isApp) {
-            // Use the utility function to convert app:// URLs, preserving chrome=false
+            // Use the utility function to convert app:// URLs, preserving shell=false
             hrefForNavigation = convertAppUrlToPath(safeHref);
           }
 
@@ -309,46 +424,41 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               {...props}
               className="text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100"
               href={hrefForNavigation}
-              target={isExternalLink ? '_blank' : undefined}
-              rel={isExternalLink ? 'noopener noreferrer' : undefined}
+              target={isExternalLink && !onLinkClick ? "_blank" : undefined}
+              rel={isExternalLink && !onLinkClick ? "noopener noreferrer" : undefined}
               onClick={
                 isAnchor
-                  ? e => {
+                  ? (e) => {
                       e.preventDefault();
                       // Extract anchor ID by removing the '#' prefix
                       const targetId = extractAnchorId(safeHref);
                       if (targetId) {
                         // Small delay to ensure content is rendered
                         requestAnimationFrame(() => {
-                          const targetElement =
-                            document.getElementById(targetId);
+                          const targetElement = document.getElementById(targetId);
                           if (targetElement) {
                             targetElement.scrollIntoView({
-                              behavior: 'smooth',
-                              block: 'start',
+                              behavior: "smooth",
+                              block: "start",
                             });
                             // Update URL hash
-                            window.history.replaceState(
-                              null,
-                              '',
-                              `#${targetId}`
-                            );
+                            window.history.replaceState(null, "", `#${targetId}`);
                           }
                         });
                       }
                     }
-                  : isApp || isRelative
-                    ? undefined // Let browser handle navigation naturally
-                    : e => handleLinkClick(safeHref, e)
+                  : onLinkClick
+                    ? (e) => handleLinkClick(safeHref, e)
+                    : undefined
               }
             >
               {children}
             </a>
           );
-        }
+        },
       ),
     }),
-    [handleLinkClick]
+    [handleLinkClick, dangerouslyAllowLocalFiles],
   );
 
   const components = useMemo(
@@ -357,7 +467,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       ...codeComponent,
       ...linkComponent,
     }),
-    [staticComponents, codeComponent, linkComponent]
+    [staticComponents, codeComponent, linkComponent],
   );
   // This is useful to declare emoji as a new type of valid markdown component
   type MarkdownComponents = Components & {
@@ -366,22 +476,64 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
   // add the components that use memo and the ones that don't in a single variable of the extended type we just created
   const componentsParams: MarkdownComponents = {
-    ...(components as React.ComponentProps<typeof ReactMarkdown>['components']),
+    ...(components as React.ComponentProps<typeof ReactMarkdown>["components"]),
 
     // ReactMarkdown will execute this when he finds an image node with hName emoji
     emoji: ({ name }: { name: string }) => <CustomEmoji name={name} />,
   };
 
-  const urlTransform = useCallback((url: string) => {
-    if (url.startsWith('app://')) {
-      return url;
-    }
-    // Validate URL before transforming to prevent open redirect vulnerabilities
-    // validateLinkUrl always returns a string ('#' for invalid URLs)
-    const validatedUrl = validateLinkUrl(url);
-    // defaultUrlTransform handles all valid URLs, and '#' for invalid URLs
-    return defaultUrlTransform(validatedUrl);
-  }, []);
+  const normalizedContent = useMemo(() => normalizeNestedFences(content), [content]);
+
+  const urlTransform = useCallback(
+    (url: string, key: string) => {
+      // Preserve popover link marker
+      if (url === "##") {
+        return url;
+      }
+      if (url.startsWith("app://")) {
+        return url;
+      }
+      // Allow file:// URLs and Windows paths when local files are enabled
+      if (
+        dangerouslyAllowLocalFiles &&
+        (url.startsWith("file://") || /^[a-zA-Z]:[\\/]/.test(url))
+      ) {
+        // For links (href), preserve file:// URL for onLinkClick to handle
+        if (key === "href") {
+          if (/^[a-zA-Z]:[\\/]/.test(url)) {
+            const normalized = url.replace(/\\/g, "/");
+            return `file:///${normalized}`;
+          }
+          return url;
+        }
+        // For images (src), use local-file proxy
+        if (isLocalFilesEnabled()) {
+          // Server supports local file proxy - use /ivy/local-file endpoint
+          let filePath: string;
+          if (url.startsWith("file:///")) {
+            filePath = decodeURIComponent(url.slice(8));
+          } else if (url.startsWith("file://")) {
+            filePath = decodeURIComponent(url.slice(7));
+          } else {
+            filePath = url.replace(/\\/g, "/");
+          }
+          return `/ivy/local-file?path=${encodeURIComponent(filePath)}`;
+        }
+        // Fallback: pass file:// URL through (browser will likely block it)
+        if (/^[a-zA-Z]:[\\/]/.test(url)) {
+          const normalized = url.replace(/\\/g, "/");
+          return `file:///${normalized}`;
+        }
+        return url;
+      }
+      // Validate URL before transforming to prevent open redirect vulnerabilities
+      // validateLinkUrl always returns a string ('#' for invalid URLs)
+      const validatedUrl = validateLinkUrl(url);
+      // defaultUrlTransform handles all valid URLs, and '#' for invalid URLs
+      return defaultUrlTransform(validatedUrl);
+    },
+    [dangerouslyAllowLocalFiles],
+  );
 
   return (
     <>
@@ -393,7 +545,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         rehypePlugins={plugins.rehypePlugins}
         urlTransform={urlTransform}
       >
-        {content}
+        {normalizedContent}
       </ReactMarkdown>
     </>
   );

@@ -55,6 +55,8 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public bool Searchable { get; set; }
 
+    [Prop] public bool ShowActions { get; set; }
+
     [Prop] public SearchMode SearchMode { get; set; } = SearchMode.CaseInsensitive;
 
     [Prop] public string? EmptyMessage { get; set; }
@@ -64,6 +66,7 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
     [Prop] public bool Ghost { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
@@ -110,7 +113,7 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>
 
     [Prop(AlwaysSerialize = true)] public TValue Value { get; init; } = default!;
 
-    [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
+    [Prop(AlwaysSerialize = true)] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
     [Prop] public IAnyOption[] Options { get; set; } = [];
 
@@ -182,6 +185,8 @@ public static class SelectInputExtensions
 
     public static SelectInputBase Searchable(this SelectInputBase widget, bool searchable = true) => widget with { Searchable = searchable };
 
+    public static SelectInputBase ShowActions(this SelectInputBase widget, bool showActions = true) => widget with { ShowActions = showActions };
+
     public static SelectInputBase SearchMode(this SelectInputBase widget, SearchMode mode) => widget with { SearchMode = mode };
 
     public static SelectInputBase EmptyMessage(this SelectInputBase widget, string message) => widget with { EmptyMessage = message };
@@ -210,6 +215,22 @@ public static class SelectInputExtensions
     public static SelectInputBase OnBlur(this SelectInputBase widget, Action onBlur)
     {
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
+    }
+
+    [OverloadResolutionPriority(1)]
+    public static SelectInputBase OnFocus(this SelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static SelectInputBase OnFocus(this SelectInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus.ToValueTask()) };
+    }
+
+    public static SelectInputBase OnFocus(this SelectInputBase widget, Action onFocus)
+    {
+        return widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
     }
 
     public static SelectInput<string> Options(this SelectInput<string> widget, IEnumerable<string> options)

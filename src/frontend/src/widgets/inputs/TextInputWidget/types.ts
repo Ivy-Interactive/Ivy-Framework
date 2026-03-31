@@ -1,13 +1,13 @@
-import { Densities } from '@/types/density';
+import { Densities } from "@/types/density";
 
 export enum TextInputVariant {
-  Text = 'Text',
-  Textarea = 'Textarea',
-  Email = 'Email',
-  Tel = 'Tel',
-  Url = 'Url',
-  Password = 'Password',
-  Search = 'Search',
+  Text = "Text",
+  Textarea = "Textarea",
+  Email = "Email",
+  Tel = "Tel",
+  Url = "Url",
+  Password = "Password",
+  Search = "Search",
 }
 
 export interface Affix {
@@ -35,5 +35,10 @@ export interface TextInputWidgetProps {
   pattern?: string;
   rows?: number;
   autoFocus?: boolean;
-  'data-testid'?: string;
+  dictation?: boolean;
+  dictationUploadUrl?: string;
+  dictationLanguage?: string;
+  dictationTranscription?: string;
+  dictationTranscriptionVersion?: number;
+  "data-testid"?: string;
 }

@@ -1,11 +1,7 @@
-import React from 'react';
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from '@/components/ui/resizable';
-import { camelCase, cn } from '@/lib/utils';
-import { getHeight, getWidth } from '@/lib/styles';
+import React from "react";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { camelCase, cn } from "@/lib/utils";
+import { getHeight, getWidth } from "@/lib/styles";
 
 interface ResizablePanelWidgetProps {
   children: React.ReactNode[];
@@ -13,56 +9,50 @@ interface ResizablePanelWidgetProps {
   id?: string;
 }
 
-export const ResizablePanelWidget: React.FC<ResizablePanelWidgetProps> = ({
-  children,
-}) => {
+export const ResizablePanelWidget: React.FC<ResizablePanelWidgetProps> = ({ children }) => {
   return <div className="h-full w-full p-4">{children}</div>;
 };
 
-ResizablePanelWidget.displayName = 'ResizablePanelWidget';
+ResizablePanelWidget.displayName = "ResizablePanelWidget";
 
 interface ResizablePanelGroupWidgetProps {
   id: string;
   children: React.ReactElement<ResizablePanelWidgetProps>[];
   showHandle?: boolean;
-  direction?: 'Horizontal' | 'Vertical';
+  direction?: "Horizontal" | "Vertical";
   width?: string;
   height?: string;
 }
 
-export const ResizablePanelGroupWidget: React.FC<
-  ResizablePanelGroupWidgetProps
-> = ({
+export const ResizablePanelGroupWidget: React.FC<ResizablePanelGroupWidgetProps> = ({
   id,
   children,
   showHandle = true,
-  direction = 'Horizontal',
-  width = 'Full',
-  height = 'Full',
+  direction = "Horizontal",
+  width = "Full",
+  height = "Full",
 }) => {
-  const panelWidgets = React.Children.toArray(children).filter(child => {
+  const panelWidgets = React.Children.toArray(children).filter((child) => {
     if (!React.isValidElement(child)) return false;
 
     // Direct component check
     if (
-      typeof child.type === 'function' &&
-      (child.type as { displayName?: string })?.displayName ===
-        'ResizablePanelWidget'
+      typeof child.type === "function" &&
+      (child.type as { displayName?: string })?.displayName === "ResizablePanelWidget"
     ) {
       return true;
     }
 
     // MemoizedWidget check - look at node.type prop
     const props = child.props as { node?: { type?: string } };
-    if (props.node?.type === 'Ivy.ResizablePanel') {
+    if (props.node?.type === "Ivy.ResizablePanel") {
       return true;
     }
 
     return false;
   });
 
-  if (panelWidgets.length === 0)
-    return <div className="remove-parent-padding"></div>;
+  if (panelWidgets.length === 0) return <div className="remove-parent-padding"></div>;
 
   const style = {
     ...getWidth(width),
@@ -72,7 +62,7 @@ export const ResizablePanelGroupWidget: React.FC<
   return (
     <ResizablePanelGroup
       style={style}
-      direction={camelCase(direction) as 'horizontal' | 'vertical'}
+      direction={camelCase(direction) as "horizontal" | "vertical"}
       className="remove-parent-padding"
       id={id}
     >
@@ -85,32 +75,22 @@ export const ResizablePanelGroupWidget: React.FC<
           const directProps = panelWidget.props as ResizablePanelWidgetProps;
 
           // Get defaultSize from either MemoizedWidget's node.props or direct props
-          const defaultSizeProp =
-            memoizedProps.node?.props?.defaultSize ?? directProps.defaultSize;
+          const defaultSizeProp = memoizedProps.node?.props?.defaultSize ?? directProps.defaultSize;
 
-          const { defaultSize, minSize, maxSize } =
-            parseSizeString(defaultSizeProp);
+          const { defaultSize, minSize, maxSize } = parseSizeString(defaultSizeProp);
 
           return (
             <React.Fragment
-              key={
-                (panelWidget as React.ReactElement<{ id?: string }>).props.id ||
-                index
-              }
+              key={(panelWidget as React.ReactElement<{ id?: string }>).props.id || index}
             >
               {index > 0 && showHandle && (
                 <ResizableHandle
                   withHandle={showHandle}
-                  className={cn(
-                    'border',
-                    direction === 'Horizontal' ? 'border-r' : 'border-t'
-                  )}
+                  className={cn("border", direction === "Horizontal" ? "border-r" : "border-t")}
                 />
               )}
               <ResizablePanel
-                defaultSize={
-                  defaultSize ?? Math.floor(100 / panelWidgets.length)
-                }
+                defaultSize={defaultSize ?? Math.floor(100 / panelWidgets.length)}
                 {...(minSize !== undefined && { minSize })}
                 {...(maxSize !== undefined && { maxSize })}
                 className="h-full"
@@ -131,14 +111,14 @@ function parseSizeString(size?: string | number): {
   minSize?: number;
   maxSize?: number;
 } {
-  if (typeof size === 'number') return { defaultSize: size };
+  if (typeof size === "number") return { defaultSize: size };
   if (!size) return {};
 
   // Size.ToString() format: Type:Value,MinType:MinValue,MaxType:MaxValue
   // Example: Fraction:0.5,Fraction:0.2,Fraction:0.8 (Value, Min, Max)
   // Or just: Fraction:0.5
 
-  const parts = size.split(',');
+  const parts = size.split(",");
   const result: {
     defaultSize?: number;
     minSize?: number;
@@ -194,15 +174,15 @@ function parseSizeString(size?: string | number): {
 
 function parseSingleSize(sizeStr: string): number | undefined {
   if (!sizeStr) return undefined;
-  const [type, val] = sizeStr.split(':');
+  const [type, val] = sizeStr.split(":");
   const value = parseFloat(val);
 
   if (isNaN(value)) return undefined;
 
   switch (type.toLowerCase()) {
-    case 'fraction':
+    case "fraction":
       return value * 100;
-    case 'px':
+    case "px":
       // ResizablePanel usually expects percentages (0-100) or pixels?
       // react-resizable-panels uses percentages by default for defaultSize?
       // Checked docs/usage: defaultSize is often percentage.

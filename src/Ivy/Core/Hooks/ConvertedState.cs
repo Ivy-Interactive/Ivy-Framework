@@ -26,6 +26,8 @@ public class ConvertedState<TFrom, TTo>(IState<TFrom> originalState, Func<TFrom,
 
     public Type GetStateType() => typeof(TTo);
 
+    public object? GetValueAsObject() => forward(originalState.Value);
+
     public TTo Value
     {
         get => forward(originalState.Value);

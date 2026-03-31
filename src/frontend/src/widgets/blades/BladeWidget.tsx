@@ -1,9 +1,9 @@
-import { ReactNode } from 'react';
-import { X, RotateCw } from 'lucide-react';
-import { useEventHandler } from '@/components/event-handler';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { getWidth } from '@/lib/styles';
-import { buttonVariant } from '@/components/ui/button/variant';
+import { ReactNode } from "react";
+import { X, RotateCw } from "lucide-react";
+import { useEventHandler } from "@/components/event-handler";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { getWidth } from "@/lib/styles";
+import { buttonVariant } from "@/components/ui/button/variant";
 
 interface BladeWidgetProps {
   id: string;
@@ -16,18 +16,11 @@ interface BladeWidgetProps {
   };
 }
 
-export function BladeWidget({
-  index,
-  title,
-  children,
-  id,
-  width,
-  slots,
-}: BladeWidgetProps) {
+export function BladeWidget({ index, title, children, id, width, slots }: BladeWidgetProps) {
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (e.button === 1) {
       e.preventDefault();
-      eventHandler('OnClose', id, []);
+      eventHandler("OnClose", id, []);
     }
   };
 
@@ -38,7 +31,7 @@ export function BladeWidget({
   };
 
   // Only apply flex-1 when no explicit width is provided
-  const flexClass = width ? '' : 'flex-1';
+  const flexClass = width ? "" : "flex-1";
 
   return (
     <div
@@ -47,26 +40,24 @@ export function BladeWidget({
     >
       <div
         className="flex items-center justify-between px-4 bg-background text-foreground h-[70px] border-b border-border"
-        onMouseDown={e => handleMouseDown(e)}
+        onMouseDown={(e) => handleMouseDown(e)}
         role="presentation"
       >
         <div className="flex items-center h-[70px]">
-          {!slots?.BladeHeader && title && (
-            <h2 className="text-body">{title}</h2>
-          )}
+          {!slots?.BladeHeader && title && <h2 className="text-body">{title}</h2>}
           <div className="flex-1 min-w-0">{slots?.BladeHeader}</div>
         </div>
         <div className="flex items-center h-[70px]">
           <button
-            onClick={() => eventHandler('OnRefresh', id, [])}
-            className={buttonVariant({ variant: 'ghost', size: 'icon' })}
+            onClick={() => eventHandler("OnRefresh", id, [])}
+            className={buttonVariant({ variant: "ghost", size: "icon" })}
           >
             <RotateCw className="h-4 w-4" />
           </button>
           {index > 0 && (
             <button
-              onClick={() => eventHandler('OnClose', id, [])}
-              className={buttonVariant({ variant: 'ghost', size: 'icon' })}
+              onClick={() => eventHandler("OnClose", id, [])}
+              className={buttonVariant({ variant: "ghost", size: "icon" })}
             >
               <X className="h-4 w-4" />
             </button>

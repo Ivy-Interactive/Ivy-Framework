@@ -13,6 +13,17 @@ public enum MenuItemVariant
     Group
 }
 
+public enum MenuItemColor
+{
+    Default,
+    Destructive,
+    Primary,
+    Secondary,
+    Success,
+    Warning,
+    Info
+}
+
 public record MenuItem(
     string? Label = null,
     MenuItem[]? Children = null,
@@ -22,11 +33,13 @@ public record MenuItem(
     bool Checked = false,
     bool Disabled = false,
     string? Shortcut = null,
+    string? Badge = null,
     bool Expanded = false,
     string? Tooltip = null,
     EventHandler<MenuItem>? OnSelect = null,
     string[]? SearchHints = null,
-    string? Path = null)
+    string? Path = null,
+    MenuItemColor Color = MenuItemColor.Default)
 {
 
     public static MenuItem Separator() => new(Variant: MenuItemVariant.Separator);
@@ -162,6 +175,11 @@ public static class MenuItemExtensions
         return menuItem with { Tooltip = tooltip };
     }
 
+    public static MenuItem Badge(this MenuItem menuItem, string? badge)
+    {
+        return menuItem with { Badge = badge };
+    }
+
     public static MenuItem Expanded(this MenuItem menuItem, bool expanded = true)
     {
         return menuItem with { Expanded = expanded };
@@ -190,5 +208,40 @@ public static class MenuItemExtensions
     public static MenuItem Path(this MenuItem menuItem, string? path)
     {
         return menuItem with { Path = path };
+    }
+
+    public static MenuItem Destructive(this MenuItem menuItem)
+    {
+        return menuItem with { Color = MenuItemColor.Destructive };
+    }
+
+    public static MenuItem Primary(this MenuItem menuItem)
+    {
+        return menuItem with { Color = MenuItemColor.Primary };
+    }
+
+    public static MenuItem Secondary(this MenuItem menuItem)
+    {
+        return menuItem with { Color = MenuItemColor.Secondary };
+    }
+
+    public static MenuItem Success(this MenuItem menuItem)
+    {
+        return menuItem with { Color = MenuItemColor.Success };
+    }
+
+    public static MenuItem Warning(this MenuItem menuItem)
+    {
+        return menuItem with { Color = MenuItemColor.Warning };
+    }
+
+    public static MenuItem Info(this MenuItem menuItem)
+    {
+        return menuItem with { Color = MenuItemColor.Info };
+    }
+
+    public static MenuItem Color(this MenuItem menuItem, MenuItemColor color)
+    {
+        return menuItem with { Color = color };
     }
 }

@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { GROUP_HEADER_HEIGHT } from '../dataTableEditor/constants';
+import { useMemo } from "react";
+import { GROUP_HEADER_HEIGHT } from "../dataTableEditor/constants";
 
 interface UseEmptyRowsProps {
   scrollContainerHeight: number;
@@ -11,7 +11,7 @@ interface UseEmptyRowsProps {
 
 /**
  * Calculates empty filler rows to fill the container when data is sparse.
- * Uses floor to avoid overflow (extra row would trigger unwanted scrollbar).
+ * Uses ceil so filler rows fully cover remaining whitespace (no visible lip).
  */
 export const useEmptyRows = ({
   scrollContainerHeight,
@@ -23,8 +23,7 @@ export const useEmptyRows = ({
   const whitespaceHeight = useMemo(() => {
     if (hasMore || scrollContainerHeight === 0 || visibleRows === 0) return 0;
 
-    const totalHeaderHeight =
-      rowHeight + (showGroups ? GROUP_HEADER_HEIGHT : 0);
+    const totalHeaderHeight = rowHeight + (showGroups ? GROUP_HEADER_HEIGHT : 0);
     const rowsHeight = visibleRows * rowHeight;
     const safeHeight = Math.floor(scrollContainerHeight);
 
@@ -33,7 +32,7 @@ export const useEmptyRows = ({
 
   const emptyRowsCount = useMemo(() => {
     if (whitespaceHeight <= 0) return 0;
-    return Math.floor(whitespaceHeight / rowHeight);
+    return Math.ceil(whitespaceHeight / rowHeight);
   }, [whitespaceHeight, rowHeight]);
 
   return {

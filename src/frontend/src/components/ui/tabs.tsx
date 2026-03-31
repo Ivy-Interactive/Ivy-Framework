@@ -1,7 +1,7 @@
-import * as React from 'react';
-import * as TabsPrimitive from '@radix-ui/react-tabs';
+import * as React from "react";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 // Custom Tabs context for non-Radix implementation
 interface TabsContextType {
@@ -21,10 +21,7 @@ interface TabsProps {
 }
 
 const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
-  (
-    { value, onValueChange, className, children, useRadix = false, ...props },
-    ref
-  ) => {
+  ({ value, onValueChange, className, children, useRadix = false, ...props }, ref) => {
     if (useRadix) {
       return (
         <TabsPrimitive.Root
@@ -45,9 +42,9 @@ const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
         </div>
       </TabsContext.Provider>
     );
-  }
+  },
 );
-Tabs.displayName = 'Tabs';
+Tabs.displayName = "Tabs";
 
 // Custom TabsList that works independently
 const TabsList = React.forwardRef<
@@ -59,8 +56,8 @@ const TabsList = React.forwardRef<
       <TabsPrimitive.List
         ref={ref as React.Ref<React.ElementRef<typeof TabsPrimitive.List>>}
         className={cn(
-          'inline-flex h-9 items-center justify-center rounded-box bg-muted dark:bg-background p-1 text-muted-foreground',
-          className
+          "inline-flex h-9 items-center justify-center rounded-box bg-muted dark:bg-background p-1 text-muted-foreground",
+          className,
         )}
         role="tablist"
         {...props}
@@ -72,19 +69,18 @@ const TabsList = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        'inline-flex h-9 items-center justify-center rounded-box bg-muted p-1 text-muted-foreground',
-        className
+        "inline-flex h-9 items-center justify-center rounded-box bg-muted p-1 text-muted-foreground",
+        className,
       )}
       role="tablist"
       {...props}
     />
   );
 });
-TabsList.displayName = 'TabsList';
+TabsList.displayName = "TabsList";
 
 // Custom TabsTrigger that works independently
-interface TabsTriggerProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   value: string;
   useRadix?: boolean;
 }
@@ -100,11 +96,11 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
           ref={ref as React.Ref<React.ElementRef<typeof TabsPrimitive.Trigger>>}
           value={value}
           className={cn(
-            'inline-flex items-center justify-center whitespace-nowrap -ml-px -mt-px px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow',
-            className
+            "inline-flex items-center justify-center whitespace-nowrap -ml-px -mt-px px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow",
+            className,
           )}
           role="tab"
-          aria-selected={props['aria-selected'] ?? false}
+          aria-selected={props["aria-selected"] ?? false}
           {...props}
         />
       );
@@ -121,19 +117,19 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
         type="button"
         role="tab"
         aria-selected={isActive}
-        data-state={isActive ? 'active' : 'inactive'}
+        data-state={isActive ? "active" : "inactive"}
         className={cn(
-          'inline-flex items-center justify-center whitespace-nowrap -ml-px -mt-px px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-          isActive && 'bg-card text-foreground shadow',
-          className
+          "inline-flex items-center justify-center whitespace-nowrap -ml-px -mt-px px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          isActive && "bg-card text-foreground shadow",
+          className,
         )}
         onClick={handleClick}
         {...props}
       />
     );
-  }
+  },
 );
-TabsTrigger.displayName = 'TabsTrigger';
+TabsTrigger.displayName = "TabsTrigger";
 
 // Custom TabsContent that works independently
 interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -152,8 +148,8 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
           ref={ref as React.Ref<React.ElementRef<typeof TabsPrimitive.Content>>}
           value={value}
           className={cn(
-            'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-            className
+            "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            className,
           )}
           {...props}
         >
@@ -172,16 +168,16 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
         role="tabpanel"
         aria-labelledby={`tab-${value}`}
         className={cn(
-          'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-          className
+          "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          className,
         )}
         {...props}
       >
         {children}
       </div>
     );
-  }
+  },
 );
-TabsContent.displayName = 'TabsContent';
+TabsContent.displayName = "TabsContent";
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };

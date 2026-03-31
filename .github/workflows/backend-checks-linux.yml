@@ -8,7 +8,10 @@ on:
     branches: [main, master]
 jobs:
   backend-checks:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm64]
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: src
@@ -18,6 +21,9 @@ jobs:
       # Install required packages
       - name: Install required packages
         run: sudo apt-get update && sudo apt-get install -y attr
+
+      # Setup Node.js (needed for integrated frontend build in dotnet build)
+      - uses: voidzero-dev/setup-vp@v1
 
       # Setup .NET
       - name: Setup .NET

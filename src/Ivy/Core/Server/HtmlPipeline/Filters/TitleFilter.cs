@@ -6,13 +6,13 @@ public class TitleFilter : IHtmlFilter
 {
     public void Process(HtmlPipelineContext context, XDocument document)
     {
-        if (!string.IsNullOrEmpty(context.ServerArgs.MetaTitle))
+        if (!string.IsNullOrEmpty(context.ServerArgs.Metadata.Title))
         {
             var head = document.Root?.Element("head");
             var titleElement = head?.Element("title");
             if (titleElement != null)
             {
-                titleElement.Value = context.ServerArgs.MetaTitle;
+                titleElement.Value = context.ServerArgs.Metadata.Title;
             }
         }
     }

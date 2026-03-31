@@ -70,6 +70,11 @@ public class CodeInputApp : SampleBase
         var emptyHtmlState = UseState("");
         var emptyYamlState = UseState("");
 
+        var onBlurState = UseState("");
+        var onBlurLabel = UseState("");
+        var onFocusState = UseState("");
+        var onFocusLabel = UseState("");
+
         var cardCode = UseState(
             """
             public class Example
@@ -229,9 +234,9 @@ public class CodeInputApp : SampleBase
         );
 
         return Layout.Vertical()
+               | Text.H1("Code Input")
                | Text.H2("Sizes")
                | sizeGrid
-               | Text.H1("CodeInput")
                | Text.H2("Variants")
                | firstGrid
                | secondGrid
@@ -243,6 +248,25 @@ public class CodeInputApp : SampleBase
                    cardCode.ToCodeInput().Language(Languages.Csharp).ShowCopyButton().Height(Size.Auto())
                ).Title("Code Example").Description("Testing copy button visibility with card background")
                | socialMediaLinks
+               | Text.H2("Events")
+               | (Layout.Vertical()
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The blur event fires when the code input loses focus.").Small()
+                           | onBlurState.ToCodeInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                           | (onBlurLabel.Value != ""
+                               ? Callout.Success(onBlurLabel.Value)
+                               : Callout.Info("Interact then click away to see blur events"))
+                   ).Title("OnBlur Handler")
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The focus event fires when you click on or tab into the code input.").Small()
+                           | onFocusState.ToCodeInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                           | (onFocusLabel.Value != ""
+                               ? Callout.Success(onFocusLabel.Value)
+                               : Callout.Info("Click or tab into the input to see focus events"))
+                   ).Title("OnFocus Handler")
+               )
                ;
     }
 

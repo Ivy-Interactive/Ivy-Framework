@@ -25,7 +25,6 @@ public class WidgetTreeChanged(string viewId, int[] indices, JsonNode patch, int
 public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 {
     private readonly Dictionary<string, WidgetTreeNode> _nodes = new();
-    private readonly Dictionary<string, string> _parents = new();
     private int _iteration;
 
     public IView RootView { get; }
@@ -60,7 +59,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             await RefreshRequested(requestedViewIds);
 
         var subscription = _buildRequestedSubject
-            .Buffer(TimeSpan.FromMilliseconds(100)) //33 = 30fps
+            .Buffer(TimeSpan.FromMilliseconds(16))
             .Select(batch => batch.Distinct().ToArray())
             .Where(batch => batch.Length > 0)
             .Subscribe(OnNext);
@@ -105,13 +104,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
     public void RefreshView(string viewId)
     {
-        // if(!_nodes.TryGetValue(viewId, out var node))
-        //     throw new NotSupportedException($"Node '{viewId}' not found.");
-        //         
-        // if(!node.IsView)
-        //     throw new NotSupportedException($"Node '{viewId}' is not a view.");
-        //
-        // node.ShouldRebuild = true;
         _buildRequestedSubject.OnNext(viewId);
     }
 
@@ -120,35 +112,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         await _buildRequestedSemaphore.WaitAsync(); //ensure only one refresh operation at a time
         try
         {
-            //todo: if the node A is a child of node B, both are request but there's a memoized node 
-            //in between, we need to rebuild them both.
-
-            // List<string[]> paths = new();
-            // foreach (var viewId in requestedViewIds)
-            // {
-            //     if (!_nodes.TryGetValue(viewId, out var node))
-            //         throw new NotSupportedException($"Node '{viewId}' not found.");
-            //
-            //     if (!node.IsView)
-            //         throw new NotSupportedException($"Node '{viewId}' is not a view.");
-            //
-            //     //if (node.ShouldRebuild) //this might have changed since we requested the build
-            //     {
-            //         var path = new List<string>();
-            //         var current = node;
-            //         path.Add(node.Id);
-            //         while (_parents.TryGetValue(current.Id, out var parentId))
-            //         {
-            //             current = _nodes[parentId];
-            //             path.Add(current.Id);
-            //         }
-            //         path.Reverse();
-            //         paths.Add(path.ToArray());
-            //     }
-            // }
-
-            //var nodesToRebuild = TreeRebuildSolver.FindMinimalRebuildNodes(paths.ToArray());
-
             var nodesToRebuild = requestedViewIds;
 
             List<WidgetTreeChanged> changes = new();
@@ -163,7 +126,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             {
                 if (_nodes.TryGetValue(nodeId, out var node))
                 {
-                    //node.CancelRebuild();
                     var changed = _RefreshView(node.Id, false);
                     if (changed != null)
                     {
@@ -206,7 +168,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         if (!node.IsView)
             throw new NotSupportedException($"Node '{viewId}' is not a view.");
 
-        _parents.TryGetValue(viewId, out var parentId);
+        var parentId = node.ParentId;
 
         var indices = node.GetWidgetTreeIndices();
 
@@ -226,7 +188,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             {
                 if (parent.Children.Length <= node.Index)
                 {
-                    Console.WriteLine($"WARN:Parent children length {parent.Children.Length} of {parentId} is less than node index {node.Index} that we are trying to update.");
+                    // Silent bound guard check
                 }
                 else
                 {
@@ -238,7 +200,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             }
             else
             {
-                Console.WriteLine($"WARN:Parent {parentId} not found. Shoudn't happen.");
+                // Unresolved parent during active flush loop
             }
         }
 
@@ -260,12 +222,19 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                     ["value"] = update?.DeepClone()
                 });
             }
+            else if (update != null && previous != null)
+            {
+                // [Native Patch Integration] Execute mathematically independent zero-allocation diffing via C/Rust!
+                var oldBytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(previous);
+                var newBytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(update);
+                patch = NativeJsonDiff.ComputePatch(oldBytes, newBytes);
+            }
             else
             {
-                patch = previous.Diff(update, new JsonPatchDeltaFormatter(), JsonDiffOptions);
+                patch = null;
             }
 
-            if (patch == null || patch.IsEmptyArray())
+            if (patch == null || patch.AsArray().Count == 0)
             {
                 return null!;
             }
@@ -300,9 +269,9 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         bool isHotReload
     )
     {
-        treePath.Push(view, index);
+        var childTreePath = treePath.Push(view, index);
 
-        view.Id = treePath.GenerateId();
+        view.Id = childTreePath.GenerateId();
 
         int? memoizedHashCode = null;
         bool memoized = false;
@@ -319,14 +288,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         IViewContext? context = previousNode?.Context;
         if (!memoized || isHotReload || isRefreshingView || previousNode == null || previousNode.MemoizedHashCode != memoizedHashCode)
         {
-            // if (!isHotReload && !isRefreshingView && previousNode != null)
-            // {
-            //     previousNode.Dispose();
-            //     _nodes.Remove(previousNode.Id);
-            //     _parents.Remove(previousNode.Id);
-            //     previousNode = null;
-            // }
-
             if (view is IStateless)
             {
                 //Small optimization for stateless views to skip context creation - not sure this really matters
@@ -336,7 +297,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                 TextInputBuildContext.SetCurrent(ancestorContext);
                 try
                 {
-                    node = BuildObject(view.Build(), treePath.Clone(), 0, view.Id, ancestorContext, isHotReload);
+                    node = BuildObject(view.Build(), childTreePath, 0, view.Id, ancestorContext, isHotReload);
                 }
                 finally
                 {
@@ -392,7 +353,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                 }
 #endif
 
-                node = BuildObject(buildResult, treePath.Clone(), 0, view.Id, context, isHotReload);
+                node = BuildObject(buildResult, childTreePath, 0, view.Id, context, isHotReload);
                 view.AfterBuild();
                 context.Reset();
             }
@@ -403,12 +364,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             node = previousNode.Children.SingleOrDefault();
         }
 
-        treePath.Pop();
-
-        _nodes[view.Id] = WidgetTreeNode.FromView(view, index, treePath.Clone(), node, context, memoizedHashCode, ancestorContext);
-
-        if (parentId != null)
-            _parents[view.Id] = parentId;
+        _nodes[view.Id] = WidgetTreeNode.FromView(view, index, treePath, node, context, memoizedHashCode, ancestorContext, parentId);
 
         if (previousNode != null)
         {
@@ -454,11 +410,11 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
     private WidgetTreeNode BuildWidget(IWidget widget, TreePath treePath, int index, string parentId, IViewContext? ancestorContext, bool isHotReload)
     {
-        treePath.Push(widget, index);
+        var childTreePath = treePath.Push(widget, index);
 
-        widget.Id = treePath.GenerateId();
+        widget.Id = childTreePath.GenerateId();
 #if DEBUG
-        widget.Path = treePath.ToString();
+        widget.Path = childTreePath.ToString();
 #endif
 
         var children = new List<WidgetTreeNode>();
@@ -466,17 +422,14 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         for (var i = 0; i < widget.Children.Length; i++)
         {
             var child = widget.Children[i];
-            var newWidget = BuildObject(child, treePath.Clone(), i, widget.Id, ancestorContext, isHotReload);
+            var newWidget = BuildObject(child, childTreePath, i, widget.Id, ancestorContext, isHotReload);
             if (newWidget == null) continue;
             children.Add(newWidget);
         }
 
-        treePath.Pop();
-
-        var node = WidgetTreeNode.FromWidget(widget, index, treePath.Clone(), children.ToArray(), ancestorContext);
+        var node = WidgetTreeNode.FromWidget(widget, index, treePath, children.ToArray(), ancestorContext, parentId);
 
         _nodes[widget.Id] = node;
-        _parents[widget.Id] = parentId;
 
         return node;
     }
@@ -507,8 +460,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
     private void PrintDebug()
     {
-        //Console.WriteLine($"Nodes:{_nodes.Count}");
-        //PrintTree(NodeTree, 0);
     }
 
     private void PrintTree(WidgetTreeNode? node, int i)
@@ -517,7 +468,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         Console.Write(new string(' ', i));
         Console.Write($"{node.Id}:{(node.Widget == null ? "View" : "Widget")}:");
         Console.Write($"{(node.Widget?.GetType().Name ?? node.View?.GetType().Name)}");
-        //Console.Write($":{node.Path}");
         Console.WriteLine();
 
         foreach (var child in node.Children)
@@ -535,7 +485,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             {
                 _ = node.DisposeAsync(); // Fire and forget
                 _nodes.Remove(nodeId);
-                _parents.Remove(nodeId);
             }
             foreach (var child in node.Children)
             {
@@ -553,7 +502,6 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             {
                 await node.DisposeAsync();
                 _nodes.Remove(nodeId);
-                _parents.Remove(nodeId);
             }
             foreach (var child in node.Children)
             {
@@ -603,8 +551,12 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             if (_nodes.TryGetValue(currentId, out var node))
             {
                 node.InvalidateSerializationCache();
+                currentId = node.ParentId;
             }
-            _parents.TryGetValue(currentId, out currentId);
+            else
+            {
+                currentId = null;
+            }
         }
     }
 

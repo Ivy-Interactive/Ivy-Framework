@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>MicrosoftEntraExample</RootNamespace>
+    <UserSecretsId>ivy-auth-microsoft-entra-example</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,7 @@
       <OutputItemType>Analyzer</OutputItemType>
     </ProjectReference>
     <ProjectReference Include="..\..\Ivy.Auth.MicrosoftEntra\Ivy.Auth.MicrosoftEntra.csproj" />
+    <ProjectReference Include="..\Ivy.Auth.Examples.Shared\Ivy.Auth.Examples.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -28,6 +28,37 @@ public enum AxisTypes
     Number
 }
 
+public enum AxisDomain
+{
+    Auto,
+    DataMin,
+    DataMax
+}
+
+public record AxisDomainValue
+{
+    public AxisDomain? Symbol { get; init; }
+    public double? Number { get; init; }
+
+    public static AxisDomainValue Auto => AxisDomain.Auto;
+    public static AxisDomainValue DataMin => AxisDomain.DataMin;
+    public static AxisDomainValue DataMax => AxisDomain.DataMax;
+
+    public static AxisDomainValue Of(double value) => new() { Number = value };
+
+    public object Value => Symbol switch
+    {
+        AxisDomain.Auto => "auto",
+        AxisDomain.DataMin => "dataMin",
+        AxisDomain.DataMax => "dataMax",
+        _ => (object?)Number ?? "auto"
+    };
+
+    public static implicit operator AxisDomainValue(double value) => Of(value);
+    public static implicit operator AxisDomainValue(int value) => Of(value);
+    public static implicit operator AxisDomainValue(AxisDomain symbol) => new() { Symbol = symbol };
+}
+
 public abstract record AxisBase<T> where T : AxisBase<T>
 {
     public AxisBase(string? dataKey)
@@ -69,9 +100,9 @@ public abstract record AxisBase<T> where T : AxisBase<T>
 
     public bool Mirror { get; set; } = false;
 
-    public object DomainStart { get; set; } = "auto";
+    public AxisDomainValue? DomainMin { get; set; } = null;
 
-    public object DomainEnd { get; set; } = "auto";
+    public AxisDomainValue? DomainMax { get; set; } = null;
 
     public bool TickLine { get; set; } = false;
 
@@ -80,6 +111,10 @@ public abstract record AxisBase<T> where T : AxisBase<T>
     public int MinTickGap { get; set; } = 5;
 
     public bool Hide { get; init; } = false;
+
+    public bool HideTickLabels { get; set; } = false;
+
+    public string? TickFormatter { get; set; } = null;
 }
 
 public record XAxis : AxisBase<XAxis>
@@ -200,9 +235,14 @@ public static class AxisExtensions
         return axis with { TickSize = tickSize };
     }
 
-    public static T Domain<T>(this T axis, object start, object end) where T : AxisBase<T>
+    public static T Domain<T>(this T axis, AxisDomainValue min, AxisDomainValue max) where T : AxisBase<T>
     {
-        return axis with { DomainStart = start, DomainEnd = end };
+        return axis with { DomainMin = min, DomainMax = max };
+    }
+
+    public static T Domain<T>(this T axis, double min, double max) where T : AxisBase<T>
+    {
+        return axis with { DomainMin = AxisDomainValue.Of(min), DomainMax = AxisDomainValue.Of(max) };
     }
 
     public static T TickLine<T>(this T axis, bool tickLine = true) where T : AxisBase<T>
@@ -233,5 +273,15 @@ public static class AxisExtensions
     public static T Hide<T>(this T axis, bool hide = true) where T : AxisBase<T>
     {
         return axis with { Hide = hide };
+    }
+
+    public static T HideTickLabels<T>(this T axis, bool hide = true) where T : AxisBase<T>
+    {
+        return axis with { HideTickLabels = hide };
+    }
+
+    public static T TickFormatter<T>(this T axis, string format) where T : AxisBase<T>
+    {
+        return axis with { TickFormatter = format };
     }
 }

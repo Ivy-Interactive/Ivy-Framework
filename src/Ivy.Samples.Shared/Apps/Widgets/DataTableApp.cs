@@ -2,29 +2,38 @@ using Ivy.Samples.Shared.Apps;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.DatabaseZap)]
+[App(icon: Icons.DatabaseZap, group: ["Widgets"], searchHints: ["datatable", "table", "grid", "rows", "columns", "footer", "aggregation", "million", "performance"])]
 public class DataTableApp : SampleBase
+{
+    protected override object? BuildSample()
+    {
+        return Layout.Tabs(
+            new Tab("Overview", new DataTableMainSample()),
+            new Tab("Footer", new DataTableFooterSample()),
+            new Tab("Multi Agg", new DataTableMultiAggSample()),
+            new Tab("Million Rows", new DataTablesMillionRowsSample())
+        ).Variant(TabsVariant.Content);
+    }
+}
+
+public class DataTableMainSample : ViewBase
 {
     private enum RowAction { Edit, Delete, View, Menu, Archive, Export, Share }
 
-    protected override object? BuildSample()
+    public override object? Build()
     {
         var client = UseService<IClientProvider>();
         var mockService = UseService<MockEmployeeService>();
 
-        // The DataTable builder will be recreated each time, but use the cached employee data
         var editModalOpen = UseState(() => false);
         var editingEmployee = UseState<EmployeeRecord?>(() => null);
         var refreshToken = UseRefreshToken();
 
-        // Configuration and row actions logic
         var dataTable = mockService.GetEmployees().AsQueryable().ToDataTable(idSelector: e => e.Id)
             .RefreshToken(refreshToken)
-            // Table dimensions (fix for issue #1311)
-            .Width(Size.Full()) // Table width set to 120 units (30rem)
-            .Height(Size.Full()) // Table height set to 120 units (30rem)
+            .Width(Size.Full())
+            .Height(Size.Full())
 
-            // Column titles
             .Header(e => e.Id, "ID")
             .Header(e => e.Age, "Age")
             .Header(e => e.Salary, "Salary")
@@ -45,7 +54,6 @@ public class DataTableApp : SampleBase
             .Header(e => e.WidgetLink, "Widgets")
             .Header(e => e.ProfileLink, "Profiles")
 
-            // Column widths
             .Width(e => e.Id, Size.Px(40))
             .Width(e => e.EmployeeCode, Size.Px(100))
             .Width(e => e.Name, Size.Px(120))
@@ -66,7 +74,6 @@ public class DataTableApp : SampleBase
             .Width(e => e.WidgetLink, Size.Px(200))
             .Width(e => e.ProfileLink, Size.Px(250))
 
-            // Alignments
             .Align(e => e.Id, Align.Left)
             .Align(e => e.Age, Align.Left)
             .Align(e => e.Salary, Align.Left)
@@ -86,7 +93,6 @@ public class DataTableApp : SampleBase
             .Align(e => e.WidgetLink, Align.Left)
             .Align(e => e.ProfileLink, Align.Left)
 
-            // Groups
             .Group(e => e.Id, "Identity")
             .Group(e => e.EmployeeCode, "Identity")
             .Group(e => e.Name, "Personal")
@@ -107,18 +113,15 @@ public class DataTableApp : SampleBase
             .Group(e => e.WidgetLink, "Links")
             .Group(e => e.ProfileLink, "Links")
 
-            // Column renderers - LinkDisplayRenderer automatically sets ColType.Link
             .Renderer(e => e.WidgetLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
             .Renderer(e => e.ProfileLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
 
-            // Sorting
-            .Sortable(e => e.Email, false) // Email not sortable
-            .Sortable(e => e.Notes, false) // Notes not sortable
+            .Sortable(e => e.Email, false)
+            .Sortable(e => e.Notes, false)
 
-            // Configuration
             .Config(config =>
             {
-                config.FreezeColumns = 2; // Freeze ID and Code
+                config.FreezeColumns = 2;
                 config.AllowSorting = true;
                 config.AllowFiltering = true;
                 config.AllowLlmFiltering = true;
@@ -129,12 +132,11 @@ public class DataTableApp : SampleBase
                 config.ShowIndexColumn = false;
                 config.ShowGroups = true;
                 config.ShowVerticalBorders = true;
-                config.ShowColumnTypeIcons = false; // Show type icons
-                config.BatchSize = 50; // Load 50 rows at a time
-                config.LoadAllRows = false; // Use pagination
+                config.ShowColumnTypeIcons = false;
+                config.BatchSize = 50;
+                config.LoadAllRows = false;
                 config.ShowSearch = true;
             })
-            // Row actions: fluent API + enum (compile-time safe); .Tag() overwrites default tag
             .RowActions(
                 MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit),
                 MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete),
@@ -185,6 +187,109 @@ public class DataTableApp : SampleBase
     }
 }
 
+public class DataTableFooterSample : ViewBase
+{
+    public override object? Build()
+    {
+        var invoiceLines = new[]
+        {
+            new { Product = "Pro License", Qty = 15, UnitPrice = 99.00m, Amount = 1485.00m },
+            new { Product = "Support Hours", Qty = 40, UnitPrice = 125.00m, Amount = 5000.00m },
+            new { Product = "Training Session", Qty = 3, UnitPrice = 500.00m, Amount = 1500.00m },
+            new { Product = "Custom Development", Qty = 80, UnitPrice = 150.00m, Amount = 12000.00m },
+            new { Product = "Hosting (Annual)", Qty = 1, UnitPrice = 1200.00m, Amount = 1200.00m }
+        }.AsQueryable();
+
+        return invoiceLines.ToDataTable()
+            .Header(x => x.Product, "Product / Service")
+            .Header(x => x.Qty, "Quantity")
+                .Footer(x => x.Qty, "Total", values => values.Sum())
+            .Header(x => x.UnitPrice, "Unit Price")
+                .Footer(x => x.UnitPrice, "Avg", values => values.Average())
+            .Header(x => x.Amount, "Amount")
+                .Footer(x => x.Amount, "Total", values => values.Sum())
+            .Width(x => x.Product, Size.Px(200))
+            .Width(x => x.Qty, Size.Units(30))
+            .Width(x => x.UnitPrice, Size.Units(30))
+            .Width(x => x.Amount, Size.Units(30))
+            .Align(x => x.Qty, Align.Right)
+            .Align(x => x.UnitPrice, Align.Right)
+            .Align(x => x.Amount, Align.Right)
+            .Height(Size.Units(80));
+    }
+}
+
+public class DataTableMultiAggSample : ViewBase
+{
+    public override object? Build()
+    {
+        var salesData = new[]
+        {
+            new { Region = "North", Sales = 45000m, Target = 50000m },
+            new { Region = "South", Sales = 62000m, Target = 60000m },
+            new { Region = "East", Sales = 38000m, Target = 45000m },
+            new { Region = "West", Sales = 71000m, Target = 70000m }
+        }.AsQueryable();
+
+        return Layout.Vertical()
+            | Text.P(
+                "Sales and Target each define two footer aggregates (Total and Avg). The grid shows one at a time; click the footer or the chevron to switch.")
+                .Muted()
+            | salesData.ToDataTable()
+            .Header(x => x.Region, "Sales Region")
+            .Header(x => x.Sales, "Actual Sales")
+                .Footer(x => x.Sales, new[]
+                {
+                    ("Total", (Func<IEnumerable<decimal>, object>)(values => values.Sum())),
+                    ("Avg", (Func<IEnumerable<decimal>, object>)(values => values.Average()))
+                })
+            .Header(x => x.Target, "Target")
+                .Footer(x => x.Target, new[]
+                {
+                    ("Total", (Func<IEnumerable<decimal>, object>)(values => values.Sum())),
+                    ("Avg", (Func<IEnumerable<decimal>, object>)(values => values.Average()))
+                })
+            .Align(x => x.Sales, Align.Right)
+            .Align(x => x.Target, Align.Right)
+            .Height(Size.Units(60));
+    }
+}
+
+public record MillionRowData(
+    int Id,
+    string Value,
+    DateTime CreatedAt
+);
+
+public class DataTablesMillionRowsSample : ViewBase
+{
+    public override object? Build()
+    {
+        var millionRows = Enumerable.Range(1, 1_000_000)
+            .Select(i => new MillionRowData(
+                Id: i,
+                Value: $"Row {i:N0}",
+                CreatedAt: DateTime.Now.AddSeconds(-i)
+            )).AsQueryable();
+
+        return millionRows.ToDataTable()
+            .Header(row => row.Id, "ID")
+            .Header(row => row.Value, "Value")
+            .Header(row => row.CreatedAt, "Created At")
+            .Width(row => row.Id, Size.Px(100))
+            .Width(row => row.Value, Size.Px(200))
+            .Width(row => row.CreatedAt, Size.Px(200))
+            .Align(row => row.Id, Align.Left)
+            .Align(row => row.Value, Align.Left)
+            .Align(row => row.CreatedAt, Align.Left)
+            .Icon(row => row.Id, Icons.Hash.ToString())
+            .Icon(row => row.Value, Icons.FileText.ToString())
+            .Icon(row => row.CreatedAt, Icons.Calendar.ToString())
+            .Config(config => config.AllowLlmFiltering = true)
+            .LoadAllRows(true);
+    }
+}
+
 public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> employeeState, RefreshToken refreshToken, Action<EmployeeRecord> onSave) : ViewBase
 {
     public override object? Build()
@@ -196,7 +301,6 @@ public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> emp
             return new Empty();
         }
 
-        // We bind the form to the employee state. ToForm() will handle the object mutations and submission.
         return employeeState.Value
             .ToForm()
             .Remove(e => e.Id)
@@ -216,7 +320,6 @@ public class EmployeeEditDialog(IState<bool> isOpen, IState<EmployeeRecord?> emp
             isOpen.Set((bool)false);
             employeeState.Set((EmployeeRecord?)null);
 
-            // Trigger refresh
             refreshToken.Refresh();
 
             return Task.CompletedTask;

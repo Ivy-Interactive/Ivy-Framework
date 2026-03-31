@@ -1,36 +1,35 @@
-import { GridColumn, GridColumnIcon } from '@glideapps/glide-data-grid';
-import type { DataColumn } from '../types/types';
+import { GridColumn, GridColumnIcon } from "@glideapps/glide-data-grid";
+import type { DataColumn } from "../types/types";
+import { estimateHeaderWidth } from "../dataTableContext/utils/parseSize";
 
 /**
  * Maps column icon names or types to appropriate icons
  * Uses built-in GridColumnIcon values where possible, custom names otherwise
  */
-export function mapColumnIcon(
-  col: DataColumn
-): GridColumnIcon | string | undefined {
+export function mapColumnIcon(col: DataColumn): GridColumnIcon | string | undefined {
   // If column has explicit icon, check if we can map it to built-in
   if (col.icon) {
     // Map icons to built-in GridColumnIcon values
     switch (col.icon) {
-      case 'Hash':
+      case "Hash":
         return GridColumnIcon.HeaderNumber;
-      case 'Type':
-      case 'User':
-      case 'Mail':
+      case "Type":
+      case "User":
+      case "Mail":
         return GridColumnIcon.HeaderString;
-      case 'Calendar':
-      case 'Clock':
+      case "Calendar":
+      case "Clock":
         return GridColumnIcon.HeaderDate;
-      case 'Image':
+      case "Image":
         return GridColumnIcon.HeaderImage;
-      case 'Link':
+      case "Link":
         return GridColumnIcon.HeaderUri;
       // Map Activity, Flag, and Zap to closest built-in icons
-      case 'Activity':
+      case "Activity":
         return GridColumnIcon.HeaderCode; // Use code icon for activity
-      case 'Flag':
+      case "Flag":
         return GridColumnIcon.HeaderBoolean; // Use boolean/checkbox for priority flag
-      case 'Zap':
+      case "Zap":
         return GridColumnIcon.HeaderEmoji; // Use emoji for zap
       default:
         // Try to use custom icon name for headerIcons lookup
@@ -42,19 +41,19 @@ export function mapColumnIcon(
   // If no explicit icon, use column type
   const normalizedType = col.type.toLowerCase();
 
-  if (normalizedType === 'number') {
+  if (normalizedType === "number") {
     return GridColumnIcon.HeaderNumber;
   }
-  if (normalizedType === 'text') {
+  if (normalizedType === "text") {
     return GridColumnIcon.HeaderString;
   }
-  if (normalizedType === 'date' || normalizedType === 'datetime') {
+  if (normalizedType === "date" || normalizedType === "datetime") {
     return GridColumnIcon.HeaderDate;
   }
-  if (normalizedType === 'boolean') {
+  if (normalizedType === "boolean") {
     return GridColumnIcon.HeaderBoolean;
   }
-  if (normalizedType === 'icon') {
+  if (normalizedType === "icon") {
     return GridColumnIcon.HeaderImage;
   }
 
@@ -68,12 +67,39 @@ export function mapColumnIcon(
 export function reorderColumns(
   columns: DataColumn[],
   startIndex: number,
-  endIndex: number
+  endIndex: number,
 ): DataColumn[] {
   const result = [...columns];
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
   return result;
+}
+
+/**
+ * Visible data columns in grid display order (same ordering as convertToGridColumns).
+ */
+export function getOrderedVisibleDataColumns(
+  columns: DataColumn[],
+  columnOrder: number[],
+): DataColumn[] {
+  const visibleColumns = columns.filter((col) => !col.hidden);
+
+  let orderedColumns = visibleColumns;
+
+  if (columnOrder.length === columns.length) {
+    orderedColumns = columnOrder.map((idx) => columns[idx]).filter((col) => !col.hidden);
+  } else {
+    const hasOrderProperty = visibleColumns.some((col) => col.order !== undefined);
+    if (hasOrderProperty) {
+      orderedColumns = [...visibleColumns].sort((a, b) => {
+        const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+      });
+    }
+  }
+
+  return orderedColumns;
 }
 
 /**
@@ -86,44 +112,19 @@ export function convertToGridColumns(
   columnWidths: Record<string, number>,
   containerWidth: number,
   showGroups: boolean,
-  showColumnTypeIcons: boolean = true
+  showColumnTypeIcons: boolean = true,
 ): GridColumn[] {
-  // Filter out hidden columns first
-  const visibleColumns = columns.filter(col => !col.hidden);
-
-  // Apply column order if available
-  let orderedColumns = visibleColumns;
-
-  // User reordering (columnOrder array) takes precedence over backend order property
-  if (columnOrder.length === columns.length) {
-    // Use the columnOrder array (from user reordering)
-    orderedColumns = columnOrder
-      .map(idx => columns[idx])
-      .filter(col => !col.hidden);
-  } else {
-    // Fall back to explicit order property if no user reordering has happened
-    const hasOrderProperty = visibleColumns.some(
-      col => col.order !== undefined
-    );
-    if (hasOrderProperty) {
-      orderedColumns = [...visibleColumns].sort((a, b) => {
-        const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
-        const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
-        return orderA - orderB;
-      });
-    }
-  }
+  const orderedColumns = getOrderedVisibleDataColumns(columns, columnOrder);
 
   return orderedColumns.map((col, index) => {
     const originalIndex = columns.indexOf(col);
     const baseWidth = columnWidths[originalIndex.toString()] || col.width;
     // Ensure width is always a number
-    let numericBaseWidth =
-      typeof baseWidth === 'string' ? parseFloat(baseWidth) : baseWidth;
+    let numericBaseWidth = typeof baseWidth === "string" ? parseFloat(baseWidth) : baseWidth;
 
-    // Fix NaN width - default to 150 if parsing fails
+    // Fix NaN width - use header-based width if parsing fails
     if (isNaN(numericBaseWidth) || !numericBaseWidth) {
-      numericBaseWidth = 150;
+      numericBaseWidth = estimateHeaderWidth(col.header || col.name);
     }
 
     // Make the last column fill the remaining space using grow (avoids gap from

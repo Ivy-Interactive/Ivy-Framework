@@ -14,37 +14,59 @@ public readonly record struct PathSegment(string Type, string? Key, int Index, b
 }
 
 [DebuggerDisplay("{ToString()}")]
-public class TreePath : Stack<PathSegment>
+public class TreePath
 {
-    public void Push(IView view, int index)
+    public PathSegment Segment { get; }
+    public TreePath? Parent { get; }
+    public int Count { get; }
+
+    public TreePath()
     {
-        Push(new PathSegment(view.GetType().Name!, view.Key, index, false));
+        Count = 0;
     }
 
-    public void Push(IWidget widget, int index)
+    private TreePath(PathSegment segment, TreePath? parent)
     {
-        Push(new PathSegment(widget.GetType().Name!, widget.Key, index, true));
+        Segment = segment;
+        Parent = parent;
+        Count = (parent?.Count ?? 0) + 1;
+    }
+
+    public TreePath Push(IView view, int index)
+    {
+        return new TreePath(new PathSegment(view.GetType().Name!, view.Key, index, false), this);
+    }
+
+    public TreePath Push(IWidget widget, int index)
+    {
+        return new TreePath(new PathSegment(widget.GetType().Name!, widget.Key, index, true), this);
     }
 
     public TreePath Clone()
     {
-        var clone = new TreePath();
-        var segments = ToArray();
-        for (int i = segments.Length - 1; i >= 0; i--)
-        {
-            clone.Push(segments[i]); // PathSegment is a struct, no need to copy fields
-        }
-        return clone;
+        return this; // Immutable linked list shares state natively!
+    }
+
+    public TreePath? Pop()
+    {
+        return Parent;
     }
 
     public override string ToString()
     {
         if (Count == 0) return string.Empty;
 
-        // Estimate capacity: avg segment ~15 chars (Type:Key/Index) + separator
+        var segments = new PathSegment[Count];
+        var curr = this;
+        for (int i = Count - 1; i >= 0; i--)
+        {
+            segments[i] = curr.Segment;
+            curr = curr.Parent!;
+        }
+
         var sb = new StringBuilder(Count * 16);
         bool first = true;
-        foreach (var e in this)
+        foreach (var e in segments)
         {
             if (!first) sb.Append('>');
             first = false;
@@ -57,9 +79,12 @@ public class TreePath : Stack<PathSegment>
     }
 
     private static readonly char[] Base32Chars = "abcdefghijklmnopqrstuvwxyz234567".ToCharArray();
+    private string? _cachedId;
 
     public string GenerateId()
     {
+        if (_cachedId != null) return _cachedId;
+
         // Use XxHash64 - extremely fast with excellent distribution
         // 64-bit hash gives collision probability of ~1 in 10^19 for random inputs
         // Even with birthday paradox, 1M items = ~0.000003% collision chance
@@ -67,8 +92,17 @@ public class TreePath : Stack<PathSegment>
         var hash = new XxHash64();
         Span<byte> indexBytes = stackalloc byte[4];
 
-        // Hash each segment directly without ToString() allocation
-        foreach (var segment in this)
+        // We must hash from root to leaf to maintain identical sequence with `Stack`.
+        // Since we are a linked list (leaf to root), we extract sequentially.
+        var segments = new PathSegment[Count];
+        var curr = this;
+        for (int i = Count - 1; i >= 0; i--)
+        {
+            segments[i] = curr.Segment;
+            curr = curr.Parent!;
+        }
+
+        foreach (var segment in segments)
         {
             // Hash the type name
             hash.Append(MemoryMarshal.AsBytes(segment.Type.AsSpan()));
@@ -94,7 +128,7 @@ public class TreePath : Stack<PathSegment>
         ulong hashValue = hash.GetCurrentHashAsUInt64();
 
         // Convert to 10-char base32 string (50 bits of entropy, plenty for uniqueness)
-        return string.Create(10, hashValue, static (span, h) =>
+        _cachedId = string.Create(10, hashValue, static (span, h) =>
         {
             for (int i = 0; i < 10; i++)
             {
@@ -102,5 +136,7 @@ public class TreePath : Stack<PathSegment>
                 h >>= 5;
             }
         });
+
+        return _cachedId;
     }
 }

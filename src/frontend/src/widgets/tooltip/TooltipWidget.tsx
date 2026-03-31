@@ -1,10 +1,5 @@
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import React from 'react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import React from "react";
 
 interface TooltipWidgetProps {
   id: string;
@@ -17,9 +12,7 @@ interface TooltipWidgetProps {
 export const TooltipWidget: React.FC<TooltipWidgetProps> = ({ slots }) => {
   if (!slots?.Trigger || !slots?.Content) {
     return (
-      <div className="text-red-500">
-        Error: Tooltip requires both Trigger and Content slots.
-      </div>
+      <div className="text-red-500">Error: Tooltip requires both Trigger and Content slots.</div>
     );
   }
 
@@ -29,7 +22,7 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({ slots }) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span style={{ display: 'inline-block' }}>{slots.Trigger}</span>
+          <span style={{ display: "inline-block" }}>{slots.Trigger}</span>
         </TooltipTrigger>
         <TooltipContent className="bg-popover text-popover-foreground shadow-md">
           {slots.Content}

@@ -18,6 +18,13 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
             return;
         }
 
+        // Skip if path base is already set (running behind a prefix-preserving proxy or UsePathBase middleware)
+        if (context.Request.PathBase.HasValue && !string.IsNullOrEmpty(context.Request.PathBase.Value))
+        {
+            await next(context);
+            return;
+        }
+
         // Convert path to appId: remove leading slash and trim trailing slash so /hooks/core/ === /hooks/core
         var appId = path.TrimStart('/').TrimEnd('/');
 

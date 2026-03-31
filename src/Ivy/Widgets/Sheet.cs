@@ -79,6 +79,11 @@ public static class SheetExtensions
         return new WithSheetView(trigger, contentFactory, title, description, width, side);
     }
 
+    public static IView WithSheet(this Button trigger, Func<Action, object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
+    {
+        return new WithSheetViewWithClose(trigger, contentFactory, title, description, width, side);
+    }
+
     [OverloadResolutionPriority(-1)]
     public static IView ToSheet(this object content, IState<bool> isOpen, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
     {
@@ -173,6 +178,46 @@ public class WithSheetView(Button trigger, Func<object> contentFactory, string? 
                 isOpen.Value = false;
                 return ValueTask.CompletedTask;
             }, contentFactory(), title, description) with
+            { Side = side };
+
+            // Use Height for top/bottom, Width for left/right
+            if (side is SheetSide.Top or SheetSide.Bottom)
+            {
+                sheet = sheet.Height(width ?? Sheet.DefaultHeight);
+            }
+            else
+            {
+                sheet = sheet.Width(width ?? Sheet.DefaultWidth);
+            }
+        }
+
+        return new Fragment(clonedTrigger, sheet);
+    }
+}
+
+public class WithSheetViewWithClose(Button trigger, Func<Action, object> contentFactory, string? title, string? description, Size? width, SheetSide side = SheetSide.Right) : ViewBase
+{
+    public override object? Build()
+    {
+        var isOpen = UseState(false);
+        var clonedTrigger = trigger with
+        {
+            OnClick = new(_ =>
+            {
+                isOpen.Value = true;
+                return ValueTask.CompletedTask;
+            })
+        };
+
+        Sheet? sheet = null;
+        if (isOpen.Value)
+        {
+            var close = () => { isOpen.Value = false; };
+            sheet = new Sheet(_ =>
+            {
+                isOpen.Value = false;
+                return ValueTask.CompletedTask;
+            }, contentFactory(close), title, description) with
             { Side = side };
 
             // Use Height for top/bottom, Width for left/right

@@ -36,6 +36,38 @@ public class SelectVariantDemo : ViewBase
 }
 ```
 
+## Enum Display Names
+
+When using enums with `SelectInput`, values are automatically formatted with spaces for better readability. For example, `BlueToRed` becomes "Blue To Red", and `GreenYellowRed` becomes "Green Yellow Red". You can override this behavior by adding a `[Description]` attribute to specific enum values:
+
+```csharp demo-below
+public class EnumDisplayDemo : ViewBase
+{
+    private enum CacheStrategy
+    {
+        LeastRecentlyUsed,     // Displays as "Least Recently Used"
+        LeastFrequentlyUsed,   // Displays as "Least Frequently Used"
+
+        [Description("FIFO")]  // Custom display name
+        FirstInFirstOut
+    }
+
+    public override object? Build()
+    {
+        var strategy = UseState(CacheStrategy.LeastRecentlyUsed);
+
+        return strategy.ToSelectInput()
+            .WithField()
+            .Label("Cache Strategy")
+            .Width(Size.Full());
+    }
+}
+```
+
+<Callout Type="tip">
+The automatic formatting works for all enum values passed through `.ToOptions()`. Use `[Description("...")]` attributes from `System.ComponentModel` when you need precise control over display names.
+</Callout>
+
 ## Radio Buttons
 
 The `Radio` variant renders traditional radio buttons for single-select scenarios. Radio buttons are ideal for small sets of mutually exclusive choices where all options should be visible:
@@ -279,6 +311,65 @@ public class SelectionLimitsDemo : ViewBase
             .WithField()
             .Label("Colors")
             .Width(Size.Full());;
+    }
+}
+```
+
+### Selection Actions
+
+For multi-select variants, you can enable a "Select All" and "Clear All" footer action using the `.ShowActions()` modifier. This provides users with a quick way to manage bulk selections:
+
+```csharp demo-below
+public class SelectActionsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selected = UseState<string[]>([]);
+        var options = new[] { "C#", "Java", "Python", "JavaScript", "Go", "Rust", "F#", "Kotlin", "TypeScript" }.ToOptions();
+        
+        return selected.ToSelectInput(options)
+            .Variant(SelectInputVariant.Select)
+            .ShowActions()
+            .Searchable(true)
+            .Placeholder("Select languages...")
+            .WithField()
+            .Label("Languages")
+            .Width(Size.Full());
+    }
+}
+```
+
+### Option Tooltips
+
+Add hover tooltips to individual options using the `tooltip` parameter on `Option<T>`. Tooltips provide contextual help for technical terms, abbreviations, or disabled options:
+
+```csharp demo-tabs
+public class OptionTooltipsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var strategy = UseState("lru");
+        var strategies = UseState<string[]>([]);
+
+        var options = new IAnyOption[]
+        {
+            new Option<string>("LRU", "lru", tooltip: "Least Recently Used — evicts the oldest accessed entry first"),
+            new Option<string>("LFU", "lfu", tooltip: "Least Frequently Used — evicts the least accessed entry first"),
+            new Option<string>("FIFO", "fifo", tooltip: "First In, First Out — evicts entries in insertion order"),
+        };
+
+        return Layout.Vertical()
+            | Text.Monospaced("Select Variant")
+            | strategy.ToSelectInput(options)
+                .Placeholder("Select a cache strategy...")
+
+            | Text.Monospaced("Toggle Variant")
+            | strategies.ToSelectInput(options)
+                .Variant(SelectInputVariant.Toggle)
+
+            | Text.Monospaced("List Variant")
+            | strategies.ToSelectInput(options)
+                .Variant(SelectInputVariant.List);
     }
 }
 ```

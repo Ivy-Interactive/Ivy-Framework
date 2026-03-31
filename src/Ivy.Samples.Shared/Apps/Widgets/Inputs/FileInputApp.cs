@@ -8,7 +8,7 @@ public class FileInputApp : SampleBase
     protected override object? BuildSample()
     {
         return Layout.Vertical()
-               | Text.H1("File Inputs")
+               | Text.H1("File Input")
                | Layout.Tabs(
                    new Tab("Variants", new FileInputVariantTests()),
                    new Tab("Size Variants", new FileInputSizeVariants()),
@@ -286,15 +286,22 @@ public class FileInputEventHandlersExample : ViewBase
     {
         var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
         var blurMessage = UseState("");
+        var focusMessage = UseState("");
         var cancelCount = UseState(0);
         var blurCount = UseState(0);
+        var focusCount = UseState(0);
         var upload = UseUpload(MemoryStreamUploadHandler.Create(files));
 
         return Layout.Vertical()
                | Text.H2("Event Handlers")
-               | Text.P("Demonstrate OnBlur and OnCancel event handlers. OnBlur fires when the file dialog closes or input loses focus. OnCancel fires when the cancel button is clicked on a file.")
+               | Text.P("Demonstrate OnBlur, OnFocus and OnCancel event handlers. OnFocus fires when the file input gains focus.")
                | files.ToFileInput(upload)
                    .Placeholder("Choose files - try selecting, canceling the dialog, or clicking the X button")
+                   .OnFocus((Event<IAnyInput> e) =>
+                   {
+                       focusCount.Set(focusCount.Value + 1);
+                       focusMessage.Set($"Focus Event #{focusCount.Value}");
+                   })
                    .OnBlur((Event<IAnyInput> e) =>
                    {
                        blurCount.Set(blurCount.Value + 1);
@@ -311,7 +318,7 @@ public class FileInputEventHandlersExample : ViewBase
                        files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());
                        cancelCount.Set(cancelCount.Value + 1);
                    })
-               | Layout.Vertical().Gap(4)
+               | Layout.Vertical()
                    | new Card(
                        Layout.Vertical().Gap(2)
                            | Text.P("The blur event fires when you close the file dialog or click away from the input.").Small()
@@ -319,6 +326,13 @@ public class FileInputEventHandlersExample : ViewBase
                                ? Callout.Success(blurMessage.Value)
                                : Callout.Info("Interact with the file input above to see blur events"))
                    ).Title("OnBlur Handler")
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The focus event fires when you click on or tab into the file input.").Small()
+                           | (focusMessage.Value != ""
+                               ? Callout.Success(focusMessage.Value)
+                               : Callout.Info("Interact with the file input above to see focus events"))
+                   ).Title("OnFocus Handler")
                    | new Card(
                        Layout.Vertical().Gap(2)
                            | Text.P("The cancel event fires when you click the X button next to a file in the list.").Small()
@@ -345,7 +359,7 @@ public class FileInputIntegrationExample : ViewBase
         return Layout.Vertical()
                | Text.H2("Integration")
                | Text.P("Examples of integrating file inputs with forms and dialogs.")
-               | Layout.Vertical().Gap(4)
+               | Layout.Vertical()
                    | Text.H3("Form Integration")
                    | new SizingExample()
                    | Text.H3("Dialog Integration")
@@ -365,7 +379,7 @@ public class SizingExample : ViewBase
 
         return Layout.Vertical()
             | new Card(
-                Layout.Vertical().Gap(4)
+                Layout.Vertical()
                 | Layout.Vertical().Gap(2)
                     | Text.Label("Profile Photo *")
                     | new ProfilePhotoUpload(profilePhoto)

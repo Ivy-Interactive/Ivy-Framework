@@ -81,49 +81,49 @@
 
 /* Sheet animations using Radix UI data-state attributes */
 /* Right side (default) */
-[data-radix-dialog-content][data-state='open'],
-[data-radix-dialog-content][data-sheet-side='right'][data-state='open'] {
+[data-radix-dialog-content][data-state="open"],
+[data-radix-dialog-content][data-sheet-side="right"][data-state="open"] {
   animation: slideInFromRight 300ms ease-out;
 }
 
-[data-radix-dialog-content][data-state='closed'],
-[data-radix-dialog-content][data-sheet-side='right'][data-state='closed'] {
+[data-radix-dialog-content][data-state="closed"],
+[data-radix-dialog-content][data-sheet-side="right"][data-state="closed"] {
   animation: slideOutToRight 300ms ease-in;
 }
 
 /* Left side */
-[data-radix-dialog-content][data-sheet-side='left'][data-state='open'] {
+[data-radix-dialog-content][data-sheet-side="left"][data-state="open"] {
   animation: slideInFromLeft 300ms ease-out;
 }
 
-[data-radix-dialog-content][data-sheet-side='left'][data-state='closed'] {
+[data-radix-dialog-content][data-sheet-side="left"][data-state="closed"] {
   animation: slideOutToLeft 300ms ease-in;
 }
 
 /* Top side */
-[data-radix-dialog-content][data-sheet-side='top'][data-state='open'] {
+[data-radix-dialog-content][data-sheet-side="top"][data-state="open"] {
   animation: slideInFromTop 300ms ease-out;
 }
 
-[data-radix-dialog-content][data-sheet-side='top'][data-state='closed'] {
+[data-radix-dialog-content][data-sheet-side="top"][data-state="closed"] {
   animation: slideOutToTop 300ms ease-in;
 }
 
 /* Bottom side */
-[data-radix-dialog-content][data-sheet-side='bottom'][data-state='open'] {
+[data-radix-dialog-content][data-sheet-side="bottom"][data-state="open"] {
   animation: slideInFromBottom 300ms ease-out;
 }
 
-[data-radix-dialog-content][data-sheet-side='bottom'][data-state='closed'] {
+[data-radix-dialog-content][data-sheet-side="bottom"][data-state="closed"] {
   animation: slideOutToBottom 300ms ease-in;
 }
 
 /* Sheet overlay animations */
-[data-radix-dialog-overlay][data-state='open'] {
+[data-radix-dialog-overlay][data-state="open"] {
   animation: fadeIn 300ms ease-out;
 }
 
-[data-radix-dialog-overlay][data-state='closed'] {
+[data-radix-dialog-overlay][data-state="closed"] {
   animation: fadeOut 300ms ease-in;
 }
 

@@ -18,6 +18,21 @@ public static partial class MarkdownConverter
     private static readonly Regex SummaryStartRegex = SummaryRegex();
     private static readonly Regex BodyStartRegex = BodyRegex();
 
+    private static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
+        .UseAdvancedExtensions()
+        .UsePreciseSourceLocation()
+        .UseYamlFrontMatter()
+        .Build();
+
+    private static readonly MarkdownPipeline BodyPipeline = new MarkdownPipelineBuilder()
+        .UseAdvancedExtensions()
+        .UsePreciseSourceLocation()
+        .Build();
+
+    private static readonly IDeserializer YamlDeserializer = new DeserializerBuilder()
+        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+        .Build();
+
     public class AppMeta
     {
         public string? Icon { get; set; }
@@ -29,17 +44,13 @@ public static partial class MarkdownConverter
         public List<string>? SearchHints { get; set; }
         public List<string>? Imports { get; set; }
         public string? Description { get; set; }
+        public bool Hidden { get; set; } = false;
     }
 
     static AppMeta ParseYamlAppMeta(string yaml)
     {
         string withoutDashes = RemoveFirstAndLastLine(yaml);
-
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-
-        return deserializer.Deserialize<AppMeta>(withoutDashes);
+        return YamlDeserializer.Deserialize<AppMeta>(withoutDashes);
     }
 
     public static async Task ConvertAsync(string name, string relativePath, string absolutePath, string outputFile, string @namespace, bool skipIfNotChanged,
@@ -61,15 +72,9 @@ public static partial class MarkdownConverter
             }
         }
 
-        Console.WriteLine("Converting {0} to {1}", absolutePath, outputFile);
+        // Console.WriteLine("Converting {0} to {1}", absolutePath, outputFile);
 
-        var pipeline = new MarkdownPipelineBuilder()
-            .UseAdvancedExtensions()
-            .UsePreciseSourceLocation()
-            .UseYamlFrontMatter()
-            .Build();
-
-        var document = Markdig.Markdown.Parse(markdownContent, pipeline);
+        var document = Markdig.Markdown.Parse(markdownContent, Pipeline);
 
         var documentSource = Utils.GetGitFileUrl(absolutePath);
 
@@ -111,6 +116,10 @@ public static partial class MarkdownConverter
         codeBuilder.Append(appMeta.Icon != null ? $", icon:Icons.{appMeta.Icon}" : "");
         codeBuilder.Append(appMeta.Title != null ? $", title:{FormatLiteral(appMeta.Title)}" : "");
         codeBuilder.Append(appMeta.GroupExpanded ? ", groupExpanded:true" : "");
+        if (appMeta.Hidden)
+        {
+            codeBuilder.Append(", isVisible:false");
+        }
         codeBuilder.Append(documentSource != null ? $", documentSource:{FormatLiteral(documentSource)}" : "");
         if (appMeta.SearchHints != null && appMeta.SearchHints.Count > 0)
         {
@@ -162,7 +171,7 @@ public static partial class MarkdownConverter
             if (referencedApps.Count > 0)
             {
                 codeBuilder.AppendTab(2).AppendLine("// Build errors here indicates that one or more referenced apps don't exist. Check markdown links.");
-                codeBuilder.AppendTab(2).Append("Type[] _ = [").Append(string.Join(", ", referencedApps.Select(e => "typeof(" + e + ")").ToArray())).AppendLine("]; ");
+                codeBuilder.AppendTab(2).Append("Type[] _ = [").Append(string.Join(", ", referencedApps.OrderBy(x => x, StringComparer.Ordinal).Select(e => "typeof(" + e + ")").ToArray())).AppendLine("]; ");
             }
 
             codeBuilder.AppendTab(2).AppendLine("return article;");
@@ -231,7 +240,7 @@ public static partial class MarkdownConverter
                     if (detailsMatch != null)
                     {
                         // Handle the complete Details block directly
-                        HandleDetailsBlockDirect(codeBuilder, detailsMatch.Value, viewBuilder, usedClassNames);
+                        HandleDetailsBlockDirect(codeBuilder, detailsMatch.Value, viewBuilder, usedClassNames, referencedApps);
                         continue;
                     }
                 }
@@ -331,7 +340,7 @@ public static partial class MarkdownConverter
         // Note: Must be case-sensitive to distinguish from HTML <details> element
         if (htmlContent.StartsWith("<Details>"))
         {
-            HandleDetailsBlock(codeBuilder, null, markdownContent, htmlBlock, viewBuilder, usedClassNames);
+            HandleDetailsBlock(codeBuilder, null, markdownContent, htmlBlock, viewBuilder, usedClassNames, referencedApps);
             return;
         }
 
@@ -369,7 +378,7 @@ public static partial class MarkdownConverter
         }
         else if (xml.Name.LocalName == "Details")
         {
-            HandleDetailsBlock(codeBuilder, xml, markdownContent, htmlBlock, viewBuilder, usedClassNames);
+            HandleDetailsBlock(codeBuilder, xml, markdownContent, htmlBlock, viewBuilder, usedClassNames, referencedApps);
         }
         else if (xml.Name.LocalName == "Ingress")
         {
@@ -381,14 +390,14 @@ public static partial class MarkdownConverter
         }
     }
 
-    private static void HandleDetailsBlock(StringBuilder codeBuilder, XElement? xml, string markdownContent, HtmlBlock htmlBlock, StringBuilder viewBuilder, HashSet<string> usedClassNames)
+    private static void HandleDetailsBlock(StringBuilder codeBuilder, XElement? xml, string markdownContent, HtmlBlock htmlBlock, StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps)
     {
         // Get the raw HTML content
         string htmlContent = markdownContent.Substring(htmlBlock.Span.Start, htmlBlock.Span.Length);
-        HandleDetailsBlockDirect(codeBuilder, htmlContent, viewBuilder, usedClassNames);
+        HandleDetailsBlockDirect(codeBuilder, htmlContent, viewBuilder, usedClassNames, referencedApps);
     }
 
-    private static void HandleDetailsBlockDirect(StringBuilder codeBuilder, string htmlContent, StringBuilder viewBuilder, HashSet<string> usedClassNames)
+    private static void HandleDetailsBlockDirect(StringBuilder codeBuilder, string htmlContent, StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps)
     {
         // Extract Summary content
         var summaryStartMatch = SummaryStartRegex.Match(htmlContent);
@@ -417,20 +426,14 @@ public static partial class MarkdownConverter
         string bodyContent = htmlContent[bodyContentStart..bodyEnd].Trim();
 
         // Process the body content through the full markdown pipeline
-        var pipeline = new MarkdownPipelineBuilder()
-            .UseAdvancedExtensions()
-            .UsePreciseSourceLocation()
-            .Build();
-
-        var bodyDocument = Markdig.Markdown.Parse(bodyContent, pipeline);
+        var bodyDocument = Markdig.Markdown.Parse(bodyContent, BodyPipeline);
 
         // Create a temporary builder for the body content
         var bodyCodeBuilder = new StringBuilder();
-        var bodyReferencedApps = new HashSet<string>();
         var bodyLinkConverter = new LinkConverter("");
 
         // Process the body through HandleBlocks
-        HandleBlocks(bodyDocument, bodyCodeBuilder, bodyContent, viewBuilder, usedClassNames, bodyReferencedApps, bodyLinkConverter, false, 4, headings: null);
+        HandleBlocks(bodyDocument, bodyCodeBuilder, bodyContent, viewBuilder, usedClassNames, referencedApps, bodyLinkConverter, false, 4, headings: null);
 
         // Get the generated body content
         var bodyOutput = bodyCodeBuilder.ToString().TrimEnd();

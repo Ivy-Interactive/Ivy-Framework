@@ -107,6 +107,11 @@ public class State<T> : IState<T>, IRef<T>
         return typeof(T);
     }
 
+    public object? GetValueAsObject()
+    {
+        return Value;
+    }
+
     public override string? ToString()
     {
         return _value?.ToString();

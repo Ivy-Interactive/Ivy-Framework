@@ -6,7 +6,7 @@ namespace Ivy;
 /// <summary>
 /// Allows users to capture photos from their device's webcam/camera.
 /// </summary>
-public record CameraInput : WidgetBase<CameraInput>
+public record CameraInput : WidgetBase<CameraInput>, IAnyInput
 {
     public CameraInput(UploadContext upload, string? placeholder = null, bool disabled = false)
     {
@@ -19,8 +19,15 @@ public record CameraInput : WidgetBase<CameraInput>
 
     [Prop] public bool Disabled { get; set; }
     [Prop] public string? Placeholder { get; set; }
+    [Prop] public string? Invalid { get; set; }
+    [Prop] public bool Nullable { get; set; }
     [Prop] public string? UploadUrl { get; set; }
     [Prop] public string FacingMode { get; set; } = "user";
+
+    [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
+
+    public Type[] SupportedStateTypes() => [];
 }
 
 public static class CameraInputExtensions

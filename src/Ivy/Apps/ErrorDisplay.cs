@@ -49,18 +49,29 @@ internal static class ErrorDisplay
     public const string SheetDescription = "Full error as returned by the server";
 
     /// <param name="sheetContent">When null, no "View details" button is shown (e.g. for NotFound, NoApps, or ServerError without details).</param>
-    public static object Build(string title, string message, Func<object>? sheetContent = null, CalloutVariant variant = CalloutVariant.Warning, Icons? icon = null)
+    public static object Build(string title, string message, Func<object>? sheetContent = null, CalloutVariant variant = CalloutVariant.Warning, Icons? icon = null, string? exceptionTypeName = null)
     {
         var callout = CalloutForVariant(variant, title, message, icon);
-        var content = sheetContent != null
-            ? (Layout.Vertical().Center()
-                | callout
-                | new Button("View details")
-                    .Variant(ButtonVariant.Outline)
-                    .Icon(Icons.FileCode)
-                    .WithSheet(sheetContent, title: SheetTitle, description: SheetDescription))
-            : (object)(Layout.Vertical().Center() | callout);
-        return Layout.Center() | content;
+
+        var vertical = Layout.Vertical().Center();
+        vertical |= callout;
+
+        // Add contextual hint if available for this exception type
+        var hint = exceptionTypeName != null ? ExceptionHints.GetHint(exceptionTypeName) : null;
+        if (hint != null)
+        {
+            vertical |= Callout.Info(hint.Description, hint.Title);
+        }
+
+        if (sheetContent != null)
+        {
+            vertical |= new Button("View details")
+                .Variant(ButtonVariant.Outline)
+                .Icon(Icons.FileCode)
+                .WithSheet(sheetContent, title: SheetTitle, description: SheetDescription);
+        }
+
+        return Layout.Center() | vertical;
     }
 
     public static object SheetContentForServerResponse(string title, string message, string? details)
@@ -119,7 +130,8 @@ public class ErrorApp : ViewBase
             message,
             sheetContent: !string.IsNullOrWhiteSpace(args?.Details) ? () => ErrorDisplay.SheetContentForServerResponse(title, message, args?.Details) : null,
             variant,
-            icon
+            icon,
+            exceptionTypeName: args?.Kind == ErrorAppArgs.KindServerError ? title : null
         );
     }
 }
@@ -144,7 +156,8 @@ public class ExceptionErrorView(Exception e) : ViewBase, IStateless
                 message,
                 () => new Error("Full error", fullError, null),
                 CalloutVariant.Error,
-                Icons.CircleAlert
+                Icons.CircleAlert,
+                exceptionTypeName: title
             );
         }
         catch

@@ -1,9 +1,10 @@
-import { useEventHandler } from '@/components/event-handler';
-import { InvalidIcon } from '@/components/InvalidIcon';
-import { inputStyles } from '@/lib/styles';
-import { cn } from '@/lib/utils';
-import { Eraser } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useEventHandler } from "@/components/event-handler";
+import { InvalidIcon } from "@/components/InvalidIcon";
+import { inputStyles } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import { Eraser } from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface Point {
   x: number;
@@ -20,46 +21,46 @@ interface SignatureInputWidgetProps {
   background?: string;
   penThickness?: number;
   placeholder?: string;
-  'data-testid'?: string;
+  "data-testid"?: string;
 }
 
 const colorMap: Record<string, string> = {
-  black: '#000000',
-  white: '#ffffff',
-  slate: '#64748b',
-  gray: '#6b7280',
-  zinc: '#71717a',
-  neutral: '#737373',
-  stone: '#78716c',
-  red: '#ef4444',
-  orange: '#f97316',
-  amber: '#f59e0b',
-  yellow: '#eab308',
-  lime: '#84cc16',
-  green: '#22c55e',
-  emerald: '#10b981',
-  teal: '#14b8a6',
-  cyan: '#06b6d4',
-  sky: '#0ea5e9',
-  blue: '#3b82f6',
-  indigo: '#6366f1',
-  violet: '#8b5cf6',
-  purple: '#a855f7',
-  fuchsia: '#d946ef',
-  pink: '#ec4899',
-  rose: '#f43f5e',
-  primary: '#3b82f6',
-  secondary: '#6b7280',
-  destructive: '#ef4444',
-  success: '#22c55e',
-  warning: '#f59e0b',
-  info: '#0ea5e9',
-  muted: '#6b7280',
+  black: "#000000",
+  white: "#ffffff",
+  slate: "#64748b",
+  gray: "#6b7280",
+  zinc: "#71717a",
+  neutral: "#737373",
+  stone: "#78716c",
+  red: "#ef4444",
+  orange: "#f97316",
+  amber: "#f59e0b",
+  yellow: "#eab308",
+  lime: "#84cc16",
+  green: "#22c55e",
+  emerald: "#10b981",
+  teal: "#14b8a6",
+  cyan: "#06b6d4",
+  sky: "#0ea5e9",
+  blue: "#3b82f6",
+  indigo: "#6366f1",
+  violet: "#8b5cf6",
+  purple: "#a855f7",
+  fuchsia: "#d946ef",
+  pink: "#ec4899",
+  rose: "#f43f5e",
+  primary: "#3b82f6",
+  secondary: "#6b7280",
+  destructive: "#ef4444",
+  success: "#22c55e",
+  warning: "#f59e0b",
+  info: "#0ea5e9",
+  muted: "#6b7280",
 };
 
 function resolveColor(color: string | undefined, fallback: string): string {
   if (!color) return fallback;
-  if (color.startsWith('#') || color.startsWith('rgb')) return color;
+  if (color.startsWith("#") || color.startsWith("rgb")) return color;
   return colorMap[color.toLowerCase()] ?? fallback;
 }
 
@@ -68,29 +69,30 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
   value,
   disabled = false,
   invalid,
-  events = [],
+  events = EMPTY_ARRAY,
   pen,
   background,
   penThickness = 2,
   placeholder,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
   const eventHandler = useEventHandler();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isFocusedRef = useRef(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<Point | null>(null);
   const [hasDrawn, setHasDrawn] = useState(false);
   const pathsRef = useRef<Point[][]>([]);
   const currentPathRef = useRef<Point[]>([]);
 
-  const penColor = resolveColor(pen, '#000000');
-  const bgColor = resolveColor(background, '#ffffff');
+  const penColor = resolveColor(pen, "#000000");
+  const bgColor = resolveColor(background, "#ffffff");
 
   const clearCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -108,7 +110,7 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
     if (value) {
       const img = new Image();
       img.onload = () => {
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext("2d");
         if (!ctx) return;
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -116,9 +118,7 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
         setHasDrawn(true);
       };
       // Value from C# is raw base64 (byte[] serialized); add data URL prefix for img.src
-      img.src = value.startsWith('data:')
-        ? value
-        : `data:image/png;base64,${value}`;
+      img.src = value.startsWith("data:") ? value : `data:image/png;base64,${value}`;
     } else {
       clearCanvas();
       setTimeout(() => setHasDrawn(false), 0);
@@ -126,16 +126,14 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
     }
   }, [value, bgColor, clearCanvas]);
 
-  const getCanvasPoint = (
-    e: React.MouseEvent | React.TouchEvent
-  ): Point | null => {
+  const getCanvasPoint = (e: React.MouseEvent | React.TouchEvent): Point | null => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
-    if ('touches' in e) {
+    if ("touches" in e) {
       const touch = e.touches[0];
       if (!touch) return null;
       return {
@@ -152,13 +150,13 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
   const drawLine = (from: Point, to: Point) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     ctx.strokeStyle = penColor;
     ctx.lineWidth = penThickness;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
@@ -201,9 +199,9 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
     // Emit the canvas as raw base64 (C# deserializes base64 strings to byte[])
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const dataUrl = canvas.toDataURL('image/png');
-    const base64 = dataUrl.split(',')[1] ?? dataUrl;
-    eventHandler('OnChange', id, [base64]);
+    const dataUrl = canvas.toDataURL("image/png");
+    const base64 = dataUrl.split(",")[1] ?? dataUrl;
+    eventHandler("OnChange", id, [base64]);
   };
 
   const handleClear = () => {
@@ -211,33 +209,71 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
     pathsRef.current = [];
     currentPathRef.current = [];
     setHasDrawn(false);
-    eventHandler('OnChange', id, [null]);
+    eventHandler("OnChange", id, [null]);
   };
 
-  const handleBlur = () => {
-    if (events.includes('OnBlur')) {
-      eventHandler('OnBlur', id, []);
-    }
-  };
+  const handleBlur = useCallback(() => {
+    if (disabled) return;
+    if (!isFocusedRef.current) return;
+    if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+    isFocusedRef.current = false;
+  }, [disabled, events, eventHandler, id]);
+
+  const handleFocus = useCallback(() => {
+    if (disabled) return;
+    if (isFocusedRef.current) return;
+    if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+    isFocusedRef.current = true;
+  }, [disabled, events, eventHandler, id]);
+
+  // Ensure focus/blur are reliable even with a non-focusable canvas + drawing events.
+  useEffect(() => {
+    if (!events?.includes("OnBlur") && !events?.includes("OnFocus")) return;
+
+    const onPointerDown = (e: PointerEvent) => {
+      const el = containerRef.current;
+      if (!el) return;
+
+      const target = e.target as Node | null;
+      const clickedInside = !!target && el.contains(target);
+
+      if (clickedInside) {
+        el.focus();
+        handleFocus();
+        return;
+      }
+
+      // Clicked outside
+      if (isFocusedRef.current) {
+        handleBlur();
+      }
+    };
+
+    window.addEventListener("pointerdown", onPointerDown, true);
+    return () => window.removeEventListener("pointerdown", onPointerDown, true);
+  }, [events, handleBlur, handleFocus]);
 
   return (
     <div
       ref={containerRef}
       className={cn(
-        'relative w-full h-full rounded-md border border-input overflow-hidden',
-        disabled && 'opacity-50 cursor-not-allowed',
-        invalid && inputStyles.invalidInput
+        "relative w-full h-full rounded-md border border-input overflow-hidden",
+        disabled && "opacity-50 cursor-not-allowed",
+        invalid && inputStyles.invalidInput,
       )}
       onBlur={handleBlur}
-      tabIndex={0}
+      onFocus={handleFocus}
+      tabIndex={disabled ? -1 : 0}
+      onPointerDown={() => {
+        if (disabled) return;
+        containerRef.current?.focus();
+        handleFocus();
+      }}
       data-testid={dataTestId}
     >
       <canvas
         ref={canvasRef}
-        className={cn(
-          'block w-full h-full',
-          disabled ? 'cursor-not-allowed' : 'cursor-crosshair'
-        )}
+        className={cn("block w-full h-full", disabled ? "cursor-not-allowed" : "cursor-crosshair")}
         onMouseDown={handleStart}
         onMouseMove={handleMove}
         onMouseUp={handleEnd}

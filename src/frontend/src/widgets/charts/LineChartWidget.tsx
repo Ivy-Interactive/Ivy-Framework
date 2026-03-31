@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
-import ReactECharts from 'echarts-for-react';
-import { getHeight, getWidth } from '@/lib/styles';
-import { useThemeWithMonitoring } from '@/components/theme-provider';
+import React, { useCallback, useMemo, useRef } from "react";
+import ReactECharts from "echarts-for-react";
+import { getHeight, getWidth } from "@/lib/styles";
+import { useThemeWithMonitoring } from "@/components/theme-provider";
 import {
   generateDataProps,
   generateEChartGrid,
@@ -14,16 +14,16 @@ import {
   getColors,
   getTransformValueFn,
   generateEChartToolbox,
-} from './sharedUtils';
-import { getChartThemeColors } from './styles';
-import { LineChartWidgetProps, ChartType } from './chartTypes';
+} from "./sharedUtils";
+import { getChartThemeColors } from "./styles";
+import { LineChartWidgetProps, ChartType } from "./chartTypes";
 
 const EMPTY_ARRAY: never[] = [];
 
 const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   data = EMPTY_ARRAY,
-  width = 'Full',
-  height = 'Full',
+  width = "Full",
+  height = "Full",
   lines = EMPTY_ARRAY,
   cartesianGrid,
   xAxis = EMPTY_ARRAY,
@@ -34,7 +34,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   referenceLines = EMPTY_ARRAY,
   referenceAreas = EMPTY_ARRAY,
   referenceDots = EMPTY_ARRAY,
-  colorScheme = 'Default',
+  colorScheme = "Default",
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -43,48 +43,34 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   });
 
   // Extract chart-specific theme colors
-  const themeColors = useMemo(
-    () => getChartThemeColors(colors, isDark),
-    [colors, isDark]
-  );
+  const themeColors = useMemo(() => getChartThemeColors(colors, isDark), [colors, isDark]);
 
   // When height is Full (100%), use flex to expand. Otherwise use explicit height.
   const heightStyle = height ? getHeight(height) : {};
-  const isFull = height?.toLowerCase().startsWith('full');
+  const isFull = height?.toLowerCase().startsWith("full");
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    position: 'relative',
-    ...(isFull
-      ? { display: 'flex', flexDirection: 'column', height: '100%' }
-      : {}),
+    position: "relative",
+    ...(isFull ? { display: "flex", flexDirection: "column", height: "100%" } : {}),
   };
 
   const chartStyles: React.CSSProperties = {
-    ...(isFull
-      ? { flex: 1, minHeight: '200px' }
-      : { ...heightStyle, minHeight: '200px' }),
-    width: '100%',
+    ...(isFull ? { flex: 1, minHeight: "200px" } : { ...heightStyle, minHeight: "200px" }),
+    width: "100%",
   };
 
   const { categories, valueKeys } = generateDataProps(data);
 
   // Chart colors depend on theme (chromatic colors automatically adapt to light/dark mode)
-  const chartColors = useMemo(
-    () => getColors(colorScheme, colors),
-    [colorScheme, colors]
-  );
+  const chartColors = useMemo(() => getColors(colorScheme, colors), [colorScheme, colors]);
 
-  const { transform, largeSpread, minValue, maxValue } =
-    getTransformValueFn(data);
+  const { transform, largeSpread, minValue, maxValue } = getTransformValueFn(data);
 
   // Memoize option configuration
   const option = useMemo(
     () => ({
-      grid: generateEChartGrid(
-        cartesianGrid,
-        !!toolbox && toolbox.enabled !== false
-      ),
+      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false),
       xAxis: generateXAxis(
         ChartType.Line,
         categories as string[],
@@ -94,7 +80,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
           mutedForeground: themeColors.mutedForeground,
           fontSans: themeColors.fontSans,
         },
-        cartesianGrid
+        cartesianGrid,
       ),
       yAxis: generateYAxis(
         largeSpread,
@@ -108,9 +94,9 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
           mutedForeground: themeColors.mutedForeground,
           fontSans: themeColors.fontSans,
         },
-        cartesianGrid
+        cartesianGrid,
       ),
-      tooltip: generateTooltip(tooltip, 'shadow', {
+      tooltip: generateTooltip(tooltip, "shadow", {
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
         background: themeColors.background,
@@ -121,10 +107,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
       }),
-      textStyle: generateTextStyle(
-        themeColors.foreground,
-        themeColors.fontSans
-      ),
+      textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
       color: chartColors,
       series: generateSeries(
         data,
@@ -133,7 +116,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         transform,
         referenceDots,
         referenceLines,
-        referenceAreas
+        referenceAreas,
       ),
     }),
     [
@@ -156,16 +139,22 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
       referenceLines,
       referenceAreas,
       toolbox,
-    ]
+    ],
   );
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleChartReady = useCallback(() => {
+    containerRef.current?.setAttribute("data-chart-rendered", "true");
+  }, []);
+
   return (
-    <div style={styles}>
+    <div ref={containerRef} style={styles}>
       <ReactECharts
         option={option}
         style={chartStyles}
         notMerge={true} // Merge changes instead of full rebuild for better performance
         lazyUpdate={true}
+        onChartReady={handleChartReady}
       />
     </div>
   );

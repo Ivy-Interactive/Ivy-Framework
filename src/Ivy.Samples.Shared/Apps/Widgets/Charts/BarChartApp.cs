@@ -13,6 +13,9 @@ public class BarChartApp : SampleBase
             | new BarChart3()
             | new BarChart4()
             | new BarChart5()
+            | new BarChart6()
+            | new BarChart7()
+            | new BarChart8()
             | new BarChart9()
         ;
     }
@@ -163,6 +166,90 @@ public class BarChart5 : ViewBase
                 .Measure("Designers", e => e.Sum(f => f.Designers))
                 .Measure("QA", e => e.Sum(f => f.QA))
                 .Toolbox()
+        ;
+    }
+}
+
+public class BarChart6 : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Month = "Jan", Revenue = 45000 },
+            new { Month = "Feb", Revenue = 52000 },
+            new { Month = "Mar", Revenue = 58000 },
+            new { Month = "Apr", Revenue = 48000 },
+            new { Month = "May", Revenue = 61000 },
+            new { Month = "Jun", Revenue = 65000 },
+        };
+
+        return new Card().Title("TickFormatter (Currency Format)")
+            | new BarChart(data)
+                .ColorScheme(ColorScheme.Default)
+                .Bar(new Bar("Revenue", 1).Radius(0, 8, 8, 0))
+                .CartesianGrid(new CartesianGrid().Vertical())
+                .Tooltip()
+                .XAxis(new XAxis("Revenue").TickFormatter("C0").Domain(0, 80000))
+                .YAxis(new YAxis("Month").TickLine(false).AxisLine(false))
+                .Legend()
+        ;
+    }
+}
+
+public class BarChart7 : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Product = "Laptop", Sales = 120 },
+            new { Product = "Mouse", Sales = 850 }, // Outlier
+            new { Product = "Keyboard", Sales = 150 },
+            new { Product = "Monitor", Sales = 80 },
+            new { Product = "Headset", Sales = 110 },
+        };
+
+        return new Card().Title("Domain & AllowDataOverflow (Clip Outlier)")
+            | new BarChart(data)
+                .ColorScheme(ColorScheme.Default)
+                .Bar(new Bar("Sales", 1).Radius(0, 8, 8, 0))
+                .CartesianGrid(new CartesianGrid().Vertical())
+                .Tooltip()
+                .XAxis(new XAxis("Sales")
+                    .Domain(0, 200) // Explicitly set max to 200 to clip the outlier
+                    .AllowDataOverflow(true))
+                .YAxis(new YAxis("Product").TickLine(false).AxisLine(false))
+                .Legend()
+        ;
+    }
+}
+
+public class BarChart8 : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Day = "Mon", Users = 420 },
+            new { Day = "Tue", Users = 480 },
+            new { Day = "Wed", Users = 510 },
+            new { Day = "Thu", Users = 490 },
+            new { Day = "Fri", Users = 550 },
+            new { Day = "Sat", Users = 620 },
+            new { Day = "Sun", Users = 590 },
+        };
+
+        return new Card().Title("HideTickLabels (Clean Look)")
+            | new BarChart(data)
+                .ColorScheme(ColorScheme.Default)
+                .Bar(new Bar("Users", 1).Radius(0, 8, 8, 0))
+                .CartesianGrid(new CartesianGrid().Vertical())
+                .Tooltip()
+                // Keep the visual structure (lines) but remove cluttered text
+                .XAxis(new XAxis("Users").HideTickLabels())
+                .YAxis(new YAxis("Day").HideTickLabels())
+                .Legend()
         ;
     }
 }

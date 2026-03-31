@@ -1,8 +1,8 @@
-import Icon from '@/components/Icon';
-import { useEventHandler } from '@/components/event-handler';
-import { getWidth } from '@/lib/styles';
-import { cn } from '@/lib/utils';
-import React from 'react';
+import Icon from "@/components/Icon";
+import { useEventHandler } from "@/components/event-handler";
+import { getWidth } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import React from "react";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -32,13 +32,13 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
   events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
-  const hasSelectHandler = events.includes('OnSelect');
+  const hasSelectHandler = events.includes("OnSelect");
 
   const handleSelect = (index: number) => {
     if (!hasSelectHandler) return;
     if (index === selectedIndex) return; // Current step not clickable
     if (index > selectedIndex && !allowSelectForward) return; // Upcoming only if allowed
-    eventHandler('OnSelect', id, [index]);
+    eventHandler("OnSelect", id, [index]);
   };
 
   const styles: React.CSSProperties = {
@@ -47,11 +47,11 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
 
   const getStepState = (index: number) => {
     if (selectedIndex === null || selectedIndex === undefined) {
-      return 'upcoming';
+      return "upcoming";
     }
-    if (index < selectedIndex) return 'completed';
-    if (index === selectedIndex) return 'current';
-    return 'upcoming';
+    if (index < selectedIndex) return "completed";
+    if (index === selectedIndex) return "current";
+    return "upcoming";
   };
 
   return (
@@ -64,8 +64,7 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
           const isLineCompleted = index < selectedIndex;
           const isClickable =
             hasSelectHandler &&
-            (state === 'completed' ||
-              (state === 'upcoming' && allowSelectForward));
+            (state === "completed" || (state === "upcoming" && allowSelectForward));
 
           return (
             <React.Fragment key={item.label || item.symbol}>
@@ -74,36 +73,31 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
                 onClick={() => handleSelect(index)}
                 disabled={!isClickable}
                 className={cn(
-                  'relative z-10 flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-medium transition-all bg-background',
-                  state === 'completed' &&
+                  "relative z-10 flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-medium transition-all bg-background",
+                  state === "completed" &&
                     isClickable &&
-                    'border-primary bg-primary text-primary-foreground cursor-pointer hover:scale-110 hover:shadow-md',
-                  state === 'completed' &&
+                    "border-primary bg-primary text-primary-foreground cursor-pointer hover:scale-110 hover:shadow-md",
+                  state === "completed" &&
                     !isClickable &&
-                    'border-primary bg-primary text-primary-foreground',
-                  state === 'current' &&
-                    'border-primary bg-primary text-primary-foreground',
-                  state === 'upcoming' &&
+                    "border-primary bg-primary text-primary-foreground",
+                  state === "current" && "border-primary bg-primary text-primary-foreground",
+                  state === "upcoming" &&
                     isClickable &&
-                    'border-muted-foreground/30 text-muted-foreground/50 cursor-pointer hover:border-primary/50 hover:text-muted-foreground hover:scale-105',
-                  state === 'upcoming' &&
+                    "border-muted-foreground/30 text-muted-foreground/50 cursor-pointer hover:border-primary/50 hover:text-muted-foreground hover:scale-105",
+                  state === "upcoming" &&
                     !isClickable &&
-                    'border-muted-foreground/30 text-muted-foreground/50'
+                    "border-muted-foreground/30 text-muted-foreground/50",
                 )}
               >
-                {item.icon ? (
-                  <Icon name={item.icon} size={16} />
-                ) : (
-                  item.symbol || index + 1
-                )}
+                {item.icon ? <Icon name={item.icon} size={16} /> : item.symbol || index + 1}
               </button>
 
               {/* Connector line between steps */}
               {!isLast && (
                 <div
                   className={cn(
-                    'flex-1 h-0.5 mx-2',
-                    isLineCompleted ? 'bg-primary' : 'bg-muted-foreground/30'
+                    "flex-1 h-0.5 mx-2",
+                    isLineCompleted ? "bg-primary" : "bg-muted-foreground/30",
                   )}
                 />
               )}
@@ -124,25 +118,25 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
               {/* Label container - same width as circle (w-8) */}
               <div
                 className={cn(
-                  'flex flex-col flex-shrink-0 w-8',
-                  isFirst && 'items-start',
-                  isLast && 'items-end',
-                  !isFirst && !isLast && 'items-center'
+                  "flex flex-col flex-shrink-0 w-8",
+                  isFirst && "items-start",
+                  isLast && "items-end",
+                  !isFirst && !isLast && "items-center",
                 )}
               >
                 <div
                   className={cn(
-                    'flex flex-col whitespace-nowrap',
-                    isFirst && 'items-start text-left',
-                    isLast && 'items-end text-right',
-                    !isFirst && !isLast && 'items-center text-center'
+                    "flex flex-col whitespace-nowrap",
+                    isFirst && "items-start text-left",
+                    isLast && "items-end text-right",
+                    !isFirst && !isLast && "items-center text-center",
                   )}
                 >
                   {item.label && (
                     <span
                       className={cn(
-                        'text-sm font-medium',
-                        state === 'upcoming' && 'text-muted-foreground/50'
+                        "text-sm font-medium",
+                        state === "upcoming" && "text-muted-foreground/50",
                       )}
                     >
                       {item.label}
@@ -151,10 +145,8 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
                   {item.description && (
                     <span
                       className={cn(
-                        'text-sm',
-                        state === 'upcoming'
-                          ? 'text-muted-foreground/40'
-                          : 'text-muted-foreground'
+                        "text-sm",
+                        state === "upcoming" ? "text-muted-foreground/40" : "text-muted-foreground",
                       )}
                     >
                       {item.description}

@@ -128,7 +128,8 @@ AUTH0_DOMAIN="your-auth0-domain"
 AUTH0_CLIENT_ID="your-client-id"
 
 ### Project settings
-ASPNETCORE_ENVIRONMENT="Production"
+IVY_ENVIRONMENT="Production"
+BASE_PATH="/my-app"
 ```
 
 ### Security and Configuration

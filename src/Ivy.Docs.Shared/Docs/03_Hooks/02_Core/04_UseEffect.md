@@ -55,6 +55,28 @@ public class BasicEffectView : ViewBase
 }
 ```
 
+## Important: UseEffect with State Dependencies Does Not Fire on Initial Render
+
+When you pass a state dependency to `UseEffect`, the effect only fires when the dependency value **changes** between renders. It does **not** fire on the first render.
+
+If you need data to be available immediately, initialize your state with the data directly:
+
+```csharp
+// WRONG: Table will be empty on first load because the effect won't fire until count changes
+var items = UseState(() => new List<Item>());
+UseEffect(() => { items.Set(GenerateItems(count.Value)); }, count);
+
+// CORRECT: Initialize state with data directly
+var items = UseState(() => GenerateItems(10));
+UseEffect(() => { items.Set(GenerateItems(count.Value)); }, count);
+```
+
+<Callout type="Warning">
+**React developers:** This differs from React's `useEffect`, which fires both on mount and when dependencies change. In Ivy, `UseEffect` with state dependencies uses `AfterChange` semantics — it only reacts to subsequent changes.
+
+If you need logic to run on mount **and** on state change, use two separate effects: one without a trigger (for mount) and one with the state dependency (for changes).
+</Callout>
+
 ## Effect Overloads
 
 Ivy provides four different overloads of `UseEffect` to handle various scenarios:
@@ -478,6 +500,41 @@ Key points:
 - Use `UseRef` to track processed state without triggering re-renders
 - Always check if the meaningful value actually changed before taking action
 - For file uploads, guard on the file name or a unique identifier
+
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Why is my component empty on first render even though I have a UseEffect that populates state?
+</Summary>
+<Body>
+
+`UseEffect` with a state dependency only fires when that dependency **changes** — it does not fire on the initial render. If your component relies on the effect to populate data, the first render will show an empty or default state.
+
+```csharp
+// This will NOT populate items on the first render:
+var count = UseState(10);
+var items = UseState(() => new List<Item>());
+UseEffect(() => { items.Set(GenerateItems(count.Value)); }, count);
+```
+
+**Fix:** Initialize your state with the data directly:
+
+```csharp
+var count = UseState(10);
+var items = UseState(() => GenerateItems(count.Value));
+UseEffect(() => { items.Set(GenerateItems(count.Value)); }, count);
+```
+
+Alternatively, if you need the effect to run on mount as well, add a separate mount effect:
+
+```csharp
+var count = UseState(10);
+var items = UseState(() => new List<Item>());
+UseEffect(() => { items.Set(GenerateItems(count.Value)); }); // Runs on mount
+UseEffect(() => { items.Set(GenerateItems(count.Value)); }, count); // Runs on change
+```
 
 </Body>
 </Details>
