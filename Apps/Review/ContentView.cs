@@ -256,10 +256,8 @@ public class ContentView(
                 foreach (var file in screenshotFiles)
                 {
                     var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(file)}";
-                    var fileCapture = file;
-                    screenshotsLayout |= new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(file) }
-                        .Height(Size.Units(15)).Width(Size.Units(22))
-                        .OnClick(() => openArtifact.Set(fileCapture));
+                    screenshotsLayout |= new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(file), Overlay = true }
+                        .Height(Size.Units(15)).Width(Size.Units(22));
                 }
                 artifactsLayout |= screenshotsLayout;
             }
@@ -288,16 +286,10 @@ public class ContentView(
             if (openArtifact.Value is { } artifactPath)
             {
                 var ext = Path.GetExtension(artifactPath).ToLowerInvariant();
-                var isImg = new[] { ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp" }.Contains(ext);
                 var isVideo = new[] { ".webm", ".mp4", ".avi", ".mov" }.Contains(ext);
 
                 object sheetContent;
-                if (isImg)
-                {
-                    var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(artifactPath)}";
-                    sheetContent = new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(artifactPath) };
-                }
-                else if (isVideo)
+                if (isVideo)
                 {
                     var videoUrl = $"/ivy/local-file?path={Uri.EscapeDataString(artifactPath)}";
                     sheetContent = new VideoPlayer(source: videoUrl, controls: true, autoplay: true);
