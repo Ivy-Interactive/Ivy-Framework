@@ -57,9 +57,11 @@ public class JobsApp : ViewBase
             .Hidden(t => t.Id)
             .Filterable(t => t.Timer, false)
             .Filterable(t => t.LastOutput, false)
+            .Sortable(t => t.Timer, false)
+            .Sortable(t => t.LastOutput, false)
             .Config(c =>
             {
-                c.AllowSorting = false;
+                c.AllowSorting = true;
                 c.AllowFiltering = true;
                 c.ShowSearch = false;
                 c.SelectionMode = SelectionModes.None;
