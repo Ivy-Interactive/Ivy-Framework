@@ -714,7 +714,7 @@ export const typography: Record<string, string> = {
   hr: "border-t border-border",
 
   // Expandable sections
-  details: "my-4 rounded-lg border border-border bg-card shadow-sm overflow-hidden",
+  details: "my-2 rounded-lg border border-border bg-card shadow-sm overflow-hidden",
   summary:
     "cursor-pointer select-none px-4 py-3 font-medium hover:bg-accent/50 transition-colors list-none [&::-webkit-details-marker]:hidden",
 };

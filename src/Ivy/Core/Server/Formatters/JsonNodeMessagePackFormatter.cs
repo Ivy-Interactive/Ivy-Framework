@@ -148,6 +148,58 @@ public sealed class JsonNodeMessagePackFormatter : IMessagePackFormatter<JsonNod
     }
 }
 
+/// <summary>
+/// A specialized MessagePack resolver that ensures all types inheriting from <see cref="JsonNode"/>
+/// are handled by the <see cref="JsonNodeMessagePackFormatter"/>.
+/// This is critical for serializing internal types like <c>JsonValuePrimitive&lt;T&gt;</c>
+/// when they are encountered dynamically (e.g., in anonymous objects or as part of an <see cref="object"/> property).
+/// </summary>
+public sealed class JsonNodeResolver : IFormatterResolver
+{
+    public static readonly IFormatterResolver Instance = new JsonNodeResolver();
+
+    private JsonNodeResolver() { }
+
+    public IMessagePackFormatter<T>? GetFormatter<T>()
+    {
+        if (typeof(JsonNode).IsAssignableFrom(typeof(T)))
+        {
+            return (IMessagePackFormatter<T>)JsonNodeFormatterCache<T>.Formatter;
+        }
+        return null;
+    }
+
+    private static class JsonNodeFormatterCache<T>
+    {
+        public static readonly object Formatter;
+
+        static JsonNodeFormatterCache()
+        {
+            var formatterType = typeof(JsonNodeSubtypeFormatter<>).MakeGenericType(typeof(T));
+            Formatter = Activator.CreateInstance(formatterType)!;
+        }
+    }
+}
+
+/// <summary>
+/// A generic formatter that wraps the base <see cref="JsonNodeMessagePackFormatter"/>
+/// to provide an <see cref="IMessagePackFormatter{T}"/> for any <see cref="JsonNode"/> subtype.
+/// </summary>
+public sealed class JsonNodeSubtypeFormatter<T> : IMessagePackFormatter<T> where T : class
+{
+    private static readonly JsonNodeMessagePackFormatter _base = new();
+
+    public void Serialize(ref MessagePackWriter writer, T value, MessagePackSerializerOptions options)
+    {
+        _base.Serialize(ref writer, value as JsonNode, options);
+    }
+
+    public T Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+    {
+        return (_base.Deserialize(ref reader, options) as T)!;
+    }
+}
+
 public sealed class JsonObjectMessagePackFormatter : IMessagePackFormatter<JsonObject?>
 {
     private static readonly JsonNodeMessagePackFormatter _base = new();

@@ -133,6 +133,13 @@ public class ButtonApp() : SampleBase
                    | new Button("Full Rounded", eventHandler, variant: ButtonVariant.Ai).BorderRadius(BorderRadius.Full)
                )
 
+               | Text.H2("Badges")
+               | (Layout.Horizontal().Gap(8)
+                   | new Button("Inbox", eventHandler).Badge("3").ShortcutKey("i")
+                   | new Button("Notifications", eventHandler, variant: ButtonVariant.Secondary).Badge("99+")
+                   | new Button("Updates", eventHandler, variant: ButtonVariant.Outline).Badge("New")
+               )
+
                | Text.H2("Keyboard Shortcuts")
                | (Layout.Horizontal().Gap(8)
                    | new Button("Search", eventHandler, variant: ButtonVariant.Primary).ShortcutKey("Ctrl+K")

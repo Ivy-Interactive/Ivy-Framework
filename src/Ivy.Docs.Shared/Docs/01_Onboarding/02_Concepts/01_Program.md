@@ -45,6 +45,7 @@ var server = new Server();
 var server = new Server(new ServerArgs
 {
     Port = 8080,
+    BasePath = "/my-app",
     Verbose = true,
     Browse = true,
     Silent = false
@@ -56,6 +57,7 @@ var server = new Server(new ServerArgs
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `Port` | `int` | `5010` | Port number for the server |
+| `BasePath` | `string?` | `null` | URL base path prefix (for example `/my-app`) |
 | `Verbose` | `bool` | `false` | Enable verbose logging |
 | `Browse` | `bool` | `false` | Automatically open browser on startup |
 | `Silent` | `bool` | `false` | Suppress startup messages |
@@ -165,7 +167,10 @@ server.UseBuilder(builder =>
 The server automatically reads configuration from environment variables:
 
 - `PORT` - Override the default port
+- `BASE_PATH` - Serve the app from a URL prefix
 - `VERBOSE` - Enable verbose logging
+
+When `BasePath` is set (via `ServerArgs`, CLI, or environment variable), Ivy applies ASP.NET Core `UsePathBase()` middleware to ensure routing and link generation work correctly under that prefix.
 
 ### Configuration Sources
 
