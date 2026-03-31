@@ -55,10 +55,12 @@ public class JobsApp : ViewBase
             .Header(t => t.StatusMessage, "Status Message")
             .Renderer(t => t.Status, new LabelsDisplayRenderer())
             .Hidden(t => t.Id)
+            .Filterable(t => t.Timer, false)
+            .Filterable(t => t.LastOutput, false)
             .Config(c =>
             {
                 c.AllowSorting = false;
-                c.AllowFiltering = false;
+                c.AllowFiltering = true;
                 c.ShowSearch = false;
                 c.SelectionMode = SelectionModes.None;
                 c.ShowIndexColumn = false;
