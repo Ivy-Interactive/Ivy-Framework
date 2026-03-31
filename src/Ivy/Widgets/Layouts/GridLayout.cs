@@ -43,6 +43,8 @@ public class GridDefinition
 
     public Size?[]? RowHeights { get; set; } = null;
 
+    public Align? AlignContent { get; set; } = null;
+
     public Func<int, object, object>? HeaderBuilder { get; set; } = null;
 
     public Func<int, object, object>? FooterBuilder { get; set; } = null;
@@ -63,6 +65,7 @@ public record GridLayout : WidgetBase<GridLayout>
         ColumnGap = def.ColumnGap;
         Padding = def.Padding;
         AutoFlow = def.AutoFlow;
+        AlignContent = def.AlignContent;
         Width = def.Width;
         Height = def.Height;
         ColumnWidths = def.ColumnWidths;
