@@ -86,34 +86,23 @@ public class DashboardApp : ViewBase
                 c.BatchSize = 7;
             });
 
-        // Per-project breakdown
-        var projectGroups = plans.GroupBy(p => p.Project).OrderBy(g => g.Key);
-        var projectSection = Layout.Vertical().Gap(1).Padding(2);
-        projectSection |= Text.Block("Per-Project Breakdown").Bold();
+        // Per-project breakdown chart
+        var projectData = plans
+            .GroupBy(p => p.Project)
+            .Select(g => new { Project = g.Key, Count = g.Count() })
+            .OrderByDescending(g => g.Count)
+            .ToArray();
 
-        foreach (var group in projectGroups)
-        {
-            var statusCounts = group.GroupBy(p => p.Status)
-                .OrderBy(s => s.Key)
-                .Select(s => $"{s.Key}: {s.Count()}")
-                .ToList();
-
-            var badges = Layout.Horizontal().Gap(2)
-                | Text.Block(group.Key).Bold();
-            foreach (var badge in statusCounts)
-            {
-                badges |= Text.Muted(badge);
-            }
-
-            projectSection |= new Expandable(
-                header: $"{group.Key} ({group.Count()} plans)",
-                content: badges
-            );
-        }
+        var projectChart = projectData.ToPieChart(
+            e => e.Project,
+            e => e.Sum(f => f.Count),
+            PieChartStyles.Donut,
+            total: new PieChartTotal(plans.Count.ToString(), "Total Plans")
+        );
 
         var content = Layout.Vertical().Gap(2)
             | dataTable
-            | projectSection;
+            | projectChart;
 
         return new HeaderLayout(
             header: statsRow,
