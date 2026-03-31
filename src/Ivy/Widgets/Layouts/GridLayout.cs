@@ -85,6 +85,8 @@ public record GridLayout : WidgetBase<GridLayout>
 
     [Prop] public AutoFlow? AutoFlow { get; set; }
 
+    [Prop] public Align? AlignContent { get; set; }
+
     [Prop] public Size?[]? ColumnWidths { get; set; }
 
     [Prop] public Size?[]? RowHeights { get; set; }
