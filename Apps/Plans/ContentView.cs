@@ -117,16 +117,7 @@ public class ContentView(
         {
             scrollableContent |= editContent.ToCodeInput()
                 .Language(Languages.Markdown)
-                .Width(Size.Full())
-                .OnBlur(() =>
-                {
-                    var plan = selectedPlanRef.Value;
-                    if (plan != null)
-                    {
-                        _planService.SavePlan(plan.FolderName, editContent.Value);
-                        _refreshPlans();
-                    }
-                });
+                .Width(Size.Full());
         }
         else
         {
