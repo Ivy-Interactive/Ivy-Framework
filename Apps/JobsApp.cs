@@ -10,7 +10,9 @@ public class JobsApp : ViewBase
     public override object? Build()
     {
         var jobService = UseService<JobService>();
+        var planService = UseService<PlanReaderService>();
         var client = UseService<IClientProvider>();
+        var nav = this.UseNavigation();
         var refreshToken = UseRefreshToken();
         UseInterval(() =>
         {
@@ -63,6 +65,7 @@ public class JobsApp : ViewBase
                 c.BatchSize = 50;
             })
             .RowActions(
+                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan"),
                 new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job"),
                 new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job")
             )
@@ -74,7 +77,15 @@ public class JobsApp : ViewBase
 
                 if (job != null)
                 {
-                    if (tag == "stop-job")
+                    if (tag == "view-plan")
+                    {
+                        if (!string.IsNullOrEmpty(job.PlanFile))
+                        {
+                            var fullPath = Path.Combine(planService.PlansDirectory, job.PlanFile);
+                            nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(fullPath));
+                        }
+                    }
+                    else if (tag == "stop-job")
                     {
                         if (job.Status == "Running")
                         {
