@@ -49,7 +49,7 @@ For each question in the `>>` lines:
 
 - Create a new revision file (next sequential number, e.g. `002.md`)
 - Incorporate the intent of each `>>` instruction into the updated plan
-- Answer questions in the `## Questions` section using `<details>` tags from the plan template:
+- Answer questions in a `## Questions` section (placed after the title, before `## Problem`) using `<details>` tags. If the updated revision has no questions (all have been answered and no new ones arose), omit the `## Questions` section entirely rather than leaving it empty. Format:
   ```html
   <details>
   <summary>Question</summary>

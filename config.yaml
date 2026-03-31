@@ -222,8 +222,6 @@ verifications:
 planTemplate: |
   # {title}
 
-  ## Questions
-
   ## Problem
 
   ## Solution
