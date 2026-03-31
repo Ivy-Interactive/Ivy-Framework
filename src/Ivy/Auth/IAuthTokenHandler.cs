@@ -3,7 +3,7 @@ namespace Ivy;
 
 public interface IAuthTokenHandler
 {
-    Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, string? basePath = null, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }

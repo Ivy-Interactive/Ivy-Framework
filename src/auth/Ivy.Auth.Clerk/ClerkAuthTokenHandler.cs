@@ -70,10 +70,10 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
         HttpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
     }
 
-    public async Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    public async Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, string? basePath = null, CancellationToken cancellationToken = default)
     {
-        _origin = $"{requestScheme}://{requestHost}";
-        _callbackBaseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost);
+        _origin = basePath != null ? $"{requestScheme}://{requestHost}{basePath}" : $"{requestScheme}://{requestHost}";
+        _callbackBaseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost, basePath);
 
         var frontendClient = MakeFrontendApiClient(authSession);
         if (IsProduction)
