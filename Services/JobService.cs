@@ -285,6 +285,18 @@ public class JobService
         JobsChanged?.Invoke();
     }
 
+    public void ClearCompletedJobs()
+    {
+        var completedIds = _jobs.Values
+            .Where(j => j.Status == "Completed")
+            .Select(j => j.Id)
+            .ToList();
+        foreach (var id in completedIds)
+            _jobs.TryRemove(id, out _);
+        if (completedIds.Count > 0)
+            JobsChanged?.Invoke();
+    }
+
     public List<JobItem> GetJobs()
     {
         return _jobs.Values.OrderByDescending(j => j.StartedAt ?? DateTime.MinValue).ToList();
