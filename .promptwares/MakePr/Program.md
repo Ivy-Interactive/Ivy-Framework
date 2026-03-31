@@ -26,6 +26,7 @@ Read `config.yaml` (from `ConfigPath`) for project repos and their `prRule` sett
 - Read `plan.yaml` from the plan folder (project, commits, repos)
 - Read the latest revision for the plan title and description
 - Read config.yaml to find the `prRule` for each repo
+- Read the project's `color` from config.yaml for Slack notification formatting
 
 ### 2. For Each Worktree
 
@@ -89,14 +90,14 @@ Append each PR URL to the `prs` list in `plan.yaml`.
 **If a screenshot URL exists** — use `notify slack done-by-niels --json` with Block Kit JSON:
 
 ```bash
-notify slack done-by-niels --json '{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":"*Title:* <plan-title>\n*Project:* <project>\n*PR:* <pr-link>"},"accessory":{"type":"image","image_url":"<screenshot-url>","alt_text":"screenshot"}}]}'
+notify slack done-by-niels --json '{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":"*Title:* <plan-title>\n*Project:* <color-emoji> <project>\n*PR:* <pr-link>"},"accessory":{"type":"image","image_url":"<screenshot-url>","alt_text":"screenshot"}}]}'
 ```
 
 **If no screenshot URL** — fall back to plain text:
 
 ```bash
 notify slack done-by-niels --message "*Title:* <plan-title>
-*Project:* <project>
+*Project:* <color-emoji> <project>
 *PR:* <pr-link>"
 ```
 
@@ -105,6 +106,16 @@ For both variants:
 - Replace `<project>` with the project from plan.yaml
 - Replace `<pr-link>` with `<url|owner/repo#number>` for each PR
 - Replace `<screenshot-url>` with the extracted URL (Block Kit variant only)
+- Replace `<color-emoji>` with a Slack emoji based on the project's `color` from config.yaml:
+  - Blue → `:large_blue_circle:`
+  - Purple → `:purple_circle:`
+  - Teal → `:large_green_circle:`
+  - Amber → `:large_yellow_circle:`
+  - Emerald → `:large_green_circle:`
+  - Sky → `:large_blue_circle:`
+  - Slate → `:white_circle:`
+  - Red → `:red_circle:`
+  - If no color is set, omit the emoji
 
 ### Rules
 

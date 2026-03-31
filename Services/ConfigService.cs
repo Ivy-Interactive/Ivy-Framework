@@ -21,6 +21,7 @@ public record RepoRef
 public record ProjectConfig
 {
     public string Name { get; set; } = "";
+    public string Color { get; set; } = "";
     public List<RepoRef> Repos { get; set; } = new();
     public List<ProjectVerificationRef> Verifications { get; set; } = new();
     public string Context { get; set; } = "";
@@ -126,4 +127,19 @@ public class ConfigService
 
     public BadgeVariant GetBadgeVariant(string level) =>
         Enum.TryParse<BadgeVariant>(_settings.Levels.FirstOrDefault(l => l.Name == level)?.Badge ?? "Outline", out var v) ? v : BadgeVariant.Outline;
+
+    public Colors? GetProjectColor(string projectName)
+    {
+        var colorStr = GetProject(projectName)?.Color;
+        return !string.IsNullOrEmpty(colorStr) && Enum.TryParse<Colors>(colorStr, out var c) ? c : null;
+    }
+}
+
+public static class ProjectBadgeExtensions
+{
+    public static Badge WithProjectColor(this Badge badge, ConfigService config, string projectName)
+    {
+        var color = config.GetProjectColor(projectName);
+        return color.HasValue ? badge.Color(color.Value) : badge;
+    }
 }
