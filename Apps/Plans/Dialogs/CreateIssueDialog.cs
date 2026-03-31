@@ -56,7 +56,7 @@ public class CreateIssueDialog(
 
         return new Dialog(
             _ => _dialogOpen.Set(false),
-            new DialogHeader("Create GitHub Issue #{_selectedPlan.Id}"),
+            new DialogHeader($"Create GitHub Issue #{_selectedPlan.Id}"),
             new DialogBody(
                 Layout.Vertical().Gap(3)
                     | _selectedRepoState.ToSelectInput(repositoryOptions.ToOptions())
