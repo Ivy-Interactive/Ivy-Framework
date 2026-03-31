@@ -61,22 +61,6 @@ projects:
       - Ivy.Internals/Workflows/ — workflow definitions
       - Ivy.Agent/Tools/ — tool implementations
 
-  - name: Mcp
-    repos:
-      - path: D:\Repos\_Ivy\Ivy-Mcp
-        prRule: yolo
-    verifications:
-      - name: DotnetBuild
-        required: true
-      - name: DotnetFormat
-        required: true
-      - name: DotnetTest
-        required: true
-      - name: CheckResult
-        required: false
-    context: |
-      MCP service for IvyQuestions and IvyDocs.
-
   - name: Console
     repos:
       - path: D:\Repos\_Ivy\Ivy
@@ -94,6 +78,13 @@ projects:
       Console/TUI client. Key folders:
       - Ivy.Console/ — desktop client
       - Ivy.Internals/ — shared internals
+
+  - name: MyPromptwares
+    repos:
+      - path: D:\Repos\_Personal\MyPromptwares
+        prRule: yolo
+    context: |
+      Personal promptwares.
 
   - name: Scripts
     repos:
@@ -125,6 +116,22 @@ projects:
       This project uses the Ivy Framework - there's CLI helper methods you can use: 
       ivy docs AGENTS.md 
       ivy question "How do I make a button in Ivy?"
+
+  - name: Mcp
+    repos:
+      - path: D:\Repos\_Ivy\Ivy-Mcp
+        prRule: yolo
+    verifications:
+      - name: DotnetBuild
+        required: true
+      - name: DotnetFormat
+        required: true
+      - name: DotnetTest
+        required: true
+      - name: CheckResult
+        required: false
+    context: |
+      MCP service for IvyQuestions and IvyDocs.
 
 verifications:
   - name: DotnetBuild

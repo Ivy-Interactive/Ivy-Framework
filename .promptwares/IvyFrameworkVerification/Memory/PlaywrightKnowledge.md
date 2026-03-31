@@ -849,3 +849,24 @@ In headless mode with File System Access API disabled, the save dialog uses `<a 
 - **No "Unknown component type" error**: With both frontends rebuilt, the external widget loads and renders correctly via the ExternalWidgetRegistry
 - 11 tests, 0 fix rounds (clean first pass excluding 2 compilation fixes: icon name + CS1660), all passed, logs clean
 - **Project location**: `D:\Tendril\Plans\01177-FixDiffViewJsxRuntimeErrorInExternalWidget\artifacts\sample\`
+
+### 2026-03-31 — Markdown Popover Links (`[text](## "content")` syntax)
+- **PopoverLink component**: Renders as `<span role="button">` with `textDecoration: underline dotted` and `cursor: pointer`. Uses Radix `<Popover>` with click trigger
+- **Locating popover triggers**: `page.locator('span[role="button"]')` finds all popover link triggers. Use `getByRole("button", { name: "link text" })` for specific ones
+- **Popover content locator**: After clicking trigger, content appears in Radix PopoverContent — use `getByText("popover content text")` to find it
+- **List item popovers**: When popover trigger text (e.g., "popover") appears in headings too, scope with `page.locator('li span[role="button"]')` to target list-item popovers specifically
+- **Dismiss behavior**: Click `page.locator("body").click({ position: { x: 10, y: 10 } })` to dismiss. Only one popover visible at a time (Radix default)
+- **OnLinkClick interaction**: Popover links (`href="##"`) do NOT trigger the `OnLinkClick` handler — they're intercepted before the link handler runs. Regular links still fire OnLinkClick
+- **urlTransform preserves `##`**: The `urlTransform` callback returns `##` as-is, preventing it from being sanitized to `#`
+- 16 tests, 1 fix round (test locator fixes only), all passed, logs clean
+- **Project location**: `D:\Tendril\Plans\01234-MarkdownLinksWithPopoverSupport\artifacts\sample\`
+
+### 2026-03-31 — Nested Code Block Rendering Fix (normalizeNestedFences)
+- **normalizeNestedFences preprocessor**: Added to MarkdownRenderer.tsx — increases outer fence backtick counts when inner fences would prematurely close them per CommonMark spec. Applied via `useMemo` before passing content to `ReactMarkdown`
+- **Same-length fences handled correctly**: Content with triple-fenced blocks nested inside triple-fenced blocks renders properly — the preprocessor increases outer fence to 4+ backticks
+- **Double/triple nesting works**: Escalates fence lengths recursively for deeply nested blocks
+- **Plain code blocks unchanged**: Non-nested blocks pass through without modification
+- **Markdown OnLinkClick with nested blocks**: Links before and after nested code blocks fire correctly; no interaction issues
+- **Link locator issue**: `getByRole("link", { name: "another link" })` timed out even though text was in body — use `page.locator("a").filter({ hasText: "text" }).first()` for more reliable anchor element targeting in Markdown content
+- 18 tests, 1 fix round (link locator fix), all passed, logs clean
+- **Project location**: `D:\Tendril\Plans\01237-FixNestedCodeBlockRenderingInMarkdownWidget\artifacts\sample\`
