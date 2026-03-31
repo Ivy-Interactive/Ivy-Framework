@@ -113,7 +113,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     /** Pre (container): padding, dimensions, typography. Padding here applies to all lines. */
     const preStyle = useMemo<CSSProperties>(() => {
       const style: CSSProperties = {
-        ...getWidth(width),
+        minWidth: "100%",
         ...getHeight(height),
         margin: 0,
         wordBreak: "normal",
