@@ -114,7 +114,7 @@ public class ContentView(
         }
         else
         {
-            scrollableContent |= new Markdown(_selectedPlan.LatestRevisionContent)
+            scrollableContent |= new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
                 .DangerouslyAllowLocalFiles()
                 .OnLinkClick(url =>
                 {
@@ -187,9 +187,24 @@ public class ContentView(
             }
             else
             {
-                var fileContent = File.Exists(filePath2) ? File.ReadAllText(filePath2) : "File not found.";
-                var language = FileApp.GetLanguage(ext);
-                sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
+                if (File.Exists(filePath2))
+                {
+                    var fileContent = File.ReadAllText(filePath2);
+                    var language = FileApp.GetLanguage(ext);
+                    sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
+                }
+                else
+                {
+                    var fileName = Path.GetFileName(filePath2);
+                    var repoPaths = _selectedPlan.Repos.Count > 0
+                        ? _selectedPlan.Repos
+                        : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
+                    var suggestions = MarkdownHelper.FindFilesInRepos(repoPaths, fileName);
+                    var notFoundContent = suggestions.Count > 0
+                        ? $"File not found.\n\nDid you mean:\n{string.Join("\n", suggestions.Select(s => $"- `{s}`"))}"
+                        : "File not found.";
+                    sheetContent = new Markdown(notFoundContent);
+                }
             }
 
             elements.Add(new Sheet(

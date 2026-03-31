@@ -252,7 +252,7 @@ public class ContentView(
             // Screenshots — horizontal thumbnail layout
             if (artifacts.TryGetValue("screenshots", out var screenshotFiles))
             {
-                var screenshotsLayout = Layout.Horizontal().Gap(2).Wrap(Wrap.Wrap);
+                var screenshotsLayout = Layout.Horizontal().Gap(2).Wrap();
                 foreach (var file in screenshotFiles)
                 {
                     var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(file)}";
@@ -267,7 +267,7 @@ public class ContentView(
             // Videos — clickable buttons
             if (artifacts.TryGetValue("videos", out var videoFiles))
             {
-                var videosLayout = Layout.Horizontal().Gap(2).Wrap(Wrap.Wrap);
+                var videosLayout = Layout.Horizontal().Gap(2).Wrap();
                 foreach (var file in videoFiles)
                 {
                     var fileName = Path.GetFileName(file);
@@ -318,7 +318,7 @@ public class ContentView(
 
         // Plan content
         content |= Text.Block("Plan").Bold();
-        content |= new Markdown(_selectedPlan.LatestRevisionContent)
+        content |= new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
             .DangerouslyAllowLocalFiles()
             .OnLinkClick(url =>
             {
@@ -342,9 +342,24 @@ public class ContentView(
             }
             else
             {
-                var fileContent = File.Exists(filePath2) ? File.ReadAllText(filePath2) : "File not found.";
-                var language = FileApp.GetLanguage(Path.GetExtension(filePath2));
-                sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
+                if (File.Exists(filePath2))
+                {
+                    var fileContent = File.ReadAllText(filePath2);
+                    var language = FileApp.GetLanguage(Path.GetExtension(filePath2));
+                    sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
+                }
+                else
+                {
+                    var fileName = Path.GetFileName(filePath2);
+                    var repoPaths = _selectedPlan.Repos.Count > 0
+                        ? _selectedPlan.Repos
+                        : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
+                    var suggestions = MarkdownHelper.FindFilesInRepos(repoPaths, fileName);
+                    var notFoundContent = suggestions.Count > 0
+                        ? $"File not found.\n\nDid you mean:\n{string.Join("\n", suggestions.Select(s => $"- `{s}`"))}"
+                        : "File not found.";
+                    sheetContent = new Markdown(notFoundContent);
+                }
             }
 
             content |= new Sheet(
