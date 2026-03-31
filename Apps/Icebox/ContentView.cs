@@ -186,7 +186,7 @@ public class ContentView(
                 onClose: () => openFile.Set(null),
                 content: sheetContent,
                 title: Path.GetFileName(filePath2)
-            ));
+            ).Width(Size.Half()));
         }
 
         return new Fragment(elements.ToArray());

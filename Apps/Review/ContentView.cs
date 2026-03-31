@@ -115,7 +115,7 @@ public class ContentView(
                     onClose: () => openVerification.Set(null),
                     content: new Markdown(reportContent).DangerouslyAllowLocalFiles(),
                     title: verName
-                );
+                ).Width(Size.Half());
             }
         }
 
@@ -255,7 +255,7 @@ public class ContentView(
                     onClose: () => openArtifact.Set(null),
                     content: sheetContent,
                     title: Path.GetFileName(artifactPath)
-                );
+                ).Width(Size.Half());
             }
         }
 
@@ -282,7 +282,7 @@ public class ContentView(
                             }
                         }),
                     title: "Original Plan"
-                );
+                ).Width(Size.Half());
             }
         }
         else
@@ -322,7 +322,7 @@ public class ContentView(
                 onClose: () => openFile.Set(null),
                 content: sheetContent,
                 title: Path.GetFileName(filePath2)
-            );
+            ).Width(Size.Half());
         }
 
         // Action bar
