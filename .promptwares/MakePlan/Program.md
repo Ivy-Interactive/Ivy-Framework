@@ -87,7 +87,7 @@ If the plan references other plans (from `[number]` syntax in args), add them to
 
 ### 4.5. Questions Section
 
-Only include content in the `## Questions` section if you have genuine questions for the user that block the plan. If there are no questions, leave the section empty (just the heading). Do NOT include placeholder question/answer blocks.
+Only include `## Questions` if you have genuine questions for the user that block the plan. Place it immediately after the title (before `## Problem`). If there are no questions, **omit the section entirely** — do not include an empty heading or placeholder text.
 
 ### 5. Verification Checklist
 

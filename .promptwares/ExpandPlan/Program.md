@@ -54,6 +54,7 @@ Example:
 
 ### Rules
 
+- If the expanded revision has no questions, omit the `## Questions` section entirely
 - The expanded plan must be **immediately actionable** without further investigation
 - If research reveals the problem is already solved or doesn't exist, note that clearly
 - Do NOT modify the original revision — always create a new revision file
