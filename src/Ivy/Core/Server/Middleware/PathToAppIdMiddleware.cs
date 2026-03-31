@@ -11,15 +11,6 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
     {
         var path = context.Request.Path.Value ?? "";
 
-        // Skip if path is sitemap.xml, robots.txt, or ends with .md (likely a static doc or specialized middleware resource)
-        if (path.Equals("/sitemap.xml", StringComparison.OrdinalIgnoreCase) ||
-            path.Equals("/robots.txt", StringComparison.OrdinalIgnoreCase) ||
-            path.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
-        {
-            await next(context);
-            return;
-        }
-
         // Skip if an endpoint has already been matched (e.g., MVC controller, gRPC service)
         if (context.GetEndpoint() != null)
         {
