@@ -799,7 +799,7 @@ c496d3d8-c090-44b5-9551-4cdf3b0aca06
 **Hallucinated API:**
 
 ```csharp
-Text.H1("0").Align(Align.Right)  // passing Ivy.Align instead of Ivy.TextAlignment
+Text.H1("0").AlignContent(Align.Right)  // passing Ivy.Align instead of Ivy.TextAlignment
 ```
 
 **Error:** `CS1503: Argument 1: cannot convert from 'Ivy.Align' to 'Ivy.TextAlignment'`
@@ -2151,7 +2151,7 @@ new Box(new Card(content)).Border(1)
 **Hallucinated API:**
 
 ```csharp
-new Card(...).Align(Align.Center)
+new Card(...).AlignContent(Align.Center)
 ```
 
 **Error:** `CS1929: 'Card' does not contain a definition for 'Align'`

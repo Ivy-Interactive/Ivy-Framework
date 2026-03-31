@@ -211,7 +211,7 @@ How do I create a horizontal layout with items spaced between?
 Instead, use a `Spacer` with `Size.Grow()` to push items apart:
 
 ```csharp
-Layout.Horizontal().Align(Align.Center)
+Layout.Horizontal().AlignContent(Align.Center)
     | Text.H1("Title")
     | new Spacer().Width(Size.Grow())
     | new Button("Action", handler)
