@@ -299,7 +299,8 @@ public class ContentView(
                 }
                 else if (isVideo)
                 {
-                    sheetContent = Text.Block($"Video file: {Path.GetFileName(artifactPath)}");
+                    var videoUrl = $"/ivy/local-file?path={Uri.EscapeDataString(artifactPath)}";
+                    sheetContent = new VideoPlayer(source: videoUrl, controls: true, autoplay: true);
                 }
                 else
                 {
