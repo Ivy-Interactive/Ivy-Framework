@@ -164,6 +164,9 @@ public class JobService
 
         WriteJobLog(job);
         JobsChanged?.Invoke();
+
+        if (!_jobs.Values.Any(j => j.Status == "Running"))
+            SendNativeNotification();
     }
 
     public void StopJob(string id)
@@ -249,6 +252,35 @@ public class JobService
             File.WriteAllText(planYamlPath, content);
         }
         catch { /* Don't let state reset failures crash job completion */ }
+    }
+
+    private void SendNativeNotification()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        var completed = _jobs.Values.Count(j => j.Status == "Completed");
+        var failed = _jobs.Values.Count(j => j.Status == "Failed");
+        var title = "Tendril \u2014 All Jobs Finished";
+        var body = failed > 0
+            ? $"{completed} completed, {failed} failed"
+            : $"{completed} job(s) completed successfully";
+
+        Task.Run(() =>
+        {
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "pwsh",
+                    Arguments = $"-NoProfile -Command \"New-BurntToastNotification -Text '{title}', '{body}'\"",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+                System.Diagnostics.Process.Start(psi);
+            }
+            catch { /* Notification is best-effort */ }
+        });
     }
 
     private void WriteJobLog(JobItem job)
