@@ -49,6 +49,10 @@ public class DashboardApp : ViewBase
             var prsMerged = plans.Where(p => p.Status == PlanStatus.Completed && p.Updated.Date == day).Sum(p => p.Prs.Count);
             var dayFailedCount = plans.Count(p => p.Status == PlanStatus.Failed && p.Updated.Date == day);
 
+            var dayCost = plans
+                .Where(p => p.Updated.Date == day && p.Status is PlanStatus.Completed or PlanStatus.Failed or PlanStatus.ReadyForReview)
+                .Sum(p => planService.GetPlanTotalCost(p.FolderPath));
+
             return new DashboardDayRow
             {
                 Date = dayLabel,
@@ -56,7 +60,8 @@ public class DashboardApp : ViewBase
                 Created = createdCount,
                 Completed = dayCompletedCount,
                 PrsMerged = prsMerged,
-                Failed = dayFailedCount
+                Failed = dayFailedCount,
+                Cost = dayCost > 0 ? $"${dayCost:F2}" : ""
             };
         }).ToList();
 
@@ -69,6 +74,7 @@ public class DashboardApp : ViewBase
             .Header(t => t.Completed, "Completed")
             .Header(t => t.PrsMerged, "PRs Merged")
             .Header(t => t.Failed, "Failed")
+            .Header(t => t.Cost, "Cost")
             .Hidden(t => t.SortDate)
             .Config(c =>
             {
@@ -131,4 +137,5 @@ public class DashboardDayRow
     public int Completed { get; set; }
     public int PrsMerged { get; set; }
     public int Failed { get; set; }
+    public string Cost { get; set; } = "";
 }

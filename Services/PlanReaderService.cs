@@ -301,6 +301,26 @@ public class PlanReaderService(ConfigService config)
         }
     }
 
+    public decimal GetPlanTotalCost(string folderPath)
+    {
+        var costsPath = Path.Combine(folderPath, "costs.csv");
+        if (!File.Exists(costsPath)) return 0m;
+
+        var lines = File.ReadAllLines(costsPath);
+        decimal total = 0m;
+        foreach (var line in lines.Skip(1)) // skip header
+        {
+            var parts = line.Split(',');
+            if (parts.Length >= 3 && decimal.TryParse(parts[2],
+                System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture, out var cost))
+            {
+                total += cost;
+            }
+        }
+        return total;
+    }
+
     private static int GetNextRevisionNumber(string revisionsDir)
     {
         var existing = Directory.GetFiles(revisionsDir, "*.md");
