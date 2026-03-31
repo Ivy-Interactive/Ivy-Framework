@@ -661,6 +661,14 @@ cp src/RustServer/target/release/rustserver.dll src/RustServer/artifacts/native/
 
 📝 **Verification tip**: To check actual cell values in Playwright tests, use React fiber introspection to find `getCellContent` and call it directly — DOM text assertions don't work because DataTable renders on `<canvas>`.
 
+## DataTable Filter Panel Overlaps HeaderLeft Slot Content
+
+### Inline filter panel intercepts pointer events on HeaderLeft widgets
+❌ **Buttons in `.HeaderLeft()` are unclickable when `AllowFiltering=true` (default)** — the DataTableOption inline filter panel has a `w-[450px]` container div that overlaps the HeaderLeft area, intercepting pointer events
+✅ **Workaround 1**: Disable filtering: `.Config(config => config.AllowFiltering = false)` if filtering is not needed
+✅ **Workaround 2**: Use `force: true` on Playwright clicks (but Ivy event handling may not process forced clicks reliably)
+📝 **Why**: `DataTableOption` with `displayMode="inline"` and `inlineDirection="right"` renders a collapsible panel to the right of the filter icon. Even when collapsed, the container div (`h-full w-[450px] flex items-center`) remains in the DOM and intercepts pointer events over the adjacent HeaderLeft slot content.
+
 ## Future Gotchas to Document
 
 As we encounter more issues during feature testing, add them here with:
