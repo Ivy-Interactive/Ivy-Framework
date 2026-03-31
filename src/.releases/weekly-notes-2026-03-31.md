@@ -16,44 +16,28 @@ The framework core now leverages Rust for performance-critical operations includ
 
 A new `DiffView` widget for displaying unified diffs (git diff output) in either unified or split view mode.
 
-Install the widget:
-
-```bash
-dotnet add package Ivy.Widgets.DiffView
-```
-
-Basic usage shows a unified diff:
+Install with `dotnet add package Ivy.Widgets.DiffView`. The widget accepts standard git diff output and supports syntax highlighting when you specify a language.
 
 ```csharp
 using Ivy.Widgets.DiffView;
 
+// Unified diff (default)
 new DiffView()
-    .Diff(myDiffString)
-```
+    .Diff(myDiffString);
 
-Switch to split view for side-by-side comparison:
-
-```csharp
+// Split view, revisions, language (for highlighting)
 new DiffView()
     .Diff(myDiffString)
     .Split()
     .OldRevision("a/file.txt")
     .NewRevision("b/file.txt")
-    .Language("typescript")
-```
+    .Language("typescript");
 
-Handle line clicks to jump to specific locations or add comments:
-
-```csharp
+// Line clicks (e.g. jump to source or add comments)
 new DiffView()
     .Diff(myDiffString)
-    .OnLineClick(lineNumber => {
-        // Handle line click - e.g., show comment dialog
-        Console.WriteLine($"Clicked line {lineNumber}");
-    })
+    .OnLineClick(lineNumber => Console.WriteLine($"Clicked line {lineNumber}"));
 ```
-
-The widget accepts standard git diff output format and includes syntax highlighting support when you specify the language.
 
 ### AutoScroll Container
 
@@ -89,12 +73,11 @@ var message = UseState("");
 
 new TextInput()
     .Bind(message)
-    .EnableDictation(language: "es-ES")  // Spanish
-    .EnableDictation()
+    .EnableDictation(language: "es-ES")  // optional; omit for default locale
     .Placeholder("Type or speak your message...")
 ```
 
-**Requirements:** Dictation requires an `IAudioTranscriptionService` to be registered. See the [Audio Transcription Service](#audio-transcription-service) section above for setup instructions using Azure Speech Services.
+**Requirements:** Dictation requires an `IAudioTranscriptionService` to be registered. See the [Audio Transcription Service](#audio-transcription-service) section for setup instructions using Azure Speech Services.
 
 ### Inline Icon Preview in Markdown
 
@@ -132,121 +115,73 @@ products.ToDataTable()
         | new Button("Settings", icon: Icons.Settings).Small())
 ```
 
-### Menu Item Badges
+### Menu Item and Button Badges
 
-You can now add badges to sidebar menu items using the new `Badge()` extension method:
-
-```csharp
-new MenuItem("Tasks", Icons.CheckSquare)
-    .Badge("New")
-```
-
-### Button Badges
-
-You can now add badges to buttons using the new `Badge()` extension method:
+You can add badges to sidebar menu items and buttons with the new `Badge()` extension method:
 
 ```csharp
-new Button("Updates", eventHandler, variant: ButtonVariant.Outline)
-    .Badge("New")
+new MenuItem("Tasks", Icons.CheckSquare).Badge("New");
+new Button("Updates", eventHandler, variant: ButtonVariant.Outline).Badge("New");
 ```
 
 ### Image Widget Border and Hover Effects
 
-Image widgets now support borders and hover effects:
+Image widgets now support borders, border opacity, and hover effects. Adding `OnClick` applies `PointerAndTranslate` by default; set `.Hover(...)` explicitly to use something else (for example `Shadow`). Available variants include `Pointer`, `Shadow`, and `PointerAndTranslate`.
 
 ```csharp
 new Image("https://example.com/photo.jpg")
     .BorderStyle(BorderStyle.Solid)
     .BorderColor(Colors.Blue)
     .BorderThickness(2)
-    .BorderRadius(BorderRadius.Rounded)
-```
+    .BorderRadius(BorderRadius.Rounded);
 
-Control border opacity for subtle effects:
-
-```csharp
 new Image("https://example.com/photo.jpg")
     .BorderStyle(BorderStyle.Solid)
     .BorderColor(Colors.Gray, opacity: 0.5f)
     .BorderThickness(1)
-    .BorderRadius(BorderRadius.Full)
-```
+    .BorderRadius(BorderRadius.Full);
 
-Add hover effects to make images interactive:
+// Hover only
+new Image("https://example.com/photo.jpg")
+    .Hover(HoverEffect.Shadow);
 
-```csharp
+// OnClick defaults to PointerAndTranslate unless you override:
 new Image("https://example.com/photo.jpg")
     .Hover(HoverEffect.Shadow)
-    .OnClick(() => ShowFullSize())
+    .OnClick(() => ShowFullSize());
 ```
-
-When you add an `OnClick` handler to an image, the framework automatically applies a `PointerAndTranslate` hover effect (cursor changes to pointer and slight lift on hover). You can override this default by explicitly setting a different hover variant:
-
-```csharp
-new Image("https://example.com/photo.jpg")
-    .Hover(HoverEffect.Shadow)
-    .OnClick(() => ShowFullSize())  // Will use Shadow instead of default PointerAndTranslate
-```
-
-Available hover variants include `HoverEffect.Pointer`, `HoverEffect.Shadow`, and `HoverEffect.PointerAndTranslate`.
 
 ## Charts
 
 ### Advanced Axis Configuration
 
-Chart axes now support extended configuration options for formatting, visibility, and domain control, giving you precise control over how your charts display data.
-
-**Format tick labels** with standard C# format strings using the new `TickFormatter()` method:
+Chart axes now support extended configuration: format tick labels with `TickFormatter()` (currency `"C0"`, `"C2:EUR"`, percentage `"P0"`, numbers `"N2"`, etc.), hide labels with `HideTickLabels()`, and control domain with numeric bounds or symbols (`AxisDomain.Auto`, `DataMin`, `DataMax`).
 
 ```csharp
-// Currency formatting on Y-axis
+// Tick formatting (e.g. currency on Y)
 new LineChart(revenueData)
     .Line(new Line("Revenue"))
-    .YAxis(new YAxis("Revenue").TickFormatter("C0"))  // $1,500,000
-    .XAxis(new XAxis("Year"))
-```
+    .YAxis(new YAxis("Revenue").TickFormatter("C0"))
+    .XAxis(new XAxis("Year"));
 
-Supported formats include currency (`"C0"`, `"C2:EUR"`), percentage (`"P0"`, `"P2"`), and number formats (`"N2"`, `"F1"`).
-
-**Hide tick labels** for a minimalist appearance while keeping grid structure:
-
-```csharp
-// Clean chart without axis labels
+// Minimalist axes (grid only)
 new BarChart(data)
     .Bar(new Bar("Users"))
     .XAxis(new XAxis("Day").HideTickLabels())
-    .YAxis(new YAxis("Users").HideTickLabels())
-```
+    .YAxis(new YAxis("Users").HideTickLabels());
 
-**Control axis domain** to clip outliers or set explicit bounds:
-
-```csharp
-// Clip extreme values between 0 and 200
+// Explicit domain + overflow; symbolic domain on another axis
 new BarChart(salesData)
     .Bar(new Bar("Sales"))
-    .XAxis(new XAxis("Sales")
-        .Domain(0, 200)
-        .AllowDataOverflow(true))  // Strictly enforce bounds
-    .YAxis(new YAxis("Product"))
+    .XAxis(new XAxis("Sales").Domain(0, 200).AllowDataOverflow(true))
+    .YAxis(new YAxis("Product"));
 ```
-
-You can also use symbolic bounds for flexible scaling:
-
-```csharp
-// Clamp bottom to zero, auto-scale top to data maximum
-.YAxis(new YAxis("Revenue")
-    .Domain(0, AxisDomain.DataMax))
-
-// Available symbols: AxisDomain.Auto, AxisDomain.DataMin, AxisDomain.DataMax
-```
-
-These configuration options work with all Cartesian charts (Line, Bar, and Area charts).
 
 ## Hooks
 
 ### UseLoading Hook
 
-A new `UseLoading` hook provides programmatic control over loading dialogs, perfect for showing progress during async operations. The hook returns a tuple containing the loading view (which you render in your component) and a `showLoading` function to trigger the dialog:
+A new `UseLoading` hook returns `(loadingView, showLoading)` for loading dialogs. The context exposes `Message`, `Status`, `Progress` (use `null` for indeterminate), and `CancellationToken` when `cancellable: true`. Pass `LoadingOptions.CancellingDisplayDuration` to override the default 800ms "Cancelling..." state. With `cancellable: false`, the close button is hidden and overlay clicks are ignored.
 
 ```csharp
 var (loadingView, showLoading) = UseLoading();
@@ -254,79 +189,15 @@ var (loadingView, showLoading) = UseLoading();
 return new Fragment(
     loadingView,
     new Button("Process Data", () =>
-    {
         showLoading(async ctx =>
         {
             ctx.Message("Processing...");
             ctx.Status("This may take a moment");
+            ctx.Progress(50);
             await ProcessDataAsync();
-        });
-    })
-);
+            ctx.Progress(100);
+        })));
 ```
-
-The loading context provides methods to update the dialog during execution:
-
-```csharp
-showLoading(async ctx =>
-{
-    ctx.Message("Loading data...");
-    ctx.Status("Fetching from database");
-
-    var data = await FetchDataAsync();
-
-    ctx.Message("Processing records");
-    ctx.Progress(50);  // Show progress bar at 50%
-
-    await ProcessAsync(data);
-
-    ctx.Progress(100);
-});
-```
-
-**Cancellable operations** - Enable user cancellation by passing `cancellable: true` and observing the `CancellationToken`:
-
-```csharp
-showLoading(async ctx =>
-{
-    ctx.Message("Downloading files...");
-    ctx.Status("Click X to cancel");
-
-    for (var i = 0; i < 10; i++)
-    {
-        ctx.CancellationToken.ThrowIfCancellationRequested();
-        ctx.Progress(i * 10);
-        await DownloadFileAsync(i, ctx.CancellationToken);
-    }
-}, cancellable: true);
-```
-
-When the user cancels, the dialog shows "Cancelling..." for 800ms by default before closing. You can customize this duration:
-
-```csharp
-showLoading(
-    async ctx => { /* your work */ },
-    cancellable: true,
-    options: new LoadingOptions
-    {
-        CancellingDisplayDuration = TimeSpan.FromMilliseconds(300)
-    }
-);
-```
-
-**Non-cancellable operations** - For operations that cannot be interrupted, the close button is automatically hidden and overlay clicks are ignored:
-
-```csharp
-showLoading(async ctx =>
-{
-    ctx.Message("Committing transaction...");
-    ctx.Status("Please wait");
-    ctx.Progress(null);  // Indeterminate progress
-    await CommitTransactionAsync();
-}, cancellable: false);
-```
-
-The hook handles exceptions automatically through the framework's `IExceptionHandler`, and properly manages cancellation token disposal.
 
 ## Configuration
 
@@ -369,18 +240,13 @@ This approach keeps sensitive credentials out of source control without needing 
 
 A new `IAudioTranscriptionService` interface has been added to the framework, providing a standardized way to transcribe audio to text.
 
-Register the Azure Speech transcription service in your dependency injection container:
+Register `AddAzureSpeechToText` in DI, then inject `IAudioTranscriptionService`. The service supports WebM, Ogg, WAV, MP4, AAC, and optional language (defaults to `"en-US"`).
 
 ```csharp
 builder.Services.AddAzureSpeechToText(
     region: "eastus",
-    subscriptionKey: Configuration["Azure:SpeechKey"]
-);
-```
+    subscriptionKey: Configuration["Azure:SpeechKey"]);
 
-Then inject and use it in your services:
-
-```csharp
 public class VoiceNoteService
 {
     private readonly IAudioTranscriptionService _transcription;
@@ -390,14 +256,10 @@ public class VoiceNoteService
         _transcription = transcription;
     }
 
-    public async Task<string> TranscribeVoiceNote(Stream audioStream, string mimeType)
-    {
-        return await _transcription.TranscribeAsync(audioStream, mimeType, language: "en-US");
-    }
+    public Task<string> TranscribeVoiceNote(Stream audioStream, string mimeType) =>
+        _transcription.TranscribeAsync(audioStream, mimeType, language: "en-US");
 }
 ```
-
-The service supports common audio formats including WebM, Ogg, WAV, MP4, and AAC. You can optionally specify the language (defaults to "en-US").
 
 ## Deployment
 
@@ -411,46 +273,23 @@ Linux ARM64 support enables deployment on ARM-based servers like AWS Graviton in
 
 ### BASE_PATH Environment Variable Support
 
-You can now configure your application's base path using the `BASE_PATH` environment variable. This matches the pattern used for other environment variables like `PORT`, `HOST`, and `VERBOSE`.
-
-```bash
-# Docker deployment example
-docker run -e BASE_PATH=/myapp -e PORT=5000 myivyapp
-
-# Or in docker-compose.yml
-environment:
-  - BASE_PATH=/myapp
-  - PORT=5000
-```
-
-You can also configure it via the CLI argument:
+You can now configure your application's base path using the `BASE_PATH` environment variable (same idea as `PORT`, `HOST`, and `VERBOSE`), or set `ServerArgs.BasePath` in code.
 
 ```csharp
-var server = new Server(args =>
-{
-    args.BasePath = "/myapp";
-});
+// Env / Docker: BASE_PATH=/myapp (e.g. docker run -e BASE_PATH=/myapp -e PORT=5000 myivyapp)
+
+var server = new Server(args => { args.BasePath = "/myapp"; });
 ```
 
 ## Developer Tools
 
 ### New CLI Documentation Commands
 
-The Ivy CLI now includes powerful commands for exploring framework documentation and getting instant answers to your questions:
-
-**Browse documentation:**
+The Ivy CLI now includes commands for browsing docs (`ivy docs list`, `ivy docs "<path>"`) and asking questions with semantic search (`ivy ask`, `ivy question`).
 
 ```bash
-# List all available docs
 ivy docs list
-
-# Read a specific doc page
 ivy docs "docs/ApiReference/IvyShared/Colors.md"
-```
-
-**Ask questions with semantic search:**
-
-```bash
 ivy ask "How do I implement a new Application Shell in Ivy?"
 ivy question "What is the command to create an auto-incrementing migration?"
 ```
@@ -459,29 +298,17 @@ ivy question "What is the command to create an auto-incrementing migration?"
 
 ### CardHoverVariant Renamed to HoverEffect
 
-The `CardHoverVariant` enum has been renamed to `HoverEffect` and moved to a shared location (`Ivy.Shared`). This enum is used by Card, Box, and Image widgets to control hover interaction effects.
-
-**Before:**
+The `CardHoverVariant` enum has been renamed to `HoverEffect` and moved to a shared location (`Ivy.Shared`). This enum is used by Card, Box, and Image widgets to control hover interaction effects. Replace `CardHoverVariant` with `HoverEffect`; `.Hover(...)` signatures are unchanged and stay in the `Ivy` namespace.
 
 ```csharp
-new Box("Click me")
-    .Hover(CardHoverVariant.Shadow)
+// Before
+new Box("Click me").Hover(CardHoverVariant.Shadow);
+new Image("photo.jpg").Hover(CardHoverVariant.PointerAndTranslate);
 
-new Image("photo.jpg")
-    .Hover(CardHoverVariant.PointerAndTranslate)
+// After
+new Box("Click me").Hover(HoverEffect.Shadow);
+new Image("photo.jpg").Hover(HoverEffect.PointerAndTranslate);
 ```
-
-**After:**
-
-```csharp
-new Box("Click me")
-    .Hover(HoverEffect.Shadow)
-
-new Image("photo.jpg")
-    .Hover(HoverEffect.PointerAndTranslate)
-```
-
-**Migration:** Replace all instances of `CardHoverVariant` with `HoverEffect`. The extension method signatures remain unchanged (`.Hover(HoverEffect variant)`), and both the old and new enums are in the `Ivy` namespace, so no namespace changes are needed.
 
 ### Layout Alignment API Renamed
 
@@ -493,20 +320,16 @@ The `Align` method and property has been renamed to clarify its purpose across s
 
 This change makes the API more explicit about whether you're aligning children inside a container or positioning the widget itself.
 
-**Before:**
-
 ```csharp
-new StackLayout() { Align = Align.Center }
-new TableCell().Align(Align.Left)
-new FloatingPanel(align: Align.BottomRight)
-```
+// Before
+new StackLayout() { Align = Align.Center };
+new TableCell().Align(Align.Left);
+new FloatingPanel(align: Align.BottomRight);
 
-**After:**
-
-```csharp
-new StackLayout() { AlignContent = Align.Center }
-new TableCell().AlignContent(Align.Left)
-new FloatingPanel(alignSelf: Align.BottomRight)
+// After
+new StackLayout() { AlignContent = Align.Center };
+new TableCell().AlignContent(Align.Left);
+new FloatingPanel(alignSelf: Align.BottomRight);
 ```
 
 ## Bug Fixes
