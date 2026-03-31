@@ -85,8 +85,8 @@ public class ContentView(
         {
             var verificationsTable = new Table(
                 new TableRow(
-                    new TableCell("Name").IsHeader(),
-                    new TableCell("Status").IsHeader()
+                    new TableCell("Status").IsHeader(),
+                    new TableCell("Name").IsHeader()
                 )
                 { IsHeader = true }
             );
@@ -96,15 +96,15 @@ public class ContentView(
                 var hasReport = File.Exists(verificationPath);
                 var nameCapture = v.Name;
                 object nameCell = hasReport
-                    ? new Button(v.Name).Link().OnClick(() => openVerification.Set(nameCapture))
+                    ? new Button(v.Name).Inline().OnClick(() => openVerification.Set(nameCapture))
                     : (object)Text.Block(v.Name);
 
                 verificationsTable |= new TableRow(
-                    new TableCell(nameCell),
                     new TableCell(new Badge(v.Status).Variant(
                         v.Status == "Pass" ? BadgeVariant.Success
                         : v.Status == "Fail" ? BadgeVariant.Destructive
-                        : BadgeVariant.Outline))
+                        : BadgeVariant.Outline)),
+                    new TableCell(nameCell)
                 );
             }
             content |= new Expandable(
@@ -151,7 +151,7 @@ public class ContentView(
             foreach (var row in commitRows)
             {
                 commitsTable |= new TableRow(
-                    new TableCell(new Button(row.ShortHash).Link().OnClick(() => openCommit.Set(row.Hash))),
+                    new TableCell(new Button(row.ShortHash).Inline().OnClick(() => openCommit.Set(row.Hash))),
                     new TableCell(row.Title)
                 );
             }
@@ -311,46 +311,18 @@ public class ContentView(
             }
         }
 
-        // Summary or Plan content
-        var summaryPath = Path.Combine(_selectedPlan.FolderPath, "artifacts", "summary.md");
-        if (File.Exists(summaryPath))
-        {
-            var summaryContent = File.ReadAllText(summaryPath);
-            content |= new Markdown(summaryContent).DangerouslyAllowLocalFiles();
-            content |= new Button("View Original Plan").Ghost().Icon(Icons.FileText).OnClick(() => showPlan.Set(true));
-
-            if (showPlan.Value)
+        // Plan content
+        content |= Text.Block("Plan").Bold();
+        content |= new Markdown(_selectedPlan.LatestRevisionContent)
+            .DangerouslyAllowLocalFiles()
+            .OnLinkClick(url =>
             {
-                content |= new Sheet(
-                    onClose: () => showPlan.Set(false),
-                    content: new Markdown(_selectedPlan.LatestRevisionContent)
-                        .DangerouslyAllowLocalFiles()
-                        .OnLinkClick(url =>
-                        {
-                            if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
-                            {
-                                var filePath = url.Substring("file:///".Length);
-                                openFile.Set(filePath);
-                            }
-                        }),
-                    title: "Original Plan"
-                ).Width(Size.Half());
-            }
-        }
-        else
-        {
-            content |= Text.Block("Plan").Bold();
-            content |= new Markdown(_selectedPlan.LatestRevisionContent)
-                .DangerouslyAllowLocalFiles()
-                .OnLinkClick(url =>
+                if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var filePath = url.Substring("file:///".Length);
-                        openFile.Set(filePath);
-                    }
-                });
-        }
+                    var filePath = url.Substring("file:///".Length);
+                    openFile.Set(filePath);
+                }
+            });
 
         // File viewer sheet
         if (openFile.Value is { } filePath2)
