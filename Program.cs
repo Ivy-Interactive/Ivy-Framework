@@ -33,6 +33,13 @@ server.Services.AddSingleton<PlanWatcherService>(sp =>
     var config = sp.GetRequiredService<ConfigService>();
     return new PlanWatcherService(config);
 });
+server.Services.AddSingleton<PlanCountsService>(sp =>
+{
+    var planReader = sp.GetRequiredService<PlanReaderService>();
+    var jobService = sp.GetRequiredService<JobService>();
+    var planWatcher = sp.GetRequiredService<PlanWatcherService>();
+    return new PlanCountsService(planReader, jobService, planWatcher);
+});
 server.Services.AddSingleton<InboxWatcherService>(sp =>
 {
     var config = sp.GetRequiredService<ConfigService>();

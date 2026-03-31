@@ -48,10 +48,9 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
         var menuItems = UseState(() => appRepository.GetMenuItems());
-        var planService = UseService<PlanReaderService>();
+        var countsService = UseService<PlanCountsService>();
+        var counts = UseState(() => countsService.Current);
         var jobService = UseService<JobService>();
-        var planWatcher = UseService<PlanWatcherService>();
-        var refreshTrigger = UseState(0);
         var sidebarOpen = UseState(settings.SidebarOpen);
         var args = UseService<AppContext>();
         var serverArgs = UseService<ServerArgs>();
@@ -61,31 +60,11 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         var feedbackScreenshot = UseState<FileUpload<byte[]>?>();
         var feedbackUploadCtx = UseUpload(MemoryStreamUploadHandler.Create(feedbackScreenshot));
 
-        var planCounts = Context.UseQuery("plan-counts", async (ct) =>
-        {
-            var plans = planService.GetPlans();
-            return new
-            {
-                Draft = plans.Count(p => p.Status == PlanStatus.Draft),
-                Review = plans.Count(p => p.Status is PlanStatus.ReadyForReview or PlanStatus.Failed),
-            };
-        }, new QueryOptions { RefreshInterval = TimeSpan.FromSeconds(5) });
-
-        var jobCount = Context.UseQuery("job-count", async (ct) =>
-        {
-            return jobService.GetJobs().Count(j => j.Status == "Running");
-        }, new QueryOptions { RefreshInterval = TimeSpan.FromSeconds(3) });
-
         UseEffect(() =>
         {
-            void OnChanged() => refreshTrigger.Set(refreshTrigger.Value + 1);
-            planWatcher.PlansChanged += OnChanged;
-            jobService.JobsChanged += OnChanged;
-            return Disposable.Create(() =>
-            {
-                planWatcher.PlansChanged -= OnChanged;
-                jobService.JobsChanged -= OnChanged;
-            });
+            void OnChanged() => counts.Set(countsService.Current);
+            countsService.CountsChanged += OnChanged;
+            return Disposable.Create(() => countsService.CountsChanged -= OnChanged);
         });
 
         UseEffect(() =>
@@ -99,16 +78,12 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         UseEffect(() =>
         {
-            var badges = new Dictionary<string, int>();
-            if (!planCounts.Loading && planCounts.Value != null)
+            var badges = new Dictionary<string, int>
             {
-                badges["plans"] = planCounts.Value.Draft;
-                badges["review"] = planCounts.Value.Review;
-            }
-            if (!jobCount.Loading)
-            {
-                badges["jobs"] = jobCount.Value;
-            }
+                ["plans"] = counts.Value.Drafts,
+                ["review"] = counts.Value.Reviews,
+                ["jobs"] = counts.Value.RunningJobs
+            };
 
             if (string.IsNullOrWhiteSpace(search.Value))
             {
@@ -134,7 +109,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                     menuItems.Set([]);
                 }
             }
-        }, search, appRepository.Reloaded.ToTrigger(), planCounts.ToTrigger(), jobCount.ToTrigger(), refreshTrigger);
+        }, search, appRepository.Reloaded.ToTrigger(), counts);
 
         UseEffect(async () =>
         {
