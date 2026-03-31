@@ -637,6 +637,30 @@ new DiffView().Diff(diff) with
 ```
 📝 **Why**: Same root cause as ScreenshotFeedback — the `OnLineClick` property is `Func<Event<DiffView, int>, ValueTask>?`. C# resolves property getter + delegate invocation before extension methods.
 
+## Ivy.csproj Rust Binary Build Failure (MSBuild Glob Issue)
+
+### `*rustserver*.dll` glob copy fails with "destination is a folder"
+❌ **`dotnet build` fails with MSB3024** — "Could not copy rustserver.dll to bin\Debug\net10.0\runtimes/win-x64/native/, because the destination is a folder instead of a file"
+✅ **Workaround**: Create the CI/CD artifacts path to bypass the fallback glob:
+```bash
+mkdir -p src/RustServer/artifacts/native/win-x64
+cp src/RustServer/target/release/rustserver.dll src/RustServer/artifacts/native/win-x64/rustserver.dll
+```
+📝 **Why**: The fallback `Content Include="../RustServer/target/release/*rustserver*.dll"` with `Link="runtimes/win-x64/native/%(Filename)%(Extension)"` and `CopyToOutputDirectory="PreserveNewest"` produces a destination path ending in `/` which MSBuild interprets as a directory. The CI/CD path (`artifacts/native/win-x64/rustserver.dll`) uses a direct filename in `Link` which works correctly.
+
+## DataTable Dual Data Path (Cell Rendering vs Data Loading)
+
+### Cell values come from useRowData, NOT convertArrowTableToData
+**Problem**: DataTable has two separate paths for accessing row data:
+1. `convertArrowTableToData()` (in `tableDataMapper.ts`) — called during data loading, converts Arrow table to `{ columns, rows }`. Used for column metadata, row counts, and `hasMore` flag.
+2. `useRowData()` (in `dataTableContext/hooks/useRowData.ts`) — called during cell rendering. Reads directly from the raw Arrow table via `column.get(rowIndex)`.
+
+**Impact**: Any fix to data conversion in `convertArrowTableToData()` will NOT affect what the grid displays. The grid cells always read raw values from the Arrow table via `useRowData()`.
+
+📝 **When fixing data conversion bugs** (like Decimal128 scaling), the fix must be applied in `useRowData.ts`, not just in `convertArrowTableToData()`. The `arrowTableRef` holds the raw Arrow table, and `useRowData` is the only path that feeds cell rendering.
+
+📝 **Verification tip**: To check actual cell values in Playwright tests, use React fiber introspection to find `getCellContent` and call it directly — DOM text assertions don't work because DataTable renders on `<canvas>`.
+
 ## Future Gotchas to Document
 
 As we encounter more issues during feature testing, add them here with:

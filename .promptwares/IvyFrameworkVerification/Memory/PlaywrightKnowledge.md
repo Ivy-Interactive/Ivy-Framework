@@ -126,7 +126,8 @@
 
 - **DataTable uses virtualized grid rendering** — cells are `<td role="gridcell">` elements that Playwright considers "hidden" even when data is present. Use `page.locator('[role="gridcell"]').first()` with `.toBeAttached()` instead of `.toBeVisible()` to verify data loaded.
 - **`.Remove()` on positional records: crash fixed but data alignment broken** — Commit `e08a55d6` fixes the crash (fills removed params with defaults in constructor). However, the DataTable serializes ALL property values (including defaults for removed fields) but maps them by index to only the visible column headers, causing a systematic data shift. The "Name" column shows `0` (default Id) instead of the actual name. This is a framework serialization bug.
-- **Decimal columns display as `0000000000000000`** — `decimal` values in DataTable grid render incorrectly (framework bug). Note as external issue.
+- **Decimal columns display as `0000000000000000`** — `decimal` values in DataTable grid render incorrectly (framework bug). Root cause: `useRowData.ts` reads raw Arrow Decimal128 values via `column.get(i)` without applying `10^scale` division. Fix was applied to `convertArrowTableToData()` but that function is only used for column metadata, not cell rendering.
+- **Reading DataTable cell values in Playwright**: Since DataTable renders on `<canvas>`, DOM text assertions don't work. Use React fiber introspection: find a `canvas` element, walk `__reactFiber` tree upward to find a component with `getCellContent` prop, then call `getCellContent([col, row])` to get `{ kind, data, displayData }`. Column 0 = first visible column.
 
 ## Layout.Vertical with IEnumerable (Critical)
 
@@ -870,3 +871,14 @@ In headless mode with File System Access API disabled, the save dialog uses `<a 
 - **Link locator issue**: `getByRole("link", { name: "another link" })` timed out even though text was in body — use `page.locator("a").filter({ hasText: "text" }).first()` for more reliable anchor element targeting in Markdown content
 - 18 tests, 1 fix round (link locator fix), all passed, logs clean
 - **Project location**: `D:\Tendril\Plans\01237-FixNestedCodeBlockRenderingInMarkdownWidget\artifacts\sample\`
+
+### 2026-03-31 — AsyncSelectInput State Update Bug Fix
+- AsyncSelectInput opens a **Sheet** (`role="dialog"`) with search input and ListItem options
+- The trigger button contains placeholder text as `<span>` — `getByText("placeholder")` matches BOTH the description paragraph and the button span, causing strict mode violation
+- **Use `getByRole('button', { name: 'placeholder text' })`** to click the AsyncSelectInput trigger
+- Inside the sheet: `sheet.getByPlaceholder('Search')` for the search input, `sheet.getByText('Option', { exact: true }).first()` for options
+- After selecting, the sheet auto-closes and state feedback updates — wait 1500ms after click for state propagation
+- **OnBlur test**: Clicking the input opens the sheet (overlay blocks subsequent clicks). Use `.focus()` + `keyboard.press('Tab')` to trigger blur without opening the sheet
+- `.Invalid("message")` renders as an icon/visual indicator on the button, NOT as visible text — don't assert `getByText("error message")`
+- `test.use({ video })` CANNOT be inside `test.describe()` — must be top-level in the file
+- 17 tests, 1 fix round (strict mode + video config + onBlur approach), all passed, logs clean

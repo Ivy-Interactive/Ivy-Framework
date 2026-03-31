@@ -42,6 +42,10 @@ Record results for the report. Skip for non-widget features.
 
 Create everything directly in `<ArtifactsDir>/sample/` so the plan folder is self-contained and runnable.
 
+**Important: Check which branch has the fix.** If the plan's commit is on a feature branch (check `plan.yaml` commits + `git branch --contains <commit>`), the worktree at `<PlanFolder>/worktrees/<RepoName>` has the correct code. Use that path for ProjectReference, NOT the main repo. If the commit is on main/master, use `D:\Repos\_Ivy\Ivy-Framework`.
+
+**If referencing a worktree and it has frontend (.ts) changes:** rebuild frontend from the worktree path (`cd <worktree>/src/frontend && npx vite build`), then clean the Ivy obj dir (`rm -rf <worktree>/src/Ivy/obj/Debug`) before building the sample project.
+
 **`<ArtifactsDir>/sample/<FeatureName>.csproj`:**
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -52,8 +56,8 @@ Create everything directly in `<ArtifactsDir>/sample/` so the plan folder is sel
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Ivy.csproj" />
-    <ProjectReference Include="D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Analyser\Ivy.Analyser.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="<IvyFrameworkPath>\src\Ivy\Ivy.csproj" />
+    <ProjectReference Include="<IvyFrameworkPath>\src\Ivy.Analyser\Ivy.Analyser.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>
 ```
