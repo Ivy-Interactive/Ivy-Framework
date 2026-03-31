@@ -1,3 +1,4 @@
+using System.Reactive.Disposables;
 using Ivy;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Apps.Review;
@@ -14,9 +15,17 @@ public class ReviewApp : ViewBase
         var jobService = UseService<JobService>();
         var configService = UseService<ConfigService>();
         var gitService = UseService<GitService>();
+        var planWatcher = UseService<PlanWatcherService>();
         var selectedPlanState = UseState<PlanFile?>(null);
         var textFilter = UseState<string?>("");
-        var refreshToken = UseState(0);
+        var refreshToken = UseRefreshToken();
+
+        UseEffect(() =>
+        {
+            void OnChanged() => refreshToken.Refresh();
+            planWatcher.PlansChanged += OnChanged;
+            return Disposable.Create(() => planWatcher.PlansChanged -= OnChanged);
+        });
 
         var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
 
@@ -43,7 +52,7 @@ public class ReviewApp : ViewBase
 
         void RefreshPlans()
         {
-            refreshToken.Set(refreshToken.Value + 1);
+            refreshToken.Refresh();
         }
 
         var sidebar = new Review.SidebarView(plans, selectedPlanState, textFilter, configService);
