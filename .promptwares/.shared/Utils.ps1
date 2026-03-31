@@ -297,7 +297,10 @@ function InvokePromptwareAgent {
     }
 
     # Report cost for this session
-    ReportSessionCost $sessionId
+    $costData = ReportSessionCost $sessionId
+    if ($costData -and $PlanPath) {
+        LogPlanCost $PlanPath $Action $costData.Tokens $costData.Cost
+    }
 
     if ($Action) { SendStatusMessage "$Action Completed" }
 
@@ -314,9 +317,7 @@ function InvokePromptwareAgent {
 function ReportSessionCost {
     param([string]$SessionId)
 
-    $jobId = $env:TENDRIL_JOB_ID
-    $url = $env:TENDRIL_URL
-    if (-not $jobId -or -not $url -or -not $SessionId) { return }
+    if (-not $SessionId) { return $null }
 
     try {
         # Find session file
@@ -325,7 +326,7 @@ function ReportSessionCost {
             Where-Object { $_.FullName -notlike "*\subagents\*" } |
             Select-Object -First 1
 
-        if (-not $sessionFile) { return }
+        if (-not $sessionFile) { return $null }
 
         # Token prices (per token) for Claude Opus 4
         $priceInput = 15e-6
@@ -335,6 +336,7 @@ function ReportSessionCost {
         $priceCacheRead = 1.5e-6
 
         $totalCost = 0.0
+        $totalTokens = 0
 
         # Parse session and calculate cost
         $filesToParse = @($sessionFile.FullName)
@@ -352,14 +354,23 @@ function ReportSessionCost {
                     $obj = $line | ConvertFrom-Json
                     if ($obj.type -eq "assistant" -and $obj.message.usage) {
                         $u = $obj.message.usage
-                        $totalCost += ($u.input_tokens ?? 0) * $priceInput
-                        $totalCost += ($u.output_tokens ?? 0) * $priceOutput
-                        $totalCost += ($u.cache_read_input_tokens ?? 0) * $priceCacheRead
+                        $inputTokens = ($u.input_tokens ?? 0)
+                        $outputTokens = ($u.output_tokens ?? 0)
+                        $cacheReadTokens = ($u.cache_read_input_tokens ?? 0)
+                        $totalTokens += $inputTokens + $outputTokens + $cacheReadTokens
+                        $totalCost += $inputTokens * $priceInput
+                        $totalCost += $outputTokens * $priceOutput
+                        $totalCost += $cacheReadTokens * $priceCacheRead
                         if ($u.cache_creation) {
-                            $totalCost += ($u.cache_creation.ephemeral_5m_input_tokens ?? 0) * $priceCache5m
-                            $totalCost += ($u.cache_creation.ephemeral_1h_input_tokens ?? 0) * $priceCache1h
+                            $cache5m = ($u.cache_creation.ephemeral_5m_input_tokens ?? 0)
+                            $cache1h = ($u.cache_creation.ephemeral_1h_input_tokens ?? 0)
+                            $totalTokens += $cache5m + $cache1h
+                            $totalCost += $cache5m * $priceCache5m
+                            $totalCost += $cache1h * $priceCache1h
                         } else {
-                            $totalCost += ($u.cache_creation_input_tokens ?? 0) * $priceCache5m
+                            $cacheCreation = ($u.cache_creation_input_tokens ?? 0)
+                            $totalTokens += $cacheCreation
+                            $totalCost += $cacheCreation * $priceCache5m
                         }
                     }
                 } catch { }
@@ -367,10 +378,34 @@ function ReportSessionCost {
         }
 
         # Report to controller (accumulates)
-        $body = @{ cost = [math]::Round($totalCost, 2) } | ConvertTo-Json
-        Invoke-RestMethod -Uri "$url/api/jobs/$jobId/cost" -Method Post `
-            -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
-    } catch { }
+        $jobId = $env:TENDRIL_JOB_ID
+        $url = $env:TENDRIL_URL
+        if ($jobId -and $url) {
+            $body = @{ cost = [math]::Round($totalCost, 2) } | ConvertTo-Json
+            Invoke-RestMethod -Uri "$url/api/jobs/$jobId/cost" -Method Post `
+                -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
+        }
+
+        return @{ Tokens = $totalTokens; Cost = $totalCost }
+    } catch {
+        return $null
+    }
+}
+
+function LogPlanCost {
+    param(
+        [string]$PlanFolder,
+        [string]$Promptware,
+        [int]$Tokens,
+        [double]$Cost
+    )
+    if (-not $PlanFolder -or -not (Test-Path $PlanFolder)) { return }
+
+    $csvPath = Join-Path $PlanFolder "costs.csv"
+    if (-not (Test-Path $csvPath)) {
+        "Promptware,Tokens,Cost" | Set-Content $csvPath -Encoding UTF8
+    }
+    "$Promptware,$Tokens,$("{0:F4}" -f $Cost)" | Add-Content $csvPath -Encoding UTF8
 }
 
 function SendStatusMessage {

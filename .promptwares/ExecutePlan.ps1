@@ -93,7 +93,10 @@ catch {
     throw
 }
 finally {
-    ReportSessionCost $sessionId
+    $costData = ReportSessionCost $sessionId
+    if ($costData) {
+        LogPlanCost $PlanPath "ExecutePlan" $costData.Tokens $costData.Cost
+    }
     Pop-Location
     Remove-Item $promptFile -ErrorAction SilentlyContinue
 }

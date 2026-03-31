@@ -18,12 +18,17 @@ $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
 }
 
 $agent = GetAgentCommandFromConfig
+$sessionId = [guid]::NewGuid().ToString()
 
 Write-Host "Starting Agent..."
 Push-Location $programFolder
 
 try {
-    $output = & $agent.Executable @($agent.Args) -- (Get-Content $promptFile -Raw)
+    $extraArgs = @()
+    if ($agent.Executable -eq "claude") {
+        $extraArgs += @("--session-id", $sessionId)
+    }
+    $output = & $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw)
     $output | Write-Output
     $exitCode = $LASTEXITCODE
 
@@ -56,6 +61,10 @@ catch {
     throw
 }
 finally {
+    $costData = ReportSessionCost $sessionId
+    if ($costData) {
+        LogPlanCost $PlanPath "MakePr" $costData.Tokens $costData.Cost
+    }
     Pop-Location
     Remove-Item $promptFile -ErrorAction SilentlyContinue
 }
