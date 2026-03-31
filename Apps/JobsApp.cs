@@ -130,7 +130,7 @@ public class JobsApp : ViewBase
             return FormatTimeSpan(elapsed);
         }
 
-        if ((job.Status == "Completed" || job.Status == "Failed") && job.DurationSeconds.HasValue)
+        if ((job.Status is "Completed" or "Failed" or "Timeout" or "Stopped") && job.DurationSeconds.HasValue)
         {
             return FormatTimeSpan(TimeSpan.FromSeconds(job.DurationSeconds.Value));
         }

@@ -22,6 +22,8 @@ public record JobItem
     public string? StatusMessage { get; set; }
     public List<string> OutputLines { get; set; } = new();
     public DateTime? LastOutputAt { get; set; }
+    public CancellationTokenSource? TimeoutCts { get; set; }
+    public bool StaleOutputDetected { get; set; }
 }
 
 public record JobItemRow
