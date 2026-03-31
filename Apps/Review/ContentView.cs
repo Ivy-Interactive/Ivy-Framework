@@ -1,9 +1,9 @@
 using Ivy;
 using Ivy.Core;
-using Ivy.Core.Apps;
 using Ivy.Hooks;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
+using Ivy.Widgets.DiffView;
 
 namespace Ivy.Tendril.Apps.Review;
 
@@ -28,21 +28,13 @@ public class ContentView(
 
     public override object? Build()
     {
-        var navigateSignal = UseSignal<NavigateSignal, NavigateArgs, Unit>();
-        var appRepository = UseService<IAppRepository>();
         var client = UseService<IClientProvider>();
         var copyToClipboard = UseClipboard();
         var openVerification = UseState<string?>(null);
         var openArtifact = UseState<string?>(null);
         var openFile = UseState<string?>(null);
+        var openCommit = UseState<string?>(null);
         var showPlan = UseState(false);
-
-        void NavigateNewTab<T>(object? appArgs = null) where T : class
-        {
-            var appId = appRepository.GetApp(typeof(T))?.Id;
-            if (appId != null)
-                navigateSignal.Send(new NavigateArgs(appId, appArgs, TabId: Guid.NewGuid().ToString()));
-        }
 
         if (_selectedPlan is null)
         {
@@ -144,8 +136,7 @@ public class ContentView(
             foreach (var row in commitRows)
             {
                 commitsTable |= new TableRow(
-                    new TableCell(new Button(row.ShortHash).Link().OnClick(() =>
-                        NavigateNewTab<CommitApp>(new CommitAppArgs(row.Hash, _selectedPlan.Project, repoPaths.ToList())))),
+                    new TableCell(new Button(row.ShortHash).Link().OnClick(() => openCommit.Set(row.Hash))),
                     new TableCell(row.Title)
                 );
             }
@@ -153,6 +144,64 @@ public class ContentView(
                 header: $"Commits ({_selectedPlan.Commits.Count})",
                 content: commitsTable
             ).Open(false);
+
+            if (openCommit.Value is { } commitHash)
+            {
+                var repoPaths2 = _selectedPlan.Repos.Count > 0
+                    ? _selectedPlan.Repos
+                    : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
+
+                string? commitDiff = null;
+                List<(string Status, string FilePath)>? commitFiles = null;
+                string? commitTitle = null;
+                foreach (var repo in repoPaths2)
+                {
+                    commitTitle = _gitService.GetCommitTitle(repo, commitHash);
+                    if (commitTitle != null)
+                    {
+                        commitDiff = _gitService.GetCommitDiff(repo, commitHash);
+                        commitFiles = _gitService.GetCommitFiles(repo, commitHash);
+                        break;
+                    }
+                }
+
+                var shortHash = commitHash.Length > 7 ? commitHash[..7] : commitHash;
+                var sheetContent = Layout.Vertical().Gap(4).Padding(2);
+                sheetContent |= Layout.Horizontal().Gap(2)
+                    | new Badge(shortHash).Variant(BadgeVariant.Outline)
+                    | Text.Block(commitTitle ?? "Commit not found").Bold();
+
+                if (commitFiles is { Count: > 0 })
+                {
+                    var filesLayout = Layout.Vertical().Gap(1);
+                    filesLayout |= Text.Block("Changed Files").Bold();
+                    foreach (var (status, filePath) in commitFiles)
+                    {
+                        var (label, variant) = status switch
+                        {
+                            "A" => ("Added", BadgeVariant.Success),
+                            "D" => ("Deleted", BadgeVariant.Destructive),
+                            _ => ("Modified", BadgeVariant.Outline)
+                        };
+                        filesLayout |= Layout.Horizontal().Gap(2)
+                            | new Badge(label).Variant(variant).Small()
+                            | Text.Block(filePath);
+                    }
+                    sheetContent |= filesLayout;
+                }
+
+                if (!string.IsNullOrWhiteSpace(commitDiff))
+                {
+                    sheetContent |= Text.Block("Diff").Bold();
+                    sheetContent |= new DiffView().Diff(commitDiff).Split();
+                }
+
+                content |= new Sheet(
+                    onClose: () => openCommit.Set(null),
+                    content: sheetContent,
+                    title: $"Commit {shortHash}"
+                ).Width(Size.Half());
+            }
         }
 
         // PRs section
