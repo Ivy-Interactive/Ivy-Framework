@@ -4,7 +4,7 @@
 
 ### Event Handling Optimization
 
-Event dispatching in widgets is now significantly faster. The framework now caches reflection lookups when invoking widget events, eliminating repeated reflection overhead on every event call. This improvement is automatic and requires no code changes - your existing event handlers will simply run faster.
+Event dispatching in widgets is now significantly faster. The framework now caches reflection lookups when invoking widget events, eliminating repeated reflection overhead on every event call.
 
 ### Rust-Powered Core Engine
 
@@ -14,7 +14,7 @@ The framework core now leverages Rust for performance-critical operations includ
 
 ### DiffView Widget
 
-A new `DiffView` widget for displaying unified diffs (git diff output) in either unified or split view mode. Perfect for code review interfaces, version comparison tools, or any application that needs to show file changes. The widget is powered by the popular [react-diff-view](https://github.com/otakustay/react-diff-view) library.
+A new `DiffView` widget for displaying unified diffs (git diff output) in either unified or split view mode.
 
 Install the widget:
 
@@ -57,7 +57,7 @@ The widget accepts standard git diff output format and includes syntax highlight
 
 ### AutoScroll Container
 
-A new `AutoScroll` widget has been added to the primitives collection. This container automatically scrolls to the bottom when its content grows, making it perfect for live logs, activity feeds, or any streaming content that needs to stay visible in a fixed-height viewport.
+This container automatically scrolls to the bottom when its content grows.
 
 ```csharp
 var lines = UseState(ImmutableArray.Create("First line", "Second line"));
@@ -67,48 +67,18 @@ AutoScroll.FromChildren(lines.Value.Select(l => Text.Muted(l)))
     .Width(Size.Full())
 ```
 
-The widget requires an explicit height to create the scroll area. Use `AutoScroll.FromChildren()` when building children from LINQ expressions to avoid type conversion issues.
-
-You can disable auto-scrolling behavior with the `Disabled()` method, which is useful when users want to read older content without being pulled back to the bottom:
-
-```csharp
-var follow = UseState(true);
-
-AutoScroll.FromChildren(logLines.Value.Select(l => Text.Block(l)))
-    .Height(Size.Px(200))
-    .Disabled(!follow.Value)
-```
-
-When auto-follow is enabled, scrolling up manually pauses the auto-scroll until the user scrolls back to the bottom - just like chat message behavior.
-
 ## UI Improvements
 
 ### Text Widget Layout Control
 
-Text widgets now support `Height()` and `Grow()` methods for better layout control. These methods work with all specialized text variants including CodeBlock, Markdown, Json, Xml, and Html:
+Text widgets now support `Height()` and `Grow()` methods for better layout control:
 
 ```csharp
-// Set explicit height for a code block
-Text.Code(sourceCode, Languages.CSharp)
-    .Height(Size.Px(400))
-    .Width(Size.Full())
-
 // Make a markdown widget grow to fill available space
 Text.Markdown(documentation)
     .Grow()
     .Height(Size.Vh(80))
-
-// Control JSON display dimensions
-Text.Json(apiResponse)
-    .Width(Size.Px(600))
-    .Height(Size.Px(300))
 ```
-
-The `Grow()` method uses flex-grow to make the widget expand within its container, perfect for creating responsive layouts. Both width and height now properly propagate from the TextBuilder to the underlying widget implementation.
-
-### Sheet Widget Animation
-
-Sheet widgets (slide-out panels) now include a smooth grow-in animation when they open, matching the polished animation behavior of Dialog widgets. This visual enhancement makes the UI feel more consistent and refined across all overlay components.
 
 ### Voice Dictation for TextInput Widgets
 
@@ -119,106 +89,20 @@ var message = UseState("");
 
 new TextInput()
     .Bind(message)
+    .EnableDictation(language: "es-ES")  // Spanish
     .EnableDictation()
     .Placeholder("Type or speak your message...")
 ```
 
-Specify a language for better transcription accuracy:
-
-```csharp
-new TextInput()
-    .Bind(message)
-    .EnableDictation(language: "es-ES")  // Spanish
-```
-
-When dictation is enabled, a microphone button appears in the input field. Users can click to record their voice, and the transcribed text automatically appears in the input. If the input is bound to a state, the transcription is appended to any existing text with proper spacing.
-
 **Requirements:** Dictation requires an `IAudioTranscriptionService` to be registered. See the [Audio Transcription Service](#audio-transcription-service) section above for setup instructions using Azure Speech Services.
-
-### Markdown Widget Collapsible Sections
-
-Fixed padding in collapsible sections (details/summary elements) within Markdown widgets. Text nodes that aren't wrapped in block elements now display with proper padding, improving the visual consistency of collapsed markdown content.
 
 ### Inline Icon Preview in Markdown
 
-When documenting icon usage in markdown, you can now use the pattern `Icons.IconName` in inline code, and the actual icon will render next to the code. This makes it easier to create icon documentation or design systems.
+When documenting icon usage in markdown, you can now use the pattern `Icons.IconName` in inline code, and the actual icon will render next to the code.
 
 ```markdown
 Use `Icons.ChevronDown` for dropdown menus or `Icons.Search` for search fields.
 ```
-
-The rendered output will show each icon name in a code block with a visual preview of the icon beside it. The pattern must start with `Icons.` followed by a capitalized icon name (e.g., `Icons.H1`, `Icons.ChevronDown`).
-
-### Local File Links in Markdown
-
-Fixed file:/// link handling in Markdown widgets when local files are enabled. Links with `file:///` URLs are now clickable and properly passed to your `onLinkClick` handler, while images continue to load through the secure proxy. This makes it easier to create markdown documentation that references local files:
-
-```csharp
-new Markdown()
-    .Source("[Open log file](file:///C:/logs/app.log)")
-    .DangerouslyAllowLocalFiles(true)
-    .OnLinkClick(url => {
-        // Handle file:/// URL
-        System.Diagnostics.Process.Start(url);
-    })
-```
-
-### Markdown Image Overlay Display
-
-Fixed an issue where the full-screen image overlay in Markdown widgets could appear behind other UI elements. When you click an image to view it full-screen, the overlay now consistently displays on top of all other content.
-
-### Markdown Task List Rendering
-
-Task list items in Markdown widgets now render correctly without bullet markers. When you use GitHub Flavored Markdown (GFM) task lists, the checkboxes will appear cleanly without redundant bullet points:
-
-```markdown
-- [ ] Incomplete task
-- [x] Completed task
-```
-
-This creates a more polished appearance that matches standard GFM rendering behavior.
-
-### Nested Code Blocks in Markdown
-
-Fixed rendering of nested code blocks in Markdown widgets. Previously, when displaying code examples that contain code blocks (common in documentation), the inner code fence would prematurely close the outer block. The framework now automatically increases the backtick count of outer fences to ensure proper nesting:
-
-```csharp
-new Markdown()
-    .Source(@"
-Here's how to create a code block:
-
-```markdown
-```csharp
-Console.WriteLine(""Hello"");
-```
-
-```
-")
-```
-
-The outer markdown fence will automatically render with four backticks (````) while the inner csharp fence uses three (```), ensuring the entire example displays correctly. This fix is particularly useful for documentation sites, tutorials, or any content that teaches users how to use markdown or code blocks.
-
-### Markdown Code Block Wrapping
-
-Fixed code block rendering to preserve ASCII art and diagram alignment. Code blocks in Markdown widgets no longer wrap text, instead using horizontal scrolling to maintain formatting. This ensures that ASCII diagrams, formatted tables, and code with specific alignment render exactly as intended:
-
-```csharp
-new Markdown()
-    .Source(@"
-```
-
-┌─────────────┐
-│   System    │
-│  ┌───────┐  │
-│  │  App  │  │
-│  └───────┘  │
-└─────────────┘
-
-```
-")
-```
-
-The diagram will now display with perfect alignment instead of wrapping and breaking the layout.
 
 ### Markdown Popover Links
 
@@ -234,86 +118,41 @@ Use the [UseState hook](## ""React-style state management for component data"") 
 ")
 ```
 
-Popover links are styled using your theme's primary color with a dotted underline to visually distinguish them from regular navigation links. This is perfect for tooltips, definitions, or explanatory notes without cluttering your documentation with parenthetical text.
-
-### DataTable Footer Aggregation Dropdown
-
-Fixed visibility issues with the DataTable footer aggregation dropdown menu. When a column has multiple aggregates (e.g., both "Total" and "Avg"), clicking to switch between them now displays the dropdown correctly above all other content. The menu also properly tracks grid column resizes and scrolling, and supports keyboard navigation with focus/blur handling.
-
-### DataTable Empty Row Display
-
-Fixed a visual glitch where DataTables would display a partial empty row at the bottom when filler rows were used to fill sparse data. The bottom edge of the table now renders cleanly without any visible gap or "lip", making the table appearance more polished when displaying fewer rows than the available viewport space.
-
 ### DataTable Header Slots
 
-DataTable widgets now support custom content in the header area through two new slot methods: `HeaderLeft()` and `HeaderRight()`. This gives you full control over the header bar, perfect for adding action buttons, item counts, status badges, or other contextual controls.
-
-**HeaderLeft** renders immediately after the filter button (if filtering is enabled):
+DataTable widgets now support custom content in the header area through two new slot methods: `HeaderLeft()` and `HeaderRight()`.
 
 ```csharp
 products.ToDataTable()
-    .HeaderLeft(ctx => new Button("Export", icon: Icons.Download).Small())
-```
-
-**HeaderRight** renders on the right side of the header bar:
-
-```csharp
-products.ToDataTable()
-    .HeaderRight(ctx => new Badge($"{products.Count()} items"))
-```
-
-Combine both slots to create rich, action-oriented table headers:
-
-```csharp
-products.ToDataTable()
-    .HeaderLeft(ctx => Layout.Horizontal().Gap(2)
+    .HeaderLeft(ctx => Layout.Horizontal().Gap(2) //renders immediately after the filter button (if filtering is enabled)
         | new Button("Export", icon: Icons.Download).Small()
         | new Button("Import", icon: Icons.Upload).Small())
-    .HeaderRight(ctx => Layout.Horizontal().Gap(2)
+    .HeaderRight(ctx => Layout.Horizontal().Gap(2) //renders on the right side of the header bar
         | new Badge($"{products.Count()} items")
         | new Button("Settings", icon: Icons.Settings).Small())
 ```
 
-The slots use the same factory pattern as other Ivy builders, giving you access to the full context for dynamic content rendering.
-
 ### Menu Item Badges
 
-You can now add badges to sidebar menu items using the new `Badge()` extension method. Badges are perfect for showing notification counts, status indicators, or other supplementary information:
+You can now add badges to sidebar menu items using the new `Badge()` extension method:
 
 ```csharp
-new MenuItem("Inbox", Icons.Mail)
-    .Badge("3")
-
 new MenuItem("Tasks", Icons.CheckSquare)
     .Badge("New")
-
-new MenuItem("Settings", Icons.Settings)
-    .Badge("!")
 ```
-
-Badges appear on the right side of menu items in the sidebar and automatically inherit the sidebar's theme styling.
 
 ### Button Badges
 
-You can now add badges to buttons using the new `Badge()` extension method. Badges are perfect for showing counts, status indicators, or notifications on action buttons:
+You can now add badges to buttons using the new `Badge()` extension method:
 
 ```csharp
-new Button("Inbox", eventHandler)
-    .Badge("3")
-    .ShortcutKey("i")
-
-new Button("Notifications", eventHandler, variant: ButtonVariant.Secondary)
-    .Badge("99+")
-
 new Button("Updates", eventHandler, variant: ButtonVariant.Outline)
     .Badge("New")
 ```
 
-Badges appear next to the button text and automatically adapt to the button's variant and theme styling. They work alongside other button features like shortcuts, icons, and loading states.
-
 ### Image Widget Border and Hover Effects
 
-Image widgets now support borders and hover effects, making it easy to create visually polished image displays. Add borders with customizable color, thickness, and border radius:
+Image widgets now support borders and hover effects:
 
 ```csharp
 new Image("https://example.com/photo.jpg")
@@ -513,7 +352,7 @@ This makes it easier to access configuration values throughout your application 
 
 ### Auth Examples Now Use .NET User Secrets
 
-Authentication example projects now use .NET user-secrets for local development instead of `appsettings.json` files. To configure an auth example:
+Authentication example projects now use .NET user-secrets for local development instead of `appsettings.json` files:
 
 ```bash
 cd src/auth/examples/Auth0Example
@@ -528,7 +367,7 @@ This approach keeps sensitive credentials out of source control without needing 
 
 ### Audio Transcription Service
 
-A new `IAudioTranscriptionService` interface has been added to the framework, providing a standardized way to transcribe audio to text. The framework includes an Azure Speech Services implementation out of the box.
+A new `IAudioTranscriptionService` interface has been added to the framework, providing a standardized way to transcribe audio to text.
 
 Register the Azure Speech transcription service in your dependency injection container:
 
@@ -560,8 +399,6 @@ public class VoiceNoteService
 
 The service supports common audio formats including WebM, Ogg, WAV, MP4, and AAC. You can optionally specify the language (defaults to "en-US").
 
-This abstraction makes it easy to swap transcription providers by implementing `IAudioTranscriptionService` with your preferred service.
-
 ## Deployment
 
 ### Multi-Platform Support
@@ -574,7 +411,7 @@ Linux ARM64 support enables deployment on ARM-based servers like AWS Graviton in
 
 ### BASE_PATH Environment Variable Support
 
-You can now configure your application's base path using the `BASE_PATH` environment variable, perfect for reverse proxy deployments where your app runs under a subpath (like `/myapp`). This matches the pattern used for other environment variables like `PORT`, `HOST`, and `VERBOSE`.
+You can now configure your application's base path using the `BASE_PATH` environment variable. This matches the pattern used for other environment variables like `PORT`, `HOST`, and `VERBOSE`.
 
 ```bash
 # Docker deployment example
@@ -594,18 +431,6 @@ var server = new Server(args =>
     args.BasePath = "/myapp";
 });
 ```
-
-The environment variable is particularly useful in containerized deployments where configuration through environment variables is preferred over CLI arguments.
-
-### Single-File Publishing Support
-
-Fixed an issue where Ivy apps published as single-file executables would fail to load authentication modules. The framework now correctly locates and loads `Ivy.Auth.*` assemblies in single-file published apps, eliminating IL3000 warnings. This change is automatic - simply publish your app with:
-
-```bash
-dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
-```
-
-Your authentication handlers will now load correctly in the single-file output.
 
 ## Developer Tools
 
@@ -629,10 +454,6 @@ ivy docs "docs/ApiReference/IvyShared/Colors.md"
 ivy ask "How do I implement a new Application Shell in Ivy?"
 ivy question "What is the command to create an auto-incrementing migration?"
 ```
-
-The `ivy ask` command (also available as `ivy question`) uses Local RAG to search the framework knowledge base and synthesize contextual answers from across the documentation. Perfect for "how do I..." questions when you're not sure where to look.
-
-Use `ivy docs` when you know exactly what topic you need, and `ivy ask` when you need the framework to find and synthesize the answer for you.
 
 ## Breaking Changes
 
@@ -666,9 +487,9 @@ new Image("photo.jpg")
 
 The `Align` method and property has been renamed to clarify its purpose across several widgets:
 
-- **StackLayout.Align → AlignContent** — controls how children are aligned within the container
-- **TableCell.Align → AlignContent** — controls how content is aligned within the cell
-- **FloatingPanel.Align → AlignSelf** — controls how the panel positions itself within its parent
+- **StackLayout.Align to AlignContent** — controls how children are aligned within the container
+- **TableCell.Align to AlignContent** — controls how content is aligned within the cell
+- **FloatingPanel.Align to AlignSelf** — controls how the panel positions itself within its parent
 
 This change makes the API more explicit about whether you're aligning children inside a container or positioning the widget itself.
 
@@ -687,32 +508,6 @@ new StackLayout() { AlignContent = Align.Center }
 new TableCell().AlignContent(Align.Left)
 new FloatingPanel(alignSelf: Align.BottomRight)
 ```
-
-**Migration:** Replace `.Align(` with `.AlignContent(` on StackLayout and TableCell widgets, and with `.AlignSelf(` on FloatingPanel. Update property initializers from `Align =` to `AlignContent =` or `AlignSelf =` as appropriate.
-
-### DiffView Widget Package Renamed
-
-The `DiffView` widget package has been renamed from `Ivy.External.DiffView` to `Ivy.Widgets.DiffView`. If you're using this widget, update your project references:
-
-```bash
-# Remove the old package
-dotnet remove package Ivy.External.DiffView
-
-# Add the new package
-dotnet add package Ivy.Widgets.DiffView
-```
-
-Update your using statements:
-
-```csharp
-// Old
-using Ivy.External.DiffView;
-
-// New
-using Ivy.Widgets.DiffView;
-```
-
-The widget API remains unchanged - only the package and namespace have been renamed.
 
 ## Bug Fixes
 
