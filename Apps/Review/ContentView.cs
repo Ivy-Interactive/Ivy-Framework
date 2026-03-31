@@ -73,6 +73,21 @@ public class ContentView(
         // Content sections
         var content = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200))).Gap(4);
 
+        // PRs section
+        if (_selectedPlan.Prs.Count > 0)
+        {
+            var prsLayout = Layout.Vertical().Gap(1);
+            foreach (var pr in _selectedPlan.Prs)
+            {
+                var prCapture = pr;
+                prsLayout |= new Button(pr).Link().OnClick(() => client.OpenUrl(prCapture));
+            }
+            content |= new Expandable(
+                header: $"Pull Requests ({_selectedPlan.Prs.Count})",
+                content: prsLayout
+            ).Open(false);
+        }
+
         // Verifications section
         if (_selectedPlan.Verifications.Count > 0)
         {
@@ -153,18 +168,6 @@ public class ContentView(
                 header: $"Commits ({_selectedPlan.Commits.Count})",
                 content: commitsTable
             ).Open(false);
-        }
-
-        // PRs section
-        if (_selectedPlan.Prs.Count > 0)
-        {
-            var prsLayout = Layout.Vertical().Gap(1);
-            prsLayout |= Text.Block("Pull Requests").Bold();
-            foreach (var pr in _selectedPlan.Prs)
-            {
-                prsLayout |= Text.Block($"  {pr}");
-            }
-            content |= prsLayout;
         }
 
         // Artifacts section
