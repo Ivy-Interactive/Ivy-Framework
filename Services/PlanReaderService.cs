@@ -33,27 +33,36 @@ public class PlanReaderService(ConfigService config)
         var stuckStates = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             { "Building", "Executing", "Updating" };
 
-        try
-        {
-            if (!Directory.Exists(PlansDirectory)) return;
+        if (!Directory.Exists(PlansDirectory)) return;
 
-            foreach (var dir in Directory.GetDirectories(PlansDirectory))
+        foreach (var dir in Directory.GetDirectories(PlansDirectory))
+        {
+            try
             {
                 var planYamlPath = Path.Combine(dir, "plan.yaml");
                 if (!File.Exists(planYamlPath)) continue;
 
                 var yaml = File.ReadAllText(planYamlPath);
-                var stateMatch = System.Text.RegularExpressions.Regex.Match(yaml, @"(?m)^state:\s*(.+)$");
+                var stateMatch = Regex.Match(yaml, @"(?m)^state:\s*(.+)$");
                 if (!stateMatch.Success) continue;
 
                 var state = stateMatch.Groups[1].Value.Trim();
                 if (stuckStates.Contains(state))
                 {
-                    TransitionState(Path.GetFileName(dir), PlanStatus.Failed);
+                    var newState = state.Equals("Executing", StringComparison.OrdinalIgnoreCase)
+                        ? "Failed" : "Draft";
+                    var updated = Regex.Replace(yaml, @"(?m)^state:\s*.*$", $"state: {newState}");
+                    updated = Regex.Replace(updated, @"(?m)^updated:\s*.*$",
+                        $"updated: {DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}");
+                    File.WriteAllText(planYamlPath, updated);
                 }
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"Failed to recover plan {Path.GetFileName(dir)}: {ex.Message}");
+            }
         }
-        catch { }
     }
 
     /// <summary>

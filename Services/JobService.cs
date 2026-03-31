@@ -179,6 +179,8 @@ public class JobService
         job.CompletedAt = DateTime.UtcNow;
         if (job.StartedAt.HasValue)
             job.DurationSeconds = (int)(job.CompletedAt.Value - job.StartedAt.Value).TotalSeconds;
+
+        ResetPlanState(job);
         JobsChanged?.Invoke();
     }
 
