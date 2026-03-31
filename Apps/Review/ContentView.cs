@@ -409,6 +409,16 @@ public class ContentView(
                 {
                     copyToClipboard(_selectedPlan.FolderPath);
                     client.Toast("Copied path to clipboard", "Path Copied");
+                }),
+                new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
+                {
+                    var yamlPath = System.IO.Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "notepad.exe",
+                        Arguments = yamlPath,
+                        UseShellExecute = true
+                    });
                 })
             );
 
