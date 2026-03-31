@@ -14,6 +14,8 @@ Read `config.yaml` (from `ConfigPath`) for project repos and context.
 
 The launcher script sets the working directory to the project's primary repo.
 
+**Note:** Plans are often executed multiple times. For example, a reviewer may not be satisfied with the first execution and sends the plan back to Draft with comments (via UpdatePlan). When re-executing, the worktree branch from the previous run may already exist — handle this gracefully (delete old worktree first, or create with a new branch suffix). Check for existing artifacts and verification reports from prior runs.
+
 ## Execution Steps
 
 ### 1. Read Plan
@@ -28,7 +30,14 @@ For each repo listed in `plan.yaml` `repos` (or the project's repos from `config
 
 1. Fetch latest from remote: `git fetch origin`
 2. Detect the default branch: `git symbolic-ref refs/remotes/origin/HEAD | sed 's|refs/remotes/origin/||'` (usually `master` or `main`)
-3. Create worktree branching from the remote default branch:
+3. If the worktree or branch already exists from a prior execution, remove it first:
+
+```bash
+git worktree remove "<PlanFolder>/worktrees/<repo-folder-name>" --force 2>/dev/null
+git branch -D "plan-<planId>-<repo-folder-name>" 2>/dev/null
+```
+
+4. Create worktree branching from the remote default branch:
 
 ```bash
 cd <original-repo-path>

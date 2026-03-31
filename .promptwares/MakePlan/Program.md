@@ -114,6 +114,7 @@ The user can edit the checklist before execution — unchecking a required verif
 
 ### Rules
 
+- **Markdown supports mermaid charts** (```mermaid code blocks) for diagrams in plan revisions. Use sparingly — only when a diagram genuinely clarifies architecture or flow. Most plans don't need diagrams.
 - **🚫 NEVER modify source code. NEVER implement changes. You READ source code for research, you WRITE only to PlansDirectory. Any file write outside PlansDirectory is a critical violation.**
 - **!CRITICAL: Every MakePlan execution MUST produce at least one plan folder. Even if the task is an analysis, review, or investigation — always create a plan with actionable steps. Never just analyze and report back without a plan.**
 - The plan must include all paths and information for an LLM coding agent to execute end-to-end without human intervention
