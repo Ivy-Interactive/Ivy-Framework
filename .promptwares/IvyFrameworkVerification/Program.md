@@ -107,7 +107,7 @@ Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 
 **package.json** — minimal, with `@playwright/test` dependency
 
-**playwright.config.ts** — Chromium only, single worker, no retries, viewport `{ width: 1920, height: 1920 }` (set in both `use` and `projects[0].use`), uses `process.env.APP_PORT`, video recording: `video: { mode: 'on', dir: '<ArtifactsDir>/videos' }` in both `use` and `projects[0].use`
+**playwright.config.ts** — Chromium only, single worker, no retries, viewport `{ width: 1920, height: 1920 }` (set in both `use` and `projects[0].use`), uses `process.env.APP_PORT`, video recording: `video: { mode: 'off' }` by default in config (videos are enabled per-test via `test.use({ video: { mode: 'on', dir: '<ArtifactsDir>/videos' } })` on the 1-2 most representative tests only)
 
 **IMPORTANT:** Screenshots and videos must be written to `<ArtifactsDir>/screenshots/` and `<ArtifactsDir>/videos/` (sibling to `sample/`), not inside `sample/`.
 
@@ -120,6 +120,7 @@ Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 - Capture backend stdout/stderr → `<ArtifactsDir>/tests/backend.log`
 
 **Videos:**
+- Limit video recordings to at most 2 — pick the most representative scenarios
 - Playwright records video per test via config (dir set to `<ArtifactsDir>/videos/`)
 - After each test, rename video with descriptive name:
   ```typescript
