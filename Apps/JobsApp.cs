@@ -107,7 +107,15 @@ public class JobsApp : ViewBase
                     }
                 }
                 return ValueTask.CompletedTask;
-            });
+            })
+            .HeaderRight(ctx => new Button("Clear Completed")
+                .Icon(Icons.Trash)
+                .Outline()
+                .OnClick(() =>
+                {
+                    jobService.ClearCompletedJobs();
+                    refreshToken.Refresh();
+                }));
 
         return dataTable;
     }
