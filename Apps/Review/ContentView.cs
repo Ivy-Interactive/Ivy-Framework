@@ -35,6 +35,8 @@ public class ContentView(
         var openFile = UseState<string?>(null);
         var openCommit = UseState<string?>(null);
         var showPlan = UseState(false);
+        var suggestChangesOpen = UseState(false);
+        var suggestChangesText = UseState("");
 
         if (_selectedPlan is null)
         {
@@ -349,12 +351,44 @@ public class ContentView(
             ).Width(Size.Half());
         }
 
+        // Suggest Changes dialog
+        if (suggestChangesOpen.Value)
+        {
+            content |= new Dialog(
+                _ => { suggestChangesText.Set(""); suggestChangesOpen.Set(false); },
+                new DialogHeader($"Suggest Changes for #{_selectedPlan.Id}"),
+                new DialogBody(
+                    Layout.Vertical()
+                        | Text.P("Describe the changes needed for this plan.")
+                        | suggestChangesText.ToTextareaInput("Enter change instructions...").Rows(6)
+                ),
+                new DialogFooter(
+                    new Button("Cancel").Outline().OnClick(() => { suggestChangesText.Set(""); suggestChangesOpen.Set(false); }),
+                    new Button("Submit Changes").Primary().OnClick(() =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(suggestChangesText.Value))
+                        {
+                            var currentContent = _planService.ReadLatestRevision(_selectedPlan.FolderName);
+                            var comments = string.Join("\n", suggestChangesText.Value
+                                .Split('\n')
+                                .Select(line => $">> {line}"));
+                            _planService.SavePlan(_selectedPlan.FolderName, currentContent + "\n\n" + comments + "\n");
+                        }
+                        _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Updating);
+                        _jobService.StartJob("UpdatePlan", _selectedPlan.FolderPath);
+                        _refreshPlans();
+                        suggestChangesText.Set("");
+                        suggestChangesOpen.Set(false);
+                    })
+                )
+            ).Width(Size.Rem(30));
+        }
+
         // Action bar
         var actionBar = Layout.Horizontal().Align(Align.Center).Gap(2).Padding(1)
-            | new Button("Back to Draft").Icon(Icons.Pencil).Outline().OnClick(() =>
+            | new Button("Suggest Changes").Icon(Icons.MessageSquare).Outline().OnClick(() =>
             {
-                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Draft);
-                _refreshPlans();
+                suggestChangesOpen.Set(true);
             }).ShortcutKey("d")
             | new Button("Discard").Icon(Icons.Trash).Outline().OnClick(() =>
             {
