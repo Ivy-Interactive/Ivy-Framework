@@ -3,14 +3,17 @@
 ## Performance Improvements
 
 ### Event Handling Optimization
+
 Event dispatching in widgets is now significantly faster. The framework now caches reflection lookups when invoking widget events, eliminating repeated reflection overhead on every event call. This improvement is automatic and requires no code changes - your existing event handlers will simply run faster.
 
 ### Rust-Powered Core Engine
+
 The framework core now leverages Rust for performance-critical operations including JSON diffing and tree synchronization. These optimizations deliver faster UI updates and reduced latency, particularly noticeable in applications with frequent state changes or large component trees. The improvements are automatic - no code changes required.
 
 ## New Widgets
 
 ### DiffView Widget
+
 A new `DiffView` widget for displaying unified diffs (git diff output) in either unified or split view mode. Perfect for code review interfaces, version comparison tools, or any application that needs to show file changes. The widget is powered by the popular [react-diff-view](https://github.com/otakustay/react-diff-view) library.
 
 Install the widget:
@@ -53,6 +56,7 @@ new DiffView()
 The widget accepts standard git diff output format and includes syntax highlighting support when you specify the language.
 
 ### AutoScroll Container
+
 A new `AutoScroll` widget has been added to the primitives collection. This container automatically scrolls to the bottom when its content grows, making it perfect for live logs, activity feeds, or any streaming content that needs to stay visible in a fixed-height viewport.
 
 ```csharp
@@ -80,6 +84,7 @@ When auto-follow is enabled, scrolling up manually pauses the auto-scroll until 
 ## UI Improvements
 
 ### Text Widget Layout Control
+
 Text widgets now support `Height()` and `Grow()` methods for better layout control. These methods work with all specialized text variants including CodeBlock, Markdown, Json, Xml, and Html:
 
 ```csharp
@@ -102,9 +107,11 @@ Text.Json(apiResponse)
 The `Grow()` method uses flex-grow to make the widget expand within its container, perfect for creating responsive layouts. Both width and height now properly propagate from the TextBuilder to the underlying widget implementation.
 
 ### Sheet Widget Animation
+
 Sheet widgets (slide-out panels) now include a smooth grow-in animation when they open, matching the polished animation behavior of Dialog widgets. This visual enhancement makes the UI feel more consistent and refined across all overlay components.
 
 ### Voice Dictation for TextInput Widgets
+
 TextInput widgets now support voice dictation, allowing users to speak their input instead of typing. Enable dictation with the `EnableDictation()` extension method:
 
 ```csharp
@@ -129,9 +136,11 @@ When dictation is enabled, a microphone button appears in the input field. Users
 **Requirements:** Dictation requires an `IAudioTranscriptionService` to be registered. See the [Audio Transcription Service](#audio-transcription-service) section above for setup instructions using Azure Speech Services.
 
 ### Markdown Widget Collapsible Sections
+
 Fixed padding in collapsible sections (details/summary elements) within Markdown widgets. Text nodes that aren't wrapped in block elements now display with proper padding, improving the visual consistency of collapsed markdown content.
 
 ### Inline Icon Preview in Markdown
+
 When documenting icon usage in markdown, you can now use the pattern `Icons.IconName` in inline code, and the actual icon will render next to the code. This makes it easier to create icon documentation or design systems.
 
 ```markdown
@@ -141,6 +150,7 @@ Use `Icons.ChevronDown` for dropdown menus or `Icons.Search` for search fields.
 The rendered output will show each icon name in a code block with a visual preview of the icon beside it. The pattern must start with `Icons.` followed by a capitalized icon name (e.g., `Icons.H1`, `Icons.ChevronDown`).
 
 ### Local File Links in Markdown
+
 Fixed file:/// link handling in Markdown widgets when local files are enabled. Links with `file:///` URLs are now clickable and properly passed to your `onLinkClick` handler, while images continue to load through the secure proxy. This makes it easier to create markdown documentation that references local files:
 
 ```csharp
@@ -154,9 +164,11 @@ new Markdown()
 ```
 
 ### Markdown Image Overlay Display
+
 Fixed an issue where the full-screen image overlay in Markdown widgets could appear behind other UI elements. When you click an image to view it full-screen, the overlay now consistently displays on top of all other content.
 
 ### Markdown Task List Rendering
+
 Task list items in Markdown widgets now render correctly without bullet markers. When you use GitHub Flavored Markdown (GFM) task lists, the checkboxes will appear cleanly without redundant bullet points:
 
 ```markdown
@@ -167,6 +179,7 @@ Task list items in Markdown widgets now render correctly without bullet markers.
 This creates a more polished appearance that matches standard GFM rendering behavior.
 
 ### Nested Code Blocks in Markdown
+
 Fixed rendering of nested code blocks in Markdown widgets. Previously, when displaying code examples that contain code blocks (common in documentation), the inner code fence would prematurely close the outer block. The framework now automatically increases the backtick count of outer fences to ensure proper nesting:
 
 ```csharp
@@ -178,6 +191,7 @@ Here's how to create a code block:
 ```csharp
 Console.WriteLine(""Hello"");
 ```
+
 ```
 ")
 ```
@@ -185,18 +199,21 @@ Console.WriteLine(""Hello"");
 The outer markdown fence will automatically render with four backticks (````) while the inner csharp fence uses three (```), ensuring the entire example displays correctly. This fix is particularly useful for documentation sites, tutorials, or any content that teaches users how to use markdown or code blocks.
 
 ### Markdown Code Block Wrapping
+
 Fixed code block rendering to preserve ASCII art and diagram alignment. Code blocks in Markdown widgets no longer wrap text, instead using horizontal scrolling to maintain formatting. This ensures that ASCII diagrams, formatted tables, and code with specific alignment render exactly as intended:
 
 ```csharp
 new Markdown()
     .Source(@"
 ```
+
 ┌─────────────┐
 │   System    │
 │  ┌───────┐  │
 │  │  App  │  │
 │  └───────┘  │
 └─────────────┘
+
 ```
 ")
 ```
@@ -204,6 +221,7 @@ new Markdown()
 The diagram will now display with perfect alignment instead of wrapping and breaking the layout.
 
 ### Markdown Popover Links
+
 Markdown widgets now support popover links for inline supplementary information. Use the special syntax `[text](## "popover content")` to create clickable text that displays a popover instead of navigating to a URL:
 
 ```csharp
@@ -219,12 +237,15 @@ Use the [UseState hook](## ""React-style state management for component data"") 
 Popover links are styled using your theme's primary color with a dotted underline to visually distinguish them from regular navigation links. This is perfect for tooltips, definitions, or explanatory notes without cluttering your documentation with parenthetical text.
 
 ### DataTable Footer Aggregation Dropdown
+
 Fixed visibility issues with the DataTable footer aggregation dropdown menu. When a column has multiple aggregates (e.g., both "Total" and "Avg"), clicking to switch between them now displays the dropdown correctly above all other content. The menu also properly tracks grid column resizes and scrolling, and supports keyboard navigation with focus/blur handling.
 
 ### DataTable Empty Row Display
+
 Fixed a visual glitch where DataTables would display a partial empty row at the bottom when filler rows were used to fill sparse data. The bottom edge of the table now renders cleanly without any visible gap or "lip", making the table appearance more polished when displaying fewer rows than the available viewport space.
 
 ### DataTable Header Slots
+
 DataTable widgets now support custom content in the header area through two new slot methods: `HeaderLeft()` and `HeaderRight()`. This gives you full control over the header bar, perfect for adding action buttons, item counts, status badges, or other contextual controls.
 
 **HeaderLeft** renders immediately after the filter button (if filtering is enabled):
@@ -256,6 +277,7 @@ products.ToDataTable()
 The slots use the same factory pattern as other Ivy builders, giving you access to the full context for dynamic content rendering.
 
 ### Menu Item Badges
+
 You can now add badges to sidebar menu items using the new `Badge()` extension method. Badges are perfect for showing notification counts, status indicators, or other supplementary information:
 
 ```csharp
@@ -272,6 +294,7 @@ new MenuItem("Settings", Icons.Settings)
 Badges appear on the right side of menu items in the sidebar and automatically inherit the sidebar's theme styling.
 
 ### Button Badges
+
 You can now add badges to buttons using the new `Badge()` extension method. Badges are perfect for showing counts, status indicators, or notifications on action buttons:
 
 ```csharp
@@ -289,6 +312,7 @@ new Button("Updates", eventHandler, variant: ButtonVariant.Outline)
 Badges appear next to the button text and automatically adapt to the button's variant and theme styling. They work alongside other button features like shortcuts, icons, and loading states.
 
 ### Image Widget Border and Hover Effects
+
 Image widgets now support borders and hover effects, making it easy to create visually polished image displays. Add borders with customizable color, thickness, and border radius:
 
 ```csharp
@@ -382,6 +406,7 @@ These configuration options work with all Cartesian charts (Line, Bar, and Area 
 ## Hooks
 
 ### UseLoading Hook
+
 A new `UseLoading` hook provides programmatic control over loading dialogs, perfect for showing progress during async operations. The hook returns a tuple containing the loading view (which you render in your component) and a `showLoading` function to trigger the dialog:
 
 ```csharp
@@ -467,6 +492,7 @@ The hook handles exceptions automatically through the framework's `IExceptionHan
 ## Configuration
 
 ### IConfiguration Now Available via Dependency Injection
+
 `IConfiguration` is now registered in the dependency injection container and can be injected into your services:
 
 ```csharp
@@ -486,6 +512,7 @@ public class MyService
 This makes it easier to access configuration values throughout your application without passing the `Server.Configuration` property explicitly.
 
 ### Auth Examples Now Use .NET User Secrets
+
 Authentication example projects now use .NET user-secrets for local development instead of `appsettings.json` files. To configure an auth example:
 
 ```bash
@@ -500,6 +527,7 @@ This approach keeps sensitive credentials out of source control without needing 
 ## New Services
 
 ### Audio Transcription Service
+
 A new `IAudioTranscriptionService` interface has been added to the framework, providing a standardized way to transcribe audio to text. The framework includes an Azure Speech Services implementation out of the box.
 
 Register the Azure Speech transcription service in your dependency injection container:
@@ -537,6 +565,7 @@ This abstraction makes it easy to swap transcription providers by implementing `
 ## Deployment
 
 ### Multi-Platform Support
+
 The Ivy Framework now includes native binaries for all major platforms including Windows (x64 and ARM64), Linux (x64 and ARM64), and macOS (Intel x64 and Apple Silicon ARM64). The framework automatically selects the correct native libraries for your target platform - no configuration required.
 
 Linux ARM64 support enables deployment on ARM-based servers like AWS Graviton instances, Oracle Cloud Ampere, and other ARM64 infrastructure, providing cost-effective hosting options with the same performance optimizations available on other platforms.
@@ -544,6 +573,7 @@ Linux ARM64 support enables deployment on ARM-based servers like AWS Graviton in
 **Alpine Linux Support:** The framework now detects and supports Alpine Linux (musl-based distributions), automatically loading the correct native libraries for musl environments. This is particularly useful for lightweight Docker containers built on Alpine Linux base images, which are popular for their minimal size and security benefits.
 
 ### BASE_PATH Environment Variable Support
+
 You can now configure your application's base path using the `BASE_PATH` environment variable, perfect for reverse proxy deployments where your app runs under a subpath (like `/myapp`). This matches the pattern used for other environment variables like `PORT`, `HOST`, and `VERBOSE`.
 
 ```bash
@@ -568,6 +598,7 @@ var server = new Server(args =>
 The environment variable is particularly useful in containerized deployments where configuration through environment variables is preferred over CLI arguments.
 
 ### Single-File Publishing Support
+
 Fixed an issue where Ivy apps published as single-file executables would fail to load authentication modules. The framework now correctly locates and loads `Ivy.Auth.*` assemblies in single-file published apps, eliminating IL3000 warnings. This change is automatic - simply publish your app with:
 
 ```bash
@@ -579,9 +610,11 @@ Your authentication handlers will now load correctly in the single-file output.
 ## Developer Tools
 
 ### New CLI Documentation Commands
+
 The Ivy CLI now includes powerful commands for exploring framework documentation and getting instant answers to your questions:
 
 **Browse documentation:**
+
 ```bash
 # List all available docs
 ivy docs list
@@ -591,6 +624,7 @@ ivy docs "docs/ApiReference/IvyShared/Colors.md"
 ```
 
 **Ask questions with semantic search:**
+
 ```bash
 ivy ask "How do I implement a new Application Shell in Ivy?"
 ivy question "What is the command to create an auto-incrementing migration?"
@@ -600,48 +634,14 @@ The `ivy ask` command (also available as `ivy question`) uses Local RAG to searc
 
 Use `ivy docs` when you know exactly what topic you need, and `ivy ask` when you need the framework to find and synthesize the answer for you.
 
-## Bug Fixes
-
-### SignalR Connection Stability
-Fixed crashes when using MessagePack with SignalR connections that could occur with certain payload types. The framework now handles MessagePack serialization more robustly, preventing connection drops in complex scenarios.
-
-### Badge Display in Tables
-Fixed badge stretching issues when badges are used inside table cells. Badges now use `inline-flex` layout instead of `flex`, preventing them from expanding to fill the entire table cell width. This ensures badges maintain their compact, pill-shaped appearance in DataTable columns and other table layouts.
-
-### Dialog Custom Width Support
-Fixed an issue where Dialog widgets with custom widths were being capped at 36rem (max-w-xl) even when a larger width was specified. When you set a custom width without an explicit maxWidth, the framework now automatically matches the maxWidth to your width value:
-
-```csharp
-new Dialog()
-    .Width(Size.Px(800))  // Now correctly displays at 800px instead of being capped at 576px
-```
-
-This fix ensures your dialog sizing works as expected without needing to specify both width and maxWidth explicitly.
-
-### DiffView Widget Runtime Error
-Fixed a JSX runtime error in the DiffView widget that could prevent it from rendering correctly. The widget now properly references the React JSX runtime, ensuring reliable operation across all scenarios.
-
-### ColorInput Height Alignment
-Fixed height inconsistencies in ColorInput widgets across density levels. ColorInput widgets now render at the same height as other input widgets (TextInput, NumberInput) at all density settings, ensuring a consistent visual appearance in forms.
-
-### TextArea Height Handling
-Fixed an issue where TextArea widgets with explicit height values weren't sizing correctly. The height property is now properly applied to the textarea element itself rather than just the wrapper, ensuring that explicit heights are respected while still allowing textareas without specified heights to fill their containers naturally.
-
-### Effect Queue Race Condition
-Fixed a race condition in the framework's effect processing system where effects could be lost if they were queued while the effect processor was finishing. Effects are now guaranteed to run even when queued during concurrent operations, preventing scenarios where state changes or side effects might not trigger as expected.
-
-### AsyncSelectInput Value Handling
-Fixed an issue in AsyncSelectInput where the OnChange event could receive stale values when the selection was refreshed. The widget now correctly passes the fresh value to OnChange handlers, ensuring your event handlers always receive the accurate selected value.
-
-### Native Library Loading Diagnostics
-Improved error messages when native Rust libraries fail to load. When the framework cannot locate the native libraries for JSON diffing and tree synchronization, it now provides detailed diagnostic information including the runtime identifier, probed file path, and base directory. This makes it easier to troubleshoot deployment issues related to native dependencies.
-
 ## Breaking Changes
 
 ### CardHoverVariant Renamed to HoverEffect
+
 The `CardHoverVariant` enum has been renamed to `HoverEffect` and moved to a shared location (`Ivy.Shared`). This enum is used by Card, Box, and Image widgets to control hover interaction effects.
 
 **Before:**
+
 ```csharp
 new Box("Click me")
     .Hover(CardHoverVariant.Shadow)
@@ -651,6 +651,7 @@ new Image("photo.jpg")
 ```
 
 **After:**
+
 ```csharp
 new Box("Click me")
     .Hover(HoverEffect.Shadow)
@@ -662,6 +663,7 @@ new Image("photo.jpg")
 **Migration:** Replace all instances of `CardHoverVariant` with `HoverEffect`. The extension method signatures remain unchanged (`.Hover(HoverEffect variant)`), and both the old and new enums are in the `Ivy` namespace, so no namespace changes are needed.
 
 ### Layout Alignment API Renamed
+
 The `Align` method and property has been renamed to clarify its purpose across several widgets:
 
 - **StackLayout.Align → AlignContent** — controls how children are aligned within the container
@@ -671,6 +673,7 @@ The `Align` method and property has been renamed to clarify its purpose across s
 This change makes the API more explicit about whether you're aligning children inside a container or positioning the widget itself.
 
 **Before:**
+
 ```csharp
 new StackLayout() { Align = Align.Center }
 new TableCell().Align(Align.Left)
@@ -678,6 +681,7 @@ new FloatingPanel(align: Align.BottomRight)
 ```
 
 **After:**
+
 ```csharp
 new StackLayout() { AlignContent = Align.Center }
 new TableCell().AlignContent(Align.Left)
@@ -687,6 +691,7 @@ new FloatingPanel(alignSelf: Align.BottomRight)
 **Migration:** Replace `.Align(` with `.AlignContent(` on StackLayout and TableCell widgets, and with `.AlignSelf(` on FloatingPanel. Update property initializers from `Align =` to `AlignContent =` or `AlignSelf =` as appropriate.
 
 ### DiffView Widget Package Renamed
+
 The `DiffView` widget package has been renamed from `Ivy.External.DiffView` to `Ivy.Widgets.DiffView`. If you're using this widget, update your project references:
 
 ```bash
@@ -708,3 +713,15 @@ using Ivy.Widgets.DiffView;
 ```
 
 The widget API remains unchanged - only the package and namespace have been renamed.
+
+## Bug Fixes
+
+- **SignalR Connection Stability**: The framework now handles MessagePack serialization more robustly, preventing connection drops in complex scenarios.
+- **Badge Display in Table**: Badges now use `inline-flex` layout instead of `flex`, preventing them from expanding to fill the entire table cell width.
+- **Dialog Custom Width Support**: When you set a custom width without an explicit maxWidth, the framework now automatically matches the maxWidth to your width value.
+- **DiffView Widget Runtime Error**: The widget now properly references the React JSX runtime, ensuring reliable operation across all scenarios.
+- **ColorInput Height Alignment**: ColorInput widgets now render at the same height as other input widgets (TextInput, NumberInput) at all density settings.
+- **TextArea Height Handling**: The height property is now properly applied to the textarea element itself rather than just the wrapper, ensuring that explicit heights are respected while still allowing textareas without specified heights to fill their containers naturally.
+- **Effect Queue Race Condition**: Effects are now guaranteed to run even when queued during concurrent operations, preventing scenarios where state changes or side effects might not trigger as expected.
+- **AsyncSelectInput Value Handling**: The widget now correctly passes the fresh value to OnChange handlers, ensuring your event handlers always receive the accurate selected value.
+- **Native Library Loading Diagnostics**: The framework now provides detailed diagnostic information including the runtime identifier, probed file path, and base directory.
