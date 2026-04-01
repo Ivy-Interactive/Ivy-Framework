@@ -36,6 +36,7 @@ public class ContentView(
 
         var isEditing = UseState(false);
         var editContent = UseState("");
+        var originalContent = UseState("");
         var isEditingPrev = UseState(false);
         var lastPlanId = UseState(_selectedPlan?.Id ?? -1);
 
@@ -48,7 +49,9 @@ public class ContentView(
             {
                 if (plan != null)
                 {
-                    editContent.Set(_planService.ReadRawPlan(plan.FolderName));
+                    var raw = _planService.ReadRawPlan(plan.FolderName);
+                    editContent.Set(raw);
+                    originalContent.Set(raw);
                 }
                 else
                 {
@@ -57,9 +60,9 @@ public class ContentView(
             }
             else if (!isEditing.Value && isEditingPrev.Value)
             {
-                if (plan != null)
+                if (plan != null && editContent.Value != originalContent.Value)
                 {
-                    _planService.SavePlan(plan.FolderName, editContent.Value);
+                    _planService.SaveRevision(plan.FolderName, editContent.Value);
                     _refreshPlans();
                 }
             }
@@ -105,9 +108,10 @@ public class ContentView(
                 .OnBlur(() =>
                 {
                     var plan = selectedPlanRef.Value;
-                    if (plan != null)
+                    if (plan != null && editContent.Value != originalContent.Value)
                     {
-                        _planService.SavePlan(plan.FolderName, editContent.Value);
+                        _planService.SaveRevision(plan.FolderName, editContent.Value);
+                        originalContent.Set(editContent.Value);
                         _refreshPlans();
                     }
                 });
