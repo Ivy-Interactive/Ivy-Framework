@@ -53,7 +53,7 @@ public class SidebarView(
             var clickablePlan = plan;
             return new ListItem($"#{plan.Id} {plan.Title}")
                 .Content(Layout.Horizontal().Gap(1)
-                    | new Badge(plan.Project).Variant(BadgeVariant.Outline).Small()
+                    | new Badge(plan.Project).Variant(BadgeVariant.Outline).Small().WithProjectColor(_config, plan.Project)
                     | new Badge(plan.Level).Variant(_config.GetBadgeVariant(plan.Level)).Small())
                 .OnClick(() => _selectedPlanState.Set(clickablePlan));
         }));
