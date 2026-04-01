@@ -15,6 +15,7 @@ public class JobsApp : ViewBase
         var client = UseService<IClientProvider>();
         var nav = this.UseNavigation();
         var refreshToken = UseRefreshToken();
+        var showCommand = UseState<string?>(null);
         UseInterval(() =>
         {
             while (jobService.PendingNotifications.TryDequeue(out var notification))
@@ -92,6 +93,7 @@ public class JobsApp : ViewBase
                 return ValueTask.CompletedTask;
             })
             .RowActions(
+                new MenuItem(Label: "Show Command", Icon: Icons.Terminal, Tag: "show-command"),
                 new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan"),
                 new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job"),
                 new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job")
@@ -120,6 +122,11 @@ public class JobsApp : ViewBase
                             refreshToken.Refresh();
                         }
                     }
+                    else if (tag == "show-command")
+                    {
+                        var command = $"pwsh -NoProfile -File \"{job.ScriptPath}\" {string.Join(" ", job.Args.Select(a => $"\"{a}\""))}";
+                        showCommand.Set(command);
+                    }
                     else if (tag == "delete-job")
                     {
                         if (job.Status != "Running")
@@ -138,6 +145,18 @@ public class JobsApp : ViewBase
                     refreshToken.Refresh();
                 })
             ));
+
+        if (showCommand.Value is { } cmd)
+        {
+            return new Fragment(
+                dataTable,
+                new Sheet(
+                    onClose: () => showCommand.Set(null),
+                    content: new Markdown($"```\n{cmd}\n```"),
+                    title: "Promptware Command"
+                ).Width(Size.Half())
+            );
+        }
 
         return dataTable;
     }
