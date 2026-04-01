@@ -49,6 +49,23 @@ public class ContentView(
         var customPrAssignee = UseState<string?>(null);
         var customPrComment = UseState("");
 
+        UseEffect(() =>
+        {
+            if (!customPrApprove.Value)
+            {
+                customPrMerge.Set(false);
+                customPrDeleteBranch.Set(false);
+            }
+        }, customPrApprove);
+
+        UseEffect(() =>
+        {
+            if (!customPrMerge.Value)
+            {
+                customPrDeleteBranch.Set(false);
+            }
+        }, customPrMerge);
+
         var githubService = UseService<GithubService>();
         var assigneesQuery = UseQuery<string[], string>(
             _selectedPlan?.Project ?? "",
