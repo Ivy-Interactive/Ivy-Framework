@@ -36,6 +36,14 @@ public class ContentView(
         var openCommit = UseState<string?>(null);
         var suggestChangesOpen = UseState(false);
         var suggestChangesText = UseState("");
+        var customPrOpen = UseState(false);
+        var customPrApprove = UseState(true);
+        var customPrMerge = UseState(true);
+        var customPrDeleteBranch = UseState(true);
+        var customPrIncludeArtifacts = UseState(true);
+        var customPrSubmitToSlack = UseState(true);
+        var customPrAssignee = UseState("");
+        var customPrComment = UseState("");
         var selectedTab = UseState(0);
 
         if (_selectedPlan is null)
@@ -398,6 +406,44 @@ public class ContentView(
             ).Width(Size.Rem(30));
         }
 
+        // Custom PR dialog
+        if (customPrOpen.Value)
+        {
+            content |= new Dialog(
+                _ => { customPrOpen.Set(false); },
+                new DialogHeader($"Custom PR for #{_selectedPlan.Id}"),
+                new DialogBody(
+                    Layout.Vertical().Gap(2)
+                        | customPrApprove.ToCheckbox("Approve")
+                        | customPrMerge.ToCheckbox("Merge").Disabled(!customPrApprove.Value)
+                        | customPrDeleteBranch.ToCheckbox("Delete Branch").Disabled(!customPrMerge.Value || !customPrApprove.Value)
+                        | customPrIncludeArtifacts.ToCheckbox("Include Artifacts")
+                        | customPrSubmitToSlack.ToCheckbox("Submit to Slack")
+                        | customPrAssignee.ToTextInput("Assignee")
+                        | customPrComment.ToTextareaInput("Comment").Rows(3)
+                ),
+                new DialogFooter(
+                    new Button("Cancel").Outline().OnClick(() => customPrOpen.Set(false)),
+                    new Button("Create PR").Primary().OnClick(() =>
+                    {
+                        var yaml = $"approve: {customPrApprove.Value.ToString().ToLowerInvariant()}\n"
+                            + $"merge: {customPrMerge.Value.ToString().ToLowerInvariant()}\n"
+                            + $"deleteBranch: {customPrDeleteBranch.Value.ToString().ToLowerInvariant()}\n"
+                            + $"includeArtifacts: {customPrIncludeArtifacts.Value.ToString().ToLowerInvariant()}\n"
+                            + $"submitToSlack: {customPrSubmitToSlack.Value.ToString().ToLowerInvariant()}\n"
+                            + $"assignee: \"{customPrAssignee.Value}\"\n"
+                            + $"comment: \"{customPrComment.Value.Replace("\"", "\\\"")}\"\n";
+                        var optionsPath = Path.Combine(_selectedPlan.FolderPath, ".custom-pr-options.yaml");
+                        File.WriteAllText(optionsPath, yaml);
+                        _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
+                        _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
+                        _refreshPlans();
+                        customPrOpen.Set(false);
+                    })
+                )
+            ).Width(Size.Rem(30));
+        }
+
         // Action bar
         var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
             | new Button("Suggest Changes").Icon(Icons.MessageSquare).Outline().OnClick(() =>
@@ -412,6 +458,17 @@ public class ContentView(
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                new MenuItem("Custom PR", Icon: Icons.GitPullRequest, Tag: "CustomPR").OnSelect(() =>
+                {
+                    customPrApprove.Set(true);
+                    customPrMerge.Set(true);
+                    customPrDeleteBranch.Set(true);
+                    customPrIncludeArtifacts.Set(true);
+                    customPrSubmitToSlack.Set(true);
+                    customPrAssignee.Set("");
+                    customPrComment.Set("");
+                    customPrOpen.Set(true);
+                }),
                 new MenuItem("Set Completed", Icon: Icons.CircleCheck, Tag: "SetCompleted").OnSelect(() =>
                 {
                     _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);

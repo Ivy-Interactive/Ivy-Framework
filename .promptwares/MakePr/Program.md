@@ -27,6 +27,15 @@ Read `config.yaml` (from `ConfigPath`) for project repos and their `prRule` sett
 - Read the latest revision for the plan title and description
 - Read config.yaml to find the `prRule` for each repo
 - Read the project's `color` from config.yaml for Slack notification formatting
+- Check for `<PlanFolder>/.custom-pr-options.yaml`. If present, read it and use its flags to conditionally skip steps below. The file has these fields (all default to `true` if missing):
+  - `approve` — if `false`, skip approval and merge entirely (regardless of prRule)
+  - `merge` — if `false`, skip merge and delete-branch
+  - `deleteBranch` — if `false`, skip branch deletion after merge
+  - `includeArtifacts` — if `false`, skip step 2.5 (artifact upload)
+  - `submitToSlack` — if `false`, skip step 6 (Slack notification)
+  - `assignee` — if non-empty, add `--assignee <assignee>` to the `gh pr create` command
+  - `comment` — if non-empty, after creating the PR run `gh pr comment <number> --repo <owner/repo> --body "<comment>"`
+- After all steps complete, delete `.custom-pr-options.yaml` so it doesn't affect future runs
 
 ### 2. For Each Worktree
 
@@ -40,6 +49,8 @@ For each worktree:
 4. `git push -u origin <branch>`
 
 ### 2.5. Upload Artifacts
+
+**Skip this step if custom PR options has `includeArtifacts: false`.**
 
 Run the `Upload-Artifacts.ps1` tool to upload screenshots and videos from `<PlanFolder>/artifacts/` to Azure storage:
 
@@ -63,10 +74,17 @@ EOF
 - **Base branch:** `gh repo view --repo <owner/repo> --json defaultBranchRef -q .defaultBranchRef.name`
 - **Title:** `[<planId>] <plan title>`
 - **Body:** If `<PlanFolder>/artifacts/summary.md` exists, use its content as the PR body (followed by list of commits). Otherwise, fall back to summary from Problem + Solution sections. If `$artifactMarkdown` from step 2.5 is non-empty, append it under an `## Artifacts` heading after the commits list.
+- **Assignee:** If custom PR options has a non-empty `assignee`, add `--assignee <assignee>` to the `gh pr create` command.
+- **Comment:** If custom PR options has a non-empty `comment`, after creating the PR run: `gh pr comment <pr-number> --repo <owner/repo> --body "<comment>"`
 
 ### 4. Apply PR Rule
 
 **!MANDATORY** — look up the `prRule` for this repo in config.yaml under the project's repos list.
+
+**Custom PR overrides:** If custom PR options exist:
+- If `approve: false`, skip this entire step (treat as `default` rule regardless of config)
+- If `merge: false`, skip the merge command (but PR is still created)
+- If `deleteBranch: false`, remove `--delete-branch` from the merge command
 
 **If `yolo`:**
 ```bash
@@ -83,7 +101,7 @@ Append each PR URL to the `prs` list in `plan.yaml`.
 
 ### 6. Notify Slack
 
-**!MANDATORY** — this step must always run, even if there are no screenshots.
+**!MANDATORY** — this step must always run, even if there are no screenshots. **Exception:** Skip if custom PR options has `submitToSlack: false`.
 
 **Check for screenshot URL:** Extract the first image URL from `$artifactMarkdown` (from step 2.5) by matching the pattern `![...](url)`.
 
