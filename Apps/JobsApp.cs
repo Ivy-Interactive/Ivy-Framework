@@ -114,7 +114,8 @@ public class JobsApp : ViewBase
                         if (!string.IsNullOrEmpty(job.PlanFile))
                         {
                             var fullPath = Path.Combine(planService.PlansDirectory, job.PlanFile);
-                            nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(fullPath));
+                            if (Directory.Exists(fullPath))
+                                nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(fullPath));
                         }
                     }
                     else if (tag == "stop-job")
