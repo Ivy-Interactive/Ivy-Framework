@@ -138,11 +138,11 @@ For both variants:
 - Replace `<screenshot-url>` with the extracted URL (Block Kit variant only)
 - Replace `<color-emoji>` with a Slack emoji based on the project's `color` from config.yaml:
   - Blue → `:large_blue_circle:`
-  - Purple → `:purple_circle:`
-  - Teal → `:large_green_circle:`
-  - Amber → `:large_yellow_circle:`
+  - Purple → `:purple_heart:`
+  - Teal → `:blue_heart:`
+  - Amber → `:large_orange_circle:`
   - Emerald → `:large_green_circle:`
-  - Sky → `:large_blue_circle:`
+  - Sky → `:diamond_shape_with_a_dot_inside:`
   - Slate → `:white_circle:`
   - Red → `:red_circle:`
   - If no color is set, omit the emoji
