@@ -89,6 +89,22 @@ If the plan references other plans (from `[number]` syntax in args), add them to
 
 Only include `## Questions` if you have genuine questions for the user that block the plan. Place it immediately after the title (before `## Problem`). If there are no questions, **omit the section entirely** — do not include an empty heading or placeholder text.
 
+### 4.6. Tests Section
+
+The `## Tests` section MUST include two parts:
+
+1. **New tests to write** — describe any new test cases needed for the feature/fix
+2. **Test scope** — specify a `dotnet test --filter` expression that limits DotnetTest to relevant tests only. 
+   
+   To determine scope:
+   - Identify the namespaces/classes being modified
+   - Search for existing test classes that cover those areas  
+   - Write a filter expression, e.g.: `FullyQualifiedName~Ivy.Tests.Widgets.ButtonTests`
+   
+   If the change is so broad that all tests are genuinely needed, explicitly state: "Run all tests (broad cross-cutting change)."
+   
+   Never leave test scope unspecified — this causes the full suite to run unnecessarily.
+
 ### 5. Verification Checklist
 
 In the `## Verification` section of the plan revision, generate a checklist from the project's `verifications` in `config.yaml`.
