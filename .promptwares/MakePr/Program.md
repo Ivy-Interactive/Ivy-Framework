@@ -26,7 +26,7 @@ Read `config.yaml` (from `ConfigPath`) for project repos and their `prRule` sett
 - Read `plan.yaml` from the plan folder (project, commits, repos)
 - Read the latest revision for the plan title and description
 - Read config.yaml to find the `prRule` for each repo
-- Read the project's `color` from config.yaml for Slack notification formatting
+- Read the project's `slackEmoji` from config.yaml for Slack notification formatting
 - **Check for custom options:** If `<PlanFolder>/.custom-pr-options.yaml` exists, read it. The file contains:
   ```yaml
   approve: true/false
@@ -136,16 +136,7 @@ For both variants:
 - Replace `<project>` with the project from plan.yaml
 - Replace `<pr-link>` with `<url|owner/repo#number>` for each PR
 - Replace `<screenshot-url>` with the extracted URL (Block Kit variant only)
-- Replace `<color-emoji>` with a Slack emoji based on the project's `color` from config.yaml:
-  - Blue → `:large_blue_circle:`
-  - Purple → `:purple_heart:`
-  - Teal → `:blue_heart:`
-  - Amber → `:large_orange_circle:`
-  - Emerald → `:large_green_circle:`
-  - Sky → `:diamond_shape_with_a_dot_inside:`
-  - Slate → `:white_circle:`
-  - Red → `:red_circle:`
-  - If no color is set, omit the emoji
+- Replace `<color-emoji>` with the project's `slackEmoji` from config.yaml. If the project has no `slackEmoji` set, omit the emoji.
 
 ### Rules
 

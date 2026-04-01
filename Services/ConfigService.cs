@@ -22,6 +22,7 @@ public record ProjectConfig
 {
     public string Name { get; set; } = "";
     public string Color { get; set; } = "";
+    public string SlackEmoji { get; set; } = "";
     public List<RepoRef> Repos { get; set; } = new();
     public List<ProjectVerificationRef> Verifications { get; set; } = new();
     public string Context { get; set; } = "";
