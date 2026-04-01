@@ -50,8 +50,8 @@ public class PullRequestApp : ViewBase
                 c.BatchSize = 50;
             })
             .RowActions(
-                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan"),
-                new MenuItem(Label: "Open PR", Icon: Icons.ExternalLink, Tag: "open-pr")
+                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
+                new MenuItem(Label: "Open PR", Icon: Icons.ExternalLink, Tag: "open-pr").Tooltip("Open the pull request in browser")
             )
             .OnRowAction(e =>
             {
