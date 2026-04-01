@@ -8,6 +8,7 @@ public class CreateIssueDialog(
     IState<string?> selectedRepoState,
     IState<string?> issueAssigneeState,
     IState<string[]> issueLabelsState,
+    IState<string> issueCommentState,
     PlanFile selectedPlan,
     JobService jobService) : ViewBase
 {
@@ -15,6 +16,7 @@ public class CreateIssueDialog(
     private readonly IState<string?> _selectedRepoState = selectedRepoState;
     private readonly IState<string?> _issueAssigneeState = issueAssigneeState;
     private readonly IState<string[]> _issueLabelsState = issueLabelsState;
+    private readonly IState<string> _issueCommentState = issueCommentState;
     private readonly PlanFile _selectedPlan = selectedPlan;
     private readonly JobService _jobService = jobService;
 
@@ -65,6 +67,7 @@ public class CreateIssueDialog(
                         .Nullable().WithField().Label("Assignee")
                     | _issueLabelsState.ToSelectInput(labels.ToOptions())
                         .Placeholder("Select labels...").WithField().Label("Labels")
+                    | _issueCommentState.ToTextInput().Multiline().WithField().Label("Comment")
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
@@ -78,7 +81,7 @@ public class CreateIssueDialog(
                         {
                             var repoPath = selectedRepo.FullName;
                             var assignee = _issueAssigneeState.Value ?? "";
-                            _jobService.StartJob("CreateIssue", _selectedPlan.FolderPath, "-Repo", repoPath, "-Assignee", assignee);
+                            _jobService.StartJob("CreateIssue", _selectedPlan.FolderPath, "-Repo", repoPath, "-Assignee", assignee, "-Comment", _issueCommentState.Value ?? "");
                         }
                     }
                     _dialogOpen.Set(false);

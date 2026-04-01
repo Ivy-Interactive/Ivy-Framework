@@ -10,6 +10,7 @@ The firmware header contains:
 - **CurrentTime** — current UTC timestamp
 - **Repo** — target repository path (local path)
 - **Assignee** — GitHub username to assign (optional, may be empty)
+- **Comment** — optional comment to include in the issue body (may be empty)
 
 ## Execution Steps
 
@@ -37,7 +38,7 @@ gh issue create --repo <owner/repo> --title "<title>" --body "<body>"
 ```
 
 - **Title:** Plan title
-- **Body:** Markdown-formatted from the plan's Problem section, with a link back to the plan ID
+- **Body:** Markdown-formatted from the plan's Problem section, with a link back to the plan ID. If `Comment` is non-empty, append it to the body under an "**Additional context:**" heading separated by a horizontal rule (`---`).
 - **Assignee:** If provided, add `--assignee <Assignee>`
 
 ### 4. Update plan.yaml
