@@ -7233,7 +7233,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  vite-plus@0.1.13(@types/node@24.10.0)(@voidzero-dev/vite-plus-core@0.1.13(@types/node@24.10.0)(jiti@2.6.1)(typescript@5.9.3)(yaml@2.8.3))(happy-dom@20.8.8)(jiti@2.6.1)(typescript@5.9.3)(yaml@2.8.3):
+  vite-plus@0.1.13(@types/node@24.10.0)(@voidzero-dev/vite-plus-core@0.1.13(@types/node@24.10.0)(jiti@2.6.1)(typescript@5.9.3)(yaml@2.8.3))(happy-dom@20.8.9)(jiti@2.6.1)(typescript@5.9.3)(yaml@2.8.3):
     dependencies:
       '@oxc-project/types': 0.120.0
       '@voidzero-dev/vite-plus-core': 0.1.13(@types/node@24.10.0)(jiti@2.6.1)(typescript@5.9.3)(yaml@2.8.3)
