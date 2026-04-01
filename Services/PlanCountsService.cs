@@ -45,9 +45,9 @@ public class PlanCountsService : IDisposable
         var plans = _planReaderService.GetPlans();
         var jobs = _jobService.GetJobs();
         return new PlanCounts(
-            Drafts: plans.Count(p => p.Status == PlanStatus.Draft),
+            Drafts: plans.Count(p => p.Status is PlanStatus.Draft or PlanStatus.Failed),
             RunningJobs: jobs.Count(j => j.Status == "Running"),
-            Reviews: plans.Count(p => p.Status is PlanStatus.ReadyForReview or PlanStatus.Failed),
+            Reviews: plans.Count(p => p.Status == PlanStatus.ReadyForReview),
             Icebox: plans.Count(p => p.Status == PlanStatus.Icebox)
         );
     }
