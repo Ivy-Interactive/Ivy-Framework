@@ -16,6 +16,7 @@ levels:
 projects:
   - name: Framework
     color: Blue
+    slackEmoji: ":large_blue_circle:"
     repos:
       - path: D:\Repos\_Ivy\Ivy-Framework
         prRule: yolo
@@ -44,6 +45,7 @@ projects:
 
   - name: Agent
     color: Purple
+    slackEmoji: ":purple_heart:"
     repos:
       - path: D:\Repos\_Ivy\Ivy-Agent
         prRule: yolo
@@ -71,6 +73,7 @@ projects:
 
   - name: Console
     color: Teal
+    slackEmoji: ":blue_heart:"
     repos:
       - path: D:\Repos\_Ivy\Ivy
         prRule: yolo
@@ -94,6 +97,7 @@ projects:
 
   - name: MyPromptwares
     color: Amber
+    slackEmoji: ":large_orange_circle:"
     repos:
       - path: D:\Repos\_Personal\MyPromptwares
         prRule: yolo
@@ -102,6 +106,7 @@ projects:
 
   - name: Scripts
     color: Slate
+    slackEmoji: ":white_circle:"
     repos:
       - path: D:\Repos\_Personal\Scripts
         prRule: yolo
@@ -112,6 +117,7 @@ projects:
 
   - name: Tendril
     color: Emerald
+    slackEmoji: ":large_green_circle:"
     repos:
       - path: D:\Repos\_Ivy\Ivy-Tendril
         prRule: yolo
@@ -135,6 +141,7 @@ projects:
 
   - name: Mcp
     color: Sky
+    slackEmoji: ":diamond_shape_with_a_dot_inside:"
     repos:
       - path: D:\Repos\_Ivy\Ivy-Mcp
         prRule: yolo
