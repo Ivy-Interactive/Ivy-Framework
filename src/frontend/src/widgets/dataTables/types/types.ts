@@ -79,6 +79,7 @@ export interface TableProps {
   editable?: boolean;
   width?: string;
   height?: string;
+  variant?: string;
   rowActions?: MenuItem[];
   onCellUpdate?: (row: number, col: number, value: unknown) => void;
   "data-testid"?: string;

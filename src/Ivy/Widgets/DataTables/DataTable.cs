@@ -3,6 +3,12 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+public enum DataTableVariant
+{
+    Default,
+    Ghost,
+}
+
 public class CellClickEventArgs
 {
     public int RowIndex { get; set; }
@@ -51,6 +57,8 @@ public record DataTable : WidgetBase<DataTable>
 
     [Prop] public DataTableConfig? Config { get; set; }
 
+    [Prop] public DataTableVariant Variant { get; set; } = DataTableVariant.Default;
+
     [Prop] public MenuItem[]? RowActions { get; set; }
 
     [Event] public EventHandler<Event<DataTable, CellClickEventArgs>>? OnCellClick { get; set; }
@@ -67,9 +75,15 @@ public record DataTable : WidgetBase<DataTable>
 
 public static class DataTableWidgetExtensions
 {
+    public static DataTable Variant(this DataTable table, DataTableVariant variant)
+        => table with { Variant = variant };
+
+    [RelatedTo(nameof(DataTable.Variant))]
+    public static DataTable Ghost(this DataTable table)
+        => table.Variant(DataTableVariant.Ghost);
+
     public static DataTable OnRowAction(this DataTable table, Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
         => table with { OnRowAction = new(handler) };
-
 
     public static DataTable OnCellClick(this DataTable table, Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
         => table with { OnCellClick = new(handler) };

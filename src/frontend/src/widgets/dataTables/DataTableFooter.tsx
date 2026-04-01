@@ -54,11 +54,18 @@ const footerStyles = {
 export interface DataTableFooterProps {
   children?: ReactNode;
   className?: string;
+  variant?: string;
 }
 
-export const DataTableFooter: React.FC<DataTableFooterProps> = ({ children, className }) => {
+export const DataTableFooter: React.FC<DataTableFooterProps> = ({
+  children,
+  className,
+  variant,
+}) => {
+  const footerStyle =
+    variant === "Ghost" ? tableStyles.tableEditor.footerGhost : tableStyles.tableEditor.footer;
   return (
-    <div className={cn(className)} style={tableStyles.tableEditor.footer}>
+    <div className={cn(className)} style={footerStyle}>
       {children}
     </div>
   );
@@ -253,12 +260,14 @@ export interface AggregateFooterProps {
   columns: DataColumn[];
   layout?: FooterColumnLayout;
   footerScrollRef?: React.RefObject<HTMLDivElement | null>;
+  variant?: string;
 }
 
 export const AggregateFooter: React.FC<AggregateFooterProps> = ({
   columns,
   layout,
   footerScrollRef,
+  variant,
 }) => {
   const hasFooter = columns.some((col) => col.footer && col.footer.length > 0);
   if (!hasFooter) return null;
@@ -279,7 +288,7 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({
 
   if (useGridLayout && gridTemplateColumns && footerScrollRef) {
     return (
-      <DataTableFooter>
+      <DataTableFooter variant={variant}>
         <div
           ref={footerScrollRef}
           data-footer-scroll
@@ -314,7 +323,7 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({
   }
 
   return (
-    <DataTableFooter>
+    <DataTableFooter variant={variant}>
       <div style={footerStyles.row}>
         {columns.map((col) => {
           const footerValues = col.footer;

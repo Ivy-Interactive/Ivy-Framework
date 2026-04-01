@@ -19,6 +19,7 @@ interface GridContainerProps {
   gridRef: React.RefObject<DataEditorRef | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   hasOptions: boolean;
+  variant?: string;
   columns: GridColumn[];
   rows: number;
   getCellContent: (cell: Item) => GridCell;
@@ -65,6 +66,7 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   gridRef,
   containerRef,
   hasOptions,
+  variant,
   columns,
   rows,
   getCellContent,
@@ -103,9 +105,14 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   height,
   hasEmptyRows = false,
 }) => {
-  const containerStyle = hasOptions
-    ? tableStyles.tableEditor.gridContainerWithOptions
-    : tableStyles.tableEditor.gridContainer;
+  const isGhost = variant === "Ghost";
+  const containerStyle = isGhost
+    ? hasOptions
+      ? tableStyles.tableEditor.gridContainerGhostWithOptions
+      : tableStyles.tableEditor.gridContainerGhost
+    : hasOptions
+      ? tableStyles.tableEditor.gridContainerWithOptions
+      : tableStyles.tableEditor.gridContainer;
 
   return (
     <div

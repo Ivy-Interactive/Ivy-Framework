@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { Theme } from "@glideapps/glide-data-grid";
 import { useThemeWithMonitoring } from "@/components/theme-provider";
 import { ThemeColors } from "@/lib/theme";
@@ -8,6 +8,7 @@ interface UseTableThemeProps {
   enableRowHover: boolean | undefined;
   visibleRows: number;
   hoverRow: number | undefined;
+  variant?: string;
 }
 
 /**
@@ -18,6 +19,7 @@ export const useTableTheme = ({
   enableRowHover,
   visibleRows,
   hoverRow,
+  variant,
 }: UseTableThemeProps) => {
   const {
     customTheme: tableTheme,
@@ -85,8 +87,15 @@ export const useTableTheme = ({
     [hoverRow, enableRowHover, themeColors, isDark, visibleRows],
   );
 
+  const finalTheme = useMemo(() => {
+    if (variant === "Ghost") {
+      return { ...tableTheme, horizontalBorderColor: "transparent" };
+    }
+    return tableTheme;
+  }, [tableTheme, variant]);
+
   return {
-    tableTheme,
+    tableTheme: finalTheme,
     themeColors,
     isDark,
     getRowThemeOverride,

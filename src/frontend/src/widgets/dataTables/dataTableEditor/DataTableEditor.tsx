@@ -28,6 +28,7 @@ interface TableEditorProps {
   rowActions?: MenuItem[];
   footer?: React.ReactNode;
   showAggregateFooter?: boolean;
+  variant?: string;
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
@@ -36,6 +37,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   rowActions,
   footer,
   showAggregateFooter = false,
+  variant,
 }) => {
   const {
     columns,
@@ -122,6 +124,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     enableRowHover: enableRowHover ?? false,
     visibleRows,
     hoverRow,
+    variant,
   });
 
   const { emptyRowsCount, totalRows } = useEmptyRows({
@@ -199,6 +202,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       columns={orderedDataColumns}
       layout={layout}
       footerScrollRef={footerScrollRef}
+      variant={variant}
     />
   ) : (
     footer
@@ -209,6 +213,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       gridRef={gridRef}
       containerRef={containerRef}
       hasOptions={hasOptions}
+      variant={variant}
       columns={finalColumns}
       rows={totalRows}
       getCellContent={getCellContent}

@@ -52,6 +52,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
   editable = false,
   width = "Full",
   height = "Full",
+  variant,
   rowActions,
   slots,
   "data-testid": dataTestId,
@@ -122,6 +123,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
             hasOptions={finalConfig.allowFiltering}
             rowActions={rowActions}
             showAggregateFooter={hasFooter}
+            variant={variant}
           />
         </TableLayout>
       </TableProvider>
