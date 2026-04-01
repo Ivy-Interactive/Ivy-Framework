@@ -1,5 +1,8 @@
 # Ivy Framework Weekly Notes - Week of 2026-03-31
 
+> [!NOTE]
+> We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
+
 ## Performance Improvements
 
 ### Event Handling Optimization
