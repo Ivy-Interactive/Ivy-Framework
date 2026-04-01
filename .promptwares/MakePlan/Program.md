@@ -42,7 +42,7 @@ The plan ID is pre-allocated by the launcher script and provided in the firmware
 
 ### 3. Research
 
-- **Check for duplicate plans** first. List existing plan folders in `PlansDirectory` and scan their `plan.yaml` titles. If an existing plan already covers the same issue (same problem, same project), **STOP** — do not create a duplicate. Instead, write a file to `<tendrilData>/Trash/<PlanId>-<SafeTitle>.md` (where `<SafeTitle>` is the title with spaces replaced by hyphens and special characters removed) with the following format, then exit without creating a plan folder:
+- **Check for duplicate plans** first — **unless the description starts with `[FORCE]`**, in which case skip duplicate detection entirely and strip the `[FORCE] ` prefix before using the description. List existing plan folders in `PlansDirectory` and scan their `plan.yaml` titles. If an existing plan already covers the same issue (same problem, same project), **STOP** — do not create a duplicate. Instead, write a file to `<tendrilData>/Trash/<PlanId>-<SafeTitle>.md` (where `<SafeTitle>` is the title with spaces replaced by hyphens and special characters removed) with the following format, then exit without creating a plan folder:
 
   ```markdown
   ---
