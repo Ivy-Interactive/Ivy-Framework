@@ -311,9 +311,6 @@ public class ContentView(
 
             var shortHash = commitHash.Length > 7 ? commitHash[..7] : commitHash;
             var commitSheetContent = Layout.Vertical().Gap(4).Padding(2);
-            commitSheetContent |= Layout.Horizontal().Gap(2)
-                | new Badge(shortHash).Variant(BadgeVariant.Outline)
-                | Text.Block(commitTitle ?? "Commit not found").Bold();
 
             if (commitFiles is { Count: > 0 })
             {
@@ -343,7 +340,7 @@ public class ContentView(
             content |= new Sheet(
                 onClose: () => openCommit.Set(null),
                 content: commitSheetContent,
-                title: $"Commit {shortHash}"
+                title: $"Commit {shortHash} — {commitTitle}"
             ).Width(Size.Half());
         }
 
