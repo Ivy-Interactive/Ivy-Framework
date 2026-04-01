@@ -82,7 +82,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             {
                 ["plans"] = counts.Value.Drafts,
                 ["review"] = counts.Value.Reviews,
-                ["jobs"] = counts.Value.RunningJobs
+                ["jobs"] = counts.Value.RunningJobs,
+                ["icebox"] = counts.Value.Icebox
             };
 
             if (string.IsNullOrWhiteSpace(search.Value))

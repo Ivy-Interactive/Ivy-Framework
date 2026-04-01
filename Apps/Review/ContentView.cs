@@ -4,6 +4,8 @@ using Ivy.Hooks;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 using Ivy.Widgets.DiffView;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Ivy.Tendril.Apps.Review;
 
@@ -55,10 +57,8 @@ public class ContentView(
         var currentIndex = _allPlans.FindIndex(p => p.FolderName == _selectedPlan.FolderName);
 
         // Header
-        var statusVariant = _selectedPlan.Status == PlanStatus.ReadyForReview ? BadgeVariant.Success : BadgeVariant.Destructive;
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
-            | new Badge(_selectedPlan.Status.ToString()).Variant(statusVariant)
             | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline).WithProjectColor(_config, _selectedPlan.Project)
             | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
             | new Spacer().Width(Size.Grow())
@@ -415,8 +415,8 @@ public class ContentView(
                 new DialogBody(
                     Layout.Vertical().Gap(2)
                         | customPrApprove.ToBoolInput("Approve")
-                        | customPrMerge.ToBoolInput("Merge", disabled: !customPrApprove.Value)
-                        | customPrDeleteBranch.ToBoolInput("Delete Branch", disabled: !customPrMerge.Value || !customPrApprove.Value)
+                        | customPrMerge.ToBoolInput("Merge").Disabled(!customPrApprove.Value)
+                        | customPrDeleteBranch.ToBoolInput("Delete Branch").Disabled(!customPrMerge.Value)
                         | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
                         | customPrSubmitToSlack.ToBoolInput("Submit to Slack")
                         | customPrAssignee.ToTextInput("Assignee")
@@ -426,15 +426,21 @@ public class ContentView(
                     new Button("Cancel").Outline().OnClick(() => customPrOpen.Set(false)),
                     new Button("Create PR").Primary().OnClick(() =>
                     {
-                        var yaml = $"approve: {customPrApprove.Value.ToString().ToLowerInvariant()}\n"
-                            + $"merge: {customPrMerge.Value.ToString().ToLowerInvariant()}\n"
-                            + $"deleteBranch: {customPrDeleteBranch.Value.ToString().ToLowerInvariant()}\n"
-                            + $"includeArtifacts: {customPrIncludeArtifacts.Value.ToString().ToLowerInvariant()}\n"
-                            + $"submitToSlack: {customPrSubmitToSlack.Value.ToString().ToLowerInvariant()}\n"
-                            + $"assignee: \"{customPrAssignee.Value}\"\n"
-                            + $"comment: \"{customPrComment.Value.Replace("\"", "\\\"")}\"\n";
+                        var options = new Dictionary<string, object>
+                        {
+                            ["approve"] = customPrApprove.Value,
+                            ["merge"] = customPrMerge.Value && customPrApprove.Value,
+                            ["deleteBranch"] = customPrDeleteBranch.Value && customPrMerge.Value && customPrApprove.Value,
+                            ["includeArtifacts"] = customPrIncludeArtifacts.Value,
+                            ["submitToSlack"] = customPrSubmitToSlack.Value,
+                            ["assignee"] = customPrAssignee.Value,
+                            ["comment"] = customPrComment.Value
+                        };
+                        var serializer = new SerializerBuilder()
+                            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                            .Build();
                         var optionsPath = Path.Combine(_selectedPlan.FolderPath, ".custom-pr-options.yaml");
-                        File.WriteAllText(optionsPath, yaml);
+                        File.WriteAllText(optionsPath, serializer.Serialize(options));
                         _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
                         _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
                         _refreshPlans();
