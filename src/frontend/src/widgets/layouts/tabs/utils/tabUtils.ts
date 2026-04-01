@@ -186,6 +186,12 @@ export function estimateTabWidth(
     // Title width
     estimatedWidth += Math.ceil(title.length * avgCharWidth);
 
+    // Badge width
+    if (badge) {
+      const badgeWidth = Math.max(24, 16 + badge.length * avgCharWidth);
+      estimatedWidth += 8 + badgeWidth; // ml-2 (8px) + badge
+    }
+
     // Gap between tabs
     estimatedWidth += 6;
   }

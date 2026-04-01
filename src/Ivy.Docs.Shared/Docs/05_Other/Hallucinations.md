@@ -95,6 +95,38 @@ The `Button` onClick parameter is `Func<Event<Button>, ValueTask>?`. The callbac
 bedc0ee6-b915-45b0-ab3a-433e2ac5ff4a
 80f19121-bcf0-4899-abe2-9f1c439f4101
 
+## Details() — empty constructor instead of passing items
+
+**Hallucinated API:**
+
+```csharp
+new Details()
+    | new Detail("Country Code", result.CountryCode, false)
+    | new Detail("VAT Number", result.VatNumber, false)
+```
+
+**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'items' of 'Details.Details(IEnumerable<Detail>)'`
+
+**Correct API:**
+
+```csharp
+new Details(new[] {
+    new Detail("Country Code", result.CountryCode, false),
+    new Detail("VAT Number", result.VatNumber, false)
+})
+// or use the builder pattern:
+result.ToDetails()
+```
+
+`Details` requires an `IEnumerable<Detail>` in its constructor. There is no parameterless public constructor, and the pipe operator `|` does not work on `Details` to add children. Use the collection constructor or the `.ToDetails()` builder pattern on a model.
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207
+b6beb60d-478d-409e-b10d-7913ae911e85
+fd5baba6-72aa-4d28-ac10-72e1be86e494
+9e1cba6f-bd19-472e-83a3-8db63b4860f6
+e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+
 ## Callout constructor — wrong constructor + invented enum / wrong argument order
 
 **Hallucinated API:**
@@ -216,37 +248,6 @@ f20dced8-1689-4289-a2d8-ee67136eb6ce
 7a9aadf3-097e-448d-8d5c-bc86152710a6
 5ba11e91-7b05-49e1-8a0f-5ea01235b192
 f07bc643-b0d7-4a23-a4c8-f4e488285e98
-
-## Details() — empty constructor instead of passing items
-
-**Hallucinated API:**
-
-```csharp
-new Details()
-    | new Detail("Country Code", result.CountryCode, false)
-    | new Detail("VAT Number", result.VatNumber, false)
-```
-
-**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'items' of 'Details.Details(IEnumerable<Detail>)'`
-
-**Correct API:**
-
-```csharp
-new Details(new[] {
-    new Detail("Country Code", result.CountryCode, false),
-    new Detail("VAT Number", result.VatNumber, false)
-})
-// or use the builder pattern:
-result.ToDetails()
-```
-
-`Details` requires an `IEnumerable<Detail>` in its constructor. There is no parameterless public constructor, and the pipe operator `|` does not work on `Details` to add children. Use the collection constructor or the `.ToDetails()` builder pattern on a model.
-
-**Found In:**
-857de09c-ab87-49a5-aac4-394f7d0aa207
-b6beb60d-478d-409e-b10d-7913ae911e85
-fd5baba6-72aa-4d28-ac10-72e1be86e494
-9e1cba6f-bd19-472e-83a3-8db63b4860f6
 
 ## ChatMessage — ambiguous reference between Microsoft.Extensions.AI and Ivy
 
@@ -498,6 +499,37 @@ Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseQuery.cs`
 857de09c-ab87-49a5-aac4-394f7d0aa207
 ab7c7708-b26c-49fa-83a4-176df47c5866
 fd4594df-0402-4f11-ad46-22165d480649
+
+## Secret(IsRequired/IsOptional) — non-existent named parameters
+
+**Hallucinated API:**
+
+```csharp
+// Variant 1: IsRequired (inverted logic)
+new Secret("ApiKey", IsRequired: true)
+new Secret("Model", IsRequired: false)
+
+// Variant 2: IsOptional (prefixed version of Optional)
+new Secret("Model", IsOptional: true)
+```
+
+**Error:** `CS1739: The best overload for 'Secret' does not have a parameter named 'IsRequired'` or `'IsOptional'`
+
+**Correct API:**
+
+```csharp
+// Secret is a record: Secret(string Key, string? Preset = null, bool Optional = false)
+new Secret("ApiKey")                      // required by default (Optional = false)
+new Secret("Model", Optional: true)       // optional secret
+new Secret("Endpoint", Preset: "https://api.openai.com/v1", Optional: true)
+```
+
+The `Secret` record has no `IsRequired` or `IsOptional` parameter. By default, secrets are required (`Optional = false`). To make a secret optional, use `Optional: true`. The agent invents prefixed variants (`IsRequired`, `IsOptional`) instead of using the actual `Optional` parameter.
+
+**Found In:**
+07a0cf7f-d297-4dd2-8fc4-883bb52aa305
+ac1aa99e-739d-4382-86df-7a92b0a25cc7
+bcae7857-4504-4b58-94a7-d733142440f7
 
 ## Button.WithIcon() — non-existent fluent method
 
@@ -837,36 +869,6 @@ new Box(content).Background(Colors.Green)
 5c9cfb70-c9f5-4642-8de6-480be8f5ee85
 332383ac-d463-4640-abe6-ee0208735329
 
-## Secret(IsRequired/IsOptional) — non-existent named parameters
-
-**Hallucinated API:**
-
-```csharp
-// Variant 1: IsRequired (inverted logic)
-new Secret("ApiKey", IsRequired: true)
-new Secret("Model", IsRequired: false)
-
-// Variant 2: IsOptional (prefixed version of Optional)
-new Secret("Model", IsOptional: true)
-```
-
-**Error:** `CS1739: The best overload for 'Secret' does not have a parameter named 'IsRequired'` or `'IsOptional'`
-
-**Correct API:**
-
-```csharp
-// Secret is a record: Secret(string Key, string? Preset = null, bool Optional = false)
-new Secret("ApiKey")                      // required by default (Optional = false)
-new Secret("Model", Optional: true)       // optional secret
-new Secret("Endpoint", Preset: "https://api.openai.com/v1", Optional: true)
-```
-
-The `Secret` record has no `IsRequired` or `IsOptional` parameter. By default, secrets are required (`Optional = false`). To make a secret optional, use `Optional: true`. The agent invents prefixed variants (`IsRequired`, `IsOptional`) instead of using the actual `Optional` parameter.
-
-**Found In:**
-07a0cf7f-d297-4dd2-8fc4-883bb52aa305
-ac1aa99e-739d-4382-86df-7a92b0a25cc7
-
 ## using Ivy.Apps / using Ivy.Shared / using Ivy.Views.Charts — non-existent namespaces
 
 **Hallucinated API:**
@@ -961,6 +963,63 @@ The agent assumed `.Icon()` was a chainable method on `TextBuilder`, but `Icon()
 **Found In:**
 c1f8feae-b342-4bf1-a18c-9b88ee8d6d17
 fd4594df-0402-4f11-ad46-22165d480649
+
+## Event<T,E>.Data / Event<T,E>.Args — non-existent properties
+
+**Hallucinated API:**
+
+```csharp
+args.Data.Id
+args.Data.Tag
+// Also seen as:
+args.Args.Id
+args.Args.Tag
+```
+
+**Error:** `'Event<DataTable, RowActionClickEventArgs>' does not contain a definition for 'Data'` / `'Args'`
+
+**Correct API:**
+
+```csharp
+args.Value.Id
+args.Value.Tag
+```
+
+`Event<TSender, TValue>` uses `.Value` to access the event args, not `.Data` or `.Args`. The agent likely confused this with other event patterns from different frameworks (e.g., WPF `DataContext`, JavaScript `event.data`, or `EventArgs` naming conventions).
+
+**Found In:**
+f20dced8-1689-4289-a2d8-ee67136eb6ce
+e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+
+## Skeleton.List() — non-existent static method
+
+**Hallucinated API:**
+
+```csharp
+Skeleton.List(1)
+```
+
+**Error:** `No overload for method 'List' takes 1 arguments` (or similar — `List` does not exist on `Skeleton`)
+
+**Correct API:**
+
+```csharp
+// Available Skeleton static factory methods:
+Skeleton.Card()
+Skeleton.Text(lines: 3)
+Skeleton.DataTable(rows: 5)
+Skeleton.Feed(items: 3)
+Skeleton.Form()
+
+// Or use a plain Skeleton instance:
+new Skeleton()
+```
+
+`Skeleton` has no `List()` method. For a list-like loading placeholder, use `Skeleton.Feed(items)` which renders a vertical feed of skeleton items.
+
+**Found In:**
+9ed7f8e7-aa7c-4c8b-b6a0-8c5b389f1dc2
+e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
 
 ## FileInput.MaxFiles(n) on single-file state — runtime error
 
@@ -1147,29 +1206,6 @@ The enum is `SelectInputVariant` (singular), not `SelectInputVariants` (plural).
 
 **Found In:**
 a55e08b9-f212-49ef-97b9-d352b7b4beb8
-
-## Event<T,E>.Data — non-existent property
-
-**Hallucinated API:**
-
-```csharp
-args.Data.Id
-args.Data.Tag
-```
-
-**Error:** `'Event<DataTable, RowActionClickEventArgs>' does not contain a definition for 'Data'`
-
-**Correct API:**
-
-```csharp
-args.Value.Id
-args.Value.Tag
-```
-
-`Event<TSender, TValue>` uses `.Value` to access the event args, not `.Data`. The agent likely confused this with other event patterns from different frameworks (e.g., WPF `DataContext`, JavaScript `event.data`).
-
-**Found In:**
-f20dced8-1689-4289-a2d8-ee67136eb6ce
 
 ## UseState\<T?\>(null) — ambiguous overload call
 
@@ -2776,35 +2812,6 @@ currencySelect.ToSelectInput(new[] {
 
 **Found In:**
 84cbe3b9-5764-4352-99d3-dd685c397a68
-
-## Skeleton.List() — non-existent static method
-
-**Hallucinated API:**
-
-```csharp
-Skeleton.List(1)
-```
-
-**Error:** `No overload for method 'List' takes 1 arguments` (or similar — `List` does not exist on `Skeleton`)
-
-**Correct API:**
-
-```csharp
-// Available Skeleton static factory methods:
-Skeleton.Card()
-Skeleton.Text(lines: 3)
-Skeleton.DataTable(rows: 5)
-Skeleton.Feed(items: 3)
-Skeleton.Form()
-
-// Or use a plain Skeleton instance:
-new Skeleton()
-```
-
-`Skeleton` has no `List()` method. For a list-like loading placeholder, use `Skeleton.Feed(items)` which renders a vertical feed of skeleton items.
-
-**Found In:**
-9ed7f8e7-aa7c-4c8b-b6a0-8c5b389f1dc2
 
 ## QueryOptions.InitialValue — non-existent property
 
