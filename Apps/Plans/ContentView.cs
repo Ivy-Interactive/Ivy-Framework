@@ -166,6 +166,11 @@ public class ContentView(
                     copyToClipboard(_selectedPlan.FolderPath);
                     client.Toast("Copied path to clipboard", "Path Copied");
                 }),
+                new MenuItem("Mark as Completed", Icon: Icons.CircleCheck, Tag: "MarkCompleted").OnSelect(() =>
+                {
+                    _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
+                    _refreshPlans();
+                }),
                 new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
                 {
                     var yamlPath = System.IO.Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
