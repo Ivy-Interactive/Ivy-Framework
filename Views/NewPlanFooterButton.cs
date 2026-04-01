@@ -32,7 +32,7 @@ public class NewPlanFooterButton : ViewBase
                 onCreatePlan: (description, project) =>
                 {
                     lastSelectedProject.Set(project);
-                    jobService.StartJob("MakePlan", "-Description", description, "-Project", project);
+                    jobService.StartJob("MakePlan", "-Description", $"[FORCE] {description}", "-Project", project);
                 },
                 onClose: () => dialogOpen.Set(false),
                 defaultProject: lastSelectedProject.Value
