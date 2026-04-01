@@ -139,7 +139,7 @@ public class JobsApp : ViewBase
                 return ValueTask.CompletedTask;
             })
             .HeaderRight(ctx => new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
-                new MenuItem("Clear Completed", Icon: Icons.Trash).OnSelect(() =>
+                new MenuItem("Clear Completed", Icon: Icons.Trash, Tag: "ClearCompleted").OnSelect(() =>
                 {
                     jobService.ClearCompletedJobs();
                     refreshToken.Refresh();
