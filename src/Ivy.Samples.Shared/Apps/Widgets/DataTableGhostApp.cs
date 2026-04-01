@@ -22,8 +22,8 @@ public class DataTableGhostApp : SampleBase
             .Height(Size.Units(60));
 
         return Layout.Vertical()
-            | Text.H2("Ghost variant inside a Card with no padding")
-            | new Card(ghostTable).Padding(0).Height(Size.Units(60))
+            | Text.H2("Ghost variant inside a Card")
+            | new Card(ghostTable).Height(Size.Units(60))
             | Text.H2("Default variant for comparison")
             | defaultTable;
     }
