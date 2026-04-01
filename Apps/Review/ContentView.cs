@@ -46,8 +46,27 @@ public class ContentView(
         var customPrDeleteBranch = UseState(true);
         var customPrIncludeArtifacts = UseState(true);
         var customPrSubmitToSlack = UseState(true);
-        var customPrAssignee = UseState("");
+        var customPrAssignee = UseState<string?>(null);
         var customPrComment = UseState("");
+
+        var githubService = UseService<GithubService>();
+        var assigneesQuery = UseQuery<string[], string>(
+            _selectedPlan?.Project ?? "",
+            async (_, ct) =>
+            {
+                if (_selectedPlan is null) return Array.Empty<string>();
+                var repos = _selectedPlan.Repos.Count > 0
+                    ? _selectedPlan.Repos
+                    : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
+                var repoPath = repos.FirstOrDefault();
+                if (repoPath is null) return Array.Empty<string>();
+                var repoConfig = GithubService.GetRepoConfigFromPath(repoPath);
+                if (repoConfig is null) return Array.Empty<string>();
+                var result = await githubService.GetAssigneesAsync(repoConfig.Owner, repoConfig.Name);
+                return result.ToArray();
+            },
+            initialValue: Array.Empty<string>()
+        );
         var selectedTab = UseState(0);
 
         if (_selectedPlan is null)
@@ -421,7 +440,8 @@ public class ContentView(
                         | customPrDeleteBranch.ToBoolInput("Delete Branch").Disabled(!customPrMerge.Value)
                         | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
                         | customPrSubmitToSlack.ToBoolInput("Submit to Slack")
-                        | customPrAssignee.ToTextInput("Assignee")
+                        | customPrAssignee.ToSelectInput((assigneesQuery.Value ?? Array.Empty<string>()).ToOptions())
+                            .Nullable().WithField().Label("Assignee")
                         | customPrComment.ToTextareaInput("Comment").Rows(3)
                 ),
                 new DialogFooter(
@@ -435,7 +455,7 @@ public class ContentView(
                             ["deleteBranch"] = customPrDeleteBranch.Value && customPrMerge.Value && customPrApprove.Value,
                             ["includeArtifacts"] = customPrIncludeArtifacts.Value,
                             ["submitToSlack"] = customPrSubmitToSlack.Value,
-                            ["assignee"] = customPrAssignee.Value,
+                            ["assignee"] = customPrAssignee.Value ?? "",
                             ["comment"] = customPrComment.Value
                         };
                         var serializer = new SerializerBuilder()
@@ -475,7 +495,7 @@ public class ContentView(
                     customPrDeleteBranch.Set(true);
                     customPrIncludeArtifacts.Set(true);
                     customPrSubmitToSlack.Set(true);
-                    customPrAssignee.Set("");
+                    customPrAssignee.Set(null);
                     customPrComment.Set("");
                     customPrOpen.Set(true);
                 }),
