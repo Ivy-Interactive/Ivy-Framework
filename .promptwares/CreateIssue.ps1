@@ -3,7 +3,8 @@ param(
     [string]$PlanPath,
     [Parameter(Mandatory=$true)]
     [string]$Repo,
-    [string]$Assignee = ""
+    [string]$Assignee = "",
+    [string]$Comment = ""
 )
 
 . "$PSScriptRoot\.shared\Utils.ps1"
@@ -22,4 +23,5 @@ InvokePromptwareAgent $PSScriptRoot $programFolder $logFile @{
     Project = $planInfo.Project
     Repo = $Repo
     Assignee = $Assignee
+    Comment = $Comment
 } -PlanPath $PlanPath -Action "CreateIssue"

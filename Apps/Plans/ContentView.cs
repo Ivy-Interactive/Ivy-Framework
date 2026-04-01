@@ -36,6 +36,7 @@ public class ContentView(
         var selectedRepoState = UseState<string?>(null);
         var issueAssigneeState = UseState<string?>(null);
         var issueLabelsState = UseState<string[]>(Array.Empty<string>());
+        var issueCommentState = UseState("");
 
         var updateText = UseState("");
         var isEditing = UseState(false);
@@ -194,7 +195,7 @@ public class ContentView(
             mainLayout,
             new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan, _jobService, _planService, _refreshPlans),
             new DeletePlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans),
-            new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, _selectedPlan, _jobService)
+            new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, issueCommentState, _selectedPlan, _jobService)
         };
 
         if (openFile.Value is { } filePath2)
