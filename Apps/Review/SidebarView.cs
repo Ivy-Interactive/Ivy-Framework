@@ -33,7 +33,7 @@ public class SidebarView(
 
             return new ListItem($"#{plan.Id} {plan.Title}")
                 .Content(Layout.Horizontal().Gap(1)
-                    | new Badge(plan.Project).Variant(BadgeVariant.Outline).Small()
+                    | new Badge(plan.Project).Variant(BadgeVariant.Outline).Small().WithProjectColor(_config, plan.Project)
                     | (verificationsPassed
                         ? new Badge("Verified").Variant(BadgeVariant.Success).Small()
                         : new Badge("Unverified").Variant(BadgeVariant.Warning).Small())
