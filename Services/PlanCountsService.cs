@@ -2,7 +2,7 @@ using Ivy.Tendril.Apps.Plans;
 
 namespace Ivy.Tendril.Services;
 
-public record PlanCounts(int Drafts, int RunningJobs, int Reviews);
+public record PlanCounts(int Drafts, int RunningJobs, int Reviews, int Icebox);
 
 public class PlanCountsService : IDisposable
 {
@@ -47,7 +47,8 @@ public class PlanCountsService : IDisposable
         return new PlanCounts(
             Drafts: plans.Count(p => p.Status == PlanStatus.Draft),
             RunningJobs: jobs.Count(j => j.Status == "Running"),
-            Reviews: plans.Count(p => p.Status is PlanStatus.ReadyForReview or PlanStatus.Failed)
+            Reviews: plans.Count(p => p.Status is PlanStatus.ReadyForReview or PlanStatus.Failed),
+            Icebox: plans.Count(p => p.Status == PlanStatus.Icebox)
         );
     }
 
