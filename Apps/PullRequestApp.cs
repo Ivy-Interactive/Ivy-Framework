@@ -63,7 +63,8 @@ public class PullRequestApp : ViewBase
                 {
                     if (tag == "view-plan")
                     {
-                        nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(row.PlanFolderPath));
+                        if (!string.IsNullOrEmpty(row.PlanFolderPath) && Directory.Exists(row.PlanFolderPath))
+                            nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(row.PlanFolderPath));
                     }
                     else if (tag == "open-pr")
                     {
