@@ -81,7 +81,8 @@ public class CreateIssueDialog(
                         {
                             var repoPath = selectedRepo.FullName;
                             var assignee = _issueAssigneeState.Value ?? "";
-                            _jobService.StartJob("CreateIssue", _selectedPlan.FolderPath, "-Repo", repoPath, "-Assignee", assignee, "-Comment", _issueCommentState.Value ?? "");
+                            var labels = string.Join(",", _issueLabelsState.Value ?? Array.Empty<string>());
+                            _jobService.StartJob("CreateIssue", _selectedPlan.FolderPath, "-Repo", repoPath, "-Assignee", assignee, "-Comment", _issueCommentState.Value ?? "", "-Labels", labels);
                         }
                     }
                     _dialogOpen.Set(false);
