@@ -312,6 +312,38 @@ f713bd0e-71ec-4f0d-8383-1d27712d71a8
 bc45eeb3-15c9-48c1-9f8f-8570a3522614
 e1c05d6b-f09b-4b5a-8872-2c276bf4b141
 
+## Secret(IsRequired/IsOptional) — non-existent named parameters
+
+**Hallucinated API:**
+
+```csharp
+// Variant 1: IsRequired (inverted logic)
+new Secret("ApiKey", IsRequired: true)
+new Secret("Model", IsRequired: false)
+
+// Variant 2: IsOptional (prefixed version of Optional)
+new Secret("Model", IsOptional: true)
+```
+
+**Error:** `CS1739: The best overload for 'Secret' does not have a parameter named 'IsRequired'` or `'IsOptional'`
+
+**Correct API:**
+
+```csharp
+// Secret is a record: Secret(string Key, string? Preset = null, bool Optional = false)
+new Secret("ApiKey")                      // required by default (Optional = false)
+new Secret("Model", Optional: true)       // optional secret
+new Secret("Endpoint", Preset: "https://api.openai.com/v1", Optional: true)
+```
+
+The `Secret` record has no `IsRequired` or `IsOptional` parameter. By default, secrets are required (`Optional = false`). To make a secret optional, use `Optional: true`. The agent invents prefixed variants (`IsRequired`, `IsOptional`) instead of using the actual `Optional` parameter.
+
+**Found In:**
+07a0cf7f-d297-4dd2-8fc4-883bb52aa305
+ac1aa99e-739d-4382-86df-7a92b0a25cc7
+bcae7857-4504-4b58-94a7-d733142440f7
+82e6addb-71f8-4e6f-85b6-0ffba1b8c4eb
+
 ## DateTimeVariant — wrong enum name
 
 **Hallucinated API:**
@@ -500,37 +532,6 @@ Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseQuery.cs`
 ab7c7708-b26c-49fa-83a4-176df47c5866
 fd4594df-0402-4f11-ad46-22165d480649
 
-## Secret(IsRequired/IsOptional) — non-existent named parameters
-
-**Hallucinated API:**
-
-```csharp
-// Variant 1: IsRequired (inverted logic)
-new Secret("ApiKey", IsRequired: true)
-new Secret("Model", IsRequired: false)
-
-// Variant 2: IsOptional (prefixed version of Optional)
-new Secret("Model", IsOptional: true)
-```
-
-**Error:** `CS1739: The best overload for 'Secret' does not have a parameter named 'IsRequired'` or `'IsOptional'`
-
-**Correct API:**
-
-```csharp
-// Secret is a record: Secret(string Key, string? Preset = null, bool Optional = false)
-new Secret("ApiKey")                      // required by default (Optional = false)
-new Secret("Model", Optional: true)       // optional secret
-new Secret("Endpoint", Preset: "https://api.openai.com/v1", Optional: true)
-```
-
-The `Secret` record has no `IsRequired` or `IsOptional` parameter. By default, secrets are required (`Optional = false`). To make a secret optional, use `Optional: true`. The agent invents prefixed variants (`IsRequired`, `IsOptional`) instead of using the actual `Optional` parameter.
-
-**Found In:**
-07a0cf7f-d297-4dd2-8fc4-883bb52aa305
-ac1aa99e-739d-4382-86df-7a92b0a25cc7
-bcae7857-4504-4b58-94a7-d733142440f7
-
 ## Button.WithIcon() — non-existent fluent method
 
 **Hallucinated API:**
@@ -552,6 +553,7 @@ The fluent method is `.Icon(Icons.X)`, not `.WithIcon(Icons.X)`. The agent likel
 **Found In:**
 8b93fae2-c7ce-4890-b0c0-43310c65dd00
 310e1e6a-facb-4caf-87b9-4f1422b51abc
+7c0abfe8-e16f-40d1-9323-95505a4697e7
 
 ## UseAlert().ShowInfo() — wrong API usage
 
@@ -1020,6 +1022,54 @@ new Skeleton()
 **Found In:**
 9ed7f8e7-aa7c-4c8b-b6a0-8c5b389f1dc2
 e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+
+## IRefreshToken — non-existent interface
+
+**Hallucinated API:**
+
+```csharp
+private readonly IRefreshToken _refreshToken;
+```
+
+**Error:** `The type or namespace name 'IRefreshToken' could not be found`
+
+**Correct API:**
+
+```csharp
+var refreshToken = UseRefreshToken();
+```
+
+`IRefreshToken` does not exist. `UseRefreshToken()` returns a `RefreshToken` class. Like all hooks, call inside `Build()`.
+
+**Found In:**
+84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 005, 006)
+0e9fc5ed-1724-4fed-b9ea-44b370358457
+
+## ToDialog/ToSheet non-existent named parameters (subtitle, footer)
+
+**Hallucinated API:**
+
+```csharp
+form.ToDialog(title: "Create Post", subtitle: "Add a new blog post")
+form.ToSheet(title: "Edit Post", subtitle: "Modify post details")
+form.ToDialog(title: "Create Tag", footer: ...)
+form.ToSheet(title: "Edit Tag", footer: ...)
+```
+
+**Error:** `CS1739: The best overload for 'ToDialog' does not have a parameter named 'subtitle'` / `CS1739: The best overload for 'ToSheet' does not have a parameter named 'footer'`
+
+**Correct API:**
+
+```csharp
+form.ToDialog(title: "Create Post")
+form.ToSheet(title: "Edit Post")
+```
+
+`ToDialog` and `ToSheet` accept a `title` parameter but not `subtitle` or `footer`. There are no subtitle/description/footer parameters on these methods. If a subtitle is needed, add it as content within the form itself.
+
+**Found In:**
+c1b87041-f92b-4ba5-96d7-6a92419e84ea (traces 009, 014)
+0e9fc5ed-1724-4fed-b9ea-44b370358457 (footer parameter variant)
 
 ## FileInput.MaxFiles(n) on single-file state — runtime error
 
@@ -1727,27 +1777,6 @@ var players = UseState(new List<Player>());
 
 **Found In:**
 84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 006, 008)
-
-## IRefreshToken — non-existent interface
-
-**Hallucinated API:**
-
-```csharp
-private readonly IRefreshToken _refreshToken;
-```
-
-**Error:** `The type or namespace name 'IRefreshToken' could not be found`
-
-**Correct API:**
-
-```csharp
-var refreshToken = UseRefreshToken();
-```
-
-`IRefreshToken` does not exist. `UseRefreshToken()` returns a `RefreshToken` class. Like all hooks, call inside `Build()`.
-
-**Found In:**
-84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 005, 006)
 
 ## Image.ObjectFit("cover") — property used as method call
 
@@ -2836,29 +2865,6 @@ The agent hallucinated `QueryOptions.InitialValue` when building list blades wit
 **Found In:**
 c1b87041-f92b-4ba5-96d7-6a92419e84ea (traces 007, 009, 013)
 
-## ToDialog/ToSheet subtitle parameter — non-existent named parameter
-
-**Hallucinated API:**
-
-```csharp
-form.ToDialog(title: "Create Post", subtitle: "Add a new blog post")
-form.ToSheet(title: "Edit Post", subtitle: "Modify post details")
-```
-
-**Error:** `CS1739: The best overload for 'ToDialog' does not have a parameter named 'subtitle'` / `CS1739: The best overload for 'ToSheet' does not have a parameter named 'subtitle'`
-
-**Correct API:**
-
-```csharp
-form.ToDialog(title: "Create Post")
-form.ToSheet(title: "Edit Post")
-```
-
-`ToDialog` and `ToSheet` accept a `title` parameter but not `subtitle`. There is no subtitle/description parameter on these methods. If a subtitle is needed, add it as content within the form itself.
-
-**Found In:**
-c1b87041-f92b-4ba5-96d7-6a92419e84ea (traces 009, 014)
-
 ## View.Args static property — non-existent static property for passing args to child views
 
 **Hallucinated API:**
@@ -2936,6 +2942,27 @@ The agent invented `.Danger()` as a styling method on Button. The correct method
 
 **Found In:**
 b73d8115-b4d2-45d5-926e-0a915c1dca63
+
+## UseService vs UseContext — blade/context services
+
+LLMs sometimes use `UseService<IBladeService>()` to obtain the blade service. This is incorrect — `IBladeService` is a **context** service provided by `UseBlades()`, not a DI-registered service. Using `UseService` returns `null`, causing `NullReferenceException` at runtime.
+
+**Wrong:**
+
+```csharp
+var bladeService = UseService<IBladeService>(); // Returns null!
+```
+
+**Correct:**
+
+```csharp
+var bladeService = UseContext<IBladeService>();
+```
+
+**Rule:** Use `UseContext<T>()` for framework-provided context services (`IBladeService`, etc.). Use `UseService<T>()` only for application-registered DI services (e.g., `DbContextFactory`, `HttpClient`).
+
+**Found In:**
+0e9fc5ed-1724-4fed-b9ea-44b370358457 (4 instances across CategoryListBlade, CategoryDetailsBlade, TagListBlade, TagDetailsBlade)
 
 ## TextInput.Grow() — Box-only extension called on TextInput
 
@@ -3038,24 +3065,6 @@ All `Handle*` event handler extension methods were renamed to `On*` in v1.2.17 (
 | `server.UseSingleApp()` | `server.UseDefaultApp(typeof(AppType))` |
 | `server.UseNoAppShell()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseAppShell()` instead |
 | `server.UseDefaultApp<T>()` | `server.UseDefaultApp(typeof(T))` — takes Type, not generic |
-
-## UseService vs UseContext — blade/context services
-
-LLMs sometimes use `UseService<IBladeService>()` to obtain the blade service. This is incorrect — `IBladeService` is a **context** service provided by `UseBlades()`, not a DI-registered service. Using `UseService` returns `null`, causing `NullReferenceException` at runtime.
-
-**Wrong:**
-
-```csharp
-var bladeService = UseService<IBladeService>(); // Returns null!
-```
-
-**Correct:**
-
-```csharp
-var bladeService = UseContext<IBladeService>();
-```
-
-**Rule:** Use `UseContext<T>()` for framework-provided context services (`IBladeService`, etc.). Use `UseService<T>()` only for application-registered DI services (e.g., `DbContextFactory`, `HttpClient`).
 
 ## ToForm(OnSubmit: ...) — OnSubmit is an extension method, not a parameter
 

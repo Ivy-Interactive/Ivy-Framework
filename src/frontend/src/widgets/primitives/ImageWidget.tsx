@@ -211,9 +211,10 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
 
   const isClickable = overlay || hasOnClick || linkProps;
 
-  const overlayElement = overlay && showOverlay ? (
-    <ImageOverlay src={validatedImageSrc} alt={altText} onClose={() => setShowOverlay(false)} />
-  ) : null;
+  const overlayElement =
+    overlay && showOverlay ? (
+      <ImageOverlay src={validatedImageSrc} alt={altText} onClose={() => setShowOverlay(false)} />
+    ) : null;
 
   if (needsContainer || overlay || hasOnClick) {
     return (
