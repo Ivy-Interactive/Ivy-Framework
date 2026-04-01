@@ -26,6 +26,7 @@ public class DataTableBuilder<TModel>(
     private FuncViewBuilder? _headerLeftFactory;
     private FuncViewBuilder? _headerRightFactory;
     private Dictionary<string, object>? _footerValuesByColumn;
+    private DataTableVariant _variant = DataTableVariant.Default;
 
     private readonly string? _idColumnName =
         idSelector != null ? TypeHelper.GetNameFromMemberExpression(idSelector.Body) : null;
@@ -374,6 +375,18 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
+    public DataTableBuilder<TModel> Variant(DataTableVariant variant)
+    {
+        _variant = variant;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Ghost()
+    {
+        _variant = DataTableVariant.Ghost;
+        return this;
+    }
+
     public override object? Build()
     {
         Context.TryUseService<IChatClient>(out var chatClient);
@@ -446,7 +459,8 @@ public class DataTableBuilder<TModel>(
             refreshToken: _refreshToken,
             emptyViewFactory: _emptyViewFactory,
             headerLeftFactory: _headerLeftFactory,
-            headerRightFactory: _headerRightFactory);
+            headerRightFactory: _headerRightFactory,
+            variant: _variant);
     }
 
     public object[] GetMemoValues()

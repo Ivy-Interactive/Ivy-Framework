@@ -17,7 +17,8 @@ public class DataTableView(
     RefreshToken? refreshToken = null,
     FuncViewBuilder? emptyViewFactory = null,
     FuncViewBuilder? headerLeftFactory = null,
-    FuncViewBuilder? headerRightFactory = null) : ViewBase, IMemoized
+    FuncViewBuilder? headerRightFactory = null,
+    DataTableVariant variant = DataTableVariant.Default) : ViewBase, IMemoized
 {
     public override object? Build()
     {
@@ -29,6 +30,7 @@ public class DataTableView(
 
         var table = new DataTable(connection, width, height, columns, config)
         {
+            Variant = variant,
             OnCellClick = onCellClick.ToEventHandler(),
             OnCellActivated = onCellActivated.ToEventHandler(),
             RowActions = rowActions,
