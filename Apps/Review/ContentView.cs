@@ -418,7 +418,7 @@ public class ContentView(
                     Layout.Vertical().Gap(2)
                         | customPrApprove.ToBoolInput("Approve")
                         | customPrMerge.ToBoolInput("Merge").Disabled(!customPrApprove.Value)
-                        | customPrDeleteBranch.ToBoolInput("Delete Branch").Disabled(!customPrMerge.Value)
+                        | customPrDeleteBranch.ToBoolInput("Delete Branch").Disabled(!customPrMerge.Value || !customPrApprove.Value)
                         | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
                         | customPrSubmitToSlack.ToBoolInput("Submit to Slack")
                         | customPrAssignee.ToTextInput("Assignee")
