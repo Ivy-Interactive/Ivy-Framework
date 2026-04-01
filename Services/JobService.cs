@@ -257,6 +257,8 @@ public class JobService
             ResetPlanState(job);
         else if (isSuccess && job.Type == "ExecutePlan")
             EnsurePlanStateTransitioned(job);
+        else if (isSuccess && job.Type == "CreateIssue")
+            SetPlanState(job, "Completed");
         else if (isSuccess && job.Type == "MakePlan")
             VerifyMakePlanResult(job);
 
@@ -390,6 +392,24 @@ public class JobService
         catch { /* Don't let state transition failures crash job completion */ }
     }
 
+    private void SetPlanState(JobItem job, string state)
+    {
+        try
+        {
+            var planFolder = job.Args.Length > 0 ? job.Args[0] : "";
+            var planYamlPath = Path.Combine(planFolder, "plan.yaml");
+            if (!File.Exists(planYamlPath)) return;
+
+            var content = File.ReadAllText(planYamlPath);
+            content = System.Text.RegularExpressions.Regex.Replace(
+                content, @"(?m)^state:\s*.*$", $"state: {state}");
+            content = System.Text.RegularExpressions.Regex.Replace(
+                content, @"(?m)^updated:\s*.*$", $"updated: {DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}");
+            File.WriteAllText(planYamlPath, content);
+        }
+        catch { /* Don't let state transition failures crash job completion */ }
+    }
+
     private void VerifyMakePlanResult(JobItem job)
     {
         try
@@ -417,7 +437,7 @@ public class JobService
     {
         try
         {
-            if (job.Type == "MakePlan" || job.Type == "MakePr") return;
+            if (job.Type is "MakePlan" or "MakePr" or "CreateIssue") return;
 
             var planFolder = job.Args.Length > 0 ? job.Args[0] : "";
             var planYamlPath = Path.Combine(planFolder, "plan.yaml");
