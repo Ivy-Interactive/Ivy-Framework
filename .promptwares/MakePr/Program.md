@@ -36,6 +36,7 @@ Read `config.yaml` (from `ConfigPath`) for project repos and their `prRule` sett
   submitToSlack: true/false
   assignee: "username"
   comment: "Review comment text"
+  slackComment: "Optional text to append to Slack notification"
   ```
   These flags override the default behavior in subsequent steps. If the file does not exist, all flags default to the behavior defined by the repo's `prRule`. **Delete the file after reading** so it doesn't affect future runs.
 
@@ -130,6 +131,8 @@ notify slack done-by-niels --message "*Title:* <plan-title>
 *Project:* <color-emoji> <project>
 *PR:* <pr-link>"
 ```
+
+**Slack comment (custom options):** If custom options exist and `slackComment` is non-empty, append `\n<slackComment>` to the mrkdwn text in Block Kit JSON, or append a newline and the comment text in plain text mode.
 
 For both variants:
 - Replace `<plan-title>` with the plan title

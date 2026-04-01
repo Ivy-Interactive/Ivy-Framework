@@ -48,6 +48,7 @@ public class ContentView(
         var customPrSubmitToSlack = UseState(true);
         var customPrAssignee = UseState<string?>(null);
         var customPrComment = UseState("");
+        var customPrSlackComment = UseState("");
 
         var githubService = UseService<GithubService>();
         var assigneesQuery = UseQuery<string[], string>(
@@ -440,6 +441,9 @@ public class ContentView(
                         | customPrDeleteBranch.ToBoolInput("Delete Branch").Disabled(!customPrMerge.Value || !customPrApprove.Value)
                         | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
                         | customPrSubmitToSlack.ToBoolInput("Submit to Slack")
+                        | (customPrSubmitToSlack.Value
+                            ? customPrSlackComment.ToTextareaInput("Slack Comment").Rows(2)
+                            : (IWidget)Layout.Empty())
                         | customPrAssignee.ToSelectInput((assigneesQuery.Value ?? Array.Empty<string>()).ToOptions())
                             .Nullable().WithField().Label("Assignee")
                         | customPrComment.ToTextareaInput("Comment").Rows(3)
@@ -456,7 +460,8 @@ public class ContentView(
                             ["includeArtifacts"] = customPrIncludeArtifacts.Value,
                             ["submitToSlack"] = customPrSubmitToSlack.Value,
                             ["assignee"] = customPrAssignee.Value ?? "",
-                            ["comment"] = customPrComment.Value
+                            ["comment"] = customPrComment.Value,
+                            ["slackComment"] = customPrSlackComment.Value
                         };
                         var serializer = new SerializerBuilder()
                             .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -497,6 +502,7 @@ public class ContentView(
                     customPrSubmitToSlack.Set(true);
                     customPrAssignee.Set(null);
                     customPrComment.Set("");
+                    customPrSlackComment.Set("");
                     customPrOpen.Set(true);
                 }),
                 new MenuItem("Set Completed", Icon: Icons.CircleCheck, Tag: "SetCompleted").OnSelect(() =>
