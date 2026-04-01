@@ -21,7 +21,7 @@ public class ProductsListBlade : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var refreshToken = UseRefreshToken();
 
         // Filter state with throttling for search
@@ -138,7 +138,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<SampleDbContextFactory>();
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var queryService = UseService<IQueryService>();
 
         var productQuery = UseQuery(

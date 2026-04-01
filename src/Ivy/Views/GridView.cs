@@ -54,6 +54,12 @@ public class GridView : ViewBase, IStateless
         return this;
     }
 
+    public GridView AlignContent(Align align)
+    {
+        _definition.AlignContent = align;
+        return this;
+    }
+
     public GridView AutoFlow(AutoFlow flow)
     {
         _definition.AutoFlow = flow;
