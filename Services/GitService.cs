@@ -28,7 +28,7 @@ public class GitService
     {
         try
         {
-            var psi = new ProcessStartInfo("git", $"show --stat --patch {commitHash}")
+            var psi = new ProcessStartInfo("git", $"show --format=\"\" --patch {commitHash}")
             {
                 WorkingDirectory = repoPath,
                 RedirectStandardOutput = true,
