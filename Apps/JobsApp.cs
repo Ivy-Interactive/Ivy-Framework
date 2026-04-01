@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Ivy;
 using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Services;
@@ -31,6 +32,7 @@ public class JobsApp : ViewBase
         {
             Id = j.Id,
             Status = j.Status,
+            PlanId = ExtractPlanId(j.PlanFile),
             Plan = j.PlanFile,
             Type = j.Type,
             Project = j.Project,
@@ -46,6 +48,7 @@ public class JobsApp : ViewBase
             .Width(Size.Full())
             .Height(Size.Full())
             .Header(t => t.Status, "Status")
+            .Header(t => t.PlanId, "Plan ID")
             .Header(t => t.Plan, "Plan")
             .Header(t => t.Type, "Type")
             .Header(t => t.Project, "Project")
@@ -54,6 +57,7 @@ public class JobsApp : ViewBase
             .Header(t => t.LastOutput, "Last Output")
             .Header(t => t.StatusMessage, "Status Message")
             .Renderer(t => t.Status, new LabelsDisplayRenderer())
+            .Renderer(t => t.PlanId, new ButtonDisplayRenderer())
             .Hidden(t => t.Id)
             .Filterable(t => t.Timer, false)
             .Filterable(t => t.LastOutput, false)
@@ -67,6 +71,25 @@ public class JobsApp : ViewBase
                 c.SelectionMode = SelectionModes.None;
                 c.ShowIndexColumn = false;
                 c.BatchSize = 50;
+                c.EnableCellClickEvents = true;
+            })
+            .OnCellClick(e =>
+            {
+                if (e.Value.ColumnName == "PlanId")
+                {
+                    var planId = e.Value.CellValue?.ToString();
+                    if (!string.IsNullOrEmpty(planId))
+                    {
+                        var job = jobs.FirstOrDefault(j => ExtractPlanId(j.PlanFile) == planId);
+                        if (job != null && !string.IsNullOrEmpty(job.PlanFile))
+                        {
+                            var fullPath = Path.Combine(planService.PlansDirectory, job.PlanFile);
+                            if (Directory.Exists(fullPath))
+                                nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(fullPath));
+                        }
+                    }
+                }
+                return ValueTask.CompletedTask;
             })
             .RowActions(
                 new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan"),
@@ -117,6 +140,13 @@ public class JobsApp : ViewBase
             ));
 
         return dataTable;
+    }
+
+    private static string ExtractPlanId(string planFile)
+    {
+        if (string.IsNullOrEmpty(planFile)) return "";
+        var match = Regex.Match(planFile, @"^(\d{5})-");
+        return match.Success ? match.Groups[1].Value : "";
     }
 
     private static string FormatLastOutput(JobItem job)
