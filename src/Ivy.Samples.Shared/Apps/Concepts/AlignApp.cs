@@ -16,12 +16,12 @@ public class AlignApp : ViewBase
 
         object AlignHorizontalTest(Align align) =>
             container.Content(
-                Layout.Horizontal().Align(align) | squareBox | tallBox | tallestBox
+                Layout.Horizontal().AlignContent(align) | squareBox | tallBox | tallestBox
             );
 
         object AlignVerticalTest(Align align) =>
             container.Content(
-                Layout.Vertical().Align(align).Height(Size.Full()) | squareBox | wideBox | widestBox
+                Layout.Vertical().AlignContent(align).Height(Size.Full()) | squareBox | wideBox | widestBox
             );
 
         var alignValues = (Align[])Enum.GetValues(typeof(Align));

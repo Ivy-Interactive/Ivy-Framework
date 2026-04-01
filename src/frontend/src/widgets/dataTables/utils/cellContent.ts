@@ -318,7 +318,7 @@ export function getCellContent(
   const originalColumnIndex = columns.indexOf(column);
   const cellValue = rowData.values[originalColumnIndex];
   const columnType = column.type?.toLowerCase() || "text";
-  const align = column.align;
+  const align = column.alignContent;
 
   // Handle null/undefined values
   if (cellValue === null || cellValue === undefined) {

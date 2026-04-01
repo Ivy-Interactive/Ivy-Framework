@@ -9,7 +9,7 @@ interface TableCellWidgetProps {
   id: string;
   isHeader?: boolean;
   isFooter?: boolean;
-  align: Align;
+  alignContent: Align;
   width?: string;
   multiline?: boolean;
   children?: React.ReactNode;
@@ -40,7 +40,7 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   children,
   isHeader,
   isFooter,
-  align,
+  alignContent,
   width,
   multiline,
 }) => {
@@ -48,7 +48,7 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
     ...getWidth(width),
   };
 
-  const textAlignStyle = getTextAlign(align);
+  const textAlignStyle = getTextAlign(alignContent);
 
   const content = (
     <div

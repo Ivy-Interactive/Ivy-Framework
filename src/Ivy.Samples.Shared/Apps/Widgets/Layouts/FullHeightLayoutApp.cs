@@ -20,7 +20,7 @@ public class FullHeightLayoutView : ViewBase
     {
         var filter = UseState("");
 
-        var header = Layout.Horizontal().Align(Align.Center)
+        var header = Layout.Horizontal().AlignContent(Align.Center)
             | Text.H2("Items")
             | filter.ToTextInput().Placeholder("Filter...").Variant(TextInputVariant.Search);
 
@@ -30,7 +30,7 @@ public class FullHeightLayoutView : ViewBase
                 .Cast<object>()
                 .ToArray();
 
-        var footer = Layout.Horizontal().Align(Align.Center)
+        var footer = Layout.Horizontal().AlignContent(Align.Center)
             | Text.Muted("30 items")
             | new Spacer()
             | new Button("Export").Variant(ButtonVariant.Outline).Icon(Icons.Download);

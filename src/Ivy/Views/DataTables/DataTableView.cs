@@ -15,7 +15,9 @@ public class DataTableView(
     Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = null,
     Func<object, object?>? idSelector = null,
     RefreshToken? refreshToken = null,
-    FuncViewBuilder? emptyViewFactory = null) : ViewBase, IMemoized
+    FuncViewBuilder? emptyViewFactory = null,
+    FuncViewBuilder? headerLeftFactory = null,
+    FuncViewBuilder? headerRightFactory = null) : ViewBase, IMemoized
 {
     public override object? Build()
     {
@@ -33,13 +35,17 @@ public class DataTableView(
             OnRowAction = onRowAction.ToEventHandler()
         };
 
-        // Pass the empty view as a slot so the frontend can render it when TotalRows == 0,
-        // avoiding a synchronous .Count() query on the DbContext during the render cycle.
+        var slots = new List<Slot>();
+
         if (emptyViewFactory != null)
-        {
-            var emptyView = emptyViewFactory(Context);
-            table = table with { Children = [new Slot("EmptyView", emptyView)] };
-        }
+            slots.Add(new Slot("EmptyView", emptyViewFactory(Context)));
+        if (headerLeftFactory != null)
+            slots.Add(new Slot("HeaderLeft", headerLeftFactory(Context)));
+        if (headerRightFactory != null)
+            slots.Add(new Slot("HeaderRight", headerRightFactory(Context)));
+
+        if (slots.Count > 0)
+            table = table with { Children = slots.ToArray<object>() };
 
         return table;
     }

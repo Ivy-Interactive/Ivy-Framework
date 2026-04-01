@@ -27,7 +27,7 @@ public class TableBuilderTests
 
         // Modify state
         builder.Remove(x => x.Age);
-        builder.Align(x => x.Name, Align.Right);
+        builder.AlignContent(x => x.Name, Align.Right);
 
         // Act
         builder.Reset();
@@ -50,13 +50,13 @@ public class TableBuilderTests
 
         var ageColumn = columns["Age"];
         Assert.False((bool)GetProp(ageColumn!, "Removed"), "Age column should be visible after Reset");
-        Assert.Equal(Align.Right, (Align)GetProp(ageColumn!, "Align")); // This is expected to FAIL if Reset sets it to Left
+        Assert.Equal(Align.Right, (Align)GetProp(ageColumn!, "AlignContent")); // This is expected to FAIL if Reset sets it to Left
 
         var nameColumn = columns["Name"];
-        Assert.Equal(Align.Left, (Align)GetProp(nameColumn!, "Align")); // Name is string, default Left. Modified to Right. Reset should back to Left.
+        Assert.Equal(Align.Left, (Align)GetProp(nameColumn!, "AlignContent")); // Name is string, default Left. Modified to Right. Reset should back to Left.
 
         var activeColumn = columns["IsActive"];
-        Assert.Equal(Align.Center, (Align)GetProp(activeColumn!, "Align")); // Bool is Center default. Reset sets to Left. expected FAIL.
+        Assert.Equal(Align.Center, (Align)GetProp(activeColumn!, "AlignContent")); // Bool is Center default. Reset sets to Left. expected FAIL.
     }
 
     [Fact]

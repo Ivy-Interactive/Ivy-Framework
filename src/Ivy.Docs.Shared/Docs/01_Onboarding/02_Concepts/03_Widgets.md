@@ -111,7 +111,7 @@ public class CommonWidgetsDemo : ViewBase
                     .ToDetails()
             ).Title("Details").Description("Label-value pairs").Height(Size.Units(70))
             | new Card(
-                Layout.Vertical().Align(Align.Center)
+                Layout.Vertical().AlignContent(Align.Center)
                     | new DropDownMenu(_ => { }, 
                         new Button("Menu"),
                         MenuItem.Default("Profile"),
@@ -120,7 +120,7 @@ public class CommonWidgetsDemo : ViewBase
                         MenuItem.Default("Logout"))
             ).Title("DropDownMenu").Description("Action menus").Height(Size.Units(40))
             | new Card(
-                Layout.Horizontal().Align(Align.Center).Gap(2)
+                Layout.Horizontal().AlignContent(Align.Center).Gap(2)
                     | new Button("Hover").Icon(Icons.Info).WithTooltip("This is a tooltip")
                     | new Button("Help").Icon(Icons.CircleQuestionMark).WithTooltip("Get help here")
             ).Title("Tooltip").Description("Contextual information").Height(Size.Units(40));
@@ -260,7 +260,7 @@ public class PrimitiveWidgetsDemo : ViewBase
                     | Text.Lead("Lead text")
             ).Title("Text").Description("Text variants").Height(Size.Units(75))
             | new Card(
-                Layout.Vertical().Align(Align.Center)
+                Layout.Vertical().AlignContent(Align.Center)
                     | new Image("https://api.images.cat/150/150")
             ).Title("Image").Description("Image display").Height(Size.Units(75))
             | new Card(
@@ -413,7 +413,7 @@ public class LayoutWidgetsDemo : ViewBase
             | new Card(
                 Layout.Vertical().Gap(4)
                 | new Card(
-                    Layout.Horizontal().Gap(2).Align(Align.Center)
+                    Layout.Horizontal().Gap(2).AlignContent(Align.Center)
                         | new Button("Show Panel", onClick: _ => showPanel.Set(true))
                         | new Button("Hide Panel", onClick: _ => showPanel.Set(false))
                 ).Width(Size.Full())
@@ -502,7 +502,7 @@ public class EffectWidgetsDemo : ViewBase
     {
         return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
             | new Card(
-                Layout.Horizontal().Align(Align.Center).Gap(2)
+                Layout.Horizontal().AlignContent(Align.Center).Gap(2)
                     | new Button("Click Confetti").WithConfetti(AnimationTrigger.Click)
                     | new Button("Hover Confetti").WithConfetti(AnimationTrigger.Hover)
             ).Title("Confetti").Description("Celebration effects").Height(Size.Units(40))

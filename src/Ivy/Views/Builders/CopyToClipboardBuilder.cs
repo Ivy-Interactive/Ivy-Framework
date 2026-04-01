@@ -15,7 +15,7 @@ public class CopyToClipboardBuilder<TModel> : IBuilder<TModel>
         return new FuncView((context) =>
         {
             var client = context.UseService<IClientProvider>();
-            return Layout.Horizontal().Gap(1).Align(Align.Center)
+            return Layout.Horizontal().Gap(1).AlignContent(Align.Center)
                    | value
                    | Icons.ClipboardCopy.ToButton(@event =>
                    {

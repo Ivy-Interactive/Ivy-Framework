@@ -358,7 +358,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     () => ({
       code: memo((props: React.ComponentProps<"code">) => {
         const { children, className } = props;
-        const inline = !className;
+        const node = (props as any).node;
+        const isInPre = node?.parent?.tagName === "pre";
+        const inline = isInPre ? false : !className && !String(children).includes("\n");
 
         // Detect Icons.X pattern in inline code
         if (inline) {

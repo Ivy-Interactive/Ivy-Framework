@@ -8,7 +8,7 @@ namespace Ivy;
 /// </summary>
 public record StackLayout : WidgetBase<StackLayout>
 {
-    public StackLayout(object[] children, Orientation orientation = Orientation.Vertical, int gap = 4, Thickness? padding = null, Thickness? margin = null, Colors? background = null, Align? align = null, bool removeParentPadding = false, bool wrap = false) : base(children)
+    public StackLayout(object[] children, Orientation orientation = Orientation.Vertical, int gap = 4, Thickness? padding = null, Thickness? margin = null, Colors? background = null, Align? alignContent = null, bool removeParentPadding = false, bool wrap = false) : base(children)
     {
         Orientation = orientation;
         RowGap = gap;
@@ -16,7 +16,7 @@ public record StackLayout : WidgetBase<StackLayout>
         Padding = padding;
         Margin = margin;
         Background = background;
-        Align = align;
+        AlignContent = alignContent;
         RemoveParentPadding = removeParentPadding;
         Wrap = wrap;
     }
@@ -35,7 +35,7 @@ public record StackLayout : WidgetBase<StackLayout>
 
     [Prop] public Colors? Background { get; set; }
 
-    [Prop] public Align? Align { get; set; }
+    [Prop] public Align? AlignContent { get; set; }
 
     [Prop] public bool RemoveParentPadding { get; set; }
 

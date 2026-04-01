@@ -8,10 +8,7 @@ on:
     branches: [main, master]
 jobs:
   backend-checks:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm64]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: src

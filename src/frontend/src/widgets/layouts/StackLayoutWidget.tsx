@@ -32,7 +32,7 @@ interface StackLayoutWidgetProps {
   width?: string;
   height?: string;
   background?: string;
-  align?: Align;
+  alignContent?: Align;
   scroll?: "None" | "Auto" | "Vertical" | "Horizontal" | "Both";
   removeParentPadding?: boolean;
   visible?: boolean;
@@ -55,7 +55,7 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
   width,
   height,
   background,
-  align,
+  alignContent,
   scroll,
   removeParentPadding = false,
   visible = true,
@@ -72,7 +72,7 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
     ...getMargin(margin),
     ...getRowGap(rowGap),
     ...getColumnGap(columnGap),
-    ...getAlign(orientation, align),
+    ...getAlign(orientation, alignContent),
     ...getWidth(width),
     ...getHeight(height),
     ...getAspectRatio(aspectRatio),

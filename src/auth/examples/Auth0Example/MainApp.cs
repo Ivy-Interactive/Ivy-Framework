@@ -39,8 +39,8 @@ public class MainApp : ViewBase
                  Layout.Vertical(
                      Text.H3(user.FullName ?? "User"),
                      Text.Muted(user.Email)
-                 ).Gap(4).Align(Align.Center)
-            ).Gap(20).Align(Align.Center),
+                 ).Gap(4).AlignContent(Align.Center)
+            ).Gap(20).AlignContent(Align.Center),
 
             // Brokered Auth Sessions Section
             Text.H3("Brokered Auth Sessions"),
@@ -55,6 +55,6 @@ public class MainApp : ViewBase
                         Layout.Vertical(brokeredSessions.Value.Select(kvp => new OAuthProviderTestView(kvp.Key, kvp.Value)).ToArray())
                     ).Gap(10)
 
-        ).Gap(40).Padding(50).Align(Align.Center).Height(Size.Full());
+        ).Gap(40).Padding(50).AlignContent(Align.Center).Height(Size.Full());
     }
 }

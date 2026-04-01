@@ -335,7 +335,7 @@ public class ThemeCustomizer : SampleBase
 
             UseEffect(() => onChange(colorState.Value), colorState);
 
-            return Layout.Horizontal().Align(Align.Center)
+            return Layout.Horizontal().AlignContent(Align.Center)
                 | Text.P(label).Small().Width(Size.Px(180))
                 | colorState.ToColorInput(variant: ColorInputVariant.TextAndPicker);
         }
@@ -624,7 +624,7 @@ public class ThemeCustomizer : SampleBase
 
             static object GetPaginationContent(int page, int total) =>
                 new Card(
-                    Layout.Vertical().Align(Align.Center)
+                    Layout.Vertical().AlignContent(Align.Center)
                         | Text.Block("Theme insight").Small()
                         | Text.P(page switch
                         {
@@ -675,7 +675,7 @@ public class ThemeCustomizer : SampleBase
                                 new Option<string>("Info", "Info")
                             }).Variant(SelectInputVariant.Toggle).Disabled(disableInputs.Value)
                             | Text.Block("Selected badges:").Small()
-                            | (Layout.Horizontal().Align(Align.Center)
+                            | (Layout.Horizontal().AlignContent(Align.Center)
                                 | badgeVariant.Value.Select(variant => variant switch
                                 {
                                     "Primary" => new Badge("Primary").Primary(),
@@ -688,7 +688,7 @@ public class ThemeCustomizer : SampleBase
                                     _ => new Badge("Primary").Primary()
                                 }).ToArray())).Height(Size.Fit())
                      | new Box(
-                        Layout.Vertical().Align(Align.Center)
+                        Layout.Vertical().AlignContent(Align.Center)
                         | Text.Block("Pagination demo").Bold()
                             | GetPaginationContent(paginationPage.Value, totalPages)
                             | new Pagination(paginationPage.Value, totalPages, e =>
@@ -704,9 +704,9 @@ public class ThemeCustomizer : SampleBase
                             | CreateLoadingButton("Secondary", ButtonVariant.Secondary).Loading()
                             | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
                         | (Layout.Horizontal().Width(Size.Full())
-                            | (Layout.Vertical().Align(Align.Left)
+                            | (Layout.Vertical().AlignContent(Align.Left)
                                 | themeSatisfaction.ToFeedbackInput().Stars().Disabled(disableInputs.Value))
-                            | (Layout.Vertical().Align(Align.Right)
+                            | (Layout.Vertical().AlignContent(Align.Right)
                                 | uxSatisfaction.ToFeedbackInput().Thumbs().Disabled(disableInputs.Value)))
                         | new Box((Layout.Horizontal().Height(Size.Fit())
                             | agreeTerms.ToBoolInput().Disabled(disableInputs.Value)
@@ -714,12 +714,12 @@ public class ThemeCustomizer : SampleBase
                         | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
                         | (Layout.Horizontal().Height(Size.Fit())
                             | (Layout.Vertical() | new Box((Layout.Horizontal()
-                                    | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all buttons"))
+                                    | (Layout.Vertical().AlignContent(Align.Left) | Text.Block("Disable all buttons"))
                                     | disableButtons.ToSwitchInput())))
                             | (Layout.Vertical() | new Box((Layout.Horizontal()
-                                | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all inputs"))
+                                | (Layout.Vertical().AlignContent(Align.Left) | Text.Block("Disable all inputs"))
                                 | disableInputs.ToSwitchInput()))))
-                        | (Layout.Vertical().Align(Align.Center) | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary())
+                        | (Layout.Vertical().AlignContent(Align.Center) | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary())
                     );
 
             object BuildThirdColumn() =>

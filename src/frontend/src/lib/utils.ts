@@ -72,7 +72,8 @@ export function getParentId(): string | null {
 
 export function getShellParam(): boolean {
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("shell")?.toLowerCase() !== "false";
+  const shellValue = urlParams.get("shell") ?? urlParams.get("chrome");
+  return shellValue?.toLowerCase() !== "false";
 }
 
 export function wrapAppContent(content: React.ReactNode): React.ReactNode {

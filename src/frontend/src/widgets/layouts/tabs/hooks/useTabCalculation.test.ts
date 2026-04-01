@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { estimateTabWidth } from "../utils/tabUtils";
 
 describe("useTabCalculation", () => {
   it("should accept correct parameters", () => {
@@ -24,5 +25,32 @@ describe("useTabCalculation", () => {
   it("should accept Content variant", () => {
     const variant = "Content" as const;
     expect(variant).toBe("Content");
+  });
+});
+
+describe("estimateTabWidth", () => {
+  it("should account for badge width in Content variant", () => {
+    const widthWithoutBadge = estimateTabWidth("Tab", undefined, undefined, false, "Content");
+    const widthWithBadge = estimateTabWidth("Tab", undefined, "New", false, "Content");
+
+    // Badge should add width: ml-2 (8px) + badge content
+    expect(widthWithBadge).toBeGreaterThan(widthWithoutBadge);
+
+    // Verify the badge adds at least 8px (margin) + 24px (min badge width)
+    expect(widthWithBadge - widthWithoutBadge).toBeGreaterThanOrEqual(32);
+  });
+
+  it("should account for badge width in Tabs variant", () => {
+    const widthWithoutBadge = estimateTabWidth("Tab", undefined, undefined, false, "Tabs");
+    const widthWithBadge = estimateTabWidth("Tab", undefined, "New", false, "Tabs");
+
+    expect(widthWithBadge).toBeGreaterThan(widthWithoutBadge);
+  });
+
+  it("should scale badge width with longer badge text", () => {
+    const shortBadge = estimateTabWidth("Tab", undefined, "3", false, "Content");
+    const longBadge = estimateTabWidth("Tab", undefined, "99 items", false, "Content");
+
+    expect(longBadge).toBeGreaterThan(shortBadge);
   });
 });

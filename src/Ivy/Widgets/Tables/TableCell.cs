@@ -20,7 +20,7 @@ public record TableCell : WidgetBase<TableCell>
 
     [Prop] public bool IsFooter { get; set; }
 
-    [Prop] public Align Align { get; set; } = Align.Left;
+    [Prop] public Align AlignContent { get; set; } = Align.Left;
 
     [Prop] public bool Multiline { get; set; }
 }
@@ -37,9 +37,9 @@ public static class TableCellExtensions
         return cell with { IsFooter = isFooter };
     }
 
-    public static TableCell Align(this TableCell cell, Align align)
+    public static TableCell AlignContent(this TableCell cell, Align align)
     {
-        return cell with { Align = align };
+        return cell with { AlignContent = align };
     }
 
     public static TableCell Multiline(this TableCell cell, bool multiline = true)
