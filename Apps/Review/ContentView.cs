@@ -442,8 +442,8 @@ public class ContentView(
                         | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
                         | customPrSubmitToSlack.ToBoolInput("Submit to Slack")
                         | (customPrSubmitToSlack.Value
-                            ? customPrSlackComment.ToTextareaInput("Slack Comment").Rows(2)
-                            : (IWidget)Layout.Empty())
+                            ? (object)customPrSlackComment.ToTextareaInput("Slack Comment").Rows(2)
+                            : new Spacer())
                         | customPrAssignee.ToSelectInput((assigneesQuery.Value ?? Array.Empty<string>()).ToOptions())
                             .Nullable().WithField().Label("Assignee")
                         | customPrComment.ToTextareaInput("Comment").Rows(3)
