@@ -119,24 +119,49 @@
     <Exec Command="cargo build --release" WorkingDirectory="../RustServer" />
   </Target>
 
-  <Target Name="AddRustBinaries" BeforeTargets="AssignTargetPaths" DependsOnTargets="BuildRustServer">
-    <Message Importance="High" Text="Adding Rust binaries from consolidated artifacts..." />
-    <ItemGroup>
-      <!-- Artifacts structure for CI/CD -->
-      <Content Include="../RustServer/artifacts/native/win-x64/rustserver.dll" Pack="true" PackagePath="runtimes/win-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/win-x64/native/rustserver.dll" Condition="Exists('../RustServer/artifacts/native/win-x64/rustserver.dll')" />
-      <Content Include="../RustServer/artifacts/native/win-arm64/rustserver.dll" Pack="true" PackagePath="runtimes/win-arm64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/win-arm64/native/rustserver.dll" Condition="Exists('../RustServer/artifacts/native/win-arm64/rustserver.dll')" />
-      <Content Include="../RustServer/artifacts/native/linux-x64/librustserver.so" Pack="true" PackagePath="runtimes/linux-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-x64/native/librustserver.so" Condition="Exists('../RustServer/artifacts/native/linux-x64/librustserver.so')" />
-      <Content Include="../RustServer/artifacts/native/osx-x64/librustserver.dylib" Pack="true" PackagePath="runtimes/osx-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/librustserver.dylib" Condition="Exists('../RustServer/artifacts/native/osx-x64/librustserver.dylib')" />
-      <Content Include="../RustServer/artifacts/native/osx-arm64/librustserver.dylib" Pack="true" PackagePath="runtimes/osx-arm64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-arm64/native/librustserver.dylib" Condition="Exists('../RustServer/artifacts/native/osx-arm64/librustserver.dylib')" />
+  <!-- Native Library Packaging -->
+  <!-- We use a static ItemGroup for Packing to ensure dotnet pack picks them up correctly. -->
+  <ItemGroup>
+    <!-- Artifacts structure for CI/CD - these are included in the NuGet if they exist -->
+    <Content Include="../RustServer/artifacts/native/win-x64/rustserver.dll" Pack="true" PackagePath="runtimes/win-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/win-x64/native/rustserver.dll" Condition="Exists('../RustServer/artifacts/native/win-x64/rustserver.dll')" />
+    <Content Include="../RustServer/artifacts/native/win-arm64/rustserver.dll" Pack="true" PackagePath="runtimes/win-arm64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/win-arm64/native/rustserver.dll" Condition="Exists('../RustServer/artifacts/native/win-arm64/rustserver.dll')" />
+    
+    <Content Include="../RustServer/artifacts/native/linux-x64/librustserver.so" Pack="true" PackagePath="runtimes/linux-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-x64/native/librustserver.so" Condition="Exists('../RustServer/artifacts/native/linux-x64/librustserver.so')" />
+    <Content Include="../RustServer/artifacts/native/linux-arm64/librustserver.so" Pack="true" PackagePath="runtimes/linux-arm64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-arm64/native/librustserver.so" Condition="Exists('../RustServer/artifacts/native/linux-arm64/librustserver.so')" />
+    
+    <!-- Linux Musl (Alpine) Support -->
+    <Content Include="../RustServer/artifacts/native/linux-musl-x64/librustserver.so" Pack="true" PackagePath="runtimes/linux-musl-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-musl-x64/native/librustserver.so" Condition="Exists('../RustServer/artifacts/native/linux-musl-x64/librustserver.so')" />
+    <Content Include="../RustServer/artifacts/native/linux-musl-arm64/librustserver.so" Pack="true" PackagePath="runtimes/linux-musl-arm64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-musl-arm64/native/librustserver.so" Condition="Exists('../RustServer/artifacts/native/linux-musl-arm64/librustserver.so')" />
 
-      <!-- Fallback for local development -->
-      <Content Include="../RustServer/target/release/*rustserver*.dll" Pack="true" PackagePath="runtimes/win-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/win-x64/native/%(Filename)%(Extension)" Condition="!Exists('../RustServer/artifacts/native/win-x64/rustserver.dll')" />
-      <Content Include="../RustServer/target/release/*rustserver*.so" Pack="true" PackagePath="runtimes/linux-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-x64/native/%(Filename)%(Extension)" Condition="!Exists('../RustServer/artifacts/native/linux-x64/librustserver.so')" />
-      
-      <!-- macOS local fallbacks, isolated to prevent MSB3021 -->
-      <Content Include="../RustServer/target/release/librustserver.dylib" Pack="true" PackagePath="runtimes/osx-arm64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-arm64/native/librustserver.dylib" Condition="!Exists('../RustServer/artifacts/native/osx-arm64/librustserver.dylib') AND Exists('../RustServer/target/release/librustserver.dylib')" />
-      <Content Include="../RustServer/target/release/librustserver.dylib" Pack="true" PackagePath="runtimes/osx-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/librustserver.dylib" Condition="!Exists('../RustServer/artifacts/native/osx-x64/librustserver.dylib') AND Exists('../RustServer/target/release/librustserver.dylib') AND '$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)' == 'X64'" />
-    </ItemGroup>
+    <Content Include="../RustServer/artifacts/native/osx-x64/librustserver.dylib" Pack="true" PackagePath="runtimes/osx-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/librustserver.dylib" Condition="Exists('../RustServer/artifacts/native/osx-x64/librustserver.dylib')" />
+    <Content Include="../RustServer/artifacts/native/osx-arm64/librustserver.dylib" Pack="true" PackagePath="runtimes/osx-arm64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-arm64/native/librustserver.dylib" Condition="Exists('../RustServer/artifacts/native/osx-arm64/librustserver.dylib')" />
+
+    <!-- Fallback for local development (no artifacts folder) - pack the binary built on the current machine -->
+    <Content Include="../RustServer/target/release/rustserver.dll" Pack="true" PackagePath="runtimes/win-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/win-x64/native/rustserver.dll" 
+             Condition="!Exists('../RustServer/artifacts/native/win-x64/rustserver.dll') AND Exists('../RustServer/target/release/rustserver.dll') AND '$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)' == 'X64' AND $([MSBuild]::IsOSPlatform('Windows'))" />
+    
+    <Content Include="../RustServer/target/release/librustserver.so" Pack="true" PackagePath="runtimes/linux-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-x64/native/librustserver.so" 
+             Condition="!Exists('../RustServer/artifacts/native/linux-x64/librustserver.so') AND Exists('../RustServer/target/release/librustserver.so') AND '$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)' == 'X64' AND $([MSBuild]::IsOSPlatform('Linux'))" />
+    
+    <Content Include="../RustServer/target/release/librustserver.so" Pack="true" PackagePath="runtimes/linux-arm64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-arm64/native/librustserver.so" 
+             Condition="!Exists('../RustServer/artifacts/native/linux-arm64/librustserver.so') AND Exists('../RustServer/target/release/librustserver.so') AND '$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)' == 'Arm64' AND $([MSBuild]::IsOSPlatform('Linux'))" />
+    
+    <Content Include="../RustServer/target/release/librustserver.dylib" Pack="true" PackagePath="runtimes/osx-arm64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-arm64/native/librustserver.dylib" 
+             Condition="!Exists('../RustServer/artifacts/native/osx-arm64/librustserver.dylib') AND Exists('../RustServer/target/release/librustserver.dylib') AND '$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)' == 'Arm64' AND $([MSBuild]::IsOSPlatform('OSX'))" />
+
+    <Content Include="../RustServer/target/release/librustserver.dylib" Pack="true" PackagePath="runtimes/osx-x64/native" CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/librustserver.dylib" 
+             Condition="!Exists('../RustServer/artifacts/native/osx-x64/librustserver.dylib') AND Exists('../RustServer/target/release/librustserver.dylib') AND '$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)' == 'X64' AND $([MSBuild]::IsOSPlatform('OSX'))" />
+
+    <!-- Always ensure the local platform binary is linked to the base dir for local unit tests without RID folders -->
+    <Content Include="../RustServer/target/release/rustserver.dll" CopyToOutputDirectory="PreserveNewest" Link="rustserver.dll" Condition="Exists('../RustServer/target/release/rustserver.dll') AND $([MSBuild]::IsOSPlatform('Windows'))" />
+    <Content Include="../RustServer/target/release/librustserver.so" CopyToOutputDirectory="PreserveNewest" Link="librustserver.so" Condition="Exists('../RustServer/target/release/librustserver.so') AND $([MSBuild]::IsOSPlatform('Linux'))" />
+    <Content Include="../RustServer/target/release/librustserver.dylib" CopyToOutputDirectory="PreserveNewest" Link="librustserver.dylib" Condition="Exists('../RustServer/target/release/librustserver.dylib') AND $([MSBuild]::IsOSPlatform('OSX'))" />
+  </ItemGroup>
+
+  <Target Name="AddRustBinariesWarning" BeforeTargets="GenerateNuspec">
+    <!-- Warn loudly if NO native binaries were found during packaging -->
+    <Warning Text="No native Rust binaries were found for packaging! The NuGet package will be missing critical components." 
+             Condition="'@(Content->WithMetadataValue('Pack', 'true')->WithMetadataValue('PackagePath', 'runtimes/win-x64/native'))' == '' AND '@(Content->WithMetadataValue('Pack', 'true')->WithMetadataValue('PackagePath', 'runtimes/linux-x64/native'))' == ''" />
   </Target>
 
 </Project>

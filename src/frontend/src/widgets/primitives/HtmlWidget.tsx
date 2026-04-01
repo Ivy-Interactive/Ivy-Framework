@@ -1,4 +1,5 @@
 import { HtmlRenderer } from "@/components/HtmlRenderer";
+import { getWidth, getHeight } from "@/lib/styles";
 import React, { useEffect, useRef } from "react";
 import { Densities } from "@/types/density";
 
@@ -7,6 +8,8 @@ interface HtmlWidgetProps {
   content: string;
   density?: Densities;
   dangerouslyAllowScripts?: boolean;
+  width?: string;
+  height?: string;
 }
 
 export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
@@ -14,6 +17,8 @@ export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
   content,
   density = Densities.Medium,
   dangerouslyAllowScripts = false,
+  width,
+  height,
 }) => {
   const getScaleStyle = (s: Densities): React.CSSProperties => {
     switch (s) {
@@ -39,6 +44,8 @@ export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
     flexDirection: "column",
     gap: "1rem",
     ...getScaleStyle(density),
+    ...getWidth(width),
+    ...getHeight(height),
   };
 
   const containerRef = useRef<HTMLDivElement>(null);

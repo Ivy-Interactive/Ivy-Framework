@@ -35,7 +35,7 @@ public class BasicFloatingPanelView : ViewBase
 }
 ```
 
-## Alignment Options
+## AlignSelf Options
 
 The `FloatingPanel` supports nine different [Align](../../04_ApiReference/Ivy/Align.md) positions to place content exactly where you need it:
 
@@ -55,11 +55,11 @@ public class CornerAlignmentView : ViewBase
                 .Large()
                 .BorderRadius(BorderRadius.Full);
             return Layout.Vertical()
-                | new FloatingPanel(floatingButton, Align.TopLeft)
-                | new FloatingPanel(floatingButton, Align.TopRight)
-                | new FloatingPanel(floatingButton, Align.BottomLeft)
-                | new FloatingPanel(floatingButton, Align.BottomRight)
-                | new FloatingPanel(new Button("Close", onClick: _ => isOpen.Set(false)).Secondary(), Align.Center);
+                | new FloatingPanel(floatingButton).AlignSelf(Align.TopLeft)
+                | new FloatingPanel(floatingButton).AlignSelf(Align.TopRight)
+                | new FloatingPanel(floatingButton).AlignSelf(Align.BottomLeft)
+                | new FloatingPanel(floatingButton).AlignSelf(Align.BottomRight)
+                | new FloatingPanel(new Button("Close", onClick: _ => isOpen.Set(false)).Secondary()).AlignSelf(Align.Center);
         });
 
         return Layout.Vertical()
@@ -85,11 +85,11 @@ public class EdgeCenterAlignmentView : ViewBase
                 .Large()
                 .BorderRadius(BorderRadius.Full);
             return Layout.Vertical()
-                | new FloatingPanel(floatingButton, Align.TopCenter)
-                | new FloatingPanel(floatingButton, Align.BottomCenter)
-                | new FloatingPanel(floatingButton, Align.Left)
-                | new FloatingPanel(floatingButton, Align.Right)
-                | new FloatingPanel(new Button("Close", onClick: _ => isOpen.Set(false)).Secondary(), Align.Center);
+                | new FloatingPanel(floatingButton).AlignSelf(Align.TopCenter)
+                | new FloatingPanel(floatingButton).AlignSelf(Align.BottomCenter)
+                | new FloatingPanel(floatingButton).AlignSelf(Align.Left)
+                | new FloatingPanel(floatingButton).AlignSelf(Align.Right)
+                | new FloatingPanel(new Button("Close", onClick: _ => isOpen.Set(false)).Secondary()).AlignSelf(Align.Center);
         });
 
         return Layout.Vertical()
@@ -116,8 +116,8 @@ public class CenterAlignmentView : ViewBase
                         | Text.Block("This panel is positioned")
                         | Text.Block("in the center of the screen")
                         | new Button("Close", onClick: _ => isOpen.Set(false)).Secondary()
-                ),
-                Align.Center) : null);
+                ))
+                .AlignSelf(Align.Center) : null);
 
         return Layout.Vertical()
             | new Button("Show Panel", onClick: _ => showPanel())
@@ -146,23 +146,23 @@ public class BasicOffsetView : ViewBase
                     new Button("Default Position")
                         .Icon(Icons.Circle)
                         .Large()
-                        .BorderRadius(BorderRadius.Full),
-                    Align.TopRight)
+                        .BorderRadius(BorderRadius.Full))
+                    .AlignSelf(Align.TopRight)
                 | new FloatingPanel(
                     new Button("Offset Down & Left")
                         .Icon(Icons.ArrowDownLeft)
                         .Large()
-                        .BorderRadius(BorderRadius.Full),
-                    Align.BottomLeft)
+                        .BorderRadius(BorderRadius.Full))
+                    .AlignSelf(Align.BottomLeft)
                     .Offset(new Thickness(0, 20, 0, 0))  // 20 units up from bottom edge
                 | new FloatingPanel(
                     new Button("Custom Offset")
                         .Icon(Icons.Move)
                         .Large()
-                        .BorderRadius(BorderRadius.Full),
-                    Align.BottomRight)
+                        .BorderRadius(BorderRadius.Full))
+                    .AlignSelf(Align.BottomRight)
                     .Offset(new Thickness(10, 0, 0, 10)) // Thickness(left, top, right, bottom): 10 from left edge, 10 from bottom edge
-                | new FloatingPanel(new Button("Close", onClick: _ => isOpen.Set(false)).Secondary(), Align.Center);
+                | new FloatingPanel(new Button("Close", onClick: _ => isOpen.Set(false)).Secondary()).AlignSelf(Align.Center);
         });
 
         return Layout.Vertical()
@@ -188,31 +188,31 @@ public class ConvenienceOffsetView : ViewBase
                     new Button("Top Offset")
                         .Icon(Icons.ArrowUp)
                         .Large()
-                        .BorderRadius(BorderRadius.Full),
-                    Align.TopRight)
+                        .BorderRadius(BorderRadius.Full))
+                    .AlignSelf(Align.TopRight)
                     .OffsetTop(30)
                 | new FloatingPanel(
                     new Button("Left Offset")
                         .Icon(Icons.ArrowLeft)
                         .Large()
-                        .BorderRadius(BorderRadius.Full),
-                    Align.TopRight)
+                        .BorderRadius(BorderRadius.Full))
+                    .AlignSelf(Align.TopRight)
                     .OffsetLeft(30)
                 | new FloatingPanel(
                     new Button("Right Offset")
                         .Icon(Icons.ArrowRight)
                         .Large()
-                        .BorderRadius(BorderRadius.Full),
-                    Align.TopLeft)
+                        .BorderRadius(BorderRadius.Full))
+                    .AlignSelf(Align.TopLeft)
                     .OffsetRight(30)
                 | new FloatingPanel(
                     new Button("Bottom Offset")
                         .Icon(Icons.ArrowDown)
                         .Large()
-                        .BorderRadius(BorderRadius.Full),
-                    Align.BottomLeft)
+                        .BorderRadius(BorderRadius.Full))
+                    .AlignSelf(Align.BottomLeft)
                     .OffsetBottom(30)
-                | new FloatingPanel(new Button("Close", onClick: _ => isOpen.Set(false)).Secondary(), Align.Center);
+                | new FloatingPanel(new Button("Close", onClick: _ => isOpen.Set(false)).Secondary()).AlignSelf(Align.Center);
         });
 
         return Layout.Vertical()
@@ -254,8 +254,8 @@ public class NavigationPanelView : ViewBase
                         .Icon(Icons.Info)
                         .Secondary()
                         .Width(Size.Units(12))
-                    | new Button("Close", onClick: _ => isOpen.Set(false)).Secondary(),
-                Align.Right)
+                    | new Button("Close", onClick: _ => isOpen.Set(false)).Secondary())
+                .AlignSelf(Align.Right)
                 .Offset(new Thickness(0, 0, 10, 0)) : null);
 
         return Layout.Vertical()
@@ -289,8 +289,8 @@ public class ActionPanelView : ViewBase
                         .Icon(Icons.Trash)
                         .Destructive()
                         .BorderRadius(BorderRadius.Full)
-                    | new Button("Close", onClick: _ => isOpen.Set(false)).Secondary(),
-                Align.BottomCenter)
+                    | new Button("Close", onClick: _ => isOpen.Set(false)).Secondary())
+                .AlignSelf(Align.BottomCenter)
                 .Offset(new Thickness(0, 0, 0, 20)) : null);
 
         return Layout.Vertical()
@@ -322,14 +322,14 @@ public class BackToTopView : ViewBase
     {
         var (panelView, showButton) = UseTrigger((IState<bool> isOpen) =>
             isOpen.Value ? new FloatingPanel(
-                Layout.Horizontal().Gap(2).Align(Align.Center)
+                Layout.Horizontal().Gap(2).AlignContent(Align.Center)
                     | new Button("Top")
                         .Icon(Icons.ArrowUp)
                         .Large()
                         .BorderRadius(BorderRadius.Full)
                         .Secondary()
-                    | new Button("Close", onClick: _ => isOpen.Set(false)).Secondary(),
-                Align.BottomRight)
+                    | new Button("Close", onClick: _ => isOpen.Set(false)).Secondary())
+                .AlignSelf(Align.BottomRight)
                 .Offset(new Thickness(0, 0, 20, 20)) : null);
 
         return Layout.Vertical()
@@ -362,8 +362,8 @@ public class FloatingSearchView : ViewBase
                         | searchQuery.ToTextInput().Placeholder("Search...")
                         | new Button("Search").Icon(Icons.Search).Primary()
                         | new Button("Close", onClick: _ => isOpen.Set(false)).Secondary()
-                ),
-                Align.TopCenter)
+                ))
+                .AlignSelf(Align.TopCenter)
                 .Offset(new Thickness(0, 10, 0, 0)) : (object?)null);
 
         return Layout.Vertical()
@@ -396,24 +396,24 @@ public class MultiPanelView : ViewBase
                         .Icon(Icons.Menu)
                         .Large()
                         .BorderRadius(BorderRadius.Full)
-                        .Secondary(),
-                    Align.TopLeft)
+                        .Secondary())
+                    .AlignSelf(Align.TopLeft)
                     .Offset(new Thickness(10, 10, 0, 0))
                 | new FloatingPanel(
                     new Button("Notifications")
                         .Icon(Icons.Bell)
                         .Large()
                         .BorderRadius(BorderRadius.Full)
-                        .Secondary(),
-                    Align.TopRight)
+                        .Secondary())
+                    .AlignSelf(Align.TopRight)
                     .Offset(new Thickness(0, 10, 10, 0))
                 | new FloatingPanel(
                     new Button("Chat")
                         .Icon(Icons.MessageCircle)
                         .Large()
                         .BorderRadius(BorderRadius.Full)
-                        .Primary(),
-                    Align.BottomRight)
+                        .Primary())
+                    .AlignSelf(Align.BottomRight)
                     .Offset(new Thickness(0, 0, 20, 20))
                 | new FloatingPanel(
                     new Card(
@@ -422,8 +422,8 @@ public class MultiPanelView : ViewBase
                             | new Button("Save").Small().Primary()
                             | new Button("Share").Small().Secondary()
                             | new Button("Close", onClick: _ => isOpen.Set(false)).Small().Secondary()
-                    ).Width(Size.Units(40)),
-                    Align.Left)
+                    ).Width(Size.Units(40)))
+                    .AlignSelf(Align.Left)
                     .Offset(new Thickness(10, 0, 0, 0));
         });
 

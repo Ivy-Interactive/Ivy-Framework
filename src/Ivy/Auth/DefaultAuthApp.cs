@@ -44,7 +44,7 @@ public class DefaultAuthApp : ViewBase
             : null;
 
         return
-            Layout.Horizontal().Align(Align.Center).Height(Size.Screen())
+            Layout.Horizontal().AlignContent(Align.Center).Height(Size.Screen())
             | (new Card(
                 Layout.Vertical().Gap(6).Padding(2)
                 | new IvyLogo()

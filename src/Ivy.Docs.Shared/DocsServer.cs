@@ -13,6 +13,7 @@ public static class DocsServer
         var server = new Server(args);
         server.UseCulture("en-US");
         server.AddAppsFromAssembly(typeof(DocsServer).Assembly);
+        server.ReservePaths("/sitemap.xml", "/robots.txt", "/agents.md", "/llms.txt");
         server.UseHotReload();
 
         server.UseWebApplication(app =>

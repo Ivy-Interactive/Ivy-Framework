@@ -49,8 +49,8 @@ public class StackLayoutExample : ViewBase
             | Text.H2("StackLayout Features")
             | Text.Label("Horizontal, Gap(2), Padding(1)")
             | (Layout.Horizontal().Gap(2).Padding(1) | box1 | box2 | box3)
-            | Text.Label("Vertical, Gap(1), Align(Center), Padding(2)")
-            | (Layout.Vertical().Gap(1).Align(Align.Center).Padding(2) | box1 | box2 | box3);
+            | Text.Label("Vertical, Gap(1), AlignContent(Center), Padding(2)")
+            | (Layout.Vertical().Gap(1).AlignContent(Align.Center).Padding(2) | box1 | box2 | box3);
     }
 }
 ```
@@ -62,11 +62,11 @@ Use `SpaceBetween`, `SpaceAround`, or `SpaceEvenly` to distribute space between 
 ```csharp demo-tabs
 new StackLayout([
     Text.Label("SpaceBetween:"),
-    new StackLayout([new Badge("A"), new Badge("B"), new Badge("C")], Orientation.Horizontal, align: Align.SpaceBetween),
+    new StackLayout([new Badge("A"), new Badge("B"), new Badge("C")], Orientation.Horizontal, alignContent: Align.SpaceBetween),
     Text.Label("SpaceAround:"),
-    new StackLayout([new Badge("A"), new Badge("B"), new Badge("C")], Orientation.Horizontal, align: Align.SpaceAround),
+    new StackLayout([new Badge("A"), new Badge("B"), new Badge("C")], Orientation.Horizontal, alignContent: Align.SpaceAround),
     Text.Label("SpaceEvenly:"),
-    new StackLayout([new Badge("A"), new Badge("B"), new Badge("C")], Orientation.Horizontal, align: Align.SpaceEvenly)
+    new StackLayout([new Badge("A"), new Badge("B"), new Badge("C")], Orientation.Horizontal, alignContent: Align.SpaceEvenly)
 ], gap: 4).Width(Size.Full())
 ```
 
@@ -183,19 +183,19 @@ public class NavigationExample : ViewBase
     {
         var client = UseService<IClientProvider>();
 
-        return Layout.Vertical().Gap(16).Padding(12).Align(Align.Center)
+        return Layout.Vertical().Gap(16).Padding(12).AlignContent(Align.Center)
             // Navigation buttons
-            | (Layout.Horizontal().Gap(8).Align(Align.Center)
+            | (Layout.Horizontal().Gap(8).AlignContent(Align.Center)
                 | new Button("Home", _ => client.Toast("Home"))
                 | new Button("About", _ => client.Toast("About"))
                 | new Button("Contact", _ => client.Toast("Contact"))
                 | new Button("Settings", _ => client.Toast("Settings")))
             // App title and user info
-            | (Layout.Vertical().Align(Align.Left)
+            | (Layout.Vertical().AlignContent(Align.Left)
                 | Text.H3("MyApp")
                 | Text.P("Welcome back!").Small())
             // User actions
-            | (Layout.Horizontal().Gap(4).Align(Align.Right)
+            | (Layout.Horizontal().Gap(4).AlignContent(Align.Right)
                 | new Button("Profile", _ => client.Toast("Profile"))
                 | new Button("Logout", _ => client.Toast("Logout")));
     }

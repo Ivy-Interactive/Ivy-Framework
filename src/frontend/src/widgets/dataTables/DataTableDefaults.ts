@@ -14,7 +14,7 @@ export const DATA_COLUMN_DEFAULTS: Partial<DataColumn> = {
   sortable: true,
   sortDirection: SortDirection.None,
   filterable: true,
-  align: "Left",
+  alignContent: "Left",
   order: 0,
   icon: null,
   help: null,
@@ -54,7 +54,7 @@ export function applyColumnDefaults(column: DataColumn): DataColumn {
     sortable: column.sortable ?? DATA_COLUMN_DEFAULTS.sortable,
     sortDirection: column.sortDirection ?? DATA_COLUMN_DEFAULTS.sortDirection,
     filterable: column.filterable ?? DATA_COLUMN_DEFAULTS.filterable,
-    align: column.align ?? DATA_COLUMN_DEFAULTS.align,
+    alignContent: column.alignContent ?? DATA_COLUMN_DEFAULTS.alignContent,
     order: column.order ?? DATA_COLUMN_DEFAULTS.order,
   } as DataColumn;
 }

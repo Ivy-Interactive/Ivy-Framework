@@ -53,7 +53,7 @@ public class ListItem(int value, int index, Action moveUp, Action moveDown) : Vi
                         moveDown();
                     }, icon: Icons.ArrowBigDown, variant: ButtonVariant.Secondary),
                     Text.Block(this.Value + ":" + DateTime.Now.Ticks)
-                ).Align(Align.Center),
+                ).AlignContent(Align.Center),
                 new Separator()
             );
     }

@@ -51,6 +51,55 @@ function mapArrowTypeToColType(arrowType: string): ColType {
   return ColType.Text;
 }
 
+/**
+ * Convert a DecimalBigNum value to a JS number using the column's scale.
+ * Primary path uses Arrow's valueOf(scale); falls back to string-based conversion
+ * when valueOf throws (e.g. RangeError from BigUint64Array alignment on IPC buffers).
+ */
+export function convertDecimalValue(
+  value: { valueOf?: (scale: number) => unknown; toString: () => string },
+  scale: number,
+): number | null {
+  try {
+    // Arrow 21.1.0's valueOf(scale) correctly divides unscaled integer by 10^scale.
+    // May throw RangeError on IPC buffers due to BigUint64Array alignment.
+    const result = typeof value.valueOf === "function" ? value.valueOf(scale) : null;
+    if (typeof result === "number") return result;
+    if (typeof result === "bigint") return Number(result);
+  } catch {
+    // Fall through to string-based fallback
+  }
+  // Fallback: parse the string representation and insert decimal point
+  try {
+    const str = value.toString();
+    const negative = str.startsWith("-");
+    const abs = negative ? str.slice(1) : str;
+    if (scale === 0) {
+      return Number(str);
+    } else if (abs.length <= scale) {
+      return Number(`${negative ? "-" : ""}0.${abs.padStart(scale, "0")}`);
+    } else {
+      return Number(`${negative ? "-" : ""}${abs.slice(0, -scale)}.${abs.slice(-scale)}`);
+    }
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Build a map of column index → decimal scale from an Arrow table schema.
+ */
+export function buildDecimalScales(schema: arrow.Schema): Map<number, number> {
+  const scales = new Map<number, number>();
+  for (let j = 0; j < schema.fields.length; j++) {
+    const field = schema.fields[j];
+    if (field.type.toString().toLowerCase().includes("decimal")) {
+      scales.set(j, (field.type as arrow.Decimal).scale);
+    }
+  }
+  return scales;
+}
+
 export function convertArrowTableToData(
   table: arrow.Table,
   requestedCount: number,
@@ -77,16 +126,7 @@ export function convertArrowTableToData(
       };
     });
 
-  // Precompute decimal column scales for proper Decimal128 → JS number conversion.
-  // Arrow's DecimalBigNum.valueOf(scale) needs the scale to divide the unscaled integer.
-  const decimalScales = new Map<number, number>();
-  for (let j = 0; j < table.schema.fields.length; j++) {
-    const field = table.schema.fields[j];
-    if (field.type.toString().toLowerCase().includes("decimal")) {
-      const scale = (field.type as arrow.Decimal).scale;
-      decimalScales.set(j, scale);
-    }
-  }
+  const decimalScales = buildDecimalScales(table.schema);
 
   const rows: DataRow[] = [];
   for (let i = 0; i < table.numRows; i++) {
@@ -95,29 +135,9 @@ export function convertArrowTableToData(
       const column = table.getChildAt(j);
       if (column) {
         let value = column.get(i);
-        // Arrow Decimal128 values are DecimalBigNum objects containing unscaled integers.
-        // We must pass the column's scale to valueOf() so it divides correctly.
         const scale = decimalScales.get(j);
         if (scale !== undefined && value != null && typeof value === "object") {
-          // Try calling valueOf with scale parameter
-          const convertedValue = typeof value.valueOf === "function" ? value.valueOf(scale) : value;
-
-          // Handle different return types from valueOf()
-          if (typeof convertedValue === "bigint") {
-            // Convert bigint to number by dividing by 10^scale
-            value = Number(convertedValue) / Math.pow(10, scale);
-          } else if (typeof convertedValue === "number") {
-            value = convertedValue;
-          } else {
-            // Fallback: parse string representation and convert
-            // This handles cases where valueOf() returns a string or doesn't work as expected
-            try {
-              const unscaledValue = BigInt(value.toString());
-              value = Number(unscaledValue) / Math.pow(10, scale);
-            } catch {
-              value = null; // Unable to convert, set to null
-            }
-          }
+          value = convertDecimalValue(value, scale);
         }
         values.push(value);
       }

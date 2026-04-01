@@ -64,7 +64,7 @@ public class ProgressBuilder<TModel> : IBuilder<TModel>
         if (format != null)
         {
             var formattedValue = FormatValue(numericValue);
-            return Layout.Horizontal().Gap(2).Align(Align.Center)
+            return Layout.Horizontal().Gap(2).AlignContent(Align.Center)
                    | progress.Width(Size.Full())
                    | Text.Muted(formattedValue);
         }

@@ -146,7 +146,7 @@ public class GitHubOAuthTestView : ViewBase
                         ).Gap(10),
                         new Button("View on GitHub").Url(userInfo.Value.HtmlUrl).Link().OpenInNewTab()
                     ).Gap(5)
-                ).Gap(20).Align(Align.Left)
+                ).Gap(20).AlignContent(Align.Left)
                 : null,
             reposList.Value != null
                 ? Layout.Vertical(

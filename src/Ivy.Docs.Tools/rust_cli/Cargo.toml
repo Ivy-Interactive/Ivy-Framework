@@ -14,7 +14,7 @@ rayon = "1.11.0"
 regex = "1.12.3"
 roxmltree = "0.21.1"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_yml = "0.0.12"
+serde_yaml_ng = "0.10"
 sha2 = "0.11.0"
 walkdir = "2.5.0"
 

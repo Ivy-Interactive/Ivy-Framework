@@ -3,14 +3,14 @@ import React from "react";
 
 interface FloatingPanelWidgetProps {
   id: string;
-  align: Align;
+  alignSelf: Align;
   offset?: string;
   children: React.ReactNode;
 }
 
 export const FloatingPanelWidget = ({
   id,
-  align = "BottomRight",
+  alignSelf = "BottomRight",
   offset,
   children,
 }: FloatingPanelWidgetProps) => {
@@ -34,7 +34,7 @@ export const FloatingPanelWidget = ({
     SpaceEvenly: "",
   };
   return (
-    <div className={`fixed ${positionClasses[align]} z-50`} style={styles} key={id}>
+    <div className={`fixed ${positionClasses[alignSelf]} z-50`} style={styles} key={id}>
       {children}
     </div>
   );

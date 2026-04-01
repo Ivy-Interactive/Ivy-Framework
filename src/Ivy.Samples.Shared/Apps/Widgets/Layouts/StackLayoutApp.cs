@@ -18,7 +18,7 @@ public class StackLayoutApp : SampleBase
             Layout.Vertical(
                 Text.Muted(align.ToString()),
                 container.Content(
-                    Layout.Horizontal().Align(align) | squareBox | tallBox | tallestBox
+                    Layout.Horizontal().AlignContent(align) | squareBox | tallBox | tallestBox
                 )
             ).Gap(0);
 
@@ -26,7 +26,7 @@ public class StackLayoutApp : SampleBase
             Layout.Vertical(
                 Text.Muted(align.ToString()),
                 container.Content(
-                    Layout.Vertical().Align(align).Height(Size.Full()) | squareBox | wideBox | widestBox
+                    Layout.Vertical().AlignContent(align).Height(Size.Full()) | squareBox | wideBox | widestBox
                 )
             ).Gap(0);
 

@@ -19,7 +19,7 @@ import { useEventHandler } from "@/components/event-handler";
 
 const EMPTY_ARRAY: never[] = [];
 
-export type BoxHoverVariant = "None" | "Pointer" | "PointerAndTranslate" | "Shadow";
+export type HoverEffect = "None" | "Pointer" | "PointerAndTranslate" | "Shadow";
 
 interface BoxWidgetProps {
   id: string;
@@ -39,7 +39,7 @@ interface BoxWidgetProps {
   className?: string;
   events?: string[];
   aspectRatio?: number;
-  hoverVariant?: BoxHoverVariant;
+  hoverVariant?: HoverEffect;
 }
 
 export const BoxWidget: React.FC<BoxWidgetProps> = ({

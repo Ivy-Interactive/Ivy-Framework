@@ -14,13 +14,13 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         string name,
         int order,
         IBuilder<TModel> builder,
-        Align align,
+        Align alignContent,
         FieldInfo fieldInfo,
         PropertyInfo? propertyInfo,
         bool removed,
         IBuilder<TModel> initialBuilder,
         bool initialRemoved,
-        Align initialAlign)
+        Align initialAlignContent)
     {
         public string Name { get; set; } = name;
         private FieldInfo? FieldInfo { get; set; } = fieldInfo;
@@ -33,16 +33,16 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public bool Removed { get; set; } = removed;
         private readonly IBuilder<TModel> _initialBuilder = initialBuilder;
         private readonly bool _initialRemoved = initialRemoved;
-        private readonly Align _initialAlign = initialAlign;
+        private readonly Align _initialAlignContent = initialAlignContent;
 
         public void Reset()
         {
             Builder = _initialBuilder;
             Removed = _initialRemoved;
-            Align = _initialAlign;
+            AlignContent = _initialAlignContent;
         }
         public bool IsMultiline { get; set; }
-        public Align Align { get; set; } = align;
+        public Align AlignContent { get; set; } = alignContent;
         public Size? Width { get; set; }
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
 
@@ -288,10 +288,10 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    public TableBuilder<TModel> Align(Expression<Func<TModel, object>> field, Align align)
+    public TableBuilder<TModel> AlignContent(Expression<Func<TModel, object>> field, Align align)
     {
         var hint = GetField(field);
-        hint.Align = align;
+        hint.AlignContent = align;
         return this;
     }
 
@@ -407,7 +407,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             var cell = new TableCell(content)
                 .IsHeader(isHeader)
                 .IsFooter(isFooter)
-                .Align(column.Align);
+                .AlignContent(column.AlignContent);
 
             if (column.IsMultiline)
             {

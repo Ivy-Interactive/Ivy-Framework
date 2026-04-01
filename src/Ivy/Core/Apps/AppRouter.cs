@@ -35,11 +35,17 @@ public class AppRouter(global::Ivy.Server server)
         return ResolveExplicitApp(appId, appShell);
     }
 
-    private static bool GetAppShell(HttpContext httpContext)
+    internal static bool GetAppShell(HttpContext httpContext)
     {
-        if (httpContext.Request.Query.TryGetValue("shell", out var appShellParam))
+        if (httpContext.Request.Query.TryGetValue("shell", out var shellParam))
         {
-            return !appShellParam.ToString().Equals("false", StringComparison.OrdinalIgnoreCase);
+            return !shellParam.ToString().Equals("false", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Backwards compatibility: accept the old "chrome" parameter name
+        if (httpContext.Request.Query.TryGetValue("chrome", out var chromeParam))
+        {
+            return !chromeParam.ToString().Equals("false", StringComparison.OrdinalIgnoreCase);
         }
 
         return true;

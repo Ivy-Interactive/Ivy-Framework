@@ -86,7 +86,7 @@ Layout.Horizontal()
 You can animate icons using the [`Animation`](../../02_Widgets/05_Effects/Animation.md) widget and the `.WithAnimation()` extension methods.
 
 ```csharp demo-tabs
-Layout.Horizontal().Align(Align.Center)
+Layout.Horizontal().AlignContent(Align.Center)
     | Icons.LoaderCircle
         .ToIcon()
         .Color(Colors.Blue)

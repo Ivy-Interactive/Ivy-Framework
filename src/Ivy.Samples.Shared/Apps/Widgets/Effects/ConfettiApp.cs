@@ -17,7 +17,7 @@ public class ConfettiApp : SampleBase
 
         var onAuto = new Button("Auto").WithConfetti(AnimationTrigger.Auto);
 
-        return Layout.Horizontal().Align(Align.Center).Height(Size.Screen()).Gap(20)
+        return Layout.Horizontal().AlignContent(Align.Center).Height(Size.Screen()).Gap(20)
                | onClick
                | onHover
                | onAuto

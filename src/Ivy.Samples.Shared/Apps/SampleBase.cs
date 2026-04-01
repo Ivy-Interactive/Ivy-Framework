@@ -28,7 +28,7 @@ public abstract class SampleBase : ViewBase
                 .Large()
                 .BorderRadius(BorderRadius.Full)
                 .WithSheet(() => new CodeView(runtimeType), runtimeType.FullName![12..].Replace(".", "/") + ".cs", width: Size.Fraction(1 / 2f)))
-                .Align(_showCodePosition.Value)
+                .AlignSelf(_showCodePosition.Value)
                 .Offset(_showCodeOffset)
                 : null
         );

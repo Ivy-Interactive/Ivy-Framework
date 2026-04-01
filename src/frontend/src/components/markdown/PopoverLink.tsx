@@ -15,8 +15,8 @@ export const PopoverLink: React.FC<PopoverLinkProps> = ({ content, children }) =
           style={{
             textDecoration: "underline dotted",
             textUnderlineOffset: "3px",
-            textDecorationColor: "green",
-            color: "green",
+            textDecorationColor: "var(--primary)",
+            color: "var(--primary)",
           }}
           role="button"
           tabIndex={0}

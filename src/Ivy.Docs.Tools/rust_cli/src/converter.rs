@@ -80,7 +80,7 @@ pub fn convert_async(
 
     if let Node::Root(root) = &ast {
         if let Some(Node::Yaml(yaml)) = root.children.first() {
-            if let Ok(meta) = serde_yml::from_str::<AppMeta>(&yaml.value) {
+            if let Ok(meta) = serde_yaml_ng::from_str::<AppMeta>(&yaml.value) {
                 app_meta = meta;
             }
         }

@@ -3,15 +3,6 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum CardHoverVariant
-{
-    None,
-    Pointer,
-    PointerAndTranslate,
-    Shadow,
-}
-
-
 /// <summary>
 /// A flexible container with a border and shadow for grouping related content.
 /// </summary>
@@ -34,7 +25,7 @@ public record Card : WidgetBase<Card>
     internal object? Description { get; set; }
     internal object? Icon { get; set; }
 
-    [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
+    [Prop] public HoverEffect HoverVariant { get; set; } = HoverEffect.None;
 
     [Prop] public bool Disabled { get; set; }
 
@@ -72,7 +63,7 @@ public static class CardExtensions
     public static Card Header(this Card card, object? title = null, object? description = null, object? icon = null)
     {
         object? header = Layout.Vertical().Gap(0)
-                         | (Layout.Horizontal().Align(Align.Center)
+                         | (Layout.Horizontal().AlignContent(Align.Center)
                             | title?.WithLayout().Grow()
                             | icon)
                          | description;
@@ -112,11 +103,11 @@ public static class CardExtensions
     public static Card Footer(this Card card, object? footer) =>
         card with { Children = WithSlot(card, "Footer", footer) };
 
-    public static Card Hover(this Card card, CardHoverVariant variant) => card with { HoverVariant = variant };
+    public static Card Hover(this Card card, HoverEffect variant) => card with { HoverVariant = variant };
 
     public static Card Disabled(this Card card, bool disabled = true) => card with { Disabled = disabled };
 
-    private static CardHoverVariant HoverVariantWithClick(this Card card) => card.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : card.HoverVariant;
+    private static HoverEffect HoverVariantWithClick(this Card card) => card.HoverVariant == HoverEffect.None ? HoverEffect.PointerAndTranslate : card.HoverVariant;
 
     public static Card OnClick(this Card card, Func<Event<Card>, ValueTask> onClick)
     {

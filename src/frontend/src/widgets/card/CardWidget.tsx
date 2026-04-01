@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useEventHandler } from "@/components/event-handler";
 import React, { useCallback } from "react";
 import { Densities } from "@/types/density";
+import type { HoverEffect } from "@/widgets/primitives/BoxWidget";
 import { cardStyles, getSizeClasses } from "./styles";
 
 const EMPTY_ARRAY: never[] = [];
@@ -14,7 +15,7 @@ interface CardWidgetProps {
   width?: string;
   height?: string;
   aspectRatio?: number;
-  hoverVariant?: "None" | "Pointer" | "PointerAndTranslate" | "Shadow";
+  hoverVariant?: HoverEffect;
   density?: Densities;
   disabled?: boolean;
   "data-testid"?: string;

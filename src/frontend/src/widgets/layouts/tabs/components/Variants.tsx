@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { getPadding, getWidth } from "@/lib/styles";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
+import { Badge } from "@/components/ui/badge";
 import { SortableTabTrigger } from "./Sortable";
 import { getTabProps } from "../utils/tabUtils";
 
@@ -126,7 +127,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
             if (!React.isValidElement(tabWidget)) return null;
             const props = getTabProps(tabWidget);
             if (!props?.id) return null;
-            const { title, id } = props;
+            const { title, id, badge } = props;
 
             // Only render tabs that are visible
             if (!visibleTabs.includes(id)) return null;
@@ -157,6 +158,11 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
               >
                 <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center h-full">
                   {title}
+                  {badge && (
+                    <Badge variant="primary" className="ml-2 w-min whitespace-nowrap">
+                      {badge}
+                    </Badge>
+                  )}
                 </div>
               </button>
             );

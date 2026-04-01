@@ -26,7 +26,7 @@ public class AppHub(
 {
     private static readonly HashSet<string> ReservedQueryParams = new(StringComparer.OrdinalIgnoreCase)
     {
-        "appId", "machineId", "parentId", "shell", "appArgs", "oauthLogin", "id"
+        "appId", "machineId", "parentId", "shell", "chrome", "appArgs", "oauthLogin", "id"
     };
 
     private AppContext GetAppArgs(string connectionId, string machineId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)

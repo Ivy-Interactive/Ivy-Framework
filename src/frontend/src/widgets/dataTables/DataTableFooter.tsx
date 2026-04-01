@@ -301,7 +301,7 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({
                 <FooterCell
                   key={col.name}
                   values={footerValues}
-                  align={col.align}
+                  align={col.alignContent}
                   cellStyle={cellStyle}
                   layoutSyncKey={layoutSyncKey}
                 />
@@ -329,7 +329,7 @@ export const AggregateFooter: React.FC<AggregateFooterProps> = ({
             <FooterCell
               key={col.name}
               values={footerValues}
-              align={col.align}
+              align={col.alignContent}
               cellStyle={cellStyle}
               layoutSyncKey={layoutSyncKey}
             />

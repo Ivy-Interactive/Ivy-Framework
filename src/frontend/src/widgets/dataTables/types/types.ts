@@ -33,7 +33,7 @@ export interface DataColumn {
   sortable?: boolean;
   sortDirection?: SortDirection;
   filterable?: boolean;
-  align?: Align;
+  alignContent?: Align;
   order?: number;
   icon?: string | null;
   help?: string | null;

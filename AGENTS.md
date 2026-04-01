@@ -106,7 +106,7 @@ Layout.Vertical()
     | new Badge("Bottom");
 
 // Nested layouts with alignment
-Layout.Vertical().Align(Align.Center)
+Layout.Vertical().AlignContent(Align.Center)
     | Text.Label("Header")
     | (Layout.Horizontal()
         | new Button("Previous")
