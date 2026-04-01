@@ -200,7 +200,7 @@ public class AppHub(
 
             if (routeResult.AppDescriptor.Title is { } title && routeResult.AppId != AppIds.AppShell && parentId == null)
             {
-                clientProvider.SetTitle(title, server.Args.Metadata.Title);
+                clientProvider.SetTitle(title, server.Args?.Metadata?.Title);
             }
 
             appServices.AddSingleton(routeResult.AppRepository);
