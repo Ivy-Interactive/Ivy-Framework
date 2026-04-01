@@ -238,7 +238,7 @@ public class JobService
         else
         {
             var success = exitCode == 0;
-            job.StatusMessage = null;
+            job.StatusMessage = success ? null : ExtractFailureReason(job.OutputLines);
             job.Status = success ? "Completed" : "Failed";
         }
 
@@ -249,6 +249,8 @@ public class JobService
         var isSuccess = job.Status == "Completed";
         var title = job.Status == "Timeout" ? "Job Timed Out" : (isSuccess ? "Job Completed" : "Job Failed");
         var message = job.PlanFile ?? job.Type;
+        if (!isSuccess && job.StatusMessage != null)
+            message += $": {job.StatusMessage}";
         PendingNotifications.Enqueue(new JobNotification(title, message, isSuccess));
 
         if (job.Status is "Failed" or "Timeout")
@@ -307,6 +309,50 @@ public class JobService
     public JobItem? GetJob(string id)
     {
         return _jobs.GetValueOrDefault(id);
+    }
+
+    internal static string ExtractFailureReason(List<string> outputLines)
+    {
+        if (outputLines.Count == 0)
+            return "Unknown error (exit code non-zero)";
+
+        // Search from end for stderr lines
+        var stderrLines = new List<string>();
+        for (var i = outputLines.Count - 1; i >= 0 && stderrLines.Count < 3; i--)
+        {
+            var line = outputLines[i];
+            if (line.StartsWith("[stderr] "))
+            {
+                var content = line["[stderr] ".Length..].Trim();
+                if (content.Length > 0)
+                    stderrLines.Insert(0, content);
+            }
+        }
+
+        string reason;
+        if (stderrLines.Count > 0)
+        {
+            reason = string.Join(" | ", stderrLines);
+        }
+        else
+        {
+            // Fall back to last non-empty output line
+            reason = "";
+            for (var i = outputLines.Count - 1; i >= 0; i--)
+            {
+                var trimmed = outputLines[i].Trim();
+                if (trimmed.Length > 0)
+                {
+                    reason = trimmed;
+                    break;
+                }
+            }
+
+            if (reason.Length == 0)
+                return "Unknown error (exit code non-zero)";
+        }
+
+        return reason.Length > 200 ? reason[..200] + "..." : reason;
     }
 
     private static string? GetNamedArg(string[] args, string name)

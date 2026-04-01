@@ -16,6 +16,7 @@ public class JobsApp : ViewBase
         var nav = this.UseNavigation();
         var refreshToken = UseRefreshToken();
         var showCommand = UseState<string?>(null);
+        var showOutput = UseState<string?>(null);
         UseInterval(() =>
         {
             while (jobService.PendingNotifications.TryDequeue(out var notification))
@@ -94,6 +95,7 @@ public class JobsApp : ViewBase
             })
             .RowActions(
                 new MenuItem(Label: "Show Command", Icon: Icons.Terminal, Tag: "show-command").Tooltip("Show the PowerShell command"),
+                new MenuItem(Label: "View Output", Icon: Icons.ScrollText, Tag: "view-output").Tooltip("View full job output"),
                 new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
                 new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
                 new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job").Tooltip("Delete this job")
@@ -127,6 +129,13 @@ public class JobsApp : ViewBase
                         var command = $"pwsh -NoProfile -File \"{job.ScriptPath}\" {string.Join(" ", job.Args.Select(a => $"\"{a}\""))}";
                         showCommand.Set(command);
                     }
+                    else if (tag == "view-output")
+                    {
+                        if (job.Status != "Running" && job.OutputLines.Count > 0)
+                        {
+                            showOutput.Set(string.Join("\n", job.OutputLines));
+                        }
+                    }
                     else if (tag == "delete-job")
                     {
                         if (job.Status != "Running")
@@ -155,6 +164,18 @@ public class JobsApp : ViewBase
                     content: new Markdown($"```\n{cmd}\n```"),
                     title: "Promptware Command"
                 ).Width(Size.Half())
+            );
+        }
+
+        if (showOutput.Value is { } output)
+        {
+            return new Fragment(
+                dataTable,
+                new Sheet(
+                    onClose: () => showOutput.Set(null),
+                    content: new Markdown($"```\n{output}\n```"),
+                    title: "Job Output"
+                ).Width(Size.Full())
             );
         }
 
