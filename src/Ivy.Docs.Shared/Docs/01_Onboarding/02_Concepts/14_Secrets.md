@@ -134,3 +134,15 @@ public void ValidateSecrets(IEnumerable<IHaveSecrets> services)
         .ToHashSet();
 }
 ```
+
+## Runtime Environment Settings
+
+In addition to application-specific secrets, Ivy server runtime can also be configured through environment variables in deployment secret stores.
+
+Common runtime variables include:
+
+- `PORT` - Server port override.
+- `BASE_PATH` - URL prefix to serve the app under (for example `/my-app`).
+- `VERBOSE` - Enable verbose startup logging.
+
+Use `BASE_PATH` when deploying behind a reverse proxy or ingress that routes your app from a sub-path instead of `/`.

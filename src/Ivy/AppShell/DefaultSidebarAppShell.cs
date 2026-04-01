@@ -429,7 +429,7 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
         {
             var trigger = new Button().Variant(ButtonVariant.Ghost)
                 .Content(
-                    Layout.Horizontal().Align(Align.Left).Width(Size.Full())
+                    Layout.Horizontal().AlignContent(Align.Left).Width(Size.Full())
                         | new Avatar(user.Value.Initials, user.Value.AvatarUrl)
                         | (Layout.Vertical().Gap(1)
                            | (user.Value.FullName != null
@@ -453,7 +453,7 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
         {
             var trigger = new Button("Settings")
                 .Content(
-                    Layout.Horizontal().Align(Align.Left)
+                    Layout.Horizontal().AlignContent(Align.Left)
                         | Icons.Settings.ToIcon()
                         | Text.P("Settings").Small().Muted()
                     )

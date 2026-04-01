@@ -63,7 +63,7 @@ sampleUsers.ToDataTable()
     .Width(u => u.Name, Size.Units(50))
     .Width(u => u.Email, Size.Units(60))
     .Width(u => u.Salary, Size.Units(80))
-    .Align(u => u.Salary, Align.Right)
+    .AlignContent(u => u.Salary, Align.Right)
     .Icon(u => u.Name, Icons.User.ToString())
     .Icon(u => u.Email, Icons.Mail.ToString())
     .Icon(u => u.Salary, Icons.DollarSign.ToString())
@@ -79,7 +79,7 @@ sampleUsers.ToDataTable()
 
 - **Header** - Set custom column header text
 - **Width** - Set column width using [Size](../../04_ApiReference/Ivy/Size.md) (e.g. `Size.Px()`, `Size.Percent()`).
-- **Align** - Control text alignment ([Align](../../04_ApiReference/Ivy/Align.md): Left, Right, Center)
+- **AlignContent** - Control text alignment ([Align](../../04_ApiReference/Ivy/Align.md): Left, Right, Center)
 - **Icon** - Add an icon to the column header
 - **Help** - Add tooltip help text to the column header
 - **Sortable** - Enable or disable sorting for specific columns
@@ -290,7 +290,7 @@ public class EmptyDataTableDemo : ViewBase
             .Empty((context) => Layout.Vertical()
                 .Padding(16)
                 .Gap(8)
-                .Align(Align.Center)
+                .AlignContent(Align.Center)
                 | Text.Block("No people found")
                     .Large()
                     .Bold()

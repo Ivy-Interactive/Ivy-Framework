@@ -22,7 +22,7 @@ The `Animation` widget wraps any child widget and animates it using the specifie
 The simplest way to add animation to any widget is using the `WithAnimation` extension method. Click any icon to see its animation:
 
 ```csharp demo-tabs
-Layout.Wrap().Gap(4).Align(Align.Center)
+Layout.Wrap().Gap(4).AlignContent(Align.Center)
     | Icons.LoaderCircle
         .ToIcon()
         .Color(Colors.Blue)
@@ -67,7 +67,7 @@ Layout.Wrap().Gap(4).Align(Align.Center)
 Ivy provides a rich set of animation types for different use cases. Click any icon to see its animation:
 
 ```csharp demo-tabs
-Layout.Wrap().Gap(4).Align(Align.Center)
+Layout.Wrap().Gap(4).AlignContent(Align.Center)
     | Icons.ArrowRight
         .ToIcon()
         .Color(Colors.Blue)
@@ -139,7 +139,7 @@ Control when animations start using different trigger types:
 **Auto Trigger** - Animations play automatically when the page renders:
 
 ```csharp demo-tabs
-Layout.Wrap().Gap(4).Align(Align.Center)
+Layout.Wrap().Gap(4).AlignContent(Align.Center)
     | Icons.LoaderCircle
         .ToIcon()
         .Color(Colors.Blue)
@@ -163,7 +163,7 @@ Layout.Wrap().Gap(4).Align(Align.Center)
 **Click and Hover Triggers** - Try clicking and hovering over these icons:
 
 ```csharp demo-tabs
-Layout.Wrap().Gap(4).Align(Align.Center)
+Layout.Wrap().Gap(4).AlignContent(Align.Center)
     | Icons.Heart
         .ToIcon()
         .Color(Colors.Red)
@@ -206,7 +206,7 @@ Layout.Wrap().Gap(4).Align(Align.Center)
 Explore different animation customization options. Click any icon to see the effect:
 
 ```csharp demo-tabs
-Layout.Wrap().Gap(4).Align(Align.Center)
+Layout.Wrap().Gap(4).AlignContent(Align.Center)
     | Icons.Flame
         .ToIcon()
         .Color(Colors.Red)
@@ -275,7 +275,7 @@ Layout.Wrap().Gap(4).Align(Align.Center)
 Click any icon to see user interaction feedback animations:
 
 ```csharp demo-tabs
-Layout.Wrap().Gap(4).Align(Align.Center)
+Layout.Wrap().Gap(4).AlignContent(Align.Center)
     | Icons.Check
         .ToIcon()
         .Color(Colors.Blue)
@@ -357,7 +357,7 @@ Interactive buttons with various animation effects.
 Click any button to see the animation:
 
 ```csharp demo-tabs
-Layout.Wrap().Gap(3).Align(Align.Center)
+Layout.Wrap().Gap(3).AlignContent(Align.Center)
     | new Button("Bounce", onClick: _ => {})
         .Icon(Icons.Zap)
         .WithAnimation(AnimationType.Bounce)
@@ -427,7 +427,7 @@ Media & Directional Examples
 Click any icon to see media controls and directional animations:
 
 ```csharp demo-tabs
-Layout.Wrap().Gap(4).Align(Align.Center)
+Layout.Wrap().Gap(4).AlignContent(Align.Center)
     | Icons.Play
         .ToIcon()
         .Color(Colors.Green)

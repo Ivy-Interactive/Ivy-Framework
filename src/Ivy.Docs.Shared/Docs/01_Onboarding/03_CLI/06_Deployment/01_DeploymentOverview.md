@@ -129,6 +129,7 @@ AUTH0_CLIENT_ID="your-client-id"
 
 ### Project settings
 IVY_ENVIRONMENT="Production"
+BASE_PATH="/my-app"
 ```
 
 ### Security and Configuration

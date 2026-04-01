@@ -58,7 +58,7 @@ Long text in cells automatically gets truncated with ellipsis (...) and shows fu
 
 **Header(p => p.ColumnName)** is used to show custom header text of the table
 
-**Align(p => p.ColumnName, [Align](../../04_ApiReference/Ivy/Align.md).Left|Center|Right)** - sets the alignment for both the header and data cells in the selected column. The alignment applies to the content within cells, not the entire column structure.
+**AlignContent(p => p.ColumnName, [Align](../../04_ApiReference/Ivy/Align.md).Left|Center|Right)** - sets the alignment for both the header and data cells in the selected column. The alignment applies to the content within cells, not the entire column structure.
 
 **Order(p => p.ColumnNameFirst, p.ColumnNameSecond, p.ColumnNameThird, ...)** - is used to order columns in a specific way
 
@@ -86,7 +86,7 @@ public class TableConfigurationExample : ViewBase
             .ColumnWidth(p => p.Url, Size.Fraction(0.55f))
             .Header(p => p.Price, "Unit Price")
             .Header(p => p._hiddenNotes, "Internal Notes") // underscore + letter hidden automatically
-            .Align(p => p.Price, Align.Right)
+            .AlignContent(p => p.Price, Align.Right)
             .Order(p => p.Name, p => p.Price, p => p.Sku)
             .Remove(p => p.Url)
             .Totals(p => p.Price)
@@ -123,8 +123,8 @@ public class ColumnManagementTable : ViewBase
             .Add(p => p.Stock)                         // Add Stock column
             .Header(p => p._hiddenInternal, "Internal Flag") // hidden by default due to underscore
             .Header(p => p.Price, "Unit Price")
-            .Align(p => p.Price, Align.Right)
-            .Align(p => p.Stock, Align.Center);
+            .AlignContent(p => p.Price, Align.Right)
+            .AlignContent(p => p.Stock, Align.Center);
     }
 }
 ```
@@ -149,8 +149,8 @@ public class AdvancedAggregationsTable : ViewBase
             .Width(Size.Full())
             .Header(p => p.Price, "Unit Price")
             .Header(p => p.Stock, "In Stock")
-            .Align(p => p.Price, Align.Right)
-            .Align(p => p.Stock, Align.Center)
+            .AlignContent(p => p.Price, Align.Right)
+            .AlignContent(p => p.Stock, Align.Center)
             .Totals(p => p.Price)                      // Sum of prices
             .Totals(p => p.Stock, items => items.Count()) // Count of items
             .Totals(p => p.Price, items => items.Average(p => p.Price)) // Average price
@@ -223,9 +223,9 @@ public class PivotTableExample : ViewBase
                 .Header(r => r.TotalSessions, "Total Sessions")
                 .Header(r => r.TotalRevenue, "Revenue")
                 .Header(r => r.AverageRevenue, "Avg Revenue")
-                .Align(r => r.TotalSessions, Align.Right)
-                .Align(r => r.TotalRevenue, Align.Right)
-                .Align(r => r.AverageRevenue, Align.Right);
+                .AlignContent(r => r.TotalSessions, Align.Right)
+                .AlignContent(r => r.TotalRevenue, Align.Right)
+                .AlignContent(r => r.AverageRevenue, Align.Right);
     }
 }
 ```
@@ -249,7 +249,7 @@ public class EmptyColumnsTable : ViewBase
             .Width(Size.Full())
             .RemoveEmptyColumns()                      // Automatically hides "Notes" because it's empty in all rows
             .Header(p => p.Price, "Unit Price")
-            .Align(p => p.Price, Align.Right);
+            .AlignContent(p => p.Price, Align.Right);
     }
 }
 ```
@@ -271,7 +271,7 @@ public class ResetTableExample : ViewBase
         return products.ToTable()
             .Width(Size.Full())
             .Remove(p => p.Category)                   // Hide Category column
-            .Align(p => p.Price, Align.Right)          // Set alignment
+            .AlignContent(p => p.Price, Align.Right)          // Set alignment
             .Header(p => p.Price, "Unit Price")        // Custom header
             .Header(p => p._hiddenMetadata, "Metadata") // underscore + letter hidden automatically
             .Reset()                                   // Reset all settings to defaults
@@ -292,13 +292,13 @@ public class ManualTableDemo : ViewBase
     {
         return new Table(
             new TableRow(
-                new TableCell("Name").IsHeader().Align(Align.Left),
-                new TableCell("Age").IsHeader().Align(Align.Center),
-                new TableCell("Email").IsHeader().Align(Align.Left)
+                new TableCell("Name").IsHeader().AlignContent(Align.Left),
+                new TableCell("Age").IsHeader().AlignContent(Align.Center),
+                new TableCell("Email").IsHeader().AlignContent(Align.Left)
             ),
             new TableRow(
                 new TableCell("Alice"),
-                new TableCell("30").Align(Align.Center),
+                new TableCell("30").AlignContent(Align.Center),
                 new TableCell("alice@example.com")
             )
         ).Width(Size.Full());
@@ -333,7 +333,7 @@ public class CellBuildersExample : ViewBase
             .Builder(p => p.Sku, f => f.CopyToClipboard())    // Copy to clipboard
             .Builder(p => p.Name, f => f.Default())           // Default builder
             .Header(p => p.Price, "Unit Price")
-            .Align(p => p.Price, Align.Right);
+            .AlignContent(p => p.Price, Align.Right);
     }
 }
 ```

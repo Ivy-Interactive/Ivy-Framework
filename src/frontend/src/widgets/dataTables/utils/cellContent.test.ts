@@ -625,14 +625,14 @@ describe("cellContent utilities", () => {
 
     it("should apply alignment from column metadata in getCellContent", () => {
       const alignedColumns: DataColumn[] = [
-        { name: "Left", type: ColType.Text, width: 100, align: "Left" },
+        { name: "Left", type: ColType.Text, width: 100, alignContent: "Left" },
         {
           name: "Center",
           type: ColType.Number,
           width: 100,
-          align: "Center",
+          alignContent: "Center",
         },
-        { name: "Right", type: ColType.Text, width: 100, align: "Right" },
+        { name: "Right", type: ColType.Text, width: 100, alignContent: "Right" },
       ];
 
       const alignData: DataRow[] = [{ values: ["left text", 42, "right text"] }];
@@ -766,7 +766,7 @@ describe("cellContent utilities", () => {
 
     it("should respect alignment for Labels column type", () => {
       const labelsColumns: DataColumn[] = [
-        { name: "tags", type: ColType.Labels, width: 200, align: "Right" },
+        { name: "tags", type: ColType.Labels, width: 200, alignContent: "Right" },
       ];
 
       const labelsData: DataRow[] = [{ values: [["Tag1", "Tag2"]] }];

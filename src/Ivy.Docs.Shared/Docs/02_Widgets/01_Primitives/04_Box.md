@@ -180,7 +180,7 @@ public class InteractiveBoxView : ViewBase
 
         return Layout.Vertical().Gap(8)
             | new Box("Pointer + Translate Hover")
-                .Hover(CardHoverVariant.PointerAndTranslate)
+                .Hover(HoverEffect.PointerAndTranslate)
                 .OnClick(_ => client.Toast("Box clicked!"))
                 .Padding(8)
             | Layout.Horizontal().Gap(4)
@@ -194,7 +194,7 @@ public class InteractiveBoxView : ViewBase
         return new Box(label)
             .Background(isSelected ? Colors.Primary : Colors.Muted)
             .BorderThickness(isSelected ? 2 : 1)
-            .Hover(CardHoverVariant.Pointer)
+            .Hover(HoverEffect.Pointer)
             .OnClick(_ => {
                 selected.Set(label);
                 client.Toast($"Selected: {label}");
@@ -292,7 +292,7 @@ public class CardLayoutView : ViewBase
         return new Box(label)
             .Background(isSelected ? Colors.Primary : Colors.Muted)
             .BorderThickness(isSelected ? 2 : 1)
-            .Hover(CardHoverVariant.Pointer)
+            .Hover(HoverEffect.Pointer)
             .OnClick(_ => {
                 selected.Set(label);
                 client.Toast($"Selected: {label}");

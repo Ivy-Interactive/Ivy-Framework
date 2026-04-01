@@ -240,7 +240,7 @@ public class AlignmentExample : ViewBase
 
         return Layout.Vertical()
             | Text.H3("Column Alignment with Different Widths")
-            | Text.P("Alignment applies to both headers and data cells (rows). Use .Align() to control how content is aligned within cells.")
+            | Text.P("Alignment applies to both headers and data cells (rows). Use .AlignContent() to control how content is aligned within cells.")
 
             | Text.Label("Example 1: Narrow Column (Fit) - Right Aligned Numbers")
             | Text.P("Views column uses Fit() width with Right alignment to show numbers clearly")
@@ -250,7 +250,7 @@ public class AlignmentExample : ViewBase
                 .ColumnWidth(e => e.Reference, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Contact, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Views, Size.Fit())
-                .Align(e => e.Views, Align.Right)
+                .AlignContent(e => e.Views, Align.Right)
 
             | Text.Label("Example 2: Wide Column (Fraction) - Center Aligned Text")
             | Text.P("Contact column uses Fraction(0.6) width with Center alignment")
@@ -260,8 +260,8 @@ public class AlignmentExample : ViewBase
                 .ColumnWidth(e => e.Reference, Size.Fraction(0.2f))
                 .ColumnWidth(e => e.Contact, Size.Fraction(0.6f))
                 .ColumnWidth(e => e.Views, Size.Fraction(0.2f))
-                .Align(e => e.Contact, Align.Center)
-                .Align(e => e.Views, Align.Right)
+                .AlignContent(e => e.Contact, Align.Center)
+                .AlignContent(e => e.Views, Align.Right)
 
             | Text.Label("Example 3: Mixed Alignments with Fixed Widths")
             | Text.P("Reference: Left (default), Contact: Center, Views: Right")
@@ -271,8 +271,8 @@ public class AlignmentExample : ViewBase
                 .ColumnWidth(e => e.Reference, Size.Units(25))
                 .ColumnWidth(e => e.Contact, Size.Fraction(1.0f))
                 .ColumnWidth(e => e.Views, Size.Units(20))
-                .Align(e => e.Contact, Align.Center)
-                .Align(e => e.Views, Align.Right)
+                .AlignContent(e => e.Contact, Align.Center)
+                .AlignContent(e => e.Views, Align.Right)
 
             | Text.Label("Example 4: All Right Aligned in Narrow Columns")
             | Text.P("All columns right-aligned with narrow widths to demonstrate alignment effect")
@@ -282,9 +282,9 @@ public class AlignmentExample : ViewBase
                 .ColumnWidth(e => e.Reference, Size.Fraction(0.33f))
                 .ColumnWidth(e => e.Contact, Size.Fraction(0.33f))
                 .ColumnWidth(e => e.Views, Size.Fraction(0.34f))
-                .Align(e => e.Reference, Align.Right)
-                .Align(e => e.Contact, Align.Right)
-                .Align(e => e.Views, Align.Right)
+                .AlignContent(e => e.Reference, Align.Right)
+                .AlignContent(e => e.Contact, Align.Right)
+                .AlignContent(e => e.Views, Align.Right)
 
             | Text.Label("Example 5: Wide Center Column with Narrow Side Columns")
             | Text.P("Center column (Contact) uses Fraction(0.7) with Center alignment, side columns are narrow")
@@ -294,8 +294,8 @@ public class AlignmentExample : ViewBase
                 .ColumnWidth(e => e.Reference, Size.Fraction(0.15f))
                 .ColumnWidth(e => e.Contact, Size.Fraction(0.7f))
                 .ColumnWidth(e => e.Views, Size.Fraction(0.15f))
-                .Align(e => e.Contact, Align.Center)
-                .Align(e => e.Views, Align.Right);
+                .AlignContent(e => e.Contact, Align.Center)
+                .AlignContent(e => e.Views, Align.Right);
     }
 }
 

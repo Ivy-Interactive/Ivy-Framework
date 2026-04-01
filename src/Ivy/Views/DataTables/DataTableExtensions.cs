@@ -27,7 +27,7 @@ public static class DataTableExtensions
         builder.Empty((context) => Layout.Vertical()
             .Padding(16)
             .Gap(8)
-            .Align(Align.Center)
+            .AlignContent(Align.Center)
             | Text.Block("No items found")
                 .Large()
                 .Color(Colors.Muted)

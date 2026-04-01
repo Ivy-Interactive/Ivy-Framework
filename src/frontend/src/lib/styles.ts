@@ -710,11 +710,11 @@ export const typography: Record<string, string> = {
   td: "border border-border px-4 py-2 text-sm",
 
   // Media
-  img: "max-w-full h-auto cursor-zoom-in",
+  img: "max-w-full h-auto cursor-zoom-in border border-border rounded-md",
   hr: "border-t border-border",
 
   // Expandable sections
-  details: "my-4 rounded-lg border border-border bg-card shadow-sm overflow-hidden",
+  details: "my-2 rounded-lg border border-border bg-card shadow-sm overflow-hidden",
   summary:
     "cursor-pointer select-none px-4 py-3 font-medium hover:bg-accent/50 transition-colors list-none [&::-webkit-details-marker]:hidden",
 };

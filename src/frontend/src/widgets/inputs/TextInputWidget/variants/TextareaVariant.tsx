@@ -51,8 +51,11 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
     onChange(syntheticEvent);
   });
 
-  const styles: React.CSSProperties = {
+  const wrapperStyles: React.CSSProperties = {
     ...getWidth(props.width),
+  };
+
+  const textareaStyles: React.CSSProperties = {
     ...getHeight(props.height),
   };
 
@@ -64,7 +67,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
     <div className="relative w-full select-none">
       <div
         className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10"
-        style={styles}
+        style={wrapperStyles}
       >
         <Textarea
           ref={elementRef as React.RefObject<HTMLTextAreaElement>}
@@ -79,9 +82,11 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           onBlur={onBlur}
           onFocus={onFocus}
           onPaste={handlePaste}
+          style={textareaStyles}
           className={cn(
             textareaSizeVariant({ density }),
-            "border-0 shadow-none dark:bg-transparent h-full",
+            "border-0 shadow-none dark:bg-transparent",
+            !props.height && "h-full",
             props.invalid && inputStyles.invalidInput,
             (props.invalid || showClear) && "pr-8",
             props.shortcutKey && !isFocused && !hasValue && !showClear && !props.invalid && "pr-16",

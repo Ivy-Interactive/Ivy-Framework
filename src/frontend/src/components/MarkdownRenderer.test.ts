@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { validateLinkUrl, validateMediaUrl } from "@/lib/url";
+import { normalizeNestedFences } from "./MarkdownRenderer";
 
 /**
  * Tests for URL validation in markdown links.
@@ -302,6 +303,99 @@ describe("Markdown inline code icon detection", () => {
     const match = "Icons.H1".match(iconPattern);
     expect(match).not.toBeNull();
     expect(match![1]).toBe("H1");
+  });
+});
+
+describe("normalizeNestedFences", () => {
+  it("should pass through content with no code fences unchanged", () => {
+    const content = "Hello world\n\nSome paragraph.";
+    expect(normalizeNestedFences(content)).toBe(content);
+  });
+
+  it("should pass through content with a single code fence unchanged", () => {
+    const content = "```csharp\nConsole.WriteLine();\n```";
+    expect(normalizeNestedFences(content)).toBe(content);
+  });
+
+  it("should normalize nested fences with matching backtick counts", () => {
+    const input = ["```markdown", "```csharp", 'Console.WriteLine("hello");', "```", "```"].join(
+      "\n",
+    );
+
+    const expected = [
+      "````markdown",
+      "```csharp",
+      'Console.WriteLine("hello");',
+      "```",
+      "````",
+    ].join("\n");
+
+    expect(normalizeNestedFences(input)).toBe(expected);
+  });
+
+  it("should handle triple nesting by escalating fence lengths", () => {
+    const input = [
+      "```markdown",
+      "Here is an example:",
+      "```markdown",
+      "```csharp",
+      "var x = 1;",
+      "```",
+      "```",
+      "End of example.",
+      "```",
+    ].join("\n");
+
+    const expected = [
+      "`````markdown",
+      "Here is an example:",
+      "````markdown",
+      "```csharp",
+      "var x = 1;",
+      "```",
+      "````",
+      "End of example.",
+      "`````",
+    ].join("\n");
+
+    expect(normalizeNestedFences(input)).toBe(expected);
+  });
+
+  it("should preserve language info strings on fences", () => {
+    const input = ["```markdown", "```python", "print('hello')", "```", "```"].join("\n");
+
+    const result = normalizeNestedFences(input);
+    expect(result).toContain("````markdown");
+    expect(result).toContain("```python");
+  });
+
+  it("should handle multiple independent nested blocks", () => {
+    const input = [
+      "```markdown",
+      "```js",
+      "const x = 1;",
+      "```",
+      "```",
+      "",
+      "```markdown",
+      "```py",
+      "x = 1",
+      "```",
+      "```",
+    ].join("\n");
+
+    const result = normalizeNestedFences(input);
+    // Both outer fences should be increased
+    const lines = result.split("\n");
+    expect(lines[0]).toBe("````markdown");
+    expect(lines[4]).toBe("````");
+    expect(lines[6]).toBe("````markdown");
+    expect(lines[10]).toBe("````");
+  });
+
+  it("should handle fences with no info string at top level", () => {
+    const content = "```\nplain code\n```";
+    expect(normalizeNestedFences(content)).toBe(content);
   });
 });
 

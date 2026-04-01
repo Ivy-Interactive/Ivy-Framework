@@ -39,6 +39,8 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children, emptyView }) => {
 interface DataTableWidgetProps extends TableProps {
   slots?: {
     EmptyView?: React.ReactNode[];
+    HeaderLeft?: React.ReactNode[];
+    HeaderRight?: React.ReactNode[];
   };
 }
 
@@ -94,18 +96,25 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
       >
         <TableLayout emptyView={slots?.EmptyView}>
           <DataTableHeader>
-            {finalConfig.allowFiltering && (
-              <DataTableOption
-                icon={FilterIcon}
-                label="Filter"
-                tooltip="Filter table data"
-                displayMode="inline"
-                inlineDirection="right"
-                showLabel={false}
-              >
-                <DataTableFilterOption allowLlmFiltering={finalConfig.allowLlmFiltering} />
-              </DataTableOption>
-            )}
+            <div className="flex items-center gap-2 w-full">
+              <div className="flex items-center gap-1">
+                {finalConfig.allowFiltering && (
+                  <DataTableOption
+                    icon={FilterIcon}
+                    label="Filter"
+                    tooltip="Filter table data"
+                    displayMode="inline"
+                    inlineDirection="right"
+                    showLabel={false}
+                  >
+                    <DataTableFilterOption allowLlmFiltering={finalConfig.allowLlmFiltering} />
+                  </DataTableOption>
+                )}
+                {slots?.HeaderLeft}
+              </div>
+              <div className="flex-1" />
+              <div className="flex items-center gap-1">{slots?.HeaderRight}</div>
+            </div>
           </DataTableHeader>
 
           <DataTableEditor

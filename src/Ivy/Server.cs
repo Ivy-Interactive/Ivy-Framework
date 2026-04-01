@@ -703,7 +703,10 @@ public class Server
                         new JsonArrayMessagePackFormatter(),
                         new JsonValueMessagePackFormatter()
                     },
-                    new IFormatterResolver[] { ContractlessStandardResolver.Instance }
+                    new IFormatterResolver[] {
+                        JsonNodeResolver.Instance,
+                        ContractlessStandardResolver.Instance
+                    }
                 )
             );
         });

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
+import { Badge } from "@/components/ui/badge";
 import { SortableDropdownMenuItem } from "./Sortable";
 import { getTabProps } from "../utils/tabUtils";
 
@@ -58,7 +59,7 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
                 if (!React.isValidElement(tabWidget)) return null;
                 const props = getTabProps(tabWidget);
                 if (!props?.id) return null;
-                const { title, id } = props;
+                const { title, id, badge } = props;
 
                 // Only render tabs that are hidden
                 if (!hiddenTabs.includes(id)) return null;
@@ -75,7 +76,14 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
                     isActive={activeTabId === id}
                     showClose={showClose}
                   >
-                    {title}
+                    <span className="flex items-center">
+                      {title}
+                      {badge && (
+                        <Badge variant="primary" className="ml-2 w-min whitespace-nowrap">
+                          {badge}
+                        </Badge>
+                      )}
+                    </span>
                   </SortableDropdownMenuItem>
                 );
               })}

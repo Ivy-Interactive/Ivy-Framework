@@ -65,11 +65,11 @@ public class BoxApp : SampleBase
                )
 
                | Text.H2("Hover Variants")
-               | new DemoView(_ => box.Hover(CardHoverVariant.PointerAndTranslate).Content("CardHoverVariant.PointerAndTranslate"))
+               | new DemoView(_ => box.Hover(HoverEffect.PointerAndTranslate).Content("HoverEffect.PointerAndTranslate"))
                | (Layout.Horizontal()
-                  | box.Hover(CardHoverVariant.None).Content("None")
-                  | box.Hover(CardHoverVariant.Pointer).Content("Pointer")
-                  | box.Hover(CardHoverVariant.PointerAndTranslate).Content("PointerAndTranslate")
+                  | box.Hover(HoverEffect.None).Content("None")
+                  | box.Hover(HoverEffect.Pointer).Content("Pointer")
+                  | box.Hover(HoverEffect.PointerAndTranslate).Content("PointerAndTranslate")
                )
 
             ;

@@ -8,14 +8,14 @@ namespace Ivy;
 /// </summary>
 public record FloatingPanel : WidgetBase<FloatingPanel>
 {
-    public FloatingPanel(object? child = null, Align align = Align.BottomRight) : base(child != null ? [child] : [])
+    public FloatingPanel(object? child = null, Align alignSelf = Align.BottomRight) : base(child != null ? [child] : [])
     {
-        Align = align;
+        AlignSelf = alignSelf;
     }
 
     internal FloatingPanel() { }
 
-    [Prop] public Align Align { get; set; } = Align.BottomRight;
+    [Prop] public Align AlignSelf { get; set; } = Align.BottomRight;
 
     [Prop] public Thickness? Offset { get; set; }
 
@@ -32,7 +32,7 @@ public record FloatingPanel : WidgetBase<FloatingPanel>
 
 public static class FloatingLayerExtensions
 {
-    public static FloatingPanel Align(this FloatingPanel floatingButton, Align align) => floatingButton with { Align = align };
+    public static FloatingPanel AlignSelf(this FloatingPanel floatingButton, Align align) => floatingButton with { AlignSelf = align };
 
     public static FloatingPanel Offset(this FloatingPanel floatingButton, Thickness? offset) => floatingButton with { Offset = offset };
 

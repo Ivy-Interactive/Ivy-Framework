@@ -64,7 +64,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
       <SheetContent
         side={normalizedSide}
         style={styles}
-        className={cn("flex flex-col p-0 gap-0", isHorizontal && "h-full")}
+        className={cn("flex flex-col p-0 gap-0 alert-animate-enter", isHorizontal && "h-full")}
         data-sheet-side={normalizedSide}
         onOpenAutoFocus={(e) => {
           e.preventDefault();

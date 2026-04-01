@@ -28,7 +28,7 @@ public class AlertView(IState<AlertResult> alertResult, IState<bool> isOpen, Ale
             new DialogHeader(options.Title ?? ""),
             new DialogBody(options.Message ?? ""),
             new DialogFooter(
-                Layout.Horizontal(options.Buttons.Select(CreateButton)).Align(Align.Right)
+                Layout.Horizontal(options.Buttons.Select(CreateButton)).AlignContent(Align.Right)
             )
         );
     }

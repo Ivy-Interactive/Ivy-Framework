@@ -38,6 +38,12 @@ RUN dotnet publish "./Ivy.Docs.csproj" -c $BUILD_CONFIGURATION -o /app/publish /
 FROM base AS final
 WORKDIR /app
 ENV PORT=5010
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libc6 \
+    libgcc-s1 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+USER $APP_UID
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Ivy.Docs.dll"]
 

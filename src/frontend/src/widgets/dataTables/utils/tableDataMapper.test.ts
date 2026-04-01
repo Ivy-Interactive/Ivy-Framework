@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import * as arrow from "apache-arrow";
-import { convertArrowTableToData } from "./tableDataMapper";
+import { convertArrowTableToData, convertDecimalValue } from "./tableDataMapper";
 import { ColType } from "../types/types";
 
 describe("tableDataMapper", () => {
@@ -313,6 +313,91 @@ describe("tableDataMapper", () => {
         const result = convertArrowTableToData(mockTable, 5);
         expect(result.columns[0].type).toBe(expectedType);
       });
+    });
+  });
+
+  describe("convertDecimalValue", () => {
+    it("should use valueOf(scale) when it returns a number", () => {
+      const value = {
+        valueOf: (scale: number) => 95000 / Math.pow(10, scale - scale) || 95000,
+        toString: () => "9500000000000000000000000000000000",
+      };
+      // Simulate valueOf returning the correct number directly
+      value.valueOf = (_scale: number) => 95000;
+      expect(convertDecimalValue(value, 28)).toBe(95000);
+    });
+
+    it("should handle valueOf(scale) returning bigint", () => {
+      const value = {
+        valueOf: (_scale: number) => 95000n,
+        toString: () => "95000",
+      };
+      expect(convertDecimalValue(value, 28)).toBe(95000);
+    });
+
+    it("should fall back to string parsing when valueOf throws RangeError", () => {
+      const value = {
+        valueOf: () => {
+          throw new RangeError("byte offset is not aligned");
+        },
+        toString: () => "9500000000000000000000000000000000",
+      };
+      // scale=28, str="9500000000000000000000000000000000" (34 chars)
+      // abs.slice(0, -28) = "950000", abs.slice(-28) = "0000000000000000000000000000"
+      // → "950000.0000000000000000000000000000" → 950000
+      expect(convertDecimalValue(value, 28)).toBe(950000);
+    });
+
+    it("should handle small fractional values in string fallback", () => {
+      // Value "1" with scale 2 → "0.01"
+      const value = {
+        valueOf: () => {
+          throw new RangeError("alignment");
+        },
+        toString: () => "1",
+      };
+      expect(convertDecimalValue(value, 2)).toBe(0.01);
+    });
+
+    it("should handle negative values in string fallback", () => {
+      const value = {
+        valueOf: () => {
+          throw new Error();
+        },
+        toString: () => "-12345",
+      };
+      // scale=2 → "-123.45"
+      expect(convertDecimalValue(value, 2)).toBe(-123.45);
+    });
+
+    it("should handle zero scale in string fallback", () => {
+      const value = {
+        valueOf: () => {
+          throw new Error();
+        },
+        toString: () => "42",
+      };
+      expect(convertDecimalValue(value, 0)).toBe(42);
+    });
+
+    it("should handle zero value", () => {
+      const value = {
+        valueOf: (_scale: number) => 0,
+        toString: () => "0",
+      };
+      expect(convertDecimalValue(value, 28)).toBe(0);
+    });
+
+    it("should return null when both paths fail", () => {
+      const value = {
+        valueOf: () => {
+          throw new Error();
+        },
+        toString: () => {
+          throw new Error();
+        },
+      };
+      expect(convertDecimalValue(value, 2)).toBeNull();
     });
   });
 });

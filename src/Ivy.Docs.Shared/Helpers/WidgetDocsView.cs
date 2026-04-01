@@ -122,7 +122,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
         return Layout.Vertical().Gap(2)
                | new Markdown("## API")
                | (fileName != null
-                   ? (Layout.Horizontal().Align(Align.Left).Gap(0) | Icons.Github.ToIcon() |
+                   ? (Layout.Horizontal().AlignContent(Align.Left).Gap(0) | Icons.Github.ToIcon() |
                       new Button(fileName).Link().Url(sourceUrl))
                    : null)
                | constructorSection

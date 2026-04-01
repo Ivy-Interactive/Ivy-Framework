@@ -22,8 +22,8 @@ public class DataTableColumn
     public SortDirection SortDirection { get; set; } = SortDirection.None;
     public bool Filterable { get; set; } = true;
 
-    [JsonPropertyName("align")]
-    public Align Align { get; set; } = Align.Left;
+    [JsonPropertyName("alignContent")]
+    public Align AlignContent { get; set; } = Align.Left;
 
     public int Order { get; set; } = 0;
     public string? Icon { get; set; } = null;

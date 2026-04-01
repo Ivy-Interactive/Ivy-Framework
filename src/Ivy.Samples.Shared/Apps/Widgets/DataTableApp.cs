@@ -9,6 +9,7 @@ public class DataTableApp : SampleBase
     {
         return Layout.Tabs(
             new Tab("Overview", new DataTableMainSample()),
+            new Tab("Header Slots", new DataTableHeaderSlotsSample()),
             new Tab("Footer", new DataTableFooterSample()),
             new Tab("Multi Agg", new DataTableMultiAggSample()),
             new Tab("Million Rows", new DataTablesMillionRowsSample())
@@ -74,24 +75,24 @@ public class DataTableMainSample : ViewBase
             .Width(e => e.WidgetLink, Size.Px(200))
             .Width(e => e.ProfileLink, Size.Px(250))
 
-            .Align(e => e.Id, Align.Left)
-            .Align(e => e.Age, Align.Left)
-            .Align(e => e.Salary, Align.Left)
-            .Align(e => e.Performance, Align.Left)
-            .Align(e => e.Name, Align.Left)
-            .Align(e => e.Email, Align.Left)
-            .Align(e => e.Notes, Align.Left)
-            .Align(e => e.IsActive, Align.Left)
-            .Align(e => e.IsManager, Align.Left)
-            .Align(e => e.HireDate, Align.Left)
-            .Align(e => e.LastReview, Align.Left)
-            .Align(e => e.Status, Align.Left)
-            .Align(e => e.Priority, Align.Left)
-            .Align(e => e.Department, Align.Left)
-            .Align(e => e.OptionalId, Align.Left)
-            .Align(e => e.Skills, Align.Left)
-            .Align(e => e.WidgetLink, Align.Left)
-            .Align(e => e.ProfileLink, Align.Left)
+            .AlignContent(e => e.Id, Align.Left)
+            .AlignContent(e => e.Age, Align.Left)
+            .AlignContent(e => e.Salary, Align.Left)
+            .AlignContent(e => e.Performance, Align.Left)
+            .AlignContent(e => e.Name, Align.Left)
+            .AlignContent(e => e.Email, Align.Left)
+            .AlignContent(e => e.Notes, Align.Left)
+            .AlignContent(e => e.IsActive, Align.Left)
+            .AlignContent(e => e.IsManager, Align.Left)
+            .AlignContent(e => e.HireDate, Align.Left)
+            .AlignContent(e => e.LastReview, Align.Left)
+            .AlignContent(e => e.Status, Align.Left)
+            .AlignContent(e => e.Priority, Align.Left)
+            .AlignContent(e => e.Department, Align.Left)
+            .AlignContent(e => e.OptionalId, Align.Left)
+            .AlignContent(e => e.Skills, Align.Left)
+            .AlignContent(e => e.WidgetLink, Align.Left)
+            .AlignContent(e => e.ProfileLink, Align.Left)
 
             .Group(e => e.Id, "Identity")
             .Group(e => e.EmployeeCode, "Identity")
@@ -187,6 +188,28 @@ public class DataTableMainSample : ViewBase
     }
 }
 
+public class DataTableHeaderSlotsSample : ViewBase
+{
+    public override object? Build()
+    {
+        var products = new[]
+        {
+            new { Id = 1, Product = "Widget A", Price = 29.99m, Stock = 150 },
+            new { Id = 2, Product = "Widget B", Price = 49.99m, Stock = 85 },
+            new { Id = 3, Product = "Widget C", Price = 19.99m, Stock = 320 },
+            new { Id = 4, Product = "Gadget X", Price = 99.99m, Stock = 42 },
+            new { Id = 5, Product = "Gadget Y", Price = 149.99m, Stock = 18 },
+        }.AsQueryable();
+
+        return products.ToDataTable()
+            .HeaderLeft(ctx => new Button("Export", icon: Icons.Download).Small())
+            .HeaderRight(ctx => Layout.Horizontal().Gap(2)
+                | new Badge($"{products.Count()} items")
+                | new Button("Settings", icon: Icons.Settings).Small())
+            .Height(Size.Units(80));
+    }
+}
+
 public class DataTableFooterSample : ViewBase
 {
     public override object? Build()
@@ -212,9 +235,9 @@ public class DataTableFooterSample : ViewBase
             .Width(x => x.Qty, Size.Units(30))
             .Width(x => x.UnitPrice, Size.Units(30))
             .Width(x => x.Amount, Size.Units(30))
-            .Align(x => x.Qty, Align.Right)
-            .Align(x => x.UnitPrice, Align.Right)
-            .Align(x => x.Amount, Align.Right)
+            .AlignContent(x => x.Qty, Align.Right)
+            .AlignContent(x => x.UnitPrice, Align.Right)
+            .AlignContent(x => x.Amount, Align.Right)
             .Height(Size.Units(80));
     }
 }
@@ -249,8 +272,8 @@ public class DataTableMultiAggSample : ViewBase
                     ("Total", (Func<IEnumerable<decimal>, object>)(values => values.Sum())),
                     ("Avg", (Func<IEnumerable<decimal>, object>)(values => values.Average()))
                 })
-            .Align(x => x.Sales, Align.Right)
-            .Align(x => x.Target, Align.Right)
+            .AlignContent(x => x.Sales, Align.Right)
+            .AlignContent(x => x.Target, Align.Right)
             .Height(Size.Units(60));
     }
 }
@@ -279,9 +302,9 @@ public class DataTablesMillionRowsSample : ViewBase
             .Width(row => row.Id, Size.Px(100))
             .Width(row => row.Value, Size.Px(200))
             .Width(row => row.CreatedAt, Size.Px(200))
-            .Align(row => row.Id, Align.Left)
-            .Align(row => row.Value, Align.Left)
-            .Align(row => row.CreatedAt, Align.Left)
+            .AlignContent(row => row.Id, Align.Left)
+            .AlignContent(row => row.Value, Align.Left)
+            .AlignContent(row => row.CreatedAt, Align.Left)
             .Icon(row => row.Id, Icons.Hash.ToString())
             .Icon(row => row.Value, Icons.FileText.ToString())
             .Icon(row => row.CreatedAt, Icons.Calendar.ToString())

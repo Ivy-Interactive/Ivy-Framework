@@ -31,7 +31,7 @@ export const CodeBlock = memo(
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
     const typography = useTypography();
 
-    if (!inline && match && hasCodeBlocks) {
+    if (!inline && hasCodeBlocks) {
       // Handle Mermaid diagrams
       if (isMermaid && hasMermaid) {
         return (
@@ -105,7 +105,7 @@ export const CodeBlock = memo(
             </div>
             <ScrollArea className="w-full border border-border rounded-md">
               <SyntaxHighlighter
-                language={match[1]}
+                language={match ? match[1] : "text"}
                 style={dynamicTheme}
                 customStyle={{
                   margin: 0,

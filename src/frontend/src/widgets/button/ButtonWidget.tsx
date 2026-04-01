@@ -14,6 +14,7 @@ import {
 import { useEventHandler } from "@/components/event-handler";
 import withTooltip from "@/hoc/withTooltip";
 import { Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { BorderRadius, getColor, getWidth } from "@/lib/styles";
 import { Densities } from "@/types/density";
 import {
@@ -47,6 +48,7 @@ interface ButtonWidgetProps {
   target?: "Blank" | "Self";
   width?: string;
   shortcutKey?: string;
+  badge?: string;
   children?: React.ReactNode;
   borderRadius?: BorderRadius;
   "data-testid"?: string;
@@ -100,6 +102,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   loading = false,
   width,
   shortcutKey,
+  badge,
   children,
   borderRadius = "Rounded",
   density = Densities.Medium,
@@ -255,6 +258,11 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
             <span className="truncate">{title}</span>
           ) : (
             title
+          )}
+          {badge && (
+            <Badge variant="outline" className="ml-1 w-min whitespace-nowrap">
+              {badge}
+            </Badge>
           )}
           {shortcutKey && title && (
             <kbd className="ml-1 px-1 py-0.5 text-[0.65rem] font-medium text-muted-foreground bg-muted border border-border rounded-selector">

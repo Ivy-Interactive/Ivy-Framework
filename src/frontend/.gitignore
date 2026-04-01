@@ -33,3 +33,4 @@ dist-ssr
 doctor.txt
 doctor-output.json
 
+package-lock.json

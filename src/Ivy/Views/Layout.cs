@@ -30,13 +30,13 @@ public static class Layout
     {
         return Horizontal(Flatten(elements))
             .Height(Size.Screen())
-            .RemoveParentPadding().Align(Align.Center);
+            .RemoveParentPadding().AlignContent(Align.Center);
     }
 
     public static LayoutView TopCenter(params IEnumerable<object?> elements)
     {
         return Horizontal(Flatten(elements))
-            .RemoveParentPadding().Align(Align.TopCenter);
+            .RemoveParentPadding().AlignContent(Align.TopCenter);
     }
 
     public static LayoutView Wrap(params IEnumerable<object?> elements)

@@ -22,6 +22,7 @@ import { remarkCustomEmojiPlugin } from "./custom-emojis/remarkCustomEmojiPlugin
 
 import { ImageOverlay } from "./markdown/ImageOverlay";
 import { CodeBlock } from "./markdown/CodeBlock";
+import { PopoverLink } from "./markdown/PopoverLink";
 import Icon from "@/components/Icon";
 import { Components } from "react-markdown";
 
@@ -29,6 +30,89 @@ interface MarkdownRendererProps {
   content: string;
   onLinkClick?: (url: string) => void;
   dangerouslyAllowLocalFiles?: boolean;
+}
+
+interface FenceBlock {
+  openLine: number;
+  closeLine: number;
+  indent: string;
+  infoString: string;
+  children: FenceBlock[];
+}
+
+/**
+ * Normalizes nested fenced code blocks so that outer fences use more backticks
+ * than inner fences. This fixes CommonMark rendering where nested fences of
+ * the same length cause the inner fence to prematurely close the outer one.
+ *
+ * For example, a markdown block containing a ```csharp block would have its
+ * outer fence increased to ```` so the inner ``` doesn't close it.
+ */
+export function normalizeNestedFences(content: string): string {
+  const lines = content.split("\n");
+  const fenceRegex = /^(\s{0,3})(`{3,})\s*(.*)/;
+
+  const stack: { line: number; indent: string; infoString: string; children: FenceBlock[] }[] = [];
+  const topLevel: FenceBlock[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(fenceRegex);
+    if (!match) continue;
+
+    const indent = match[1];
+    const infoString = match[3].trim();
+
+    if (stack.length === 0 || infoString) {
+      // Opening fence: either top-level or nested (has info string)
+      stack.push({ line: i, indent, infoString, children: [] });
+    } else {
+      // Closing fence (no info string, inside an open block)
+      const open = stack.pop()!;
+      const block: FenceBlock = {
+        openLine: open.line,
+        closeLine: i,
+        indent: open.indent,
+        infoString: open.infoString,
+        children: open.children,
+      };
+      if (stack.length > 0) {
+        stack[stack.length - 1].children.push(block);
+      } else {
+        topLevel.push(block);
+      }
+    }
+  }
+
+  // No nesting found — return content unchanged
+  if (topLevel.every((b) => b.children.length === 0)) {
+    return content;
+  }
+
+  function getRequiredBackticks(block: FenceBlock): number {
+    if (block.children.length === 0) return 3;
+    const maxChild = Math.max(...block.children.map(getRequiredBackticks));
+    return maxChild + 1;
+  }
+
+  function rewriteBlock(block: FenceBlock) {
+    const count = getRequiredBackticks(block);
+    const backticks = "`".repeat(count);
+
+    lines[block.openLine] = block.infoString
+      ? `${block.indent}${backticks}${block.infoString}`
+      : `${block.indent}${backticks}`;
+    lines[block.closeLine] = `${block.indent}${backticks}`;
+
+    for (const child of block.children) {
+      rewriteBlock(child);
+    }
+  }
+
+  for (const block of topLevel) {
+    rewriteBlock(block);
+  }
+
+  return lines.join("\n");
 }
 
 const hasContentFeature = (content: string, feature: RegExp): boolean => {
@@ -274,7 +358,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     () => ({
       code: memo((props: React.ComponentProps<"code">) => {
         const { children, className } = props;
-        const inline = !className;
+        const node = (props as any).node;
+        const isInPre = node?.parent?.tagName === "pre";
+        const inline = isInPre ? false : !className && !String(children).includes("\n");
 
         // Detect Icons.X pattern in inline code
         if (inline) {
@@ -308,64 +394,71 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   // Memoize link component separately (depends on handleLinkClick)
   const linkComponent = useMemo(
     () => ({
-      a: memo(({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-        // When local files are enabled, allow file:// URLs to render as clickable links
-        const isLocalFileUrl = dangerouslyAllowLocalFiles && href?.startsWith("file:///");
+      a: memo(
+        ({ children, href, title, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+          // Popover links: [text](## "popover content")
+          if (href === "##" && title) {
+            return <PopoverLink content={title}>{children}</PopoverLink>;
+          }
 
-        const safeHref = isLocalFileUrl ? href! : validateLinkUrl(href);
-        if (safeHref === "#") {
-          return <span {...props}>{children}</span>;
-        }
+          // When local files are enabled, allow file:// URLs to render as clickable links
+          const isLocalFileUrl = dangerouslyAllowLocalFiles && href?.startsWith("file:///");
 
-        // Use helper functions for URL type detection
-        const isExternalLink = isExternalUrl(safeHref);
-        const isAnchor = isAnchorLink(safeHref);
-        const isApp = isAppProtocol(safeHref);
+          const safeHref = isLocalFileUrl ? href! : validateLinkUrl(href);
+          if (safeHref === "#") {
+            return <span {...props}>{children}</span>;
+          }
 
-        // Convert app:// URLs to regular paths for href attribute
-        let hrefForNavigation = safeHref;
-        if (isApp) {
-          // Use the utility function to convert app:// URLs, preserving shell=false
-          hrefForNavigation = convertAppUrlToPath(safeHref);
-        }
+          // Use helper functions for URL type detection
+          const isExternalLink = isExternalUrl(safeHref);
+          const isAnchor = isAnchorLink(safeHref);
+          const isApp = isAppProtocol(safeHref);
 
-        return (
-          <a
-            {...props}
-            className="text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100"
-            href={hrefForNavigation}
-            target={isExternalLink && !onLinkClick ? "_blank" : undefined}
-            rel={isExternalLink && !onLinkClick ? "noopener noreferrer" : undefined}
-            onClick={
-              isAnchor
-                ? (e) => {
-                    e.preventDefault();
-                    // Extract anchor ID by removing the '#' prefix
-                    const targetId = extractAnchorId(safeHref);
-                    if (targetId) {
-                      // Small delay to ensure content is rendered
-                      requestAnimationFrame(() => {
-                        const targetElement = document.getElementById(targetId);
-                        if (targetElement) {
-                          targetElement.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                          });
-                          // Update URL hash
-                          window.history.replaceState(null, "", `#${targetId}`);
-                        }
-                      });
+          // Convert app:// URLs to regular paths for href attribute
+          let hrefForNavigation = safeHref;
+          if (isApp) {
+            // Use the utility function to convert app:// URLs, preserving shell=false
+            hrefForNavigation = convertAppUrlToPath(safeHref);
+          }
+
+          return (
+            <a
+              {...props}
+              className="text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100"
+              href={hrefForNavigation}
+              target={isExternalLink && !onLinkClick ? "_blank" : undefined}
+              rel={isExternalLink && !onLinkClick ? "noopener noreferrer" : undefined}
+              onClick={
+                isAnchor
+                  ? (e) => {
+                      e.preventDefault();
+                      // Extract anchor ID by removing the '#' prefix
+                      const targetId = extractAnchorId(safeHref);
+                      if (targetId) {
+                        // Small delay to ensure content is rendered
+                        requestAnimationFrame(() => {
+                          const targetElement = document.getElementById(targetId);
+                          if (targetElement) {
+                            targetElement.scrollIntoView({
+                              behavior: "smooth",
+                              block: "start",
+                            });
+                            // Update URL hash
+                            window.history.replaceState(null, "", `#${targetId}`);
+                          }
+                        });
+                      }
                     }
-                  }
-                : onLinkClick
-                  ? (e) => handleLinkClick(safeHref, e)
-                  : undefined
-            }
-          >
-            {children}
-          </a>
-        );
-      }),
+                  : onLinkClick
+                    ? (e) => handleLinkClick(safeHref, e)
+                    : undefined
+              }
+            >
+              {children}
+            </a>
+          );
+        },
+      ),
     }),
     [handleLinkClick, dangerouslyAllowLocalFiles],
   );
@@ -391,8 +484,14 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     emoji: ({ name }: { name: string }) => <CustomEmoji name={name} />,
   };
 
+  const normalizedContent = useMemo(() => normalizeNestedFences(content), [content]);
+
   const urlTransform = useCallback(
     (url: string, key: string) => {
+      // Preserve popover link marker
+      if (url === "##") {
+        return url;
+      }
       if (url.startsWith("app://")) {
         return url;
       }
@@ -448,7 +547,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         rehypePlugins={plugins.rehypePlugins}
         urlTransform={urlTransform}
       >
-        {content}
+        {normalizedContent}
       </ReactMarkdown>
     </>
   );

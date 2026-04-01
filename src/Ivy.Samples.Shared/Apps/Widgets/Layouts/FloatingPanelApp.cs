@@ -8,7 +8,7 @@ public class FloatingPanelApp : SampleBase
     {
         return new Fragment()
                | Text.H1("Floating Panel")
-               | (new FloatingPanel().Align(Align.TopRight)
+               | (new FloatingPanel().AlignSelf(Align.TopRight)
                   | (Layout.Horizontal()
                      | new Button("Back")
                         .Icon(Icons.ArrowLeft)

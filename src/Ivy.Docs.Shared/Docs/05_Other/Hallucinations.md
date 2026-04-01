@@ -65,6 +65,68 @@ Ivy-Framework#2612
 fd5baba6-72aa-4d28-ac10-72e1be86e494
 (multiple sessions — agent uses old API names from training data)
 
+## Button onClick — wrong callback signature (method group)
+
+**Hallucinated API:**
+
+```csharp
+async Task GenerateEmbedding() { ... }
+new Button("Generate Embedding", GenerateEmbedding)
+```
+
+**Error:** `Argument 2: cannot convert from 'method group' to 'System.Func<Ivy.Event<Ivy.Button>, System.Threading.Tasks.ValueTask>?'`
+
+**Correct API:**
+
+```csharp
+async ValueTask GenerateEmbedding(Event<Button> e) { ... }
+new Button("Generate Embedding", GenerateEmbedding)
+
+// Or inline:
+new Button("Generate", async (e) => { await DoWork(); })
+```
+
+The `Button` onClick parameter is `Func<Event<Button>, ValueTask>?`. The callback must: (1) accept `Event<Button>` as parameter, (2) return `ValueTask` (not `Task` or `void`). A method group with wrong signature (e.g., `async Task Foo()`) will fail with CS1503.
+
+**Found In:**
+55eafb82-2cc2-48ba-9a66-cd2ed8d38d67
+6ee57156-8185-4cdd-97b1-fdb53b45383a
+4874e3a3-c6d8-4be5-b1b3-bc4209408343
+bedc0ee6-b915-45b0-ab3a-433e2ac5ff4a
+80f19121-bcf0-4899-abe2-9f1c439f4101
+
+## Details() — empty constructor instead of passing items
+
+**Hallucinated API:**
+
+```csharp
+new Details()
+    | new Detail("Country Code", result.CountryCode, false)
+    | new Detail("VAT Number", result.VatNumber, false)
+```
+
+**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'items' of 'Details.Details(IEnumerable<Detail>)'`
+
+**Correct API:**
+
+```csharp
+new Details(new[] {
+    new Detail("Country Code", result.CountryCode, false),
+    new Detail("VAT Number", result.VatNumber, false)
+})
+// or use the builder pattern:
+result.ToDetails()
+```
+
+`Details` requires an `IEnumerable<Detail>` in its constructor. There is no parameterless public constructor, and the pipe operator `|` does not work on `Details` to add children. Use the collection constructor or the `.ToDetails()` builder pattern on a model.
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207
+b6beb60d-478d-409e-b10d-7913ae911e85
+fd5baba6-72aa-4d28-ac10-72e1be86e494
+9e1cba6f-bd19-472e-83a3-8db63b4860f6
+e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+
 ## Callout constructor — wrong constructor + invented enum / wrong argument order
 
 **Hallucinated API:**
@@ -187,34 +249,68 @@ f20dced8-1689-4289-a2d8-ee67136eb6ce
 5ba11e91-7b05-49e1-8a0f-5ea01235b192
 f07bc643-b0d7-4a23-a4c8-f4e488285e98
 
-## Button onClick — wrong callback signature (method group)
+## ChatMessage — ambiguous reference between Microsoft.Extensions.AI and Ivy
 
 **Hallucinated API:**
 
 ```csharp
-async Task GenerateEmbedding() { ... }
-new Button("Generate Embedding", GenerateEmbedding)
+var messages = new List<ChatMessage>
+{
+    new ChatMessage(ChatRole.System, "You are a helpful assistant."),
+    new ChatMessage(ChatRole.User, content)
+};
 ```
 
-**Error:** `Argument 2: cannot convert from 'method group' to 'System.Func<Ivy.Event<Ivy.Button>, System.Threading.Tasks.ValueTask>?'`
+**Error:** `CS0104: 'ChatMessage' is an ambiguous reference between 'Microsoft.Extensions.AI.ChatMessage' and 'Ivy.ChatMessage'`
 
 **Correct API:**
 
 ```csharp
-async ValueTask GenerateEmbedding(Event<Button> e) { ... }
-new Button("Generate Embedding", GenerateEmbedding)
+// Fully qualify the namespace:
+var messages = new List<Microsoft.Extensions.AI.ChatMessage>
+{
+    new(Microsoft.Extensions.AI.ChatRole.System, "You are a helpful assistant."),
+    new(Microsoft.Extensions.AI.ChatRole.User, content)
+};
 
-// Or inline:
-new Button("Generate", async (e) => { await DoWork(); })
+// Or add a using alias at the top of the file:
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
+using ChatRole = Microsoft.Extensions.AI.ChatRole;
 ```
 
-The `Button` onClick parameter is `Func<Event<Button>, ValueTask>?`. The callback must: (1) accept `Event<Button>` as parameter, (2) return `ValueTask` (not `Task` or `void`). A method group with wrong signature (e.g., `async Task Foo()`) will fail with CS1503.
+When using `IChatClient` from `Microsoft.Extensions.AI` in an Ivy project, `ChatMessage` conflicts with `Ivy.ChatMessage` (the Chat widget's message record) which is available via global using. Always fully qualify or alias the `Microsoft.Extensions.AI` types.
 
 **Found In:**
-55eafb82-2cc2-48ba-9a66-cd2ed8d38d67
-6ee57156-8185-4cdd-97b1-fdb53b45383a
-4874e3a3-c6d8-4be5-b1b3-bc4209408343
-bedc0ee6-b915-45b0-ab3a-433e2ac5ff4a
+142f4e78-ada2-4bd6-8c9f-a8562c82afb7
+ab7c7708-b26c-49fa-83a4-176df47c5866
+a8e15b46-41e2-4281-b570-6d46721e0425
+b73d8115-b4d2-45d5-926e-0a915c1dca63
+
+## TextInputBase.Icon() — wrong receiver type
+
+**Hallucinated API:**
+
+```csharp
+searchState.ToTextInput().Icon(Icons.Search)
+```
+
+**Error:** `CS1929: 'TextInputBase' does not contain a definition for 'Icon' and the best extension method overload 'MenuItemExtensions.Icon(MenuItem, Icons)' requires a receiver of type 'Ivy.MenuItem'`
+
+**Correct API:**
+
+```csharp
+// Use .Prefix() or .Suffix() to add icons to text inputs:
+searchState.ToTextInput().Prefix(Icons.Search)
+searchState.ToTextInput().Suffix(Icons.ArrowRight)
+```
+
+`.Icon()` is a method for `Button` and `MenuItem`, not for input widgets like `TextInputBase`. Use `.Prefix(Icons)` or `.Suffix(Icons)` to add icons to text inputs.
+
+**Found In:**
+c496d3d8-c090-44b5-9551-4cdf3b0aca06
+f713bd0e-71ec-4f0d-8383-1d27712d71a8
+bc45eeb3-15c9-48c1-9f8f-8570a3522614
+e1c05d6b-f09b-4b5a-8872-2c276bf4b141
 
 ## DateTimeVariant — wrong enum name
 
@@ -238,36 +334,6 @@ The enum is `DateTimeInputVariant` (singular), not `DateTimeVariant` (missing "I
 
 **Found In:**
 d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
-
-## Details() — empty constructor instead of passing items
-
-**Hallucinated API:**
-
-```csharp
-new Details()
-    | new Detail("Country Code", result.CountryCode, false)
-    | new Detail("VAT Number", result.VatNumber, false)
-```
-
-**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'items' of 'Details.Details(IEnumerable<Detail>)'`
-
-**Correct API:**
-
-```csharp
-new Details(new[] {
-    new Detail("Country Code", result.CountryCode, false),
-    new Detail("VAT Number", result.VatNumber, false)
-})
-// or use the builder pattern:
-result.ToDetails()
-```
-
-`Details` requires an `IEnumerable<Detail>` in its constructor. There is no parameterless public constructor, and the pipe operator `|` does not work on `Details` to add children. Use the collection constructor or the `.ToDetails()` builder pattern on a model.
-
-**Found In:**
-857de09c-ab87-49a5-aac4-394f7d0aa207
-b6beb60d-478d-409e-b10d-7913ae911e85
-fd5baba6-72aa-4d28-ac10-72e1be86e494
 
 ## AppAttribute.path old parameter name
 
@@ -403,30 +469,67 @@ a9ee3993-1cfb-4cba-9322-80a60b56c8d2
 9f10ed3d-11bc-40ba-903a-f446ff496f21
 b321412b-3b6c-4b50-b027-bc323db8fe98
 
-## TextInputBase.Icon() — wrong receiver type
+## QueryMutator.Trigger() / .IsLoading / .Error — non-existent properties
 
 **Hallucinated API:**
 
 ```csharp
-searchState.ToTextInput().Icon(Icons.Search)
+var mutation = UseMutation(key);
+mutation.Trigger();    // doesn't exist
+mutation.IsLoading     // doesn't exist
+mutation.Error         // doesn't exist
 ```
 
-**Error:** `CS1929: 'TextInputBase' does not contain a definition for 'Icon' and the best extension method overload 'MenuItemExtensions.Icon(MenuItem, Icons)' requires a receiver of type 'Ivy.MenuItem'`
+**Error:** `CS1061: 'QueryMutator' does not contain a definition for 'Trigger'/'IsLoading'/'Error'`
+
+**Correct API:**
+`QueryMutator` only has `Revalidate` (Action) and `Invalidate` (Action). `QueryMutator<T>` adds `Mutate` (MutateDelegate<T>). For loading state and error, use `QueryResult<T>` from `UseQuery()`, which has `.Loading`, `.Error`, and `.Value`.
+
+For async operations triggered by a button click, use the button's async `OnClick` handler directly:
+
+```csharp
+new Button("Validate", async () => {
+    result = await service.ValidateAsync(input);
+})
+```
+
+Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseQuery.cs`
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207
+ab7c7708-b26c-49fa-83a4-176df47c5866
+fd4594df-0402-4f11-ad46-22165d480649
+
+## Secret(IsRequired/IsOptional) — non-existent named parameters
+
+**Hallucinated API:**
+
+```csharp
+// Variant 1: IsRequired (inverted logic)
+new Secret("ApiKey", IsRequired: true)
+new Secret("Model", IsRequired: false)
+
+// Variant 2: IsOptional (prefixed version of Optional)
+new Secret("Model", IsOptional: true)
+```
+
+**Error:** `CS1739: The best overload for 'Secret' does not have a parameter named 'IsRequired'` or `'IsOptional'`
 
 **Correct API:**
 
 ```csharp
-// Use .Prefix() or .Suffix() to add icons to text inputs:
-searchState.ToTextInput().Prefix(Icons.Search)
-searchState.ToTextInput().Suffix(Icons.ArrowRight)
+// Secret is a record: Secret(string Key, string? Preset = null, bool Optional = false)
+new Secret("ApiKey")                      // required by default (Optional = false)
+new Secret("Model", Optional: true)       // optional secret
+new Secret("Endpoint", Preset: "https://api.openai.com/v1", Optional: true)
 ```
 
-`.Icon()` is a method for `Button` and `MenuItem`, not for input widgets like `TextInputBase`. Use `.Prefix(Icons)` or `.Suffix(Icons)` to add icons to text inputs.
+The `Secret` record has no `IsRequired` or `IsOptional` parameter. By default, secrets are required (`Optional = false`). To make a secret optional, use `Optional: true`. The agent invents prefixed variants (`IsRequired`, `IsOptional`) instead of using the actual `Optional` parameter.
 
 **Found In:**
-c496d3d8-c090-44b5-9551-4cdf3b0aca06
-f713bd0e-71ec-4f0d-8383-1d27712d71a8
-bc45eeb3-15c9-48c1-9f8f-8570a3522614
+07a0cf7f-d297-4dd2-8fc4-883bb52aa305
+ac1aa99e-739d-4382-86df-7a92b0a25cc7
+bcae7857-4504-4b58-94a7-d733142440f7
 
 ## Button.WithIcon() — non-existent fluent method
 
@@ -728,7 +831,7 @@ c496d3d8-c090-44b5-9551-4cdf3b0aca06
 **Hallucinated API:**
 
 ```csharp
-Text.H1("0").Align(Align.Right)  // passing Ivy.Align instead of Ivy.TextAlignment
+Text.H1("0").AlignContent(Align.Right)  // passing Ivy.Align instead of Ivy.TextAlignment
 ```
 
 **Error:** `CS1503: Argument 1: cannot convert from 'Ivy.Align' to 'Ivy.TextAlignment'`
@@ -744,6 +847,179 @@ Text.H1("0").Align(TextAlignment.Right)
 **Found In:**
 2739aa95-7d5b-481b-a456-af895e6268df
 818a3388-f1c8-4206-a44c-303b0fa481fa
+
+## Card.Color() — non-existent method on Card
+
+**Hallucinated API:**
+
+```csharp
+new Card(...).Color(Colors.Green)
+```
+
+**Error:** `CS1061: 'Card' does not contain a definition for 'Color'`
+
+**Correct API:**
+
+```csharp
+// Cards don't have a Color method. Use Box for colored containers:
+new Box(content).Background(Colors.Green)
+```
+
+**Found In:**
+5c9cfb70-c9f5-4642-8de6-480be8f5ee85
+332383ac-d463-4640-abe6-ee0208735329
+
+## using Ivy.Apps / using Ivy.Shared / using Ivy.Views.Charts — non-existent namespaces
+
+**Hallucinated API:**
+
+```csharp
+using Ivy.Apps;
+using Ivy.Shared;
+using Ivy.Views.Charts;
+```
+
+**Error:** `The type or namespace name 'Apps' does not exist in the namespace 'Ivy'` / `The type or namespace name 'Shared' does not exist in the namespace 'Ivy'` / `The type or namespace name 'Charts' does not exist in the namespace 'Ivy.Views'`
+
+**Correct API:**
+
+```csharp
+using Ivy;
+```
+
+There are no `Ivy.Apps`, `Ivy.Shared`, or `Ivy.Views.Charts` namespaces. All Ivy widgets, hooks, and types are in the root `Ivy` namespace. The agent likely hallucinates these from ASP.NET conventions or other framework patterns where subnamespaces separate concerns.
+
+**Found In:**
+a55e08b9-f212-49ef-97b9-d352b7b4beb8
+fc57ee42-4ff5-4559-9268-b8d60149b173
+
+## Table.Columns() — non-existent fluent method
+
+**Hallucinated API:**
+
+```csharp
+new Table().Columns("Name", "Status") | new TableRow("Item 1", "Active")
+```
+
+**Error:** `CS1061: 'Table' does not contain a definition for 'Columns'`
+
+**Correct API:**
+
+```csharp
+// Use .ToTable() extension on a collection:
+items.ToTable()
+// Or construct with TableRow[] and use headers via the builder:
+items.ToTable().Header("Name", "Status")
+```
+
+`Table` does not have a `.Columns()` fluent method. The recommended approach is `.ToTable()` on a collection, which auto-generates columns from properties. For manual table construction, use `TableRow` with `TableCell` instances.
+
+**Found In:**
+9e1cba6f-bd19-472e-83a3-8db63b4860f6
+2a35b6e1-43e2-4fac-aa54-29a680c6009a (traces 003, 004, 005)
+
+## TableRow(string) — string instead of TableCell
+
+**Hallucinated API:**
+
+```csharp
+new TableRow("Item 1", "Active")
+```
+
+**Error:** `CS1503: Argument 1: cannot convert from 'string' to 'Ivy.TableCell'`
+
+**Correct API:**
+
+```csharp
+new TableRow(new TableCell("Item 1"), new TableCell("Active"))
+```
+
+`TableRow` constructor accepts `TableCell` instances, not raw strings. There is no implicit conversion from `string` to `TableCell`. Use `new TableCell("text")` or the `.ToTable()` builder pattern which handles this automatically.
+
+**Found In:**
+9e1cba6f-bd19-472e-83a3-8db63b4860f6
+2a35b6e1-43e2-4fac-aa54-29a680c6009a (traces 003, 004, 005)
+
+## TextBuilder.Icon() — extension method receiver mismatch
+
+**Hallucinated API:**
+
+```csharp
+Text.H3("Task Hub").Icon(Icons.KanbanSquare)
+```
+
+**Error:** `CS1929: 'TextBuilder' does not contain a definition for 'Icon' and the best extension method overload 'MenuItemExtensions.Icon(MenuItem, Icons)' requires a receiver of type 'Ivy.MenuItem'`
+
+**Correct API:**
+
+```csharp
+// Icon() is only available on MenuItem, not on TextBuilder.
+// To show an icon next to text, use a layout:
+new Horizontal(new Icon(Icons.KanbanSquare), Text.H3("Task Hub"))
+```
+
+The agent assumed `.Icon()` was a chainable method on `TextBuilder`, but `Icon()` is an extension method that only applies to `MenuItem`. The `ReplaceInvalidIcons` refactoring rule caught and fixed the invalid icon name, but not the wrong receiver type.
+
+**Found In:**
+c1f8feae-b342-4bf1-a18c-9b88ee8d6d17
+fd4594df-0402-4f11-ad46-22165d480649
+
+## Event<T,E>.Data / Event<T,E>.Args — non-existent properties
+
+**Hallucinated API:**
+
+```csharp
+args.Data.Id
+args.Data.Tag
+// Also seen as:
+args.Args.Id
+args.Args.Tag
+```
+
+**Error:** `'Event<DataTable, RowActionClickEventArgs>' does not contain a definition for 'Data'` / `'Args'`
+
+**Correct API:**
+
+```csharp
+args.Value.Id
+args.Value.Tag
+```
+
+`Event<TSender, TValue>` uses `.Value` to access the event args, not `.Data` or `.Args`. The agent likely confused this with other event patterns from different frameworks (e.g., WPF `DataContext`, JavaScript `event.data`, or `EventArgs` naming conventions).
+
+**Found In:**
+f20dced8-1689-4289-a2d8-ee67136eb6ce
+e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+
+## Skeleton.List() — non-existent static method
+
+**Hallucinated API:**
+
+```csharp
+Skeleton.List(1)
+```
+
+**Error:** `No overload for method 'List' takes 1 arguments` (or similar — `List` does not exist on `Skeleton`)
+
+**Correct API:**
+
+```csharp
+// Available Skeleton static factory methods:
+Skeleton.Card()
+Skeleton.Text(lines: 3)
+Skeleton.DataTable(rows: 5)
+Skeleton.Feed(items: 3)
+Skeleton.Form()
+
+// Or use a plain Skeleton instance:
+new Skeleton()
+```
+
+`Skeleton` has no `List()` method. For a list-like loading placeholder, use `Skeleton.Feed(items)` which renders a vertical feed of skeleton items.
+
+**Found In:**
+9ed7f8e7-aa7c-4c8b-b6a0-8c5b389f1dc2
+e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
 
 ## FileInput.MaxFiles(n) on single-file state — runtime error
 
@@ -930,29 +1206,6 @@ The enum is `SelectInputVariant` (singular), not `SelectInputVariants` (plural).
 
 **Found In:**
 a55e08b9-f212-49ef-97b9-d352b7b4beb8
-
-## Event<T,E>.Data — non-existent property
-
-**Hallucinated API:**
-
-```csharp
-args.Data.Id
-args.Data.Tag
-```
-
-**Error:** `'Event<DataTable, RowActionClickEventArgs>' does not contain a definition for 'Data'`
-
-**Correct API:**
-
-```csharp
-args.Value.Id
-args.Value.Tag
-```
-
-`Event<TSender, TValue>` uses `.Value` to access the event args, not `.Data`. The agent likely confused this with other event patterns from different frameworks (e.g., WPF `DataContext`, JavaScript `event.data`).
-
-**Found In:**
-f20dced8-1689-4289-a2d8-ee67136eb6ce
 
 ## UseState\<T?\>(null) — ambiguous overload call
 
@@ -1214,35 +1467,6 @@ queryResult.IsLoading
 
 **Found In:**
 a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 002, 004)
-
-## QueryMutator.Trigger() / .IsLoading / .Error — non-existent properties
-
-**Hallucinated API:**
-
-```csharp
-var mutation = UseMutation(key);
-mutation.Trigger();    // doesn't exist
-mutation.IsLoading     // doesn't exist
-mutation.Error         // doesn't exist
-```
-
-**Error:** `CS1061: 'QueryMutator' does not contain a definition for 'Trigger'/'IsLoading'/'Error'`
-
-**Correct API:**
-`QueryMutator` only has `Revalidate` (Action) and `Invalidate` (Action). `QueryMutator<T>` adds `Mutate` (MutateDelegate<T>). For loading state and error, use `QueryResult<T>` from `UseQuery()`, which has `.Loading`, `.Error`, and `.Value`.
-
-For async operations triggered by a button click, use the button's async `OnClick` handler directly:
-
-```csharp
-new Button("Validate", async () => {
-    result = await service.ValidateAsync(input);
-})
-```
-
-Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseQuery.cs`
-
-**Found In:**
-857de09c-ab87-49a5-aac4-394f7d0aa207
 
 ## ListItem.Description / ListItem.Meta / ListItem.Actions — non-existent members
 
@@ -1958,32 +2182,12 @@ new Box(new Card(content)).Border(1)
 **Found In:**
 5c9cfb70-c9f5-4642-8de6-480be8f5ee85
 
-## Card.Color() — non-existent method on Card
-
-**Hallucinated API:**
-
-```csharp
-new Card(...).Color(Colors.Green)
-```
-
-**Error:** `CS1061: 'Card' does not contain a definition for 'Color'`
-
-**Correct API:**
-
-```csharp
-// Cards don't have a Color method. Use Box for colored containers:
-new Box(content).Background(Colors.Green)
-```
-
-**Found In:**
-5c9cfb70-c9f5-4642-8de6-480be8f5ee85
-
 ## Card.Align() — non-existent method on Card
 
 **Hallucinated API:**
 
 ```csharp
-new Card(...).Align(Align.Center)
+new Card(...).AlignContent(Align.Center)
 ```
 
 **Error:** `CS1929: 'Card' does not contain a definition for 'Align'`
@@ -2173,28 +2377,6 @@ The `DataTable` public constructor requires all 5 positional parameters: `(DataT
 **Found In:**
 30c1b273-c528-4496-b194-c98e0ffeaa23
 
-## using Ivy.Apps / using Ivy.Shared — non-existent namespaces
-
-**Hallucinated API:**
-
-```csharp
-using Ivy.Apps;
-using Ivy.Shared;
-```
-
-**Error:** `The type or namespace name 'Apps' does not exist in the namespace 'Ivy'` / `The type or namespace name 'Shared' does not exist in the namespace 'Ivy'`
-
-**Correct API:**
-
-```csharp
-using Ivy;
-```
-
-There are no `Ivy.Apps` or `Ivy.Shared` namespaces. All Ivy widgets, hooks, and types are in the root `Ivy` namespace. The agent likely hallucinates these from ASP.NET conventions or other framework patterns where subnamespaces separate concerns.
-
-**Found In:**
-a55e08b9-f212-49ef-97b9-d352b7b4beb8
-
 ## await void OnSubmit callback — incorrect async pattern
 
 **Hallucinated API:**
@@ -2324,16 +2506,17 @@ When using `UseDownload` with a lambda, you must explicitly cast to `Func<byte[]
 **Found In:**
 (session not yet recorded)
 
-## Server.OnReady / Server.OnStartup — non-existent lifecycle callbacks
+## Server.OnReady / Server.OnStartup / Server.OnAfterStart — non-existent lifecycle callbacks
 
 **Hallucinated API:**
 
 ```csharp
 server.OnReady(() => { /* seed data */ });
 server.OnStartup(() => { /* initialize */ });
+server.OnAfterStart(() => { /* seed data */ });
 ```
 
-**Error:** `CS1061: 'Server' does not contain a definition for 'OnReady'`
+**Error:** `CS1061: 'Server' does not contain a definition for 'OnReady'` / `CS1061: 'Server' does not contain a definition for 'OnAfterStart'`
 
 **Correct API:**
 
@@ -2356,7 +2539,7 @@ myService.Initialize();
 The `Server` class does not have `OnReady`, `OnStartup`, or similar lifecycle callback methods. To run initialization code (e.g., database seeding), use the connection's context factory pattern — seed data in the factory's `CreateContext` method or use `server.Services` to resolve and call services directly in `Program.cs`.
 
 **Found In:**
-(session not yet recorded)
+c1b87041-f92b-4ba5-96d7-6a92419e84ea
 
 ## Fragment.Empty — non-existent static member
 
@@ -2384,7 +2567,7 @@ return null;
 `Fragment` does not have an `Empty` static member. To return nothing from a view, use `ViewBase.Empty`, `new Fragment()`, or `null`.
 
 **Found In:**
-(session not yet recorded)
+80f19121-bcf0-4899-abe2-9f1c439f4101
 
 ## Field.Invalid() — extension method called on wrong type
 
@@ -2436,29 +2619,6 @@ NumberInput<int>
 
 **Found In:**
 8111879a-ebe9-48d0-bd8e-936becb133ee
-
-## TextBuilder.Icon() — extension method receiver mismatch
-
-**Hallucinated API:**
-
-```csharp
-Text.H3("Task Hub").Icon(Icons.KanbanSquare)
-```
-
-**Error:** `CS1929: 'TextBuilder' does not contain a definition for 'Icon' and the best extension method overload 'MenuItemExtensions.Icon(MenuItem, Icons)' requires a receiver of type 'Ivy.MenuItem'`
-
-**Correct API:**
-
-```csharp
-// Icon() is only available on MenuItem, not on TextBuilder.
-// To show an icon next to text, use a layout:
-new Horizontal(new Icon(Icons.KanbanSquare), Text.H3("Task Hub"))
-```
-
-The agent assumed `.Icon()` was a chainable method on `TextBuilder`, but `Icon()` is an extension method that only applies to `MenuItem`. The `ReplaceInvalidIcons` refactoring rule caught and fixed the invalid icon name, but not the wrong receiver type.
-
-**Found In:**
-c1f8feae-b342-4bf1-a18c-9b88ee8d6d17
 
 ## Expandable constructor — missing content parameter
 
@@ -2653,59 +2813,129 @@ currencySelect.ToSelectInput(new[] {
 **Found In:**
 84cbe3b9-5764-4352-99d3-dd685c397a68
 
-## Secret(IsRequired: true) — non-existent named parameter
+## QueryOptions.InitialValue — non-existent property
 
 **Hallucinated API:**
 
 ```csharp
-new Secret("ApiKey", IsRequired: true)
-new Secret("Model", IsRequired: false)
+var options = new QueryOptions { InitialValue = someValue };
 ```
 
-**Error:** `CS1739: The best overload for 'Secret' does not have a parameter named 'IsRequired'`
+**Error:** `CS0117: 'QueryOptions' does not contain a definition for 'InitialValue'`
 
 **Correct API:**
 
 ```csharp
-// Secret is a record: Secret(string Key, string? Preset = null, bool Optional = false)
-new Secret("ApiKey")                      // required by default (Optional = false)
-new Secret("Model", Optional: true)       // optional secret
-new Secret("Endpoint", Preset: "https://api.openai.com/v1", Optional: true)
+// QueryOptions does not have an InitialValue property.
+// Use UseQuery with a default value in the factory function,
+// or use UseState to hold initial data separately.
 ```
 
-The `Secret` record has no `IsRequired` parameter. By default, secrets are required (`Optional = false`). To make a secret optional, use `Optional: true`. The agent confused a hypothetical `IsRequired` with the actual `Optional` parameter (inverted logic).
+The agent hallucinated `QueryOptions.InitialValue` when building list blades with query-based data loading. `QueryOptions` is used for configuring query behavior (e.g., tags, refetch intervals), not for providing initial values. The agent likely confused this with React Query's `initialData` option.
 
 **Found In:**
-07a0cf7f-d297-4dd2-8fc4-883bb52aa305
+c1b87041-f92b-4ba5-96d7-6a92419e84ea (traces 007, 009, 013)
 
-## Skeleton.List() — non-existent static method
+## ToDialog/ToSheet subtitle parameter — non-existent named parameter
 
 **Hallucinated API:**
 
 ```csharp
-Skeleton.List(1)
+form.ToDialog(title: "Create Post", subtitle: "Add a new blog post")
+form.ToSheet(title: "Edit Post", subtitle: "Modify post details")
 ```
 
-**Error:** `No overload for method 'List' takes 1 arguments` (or similar — `List` does not exist on `Skeleton`)
+**Error:** `CS1739: The best overload for 'ToDialog' does not have a parameter named 'subtitle'` / `CS1739: The best overload for 'ToSheet' does not have a parameter named 'subtitle'`
 
 **Correct API:**
 
 ```csharp
-// Available Skeleton static factory methods:
-Skeleton.Card()
-Skeleton.Text(lines: 3)
-Skeleton.DataTable(rows: 5)
-Skeleton.Feed(items: 3)
-Skeleton.Form()
-
-// Or use a plain Skeleton instance:
-new Skeleton()
+form.ToDialog(title: "Create Post")
+form.ToSheet(title: "Edit Post")
 ```
 
-`Skeleton` has no `List()` method. For a list-like loading placeholder, use `Skeleton.Feed(items)` which renders a vertical feed of skeleton items.
+`ToDialog` and `ToSheet` accept a `title` parameter but not `subtitle`. There is no subtitle/description parameter on these methods. If a subtitle is needed, add it as content within the form itself.
 
 **Found In:**
-9ed7f8e7-aa7c-4c8b-b6a0-8c5b389f1dc2
+c1b87041-f92b-4ba5-96d7-6a92419e84ea (traces 009, 014)
+
+## View.Args static property — non-existent static property for passing args to child views
+
+**Hallucinated API:**
+
+```csharp
+PreviewView.Args = new PreviewArgs(data);
+new PreviewView()
+```
+
+**Error:** `CS0117: 'PreviewView' does not contain a definition for 'Args'`
+
+**Correct API:**
+
+```csharp
+// UseArgs<T>() is an instance-level hook used inside the target view,
+// not a static property. For composing child views inline, pass data
+// via constructor parameters:
+new PreviewView(data)
+// Or use UseNavigation().Navigate() for navigation-based arg passing.
+```
+
+The agent assumed child views have a static `Args` property (e.g., `PreviewView.Args`). `UseArgs<T>()` is a hook that retrieves navigation arguments inside a view — it has no static counterpart. For composing views inline within a parent's `Build()` method, use constructor parameters.
+
+**Found In:**
+2a35b6e1-43e2-4fac-aa54-29a680c6009a (traces 001, 006)
+
+## Field.BottomMargin() — LayoutView extension used on Field
+
+**Hallucinated API:**
+
+```csharp
+prompt.WithField().Label("Your Query").BottomMargin(2)
+```
+
+**Error:** `CS1061: 'Field' does not contain a definition for 'BottomMargin'`
+
+**Correct API:**
+
+```csharp
+// BottomMargin is a LayoutView extension, not available on Field or InputBase types.
+// For spacing between fields, use Layout methods:
+new LayoutView().Gap(2).Vertical(
+    prompt.WithField().Label("Your Query"),
+    nextField
+)
+```
+
+`BottomMargin()` is defined on `LayoutView` (in `LayoutView.cs`) for controlling vertical spacing. The agent applied it to a `Field` type after reading the DesignGuidelines reference which mentions `.BottomMargin(2)` for Layout elements. Field does not support margin methods — use `LayoutView.Gap()` or wrap in a `LayoutView` instead.
+
+**Found In:**
+0a553480-20f4-4803-9650-9a6d089259bf
+
+## Button.Danger() — non-existent fluent method
+
+**Hallucinated API:**
+
+```csharp
+new Button("Delete").Danger()
+new Button("Remove").Danger()
+```
+
+**Error:** `CS1061: 'Button' does not contain a definition for 'Danger'`
+
+**Correct API:**
+
+```csharp
+// Use Destructive() fluent method:
+new Button("Delete").Destructive()
+
+// Or via explicit Variant():
+new Button("Remove").Variant(ButtonVariant.Destructive)
+```
+
+The agent invented `.Danger()` as a styling method on Button. The correct method is `.Destructive()` which maps to `ButtonVariant.Destructive`.
+
+**Found In:**
+b73d8115-b4d2-45d5-926e-0a915c1dca63
 
 ## TextInput.Grow() — Box-only extension called on TextInput
 
