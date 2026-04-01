@@ -21,7 +21,7 @@ public class DepartmentsListBlade : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var refreshToken = UseRefreshToken();
 
         var filter = UseState("");
@@ -136,7 +136,7 @@ public class DepartmentDetailsBlade(Guid departmentId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<SampleDbContextFactory>();
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var queryService = UseService<IQueryService>();
 
         var departmentQuery = UseQuery(

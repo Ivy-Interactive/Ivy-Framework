@@ -164,7 +164,9 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
           mutedForeground: themeColors.mutedForeground,
         }),
         trigger: "item",
-        formatter: "{a} <br/>{b}: {c} ({d}%)",
+        formatter: (params: { name: string; value: number; percent: number; marker: string }) => {
+          return `${params.marker} ${params.name}<br/><strong>${params.value.toLocaleString()}</strong> (${params.percent}%)`;
+        },
       },
       series: series,
       toolbox: generateEChartToolbox(toolbox && { ...toolbox, magicType: false }),
