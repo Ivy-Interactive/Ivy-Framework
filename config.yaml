@@ -59,11 +59,15 @@ projects:
       - name: CheckResult
         required: true
     context: |
-      Ivy Agent is the AI agent server and client. Key folders:
+      Ivy Agent is the AI agent server. Key folders:
       - Ivy.Agent.Server/ — agent server
       - Ivy.Agent/Agents/Personas/Prompts/ — persona prompts
       - Ivy.Internals/Workflows/ — workflow definitions
       - Ivy.Agent/Tools/ — tool implementations
+
+      Our goal is to make the best possible coding agent for Ivy Framework. 
+      In this folder we have collected other coding agent that you can use for inspiration: D:\Repos\CodingAgents\
+      COPY WITH PRIDE!
 
   - name: Console
     color: Teal
@@ -80,9 +84,13 @@ projects:
       - name: CheckResult
         required: true
     context: |
-      Console/TUI client. Key folders:
-      - Ivy.Console/ — desktop client
+      - Ivy.Console/ — desktop CLI and TUI client
       - Ivy.Internals/ — shared internals
+      - Ivy.Studio/ — vibe-coding agent 
+
+      Our goal is to make the best possible coding agent for Ivy Framework. 
+      In this folder we have collected other coding agent that you can use for inspiration: D:\Repos\CodingAgents\ 
+      COPY WITH PRIDE!
 
   - name: MyPromptwares
     color: Amber

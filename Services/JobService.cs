@@ -255,6 +255,8 @@ public class JobService
             ResetPlanState(job);
         else if (isSuccess && job.Type == "ExecutePlan")
             EnsurePlanStateTransitioned(job);
+        else if (isSuccess && job.Type == "MakePlan")
+            VerifyMakePlanResult(job);
 
         WriteJobLog(job);
         JobsChanged?.Invoke();
@@ -340,6 +342,29 @@ public class JobService
             }
         }
         catch { /* Don't let state transition failures crash job completion */ }
+    }
+
+    private void VerifyMakePlanResult(JobItem job)
+    {
+        try
+        {
+            if (_planReaderService == null) return;
+            var plansDir = _planReaderService.PlansDirectory;
+            if (!Directory.Exists(plansDir)) return;
+
+            var outputText = string.Join("\n", job.OutputLines);
+            var created = System.Text.RegularExpressions.Regex.IsMatch(outputText, @"Plan created:");
+            var duplicate = System.Text.RegularExpressions.Regex.IsMatch(outputText, @"identified as duplicate:");
+
+            if (!created && !duplicate)
+            {
+                // Agent exited 0 but didn't create a plan or detect a duplicate — flag it
+                job.OutputLines.Add("[Tendril] WARNING: MakePlan completed but no plan folder or trash entry was found.");
+                job.Status = "Failed";
+                job.StatusMessage = "No plan created";
+            }
+        }
+        catch { /* Don't let verification failures crash job completion */ }
     }
 
     private void ResetPlanState(JobItem job)
