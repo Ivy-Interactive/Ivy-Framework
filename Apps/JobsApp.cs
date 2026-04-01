@@ -96,6 +96,7 @@ public class JobsApp : ViewBase
                 new MenuItem(Label: "Show Command", Icon: Icons.Terminal, Tag: "show-command").Tooltip("Show the PowerShell command"),
                 new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
                 new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
+                new MenuItem(Label: "Rerun", Icon: Icons.RotateCw, Tag: "rerun-job").Tooltip("Rerun this job"),
                 new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job").Tooltip("Delete this job")
             )
             .OnRowAction(e =>
@@ -126,6 +127,14 @@ public class JobsApp : ViewBase
                     {
                         var command = $"pwsh -NoProfile -File \"{job.ScriptPath}\" {string.Join(" ", job.Args.Select(a => $"\"{a}\""))}";
                         showCommand.Set(command);
+                    }
+                    else if (tag == "rerun-job")
+                    {
+                        if (job.Status is "Failed" or "Timeout" or "Stopped")
+                        {
+                            jobService.StartJob(job.Type, job.Args);
+                            refreshToken.Refresh();
+                        }
                     }
                     else if (tag == "delete-job")
                     {
