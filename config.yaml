@@ -71,6 +71,29 @@ projects:
       In this folder we have collected other coding agent that you can use for inspiration: D:\Repos\CodingAgents\
       COPY WITH PRIDE!
 
+  - name: TestManager
+    color: Rose
+    slackEmoji: ":test_tube:"
+    repos:
+      - path: D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Studio
+        prRule: yolo
+      - path: D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Manager
+        prRule: yolo
+    verifications:
+      - name: DotnetBuild
+        required: true
+      - name: DotnetFormat
+        required: true
+      - name: DotnetTest
+        required: true
+      - name: CheckResult
+        required: true
+    context: |
+      Test Manager for Ivy Agent. Key folders:
+      - Ivy.Agent.Test.Manager/ — CLI for managing test cases, runs, and scoring
+      - Ivy.Agent.Test.Studio/ — TUI app for test management UI
+      See D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Manager\AGENTS.md for CLI reference.
+
   - name: Console
     color: Teal
     slackEmoji: ":blue_heart:"
