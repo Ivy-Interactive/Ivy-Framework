@@ -123,18 +123,19 @@ public class JobsApp : ViewBase
                 })
             ));
 
-        object content = dataTable;
-
         if (showCommand.Value is { } cmd)
         {
-            content |= new Sheet(
-                onClose: () => showCommand.Set(null),
-                content: new Markdown($"```\n{cmd}\n```"),
-                title: "Promptware Command"
-            ).Width(Size.Half());
+            return new Fragment(
+                dataTable,
+                new Sheet(
+                    onClose: () => showCommand.Set(null),
+                    content: new Markdown($"```\n{cmd}\n```"),
+                    title: "Promptware Command"
+                ).Width(Size.Half())
+            );
         }
 
-        return content;
+        return dataTable;
     }
 
     private static string FormatLastOutput(JobItem job)
