@@ -243,6 +243,10 @@ planTemplate: |
 
   ## Tests
 
-  (specify all tests we need to write to ensure new functionality)
+  **New tests:**
+  (specify tests to write for new functionality, or "None" if no new tests needed)
+
+  **Test scope (dotnet test --filter):**
+  (specify filter expression to limit DotnetTest to relevant tests, e.g. `FullyQualifiedName~Namespace.TestClass`)
 
   ## Verification
