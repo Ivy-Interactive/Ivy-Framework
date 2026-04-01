@@ -98,6 +98,7 @@ public class JobsApp : ViewBase
                 new MenuItem(Label: "View Output", Icon: Icons.ScrollText, Tag: "view-output").Tooltip("View full job output"),
                 new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
                 new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
+                new MenuItem(Label: "Rerun", Icon: Icons.RotateCw, Tag: "rerun-job").Tooltip("Rerun this job"),
                 new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job").Tooltip("Delete this job")
             )
             .OnRowAction(e =>
@@ -134,6 +135,14 @@ public class JobsApp : ViewBase
                         if (job.Status != "Running" && job.OutputLines.Count > 0)
                         {
                             showOutput.Set(string.Join("\n", job.OutputLines));
+                        }
+                    }
+                    else if (tag == "rerun-job")
+                    {
+                        if (job.Status is "Failed" or "Timeout" or "Stopped")
+                        {
+                            jobService.StartJob(job.Type, job.Args);
+                            refreshToken.Refresh();
                         }
                     }
                     else if (tag == "delete-job")
