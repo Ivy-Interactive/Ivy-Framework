@@ -1412,3 +1412,68 @@ describe("validateEmbedUrl", () => {
     });
   });
 });
+
+describe("getShellParam", () => {
+  const originalLocation = window.location;
+
+  function setSearch(search: string) {
+    Object.defineProperty(window, "location", {
+      value: { ...originalLocation, search },
+      writable: true,
+      configurable: true,
+    });
+  }
+
+  afterEach(() => {
+    Object.defineProperty(window, "location", {
+      value: originalLocation,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it("should return true when no parameter is present", () => {
+    setSearch("");
+    expect(utils.getShellParam()).toBe(true);
+  });
+
+  it("should return false when shell=false", () => {
+    setSearch("?shell=false");
+    expect(utils.getShellParam()).toBe(false);
+  });
+
+  it("should return true when shell=true", () => {
+    setSearch("?shell=true");
+    expect(utils.getShellParam()).toBe(true);
+  });
+
+  it("should return false when chrome=false (backwards compatibility)", () => {
+    setSearch("?chrome=false");
+    expect(utils.getShellParam()).toBe(false);
+  });
+
+  it("should return true when chrome=true", () => {
+    setSearch("?chrome=true");
+    expect(utils.getShellParam()).toBe(true);
+  });
+
+  it("should prefer shell over chrome when both present", () => {
+    setSearch("?shell=true&chrome=false");
+    expect(utils.getShellParam()).toBe(true);
+  });
+
+  it("should prefer shell=false over chrome=true when both present", () => {
+    setSearch("?shell=false&chrome=true");
+    expect(utils.getShellParam()).toBe(false);
+  });
+
+  it("should be case-insensitive for shell value", () => {
+    setSearch("?shell=FALSE");
+    expect(utils.getShellParam()).toBe(false);
+  });
+
+  it("should be case-insensitive for chrome value", () => {
+    setSearch("?chrome=False");
+    expect(utils.getShellParam()).toBe(false);
+  });
+});
