@@ -414,11 +414,11 @@ public class ContentView(
                 new DialogHeader($"Custom PR for #{_selectedPlan.Id}"),
                 new DialogBody(
                     Layout.Vertical().Gap(2)
-                        | customPrApprove.ToCheckbox("Approve")
-                        | customPrMerge.ToCheckbox("Merge").Disabled(!customPrApprove.Value)
-                        | customPrDeleteBranch.ToCheckbox("Delete Branch").Disabled(!customPrMerge.Value || !customPrApprove.Value)
-                        | customPrIncludeArtifacts.ToCheckbox("Include Artifacts")
-                        | customPrSubmitToSlack.ToCheckbox("Submit to Slack")
+                        | customPrApprove.ToBoolInput("Approve")
+                        | customPrMerge.ToBoolInput("Merge", disabled: !customPrApprove.Value)
+                        | customPrDeleteBranch.ToBoolInput("Delete Branch", disabled: !customPrMerge.Value || !customPrApprove.Value)
+                        | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
+                        | customPrSubmitToSlack.ToBoolInput("Submit to Slack")
                         | customPrAssignee.ToTextInput("Assignee")
                         | customPrComment.ToTextareaInput("Comment").Rows(3)
                 ),
