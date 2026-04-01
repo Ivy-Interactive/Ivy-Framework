@@ -2,6 +2,7 @@ using Ivy;
 using Ivy.Core;
 using Ivy.Hooks;
 using Ivy.Tendril.Apps.Plans;
+using Ivy.Tendril.Apps.Review.Dialogs;
 using Ivy.Tendril.Services;
 using Ivy.Widgets.DiffView;
 using YamlDotNet.Serialization;
@@ -36,6 +37,7 @@ public class ContentView(
         var openArtifact = UseState<string?>(null);
         var openFile = UseState<string?>(null);
         var openCommit = UseState<string?>(null);
+        var discardDialogOpen = UseState(false);
         var suggestChangesOpen = UseState(false);
         var suggestChangesText = UseState("");
         var customPrOpen = UseState(false);
@@ -450,6 +452,9 @@ public class ContentView(
             ).Width(Size.Rem(30));
         }
 
+        // Discard confirmation dialog
+        content |= new DiscardPlanDialog(discardDialogOpen, _selectedPlan, _planService, _refreshPlans);
+
         // Action bar
         var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
             | new Button("Suggest Changes").Icon(Icons.MessageSquare).Outline().OnClick(() =>
@@ -458,8 +463,7 @@ public class ContentView(
             }).ShortcutKey("d")
             | new Button("Discard").Icon(Icons.Trash).Outline().OnClick(() =>
             {
-                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Skipped);
-                _refreshPlans();
+                discardDialogOpen.Set(true);
             })
             | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
             | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
