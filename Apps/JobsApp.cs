@@ -93,10 +93,10 @@ public class JobsApp : ViewBase
                 return ValueTask.CompletedTask;
             })
             .RowActions(
-                new MenuItem(Label: "Show Command", Icon: Icons.Terminal, Tag: "show-command"),
-                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan"),
-                new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job"),
-                new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job")
+                new MenuItem(Label: "Show Command", Icon: Icons.Terminal, Tag: "show-command").Tooltip("Show the PowerShell command"),
+                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
+                new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
+                new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job").Tooltip("Delete this job")
             )
             .OnRowAction(e =>
             {
