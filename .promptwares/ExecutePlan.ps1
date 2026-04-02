@@ -76,6 +76,7 @@ try {
         if ($hasFailed -or $hasPending) {
             UpdatePlanState $PlanPath "Failed"
             Write-Host "Plan has incomplete or failed verifications" -ForegroundColor Red
+            exit 1  # Signal failure to JobService
         } else {
             UpdatePlanState $PlanPath "ReadyForReview"
             Write-Host "Plan execution completed - ready for review" -ForegroundColor Green

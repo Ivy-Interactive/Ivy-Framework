@@ -397,8 +397,17 @@ public class JobService
             var currentState = stateMatch.Groups[1].Value.Trim();
             if (currentState is "Executing" or "Building")
             {
+                // Check verification statuses before deciding target state
+                var verificationStatuses = System.Text.RegularExpressions.Regex.Matches(content, @"(?m)^\s+status:\s*(.+)$")
+                    .Cast<System.Text.RegularExpressions.Match>()
+                    .Select(m => m.Groups[1].Value.Trim())
+                    .ToList();
+
+                var hasIncomplete = verificationStatuses.Any(s => s is "Pending" or "Fail");
+                var targetState = hasIncomplete ? "Failed" : "ReadyForReview";
+
                 content = System.Text.RegularExpressions.Regex.Replace(
-                    content, @"(?m)^state:\s*.*$", "state: ReadyForReview");
+                    content, @"(?m)^state:\s*.*$", $"state: {targetState}");
                 content = System.Text.RegularExpressions.Regex.Replace(
                     content, @"(?m)^updated:\s*.*$", $"updated: {DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}");
                 File.WriteAllText(planYamlPath, content);
