@@ -114,6 +114,18 @@ public class ContentView(
         // Content sections
         var content = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)));
 
+        // Recommendations
+        var recommendationsPath = Path.Combine(_selectedPlan.FolderPath, "artifacts", "recommendations.yaml");
+        var recommendations = new List<RecommendationItem>();
+        if (File.Exists(recommendationsPath))
+        {
+            var recDeserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+            recommendations = recDeserializer.Deserialize<List<RecommendationItem>>(
+                File.ReadAllText(recommendationsPath)) ?? new();
+        }
+
         // Summary tab content
         var summaryPath = Path.Combine(_selectedPlan.FolderPath, "artifacts", "summary.md");
         var hasSummary = File.Exists(summaryPath);
@@ -326,6 +338,31 @@ public class ContentView(
             content |= actionsBar;
         }
 
+        // Recommendations tab content
+        var recommendationsLayout = Layout.Vertical().Gap(4).Padding(2);
+        if (recommendations.Count == 0)
+        {
+            recommendationsLayout |= Text.Muted("No recommendations.");
+        }
+        else
+        {
+            foreach (var rec in recommendations)
+            {
+                var recCapture = rec;
+                var card = Layout.Vertical().Gap(1)
+                    | Text.Block(rec.Title).Bold()
+                    | new Markdown(rec.Description).DangerouslyAllowLocalFiles()
+                    | new Button("Make Draft").Icon(Icons.Plus).Outline().Small().OnClick(() =>
+                    {
+                        _jobService.StartJob("MakePlan",
+                            "-Description", $"[FORCE] {_selectedPlan.Project}: {recCapture.Title}\n\n{recCapture.Description}",
+                            "-Project", _selectedPlan.Project);
+                    });
+                recommendationsLayout |= card;
+                recommendationsLayout |= new Separator();
+            }
+        }
+
         // Build tabs
         var tabs = new TabsLayout(
             onSelect: e => selectedTab.Set(e.Value),
@@ -338,6 +375,7 @@ public class ContentView(
             new Tab("Commits", commitsTable).Badge(_selectedPlan.Commits.Count.ToString()),
             new Tab("PRs", prsTable).Badge(_selectedPlan.Prs.Count.ToString()),
             new Tab("Artifacts", artifactsLayout).Badge(totalArtifacts.ToString()),
+            new Tab("Recommendations", recommendationsLayout).Badge(recommendations.Count.ToString()),
             new Tab("Plan", planTabContent)
         ).Variant(TabsVariant.Content);
 

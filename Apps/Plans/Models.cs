@@ -38,6 +38,12 @@ public record PlanFile(
     public string FolderName => Path.GetFileName(FolderPath);
 }
 
+public class RecommendationItem
+{
+    public string Title { get; set; } = "";
+    public string Description { get; set; } = "";
+}
+
 public static class PlanFilters
 {
     public static IEnumerable<PlanFile> ApplyFilters(
