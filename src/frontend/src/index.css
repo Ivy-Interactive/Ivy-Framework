@@ -76,6 +76,8 @@ ivy-widget {
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
+    --ivy-green: #00cc92;
+    --ivy-green-foreground: #ffffff;
     --color-ivy-green: var(--ivy-green);
     --color-ivy-green-foreground: var(--ivy-green-foreground);
 
