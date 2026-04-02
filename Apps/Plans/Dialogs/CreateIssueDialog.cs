@@ -62,7 +62,7 @@ public class CreateIssueDialog(
             new DialogBody(
                 Layout.Vertical().Gap(3)
                     | _selectedRepoState.ToSelectInput(repositoryOptions.ToOptions())
-                        .WithField().Label("Repository").Required()
+                        .AutoFocus().WithField().Label("Repository").Required()
                     | _issueAssigneeState.ToSelectInput(assignees.ToOptions())
                         .Nullable().WithField().Label("Assignee")
                     | _issueLabelsState.ToSelectInput(labels.ToOptions())

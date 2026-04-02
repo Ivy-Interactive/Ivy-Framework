@@ -28,7 +28,7 @@ public class UpdatePlanDialog(
             new DialogBody(
                 Layout.Vertical()
                     | Text.P("Provide instructions for updating this plan.")
-                    | _updateText.ToTextareaInput("Enter update instructions...").Rows(6)
+                    | _updateText.ToTextareaInput("Enter update instructions...").Rows(6).AutoFocus()
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => { _updateText.Set(""); _dialogOpen.Set(false); }),
