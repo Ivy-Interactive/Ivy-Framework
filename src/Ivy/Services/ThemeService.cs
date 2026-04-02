@@ -112,9 +112,9 @@ public class ThemeService : IThemeService
         AppendColorVariable(sb, "--popover", colors.Popover ?? defaults.Popover);
         AppendColorVariable(sb, "--popover-foreground", colors.PopoverForeground ?? defaults.PopoverForeground);
 
-        // Brand colors (Ivy green for logo and branding elements)
-        AppendColorVariable(sb, "--brand", colors.Brand ?? defaults.Brand);
-        AppendColorVariable(sb, "--brand-foreground", colors.BrandForeground ?? defaults.BrandForeground);
+        // Ivy green for logo and branding elements
+        AppendColorVariable(sb, "--ivy-green", colors.IvyGreen ?? defaults.IvyGreen);
+        AppendColorVariable(sb, "--ivy-green-foreground", colors.IvyGreenForeground ?? defaults.IvyGreenForeground);
     }
 
     private void AppendNeutralColors(StringBuilder sb)

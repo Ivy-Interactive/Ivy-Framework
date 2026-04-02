@@ -76,8 +76,8 @@ ivy-widget {
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
-    --color-brand: var(--brand);
-    --color-brand-foreground: var(--brand-foreground);
+    --color-ivy-green: var(--ivy-green);
+    --color-ivy-green-foreground: var(--ivy-green-foreground);
 
     /* Neutral colors - reference CSS variables injected by the backend */
     --color-black: var(--black);
@@ -166,11 +166,11 @@ ivy-widget {
 
   /* Ensure sidebar icons and logo use primary brand color */
   [data-sidebar="sidebar"] .text-primary {
-    color: var(--brand) !important;
+    color: var(--ivy-green) !important;
   }
 
   [data-sidebar="sidebar"] svg[fill="currentColor"] {
-    color: var(--brand);
+    color: var(--ivy-green);
   }
 }
 

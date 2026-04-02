@@ -165,9 +165,7 @@ public class ThemeCustomizer : SampleBase
             Card = source.Card,
             CardForeground = source.CardForeground,
             Popover = source.Popover,
-            PopoverForeground = source.PopoverForeground,
-            Brand = source.Brand,
-            BrandForeground = source.BrandForeground
+            PopoverForeground = source.PopoverForeground
         };
     }
 
@@ -258,9 +256,7 @@ public class ThemeCustomizer : SampleBase
                             | new ThemeColorPicker(currentColors.Secondary ?? "#000000", e => UpdateColor(c => c.Secondary = e.Value), placeholder: "Secondary").AllowAlpha().WithField().Medium().Description("Secondary").WithTooltip($"Secondary: {currentColors.Secondary ?? "#000000"}")
                             | new ThemeColorPicker(currentColors.SecondaryForeground ?? "#000000", e => UpdateColor(c => c.SecondaryForeground = e.Value), placeholder: "Secondary Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Secondary Foreground: {currentColors.SecondaryForeground ?? "#000000"}")
                             | new ThemeColorPicker(currentColors.Background ?? "#000000", e => UpdateColor(c => c.Background = e.Value), placeholder: "Background").AllowAlpha().WithField().Medium().Description("Background").WithTooltip($"Background: {currentColors.Background ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Foreground ?? "#000000", e => UpdateColor(c => c.Foreground = e.Value), placeholder: "Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Foreground: {currentColors.Foreground ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.Brand ?? "#000000", e => UpdateColor(c => c.Brand = e.Value), placeholder: "Brand").AllowAlpha().WithField().Medium().Description("Brand").WithTooltip($"Brand: {currentColors.Brand ?? "#000000"}")
-                            | new ThemeColorPicker(currentColors.BrandForeground ?? "#000000", e => UpdateColor(c => c.BrandForeground = e.Value), placeholder: "Brand Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Brand Foreground: {currentColors.BrandForeground ?? "#000000"}"))
+                            | new ThemeColorPicker(currentColors.Foreground ?? "#000000", e => UpdateColor(c => c.Foreground = e.Value), placeholder: "Foreground").Foreground(true).AllowAlpha().WithField().Medium().Description("\u00A0").WithTooltip($"Foreground: {currentColors.Foreground ?? "#000000"}"))
 
                         | new Separator()
 
@@ -474,8 +470,7 @@ public class ThemeCustomizer : SampleBase
                     | new ColorPreview("Warning", theme.Colors.Light.Warning, theme.Colors.Light.WarningForeground)
                     | new ColorPreview("Info", theme.Colors.Light.Info, theme.Colors.Light.InfoForeground)
                     | new ColorPreview("Muted", theme.Colors.Light.Muted, theme.Colors.Light.MutedForeground)
-                    | new ColorPreview("Accent", theme.Colors.Light.Accent, theme.Colors.Light.AccentForeground)
-                    | new ColorPreview("Brand", theme.Colors.Light.Brand, theme.Colors.Light.BrandForeground))
+                    | new ColorPreview("Accent", theme.Colors.Light.Accent, theme.Colors.Light.AccentForeground))
 
                 | Text.H3("Dark Theme Colors")
                 | (Layout.Grid().Columns(2)
@@ -486,8 +481,7 @@ public class ThemeCustomizer : SampleBase
                     | new ColorPreview("Warning", theme.Colors.Dark.Warning, theme.Colors.Dark.WarningForeground)
                     | new ColorPreview("Info", theme.Colors.Dark.Info, theme.Colors.Dark.InfoForeground)
                     | new ColorPreview("Muted", theme.Colors.Dark.Muted, theme.Colors.Dark.MutedForeground)
-                    | new ColorPreview("Accent", theme.Colors.Dark.Accent, theme.Colors.Dark.AccentForeground)
-                    | new ColorPreview("Brand", theme.Colors.Dark.Brand, theme.Colors.Dark.BrandForeground));
+                    | new ColorPreview("Accent", theme.Colors.Dark.Accent, theme.Colors.Dark.AccentForeground));
         }
     }
 
@@ -876,9 +870,7 @@ var server = new Server()
                 Card = ""{lightColors.Card}"",
                 CardForeground = ""{lightColors.CardForeground}"",
                 Popover = ""{lightColors.Popover}"",
-                PopoverForeground = ""{lightColors.PopoverForeground}"",
-                Brand = ""{lightColors.Brand}"",
-                BrandForeground = ""{lightColors.BrandForeground}""
+                PopoverForeground = ""{lightColors.PopoverForeground}""
             }},
             Dark = new ThemeColors
             {{
@@ -906,9 +898,7 @@ var server = new Server()
                 Card = ""{darkColors.Card}"",
                 CardForeground = ""{darkColors.CardForeground}"",
                 Popover = ""{darkColors.Popover}"",
-                PopoverForeground = ""{darkColors.PopoverForeground}"",
-                Brand = ""{darkColors.Brand}"",
-                BrandForeground = ""{darkColors.BrandForeground}""
+                PopoverForeground = ""{darkColors.PopoverForeground}""
             }}
         }}
         theme.FontFamily = ""{theme.FontFamily}"";

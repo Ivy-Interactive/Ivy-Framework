@@ -38,5 +38,5 @@ public enum Colors
     Warning,
     Info,
     Muted,
-    Brand
+    IvyGreen
 }

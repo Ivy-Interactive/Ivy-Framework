@@ -74,8 +74,8 @@ public class ThemeColors
     public string? CardForeground { get; set; }
     public string? Popover { get; set; }
     public string? PopoverForeground { get; set; }
-    public string? Brand { get; set; }
-    public string? BrandForeground { get; set; }
+    public string? IvyGreen { get; set; }
+    public string? IvyGreenForeground { get; set; }
 
     public static ThemeColors DefaultLight => new()
     {
@@ -104,8 +104,8 @@ public class ThemeColors
         CardForeground = IvyFrameworkLightThemeTokens.Color.CardForeground,
         Popover = IvyFrameworkLightThemeTokens.Color.Popover,
         PopoverForeground = IvyFrameworkLightThemeTokens.Color.PopoverForeground,
-        Brand = IvyFrameworkLightThemeTokens.Color.Primary,
-        BrandForeground = IvyFrameworkLightThemeTokens.Color.PrimaryForeground
+        IvyGreen = IvyFrameworkLightThemeTokens.Color.Primary,
+        IvyGreenForeground = IvyFrameworkLightThemeTokens.Color.PrimaryForeground
     };
 
     public static ThemeColors DefaultDark => new()
@@ -135,7 +135,7 @@ public class ThemeColors
         CardForeground = IvyFrameworkDarkThemeTokens.Color.CardForeground,
         Popover = IvyFrameworkDarkThemeTokens.Color.Popover,
         PopoverForeground = IvyFrameworkDarkThemeTokens.Color.PopoverForeground,
-        Brand = IvyFrameworkDarkThemeTokens.Color.Primary,
-        BrandForeground = IvyFrameworkDarkThemeTokens.Color.PrimaryForeground
+        IvyGreen = IvyFrameworkDarkThemeTokens.Color.Primary,
+        IvyGreenForeground = IvyFrameworkDarkThemeTokens.Color.PrimaryForeground
     };
 }

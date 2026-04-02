@@ -123,9 +123,7 @@ var server = new Server()
                 Card = "#FFFFFF",
                 CardForeground = "#1A1A1A",
                 Popover = "#FFFFFF",
-                PopoverForeground = "#1A1A1A",
-                Brand = "#22C55E",
-                BrandForeground = "#FFFFFF"
+                PopoverForeground = "#1A1A1A"
             },
             Dark = new ThemeColors
             {
@@ -153,9 +151,7 @@ var server = new Server()
                 Card = "#0F2A4A",
                 CardForeground = "#E8F4FD",
                 Popover = "#001122",
-                PopoverForeground = "#E8F4FD",
-                Brand = "#4ADE80",
-                BrandForeground = "#001122"
+                PopoverForeground = "#E8F4FD"
             }
         };
     });
