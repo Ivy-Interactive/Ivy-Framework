@@ -669,6 +669,28 @@ cp src/RustServer/target/release/rustserver.dll src/RustServer/artifacts/native/
 ✅ **Workaround 2**: Use `force: true` on Playwright clicks (but Ivy event handling may not process forced clicks reliably)
 📝 **Why**: `DataTableOption` with `displayMode="inline"` and `inlineDirection="right"` renders a collapsible panel to the right of the filter icon. Even when collapsed, the container div (`h-full w-[450px] flex items-center`) remains in the DOM and intercepts pointer events over the adjacent HeaderLeft slot content.
 
+## Size API
+
+### Size.Pixels() doesn't exist
+❌ **`Size.Pixels(200)`** — no such method
+✅ **`Size.Px(200)`** — correct method for pixel sizes
+📝 **Available methods**: `Size.Px(int)`, `Size.Rem(int)`, `Size.Units(int)`, `Size.Fraction(float)`, `Size.Full()`, `Size.Fit()`, `Size.Screen()`, `Size.MinContent()`, `Size.MaxContent()`, `Size.Auto()`, `Size.Grow()`, `Size.Shrink()`, `Size.Half()`, `Size.Third()`, `Size.Percent(int)`
+
+## Image Widget MinContent Default Causes Hidden Elements in Playwright
+
+### Images with default sizing are invisible before HTTP load completes
+❌ **`new Image("https://example.com/img.jpg") { Overlay = true }`** — Playwright considers this "hidden" because `Width = MinContent` + `Height = MinContent` defaults produce 0x0 dimensions until the image loads from the network
+✅ **`new Image("https://example.com/img.jpg") { Overlay = true, Width = Size.Px(200), Height = Size.Px(150) }`** — explicit pixel dimensions ensure the element is visible immediately
+📝 **Why**: `Image` defaults to `Width = Size.MinContent()` and `Height = Size.MinContent()`. Before the browser loads the remote image, `<img>` has intrinsic size 0x0. Playwright's `toBeVisible()` requires non-zero dimensions. Always set explicit `Width`/`Height` in test apps using external image URLs.
+
+## RefreshToken API
+
+### Method is `.Refresh()`, not `.Trigger()`
+❌ **`refreshToken.Trigger()`** — no such method; causes CS1501
+✅ **`refreshToken.Refresh()`** — correct method to signal data refresh
+✅ **`refreshToken.Refresh(returnValue)`** — optional return value parameter
+📝 **Why**: `RefreshToken` wraps an `IState<(Guid, object?, bool)>` tuple. `.Refresh()` generates a new GUID to trigger state change. The class implements `IEffectTriggerConvertible` via `.ToTrigger()` for `UseEffect` dependencies.
+
 ## Future Gotchas to Document
 
 As we encounter more issues during feature testing, add them here with:
