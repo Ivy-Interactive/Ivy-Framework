@@ -29,14 +29,32 @@ If the changes are non-visual (docs, analyzers, refactoring, code-only fixes), w
 - Read relevant source code for the changed feature from `D:\Repos\_Ivy\Ivy-Framework\src\`
 - Read existing samples: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Samples.Shared\Apps\`
 
-### 3. Verify Completeness (Widgets Only)
+### 3. Verify Completeness
 
-If the feature is a **widget**, check that required companion artifacts exist:
+Check that required companion artifacts exist for the feature being verified:
 
-1. **Sample App**: Search `D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Samples.Shared\Apps\` for files containing the widget name
-2. **Documentation Page**: Search `D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Docs.Shared\Docs\02_Widgets\` for a matching `.md` file
+1. **Identify the feature type** from the plan revision:
+   - Widget (new or modified widget class)
+   - Hook (new or modified hook)
+   - Concept (new layout, form feature, navigation, etc.)
+   - Bugfix/Refactor (internal change, no new public API)
 
-Record results for the report. Skip for non-widget features.
+2. **Sample App**: Search `D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Samples.Shared\Apps\` for files that demonstrate the feature:
+   - Widgets → search by widget class name in `Apps/Widgets/`
+   - Hooks → search by hook name (e.g. `UseQuery`) across all `Apps/`
+   - Concepts → search by concept name across `Apps/Concepts/`
+   - Bugfix/Refactor → skip (no sample expected)
+
+3. **Documentation Page**: Search `D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Docs.Shared\Docs\` for documentation:
+   - Widgets → `Docs/02_Widgets/`
+   - Hooks → `Docs/03_Hooks/`
+   - Concepts → `Docs/01_Onboarding/02_Concepts/`
+   - Other → broad search across all `Docs/`
+   - Bugfix/Refactor → skip (no doc expected)
+
+4. If the plan's commits modified an existing Sample or Doc file, verify the changes are present in the worktree.
+
+Record results for the report. For missing artifacts on new features, flag as a warning.
 
 ### 4. Create Sample Project
 
@@ -186,12 +204,12 @@ Write to `<VerificationDir>/IvyFrameworkVerification.md`:
 
 <description of what was verified>
 
-## Completeness (Widgets Only)
+## Completeness
 
 | Artifact | Status | Path |
 |----------|--------|------|
-| Sample App | Found/Missing | path or N/A |
-| Documentation | Found/Missing | path or N/A |
+| Sample App | Found/Missing/N/A | path or N/A |
+| Documentation | Found/Missing/N/A | path or N/A |
 
 ## Props Tested
 
