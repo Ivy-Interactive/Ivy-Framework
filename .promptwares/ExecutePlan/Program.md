@@ -123,6 +123,23 @@ Focus on **what changed** (past tense), not what the plan said to do. Emphasize 
 
 Update the summary after verification fixes too — if verifications cause additional commits, append those changes to the summary.
 
+### 5.7. Generate Recommendations
+
+If during implementation you discovered any of the following, record them in `<PlanFolder>/artifacts/recommendations.yaml`:
+- Follow-up work or improvements not in scope of this plan
+- Code quality issues in surrounding code
+- Unrelated bugs encountered
+- Potential optimizations or refactors
+
+Each recommendation is a YAML list item with `title` (short) and `description` (markdown). Only create the file if there are actual recommendations. Do NOT include items that are part of the current plan's scope.
+
+Format:
+```yaml
+- title: "Short descriptive title"
+  description: |
+    Markdown description with context.
+```
+
 ### 6. Document Commits
 
 Update `plan.yaml` in the plan folder (NOT in the worktree). Use the Edit tool on the original `plan.yaml` at the `PlanFolder` path.
