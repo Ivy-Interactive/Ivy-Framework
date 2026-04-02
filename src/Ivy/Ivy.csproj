@@ -41,7 +41,6 @@
     <EmbeddedResource Include="../../AGENTS.md" Link="AGENTS.md" />
     <None Include="../../AGENTS.md" Pack="true" PackagePath="" />
     <None Include="../Ivy.Docs.Shared/Generated/**/*.md" Pack="true" PackagePath="docs/generated" Visible="false" />
-    <EmbeddedResource Include="../frontend/dist/**/*" Visible="false" />
     <EmbeddedResource Include="../frontend/src/routing-constants.json" LogicalName="RoutingConstants" Visible="false" />
   </ItemGroup>
   
@@ -113,6 +112,12 @@
           Outputs="../frontend/dist/.build-stamp">
     <Exec Command="vp run build" WorkingDirectory="../frontend" />
     <Touch Files="../frontend/dist/.build-stamp" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="EmbedFrontendResources" AfterTargets="BuildFrontend" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <EmbeddedResource Include="../frontend/dist/**/*" Visible="false" />
+    </ItemGroup>
   </Target>
 
   <Target Name="BuildRustServer" BeforeTargets="BeforeBuild">
