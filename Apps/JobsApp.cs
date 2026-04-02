@@ -188,7 +188,7 @@ public class JobsApp : ViewBase
                     onClose: () => showCommand.Set(null),
                     content: new Markdown($"```\n{cmd}\n```"),
                     title: "Promptware Command"
-                ).Width(Size.Half())
+                ).Width(Size.Half()).Resizable()
             );
         }
 
@@ -200,7 +200,7 @@ public class JobsApp : ViewBase
                     onClose: () => showOutput.Set(null),
                     content: new Markdown($"```\n{output}\n```"),
                     title: "Job Output"
-                ).Width(Size.Full())
+                ).Width(Size.Full()).Resizable()
             );
         }
 

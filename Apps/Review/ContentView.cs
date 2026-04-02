@@ -293,7 +293,7 @@ public class ContentView(
                 onClose: () => openVerification.Set(null),
                 content: new Markdown(reportContent).DangerouslyAllowLocalFiles(),
                 title: verName
-            ).Width(Size.Half());
+            ).Width(Size.Half()).Resizable();
         }
 
         if (openCommit.Value is { } commitHash)
@@ -348,7 +348,7 @@ public class ContentView(
                 onClose: () => openCommit.Set(null),
                 content: commitSheetContent,
                 title: $"Commit {shortHash} — {commitTitle}"
-            ).Width(Size.Half());
+            ).Width(Size.Half()).Resizable();
         }
 
         if (openArtifact.Value is { } artifactPath)
@@ -373,7 +373,7 @@ public class ContentView(
                 onClose: () => openArtifact.Set(null),
                 content: artifactSheetContent,
                 title: Path.GetFileName(artifactPath)
-            ).Width(Size.Half());
+            ).Width(Size.Half()).Resizable();
         }
 
         if (openFile.Value is { } filePath2)
@@ -412,7 +412,7 @@ public class ContentView(
                 onClose: () => openFile.Set(null),
                 content: fileSheetContent,
                 title: Path.GetFileName(filePath2)
-            ).Width(Size.Half());
+            ).Width(Size.Half()).Resizable();
         }
 
         // Suggest Changes dialog
