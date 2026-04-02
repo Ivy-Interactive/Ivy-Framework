@@ -86,6 +86,7 @@ interface NumberInputBaseProps {
   prefix?: Affix;
   suffix?: Affix;
   noGrouping?: boolean;
+  autoFocus?: boolean;
   events?: string[];
 }
 
@@ -93,6 +94,7 @@ interface NumberInputWidgetProps extends Omit<NumberInputBaseProps, "onValueChan
   variant?: "Number" | "Slider";
   targetType?: string;
   width?: string;
+  autoFocus?: boolean;
 }
 
 // Function to validate and cap values based on target type
@@ -246,6 +248,7 @@ const NumberVariant = memo(
     prefix,
     suffix,
     noGrouping,
+    autoFocus,
     "data-testid": dataTestId,
   }: NumberInputBaseProps) => {
     const isBytesFormat = formatStyle === "Bytes";
@@ -321,6 +324,7 @@ const NumberVariant = memo(
             value={value ?? (nullable ? null : 0)}
             disabled={disabled}
             density={density}
+            autoFocus={autoFocus}
             onChange={handleNumberChange}
             onBlur={onBlur}
             onFocus={onFocus}

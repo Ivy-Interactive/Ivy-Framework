@@ -7,6 +7,7 @@ interface ReadOnlyInputWidgetProps {
   id: string;
   value: string | number | boolean | null | undefined;
   showCopyButton?: boolean;
+  autoFocus?: boolean;
   events?: string[];
 }
 
@@ -15,6 +16,7 @@ export const ReadOnlyInputWidget: React.FC<ReadOnlyInputWidgetProps> = ({
   value,
   showCopyButton = true,
   events = EMPTY_ARRAY,
+  autoFocus,
 }) => {
   const eventHandler = useEventHandler();
   return (
@@ -28,6 +30,7 @@ export const ReadOnlyInputWidget: React.FC<ReadOnlyInputWidgetProps> = ({
         if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
       }}
       tabIndex={0}
+      autoFocus={autoFocus}
     >
       <div className="flex-1">{value != null && value !== "" ? String(value) : "-"}</div>
       {showCopyButton && <CopyToClipboardButton textToCopy={String(value || "")} label="" />}

@@ -133,6 +133,12 @@ public class ButtonApp() : SampleBase
                    | new Button("Full Rounded", eventHandler, variant: ButtonVariant.Ai).BorderRadius(BorderRadius.Full)
                )
 
+               | Text.H2("Auto Focus")
+               | (Layout.Horizontal().Gap(8)
+                   | new Button("Focused on Load", eventHandler, variant: ButtonVariant.Primary).AutoFocus()
+                   | new Button("Not Focused", eventHandler, variant: ButtonVariant.Secondary)
+               )
+
                | Text.H2("Badges")
                | (Layout.Horizontal().Gap(8)
                    | new Button("Inbox", eventHandler).Badge("3").ShortcutKey("i")

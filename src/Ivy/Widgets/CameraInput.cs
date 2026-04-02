@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
@@ -27,6 +28,8 @@ public record CameraInput : WidgetBase<CameraInput>, IAnyInput
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
     [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     public Type[] SupportedStateTypes() => [];
 }
 
@@ -40,4 +43,27 @@ public static class CameraInputExtensions
 
     public static CameraInput FacingMode(this CameraInput widget, string facingMode)
         => widget with { FacingMode = facingMode };
+
+    public static CameraInput AutoFocus(this CameraInput widget, bool autoFocus = true)
+        => widget with { AutoFocus = autoFocus };
+
+    [OverloadResolutionPriority(1)]
+    public static CameraInput OnBlur(this CameraInput widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+        => widget with { OnBlur = new(onBlur) };
+
+    public static CameraInput OnBlur(this CameraInput widget, Action<Event<IAnyInput>> onBlur)
+        => widget with { OnBlur = new(onBlur.ToValueTask()) };
+
+    public static CameraInput OnBlur(this CameraInput widget, Action onBlur)
+        => widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
+
+    [OverloadResolutionPriority(1)]
+    public static CameraInput OnFocus(this CameraInput widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+        => widget with { OnFocus = new(onFocus) };
+
+    public static CameraInput OnFocus(this CameraInput widget, Action<Event<IAnyInput>> onFocus)
+        => widget with { OnFocus = new(onFocus.ToValueTask()) };
+
+    public static CameraInput OnFocus(this CameraInput widget, Action onFocus)
+        => widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
 }

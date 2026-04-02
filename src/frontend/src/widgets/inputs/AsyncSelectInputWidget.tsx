@@ -53,6 +53,7 @@ interface AsyncSelectInputWidgetProps {
   invalid?: string;
   density?: Densities;
   ghost?: boolean;
+  autoFocus?: boolean;
   events?: string[];
 }
 
@@ -65,6 +66,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   loading,
   density = Densities.Medium,
   ghost = false,
+  autoFocus,
   events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
@@ -144,6 +146,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
       <button
         type="button"
         disabled={disabled}
+        autoFocus={autoFocus}
         onClick={handleSelect}
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget)) {

@@ -56,6 +56,8 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Prop] public double? Min { get; set; }
 
     [Prop] public double? Max { get; set; }

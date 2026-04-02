@@ -36,6 +36,9 @@ public class DataTableColumn
 
     [JsonIgnore]
     public IDataTableColumnRenderer? Renderer { get; set; } = null;
+
+    [JsonIgnore]
+    public Func<object, object?>? ValueAccessor { get; set; } = null;
 }
 
 public enum SortDirection

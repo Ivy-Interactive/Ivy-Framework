@@ -28,6 +28,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
   min,
   max,
   density = Densities.Medium,
+  autoFocus,
   "data-testid": dataTestId,
   onFocusChange,
 }) => {
@@ -71,6 +72,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
           <Button
             disabled={disabled}
             variant="outline"
+            autoFocus={autoFocus}
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),

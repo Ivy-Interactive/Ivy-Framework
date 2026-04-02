@@ -32,6 +32,7 @@ interface BoolInputWidgetProps {
   variant: VariantType;
   icon?: string;
   density?: Densities;
+  autoFocus?: boolean;
   events?: string[];
   "data-testid"?: string;
 }
@@ -46,6 +47,7 @@ interface BaseVariantProps {
   disabled: boolean;
   loading: boolean;
   density?: Densities;
+  autoFocus?: boolean;
   "data-testid"?: string;
 }
 
@@ -62,6 +64,7 @@ interface SwitchVariantProps extends BaseVariantProps {
 interface ToggleVariantProps extends BaseVariantProps {
   icon?: string;
   onPressedChange: (pressed: boolean) => void;
+  autoFocus?: boolean;
 }
 
 const InputLabel: React.FC<{
@@ -127,6 +130,7 @@ const VariantComponents = {
       nullable,
       invalid,
       density = Densities.Medium,
+      autoFocus,
       onCheckedChange,
       "data-testid": dataTestId,
     }: CheckboxVariantProps) => {
@@ -138,6 +142,7 @@ const VariantComponents = {
             onCheckedChange={onCheckedChange}
             disabled={disabled || loading}
             nullable={nullable}
+            autoFocus={autoFocus}
             className={cn(invalid && inputStyles.invalid)}
             data-testid={dataTestId}
           />
@@ -176,6 +181,7 @@ const VariantComponents = {
       loading,
       invalid,
       density = Densities.Medium,
+      autoFocus,
       icon,
       onCheckedChange,
       "data-testid": dataTestId,
@@ -188,6 +194,7 @@ const VariantComponents = {
             onCheckedChange={onCheckedChange}
             disabled={disabled || loading}
             icon={icon}
+            autoFocus={autoFocus}
             className={cn(invalid && inputStyles.invalid)}
             data-testid={dataTestId}
           />
@@ -227,6 +234,7 @@ const VariantComponents = {
       icon,
       invalid,
       density = Densities.Medium,
+      autoFocus,
       onPressedChange,
       "data-testid": dataTestId,
     }: ToggleVariantProps) => {
@@ -238,6 +246,7 @@ const VariantComponents = {
             onPressedChange={onPressedChange}
             disabled={disabled || loading}
             aria-label={label}
+            autoFocus={autoFocus}
             className={cn(invalid && inputStyles.invalid)}
             data-testid={dataTestId}
           >
@@ -281,6 +290,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   variant = "Checkbox",
   icon,
   density = Densities.Medium,
+  autoFocus,
   events = EMPTY_ARRAY,
   "data-testid": dataTestId,
 }) => {
@@ -326,6 +336,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
         icon={icon}
         invalid={invalid}
         density={density}
+        autoFocus={autoFocus}
         onCheckedChange={handleChange}
         onPressedChange={handleChange}
         data-testid={dataTestId}

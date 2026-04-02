@@ -11,6 +11,7 @@ const SyntaxHighlighter = lazy(() =>
 );
 
 const MermaidRenderer = lazy(() => import("../MermaidRenderer"));
+const GraphvizRenderer = lazy(() => import("../GraphvizRenderer"));
 
 interface CodeBlockProps {
   className?: string;
@@ -18,14 +19,16 @@ interface CodeBlockProps {
   inline?: boolean;
   hasCodeBlocks: boolean;
   hasMermaid: boolean;
+  hasGraphviz: boolean;
 }
 
 export const CodeBlock = memo(
-  ({ className, children, inline, hasCodeBlocks, hasMermaid }: CodeBlockProps) => {
+  ({ className, children, inline, hasCodeBlocks, hasMermaid, hasGraphviz }: CodeBlockProps) => {
     const match = /language-(\w+)/.exec(className || "");
     const content = String(children).replace(/\n$/, "");
     const isTerminal = match && match[1] === "terminal";
     const isMermaid = match && match[1] === "mermaid";
+    const isGraphviz = match && (match[1] === "graphviz" || match[1] === "dot");
 
     // Create dynamic theme that adapts to current CSS variables
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
@@ -47,6 +50,26 @@ export const CodeBlock = memo(
               }
             >
               <MermaidRenderer content={content} />
+            </Suspense>
+          </ErrorBoundary>
+        );
+      }
+
+      // Handle Graphviz diagrams
+      if (isGraphviz && hasGraphviz) {
+        return (
+          <ErrorBoundary>
+            <Suspense
+              fallback={
+                <div className="rounded-md border bg-background p-4">
+                  <div className="flex items-center justify-center p-8 text-muted-foreground">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <span className="ml-2 text-sm">Loading Graphviz...</span>
+                  </div>
+                </div>
+              }
+            >
+              <GraphvizRenderer content={content} />
             </Suspense>
           </ErrorBoundary>
         );

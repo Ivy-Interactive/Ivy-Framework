@@ -334,15 +334,22 @@ export const generateXAxis = (
 
   return {
     position: axis.orientation?.toLowerCase() === "top" ? "top" : "bottom",
-    type: isVertical ? "value" : "category",
+    type: isVertical ? "category" : "value",
     boundaryGap: chartType === "bar" ? true : false,
-    data: isVertical ? undefined : categories,
+    data: isVertical ? categories : undefined,
     ...(minOpt !== undefined && { min: minOpt }),
     ...(maxOpt !== undefined && { max: maxOpt }),
     axisLabel: {
       show: axis.hideTickLabels ? false : true,
       formatter: isVertical
-        ? (value: number | string) => {
+        ? (value: string | number) => {
+            if (axis.tickFormatter) {
+              return formatTickLabel(value, axis.tickFormatter);
+            }
+            const strVal = String(value);
+            return strVal.length > 10 ? strVal.match(/.{1,10}/g)?.join("\n") : strVal;
+          }
+        : (value: number | string) => {
             if (axis.tickFormatter) {
               return formatTickLabel(value, axis.tickFormatter);
             }
@@ -351,13 +358,6 @@ export const generateXAxis = (
             if (Math.abs(numVal) >= 1e6) return (numVal / 1e6).toFixed(0) + "M";
             if (Math.abs(numVal) >= 1e3) return (numVal / 1e3).toFixed(0) + "K";
             return String(value);
-          }
-        : (value: string | number) => {
-            if (axis.tickFormatter) {
-              return formatTickLabel(value, axis.tickFormatter);
-            }
-            const strVal = String(value);
-            return strVal.length > 10 ? strVal.match(/.{1,10}/g)?.join("\n") : strVal;
           },
       interval: "auto",
       ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
@@ -412,8 +412,8 @@ export const generateYAxis = (
   }
 
   return {
-    type: isVertical ? "category" : "value",
-    data: isVertical ? categories : undefined,
+    type: isVertical ? "value" : "category",
+    data: isVertical ? undefined : categories,
     ...(minOpt !== undefined && { min: minOpt }),
     ...(maxOpt !== undefined && { max: maxOpt }),
     axisLabel: {

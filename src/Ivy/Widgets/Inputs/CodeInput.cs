@@ -27,6 +27,8 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Prop] public CodeInputVariant Variant { get; set; } = CodeInputVariant.Default;
 
     [Prop] public Languages? Language { get; set; } = null;
