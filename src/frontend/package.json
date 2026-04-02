@@ -35,6 +35,7 @@
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@glideapps/glide-data-grid": "6.0.4-alpha24",
+    "@hpcc-js/wasm-graphviz": "^1.21.2",
     "@ivy-interactive/ivy-design-system": "1.1.18",
     "@lezer/highlight": "1.2.3",
     "@microsoft/signalr": "10.0.0",
