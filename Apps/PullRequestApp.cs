@@ -55,8 +55,8 @@ public class PullRequestApp : ViewBase
             {
                 if (e.Value.ColumnName == "PlanId")
                 {
-                    var id = e.Value.Id?.ToString();
-                    var row = rows.FirstOrDefault(r => r.Id == id);
+                    var planId = e.Value.CellValue?.ToString();
+                    var row = rows.FirstOrDefault(r => r.PlanId == planId);
                     if (row != null && !string.IsNullOrEmpty(row.PlanFolderPath) && Directory.Exists(row.PlanFolderPath))
                         nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(row.PlanFolderPath));
                 }
