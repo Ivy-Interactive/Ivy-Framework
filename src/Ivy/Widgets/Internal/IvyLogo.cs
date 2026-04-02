@@ -5,7 +5,7 @@ namespace Ivy;
 
 public record IvyLogo : WidgetBase<IvyLogo>
 {
-    public IvyLogo(Colors color = Colors.Primary) : this()
+    public IvyLogo(Colors color = Colors.IvyGreen) : this()
     {
         Color = color;
     }
@@ -16,5 +16,5 @@ public record IvyLogo : WidgetBase<IvyLogo>
         Height = Size.Auto();
     }
 
-    [Prop] public Colors Color { get; set; } = Colors.Primary;
+    [Prop] public Colors Color { get; set; } = Colors.IvyGreen;
 }

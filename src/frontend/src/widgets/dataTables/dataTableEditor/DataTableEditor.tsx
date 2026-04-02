@@ -228,7 +228,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       gridSelection={gridSelection}
       onGridSelectionChange={handleGridSelectionChange}
       width={containerWidth}
-      height={containerHeight > 0 ? containerHeight : undefined}
+      height={
+        containerHeight > 0 ? containerHeight : containerRef.current?.clientHeight || undefined
+      }
       rowMarkers={showIndexColumn ? "number" : "none"}
       onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
       groupHeaderHeight={showGroups ? GROUP_HEADER_HEIGHT : undefined}

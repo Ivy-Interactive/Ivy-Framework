@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/.vs/
+**/.idea/
+**/.vscode/
+**/.git/
+**/RustServer/target/

@@ -57,6 +57,8 @@ public record Sheet : WidgetBase<Sheet>
 
     [Prop] public SheetSide Side { get; init; } = SheetSide.Right;
 
+    [Prop] public bool Resizable { get; init; } = false;
+
     [Event] public EventHandler<Event<Sheet>>? OnClose { get; set; }
 
     public static Sheet operator |(Sheet widget, object child)
@@ -73,6 +75,48 @@ public record Sheet : WidgetBase<Sheet>
 public static class SheetExtensions
 {
     public static Sheet Side(this Sheet sheet, SheetSide side) => sheet with { Side = side };
+
+    /// <summary>
+    /// Enables drag-to-resize on the inner edge of the sheet. Users can drag to adjust the sheet width/height at runtime.
+    /// Use .Width(Size.Rem(24).Min(Size.Px(200)).Max(Size.Px(800))) to customize constraints.
+    /// Default constraints when resizable: 200px min and 80vw max.
+    /// </summary>
+    public static Sheet Resizable(this Sheet sheet, bool resizable = true)
+    {
+        if (!resizable)
+        {
+            return sheet with { Resizable = false };
+        }
+
+        var isHorizontal = sheet.Side is SheetSide.Left or SheetSide.Right;
+
+        if (isHorizontal)
+        {
+            var width = sheet.Width ?? Sheet.DefaultWidth;
+            if (width.Min == null)
+            {
+                width = width.Min(Size.Px(200));
+            }
+            if (width.Max == null)
+            {
+                width = width.Max(Size.Px(1200));
+            }
+            return sheet with { Resizable = true, Width = width };
+        }
+        else
+        {
+            var height = sheet.Height ?? Sheet.DefaultHeight;
+            if (height.Min == null)
+            {
+                height = height.Min(Size.Px(100));
+            }
+            if (height.Max == null)
+            {
+                height = height.Max(Size.Px(900));
+            }
+            return sheet with { Resizable = true, Height = height };
+        }
+    }
 
     public static IView WithSheet(this Button trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
     {
