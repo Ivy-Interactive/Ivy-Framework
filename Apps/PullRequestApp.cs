@@ -37,6 +37,7 @@ public class PullRequestApp : ViewBase
             .Header(t => t.Repository, "Repository")
             .Header(t => t.Pr, "PR")
             .Header(t => t.Plan, "Plan")
+            .Renderer(t => t.PlanId, new ButtonDisplayRenderer())
             .Renderer(t => t.Pr, new LinkDisplayRenderer())
             .Hidden(t => t.Id)
             .Hidden(t => t.PlanFolderPath)
@@ -48,6 +49,18 @@ public class PullRequestApp : ViewBase
                 c.SelectionMode = SelectionModes.None;
                 c.ShowIndexColumn = false;
                 c.BatchSize = 50;
+                c.EnableCellClickEvents = true;
+            })
+            .OnCellClick(e =>
+            {
+                if (e.Value.ColumnName == "PlanId")
+                {
+                    var id = e.Value.Id?.ToString();
+                    var row = rows.FirstOrDefault(r => r.Id == id);
+                    if (row != null && !string.IsNullOrEmpty(row.PlanFolderPath) && Directory.Exists(row.PlanFolderPath))
+                        nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(row.PlanFolderPath));
+                }
+                return ValueTask.CompletedTask;
             })
             .RowActions(
                 new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
