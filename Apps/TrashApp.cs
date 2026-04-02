@@ -98,7 +98,7 @@ public class TrashApp : ViewBase
                 ),
                 new DialogFooter(
                     new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() => confirmDelete.Set(false)),
-                    new Button("Delete").Destructive().ShortcutKey("Enter").OnClick(() =>
+                    new Button("Delete").Destructive().ShortcutKey("Enter").AutoFocus().OnClick(() =>
                     {
                         if (File.Exists(deletePath))
                             File.Delete(deletePath);

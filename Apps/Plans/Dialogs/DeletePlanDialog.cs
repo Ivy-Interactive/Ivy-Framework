@@ -41,7 +41,7 @@ public class DeletePlanDialog(
                             _dialogOpen.Set(false);
                         }))
                     | (Layout.Horizontal().Right()
-                        | new Button("Delete").Destructive().ShortcutKey("Enter").OnClick(() =>
+                        | new Button("Delete").Destructive().ShortcutKey("Enter").AutoFocus().OnClick(() =>
                         {
                             _planService.DeletePlan(_selectedPlan.FolderName);
                             _refreshPlans();

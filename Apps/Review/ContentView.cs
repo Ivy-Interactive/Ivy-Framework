@@ -511,7 +511,7 @@ public class ContentView(
                 new DialogBody(
                     Layout.Vertical()
                         | Text.P("Describe the changes needed for this plan.")
-                        | suggestChangesText.ToTextareaInput("Enter change instructions...").Rows(6)
+                        | suggestChangesText.ToTextareaInput("Enter change instructions...").Rows(6).AutoFocus()
                 ),
                 new DialogFooter(
                     new Button("Cancel").Outline().OnClick(() => { suggestChangesText.Set(""); suggestChangesOpen.Set(false); }),
@@ -543,7 +543,7 @@ public class ContentView(
                 new DialogHeader($"Custom PR for #{_selectedPlan.Id}"),
                 new DialogBody(
                     Layout.Vertical().Gap(2)
-                        | customPrApprove.ToBoolInput("Approve")
+                        | customPrApprove.ToBoolInput("Approve").AutoFocus()
                         | customPrMerge.ToBoolInput("Merge").Disabled(!customPrApprove.Value)
                         | customPrDeleteBranch.ToBoolInput("Delete Branch").Disabled(!customPrMerge.Value || !customPrApprove.Value)
                         | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
