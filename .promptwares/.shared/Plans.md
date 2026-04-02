@@ -20,7 +20,6 @@ Plans are stored in the folder specified by `planFolder` in `config.yaml`.
 │   ├── artifacts/                    # Output artifacts from execution
 │   │   ├── tests/                    # Test scripts and data
 │   │   ├── screenshots/              # UI screenshots
-│   │   ├── videos/                   # Screen recordings
 │   │   └── sample/                   # Sample apps exercising new functionality
 │   ├── verification/                 # Verification reports
 │   │   ├── DotnetBuild.md

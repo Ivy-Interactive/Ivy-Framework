@@ -212,4 +212,4 @@ You are running in non-interactive mode and CANNOT ask questions. If you are uns
 - Do NOT skip tests or pre-commit formatting
 - Commit messages must reference the plan ID
 - All `file:///` paths in plans should be converted to Windows paths when needed
-- Do NOT commit artifact files (screenshots, videos, images) to the repo. Test artifacts belong in `<PlanFolder>/artifacts/` only — MakePr handles uploading them to persistent storage.
+- Do NOT commit artifact files (screenshots, images) to the repo. Test artifacts belong in `<PlanFolder>/artifacts/` only — MakePr handles uploading them to persistent storage.
