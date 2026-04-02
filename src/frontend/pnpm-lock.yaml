@@ -70,8 +70,8 @@ importers:
         specifier: 6.0.4-alpha24
         version: 6.0.4-alpha24(lodash@4.17.23)(marked@16.4.2)(react-dom@19.2.3(react@19.2.3))(react-responsive-carousel@3.2.23)(react@19.2.3)
       '@ivy-interactive/ivy-design-system':
-        specifier: 1.1.18
-        version: 1.1.18
+        specifier: 1.1.26
+        version: 1.1.26
       '@lezer/highlight':
         specifier: 1.2.3
         version: 1.2.3
@@ -489,8 +489,8 @@ packages:
   '@iconify/utils@3.1.0':
     resolution: {integrity: sha512-Zlzem1ZXhI1iHeeERabLNzBHdOa4VhQbqAcOQaMKuTuyZCpwKbC2R4Dd0Zo3g9EAc+Y4fiarO8HIHRAth7+skw==}
 
-  '@ivy-interactive/ivy-design-system@1.1.18':
-    resolution: {integrity: sha512-bkfnLdTodu67hP6OJCy7LCgoIfCwf8Wnw3dRtSU6PIDAp/1jlPajPAiSPb3Im6LcRPVsalt9YLBh582JcKVyzQ==}
+  '@ivy-interactive/ivy-design-system@1.1.26':
+    resolution: {integrity: sha512-m1jmPKdtdHOjwpR6xQgQgKFtCJMx9E3+Tp3cgj8mb+TPsDkXZLm5iaLq1G25nEBvidcClNgwrbstu4Mx7czmyQ==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -3831,7 +3831,7 @@ snapshots:
       '@iconify/types': 2.0.0
       mlly: 1.8.2
 
-  '@ivy-interactive/ivy-design-system@1.1.18': {}
+  '@ivy-interactive/ivy-design-system@1.1.26': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
