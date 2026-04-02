@@ -303,6 +303,18 @@ public class JobService
             JobsChanged?.Invoke();
     }
 
+    public void ClearFailedJobs()
+    {
+        var failedIds = _jobs.Values
+            .Where(j => j.Status is "Failed" or "Timeout")
+            .Select(j => j.Id)
+            .ToList();
+        foreach (var id in failedIds)
+            _jobs.TryRemove(id, out _);
+        if (failedIds.Count > 0)
+            JobsChanged?.Invoke();
+    }
+
     public List<JobItem> GetJobs()
     {
         return _jobs.Values.OrderByDescending(j => j.StartedAt ?? DateTime.MinValue).ToList();
