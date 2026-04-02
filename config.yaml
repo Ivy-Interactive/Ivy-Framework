@@ -23,7 +23,7 @@ projects:
     reviewActions:
       - name: "Sample"
         condition: 'Test-Path "artifacts\sample\*.csproj"'
-        action: 'artifacts\sample\dotnet run --browse'
+        action: 'dotnet run --project artifacts\sample --browse'
     verifications:
       - name: DotnetBuild
         required: true
