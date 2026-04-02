@@ -110,17 +110,17 @@ public class ContentView(
             header |= new Badge($"Depends on: {depIds}").Variant(BadgeVariant.Secondary);
         }
 
-        header |= isEditing.ToSwitchInput(Icons.Code)
-            | new Spacer().Width(Size.Grow())
-            | Text.Rich()
-                .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
-                .Muted("plans", word: true)
-            | new Button("Execute").Icon(Icons.Rocket).Primary().ShortcutKey("e").OnClick(() =>
-            {
-                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
-                _jobService.StartJob("ExecutePlan", _selectedPlan.FolderPath);
-                _refreshPlans();
-            });
+        header |= isEditing.ToSwitchInput(Icons.Code);
+        header |= new Spacer().Width(Size.Grow());
+        header |= Text.Rich()
+            .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
+            .Muted("plans", word: true);
+        header |= new Button("Execute").Icon(Icons.Rocket).Primary().ShortcutKey("e").OnClick(() =>
+        {
+            _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
+            _jobService.StartJob("ExecutePlan", _selectedPlan.FolderPath);
+            _refreshPlans();
+        });
 
         var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)));
 
