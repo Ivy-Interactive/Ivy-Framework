@@ -30,6 +30,9 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   id,
   events = EMPTY_ARRAY,
 }) => {
+  const hasIcon = icon && icon !== "None";
+  if (!title?.trim() && !hasIcon) return null;
+
   const eventHandler = useEventHandler();
   const isClickable = events.includes("OnClick");
 
@@ -84,8 +87,6 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
           | "info";
     }
   };
-
-  const hasIcon = icon && icon !== "None";
 
   const colorStyles: React.CSSProperties = color
     ? {
