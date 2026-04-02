@@ -221,7 +221,8 @@ public class ContentView(
             artifactsLayout |= screenshotsLayout;
         }
 
-        var totalArtifacts = (artifacts.GetValueOrDefault("screenshots")?.Count ?? 0);
+        var totalArtifacts = (artifacts.GetValueOrDefault("screenshots")?.Count ?? 0)
+            + (artifacts.ContainsKey("sample") ? 1 : 0);
 
         // Plan tab content
         var planTabContent = new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
