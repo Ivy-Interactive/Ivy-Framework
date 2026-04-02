@@ -127,8 +127,11 @@ public class JobService
         {
             if (e.Data != null)
             {
-                job.OutputLines.Add(e.Data);
                 job.LastOutputAt = DateTime.UtcNow;
+                if (!e.Data.Contains("\"type\":\"heartbeat\""))
+                {
+                    job.OutputLines.Add(e.Data);
+                }
             }
         };
         process.ErrorDataReceived += (_, e) =>

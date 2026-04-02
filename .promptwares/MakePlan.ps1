@@ -32,7 +32,12 @@ $extraArgs = @()
 if ($agent.Executable -eq "claude") {
     $extraArgs += @("--session-id", $sessionId)
 }
-& $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw)
+$heartbeat = Start-Heartbeat
+try {
+    & $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw)
+} finally {
+    Stop-Heartbeat $heartbeat
+}
 Pop-Location
 
 $costData = ReportSessionCost $sessionId

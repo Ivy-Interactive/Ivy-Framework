@@ -280,8 +280,13 @@ function InvokePromptwareAgent {
     Write-Host "Starting Agent..."
     if ($Action) { SendStatusMessage "Running $Action" }
     Push-Location $WorkDir
-    $output = & $agent.Executable @($agent.Args) @ExtraAgentArgs -- (Get-Content $promptFile -Raw)
-    $output | Write-Output
+    $heartbeat = Start-Heartbeat
+    try {
+        $output = & $agent.Executable @($agent.Args) @ExtraAgentArgs -- (Get-Content $promptFile -Raw)
+        $output | Write-Output
+    } finally {
+        Stop-Heartbeat $heartbeat
+    }
     Pop-Location
 
     # Extract summary from agent's stream-json result
@@ -419,6 +424,27 @@ function SendStatusMessage {
         $body = @{ message = $Message } | ConvertTo-Json
         Invoke-RestMethod -Uri "$url/api/jobs/$jobId/status" -Method Post -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
     } catch { }
+}
+
+function Start-Heartbeat {
+    param([int]$IntervalSeconds = 120)
+    $job = Start-Job -ScriptBlock {
+        param($interval)
+        while ($true) {
+            Start-Sleep -Seconds $interval
+            $ts = (Get-Date).ToUniversalTime().ToString("o")
+            [Console]::WriteLine("{""type"":""heartbeat"",""timestamp"":""$ts""}")
+        }
+    } -ArgumentList $IntervalSeconds
+    return $job
+}
+
+function Stop-Heartbeat {
+    param($Job)
+    if ($Job) {
+        Stop-Job $Job -ErrorAction SilentlyContinue
+        Remove-Job $Job -ErrorAction SilentlyContinue
+    }
 }
 
 function GetAgentCommandFromConfig {
