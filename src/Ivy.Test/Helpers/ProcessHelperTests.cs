@@ -87,6 +87,14 @@ public class ProcessHelperTests
     }
 
     [Fact]
+    public void KillProcessUsingPort_NoProcessOnPort_DoesNotThrow()
+    {
+        // Use a random high port that is very unlikely to be in use
+        var exception = Record.Exception(() => ProcessHelper.KillProcessUsingPort(39_517));
+        Assert.Null(exception);
+    }
+
+    [Fact]
     public void OpenBrowser_NullUrl_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => ProcessHelper.OpenBrowser(null!));

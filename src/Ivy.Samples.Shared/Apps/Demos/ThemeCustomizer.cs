@@ -410,23 +410,15 @@ public class ThemeCustomizer : SampleBase
             var normalizedCurrent = string.IsNullOrWhiteSpace(currentValue) ? "0px" : currentValue;
             var normalizedOption = remValue == "0px" ? "0px" : remValue;
             var isSelected = normalizedCurrent == normalizedOption;
-            var fillColor = isSelected ? "var(--primary)" : "var(--secondary)";
+            var strokeColor = isSelected ? "var(--primary)" : "var(--muted-foreground)";
 
-            // Allow rectangle to be larger than viewbox to support large radii without capping
-            // If rect is 32x32, max radius is 16. If rect is 64x64, max radius is 32.
             var rectSize = SvgViewBox * 2;
-
-            // ViewBox shows the top-left 32x32 area
-            // Radii: 0, 8, 16, 24, 32 will now be visually distinct
-            var svgContent = $@"<svg width='100%' height='100%' viewBox='0 0 {SvgViewBox} {SvgViewBox}' xmlns='http://www.w3.org/2000/svg'>
-                <rect width='{rectSize}' height='{rectSize}' rx='{pxRadius}' fill='{fillColor}' />
-            </svg>";
+            var svgContent = $"<svg width='{PreviewSize}' height='{PreviewSize}' viewBox='0 0 {SvgViewBox} {SvgViewBox}'><rect x='1' y='1' width='{rectSize}' height='{rectSize}' rx='{pxRadius}' fill='none' stroke='{strokeColor}' stroke-width='3'/></svg>";
 
             return new Card(
-                    Layout.Center()
-                        | new Svg(svgContent)
-                            .Width(Size.Px(PreviewSize))
-                            .Height(Size.Px(PreviewSize))
+                    new Svg(svgContent)
+                        .Width(Size.Px(PreviewSize))
+                        .Height(Size.Px(PreviewSize))
                 )
                 .Width(Size.Px(CardSize))
                 .Height(Size.Px(CardSize))

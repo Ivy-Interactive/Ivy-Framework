@@ -80,7 +80,7 @@
     "framer-motion": "12.23.24",
     "jose": "6.1.0",
     "katex": "0.16.25",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "lucide-react": "0.562.0",
     "mdast": "3.0.0",
     "mermaid": "11.12.1",
@@ -140,7 +140,7 @@
     "overrides": {
       "@swc/helpers": "0.5.17",
       "dompurify": "3.3.2",
-      "lodash-es": "4.17.23",
+      "lodash-es": "4.18.1",
       "minimatch": "9.0.7",
       "remark-mermaid-plugin>mermaid": "11.12.1",
       "rollup": ">=4.59.0",
