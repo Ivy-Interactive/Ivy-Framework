@@ -29,7 +29,8 @@ public class SidebarView(
         return new List(filteredPlans.Select(plan =>
         {
             var clickablePlan = plan;
-            var verificationsPassed = plan.Verifications.Count > 0 && plan.Verifications.All(v => v.Status == "Pass");
+            var verificationsPassed = plan.Verifications.Count > 0
+                    && plan.Verifications.All(v => v.Status is "Pass" or "Skipped");
 
             return new ListItem($"#{plan.Id} {plan.Title}")
                 .Content(Layout.Horizontal().Gap(1)
