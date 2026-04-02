@@ -28,6 +28,8 @@ RUN curl -fsSL https://vite.plus | bash
 ENV PATH="/root/.vite-plus/bin:${PATH}"
 COPY . .
 COPY --from=frontend /src/src/frontend/dist /src/src/frontend/dist
+# Build Rust native libraries before dotnet restore/publish so msbuild can properly pick them up in static ItemGroup evaluation
+RUN cd src/RustServer && cargo build --release
 RUN dotnet restore "src/Ivy.Samples/Ivy.Samples.csproj"
 RUN dotnet publish "src/Ivy.Samples/Ivy.Samples.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
