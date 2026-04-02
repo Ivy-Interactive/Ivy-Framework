@@ -9,6 +9,7 @@ import {
   convertSizeToGridValue,
   gridCellOverflow,
   getAlignSelf,
+  getGridAlign,
 } from "../../lib/styles";
 
 const EMPTY_ARRAY: never[] = [];
@@ -19,6 +20,7 @@ interface GridLayoutWidgetProps {
   rowGap?: number;
   columnGap?: number;
   padding: string;
+  alignContent?: Align;
   autoFlow?: "Row" | "Column" | "RowDense" | "ColumnDense";
   width?: string;
   height?: string;
@@ -63,7 +65,7 @@ const GridLayoutCell: React.FC<GridLayoutCellProps> = ({
   return (
     <div
       style={styles}
-      className={`relative flex items-stretch h-full w-full min-w-0 ${gridCellOverflow.ellipsis} ${className}`}
+      className={`relative flex items-start h-full w-full min-w-0 ${gridCellOverflow.ellipsis} ${className}`}
     >
       {children}
     </div>
@@ -74,6 +76,7 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   children,
   columns = 1,
   rows = 1,
+  alignContent,
   autoFlow,
   width,
   height,
@@ -103,10 +106,11 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
     ...getColumnGap(columnGap),
     ...getWidth(width),
     ...getHeight(height),
+    ...getGridAlign(alignContent),
   };
 
   return (
-    <div style={styles} className={`place-items-stretch ${className}`}>
+    <div style={styles} className={className}>
       {React.Children.map(children, (child, index) => (
         <GridLayoutCell
           column={childColumn[index]}

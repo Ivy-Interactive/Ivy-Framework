@@ -43,6 +43,8 @@ public class GridDefinition
 
     public Size?[]? RowHeights { get; set; } = null;
 
+    public Align? AlignContent { get; set; } = null;
+
     public Func<int, object, object>? HeaderBuilder { get; set; } = null;
 
     public Func<int, object, object>? FooterBuilder { get; set; } = null;
@@ -63,6 +65,7 @@ public record GridLayout : WidgetBase<GridLayout>
         ColumnGap = def.ColumnGap;
         Padding = def.Padding;
         AutoFlow = def.AutoFlow;
+        AlignContent = def.AlignContent;
         Width = def.Width;
         Height = def.Height;
         ColumnWidths = def.ColumnWidths;
@@ -84,6 +87,8 @@ public record GridLayout : WidgetBase<GridLayout>
     [Prop] public Thickness Padding { get; set; } = new(0);
 
     [Prop] public AutoFlow? AutoFlow { get; set; }
+
+    [Prop] public Align? AlignContent { get; set; }
 
     [Prop] public Size?[]? ColumnWidths { get; set; }
 

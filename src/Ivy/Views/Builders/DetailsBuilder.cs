@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Hooks;
+using Ivy.Views.Builders;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -77,13 +78,23 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         foreach (var field in fields)
         {
             var label = StringHelper.LabelFor(field.Name, field.Type);
-            _items[field.Name] =
-                new Item(
-                    label,
-                    new DefaultBuilder<TModel>(),
-                    field.FieldInfo,
-                    field.PropertyInfo
-                );
+            var item = new Item(
+                label,
+                new DefaultBuilder<TModel>(),
+                field.FieldInfo,
+                field.PropertyInfo
+            );
+
+            if (TypeHelper.IsCollectionType(field.Type))
+            {
+                item.IsRemoved = true;
+            }
+            else if (!TypeHelper.IsSimpleType(field.Type) && field.Type != typeof(string) && field.Type.IsClass)
+            {
+                item.Builder = new NavigationPropertyBuilder<TModel>();
+            }
+
+            _items[field.Name] = item;
         }
 
     }
