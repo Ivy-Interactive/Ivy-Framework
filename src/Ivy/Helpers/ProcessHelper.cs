@@ -39,7 +39,7 @@ public static class ProcessHelper
 
     private static void KillProcessUsingPortWindows(int port)
     {
-        var netstat = new Process
+        using var netstat = new Process
         {
             StartInfo = new ProcessStartInfo
             {
@@ -74,7 +74,8 @@ public static class ProcessHelper
             if (pid == 0) continue;
             try
             {
-                Process.GetProcessById(pid).Kill();
+                using var proc = Process.GetProcessById(pid);
+                proc.Kill();
             }
             catch (Exception)
             {
@@ -85,7 +86,7 @@ public static class ProcessHelper
 
     private static void KillProcessUsingPortUnix(int port)
     {
-        var lsof = new Process
+        using var lsof = new Process
         {
             StartInfo = new ProcessStartInfo
             {
@@ -110,7 +111,8 @@ public static class ProcessHelper
                 continue;
             try
             {
-                Process.GetProcessById(pid).Kill();
+                using var proc = Process.GetProcessById(pid);
+                proc.Kill();
             }
             catch (Exception)
             {
