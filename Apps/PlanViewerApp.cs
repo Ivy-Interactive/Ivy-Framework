@@ -85,7 +85,7 @@ public class PlanViewerApp : ViewBase
                     onClose: () => openFile.Set(null),
                     content: sheetContent,
                     title: Path.GetFileName(filePath2)
-                ).Width(Size.Half())
+                ).Width(Size.Half()).Resizable()
             );
         }
 
