@@ -40,7 +40,6 @@
     <None Include="../../README.md" Pack="true" PackagePath="" />
     <EmbeddedResource Include="../../AGENTS.md" Link="AGENTS.md" />
     <None Include="../../AGENTS.md" Pack="true" PackagePath="" />
-    <None Include="../Ivy.Docs.Shared/Generated/**/*.md" Pack="true" PackagePath="docs/generated" Visible="false" />
     <EmbeddedResource Include="../frontend/src/routing-constants.json" LogicalName="RoutingConstants" Visible="false" />
   </ItemGroup>
   
@@ -169,6 +168,18 @@
     <!-- Warn loudly if NO native binaries were found during packaging -->
     <Warning Text="No native Rust binaries were found for packaging! The NuGet package will be missing critical components." 
              Condition="'@(Content->WithMetadataValue('Pack', 'true')->WithMetadataValue('PackagePath', 'runtimes/win-x64/native'))' == '' AND '@(Content->WithMetadataValue('Pack', 'true')->WithMetadataValue('PackagePath', 'runtimes/linux-x64/native'))' == ''" />
+  </Target>
+
+  <PropertyGroup>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);InjectDocsIntoPackageRoot</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="InjectDocsIntoPackageRoot">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="../Ivy.Docs.Shared/Generated/**/*.md">
+        <PackagePath>docs/generated</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
   </Target>
 
 </Project>
