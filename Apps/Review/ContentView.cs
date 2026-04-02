@@ -117,7 +117,8 @@ public class ContentView(
             });
 
         // Content sections
-        var content = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)));
+        var content = Layout.Vertical();
+        object Cap(object inner) => Layout.Vertical().Width(Size.Auto().Max(Size.Units(200))) | inner;
 
         // Recommendations
         var recommendationsPath = Path.Combine(_selectedPlan.FolderPath, "artifacts", "recommendations.yaml");
@@ -350,13 +351,13 @@ public class ContentView(
             onRefresh: null,
             onReorder: null,
             selectedIndex: selectedTab.Value,
-            new Tab("Summary", summaryTabContent),
-            new Tab("Verifications", verificationsTable).Badge(_selectedPlan.Verifications.Count.ToString()),
-            new Tab("Commits", commitsTable).Badge(_selectedPlan.Commits.Count.ToString()),
-            new Tab("PRs", prsContent).Badge(_selectedPlan.Prs.Count.ToString()),
-            new Tab("Artifacts", artifactsLayout).Badge(totalArtifacts.ToString()),
-            new Tab("Recommendations", recommendationsLayout).Badge(recommendations.Count.ToString()),
-            new Tab("Plan", planTabContent)
+            new Tab("Summary", Cap(summaryTabContent)),
+            new Tab("Verifications", Cap(verificationsTable)).Badge(_selectedPlan.Verifications.Count.ToString()),
+            new Tab("Commits", Cap(commitsTable)).Badge(_selectedPlan.Commits.Count.ToString()),
+            new Tab("PRs", Cap(prsContent)).Badge(_selectedPlan.Prs.Count.ToString()),
+            new Tab("Artifacts", Cap(artifactsLayout)).Badge(totalArtifacts.ToString()),
+            new Tab("Recommendations", Cap(recommendationsLayout)).Badge(recommendations.Count.ToString()),
+            new Tab("Plan", Cap(planTabContent))
         ).Variant(TabsVariant.Content);
 
         content |= tabs;
