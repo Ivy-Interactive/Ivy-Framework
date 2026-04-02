@@ -277,12 +277,28 @@ function InvokePromptwareAgent {
         $ExtraAgentArgs += @("--session-id", $sessionId)
     }
 
+    # Create raw output log
+    $rawLogFile = [System.IO.Path]::ChangeExtension($LogFile, ".raw.jsonl")
+
     Write-Host "Starting Agent..."
     if ($Action) { SendStatusMessage "Running $Action" }
     Push-Location $WorkDir
     $heartbeat = Start-Heartbeat
     try {
-        $output = & $agent.Executable @($agent.Args) @ExtraAgentArgs -- (Get-Content $promptFile -Raw)
+        $startTs = (Get-Date).ToUniversalTime().ToString("o")
+        Add-Content -Path $rawLogFile -Value "[tendril] Claude invocation started at $startTs" -Encoding UTF8
+        Add-Content -Path $rawLogFile -Value "[tendril] Command: $($agent.Executable) $($agent.Args -join ' ') $($ExtraAgentArgs -join ' ')" -Encoding UTF8
+
+        $output = & $agent.Executable @($agent.Args) @ExtraAgentArgs -- (Get-Content $promptFile -Raw) 2>&1 |
+            ForEach-Object {
+                $line = if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                    "[stderr] $_"
+                } else {
+                    "$_"
+                }
+                Add-Content -Path $rawLogFile -Value $line -Encoding UTF8
+                $_
+            }
         $output | Write-Output
     } finally {
         Stop-Heartbeat $heartbeat
@@ -428,12 +444,13 @@ function SendStatusMessage {
 
 function Start-Heartbeat {
     param([int]$IntervalSeconds = 120)
-    $job = Start-Job -ScriptBlock {
+    $job = Start-ThreadJob -ScriptBlock {
         param($interval)
         while ($true) {
             Start-Sleep -Seconds $interval
             $ts = (Get-Date).ToUniversalTime().ToString("o")
-            [Console]::WriteLine("{""type"":""heartbeat"",""timestamp"":""$ts""}")
+            [Console]::Out.WriteLine("{""type"":""heartbeat"",""timestamp"":""$ts""}")
+            [Console]::Out.Flush()
         }
     } -ArgumentList $IntervalSeconds
     return $job
