@@ -7,11 +7,11 @@ server.UseHotReload();
 server.AddConnectionsFromAssembly();
 server.AddAppsFromAssembly();
 
-var settings = new ChromeSettings()
+var settings = new AppShellSettings()
     .UseTabs(preventDuplicates: true)
     .DefaultApp<AutheliaExample.MainApp>();
 
-server.UseChrome(settings);
+server.UseAppShell(settings);
 
 server.SetMetaTitle("Authelia Example");
 

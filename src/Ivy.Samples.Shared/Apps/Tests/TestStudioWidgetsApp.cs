@@ -53,12 +53,12 @@ public class TestStudioWidgetsApp : SampleBase
             | Text.H2("FloatingBox")
             | Text.P("A subtle dark-tinted container with transparent border.")
             | new FloatingBox(
-                Layout.Horizontal().Gap(1).Align(Align.Center)
+                Layout.Horizontal().Gap(1).AlignContent(Align.Center)
                 | (Layout.Horizontal().Gap(1).Grow()
                     | Icons.Citrus.ToButton().BorderRadius(BorderRadius.Full)
                     | Icons.Waypoints.ToButton().BorderRadius(BorderRadius.Full).Ghost()
                     | Icons.Code.ToButton().BorderRadius(BorderRadius.Full).Ghost())
-                | (Layout.Horizontal().Gap(2).Align(Align.Right)
+                | (Layout.Horizontal().Gap(2).AlignContent(Align.Right)
                     | new Button("Action")
                     | new Avatar("JD")))
 

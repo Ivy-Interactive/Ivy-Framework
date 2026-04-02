@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { cn } from '@/lib/utils';
+import React, { useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { cn } from "@/lib/utils";
 
 type ListWidgetProps = {
   children: React.ReactNode;
@@ -21,14 +21,12 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
   return (
     <div
       ref={parentRef}
-      className={cn(
-        'relative h-full w-full overflow-y-auto remove-parent-padding'
-      )}
+      className={cn("relative h-full w-full overflow-y-auto remove-parent-padding")}
     >
       <div
         style={{
           height: rowVirtualizer.getTotalSize(),
-          position: 'relative',
+          position: "relative",
         }}
       >
         {rowVirtualizer.getVirtualItems().map((virtualRow, index) => {
@@ -39,8 +37,8 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
               key={virtualRow.key}
               data-index={virtualRow.index}
               className={cn(
-                'absolute top-0 left-0 w-full flex items-center min-w-0',
-                !isLast && 'border-b border-border'
+                "absolute top-0 left-0 w-full flex items-center min-w-0",
+                !isLast && "border-b border-border",
               )}
               style={{
                 transform: `translateY(${virtualRow.start}px)`,

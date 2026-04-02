@@ -51,7 +51,16 @@ public class EffectQueue(IExceptionHandler exceptionHandler) : IAsyncDisposable
         }
         finally
         {
-            _isProcessing = false;
+            bool hasMore;
+            lock (_syncLock)
+            {
+                _isProcessing = false;
+                hasMore = _queue.Count > 0;
+            }
+            if (hasMore)
+            {
+                _ = ProcessQueueAsync();
+            }
         }
     }
 

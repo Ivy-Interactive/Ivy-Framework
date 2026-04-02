@@ -1,13 +1,11 @@
-import { useContext, useEffect, useRef } from 'react';
-import { StreamSubscriber } from './types';
-import { StreamHandlerContext } from './context';
+import { useContext, useEffect, useRef } from "react";
+import { StreamSubscriber } from "./types";
+import { StreamHandlerContext } from "./context";
 
 export const useStreamSubscriber = (): StreamSubscriber => {
   const context = useContext(StreamHandlerContext);
   if (!context) {
-    throw new Error(
-      'useStreamSubscriber must be used within a StreamHandlerProvider'
-    );
+    throw new Error("useStreamSubscriber must be used within a StreamHandlerProvider");
   }
   return context.subscribeToStream;
 };
@@ -18,7 +16,7 @@ export const useStreamSubscriber = (): StreamSubscriber => {
  */
 export const useStream = <T = unknown>(
   streamId: string | undefined,
-  onData: (data: T) => void
+  onData: (data: T) => void,
 ): void => {
   const subscribeToStream = useStreamSubscriber();
   const callbackRef = useRef(onData);
@@ -29,7 +27,7 @@ export const useStream = <T = unknown>(
   useEffect(() => {
     if (!streamId) return;
 
-    const unsubscribe = subscribeToStream(streamId, data => {
+    const unsubscribe = subscribeToStream(streamId, (data) => {
       callbackRef.current(data as T);
     });
 

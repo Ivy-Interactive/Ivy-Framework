@@ -71,9 +71,22 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
+    [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnSubmit { get; set; }
+
+    [Prop] public bool Dictation { get; set; }
+
+    [Prop] public string? DictationUploadUrl { get; set; }
+
+    [Prop] public string? DictationLanguage { get; set; }
+
+    [Prop] public string? DictationTranscription { get; set; }
+
+    [Prop] public int DictationTranscriptionVersion { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
@@ -115,7 +128,7 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
 
     internal TextInput() { }
 
-    [Prop] public TString Value { get; init; } = default!;
+    [Prop(AlwaysSerialize = true)] public TString Value { get; init; } = default!;
 
     [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
 
@@ -299,6 +312,22 @@ public static class TextInputExtensions
         return widget with { OnBlur = new(_ => { onBlur(); return ValueTask.CompletedTask; }) };
     }
 
+    [OverloadResolutionPriority(1)]
+    public static TextInputBase OnFocus(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus) };
+    }
+
+    public static TextInputBase OnFocus(this TextInputBase widget, Action<Event<IAnyInput>> onFocus)
+    {
+        return widget with { OnFocus = new(onFocus.ToValueTask()) };
+    }
+
+    public static TextInputBase OnFocus(this TextInputBase widget, Action onFocus)
+    {
+        return widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
+    }
+
 
     [OverloadResolutionPriority(1)]
     public static TextInputBase OnSubmit(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onSubmit)
@@ -314,5 +343,49 @@ public static class TextInputExtensions
     public static TextInputBase OnSubmit(this TextInputBase widget, Action onSubmit)
     {
         return widget.OnSubmit(_ => { onSubmit(); return ValueTask.CompletedTask; });
+    }
+
+    public static TextInputBase EnableDictation(this TextInputBase widget, string? language = null)
+    {
+        var w = widget with { Dictation = true, DictationLanguage = language };
+
+        if (TextInputBuildContext.GetCurrent() is not { } context)
+            return w;
+
+        if (!context.TryUseService<IAudioTranscriptionService>(out var transcriptionService))
+            throw new InvalidOperationException(
+                "EnableDictation() requires an IAudioTranscriptionService to be registered. " +
+                "Call services.AddAzureSpeechToText(region, key) in Program.cs.");
+
+        var transcriptionState = context.UseState("");
+        var versionState = context.UseState(0);
+
+        var boundState = w.GetAttachedValue(ValidationOwner, AttachedValidationState) as IAnyState;
+
+        var uploadState = context.UseUpload(async (fileUpload, stream, ct) =>
+        {
+            var transcription = await transcriptionService.TranscribeAsync(
+                stream, fileUpload.ContentType, language, ct);
+
+            if (!string.IsNullOrEmpty(transcription))
+            {
+                transcriptionState.Set(transcription);
+                versionState.Set(v => v + 1);
+
+                if (boundState is IState<string> stringState)
+                {
+                    var current = stringState.Value ?? "";
+                    var separator = current.Length > 0 && !current.EndsWith(' ') ? " " : "";
+                    stringState.Set(current + separator + transcription);
+                }
+            }
+        }, defaultContentType: "audio/webm");
+
+        return w with
+        {
+            DictationUploadUrl = uploadState.Value.UploadUrl,
+            DictationTranscription = transcriptionState.Value,
+            DictationTranscriptionVersion = versionState.Value
+        };
     }
 }

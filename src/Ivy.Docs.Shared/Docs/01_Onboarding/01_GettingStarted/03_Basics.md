@@ -75,7 +75,7 @@ public class CounterApp : ViewBase
     public override object? Build()
     {
         var counter = UseState(0);
-        return Layout.Horizontal().Align(Align.Left)
+        return Layout.Horizontal().AlignContent(Align.Left)
           | new Button("+1", onClick: _ => counter.Set(counter.Value+1))
           | new Button("-1", onClick: _ => counter.Set(counter.Value-1))
           | counter;
@@ -91,7 +91,7 @@ public class CounterApp : ViewBase
     public override object? Build()
     {
         var counter = UseState(0);
-        return Layout.Horizontal().Align(Align.Left)
+        return Layout.Horizontal().AlignContent(Align.Left)
           | new Button("+1", onClick: _ => counter.Set(counter.Value+1))
           | new Button("-1", onClick: _ => counter.Set(counter.Value-1))
           | counter;

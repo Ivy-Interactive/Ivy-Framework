@@ -298,7 +298,7 @@ public class LayoutView : ViewBase, IStateless
         return this;
     }
 
-    public LayoutView Align(Align align)
+    public LayoutView AlignContent(Align align)
     {
         _alignment = align;
         return this;

@@ -21,7 +21,7 @@ public class CategoriesListBlade : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var refreshToken = UseRefreshToken();
 
         var filter = UseState("");
@@ -136,7 +136,7 @@ public class CategoryDetailsBlade(Guid categoryId) : ViewBase
     public override object? Build()
     {
         var factory = UseService<SampleDbContextFactory>();
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var queryService = UseService<IQueryService>();
 
         var categoryQuery = UseQuery(

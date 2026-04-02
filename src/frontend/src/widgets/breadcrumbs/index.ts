@@ -1,1 +1,1 @@
-export { BreadcrumbsWidget } from './BreadcrumbsWidget';
+export { BreadcrumbsWidget } from "./BreadcrumbsWidget";

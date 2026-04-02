@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Auth0Example</RootNamespace>
+    <UserSecretsId>ivy-auth-auth0-example</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +18,9 @@
       <OutputItemType>Analyzer</OutputItemType>
     </ProjectReference>
     <ProjectReference Include="..\..\Ivy.Auth.Auth0\Ivy.Auth.Auth0.csproj" />
+    <ProjectReference Include="..\..\Ivy.Auth.GitHub\Ivy.Auth.GitHub.csproj" />
+    <ProjectReference Include="..\..\Ivy.Auth.Google\Ivy.Auth.Google.csproj" />
+    <ProjectReference Include="..\Ivy.Auth.Examples.Shared\Ivy.Auth.Examples.Shared.csproj" />
   </ItemGroup>
 
 </Project>
-

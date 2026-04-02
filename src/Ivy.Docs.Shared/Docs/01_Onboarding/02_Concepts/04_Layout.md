@@ -137,13 +137,13 @@ Distribute space between elements using `SpaceBetween`, `SpaceAround`, or `Space
 ```csharp demo-tabs
 Layout.Vertical().Gap(4)
     | Text.Label("SpaceBetween — items pushed to edges:")
-    | (Layout.Horizontal().Align(Align.SpaceBetween).Width(Size.Full())
+    | (Layout.Horizontal().AlignContent(Align.SpaceBetween).Width(Size.Full())
         | new Badge("A") | new Badge("B") | new Badge("C"))
     | Text.Label("SpaceAround — equal space around each item:")
-    | (Layout.Horizontal().Align(Align.SpaceAround).Width(Size.Full())
+    | (Layout.Horizontal().AlignContent(Align.SpaceAround).Width(Size.Full())
         | new Badge("A") | new Badge("B") | new Badge("C"))
     | Text.Label("SpaceEvenly — equal space between all items:")
-    | (Layout.Horizontal().Align(Align.SpaceEvenly).Width(Size.Full())
+    | (Layout.Horizontal().AlignContent(Align.SpaceEvenly).Width(Size.Full())
         | new Badge("A") | new Badge("B") | new Badge("C"))
 ```
 

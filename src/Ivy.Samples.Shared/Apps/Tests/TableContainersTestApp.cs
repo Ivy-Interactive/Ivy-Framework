@@ -28,7 +28,7 @@ public class BladeContent : ViewBase
 {
     public override object? Build()
     {
-        var bladeController = UseContext<IBladeService>();
+        var bladeController = UseContext<IBladeContext>();
 
         void PushNoWidth(Event<Button> e) => bladeController.Push(this, new BladeTableNoWidth(), "No Width");
         void PushFull(Event<Button> e) => bladeController.Push(this, new BladeTableFull(), "Width: Full");

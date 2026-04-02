@@ -202,6 +202,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
 {
     private bool _strikeThrough;
     private Size? _width;
+    private Size? _height;
     private Colors? _color;
     private bool _noWrap;
     private Overflow? _overflow;
@@ -219,17 +220,17 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         switch (variant)
         {
             case TextVariant.Code:
-                return new CodeBlock(content, codeLanguage);
+                return new CodeBlock(content, codeLanguage) { Width = _width, Height = _height, Density = _density, TestId = _testId };
             case TextVariant.Markdown:
-                return new Markdown(content) { Density = _density };
+                return new Markdown(content) { Width = _width, Height = _height, Density = _density, TestId = _testId };
             case TextVariant.Json:
-                return new Json(content);
+                return new Json(content) { Width = _width, Height = _height, Density = _density, TestId = _testId };
             case TextVariant.Xml:
-                return new Xml(content);
+                return new Xml(content) { Width = _width, Height = _height, Density = _density, TestId = _testId };
             case TextVariant.Html:
-                return new Html(content);
+                return new Html(content) { Width = _width, Height = _height, Density = _density, TestId = _testId };
             case TextVariant.Latex:
-                return new Markdown("$$" + Environment.NewLine + content + Environment.NewLine + "$$");
+                return new Markdown("$$" + Environment.NewLine + content + Environment.NewLine + "$$") { Width = _width, Density = _density, TestId = _testId };
             default:
                 {
                     var text = new TextBlock(
@@ -253,6 +254,18 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     public TextBuilder Width(Size width)
     {
         _width = width;
+        return this;
+    }
+
+    public TextBuilder Height(Size height)
+    {
+        _height = height;
+        return this;
+    }
+
+    public TextBuilder Grow(int value = 1)
+    {
+        _width = Size.Grow(value);
         return this;
     }
 

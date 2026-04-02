@@ -158,7 +158,7 @@ When used as the main application sidebar, you can enable toggle mechanics and r
 - `.MainAppSidebar(bool isMainApp = true)`: Configures the layout as the primary application menu. This automatically adds a collapse/expand toggle button for the user and enables responsive behavior on smaller screens.
 - `.Open(bool open = true)`: Controls whether the layout starts in an expanded or collapsed state. By default, this is set to `true`.
 
-When utilizing `ChromeSettings` to define the main application chrome, you can also inject the initialization state through `ChromeSettings.SidebarOpen(false)`.
+When utilizing `AppShellSettings` to define the main application shell, you can also inject the initialization state through `AppShellSettings.SidebarOpen(false)`.
 
 <Callout Type="tip">
 "You can combine `.MainAppSidebar(true)` and `.Open(false)` to construct a toggleable sidebar that specifically starts fully collapsed."

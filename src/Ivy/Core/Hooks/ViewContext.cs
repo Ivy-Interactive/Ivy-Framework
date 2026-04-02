@@ -1,4 +1,5 @@
 using System.ComponentModel.Design;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Disposables;
 using Ivy.Core.Exceptions;
 using Ivy.Core.Helpers;
@@ -172,10 +173,19 @@ public class ViewContext : IViewContext
     public T UseService<T>()
     {
         if (_appServices.GetService(typeof(T)) is T service)
-        {
             return service;
+        throw new InvalidOperationException($"Service of type '{typeof(T).FullName}' is not registered.");
+    }
+
+    public bool TryUseService<T>([MaybeNullWhen(false)] out T service)
+    {
+        if (_appServices.GetService(typeof(T)) is T found)
+        {
+            service = found;
+            return true;
         }
-        return default!;
+        service = default;
+        return false;
     }
 
     public object UseService(Type serviceType)

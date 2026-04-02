@@ -57,6 +57,8 @@ public record Sheet : WidgetBase<Sheet>
 
     [Prop] public SheetSide Side { get; init; } = SheetSide.Right;
 
+    [Prop] public bool Resizable { get; init; } = false;
+
     [Event] public EventHandler<Event<Sheet>>? OnClose { get; set; }
 
     public static Sheet operator |(Sheet widget, object child)
@@ -74,9 +76,56 @@ public static class SheetExtensions
 {
     public static Sheet Side(this Sheet sheet, SheetSide side) => sheet with { Side = side };
 
+    /// <summary>
+    /// Enables drag-to-resize on the inner edge of the sheet. Users can drag to adjust the sheet width/height at runtime.
+    /// Use .Width(Size.Rem(24).Min(Size.Px(200)).Max(Size.Px(800))) to customize constraints.
+    /// Default constraints when resizable: 200px min and 80vw max.
+    /// </summary>
+    public static Sheet Resizable(this Sheet sheet, bool resizable = true)
+    {
+        if (!resizable)
+        {
+            return sheet with { Resizable = false };
+        }
+
+        var isHorizontal = sheet.Side is SheetSide.Left or SheetSide.Right;
+
+        if (isHorizontal)
+        {
+            var width = sheet.Width ?? Sheet.DefaultWidth;
+            if (width.Min == null)
+            {
+                width = width.Min(Size.Px(200));
+            }
+            if (width.Max == null)
+            {
+                width = width.Max(Size.Px(1200));
+            }
+            return sheet with { Resizable = true, Width = width };
+        }
+        else
+        {
+            var height = sheet.Height ?? Sheet.DefaultHeight;
+            if (height.Min == null)
+            {
+                height = height.Min(Size.Px(100));
+            }
+            if (height.Max == null)
+            {
+                height = height.Max(Size.Px(900));
+            }
+            return sheet with { Resizable = true, Height = height };
+        }
+    }
+
     public static IView WithSheet(this Button trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
     {
         return new WithSheetView(trigger, contentFactory, title, description, width, side);
+    }
+
+    public static IView WithSheet(this Button trigger, Func<Action, object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
+    {
+        return new WithSheetViewWithClose(trigger, contentFactory, title, description, width, side);
     }
 
     [OverloadResolutionPriority(-1)]
@@ -173,6 +222,46 @@ public class WithSheetView(Button trigger, Func<object> contentFactory, string? 
                 isOpen.Value = false;
                 return ValueTask.CompletedTask;
             }, contentFactory(), title, description) with
+            { Side = side };
+
+            // Use Height for top/bottom, Width for left/right
+            if (side is SheetSide.Top or SheetSide.Bottom)
+            {
+                sheet = sheet.Height(width ?? Sheet.DefaultHeight);
+            }
+            else
+            {
+                sheet = sheet.Width(width ?? Sheet.DefaultWidth);
+            }
+        }
+
+        return new Fragment(clonedTrigger, sheet);
+    }
+}
+
+public class WithSheetViewWithClose(Button trigger, Func<Action, object> contentFactory, string? title, string? description, Size? width, SheetSide side = SheetSide.Right) : ViewBase
+{
+    public override object? Build()
+    {
+        var isOpen = UseState(false);
+        var clonedTrigger = trigger with
+        {
+            OnClick = new(_ =>
+            {
+                isOpen.Value = true;
+                return ValueTask.CompletedTask;
+            })
+        };
+
+        Sheet? sheet = null;
+        if (isOpen.Value)
+        {
+            var close = () => { isOpen.Value = false; };
+            sheet = new Sheet(_ =>
+            {
+                isOpen.Value = false;
+                return ValueTask.CompletedTask;
+            }, contentFactory(close), title, description) with
             { Side = side };
 
             // Use Height for top/bottom, Width for left/right

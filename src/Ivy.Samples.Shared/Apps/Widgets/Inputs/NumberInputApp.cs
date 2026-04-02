@@ -10,55 +10,74 @@ public class NumberInputApp : SampleBase
         var intValue = UseState(12345);
         var onChangedState = UseState(0);
         var onChangeLabel = UseState("");
-        UseEffect(() => { onChangeLabel.Set("Changed"); }, onChangedState);
         var onBlurState = UseState(0);
         var onBlurLabel = UseState("");
+        var onFocusState = UseState(0);
+        var onFocusLabel = UseState("");
         var usdValue = UseState(1234.56m);
         var eurValue = UseState(987.65m);
         var gbpValue = UseState(567.89m);
         var jpyValue = UseState(12345m);
         var nullCurrencyValue = UseState<decimal?>(() => null);
         var nullIntInvalid = UseState<int?>();
+
+        // New format style examples
+        var compactValue = UseState(1_234_567.0);
+        var scientificValue = UseState(1_234_567.0);
+        var engineeringValue = UseState(1_234_567.0);
+        var accountingValue = UseState(-1234.56m);
+        var bytesValue = UseState(5_242_880.0);
+
+        // Create a currency value for size examples
         var sizeExampleCurrency = UseState(1234.56m);
+
+        // Prefix and Suffix examples
         var priceValue = UseState(99.99m);
         var weightValue = UseState(5.5);
         var temperatureValue = UseState(22);
         var percentValue = UseState(0.75);
 
-        var shortState = UseState((short)0);
-        var shortNullState = UseState((short?)null);
-        var intVariantState = UseState(0);
-        var intNullVariantState = UseState((int?)null);
-        var longState = UseState((long)0);
-        var longNullState = UseState((long?)null);
-        var byteState = UseState((byte)0);
-        var byteNullState = UseState((byte?)null);
-        var floatState = UseState(0.0f);
-        var floatNullState = UseState((float?)null);
-        var doubleState = UseState(0.0);
-        var doubleNullState = UseState((double?)null);
-        var decimalState = UseState((decimal)0);
-        var decimalNullState = UseState((decimal?)null);
-
         // Numeric type test states
+        var shortState = UseState((short)0);
+        var shortNullableState = UseState((short?)null);
+        var intState = UseState(0);
+        var intNullableState = UseState((int?)null);
+        var longState = UseState((long)0);
+        var longNullableState = UseState((long?)null);
+        var byteState = UseState((byte)0);
+        var byteNullableState = UseState((byte?)null);
+        var floatState = UseState(0.0f);
+        var floatNullableState = UseState((float?)null);
+        var doubleState = UseState(0.0);
+        var doubleNullableState = UseState((double?)null);
+        var decimalState = UseState((decimal)0);
+        var decimalNullableState = UseState((decimal?)null);
+
+        UseEffect(() => { onChangeLabel.Set("Changed"); }, onChangedState);
+
+        // Moved from CreateNumericTypeTests
         var numericTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
             // Signed integer types
-            ("short", shortState, shortNullState),
-            ("int", intVariantState, intNullVariantState),
-            ("long", longState, longNullState),
+            ("short", shortState, shortNullableState),
+            ("int", intState, intNullableState),
+            ("long", longState, longNullableState),
 
             // Unsigned integer types
-            ("byte", byteState, byteNullState),
+            ("byte", byteState, byteNullableState),
 
             // Floating-point types
-            ("float", floatState, floatNullState),
-            ("double", doubleState, doubleNullState),
-            ("decimal", decimalState, decimalNullState)
+            ("float", floatState, floatNullableState),
+            ("double", doubleState, doubleNullableState),
+            ("decimal", decimalState, decimalNullableState)
         };
 
         var dataBinding = CreateNumericTypeTests(numericTypes);
-        var currencyExamples = CreateCurrencyExamples((IState<decimal>)usdValue, (IState<decimal>)eurValue, (IState<decimal>)gbpValue, (IState<decimal>)jpyValue, (IState<decimal?>)nullCurrencyValue);
+
+        var currencyExamples = CreateCurrencyExamples((IState<decimal>)usdValue, (IState<decimal>)eurValue, (IState<decimal>)gbpValue, (IState<decimal>)jpyValue, (IState<decimal?>)nullCurrencyValue,
+            compactValue, scientificValue, engineeringValue, (IState<decimal>)accountingValue, bytesValue);
+
+
 
 
 
@@ -67,7 +86,7 @@ public class NumberInputApp : SampleBase
         return Layout.Vertical()
 
                // Main grid with variants
-               | Text.H1("Number Inputs")
+               | Text.H1("Number Input")
                | Text.H2("Variants")
                | (Layout.Grid().Columns(6)
 
@@ -205,12 +224,23 @@ public class NumberInputApp : SampleBase
                    onChangedState.ToNumberInput(),
                    onChangeLabel
                )
-               | Text.H3("OnBlur")
-               | Layout.Horizontal(
-                   onBlurState
-                    .ToNumberInput()
-                    .OnBlur(e => onBlurLabel.Set("Blur")),
-                   onBlurLabel
+               | (Layout.Vertical()
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The blur event fires when the number input loses focus.").Small()
+                           | onBlurState.ToNumberInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                           | (onBlurLabel.Value != ""
+                               ? Callout.Success(onBlurLabel.Value)
+                               : Callout.Info("Interact then click away to see blur events"))
+                   ).Title("OnBlur Handler")
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.P("The focus event fires when you click on or tab into the number input.").Small()
+                           | onFocusState.ToNumberInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                           | (onFocusLabel.Value != ""
+                               ? Callout.Success(onFocusLabel.Value)
+                               : Callout.Info("Click or tab into the input to see focus events"))
+                   ).Title("OnFocus Handler")
                )
             ;
     }
@@ -220,7 +250,12 @@ public class NumberInputApp : SampleBase
         IState<decimal> eurValue,
         IState<decimal> gbpValue,
         IState<decimal> jpyValue,
-        IState<decimal?> nullCurrencyValue)
+        IState<decimal?> nullCurrencyValue,
+        IState<double> compactValue,
+        IState<double> scientificValue,
+        IState<double> engineeringValue,
+        IState<decimal> accountingValue,
+        IState<double> bytesValue)
     {
 
         return Layout.Vertical()
@@ -311,6 +346,59 @@ public class NumberInputApp : SampleBase
                   | usdValue
                     .ToSliderInput()
                     .FormatStyle(NumberFormatStyle.Percent)
+
+                  | Text.Block("Compact")
+                  | Text.Block("1.2M")
+                  | compactValue
+                    .ToNumberInput()
+                    .FormatStyle(NumberFormatStyle.Compact)
+                    .Precision(1)
+                  | compactValue
+                    .ToSliderInput()
+                    .FormatStyle(NumberFormatStyle.Compact)
+                    .Precision(1)
+
+                  | Text.Block("Scientific")
+                  | Text.Block("1.23E6")
+                  | scientificValue
+                    .ToNumberInput()
+                    .FormatStyle(NumberFormatStyle.Scientific)
+                    .Precision(2)
+                  | scientificValue
+                    .ToSliderInput()
+                    .FormatStyle(NumberFormatStyle.Scientific)
+                    .Precision(2)
+
+                  | Text.Block("Engineering")
+                  | Text.Block("1.23E6")
+                  | engineeringValue
+                    .ToNumberInput()
+                    .FormatStyle(NumberFormatStyle.Engineering)
+                    .Precision(2)
+                  | engineeringValue
+                    .ToSliderInput()
+                    .FormatStyle(NumberFormatStyle.Engineering)
+                    .Precision(2)
+
+                  | Text.Block("Accounting")
+                  | Text.Block("($1,234.56)")
+                  | accountingValue
+                    .ToNumberInput()
+                    .FormatStyle(NumberFormatStyle.Accounting)
+                    .Currency("USD")
+                  | accountingValue
+                    .ToSliderInput()
+                    .FormatStyle(NumberFormatStyle.Accounting)
+                    .Currency("USD")
+
+                  | Text.Block("Bytes")
+                  | Text.Block("5 MB")
+                  | bytesValue
+                    .ToNumberInput()
+                    .FormatStyle(NumberFormatStyle.Bytes)
+                  | bytesValue
+                    .ToSliderInput()
+                    .FormatStyle(NumberFormatStyle.Bytes)
                )
 
                | Text.H3("Currency with Constraints")

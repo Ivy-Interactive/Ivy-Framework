@@ -1,4 +1,5 @@
-import React from 'react';
+import React from "react";
+import { ImageOverlayProvider } from "@/components/markdown/ImageOverlayContext";
 import {
   Align,
   getRowGap,
@@ -9,7 +10,8 @@ import {
   convertSizeToGridValue,
   gridCellOverflow,
   getAlignSelf,
-} from '../../lib/styles';
+  getGridAlign,
+} from "../../lib/styles";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -19,7 +21,8 @@ interface GridLayoutWidgetProps {
   rowGap?: number;
   columnGap?: number;
   padding: string;
-  autoFlow?: 'Row' | 'Column' | 'RowDense' | 'ColumnDense';
+  alignContent?: Align;
+  autoFlow?: "Row" | "Column" | "RowDense" | "ColumnDense";
   width?: string;
   height?: string;
   columnWidths?: string[];
@@ -63,7 +66,7 @@ const GridLayoutCell: React.FC<GridLayoutCellProps> = ({
   return (
     <div
       style={styles}
-      className={`relative flex items-center h-full w-full min-w-0 ${gridCellOverflow.ellipsis} ${className}`}
+      className={`relative flex items-start h-full w-full min-w-0 ${gridCellOverflow.ellipsis} ${className}`}
     >
       {children}
     </div>
@@ -74,12 +77,13 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   children,
   columns = 1,
   rows = 1,
+  alignContent,
   autoFlow,
   width,
   height,
   rowGap = 4,
   columnGap = 4,
-  padding = '0,0,0,0',
+  padding = "0,0,0,0",
   columnWidths,
   rowHeights,
   childColumn = EMPTY_ARRAY,
@@ -87,43 +91,44 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   childRow = EMPTY_ARRAY,
   childRowSpan = EMPTY_ARRAY,
   childAlignSelf = EMPTY_ARRAY,
-  className = '',
+  className = "",
 }) => {
   const styles: React.CSSProperties = {
-    display: 'grid',
+    display: "grid",
     gridTemplateColumns: columnWidths
-      ? columnWidths.map(convertSizeToGridValue).join(' ')
+      ? columnWidths.map(convertSizeToGridValue).join(" ")
       : `repeat(${columns}, minmax(0, 1fr))`,
     gridTemplateRows: rowHeights
-      ? rowHeights.map(convertSizeToGridValue).join(' ')
+      ? rowHeights.map(convertSizeToGridValue).join(" ")
       : `repeat(${rows}, minmax(0, 1fr))`,
-    gridAutoFlow: autoFlow?.toLowerCase() || 'row',
+    gridAutoFlow: autoFlow?.toLowerCase() || "row",
     ...getPadding(padding),
     ...getRowGap(rowGap),
     ...getColumnGap(columnGap),
     ...getWidth(width),
     ...getHeight(height),
+    ...getGridAlign(alignContent),
   };
 
   return (
-    <div style={styles} className={`place-items-center ${className}`}>
-      {React.Children.map(children, (child, index) => (
-        <GridLayoutCell
-          column={childColumn[index]}
-          columnSpan={childColumnSpan[index]}
-          row={childRow[index]}
-          rowSpan={childRowSpan[index]}
-          alignSelf={childAlignSelf[index]}
-          className={
-            React.isValidElement(child)
-              ? (child.props as { className?: string }).className
-              : ''
-          }
-        >
-          {child}
-        </GridLayoutCell>
-      ))}
-    </div>
+    <ImageOverlayProvider>
+      <div style={styles} className={className}>
+        {React.Children.map(children, (child, index) => (
+          <GridLayoutCell
+            column={childColumn[index]}
+            columnSpan={childColumnSpan[index]}
+            row={childRow[index]}
+            rowSpan={childRowSpan[index]}
+            alignSelf={childAlignSelf[index]}
+            className={
+              React.isValidElement(child) ? (child.props as { className?: string }).className : ""
+            }
+          >
+            {child}
+          </GridLayoutCell>
+        ))}
+      </div>
+    </ImageOverlayProvider>
   );
 };
 

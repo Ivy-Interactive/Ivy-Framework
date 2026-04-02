@@ -36,7 +36,7 @@ public record Box : WidgetBase<Box>
 
     [Prop] public float? BorderOpacity { get; set; }
 
-    [Prop] public CardHoverVariant HoverVariant { get; set; } = CardHoverVariant.None;
+    [Prop] public HoverEffect HoverVariant { get; set; } = HoverEffect.None;
 
     [Event] public EventHandler<Event<Box>>? OnClick { get; set; }
 }
@@ -47,9 +47,13 @@ public static class BoxExtensions
 
     public static Box Background(this Box box, Colors color, float opacity) => box with { Background = color, Opacity = (1.0f - opacity) * 100 };
 
+    public static Box Opacity(this Box box, float opacity) => box with { Opacity = opacity };
+
     public static Box BorderColor(this Box box, Colors color) => box with { BorderColor = color };
 
     public static Box BorderColor(this Box box, Colors color, float opacity) => box with { BorderColor = color, BorderOpacity = (1.0f - opacity) * 100 };
+
+    public static Box BorderOpacity(this Box box, float opacity) => box with { BorderOpacity = opacity };
 
     public static Box BorderThickness(this Box box, int thickness) => box with { BorderThickness = new(thickness) };
 
@@ -91,9 +95,9 @@ public static class BoxExtensions
 
     public static Box Grow(this Box box) => box.Width(Size.Grow());
 
-    public static Box Hover(this Box box, CardHoverVariant variant) => box with { HoverVariant = variant };
+    public static Box Hover(this Box box, HoverEffect variant) => box with { HoverVariant = variant };
 
-    private static CardHoverVariant HoverVariantWithClick(this Box box) => box.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : box.HoverVariant;
+    private static HoverEffect HoverVariantWithClick(this Box box) => box.HoverVariant == HoverEffect.None ? HoverEffect.PointerAndTranslate : box.HoverVariant;
 
     public static Box OnClick(this Box box, Func<Event<Box>, ValueTask> onClick)
     {

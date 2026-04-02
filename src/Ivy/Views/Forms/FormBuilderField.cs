@@ -47,5 +47,7 @@ public class FormBuilderField<TModel>(
 
     public bool Required { get; set; } = required;
 
+    public LabelPosition? LabelPosition { get; set; }
+
     public List<Func<object?, (bool, string)>> Validators { get; set; } = new();
 }

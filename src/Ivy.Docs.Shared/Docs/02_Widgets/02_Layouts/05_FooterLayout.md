@@ -58,7 +58,7 @@ public class FormWithFooterExample : ViewBase
         return Layout.Vertical()
             | new Card("Form Header")
             | new FooterLayout(
-                footer: Layout.Horizontal().Align(Align.Right)
+                footer: Layout.Horizontal().AlignContent(Align.Right)
                     | new Button("Cancel", _ => client.Toast("Cancelled"))
                     | new Button("Submit", _ => client.Toast("Form submitted"))
                         .Variant(ButtonVariant.Primary),
@@ -92,7 +92,7 @@ public class SheetWithFooterExample : ViewBase
                         | Text.P("Article Editor")
                         | Text.P("Create and edit your articles with ease").Small().Color(Colors.Gray)
             | new FooterLayout(
-                footer: Layout.Horizontal().Align(Align.Right)
+                footer: Layout.Horizontal().AlignContent(Align.Right)
                     | new Button("Save Draft", _ => client.Toast("Draft saved"))
                     | new Button("Publish", _ => client.Toast("Published!"))
                         .Variant(ButtonVariant.Primary),
@@ -140,7 +140,7 @@ public class ComplexFooterExample : ViewBase
                         | Text.P("Document Editor")
                         | Text.P("Comprehensive project management tool").Small().Color(Colors.Gray)
             | new FooterLayout(
-                footer: Layout.Horizontal().Align(Align.Right)
+                footer: Layout.Horizontal().AlignContent(Align.Right)
                     | new Badge("Draft").Variant(BadgeVariant.Secondary)
                     | new Button("Save Draft", _ => client.Toast("Draft saved"))
                     | new Button("Submit", _ => client.Toast("Submitted for review"))

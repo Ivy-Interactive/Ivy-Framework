@@ -1,22 +1,22 @@
-import React, { useMemo } from 'react';
-import { getHeight, getWidth } from '@/lib/styles';
-import { useThemeWithMonitoring } from '@/components/theme-provider';
-import ReactECharts from 'echarts-for-react';
+import React, { useCallback, useMemo, useRef } from "react";
+import { getHeight, getWidth } from "@/lib/styles";
+import { useThemeWithMonitoring } from "@/components/theme-provider";
+import ReactECharts from "echarts-for-react";
 import {
   getColors,
   generateTextStyle,
   generateEChartToolbox,
   generateTooltip,
   generateEChartLegend,
-} from './sharedUtils';
-import { ChordChartWidgetProps } from './chartTypes';
-import { getChartThemeColors } from './styles';
+} from "./sharedUtils";
+import { ChordChartWidgetProps } from "./chartTypes";
+import { getChartThemeColors } from "./styles";
 
 const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
   data,
-  width = 'Full',
-  height = 'Full',
-  colorScheme = 'Default',
+  width = "Full",
+  height = "Full",
+  colorScheme = "Default",
   sort = false,
   tooltip,
   legend,
@@ -27,33 +27,23 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
     monitorSystem: true,
   });
 
-  const themeColors = useMemo(
-    () => getChartThemeColors(colors, isDark),
-    [colors, isDark]
-  );
+  const themeColors = useMemo(() => getChartThemeColors(colors, isDark), [colors, isDark]);
 
   const heightStyle = height ? getHeight(height) : {};
-  const isFull = height?.toLowerCase().startsWith('full');
+  const isFull = height?.toLowerCase().startsWith("full");
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    position: 'relative',
-    ...(isFull
-      ? { display: 'flex', flexDirection: 'column', height: '100%' }
-      : {}),
+    position: "relative",
+    ...(isFull ? { display: "flex", flexDirection: "column", height: "100%" } : {}),
   };
 
   const chartStyles: React.CSSProperties = {
-    ...(isFull
-      ? { flex: 1, minHeight: '200px' }
-      : { ...heightStyle, minHeight: '200px' }),
-    width: '100%',
+    ...(isFull ? { flex: 1, minHeight: "200px" } : { ...heightStyle, minHeight: "200px" }),
+    width: "100%",
   };
 
-  const chartColors = useMemo(
-    () => getColors(colorScheme, colors),
-    [colorScheme, colors]
-  );
+  const chartColors = useMemo(() => getColors(colorScheme, colors), [colorScheme, colors]);
 
   const option = useMemo(() => {
     const nodes = data?.nodes || [];
@@ -70,7 +60,7 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
     }));
 
     // Build links with source/target as names and value
-    const graphLinks = links.map(link => ({
+    const graphLinks = links.map((link) => ({
       source: nodes[link.source]?.name ?? String(link.source),
       target: nodes[link.target]?.name ?? String(link.target),
       value: link.value,
@@ -85,18 +75,10 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
     if (sort) {
       graphNodes.sort((a, b) => {
         const aTotal = links
-          .filter(
-            l =>
-              nodes[l.source]?.name === a.name ||
-              nodes[l.target]?.name === a.name
-          )
+          .filter((l) => nodes[l.source]?.name === a.name || nodes[l.target]?.name === a.name)
           .reduce((sum, l) => sum + l.value, 0);
         const bTotal = links
-          .filter(
-            l =>
-              nodes[l.source]?.name === b.name ||
-              nodes[l.target]?.name === b.name
-          )
+          .filter((l) => nodes[l.source]?.name === b.name || nodes[l.target]?.name === b.name)
           .reduce((sum, l) => sum + l.value, 0);
         return bTotal - aTotal;
       });
@@ -112,10 +94,7 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
 
     return {
       color: chartColors,
-      textStyle: generateTextStyle(
-        themeColors.foreground,
-        themeColors.fontSans
-      ),
+      textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
       tooltip: {
         ...generateTooltip(tooltip, undefined, {
           foreground: themeColors.foreground,
@@ -123,7 +102,7 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
           background: themeColors.background,
           mutedForeground: themeColors.mutedForeground,
         }),
-        trigger: 'item',
+        trigger: "item",
       },
       legend: legend
         ? generateEChartLegend(legend, {
@@ -132,11 +111,11 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
           })
         : { show: false },
       animationDurationUpdate: 1500,
-      animationEasingUpdate: 'quinticInOut',
+      animationEasingUpdate: "quinticInOut",
       series: [
         {
-          type: 'graph',
-          layout: 'circular',
+          type: "graph",
+          layout: "circular",
           circular: {
             rotateLabel: false,
           },
@@ -146,17 +125,17 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
           roam: true,
           label: {
             show: true,
-            position: 'right',
+            position: "right",
             color: themeColors.foreground,
             fontFamily: themeColors.fontSans,
             fontSize: 12,
           },
           lineStyle: {
-            color: 'source',
+            color: "source",
             curveness: 0.3,
           },
           emphasis: {
-            focus: 'adjacency',
+            focus: "adjacency",
             lineStyle: {
               width: 4,
               opacity: 0.8,
@@ -164,19 +143,23 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
           },
         },
       ],
-      toolbox: generateEChartToolbox(
-        toolbox && { ...toolbox, magicType: false }
-      ),
+      toolbox: generateEChartToolbox(toolbox && { ...toolbox, magicType: false }),
     };
   }, [chartColors, data, sort, legend, themeColors, tooltip, toolbox]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleChartReady = useCallback(() => {
+    containerRef.current?.setAttribute("data-chart-rendered", "true");
+  }, []);
+
   return (
-    <div style={styles}>
+    <div ref={containerRef} style={styles}>
       <ReactECharts
         option={option}
         style={chartStyles}
         notMerge={true}
         lazyUpdate={true}
+        onChartReady={handleChartReady}
       />
     </div>
   );

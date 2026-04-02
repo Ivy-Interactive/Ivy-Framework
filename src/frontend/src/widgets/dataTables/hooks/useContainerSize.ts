@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Tracks container dimensions. Uses dvn-scroller.clientHeight for scroll area
@@ -19,7 +19,7 @@ export const useContainerSize = () => {
     if (!containerRef.current) return;
 
     const observeScrollArea = () => {
-      const scroller = containerRef.current?.querySelector('.dvn-scroller');
+      const scroller = containerRef.current?.querySelector(".dvn-scroller");
       if (!scroller || scrollObserverRef.current) return;
 
       const update = () => setScrollAreaHeight(scroller.clientHeight);
@@ -37,7 +37,7 @@ export const useContainerSize = () => {
       requestAnimationFrame(observeScrollArea);
     };
 
-    const resizeObserver = new ResizeObserver(entries => {
+    const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
         const widthChanged = Math.abs(width - lastWidthRef.current) > 1;
@@ -57,6 +57,23 @@ export const useContainerSize = () => {
     });
 
     resizeObserver.observe(containerRef.current);
+
+    // Retry initial measurement until layout settles (max ~100ms).
+    // In nested flex layouts (e.g. HeaderLayout → Vertical → DataTable), the container
+    // may still have height=0 at mount time. Retrying across animation frames ensures
+    // we catch the moment the layout resolves.
+    let retries = 0;
+    const tryInit = () => {
+      if (hasAppliedInitialRef.current || !containerRef.current) return;
+      const { width, height } = containerRef.current.getBoundingClientRect();
+      if (width > 0 || height > 0) {
+        apply(width, height);
+      } else if (retries++ < 5) {
+        requestAnimationFrame(tryInit);
+      }
+    };
+    tryInit();
+
     requestAnimationFrame(observeScrollArea);
 
     return () => {
@@ -71,7 +88,6 @@ export const useContainerSize = () => {
     containerRef,
     containerWidth,
     containerHeight,
-    scrollContainerHeight:
-      scrollAreaHeight > 0 ? scrollAreaHeight : containerHeight,
+    scrollContainerHeight: scrollAreaHeight > 0 ? scrollAreaHeight : containerHeight,
   };
 };

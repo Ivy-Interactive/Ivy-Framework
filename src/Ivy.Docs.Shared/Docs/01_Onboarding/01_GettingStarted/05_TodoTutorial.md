@@ -114,7 +114,7 @@ public class TodoItem(Todo todo, Action deleteTodo, Action toggleTodo) : ViewBas
     public override object? Build()
     {
         return Layout.Vertical()
-           | (Layout.Horizontal().Align(Align.Center).Width(Size.Full())
+           | (Layout.Horizontal().AlignContent(Align.Center).Width(Size.Full())
               | todo.Done.ToBoolInput().OnChange(_ =>
               {
                   toggleTodo();

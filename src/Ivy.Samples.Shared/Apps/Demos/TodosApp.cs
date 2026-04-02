@@ -69,7 +69,7 @@ public class TodoItem(Todo todo, Action deleteTodo, Action toggleTodo) : ViewBas
                 {
                     deleteTodo();
                 }).Icon(Icons.Trash).Variant(ButtonVariant.Outline)
-            ).Align(Align.Center).Width(Size.Full()),
+            ).AlignContent(Align.Center).Width(Size.Full()),
             new Separator()
         );
     }

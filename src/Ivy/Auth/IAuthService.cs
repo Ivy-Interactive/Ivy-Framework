@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public interface IAuthService
+public interface IAuthService : IAuthTokenHandlerService
 {
     Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
 
@@ -14,21 +14,11 @@ public interface IAuthService
 
     Task LogoutAsync(CancellationToken cancellationToken = default);
 
-    Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken = default);
-
     AuthOption[] GetAuthOptions();
-
-    Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken = default);
-
-    AuthToken? GetCurrentToken();
-
-    string? GetCurrentSessionData();
 
     IAuthSession GetAuthSession();
 
-    internal void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null);
+    Task<BrokeredSessionsResult> GetBrokeredSessionsAsync(bool skipCache = false, CancellationToken cancellationToken = default);
 
-    internal void SetAuthTokenCookies(bool reloadPage = true, bool? triggerMachineReload = null);
-
-    internal void SetAuthSessionDataCookies(bool reloadPage = false, bool? triggerMachineReload = null);
+    internal void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null, bool triggerMachineBrokeredRefresh = false);
 }

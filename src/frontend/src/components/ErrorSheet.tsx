@@ -1,13 +1,14 @@
-'use client';
+"use client";
 
-import { useErrorSheet } from '@/hooks/use-error-sheet';
+import { useErrorSheet } from "@/hooks/use-error-sheet";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet';
-import { ErrorDisplay } from '@/components/ErrorDisplay';
+} from "@/components/ui/sheet";
+import { ErrorDisplay } from "@/components/ErrorDisplay";
 
 export function ErrorSheet() {
   const { errors, hideError, clearError } = useErrorSheet();
@@ -18,7 +19,7 @@ export function ErrorSheet() {
         <Sheet
           key={id}
           open={open}
-          onOpenChange={isOpen => {
+          onOpenChange={(isOpen) => {
             if (!isOpen) {
               hideError(id);
               setTimeout(() => clearError(id), 300);
@@ -31,13 +32,12 @@ export function ErrorSheet() {
           >
             <SheetHeader>
               <SheetTitle>Oops! Something went wrong</SheetTitle>
+              <SheetDescription>
+                An error occurred in the application. Details are shown below.
+              </SheetDescription>
             </SheetHeader>
             <div className="flex-1 min-h-0 overflow-y-auto">
-              <ErrorDisplay
-                title={title}
-                message={message}
-                stackTrace={stackTrace}
-              />
+              <ErrorDisplay title={title} message={message} stackTrace={stackTrace} />
             </div>
           </SheetContent>
         </Sheet>

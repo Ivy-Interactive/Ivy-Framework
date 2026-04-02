@@ -41,6 +41,7 @@ public static class ServerUtils
             TestConnection = parser.GetValue<string?>(parsedArgs, "test-connection", null),
             EnableDevTools = parser.GetValue(parsedArgs, "enable-dev-tools", false),
             Host = parser.GetValue<string?>(parsedArgs, "host", null),
+            BasePath = parser.GetValue<string?>(parsedArgs, "path-base", null),
         };
         serverArgs = serverArgs with { FindAvailablePort = parser.GetValue(parsedArgs, "find-available-port", false) };
         if (serverArgs.IsCliCommand)

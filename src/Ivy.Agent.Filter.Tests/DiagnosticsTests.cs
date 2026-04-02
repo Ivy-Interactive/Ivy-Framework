@@ -142,7 +142,7 @@ public class DiagnosticsTests
         // Assert
         Assert.Equal(3, errorListener.Diagnostics.Count);
         Assert.Equal(2, errorListener.Diagnostics.Count(d => d.Severity == DiagnosticSeverity.Error));
-        Assert.Single(errorListener.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warning));
+        Assert.Single(errorListener.Diagnostics, d => d.Severity == DiagnosticSeverity.Warning);
     }
 
     [Theory]

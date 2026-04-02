@@ -335,7 +335,7 @@ public class ThemeCustomizer : SampleBase
 
             UseEffect(() => onChange(colorState.Value), colorState);
 
-            return Layout.Horizontal().Align(Align.Center)
+            return Layout.Horizontal().AlignContent(Align.Center)
                 | Text.P(label).Small().Width(Size.Px(180))
                 | colorState.ToColorInput(variant: ColorInputVariant.TextAndPicker);
         }
@@ -410,23 +410,15 @@ public class ThemeCustomizer : SampleBase
             var normalizedCurrent = string.IsNullOrWhiteSpace(currentValue) ? "0px" : currentValue;
             var normalizedOption = remValue == "0px" ? "0px" : remValue;
             var isSelected = normalizedCurrent == normalizedOption;
-            var fillColor = isSelected ? "var(--primary)" : "var(--secondary)";
+            var strokeColor = isSelected ? "var(--primary)" : "var(--muted-foreground)";
 
-            // Allow rectangle to be larger than viewbox to support large radii without capping
-            // If rect is 32x32, max radius is 16. If rect is 64x64, max radius is 32.
             var rectSize = SvgViewBox * 2;
-
-            // ViewBox shows the top-left 32x32 area
-            // Radii: 0, 8, 16, 24, 32 will now be visually distinct
-            var svgContent = $@"<svg width='100%' height='100%' viewBox='0 0 {SvgViewBox} {SvgViewBox}' xmlns='http://www.w3.org/2000/svg'>
-                <rect width='{rectSize}' height='{rectSize}' rx='{pxRadius}' fill='{fillColor}' />
-            </svg>";
+            var svgContent = $"<svg width='{PreviewSize}' height='{PreviewSize}' viewBox='0 0 {SvgViewBox} {SvgViewBox}'><rect x='1' y='1' width='{rectSize}' height='{rectSize}' rx='{pxRadius}' fill='none' stroke='{strokeColor}' stroke-width='3'/></svg>";
 
             return new Card(
-                    Layout.Center()
-                        | new Svg(svgContent)
-                            .Width(Size.Px(PreviewSize))
-                            .Height(Size.Px(PreviewSize))
+                    new Svg(svgContent)
+                        .Width(Size.Px(PreviewSize))
+                        .Height(Size.Px(PreviewSize))
                 )
                 .Width(Size.Px(CardSize))
                 .Height(Size.Px(CardSize))
@@ -624,7 +616,7 @@ public class ThemeCustomizer : SampleBase
 
             static object GetPaginationContent(int page, int total) =>
                 new Card(
-                    Layout.Vertical().Align(Align.Center)
+                    Layout.Vertical().AlignContent(Align.Center)
                         | Text.Block("Theme insight").Small()
                         | Text.P(page switch
                         {
@@ -675,7 +667,7 @@ public class ThemeCustomizer : SampleBase
                                 new Option<string>("Info", "Info")
                             }).Variant(SelectInputVariant.Toggle).Disabled(disableInputs.Value)
                             | Text.Block("Selected badges:").Small()
-                            | (Layout.Horizontal().Align(Align.Center)
+                            | (Layout.Horizontal().AlignContent(Align.Center)
                                 | badgeVariant.Value.Select(variant => variant switch
                                 {
                                     "Primary" => new Badge("Primary").Primary(),
@@ -688,7 +680,7 @@ public class ThemeCustomizer : SampleBase
                                     _ => new Badge("Primary").Primary()
                                 }).ToArray())).Height(Size.Fit())
                      | new Box(
-                        Layout.Vertical().Align(Align.Center)
+                        Layout.Vertical().AlignContent(Align.Center)
                         | Text.Block("Pagination demo").Bold()
                             | GetPaginationContent(paginationPage.Value, totalPages)
                             | new Pagination(paginationPage.Value, totalPages, e =>
@@ -704,9 +696,9 @@ public class ThemeCustomizer : SampleBase
                             | CreateLoadingButton("Secondary", ButtonVariant.Secondary).Loading()
                             | CreateLoadingButton("Outline", ButtonVariant.Outline).Loading())
                         | (Layout.Horizontal().Width(Size.Full())
-                            | (Layout.Vertical().Align(Align.Left)
+                            | (Layout.Vertical().AlignContent(Align.Left)
                                 | themeSatisfaction.ToFeedbackInput().Stars().Disabled(disableInputs.Value))
-                            | (Layout.Vertical().Align(Align.Right)
+                            | (Layout.Vertical().AlignContent(Align.Right)
                                 | uxSatisfaction.ToFeedbackInput().Thumbs().Disabled(disableInputs.Value)))
                         | new Box((Layout.Horizontal().Height(Size.Fit())
                             | agreeTerms.ToBoolInput().Disabled(disableInputs.Value)
@@ -714,12 +706,12 @@ public class ThemeCustomizer : SampleBase
                         | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
                         | (Layout.Horizontal().Height(Size.Fit())
                             | (Layout.Vertical() | new Box((Layout.Horizontal()
-                                    | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all buttons"))
+                                    | (Layout.Vertical().AlignContent(Align.Left) | Text.Block("Disable all buttons"))
                                     | disableButtons.ToSwitchInput())))
                             | (Layout.Vertical() | new Box((Layout.Horizontal()
-                                | (Layout.Vertical().Align(Align.Left) | Text.Block("Disable all inputs"))
+                                | (Layout.Vertical().AlignContent(Align.Left) | Text.Block("Disable all inputs"))
                                 | disableInputs.ToSwitchInput()))))
-                        | (Layout.Vertical().Align(Align.Center) | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary())
+                        | (Layout.Vertical().AlignContent(Align.Center) | new Badge($"{_theme.Name} theme active", statusVariant, themeIcon).Primary())
                     );
 
             object BuildThirdColumn() =>

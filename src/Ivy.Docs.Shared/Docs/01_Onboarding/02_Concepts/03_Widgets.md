@@ -39,8 +39,8 @@ Ivy ships with a comprehensive set of strongly-typed widgets:
 |----------|----------|
 | Common | [Button](../../02_Widgets/03_Common/01_Button.md), [Badge](../../02_Widgets/03_Common/02_Badge.md), [Tooltip](../../02_Widgets/03_Common/03_Tooltip.md), [Card](../../02_Widgets/03_Common/04_Card.md), [Details](../../02_Widgets/03_Common/05_Details.md), [Expandable](../../02_Widgets/03_Common/06_Expandable.md), [List](../../02_Widgets/03_Common/07_List.md), [Table](../../02_Widgets/03_Common/08_Table.md), [Pagination](../../02_Widgets/03_Common/09_Pagination.md), [Progress](../../02_Widgets/03_Common/10_Progress.md), [DropDownMenu](../../02_Widgets/03_Common/11_DropDownMenu.md), [Blades](../../02_Widgets/03_Common/12_Blades.md), [MetricView](../../02_Widgets/03_Common/13_MetricView.md), [Terminal](../../02_Widgets/03_Common/14_Terminal.md), [Dialog](../../02_Widgets/03_Common/15_Dialog.md), [Tree](../../02_Widgets/03_Common/16_Tree.md) |
 | Inputs | [Field](../../02_Widgets/04_Inputs/01_Field.md), [TextInput](../../02_Widgets/04_Inputs/02_TextInput.md), [NumberInput](../../02_Widgets/04_Inputs/03_NumberInput.md), [BoolInput](../../02_Widgets/04_Inputs/04_BoolInput.md), [SelectInput](../../02_Widgets/04_Inputs/05_SelectInput.md), [AsyncSelectInput](../../02_Widgets/04_Inputs/06_AsyncSelectInput.md), [DateTimeInput](../../02_Widgets/04_Inputs/07_DateTimeInput.md), [DateRangeInput](../../02_Widgets/04_Inputs/08_DateRangeInput.md), [ColorInput](../../02_Widgets/04_Inputs/09_ColorInput.md), [FileInput](../../02_Widgets/04_Inputs/10_FileInput.md), [CodeInput](../../02_Widgets/04_Inputs/11_CodeInput.md), [AudioInput](../../02_Widgets/04_Inputs/12_AudioInput.md), [FeedbackInput](../../02_Widgets/04_Inputs/13_FeedbackInput.md), [ReadOnlyInput](../../02_Widgets/04_Inputs/14_ReadOnlyInput.md) |
-| Primitives | [Text](../../02_Widgets/01_Primitives/01_TextBlock.md), [Icon](../../02_Widgets/01_Primitives/02_Icon.md), [Image](../../02_Widgets/01_Primitives/03_Image.md), [Box](../../02_Widgets/01_Primitives/04_Box.md), [Fragment](../../02_Widgets/01_Primitives/05_Fragment.md), [Spacer](../../02_Widgets/01_Primitives/06_Spacer.md), [Separator](../../02_Widgets/01_Primitives/07_Separator.md), [Avatar](../../02_Widgets/01_Primitives/08_Avatar.md), [Skeleton](../../02_Widgets/01_Primitives/09_Skeleton.md), [CodeBlock](../../02_Widgets/01_Primitives/10_CodeBlock.md), [Kbd](../../02_Widgets/01_Primitives/11_Kbd.md), [Callout](../../02_Widgets/01_Primitives/12_Callout.md), [Error](../../02_Widgets/01_Primitives/13_Error.md), [Markdown](../../02_Widgets/01_Primitives/14_Markdown.md), [Html](../../02_Widgets/01_Primitives/15_Html.md), [Xml](../../02_Widgets/01_Primitives/16_Xml.md), [Json](../../02_Widgets/01_Primitives/17_Json.md), [Svg](../../02_Widgets/01_Primitives/18_Svg.md), [Embed](../../02_Widgets/01_Primitives/19_Embed.md), [Iframe](../../02_Widgets/01_Primitives/20_Iframe.md), [AudioPlayer](../../02_Widgets/01_Primitives/21_AudioPlayer.md), [VideoPlayer](../../02_Widgets/01_Primitives/22_VideoPlayer.md), [Stepper](../../02_Widgets/01_Primitives/23_Stepper.md) |
-| Layouts | [GridLayout](../../02_Widgets/02_Layouts/03_GridLayout.md), [HeaderLayout](../../02_Widgets/02_Layouts/04_HeaderLayout.md), [FooterLayout](../../02_Widgets/02_Layouts/05_FooterLayout.md), [SidebarLayout](../../02_Widgets/02_Layouts/06_SidebarLayout.md), [ResizablePanelGroup](../../02_Widgets/02_Layouts/08_ResizablePanelGroup.md), [FloatingPanel](../../02_Widgets/02_Layouts/09_FloatingPanel.md) |
+| Primitives | [Text](../../02_Widgets/01_Primitives/01_TextBlock.md), [Icon](../../02_Widgets/01_Primitives/02_Icon.md), [Image](../../02_Widgets/01_Primitives/03_Image.md), [Box](../../02_Widgets/01_Primitives/04_Box.md), [Fragment](../../02_Widgets/01_Primitives/05_Fragment.md), [Spacer](../../02_Widgets/01_Primitives/06_Spacer.md), [Separator](../../02_Widgets/01_Primitives/07_Separator.md), [Avatar](../../02_Widgets/01_Primitives/08_Avatar.md), [Skeleton](../../02_Widgets/01_Primitives/09_Skeleton.md), [CodeBlock](../../02_Widgets/01_Primitives/10_CodeBlock.md), [Kbd](../../02_Widgets/01_Primitives/11_Kbd.md), [Callout](../../02_Widgets/01_Primitives/12_Callout.md), [Error](../../02_Widgets/01_Primitives/13_Error.md), [Markdown](../../02_Widgets/01_Primitives/14_Markdown.md), [Html](../../02_Widgets/01_Primitives/15_Html.md), [Xml](../../02_Widgets/01_Primitives/16_Xml.md), [Json](../../02_Widgets/01_Primitives/17_Json.md), [Svg](../../02_Widgets/01_Primitives/18_Svg.md), [Embed](../../02_Widgets/01_Primitives/19_Embed.md), [Iframe](../../02_Widgets/01_Primitives/20_Iframe.md), [AudioPlayer](../../02_Widgets/01_Primitives/21_AudioPlayer.md), [VideoPlayer](../../02_Widgets/01_Primitives/22_VideoPlayer.md), [Stepper](../../02_Widgets/01_Primitives/23_Stepper.md), [AutoScroll](../../02_Widgets/01_Primitives/26_AutoScroll.md) |
+| Layouts | [StackLayout](../../02_Widgets/02_Layouts/01_StackLayout.md), [GridLayout](../../02_Widgets/02_Layouts/03_GridLayout.md), [HeaderLayout](../../02_Widgets/02_Layouts/04_HeaderLayout.md), [FooterLayout](../../02_Widgets/02_Layouts/05_FooterLayout.md), [SidebarLayout](../../02_Widgets/02_Layouts/06_SidebarLayout.md), [TabsLayout](../../02_Widgets/02_Layouts/07_TabsLayout.md), [ResizablePanelGroup](../../02_Widgets/02_Layouts/08_ResizablePanelGroup.md), [FloatingPanel](../../02_Widgets/02_Layouts/09_FloatingPanel.md) |
 | Effects | [Animation](../../02_Widgets/05_Effects/Animation.md), [Confetti](../../02_Widgets/05_Effects/Confetti.md) |
 | Charts | [LineChart](../../02_Widgets/06_Charts/01_LineChart.md), [BarChart](../../02_Widgets/06_Charts/02_BarChart.md), [AreaChart](../../02_Widgets/06_Charts/03_AreaChart.md), [PieChart](../../02_Widgets/06_Charts/04_PieChart.md) |
 | Advanced | [DataTable](../../02_Widgets/07_Advanced/01_DataTable.md), [Sheet](../../02_Widgets/07_Advanced/02_Sheet.md), [Kanban](../../02_Widgets/07_Advanced/03_Kanban.md), [Chat](../../02_Widgets/07_Advanced/04_Chat.md), [ExternalWidgets](../../02_Widgets/07_Advanced/05_ExternalWidgets.md) |
@@ -111,7 +111,7 @@ public class CommonWidgetsDemo : ViewBase
                     .ToDetails()
             ).Title("Details").Description("Label-value pairs").Height(Size.Units(70))
             | new Card(
-                Layout.Vertical().Align(Align.Center)
+                Layout.Vertical().AlignContent(Align.Center)
                     | new DropDownMenu(_ => { }, 
                         new Button("Menu"),
                         MenuItem.Default("Profile"),
@@ -120,7 +120,7 @@ public class CommonWidgetsDemo : ViewBase
                         MenuItem.Default("Logout"))
             ).Title("DropDownMenu").Description("Action menus").Height(Size.Units(40))
             | new Card(
-                Layout.Horizontal().Align(Align.Center).Gap(2)
+                Layout.Horizontal().AlignContent(Align.Center).Gap(2)
                     | new Button("Hover").Icon(Icons.Info).WithTooltip("This is a tooltip")
                     | new Button("Help").Icon(Icons.CircleQuestionMark).WithTooltip("Get help here")
             ).Title("Tooltip").Description("Contextual information").Height(Size.Units(40));
@@ -260,7 +260,7 @@ public class PrimitiveWidgetsDemo : ViewBase
                     | Text.Lead("Lead text")
             ).Title("Text").Description("Text variants").Height(Size.Units(75))
             | new Card(
-                Layout.Vertical().Align(Align.Center)
+                Layout.Vertical().AlignContent(Align.Center)
                     | new Image("https://api.images.cat/150/150")
             ).Title("Image").Description("Image display").Height(Size.Units(75))
             | new Card(
@@ -413,7 +413,7 @@ public class LayoutWidgetsDemo : ViewBase
             | new Card(
                 Layout.Vertical().Gap(4)
                 | new Card(
-                    Layout.Horizontal().Gap(2).Align(Align.Center)
+                    Layout.Horizontal().Gap(2).AlignContent(Align.Center)
                         | new Button("Show Panel", onClick: _ => showPanel.Set(true))
                         | new Button("Hide Panel", onClick: _ => showPanel.Set(false))
                 ).Width(Size.Full())
@@ -502,7 +502,7 @@ public class EffectWidgetsDemo : ViewBase
     {
         return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
             | new Card(
-                Layout.Horizontal().Align(Align.Center).Gap(2)
+                Layout.Horizontal().AlignContent(Align.Center).Gap(2)
                     | new Button("Click Confetti").WithConfetti(AnimationTrigger.Click)
                     | new Button("Hover Confetti").WithConfetti(AnimationTrigger.Hover)
             ).Title("Confetti").Description("Celebration effects").Height(Size.Units(40))

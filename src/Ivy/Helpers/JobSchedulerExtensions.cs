@@ -49,7 +49,7 @@ public static class JobSchedulerExtensions
         }
 
         return Layout.Vertical()
-               | (Layout.Horizontal().Align(Align.Left).Gap(2)
+               | (Layout.Horizontal().AlignContent(Align.Left).Gap(2)
                   | GetIcon()
                   | Text.Muted(job.Title)
                   | new Spacer().Width(Size.Grow())

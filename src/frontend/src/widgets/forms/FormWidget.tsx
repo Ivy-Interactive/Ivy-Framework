@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { useEventHandler } from '@/components/event-handler';
+import React, { useEffect, useRef } from "react";
+import { useEventHandler } from "@/components/event-handler";
 
 interface FormWidgetProps {
   id: string;
@@ -17,19 +17,17 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target;
       if (
-        e.key === 'Enter' &&
+        e.key === "Enter" &&
         target instanceof HTMLElement &&
-        (target.tagName === 'INPUT' || target.tagName === 'SELECT')
+        (target.tagName === "INPUT" || target.tagName === "SELECT")
       ) {
         e.preventDefault();
 
         // Find all inputs in the form
         const inputs = Array.from(
-          form.querySelectorAll('input:not([type="hidden"]), textarea, select')
+          form.querySelectorAll('input:not([type="hidden"]), textarea, select'),
         ).filter(
-          el =>
-            !el.hasAttribute('disabled') &&
-            (el as HTMLElement).offsetParent !== null
+          (el) => !el.hasAttribute("disabled") && (el as HTMLElement).offsetParent !== null,
         ) as HTMLElement[];
 
         const currentIndex = inputs.indexOf(target);
@@ -43,11 +41,9 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
           nextInput.focus();
         } else {
           // We're on the last field - check for invalid fields
-          const invalidInputs = inputs.filter(input => {
+          const invalidInputs = inputs.filter((input) => {
             const parent = input.closest('[class*="flex-col"]');
-            return (
-              parent?.querySelector('[class*="text-destructive"]') !== null
-            );
+            return parent?.querySelector('[class*="text-destructive"]') !== null;
           });
 
           if (invalidInputs.length > 0) {
@@ -55,15 +51,15 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
             invalidInputs[0].focus();
           } else {
             // All fields valid - submit the form
-            eventHandler('OnSubmit', id, []);
+            eventHandler("OnSubmit", id, []);
           }
         }
       }
     };
 
-    form.addEventListener('keydown', handleKeyDown);
+    form.addEventListener("keydown", handleKeyDown);
     return () => {
-      form.removeEventListener('keydown', handleKeyDown);
+      form.removeEventListener("keydown", handleKeyDown);
     };
   }, [id, eventHandler]);
 

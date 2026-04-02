@@ -1,9 +1,9 @@
-import React, { useMemo, useRef } from 'react';
-import { CustomRenderer, DataEditorRef } from '@glideapps/glide-data-grid';
-import { useTable } from '../dataTableContext';
-import { getSelectionProps } from '../utils/selectionModes';
-import { iconCellRenderer, linkCellRenderer } from '../utils/customRenderers';
-import { generateHeaderIcons, addStandardIcons } from '../utils/headerIcons';
+import React, { useMemo, useRef } from "react";
+import { CustomRenderer, DataEditorRef } from "@glideapps/glide-data-grid";
+import { useTable } from "../dataTableContext";
+import { getSelectionProps } from "../utils/selectionModes";
+import { iconCellRenderer, linkCellRenderer } from "../utils/customRenderers";
+import { generateHeaderIcons, addStandardIcons } from "../utils/headerIcons";
 import {
   useContainerSize,
   useSearch,
@@ -13,17 +13,21 @@ import {
   useRowHover,
   useEmptyRows,
   useDataLoading,
-} from '../hooks';
-import { GridContainer } from '../components/GridContainer';
-import { MenuItem } from '@/types/widgets';
-import { ROW_HEIGHT, GROUP_HEADER_HEIGHT } from './constants';
-import { useCellContent, useGridColumns, useHeaderMenu } from './hooks';
+} from "../hooks";
+import { useFooterColumnLayout } from "../hooks/useFooterColumnLayout";
+import { GridContainer } from "../components/GridContainer";
+import { AggregateFooter } from "../DataTableFooter";
+import { MenuItem } from "@/types/widgets";
+import { ROW_HEIGHT, GROUP_HEADER_HEIGHT } from "./constants";
+import { useCellContent, useGridColumns, useHeaderMenu } from "./hooks";
+import { getOrderedVisibleDataColumns } from "../utils/columnHelpers";
 
 interface TableEditorProps {
   widgetId: string;
   hasOptions?: boolean;
   rowActions?: MenuItem[];
   footer?: React.ReactNode;
+  showAggregateFooter?: boolean;
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
@@ -31,6 +35,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   hasOptions = false,
   rowActions,
   footer,
+  showAggregateFooter = false,
 }) => {
   const {
     columns,
@@ -67,12 +72,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
   const selectionProps = getSelectionProps(selectionMode);
 
-  const {
-    containerRef,
-    containerWidth,
-    containerHeight,
-    scrollContainerHeight,
-  } = useContainerSize();
+  const { containerRef, containerWidth, containerHeight, scrollContainerHeight } =
+    useContainerSize();
 
   // Search functionality
   const { showSearch, setShowSearch } = useSearch(showSearchConfig ?? false);
@@ -105,13 +106,12 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   });
 
   // Row hover and actions
-  const { hoverRow, actionButtonsTop, onItemHovered, handleRowActionClick } =
+  const { hoverRow, actionButtonsTop, actionButtonsHeight, onItemHovered, handleRowActionClick } =
     useRowHover({
       widgetId,
       visibleRows,
       enableRowHover: enableRowHover ?? false,
       rowActions,
-      gridRef,
       containerRef,
       arrowTableRef,
     });
@@ -170,9 +170,39 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showColumnTypeIcons: showColumnTypeIcons ?? true,
   });
 
+  const orderedDataColumns = useMemo(
+    () => getOrderedVisibleDataColumns(columns, columnOrder),
+    [columns, columnOrder],
+  );
+
+  const wantAggregateFooter =
+    showAggregateFooter && orderedDataColumns.some((c) => c.footer && c.footer.length > 0);
+
+  const { layout, footerScrollRef } = useFooterColumnLayout(
+    containerRef,
+    finalColumns,
+    getCellContent,
+    totalRows,
+    containerWidth,
+    tableTheme,
+    showIndexColumn ?? false,
+    visibleRows,
+    wantAggregateFooter,
+  );
+
   if (finalColumns.length === 0) {
     return null;
   }
+
+  const footerNode = wantAggregateFooter ? (
+    <AggregateFooter
+      columns={orderedDataColumns}
+      layout={layout}
+      footerScrollRef={footerScrollRef}
+    />
+  ) : (
+    footer
+  );
 
   return (
     <GridContainer
@@ -182,12 +212,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       columns={finalColumns}
       rows={totalRows}
       getCellContent={getCellContent}
-      customRenderers={
-        [
-          iconCellRenderer,
-          linkCellRenderer,
-        ] as unknown as readonly CustomRenderer[]
-      }
+      customRenderers={[iconCellRenderer, linkCellRenderer] as unknown as readonly CustomRenderer[]}
       headerIcons={headerIcons}
       onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
       onVisibleRegionChanged={handleVisibleRegionChanged}
@@ -203,26 +228,25 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       gridSelection={gridSelection}
       onGridSelectionChange={handleGridSelectionChange}
       width={containerWidth}
-      height={containerHeight > 0 ? containerHeight : undefined}
-      rowMarkers={showIndexColumn ? 'number' : 'none'}
+      height={
+        containerHeight > 0 ? containerHeight : containerRef.current?.clientHeight || undefined
+      }
+      rowMarkers={showIndexColumn ? "number" : "none"}
       onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
       groupHeaderHeight={showGroups ? GROUP_HEADER_HEIGHT : undefined}
       onCellClicked={handleCellClicked}
       onCellActivated={handleCellActivated}
-      onGroupHeaderClicked={
-        shouldUseColumnGroups ? onGroupHeaderClicked : undefined
-      }
+      onGroupHeaderClicked={shouldUseColumnGroups ? onGroupHeaderClicked : undefined}
       showSearch={showSearchConfig ? showSearch : false}
       onSearchClose={() => setShowSearch(false)}
       onItemHovered={enableRowHover ? onItemHovered : undefined}
-      getRowThemeOverride={
-        enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined
-      }
+      getRowThemeOverride={enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined}
       rowActions={rowActions}
       actionButtonsTop={actionButtonsTop}
+      actionButtonsHeight={actionButtonsHeight}
       hoverRow={hoverRow}
       onRowActionClick={handleRowActionClick}
-      footer={footer}
+      footer={footerNode}
       hasEmptyRows={emptyRowsCount > 0}
     />
   );

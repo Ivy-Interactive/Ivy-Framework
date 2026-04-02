@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import '@ivy-interactive/ivy-design-system/css/fonts';
+@import "tailwindcss";
+@import "@ivy-interactive/ivy-design-system/css/fonts";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -18,9 +18,9 @@ ivy-widget {
 @layer base {
   :root {
     /* Fonts */
-    --font-sans: 'Geist';
-    --font-serif: 'Geist';
-    --font-mono: 'Geist Mono';
+    --font-sans: "Geist";
+    --font-serif: "Geist";
+    --font-mono: "Geist Mono";
 
     /* Additional variables not in design system yet */
     --toolbox: #38363a;
@@ -76,6 +76,10 @@ ivy-widget {
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
+    --ivy-green: #00cc92;
+    --ivy-green-foreground: #ffffff;
+    --color-ivy-green: var(--ivy-green);
+    --color-ivy-green-foreground: var(--ivy-green-foreground);
 
     /* Neutral colors - reference CSS variables injected by the backend */
     --color-black: var(--black);
@@ -163,12 +167,12 @@ ivy-widget {
   }
 
   /* Ensure sidebar icons and logo use primary brand color */
-  [data-sidebar='sidebar'] .text-primary {
-    color: var(--primary) !important;
+  [data-sidebar="sidebar"] .text-primary {
+    color: var(--ivy-green) !important;
   }
 
-  [data-sidebar='sidebar'] svg[fill='currentColor'] {
-    color: var(--primary);
+  [data-sidebar="sidebar"] svg[fill="currentColor"] {
+    color: var(--ivy-green);
   }
 }
 
@@ -179,20 +183,14 @@ ivy-widget {
   }
 
   to {
-    height: var(
-      --radix-accordion-content-height,
-      var(--radix-collapsible-content-height)
-    );
+    height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height));
     opacity: 1;
   }
 }
 
 @keyframes accordion-up {
   from {
-    height: var(
-      --radix-accordion-content-height,
-      var(--radix-collapsible-content-height)
-    );
+    height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height));
     opacity: 1;
   }
 
@@ -237,7 +235,7 @@ ivy-widget {
 }
 
 /* Radix UI toast animations using data attributes */
-[data-radix-toast-root][data-state='open'] {
+[data-radix-toast-root][data-state="open"] {
   animation: toastSlideIn 300ms ease-out;
 }
 
@@ -322,9 +320,7 @@ ivy-widget {
 :has(> ivy-widget > .remove-parent-padding),
 :has(> ivy-widget > ivy-widget > .remove-parent-padding),
 :has(> ivy-widget > ivy-widget > ivy-widget > .remove-parent-padding),
-:has(
-  > ivy-widget > ivy-widget > ivy-widget > ivy-widget > .remove-parent-padding
-) {
+:has(> ivy-widget > ivy-widget > ivy-widget > ivy-widget > .remove-parent-padding) {
   padding: 0 !important;
 }
 
@@ -374,6 +370,19 @@ ivy-widget {
     -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
     -webkit-text-fill-color: var(--foreground) !important;
   }
+}
+
+/* Details/Summary styling for markdown collapsible sections */
+details {
+  padding: 0 1rem 1rem 1rem;
+}
+details > summary {
+  margin: 0 -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+details:not([open]) {
+  padding-bottom: 0;
 }
 
 /* Prevent dialog from getting focus rings when elements inside are focused */

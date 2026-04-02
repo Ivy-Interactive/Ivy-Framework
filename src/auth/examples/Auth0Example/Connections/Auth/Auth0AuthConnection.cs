@@ -19,7 +19,7 @@ public class Auth0AuthConnection : IConnection, IHaveSecrets
 
     public void RegisterServices(Server server)
     {
-        server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle());
+        server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle().UseGithub());
     }
 
     public Secret[] GetSecrets() =>
@@ -27,8 +27,7 @@ public class Auth0AuthConnection : IConnection, IHaveSecrets
         new("Auth0:Domain"),
         new("Auth0:ClientId"),
         new("Auth0:ClientSecret"),
-        new("Auth0:Audience"),
-        new("Auth0:Namespace")
+        new("Auth0:Audience")
     ];
 
     public async Task<(bool ok, string? message)> TestConnection(IConfiguration config)

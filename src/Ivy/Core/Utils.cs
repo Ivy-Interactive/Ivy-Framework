@@ -99,7 +99,11 @@ public static class Utils
         }
 
         if (t.IsEnum && jsonNode is JsonValue enumVal && enumVal.TryGetValue(out string? enumStr))
+        {
+            if (string.IsNullOrEmpty(enumStr))
+                return Nullable.GetUnderlyingType(valueType) != null ? null : default;
             return Enum.Parse(t, enumStr, true);
+        }
 
         if (t == typeof(bool) && jsonNode is JsonValue boolVal)
         {
@@ -141,6 +145,15 @@ public static class Utils
             var item1 = obj.ContainsKey("item1") ? ConvertJsonNode(obj["item1"]!, item1Type) : null;
             var item2 = obj.ContainsKey("item2") ? ConvertJsonNode(obj["item2"]!, item2Type) : null;
             return Activator.CreateInstance(t, item1, item2);
+        }
+
+        // DateOnly expects "yyyy-MM-dd"; frontend sends ISO datetime. Parse via DateTime first.
+        if ((t == typeof(DateOnly) || valueType == typeof(DateOnly?)) && jsonNode is JsonValue strVal && strVal.TryGetValue(out string? dateStr))
+        {
+            if (string.IsNullOrWhiteSpace(dateStr) && valueType == typeof(DateOnly?))
+                return null;
+            var dt = DateTime.Parse(dateStr, null, System.Globalization.DateTimeStyles.RoundtripKind);
+            return DateOnly.FromDateTime(dt);
         }
 
         var options = new JsonSerializerOptions

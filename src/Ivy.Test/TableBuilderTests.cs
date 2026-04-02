@@ -27,7 +27,7 @@ public class TableBuilderTests
 
         // Modify state
         builder.Remove(x => x.Age);
-        builder.Align(x => x.Name, Align.Right);
+        builder.AlignContent(x => x.Name, Align.Right);
 
         // Act
         builder.Reset();
@@ -50,13 +50,130 @@ public class TableBuilderTests
 
         var ageColumn = columns["Age"];
         Assert.False((bool)GetProp(ageColumn!, "Removed"), "Age column should be visible after Reset");
-        Assert.Equal(Align.Right, (Align)GetProp(ageColumn!, "Align")); // This is expected to FAIL if Reset sets it to Left
+        Assert.Equal(Align.Right, (Align)GetProp(ageColumn!, "AlignContent")); // This is expected to FAIL if Reset sets it to Left
 
         var nameColumn = columns["Name"];
-        Assert.Equal(Align.Left, (Align)GetProp(nameColumn!, "Align")); // Name is string, default Left. Modified to Right. Reset should back to Left.
+        Assert.Equal(Align.Left, (Align)GetProp(nameColumn!, "AlignContent")); // Name is string, default Left. Modified to Right. Reset should back to Left.
 
         var activeColumn = columns["IsActive"];
-        Assert.Equal(Align.Center, (Align)GetProp(activeColumn!, "Align")); // Bool is Center default. Reset sets to Left. expected FAIL.
+        Assert.Equal(Align.Center, (Align)GetProp(activeColumn!, "AlignContent")); // Bool is Center default. Reset sets to Left. expected FAIL.
+    }
+
+    [Fact]
+    public void DictionaryModel_Header_CreatesColumnDynamically()
+    {
+        var data = new List<Dictionary<string, string>>
+        {
+            new() { ["Name"] = "Alice", ["Age"] = "30" },
+            new() { ["Name"] = "Bob",   ["Age"] = "25" }
+        };
+
+        var builder = new TableBuilder<Dictionary<string, string>>(data);
+        builder.Header(r => r["Name"], "Name");
+        builder.Header(r => r["Age"], "Age");
+
+        var columnsField = typeof(TableBuilder<Dictionary<string, string>>)
+            .GetField("_columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var columns = (System.Collections.IDictionary)columnsField!.GetValue(builder)!;
+
+        Assert.True(columns.Contains("Name"));
+        Assert.True(columns.Contains("Age"));
+        Assert.False(columns.Contains("Count"));
+        Assert.False(columns.Contains("Keys"));
+    }
+
+    [Fact]
+    public void DictionaryModel_GetValue_ReturnsDictionaryValue()
+    {
+        var data = new List<Dictionary<string, string>>
+        {
+            new() { ["Name"] = "Alice" }
+        };
+
+        var builder = new TableBuilder<Dictionary<string, string>>(data);
+        builder.Header(r => r["Name"], "Name");
+
+        var columnsField = typeof(TableBuilder<Dictionary<string, string>>)
+            .GetField("_columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var columns = (System.Collections.IDictionary)columnsField!.GetValue(builder)!;
+        var nameColumn = columns["Name"]!;
+
+        var getValueMethod = nameColumn.GetType().GetMethod("GetValue");
+        var result = getValueMethod!.Invoke(nameColumn, new object[] { data[0] });
+        Assert.Equal("Alice", result);
+    }
+
+    [Fact]
+    public void DictionaryModel_GetValue_MissingKey_ReturnsNull()
+    {
+        var data = new List<Dictionary<string, string>>
+        {
+            new() { ["Name"] = "Alice" }
+        };
+
+        var builder = new TableBuilder<Dictionary<string, string>>(data);
+        builder.Header(r => r["Email"], "Email");
+
+        var columnsField = typeof(TableBuilder<Dictionary<string, string>>)
+            .GetField("_columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var columns = (System.Collections.IDictionary)columnsField!.GetValue(builder)!;
+        var emailColumn = columns["Email"]!;
+
+        var getValueMethod = emailColumn.GetType().GetMethod("GetValue");
+        var result = getValueMethod!.Invoke(emailColumn, new object[] { data[0] });
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void DictionaryModel_AutoScaffolds_ColumnsFromKeys()
+    {
+        var data = new List<Dictionary<string, string>>
+        {
+            new() { ["Name"] = "Alice", ["Age"] = "30" },
+            new() { ["Name"] = "Bob",   ["Age"] = "25" }
+        };
+
+        var builder = new TableBuilder<Dictionary<string, string>>(data);
+
+        var columnsField = typeof(TableBuilder<Dictionary<string, string>>)
+            .GetField("_columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var columns = (System.Collections.IDictionary)columnsField!.GetValue(builder)!;
+
+        Assert.Equal(2, columns.Count);
+        Assert.True(columns.Contains("Name"));
+        Assert.True(columns.Contains("Age"));
+    }
+
+    [Fact]
+    public void DictionaryModel_AutoScaffolds_EmptyCollection_NoColumns()
+    {
+        var data = new List<Dictionary<string, string>>();
+
+        var builder = new TableBuilder<Dictionary<string, string>>(data);
+
+        var columnsField = typeof(TableBuilder<Dictionary<string, string>>)
+            .GetField("_columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var columns = (System.Collections.IDictionary)columnsField!.GetValue(builder)!;
+        Assert.Empty(columns);
+    }
+
+    [Fact]
+    public void PocoModel_StillWorksAfterDictionaryChanges()
+    {
+        var data = new[]
+        {
+            new TestModel { Name = "Alice", Age = 30, IsActive = true }
+        };
+
+        var builder = new TableBuilder<TestModel>(data);
+
+        var columnsField = typeof(TableBuilder<TestModel>)
+            .GetField("_columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var columns = (System.Collections.IDictionary)columnsField!.GetValue(builder)!;
+
+        Assert.True(columns.Contains("Name"));
+        Assert.True(columns.Contains("Age"));
+        Assert.True(columns.Contains("IsActive"));
     }
 
     [Fact]

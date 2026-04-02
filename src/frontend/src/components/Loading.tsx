@@ -1,12 +1,12 @@
-import { useMemo, useEffect, useReducer } from 'react';
+import { useMemo, useEffect, useReducer } from "react";
 
 const SHAPES = [
   undefined,
-  'M0 0 H28 V28 H0 Z', // Square
-  'M28 0H0V28C15.46 28 28 15.46 28 0Z', // Perfect quarter circle
+  "M0 0 H28 V28 H0 Z", // Square
+  "M28 0H0V28C15.46 28 28 15.46 28 0Z", // Perfect quarter circle
 ];
 const SHAPE_LIKELIHOODS = [0, 0.4, 0.6];
-const COLORS = ['#00CC92', '#0D4A2F', '#80E6C9'];
+const COLORS = ["#00CC92", "#0D4A2F", "#80E6C9"];
 const COLOR_LIKELIHOODS = [0.6, 0.2, 0.2];
 const STEP_INTERVAL_MS = 200;
 const CELLS_TO_MUTATE_PER_STEP = 2;
@@ -22,27 +22,24 @@ type LoadingState = {
   lastMutatedIndices: Set<number>;
 };
 
-type LoadingAction = { type: 'TICK' } | { type: 'PAUSE_COMPLETE' };
+type LoadingAction = { type: "TICK" } | { type: "PAUSE_COMPLETE" };
 
 const reducer = (state: LoadingState, action: LoadingAction): LoadingState => {
   switch (action.type) {
-    case 'PAUSE_COMPLETE':
+    case "PAUSE_COMPLETE":
       return { ...state, isPaused: false };
-    case 'TICK': {
+    case "TICK": {
       if (!state.isReverting) {
         if (state.forwardStepCount < MUTATION_STEPS_FORWARD) {
           const mutableCellIndices = state.current
             .map((cell, index) => (cell[0] !== 0 ? index : -1))
-            .filter(index => index !== -1);
+            .filter((index) => index !== -1);
 
           const availableForMutation = mutableCellIndices.filter(
-            idx => !state.lastMutatedIndices.has(idx)
+            (idx) => !state.lastMutatedIndices.has(idx),
           );
 
-          if (
-            availableForMutation.length === 0 &&
-            mutableCellIndices.length > 0
-          ) {
+          if (availableForMutation.length === 0 && mutableCellIndices.length > 0) {
             return {
               ...state,
               history: [...state.history, state.current],
@@ -53,15 +50,12 @@ const reducer = (state: LoadingState, action: LoadingAction): LoadingState => {
 
           const cellsToMutateCount = Math.min(
             CELLS_TO_MUTATE_PER_STEP,
-            availableForMutation.length
+            availableForMutation.length,
           );
           const mutatedThisStep = new Set<number>();
           const pickable = [...availableForMutation];
 
-          while (
-            mutatedThisStep.size < cellsToMutateCount &&
-            pickable.length > 0
-          ) {
+          while (mutatedThisStep.size < cellsToMutateCount && pickable.length > 0) {
             const rIdx = Math.floor(Math.random() * pickable.length);
             mutatedThisStep.add(pickable[rIdx]);
             pickable.splice(rIdx, 1);
@@ -142,7 +136,7 @@ export function Loading() {
       [2, 0, 1],
       [2, 0, 0],
     ],
-    []
+    [],
   );
 
   const [state, dispatch] = useReducer(reducer, {
@@ -156,16 +150,10 @@ export function Loading() {
 
   useEffect(() => {
     if (state.isPaused) {
-      const id = setTimeout(
-        () => dispatch({ type: 'PAUSE_COMPLETE' }),
-        PAUSE_DURATION_MS
-      );
+      const id = setTimeout(() => dispatch({ type: "PAUSE_COMPLETE" }), PAUSE_DURATION_MS);
       return () => clearTimeout(id);
     } else {
-      const id = setInterval(
-        () => dispatch({ type: 'TICK' }),
-        STEP_INTERVAL_MS
-      );
+      const id = setInterval(() => dispatch({ type: "TICK" }), STEP_INTERVAL_MS);
       return () => clearInterval(id);
     }
   }, [state.isPaused]);
@@ -178,20 +166,15 @@ export function Loading() {
         const color = COLORS[colorIndex] || COLORS[0];
 
         return (
-          <div
-            key={`loading-cell-${index}`}
-            className="w-7 h-7"
-            style={{ margin: '-0.5px' }}
-          >
+          <div key={`loading-cell-${index}`} className="w-7 h-7" style={{ margin: "-0.5px" }}>
             {shape && (
               <svg
                 viewBox="0 0 28 28"
                 className="w-full h-full"
                 style={{
                   transform: `rotate(${rotation * 90}deg)`,
-                  transition:
-                    'transform 0.2s ease-in-out, fill 0.3s ease-in-out',
-                  display: 'block',
+                  transition: "transform 0.2s ease-in-out, fill 0.3s ease-in-out",
+                  display: "block",
                 }}
               >
                 <path d={shape} fill={color} />

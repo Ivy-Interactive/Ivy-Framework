@@ -1,20 +1,16 @@
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   expandableTriggerVariant,
   expandableHeaderVariant,
   expandableChevronContainerVariant,
   expandableChevronVariant,
   expandableContentVariant,
-} from '@/components/ui/expandable/expandable-variant';
-import { ChevronRight } from 'lucide-react';
-import React from 'react';
-import Icon from '@/components/Icon';
-import { Densities } from '@/types/density';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/expandable/expandable-variant";
+import { ChevronRight } from "lucide-react";
+import React from "react";
+import Icon from "@/components/Icon";
+import { Densities } from "@/types/density";
+import { cn } from "@/lib/utils";
 
 interface ExpandableWidgetProps {
   id: string;
@@ -22,6 +18,7 @@ interface ExpandableWidgetProps {
   open?: boolean;
   density?: Densities;
   icon?: string;
+  ghost?: boolean;
   slots?: {
     Header: React.ReactNode;
     Content: React.ReactNode;
@@ -34,6 +31,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   open = false,
   density = Densities.Medium,
   icon = undefined,
+  ghost = false,
   slots,
 }) => {
   let iconSize: number = 4;
@@ -78,13 +76,13 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   const handleTriggerClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     const isInteractiveElement =
-      target.closest('button:not([data-collapsible-trigger])') ||
-      target.closest('input') ||
-      target.closest('select') ||
+      target.closest("button:not([data-collapsible-trigger])") ||
+      target.closest("input") ||
+      target.closest("select") ||
       target.closest('[role="button"]:not([data-collapsible-trigger])') ||
       target.closest('[role="switch"]') ||
       target.closest('[role="checkbox"]') ||
-      target.closest('a[href]');
+      target.closest("a[href]");
 
     if (isInteractiveElement) {
       e.stopPropagation();
@@ -103,8 +101,11 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       open={isOpen}
       onOpenChange={handleOpenChange}
       className={cn(
-        'w-full rounded-box border border-border shadow-sm data-[disabled=true]:cursor-not-allowed',
-        'p-0'
+        "w-full data-[disabled=true]:cursor-not-allowed",
+        ghost
+          ? "border-none shadow-none bg-transparent"
+          : "rounded-box border border-border shadow-sm",
+        "p-0",
       )}
       data-disabled={disabled}
       role="details"
@@ -113,49 +114,51 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
         <div
           className={cn(
             expandableTriggerVariant({ density }),
-            'relative cursor-pointer data-[disabled=true]:cursor-not-allowed'
+            "relative cursor-pointer data-[disabled=true]:cursor-not-allowed",
+            ghost && "px-0 py-0 h-auto hover:bg-transparent",
           )}
           onClick={handleTriggerClick}
           data-collapsible-trigger
           data-disabled={disabled}
           role="button"
           tabIndex={disabled ? -1 : 0}
-          onKeyDown={e => {
-            if (e.key === 'Enter' || e.key === ' ') {
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              if (!disabled) setIsOpen(prev => !prev);
+              if (!disabled) setIsOpen((prev) => !prev);
             }
           }}
         >
           <div
             className={cn(
               expandableHeaderVariant({ density }),
-              disabled && 'text-muted-foreground',
-              'flex items-center gap-2'
+              disabled && "text-muted-foreground",
+              "flex items-center gap-2",
             )}
             role="summary"
           >
-            {icon && icon !== 'None' && <Icon style={iconStyles} name={icon} />}
+            {icon && icon !== "None" && <Icon style={iconStyles} name={icon} />}
             {slots?.Header}
           </div>
           <span
             className={cn(
               expandableChevronContainerVariant({ density }),
-              disabled && 'opacity-50'
+              disabled && "opacity-50",
+              ghost && "relative w-auto right-auto",
             )}
             aria-hidden="true"
           >
             <ChevronRight
               className={cn(
                 expandableChevronVariant({ density }),
-                isOpen ? 'rotate-90' : 'rotate-0'
+                isOpen ? "rotate-90" : "rotate-0",
               )}
             />
           </span>
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className={expandableContentVariant({ density })}>
+        <div className={cn(expandableContentVariant({ density }), ghost && "px-0")}>
           {slots?.Content}
         </div>
       </CollapsibleContent>

@@ -20,14 +20,16 @@ public static class UseMemoExtensions
         var prevDepsRef = context.UseRef<object?[]?>((object?[]?)null);
         var hasComputedRef = context.UseRef<bool>(false);
 
+        var unwrapped = UnwrapDeps(deps);
+
         var depsChanged = !hasComputedRef.Value ||
                           prevDepsRef.Value is null ||
-                          !DepsEqual(prevDepsRef.Value, deps);
+                          !DepsEqual(prevDepsRef.Value, unwrapped);
 
         if (depsChanged)
         {
             valueRef.Value = factory();
-            prevDepsRef.Value = [.. deps];
+            prevDepsRef.Value = unwrapped;
             hasComputedRef.Value = true;
         }
 
@@ -53,6 +55,16 @@ public static class UseMemoExtensions
         }
 
         return valueRef.Value!;
+    }
+
+    private static object?[] UnwrapDeps(object?[] deps)
+    {
+        var unwrapped = new object?[deps.Length];
+        for (var i = 0; i < deps.Length; i++)
+        {
+            unwrapped[i] = deps[i] is IAnyState state ? state.GetValueAsObject() : deps[i];
+        }
+        return unwrapped;
     }
 
     private static bool DepsEqual(object?[] prev, object?[] current)

@@ -60,9 +60,9 @@ public class ExpandableApp : SampleBase
         ).Large();
 
         var switchInHeaderExpandable1 = new Expandable(
-            Layout.Horizontal().Align(Align.Left)
+            Layout.Horizontal().AlignContent(Align.Left)
             | headerSwitchState1.ToBoolInput(variant: BoolInputVariant.Switch)
-            | (Layout.Horizontal().Align(Align.Left)
+            | (Layout.Horizontal().AlignContent(Align.Left)
                | Text.Block("Apps")
                | new Icon(Icons.ChevronRight)
                | new Icon(Icons.Paperclip)
@@ -71,9 +71,9 @@ public class ExpandableApp : SampleBase
         ).Disabled(true);
 
         var switchInHeaderExpandable2 = new Expandable(
-            Layout.Horizontal().Align(Align.Left)
+            Layout.Horizontal().AlignContent(Align.Left)
             | headerSwitchState2.ToBoolInput(variant: BoolInputVariant.Switch)
-            | (Layout.Horizontal().Align(Align.Left)
+            | (Layout.Horizontal().AlignContent(Align.Left)
                | Text.Block("Apps")
                | new Icon(Icons.ChevronRight)
                | new Icon(Icons.MessageCircle)
@@ -82,9 +82,9 @@ public class ExpandableApp : SampleBase
         ).Disabled(true);
 
         var switchInHeaderExpandable3 = new Expandable(
-            Layout.Horizontal().Align(Align.Left)
+            Layout.Horizontal().AlignContent(Align.Left)
             | headerSwitchState3.ToBoolInput(variant: BoolInputVariant.Switch)
-            | (Layout.Horizontal().Align(Align.Left)
+            | (Layout.Horizontal().AlignContent(Align.Left)
                | Text.Block("Apps")
                | new Icon(Icons.ChevronRight)
                | new Icon(Icons.Bug)
@@ -93,15 +93,22 @@ public class ExpandableApp : SampleBase
         );
 
         var switchInHeaderExpandable4 = new Expandable(
-            Layout.Horizontal().Align(Align.Left)
+            Layout.Horizontal().AlignContent(Align.Left)
             | headerSwitchState4.ToBoolInput(variant: BoolInputVariant.Switch)
-            | (Layout.Horizontal().Align(Align.Left)
+            | (Layout.Horizontal().AlignContent(Align.Left)
                | Text.Block("Settings")
                | new Icon(Icons.ChevronRight)
                | new Icon(Icons.Users)
                | Text.Block("Project Users")),
             Text.Block("This is the content for Project Users")
         ).Disabled(true);
+
+        var ghostExpandable = new Expandable("Ghost Expandable", "This expandable uses the Ghost variant — minimal border, no shadow.")
+            .Ghost();
+
+        var ghostWithIconExpandable = new Expandable("Ghost with Icon", "Ghost variant combined with an icon.")
+            .Ghost()
+            .Icon(Icons.Ghost);
 
         return Layout.Vertical()
             | Text.H2("Original Basic Expandable")
@@ -123,6 +130,9 @@ public class ExpandableApp : SampleBase
             | switchInHeaderExpandable1
             | switchInHeaderExpandable2
             | switchInHeaderExpandable3
-            | switchInHeaderExpandable4;
+            | switchInHeaderExpandable4
+            | Text.H2("Ghost Variant")
+            | ghostExpandable
+            | ghostWithIconExpandable;
     }
 }

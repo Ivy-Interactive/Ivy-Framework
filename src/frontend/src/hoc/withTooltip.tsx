@@ -1,10 +1,5 @@
-import React, { ComponentType } from 'react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import React, { ComponentType } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type WithTooltipProps<P> = P &
   React.JSX.IntrinsicAttributes & {
@@ -13,14 +8,14 @@ type WithTooltipProps<P> = P &
     style?: React.CSSProperties;
   };
 
-function withTooltip<P extends React.JSX.IntrinsicAttributes>(
-  Component: ComponentType<P>
-) {
+function withTooltip<P extends React.JSX.IntrinsicAttributes>(Component: ComponentType<P>) {
   return function TooltipHOC(props: WithTooltipProps<P>) {
     const { tooltipText, className, style, ...restProps } = props;
 
+    const ariaLabel = tooltipText && !(restProps as any)["aria-label"] ? tooltipText : undefined;
+
     const componentWithStyles = (
-      <Component className={className} style={style} {...(restProps as P)} />
+      <Component className={className} style={style} aria-label={ariaLabel} {...(restProps as P)} />
     );
 
     if (!tooltipText) {

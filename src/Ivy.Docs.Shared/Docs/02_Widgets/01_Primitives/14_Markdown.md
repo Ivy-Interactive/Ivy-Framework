@@ -145,6 +145,35 @@ public class MermaidView : ViewBase
 }
 ```
 
+### Graphviz Diagrams
+
+Graphviz diagrams let you create directed and undirected graphs using the DOT language. Use ` ```dot ` or ` ```graphviz ` code fences. For the full DOT language reference, see the [Graphviz documentation](https://graphviz.org/doc/info/lang.html).
+
+```csharp demo-tabs
+public class GraphvizView : ViewBase
+{
+    public override object? Build()
+    {
+        var markdownContent = 
+            """
+            ```dot
+            digraph G {
+                rankdir=LR;
+                node [shape=box, style="rounded,filled", fillcolor="#f0f0f0"];
+                
+                Client -> Server [label="Request"];
+                Server -> Database [label="Query"];
+                Database -> Server [label="Result"];
+                Server -> Client [label="Response"];
+            }
+            ```
+            """;
+            
+        return new Markdown(markdownContent);
+    }
+}
+```
+
 ### Emojis
 
 Emoji support enhances content with visual elements and expressions. You can use standard emoji shortcodes to add personality and visual appeal to your markdown content.
@@ -225,6 +254,29 @@ public class HtmlAndLinksView : ViewBase
     }
 }
 ```
+
+### Local Images
+
+Display images from the local filesystem by enabling local file support on both the server and the widget. Use forward slashes (`C:/...`) or `file:///` URLs — backslash paths (`C:\...`) don't work because the markdown parser interprets backslashes as escape characters.
+
+```csharp demo-tabs
+public class LocalImagesView : ViewBase
+{
+    public override object? Build()
+    {
+        var markdownContent =
+            """
+            ![Photo](C:/Users/me/Photos/landscape.png)
+            ![Screenshot](file:///C:/Screenshots/capture.png)
+            """;
+
+        return new Markdown(markdownContent)
+            .DangerouslyAllowLocalFiles();
+    }
+}
+```
+
+> **Note:** The server must also opt in via `server.DangerouslyAllowLocalFiles()` in `Program.cs`. Images are served through a proxy endpoint (`/ivy/local-file`) — the browser never accesses `file://` URLs directly.
 
 ### Complete Example
 

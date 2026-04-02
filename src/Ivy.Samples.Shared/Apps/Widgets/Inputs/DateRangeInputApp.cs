@@ -16,6 +16,10 @@ public class DateRangeInputApp : SampleBase
         var nullableInvalidDateOnlyState = UseState<(DateOnly?, DateOnly?)>(() => (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today)));
         var nullableDisabledDateOnlyState = UseState<(DateOnly?, DateOnly?)>(() => (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today)));
         var emptyNullableDateOnlyState = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
+        var onBlurState = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
+        var onBlurLabel = UseState("");
+        var onFocusState = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
+        var onFocusLabel = UseState("");
         var constrainedRangeState = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
 
         // Size examples
@@ -93,7 +97,7 @@ public class DateRangeInputApp : SampleBase
                 .TestId("daterange-input-min-max-example");
 
         return Layout.Vertical()
-            | Text.H1("DateRangeInput")
+            | Text.H1("DateRang Input")
             | Text.H2("Size Examples")
             | sizeExamplesGrid
             | Text.H2("Variants")
@@ -104,6 +108,25 @@ public class DateRangeInputApp : SampleBase
             | minMaxExample
             | Text.H2("Data Binding")
             | dataBindingGrid
+            | Text.H2("Events")
+            | (Layout.Vertical()
+                | new Card(
+                    Layout.Vertical().Gap(2)
+                        | Text.P("The blur event fires when the input loses focus.").Small()
+                        | onBlurState.ToDateRangeInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                        | (onBlurLabel.Value != ""
+                            ? Callout.Success(onBlurLabel.Value)
+                            : Callout.Info("Interact then click away to see blur events"))
+                ).Title("OnBlur Handler")
+                | new Card(
+                    Layout.Vertical().Gap(2)
+                        | Text.P("The focus event fires when you click on or tab into the input.").Small()
+                        | onFocusState.ToDateRangeInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                        | (onFocusLabel.Value != ""
+                            ? Callout.Success(onFocusLabel.Value)
+                            : Callout.Info("Click or tab into the input to see focus events"))
+                ).Title("OnFocus Handler")
+            )
             | currentValues;
     }
 }

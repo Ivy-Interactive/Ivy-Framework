@@ -4,9 +4,9 @@
  * When values equal the C# default, they are not serialized, so we must apply them here.
  */
 
-import type { DataTableConfig, DataColumn } from './types/types';
-import { SortDirection, SelectionModes } from './types/types';
-import { applyDefaults } from '@/lib/utils';
+import type { DataTableConfig, DataColumn } from "./types/types";
+import { SortDirection, SelectionModes } from "./types/types";
+import { applyDefaults } from "@/lib/utils";
 
 // DataTableColumn defaults (DataTableColumn.cs)
 export const DATA_COLUMN_DEFAULTS: Partial<DataColumn> = {
@@ -14,10 +14,11 @@ export const DATA_COLUMN_DEFAULTS: Partial<DataColumn> = {
   sortable: true,
   sortDirection: SortDirection.None,
   filterable: true,
-  align: 'Left',
+  alignContent: "Left",
   order: 0,
   icon: null,
   help: null,
+  footer: null,
 };
 
 // DataTableConfig defaults (DataTableConfig.cs)
@@ -53,7 +54,7 @@ export function applyColumnDefaults(column: DataColumn): DataColumn {
     sortable: column.sortable ?? DATA_COLUMN_DEFAULTS.sortable,
     sortDirection: column.sortDirection ?? DATA_COLUMN_DEFAULTS.sortDirection,
     filterable: column.filterable ?? DATA_COLUMN_DEFAULTS.filterable,
-    align: column.align ?? DATA_COLUMN_DEFAULTS.align,
+    alignContent: column.alignContent ?? DATA_COLUMN_DEFAULTS.alignContent,
     order: column.order ?? DATA_COLUMN_DEFAULTS.order,
   } as DataColumn;
 }
@@ -68,8 +69,6 @@ export function applyColumnsDefaults(columns: DataColumn[]): DataColumn[] {
 /**
  * Apply config defaults to a DataTableConfig.
  */
-export function applyConfigDefaults(
-  config: Partial<DataTableConfig> | undefined
-): DataTableConfig {
+export function applyConfigDefaults(config: Partial<DataTableConfig> | undefined): DataTableConfig {
   return applyDefaults(config, DATA_TABLE_CONFIG_DEFAULTS) as DataTableConfig;
 }

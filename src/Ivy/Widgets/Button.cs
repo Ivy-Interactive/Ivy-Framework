@@ -88,7 +88,13 @@ public record Button : WidgetBase<Button>
 
     [Prop] public bool Loading { get; set; }
 
+    [Prop] public string? ShortcutKey { get; set; }
+
+    [Prop] public string? Badge { get; set; }
+
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
+
+    [Prop] public bool AutoFocus { get; set; }
 
     [Event] public EventHandler<Event<Button>>? OnClick { get; set; }
 
@@ -179,6 +185,12 @@ public static class ButtonExtensions
     public static Button OnClick(this Button button, Action onClick) => button with { OnClick = new(_ => { onClick(); return ValueTask.CompletedTask; }) };
 
     public static Button OnClick(this Button button, Func<ValueTask> onClick) => button with { OnClick = new(_ => onClick()) };
+
+    public static Button AutoFocus(this Button button, bool autoFocus = true) => button with { AutoFocus = autoFocus };
+
+    public static Button ShortcutKey(this Button button, string shortcutKey) => button with { ShortcutKey = shortcutKey };
+
+    public static Button Badge(this Button button, string? badge) => button with { Badge = badge };
 
     public static Button Tag(this Button button, object tag) => button with { Tag = tag };
 

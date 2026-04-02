@@ -9,11 +9,11 @@ server.UseAuth<SliplaneAuthProvider>();
 
 server.AddAppsFromAssembly();
 
-var settings = new ChromeSettings()
+var settings = new AppShellSettings()
     .UseTabs(preventDuplicates: true)
     .DefaultApp<SliplaneExample.MainApp>();
 
-server.UseChrome(settings);
+server.UseAppShell(settings);
 
 server.SetMetaTitle("Sliplane Example");
 

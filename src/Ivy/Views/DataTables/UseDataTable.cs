@@ -42,7 +42,11 @@ public static class UseDataTableExtensions
             cleanup.Value?.Dispose();
 
             var columnNames = columns?.Select(c => c.Name).ToArray();
-            var (newCleanup, newConnection) = dataTableService.AddQueryable(queryable, idSelector, columnNames);
+            var valueAccessors = columns?
+                .Where(c => c.ValueAccessor != null)
+                .ToDictionary(c => c.Name, c => c.ValueAccessor!);
+            if (valueAccessors?.Count == 0) valueAccessors = null;
+            var (newCleanup, newConnection) = dataTableService.AddQueryable(queryable, idSelector, columnNames, valueAccessors);
             resultConnection = newConnection with { VersionToken = versionToken };
 
             connection.Set(resultConnection);

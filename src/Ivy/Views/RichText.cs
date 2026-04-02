@@ -60,6 +60,13 @@ public class RichTextBuilder : ViewBase, IStateless
         => Run(content, bold: bold, italic: italic, strikeThrough: true,
             color: color, highlightColor: highlightColor, word: word, link: link, linkTarget: linkTarget);
 
+    /// <summary>Add a muted (secondary color) text run.</summary>
+    public RichTextBuilder Muted(string content, bool bold = false, bool italic = false,
+        bool strikeThrough = false, Colors? highlightColor = null,
+        bool word = false, string? link = null, LinkTarget linkTarget = LinkTarget.Self)
+        => Run(content, bold: bold, italic: italic, strikeThrough: strikeThrough,
+            color: Colors.Muted, highlightColor: highlightColor, word: word, link: link, linkTarget: linkTarget);
+
     /// <summary>Add a plain text run with Word=true for auto-spacing.</summary>
     public RichTextBuilder Word(string content, bool bold = false, bool italic = false,
         bool strikeThrough = false, Colors? color = null, Colors? highlightColor = null, string? link = null,
@@ -73,6 +80,13 @@ public class RichTextBuilder : ViewBase, IStateless
         bool word = true, LinkTarget linkTarget = LinkTarget.Self)
         => Run(content, bold: bold, italic: italic, strikeThrough: strikeThrough,
             color: color, highlightColor: highlightColor, word: word, link: url, linkTarget: linkTarget);
+
+    /// <summary>Add a line break run.</summary>
+    public RichTextBuilder LineBreak()
+    {
+        _runs.Add(new TextRun { LineBreak = true });
+        return this;
+    }
 
     // --- Block-level styling ---
 

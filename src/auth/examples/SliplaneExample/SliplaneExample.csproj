@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>SliplaneExample</RootNamespace>
+    <UserSecretsId>ivy-auth-sliplane-example</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

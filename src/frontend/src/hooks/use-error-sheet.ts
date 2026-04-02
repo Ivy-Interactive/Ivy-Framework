@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
 export interface ErrorSheetData {
   id: string;
@@ -11,9 +11,9 @@ export interface ErrorSheetData {
 }
 
 type ActionType = {
-  SHOW_ERROR: 'SHOW_ERROR';
-  HIDE_ERROR: 'HIDE_ERROR';
-  CLEAR_ERROR: 'CLEAR_ERROR';
+  SHOW_ERROR: "SHOW_ERROR";
+  HIDE_ERROR: "HIDE_ERROR";
+  CLEAR_ERROR: "CLEAR_ERROR";
 };
 
 let count = 0;
@@ -25,15 +25,15 @@ function genId() {
 
 type Action =
   | {
-      type: ActionType['SHOW_ERROR'];
+      type: ActionType["SHOW_ERROR"];
       error: ErrorSheetData;
     }
   | {
-      type: ActionType['HIDE_ERROR'];
+      type: ActionType["HIDE_ERROR"];
       errorId: string;
     }
   | {
-      type: ActionType['CLEAR_ERROR'];
+      type: ActionType["CLEAR_ERROR"];
       errorId: string;
     };
 
@@ -43,24 +43,22 @@ interface State {
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'SHOW_ERROR':
+    case "SHOW_ERROR":
       return {
         ...state,
         errors: [...state.errors, { ...action.error, open: true }],
       };
 
-    case 'HIDE_ERROR':
+    case "HIDE_ERROR":
       return {
         ...state,
-        errors: state.errors.map(e =>
-          e.id === action.errorId ? { ...e, open: false } : e
-        ),
+        errors: state.errors.map((e) => (e.id === action.errorId ? { ...e, open: false } : e)),
       };
 
-    case 'CLEAR_ERROR':
+    case "CLEAR_ERROR":
       return {
         ...state,
-        errors: state.errors.filter(e => e.id !== action.errorId),
+        errors: state.errors.filter((e) => e.id !== action.errorId),
       };
   }
 };
@@ -71,21 +69,21 @@ let memoryState: State = { errors: [] };
 
 function dispatch(action: Action) {
   memoryState = reducer(memoryState, action);
-  listeners.forEach(listener => {
+  listeners.forEach((listener) => {
     listener(memoryState);
   });
 }
 
-type ErrorData = Omit<ErrorSheetData, 'id' | 'open'>;
+type ErrorData = Omit<ErrorSheetData, "id" | "open">;
 
 function showError({ ...props }: ErrorData) {
   const id = genId();
 
-  const hide = () => dispatch({ type: 'HIDE_ERROR', errorId: id });
-  const clear = () => dispatch({ type: 'CLEAR_ERROR', errorId: id });
+  const hide = () => dispatch({ type: "HIDE_ERROR", errorId: id });
+  const clear = () => dispatch({ type: "CLEAR_ERROR", errorId: id });
 
   dispatch({
-    type: 'SHOW_ERROR',
+    type: "SHOW_ERROR",
     error: {
       ...props,
       id,
@@ -116,8 +114,8 @@ function useErrorSheet() {
   return {
     ...state,
     showError,
-    hideError: (errorId: string) => dispatch({ type: 'HIDE_ERROR', errorId }),
-    clearError: (errorId: string) => dispatch({ type: 'CLEAR_ERROR', errorId }),
+    hideError: (errorId: string) => dispatch({ type: "HIDE_ERROR", errorId }),
+    clearError: (errorId: string) => dispatch({ type: "CLEAR_ERROR", errorId }),
   };
 }
 

@@ -1,6 +1,4 @@
-using System.Linq;
 using Ivy.Core;
-using Microsoft.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -17,7 +15,9 @@ public class DataTableView(
     Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = null,
     Func<object, object?>? idSelector = null,
     RefreshToken? refreshToken = null,
-    FuncViewBuilder? emptyViewFactory = null) : ViewBase, IMemoized
+    FuncViewBuilder? emptyViewFactory = null,
+    FuncViewBuilder? headerLeftFactory = null,
+    FuncViewBuilder? headerRightFactory = null) : ViewBase, IMemoized
 {
     public override object? Build()
     {
@@ -27,16 +27,6 @@ public class DataTableView(
             return null;
         }
 
-        // Check if query returned empty results and render empty state if configured
-        if (emptyViewFactory != null)
-        {
-            var isEmpty = queryable.Cast<object>().Count() == 0;
-            if (isEmpty)
-            {
-                return emptyViewFactory(Context);
-            }
-        }
-
         var table = new DataTable(connection, width, height, columns, config)
         {
             OnCellClick = onCellClick.ToEventHandler(),
@@ -44,6 +34,18 @@ public class DataTableView(
             RowActions = rowActions,
             OnRowAction = onRowAction.ToEventHandler()
         };
+
+        var slots = new List<Slot>();
+
+        if (emptyViewFactory != null)
+            slots.Add(new Slot("EmptyView", emptyViewFactory(Context)));
+        if (headerLeftFactory != null)
+            slots.Add(new Slot("HeaderLeft", headerLeftFactory(Context)));
+        if (headerRightFactory != null)
+            slots.Add(new Slot("HeaderRight", headerRightFactory(Context)));
+
+        if (slots.Count > 0)
+            table = table with { Children = slots.ToArray<object>() };
 
         return table;
     }

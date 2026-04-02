@@ -13,12 +13,12 @@ public record MetricRecord(
 public class MetricView(
     string title,
     Icons? icon,
-    Func<IViewContext, QueryResult<MetricRecord>> useMetricData
+    Func<IViewContext, QueryResult<MetricRecord>> UseMetricData
 ) : ViewBase
 {
     public override object? Build()
     {
-        var query = useMetricData(Context);
+        var query = UseMetricData(Context);
 
         if (query.Error is not null)
         {
@@ -54,9 +54,9 @@ public class MetricView(
 
         return new Card(
                 content: Text.Display(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip),
-                header: Layout.Horizontal().Align(Align.Center)
+                header: Layout.Horizontal().AlignContent(Align.Center)
                     | Text.H4(title).NoWrap().Overflow(Overflow.Ellipsis).Width(Size.Grow())
-                    | (Layout.Horizontal().Align(Align.Right).Gap(1).Width(Size.Fit())
+                    | (Layout.Horizontal().AlignContent(Align.Right).Gap(1).Width(Size.Fit())
                         | (x.TrendComparedToPreviousPeriod != null ? x.TrendComparedToPreviousPeriod >= 0
                                 ? Icons.TrendingUp.ToIcon().Color(Colors.Success).Small()
                                 : Icons.TrendingDown.ToIcon().Color(Colors.Destructive).Small()

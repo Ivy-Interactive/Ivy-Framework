@@ -111,6 +111,7 @@ public class ThemeService : IThemeService
         // Popover colors
         AppendColorVariable(sb, "--popover", colors.Popover ?? defaults.Popover);
         AppendColorVariable(sb, "--popover-foreground", colors.PopoverForeground ?? defaults.PopoverForeground);
+
     }
 
     private void AppendNeutralColors(StringBuilder sb)

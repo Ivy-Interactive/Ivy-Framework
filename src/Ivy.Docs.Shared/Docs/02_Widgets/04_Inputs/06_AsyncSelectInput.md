@@ -54,6 +54,27 @@ public class AsyncSelectBasicDemo : ViewBase
 }
 ```
 
+## Option Parameter Order
+
+When creating options for `AsyncSelectInput`, use the `Option<T>` constructor with the parameter order `(label, value)`:
+
+- **label** — the display text shown to the user in the dropdown
+- **value** — the underlying value stored when the option is selected
+
+```csharp
+// Correct: label first, value second
+new Option<string>("Germany", "DE")           // displays "Germany", stores "DE"
+new Option<int>("Year 2024", 2024)            // displays "Year 2024", stores 2024
+new Option<Guid>("John Doe", userId)          // displays "John Doe", stores the Guid
+
+// Single-parameter shortcut: uses value.ToString() as the label
+new Option<string>("Electronics")             // displays "Electronics", stores "Electronics"
+```
+
+<Callout Type="warning">
+A common mistake is reversing the parameters: `new Option<string>(code, name)` instead of `new Option<string>(name, code)`. When both the label and value are strings, the compiler won't catch this — but the value will display as the label in the dropdown.
+</Callout>
+
 ## Data Types
 
 AsyncSelectInput supports various data types. Here's an example showing String, Integer, and Enum-based AsyncSelects:

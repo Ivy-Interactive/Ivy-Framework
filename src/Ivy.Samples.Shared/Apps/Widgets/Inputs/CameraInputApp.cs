@@ -13,12 +13,16 @@ public class CameraInputApp() : SampleBase
         );
 
         return Layout.Vertical()
-               | Text.H1("Camera Input Widget Examples")
+               | Text.H1("Camera Input")
                | Text.P("Demonstrates the CameraInput widget for capturing photos from the user's webcam/camera.")
                | Text.H2("Examples")
-               | (Layout.Horizontal().Gap(4)
+               | (Layout.Horizontal()
                     | new Card(new CameraInputBasic()).Title("Basic")
+                    | new Card(new CameraInputEvents()).Title("OnFocus / OnBlur")
                     | new Card(new CameraInputDisabledState()).Title("Disabled State"))
+               | Text.H2("Validation")
+               | new CameraInput(dummyUpload.Value, "Take a photo")
+                   .Invalid("Camera input is invalid")
                | Text.H2("Sizes")
                | CreateSizesSection(dummyUpload.Value);
     }
@@ -81,9 +85,43 @@ public class CameraInputDisabledState : ViewBase
             defaultContentType: "image/png"
         );
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | Text.P("Demonstrates the CameraInput widget in a disabled state. The camera cannot be activated.")
                | new CameraInput(dummyUpload.Value, "Take a photo", disabled: true);
+    }
+}
+
+public class CameraInputEvents : ViewBase
+{
+    public override object? Build()
+    {
+        var focused = UseState(false);
+        var lastEvent = UseState<string?>(() => null);
+
+        var dummyUpload = UseUpload(
+            (fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask,
+            defaultContentType: "image/png"
+        );
+
+        void onFocus()
+        {
+            focused.Set(true);
+            lastEvent.Set("OnFocus");
+        }
+
+        void onBlur()
+        {
+            focused.Set(false);
+            lastEvent.Set("OnBlur");
+        }
+
+        return Layout.Vertical()
+               | Text.P("Focus the camera input (Tab / click), then blur it to trigger events.")
+               | new CameraInput(dummyUpload.Value, "Take a photo")
+                   .OnFocus(onFocus)
+                   .OnBlur(onBlur)
+               | Text.P($"Focused: {focused.Value}").Small()
+               | Text.P($"Last event: {lastEvent.Value ?? "—"}").Small();
     }
 }
 

@@ -222,13 +222,40 @@ public static class TypeHelper
             switch (expression)
             {
                 case MemberExpression memberExpression:
+                    // Walk up the chain to the root member (the one whose Expression is a ParameterExpression)
+                    while (memberExpression.Expression is MemberExpression parent)
+                    {
+                        memberExpression = parent;
+                    }
                     return memberExpression.Member.Name;
                 case UnaryExpression unaryExpression:
                     expression = unaryExpression.Operand;
                     continue;
+                case ConditionalExpression conditionalExpression:
+                    // For ternary expressions, extract the member from the IfTrue branch
+                    expression = conditionalExpression.IfTrue;
+                    continue;
+                case MethodCallExpression methodCall when methodCall.Method.Name == "get_Item"
+                    && methodCall.Arguments.Count == 1
+                    && methodCall.Arguments[0] is ConstantExpression constant:
+                    return constant.Value?.ToString() ?? throw new ArgumentException("Invalid expression.");
             }
 
             throw new ArgumentException("Invalid expression.");
         }
+    }
+
+    internal static bool IsComplexExpression(Expression expression)
+    {
+        // Unwrap Convert/ConvertChecked
+        while (expression is UnaryExpression unary)
+            expression = unary.Operand;
+
+        return expression switch
+        {
+            MemberExpression member => member.Expression is MemberExpression,
+            ConditionalExpression => true,
+            _ => false
+        };
     }
 }

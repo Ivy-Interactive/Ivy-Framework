@@ -1,12 +1,41 @@
 # Frontend
 
-**Node.js Version Requirement**: This project requires Node.js version 22.12.0 or greater.
+**Node.js Version Requirement**: This project requires Node.js version 22.12.0 or greater, and uses **vp** (Vite+) as its toolchain.
 
 ## Development
 
+**Important Tooling Note**: This ecosystem strictly uses `vp`. Running the legacy `npm install` command is deliberately blocked.
+
+**For Full-Stack / .NET Developers:**
+If you are simply cloning the repository and running `dotnet build` (or opening the solution in an IDE like visual studio or Rider), **you do not need to install anything manually**. We've engineered the MSBuild targets to natively bootstrap `vite-plus` safely if needed, but the recommended approach is to have the `vp` CLI installed globally. This completely automates the frontend installation and compilation pipeline seamlessly without requiring manual intervention.
+
+**For Standalone Frontend Development:**
+If you want to explicitly work on the frontend in isolation (using HMR for widgets), you must manually run:
+
 ```bash
-npm run dev
-npm run build
+# Install vp (Vite+)
+# macOS / Linux
+curl -fsSL https://vite.plus | bash
+
+# Windows (PowerShell)
+irm https://vite.plus/ps1 | iex
+
+# After installation, restart your terminal and run:
+vp i
+```
+
+For more information, see the [Vite+ Installation Guide](https://viteplus.dev/guide/#install-vp).
+
+After installing the packages, you can use the native Vite+ CLI:
+
+```bash
+vp dev
+```
+
+To build for production (which runs `tsc` for type-checking before bundling):
+
+```bash
+vp run build
 ```
 
 ## Developer Logging
@@ -55,17 +84,15 @@ Developer options are stored in localStorage and persist across:
 
 ## Code Quality
 
-The frontend project uses ESLint and Prettier for code quality and formatting, with automatic pre-commit hooks. It is also responsible for handling `dotnet format` precommit hook for the BE.
+The frontend project uses **Vite+** integrated tools (**Oxlint** and **Oxfmt**) for high-performance code quality and formatting, alongside automatic pre-commit hooks. It is also responsible for handling `dotnet format` precommit hook for the BE.
 
 ### Pre-commit Hooks
 
 We use a Husky npm package to setup precommit hooks for both the FE and the BE.
 
-To get the auto-linting for staged files, you need to have run `npm run install` in `./frontend` at least once. Ideally, you would not then need to run any formatting or lint commands as it will be done for you. In case you want to manually run them, you still can.
+To get the auto-linting for staged files, you need to have run `vp install` in `./frontend` at least once. Ideally, you would not then need to run any formatting or lint commands as it will be done for you. In case you want to manually run them, you still can.
 
-If you have Prettier and ESLint, you can configure your IDE to respect the repositories styling guidelines and easily format your code.
-
-If there are issues that auto-linting and formatting can't be resolved, your commit will be blocked from being pushed. If you really need to push, you can specify checks behavior per commit (not recommended):
+If there are issues that auto-linting and formatting can't resolve automatically, your commit will be blocked from being pushed. If you really need to push, you can specify checks behavior per commit (not recommended):
 
 ```bash
 git commit --no-verify -m "Commit message"
@@ -73,49 +100,47 @@ git commit --no-verify -m "Commit message"
 
 ### Code Formatting
 
-Format all files with Prettier:
+Format all files with Oxfmt using the Vite+ CLI:
 
 ```bash
-npm run format
+vp fmt .
 ```
 
 Check if files are properly formatted:
 
 ```bash
-npm run format:check
+vp fmt --check .
 ```
 
 ### Linting
 
-Check for linting issues:
+Check for linting issues with Oxlint using the Vite+ CLI:
 
 ```bash
-npm run lint
+vp lint .
 ```
 
 Automatically fix linting issues:
 
 ```bash
-npm run lint:fix
+vp lint --fix .
 ```
 
 ### Configuration Files
 
-- `.prettierrc` - Prettier configuration
-- `.prettierignore` - Files to exclude from formatting
-- `eslint.config.js` - ESLint configuration with Prettier integration
-- `package.json` - Contains lint-staged configuration and scripts
+- `vite.config.ts` - Contains Vite+ syntax formatting and linting preferences
+- `package.json` - Contains execution scripts
 
 ## Testing
 
-This project uses Vitest for unit testing and Playwright for end-to-end testing.
+This project uses Vitest (via Vite+) for unit testing and Playwright for end-to-end testing.
 
 ### Unit Testing with Vitest
 
-Run unit tests:
+Run unit tests interactively using Vite+:
 
 ```bash
-npm run test
+vp test
 ```
 
 Unit tests are configured to run only on files ending with `.test.ts`. Place your unit test files alongside your source code with the `.test.ts` extension.
@@ -133,13 +158,13 @@ cd frontend
 ### Install Dependencies
 
 ```bash
-npm ci
+vp install
 ```
 
 ### Install Playwright Browsers
 
 ```bash
-npx playwright install --with-deps
+vp exec playwright install --with-deps
 ```
 
 ### Running Tests
@@ -147,57 +172,55 @@ npx playwright install --with-deps
 Run all e2e tests:
 
 ```bash
-npm run e2e
+vp run e2e
 ```
 
 Run only Ivy.Docs e2e tests:
 
 ```bash
-npm run e2e:docs
+vp run e2e:docs
 ```
 
 Run only Ivy.Samples e2e tests:
 
 ```bash
-npm run e2e:samples
+vp run e2e:samples
 ```
 
 Run tests in a specific browser:
 
 ```bash
-npm run e2e -- --project=chromium
-npm run e2e -- --project=firefox
-npm run e2e -- --project=webkit
+vp run e2e -- --project=chromium
+vp run e2e -- --project=firefox
+vp run e2e -- --project=webkit
 ```
 
 Run tests in headed mode (to see the browser):
 
 ```bash
-npm run e2e -- --headed
+vp run e2e -- --headed
 ```
 
 Run tests in debug mode:
 
 ```bash
-npm run e2e -- --debug
+vp run e2e -- --debug
 ```
 
 Run a specific test file:
 
 ```bash
-npm run e2e -- example.spec.ts
+vp run e2e -- example.spec.ts
 ```
-
-**Note**: We use npm scripts instead of `npx playwright test` to ensure consistent usage of the locally installed Playwright version and avoid version conflicts.
 
 ### Test Reports
 
 View the HTML test report:
 
 ```bash
-npm run e2e -- --reporter=html
+vp run e2e -- --reporter=html
 # Then open the report
-npx playwright show-report
+vp exec playwright show-report
 ```
 
 ### Test Files
@@ -208,23 +231,23 @@ npx playwright show-report
 
 Tests are automatically run in GitHub Actions on push to main/master branches and pull requests. The CI pipeline includes:
 
-1. Code formatting checks (`npm run format:check`)
-2. Linting checks (`npm run lint`)
-3. Unit tests (`npm run test`)
+1. Code formatting checks (`vp fmt --check .`)
+2. Linting checks (`vp lint .`)
+3. Unit tests (`vp test`)
 4. Playwright end-to-end tests
 
-## Available Scripts
+## Available Commands and Scripts
 
-| Script                 | Description                           |
-| ---------------------- | ------------------------------------- |
-| `npm run dev`          | Start development server              |
-| `npm run build`        | Build for production                  |
-| `npm run preview`      | Preview production build              |
-| `npm run test`         | Run unit tests with Vitest            |
-| `npm run e2e`          | Run all end-to-end tests              |
-| `npm run e2e:docs`     | Run Ivy.Docs end-to-end tests         |
-| `npm run e2e:samples`  | Run Ivy.Samples end-to-end tests      |
-| `npm run lint`         | Check for linting issues              |
-| `npm run lint:fix`     | Fix linting issues automatically      |
-| `npm run format`       | Format all files with Prettier        |
-| `npm run format:check` | Check if files are properly formatted |
+| Command/Script       | Description                           |
+| -------------------- | ------------------------------------- |
+| `vp dev`             | Start development server              |
+| `vp run build`       | Build for production (typecheck + vp) |
+| `vp preview`         | Preview production build              |
+| `vp test`            | Run unit tests with Vitest            |
+| `vp run e2e`         | Run all end-to-end tests              |
+| `vp run e2e:docs`    | Run Ivy.Docs end-to-end tests         |
+| `vp run e2e:samples` | Run Ivy.Samples end-to-end tests      |
+| `vp lint .`          | Check for linting issues              |
+| `vp lint --fix .`    | Fix linting issues automatically      |
+| `vp fmt .`           | Format all files with Oxfmt           |
+| `vp fmt --check .`   | Check if files are properly formatted |

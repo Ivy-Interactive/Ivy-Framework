@@ -7,12 +7,15 @@ public class SignatureInputApp : SampleBase
     protected override object? BuildSample()
     {
         return Layout.Vertical()
+               | Text.H1("Signature Input")
                | Text.H2("Basic Signature")
                | new SignatureInputBasic()
                | Text.H2("Custom Styling")
                | new SignatureInputStyling()
                | Text.H2("States")
                | new SignatureInputStates()
+               | Text.H2("Events")
+               | new SignatureInputEvents()
             ;
     }
 }
@@ -78,5 +81,34 @@ public class SignatureInputStates : ViewBase
                | invalidSig.ToSignatureInput()
                    .Invalid("Signature is required")
                    .Placeholder("Draw here");
+    }
+}
+
+public class SignatureInputEvents : ViewBase
+{
+    public override object Build()
+    {
+        var onBlurState = UseState<byte[]?>(() => null);
+        var onBlurLabel = UseState("");
+        var onFocusState = UseState<byte[]?>(() => null);
+        var onFocusLabel = UseState("");
+
+        return Layout.Vertical()
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.P("The blur event fires when the signature pad loses focus.").Small()
+                    | onBlurState.ToSignatureInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                    | (onBlurLabel.Value != ""
+                        ? Callout.Success(onBlurLabel.Value)
+                        : Callout.Info("Interact then click away to see blur events"))
+            ).Title("OnBlur Handler")
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.P("The focus event fires when you click on or tab into the signature pad.").Small()
+                    | onFocusState.ToSignatureInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                    | (onFocusLabel.Value != ""
+                        ? Callout.Success(onFocusLabel.Value)
+                        : Callout.Info("Click or tab into the signature pad to see focus events"))
+            ).Title("OnFocus Handler");
     }
 }

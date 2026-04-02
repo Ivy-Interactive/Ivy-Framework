@@ -152,6 +152,53 @@ Key features of the Supabase provider:
 - **Social Providers**: Built-in support for multiple OAuth providers
 - **User Management**: Built-in user management APIs and dashboard
 
+## Brokered Sessions
+
+Brokered sessions allow you to access OAuth provider tokens (Google, GitHub, etc.) to call external APIs directly. For more information, see [Authentication Overview](01_AuthenticationOverview.md#brokered-sessions).
+
+### How It Works
+
+Supabase captures provider tokens during the initial OAuth callback when users authenticate via social providers. These tokens are stored in the brokered sessions and can be used to call the provider's APIs.
+
+### Important Limitation
+
+Supabase does not provide a way to refetch provider tokens after the initial login. If the session is lost or the user logs out, the brokered tokens are gone and the user must re-authenticate via OAuth to obtain new tokens.
+
+### Register Token Handlers
+
+For an OAuth provider to appear in brokered sessions, you must have a registered token handler:
+
+**Built-in handlers** - Add the NuGet package to your project:
+- `Ivy.Auth.Google` - For Google OAuth tokens (requires `Google:ClientId` and `Google:ClientSecret` configuration)
+- `Ivy.Auth.GitHub` - For GitHub OAuth tokens
+
+> **Note:** The Google token handler requires your Google OAuth credentials (`Google:ClientId` and `Google:ClientSecret`) to refresh tokens. These are the same credentials you configured in Supabase for Google social login.
+
+**Custom handlers** - For other providers, implement a custom `IAuthTokenHandler` and register it in `Program.cs`:
+
+```csharp
+server.RegisterAuthTokenHandler<MyDiscordTokenHandler>(OAuthProviders.Discord);
+```
+
+See [Authentication Overview](01_AuthenticationOverview.md#registering-token-handlers) for details on implementing custom token handlers.
+
+### Usage Example
+
+```csharp
+var authService = UseService<IAuthService>();
+var result = await authService.GetBrokeredSessionsAsync();
+
+if (result.Sessions?.TryGetValue(OAuthProviders.Google, out var googleSession) == true)
+{
+    using var httpClient = new HttpClient();
+    httpClient.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", googleSession.AuthToken?.AccessToken);
+
+    var response = await httpClient.GetAsync("https://www.googleapis.com/drive/v3/files");
+    // Process response...
+}
+```
+
 ## Security Best Practices
 
 - **Always use HTTPS** in production environments

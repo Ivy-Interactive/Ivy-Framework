@@ -416,4 +416,6 @@ Ivy.Samples/.claude/settings.local.json
 .claude/commands/
 .claude/hooks/
 /**/dist/
+.ivy/
+**/tmp_out/
 

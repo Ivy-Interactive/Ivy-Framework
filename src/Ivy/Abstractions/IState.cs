@@ -11,6 +11,8 @@ public interface IAnyState : IDisposable, IEffectTriggerConvertible
     public IDisposable SubscribeAny(Action<object?> action);
 
     public Type GetStateType();
+
+    public object? GetValueAsObject();
 }
 
 public interface IState<T> : IObservable<T>, IAnyState

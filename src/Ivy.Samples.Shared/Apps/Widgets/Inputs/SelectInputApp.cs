@@ -1,5 +1,3 @@
-#pragma warning disable IVYHOOK001
-
 using System.ComponentModel;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
@@ -9,18 +7,23 @@ public class SelectInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return Layout.Tabs(
+        return Layout.Vertical()
+            | Text.H1("Select Input")
+            | Layout.Tabs(
             new Tab("Basic", new SelectInputBasicExample()),
+            new Tab("Events", new SelectInputEventsExample()),
             new Tab("Sizes", new SelectInputSizesExample()),
             new Tab("Variants", new SelectInputVariantsExample()),
             new Tab("Radio", new SelectInputRadioExample()),
             new Tab("Slider", new SelectInputSliderExample()),
             new Tab("Disabled Options", new SelectInputDisabledOptionsExample()),
+            new Tab("Tooltips", new SelectInputTooltipsExample()),
             new Tab("Nullable & Edge Cases", new SelectInputAdvancedExample()),
             new Tab("Advanced Props", new SelectInputAdvancedPropsExample()),
             new Tab("Ghost", new SelectInputGhostExample()),
             new Tab("Descriptions", new SelectInputDescriptionsExample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content)
+        ;
     }
 }
 
@@ -41,6 +44,36 @@ public class SelectInputBasicExample : ViewBase
                     .Placeholder("Select notification types...")
                     .WithField()
                     .Label("Notification types");
+    }
+}
+
+public class SelectInputEventsExample : ViewBase
+{
+    public override object? Build()
+    {
+        var onBlurState = UseState("Allowed");
+        var onBlurLabel = UseState("");
+        var onFocusState = UseState("Allowed");
+        var onFocusLabel = UseState("");
+
+        return Layout.Vertical()
+            | Text.H3("Events")
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.P("The blur event fires when the input loses focus.").Small()
+                    | (onBlurLabel.Value != ""
+                        ? Callout.Success(onBlurLabel.Value)
+                        : Callout.Info("Interact then click away to see blur events"))
+                    | onBlurState.ToSelectInput(["Refused", "Allowed", "Ignored"]).OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+            ).Title("OnBlur Handler")
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.P("The focus event fires when you click on or tab into the input. Feedback is shown above the control so the open menu does not cover it.").Small()
+                    | (onFocusLabel.Value != ""
+                        ? Callout.Success(onFocusLabel.Value)
+                        : Callout.Info("Click or tab into the input to see focus events"))
+                    | onFocusState.ToSelectInput(["Refused", "Allowed", "Ignored"]).OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+            ).Title("OnFocus Handler");
     }
 }
 
@@ -117,6 +150,11 @@ public class SelectInputVariantsExample : ViewBase
         var nullableColorArrayState = UseState<Colors[]?>(() => null);
         var iconsState = UseState<string>("bold");
         var nullableIconsState = UseState<string?>();
+
+        var colorStateSelect = UseState<Colors[]>([]);
+        var colorStateList = UseState<Colors[]>([]);
+        var colorStateToggle = UseState<Colors[]>([]);
+
         var colorOptions = typeof(Colors).ToOptions();
 
         return Layout.Vertical()
@@ -164,14 +202,11 @@ public class SelectInputVariantsExample : ViewBase
                     | nullableIconsState.ToSelectInput(IconOptions).Variant(SelectInputVariant.Toggle)
                     | nullableIconsState.ToSelectInput(IconOptions).Variant(SelectInputVariant.Toggle).Invalid("Invalid"))
             | Text.H3("Multi-Select Variants")
-            | CreateMultiSelectVariants();
+            | CreateMultiSelectVariants(colorStateSelect, colorStateList, colorStateToggle);
     }
 
-    private object CreateMultiSelectVariants()
+    private object CreateMultiSelectVariants(IState<Colors[]> colorStateSelect, IState<Colors[]> colorStateList, IState<Colors[]> colorStateToggle)
     {
-        var colorStateSelect = UseState<Colors[]>([]);
-        var colorStateList = UseState<Colors[]>([]);
-        var colorStateToggle = UseState<Colors[]>([]);
         var colorOptions = typeof(Colors).ToOptions();
 
         return Layout.Vertical().Gap(6)
@@ -274,6 +309,41 @@ public class SelectInputDisabledOptionsExample : ViewBase
     }
 }
 
+public class SelectInputTooltipsExample : ViewBase
+{
+    public override object? Build()
+    {
+        var cacheStrategy = UseState("lru");
+        var cacheStrategyMulti = UseState<string[]>([]);
+
+        var cacheOptions = new IAnyOption[]
+        {
+            new Option<string>("LRU", "lru", tooltip: "Least Recently Used — evicts the oldest accessed entry first"),
+            new Option<string>("LFU", "lfu", tooltip: "Least Frequently Used — evicts the least accessed entry first"),
+            new Option<string>("FIFO", "fifo", tooltip: "First In, First Out — evicts entries in insertion order"),
+            new Option<string>("Write-Through", "write-through", tooltip: "Writes to cache and backing store simultaneously"),
+            new Option<string>("Write-Back", "write-back", tooltip: "Writes to cache first, syncs to backing store later").Disabled(),
+        };
+
+        return Layout.Vertical()
+            | Text.H3("Option Tooltips")
+            | Text.P("Hover over options to see contextual help tooltips. Tooltips work across all variants.")
+            | Layout.Grid().Columns(3).Gap(6)
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Select Variant")
+                    | cacheStrategy.ToSelectInput(cacheOptions)
+                        .Placeholder("Select a cache strategy..."))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("List Variant")
+                    | cacheStrategyMulti.ToSelectInput(cacheOptions)
+                        .Variant(SelectInputVariant.List))
+                | (Layout.Vertical().Gap(2)
+                    | Text.Monospaced("Toggle Variant")
+                    | cacheStrategyMulti.ToSelectInput(cacheOptions)
+                        .Variant(SelectInputVariant.Toggle));
+    }
+}
+
 public class SelectInputAdvancedExample : ViewBase
 {
     private enum Colors { Red, Green, Blue, Yellow }
@@ -285,10 +355,8 @@ public class SelectInputAdvancedExample : ViewBase
         [Description("snake_case")] SnakeCase,
     }
 
-    private object CreateNullableTestSection()
+    private object CreateNullableTestSection(IState<Colors?> nullableColorState, IState<Colors> nonNullableColorState)
     {
-        var nullableColorState = UseState((Colors?)null);
-        var nonNullableColorState = UseState(Colors.Red);
         var colorOptions = typeof(Colors).ToOptions();
 
         var nullableGrid = Layout.Grid().Columns(4)
@@ -312,11 +380,9 @@ public class SelectInputAdvancedExample : ViewBase
             | nullableGrid;
     }
 
-    private object CreateLabelValueEdgeCasesSection()
+    private object CreateLabelValueEdgeCasesSection(IState<DatabaseNamingConvention> singleSelectState, IState<DatabaseNamingConvention[]> multiSelectState)
     {
         var namingConventionOptions = typeof(DatabaseNamingConvention).ToOptions();
-        var singleSelectState = UseState(DatabaseNamingConvention.PascalCase);
-        var multiSelectState = UseState<DatabaseNamingConvention[]>([DatabaseNamingConvention.PascalCase, DatabaseNamingConvention.SnakeCase]);
 
         var edgeCasesGrid = Layout.Grid().Columns(4)
             | Text.Monospaced("Type")
@@ -342,15 +408,37 @@ public class SelectInputAdvancedExample : ViewBase
 
     public override object? Build()
     {
+        var nullableColorState = UseState((Colors?)null);
+        var nonNullableColorState = UseState(Colors.Red);
+
+        var singleSelectState = UseState(DatabaseNamingConvention.PascalCase);
+        var multiSelectState = UseState<DatabaseNamingConvention[]>([DatabaseNamingConvention.PascalCase, DatabaseNamingConvention.SnakeCase]);
+
+        var namingConventionOptions = typeof(DatabaseNamingConvention).ToOptions();
+
         return Layout.Vertical()
-            | CreateNullableTestSection()
-            | CreateLabelValueEdgeCasesSection();
+            | CreateNullableTestSection(nullableColorState, nonNullableColorState)
+            | CreateLabelValueEdgeCasesSection(singleSelectState, multiSelectState);
     }
 }
 
 public class SelectInputAdvancedPropsExample : ViewBase
 {
     private enum Frameworks { React, Angular, Vue, Svelte, Ember, Backbone, Preact, Lit, Solid, Alpine }
+
+    private enum DemoOption
+    {
+        Alpha,
+        Bravo,
+        Charlie,
+        Delta,
+        Echo,
+        Foxtrot,
+        Golf,
+        Hotel,
+        India,
+        Juliet,
+    }
 
     public override object? Build()
     {
@@ -366,7 +454,15 @@ public class SelectInputAdvancedPropsExample : ViewBase
         var isLoading = UseState(false);
         var isSearchable = UseState(true);
 
-        var options = typeof(Frameworks).ToOptions();
+        var multiSelect = UseState<DemoOption[]>([]);
+        var multiList = UseState<DemoOption[]>([]);
+        var multiToggle = UseState<DemoOption[]>([]);
+        var nullableMultiSelect = UseState<DemoOption[]?>(() => null);
+        var nullableMultiList = UseState<DemoOption[]?>(() => null);
+        var nullableMultiToggle = UseState<DemoOption[]?>(() => null);
+
+        var frameworkOptions = typeof(Frameworks).ToOptions();
+        var demoOptions = typeof(DemoOption).ToOptions();
 
         return Layout.Vertical()
             | Text.H3("Advanced properties")
@@ -377,31 +473,55 @@ public class SelectInputAdvancedPropsExample : ViewBase
                 | (Layout.Vertical()
                     | Text.H4("Select (Single)")
                     | (Layout.Horizontal()
-                        | fwSingle.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                        | fwSingle.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Select)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).EmptyMessage("No frameworks found").SearchMode(SearchMode.Fuzzy).Width(Size.Grow())
-                        | fwNullableSingle.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                        | fwNullableSingle.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Select)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).EmptyMessage("No frameworks found").SearchMode(SearchMode.Fuzzy).Width(Size.Grow()).Nullable(true)))
                 | (Layout.Vertical()
                     | Text.H4("Select (Multi, Min=1, Max=3)")
                     | (Layout.Horizontal()
-                        | fwMultiSelect.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                        | fwMultiSelect.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Select)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow())
-                        | fwNullableMultiSelect.ToSelectInput(options).Variant(SelectInputVariant.Select)
+                        | fwNullableMultiSelect.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Select)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow()).Nullable(true)))
                 | (Layout.Vertical()
                     | Text.H4("List (Multi, Min=1, Max=3)")
                     | (Layout.Horizontal()
-                        | fwMultiList.ToSelectInput(options).Variant(SelectInputVariant.List)
+                        | fwMultiList.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.List)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow())
-                        | fwNullableMultiList.ToSelectInput(options).Variant(SelectInputVariant.List)
+                        | fwNullableMultiList.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.List)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("No frameworks found").Width(Size.Grow()).Nullable(true)))
                 | (Layout.Vertical()
                     | Text.H4("Toggle (Multi, Min=1, Max=3)")
                     | (Layout.Horizontal()
-                        | fwMultiToggle.ToSelectInput(options).Variant(SelectInputVariant.Toggle)
+                        | fwMultiToggle.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Toggle)
                             .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow())
-                        | fwNullableMultiToggle.ToSelectInput(options).Variant(SelectInputVariant.Toggle)
-                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow()).Nullable(true)));
+                        | fwNullableMultiToggle.ToSelectInput(frameworkOptions).Variant(SelectInputVariant.Toggle)
+                            .Searchable(isSearchable.Value).Loading(isLoading.Value).MinSelections(1).MaxSelections(3).EmptyMessage("Nothing here").Width(Size.Grow()).Nullable(true)))
+            | Text.H3("ShowActions")
+            | Text.P("Multi-select inputs can show a footer with Select All and Clear All. ")
+            | Layout.Grid().Columns(2)
+                | (Layout.Vertical()
+                    | Text.H4("Select (multi)")
+                    | (Layout.Horizontal()
+                        | multiSelect.ToSelectInput(demoOptions).Variant(SelectInputVariant.Select)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).ShowActions()
+                        | nullableMultiSelect.ToSelectInput(demoOptions).Variant(SelectInputVariant.Select)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).Nullable(true).ShowActions()))
+                | (Layout.Vertical()
+                    | Text.H4("List (multi)")
+                    | (Layout.Horizontal()
+                        | multiList.ToSelectInput(demoOptions).Variant(SelectInputVariant.List)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).ShowActions()
+                        | nullableMultiList.ToSelectInput(demoOptions).Variant(SelectInputVariant.List)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).Nullable(true).ShowActions()))
+                | (Layout.Vertical()
+                    | Text.H4("Toggle (multi)")
+                    | (Layout.Horizontal()
+                        | multiToggle.ToSelectInput(demoOptions).Variant(SelectInputVariant.Toggle)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).ShowActions()
+                        | nullableMultiToggle.ToSelectInput(demoOptions).Variant(SelectInputVariant.Toggle)
+                            .Searchable(true).EmptyMessage("No options").Width(Size.Grow()).Nullable(true).ShowActions()));
     }
 }
 
@@ -524,5 +644,3 @@ public class SelectInputRadioExample : ViewBase
                         .WithField().Label("Notification frequency"));
     }
 }
-
-#pragma warning restore IVYHOOK001

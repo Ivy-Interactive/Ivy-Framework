@@ -13,6 +13,7 @@ public class MarkdownApp : SampleBase
             new Tab("Code", new CodeBlocksTab()),
             new Tab("Tables", new TablesTab()),
             new Tab("Math", new MathTab()),
+            new Tab("Diagrams", new DiagramsTab()),
             new Tab("Media", new MediaTab())
         ).Variant(TabsVariant.Content);
     }
@@ -310,6 +311,46 @@ public class MathTab : ViewBase
                        $$
                        F(\\omega) = \int_{-\\infty}^{\\infty} f(t) e^{-i\\omega t} dt
                        $$
+                       """;
+
+        return new Markdown(markdown);
+    }
+}
+
+public class DiagramsTab : ViewBase
+{
+    public override object? Build()
+    {
+        var markdown = """
+                       # Diagrams
+
+                       ## Mermaid Diagrams
+
+                       ```mermaid
+                       graph TD
+                           A[Start] --> B{Decision}
+                           B -->|Yes| C[Action]
+                           B -->|No| D[End]
+                           C --> D
+                       ```
+
+                       ## Graphviz Diagrams
+
+                       Use ` ```dot ` or ` ```graphviz ` code fences:
+
+                       ```dot
+                       digraph G {
+                           rankdir=LR;
+                           node [shape=box, style="rounded,filled", fillcolor="#e8f4f8"];
+                           edge [color="#666666"];
+
+                           UI -> API [label="HTTP"];
+                           API -> Auth [label="Validate"];
+                           API -> DB [label="Query"];
+                           DB -> Cache [label="Lookup"];
+                           Cache -> API [label="Result", style=dashed];
+                       }
+                       ```
                        """;
 
         return new Markdown(markdown);

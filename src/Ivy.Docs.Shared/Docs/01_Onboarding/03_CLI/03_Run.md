@@ -31,6 +31,7 @@ You can also run the command with various options to customize its behavior:
 | Option | Description | Example |
 | :--- | :--- | :--- |
 | `--port <PORT>` | Specify a custom port (default: 5010). | `ivy run --port 8080` |
+| `--path-base <PATH_BASE>` | Host the app under a URL prefix (for example behind a reverse proxy). | `ivy run --path-base /my-app` |
 | `--browse` | Open default browser on start. | `ivy run --browse` |
 | `--app <NAME>` | Run a specific [app](../02_Concepts/10_Apps.md) in a multi-app project. | `ivy run --app Admin` |
 | `--describe` | Show application metadata without starting. | `ivy run --describe` |
@@ -71,6 +72,33 @@ Set the `PORT` environment variable before starting the app:
 This works with any launch method (`ivy run`, `dotnet run`, file-based apps).
 
 See [Program](../02_Concepts/01_Program.md) for more details on server configuration.
+
+## Configuring a Base Path
+
+Use a base path when your app is served from a sub-path like `https://example.com/my-app` instead of the domain root.
+
+### CLI Flag
+
+```terminal
+>ivy run --path-base /my-app
+```
+
+### Server Configuration in Code
+
+```csharp
+var server = new Server(new ServerArgs { BasePath = "/my-app" });
+```
+
+### Environment Variable
+
+Set the `BASE_PATH` environment variable before starting the app:
+
+```terminal
+>set BASE_PATH=/my-app
+>dotnet run
+```
+
+When `BasePath` is configured, Ivy applies ASP.NET Core `UsePathBase()` middleware so routing and generated links resolve under that prefix.
 
 ## Conflict Resolution & Debugging
 

@@ -119,6 +119,12 @@ public class FrontendApiClient
         return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
     }
 
+    public async Task<ClerkSignInResponse> RetrieveSignInAsync(string signInId, ClerkCredentials credentials, CancellationToken cancellationToken = default)
+    {
+        var response = await RequestAsync(HttpMethod.Get, $"client/sign_ins/{signInId}", credentials, cancellationToken: cancellationToken);
+        return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
+    }
+
     public async Task<ClerkSignInResponse> PrepareFirstFactorVerificationAsync(ClerkCredentials credentials, string origin, string signInId, string strategy, string redirectUrl, string? actionCompleteRedirectUrl, CancellationToken cancellationToken = default)
     {
         var formData = new Dictionary<string, string>
@@ -151,6 +157,52 @@ public class FrontendApiClient
 
         var response = await RequestAsync(HttpMethod.Post, "client/sign_ins", credentials, content: content, cancellationToken: cancellationToken);
         return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
+    }
+
+    public async Task<ClerkSignUpResponse> CreateSignUpAsync(ClerkCredentials credentials, string origin, string? strategy, string? redirectUrl, string? actionCompleteRedirectUrl, bool transfer, CancellationToken cancellationToken = default)
+    {
+        var formData = new Dictionary<string, string>();
+
+        if (strategy is not null)
+        {
+            formData.Add("strategy", strategy);
+        }
+        if (redirectUrl is not null)
+        {
+            formData.Add("redirect_url", redirectUrl);
+        }
+        if (actionCompleteRedirectUrl is not null)
+        {
+            formData.Add("action_complete_redirect_url", actionCompleteRedirectUrl);
+        }
+        if (transfer)
+        {
+            formData.Add("transfer", "true");
+        }
+
+        var content = new FormUrlEncodedContent(formData);
+
+        var response = await RequestAsync(HttpMethod.Post, "client/sign_ups", credentials, setHeaders: headers => headers.Add("Origin", origin), content: content, cancellationToken: cancellationToken);
+        return await ParseResponseAsync<ClerkSignUpResponse>(response, credentials, cancellationToken);
+    }
+
+    public async Task<ClerkSignUpResponse> PrepareSignUpExternalAccountAsync(ClerkCredentials credentials, string signUpId, string origin, string strategy, string redirectUrl, string? actionCompleteRedirectUrl, CancellationToken cancellationToken = default)
+    {
+        var formData = new Dictionary<string, string>
+        {
+            { "strategy", strategy },
+            { "redirect_url", redirectUrl }
+        };
+
+        if (actionCompleteRedirectUrl is not null)
+        {
+            formData.Add("action_complete_redirect_url", actionCompleteRedirectUrl);
+        }
+
+        var content = new FormUrlEncodedContent(formData);
+
+        var response = await RequestAsync(HttpMethod.Post, $"client/sign_ups/{signUpId}/prepare_verification", credentials, setHeaders: headers => headers.Add("Origin", origin), content: content, cancellationToken: cancellationToken);
+        return await ParseResponseAsync<ClerkSignUpResponse>(response, credentials, cancellationToken);
     }
 
     private async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string endpoint, ClerkCredentials? credentials = null, bool sendSessionToken = true, string? additionalQueryParameters = null, Action<HttpRequestHeaders>? setHeaders = null, HttpContent? content = null, CancellationToken cancellationToken = default)

@@ -2,6 +2,7 @@ using Ivy.Docs.Shared.Middleware;
 using Ivy.Docs.Shared.Services;
 using Ivy.Docs.Shared.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using Ivy;
 
 namespace Ivy.Docs.Shared;
 
@@ -12,6 +13,7 @@ public static class DocsServer
         var server = new Server(args);
         server.UseCulture("en-US");
         server.AddAppsFromAssembly(typeof(DocsServer).Assembly);
+        server.ReservePaths("/sitemap.xml", "/robots.txt", "/agents.md", "/llms.txt");
         server.UseHotReload();
 
         server.UseWebApplication(app =>
@@ -27,7 +29,7 @@ public static class DocsServer
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
         server.SetMetaTitle($"Ivy Docs {version}");
 
-        var chromeSettings = new ChromeSettings()
+        var appShellSettings = new AppShellSettings()
             .Header(
                 Layout.Vertical().Padding(2)
                 | new IvyLogo()
@@ -35,7 +37,7 @@ public static class DocsServer
             )
             .DefaultApp<Apps.Onboarding.GettingStarted.IntroductionApp>()
             .UsePages();
-        server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
+        server.UseAppShell(() => new DefaultSidebarAppShell(appShellSettings));
 
         await server.RunAsync();
     }

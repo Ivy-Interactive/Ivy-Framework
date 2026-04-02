@@ -14,13 +14,13 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         string name,
         int order,
         IBuilder<TModel> builder,
-        Align align,
+        Align alignContent,
         FieldInfo fieldInfo,
         PropertyInfo? propertyInfo,
         bool removed,
         IBuilder<TModel> initialBuilder,
         bool initialRemoved,
-        Align initialAlign)
+        Align initialAlignContent)
     {
         public string Name { get; set; } = name;
         private FieldInfo? FieldInfo { get; set; } = fieldInfo;
@@ -33,16 +33,16 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public bool Removed { get; set; } = removed;
         private readonly IBuilder<TModel> _initialBuilder = initialBuilder;
         private readonly bool _initialRemoved = initialRemoved;
-        private readonly Align _initialAlign = initialAlign;
+        private readonly Align _initialAlignContent = initialAlignContent;
 
         public void Reset()
         {
             Builder = _initialBuilder;
             Removed = _initialRemoved;
-            Align = _initialAlign;
+            AlignContent = _initialAlignContent;
         }
         public bool IsMultiline { get; set; }
-        public Align Align { get; set; } = align;
+        public Align AlignContent { get; set; } = alignContent;
         public Size? Width { get; set; }
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
 
@@ -60,6 +60,20 @@ public class TableBuilder<TModel> : ViewBase, IStateless
                 if (PropertyInfo != null)
                 {
                     return PropertyInfo.GetValue(obj);
+                }
+
+                // Fallback: dictionary indexer access for dynamically created columns
+                if (obj is IDictionary<string, object> dictObj)
+                {
+                    return dictObj.TryGetValue(Name, out var val) ? val : null;
+                }
+                if (obj is IDictionary<string, string> dictStr)
+                {
+                    return dictStr.TryGetValue(Name, out var val) ? val : null;
+                }
+                if (obj is IDictionary dict)
+                {
+                    return dict.Contains(Name) ? dict[Name] : null;
                 }
 
                 return null;
@@ -91,6 +105,12 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     private void _Scaffold()
     {
         var type = typeof(TModel);
+
+        if (typeof(IDictionary).IsAssignableFrom(type))
+        {
+            ScaffoldDictionaryColumns();
+            return;
+        }
 
         var fields = type
             .GetFields()
@@ -134,6 +154,43 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             var column = new TableBuilderColumn(field.Name, order++, cellBuilder, cellAlignment, field.FieldInfo, field.PropertyInfo, removed, cellBuilder, removed, cellAlignment);
             column.Width = CalculateSmartDefaultWidth(column);
             _columns[field.Name] = column;
+        }
+    }
+
+    private void ScaffoldDictionaryColumns()
+    {
+        var first = _records.FirstOrDefault();
+        if (first == null) return;
+
+        int order = 0;
+        var builder = _builderFactory.Default();
+
+        if (first is IDictionary<string, object> dictObj)
+        {
+            foreach (var key in dictObj.Keys)
+            {
+                var column = new TableBuilderColumn(key, order++, builder, Ivy.Align.Left, null!, null, false, builder, false, Ivy.Align.Left);
+                column.Width = CalculateSmartDefaultWidth(column);
+                _columns[key] = column;
+            }
+        }
+        else if (first is IDictionary<string, string> dictStr)
+        {
+            foreach (var key in dictStr.Keys)
+            {
+                var column = new TableBuilderColumn(key, order++, builder, Ivy.Align.Left, null!, null, false, builder, false, Ivy.Align.Left);
+                column.Width = CalculateSmartDefaultWidth(column);
+                _columns[key] = column;
+            }
+        }
+        else if (first is IDictionary dict)
+        {
+            foreach (var key in dict.Keys.Cast<object>().Select(k => k.ToString()!))
+            {
+                var column = new TableBuilderColumn(key, order++, builder, Ivy.Align.Left, null!, null, false, builder, false, Ivy.Align.Left);
+                column.Width = CalculateSmartDefaultWidth(column);
+                _columns[key] = column;
+            }
         }
     }
 
@@ -190,7 +247,15 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     private TableBuilderColumn GetField(Expression<Func<TModel, object>> field)
     {
         var name = TypeHelper.GetNameFromMemberExpression(field.Body);
-        return _columns[name];
+        if (!_columns.TryGetValue(name, out var column))
+        {
+            var order = _columns.Count;
+            var builder = _builderFactory.Default();
+            column = new TableBuilderColumn(name, order, builder, Ivy.Align.Left, null!, null, false, builder, false, Ivy.Align.Left);
+            column.Width = CalculateSmartDefaultWidth(column);
+            _columns[name] = column;
+        }
+        return column;
     }
 
     public TableBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
@@ -223,10 +288,10 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    public TableBuilder<TModel> Align(Expression<Func<TModel, object>> field, Align align)
+    public TableBuilder<TModel> AlignContent(Expression<Func<TModel, object>> field, Align align)
     {
         var hint = GetField(field);
-        hint.Align = align;
+        hint.AlignContent = align;
         return this;
     }
 
@@ -342,7 +407,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             var cell = new TableCell(content)
                 .IsHeader(isHeader)
                 .IsFooter(isFooter)
-                .Align(column.Align);
+                .AlignContent(column.AlignContent);
 
             if (column.IsMultiline)
             {
