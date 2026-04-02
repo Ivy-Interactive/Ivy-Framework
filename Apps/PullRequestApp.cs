@@ -81,7 +81,7 @@ public class PullRequestApp : ViewBase
     /// Extracts "owner/repo" from a GitHub PR URL.
     /// E.g. "https://github.com/owner/repo/pull/123" -> "owner/repo"
     /// </summary>
-    private static string ExtractRepo(string prUrl)
+    internal static string ExtractRepo(string prUrl)
     {
         try
         {

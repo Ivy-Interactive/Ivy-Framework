@@ -114,18 +114,6 @@ public class ContentView(
         // Content sections
         var content = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)));
 
-        // PRs section (above tabs — cross-cutting concern)
-        if (_selectedPlan.Prs.Count > 0)
-        {
-            var prsLayout = Layout.Horizontal().Gap(2).Wrap().Padding(1);
-            foreach (var pr in _selectedPlan.Prs)
-            {
-                var prCapture = pr;
-                prsLayout |= new Button(pr).Link().OnClick(() => client.OpenUrl(prCapture));
-            }
-            content |= prsLayout;
-        }
-
         // Summary tab content
         var summaryPath = Path.Combine(_selectedPlan.FolderPath, "artifacts", "summary.md");
         var hasSummary = File.Exists(summaryPath);
@@ -192,6 +180,23 @@ public class ContentView(
             commitsTable |= new TableRow(
                 new TableCell(new Button(row.ShortHash).Inline().OnClick(() => openCommit.Set(row.Hash))),
                 new TableCell(row.Title)
+            );
+        }
+
+        // PRs tab content
+        var prsTable = new Table(
+            new TableRow(
+                new TableCell("Repository").IsHeader(),
+                new TableCell("PR").IsHeader()
+            )
+            { IsHeader = true }
+        );
+        foreach (var pr in _selectedPlan.Prs)
+        {
+            var prCapture = pr;
+            prsTable |= new TableRow(
+                new TableCell(PullRequestApp.ExtractRepo(pr)),
+                new TableCell(new Button(pr).Link().OnClick(() => client.OpenUrl(prCapture)))
             );
         }
 
@@ -270,6 +275,7 @@ public class ContentView(
             new Tab("Summary", summaryTabContent),
             new Tab("Verifications", verificationsTable).Badge(_selectedPlan.Verifications.Count.ToString()),
             new Tab("Commits", commitsTable).Badge(_selectedPlan.Commits.Count.ToString()),
+            new Tab("PRs", prsTable).Badge(_selectedPlan.Prs.Count.ToString()),
             new Tab("Artifacts", artifactsLayout).Badge(totalArtifacts.ToString()),
             new Tab("Plan", planTabContent)
         ).Variant(TabsVariant.Content);
