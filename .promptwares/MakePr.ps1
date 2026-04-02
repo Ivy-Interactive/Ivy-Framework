@@ -23,6 +23,7 @@ $sessionId = [guid]::NewGuid().ToString()
 Write-Host "Starting Agent..."
 Push-Location $programFolder
 
+$heartbeat = Start-Heartbeat
 try {
     $extraArgs = @()
     if ($agent.Executable -eq "claude") {
@@ -61,6 +62,7 @@ catch {
     throw
 }
 finally {
+    Stop-Heartbeat $heartbeat
     $costData = ReportSessionCost $sessionId
     if ($costData) {
         LogPlanCost $PlanPath "MakePr" $costData.Tokens $costData.Cost

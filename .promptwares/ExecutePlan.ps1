@@ -39,6 +39,7 @@ Write-Host "Starting Agent in $workDir..."
 SendStatusMessage "Executing Plan"
 Push-Location $workDir
 
+$heartbeat = Start-Heartbeat
 try {
     $extraArgs = @()
     if ($agent.Executable -eq "claude") {
@@ -93,6 +94,7 @@ catch {
     throw
 }
 finally {
+    Stop-Heartbeat $heartbeat
     $costData = ReportSessionCost $sessionId
     if ($costData) {
         LogPlanCost $PlanPath "ExecutePlan" $costData.Tokens $costData.Cost
