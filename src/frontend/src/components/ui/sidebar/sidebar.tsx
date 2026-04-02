@@ -151,7 +151,7 @@ const Sidebar = React.forwardRef<
       return (
         <div
           className={cn(
-            "flex h-full flex-col bg-background text-foreground",
+            "flex h-full flex-col bg-secondary text-foreground",
             "w-[var(--sidebar-width)]",
             className,
           )}
@@ -168,7 +168,7 @@ const Sidebar = React.forwardRef<
         <div className="md:hidden">
           {openMobile && (
             <div
-              className="fixed inset-0 z-50 bg-background p-0 text-foreground"
+              className="fixed inset-0 z-50 bg-secondary p-0 text-foreground"
               style={{ width: SIDEBAR_WIDTH_MOBILE }}
             >
               {children}
@@ -216,7 +216,7 @@ const Sidebar = React.forwardRef<
         >
           <div
             data-sidebar="sidebar"
-            className="flex h-full w-full flex-col bg-background group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-border group-data-[variant=floating]:shadow"
+            className="flex h-full w-full flex-col bg-secondary group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-border group-data-[variant=floating]:shadow"
           >
             {children}
           </div>
