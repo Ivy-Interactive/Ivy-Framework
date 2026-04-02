@@ -584,26 +584,13 @@ public class Server
         var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
         var isLocalDev = !isContainer && !hasPortEnv && !_args.IsCliCommand;
 
-        // For local development, we try to reserve two adjacent ports to support both HTTP and HTTPS endpoints.
-        bool ArePortsInUse(int port) {
-            var portInUse = ProcessHelper.IsPortInUse(port);
-            return isLocalDev
-                ? portInUse || ProcessHelper.IsPortInUse(port + 1)
-                : portInUse;
-        }
-
         // CLI-only commands (--describe, --describe-connection, --test-connection) never start
         // the web host, so skip port checks entirely. Port 0 will be used below.
-        if (!_args.IsCliCommand && ArePortsInUse(_args.Port))
+        if (!_args.IsCliCommand && ProcessHelper.IsPortInUse(_args.Port))
         {
             if (_args.IKillForThisPort)
             {
                 ProcessHelper.KillProcessUsingPort(_args.Port);
-                if (isLocalDev)
-                {
-                    // If we're in local dev, also kill the next port to avoid conflicts with the dev cert HTTPS endpoint
-                    ProcessHelper.KillProcessUsingPort(_args.Port + 1);
-                }
             }
             else if (_args.FindAvailablePort)
             {
@@ -611,7 +598,7 @@ public class Server
                 var maxAttempts = 100;
                 var attemptCount = 0;
 
-                while (ArePortsInUse(_args.Port) && attemptCount < maxAttempts)
+                while (ProcessHelper.IsPortInUse(_args.Port) && attemptCount < maxAttempts)
                 {
                     _args = _args with { Port = _args.Port + 1 };
                     attemptCount++;
@@ -687,8 +674,8 @@ public class Server
         }
         else if (isLocalDev)
         {
-            // Local development: HTTPS using the ASP.NET Core dev certificate, HTTP on the next port for Vite+ HMR.
-            builder.WebHost.UseUrls($"https://{host}:{_args.Port}", $"http://{host}:{_args.Port + 1}");
+            // Local development: HTTPS using the ASP.NET Core dev certificate
+            builder.WebHost.UseUrls($"https://{host}:{_args.Port}");
         }
         else
         {

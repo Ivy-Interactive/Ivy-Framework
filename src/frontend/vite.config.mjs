@@ -51,7 +51,7 @@ const injectMeta = (mode) => {
     name: "inject-ivy-meta",
     async transformIndexHtml(localHtml) {
       if (mode === "development") {
-        const host = process.env.IVY_HOST || "http://localhost:5011";
+        const host = process.env.IVY_HOST || "https://localhost:5010";
         const serverHtml = await fetch(`${host}`).then((res) => res.text());
         const transformedHtml = transferMeta(serverHtml, localHtml);
         const ivyHostTag = `<meta name="ivy-host" content="${host}" />`;
@@ -74,14 +74,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), mkcert(), injectMeta(mode)],
   server: {
     proxy: {
-      "/ivy": {
-        target: process.env.IVY_HOST || "http://localhost:5011",
-        changeOrigin: true,
-        secure: false,
-        ws: true,
-      },
       "^/(.*\\.md|llms\\.txt)$": {
-        target: process.env.IVY_HOST || "http://localhost:5011",
+        target: process.env.IVY_HOST || "https://localhost:5010",
         changeOrigin: true,
         secure: false,
       },
