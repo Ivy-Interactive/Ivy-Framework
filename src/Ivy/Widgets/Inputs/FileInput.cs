@@ -41,6 +41,8 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
     [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 

@@ -18,6 +18,7 @@ export interface DateTimeInputWidgetProps {
   max?: string;
   step?: string;
   density?: Densities;
+  autoFocus?: boolean;
   "data-testid"?: string;
   events?: string[];
 }
@@ -35,6 +36,7 @@ export interface BaseVariantProps {
   max?: string;
   step?: string;
   density?: Densities;
+  autoFocus?: boolean;
   "data-testid"?: string;
   onFocusChange?: (open: boolean) => void;
 }

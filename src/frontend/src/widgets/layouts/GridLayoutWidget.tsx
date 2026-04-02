@@ -1,4 +1,5 @@
 import React from "react";
+import { ImageOverlayProvider } from "@/components/markdown/ImageOverlayContext";
 import {
   Align,
   getRowGap,
@@ -110,22 +111,24 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   };
 
   return (
-    <div style={styles} className={className}>
-      {React.Children.map(children, (child, index) => (
-        <GridLayoutCell
-          column={childColumn[index]}
-          columnSpan={childColumnSpan[index]}
-          row={childRow[index]}
-          rowSpan={childRowSpan[index]}
-          alignSelf={childAlignSelf[index]}
-          className={
-            React.isValidElement(child) ? (child.props as { className?: string }).className : ""
-          }
-        >
-          {child}
-        </GridLayoutCell>
-      ))}
-    </div>
+    <ImageOverlayProvider>
+      <div style={styles} className={className}>
+        {React.Children.map(children, (child, index) => (
+          <GridLayoutCell
+            column={childColumn[index]}
+            columnSpan={childColumnSpan[index]}
+            row={childRow[index]}
+            rowSpan={childRowSpan[index]}
+            alignSelf={childAlignSelf[index]}
+            className={
+              React.isValidElement(child) ? (child.props as { className?: string }).className : ""
+            }
+          >
+            {child}
+          </GridLayoutCell>
+        ))}
+      </div>
+    </ImageOverlayProvider>
   );
 };
 

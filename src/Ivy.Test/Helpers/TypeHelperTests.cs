@@ -165,9 +165,66 @@ public class TypeHelperTests
         Assert.Equal("Column With Spaces", name);
     }
 
+    [Fact]
+    public void GetNameFromMemberExpression_NavigationProperty_ReturnsRootMemberName()
+    {
+        Expression<Func<TestModel, object>> expr = m => m.Owner!.Name;
+        var name = TypeHelper.GetNameFromMemberExpression(expr.Body);
+        Assert.Equal("Owner", name);
+    }
+
+    [Fact]
+    public void GetNameFromMemberExpression_ConditionalExpression_ReturnsRootMemberName()
+    {
+        Expression<Func<TestModel, object>> expr = m => m.Owner != null ? m.Owner.Name : "";
+        var name = TypeHelper.GetNameFromMemberExpression(expr.Body);
+        Assert.Equal("Owner", name);
+    }
+
+    [Fact]
+    public void GetNameFromMemberExpression_DeepNavigation_ReturnsRootMemberName()
+    {
+        Expression<Func<TestModel, object>> expr = m => m.Owner!.Address!.City;
+        var name = TypeHelper.GetNameFromMemberExpression(expr.Body);
+        Assert.Equal("Owner", name);
+    }
+
+    [Fact]
+    public void IsComplexExpression_SimpleProperty_ReturnsFalse()
+    {
+        Expression<Func<TestModel, object>> expr = m => m.Name;
+        Assert.False(TypeHelper.IsComplexExpression(expr.Body));
+    }
+
+    [Fact]
+    public void IsComplexExpression_NavigationProperty_ReturnsTrue()
+    {
+        Expression<Func<TestModel, object>> expr = m => m.Owner!.Name;
+        Assert.True(TypeHelper.IsComplexExpression(expr.Body));
+    }
+
+    [Fact]
+    public void IsComplexExpression_ConditionalExpression_ReturnsTrue()
+    {
+        Expression<Func<TestModel, object>> expr = m => m.Owner != null ? m.Owner.Name : "";
+        Assert.True(TypeHelper.IsComplexExpression(expr.Body));
+    }
+
     private class TestModel
     {
         public string Name { get; set; } = "";
         public int Age { get; set; }
+        public TestOwner? Owner { get; set; }
+    }
+
+    private class TestOwner
+    {
+        public string Name { get; set; } = "";
+        public TestAddress? Address { get; set; }
+    }
+
+    private class TestAddress
+    {
+        public string City { get; set; } = "";
     }
 }

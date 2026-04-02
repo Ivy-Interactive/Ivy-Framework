@@ -40,6 +40,8 @@ public record AudioInput : WidgetBase<AudioInput>, IAnyInput
     [Prop] public string? Invalid { get; set; }
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
     [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
@@ -113,5 +115,10 @@ public static class AudioInputExtensions
     public static AudioInput OnFocus(this AudioInput widget, Action onFocus)
     {
         return widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
+    }
+
+    public static AudioInput AutoFocus(this AudioInput widget, bool autoFocus = true)
+    {
+        return widget with { AutoFocus = autoFocus };
     }
 }

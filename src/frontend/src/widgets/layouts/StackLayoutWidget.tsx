@@ -19,6 +19,7 @@ import {
   getBoxRadius,
 } from "@/lib/styles";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ImageOverlayProvider } from "@/components/markdown/ImageOverlayContext";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -118,20 +119,24 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
     };
 
     return (
-      <ScrollArea
-        className={removeParentPadding ? "remove-parent-padding" : ""}
-        style={outerStyles}
-        type="scroll"
-        scrollHideDelay={600}
-      >
-        <div style={flexStyles}>{wrappedChildren}</div>
-      </ScrollArea>
+      <ImageOverlayProvider>
+        <ScrollArea
+          className={removeParentPadding ? "remove-parent-padding" : ""}
+          style={outerStyles}
+          type="scroll"
+          scrollHideDelay={600}
+        >
+          <div style={flexStyles}>{wrappedChildren}</div>
+        </ScrollArea>
+      </ImageOverlayProvider>
     );
   }
 
   return (
-    <div style={baseStyles} className={removeParentPadding ? "remove-parent-padding" : ""}>
-      {wrappedChildren}
-    </div>
+    <ImageOverlayProvider>
+      <div style={baseStyles} className={removeParentPadding ? "remove-parent-padding" : ""}>
+        {wrappedChildren}
+      </div>
+    </ImageOverlayProvider>
   );
 };

@@ -617,7 +617,7 @@ export class GrpcTableService extends EventEmitter {
     if (fullResult.arrow_ipc_stream) {
       try {
         table = arrow.tableFromIPC(fullResult.arrow_ipc_stream);
-        logger.info("gRPC Table Service - Successfully parsed Arrow table:", {
+        logger.debug("gRPC Table Service - Successfully parsed Arrow table:", {
           numRows: table.numRows,
           numCols: table.numCols,
           schema: table.schema.fields.map((f: arrow.Field) => f.name),

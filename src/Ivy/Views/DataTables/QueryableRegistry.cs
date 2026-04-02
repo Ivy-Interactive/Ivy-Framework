@@ -9,9 +9,11 @@ public interface IQueryableRegistry
     string RegisterQueryable(IQueryable queryable);
     string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector);
     string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames);
+    string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors);
     IQueryable? GetQueryable(string sourceId);
     Func<object, object?>? GetIdSelector(string sourceId);
     string[]? GetColumnNames(string sourceId);
+    Dictionary<string, Func<object, object?>>? GetValueAccessors(string sourceId);
     IDisposable AddCleanup(string sourceId, IDisposable cleanup);
 }
 
@@ -21,6 +23,7 @@ public class QueryableRegistry : IQueryableRegistry
     private readonly ConcurrentDictionary<string, CompositeDisposable> _cleanups = new();
     private readonly ConcurrentDictionary<string, Func<object, object?>?> _idSelectors = new();
     private readonly ConcurrentDictionary<string, string[]?> _columnNames = new();
+    private readonly ConcurrentDictionary<string, Dictionary<string, Func<object, object?>>?> _valueAccessors = new();
 
     public string RegisterQueryable(IQueryable queryable)
     {
@@ -34,11 +37,17 @@ public class QueryableRegistry : IQueryableRegistry
 
     public string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames)
     {
+        return RegisterQueryable(queryable, idSelector, columnNames, null);
+    }
+
+    public string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors)
+    {
         var sourceId = Guid.NewGuid().ToString();
         _queryables[sourceId] = queryable;
         _cleanups[sourceId] = new CompositeDisposable();
         _idSelectors[sourceId] = idSelector;
         _columnNames[sourceId] = columnNames;
+        _valueAccessors[sourceId] = valueAccessors;
         return sourceId;
     }
 
@@ -57,6 +66,11 @@ public class QueryableRegistry : IQueryableRegistry
         return _columnNames.GetValueOrDefault(sourceId);
     }
 
+    public Dictionary<string, Func<object, object?>>? GetValueAccessors(string sourceId)
+    {
+        return _valueAccessors.GetValueOrDefault(sourceId);
+    }
+
     public IDisposable AddCleanup(string sourceId, IDisposable cleanup)
     {
         if (_cleanups.TryGetValue(sourceId, out var compositeDisposable))
@@ -73,6 +87,7 @@ public class QueryableRegistry : IQueryableRegistry
             _queryables.TryRemove(sourceId, out _);
             _idSelectors.TryRemove(sourceId, out _);
             _columnNames.TryRemove(sourceId, out _);
+            _valueAccessors.TryRemove(sourceId, out _);
         });
     }
 }

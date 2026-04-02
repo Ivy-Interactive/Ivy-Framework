@@ -164,7 +164,10 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
       <SheetContent
         side={normalizedSide}
         style={styles}
-        className={cn("flex flex-col p-0 gap-0", isHorizontal && "h-full")}
+        className={cn(
+          "flex flex-col p-0 gap-0",
+          isHorizontal ? "h-full w-auto sm:max-w-none" : "max-h-none",
+        )}
         data-sheet-side={normalizedSide}
         onOpenAutoFocus={(e) => {
           e.preventDefault();

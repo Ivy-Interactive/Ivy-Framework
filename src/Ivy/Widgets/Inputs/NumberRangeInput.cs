@@ -35,6 +35,8 @@ public abstract record NumberRangeInputBase : WidgetBase<NumberRangeInputBase>, 
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Prop] public double? Min { get; set; }
 
     [Prop] public double? Max { get; set; }
@@ -178,6 +180,11 @@ public static class NumberRangeInputExtensions
     public static NumberRangeInputBase Disabled(this NumberRangeInputBase widget, bool enabled = true)
     {
         return widget with { Disabled = enabled };
+    }
+
+    public static NumberRangeInputBase AutoFocus(this NumberRangeInputBase widget, bool autoFocus = true)
+    {
+        return widget with { AutoFocus = autoFocus };
     }
 
     public static NumberRangeInputBase Min(this NumberRangeInputBase widget, double min)

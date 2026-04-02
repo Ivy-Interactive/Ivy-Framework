@@ -29,6 +29,8 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Prop] public DayOfWeek? FirstDayOfWeek { get; set; }
 
     [Prop] public DateOnly? Min { get; set; }

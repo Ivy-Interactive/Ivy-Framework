@@ -61,6 +61,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   max,
   step,
   density = Densities.Medium,
+  autoFocus,
   events = EMPTY_ARRAY,
   "data-testid": dataTestId,
 }) => {
@@ -140,6 +141,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
         max={max}
         step={step}
         density={density}
+        autoFocus={autoFocus}
         onDateChange={handleDateChange}
         onTimeChange={handleTimeChange}
         onFocusChange={handleFocusChange}

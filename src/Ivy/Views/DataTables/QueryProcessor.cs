@@ -77,7 +77,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             (openMethod, typeArgs[0], typeArgs.Length > 1 ? typeArgs[1] : typeof(void)),
             _ => openMethod.MakeGenericMethod(typeArgs));
 
-    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query, Func<object, object?>? idSelector = null)
+    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query, Func<object, object?>? idSelector = null, Dictionary<string, Func<object, object?>>? valueAccessors = null)
     {
         try
         {
@@ -151,7 +151,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
             // Convert to Arrow table
             logger?.LogDebug("Converting to Arrow table");
-            var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType, idSelector);
+            var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType, idSelector, valueAccessors);
             logger?.LogInformation("Arrow conversion complete, {ByteCount} bytes", arrowData.Length);
 
             var result = new QueryResult
@@ -891,7 +891,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         }
     }
 
-    private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType, Func<object, object?>? idSelector = null)
+    private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType, Func<object, object?>? idSelector = null, Dictionary<string, Func<object, object?>>? valueAccessors = null)
     {
         logger?.LogDebug("Converting {DataCount} items to Arrow table", data.Count);
 
@@ -909,13 +909,20 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         // Create schema and empty arrays even when there's no data
         foreach (var prop in properties)
         {
-            var arrowType = QueryHelpers.GetArrowType(prop.PropertyType);
+            Func<object, object?>? accessor = null;
+            var hasAccessor = valueAccessors?.TryGetValue(prop.Name, out accessor) == true;
+            var arrowType = hasAccessor ? (IArrowType)StringType.Default : QueryHelpers.GetArrowType(prop.PropertyType);
             fields.Add(new ArrowField(prop.Name, arrowType, nullable: true));
 
-            // Create empty array if no data, otherwise create array with data
             if (!data.Any())
             {
                 arrays.Add(QueryHelpers.CreateEmptyArrowArray(arrowType));
+            }
+            else if (hasAccessor)
+            {
+                // Use custom accessor for navigation/ternary expressions
+                var values = data.Select(item => accessor!(item)).ToList();
+                arrays.Add(QueryHelpers.CreateStringArray(values));
             }
             else
             {

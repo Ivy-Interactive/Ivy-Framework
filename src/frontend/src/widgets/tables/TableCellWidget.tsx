@@ -82,8 +82,8 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   const shouldShowTooltip =
     !multiline && (typeof children === "string" || typeof children === "number");
 
-  const cellClasses = cn("border-border force-text-inherit", {
-    "header-cell bg-muted font-semibold": isHeader,
+  const cellClasses = cn("border border-border force-text-inherit", {
+    "header-cell bg-muted font-bold": isHeader,
     "footer-cell bg-muted font-semibold": isFooter,
     "max-w-0 overflow-hidden": shouldTruncate,
   });

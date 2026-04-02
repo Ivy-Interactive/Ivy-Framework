@@ -40,8 +40,7 @@
     <None Include="../../README.md" Pack="true" PackagePath="" />
     <EmbeddedResource Include="../../AGENTS.md" Link="AGENTS.md" />
     <None Include="../../AGENTS.md" Pack="true" PackagePath="" />
-    <None Include="../Ivy.Docs.Shared/Generated/**/*.md" Pack="true" PackagePath="docs/generated" Visible="false" />
-    <EmbeddedResource Include="../frontend/dist/**/*" Visible="false" />
+    <None Include="../Ivy.Docs.Shared/Docs/**/*.md" Pack="true" PackagePath="docs/generated" Visible="false" />
     <EmbeddedResource Include="../frontend/src/routing-constants.json" LogicalName="RoutingConstants" Visible="false" />
   </ItemGroup>
   
@@ -73,7 +72,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.IO.Hashing" Version="10.0.5" />
     <PackageReference Include="Ivy.SystemTextJson.JsonDiffPatch" Version="2.0.4" />
-<PackageReference Include="Ivy.DesignSystem" Version="1.1.22" />
+<PackageReference Include="Ivy.DesignSystem" Version="1.1.26" />
   </ItemGroup>
 
   <ItemGroup>
@@ -113,6 +112,14 @@
           Outputs="../frontend/dist/.build-stamp">
     <Exec Command="vp run build" WorkingDirectory="../frontend" />
     <Touch Files="../frontend/dist/.build-stamp" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="EmbedFrontendResources" AfterTargets="BuildFrontend" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <_FrontendDistFile Include="../frontend/dist/**/*" />
+      <EmbeddedResource Include="@(_FrontendDistFile)" Visible="false"
+                        LogicalName="Ivy.$([System.String]::Copy('%(Identity)').Replace('..\frontend\dist\','').Replace('../frontend/dist/','').Replace('\','.'))" />
+    </ItemGroup>
   </Target>
 
   <Target Name="BuildRustServer" BeforeTargets="BeforeBuild">

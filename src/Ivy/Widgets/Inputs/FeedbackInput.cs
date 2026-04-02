@@ -31,6 +31,8 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public bool AutoFocus { get; set; }
+
     [Prop] public FeedbackInputVariant Variant { get; set; } = FeedbackInputVariant.Stars;
 
     [Prop] public bool AllowHalf { get; set; }

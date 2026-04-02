@@ -43,6 +43,8 @@ if (query.Loading) return Text.Muted("Loading...");
 if (query.Error is { } error) return Callout.Error(error.Message);
 ```
 
+> **Exception: EF Core + DataTable.** When displaying EF Core data in a DataTable, pass the `IQueryable` directly to `.ToDataTable()` instead of wrapping it in UseQuery. DataTables handle pagination, sorting, and filtering server-side. (Fetching from an API via UseQuery and then using `.ToDataTable()` is fine.)
+
 For conditional fetching, pass `null` as the key to disable the query:
 
 ```csharp
