@@ -4,34 +4,56 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 5010
+# Speeds up JIT for responsive spin-up
+ENV DOTNET_TieredPGO=1
+ENV DOTNET_TC_QuickJitForLoops=1
 
 # Build frontend (Ivy embeds frontend/dist)
 FROM node:24-bookworm-slim AS frontend
 WORKDIR /src
-COPY ["src/frontend/package.json", "src/frontend/pnpm-lock.yaml", "src/frontend/"]
-RUN apt-get update && apt-get install -y curl bash && rm -rf /var/lib/apt/lists/*
+# Cache npm layers
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update && apt-get install -y curl bash && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://vite.plus | bash
 ENV PATH="/root/.vite-plus/bin:${PATH}"
-RUN cd src/frontend && vp install
+COPY ["src/frontend/package.json", "src/frontend/pnpm-lock.yaml", "src/frontend/"]
+# Cache vp install layer
+RUN --mount=type=cache,target=/root/.npm \
+    cd src/frontend && vp install
 COPY ["src/frontend/", "src/frontend/"]
 RUN cd src/frontend && vp build
 
 # Build .NET from source (no IVY_PACKAGE_VERSION = use ProjectReference, your changes apply)
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
+ARG TARGETARCH
 WORKDIR /src
-RUN apt-get update && apt-get install -y curl bash build-essential && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update && apt-get install -y curl bash build-essential && rm -rf /var/lib/apt/lists/*
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs
 RUN curl -fsSL https://vite.plus | bash
 ENV PATH="/root/.vite-plus/bin:${PATH}"
+
 COPY . .
 COPY --from=frontend /src/src/frontend/dist /src/src/frontend/dist
-# Build Rust native libraries before dotnet restore/publish so msbuild can properly pick them up in static ItemGroup evaluation
-RUN cd src/RustServer && cargo build --release
-RUN dotnet restore "src/Ivy.Docs/Ivy.Docs.csproj"
-RUN dotnet publish "src/Ivy.Docs/Ivy.Docs.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+# Use BuildKit mounts to cache crates and packages across builds
+RUN --mount=type=cache,target=/root/.cargo/registry \
+    cd src/RustServer && cargo build --release
+
+RUN --mount=type=cache,target=/root/.nuget/packages \
+    dotnet restore "src/Ivy.Docs/Ivy.Docs.csproj"
+
+# Publish with ReadyToRun to pre-compile IL to native code for instant container spin-up
+RUN --mount=type=cache,target=/root/.nuget/packages \
+    dotnet publish "src/Ivy.Docs/Ivy.Docs.csproj" \
+    -a ${TARGETARCH:-x64} \
+    -c $BUILD_CONFIGURATION \
+    -o /app/publish \
+    /p:UseAppHost=false \
+    /p:PublishReadyToRun=true
 
 FROM base AS final
 WORKDIR /app
