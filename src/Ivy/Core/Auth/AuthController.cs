@@ -31,14 +31,20 @@ public class AuthController() : Controller
 
         if (!sessionStore.Sessions.TryGetValue(connectionId, out var appSession))
         {
-            logger.LogWarning("OAuth login failed: Session not found for connection {ConnectionId}", connectionId);
+            logger.LogWarning("OAuth login failed: Missing required parameters");
+            return BadRequest("Authentication error");
+        }
+
+        if (!sessionStore.Sessions.TryGetValue(connectionId, out var appSession))
+        {
+            logger.LogWarning("OAuth login failed: Session not found for connection {ConnectionId}", connectionId.Replace("\n", "").Replace("\r", ""));
             return BadRequest("Authentication error");
         }
 
         var authService = appSession.AppServices.GetService<IAuthService>();
         if (authService == null)
         {
-            logger.LogWarning("OAuth login failed: Auth service not configured for connection {ConnectionId}", connectionId);
+            logger.LogWarning("OAuth login failed: Auth service not configured for connection {ConnectionId}", connectionId.Replace("\n", "").Replace("\r", ""));
             return BadRequest("Authentication error");
         }
 
@@ -47,7 +53,7 @@ public class AuthController() : Controller
         var option = options.FirstOrDefault(o => o.Id == optionId);
         if (option == null)
         {
-            logger.LogWarning("OAuth login failed: Auth option '{OptionId}' not found for connection {ConnectionId}", optionId, connectionId);
+            logger.LogWarning("OAuth login failed: Auth option '{OptionId}' not found for connection {ConnectionId}", optionId.Replace("\n", "").Replace("\r", ""), connectionId.Replace("\n", "").Replace("\r", ""));
             return BadRequest("Authentication error");
         }
 
@@ -91,7 +97,7 @@ public class AuthController() : Controller
 
         if (!string.IsNullOrEmpty(error))
         {
-            logger.LogWarning("OAuth callback error: {Error} - {Description}", error, errorDescription);
+            logger.LogWarning("OAuth callback error: {Error} - {Description}", error.Replace("\n", "").Replace("\r", ""), errorDescription?.Replace("\n", "").Replace("\r", ""));
             return BadRequest($"OAuth error: {error}");
         }
 
@@ -104,7 +110,7 @@ public class AuthController() : Controller
         var pending = registry.GetAndRemove(effectiveId);
         if (pending == null)
         {
-            logger.LogWarning("OAuth callback failed: Invalid or expired callback id '{CallbackId}'", effectiveId);
+            logger.LogWarning("OAuth callback failed: Invalid or expired callback id '{CallbackId}'", effectiveId.Replace("\n", "").Replace("\r", ""));
             return BadRequest("Invalid or expired OAuth state. Please try logging in again.");
         }
 
@@ -118,7 +124,7 @@ public class AuthController() : Controller
             }
             else
             {
-                logger.LogDebug("OAuth callback: session not found for connection {ConnectionId} (expected during redirect flow). Unable to retrieve frontend-tunneled HttpMessageHandler; Clerk auth provider may be affected.", pending.ConnectionId);
+                logger.LogDebug("OAuth callback: session not found for connection {ConnectionId} (expected during redirect flow). Unable to retrieve frontend-tunneled HttpMessageHandler; Clerk auth provider may be affected.", pending.ConnectionId.Replace("\n", "").Replace("\r", ""));
                 httpMessageHandler = null;
             }
 
@@ -174,7 +180,7 @@ public class AuthController() : Controller
                 if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var loginHeaderValue))
                 {
                     var machineId = loginHeaderValue.ToString();
-                    TriggerMachineReload(sessionStore, machineId, request.ConnectionId);
+                    TriggerMachineReload(sessionStore, machineId.Replace("\n", "").Replace("\r", ""), request.ConnectionId?.Replace("\n", "").Replace("\r", ""));
                 }
             }
             else
@@ -183,7 +189,7 @@ public class AuthController() : Controller
                 if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
                 {
                     var machineId = headerValue.ToString();
-                    await TriggerMachineLogout(sessionStore, machineId, request.ConnectionId, contentBuilder, logger);
+                    await TriggerMachineLogout(sessionStore, machineId.Replace("\n", "").Replace("\r", ""), request.ConnectionId?.Replace("\n", "").Replace("\r", ""), contentBuilder, logger);
                 }
             }
         }
@@ -193,7 +199,7 @@ public class AuthController() : Controller
             if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
             {
                 var machineId = headerValue.ToString();
-                TriggerMachineAuthRefresh(sessionStore, machineId, request.ConnectionId, logger);
+                TriggerMachineAuthRefresh(sessionStore, machineId.Replace("\n", "").Replace("\r", ""), request.ConnectionId?.Replace("\n", "").Replace("\r", ""), logger);
             }
         }
 
@@ -282,7 +288,7 @@ public class AuthController() : Controller
 
         foreach (var session in sessions)
         {
-            logger.LogInformation("Triggering auth refresh from cookies for session {ConnectionId}", session.ConnectionId);
+            logger.LogInformation("Triggering auth refresh from cookies for session {ConnectionId}", session.ConnectionId.Replace("\n", "").Replace("\r", ""));
             var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
             clientProvider.RefreshAuthFromCookies();
         }
@@ -299,7 +305,7 @@ public class AuthController() : Controller
         // Validate session exists
         if (!sessionStore.Sessions.TryGetValue(connectionId, out var session))
         {
-            logger.LogWarning("RefreshSessionFromCookies: Session not found for {ConnectionId}", connectionId);
+            logger.LogWarning("RefreshSessionFromCookies: Session not found for {ConnectionId}", connectionId.Replace("\n", "").Replace("\r", ""));
             return NotFound("Session not found");
         }
 
@@ -307,7 +313,7 @@ public class AuthController() : Controller
         if (session.MachineId != machineId)
         {
             logger.LogWarning("RefreshSessionFromCookies: Machine ID mismatch for {ConnectionId}. Expected {Expected}, got {Actual}",
-                connectionId, session.MachineId, machineId);
+                connectionId.Replace("\n", "").Replace("\r", ""), session.MachineId.Replace("\n", "").Replace("\r", ""), machineId.Replace("\n", "").Replace("\r", ""));
             return BadRequest("Machine ID mismatch");
         }
 
@@ -315,7 +321,7 @@ public class AuthController() : Controller
         var authService = session.AppServices.GetService<IAuthService>();
         if (authService == null)
         {
-            logger.LogWarning("RefreshSessionFromCookies: Auth not configured for {ConnectionId}", connectionId);
+            logger.LogWarning("RefreshSessionFromCookies: Auth not configured for {ConnectionId}", connectionId.Replace("\n", "").Replace("\r", ""));
             return BadRequest("Auth not configured for this session");
         }
 
@@ -331,7 +337,7 @@ public class AuthController() : Controller
         // Sync brokered sessions (fires Add/Remove events → starts/stops refresh loops)
         SyncBrokeredSessions(existingSession, freshAuthState.BrokeredSessions, logger);
 
-        logger.LogInformation("Refreshed auth session from cookies for {ConnectionId}", connectionId);
+        logger.LogInformation("Refreshed auth session from cookies for {ConnectionId}", connectionId.Replace("\n", "").Replace("\r", ""));
         return Ok();
     }
 
@@ -346,7 +352,7 @@ public class AuthController() : Controller
         // Remove providers no longer present
         foreach (var provider in existingProviders.Except(newProviders))
         {
-            logger.LogInformation("SyncBrokeredSessions: Removing provider {Provider}", provider);
+            logger.LogInformation("SyncBrokeredSessions: Removing provider {Provider}", provider.Replace("\n", "").Replace("\r", ""));
             existing.RemoveBrokeredSession(provider);
         }
 
@@ -362,7 +368,7 @@ public class AuthController() : Controller
             else
             {
                 // Add new provider → fires BrokeredSessionAdded → starts refresh loop
-                logger.LogInformation("SyncBrokeredSessions: Adding provider {Provider}", provider);
+                logger.LogInformation("SyncBrokeredSessions: Adding provider {Provider}", provider.Replace("\n", "").Replace("\r", ""));
                 existing.AddBrokeredSession(provider, newSession);
             }
         }
