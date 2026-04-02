@@ -200,7 +200,7 @@ public class JobsApp : ViewBase
                     onClose: () => showOutput.Set(null),
                     content: new Markdown($"```\n{output}\n```"),
                     title: "Job Output"
-                ).Width(Size.Full()).Resizable()
+                ).Width(Size.Half()).Resizable()
             );
         }
 
