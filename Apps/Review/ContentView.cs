@@ -238,7 +238,11 @@ public class ContentView(
             {
                 var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(file)}";
                 screenshotsLayout |= new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(file), Overlay = true }
-                    .Height(Size.Units(15)).Width(Size.Units(22));
+                    .Height(Size.Units(15)).Width(Size.Units(22))
+                    .BorderColor(Colors.Neutral)
+                    .BorderStyle(BorderStyle.Solid)
+                    .BorderThickness(1)
+                    .BorderRadius(BorderRadius.Rounded);
             }
             artifactsLayout |= screenshotsLayout;
         }
