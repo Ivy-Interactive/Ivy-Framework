@@ -605,6 +605,15 @@ public class ContentView(
                         UseShellExecute = true
                     });
                 }),
+                new MenuItem("Open in Terminal", Icon: Icons.Terminal, Tag: "OpenInTerminal").OnSelect(() =>
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "wt.exe",
+                        Arguments = $"-d \"{_selectedPlan.FolderPath}\"",
+                        UseShellExecute = true
+                    });
+                }),
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath").OnSelect(() =>
                 {
                     copyToClipboard(_selectedPlan.FolderPath);
