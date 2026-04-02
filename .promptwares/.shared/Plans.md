@@ -75,6 +75,7 @@ relatedPlans: []
 | `prs`          | Associated pull request URLs                     |
 | `commits`      | Associated commit hashes                         |
 | `verifications`| List of `{name, status}` — status is `Pending`, `Pass`, or `Fail` |
+| `sourcePath`   | (Optional) Absolute path to the source that generated this plan (e.g. test working directory) |
 | `relatedPlans` | Paths to related plan folders (parent plans, split-from, follow-ups) |
 
 ## State Lifecycle
