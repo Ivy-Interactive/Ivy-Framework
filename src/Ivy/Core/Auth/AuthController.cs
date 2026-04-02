@@ -31,12 +31,6 @@ public class AuthController() : Controller
 
         if (!sessionStore.Sessions.TryGetValue(connectionId, out var appSession))
         {
-            logger.LogWarning("OAuth login failed: Missing required parameters");
-            return BadRequest("Authentication error");
-        }
-
-        if (!sessionStore.Sessions.TryGetValue(connectionId, out var appSession))
-        {
             logger.LogWarning("OAuth login failed: Session not found for connection {ConnectionId}", connectionId.Replace("\n", "").Replace("\r", ""));
             return BadRequest("Authentication error");
         }
