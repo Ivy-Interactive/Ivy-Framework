@@ -128,13 +128,29 @@ public class DataTableBuilder<TModel>(
     private InternalColumn GetColumn(Expression<Func<TModel, object>> field)
     {
         var name = TypeHelper.GetNameFromMemberExpression(field.Body);
-        return _columns[name];
+        var column = _columns[name];
+
+        if (TypeHelper.IsComplexExpression(field.Body))
+        {
+            var compiled = field.Compile();
+            column.Column.ValueAccessor = obj => compiled((TModel)obj);
+        }
+
+        return column;
     }
 
     private InternalColumn GetColumn<TValue>(Expression<Func<TModel, TValue>> field)
     {
         var name = TypeHelper.GetNameFromMemberExpression(field.Body);
-        return _columns[name];
+        var column = _columns[name];
+
+        if (TypeHelper.IsComplexExpression(field.Body))
+        {
+            var compiled = field.Compile();
+            column.Column.ValueAccessor = obj => compiled((TModel)obj);
+        }
+
+        return column;
     }
 
     public DataTableBuilder<TModel> Header(Expression<Func<TModel, object>> field, string label)

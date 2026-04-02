@@ -248,6 +248,8 @@ QueryResult<T> properties:
 - .Error — exception if the fetch failed
 - .Mutator — provides .Revalidate(), .Invalidate(), .Mutate(value, revalidate)
 
+**Do not combine UseQuery with DataTable for EF Core data.** When a DataTable can receive an EF Core `IQueryable` directly, pass it to `.ToDataTable()` without UseQuery. DataTables handle their own server-side data loading. (API data fetched via UseQuery → `.ToDataTable()` is fine.)
+
 Key conventions:
 
 - String: `"my-data"`

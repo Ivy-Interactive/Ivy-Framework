@@ -78,6 +78,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           maxLength={props.maxLength}
           minLength={props.minLength}
           rows={props.rows}
+          autoFocus={props.autoFocus}
           onChange={handleChange}
           onBlur={onBlur}
           onFocus={onFocus}

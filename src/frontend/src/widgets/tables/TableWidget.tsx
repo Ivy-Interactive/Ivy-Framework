@@ -21,7 +21,7 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
   return (
     <Table
       density={density}
-      className={cn("w-full caption-bottom")}
+      className={cn("w-full caption-bottom border-collapse border border-border")}
       style={{
         ...widthStyles,
         ...(widthStyles.width === "100%"

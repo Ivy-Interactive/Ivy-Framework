@@ -25,6 +25,7 @@ interface NumberInputProps {
   format?: Intl.NumberFormatOptions;
   isBytesFormat?: boolean;
   allowNegative?: boolean;
+  autoFocus?: boolean;
   className?: string;
   density?: Densities;
   "data-testid"?: string;

@@ -220,7 +220,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       {/* Custom Sidebar with Slide Animation */}
       <div
         ref={sidebarRef}
-        className={`flex h-full flex-col bg-background text-foreground border-r border-border relative overflow-hidden ${
+        className={`flex h-full flex-col bg-card text-foreground border-r border-border relative overflow-hidden ${
           isResizing ? "" : "transition-transform duration-300 ease-in-out"
         } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         style={{ width: effectiveSidebarWidth }}
@@ -391,8 +391,8 @@ const CollapsibleMenuItem: React.FC<{
           <CollapsibleTrigger asChild>
             <button
               className={cn(
-                "group flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-                isActive && "bg-accent text-accent-foreground",
+                "group flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-secondary hover:text-accent-foreground cursor-pointer h-8 text-left",
+                isActive && "bg-secondary text-accent-foreground",
               )}
               onClick={() => {
                 // For items with children, toggle the collapsible state
@@ -431,8 +431,8 @@ const CollapsibleMenuItem: React.FC<{
       <li key={item.label} ref={itemRef} data-menu-item={item.tag || item.label}>
         <button
           className={cn(
-            "flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-            isActive && "bg-accent text-accent-foreground",
+            "flex w-full items-center gap-2 rounded-selector p-2 text-large-label hover:bg-secondary hover:text-accent-foreground cursor-pointer h-8 text-left",
+            isActive && "bg-secondary text-accent-foreground",
           )}
           onClick={() => onItemClick(item)}
           onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
@@ -474,7 +474,7 @@ const renderMenuItems = (
       if (level === 0) {
         return (
           <div key={itemPathKey} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="sticky top-0 z-10 bg-background px-2 py-2 text-small-label text-muted-foreground mb-0">
+            <h4 className="sticky top-0 z-10 bg-card px-2 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">
@@ -517,8 +517,8 @@ const renderMenuItems = (
           <li key={item.tag} data-menu-item={item.tag}>
             <button
               className={cn(
-                "flex w-full items-center gap-2 rounded-selector p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-                isActive && "bg-accent text-accent-foreground",
+                "flex w-full items-center gap-2 rounded-selector p-2 text-body hover:bg-secondary hover:text-accent-foreground cursor-pointer h-8 text-left",
+                isActive && "bg-secondary text-accent-foreground",
               )}
               onClick={() => onItemClick(item)}
               onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
@@ -534,8 +534,8 @@ const renderMenuItems = (
           <li key={item.tag} data-menu-item={item.tag}>
             <button
               className={cn(
-                "flex w-full items-center gap-2 rounded-selector p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left",
-                isActive && "bg-accent text-accent-foreground",
+                "flex w-full items-center gap-2 rounded-selector p-2 text-body hover:bg-secondary hover:text-accent-foreground cursor-pointer h-8 text-left",
+                isActive && "bg-secondary text-accent-foreground",
               )}
               onClick={() => onItemClick(item)}
               onMouseDown={(e) => onCtrlRightMouseClick(e, item)}
@@ -738,10 +738,10 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
           <button
             {...(flatIdx >= 0 && { "data-sidebar-result-index": flatIdx })}
             className={cn(
-              "flex w-full rounded-selector p-2 text-sm hover:bg-accent/50 cursor-pointer min-h-8 text-left",
+              "flex w-full rounded-selector p-2 text-sm hover:bg-secondary/50 cursor-pointer min-h-8 text-left",
               showPath && item.path ? "flex-col items-start gap-1" : "items-center gap-2",
-              isHovered && !isActivePage && "bg-accent/30",
-              isActivePage && "bg-accent text-accent-foreground hover:bg-accent",
+              isHovered && !isActivePage && "bg-secondary/30",
+              isActivePage && "bg-secondary text-accent-foreground hover:bg-secondary",
             )}
             tabIndex={-1}
             onClick={() => {
@@ -788,7 +788,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
 
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="sticky top-0 z-10 bg-background px-2 py-2 text-small-label text-muted-foreground mb-0">
+            <h4 className="sticky top-0 z-10 bg-card px-2 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">

@@ -114,6 +114,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           maxLength={props.maxLength}
           minLength={props.minLength}
           pattern={props.pattern}
+          autoFocus={props.autoFocus}
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={onFocus}

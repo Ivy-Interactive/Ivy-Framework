@@ -19,7 +19,7 @@ export function useOptimisticValue<T>(
 
   useEffect(() => {
     if (!isActive && !eq(serverValue, localValue)) {
-      queueMicrotask(() => setLocalValue(serverValue));
+      setLocalValue(serverValue);
     }
   }, [serverValue, isActive]); // oxlint-disable-line react-hooks/exhaustive-deps
 

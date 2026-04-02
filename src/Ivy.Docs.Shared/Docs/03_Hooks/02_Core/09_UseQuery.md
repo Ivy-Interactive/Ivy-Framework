@@ -497,7 +497,7 @@ var query = UseQuery(async () =>
 if (query.Loading) return Text.P("Loading...");
 if (query.Value is not { } items) return Callout.Info("No data.");
 
-return items.ToDataTable();
+return items.ToTable();
 ```
 
 **Key points:**
@@ -506,6 +506,8 @@ return items.ToDataTable();
 - Pass a `RefreshToken` as a dependency to re-fetch data after mutations
 - Always call `.ToListAsync()` inside the query lambda — do NOT return `IQueryable` directly
 - For mutations (add/edit/delete), use a separate method that creates its own `DbContext` from the factory, calls `db.SaveChangesAsync()`, then `refreshToken.Refresh()`
+
+> **EF Core + DataTable:** When displaying EF Core data in a DataTable, pass the `IQueryable` directly to `.ToDataTable()` — do not wrap it in UseQuery. DataTables handle pagination, sorting, and filtering server-side on the `IQueryable`. However, if you're fetching data from an API via UseQuery and then displaying it in a DataTable, that's fine — there's no server-side `IQueryable` to leverage.
 
 </Body>
 </Details>

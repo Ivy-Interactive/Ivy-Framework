@@ -30,6 +30,7 @@ export const YearVariant: React.FC<YearVariantProps> = ({
   min,
   max,
   density = Densities.Medium,
+  autoFocus,
   "data-testid": dataTestId,
   onFocusChange,
 }) => {
@@ -95,6 +96,7 @@ export const YearVariant: React.FC<YearVariantProps> = ({
           <Button
             disabled={disabled}
             variant="outline"
+            autoFocus={autoFocus}
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),

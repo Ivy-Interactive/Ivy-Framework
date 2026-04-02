@@ -25,6 +25,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
   max,
   step,
   density = Densities.Medium,
+  autoFocus,
   "data-testid": dataTestId,
   onFocusChange,
 }) => {
@@ -129,6 +130,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
           onBlur={handleTimeBlur}
           onKeyDown={handleKeyDown}
           disabled={disabled}
+          autoFocus={autoFocus}
           placeholder={placeholder || "Select time"}
           className={cn(
             "bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0",

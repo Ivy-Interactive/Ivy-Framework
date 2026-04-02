@@ -21,7 +21,8 @@ import { useEventHandler } from "@/components/event-handler";
 import type { HoverEffect } from "@/widgets/primitives/BoxWidget";
 import { cardStyles } from "@/widgets/card/styles";
 import { ImageOverlay } from "@/components/markdown/ImageOverlay";
-import React, { useCallback, useState } from "react";
+import { useImageOverlayContext } from "@/components/markdown/ImageOverlayContext";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface ImageWidgetProps {
   id: string;
@@ -125,14 +126,30 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
   const eventHandler = useEventHandler();
   const hasOnClick = events?.includes("OnClick") ?? false;
   const [showOverlay, setShowOverlay] = useState(false);
+  const imageOverlayContext = useImageOverlayContext();
+
+  const validatedSrc = getImageUrl(src);
+  const altText = alt ?? caption ?? "";
+
+  // Register with context for sibling navigation
+  useEffect(() => {
+    if (overlay && validatedSrc && imageOverlayContext) {
+      imageOverlayContext.register(id, validatedSrc, altText);
+      return () => imageOverlayContext.unregister(id);
+    }
+  }, [overlay, validatedSrc, altText, id, imageOverlayContext]);
 
   const handleClick = useCallback(() => {
     if (overlay) {
-      setShowOverlay(true);
+      if (imageOverlayContext) {
+        imageOverlayContext.open(id);
+      } else {
+        setShowOverlay(true);
+      }
     } else if (hasOnClick) {
       eventHandler("OnClick", id, []);
     }
-  }, [id, eventHandler, hasOnClick, overlay]);
+  }, [id, eventHandler, hasOnClick, overlay, imageOverlayContext]);
 
   const outerStyles: React.CSSProperties = {
     ...getWidth(width),
@@ -154,9 +171,7 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
       }
     : {};
 
-  // getImageUrl handles null/undefined and validates the URL internally
-  const validatedImageSrc = getImageUrl(src);
-  if (!validatedImageSrc) {
+  if (!validatedSrc) {
     // Show error message for missing or invalid URLs
     return (
       <div
@@ -174,8 +189,6 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
   // Overlay takes precedence over OnClick and Link
   const linkProps = !overlay && !hasOnClick && link ? getLinkProps(link) : null;
 
-  const altText = alt ?? caption ?? "";
-
   const imgStyles: React.CSSProperties = objectFit
     ? {
         width: "100%",
@@ -186,7 +199,7 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
 
   const hoverClass = getHoverClass(hoverVariant);
 
-  const imgElement = <img src={validatedImageSrc} alt={altText} style={imgStyles} />;
+  const imgElement = <img src={validatedSrc} alt={altText} style={imgStyles} />;
 
   const wrappedImg = linkProps ? (
     <a {...linkProps} style={{ cursor: "pointer" }}>
@@ -203,17 +216,18 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
     </figure>
   ) : linkProps ? (
     <a {...linkProps} style={{ cursor: "pointer" }}>
-      <img src={validatedImageSrc} alt={altText} style={imgStyles} />
+      <img src={validatedSrc} alt={altText} style={imgStyles} />
     </a>
   ) : (
-    <img src={validatedImageSrc} alt={altText} style={imgStyles} />
+    <img src={validatedSrc} alt={altText} style={imgStyles} />
   );
 
   const isClickable = overlay || hasOnClick || linkProps;
 
+  // Only render standalone overlay when no context is available (fallback for single images)
   const overlayElement =
-    overlay && showOverlay ? (
-      <ImageOverlay src={validatedImageSrc} alt={altText} onClose={() => setShowOverlay(false)} />
+    overlay && showOverlay && !imageOverlayContext ? (
+      <ImageOverlay src={validatedSrc} alt={altText} onClose={() => setShowOverlay(false)} />
     ) : null;
 
   if (needsContainer || overlay || hasOnClick) {
@@ -249,5 +263,5 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
   }
 
   // Simple case: no border, no hover, no click
-  return <img src={validatedImageSrc} key={id} style={outerStyles} alt={altText} />;
+  return <img src={validatedSrc} key={id} style={outerStyles} alt={altText} />;
 };

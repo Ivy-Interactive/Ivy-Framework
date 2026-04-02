@@ -9,6 +9,7 @@ public interface IDataTableService
     (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable);
     (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector);
     (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames);
+    (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors);
 }
 
 public class DataTableConnectionService(IQueryableRegistry queryableRegistry, ServerArgs serverArgs, string connectionId, ILogger<DataTableConnectionService>? logger = null) : IDataTableService
@@ -25,8 +26,13 @@ public class DataTableConnectionService(IQueryableRegistry queryableRegistry, Se
 
     public (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames)
     {
+        return AddQueryable(queryable, idSelector, columnNames, null);
+    }
+
+    public (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors)
+    {
         logger?.LogInformation("Adding queryable with connectionId: {ConnectionId}", connectionId);
-        var sourceId = queryableRegistry.RegisterQueryable(queryable, idSelector, columnNames);
+        var sourceId = queryableRegistry.RegisterQueryable(queryable, idSelector, columnNames, valueAccessors);
 
         var cleanup = queryableRegistry.AddCleanup(sourceId, Disposable.Empty);
 

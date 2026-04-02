@@ -47,6 +47,7 @@ interface ButtonWidgetProps {
   url?: string;
   target?: "Blank" | "Self";
   width?: string;
+  autoFocus?: boolean;
   shortcutKey?: string;
   badge?: string;
   children?: React.ReactNode;
@@ -101,6 +102,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   target = "Self",
   loading = false,
   width,
+  autoFocus,
   shortcutKey,
   badge,
   children,
@@ -355,6 +357,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           )}
           style={borderRadiusClasses.buttonStyle}
           tooltipText={tooltip || undefined}
+          autoFocus={autoFocus}
           data-testid={dataTestId}
         >
           {hasUrl && validatedHref ? (
@@ -383,6 +386,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       style={styles}
       size={buttonSize}
       onClick={hasUrl ? undefined : handleClick}
+      autoFocus={autoFocus}
       variant={
         (variant === "Primary" ? "default" : camelCase(variant)) as
           | "default"

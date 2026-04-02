@@ -23,6 +23,7 @@ type AppCheckboxProps = {
   onCheckedChange: (checked: boolean | null) => void;
   disabled?: boolean;
   nullable?: boolean;
+  autoFocus?: boolean;
   className?: string;
   density?: Densities;
 };
