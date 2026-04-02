@@ -574,13 +574,36 @@ public class Server
         }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 #endif
 
+        // CLI-only commands need DI but never call app.StartAsync(),
+        // so use port 0 to avoid conflicts with a running instance.
+        // Bind to localhost for local dev (avoids Windows Firewall prompt),
+        // but use wildcard in containers so health probes can reach the app.
+        // On Sliplane or other hosted environments, we usually have PORT set and need to listen on 0.0.0.0.
+        var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+        var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
+        var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
+        var isLocalDev = !isContainer && !hasPortEnv && !_args.IsCliCommand;
+
+        // For local development, we try to reserve two adjacent ports to support both HTTP and HTTPS endpoints.
+        bool ArePortsInUse(int port) {
+            var portInUse = ProcessHelper.IsPortInUse(port);
+            return isLocalDev
+                ? portInUse || ProcessHelper.IsPortInUse(port + 1)
+                : portInUse;
+        }
+
         // CLI-only commands (--describe, --describe-connection, --test-connection) never start
         // the web host, so skip port checks entirely. Port 0 will be used below.
-        if (!_args.IsCliCommand && ProcessHelper.IsPortInUse(_args.Port))
+        if (!_args.IsCliCommand && ArePortsInUse(_args.Port))
         {
             if (_args.IKillForThisPort)
             {
                 ProcessHelper.KillProcessUsingPort(_args.Port);
+                if (isLocalDev)
+                {
+                    // If we're in local dev, also kill the next port to avoid conflicts with the dev cert HTTPS endpoint
+                    ProcessHelper.KillProcessUsingPort(_args.Port + 1);
+                }
             }
             else if (_args.FindAvailablePort)
             {
@@ -588,7 +611,7 @@ public class Server
                 var maxAttempts = 100;
                 var attemptCount = 0;
 
-                while (ProcessHelper.IsPortInUse(_args.Port) && attemptCount < maxAttempts)
+                while (ArePortsInUse(_args.Port) && attemptCount < maxAttempts)
                 {
                     _args = _args with { Port = _args.Port + 1 };
                     attemptCount++;
@@ -658,25 +681,14 @@ public class Server
             mod(builder);
         }
 
-        // CLI-only commands need DI but never call app.StartAsync(),
-        // so use port 0 to avoid conflicts with a running instance.
-        // Bind to localhost for local dev (avoids Windows Firewall prompt),
-        // but use wildcard in containers so health probes can reach the app.
-        // On Sliplane or other hosted environments, we usually have PORT set and need to listen on 0.0.0.0.
-        var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
-        var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
-        var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
-        var isLocalDev = !isContainer && !hasPortEnv && !_args.IsCliCommand;
-
         if (_args.IsCliCommand)
         {
             builder.WebHost.UseUrls("http://localhost:0");
         }
         else if (isLocalDev)
         {
-            // Local development: HTTPS only using the ASP.NET Core dev certificate.
-            // Run `dotnet dev-certs https --trust` if the certificate is not yet trusted.
-            builder.WebHost.UseUrls($"https://{host}:{_args.Port}");
+            // Local development: HTTPS using the ASP.NET Core dev certificate, HTTP on the next port for Vite+ HMR.
+            builder.WebHost.UseUrls($"https://{host}:{_args.Port}", $"http://{host}:{_args.Port + 1}");
         }
         else
         {

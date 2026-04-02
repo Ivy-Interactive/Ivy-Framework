@@ -4,7 +4,6 @@ import mkcert from "vite-plugin-mkcert";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-import https from "node:https";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
@@ -52,8 +51,8 @@ const injectMeta = (mode) => {
     name: "inject-ivy-meta",
     async transformIndexHtml(localHtml) {
       if (mode === "development") {
-        const host = process.env.IVY_HOST || "https://localhost:5010";
-        const serverHtml = await insecureFetch(host);
+        const host = process.env.IVY_HOST || "http://localhost:5011";
+        const serverHtml = await fetch(`${host}`).then((res) => res.text());
         const transformedHtml = transferMeta(serverHtml, localHtml);
         const ivyHostTag = `<meta name="ivy-host" content="${host}" />`;
         return transformedHtml.replace("</head>", ` ${ivyHostTag}\n</head>`);
@@ -64,17 +63,6 @@ const injectMeta = (mode) => {
 };
 
 const mode = process.env.NODE_ENV || "development";
-function insecureFetch(url) {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, { rejectUnauthorized: false }, (res) => {
-        let data = "";
-        res.on("data", (chunk) => (data += chunk));
-        res.on("end", () => resolve(data));
-      })
-      .on("error", reject);
-  });
-}
 
 export default defineConfig({
   base: "./",
@@ -86,8 +74,14 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), mkcert(), injectMeta(mode)],
   server: {
     proxy: {
+      "/ivy": {
+        target: process.env.IVY_HOST || "http://localhost:5011",
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
       "^/(.*\\.md|llms\\.txt)$": {
-        target: process.env.IVY_HOST || "https://localhost:5010",
+        target: process.env.IVY_HOST || "http://localhost:5011",
         changeOrigin: true,
         secure: false,
       },
