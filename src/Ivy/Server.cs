@@ -852,7 +852,7 @@ public class Server
         }
 
         app.UseFrontend(_args, logger);
-        app.UseAssets(_args, logger, "Assets", "ivy/assets");
+        app.UseAssets(_args, logger, "Assets", "ivy/_assets");
 
         app.Lifetime.ApplicationStarted.Register(() =>
         {

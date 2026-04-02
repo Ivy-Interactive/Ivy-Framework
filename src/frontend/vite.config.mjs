@@ -86,14 +86,14 @@ export default defineConfig({
   build: {
     target: "es2020",
     outDir: "dist",
-    assetsDir: "assets",
+    assetsDir: "_assets",
     cssCodeSplit: true,
     sourcemap: false,
     rollupOptions: {
       output: {
-        entryFileNames: "assets/[name]-[hash].js",
-        chunkFileNames: "assets/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash].[ext]",
+        entryFileNames: "_assets/[name]-[hash].js",
+        chunkFileNames: "_assets/[name]-[hash].js",
+        assetFileNames: "_assets/[name]-[hash].[ext]",
       },
     },
   },
