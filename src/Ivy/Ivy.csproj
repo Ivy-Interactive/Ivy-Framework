@@ -86,10 +86,6 @@
   <ItemGroup>
     <ProjectReference Include="../Ivy.Agent.Filter/Ivy.Agent.Filter.csproj" />
   </ItemGroup>
-
-  <Target Name="GenerateDocumentationFiles" BeforeTargets="BeforeBuild">
-    <MSBuild Projects="../Ivy.Docs.Shared/Ivy.Docs.Shared.csproj" Targets="TransformMarkdown" />
-  </Target>
   
   <ItemGroup>
     <Folder Include="Core/Apps/" />

@@ -158,13 +158,6 @@ fn main() {
                 ) {
                     println!("Error converting {}: {}", name, e);
                 }
-
-                // Copy the markdown file over so it is embedded in the DLL and packaged into Nuget
-                let mut md_output = folder.clone();
-                md_output.push(format!("{}.md", name));
-                if let Err(e) = fs::copy(absolute_input_path, &md_output) {
-                    println!("Error copying md file {}: {}", name, e);
-                }
             });
         }
     }
