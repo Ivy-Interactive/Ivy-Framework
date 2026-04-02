@@ -49,9 +49,12 @@ public class DashboardApp : ViewBase
             var prsMerged = plans.Where(p => p.Status == PlanStatus.Completed && p.Updated.Date == day).Sum(p => p.Prs.Count);
             var dayFailedCount = plans.Count(p => p.Status == PlanStatus.Failed && p.Updated.Date == day);
 
-            var dayCost = plans
+            var completedOrFailedPlans = plans
                 .Where(p => p.Updated.Date == day && p.Status is PlanStatus.Completed or PlanStatus.Failed or PlanStatus.ReadyForReview)
-                .Sum(p => planService.GetPlanTotalCost(p.FolderPath));
+                .ToList();
+
+            var dayCost = completedOrFailedPlans.Sum(p => planService.GetPlanTotalCost(p.FolderPath));
+            var dayTokens = completedOrFailedPlans.Sum(p => planService.GetPlanTotalTokens(p.FolderPath));
 
             return new DashboardDayRow
             {
@@ -61,7 +64,8 @@ public class DashboardApp : ViewBase
                 Completed = dayCompletedCount,
                 PrsMerged = prsMerged,
                 Failed = dayFailedCount,
-                Cost = dayCost > 0 ? $"${dayCost:F2}" : ""
+                Cost = dayCost > 0 ? $"${dayCost:F2}" : "",
+                Tokens = dayTokens > 0 ? FormatTokens(dayTokens) : ""
             };
         }).ToList();
 
@@ -76,6 +80,7 @@ public class DashboardApp : ViewBase
             .Header(t => t.PrsMerged, "PRs Merged")
             .Header(t => t.Failed, "Failed")
             .Header(t => t.Cost, "Cost")
+            .Header(t => t.Tokens, "Tokens")
             .Hidden(t => t.SortDate)
             .Config(c =>
             {
@@ -110,15 +115,29 @@ public class DashboardApp : ViewBase
             .Height(Size.Px(300))
             .Width(Size.Full());
 
+        var tokensChart = hourlyBurn.ToBarChart(style: BarChartStyles.Dashboard)
+            .Dimension("Hour", e => e.Hour.ToString("MM/dd HH:mm"))
+            .Measure("Tokens", e => e.Sum(f => (double)f.Tokens))
+            .Height(Size.Px(300))
+            .Width(Size.Full());
+
         var content = Layout.Vertical().Gap(2)
             | dataTable
             | burnChart
+            | tokensChart
             | projectChart;
 
         return new HeaderLayout(
             header: statsRow,
             content: content
         );
+    }
+
+    private static string FormatTokens(int tokens)
+    {
+        return tokens >= 1_000_000 ? $"{tokens / 1_000_000.0:F1}M"
+             : tokens >= 1_000 ? $"{tokens / 1_000.0:F0}K"
+             : tokens.ToString();
     }
 
     private static object BuildStatCard(int count, string label)
@@ -138,4 +157,5 @@ public class DashboardDayRow
     public int PrsMerged { get; set; }
     public int Failed { get; set; }
     public string Cost { get; set; } = "";
+    public string Tokens { get; set; } = "";
 }

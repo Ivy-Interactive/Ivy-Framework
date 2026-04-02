@@ -327,6 +327,26 @@ public class PlanReaderService(ConfigService config)
         return total;
     }
 
+    public int GetPlanTotalTokens(string folderPath)
+    {
+        var costsPath = Path.Combine(folderPath, "costs.csv");
+        if (!File.Exists(costsPath)) return 0;
+
+        var lines = File.ReadAllLines(costsPath);
+        int total = 0;
+        foreach (var line in lines.Skip(1))
+        {
+            var parts = line.Split(',');
+            if (parts.Length >= 2 && int.TryParse(parts[1],
+                System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture, out var tokens))
+            {
+                total += tokens;
+            }
+        }
+        return total;
+    }
+
     public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7)
     {
         var cutoff = DateTime.UtcNow.AddDays(-days);
