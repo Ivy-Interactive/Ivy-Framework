@@ -110,4 +110,64 @@ projects:
         var project3 = settings.Projects.FirstOrDefault(p => p.Name.Equals("NonExistent", StringComparison.OrdinalIgnoreCase));
         Assert.Null(project3);
     }
+
+    [Fact]
+    public void Should_Deserialize_ReviewActions()
+    {
+        var yaml = @"
+tendrilData: D:\Tendril
+
+projects:
+  - name: TestProject
+    repos:
+      - path: D:\Repos\Test
+    reviewActions:
+      - name: Sample
+        condition: 'Test-Path ""artifacts\sample\*.csproj""'
+        action: 'dotnet run --browse'
+      - name: Open Docs
+        condition: ''
+        action: 'start docs/index.html'
+";
+
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .Build();
+        var settings = deserializer.Deserialize<TendrilSettings>(yaml);
+
+        Assert.NotNull(settings);
+        var project = settings.Projects[0];
+        Assert.Equal(2, project.ReviewActions.Count);
+
+        Assert.Equal("Sample", project.ReviewActions[0].Name);
+        Assert.Contains("Test-Path", project.ReviewActions[0].Condition);
+        Assert.Equal("dotnet run --browse", project.ReviewActions[0].Action);
+
+        Assert.Equal("Open Docs", project.ReviewActions[1].Name);
+        Assert.Empty(project.ReviewActions[1].Condition);
+        Assert.Equal("start docs/index.html", project.ReviewActions[1].Action);
+    }
+
+    [Fact]
+    public void Should_Default_ReviewActions_To_Empty_List()
+    {
+        var yaml = @"
+tendrilData: D:\Tendril
+
+projects:
+  - name: TestProject
+    repos:
+      - path: D:\Repos\Test
+";
+
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .Build();
+        var settings = deserializer.Deserialize<TendrilSettings>(yaml);
+
+        Assert.NotNull(settings);
+        var project = settings.Projects[0];
+        Assert.NotNull(project.ReviewActions);
+        Assert.Empty(project.ReviewActions);
+    }
 }

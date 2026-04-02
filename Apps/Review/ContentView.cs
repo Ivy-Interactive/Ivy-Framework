@@ -265,6 +265,67 @@ public class ContentView(
                 }
             });
 
+        // Review actions
+        var projectConfig = _config.GetProject(_selectedPlan.Project);
+        var reviewActions = projectConfig?.ReviewActions ?? new();
+        if (reviewActions.Count > 0)
+        {
+            var actionsBar = Layout.Horizontal().Gap(2).Padding(1);
+            foreach (var action in reviewActions)
+            {
+                var conditionMet = false;
+                if (!string.IsNullOrEmpty(action.Condition))
+                {
+                    try
+                    {
+                        var psi = new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "pwsh",
+                            Arguments = $"-NoProfile -Command \"if ({action.Condition}) {{ exit 0 }} else {{ exit 1 }}\"",
+                            WorkingDirectory = _selectedPlan.FolderPath,
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        };
+                        var proc = System.Diagnostics.Process.Start(psi);
+                        proc?.WaitForExit(5000);
+                        conditionMet = proc?.ExitCode == 0;
+                    }
+                    catch
+                    {
+                        conditionMet = false;
+                    }
+                }
+                else
+                {
+                    conditionMet = true;
+                }
+
+                var btn = new Button(action.Name).Icon(Icons.Play).Outline();
+                if (!conditionMet)
+                {
+                    btn = btn.Disabled();
+                }
+                else
+                {
+                    var actionCapture = action;
+                    btn = btn.OnClick(() =>
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "pwsh",
+                            Arguments = $"-NoProfile -Command \"{actionCapture.Action}\"",
+                            WorkingDirectory = _selectedPlan.FolderPath,
+                            UseShellExecute = true
+                        });
+                    });
+                }
+                actionsBar |= btn;
+            }
+            content |= actionsBar;
+        }
+
         // Build tabs
         var tabs = new TabsLayout(
             onSelect: e => selectedTab.Set(e.Value),

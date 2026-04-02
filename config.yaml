@@ -20,6 +20,10 @@ projects:
     repos:
       - path: D:\Repos\_Ivy\Ivy-Framework
         prRule: yolo
+    reviewActions:
+      - name: "Sample"
+        condition: 'Test-Path "artifacts\sample\*.csproj"'
+        action: 'artifacts\sample\dotnet run --browse'
     verifications:
       - name: DotnetBuild
         required: true
