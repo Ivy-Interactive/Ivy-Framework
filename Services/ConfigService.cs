@@ -26,6 +26,7 @@ public record ProjectConfig
     public List<RepoRef> Repos { get; set; } = new();
     public List<ProjectVerificationRef> Verifications { get; set; } = new();
     public string Context { get; set; } = "";
+    public List<ReviewActionConfig> ReviewActions { get; set; } = new();
     public List<string> RepoPaths => Repos.Select(r => r.Path).ToList();
 }
 
@@ -45,6 +46,13 @@ public record ProjectVerificationRef
 {
     public string Name { get; set; } = "";
     public bool Required { get; set; }
+}
+
+public record ReviewActionConfig
+{
+    public string Name { get; set; } = "";
+    public string Condition { get; set; } = "";
+    public string Action { get; set; } = "";
 }
 
 public class TendrilSettings
