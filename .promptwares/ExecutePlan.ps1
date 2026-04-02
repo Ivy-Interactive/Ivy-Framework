@@ -39,13 +39,29 @@ Write-Host "Starting Agent in $workDir..."
 SendStatusMessage "Executing Plan"
 Push-Location $workDir
 
+$rawLogFile = [System.IO.Path]::ChangeExtension($logFile, ".raw.jsonl")
+
 $heartbeat = Start-Heartbeat
 try {
     $extraArgs = @()
     if ($agent.Executable -eq "claude") {
         $extraArgs += @("--session-id", $sessionId)
     }
-    $output = & $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw)
+
+    $startTs = (Get-Date).ToUniversalTime().ToString("o")
+    Add-Content -Path $rawLogFile -Value "[tendril] Claude invocation started at $startTs" -Encoding UTF8
+    Add-Content -Path $rawLogFile -Value "[tendril] Command: $($agent.Executable) $($agent.Args -join ' ') $($extraArgs -join ' ')" -Encoding UTF8
+
+    $output = & $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw) 2>&1 |
+        ForEach-Object {
+            $line = if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                "[stderr] $_"
+            } else {
+                "$_"
+            }
+            Add-Content -Path $rawLogFile -Value $line -Encoding UTF8
+            $_
+        }
     $output | Write-Output
     $exitCode = $LASTEXITCODE
 

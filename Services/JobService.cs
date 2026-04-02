@@ -530,6 +530,19 @@ public class JobService
                 logContent += $"- **Timeout Reason:** {job.StatusMessage}\n";
 
             _planReaderService.AddLog(job.PlanFile, job.Type, logContent);
+
+            // Persist raw output for failed/timeout jobs
+            if (job.Status is "Failed" or "Timeout" && job.OutputLines.Count > 0)
+            {
+                var planFolder = job.Args.Length > 0 ? job.Args[0] : null;
+                if (planFolder != null && Directory.Exists(planFolder))
+                {
+                    var logsDir = Path.Combine(planFolder, "logs");
+                    Directory.CreateDirectory(logsDir);
+                    var outputFile = Path.Combine(logsDir, $"{job.Type}-{job.Id}.output.log");
+                    File.WriteAllLines(outputFile, job.OutputLines);
+                }
+            }
         }
         catch
         {
