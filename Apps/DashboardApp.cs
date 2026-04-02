@@ -101,8 +101,18 @@ public class DashboardApp : ViewBase
             total: new PieChartTotal(plans.Count.ToString(), "Total Plans")
         );
 
+        // Hourly token burn bar chart
+        var hourlyBurn = planService.GetHourlyTokenBurn(days: 7);
+
+        var burnChart = hourlyBurn.ToBarChart(style: BarChartStyles.Dashboard)
+            .Dimension("Hour", e => e.Hour.ToString("MM/dd HH:mm"))
+            .Measure("Cost ($)", e => e.Sum(f => (double)f.Cost))
+            .Height(Size.Px(300))
+            .Width(Size.Full());
+
         var content = Layout.Vertical().Gap(2)
             | dataTable
+            | burnChart
             | projectChart;
 
         return new HeaderLayout(
