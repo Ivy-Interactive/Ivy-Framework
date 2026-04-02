@@ -3,6 +3,24 @@ agentCommand: claude --print --verbose --output-format stream-json --dangerously
 jobTimeout: 30
 staleOutputTimeout: 10
 
+promptwares:
+  MakePlan:
+    model: sonnet
+  ExecutePlan:
+    model: opus
+  ExpandPlan:
+    model: sonnet
+  MakePr:
+    model: sonnet
+  UpdatePlan:
+    model: sonnet
+  SplitPlan:
+    model: sonnet
+  CreateIssue:
+    model: sonnet
+  IvyFrameworkVerification:
+    model: sonnet
+
 levels:
   - name: Critical
     badge: Warning

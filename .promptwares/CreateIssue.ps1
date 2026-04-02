@@ -26,4 +26,4 @@ InvokePromptwareAgent $PSScriptRoot $programFolder $logFile @{
     Assignee = $Assignee
     Comment = $Comment
     Labels = $Labels
-} -PlanPath $PlanPath -Action "CreateIssue"
+} -PlanPath $PlanPath -Action "CreateIssue" -Promptware "CreateIssue"

@@ -17,4 +17,4 @@ Write-Host "Log file: $logFile"
 
 InvokePromptwareAgent $PSScriptRoot $programFolder $logFile @{
     Args = $PlanPath; PlanFolder = $PlanPath; Project = $planInfo.Project
-} -PlanPath $PlanPath -Action "SplitPlan" -FinalState "Skipped"
+} -PlanPath $PlanPath -Action "SplitPlan" -FinalState "Skipped" -Promptware "SplitPlan"

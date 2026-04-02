@@ -44,4 +44,4 @@ InvokePromptwareAgent $PSScriptRoot $programFolder $logFile @{
     Project = $planInfo.Project
     VerificationDir = $verificationDir
     ArtifactsDir = $artifactsDir
-} -PlanPath $PlanPath -Action "IvyFrameworkVerification"
+} -PlanPath $PlanPath -Action "IvyFrameworkVerification" -Promptware "IvyFrameworkVerification"
