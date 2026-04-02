@@ -68,7 +68,7 @@ importers:
         version: 3.2.2(react@19.2.3)
       '@glideapps/glide-data-grid':
         specifier: 6.0.4-alpha24
-        version: 6.0.4-alpha24(lodash@4.17.23)(marked@16.4.2)(react-dom@19.2.3(react@19.2.3))(react-responsive-carousel@3.2.23)(react@19.2.3)
+        version: 6.0.4-alpha24(lodash@4.18.1)(marked@16.4.2)(react-dom@19.2.3(react@19.2.3))(react-responsive-carousel@3.2.23)(react@19.2.3)
       '@hpcc-js/wasm-graphviz':
         specifier: ^1.21.2
         version: 1.21.2
