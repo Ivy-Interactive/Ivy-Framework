@@ -142,6 +142,16 @@ public class JobsApp : ViewBase
                     {
                         if (job.Status is "Failed" or "Timeout" or "Stopped")
                         {
+                            if (job.Type is "ExecutePlan" or "ExpandPlan" && job.Args.Length > 0)
+                            {
+                                var folderName = Path.GetFileName(job.Args[0]);
+                                planService.TransitionState(folderName, Plans.PlanStatus.Building);
+                            }
+                            else if (job.Type == "UpdatePlan" && job.Args.Length > 0)
+                            {
+                                var folderName = Path.GetFileName(job.Args[0]);
+                                planService.TransitionState(folderName, Plans.PlanStatus.Updating);
+                            }
                             jobService.StartJob(job.Type, job.Args);
                             refreshToken.Refresh();
                         }
