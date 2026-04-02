@@ -321,6 +321,112 @@ public class PlanReaderService(ConfigService config)
         return total;
     }
 
+    public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7)
+    {
+        var cutoff = DateTime.UtcNow.AddDays(-days);
+        var buckets = new Dictionary<DateTime, (decimal Cost, int Tokens)>();
+
+        if (!Directory.Exists(PlansDirectory)) return new List<HourlyTokenBurn>();
+
+        foreach (var dir in Directory.GetDirectories(PlansDirectory))
+        {
+            try
+            {
+                var costsPath = Path.Combine(dir, "costs.csv");
+                var logsDir = Path.Combine(dir, "logs");
+                if (!File.Exists(costsPath) || !Directory.Exists(logsDir)) continue;
+
+                var costLines = File.ReadAllLines(costsPath).Skip(1).ToList();
+                if (costLines.Count == 0) continue;
+
+                // Build a map: promptware name -> list of log files (ordered by number)
+                var logFiles = Directory.GetFiles(logsDir, "*.md")
+                    .Select(f =>
+                    {
+                        var name = Path.GetFileNameWithoutExtension(f);
+                        var dashIdx = name.IndexOf('-');
+                        if (dashIdx < 0) return (Promptware: name, Path: f, Num: 0);
+                        var numPart = name.Substring(0, dashIdx);
+                        var pwName = name.Substring(dashIdx + 1);
+                        int.TryParse(numPart, out var num);
+                        return (Promptware: pwName, Path: f, Num: num);
+                    })
+                    .OrderBy(l => l.Num)
+                    .ToList();
+
+                // Group log files by promptware name, preserving order
+                var logsByPromptware = new Dictionary<string, Queue<string>>(StringComparer.OrdinalIgnoreCase);
+                foreach (var log in logFiles)
+                {
+                    if (!logsByPromptware.ContainsKey(log.Promptware))
+                        logsByPromptware[log.Promptware] = new Queue<string>();
+                    logsByPromptware[log.Promptware].Enqueue(log.Path);
+                }
+
+                // Correlate each cost row with its log file
+                foreach (var line in costLines)
+                {
+                    var parts = line.Split(',');
+                    if (parts.Length < 3) continue;
+
+                    var promptware = parts[0].Trim();
+                    if (!int.TryParse(parts[1].Trim(), System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out var tokens)) continue;
+                    if (!decimal.TryParse(parts[2].Trim(), System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out var cost)) continue;
+
+                    if (!logsByPromptware.TryGetValue(promptware, out var queue) || queue.Count == 0)
+                        continue;
+
+                    var logPath = queue.Dequeue();
+                    var timestamp = ExtractCompletedTimestamp(logPath);
+                    if (timestamp == null || timestamp.Value < cutoff) continue;
+
+                    var hour = new DateTime(timestamp.Value.Year, timestamp.Value.Month,
+                        timestamp.Value.Day, timestamp.Value.Hour, 0, 0, DateTimeKind.Utc);
+
+                    if (buckets.TryGetValue(hour, out var existing))
+                        buckets[hour] = (existing.Cost + cost, existing.Tokens + tokens);
+                    else
+                        buckets[hour] = (cost, tokens);
+                }
+            }
+            catch
+            {
+                // Skip problematic plan folders
+            }
+        }
+
+        return buckets
+            .OrderBy(b => b.Key)
+            .Select(b => new HourlyTokenBurn
+            {
+                Hour = b.Key,
+                Cost = b.Value.Cost,
+                Tokens = b.Value.Tokens
+            })
+            .ToList();
+    }
+
+    private static DateTime? ExtractCompletedTimestamp(string logFilePath)
+    {
+        try
+        {
+            foreach (var line in File.ReadLines(logFilePath))
+            {
+                var match = Regex.Match(line, @"\*\*Completed:\*\*\s*(.+)");
+                if (match.Success && DateTime.TryParse(match.Groups[1].Value.Trim(),
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.AdjustToUniversal, out var dt))
+                {
+                    return dt;
+                }
+            }
+        }
+        catch { }
+        return null;
+    }
+
     private static int GetNextRevisionNumber(string revisionsDir)
     {
         var existing = Directory.GetFiles(revisionsDir, "*.md");
@@ -332,4 +438,11 @@ public class PlanReaderService(ConfigService config)
             .DefaultIfEmpty(0)
             .Max() + 1;
     }
+}
+
+public class HourlyTokenBurn
+{
+    public DateTime Hour { get; set; }
+    public decimal Cost { get; set; }
+    public int Tokens { get; set; }
 }
