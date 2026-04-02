@@ -29,9 +29,16 @@ public static class ProcessHelper
 
     public static void KillProcessUsingPort(int port)
     {
-        if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-            throw new NotSupportedException("This method is only supported on Windows.");
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            KillProcessUsingPortWindows(port);
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            KillProcessUsingPortUnix(port);
+        else
+            throw new PlatformNotSupportedException("KillProcessUsingPort is not supported on this platform.");
+    }
 
+    private static void KillProcessUsingPortWindows(int port)
+    {
         var netstat = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -72,6 +79,42 @@ public static class ProcessHelper
             catch (Exception)
             {
                 //ignore
+            }
+        }
+    }
+
+    private static void KillProcessUsingPortUnix(int port)
+    {
+        var lsof = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "lsof",
+                Arguments = $"-ti tcp:{port}",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        lsof.Start();
+        string output = lsof.StandardOutput.ReadToEnd();
+        lsof.WaitForExit();
+
+        if (lsof.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
+            return;
+
+        var pids = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+        foreach (var pidStr in pids)
+        {
+            if (!int.TryParse(pidStr.Trim(), out int pid) || pid == 0)
+                continue;
+            try
+            {
+                Process.GetProcessById(pid).Kill();
+            }
+            catch (Exception)
+            {
+                // ignore - process may have already exited
             }
         }
     }
