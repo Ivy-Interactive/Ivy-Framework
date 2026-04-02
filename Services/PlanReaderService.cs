@@ -129,6 +129,12 @@ public class PlanReaderService(ConfigService config)
         }
     }
 
+    public PlanFile? GetPlanByFolder(string folderPath)
+    {
+        if (!Directory.Exists(folderPath)) return null;
+        return ParsePlanFolder(folderPath);
+    }
+
     public List<PlanFile> GetIceboxPlans()
     {
         return GetPlans(PlanStatus.Icebox);
@@ -284,7 +290,7 @@ public class PlanReaderService(ConfigService config)
             if (!Enum.TryParse<PlanStatus>(planYaml.State, ignoreCase: true, out var status))
                 status = PlanStatus.Draft;
 
-            var metadata = new PlanMetadata(id, planYaml.Project, planYaml.Level, planYaml.Title, status, planYaml.Repos, planYaml.Commits, planYaml.Prs, planYaml.Verifications, planYaml.RelatedPlans, planYaml.DependsOn, planYaml.Created, planYaml.Updated);
+            var metadata = new PlanMetadata(id, planYaml.Project ?? "", planYaml.Level ?? "NiceToHave", planYaml.Title ?? "", status, planYaml.Repos ?? new(), planYaml.Commits ?? new(), planYaml.Prs ?? new(), planYaml.Verifications ?? new(), planYaml.RelatedPlans ?? new(), planYaml.DependsOn ?? new(), planYaml.Created, planYaml.Updated);
             var latestContent = ReadLatestRevision(folderName);
 
             var revisionsDir = Path.Combine(folderPath, "revisions");

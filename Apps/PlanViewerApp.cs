@@ -19,76 +19,82 @@ public class PlanViewerApp : ViewBase
         if (args?.PlanFolderPath is not { } folderPath || string.IsNullOrWhiteSpace(folderPath))
             return Text.P("No plan path provided.");
 
-        var folderName = Path.GetFileName(folderPath);
-        var content = planService.ReadLatestRevision(folderName);
-
-        if (string.IsNullOrEmpty(content))
-            return Text.P("Plan not found or empty.");
-
-        var plans = planService.GetPlans();
-        var plan = plans.FirstOrDefault(p => p.FolderPath == folderPath);
-        var title = plan?.Title ?? folderName;
-
-        var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
-            | Text.Block($"#{plan?.Id} {title}").Bold()
-            | new Badge(plan?.Project ?? "").Variant(BadgeVariant.Outline)
-            | new Badge(plan?.Level ?? "").Variant(config.GetBadgeVariant(plan?.Level ?? ""));
-
-        var mainLayout = new HeaderLayout(
-            header: header,
-            content: new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(content)).DangerouslyAllowLocalFiles()
-                .OnLinkClick(url =>
-                {
-                    if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var filePath = url.Substring("file:///".Length);
-                        openFile.Set(filePath);
-                    }
-                })
-        ).Scroll(Scroll.None).Size(Size.Full());
-
-        if (openFile.Value is { } filePath2)
+        try
         {
-            var ext = Path.GetExtension(filePath2);
-            var imageExts = new[] { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
-            object sheetContent;
-            if (imageExts.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            var folderName = Path.GetFileName(folderPath);
+            var content = planService.ReadLatestRevision(folderName);
+
+            if (string.IsNullOrEmpty(content))
+                return Text.P("Plan not found or empty.");
+
+            var plan = planService.GetPlanByFolder(folderPath);
+            var title = plan?.Title ?? folderName;
+
+            var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
+                | Text.Block($"#{plan?.Id} {title}").Bold()
+                | new Badge(plan?.Project ?? "").Variant(BadgeVariant.Outline)
+                | new Badge(plan?.Level ?? "").Variant(config.GetBadgeVariant(plan?.Level ?? ""));
+
+            var mainLayout = new HeaderLayout(
+                header: header,
+                content: new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(content)).DangerouslyAllowLocalFiles()
+                    .OnLinkClick(url =>
+                    {
+                        if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var filePath = url.Substring("file:///".Length);
+                            openFile.Set(filePath);
+                        }
+                    })
+            ).Scroll(Scroll.None).Size(Size.Full());
+
+            if (openFile.Value is { } filePath2)
             {
-                var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(filePath2)}";
-                sheetContent = new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(filePath2) };
-            }
-            else
-            {
-                if (File.Exists(filePath2))
+                var ext = Path.GetExtension(filePath2);
+                var imageExts = new[] { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
+                object sheetContent;
+                if (imageExts.Contains(ext, StringComparer.OrdinalIgnoreCase))
                 {
-                    var fileContent = File.ReadAllText(filePath2);
-                    var language = FileApp.GetLanguage(ext);
-                    sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
+                    var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(filePath2)}";
+                    sheetContent = new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(filePath2) };
                 }
                 else
                 {
-                    var fileName = Path.GetFileName(filePath2);
-                    var repoPaths = plan?.Repos.Count > 0
-                        ? plan.Repos
-                        : config.GetProject(plan?.Project ?? "")?.RepoPaths ?? [];
-                    var suggestions = MarkdownHelper.FindFilesInRepos(repoPaths, fileName);
-                    var notFoundContent = suggestions.Count > 0
-                        ? $"File not found.\n\nDid you mean:\n{string.Join("\n", suggestions.Select(s => $"- `{s}`"))}"
-                        : "File not found.";
-                    sheetContent = new Markdown(notFoundContent);
+                    if (File.Exists(filePath2))
+                    {
+                        var fileContent = File.ReadAllText(filePath2);
+                        var language = FileApp.GetLanguage(ext);
+                        sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
+                    }
+                    else
+                    {
+                        var fileName = Path.GetFileName(filePath2);
+                        var repoPaths = plan?.Repos.Count > 0
+                            ? plan.Repos
+                            : config.GetProject(plan?.Project ?? "")?.RepoPaths ?? [];
+                        var suggestions = MarkdownHelper.FindFilesInRepos(repoPaths, fileName);
+                        var notFoundContent = suggestions.Count > 0
+                            ? $"File not found.\n\nDid you mean:\n{string.Join("\n", suggestions.Select(s => $"- `{s}`"))}"
+                            : "File not found.";
+                        sheetContent = new Markdown(notFoundContent);
+                    }
                 }
+
+                return new Fragment(
+                    mainLayout,
+                    new Sheet(
+                        onClose: () => openFile.Set(null),
+                        content: sheetContent,
+                        title: Path.GetFileName(filePath2)
+                    ).Width(Size.Half()).Resizable()
+                );
             }
 
-            return new Fragment(
-                mainLayout,
-                new Sheet(
-                    onClose: () => openFile.Set(null),
-                    content: sheetContent,
-                    title: Path.GetFileName(filePath2)
-                ).Width(Size.Half()).Resizable()
-            );
+            return mainLayout;
         }
-
-        return mainLayout;
+        catch (Exception ex)
+        {
+            return Text.P($"Error loading plan: {ex.Message}");
+        }
     }
 }
