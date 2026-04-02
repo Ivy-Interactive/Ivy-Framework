@@ -39,9 +39,6 @@ public class TrashApp : ViewBase
                 .OnClick(() => selectedFile.Set(item.FilePath));
         }));
 
-        var sidebarHeader = Layout.Vertical()
-            | Text.Muted($"{files.Count} file(s)").Small();
-
         // Main content
         object mainContent;
         if (selected is null)
@@ -86,8 +83,7 @@ public class TrashApp : ViewBase
         {
             new SidebarLayout(
                 mainContent: mainContent,
-                sidebarContent: sidebarContent,
-                sidebarHeader: sidebarHeader
+                sidebarContent: sidebarContent
             )
         };
 
