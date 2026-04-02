@@ -69,6 +69,7 @@ using System.Reflection;
 
 var server = new Server();
 server.AddAppsFromAssembly(Assembly.GetExecutingAssembly());
+server.UseAppShell();
 await server.RunAsync();
 ```
 
