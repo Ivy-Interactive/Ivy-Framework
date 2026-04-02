@@ -21,7 +21,7 @@ public class ListBlade : ViewBase
         var searchString = UseState("");
         var filteredProducts = UseState(products);
 
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
 
         UseEffect(() =>
         {

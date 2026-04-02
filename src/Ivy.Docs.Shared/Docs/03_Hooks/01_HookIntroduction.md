@@ -641,7 +641,7 @@ public class NavigationRootView : ViewBase
 {
     public override object? Build()
     {
-        var blades = UseContext<IBladeService>();
+        var blades = UseContext<IBladeContext>();
         var index = blades.GetIndex(this);
 
         return Layout.Horizontal().Height(Size.Units(50))

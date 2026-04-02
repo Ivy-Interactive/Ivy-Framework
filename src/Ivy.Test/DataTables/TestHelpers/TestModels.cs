@@ -36,6 +36,16 @@ public class Person
 }
 
 /// <summary>
+/// Test model with an object-typed property that can hold widget instances
+/// </summary>
+public class ItemWithWidgetStatus
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public object Status { get; set; } = string.Empty;
+}
+
+/// <summary>
 /// Test data generator
 /// </summary>
 public static class TestDataGenerator

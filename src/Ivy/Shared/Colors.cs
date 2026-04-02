@@ -37,5 +37,6 @@ public enum Colors
     Success,
     Warning,
     Info,
-    Muted
+    Muted,
+    IvyGreen
 }

@@ -60,7 +60,7 @@ export const DiffView: React.FC<DiffViewProps> = ({
   }
 
   return (
-    <div style={style}>
+    <div style={style} className="text-xs">
       {files.map((file, fileIndex) => {
         const hasHeader = oldRevision || newRevision || file.oldPath || file.newPath;
         return (

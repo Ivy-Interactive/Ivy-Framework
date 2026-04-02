@@ -41,6 +41,39 @@ ce144de9-0688-490a-bef6-b2766e323154
 c9185561-51f5-4c76-ae5b-7448f5a68a0f
 8b576f86-85cc-43b8-97e2-358bae83464a
 
+## Details() — empty constructor instead of passing items
+
+**Hallucinated API:**
+
+```csharp
+new Details()
+    | new Detail("Country Code", result.CountryCode, false)
+    | new Detail("VAT Number", result.VatNumber, false)
+```
+
+**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'items' of 'Details.Details(IEnumerable<Detail>)'`
+
+**Correct API:**
+
+```csharp
+new Details(new[] {
+    new Detail("Country Code", result.CountryCode, false),
+    new Detail("VAT Number", result.VatNumber, false)
+})
+// or use the builder pattern:
+result.ToDetails()
+```
+
+`Details` requires an `IEnumerable<Detail>` in its constructor. There is no parameterless public constructor, and the pipe operator `|` does not work on `Details` to add children. Use the collection constructor or the `.ToDetails()` builder pattern on a model.
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207
+b6beb60d-478d-409e-b10d-7913ae911e85
+fd5baba6-72aa-4d28-ac10-72e1be86e494
+9e1cba6f-bd19-472e-83a3-8db63b4860f6
+e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+ee364ec5-064f-4d9c-a63c-b04a4a4bbbdc
+
 ## AppAttribute.path — renamed to group
 
 **Hallucinated API:**
@@ -95,37 +128,77 @@ The `Button` onClick parameter is `Func<Event<Button>, ValueTask>?`. The callbac
 bedc0ee6-b915-45b0-ab3a-433e2ac5ff4a
 80f19121-bcf0-4899-abe2-9f1c439f4101
 
-## Details() — empty constructor instead of passing items
+## ChatMessage — ambiguous reference between Microsoft.Extensions.AI and Ivy
 
 **Hallucinated API:**
 
 ```csharp
-new Details()
-    | new Detail("Country Code", result.CountryCode, false)
-    | new Detail("VAT Number", result.VatNumber, false)
+var messages = new List<ChatMessage>
+{
+    new ChatMessage(ChatRole.System, "You are a helpful assistant."),
+    new ChatMessage(ChatRole.User, content)
+};
 ```
 
-**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'items' of 'Details.Details(IEnumerable<Detail>)'`
+**Error:** `CS0104: 'ChatMessage' is an ambiguous reference between 'Microsoft.Extensions.AI.ChatMessage' and 'Ivy.ChatMessage'`
 
 **Correct API:**
 
 ```csharp
-new Details(new[] {
-    new Detail("Country Code", result.CountryCode, false),
-    new Detail("VAT Number", result.VatNumber, false)
-})
-// or use the builder pattern:
-result.ToDetails()
+// Fully qualify the namespace:
+var messages = new List<Microsoft.Extensions.AI.ChatMessage>
+{
+    new(Microsoft.Extensions.AI.ChatRole.System, "You are a helpful assistant."),
+    new(Microsoft.Extensions.AI.ChatRole.User, content)
+};
+
+// Or add a using alias at the top of the file:
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
+using ChatRole = Microsoft.Extensions.AI.ChatRole;
 ```
 
-`Details` requires an `IEnumerable<Detail>` in its constructor. There is no parameterless public constructor, and the pipe operator `|` does not work on `Details` to add children. Use the collection constructor or the `.ToDetails()` builder pattern on a model.
+When using `IChatClient` from `Microsoft.Extensions.AI` in an Ivy project, `ChatMessage` conflicts with `Ivy.ChatMessage` (the Chat widget's message record) which is available via global using. Always fully qualify or alias the `Microsoft.Extensions.AI` types.
 
 **Found In:**
-857de09c-ab87-49a5-aac4-394f7d0aa207
-b6beb60d-478d-409e-b10d-7913ae911e85
-fd5baba6-72aa-4d28-ac10-72e1be86e494
-9e1cba6f-bd19-472e-83a3-8db63b4860f6
-e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+142f4e78-ada2-4bd6-8c9f-a8562c82afb7
+ab7c7708-b26c-49fa-83a4-176df47c5866
+a8e15b46-41e2-4281-b570-6d46721e0425
+b73d8115-b4d2-45d5-926e-0a915c1dca63
+b16d95b1-ff2f-4db3-9c67-910e21eb0713
+
+## ToDataTable() on List\<T\> or T[] — wrong receiver type
+
+**Hallucinated API:**
+
+```csharp
+var items = await db.Categories.ToListAsync();
+items.ToDataTable()
+
+// Also seen with arrays:
+var rows = query.Select(...).ToArray();
+rows.ToDataTable()
+```
+
+**Error:** `CS1061: 'List<Category>' does not contain a definition for 'ToDataTable'` / `CS1061: 'TestFileRow[]' does not contain a definition for 'ToDataTable'`
+
+**Correct API:**
+
+```csharp
+// ToDataTable() is an extension on IQueryable<T>, not List<T> or T[]:
+db.Categories.ToDataTable()
+
+// Or use ToTable() for in-memory collections:
+items.ToTable()
+```
+
+`ToDataTable()` is defined on `IQueryable<T>` (via `DataTableBuilder`), not on `List<T>`, `T[]`, or `IEnumerable<T>`. The agent often materializes a query to a List or array first, then tries to call `ToDataTable()` on the result. Pass the `IQueryable<T>` directly to `ToDataTable()` without materializing. For in-memory collections, use `.ToTable()` instead.
+
+**Found In:**
+9d8f5446-43c4-44a2-b6ce-3caeff413407 (TestFilesApp.cs and CategoriesApp.cs)
+8b576f86-85cc-43b8-97e2-358bae83464a
+16d32bb9-34f3-4b14-adf9-83f802350032
+2bcae879-5f09-4655-a74f-9371bc1d26e4
+1bbd69d3-7fb5-4dd1-acb1-671563c83a72
 
 ## Callout constructor — wrong constructor + invented enum / wrong argument order
 
@@ -249,43 +322,6 @@ f20dced8-1689-4289-a2d8-ee67136eb6ce
 5ba11e91-7b05-49e1-8a0f-5ea01235b192
 f07bc643-b0d7-4a23-a4c8-f4e488285e98
 
-## ChatMessage — ambiguous reference between Microsoft.Extensions.AI and Ivy
-
-**Hallucinated API:**
-
-```csharp
-var messages = new List<ChatMessage>
-{
-    new ChatMessage(ChatRole.System, "You are a helpful assistant."),
-    new ChatMessage(ChatRole.User, content)
-};
-```
-
-**Error:** `CS0104: 'ChatMessage' is an ambiguous reference between 'Microsoft.Extensions.AI.ChatMessage' and 'Ivy.ChatMessage'`
-
-**Correct API:**
-
-```csharp
-// Fully qualify the namespace:
-var messages = new List<Microsoft.Extensions.AI.ChatMessage>
-{
-    new(Microsoft.Extensions.AI.ChatRole.System, "You are a helpful assistant."),
-    new(Microsoft.Extensions.AI.ChatRole.User, content)
-};
-
-// Or add a using alias at the top of the file:
-using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
-using ChatRole = Microsoft.Extensions.AI.ChatRole;
-```
-
-When using `IChatClient` from `Microsoft.Extensions.AI` in an Ivy project, `ChatMessage` conflicts with `Ivy.ChatMessage` (the Chat widget's message record) which is available via global using. Always fully qualify or alias the `Microsoft.Extensions.AI` types.
-
-**Found In:**
-142f4e78-ada2-4bd6-8c9f-a8562c82afb7
-ab7c7708-b26c-49fa-83a4-176df47c5866
-a8e15b46-41e2-4281-b570-6d46721e0425
-b73d8115-b4d2-45d5-926e-0a915c1dca63
-
 ## TextInputBase.Icon() — wrong receiver type
 
 **Hallucinated API:**
@@ -311,6 +347,95 @@ c496d3d8-c090-44b5-9551-4cdf3b0aca06
 f713bd0e-71ec-4f0d-8383-1d27712d71a8
 bc45eeb3-15c9-48c1-9f8f-8570a3522614
 e1c05d6b-f09b-4b5a-8872-2c276bf4b141
+
+## Secret(IsRequired/IsOptional) — non-existent named parameters
+
+**Hallucinated API:**
+
+```csharp
+// Variant 1: IsRequired (inverted logic)
+new Secret("ApiKey", IsRequired: true)
+new Secret("Model", IsRequired: false)
+
+// Variant 2: IsOptional (prefixed version of Optional)
+new Secret("Model", IsOptional: true)
+```
+
+**Error:** `CS1739: The best overload for 'Secret' does not have a parameter named 'IsRequired'` or `'IsOptional'`
+
+**Correct API:**
+
+```csharp
+// Secret is a record: Secret(string Key, string? Preset = null, bool Optional = false)
+new Secret("ApiKey")                      // required by default (Optional = false)
+new Secret("Model", Optional: true)       // optional secret
+new Secret("Endpoint", Preset: "https://api.openai.com/v1", Optional: true)
+```
+
+The `Secret` record has no `IsRequired` or `IsOptional` parameter. By default, secrets are required (`Optional = false`). To make a secret optional, use `Optional: true`. The agent invents prefixed variants (`IsRequired`, `IsOptional`) instead of using the actual `Optional` parameter.
+
+**Found In:**
+07a0cf7f-d297-4dd2-8fc4-883bb52aa305
+ac1aa99e-739d-4382-86df-7a92b0a25cc7
+bcae7857-4504-4b58-94a7-d733142440f7
+82e6addb-71f8-4e6f-85b6-0ffba1b8c4eb
+
+## Event<T,E>.Data / Event<T,E>.Args — non-existent properties
+
+**Hallucinated API:**
+
+```csharp
+args.Data.Id
+args.Data.Tag
+// Also seen as:
+args.Args.Id
+args.Args.Tag
+```
+
+**Error:** `'Event<DataTable, RowActionClickEventArgs>' does not contain a definition for 'Data'` / `'Args'`
+
+**Correct API:**
+
+```csharp
+args.Value.Id
+args.Value.Tag
+```
+
+`Event<TSender, TValue>` uses `.Value` to access the event args, not `.Data` or `.Args`. The agent likely confused this with other event patterns from different frameworks (e.g., WPF `DataContext`, JavaScript `event.data`, or `EventArgs` naming conventions).
+
+**Found In:**
+f20dced8-1689-4289-a2d8-ee67136eb6ce
+e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+ee364ec5-064f-4d9c-a63c-b04a4a4bbbdc
+563ac3be-4fe9-4612-9331-4eff47725fa6
+
+## IBladeService — non-existent interface (correct: IBladeContext)
+
+**Hallucinated API:**
+
+```csharp
+var blades = UseContext<IBladeService>();
+blades.Push(new CustomerDetailsBlade(id));
+blades.Pop();
+```
+
+**Error:** `CS0246: The type or namespace name 'IBladeService' could not be found`
+
+**Correct API:**
+
+```csharp
+var blades = UseContext<IBladeContext>();
+blades.Push(new CustomerDetailsBlade(id));
+blades.Pop();
+```
+
+The blade navigation context interface is `IBladeContext`, not `IBladeService`. Access it via `UseContext<IBladeContext>()` inside views initialized with the `UseBlades` hook. The agent consistently uses `IBladeService` because **IvyMcp returns the wrong interface name in all blade-related answers** (10 out of 10 IvyQuestion responses about blades use `IBladeService`). This is an IvyMcp knowledge base bug, not an LLM hallucination.
+
+**Found In:**
+2235e1c1-ab1e-4313-be50-995daa1be1f9 (12 blade files affected)
+6341e55e-56eb-41d0-81d3-c2cdfff33093 (8 blade files affected)
+b4b09997-2c10-4b65-861c-16592e447c46 (10 blade files affected)
+1bc9499a-436c-4526-906a-0adbb0f180e8 (6 blade files affected)
 
 ## DateTimeVariant — wrong enum name
 
@@ -385,38 +510,6 @@ DataTable's `OnRowAction` uses `Event<DataTable, RowActionClickEventArgs>`, not 
 **Found In:**
 30c1b273-c528-4496-b194-c98e0ffeaa23
 9d8f5446-43c4-44a2-b6ce-3caeff413407
-16d32bb9-34f3-4b14-adf9-83f802350032
-
-## ToDataTable() on List\<T\> or T[] — wrong receiver type
-
-**Hallucinated API:**
-
-```csharp
-var items = await db.Categories.ToListAsync();
-items.ToDataTable()
-
-// Also seen with arrays:
-var rows = query.Select(...).ToArray();
-rows.ToDataTable()
-```
-
-**Error:** `CS1061: 'List<Category>' does not contain a definition for 'ToDataTable'` / `CS1061: 'TestFileRow[]' does not contain a definition for 'ToDataTable'`
-
-**Correct API:**
-
-```csharp
-// ToDataTable() is an extension on IQueryable<T>, not List<T> or T[]:
-db.Categories.ToDataTable()
-
-// Or use ToTable() for in-memory collections:
-items.ToTable()
-```
-
-`ToDataTable()` is defined on `IQueryable<T>` (via `DataTableBuilder`), not on `List<T>`, `T[]`, or `IEnumerable<T>`. The agent often materializes a query to a List or array first, then tries to call `ToDataTable()` on the result. Pass the `IQueryable<T>` directly to `ToDataTable()` without materializing. For in-memory collections, use `.ToTable()` instead.
-
-**Found In:**
-9d8f5446-43c4-44a2-b6ce-3caeff413407 (TestFilesApp.cs and CategoriesApp.cs)
-8b576f86-85cc-43b8-97e2-358bae83464a
 16d32bb9-34f3-4b14-adf9-83f802350032
 
 ## Toast() — standalone function call instead of IClientProvider method
@@ -500,37 +593,6 @@ Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseQuery.cs`
 ab7c7708-b26c-49fa-83a4-176df47c5866
 fd4594df-0402-4f11-ad46-22165d480649
 
-## Secret(IsRequired/IsOptional) — non-existent named parameters
-
-**Hallucinated API:**
-
-```csharp
-// Variant 1: IsRequired (inverted logic)
-new Secret("ApiKey", IsRequired: true)
-new Secret("Model", IsRequired: false)
-
-// Variant 2: IsOptional (prefixed version of Optional)
-new Secret("Model", IsOptional: true)
-```
-
-**Error:** `CS1739: The best overload for 'Secret' does not have a parameter named 'IsRequired'` or `'IsOptional'`
-
-**Correct API:**
-
-```csharp
-// Secret is a record: Secret(string Key, string? Preset = null, bool Optional = false)
-new Secret("ApiKey")                      // required by default (Optional = false)
-new Secret("Model", Optional: true)       // optional secret
-new Secret("Endpoint", Preset: "https://api.openai.com/v1", Optional: true)
-```
-
-The `Secret` record has no `IsRequired` or `IsOptional` parameter. By default, secrets are required (`Optional = false`). To make a secret optional, use `Optional: true`. The agent invents prefixed variants (`IsRequired`, `IsOptional`) instead of using the actual `Optional` parameter.
-
-**Found In:**
-07a0cf7f-d297-4dd2-8fc4-883bb52aa305
-ac1aa99e-739d-4382-86df-7a92b0a25cc7
-bcae7857-4504-4b58-94a7-d733142440f7
-
 ## Button.WithIcon() — non-existent fluent method
 
 **Hallucinated API:**
@@ -552,6 +614,111 @@ The fluent method is `.Icon(Icons.X)`, not `.WithIcon(Icons.X)`. The agent likel
 **Found In:**
 8b93fae2-c7ce-4890-b0c0-43310c65dd00
 310e1e6a-facb-4caf-87b9-4f1422b51abc
+7c0abfe8-e16f-40d1-9323-95505a4697e7
+
+## Server.OnReady / Server.OnStartup / Server.OnAfterStart — non-existent lifecycle callbacks
+
+**Hallucinated API:**
+
+```csharp
+server.OnReady(() => { /* seed data */ });
+server.OnStartup(() => { /* initialize */ });
+server.OnAfterStart(() => { /* seed data */ });
+```
+
+**Error:** `CS1061: 'Server' does not contain a definition for 'OnReady'` / `CS1061: 'Server' does not contain a definition for 'OnAfterStart'`
+
+**Correct API:**
+
+```csharp
+// Seed data via the context factory pattern:
+var connection = server.UseConnection<MyDbContext>(options =>
+    options.ContextFactory = () =>
+    {
+        var ctx = new MyDbContext();
+        ctx.Database.EnsureCreated();
+        SeedData(ctx);
+        return ctx;
+    });
+
+// Or resolve services directly in Program.cs:
+var myService = server.Services.GetRequiredService<IMyService>();
+myService.Initialize();
+```
+
+The `Server` class does not have `OnReady`, `OnStartup`, or similar lifecycle callback methods. To run initialization code (e.g., database seeding), use the connection's context factory pattern — seed data in the factory's `CreateContext` method or use `server.Services` to resolve and call services directly in `Program.cs`.
+
+**Found In:**
+c1b87041-f92b-4ba5-96d7-6a92419e84ea
+6341e55e-56eb-41d0-81d3-c2cdfff33093
+2bcae879-5f09-4655-a74f-9371bc1d26e4
+
+## SelectOption\<T\> — non-existent type
+
+**Hallucinated API:**
+
+```csharp
+var clauseTypes = new SelectOption<string>[]
+{
+    new("Indemnification", "Indemnification"),
+    new("Termination", "Termination")
+};
+```
+
+**Error:** `CS0246: The type or namespace name 'SelectOption<>' could not be found`
+
+**Correct API:**
+
+```csharp
+// Use .ToOptions() on a string array:
+var options = new[] { "Indemnification", "Termination" }.ToOptions();
+state.ToSelectInput(options)
+
+// Or use Option<T> for custom value/label pairs:
+var options = new[] {
+    new Option<string>("indemnification", "Indemnification"),
+    new Option<string>("termination", "Termination")
+};
+state.ToSelectInput(options)
+```
+
+`SelectOption<T>` does not exist in Ivy. The agent confused the naming with `Option<T>` or the `.ToOptions()` pattern. For simple string options, use `.ToOptions()` on a string array. For key-value pairs, use `Option<T>`.
+
+**Found In:**
+b16d95b1-ff2f-4db3-9c67-910e21eb0713
+bc53ef0b-235f-4fba-a6bf-c3a9a9946e26
+563ac3be-4fe9-4612-9331-4eff47725fa6
+
+## Skeleton.List() — non-existent static method
+
+**Hallucinated API:**
+
+```csharp
+Skeleton.List(1)
+```
+
+**Error:** `No overload for method 'List' takes 1 arguments` (or similar — `List` does not exist on `Skeleton`)
+
+**Correct API:**
+
+```csharp
+// Available Skeleton static factory methods:
+Skeleton.Card()
+Skeleton.Text(lines: 3)
+Skeleton.DataTable(rows: 5)
+Skeleton.Feed(items: 3)
+Skeleton.Form()
+
+// Or use a plain Skeleton instance:
+new Skeleton()
+```
+
+`Skeleton` has no `List()` method. For a list-like loading placeholder, use `Skeleton.Feed(items)` which renders a vertical feed of skeleton items.
+
+**Found In:**
+9ed7f8e7-aa7c-4c8b-b6a0-8c5b389f1dc2
+e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+1bc9499a-436c-4526-906a-0adbb0f180e8
 
 ## UseAlert().ShowInfo() — wrong API usage
 
@@ -964,62 +1131,133 @@ The agent assumed `.Icon()` was a chainable method on `TextBuilder`, but `Icon()
 c1f8feae-b342-4bf1-a18c-9b88ee8d6d17
 fd4594df-0402-4f11-ad46-22165d480649
 
-## Event<T,E>.Data / Event<T,E>.Args — non-existent properties
+## IRefreshToken — non-existent interface
 
 **Hallucinated API:**
 
 ```csharp
-args.Data.Id
-args.Data.Tag
-// Also seen as:
-args.Args.Id
-args.Args.Tag
+private readonly IRefreshToken _refreshToken;
 ```
 
-**Error:** `'Event<DataTable, RowActionClickEventArgs>' does not contain a definition for 'Data'` / `'Args'`
+**Error:** `The type or namespace name 'IRefreshToken' could not be found`
 
 **Correct API:**
 
 ```csharp
-args.Value.Id
-args.Value.Tag
+var refreshToken = UseRefreshToken();
 ```
 
-`Event<TSender, TValue>` uses `.Value` to access the event args, not `.Data` or `.Args`. The agent likely confused this with other event patterns from different frameworks (e.g., WPF `DataContext`, JavaScript `event.data`, or `EventArgs` naming conventions).
+`IRefreshToken` does not exist. `UseRefreshToken()` returns a `RefreshToken` class. Like all hooks, call inside `Build()`.
 
 **Found In:**
-f20dced8-1689-4289-a2d8-ee67136eb6ce
-e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 005, 006)
+0e9fc5ed-1724-4fed-b9ea-44b370358457
 
-## Skeleton.List() — non-existent static method
+## ToDialog/ToSheet non-existent named parameters (subtitle, footer)
 
 **Hallucinated API:**
 
 ```csharp
-Skeleton.List(1)
+form.ToDialog(title: "Create Post", subtitle: "Add a new blog post")
+form.ToSheet(title: "Edit Post", subtitle: "Modify post details")
+form.ToDialog(title: "Create Tag", footer: ...)
+form.ToSheet(title: "Edit Tag", footer: ...)
 ```
 
-**Error:** `No overload for method 'List' takes 1 arguments` (or similar — `List` does not exist on `Skeleton`)
+**Error:** `CS1739: The best overload for 'ToDialog' does not have a parameter named 'subtitle'` / `CS1739: The best overload for 'ToSheet' does not have a parameter named 'footer'`
 
 **Correct API:**
 
 ```csharp
-// Available Skeleton static factory methods:
-Skeleton.Card()
-Skeleton.Text(lines: 3)
-Skeleton.DataTable(rows: 5)
-Skeleton.Feed(items: 3)
-Skeleton.Form()
-
-// Or use a plain Skeleton instance:
-new Skeleton()
+form.ToDialog(title: "Create Post")
+form.ToSheet(title: "Edit Post")
 ```
 
-`Skeleton` has no `List()` method. For a list-like loading placeholder, use `Skeleton.Feed(items)` which renders a vertical feed of skeleton items.
+`ToDialog` and `ToSheet` accept a `title` parameter but not `subtitle` or `footer`. There are no subtitle/description/footer parameters on these methods. If a subtitle is needed, add it as content within the form itself.
 
 **Found In:**
-9ed7f8e7-aa7c-4c8b-b6a0-8c5b389f1dc2
-e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+c1b87041-f92b-4ba5-96d7-6a92419e84ea (traces 009, 014)
+0e9fc5ed-1724-4fed-b9ea-44b370358457 (footer parameter variant)
+
+## FormBuilder.Header() — non-existent method
+
+**Hallucinated API:**
+
+```csharp
+entity.ToForm()
+    .Header("Edit Fund")
+    .Field(f => f.Name)
+```
+
+**Error:** `'FormBuilder<T>' does not contain a definition for 'Header'`
+
+**Correct API:**
+
+```csharp
+entity.ToForm()
+    .Field(f => f.Name)
+    .ToSheet(title: "Edit Fund")
+```
+
+`FormBuilder` does not have a `.Header()` method. The title/header is set when converting the form to a dialog or sheet via `.ToDialog(title:)` or `.ToSheet(title:)`. The agent confused this with `Card.Header()` or `BladeHeader`.
+
+**Found In:**
+d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002, 003)
+2bcae879-5f09-4655-a74f-9371bc1d26e4
+
+## TabsLayout(params Tab[]) — simplified constructor doesn't exist
+
+**Hallucinated API:**
+
+```csharp
+new TabsLayout(
+    new Tab("Markets", new MarketsView()),
+    new Tab("Chart", new ChartView()),
+    new Tab("Portfolio", new PortfolioView())
+)
+```
+
+**Error:** `CS1729: 'TabsLayout' does not contain a constructor that takes 1 arguments`
+
+**Correct API:**
+
+```csharp
+new TabsLayout(
+    onSelect: null, onClose: null, onRefresh: null, onReorder: null, selectedIndex: null,
+    new Tab("Markets", new MarketsView()),
+    new Tab("Chart", new ChartView()),
+    new Tab("Portfolio", new PortfolioView())
+)
+```
+
+`TabsLayout` has no simplified `(params Tab[])` constructor. The public constructor requires 5 positional parameters before the `params Tab[]`: `onSelect`, `onClose`, `onRefresh`, `onReorder`, `selectedIndex`. Pass `null` for all event handlers and selectedIndex when only tabs are needed. The agent tried to skip these parameters, causing repeated build failures (5 times in a single session).
+
+**Found In:**
+3d2cdc9c-aad3-410e-a1e4-7c007529077a
+2bcae879-5f09-4655-a74f-9371bc1d26e4
+
+## TableBuilder.Header(selector, label, builder) — 3-argument overload doesn't exist
+
+**Hallucinated API:**
+
+```csharp
+.Header(e => e.Status, "Status", b => b.Func<string>(s => new Badge(s).Success()))
+```
+
+**Error:** `CS1501: No overload for method 'Header' takes 3 arguments`
+
+**Correct API:**
+
+```csharp
+// Header takes 2 arguments (selector, label). For custom rendering, chain .Builder():
+.Header(e => e.Status, "Status").Builder(b => b.Func<Employee, string>(e => new Badge(e.Status).Success()))
+```
+
+`TableBuilder.Header()` only accepts 2 parameters: the property selector and the column label. To customize column rendering, chain `.Builder()` after `.Header()`.
+
+**Found In:**
+8b576f86-85cc-43b8-97e2-358bae83464a
+2bcae879-5f09-4655-a74f-9371bc1d26e4
 
 ## FileInput.MaxFiles(n) on single-file state — runtime error
 
@@ -1282,31 +1520,6 @@ The `|` pipe operator works on `LayoutView` (for composing children) but does NO
 
 **Found In:**
 41ae072b-2845-46f1-bd0b-a4a6370c6807
-
-## FormBuilder.Header() — non-existent method
-
-**Hallucinated API:**
-
-```csharp
-entity.ToForm()
-    .Header("Edit Fund")
-    .Field(f => f.Name)
-```
-
-**Error:** `'FormBuilder<T>' does not contain a definition for 'Header'`
-
-**Correct API:**
-
-```csharp
-entity.ToForm()
-    .Field(f => f.Name)
-    .ToSheet(title: "Edit Fund")
-```
-
-`FormBuilder` does not have a `.Header()` method. The title/header is set when converting the form to a dialog or sheet via `.ToDialog(title:)` or `.ToSheet(title:)`. The agent confused this with `Card.Header()` or `BladeHeader`.
-
-**Found In:**
-d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002, 003)
 
 ## Callout.Color(Colors.X) — non-existent fluent method
 
@@ -1727,27 +1940,6 @@ var players = UseState(new List<Player>());
 
 **Found In:**
 84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 006, 008)
-
-## IRefreshToken — non-existent interface
-
-**Hallucinated API:**
-
-```csharp
-private readonly IRefreshToken _refreshToken;
-```
-
-**Error:** `The type or namespace name 'IRefreshToken' could not be found`
-
-**Correct API:**
-
-```csharp
-var refreshToken = UseRefreshToken();
-```
-
-`IRefreshToken` does not exist. `UseRefreshToken()` returns a `RefreshToken` class. Like all hooks, call inside `Build()`.
-
-**Found In:**
-84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 005, 006)
 
 ## Image.ObjectFit("cover") — property used as method call
 
@@ -2403,36 +2595,6 @@ The agent sometimes uses `await` on a method that returns `void` inside a form `
 **Found In:**
 9d8f5446-43c4-44a2-b6ce-3caeff413407 (TestsApp.cs)
 
-## TabsLayout(params Tab[]) — simplified constructor doesn't exist
-
-**Hallucinated API:**
-
-```csharp
-new TabsLayout(
-    new Tab("Markets", new MarketsView()),
-    new Tab("Chart", new ChartView()),
-    new Tab("Portfolio", new PortfolioView())
-)
-```
-
-**Error:** `CS1729: 'TabsLayout' does not contain a constructor that takes 1 arguments`
-
-**Correct API:**
-
-```csharp
-new TabsLayout(
-    onSelect: null, onClose: null, onRefresh: null, onReorder: null, selectedIndex: null,
-    new Tab("Markets", new MarketsView()),
-    new Tab("Chart", new ChartView()),
-    new Tab("Portfolio", new PortfolioView())
-)
-```
-
-`TabsLayout` has no simplified `(params Tab[])` constructor. The public constructor requires 5 positional parameters before the `params Tab[]`: `onSelect`, `onClose`, `onRefresh`, `onReorder`, `selectedIndex`. Pass `null` for all event handlers and selectedIndex when only tabs are needed. The agent tried to skip these parameters, causing repeated build failures (5 times in a single session).
-
-**Found In:**
-3d2cdc9c-aad3-410e-a1e4-7c007529077a
-
 ## Text.Secondary("text") — non-existent static factory
 
 **Hallucinated API:**
@@ -2505,41 +2667,6 @@ When using `UseDownload` with a lambda, you must explicitly cast to `Func<byte[]
 
 **Found In:**
 (session not yet recorded)
-
-## Server.OnReady / Server.OnStartup / Server.OnAfterStart — non-existent lifecycle callbacks
-
-**Hallucinated API:**
-
-```csharp
-server.OnReady(() => { /* seed data */ });
-server.OnStartup(() => { /* initialize */ });
-server.OnAfterStart(() => { /* seed data */ });
-```
-
-**Error:** `CS1061: 'Server' does not contain a definition for 'OnReady'` / `CS1061: 'Server' does not contain a definition for 'OnAfterStart'`
-
-**Correct API:**
-
-```csharp
-// Seed data via the context factory pattern:
-var connection = server.UseConnection<MyDbContext>(options =>
-    options.ContextFactory = () =>
-    {
-        var ctx = new MyDbContext();
-        ctx.Database.EnsureCreated();
-        SeedData(ctx);
-        return ctx;
-    });
-
-// Or resolve services directly in Program.cs:
-var myService = server.Services.GetRequiredService<IMyService>();
-myService.Initialize();
-```
-
-The `Server` class does not have `OnReady`, `OnStartup`, or similar lifecycle callback methods. To run initialization code (e.g., database seeding), use the connection's context factory pattern — seed data in the factory's `CreateContext` method or use `server.Services` to resolve and call services directly in `Program.cs`.
-
-**Found In:**
-c1b87041-f92b-4ba5-96d7-6a92419e84ea
 
 ## Fragment.Empty — non-existent static member
 
@@ -2641,28 +2768,6 @@ The `Expandable` constructor requires two arguments: `(object title, object cont
 
 **Found In:**
 6c834561-6c01-424b-b8fb-a4a473c1c86a
-
-## TableBuilder.Header(selector, label, builder) — 3-argument overload doesn't exist
-
-**Hallucinated API:**
-
-```csharp
-.Header(e => e.Status, "Status", b => b.Func<string>(s => new Badge(s).Success()))
-```
-
-**Error:** `CS1501: No overload for method 'Header' takes 3 arguments`
-
-**Correct API:**
-
-```csharp
-// Header takes 2 arguments (selector, label). For custom rendering, chain .Builder():
-.Header(e => e.Status, "Status").Builder(b => b.Func<Employee, string>(e => new Badge(e.Status).Success()))
-```
-
-`TableBuilder.Header()` only accepts 2 parameters: the property selector and the column label. To customize column rendering, chain `.Builder()` after `.Header()`.
-
-**Found In:**
-8b576f86-85cc-43b8-97e2-358bae83464a
 
 ## IBuilderFactory\<T\>.Custom() — non-existent method
 
@@ -2836,29 +2941,6 @@ The agent hallucinated `QueryOptions.InitialValue` when building list blades wit
 **Found In:**
 c1b87041-f92b-4ba5-96d7-6a92419e84ea (traces 007, 009, 013)
 
-## ToDialog/ToSheet subtitle parameter — non-existent named parameter
-
-**Hallucinated API:**
-
-```csharp
-form.ToDialog(title: "Create Post", subtitle: "Add a new blog post")
-form.ToSheet(title: "Edit Post", subtitle: "Modify post details")
-```
-
-**Error:** `CS1739: The best overload for 'ToDialog' does not have a parameter named 'subtitle'` / `CS1739: The best overload for 'ToSheet' does not have a parameter named 'subtitle'`
-
-**Correct API:**
-
-```csharp
-form.ToDialog(title: "Create Post")
-form.ToSheet(title: "Edit Post")
-```
-
-`ToDialog` and `ToSheet` accept a `title` parameter but not `subtitle`. There is no subtitle/description parameter on these methods. If a subtitle is needed, add it as content within the form itself.
-
-**Found In:**
-c1b87041-f92b-4ba5-96d7-6a92419e84ea (traces 009, 014)
-
 ## View.Args static property — non-existent static property for passing args to child views
 
 **Hallucinated API:**
@@ -2936,6 +3018,143 @@ The agent invented `.Danger()` as a styling method on Button. The correct method
 
 **Found In:**
 b73d8115-b4d2-45d5-926e-0a915c1dca63
+
+## UseService vs UseContext — blade/context services
+
+LLMs sometimes use `UseService<IBladeContext>()` to obtain the blade context. This is incorrect — `IBladeContext` is a **context** provided by `UseBlades()`, not a DI-registered service. Using `UseService` returns `null`, causing `NullReferenceException` at runtime.
+
+**Wrong:**
+
+```csharp
+var blades = UseService<IBladeContext>(); // Returns null!
+```
+
+**Correct:**
+
+```csharp
+var blades = UseContext<IBladeContext>();
+```
+
+**Rule:** Use `UseContext<T>()` for framework-provided context services (`IBladeContext`, etc.). Use `UseService<T>()` only for application-registered DI services (e.g., `DbContextFactory`, `HttpClient`).
+
+**Found In:**
+0e9fc5ed-1724-4fed-b9ea-44b370358457 (4 instances across CategoryListBlade, CategoryDetailsBlade, TagListBlade, TagDetailsBlade)
+
+## Server.StartAsync() / Server.WaitForShutdownAsync() — non-existent methods
+
+**Hallucinated API:**
+
+```csharp
+await server.StartAsync();
+// ... seed data ...
+await server.WaitForShutdownAsync();
+```
+
+**Error:** `CS1061: 'Server' does not contain a definition for 'StartAsync'` / `CS1061: 'Server' does not contain a definition for 'WaitForShutdownAsync'`
+
+**Correct API:**
+
+```csharp
+// Use RunAsync() which handles both start and shutdown:
+await server.RunAsync();
+
+// For startup initialization, use UseWebApplication:
+server.UseWebApplication(app =>
+{
+    using var scope = app.Services.CreateScope();
+    var ctx = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+    ctx.Database.EnsureCreated();
+    SeedData(ctx);
+});
+await server.RunAsync();
+```
+
+The `Server` class does not have `StartAsync()` or `WaitForShutdownAsync()`. The agent confused ASP.NET Core's `IHost.StartAsync()` / `IHost.WaitForShutdownAsync()` pattern with Ivy's `Server` API. Use `server.RunAsync()` for the full lifecycle. See also: `Server.OnReady / Server.OnStartup` and `Server.BuildAsync()` entries.
+
+**Found In:**
+2235e1c1-ab1e-4313-be50-995daa1be1f9
+
+## Languages.Bash — non-existent language enum value
+
+**Hallucinated API:**
+
+```csharp
+new CodeBlock(result, Languages.Bash)
+```
+
+**Error:** `CS0117: 'Languages' does not contain a definition for 'Bash'`
+
+**Correct API:**
+
+```csharp
+new CodeBlock(result, Languages.Text)
+```
+
+The agent hallucinated `Languages.Bash` when displaying non-code content (e.g., commit messages) in a `CodeBlock`. `Bash` is not a valid `Languages` enum value. Use `Languages.Text` for plain text. This is a variant of the existing `Languages.PlainText/Plain/Http` hallucination pattern.
+
+**Found In:**
+139008ad-82b6-441d-ab2f-ae26b56a6de2
+
+## DataTableBuilder.Builder() — TableBuilder method used on DataTableBuilder
+
+**Hallucinated API:**
+
+```csharp
+items.ToDataTable()
+    .Header(e => e.Status, "Status")
+    .Builder(b => b.Func<Employee, string>(e => new Badge(e.Status).Success()))
+```
+
+**Error:** `CS1061: 'DataTableBuilder<T>' does not contain a definition for 'Builder'`
+
+**Correct API:**
+
+```csharp
+// DataTableBuilder uses .Renderer(), not .Builder():
+items.ToDataTable()
+    .Header(e => e.Status, "Status")
+    .Renderer(e => e.Status, new MyCustomRenderer())
+
+// Or map data to display-friendly records before calling .ToDataTable():
+items.Select(e => new { e.Name, Status = e.IsActive ? "Active" : "Inactive" })
+    .AsQueryable()
+    .ToDataTable()
+```
+
+`.Builder()` is a method on `TableBuilder` (for the simple `Table` widget), not on `DataTableBuilder`. For `DataTable`, use `.Renderer()` which takes an `IDataTableColumnRenderer`. The simpler approach is to map data to display-friendly string properties before calling `.ToDataTable()`.
+
+**Source:** IvyMcp knowledge base (IvyQuestion answer explicitly shows `.Builder()` on DataTable chain — see Ivy-Interactive/Ivy-Mcp#161)
+
+**Found In:**
+b8d6684b-0759-4673-a060-032fce3c37d2
+
+## ConnectionBase — non-existent base class for database connections
+
+**Hallucinated API:**
+
+```csharp
+public class AccountingDbConnection : ConnectionBase
+{
+    // ...
+}
+```
+
+**Error:** `CS0246: The type or namespace name 'ConnectionBase' could not be found`
+
+**Correct API:**
+
+```csharp
+public class AccountingDbConnection : IConnection
+{
+    public string Name => "AccountingDb";
+    // Implement IConnection interface members
+}
+```
+
+`ConnectionBase` does not exist. Database connections must implement the `IConnection` interface directly. The agent hallucinated a base class pattern that doesn't exist in Ivy — there is no abstract base class for connections.
+
+**Found In:**
+2bcae879-5f09-4655-a74f-9371bc1d26e4
 
 ## TextInput.Grow() — Box-only extension called on TextInput
 
@@ -3038,24 +3257,6 @@ All `Handle*` event handler extension methods were renamed to `On*` in v1.2.17 (
 | `server.UseSingleApp()` | `server.UseDefaultApp(typeof(AppType))` |
 | `server.UseNoAppShell()` | `server.UseDefaultApp(typeof(AppType))` — omit `UseAppShell()` instead |
 | `server.UseDefaultApp<T>()` | `server.UseDefaultApp(typeof(T))` — takes Type, not generic |
-
-## UseService vs UseContext — blade/context services
-
-LLMs sometimes use `UseService<IBladeService>()` to obtain the blade service. This is incorrect — `IBladeService` is a **context** service provided by `UseBlades()`, not a DI-registered service. Using `UseService` returns `null`, causing `NullReferenceException` at runtime.
-
-**Wrong:**
-
-```csharp
-var bladeService = UseService<IBladeService>(); // Returns null!
-```
-
-**Correct:**
-
-```csharp
-var bladeService = UseContext<IBladeService>();
-```
-
-**Rule:** Use `UseContext<T>()` for framework-provided context services (`IBladeService`, etc.). Use `UseService<T>()` only for application-registered DI services (e.g., `DbContextFactory`, `HttpClient`).
 
 ## ToForm(OnSubmit: ...) — OnSubmit is an extension method, not a parameter
 

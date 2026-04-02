@@ -159,6 +159,16 @@ public class OptionExtensionsTests
     }
 
     [Fact]
+    public void ToOptions_WithLanguagesEnum_UsesDescriptionAttributes()
+    {
+        var values = Enum.GetValues<Languages>();
+        var options = values.ToOptions();
+        Assert.Equal("C#", options.First(o => (Languages)o.TypedValue! == Languages.Csharp).Label);
+        Assert.Equal("JavaScript", options.First(o => (Languages)o.TypedValue! == Languages.Javascript).Label);
+        Assert.Equal("SQL", options.First(o => (Languages)o.TypedValue! == Languages.Sql).Label);
+    }
+
+    [Fact]
     public void ToOptions_TypeOverload_WithDescriptionAttribute_PrefersDescription()
     {
         // Arrange

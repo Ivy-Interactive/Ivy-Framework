@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
@@ -5,19 +6,33 @@ namespace Ivy;
 
 public enum Languages
 {
+    [Description("C#")]
     Csharp,
+    [Description("JavaScript")]
     Javascript,
+    [Description("TypeScript")]
     Typescript,
+    [Description("Python")]
     Python,
+    [Description("SQL")]
     Sql,
+    [Description("HTML")]
     Html,
+    [Description("CSS")]
     Css,
+    [Description("JSON")]
     Json,
+    [Description("DBML")]
     Dbml,
+    [Description("Markdown")]
     Markdown,
+    [Description("Text")]
     Text,
+    [Description("XML")]
     Xml,
+    [Description("YAML")]
     Yaml,
+    [Description("CSV")]
     Csv,
 }
 

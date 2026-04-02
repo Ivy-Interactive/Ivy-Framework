@@ -5,7 +5,7 @@ using Ivy.Core.Hooks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public interface IBladeService
+public interface IBladeContext
 {
     IState<ImmutableArray<BladeItem>> Blades { get; }
 
@@ -20,14 +20,14 @@ public interface IBladeService
     int GetIndex(IView bladeView);
 }
 
-public class BladeService : IBladeService
+public class BladeContext : IBladeContext
 {
-    public BladeService()
+    public BladeContext()
     {
         Blades = new State<ImmutableArray<BladeItem>>([]);
     }
 
-    public BladeService(IState<ImmutableArray<BladeItem>> blades)
+    public BladeContext(IState<ImmutableArray<BladeItem>> blades)
     {
         Blades = blades;
     }
@@ -88,7 +88,7 @@ public static class UseBladesExtensions
     public static IView UseBlades(this IViewContext context, Func<IView> rootBlade, string? title = null, Size? width = null)
     {
         var blades = context.UseState<ImmutableArray<BladeItem>>(() => [new BladeItem(rootBlade(), 0, title, width)]);
-        context.CreateContext<IBladeService>(() => new BladeService(blades));
+        context.CreateContext<IBladeContext>(() => new BladeContext(blades));
         IView bladeView = new BladesView();
         return bladeView;
     }
