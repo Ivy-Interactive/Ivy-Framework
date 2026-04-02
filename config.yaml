@@ -23,7 +23,13 @@ projects:
     reviewActions:
       - name: "Sample"
         condition: 'Test-Path "artifacts\sample\*.csproj"'
-        action: 'dotnet run --project artifacts\sample --browse'
+        action: 'dotnet run --project artifacts\sample --browse --find-available-port'
+      - name: "Docs"
+        condition: 'Test-Path "worktrees\Ivy-Framework\src\Ivy.Docs"'
+        action: 'dotnet run --project worktrees\Ivy-Framework\src\Ivy.Docs --browse --find-available-port'
+      - name: "Samples"
+        condition: 'Test-Path "worktrees\Ivy-Framework\src\Ivy.Samples"'
+        action: 'dotnet run --project worktrees\Ivy-Framework\src\Ivy.Samples --browse --find-available-port'
     verifications:
       - name: DotnetBuild
         required: true
