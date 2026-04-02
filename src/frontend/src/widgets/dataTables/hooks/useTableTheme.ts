@@ -89,10 +89,13 @@ export const useTableTheme = ({
 
   const finalTheme = useMemo(() => {
     if (variant === "Ghost") {
-      return { ...tableTheme, horizontalBorderColor: "transparent" };
+      return {
+        ...tableTheme,
+        horizontalBorderColor: isDark ? "rgba(255,255,255,0.05)" : "transparent",
+      };
     }
     return tableTheme;
-  }, [tableTheme, variant]);
+  }, [tableTheme, variant, isDark]);
 
   return {
     tableTheme: finalTheme,

@@ -12,8 +12,41 @@ public class DataTableApp : SampleBase
             new Tab("Header Slots", new DataTableHeaderSlotsSample()),
             new Tab("Footer", new DataTableFooterSample()),
             new Tab("Multi Agg", new DataTableMultiAggSample()),
-            new Tab("Million Rows", new DataTablesMillionRowsSample())
+            new Tab("Million Rows", new DataTablesMillionRowsSample()),
+            new Tab("Ghost Variant", new DataTableGhostSample())
         ).Variant(TabsVariant.Content);
+    }
+}
+
+public class DataTableGhostSample : ViewBase
+{
+    public override object? Build()
+    {
+        var products = new[]
+        {
+            new { Id = 1, Product = "Widget A", Price = 29.99m, Stock = 150 },
+            new { Id = 2, Product = "Widget B", Price = 49.99m, Stock = 85 },
+            new { Id = 3, Product = "Widget C", Price = 19.99m, Stock = 320 },
+            new { Id = 4, Product = "Gadget X", Price = 99.99m, Stock = 42 },
+            new { Id = 5, Product = "Gadget Y", Price = 149.99m, Stock = 18 },
+        }.AsQueryable();
+
+        var ghostTable = products.ToDataTable()
+            .Ghost()
+            .Height(Size.Full());
+
+        var defaultTable = products.ToDataTable()
+            .Height(Size.Full());
+
+        return Layout.Horizontal().Gap(4)
+            | (Layout.Vertical().Width(Size.Fraction(0.5f))
+                | Text.H3("Default variant in Card")
+                | Text.P("Notice the double border effect").Muted()
+                | new Card(defaultTable).Height(Size.Units(60)))
+            | (Layout.Vertical().Width(Size.Fraction(0.5f))
+                | Text.H3("Ghost variant in Card")
+                | Text.P("Seamlessly embedded - no double borders").Muted()
+                | new Card(ghostTable).Height(Size.Units(60)));
     }
 }
 
