@@ -55,7 +55,7 @@ public class HttpTunnelingController : Controller
 
         logger.LogDebug("HttpResponse: {RequestId} with status {StatusCode} for connection {ConnectionId}",
             response.RequestId.Replace("\n", "").Replace("\r", ""), response.StatusCode, connectionId.Replace("\n", "").Replace("\r", ""));
-        
+
         var fullRequestId = $"{connectionId}:{response.RequestId}";
 
         if (!_pendingRequests.TryRemove(fullRequestId, out var pendingRequest))
