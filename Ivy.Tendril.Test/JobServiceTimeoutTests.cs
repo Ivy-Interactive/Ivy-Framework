@@ -112,6 +112,41 @@ public class JobServiceTimeoutTests
     }
 
     [Fact]
+    public void ClearFailedJobs_RemovesFailedAndTimeoutJobs()
+    {
+        var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
+
+        var runningId = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var completedId = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var failedId = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var timeoutId = service.StartJob("ExecutePlan", Path.GetTempPath());
+
+        service.CompleteJob(completedId, exitCode: 0);
+        service.CompleteJob(failedId, exitCode: 1);
+        service.CompleteJob(timeoutId, exitCode: null, timedOut: true);
+
+        service.ClearFailedJobs();
+
+        Assert.NotNull(service.GetJob(runningId));
+        Assert.NotNull(service.GetJob(completedId));
+        Assert.Null(service.GetJob(failedId));
+        Assert.Null(service.GetJob(timeoutId));
+    }
+
+    [Fact]
+    public void ClearFailedJobs_DoesNothingWhenNoFailedJobs()
+    {
+        var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
+
+        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        service.CompleteJob(id, exitCode: 0);
+
+        service.ClearFailedJobs();
+
+        Assert.NotNull(service.GetJob(id));
+    }
+
+    [Fact]
     public void ConfigService_ParsesJobTimeoutSettings()
     {
         var yaml = @"

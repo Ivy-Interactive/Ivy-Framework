@@ -172,6 +172,11 @@ public class JobsApp : ViewBase
                 {
                     jobService.ClearCompletedJobs();
                     refreshToken.Refresh();
+                }),
+                new MenuItem("Clear Failed", Icon: Icons.Trash, Tag: "ClearFailed").OnSelect(() =>
+                {
+                    jobService.ClearFailedJobs();
+                    refreshToken.Refresh();
                 })
             ));
 
