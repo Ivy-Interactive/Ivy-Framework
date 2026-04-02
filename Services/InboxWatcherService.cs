@@ -56,9 +56,12 @@ public class InboxWatcherService : IDisposable
                 return;
 
             var content = await File.ReadAllTextAsync(filePath);
-            var (project, description) = ParseContent(content);
+            var (project, description, sourcePath) = ParseContent(content);
 
-            _jobService.StartJob("MakePlan", "-Description", description, "-Project", project);
+            var args = new List<string> { "-Description", description, "-Project", project };
+            if (!string.IsNullOrEmpty(sourcePath))
+                args.AddRange(["-SourcePath", sourcePath]);
+            _jobService.StartJob("MakePlan", args.ToArray());
 
             File.Delete(filePath);
         }
@@ -72,9 +75,12 @@ public class InboxWatcherService : IDisposable
                     return;
 
                 var content = await File.ReadAllTextAsync(filePath);
-                var (project, description) = ParseContent(content);
+                var (project, description, sourcePath) = ParseContent(content);
 
-                _jobService.StartJob("MakePlan", "-Description", description, "-Project", project);
+                var args = new List<string> { "-Description", description, "-Project", project };
+                if (!string.IsNullOrEmpty(sourcePath))
+                    args.AddRange(["-SourcePath", sourcePath]);
+                _jobService.StartJob("MakePlan", args.ToArray());
 
                 File.Delete(filePath);
             }
@@ -89,7 +95,7 @@ public class InboxWatcherService : IDisposable
         }
     }
 
-    internal static (string project, string description) ParseContent(string content)
+    internal static (string project, string description, string? sourcePath) ParseContent(string content)
     {
         if (content.StartsWith("---"))
         {
@@ -99,22 +105,24 @@ public class InboxWatcherService : IDisposable
                 var frontmatter = content.Substring(3, endIndex - 3).Trim();
                 var description = content.Substring(endIndex + 3).Trim();
 
+                string? project = null;
+                string? sourcePath = null;
+
                 foreach (var line in frontmatter.Split('\n'))
                 {
                     var trimmed = line.Trim();
                     if (trimmed.StartsWith("project:", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var project = trimmed.Substring("project:".Length).Trim();
-                        return (project, string.IsNullOrEmpty(description) ? content : description);
-                    }
+                        project = trimmed.Substring("project:".Length).Trim();
+                    else if (trimmed.StartsWith("sourcePath:", StringComparison.OrdinalIgnoreCase))
+                        sourcePath = trimmed.Substring("sourcePath:".Length).Trim();
                 }
 
-                // Frontmatter exists but no project field
-                return ("[Auto]", string.IsNullOrEmpty(description) ? content : description);
+                var desc = string.IsNullOrEmpty(description) ? content : description;
+                return (project ?? "[Auto]", desc, sourcePath);
             }
         }
 
-        return ("[Auto]", content);
+        return ("[Auto]", content, null);
     }
 
     public void Dispose()

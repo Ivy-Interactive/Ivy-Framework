@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory=$true)]
     [string]$Description,
-    [string]$Project = "[Auto]"
+    [string]$Project = "[Auto]",
+    [string]$SourcePath = ""
 )
 
 . "$PSScriptRoot\.shared\Utils.ps1"
@@ -15,13 +16,16 @@ Write-Host "Log file: $logFile"
 $sessionId = [guid]::NewGuid().ToString()
 $planId = AllocatePlanId
 
-$promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
+$firmwareValues = @{
     Args = $Description
     ClaudeSessionId = $sessionId
     PlanId = ("{0:D5}" -f $planId)
     PlansDirectory = $script:PlansDir
     Project = $Project
 }
+if ($SourcePath) { $firmwareValues["SourcePath"] = $SourcePath }
+
+$promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder $firmwareValues
 
 $agent = GetAgentCommandFromConfig
 

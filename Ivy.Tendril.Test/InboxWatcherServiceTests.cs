@@ -9,10 +9,11 @@ public class InboxWatcherServiceTests
     {
         var content = "Add a new color picker widget with HSL support";
 
-        var (project, description) = InboxWatcherService.ParseContent(content);
+        var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
 
         Assert.Equal("[Auto]", project);
         Assert.Equal(content, description);
+        Assert.Null(sourcePath);
     }
 
     [Fact]
@@ -20,10 +21,11 @@ public class InboxWatcherServiceTests
     {
         var content = "---\nproject: Framework\n---\nAdd a new color picker widget";
 
-        var (project, description) = InboxWatcherService.ParseContent(content);
+        var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
 
         Assert.Equal("Framework", project);
         Assert.Equal("Add a new color picker widget", description);
+        Assert.Null(sourcePath);
     }
 
     [Fact]
@@ -31,10 +33,11 @@ public class InboxWatcherServiceTests
     {
         var content = "---\nlevel: Critical\n---\nFix the login bug";
 
-        var (project, description) = InboxWatcherService.ParseContent(content);
+        var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
 
         Assert.Equal("[Auto]", project);
         Assert.Equal("Fix the login bug", description);
+        Assert.Null(sourcePath);
     }
 
     [Fact]
@@ -42,10 +45,11 @@ public class InboxWatcherServiceTests
     {
         var content = "---\nproject: Agent\n---\n";
 
-        var (project, description) = InboxWatcherService.ParseContent(content);
+        var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
 
         Assert.Equal("Agent", project);
         Assert.Equal(content, description);
+        Assert.Null(sourcePath);
     }
 
     [Fact]
@@ -53,10 +57,35 @@ public class InboxWatcherServiceTests
     {
         var content = "--- some header without closing";
 
-        var (project, description) = InboxWatcherService.ParseContent(content);
+        var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
 
         Assert.Equal("[Auto]", project);
         Assert.Equal(content, description);
+        Assert.Null(sourcePath);
+    }
+
+    [Fact]
+    public void ParseContent_WithSourcePath_ExtractsAll()
+    {
+        var content = "---\nproject: Agent\nsourcePath: D:\\Tests\\Session123\n---\nFix the widget rendering";
+
+        var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
+
+        Assert.Equal("Agent", project);
+        Assert.Equal("Fix the widget rendering", description);
+        Assert.Equal("D:\\Tests\\Session123", sourcePath);
+    }
+
+    [Fact]
+    public void ParseContent_WithoutSourcePath_ReturnsNull()
+    {
+        var content = "---\nproject: Framework\n---\nAdd a button";
+
+        var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
+
+        Assert.Equal("Framework", project);
+        Assert.Equal("Add a button", description);
+        Assert.Null(sourcePath);
     }
 
     [Fact]

@@ -11,6 +11,7 @@ The firmware header contains these key values:
 - **PlansDirectory** — where plan folders are created
 - **ConfigPath** — absolute path to config.yaml (projects, repos, context)
 - **Project** — selected project name, or `[Auto]` if not specified
+- **SourcePath** (optional) — absolute path to the source that generated this plan (e.g. test working directory)
 
 Read the plan folder structure in `../.shared/Plans.md`.
 Read the project configuration from the `ConfigPath` in the firmware header.
@@ -82,6 +83,8 @@ verifications:
   - name: DotnetTest
     status: Pending
 ```
+
+If `SourcePath` is present in the firmware header, copy it to `plan.yaml` as `sourcePath`.
 
 If the plan references other plans (from `[number]` syntax in args), add them to `relatedPlans`.
 
