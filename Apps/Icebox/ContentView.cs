@@ -211,9 +211,24 @@ public class ContentView(
                 }
             }
 
+            var finalContent = File.Exists(filePath2)
+                ? (object)new HeaderLayout(
+                    header: new Button("Open in VS Code").Icon(Icons.ExternalLink).Outline().OnClick(() =>
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "code",
+                            Arguments = $"\"{filePath2}\"",
+                            UseShellExecute = true
+                        });
+                    }),
+                    content: sheetContent
+                )
+                : sheetContent;
+
             elements.Add(new Sheet(
                 onClose: () => openFile.Set(null),
-                content: sheetContent,
+                content: finalContent,
                 title: Path.GetFileName(filePath2)
             ).Width(Size.Half()).Resizable());
         }
