@@ -204,27 +204,6 @@ public class ContentView(
         var artifacts = GetArtifacts(_selectedPlan.FolderPath);
         var artifactsLayout = Layout.Vertical().Gap(2);
 
-        if (artifacts.TryGetValue("sample", out var sampleFiles))
-        {
-            var sampleDir = Path.Combine(_selectedPlan.FolderPath, "artifacts", "sample");
-            var csproj = Directory.GetFiles(sampleDir, "*.csproj", SearchOption.AllDirectories).FirstOrDefault();
-            if (csproj != null)
-            {
-                var projectDir = Path.GetDirectoryName(csproj)!;
-                artifactsLayout |= new Button("Run Sample").Icon(Icons.Play).Outline().OnClick(() =>
-                {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = "cmd.exe",
-                        Arguments = $"/k dotnet run --browse --find-available-port",
-                        WorkingDirectory = projectDir,
-                        UseShellExecute = true,
-                        CreateNoWindow = false
-                    });
-                });
-            }
-        }
-
         if (artifacts.TryGetValue("screenshots", out var screenshotFiles))
         {
             var screenshotsLayout = Layout.Horizontal().Gap(2).Wrap();
