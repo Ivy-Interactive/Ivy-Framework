@@ -1,6 +1,7 @@
 using Google.Protobuf.WellKnownTypes;
 using Ivy.Protos.DataTable;
 using Ivy.Test.DataTables.TestHelpers;
+using Ivy.Widgets;
 using ProtoSortOrder = Ivy.Protos.DataTable.SortOrder;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -923,5 +924,71 @@ public class QueryProcessorTests
 
         Assert.Contains("invalidFunction", exception.Message);
         _output.WriteLine($"Expected error for invalid function: {exception.Message}");
+    }
+
+    [Fact]
+    public void DataTable_WithBadgeInObjectColumn_SerializesToArrowSuccessfully()
+    {
+        // Arrange
+        var items = new List<ItemWithWidgetStatus>
+        {
+            new() { Id = 1, Name = "Item 1", Status = new Badge("Active", BadgeVariant.Success) },
+            new() { Id = 2, Name = "Item 2", Status = new Badge("Pending", BadgeVariant.Warning) },
+            new() { Id = 3, Name = "Item 3", Status = "Plain string" }
+        };
+        var queryable = items.AsQueryable();
+        var processor = new QueryProcessor(logger: null);
+        var query = new DataTableQuery
+        {
+            SourceId = "test-widget-status",
+            Offset = 0,
+            Limit = 100
+        };
+
+        // Act
+        var result = processor.ProcessQuery(queryable, query);
+
+        // Assert — the Arrow stream is valid and parseable
+        Assert.NotNull(result);
+        Assert.NotNull(result.ArrowData);
+        Assert.True(result.ArrowData.Length > 0);
+        Assert.Equal(3, result.RowCount);
+
+        var batch = ArrowTestHelper.ParseArrowData(result.ArrowData);
+        Assert.Equal(3, batch.Length);
+
+        var statusValues = ArrowTestHelper.GetColumnValues(batch, "Status");
+        Assert.Equal("Badge", statusValues[0]);
+        Assert.Equal("Badge", statusValues[1]);
+        Assert.Equal("Plain string", statusValues[2]);
+
+        _output.WriteLine($"Arrow data size: {result.ArrowData.Length} bytes");
+        _output.WriteLine(ArrowTestHelper.PrettyPrint(batch));
+    }
+
+    [Fact]
+    public void CreateStringArray_WithWidgetValue_ReturnsTypeName()
+    {
+        // Arrange
+        var values = new List<object?>
+        {
+            "plain string",
+            new Badge("Active", BadgeVariant.Success),
+            null,
+            new Badge("Error", BadgeVariant.Destructive),
+            42
+        };
+
+        // Act
+        var array = QueryHelpers.CreateStringArray(values);
+
+        // Assert
+        Assert.Equal(5, array.Length);
+        var stringArray = Assert.IsType<Apache.Arrow.StringArray>(array);
+        Assert.Equal("plain string", stringArray.GetString(0));
+        Assert.Equal("Badge", stringArray.GetString(1));
+        Assert.True(stringArray.IsNull(2));
+        Assert.Equal("Badge", stringArray.GetString(3));
+        Assert.Equal("42", stringArray.GetString(4));
     }
 }

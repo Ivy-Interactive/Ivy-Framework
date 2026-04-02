@@ -69,6 +69,8 @@ public abstract record AbstractWidget : IWidget
 
     public JsonNode Serialize() => WidgetSerializer.Serialize(this);
 
+    public sealed override string ToString() => GetType().Name;
+
     public async Task<bool> InvokeEventAsync(string eventName, JsonArray args)
     {
         var type = GetType();

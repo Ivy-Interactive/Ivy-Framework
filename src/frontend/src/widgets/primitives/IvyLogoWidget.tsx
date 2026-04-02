@@ -15,8 +15,8 @@ export const IvyLogoWidget: React.FC<IvyLogoWidgetProps> = ({
   const styles = {
     ...getWidth(width),
     ...getHeight(height),
-    ...getColor(color || "primary", "color", "background"),
+    ...getColor(color || "brand", "color", "background"),
   };
 
-  return <IvyLogo style={styles} className="text-primary" />;
+  return <IvyLogo style={styles} className="text-brand" />;
 };

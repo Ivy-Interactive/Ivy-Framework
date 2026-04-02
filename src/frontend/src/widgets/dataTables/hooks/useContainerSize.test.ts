@@ -31,7 +31,7 @@ describe("useContainerSize - synchronous initial measurement", () => {
 
   it("should only apply synchronous measurement when dimensions are non-zero", () => {
     // The fix guards against applying zero-dimension measurements
-    expect(hookSource).toContain("initWidth > 0 || initHeight > 0");
+    expect(hookSource).toContain("width > 0 || height > 0");
     expect(hookSource).toContain("!hasAppliedInitialRef.current");
   });
 
@@ -39,6 +39,6 @@ describe("useContainerSize - synchronous initial measurement", () => {
     // After reading dimensions, the hook must call apply() to set state
     // Find the sync measurement block and verify it calls apply
     const syncBlock = hookSource.slice(hookSource.indexOf("getBoundingClientRect()"));
-    expect(syncBlock).toContain("apply(initWidth, initHeight)");
+    expect(syncBlock).toContain("apply(width, height)");
   });
 });
