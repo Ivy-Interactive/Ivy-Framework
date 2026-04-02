@@ -201,20 +201,29 @@ public class ContentView(
         }
 
         // PRs tab content
-        var prsTable = new Table(
-            new TableRow(
-                new TableCell("Repository").IsHeader(),
-                new TableCell("PR").IsHeader()
-            )
-            { IsHeader = true }
-        );
-        foreach (var pr in _selectedPlan.Prs)
+        object prsContent;
+        if (_selectedPlan.Prs.Count > 0)
         {
-            var prCapture = pr;
-            prsTable |= new TableRow(
-                new TableCell(PullRequestApp.ExtractRepo(pr)),
-                new TableCell(new Button(pr).Link().OnClick(() => client.OpenUrl(prCapture)))
+            var prsTable = new Table(
+                new TableRow(
+                    new TableCell("Repository").IsHeader(),
+                    new TableCell("PR").IsHeader()
+                )
+                { IsHeader = true }
             );
+            foreach (var pr in _selectedPlan.Prs)
+            {
+                var prCapture = pr;
+                prsTable |= new TableRow(
+                    new TableCell(PullRequestApp.ExtractRepo(pr)),
+                    new TableCell(new Button(pr).Link().OnClick(() => client.OpenUrl(prCapture)))
+                );
+            }
+            prsContent = prsTable;
+        }
+        else
+        {
+            prsContent = new Empty();
         }
 
         // Artifacts tab content
@@ -344,7 +353,7 @@ public class ContentView(
             new Tab("Summary", summaryTabContent),
             new Tab("Verifications", verificationsTable).Badge(_selectedPlan.Verifications.Count.ToString()),
             new Tab("Commits", commitsTable).Badge(_selectedPlan.Commits.Count.ToString()),
-            new Tab("PRs", prsTable).Badge(_selectedPlan.Prs.Count.ToString()),
+            new Tab("PRs", prsContent).Badge(_selectedPlan.Prs.Count.ToString()),
             new Tab("Artifacts", artifactsLayout).Badge(totalArtifacts.ToString()),
             new Tab("Recommendations", recommendationsLayout).Badge(recommendations.Count.ToString()),
             new Tab("Plan", planTabContent)
