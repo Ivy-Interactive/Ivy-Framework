@@ -12,7 +12,7 @@ searchHints:
 
 Ivy provides predefined colors with light/dark [theme](../../../01_Onboarding/02_Concepts/12_Theming.md) support.
 
-The system includes neutral (Black, White, grayscale), chromatic (Red to Rose spectrum), and semantic (Primary, Secondary, Destructive, Success, Warning, Info) colors.
+The system includes neutral (Black, White, grayscale), chromatic (Red to Rose spectrum), and semantic (Primary, Secondary, Destructive, Success, Warning, Info, Brand) colors.
 
 All colors meet WCAG accessibility standards and automatically adapt to light/dark themes. Use them with [widgets](../../../01_Onboarding/02_Concepts/03_Widgets.md) such as [Box](../../../02_Widgets/01_Primitives/04_Box.md) (`.Background()`, `.Background()`) and [Button](../../../02_Widgets/03_Common/01_Button.md) variants.
 
@@ -96,7 +96,7 @@ public class SemanticColorsView : ViewBase
 {
     public override object? Build()
     {
-        var semanticColors = new Colors[] { Colors.Primary, Colors.Secondary, Colors.Destructive, Colors.Success, Colors.Warning, Colors.Info };
+        var semanticColors = new Colors[] { Colors.Primary, Colors.Secondary, Colors.Destructive, Colors.Success, Colors.Warning, Colors.Info, Colors.Brand };
         
         return Layout.Vertical(
             semanticColors.Select(color =>
@@ -198,6 +198,7 @@ public class ButtonColorsView : ViewBase
 3. **Consider color meaning** - use red/destructive for errors, green for success
 4. **Maintain consistency** - stick to a chosen color scheme throughout your project
 5. **Accessibility first** - ensure proper contrast ratios for text and backgrounds
+6. **Use Brand color** for Ivy branding elements only (logo, "Made with Ivy" corner) — it preserves the original Ivy green while Primary follows the shadcn palette
 
 ## Technical Implementation
 
