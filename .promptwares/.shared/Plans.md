@@ -57,6 +57,7 @@ verifications:
   - name: DotnetTest
     status: Pending
 relatedPlans: []
+dependsOn: []
 ```
 
 ### Fields
@@ -77,6 +78,7 @@ relatedPlans: []
 | `verifications`| List of `{name, status}` — status is `Pending`, `Pass`, or `Fail` |
 | `sourcePath`   | (Optional) Absolute path to the source that generated this plan (e.g. test working directory) |
 | `relatedPlans` | Paths to related plan folders (parent plans, split-from, follow-ups) |
+| `dependsOn`    | Plan folder names this plan depends on (e.g. `- 01478-WorktreeIsolation`). ExecutePlan will block until all dependencies are `Completed` and their PRs are merged. |
 
 ## State Lifecycle
 

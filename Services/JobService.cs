@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
 using Ivy;
 using Ivy.Tendril.Apps.Jobs;
+using Ivy.Tendril.Apps.Plans;
 
 namespace Ivy.Tendril.Services;
 
@@ -97,6 +99,28 @@ public class JobService
         };
 
         _jobs[id] = job;
+
+        // Check dependencies for ExecutePlan jobs
+        if (type == "ExecutePlan")
+        {
+            var planFolder = args.Length > 0 ? args[0] : "";
+            var (ok, blockReason) = CheckDependencies(planFolder);
+            if (!ok)
+            {
+                job.Status = "Blocked";
+                job.StatusMessage = blockReason;
+                job.CompletedAt = DateTime.UtcNow;
+                if (job.StartedAt.HasValue)
+                    job.DurationSeconds = (int)(job.CompletedAt.Value - job.StartedAt.Value).TotalSeconds;
+
+                // Reset plan state back to Draft since we can't execute
+                ResetPlanStateToBlocked(job);
+
+                PendingNotifications.Enqueue(new JobNotification("Job Blocked", $"{planFile}: {blockReason}", false));
+                JobsChanged?.Invoke();
+                return id;
+            }
+        }
 
         // Launch process
         var processArgs = new List<string> { "-NoProfile", "-File", scriptPath };
@@ -309,7 +333,7 @@ public class JobService
     public void ClearFailedJobs()
     {
         var failedIds = _jobs.Values
-            .Where(j => j.Status is "Failed" or "Timeout")
+            .Where(j => j.Status is "Failed" or "Timeout" or "Blocked")
             .Select(j => j.Id)
             .ToList();
         foreach (var id in failedIds)
@@ -476,6 +500,104 @@ public class JobService
             File.WriteAllText(planYamlPath, content);
         }
         catch { /* Don't let state reset failures crash job completion */ }
+    }
+
+    private (bool Ok, string? BlockReason) CheckDependencies(string planFolder)
+    {
+        try
+        {
+            var planYamlPath = Path.Combine(planFolder, "plan.yaml");
+            if (!File.Exists(planYamlPath)) return (true, null);
+
+            var yaml = File.ReadAllText(planYamlPath);
+            var planYaml = new YamlDotNet.Serialization.DeserializerBuilder()
+                .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.CamelCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
+                .Build()
+                .Deserialize<PlanYaml>(yaml);
+
+            if (planYaml?.DependsOn == null || planYaml.DependsOn.Count == 0)
+                return (true, null);
+
+            var plansDir = _planReaderService?.PlansDirectory;
+            if (plansDir == null) return (true, null);
+
+            foreach (var dep in planYaml.DependsOn)
+            {
+                var depFolder = Path.Combine(plansDir, dep);
+                var depYamlPath = Path.Combine(depFolder, "plan.yaml");
+
+                if (!File.Exists(depYamlPath))
+                    return (false, $"Dependency '{dep}' not found");
+
+                var depYaml = File.ReadAllText(depYamlPath);
+                var stateMatch = Regex.Match(depYaml, @"(?m)^state:\s*(.+)$");
+                if (!stateMatch.Success)
+                    return (false, $"Dependency '{dep}' has no state");
+
+                var state = stateMatch.Groups[1].Value.Trim();
+                if (!state.Equals("Completed", StringComparison.OrdinalIgnoreCase))
+                    return (false, $"Dependency '{dep}' is '{state}', not Completed");
+
+                // Check that all PRs are actually merged
+                var prMatches = Regex.Matches(depYaml, @"(?m)^- (https://github\.com/.+/pull/\d+)$");
+                if (prMatches.Count == 0)
+                {
+                    // No PRs — completed without PR (e.g. CreateIssue), that's ok
+                    continue;
+                }
+
+                foreach (System.Text.RegularExpressions.Match prMatch in prMatches)
+                {
+                    var prUrl = prMatch.Groups[1].Value.Trim();
+                    try
+                    {
+                        var psi = new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "gh",
+                            Arguments = $"pr view \"{prUrl}\" --json state -q .state",
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                        };
+                        var proc = System.Diagnostics.Process.Start(psi);
+                        var output = proc?.StandardOutput.ReadToEnd().Trim() ?? "";
+                        proc?.WaitForExit(10000);
+
+                        if (!output.Equals("MERGED", StringComparison.OrdinalIgnoreCase))
+                            return (false, $"Dependency '{dep}' PR {prUrl} is '{output}', not MERGED");
+                    }
+                    catch (Exception ex)
+                    {
+                        return (false, $"Failed to check PR status for '{dep}': {ex.Message}");
+                    }
+                }
+            }
+
+            return (true, null);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Dependency check failed: {ex.Message}");
+        }
+    }
+
+    private void ResetPlanStateToBlocked(JobItem job)
+    {
+        try
+        {
+            var planFolder = job.Args.Length > 0 ? job.Args[0] : "";
+            var planYamlPath = Path.Combine(planFolder, "plan.yaml");
+            if (!File.Exists(planYamlPath)) return;
+
+            var content = File.ReadAllText(planYamlPath);
+            content = Regex.Replace(content, @"(?m)^state:\s*.*$", "state: Draft");
+            content = Regex.Replace(content, @"(?m)^updated:\s*.*$",
+                $"updated: {DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}");
+            File.WriteAllText(planYamlPath, content);
+        }
+        catch { }
     }
 
     private void SendNativeNotification()

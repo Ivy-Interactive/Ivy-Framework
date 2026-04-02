@@ -13,7 +13,7 @@ public enum PlanStatus
     Icebox
 }
 
-public record PlanMetadata(int Id, string Project, string Level, string Title, PlanStatus State, List<string> Repos, List<string> Commits, List<string> Prs, List<PlanVerificationEntry> Verifications, List<string> RelatedPlans, DateTime Created, DateTime Updated);
+public record PlanMetadata(int Id, string Project, string Level, string Title, PlanStatus State, List<string> Repos, List<string> Commits, List<string> Prs, List<PlanVerificationEntry> Verifications, List<string> RelatedPlans, List<string> DependsOn, DateTime Created, DateTime Updated);
 
 public record PlanFile(
     PlanMetadata Metadata,
@@ -33,6 +33,7 @@ public record PlanFile(
     public List<string> Prs => Metadata.Prs;
     public List<PlanVerificationEntry> Verifications => Metadata.Verifications;
     public List<string> RelatedPlans => Metadata.RelatedPlans;
+    public List<string> DependsOn => Metadata.DependsOn;
     public DateTime Created => Metadata.Created;
     public DateTime Updated => Metadata.Updated;
     public string FolderName => Path.GetFileName(FolderPath);

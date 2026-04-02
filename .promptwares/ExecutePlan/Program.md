@@ -24,6 +24,21 @@ The launcher script sets the working directory to the project's primary repo.
 - Read the latest revision from `revisions/` (highest numbered .md file)
 - Extract the plan ID from the folder name (e.g. `01105` from `01105-TestPlan`)
 
+### 1.5. Verify Dependencies
+
+If `plan.yaml` has a `dependsOn` list, for each entry:
+
+1. Locate the dependency plan folder in the plans directory
+2. Verify the dependency plan's state is `Completed`
+3. Verify all PRs listed in the dependency's `plan.yaml` are actually merged on GitHub:
+   ```bash
+   gh pr view <pr-url> --json state -q .state
+   # Must return "MERGED"
+   ```
+4. If any dependency is unmet (not completed or PRs not merged), **fail immediately** with a clear message explaining which dependency isn't ready and why.
+
+**Note:** The JobService also performs this check before launching ExecutePlan, but this step acts as a safety net in case the dependency state changed between job launch and execution.
+
 ### 2. Create Worktrees
 
 For each repo listed in `plan.yaml` `repos` (or the project's repos from `config.yaml` if empty):
