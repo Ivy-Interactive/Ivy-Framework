@@ -87,6 +87,11 @@ public class ContentView(
         );
         var selectedTab = UseState(0);
 
+        UseEffect(() =>
+        {
+            selectedTab.Set(0);
+        }, _selectedPlanState);
+
         if (_selectedPlan is null)
         {
             return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
