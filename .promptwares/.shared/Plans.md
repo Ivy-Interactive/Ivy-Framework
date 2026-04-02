@@ -57,6 +57,7 @@ verifications:
   - name: DotnetTest
     status: Pending
 relatedPlans: []
+dependsOn: []
 ```
 
 ### Fields
@@ -76,6 +77,7 @@ relatedPlans: []
 | `commits`      | Associated commit hashes                         |
 | `verifications`| List of `{name, status}` — status is `Pending`, `Pass`, or `Fail` |
 | `relatedPlans` | Paths to related plan folders (parent plans, split-from, follow-ups) |
+| `dependsOn`    | Plan folder names this plan depends on (e.g. `- 01478-WorktreeIsolation`). ExecutePlan will block until all dependencies are `Completed` and their PRs are merged. |
 
 ## State Lifecycle
 

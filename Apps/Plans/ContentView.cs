@@ -97,8 +97,20 @@ public class ContentView(
             | new Badge(_selectedPlan.Status.ToString()).Variant(_selectedPlan.Status == PlanStatus.Failed ? BadgeVariant.Destructive : BadgeVariant.Outline)
             | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline).WithProjectColor(_config, _selectedPlan.Project)
             | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
-            | new Badge($"rev:{_selectedPlan.RevisionCount}").Variant(BadgeVariant.Outline)
-            | isEditing.ToSwitchInput(Icons.Code)
+            | new Badge($"rev:{_selectedPlan.RevisionCount}").Variant(BadgeVariant.Outline);
+
+        if (_selectedPlan.DependsOn.Count > 0)
+        {
+            var depIds = string.Join(", ", _selectedPlan.DependsOn.Select(d =>
+            {
+                var name = Path.GetFileName(d);
+                var dashIdx = name.IndexOf('-');
+                return dashIdx > 0 ? name[..dashIdx] : name;
+            }));
+            header |= new Badge($"Depends on: {depIds}").Variant(BadgeVariant.Secondary);
+        }
+
+        header |= isEditing.ToSwitchInput(Icons.Code)
             | new Spacer().Width(Size.Grow())
             | Text.Rich()
                 .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
