@@ -237,21 +237,7 @@ public class ContentView(
             artifactsLayout |= screenshotsLayout;
         }
 
-        if (artifacts.TryGetValue("videos", out var videoFiles))
-        {
-            var videosLayout = Layout.Horizontal().Gap(2).Wrap();
-            foreach (var file in videoFiles)
-            {
-                var fileName = Path.GetFileName(file);
-                var fileCapture = file;
-                videosLayout |= new Button(fileName).Ghost().Icon(Icons.Play).OnClick(() =>
-                    openArtifact.Set(fileCapture));
-            }
-            artifactsLayout |= videosLayout;
-        }
-
-        var totalArtifacts = (artifacts.GetValueOrDefault("screenshots")?.Count ?? 0)
-            + (artifacts.GetValueOrDefault("videos")?.Count ?? 0);
+        var totalArtifacts = (artifacts.GetValueOrDefault("screenshots")?.Count ?? 0);
 
         // Plan tab content
         var planTabContent = new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
@@ -414,21 +400,9 @@ public class ContentView(
 
         if (openArtifact.Value is { } artifactPath)
         {
-            var ext = Path.GetExtension(artifactPath).ToLowerInvariant();
-            var isVideo = new[] { ".webm", ".mp4", ".avi", ".mov" }.Contains(ext);
-
-            object artifactSheetContent;
-            if (isVideo)
-            {
-                var videoUrl = $"/ivy/local-file?path={Uri.EscapeDataString(artifactPath)}";
-                artifactSheetContent = new VideoPlayer(source: videoUrl, controls: true, autoplay: true);
-            }
-            else
-            {
-                var fileContent = File.Exists(artifactPath) ? File.ReadAllText(artifactPath) : "File not found.";
-                var language = FileApp.GetLanguage(Path.GetExtension(artifactPath));
-                artifactSheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
-            }
+            var fileContent = File.Exists(artifactPath) ? File.ReadAllText(artifactPath) : "File not found.";
+            var language = FileApp.GetLanguage(Path.GetExtension(artifactPath));
+            var artifactSheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
 
             content |= new Sheet(
                 onClose: () => openArtifact.Set(null),
