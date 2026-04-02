@@ -45,18 +45,29 @@ For each question in the `>>` lines:
 1. Read relevant source files to find the answer
 2. Read `config.yaml` (from `ConfigPath` in header) for project context if needed
 
+### 3.5. Resolve Answered Questions
+
+Compare each existing question in `## Questions` against:
+- The `>>` comments (user may have directly answered a question)
+- Your research findings from step 3
+
+For each question, determine if it has been answered — either explicitly by a `>>` comment or implicitly by a decision made in the updated plan. If answered:
+- Wrap the question in a `<details>` block (collapsed) with the answer as the body
+- The answer should reference the user's comment or the design decision that resolves it
+
+If all questions are resolved and no new questions arose, omit the `## Questions` section entirely.
+
 ### 4. Apply Changes
 
 - Create a new revision file (next sequential number, e.g. `002.md`)
 - Incorporate the intent of each `>>` instruction into the updated plan
-- Answer questions in a `## Questions` section (placed after the title, before `## Problem`) using `<details>` tags. If the updated revision has no questions (all have been answered and no new ones arose), omit the `## Questions` section entirely rather than leaving it empty. Format:
+- Maintain the `## Questions` section (placed after the title, before `## Problem`) using `<details>` tags: (1) Existing questions answered by `>>` comments or research should be collapsed into `<details>` blocks with the answer. (2) New `>>` questions become new `<details>` blocks with answers. (3) Unanswered questions from prior revisions remain as open items (not in `<details>`). (4) If all questions are resolved and no new ones arose, omit the section entirely. Format:
   ```html
   <details>
   <summary>Question</summary>
   Answer
   </details>
   ```
-  Each `>>` question becomes a new `<details>` block. Preserve any existing `<details>` blocks from prior revisions.
 - Remove all `>>` lines — they've been processed
 - Preserve the plan template structure
 - The updated plan must be at least as comprehensive as the original
