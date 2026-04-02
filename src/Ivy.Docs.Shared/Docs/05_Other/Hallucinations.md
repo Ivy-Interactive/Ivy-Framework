@@ -73,6 +73,7 @@ fd5baba6-72aa-4d28-ac10-72e1be86e494
 9e1cba6f-bd19-472e-83a3-8db63b4860f6
 e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
 ee364ec5-064f-4d9c-a63c-b04a4a4bbbdc
+ba29e58f-4fb0-48ac-851d-0d88b390a03a
 
 ## AppAttribute.path — renamed to group
 
@@ -199,6 +200,36 @@ items.ToTable()
 16d32bb9-34f3-4b14-adf9-83f802350032
 2bcae879-5f09-4655-a74f-9371bc1d26e4
 1bbd69d3-7fb5-4dd1-acb1-671563c83a72
+
+## Event<T,E>.Data / Event<T,E>.Args — non-existent properties
+
+**Hallucinated API:**
+
+```csharp
+args.Data.Id
+args.Data.Tag
+// Also seen as:
+args.Args.Id
+args.Args.Tag
+```
+
+**Error:** `'Event<DataTable, RowActionClickEventArgs>' does not contain a definition for 'Data'` / `'Args'`
+
+**Correct API:**
+
+```csharp
+args.Value.Id
+args.Value.Tag
+```
+
+`Event<TSender, TValue>` uses `.Value` to access the event args, not `.Data` or `.Args`. The agent likely confused this with other event patterns from different frameworks (e.g., WPF `DataContext`, JavaScript `event.data`, or `EventArgs` naming conventions).
+
+**Found In:**
+f20dced8-1689-4289-a2d8-ee67136eb6ce
+e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
+ee364ec5-064f-4d9c-a63c-b04a4a4bbbdc
+563ac3be-4fe9-4612-9331-4eff47725fa6
+ba29e58f-4fb0-48ac-851d-0d88b390a03a
 
 ## Callout constructor — wrong constructor + invented enum / wrong argument order
 
@@ -380,35 +411,6 @@ ac1aa99e-739d-4382-86df-7a92b0a25cc7
 bcae7857-4504-4b58-94a7-d733142440f7
 82e6addb-71f8-4e6f-85b6-0ffba1b8c4eb
 
-## Event<T,E>.Data / Event<T,E>.Args — non-existent properties
-
-**Hallucinated API:**
-
-```csharp
-args.Data.Id
-args.Data.Tag
-// Also seen as:
-args.Args.Id
-args.Args.Tag
-```
-
-**Error:** `'Event<DataTable, RowActionClickEventArgs>' does not contain a definition for 'Data'` / `'Args'`
-
-**Correct API:**
-
-```csharp
-args.Value.Id
-args.Value.Tag
-```
-
-`Event<TSender, TValue>` uses `.Value` to access the event args, not `.Data` or `.Args`. The agent likely confused this with other event patterns from different frameworks (e.g., WPF `DataContext`, JavaScript `event.data`, or `EventArgs` naming conventions).
-
-**Found In:**
-f20dced8-1689-4289-a2d8-ee67136eb6ce
-e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
-ee364ec5-064f-4d9c-a63c-b04a4a4bbbdc
-563ac3be-4fe9-4612-9331-4eff47725fa6
-
 ## IBladeService — non-existent interface (correct: IBladeContext)
 
 **Hallucinated API:**
@@ -436,6 +438,44 @@ The blade navigation context interface is `IBladeContext`, not `IBladeService`. 
 6341e55e-56eb-41d0-81d3-c2cdfff33093 (8 blade files affected)
 b4b09997-2c10-4b65-861c-16592e447c46 (10 blade files affected)
 1bc9499a-436c-4526-906a-0adbb0f180e8 (6 blade files affected)
+
+## Server.OnReady / Server.OnStartup / Server.OnAfterStart — non-existent lifecycle callbacks
+
+**Hallucinated API:**
+
+```csharp
+server.OnReady(() => { /* seed data */ });
+server.OnStartup(() => { /* initialize */ });
+server.OnAfterStart(() => { /* seed data */ });
+```
+
+**Error:** `CS1061: 'Server' does not contain a definition for 'OnReady'` / `CS1061: 'Server' does not contain a definition for 'OnAfterStart'`
+
+**Correct API:**
+
+```csharp
+// Seed data via the context factory pattern:
+var connection = server.UseConnection<MyDbContext>(options =>
+    options.ContextFactory = () =>
+    {
+        var ctx = new MyDbContext();
+        ctx.Database.EnsureCreated();
+        SeedData(ctx);
+        return ctx;
+    });
+
+// Or resolve services directly in Program.cs:
+var myService = server.Services.GetRequiredService<IMyService>();
+myService.Initialize();
+```
+
+The `Server` class does not have `OnReady`, `OnStartup`, or similar lifecycle callback methods. To run initialization code (e.g., database seeding), use the connection's context factory pattern — seed data in the factory's `CreateContext` method or use `server.Services` to resolve and call services directly in `Program.cs`.
+
+**Found In:**
+c1b87041-f92b-4ba5-96d7-6a92419e84ea
+6341e55e-56eb-41d0-81d3-c2cdfff33093
+2bcae879-5f09-4655-a74f-9371bc1d26e4
+ce2e89b0-1a7e-4823-9426-c8288ac4a6fa
 
 ## DateTimeVariant — wrong enum name
 
@@ -615,43 +655,6 @@ The fluent method is `.Icon(Icons.X)`, not `.WithIcon(Icons.X)`. The agent likel
 8b93fae2-c7ce-4890-b0c0-43310c65dd00
 310e1e6a-facb-4caf-87b9-4f1422b51abc
 7c0abfe8-e16f-40d1-9323-95505a4697e7
-
-## Server.OnReady / Server.OnStartup / Server.OnAfterStart — non-existent lifecycle callbacks
-
-**Hallucinated API:**
-
-```csharp
-server.OnReady(() => { /* seed data */ });
-server.OnStartup(() => { /* initialize */ });
-server.OnAfterStart(() => { /* seed data */ });
-```
-
-**Error:** `CS1061: 'Server' does not contain a definition for 'OnReady'` / `CS1061: 'Server' does not contain a definition for 'OnAfterStart'`
-
-**Correct API:**
-
-```csharp
-// Seed data via the context factory pattern:
-var connection = server.UseConnection<MyDbContext>(options =>
-    options.ContextFactory = () =>
-    {
-        var ctx = new MyDbContext();
-        ctx.Database.EnsureCreated();
-        SeedData(ctx);
-        return ctx;
-    });
-
-// Or resolve services directly in Program.cs:
-var myService = server.Services.GetRequiredService<IMyService>();
-myService.Initialize();
-```
-
-The `Server` class does not have `OnReady`, `OnStartup`, or similar lifecycle callback methods. To run initialization code (e.g., database seeding), use the connection's context factory pattern — seed data in the factory's `CreateContext` method or use `server.Services` to resolve and call services directly in `Program.cs`.
-
-**Found In:**
-c1b87041-f92b-4ba5-96d7-6a92419e84ea
-6341e55e-56eb-41d0-81d3-c2cdfff33093
-2bcae879-5f09-4655-a74f-9371bc1d26e4
 
 ## SelectOption\<T\> — non-existent type
 
@@ -1258,6 +1261,58 @@ new TabsLayout(
 **Found In:**
 8b576f86-85cc-43b8-97e2-358bae83464a
 2bcae879-5f09-4655-a74f-9371bc1d26e4
+
+## AppContext.BaseDirectory — Ivy's AppContext shadows System.AppContext
+
+**Hallucinated API:**
+
+```csharp
+var dbPath = Path.Combine(AppContext.BaseDirectory, "MyDb.db");
+```
+
+**Error:** `CS0117: 'AppContext' does not contain a definition for 'BaseDirectory'`
+
+**Correct API:**
+
+```csharp
+// Use fully-qualified System.AppContext:
+var dbPath = Path.Combine(System.AppContext.BaseDirectory, "MyDb.db");
+
+// Or use Environment.CurrentDirectory:
+var dbPath = Path.Combine(Environment.CurrentDirectory, "MyDb.db");
+```
+
+Ivy has its own `AppContext` class (`Ivy.Apps.AppContext`) which is imported via global usings and shadows `System.AppContext`. The agent uses the standard .NET `AppContext.BaseDirectory` pattern for resolving file paths, but in an Ivy project this resolves to `Ivy.Apps.AppContext` which has no `BaseDirectory` property.
+
+**Found In:**
+ce2e89b0-1a7e-4823-9426-c8288ac4a6fa
+
+## TableBuilder.OnCellClick() — extension method only exists on DataTable
+
+**Hallucinated API:**
+
+```csharp
+accounts.ToTable()
+    .OnCellClick(async e => { selectedId.Set(e.Value.RowIndex); })
+```
+
+**Error:** `CS1929: 'TableBuilder<T>' does not contain a definition for 'OnCellClick' and the best extension method overload 'DataTableWidgetExtensions.OnCellClick(DataTable, Func<Event<DataTable, CellClickEventArgs>, ValueTask>)' requires a receiver of type 'Ivy.DataTable'`
+
+**Correct API:**
+
+```csharp
+// OnCellClick is only available on DataTable (from IQueryable), not TableBuilder (from .ToTable()):
+query.ToDataTable().OnCellClick(async e => { ... })
+
+// For in-memory TableBuilder, use RowActions instead:
+items.ToTable()
+    .RowAction("View", Icons.Eye, async e => { ... })
+```
+
+`OnCellClick` and `OnRowAction` are extension methods on `DataTable`, not on `TableBuilder<T>`. The agent often builds an in-memory table with `.ToTable()` and then tries to add click handlers that only work on `DataTable` (which wraps an `IQueryable<T>`). For in-memory collections, use `.RowAction()` on `TableBuilder` or switch to `.ToDataTable()` on the `IQueryable` directly.
+
+**Found In:**
+ba29e58f-4fb0-48ac-851d-0d88b390a03a
 
 ## FileInput.MaxFiles(n) on single-file state — runtime error
 

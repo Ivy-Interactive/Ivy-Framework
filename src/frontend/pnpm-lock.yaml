@@ -68,7 +68,10 @@ importers:
         version: 3.2.2(react@19.2.3)
       '@glideapps/glide-data-grid':
         specifier: 6.0.4-alpha24
-        version: 6.0.4-alpha24(lodash@4.18.1)(marked@16.4.2)(react-dom@19.2.3(react@19.2.3))(react-responsive-carousel@3.2.23)(react@19.2.3)
+        version: 6.0.4-alpha24(lodash@4.17.23)(marked@16.4.2)(react-dom@19.2.3(react@19.2.3))(react-responsive-carousel@3.2.23)(react@19.2.3)
+      '@hpcc-js/wasm-graphviz':
+        specifier: ^1.21.2
+        version: 1.21.2
       '@ivy-interactive/ivy-design-system':
         specifier: 1.1.18
         version: 1.1.18
@@ -482,6 +485,9 @@ packages:
       react: ^16.12.0 || 17.x || 18.x || 19.x
       react-dom: ^16.12.0 || 17.x || 18.x || 19.x
       react-responsive-carousel: ^3.2.7
+
+  '@hpcc-js/wasm-graphviz@1.21.2':
+    resolution: {integrity: sha512-UKvY3MSI1CfkOsVL6Wgg9m8S0x/28u27NgFX5UG+myTYfxU0Sl6jYKXQkcEQLZfulHKQjgHjz5/Rpw5R0CC3/g==}
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
@@ -3822,6 +3828,8 @@ snapshots:
       react-responsive-carousel: 3.2.23
     transitivePeerDependencies:
       - supports-color
+
+  '@hpcc-js/wasm-graphviz@1.21.2': {}
 
   '@iconify/types@2.0.0': {}
 

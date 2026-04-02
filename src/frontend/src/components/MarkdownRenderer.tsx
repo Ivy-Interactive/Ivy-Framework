@@ -130,6 +130,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       hasMath: hasContentFeature(content, /(\$|\\\(|\\\[|\\begin\{)/),
       hasCodeBlocks: hasContentFeature(content, /```/),
       hasMermaid: hasContentFeature(content, /```mermaid/),
+      hasGraphviz: hasContentFeature(content, /```(graphviz|dot)/),
     }),
     [content],
   );
@@ -382,13 +383,19 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             inline={inline}
             hasCodeBlocks={contentFeatures.hasCodeBlocks}
             hasMermaid={contentFeatures.hasMermaid}
+            hasGraphviz={contentFeatures.hasGraphviz}
           >
             {children}
           </CodeBlock>
         );
       }),
     }),
-    [contentFeatures.hasCodeBlocks, contentFeatures.hasMermaid, typography.code],
+    [
+      contentFeatures.hasCodeBlocks,
+      contentFeatures.hasMermaid,
+      contentFeatures.hasGraphviz,
+      typography.code,
+    ],
   );
 
   // Memoize link component separately (depends on handleLinkClick)

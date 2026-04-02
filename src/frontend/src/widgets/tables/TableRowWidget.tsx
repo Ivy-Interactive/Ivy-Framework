@@ -11,5 +11,7 @@ interface TableRowWidgetProps {
 }
 
 export const TableRowWidget: React.FC<TableRowWidgetProps> = ({ children, isHeader = false }) => (
-  <TableRow className={`${isHeader ? "font-medium bg-background" : ""}`}>{children}</TableRow>
+  <TableRow className={`border border-border ${isHeader ? "font-medium bg-background" : ""}`}>
+    {children}
+  </TableRow>
 );
