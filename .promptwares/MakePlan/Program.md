@@ -43,7 +43,45 @@ The plan ID is pre-allocated by the launcher script and provided in the firmware
 
 ### 3. Research
 
-- **Check for duplicate plans** first — **unless the description starts with `[FORCE]`**, in which case skip duplicate detection entirely and strip the `[FORCE] ` prefix before using the description. List existing plan folders in `PlansDirectory` and scan their `plan.yaml` titles. If an existing plan already covers the same issue (same problem, same project), **STOP** — do not create a duplicate. Instead, write a file to `<tendrilData>/Trash/<PlanId>-<SafeTitle>.md` (where `<SafeTitle>` is the title with spaces replaced by hyphens and special characters removed) with the following format, then exit without creating a plan folder:
+- **Check for duplicate plans** first — **unless the description starts with `[FORCE]`**, in which case skip duplicate detection entirely and strip the `[FORCE] ` prefix before using the description. List existing plan folders in `PlansDirectory` and scan their `plan.yaml` titles. If an existing plan already covers the same issue (same problem, same project), perform **state-aware duplicate detection** before deciding:
+
+  #### Step 1: Read existing plan state
+  
+  Read the matching plan's `plan.yaml` and check its `state`, `commits`, and `prs` fields.
+
+  #### Step 2: Decide based on state
+
+  | Existing plan state | Action |
+  |---|---|
+  | `Completed` (with merged PR) | Check for regression (Step 4), otherwise trash |
+  | `Completed` (no PR, but commits exist) | Check for regression (Step 4), trash with note "no PR found" |
+  | `Draft` / `Building` / `Executing` | Trash, but note "plan in progress (state: X)" |
+  | `ReadyForReview` | Trash, note "awaiting review" |
+  | `Failed` | **Do NOT trash** — create the plan (the previous attempt failed) |
+  | `Icebox` / `Skipped` | Trash with note "existing plan state: X" (issue is already covered) |
+
+  #### Step 3: Stricter checks for critical issues
+
+  When the incoming request describes a critical/blocking issue (errors, failures, crashes), apply **additional checks** before trashing:
+
+  - **Verify the fix commit exists on main**: Read the existing plan's `commits` list and run `git log --oneline <hash>` to confirm the commit is on the main branch. If the commit is not on main, do NOT trash — create the plan.
+  - **Check commit date vs observation time**: If the inbox item describes an issue observed at a specific time, compare against the fix commit date (`git log -1 --format=%ci <hash>`). If the observation is **after** the fix was committed, the fix may not have worked — create the plan instead of trashing.
+  - **Verify in code**: For code fixes, grep the actual source to confirm the fix is still present.
+
+  #### Step 4: Regression detection (for Completed plans)
+
+  When the existing plan is `Completed`, check whether the incoming issue could be a **regression**:
+
+  1. **Time gap check**: Get the fix commit date via `git log -1 --format=%ci <hash>`. If the fix was committed **more than 7 days ago** and a new report of the same issue arrives, treat it as a potential regression.
+  2. **Source verification**: For code fixes, grep the source to confirm the fix is still present (hasn't been reverted or overwritten).
+  3. **Decision**:
+     - Fix still in code AND commit recent (< 7 days) → **trash** as duplicate (likely a stale observation)
+     - Fix still in code BUT commit old (>= 7 days) → **create new plan** with `[Regression]` title prefix and `relatedPlans` link to the original
+     - Fix appears missing/reverted → **create new plan** with `[Regression]` title prefix and `relatedPlans` link to the original
+
+  #### Step 5: Write trash file (when trashing)
+
+  Write a file to `<tendrilData>/Trash/<PlanId>-<SafeTitle>.md` (where `<SafeTitle>` is the title with spaces replaced by hyphens and special characters removed) with the following format, then exit without creating a plan folder:
 
   ```markdown
   ---
@@ -51,6 +89,8 @@ The plan ID is pre-allocated by the launcher script and provided in the firmware
   originalRequest: "<the args/request text>"
   duplicateOf: "<existing plan folder name>"
   project: "<project name>"
+  existingPlanState: "<state from the existing plan's plan.yaml>"
+  fixCommitDate: "<date of the fix commit from git log, or empty if no commits>"
   ---
 
   # Duplicate Request
@@ -58,6 +98,8 @@ The plan ID is pre-allocated by the launcher script and provided in the firmware
   This request was identified as a duplicate of plan [<existing plan ID>](<path to existing plan>).
 
   **Original request:** <args text>
+
+  **Existing plan state:** <state>
 
   **Reason:** <brief explanation of why it's a duplicate>
   ```
