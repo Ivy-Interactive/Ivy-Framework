@@ -16,7 +16,7 @@ Write-Host "Log file: $logFile"
 # Ensure verification and artifacts dirs exist
 $verificationDir = Join-Path $PlanPath "verification"
 $artifactsDir = Join-Path $PlanPath "artifacts"
-foreach ($dir in @($verificationDir, "$artifactsDir\tests", "$artifactsDir\screenshots", "$artifactsDir\videos", "$artifactsDir\sample")) {
+foreach ($dir in @($verificationDir, "$artifactsDir\tests", "$artifactsDir\screenshots", "$artifactsDir\sample")) {
     if (-not (Test-Path $dir)) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
     }

@@ -36,6 +36,18 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         return item;
     }
 
+    private static MenuItem[] BuildMenuItems(IAppRepository repo, PlanCounts planCounts)
+    {
+        var badges = new Dictionary<string, int>
+        {
+            ["plans"] = planCounts.Drafts,
+            ["review"] = planCounts.Reviews,
+            ["jobs"] = planCounts.RunningJobs,
+            ["icebox"] = planCounts.Icebox
+        };
+        return repo.GetMenuItems().Select(m => AddBadge(m, badges)).ToArray();
+    }
+
     public override object? Build()
     {
         // All hooks must be at the top of Build()
@@ -47,8 +59,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         var user = UseState<UserInfo?>();
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
-        var menuItems = UseState(() => appRepository.GetMenuItems());
         var countsService = UseService<PlanCountsService>();
+        var menuItems = UseState(() => BuildMenuItems(appRepository, countsService.Current));
         var counts = UseState(() => countsService.Current);
         var jobService = UseService<JobService>();
         var sidebarOpen = UseState(settings.SidebarOpen);
@@ -78,17 +90,9 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         UseEffect(() =>
         {
-            var badges = new Dictionary<string, int>
-            {
-                ["plans"] = counts.Value.Drafts,
-                ["review"] = counts.Value.Reviews,
-                ["jobs"] = counts.Value.RunningJobs,
-                ["icebox"] = counts.Value.Icebox
-            };
-
             if (string.IsNullOrWhiteSpace(search.Value))
             {
-                menuItems.Set(appRepository.GetMenuItems().Select(m => AddBadge(m, badges)).ToArray());
+                menuItems.Set(BuildMenuItems(appRepository, counts.Value));
             }
             else
             {

@@ -111,9 +111,9 @@ Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 
 **package.json** — minimal, with `@playwright/test` dependency
 
-**playwright.config.ts** — Chromium only, single worker, no retries, viewport `{ width: 1920, height: 1920 }` (set in both `use` and `projects[0].use`), uses `process.env.APP_PORT`, video recording: `video: { mode: 'off' }` by default in config (videos are enabled per-test via `test.use({ video: { mode: 'on', dir: '<ArtifactsDir>/videos' } })` on the 1-2 most representative tests only)
+**playwright.config.ts** — Chromium only, single worker, no retries, viewport `{ width: 1920, height: 1920 }` (set in both `use` and `projects[0].use`), uses `process.env.APP_PORT`
 
-**IMPORTANT:** Screenshots and videos must be written to `<ArtifactsDir>/screenshots/` and `<ArtifactsDir>/videos/` (sibling to `sample/`), not inside `sample/`.
+**IMPORTANT:** Screenshots must be written to `<ArtifactsDir>/screenshots/` (sibling to `sample/`), not inside `sample/`.
 
 **One `.spec.ts` per app:**
 - `beforeAll`: find free port, spawn `dotnet run -- --port <port>`, wait for HTTP 200
@@ -123,23 +123,6 @@ Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 - Capture browser console logs → `<ArtifactsDir>/tests/console.log`
 - Capture backend stdout/stderr → `<ArtifactsDir>/tests/backend.log`
 
-**Videos:**
-- Limit video recordings to at most 2 — pick the most representative scenarios
-- Playwright records video per test via config (dir set to `<ArtifactsDir>/videos/`)
-- After each test, rename video with descriptive name:
-  ```typescript
-  test.afterEach(async ({ page }, testInfo) => {
-    const video = page.video();
-    if (video) {
-      const videoPath = await video.path();
-      const targetName = testInfo.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
-      const targetPath = path.join(process.env.ARTIFACTS_DIR!, 'videos', `${targetName}.webm`);
-      await fs.promises.mkdir(path.dirname(targetPath), { recursive: true });
-      await fs.promises.copyFile(videoPath, targetPath);
-    }
-  });
-  ```
-
 **Test coverage must verify:**
 1. Feature renders correctly (screenshots)
 2. All props produce expected visual output
@@ -147,7 +130,6 @@ Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 4. Feature integrates with other widgets
 5. No console errors or warnings
 6. No backend errors or exceptions
-7. Video captures show smooth interactions
 
 **Code patterns (from PlaywrightKnowledge.md):**
 - Use `getByText()`, `getByRole()` locators
@@ -183,7 +165,6 @@ If tests fail, logs have errors, or screenshots show issues:
 Everything is already in place under `<ArtifactsDir>/`:
 - `sample/` — `.csproj`, `.cs` files, `.ivy/tests/` (runnable project)
 - `screenshots/` — Playwright screenshots
-- `videos/` — Playwright video recordings
 - `tests/` — `console.log`, `backend.log`
 
 Confirm all expected files exist before writing the report.
@@ -236,7 +217,6 @@ Write to `<VerificationDir>/IvyFrameworkVerification.md`:
 ## Artifacts
 
 - Screenshots: <list>
-- Videos: <list>
 - Sample app: <path>
 
 ## Issues Found

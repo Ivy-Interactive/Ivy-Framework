@@ -16,7 +16,7 @@ levels:
 projects:
   - name: Framework
     color: Blue
-    slackEmoji: ":large_blue_circle:"
+    slackEmoji: ":hammer_and_wrench:"
     repos:
       - path: D:\Repos\_Ivy\Ivy-Framework
         prRule: yolo
@@ -49,7 +49,7 @@ projects:
 
   - name: Agent
     color: Purple
-    slackEmoji: ":purple_heart:"
+    slackEmoji: ":robot_face:"
     repos:
       - path: D:\Repos\_Ivy\Ivy-Agent
         prRule: yolo
@@ -100,7 +100,7 @@ projects:
 
   - name: Console
     color: Teal
-    slackEmoji: ":blue_heart:"
+    slackEmoji: ":desktop_computer:"
     repos:
       - path: D:\Repos\_Ivy\Ivy
         prRule: yolo
@@ -124,7 +124,7 @@ projects:
 
   - name: MyPromptwares
     color: Amber
-    slackEmoji: ":large_orange_circle:"
+    slackEmoji: ":scroll:"
     repos:
       - path: D:\Repos\_Personal\MyPromptwares
         prRule: yolo
@@ -133,7 +133,7 @@ projects:
 
   - name: Scripts
     color: Slate
-    slackEmoji: ":white_circle:"
+    slackEmoji: ":gear:"
     repos:
       - path: D:\Repos\_Personal\Scripts
         prRule: yolo
@@ -144,7 +144,7 @@ projects:
 
   - name: Tendril
     color: Emerald
-    slackEmoji: ":large_green_circle:"
+    slackEmoji: ":seedling:"
     repos:
       - path: D:\Repos\_Ivy\Ivy-Tendril
         prRule: yolo
@@ -168,7 +168,7 @@ projects:
 
   - name: Mcp
     color: Sky
-    slackEmoji: ":diamond_shape_with_a_dot_inside:"
+    slackEmoji: ":electric_plug:"
     repos:
       - path: D:\Repos\_Ivy\Ivy-Mcp
         prRule: yolo
