@@ -17,7 +17,7 @@ $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
     Args = $PlanPath; PlanFolder = $PlanPath; Project = $planInfo.Project
 }
 
-$agent = GetAgentCommandFromConfig
+$agent = GetAgentCommandFromConfig -Promptware "MakePr"
 $sessionId = [guid]::NewGuid().ToString()
 
 Write-Host "Starting Agent..."

@@ -27,7 +27,7 @@ if ($SourcePath) { $firmwareValues["SourcePath"] = $SourcePath }
 
 $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder $firmwareValues
 
-$agent = GetAgentCommandFromConfig
+$agent = GetAgentCommandFromConfig -Promptware "MakePlan"
 
 Write-Host "Starting Agent..."
 SendStatusMessage "Creating Plan"

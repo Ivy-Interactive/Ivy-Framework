@@ -29,4 +29,4 @@ Write-Host "Log file: $logFile"
 
 InvokePromptwareAgent $PSScriptRoot $programFolder $logFile @{
     Args = $PlanPath; PlanFolder = $PlanPath; Project = $planInfo.Project
-} -PlanPath $PlanPath -Action "UpdatePlan" -FinalState "Draft"
+} -PlanPath $PlanPath -Action "UpdatePlan" -FinalState "Draft" -Promptware "UpdatePlan"

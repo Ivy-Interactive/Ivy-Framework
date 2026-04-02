@@ -32,7 +32,7 @@ $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
     Project = $planInfo.Project
 }
 
-$agent = GetAgentCommandFromConfig
+$agent = GetAgentCommandFromConfig -Promptware "ExecutePlan"
 $sessionId = [guid]::NewGuid().ToString()
 
 Write-Host "Starting Agent in $workDir..."

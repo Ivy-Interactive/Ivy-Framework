@@ -262,7 +262,8 @@ function InvokePromptwareAgent {
         [string]$PlanPath = $null,
         [string]$Action = $null,
         [string]$FinalState = $null,
-        [string[]]$ExtraAgentArgs = @()
+        [string[]]$ExtraAgentArgs = @(),
+        [string]$Promptware = ""
     )
 
     # Generate session-id for cost tracking
@@ -270,7 +271,7 @@ function InvokePromptwareAgent {
     $FirmwareValues["ClaudeSessionId"] = $sessionId
 
     $promptFile = PrepareFirmware $ScriptRoot $LogFile $ProgramFolder $FirmwareValues
-    $agent = GetAgentCommandFromConfig
+    $agent = GetAgentCommandFromConfig -Promptware $Promptware
 
     # Pass --session-id when using claude CLI
     if ($agent.Executable -eq "claude") {
@@ -465,6 +466,8 @@ function Stop-Heartbeat {
 }
 
 function GetAgentCommandFromConfig {
+    param([string]$Promptware = "")
+
     $configPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
     $raw = "claude --print --verbose --output-format stream-json --dangerously-skip-permissions"
 
@@ -475,6 +478,16 @@ function GetAgentCommandFromConfig {
             $match = [regex]::Match($yaml, $pattern)
             if ($match.Success) {
                 $raw = $match.Groups[1].Value.Trim()
+            }
+
+            # Check for per-promptware model override
+            if ($Promptware) {
+                $modelPattern = "(?s)promptwares:.*?${Promptware}:\s*\n\s+model:\s*(\w+)"
+                $modelMatch = [regex]::Match($yaml, $modelPattern)
+                if ($modelMatch.Success) {
+                    $modelAlias = $modelMatch.Groups[1].Value.Trim()
+                    $raw += " --model $modelAlias"
+                }
             }
         }
         catch {
