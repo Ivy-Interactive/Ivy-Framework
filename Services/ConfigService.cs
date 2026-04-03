@@ -76,12 +76,6 @@ public record PromptwareConfig
     public string Model { get; set; } = "";
 }
 
-public record EditorConfig
-{
-    public string Command { get; set; } = "code";
-    public string Label { get; set; } = "VS Code";
-}
-
 public record LlmConfig
 {
     public string Endpoint { get; set; } = "";
@@ -100,7 +94,7 @@ public class TendrilSettings
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
     public EditorConfig Editor { get; set; } = new();
-    public LlmConfig? Llm { get; set; };
+    public LlmConfig? Llm { get; set; }
     public Dictionary<string, PromptwareConfig> Promptwares { get; set; } = new();
     public bool Telemetry { get; set; } = true;
     public List<LevelConfig> Levels { get; set; } = new()
