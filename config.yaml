@@ -3,6 +3,10 @@ agentCommand: claude --print --verbose --output-format stream-json --dangerously
 jobTimeout: 30
 staleOutputTimeout: 10
 
+editor:
+  command: code
+  label: VS Code
+
 promptwares:
   MakePlan:
     model: sonnet

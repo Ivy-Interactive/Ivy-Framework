@@ -55,6 +55,12 @@ public record ReviewActionConfig
     public string Action { get; set; } = "";
 }
 
+public record EditorConfig
+{
+    public string Command { get; set; } = "code";
+    public string Label { get; set; } = "VS Code";
+}
+
 public class TendrilSettings
 {
     public string TendrilData { get; set; } = "";
@@ -65,6 +71,7 @@ public class TendrilSettings
     public List<ProjectConfig> Projects { get; set; } = new();
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
+    public EditorConfig Editor { get; set; } = new();
     public List<LevelConfig> Levels { get; set; } = new()
     {
         new() { Name = "Critical", Badge = "Warning" },
@@ -127,6 +134,7 @@ public class ConfigService
     }
 
     public TendrilSettings Settings => _settings;
+    public EditorConfig Editor => _settings.Editor;
     public string TendrilData => _settings.TendrilData;
     public string PlanFolder => _settings.PlanFolder;
     public List<ProjectConfig> Projects => _settings.Projects;
