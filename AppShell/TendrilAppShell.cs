@@ -167,101 +167,108 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         void OpenApp(NavigateArgs navigateArgs, bool replaceHistory = false)
         {
-            if (settings.Navigation == AppShellNavigation.Pages)
+            try
             {
-                var previousApp = currentApp.Value?.AppId;
-
-                if (navigateArgs.AppId == null)
+                if (settings.Navigation == AppShellNavigation.Pages)
                 {
-                    navigateArgs = navigateArgs with { AppId = settings.DefaultAppId };
+                    var previousApp = currentApp.Value?.AppId;
+
+                    if (navigateArgs.AppId == null)
+                    {
+                        navigateArgs = navigateArgs with { AppId = settings.DefaultAppId };
+                    }
+
+                    var appHost = navigateArgs.AppId != null
+                        ? navigateArgs.ToAppHost(args.ConnectionId)
+                        : null;
+
+                    currentApp.Set(appHost);
+
+                    if (navigateArgs.AppId != null)
+                    {
+                        SetAppTitle(navigateArgs.AppId);
+                    }
+
+                    if (navigateArgs.HistoryOp is HistoryOp.Push && previousApp != navigateArgs.AppId)
+                    {
+                        RedirectToAppIfNotError(navigateArgs, replaceHistory);
+                    }
                 }
-
-                var appHost = navigateArgs.AppId != null
-                    ? navigateArgs.ToAppHost(args.ConnectionId)
-                    : null;
-
-                currentApp.Set(appHost);
-
-                if (navigateArgs.AppId != null)
+                else
                 {
-                    SetAppTitle(navigateArgs.AppId);
-                }
+                    if (!string.IsNullOrEmpty(navigateArgs.TabId))
+                    {
+                        var tabIndex = tabs.Value.ToList().FindIndex(t => t.Id == navigateArgs.TabId);
+                        if (tabIndex >= 0)
+                        {
+                            selectedIndex.Set(tabIndex);
+                            var tab = tabs.Value[tabIndex];
+                            SetAppTitle(tab.AppId);
 
-                if (navigateArgs.HistoryOp is HistoryOp.Push && previousApp != navigateArgs.AppId)
-                {
-                    RedirectToAppIfNotError(navigateArgs, replaceHistory);
+                            if (navigateArgs.HistoryOp is HistoryOp.Push)
+                            {
+                                RedirectToAppIfNotError(navigateArgs, replaceHistory, tab.Id);
+                            }
+                            return;
+                        }
+
+                        if (navigateArgs.HistoryOp is HistoryOp.Pop)
+                        {
+                            client.Error(new InvalidOperationException("Tab no longer exists."));
+                            return;
+                        }
+                    }
+
+                    if (navigateArgs.AppId == null)
+                    {
+                        return;
+                    }
+
+                    var tabId = Guid.NewGuid().ToString();
+                    var appHost = navigateArgs.ToAppHost(args.ConnectionId);
+
+                    if (settings.PreventTabDuplicates)
+                    {
+                        var appId = navigateArgs.AppId;
+                        int existingTabIndex = -1;
+                        for (int i = 0; i < tabs.Value.Length; i++)
+                        {
+                            if (tabs.Value[i].AppId == appId)
+                            {
+                                existingTabIndex = i;
+                                break;
+                            }
+                        }
+
+                        if (existingTabIndex >= 0)
+                        {
+                            var previousSelectedIndex = selectedIndex.Value;
+                            selectedIndex.Set(existingTabIndex);
+                            tabId = tabs.Value[existingTabIndex].Id;
+                            SetAppTitle(appId);
+
+                            if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
+                            {
+                                RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
+                            }
+                            return;
+                        }
+                    }
+
+                    if (navigateArgs.HistoryOp is HistoryOp.Push)
+                    {
+                        var app = appRepository!.GetAppOrDefault(navigateArgs.AppId);
+                        var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));
+                        tabs.Set(newTabs);
+                        selectedIndex.Set(newTabs.Length - 1);
+                        SetAppTitle(app.Id);
+                        RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
+                    }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                if (!string.IsNullOrEmpty(navigateArgs.TabId))
-                {
-                    var tabIndex = tabs.Value.ToList().FindIndex(t => t.Id == navigateArgs.TabId);
-                    if (tabIndex >= 0)
-                    {
-                        selectedIndex.Set(tabIndex);
-                        var tab = tabs.Value[tabIndex];
-                        SetAppTitle(tab.AppId);
-
-                        if (navigateArgs.HistoryOp is HistoryOp.Push)
-                        {
-                            RedirectToAppIfNotError(navigateArgs, replaceHistory, tab.Id);
-                        }
-                        return;
-                    }
-
-                    if (navigateArgs.HistoryOp is HistoryOp.Pop)
-                    {
-                        client.Error(new InvalidOperationException("Tab no longer exists."));
-                        return;
-                    }
-                }
-
-                if (navigateArgs.AppId == null)
-                {
-                    return;
-                }
-
-                var tabId = Guid.NewGuid().ToString();
-                var appHost = navigateArgs.ToAppHost(args.ConnectionId);
-
-                if (settings.PreventTabDuplicates)
-                {
-                    var appId = navigateArgs.AppId;
-                    int existingTabIndex = -1;
-                    for (int i = 0; i < tabs.Value.Length; i++)
-                    {
-                        if (tabs.Value[i].AppId == appId)
-                        {
-                            existingTabIndex = i;
-                            break;
-                        }
-                    }
-
-                    if (existingTabIndex >= 0)
-                    {
-                        var previousSelectedIndex = selectedIndex.Value;
-                        selectedIndex.Set(existingTabIndex);
-                        tabId = tabs.Value[existingTabIndex].Id;
-                        SetAppTitle(appId);
-
-                        if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
-                        {
-                            RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
-                        }
-                        return;
-                    }
-                }
-
-                if (navigateArgs.HistoryOp is HistoryOp.Push)
-                {
-                    var app = appRepository!.GetAppOrDefault(navigateArgs.AppId);
-                    var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));
-                    tabs.Set(newTabs);
-                    selectedIndex.Set(newTabs.Length - 1);
-                    SetAppTitle(app.Id);
-                    RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
-                }
+                Console.WriteLine($"[ERROR] TendrilAppShell.OpenApp failed for {navigateArgs.AppId}: {ex}");
             }
         }
 
