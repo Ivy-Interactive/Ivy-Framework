@@ -38,6 +38,10 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
       eventHandler("OnClick", id, []);
     }
   }, [id, isClickable, eventHandler]);
+
+  const hasIcon = icon && icon !== "None";
+  if (!title?.trim() && !hasIcon) return null;
+
   let iconSize: number = 4;
 
   switch (density) {
@@ -84,8 +88,6 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
           | "info";
     }
   };
-
-  const hasIcon = icon && icon !== "None";
 
   const colorStyles: React.CSSProperties = color
     ? {

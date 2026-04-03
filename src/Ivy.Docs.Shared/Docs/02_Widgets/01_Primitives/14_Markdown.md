@@ -145,6 +145,35 @@ public class MermaidView : ViewBase
 }
 ```
 
+### Graphviz Diagrams
+
+Graphviz diagrams let you create directed and undirected graphs using the DOT language. Use ` ```dot ` or ` ```graphviz ` code fences. For the full DOT language reference, see the [Graphviz documentation](https://graphviz.org/doc/info/lang.html).
+
+```csharp demo-tabs
+public class GraphvizView : ViewBase
+{
+    public override object? Build()
+    {
+        var markdownContent = 
+            """
+            ```dot
+            digraph G {
+                rankdir=LR;
+                node [shape=box, style="rounded,filled", fillcolor="#f0f0f0"];
+                
+                Client -> Server [label="Request"];
+                Server -> Database [label="Query"];
+                Database -> Server [label="Result"];
+                Server -> Client [label="Response"];
+            }
+            ```
+            """;
+            
+        return new Markdown(markdownContent);
+    }
+}
+```
+
 ### Emojis
 
 Emoji support enhances content with visual elements and expressions. You can use standard emoji shortcodes to add personality and visual appeal to your markdown content.

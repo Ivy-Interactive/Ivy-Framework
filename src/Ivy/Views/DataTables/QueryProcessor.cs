@@ -115,6 +115,12 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             {
                 processedQuery = ApplySort(processedQuery, query.Sort);
             }
+            else
+            {
+                // Apply default ordering by first property to prevent EF Core Query[10102]
+                // warnings when Skip/Take are used without an explicit OrderBy.
+                processedQuery = ApplyDefaultSort(processedQuery);
+            }
 
             // Serialize count + data queries for EF Core providers to prevent concurrent DbContext access.
             var useGuard = IsEfCoreProvider(queryable);
@@ -273,6 +279,23 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         }
 
         return query;
+    }
+
+    private IQueryable ApplyDefaultSort(IQueryable query)
+    {
+        var elementType = query.ElementType;
+        var firstProperty = elementType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .FirstOrDefault();
+
+        if (firstProperty == null)
+            return query;
+
+        var parameter = System.Linq.Expressions.Expression.Parameter(elementType, "x");
+        var propertyAccess = System.Linq.Expressions.Expression.Property(parameter, firstProperty);
+        var lambda = System.Linq.Expressions.Expression.Lambda(propertyAccess, parameter);
+
+        var method = GetGenericMethod(s_orderByMethod, elementType, firstProperty.PropertyType);
+        return (IQueryable)method.Invoke(null, new object[] { query, lambda })!;
     }
 
     private IQueryable ApplyFilter(IQueryable query, Filter filter)

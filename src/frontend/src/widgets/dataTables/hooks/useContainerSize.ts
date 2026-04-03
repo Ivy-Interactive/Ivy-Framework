@@ -68,8 +68,15 @@ export const useContainerSize = () => {
       const { width, height } = containerRef.current.getBoundingClientRect();
       if (width > 0 || height > 0) {
         apply(width, height);
-      } else if (retries++ < 5) {
+      } else if (retries++ < 10) {
         requestAnimationFrame(tryInit);
+      } else {
+        // Final fallback: schedule one more check after layout paint
+        setTimeout(() => {
+          if (hasAppliedInitialRef.current || !containerRef.current) return;
+          const { width, height } = containerRef.current.getBoundingClientRect();
+          if (width > 0 || height > 0) apply(width, height);
+        }, 100);
       }
     };
     tryInit();

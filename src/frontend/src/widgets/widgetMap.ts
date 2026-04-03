@@ -18,6 +18,7 @@ import {
 } from "@/widgets";
 import { ToolbarWidget } from "@/widgets/toolbar";
 import { BreadcrumbsWidget } from "@/widgets/breadcrumbs";
+import { StackedProgressWidget } from "@/widgets/stackedProgress";
 import { FileDialogWidget, SaveDialogWidget, FolderDialogWidget } from "@/widgets/filePicker";
 import { BladeContainerWidget, BladeWidget } from "@/widgets/blades";
 import { DetailsWidget, DetailWidget } from "@/widgets/details";
@@ -130,6 +131,7 @@ export const widgetMap = {
   "Ivy.Article": ArticleWidget,
   "Ivy.Button": ButtonWidget,
   "Ivy.Progress": ProgressWidget,
+  "Ivy.StackedProgress": StackedProgressWidget,
   "Ivy.Tooltip": TooltipWidget,
   "Ivy.Toolbar": ToolbarWidget,
   "Ivy.Slot": SlotWidget,
