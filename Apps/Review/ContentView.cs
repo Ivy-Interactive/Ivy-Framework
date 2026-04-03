@@ -557,7 +557,7 @@ public class ContentView(
                 ),
                 new DialogFooter(
                     new Button("Cancel").Outline().OnClick(() => customPrOpen.Set(false)),
-                    new Button("Create PR").Primary().WithConfetti(AnimationTrigger.Click).OnClick(() =>
+                    new Button("Create PR").Primary().OnClick(() =>
                     {
                         var options = new Dictionary<string, object>
                         {
@@ -579,7 +579,7 @@ public class ContentView(
                         _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
                         _refreshPlans();
                         customPrOpen.Set(false);
-                    })
+                    }).WithConfetti(AnimationTrigger.Click)
                 )
             ).Width(Size.Rem(30));
         }
