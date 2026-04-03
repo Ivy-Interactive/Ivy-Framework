@@ -1,8 +1,8 @@
 # MakePr
 
-Create GitHub pull requests, apply PR rules, and notify Slack.
+Create GitHub pull requests and apply PR rules.
 
-**!CRITICAL: ALL steps are mandatory. Do not skip Slack notification or PR rule application.**
+**!CRITICAL: ALL steps are mandatory. Do not skip PR rule application.**
 
 ## Context
 
@@ -26,17 +26,14 @@ Read `config.yaml` (from `ConfigPath`) for project repos and their `prRule` sett
 - Read `plan.yaml` from the plan folder (project, commits, repos)
 - Read the latest revision for the plan title and description
 - Read config.yaml to find the `prRule` for each repo
-- Read the project's `meta.slackEmoji` from config.yaml for Slack notification formatting
 - **Check for custom options:** If `<PlanFolder>/.custom-pr-options.yaml` exists, read it. The file contains:
   ```yaml
   approve: true/false
   merge: true/false
   deleteBranch: true/false
   includeArtifacts: true/false
-  submitToSlack: true/false
   assignee: "username"
   comment: "Review comment text"
-  slackComment: "Optional text to append to Slack notification"
   ```
   These flags override the default behavior in subsequent steps. If the file does not exist, all flags default to the behavior defined by the repo's `prRule`. **Delete the file after reading** so it doesn't affect future runs.
 
@@ -112,38 +109,9 @@ git pull origin <default-branch>
 
 Append each PR URL to the `prs` list in `plan.yaml`.
 
-### 6. Notify Slack
-
-**!MANDATORY** — this step must always run, even if there are no screenshots. **Exception:** If custom options exist and `submitToSlack` is `false`, skip this step entirely.
-
-**Check for screenshot URL:** Extract the first image URL from `$artifactMarkdown` (from step 2.5) by matching the pattern `![...](url)`.
-
-**If a screenshot URL exists** — use `notify slack done-by-niels --json` with Block Kit JSON:
-
-```bash
-notify slack done-by-niels --json '{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":"*Title:* <plan-title>\n*Project:* <color-emoji> <project>\n*PR:* <pr-link>"},"accessory":{"type":"image","image_url":"<screenshot-url>","alt_text":"screenshot"}}]}'
-```
-
-**If no screenshot URL** — fall back to plain text:
-
-```bash
-notify slack done-by-niels --message "*Title:* <plan-title>
-*Project:* <color-emoji> <project>
-*PR:* <pr-link>"
-```
-
-**Slack comment (custom options):** If custom options exist and `slackComment` is non-empty, append `\n<slackComment>` to the mrkdwn text in Block Kit JSON, or append a newline and the comment text in plain text mode.
-
-For both variants:
-- Replace `<plan-title>` with the plan title
-- Replace `<project>` with the project from plan.yaml
-- Replace `<pr-link>` with `<url|owner/repo#number>` for each PR
-- Replace `<screenshot-url>` with the extracted URL (Block Kit variant only)
-- Replace `<color-emoji>` with the project's `meta.slackEmoji` from config.yaml. If the project has no `meta.slackEmoji` set, omit the emoji.
-
 ### Rules
 
-- **ALL 7 steps are mandatory** (including 2.5) — do not stop after creating the PR
+- **ALL 6 steps are mandatory** (including 2.5) — do not stop after creating the PR
 - One PR per repo worktree that has commits
 - Skip worktrees with no commits ahead of the base branch
 - Use `gh` CLI for all GitHub operations

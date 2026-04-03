@@ -45,10 +45,8 @@ public class ContentView(
         var customPrMerge = UseState(true);
         var customPrDeleteBranch = UseState(true);
         var customPrIncludeArtifacts = UseState(true);
-        var customPrSubmitToSlack = UseState(true);
         var customPrAssignee = UseState<string?>(null);
         var customPrComment = UseState("");
-        var customPrSlackComment = UseState("");
 
         UseEffect(() =>
         {
@@ -547,10 +545,6 @@ public class ContentView(
                         | customPrMerge.ToBoolInput("Merge").Disabled(!customPrApprove.Value)
                         | customPrDeleteBranch.ToBoolInput("Delete Branch").Disabled(!customPrMerge.Value || !customPrApprove.Value)
                         | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
-                        | customPrSubmitToSlack.ToBoolInput("Submit to Slack")
-                        | (customPrSubmitToSlack.Value
-                            ? (object)customPrSlackComment.ToTextareaInput("Slack Comment").Rows(2)
-                            : new Spacer())
                         | customPrAssignee.ToSelectInput((assigneesQuery.Value ?? Array.Empty<string>()).ToOptions())
                             .Nullable().WithField().Label("Assignee")
                         | customPrComment.ToTextareaInput("Comment").Rows(3)
@@ -565,10 +559,8 @@ public class ContentView(
                             ["merge"] = customPrMerge.Value && customPrApprove.Value,
                             ["deleteBranch"] = customPrDeleteBranch.Value && customPrMerge.Value && customPrApprove.Value,
                             ["includeArtifacts"] = customPrIncludeArtifacts.Value,
-                            ["submitToSlack"] = customPrSubmitToSlack.Value,
                             ["assignee"] = customPrAssignee.Value ?? "",
-                            ["comment"] = customPrComment.Value,
-                            ["slackComment"] = customPrSlackComment.Value
+                            ["comment"] = customPrComment.Value
                         };
                         var serializer = new SerializerBuilder()
                             .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -606,10 +598,8 @@ public class ContentView(
                     customPrMerge.Set(true);
                     customPrDeleteBranch.Set(true);
                     customPrIncludeArtifacts.Set(true);
-                    customPrSubmitToSlack.Set(true);
                     customPrAssignee.Set(null);
                     customPrComment.Set("");
-                    customPrSlackComment.Set("");
                     customPrOpen.Set(true);
                 }),
                 new MenuItem("Set Completed", Icon: Icons.CircleCheck, Tag: "SetCompleted").OnSelect(() =>
