@@ -199,20 +199,36 @@ public class NumberRangeStepDemo : ViewBase
 
 ## Event Handling
 
-NumberRangeInput supports change events that receive the full tuple value:
+Number range inputs support focus, blur, and manual `AutoFocus` behavior.
 
-```csharp
-var rangeState = UseState<(int, int)>(() => (0, 100));
-var changeLabel = UseState("");
+```csharp demo-tabs
+public class NumberRangeInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var value = UseState(() => (25, 75));
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
 
-new NumberRangeInput<int>(rangeState.Value, e =>
-{
-    rangeState.Set(e);
-    changeLabel.Set($"Range changed to: {e.Item1} - {e.Item2}");
-})
-{
-    Min = 0,
-    Max = 100
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToNumberRangeInput()
+                    .Min(0)
+                    .Max(100)
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
+    }
 }
 ```
 

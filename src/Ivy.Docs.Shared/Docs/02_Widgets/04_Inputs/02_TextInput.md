@@ -197,18 +197,34 @@ public class MinLengthValidationDemo : ViewBase
 
 ## Event Handling
 
-Use the [`OnChange`](../../01_Onboarding/02_Concepts/05_EventHandlers.md) callback to react to text input changes. The callback receives an event with the current value.
+Input widgets support standard focus and blur events, along with the `AutoFocus` property.
 
 ```csharp demo-tabs
-public class EventsDemoApp : ViewBase
+public class TextInputEventsDemo : ViewBase
 {
     public override object? Build()
     {
-        var name = UseState("");
-        return Layout.Vertical()
-            | name.ToTextInput()
-                  .Placeholder("Enter your name...").WithField().Label("Name")
-            | (name.Value.Length > 0 ? $"Hello, {name.Value}!" : "");
+        var value = UseState("");
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToTextInput()
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                    .Placeholder("Input will focus automatically...")
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
     }
 }
 ```

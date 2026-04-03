@@ -32,7 +32,38 @@ public class ReadOnlyDemo : ViewBase
 }    
 ```
 
-<WidgetDocs Type="Ivy.ReadOnlyInput" ExtensionTypes="Ivy.ReadOnlyInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/ReadOnlyInput.cs"/>
+## Event Handling
+
+Read-only inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class ReadOnlyInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var value = UseState("Static Info");
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToReadOnlyInput()
+                    .OnFocus<string>(() => onFocusTriggered.Set(true))
+                    .OnBlur<string>(() => onBlurTriggered.Set(true))
+                    .AutoFocus()
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
+    }
+}
+```
 
 ## Examples
 

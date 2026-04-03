@@ -478,56 +478,36 @@ public class FileInputDisabledDemo : ViewBase
 }
 ```
 
-## Event Handlers
+## Event Handling
 
-FileInput supports event handlers to respond to user interactions:
+File inputs support focus, blur, and manual `AutoFocus` behavior.
 
-```mermaid
-graph LR
-    A[User Action] --> B{Event Type}
-    B -->|File dialog closes| C[OnBlur]
-    B -->|Cancel clicked| D[OnCancel]
-    C --> E[Handler]
-    D --> F[Handler]
-```
-
-```csharp demo-below
-public class FileInputEventHandlersDemo : ViewBase
+```csharp demo-tabs
+public class FileInputEventsDemo : ViewBase
 {
     public override object? Build()
     {
         var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var blurMessage = UseState("");
-        var cancelCount = UseState(0);
         var upload = UseUpload(MemoryStreamUploadHandler.Create(files));
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
 
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
                 | files.ToFileInput(upload)
-                    .Placeholder("Choose files")
-                    .OnBlur((Event<IAnyInput> e) =>
-                    {
-                        if (files.Value.Length > 0)
-                            blurMessage.Set($"Blur: {files.Value.Length} file(s) selected");
-                        else
-                            blurMessage.Set("Blur: No file selected");
-                    })
-                    .OnCancel((Guid fileId) =>
-                    {
-                        upload.Value.Cancel(fileId);
-                        files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());
-                        cancelCount.Set(cancelCount.Value + 1);
-                    })
-                | (blurMessage.Value != "" 
-                    ? Text.P(blurMessage.Value).Color(Colors.Success)
-                    : null)
-                | files.Value.ToTable()
-                    .Width(Size.Full())
-                    .Builder(e => e.FileName, e => e.Func((string x) => x))
-                    .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
-                    .Remove(e => e.Id)
-                | (cancelCount.Value > 0
-                    ? Text.P($"Cancelled {cancelCount.Value} file(s)").Color(Colors.Info)
-                    : null);
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
     }
 }
 ```

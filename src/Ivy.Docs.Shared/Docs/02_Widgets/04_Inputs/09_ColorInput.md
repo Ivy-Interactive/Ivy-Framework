@@ -99,31 +99,33 @@ public class ColorSwatchDemo : ViewBase
 
 ## Event Handling
 
-ColorInput typically handles state automatically through `UseState`. If you need to perform actions when the color changes, use the [UseEffect](../../03_Hooks/02_Core/04_UseEffect.md) hook to watch the state.
-The following demo shows how the `Picker` variant can be used with a code
-block.
+Color inputs support focus, blur, and manual `AutoFocus` behavior.
 
-```csharp demo-below
-public class ColorChangedDemo : ViewBase
+```csharp demo-tabs
+public class ColorInputEventsDemo : ViewBase
 {
-
     public override object? Build()
     {
-        var colorState = UseState("#ff0000");
-        var colorName = UseState(colorState.Value);
-        
-        UseEffect(() => {
-            colorName.Set(colorState.Value);
-        }, colorState);
+        var value = UseState("#ff0000");
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
 
-        return Layout.Vertical()
-                | H3("Hex Color Picker")
-                | (Layout.Horizontal()
-                | colorState.ToColorInput()
-                      .Variant(ColorInputVariant.Picker)
-                | new CodeBlock(colorName.Value)
-                    .ShowCopyButton()
-                    .ShowBorder());
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToColorInput()
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
     }
 }
 ```

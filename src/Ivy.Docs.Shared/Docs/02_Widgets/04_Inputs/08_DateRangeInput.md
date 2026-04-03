@@ -73,6 +73,39 @@ public class DateRangeVariantsDemo : ViewBase
 }
 ```
 
+## Event Handling
+
+Date range inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class DateRangeInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var value = UseState(() => (from: DateTime.Today, to: DateTime.Today.AddDays(7)));
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToDateRangeInput()
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
+    }
+}
+```
+
 ## Format
 
 To change the format of selected dates the `Format` function needs to be used.

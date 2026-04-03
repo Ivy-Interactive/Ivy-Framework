@@ -164,6 +164,40 @@ public class SingleToggleDemo : ViewBase
 }
 ```
 
+## Event Handling
+
+Boolean inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class BoolInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var value = UseState(false);
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToSwitchInput()
+                    .Label("Toggle me")
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
+    }
+}
+```
+
 ## Styling and States
 
 Customize the `BoolInput` with various styling options:

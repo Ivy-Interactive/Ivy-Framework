@@ -75,6 +75,40 @@ public class ChunkedUploadDemo : ViewBase
 Use `MemoryStreamUploadHandler` for complete file uploads (uploads when recording stops) and `ChunkedMemoryStreamUploadHandler` for streaming uploads (uploads chunks during recording).
 </Callout>
 
+## Event Handling
+
+Audio inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class AudioInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var value = UseState<FileUpload<byte[]>?>();
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(value));
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | new AudioInput(upload.Value)
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
+    }
+}
+```
+
 ## Audio Format
 
 Specify the audio format using MIME type and optionally the sample rate in Hz (e.g. 16000 for speech, 48000 for high-fidelity). When `SampleRate` is null, the browser uses its default (typically 48000 Hz). Common values: 8000, 11025, 16000, 22050, 24000, 32000, 44100, 48000; other values may be used and the browser will pick the closest supported rate.

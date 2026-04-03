@@ -43,6 +43,40 @@ public class BasicCameraInputDemo : ViewBase
 3. Clicking **Capture** takes a snapshot and uploads it as a PNG image
 4. The captured image is shown with a **Retake** button to restart the camera
 
+## Event Handling
+
+Camera inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class CameraInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var value = UseState<FileUpload<byte[]>?>();
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(value));
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | new CameraInput(upload.Value)
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
+    }
+}
+```
+
 ## Configuration
 
 ### Placeholder

@@ -289,18 +289,36 @@ The `Prefix` and `Suffix` methods accept either a `string` or an `Icons` value, 
 
 ## Event Handling
 
-`NumberInput`s can handle change and blur events:
+`NumberInput` widgets can handle various events such as change, blur, and focus. You can also use the `AutoFocus` property to automatically focus the input when it is mounted.
 
-```csharp
-var onChangedState = UseState(0);
-var onChangeLabel = UseState("");
-
-UseEffect(() =>
+```csharp demo-tabs
+public class NumberInputEventsDemo : ViewBase
 {
-    onChangeLabel.Set("Changed");
-}, onChangedState);
+    public override object? Build()
+    {
+        var value = UseState(0);
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
 
-onChangedState.ToNumberInput();
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToNumberInput()
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                    .Placeholder("Input will focus automatically...")
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
+    }
+}
 ```
 
 <WidgetDocs Type="Ivy.NumberInput" ExtensionTypes="Ivy.NumberInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/NumberInput.cs"/>

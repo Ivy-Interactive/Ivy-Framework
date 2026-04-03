@@ -101,15 +101,35 @@ public class DateTimeVariantsDemo : ViewBase
 
 ## Event Handling
 
-`DateTimeInput` can handle change and blur events:
+Date and time inputs support focus, blur, and manual `AutoFocus` behavior.
 
-```csharp
-var dateState = UseState(DateTime.Now);
-var onChangeHandler = (Event<IInput<DateTime>, DateTime> e) =>
+```csharp demo-tabs
+public class DateTimeInputEventsDemo : ViewBase
 {
-    dateState.Set(e.Value);
-};
-return dateState.ToDateTimeInput().OnChange(onChangeHandler);
+    public override object? Build()
+    {
+        var value = UseState(DateTime.Now);
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToDateInput()
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
+    }
+}
 ```
 
 ## Format

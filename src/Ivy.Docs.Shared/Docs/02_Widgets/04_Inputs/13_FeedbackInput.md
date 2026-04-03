@@ -70,28 +70,33 @@ public class FeedbackDemo : ViewBase
 
 ## Event Handling
 
-The following example shows how change events can be handled for `FeedbackInput`s.
+Feedback inputs support focus, blur, and manual `AutoFocus` behavior.
 
-```csharp demo-below
-public class FeedbackHandling: ViewBase
+```csharp demo-tabs
+public class FeedbackInputEventsDemo : ViewBase
 {
     public override object? Build()
     {
-        var feedbackState = UseState(1);
-        var exclamation = UseState("");
-        exclamation.Set(feedbackState.Value switch
-        {
-            0 => "No rating yet",
-            1 => "Seriously?",
-            2 => "Oh! is it that bad?",
-            3 => "Ah! you almost liked it!",
-            4 => "Cool! Tell me more!",
-            5 => "WOW! Would you recommend it?",
-            _ => "Invalid rating"
-        });
-        return Layout.Vertical()
-                | feedbackState.ToFeedbackInput()
-                | Text.Block(exclamation);
+        var value = UseState(3);
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToFeedbackInput()
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
     }
 }
 ```

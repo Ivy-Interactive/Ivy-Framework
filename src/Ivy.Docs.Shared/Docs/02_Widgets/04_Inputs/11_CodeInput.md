@@ -160,29 +160,34 @@ UseState("def calculate_fibonacci(n):\n    if n <= 1:\n        return n\n    ret
 
 ## Event Handling
 
-Event handling enables you to respond to code changes and validate input in real-time. This allows for dynamic behavior like live validation and [conditional UI updates](../../01_Onboarding/02_Concepts/02_Views.md).
-
-Handle code changes and validation:
+Code inputs support focus, blur, and manual `AutoFocus` behavior.
 
 ```csharp demo-tabs
-public class CodeInputWithValidation : ViewBase 
+public class CodeInputEventsDemo : ViewBase
 {
     public override object? Build()
-    {        
-        var codeState = UseState("");
-        var isValid = !string.IsNullOrWhiteSpace(codeState.Value);
-        
-        return Layout.Vertical()
-            | codeState.ToCodeInput()
-                    .Width(Size.Auto())
-                    .Height(Size.Auto())
-                    .Placeholder("Enter your code here...")
+    {
+        var value = UseState("// Write some code...");
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToCodeInput()
                     .Language(Languages.Javascript)
-                    .WithField()
-                    .Label("Enter Code:")
-            | Text.P(isValid 
-                ? "Entered code is valid ✅" 
-                : "Enter some code to validate").Small();
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
     }
 }
 ```

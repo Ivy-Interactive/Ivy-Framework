@@ -30,6 +30,39 @@ public class SignatureDemo : ViewBase
 }
 ```
 
+## Event Handling
+
+Signature inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class SignatureInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var value = UseState<byte[]?>(null);
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToSignatureInput()
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
+    }
+}
+```
+
 ## Pen Customization
 
 Configure pen color and thickness to match your application's style:

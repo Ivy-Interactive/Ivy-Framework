@@ -135,44 +135,34 @@ public class MultiSelectDemo : ViewBase
 
 ## Event Handling
 
-Handle change events and create dynamic option lists that respond to user selections:
+Select inputs support focus, blur, and manual `AutoFocus` behavior.
 
 ```csharp demo-tabs
-public class EventHandlingDemo : ViewBase
+public class SelectInputEventsDemo : ViewBase
 {
-    private static readonly Dictionary<string, string[]> CategoryOptions = new()
-    {
-        ["Programming"] = new[]{"C#", "Java", "Python", "JavaScript"},
-        ["Design"] = new[]{"Photoshop", "Figma", "Sketch"},
-        ["Database"] = new[]{"SQL Server", "PostgreSQL", "MongoDB"}
-    };
-    
+    public enum Fruits { Apple, Banana, Orange }
+
     public override object? Build()
     {
-        var selectedCategory = UseState("Programming");
-        var selectedSkill = UseState("");
-        
-        var categoryOptions = CategoryOptions.Keys.ToOptions();
-        var skillOptions = CategoryOptions[selectedCategory.Value].ToOptions();
-        
-        UseEffect(() => {
-            selectedSkill.Set("");
-        }, selectedCategory);
-        
-        return Layout.Vertical()
-            | Layout.Grid().Columns(2)
-                | selectedCategory.ToSelectInput(categoryOptions)
-                    .Placeholder("Choose a category...")
-                    .WithField()
-                    .Label("Category:")
-                
-                | selectedSkill.ToSelectInput(skillOptions)
-                    .Placeholder("Select a skill...")
-                    .WithField()
-                    .Label("Skill:")
-            
-            | (!string.IsNullOrEmpty(selectedSkill.Value) 
-                ? Text.Block($"Selected: {selectedCategory.Value} → {selectedSkill.Value}") 
+        var value = UseState(Fruits.Apple);
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToSelectInput()
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
                 : null);
     }
 }

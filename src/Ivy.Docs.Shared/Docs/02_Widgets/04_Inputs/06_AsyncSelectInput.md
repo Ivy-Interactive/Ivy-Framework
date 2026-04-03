@@ -326,7 +326,56 @@ public class AdvancedQueryDemo : ViewBase
 Use AsyncSelectInput for foreign key relationships, large datasets, and when you need to provide search functionality. It's perfect for scenarios where the full list of options would be too large to load upfront.
 </Callout>
 
-### Styling and States
+### Event Handling
+
+Async select inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class AsyncSelectInputEventsDemo : ViewBase
+{
+    private static readonly string[] Fruits = { "Apple", "Banana", "Orange" };
+
+    public override object? Build()
+    {
+        var value = UseState<string?>(null);
+        var show = UseState(false);
+        var onFocusTriggered = UseState(false);
+        var onBlurTriggered = UseState(false);
+
+        QueryResult<Option<string>[]> UseQuery(IViewContext context, string query) =>
+            context.UseQuery(
+                key: ("search", query),
+                fetcher: _ => Task.FromResult(Fruits
+                    .Where(f => f.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .Select(f => new Option<string>(f))
+                    .ToArray()));
+
+        QueryResult<Option<string>?> UseLookup(IViewContext context, string? val) =>
+            context.UseQuery(
+                key: ("lookup", val),
+                fetcher: _ => Task.FromResult(val != null ? new Option<string>(val) : null));
+
+        return Layout.Vertical().Gap(4)
+            | new Button("Mount with AutoFocus", () => {
+                show.Set(true);
+                onFocusTriggered.Set(false);
+                onBlurTriggered.Set(false);
+            }).Primary()
+            | (show.Value ? Layout.Vertical().Gap(2)
+                | value.ToAsyncSelectInput(UseQuery, UseLookup)
+                    .AutoFocus()
+                    .OnFocus(() => onFocusTriggered.Set(true))
+                    .OnBlur(() => onBlurTriggered.Set(true))
+                    .Placeholder("Search fruits...")
+                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
+                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
+                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
+                : null);
+    }
+}
+```
+
+## Styling and States
 
 Customize the `AsyncSelectInput` with various styling options:
 
