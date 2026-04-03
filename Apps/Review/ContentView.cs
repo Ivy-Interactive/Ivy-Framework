@@ -617,33 +617,24 @@ public class ContentView(
                     _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
                     _refreshPlans();
                 }),
-                new MenuItem("Open in Explorer", Icon: Icons.FolderOpen, Tag: "OpenInExplorer").OnSelect(() =>
+                new MenuItem("Open in File Manager", Icon: Icons.FolderOpen, Tag: "OpenInExplorer").OnSelect(() =>
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = _selectedPlan.FolderPath,
-                        UseShellExecute = true
-                    });
+                    PlatformHelper.OpenInFileManager(_selectedPlan.FolderPath);
                 }),
                 new MenuItem("Open in Terminal", Icon: Icons.Terminal, Tag: "OpenInTerminal").OnSelect(() =>
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = "wt.exe",
-                        Arguments = $"-d \"{_selectedPlan.FolderPath}\"",
-                        UseShellExecute = true
-                    });
+                    PlatformHelper.OpenInTerminal(_selectedPlan.FolderPath);
                 }),
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath").OnSelect(() =>
                 {
                     copyToClipboard(_selectedPlan.FolderPath);
                     client.Toast("Copied path to clipboard", "Path Copied");
                 }),
-                new MenuItem("Open in VS Code", Icon: Icons.Code, Tag: "OpenInEditor").OnSelect(() =>
+                new MenuItem($"Open in {_config.Editor.Label}", Icon: Icons.Code, Tag: "OpenInEditor").OnSelect(() =>
                 {
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        FileName = "code",
+                        FileName = _config.Editor.Command,
                         Arguments = $"\"{_selectedPlan.FolderPath}\"",
                         UseShellExecute = true
                     });
@@ -653,7 +644,7 @@ public class ContentView(
                     var yamlPath = System.IO.Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        FileName = "notepad.exe",
+                        FileName = _config.Editor.Command,
                         Arguments = yamlPath,
                         UseShellExecute = true
                     });

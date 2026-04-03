@@ -155,7 +155,7 @@ public class ContentView(
                     var yamlPath = System.IO.Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        FileName = "notepad.exe",
+                        FileName = _config.Editor.Command,
                         Arguments = yamlPath,
                         UseShellExecute = true
                     });
