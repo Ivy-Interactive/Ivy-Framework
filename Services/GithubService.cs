@@ -114,16 +114,22 @@ public class GithubService(ConfigService config)
             if (process is null) return new();
 
             var output = await process.StandardOutput.ReadToEndAsync();
+            var stderr = await process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync();
 
-            if (process.ExitCode != 0) return new();
+            if (process.ExitCode != 0)
+            {
+                Console.Error.WriteLine($"[GithubService] gh api labels failed for {owner}/{repo}: {stderr}");
+                return new();
+            }
 
             return output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .OrderBy(x => x)
                 .ToList();
         }
-        catch
+        catch (Exception ex)
         {
+            Console.Error.WriteLine($"[GithubService] Failed to fetch labels for {owner}/{repo}: {ex.Message}");
             return new();
         }
     }
@@ -146,16 +152,22 @@ public class GithubService(ConfigService config)
             if (process is null) return new();
 
             var output = await process.StandardOutput.ReadToEndAsync();
+            var stderr = await process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync();
 
-            if (process.ExitCode != 0) return new();
+            if (process.ExitCode != 0)
+            {
+                Console.Error.WriteLine($"[GithubService] gh api assignees failed for {owner}/{repo}: {stderr}");
+                return new();
+            }
 
             return output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .OrderBy(x => x)
                 .ToList();
         }
-        catch
+        catch (Exception ex)
         {
+            Console.Error.WriteLine($"[GithubService] Failed to fetch assignees for {owner}/{repo}: {ex.Message}");
             return new();
         }
     }

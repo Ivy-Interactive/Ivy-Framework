@@ -25,10 +25,11 @@ public class CreateIssueDialog(
         var githubService = UseService<GithubService>();
         var assigneesQuery = UseQuery<string[], string>(
             _selectedRepoState.Value ?? "",
-            async (_, ct) =>
+            async (repoName, ct) =>
             {
+                if (string.IsNullOrEmpty(repoName)) return Array.Empty<string>();
                 var repos = githubService.GetRepos();
-                var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == _selectedRepoState.Value);
+                var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == repoName);
                 if (selectedRepo is null) return Array.Empty<string>();
                 var result = await githubService.GetAssigneesAsync(selectedRepo.Owner, selectedRepo.Name);
                 return result.ToArray();
@@ -38,10 +39,11 @@ public class CreateIssueDialog(
 
         var labelsQuery = UseQuery<string[], string>(
             _selectedRepoState.Value ?? "",
-            async (_, ct) =>
+            async (repoName, ct) =>
             {
+                if (string.IsNullOrEmpty(repoName)) return Array.Empty<string>();
                 var repos = githubService.GetRepos();
-                var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == _selectedRepoState.Value);
+                var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == repoName);
                 if (selectedRepo is null) return Array.Empty<string>();
                 var result = await githubService.GetLabelsAsync(selectedRepo.Owner, selectedRepo.Name);
                 return result.ToArray();
