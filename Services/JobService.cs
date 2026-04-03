@@ -13,6 +13,7 @@ public class JobService
     private readonly ConcurrentDictionary<string, JobItem> _jobs = new();
     private int _counter;
     private PlanReaderService? _planReaderService;
+    private TelemetryService? _telemetryService;
     private readonly TimeSpan _jobTimeout;
     private readonly TimeSpan _staleOutputTimeout;
 
@@ -49,6 +50,11 @@ public class JobService
     public void SetPlanReaderService(PlanReaderService planReaderService)
     {
         _planReaderService = planReaderService;
+    }
+
+    public void SetTelemetryService(TelemetryService telemetryService)
+    {
+        _telemetryService = telemetryService;
     }
 
     public string StartJob(string type, params string[] args)
@@ -287,7 +293,16 @@ public class JobService
         else if (isSuccess && job.Type == "CreateIssue")
             SetPlanState(job, "Completed");
         else if (isSuccess && job.Type == "MakePlan")
+        {
             VerifyMakePlanResult(job);
+            if (job.Status == "Completed")
+                _telemetryService?.TrackPlanCreated();
+        }
+
+        if (isSuccess && job.Type == "MakePr")
+            _telemetryService?.TrackPrCreated();
+
+        _telemetryService?.TrackJobCompleted(job.Type, job.Status, job.DurationSeconds);
 
         WriteJobLog(job);
         JobsChanged?.Invoke();

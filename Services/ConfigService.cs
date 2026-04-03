@@ -71,6 +71,7 @@ public class TendrilSettings
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
     public Dictionary<string, PromptwareConfig> Promptwares { get; set; } = new();
+    public bool Telemetry { get; set; } = true;
     public List<LevelConfig> Levels { get; set; } = new()
     {
         new() { Name = "Critical", Badge = "Warning" },
