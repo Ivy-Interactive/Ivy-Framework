@@ -18,6 +18,7 @@ Common mistakes and issues encountered when working with the Ivy Framework durin
 - ❌ **Not all Lucide icons available**: Some expected names don't exist (e.g., `Icons.AlignCenter`)
 - ✅ **Use correct names**: `Icons.AlignCenterHorizontal` instead
 - 📝 **Note**: Lucide renamed some icons (e.g., `AlertTriangle` → `TriangleAlert`)
+- 📝 **Chart icons**: Use `Icons.ChartBarStacked` for bar charts (not `Icons.BarChart`, `Icons.BarChart3`, or `Icons.BarChartBig`)
 
 ## Hook Rules (Critical)
 
@@ -137,6 +138,15 @@ await server.RunAsync();
 ❌ **Don't use `AppBase`** for test apps
 ✅ **Use `ViewBase`** - it's the correct base class for Ivy views
 
+### BarChartBuilder: No .Tooltip()
+❌ **`.Tooltip()` on `BarChartBuilder`** — causes CS1929; `Tooltip` is an `AreaChart` extension
+✅ **Use `polish:`** to set tooltip: `polish: chart => chart with { Tooltip = new ChartTooltip().Animated(true) }`
+📝 **Note**: `.Toolbox()` IS available on `BarChartBuilder`
+
+### BarChart: Dual-axis via `polish`
+❌ **No `bars:` or `YAxis:` parameters on `ToBarChart()`** — these are not constructor args
+✅ **Use `polish:`**: `data.ToBarChart(polish: chart => chart with { Bars = [...], YAxis = [...] })`
+
 ### Badge.Color() Doesn't Exist
 ❌ **`new Badge("text").Color(Colors.X)`** — `Color()` extension is for `CalendarEvent`, not `Badge`
 ✅ **Use**: `new Badge("text")` with variant methods if available, or no color modifier
@@ -144,6 +154,12 @@ await server.RunAsync();
 ### MemoryStreamUploadHandler.Create() Requires State
 ❌ **`MemoryStreamUploadHandler.Create()`** — no zero-arg overload
 ✅ **Use**: `MemoryStreamUploadHandler.Create(state)` where `state` is `IState<FileUpload<byte[]>?>`
+
+### Ivy.Widgets.Xterm.Terminal Ambiguity with Ivy.Terminal
+❌ **`using Ivy; using Ivy.Widgets.Xterm;`** — `Terminal` is ambiguous between `Ivy.Terminal` and `Ivy.Widgets.Xterm.Terminal`
+❌ **Type alias `using XTerminal = Ivy.Widgets.Xterm.Terminal;`** — does NOT fix extension method overload resolution (e.g., `.OnInput(data => ...)` still fails with CS1660)
+✅ **Use fully qualified extension methods**: `Ivy.Widgets.Xterm.TerminalExtensions.OnInput(terminal, data => ...)` for event handlers
+✅ **For non-event fluent methods**: `using XTerminal = Ivy.Widgets.Xterm.Terminal;` with `new XTerminal()` works for `.Background()`, `.Foreground()`, `.InitialContent()`, `.Height()` etc.
 
 ### Namespace Conflicts with External Widget Types
 ❌ **Using namespace matching widget type name** (e.g., `namespace ScreenshotFeedback` when using `Ivy.Widgets.ScreenshotFeedback.ScreenshotFeedback`)

@@ -250,6 +250,14 @@
 - `.ToDialog(isOpen, title, submitTitle)` renders a dialog with custom title and submit button text
 - `.ToSheet(isOpen, title)` renders a slide-in sheet with Save/Cancel buttons
 
+## ECharts (Bar/Line/Area/Pie Charts) Locators
+
+- Ivy charts use **echarts-for-react** which renders as **SVG** (not canvas) by default — `page.locator('canvas')` will NOT find chart elements
+- Locate ECharts instances via: `page.locator('[_echarts_instance_]')` — this attribute is set on the chart container div
+- The `onChartReady` callback sets `data-chart-rendered="true"` on the container ONLY when the chart initializes successfully. If ECharts silently fails (e.g., `yAxisIndex` references a non-existent axis), the attribute is still set but the chart area is blank
+- For screenshot-based verification of charts, use longer waits (3s+) since chart rendering is async
+- **Screenshot path in test specs**: `projectRoot` resolves to the `sample/` dir; screenshots go to `path.resolve(projectRoot, '..', 'screenshots')` (one level up, not two)
+
 ## Ivy Component Test Patterns
 
 - `AsQueryable().ToDataTable()` renders using glide-data-grid — a virtualized grid where cells have `role="gridcell"` but may not be "visible" (outside virtual viewport). Use `toBeAttached()` instead of `toBeVisible()` for these cells.
