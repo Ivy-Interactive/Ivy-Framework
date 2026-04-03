@@ -11,13 +11,11 @@ ENV DOTNET_TC_QuickJitForLoops=1
 # Build frontend (Ivy embeds frontend/dist)
 FROM node:24-bookworm-slim AS frontend
 WORKDIR /src
-# Cache npm layers
 RUN --mount=type=cache,id=apt-samples-frontend,target=/var/cache/apt \
     apt-get update && apt-get install -y curl bash && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://vite.plus | bash
 ENV PATH="/root/.vite-plus/bin:${PATH}"
 COPY ["src/frontend/package.json", "src/frontend/pnpm-lock.yaml", "src/frontend/"]
-# Cache vp install layer
 RUN --mount=type=cache,target=/root/.npm \
     cd src/frontend && vp install
 COPY ["src/frontend/", "src/frontend/"]
@@ -30,23 +28,30 @@ ARG TARGETARCH
 WORKDIR /src
 RUN --mount=type=cache,id=apt-samples-build,target=/var/cache/apt \
     apt-get update && apt-get install -y curl bash build-essential && rm -rf /var/lib/apt/lists/*
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs
-RUN curl -fsSL https://vite.plus | bash
-ENV PATH="/root/.vite-plus/bin:${PATH}"
+# --profile minimal skips rustfmt/clippy — not needed for a release build
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --profile minimal
+ENV PATH="/root/.cargo/bin:/root/.vite-plus/bin:${PATH}"
+
+# Copy only RustServer first so this layer stays cached when only .NET files change
+COPY src/RustServer/ src/RustServer/
+RUN --mount=type=cache,id=cargo-registry-samples,target=/root/.cargo/registry \
+    --mount=type=cache,id=cargo-target-samples,target=/src/src/RustServer/target \
+    cd src/RustServer && cargo build --release && \
+    mkdir -p /tmp/rust-artifacts && \
+    find target/release -maxdepth 1 -type f ! -name "*.d" -exec cp {} /tmp/rust-artifacts/ \;
 
 COPY . .
 COPY --from=frontend /src/src/frontend/dist /src/src/frontend/dist
-
-# Use BuildKit mounts to cache crates and packages across builds
-RUN --mount=type=cache,id=cargo-samples,target=/root/.cargo/registry \
-    cd src/RustServer && cargo build --release
-
-RUN --mount=type=cache,id=nuget-samples,target=/root/.nuget/packages \
-    dotnet restore "src/Ivy.Samples/Ivy.Samples.csproj"
+# Reuse vp binary and already-installed node_modules from the frontend stage
+COPY --from=frontend /root/.vite-plus /root/.vite-plus
+COPY --from=frontend /src/src/frontend/node_modules /src/src/frontend/node_modules
+# Restore Rust artifacts; touch .build-stamp so MSBuild skips BuildFrontend (dist already built above)
+RUN mkdir -p src/RustServer/target/release && \
+    cp /tmp/rust-artifacts/* src/RustServer/target/release/ && \
+    touch src/frontend/dist/.build-stamp
 
 # Publish with ReadyToRun to pre-compile IL to native code for instant container spin-up
+# (restore is intentionally included so runtime packs required by ReadyToRun are downloaded)
 RUN --mount=type=cache,id=nuget-samples,target=/root/.nuget/packages \
     dotnet publish "src/Ivy.Samples/Ivy.Samples.csproj" \
     -a ${TARGETARCH:-x64} \
