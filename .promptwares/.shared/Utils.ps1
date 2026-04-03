@@ -1,8 +1,12 @@
 # Ensure claude CLI is on the PATH
-$claudeDir = Join-Path $env:USERPROFILE ".local\bin"
-if (Test-Path $claudeDir) {
+$homeDir = $null
+if ($IsWindows) { $homeDir = $env:USERPROFILE } else { $homeDir = $env:HOME }
+$claudeDir = $null
+if ($homeDir) { $claudeDir = Join-Path $homeDir ".local/bin" }
+if ($claudeDir -and (Test-Path $claudeDir)) {
     if ($env:PATH -notlike "*$claudeDir*") {
-        $env:PATH = "$claudeDir;$env:PATH"
+        $sep = if ($IsWindows) { ";" } else { ":" }
+        $env:PATH = "$claudeDir$sep$env:PATH"
     }
 }
 
@@ -476,13 +480,14 @@ function Stop-Heartbeat {
 function GetAgentCommandFromConfig {
     param([string]$Promptware = "")
 
-    $configPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
+    $configPath = $script:ConfigPath
     $raw = "claude --print --verbose --output-format stream-json --dangerously-skip-permissions"
     $allowedTools = @()
 
     if (Test-Path $configPath) {
         try {
             $yaml = Get-Content $configPath -Raw
+            # Regex match as first pass or fallback
             $pattern = "(?m)^agentCommand:\s*(.+)$"
             $match = [regex]::Match($yaml, $pattern)
             if ($match.Success) {
@@ -492,11 +497,17 @@ function GetAgentCommandFromConfig {
             # Parse config with ConvertFrom-Yaml for structured access
             $config = $yaml | ConvertFrom-Yaml
 
+            if ($config.agentCommand) {
+                $raw = $config.agentCommand
+            }
+
             if ($Promptware -and $config.promptwares.$Promptware) {
                 $pwConfig = $config.promptwares.$Promptware
 
                 # Apply model override
                 if ($pwConfig.model) {
+                    # Strip any existing --model from raw if we're overriding it
+                    $raw = $raw -replace '--model\s+\S+', ''
                     $raw += " --model $($pwConfig.model)"
                 }
 
