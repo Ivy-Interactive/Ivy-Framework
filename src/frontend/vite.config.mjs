@@ -59,11 +59,13 @@ async function fetchText(url) {
   const mod = url.startsWith("https") ? await import("node:https") : await import("node:http");
   const options = isLocalHost(url) ? { rejectUnauthorized: false } : {};
   return new Promise((resolve, reject) => {
-    mod.get(url, options, (res) => {
-      let data = "";
-      res.on("data", (chunk) => (data += chunk));
-      res.on("end", () => resolve(data));
-    }).on("error", reject);
+    mod
+      .get(url, options, (res) => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => resolve(data));
+      })
+      .on("error", reject);
   });
 }
 
