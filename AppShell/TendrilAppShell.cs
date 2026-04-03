@@ -503,6 +503,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                     | new NewPlanFooterButton()
                 ,
                 Layout.Vertical(
+                    new SidebarNews("https://ivy.app/news.json"),
                     settings.Footer,
                     footer
                 ),
