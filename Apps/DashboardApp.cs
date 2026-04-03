@@ -99,12 +99,14 @@ public class DashboardApp : ViewBase
             .OrderByDescending(g => g.Count)
             .ToArray();
 
-        var projectChart = projectData.ToPieChart(
-            e => e.Project,
-            e => e.Sum(f => f.Count),
-            PieChartStyles.Donut,
-            total: new PieChartTotal(plans.Count.ToString(), "Total Plans")
-        );
+        var configService = UseService<ConfigService>();
+        var projectProgress = new StackedProgress(
+            projectData.Select(p => new ProgressSegment(
+                Value: p.Count,
+                Color: configService.GetProjectColor(p.Project),
+                Label: p.Project
+            )).ToArray()
+        ).ShowLabels();
 
         // Hourly token burn bar chart
         var hourlyBurn = planService.GetHourlyTokenBurn(days: 7);
@@ -125,7 +127,7 @@ public class DashboardApp : ViewBase
             | dataTable
             | burnChart
             | tokensChart
-            | projectChart;
+            | projectProgress;
 
         return new HeaderLayout(
             header: statsRow,
