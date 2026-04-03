@@ -1,7 +1,6 @@
 using Ivy;
 using Ivy.Tendril.Apps.PullRequest;
 using Ivy.Tendril.Services;
-using Ivy.Widgets.DataTables;
 
 namespace Ivy.Tendril.Apps;
 
