@@ -87,7 +87,7 @@ public class PullRequestApp : ViewBase
                 return ValueTask.CompletedTask;
             });
 
-        return dataTable;
+        return Layout.Vertical().Height(Size.Full()) | dataTable;
     }
 
     /// <summary>
