@@ -1,9 +1,9 @@
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$PlanPath
 )
 
-. "$PSScriptRoot\.shared\Utils.ps1"
+. "$PSScriptRoot/.shared/Utils.ps1"
 
 $programFolder = GetProgramFolder $PSCommandPath
 $planYamlPath = ValidatePlanPath $PlanPath
@@ -39,9 +39,9 @@ if (Test-Path $sampleBinDir) {
 $env:ARTIFACTS_DIR = $artifactsDir
 
 InvokePromptwareAgent $PSScriptRoot $programFolder $logFile @{
-    Args = $PlanPath
-    PlanFolder = $PlanPath
-    Project = $planInfo.Project
+    Args            = $PlanPath
+    PlanFolder      = $PlanPath
+    Project         = $planInfo.Project
     VerificationDir = $verificationDir
-    ArtifactsDir = $artifactsDir
+    ArtifactsDir    = $artifactsDir
 } -PlanPath $PlanPath -Action "IvyFrameworkVerification" -Promptware "IvyFrameworkVerification"
