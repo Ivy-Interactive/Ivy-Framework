@@ -108,26 +108,34 @@ public class DashboardApp : ViewBase
             )).ToArray()
         ).ShowLabels();
 
-        // Hourly token burn bar chart
+        // Hourly cost & tokens combined bar chart
         var hourlyBurn = planService.GetHourlyTokenBurn(days: 7);
 
-        var burnChart = hourlyBurn.ToBarChart(style: BarChartStyles.Dashboard)
+        var combinedChart = hourlyBurn.ToBarChart(
+                style: BarChartStyles.Default,
+                polish: chart => chart with
+                {
+                    Bars =
+                    [
+                        new Bar("Cost ($)").Radius(4).FillOpacity(0.8).YAxisIndex(0),
+                        new Bar("Tokens").Radius(4).FillOpacity(0.8).YAxisIndex(1),
+                    ],
+                    YAxis =
+                    [
+                        new YAxis("Cost ($)"),
+                        new YAxis("Tokens").Orientation(YAxis.Orientations.Right),
+                    ]
+                })
             .Dimension("Hour", e => e.Hour.ToString("MM/dd HH"))
             .Measure("Cost ($)", e => e.Sum(f => (double)f.Cost))
-            .Height(Size.Px(300))
-            .Width(Size.Full());
-
-        var tokensChart = hourlyBurn.ToBarChart(style: BarChartStyles.Dashboard)
-            .Dimension("Hour", e => e.Hour.ToString("MM/dd HH"))
             .Measure("Tokens", e => e.Sum(f => (double)f.Tokens))
-            .Height(Size.Px(300))
+            .Height(Size.Px(350))
             .Width(Size.Full());
 
         var content = Layout.Vertical().Gap(2)
             | dataTable
             | projectProgress
-            | burnChart
-            | tokensChart;
+            | combinedChart;
 
         return new HeaderLayout(
             header: statsRow,
