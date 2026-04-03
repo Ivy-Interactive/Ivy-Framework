@@ -182,9 +182,11 @@ public class JobsApp : ViewBase
                 })
             ));
 
+        var layout = Layout.Vertical().Height(Size.Full());
+
         if (showCommand.Value is { } cmd)
         {
-            return new Fragment(
+            return layout | new Fragment(
                 dataTable,
                 new Sheet(
                     onClose: () => showCommand.Set(null),
@@ -196,7 +198,7 @@ public class JobsApp : ViewBase
 
         if (showOutput.Value is { } output)
         {
-            return new Fragment(
+            return layout | new Fragment(
                 dataTable,
                 new Sheet(
                     onClose: () => showOutput.Set(null),
@@ -206,7 +208,7 @@ public class JobsApp : ViewBase
             );
         }
 
-        return dataTable;
+        return layout | dataTable;
     }
 
     private static string ExtractPlanId(string planFile)
