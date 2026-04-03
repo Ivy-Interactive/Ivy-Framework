@@ -49,6 +49,7 @@ export default defineConfig({
   webServer: {
     command: "vp dev",
     url: "https://localhost:5173",
+    ignoreHTTPSErrors: true,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
