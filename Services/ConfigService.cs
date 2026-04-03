@@ -75,6 +75,7 @@ public record EditorConfig
 public record PromptwareConfig
 {
     public string Model { get; set; } = "";
+    public List<string> AllowedTools { get; set; } = new();
 }
 
 public record LlmConfig

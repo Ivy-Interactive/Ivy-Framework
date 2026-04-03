@@ -470,6 +470,7 @@ function GetAgentCommandFromConfig {
 
     $configPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
     $raw = "claude --print --verbose --output-format stream-json --dangerously-skip-permissions"
+    $allowedTools = @()
 
     if (Test-Path $configPath) {
         try {
@@ -480,13 +481,24 @@ function GetAgentCommandFromConfig {
                 $raw = $match.Groups[1].Value.Trim()
             }
 
-            # Check for per-promptware model override
-            if ($Promptware) {
-                $modelPattern = "(?s)promptwares:.*?${Promptware}:\s*\n\s+model:\s*(\w+)"
-                $modelMatch = [regex]::Match($yaml, $modelPattern)
-                if ($modelMatch.Success) {
-                    $modelAlias = $modelMatch.Groups[1].Value.Trim()
-                    $raw += " --model $modelAlias"
+            # Parse config with ConvertFrom-Yaml for structured access
+            $config = $yaml | ConvertFrom-Yaml
+
+            if ($Promptware -and $config.promptwares.$Promptware) {
+                $pwConfig = $config.promptwares.$Promptware
+
+                # Apply model override
+                if ($pwConfig.model) {
+                    $raw += " --model $($pwConfig.model)"
+                }
+
+                # Apply allowedTools with %TENDRIL% substitution
+                if ($pwConfig.allowedTools) {
+                    $tendrilPath = if ($config.tendrilData) { $config.tendrilData -replace '\\', '/' } else { "" }
+                    foreach ($tool in $pwConfig.allowedTools) {
+                        $resolvedTool = $tool -replace '%TENDRIL%', $tendrilPath
+                        $allowedTools += $resolvedTool
+                    }
                 }
             }
         }
@@ -495,10 +507,32 @@ function GetAgentCommandFromConfig {
         }
     }
 
-    # Split into executable and args
-    $parts = $raw -split '\s+', 2
+    # Build args with quote-aware parsing
+    $parts = @()
+    $current = ""
+    $inQuote = $false
+    foreach ($char in $raw.ToCharArray()) {
+        if ($char -eq '"' -and !$inQuote) { $inQuote = $true; continue }
+        elseif ($char -eq '"' -and $inQuote) { $inQuote = $false; continue }
+        elseif ($char -eq ' ' -and !$inQuote -and $current) {
+            $parts += $current; $current = ""; continue
+        }
+        elseif ($char -eq ' ' -and !$inQuote) { continue }
+        $current += $char
+    }
+    if ($current) { $parts += $current }
+
+    # Append allowedTools as individual args
+    $args = $parts[1..($parts.Length - 1)]
+    if ($allowedTools.Count -gt 0) {
+        foreach ($tool in $allowedTools) {
+            $args += "--allowedTools"
+            $args += $tool
+        }
+    }
+
     return @{
         Executable = $parts[0]
-        Args = if ($parts.Length -gt 1) { $parts[1] -split '\s+' } else { @() }
+        Args = $args
     }
 }
