@@ -122,7 +122,7 @@ public class DashboardApp : ViewBase
                     ],
                     YAxis =
                     [
-                        new YAxis("Cost ($)"),
+                        new YAxis("Cost ($)").TickFormatter("C2"),
                         new YAxis("Tokens").Orientation(YAxis.Orientations.Right),
                     ]
                 })
