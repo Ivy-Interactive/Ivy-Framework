@@ -114,7 +114,7 @@ public class ContentView(
                 _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
                 _refreshPlans();
-            });
+            }).WithConfetti(AnimationTrigger.Click);
 
         // Content sections
         var content = Layout.Vertical();
@@ -557,7 +557,7 @@ public class ContentView(
                 ),
                 new DialogFooter(
                     new Button("Cancel").Outline().OnClick(() => customPrOpen.Set(false)),
-                    new Button("Create PR").Primary().OnClick(() =>
+                    new Button("Create PR").Primary().WithConfetti(AnimationTrigger.Click).OnClick(() =>
                     {
                         var options = new Dictionary<string, object>
                         {
