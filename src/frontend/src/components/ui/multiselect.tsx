@@ -75,6 +75,7 @@ interface MultipleSelectorProps {
   maxSelections?: number;
   minSelections?: number;
   onNullableClear?: () => void;
+  autoFocus?: boolean;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -102,6 +103,7 @@ const MultipleSelector = React.forwardRef<
       maxSelections,
       minSelections,
       onNullableClear,
+      autoFocus = false,
     },
     ref,
   ) => {
@@ -430,6 +432,7 @@ const MultipleSelector = React.forwardRef<
                   });
                   onFocus?.(e);
                 }}
+                autoFocus={autoFocus}
                 placeholder={
                   hidePlaceholderWhenSelected && value.length > 0 ? undefined : placeholder
                 }

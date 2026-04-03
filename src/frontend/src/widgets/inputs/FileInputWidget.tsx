@@ -49,6 +49,7 @@ interface FileInputWidgetProps {
   uploadUrl?: string;
   density?: Densities;
   variant?: "Default" | "Drop";
+  autoFocus?: boolean;
 }
 
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
@@ -67,6 +68,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   uploadUrl,
   density = Densities.Medium,
   variant = "Drop",
+  autoFocus,
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
@@ -305,6 +307,14 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       inputRef.current.click();
     }
   }, [disabled, hasBlurHandler]);
+
+  const hasAutoFocusedRef = useRef(false);
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      openFileDialog();
+    }
+  }, [autoFocus, disabled, openFileDialog]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {

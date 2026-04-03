@@ -1024,11 +1024,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
 const SelectVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHandler }> = (
   props,
 ) => {
-  return props.selectMany ? (
-    <SelectMultiVariant {...props} />
-  ) : (
-    <SelectSingleVariant key={props.value?.toString() ?? "null"} {...props} />
-  );
+  return props.selectMany ? <SelectMultiVariant {...props} /> : <SelectSingleVariant {...props} />;
 };
 
 const sliderLabelVariant: Record<string, string> = {
@@ -1216,13 +1212,7 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = (props) => {
     case "Toggle":
       return <ToggleVariant {...normalizedProps} eventHandler={eventHandler} />;
     case "Slider":
-      return (
-        <SliderVariant
-          key={normalizedProps.value?.toString() ?? "null"}
-          {...normalizedProps}
-          eventHandler={eventHandler}
-        />
-      );
+      return <SliderVariant {...normalizedProps} eventHandler={eventHandler} />;
     default:
       return <SelectVariant {...normalizedProps} eventHandler={eventHandler} />;
   }
