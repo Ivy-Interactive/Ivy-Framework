@@ -188,7 +188,7 @@ public class ProjectsSettingsView : ViewBase
                         var project = isNew ? new ProjectConfig() : projects[editIndex.Value!.Value];
                         project.Name = editName.Value;
                         project.Color = editColor.Value;
-                        project.SlackEmoji = editSlackEmoji.Value;
+                        project.Meta["slackEmoji"] = editSlackEmoji.Value;
                         project.Context = editContext.Value;
                         project.Repos = new List<RepoRef>(editRepos.Value);
                         project.Verifications = new List<ProjectVerificationRef>(editVerifications.Value);
@@ -233,7 +233,7 @@ public class ProjectsSettingsView : ViewBase
             editIndex.Set(idx);
             editName.Set(project.Name);
             editColor.Set(project.Color);
-            editSlackEmoji.Set(project.SlackEmoji);
+            editSlackEmoji.Set(project.GetMeta("slackEmoji") ?? "");
             editContext.Set(project.Context);
             editRepos.Set(new List<RepoRef>(project.Repos.Select(r => new RepoRef { Path = r.Path, PrRule = r.PrRule })));
             editVerifications.Set(new List<ProjectVerificationRef>(
