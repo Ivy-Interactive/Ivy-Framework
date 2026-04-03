@@ -86,6 +86,7 @@ public class JobsApp : ViewBase
                         if (job != null && !string.IsNullOrEmpty(job.PlanFile))
                         {
                             var fullPath = Path.Combine(planService.PlansDirectory, job.PlanFile);
+                            Console.WriteLine($"[Jobs] Navigating to plan (cell click): {fullPath}, exists: {Directory.Exists(fullPath)}");
                             if (Directory.Exists(fullPath))
                                 nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(fullPath));
                         }
@@ -114,6 +115,7 @@ public class JobsApp : ViewBase
                         if (!string.IsNullOrEmpty(job.PlanFile))
                         {
                             var fullPath = Path.Combine(planService.PlansDirectory, job.PlanFile);
+                            Console.WriteLine($"[Jobs] Navigating to plan (row action): {fullPath}, exists: {Directory.Exists(fullPath)}");
                             if (Directory.Exists(fullPath))
                                 nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(fullPath));
                         }
