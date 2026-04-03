@@ -10,6 +10,7 @@ public class DashboardApp : ViewBase
     public override object? Build()
     {
         var planService = UseService<PlanReaderService>();
+        var configService = UseService<ConfigService>();
         var refreshToken = UseRefreshToken();
         UseInterval(() =>
         {
@@ -99,7 +100,6 @@ public class DashboardApp : ViewBase
             .OrderByDescending(g => g.Count)
             .ToArray();
 
-        var configService = UseService<ConfigService>();
         var projectProgress = new StackedProgress(
             projectData.Select(p => new ProgressSegment(
                 Value: p.Count,
