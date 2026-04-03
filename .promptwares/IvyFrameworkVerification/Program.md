@@ -5,6 +5,7 @@ Test and visually verify Ivy Framework UI changes by creating demo apps and runn
 ## Context
 
 The firmware header contains:
+
 - **PlanFolder** — path to the plan folder
 - **ConfigPath** — absolute path to config.yaml
 - **CurrentTime** — current UTC timestamp
@@ -25,9 +26,9 @@ If the changes are non-visual (docs, analyzers, refactoring, code-only fixes), w
 
 - Read `Memory/IvyFrameworkGotchas.md` for known API issues and workarounds
 - Read `Memory/PlaywrightKnowledge.md` for Ivy testing patterns and locator strategies
-- Read the Ivy Framework AGENTS.md: `D:\Repos\_Ivy\Ivy-Framework\AGENTS.md`
-- Read relevant source code for the changed feature from `D:\Repos\_Ivy\Ivy-Framework\src\`
-- Read existing samples: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Samples.Shared\Apps\`
+- Read the Ivy Framework AGENTS.md: `~/git/ivy/Ivy-Framework/AGENTS.md`
+- Read relevant source code for the changed feature from `~/git/ivy/Ivy-Framework/src/`
+- Read existing samples: `~/git/ivy/Ivy-Framework/src/Ivy.Samples.Shared/Apps/`
 
 ### 3. Verify Completeness
 
@@ -39,13 +40,13 @@ Check that required companion artifacts exist for the feature being verified:
    - Concept (new layout, form feature, navigation, etc.)
    - Bugfix/Refactor (internal change, no new public API)
 
-2. **Sample App**: Search `D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Samples.Shared\Apps\` for files that demonstrate the feature:
+2. **Sample App**: Search `~/git/ivy/Ivy-Framework/src/Ivy.Samples.Shared/Apps/` for files that demonstrate the feature:
    - Widgets → search by widget class name in `Apps/Widgets/`
    - Hooks → search by hook name (e.g. `UseQuery`) across all `Apps/`
    - Concepts → search by concept name across `Apps/Concepts/`
    - Bugfix/Refactor → skip (no sample expected)
 
-3. **Documentation Page**: Search `D:\Repos\_Ivy\Ivy-Framework\src\Ivy.Docs.Shared\Docs\` for documentation:
+3. **Documentation Page**: Search `~/git/ivy/Ivy-Framework/src/Ivy.Docs.Shared/Docs/` for documentation:
    - Widgets → `Docs/02_Widgets/`
    - Hooks → `Docs/03_Hooks/`
    - Concepts → `Docs/01_Onboarding/02_Concepts/`
@@ -60,11 +61,12 @@ Record results for the report. For missing artifacts on new features, flag as a 
 
 Create everything directly in `<ArtifactsDir>/sample/` so the plan folder is self-contained and runnable.
 
-**Important: Check which branch has the fix.** If the plan's commit is on a feature branch (check `plan.yaml` commits + `git branch --contains <commit>`), the worktree at `<PlanFolder>/worktrees/<RepoName>` has the correct code. Use that path for ProjectReference, NOT the main repo. If the commit is on main/master, use `D:\Repos\_Ivy\Ivy-Framework`.
+**Important: Check which branch has the fix.** If the plan's commit is on a feature branch (check `plan.yaml` commits + `git branch --contains <commit>`), the worktree at `<PlanFolder>/worktrees/<RepoName>` has the correct code. Use that path for ProjectReference, NOT the main repo. If the commit is on main/master, use `~/git/ivy/Ivy-Framework`.
 
-**If referencing a worktree and it has frontend (.ts) changes:** rebuild frontend from the worktree path (`cd <worktree>/src/frontend && npx vite build`), then clean the Ivy obj dir (`rm -rf <worktree>/src/Ivy/obj/Debug`) before building the sample project.
+**If referencing a worktree and it has frontend (.ts) changes:** rebuild frontend from the worktree path (`cd <worktree>/src/frontend && vp build`), then clean the Ivy obj dir (`rm -rf <worktree>/src/Ivy/obj/Debug`) before building the sample project.
 
 **`<ArtifactsDir>/sample/<FeatureName>.csproj`:**
+
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
@@ -81,6 +83,7 @@ Create everything directly in `<ArtifactsDir>/sample/` so the plan folder is sel
 ```
 
 **`<ArtifactsDir>/sample/Program.cs`:**
+
 ```csharp
 using Ivy;
 using System.Reflection;
@@ -102,6 +105,7 @@ Create multiple `.cs` app files exercising the feature:
 - **EdgeCasesApp** — Empty values, large data, rapid interactions
 
 Each app must:
+
 - Inherit from `ViewBase` (NOT `AppBase`)
 - Have `[App]` attribute with descriptive title and appropriate icon
 - Show clear labels for what each section tests
@@ -135,6 +139,7 @@ Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 **IMPORTANT:** Screenshots must be written to `<ArtifactsDir>/screenshots/` (sibling to `sample/`), not inside `sample/`.
 
 **One `.spec.ts` per app:**
+
 - `beforeAll`: find free port, spawn `dotnet run -- --port <port>`, wait for HTTP 200
 - `afterAll`: kill process
 - Test each app at `http://localhost:<port>/<app-id>?shell=false`
@@ -143,6 +148,7 @@ Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 - Capture backend stdout/stderr → `<ArtifactsDir>/tests/backend.log`
 
 **Test coverage must verify:**
+
 1. Feature renders correctly (screenshots)
 2. All props produce expected visual output
 3. All events fire correctly (state feedback)
@@ -151,6 +157,7 @@ Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 6. No backend errors or exceptions
 
 **Code patterns (from PlaywrightKnowledge.md):**
+
 - Use `getByText()`, `getByRole()` locators
 - Use `.first()` when multiple matches possible
 - Use `waitForTimeout(500)` after interactions
@@ -182,6 +189,7 @@ If tests fail, logs have errors, or screenshots show issues:
 ### 10. Verify Artifacts
 
 Everything is already in place under `<ArtifactsDir>/`:
+
 - `sample/` — `.csproj`, `.cs` files, `.ivy/tests/` (runnable project)
 - `screenshots/` — Playwright screenshots
 - `tests/` — `console.log`, `backend.log`

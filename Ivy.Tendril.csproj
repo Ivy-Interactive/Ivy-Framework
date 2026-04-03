@@ -23,14 +23,14 @@
     <PackageReference Include="PostHog" Version="1.0.*" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Ivy-Framework\src\Ivy\Ivy.csproj" />
-    <ProjectReference Include="..\Ivy-Framework\src\Ivy.Hooks.Pty\Ivy.Hooks.Pty.csproj" />
-    <ProjectReference Include="..\Ivy-Framework\src\widgets\Ivy.Widgets.Xterm\Ivy.Widgets.Xterm.csproj" />
-    <ProjectReference Include="..\Ivy-Framework\src\widgets\Ivy.Widgets.ScreenshotFeedback\Ivy.Widgets.ScreenshotFeedback.csproj" />
-    <ProjectReference Include="..\Ivy-Framework\src\widgets\Ivy.Widgets.DiffView\Ivy.Widgets.DiffView.csproj" />
+    <ProjectReference Include="../Ivy-Framework/src/Ivy/Ivy.csproj" />
+    <ProjectReference Include="../Ivy-Framework/src/Ivy.Hooks.Pty/Ivy.Hooks.Pty.csproj" />
+    <ProjectReference Include="../Ivy-Framework/src/widgets/Ivy.Widgets.Xterm/Ivy.Widgets.Xterm.csproj" />
+    <ProjectReference Include="../Ivy-Framework/src/widgets/Ivy.Widgets.ScreenshotFeedback/Ivy.Widgets.ScreenshotFeedback.csproj" />
+    <ProjectReference Include="../Ivy-Framework/src/widgets/Ivy.Widgets.DiffView/Ivy.Widgets.DiffView.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Ivy-Framework\src\Ivy.Analyser\Ivy.Analyser.csproj">
+    <ProjectReference Include="../Ivy-Framework/src/Ivy.Analyser/Ivy.Analyser.csproj">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

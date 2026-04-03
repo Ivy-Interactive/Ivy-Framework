@@ -1,9 +1,9 @@
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$PlanPath
 )
 
-. "$PSScriptRoot\.shared\Utils.ps1"
+. "$PSScriptRoot/.shared/Utils.ps1"
 
 $programFolder = GetProgramFolder $PSCommandPath
 $planYamlPath = ValidatePlanPath $PlanPath
@@ -35,15 +35,16 @@ try {
     Add-Content -Path $rawLogFile -Value "[tendril] Command: $($agent.Executable) $($agent.Args -join ' ') $($extraArgs -join ' ')" -Encoding UTF8
 
     $output = & $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw) 2>&1 |
-        ForEach-Object {
-            $line = if ($_ -is [System.Management.Automation.ErrorRecord]) {
-                "[stderr] $_"
-            } else {
-                "$_"
-            }
-            Add-Content -Path $rawLogFile -Value $line -Encoding UTF8
-            $_
+    ForEach-Object {
+        $line = if ($_ -is [System.Management.Automation.ErrorRecord]) {
+            "[stderr] $_"
         }
+        else {
+            "$_"
+        }
+        Add-Content -Path $rawLogFile -Value $line -Encoding UTF8
+        $_
+    }
     $output | Write-Output
     $exitCode = $LASTEXITCODE
 
@@ -55,7 +56,8 @@ try {
             try {
                 $resultJson = $resultLine.Line | ConvertFrom-Json
                 $summary = $resultJson.result
-            } catch { }
+            }
+            catch { }
         }
     }
 
@@ -63,7 +65,8 @@ try {
         WritePlanLog $PlanPath "MakePr" $summary
         UpdatePlanState $PlanPath "Completed"
         Write-Host "MakePr completed successfully" -ForegroundColor Green
-    } else {
+    }
+    else {
         WritePlanLog $PlanPath "MakePr-Failed" $summary
         UpdatePlanState $PlanPath "ReadyForReview"
         Write-Host "MakePr failed with exit code: $exitCode — plan returned to ReadyForReview" -ForegroundColor Red

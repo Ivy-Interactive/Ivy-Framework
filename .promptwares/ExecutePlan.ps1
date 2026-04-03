@@ -1,9 +1,9 @@
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$PlanPath
 )
 
-. "$PSScriptRoot\.shared\Utils.ps1"
+. "$PSScriptRoot/.shared/Utils.ps1"
 
 $programFolder = GetProgramFolder $PSCommandPath
 $planYamlPath = ValidatePlanPath $PlanPath
@@ -27,9 +27,9 @@ Write-Host "Log file: $logFile"
 $workDir = GetProjectWorkDir $planInfo.Project
 
 $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
-    Args = $PlanPath
+    Args       = $PlanPath
     PlanFolder = $PlanPath
-    Project = $planInfo.Project
+    Project    = $planInfo.Project
 }
 
 $agent = GetAgentCommandFromConfig -Promptware "ExecutePlan"
@@ -53,15 +53,16 @@ try {
     Add-Content -Path $rawLogFile -Value "[tendril] Command: $($agent.Executable) $($agent.Args -join ' ') $($extraArgs -join ' ')" -Encoding UTF8
 
     $output = & $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw) 2>&1 |
-        ForEach-Object {
-            $line = if ($_ -is [System.Management.Automation.ErrorRecord]) {
-                "[stderr] $_"
-            } else {
-                "$_"
-            }
-            Add-Content -Path $rawLogFile -Value $line -Encoding UTF8
-            $_
+    ForEach-Object {
+        $line = if ($_ -is [System.Management.Automation.ErrorRecord]) {
+            "[stderr] $_"
         }
+        else {
+            "$_"
+        }
+        Add-Content -Path $rawLogFile -Value $line -Encoding UTF8
+        $_
+    }
     $output | Write-Output
     $exitCode = $LASTEXITCODE
 
@@ -73,7 +74,8 @@ try {
             try {
                 $resultJson = $resultLine.Line | ConvertFrom-Json
                 $summary = $resultJson.result
-            } catch { }
+            }
+            catch { }
         }
     }
 
@@ -84,7 +86,7 @@ try {
         # Check verification statuses before transitioning
         $planYaml = Get-Content (Join-Path $PlanPath "plan.yaml") -Raw
         $verificationStatuses = [regex]::Matches($planYaml, '(?m)^\s+status:\s*(.+)$') |
-            ForEach-Object { $_.Groups[1].Value.Trim() }
+        ForEach-Object { $_.Groups[1].Value.Trim() }
 
         $hasFailed = $verificationStatuses | Where-Object { $_ -eq "Fail" }
         $hasPending = $verificationStatuses | Where-Object { $_ -eq "Pending" }
@@ -93,11 +95,13 @@ try {
             UpdatePlanState $PlanPath "Failed"
             Write-Host "Plan has incomplete or failed verifications" -ForegroundColor Red
             exit 1  # Signal failure to JobService
-        } else {
+        }
+        else {
             UpdatePlanState $PlanPath "ReadyForReview"
             Write-Host "Plan execution completed - ready for review" -ForegroundColor Green
         }
-    } else {
+    }
+    else {
         SendStatusMessage "Execution failed (exit code: $exitCode)"
         WritePlanLog $PlanPath "ExecutePlan-Failed" $summary
         UpdatePlanState $PlanPath "Failed"
