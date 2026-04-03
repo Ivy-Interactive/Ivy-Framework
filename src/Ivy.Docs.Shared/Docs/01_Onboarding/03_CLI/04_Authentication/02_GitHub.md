@@ -32,7 +32,7 @@ Before using GitHub authentication with Ivy, you'll need to create a GitHub OAut
    - **Authorization callback URL**: Your application's callback endpoint (e.g., `https://localhost:5010/ivy/auth/callback` for local development or `https://your-app.com/ivy/auth/callback` for production)
 4. **Click "Register application"**
 
-> **Note**: The Authorization callback URL must match your application's auth callback endpoint. For local development, this is typically `http://localhost:PORT/ivy/auth/callback` where PORT is your application's port.
+> **Note**: The Authorization callback URL must match your application's auth callback endpoint. For local development, this is typically `https://localhost:PORT/ivy/auth/callback` where PORT is your application's port.
 
 ### Step 2: Get Your Configuration Values
 
