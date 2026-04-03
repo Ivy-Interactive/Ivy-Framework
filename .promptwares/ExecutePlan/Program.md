@@ -5,6 +5,7 @@ Execute an approved plan in isolated git worktrees.
 ## Context
 
 The firmware header contains:
+
 - **Args** / **PlanFolder** — path to the plan folder
 - **ConfigPath** — absolute path to config.yaml
 - **CurrentTime** — current UTC timestamp
@@ -31,10 +32,12 @@ If `plan.yaml` has a `dependsOn` list, for each entry:
 1. Locate the dependency plan folder in the plans directory
 2. Verify the dependency plan's state is `Completed`
 3. Verify all PRs listed in the dependency's `plan.yaml` are actually merged on GitHub:
+
    ```bash
    gh pr view <pr-url> --json state -q .state
    # Must return "MERGED"
    ```
+
 4. If any dependency is unmet (not completed or PRs not merged), **fail immediately** with a clear message explaining which dependency isn't ready and why.
 
 **Note:** The JobService also performs this check before launching ExecutePlan, but this step acts as a safety net in case the dependency state changed between job launch and execution.
@@ -52,7 +55,7 @@ git worktree remove "<PlanFolder>/worktrees/<repo-folder-name>" --force 2>/dev/n
 git branch -D "plan-<planId>-<repo-folder-name>" 2>/dev/null
 ```
 
-4. Create worktree branching from the remote default branch:
+1. Create worktree branching from the remote default branch:
 
 ```bash
 cd <original-repo-path>
@@ -61,8 +64,9 @@ git worktree add "<PlanFolder>/worktrees/<repo-folder-name>" -b "plan-<planId>-<
 ```
 
 Example:
+
 ```bash
-cd D:\Repos\_Ivy\Ivy-Tendril
+cd ~/git/ivy/Ivy-Tendril
 git fetch origin
 git worktree add "<PlanFolder>/worktrees/Ivy-Tendril" -b "plan-01105-Ivy-Tendril" origin/master
 ```
@@ -71,7 +75,7 @@ git worktree add "<PlanFolder>/worktrees/Ivy-Tendril" -b "plan-01105-Ivy-Tendril
 
 ### 3. Handle Cross-Repo References
 
-Projects may reference other repos via absolute paths in `.csproj` files (e.g. `<ProjectReference Include="D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Ivy.csproj" />`).
+Projects may reference other repos via absolute paths in `.csproj` files (e.g. `<ProjectReference Include="~/git/ivy/Ivy-Framework/src/Ivy/Ivy.csproj" />`).
 
 These paths point to the original repos, not the worktree copies. Since we only modify files in the worktree, this is usually fine — the build references the original (stable) code.
 
@@ -92,24 +96,29 @@ Make logically grouped commits in the worktree(s). Each commit should be a coher
 Before each commit, run formatting/linting:
 
 **Frontend files** (under `src/frontend/`):
+
 ```bash
 cd src/frontend && npm run format && npm run lint:fix && cd ../..
 ```
 
 **C# files**:
+
 ```bash
 dotnet format
 ```
 
 Commit messages should reference the plan ID:
+
 ```
 [01105] Add settings app with config display
 ```
 
 After all commits, verify no uncommitted files remain:
+
 ```bash
 git status
 ```
+
 If there are uncommitted changes, either commit them or discard them with a clear reason. The worktree must be clean.
 
 ### 5.5. Generate Summary
@@ -141,6 +150,7 @@ Update the summary after verification fixes too — if verifications cause addit
 ### 5.7. Generate Recommendations
 
 If during implementation you discovered any of the following, record them in `<PlanFolder>/artifacts/recommendations.yaml`:
+
 - Follow-up work or improvements not in scope of this plan
 - Code quality issues in surrounding code
 - Unrelated bugs encountered
@@ -149,6 +159,7 @@ If during implementation you discovered any of the following, record them in `<P
 Each recommendation is a YAML list item with `title` (short) and `description` (markdown). Only create the file if there are actual recommendations. Do NOT include items that are part of the current plan's scope.
 
 Format:
+
 ```yaml
 - title: "Short descriptive title"
   description: |
@@ -191,6 +202,7 @@ Create a `verification/` directory in the plan folder if it doesn't exist.
 Check the `## Verification` section in the plan revision for checked items (`- [x]`). Skip unchecked items (`- [ ]`).
 
 For each checked verification:
+
 1. Send a status message: `Invoke-RestMethod -Uri "$env:TENDRIL_URL/api/jobs/$env:TENDRIL_JOB_ID/status" -Method Post -Body ('{"message":"Verifying: <Name>"}') -ContentType "application/json" -ErrorAction SilentlyContinue`
 2. Look up its `prompt` in the `verifications` list in `config.yaml`
 3. Execute the prompt in the worktree directory
