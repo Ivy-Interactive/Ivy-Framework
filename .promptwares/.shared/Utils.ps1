@@ -472,7 +472,10 @@ function Stop-Heartbeat {
 function GetAgentCommandFromConfig {
     param([string]$Promptware = "")
 
-    $configPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
+    $configPath = $script:ConfigPath
+    if (-not $configPath) {
+        $configPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "config.yaml"
+    }
     $raw = "claude --print --verbose --output-format stream-json --dangerously-skip-permissions"
 
     if (Test-Path $configPath) {
