@@ -27,6 +27,7 @@ public record ProjectConfig
     public List<ProjectVerificationRef> Verifications { get; set; } = new();
     public string Context { get; set; } = "";
     public List<ReviewActionConfig> ReviewActions { get; set; } = new();
+    public List<PromptwareHookConfig> Hooks { get; set; } = new();
     public List<string> RepoPaths => Repos.Select(r => r.Path).ToList();
 }
 
@@ -51,6 +52,15 @@ public record ProjectVerificationRef
 public record ReviewActionConfig
 {
     public string Name { get; set; } = "";
+    public string Condition { get; set; } = "";
+    public string Action { get; set; } = "";
+}
+
+public record PromptwareHookConfig
+{
+    public string Name { get; set; } = "";
+    public string When { get; set; } = "before";
+    public List<string> Promptwares { get; set; } = new();
     public string Condition { get; set; } = "";
     public string Action { get; set; } = "";
 }
