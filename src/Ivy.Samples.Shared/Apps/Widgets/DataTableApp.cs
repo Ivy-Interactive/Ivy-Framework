@@ -139,10 +139,10 @@ public class DataTableMainSample : ViewBase
                 config.ShowSearch = true;
             })
             .RowActions(
-                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit),
-                MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete),
-                MenuItem.Default(Icons.Eye).Tag(RowAction.View),
-                MenuItem.Default(Icons.EllipsisVertical).Tag(RowAction.Menu)
+                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit).Tooltip("Edit employee"),
+                MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete).Tooltip("Delete employee"),
+                MenuItem.Default(Icons.Eye).Tag(RowAction.View).Tooltip("View details"),
+                MenuItem.Default(Icons.EllipsisVertical).Tag(RowAction.Menu).Tooltip("More actions")
                     .Children([
                         MenuItem.Default(Icons.Archive).Tag(RowAction.Archive).Label("Archive"),
                         MenuItem.Default(Icons.Download).Tag(RowAction.Export).Label("Export"),
