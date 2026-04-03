@@ -228,4 +228,212 @@ public class JobServiceHookTests
 
         service.CompleteJob(id, exitCode: 0);
     }
+
+    [Fact]
+    public void WriteHookLog_CreatesLogFile()
+    {
+        var hooks = new List<PromptwareHookConfig>
+        {
+            new() { Name = "TestHook", When = "before", Action = "Write-Host test" },
+        };
+        var (service, config) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder();
+        var planReaderService = new PlanReaderService(config);
+        service.SetPlanReaderService(planReaderService);
+
+        try
+        {
+            var id = service.StartJob("ExecutePlan", planFolder);
+            var job = service.GetJob(id)!;
+
+            // Check that a log file was created
+            var logsDir = Path.Combine(planFolder, "logs");
+            Assert.True(Directory.Exists(logsDir), "Logs directory should exist");
+
+            var logFiles = Directory.GetFiles(logsDir, "*.md");
+            Assert.NotEmpty(logFiles);
+
+            var logFile = logFiles.First(f => Path.GetFileName(f).Contains("TestHook"));
+            Assert.True(File.Exists(logFile), "Log file for TestHook should exist");
+
+            service.CompleteJob(id, exitCode: 0);
+        }
+        finally
+        {
+            Directory.Delete(planFolder, true);
+        }
+    }
+
+    [Fact]
+    public void WriteHookLog_ContainsMetadata()
+    {
+        var hooks = new List<PromptwareHookConfig>
+        {
+            new() { Name = "MetaHook", When = "after", Action = "Write-Host metadata" },
+        };
+        var (service, config) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder();
+        var planReaderService = new PlanReaderService(config);
+        service.SetPlanReaderService(planReaderService);
+
+        try
+        {
+            var id = service.StartJob("ExecutePlan", planFolder);
+            service.CompleteJob(id, exitCode: 0);
+
+            var logsDir = Path.Combine(planFolder, "logs");
+            var logFiles = Directory.GetFiles(logsDir, "*.md");
+            var logFile = logFiles.First(f => Path.GetFileName(f).Contains("MetaHook"));
+            var content = File.ReadAllText(logFile);
+
+            // Verify metadata fields
+            Assert.Contains("**Status:** Completed", content);
+            Assert.Contains("**When:** after", content);
+            Assert.Contains("**Job Type:** ExecutePlan", content);
+            Assert.Contains("**Started:**", content);
+            Assert.Contains("**Completed:**", content);
+            Assert.Contains("**Duration:**", content);
+            Assert.Contains("**Exit Code:** 0", content);
+        }
+        finally
+        {
+            Directory.Delete(planFolder, true);
+        }
+    }
+
+    [Fact]
+    public void WriteHookLog_CapturesOutput()
+    {
+        var hooks = new List<PromptwareHookConfig>
+        {
+            new()
+            {
+                Name = "OutputHook",
+                When = "before",
+                Action = "Write-Host 'stdout-message'; Write-Error 'stderr-message'",
+            },
+        };
+        var (service, config) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder();
+        var planReaderService = new PlanReaderService(config);
+        service.SetPlanReaderService(planReaderService);
+
+        try
+        {
+            var id = service.StartJob("ExecutePlan", planFolder);
+            service.CompleteJob(id, exitCode: 0);
+
+            var logsDir = Path.Combine(planFolder, "logs");
+            var logFiles = Directory.GetFiles(logsDir, "*.md");
+            var logFile = logFiles.First(f => Path.GetFileName(f).Contains("OutputHook"));
+            var content = File.ReadAllText(logFile);
+
+            // Verify stdout and stderr are captured
+            Assert.Contains("## Output", content);
+            Assert.Contains("stdout-message", content);
+            Assert.Contains("## Errors", content);
+            Assert.Contains("stderr-message", content);
+        }
+        finally
+        {
+            Directory.Delete(planFolder, true);
+        }
+    }
+
+    [Fact]
+    public void WriteHookLog_SkippedHook_LogsAsSkipped()
+    {
+        var hooks = new List<PromptwareHookConfig>
+        {
+            new()
+            {
+                Name = "SkippedHook",
+                When = "before",
+                Condition = "$false",
+                Action = "Write-Host should-not-run",
+            },
+        };
+        var (service, config) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder();
+        var planReaderService = new PlanReaderService(config);
+        service.SetPlanReaderService(planReaderService);
+
+        try
+        {
+            var id = service.StartJob("ExecutePlan", planFolder);
+            service.CompleteJob(id, exitCode: 0);
+
+            var logsDir = Path.Combine(planFolder, "logs");
+            var logFiles = Directory.GetFiles(logsDir, "*.md");
+            var logFile = logFiles.First(f => Path.GetFileName(f).Contains("SkippedHook"));
+            var content = File.ReadAllText(logFile);
+
+            // Verify skipped status and condition
+            Assert.Contains("**Status:** Skipped", content);
+            Assert.Contains("**Condition:** $false (result: not met)", content);
+        }
+        finally
+        {
+            Directory.Delete(planFolder, true);
+        }
+    }
+
+    [Fact]
+    public void WriteHookLog_FailedHook_LogsError()
+    {
+        var hooks = new List<PromptwareHookConfig>
+        {
+            new()
+            {
+                Name = "FailedHook",
+                When = "before",
+                Action = "exit 42",
+            },
+        };
+        var (service, config) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder();
+        var planReaderService = new PlanReaderService(config);
+        service.SetPlanReaderService(planReaderService);
+
+        try
+        {
+            var id = service.StartJob("ExecutePlan", planFolder);
+            service.CompleteJob(id, exitCode: 0);
+
+            var logsDir = Path.Combine(planFolder, "logs");
+            var logFiles = Directory.GetFiles(logsDir, "*.md");
+            var logFile = logFiles.First(f => Path.GetFileName(f).Contains("FailedHook"));
+            var content = File.ReadAllText(logFile);
+
+            // Verify failed status and exit code
+            Assert.Contains("**Status:** Failed", content);
+            Assert.Contains("**Exit Code:** 42", content);
+        }
+        finally
+        {
+            Directory.Delete(planFolder, true);
+        }
+    }
+
+    [Fact]
+    public void WriteHookLog_MakePlanBeforeHook_NoLog()
+    {
+        var hooks = new List<PromptwareHookConfig>
+        {
+            new() { Name = "MakePlanHook", When = "before", Action = "Write-Host makeplan" },
+        };
+        var (service, config) = CreateServiceWithHooks(hooks);
+        var planReaderService = new PlanReaderService(config);
+        service.SetPlanReaderService(planReaderService);
+
+        // Start a job with empty plan folder (simulating MakePlan before-hook)
+        var id = service.StartJob("MakePlan", "");
+
+        // No plan folder exists, so no log should be written
+        // Just verify the job runs without throwing
+        var job = service.GetJob(id)!;
+        Assert.Equal("Running", job.Status);
+
+        service.CompleteJob(id, exitCode: 0);
+    }
 }

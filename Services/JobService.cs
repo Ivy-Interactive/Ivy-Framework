@@ -281,6 +281,13 @@ public class JobService
 
         foreach (var hook in hooks)
         {
+            var startTime = DateTime.UtcNow;
+            string status = "Completed";
+            int? exitCode = null;
+            string stdout = "";
+            string stderr = "";
+            string? conditionResult = null;
+
             try
             {
                 // Evaluate condition if set
@@ -303,9 +310,17 @@ public class JobService
                     if (condProc?.ExitCode != 0 ||
                         condOutput.Equals("False", StringComparison.OrdinalIgnoreCase))
                     {
+                        status = "Skipped";
+                        conditionResult = $"{hook.Condition} (result: not met)";
                         job.OutputLines.Add($"[hook:{hook.Name}] Condition not met, skipping");
+
+                        // Write log for skipped hook
+                        WriteHookLog(planFolder, hook.Name, when, jobType, startTime, DateTime.UtcNow,
+                            status, exitCode, stdout, stderr, conditionResult);
                         continue;
                     }
+
+                    conditionResult = $"{hook.Condition} (result: met)";
                 }
 
                 // Run the action
@@ -325,22 +340,86 @@ public class JobService
                 actionPsi.Environment["TENDRIL_PLAN_FOLDER"] = planFolder;
 
                 var actionProc = System.Diagnostics.Process.Start(actionPsi);
-                var output = actionProc?.StandardOutput.ReadToEnd().Trim() ?? "";
-                var stderr = actionProc?.StandardError.ReadToEnd().Trim() ?? "";
+                stdout = actionProc?.StandardOutput.ReadToEnd().Trim() ?? "";
+                stderr = actionProc?.StandardError.ReadToEnd().Trim() ?? "";
                 actionProc?.WaitForExit(30000);
 
-                if (!string.IsNullOrEmpty(output))
-                    job.OutputLines.Add($"[hook:{hook.Name}] {output}");
+                exitCode = actionProc?.ExitCode ?? 0;
+
+                if (!string.IsNullOrEmpty(stdout))
+                    job.OutputLines.Add($"[hook:{hook.Name}] {stdout}");
                 if (!string.IsNullOrEmpty(stderr))
                     job.OutputLines.Add($"[hook:{hook.Name}] [stderr] {stderr}");
 
-                if (actionProc?.ExitCode != 0)
-                    job.OutputLines.Add($"[hook:{hook.Name}] Hook failed with exit code {actionProc?.ExitCode}");
+                if (exitCode != 0)
+                {
+                    status = "Failed";
+                    job.OutputLines.Add($"[hook:{hook.Name}] Hook failed with exit code {exitCode}");
+                }
             }
             catch (Exception ex)
             {
+                status = "Failed";
+                stderr = ex.Message;
                 job.OutputLines.Add($"[hook:{hook.Name}] Error: {ex.Message}");
             }
+            finally
+            {
+                var endTime = DateTime.UtcNow;
+                WriteHookLog(planFolder, hook.Name, when, jobType, startTime, endTime,
+                    status, exitCode, stdout, stderr, conditionResult);
+            }
+        }
+    }
+
+    private void WriteHookLog(string planFolder, string hookName, string when, string jobType,
+        DateTime startTime, DateTime endTime, string status, int? exitCode,
+        string stdout, string stderr, string? conditionResult)
+    {
+        // Skip if no plan folder (e.g., MakePlan before-hooks before folder exists)
+        if (string.IsNullOrEmpty(planFolder) || !Directory.Exists(planFolder))
+            return;
+
+        // Skip if no PlanReaderService available
+        if (_planReaderService == null)
+            return;
+
+        // Skip if plan.yaml doesn't exist (not a valid plan folder)
+        var planYamlPath = Path.Combine(planFolder, "plan.yaml");
+        if (!File.Exists(planYamlPath))
+            return;
+
+        // Extract plan folder name from full path
+        var folderName = Path.GetFileName(planFolder);
+        var duration = (endTime - startTime).TotalSeconds;
+
+        var logContent = $@"# {hookName}
+
+- **Status:** {status}
+- **When:** {when}
+- **Job Type:** {jobType}
+- **Started:** {startTime:yyyy-MM-ddTHH:mm:ssZ}
+- **Completed:** {endTime:yyyy-MM-ddTHH:mm:ssZ}
+- **Duration:** {duration:F1}s
+- **Exit Code:** {exitCode?.ToString() ?? "N/A"}
+{(conditionResult != null ? $"- **Condition:** {conditionResult}" : "")}
+
+## Output
+
+{(string.IsNullOrEmpty(stdout) ? "None" : stdout)}
+
+## Errors
+
+{(string.IsNullOrEmpty(stderr) ? "None" : stderr)}
+";
+
+        try
+        {
+            _planReaderService.AddLog(folderName, hookName, logContent);
+        }
+        catch
+        {
+            // Silently ignore log write failures to avoid breaking hook execution
         }
     }
 
