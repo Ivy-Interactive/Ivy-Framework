@@ -98,7 +98,7 @@ public class ContentView(
             header |= new Badge(_selectedPlan.Status.ToString()).Variant(_selectedPlan.Status == PlanStatus.Failed ? BadgeVariant.Destructive : BadgeVariant.Outline);
         header |= new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline).WithProjectColor(_config, _selectedPlan.Project);
         header |= new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level));
-        header |= new Badge($"rev:{_selectedPlan.RevisionCount}").Variant(BadgeVariant.Outline);
+        header |= Text.Muted($"rev:{_selectedPlan.RevisionCount}");
 
         if (_selectedPlan.DependsOn.Count > 0)
         {
