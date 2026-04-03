@@ -27,6 +27,7 @@ public record ProjectConfig
     public List<ProjectVerificationRef> Verifications { get; set; } = new();
     public string Context { get; set; } = "";
     public List<ReviewActionConfig> ReviewActions { get; set; } = new();
+    public List<PromptwareHookConfig> Hooks { get; set; } = new();
     public List<string> RepoPaths => Repos.Select(r => r.Path).ToList();
 }
 
@@ -55,9 +56,25 @@ public record ReviewActionConfig
     public string Action { get; set; } = "";
 }
 
+public record PromptwareHookConfig
+{
+    public string Name { get; set; } = "";
+    public string When { get; set; } = "before";
+    public List<string> Promptwares { get; set; } = new();
+    public string Condition { get; set; } = "";
+    public string Action { get; set; } = "";
+}
+
 public record PromptwareConfig
 {
     public string Model { get; set; } = "";
+}
+
+public record LlmConfig
+{
+    public string Endpoint { get; set; } = "";
+    public string ApiKey { get; set; } = "";
+    public string Model { get; set; } = "gpt-4o-mini";
 }
 
 public class TendrilSettings
@@ -70,7 +87,9 @@ public class TendrilSettings
     public List<ProjectConfig> Projects { get; set; } = new();
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
+    public LlmConfig? Llm { get; set; }
     public Dictionary<string, PromptwareConfig> Promptwares { get; set; } = new();
+    public bool Telemetry { get; set; } = true;
     public List<LevelConfig> Levels { get; set; } = new()
     {
         new() { Name = "Critical", Badge = "Warning" },
