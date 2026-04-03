@@ -4,8 +4,8 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Settings", icon: Icons.Settings, group: new[] { "Tools" }, order: 50)]
-public class SettingsApp : ViewBase
+[App(title: "Setup", icon: Icons.Construction, isVisible: false)]
+public class SetupApp : ViewBase
 {
     public override object? Build()
     {
