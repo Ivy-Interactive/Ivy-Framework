@@ -39,6 +39,7 @@ public record JobItemRow
     public string Project { get; init; } = "";
     public string Timer { get; init; } = "";
     public string LastOutput { get; init; } = "";
+    public DateTime? LastOutputTimestamp { get; init; }
     public string Cost { get; init; } = "";
     public string StatusMessage { get; init; } = "";
 }
