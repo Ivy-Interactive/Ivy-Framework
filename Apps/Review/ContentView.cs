@@ -482,11 +482,11 @@ public class ContentView(
 
             var fileFinalContent = File.Exists(filePath2)
                 ? (object)new HeaderLayout(
-                    header: new Button("Open in VS Code").Icon(Icons.ExternalLink).Outline().OnClick(() =>
+                    header: new Button($"Open in {_config.Editor.Label}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
                     {
                         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                         {
-                            FileName = "code",
+                            FileName = _config.Editor.Command,
                             Arguments = $"\"{filePath2}\"",
                             UseShellExecute = true
                         });
@@ -639,11 +639,11 @@ public class ContentView(
                     copyToClipboard(_selectedPlan.FolderPath);
                     client.Toast("Copied path to clipboard", "Path Copied");
                 }),
-                new MenuItem("Open in VS Code", Icon: Icons.Code, Tag: "OpenInVsCode").OnSelect(() =>
+                new MenuItem($"Open in {_config.Editor.Label}", Icon: Icons.Code, Tag: "OpenInEditor").OnSelect(() =>
                 {
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        FileName = "code",
+                        FileName = _config.Editor.Command,
                         Arguments = $"\"{_selectedPlan.FolderPath}\"",
                         UseShellExecute = true
                     });

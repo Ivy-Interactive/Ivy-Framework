@@ -82,11 +82,11 @@ public class PlanViewerApp : ViewBase
 
                 var finalContent = File.Exists(filePath2)
                     ? (object)new HeaderLayout(
-                        header: new Button("Open in VS Code").Icon(Icons.ExternalLink).Outline().OnClick(() =>
+                        header: new Button($"Open in {config.Editor.Label}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
                         {
                             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                             {
-                                FileName = "code",
+                                FileName = config.Editor.Command,
                                 Arguments = $"\"{filePath2}\"",
                                 UseShellExecute = true
                             });
