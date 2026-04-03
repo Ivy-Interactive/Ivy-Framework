@@ -8,6 +8,17 @@ using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 
 
+AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+{
+    Console.WriteLine($"[FATAL] Unhandled exception: {e.ExceptionObject}");
+};
+
+TaskScheduler.UnobservedTaskException += (sender, e) =>
+{
+    Console.WriteLine($"[FATAL] Unobserved task exception: {e.Exception}");
+    e.SetObserved();
+};
+
 var server = new Server();
 server.DangerouslyAllowLocalFiles();
 server.UseCulture("en-US");
