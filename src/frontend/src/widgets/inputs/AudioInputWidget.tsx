@@ -27,6 +27,7 @@ interface AudioInputWidgetProps {
   sampleRate?: number | null;
   density?: Densities;
   invalid?: string;
+  autoFocus?: boolean;
 }
 
 const supportedMimeTypes = [
@@ -52,8 +53,18 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
   density = Densities.Medium,
   events = EMPTY_ARRAY,
   invalid,
+  autoFocus,
 }) => {
   const eventHandler = useEventHandler();
+  const hasAutoFocusedRef = useRef(false);
+
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      setRecording(true);
+      setError(false);
+    }
+  }, [autoFocus, disabled]);
   const normalizedMimeTypes = useMemo(() => {
     const candidates: string[] = [];
     const addCandidate = (value?: string) => {
