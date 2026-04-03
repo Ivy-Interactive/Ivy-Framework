@@ -112,13 +112,13 @@ public class DashboardApp : ViewBase
         var hourlyBurn = planService.GetHourlyTokenBurn(days: 7);
 
         var burnChart = hourlyBurn.ToBarChart(style: BarChartStyles.Dashboard)
-            .Dimension("Hour", e => e.Hour.ToString("MM/dd HH:mm"))
+            .Dimension("Hour", e => e.Hour.ToString("MM/dd HH"))
             .Measure("Cost ($)", e => e.Sum(f => (double)f.Cost))
             .Height(Size.Px(300))
             .Width(Size.Full());
 
         var tokensChart = hourlyBurn.ToBarChart(style: BarChartStyles.Dashboard)
-            .Dimension("Hour", e => e.Hour.ToString("MM/dd HH:mm"))
+            .Dimension("Hour", e => e.Hour.ToString("MM/dd HH"))
             .Measure("Tokens", e => e.Sum(f => (double)f.Tokens))
             .Height(Size.Px(300))
             .Width(Size.Full());
