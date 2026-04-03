@@ -4,13 +4,18 @@ namespace Ivy.Tendril.Test;
 
 public class JobServiceHookTests
 {
-    private static (JobService Service, ConfigService Config) CreateServiceWithHooks(
+    private static (JobService Service, ConfigService Config, string TempPlansDir) CreateServiceWithHooks(
         List<PromptwareHookConfig> hooks, string projectName = "TestProject")
     {
+        // Create a temp plans directory for this test
+        var tempPlansDir = Path.Combine(Path.GetTempPath(), $"ivy-hook-plans-{Guid.NewGuid()}");
+        Directory.CreateDirectory(tempPlansDir);
+
         var settings = new TendrilSettings
         {
             JobTimeout = 30,
             StaleOutputTimeout = 10,
+            PlanFolder = tempPlansDir,
             Projects = new List<ProjectConfig>
             {
                 new()
@@ -22,12 +27,12 @@ public class JobServiceHookTests
         };
         var config = new ConfigService(settings);
         var service = new JobService(config);
-        return (service, config);
+        return (service, config, tempPlansDir);
     }
 
-    private static string CreateTempPlanFolder(string projectName = "TestProject")
+    private static string CreateTempPlanFolder(string tempPlansDir, string projectName = "TestProject")
     {
-        var dir = Path.Combine(Path.GetTempPath(), $"ivy-hook-test-{Guid.NewGuid()}");
+        var dir = Path.Combine(tempPlansDir, $"ivy-hook-test-{Guid.NewGuid()}");
         Directory.CreateDirectory(dir);
         File.WriteAllText(Path.Combine(dir, "plan.yaml"), $"state: Executing\nproject: {projectName}\n");
         return dir;
@@ -41,8 +46,8 @@ public class JobServiceHookTests
             new() { Name = "Before Hook", When = "before", Action = "Write-Host before" },
             new() { Name = "After Hook", When = "after", Action = "Write-Host after" },
         };
-        var (service, _) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, _, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
 
         try
         {
@@ -60,7 +65,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -71,8 +76,8 @@ public class JobServiceHookTests
         {
             new() { Name = "Global Hook", When = "before", Promptwares = new(), Action = "Write-Host global" },
         };
-        var (service, _) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, _, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
 
         try
         {
@@ -85,7 +90,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -102,8 +107,8 @@ public class JobServiceHookTests
                 Action = "Write-Host execute-only",
             },
         };
-        var (service, _) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, _, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
 
         try
         {
@@ -117,7 +122,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -133,8 +138,8 @@ public class JobServiceHookTests
                 Action = "exit 1",
             },
         };
-        var (service, _) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, _, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
 
         try
         {
@@ -149,7 +154,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -166,8 +171,8 @@ public class JobServiceHookTests
                 Action = "Write-Host should-not-run",
             },
         };
-        var (service, _) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, _, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
 
         try
         {
@@ -181,7 +186,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -197,8 +202,8 @@ public class JobServiceHookTests
                 Action = "Write-Host $env:TENDRIL_JOB_STATUS",
             },
         };
-        var (service, _) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, _, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
 
         try
         {
@@ -210,7 +215,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -236,8 +241,8 @@ public class JobServiceHookTests
         {
             new() { Name = "TestHook", When = "before", Action = "Write-Host test" },
         };
-        var (service, config) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, config, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
         var planReaderService = new PlanReaderService(config);
         service.SetPlanReaderService(planReaderService);
 
@@ -260,7 +265,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -271,8 +276,8 @@ public class JobServiceHookTests
         {
             new() { Name = "MetaHook", When = "after", Action = "Write-Host metadata" },
         };
-        var (service, config) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, config, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
         var planReaderService = new PlanReaderService(config);
         service.SetPlanReaderService(planReaderService);
 
@@ -297,7 +302,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -313,8 +318,8 @@ public class JobServiceHookTests
                 Action = "Write-Host 'stdout-message'; Write-Error 'stderr-message'",
             },
         };
-        var (service, config) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, config, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
         var planReaderService = new PlanReaderService(config);
         service.SetPlanReaderService(planReaderService);
 
@@ -336,7 +341,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -353,8 +358,8 @@ public class JobServiceHookTests
                 Action = "Write-Host should-not-run",
             },
         };
-        var (service, config) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, config, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
         var planReaderService = new PlanReaderService(config);
         service.SetPlanReaderService(planReaderService);
 
@@ -374,7 +379,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -390,8 +395,8 @@ public class JobServiceHookTests
                 Action = "exit 42",
             },
         };
-        var (service, config) = CreateServiceWithHooks(hooks);
-        var planFolder = CreateTempPlanFolder();
+        var (service, config, tempPlansDir) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder(tempPlansDir);
         var planReaderService = new PlanReaderService(config);
         service.SetPlanReaderService(planReaderService);
 
@@ -411,7 +416,7 @@ public class JobServiceHookTests
         }
         finally
         {
-            Directory.Delete(planFolder, true);
+            Directory.Delete(tempPlansDir, true);
         }
     }
 
@@ -422,18 +427,25 @@ public class JobServiceHookTests
         {
             new() { Name = "MakePlanHook", When = "before", Action = "Write-Host makeplan" },
         };
-        var (service, config) = CreateServiceWithHooks(hooks);
+        var (service, config, tempPlansDir) = CreateServiceWithHooks(hooks);
         var planReaderService = new PlanReaderService(config);
         service.SetPlanReaderService(planReaderService);
 
-        // Start a job with empty plan folder (simulating MakePlan before-hook)
-        var id = service.StartJob("MakePlan", "");
+        try
+        {
+            // Start a job with empty plan folder (simulating MakePlan before-hook)
+            var id = service.StartJob("MakePlan", "");
 
-        // No plan folder exists, so no log should be written
-        // Just verify the job runs without throwing
-        var job = service.GetJob(id)!;
-        Assert.Equal("Running", job.Status);
+            // No plan folder exists, so no log should be written
+            // Just verify the job runs without throwing
+            var job = service.GetJob(id)!;
+            Assert.Equal("Running", job.Status);
 
-        service.CompleteJob(id, exitCode: 0);
+            service.CompleteJob(id, exitCode: 0);
+        }
+        finally
+        {
+            Directory.Delete(tempPlansDir, true);
+        }
     }
 }
