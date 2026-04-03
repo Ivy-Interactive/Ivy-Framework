@@ -5,7 +5,7 @@ namespace Ivy.Tendril.Apps;
 
 public record TrashFileInfo(string FilePath, string FileName, DateTime Date, string OriginalRequest, string DuplicateOf, string Project, string Content);
 
-[App(title: "Trash", icon: Icons.Trash2, group: new[] { "Tools" }, order: 40)]
+[App(title: "Trash", icon: Icons.Trash2, group: new[] { "Settings" }, order: 10)]
 public class TrashApp : ViewBase
 {
     public override object? Build()
