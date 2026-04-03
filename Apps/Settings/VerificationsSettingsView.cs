@@ -18,58 +18,35 @@ public class VerificationsSettingsView : ViewBase
 
         var rows = verifications.Select((v, i) => new VerificationRow(i, v.Name, v.Prompt)).ToList();
 
-        var dataTable = rows.AsQueryable()
-            .ToDataTable(idSelector: t => t.Index)
-            .RefreshToken(refreshToken)
-            .Width(Size.Full())
-            .Header(t => t.Name, "Name")
-            .Header(t => t.Prompt, "Prompt")
-            .Hidden(t => t.Index)
-            .Config(c =>
-            {
-                c.AllowSorting = false;
-                c.AllowFiltering = false;
-                c.ShowSearch = false;
-                c.SelectionMode = SelectionModes.None;
-                c.ShowIndexColumn = false;
-            })
-            .RowActions(
-                new MenuItem(Label: "Edit", Icon: Icons.Pencil, Tag: "edit"),
-                new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete")
-            )
-            .OnRowAction(e =>
-            {
-                var tag = e.Value.Tag?.ToString();
-                var id = e.Value.Id?.ToString();
-                if (int.TryParse(id, out var idx) && idx >= 0 && idx < verifications.Count)
-                {
-                    if (tag == "edit")
+        var table = new TableBuilder<VerificationRow>(rows)
+            .Header(t => t.Index, "Actions")
+            .Builder(t => t.Index, f => f.Func<VerificationRow, int>(idx =>
+                Layout.Horizontal().Gap(1)
+                    | new Button("Edit").Outline().Small().OnClick(() =>
                     {
                         editIndex.Set(idx);
                         editName.Set(verifications[idx].Name);
                         editPrompt.Set(verifications[idx].Prompt);
-                    }
-                    else if (tag == "delete")
+                    })
+                    | new Button("Delete").Outline().Small().OnClick(() =>
                     {
                         var name = verifications[idx].Name;
                         verifications.RemoveAt(idx);
                         config.SaveSettings();
                         client.Toast($"Verification '{name}' deleted", "Deleted");
                         refreshToken.Refresh();
-                    }
-                }
-                return ValueTask.CompletedTask;
-            })
-            .HeaderRight(_ => new Button("Add Verification").Icon(Icons.Plus).Outline().OnClick(() =>
+                    })
+            ));
+
+        var content = Layout.Vertical().Gap(4).Padding(4)
+            | Text.Block("Verification Definitions").Bold()
+            | table
+            | new Button("Add Verification").Icon(Icons.Plus).Outline().OnClick(() =>
             {
                 editIndex.Set(null);
                 editName.Set("");
                 editPrompt.Set("");
-            }));
-
-        var content = Layout.Vertical().Gap(4).Padding(4)
-            | Text.Block("Verification Definitions").Bold()
-            | dataTable;
+            });
 
         if (editIndex.Value != -1)
         {

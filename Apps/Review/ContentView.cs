@@ -45,10 +45,8 @@ public class ContentView(
         var customPrMerge = UseState(true);
         var customPrDeleteBranch = UseState(true);
         var customPrIncludeArtifacts = UseState(true);
-        var customPrSubmitToSlack = UseState(true);
         var customPrAssignee = UseState<string?>(null);
         var customPrComment = UseState("");
-        var customPrSlackComment = UseState("");
 
         UseEffect(() =>
         {
@@ -73,7 +71,7 @@ public class ContentView(
             async (_, ct) =>
             {
                 if (_selectedPlan is null) return Array.Empty<string>();
-                var repos = _selectedPlan.Repos.Count > 0
+                var repos = (_selectedPlan.Repos?.Count ?? 0) > 0
                     ? _selectedPlan.Repos
                     : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
                 var repoPath = repos.FirstOrDefault();
@@ -174,7 +172,7 @@ public class ContentView(
         }
 
         // Commits tab content
-        var repoPaths = _selectedPlan.Repos.Count > 0
+        var repoPaths = (_selectedPlan.Repos?.Count ?? 0) > 0
             ? _selectedPlan.Repos
             : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
         var commitRows = _selectedPlan.Commits.Select(commit =>
@@ -382,7 +380,7 @@ public class ContentView(
 
         if (openCommit.Value is { } commitHash)
         {
-            var repoPaths2 = _selectedPlan.Repos.Count > 0
+            var repoPaths2 = (_selectedPlan.Repos?.Count ?? 0) > 0
                 ? _selectedPlan.Repos
                 : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
 
@@ -469,7 +467,7 @@ public class ContentView(
                 else
                 {
                     var fileName = Path.GetFileName(filePath2);
-                    var fileRepoPaths = _selectedPlan.Repos.Count > 0
+                    var fileRepoPaths = (_selectedPlan.Repos?.Count ?? 0) > 0
                         ? _selectedPlan.Repos
                         : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
                     var suggestions = MarkdownHelper.FindFilesInRepos(fileRepoPaths, fileName);
@@ -547,10 +545,6 @@ public class ContentView(
                         | customPrMerge.ToBoolInput("Merge").Disabled(!customPrApprove.Value)
                         | customPrDeleteBranch.ToBoolInput("Delete Branch").Disabled(!customPrMerge.Value || !customPrApprove.Value)
                         | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
-                        | customPrSubmitToSlack.ToBoolInput("Submit to Slack")
-                        | (customPrSubmitToSlack.Value
-                            ? (object)customPrSlackComment.ToTextareaInput("Slack Comment").Rows(2)
-                            : new Spacer())
                         | customPrAssignee.ToSelectInput((assigneesQuery.Value ?? Array.Empty<string>()).ToOptions())
                             .Nullable().WithField().Label("Assignee")
                         | customPrComment.ToTextareaInput("Comment").Rows(3)
@@ -565,10 +559,8 @@ public class ContentView(
                             ["merge"] = customPrMerge.Value && customPrApprove.Value,
                             ["deleteBranch"] = customPrDeleteBranch.Value && customPrMerge.Value && customPrApprove.Value,
                             ["includeArtifacts"] = customPrIncludeArtifacts.Value,
-                            ["submitToSlack"] = customPrSubmitToSlack.Value,
                             ["assignee"] = customPrAssignee.Value ?? "",
-                            ["comment"] = customPrComment.Value,
-                            ["slackComment"] = customPrSlackComment.Value
+                            ["comment"] = customPrComment.Value
                         };
                         var serializer = new SerializerBuilder()
                             .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -606,10 +598,8 @@ public class ContentView(
                     customPrMerge.Set(true);
                     customPrDeleteBranch.Set(true);
                     customPrIncludeArtifacts.Set(true);
-                    customPrSubmitToSlack.Set(true);
                     customPrAssignee.Set(null);
                     customPrComment.Set("");
-                    customPrSlackComment.Set("");
                     customPrOpen.Set(true);
                 }),
                 new MenuItem("Set Completed", Icon: Icons.CircleCheck, Tag: "SetCompleted").OnSelect(() =>
@@ -617,47 +607,24 @@ public class ContentView(
                     _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
                     _refreshPlans();
                 }),
-                new MenuItem("Open in Explorer", Icon: Icons.FolderOpen, Tag: "OpenInExplorer").OnSelect(() =>
+                new MenuItem("Open in File Manager", Icon: Icons.FolderOpen, Tag: "OpenInExplorer").OnSelect(() =>
                 {
-                    if (OperatingSystem.IsMacOS())
-                    {
-                        System.Diagnostics.Process.Start("open", $"\"{_selectedPlan.FolderPath}\"");
-                    }
-                    else
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = _selectedPlan.FolderPath,
-                            UseShellExecute = true
-                        });
-                    }
+                    PlatformHelper.OpenInFileManager(_selectedPlan.FolderPath);
                 }),
                 new MenuItem("Open in Terminal", Icon: Icons.Terminal, Tag: "OpenInTerminal").OnSelect(() =>
                 {
-                    if (OperatingSystem.IsMacOS())
-                    {
-                        System.Diagnostics.Process.Start("open", $"-a Terminal \"{_selectedPlan.FolderPath}\"");
-                    }
-                    else
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = "wt.exe",
-                            Arguments = $"-d \"{_selectedPlan.FolderPath}\"",
-                            UseShellExecute = true
-                        });
-                    }
+                    PlatformHelper.OpenInTerminal(_selectedPlan.FolderPath);
                 }),
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath").OnSelect(() =>
                 {
                     copyToClipboard(_selectedPlan.FolderPath);
                     client.Toast("Copied path to clipboard", "Path Copied");
                 }),
-                new MenuItem("Open in VS Code", Icon: Icons.Code, Tag: "OpenInEditor").OnSelect(() =>
+                new MenuItem($"Open in {_config.Editor.Label}", Icon: Icons.Code, Tag: "OpenInEditor").OnSelect(() =>
                 {
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        FileName = "code",
+                        FileName = _config.Editor.Command,
                         Arguments = $"\"{_selectedPlan.FolderPath}\"",
                         UseShellExecute = true
                     });
@@ -665,19 +632,12 @@ public class ContentView(
                 new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
                 {
                     var yamlPath = System.IO.Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
-                    if (OperatingSystem.IsMacOS())
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        System.Diagnostics.Process.Start("open", $"-e \"{yamlPath}\"");
-                    }
-                    else
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = "notepad.exe",
-                            Arguments = yamlPath,
-                            UseShellExecute = true
-                        });
-                    }
+                        FileName = _config.Editor.Command,
+                        Arguments = yamlPath,
+                        UseShellExecute = true
+                    });
                 })
             );
 

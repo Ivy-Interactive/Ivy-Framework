@@ -155,7 +155,7 @@ public class ContentView(
                     var yamlPath = System.IO.Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        FileName = "notepad.exe",
+                        FileName = _config.Editor.Command,
                         Arguments = yamlPath,
                         UseShellExecute = true
                     });
@@ -200,7 +200,7 @@ public class ContentView(
                 else
                 {
                     var fileName = Path.GetFileName(filePath2);
-                    var repoPaths = _selectedPlan.Repos.Count > 0
+                    var repoPaths = (_selectedPlan.Repos?.Count ?? 0) > 0
                         ? _selectedPlan.Repos
                         : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
                     var suggestions = MarkdownHelper.FindFilesInRepos(repoPaths, fileName);

@@ -98,7 +98,7 @@ public class ContentView(
             header |= new Badge(_selectedPlan.Status.ToString()).Variant(_selectedPlan.Status == PlanStatus.Failed ? BadgeVariant.Destructive : BadgeVariant.Outline);
         header |= new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline).WithProjectColor(_config, _selectedPlan.Project);
         header |= new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level));
-        header |= new Badge($"rev:{_selectedPlan.RevisionCount}").Variant(BadgeVariant.Outline);
+        header |= Text.Muted($"rev:{_selectedPlan.RevisionCount}");
 
         if (_selectedPlan.DependsOn.Count > 0)
         {
@@ -190,7 +190,7 @@ public class ContentView(
                     var yamlPath = System.IO.Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
-                        FileName = "notepad.exe",
+                        FileName = _config.Editor.Command,
                         Arguments = yamlPath,
                         UseShellExecute = true
                     });
@@ -237,7 +237,7 @@ public class ContentView(
                 else
                 {
                     var fileName = Path.GetFileName(filePath2);
-                    var repoPaths = _selectedPlan.Repos.Count > 0
+                    var repoPaths = (_selectedPlan.Repos?.Count ?? 0) > 0
                         ? _selectedPlan.Repos
                         : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
                     var suggestions = MarkdownHelper.FindFilesInRepos(repoPaths, fileName);

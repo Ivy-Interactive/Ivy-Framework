@@ -1,9 +1,23 @@
+using System.ClientModel;
 using Ivy;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using OpenAI;
 using Ivy.Tendril.AppShell;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 
+
+AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+{
+    Console.WriteLine($"[FATAL] Unhandled exception: {e.ExceptionObject}");
+};
+
+TaskScheduler.UnobservedTaskException += (sender, e) =>
+{
+    Console.WriteLine($"[FATAL] Unobserved task exception: {e.Exception}");
+    e.SetObserved();
+};
 
 var server = new Server();
 server.DangerouslyAllowLocalFiles();
@@ -13,6 +27,23 @@ server.UseHotReload();
 #endif
 server.SetMetaTitle("Ivy Tendril");
 server.Services.AddSingleton<ConfigService>();
+
+// Register IChatClient if LLM is configured
+var configForLlm = new ConfigService();
+if (configForLlm.Settings.Llm is { } llmConfig && !string.IsNullOrEmpty(llmConfig.ApiKey))
+{
+    server.Services.AddSingleton<IChatClient>(sp =>
+    {
+        var config = sp.GetRequiredService<ConfigService>();
+        var llm = config.Settings.Llm!;
+        var endpoint = !string.IsNullOrEmpty(llm.Endpoint) ? llm.Endpoint : "https://api.openai.com/v1";
+        var client = new OpenAIClient(
+            new ApiKeyCredential(llm.ApiKey),
+            new OpenAIClientOptions { Endpoint = new Uri(endpoint) });
+        return client.GetChatClient(llm.Model).AsIChatClient();
+    });
+}
+
 server.Services.AddSingleton<GithubService>();
 server.Services.AddSingleton<GitService>();
 server.Services.AddSingleton<PlanReaderService>(sp =>
@@ -22,10 +53,16 @@ server.Services.AddSingleton<PlanReaderService>(sp =>
     planService.RecoverStuckPlans();
     return planService;
 });
+server.Services.AddSingleton<TelemetryService>(sp =>
+{
+    var config = sp.GetRequiredService<ConfigService>();
+    return new TelemetryService(config.Settings.Telemetry);
+});
 server.Services.AddSingleton<JobService>(sp =>
 {
     var jobService = new JobService(sp.GetRequiredService<ConfigService>());
     jobService.SetPlanReaderService(sp.GetRequiredService<PlanReaderService>());
+    jobService.SetTelemetryService(sp.GetRequiredService<TelemetryService>());
     return jobService;
 });
 server.Services.AddSingleton<PlanWatcherService>(sp =>
@@ -51,6 +88,7 @@ server.UseWebApplication(app =>
     // Eagerly resolve watcher services so their FileSystemWatchers start immediately
     app.Services.GetRequiredService<PlanWatcherService>();
     app.Services.GetRequiredService<InboxWatcherService>();
+    app.Services.GetRequiredService<TelemetryService>().TrackAppStarted();
 });
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();

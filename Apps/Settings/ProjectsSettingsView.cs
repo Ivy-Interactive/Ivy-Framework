@@ -37,45 +37,24 @@ public class ProjectsSettingsView : ViewBase
             i, p.Name, p.Color, p.Repos.Count, p.Verifications.Count
         )).ToList();
 
-        var dataTable = rows.AsQueryable()
-            .ToDataTable(idSelector: t => t.Index)
-            .RefreshToken(refreshToken)
-            .Width(Size.Full())
-            .Header(t => t.Name, "Name")
-            .Header(t => t.Color, "Color")
-            .Header(t => t.RepoCount, "Repos")
-            .Header(t => t.VerificationCount, "Verifications")
-            .Hidden(t => t.Index)
-            .Config(c =>
-            {
-                c.AllowSorting = false;
-                c.AllowFiltering = false;
-                c.ShowSearch = false;
-                c.SelectionMode = SelectionModes.None;
-                c.ShowIndexColumn = false;
-            })
-            .RowActions(
-                new MenuItem(Label: "Edit", Icon: Icons.Pencil, Tag: "edit"),
-                new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete")
-            )
-            .OnRowAction(e =>
-            {
-                var tag = e.Value.Tag?.ToString();
-                var id = e.Value.Id?.ToString();
-                if (int.TryParse(id, out var idx) && idx >= 0 && idx < projects.Count)
-                {
-                    if (tag == "edit")
+        var table = new TableBuilder<ProjectRow>(rows)
+            .Header(t => t.Index, "Actions")
+            .Builder(t => t.Index, f => f.Func<ProjectRow, int>(idx =>
+                Layout.Horizontal().Gap(1)
+                    | new Button("Edit").Outline().Small().OnClick(() =>
                     {
                         LoadProjectIntoEditor(projects[idx], idx);
-                    }
-                    else if (tag == "delete")
+                    })
+                    | new Button("Delete").Outline().Small().OnClick(() =>
                     {
                         deleteIndex.Set(idx);
-                    }
-                }
-                return ValueTask.CompletedTask;
-            })
-            .HeaderRight(_ => new Button("Add Project").Icon(Icons.Plus).Outline().OnClick(() =>
+                    })
+            ));
+
+        var content = Layout.Vertical().Gap(4).Padding(4)
+            | Text.Block("Projects").Bold()
+            | table
+            | new Button("Add Project").Icon(Icons.Plus).Outline().OnClick(() =>
             {
                 editIndex.Set(null);
                 editName.Set("");
@@ -84,11 +63,7 @@ public class ProjectsSettingsView : ViewBase
                 editContext.Set("");
                 editRepos.Set(new List<RepoRef>());
                 editVerifications.Set(new List<ProjectVerificationRef>());
-            }));
-
-        var content = Layout.Vertical().Gap(4).Padding(4)
-            | Text.Block("Projects").Bold()
-            | dataTable;
+            });
 
         // Edit dialog
         if (editIndex.Value != -1)
@@ -188,7 +163,7 @@ public class ProjectsSettingsView : ViewBase
                         var project = isNew ? new ProjectConfig() : projects[editIndex.Value!.Value];
                         project.Name = editName.Value;
                         project.Color = editColor.Value;
-                        project.SlackEmoji = editSlackEmoji.Value;
+                        project.Meta["slackEmoji"] = editSlackEmoji.Value;
                         project.Context = editContext.Value;
                         project.Repos = new List<RepoRef>(editRepos.Value);
                         project.Verifications = new List<ProjectVerificationRef>(editVerifications.Value);
@@ -233,7 +208,7 @@ public class ProjectsSettingsView : ViewBase
             editIndex.Set(idx);
             editName.Set(project.Name);
             editColor.Set(project.Color);
-            editSlackEmoji.Set(project.SlackEmoji);
+            editSlackEmoji.Set(project.GetMeta("slackEmoji") ?? "");
             editContext.Set(project.Context);
             editRepos.Set(new List<RepoRef>(project.Repos.Select(r => new RepoRef { Path = r.Path, PrRule = r.PrRule })));
             editVerifications.Set(new List<ProjectVerificationRef>(

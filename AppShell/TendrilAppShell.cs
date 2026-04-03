@@ -3,6 +3,7 @@ using Ivy.Core;
 using Ivy.Core.Apps;
 using Ivy.Core.AppShell;
 using Ivy.Core.Server;
+using Ivy.Tendril.Apps;
 using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
@@ -423,6 +424,10 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         var commonMenuItems = new[]
         {
+            MenuItem.Default("Setup")
+                .Tag("$setup")
+                .Icon(Icons.Construction)
+                .OnSelect(() => navigator.Navigate<SetupApp>()),
             MenuItem.Default("Tendril Feedback")
                 .Tag("$feedback")
                 .Icon(Icons.MessageSquare)
@@ -479,11 +484,11 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         }
         else
         {
-            var trigger = new Button("Settings")
+            var trigger = new Button("Setup")
                 .Content(
                     Layout.Horizontal().AlignContent(Align.Left)
-                        | Icons.Settings.ToIcon()
-                        | Text.P("Settings").Small().Muted()
+                        | Icons.Construction.ToIcon()
+                        | Text.P("Setup").Small().Muted()
                     )
                     .Variant(ButtonVariant.Ghost).Width(Size.Full());
 

@@ -149,22 +149,24 @@ Update the summary after verification fixes too — if verifications cause addit
 
 ### 5.7. Generate Recommendations
 
-If during implementation you discovered any of the following, record them in `<PlanFolder>/artifacts/recommendations.yaml`:
+**REQUIRED STEP** — After implementation, actively reflect on what you observed during this plan's execution. Consider each of the following categories and write down any findings:
 
-- Follow-up work or improvements not in scope of this plan
-- Code quality issues in surrounding code
-- Unrelated bugs encountered
-- Potential optimizations or refactors
+1. **Follow-up work** — Did you notice functionality that should be extended, edge cases not covered, or related features that would complement this change?
+2. **Code quality** — Did you encounter confusing code, missing documentation, inconsistent patterns, or technical debt in the files you touched or read?
+3. **Bugs** — Did you notice any unrelated bugs, broken tests, or incorrect behavior in surrounding code?
+4. **Optimizations** — Are there performance improvements, unnecessary complexity, or refactoring opportunities in the area you worked in?
 
-Each recommendation is a YAML list item with `title` (short) and `description` (markdown). Only create the file if there are actual recommendations. Do NOT include items that are part of the current plan's scope.
-
-Format:
+If you identified items in ANY category, write them to `<PlanFolder>/artifacts/recommendations.yaml`:
 
 ```yaml
 - title: "Short descriptive title"
   description: |
-    Markdown description with context.
+    Markdown description with context and location.
 ```
+
+Do NOT include items that are part of the current plan's scope.
+
+If after genuine reflection you found nothing noteworthy, skip the file — but this should be rare. Most plans touch enough code to surface at least one observation.
 
 ### 6. Document Commits
 

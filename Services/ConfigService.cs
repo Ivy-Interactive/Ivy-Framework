@@ -22,12 +22,14 @@ public record ProjectConfig
 {
     public string Name { get; set; } = "";
     public string Color { get; set; } = "";
-    public string SlackEmoji { get; set; } = "";
+    public Dictionary<string, object> Meta { get; set; } = new();
     public List<RepoRef> Repos { get; set; } = new();
     public List<ProjectVerificationRef> Verifications { get; set; } = new();
     public string Context { get; set; } = "";
     public List<ReviewActionConfig> ReviewActions { get; set; } = new();
+    public List<PromptwareHookConfig> Hooks { get; set; } = new();
     public List<string> RepoPaths => Repos.Select(r => r.Path).ToList();
+    public string? GetMeta(string key) => Meta.TryGetValue(key, out var v) ? v?.ToString() : null;
 }
 
 public record LevelConfig
@@ -55,9 +57,32 @@ public record ReviewActionConfig
     public string Action { get; set; } = "";
 }
 
+public record PromptwareHookConfig
+{
+    public string Name { get; set; } = "";
+    public string When { get; set; } = "before";
+    public List<string> Promptwares { get; set; } = new();
+    public string Condition { get; set; } = "";
+    public string Action { get; set; } = "";
+}
+
+public record EditorConfig
+{
+    public string Command { get; set; } = "code";
+    public string Label { get; set; } = "VS Code";
+}
+
 public record PromptwareConfig
 {
     public string Model { get; set; } = "";
+    public List<string> AllowedTools { get; set; } = new();
+}
+
+public record LlmConfig
+{
+    public string Endpoint { get; set; } = "";
+    public string ApiKey { get; set; } = "";
+    public string Model { get; set; } = "gpt-4o-mini";
 }
 
 public class TendrilSettings
@@ -70,7 +95,10 @@ public class TendrilSettings
     public List<ProjectConfig> Projects { get; set; } = new();
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
+    public EditorConfig Editor { get; set; } = new();
+    public LlmConfig? Llm { get; set; }
     public Dictionary<string, PromptwareConfig> Promptwares { get; set; } = new();
+    public bool Telemetry { get; set; } = true;
     public List<LevelConfig> Levels { get; set; } = new()
     {
         new() { Name = "Critical", Badge = "Warning" },
@@ -168,6 +196,7 @@ public class ConfigService
     public List<ProjectConfig> Projects => _settings.Projects;
     public List<LevelConfig> Levels => _settings.Levels;
     public string[] LevelNames => _settings.Levels.Select(l => l.Name).ToArray();
+    public EditorConfig Editor => _settings.Editor;
     public ProjectConfig? GetProject(string name) => _settings.Projects.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
     public BadgeVariant GetBadgeVariant(string level) =>

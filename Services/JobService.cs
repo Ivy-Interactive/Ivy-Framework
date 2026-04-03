@@ -13,8 +13,12 @@ public class JobService
     private readonly ConcurrentDictionary<string, JobItem> _jobs = new();
     private int _counter;
     private PlanReaderService? _planReaderService;
+    private readonly ConfigService? _configService;
+    private TelemetryService? _telemetryService;
     private readonly TimeSpan _jobTimeout;
     private readonly TimeSpan _staleOutputTimeout;
+
+    private readonly string? _inboxPath;
 
     public event Action? JobsChanged;
     public ConcurrentQueue<JobNotification> PendingNotifications { get; } = new();
@@ -36,14 +40,17 @@ public class JobService
 
     public JobService(ConfigService configService)
     {
+        _configService = configService;
         _jobTimeout = TimeSpan.FromMinutes(configService.Settings.JobTimeout);
         _staleOutputTimeout = TimeSpan.FromMinutes(configService.Settings.StaleOutputTimeout);
+        _inboxPath = Path.Combine(configService.TendrilData, "Inbox");
     }
 
-    public JobService(TimeSpan jobTimeout, TimeSpan staleOutputTimeout)
+    public JobService(TimeSpan jobTimeout, TimeSpan staleOutputTimeout, string? inboxPath = null)
     {
         _jobTimeout = jobTimeout;
         _staleOutputTimeout = staleOutputTimeout;
+        _inboxPath = inboxPath;
     }
 
     public void SetPlanReaderService(PlanReaderService planReaderService)
@@ -51,7 +58,22 @@ public class JobService
         _planReaderService = planReaderService;
     }
 
+    public void SetTelemetryService(TelemetryService telemetryService)
+    {
+        _telemetryService = telemetryService;
+    }
+
+    public string StartJob(string type, string[] args, string? inboxFilePath)
+    {
+        return StartJobInternal(type, args, inboxFilePath);
+    }
+
     public string StartJob(string type, params string[] args)
+    {
+        return StartJobInternal(type, args, inboxFilePath: null);
+    }
+
+    private string StartJobInternal(string type, string[] args, string? inboxFilePath)
     {
         var id = $"job-{Interlocked.Increment(ref _counter):D3}";
         var scriptPath = ScriptPaths.GetValueOrDefault(type, "");
@@ -98,6 +120,31 @@ public class JobService
             Args = args,
         };
 
+        // For MakePlan jobs: track the inbox file for crash recovery
+        if (type == "MakePlan")
+        {
+            if (inboxFilePath != null)
+            {
+                // Inbox-originated job — file already renamed to .processing by InboxWatcherService
+                job.InboxFile = inboxFilePath;
+            }
+            else if (_inboxPath != null)
+            {
+                // Manual MakePlan — write a .processing inbox file as a write-ahead log
+                try
+                {
+                    Directory.CreateDirectory(_inboxPath);
+                    var description = GetNamedArg(args, "-Description") ?? "New Plan";
+                    var inboxProject = GetNamedArg(args, "-Project") ?? "[Auto]";
+                    var pendingFile = Path.Combine(_inboxPath, $"pending-{id}.md.processing");
+                    var content = $"---\nproject: {inboxProject}\n---\n{description}";
+                    File.WriteAllText(pendingFile, content);
+                    job.InboxFile = pendingFile;
+                }
+                catch { /* Best-effort — don't fail the job if we can't write the recovery file */ }
+            }
+        }
+
         _jobs[id] = job;
 
         // Check dependencies for ExecutePlan jobs
@@ -121,6 +168,10 @@ public class JobService
                 return id;
             }
         }
+
+        // Run before-hooks
+        var planFolderForHooks = type != "MakePlan" && args.Length > 0 ? args[0] : "";
+        RunHooks("before", type, planFolderForHooks, project, job);
 
         // Launch process
         var processArgs = new List<string> { "-NoProfile", "-File", scriptPath };
@@ -216,6 +267,83 @@ public class JobService
         return id;
     }
 
+    internal void RunHooks(string when, string jobType, string planFolder, string project, JobItem job)
+    {
+        if (_configService == null) return;
+
+        var projectConfig = _configService.GetProject(project);
+        if (projectConfig == null) return;
+
+        var hooks = projectConfig.Hooks
+            .Where(h => h.When.Equals(when, StringComparison.OrdinalIgnoreCase))
+            .Where(h => h.Promptwares.Count == 0 || h.Promptwares.Contains(jobType, StringComparer.OrdinalIgnoreCase))
+            .ToList();
+
+        foreach (var hook in hooks)
+        {
+            try
+            {
+                // Evaluate condition if set
+                if (!string.IsNullOrWhiteSpace(hook.Condition))
+                {
+                    var condPsi = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "pwsh",
+                        Arguments = $"-NoProfile -Command \"{hook.Condition}\"",
+                        WorkingDirectory = string.IsNullOrEmpty(planFolder) ? "." : planFolder,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    };
+                    var condProc = System.Diagnostics.Process.Start(condPsi);
+                    var condOutput = condProc?.StandardOutput.ReadToEnd().Trim() ?? "";
+                    condProc?.WaitForExit(10000);
+
+                    if (condProc?.ExitCode != 0 ||
+                        condOutput.Equals("False", StringComparison.OrdinalIgnoreCase))
+                    {
+                        job.OutputLines.Add($"[hook:{hook.Name}] Condition not met, skipping");
+                        continue;
+                    }
+                }
+
+                // Run the action
+                var actionPsi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "pwsh",
+                    Arguments = $"-NoProfile -Command \"{hook.Action}\"",
+                    WorkingDirectory = string.IsNullOrEmpty(planFolder) ? "." : planFolder,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                };
+                actionPsi.Environment["TENDRIL_JOB_ID"] = job.Id;
+                actionPsi.Environment["TENDRIL_JOB_TYPE"] = jobType;
+                actionPsi.Environment["TENDRIL_JOB_STATUS"] = job.Status;
+                actionPsi.Environment["TENDRIL_PLAN_FOLDER"] = planFolder;
+
+                var actionProc = System.Diagnostics.Process.Start(actionPsi);
+                var output = actionProc?.StandardOutput.ReadToEnd().Trim() ?? "";
+                var stderr = actionProc?.StandardError.ReadToEnd().Trim() ?? "";
+                actionProc?.WaitForExit(30000);
+
+                if (!string.IsNullOrEmpty(output))
+                    job.OutputLines.Add($"[hook:{hook.Name}] {output}");
+                if (!string.IsNullOrEmpty(stderr))
+                    job.OutputLines.Add($"[hook:{hook.Name}] [stderr] {stderr}");
+
+                if (actionProc?.ExitCode != 0)
+                    job.OutputLines.Add($"[hook:{hook.Name}] Hook failed with exit code {actionProc?.ExitCode}");
+            }
+            catch (Exception ex)
+            {
+                job.OutputLines.Add($"[hook:{hook.Name}] Error: {ex.Message}");
+            }
+        }
+    }
+
     private async Task RunStaleOutputWatchdog(string id, CancellationTokenSource timeoutCts)
     {
         var checkInterval = TimeSpan.FromSeconds(60);
@@ -273,6 +401,10 @@ public class JobService
         if (job.StartedAt.HasValue)
             job.DurationSeconds = (int)(job.CompletedAt.Value - job.StartedAt.Value).TotalSeconds;
 
+        // Run after-hooks
+        var planFolderForHooks = job.Args.Length > 0 ? job.Args[0] : "";
+        RunHooks("after", job.Type, planFolderForHooks, job.Project, job);
+
         var isSuccess = job.Status == "Completed";
         var title = job.Status == "Timeout" ? "Job Timed Out" : (isSuccess ? "Job Completed" : "Job Failed");
         var message = job.PlanFile ?? job.Type;
@@ -287,8 +419,18 @@ public class JobService
         else if (isSuccess && job.Type == "CreateIssue")
             SetPlanState(job, "Completed");
         else if (isSuccess && job.Type == "MakePlan")
+        {
             VerifyMakePlanResult(job);
+            if (job.Status == "Completed")
+                _telemetryService?.TrackPlanCreated();
+        }
 
+        if (isSuccess && job.Type == "MakePr")
+            _telemetryService?.TrackPrCreated();
+
+        _telemetryService?.TrackJobCompleted(job.Type, job.Status, job.DurationSeconds);
+
+        CleanupInboxFile(job);
         WriteJobLog(job);
         JobsChanged?.Invoke();
 
@@ -308,6 +450,7 @@ public class JobService
         if (job.StartedAt.HasValue)
             job.DurationSeconds = (int)(job.CompletedAt.Value - job.StartedAt.Value).TotalSeconds;
 
+        CleanupInboxFile(job);
         ResetPlanState(job);
         JobsChanged?.Invoke();
     }
@@ -581,6 +724,30 @@ public class JobService
         {
             return (false, $"Dependency check failed: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Checks whether the given inbox file path is already tracked by a running MakePlan job.
+    /// Used by InboxWatcherService to avoid re-processing files.
+    /// </summary>
+    public bool IsInboxFileTracked(string filePath)
+    {
+        return _jobs.Values.Any(j =>
+            j.Type == "MakePlan" &&
+            j.Status == "Running" &&
+            j.InboxFile != null &&
+            j.InboxFile.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void CleanupInboxFile(JobItem job)
+    {
+        if (string.IsNullOrEmpty(job.InboxFile)) return;
+        try
+        {
+            if (File.Exists(job.InboxFile))
+                File.Delete(job.InboxFile);
+        }
+        catch { /* Best-effort cleanup */ }
     }
 
     private void ResetPlanStateToBlocked(JobItem job)
