@@ -60,6 +60,13 @@ public record PromptwareConfig
     public string Model { get; set; } = "";
 }
 
+public record LlmConfig
+{
+    public string Endpoint { get; set; } = "";
+    public string ApiKey { get; set; } = "";
+    public string Model { get; set; } = "gpt-4o-mini";
+}
+
 public class TendrilSettings
 {
     public string TendrilData { get; set; } = "";
@@ -70,6 +77,7 @@ public class TendrilSettings
     public List<ProjectConfig> Projects { get; set; } = new();
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
+    public LlmConfig? Llm { get; set; }
     public Dictionary<string, PromptwareConfig> Promptwares { get; set; } = new();
     public List<LevelConfig> Levels { get; set; } = new()
     {

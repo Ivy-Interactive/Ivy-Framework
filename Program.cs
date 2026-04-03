@@ -1,5 +1,8 @@
+using System.ClientModel;
 using Ivy;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using OpenAI;
 using Ivy.Tendril.AppShell;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
@@ -13,6 +16,23 @@ server.UseHotReload();
 #endif
 server.SetMetaTitle("Ivy Tendril");
 server.Services.AddSingleton<ConfigService>();
+
+// Register IChatClient if LLM is configured
+var configForLlm = new ConfigService();
+if (configForLlm.Settings.Llm is { } llmConfig && !string.IsNullOrEmpty(llmConfig.ApiKey))
+{
+    server.Services.AddSingleton<IChatClient>(sp =>
+    {
+        var config = sp.GetRequiredService<ConfigService>();
+        var llm = config.Settings.Llm!;
+        var endpoint = !string.IsNullOrEmpty(llm.Endpoint) ? llm.Endpoint : "https://api.openai.com/v1";
+        var client = new OpenAIClient(
+            new ApiKeyCredential(llm.ApiKey),
+            new OpenAIClientOptions { Endpoint = new Uri(endpoint) });
+        return client.GetChatClient(llm.Model).AsIChatClient();
+    });
+}
+
 server.Services.AddSingleton<GithubService>();
 server.Services.AddSingleton<GitService>();
 server.Services.AddSingleton<PlanReaderService>(sp =>
