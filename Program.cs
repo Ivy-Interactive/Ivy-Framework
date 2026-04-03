@@ -42,10 +42,16 @@ server.Services.AddSingleton<PlanReaderService>(sp =>
     planService.RecoverStuckPlans();
     return planService;
 });
+server.Services.AddSingleton<TelemetryService>(sp =>
+{
+    var config = sp.GetRequiredService<ConfigService>();
+    return new TelemetryService(config.Settings.Telemetry);
+});
 server.Services.AddSingleton<JobService>(sp =>
 {
     var jobService = new JobService(sp.GetRequiredService<ConfigService>());
     jobService.SetPlanReaderService(sp.GetRequiredService<PlanReaderService>());
+    jobService.SetTelemetryService(sp.GetRequiredService<TelemetryService>());
     return jobService;
 });
 server.Services.AddSingleton<PlanWatcherService>(sp =>
@@ -71,6 +77,7 @@ server.UseWebApplication(app =>
     // Eagerly resolve watcher services so their FileSystemWatchers start immediately
     app.Services.GetRequiredService<PlanWatcherService>();
     app.Services.GetRequiredService<InboxWatcherService>();
+    app.Services.GetRequiredService<TelemetryService>().TrackAppStarted();
 });
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
