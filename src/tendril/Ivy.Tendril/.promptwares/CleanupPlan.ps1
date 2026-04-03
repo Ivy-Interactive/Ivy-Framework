@@ -9,8 +9,8 @@ $planYamlPath = ValidatePlanPath $PlanPath
 $planInfo = ReadPlanProject $planYamlPath
 
 # Check plan state
-$stateMatch = [regex]::Match($planInfo.Content, '(?m)^state:\s*(.+)$')
-$currentState = if ($stateMatch.Success) { $stateMatch.Groups[1].Value.Trim() } else { "Unknown" }
+$plan = $planInfo.Content | ConvertFrom-Yaml
+$currentState = if ($plan.state) { $plan.state } else { "Unknown" }
 
 $terminalStates = @("Completed", "Failed", "Skipped", "Icebox")
 if ($currentState -notin $terminalStates) {
@@ -30,12 +30,9 @@ $planFolderName = Split-Path $PlanPath -Leaf
 $planId = if ($planFolderName -match '^(\d+)') { $Matches[1] } else { "" }
 
 # Extract repo paths from plan.yaml
-$repoMatches = [regex]::Matches($planInfo.Content, '(?m)^\s*-\s*((?:[A-Za-z]:\\|/).+)$')
 $repoPaths = @()
-foreach ($m in $repoMatches) {
-    $p = $m.Groups[1].Value.Trim()
-    # Expand %REPOS_HOME% if present
-    $p = [Environment]::ExpandEnvironmentVariables($p)
+foreach ($repo in $plan.repos) {
+    $p = [Environment]::ExpandEnvironmentVariables($repo)
     if (Test-Path $p) { $repoPaths += $p }
 }
 

@@ -208,8 +208,8 @@ function ReadPlanProject {
     param([string]$PlanYamlPath)
 
     $content = Get-Content $PlanYamlPath -Raw
-    $match = [regex]::Match($content, '(?m)^project:\s*(.+)$')
-    $project = if ($match.Success) { $match.Groups[1].Value.Trim() } else { "[Auto]" }
+    $plan = $content | ConvertFrom-Yaml
+    $project = if ($plan.project) { $plan.project } else { "[Auto]" }
     return @{ Content = $content; Project = $project }
 }
 
@@ -374,13 +374,6 @@ function GetAgentCommandFromConfig {
     if (Test-Path $configPath) {
         try {
             $yaml = Get-Content $configPath -Raw
-            # Regex match as first pass or fallback
-            $pattern = "(?m)^agentCommand:\s*(.+)$"
-            $match = [regex]::Match($yaml, $pattern)
-            if ($match.Success) {
-                $raw = $match.Groups[1].Value.Trim()
-            }
-
             # Parse config with ConvertFrom-Yaml for structured access
             $config = $yaml | ConvertFrom-Yaml
 

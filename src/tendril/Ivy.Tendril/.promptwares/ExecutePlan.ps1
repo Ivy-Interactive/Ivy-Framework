@@ -10,8 +10,8 @@ $planYamlPath = ValidatePlanPath $PlanPath
 $planInfo = ReadPlanProject $planYamlPath
 
 # Verify plan is in Building state
-$stateMatch = [regex]::Match($planInfo.Content, '(?m)^state:\s*(.+)$')
-$currentState = if ($stateMatch.Success) { $stateMatch.Groups[1].Value.Trim() } else { "Unknown" }
+$plan = $planInfo.Content | ConvertFrom-Yaml
+$currentState = if ($plan.state) { $plan.state } else { "Unknown" }
 
 if ($currentState -ne "Building") {
     Write-Host "Plan is not in Building state (current: $currentState): $PlanPath" -ForegroundColor Red
@@ -85,8 +85,8 @@ try {
 
         # Check verification statuses before transitioning
         $planYaml = Get-Content (Join-Path $PlanPath "plan.yaml") -Raw
-        $verificationStatuses = [regex]::Matches($planYaml, '(?m)^\s+status:\s*(.+)$') |
-        ForEach-Object { $_.Groups[1].Value.Trim() }
+        $planData = $planYaml | ConvertFrom-Yaml
+        $verificationStatuses = $planData.verifications | ForEach-Object { $_.status }
 
         $hasFailed = $verificationStatuses | Where-Object { $_ -eq "Fail" }
         $hasPending = $verificationStatuses | Where-Object { $_ -eq "Pending" }

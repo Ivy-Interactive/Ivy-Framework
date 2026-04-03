@@ -38,16 +38,15 @@ foreach ($planFolder in $planFolders) {
     if (-not (Test-Path $planYamlPath)) { continue }
 
     $planContent = Get-Content $planYamlPath -Raw
+    $plan = $planContent | ConvertFrom-Yaml
 
     # Check state
-    $stateMatch = [regex]::Match($planContent, '(?m)^state:\s*(.+)$')
-    $state = if ($stateMatch.Success) { $stateMatch.Groups[1].Value.Trim() } else { "Unknown" }
+    $state = if ($plan.state) { $plan.state } else { "Unknown" }
     if ($state -notin $terminalStates) { continue }
 
     # Check age (use updated timestamp)
-    $updatedMatch = [regex]::Match($planContent, '(?m)^updated:\s*(.+)$')
-    if ($updatedMatch.Success) {
-        $updated = [datetime]::Parse($updatedMatch.Groups[1].Value.Trim())
+    if ($plan.updated) {
+        $updated = [datetime]::Parse($plan.updated)
         if ($updated -gt $cutoffDate) { continue }
     }
 
@@ -55,11 +54,9 @@ foreach ($planFolder in $planFolders) {
     $planId = if ($planFolder.Name -match '^(\d+)') { $Matches[1] } else { "" }
 
     # Extract repo paths
-    $repoMatches = [regex]::Matches($planContent, '(?m)^\s*-\s*((?:[A-Za-z]:\\|/).+)$')
     $repoPaths = @()
-    foreach ($m in $repoMatches) {
-        $p = $m.Groups[1].Value.Trim()
-        $p = [Environment]::ExpandEnvironmentVariables($p)
+    foreach ($repo in $plan.repos) {
+        $p = [Environment]::ExpandEnvironmentVariables($repo)
         if (Test-Path $p) { $repoPaths += $p }
     }
 
