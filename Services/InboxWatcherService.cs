@@ -18,6 +18,9 @@ public class InboxWatcherService : IDisposable
         if (!Directory.Exists(_inboxPath))
             Directory.CreateDirectory(_inboxPath);
 
+        // Recover crashed MakePlan jobs: rename .processing files back to .md
+        RecoverProcessingFiles();
+
         ProcessExistingFiles();
 
         _watcher = new FileSystemWatcher(_inboxPath, "*.md")
@@ -29,6 +32,30 @@ public class InboxWatcherService : IDisposable
         _watcher.Created += (_, e) => _ = Task.Run(() => ProcessFileAsync(e.FullPath));
 
         _pollTimer = new Timer(_ => ProcessExistingFiles(), null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+    }
+
+    internal void RecoverProcessingFiles()
+    {
+        if (!Directory.Exists(_inboxPath))
+            return;
+
+        foreach (var file in Directory.GetFiles(_inboxPath, "*.md.processing"))
+        {
+            try
+            {
+                var mdPath = file[..^".processing".Length];
+                if (File.Exists(mdPath))
+                {
+                    // .md already exists — just delete the stale .processing file
+                    File.Delete(file);
+                }
+                else
+                {
+                    File.Move(file, mdPath);
+                }
+            }
+            catch { /* Will be retried on next startup */ }
+        }
     }
 
     internal void ProcessExistingFiles()
@@ -58,12 +85,14 @@ public class InboxWatcherService : IDisposable
             var content = await File.ReadAllTextAsync(filePath);
             var (project, description, sourcePath) = ParseContent(content);
 
+            // Rename to .processing so the watcher/poller ignores it while the job runs
+            var processingPath = filePath + ".processing";
+            File.Move(filePath, processingPath);
+
             var args = new List<string> { "-Description", description, "-Project", project };
             if (!string.IsNullOrEmpty(sourcePath))
                 args.AddRange(["-SourcePath", sourcePath]);
-            _jobService.StartJob("MakePlan", args.ToArray());
-
-            File.Delete(filePath);
+            _jobService.StartJob("MakePlan", args.ToArray(), processingPath);
         }
         catch
         {
@@ -77,12 +106,13 @@ public class InboxWatcherService : IDisposable
                 var content = await File.ReadAllTextAsync(filePath);
                 var (project, description, sourcePath) = ParseContent(content);
 
+                var processingPath = filePath + ".processing";
+                File.Move(filePath, processingPath);
+
                 var args = new List<string> { "-Description", description, "-Project", project };
                 if (!string.IsNullOrEmpty(sourcePath))
                     args.AddRange(["-SourcePath", sourcePath]);
-                _jobService.StartJob("MakePlan", args.ToArray());
-
-                File.Delete(filePath);
+                _jobService.StartJob("MakePlan", args.ToArray(), processingPath);
             }
             catch
             {

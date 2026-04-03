@@ -16,6 +16,8 @@ public class JobService
     private readonly TimeSpan _jobTimeout;
     private readonly TimeSpan _staleOutputTimeout;
 
+    private readonly string? _inboxPath;
+
     public event Action? JobsChanged;
     public ConcurrentQueue<JobNotification> PendingNotifications { get; } = new();
 
@@ -38,12 +40,14 @@ public class JobService
     {
         _jobTimeout = TimeSpan.FromMinutes(configService.Settings.JobTimeout);
         _staleOutputTimeout = TimeSpan.FromMinutes(configService.Settings.StaleOutputTimeout);
+        _inboxPath = Path.Combine(configService.TendrilData, "Inbox");
     }
 
-    public JobService(TimeSpan jobTimeout, TimeSpan staleOutputTimeout)
+    public JobService(TimeSpan jobTimeout, TimeSpan staleOutputTimeout, string? inboxPath = null)
     {
         _jobTimeout = jobTimeout;
         _staleOutputTimeout = staleOutputTimeout;
+        _inboxPath = inboxPath;
     }
 
     public void SetPlanReaderService(PlanReaderService planReaderService)
@@ -51,7 +55,17 @@ public class JobService
         _planReaderService = planReaderService;
     }
 
+    public string StartJob(string type, string[] args, string? inboxFilePath)
+    {
+        return StartJobInternal(type, args, inboxFilePath);
+    }
+
     public string StartJob(string type, params string[] args)
+    {
+        return StartJobInternal(type, args, inboxFilePath: null);
+    }
+
+    private string StartJobInternal(string type, string[] args, string? inboxFilePath)
     {
         var id = $"job-{Interlocked.Increment(ref _counter):D3}";
         var scriptPath = ScriptPaths.GetValueOrDefault(type, "");
@@ -97,6 +111,31 @@ public class JobService
             ScriptPath = scriptPath,
             Args = args,
         };
+
+        // For MakePlan jobs: track the inbox file for crash recovery
+        if (type == "MakePlan")
+        {
+            if (inboxFilePath != null)
+            {
+                // Inbox-originated job — file already renamed to .processing by InboxWatcherService
+                job.InboxFile = inboxFilePath;
+            }
+            else if (_inboxPath != null)
+            {
+                // Manual MakePlan — write a .processing inbox file as a write-ahead log
+                try
+                {
+                    Directory.CreateDirectory(_inboxPath);
+                    var description = GetNamedArg(args, "-Description") ?? "New Plan";
+                    var inboxProject = GetNamedArg(args, "-Project") ?? "[Auto]";
+                    var pendingFile = Path.Combine(_inboxPath, $"pending-{id}.md.processing");
+                    var content = $"---\nproject: {inboxProject}\n---\n{description}";
+                    File.WriteAllText(pendingFile, content);
+                    job.InboxFile = pendingFile;
+                }
+                catch { /* Best-effort — don't fail the job if we can't write the recovery file */ }
+            }
+        }
 
         _jobs[id] = job;
 
@@ -289,6 +328,7 @@ public class JobService
         else if (isSuccess && job.Type == "MakePlan")
             VerifyMakePlanResult(job);
 
+        CleanupInboxFile(job);
         WriteJobLog(job);
         JobsChanged?.Invoke();
 
@@ -308,6 +348,7 @@ public class JobService
         if (job.StartedAt.HasValue)
             job.DurationSeconds = (int)(job.CompletedAt.Value - job.StartedAt.Value).TotalSeconds;
 
+        CleanupInboxFile(job);
         ResetPlanState(job);
         JobsChanged?.Invoke();
     }
@@ -581,6 +622,30 @@ public class JobService
         {
             return (false, $"Dependency check failed: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Checks whether the given inbox file path is already tracked by a running MakePlan job.
+    /// Used by InboxWatcherService to avoid re-processing files.
+    /// </summary>
+    public bool IsInboxFileTracked(string filePath)
+    {
+        return _jobs.Values.Any(j =>
+            j.Type == "MakePlan" &&
+            j.Status == "Running" &&
+            j.InboxFile != null &&
+            j.InboxFile.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void CleanupInboxFile(JobItem job)
+    {
+        if (string.IsNullOrEmpty(job.InboxFile)) return;
+        try
+        {
+            if (File.Exists(job.InboxFile))
+                File.Delete(job.InboxFile);
+        }
+        catch { /* Best-effort cleanup */ }
     }
 
     private void ResetPlanStateToBlocked(JobItem job)
