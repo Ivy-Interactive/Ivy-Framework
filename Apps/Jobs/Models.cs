@@ -24,6 +24,9 @@ public record JobItem
     public DateTime? LastOutputAt { get; set; }
     public CancellationTokenSource? TimeoutCts { get; set; }
     public bool StaleOutputDetected { get; set; }
+
+    // Path to the .processing inbox file for MakePlan job recovery
+    public string? InboxFile { get; set; }
 }
 
 public record JobItemRow

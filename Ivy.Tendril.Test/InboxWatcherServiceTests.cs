@@ -101,14 +101,14 @@ public class InboxWatcherServiceTests
             File.WriteAllText(Path.Combine(inboxDir, "test-entry.md"), "Test inbox entry");
 
             var config = new ConfigService(new TendrilSettings { TendrilData = tempDir });
-            var jobService = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
+            var jobService = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10), inboxDir);
             using var watcher = new InboxWatcherService(config, jobService);
 
             // The constructor calls ProcessExistingFiles, which dispatches async processing.
-            // Wait briefly for the async task to pick up and delete the file.
+            // Wait briefly for the async task to pick up and rename the file to .processing.
             Thread.Sleep(2000);
 
-            // The file should have been processed and deleted
+            // The .md file should have been renamed to .processing (job started)
             Assert.Empty(Directory.GetFiles(inboxDir, "*.md"));
         }
         finally
