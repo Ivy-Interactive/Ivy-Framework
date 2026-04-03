@@ -619,20 +619,34 @@ public class ContentView(
                 }),
                 new MenuItem("Open in Explorer", Icon: Icons.FolderOpen, Tag: "OpenInExplorer").OnSelect(() =>
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    if (OperatingSystem.IsMacOS())
                     {
-                        FileName = _selectedPlan.FolderPath,
-                        UseShellExecute = true
-                    });
+                        System.Diagnostics.Process.Start("open", $"\"{_selectedPlan.FolderPath}\"");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = _selectedPlan.FolderPath,
+                            UseShellExecute = true
+                        });
+                    }
                 }),
                 new MenuItem("Open in Terminal", Icon: Icons.Terminal, Tag: "OpenInTerminal").OnSelect(() =>
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    if (OperatingSystem.IsMacOS())
                     {
-                        FileName = "wt.exe",
-                        Arguments = $"-d \"{_selectedPlan.FolderPath}\"",
-                        UseShellExecute = true
-                    });
+                        System.Diagnostics.Process.Start("open", $"-a Terminal \"{_selectedPlan.FolderPath}\"");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "wt.exe",
+                            Arguments = $"-d \"{_selectedPlan.FolderPath}\"",
+                            UseShellExecute = true
+                        });
+                    }
                 }),
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath").OnSelect(() =>
                 {
@@ -651,12 +665,19 @@ public class ContentView(
                 new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
                 {
                     var yamlPath = System.IO.Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    if (OperatingSystem.IsMacOS())
                     {
-                        FileName = "notepad.exe",
-                        Arguments = yamlPath,
-                        UseShellExecute = true
-                    });
+                        System.Diagnostics.Process.Start("open", $"-e \"{yamlPath}\"");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "notepad.exe",
+                            Arguments = yamlPath,
+                            UseShellExecute = true
+                        });
+                    }
                 })
             );
 
