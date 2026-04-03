@@ -72,8 +72,8 @@ public class PlanViewerApp : ViewBase
                     else
                     {
                         var fileName = Path.GetFileName(filePath2);
-                        var repoPaths = plan?.Repos.Count > 0
-                            ? plan.Repos
+                        var repoPaths = (plan?.Repos?.Count ?? 0) > 0
+                            ? plan!.Repos
                             : config.GetProject(plan?.Project ?? "")?.RepoPaths ?? [];
                         var suggestions = MarkdownHelper.FindFilesInRepos(repoPaths, fileName);
                         var notFoundContent = suggestions.Count > 0
@@ -98,6 +98,7 @@ public class PlanViewerApp : ViewBase
                     )
                     : sheetContent;
 
+                Console.WriteLine("[PlanViewer] Build complete, returning widget tree (sheet)");
                 return new Fragment(
                     mainLayout,
                     new Sheet(
@@ -108,6 +109,7 @@ public class PlanViewerApp : ViewBase
                 );
             }
 
+            Console.WriteLine("[PlanViewer] Build complete, returning widget tree");
             return mainLayout;
         }
         catch (Exception ex)

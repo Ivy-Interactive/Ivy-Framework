@@ -200,7 +200,7 @@ public class ContentView(
                 else
                 {
                     var fileName = Path.GetFileName(filePath2);
-                    var repoPaths = _selectedPlan.Repos.Count > 0
+                    var repoPaths = (_selectedPlan.Repos?.Count ?? 0) > 0
                         ? _selectedPlan.Repos
                         : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
                     var suggestions = MarkdownHelper.FindFilesInRepos(repoPaths, fileName);

@@ -73,7 +73,7 @@ public class ContentView(
             async (_, ct) =>
             {
                 if (_selectedPlan is null) return Array.Empty<string>();
-                var repos = _selectedPlan.Repos.Count > 0
+                var repos = (_selectedPlan.Repos?.Count ?? 0) > 0
                     ? _selectedPlan.Repos
                     : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
                 var repoPath = repos.FirstOrDefault();
@@ -174,7 +174,7 @@ public class ContentView(
         }
 
         // Commits tab content
-        var repoPaths = _selectedPlan.Repos.Count > 0
+        var repoPaths = (_selectedPlan.Repos?.Count ?? 0) > 0
             ? _selectedPlan.Repos
             : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
         var commitRows = _selectedPlan.Commits.Select(commit =>
@@ -382,7 +382,7 @@ public class ContentView(
 
         if (openCommit.Value is { } commitHash)
         {
-            var repoPaths2 = _selectedPlan.Repos.Count > 0
+            var repoPaths2 = (_selectedPlan.Repos?.Count ?? 0) > 0
                 ? _selectedPlan.Repos
                 : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
 
@@ -469,7 +469,7 @@ public class ContentView(
                 else
                 {
                     var fileName = Path.GetFileName(filePath2);
-                    var fileRepoPaths = _selectedPlan.Repos.Count > 0
+                    var fileRepoPaths = (_selectedPlan.Repos?.Count ?? 0) > 0
                         ? _selectedPlan.Repos
                         : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
                     var suggestions = MarkdownHelper.FindFilesInRepos(fileRepoPaths, fileName);
