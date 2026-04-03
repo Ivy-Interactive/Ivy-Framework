@@ -21,13 +21,16 @@ public class PlanViewerApp : ViewBase
 
         try
         {
+            Console.WriteLine($"[PlanViewer] Loading plan from: {folderPath}");
             var folderName = Path.GetFileName(folderPath);
             var content = planService.ReadLatestRevision(folderName);
+            Console.WriteLine($"[PlanViewer] Revision content length: {content?.Length ?? 0}");
 
             if (string.IsNullOrEmpty(content))
                 return Text.P("Plan not found or empty.");
 
             var plan = planService.GetPlanByFolder(folderPath);
+            Console.WriteLine($"[PlanViewer] Plan loaded: {plan?.Id} {plan?.Title}");
             var title = plan?.Title ?? folderName;
 
             var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
@@ -82,11 +85,11 @@ public class PlanViewerApp : ViewBase
 
                 var finalContent = File.Exists(filePath2)
                     ? (object)new HeaderLayout(
-                        header: new Button($"Open in {config.Editor.Label}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
+                        header: new Button("Open in VS Code").Icon(Icons.ExternalLink).Outline().OnClick(() =>
                         {
                             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                             {
-                                FileName = config.Editor.Command,
+                                FileName = "code",
                                 Arguments = $"\"{filePath2}\"",
                                 UseShellExecute = true
                             });
@@ -109,6 +112,7 @@ public class PlanViewerApp : ViewBase
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[ERROR] PlanViewerApp.Build failed: {ex}");
             return Text.P($"Error loading plan: {ex.Message}");
         }
     }

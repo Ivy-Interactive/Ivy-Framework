@@ -55,10 +55,9 @@ public record ReviewActionConfig
     public string Action { get; set; } = "";
 }
 
-public record EditorConfig
+public record PromptwareConfig
 {
-    public string Command { get; set; } = "code";
-    public string Label { get; set; } = "VS Code";
+    public string Model { get; set; } = "";
 }
 
 public class TendrilSettings
@@ -71,7 +70,7 @@ public class TendrilSettings
     public List<ProjectConfig> Projects { get; set; } = new();
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
-    public EditorConfig Editor { get; set; } = new();
+    public Dictionary<string, PromptwareConfig> Promptwares { get; set; } = new();
     public List<LevelConfig> Levels { get; set; } = new()
     {
         new() { Name = "Critical", Badge = "Warning" },
@@ -84,15 +83,18 @@ public class TendrilSettings
 public class ConfigService
 {
     private readonly TendrilSettings _settings;
+    private readonly string _configPath;
 
     internal ConfigService(TendrilSettings settings)
     {
         _settings = settings;
+        _configPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
     }
 
     public ConfigService()
     {
-        var configPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
+        _configPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
+        var configPath = _configPath;
         if (File.Exists(configPath))
         {
             var yaml = File.ReadAllText(configPath);
@@ -134,7 +136,6 @@ public class ConfigService
     }
 
     public TendrilSettings Settings => _settings;
-    public EditorConfig Editor => _settings.Editor;
     public string TendrilData => _settings.TendrilData;
     public string PlanFolder => _settings.PlanFolder;
     public List<ProjectConfig> Projects => _settings.Projects;
@@ -149,6 +150,16 @@ public class ConfigService
     {
         var colorStr = GetProject(projectName)?.Color;
         return !string.IsNullOrEmpty(colorStr) && Enum.TryParse<Colors>(colorStr, out var c) ? c : null;
+    }
+
+    public void SaveSettings()
+    {
+        var serializer = new SerializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+            .Build();
+        var yaml = serializer.Serialize(_settings);
+        File.WriteAllText(_configPath, yaml);
     }
 }
 
