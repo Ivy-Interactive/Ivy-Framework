@@ -39,6 +39,7 @@ public class PullRequestApp : ViewBase
             .Header(t => t.Plan, "Plan")
             .Renderer(t => t.PlanId, new ButtonDisplayRenderer())
             .Renderer(t => t.Pr, new LinkDisplayRenderer())
+            .SortDirection(t => t.PlanId, SortDirection.Descending)
             .Hidden(t => t.Id)
             .Hidden(t => t.PlanFolderPath)
             .Config(c =>
