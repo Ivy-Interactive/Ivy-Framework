@@ -133,9 +133,9 @@ public class DashboardApp : ViewBase
             .Width(Size.Full());
 
         var content = Layout.Vertical().Gap(2)
-            | combinedChart
+            | projectProgress
             | dataTable
-            | projectProgress;
+            | combinedChart;
 
         return new HeaderLayout(
             header: statsRow,
