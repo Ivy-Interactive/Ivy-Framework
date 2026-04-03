@@ -250,11 +250,11 @@ public class ContentView(
 
             var finalContent = File.Exists(filePath2)
                 ? (object)new HeaderLayout(
-                    header: new Button($"Open in {_config.Editor.Label}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
+                    header: new Button("Open in VS Code").Icon(Icons.ExternalLink).Outline().OnClick(() =>
                     {
                         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                         {
-                            FileName = _config.Editor.Command,
+                            FileName = "code",
                             Arguments = $"\"{filePath2}\"",
                             UseShellExecute = true
                         });
