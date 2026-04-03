@@ -1,5 +1,5 @@
 # Ensure claude CLI is on the PATH
-$claudeDir = Join-Path $env:USERPROFILE ".local\bin"
+$claudeDir = Join-Path $HOME ".local\bin"
 if (Test-Path $claudeDir) {
     if ($env:PATH -notlike "*$claudeDir*") {
         $env:PATH = "$claudeDir;$env:PATH"
@@ -28,8 +28,12 @@ if (Test-Path $script:ConfigPath) {
     catch { }
 }
 if (-not $script:PlansDir) {
-    $script:PlansDir = "D:\Plans"  # fallback
+    $script:PlansDir = Join-Path $HOME "tendril-data\Plans"  # fallback
 }
+if ($script:PlansDir -match '^~[/\\](.*)') {
+    $script:PlansDir = Join-Path $HOME $matches[1]
+}
+
 
 function GetProgramFolder {
     param([string]$ScriptPath)
