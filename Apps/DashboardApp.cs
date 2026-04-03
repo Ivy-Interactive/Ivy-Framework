@@ -125,9 +125,9 @@ public class DashboardApp : ViewBase
 
         var content = Layout.Vertical().Gap(2)
             | dataTable
+            | projectProgress
             | burnChart
-            | tokensChart
-            | projectProgress;
+            | tokensChart;
 
         return new HeaderLayout(
             header: statsRow,
