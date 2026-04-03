@@ -1,5 +1,5 @@
 # Ensure claude CLI is on the PATH
-$claudeDir = Join-Path $HOME ".local\bin"
+$claudeDir = Join-Path $env:USERPROFILE ".local\bin"
 if (Test-Path $claudeDir) {
     if ($env:PATH -notlike "*$claudeDir*") {
         $env:PATH = "$claudeDir;$env:PATH"
@@ -28,12 +28,8 @@ if (Test-Path $script:ConfigPath) {
     catch { }
 }
 if (-not $script:PlansDir) {
-    $script:PlansDir = Join-Path $HOME "tendril-data\Plans"  # fallback
+    $script:PlansDir = "D:\Plans"  # fallback
 }
-if ($script:PlansDir -match '^~[/\\](.*)') {
-    $script:PlansDir = Join-Path $HOME $matches[1]
-}
-
 
 function GetProgramFolder {
     param([string]$ScriptPath)
@@ -55,10 +51,10 @@ function GetNextLogFile {
     }
 
     $existing = Get-ChildItem -Path $logsFolder -Filter "*.md" -File |
-        Where-Object { $_.BaseName -match '^\d+$' } |
-        ForEach-Object { [int]$_.BaseName } |
-        Sort-Object -Descending |
-        Select-Object -First 1
+    Where-Object { $_.BaseName -match '^\d+$' } |
+    ForEach-Object { [int]$_.BaseName } |
+    Sort-Object -Descending |
+    Select-Object -First 1
 
     $next = if ($existing) { $existing + 1 } else { 1 }
     return Join-Path $logsFolder ("{0:D5}.md" -f $next)
@@ -109,7 +105,8 @@ function AllocatePlanId {
             try {
                 $lock = [System.IO.File]::Open($lockFile, [System.IO.FileMode]::OpenOrCreate, [System.IO.FileAccess]::ReadWrite, [System.IO.FileShare]::None)
                 break
-            } catch {
+            }
+            catch {
                 Start-Sleep -Milliseconds 500
             }
         }
@@ -161,12 +158,12 @@ function WritePlanLog {
     }
 
     $existing = Get-ChildItem -Path $logsDir -Filter "*.md" -File |
-        ForEach-Object {
-            $dashIdx = $_.BaseName.IndexOf('-')
-            if ($dashIdx -ge 0) { [int]$_.BaseName.Substring(0, $dashIdx) } else { 0 }
-        } |
-        Sort-Object -Descending |
-        Select-Object -First 1
+    ForEach-Object {
+        $dashIdx = $_.BaseName.IndexOf('-')
+        if ($dashIdx -ge 0) { [int]$_.BaseName.Substring(0, $dashIdx) } else { 0 }
+    } |
+    Sort-Object -Descending |
+    Select-Object -First 1
 
     $next = if ($existing) { $existing + 1 } else { 1 }
     $logPath = Join-Path $logsDir ("{0:D3}-{1}.md" -f $next, $Action)
@@ -295,17 +292,19 @@ function InvokePromptwareAgent {
         Add-Content -Path $rawLogFile -Value "[tendril] Command: $($agent.Executable) $($agent.Args -join ' ') $($ExtraAgentArgs -join ' ')" -Encoding UTF8
 
         $output = & $agent.Executable @($agent.Args) @ExtraAgentArgs -- (Get-Content $promptFile -Raw) 2>&1 |
-            ForEach-Object {
-                $line = if ($_ -is [System.Management.Automation.ErrorRecord]) {
-                    "[stderr] $_"
-                } else {
-                    "$_"
-                }
-                Add-Content -Path $rawLogFile -Value $line -Encoding UTF8
-                $_
+        ForEach-Object {
+            $line = if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                "[stderr] $_"
             }
+            else {
+                "$_"
+            }
+            Add-Content -Path $rawLogFile -Value $line -Encoding UTF8
+            $_
+        }
         $output | Write-Output
-    } finally {
+    }
+    finally {
         Stop-Heartbeat $heartbeat
     }
     Pop-Location
@@ -318,7 +317,8 @@ function InvokePromptwareAgent {
             try {
                 $resultJson = $resultLine.Line | ConvertFrom-Json
                 $summary = $resultJson.result
-            } catch { }
+            }
+            catch { }
         }
     }
 
@@ -349,8 +349,8 @@ function ReportSessionCost {
         # Find session file
         $claudeProjectsDir = Join-Path $env:USERPROFILE ".claude\projects"
         $sessionFile = Get-ChildItem -Path $claudeProjectsDir -Recurse -Filter "$SessionId.jsonl" |
-            Where-Object { $_.FullName -notlike "*\subagents\*" } |
-            Select-Object -First 1
+        Where-Object { $_.FullName -notlike "*\subagents\*" } |
+        Select-Object -First 1
 
         if (-not $sessionFile) { return $null }
 
@@ -393,13 +393,15 @@ function ReportSessionCost {
                             $totalTokens += $cache5m + $cache1h
                             $totalCost += $cache5m * $priceCache5m
                             $totalCost += $cache1h * $priceCache1h
-                        } else {
+                        }
+                        else {
                             $cacheCreation = ($u.cache_creation_input_tokens ?? 0)
                             $totalTokens += $cacheCreation
                             $totalCost += $cacheCreation * $priceCache5m
                         }
                     }
-                } catch { }
+                }
+                catch { }
             }
         }
 
@@ -413,7 +415,8 @@ function ReportSessionCost {
         }
 
         return @{ Tokens = $totalTokens; Cost = $totalCost }
-    } catch {
+    }
+    catch {
         return $null
     }
 }
@@ -444,7 +447,8 @@ function SendStatusMessage {
     try {
         $body = @{ message = $Message } | ConvertTo-Json
         Invoke-RestMethod -Uri "$url/api/jobs/$jobId/status" -Method Post -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
-    } catch { }
+    }
+    catch { }
 }
 
 function Start-Heartbeat {
@@ -472,11 +476,9 @@ function Stop-Heartbeat {
 function GetAgentCommandFromConfig {
     param([string]$Promptware = "")
 
-    $configPath = $script:ConfigPath
-    if (-not $configPath) {
-        $configPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "config.yaml"
-    }
+    $configPath = Join-Path (Split-Path $PSScriptRoot) "config.yaml"
     $raw = "claude --print --verbose --output-format stream-json --dangerously-skip-permissions"
+    $allowedTools = @()
 
     if (Test-Path $configPath) {
         try {
@@ -487,13 +489,24 @@ function GetAgentCommandFromConfig {
                 $raw = $match.Groups[1].Value.Trim()
             }
 
-            # Check for per-promptware model override
-            if ($Promptware) {
-                $modelPattern = "(?s)promptwares:.*?${Promptware}:\s*\n\s+model:\s*(\w+)"
-                $modelMatch = [regex]::Match($yaml, $modelPattern)
-                if ($modelMatch.Success) {
-                    $modelAlias = $modelMatch.Groups[1].Value.Trim()
-                    $raw += " --model $modelAlias"
+            # Parse config with ConvertFrom-Yaml for structured access
+            $config = $yaml | ConvertFrom-Yaml
+
+            if ($Promptware -and $config.promptwares.$Promptware) {
+                $pwConfig = $config.promptwares.$Promptware
+
+                # Apply model override
+                if ($pwConfig.model) {
+                    $raw += " --model $($pwConfig.model)"
+                }
+
+                # Apply allowedTools with %TENDRIL% substitution
+                if ($pwConfig.allowedTools) {
+                    $tendrilPath = if ($config.tendrilData) { $config.tendrilData -replace '\\', '/' } else { "" }
+                    foreach ($tool in $pwConfig.allowedTools) {
+                        $resolvedTool = $tool -replace '%TENDRIL%', $tendrilPath
+                        $allowedTools += $resolvedTool
+                    }
                 }
             }
         }
@@ -502,10 +515,33 @@ function GetAgentCommandFromConfig {
         }
     }
 
-    # Split into executable and args
-    $parts = $raw -split '\s+', 2
+    # Build args with quote-aware parsing
+    $parts = @()
+    $current = ""
+    $inQuote = $false
+    foreach ($char in $raw.ToCharArray()) {
+        if ($char -eq '"' -and !$inQuote) { $inQuote = $true; continue }
+        elseif ($char -eq '"' -and $inQuote) { $inQuote = $false; continue }
+        elseif ($char -eq ' ' -and !$inQuote -and $current) {
+            $parts += $current; $current = ""; continue
+        }
+        elseif ($char -eq ' ' -and !$inQuote) { continue }
+        $current += $char
+    }
+    if ($current) { $parts += $current }
+
+    # Append allowedTools as individual args
+    $args = $parts[1..($parts.Length - 1)]
+    if ($allowedTools.Count -gt 0) {
+        foreach ($tool in $allowedTools) {
+            $args += "--allowedTools"
+            $args += $tool
+        }
+    }
+
     return @{
         Executable = $parts[0]
-        Args = if ($parts.Length -gt 1) { $parts[1] -split '\s+' } else { @() }
+        Args       = $args
     }
+} }
 }
