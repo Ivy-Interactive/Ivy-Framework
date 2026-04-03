@@ -79,11 +79,15 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
     ...getHeight(height),
   };
 
-  // If height is Full, ensure it can shrink and grow properly within a flex container
-  // to avoid "infinite growth" when no height constraint is provided by the parent.
+  // If height is Full, use flex-based sizing instead of height: 100%.
+  // In unconstrained parents (e.g. Layout.Vertical() with no explicit height),
+  // height: 100% resolves to 0 because the parent has no definite height.
+  // flexGrow fills available space in flex parents, while minHeight ensures
+  // at least ~5 rows are visible in unconstrained parents.
   if (height === "Full") {
+    delete containerStyle.height;
     containerStyle.flexGrow = 1;
-    containerStyle.minHeight = 0;
+    containerStyle.minHeight = "200px";
   }
 
   return (
