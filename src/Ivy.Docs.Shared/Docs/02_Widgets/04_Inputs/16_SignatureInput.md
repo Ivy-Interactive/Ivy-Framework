@@ -30,39 +30,6 @@ public class SignatureDemo : ViewBase
 }
 ```
 
-## Event Handling
-
-Signature inputs support focus, blur, and manual `AutoFocus` behavior.
-
-```csharp demo-tabs
-public class SignatureInputEventsDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var value = UseState<byte[]?>(null);
-        var show = UseState(false);
-        var onFocusTriggered = UseState(false);
-        var onBlurTriggered = UseState(false);
-
-        return Layout.Vertical().Gap(4)
-            | new Button("Mount with AutoFocus", () => {
-                show.Set(true);
-                onFocusTriggered.Set(false);
-                onBlurTriggered.Set(false);
-            }).Primary()
-            | (show.Value ? Layout.Vertical().Gap(2)
-                | value.ToSignatureInput()
-                    .AutoFocus()
-                    .OnFocus(() => onFocusTriggered.Set(true))
-                    .OnBlur(() => onBlurTriggered.Set(true))
-                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
-                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
-                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
-                : null);
-    }
-}
-```
-
 ## Pen Customization
 
 Configure pen color and thickness to match your application's style:
@@ -112,6 +79,43 @@ public class SignatureFormDemo : ViewBase
             .WithField()
             .Label("Customer Signature")
             .Description("Please sign to confirm delivery");
+    }
+}
+```
+
+## Event Handling
+
+Signature inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class SignatureInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState<byte[]?>(null);
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the signature canvas gains focus.")
+                | state.ToSignatureInput().Placeholder("Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the signature canvas loses focus.")
+                | state.ToSignatureInput().Placeholder("Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget and shows a focus ring upon mounting.")
+                | state.ToSignatureInput().Placeholder("AutoFocused SignatureInput")
+                    .AutoFocus()
+                | Text.Lead("Focused!")
+            )
+        ).Variant(TabsVariant.Tabs);
     }
 }
 ```

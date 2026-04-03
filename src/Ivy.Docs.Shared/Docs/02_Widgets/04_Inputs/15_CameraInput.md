@@ -43,40 +43,6 @@ public class BasicCameraInputDemo : ViewBase
 3. Clicking **Capture** takes a snapshot and uploads it as a PNG image
 4. The captured image is shown with a **Retake** button to restart the camera
 
-## Event Handling
-
-Camera inputs support focus, blur, and manual `AutoFocus` behavior.
-
-```csharp demo-tabs
-public class CameraInputEventsDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var value = UseState<FileUpload<byte[]>?>();
-        var upload = UseUpload(MemoryStreamUploadHandler.Create(value));
-        var show = UseState(false);
-        var onFocusTriggered = UseState(false);
-        var onBlurTriggered = UseState(false);
-
-        return Layout.Vertical().Gap(4)
-            | new Button("Mount with AutoFocus", () => {
-                show.Set(true);
-                onFocusTriggered.Set(false);
-                onBlurTriggered.Set(false);
-            }).Primary()
-            | (show.Value ? Layout.Vertical().Gap(2)
-                | new CameraInput(upload.Value)
-                    .AutoFocus()
-                    .OnFocus(() => onFocusTriggered.Set(true))
-                    .OnBlur(() => onBlurTriggered.Set(true))
-                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
-                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
-                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
-                : null);
-    }
-}
-```
-
 ## Configuration
 
 ### Placeholder
@@ -130,6 +96,44 @@ if (photo.Value != null)
     var fileName = photo.Value.FileName;    // "capture.png"
     var fileSize = photo.Value.Length;       // Size in bytes
     var fileData = photo.Value.Content;      // byte[] containing PNG data
+}
+```
+
+## Event Handling
+
+Camera inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class CameraInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var photo = UseState<FileUpload<byte[]>?>();
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(photo));
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the camera input gains focus.")
+                | new CameraInput(upload.Value, "Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the camera input loses focus.")
+                | new CameraInput(upload.Value, "Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget upon mounting.")
+                | new CameraInput(upload.Value, "AutoFocused CameraInput")
+                    .AutoFocus()
+                | Text.Lead("Focused!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
 }
 ```
 

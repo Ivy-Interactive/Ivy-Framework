@@ -97,39 +97,6 @@ public class ColorSwatchDemo : ViewBase
 }
 ```
 
-## Event Handling
-
-Color inputs support focus, blur, and manual `AutoFocus` behavior.
-
-```csharp demo-tabs
-public class ColorInputEventsDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var value = UseState("#ff0000");
-        var show = UseState(false);
-        var onFocusTriggered = UseState(false);
-        var onBlurTriggered = UseState(false);
-
-        return Layout.Vertical().Gap(4)
-            | new Button("Mount with AutoFocus", () => {
-                show.Set(true);
-                onFocusTriggered.Set(false);
-                onBlurTriggered.Set(false);
-            }).Primary()
-            | (show.Value ? Layout.Vertical().Gap(2)
-                | value.ToColorInput()
-                    .AutoFocus()
-                    .OnFocus(() => onFocusTriggered.Set(true))
-                    .OnBlur(() => onBlurTriggered.Set(true))
-                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
-                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
-                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
-                : null);
-    }
-}
-```
-
 ## Styling
 
 `ColorInput` can be customized with various styling options, such as setting a placeholder or disabling the input.
@@ -160,6 +127,43 @@ public class ColorAlphaDemo : ViewBase
         return Layout.Vertical()
             | colorState.ToColorInput().AllowAlpha()
             | Text.P($"Selected: {colorState.Value}");
+    }
+}
+```
+
+## Event Handling
+
+Color inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class ColorInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState("#ff0000");
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the color input gains focus.")
+                | state.ToColorInput().Placeholder("Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the color input loses focus.")
+                | state.ToColorInput().Placeholder("Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget upon mounting.")
+                | state.ToColorInput().Placeholder("AutoFocused ColorInput")
+                    .AutoFocus()
+                | Text.Lead("Focused & Open!")
+            )
+        ).Variant(TabsVariant.Tabs);
     }
 }
 ```

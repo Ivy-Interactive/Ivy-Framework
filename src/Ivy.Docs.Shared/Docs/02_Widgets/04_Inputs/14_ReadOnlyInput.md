@@ -22,14 +22,14 @@ Here's a simple example of a `ReadOnlyInput` displaying a value:
 
 ```csharp demo-below
 public class ReadOnlyDemo : ViewBase
-{    
+{
     public override object? Build()
-    {    
+    {
         var value = UseState(123.45);
         var readOnlyInput = value.ToReadOnlyInput();
         return readOnlyInput;
-    }    
-}    
+    }
+}
 ```
 
 ## Event Handling
@@ -41,29 +41,34 @@ public class ReadOnlyInputEventsDemo : ViewBase
 {
     public override object? Build()
     {
-        var value = UseState("Static Info");
-        var show = UseState(false);
-        var onFocusTriggered = UseState(false);
-        var onBlurTriggered = UseState(false);
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState("Static Info");
 
-        return Layout.Vertical().Gap(4)
-            | new Button("Mount with AutoFocus", () => {
-                show.Set(true);
-                onFocusTriggered.Set(false);
-                onBlurTriggered.Set(false);
-            }).Primary()
-            | (show.Value ? Layout.Vertical().Gap(2)
-                | value.ToReadOnlyInput()
-                    .OnFocus<string>(() => onFocusTriggered.Set(true))
-                    .OnBlur<string>(() => onBlurTriggered.Set(true))
-                    .AutoFocus()
-                | (onFocusTriggered.Value ? Callout.Success("OnFocus triggered (via AutoFocus)") : null)
-                | (onBlurTriggered.Value ? Callout.Warning("OnBlur triggered") : null)
-                | new Button("Reset Demo", () => show.Set(false)).Outline().Small()
-                : null);
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the read-only input gains focus.")
+                | state.ToReadOnlyInput()
+                    .OnFocus<string>(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the read-only input loses focus.")
+                | state.ToReadOnlyInput()
+                    .OnBlur<string>(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget upon mounting.")
+                | state.ToReadOnlyInput().AutoFocus()
+                | Text.Lead("Focused!")
+            )
+        ).Variant(TabsVariant.Tabs);
     }
 }
 ```
+
+<WidgetDocs Type="Ivy.ReadOnlyInput" ExtensionTypes="Ivy.ReadOnlyInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/ReadOnlyInput.cs"/>
 
 ## Examples
 
@@ -81,12 +86,12 @@ public class ReadOnlyFormDemo : ViewBase
         var price = UseState(100.0);
         var quantity = UseState(5);
         var total = UseState(price.Value * quantity.Value);
-        
+
         UseEffect(() => {
             total.Set(price.Value * quantity.Value);
         }, price, quantity);
-        
-        return Layout.Vertical().Gap(2)
+
+        return Layout.Vertical()
             | price.ToNumberInput()
                 .WithField().Label("Price")
             | quantity.ToNumberInput()
