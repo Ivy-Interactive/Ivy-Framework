@@ -46,13 +46,34 @@ function transferMeta(htmlServer, htmlLocal) {
   return result;
 }
 
+function isLocalHost(urlString) {
+  try {
+    const url = new URL(urlString);
+    return ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+async function fetchText(url) {
+  const mod = url.startsWith("https") ? await import("node:https") : await import("node:http");
+  const options = isLocalHost(url) ? { rejectUnauthorized: false } : {};
+  return new Promise((resolve, reject) => {
+    mod.get(url, options, (res) => {
+      let data = "";
+      res.on("data", (chunk) => (data += chunk));
+      res.on("end", () => resolve(data));
+    }).on("error", reject);
+  });
+}
+
 const injectMeta = (mode) => {
   return {
     name: "inject-ivy-meta",
     async transformIndexHtml(localHtml) {
       if (mode === "development") {
         const host = process.env.IVY_HOST || "https://localhost:5010";
-        const serverHtml = await fetch(`${host}`).then((res) => res.text());
+        const serverHtml = await fetchText(`${host}`);
         const transformedHtml = transferMeta(serverHtml, localHtml);
         const ivyHostTag = `<meta name="ivy-host" content="${host}" />`;
         return transformedHtml.replace("</head>", ` ${ivyHostTag}\n</head>`);
