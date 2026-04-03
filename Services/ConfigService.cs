@@ -65,6 +65,12 @@ public record PromptwareHookConfig
     public string Action { get; set; } = "";
 }
 
+public record EditorConfig
+{
+    public string Command { get; set; } = "code";
+    public string Label { get; set; } = "VS Code";
+}
+
 public record PromptwareConfig
 {
     public string Model { get; set; } = "";
@@ -88,6 +94,7 @@ public class TendrilSettings
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
     public LlmConfig? Llm { get; set; }
+    public EditorConfig Editor { get; set; } = new();
     public Dictionary<string, PromptwareConfig> Promptwares { get; set; } = new();
     public bool Telemetry { get; set; } = true;
     public List<LevelConfig> Levels { get; set; } = new()
@@ -160,6 +167,7 @@ public class ConfigService
     public List<ProjectConfig> Projects => _settings.Projects;
     public List<LevelConfig> Levels => _settings.Levels;
     public string[] LevelNames => _settings.Levels.Select(l => l.Name).ToArray();
+    public EditorConfig Editor => _settings.Editor;
     public ProjectConfig? GetProject(string name) => _settings.Projects.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
     public BadgeVariant GetBadgeVariant(string level) =>
