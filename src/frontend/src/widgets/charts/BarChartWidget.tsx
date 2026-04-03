@@ -184,6 +184,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
             typeof barCategoryGap === "number" ? `${barCategoryGap}%` : barCategoryGap || "10%",
           barMaxWidth: maxBarSize,
           stackOrder: reverseStackOrder ? "seriesDesc" : "seriesAsc",
+          yAxisIndex: barConfig.yAxisIndex ?? 0,
           itemStyle: {
             borderRadius: barConfig.radius ?? BAR_DEFAULTS.radius,
             borderColor: barConfig.stroke ?? undefined,

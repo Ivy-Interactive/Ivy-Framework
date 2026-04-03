@@ -29,6 +29,8 @@ public record Terminal : WidgetBase<Terminal>
     [Prop] public string? InitialContent { get; init; }
     [Prop] public bool Closed { get; init; }
     [Prop] public bool AllowClipboard { get; init; } = true;
+    [Prop] public Colors? Background { get; init; }
+    [Prop] public Colors? Foreground { get; init; }
 
     [Prop] public IWriteStream<byte[]>? Stream { get; init; }
 
@@ -62,6 +64,12 @@ public static class TerminalExtensions
 
     public static Terminal AllowClipboard(this Terminal widget, bool allowClipboard = true) =>
         widget with { AllowClipboard = allowClipboard };
+
+    public static Terminal Background(this Terminal widget, Colors color) =>
+        widget with { Background = color };
+
+    public static Terminal Foreground(this Terminal widget, Colors color) =>
+        widget with { Foreground = color };
 
     public static Terminal Stream(this Terminal widget, IWriteStream<byte[]> stream) =>
         widget with { Stream = stream };

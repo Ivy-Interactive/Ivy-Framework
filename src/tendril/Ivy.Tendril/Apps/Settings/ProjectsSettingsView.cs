@@ -1,0 +1,220 @@
+using Ivy;
+using Ivy.Tendril.Services;
+
+namespace Ivy.Tendril.Apps.Settings;
+
+public class ProjectsSettingsView : ViewBase
+{
+    public override object? Build()
+    {
+        var config = UseService<ConfigService>();
+        var client = UseService<IClientProvider>();
+        var refreshToken = UseRefreshToken();
+        var editIndex = UseState<int?>(-1);
+        var deleteIndex = UseState<int?>(-1);
+
+        // Edit form state — must be declared unconditionally (Ivy hook rules)
+        var editName = UseState("");
+        var editColor = UseState("");
+        var editSlackEmoji = UseState("");
+        var editContext = UseState("");
+        var editRepos = UseState(new List<RepoRef>());
+        var editVerifications = UseState(new List<ProjectVerificationRef>());
+        var newRepoPath = UseState("");
+        var newRepoPrRule = UseState("default");
+
+        var projects = config.Settings.Projects;
+        var allVerifications = config.Settings.Verifications.Select(v => v.Name).ToList();
+
+        var colorOptions = new List<string>
+        {
+            "", "Red", "Orange", "Amber", "Yellow", "Lime", "Green", "Emerald", "Teal",
+            "Cyan", "Sky", "Blue", "Indigo", "Violet", "Purple", "Fuchsia", "Pink", "Rose",
+            "Slate", "Gray", "Zinc", "Neutral", "Stone"
+        };
+
+        var rows = projects.Select((p, i) => new ProjectRow(
+            i, p.Name, p.Color, p.Repos.Count, p.Verifications.Count
+        )).ToList();
+
+        var table = new TableBuilder<ProjectRow>(rows)
+            .Header(t => t.Index, "Actions")
+            .Builder(t => t.Index, f => f.Func<ProjectRow, int>(idx =>
+                Layout.Horizontal().Gap(1)
+                    | new Button("Edit").Outline().Small().OnClick(() =>
+                    {
+                        LoadProjectIntoEditor(projects[idx], idx);
+                    })
+                    | new Button("Delete").Outline().Small().OnClick(() =>
+                    {
+                        deleteIndex.Set(idx);
+                    })
+            ));
+
+        var content = Layout.Vertical().Gap(4).Padding(4)
+            | Text.Block("Projects").Bold()
+            | table
+            | new Button("Add Project").Icon(Icons.Plus).Outline().OnClick(() =>
+            {
+                editIndex.Set(null);
+                editName.Set("");
+                editColor.Set("");
+                editSlackEmoji.Set("");
+                editContext.Set("");
+                editRepos.Set(new List<RepoRef>());
+                editVerifications.Set(new List<ProjectVerificationRef>());
+            });
+
+        // Edit dialog
+        if (editIndex.Value != -1)
+        {
+            var isNew = editIndex.Value == null;
+
+            var reposLayout = Layout.Vertical().Gap(2);
+            var currentRepos = editRepos.Value;
+            for (var i = 0; i < currentRepos.Count; i++)
+            {
+                var ri = i;
+                var repo = currentRepos[ri];
+                reposLayout |= Layout.Horizontal().Gap(2).AlignContent(Align.Center)
+                    | Text.Block(repo.Path).Width(Size.Grow())
+                    | new Badge(repo.PrRule).Variant(BadgeVariant.Outline)
+                    | new Button().Icon(Icons.Trash).Ghost().Small().OnClick(() =>
+                    {
+                        var list = new List<RepoRef>(editRepos.Value);
+                        list.RemoveAt(ri);
+                        editRepos.Set(list);
+                    });
+            }
+
+            reposLayout |= Layout.Horizontal().Gap(2).AlignContent(Align.Center)
+                | newRepoPath.ToTextInput("Repo path...").Width(Size.Grow())
+                | newRepoPrRule.ToSelectInput(new List<string> { "default", "yolo" }).Width(Size.Units(20))
+                | new Button("Add").Outline().Small().OnClick(() =>
+                {
+                    if (!string.IsNullOrWhiteSpace(newRepoPath.Value))
+                    {
+                        var list = new List<RepoRef>(editRepos.Value)
+                        {
+                            new() { Path = newRepoPath.Value, PrRule = newRepoPrRule.Value }
+                        };
+                        editRepos.Set(list);
+                        newRepoPath.Set("");
+                        newRepoPrRule.Set("default");
+                    }
+                });
+
+            // Verifications checklist
+            var verificationsLayout = Layout.Vertical().Gap(1);
+            foreach (var vName in allVerifications)
+            {
+                var existing = editVerifications.Value.FirstOrDefault(v => v.Name == vName);
+                var isChecked = existing != null;
+                var isRequired = existing?.Required ?? false;
+                var capturedName = vName;
+
+                verificationsLayout |= Layout.Horizontal().Gap(2).AlignContent(Align.Center)
+                    | new Button(isChecked ? "x" : " ")
+                        .Ghost().Small().OnClick(() =>
+                        {
+                            var list = new List<ProjectVerificationRef>(editVerifications.Value);
+                            if (isChecked)
+                                list.RemoveAll(v => v.Name == capturedName);
+                            else
+                                list.Add(new ProjectVerificationRef { Name = capturedName, Required = false });
+                            editVerifications.Set(list);
+                        })
+                    | Text.Block(capturedName).Width(Size.Grow())
+                    | (isChecked
+                        ? (object)new Button(isRequired ? "Required" : "Optional")
+                            .Small()
+                            .Variant(isRequired ? ButtonVariant.Primary : ButtonVariant.Outline)
+                            .OnClick(() =>
+                            {
+                                var list = new List<ProjectVerificationRef>(editVerifications.Value);
+                                var item = list.First(v => v.Name == capturedName);
+                                item.Required = !item.Required;
+                                editVerifications.Set(list);
+                            })
+                        : new Spacer());
+            }
+
+            content |= new Dialog(
+                _ => editIndex.Set(-1),
+                new DialogHeader(isNew ? "Add Project" : $"Edit Project: {editName.Value}"),
+                new DialogBody(
+                    Layout.Vertical().Gap(4)
+                        | editName.ToTextInput("Project name...").WithField().Label("Name")
+                        | editColor.ToSelectInput(colorOptions).Nullable().WithField().Label("Color")
+                        | editSlackEmoji.ToTextInput(":emoji:").WithField().Label("Slack Emoji")
+                        | editContext.ToTextareaInput("Project context...").Rows(4).WithField().Label("Context")
+                        | (Layout.Vertical().Gap(2)
+                            | Text.Block("Repositories").Bold()
+                            | reposLayout)
+                        | (Layout.Vertical().Gap(2)
+                            | Text.Block("Verifications").Bold()
+                            | verificationsLayout)
+                ),
+                new DialogFooter(
+                    new Button("Cancel").Outline().OnClick(() => editIndex.Set(-1)),
+                    new Button(isNew ? "Add" : "Save").Primary().OnClick(() =>
+                    {
+                        if (string.IsNullOrWhiteSpace(editName.Value)) return;
+                        var project = isNew ? new ProjectConfig() : projects[editIndex.Value!.Value];
+                        project.Name = editName.Value;
+                        project.Color = editColor.Value;
+                        project.Meta["slackEmoji"] = editSlackEmoji.Value;
+                        project.Context = editContext.Value;
+                        project.Repos = new List<RepoRef>(editRepos.Value);
+                        project.Verifications = new List<ProjectVerificationRef>(editVerifications.Value);
+                        if (isNew) projects.Add(project);
+                        config.SaveSettings();
+                        editIndex.Set(-1);
+                        refreshToken.Refresh();
+                        client.Toast($"Project '{editName.Value}' saved", "Saved");
+                    })
+                )
+            ).Width(Size.Rem(40));
+        }
+
+        // Delete confirmation
+        if (deleteIndex.Value is { } di && di >= 0 && di < projects.Count)
+        {
+            var projectName = projects[di].Name;
+            content |= new Dialog(
+                _ => deleteIndex.Set(-1),
+                new DialogHeader("Delete Project"),
+                new DialogBody(
+                    Text.P($"Are you sure you want to delete the project '{projectName}'? This cannot be undone.")
+                ),
+                new DialogFooter(
+                    new Button("Cancel").Outline().OnClick(() => deleteIndex.Set(-1)),
+                    new Button("Delete").Variant(ButtonVariant.Destructive).OnClick(() =>
+                    {
+                        projects.RemoveAt(di);
+                        config.SaveSettings();
+                        deleteIndex.Set(-1);
+                        refreshToken.Refresh();
+                        client.Toast($"Project '{projectName}' deleted", "Deleted");
+                    })
+                )
+            ).Width(Size.Rem(25));
+        }
+
+        return content;
+
+        void LoadProjectIntoEditor(ProjectConfig project, int idx)
+        {
+            editIndex.Set(idx);
+            editName.Set(project.Name);
+            editColor.Set(project.Color);
+            editSlackEmoji.Set(project.GetMeta("slackEmoji") ?? "");
+            editContext.Set(project.Context);
+            editRepos.Set(new List<RepoRef>(project.Repos.Select(r => new RepoRef { Path = r.Path, PrRule = r.PrRule })));
+            editVerifications.Set(new List<ProjectVerificationRef>(
+                project.Verifications.Select(v => new ProjectVerificationRef { Name = v.Name, Required = v.Required })));
+        }
+    }
+
+    private record ProjectRow(int Index, string Name, string Color, int RepoCount, int VerificationCount);
+}

@@ -170,7 +170,14 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
         )}
         data-sheet-side={normalizedSide}
         onOpenAutoFocus={(e) => {
-          e.preventDefault();
+          const container = e.currentTarget as HTMLElement | null;
+          const target = container?.querySelector<HTMLElement>("[autofocus]");
+          if (target) {
+            e.preventDefault();
+            target.focus();
+          } else {
+            e.preventDefault();
+          }
         }}
       >
         {resizable && (

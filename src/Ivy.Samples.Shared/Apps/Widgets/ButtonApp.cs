@@ -152,6 +152,8 @@ public class ButtonApp() : SampleBase
                    | new Button("Save", eventHandler, variant: ButtonVariant.Secondary).ShortcutKey("Ctrl+S")
                    | new Button("Delete", eventHandler, variant: ButtonVariant.Destructive).ShortcutKey("Delete")
                    | new Button("Submit", eventHandler, variant: ButtonVariant.Success).ShortcutKey("Ctrl+Enter")
+                   | new Button("Copy", eventHandler, variant: ButtonVariant.Outline).ShortcutKey("Alt+C")
+                   | new Button("Paste", eventHandler, variant: ButtonVariant.Info).ShortcutKey("Cmd+V")
                )
 
                | Text.H2("Interactive Demo")

@@ -86,6 +86,8 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
   // at least ~5 rows are visible in unconstrained parents.
   if (height === "Full") {
     delete containerStyle.height;
+    containerStyle.display = "flex";
+    containerStyle.flexDirection = "column";
     containerStyle.flexGrow = 1;
     containerStyle.minHeight = "200px";
   }

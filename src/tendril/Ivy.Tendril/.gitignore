@@ -1,0 +1,5 @@
+config.yaml
+bin/
+obj/
+Ivy.Tendril.Test/bin/
+Ivy.Tendril.Test/obj/

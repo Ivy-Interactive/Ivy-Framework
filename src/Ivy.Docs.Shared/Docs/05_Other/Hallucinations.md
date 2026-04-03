@@ -74,6 +74,46 @@ fd5baba6-72aa-4d28-ac10-72e1be86e494
 e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
 ee364ec5-064f-4d9c-a63c-b04a4a4bbbdc
 ba29e58f-4fb0-48ac-851d-0d88b390a03a
+7cac06c3-b2d0-406f-9271-24073cb42ef1
+
+## SelectOption\<T\> — non-existent type
+
+**Hallucinated API:**
+
+```csharp
+var clauseTypes = new SelectOption<string>[]
+{
+    new("Indemnification", "Indemnification"),
+    new("Termination", "Termination")
+};
+```
+
+**Error:** `CS0246: The type or namespace name 'SelectOption<>' could not be found`
+
+**Correct API:**
+
+```csharp
+// Use .ToOptions() on a string array:
+var options = new[] { "Indemnification", "Termination" }.ToOptions();
+state.ToSelectInput(options)
+
+// Or use Option<T> for custom value/label pairs:
+var options = new[] {
+    new Option<string>("indemnification", "Indemnification"),
+    new Option<string>("termination", "Termination")
+};
+state.ToSelectInput(options)
+```
+
+`SelectOption<T>` does not exist in Ivy. The agent confused the naming with `Option<T>` or the `.ToOptions()` pattern. For simple string options, use `.ToOptions()` on a string array. For key-value pairs, use `Option<T>`.
+
+**Found In:**
+b16d95b1-ff2f-4db3-9c67-910e21eb0713
+bc53ef0b-235f-4fba-a6bf-c3a9a9946e26
+563ac3be-4fe9-4612-9331-4eff47725fa6
+9e0f419b-6991-4ba0-80d3-384f491c2064
+6ab76176-bc16-456e-91c9-719bd84b05a6
+7622b8e9-9662-4bcf-8c4c-e7ad0cfb4ba1
 
 ## AppAttribute.path — renamed to group
 
@@ -261,6 +301,7 @@ new Callout("Warning!", "Title", CalloutVariant.Warning, Icons.AlertTriangle)
 bd5f45ac-569d-4be8-8ef8-882451e608a1
 0c7c0b33-a500-45c2-911b-b33ca1f9662e
 cdf77a72-658e-45df-9bdb-9bf7c79100b2
+a31113e3-0282-46f8-a78f-4bd42b9cebc2
 4874e3a3-c6d8-4be5-b1b3-bc4209408343
 
 ## InputBase.Label() — AxisExtensions method used on input
@@ -300,6 +341,7 @@ f20dced8-1689-4289-a2d8-ee67136eb6ce
 2e91e9c7-9c03-4b86-a9d2-c0417bcf715f
 7a9aadf3-097e-448d-8d5c-bc86152710a6
 f07bc643-b0d7-4a23-a4c8-f4e488285e98
+a31113e3-0282-46f8-a78f-4bd42b9cebc2
 
 ## BorderRadius.Medium — non-existent enum value
 
@@ -477,6 +519,38 @@ c1b87041-f92b-4ba5-96d7-6a92419e84ea
 2bcae879-5f09-4655-a74f-9371bc1d26e4
 ce2e89b0-1a7e-4823-9426-c8288ac4a6fa
 
+## QueryMutator.Trigger() / .IsLoading / .Error — non-existent properties
+
+**Hallucinated API:**
+
+```csharp
+var mutation = UseMutation(key);
+mutation.Trigger();    // doesn't exist
+mutation.IsLoading     // doesn't exist
+mutation.Error         // doesn't exist
+```
+
+**Error:** `CS1061: 'QueryMutator' does not contain a definition for 'Trigger'/'IsLoading'/'Error'`
+
+**Correct API:**
+`QueryMutator` only has `Revalidate` (Action) and `Invalidate` (Action). `QueryMutator<T>` adds `Mutate` (MutateDelegate<T>). For loading state and error, use `QueryResult<T>` from `UseQuery()`, which has `.Loading`, `.Error`, and `.Value`.
+
+For async operations triggered by a button click, use the button's async `OnClick` handler directly:
+
+```csharp
+new Button("Validate", async () => {
+    result = await service.ValidateAsync(input);
+})
+```
+
+Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseQuery.cs`
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207
+ab7c7708-b26c-49fa-83a4-176df47c5866
+fd4594df-0402-4f11-ad46-22165d480649
+7622b8e9-9662-4bcf-8c4c-e7ad0cfb4ba1
+
 ## DateTimeVariant — wrong enum name
 
 **Hallucinated API:**
@@ -602,37 +676,6 @@ a9ee3993-1cfb-4cba-9322-80a60b56c8d2
 9f10ed3d-11bc-40ba-903a-f446ff496f21
 b321412b-3b6c-4b50-b027-bc323db8fe98
 
-## QueryMutator.Trigger() / .IsLoading / .Error — non-existent properties
-
-**Hallucinated API:**
-
-```csharp
-var mutation = UseMutation(key);
-mutation.Trigger();    // doesn't exist
-mutation.IsLoading     // doesn't exist
-mutation.Error         // doesn't exist
-```
-
-**Error:** `CS1061: 'QueryMutator' does not contain a definition for 'Trigger'/'IsLoading'/'Error'`
-
-**Correct API:**
-`QueryMutator` only has `Revalidate` (Action) and `Invalidate` (Action). `QueryMutator<T>` adds `Mutate` (MutateDelegate<T>). For loading state and error, use `QueryResult<T>` from `UseQuery()`, which has `.Loading`, `.Error`, and `.Value`.
-
-For async operations triggered by a button click, use the button's async `OnClick` handler directly:
-
-```csharp
-new Button("Validate", async () => {
-    result = await service.ValidateAsync(input);
-})
-```
-
-Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseQuery.cs`
-
-**Found In:**
-857de09c-ab87-49a5-aac4-394f7d0aa207
-ab7c7708-b26c-49fa-83a4-176df47c5866
-fd4594df-0402-4f11-ad46-22165d480649
-
 ## Button.WithIcon() — non-existent fluent method
 
 **Hallucinated API:**
@@ -655,42 +698,6 @@ The fluent method is `.Icon(Icons.X)`, not `.WithIcon(Icons.X)`. The agent likel
 8b93fae2-c7ce-4890-b0c0-43310c65dd00
 310e1e6a-facb-4caf-87b9-4f1422b51abc
 7c0abfe8-e16f-40d1-9323-95505a4697e7
-
-## SelectOption\<T\> — non-existent type
-
-**Hallucinated API:**
-
-```csharp
-var clauseTypes = new SelectOption<string>[]
-{
-    new("Indemnification", "Indemnification"),
-    new("Termination", "Termination")
-};
-```
-
-**Error:** `CS0246: The type or namespace name 'SelectOption<>' could not be found`
-
-**Correct API:**
-
-```csharp
-// Use .ToOptions() on a string array:
-var options = new[] { "Indemnification", "Termination" }.ToOptions();
-state.ToSelectInput(options)
-
-// Or use Option<T> for custom value/label pairs:
-var options = new[] {
-    new Option<string>("indemnification", "Indemnification"),
-    new Option<string>("termination", "Termination")
-};
-state.ToSelectInput(options)
-```
-
-`SelectOption<T>` does not exist in Ivy. The agent confused the naming with `Option<T>` or the `.ToOptions()` pattern. For simple string options, use `.ToOptions()` on a string array. For key-value pairs, use `Option<T>`.
-
-**Found In:**
-b16d95b1-ff2f-4db3-9c67-910e21eb0713
-bc53ef0b-235f-4fba-a6bf-c3a9a9946e26
-563ac3be-4fe9-4612-9331-4eff47725fa6
 
 ## Skeleton.List() — non-existent static method
 
@@ -722,6 +729,110 @@ new Skeleton()
 9ed7f8e7-aa7c-4c8b-b6a0-8c5b389f1dc2
 e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
 1bc9499a-436c-4526-906a-0adbb0f180e8
+
+## RefreshToken.Value — non-existent property
+
+**Hallucinated API:**
+
+```csharp
+refreshToken.Value
+```
+
+**Error:** `'RefreshToken' does not contain a definition for 'Value'`
+
+**Correct API:**
+`RefreshToken` has these members: `Token` (Guid), `ReturnValue` (object?), `IsRefreshed` (bool), `Refresh()`, `ToTrigger()`. There is no `Value` property. Pass `refreshToken` directly as a dependency to `UseQuery`, or use `refreshToken.Token` if you need a changing value.
+
+Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseRefreshToken.cs`
+
+**Found In:**
+a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 002-005, 008-009)
+f713bd0e-71ec-4f0d-8383-1d27712d71a8
+7622b8e9-9662-4bcf-8c4c-e7ad0cfb4ba1
+
+## IRefreshToken — non-existent interface
+
+**Hallucinated API:**
+
+```csharp
+private readonly IRefreshToken _refreshToken;
+```
+
+**Error:** `The type or namespace name 'IRefreshToken' could not be found`
+
+**Correct API:**
+
+```csharp
+var refreshToken = UseRefreshToken();
+```
+
+`IRefreshToken` does not exist. `UseRefreshToken()` returns a `RefreshToken` class. Like all hooks, call inside `Build()`.
+
+**Found In:**
+84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 005, 006)
+0e9fc5ed-1724-4fed-b9ea-44b370358457
+7622b8e9-9662-4bcf-8c4c-e7ad0cfb4ba1
+
+## TextInputBase.Lines() — non-existent multi-line property
+
+**Hallucinated API:**
+
+```csharp
+var text = UseState("");
+text.ToTextInput().Lines(8)
+```
+
+**Error:** `CS1061: 'TextInputBase' does not contain a definition for 'Lines'`
+
+**Correct API:**
+
+```csharp
+var text = UseState("");
+text.ToTextareaInput()
+// or equivalently:
+text.ToTextInput().Multiline()
+```
+
+There is no `.Lines()` method. Use `ToTextareaInput()` or `ToTextInput().Multiline()` for multi-line text input. The textarea height can be controlled via `.Height()` on the widget.
+
+**Found In:**
+857de09c-ab87-49a5-aac4-394f7d0aa207
+edd92ecc-6378-440a-b9cf-bb8e1cb29de9
+a31113e3-0282-46f8-a78f-4bd42b9cebc2
+
+## CellClickEventArgs.RowId — non-existent property
+
+**Hallucinated API:**
+
+```csharp
+table.OnCellActivated(e =>
+{
+    var selectedId = e.Value.RowId;
+    selectedAccount.Set(selectedId);
+});
+```
+
+**Error:** `CS1061: 'CellClickEventArgs' does not contain a definition for 'RowId'`
+
+**Correct API:**
+
+```csharp
+// Use RowIndex to look up the item from your data source:
+items.ToDataTable(idSelector: e => e.Id)
+    .OnCellActivated(e =>
+    {
+        var rowIndex = e.Value.RowIndex;
+        var item = items[rowIndex];
+        selectedId.Set(item.Id);
+    })
+```
+
+`CellClickEventArgs` has `RowIndex` (int) and `CellValue`, not `RowId`. To get the entity ID, use `RowIndex` to look up the item in your original data source and access the ID property.
+
+**Found In:**
+6ab76176-bc16-456e-91c9-719bd84b05a6
+a31113e3-0282-46f8-a78f-4bd42b9cebc2
+fe86750a-00a8-454f-a252-d2064382e828
 
 ## UseAlert().ShowInfo() — wrong API usage
 
@@ -897,51 +1008,6 @@ widget.WithMargin(0, 4, 0, 0)   // left, top, right, bottom
 **Found In:**
 2e18b175-94ec-459c-94a5-8f28b81ecfdc
 6c834561-6c01-424b-b8fb-a4a473c1c86a
-
-## TextInputBase.Lines() — non-existent multi-line property
-
-**Hallucinated API:**
-
-```csharp
-var text = UseState("");
-text.ToTextInput().Lines(8)
-```
-
-**Error:** `CS1061: 'TextInputBase' does not contain a definition for 'Lines'`
-
-**Correct API:**
-
-```csharp
-var text = UseState("");
-text.ToTextareaInput()
-// or equivalently:
-text.ToTextInput().Multiline()
-```
-
-There is no `.Lines()` method. Use `ToTextareaInput()` or `ToTextInput().Multiline()` for multi-line text input. The textarea height can be controlled via `.Height()` on the widget.
-
-**Found In:**
-857de09c-ab87-49a5-aac4-394f7d0aa207
-edd92ecc-6378-440a-b9cf-bb8e1cb29de9
-
-## RefreshToken.Value — non-existent property
-
-**Hallucinated API:**
-
-```csharp
-refreshToken.Value
-```
-
-**Error:** `'RefreshToken' does not contain a definition for 'Value'`
-
-**Correct API:**
-`RefreshToken` has these members: `Token` (Guid), `ReturnValue` (object?), `IsRefreshed` (bool), `Refresh()`, `ToTrigger()`. There is no `Value` property. Pass `refreshToken` directly as a dependency to `UseQuery`, or use `refreshToken.Token` if you need a changing value.
-
-Source: `D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Hooks\UseRefreshToken.cs`
-
-**Found In:**
-a224c9f6-94b2-4b9f-9d5c-6a9ba67d5b3b (traces 002-005, 008-009)
-f713bd0e-71ec-4f0d-8383-1d27712d71a8
 
 ## FileUpload\<T\>.Data — wrong property name
 
@@ -1134,28 +1200,6 @@ The agent assumed `.Icon()` was a chainable method on `TextBuilder`, but `Icon()
 c1f8feae-b342-4bf1-a18c-9b88ee8d6d17
 fd4594df-0402-4f11-ad46-22165d480649
 
-## IRefreshToken — non-existent interface
-
-**Hallucinated API:**
-
-```csharp
-private readonly IRefreshToken _refreshToken;
-```
-
-**Error:** `The type or namespace name 'IRefreshToken' could not be found`
-
-**Correct API:**
-
-```csharp
-var refreshToken = UseRefreshToken();
-```
-
-`IRefreshToken` does not exist. `UseRefreshToken()` returns a `RefreshToken` class. Like all hooks, call inside `Build()`.
-
-**Found In:**
-84faf65a-c7df-4b5a-888b-4c49255c50ab (traces 004, 005, 006)
-0e9fc5ed-1724-4fed-b9ea-44b370358457
-
 ## ToDialog/ToSheet non-existent named parameters (subtitle, footer)
 
 **Hallucinated API:**
@@ -1262,6 +1306,35 @@ new TabsLayout(
 8b576f86-85cc-43b8-97e2-358bae83464a
 2bcae879-5f09-4655-a74f-9371bc1d26e4
 
+## ConnectionBase — non-existent base class for database connections
+
+**Hallucinated API:**
+
+```csharp
+public class AccountingDbConnection : ConnectionBase
+{
+    // ...
+}
+```
+
+**Error:** `CS0246: The type or namespace name 'ConnectionBase' could not be found`
+
+**Correct API:**
+
+```csharp
+public class AccountingDbConnection : IConnection
+{
+    public string Name => "AccountingDb";
+    // Implement IConnection interface members
+}
+```
+
+`ConnectionBase` does not exist. Database connections must implement the `IConnection` interface directly. The agent hallucinated a base class pattern that doesn't exist in Ivy — there is no abstract base class for connections.
+
+**Found In:**
+2bcae879-5f09-4655-a74f-9371bc1d26e4
+7622b8e9-9662-4bcf-8c4c-e7ad0cfb4ba1
+
 ## AppContext.BaseDirectory — Ivy's AppContext shadows System.AppContext
 
 **Hallucinated API:**
@@ -1286,6 +1359,61 @@ Ivy has its own `AppContext` class (`Ivy.Apps.AppContext`) which is imported via
 
 **Found In:**
 ce2e89b0-1a7e-4823-9426-c8288ac4a6fa
+a31113e3-0282-46f8-a78f-4bd42b9cebc2
+
+## Callout.Color(Colors.X) — non-existent fluent method
+
+**Hallucinated API:**
+
+```csharp
+new Callout("Error message").Color(Colors.Destructive)
+```
+
+**Error:** `'Callout' does not contain a definition for 'Color' and the best extension method overload 'LabelExtensions.Color(Label, Colors)' requires a receiver of type 'Ivy.Label'`
+
+**Correct API:**
+
+```csharp
+Callout.Error("Error message")
+Callout.Warning("Warning message")
+Callout.Info("Info message")
+Callout.Success("Success message")
+```
+
+`Callout` uses static factory methods, not a constructor + `.Color()` chain. This is a variant of the documented `Callout.Destructive()` hallucination — both stem from the agent trying to apply fluent styling to Callout instead of using the static factory pattern. To change variant after creation, use `.Variant(CalloutVariant.Warning)`.
+
+**Found In:**
+3c507fb4-71e1-4136-9d40-8eca6590250d
+a31113e3-0282-46f8-a78f-4bd42b9cebc2
+
+## UseDisposable — non-existent hook
+
+**Hallucinated API:**
+
+```csharp
+var db = UseDisposable(() => dbFactory.CreateDbContext());
+```
+
+**Error:** `CS0103: The name 'UseDisposable' does not exist in the current context`
+
+**Correct API:**
+
+```csharp
+// Create the DbContext and track it for disposal:
+var db = dbFactory.CreateDbContext();
+TrackDisposable(db);
+
+// Or use UseQuery to load data and let the context be scoped:
+var data = UseQuery(async () => {
+    using var db = dbFactory.CreateDbContext();
+    return await db.Items.ToListAsync();
+});
+```
+
+`UseDisposable` does not exist in Ivy. The agent likely confused this with React's `useEffect` cleanup pattern or other frameworks' disposable hooks. In Ivy, use `TrackDisposable()` to register an `IDisposable` for cleanup when the view is disposed, or scope the `DbContext` within a `UseQuery` callback.
+
+**Found In:**
+7cac06c3-b2d0-406f-9271-24073cb42ef1
 
 ## TableBuilder.OnCellClick() — extension method only exists on DataTable
 
@@ -1575,30 +1703,6 @@ The `|` pipe operator works on `LayoutView` (for composing children) but does NO
 
 **Found In:**
 41ae072b-2845-46f1-bd0b-a4a6370c6807
-
-## Callout.Color(Colors.X) — non-existent fluent method
-
-**Hallucinated API:**
-
-```csharp
-new Callout("Error message").Color(Colors.Destructive)
-```
-
-**Error:** `'Callout' does not contain a definition for 'Color' and the best extension method overload 'LabelExtensions.Color(Label, Colors)' requires a receiver of type 'Ivy.Label'`
-
-**Correct API:**
-
-```csharp
-Callout.Error("Error message")
-Callout.Warning("Warning message")
-Callout.Info("Info message")
-Callout.Success("Success message")
-```
-
-`Callout` uses static factory methods, not a constructor + `.Color()` chain. This is a variant of the documented `Callout.Destructive()` hallucination — both stem from the agent trying to apply fluent styling to Callout instead of using the static factory pattern. To change variant after creation, use `.Variant(CalloutVariant.Warning)`.
-
-**Found In:**
-3c507fb4-71e1-4136-9d40-8eca6590250d
 
 ## Spacer(int) constructor — non-existent constructor overload
 
@@ -2776,6 +2880,28 @@ stat.ToNumberInput().Invalid(overBudget ? "Over budget" : null).WithField().Labe
 **Found In:**
 8111879a-ebe9-48d0-bd8e-936becb133ee
 
+## Field.Placeholder() — extension method called on wrong type
+
+**Hallucinated API:**
+
+```csharp
+jobPosting.ToTextInput(TextInputVariant.TextArea).WithField().Label("Job Posting").Placeholder("Paste the job posting here...")
+```
+
+**Error:** `CS0311: The type 'Ivy.Field' cannot be used as type parameter 'T' in the generic type or method 'DateTimeInputExtensions.Placeholder<T>(T, string)'. There is no implicit reference conversion from 'Ivy.Field' to 'Ivy.DateTimeInputBase'.`
+
+**Correct API:**
+
+```csharp
+// Call .Placeholder() on the input BEFORE wrapping in a Field:
+jobPosting.ToTextInput(TextInputVariant.TextArea).Placeholder("Paste the job posting here...").WithField().Label("Job Posting")
+```
+
+`.Placeholder()` is an extension method on input base types (`TextInputBase`, `SelectInputBase`, `NumberInputBase`, etc.), not on `Field`. When using the `.WithField()` fluent chain, `.Placeholder()` must be called on the input before `.WithField()` converts it to a `Field`. Same pattern as `Field.Invalid()`.
+
+**Found In:**
+28e6055a-ef55-47f3-8639-cb24b3cbcee5
+
 ## NumberInput without generic type argument
 
 **Hallucinated API:**
@@ -3183,33 +3309,82 @@ items.Select(e => new { e.Name, Status = e.IsActive ? "Active" : "Inactive" })
 **Found In:**
 b8d6684b-0759-4673-a060-032fce3c37d2
 
-## ConnectionBase — non-existent base class for database connections
+## UploadContext.Accept() — extension called on wrong receiver type
 
 **Hallucinated API:**
 
 ```csharp
-public class AccountingDbConnection : ConnectionBase
-{
-    // ...
-}
+var upload = UseUpload(new MemoryStreamUploadHandler());
+upload.Value.Accept(".pdf").MaxFiles(10);
 ```
 
-**Error:** `CS0246: The type or namespace name 'ConnectionBase' could not be found`
+**Error:** `CS1929: 'UploadContext' does not contain a definition for 'Accept' and the best extension method overload 'UploadContextExtensions.Accept(IState<UploadContext>, string)' requires a receiver of type 'Ivy.IState<Ivy.UploadContext>'`
 
 **Correct API:**
 
 ```csharp
-public class AccountingDbConnection : IConnection
-{
-    public string Name => "AccountingDb";
-    // Implement IConnection interface members
-}
+var upload = UseUpload(new MemoryStreamUploadHandler());
+upload.Accept(".pdf").MaxFiles(10);
 ```
 
-`ConnectionBase` does not exist. Database connections must implement the `IConnection` interface directly. The agent hallucinated a base class pattern that doesn't exist in Ivy — there is no abstract base class for connections.
+`.Accept()` and `.MaxFiles()` are extension methods on `IState<UploadContext>` (which `UseUpload` returns), not on `UploadContext` directly. Do not unwrap via `.Value` before calling these methods.
 
 **Found In:**
-2bcae879-5f09-4655-a74f-9371bc1d26e4
+9e0f419b-6991-4ba0-80d3-384f491c2064
+
+## RowActionClickEventArgs.RowId — non-existent property
+
+**Hallucinated API:**
+
+```csharp
+table.OnRowAction(e =>
+{
+    var id = e.Value.RowId;
+    // approve/reject logic
+});
+```
+
+**Error:** `CS1061: 'RowActionClickEventArgs' does not contain a definition for 'RowId'`
+
+**Correct API:**
+
+```csharp
+table.OnRowAction(e =>
+{
+    var id = e.Value.Id;   // correct property name
+    var tag = e.Value.Tag; // action identifier
+});
+```
+
+`RowActionClickEventArgs` has `Id` (from the `idSelector`) and `Tag` (the action tag), not `RowId`. The agent conflates this with `CellClickEventArgs.RowId` (also hallucinated). Both share the pattern of inventing a `RowId` property that doesn't exist.
+
+**Found In:**
+a31113e3-0282-46f8-a78f-4bd42b9cebc2
+
+## Detail(string, object) — missing required multiline parameter
+
+**Hallucinated API:**
+
+```csharp
+new Detail("Author", post.Author.FirstName)
+new Detail("Status", post.Status)
+```
+
+**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'multiline' of 'Detail.Detail(string?, object?, bool)'`
+
+**Correct API:**
+
+```csharp
+new Detail("Author", post.Author.FirstName, false)
+new Detail("Status", post.Status, false)
+// For long text content:
+new Detail("Body", post.Body, true)
+```
+
+`Detail` constructor requires three parameters: `(string? label, object? value, bool multiline)`. The `multiline` parameter is not optional. The agent omits it because most UI frameworks default boolean display options to `false`.
+
+**Found In:**
+a31113e3-0282-46f8-a78f-4bd42b9cebc2
 
 ## TextInput.Grow() — Box-only extension called on TextInput
 

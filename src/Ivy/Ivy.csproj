@@ -118,7 +118,7 @@
     <ItemGroup>
       <_FrontendDistFile Include="../frontend/dist/**/*" />
       <EmbeddedResource Include="@(_FrontendDistFile)" Visible="false"
-                        LogicalName="Ivy.$([System.String]::Copy('%(Identity)').Replace('..\frontend\dist\','').Replace('../frontend/dist/','').Replace('\','.'))" />
+                        LogicalName="Ivy.$([System.String]::Copy('%(Identity)').Replace('..\frontend\dist\','').Replace('../frontend/dist/','').Replace('\','.').Replace('/','.'))" />
     </ItemGroup>
   </Target>
 

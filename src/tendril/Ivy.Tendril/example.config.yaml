@@ -1,0 +1,70 @@
+# These paths will be set during onboarding
+# tendrilData: /path/to/tendril/data  # Required - or set via TENDRIL_HOME env var
+# reposHome: /path/to/repos           # Optional - or set via REPOS_HOME env var
+
+agentCommand: claude
+jobTimeout: 30
+staleOutputTimeout: 10
+
+# Variable Expansion Support:
+# - %DotnetUserSecrets:Section:Key% - Read from .NET user secrets (requires .csproj with UserSecretsId)
+# - %TENDRIL_HOME% - Expands to tendrilData path
+# - %REPOS_HOME% - Expands to reposHome path
+# - %ENV_VAR% - Standard environment variable expansion
+# See VARIABLE_EXPANSION.md for details
+
+# Example with user secrets for sensitive data:
+# llm:
+#   endpoint: %DotnetUserSecrets:OpenAi:Endpoint%
+#   apiKey: %DotnetUserSecrets:OpenAi:ApiKey%
+#   model: gpt-4o-mini
+
+projects: []
+verifications: []
+
+editor:
+  command: code
+  label: VS Code
+
+telemetry: true
+
+# Model pricing per million tokens
+# Source: https://www.anthropic.com/pricing
+# Last verified: 2026-04-03
+modelPricing:
+  claude-opus-4:
+    input: 15.00
+    output: 75.00
+    cacheWrite: 18.75
+    cacheRead: 1.50
+  claude-sonnet-4:
+    input: 3.00
+    output: 15.00
+    cacheWrite: 3.75
+    cacheRead: 0.30
+  claude-haiku-4:
+    input: 0.80
+    output: 4.00
+    cacheWrite: 1.00
+    cacheRead: 0.08
+
+# Example project configuration:
+# Option 1: Using absolute paths (no reposHome needed)
+# projects:
+#   - name: MyProject
+#     color: Blue
+#     repos:
+#       - path: /absolute/path/to/repo1
+#       - path: /absolute/path/to/repo2
+#     verifications:
+#       - name: DotnetBuild
+#         required: true
+#
+# Option 2: Using reposHome as a base
+# reposHome: /home/user/repos
+# projects:
+#   - name: MyProject
+#     color: Blue
+#     repos:
+#       - path: project1/repo1        # Resolves to /home/user/repos/project1/repo1
+#       - path: /absolute/path        # Can mix absolute paths too

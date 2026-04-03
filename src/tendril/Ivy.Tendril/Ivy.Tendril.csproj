@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>CS8618;CS8603;CS8602;CS8604;CS9113</NoWarn>
+    <RootNamespace>Ivy.Tendril</RootNamespace>
+    <UserSecretsId>a8f3c2e1-4b7d-4e9f-a1c3-8d6e2f5b9a7c</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Ivy.Tendril.Test" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets/**/*" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5" />
+    <PackageReference Include="OpenAI" Version="2.9.1" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
+    <PackageReference Include="PostHog" Version="1.0.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Ivy-Framework/src/Ivy/Ivy.csproj" />
+    <ProjectReference Include="../Ivy-Framework/src/Ivy.Hooks.Pty/Ivy.Hooks.Pty.csproj" />
+    <ProjectReference Include="../Ivy-Framework/src/widgets/Ivy.Widgets.Xterm/Ivy.Widgets.Xterm.csproj" />
+    <ProjectReference Include="../Ivy-Framework/src/widgets/Ivy.Widgets.ScreenshotFeedback/Ivy.Widgets.ScreenshotFeedback.csproj" />
+    <ProjectReference Include="../Ivy-Framework/src/widgets/Ivy.Widgets.DiffView/Ivy.Widgets.DiffView.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Ivy-Framework/src/Ivy.Analyser/Ivy.Analyser.csproj">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Apps" />
+    <Folder Include="Connections" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Ivy.Tendril.Test\**" />
+    <EmbeddedResource Remove="Ivy.Tendril.Test\**" />
+    <None Remove="Ivy.Tendril.Test\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="config.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

@@ -19,6 +19,21 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
   showHeaderDivider = true,
   contentScroll = "Auto",
 }) => {
+  const [isScrolled, setIsScrolled] = React.useState(false);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const viewport = scrollRef.current?.querySelector("[data-radix-scroll-area-viewport]");
+    if (!viewport) return;
+
+    const handleScroll = () => {
+      setIsScrolled(viewport.scrollTop > 0);
+    };
+
+    viewport.addEventListener("scroll", handleScroll);
+    return () => viewport.removeEventListener("scroll", handleScroll);
+  }, []);
+
   if (!slots?.Header || !slots?.Content) {
     return (
       <div className="text-red-500">
@@ -36,10 +51,16 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
 
   return (
     <div className="remove-parent-padding flex flex-col w-full h-full" style={styles}>
-      <div className={cn("flex-none p-2 bg-background w-full", showHeaderDivider && "border-b")}>
+      <div
+        className={cn(
+          "flex-none p-2 bg-background w-full transition-shadow",
+          showHeaderDivider && "border-b",
+          isScrolled && "shadow-sm",
+        )}
+      >
         {slots.Header}
       </div>
-      <div className="flex-1 min-h-0 w-full overflow-hidden">
+      <div ref={scrollRef} className="flex-1 min-h-0 w-full overflow-hidden">
         {shouldScroll ? (
           <ScrollArea className="h-full w-full">
             <div className="p-4 w-full">{slots.Content}</div>

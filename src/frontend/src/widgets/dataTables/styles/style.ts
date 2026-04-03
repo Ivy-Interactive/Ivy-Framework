@@ -5,6 +5,7 @@ export const tableStyles = {
     container: {
       display: "flex",
       flexDirection: "column",
+      height: "100%",
       flex: 1,
       minHeight: 0,
     } as React.CSSProperties,

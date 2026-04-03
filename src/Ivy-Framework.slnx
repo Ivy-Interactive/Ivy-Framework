@@ -46,6 +46,7 @@
   <Project Path="Ivy.Samples.Shared/Ivy.Samples.Shared.csproj" />
   <Project Path="Ivy.Samples/Ivy.Samples.csproj" />
   <Project Path="Ivy.Test/Ivy.Test.csproj" />
+  <Project Path="Ivy.Tests/Ivy.Tests.csproj" />
   <Project Path="Ivy.XamlBuilder.Test/Ivy.XamlBuilder.Test.csproj" />
   <Project Path="Ivy.XamlBuilder/Ivy.XamlBuilder.csproj" />
   <Project Path="Ivy/Ivy.csproj" />

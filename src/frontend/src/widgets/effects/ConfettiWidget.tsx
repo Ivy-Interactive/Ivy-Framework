@@ -19,8 +19,9 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = "Au
 
   const confettiConfig = useMemo(
     () => ({
-      particleCount: 100,
+      particleCount: 75,
       spread: 70,
+      ticks: 133,
       shapes: [quadrant],
       colors: ["#00CC92", "#0D4A2F"],
     }),

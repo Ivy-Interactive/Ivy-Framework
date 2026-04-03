@@ -9,7 +9,6 @@ use lazy_static::lazy_static;
 
 use crate::utils;
 use crate::link_converter::LinkConverter;
-use crate::file_hash;
 use roxmltree::Document as XmlDocument;
 
 #[derive(Debug, Deserialize, Default)]
@@ -50,17 +49,8 @@ pub fn convert_async(
 ) -> Result<(), String> {
     let class_name = format!("{}App", name);
     let markdown_content = fs::read_to_string(absolute_path).expect("Failed to read");
-    let hash = utils::get_short_hash(&markdown_content);
-
-    if output_file.exists() && skip_if_not_changed {
-        if let Some(old_hash) = file_hash::read_hash(output_file) {
-            if old_hash == hash {
-                return Ok(());
-            }
-        }
-    }
-
     let document_source = utils::get_git_file_url(absolute_path);
+
     
     let mut app_meta = AppMeta {
         view_base: "ViewBase".to_string(),
@@ -172,8 +162,15 @@ pub fn convert_async(
     code_builder.push_str("    }\n}\n");
     code_builder.push_str(&view_builder);
 
+    if output_file.exists() && skip_if_not_changed {
+        if let Ok(existing_content) = fs::read_to_string(output_file) {
+            if existing_content == code_builder {
+                return Ok(());
+            }
+        }
+    }
+
     fs::write(output_file, code_builder).expect("Failed to write to file");
-    file_hash::write_hash(output_file, &hash);
     Ok(())
 }
 
