@@ -84,15 +84,18 @@ public class TendrilSettings
 public class ConfigService
 {
     private readonly TendrilSettings _settings;
+    private readonly string _configPath;
 
     internal ConfigService(TendrilSettings settings)
     {
         _settings = settings;
+        _configPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
     }
 
     public ConfigService()
     {
-        var configPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
+        _configPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
+        var configPath = _configPath;
         if (File.Exists(configPath))
         {
             var yaml = File.ReadAllText(configPath);
@@ -149,6 +152,16 @@ public class ConfigService
     {
         var colorStr = GetProject(projectName)?.Color;
         return !string.IsNullOrEmpty(colorStr) && Enum.TryParse<Colors>(colorStr, out var c) ? c : null;
+    }
+
+    public void SaveSettings()
+    {
+        var serializer = new SerializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+            .Build();
+        var yaml = serializer.Serialize(_settings);
+        File.WriteAllText(_configPath, yaml);
     }
 }
 
