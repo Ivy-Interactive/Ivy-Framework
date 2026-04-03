@@ -41,8 +41,11 @@ public class JobsApp : ViewBase
             Timer = FormatTimer(j),
             Cost = j.Cost.HasValue ? $"${j.Cost.Value:F2}" : "",
             LastOutput = FormatLastOutput(j),
+            LastOutputTimestamp = j.LastOutputAt,
             StatusMessage = j.StatusMessage ?? ""
-        }).ToList();
+        })
+        .OrderByDescending(r => r.LastOutputTimestamp ?? DateTime.MinValue)
+        .ToList();
 
         var dataTable = rows.AsQueryable()
             .ToDataTable(idSelector: t => t.Id)
