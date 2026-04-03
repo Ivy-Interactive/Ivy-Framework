@@ -543,5 +543,4 @@ function GetAgentCommandFromConfig {
         Executable = $parts[0]
         Args       = $args
     }
-} }
 }
