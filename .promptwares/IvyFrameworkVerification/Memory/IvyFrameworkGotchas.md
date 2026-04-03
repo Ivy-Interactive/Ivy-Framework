@@ -100,6 +100,14 @@ server.AddAppsFromAssembly(Assembly.GetExecutingAssembly());  // ✅ Required
 await server.RunAsync();
 ```
 
+### App Attribute Parameters
+- ❌ **No `path:` parameter**: `[App(icon: Icons.Table, path: ["Apps"])]` → CS1739
+- ✅ **Use `group:`**: `[App(icon: Icons.Table, group: ["Widgets"])]`
+
+### Size API
+- ❌ **No `Size.Vh()`**: `Size.Vh(80)` does NOT exist → CS0117
+- ✅ **Use `Size.Px()`** for fixed heights or `Size.Full()` for 100%
+
 ### Nullable Enable Required
 **Problem**: CS8632 warnings about nullable reference types.
 
