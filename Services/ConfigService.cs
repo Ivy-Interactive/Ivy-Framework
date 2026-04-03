@@ -108,6 +108,33 @@ public class ConfigService
             _settings = new TendrilSettings();
         }
 
+        string ExpandTilde(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return path;
+            if (path.StartsWith("~/") || path.StartsWith("~\\"))
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), path.Substring(2));
+            return path;
+        }
+
+        if (_settings != null)
+        {
+            _settings.TendrilData = ExpandTilde(_settings.TendrilData);
+            _settings.PlanFolder = ExpandTilde(_settings.PlanFolder);
+            if (_settings.Projects != null)
+            {
+                foreach (var proj in _settings.Projects)
+                {
+                    if (proj.Repos != null)
+                    {
+                        foreach (var repo in proj.Repos)
+                        {
+                            repo.Path = ExpandTilde(repo.Path);
+                        }
+                    }
+                }
+            }
+        }
+
         var tendrilRoot = Path.GetFullPath(Path.Combine(System.AppContext.BaseDirectory, "..", "..", ".."));
 
         // Resolve tendrilData path
