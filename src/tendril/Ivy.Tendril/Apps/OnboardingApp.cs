@@ -92,12 +92,12 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
                    .OnSubmit(OnSubmit)
             ;
 
-        async Task OnSubmit(TendrilHomeDetails? details)
+        Task OnSubmit(TendrilHomeDetails? details)
         {
             if (string.IsNullOrEmpty(details?.TendrilHome))
             {
                 error.Set("Please provide a valid path");
-                return;
+                return Task.CompletedTask;
             }
 
             try
@@ -120,7 +120,7 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
                 else if (tendrilHome.StartsWith("$"))
                 {
                     // Handle $HOME style expansion if missed by ExpandEnvironmentVariables
-                    var match = System.Text.RegularExpressions.Regex.Match(tendrilHome, @"^\$([A-Z0-9_]+)");
+                    var match = System.Text.RegularExpressions.Regex.Match(tendrilHome, @"^\$([A-Za-z_][A-Za-z0-9_]*)");
                     if (match.Success)
                     {
                         var varName = match.Groups[1].Value;
@@ -150,6 +150,8 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
             {
                 error.Set($"Invalid path: {ex.Message}");
             }
+
+            return Task.CompletedTask;
         }
     }
 }
