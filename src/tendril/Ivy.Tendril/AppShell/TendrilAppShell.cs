@@ -108,6 +108,12 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             var initialAppId = args.NavigationAppId ?? settings.DefaultAppId;
             if (!string.IsNullOrWhiteSpace(initialAppId))
             {
+                // Force redirect from onboarding if it's already done
+                if (!config.NeedsOnboarding && (initialAppId.Equals("onboarding", StringComparison.OrdinalIgnoreCase) || initialAppId.Equals("OnboardingApp", StringComparison.OrdinalIgnoreCase)))
+                {
+                    initialAppId = settings.DefaultAppId ?? "dashboard";
+                }
+
                 var appArgs = args.GetArgs<object>();
                 OpenApp(new NavigateArgs(initialAppId, appArgs), replaceHistory: true);
             }

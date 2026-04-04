@@ -126,9 +126,14 @@ public class ConfigService
 
     public ConfigService()
     {
-        // TENDRIL_HOME is required
-        var tendrilHomeEnv = Environment.GetEnvironmentVariable("TENDRIL_HOME");
-        // If TENDRIL_HOME is not set, trigger onboarding
+        var tendrilHomeEnv = Environment.GetEnvironmentVariable("TENDRIL_HOME")?.Trim();
+
+        // Remove quotes if present
+        if (!string.IsNullOrEmpty(tendrilHomeEnv) && tendrilHomeEnv.StartsWith("\"") && tendrilHomeEnv.EndsWith("\""))
+        {
+            tendrilHomeEnv = tendrilHomeEnv.Substring(1, tendrilHomeEnv.Length - 2);
+        }
+
         if (string.IsNullOrEmpty(tendrilHomeEnv))
         {
             NeedsOnboarding = true;
@@ -139,44 +144,29 @@ public class ConfigService
         }
 
         _tendrilHome = tendrilHomeEnv;
-
-        // Determine config path: TENDRIL_HOME/config.yaml
         _configPath = Path.Combine(_tendrilHome, "config.yaml");
 
-        // Load config if it exists
         if (File.Exists(_configPath))
         {
             var yaml = File.ReadAllText(_configPath);
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
                 .Build();
             _settings = deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
+            NeedsOnboarding = false;
         }
         else
         {
-            // No config file exists - need onboarding
             NeedsOnboarding = true;
             _settings = new TendrilSettings();
             return;
         }
 
-        NeedsOnboarding = false;
-
         if (_settings != null && !NeedsOnboarding)
         {
-            // Initialize user secrets - check TENDRIL_HOME if it has a .csproj
-            var secretsDirectory = Path.GetDirectoryName(_configPath) ?? System.AppContext.BaseDirectory;
-            if (!string.IsNullOrEmpty(_tendrilHome) && Directory.Exists(_tendrilHome))
-            {
-                var tendrilCsproj = Directory.GetFiles(_tendrilHome, "*.csproj", SearchOption.TopDirectoryOnly);
-                if (tendrilCsproj.Length > 0)
-                {
-                    secretsDirectory = _tendrilHome;
-                }
-            }
-            VariableExpansion.InitializeUserSecrets(secretsDirectory);
-
-            // Expand variables in settings
+            // Initialize basic stuff
+            VariableExpansion.InitializeUserSecrets(_tendrilHome);
             ExpandSettingsVariables();
 
             // Expand repo paths
@@ -194,7 +184,7 @@ public class ConfigService
                 }
             }
 
-            // Ensure all required directories exist
+            // Ensure directories exist
             Directory.CreateDirectory(_tendrilHome);
             Directory.CreateDirectory(Path.Combine(_tendrilHome, "Inbox"));
             Directory.CreateDirectory(Path.Combine(_tendrilHome, "Plans"));
