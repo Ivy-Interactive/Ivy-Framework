@@ -50,6 +50,9 @@
     <None Remove="Ivy.Tendril.Test\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="example.config.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="config.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

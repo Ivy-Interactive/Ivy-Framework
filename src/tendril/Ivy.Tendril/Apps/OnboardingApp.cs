@@ -92,33 +92,54 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
                    .OnSubmit(OnSubmit)
             ;
 
-        Task OnSubmit(TendrilHomeDetails? details)
+        async Task OnSubmit(TendrilHomeDetails? details)
         {
-            if (details?.TendrilHome == null)
+            if (string.IsNullOrEmpty(details?.TendrilHome))
             {
                 error.Set("Please provide a valid path");
-                return Task.CompletedTask;
+                return;
             }
 
             try
             {
                 var tendrilHome = details.TendrilHome;
 
-                // Expand environment variables and ~
+                // Expand environment variables (handles %VAR%)
                 tendrilHome = Environment.ExpandEnvironmentVariables(tendrilHome);
-                if (tendrilHome.StartsWith("~/") || tendrilHome.StartsWith("~\\"))
+
+                // Manual expansion for ~ and $HOME (Mac/Linux)
+                if (tendrilHome.StartsWith("~"))
                 {
-                    tendrilHome = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                        tendrilHome.Substring(2)
-                    );
+                    var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                    if (tendrilHome == "~") tendrilHome = home;
+                    else if (tendrilHome.StartsWith("~/") || tendrilHome.StartsWith("~\\"))
+                    {
+                        tendrilHome = Path.Combine(home, tendrilHome.Substring(2));
+                    }
+                }
+                else if (tendrilHome.StartsWith("$"))
+                {
+                    // Handle $HOME style expansion if missed by ExpandEnvironmentVariables
+                    var match = System.Text.RegularExpressions.Regex.Match(tendrilHome, @"^\$([A-Z0-9_]+)");
+                    if (match.Success)
+                    {
+                        var varName = match.Groups[1].Value;
+                        var varValue = Environment.GetEnvironmentVariable(varName);
+                        if (!string.IsNullOrEmpty(varValue))
+                        {
+                            tendrilHome = varValue + tendrilHome.Substring(match.Length);
+                        }
+                    }
                 }
 
-                // Validate path
+                // Normalize and root
                 if (!Path.IsPathRooted(tendrilHome))
                 {
                     tendrilHome = Path.GetFullPath(tendrilHome);
                 }
+
+                // Final normalization
+                tendrilHome = Path.GetFullPath(tendrilHome);
 
                 // Store in config for next step
                 config.SetPendingTendrilHome(tendrilHome);
@@ -129,8 +150,6 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
             {
                 error.Set($"Invalid path: {ex.Message}");
             }
-
-            return Task.CompletedTask;
         }
     }
 }
@@ -168,8 +187,17 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
                 Directory.CreateDirectory(Path.Combine(tendrilHome, "Promptwares"));
                 Directory.CreateDirectory(Path.Combine(tendrilHome, "Hooks"));
 
-                // Copy example.config.yaml to tendrilHome/config.yaml
-                var exampleConfigPath = Path.Combine(System.AppContext.BaseDirectory, "example.config.yaml");
+                // Copy template or create basic config
+                var projectDir = Path.GetDirectoryName(System.AppContext.BaseDirectory); // Go up from bin/Debug/...
+                while (projectDir != null && !File.Exists(Path.Combine(projectDir, "example.config.yaml")))
+                {
+                    projectDir = Path.GetDirectoryName(projectDir);
+                }
+
+                var exampleConfigPath = projectDir != null
+                    ? Path.Combine(projectDir, "example.config.yaml")
+                    : Path.Combine(System.AppContext.BaseDirectory, "example.config.yaml");
+
                 var configPath = Path.Combine(tendrilHome, "config.yaml");
 
                 if (File.Exists(exampleConfigPath))
@@ -177,9 +205,9 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
                     var exampleContent = await File.ReadAllTextAsync(exampleConfigPath);
                     await File.WriteAllTextAsync(configPath, exampleContent);
                 }
-                else
+                else if (!File.Exists(configPath))
                 {
-                    // Create a basic config.yaml
+                    // Create a basic config.yaml only if it doesn't exist
                     var basicConfig = "agentCommand: claude\n" +
                                       "jobTimeout: 30\n" +
                                       "staleOutputTimeout: 10\n" +
@@ -191,7 +219,7 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
                 // Set environment variable for current session
                 Environment.SetEnvironmentVariable("TENDRIL_HOME", tendrilHome);
 
-                // Mark onboarding complete
+                // Mark onboarding complete (this reloads config from the file we just wrote)
                 config.CompleteOnboarding(tendrilHome);
 
                 // Navigate to SetupApp
