@@ -52,14 +52,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
     public override object? Build()
     {
-        // Check if onboarding is needed first
+        // All hooks must be at the top level of Build()
         var config = UseService<ConfigService>();
-        if (config.NeedsOnboarding)
-        {
-            return new OnboardingApp();
-        }
-
-        // All hooks must be at the top of Build()
         var tabs = UseState(ImmutableArray.Create<TabState>);
         var selectedIndex = UseState<int?>();
         var appRepository = UseService<IAppRepository>();
@@ -103,6 +97,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         UseEffect(async () =>
         {
+            if (config.NeedsOnboarding) return;
+
             if (auth != null)
             {
                 var userInfo = await auth.GetUserInfoAsync();
@@ -488,6 +484,11 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 .Items(
                     settings.FooterMenuItemsTransformer(footerMenuItems, navigator)
                 );
+        }
+
+        if (config.NeedsOnboarding)
+        {
+            return new OnboardingApp();
         }
 
         return new Fragment(

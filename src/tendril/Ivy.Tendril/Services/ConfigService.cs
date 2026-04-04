@@ -108,7 +108,7 @@ public class TendrilSettings
 
 public class ConfigService
 {
-    private readonly TendrilSettings _settings;
+    private TendrilSettings _settings;
     private string _configPath;
     private string _tendrilHome;
     private string? _pendingTendrilHome;
@@ -248,6 +248,21 @@ public class ConfigService
     {
         _tendrilHome = tendrilHome;
         _configPath = Path.Combine(_tendrilHome, "config.yaml");
+
+        // Load config if it exists at the new path
+        if (File.Exists(_configPath))
+        {
+            var yaml = File.ReadAllText(_configPath);
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+            var loadedSettings = deserializer.Deserialize<TendrilSettings>(yaml);
+            if (loadedSettings != null)
+            {
+                _settings = loadedSettings;
+            }
+        }
+
         VariableExpansion.InitializeUserSecrets(_tendrilHome);
         ExpandSettingsVariables();
     }
