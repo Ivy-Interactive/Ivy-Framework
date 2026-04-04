@@ -13,10 +13,10 @@ public class JobsApp : ViewBase
         var jobService = UseService<JobService>();
         var planService = UseService<PlanReaderService>();
         var client = UseService<IClientProvider>();
-        var nav = this.UseNavigation();
         var refreshToken = UseRefreshToken();
         var showCommand = UseState<string?>(null);
         var showOutput = UseState<string?>(null);
+        var showPlan = UseState<string?>(null);
         UseInterval(() =>
         {
             while (jobService.PendingNotifications.TryDequeue(out var notification))
@@ -53,17 +53,27 @@ public class JobsApp : ViewBase
             .Width(Size.Full())
             .Height(Size.Full())
             .Header(t => t.Status, "Status")
+            .Header(t => t.Type, "Type")
             .Header(t => t.PlanId, "Plan ID")
             .Header(t => t.Plan, "Plan")
-            .Header(t => t.Type, "Type")
             .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
             .Header(t => t.Cost, "Cost")
             .Header(t => t.LastOutput, "Last Output")
             .Header(t => t.StatusMessage, "Status Message")
+            .Width(t => t.Status, Size.Px(100))
+            .Width(t => t.PlanId, Size.Px(80))
+            .Width(t => t.Type, Size.Px(120))
+            .Width(t => t.Plan, Size.Auto())
+            .Width(t => t.Project, Size.Px(80))
+            .Width(t => t.Timer, Size.Px(90))
+            .Width(t => t.LastOutput, Size.Px(90))
+            .Width(t => t.Cost, Size.Px(80))
+            .Width(t => t.StatusMessage, Size.Auto())
             .Renderer(t => t.Status, new LabelsDisplayRenderer())
             .Renderer(t => t.PlanId, new ButtonDisplayRenderer())
             .Hidden(t => t.Id)
+            .Hidden(t => t.LastOutputTimestamp)
             .Filterable(t => t.Timer, false)
             .Filterable(t => t.LastOutput, false)
             .Sortable(t => t.Timer, false)
@@ -89,9 +99,8 @@ public class JobsApp : ViewBase
                         if (job != null && !string.IsNullOrEmpty(job.PlanFile))
                         {
                             var fullPath = Path.Combine(planService.PlansDirectory, job.PlanFile);
-                            Console.WriteLine($"[Jobs] Navigating to plan (cell click): {fullPath}, exists: {Directory.Exists(fullPath)}");
                             if (Directory.Exists(fullPath))
-                                nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(fullPath));
+                                showPlan.Set(fullPath);
                         }
                     }
                 }
@@ -118,9 +127,8 @@ public class JobsApp : ViewBase
                         if (!string.IsNullOrEmpty(job.PlanFile))
                         {
                             var fullPath = Path.Combine(planService.PlansDirectory, job.PlanFile);
-                            Console.WriteLine($"[Jobs] Navigating to plan (row action): {fullPath}, exists: {Directory.Exists(fullPath)}");
                             if (Directory.Exists(fullPath))
-                                nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(fullPath));
+                                showPlan.Set(fullPath);
                         }
                     }
                     else if (tag == "stop-job")
@@ -207,6 +215,27 @@ public class JobsApp : ViewBase
                     onClose: () => showOutput.Set(null),
                     content: new Markdown($"```\n{output}\n```"),
                     title: "Job Output"
+                ).Width(Size.Half()).Resizable()
+            );
+        }
+
+        if (showPlan.Value is { } planPath)
+        {
+            var folderName = Path.GetFileName(planPath);
+            var content = planService.ReadLatestRevision(folderName);
+            var plan = planService.GetPlanByFolder(planPath);
+
+            var sheetContent = string.IsNullOrEmpty(content)
+                ? Text.P("Plan not found or empty.")
+                : (object)new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(content))
+                    .DangerouslyAllowLocalFiles();
+
+            return layout | new Fragment(
+                dataTable,
+                new Sheet(
+                    onClose: () => showPlan.Set(null),
+                    content: sheetContent,
+                    title: plan?.Title ?? folderName
                 ).Width(Size.Half()).Resizable()
             );
         }

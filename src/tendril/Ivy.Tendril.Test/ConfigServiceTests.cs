@@ -19,7 +19,7 @@ public class ConfigServiceTests
     public void Should_Parse_Projects_From_Config()
     {
         var yaml = @"
-tendrilData: D:\Tendril
+agentCommand: claude
 
 projects:
   - name: TestProject
@@ -60,7 +60,7 @@ projects:
     public void Should_Return_Empty_Projects_When_No_Section()
     {
         var yaml = @"
-tendrilData: D:\Tendril
+agentCommand: claude
 ";
 
         var deserializer = new DeserializerBuilder()
@@ -77,7 +77,7 @@ tendrilData: D:\Tendril
     public void Should_Find_Project_By_Name()
     {
         var yaml = @"
-tendrilData: D:\Tendril
+agentCommand: claude
 
 projects:
   - name: IvyFramework
@@ -115,7 +115,7 @@ projects:
     public void Should_Deserialize_ReviewActions()
     {
         var yaml = @"
-tendrilData: D:\Tendril
+agentCommand: claude
 
 projects:
   - name: TestProject
@@ -152,7 +152,7 @@ projects:
     public void Should_Default_ReviewActions_To_Empty_List()
     {
         var yaml = @"
-tendrilData: D:\Tendril
+agentCommand: claude
 
 projects:
   - name: TestProject

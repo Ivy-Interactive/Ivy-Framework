@@ -87,9 +87,6 @@ public record LlmConfig
 
 public class TendrilSettings
 {
-    public string TendrilData { get; set; } = "";
-    public string ReposHome { get; set; } = "";
-    public string PlanFolder { get; set; } = "";
     public string AgentCommand { get; set; } = "claude";
     public int JobTimeout { get; set; } = 30;
     public int StaleOutputTimeout { get; set; } = 10;
@@ -113,112 +110,76 @@ public class ConfigService
 {
     private readonly TendrilSettings _settings;
     private readonly string _configPath;
+    private readonly string _tendrilHome;
     private string? _pendingTendrilHome;
 
-    internal ConfigService(TendrilSettings settings)
+    internal ConfigService(TendrilSettings settings, string tendrilHome = "")
     {
         _settings = settings;
-        _configPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
+        _tendrilHome = !string.IsNullOrEmpty(tendrilHome)
+            ? tendrilHome
+            : Environment.GetEnvironmentVariable("TENDRIL_HOME") ?? "";
+        _configPath = !string.IsNullOrEmpty(_tendrilHome)
+            ? Path.Combine(_tendrilHome, "config.yaml")
+            : Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
     }
 
     public ConfigService()
     {
-        // Check for TENDRIL_HOME first - might have config there
+        // TENDRIL_HOME is required
         var tendrilHomeEnv = Environment.GetEnvironmentVariable("TENDRIL_HOME");
-
-        // Determine config path: prefer TENDRIL_HOME/config.yaml if it exists
-        if (!string.IsNullOrEmpty(tendrilHomeEnv) && Directory.Exists(tendrilHomeEnv))
+        // If TENDRIL_HOME is not set, trigger onboarding
+        if (string.IsNullOrEmpty(tendrilHomeEnv))
         {
-            var tendrilConfig = Path.Combine(tendrilHomeEnv, "config.yaml");
-            if (File.Exists(tendrilConfig))
-            {
-                _configPath = tendrilConfig;
-            }
-            else
-            {
-                _configPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
-            }
-        }
-        else
-        {
+            NeedsOnboarding = true;
+            _settings = new TendrilSettings();
             _configPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
+            _tendrilHome = "";
+            return;
         }
 
-        var configPath = _configPath;
-        var reposHomeEnv = Environment.GetEnvironmentVariable("REPOS_HOME");
-        var needsOnboarding = false;
+        _tendrilHome = tendrilHomeEnv;
 
-        if (File.Exists(configPath))
+        // Determine config path: TENDRIL_HOME/config.yaml
+        _configPath = Path.Combine(_tendrilHome, "config.yaml");
+
+        // Load config if it exists
+        if (File.Exists(_configPath))
         {
-            var yaml = File.ReadAllText(configPath);
+            var yaml = File.ReadAllText(_configPath);
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
             _settings = deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
-
-            // Override with environment variables if set
-            if (!string.IsNullOrEmpty(tendrilHomeEnv))
-            {
-                _settings.TendrilData = tendrilHomeEnv;
-            }
-            if (!string.IsNullOrEmpty(reposHomeEnv))
-            {
-                _settings.ReposHome = reposHomeEnv;
-            }
-
-            // Check if we have valid tendril data folder
-            if (string.IsNullOrEmpty(_settings.TendrilData) || !Directory.Exists(_settings.TendrilData))
-            {
-                needsOnboarding = true;
-            }
         }
         else
         {
             // No config file exists - need onboarding
-            needsOnboarding = true;
+            NeedsOnboarding = true;
             _settings = new TendrilSettings();
-            if (!string.IsNullOrEmpty(tendrilHomeEnv))
-            {
-                _settings.TendrilData = tendrilHomeEnv;
-            }
-            if (!string.IsNullOrEmpty(reposHomeEnv))
-            {
-                _settings.ReposHome = reposHomeEnv;
-            }
+            return;
         }
 
-        NeedsOnboarding = needsOnboarding;
+        NeedsOnboarding = false;
 
-        string ExpandTilde(string path)
+        if (_settings != null && !NeedsOnboarding)
         {
-            if (string.IsNullOrEmpty(path)) return path;
-            if (path.StartsWith("~/") || path.StartsWith("~\\"))
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), path.Substring(2));
-            return path;
-        }
-
-        if (_settings != null)
-        {
-            // First expand tilde
-            _settings.TendrilData = ExpandTilde(_settings.TendrilData);
-            _settings.ReposHome = ExpandTilde(_settings.ReposHome);
-            _settings.PlanFolder = ExpandTilde(_settings.PlanFolder);
-
-            // Initialize user secrets - check TENDRIL_HOME first if it has a .csproj
+            // Initialize user secrets - check TENDRIL_HOME if it has a .csproj
             var secretsDirectory = Path.GetDirectoryName(_configPath) ?? System.AppContext.BaseDirectory;
-            if (!string.IsNullOrEmpty(_settings.TendrilData) && Directory.Exists(_settings.TendrilData))
+            if (!string.IsNullOrEmpty(_tendrilHome) && Directory.Exists(_tendrilHome))
             {
-                var tendrilCsproj = Directory.GetFiles(_settings.TendrilData, "*.csproj", SearchOption.TopDirectoryOnly);
+                var tendrilCsproj = Directory.GetFiles(_tendrilHome, "*.csproj", SearchOption.TopDirectoryOnly);
                 if (tendrilCsproj.Length > 0)
                 {
-                    secretsDirectory = _settings.TendrilData;
+                    secretsDirectory = _tendrilHome;
                 }
             }
             VariableExpansion.InitializeUserSecrets(secretsDirectory);
 
-            // Then expand variables (now that we know tendrilData and reposHome)
+            // Expand variables in settings
             ExpandSettingsVariables();
 
+            // Expand repo paths
             if (_settings.Projects != null)
             {
                 foreach (var proj in _settings.Projects)
@@ -227,50 +188,25 @@ public class ConfigService
                     {
                         foreach (var repo in proj.Repos)
                         {
-                            repo.Path = ExpandTilde(repo.Path);
-                            repo.Path = VariableExpansion.ExpandVariables(repo.Path, _settings.TendrilData, _settings.ReposHome);
+                            repo.Path = VariableExpansion.ExpandVariables(repo.Path, _tendrilHome);
                         }
                     }
                 }
             }
-        }
 
-        var tendrilRoot = Path.GetFullPath(Path.Combine(System.AppContext.BaseDirectory, "..", "..", ".."));
-
-        // Resolve tendrilData path
-        if (!string.IsNullOrEmpty(_settings.TendrilData) && !Path.IsPathRooted(_settings.TendrilData))
-        {
-            _settings.TendrilData = Path.GetFullPath(Path.Combine(tendrilRoot, _settings.TendrilData));
-        }
-
-        // Derive planFolder from tendrilData if not explicitly set
-        if (string.IsNullOrEmpty(_settings.PlanFolder))
-        {
-            _settings.PlanFolder = !string.IsNullOrEmpty(_settings.TendrilData)
-                ? Path.Combine(_settings.TendrilData, "Plans")
-                : Path.Combine(tendrilRoot, ".plans");
-        }
-        else if (!Path.IsPathRooted(_settings.PlanFolder))
-        {
-            _settings.PlanFolder = Path.GetFullPath(Path.Combine(tendrilRoot, _settings.PlanFolder));
-        }
-
-        // Ensure all required directories exist
-        if (!string.IsNullOrEmpty(_settings.TendrilData))
-        {
-            Directory.CreateDirectory(_settings.TendrilData);
-            Directory.CreateDirectory(Path.Combine(_settings.TendrilData, "Inbox"));
-            Directory.CreateDirectory(Path.Combine(_settings.TendrilData, "Plans"));
-            Directory.CreateDirectory(Path.Combine(_settings.TendrilData, "Trash"));
-            Directory.CreateDirectory(Path.Combine(_settings.TendrilData, "Promptwares"));
-            Directory.CreateDirectory(Path.Combine(_settings.TendrilData, "Hooks"));
+            // Ensure all required directories exist
+            Directory.CreateDirectory(_tendrilHome);
+            Directory.CreateDirectory(Path.Combine(_tendrilHome, "Inbox"));
+            Directory.CreateDirectory(Path.Combine(_tendrilHome, "Plans"));
+            Directory.CreateDirectory(Path.Combine(_tendrilHome, "Trash"));
+            Directory.CreateDirectory(Path.Combine(_tendrilHome, "Promptwares"));
+            Directory.CreateDirectory(Path.Combine(_tendrilHome, "Hooks"));
         }
     }
 
     public TendrilSettings Settings => _settings;
-    public string TendrilData => _settings.TendrilData;
-    public string ReposHome => _settings.ReposHome;
-    public string PlanFolder => _settings.PlanFolder;
+    public string TendrilHome => _tendrilHome;
+    public string PlanFolder => string.IsNullOrEmpty(_tendrilHome) ? "" : Path.Combine(_tendrilHome, "Plans");
     public List<ProjectConfig> Projects => _settings.Projects;
     public List<LevelConfig> Levels => _settings.Levels;
     public string[] LevelNames => _settings.Levels.Select(l => l.Name).ToArray();
@@ -298,8 +234,6 @@ public class ConfigService
 
     // Onboarding support
     public bool NeedsOnboarding { get; private set; }
-    private string? _pendingReposHome;
-
     public void SetPendingTendrilHome(string path)
     {
         _pendingTendrilHome = path;
@@ -310,23 +244,26 @@ public class ConfigService
         return _pendingTendrilHome;
     }
 
-    public void SetPendingReposHome(string path)
+    public void CompleteOnboarding(string tendrilHome)
     {
-        _pendingReposHome = path;
-    }
+        // Create tendril home directory structure
+        Directory.CreateDirectory(tendrilHome);
+        Directory.CreateDirectory(Path.Combine(tendrilHome, "Inbox"));
+        Directory.CreateDirectory(Path.Combine(tendrilHome, "Plans"));
+        Directory.CreateDirectory(Path.Combine(tendrilHome, "Trash"));
+        Directory.CreateDirectory(Path.Combine(tendrilHome, "Promptwares"));
+        Directory.CreateDirectory(Path.Combine(tendrilHome, "Hooks"));
 
-    public string? GetPendingReposHome()
-    {
-        return _pendingReposHome;
-    }
+        // Save config to tendrilHome
+        var newConfigPath = Path.Combine(tendrilHome, "config.yaml");
+        var serializer = new SerializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+            .Build();
+        var yaml = serializer.Serialize(_settings);
+        File.WriteAllText(newConfigPath, yaml);
 
-    public void CompleteOnboarding(string tendrilHome, string reposHome)
-    {
-        _settings.TendrilData = tendrilHome;
-        _settings.ReposHome = reposHome;
-        _settings.PlanFolder = Path.Combine(tendrilHome, "Plans");
         NeedsOnboarding = false;
-        SaveSettings();
     }
 
     /// <summary>
@@ -336,28 +273,25 @@ public class ConfigService
     {
         if (_settings == null) return;
 
-        var tendrilHome = _settings.TendrilData;
-        var reposHome = _settings.ReposHome;
-
         // Expand agent command
-        _settings.AgentCommand = VariableExpansion.ExpandVariables(_settings.AgentCommand, tendrilHome, reposHome);
+        _settings.AgentCommand = VariableExpansion.ExpandVariables(_settings.AgentCommand, _tendrilHome);
 
         // Expand plan template
-        _settings.PlanTemplate = VariableExpansion.ExpandVariables(_settings.PlanTemplate, tendrilHome, reposHome);
+        _settings.PlanTemplate = VariableExpansion.ExpandVariables(_settings.PlanTemplate, _tendrilHome);
 
         // Expand LLM config
         if (_settings.Llm != null)
         {
-            _settings.Llm.Endpoint = VariableExpansion.ExpandVariables(_settings.Llm.Endpoint, tendrilHome, reposHome);
-            _settings.Llm.ApiKey = VariableExpansion.ExpandVariables(_settings.Llm.ApiKey, tendrilHome, reposHome);
-            _settings.Llm.Model = VariableExpansion.ExpandVariables(_settings.Llm.Model, tendrilHome, reposHome);
+            _settings.Llm.Endpoint = VariableExpansion.ExpandVariables(_settings.Llm.Endpoint, _tendrilHome);
+            _settings.Llm.ApiKey = VariableExpansion.ExpandVariables(_settings.Llm.ApiKey, _tendrilHome);
+            _settings.Llm.Model = VariableExpansion.ExpandVariables(_settings.Llm.Model, _tendrilHome);
         }
 
         // Expand editor config
         if (_settings.Editor != null)
         {
-            _settings.Editor.Command = VariableExpansion.ExpandVariables(_settings.Editor.Command, tendrilHome, reposHome);
-            _settings.Editor.Label = VariableExpansion.ExpandVariables(_settings.Editor.Label, tendrilHome, reposHome);
+            _settings.Editor.Command = VariableExpansion.ExpandVariables(_settings.Editor.Command, _tendrilHome);
+            _settings.Editor.Label = VariableExpansion.ExpandVariables(_settings.Editor.Label, _tendrilHome);
         }
 
         // Expand promptware configs
@@ -366,13 +300,13 @@ public class ConfigService
             foreach (var kvp in _settings.Promptwares.ToList())
             {
                 var config = kvp.Value;
-                config.Model = VariableExpansion.ExpandVariables(config.Model, tendrilHome, reposHome);
+                config.Model = VariableExpansion.ExpandVariables(config.Model, _tendrilHome);
 
                 if (config.AllowedTools != null)
                 {
                     for (int i = 0; i < config.AllowedTools.Count; i++)
                     {
-                        config.AllowedTools[i] = VariableExpansion.ExpandVariables(config.AllowedTools[i], tendrilHome, reposHome);
+                        config.AllowedTools[i] = VariableExpansion.ExpandVariables(config.AllowedTools[i], _tendrilHome);
                     }
                 }
             }
@@ -383,15 +317,15 @@ public class ConfigService
         {
             foreach (var project in _settings.Projects)
             {
-                project.Context = VariableExpansion.ExpandVariables(project.Context, tendrilHome, reposHome);
+                project.Context = VariableExpansion.ExpandVariables(project.Context, _tendrilHome);
 
                 // Expand review actions
                 if (project.ReviewActions != null)
                 {
                     foreach (var action in project.ReviewActions)
                     {
-                        action.Condition = VariableExpansion.ExpandVariables(action.Condition, tendrilHome, reposHome);
-                        action.Action = VariableExpansion.ExpandVariables(action.Action, tendrilHome, reposHome);
+                        action.Condition = VariableExpansion.ExpandVariables(action.Condition, _tendrilHome);
+                        action.Action = VariableExpansion.ExpandVariables(action.Action, _tendrilHome);
                     }
                 }
 
@@ -400,8 +334,8 @@ public class ConfigService
                 {
                     foreach (var hook in project.Hooks)
                     {
-                        hook.Condition = VariableExpansion.ExpandVariables(hook.Condition, tendrilHome, reposHome);
-                        hook.Action = VariableExpansion.ExpandVariables(hook.Action, tendrilHome, reposHome);
+                        hook.Condition = VariableExpansion.ExpandVariables(hook.Condition, _tendrilHome);
+                        hook.Action = VariableExpansion.ExpandVariables(hook.Action, _tendrilHome);
                     }
                 }
             }
@@ -412,7 +346,7 @@ public class ConfigService
         {
             foreach (var verification in _settings.Verifications)
             {
-                verification.Prompt = VariableExpansion.ExpandVariables(verification.Prompt, tendrilHome, reposHome);
+                verification.Prompt = VariableExpansion.ExpandVariables(verification.Prompt, _tendrilHome);
             }
         }
     }

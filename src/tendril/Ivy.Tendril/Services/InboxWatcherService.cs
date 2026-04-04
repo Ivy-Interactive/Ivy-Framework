@@ -13,7 +13,7 @@ public class InboxWatcherService : IDisposable
     public InboxWatcherService(ConfigService config, JobService jobService)
     {
         _jobService = jobService;
-        _inboxPath = Path.Combine(config.TendrilData, "Inbox");
+        _inboxPath = Path.Combine(config.TendrilHome, "Inbox");
 
         if (!Directory.Exists(_inboxPath))
             Directory.CreateDirectory(_inboxPath);

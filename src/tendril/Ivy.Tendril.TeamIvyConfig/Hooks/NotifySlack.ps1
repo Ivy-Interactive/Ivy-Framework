@@ -19,25 +19,18 @@ if (-not (Test-Path $planYamlPath)) {
     exit 1
 }
 
+# Ensure powershell-yaml is available
+if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
+    Install-Module -Name powershell-yaml -Force -Scope CurrentUser
+}
+Import-Module powershell-yaml
+
 $planContent = Get-Content $planYamlPath -Raw
+$plan = ConvertFrom-Yaml $planContent
 
-# Parse title
-$title = ""
-if ($planContent -match "(?m)^title:\s*(.+)$") {
-    $title = $Matches[1].Trim()
-}
-
-# Parse project
-$project = ""
-if ($planContent -match "(?m)^project:\s*(.+)$") {
-    $project = $Matches[1].Trim()
-}
-
-# Parse PRs
-$prs = @()
-if ($planContent -match "(?ms)^prs:\s*\n((?:- .+\n?)+)") {
-    $prs = [regex]::Matches($Matches[1], "- (.+)") | ForEach-Object { $_.Groups[1].Value.Trim() }
-}
+$title = if ($plan.title) { $plan.title } else { "" }
+$project = if ($plan.project) { $plan.project } else { "" }
+$prs = if ($plan.prs) { @($plan.prs) } else { @() }
 
 if ($prs.Count -eq 0) {
     Write-Output "No PRs found in plan.yaml, skipping Slack notification"
@@ -54,9 +47,10 @@ if (-not (Test-Path $configPath)) {
 $slackEmoji = ""
 if (Test-Path $configPath) {
     $configContent = Get-Content $configPath -Raw
-    # Find the project section and extract slackEmoji
-    if ($configContent -match "(?ms)name:\s*$([regex]::Escape($project)).*?slackEmoji:\s*""([^""]+)""") {
-        $slackEmoji = $Matches[1]
+    $config = ConvertFrom-Yaml $configContent
+    $projectConfig = $config.projects | Where-Object { $_.name -eq $project } | Select-Object -First 1
+    if ($projectConfig -and $projectConfig.meta -and $projectConfig.meta.slackEmoji) {
+        $slackEmoji = $projectConfig.meta.slackEmoji
     }
 }
 
@@ -65,8 +59,9 @@ $slackComment = ""
 $customOptionsPath = Join-Path $planFolder ".custom-pr-options.yaml"
 if (Test-Path $customOptionsPath) {
     $optionsContent = Get-Content $customOptionsPath -Raw
-    if ($optionsContent -match "(?m)^slackComment:\s*(.+)$") {
-        $slackComment = $Matches[1].Trim().Trim('"', "'")
+    $options = ConvertFrom-Yaml $optionsContent
+    if ($options.slackComment) {
+        $slackComment = $options.slackComment
     }
 }
 

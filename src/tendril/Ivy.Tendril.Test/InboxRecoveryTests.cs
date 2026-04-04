@@ -17,7 +17,7 @@ public class InboxRecoveryTests
             var processingFile = Path.Combine(inboxDir, "pending-job-001.md.processing");
             File.WriteAllText(processingFile, "---\nproject: Tendril\n---\nSome task");
 
-            var config = new ConfigService(new TendrilSettings { TendrilData = tempDir });
+            var config = new ConfigService(new TendrilSettings(), tendrilHome: tempDir);
             var jobService = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10), inboxDir);
 
             // Create InboxWatcherService — constructor calls RecoverProcessingFiles
@@ -49,7 +49,7 @@ public class InboxRecoveryTests
             File.WriteAllText(mdFile, "---\nproject: Tendril\n---\nOriginal");
             File.WriteAllText(processingFile, "---\nproject: Tendril\n---\nDuplicate");
 
-            var config = new ConfigService(new TendrilSettings { TendrilData = tempDir });
+            var config = new ConfigService(new TendrilSettings(), tendrilHome: tempDir);
             var jobService = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10), inboxDir);
             using var watcher = new InboxWatcherService(config, jobService);
 
@@ -79,7 +79,7 @@ public class InboxRecoveryTests
             File.WriteAllText(processingFile, "---\nproject: Tendril\n---\nRunning task");
 
             // Also no .md files
-            var config = new ConfigService(new TendrilSettings { TendrilData = tempDir });
+            var config = new ConfigService(new TendrilSettings(), tendrilHome: tempDir);
             var jobService = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10), inboxDir);
 
             // Don't use InboxWatcherService constructor (it calls RecoverProcessingFiles).
@@ -269,7 +269,7 @@ public class InboxRecoveryTests
             File.WriteAllText(processingFile, "---\nproject: Tendril\n---\nCrashed task description");
 
             // Step 2: Create services (simulating restart)
-            var config = new ConfigService(new TendrilSettings { TendrilData = tempDir });
+            var config = new ConfigService(new TendrilSettings(), tendrilHome: tempDir);
             var jobService = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10), inboxDir);
             using var watcher = new InboxWatcherService(config, jobService);
 

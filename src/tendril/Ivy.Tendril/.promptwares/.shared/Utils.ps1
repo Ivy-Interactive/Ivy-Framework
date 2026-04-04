@@ -10,32 +10,14 @@ if ($claudeDir -and (Test-Path $claudeDir)) {
     }
 }
 
-# Read plans directory from config.yaml
-$script:ConfigPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "config.yaml"
-$script:PlansDir = $null
-if (Test-Path $script:ConfigPath) {
-    try {
-        $configYaml = Get-Content $script:ConfigPath -Raw
-        # First check explicit planFolder
-        $pfMatch = [regex]::Match($configYaml, '(?m)^planFolder:\s*(.+)$')
-        if ($pfMatch.Success) {
-            $script:PlansDir = $pfMatch.Groups[1].Value.Trim().TrimEnd('\', '/')
-        }
-        # Otherwise derive from tendrilData
-        if (-not $script:PlansDir) {
-            $tdMatch = [regex]::Match($configYaml, '(?m)^tendrilData:\s*(.+)$')
-            if ($tdMatch.Success) {
-                $script:PlansDir = Join-Path $tdMatch.Groups[1].Value.Trim().TrimEnd('\', '/') "Plans"
-            }
-        }
-    }
-    catch { }
+# TENDRIL_HOME is required
+if (-not $env:TENDRIL_HOME) {
+    Write-Error "TENDRIL_HOME environment variable is not set. Please set it to your Tendril configuration directory."
+    exit 1
 }
-if (-not $script:PlansDir) {
-    # Fallback to temp directory if config cannot be read
-    $fallbackRoot = Join-Path ([System.IO.Path]::GetTempPath()) "Tendril"
-    $script:PlansDir = Join-Path $fallbackRoot "Plans"
-}
+
+$script:ConfigPath = Join-Path $env:TENDRIL_HOME "config.yaml"
+$script:PlansDir = Join-Path $env:TENDRIL_HOME "Plans"
 
 function GetProgramFolder {
     param([string]$ScriptPath)
@@ -346,144 +328,6 @@ function InvokePromptwareAgent {
     Remove-Item $promptFile -ErrorAction SilentlyContinue
 }
 
-function ReportSessionCost {
-    param([string]$SessionId)
-
-    if (-not $SessionId) { return $null }
-
-    try {
-        # Find session file
-        $claudeProjectsDir = Join-Path $env:USERPROFILE ".claude\projects"
-        $sessionFile = Get-ChildItem -Path $claudeProjectsDir -Recurse -Filter "$SessionId.jsonl" |
-        Where-Object { $_.FullName -notlike "*\subagents\*" } |
-        Select-Object -First 1
-
-        if (-not $sessionFile) { return $null }
-
-        # Load pricing from config.yaml
-        $configPath = $script:ConfigPath
-        if (-not $configPath -or -not (Test-Path $configPath)) {
-            $configPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "config.yaml"
-        }
-
-        $modelPricing = $null
-        if (Test-Path $configPath) {
-            try {
-                $config = Get-Content $configPath -Raw | ConvertFrom-Yaml
-                $modelPricing = $config.modelPricing
-            }
-            catch {
-                Write-Warning "Could not load modelPricing from config.yaml: $_"
-            }
-        }
-
-        if (-not $modelPricing) {
-            Write-Warning "No modelPricing found in config.yaml, using Opus 4 defaults"
-            $modelPricing = @{
-                "claude-opus-4" = @{ input=15.00; output=75.00; cacheWrite=18.75; cacheRead=1.50 }
-            }
-        }
-
-        $totalCost = 0.0
-        $totalTokens = 0
-
-        # Parse session and calculate cost
-        $filesToParse = @($sessionFile.FullName)
-
-        # Add subagent sessions
-        $subagentDir = Join-Path ($sessionFile.FullName -replace '\.jsonl$', '') "subagents"
-        if (Test-Path $subagentDir) {
-            $filesToParse += (Get-ChildItem $subagentDir -Filter "*.jsonl").FullName
-        }
-
-        foreach ($filePath in $filesToParse) {
-            foreach ($line in (Get-Content $filePath)) {
-                if (-not $line.Trim()) { continue }
-                try {
-                    $obj = $line | ConvertFrom-Json
-                    if ($obj.type -eq "assistant" -and $obj.message.usage) {
-                        $u = $obj.message.usage
-                        $model = $obj.message.model ?? "claude-opus-4"
-
-                        # Find matching pricing tier
-                        $prices = $null
-                        foreach ($key in $modelPricing.Keys) {
-                            if ($model -like "*$key*") {
-                                $prices = $modelPricing[$key]
-                                break
-                            }
-                        }
-
-                        # Fallback to Opus if no match
-                        if (-not $prices) {
-                            $prices = $modelPricing["claude-opus-4"]
-                        }
-
-                        # Convert per-million to per-token
-                        $priceInput = $prices.input * 1e-6
-                        $priceOutput = $prices.output * 1e-6
-                        $priceCacheWrite = $prices.cacheWrite * 1e-6
-                        $priceCacheRead = $prices.cacheRead * 1e-6
-
-                        # Calculate cost
-                        $inputTokens = ($u.input_tokens ?? 0)
-                        $outputTokens = ($u.output_tokens ?? 0)
-                        $cacheReadTokens = ($u.cache_read_input_tokens ?? 0)
-
-                        $totalTokens += $inputTokens + $outputTokens + $cacheReadTokens
-                        $totalCost += $inputTokens * $priceInput
-                        $totalCost += $outputTokens * $priceOutput
-                        $totalCost += $cacheReadTokens * $priceCacheRead
-
-                        # Handle cache creation
-                        if ($u.cache_creation) {
-                            $cache5m = ($u.cache_creation.ephemeral_5m_input_tokens ?? 0)
-                            $cache1h = ($u.cache_creation.ephemeral_1h_input_tokens ?? 0)
-                            $totalTokens += $cache5m + $cache1h
-                            $totalCost += ($cache5m + $cache1h) * $priceCacheWrite
-                        } else {
-                            $cacheCreation = ($u.cache_creation_input_tokens ?? 0)
-                            $totalTokens += $cacheCreation
-                            $totalCost += $cacheCreation * $priceCacheWrite
-                        }
-                    }
-                }
-                catch { }
-            }
-        }
-
-        # Report to controller (accumulates)
-        $jobId = $env:TENDRIL_JOB_ID
-        $url = $env:TENDRIL_URL
-        if ($jobId -and $url) {
-            $body = @{ cost = [math]::Round($totalCost, 2) } | ConvertTo-Json
-            Invoke-RestMethod -Uri "$url/api/jobs/$jobId/cost" -Method Post `
-                -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
-        }
-
-        return @{ Tokens = $totalTokens; Cost = $totalCost }
-    }
-    catch {
-        return $null
-    }
-}
-
-function LogPlanCost {
-    param(
-        [string]$PlanFolder,
-        [string]$Promptware,
-        [int]$Tokens,
-        [double]$Cost
-    )
-    if (-not $PlanFolder -or -not (Test-Path $PlanFolder)) { return }
-
-    $csvPath = Join-Path $PlanFolder "costs.csv"
-    if (-not (Test-Path $csvPath)) {
-        "Promptware,Tokens,Cost" | Set-Content $csvPath -Encoding UTF8
-    }
-    "$Promptware,$Tokens,$("{0:F4}" -f $Cost)" | Add-Content $csvPath -Encoding UTF8
-}
-
 function SendStatusMessage {
     param([string]$Message)
 
@@ -554,11 +398,12 @@ function GetAgentCommandFromConfig {
                     $raw += " --model $($pwConfig.model)"
                 }
 
-                # Apply allowedTools with %TENDRIL_HOME% substitution
+                # Apply allowedTools with environment variable expansion
                 if ($pwConfig.allowedTools) {
-                    $tendrilPath = if ($config.tendrilData) { $config.tendrilData -replace '\\', '/' } else { "" }
                     foreach ($tool in $pwConfig.allowedTools) {
-                        $resolvedTool = $tool -replace '%TENDRIL_HOME%', $tendrilPath
+                        $resolvedTool = [Environment]::ExpandEnvironmentVariables($tool)
+                        # Normalize to forward slashes for claude CLI path patterns
+                        $resolvedTool = $resolvedTool -replace '\\', '/'
                         $allowedTools += $resolvedTool
                     }
                 }
@@ -584,17 +429,16 @@ function GetAgentCommandFromConfig {
     }
     if ($current) { $parts += $current }
 
-    # Append allowedTools as individual args
-    $args = $parts[1..($parts.Length - 1)]
+    # Append allowedTools as a single comma-separated argument
+    # Note: avoid using $args as it's an automatic variable in PowerShell
+    $cmdArgs = @($parts[1..($parts.Length - 1)])
     if ($allowedTools.Count -gt 0) {
-        foreach ($tool in $allowedTools) {
-            $args += "--allowedTools"
-            $args += $tool
-        }
+        $cmdArgs += "--allowedTools"
+        $cmdArgs += ($allowedTools -join ",")
     }
 
     return @{
         Executable = $parts[0]
-        Args       = $args
+        Args       = $cmdArgs
     }
 }

@@ -32,7 +32,7 @@ public class UpdatePlanDialog(
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => { _updateText.Set(""); _dialogOpen.Set(false); }),
-                new Button("Submit Update").Primary().OnClick(() =>
+                new Button("Submit Update").Primary().ShortcutKey("Ctrl+Enter").OnClick(() =>
                 {
                     if (!string.IsNullOrWhiteSpace(_updateText.Value))
                     {

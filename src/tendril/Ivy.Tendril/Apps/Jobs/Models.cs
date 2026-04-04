@@ -15,6 +15,7 @@ public record JobItem
     public string ScriptPath { get; init; } = "";
     public string[] Args { get; init; } = [];
     public bool CancellationRequested { get; set; }
+    public string? SessionId { get; set; }
     public decimal? Cost { get; set; }
 
     // Process handle for non-interactive execution

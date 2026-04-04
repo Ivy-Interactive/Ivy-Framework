@@ -18,15 +18,9 @@ promptwares:
       - Read
       - Glob
       - Grep
-      - "Bash(git log *)"
-      - "Bash(git show *)"
-      - "Bash(git diff *)"
-      - "Bash(gh search issues *)"
-      - "Bash(ls *)"
-      - "Bash(cat *)"
-      - "Write(//%TENDRIL_HOME%/Plans/**)"
-      - "Edit(//%TENDRIL_HOME%/Plans/**)"
-      - "Write(//%TENDRIL_HOME%/Trash/**)"
+      - Bash
+      - Write
+      - Edit
   ExecutePlan:
     model: opus
     allowedTools:
@@ -44,57 +38,45 @@ promptwares:
       - Read
       - Glob
       - Grep
-      - "Bash(git log *)"
-      - "Bash(git show *)"
-      - "Bash(git diff *)"
-      - "Bash(ls *)"
-      - "Write(//%TENDRIL_HOME%/Plans/**)"
-      - "Edit(//%TENDRIL_HOME%/Plans/**)"
+      - Bash
+      - Write
+      - Edit
   MakePr:
     model: sonnet
     allowedTools:
       - Read
       - Glob
       - Grep
-      - "Bash(git *)"
-      - "Bash(gh pr *)"
-      - "Bash(gh api *)"
-      - "Bash(storage *)"
-      - "Bash(ls *)"
-      - "Write(//%TENDRIL_HOME%/Plans/**)"
-      - "Edit(//%TENDRIL_HOME%/Plans/**)"
+      - Bash
+      - Write
+      - Edit
   UpdatePlan:
     model: sonnet
     allowedTools:
       - Read
       - Glob
       - Grep
-      - "Bash(git log *)"
-      - "Bash(git show *)"
-      - "Bash(git diff *)"
-      - "Bash(ls *)"
-      - "Write(//%TENDRIL_HOME%/Plans/**)"
-      - "Edit(//%TENDRIL_HOME%/Plans/**)"
+      - Bash
+      - Write
+      - Edit
   SplitPlan:
     model: sonnet
     allowedTools:
       - Read
       - Glob
       - Grep
-      - "Bash(ls *)"
-      - "Write(//%TENDRIL_HOME%/Plans/**)"
-      - "Edit(//%TENDRIL_HOME%/Plans/**)"
+      - Bash
+      - Write
+      - Edit
   CreateIssue:
     model: sonnet
     allowedTools:
       - Read
       - Glob
       - Grep
-      - "Bash(gh issue *)"
-      - "Bash(gh repo *)"
-      - "Bash(ls *)"
-      - "Write(//%TENDRIL_HOME%/Plans/**)"
-      - "Edit(//%TENDRIL_HOME%/Plans/**)"
+      - Bash
+      - Write
+      - Edit
   IvyFrameworkVerification:
     model: sonnet
     allowedTools:
@@ -103,13 +85,7 @@ promptwares:
       - Edit
       - Glob
       - Grep
-      - "Bash(dotnet *)"
-      - "Bash(npx *)"
-      - "Bash(npm *)"
-      - "Bash(ls *)"
-      - "Bash(mkdir *)"
-      - "Bash(cp *)"
-      - "Bash(pwsh *)"
+      - Bash
 
 levels:
   - name: Critical
@@ -127,14 +103,14 @@ projects:
     meta:
       slackEmoji: ":hammer_and_wrench:"
     repos:
-      - path: %REPOS_HOME%/Ivy-Framework
+      - path: "%REPOS_HOME%/Ivy-Framework"
         prRule: yolo
     hooks:
       - name: SlackNotify
         when: after
         promptwares:
           - MakePr
-        action: 'pwsh -NoProfile -File %REPOS_HOME%/Ivy-Tendril/.hooks/NotifySlack.ps1'
+        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
     reviewActions:
       - name: "Sample"
         condition: 'Test-Path "artifacts/sample/*.csproj"'
@@ -173,16 +149,16 @@ projects:
     meta:
       slackEmoji: ":robot_face:"
     repos:
-      - path: %REPOS_HOME%/Ivy-Agent
+      - path: "%REPOS_HOME%/Ivy-Agent"
         prRule: yolo
-      - path: %REPOS_HOME%/Ivy
+      - path: "%REPOS_HOME%/Ivy"
         prRule: yolo
     hooks:
       - name: SlackNotify
         when: after
         promptwares:
           - MakePr
-        action: 'pwsh -NoProfile -File %REPOS_HOME%/Ivy-Tendril/.hooks/NotifySlack.ps1'
+        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
     verifications:
       - name: DotnetBuild
         required: true
@@ -204,16 +180,16 @@ projects:
     meta:
       slackEmoji: ":test_tube:"
     repos:
-      - path: %REPOS_HOME%/Ivy-Agent/Ivy.Agent.Test.Studio
+      - path: "%REPOS_HOME%/Ivy-Agent/Ivy.Agent.Test.Studio"
         prRule: yolo
-      - path: %REPOS_HOME%/Ivy-Agent/Ivy.Agent.Test.Manager
+      - path: "%REPOS_HOME%/Ivy-Agent/Ivy.Agent.Test.Manager"
         prRule: yolo
     hooks:
       - name: SlackNotify
         when: after
         promptwares:
           - MakePr
-        action: 'pwsh -NoProfile -File %REPOS_HOME%/Ivy-Tendril/.hooks/NotifySlack.ps1'
+        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
     verifications:
       - name: DotnetBuild
         required: true
@@ -234,14 +210,14 @@ projects:
     meta:
       slackEmoji: ":desktop_computer:"
     repos:
-      - path: %REPOS_HOME%/Ivy
+      - path: "%REPOS_HOME%/Ivy"
         prRule: yolo
     hooks:
       - name: SlackNotify
         when: after
         promptwares:
           - MakePr
-        action: 'pwsh -NoProfile -File %REPOS_HOME%/Ivy-Tendril/.hooks/NotifySlack.ps1'
+        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
     verifications:
       - name: DotnetBuild
         required: true
@@ -256,53 +232,19 @@ projects:
       - Ivy.Internals/ — shared internals
       - Ivy.Studio/ — vibe-coding agent
 
-  - name: MyPromptwares
-    color: Amber
-    meta:
-      slackEmoji: ":scroll:"
-    repos:
-      - path: D:\Repos\_Personal\MyPromptwares
-        prRule: yolo
-    hooks:
-      - name: SlackNotify
-        when: after
-        promptwares:
-          - MakePr
-        action: 'pwsh -NoProfile -File %REPOS_HOME%/Ivy-Tendril/.hooks/NotifySlack.ps1'
-    context: |
-      Personal promptwares.
-
-  - name: Scripts
-    color: Slate
-    meta:
-      slackEmoji: ":gear:"
-    repos:
-      - path: D:\Repos\_Personal\Scripts
-        prRule: yolo
-    hooks:
-      - name: SlackNotify
-        when: after
-        promptwares:
-          - MakePr
-        action: 'pwsh -NoProfile -File %REPOS_HOME%/Ivy-Tendril/.hooks/NotifySlack.ps1'
-    context: |
-      Personal scripts and agentic applications.
-      - AF2/ — promptwares (MakePlan, IvyAgentDebug, etc.)
-      - AF2/.vscode-extensions/ — VS Code extensions (installed via symlinks)
-
   - name: Tendril
     color: Emerald
     meta:
       slackEmoji: ":seedling:"
     repos:
-      - path: %REPOS_HOME%/Ivy-Tendril
+      - path: "%REPOS_HOME%/Ivy-Framework"
         prRule: yolo
     hooks:
       - name: SlackNotify
         when: after
         promptwares:
           - MakePr
-        action: 'pwsh -NoProfile -File %REPOS_HOME%/Ivy-Tendril/.hooks/NotifySlack.ps1'
+        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
     verifications:
       - name: DotnetBuild
         required: true
@@ -326,14 +268,14 @@ projects:
     meta:
       slackEmoji: ":electric_plug:"
     repos:
-      - path: %REPOS_HOME%/Ivy-Mcp
+      - path: "%REPOS_HOME%/Ivy-Mcp"
         prRule: yolo
     hooks:
       - name: SlackNotify
         when: after
         promptwares:
           - MakePr
-        action: 'pwsh -NoProfile -File %REPOS_HOME%/Ivy-Tendril/.hooks/NotifySlack.ps1'
+        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
     verifications:
       - name: DotnetBuild
         required: true
@@ -367,7 +309,7 @@ verifications:
   - name: FrontendLint
     prompt: "Run `cd src/frontend && npm run lint && npm run format:check` and verify no errors."
   - name: IvyFrameworkVerification
-    prompt: "Run the IvyFrameworkVerification promptware to visually verify UI changes. Execute: `pwsh -NoProfile -File %REPOS_HOME%/Ivy-Tendril/.promptwares/IvyFrameworkVerification.ps1 -PlanPath <PlanFolder>`. Creates a temp project with demo apps, runs Playwright tests, and copies artifacts to <PlanFolder>/artifacts/. Write the verification report to <PlanFolder>/verification/IvyFrameworkVerification.md."
+    prompt: "Run the IvyFrameworkVerification promptware to visually verify UI changes. Execute: `pwsh -NoProfile -File %TENDRIL_HOME%/Promptwares/IvyFrameworkVerification.ps1 -PlanPath <PlanFolder>`. Creates a temp project with demo apps, runs Playwright tests, and copies artifacts to <PlanFolder>/artifacts/. Write the verification report to <PlanFolder>/verification/IvyFrameworkVerification.md."
   - name: CheckResult
     prompt: |
       Verify the implementation matches what was requested in the plan.

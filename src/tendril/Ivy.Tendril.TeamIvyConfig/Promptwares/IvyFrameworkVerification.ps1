@@ -3,7 +3,9 @@ param(
     [string]$PlanPath
 )
 
-. "$PSScriptRoot/.shared/Utils.ps1"
+# User-defined promptwares use TENDRIL_SHARED to access built-in shared utilities
+$sharedDir = if ($env:TENDRIL_SHARED) { $env:TENDRIL_SHARED } else { "$PSScriptRoot/.shared" }
+. "$sharedDir/Utils.ps1"
 
 $programFolder = GetProgramFolder $PSCommandPath
 $planYamlPath = ValidatePlanPath $PlanPath

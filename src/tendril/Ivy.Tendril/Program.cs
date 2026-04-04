@@ -6,6 +6,7 @@ using OpenAI;
 using Ivy.Tendril.AppShell;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging;
 
 
 AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
@@ -27,6 +28,7 @@ server.UseHotReload();
 #endif
 server.SetMetaTitle("Ivy Tendril");
 server.Services.AddSingleton<ConfigService>();
+server.Services.AddSingleton<ModelPricingService>();
 
 // Register IChatClient if LLM is configured
 var configForLlm = new ConfigService();
@@ -60,7 +62,7 @@ server.Services.AddSingleton<TelemetryService>(sp =>
 });
 server.Services.AddSingleton<JobService>(sp =>
 {
-    var jobService = new JobService(sp.GetRequiredService<ConfigService>());
+    var jobService = new JobService(sp.GetRequiredService<ConfigService>(), sp.GetRequiredService<ModelPricingService>());
     jobService.SetPlanReaderService(sp.GetRequiredService<PlanReaderService>());
     jobService.SetTelemetryService(sp.GetRequiredService<TelemetryService>());
     return jobService;
@@ -89,9 +91,18 @@ server.UseWebApplication(app =>
     app.Services.GetRequiredService<PlanWatcherService>();
     app.Services.GetRequiredService<InboxWatcherService>();
     app.Services.GetRequiredService<TelemetryService>().TrackAppStarted();
+    app.UseAssets(server.Args, app.Services.GetRequiredService<ILogger<Server>>(), "Assets", "tendril/assets");
 });
 server.AddAppsFromAssembly();
 server.AddConnectionsFromAssembly();
-server.UseAppShell(() => new TendrilAppShell(new AppShellSettings()
-    .UseTabs(preventDuplicates: true)));
+var version = typeof(TendrilAppShell).Assembly.GetName().Version!.ToString();
+var appShellSettings = new AppShellSettings()
+    .Header(
+        Layout.Horizontal(
+            new Image("/tendril/assets/Tendril.svg").Width(Size.Units(21)).Height(Size.Auto()),
+            Text.Muted($"v{version}")
+        ).Gap(2).Padding(2).AlignContent(Align.Left)
+    )
+    .UseTabs(preventDuplicates: false);
+server.UseAppShell(() => new TendrilAppShell(appShellSettings));
 await server.RunAsync();

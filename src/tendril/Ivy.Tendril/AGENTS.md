@@ -25,20 +25,15 @@ Existing plans on disk are never recreated — they must be repaired in place. I
 
 Tendril uses these environment variables:
 
-- **`TENDRIL_HOME`** (required): Base path for all Tendril data (Plans/, Inbox/, Trash/, etc.)
-  - Overrides `tendrilData` in config.yaml if set
+- **`TENDRIL_HOME`** (required): Base path for all Tendril data (Plans/, Inbox/, Trash/, config.yaml, etc.)
+  - Must be set before starting Tendril, otherwise onboarding is triggered
   - Example: `/home/user/.tendril` or `C:\Users\User\.tendril`
-
-- **`REPOS_HOME`** (optional): Base path where repositories are located
-  - Overrides `reposHome` in config.yaml if set
-  - Example: `/home/user/repos` or `C:\Users\User\repos`
-  - **Optional convenience** - you can hardcode individual repo paths in config.yaml instead
 
 ### Path Resolution
 
-All paths derive from these sources (in order of precedence):
-1. Environment variables (`TENDRIL_HOME`, `REPOS_HOME`)
-2. config.yaml (`tendrilData`, `reposHome`)
-3. Firmware header variables (`PlanFolder`, `PlansDirectory`, `ArtifactsDir`, etc.)
+All paths derive from these sources:
+1. `TENDRIL_HOME` environment variable (required) - points to config directory
+2. Standard environment variables expanded via `%VAR%` syntax in config.yaml
+3. Firmware header variables (`PlanFolder`, `PlansDirectory`, `ArtifactsDir`, etc.) derived from TENDRIL_HOME
 
 **Never hardcode absolute paths** like `D:\Tendril` or `D:\Plans` in code or promptware instructions — always use the config values or firmware header variables.

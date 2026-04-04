@@ -7,9 +7,8 @@ namespace Ivy.Tendril.Services;
 /// Handles variable expansion in configuration values.
 /// Supports:
 /// - %DotnetUserSecrets:Section:Key% - Read from .NET user secrets
-/// - %TENDRIL_HOME% - Expand to Tendril data path
-/// - %REPOS_HOME% - Expand to repos home path
-/// - Environment variable expansion
+/// - %TENDRIL_HOME% - Expand to Tendril home path
+/// - %ANY_ENV_VAR% - Standard environment variable expansion
 /// </summary>
 public static class VariableExpansion
 {
@@ -60,7 +59,7 @@ public static class VariableExpansion
     /// <summary>
     /// Expand variables in a string value.
     /// </summary>
-    public static string ExpandVariables(string value, string? tendrilHome, string? reposHome)
+    public static string ExpandVariables(string value, string? tendrilHome)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -76,14 +75,52 @@ public static class VariableExpansion
             value = value.Replace("%TENDRIL_HOME%", tendrilHome);
         }
 
-        // Expand REPOS_HOME
-        if (!string.IsNullOrEmpty(reposHome))
+        // Expand environment variables (both %VAR% and $VAR formats)
+        // This handles %REPOS_HOME% and any other env vars
+        value = Environment.ExpandEnvironmentVariables(value);
+
+        // Normalize path separators: convert forward slashes to backslashes on Windows,
+        // and remove any double slashes that might have been created during expansion
+        value = NormalizePath(value);
+
+        return value;
+    }
+
+    /// <summary>
+    /// Normalize path separators and clean up double separators.
+    /// </summary>
+    private static string NormalizePath(string value)
+    {
+        if (string.IsNullOrEmpty(value))
         {
-            value = value.Replace("%REPOS_HOME%", reposHome);
+            return value;
         }
 
-        // Expand environment variables (both %VAR% and $VAR formats)
-        value = Environment.ExpandEnvironmentVariables(value);
+        // Only normalize if the string contains path-like patterns
+        // (contains both path separators or environment variable markers)
+        if (!value.Contains('/') && !value.Contains('\\'))
+        {
+            return value;
+        }
+
+        // On Windows, standardize to backslashes
+        if (Path.DirectorySeparatorChar == '\\')
+        {
+            value = value.Replace('/', '\\');
+        }
+        // On Unix, standardize to forward slashes
+        else
+        {
+            value = value.Replace('\\', '/');
+        }
+
+        // Remove double separators (e.g., \\ or //)
+        var sep = Path.DirectorySeparatorChar.ToString();
+        var doubleSep = sep + sep;
+        while (value.Contains(doubleSep))
+        {
+            value = value.Replace(doubleSep, sep);
+        }
 
         return value;
     }
@@ -111,18 +148,18 @@ public static class VariableExpansion
     /// <summary>
     /// Recursively expand variables in a dictionary (for nested config objects).
     /// </summary>
-    public static void ExpandInDictionary(Dictionary<string, object> dict, string? tendrilHome, string? reposHome)
+    public static void ExpandInDictionary(Dictionary<string, object> dict, string? tendrilHome)
     {
         foreach (var key in dict.Keys.ToList())
         {
             var value = dict[key];
             if (value is string stringValue)
             {
-                dict[key] = ExpandVariables(stringValue, tendrilHome, reposHome);
+                dict[key] = ExpandVariables(stringValue, tendrilHome);
             }
             else if (value is Dictionary<string, object> nestedDict)
             {
-                ExpandInDictionary(nestedDict, tendrilHome, reposHome);
+                ExpandInDictionary(nestedDict, tendrilHome);
             }
             else if (value is List<object> list)
             {
@@ -130,11 +167,11 @@ public static class VariableExpansion
                 {
                     if (list[i] is string str)
                     {
-                        list[i] = ExpandVariables(str, tendrilHome, reposHome);
+                        list[i] = ExpandVariables(str, tendrilHome);
                     }
                     else if (list[i] is Dictionary<string, object> itemDict)
                     {
-                        ExpandInDictionary(itemDict, tendrilHome, reposHome);
+                        ExpandInDictionary(itemDict, tendrilHome);
                     }
                 }
             }

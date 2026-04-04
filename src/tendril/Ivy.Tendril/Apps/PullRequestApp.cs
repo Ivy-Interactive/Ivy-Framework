@@ -12,6 +12,7 @@ public class PullRequestApp : ViewBase
         var planService = UseService<PlanReaderService>();
         var refreshToken = UseRefreshToken();
         var nav = this.UseNavigation();
+        var showPlan = UseState<string?>(null);
 
         var plans = planService.GetPlans()
             .Where(p => p.Prs.Count > 0)
@@ -59,7 +60,7 @@ public class PullRequestApp : ViewBase
                     var planId = e.Value.CellValue?.ToString();
                     var row = rows.FirstOrDefault(r => r.PlanId == planId);
                     if (row != null && !string.IsNullOrEmpty(row.PlanFolderPath) && Directory.Exists(row.PlanFolderPath))
-                        nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(row.PlanFolderPath));
+                        showPlan.Set(row.PlanFolderPath);
                 }
                 return ValueTask.CompletedTask;
             })
@@ -78,7 +79,7 @@ public class PullRequestApp : ViewBase
                     if (tag == "view-plan")
                     {
                         if (!string.IsNullOrEmpty(row.PlanFolderPath) && Directory.Exists(row.PlanFolderPath))
-                            nav.Navigate<PlanViewerApp>(new PlanViewerAppArgs(row.PlanFolderPath));
+                            showPlan.Set(row.PlanFolderPath);
                     }
                     else if (tag == "open-pr")
                     {
@@ -87,6 +88,27 @@ public class PullRequestApp : ViewBase
                 }
                 return ValueTask.CompletedTask;
             });
+
+        if (showPlan.Value is { } planPath)
+        {
+            var folderName = Path.GetFileName(planPath);
+            var content = planService.ReadLatestRevision(folderName);
+            var plan = planService.GetPlanByFolder(planPath);
+
+            var sheetContent = string.IsNullOrEmpty(content)
+                ? Text.P("Plan not found or empty.")
+                : (object)new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(content))
+                    .DangerouslyAllowLocalFiles();
+
+            return Layout.Vertical().Height(Size.Full()) | new Fragment(
+                dataTable,
+                new Sheet(
+                    onClose: () => showPlan.Set(null),
+                    content: sheetContent,
+                    title: plan?.Title ?? folderName
+                ).Width(Size.Half()).Resizable()
+            );
+        }
 
         return Layout.Vertical().Height(Size.Full()) | dataTable;
     }

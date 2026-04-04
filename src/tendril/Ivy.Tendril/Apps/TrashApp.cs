@@ -5,7 +5,7 @@ namespace Ivy.Tendril.Apps;
 
 public record TrashFileInfo(string FilePath, string FileName, DateTime Date, string OriginalRequest, string DuplicateOf, string Project, string Content);
 
-[App(title: "Trash", icon: Icons.Trash2, group: new[] { "Tools" }, order: 40)]
+[App(title: "Trash", icon: Icons.Trash2, group: new[] { "Tools" }, order: 40, isVisible: false)]
 public class TrashApp : ViewBase
 {
     public override object? Build()
@@ -19,7 +19,7 @@ public class TrashApp : ViewBase
 
         UseInterval(() => refreshToken.Refresh(), TimeSpan.FromSeconds(10));
 
-        var trashDir = Path.Combine(configService.TendrilData, "Trash");
+        var trashDir = Path.Combine(configService.TendrilHome, "Trash");
         var files = LoadTrashFiles(trashDir);
 
         // Auto-select first file if selection is invalid

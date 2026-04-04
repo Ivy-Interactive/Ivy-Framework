@@ -41,19 +41,19 @@ Tendril is a terminal UI application built on [Ivy Framework](https://github.com
    ```
 
    Key fields:
-   - `tendrilData` -- Path to the data directory where plans, jobs, and artifacts are stored
    - `projects` -- List of projects with their repo paths, verifications, and context
    - `agentCommand` -- The Claude CLI command used to run agents
 
-3. **Create the data directory**
+3. **Set `TENDRIL_HOME` environment variable**
 
-   Create the directory specified in `tendrilData`:
+   Point `TENDRIL_HOME` to your Tendril data directory:
 
    ```bash
-   mkdir -p /path/to/tendril-data
+   export TENDRIL_HOME=~/.tendril
+   mkdir -p "$TENDRIL_HOME"
    ```
 
-   Tendril will populate this with `Plans/`, `Jobs/`, and other subdirectories at runtime.
+   Tendril will populate this with `Plans/`, `Inbox/`, `Trash/`, and `config.yaml` at runtime. If `TENDRIL_HOME` is not set, Tendril will launch the onboarding wizard.
 
 4. **Run**
 

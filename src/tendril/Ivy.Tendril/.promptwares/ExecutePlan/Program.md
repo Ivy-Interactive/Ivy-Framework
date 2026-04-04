@@ -162,6 +162,7 @@ If you identified items in ANY category, write them to `<PlanFolder>/artifacts/r
 - title: "Short descriptive title"
   description: |
     Markdown description with context and location.
+  state: Pending
 ```
 
 Do NOT include items that are part of the current plan's scope.

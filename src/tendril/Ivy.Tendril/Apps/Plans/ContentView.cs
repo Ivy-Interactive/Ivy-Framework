@@ -94,10 +94,6 @@ public class ContentView(
 
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold();
-        if (_selectedPlan.Status != PlanStatus.Draft)
-            header |= new Badge(_selectedPlan.Status.ToString()).Variant(_selectedPlan.Status == PlanStatus.Failed ? BadgeVariant.Destructive : BadgeVariant.Outline);
-        header |= new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline).WithProjectColor(_config, _selectedPlan.Project);
-        header |= new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level));
         header |= Text.Muted($"rev:{_selectedPlan.RevisionCount}");
 
         if (_selectedPlan.DependsOn.Count > 0)
@@ -174,6 +170,23 @@ public class ContentView(
                 {
                     var url = downloadUrl.Value;
                     if (!string.IsNullOrEmpty(url)) client.OpenUrl(url);
+                }),
+                new MenuItem("Open in File Manager", Icon: Icons.FolderOpen, Tag: "OpenInExplorer").OnSelect(() =>
+                {
+                    PlatformHelper.OpenInFileManager(_selectedPlan.FolderPath);
+                }),
+                new MenuItem("Open in Terminal", Icon: Icons.Terminal, Tag: "OpenInTerminal").OnSelect(() =>
+                {
+                    PlatformHelper.OpenInTerminal(_selectedPlan.FolderPath);
+                }),
+                new MenuItem($"Open in {_config.Editor.Label}", Icon: Icons.Code, Tag: "OpenInEditor").OnSelect(() =>
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = _config.Editor.Command,
+                        Arguments = $"\"{_selectedPlan.FolderPath}\"",
+                        UseShellExecute = true
+                    });
                 }),
                 new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath").OnSelect(() =>
                 {

@@ -14,6 +14,7 @@ public class JobService
     private int _counter;
     private PlanReaderService? _planReaderService;
     private readonly ConfigService? _configService;
+    private readonly ModelPricingService? _modelPricingService;
     private TelemetryService? _telemetryService;
     private readonly TimeSpan _jobTimeout;
     private readonly TimeSpan _staleOutputTimeout;
@@ -25,6 +26,8 @@ public class JobService
 
     private static readonly string PromptsRoot =
         Path.GetFullPath(Path.Combine(System.AppContext.BaseDirectory, "..", "..", "..", ".promptwares"));
+
+    internal static readonly string SharedRoot = Path.Combine(PromptsRoot, ".shared");
 
     private static readonly Dictionary<string, string> ScriptPaths = new()
     {
@@ -38,12 +41,13 @@ public class JobService
         ["CreateIssue"] = Path.Combine(PromptsRoot, "CreateIssue.ps1"),
     };
 
-    public JobService(ConfigService configService)
+    public JobService(ConfigService configService, ModelPricingService? modelPricingService = null)
     {
         _configService = configService;
+        _modelPricingService = modelPricingService;
         _jobTimeout = TimeSpan.FromMinutes(configService.Settings.JobTimeout);
         _staleOutputTimeout = TimeSpan.FromMinutes(configService.Settings.StaleOutputTimeout);
-        _inboxPath = Path.Combine(configService.TendrilData, "Inbox");
+        _inboxPath = Path.Combine(configService.TendrilHome, "Inbox");
     }
 
     public JobService(TimeSpan jobTimeout, TimeSpan staleOutputTimeout, string? inboxPath = null)
@@ -80,7 +84,7 @@ public class JobService
 
         // Extract plan folder and project from args
         var planFile = "";
-        var project = "General";
+        var project = "[Auto]";
 
         // For MakePlan: args are named params like -Description "..." -Project "..."
         // For others: args[0] is the plan folder path
@@ -89,8 +93,7 @@ public class JobService
             planFile = GetNamedArg(args, "-Description") is { } desc
                 ? (desc.Length > 80 ? desc[..80] + "..." : desc)
                 : "New Plan";
-            project = GetNamedArg(args, "-Project") ?? "General";
-            if (project == "[Auto]") project = "General";
+            project = GetNamedArg(args, "-Project") ?? "[Auto]";
         }
         else
         {
@@ -191,8 +194,12 @@ public class JobService
             StandardOutputEncoding = System.Text.Encoding.UTF8,
             StandardErrorEncoding = System.Text.Encoding.UTF8,
         };
+        // Capture session ID from environment for cost tracking after job completes
+        job.SessionId = Environment.GetEnvironmentVariable("CLAUDE_SESSION_ID");
+
         psi.Environment["TENDRIL_JOB_ID"] = id;
         psi.Environment["TENDRIL_URL"] = "http://localhost:5010";
+        psi.Environment["TENDRIL_SHARED"] = SharedRoot;
 
         foreach (var arg in processArgs)
             psi.ArgumentList.Add(arg);
@@ -406,7 +413,7 @@ public class JobService
         RunHooks("after", job.Type, planFolderForHooks, job.Project, job);
 
         var isSuccess = job.Status == "Completed";
-        var title = job.Status == "Timeout" ? "Job Timed Out" : (isSuccess ? "Job Completed" : "Job Failed");
+        var title = job.Status == "Timeout" ? $"{job.Type} Timed Out" : (isSuccess ? $"{job.Type} Completed" : $"{job.Type} Failed");
         var message = job.PlanFile ?? job.Type;
         if (!isSuccess && job.StatusMessage != null)
             message += $": {job.StatusMessage}";
@@ -432,6 +439,31 @@ public class JobService
 
         CleanupInboxFile(job);
         WriteJobLog(job);
+
+        // Calculate and log costs automatically (delayed to allow session to complete)
+        if (isSuccess && _modelPricingService != null && !string.IsNullOrEmpty(job.SessionId))
+        {
+            var sessionId = job.SessionId;
+            var jobArgs = job.Args;
+            var jobType = job.Type;
+
+            _ = Task.Run(async () =>
+            {
+                // Wait for Claude session to write final usage data
+                await Task.Delay(TimeSpan.FromSeconds(30));
+
+                try
+                {
+                    var costCalc = _modelPricingService.CalculateSessionCost(sessionId);
+                    if (costCalc.TotalCost > 0 && jobArgs.Length > 0)
+                    {
+                        LogCostToCsv(jobArgs[0], jobType, costCalc.TotalTokens, costCalc.TotalCost);
+                    }
+                }
+                catch { /* Best-effort cost tracking */ }
+            });
+        }
+
         JobsChanged?.Invoke();
 
         if (!_jobs.Values.Any(j => j.Status == "Running"))
@@ -794,6 +826,20 @@ public class JobService
             }
             catch { /* Notification is best-effort */ }
         });
+    }
+
+    internal static void LogCostToCsv(string planFolder, string jobType, int tokens, double cost)
+    {
+        if (!Directory.Exists(planFolder)) return;
+
+        var csvPath = Path.Combine(planFolder, "costs.csv");
+        if (!File.Exists(csvPath))
+        {
+            File.WriteAllText(csvPath, "Promptware,Tokens,Cost\n");
+        }
+
+        var line = $"{jobType},{tokens},{cost:F4}\n";
+        File.AppendAllText(csvPath, line);
     }
 
     private void WriteJobLog(JobItem job)

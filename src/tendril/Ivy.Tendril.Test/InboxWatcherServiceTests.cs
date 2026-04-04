@@ -100,7 +100,7 @@ public class InboxWatcherServiceTests
             // Place a file in the inbox before creating the service
             File.WriteAllText(Path.Combine(inboxDir, "test-entry.md"), "Test inbox entry");
 
-            var config = new ConfigService(new TendrilSettings { TendrilData = tempDir });
+            var config = new ConfigService(new TendrilSettings(), tendrilHome: tempDir);
             var jobService = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10), inboxDir);
             using var watcher = new InboxWatcherService(config, jobService);
 

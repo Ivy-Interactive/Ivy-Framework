@@ -24,8 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ivy.Tendril.csproj" />
-    <ProjectReference Include="D:\Repos\_Ivy\Ivy-Framework\src\Ivy\Ivy.csproj" />
+    <ProjectReference Include="..\Ivy.Tendril\Ivy.Tendril.csproj" />
+    <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
   </ItemGroup>
 
 </Project>

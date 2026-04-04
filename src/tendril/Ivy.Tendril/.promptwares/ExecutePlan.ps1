@@ -116,10 +116,6 @@ catch {
 }
 finally {
     Stop-Heartbeat $heartbeat
-    $costData = ReportSessionCost $sessionId
-    if ($costData) {
-        LogPlanCost $PlanPath "ExecutePlan" $costData.Tokens $costData.Cost
-    }
     Pop-Location
     Remove-Item $promptFile -ErrorAction SilentlyContinue
 }

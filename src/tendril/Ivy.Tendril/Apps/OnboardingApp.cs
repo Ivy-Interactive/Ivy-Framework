@@ -1,25 +1,28 @@
 using Ivy;
 using Ivy.Tendril.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace Ivy.Tendril.Apps;
 
-[App(isVisible: false, icon: Icons.Rocket, path: ["Hidden"])]
+#if DEBUG
+[App(title: "Onboarding", icon: Icons.Rocket, group: new[] { "Debug" }, isVisible: true, order: 100)]
+#else
+[App(isVisible: false, icon: Icons.Rocket)]
+#endif
 public class OnboardingApp : ViewBase
 {
     private StepperItem[] GetSteps(int selectedIndex) =>
     [
         new("1", selectedIndex > 0 ? Icons.Check : null, "Welcome"),
-        new("2", selectedIndex > 1 ? Icons.Check : null, "Tendril Data"),
-        new("3", selectedIndex > 2 ? Icons.Check : null, "Repositories"),
-        new("4", selectedIndex > 3 ? Icons.Check : null, "Complete")
+        new("2", selectedIndex > 1 ? Icons.Check : null, "Tendril Home"),
+        new("3", selectedIndex > 2 ? Icons.Check : null, "Complete")
     ];
 
     private object GetStepViews(IState<int> stepperIndex) => stepperIndex.Value switch
     {
         0 => new WelcomeStepView(stepperIndex),
-        1 => new TendrilDataLocationStepView(stepperIndex),
-        2 => new ReposLocationStepView(stepperIndex),
-        3 => new CompleteStepView(stepperIndex),
+        1 => new TendrilHomeStepView(stepperIndex),
+        2 => new CompleteStepView(stepperIndex),
         _ => throw new ArgumentOutOfRangeException()
     };
 
@@ -55,39 +58,41 @@ public class WelcomeStepView(IState<int> stepperIndex) : ViewBase
                    "- Create necessary folders and configuration\n\n" +
                    "Let's begin!")
                | new Button("Get Started").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
-                   .HandleClick(stepperIndex.Incr);
+                   .OnClick(() => stepperIndex.Set(stepperIndex.Value + 1));
     }
 }
 
-public record TendrilDataLocationDetails
+public record TendrilHomeDetails
 {
     [Required]
     [Display(Name = "Where would you like to store Tendril data?")]
     public string? TendrilHome { get; set; }
 }
 
-public class TendrilDataLocationStepView(IState<int> stepperIndex) : ViewBase
+public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
 {
     public override object? Build()
     {
-        var config = UseService<ConfigService>();
-        var defaultPath = Path.Combine(
+        var details = UseState(new TendrilHomeDetails
+        {
+            TendrilHome = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".tendril"
-        );
-        var details = UseState(new TendrilDataLocationDetails { TendrilHome = defaultPath });
+        )
+        });
         var error = UseState<string?>(null);
+        var config = UseService<ConfigService>();
 
         return Layout.Vertical()
                | Text.H2("Tendril Data Location")
                | Text.Muted("This folder will store your plans, inbox, trash, and other Tendril data.")
-               | (error.Value != null ? new Alert(error.Value).Destructive() : null!)
+               | (error.Value != null ? Text.Danger(error.Value) : null!)
                | details.ToForm().Large()
                    .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving))
-                   .HandleSubmit(OnSubmit)
+                   .OnSubmit(OnSubmit)
             ;
 
-        Task OnSubmit(TendrilDataLocationDetails? details)
+        Task OnSubmit(TendrilHomeDetails? details)
         {
             if (details?.TendrilHome == null)
             {
@@ -118,91 +123,7 @@ public class TendrilDataLocationStepView(IState<int> stepperIndex) : ViewBase
                 // Store in config for next step
                 config.SetPendingTendrilHome(tendrilHome);
                 error.Set(null);
-                stepperIndex.Incr();
-            }
-            catch (Exception ex)
-            {
-                error.Set($"Invalid path: {ex.Message}");
-            }
-
-            return Task.CompletedTask;
-        }
-    }
-}
-
-public record ReposLocationDetails
-{
-    [Display(Name = "Where are your repositories located?")]
-    public string? ReposHome { get; set; }
-}
-
-public class ReposLocationStepView(IState<int> stepperIndex) : ViewBase
-{
-    public override object? Build()
-    {
-        var config = UseService<ConfigService>();
-        var defaultPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            "repos"
-        );
-        var details = UseState(new ReposLocationDetails { ReposHome = defaultPath });
-        var error = UseState<string?>(null);
-
-        return Layout.Vertical()
-               | Text.H2("Repositories Location (Optional)")
-               | Text.Markdown(
-                   "Specify the base folder where your code repositories are located.\n\n" +
-                   "**This is optional.** If you keep all your repos in one place, setting this helps with project setup. " +
-                   "Otherwise, you can skip this and specify individual repo paths when configuring projects.\n\n" +
-                   "**Examples:**\n" +
-                   "- `C:\\Users\\YourName\\repos` (Windows)\n" +
-                   "- `/home/yourname/repos` (Linux)\n" +
-                   "- `~/repos` (Any platform)")
-               | (error.Value != null ? new Alert(error.Value).Destructive() : null!)
-               | details.ToForm().Large()
-                   .SubmitBuilder((saving) =>
-                       Layout.Horizontal().Gap(2)
-                       | new Button("Skip").Outline().HandleClick(() => { config.SetPendingReposHome(""); stepperIndex.Incr(); })
-                       | new Button("Next").Primary().Icon(Icons.ArrowRight, Align.Right).Disabled(saving).Type(ButtonType.Submit))
-                   .HandleSubmit(OnSubmit)
-            ;
-
-        Task OnSubmit(ReposLocationDetails? details)
-        {
-            try
-            {
-                var reposHome = details?.ReposHome ?? "";
-
-                // Allow empty - user can configure later
-                if (!string.IsNullOrWhiteSpace(reposHome))
-                {
-                    // Expand environment variables and ~
-                    reposHome = Environment.ExpandEnvironmentVariables(reposHome);
-                    if (reposHome.StartsWith("~/") || reposHome.StartsWith("~\\"))
-                    {
-                        reposHome = Path.Combine(
-                            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                            reposHome.Substring(2)
-                        );
-                    }
-
-                    // Validate path if provided
-                    if (!Path.IsPathRooted(reposHome))
-                    {
-                        reposHome = Path.GetFullPath(reposHome);
-                    }
-
-                    // Create directory if it doesn't exist
-                    if (!Directory.Exists(reposHome))
-                    {
-                        Directory.CreateDirectory(reposHome);
-                    }
-                }
-
-                // Store in config for next step
-                config.SetPendingReposHome(reposHome);
-                error.Set(null);
-                stepperIndex.Incr();
+                stepperIndex.Set(stepperIndex.Value + 1);
             }
             catch (Exception ex)
             {
@@ -218,10 +139,10 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
 {
     public override object? Build()
     {
-        var config = UseService<ConfigService>();
-        var navigator = UseNavigation();
         var isProcessing = UseState(false);
         var error = UseState<string?>(null);
+        var config = UseService<ConfigService>();
+        var navigator = UseNavigation();
 
         async Task OnComplete()
         {
@@ -231,7 +152,6 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
             try
             {
                 var tendrilHome = config.GetPendingTendrilHome();
-                var reposHome = config.GetPendingReposHome() ?? "";
 
                 if (string.IsNullOrEmpty(tendrilHome))
                 {
@@ -248,48 +168,31 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
                 Directory.CreateDirectory(Path.Combine(tendrilHome, "Promptwares"));
                 Directory.CreateDirectory(Path.Combine(tendrilHome, "Hooks"));
 
-                // Copy example.config.yaml to config.yaml
-                var exampleConfigPath = Path.Combine(AppContext.BaseDirectory, "example.config.yaml");
-                var configPath = Path.Combine(AppContext.BaseDirectory, "config.yaml");
+                // Copy example.config.yaml to tendrilHome/config.yaml
+                var exampleConfigPath = Path.Combine(System.AppContext.BaseDirectory, "example.config.yaml");
+                var configPath = Path.Combine(tendrilHome, "config.yaml");
 
                 if (File.Exists(exampleConfigPath))
                 {
                     var exampleContent = await File.ReadAllTextAsync(exampleConfigPath);
-
-                    // Update the config with the tendrilData and reposHome paths
-                    var configContent = $"tendrilData: {tendrilHome}\n";
-                    if (!string.IsNullOrEmpty(reposHome))
-                    {
-                        configContent += $"reposHome: {reposHome}\n";
-                    }
-                    configContent += exampleContent;
-
-                    await File.WriteAllTextAsync(configPath, configContent);
+                    await File.WriteAllTextAsync(configPath, exampleContent);
                 }
                 else
                 {
                     // Create a basic config.yaml
-                    var basicConfig = $"tendrilData: {tendrilHome}\n";
-                    if (!string.IsNullOrEmpty(reposHome))
-                    {
-                        basicConfig += $"reposHome: {reposHome}\n";
-                    }
-                    basicConfig += $"planFolder: {Path.Combine(tendrilHome, "Plans")}\n" +
-                                  "agentCommand: claude\n" +
-                                  "jobTimeout: 30\n" +
-                                  "staleOutputTimeout: 10\n";
+                    var basicConfig = "agentCommand: claude\n" +
+                                      "jobTimeout: 30\n" +
+                                      "staleOutputTimeout: 10\n" +
+                                      "projects: []\n" +
+                                      "verifications: []\n";
                     await File.WriteAllTextAsync(configPath, basicConfig);
                 }
 
-                // Set environment variables for current session
+                // Set environment variable for current session
                 Environment.SetEnvironmentVariable("TENDRIL_HOME", tendrilHome);
-                if (!string.IsNullOrEmpty(reposHome))
-                {
-                    Environment.SetEnvironmentVariable("REPOS_HOME", reposHome);
-                }
 
                 // Mark onboarding complete
-                config.CompleteOnboarding(tendrilHome, reposHome);
+                config.CompleteOnboarding(tendrilHome);
 
                 // Navigate to SetupApp
                 navigator.Navigate<SetupApp>();
@@ -309,13 +212,13 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
                    "- Set up your configuration file\n" +
                    "- Initialize Tendril with default settings\n\n" +
                    "Click 'Complete Setup' to finish.")
-               | (error.Value != null ? new Alert(error.Value).Destructive() : null!)
+               | (error.Value != null ? Text.Danger(error.Value) : null!)
                | new Button("Complete Setup")
                    .Primary()
                    .Large()
                    .Icon(Icons.Check, Align.Right)
                    .Disabled(isProcessing.Value)
                    .Loading(isProcessing.Value)
-                   .HandleClick(OnComplete);
+                   .OnClick(async () => await OnComplete());
     }
 }

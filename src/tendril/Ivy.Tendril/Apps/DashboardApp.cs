@@ -68,10 +68,10 @@ public class DashboardApp : ViewBase
                 Cost = dayCost > 0 ? $"${dayCost:F2}" : "",
                 Tokens = dayTokens > 0 ? FormatTokens(dayTokens) : ""
             };
-        }).ToList();
+        }).OrderByDescending(r => r.SortDate).ToList();
 
         var dataTable = rows.AsQueryable()
-            .ToDataTable(idSelector: t => t.SortDate.ToString("yyyy-MM-dd"))
+            .ToDataTable(idSelector: t => t.SortDate)
             .RefreshToken(refreshToken)
             .Width(Size.Full())
             .Height(Size.Px(320))
@@ -115,6 +115,7 @@ public class DashboardApp : ViewBase
                 style: BarChartStyles.Default,
                 polish: chart => chart with
                 {
+                    CartesianGrid = null,
                     Bars =
                     [
                         new Bar("Cost ($)").Radius(4).FillOpacity(0.8).YAxisIndex(0),
@@ -122,8 +123,8 @@ public class DashboardApp : ViewBase
                     ],
                     YAxis =
                     [
-                        new YAxis("Cost ($)").TickFormatter("C2"),
-                        new YAxis("Tokens").Orientation(YAxis.Orientations.Right),
+                        new YAxis("Cost ($)").TickFormatter("C2").Hide(),
+                        new YAxis("Tokens").Orientation(YAxis.Orientations.Right).Hide(),
                     ]
                 })
             .Dimension("Hour", e => e.Hour.ToString("MM/dd HH"))
@@ -133,7 +134,7 @@ public class DashboardApp : ViewBase
             .Width(Size.Full());
 
         var content = Layout.Vertical().Gap(2)
-            | projectProgress
+            | new Box(projectProgress).Padding(5)
             | dataTable
             | combinedChart;
 

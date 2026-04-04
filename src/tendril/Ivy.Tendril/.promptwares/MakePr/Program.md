@@ -105,13 +105,35 @@ git pull origin <default-branch>
 
 **If `default`:** PR stays open for manual review.
 
-### 5. Update plan.yaml
+### 5. Clean Up Worktrees
+
+After successful `yolo` merges (or custom options with `merge: true`), clean up the worktrees to reclaim disk space:
+
+For each repo where the PR was merged:
+
+```bash
+cd <original-repo-path>
+git worktree remove "<PlanFolder>/worktrees/<repo-folder-name>" --force
+git branch -D "plan-<planId>-<repo-folder-name>" 2>/dev/null
+```
+
+If **all** worktrees were cleaned up, remove the now-empty `worktrees/` directory:
+
+```bash
+rm -rf "<PlanFolder>/worktrees"
+```
+
+**Skip cleanup** for repos using the `default` PR rule (or custom options with `merge: false`) — the worktree is still needed for potential review revisions.
+
+If cleanup fails (e.g. locked files on Windows), log a warning but do not fail the overall MakePr execution.
+
+### 6. Update plan.yaml
 
 Append each PR URL to the `prs` list in `plan.yaml`.
 
 ### Rules
 
-- **ALL 6 steps are mandatory** (including 2.5) — do not stop after creating the PR
+- **ALL 7 steps are mandatory** (including 2.5) — do not stop after creating the PR
 - One PR per repo worktree that has commits
 - Skip worktrees with no commits ahead of the base branch
 - Use `gh` CLI for all GitHub operations

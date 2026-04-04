@@ -12,8 +12,9 @@ public class PlanReaderServiceGetPlanTests : IDisposable
         _tempDir = Path.Combine(Path.GetTempPath(), $"tendril-test-{Guid.NewGuid()}");
         Directory.CreateDirectory(_tempDir);
 
-        var settings = new TendrilSettings { PlanFolder = _tempDir };
-        var configService = new ConfigService(settings);
+        var settings = new TendrilSettings();
+        Directory.CreateDirectory(Path.Combine(_tempDir, "Plans"));
+        var configService = new ConfigService(settings, _tempDir);
         _service = new PlanReaderService(configService);
     }
 

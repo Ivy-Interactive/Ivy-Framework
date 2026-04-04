@@ -5,4 +5,5 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="Ivy.Tendril.csproj" />
+  <Project Path="Ivy.Tendril.Test/Ivy.Tendril.Test.csproj" />
 </Solution>

@@ -234,8 +234,75 @@ public class PlanReaderService(ConfigService config)
     public void DeletePlan(string folderName)
     {
         var folderPath = Path.Combine(PlansDirectory, folderName);
-        if (Directory.Exists(folderPath))
-            Directory.Delete(folderPath, recursive: true);
+        if (!Directory.Exists(folderPath)) return;
+
+        // Remove git worktrees before deleting, otherwise Directory.Delete
+        // fails on Windows with UnauthorizedAccessException due to locked files.
+        RemoveWorktrees(folderPath);
+
+        // Clear read-only attributes that git may have set, then delete.
+        ClearReadOnlyAttributes(folderPath);
+        Directory.Delete(folderPath, recursive: true);
+    }
+
+    private static void RemoveWorktrees(string planFolderPath)
+    {
+        var worktreesDir = Path.Combine(planFolderPath, "worktrees");
+        if (!Directory.Exists(worktreesDir)) return;
+
+        foreach (var wtDir in Directory.GetDirectories(worktreesDir))
+        {
+            var gitFile = Path.Combine(wtDir, ".git");
+            if (!File.Exists(gitFile)) continue;
+
+            // Read the .git file to find which repo this worktree belongs to.
+            // Format: "gitdir: <path-to-repo>/.git/worktrees/<name>"
+            var gitContent = File.ReadAllText(gitFile).Trim();
+            var match = Regex.Match(gitContent, @"gitdir:\s*(.+)");
+            if (!match.Success) continue;
+
+            var gitDir = match.Groups[1].Value.Trim();
+            // Navigate from .git/worktrees/<name> up to the repo root
+            var repoGitDir = Path.GetFullPath(Path.Combine(gitDir, "..", ".."));
+            var repoRoot = Path.GetDirectoryName(repoGitDir);
+            if (repoRoot == null || !Directory.Exists(repoRoot)) continue;
+
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo("git", $"worktree remove --force \"{wtDir}\"")
+                {
+                    WorkingDirectory = repoRoot,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                };
+                using var process = System.Diagnostics.Process.Start(psi);
+                process?.WaitForExit(10000);
+            }
+            catch
+            {
+                // Best-effort: if git worktree remove fails, the fallback
+                // ClearReadOnlyAttributes + Directory.Delete may still work.
+            }
+        }
+    }
+
+    private static void ClearReadOnlyAttributes(string directoryPath)
+    {
+        try
+        {
+            foreach (var file in Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories))
+            {
+                var attrs = File.GetAttributes(file);
+                if ((attrs & FileAttributes.ReadOnly) != 0)
+                    File.SetAttributes(file, attrs & ~FileAttributes.ReadOnly);
+            }
+        }
+        catch
+        {
+            // Best-effort
+        }
     }
 
     public string ReadRawPlan(string folderName)
@@ -455,9 +522,11 @@ public class PlanReaderService(ConfigService config)
                     recommendations.Add(new Recommendation(
                         Title: item.Title,
                         Description: item.Description,
+                        State: string.IsNullOrWhiteSpace(item.State) ? "Pending" : item.State,
                         PlanId: plan.Id.ToString("D5"),
                         PlanTitle: plan.Title,
                         PlanFolderName: plan.FolderName,
+                        Project: plan.Project,
                         Date: plan.Updated
                     ));
                 }
@@ -469,6 +538,55 @@ public class PlanReaderService(ConfigService config)
         }
 
         return recommendations.OrderByDescending(r => r.Date).ToList();
+    }
+
+    public int GetPendingRecommendationsCount()
+    {
+        if (!Directory.Exists(PlansDirectory)) return 0;
+
+        var count = 0;
+
+        foreach (var dir in Directory.GetDirectories(PlansDirectory))
+        {
+            var recommendationsPath = Path.Combine(dir, "artifacts", "recommendations.yaml");
+            if (!File.Exists(recommendationsPath)) continue;
+
+            try
+            {
+                var yaml = File.ReadAllText(recommendationsPath);
+                var items = YamlDeserializer.Deserialize<List<RecommendationYaml>>(yaml);
+                if (items == null) continue;
+
+                foreach (var item in items)
+                {
+                    var state = string.IsNullOrWhiteSpace(item.State) ? "Pending" : item.State;
+                    if (state.Equals("Pending", StringComparison.OrdinalIgnoreCase))
+                        count++;
+                }
+            }
+            catch
+            {
+                // Skip malformed YAML files
+            }
+        }
+
+        return count;
+    }
+
+    public void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState)
+    {
+        var recommendationsPath = Path.Combine(PlansDirectory, planFolderName, "artifacts", "recommendations.yaml");
+        if (!File.Exists(recommendationsPath)) return;
+
+        var yaml = File.ReadAllText(recommendationsPath);
+        var items = YamlDeserializer.Deserialize<List<RecommendationYaml>>(yaml);
+        if (items == null) return;
+
+        var item = items.FirstOrDefault(r => r.Title == recommendationTitle);
+        if (item == null) return;
+
+        item.State = newState;
+        File.WriteAllText(recommendationsPath, YamlSerializer.Serialize(items));
     }
 
     private static DateTime? ExtractCompletedTimestamp(string logFilePath)
@@ -513,9 +631,11 @@ public class HourlyTokenBurn
 public record Recommendation(
     string Title,
     string Description,
+    string State,
     string PlanId,
     string PlanTitle,
     string PlanFolderName,
+    string Project,
     DateTime Date
 );
 
@@ -523,4 +643,5 @@ public class RecommendationYaml
 {
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
+    public string State { get; set; } = "Pending";
 }

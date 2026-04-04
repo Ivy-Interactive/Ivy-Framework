@@ -43,6 +43,7 @@ public class RecommendationItem
 {
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
+    public string State { get; set; } = "Pending";
 }
 
 public static class PlanFilters

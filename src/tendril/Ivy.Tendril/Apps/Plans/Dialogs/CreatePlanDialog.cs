@@ -14,7 +14,7 @@ public class CreatePlanDialog(List<string> projectNames, Action<string, string> 
         var createPlanText = UseState("");
         var selectedProject = UseState(_defaultProject);
 
-        var options = new List<string> { "[Auto]", "General" };
+        var options = new List<string> { "[Auto]" };
         options.AddRange(_projectNames);
 
         return new Dialog(

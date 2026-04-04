@@ -44,7 +44,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             ["plans"] = planCounts.Drafts,
             ["review"] = planCounts.Reviews,
             ["jobs"] = planCounts.RunningJobs,
-            ["icebox"] = planCounts.Icebox
+            ["icebox"] = planCounts.Icebox,
+            ["recommendations"] = planCounts.Recommendations
         };
         return repo.GetMenuItems().Select(m => AddBadge(m, badges)).ToArray();
     }
@@ -66,7 +67,6 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         Context.TryUseService<IAuthService>(out var auth);
         var user = UseState<UserInfo?>();
         var currentApp = UseState<AppHost?>();
-        var search = UseState("");
         var countsService = UseService<PlanCountsService>();
         var menuItems = UseState(() => BuildMenuItems(appRepository, countsService.Current));
         var counts = UseState(() => countsService.Current);
@@ -98,31 +98,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         UseEffect(() =>
         {
-            if (string.IsNullOrWhiteSpace(search.Value))
-            {
-                menuItems.Set(BuildMenuItems(appRepository, counts.Value));
-            }
-            else
-            {
-                var result = appRepository.GetMenuItems()
-                    .FlattenWithPath()
-                    .Select(x => new { x.Item, x.Path, Score = AppShellUtils.ItemMatchScore(x.Item, search.Value) })
-                    .Where(x => x.Score > 0)
-                    .OrderByDescending(x => x.Score)
-                    .ThenBy(x => x.Item.Label)
-                    .Select(x => x.Item with { Path = string.IsNullOrEmpty(x.Path) ? null : x.Path })
-                    .ToArray();
-
-                if (result.Length > 0)
-                {
-                    menuItems.Set([MenuItem.Default("Search Results").Children(result)]);
-                }
-                else
-                {
-                    menuItems.Set([]);
-                }
-            }
-        }, search, appRepository.Reloaded.ToTrigger(), counts);
+            menuItems.Set(BuildMenuItems(appRepository, counts.Value));
+        }, appRepository.Reloaded.ToTrigger(), counts);
 
         UseEffect(async () =>
         {
@@ -418,27 +395,28 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             }
         }
 
-        var searchInput = search.ToSearchInput().ShortcutKey("CTRL+K").TestId("sidebar-search");
-
         var sidebarMenu = new SidebarMenu(
             OnMenuSelect,
             menuItems.Value
         )
         {
-            OnCtrlRightClickSelect = new(OnCtrlRightClickSelect),
-            SearchActive = !string.IsNullOrWhiteSpace(search.Value)
+            OnCtrlRightClickSelect = new(OnCtrlRightClickSelect)
         };
 
         var commonMenuItems = new[]
         {
-            MenuItem.Default("Settings")
+            MenuItem.Default("Setup")
                 .Tag("$setup")
                 .Icon(Icons.Settings)
                 .OnSelect(() => navigator.Navigate<SetupApp>()),
-            MenuItem.Default("Tendril Feedback")
-                .Tag("$feedback")
-                .Icon(Icons.MessageSquare)
-                .OnSelect(() => feedbackOpen.Set(true)),
+            MenuItem.Default("Trash")
+                .Tag("$trash")
+                .Icon(Icons.Trash2)
+                .OnSelect(() => navigator.Navigate<TrashApp>()),
+            // MenuItem.Default("Tendril Feedback")
+            //     .Tag("$feedback")
+            //     .Icon(Icons.MessageSquare)
+            //     .OnSelect(() => feedbackOpen.Set(true)),
             MenuItem.Default("Theme")
                 .Tag("$theme")
                 .Icon(Icons.SunMoon)
@@ -491,11 +469,11 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         }
         else
         {
-            var trigger = new Button("Setup")
+            var trigger = new Button("Settings")
                 .Content(
                     Layout.Horizontal().AlignContent(Align.Left)
                         | Icons.Construction.ToIcon()
-                        | Text.P("Setup").Small().Muted()
+                        | Text.P("Settings").Small().Muted()
                     )
                     .Variant(ButtonVariant.Ghost).Width(Size.Full());
 
@@ -518,7 +496,6 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 sidebarMenu,
                 Layout.Vertical().Gap(2)
                     | settings.Header
-                    | searchInput
                     | new NewPlanFooterButton()
                 ,
                 Layout.Vertical(
