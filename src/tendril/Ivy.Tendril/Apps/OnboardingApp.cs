@@ -221,6 +221,25 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
                 // Set environment variable for current session
                 Environment.SetEnvironmentVariable("TENDRIL_HOME", tendrilHome);
 
+                // Persist to shell for Mac users
+                if (OperatingSystem.IsMacOS())
+                {
+                    try
+                    {
+                        var zshrc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".zshrc");
+                        var exportLine = $"export TENDRIL_HOME=\"{tendrilHome}\"";
+                        if (File.Exists(zshrc))
+                        {
+                            var content = await File.ReadAllTextAsync(zshrc);
+                            if (!content.Contains(exportLine))
+                            {
+                                await File.AppendAllLinesAsync(zshrc, new[] { "", "# Tendril Home", exportLine });
+                            }
+                        }
+                    }
+                    catch { /* Best effort */ }
+                }
+
                 // Mark onboarding complete (this reloads config from the file we just wrote)
                 config.CompleteOnboarding(tendrilHome);
 
