@@ -142,7 +142,7 @@ Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 
 - `beforeAll`: find free port, spawn `dotnet run -- --port <port>`, wait for HTTP 200
 - `afterAll`: kill process
-- Test each app at `http://localhost:<port>/<app-id>?shell=false`
+- Test each app at `https://localhost:<port>/<app-id>?shell=false`
 - Take screenshots directly to `<ArtifactsDir>/screenshots/` with descriptive names. **Before taking each screenshot, check if the page has meaningful content (visible text > 20 chars or > 5 visible elements). Skip screenshots of empty/blank pages** — these add no verification value. Use a `takeScreenshotIfNotEmpty()` helper (see PlaywrightKnowledge.md)
 - Capture browser console logs → `<ArtifactsDir>/tests/console.log`
 - Capture backend stdout/stderr → `<ArtifactsDir>/tests/backend.log`

@@ -198,7 +198,7 @@ public class JobService
         job.SessionId = Environment.GetEnvironmentVariable("CLAUDE_SESSION_ID");
 
         psi.Environment["TENDRIL_JOB_ID"] = id;
-        psi.Environment["TENDRIL_URL"] = "http://localhost:5010";
+        psi.Environment["TENDRIL_URL"] = "https://localhost:5010";
         psi.Environment["TENDRIL_SHARED"] = SharedRoot;
 
         foreach (var arg in processArgs)

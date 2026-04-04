@@ -5,7 +5,7 @@
 - Ivy apps are .NET web apps started with `dotnet run -- --port <port>`
 - The frontend client is in `src/frontend/` and built with `vp build` into `src/frontend/dist/`. These assets are embedded into the Ivy.dll via `<EmbeddedResource>`. If testing a commit that changed frontend `.ts` files, you MUST rebuild the frontend (`cd src/frontend && vp build`) before running the dotnet project, otherwise the old bundled JS is served.
 - If `vp build` fails due to pre-existing TS errors in unrelated files, run vite directly: `npx vite build` — this skips tsc and still produces a working bundle. (Note: `node ./node_modules/vite/bin/vite.js` may fail with MODULE_NOT_FOUND if vite is hoisted; use `npx` instead)
-- The server prints `Ivy is running on http://localhost:<port>` when ready
+- The server prints `Ivy is running on https://localhost:<port>` when ready
 - Apps are decorated with `[App(icon: Icons.X, path: ["Apps"])]` and inherit `ViewBase`
 - The `Build()` method returns the UI tree
 - State is managed via `UseState<T>()` which returns reactive state objects
@@ -65,7 +65,7 @@
 ### App Lifecycle in Tests
 - `beforeAll`: find free port via `net.createServer()`, spawn `dotnet run -- --port <port>`, wait for HTTP 200
 - `afterAll`: kill the spawned process
-- `beforeEach`: navigate to `http://localhost:<port>`
+- `beforeEach`: navigate to `https://localhost:<port>`
 - Use `cwd: process.cwd().replace(/[/\\]\.ivy[/\\]tests$/, "")` to resolve project root from test dir
 - Wait for server with polling loop (500ms interval, 30s timeout)
 
@@ -107,7 +107,7 @@
 - `state.ToSliderInput()` renders as a Radix UI slider with `role="slider"`, NOT a native `<input type="range">` — use `page.getByRole("slider")` and keyboard interaction (ArrowRight/ArrowLeft to increment/decrement by step, Home/End for min/max)
 - `UseChrome()` renders a hidden sidebar search `<input type="search" data-testid="sidebar-search">` that is the first `input` in the DOM but outside the viewport — `page.locator("input").first()` will target it instead of app inputs. Use `input[type='text']` or label-based locators to target app inputs
 - **Single-app Chrome auto-selection**: When `UseChrome().UseTabs()` is enabled and there's only ONE app registered, Chrome automatically opens that app's tab on page load — no need to click the sidebar nav item. Clicking it may cause a re-navigation that times out.
-- **Chrome URL routing**: When `UseChrome()` is active, direct URL navigation (e.g., `/basic-app` or `/basic-app?shell=false`) shows "App Not Found". Apps must be accessed by navigating to `/` first, then clicking sidebar items. In Playwright tests, always navigate to `http://localhost:PORT/` and use sidebar clicks.
+- **Chrome URL routing**: When `UseChrome()` is active, direct URL navigation (e.g., `/basic-app` or `/basic-app?shell=false`) shows "App Not Found". Apps must be accessed by navigating to `/` first, then clicking sidebar items. In Playwright tests, always navigate to `https://localhost:PORT/` and use sidebar clicks.
 - **SelectInput trigger displays all option labels**: `SelectInput<T>` with many options renders ALL option display names concatenated in the trigger button (combobox). This makes `getByText("OptionName")` ambiguous — it matches both the trigger and the dropdown item. To click a dropdown option reliably: open the dropdown, then use `page.evaluate` to find the option element by text content + bounding rect (y > trigger height), and click by coordinates. The dropdown container has `role="listbox"`.
 - **SelectInput dropdown structure**: Ivy SelectInput dropdown uses Radix-like components. The trigger is a `<button role="combobox">`. The dropdown panel is `<div role="listbox">`. Items inside have NO `role="option"` — they are plain `<div>` elements with text content. Use `page.evaluate` + coordinate clicking for reliable selection when text-based locators are ambiguous.
 - **Sidebar nav button name conflicts**: Chrome sidebar renders app names as `role="button"` elements. A button with text "C" will conflict with "Calculator" sidebar button when using `getByRole("button", { name: "C" })` — always use `{ exact: true }` for single-character button names
@@ -723,7 +723,7 @@ In headless mode with File System Access API disabled, the save dialog uses `<a 
 
 ### 2026-03-13 — AspectRatio (WidgetBase property)
 - **`data-testid` on Box/Card widgets is NOT reliably found by `[data-testid="..."]` selectors** in Playwright. Use text-based locators (`getByText`, `getByRole`) and `page.evaluate()` with DOM tree walking to inspect computed CSS properties instead
-- **`baseURL` in `playwright.config.ts` is evaluated at import time**, before `beforeAll` runs. When using dynamic ports, use full URLs in `page.goto()` calls: `page.goto(\`http://localhost:${port}/app?shell=false\`)` instead of relative paths
+- **`baseURL` in `playwright.config.ts` is evaluated at import time**, before `beforeAll` runs. When using dynamic ports, use full URLs in `page.goto()` calls: `page.goto(\`https://localhost:${port}/app?shell=false\`)` instead of relative paths
 - **Verifying CSS properties via `page.evaluate()`**: Walk the DOM tree from text content upward to find elements with specific computed styles (e.g., `window.getComputedStyle(el).aspectRatio`). This is more reliable than data-testid selectors for layout/style verification
 - **Flex stretch overrides `aspect-ratio`**: In `Layout.Horizontal()`, flex `align-items: stretch` causes all children to share the tallest height, partially overriding the visual aspect ratio. This is standard CSS behavior. In non-flex contexts, aspect-ratio works perfectly
 - 6 tests passed after 2 fix rounds (test fixes only: URL pattern + frontend rebuild), no project fixes needed
@@ -803,7 +803,7 @@ In headless mode with File System Access API disabled, the save dialog uses `<a 
 - Project location: `D:\Temp\IvyFeatureTester\2026-03-26\MarkdownOnLinkClick\`
 
 ### 2026-03-26 — Markdown Widget Local Image Support (FIXED and Re-Tested Successfully)
-- **Initial Test (Pre-Fix)**: Commit 1e799a56 added `.DangerouslyAllowLocalFiles()` but feature was NOT working - images showed `src="http://localhost:PORT/ivy/#"` instead of `file://` URLs
+- **Initial Test (Pre-Fix)**: Commit 1e799a56 added `.DangerouslyAllowLocalFiles()` but feature was NOT working - images showed `src="https://localhost:PORT/ivy/#"` instead of `file://` URLs
 - **Root Cause**: The `urlTransform` callback in MarkdownRenderer.tsx was stripping out file:// URLs before they reached the img component
 - **Fix Applied (Commit 9906a883)**: Updated urlTransform to check `dangerouslyAllowLocalFiles` flag and preserve file:// URLs and Windows paths when enabled
 - **Re-Test Result**: ✅ **ALL 18/18 tests passed** - fix confirmed working

@@ -417,7 +417,7 @@ if (maxDate) disabledMatcher.push({ after: maxDate });
 - ❌ Don't test actual page navigation (URL change, new page content) in `chrome=false` mode
 - ✅ Test state feedback before navigation (click counters, action logs)
 - ✅ Test beacon discovery and availability (UseNavigationBeacon returns non-null)
-- ✅ Test target apps by navigating directly via URL: `page.goto(\`http://localhost:\${port}/app-id?chrome=false\`)`
+- ✅ Test target apps by navigating directly via URL: `page.goto(\`https://localhost:\${port}/app-id?chrome=false\`)`
 - ✅ Test button enabled/disabled state based on beacon availability
 
 ### Beacon AppId Must Match Full Registered ID
