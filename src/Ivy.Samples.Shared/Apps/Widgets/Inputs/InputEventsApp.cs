@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.Zap, group: ["Widgets", "Inputs"], title: "Input Events")]
+[App(icon: Icons.Zap, group: ["Widgets", "Inputs"], isVisible: false, title: "Input Events")]
 public class InputEventsApp : SampleBase
 {
     protected override object? BuildSample()
