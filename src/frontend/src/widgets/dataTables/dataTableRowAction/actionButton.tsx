@@ -34,6 +34,11 @@ export const ActionButton: React.FC<ActionButtonProps> = ({ action, actionId, on
     e.stopPropagation();
   };
 
+  const getColorClass = (color: MenuItem["color"]) => {
+    if (!color || color === "Default") return "text-(--color-foreground)";
+    return `text-${color.toLowerCase()}`;
+  };
+
   return (
     <ButtonWithTooltip
       className={ACTION_BUTTON_CLASSES}
@@ -43,7 +48,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({ action, actionId, on
       tooltipText={action.tooltip}
       type="button"
     >
-      {action.icon && <Icon name={action.icon} size={16} className="text-(--color-foreground)" />}
+      {action.icon && <Icon name={action.icon} size={16} className={getColorClass(action.color)} />}
     </ButtonWithTooltip>
   );
 };

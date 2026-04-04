@@ -31,6 +31,11 @@ const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
       props.onMouseDown?.(e);
     };
 
+    const getColorClass = (color: MenuItem["color"]) => {
+      if (!color || color === "Default") return "text-(--color-foreground)";
+      return `text-${color.toLowerCase()}`;
+    };
+
     return (
       <button
         ref={ref}
@@ -41,7 +46,9 @@ const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
         title={action.tooltip}
         type="button"
       >
-        {action.icon && <Icon name={action.icon} size={16} className="text-(--color-foreground)" />}
+        {action.icon && (
+          <Icon name={action.icon} size={16} className={getColorClass(action.color)} />
+        )}
       </button>
     );
   },
@@ -66,11 +73,13 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
       <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
         {validChildren.map((childAction) => {
           const childId = getActionId(childAction);
-          const isDestructive = childAction.color === "Destructive";
+          const color = childAction.color || "Default";
+          const colorClass = color !== "Default" ? `text-${color.toLowerCase()}` : "";
+
           return (
             <DropdownMenuItem
               key={childId}
-              className={isDestructive ? "text-destructive focus:text-destructive" : undefined}
+              className={color !== "Default" ? `${colorClass} focus:${colorClass}` : undefined}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick(childAction);
@@ -81,7 +90,7 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
                   name={childAction.icon}
                   size={16}
                   className={
-                    isDestructive ? "mr-2 text-destructive" : "mr-2 text-(--color-foreground)"
+                    color !== "Default" ? `mr-2 ${colorClass}` : "mr-2 text-(--color-foreground)"
                   }
                 />
               )}
