@@ -200,11 +200,13 @@ public class DataTableHeaderSlotsSample : ViewBase
         }.AsQueryable();
 
         return products.ToDataTable()
-            .HeaderLeft(ctx => new Button("Export", icon: Icons.Download).Small())
+            .HeaderLeft(ctx => Layout.Horizontal().Gap(2)
+                | new Button("Export", icon: Icons.Download).Small()
+                | new Badge("Live").Color(Colors.Blue).Small())
             .HeaderRight(ctx => Layout.Horizontal().Gap(2)
-                | new Badge($"{products.Count()} items")
-                | new Button("Settings", icon: Icons.Settings).Small())
-            .Height(Size.Units(80));
+                | new Badge($"{products.Count()} items").Color(Colors.Green).Small()
+                | new Button("Settings", icon: Icons.Settings).Primary().Small())
+            .Height(Size.Units(80));    
     }
 }
 
