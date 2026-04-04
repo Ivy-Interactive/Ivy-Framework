@@ -148,13 +148,21 @@ public class ConfigService
 
         if (File.Exists(_configPath))
         {
-            var yaml = File.ReadAllText(_configPath);
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .IgnoreUnmatchedProperties()
-                .Build();
-            _settings = deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
-            NeedsOnboarding = false;
+            try
+            {
+                var yaml = File.ReadAllText(_configPath);
+                var deserializer = new DeserializerBuilder()
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                    .IgnoreUnmatchedProperties()
+                    .Build();
+                _settings = deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
+                NeedsOnboarding = false;
+            }
+            catch (Exception)
+            {
+                NeedsOnboarding = true;
+                _settings = new TendrilSettings();
+            }
         }
         else
         {

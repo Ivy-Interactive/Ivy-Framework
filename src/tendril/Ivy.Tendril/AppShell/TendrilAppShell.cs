@@ -109,7 +109,9 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             if (!string.IsNullOrWhiteSpace(initialAppId))
             {
                 // Force redirect from onboarding if it's already done
-                if (!config.NeedsOnboarding && (initialAppId.Equals("onboarding", StringComparison.OrdinalIgnoreCase) || initialAppId.Equals("OnboardingApp", StringComparison.OrdinalIgnoreCase)))
+                if (!config.NeedsOnboarding && (initialAppId.Equals("onboarding", StringComparison.OrdinalIgnoreCase) || 
+                                              initialAppId.Equals("OnboardingApp", StringComparison.OrdinalIgnoreCase) ||
+                                              initialAppId.Equals("onboarding-app", StringComparison.OrdinalIgnoreCase)))
                 {
                     initialAppId = settings.DefaultAppId ?? "dashboard";
                 }

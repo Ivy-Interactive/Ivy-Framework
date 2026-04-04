@@ -1,12 +1,12 @@
-using System.ClientModel;
 using Ivy;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
-using OpenAI;
 using Ivy.Tendril.AppShell;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 using Microsoft.Extensions.Logging;
+using OpenAI;
+using System.ClientModel;
 
 
 AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
