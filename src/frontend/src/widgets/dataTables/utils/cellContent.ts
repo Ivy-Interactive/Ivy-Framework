@@ -1,5 +1,6 @@
-import { GridCell, GridCellKind, Item } from "@glideapps/glide-data-grid";
+import { GridCell, GridCellKind, Item, Theme } from "@glideapps/glide-data-grid";
 import { Align, DataColumn, DataRow } from "../types/types";
+import { getCSSVariable } from "@/lib/theme";
 
 /**
  * Converts Align enum to contentAlign value for GridCell
@@ -214,7 +215,12 @@ export function createTextCell(cellValue: unknown, editable: boolean, align?: Al
 /**
  * Creates a labels/bubble cell for displaying multiple labels as chips
  */
-export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
+export function createLabelsCell(
+  cellValue: unknown,
+  align?: Align,
+  color?: string | null,
+  customColor?: string | null,
+): GridCell {
   // Handle different input formats
   let labels: readonly string[];
 
@@ -246,11 +252,53 @@ export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
     labels = [];
   }
 
+  const themeOverride: Partial<Theme> = {};
+  const effectiveColor = customColor || color;
+  if (effectiveColor) {
+    const isDirectColor =
+      effectiveColor.startsWith("#") ||
+      effectiveColor.startsWith("rgb") ||
+      effectiveColor.startsWith("hsl") ||
+      effectiveColor.includes("(");
+
+    if (isDirectColor) {
+      themeOverride.bgBubble = effectiveColor;
+    } else {
+      const lowerColor = effectiveColor.toLowerCase().replace(/\s+/g, "-");
+      const bgVar = `--${lowerColor}`;
+      const fgVar = `--${lowerColor}-foreground`;
+
+      let bgColor = getCSSVariable(bgVar);
+      let fgColor = getCSSVariable(fgVar);
+
+      // Shadcn/Tailwind often use raw HSL components in variables
+      const wrapInHsl = (val: string) => {
+        if (!val) return val;
+        if (
+          val.startsWith("#") ||
+          val.startsWith("rgb") ||
+          val.startsWith("hsl") ||
+          val.includes("(")
+        )
+          return val;
+        if (val.split(/[\s,]+/).filter(Boolean).length >= 3) return `hsl(${val})`;
+        return val;
+      };
+
+      bgColor = wrapInHsl(bgColor);
+      fgColor = wrapInHsl(fgColor);
+
+      if (bgColor) themeOverride.bgBubble = bgColor;
+      if (fgColor) themeOverride.textBubble = fgColor;
+    }
+  }
+
   return {
     kind: GridCellKind.Bubble,
     data: labels as string[],
     allowOverlay: false,
     contentAlign: align ? getContentAlign(align) : undefined,
+    themeOverride: Object.keys(themeOverride).length > 0 ? themeOverride : undefined,
   };
 }
 
@@ -332,7 +380,7 @@ export function getCellContent(
 
   // Handle Labels type - supports arrays or comma-separated strings
   if (column.type === "Labels") {
-    return createLabelsCell(cellValue, align);
+    return createLabelsCell(cellValue, align, column.color, column.customColor);
   }
 
   // Handle explicit link type from backend metadata

@@ -30,6 +30,9 @@ public class DataTableColumn
     public string? Help { get; set; } = null;
     public List<string>? Footer { get; set; } = null;
 
+    public Colors? Color { get; set; }
+    public string? CustomColor { get; set; }
+
     public NumberFormatStyle? FormatStyle { get; set; } = null;
     public int? Precision { get; set; } = null;
     public string? Currency { get; set; } = null;
@@ -135,6 +138,8 @@ public class ProgressDisplayRenderer : IDataTableColumnRenderer
 
 public class LabelsDisplayRenderer : IDataTableColumnRenderer
 {
+    public Colors? Color { get; set; }
+    public string? CustomColor { get; set; }
     public bool IsEditable => false;
     public ColType ColType => ColType.Labels;
 }

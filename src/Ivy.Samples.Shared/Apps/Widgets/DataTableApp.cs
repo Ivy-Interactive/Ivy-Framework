@@ -109,6 +109,7 @@ public class DataTableMainSample : ViewBase
             .Group(e => e.Notes, "Other")
             .Group(e => e.OptionalId, "Other")
             .Group(e => e.Skills, "Personal")
+            .Badges(e => e.Skills, Colors.Sky)
             .Group(e => e.WidgetLink, "Links")
             .Group(e => e.ProfileLink, "Links")
 
