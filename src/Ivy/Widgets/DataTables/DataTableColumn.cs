@@ -32,16 +32,14 @@ public class DataTableColumn
 
     public Colors? Color { get; set; }
     public string? CustomColor { get; set; }
-
+    public Dictionary<string, string>? BadgeColorMapping { get; set; }
     public NumberFormatStyle? FormatStyle { get; set; } = null;
     public int? Precision { get; set; } = null;
     public string? Currency { get; set; } = null;
+    public Func<object, object?>? ValueAccessor { get; set; } = null;
 
     [JsonIgnore]
     public IDataTableColumnRenderer? Renderer { get; set; } = null;
-
-    [JsonIgnore]
-    public Func<object, object?>? ValueAccessor { get; set; } = null;
 }
 
 public enum SortDirection
@@ -140,6 +138,7 @@ public class LabelsDisplayRenderer : IDataTableColumnRenderer
 {
     public Colors? Color { get; set; }
     public string? CustomColor { get; set; }
+    public Dictionary<string, string>? BadgeColorMapping { get; set; }
     public bool IsEditable => false;
     public ColType ColType => ColType.Labels;
 }

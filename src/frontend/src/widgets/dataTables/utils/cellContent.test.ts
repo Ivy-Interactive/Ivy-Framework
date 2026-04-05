@@ -19,8 +19,10 @@ import {
   getOrderedColumns,
   getCellContent,
   getContentAlign,
+  lookupBadgeColorMapping,
 } from "./cellContent";
 import { DataColumn, DataRow, ColType } from "../types/types";
+import type { LabelsBadgesCellData } from "./customRenderers";
 
 describe("cellContent utilities", () => {
   describe("createEmptyCell", () => {
@@ -721,6 +723,24 @@ describe("cellContent utilities", () => {
     it("should apply alignment when provided", () => {
       const cell = createLabelsCell(["Tag1", "Tag2"], "Center");
       expect(cell.contentAlign).toBe("center");
+    });
+
+    it("should resolve mapping keys case-insensitively (JSON camelCase keys vs row values)", () => {
+      expect(lookupBadgeColorMapping({ python: "Sky", DotNet: "Purple" }, "Python")).toBe("Sky");
+      expect(lookupBadgeColorMapping({ python: "Sky", DotNet: "Purple" }, "dotnet")).toBe("Purple");
+    });
+
+    it("should use custom cell when badge mapping exists and multiple labels (per-badge colors)", () => {
+      const cell = createLabelsCell(["Python", "React"], undefined, null, null, {
+        python: "Sky",
+        react: "Blue",
+      });
+      expect(cell.kind).toBe(GridCellKind.Custom);
+      if (cell.kind === GridCellKind.Custom) {
+        const data = cell.data as LabelsBadgesCellData;
+        expect(data.kind).toBe("labels-badges-cell");
+        expect(data.items).toHaveLength(2);
+      }
     });
 
     it("should filter out empty strings from comma-separated input", () => {

@@ -2,7 +2,11 @@ import React, { useMemo, useRef } from "react";
 import { CustomRenderer, DataEditorRef } from "@glideapps/glide-data-grid";
 import { useTable } from "../dataTableContext";
 import { getSelectionProps } from "../utils/selectionModes";
-import { iconCellRenderer, linkCellRenderer } from "../utils/customRenderers";
+import {
+  iconCellRenderer,
+  labelsBadgesCellRenderer,
+  linkCellRenderer,
+} from "../utils/customRenderers";
 import { generateHeaderIcons, addStandardIcons } from "../utils/headerIcons";
 import {
   useContainerSize,
@@ -212,7 +216,13 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       columns={finalColumns}
       rows={totalRows}
       getCellContent={getCellContent}
-      customRenderers={[iconCellRenderer, linkCellRenderer] as unknown as readonly CustomRenderer[]}
+      customRenderers={
+        [
+          iconCellRenderer,
+          linkCellRenderer,
+          labelsBadgesCellRenderer,
+        ] as unknown as readonly CustomRenderer[]
+      }
       headerIcons={headerIcons}
       onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
       onVisibleRegionChanged={handleVisibleRegionChanged}

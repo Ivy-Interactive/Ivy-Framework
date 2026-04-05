@@ -13,7 +13,11 @@ import {
   type Item,
   type Theme,
 } from "@glideapps/glide-data-grid";
-import { iconCellRenderer, linkCellRenderer } from "../utils/customRenderers";
+import {
+  iconCellRenderer,
+  labelsBadgesCellRenderer,
+  linkCellRenderer,
+} from "../utils/customRenderers";
 
 /**
  * Same behavior as Glide's mergeAndRealizeTheme (common/styles.js), using only
@@ -160,6 +164,7 @@ export function useFooterColumnLayout(
       const c = cell as CustomCell<Record<string, unknown>>;
       if (iconCellRenderer.isMatch(c)) return iconCellRenderer;
       if (linkCellRenderer.isMatch(c)) return linkCellRenderer;
+      if (labelsBadgesCellRenderer.isMatch(c)) return labelsBadgesCellRenderer;
       return undefined;
     },
     [rendererMap],

@@ -41,6 +41,7 @@ export interface DataColumn {
   iconSet?: "lucide" | "custom";
   color?: string | null;
   customColor?: string | null;
+  badgeColorMapping?: Record<string, string> | null;
 }
 
 export interface DataTableConnection {
