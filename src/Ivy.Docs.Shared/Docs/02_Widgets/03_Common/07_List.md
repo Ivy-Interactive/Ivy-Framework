@@ -42,14 +42,22 @@ public class BasicListDemo : ViewBase
 
 ## ListItem Configuration
 
-`ListItem`s are highly customizable, supporting titles, subtitles, [icons](../01_Primitives/02_Icon.md), [badges](02_Badge.md), custom content, and interactive states.
+`ListItem` is a flexible building block for the `List` widget. Each item supports text labels, [icons](../01_Primitives/02_Icon.md), [badges](02_Badge.md), custom widget content, click handlers, and disabled states.
 
-- **Title & Subtitle** - Primary and secondary text labels.
-- **Icon** - Visual indicator using the [Icons](../../04_ApiReference/Ivy/Icons.md) enum.
-- **Badge** - Small status indicator or counter.
-- **Tag** - Hidden object reference (e.g., a database entity) used to identify the item in click handlers.
-- **Disabled** - Disables interactions and applies a muted visual style.
-- **Content** - Custom widget content injected into the item (e.g., a switch, input, or complex layout).
+### ListItem Properties
+
+| Method | Description |
+|--------|-------------|
+| `.Title(string)` | Primary text label displayed on the item |
+| `.Subtitle(string)` | Secondary text label displayed below the title |
+| `.Icon(Icons)` | Visual indicator using the [Icons](../../04_ApiReference/Ivy/Icons.md) enum |
+| `.Badge(string)` | Small status indicator or counter displayed on the right side |
+| `.Tag(object)` | Hidden object reference (e.g., a database entity) used to identify the item in click handlers |
+| `.Content(object)` | Custom widget content injected into the item (e.g., a switch, input, or complex layout) |
+| `.Disabled(bool)` | Disables interactions and applies a muted visual style |
+| `.OnClick(...)` | Click event handler — supports multiple overloads (see [OnClick Overloads](#onclick-overloads) below) |
+
+All properties can be set either via constructor parameters or through fluent extension methods.
 
 ```csharp demo-tabs
 public class ListConfigDemo : ViewBase
@@ -95,6 +103,54 @@ public class ListConfigDemo : ViewBase
     }
 }
 ```
+
+## Item Identification with Tag
+
+Use the `.Tag()` method to attach a data object (e.g., a database entity) to a `ListItem`. When the item is clicked, retrieve the tag from `e.Sender.Tag` to identify which item was selected. This pattern is essential for building master-detail interfaces with [blades](12_Blades.md).
+
+```csharp demo-tabs
+public class TagIdentificationDemo : ViewBase
+{
+    record User(int Id, string Name, string Email, int Age);
+
+    public override object? Build()
+    {
+        var selectedUser = UseState<User?>(null);
+
+        var users = new[]
+        {
+            new User(1, "Alice Johnson", "alice@example.com", 28),
+            new User(2, "Bob Smith", "bob@example.com", 35),
+            new User(3, "Charlie Brown", "charlie@example.com", 42)
+        };
+
+        var onItemClick = new Action<Event<ListItem>>(e =>
+        {
+            var user = (User)e.Sender.Tag!;
+            selectedUser.Set(user);
+        });
+
+        var listItems = users.Select(user =>
+            new ListItem(user.Name)
+                .Subtitle(user.Email)
+                .Icon(Icons.User)
+                .Badge(user.Age.ToString())
+                .Tag(user)
+                .OnClick(onItemClick)
+        );
+
+        return Layout.Horizontal().Gap(6)
+            | new List(listItems)
+            | (selectedUser.Value != null
+                ? selectedUser.Value.ToDetails()
+                : Text.Muted("Select a user from the list"));
+    }
+}
+```
+
+<Callout Type="tip">
+The <code>Tag</code> property is not rendered in the UI — it is only accessible in event handlers via <code>e.Sender.Tag</code>. Use it to pass entity objects, IDs, or any reference data needed for handling clicks.
+</Callout>
 
 ## Interactive Lists
 
@@ -191,6 +247,34 @@ public class SearchableListDemo : ViewBase
             | new List(listItems);
     }
 }
+```
+
+## OnClick Overloads
+
+`ListItem` supports multiple `.OnClick()` overloads to match different handler patterns:
+
+| Overload | Description |
+|----------|-------------|
+| `.OnClick(Action)` | Simple callback with no parameters |
+| `.OnClick(Action<Event<ListItem>>)` | Callback with access to the event sender (use `e.Sender.Tag` to identify the item) |
+| `.OnClick(Func<Event<ListItem>, ValueTask>)` | Async callback for operations that need `await` |
+| `.OnClick(EventHandler<Event<ListItem>>)` | Full event handler delegate |
+
+The same overloads are available via the constructor's `onClick` parameter:
+
+```csharp
+// Constructor with Action<Event<ListItem>>
+new ListItem("Click me", onClick: e => Console.WriteLine(e.Sender.Title))
+
+// Constructor with simple Action
+new ListItem("Click me", onClick: () => Console.WriteLine("Clicked!"))
+
+// Extension method
+new ListItem("Click me").OnClick(async e =>
+{
+    await Task.Delay(100);
+    Console.WriteLine($"Async click: {e.Sender.Tag}");
+})
 ```
 
 <WidgetDocs Type="Ivy.List" ExtensionTypes="Ivy.WidgetBaseExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Lists/List.cs"/>
