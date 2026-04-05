@@ -116,14 +116,14 @@ public static class SheetExtensions
         }
     }
 
-    public static IView WithSheet(this Button trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
+    public static IView WithSheet(this Button trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right, bool resizable = false)
     {
-        return new WithSheetView(trigger, contentFactory, title, description, width, side);
+        return new WithSheetView(trigger, contentFactory, title, description, width, side, resizable);
     }
 
-    public static IView WithSheet(this Button trigger, Func<Action, object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right)
+    public static IView WithSheet(this Button trigger, Func<Action, object> contentFactory, string? title = null, string? description = null, Size? width = null, SheetSide side = SheetSide.Right, bool resizable = false)
     {
-        return new WithSheetViewWithClose(trigger, contentFactory, title, description, width, side);
+        return new WithSheetViewWithClose(trigger, contentFactory, title, description, width, side, resizable);
     }
 
     [OverloadResolutionPriority(-1)]
@@ -198,7 +198,7 @@ public static class SheetExtensions
     }
 }
 
-public class WithSheetView(Button trigger, Func<object> contentFactory, string? title, string? description, Size? width, SheetSide side = SheetSide.Right) : ViewBase
+public class WithSheetView(Button trigger, Func<object> contentFactory, string? title, string? description, Size? width, SheetSide side = SheetSide.Right, bool resizable = false) : ViewBase
 {
     public override object? Build()
     {
@@ -231,13 +231,18 @@ public class WithSheetView(Button trigger, Func<object> contentFactory, string? 
             {
                 sheet = sheet.Width(width ?? Sheet.DefaultWidth);
             }
+
+            if (resizable)
+            {
+                sheet = sheet.Resizable();
+            }
         }
 
         return new Fragment(clonedTrigger, sheet);
     }
 }
 
-public class WithSheetViewWithClose(Button trigger, Func<Action, object> contentFactory, string? title, string? description, Size? width, SheetSide side = SheetSide.Right) : ViewBase
+public class WithSheetViewWithClose(Button trigger, Func<Action, object> contentFactory, string? title, string? description, Size? width, SheetSide side = SheetSide.Right, bool resizable = false) : ViewBase
 {
     public override object? Build()
     {
@@ -270,6 +275,11 @@ public class WithSheetViewWithClose(Button trigger, Func<Action, object> content
             else
             {
                 sheet = sheet.Width(width ?? Sheet.DefaultWidth);
+            }
+
+            if (resizable)
+            {
+                sheet = sheet.Resizable();
             }
         }
 
