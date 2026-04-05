@@ -7,7 +7,7 @@ import {
   Item,
 } from "@glideapps/glide-data-grid";
 
-const activeMatchColor = (isDark: boolean) => (isDark ? "#b45309" : "#fde047");
+const activeMatchColor = (isDark: boolean) => (isDark ? "#eab308" : "#fde047");
 
 function singleCellGridSelection(dataCol: number, row: number): GridSelection {
   return {
