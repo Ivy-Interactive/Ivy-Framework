@@ -90,3 +90,10 @@
 [data-has-empty-rows] .dvn-scroller {
   overflow-y: hidden !important;
 }
+
+/* The search bar is a sibling of dvn-scroller inside DataEditorContainer.
+   dvn-scroller has z-index: 10 (for scrollbar-over-footer visibility), so the
+   search bar needs a higher z-index to stay on top and receive pointer events. */
+.gdg-search-bar {
+  z-index: 20;
+}

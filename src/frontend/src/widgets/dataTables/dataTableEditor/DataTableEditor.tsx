@@ -7,6 +7,7 @@ import { generateHeaderIcons, addStandardIcons } from "../utils/headerIcons";
 import {
   useContainerSize,
   useSearch,
+  useSearchNavigation,
   useTableTheme,
   useGridSelection,
   useCellInteractions,
@@ -91,7 +92,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   });
 
   // Grid selection
-  const { gridSelection, handleGridSelectionChange } = useGridSelection({
+  const { gridSelection, handleGridSelectionChange, setGridSelection } = useGridSelection({
     visibleRows,
     getCellContent,
   });
@@ -117,12 +118,20 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     });
 
   // Table theme
-  const { tableTheme, getRowThemeOverride } = useTableTheme({
+  const { tableTheme, getRowThemeOverride, isDark } = useTableTheme({
     showVerticalBorders: showVerticalBorders ?? false,
     enableRowHover: enableRowHover ?? false,
     visibleRows,
     hoverRow,
   });
+
+  const { onSearchResultsChanged, onSearchClose, highlightRegions } = useSearchNavigation(
+    gridRef,
+    setGridSelection,
+    isDark,
+    showSearch,
+    setShowSearch,
+  );
 
   const { emptyRowsCount, totalRows } = useEmptyRows({
     scrollContainerHeight,
@@ -238,7 +247,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       onCellActivated={handleCellActivated}
       onGroupHeaderClicked={shouldUseColumnGroups ? onGroupHeaderClicked : undefined}
       showSearch={showSearchConfig ? showSearch : false}
-      onSearchClose={() => setShowSearch(false)}
+      onSearchClose={onSearchClose}
+      onSearchResultsChanged={showSearchConfig ? onSearchResultsChanged : undefined}
+      highlightRegions={showSearchConfig ? highlightRegions : undefined}
       onItemHovered={enableRowHover ? onItemHovered : undefined}
       getRowThemeOverride={enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined}
       rowActions={rowActions}
