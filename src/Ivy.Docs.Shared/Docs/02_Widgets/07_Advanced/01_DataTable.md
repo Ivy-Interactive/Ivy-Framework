@@ -116,6 +116,7 @@ data.ToDataTable()
 ```
 
 **Footer features:**
+
 - Calculate aggregates across the full dataset (not just visible rows)
 - Common patterns: `.Sum()`, `.Average()`, `.Count()`, `.Min()`, `.Max()`
 - Supports single or multiple aggregates per column
@@ -200,12 +201,13 @@ public class RowActionsDemo : ViewBase
             .Header(e => e.Email, "Email")
             .Header(e => e.Salary, "Salary")
             .RowActions(
-                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit),
-                MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete),
+                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit).Primary(),
+                MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete).Destructive(),
+                MenuItem.Default(Icons.Eye).Tag(RowAction.More).Color(Colors.Violet),
                 MenuItem.Default(Icons.EllipsisVertical).Tag(RowAction.More)
                     .Children([
-                        MenuItem.Default(Icons.Archive).Tag(RowAction.Archive).Label("Archive"),
-                        MenuItem.Default(Icons.Download).Tag(RowAction.Export).Label("Export"),
+                        MenuItem.Default(Icons.Archive).Tag(RowAction.Archive).Label("Archive").Warning(),
+                        MenuItem.Default(Icons.Download).Tag(RowAction.Export).Label("Export").Color(Colors.Cyan),
                         MenuItem.Default(Icons.Share2).Tag(RowAction.Share).Label("Share")
                     ])
             )

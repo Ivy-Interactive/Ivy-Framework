@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getActionId, ACTION_BUTTON_CLASSES } from "./utils";
+import { getColor } from "@/lib/styles";
 
 interface ActionDropdownProps {
   action: MenuItem;
@@ -26,15 +27,11 @@ interface TriggerButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
   ({ action, actionId, ...props }, ref) => {
     const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-      // Stop propagation to prevent grid interactions
       e.stopPropagation();
       props.onMouseDown?.(e);
     };
 
-    const getColorClass = (color: MenuItem["color"]) => {
-      if (!color || color === "Default") return "text-(--color-foreground)";
-      return `text-${color.toLowerCase()}`;
-    };
+    const colorStyle = action.color ? getColor(action.color, "color") : {};
 
     return (
       <button
@@ -46,9 +43,7 @@ const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
         title={action.tooltip}
         type="button"
       >
-        {action.icon && (
-          <Icon name={action.icon} size={16} className={getColorClass(action.color)} />
-        )}
+        {action.icon && <Icon name={action.icon} size={16} style={colorStyle} />}
       </button>
     );
   },
@@ -73,26 +68,19 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
       <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
         {validChildren.map((childAction) => {
           const childId = getActionId(childAction);
-          const color = childAction.color || "Default";
-          const colorClass = color !== "Default" ? `text-${color.toLowerCase()}` : "";
+          const colorStyle = childAction.color ? getColor(childAction.color, "color") : {};
 
           return (
             <DropdownMenuItem
               key={childId}
-              className={color !== "Default" ? `${colorClass} focus:${colorClass}` : undefined}
+              style={colorStyle}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick(childAction);
               }}
             >
               {childAction.icon && (
-                <Icon
-                  name={childAction.icon}
-                  size={16}
-                  className={
-                    color !== "Default" ? `mr-2 ${colorClass}` : "mr-2 text-(--color-foreground)"
-                  }
-                />
+                <Icon name={childAction.icon} size={16} className="mr-2" style={colorStyle} />
               )}
               {childAction.label || childId}
             </DropdownMenuItem>

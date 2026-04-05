@@ -28,7 +28,7 @@ export interface MenuItem {
   variant: "Default" | "Separator" | "Checkbox" | "Radio" | "Group";
   checked: boolean;
   disabled: boolean;
-  color?: "Default" | "Destructive" | "Primary" | "Secondary" | "Success" | "Warning" | "Info";
+  color?: string;
   shortcut?: string;
   badge?: string;
   expanded: boolean;

@@ -139,11 +139,11 @@ public class DataTableMainSample : ViewBase
             .RowActions(
                 MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit).Tooltip("Edit employee").Primary(),
                 MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete).Tooltip("Delete employee").Destructive(),
-                MenuItem.Default(Icons.Eye).Tag(RowAction.View).Tooltip("View details").Success(),
+                MenuItem.Default(Icons.Eye).Tag(RowAction.View).Tooltip("View details").Color(Colors.Violet),
                 MenuItem.Default(Icons.EllipsisVertical).Tag(RowAction.Menu).Tooltip("More actions")
                     .Children([
                         MenuItem.Default(Icons.Archive).Tag(RowAction.Archive).Label("Archive").Warning(),
-                        MenuItem.Default(Icons.Download).Tag(RowAction.Export).Label("Export").Info(),
+                        MenuItem.Default(Icons.Download).Tag(RowAction.Export).Label("Export").Color(Colors.Cyan),
                         MenuItem.Default(Icons.Share2).Tag(RowAction.Share).Label("Share")
                     ])
             )
@@ -206,7 +206,7 @@ public class DataTableHeaderSlotsSample : ViewBase
             .HeaderRight(ctx => Layout.Horizontal().Gap(2)
                 | new Badge($"{products.Count()} items").Color(Colors.Green).Small()
                 | new Button("Settings", icon: Icons.Settings).Primary().Small())
-            .Height(Size.Units(80));    
+            .Height(Size.Units(80));
     }
 }
 

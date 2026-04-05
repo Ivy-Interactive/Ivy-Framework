@@ -3,6 +3,7 @@ import Icon from "@/components/Icon";
 import { MenuItem } from "@/types/widgets";
 import { ACTION_BUTTON_CLASSES } from "./utils";
 import withTooltip from "@/hoc/withTooltip";
+import { getColor } from "@/lib/styles";
 
 const NativeButton = forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
   (props, ref) => <button ref={ref} {...props} />,
@@ -34,10 +35,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({ action, actionId, on
     e.stopPropagation();
   };
 
-  const getColorClass = (color: MenuItem["color"]) => {
-    if (!color || color === "Default") return "text-(--color-foreground)";
-    return `text-${color.toLowerCase()}`;
-  };
+  const getColorStyle = (color: MenuItem["color"]) => (color ? getColor(color, "color") : {});
 
   return (
     <ButtonWithTooltip
@@ -48,7 +46,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({ action, actionId, on
       tooltipText={action.tooltip}
       type="button"
     >
-      {action.icon && <Icon name={action.icon} size={16} className={getColorClass(action.color)} />}
+      {action.icon && <Icon name={action.icon} size={16} style={getColorStyle(action.color)} />}
     </ButtonWithTooltip>
   );
 };
