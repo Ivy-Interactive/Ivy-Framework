@@ -37,6 +37,7 @@ public record Badge : WidgetBase<Badge>
     [Prop] public Icons? Icon { get; set; }
 
     [Prop] public Colors? Color { get; set; }
+    [Prop] public string? CustomColor { get; set; }
 
     [Prop] public Align IconPosition { get; set; } = Align.Left;
 
@@ -66,46 +67,36 @@ public static class BadgeExtensions
         return badge with { Color = color };
     }
 
-    [RelatedTo(nameof(Badge.Variant))]
-    public static Badge Secondary(this Badge badge)
+    public static Badge Color(this Badge badge, string color)
     {
-        return badge with { Variant = BadgeVariant.Secondary };
+        return badge with { CustomColor = color };
     }
 
-    [RelatedTo(nameof(Badge.Variant))]
-    public static Badge Destructive(this Badge badge)
-    {
-        return badge with { Variant = BadgeVariant.Destructive };
-    }
+    [RelatedTo(nameof(Badge.Color))]
+    public static Badge Secondary(this Badge badge) => badge with { Color = Colors.Secondary };
+
+    [RelatedTo(nameof(Badge.Color))]
+    public static Badge Destructive(this Badge badge) => badge with { Color = Colors.Destructive };
+
+    [RelatedTo(nameof(Badge.Color))]
+    public static Badge Success(this Badge badge) => badge with { Color = Colors.Success };
+
+    [RelatedTo(nameof(Badge.Color))]
+    public static Badge Warning(this Badge badge) => badge with { Color = Colors.Warning };
+
+    [RelatedTo(nameof(Badge.Color))]
+    public static Badge Info(this Badge badge) => badge with { Color = Colors.Info };
+
+    [RelatedTo(nameof(Badge.Color))]
+    public static Badge Muted(this Badge badge) => badge with { Color = Colors.Muted };
+
+    [RelatedTo(nameof(Badge.Color))]
+    public static Badge Primary(this Badge badge) => badge with { Color = Colors.Primary };
 
     [RelatedTo(nameof(Badge.Variant))]
     public static Badge Outline(this Badge badge)
     {
         return badge with { Variant = BadgeVariant.Outline };
-    }
-
-    [RelatedTo(nameof(Badge.Variant))]
-    public static Badge Primary(this Badge badge)
-    {
-        return badge with { Variant = BadgeVariant.Primary };
-    }
-
-    [RelatedTo(nameof(Badge.Variant))]
-    public static Badge Success(this Badge badge)
-    {
-        return badge with { Variant = BadgeVariant.Success };
-    }
-
-    [RelatedTo(nameof(Badge.Variant))]
-    public static Badge Warning(this Badge badge)
-    {
-        return badge with { Variant = BadgeVariant.Warning };
-    }
-
-    [RelatedTo(nameof(Badge.Variant))]
-    public static Badge Info(this Badge badge)
-    {
-        return badge with { Variant = BadgeVariant.Info };
     }
 
     public static Badge OnClick(this Badge badge, Func<Event<Badge>, ValueTask> onClick) => badge with { OnClick = new(onClick) };
