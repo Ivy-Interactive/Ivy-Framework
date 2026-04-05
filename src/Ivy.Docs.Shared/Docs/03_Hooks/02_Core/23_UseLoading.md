@@ -272,7 +272,6 @@ public class DataImportExample : ViewBase
 {
     public override object? Build()
     {
-        var client = UseService<IClientProvider>();
         var (loadingView, showLoading) = UseLoading();
 
         return new Fragment(

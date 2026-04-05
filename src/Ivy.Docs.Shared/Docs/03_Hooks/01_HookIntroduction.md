@@ -4,6 +4,7 @@ searchHints:
   - useState
   - useEffect
   - useQuery
+  - useloading
   - state-management
   - lifecycle
   - reactivity
@@ -45,7 +46,7 @@ Ivy ships with a comprehensive set of hooks organized by purpose:
 | **References & Context**     | [UseRef](./02_Core/08_UseRef.md), [UseContext](./02_Core/12_UseContext.md), [UseArgs](./02_Core/13_UseArgs.md)                                     |
 | **Data Fetching**            | [UseQuery](./02_Core/09_UseQuery.md), [UseMutation](./02_Core/14_UseMutation.md), [UseSignal](./02_Core/10_UseSignal.md)                           |
 | **Services & Dependencies**  | [UseService](./02_Core/11_UseService.md), [UseRefreshToken](./02_Core/16_UseRefreshToken.md), [UseWebhook](./02_Core/19_UseWebhook.md)            |
-| **UI & Interaction**         | [UseNavigation](../01_Onboarding/02_Concepts/09_Navigation.md), [UseAlert](../01_Onboarding/02_Concepts/17_Alerts.md), [UseBlades](../02_Widgets/03_Common/12_Blades.md), [UseTrigger](./02_Core/17_UseTrigger.md)  |
+| **UI & Interaction**         | [UseNavigation](../01_Onboarding/02_Concepts/09_Navigation.md), [UseAlert](../01_Onboarding/02_Concepts/17_Alerts.md), [UseLoading](./02_Core/23_UseLoading.md), [UseBlades](../02_Widgets/03_Common/12_Blades.md), [UseTrigger](./02_Core/17_UseTrigger.md)  |
 | **Forms**                    | [UseForm](../01_Onboarding/02_Concepts/08_Forms.md)                                                                                                             |
 | **Files**                    | [UseUpload](../02_Widgets/04_Inputs/10_FileInput.md), [UseDownload](./02_Core/15_UseDownload.md)                                                              |
 
@@ -578,7 +579,8 @@ flowchart TB
     
     B --> B1[UseNavigation]
     C --> C1[UseAlert]
-    C --> C2[UseTrigger]
+    C --> C2[UseLoading]
+    C --> C3[UseTrigger]
     D --> D1[UseBlades]
     E --> E1[UseForm]
 ```
@@ -688,6 +690,41 @@ public class ModalDialog(IState<bool> isOpen) : ViewBase
 ```
 
 See [UseTrigger](./02_Core/17_UseTrigger.md) for detailed documentation.
+
+### UseLoading
+
+Display a modal loading dialog while async work runs. Supports progress reporting (determinate and indeterminate), status messages, and optional cancellation. Work executes on a background thread so the UI event queue stays free.
+
+```csharp demo-below
+public class LoadingDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var (loadingView, showLoading) = UseLoading();
+
+        return new Fragment(
+            loadingView,
+            Layout.Vertical()
+            | new Button("Start Work", () =>
+            {
+                showLoading(async ctx =>
+                {
+                    ctx.Message("Processing…");
+                    for (var i = 0; i < 5; i++)
+                    {
+                        ctx.CancellationToken.ThrowIfCancellationRequested();
+                        ctx.Progress(i * 100 / 5);
+                        ctx.Status($"Step {i + 1} of 5");
+                        await Task.Delay(1000, ctx.CancellationToken);
+                    }
+                }, cancellable: true);
+            })
+        );
+    }
+}
+```
+
+See [UseLoading](./02_Core/23_UseLoading.md) for detailed documentation.
 
 ### UseForm
 
