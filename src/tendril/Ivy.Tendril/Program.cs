@@ -101,9 +101,9 @@ var appShellSettings = new AppShellSettings()
         Layout.Horizontal(
             new Image("/tendril/assets/Tendril.svg").Width(Size.Units(15)).Height(Size.Auto()),
             Layout.Vertical(
-                Text.Muted("Ivy Tendril").Small(),
+                Text.Muted("Ivy Tendril"),
                 Text.Muted($"v{versionString}")
-            )
+            ).Gap(0)
         ).Gap(2).Padding(2).AlignContent(Align.BottomLeft)
     )
     .DefaultAppId("dashboard")

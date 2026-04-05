@@ -25,17 +25,26 @@ foreach ($dir in @($verificationDir, "$artifactsDir\tests", "$artifactsDir\scree
     }
 }
 
-# Kill any leftover sample processes that may lock DLLs
-$sampleBinDir = Join-Path $artifactsDir "sample" "bin"
-if (Test-Path $sampleBinDir) {
-    Get-Process | Where-Object {
-        $_.Path -and $_.Path.StartsWith($sampleBinDir, [StringComparison]::OrdinalIgnoreCase)
-    } | ForEach-Object {
-        Write-Host "Killing leftover process: $($_.ProcessName) ($($_.Id))" -ForegroundColor Yellow
-        $_ | Stop-Process -Force -ErrorAction SilentlyContinue
+# Kill ALL sample processes from any plan's artifacts directory (not just current plan)
+# to prevent accumulated zombie processes from blocking builds
+Write-Host "Cleaning up any leftover sample processes..." -ForegroundColor Yellow
+$killed = 0
+Get-Process -ErrorAction SilentlyContinue | Where-Object {
+    $_.Path -and $_.Path -match '\\artifacts\\sample\\bin\\'
+} | ForEach-Object {
+    Write-Host "  Killing: $($_.ProcessName) (PID $($_.Id)) from $($_.Path)" -ForegroundColor Yellow
+    try {
+        $_ | Stop-Process -Force -ErrorAction Stop
+        $killed++
+    } catch {
+        Write-Warning "  Failed to kill PID $($_.Id): $_"
     }
-    # Brief wait for file handles to release
-    Start-Sleep -Milliseconds 500
+}
+if ($killed -gt 0) {
+    Write-Host "  Killed $killed process(es). Waiting for file handles to release..." -ForegroundColor Yellow
+    Start-Sleep -Milliseconds 2000
+} else {
+    Write-Host "  No leftover processes found." -ForegroundColor Green
 }
 
 # Set ARTIFACTS_DIR so Playwright tests can write directly to plan artifacts

@@ -84,6 +84,13 @@ public class ContentView(
 
         if (_selectedPlan is null)
         {
+            if (_allPlans.Count == 0)
+            {
+                return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full()).Gap(2)
+                    | new Icon(Icons.Inbox).Large().Color(Colors.Gray)
+                    | Text.Muted("No draft plans yet");
+            }
+
             return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
                 | Text.Muted("Select a plan from the sidebar");
         }

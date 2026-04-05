@@ -2,7 +2,7 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Test;
 
-public class JobServiceCostTrackingTests
+public class JobServiceLogCostTests
 {
     [Fact]
     public void LogCostToCsv_CreatesFileWithHeaders()

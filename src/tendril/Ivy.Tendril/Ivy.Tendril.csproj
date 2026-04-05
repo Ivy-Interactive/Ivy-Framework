@@ -5,7 +5,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>CS8618;CS8603;CS8602;CS8604;CS9113</NoWarn>
-    <Version>1.0.1</Version>
     <RootNamespace>Ivy.Tendril</RootNamespace>
     <UserSecretsId>a8f3c2e1-4b7d-4e9f-a1c3-8d6e2f5b9a7c</UserSecretsId>
   </PropertyGroup>
@@ -44,11 +43,7 @@
     <Folder Include="Apps" />
     <Folder Include="Connections" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Ivy.Tendril.Test\**" />
-    <EmbeddedResource Remove="Ivy.Tendril.Test\**" />
-    <None Remove="Ivy.Tendril.Test\**" />
-  </ItemGroup>
+
   <ItemGroup>
     <None Update="example.config.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

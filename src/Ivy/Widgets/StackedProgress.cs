@@ -14,6 +14,10 @@ public record StackedProgress : WidgetBase<StackedProgress>
     public StackedProgress(params ProgressSegment[] segments) : this()
     {
         Segments = segments;
+
+        // Auto-enable ShowLabels if any segment has a label
+        if (segments.Any(s => !string.IsNullOrEmpty(s.Label)))
+            ShowLabels = true;
     }
 
     internal StackedProgress()

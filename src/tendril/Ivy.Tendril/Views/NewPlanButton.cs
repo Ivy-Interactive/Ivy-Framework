@@ -3,7 +3,7 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Views;
 
-public class NewPlanFooterButton : ViewBase
+public class NewPlanButton : ViewBase
 {
     public override object? Build()
     {

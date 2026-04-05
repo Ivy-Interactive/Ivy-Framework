@@ -1,3 +1,4 @@
+using Ivy.Tendril.Apps.Recommendations.Dialogs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Recommendations;
@@ -21,6 +22,9 @@ public class ContentView(
     {
         var client = UseService<IClientProvider>();
         var showPlan = UseState<string?>(null);
+        var showNotesDialog = UseState(false);
+        var showDeclineDialog = UseState<bool>(false);
+        var declineReason = UseState<string?>("");
 
         if (_selected is null)
         {
@@ -51,9 +55,8 @@ public class ContentView(
             })
             | new Button("Decline").Icon(Icons.X).Outline().ShortcutKey("x").OnClick(() =>
             {
-                _planService.UpdateRecommendationState(_selected.PlanFolderName, _selected.Title, "Declined");
-                _refresh();
-                GoToNext();
+                declineReason.Set("");
+                showDeclineDialog.Set(true);
             })
             | new Spacer().Width(Size.Grow())
             | Text.Rich()
@@ -76,14 +79,7 @@ public class ContentView(
 
         // Action bar (secondary actions)
         var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
-            | new Button("Accept with Notes").Icon(Icons.CircleCheck).Outline().ShortcutKey("w").OnClick(() =>
-            {
-                _planService.UpdateRecommendationState(_selected.PlanFolderName, _selected.Title, "AcceptedWithNotes");
-                _jobService.StartJob("MakePlan", "-Description", _selected.Description, "-Project", _selected.Project);
-                client.Toast($"Started MakePlan: {_selected.Title}", "Recommendation Accepted with Notes");
-                _refresh();
-                GoToNext();
-            })
+            | new Button("Accept with Notes").Icon(Icons.CircleCheck).Outline().ShortcutKey("w").OnClick(() => showNotesDialog.Set(true))
             | new Button("View Plan").Icon(Icons.ExternalLink).Outline().ShortcutKey("d").OnClick(() =>
             {
                 var fullPath = Path.Combine(_planService.PlansDirectory, _selected.PlanFolderName);
@@ -100,6 +96,57 @@ public class ContentView(
                 content: scrollableContent
             ).Size(Size.Full())
         ).Scroll(Scroll.None).Size(Size.Full());
+
+        var notesDialog = new AcceptWithNotesDialog(
+            showNotesDialog,
+            _selected,
+            notes =>
+            {
+                var description = $"[ORIGINAL RECOMMENDATION]\n{_selected.Description}\n\n[NOTES]\n{notes}";
+                _planService.UpdateRecommendationState(_selected.PlanFolderName, _selected.Title, "AcceptedWithNotes");
+                _jobService.StartJob("MakePlan", "-Description", description, "-Project", _selected.Project);
+                client.Toast($"Started MakePlan: {_selected.Title}", "Recommendation Accepted with Notes");
+                _refresh();
+                GoToNext();
+            });
+
+        if (showDeclineDialog.Value)
+        {
+            var selectedForDecline = _selected;
+            return new Fragment(
+                mainLayout,
+                new Dialog(
+                    _ => { declineReason.Set(""); showDeclineDialog.Set(false); },
+                    new DialogHeader("Decline Recommendation"),
+                    new DialogBody(
+                        Layout.Vertical()
+                            | Text.P("Optionally provide a reason for declining this recommendation.")
+                            | declineReason.ToTextareaInput("Enter reason (optional)...").Rows(4).AutoFocus()
+                    ),
+                    new DialogFooter(
+                        new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() =>
+                        {
+                            declineReason.Set("");
+                            showDeclineDialog.Set(false);
+                        }),
+                        new Button("Decline").Destructive().ShortcutKey("Enter").OnClick(() =>
+                        {
+                            _planService.UpdateRecommendationState(
+                                selectedForDecline.PlanFolderName,
+                                selectedForDecline.Title,
+                                "Declined",
+                                declineReason.Value
+                            );
+                            _refresh();
+                            showDeclineDialog.Set(false);
+                            declineReason.Set("");
+                            GoToNext();
+                        })
+                    )
+                ).Width(Size.Rem(40)),
+                notesDialog
+            );
+        }
 
         if (showPlan.Value is { } planPath)
         {
@@ -118,11 +165,12 @@ public class ContentView(
                     onClose: () => showPlan.Set(null),
                     content: sheetContent,
                     title: plan?.Title ?? folderName
-                ).Width(Size.Half()).Resizable()
+                ).Width(Size.Half()).Resizable(),
+                notesDialog
             );
         }
 
-        return mainLayout;
+        return new Fragment(mainLayout, notesDialog);
     }
 
     private void GoToNext()

@@ -1,6 +1,6 @@
 namespace Ivy.Tendril.Services;
 
-public record PlanCounts(int Drafts, int RunningJobs, int Reviews, int Icebox, int Recommendations);
+public record PlanCounts(int Drafts, int ActiveJobs, int Reviews, int Icebox, int Recommendations);
 
 public class PlanCountsService : IDisposable
 {
@@ -44,8 +44,8 @@ public class PlanCountsService : IDisposable
         var jobs = _jobService.GetJobs();
 
         return new PlanCounts(
-            Drafts: snapshot.Drafts,
-            RunningJobs: jobs.Count(j => j.Status == "Running"),
+            Drafts: snapshot.Drafts + snapshot.Failed,
+            ActiveJobs: jobs.Count(j => j.Status == "Running" || j.Status == "Queued"),
             Reviews: snapshot.ReadyForReview + snapshot.Failed,
             Icebox: snapshot.Icebox,
             Recommendations: snapshot.PendingRecommendations

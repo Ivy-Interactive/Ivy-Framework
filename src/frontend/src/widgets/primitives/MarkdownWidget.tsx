@@ -4,6 +4,8 @@ import { getWidth, getHeight } from "@/lib/styles";
 import React, { useCallback, useState, useEffect } from "react";
 import { widgetContentOverrides, subscribeToContentOverride } from "@/widgets/widgetRenderer";
 
+import "@/styles/markdown-spacing.css";
+
 import { Densities } from "@/types/density";
 import { TextAlignment } from "@/types/textAlignment";
 
@@ -64,7 +66,6 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   const styles: React.CSSProperties = {
     display: "flex",
     flexDirection: "column",
-    gap: "0.5rem",
     wordBreak: "normal",
     overflowWrap: "break-word",
     ...(textAlignment && {

@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Core.ExternalWidgets;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Core.DevTools;
 
@@ -10,12 +11,12 @@ namespace Ivy.Core.DevTools;
 /// Serves a JSON Schema describing every registered widget type and its props.
 /// Only available when the server is started with --enable-dev-tools.
 /// </summary>
-[Microsoft.AspNetCore.Mvc.ApiController]
-[Microsoft.AspNetCore.Mvc.Route("ivy/dev-tools")]
-public class WidgetSchemaController(ServerArgs args) : Microsoft.AspNetCore.Mvc.ControllerBase
+[ApiController]
+[Route("ivy/dev-tools")]
+public class WidgetSchemaController(ServerArgs args) : ControllerBase
 {
-    [Microsoft.AspNetCore.Mvc.HttpGet("widget-schema")]
-    public Microsoft.AspNetCore.Mvc.IActionResult GetWidgetSchema()
+    [HttpGet("widget-schema")]
+    public IActionResult GetWidgetSchema()
     {
         if (!args.EnableDevTools)
             return NotFound("Widget schema is only available with --enable-dev-tools");

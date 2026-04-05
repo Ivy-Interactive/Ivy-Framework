@@ -105,7 +105,7 @@ public class DashboardApp : ViewBase
                 Color: configService.GetProjectColor(p.Project),
                 Label: p.Project
             )).ToArray()
-        ).ShowLabels();
+        );
 
         // Hourly cost & tokens combined bar chart
         var hourlyBurn = planService.GetHourlyTokenBurn(days: 7);
@@ -119,6 +119,10 @@ public class DashboardApp : ViewBase
                     [
                         new Bar("Cost ($)").Radius(4).FillOpacity(0.8).YAxisIndex(0),
                         new Bar("Tokens").Radius(4).FillOpacity(0.8).YAxisIndex(1),
+                    ],
+                    XAxis =
+                    [
+                        new XAxis().Hide()
                     ],
                     YAxis =
                     [

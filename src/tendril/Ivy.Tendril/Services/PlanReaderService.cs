@@ -42,7 +42,7 @@ public class PlanReaderService(ConfigService config)
                 var planYamlPath = Path.Combine(dir, "plan.yaml");
                 if (!File.Exists(planYamlPath)) continue;
 
-                var yaml = File.ReadAllText(planYamlPath);
+                var yaml = FileHelper.ReadAllText(planYamlPath);
                 var stateMatch = Regex.Match(yaml, @"(?m)^state:\s*(.+)$");
                 if (!stateMatch.Success) continue;
 
@@ -54,7 +54,7 @@ public class PlanReaderService(ConfigService config)
                     var updated = Regex.Replace(yaml, @"(?m)^state:\s*.*$", $"state: {newState}");
                     updated = Regex.Replace(updated, @"(?m)^updated:\s*.*$",
                         $"updated: {DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}");
-                    File.WriteAllText(planYamlPath, updated);
+                    FileHelper.WriteAllText(planYamlPath, updated);
                 }
             }
             catch (Exception ex)
@@ -80,7 +80,7 @@ public class PlanReaderService(ConfigService config)
                 var planYamlPath = Path.Combine(dir, "plan.yaml");
                 if (!File.Exists(planYamlPath)) continue;
 
-                var yaml = File.ReadAllText(planYamlPath);
+                var yaml = FileHelper.ReadAllText(planYamlPath);
 
                 // Fix structured repos (path: + optional prRule:) → plain path strings
                 var repaired = Regex.Replace(yaml,
@@ -88,7 +88,7 @@ public class PlanReaderService(ConfigService config)
                     "$1- $2");
 
                 if (repaired != yaml)
-                    File.WriteAllText(planYamlPath, repaired);
+                    FileHelper.WriteAllText(planYamlPath, repaired);
             }
         }
         catch { }
@@ -117,6 +117,11 @@ public class PlanReaderService(ConfigService config)
         }
     }
 
+    /// <summary>
+    /// Retrieves all plans from the plans directory, optionally filtered by status.
+    /// </summary>
+    /// <param name="statusFilter">Optional status to filter by. If <c>null</c>, returns all plans.</param>
+    /// <returns>List of plans ordered by ID, or an empty list if the plans directory does not exist or parsing fails.</returns>
     public List<PlanFile> GetPlans(PlanStatus? statusFilter = null)
     {
         try
@@ -142,17 +147,31 @@ public class PlanReaderService(ConfigService config)
         }
     }
 
+    /// <summary>
+    /// Retrieves a single plan by its folder path.
+    /// </summary>
+    /// <param name="folderPath">Absolute path to the plan folder.</param>
+    /// <returns>The parsed <see cref="PlanFile"/>, or <c>null</c> if the folder does not exist or parsing fails.</returns>
     public PlanFile? GetPlanByFolder(string folderPath)
     {
         if (!Directory.Exists(folderPath)) return null;
         return ParsePlanFolder(folderPath);
     }
 
+    /// <summary>
+    /// Retrieves all plans that are in the <see cref="PlanStatus.Icebox"/> state.
+    /// </summary>
+    /// <returns>List of icebox plans ordered by ID.</returns>
     public List<PlanFile> GetIceboxPlans()
     {
         return GetPlans(PlanStatus.Icebox);
     }
 
+    /// <summary>
+    /// Transitions a plan to a new state by updating its <c>plan.yaml</c> file.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder (e.g. <c>01105-TestPlan</c>).</param>
+    /// <param name="newState">The target state to transition to.</param>
     public void TransitionState(string folderName, PlanStatus newState)
     {
         var folderPath = Path.Combine(PlansDirectory, folderName);
@@ -160,15 +179,20 @@ public class PlanReaderService(ConfigService config)
 
         if (!File.Exists(planYamlPath)) return;
 
-        var yaml = File.ReadAllText(planYamlPath);
+        var yaml = FileHelper.ReadAllText(planYamlPath);
         var planYaml = YamlDeserializer.Deserialize<PlanYaml>(yaml) ?? new PlanYaml();
 
         planYaml.State = newState.ToString();
         planYaml.Updated = DateTime.UtcNow;
 
-        File.WriteAllText(planYamlPath, YamlSerializer.Serialize(planYaml));
+        FileHelper.WriteAllText(planYamlPath, YamlSerializer.Serialize(planYaml));
     }
 
+    /// <summary>
+    /// Creates a new revision file for a plan and updates the plan's timestamp.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <param name="content">Markdown content of the new revision.</param>
     public void SaveRevision(string folderName, string content)
     {
         var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
@@ -182,13 +206,18 @@ public class PlanReaderService(ConfigService config)
         var planYamlPath = Path.Combine(PlansDirectory, folderName, "plan.yaml");
         if (File.Exists(planYamlPath))
         {
-            var yaml = File.ReadAllText(planYamlPath);
+            var yaml = FileHelper.ReadAllText(planYamlPath);
             var planYaml = YamlDeserializer.Deserialize<PlanYaml>(yaml) ?? new PlanYaml();
             planYaml.Updated = DateTime.UtcNow;
-            File.WriteAllText(planYamlPath, YamlSerializer.Serialize(planYaml));
+            FileHelper.WriteAllText(planYamlPath, YamlSerializer.Serialize(planYaml));
         }
     }
 
+    /// <summary>
+    /// Reads the content of the most recent revision file for a plan.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <returns>The markdown content of the latest revision, or <see cref="string.Empty"/> if no revisions exist.</returns>
     public string ReadLatestRevision(string folderName)
     {
         var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
@@ -201,6 +230,11 @@ public class PlanReaderService(ConfigService config)
         return latestFile != null ? File.ReadAllText(latestFile) : string.Empty;
     }
 
+    /// <summary>
+    /// Gets all revisions for a plan, ordered by revision number.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <returns>List of tuples containing revision number, content, and last-modified timestamp (UTC).</returns>
     public List<(int Number, string Content, DateTime Modified)> GetRevisions(string folderName)
     {
         var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
@@ -219,6 +253,12 @@ public class PlanReaderService(ConfigService config)
             .ToList();
     }
 
+    /// <summary>
+    /// Appends a log entry to a plan's logs directory.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <param name="action">Action name used in the log filename (e.g. <c>ExecutePlan</c>).</param>
+    /// <param name="content">Markdown content of the log entry.</param>
     public void AddLog(string folderName, string action, string content)
     {
         var logsDir = Path.Combine(PlansDirectory, folderName, "logs");
@@ -244,6 +284,14 @@ public class PlanReaderService(ConfigService config)
         File.WriteAllText(logPath, content);
     }
 
+    /// <summary>
+    /// Deletes a plan folder and all its contents, including any associated git worktrees.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <remarks>
+    /// Removes git worktrees first to avoid locked file issues on Windows, then clears
+    /// read-only attributes before deleting the directory tree.
+    /// </remarks>
     public void DeletePlan(string folderName)
     {
         var folderPath = Path.Combine(PlansDirectory, folderName);
@@ -318,16 +366,31 @@ public class PlanReaderService(ConfigService config)
         }
     }
 
+    /// <summary>
+    /// Reads the raw content of a plan's latest revision.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <returns>The markdown content of the latest revision.</returns>
     public string ReadRawPlan(string folderName)
     {
         return ReadLatestRevision(folderName);
     }
 
+    /// <summary>
+    /// Saves content to a plan by overwriting its latest revision.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <param name="fullContent">The full markdown content to write.</param>
     public void SavePlan(string folderName, string fullContent)
     {
         UpdateLatestRevision(folderName, fullContent);
     }
 
+    /// <summary>
+    /// Overwrites the most recent revision file for a plan and updates the plan's timestamp.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <param name="content">The updated markdown content to write.</param>
     public void UpdateLatestRevision(string folderName, string content)
     {
         var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
@@ -344,10 +407,10 @@ public class PlanReaderService(ConfigService config)
             var planYamlPath = Path.Combine(PlansDirectory, folderName, "plan.yaml");
             if (File.Exists(planYamlPath))
             {
-                var yaml = File.ReadAllText(planYamlPath);
+                var yaml = FileHelper.ReadAllText(planYamlPath);
                 var planYaml = YamlDeserializer.Deserialize<PlanYaml>(yaml) ?? new PlanYaml();
                 planYaml.Updated = DateTime.UtcNow;
-                File.WriteAllText(planYamlPath, YamlSerializer.Serialize(planYaml));
+                FileHelper.WriteAllText(planYamlPath, YamlSerializer.Serialize(planYaml));
             }
         }
     }
@@ -357,7 +420,7 @@ public class PlanReaderService(ConfigService config)
         try
         {
             var planYamlPath = Path.Combine(folderPath, "plan.yaml");
-            var yamlContent = File.ReadAllText(planYamlPath);
+            var yamlContent = FileHelper.ReadAllText(planYamlPath);
             var planYaml = YamlDeserializer.Deserialize<PlanYaml>(yamlContent);
             if (planYaml == null) return null;
 
@@ -387,12 +450,17 @@ public class PlanReaderService(ConfigService config)
         }
     }
 
+    /// <summary>
+    /// Calculates the total cost for a plan by summing all entries in its <c>costs.csv</c> file.
+    /// </summary>
+    /// <param name="folderPath">Absolute path to the plan folder.</param>
+    /// <returns>Total cost in dollars, or <c>0</c> if no costs file exists.</returns>
     public decimal GetPlanTotalCost(string folderPath)
     {
         var costsPath = Path.Combine(folderPath, "costs.csv");
         if (!File.Exists(costsPath)) return 0m;
 
-        var lines = File.ReadAllLines(costsPath);
+        var lines = FileHelper.ReadAllLines(costsPath);
         decimal total = 0m;
         foreach (var line in lines.Skip(1)) // skip header
         {
@@ -407,12 +475,17 @@ public class PlanReaderService(ConfigService config)
         return total;
     }
 
+    /// <summary>
+    /// Calculates the total token usage for a plan by summing all entries in its <c>costs.csv</c> file.
+    /// </summary>
+    /// <param name="folderPath">Absolute path to the plan folder.</param>
+    /// <returns>Total token count, or <c>0</c> if no costs file exists.</returns>
     public int GetPlanTotalTokens(string folderPath)
     {
         var costsPath = Path.Combine(folderPath, "costs.csv");
         if (!File.Exists(costsPath)) return 0;
 
-        var lines = File.ReadAllLines(costsPath);
+        var lines = FileHelper.ReadAllLines(costsPath);
         int total = 0;
         foreach (var line in lines.Skip(1))
         {
@@ -427,6 +500,15 @@ public class PlanReaderService(ConfigService config)
         return total;
     }
 
+    /// <summary>
+    /// Computes hourly token usage and cost statistics across all plans over a given time window.
+    /// </summary>
+    /// <param name="days">Number of days to look back from now. Defaults to 7.</param>
+    /// <returns>List of hourly buckets with aggregated cost and token counts, ordered chronologically.</returns>
+    /// <remarks>
+    /// Correlates <c>costs.csv</c> entries with log file timestamps to determine when tokens were consumed.
+    /// Plans without both a costs file and a logs directory are skipped.
+    /// </remarks>
     public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7)
     {
         var cutoff = DateTime.UtcNow.AddDays(-days);
@@ -442,7 +524,7 @@ public class PlanReaderService(ConfigService config)
                 var logsDir = Path.Combine(dir, "logs");
                 if (!File.Exists(costsPath) || !Directory.Exists(logsDir)) continue;
 
-                var costLines = File.ReadAllLines(costsPath).Skip(1).ToList();
+                var costLines = FileHelper.ReadAllLines(costsPath).Skip(1).ToList();
                 if (costLines.Count == 0) continue;
 
                 // Build a map: promptware name -> list of log files (ordered by number)
@@ -514,6 +596,16 @@ public class PlanReaderService(ConfigService config)
             .ToList();
     }
 
+    /// <summary>
+    /// Gets all recommendations from all plans. This method reads and deserializes all
+    /// recommendations.yaml files in the plans directory, which can be expensive.
+    /// </summary>
+    /// <remarks>
+    /// If you only need the count of pending recommendations, use <see cref="GetPendingRecommendationsCount"/>
+    /// instead, which uses an optimized path via <see cref="ComputePlanCounts"/> that counts
+    /// without full deserialization.
+    /// </remarks>
+    /// <returns>List of all recommendations ordered by date (most recent first).</returns>
     public List<Recommendation> GetRecommendations()
     {
         var recommendations = new List<Recommendation>();
@@ -525,11 +617,11 @@ public class PlanReaderService(ConfigService config)
 
             try
             {
-                var planYaml = File.ReadAllText(planYamlPath);
+                var planYaml = FileHelper.ReadAllText(planYamlPath);
                 var plan = YamlDeserializer.Deserialize<PlanYaml>(planYaml);
                 if (plan == null) continue;
 
-                var yaml = File.ReadAllText(recommendationsPath);
+                var yaml = FileHelper.ReadAllText(recommendationsPath);
                 var items = YamlDeserializer.Deserialize<List<RecommendationYaml>>(yaml);
                 if (items == null) continue;
 
@@ -550,7 +642,8 @@ public class PlanReaderService(ConfigService config)
                         PlanFolderName: folderName,
                         Project: plan.Project ?? "",
                         Date: plan.Updated,
-                        SourcePlanStatus: status
+                        SourcePlanStatus: status,
+                        DeclineReason: item.DeclineReason
                     ));
                 }
             }
@@ -563,6 +656,15 @@ public class PlanReaderService(ConfigService config)
         return recommendations.OrderByDescending(r => r.Date).ToList();
     }
 
+    /// <summary>
+    /// Gets the count of pending recommendations efficiently without deserializing full recommendation objects.
+    /// </summary>
+    /// <remarks>
+    /// This method delegates to <see cref="ComputePlanCounts"/> which only counts pending items
+    /// without building full Recommendation objects, making it much more efficient than calling
+    /// <c>GetRecommendations().Count(r => r.State == "Pending")</c>.
+    /// </remarks>
+    /// <returns>Number of pending recommendations.</returns>
     public int GetPendingRecommendationsCount()
     {
         return ComputePlanCounts().PendingRecommendations;
@@ -576,6 +678,11 @@ public class PlanReaderService(ConfigService config)
         int PendingRecommendations
     );
 
+    /// <summary>
+    /// Efficiently computes plan counts by status and pending recommendation count
+    /// using regex-based state extraction instead of full YAML deserialization.
+    /// </summary>
+    /// <returns>A <see cref="PlanCountSnapshot"/> with counts for each status category and pending recommendations.</returns>
     public PlanCountSnapshot ComputePlanCounts()
     {
         int drafts = 0, reviews = 0, failed = 0, icebox = 0, pendingRecs = 0;
@@ -584,7 +691,7 @@ public class PlanReaderService(ConfigService config)
         {
             try
             {
-                var yaml = File.ReadAllText(planYamlPath);
+                var yaml = FileHelper.ReadAllText(planYamlPath);
                 var stateMatch = Regex.Match(yaml, @"(?m)^state:\s*(.+)$");
                 if (stateMatch.Success)
                 {
@@ -601,7 +708,7 @@ public class PlanReaderService(ConfigService config)
                 var recommendationsPath = Path.Combine(folderPath, "artifacts", "recommendations.yaml");
                 if (File.Exists(recommendationsPath))
                 {
-                    var recYaml = File.ReadAllText(recommendationsPath);
+                    var recYaml = FileHelper.ReadAllText(recommendationsPath);
                     var items = YamlDeserializer.Deserialize<List<RecommendationYaml>>(recYaml);
                     if (items != null)
                     {
@@ -623,12 +730,19 @@ public class PlanReaderService(ConfigService config)
         return new PlanCountSnapshot(drafts, reviews, failed, icebox, pendingRecs);
     }
 
-    public void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState)
+    /// <summary>
+    /// Updates the state of a specific recommendation within a plan's <c>recommendations.yaml</c> file.
+    /// </summary>
+    /// <param name="planFolderName">Name of the plan folder containing the recommendation.</param>
+    /// <param name="recommendationTitle">Exact title of the recommendation to update.</param>
+    /// <param name="newState">The new state value (e.g. <c>Pending</c>, <c>Accepted</c>, <c>Dismissed</c>).</param>
+    /// <param name="declineReason">Optional reason for declining the recommendation.</param>
+    public void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState, string? declineReason = null)
     {
         var recommendationsPath = Path.Combine(PlansDirectory, planFolderName, "artifacts", "recommendations.yaml");
         if (!File.Exists(recommendationsPath)) return;
 
-        var yaml = File.ReadAllText(recommendationsPath);
+        var yaml = FileHelper.ReadAllText(recommendationsPath);
         var items = YamlDeserializer.Deserialize<List<RecommendationYaml>>(yaml);
         if (items == null) return;
 
@@ -636,7 +750,11 @@ public class PlanReaderService(ConfigService config)
         if (item == null) return;
 
         item.State = newState;
-        File.WriteAllText(recommendationsPath, YamlSerializer.Serialize(items));
+        if (newState == "Declined" && !string.IsNullOrWhiteSpace(declineReason))
+        {
+            item.DeclineReason = declineReason;
+        }
+        FileHelper.WriteAllText(recommendationsPath, YamlSerializer.Serialize(items));
     }
 
     private static DateTime? ExtractCompletedTimestamp(string logFilePath)
@@ -687,7 +805,8 @@ public record Recommendation(
     string PlanFolderName,
     string Project,
     DateTime Date,
-    PlanStatus SourcePlanStatus
+    PlanStatus SourcePlanStatus,
+    string? DeclineReason = null
 );
 
 public class RecommendationYaml
@@ -695,4 +814,5 @@ public class RecommendationYaml
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
     public string State { get; set; } = "Pending";
+    public string? DeclineReason { get; set; }
 }

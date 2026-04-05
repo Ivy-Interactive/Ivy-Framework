@@ -231,6 +231,57 @@ public class RecommendationServiceTests : IDisposable
     }
 
     [Fact]
+    public void UpdateRecommendationState_DeclineWithReason_StoresReasonInYaml()
+    {
+        var yaml = "- title: Fix bug\n  description: Found a bug\n  state: Pending\n";
+        CreatePlanWithRecommendations("01640-DeclineReason", yaml);
+
+        _service.UpdateRecommendationState("01640-DeclineReason", "Fix bug", "Declined", "Not relevant to our project");
+
+        var filePath = Path.Combine(_plansDir, "01640-DeclineReason", "artifacts", "recommendations.yaml");
+        var content = File.ReadAllText(filePath);
+        Assert.Contains("Declined", content);
+        Assert.Contains("Not relevant to our project", content);
+
+        var recommendations = _service.GetRecommendations();
+        Assert.Single(recommendations);
+        Assert.Equal("Declined", recommendations[0].State);
+        Assert.Equal("Not relevant to our project", recommendations[0].DeclineReason);
+    }
+
+    [Fact]
+    public void UpdateRecommendationState_DeclineWithEmptyReason_DoesNotStoreReason()
+    {
+        var yaml = "- title: Fix bug\n  description: Found a bug\n  state: Pending\n";
+        CreatePlanWithRecommendations("01641-DeclineNoReason", yaml);
+
+        _service.UpdateRecommendationState("01641-DeclineNoReason", "Fix bug", "Declined", "");
+
+        var recommendations = _service.GetRecommendations();
+        Assert.Single(recommendations);
+        Assert.Equal("Declined", recommendations[0].State);
+        Assert.Null(recommendations[0].DeclineReason);
+    }
+
+    [Fact]
+    public void UpdateRecommendationState_DeclineReasonPersistsAndCanBeReadBack()
+    {
+        var yaml = "- title: Item A\n  description: First\n  state: Pending\n- title: Item B\n  description: Second\n  state: Pending\n";
+        CreatePlanWithRecommendations("01642-DeclinePersist", yaml);
+
+        _service.UpdateRecommendationState("01642-DeclinePersist", "Item A", "Declined", "Duplicate of another recommendation");
+
+        var recommendations = _service.GetRecommendations();
+        var itemA = recommendations.First(r => r.Title == "Item A");
+        var itemB = recommendations.First(r => r.Title == "Item B");
+
+        Assert.Equal("Declined", itemA.State);
+        Assert.Equal("Duplicate of another recommendation", itemA.DeclineReason);
+        Assert.Equal("Pending", itemB.State);
+        Assert.Null(itemB.DeclineReason);
+    }
+
+    [Fact]
     public void GetRecommendations_NullFilters_ReturnsAll()
     {
         var yaml = "- title: Rec\n  description: Desc\n  state: Pending\n";

@@ -17,11 +17,11 @@ public class CreatePlanDialog(List<string> projectNames, Action<string, string> 
 
         return new Dialog(
             _ => _onClose(),
-            new DialogHeader("Create New Draft"),
+            new DialogHeader("Create New Plan"),
             new DialogBody(
                 Layout.Vertical()
                     | selectedProject.ToSelectInput(options).Variant(SelectInputVariant.Toggle).WithLabel("Select project")
-                    | createPlanText.ToTextareaInput("Enter task description...").Rows(6).AutoFocus().WithField().Label("Describe the task for the new draft")
+                    | createPlanText.ToTextareaInput("Enter task description...").Rows(6).AutoFocus().WithField().Label("Describe the task for the new plan")
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _onClose()),

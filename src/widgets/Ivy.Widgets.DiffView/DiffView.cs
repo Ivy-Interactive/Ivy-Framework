@@ -1,6 +1,3 @@
-using Ivy;
-using Ivy.Core;
-
 namespace Ivy.Widgets.DiffView;
 
 public enum DiffViewType

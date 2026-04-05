@@ -46,19 +46,37 @@ public class TrashApp : ViewBase
         // Sidebar content - search input + file list
         var sidebarHeader = searchFilter.ToSearchInput().Placeholder("Search trash...");
 
-        var sidebarList = new List(filteredList.Select(f =>
+        object sidebarList;
+        if (filteredList.Count == 0)
         {
-            var item = f;
-            return new ListItem(item.FileName.Replace(".md", ""))
-                .Content(Layout.Horizontal().Gap(1)
-                    | new Badge(item.Project).Variant(BadgeVariant.Outline).Small()
-                    | Text.Muted(item.Date.ToString("yyyy-MM-dd")).Small())
-                .OnClick(() => selectedFile.Set(item.FilePath));
-        }));
+            sidebarList = Layout.Vertical().AlignContent(Align.Center).Gap(2).Padding(4)
+                | new Icon(Icons.Trash2).Size(Size.Units(6)).Color(Colors.Gray)
+                | Text.Muted("No trash items")
+                | Text.Muted("Duplicate plans will appear here").Small();
+        }
+        else
+        {
+            sidebarList = new List(filteredList.Select(f =>
+            {
+                var item = f;
+                return new ListItem(item.FileName.Replace(".md", ""))
+                    .Content(Layout.Horizontal().Gap(1)
+                        | new Badge(item.Project).Variant(BadgeVariant.Outline).Small()
+                        | Text.Muted(item.Date.ToString("yyyy-MM-dd")).Small())
+                    .OnClick(() => selectedFile.Set(item.FilePath));
+            }));
+        }
 
         // Main content
         object mainContent;
-        if (selected is null)
+        if (files.Count == 0)
+        {
+            mainContent = Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
+                | new Icon(Icons.Trash2).Size(Size.Units(8)).Color(Colors.Gray)
+                | Text.Muted("No trash files yet")
+                | Text.Muted("Duplicate plans will appear here").Small();
+        }
+        else if (selected is null)
         {
             mainContent = Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
                 | Text.Muted("Select a file from the sidebar");

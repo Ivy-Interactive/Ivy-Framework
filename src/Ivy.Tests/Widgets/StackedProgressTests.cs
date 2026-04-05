@@ -132,4 +132,34 @@ public class StackedProgressTests
 
         Assert.Null(widget.Selected);
     }
+
+    [Fact]
+    public void ShowLabels_AutoEnabled_WhenSegmentHasLabel()
+    {
+        var widget = new StackedProgress(
+            new ProgressSegment(50, Label: "Segment 1")
+        );
+
+        Assert.True(widget.ShowLabels);
+    }
+
+    [Fact]
+    public void ShowLabels_CanBeExplicitlyDisabled_EvenWithLabels()
+    {
+        var widget = new StackedProgress(
+            new ProgressSegment(50, Label: "Segment 1")
+        ).ShowLabels(false);
+
+        Assert.False(widget.ShowLabels);
+    }
+
+    [Fact]
+    public void ShowLabels_RemainsFalse_WhenNoLabels()
+    {
+        var widget = new StackedProgress(
+            new ProgressSegment(50)
+        );
+
+        Assert.False(widget.ShowLabels);
+    }
 }

@@ -378,13 +378,18 @@ A verification is not complete without its report. If the report file does not e
 
 After all verifications pass:
 
-1. Delete temporary `.npmrc` files created in Step 2.5 (if any):
+1. Kill any remaining sample processes from the plan's artifacts directory:
+   ```bash
+   powershell.exe -NoProfile -Command "\$planFolder = '<PlanFolder>'.Replace('\\', '\\\\'); Get-Process -ErrorAction SilentlyContinue | Where-Object { \$_.Path -and \$_.Path -match [regex]::Escape(\$planFolder) -and \$_.Path -match '\\\\artifacts\\\\sample\\\\bin\\\\' } | ForEach-Object { Write-Host \"Killing zombie process: \$(\$_.ProcessName) (PID \$(\$_.Id))\"; \$_ | Stop-Process -Force -ErrorAction SilentlyContinue }"
+   ```
+
+2. Delete temporary `.npmrc` files created in Step 2.5 (if any):
    ```bash
    rm -f <worktree>/src/frontend/.npmrc
    rm -f <worktree>/src/widgets/*/frontend/.npmrc
    ```
 
-2. Run `git status` in every worktree. If there are any uncommitted files (from verification fixes, generated files, etc.), commit or discard them. The worktrees must be completely clean before finishing.
+3. Run `git status` in every worktree. If there are any uncommitted files (from verification fixes, generated files, etc.), commit or discard them. The worktrees must be completely clean before finishing.
 
 ### 9. Plan State
 

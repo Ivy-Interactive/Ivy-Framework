@@ -32,6 +32,11 @@ public class ReviewApp : ViewBase
             .ToList();
         var filteredPlans = PlanFilters.ApplyFilters(plans, null, null, textFilter.Value).ToList();
 
+        if (selectedPlanState.Value == null && filteredPlans.Count > 0)
+        {
+            selectedPlanState.Set(filteredPlans[0]);
+        }
+
         if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
             var oldIndex = previousPlans.Value.FindIndex(p => p.FolderName == selected.FolderName);

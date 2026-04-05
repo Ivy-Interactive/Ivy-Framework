@@ -8,6 +8,7 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <RootNamespace>Ivy.Tendril.Test</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
