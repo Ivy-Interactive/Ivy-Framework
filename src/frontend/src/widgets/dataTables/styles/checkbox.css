@@ -96,4 +96,6 @@
    search bar needs a higher z-index to stay on top and receive pointer events. */
 .gdg-search-bar {
   z-index: 20;
+  overflow: hidden;
+  border-radius: 6px;
 }
