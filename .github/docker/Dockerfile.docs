@@ -11,12 +11,14 @@ ENV DOTNET_TC_QuickJitForLoops=1
 # Build frontend (Ivy embeds frontend/dist)
 FROM node:24-bookworm-slim AS frontend
 WORKDIR /src
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 RUN --mount=type=cache,id=apt-docs-frontend,target=/var/cache/apt \
-    apt-get update && apt-get install -y curl bash && rm -rf /var/lib/apt/lists/*
+    --mount=type=cache,id=apt-docs-frontend-lib,target=/var/lib/apt \
+    apt-get update && apt-get install -y curl bash
 RUN curl -fsSL https://vite.plus | bash
 ENV PATH="/root/.vite-plus/bin:${PATH}"
 COPY ["src/frontend/package.json", "src/frontend/pnpm-lock.yaml", "src/frontend/"]
-RUN --mount=type=cache,target=/root/.npm \
+RUN --mount=type=cache,id=pnpm-docs,target=/root/.local/share/pnpm/store \
     cd src/frontend && vp install
 COPY ["src/frontend/", "src/frontend/"]
 RUN cd src/frontend && vp build
@@ -26,8 +28,10 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 ARG TARGETARCH
 WORKDIR /src
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 RUN --mount=type=cache,id=apt-docs-build,target=/var/cache/apt \
-    apt-get update && apt-get install -y curl bash build-essential && rm -rf /var/lib/apt/lists/*
+    --mount=type=cache,id=apt-docs-build-lib,target=/var/lib/apt \
+    apt-get update && apt-get install -y curl bash build-essential
 # --profile minimal skips rustfmt/clippy — not needed for a release build
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --profile minimal
 ENV PATH="/root/.cargo/bin:/root/.vite-plus/bin:${PATH}"
@@ -35,6 +39,7 @@ ENV PATH="/root/.cargo/bin:/root/.vite-plus/bin:${PATH}"
 # Copy only RustServer first so this layer stays cached when only .NET files change
 COPY src/RustServer/ src/RustServer/
 RUN --mount=type=cache,id=cargo-registry-docs,target=/root/.cargo/registry \
+    --mount=type=cache,id=cargo-git-docs,target=/root/.cargo/git \
     --mount=type=cache,id=cargo-target-docs,target=/src/src/RustServer/target \
     cd src/RustServer && cargo build --release && \
     mkdir -p /tmp/rust-artifacts && \
