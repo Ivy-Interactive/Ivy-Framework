@@ -1,7 +1,7 @@
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
-import { getFullUrl } from "@/lib/url";
 import { validateFileWithToast, validateFileCount } from "../file-input-validation";
+import { uploadFileWithProgress } from "@/widgets/filePicker/shared";
 
 interface UseFileAttachmentsOptions {
   uploadUrl?: string;
@@ -16,30 +16,62 @@ interface UseFileAttachmentsOptions {
 export function useFileAttachments(options: UseFileAttachmentsOptions) {
   const { uploadUrl, accept, maxFileSize, maxFiles, currentFileCount, disabled } = options;
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<Map<string, number>>(new Map());
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllersRef = useRef<Map<string, () => void>>(new Map());
+
+  // Abort any pending uploads when the component unmounts
+  useEffect(() => {
+    return () => {
+      abortControllersRef.current.forEach((abort) => abort());
+    };
+  }, []);
 
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {
       if (!uploadUrl) return;
       if (!validateFileWithToast({ file, accept, maxFileSize })) return;
 
-      const formData = new FormData();
-      formData.append("file", file);
+      const clientFileId = `upload-${crypto.randomUUID()}-${file.size}-${file.name}`;
+
+      setUploadProgress((prev) => new Map(prev).set(clientFileId, 0));
+
+      const { promise, abort } = uploadFileWithProgress(uploadUrl, file, (progress) => {
+        setUploadProgress((prev) => new Map(prev).set(clientFileId, progress));
+      });
+
+      abortControllersRef.current.set(clientFileId, abort);
 
       try {
-        const response = await fetch(getFullUrl(uploadUrl), {
-          method: "POST",
-          body: formData,
-        });
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
+        await promise;
+      } catch (error: any) {
+        if (error.message !== "Upload aborted") {
+          console.error("File upload error:", error);
+          toast({
+            title: "Upload failed",
+            description: error.message || `Could not upload ${file.name}`,
+            variant: "destructive",
+          });
         }
-      } catch (error) {
-        console.error("File upload error:", error);
+      } finally {
+        setUploadProgress((prev) => {
+          const next = new Map(prev);
+          next.delete(clientFileId);
+          return next;
+        });
+        abortControllersRef.current.delete(clientFileId);
       }
     },
     [uploadUrl, accept, maxFileSize],
   );
+
+  const cancelUpload = useCallback((clientFileId: string) => {
+    const abort = abortControllersRef.current.get(clientFileId);
+    if (abort) {
+      abort();
+      abortControllersRef.current.delete(clientFileId);
+    }
+  }, []);
 
   const uploadFiles = useCallback(
     async (files: File[]) => {
@@ -150,5 +182,7 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
     openFilePicker,
     handleFileInputChange,
     fileInputRef,
+    uploadProgress,
+    cancelUpload,
   };
 }

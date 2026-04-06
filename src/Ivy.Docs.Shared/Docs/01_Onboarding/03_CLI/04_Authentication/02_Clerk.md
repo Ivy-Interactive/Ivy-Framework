@@ -40,7 +40,7 @@ To find your API keys, go to **Configure → API keys** in your Clerk Dashboard.
 - **Publishable key**: Starts with `pk_test_` (development) or `pk_live_` (production)
 - **Secret key**: Starts with `sk_test_` (development) or `sk_live_` (production)
 
-![Clerk API Keys](/ivy/assets/clerk_api_keys.webp "Clerk API Keys")
+![Clerk API Keys](/ivy/ivy-assets/clerk_api_keys.webp "Clerk API Keys")
 
 > **Important**: Keep your secret key secure. Never commit it to version control or expose it in client-side code.
 

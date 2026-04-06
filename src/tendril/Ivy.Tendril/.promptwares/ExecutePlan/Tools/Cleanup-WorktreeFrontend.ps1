@@ -36,7 +36,8 @@ foreach ($worktree in $worktrees) {
         Where-Object { $_.Directory.Name -eq "frontend" })
 
     foreach ($npmrcFile in $npmrcFiles) {
-        $relativePath = $npmrcFile.FullName.Replace($worktree.FullName + "\", "").Replace("\", "/")
+        $sep = [System.IO.Path]::DirectorySeparatorChar
+        $relativePath = $npmrcFile.FullName.Replace($worktree.FullName + $sep, "").Replace("\", "/")
 
         # Check if this file is tracked in git
         Push-Location $worktree.FullName
