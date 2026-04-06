@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
@@ -6,8 +7,8 @@ namespace Ivy.Tendril.Services;
 public class GithubService(IConfigService config) : IGithubService
 {
     private readonly IConfigService _config = config;
-    private readonly Dictionary<string, List<string>> _assigneeCache = new();
-    private readonly Dictionary<string, List<string>> _labelCache = new();
+    private readonly ConcurrentDictionary<string, List<string>> _assigneeCache = new();
+    private readonly ConcurrentDictionary<string, List<string>> _labelCache = new();
     private List<RepoConfig>? _repoCache;
 
     public List<RepoConfig> GetRepos()

@@ -28,9 +28,6 @@ public class JobService : IJobService
     public event Action? JobsChanged;
     public event Action<JobNotification>? NotificationReady;
 
-    [Obsolete("Use NotificationReady event instead. Will be removed in a future version.")]
-    public ConcurrentQueue<JobNotification> PendingNotifications { get; } = new();
-
     private static readonly string PromptsRoot =
         Path.GetFullPath(Path.Combine(System.AppContext.BaseDirectory, "..", "..", "..", ".promptwares"));
 
@@ -262,7 +259,7 @@ public class JobService : IJobService
         job.SessionId = Guid.NewGuid().ToString();
 
         psi.Environment["TENDRIL_JOB_ID"] = id;
-        psi.Environment["TENDRIL_URL"] = "http://localhost:5010";
+        psi.Environment["TENDRIL_URL"] = Environment.GetEnvironmentVariable("TENDRIL_URL") ?? "http://localhost:5010";
         psi.Environment["TENDRIL_SHARED"] = SharedRoot;
         psi.Environment["TENDRIL_SESSION_ID"] = job.SessionId;
         if (_configService != null)
@@ -323,7 +320,7 @@ public class JobService : IJobService
 
             if (timedOut)
             {
-                try { process.Kill(entireProcessTree: true); } catch { }
+                try { process.Kill(entireProcessTree: true); } catch { /* Process may have already exited */ }
                 CompleteJob(id, exitCode: null, timedOut: true, staleOutput: false);
                 return;
             }
@@ -443,7 +440,7 @@ public class JobService : IJobService
                 {
                     // Stale output detected — cancel the timeout CTS to trigger the main monitor
                     job.StaleOutputDetected = true;
-                    try { job.Process?.Kill(entireProcessTree: true); } catch { }
+                    try { job.Process?.Kill(entireProcessTree: true); } catch { /* Process may have already exited */ }
                     CompleteJob(id, exitCode: null, timedOut: true, staleOutput: true);
                     break;
                 }
@@ -560,8 +557,8 @@ public class JobService : IJobService
 
         var wasRunning = job.Status == "Running";
         job.CancellationRequested = true;
-        try { job.TimeoutCts?.Cancel(); } catch { }
-        try { job.Process?.Kill(entireProcessTree: true); } catch { }
+        try { job.TimeoutCts?.Cancel(); } catch { /* CTS may already be disposed */ }
+        try { job.Process?.Kill(entireProcessTree: true); } catch { /* Process may have already exited */ }
         job.Status = "Stopped";
         job.CompletedAt = DateTime.UtcNow;
         if (job.StartedAt.HasValue)
@@ -915,7 +912,7 @@ public class JobService : IJobService
                 $"updated: {DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}");
             FileHelper.WriteAllText(planYamlPath, content);
         }
-        catch { }
+        catch { /* Don't let state reset failures crash job completion */ }
     }
 
     private void SendNativeNotification()

@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Upload, X } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getWidth } from "@/lib/styles";
@@ -15,27 +15,12 @@ import {
 } from "@/components/ui/input/file-input-variant";
 import { validateSingleFile, validateFileCount } from "./file-input-validation";
 import { EMPTY_ARRAY } from "@/lib/constants";
-
-enum FileInputStatus {
-  Pending = "Pending",
-  Aborted = "Aborted",
-  Loading = "Loading",
-  Failed = "Failed",
-  Finished = "Finished",
-}
-
-interface FileInput {
-  id: string;
-  fileName: string;
-  contentType: string;
-  length: number;
-  progress: number;
-  status: FileInputStatus;
-}
+import { FileItem } from "./shared/types";
+import { FileAttachmentList } from "./shared/FileAttachmentList";
 
 interface FileInputWidgetProps {
   id: string;
-  value?: FileInput | FileInput[] | null;
+  value?: FileItem | FileItem[] | null;
   disabled: boolean;
   invalid?: string;
   events: string[];
@@ -347,48 +332,6 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     [handleClick],
   );
 
-  // Render individual file item for multiple files view
-  const renderFileItem = (file: FileInput) => {
-    const isFileLoading = file.status === FileInputStatus.Loading;
-    const fileProgress = file.progress ?? 0;
-
-    return (
-      <div
-        key={file.id}
-        data-file-item
-        className="flex items-center gap-3 p-3 border border-muted-foreground/25 rounded-md bg-transparent"
-      >
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{file.fileName}</p>
-          {isFileLoading && (
-            <div className="mt-2">
-              <div className="w-full bg-muted rounded-full h-1.5">
-                <div
-                  className="bg-primary h-1.5 rounded-full transition-all duration-300"
-                  style={{ width: `${fileProgress * 100}%` }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-        {hasCancelHandler && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 shrink-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCancel(file.id);
-            }}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    );
-  };
-
   // Check if we have any files to display
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
   const fileList = Array.isArray(value) ? value : value ? [value] : [];
@@ -476,7 +419,14 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
               )}
             </div>
             {hasFiles && (
-              <div className="space-y-2 w-full">{fileList.map((file) => renderFileItem(file))}</div>
+              <div className="w-full">
+                <FileAttachmentList
+                  files={fileList}
+                  onCancel={handleCancel}
+                  hasCancelHandler={hasCancelHandler}
+                  variant="card"
+                />
+              </div>
             )}
           </div>
         ) : (
@@ -495,8 +445,13 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
             )}
             {/* Show file list when files are present in Drop variant */}
             {hasFiles && (
-              <div className="space-y-2 w-full mt-4">
-                {fileList.map((file) => renderFileItem(file))}
+              <div className="w-full mt-4">
+                <FileAttachmentList
+                  files={fileList}
+                  onCancel={handleCancel}
+                  hasCancelHandler={hasCancelHandler}
+                  variant="card"
+                />
               </div>
             )}
           </div>

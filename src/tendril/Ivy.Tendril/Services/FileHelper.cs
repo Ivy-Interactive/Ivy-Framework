@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Text.RegularExpressions;
+
 namespace Ivy.Tendril.Services;
 
 /// <summary>
@@ -7,6 +10,32 @@ namespace Ivy.Tendril.Services;
 /// </summary>
 internal static class FileHelper
 {
+    private static readonly Regex CompletedTimestampRegex =
+        new(@"\*\*Completed:\*\*\s*(.+)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Extracts the "**Completed:** &lt;timestamp&gt;" value from a log file.
+    /// Returns null if the file doesn't exist, can't be read, or has no completed timestamp.
+    /// </summary>
+    public static DateTime? ExtractCompletedTimestamp(string logFilePath)
+    {
+        try
+        {
+            foreach (var line in File.ReadLines(logFilePath))
+            {
+                var match = CompletedTimestampRegex.Match(line);
+                if (match.Success && DateTime.TryParse(match.Groups[1].Value.Trim(),
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AdjustToUniversal, out var dt))
+                {
+                    return dt;
+                }
+            }
+        }
+        catch { /* Best-effort: file may be locked or missing */ }
+        return null;
+    }
+
     private const int MaxRetries = 5;
     private static readonly int[] RetryDelaysMs = [50, 150, 350, 750, 1500];
 

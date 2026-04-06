@@ -35,6 +35,8 @@ public enum Languages
     Csv,
     [Description("PowerShell")]
     Powershell,
+    [Description("Bash")]
+    Bash,
 }
 
 /// <summary>

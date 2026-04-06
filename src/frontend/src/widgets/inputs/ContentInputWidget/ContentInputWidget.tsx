@@ -11,6 +11,11 @@ import { useFileAttachments } from "./useFileAttachments";
 import { FileAttachmentList } from "./FileAttachmentList";
 import { ContentInputWidgetProps } from "./types";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import {
+  formatShortcutForDisplay,
+  parseShortcut,
+  keyToCode,
+} from "@/widgets/inputs/TextInputWidget/utils/shortcut";
 
 export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
   id,
@@ -27,6 +32,7 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
   uploadUrl,
   accept,
   maxFileSize,
+  shortcutKey,
   maxFiles,
   files = EMPTY_ARRAY,
 }) => {
@@ -96,12 +102,13 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (hasSubmitHandler && e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      // If shortcutKey is set, the global useEffect handles the shortcut instead
+      if (!shortcutKey && hasSubmitHandler && e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         handleEvent("OnSubmit", id, []);
       }
     },
-    [hasSubmitHandler, handleEvent, id],
+    [shortcutKey, hasSubmitHandler, handleEvent, id],
   );
 
   const handleCancel = useCallback(
@@ -118,6 +125,42 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
       textareaRef.current.focus();
     }
   }, [autoFocus]);
+
+  const shortcutDisplay = formatShortcutForDisplay(shortcutKey);
+
+  useEffect(() => {
+    if (!shortcutKey || disabled) return;
+
+    const shortcutObj = parseShortcut(shortcutKey);
+    if (!shortcutObj) return;
+
+    const handleShortcut = (event: KeyboardEvent) => {
+      const modifierMatch =
+        (shortcutObj.meta && event.metaKey) ||
+        (shortcutObj.ctrl && event.ctrlKey) ||
+        (!shortcutObj.meta && !shortcutObj.ctrl && !event.metaKey && !event.ctrlKey);
+
+      const expectedCode = keyToCode(shortcutObj.key);
+
+      const isShortcutPressed =
+        modifierMatch &&
+        event.shiftKey === shortcutObj.shift &&
+        event.altKey === shortcutObj.alt &&
+        event.code === expectedCode;
+
+      if (isShortcutPressed) {
+        event.preventDefault();
+        if (hasSubmitHandler) {
+          handleEvent("OnSubmit", id, []);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => {
+      window.removeEventListener("keydown", handleShortcut);
+    };
+  }, [shortcutKey, disabled, hasSubmitHandler, handleEvent, id]);
 
   return (
     <div
@@ -189,6 +232,11 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
             </button>
           )}
           {isDragging && <span className="text-xs text-primary ml-1">Drop files here</span>}
+          {shortcutKey && !isFocused && (
+            <kbd className="ml-auto px-1 py-0.5 text-xs font-medium text-muted-foreground bg-muted border border-border rounded-field">
+              {shortcutDisplay}
+            </kbd>
+          )}
         </div>
 
         <input

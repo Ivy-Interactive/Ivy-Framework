@@ -116,6 +116,12 @@ server.Services.AddSingleton<InboxWatcherService>(sp =>
 server.Services.AddSingleton<IInboxWatcherService>(sp => sp.GetRequiredService<InboxWatcherService>());
 server.UseWebApplication(app =>
 {
+    // Publish the actual bound URL so child processes can reach this server,
+    // even when --find-available-port shifts the port away from the default.
+    var serverUrl = app.Urls.FirstOrDefault();
+    if (serverUrl != null)
+        Environment.SetEnvironmentVariable("TENDRIL_URL", serverUrl);
+
     // Eagerly resolve watcher services so their FileSystemWatchers start immediately
     app.Services.GetRequiredService<PlanWatcherService>();
     app.Services.GetRequiredService<IInboxWatcherService>();
