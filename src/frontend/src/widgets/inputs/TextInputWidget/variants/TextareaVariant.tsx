@@ -24,6 +24,7 @@ interface TextareaVariantProps {
   isFocused: boolean;
   nullable?: boolean;
   density?: Densities;
+  ghost?: boolean;
 }
 
 export const TextareaVariant: React.FC<TextareaVariantProps> = ({
@@ -35,6 +36,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   inputRef,
   isFocused,
   density = Densities.Medium,
+  ghost,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
 
@@ -66,7 +68,10 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   return (
     <div className="relative w-full select-none">
       <div
-        className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10"
+        className={cn(
+          "rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
+          ghost && "border-transparent shadow-none bg-transparent hover:bg-accent dark:border-transparent dark:bg-transparent dark:hover:bg-accent"
+        )}
         style={wrapperStyles}
       >
         <Textarea

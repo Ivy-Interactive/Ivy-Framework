@@ -21,6 +21,7 @@ interface DefaultVariantProps {
     dictation?: boolean;
     isRecording?: boolean;
     onDictationToggle?: () => void;
+    ghost?: boolean;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -30,6 +31,7 @@ interface DefaultVariantProps {
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
   density?: Densities;
+  ghost?: boolean;
 }
 
 export const DefaultVariant: React.FC<DefaultVariantProps> = ({
@@ -43,6 +45,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
   inputRef,
   isFocused,
   density = Densities.Medium,
+  ghost,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
   const handleKeyDown = useEnterKeyBlur(onSubmit);
@@ -77,13 +80,14 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
         className={cn(
           "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
           isFocused && "outline-none ring-1 ring-ring",
+          ghost && "border-transparent shadow-none bg-transparent hover:bg-accent dark:border-transparent dark:bg-transparent dark:hover:bg-accent",
           props.invalid && "border-destructive",
           props.disabled && "cursor-not-allowed opacity-50",
         )}
       >
         {/* Prefix with background and separator */}
         {prefixContent && (
-          <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+          <div className={cn("flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]", ghost && "bg-transparent border-transparent")}>
             {prefixContent}
           </div>
         )}
@@ -170,6 +174,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             className={cn(
               "flex items-center justify-center px-2 border-l border-input hover:bg-accent focus:outline-none cursor-pointer transition-colors",
               props.isRecording && "bg-destructive/10 text-destructive",
+              ghost && "border-transparent",
             )}
           >
             <Mic className={cn("h-4 w-4", props.isRecording && "animate-pulse text-destructive")} />
@@ -178,7 +183,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
 
         {/* Suffix with background and separator */}
         {suffixContent && (
-          <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+          <div className={cn("flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]", ghost && "bg-transparent border-transparent")}>
             {suffixContent}
           </div>
         )}

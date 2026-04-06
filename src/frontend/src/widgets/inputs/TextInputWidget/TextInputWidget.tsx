@@ -14,6 +14,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   value,
   variant = "Text",
   disabled = false,
+  ghost,
   invalid,
   nullable = false,
   width,
@@ -178,6 +179,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       placeholder,
       value: localValue,
       disabled,
+      ghost,
       invalid: effectiveInvalid,
       nullable,
       width,
@@ -202,6 +204,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       placeholder,
       localValue,
       disabled,
+      ghost,
       effectiveInvalid,
       nullable,
       events,
@@ -235,6 +238,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onSubmit={handleSubmit}
           inputRef={inputRef}
           density={density}
+          ghost={ghost}
         />
       );
     case TextInputVariant.Textarea:
@@ -248,6 +252,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           inputRef={inputRef}
           isFocused={isFocused}
           density={density}
+          ghost={ghost}
         />
       );
     case TextInputVariant.Search:
@@ -262,6 +267,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           inputRef={inputRef}
           isFocused={isFocused}
           density={density}
+          ghost={ghost}
         />
       );
     default:
@@ -277,6 +283,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           inputRef={inputRef}
           isFocused={isFocused}
           density={density}
+          ghost={ghost}
         />
       );
   }

@@ -21,6 +21,7 @@ export interface TextInputWidgetProps {
   value?: string;
   variant: TextInputVariant;
   disabled: boolean;
+  ghost?: boolean;
   invalid?: string;
   nullable?: boolean;
   events: string[];

@@ -19,7 +19,7 @@ import {
 } from "../hooks";
 
 interface PasswordVariantProps {
-  props: Omit<TextInputWidgetProps, "variant">;
+  props: Omit<TextInputWidgetProps, "variant"> & { ghost?: boolean };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -28,6 +28,7 @@ interface PasswordVariantProps {
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   density?: Densities;
+  ghost?: boolean;
 }
 
 export const PasswordVariant: React.FC<PasswordVariantProps> = ({
@@ -39,6 +40,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
   onSubmit,
   inputRef,
   density = Densities.Medium,
+  ghost,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [hasLastPass, setHasLastPass] = useState(false);
@@ -85,7 +87,10 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
 
   return (
     <div className="relative w-full select-none" style={styles} ref={containerRef}>
-      <div className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
+      <div className={cn(
+          "rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
+          ghost && "border-transparent shadow-none bg-transparent hover:bg-accent dark:border-transparent dark:bg-transparent dark:hover:bg-accent"
+        )}>
         <Input
           ref={elementRef}
           id={props.id}

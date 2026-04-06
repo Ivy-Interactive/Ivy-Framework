@@ -16,7 +16,7 @@ import { TextInputWidgetProps } from "../types";
 import { useCursorPosition, usePasteHandler, formatShortcutForDisplay } from "../hooks";
 
 interface SearchVariantProps {
-  props: Omit<TextInputWidgetProps, "variant">;
+  props: Omit<TextInputWidgetProps, "variant"> & { ghost?: boolean };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -26,6 +26,7 @@ interface SearchVariantProps {
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
   density?: Densities;
+  ghost?: boolean;
 }
 
 export const SearchVariant: React.FC<SearchVariantProps> = ({
@@ -38,6 +39,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   inputRef,
   isFocused,
   density = Densities.Medium,
+  ghost,
 }) => {
   const { savePosition } = useCursorPosition(props.value, inputRef) as {
     savePosition: () => void;
@@ -103,7 +105,10 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   return (
     <div className="relative w-full select-none" style={styles}>
       <Search className={searchIconVariant({ density })} />
-      <div className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
+      <div className={cn(
+        "rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
+        ghost && "border-transparent shadow-none bg-transparent hover:bg-accent dark:border-transparent dark:bg-transparent dark:hover:bg-accent"
+      )}>
         <Input
           ref={mergedRef}
           id={props.id}
