@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveColor, CHROMATIC_COLORS, DEFAULT_SEMANTIC_COLORS } from "./SignatureInputWidget";
+import { resolveColor, CHROMATIC_COLORS, DEFAULT_SEMANTIC_COLORS } from "@/lib/theme";
 
 /** A full color map combining chromatic + default semantic colors, matching runtime defaults. */
 const fullColorMap: Record<string, string> = {
