@@ -187,8 +187,71 @@ public class JobServiceHookTests
     }
 
     [Fact]
+    public void RunHooks_AllJobStatusesProduceExpectedStrings()
+    {
+        // Verify that all JobStatus enum values produce their name as a string
+        // This ensures hook scripts can safely perform string comparisons
+        var expected = new Dictionary<JobStatus, string>
+        {
+            [JobStatus.Pending] = "Pending",
+            [JobStatus.Queued] = "Queued",
+            [JobStatus.Running] = "Running",
+            [JobStatus.Completed] = "Completed",
+            [JobStatus.Failed] = "Failed",
+            [JobStatus.Timeout] = "Timeout",
+            [JobStatus.Stopped] = "Stopped",
+            [JobStatus.Blocked] = "Blocked",
+        };
+
+        foreach (var (status, expectedString) in expected)
+        {
+            var actual = status.ToString();
+            Assert.Equal(expectedString, actual);
+        }
+    }
+
+    [Fact]
+    public void RunHooks_HookCanPerformStringComparison()
+    {
+        var hooks = new List<PromptwareHookConfig>
+        {
+            new()
+            {
+                Name = "StatusCheck",
+                When = "after",
+                Action = @"
+                    if ($env:TENDRIL_JOB_STATUS -eq 'Completed') {
+                        Write-Host 'Job completed successfully'
+                    } elseif ($env:TENDRIL_JOB_STATUS -eq 'Failed') {
+                        Write-Host 'Job failed'
+                    } else {
+                        Write-Host ""Job status: $env:TENDRIL_JOB_STATUS""
+                    }
+                ",
+            },
+        };
+        var (service, _) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder();
+
+        try
+        {
+            var id = service.StartJob("ExecutePlan", planFolder);
+            service.CompleteJob(id, exitCode: 0);
+
+            var job = service.GetJob(id)!;
+            Assert.Contains(job.OutputLines, l => l.Contains("Job completed successfully"));
+        }
+        finally
+        {
+            Directory.Delete(planFolder, true);
+        }
+    }
+
+    [Fact]
     public void RunHooks_AfterHooksReceiveJobStatus()
     {
+        // Basic smoke test — see RunHooks_AllJobStatusesProduceExpectedStrings
+        // for comprehensive enum-to-string conversion verification
         var hooks = new List<PromptwareHookConfig>
         {
             new()

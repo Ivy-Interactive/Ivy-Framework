@@ -14,7 +14,7 @@ public class ProjectsSettingsView : ViewBase
 
         // Edit form state — must be declared unconditionally (Ivy hook rules)
         var editName = UseState("");
-        var editColor = UseState("");
+        var editColor = UseState<Colors?>(null);
         var editSlackEmoji = UseState("");
         var editContext = UseState("");
         var editRepos = UseState(new List<RepoRef>());
@@ -60,7 +60,7 @@ public class ProjectsSettingsView : ViewBase
             {
                 editIndex.Set(null);
                 editName.Set("");
-                editColor.Set("");
+                editColor.Set(null);
                 editSlackEmoji.Set("");
                 editContext.Set("");
                 editRepos.Set(new List<RepoRef>());
@@ -225,7 +225,7 @@ public class ProjectsSettingsView : ViewBase
                 new DialogBody(
                     Layout.Vertical().Gap(4)
                         | editName.ToTextInput("Project name...").WithField().Label("Name")
-                        | editColor.ToColorInput().Variant(ColorInputVariant.TextAndPicker).Nullable().WithField().Label("Color")
+                        | editColor.ToSelectInput().WithField().Label("Color")
                         | editSlackEmoji.ToTextInput(":emoji:").WithField().Label("Slack Emoji")
                         | editContext.ToTextareaInput("Project context...").Rows(4).WithField().Label("Context")
                         | (Layout.Vertical().Gap(2)
@@ -242,7 +242,7 @@ public class ProjectsSettingsView : ViewBase
                         if (string.IsNullOrWhiteSpace(editName.Value)) return;
                         var project = isNew ? new ProjectConfig() : projects[editIndex.Value!.Value];
                         project.Name = editName.Value;
-                        project.Color = editColor.Value;
+                        project.Color = editColor.Value?.ToString() ?? "";
                         project.Meta["slackEmoji"] = editSlackEmoji.Value;
                         project.Context = editContext.Value;
                         project.Repos = new List<RepoRef>(editRepos.Value);
@@ -289,7 +289,7 @@ public class ProjectsSettingsView : ViewBase
         {
             editIndex.Set(idx);
             editName.Set(project.Name);
-            editColor.Set(project.Color);
+            editColor.Set(Enum.TryParse<Colors>(project.Color, out var c) ? c : null);
             editSlackEmoji.Set(project.GetMeta("slackEmoji") ?? "");
             editContext.Set(project.Context);
             editRepos.Set(new List<RepoRef>(project.Repos.Select(r => new RepoRef { Path = r.Path, PrRule = r.PrRule })));

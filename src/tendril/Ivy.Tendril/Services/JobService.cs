@@ -530,7 +530,11 @@ public class JobService : IJobService
         if (isSuccess && job.Type == "MakePr")
             _telemetryService?.TrackPrCreated();
 
-        _telemetryService?.TrackJobCompleted(job.Type, job.Status.ToString(), job.DurationSeconds);
+        _telemetryService?.TrackJobCompleted(job.Type, job.Status, job.DurationSeconds);
+
+        // Flush telemetry events to ensure they reach PostHog
+        if (_telemetryService != null)
+            _ = Task.Run(async () => await _telemetryService.FlushAsync());
 
         CleanupInboxFile(job);
         WriteJobLog(job);

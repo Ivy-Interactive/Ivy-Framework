@@ -1,4 +1,6 @@
+using Ivy.Tendril.Apps.Jobs;
 using PostHog;
+using Microsoft.Extensions.Logging;
 
 namespace Ivy.Tendril.Services;
 
@@ -6,9 +8,12 @@ public class TelemetryService : ITelemetryService, IAsyncDisposable
 {
     private readonly PostHogClient? _client;
     private readonly string _distinctId;
+    private readonly ILogger<TelemetryService>? _logger;
 
-    public TelemetryService(bool enabled)
+    public TelemetryService(bool enabled, ILogger<TelemetryService>? logger = null)
     {
+        _logger = logger;
+
         if (!enabled)
         {
             _client = null;
@@ -16,37 +21,94 @@ public class TelemetryService : ITelemetryService, IAsyncDisposable
             return;
         }
 
-        // Public key — safe to expose (like a website tracking snippet)
-        _client = new PostHogClient(new PostHogOptions
+        try
         {
-            ProjectApiKey = "phc_uHeJHFURzThFPnizzGMzLEimLWnRAuqy8DunK8N3oYcd"
-        });
-        _distinctId = GetOrCreateAnonymousId();
+            // Public key — safe to expose (like a website tracking snippet)
+            _client = new PostHogClient(new PostHogOptions
+            {
+                ProjectApiKey = "phc_uHeJHFURzThFPnizzGMzLEimLWnRAuqy8DunK8N3oYcd"
+            });
+            _distinctId = GetOrCreateAnonymousId();
+            _logger?.LogDebug("TelemetryService initialized with anonymous ID: {DistinctId}", _distinctId);
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Failed to initialize PostHog client");
+            _client = null;
+            _distinctId = "";
+        }
     }
 
     public void TrackAppStarted()
     {
-        _client?.Capture(_distinctId, "app_started");
+        try
+        {
+            _client?.Capture(_distinctId, "app_started");
+            _logger?.LogDebug("Tracked app_started event");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Failed to track app_started event");
+        }
     }
 
     public void TrackPlanCreated()
     {
-        _client?.Capture(_distinctId, "plan_created");
+        try
+        {
+            _client?.Capture(_distinctId, "plan_created");
+            _logger?.LogDebug("Tracked plan_created event");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Failed to track plan_created event");
+        }
     }
 
     public void TrackPrCreated()
     {
-        _client?.Capture(_distinctId, "pr_created");
+        try
+        {
+            _client?.Capture(_distinctId, "pr_created");
+            _logger?.LogDebug("Tracked pr_created event");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Failed to track pr_created event");
+        }
     }
 
-    public void TrackJobCompleted(string jobType, string status, int? durationSeconds)
+    public void TrackJobCompleted(string jobType, JobStatus status, int? durationSeconds)
     {
-        _client?.Capture(_distinctId, "job_completed", new Dictionary<string, object>
+        try
         {
-            ["job_type"] = jobType,
-            ["status"] = status,
-            ["duration_seconds"] = durationSeconds ?? 0
-        });
+            _client?.Capture(_distinctId, "job_completed", new Dictionary<string, object>
+            {
+                ["job_type"] = jobType,
+                ["status"] = status.ToString(),
+                ["duration_seconds"] = durationSeconds ?? 0
+            });
+            _logger?.LogDebug("Tracked job_completed event: {JobType} - {Status}", jobType, status);
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Failed to track job_completed event");
+        }
+    }
+
+    public async Task FlushAsync()
+    {
+        if (_client == null) return;
+
+        try
+        {
+            await _client.FlushAsync();
+            _logger?.LogDebug("Flushed telemetry events to PostHog");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Failed to flush telemetry events");
+        }
     }
 
     private static string GetOrCreateAnonymousId()
@@ -71,6 +133,16 @@ public class TelemetryService : ITelemetryService, IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (_client != null)
-            await _client.DisposeAsync();
+        {
+            try
+            {
+                await FlushAsync();
+                await _client.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error during telemetry service disposal");
+            }
+        }
     }
 }
