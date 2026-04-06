@@ -1,4 +1,5 @@
 using System.Net;
+using Ivy.Test.TestHelpers;
 
 namespace Ivy.Test;
 
@@ -81,21 +82,5 @@ public class DictationTests
     public void AzureSpeechTranscriptionService_Constructor_ThrowsOnEmptyKey()
     {
         Assert.Throws<ArgumentException>(() => new AzureSpeechTranscriptionService("region", ""));
-    }
-
-    private class MockHttpHandler(string responseContent, HttpStatusCode statusCode) : HttpMessageHandler
-    {
-        public HttpRequestMessage? LastRequest { get; private set; }
-        public Uri? LastRequestUri { get; private set; }
-
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            LastRequest = request;
-            LastRequestUri = request.RequestUri;
-            return new HttpResponseMessage(statusCode)
-            {
-                Content = new StringContent(responseContent)
-            };
-        }
     }
 }
