@@ -6,7 +6,7 @@ import { X, Check } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useOptimisticValue } from "./shared/useOptimisticValue";
 import { cn } from "@/lib/utils";
-import { enumColorsToCssVar, convertToHex } from "./color-utils";
+import { enumColorsToCssVar, convertToHex, getDisplayColor } from "./color-utils";
 import {
   colorInputVariant,
   colorInputPickerVariant,
@@ -263,16 +263,6 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   const displayValue = localValue ?? "";
   const inputValue = localValue ?? "";
 
-  const getDisplayColor = (): string => {
-    if (!displayValue) return "#000000";
-    const hexValue = convertToHex(displayValue);
-    if (hexValue.startsWith("var(")) return "#000000";
-    if (hexValue.startsWith("#") && hexValue.length === 9) {
-      return hexValue.slice(0, 7);
-    }
-    return hexValue.startsWith("#") ? hexValue : "#000000";
-  };
-
   const currentAlpha = displayValue ? parseHexAlpha(convertToHex(displayValue)).alpha : 255;
 
   const fireColorChange = (newColor: string | null) => {
@@ -290,7 +280,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   };
 
   const handleAlphaChange = (newAlpha: number) => {
-    const baseColor = getDisplayColor();
+    const baseColor = getDisplayColor(displayValue);
     fireColorChange(combineHexAlpha(baseColor, newAlpha));
   };
 
@@ -369,7 +359,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
         </div>
         {allowAlpha && (
           <AlphaSlider
-            color={getDisplayColor()}
+            color={getDisplayColor(displayValue)}
             alpha={currentAlpha}
             onChange={handleAlphaChange}
             disabled={disabled}
@@ -404,7 +394,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           density={density}
           disabled={disabled}
           invalid={invalid}
-          displayColor={getDisplayColor()}
+          displayColor={getDisplayColor(displayValue)}
           actualColor={convertToHex(displayValue)}
           onChange={handleColorChange}
           onBlur={handleInputBlur}
@@ -412,7 +402,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
         />
         {allowAlpha && (
           <AlphaSlider
-            color={getDisplayColor()}
+            color={getDisplayColor(displayValue)}
             alpha={currentAlpha}
             onChange={handleAlphaChange}
             disabled={disabled}
@@ -430,7 +420,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
         density={density}
         disabled={disabled}
         invalid={invalid}
-        displayColor={getDisplayColor()}
+        displayColor={getDisplayColor(displayValue)}
         actualColor={convertToHex(displayValue)}
         onChange={handleColorChange}
       />
@@ -476,7 +466,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
       </div>
       {allowAlpha && (
         <AlphaSlider
-          color={getDisplayColor()}
+          color={getDisplayColor(displayValue)}
           alpha={currentAlpha}
           onChange={handleAlphaChange}
           disabled={disabled}

@@ -113,3 +113,13 @@ export function convertToHex(colorValue: string): string {
   }
   return colorValue;
 }
+
+export function getDisplayColor(displayValue: string): string {
+  if (!displayValue) return "#000000";
+  const hexValue = convertToHex(displayValue);
+  if (hexValue.startsWith("var(")) return "#000000";
+  if (hexValue.startsWith("#") && hexValue.length === 9) {
+    return hexValue.slice(0, 7);
+  }
+  return hexValue.startsWith("#") ? hexValue : "#000000";
+}
