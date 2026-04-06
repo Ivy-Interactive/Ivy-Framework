@@ -145,7 +145,7 @@ public class AuthController() : Controller
 
             var path = (serverArgs.BasePath ?? "").Trim().Replace('\\', '/').TrimStart('/').TrimEnd('/');
             var redirectUrl = string.IsNullOrEmpty(path) ? "/?oauthLogin=1" : $"/{path}/?oauthLogin=1";
-            return Redirect(redirectUrl);
+            return LocalRedirect(redirectUrl);
         }
         catch (Exception ex)
         {
