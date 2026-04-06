@@ -1,9 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Ivy;
 using Ivy.Core;
 using Ivy.Core.Helpers;
-using Ivy.Core.Hooks;
 
 namespace Ivy.Widgets.Tiptap;
 

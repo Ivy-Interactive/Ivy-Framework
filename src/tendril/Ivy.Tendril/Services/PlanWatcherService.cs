@@ -1,13 +1,13 @@
 namespace Ivy.Tendril.Services;
 
-public class PlanWatcherService : IDisposable
+public class PlanWatcherService : IPlanWatcherService, IDisposable
 {
     private readonly FileSystemWatcher? _watcher;
     private readonly System.Timers.Timer _debounceTimer;
 
     public event Action? PlansChanged;
 
-    public PlanWatcherService(ConfigService config)
+    public PlanWatcherService(IConfigService config)
     {
         _debounceTimer = new System.Timers.Timer(500);
         _debounceTimer.AutoReset = false;

@@ -13,9 +13,8 @@ public class PlanReaderServiceRecoveryTests : IDisposable
         Directory.CreateDirectory(_tempDir);
 
         var settings = new TendrilSettings();
-        Directory.CreateDirectory(Path.Combine(_tempDir, "Plans"));
         var configService = new ConfigService(settings, _tempDir);
-        _service = new PlanReaderService(configService);
+        _service = new PlanReaderService(configService, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlanReaderService>.Instance);
     }
 
     public void Dispose()
@@ -26,7 +25,7 @@ public class PlanReaderServiceRecoveryTests : IDisposable
 
     private void CreatePlan(string folderName, string state)
     {
-        var dir = Path.Combine(_tempDir, folderName);
+        var dir = Path.Combine(_service.PlansDirectory, folderName);
         Directory.CreateDirectory(dir);
         File.WriteAllText(Path.Combine(dir, "plan.yaml"),
             $"state: {state}\nproject: Test\ntitle: Test Plan\nupdated: 2026-01-01T00:00:00Z\n");
@@ -34,7 +33,7 @@ public class PlanReaderServiceRecoveryTests : IDisposable
 
     private string ReadState(string folderName)
     {
-        var yaml = File.ReadAllText(Path.Combine(_tempDir, folderName, "plan.yaml"));
+        var yaml = File.ReadAllText(Path.Combine(_service.PlansDirectory, folderName, "plan.yaml"));
         var match = System.Text.RegularExpressions.Regex.Match(yaml, @"(?m)^state:\s*(.+)$");
         return match.Success ? match.Groups[1].Value.Trim() : "";
     }
@@ -93,7 +92,7 @@ public class PlanReaderServiceRecoveryTests : IDisposable
     public void One_Bad_Plan_Does_Not_Block_Others()
     {
         // Create a plan with an unreadable plan.yaml (directory instead of file)
-        var badDir = Path.Combine(_tempDir, "01104-BadPlan");
+        var badDir = Path.Combine(_service.PlansDirectory, "01104-BadPlan");
         Directory.CreateDirectory(badDir);
         Directory.CreateDirectory(Path.Combine(badDir, "plan.yaml")); // directory, not file
 

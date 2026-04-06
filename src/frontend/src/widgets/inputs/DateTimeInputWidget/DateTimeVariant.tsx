@@ -37,6 +37,15 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   onFocusChange,
 }) => {
   const [open, setOpen] = useState(false);
+
+  const hasAutoFocusedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      setOpen(true);
+    }
+  }, [autoFocus, disabled]);
+
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
   const minDate = useMemo(() => (min ? new Date(min) : undefined), [min]);
   const maxDate = useMemo(() => (max ? new Date(max) : undefined), [max]);

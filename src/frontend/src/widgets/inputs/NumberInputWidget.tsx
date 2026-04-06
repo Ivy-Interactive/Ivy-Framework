@@ -18,7 +18,7 @@ interface Affix {
   text?: string;
 }
 
-const renderAffix = (affix?: Affix): React.ReactNode => {
+export const renderAffix = (affix?: Affix): React.ReactNode => {
   if (!affix) return null;
 
   if (affix.icon) {
@@ -49,7 +49,7 @@ const formatStyleMap = {
 type FormatStyle = keyof typeof formatStyleMap;
 
 // Type limits for validation
-const TYPE_LIMITS = {
+export const TYPE_LIMITS = {
   byte: { min: 0, max: 255 },
   sbyte: { min: -128, max: 127 },
   short: { min: -32768, max: 32767 },
@@ -98,7 +98,7 @@ interface NumberInputWidgetProps extends Omit<NumberInputBaseProps, "onValueChan
 }
 
 // Function to validate and cap values based on target type
-const validateAndCapValue = (value: number | null, targetType?: string): number | null => {
+export const validateAndCapValue = (value: number | null, targetType?: string): number | null => {
   if (value === null) return null;
   if (!targetType) return value;
 

@@ -10,8 +10,7 @@ $planYamlPath = ValidatePlanPath $PlanPath
 $planInfo = ReadPlanProject $planYamlPath
 
 # Verify plan is in Building state
-$stateMatch = [regex]::Match($planInfo.Content, '(?m)^state:\s*(.+)$')
-$currentState = if ($stateMatch.Success) { $stateMatch.Groups[1].Value.Trim() } else { "Unknown" }
+$currentState = if ($planInfo.Yaml.state) { $planInfo.Yaml.state } else { "Unknown" }
 
 if ($currentState -ne "Building") {
     Write-Host "Plan is not in Building state (current: $currentState): $PlanPath" -ForegroundColor Red
@@ -33,7 +32,11 @@ $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
 }
 
 $agent = GetAgentCommandFromConfig -Promptware "ExecutePlan"
-$sessionId = [guid]::NewGuid().ToString()
+$sessionId = $env:TENDRIL_SESSION_ID
+if (-not $sessionId) {
+    $sessionId = [guid]::NewGuid().ToString()
+    Write-Warning "TENDRIL_SESSION_ID not set, generated fallback: $sessionId"
+}
 
 Write-Host "Starting Agent in $workDir..."
 SendStatusMessage "Executing Plan"
@@ -84,9 +87,12 @@ try {
         WritePlanLog $PlanPath "ExecutePlan" $summary
 
         # Check verification statuses before transitioning
-        $planYaml = Get-Content (Join-Path $PlanPath "plan.yaml") -Raw
-        $verificationStatuses = [regex]::Matches($planYaml, '(?m)^\s+status:\s*(.+)$') |
-        ForEach-Object { $_.Groups[1].Value.Trim() }
+        $planYamlContent = Get-Content (Join-Path $PlanPath "plan.yaml") -Raw
+        $planYamlParsed = $planYamlContent | ConvertFrom-Yaml
+        $verificationStatuses = @()
+        if ($planYamlParsed.verifications) {
+            $verificationStatuses = $planYamlParsed.verifications | ForEach-Object { $_.status }
+        }
 
         $hasFailed = $verificationStatuses | Where-Object { $_ -eq "Fail" }
         $hasPending = $verificationStatuses | Where-Object { $_ -eq "Pending" }

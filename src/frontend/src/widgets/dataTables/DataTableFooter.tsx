@@ -179,10 +179,18 @@ const FooterCell: React.FC<{
             key={i}
             role="option"
             aria-selected={i === selectedIndex}
+            tabIndex={0}
             onMouseDown={(e) => {
               e.preventDefault();
               setSelectedIndex(i);
               setOpen(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setSelectedIndex(i);
+                setOpen(false);
+              }
             }}
             className={cn(
               "px-2 py-1 text-xs cursor-pointer whitespace-nowrap transition-colors",
@@ -207,6 +215,7 @@ const FooterCell: React.FC<{
           open && "bg-accent text-accent-foreground",
         )}
         role="button"
+        aria-label="Page size"
         tabIndex={0}
         onPointerDown={() => {
           // Ensure focus is on the trigger so `onBlur` can close the dropdown.

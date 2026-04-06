@@ -1,4 +1,3 @@
-using Ivy.Core;
 using Ivy.Widgets.ScreenshotFeedback;
 
 // ReSharper disable once CheckNamespace

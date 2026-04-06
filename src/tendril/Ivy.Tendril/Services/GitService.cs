@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Ivy.Tendril.Services;
 
-public class GitService
+public class GitService : IGitService
 {
     public string? GetCommitTitle(string repoPath, string commitHash)
     {
@@ -21,7 +21,7 @@ public class GitService
             process?.WaitForExit();
             return process?.ExitCode == 0 ? title : null;
         }
-        catch { return null; }
+        catch { return null; /* git may not be installed, or repo path invalid */ }
     }
 
     public string? GetCommitDiff(string repoPath, string commitHash)
@@ -41,7 +41,7 @@ public class GitService
             process?.WaitForExit();
             return process?.ExitCode == 0 ? output : null;
         }
-        catch { return null; }
+        catch { return null; /* git may not be installed, or repo path invalid */ }
     }
 
     public List<(string Status, string FilePath)>? GetCommitFiles(string repoPath, string commitHash)
@@ -70,6 +70,6 @@ public class GitService
             }
             return files;
         }
-        catch { return null; }
+        catch { return null; /* git may not be installed, or repo path invalid */ }
     }
 }

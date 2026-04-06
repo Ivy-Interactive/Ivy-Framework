@@ -1,5 +1,3 @@
-using Ivy.Views;
-
 namespace Ivy.Views.Builders;
 
 public class ProgressBuilder<TModel> : IBuilder<TModel>

@@ -18,7 +18,11 @@ $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
 }
 
 $agent = GetAgentCommandFromConfig -Promptware "MakePr"
-$sessionId = [guid]::NewGuid().ToString()
+$sessionId = $env:TENDRIL_SESSION_ID
+if (-not $sessionId) {
+    $sessionId = [guid]::NewGuid().ToString()
+    Write-Warning "TENDRIL_SESSION_ID not set, generated fallback: $sessionId"
+}
 
 Write-Host "Starting Agent..."
 Push-Location $programFolder

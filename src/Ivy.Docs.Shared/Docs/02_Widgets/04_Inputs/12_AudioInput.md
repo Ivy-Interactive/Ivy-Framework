@@ -155,4 +155,42 @@ public class AudioInputDisabledDemo : ViewBase
 }
 ```
 
+## Event Handling
+
+Audio inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class AudioInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var value = UseState<FileUpload<byte[]>?>();
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(value));
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the audio input gains focus.")
+                | new AudioInput(upload.Value, "Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the audio input loses focus.")
+                | new AudioInput(upload.Value, "Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget upon mounting.")
+                | new AudioInput(upload.Value, "AutoFocused AudioInput")
+                    .AutoFocus()
+                | Text.Lead("Focused & Recording!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.AudioInput" ExtensionTypes="Ivy.AudioInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/AudioInput.cs"/>

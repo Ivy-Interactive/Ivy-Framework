@@ -1,5 +1,3 @@
-using Ivy;
-
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 

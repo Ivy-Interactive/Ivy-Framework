@@ -2,15 +2,15 @@ using System.Collections.Concurrent;
 
 namespace Ivy.Tendril.Services;
 
-public class InboxWatcherService : IDisposable
+public class InboxWatcherService : IInboxWatcherService, IDisposable
 {
-    private readonly JobService _jobService;
+    private readonly IJobService _jobService;
     private readonly FileSystemWatcher? _watcher;
     private readonly string _inboxPath;
     private readonly Timer _pollTimer;
     private readonly ConcurrentDictionary<string, byte> _processing = new();
 
-    public InboxWatcherService(ConfigService config, JobService jobService)
+    public InboxWatcherService(IConfigService config, IJobService jobService)
     {
         _jobService = jobService;
         _inboxPath = Path.Combine(config.TendrilHome, "Inbox");

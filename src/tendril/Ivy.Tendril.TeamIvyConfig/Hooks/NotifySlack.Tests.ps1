@@ -1,10 +1,13 @@
-# NotifySlack.Tests.ps1 — Pester tests for NotifySlack.ps1 YAML parsing
-# Run: Invoke-Pester -Path ./NotifySlack.Tests.ps1
+# NotifySlack.Tests.ps1 — Pester v5 tests for NotifySlack.ps1 YAML parsing
+# Requirements: Pester v5.0.0+
+# Run: Invoke-Pester -Path ./NotifySlack.Tests.ps1 -Output Detailed
 
-if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
-    Install-Module -Name powershell-yaml -Force -Scope CurrentUser
+BeforeAll {
+    if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
+        Install-Module -Name powershell-yaml -Force -Scope CurrentUser
+    }
+    Import-Module powershell-yaml
 }
-Import-Module powershell-yaml
 
 Describe "plan.yaml parsing with ConvertFrom-Yaml" {
     It "parses simple title and project" {
@@ -17,8 +20,8 @@ prs:
 commits: []
 "@
         $plan = ConvertFrom-Yaml $yaml
-        $plan.title | Should Be "Fix the login bug"
-        $plan.project | Should Be "Tendril"
+        $plan.title | Should -Be "Fix the login bug"
+        $plan.project | Should -Be "Tendril"
     }
 
     It "parses title with multi-line quoted string" {
@@ -29,7 +32,7 @@ title: "Fix the bug that spans multiple lines"
 prs: []
 "@
         $plan = ConvertFrom-Yaml $yaml
-        $plan.title | Should Be "Fix the bug that spans multiple lines"
+        $plan.title | Should -Be "Fix the bug that spans multiple lines"
     }
 
     It "parses title with special characters in quotes" {
@@ -40,7 +43,7 @@ title: 'Fix: Add support for special values'
 prs: []
 "@
         $plan = ConvertFrom-Yaml $yaml
-        $plan.title | Should Be "Fix: Add support for special values"
+        $plan.title | Should -Be "Fix: Add support for special values"
     }
 
     It "parses YAML block scalar title" {
@@ -53,7 +56,7 @@ title: |
 prs: []
 "@
         $plan = ConvertFrom-Yaml $yaml
-        $plan.title | Should Match "Multi-line title"
+        $plan.title | Should -Match "Multi-line title"
     }
 
     It "parses empty prs list" {
@@ -65,7 +68,7 @@ prs: []
 "@
         $plan = ConvertFrom-Yaml $yaml
         $prs = if ($plan.prs) { @($plan.prs) } else { @() }
-        $prs.Count | Should Be 0
+        $prs.Count | Should -Be 0
     }
 
     It "parses multiple PRs" {
@@ -80,9 +83,9 @@ prs:
 "@
         $plan = ConvertFrom-Yaml $yaml
         $prs = @($plan.prs)
-        $prs.Count | Should Be 3
-        $prs[0] | Should Be "https://github.com/owner/repo/pull/1"
-        $prs[2] | Should Be "https://github.com/owner/other/pull/99"
+        $prs.Count | Should -Be 3
+        $prs[0] | Should -Be "https://github.com/owner/repo/pull/1"
+        $prs[2] | Should -Be "https://github.com/owner/other/pull/99"
     }
 }
 
@@ -101,7 +104,7 @@ projects:
 "@
         $config = ConvertFrom-Yaml $yaml
         $projectConfig = $config.projects | Where-Object { $_.name -eq "Tendril" } | Select-Object -First 1
-        $projectConfig.meta.slackEmoji | Should Be ":seedling:"
+        $projectConfig.meta.slackEmoji | Should -Be ":seedling:"
     }
 
     It "returns empty when project has no slackEmoji" {
@@ -116,7 +119,7 @@ projects:
         if ($projectConfig -and $projectConfig.meta -and $projectConfig.meta.slackEmoji) {
             $slackEmoji = $projectConfig.meta.slackEmoji
         }
-        $slackEmoji | Should Be ""
+        $slackEmoji | Should -Be ""
     }
 
     It "handles project not found in config" {
@@ -128,7 +131,7 @@ projects:
 "@
         $config = ConvertFrom-Yaml $yaml
         $projectConfig = $config.projects | Where-Object { $_.name -eq "NonExistent" } | Select-Object -First 1
-        $projectConfig | Should BeNullOrEmpty
+        $projectConfig | Should -BeNullOrEmpty
     }
 }
 
@@ -138,7 +141,7 @@ Describe "custom-pr-options.yaml parsing with ConvertFrom-Yaml" {
 slackComment: "Great work on this feature!"
 "@
         $options = ConvertFrom-Yaml $yaml
-        $options.slackComment | Should Be "Great work on this feature!"
+        $options.slackComment | Should -Be "Great work on this feature!"
     }
 
     It "handles missing slackComment" {
@@ -150,7 +153,7 @@ otherOption: value
         if ($options.slackComment) {
             $slackComment = $options.slackComment
         }
-        $slackComment | Should Be ""
+        $slackComment | Should -Be ""
     }
 
     It "handles slackComment with special characters" {
@@ -158,6 +161,6 @@ otherOption: value
 slackComment: "Contains: colons and *markdown*"
 "@
         $options = ConvertFrom-Yaml $yaml
-        $options.slackComment | Should Be "Contains: colons and *markdown*"
+        $options.slackComment | Should -Be "Contains: colons and *markdown*"
     }
 }

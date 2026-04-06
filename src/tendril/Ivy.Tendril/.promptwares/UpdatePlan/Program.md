@@ -6,10 +6,10 @@ Update an existing plan by applying user comments (lines prefixed with `>>`).
 
 The firmware header contains:
 - **Args** / **PlanFolder** — path to the plan folder
-- **ConfigPath** — absolute path to config.yaml
 - **CurrentTime** — current UTC timestamp
 
 Read the plan structure in `../.shared/Plans.md`.
+Read `config.yaml` from the `TENDRIL_CONFIG` environment variable (absolute path to config.yaml).
 
 ## Execution Steps
 
@@ -43,7 +43,7 @@ If no `>>` lines exist, report "No comments found" and stop.
 
 For each question in the `>>` lines:
 1. Read relevant source files to find the answer
-2. Read `config.yaml` (from `ConfigPath` in header) for project context if needed
+2. Read `config.yaml` (from `TENDRIL_CONFIG` environment variable) for project context if needed
 
 ### 3.5. Resolve Answered Questions
 

@@ -1,20 +1,18 @@
 using System.Reactive.Disposables;
-using Ivy;
-using Ivy.Tendril.Apps.Icebox;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Icebox", icon: Icons.Snowflake, group: new[] { "Tools" }, order: 30)]
+[App(title: "Icebox", icon: Icons.Snowflake, group: new[] { "Tools" }, order: MenuOrder.Icebox)]
 public class IceboxApp : ViewBase
 {
     public override object? Build()
     {
-        var planService = UseService<PlanReaderService>();
-        var jobService = UseService<JobService>();
-        var configService = UseService<ConfigService>();
-        var planWatcher = UseService<PlanWatcherService>();
+        var planService = UseService<IPlanReaderService>();
+        var jobService = UseService<IJobService>();
+        var configService = UseService<IConfigService>();
+        var planWatcher = UseService<IPlanWatcherService>();
         var selectedPlanState = UseState<PlanFile?>(null);
         var projectFilter = UseState<string?>(null);
         var levelFilter = UseState<string?>(null);
@@ -57,8 +55,7 @@ public class IceboxApp : ViewBase
 
         return new SidebarLayout(
             mainContent: new Icebox.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
-            sidebarContent: sidebar.BuildContent(),
-            sidebarHeader: sidebar.BuildHeader()
+            sidebarContent: sidebar
         );
     }
 }

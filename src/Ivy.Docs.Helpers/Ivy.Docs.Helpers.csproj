@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Ivy.Docs.Helpers</RootNamespace>
+    <NoWarn>CS1591;CS8618;CS8603;CS8602;CS8604;CS8669;CS9113</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Ivy/Ivy.csproj" />
+  </ItemGroup>
+
+</Project>

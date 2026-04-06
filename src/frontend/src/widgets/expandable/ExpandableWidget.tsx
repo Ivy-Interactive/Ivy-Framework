@@ -108,7 +108,8 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
         "p-0",
       )}
       data-disabled={disabled}
-      role="details"
+      role="group"
+      aria-label={isOpen ? "Expanded section" : "Collapsed section"}
     >
       <CollapsibleTrigger asChild>
         <div
@@ -121,6 +122,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
           data-collapsible-trigger
           data-disabled={disabled}
           role="button"
+          aria-label={isOpen ? "Collapse section" : "Expand section"}
           tabIndex={disabled ? -1 : 0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
@@ -135,7 +137,6 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
               disabled && "text-muted-foreground",
               "flex items-center gap-2",
             )}
-            role="summary"
           >
             {icon && icon !== "None" && <Icon style={iconStyles} name={icon} />}
             {slots?.Header}

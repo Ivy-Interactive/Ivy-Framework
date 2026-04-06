@@ -17,8 +17,10 @@ public record CostCalculation
     public double TotalCost { get; init; }
 }
 
-public class ModelPricingService
+public class ModelPricingService : IModelPricingService
 {
+    private static readonly IDeserializer DefaultDeserializer = new DeserializerBuilder().Build();
+
     private readonly Dictionary<string, ModelPricing> _pricing;
 
     public ModelPricingService()
@@ -42,8 +44,7 @@ public class ModelPricingService
         using var reader = new StreamReader(stream);
         var yaml = reader.ReadToEnd();
 
-        var deserializer = new DeserializerBuilder().Build();
-        var config = deserializer.Deserialize<Dictionary<string, object>>(yaml);
+        var config = DefaultDeserializer.Deserialize<Dictionary<string, object>>(yaml);
 
         var result = new Dictionary<string, ModelPricing>();
         if (config.TryGetValue("models", out var modelsObj) && modelsObj is Dictionary<object, object> models)

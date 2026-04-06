@@ -1,5 +1,3 @@
-using Ivy;
-
 namespace Ivy.Tests.Views;
 
 public class RichTextMarkdownParserTests

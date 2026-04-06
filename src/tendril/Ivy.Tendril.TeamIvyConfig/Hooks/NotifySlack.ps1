@@ -19,11 +19,9 @@ if (-not (Test-Path $planYamlPath)) {
     exit 1
 }
 
-# Ensure powershell-yaml is available
-if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
-    Install-Module -Name powershell-yaml -Force -Scope CurrentUser
-}
-Import-Module powershell-yaml
+# Bootstrap required PowerShell modules
+$sharedPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "Ivy.Tendril/.promptwares/.shared"
+. (Join-Path $sharedPath "Bootstrap-Modules.ps1")
 
 $planContent = Get-Content $planYamlPath -Raw
 $plan = ConvertFrom-Yaml $planContent
@@ -38,10 +36,10 @@ if ($prs.Count -eq 0) {
 }
 
 # Read config.yaml to find slackEmoji for the project
-$configPath = Join-Path (Split-Path (Split-Path $planFolder -Parent) -Parent) "config.yaml"
-# Try standard config location; fall back to repo path
-if (-not (Test-Path $configPath)) {
-    $configPath = "D:\Repos\_Ivy\Ivy-Tendril\config.yaml"
+$configPath = $env:TENDRIL_CONFIG
+if (-not $configPath -or -not (Test-Path $configPath)) {
+    Write-Error "TENDRIL_CONFIG not set or config.yaml not found at $configPath"
+    exit 1
 }
 
 $slackEmoji = ""

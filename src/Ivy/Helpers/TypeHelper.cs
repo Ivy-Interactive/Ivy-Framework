@@ -245,6 +245,33 @@ public static class TypeHelper
         }
     }
 
+    public static string GetFullPathFromMemberExpression(Expression expression)
+    {
+        while (expression is UnaryExpression unary)
+            expression = unary.Operand;
+
+        if (expression is MethodCallExpression methodCall
+            && methodCall.Method.Name == "get_Item"
+            && methodCall.Arguments.Count == 1
+            && methodCall.Arguments[0] is ConstantExpression constant)
+        {
+            return constant.Value?.ToString() ?? throw new ArgumentException("Invalid expression.");
+        }
+
+        var parts = new List<string>();
+        while (expression is MemberExpression member)
+        {
+            parts.Add(member.Member.Name);
+            expression = member.Expression!;
+        }
+
+        if (parts.Count == 0)
+            throw new ArgumentException("Invalid expression.");
+
+        parts.Reverse();
+        return string.Join(".", parts);
+    }
+
     internal static bool IsComplexExpression(Expression expression)
     {
         // Unwrap Convert/ConvertChecked

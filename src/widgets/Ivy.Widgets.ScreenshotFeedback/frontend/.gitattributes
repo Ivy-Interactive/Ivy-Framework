@@ -1,0 +1,4 @@
+# Force LF line endings for all frontend source files.
+# The oxfmt formatter (used by vp fmt) normalizes to LF, so files must be
+# checked out with LF to avoid false positives from `vp fmt --check`.
+* text=auto eol=lf

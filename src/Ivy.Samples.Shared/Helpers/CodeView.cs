@@ -1,5 +1,3 @@
-using Ivy;
-
 namespace Ivy.Samples.Shared.Helpers;
 
 public class CodeView(Type type) : ViewBase

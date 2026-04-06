@@ -1,3 +1,4 @@
+using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Test;
@@ -142,10 +143,10 @@ public class JobServiceHookTests
             var job = service.GetJob(id)!;
 
             // Job should still be running despite hook failure
-            Assert.Equal("Running", job.Status);
+            Assert.Equal(JobStatus.Running, job.Status);
 
             service.CompleteJob(id, exitCode: 0);
-            Assert.Equal("Completed", job.Status);
+            Assert.Equal(JobStatus.Completed, job.Status);
         }
         finally
         {
@@ -224,7 +225,7 @@ public class JobServiceHookTests
         var job = service.GetJob(id)!;
 
         // Should not throw, just silently skip hooks
-        Assert.Equal("Running", job.Status);
+        Assert.Equal(JobStatus.Running, job.Status);
 
         service.CompleteJob(id, exitCode: 0);
     }

@@ -304,7 +304,10 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
 
           if (run.codeBlock !== undefined) {
             return (
-              <pre key={`run-${index}`} className="rounded-md bg-muted p-4 overflow-x-auto">
+              <pre
+                key={`run-${index}`}
+                className="rounded-md bg-muted p-4 overflow-x-auto slim-scrollbar"
+              >
                 <code className={run.codeBlock ? `language-${run.codeBlock}` : undefined}>
                   {run.content}
                 </code>

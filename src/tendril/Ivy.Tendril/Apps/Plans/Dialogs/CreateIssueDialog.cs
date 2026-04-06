@@ -1,4 +1,3 @@
-using Ivy;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
@@ -10,7 +9,7 @@ public class CreateIssueDialog(
     IState<string[]> issueLabelsState,
     IState<string> issueCommentState,
     PlanFile selectedPlan,
-    JobService jobService) : ViewBase
+    IJobService jobService) : ViewBase
 {
     private readonly IState<bool> _dialogOpen = dialogOpen;
     private readonly IState<string?> _selectedRepoState = selectedRepoState;
@@ -18,11 +17,11 @@ public class CreateIssueDialog(
     private readonly IState<string[]> _issueLabelsState = issueLabelsState;
     private readonly IState<string> _issueCommentState = issueCommentState;
     private readonly PlanFile _selectedPlan = selectedPlan;
-    private readonly JobService _jobService = jobService;
+    private readonly IJobService _jobService = jobService;
 
     public override object? Build()
     {
-        var githubService = UseService<GithubService>();
+        var githubService = UseService<IGithubService>();
         var assigneesQuery = UseQuery<string[], string>(
             _selectedRepoState.Value ?? "",
             async (repoName, ct) =>

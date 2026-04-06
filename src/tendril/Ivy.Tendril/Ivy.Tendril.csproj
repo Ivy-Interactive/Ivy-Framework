@@ -5,9 +5,22 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>CS8618;CS8603;CS8602;CS8604;CS9113</NoWarn>
-    <Version>1.0.1</Version>
     <RootNamespace>Ivy.Tendril</RootNamespace>
     <UserSecretsId>a8f3c2e1-4b7d-4e9f-a1c3-8d6e2f5b9a7c</UserSecretsId>
+    <MinVerTagPrefix>tendril/v</MinVerTagPrefix>
+    <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>tendril</ToolCommandName>
+    <PackageId>Ivy.Tendril</PackageId>
+    <IsPackable>true</IsPackable>
+    <Company>Ivy</Company>
+    <Description>Tendril — AI-powered plan management TUI built on Ivy Framework</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Ivy.Tendril.Test" />
@@ -23,7 +36,9 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5" />
     <PackageReference Include="OpenAI" Version="2.9.1" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
-    <PackageReference Include="PostHog" Version="1.0.*" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
+    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
+    <PackageReference Include="PostHog" Version="1.0.8" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Ivy/Ivy.csproj" />
@@ -42,14 +57,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Apps" />
-    <Folder Include="Connections" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Remove="Ivy.Tendril.Test\**" />
-    <EmbeddedResource Remove="Ivy.Tendril.Test\**" />
-    <None Remove="Ivy.Tendril.Test\**" />
-  </ItemGroup>
-  <ItemGroup>
+    <None Update="example.config.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="config.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

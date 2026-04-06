@@ -1,33 +1,41 @@
-using Ivy;
+using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Apps.PullRequest;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Pull Requests", icon: Icons.GitPullRequest, group: new[] { "Tools" }, order: 27)]
+[App(title: "Pull Requests", icon: Icons.GitPullRequest, group: new[] { "Tools" }, order: MenuOrder.PullRequests)]
 public class PullRequestApp : ViewBase
 {
     public override object? Build()
     {
-        var planService = UseService<PlanReaderService>();
+        var planService = UseService<IPlanReaderService>();
         var refreshToken = UseRefreshToken();
         var nav = this.UseNavigation();
         var showPlan = UseState<string?>(null);
+        var openFile = UseState<string?>(null);
+        var config = UseService<IConfigService>();
 
         var plans = planService.GetPlans()
             .Where(p => p.Prs.Count > 0)
             .OrderByDescending(p => p.Id)
             .ToList();
 
-        var rows = plans.SelectMany(plan => plan.Prs.Select((pr, i) => new PrRow
+        var rows = plans.SelectMany(plan =>
         {
-            Id = $"{plan.Id}-{i}",
-            PlanId = $"{plan.Id:D5}",
-            Repository = ExtractRepo(pr),
-            Pr = pr,
-            Plan = $"#{plan.Id:D5} {plan.Title}",
-            PlanFolderPath = plan.FolderPath
-        })).ToList();
+            var costValue = planService.GetPlanTotalCost(plan.FolderPath);
+            var cost = costValue > 0 ? $"${costValue:F2}" : "";
+            return plan.Prs.Select((pr, i) => new PrRow
+            {
+                Id = $"{plan.Id}-{i}",
+                PlanId = $"{plan.Id:D5}",
+                Repository = ExtractRepo(pr),
+                Pr = pr,
+                Plan = $"#{plan.Id:D5} {plan.Title}",
+                Cost = cost,
+                PlanFolderPath = plan.FolderPath
+            });
+        }).ToList();
 
         var dataTable = rows.AsQueryable()
             .ToDataTable(idSelector: t => t.Id)
@@ -36,9 +44,11 @@ public class PullRequestApp : ViewBase
             .Height(Size.Full())
             .Header(t => t.PlanId, "Plan ID")
             .Header(t => t.Repository, "Repository")
+            .Header(t => t.Cost, "Cost")
             .Header(t => t.Pr, "PR")
             .Header(t => t.Plan, "Plan")
-            .Renderer(t => t.PlanId, new ButtonDisplayRenderer())
+            .Width(t => t.Cost, Size.Px(80))
+            .Renderer(t => t.PlanId, new LinkDisplayRenderer())
             .Renderer(t => t.Pr, new LinkDisplayRenderer())
             .SortDirection(t => t.PlanId, SortDirection.Descending)
             .Hidden(t => t.Id)
@@ -98,16 +108,25 @@ public class PullRequestApp : ViewBase
             var sheetContent = string.IsNullOrEmpty(content)
                 ? Text.P("Plan not found or empty.")
                 : (object)new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(content))
-                    .DangerouslyAllowLocalFiles();
+                    .DangerouslyAllowLocalFiles()
+                    .OnLinkClick(FileLinkHelper.CreateFileLinkClickHandler(openFile));
 
-            return Layout.Vertical().Height(Size.Full()) | new Fragment(
-                dataTable,
-                new Sheet(
-                    onClose: () => showPlan.Set(null),
-                    content: sheetContent,
-                    title: plan?.Title ?? folderName
-                ).Width(Size.Half()).Resizable()
-            );
+            var repoPaths = plan?.GetEffectiveRepoPaths(config) ?? [];
+            var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(
+                openFile.Value, () => openFile.Set(null), repoPaths);
+
+            var planSheet = new Sheet(
+                onClose: () => showPlan.Set(null),
+                content: sheetContent,
+                title: plan?.Title ?? folderName
+            ).Width(Size.Half()).Resizable();
+
+            if (fileLinkSheet is not null)
+            {
+                return Layout.Vertical().Height(Size.Full()) | new Fragment(dataTable, planSheet, fileLinkSheet);
+            }
+
+            return Layout.Vertical().Height(Size.Full()) | new Fragment(dataTable, planSheet);
         }
 
         return Layout.Vertical().Height(Size.Full()) | dataTable;

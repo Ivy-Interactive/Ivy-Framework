@@ -1,10 +1,7 @@
 using Ivy.Core;
 using Ivy.Core.Apps;
 using Ivy.Core.AppShell;
-using Ivy.Core.Server;
-using Ivy.Widgets.Internal;
 using System.Collections.Immutable;
-using AppContext = Ivy.AppContext;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -172,30 +169,34 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
                 if (settings.PreventTabDuplicates)
                 {
                     var appId = navigateArgs.AppId;
-                    int existingTabIndex = -1;
-                    for (int i = 0; i < tabs.Value.Length; i++)
+                    var appDescriptor = appRepository.GetApp(appId);
+                    if (appDescriptor?.AllowDuplicateTabs != true)
                     {
-                        if (tabs.Value[i].AppId == appId)
+                        int existingTabIndex = -1;
+                        for (int i = 0; i < tabs.Value.Length; i++)
                         {
-                            existingTabIndex = i;
-                            break;
+                            if (tabs.Value[i].AppId == appId)
+                            {
+                                existingTabIndex = i;
+                                break;
+                            }
                         }
-                    }
 
-                    if (existingTabIndex >= 0)
-                    {
-                        var previousSelectedIndex = selectedIndex.Value;
-                        selectedIndex.Set(existingTabIndex);
-                        tabId = tabs.Value[existingTabIndex].Id;
-
-                        // Set page title
-                        SetAppTitle(appId);
-
-                        if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
+                        if (existingTabIndex >= 0)
                         {
-                            RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
+                            var previousSelectedIndex = selectedIndex.Value;
+                            selectedIndex.Set(existingTabIndex);
+                            tabId = tabs.Value[existingTabIndex].Id;
+
+                            // Set page title
+                            SetAppTitle(appId);
+
+                            if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
+                            {
+                                RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
+                            }
+                            return;
                         }
-                        return;
                     }
                 }
 
@@ -341,6 +342,22 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
             selectedIndex.Set(@event.Value);
         }
 
+        void OnTabCloseOthers(Event<TabsLayout, int> @event)
+        {
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
+            var keptTab = tabs.Value[@event.Value];
+            tabs.Set([keptTab]);
+            selectedIndex.Set(0);
+
+            // Update browser URL to the kept tab's app
+            SetAppTitle(keptTab.AppId);
+            RedirectToAppIfNotError(new NavigateArgs(keptTab.AppId), tabId: keptTab.Id);
+        }
+
         void OnTabReorder(Event<TabsLayout, int[]> @event)
         {
             var newOrder = @event.Value;
@@ -380,7 +397,9 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
             {
                 body = new TabsLayout(OnTabSelect, OnTabClose, OnTabRefresh, OnTabReorder, selectedIndex.Value,
                     tabs.Value.ToArray().Select(e => e.ToTab()).ToArray()
-                ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0);
+                ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0)
+                    with
+                { OnCloseOthers = ((Action<Event<TabsLayout, int>>)OnTabCloseOthers).ToEventHandler() };
             }
         }
 

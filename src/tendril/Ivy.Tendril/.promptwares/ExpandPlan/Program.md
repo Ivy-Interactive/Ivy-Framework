@@ -6,10 +6,10 @@ Transform investigation-heavy plans into concrete implementation plans.
 
 The firmware header contains:
 - **Args** / **PlanFolder** — path to the plan folder
-- **ConfigPath** — absolute path to config.yaml
 - **CurrentTime** — current UTC timestamp
 
 Read the plan structure in `../.shared/Plans.md`.
+Read `config.yaml` from the `TENDRIL_CONFIG` environment variable (absolute path to config.yaml).
 
 ## Execution Steps
 

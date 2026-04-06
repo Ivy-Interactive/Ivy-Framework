@@ -56,7 +56,13 @@ export function useTabManagement(
 
   const safeEvent = React.useCallback(
     (
-      name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+      name:
+        | "OnSelect"
+        | "OnClose"
+        | "OnCloseOthers"
+        | "OnRefresh"
+        | "OnReorder"
+        | "OnAddButtonClick",
       args: unknown[],
     ) => {
       if (Array.isArray(events) && events.includes(name)) {
@@ -102,19 +108,30 @@ export function useTabManagement(
     eventHandlerRef.current = eventHandler;
   }, [eventHandler]);
 
-  // Sync tab order on add/remove
-  React.useEffect(() => {
-    const prev = tabOrderRef.current;
-    const currentTabIds = tabWidgets
-      .map((tab) => getTabProps(tab)?.id)
-      .filter((id): id is string => id !== undefined);
-    const added = currentTabIds.filter((id) => !prev.includes(id));
-    const removed = prev.filter((id) => !currentTabIds.includes(id));
+  const currentTabIds = React.useMemo(
+    () =>
+      tabWidgets.map((tab) => getTabProps(tab)?.id).filter((id): id is string => id !== undefined),
+    [tabWidgets],
+  );
 
-    if (added.length || removed.length) {
-      setTabOrder(currentTabIds);
+  const added = currentTabIds.filter((id) => !tabOrder.includes(id));
+  const removed = tabOrder.filter((id) => !currentTabIds.includes(id));
+
+  if (added.length || removed.length) {
+    if (activeTabId && removed.includes(activeTabId)) {
+      const oldIndex = tabOrder.indexOf(activeTabId);
+      const newIdAtSamePos = currentTabIds[oldIndex];
+      if (newIdAtSamePos && added.includes(newIdAtSamePos)) {
+        setActiveTabId(newIdAtSamePos);
+        setLoadedTabs((prev) => {
+          const newSet = new Set(prev);
+          newSet.add(newIdAtSamePos);
+          return newSet;
+        });
+      }
     }
-  }, [tabWidgets, tabOrderRef, setTabOrder]);
+    setTabOrder(currentTabIds);
+  }
 
   // Sync activeTabId with selectedIndex prop from backend (only when not user-initiated)
   React.useEffect(() => {

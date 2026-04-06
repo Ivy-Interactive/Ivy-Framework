@@ -9,12 +9,11 @@ Create an implementation plan for a task described in args.
 The firmware header contains these key values:
 - **PlanId** — pre-allocated 5-digit plan ID (e.g. `01127`). Use this — do NOT read `.counter`.
 - **PlansDirectory** — where plan folders are created
-- **ConfigPath** — absolute path to config.yaml (projects, repos, context)
 - **Project** — selected project name, or `[Auto]` if not specified
 - **SourcePath** (optional) — absolute path to the source that generated this plan (e.g. test working directory)
 
 Read the plan folder structure in `../.shared/Plans.md`.
-Read the project configuration from the `ConfigPath` in the firmware header.
+Read the project configuration from the `TENDRIL_CONFIG` environment variable (absolute path to config.yaml).
 
 ## Execution Steps
 
@@ -28,7 +27,7 @@ Args contains the user's task description. If it references related plans with `
 
 ### 1.5. Load Project Context
 
-Read `config.yaml` (at the path from the firmware header) to understand all available projects, their repos, and context.
+Read `config.yaml` (at the path from `TENDRIL_CONFIG` environment variable) to understand all available projects, their repos, and context.
 
 **If `Project` is set to a specific project name** (not `[Auto]`):
 - Find that project in `config.yaml` and use its repos and context to scope your research
@@ -68,7 +67,7 @@ The plan ID is pre-allocated by the launcher script and provided in the firmware
 
   - **Verify the fix commit exists on main**: Read the existing plan's `commits` list and run `git log --oneline <hash>` to confirm the commit is on the main branch. If the commit is not on main, do NOT trash — create the plan.
   - **Check commit date vs observation time**: If the inbox item describes an issue observed at a specific time, compare against the fix commit date (`git log -1 --format=%ci <hash>`). If the observation is **after** the fix was committed, the fix may not have worked — create the plan instead of trashing.
-  - **Verify in code**: For code fixes, grep the actual source to confirm the fix is still present.
+  - **Verify in code**: For code fixes, use `Tools/Validate-CodeAssertion.ps1` or grep the actual source to confirm the fix is still present.
 
   #### Step 4: Regression detection (for Completed plans)
 
@@ -113,6 +112,48 @@ The plan ID is pre-allocated by the launcher script and provided in the firmware
   gh search issues "<keyword>" --repo <owner>/<repo> --json title,url,number,state
   ```
   Derive the repo owner/name from the repos in `config.yaml`. If an issue already covers the task, reference it in the plan and avoid creating workaround plans.
+- **Check for concurrent active plans on overlapping repos.** After duplicate detection, scan `PlansDirectory` for other plans in `Building` or `Executing` state that target any of the same repos:
+
+  ```bash
+  for plan_folder in <PlansDirectory>/*/plan.yaml; do
+    state=$(grep '^state:' "$plan_folder" | awk '{print $2}')
+    if [[ "$state" == "Building" || "$state" == "Executing" ]]; then
+      # Check if repos overlap with the current plan's repos
+      plan_repos=$(grep '^\- D:' "$plan_folder")
+      # If overlap detected, note the plan ID and title
+    fi
+  done
+  ```
+
+  If overlapping active plans are found, add a warning to the `## Questions` section of the plan revision:
+
+  > **Warning:** Plans \<IDs\> are currently executing on overlapping repositories. Review their changes before executing this plan to avoid conflicts.
+
+  This makes concurrent execution visible so the reviewer can decide whether to wait or proceed.
+
+### 3.5. Validate Code State
+
+Before creating the plan, scan the task description (args) for code state assertions — statements about what the code currently does or how it currently looks.
+
+**Patterns to detect:**
+- "currently does/has/is/returns"
+- "the code at [location]" or "[file]:[lines]"
+- Code blocks (` ```language ... ``` `) with descriptive context
+- "existing implementation" or "current behavior"
+
+For each assertion found:
+1. Extract the referenced file path and optional line range
+2. Use `Tools/Validate-CodeAssertion.ps1` to check if the described code actually exists
+3. If validation fails, investigate:
+   - Check `git log --oneline -10 --all -- <file>` for recent changes
+   - Check `git blame <file>` to find who/when the code changed
+   - Look for plan IDs in commit messages (e.g., `[01234]`)
+
+**Decision:**
+- **All validations pass** → Proceed to Step 4, include validated code blocks in plan with `**Current implementation**` headers
+- **Any validation fails** → Write trash file to `$env:TENDRIL_HOME/Trash/<PlanId>-<SafeTitle>.md` explaining the validation failure, then exit without creating a plan
+
+This catches stale plans before they enter the review queue, reducing wasted review time.
 
 ### 4. Create Plan
 
@@ -131,6 +172,20 @@ verifications:
 If `SourcePath` is present in the firmware header, copy it to `plan.yaml` as `sourcePath`.
 
 If the plan references other plans (from `[number]` syntax in args), add them to `relatedPlans`.
+
+**Validate repo paths**: After determining the project and repos from config.yaml, verify each repo path exists locally:
+- For each repo in the plan's repos list, check `Test-Path <repo-path>`
+- If any repo path doesn't exist, fail with error: "Repository path does not exist: `<path>`. Check config.yaml project configuration."
+- This prevents creating plans targeting non-existent repo paths (e.g. a deprecated `Ivy-Tendril` repo when the code actually lives in `Ivy-Framework/src/tendril/`)
+
+**Interface extraction plans**: When creating plans that extract interfaces from concrete service types, perform an exhaustive consumer audit:
+1. Use grep to find ALL consumers across ALL resolution patterns:
+   - `UseService<ConcreteType>()`
+   - Constructor parameter injection: `ConcreteType paramName`
+   - Field/property declarations: `_concreteType` or `concreteType:`
+2. List EVERY consumer with file path and line number in the plan revision
+3. Validate count: grep results should match documented consumers
+4. Incomplete consumer lists cause follow-up plans during execution (see Memory/interface-extraction-consumer-audit.md)
 
 ### 4.5. Questions Section
 
@@ -151,6 +206,24 @@ The `## Tests` section MUST include two parts:
    If the change is so broad that all tests are genuinely needed, explicitly state: "Run all tests (broad cross-cutting change)."
    
    Never leave test scope unspecified — this causes the full suite to run unnecessarily.
+
+### 4.7. API Validation
+
+When suggesting Ivy Framework code in plan revisions:
+
+1. **Read Memory** — Check `Memory/ivy-framework-api-reference.md` for known patterns
+2. **Verify APIs** — Before suggesting any Ivy API (widgets, layouts, properties):
+   - Use `Grep` to find actual usage in `D:\Repos\_Ivy\Ivy-Framework\src\Ivy`
+   - Read the source file to confirm method signatures
+   - Check AGENTS.md for documented patterns
+3. **Never Guess** — If you can't verify an API, either:
+   - Use a verified alternative from memory/AGENTS.md
+   - Suggest the user verify the API (in ## Questions section)
+   - Omit the specific API and describe behavior instead
+
+**Example violation**: Writing `AlignItems(Alignment.Center)` without verifying it exists.
+
+**Correct approach**: Grep for `AlignContent` → Read `LayoutView.cs` → Confirm `AlignContent(Align align)` exists → Suggest verified API.
 
 ### 5. Verification Checklist
 

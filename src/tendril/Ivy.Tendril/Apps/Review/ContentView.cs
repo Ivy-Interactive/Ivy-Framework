@@ -1,12 +1,10 @@
 using Ivy;
 using Ivy.Core;
-using Ivy.Hooks;
 using Ivy.Tendril.Apps.Plans;
+using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Apps.Review.Dialogs;
 using Ivy.Tendril.Services;
 using Ivy.Widgets.DiffView;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Ivy.Tendril.Apps.Review;
 
@@ -14,20 +12,20 @@ public class ContentView(
     PlanFile? selectedPlan,
     List<PlanFile> allPlans,
     IState<PlanFile?> selectedPlanState,
-    PlanReaderService planService,
-    JobService jobService,
+    IPlanReaderService planService,
+    IJobService jobService,
     Action refreshPlans,
-    ConfigService config,
-    GitService gitService) : ViewBase
+    IConfigService config,
+    IGitService gitService) : ViewBase
 {
     private readonly PlanFile? _selectedPlan = selectedPlan;
     private readonly List<PlanFile> _allPlans = allPlans;
     private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
-    private readonly PlanReaderService _planService = planService;
-    private readonly JobService _jobService = jobService;
+    private readonly IPlanReaderService _planService = planService;
+    private readonly IJobService _jobService = jobService;
     private readonly Action _refreshPlans = refreshPlans;
-    private readonly ConfigService _config = config;
-    private readonly GitService _gitService = gitService;
+    private readonly IConfigService _config = config;
+    private readonly IGitService _gitService = gitService;
 
     public override object? Build()
     {
@@ -41,39 +39,14 @@ public class ContentView(
         var suggestChangesOpen = UseState(false);
         var suggestChangesText = UseState("");
         var customPrOpen = UseState(false);
-        var customPrApprove = UseState(true);
-        var customPrMerge = UseState(true);
-        var customPrDeleteBranch = UseState(true);
-        var customPrIncludeArtifacts = UseState(true);
-        var customPrAssignee = UseState<string?>(null);
-        var customPrComment = UseState("");
 
-        UseEffect(() =>
-        {
-            if (!customPrApprove.Value)
-            {
-                customPrMerge.Set(false);
-                customPrDeleteBranch.Set(false);
-            }
-        }, customPrApprove);
-
-        UseEffect(() =>
-        {
-            if (!customPrMerge.Value)
-            {
-                customPrDeleteBranch.Set(false);
-            }
-        }, customPrMerge);
-
-        var githubService = UseService<GithubService>();
+        var githubService = UseService<IGithubService>();
         var assigneesQuery = UseQuery<string[], string>(
             _selectedPlan?.Project ?? "",
             async (_, ct) =>
             {
                 if (_selectedPlan is null) return Array.Empty<string>();
-                var repos = (_selectedPlan.Repos?.Count ?? 0) > 0
-                    ? _selectedPlan.Repos
-                    : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
+                var repos = _selectedPlan.GetEffectiveRepoPaths(_config);
                 var repoPath = repos.FirstOrDefault();
                 if (repoPath is null) return Array.Empty<string>();
                 var repoConfig = GithubService.GetRepoConfigFromPath(repoPath);
@@ -92,6 +65,13 @@ public class ContentView(
 
         if (_selectedPlan is null)
         {
+            if (_allPlans.Count == 0)
+            {
+                return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full()).Gap(2)
+                    | new Icon(Icons.Inbox).Large().Color(Colors.Gray)
+                    | Text.Muted("No plans to review");
+            }
+
             return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
                 | Text.Muted("Select a completed plan to review");
         }
@@ -101,8 +81,6 @@ public class ContentView(
         // Header
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
             | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
-            | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline).WithProjectColor(_config, _selectedPlan.Project)
-            | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
             | new Spacer().Width(Size.Grow())
             | Text.Rich()
                 .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
@@ -112,7 +90,7 @@ public class ContentView(
                 _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
                 _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
                 _refreshPlans();
-            }).WithConfetti(AnimationTrigger.Click);
+            }).ShortcutKey("m").WithConfetti(AnimationTrigger.Click);
 
         // Content sections
         var content = Layout.Vertical();
@@ -120,13 +98,10 @@ public class ContentView(
 
         // Recommendations
         var recommendationsPath = Path.Combine(_selectedPlan.FolderPath, "artifacts", "recommendations.yaml");
-        var recommendations = new List<RecommendationItem>();
+        var recommendations = new List<RecommendationYaml>();
         if (File.Exists(recommendationsPath))
         {
-            var recDeserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-            recommendations = recDeserializer.Deserialize<List<RecommendationItem>>(
+            recommendations = YamlHelper.Deserializer.Deserialize<List<RecommendationYaml>>(
                 File.ReadAllText(recommendationsPath)) ?? new();
         }
 
@@ -164,17 +139,15 @@ public class ContentView(
 
             verificationsTable |= new TableRow(
                 new TableCell(new Badge(v.Status).Variant(
-                    v.Status == "Pass" ? BadgeVariant.Success
-                    : v.Status == "Fail" ? BadgeVariant.Destructive
-                    : BadgeVariant.Outline)),
+                    StatusMappings.VerificationStatusBadgeVariants.TryGetValue(v.Status, out var variant)
+                        ? variant
+                        : BadgeVariant.Outline)),
                 new TableCell(nameCell)
             );
         }
 
         // Commits tab content
-        var repoPaths = (_selectedPlan.Repos?.Count ?? 0) > 0
-            ? _selectedPlan.Repos
-            : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
+        var repoPaths = _selectedPlan.GetEffectiveRepoPaths(_config);
         var commitRows = _selectedPlan.Commits.Select(commit =>
         {
             var title = repoPaths
@@ -251,14 +224,7 @@ public class ContentView(
         // Plan tab content
         var planTabContent = new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
             .DangerouslyAllowLocalFiles()
-            .OnLinkClick(url =>
-            {
-                if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
-                {
-                    var filePath = url.Substring("file:///".Length);
-                    openFile.Set(filePath);
-                }
-            });
+            .OnLinkClick(FileLinkHelper.CreateFileLinkClickHandler(openFile));
 
         // Review actions
         var projectConfig = _config.GetProject(_selectedPlan.Project);
@@ -331,16 +297,9 @@ public class ContentView(
         {
             foreach (var rec in recommendations)
             {
-                var recCapture = rec;
                 var card = Layout.Vertical().Gap(1)
                     | Text.Block(rec.Title).Bold()
-                    | new Markdown(rec.Description).DangerouslyAllowLocalFiles()
-                    | new Button("Make Draft").Icon(Icons.Plus).Outline().Small().OnClick(() =>
-                    {
-                        _jobService.StartJob("MakePlan",
-                            "-Description", $"[FORCE] {_selectedPlan.Project}: {recCapture.Title}\n\n{recCapture.Description}",
-                            "-Project", _selectedPlan.Project);
-                    });
+                    | new Markdown(rec.Description).DangerouslyAllowLocalFiles();
                 recommendationsLayout |= card;
                 recommendationsLayout |= new Separator();
             }
@@ -380,9 +339,7 @@ public class ContentView(
 
         if (openCommit.Value is { } commitHash)
         {
-            var repoPaths2 = (_selectedPlan.Repos?.Count ?? 0) > 0
-                ? _selectedPlan.Repos
-                : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
+            var repoPaths2 = _selectedPlan.GetEffectiveRepoPaths(_config);
 
             string? commitDiff = null;
             List<(string Status, string FilePath)>? commitFiles = null;
@@ -446,135 +403,15 @@ public class ContentView(
             ).Width(Size.Half()).Resizable();
         }
 
-        if (openFile.Value is { } filePath2)
         {
-            var ext = Path.GetExtension(filePath2);
-            var imageExts = new[] { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
-            object fileSheetContent;
-            if (imageExts.Contains(ext, StringComparer.OrdinalIgnoreCase))
-            {
-                var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(filePath2)}";
-                fileSheetContent = new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(filePath2) };
-            }
-            else
-            {
-                if (File.Exists(filePath2))
-                {
-                    var fileContent = File.ReadAllText(filePath2);
-                    var language = FileApp.GetLanguage(Path.GetExtension(filePath2));
-                    fileSheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
-                }
-                else
-                {
-                    var fileName = Path.GetFileName(filePath2);
-                    var fileRepoPaths = (_selectedPlan.Repos?.Count ?? 0) > 0
-                        ? _selectedPlan.Repos
-                        : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
-                    var suggestions = MarkdownHelper.FindFilesInRepos(fileRepoPaths, fileName);
-                    var notFoundContent = suggestions.Count > 0
-                        ? $"File not found.\n\nDid you mean:\n{string.Join("\n", suggestions.Select(s => $"- `{s}`"))}"
-                        : "File not found.";
-                    fileSheetContent = new Markdown(notFoundContent);
-                }
-            }
-
-            var fileFinalContent = File.Exists(filePath2)
-                ? (object)new HeaderLayout(
-                    header: new Button("Open in VS Code").Icon(Icons.ExternalLink).Outline().OnClick(() =>
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = "code",
-                            Arguments = $"\"{filePath2}\"",
-                            UseShellExecute = true
-                        });
-                    }),
-                    content: fileSheetContent
-                )
-                : fileSheetContent;
-
-            content |= new Sheet(
-                onClose: () => openFile.Set(null),
-                content: fileFinalContent,
-                title: Path.GetFileName(filePath2)
-            ).Width(Size.Half()).Resizable();
+            var fileRepoPaths = _selectedPlan.GetEffectiveRepoPaths(_config);
+            var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(openFile.Value, () => openFile.Set(null), fileRepoPaths);
+            if (fileLinkSheet != null) content |= fileLinkSheet;
         }
 
-        // Suggest Changes dialog
-        if (suggestChangesOpen.Value)
-        {
-            content |= new Dialog(
-                _ => { suggestChangesText.Set(""); suggestChangesOpen.Set(false); },
-                new DialogHeader($"Suggest Changes for #{_selectedPlan.Id}"),
-                new DialogBody(
-                    Layout.Vertical()
-                        | Text.P("Describe the changes needed for this plan.")
-                        | suggestChangesText.ToTextareaInput("Enter change instructions...").Rows(6).AutoFocus()
-                ),
-                new DialogFooter(
-                    new Button("Cancel").Outline().OnClick(() => { suggestChangesText.Set(""); suggestChangesOpen.Set(false); }),
-                    new Button("Submit Changes").Primary().OnClick(() =>
-                    {
-                        if (!string.IsNullOrWhiteSpace(suggestChangesText.Value))
-                        {
-                            var currentContent = _planService.ReadLatestRevision(_selectedPlan.FolderName);
-                            var comments = string.Join("\n", suggestChangesText.Value
-                                .Split('\n')
-                                .Select(line => $">> {line}"));
-                            _planService.SavePlan(_selectedPlan.FolderName, currentContent + "\n\n" + comments + "\n");
-                        }
-                        _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Updating);
-                        _jobService.StartJob("UpdatePlan", _selectedPlan.FolderPath);
-                        _refreshPlans();
-                        suggestChangesText.Set("");
-                        suggestChangesOpen.Set(false);
-                    })
-                )
-            ).Width(Size.Rem(30));
-        }
-
-        // Custom PR dialog
-        if (customPrOpen.Value)
-        {
-            content |= new Dialog(
-                _ => { customPrOpen.Set(false); },
-                new DialogHeader($"Custom PR for #{_selectedPlan.Id}"),
-                new DialogBody(
-                    Layout.Vertical().Gap(2)
-                        | customPrApprove.ToBoolInput("Approve").AutoFocus()
-                        | customPrMerge.ToBoolInput("Merge").Disabled(!customPrApprove.Value)
-                        | customPrDeleteBranch.ToBoolInput("Delete Branch").Disabled(!customPrMerge.Value || !customPrApprove.Value)
-                        | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
-                        | customPrAssignee.ToSelectInput((assigneesQuery.Value ?? Array.Empty<string>()).ToOptions())
-                            .Nullable().WithField().Label("Assignee")
-                        | customPrComment.ToTextareaInput("Comment").Rows(3)
-                ),
-                new DialogFooter(
-                    new Button("Cancel").Outline().OnClick(() => customPrOpen.Set(false)),
-                    new Button("Create PR").Primary().OnClick(() =>
-                    {
-                        var options = new Dictionary<string, object>
-                        {
-                            ["approve"] = customPrApprove.Value,
-                            ["merge"] = customPrMerge.Value && customPrApprove.Value,
-                            ["deleteBranch"] = customPrDeleteBranch.Value && customPrMerge.Value && customPrApprove.Value,
-                            ["includeArtifacts"] = customPrIncludeArtifacts.Value,
-                            ["assignee"] = customPrAssignee.Value ?? "",
-                            ["comment"] = customPrComment.Value
-                        };
-                        var serializer = new SerializerBuilder()
-                            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                            .Build();
-                        var optionsPath = Path.Combine(_selectedPlan.FolderPath, ".custom-pr-options.yaml");
-                        File.WriteAllText(optionsPath, serializer.Serialize(options));
-                        _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
-                        _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
-                        _refreshPlans();
-                        customPrOpen.Set(false);
-                    }).WithConfetti(AnimationTrigger.Click)
-                )
-            ).Width(Size.Rem(30));
-        }
+        // Dialogs
+        content |= new UpdatePlanDialog(suggestChangesOpen, suggestChangesText, _selectedPlan, _jobService, _planService, _refreshPlans);
+        content |= new CustomPrDialog(customPrOpen, _selectedPlan, _jobService, _planService, _refreshPlans, assigneesQuery);
 
         // Discard confirmation dialog
         content |= new DiscardPlanDialog(discardDialogOpen, _selectedPlan, _planService, _refreshPlans);
@@ -594,12 +431,6 @@ public class ContentView(
             | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
                 new MenuItem("Custom PR", Icon: Icons.GitPullRequest, Tag: "CustomPR").OnSelect(() =>
                 {
-                    customPrApprove.Set(true);
-                    customPrMerge.Set(true);
-                    customPrDeleteBranch.Set(true);
-                    customPrIncludeArtifacts.Set(true);
-                    customPrAssignee.Set(null);
-                    customPrComment.Set("");
                     customPrOpen.Set(true);
                 }),
                 new MenuItem("Set Completed", Icon: Icons.CircleCheck, Tag: "SetCompleted").OnSelect(() =>

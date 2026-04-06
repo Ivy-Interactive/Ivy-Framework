@@ -1,4 +1,3 @@
-using Ivy;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 
@@ -7,12 +6,12 @@ namespace Ivy.Tendril.Apps.Review.Dialogs;
 public class DiscardPlanDialog(
     IState<bool> dialogOpen,
     PlanFile selectedPlan,
-    PlanReaderService planService,
+    IPlanReaderService planService,
     Action refreshPlans) : ViewBase
 {
     private readonly IState<bool> _dialogOpen = dialogOpen;
     private readonly PlanFile _selectedPlan = selectedPlan;
-    private readonly PlanReaderService _planService = planService;
+    private readonly IPlanReaderService _planService = planService;
     private readonly Action _refreshPlans = refreshPlans;
 
     public override object? Build()

@@ -2,7 +2,7 @@ using PostHog;
 
 namespace Ivy.Tendril.Services;
 
-public class TelemetryService : IAsyncDisposable
+public class TelemetryService : ITelemetryService, IAsyncDisposable
 {
     private readonly PostHogClient? _client;
     private readonly string _distinctId;

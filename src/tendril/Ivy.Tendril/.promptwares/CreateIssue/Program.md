@@ -6,7 +6,6 @@ Create a GitHub issue from a plan.
 
 The firmware header contains:
 - **PlanFolder** — path to the plan folder
-- **ConfigPath** — absolute path to config.yaml
 - **CurrentTime** — current UTC timestamp
 - **Repo** — target repository path (local path)
 - **Assignee** — GitHub username to assign (optional, may be empty)

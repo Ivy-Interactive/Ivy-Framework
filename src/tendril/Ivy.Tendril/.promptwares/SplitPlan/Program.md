@@ -6,11 +6,10 @@ Split a multi-issue plan into separate, self-contained plans.
 
 The firmware header contains:
 - **Args** / **PlanFolder** — path to the plan folder to split
-- **ConfigPath** — absolute path to config.yaml
 - **CurrentTime** — current UTC timestamp
 
 Read the plan structure in `../.shared/Plans.md`.
-Read `config.yaml` (from `ConfigPath`) for available projects and their repos.
+Read `config.yaml` from the `TENDRIL_CONFIG` environment variable (absolute path to config.yaml) for available projects and their repos.
 
 The plans directory path can be derived from the plan folder's parent directory.
 

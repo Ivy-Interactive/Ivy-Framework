@@ -1,5 +1,3 @@
-using Ivy;
-
 namespace Ivy.Tests.Widgets;
 
 public class StackedProgressTests
@@ -109,5 +107,59 @@ public class StackedProgressTests
         var widget = new StackedProgress();
 
         Assert.Throws<NotSupportedException>(() => widget | "child");
+    }
+
+    [Fact]
+    public void OnSelect_Extension_SetsHandler()
+    {
+        var widget = new StackedProgress().OnSelect(e => ValueTask.CompletedTask);
+
+        Assert.NotNull(widget.OnSelect);
+    }
+
+    [Fact]
+    public void Selected_Extension_SetsProperty()
+    {
+        var widget = new StackedProgress().Selected(2);
+
+        Assert.Equal(2, widget.Selected);
+    }
+
+    [Fact]
+    public void Selected_Extension_WithNull_ClearsProperty()
+    {
+        var widget = new StackedProgress().Selected(2).Selected(null);
+
+        Assert.Null(widget.Selected);
+    }
+
+    [Fact]
+    public void ShowLabels_AutoEnabled_WhenSegmentHasLabel()
+    {
+        var widget = new StackedProgress(
+            new ProgressSegment(50, Label: "Segment 1")
+        );
+
+        Assert.True(widget.ShowLabels);
+    }
+
+    [Fact]
+    public void ShowLabels_CanBeExplicitlyDisabled_EvenWithLabels()
+    {
+        var widget = new StackedProgress(
+            new ProgressSegment(50, Label: "Segment 1")
+        ).ShowLabels(false);
+
+        Assert.False(widget.ShowLabels);
+    }
+
+    [Fact]
+    public void ShowLabels_RemainsFalse_WhenNoLabels()
+    {
+        var widget = new StackedProgress(
+            new ProgressSegment(50)
+        );
+
+        Assert.False(widget.ShowLabels);
     }
 }

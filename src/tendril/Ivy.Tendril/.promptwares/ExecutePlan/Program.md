@@ -7,15 +7,26 @@ Execute an approved plan in isolated git worktrees.
 The firmware header contains:
 
 - **Args** / **PlanFolder** — path to the plan folder
-- **ConfigPath** — absolute path to config.yaml
 - **CurrentTime** — current UTC timestamp
 
 Read the plan structure in `../.shared/Plans.md`.
-Read `config.yaml` (from `ConfigPath`) for project repos and context.
+Read `config.yaml` from the `TENDRIL_CONFIG` environment variable (absolute path to config.yaml) for project repos and context.
 
 The launcher script sets the working directory to the project's primary repo.
 
 **Note:** Plans are often executed multiple times. For example, a reviewer may not be satisfied with the first execution and sends the plan back to Draft with comments (via UpdatePlan). When re-executing, the worktree branch from the previous run may already exist — handle this gracefully (delete old worktree first, or create with a new branch suffix). Check for existing artifacts and verification reports from prior runs.
+
+## Time Budget Awareness
+
+**You have a 30-minute hard timeout.** Plan your time carefully:
+
+1. **Spend at most 10 minutes reading/understanding the codebase**, then start implementing. If you haven't started writing code by the 10-minute mark, simplify your approach.
+
+2. **Prefer implementing incrementally** (write code, build, fix errors) over exhaustive upfront research. You can read more code as needed during implementation.
+
+3. **If the plan involves unfamiliar patterns, look at ONE good example and follow it** — don't survey every usage in the codebase. Find a single clear reference and proceed.
+
+Focus on making progress, not achieving perfect understanding. A working implementation with minor imperfections beats a timeout with no code written.
 
 ## Execution Steps
 
@@ -41,6 +52,89 @@ If `plan.yaml` has a `dependsOn` list, for each entry:
 4. If any dependency is unmet (not completed or PRs not merged), **fail immediately** with a clear message explaining which dependency isn't ready and why.
 
 **Note:** The JobService also performs this check before launching ExecutePlan, but this step acts as a safety net in case the dependency state changed between job launch and execution.
+
+### 1.7. Validate Code State
+
+After reading the plan revision, scan it for code validation markers to detect stale plans (where the described code has already been changed by another plan).
+
+1. **Extract validation blocks** — Parse the plan revision for sections containing:
+   - Headers matching `**Current implementation**`, `**Current implementation in <file>**`, or `**Old implementation**`
+   - Fenced code blocks (` ```language ... ``` `) immediately following these headers
+   - Associated file paths (markdown links with `file:///` or inline text like `Utils.ps1:217`)
+
+2. **Validate code exists** — For each validation block found:
+   - Extract the file path from the context (header text or preceding paragraph)
+   - Convert `file:///` URLs to local paths if needed
+   - If a line range is specified (e.g., `:217-242`), read those specific lines
+   - Otherwise, read the entire file and search for the code snippet (normalize whitespace when comparing — ignore leading/trailing blank lines and trailing spaces)
+   - **Exact match** → validation passes, proceed
+   - **Not found** → validation fails, the code may have already changed
+   - **File not found** → validation fails, the file may have been deleted/moved
+
+3. **Decision logic:**
+   - **If no validation blocks found** → Skip validation, proceed to worktree creation (backward compatible)
+   - **If all validation blocks pass** → Proceed to worktree creation
+   - **If any validation fails** → Fail the plan immediately with a detailed report
+
+4. **Write validation report** — Create `<PlanFolder>/verification/PreExecution.md`:
+
+```markdown
+# PreExecution
+
+- **Date:** <CurrentTime>
+- **Result:** Pass / Fail / Skipped
+- **Blocks Found:** <number>
+
+## Validation Blocks
+
+### Block 1: <file path>
+- **Status:** Pass / Fail
+- **Expected:** (first 5 lines of expected code)
+- **Actual:** (first 5 lines of actual code, or "File not found")
+
+## Recommendation (on failure)
+
+- Review the plan against the current codebase
+- Check if this work was already completed by another plan
+- Update the plan via UpdatePlan or mark as Skipped
+```
+
+**Note:** This step runs against the original repo (before worktrees are created), since it validates whether the plan's assumptions about the codebase are still accurate.
+
+### 1.8. Auto-Commit Uncommitted Changes
+
+Before creating worktrees, check each repo for uncommitted changes and automatically commit them. This prevents silent data loss when worktrees are created from `origin/<default-branch>` and later merged back.
+
+For each repo listed in `plan.yaml` `repos` (or the project's repos from `config.yaml` if empty):
+
+```bash
+cd <repo-path>
+
+# Check for uncommitted changes (staged, unstaged, or untracked)
+if [[ -n $(git status --porcelain) ]]; then
+  echo "Found uncommitted changes in $(pwd), auto-committing..."
+  git status --short
+  
+  # Stage all changes
+  git add -A
+  
+  # Create commit with timestamp
+  git commit -m "WIP: Auto-commit before plan execution [$(date -u +%Y-%m-%dT%H:%M:%SZ)]"
+  
+  # Push to remote so worktrees created from origin/<default-branch> include these changes
+  git push origin $(git branch --show-current)
+  
+  echo "Changes committed and pushed successfully"
+fi
+```
+
+**Rationale:**
+- Worktrees branch from `origin/<default-branch>` (Step 2), so unpushed local changes won't be in the worktree base
+- When the PR merges and MakePr pulls main back, `git pull` would overwrite any uncommitted local changes
+- Auto-committing and pushing ensures all local work is preserved and visible to worktrees
+- The `WIP:` prefix makes auto-commits easily identifiable for later cleanup (squash/amend)
+
+**Note:** This step runs in the original repo directories, before worktree creation.
 
 ### 2. Create Worktrees
 
@@ -72,6 +166,84 @@ git worktree add "<PlanFolder>/worktrees/<RepoName>" -b "plan-<PlanId>-<RepoName
 ```
 
 **Important:** Always branch from `origin/<default-branch>`, not local HEAD. This ensures the PR only contains the plan's commits, not any unpushed local work.
+
+### 2.5. Setup Frontend Dependencies
+
+**!CRITICAL: Frontend builds in worktrees have known issues with `@linaria/core` and `echarts` module resolution that cause 15-25 minute timeouts. Follow this workaround to avoid them.**
+
+#### Cleanup Leftover Files
+
+Before setting up frontend dependencies, clean up any `.npmrc` files left from previous crashed runs:
+
+```bash
+pwsh -NoProfile -File "$env:TENDRIL_HOME/.promptwares/ExecutePlan/Tools/Cleanup-WorktreeFrontend.ps1" -WorktreeRoot "<PlanFolder>/worktrees"
+```
+
+This removes temporary `.npmrc` files with auth tokens while preserving tracked files.
+
+#### Default Path (Most Plans)
+
+If the plan does **NOT** modify frontend code (`.tsx`, `.ts`, `.css` files in `src/frontend/` or `src/widgets/*/frontend/`):
+
+1. **Copy pre-built artifacts** from the original repo into each worktree:
+
+```bash
+# Copy main frontend dist
+if [ -d "<original-repo-path>/src/frontend/dist" ]; then
+  mkdir -p "<worktree-path>/src/frontend"
+  cp -r "<original-repo-path>/src/frontend/dist" "<worktree-path>/src/frontend/"
+fi
+
+# Copy widget frontend dists
+for widget_dist in "<original-repo-path>"/src/widgets/*/frontend/dist; do
+  if [ -d "$widget_dist" ]; then
+    widget_name=$(basename $(dirname $(dirname "$widget_dist")))
+    mkdir -p "<worktree-path>/src/widgets/$widget_name/frontend"
+    cp -r "$widget_dist" "<worktree-path>/src/widgets/$widget_name/frontend/"
+  fi
+done
+```
+
+2. **Create `.npmrc`** in each frontend directory preemptively (in case C# tests need to load frontend resources):
+
+```bash
+# Create .npmrc in main frontend
+if [ -d "<worktree-path>/src/frontend" ]; then
+  echo "node-linker=hoisted" > "<worktree-path>/src/frontend/.npmrc"
+fi
+
+# Create .npmrc in widget frontends
+for widget_frontend in "<worktree-path>"/src/widgets/*/frontend; do
+  if [ -d "$widget_frontend" ]; then
+    echo "node-linker=hoisted" > "$widget_frontend/.npmrc"
+  fi
+done
+```
+
+3. **Skip `pnpm install`** entirely — the copied artifacts are sufficient for C# build and tests.
+
+#### Exception Path (Frontend Code Changes)
+
+If the plan **modifies frontend code** (adding/editing `.tsx`, `.ts`, `.css` files), you MUST rebuild:
+
+1. **Create `.npmrc`** with `node-linker=hoisted` in each frontend directory (required for pnpm in worktrees)
+2. **Run `pnpm install`** in each frontend directory:
+
+```bash
+cd "<worktree-path>/src/frontend" && pnpm install && cd ../..
+
+# For each widget with frontend
+for widget_frontend in "<worktree-path>"/src/widgets/*/frontend; do
+  if [ -f "$widget_frontend/package.json" ]; then
+    cd "$widget_frontend" && pnpm install && cd ../../..
+  fi
+done
+```
+
+3. **Run `pnpm run build`** to regenerate `dist/`
+4. Be prepared for resolution failures — if `pnpm install` fails after 2 attempts, document the failure and recommend the user manually fix the lockfile
+
+**Note:** The `Setup-WorktreeFrontend.ps1` tool can automate authentication and `.npmrc` creation, but by default it also runs `pnpm install`. Only use it for the Exception Path when you need a full rebuild.
 
 ### 3. Handle Cross-Repo References
 
@@ -239,7 +411,19 @@ A verification is not complete without its report. If the report file does not e
 
 ### 8. Final Clean Check
 
-After all verifications pass, run `git status` in every worktree. If there are any uncommitted files (from verification fixes, generated files, etc.), commit or discard them. The worktrees must be completely clean before finishing.
+After all verifications pass:
+
+1. Kill any remaining sample processes from the plan's artifacts directory:
+   ```bash
+   powershell.exe -NoProfile -Command "\$planFolder = '<PlanFolder>'.Replace('\\', '\\\\'); Get-Process -ErrorAction SilentlyContinue | Where-Object { \$_.Path -and \$_.Path -match [regex]::Escape(\$planFolder) -and \$_.Path -match '\\\\artifacts\\\\sample\\\\bin\\\\' } | ForEach-Object { Write-Host \"Killing zombie process: \$(\$_.ProcessName) (PID \$(\$_.Id))\"; \$_ | Stop-Process -Force -ErrorAction SilentlyContinue }"
+   ```
+
+2. Clean up temporary `.npmrc` files created in Step 2.5:
+   ```bash
+   pwsh -NoProfile -File "$env:TENDRIL_HOME/.promptwares/ExecutePlan/Tools/Cleanup-WorktreeFrontend.ps1" -WorktreeRoot "<PlanFolder>/worktrees"
+   ```
+
+3. Run `git status` in every worktree. If there are any uncommitted files (from verification fixes, generated files, etc.), commit or discard them. The worktrees must be completely clean before finishing.
 
 ### 9. Plan State
 
@@ -260,3 +444,5 @@ You are running in non-interactive mode and CANNOT ask questions. If you are uns
 - Commit messages must reference the plan ID
 - All `file:///` paths in plans should be converted to Windows paths when needed
 - Do NOT commit artifact files (screenshots, images) to the repo. Test artifacts belong in `<PlanFolder>/artifacts/` only — MakePr handles uploading them to persistent storage.
+- Private npm packages (like `@ivy-interactive/ivy-design-system`) require authentication via `.npmrc`. The Setup-WorktreeFrontend.ps1 tool handles this automatically. Credentials come from NPM_TOKEN env var or .NET user secrets (Npm:RegistryToken).
+- Do NOT use `subst` to create drive letter mappings for worktree paths. The plans directory is already symlinked to a short path to avoid long-path issues. Using `subst` creates phantom drives that are never cleaned up.

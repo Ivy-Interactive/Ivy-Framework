@@ -1,6 +1,5 @@
 using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
-using Ivy.Core.Hooks;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

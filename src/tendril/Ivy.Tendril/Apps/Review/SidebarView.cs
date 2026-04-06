@@ -1,4 +1,3 @@
-using Ivy;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 
@@ -8,25 +7,21 @@ public class SidebarView(
     List<PlanFile> plans,
     IState<PlanFile?> selectedPlanState,
     IState<string?> textFilter,
-    ConfigService config) : ViewBase
+    IConfigService config) : ViewBase
 {
     private readonly List<PlanFile> _plans = plans;
     private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
     private readonly IState<string?> _textFilter = textFilter;
-    private readonly ConfigService _config = config;
+    private readonly IConfigService _config = config;
 
-    public object BuildHeader()
-    {
-        return Layout.Vertical()
-            | _textFilter.ToSearchInput().Placeholder("Search plans...")
-            ;
-    }
-
-    public object BuildContent()
+    public override object Build()
     {
         var filteredPlans = PlanFilters.ApplyFilters(_plans, null, null, _textFilter.Value);
 
-        return new List(filteredPlans.Select(plan =>
+        var header = Layout.Vertical()
+            | _textFilter.ToSearchInput().Placeholder("Search plans...");
+
+        var content = new List(filteredPlans.Select(plan =>
         {
             var clickablePlan = plan;
             var verificationsPassed = plan.Verifications.Count > 0
@@ -41,10 +36,7 @@ public class SidebarView(
                 )
                 .OnClick(() => _selectedPlanState.Set(clickablePlan));
         }));
-    }
 
-    public override object Build()
-    {
-        return BuildContent();
+        return new HeaderLayout(header, content);
     }
 }

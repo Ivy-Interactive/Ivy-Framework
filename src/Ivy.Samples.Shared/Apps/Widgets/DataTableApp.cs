@@ -1,5 +1,3 @@
-using Ivy.Samples.Shared.Apps;
-
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
 [App(icon: Icons.DatabaseZap, group: ["Widgets"], searchHints: ["datatable", "table", "grid", "rows", "columns", "footer", "aggregation", "million", "performance"])]
@@ -111,6 +109,7 @@ public class DataTableMainSample : ViewBase
             .Group(e => e.Notes, "Other")
             .Group(e => e.OptionalId, "Other")
             .Group(e => e.Skills, "Personal")
+            .Badges(e => e.Skills, Colors.Sky)
             .Group(e => e.WidgetLink, "Links")
             .Group(e => e.ProfileLink, "Links")
 
@@ -139,13 +138,13 @@ public class DataTableMainSample : ViewBase
                 config.ShowSearch = true;
             })
             .RowActions(
-                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit).Tooltip("Edit employee"),
-                MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete).Tooltip("Delete employee"),
-                MenuItem.Default(Icons.Eye).Tag(RowAction.View).Tooltip("View details"),
+                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit).Tooltip("Edit employee").Primary(),
+                MenuItem.Default(Icons.Trash2).Tag(RowAction.Delete).Tooltip("Delete employee").Destructive(),
+                MenuItem.Default(Icons.Eye).Tag(RowAction.View).Tooltip("View details").Color(Colors.Violet),
                 MenuItem.Default(Icons.EllipsisVertical).Tag(RowAction.Menu).Tooltip("More actions")
                     .Children([
-                        MenuItem.Default(Icons.Archive).Tag(RowAction.Archive).Label("Archive"),
-                        MenuItem.Default(Icons.Download).Tag(RowAction.Export).Label("Export"),
+                        MenuItem.Default(Icons.Archive).Tag(RowAction.Archive).Label("Archive").Warning(),
+                        MenuItem.Default(Icons.Download).Tag(RowAction.Export).Label("Export").Color(Colors.Cyan),
                         MenuItem.Default(Icons.Share2).Tag(RowAction.Share).Label("Share")
                     ])
             )
@@ -202,10 +201,12 @@ public class DataTableHeaderSlotsSample : ViewBase
         }.AsQueryable();
 
         return products.ToDataTable()
-            .HeaderLeft(ctx => new Button("Export", icon: Icons.Download).Small())
+            .HeaderLeft(ctx => Layout.Horizontal().Gap(2)
+                | new Button("Export", icon: Icons.Download).Small()
+                | new Badge("Live").Color(Colors.Blue).Small())
             .HeaderRight(ctx => Layout.Horizontal().Gap(2)
-                | new Badge($"{products.Count()} items")
-                | new Button("Settings", icon: Icons.Settings).Small())
+                | new Badge($"{products.Count()} items").Color(Colors.Green).Small()
+                | new Button("Settings", icon: Icons.Settings).Primary().Small())
             .Height(Size.Units(80));
     }
 }

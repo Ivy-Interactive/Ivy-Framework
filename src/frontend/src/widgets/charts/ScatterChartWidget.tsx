@@ -286,6 +286,7 @@ const generateScatterSeries = (
         data: scatterData,
         symbol: customPath || symbol,
         symbolSize,
+        yAxisIndex: scatter.yAxisIndex ?? 0,
         itemStyle: {
           color: scatter.fill || undefined,
           opacity: scatter.fillOpacity !== null ? scatter.fillOpacity : 0.8,
@@ -384,7 +385,7 @@ const ScatterChartWidget: React.FC<ScatterChartWidgetProps> = ({
   // Memoize option configuration
   const option = useMemo(
     () => ({
-      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false),
+      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false, yAxis, xAxis),
       xAxis: generateScatterXAxis(xAxis, {
         mutedForeground: themeColors.mutedForeground,
         fontSans: themeColors.fontSans,

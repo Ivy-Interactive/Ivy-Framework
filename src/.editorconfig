@@ -3,6 +3,9 @@ root = true
 [*.cs]
 end_of_line = lf
 
+# IDE0005: Remove unnecessary using directives
+dotnet_diagnostic.IDE0005.severity = warning
+
 [*.tsx]
 end_of_line = lf
 

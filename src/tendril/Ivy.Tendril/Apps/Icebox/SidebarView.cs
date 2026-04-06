@@ -1,4 +1,3 @@
-using Ivy;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 
@@ -10,17 +9,19 @@ public class SidebarView(
     IState<string?> projectFilter,
     IState<string?> levelFilter,
     IState<string?> textFilter,
-    ConfigService config) : ViewBase
+    IConfigService config) : ViewBase
 {
     private readonly List<PlanFile> _plans = plans;
     private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
     private readonly IState<string?> _projectFilter = projectFilter;
     private readonly IState<string?> _levelFilter = levelFilter;
     private readonly IState<string?> _textFilter = textFilter;
-    private readonly ConfigService _config = config;
+    private readonly IConfigService _config = config;
 
-    public object BuildHeader()
+    public override object Build()
     {
+        var filteredPlans = PlanFilters.ApplyFilters(_plans, _projectFilter.Value, _levelFilter.Value, _textFilter.Value);
+
         var levelOptions = _config.LevelNames;
 
         var levelFilteredPlans = _plans.AsEnumerable();
@@ -33,22 +34,16 @@ public class SidebarView(
             .Select(g => new Option<string>($"{g.Key} ({g.Count()})", g.Key))
             .ToArray<IAnyOption>();
 
-        return Layout.Vertical()
+        var header = Layout.Vertical()
             | _textFilter.ToSearchInput().Placeholder("Search plans...")
             | new Expandable(
                 header: "Filters",
                 content: Layout.Vertical()
                     | _projectFilter.ToSelectInput(projectCounts).Placeholder("All Projects").Nullable().WithField().Label("Project")
                     | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().WithField().Label("Level")
-            ).Open(false).Ghost()
-            ;
-    }
+            ).Open(false).Ghost();
 
-    public object BuildContent()
-    {
-        var filteredPlans = PlanFilters.ApplyFilters(_plans, _projectFilter.Value, _levelFilter.Value, _textFilter.Value);
-
-        return new List(filteredPlans.Select(plan =>
+        var content = new List(filteredPlans.Select(plan =>
         {
             var clickablePlan = plan;
             return new ListItem($"#{plan.Id} {plan.Title}")
@@ -57,10 +52,7 @@ public class SidebarView(
                     | new Badge(plan.Level).Variant(_config.GetBadgeVariant(plan.Level)).Small())
                 .OnClick(() => _selectedPlanState.Set(clickablePlan));
         }));
-    }
 
-    public override object Build()
-    {
-        return BuildContent();
+        return new HeaderLayout(header, content);
     }
 }

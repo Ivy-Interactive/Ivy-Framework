@@ -30,6 +30,7 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
   "data-testid": dataTestId,
   width,
   events = EMPTY_ARRAY,
+  autoFocus,
 }) => {
   const validOptions = options.filter(
     (option) => option.value != null && option.value.toString().trim() !== "",
@@ -138,6 +139,7 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
           maxSelections={maxSelections}
           minSelections={minSelections}
           onNullableClear={nullable ? () => eventHandler("OnChange", id, [null]) : undefined}
+          autoFocus={autoFocus}
         />
         {(selectedMultiSelectOptions.length > 0 && !disabled) || invalid || loading ? (
           <div className={selectIconContainerVariant({ density })} style={{ zIndex: 2 }}>

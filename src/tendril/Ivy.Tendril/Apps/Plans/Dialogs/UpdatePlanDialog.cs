@@ -1,4 +1,3 @@
-using Ivy;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
@@ -7,15 +6,15 @@ public class UpdatePlanDialog(
     IState<bool> dialogOpen,
     IState<string> updateText,
     PlanFile selectedPlan,
-    JobService jobService,
-    PlanReaderService planService,
+    IJobService jobService,
+    IPlanReaderService planService,
     Action refreshPlans) : ViewBase
 {
     private readonly IState<bool> _dialogOpen = dialogOpen;
     private readonly IState<string> _updateText = updateText;
     private readonly PlanFile _selectedPlan = selectedPlan;
-    private readonly JobService _jobService = jobService;
-    private readonly PlanReaderService _planService = planService;
+    private readonly IJobService _jobService = jobService;
+    private readonly IPlanReaderService _planService = planService;
     private readonly Action _refreshPlans = refreshPlans;
 
     public override object? Build()

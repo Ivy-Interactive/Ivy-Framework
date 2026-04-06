@@ -8,11 +8,10 @@ Create GitHub pull requests and apply PR rules.
 
 The firmware header contains:
 - **PlanFolder** — path to the plan folder
-- **ConfigPath** — absolute path to config.yaml
 - **CurrentTime** — current UTC timestamp
 
 Read the plan structure in `../.shared/Plans.md`.
-Read `config.yaml` (from `ConfigPath`) for project repos and their `prRule` setting.
+Read `config.yaml` from the `TENDRIL_CONFIG` environment variable (absolute path to config.yaml) for project repos and their `prRule` setting.
 
 ## PR Rules (from config.yaml per repo)
 
@@ -20,6 +19,12 @@ Read `config.yaml` (from `ConfigPath`) for project repos and their `prRule` sett
 - **`yolo`** — Create PR → auto-merge with `--admin` → delete remote branch → pull default branch into the original local repo
 
 ## Execution Steps
+
+### 0. Check Plan State
+
+Before processing, read `plan.yaml` and check the `state` field:
+- If `state: Completed`, the plan was already processed. Exit early with a message indicating the plan is already completed and showing the existing PR URLs from the `prs` list.
+- Otherwise, proceed with step 1.
 
 ### 1. Read Plan
 

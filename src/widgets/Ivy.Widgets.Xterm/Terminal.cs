@@ -1,6 +1,3 @@
-using Ivy;
-using Ivy.Core;
-
 namespace Ivy.Widgets.Xterm;
 
 public record TerminalSize(int Cols, int Rows);

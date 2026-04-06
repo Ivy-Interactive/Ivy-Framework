@@ -1,7 +1,3 @@
-using Ivy;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
-
 namespace Ivy.Tendril.Services;
 
 public record RepoConfig
@@ -90,6 +86,7 @@ public class TendrilSettings
     public string AgentCommand { get; set; } = "claude";
     public int JobTimeout { get; set; } = 30;
     public int StaleOutputTimeout { get; set; } = 10;
+    public int MaxConcurrentJobs { get; set; } = 5;
     public List<ProjectConfig> Projects { get; set; } = new();
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
@@ -106,12 +103,14 @@ public class TendrilSettings
     };
 }
 
-public class ConfigService
+public class ConfigService : IConfigService
 {
-    private readonly TendrilSettings _settings;
-    private readonly string _configPath;
-    private readonly string _tendrilHome;
+    private TendrilSettings _settings;
+    private string _configPath;
+    private string _tendrilHome;
     private string? _pendingTendrilHome;
+    private ProjectConfig? _pendingProject;
+    private string[]? _levelNamesCache;
 
     internal ConfigService(TendrilSettings settings, string tendrilHome = "")
     {
@@ -126,9 +125,14 @@ public class ConfigService
 
     public ConfigService()
     {
-        // TENDRIL_HOME is required
-        var tendrilHomeEnv = Environment.GetEnvironmentVariable("TENDRIL_HOME");
-        // If TENDRIL_HOME is not set, trigger onboarding
+        var tendrilHomeEnv = Environment.GetEnvironmentVariable("TENDRIL_HOME")?.Trim();
+
+        // Remove quotes if present
+        if (!string.IsNullOrEmpty(tendrilHomeEnv) && tendrilHomeEnv.StartsWith("\"") && tendrilHomeEnv.EndsWith("\""))
+        {
+            tendrilHomeEnv = tendrilHomeEnv.Substring(1, tendrilHomeEnv.Length - 2);
+        }
+
         if (string.IsNullOrEmpty(tendrilHomeEnv))
         {
             NeedsOnboarding = true;
@@ -139,44 +143,33 @@ public class ConfigService
         }
 
         _tendrilHome = tendrilHomeEnv;
-
-        // Determine config path: TENDRIL_HOME/config.yaml
         _configPath = Path.Combine(_tendrilHome, "config.yaml");
 
-        // Load config if it exists
         if (File.Exists(_configPath))
         {
-            var yaml = File.ReadAllText(_configPath);
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-            _settings = deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
+            try
+            {
+                var yaml = File.ReadAllText(_configPath);
+                _settings = YamlHelper.Deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
+                NeedsOnboarding = false;
+            }
+            catch (Exception)
+            {
+                NeedsOnboarding = true;
+                _settings = new TendrilSettings();
+            }
         }
         else
         {
-            // No config file exists - need onboarding
             NeedsOnboarding = true;
             _settings = new TendrilSettings();
             return;
         }
 
-        NeedsOnboarding = false;
-
         if (_settings != null && !NeedsOnboarding)
         {
-            // Initialize user secrets - check TENDRIL_HOME if it has a .csproj
-            var secretsDirectory = Path.GetDirectoryName(_configPath) ?? System.AppContext.BaseDirectory;
-            if (!string.IsNullOrEmpty(_tendrilHome) && Directory.Exists(_tendrilHome))
-            {
-                var tendrilCsproj = Directory.GetFiles(_tendrilHome, "*.csproj", SearchOption.TopDirectoryOnly);
-                if (tendrilCsproj.Length > 0)
-                {
-                    secretsDirectory = _tendrilHome;
-                }
-            }
-            VariableExpansion.InitializeUserSecrets(secretsDirectory);
-
-            // Expand variables in settings
+            // Initialize basic stuff
+            VariableExpansion.InitializeUserSecrets(_tendrilHome);
             ExpandSettingsVariables();
 
             // Expand repo paths
@@ -194,7 +187,7 @@ public class ConfigService
                 }
             }
 
-            // Ensure all required directories exist
+            // Ensure directories exist
             Directory.CreateDirectory(_tendrilHome);
             Directory.CreateDirectory(Path.Combine(_tendrilHome, "Inbox"));
             Directory.CreateDirectory(Path.Combine(_tendrilHome, "Plans"));
@@ -206,10 +199,23 @@ public class ConfigService
 
     public TendrilSettings Settings => _settings;
     public string TendrilHome => _tendrilHome;
+    public string ConfigPath => _configPath;
     public string PlanFolder => string.IsNullOrEmpty(_tendrilHome) ? "" : Path.Combine(_tendrilHome, "Plans");
     public List<ProjectConfig> Projects => _settings.Projects;
+    // Levels are returned in the order defined in config.yaml (not sorted).
+    // Users can reorder levels in the Settings UI, and the order is preserved.
     public List<LevelConfig> Levels => _settings.Levels;
-    public string[] LevelNames => _settings.Levels.Select(l => l.Name).ToArray();
+    public string[] LevelNames
+    {
+        get
+        {
+            if (_levelNamesCache == null)
+            {
+                _levelNamesCache = _settings.Levels.Select(l => l.Name).ToArray();
+            }
+            return _levelNamesCache;
+        }
+    }
     public EditorConfig Editor => _settings.Editor;
     public ProjectConfig? GetProject(string name) => _settings.Projects.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
@@ -224,11 +230,8 @@ public class ConfigService
 
     public void SaveSettings()
     {
-        var serializer = new SerializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
-            .Build();
-        var yaml = serializer.Serialize(_settings);
+        _levelNamesCache = null;
+        var yaml = YamlHelper.SerializerCompact.Serialize(_settings);
         File.WriteAllText(_configPath, yaml);
     }
 
@@ -244,24 +247,53 @@ public class ConfigService
         return _pendingTendrilHome;
     }
 
+    public void SetPendingProject(ProjectConfig project)
+    {
+        _pendingProject = project;
+    }
+
+    public ProjectConfig? GetPendingProject()
+    {
+        return _pendingProject;
+    }
+
+    internal void SetTendrilHome(string tendrilHome)
+    {
+        _tendrilHome = tendrilHome;
+        _configPath = Path.Combine(_tendrilHome, "config.yaml");
+
+        // Load config if it exists at the new path
+        if (File.Exists(_configPath))
+        {
+            var yaml = File.ReadAllText(_configPath);
+            var loadedSettings = YamlHelper.Deserializer.Deserialize<TendrilSettings>(yaml);
+            if (loadedSettings != null)
+            {
+                _settings = loadedSettings;
+            }
+        }
+
+        _levelNamesCache = null;
+        VariableExpansion.InitializeUserSecrets(_tendrilHome);
+        ExpandSettingsVariables();
+    }
+
     public void CompleteOnboarding(string tendrilHome)
     {
-        // Create tendril home directory structure
-        Directory.CreateDirectory(tendrilHome);
-        Directory.CreateDirectory(Path.Combine(tendrilHome, "Inbox"));
-        Directory.CreateDirectory(Path.Combine(tendrilHome, "Plans"));
-        Directory.CreateDirectory(Path.Combine(tendrilHome, "Trash"));
-        Directory.CreateDirectory(Path.Combine(tendrilHome, "Promptwares"));
-        Directory.CreateDirectory(Path.Combine(tendrilHome, "Hooks"));
+        // Update paths
+        SetTendrilHome(tendrilHome);
 
-        // Save config to tendrilHome
-        var newConfigPath = Path.Combine(tendrilHome, "config.yaml");
-        var serializer = new SerializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
-            .Build();
-        var yaml = serializer.Serialize(_settings);
-        File.WriteAllText(newConfigPath, yaml);
+        // Ensure directories exist
+        Directory.CreateDirectory(_tendrilHome);
+        Directory.CreateDirectory(Path.Combine(_tendrilHome, "Inbox"));
+        Directory.CreateDirectory(Path.Combine(_tendrilHome, "Plans"));
+        Directory.CreateDirectory(Path.Combine(_tendrilHome, "Trash"));
+        Directory.CreateDirectory(Path.Combine(_tendrilHome, "Promptwares"));
+        Directory.CreateDirectory(Path.Combine(_tendrilHome, "Hooks"));
+
+        // Use current settings (already initialized or updated during onboarding)
+        // If they are empty, serialize defaults
+        SaveSettings();
 
         NeedsOnboarding = false;
     }
@@ -355,7 +387,7 @@ public class ConfigService
 
 public static class ProjectBadgeExtensions
 {
-    public static Badge WithProjectColor(this Badge badge, ConfigService config, string projectName)
+    public static Badge WithProjectColor(this Badge badge, IConfigService config, string projectName)
     {
         var color = config.GetProjectColor(projectName);
         return color.HasValue ? badge.Color(color.Value) : badge;

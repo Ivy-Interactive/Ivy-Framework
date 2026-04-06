@@ -1,5 +1,3 @@
-using System.Text.Json;
-using Ivy;
 using Ivy.Core;
 
 namespace Ivy.Tests.Widgets.Charts;

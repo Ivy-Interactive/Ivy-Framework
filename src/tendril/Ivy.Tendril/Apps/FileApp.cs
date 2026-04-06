@@ -1,10 +1,8 @@
-using Ivy;
-
 namespace Ivy.Tendril.Apps;
 
 public record FileAppArgs(string Url);
 
-[App(title: "File", icon: Icons.File, isVisible: false)]
+[App(title: "File", icon: Icons.File, isVisible: false, allowDuplicateTabs: true)]
 public class FileApp : ViewBase
 {
     private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -36,6 +34,10 @@ public class FileApp : ViewBase
         { ".config", Languages.Xml },
         { ".csproj", Languages.Xml },
         { ".sln", Languages.Text },
+        { ".ps1", Languages.Powershell },
+        { ".psm1", Languages.Powershell },
+        { ".sh", Languages.Bash },
+        { ".bash", Languages.Bash },
     };
 
     public static Languages GetLanguage(string extension)

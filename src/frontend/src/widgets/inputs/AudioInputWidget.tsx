@@ -12,6 +12,7 @@ import {
   timerSizeVariant,
   iconSizeVariant,
 } from "@/components/ui/input/audio-input-variant";
+import { uploadFile } from "@/widgets/filePicker/shared";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface AudioInputWidgetProps {
@@ -27,6 +28,7 @@ interface AudioInputWidgetProps {
   sampleRate?: number | null;
   density?: Densities;
   invalid?: string;
+  autoFocus?: boolean;
 }
 
 const supportedMimeTypes = [
@@ -52,8 +54,18 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
   density = Densities.Medium,
   events = EMPTY_ARRAY,
   invalid,
+  autoFocus,
 }) => {
   const eventHandler = useEventHandler();
+  const hasAutoFocusedRef = useRef(false);
+
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      setRecording(true);
+      setError(false);
+    }
+  }, [autoFocus, disabled]);
   const normalizedMimeTypes = useMemo(() => {
     const candidates: string[] = [];
     const addCandidate = (value?: string) => {
@@ -75,33 +87,13 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
     async (chunk: Blob): Promise<void> => {
       if (!uploadUrl) return;
 
-      // Get the correct host from meta tag or use relative URL
-      const getUploadUrl = () => {
-        const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-        if (ivyHostMeta) {
-          const host = ivyHostMeta.getAttribute("content");
-          return host + uploadUrl;
-        }
-        // If no meta tag, use relative URL (should work in production)
-        return uploadUrl;
-      };
-
       const selectedMime =
         selectedMimeTypeRef.current ?? normalizedMimeTypes[0] ?? supportedMimeTypes[0];
 
-      const formData = new FormData();
-      formData.append("file", chunk);
-      formData.append("mimeType", selectedMime);
-
       try {
-        const response = await fetch(getUploadUrl(), {
-          method: "POST",
-          body: formData,
+        await uploadFile(uploadUrl, chunk, {
+          extraFields: { mimeType: selectedMime },
         });
-
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
-        }
       } catch (error) {
         logger.error("File upload error:", error);
       }
@@ -266,6 +258,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
               }
         }
         role="button"
+        aria-label={recording ? "Stop recording" : "Start recording"}
         tabIndex={disabled ? -1 : 0}
         onBlur={(e) => {
           if (disabled) return;

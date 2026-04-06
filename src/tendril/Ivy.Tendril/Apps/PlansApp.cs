@@ -1,19 +1,18 @@
 using System.Reactive.Disposables;
-using Ivy;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Drafts", icon: Icons.Feather, group: new[] { "Tools" }, order: 10)]
+[App(title: "Drafts", icon: Icons.Feather, group: new[] { "Tools" }, order: MenuOrder.Drafts)]
 public class PlansApp : ViewBase
 {
     public override object? Build()
     {
-        var planService = UseService<PlanReaderService>();
-        var jobService = UseService<JobService>();
-        var configService = UseService<ConfigService>();
-        var planWatcher = UseService<PlanWatcherService>();
+        var planService = UseService<IPlanReaderService>();
+        var jobService = UseService<IJobService>();
+        var configService = UseService<IConfigService>();
+        var planWatcher = UseService<IPlanWatcherService>();
         var selectedPlanState = UseState<PlanFile?>(null);
         var projectFilter = UseState<string?>(null);
         var levelFilter = UseState<string?>(null);
@@ -30,9 +29,14 @@ public class PlansApp : ViewBase
         var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
 
         var plans = planService.GetPlans()
-            .Where(p => p.Status is PlanStatus.Draft or PlanStatus.Failed)
+            .Where(p => p.Status == PlanStatus.Draft)
             .ToList();
         var filteredPlans = PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value).ToList();
+
+        if (selectedPlanState.Value == null && filteredPlans.Count > 0)
+        {
+            selectedPlanState.Set(filteredPlans[0]);
+        }
 
         if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
@@ -60,8 +64,7 @@ public class PlansApp : ViewBase
 
         return new SidebarLayout(
             mainContent: new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
-            sidebarContent: sidebar,
-            sidebarHeader: sidebar.BuildHeader()
+            sidebarContent: sidebar
         );
     }
 }

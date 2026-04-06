@@ -1,12 +1,6 @@
-using System.Collections.Immutable;
-using System.Linq;
 using System.Threading.Tasks;
-using Ivy.Analyser.Analyzers;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Xunit;
-using VerifyCS = Microsoft.CodeAnalysis.CSharp.Testing.XUnit.AnalyzerVerifier<
+using VerifyCS = Ivy.Analyser.Test.CSharpAnalyzerVerifier<
     Ivy.Analyser.Analyzers.UseEffectTaskAnalyzer>;
 
 namespace Ivy.Analyser.Test;
@@ -33,30 +27,6 @@ static class UseEffectExtensions
 }
 ";
 
-    private static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source)
-    {
-        var syntaxTree = CSharpSyntaxTree.ParseText(source);
-        var references = new[]
-        {
-            MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(System.IAsyncDisposable).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(Task).Assembly.Location),
-        };
-
-        // Add runtime assembly references
-        var runtimeDir = System.IO.Path.GetDirectoryName(typeof(object).Assembly.Location)!;
-        var runtimeRef = MetadataReference.CreateFromFile(System.IO.Path.Combine(runtimeDir, "System.Runtime.dll"));
-
-        var compilation = CSharpCompilation.Create("TestAssembly",
-            new[] { syntaxTree },
-            references.Append(runtimeRef),
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-        var analyzer = new UseEffectTaskAnalyzer();
-        var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
-        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-    }
-
     [Fact]
     public async Task ContinueWith_InsideUseEffect_ReportsDiagnostic()
     {
@@ -66,17 +36,14 @@ public class MyView : Ivy.ViewBase
     public override object Build()
     {
         this.UseEffect(() => {
-            Task.Delay(300).ContinueWith(_ => { });
-            return null;
+            {|IVYEFFECT001:Task.Delay(300).ContinueWith(_ => { })|};
+            return (IDisposable)null;
         });
         return null;
     }
 }
 ";
-        var diagnostics = await GetDiagnosticsAsync(test);
-        var ivyDiag = diagnostics.Where(d => d.Id == "IVYEFFECT001").ToArray();
-        Assert.Single(ivyDiag);
-        Assert.Equal(DiagnosticSeverity.Warning, ivyDiag[0].Severity);
+        await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
     [Fact]
@@ -142,15 +109,13 @@ public class MyView : Ivy.ViewBase
     {
         var x = 1;
         this.UseEffect(() => {
-            Task.Delay(300).ContinueWith(_ => { });
-            return null;
+            {|IVYEFFECT001:Task.Delay(300).ContinueWith(_ => { })|};
+            return (IDisposable)null;
         }, x);
         return null;
     }
 }
 ";
-        var diagnostics = await GetDiagnosticsAsync(test);
-        var ivyDiag = diagnostics.Where(d => d.Id == "IVYEFFECT001").ToArray();
-        Assert.Single(ivyDiag);
+        await VerifyCS.VerifyAnalyzerAsync(test);
     }
 }

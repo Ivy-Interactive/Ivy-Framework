@@ -2,11 +2,16 @@ import React, { useMemo, useRef } from "react";
 import { CustomRenderer, DataEditorRef } from "@glideapps/glide-data-grid";
 import { useTable } from "../dataTableContext";
 import { getSelectionProps } from "../utils/selectionModes";
-import { iconCellRenderer, linkCellRenderer } from "../utils/customRenderers";
+import {
+  iconCellRenderer,
+  labelsBadgesCellRenderer,
+  linkCellRenderer,
+} from "../utils/customRenderers";
 import { generateHeaderIcons, addStandardIcons } from "../utils/headerIcons";
 import {
   useContainerSize,
   useSearch,
+  useSearchNavigation,
   useTableTheme,
   useGridSelection,
   useCellInteractions,
@@ -91,7 +96,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   });
 
   // Grid selection
-  const { gridSelection, handleGridSelectionChange } = useGridSelection({
+  const { gridSelection, handleGridSelectionChange, setGridSelection } = useGridSelection({
     visibleRows,
     getCellContent,
   });
@@ -117,12 +122,21 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     });
 
   // Table theme
-  const { tableTheme, getRowThemeOverride } = useTableTheme({
+  const { tableTheme, getRowThemeOverride, isDark } = useTableTheme({
     showVerticalBorders: showVerticalBorders ?? false,
     enableRowHover: enableRowHover ?? false,
     visibleRows,
     hoverRow,
   });
+
+  const { onSearchResultsChanged, onSearchClose, highlightRegions } = useSearchNavigation(
+    gridRef,
+    containerRef,
+    setGridSelection,
+    isDark,
+    showSearch,
+    setShowSearch,
+  );
 
   const { emptyRowsCount, totalRows } = useEmptyRows({
     scrollContainerHeight,
@@ -212,7 +226,13 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       columns={finalColumns}
       rows={totalRows}
       getCellContent={getCellContent}
-      customRenderers={[iconCellRenderer, linkCellRenderer] as unknown as readonly CustomRenderer[]}
+      customRenderers={
+        [
+          iconCellRenderer,
+          linkCellRenderer,
+          labelsBadgesCellRenderer,
+        ] as unknown as readonly CustomRenderer[]
+      }
       headerIcons={headerIcons}
       onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
       onVisibleRegionChanged={handleVisibleRegionChanged}
@@ -238,7 +258,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       onCellActivated={handleCellActivated}
       onGroupHeaderClicked={shouldUseColumnGroups ? onGroupHeaderClicked : undefined}
       showSearch={showSearchConfig ? showSearch : false}
-      onSearchClose={() => setShowSearch(false)}
+      onSearchClose={onSearchClose}
+      onSearchResultsChanged={showSearchConfig ? onSearchResultsChanged : undefined}
+      highlightRegions={showSearchConfig ? highlightRegions : undefined}
       onItemHovered={enableRowHover ? onItemHovered : undefined}
       getRowThemeOverride={enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined}
       rowActions={rowActions}

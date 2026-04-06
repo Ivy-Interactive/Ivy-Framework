@@ -1,21 +1,21 @@
-using Ivy.Tendril.Apps.Plans;
+using Ivy.Tendril.Apps.Jobs;
 
 namespace Ivy.Tendril.Services;
 
-public record PlanCounts(int Drafts, int RunningJobs, int Reviews, int Icebox, int Recommendations);
+public record PlanCounts(int Drafts, int ActiveJobs, int Reviews, int Icebox, int Recommendations);
 
-public class PlanCountsService : IDisposable
+public class PlanCountsService : IPlanCountsService, IDisposable
 {
-    private readonly PlanReaderService _planReaderService;
-    private readonly JobService _jobService;
-    private readonly PlanWatcherService _planWatcher;
+    private readonly IPlanReaderService _planReaderService;
+    private readonly IJobService _jobService;
+    private readonly IPlanWatcherService _planWatcher;
     private PlanCounts _current;
 
     public event Action? CountsChanged;
 
     public PlanCounts Current => _current;
 
-    public PlanCountsService(PlanReaderService planReaderService, JobService jobService, PlanWatcherService planWatcher)
+    public PlanCountsService(IPlanReaderService planReaderService, IJobService jobService, IPlanWatcherService planWatcher)
     {
         _planReaderService = planReaderService;
         _jobService = jobService;
@@ -27,6 +27,7 @@ public class PlanCountsService : IDisposable
 
     private void OnSourceChanged()
     {
+        _planReaderService.InvalidateCaches();
         Refresh();
     }
 
@@ -42,14 +43,15 @@ public class PlanCountsService : IDisposable
 
     private PlanCounts ComputeCounts()
     {
-        var plans = _planReaderService.GetPlans();
+        var snapshot = _planReaderService.ComputePlanCounts();
         var jobs = _jobService.GetJobs();
+
         return new PlanCounts(
-            Drafts: plans.Count(p => p.Status == PlanStatus.Draft),
-            RunningJobs: jobs.Count(j => j.Status == "Running"),
-            Reviews: plans.Count(p => p.Status is PlanStatus.ReadyForReview or PlanStatus.Failed),
-            Icebox: plans.Count(p => p.Status == PlanStatus.Icebox),
-            Recommendations: _planReaderService.GetPendingRecommendationsCount()
+            Drafts: snapshot.Drafts,
+            ActiveJobs: jobs.Count(j => j.Status == JobStatus.Running || j.Status == JobStatus.Queued),
+            Reviews: snapshot.ReadyForReview + snapshot.Failed,
+            Icebox: snapshot.Icebox,
+            Recommendations: snapshot.PendingRecommendations
         );
     }
 

@@ -7,5 +7,6 @@ public record PrRow
     public string Repository { get; init; } = "";
     public string Pr { get; init; } = "";
     public string Plan { get; init; } = "";
+    public string Cost { get; init; } = "";
     public string PlanFolderPath { get; init; } = "";
 }

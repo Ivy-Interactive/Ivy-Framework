@@ -1,4 +1,3 @@
-using Ivy.Core;
 using Ivy.Core.Apps;
 using Ivy.Core.Helpers;
 using Ivy.Core.HttpTunneling;
@@ -23,6 +22,7 @@ public class AuthController() : Controller
         [FromQuery] string callbackId,
         [FromQuery] string connectionId,
         [FromServices] AppSessionStore sessionStore,
+        [FromServices] ServerArgs serverArgs,
         [FromServices] ILogger<AuthController> logger)
     {
         if (string.IsNullOrWhiteSpace(optionId) || string.IsNullOrWhiteSpace(callbackId) || string.IsNullOrWhiteSpace(connectionId))
@@ -60,7 +60,7 @@ public class AuthController() : Controller
             scheme = forwardedProto.ToString();
         }
         var host = HttpContext.Request.Host.Value ?? throw new InvalidOperationException("Host not found in request");
-        var callback = WebhookEndpoint.CreateAuthCallback(callbackId, scheme, host);
+        var callback = WebhookEndpoint.CreateAuthCallback(callbackId, scheme, host, serverArgs.BasePath);
 
         try
         {
@@ -87,6 +87,7 @@ public class AuthController() : Controller
         [FromServices] IOAuthCallbackRegistry registry,
         [FromServices] IAuthProvider authProvider,
         [FromServices] AppSessionStore sessionStore,
+        [FromServices] ServerArgs serverArgs,
         [FromServices] ILogger<AuthController> logger)
     {
         var effectiveId = callbackId ?? state;
@@ -142,7 +143,9 @@ public class AuthController() : Controller
             cookies.AddCookiesForBrokeredSessions(tempSession.BrokeredSessions);
             cookies.WriteToResponse(Response);
 
-            return Redirect("/?oauthLogin=1");
+            var path = (serverArgs.BasePath ?? "").Trim().Replace('\\', '/').TrimStart('/').TrimEnd('/');
+            var redirectUrl = string.IsNullOrEmpty(path) ? "/?oauthLogin=1" : $"/{path}/?oauthLogin=1";
+            return LocalRedirect(redirectUrl);
         }
         catch (Exception ex)
         {

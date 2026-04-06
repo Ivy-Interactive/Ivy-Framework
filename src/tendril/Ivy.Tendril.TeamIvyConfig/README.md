@@ -46,7 +46,63 @@ dotnet user-secrets list
 
 **Note:** The `TeamIvyConfig.csproj` file in this folder contains the `UserSecretsId` needed for .NET user secrets to work.
 
-### 3. Run Tendril
+### 3. Configure Slack Notifications (Optional)
+
+Tendril can send Slack notifications when PRs are created using the `notify` CLI tool and hook scripts.
+
+#### Install notify CLI
+
+Install the `notify` CLI tool as a .NET global tool:
+
+```bash
+dotnet tool install -g notify.console
+```
+
+#### Configure Slack Webhook
+
+1. Create a Slack app and incoming webhook by following the [Slack webhooks guide](https://api.slack.com/messaging/webhooks).
+2. Copy the webhook URL for your target channel.
+3. Configure a profile in the `notify` tool for your channel (e.g. `done-by-niels`):
+
+```bash
+notify config slack done-by-niels --webhook-url "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+```
+
+The profile name should match the `$slackChannel` variable in `Hooks/NotifySlack.ps1`.
+
+#### Testing
+
+Verify the setup by sending a test message:
+
+```bash
+notify slack done-by-niels --message "Test message from Tendril"
+```
+
+#### How it works
+
+The `config.yaml` `hooks` section defines a `SlackNotify` hook that runs **after** the `MakePr` promptware completes:
+
+```yaml
+hooks:
+- name: SlackNotify
+  when: after
+  promptwares:
+  - MakePr
+  action: pwsh -NoProfile -File Hooks/NotifySlack.ps1
+```
+
+The `NotifySlack.ps1` script receives these environment variables:
+- `TENDRIL_PLAN_FOLDER` — path to the plan being processed
+- `TENDRIL_JOB_STATUS` — the job's completion status
+- `TENDRIL_CONFIG` — path to config.yaml
+
+It reads `plan.yaml` to extract the plan title, project name, and PR URLs, then sends a formatted Slack message that includes:
+- Plan title and project name (with the project's `slackEmoji` from config)
+- Clickable PR links
+- A screenshot from `artifacts/screenshots/` if one exists (uploaded to blob storage)
+- An optional comment from `.custom-pr-options.yaml` (`slackComment` field)
+
+### 4. Run Tendril
 
 ```bash
 # From the Ivy.Tendril application directory

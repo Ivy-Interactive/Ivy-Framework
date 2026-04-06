@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { parseShortcut, keyToCode } from "../utils/shortcut";
+import { parseShortcut, keyToCode } from "@/lib/shortcut";
 
 interface UseShortcutKeyParams {
   shortcutKey: string | undefined;

@@ -1,5 +1,4 @@
 using Ivy;
-using Microsoft.AspNetCore.Mvc;
 
 namespace BasicAuthExample;
 

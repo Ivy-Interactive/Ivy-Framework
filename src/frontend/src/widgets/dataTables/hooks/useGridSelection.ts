@@ -59,5 +59,6 @@ export const useGridSelection = ({ visibleRows, getCellContent }: UseGridSelecti
   return {
     gridSelection,
     handleGridSelectionChange,
+    setGridSelection,
   };
 };

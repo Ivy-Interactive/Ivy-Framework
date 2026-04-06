@@ -1,6 +1,4 @@
 using Ivy.Tendril.Services;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Ivy.Tendril.Test;
 
@@ -36,24 +34,31 @@ projects:
       Another test context.
 ";
 
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-        var settings = deserializer.Deserialize<TendrilSettings>(yaml);
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings(), "");
 
-        Assert.NotNull(settings);
-        Assert.Equal(2, settings.Projects.Count);
+        try
+        {
+            service.SetTendrilHome(tempDir);
 
-        var project1 = settings.Projects[0];
-        Assert.Equal("TestProject", project1.Name);
-        Assert.Single(project1.Repos);
-        Assert.Equal(@"D:\Repos\Test", project1.Repos[0].Path);
-        Assert.Contains("Test context for the project", project1.Context);
+            Assert.NotNull(service.Settings);
+            Assert.Equal(2, service.Settings.Projects.Count);
 
-        var project2 = settings.Projects[1];
-        Assert.Equal("AnotherProject", project2.Name);
-        Assert.Equal(2, project2.Repos.Count);
-        Assert.Contains("Another test context", project2.Context);
+            var project1 = service.Settings.Projects[0];
+            Assert.Equal("TestProject", project1.Name);
+            Assert.Single(project1.Repos);
+            Assert.Equal(@"D:\Repos\Test", project1.Repos[0].Path);
+            Assert.Contains("Test context for the project", project1.Context);
+
+            var project2 = service.Settings.Projects[1];
+            Assert.Equal("AnotherProject", project2.Name);
+            Assert.Equal(2, project2.Repos.Count);
+            Assert.Contains("Another test context", project2.Context);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
     }
 
     [Fact]
@@ -63,14 +68,21 @@ projects:
 agentCommand: claude
 ";
 
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-        var settings = deserializer.Deserialize<TendrilSettings>(yaml);
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings(), "");
 
-        Assert.NotNull(settings);
-        Assert.NotNull(settings.Projects);
-        Assert.Empty(settings.Projects);
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            Assert.NotNull(service.Settings);
+            Assert.NotNull(service.Settings.Projects);
+            Assert.Empty(service.Settings.Projects);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
     }
 
     [Fact]
@@ -90,25 +102,32 @@ projects:
     context: Agent context
 ";
 
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-        var settings = deserializer.Deserialize<TendrilSettings>(yaml);
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings(), "");
 
-        // Test exact match
-        var project = settings.Projects.FirstOrDefault(p => p.Name.Equals("IvyFramework", StringComparison.OrdinalIgnoreCase));
-        Assert.NotNull(project);
-        Assert.Equal("IvyFramework", project.Name);
-        Assert.Contains("Framework context", project.Context);
+        try
+        {
+            service.SetTendrilHome(tempDir);
 
-        // Test case-insensitive match
-        var project2 = settings.Projects.FirstOrDefault(p => p.Name.Equals("ivyagent", StringComparison.OrdinalIgnoreCase));
-        Assert.NotNull(project2);
-        Assert.Equal("IvyAgent", project2.Name);
+            // Test exact match
+            var project = service.Settings.Projects.FirstOrDefault(p => p.Name.Equals("IvyFramework", StringComparison.OrdinalIgnoreCase));
+            Assert.NotNull(project);
+            Assert.Equal("IvyFramework", project.Name);
+            Assert.Contains("Framework context", project.Context);
 
-        // Test non-existent project
-        var project3 = settings.Projects.FirstOrDefault(p => p.Name.Equals("NonExistent", StringComparison.OrdinalIgnoreCase));
-        Assert.Null(project3);
+            // Test case-insensitive match
+            var project2 = service.Settings.Projects.FirstOrDefault(p => p.Name.Equals("ivyagent", StringComparison.OrdinalIgnoreCase));
+            Assert.NotNull(project2);
+            Assert.Equal("IvyAgent", project2.Name);
+
+            // Test non-existent project
+            var project3 = service.Settings.Projects.FirstOrDefault(p => p.Name.Equals("NonExistent", StringComparison.OrdinalIgnoreCase));
+            Assert.Null(project3);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
     }
 
     [Fact]
@@ -130,22 +149,30 @@ projects:
         action: 'start docs/index.html'
 ";
 
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-        var settings = deserializer.Deserialize<TendrilSettings>(yaml);
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings(), "");
 
-        Assert.NotNull(settings);
-        var project = settings.Projects[0];
-        Assert.Equal(2, project.ReviewActions.Count);
+        try
+        {
+            service.SetTendrilHome(tempDir);
 
-        Assert.Equal("Sample", project.ReviewActions[0].Name);
-        Assert.Contains("Test-Path", project.ReviewActions[0].Condition);
-        Assert.Equal("dotnet run --browse", project.ReviewActions[0].Action);
+            Assert.NotNull(service.Settings);
+            var project = service.Settings.Projects[0];
+            Assert.Equal(2, project.ReviewActions.Count);
 
-        Assert.Equal("Open Docs", project.ReviewActions[1].Name);
-        Assert.Empty(project.ReviewActions[1].Condition);
-        Assert.Equal("start docs/index.html", project.ReviewActions[1].Action);
+            Assert.Equal("Sample", project.ReviewActions[0].Name);
+            Assert.Contains("Test-Path", project.ReviewActions[0].Condition);
+            Assert.Equal("dotnet run --browse", project.ReviewActions[0].Action);
+
+            Assert.Equal("Open Docs", project.ReviewActions[1].Name);
+            Assert.Empty(project.ReviewActions[1].Condition);
+            Assert.Contains("start docs", project.ReviewActions[1].Action);
+            Assert.Contains("index.html", project.ReviewActions[1].Action);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
     }
 
     [Fact]
@@ -160,14 +187,118 @@ projects:
       - path: D:\Repos\Test
 ";
 
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-        var settings = deserializer.Deserialize<TendrilSettings>(yaml);
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings(), "");
 
-        Assert.NotNull(settings);
-        var project = settings.Projects[0];
-        Assert.NotNull(project.ReviewActions);
-        Assert.Empty(project.ReviewActions);
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            Assert.NotNull(service.Settings);
+            var project = service.Settings.Projects[0];
+            Assert.NotNull(project.ReviewActions);
+            Assert.Empty(project.ReviewActions);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void Constructor_IgnoresUnknownYamlKeys()
+    {
+        var tempDir = CreateTempConfigFile(@"
+agentCommand: claude
+unknownKey: someValue
+projects:
+  - name: Test
+    color: Blue
+    repos: []
+    verifications: []
+");
+
+        var previousHome = Environment.GetEnvironmentVariable("TENDRIL_HOME");
+        Environment.SetEnvironmentVariable("TENDRIL_HOME", tempDir);
+
+        try
+        {
+            var service = new ConfigService();
+
+            Assert.NotNull(service.Settings);
+            Assert.Equal("claude", service.Settings.AgentCommand);
+            Assert.False(service.NeedsOnboarding);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("TENDRIL_HOME", previousHome);
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void SetTendrilHome_IgnoresUnknownYamlKeys()
+    {
+        var tempDir = CreateTempConfigFile(@"
+agentCommand: test-agent
+anotherUnknownKey: anotherValue
+projects:
+  - name: TestProject
+    color: Red
+    repos: []
+    verifications: []
+");
+
+        var service = new ConfigService(new TendrilSettings { AgentCommand = "initial" }, "");
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            Assert.NotNull(service.Settings);
+            Assert.Equal("test-agent", service.Settings.AgentCommand);
+            Assert.Equal(tempDir, service.TendrilHome);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void Constructor_And_SetTendrilHome_BehaviorIsConsistent()
+    {
+        var tempDir = CreateTempConfigFile(@"
+agentCommand: consistent-agent
+unknownField: ignored
+maxConcurrentJobs: 10
+projects: []
+verifications: []
+");
+
+        var previousHome = Environment.GetEnvironmentVariable("TENDRIL_HOME");
+        Environment.SetEnvironmentVariable("TENDRIL_HOME", tempDir);
+
+        try
+        {
+            // Load via constructor
+            var serviceViaConstructor = new ConfigService();
+
+            // Load via SetTendrilHome
+            var serviceViaSetHome = new ConfigService(new TendrilSettings(), "");
+            serviceViaSetHome.SetTendrilHome(tempDir);
+
+            // Both should succeed and load the same settings
+            Assert.Equal("consistent-agent", serviceViaConstructor.Settings.AgentCommand);
+            Assert.Equal("consistent-agent", serviceViaSetHome.Settings.AgentCommand);
+
+            Assert.Equal(10, serviceViaConstructor.Settings.MaxConcurrentJobs);
+            Assert.Equal(10, serviceViaSetHome.Settings.MaxConcurrentJobs);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("TENDRIL_HOME", previousHome);
+            Directory.Delete(tempDir, true);
+        }
     }
 }

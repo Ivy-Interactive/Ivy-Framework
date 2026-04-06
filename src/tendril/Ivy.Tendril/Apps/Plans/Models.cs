@@ -13,7 +13,7 @@ public enum PlanStatus
     Icebox
 }
 
-public record PlanMetadata(int Id, string Project, string Level, string Title, PlanStatus State, List<string> Repos, List<string> Commits, List<string> Prs, List<PlanVerificationEntry> Verifications, List<string> RelatedPlans, List<string> DependsOn, DateTime Created, DateTime Updated);
+public record PlanMetadata(int Id, string Project, string Level, string Title, PlanStatus State, List<string> Repos, List<string> Commits, List<string> Prs, List<PlanVerificationEntry> Verifications, List<string> RelatedPlans, List<string> DependsOn, DateTime Created, DateTime Updated, string? InitialPrompt);
 
 public record PlanFile(
     PlanMetadata Metadata,
@@ -36,14 +36,16 @@ public record PlanFile(
     public List<string> DependsOn => Metadata.DependsOn;
     public DateTime Created => Metadata.Created;
     public DateTime Updated => Metadata.Updated;
+    public string? InitialPrompt => Metadata.InitialPrompt;
     public string FolderName => Path.GetFileName(FolderPath);
 }
 
-public class RecommendationItem
+public class RecommendationYaml
 {
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
     public string State { get; set; } = "Pending";
+    public string? DeclineReason { get; set; }
 }
 
 public static class PlanFilters

@@ -1,10 +1,6 @@
-using System.Drawing;
 using Ivy;
 using Ivy.Core;
-using Ivy.Hooks;
-using Ivy.Tendril.Apps.Icebox.Dialogs;
 using Ivy.Tendril.Apps.Plans;
-using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Icebox;
@@ -13,18 +9,18 @@ public class ContentView(
     PlanFile? selectedPlan,
     List<PlanFile> allPlans,
     IState<PlanFile?> selectedPlanState,
-    PlanReaderService planService,
-    JobService jobService,
+    IPlanReaderService planService,
+    IJobService jobService,
     Action refreshPlans,
-    ConfigService config) : ViewBase
+    IConfigService config) : ViewBase
 {
     private readonly PlanFile? _selectedPlan = selectedPlan;
     private readonly List<PlanFile> _allPlans = allPlans;
     private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
-    private readonly PlanReaderService _planService = planService;
-    private readonly JobService _jobService = jobService;
+    private readonly IPlanReaderService _planService = planService;
+    private readonly IJobService _jobService = jobService;
     private readonly Action _refreshPlans = refreshPlans;
-    private readonly ConfigService _config = config;
+    private readonly IConfigService _config = config;
 
     public override object? Build()
     {
@@ -120,14 +116,7 @@ public class ContentView(
         {
             scrollableContent |= new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
                 .DangerouslyAllowLocalFiles()
-                .OnLinkClick(url =>
-                {
-                    if (url.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var filePath = url.Substring("file:///".Length);
-                        openFile.Set(filePath);
-                    }
-                });
+                .OnLinkClick(FileLinkHelper.CreateFileLinkClickHandler(openFile));
         }
 
         var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
@@ -179,59 +168,11 @@ public class ContentView(
             new Icebox.Dialogs.DeletePlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans)
         };
 
-        if (openFile.Value is { } filePath2)
-        {
-            var ext = Path.GetExtension(filePath2);
-            var imageExts = new[] { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
-            object sheetContent;
-            if (imageExts.Contains(ext, StringComparer.OrdinalIgnoreCase))
-            {
-                var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(filePath2)}";
-                sheetContent = new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(filePath2) };
-            }
-            else
-            {
-                if (File.Exists(filePath2))
-                {
-                    var fileContent = File.ReadAllText(filePath2);
-                    var language = FileApp.GetLanguage(ext);
-                    sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
-                }
-                else
-                {
-                    var fileName = Path.GetFileName(filePath2);
-                    var repoPaths = (_selectedPlan.Repos?.Count ?? 0) > 0
-                        ? _selectedPlan.Repos
-                        : _config.GetProject(_selectedPlan.Project)?.RepoPaths ?? [];
-                    var suggestions = MarkdownHelper.FindFilesInRepos(repoPaths, fileName);
-                    var notFoundContent = suggestions.Count > 0
-                        ? $"File not found.\n\nDid you mean:\n{string.Join("\n", suggestions.Select(s => $"- `{s}`"))}"
-                        : "File not found.";
-                    sheetContent = new Markdown(notFoundContent);
-                }
-            }
-
-            var finalContent = File.Exists(filePath2)
-                ? (object)new HeaderLayout(
-                    header: new Button("Open in VS Code").Icon(Icons.ExternalLink).Outline().OnClick(() =>
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = "code",
-                            Arguments = $"\"{filePath2}\"",
-                            UseShellExecute = true
-                        });
-                    }),
-                    content: sheetContent
-                )
-                : sheetContent;
-
-            elements.Add(new Sheet(
-                onClose: () => openFile.Set(null),
-                content: finalContent,
-                title: Path.GetFileName(filePath2)
-            ).Width(Size.Half()).Resizable());
-        }
+        var repoPaths = _selectedPlan.GetEffectiveRepoPaths(_config);
+        var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(
+            openFile.Value, () => openFile.Set(null), repoPaths, _config.Editor.Command, _config.Editor.Label);
+        if (fileLinkSheet is not null)
+            elements.Add(fileLinkSheet);
 
         return new Fragment(elements.ToArray());
     }

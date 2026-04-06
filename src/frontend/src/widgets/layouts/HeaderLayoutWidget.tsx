@@ -1,5 +1,6 @@
 import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useScrollShadow } from "@/hooks/use-scroll-shadow";
 import { getWidth } from "@/lib/styles";
 import { cn } from "@/lib/utils";
 
@@ -19,20 +20,7 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
   showHeaderDivider = true,
   contentScroll = "Auto",
 }) => {
-  const [isScrolled, setIsScrolled] = React.useState(false);
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const viewport = scrollRef.current?.querySelector("[data-radix-scroll-area-viewport]");
-    if (!viewport) return;
-
-    const handleScroll = () => {
-      setIsScrolled(viewport.scrollTop > 0);
-    };
-
-    viewport.addEventListener("scroll", handleScroll);
-    return () => viewport.removeEventListener("scroll", handleScroll);
-  }, []);
+  const { isScrolled, scrollRef } = useScrollShadow();
 
   if (!slots?.Header || !slots?.Content) {
     return (

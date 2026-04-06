@@ -1,6 +1,10 @@
 import React from "react";
+import { useEventHandler } from "@/components/event-handler";
 import { getWidth } from "@/lib/styles";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+
+const EMPTY_ARRAY: never[] = [];
 
 interface ProgressSegment {
   value: number;
@@ -14,16 +18,23 @@ interface StackedProgressWidgetProps {
   barHeight?: number;
   showLabels?: boolean;
   rounded?: boolean;
+  selected?: number;
   width?: string;
+  events?: string[];
 }
 
 export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
+  id,
   segments = [],
   barHeight = 8,
   showLabels = false,
   rounded = true,
+  selected,
   width = "Full",
+  events = EMPTY_ARRAY,
 }) => {
+  const eventHandler = useEventHandler();
+  const hasSelectHandler = events.includes("OnSelect");
   const total = segments.reduce((sum, s) => sum + s.value, 0);
 
   if (total === 0) {
@@ -47,6 +58,17 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
     borderRadius: rounded ? `${barHeight / 2}px` : undefined,
   };
 
+  const handleSelect = (index: number) => {
+    if (hasSelectHandler) {
+      eventHandler("OnSelect", id, [index]);
+    }
+  };
+
+  // Map from filtered label index back to the original segment index
+  const labelSegments = segments
+    .map((segment, index) => ({ segment, originalIndex: index }))
+    .filter(({ segment }) => segment.label);
+
   return (
     <TooltipProvider>
       <div className="flex flex-col gap-1" style={getWidth(width)}>
@@ -56,16 +78,36 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
             const color = segment.color
               ? `var(--${segment.color.toLowerCase()})`
               : "var(--primary)";
+            const isSelected = selected === index;
 
             const segmentEl = (
               <div
                 key={index}
-                className="transition-all duration-300 ease-in-out"
+                role={hasSelectHandler ? "button" : undefined}
+                aria-label={hasSelectHandler ? `Select segment ${index + 1}` : undefined}
+                tabIndex={hasSelectHandler ? 0 : undefined}
+                onClick={hasSelectHandler ? () => handleSelect(index) : undefined}
+                onKeyDown={
+                  hasSelectHandler
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleSelect(index);
+                        }
+                      }
+                    : undefined
+                }
+                className={cn(
+                  "transition-all duration-300 ease-in-out",
+                  hasSelectHandler && "cursor-pointer hover:opacity-80",
+                  isSelected && "ring-2 ring-foreground ring-offset-1",
+                )}
                 style={{
                   width: `${percentage}%`,
                   height: "100%",
                   backgroundColor: color,
                   minWidth: segment.value > 0 ? "2px" : 0,
+                  transform: isSelected ? "scaleY(1.2)" : undefined,
                 }}
               />
             );
@@ -88,30 +130,47 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
         </div>
         {showLabels && (
           <div className="flex gap-3 flex-wrap">
-            {segments
-              .filter((s) => s.label)
-              .map((segment, index) => {
-                const color = segment.color
-                  ? `var(--${segment.color.toLowerCase()})`
-                  : "var(--primary)";
-                return (
+            {labelSegments.map(({ segment, originalIndex }) => {
+              const color = segment.color
+                ? `var(--${segment.color.toLowerCase()})`
+                : "var(--primary)";
+              const isSelected = selected === originalIndex;
+              return (
+                <div
+                  key={originalIndex}
+                  role={hasSelectHandler ? "button" : undefined}
+                  aria-label={hasSelectHandler ? `Select segment ${originalIndex + 1}` : undefined}
+                  tabIndex={hasSelectHandler ? 0 : undefined}
+                  onClick={hasSelectHandler ? () => handleSelect(originalIndex) : undefined}
+                  onKeyDown={
+                    hasSelectHandler
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleSelect(originalIndex);
+                          }
+                        }
+                      : undefined
+                  }
+                  className={cn(
+                    "flex items-center gap-1.5 text-xs text-muted-foreground",
+                    hasSelectHandler && "cursor-pointer hover:text-foreground",
+                    isSelected && "text-foreground font-semibold",
+                  )}
+                >
                   <div
-                    key={index}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground"
-                  >
-                    <div
-                      className="rounded-full"
-                      style={{
-                        width: "8px",
-                        height: "8px",
-                        backgroundColor: color,
-                      }}
-                    />
-                    <span>{segment.label}</span>
-                    <span className="font-medium text-foreground">{segment.value}</span>
-                  </div>
-                );
-              })}
+                    className={cn("rounded-full", isSelected && "ring-2 ring-foreground")}
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      backgroundColor: color,
+                    }}
+                  />
+                  <span>{segment.label}</span>
+                  <span className="font-medium text-foreground">{segment.value}</span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

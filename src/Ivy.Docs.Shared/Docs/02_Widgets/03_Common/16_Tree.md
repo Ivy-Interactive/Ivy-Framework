@@ -95,10 +95,10 @@ public class TreeRowActionsDemo : ViewBase
                 new MenuItem("package.json").Icon(Icons.Braces).Tag("package.json")
             )
             .RowActions(
-                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit).Label("Edit"),
+                MenuItem.Default(Icons.Pencil).Tag(RowAction.Edit).Label("Edit").Primary(),
                 MenuItem.Default(Icons.Ellipsis).Tag(RowAction.More).Label("More").Children(
-                    MenuItem.Default(Icons.Copy).Tag(RowAction.Duplicate).Label("Duplicate"),
-                    MenuItem.Default(Icons.Trash).Tag(RowAction.Delete).Label("Delete")
+                    MenuItem.Default(Icons.Copy).Tag(RowAction.Duplicate).Label("Duplicate").Color(Colors.Amber),
+                    MenuItem.Default(Icons.Trash).Tag(RowAction.Delete).Label("Delete").Destructive()
                 )
             )
             .OnRowAction(e => {

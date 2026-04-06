@@ -1,6 +1,3 @@
-using Ivy;
-using Ivy.Core;
-
 namespace Ivy.Widgets.Leaflet;
 
 [ExternalWidget("frontend/dist/Ivy_Widgets_Leaflet.js", ExportName = "Map")]

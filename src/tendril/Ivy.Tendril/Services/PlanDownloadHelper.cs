@@ -1,12 +1,10 @@
-using Ivy;
-using Ivy.Core;
 using Ivy.Tendril.Apps.Plans;
 
 namespace Ivy.Tendril.Services;
 
 public static class PlanDownloadHelper
 {
-    public static IState<string?> UsePlanDownload(IViewContext context, PlanReaderService planService, PlanFile? plan)
+    public static IState<string?> UsePlanDownload(IViewContext context, IPlanReaderService planService, PlanFile? plan)
     {
         var pdfService = new PlanPdfService();
         var planRef = context.UseRef<PlanFile?>(plan);

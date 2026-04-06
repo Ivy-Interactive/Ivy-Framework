@@ -9,6 +9,8 @@ public class StackedProgressApp : SampleBase
         var inProgress = UseState(25.0);
         var pending = UseState(20.0);
         var failed = UseState(15.0);
+        var selectedIndex = UseState<int?>(null);
+        string[] segmentLabels = ["Completed", "In Progress", "Pending", "Failed"];
 
         return Layout.Vertical()
             | Text.H1("Stacked Progress")
@@ -74,6 +76,19 @@ public class StackedProgressApp : SampleBase
                 | new Button("More Completed", _ => { completed.Set(completed.Value + 5); failed.Set(Math.Max(0, failed.Value - 5)); })
                 | new Button("More Failed", _ => { failed.Set(failed.Value + 5); completed.Set(Math.Max(0, completed.Value - 5)); })
                 | new Button("Reset", _ => { completed.Set(40); inProgress.Set(25); pending.Set(20); failed.Set(15); }))
+
+            | Text.H2("With OnSelect Event")
+            | new StackedProgress(
+                new ProgressSegment(completed.Value, Colors.Green, "Completed"),
+                new ProgressSegment(inProgress.Value, Colors.Blue, "In Progress"),
+                new ProgressSegment(pending.Value, Colors.Orange, "Pending"),
+                new ProgressSegment(failed.Value, Colors.Red, "Failed")
+            ).ShowLabels().Selected(selectedIndex.Value).OnSelect(e =>
+            {
+                selectedIndex.Value = e.Value;
+                return ValueTask.CompletedTask;
+            })
+            | Text.Muted(selectedIndex.Value is { } idx ? $"Selected: {segmentLabels[idx]}" : "Click a segment to select it")
         ;
     }
 }

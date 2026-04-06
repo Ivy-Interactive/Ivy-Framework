@@ -1,4 +1,3 @@
-using Ivy;
 using Ivy.Core.Hooks;
 
 namespace Ivy.Test;

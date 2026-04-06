@@ -2,8 +2,6 @@ using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
-using Ivy.Core;
-using Ivy.Core.Hooks;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -45,6 +43,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public Align AlignContent { get; set; } = alignContent;
         public Size? Width { get; set; }
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
+        public Func<TModel, object>? ExpressionAccessor { get; set; }
 
         public object? GetValue(TModel obj)
         {
@@ -52,6 +51,11 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
             try
             {
+                if (ExpressionAccessor != null)
+                {
+                    return ExpressionAccessor(obj);
+                }
+
                 if (FieldInfo != null)
                 {
                     return FieldInfo.GetValue(obj);
@@ -246,12 +250,13 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
     private TableBuilderColumn GetField(Expression<Func<TModel, object>> field)
     {
-        var name = TypeHelper.GetNameFromMemberExpression(field.Body);
+        var name = TypeHelper.GetFullPathFromMemberExpression(field.Body);
         if (!_columns.TryGetValue(name, out var column))
         {
             var order = _columns.Count;
             var builder = _builderFactory.Default();
             column = new TableBuilderColumn(name, order, builder, Ivy.Align.Left, null!, null, false, builder, false, Ivy.Align.Left);
+            column.ExpressionAccessor = field.Compile();
             column.Width = CalculateSmartDefaultWidth(column);
             _columns[name] = column;
         }
@@ -311,7 +316,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     {
         foreach (var field in fields)
         {
-            var name = TypeHelper.GetNameFromMemberExpression(field.Body);
+            var name = TypeHelper.GetFullPathFromMemberExpression(field.Body);
             if (!_columns.TryGetValue(name, out var hint)) continue;
             hint.Removed = true;
         }

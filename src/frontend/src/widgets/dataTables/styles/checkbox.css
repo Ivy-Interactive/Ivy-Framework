@@ -90,3 +90,25 @@
 [data-has-empty-rows] .dvn-scroller {
   overflow-y: hidden !important;
 }
+
+/* Search overlay: above scroller, clip to radius; bottom bar width from useSearchNavigation (--ivy-search-match-progress). */
+.gdg-search-bar {
+  z-index: 20;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.gdg-search-bar .gdg-search-progress {
+  display: none;
+}
+
+.gdg-search-bar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: var(--ivy-search-match-progress, 0%);
+  background-color: var(--gdg-text-light);
+  pointer-events: none;
+}

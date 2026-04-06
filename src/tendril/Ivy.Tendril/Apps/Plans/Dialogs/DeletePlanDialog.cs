@@ -1,4 +1,3 @@
-using Ivy;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
@@ -6,12 +5,12 @@ namespace Ivy.Tendril.Apps.Plans.Dialogs;
 public class DeletePlanDialog(
     IState<bool> dialogOpen,
     PlanFile selectedPlan,
-    PlanReaderService planService,
+    IPlanReaderService planService,
     Action refreshPlans) : ViewBase
 {
     private readonly IState<bool> _dialogOpen = dialogOpen;
     private readonly PlanFile _selectedPlan = selectedPlan;
-    private readonly PlanReaderService _planService = planService;
+    private readonly IPlanReaderService _planService = planService;
     private readonly Action _refreshPlans = refreshPlans;
 
     public override object? Build()

@@ -10,14 +10,16 @@ param(
 
 $ErrorActionPreference = "Continue"
 
-# Resolve plans directory
-$tendrilHome = $env:TENDRIL_HOME
-if (-not $tendrilHome) {
-    Write-Error "TENDRIL_HOME environment variable is not set."
-    exit 1
+# Set TENDRIL_CONFIG if not already set (for standalone execution)
+if (-not $env:TENDRIL_CONFIG -and $env:TENDRIL_HOME) {
+    $env:TENDRIL_CONFIG = Join-Path $env:TENDRIL_HOME "config.yaml"
 }
 
-$plansDir = Join-Path $tendrilHome "Plans"
+# Bootstrap shared utilities (includes Bootstrap-Modules.ps1 and ExtractRepoPathsFromYaml)
+$sharedPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "Ivy.Tendril/.promptwares/.shared"
+. (Join-Path $sharedPath "Utils.ps1")
+
+$plansDir = Join-Path $env:TENDRIL_HOME "Plans"
 if (-not (Test-Path $plansDir)) {
     Write-Host "Plans directory not found: $plansDir" -ForegroundColor Yellow
     exit 0
@@ -38,16 +40,15 @@ foreach ($planFolder in $planFolders) {
     if (-not (Test-Path $planYamlPath)) { continue }
 
     $planContent = Get-Content $planYamlPath -Raw
+    $yaml = $planContent | ConvertFrom-Yaml
 
     # Check state
-    $stateMatch = [regex]::Match($planContent, '(?m)^state:\s*(.+)$')
-    $state = if ($stateMatch.Success) { $stateMatch.Groups[1].Value.Trim() } else { "Unknown" }
+    $state = if ($yaml.state) { $yaml.state } else { "Unknown" }
     if ($state -notin $terminalStates) { continue }
 
     # Check age (use updated timestamp)
-    $updatedMatch = [regex]::Match($planContent, '(?m)^updated:\s*(.+)$')
-    if ($updatedMatch.Success) {
-        $updated = [datetime]::Parse($updatedMatch.Groups[1].Value.Trim())
+    if ($yaml.updated) {
+        $updated = [datetime]::Parse("$($yaml.updated)")
         if ($updated -gt $cutoffDate) { continue }
     }
 
@@ -55,13 +56,7 @@ foreach ($planFolder in $planFolders) {
     $planId = if ($planFolder.Name -match '^(\d+)') { $Matches[1] } else { "" }
 
     # Extract repo paths
-    $repoMatches = [regex]::Matches($planContent, '(?m)^\s*-\s*((?:[A-Za-z]:\\|/).+)$')
-    $repoPaths = @()
-    foreach ($m in $repoMatches) {
-        $p = $m.Groups[1].Value.Trim()
-        $p = [Environment]::ExpandEnvironmentVariables($p)
-        if (Test-Path $p) { $repoPaths += $p }
-    }
+    $repoPaths = ExtractRepoPathsFromYaml -ReposArray $yaml.repos -ValidateExists
 
     Write-Host "Cleaning plan $($planFolder.Name) (state: $state)" -ForegroundColor Cyan
 

@@ -227,3 +227,84 @@ public class TiobeIndexDemo : ViewBase
 
 </Body>
 </Details>
+
+## Dual-axis charts
+
+BarChart supports multiple Y-axes through the `YAxisIndex` property on `Bar`. This lets different bar series use different scales — useful when comparing metrics with very different ranges (e.g., revenue in thousands alongside a conversion rate as a percentage).
+
+Y-axes are indexed starting from 0. The first Y-axis defaults to the left side and additional axes can be placed on the right using `.Orientation(YAxis.Orientations.Right)`. Assign each bar to its axis with `.YAxisIndex(index)`.
+
+### Manual BarChart construction
+
+```csharp demo-below
+public class DualAxisBarChart : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Month = "Jan", Revenue = 4200, ConversionRate = 2.1 },
+            new { Month = "Feb", Revenue = 5800, ConversionRate = 3.4 },
+            new { Month = "Mar", Revenue = 5100, ConversionRate = 2.8 },
+            new { Month = "Apr", Revenue = 7400, ConversionRate = 4.2 },
+            new { Month = "May", Revenue = 6200, ConversionRate = 3.6 },
+        };
+
+        return Layout.Vertical()
+            | new BarChart(data,
+                    new Bar("Revenue").Fill(Colors.Blue).YAxisIndex(0),
+                    new Bar("ConversionRate").Fill(Colors.Orange).Name("Conversion Rate").Unit("%").YAxisIndex(1))
+                .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
+                .YAxis(new YAxis().Orientation(YAxis.Orientations.Left))
+                .YAxis(new YAxis().Orientation(YAxis.Orientations.Right))
+                .CartesianGrid(new CartesianGrid().Horizontal())
+                .Tooltip()
+                .Legend();
+    }
+}
+```
+
+### Using ToBarChart with polish
+
+When building charts from queryable data with `ToBarChart()`, use the `polish` callback to add extra Y-axes and reassign bars. The default style already creates bars from your measures, so `polish` modifies the scaffolded chart — replacing bars with versions that have `YAxisIndex` set:
+
+```csharp demo-below
+public class DualAxisPolishBarChart : ViewBase
+{
+    record SalesData(string Month, int Revenue, double ConversionRate);
+
+    public override object? Build()
+    {
+        var data = new SalesData[]
+        {
+            new("Jan", 4200, 2.1),
+            new("Feb", 5800, 3.4),
+            new("Mar", 5100, 2.8),
+            new("Apr", 7400, 4.2),
+            new("May", 6200, 3.6),
+        };
+
+        return Layout.Vertical()
+            | data.ToBarChart(
+                polish: chart =>
+                {
+                    chart = chart.YAxis(new YAxis().Orientation(YAxis.Orientations.Right));
+                    return chart with
+                    {
+                        Bars =
+                        [
+                            new Bar("Revenue").YAxisIndex(0).Fill(Colors.Blue),
+                            new Bar("ConversionRate").YAxisIndex(1).Fill(Colors.Orange)
+                                .Name("Conversion Rate").Unit("%")
+                        ]
+                    };
+                }
+            )
+            .Dimension("Month", e => e.Month)
+            .Measure("Revenue", e => e.Sum(f => f.Revenue))
+            .Measure("ConversionRate", e => e.Average(f => f.ConversionRate));
+    }
+}
+```
+
+> **Note:** The `polish` callback receives the fully scaffolded `BarChart` which already includes one Y-axis and bars from the style. The example above adds a second Y-axis and replaces the `Bars` array with versions that specify `YAxisIndex`. Use contrasting colors for bars on different axes so readers can quickly match each bar to its scale.

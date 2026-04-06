@@ -1,47 +1,61 @@
-using Ivy;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
 public record TrashFileInfo(string FilePath, string FileName, DateTime Date, string OriginalRequest, string DuplicateOf, string Project, string Content);
 
-[App(title: "Trash", icon: Icons.Trash2, group: new[] { "Tools" }, order: 40, isVisible: false)]
+[App(title: "Trash", icon: Icons.Trash2, group: new[] { "Tools" }, order: MenuOrder.Trash, isVisible: false)]
 public class TrashApp : ViewBase
 {
     public override object? Build()
     {
-        var configService = UseService<ConfigService>();
-        var jobService = UseService<JobService>();
+        var configService = UseService<IConfigService>();
+        var jobService = UseService<IJobService>();
         var client = UseService<IClientProvider>();
         var refreshToken = UseRefreshToken();
         var selectedFile = UseState<string?>(null);
         var confirmDelete = UseState(false);
+        var searchFilter = UseState<string?>("");
+        var openFile = UseState<string?>(null);
 
         UseInterval(() => refreshToken.Refresh(), TimeSpan.FromSeconds(10));
 
         var trashDir = Path.Combine(configService.TendrilHome, "Trash");
         var files = LoadTrashFiles(trashDir);
 
-        // Auto-select first file if selection is invalid
-        if (selectedFile.Value is { } sel && !files.Any(f => f.FilePath == sel))
-            selectedFile.Set(files.FirstOrDefault()?.FilePath);
-
-        var selected = files.FirstOrDefault(f => f.FilePath == selectedFile.Value);
-
-        // Sidebar content - file list
-        var sidebarContent = new List(files.Select(f =>
+        // Apply search filter for selection logic
+        var filteredFiles = files.AsEnumerable();
+        if (!string.IsNullOrWhiteSpace(searchFilter.Value))
         {
-            var item = f;
-            return new ListItem(item.FileName.Replace(".md", ""))
-                .Content(Layout.Horizontal().Gap(1)
-                    | new Badge(item.Project).Variant(BadgeVariant.Outline).Small()
-                    | Text.Muted(item.Date.ToString("yyyy-MM-dd")).Small())
-                .OnClick(() => selectedFile.Set(item.FilePath));
-        }));
+            var searchTerm = searchFilter.Value.ToLowerInvariant();
+            filteredFiles = filteredFiles.Where(f =>
+                f.FileName.ToLowerInvariant().Contains(searchTerm) ||
+                f.OriginalRequest.ToLowerInvariant().Contains(searchTerm) ||
+                f.Project.ToLowerInvariant().Contains(searchTerm) ||
+                f.DuplicateOf.ToLowerInvariant().Contains(searchTerm)
+            );
+        }
+
+        var filteredList = filteredFiles.ToList();
+
+        // Auto-select first file if selection is invalid
+        if (selectedFile.Value is { } sel && !filteredList.Any(f => f.FilePath == sel))
+            selectedFile.Set(filteredList.FirstOrDefault()?.FilePath);
+
+        var selected = filteredList.FirstOrDefault(f => f.FilePath == selectedFile.Value);
+
+        var sidebar = new Trash.SidebarView(files, selectedFile, searchFilter);
 
         // Main content
         object mainContent;
-        if (selected is null)
+        if (files.Count == 0)
+        {
+            mainContent = Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
+                | new Icon(Icons.Trash2).Size(Size.Units(8)).Color(Colors.Gray)
+                | Text.Muted("No trash files yet")
+                | Text.Muted("Duplicate plans will appear here").Small();
+        }
+        else if (selected is null)
         {
             mainContent = Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
                 | Text.Muted("Select a file from the sidebar");
@@ -68,7 +82,9 @@ public class TrashApp : ViewBase
                 });
 
             var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)))
-                | new Markdown(selected.Content);
+                | new Markdown(selected.Content)
+                    .DangerouslyAllowLocalFiles()
+                    .OnLinkClick(FileLinkHelper.CreateFileLinkClickHandler(openFile));
 
             mainContent = new HeaderLayout(
                 header: header,
@@ -83,9 +99,21 @@ public class TrashApp : ViewBase
         {
             new SidebarLayout(
                 mainContent: mainContent,
-                sidebarContent: sidebarContent
+                sidebarContent: sidebar
             )
         };
+
+        if (openFile.Value is { } filePath)
+        {
+            var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(
+                filePath,
+                () => openFile.Set(null),
+                [],
+                configService.Editor.Command,
+                configService.Editor.Label);
+            if (fileLinkSheet is not null)
+                elements.Add(fileLinkSheet);
+        }
 
         if (confirmDelete.Value && selected is not null)
         {

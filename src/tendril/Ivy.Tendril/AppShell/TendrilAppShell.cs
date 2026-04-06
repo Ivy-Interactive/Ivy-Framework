@@ -1,18 +1,13 @@
 using Ivy;
 using Ivy.Core;
 using Ivy.Core.Apps;
-using Ivy.Core.AppShell;
-using Ivy.Core.Server;
 using Ivy.Tendril.Apps;
-using Ivy.Tendril.Apps.Jobs;
-using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 using Ivy.Widgets.Internal;
 using Ivy.Widgets.ScreenshotFeedback;
 using System.Collections.Immutable;
 using System.Reactive.Disposables;
 using Ivy.Tendril.Views;
-using AppContext = Ivy.AppContext;
 
 namespace Ivy.Tendril.AppShell;
 
@@ -43,7 +38,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         {
             ["plans"] = planCounts.Drafts,
             ["review"] = planCounts.Reviews,
-            ["jobs"] = planCounts.RunningJobs,
+            ["jobs"] = planCounts.ActiveJobs,
             ["icebox"] = planCounts.Icebox,
             ["recommendations"] = planCounts.Recommendations
         };
@@ -52,14 +47,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
     public override object? Build()
     {
-        // Check if onboarding is needed first
-        var config = UseService<ConfigService>();
-        if (config.NeedsOnboarding)
-        {
-            return new OnboardingApp();
-        }
-
-        // All hooks must be at the top of Build()
+        // All hooks must be at the top level of Build()
+        var config = UseService<IConfigService>();
         var tabs = UseState(ImmutableArray.Create<TabState>);
         var selectedIndex = UseState<int?>();
         var appRepository = UseService<IAppRepository>();
@@ -67,10 +56,10 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         Context.TryUseService<IAuthService>(out var auth);
         var user = UseState<UserInfo?>();
         var currentApp = UseState<AppHost?>();
-        var countsService = UseService<PlanCountsService>();
+        var countsService = UseService<IPlanCountsService>();
         var menuItems = UseState(() => BuildMenuItems(appRepository, countsService.Current));
         var counts = UseState(() => countsService.Current);
-        var jobService = UseService<JobService>();
+        var jobService = UseService<IJobService>();
         var sidebarOpen = UseState(settings.SidebarOpen);
         var args = UseService<AppContext>();
         var serverArgs = UseService<ServerArgs>();
@@ -103,6 +92,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         UseEffect(async () =>
         {
+            if (config.NeedsOnboarding) return;
+
             if (auth != null)
             {
                 var userInfo = await auth.GetUserInfoAsync();
@@ -112,6 +103,14 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             var initialAppId = args.NavigationAppId ?? settings.DefaultAppId;
             if (!string.IsNullOrWhiteSpace(initialAppId))
             {
+                // Force redirect from onboarding if it's already done
+                if (!config.NeedsOnboarding && (initialAppId.Equals("onboarding", StringComparison.OrdinalIgnoreCase) ||
+                                              initialAppId.Equals("OnboardingApp", StringComparison.OrdinalIgnoreCase) ||
+                                              initialAppId.Equals("onboarding-app", StringComparison.OrdinalIgnoreCase)))
+                {
+                    initialAppId = settings.DefaultAppId ?? "dashboard";
+                }
+
                 var appArgs = args.GetArgs<object>();
                 OpenApp(new NavigateArgs(initialAppId, appArgs), replaceHistory: true);
             }
@@ -215,28 +214,32 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                     if (settings.PreventTabDuplicates)
                     {
                         var appId = navigateArgs.AppId;
-                        int existingTabIndex = -1;
-                        for (int i = 0; i < tabs.Value.Length; i++)
+                        var appDescriptor = appRepository.GetApp(appId);
+                        if (appDescriptor?.AllowDuplicateTabs != true)
                         {
-                            if (tabs.Value[i].AppId == appId)
+                            int existingTabIndex = -1;
+                            for (int i = 0; i < tabs.Value.Length; i++)
                             {
-                                existingTabIndex = i;
-                                break;
+                                if (tabs.Value[i].AppId == appId)
+                                {
+                                    existingTabIndex = i;
+                                    break;
+                                }
                             }
-                        }
 
-                        if (existingTabIndex >= 0)
-                        {
-                            var previousSelectedIndex = selectedIndex.Value;
-                            selectedIndex.Set(existingTabIndex);
-                            tabId = tabs.Value[existingTabIndex].Id;
-                            SetAppTitle(appId);
-
-                            if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
+                            if (existingTabIndex >= 0)
                             {
-                                RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
+                                var previousSelectedIndex = selectedIndex.Value;
+                                selectedIndex.Set(existingTabIndex);
+                                tabId = tabs.Value[existingTabIndex].Id;
+                                SetAppTitle(appId);
+
+                                if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
+                                {
+                                    RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
+                                }
+                                return;
                             }
-                            return;
                         }
                     }
 
@@ -407,7 +410,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         {
             MenuItem.Default("Setup")
                 .Tag("$setup")
-                .Icon(Icons.Settings)
+                .Icon(Icons.Construction)
                 .OnSelect(() => navigator.Navigate<SetupApp>()),
             MenuItem.Default("Trash")
                 .Tag("$trash")
@@ -472,7 +475,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             var trigger = new Button("Settings")
                 .Content(
                     Layout.Horizontal().AlignContent(Align.Left)
-                        | Icons.Construction.ToIcon()
+                        | Icons.Settings.ToIcon()
                         | Text.P("Settings").Small().Muted()
                     )
                     .Variant(ButtonVariant.Ghost).Width(Size.Full());
@@ -490,13 +493,18 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 );
         }
 
+        if (config.NeedsOnboarding)
+        {
+            return new OnboardingApp();
+        }
+
         return new Fragment(
             new SidebarLayout(
                 body ?? null!,
                 sidebarMenu,
                 Layout.Vertical().Gap(2)
                     | settings.Header
-                    | new NewPlanFooterButton()
+                    | new NewPlanButton()
                 ,
                 Layout.Vertical(
                     new SidebarNews("https://ivy.app/news.json"),

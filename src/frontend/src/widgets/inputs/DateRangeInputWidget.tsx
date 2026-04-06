@@ -147,6 +147,14 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   const [rightMonth, setRightMonth] = useState(() => addMonths(new Date(), 1));
   const [isOpen, setIsOpen] = useState(false);
 
+  const hasAutoFocusedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      setIsOpen(true);
+    }
+  }, [autoFocus, disabled]);
+
   const handleLeftMonthChange = (newLeft: Date) => {
     setLeftMonth(newLeft);
     if (isBefore(rightMonth, newLeft) || isSameMonth(rightMonth, newLeft)) {

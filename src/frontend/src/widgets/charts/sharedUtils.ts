@@ -160,13 +160,21 @@ export const generateDataProps = (data: Record<string, unknown>[]) => {
 export function generateEChartGrid(
   cartesianGrid?: CartesianGridProps,
   hasToolbox: boolean = false,
+  yAxis?: YAxisProps[],
+  xAxis?: XAxisProps[],
 ) {
+  // When all Y axes are hidden, remove left/right padding so the chart uses full width
+  const allYAxesHidden = yAxis && yAxis.length > 0 && yAxis.every((axis) => axis.hide === true);
+
+  // When all X axes are hidden, remove bottom padding
+  const allXAxesHidden = xAxis && xAxis.length > 0 && xAxis.every((axis) => axis.hide === true);
+
   const defaultGrid = {
     show: false, // Hide grid border to remove the square frame
-    left: "3%",
-    right: "4%",
+    left: allYAxesHidden ? 0 : "3%",
+    right: allYAxesHidden ? 0 : "4%",
     top: hasToolbox ? 40 : 15,
-    bottom: 50, // Space for legend below axis labels
+    bottom: allXAxesHidden ? 10 : 50, // Reduce bottom padding when X axis is hidden
     containLabel: true,
     borderWidth: 0, // Ensure no border is drawn
   };
@@ -414,6 +422,7 @@ export const generateYAxis = (
     }
 
     return {
+      show: axis.hide ? false : true,
       type: isVertical ? "value" : "category",
       data: isVertical ? undefined : categories,
       ...(minOpt !== undefined && { min: minOpt }),

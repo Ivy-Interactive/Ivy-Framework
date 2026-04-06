@@ -137,6 +137,7 @@ export const TabsLayoutWidget = ({
   );
   const showClose = events.includes("OnClose");
   const showRefresh = events.includes("OnRefresh");
+  const showCloseOthers = events.includes("OnCloseOthers");
   const orderedTabWidgets = React.useMemo(
     () => orderTabWidgets(tabOrder, tabWidgets),
     [tabOrder, tabWidgets],
@@ -170,6 +171,8 @@ export const TabsLayoutWidget = ({
       handleDragEnd={handleDragEnd}
       handleTabSelect={handleTabSelect}
       isUserInitiatedChangeRef={isUserInitiatedChangeRef}
+      showCloseOthers={showCloseOthers}
+      safeEvent={safeEvent}
     />
   );
 

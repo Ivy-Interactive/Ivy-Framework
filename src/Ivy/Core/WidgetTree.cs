@@ -1,13 +1,8 @@
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
 using System.Text.Json.JsonDiffPatch;
-using System.Text.Json.JsonDiffPatch.Diffs.Formatters;
 using System.Text.Json.Nodes;
-using Ivy;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 

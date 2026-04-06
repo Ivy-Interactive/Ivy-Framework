@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Http.Features;
-
-
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
@@ -13,16 +10,7 @@ public enum MenuItemVariant
     Group
 }
 
-public enum MenuItemColor
-{
-    Default,
-    Destructive,
-    Primary,
-    Secondary,
-    Success,
-    Warning,
-    Info
-}
+
 
 public record MenuItem(
     string? Label = null,
@@ -39,7 +27,7 @@ public record MenuItem(
     EventHandler<MenuItem>? OnSelect = null,
     string[]? SearchHints = null,
     string? Path = null,
-    MenuItemColor Color = MenuItemColor.Default)
+    Colors? Color = null)
 {
 
     public static MenuItem Separator() => new(Variant: MenuItemVariant.Separator);
@@ -212,35 +200,35 @@ public static class MenuItemExtensions
 
     public static MenuItem Destructive(this MenuItem menuItem)
     {
-        return menuItem with { Color = MenuItemColor.Destructive };
+        return menuItem with { Color = Colors.Destructive };
     }
 
     public static MenuItem Primary(this MenuItem menuItem)
     {
-        return menuItem with { Color = MenuItemColor.Primary };
+        return menuItem with { Color = Colors.Primary };
     }
 
     public static MenuItem Secondary(this MenuItem menuItem)
     {
-        return menuItem with { Color = MenuItemColor.Secondary };
+        return menuItem with { Color = Colors.Secondary };
     }
 
     public static MenuItem Success(this MenuItem menuItem)
     {
-        return menuItem with { Color = MenuItemColor.Success };
+        return menuItem with { Color = Colors.Success };
     }
 
     public static MenuItem Warning(this MenuItem menuItem)
     {
-        return menuItem with { Color = MenuItemColor.Warning };
+        return menuItem with { Color = Colors.Warning };
     }
 
     public static MenuItem Info(this MenuItem menuItem)
     {
-        return menuItem with { Color = MenuItemColor.Info };
+        return menuItem with { Color = Colors.Info };
     }
 
-    public static MenuItem Color(this MenuItem menuItem, MenuItemColor color)
+    public static MenuItem Color(this MenuItem menuItem, Colors color)
     {
         return menuItem with { Color = color };
     }

@@ -1,5 +1,3 @@
-using Ivy;
-
 namespace Ivy.Test;
 
 public class UrlValidationTests

@@ -1,4 +1,3 @@
-using Ivy;
 using Ivy.Tendril.Apps.Plans;
 
 namespace Ivy.Tendril.Test;
@@ -9,7 +8,7 @@ public class ContentViewTests
     {
         var metadata = new PlanMetadata(
             1, "Test", "Bug", "Test Plan", PlanStatus.Failed,
-            [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow);
+            [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null);
         return new PlanFile(metadata, "", folderPath, "");
     }
 

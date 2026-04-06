@@ -1,5 +1,3 @@
-using Ivy;
-
 namespace Ivy.Test.Helpers;
 
 public class StringHelperTests

@@ -16,8 +16,32 @@ if (-not $env:TENDRIL_HOME) {
     exit 1
 }
 
-$script:ConfigPath = Join-Path $env:TENDRIL_HOME "config.yaml"
+# TENDRIL_CONFIG is required
+if (-not $env:TENDRIL_CONFIG) {
+    Write-Error "TENDRIL_CONFIG environment variable is not set. This variable must be set by JobService before invoking promptware scripts."
+    exit 1
+}
+
+$script:ConfigPath = $env:TENDRIL_CONFIG
 $script:PlansDir = Join-Path $env:TENDRIL_HOME "Plans"
+
+# Bootstrap required PowerShell modules
+. (Join-Path $PSScriptRoot "Bootstrap-Modules.ps1")
+
+# Resolves the shared folder path. Uses $env:TENDRIL_SHARED if set, otherwise
+# falls back to the ".shared" directory relative to the given script root.
+# Note: Scripts that need to dot-source Utils.ps1 itself cannot use this helper
+# (they need the path before Utils.ps1 is loaded). Those scripts must use the
+# inline pattern instead — see IvyFrameworkVerification.ps1 for an example.
+function Get-SharedFolder {
+    param([string]$ScriptRoot)
+
+    if ($env:TENDRIL_SHARED) {
+        return $env:TENDRIL_SHARED
+    } else {
+        return Join-Path $ScriptRoot ".shared"
+    }
+}
 
 function GetProgramFolder {
     param([string]$ScriptPath)
@@ -60,13 +84,9 @@ function PrepareFirmware {
     if (-not $Values.ContainsKey("CurrentTime")) {
         $Values["CurrentTime"] = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     }
-    if (-not $Values.ContainsKey("ConfigPath")) {
-        $Values["ConfigPath"] = $script:ConfigPath
-    }
-
     $header = ($Values.GetEnumerator() | Sort-Object Name | ForEach-Object { "$($_.Key): $($_.Value)" }) -join "`n"
 
-    $sharedFolder = Join-Path $ScriptRoot ".shared"
+    $sharedFolder = Get-SharedFolder $ScriptRoot
     $firmware = Get-Content "$sharedFolder\Firmware.md" -Raw
     $firmware = $firmware.Replace("[HEADER]", $header)
     $firmware = $firmware.Replace("[LOGFILE]", $LogFile)
@@ -127,9 +147,11 @@ function UpdatePlanState {
 
     $content = Get-Content $planYamlPath -Raw
     $now = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-    $content = $content -replace '(?m)^state:\s*.*$', "state: $NewState"
-    $content = $content -replace '(?m)^updated:\s*.*$', "updated: $now"
-    Set-Content -Path $planYamlPath -Value $content -Encoding UTF8
+    $yaml = $content | ConvertFrom-Yaml -Ordered
+    $yaml["state"] = $NewState
+    $yaml["updated"] = $now
+    $content = ConvertTo-Yaml $yaml
+    Set-Content -Path $planYamlPath -Value $content -NoNewline -Encoding UTF8
     Write-Host "Plan state updated to: $NewState" -ForegroundColor Cyan
 }
 
@@ -204,35 +226,150 @@ function ValidatePlanPath {
     return $planYamlPath
 }
 
+<#
+.SYNOPSIS
+Reads plan.yaml and extracts project name and parsed YAML structure.
+
+.PARAMETER PlanYamlPath
+Absolute path to the plan.yaml file to read
+
+.OUTPUTS
+Returns a hashtable with three keys:
+- Content: Raw YAML file content as string
+- Project: Project name from YAML, or "[Auto]" if not specified
+- Yaml: Parsed YAML as hashtable/ordered dictionary
+
+.EXAMPLE
+$planInfo = ReadPlanProject "D:\Plans\01234-MyPlan\plan.yaml"
+$projectName = $planInfo.Project  # "Tendril"
+$repos = $planInfo.Yaml.repos     # Array of repo paths
+#>
 function ReadPlanProject {
     param([string]$PlanYamlPath)
 
     $content = Get-Content $PlanYamlPath -Raw
-    $match = [regex]::Match($content, '(?m)^project:\s*(.+)$')
-    $project = if ($match.Success) { $match.Groups[1].Value.Trim() } else { "[Auto]" }
-    return @{ Content = $content; Project = $project }
+    $yaml = $content | ConvertFrom-Yaml
+    $project = if ($yaml.project) { $yaml.project } else { "[Auto]" }
+    return @{ Content = $content; Project = $project; Yaml = $yaml }
 }
 
+# ExtractRepoPathsFromYaml — Centralized repo path extraction
+#
+# Use this function whenever you need to extract repository paths from YAML config.
+# Handles both formats:
+# - Plain strings: repos: ["D:\Repos\Foo"]
+# - Objects: repos: [{ path: "%REPOS_HOME%/Foo", prRule: "yolo" }]
+#
+# Automatically expands environment variables (%REPOS_HOME%, %TENDRIL_HOME%, etc.)
+# and optionally validates paths exist on disk.
+#
+# Examples:
+#   # From plan.yaml (plan repos are plain strings or objects)
+#   $repoPaths = ExtractRepoPathsFromYaml -ReposArray $planYaml.repos -ValidateExists
+#
+#   # From config.yaml project entry
+#   $projectConfig = $config.projects | Where-Object { $_.name -eq $project } | Select-Object -First 1
+#   $repoPaths = ExtractRepoPathsFromYaml -ReposArray $projectConfig.repos
+#
+#   # Get first repo path only (for working directory)
+#   $workDir = (ExtractRepoPathsFromYaml -ReposArray $projectConfig.repos)[0]
+#
+function ExtractRepoPathsFromYaml {
+    <#
+    .SYNOPSIS
+    Extracts and resolves repository paths from YAML repo entries.
+
+    .DESCRIPTION
+    Centralized utility for extracting repository paths from config.yaml or plan.yaml.
+    Handles both plain string entries and object entries with a .path property.
+    Automatically expands environment variables (e.g. %REPOS_HOME%).
+
+    .PARAMETER Repos
+    Array of repo entries from YAML (can be hashtables with .path or plain strings)
+
+    .PARAMETER ValidateExists
+    If true, only returns paths that exist on disk
+
+    .PARAMETER ReturnFirst
+    If true, returns only the first valid path (for GetProjectWorkDir compatibility)
+
+    .EXAMPLE
+    $repoPaths = ExtractRepoPathsFromYaml $planInfo.Yaml.repos -ValidateExists
+
+    .EXAMPLE
+    $projectConfig = $config.projects | Where-Object { $_.name -eq $project } | Select-Object -First 1
+    $repoPaths = ExtractRepoPathsFromYaml $projectConfig.repos
+
+    .EXAMPLE
+    $workDir = ExtractRepoPathsFromYaml $projectConfig.repos -ReturnFirst
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        $Repos,
+
+        [switch]$ValidateExists,
+        [switch]$ReturnFirst
+    )
+
+    if (-not $Repos) {
+        if ($ReturnFirst) { return $null }
+        return @()
+    }
+
+    $paths = @()
+    foreach ($repo in $Repos) {
+        $p = if ($repo -is [hashtable] -or $repo -is [System.Collections.IDictionary]) {
+            $repo.path
+        } else {
+            "$repo"
+        }
+
+        if ($p) {
+            $p = [Environment]::ExpandEnvironmentVariables($p)
+
+            if ($ValidateExists) {
+                if (Test-Path $p) {
+                    $paths += $p
+                    if ($ReturnFirst) { return $p }
+                }
+            } else {
+                $paths += $p
+                if ($ReturnFirst) { return $p }
+            }
+        }
+    }
+
+    if ($ReturnFirst) { return $null }
+    return $paths
+}
+
+<#
+.SYNOPSIS
+Resolves the first repository path for a given project from config.yaml.
+
+.PARAMETER Project
+The project name to look up in config.yaml (e.g., "Framework", "Tendril")
+
+.OUTPUTS
+Returns the first repository path for the project from config.yaml, or the current working directory if project not found
+
+.EXAMPLE
+$workDir = GetProjectWorkDir "Tendril"
+# Returns: D:\Repos\_Ivy\Ivy-Framework (first repo path from Tendril project config)
+
+.EXAMPLE
+$workDir = GetProjectWorkDir "NonExistent"
+# Returns: (Get-Location).Path (falls back to current directory)
+#>
 function GetProjectWorkDir {
     param([string]$Project)
 
     if (Test-Path $script:ConfigPath) {
         try {
-            $yaml = Get-Content $script:ConfigPath -Raw
-            # Match the project block and extract the first repo path
-            $pattern = "(?s)- name:\s*$([regex]::Escape($Project))\s+repos:\s*\n((?:\s+-.+\n?)+)"
-            $match = [regex]::Match($yaml, $pattern)
-            if ($match.Success) {
-                # Try new format: - path: D:\...
-                $pathLine = [regex]::Match($match.Groups[1].Value, '(?m)path:\s*(.+)$')
-                if ($pathLine.Success) {
-                    return $pathLine.Groups[1].Value.Trim()
-                }
-                # Fallback: old format - D:\...
-                $repoLine = [regex]::Match($match.Groups[1].Value, '^\s+-\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Multiline)
-                if ($repoLine.Success) {
-                    return $repoLine.Groups[1].Value.Trim()
-                }
+            $config = Get-Content $script:ConfigPath -Raw | ConvertFrom-Yaml
+            $projectEntry = $config.projects | Where-Object { $_.name -eq $Project } | Select-Object -First 1
+            if ($projectEntry -and $projectEntry.repos -and $projectEntry.repos.Count -gt 0) {
+                return ExtractRepoPathsFromYaml $projectEntry.repos -ReturnFirst
             }
         }
         catch { }
@@ -241,6 +378,52 @@ function GetProjectWorkDir {
     return (Get-Location).Path
 }
 
+<#
+.SYNOPSIS
+Invokes a Claude agent with firmware preparation, cost tracking, and logging.
+
+.PARAMETER ScriptRoot
+Root directory of the calling promptware script (usually $PSScriptRoot)
+
+.PARAMETER ProgramFolder
+Program folder path (from GetProgramFolder)
+
+.PARAMETER LogFile
+Path to the log file for this session
+
+.PARAMETER FirmwareValues
+Hashtable of key-value pairs to inject into firmware header (e.g., @{ PlanId = "01234"; Project = "Tendril" })
+
+.PARAMETER WorkDir
+Working directory for the agent (defaults to ProgramFolder)
+
+.PARAMETER PlanPath
+Optional path to plan folder (enables plan-specific logging and state updates)
+
+.PARAMETER Action
+Optional action name for logging (e.g., "MakePlan", "ExecutePlan")
+
+.PARAMETER FinalState
+Optional final state to set in plan.yaml after execution completes (e.g., "Draft", "ReadyForReview")
+
+.PARAMETER ExtraAgentArgs
+Optional array of additional arguments to pass to the claude CLI
+
+.PARAMETER Promptware
+Promptware name to look up model and allowedTools config overrides (e.g., "MakePlan", "ExecutePlan")
+
+.EXAMPLE
+InvokePromptwareAgent `
+    -ScriptRoot $PSScriptRoot `
+    -ProgramFolder $programFolder `
+    -LogFile $logFile `
+    -FirmwareValues @{ PlanId = $planId; Project = "Tendril" } `
+    -WorkDir $repoPath `
+    -PlanPath $planFolder `
+    -Action "MakePlan" `
+    -FinalState "Draft" `
+    -Promptware "MakePlan"
+#>
 function InvokePromptwareAgent {
     param(
         [string]$ScriptRoot,
@@ -373,16 +556,7 @@ function GetAgentCommandFromConfig {
 
     if (Test-Path $configPath) {
         try {
-            $yaml = Get-Content $configPath -Raw
-            # Regex match as first pass or fallback
-            $pattern = "(?m)^agentCommand:\s*(.+)$"
-            $match = [regex]::Match($yaml, $pattern)
-            if ($match.Success) {
-                $raw = $match.Groups[1].Value.Trim()
-            }
-
-            # Parse config with ConvertFrom-Yaml for structured access
-            $config = $yaml | ConvertFrom-Yaml
+            $config = Get-Content $configPath -Raw | ConvertFrom-Yaml
 
             if ($config.agentCommand) {
                 $raw = $config.agentCommand

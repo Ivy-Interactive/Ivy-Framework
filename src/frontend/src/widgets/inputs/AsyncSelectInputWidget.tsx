@@ -75,6 +75,14 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
     eventHandler("OnSelect", id, []);
   };
 
+  const hasAutoFocusedRef = useRef(false);
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      handleSelect();
+    }
+  }, [autoFocus, disabled, handleSelect]);
+
   // Create ref for the display value span
   const displayValueRef = useRef<HTMLSpanElement>(null);
 
