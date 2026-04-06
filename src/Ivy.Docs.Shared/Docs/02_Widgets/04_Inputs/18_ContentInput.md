@@ -55,6 +55,7 @@ text.ToContentInput(upload)
 | `.MaxFiles(int)` | Maximum number of attachments |
 | `.Files(IEnumerable<FileUpload>)` | Display current file attachments |
 | `.Disabled(bool)` | Disable the input |
+| `.ShortcutKey(string)` | Keyboard shortcut to focus the input (e.g., `"Ctrl+K"`) |
 | `.Invalid(string)` | Show validation error |
 
 ## Events
