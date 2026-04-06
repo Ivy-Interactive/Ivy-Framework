@@ -285,7 +285,10 @@ const MultipleSelector = React.forwardRef<
     const handleBulkSelectAll = React.useCallback(() => {
       const merged = computeSelectAllValues(
         selectedValueStrings,
-        visibleEnabledForBulk.map((o) => ({ value: o.value, disabled: !!o.disable })),
+        visibleEnabledForBulk.map((o) => ({
+          value: o.value,
+          disabled: !!o.disable,
+        })),
         maxSelections,
       );
       const newOptions: Option[] = merged.map((v) => {
@@ -503,7 +506,7 @@ const MultipleSelector = React.forwardRef<
             >
               {defaultOptions.length > 0 ? (
                 <>
-                  <CommandGroup className="h-full overflow-auto max-h-[300px]">
+                  <CommandGroup className="h-full overflow-auto max-h-[300px] slim-scrollbar">
                     {defaultOptions.map((option) => {
                       const selected = isSelected(option);
                       return (
