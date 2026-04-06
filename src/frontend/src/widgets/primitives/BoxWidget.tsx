@@ -40,6 +40,7 @@ interface BoxWidgetProps {
   events?: string[];
   aspectRatio?: number;
   hoverVariant?: HoverEffect;
+  ariaLabel?: string;
 }
 
 export const BoxWidget: React.FC<BoxWidgetProps> = ({
@@ -61,6 +62,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   aspectRatio,
   events = EMPTY_ARRAY,
   hoverVariant = "None",
+  ariaLabel,
 }) => {
   const eventHandler = useEventHandler();
   const isClickable = events.includes("OnClick");
@@ -122,7 +124,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
           }
         }}
         role="button"
-        aria-label="Interactive region"
+        aria-label={ariaLabel ?? "Interactive region"}
         tabIndex={0}
       >
         {children}

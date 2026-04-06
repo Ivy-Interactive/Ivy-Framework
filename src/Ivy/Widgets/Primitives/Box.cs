@@ -38,6 +38,8 @@ public record Box : WidgetBase<Box>
 
     [Prop] public HoverEffect HoverVariant { get; set; } = HoverEffect.None;
 
+    [Prop] public string? AriaLabel { get; set; }
+
     [Event] public EventHandler<Event<Box>>? OnClick { get; set; }
 }
 
@@ -96,6 +98,8 @@ public static class BoxExtensions
     public static Box Grow(this Box box) => box.Width(Size.Grow());
 
     public static Box Hover(this Box box, HoverEffect variant) => box with { HoverVariant = variant };
+
+    public static Box AriaLabel(this Box box, string label) => box with { AriaLabel = label };
 
     private static HoverEffect HoverVariantWithClick(this Box box) => box.HoverVariant == HoverEffect.None ? HoverEffect.PointerAndTranslate : box.HoverVariant;
 
