@@ -65,7 +65,7 @@ public class TextInputApp : SampleBase
                   | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
                   | Text.Monospaced("TextInputVariant.Textarea")
-                  | withoutValue.ToTextareaInput().Placeholder("Placeholder")
+                  | withoutValue.ToTextareaInput().Placeholder("Placeholder").ShortcutKey("Ctrl+T")
                   | withValue.ToTextareaInput()
                   | withValue.ToTextareaInput().Disabled()
                   | withValue.ToTextareaInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
@@ -75,6 +75,24 @@ public class TextInputApp : SampleBase
                   | withValue.ToSearchInput()
                   | withValue.ToSearchInput().Disabled()
                   | withValue.ToSearchInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+                  | Text.Monospaced("TextInputVariant.Email")
+                  | withoutValue.ToEmailInput().Placeholder("Placeholder").ShortcutKey("Ctrl+E")
+                  | withValue.ToEmailInput()
+                  | withValue.ToEmailInput().Disabled()
+                  | withValue.ToEmailInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+                  | Text.Monospaced("TextInputVariant.Tel")
+                  | withoutValue.ToTelInput().Placeholder("Placeholder").ShortcutKey("Ctrl+J")
+                  | withValue.ToTelInput()
+                  | withValue.ToTelInput().Disabled()
+                  | withValue.ToTelInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+                  | Text.Monospaced("TextInputVariant.Url")
+                  | withoutValue.ToUrlInput().Placeholder("Placeholder").ShortcutKey("Ctrl+U")
+                  | withValue.ToUrlInput()
+                  | withValue.ToUrlInput().Disabled()
+                  | withValue.ToUrlInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
                )
 
                | Text.H2("Affixes")
