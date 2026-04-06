@@ -248,6 +248,43 @@ public class JobServiceHookTests
     }
 
     [Fact]
+    public void RunHooks_HookCanPerformStringComparison_Failed()
+    {
+        var hooks = new List<PromptwareHookConfig>
+        {
+            new()
+            {
+                Name = "StatusCheck",
+                When = "after",
+                Action = @"
+                    if ($env:TENDRIL_JOB_STATUS -eq 'Completed') {
+                        Write-Host 'Job completed successfully'
+                    } elseif ($env:TENDRIL_JOB_STATUS -eq 'Failed') {
+                        Write-Host 'Job failed'
+                    } else {
+                        Write-Host ""Job status: $env:TENDRIL_JOB_STATUS""
+                    }
+                ",
+            },
+        };
+        var (service, _) = CreateServiceWithHooks(hooks);
+        var planFolder = CreateTempPlanFolder();
+
+        try
+        {
+            var id = service.StartJob("ExecutePlan", planFolder);
+            service.CompleteJob(id, exitCode: 1);
+
+            var job = service.GetJob(id)!;
+            Assert.Contains(job.OutputLines, l => l.Contains("Job failed"));
+        }
+        finally
+        {
+            Directory.Delete(planFolder, true);
+        }
+    }
+
+    [Fact]
     public void RunHooks_AfterHooksReceiveJobStatus()
     {
         // Basic smoke test — see RunHooks_AllJobStatusesProduceExpectedStrings

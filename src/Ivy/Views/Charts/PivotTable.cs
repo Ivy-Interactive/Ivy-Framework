@@ -162,7 +162,11 @@ public class PivotTable<T>
                 FillGaps(result, dimensionName, measures, startInt, endInt,
                     interval as int? ?? 1),
 
-            _ => result
+            _ => throw new ArgumentException(
+                $"FillGaps() is only supported for DateTime and int dimensions. " +
+                $"Dimension '{dimensionName}' has type '{firstValue.GetType().Name}'. " +
+                $"Use a DateTime or int dimension instead of formatting the value as a string.",
+                nameof(dimension))
         };
     }
 

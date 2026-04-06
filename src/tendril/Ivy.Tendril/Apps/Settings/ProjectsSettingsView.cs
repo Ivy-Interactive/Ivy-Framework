@@ -227,7 +227,7 @@ public class ProjectsSettingsView : ViewBase
                         | editName.ToTextInput("Project name...").WithField().Label("Name")
                         | editColor.ToSelectInput().WithField().Label("Color")
                         | editSlackEmoji.ToTextInput(":emoji:").WithField().Label("Slack Emoji")
-                        | editContext.ToTextareaInput("Project context...").Rows(4).WithField().Label("Context")
+                        | editContext.ToTextareaInput("Project context or prompt for AI agents (optional)...").Rows(4).WithField().Label("Context / Prompt (Optional)")
                         | (Layout.Vertical().Gap(2)
                             | Text.Block("Repositories").Bold()
                             | reposLayout)
