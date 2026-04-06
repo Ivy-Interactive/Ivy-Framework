@@ -20,7 +20,7 @@ Each job captures:
 
 - **Status** — Pending, Running, Completed, Failed, or Timed Out
 - **Type** — Which promptware is running (MakePlan, ExecutePlan, etc.)
-- **Plan ID** — The plan this job belongs to
+- **Plan** — The plan this job belongs to
 - **Cost** — Token usage and estimated cost
 - **Duration** — How long the job has been running
 - **Output** — Live status messages from the agent

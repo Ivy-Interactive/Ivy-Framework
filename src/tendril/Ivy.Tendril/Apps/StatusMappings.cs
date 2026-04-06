@@ -49,4 +49,18 @@ internal static class StatusMappings
         [JobStatus.Stopped] = Colors.Gray,
         [JobStatus.Blocked] = Colors.Orange
     };
+
+    /// <summary>
+    /// Maps job type strings to colors for consistent styling.
+    /// </summary>
+    public static readonly Dictionary<string, Colors> JobTypeColors = new()
+    {
+        ["MakePlan"] = Colors.Purple,
+        ["ExecutePlan"] = Colors.Blue,
+        ["UpdatePlan"] = Colors.Cyan,
+        ["ExpandPlan"] = Colors.Teal,
+        ["SplitPlan"] = Colors.Indigo,
+        ["MakePr"] = Colors.Green,
+        ["CreateIssue"] = Colors.Rose
+    };
 }

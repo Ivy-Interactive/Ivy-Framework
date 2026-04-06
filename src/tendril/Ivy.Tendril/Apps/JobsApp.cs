@@ -88,26 +88,33 @@ public class JobsApp : ViewBase
             .Height(Size.Full())
             .Header(t => t.Status, "Status")
             .Header(t => t.Type, "Type")
-            .Header(t => t.PlanId, "Plan ID")
+            .Header(t => t.PlanId, "Plan")
             .Header(t => t.Plan, "Plan")
             .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
             .Header(t => t.Cost, "Cost")
             .Header(t => t.LastOutput, "Last Output")
             .Header(t => t.StatusMessage, "Status Message")
-            .Width(t => t.Status, Size.Px(100))
-            .Width(t => t.PlanId, Size.Px(80))
-            .Width(t => t.Type, Size.Px(120))
-            .Width(t => t.Plan, Size.Auto())
-            .Width(t => t.Project, Size.Px(80))
+            .Width(t => t.Status, Size.Px(90))
+            .Width(t => t.PlanId, Size.Px(90))
+            .Width(t => t.Type, Size.Px(90))
+            .Width(t => t.Plan, Size.Fraction(0.5f))
+            .Width(t => t.Project, Size.Px(90))
             .Width(t => t.Timer, Size.Px(90))
             .Width(t => t.LastOutput, Size.Px(90))
-            .Width(t => t.Cost, Size.Px(80))
-            .Width(t => t.StatusMessage, Size.Auto())
+            .Width(t => t.Cost, Size.Px(90))
+            .Width(t => t.StatusMessage, Size.Fraction(0.5f))
             .Renderer(t => t.Status, new LabelsDisplayRenderer
             {
                 BadgeColorMapping = StatusMappings.JobStatusColors.ToDictionary(
                     kvp => kvp.Key.ToString(),
+                    kvp => kvp.Value.ToString()
+                )
+            })
+            .Renderer(t => t.Type, new LabelsDisplayRenderer
+            {
+                BadgeColorMapping = StatusMappings.JobTypeColors.ToDictionary(
+                    kvp => kvp.Key,
                     kvp => kvp.Value.ToString()
                 )
             })

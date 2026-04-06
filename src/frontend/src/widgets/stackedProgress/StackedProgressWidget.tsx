@@ -117,7 +117,9 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
                 <Tooltip key={index}>
                   <TooltipTrigger asChild>{segmentEl}</TooltipTrigger>
                   <TooltipContent>
-                    <span>{segment.label || segment.value}</span>
+                    <span>
+                      {segment.label ? `${segment.label}: ${segment.value}` : `${segment.value}`}
+                    </span>
                   </TooltipContent>
                 </Tooltip>
               );
@@ -164,7 +166,8 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
                       backgroundColor: color,
                     }}
                   />
-                  <span>{segment.label || segment.value}</span>
+                  <span>{segment.label}</span>
+                  <span className="font-medium text-foreground">{segment.value}</span>
                 </div>
               );
             })}

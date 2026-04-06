@@ -151,6 +151,7 @@ public class ConfigService : IConfigService
             {
                 var yaml = File.ReadAllText(_configPath);
                 _settings = YamlHelper.Deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
+                MigrateProjectColors();
                 NeedsOnboarding = false;
             }
             catch (Exception)
@@ -228,6 +229,40 @@ public class ConfigService : IConfigService
         return !string.IsNullOrEmpty(colorStr) && Enum.TryParse<Colors>(colorStr, out var c) ? c : null;
     }
 
+    internal static string? MigrateProjectColor(string? colorValue)
+    {
+        if (string.IsNullOrEmpty(colorValue))
+            return null;
+
+        if (Enum.TryParse<Colors>(colorValue, out _))
+            return colorValue;
+
+        return Colors.Slate.ToString();
+    }
+
+    private void MigrateProjectColors()
+    {
+        if (_settings?.Projects == null) return;
+
+        var needsSave = false;
+        foreach (var project in _settings.Projects)
+        {
+            var migrated = MigrateProjectColor(project.Color);
+            var migratedStr = migrated ?? "";
+            if (migratedStr != project.Color)
+            {
+                project.Color = migratedStr;
+                needsSave = true;
+            }
+        }
+
+        if (needsSave && File.Exists(_configPath))
+        {
+            var yaml = YamlHelper.SerializerCompact.Serialize(_settings);
+            File.WriteAllText(_configPath, yaml);
+        }
+    }
+
     public void SaveSettings()
     {
         _levelNamesCache = null;
@@ -273,6 +308,7 @@ public class ConfigService : IConfigService
             }
         }
 
+        MigrateProjectColors();
         _levelNamesCache = null;
         VariableExpansion.InitializeUserSecrets(_tendrilHome);
         ExpandSettingsVariables();

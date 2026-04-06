@@ -130,7 +130,7 @@ public class DashboardApp : ViewBase
             projectData.Select(p => new ProgressSegment(
                 Value: p.Count,
                 Color: configService.GetProjectColor(p.Project),
-                Label: $"{p.Project} ({p.Count})"
+                Label: $"{p.Project}"
             )).ToArray()
         )
         .Selected(selectedProject.Value != null

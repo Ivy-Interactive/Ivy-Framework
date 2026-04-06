@@ -301,4 +301,74 @@ verifications: []
             Directory.Delete(tempDir, true);
         }
     }
+
+    [Theory]
+    [InlineData("#9a3c3c", "Slate")]
+    [InlineData("#2563eb", "Slate")]
+    [InlineData("invalid", "Slate")]
+    [InlineData("Blue", "Blue")]
+    [InlineData("Emerald", "Emerald")]
+    [InlineData("", null)]
+    [InlineData(null, null)]
+    public void MigrateProjectColor_HandlesVariousInputs(string? input, string? expected)
+    {
+        var result = ConfigService.MigrateProjectColor(input);
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void LoadSettings_MigratesHexColorsToSlate()
+    {
+        var tempDir = CreateTempConfigFile(@"
+agentCommand: claude
+projects:
+  - name: TestProject
+    color: '#9a3c3c'
+    repos: []
+    verifications: []
+");
+
+        var service = new ConfigService(new TendrilSettings(), "");
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            Assert.Equal("Slate", service.Settings.Projects[0].Color);
+
+            var savedYaml = File.ReadAllText(Path.Combine(tempDir, "config.yaml"));
+            Assert.Contains("Slate", savedYaml);
+            Assert.DoesNotContain("#9a3c3c", savedYaml);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void LoadSettings_PreservesValidEnumColors()
+    {
+        var tempDir = CreateTempConfigFile(@"
+agentCommand: claude
+projects:
+  - name: TestProject
+    color: Blue
+    repos: []
+    verifications: []
+");
+
+        var service = new ConfigService(new TendrilSettings(), "");
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            Assert.Equal("Blue", service.Settings.Projects[0].Color);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
 }

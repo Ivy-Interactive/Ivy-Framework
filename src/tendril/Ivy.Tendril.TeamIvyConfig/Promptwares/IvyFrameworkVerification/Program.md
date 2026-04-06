@@ -74,7 +74,7 @@ Create everything directly in `<ArtifactsDir>/sample/` so the plan folder is sel
 
 **If referencing a worktree and it has frontend (.ts) changes:** rebuild frontend from the worktree path (`cd <worktree>/src/frontend && vp build`), then clean the Ivy obj dir (`rm -rf <worktree>/src/Ivy/obj/Debug`) before building the sample project.
 
-**`<ArtifactsDir>/sample/<FeatureName>.csproj`:**
+**`<ArtifactsDir>/sample/Sample.csproj`:**
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -90,6 +90,8 @@ Create everything directly in `<ArtifactsDir>/sample/` so the plan folder is sel
   </ItemGroup>
 </Project>
 ```
+
+**Note:** Always use the filename `Sample.csproj` (not `<FeatureName>.csproj`) to ensure reruns with "Suggested Changes" overwrite the same file instead of creating multiple .csproj files.
 
 **`<ArtifactsDir>/sample/Program.cs`:**
 
