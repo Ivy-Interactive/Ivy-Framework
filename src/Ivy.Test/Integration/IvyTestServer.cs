@@ -1,19 +1,20 @@
 using Ivy.Core.Server;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Ivy.Test.Integration;
 
 public class IvyTestServer : IAsyncDisposable
 {
-    private readonly WebApplication _app;
-    public AppSessionStore SessionStore { get; }
-    public string BaseUrl { get; }
+    private readonly Microsoft.AspNetCore.Builder.WebApplication _app;
+    private readonly AppSessionStore _sessionStore;
 
-    private IvyTestServer(WebApplication app, AppSessionStore sessionStore, string baseUrl)
+    public string BaseUrl { get; }
+    public AppSessionStore SessionStore => _sessionStore;
+
+    private IvyTestServer(Microsoft.AspNetCore.Builder.WebApplication app, AppSessionStore sessionStore, string baseUrl)
     {
         _app = app;
-        SessionStore = sessionStore;
+        _sessionStore = sessionStore;
         BaseUrl = baseUrl;
     }
 
@@ -23,18 +24,16 @@ public class IvyTestServer : IAsyncDisposable
         var server = new Server(new ServerArgs { Port = 0, Silent = true, Host = "127.0.0.1" });
         server.AddApp(new AppDescriptor
         {
-            Id = AppIds.Default,
+            Id = "test-app",
             Title = "Test App",
-            ViewFunc = _ => "Hello from test",
-            Group = ["Apps"],
+            ViewFunc = ctx => "Hello Integration Test",
+            Group = [],
             IsVisible = true
         });
 
-        var app = server.BuildWebApplication(sessionStore);
-        if (app == null)
-            throw new InvalidOperationException("Failed to build WebApplication");
-
+        var app = server.BuildWebApplication(sessionStore)!;
         await app.StartAsync();
+
         var baseUrl = app.Urls.First();
         return new IvyTestServer(app, sessionStore, baseUrl);
     }
@@ -42,7 +41,7 @@ public class IvyTestServer : IAsyncDisposable
     public HubConnection CreateHubConnection()
     {
         return new HubConnectionBuilder()
-            .WithUrl($"{BaseUrl}/ivy/messages?machineId=test-machine")
+            .WithUrl($"{BaseUrl}/ivy/messages?appId=test-app&machineId=test-machine&shell=false")
             .Build();
     }
 
@@ -50,6 +49,6 @@ public class IvyTestServer : IAsyncDisposable
     {
         await _app.StopAsync();
         await _app.DisposeAsync();
-        SessionStore.Dispose();
+        _sessionStore.Dispose();
     }
 }

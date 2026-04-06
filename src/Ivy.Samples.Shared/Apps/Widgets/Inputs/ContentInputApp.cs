@@ -13,7 +13,8 @@ public class ContentInputApp : SampleBase
                | Layout.Tabs(
                    new Tab("Basic", new ContentInputBasicExample()),
                    new Tab("With Files", new ContentInputWithFilesExample()),
-                   new Tab("Configured", new ContentInputConfiguredExample())
+                   new Tab("Configured", new ContentInputConfiguredExample()),
+                   new Tab("Submit", new ContentInputSubmitExample())
                ).Variant(TabsVariant.Content);
     }
 }
@@ -95,5 +96,33 @@ public class ContentInputConfiguredExample : ViewBase
                        .Placeholder("Taller textarea")
                        .Rows(6)
                );
+    }
+}
+
+public class ContentInputSubmitExample : ViewBase
+{
+    public override object? Build()
+    {
+        var text = UseState("");
+        var files = UseState(ImmutableArray<FileUpload<byte[]>>.Empty);
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(files));
+        var lastSubmission = UseState("");
+
+        return Layout.Vertical()
+               | Text.H2("ShortcutKey + OnSubmit")
+               | Text.P("Press Ctrl+Enter (or Cmd+Enter on Mac) to submit. The shortcut badge appears on the send button.")
+               | text.ToContentInput(upload)
+                   .Files(files.Value)
+                   .Placeholder("Type and press Ctrl+Enter to submit...")
+                   .ShortcutKey("Ctrl+Enter")
+                   .OnSubmit(() =>
+                   {
+                       lastSubmission.Set($"Submitted: \"{text.Value}\" with {files.Value.Length} file(s)");
+                       text.Set("");
+                       files.Set(ImmutableArray<FileUpload<byte[]>>.Empty);
+                   })
+               | (string.IsNullOrEmpty(lastSubmission.Value)
+                   ? (object)Text.Muted("Nothing submitted yet")
+                   : Callout.Success(lastSubmission.Value));
     }
 }

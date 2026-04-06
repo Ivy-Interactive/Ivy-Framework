@@ -9,6 +9,7 @@ import { Densities } from "@/types/density";
 import { cva } from "class-variance-authority";
 import { useEventHandler } from "@/components/event-handler";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { getFullUrl } from "@/lib/url";
 
 const containerVariant = cva(
   "relative rounded-field border-dashed transition-colors border-muted-foreground/25 overflow-hidden flex flex-col items-center justify-center",
@@ -88,15 +89,6 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
       streamRef.current = null;
     }
   }, []);
-
-  const getUploadUrl = useCallback(() => {
-    const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-    if (ivyHostMeta) {
-      const host = ivyHostMeta.getAttribute("content");
-      return host + uploadUrl;
-    }
-    return uploadUrl;
-  }, [uploadUrl]);
 
   const startCamera = useCallback(async () => {
     if (disabled) return;
@@ -198,7 +190,7 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
       formData.append("file", blob, "capture.png");
 
       try {
-        const response = await fetch(getUploadUrl(), {
+        const response = await fetch(getFullUrl(uploadUrl), {
           method: "POST",
           body: formData,
         });
@@ -214,7 +206,7 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
         });
       }
     }, "image/png");
-  }, [stopStream, uploadUrl, getUploadUrl]);
+  }, [stopStream, uploadUrl]);
 
   const retake = useCallback(() => {
     setCapturedImage(null);

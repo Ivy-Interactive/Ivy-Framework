@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { logger } from "@/lib/logger";
+import { getFullUrl } from "@/lib/url";
 
 interface UseDictationOptions {
   dictationUploadUrl?: string;
@@ -20,15 +21,6 @@ const supportedMimeTypes = [
   "audio/ogg",
   "audio/wav",
 ];
-
-function getUploadUrl(uploadUrl: string): string {
-  const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-  if (ivyHostMeta) {
-    const host = ivyHostMeta.getAttribute("content");
-    return host + uploadUrl;
-  }
-  return uploadUrl;
-}
 
 export function useDictation({
   dictationUploadUrl,
@@ -94,7 +86,7 @@ export function useDictation({
         formData.append("mimeType", selectedMimeType!);
 
         try {
-          await fetch(getUploadUrl(dictationUploadUrl), {
+          await fetch(getFullUrl(dictationUploadUrl), {
             method: "POST",
             body: formData,
           });

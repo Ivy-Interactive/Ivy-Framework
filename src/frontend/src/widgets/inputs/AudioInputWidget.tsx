@@ -13,6 +13,7 @@ import {
   iconSizeVariant,
 } from "@/components/ui/input/audio-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { getFullUrl } from "@/lib/url";
 
 interface AudioInputWidgetProps {
   id: string;
@@ -86,17 +87,6 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
     async (chunk: Blob): Promise<void> => {
       if (!uploadUrl) return;
 
-      // Get the correct host from meta tag or use relative URL
-      const getUploadUrl = () => {
-        const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-        if (ivyHostMeta) {
-          const host = ivyHostMeta.getAttribute("content");
-          return host + uploadUrl;
-        }
-        // If no meta tag, use relative URL (should work in production)
-        return uploadUrl;
-      };
-
       const selectedMime =
         selectedMimeTypeRef.current ?? normalizedMimeTypes[0] ?? supportedMimeTypes[0];
 
@@ -105,7 +95,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
       formData.append("mimeType", selectedMime);
 
       try {
-        const response = await fetch(getUploadUrl(), {
+        const response = await fetch(getFullUrl(uploadUrl), {
           method: "POST",
           body: formData,
         });

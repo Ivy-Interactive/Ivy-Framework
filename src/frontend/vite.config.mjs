@@ -86,14 +86,14 @@ export default defineConfig({
   build: {
     target: "es2020",
     outDir: "dist",
-    assetsDir: "assets",
+    assetsDir: "ivy-assets",
     cssCodeSplit: true,
     sourcemap: false,
     rollupOptions: {
       output: {
-        entryFileNames: "assets/[name]-[hash].js",
-        chunkFileNames: "assets/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash].[ext]",
+        entryFileNames: "ivy-assets/[name]-[hash].js",
+        chunkFileNames: "ivy-assets/[name]-[hash].js",
+        assetFileNames: "ivy-assets/[name]-[hash].[ext]",
       },
     },
   },
