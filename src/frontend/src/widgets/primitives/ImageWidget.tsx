@@ -253,6 +253,7 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
               : undefined
           }
           role={overlay || hasOnClick ? "button" : undefined}
+          aria-label={overlay ? "View image overlay" : hasOnClick ? "Image action" : undefined}
           tabIndex={overlay || hasOnClick ? 0 : undefined}
         >
           {content}

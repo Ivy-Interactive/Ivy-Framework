@@ -1,7 +1,7 @@
 {
   "excludedPaths": [
     "/ivy",
-    "/ivy-assets",
+    "/assets",
     "/fonts",
     "/_framework",
     "/favicon.ico",

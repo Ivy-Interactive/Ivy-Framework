@@ -84,6 +84,7 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = "Au
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         role="button"
+        aria-label="Trigger confetti"
         tabIndex={0}
         onKeyDown={handleKeyDown}
       >

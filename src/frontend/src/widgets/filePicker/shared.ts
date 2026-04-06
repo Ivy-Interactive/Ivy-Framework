@@ -1,21 +1,40 @@
+import { getFullUrl } from "@/lib/url";
+import { validateFileWithToast } from "@/widgets/inputs/file-input-validation";
+export { getFullUrl };
+
 /**
- * Get the full upload URL, accounting for the ivy-host meta tag.
+ * Validate a file against accept, maxFileSize, and minFileSize constraints.
+ * Shows a toast on validation failure and returns false.
  */
-export function getFullUrl(path: string): string {
-  const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-  if (ivyHostMeta) {
-    const host = ivyHostMeta.getAttribute("content");
-    return host + path;
-  }
-  return path;
+export function validateFile(
+  file: File,
+  accept?: string,
+  maxFileSize?: number,
+  minFileSize?: number,
+): boolean {
+  return validateFileWithToast({ file, accept, maxFileSize, minFileSize });
 }
 
 /**
  * Upload a file to the given upload URL using FormData.
+ * Supports Blob or File, optional filename, and optional extra form fields.
  */
-export async function uploadFile(uploadUrl: string, file: File): Promise<void> {
+export async function uploadFile(
+  uploadUrl: string,
+  file: File | Blob,
+  options?: { filename?: string; extraFields?: Record<string, string> },
+): Promise<void> {
   const formData = new FormData();
-  formData.append("file", file);
+  if (options?.filename) {
+    formData.append("file", file, options.filename);
+  } else {
+    formData.append("file", file);
+  }
+  if (options?.extraFields) {
+    for (const [key, value] of Object.entries(options.extraFields)) {
+      formData.append(key, value);
+    }
+  }
 
   const response = await fetch(getFullUrl(uploadUrl), {
     method: "POST",

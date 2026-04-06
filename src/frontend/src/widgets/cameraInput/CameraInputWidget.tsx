@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { Densities } from "@/types/density";
 import { cva } from "class-variance-authority";
 import { useEventHandler } from "@/components/event-handler";
+import { uploadFile } from "@/widgets/filePicker/shared";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
 const containerVariant = cva(
@@ -88,15 +89,6 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
       streamRef.current = null;
     }
   }, []);
-
-  const getUploadUrl = useCallback(() => {
-    const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-    if (ivyHostMeta) {
-      const host = ivyHostMeta.getAttribute("content");
-      return host + uploadUrl;
-    }
-    return uploadUrl;
-  }, [uploadUrl]);
 
   const startCamera = useCallback(async () => {
     if (disabled) return;
@@ -194,17 +186,8 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
     canvas.toBlob(async (blob) => {
       if (!blob || !uploadUrl) return;
 
-      const formData = new FormData();
-      formData.append("file", blob, "capture.png");
-
       try {
-        const response = await fetch(getUploadUrl(), {
-          method: "POST",
-          body: formData,
-        });
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
-        }
+        await uploadFile(uploadUrl, blob, { filename: "capture.png" });
       } catch (error) {
         logger.error("Photo upload error:", error);
         toast({
@@ -214,7 +197,7 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
         });
       }
     }, "image/png");
-  }, [stopStream, uploadUrl, getUploadUrl]);
+  }, [stopStream, uploadUrl]);
 
   const retake = useCallback(() => {
     setCapturedImage(null);
@@ -264,6 +247,7 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
             className={cn("flex flex-col items-center gap-2", !disabled && "cursor-pointer")}
             onClick={disabled ? undefined : startCamera}
             role="button"
+            aria-label="Start camera"
             tabIndex={disabled ? -1 : 0}
             onKeyDown={(e) => {
               if (disabled) return;

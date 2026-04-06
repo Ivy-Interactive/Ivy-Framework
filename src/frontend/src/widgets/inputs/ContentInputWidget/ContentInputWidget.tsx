@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useEffect } from "react";
 import { Paperclip } from "lucide-react";
+import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
@@ -12,6 +13,64 @@ import { FileAttachmentList } from "./FileAttachmentList";
 import { ContentInputWidgetProps } from "./types";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { formatShortcutForDisplay, parseShortcut, keyToCode } from "@/lib/shortcut";
+
+const toolbarVariant = cva("flex items-center gap-1", {
+  variants: {
+    density: {
+      Small: "px-1.5 pb-1",
+      Medium: "px-2 pb-1.5",
+      Large: "px-3 pb-2",
+    },
+  },
+  defaultVariants: { density: "Medium" },
+});
+
+const paperclipIconVariant = cva("text-muted-foreground", {
+  variants: {
+    density: {
+      Small: "h-3 w-3",
+      Medium: "h-4 w-4",
+      Large: "h-5 w-5",
+    },
+  },
+  defaultVariants: { density: "Medium" },
+});
+
+const paperclipButtonVariant = cva("rounded hover:bg-accent focus:outline-none transition-colors", {
+  variants: {
+    density: {
+      Small: "p-0.5",
+      Medium: "p-1",
+      Large: "p-1.5",
+    },
+  },
+  defaultVariants: { density: "Medium" },
+});
+
+const dropTextVariant = cva("text-primary ml-1", {
+  variants: {
+    density: {
+      Small: "text-[10px]",
+      Medium: "text-xs",
+      Large: "text-sm",
+    },
+  },
+  defaultVariants: { density: "Medium" },
+});
+
+const shortcutBadgeVariant = cva(
+  "ml-auto font-medium text-muted-foreground bg-muted border border-border rounded-field",
+  {
+    variants: {
+      density: {
+        Small: "text-[10px] px-0.5 py-0",
+        Medium: "text-xs px-1 py-0.5",
+        Large: "text-sm px-1.5 py-0.5",
+      },
+    },
+    defaultVariants: { density: "Medium" },
+  },
+);
 
 export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
   id,
@@ -52,8 +111,6 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
     openFilePicker,
     handleFileInputChange,
     fileInputRef,
-    uploadProgress,
-    cancelUpload,
   } = useFileAttachments({
     uploadUrl,
     accept,
@@ -111,16 +168,11 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
 
   const handleCancel = useCallback(
     (fileId: string) => {
-      // Check if this is a client-side upload in progress
-      if (uploadProgress.has(fileId)) {
-        cancelUpload(fileId);
-        return;
-      }
       if (hasCancelHandler) {
         handleEvent("OnCancel", id, [fileId]);
       }
     },
-    [hasCancelHandler, handleEvent, id, uploadProgress, cancelUpload],
+    [hasCancelHandler, handleEvent, id],
   );
 
   useEffect(() => {
@@ -210,16 +262,16 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
           )}
         </div>
 
-        {(fileList.length > 0 || uploadProgress.size > 0) && (
+        {fileList.length > 0 && (
           <FileAttachmentList
             files={fileList}
-            uploadProgress={uploadProgress}
             onCancel={handleCancel}
             hasCancelHandler={hasCancelHandler}
+            density={density}
           />
         )}
 
-        <div className="flex items-center gap-1 px-2 pb-1.5">
+        <div className={toolbarVariant({ density })}>
           {uploadUrl && (
             <button
               type="button"
@@ -227,19 +279,17 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
               disabled={disabled}
               onClick={openFilePicker}
               className={cn(
-                "p-1 rounded hover:bg-accent focus:outline-none transition-colors",
+                paperclipButtonVariant({ density }),
                 disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
               )}
               aria-label="Attach file"
             >
-              <Paperclip className="h-4 w-4 text-muted-foreground" />
+              <Paperclip className={paperclipIconVariant({ density })} />
             </button>
           )}
-          {isDragging && <span className="text-xs text-primary ml-1">Drop files here</span>}
+          {isDragging && <span className={dropTextVariant({ density })}>Drop files here</span>}
           {shortcutKey && !isFocused && (
-            <kbd className="ml-auto px-1 py-0.5 text-xs font-medium text-muted-foreground bg-muted border border-border rounded-field">
-              {shortcutDisplay}
-            </kbd>
+            <kbd className={shortcutBadgeVariant({ density })}>{shortcutDisplay}</kbd>
           )}
         </div>
 

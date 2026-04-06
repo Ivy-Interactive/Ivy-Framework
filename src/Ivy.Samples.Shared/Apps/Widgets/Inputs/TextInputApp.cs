@@ -59,13 +59,13 @@ public class TextInputApp : SampleBase
                   | withValue.ToTextInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
                   | Text.Monospaced("TextInputVariant.Password")
-                  | withoutValue.ToPasswordInput().Placeholder("Placeholder")
+                  | withoutValue.ToPasswordInput().Placeholder("Placeholder").ShortcutKey("Ctrl+L")
                   | withValue.ToPasswordInput()
                   | withValue.ToPasswordInput().Disabled()
                   | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
 
                   | Text.Monospaced("TextInputVariant.Textarea")
-                  | withoutValue.ToTextareaInput().Placeholder("Placeholder")
+                  | withoutValue.ToTextareaInput().Placeholder("Placeholder").ShortcutKey("Ctrl+T")
                   | withValue.ToTextareaInput()
                   | withValue.ToTextareaInput().Disabled()
                   | withValue.ToTextareaInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
@@ -75,6 +75,24 @@ public class TextInputApp : SampleBase
                   | withValue.ToSearchInput()
                   | withValue.ToSearchInput().Disabled()
                   | withValue.ToSearchInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+                  | Text.Monospaced("TextInputVariant.Email")
+                  | withoutValue.ToEmailInput().Placeholder("Placeholder").ShortcutKey("Ctrl+E")
+                  | withValue.ToEmailInput()
+                  | withValue.ToEmailInput().Disabled()
+                  | withValue.ToEmailInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+                  | Text.Monospaced("TextInputVariant.Tel")
+                  | withoutValue.ToTelInput().Placeholder("Placeholder").ShortcutKey("Ctrl+J")
+                  | withValue.ToTelInput()
+                  | withValue.ToTelInput().Disabled()
+                  | withValue.ToTelInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+                  | Text.Monospaced("TextInputVariant.Url")
+                  | withoutValue.ToUrlInput().Placeholder("Placeholder").ShortcutKey("Ctrl+U")
+                  | withValue.ToUrlInput()
+                  | withValue.ToUrlInput().Disabled()
+                  | withValue.ToUrlInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
                )
 
                | Text.H2("Affixes")
@@ -221,6 +239,8 @@ public class TextInputSubmitDemo : ViewBase
         var searchResult = UseState("");
         var tag = UseState("");
         var tags = UseState<List<string>>(new List<string>());
+        var password = UseState("");
+        var loginResult = UseState("");
 
         return Layout.Vertical()
                | Text.P("Search example (type and press Enter):")
@@ -243,6 +263,17 @@ public class TextInputSubmitDemo : ViewBase
                            }
                        }),
                    Layout.Horizontal().Gap(2) | tags.Value.Select(t => new Badge(t))
+               )
+               | Text.P("Password submit (type and press Enter to login):")
+               | Layout.Horizontal(
+                   password.ToPasswordInput()
+                       .Placeholder("Enter password...")
+                       .ShortcutKey("Ctrl+Enter")
+                       .OnSubmit(() => loginResult.Set(
+                           string.IsNullOrWhiteSpace(password.Value)
+                               ? "Password cannot be empty"
+                               : "Login submitted")),
+                   loginResult
                );
     }
 }

@@ -121,6 +121,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
           data-collapsible-trigger
           data-disabled={disabled}
           role="button"
+          aria-label={isOpen ? "Collapse section" : "Expand section"}
           tabIndex={disabled ? -1 : 0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {

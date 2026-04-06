@@ -84,6 +84,7 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
               <div
                 key={index}
                 role={hasSelectHandler ? "button" : undefined}
+                aria-label={hasSelectHandler ? `Select segment ${index + 1}` : undefined}
                 tabIndex={hasSelectHandler ? 0 : undefined}
                 onClick={hasSelectHandler ? () => handleSelect(index) : undefined}
                 onKeyDown={
@@ -138,6 +139,7 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
                 <div
                   key={originalIndex}
                   role={hasSelectHandler ? "button" : undefined}
+                  aria-label={hasSelectHandler ? `Select segment ${originalIndex + 1}` : undefined}
                   tabIndex={hasSelectHandler ? 0 : undefined}
                   onClick={hasSelectHandler ? () => handleSelect(originalIndex) : undefined}
                   onKeyDown={

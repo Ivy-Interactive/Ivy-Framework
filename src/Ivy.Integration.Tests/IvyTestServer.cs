@@ -1,7 +1,7 @@
 using Ivy.Core.Server;
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace Ivy.Test.Integration;
+namespace Ivy.Integration.Tests;
 
 public class IvyTestServer : IAsyncDisposable
 {

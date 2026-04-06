@@ -1,7 +1,34 @@
+using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
+
 namespace Ivy.Test;
 
 public class ContentInputTests
 {
+    private class MockState<T>(T value) : IState<T>
+    {
+        private readonly Subject<T> _subject = new();
+        public T Value { get; set; } = value;
+
+        [OverloadResolutionPriority(1)]
+        public T Set(T value) { Value = value; return Value; }
+        public T Set(Func<T, T> setter) { Value = setter(Value); return Value; }
+        public T Reset() => Set(default(T)!);
+        public Type GetStateType() => typeof(T);
+
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            observer.OnNext(Value);
+            return _subject.Subscribe(observer);
+        }
+
+        public void Dispose() => _subject.Dispose();
+        public IDisposable SubscribeAny(Action action) => _subject.Subscribe(_ => action());
+        public IDisposable SubscribeAny(Action<object?> action) => _subject.Subscribe(x => action(x));
+        public IEffectTrigger ToTrigger() => EffectTrigger.OnStateChange(this);
+        public object? GetValueAsObject() => Value;
+    }
+
     [Fact]
     public void ToContentInput_SetsPropsFromUploadContext()
     {
@@ -101,6 +128,39 @@ public class ContentInputTests
         Assert.Equal(10 * 1024 * 1024, widget.MaxFileSize);
         Assert.Equal(3, widget.MaxFiles);
         Assert.True(widget.Disabled);
+    }
+
+    [Theory]
+    [InlineData(Density.Small)]
+    [InlineData(Density.Medium)]
+    [InlineData(Density.Large)]
+    public void Density_SetsBySmallMediumLarge(Density density)
+    {
+        var textState = new MockState<string>("");
+        var uploadContext = new MockState<UploadContext>(new UploadContext("/upload", _ => { }));
+
+        var widget = textState.ToContentInput(uploadContext);
+        widget = density switch
+        {
+            Density.Small => widget.Small(),
+            Density.Medium => widget.Medium(),
+            Density.Large => widget.Large(),
+            _ => widget
+        };
+
+        Assert.Equal(density, widget.Density);
+    }
+
+    [Fact]
+    public void Invalid_SetsInvalidProperty()
+    {
+        var textState = new MockState<string>("");
+        var uploadContext = new MockState<UploadContext>(new UploadContext("/upload", _ => { }));
+
+        var widget = textState.ToContentInput(uploadContext)
+            .Invalid("This field is required");
+
+        Assert.Equal("This field is required", widget.Invalid);
     }
 
     [Fact]

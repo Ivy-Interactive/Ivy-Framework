@@ -10,7 +10,6 @@ public class PlanDatabaseSyncService : IDisposable
     private readonly IPlanDatabaseService _database;
     private readonly IPlanWatcherService _watcher;
     private readonly ILogger<PlanDatabaseSyncService> _logger;
-    private readonly object _syncLock = new();
     private volatile bool _isInitialSyncComplete;
 
     public PlanDatabaseSyncService(
@@ -38,20 +37,15 @@ public class PlanDatabaseSyncService : IDisposable
 
             // Read directly from file system to avoid circular dependency
             var plans = _planReader.GetPlansFromFileSystem();
+            _database.BulkUpsertPlans(plans);
 
-            lock (_syncLock)
+            foreach (var plan in plans)
             {
-                _database.BulkUpsertPlans(plans);
-
-                foreach (var plan in plans)
-                {
-                    SyncPlanCosts(plan);
-                    SyncPlanRecommendations(plan);
-                }
-
-                _database.SetLastSyncTime(DateTime.UtcNow);
+                SyncPlanCosts(plan);
+                SyncPlanRecommendations(plan);
             }
 
+            _database.SetLastSyncTime(DateTime.UtcNow);
             _isInitialSyncComplete = true;
 
             // Enable database-backed reads in PlanReaderService
@@ -74,21 +68,17 @@ public class PlanDatabaseSyncService : IDisposable
 
         try
         {
-            // Read from file system outside the lock (IO-bound, no DB access)
+            // Read from file system for sync
             var plans = _planReader.GetPlansFromFileSystem();
+            _database.BulkUpsertPlans(plans);
 
-            lock (_syncLock)
+            foreach (var plan in plans)
             {
-                _database.BulkUpsertPlans(plans);
-
-                foreach (var plan in plans)
-                {
-                    SyncPlanCosts(plan);
-                    SyncPlanRecommendations(plan);
-                }
-
-                _database.SetLastSyncTime(DateTime.UtcNow);
+                SyncPlanCosts(plan);
+                SyncPlanRecommendations(plan);
             }
+
+            _database.SetLastSyncTime(DateTime.UtcNow);
         }
         catch (Exception ex)
         {

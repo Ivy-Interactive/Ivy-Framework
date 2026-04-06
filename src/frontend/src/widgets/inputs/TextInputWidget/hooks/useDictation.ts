@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { logger } from "@/lib/logger";
+import { uploadFile } from "@/widgets/filePicker/shared";
 
 interface UseDictationOptions {
   dictationUploadUrl?: string;
@@ -20,15 +21,6 @@ const supportedMimeTypes = [
   "audio/ogg",
   "audio/wav",
 ];
-
-function getUploadUrl(uploadUrl: string): string {
-  const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-  if (ivyHostMeta) {
-    const host = ivyHostMeta.getAttribute("content");
-    return host + uploadUrl;
-  }
-  return uploadUrl;
-}
 
 export function useDictation({
   dictationUploadUrl,
@@ -74,7 +66,9 @@ export function useDictation({
       }
 
       chunksRef.current = [];
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: selectedMimeType });
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: selectedMimeType,
+      });
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (event) => {
@@ -89,14 +83,10 @@ export function useDictation({
 
         if (blob.size === 0) return;
 
-        const formData = new FormData();
-        formData.append("file", blob, "dictation.webm");
-        formData.append("mimeType", selectedMimeType!);
-
         try {
-          await fetch(getUploadUrl(dictationUploadUrl), {
-            method: "POST",
-            body: formData,
+          await uploadFile(dictationUploadUrl, blob, {
+            filename: "dictation.webm",
+            extraFields: { mimeType: selectedMimeType! },
           });
         } catch (error) {
           logger.error("Dictation upload error:", error);

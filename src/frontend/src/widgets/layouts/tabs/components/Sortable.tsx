@@ -83,6 +83,7 @@ export function SortableDropdownMenuItem({
         }
       }}
       role="button"
+      aria-label={children?.toString() ?? "Tab"}
       tabIndex={0}
       className={cn(
         "group w-full flex items-center p-1 text-sm cursor-pointer select-none rounded-sm transition-colors hover:bg-accent",

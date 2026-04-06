@@ -62,6 +62,8 @@ DataTable uses Glide Data Grid — renders as `<canvas>`, NOT HTML `<table>`.
 - **macOS shortcut key mapping**: `parseShortcut("Ctrl+X")` maps `Ctrl` to `meta` (Cmd key) on macOS. In Playwright tests, use `Meta+Enter` (not `Control+Enter`) on macOS to trigger `Ctrl+Enter` shortcuts. Detect with `process.platform === 'darwin'`.
 - kbd badge locator: `page.locator('kbd')`
 - When `shortcutKey` is set, the inline `Ctrl/Cmd+Enter` handler is disabled — only the global `useEffect` listener fires
+- `.Invalid("message")` renders as `InvalidIcon` (info icon with `data-invalid-icon="true"`) in top-right corner, NOT visible text. The message is shown in a Radix tooltip on hover. To test: `page.locator('[data-invalid-icon="true"]').first().hover()` then assert tooltip text with `.first()` (Radix creates duplicate tooltip DOM elements). Invalid also adds `border-destructive` CSS class to the wrapper.
+- `.Small()` / `.Medium()` / `.Large()` density variants scale textarea size, toolbar padding, paperclip icon, and shortcut badge proportionally
 
 ### TextInput / TextareaInput
 

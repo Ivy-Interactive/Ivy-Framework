@@ -207,6 +207,7 @@ const FooterCell: React.FC<{
           open && "bg-accent text-accent-foreground",
         )}
         role="button"
+        aria-label="Page size"
         tabIndex={0}
         onPointerDown={() => {
           // Ensure focus is on the trigger so `onBlur` can close the dropdown.

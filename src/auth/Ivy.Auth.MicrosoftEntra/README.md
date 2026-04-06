@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/ivy-assets/logo_green_w200.png" alt="Ivy Logo" width="100"/>
+  <img src="https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/assets/logo_green_w200.png" alt="Ivy Logo" width="100"/>
 </div>
 
 # Ivy.Auth.MicrosoftEntra
