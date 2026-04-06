@@ -33,7 +33,7 @@ interface ColorInputWidgetProps {
 }
 
 // Hoisted color map for backend Colors enum
-const enumColorsToCssVar: Record<string, string> = {
+export const enumColorsToCssVar: Record<string, string> = {
   black: "var(--color-black)",
   white: "var(--color-white)",
   slate: "var(--color-slate)",
@@ -120,7 +120,7 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
   );
 };
 
-function parseHexAlpha(hex: string): { rgb: string; alpha: number } {
+export function parseHexAlpha(hex: string): { rgb: string; alpha: number } {
   if (!hex || !hex.startsWith("#")) return { rgb: hex || "#000000", alpha: 255 };
   const clean = hex.slice(1);
   if (clean.length === 8) {
@@ -132,7 +132,7 @@ function parseHexAlpha(hex: string): { rgb: string; alpha: number } {
   return { rgb: hex.length === 7 ? hex : "#000000", alpha: 255 };
 }
 
-function combineHexAlpha(rgb: string, alpha: number): string {
+export function combineHexAlpha(rgb: string, alpha: number): string {
   const base = rgb.startsWith("#") ? rgb : "#" + rgb;
   const hex6 = base.length === 7 ? base : "#000000";
   if (alpha >= 255) return hex6; // fully opaque → keep 6-char hex
