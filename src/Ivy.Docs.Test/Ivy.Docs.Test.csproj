@@ -25,8 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Ivy.Docs/Ivy.Docs.csproj" />
-    <ProjectReference Include="..\Ivy.Docs.Shared\Ivy.Docs.Shared.csproj" />
-    <ProjectReference Include="..\Ivy.Docs.Tools\Ivy.Docs.Tools.csproj" />
+    <ProjectReference Include="../Ivy.Docs.Shared/Ivy.Docs.Shared.csproj" />
   </ItemGroup>
 
 </Project>

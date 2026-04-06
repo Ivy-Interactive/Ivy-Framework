@@ -40,14 +40,6 @@
 
 
 
-  <Target Name="GenerateApiDocsManifest" AfterTargets="ResolveProjectReferences" BeforeTargets="TransformMarkdown">
-    <PropertyGroup>
-      <DocsToolProject>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine($(MSBuildProjectDirectory), '..', 'Ivy.Docs.Tools', 'Ivy.Docs.Tools.csproj'))'))</DocsToolProject>
-      <ApiDocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs', '*.md'))</ApiDocsInputPath>
-      <ApiDocsManifestPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(IntermediateOutputPath), 'api-docs.json'))</ApiDocsManifestPath>
-    </PropertyGroup>
-    <Exec Command="dotnet run --project &quot;$(DocsToolProject)&quot; -- generate-api-docs &quot;$(ApiDocsInputPath)&quot; &quot;$(ApiDocsManifestPath)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
-  </Target>
 
   <Target Name="TransformMarkdown" AfterTargets="GenerateApiDocsManifest" BeforeTargets="CoreCompile">
     <PropertyGroup>
