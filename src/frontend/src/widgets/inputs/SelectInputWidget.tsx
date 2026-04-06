@@ -280,9 +280,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   );
 
   const bulkSelectAllDisabled =
-    !selectMany ||
-    visibleEnabledForBulk.length === 0 ||
-    visibleEnabledForBulk.every((o) => selectedValues.includes(o.value));
+    !selectMany || visibleEnabledForBulk.every((o) => selectedValues.includes(o.value));
 
   const bulkClearAllDisabled = !selectMany || selectedValues.length <= (minSelections ?? 0);
 
@@ -761,9 +759,9 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
     [filteredOptions, disabled, loading],
   );
 
-  const bulkSelectAllDisabledList =
-    visibleEnabledForBulkList.length === 0 ||
-    visibleEnabledForBulkList.every((o) => selectedValues.includes(o.value));
+  const bulkSelectAllDisabledList = visibleEnabledForBulkList.every((o) =>
+    selectedValues.includes(o.value),
+  );
 
   const bulkClearAllDisabledList = selectedValues.length <= (minSelections ?? 0);
 
@@ -1024,11 +1022,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
 const SelectVariant: React.FC<SelectInputWidgetProps & { eventHandler: EventHandler }> = (
   props,
 ) => {
-  return props.selectMany ? (
-    <SelectMultiVariant {...props} />
-  ) : (
-    <SelectSingleVariant key={props.value?.toString() ?? "null"} {...props} />
-  );
+  return props.selectMany ? <SelectMultiVariant {...props} /> : <SelectSingleVariant {...props} />;
 };
 
 const sliderLabelVariant: Record<string, string> = {
@@ -1216,13 +1210,7 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = (props) => {
     case "Toggle":
       return <ToggleVariant {...normalizedProps} eventHandler={eventHandler} />;
     case "Slider":
-      return (
-        <SliderVariant
-          key={normalizedProps.value?.toString() ?? "null"}
-          {...normalizedProps}
-          eventHandler={eventHandler}
-        />
-      );
+      return <SliderVariant {...normalizedProps} eventHandler={eventHandler} />;
     default:
       return <SelectVariant {...normalizedProps} eventHandler={eventHandler} />;
   }

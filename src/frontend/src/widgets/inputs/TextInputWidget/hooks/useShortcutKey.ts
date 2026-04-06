@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { parseShortcut } from "../utils/shortcut";
+import { parseShortcut, keyToCode } from "../utils/shortcut";
 
 interface UseShortcutKeyParams {
   shortcutKey: string | undefined;
@@ -34,11 +34,13 @@ export const useShortcutKey = ({
         (shortcutObj.ctrl && event.ctrlKey) ||
         (!shortcutObj.meta && !shortcutObj.ctrl && !event.metaKey && !event.ctrlKey);
 
+      const expectedCode = keyToCode(shortcutObj.key);
+
       const isShortcutPressed =
         modifierMatch &&
         event.shiftKey === shortcutObj.shift &&
         event.altKey === shortcutObj.alt &&
-        event.key.toLowerCase() === shortcutObj.key.toLowerCase();
+        event.code === expectedCode;
 
       if (isShortcutPressed) {
         event.preventDefault();

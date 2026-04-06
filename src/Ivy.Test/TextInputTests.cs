@@ -1,7 +1,5 @@
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
-using Ivy.Core;
-using Ivy.Core.Hooks;
 
 namespace Ivy.Test;
 

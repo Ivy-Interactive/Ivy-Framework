@@ -24,7 +24,7 @@ Here's a simple example of a `DateRangeInput` that allows users to select a date
 public class BasicDateRangeDemo : ViewBase
 {
     public override object? Build()
-    {    
+    {
         var dateRangeState = UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
         var start = dateRangeState.Value.Item1;
         var end = dateRangeState.Value.Item2;
@@ -32,8 +32,8 @@ public class BasicDateRangeDemo : ViewBase
         return Layout.Vertical()
                 | dateRangeState.ToDateRangeInput()
                 | Text.P(span).Large();
-    }    
-}        
+    }
+}
 ```
 
 As can be seen, the starting and ending date of the date range can be extracted using the
@@ -55,11 +55,11 @@ public class DateRangeVariantsDemo : ViewBase
 {
     public override object? Build()
     {
-        var dateRange = UseState(() => 
+        var dateRange = UseState(() =>
             (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
-        
-        var nullableRange = UseState<(DateOnly?, DateOnly?)>(() => 
-            (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), 
+
+        var nullableRange = UseState<(DateOnly?, DateOnly?)>(() =>
+            (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)),
              DateOnly.FromDateTime(DateTime.Today)));
 
         return Layout.Vertical().Gap(4)
@@ -81,14 +81,14 @@ To change the format of selected dates the `Format` function needs to be used.
 public class FormatDateRangeDemo : ViewBase
 {
     public override object? Build()
-    {   
-         var dateRangeState = UseState(() => 
+    {
+         var dateRangeState = UseState(() =>
             (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
          return Layout.Vertical()
                  | dateRangeState.ToDateRangeInput()
                                   .Format("yyyy-MM-dd");
-    }    
-}        
+    }
+}
 ```
 
 ## Constraints
@@ -116,6 +116,43 @@ public class DateRangeConstraintsDemo : ViewBase
 }
 ```
 
+## Event Handling
+
+Date range inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class DateRangeInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState(() => (from: DateTime.Today, to: DateTime.Today.AddDays(7)));
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the date range picker gains focus.")
+                | state.ToDateRangeInput().Placeholder("Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the date range picker loses focus.")
+                | state.ToDateRangeInput().Placeholder("Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget and opens the range calendar upon mounting.")
+                | state.ToDateRangeInput().Placeholder("AutoFocused RangePicker")
+                    .AutoFocus()
+                | Text.Lead("Focused & Open!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.DateRangeInput" ExtensionTypes="Ivy.DateRangeInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/DateRangeInput.cs"/>
 
 ## Examples
@@ -132,18 +169,18 @@ A realistic example demonstrating a hotel booking form with date range selection
 public class HotelBookingDemo : ViewBase
 {
     private const decimal PricePerNight = 120m;
-    
+
     public override object? Build()
     {
         var bookingRange = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
-        
+
         var from = bookingRange.Value.Item1;
         var to = bookingRange.Value.Item2;
-        
-        var nights = from.HasValue && to.HasValue 
-            ? (to.Value.ToDateTime(TimeOnly.MinValue) - from.Value.ToDateTime(TimeOnly.MinValue)).Days 
+
+        var nights = from.HasValue && to.HasValue
+            ? (to.Value.ToDateTime(TimeOnly.MinValue) - from.Value.ToDateTime(TimeOnly.MinValue)).Days
             : 0;
-        
+
         var isValid = nights >= 1;
         var errorMessage = !isValid && from.HasValue ? "Minimum stay is 1 night" : "";
         var totalPrice = nights * PricePerNight;
@@ -156,7 +193,7 @@ public class HotelBookingDemo : ViewBase
                 .Placeholder("Select check-in and check-out dates")
                 .Format("MMM dd, yyyy")
                 .Invalid(errorMessage)
-            | (nights > 0 
+            | (nights > 0
                 ? Layout.Horizontal().Gap(2)
                     | Text.P($"{nights} night(s)").Small().Muted()
                     | Text.P($"Total: ${totalPrice}").Small().Bold()

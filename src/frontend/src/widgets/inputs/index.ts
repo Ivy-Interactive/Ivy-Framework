@@ -13,4 +13,5 @@ export { DateRangeInputWidget } from "./DateRangeInputWidget";
 export { FileInputWidget } from "./FileInputWidget";
 export { SignatureInputWidget } from "./SignatureInputWidget";
 export { FieldWidget } from "./FieldWidget";
+export { ContentInputWidget } from "./ContentInputWidget";
 export { CodeInputWidget } from "./code";

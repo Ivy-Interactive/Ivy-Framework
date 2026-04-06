@@ -40,6 +40,8 @@ public record Bar
     public int[] Radius { get; set; } = [0, 0, 0, 0];
 
     public LabelList[] LabelLists { get; set; } = [];
+
+    public int? YAxisIndex { get; set; } = null;
 }
 
 public static class BarExtensions
@@ -122,6 +124,11 @@ public static class BarExtensions
     public static Bar Radius(this Bar area, int top, int bottom)
     {
         return area with { Radius = [top, top, bottom, bottom] };
+    }
+
+    public static Bar YAxisIndex(this Bar bar, int yAxisIndex)
+    {
+        return bar with { YAxisIndex = yAxisIndex };
     }
 }
 

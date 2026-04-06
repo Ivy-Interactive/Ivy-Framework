@@ -55,6 +55,7 @@ interface CameraInputWidgetProps {
   width?: string;
   density?: Densities;
   events?: string[];
+  autoFocus?: boolean;
 }
 
 type CameraState = "idle" | "active" | "captured";
@@ -68,8 +69,11 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
   width,
   density = Densities.Medium,
   events = EMPTY_ARRAY,
+  autoFocus,
 }) => {
   const eventHandler = useEventHandler();
+  const hasAutoFocusedRef = useRef(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const isFocusedRef = useRef(false);
   const [cameraState, setCameraState] = useState<CameraState>("idle");
@@ -118,6 +122,13 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
       });
     }
   }, [disabled, facingMode]);
+
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      startCamera();
+    }
+  }, [autoFocus, disabled, startCamera]);
 
   const onFocus = useCallback(() => {
     if (disabled) return;

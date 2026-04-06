@@ -326,7 +326,7 @@ public class AdvancedQueryDemo : ViewBase
 Use AsyncSelectInput for foreign key relationships, large datasets, and when you need to provide search functionality. It's perfect for scenarios where the full list of options would be too large to load upfront.
 </Callout>
 
-### Styling and States
+## Styling and States
 
 Customize the `AsyncSelectInput` with various styling options:
 
@@ -361,12 +361,12 @@ public class StylingDemo : ViewBase
             | normalSelect.ToAsyncSelectInput(UseQueryOptions, UseLookupOption, placeholder: "Choose an option...")
                 .WithField()
                 .Label("Normal AsyncSelectInput:")
-            
+
             | invalidSelect.ToAsyncSelectInput(UseQueryOptions, UseLookupOption, placeholder: "This has an error...")
                 .Invalid("This field is required")
                 .WithField()
                 .Label("Invalid AsyncSelectInput:")
-            
+
             | disabledSelect.ToAsyncSelectInput(UseQueryOptions, UseLookupOption, placeholder: "This is disabled...")
                 .Disabled(true)
                 .WithField()
@@ -378,5 +378,57 @@ public class StylingDemo : ViewBase
 <Callout Type="tip">
 AsyncSelectInput automatically handles loading states and provides a smooth user [experience](../../01_Onboarding/02_Concepts/02_Views.md). The query function is called as the user types, and the lookup function is called when displaying the selected value.
 </Callout>
+
+## Event Handling
+
+Async select inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class AsyncSelectInputEventsDemo : ViewBase
+{
+    private static readonly string[] Fruits = { "Apple", "Banana", "Orange" };
+
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState<string?>(null);
+
+        QueryResult<Option<string>[]> UseQuery(IViewContext context, string query) =>
+            context.UseQuery(
+                key: ("search", query),
+                fetcher: _ => Task.FromResult(Fruits
+                    .Where(f => f.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .Select(f => new Option<string>(f))
+                    .ToArray()));
+
+        QueryResult<Option<string>?> UseLookup(IViewContext context, string? val) =>
+            context.UseQuery(
+                key: ("lookup", val),
+                fetcher: _ => Task.FromResult(val != null ? new Option<string>(val) : null));
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the input gains focus.")
+                | state.ToAsyncSelectInput(UseQuery, UseLookup).Placeholder("Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the input loses focus.")
+                | state.ToAsyncSelectInput(UseQuery, UseLookup).Placeholder("Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the search input and opens the interaction list upon mounting.")
+                | state.ToAsyncSelectInput(UseQuery, UseLookup).Placeholder("AutoFocused AsyncSelect")
+                    .AutoFocus()
+                | Text.Lead("Focused & Open!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
+}
+```
 
 <WidgetDocs Type="Ivy.AsyncSelectInput" ExtensionTypes="Ivy.AsyncSelectInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/AsyncSelectInput.cs"/>

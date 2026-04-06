@@ -1,14 +1,9 @@
-﻿using System.Security.Claims;
-using System.Text;
-using Ivy.Core;
+﻿using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Supabase;
 using Supabase.Gotrue;
 using GotrueConstants = global::Supabase.Gotrue.Constants;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text.Json;
 
 namespace Ivy.Auth.Supabase;
 

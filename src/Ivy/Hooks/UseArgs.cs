@@ -1,6 +1,3 @@
-using Ivy.Core.Hooks;
-using AppContext = Ivy.AppContext;
-
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 

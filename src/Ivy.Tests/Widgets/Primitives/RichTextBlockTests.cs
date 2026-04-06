@@ -1,5 +1,3 @@
-using Ivy;
-
 namespace Ivy.Tests.Widgets.Primitives;
 
 public class RichTextBlockTests

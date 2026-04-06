@@ -6,6 +6,7 @@ export const tableStyles = {
       display: "flex",
       flexDirection: "column",
       height: "100%",
+      flex: 1,
       minHeight: 0,
     } as React.CSSProperties,
     heading: "text-display-25 font-bold mb-4",

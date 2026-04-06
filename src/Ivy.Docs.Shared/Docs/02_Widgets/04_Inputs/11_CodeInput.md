@@ -9,6 +9,7 @@ searchHints:
   - highlighting
   - code
 ---
+
 # CodeInput
 
 <Ingress>
@@ -20,7 +21,7 @@ It supports various programming languages and offers features like line numbers 
 
 ## Supported Languages
 
-### C #
+### C
 
 ```csharp demo-tabs
 UseState("using System;\n\npublic class Program\n{\n    static void Main()\n    {\n        Console.WriteLine(\"Hello, World!\");\n    }\n}")
@@ -158,35 +159,6 @@ UseState("def calculate_fibonacci(n):\n    if n <= 1:\n        return n\n    ret
     .Disabled()
 ```
 
-## Event Handling
-
-Event handling enables you to respond to code changes and validate input in real-time. This allows for dynamic behavior like live validation and [conditional UI updates](../../01_Onboarding/02_Concepts/02_Views.md).
-
-Handle code changes and validation:
-
-```csharp demo-tabs
-public class CodeInputWithValidation : ViewBase 
-{
-    public override object? Build()
-    {        
-        var codeState = UseState("");
-        var isValid = !string.IsNullOrWhiteSpace(codeState.Value);
-        
-        return Layout.Vertical()
-            | codeState.ToCodeInput()
-                    .Width(Size.Auto())
-                    .Height(Size.Auto())
-                    .Placeholder("Enter your code here...")
-                    .Language(Languages.Javascript)
-                    .WithField()
-                    .Label("Enter Code:")
-            | Text.P(isValid 
-                ? "Entered code is valid ✅" 
-                : "Enter some code to validate").Small();
-    }
-}
-```
-
 ## Supported Languages
 
 <Details>
@@ -214,5 +186,42 @@ The `CodeInput` widget supports syntax highlighting and formatting for the follo
 
 </Body>
 </Details>
+
+## Event Handling
+
+Code inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class CodeInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState("// Code editor\nconsole.log('Test');");
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the code editor gains focus.")
+                | state.ToCodeInput().Language(Languages.Javascript)
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the code editor loses focus.")
+                | state.ToCodeInput().Language(Languages.Javascript)
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the editor and places the cursor inside upon mounting.")
+                | state.ToCodeInput().Language(Languages.Javascript)
+                    .AutoFocus()
+                | Text.Lead("Focused!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
+}
+```
 
 <WidgetDocs Type="Ivy.CodeInput" ExtensionTypes="Ivy.CodeInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/CodeInput.cs"/>

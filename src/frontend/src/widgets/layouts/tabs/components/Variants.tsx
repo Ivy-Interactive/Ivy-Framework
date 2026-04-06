@@ -159,7 +159,11 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
                 <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center h-full">
                   {title}
                   {badge && (
-                    <Badge variant="primary" className="ml-2 w-min whitespace-nowrap">
+                    <Badge
+                      variant="secondary"
+                      density="small"
+                      className="ml-2 w-min whitespace-nowrap"
+                    >
                       {badge}
                     </Badge>
                   )}

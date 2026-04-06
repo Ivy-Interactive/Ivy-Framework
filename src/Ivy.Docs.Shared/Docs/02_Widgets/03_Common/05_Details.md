@@ -141,3 +141,4 @@ Use `.Builder(x => x.Field, b => ...)` to customize how a value is *rendered*, n
 </Details>
 
 <WidgetDocs Type="Ivy.Details" ExtensionTypes="Ivy.DetailsBuilderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Views/Builders/DetailsBuilder.cs"/>
+<WidgetDocs Type="Ivy.Detail" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Details/Detail.cs"/>

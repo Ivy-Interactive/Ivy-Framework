@@ -8,10 +8,11 @@ public class DialogApp : SampleBase
         return Layout.Vertical().Gap(4)
                | Text.H1("Dialog")
                | Text.P("Modal windows with Header, Body, and Footer sections. Each example demonstrates different use cases.")
-               | Layout.Grid().Columns(3).Gap(4)
+               | Layout.Grid().Columns(2).Gap(4)
                    | new CreateDialogExample()
                    | new DeleteDialogExample()
-                   | new ExitCommentDialogExample();
+                   | new ExitCommentDialogExample()
+                   | new AutoFocusDialogExample();
     }
 }
 
@@ -151,6 +152,43 @@ public class ExitCommentDialogExample : ViewBase
                                comment.Set("");
                                isOpen.Set(false);
                            })
+                       )
+                   )
+                   : null);
+    }
+}
+
+public class AutoFocusDialogExample : ViewBase
+{
+    public override object? Build()
+    {
+        var isOpen = UseState(false);
+        var searchQuery = UseState("");
+
+        return Layout.Vertical().Gap(2)
+               | new Card(
+                   Layout.Vertical().Gap(3)
+                   | Layout.Horizontal()
+                       | Icons.Search
+                       | Text.H3("AutoFocus Example")
+                   | Text.P("When the dialog opens, the input is automatically focused.")
+                   | new Button("Open Quick Search", _ => isOpen.Set(true))
+                       .Variant(ButtonVariant.Outline)
+                       .Icon(Icons.Search)
+               )
+               | (isOpen.Value
+                   ? new Dialog(
+                       _ => isOpen.Set(false),
+                       new DialogHeader("Quick Search"),
+                       new DialogBody(
+                           Layout.Vertical().Gap(3)
+                           | Text.P("Start typing to search...")
+                           | searchQuery.ToSearchInput()
+                               .Placeholder("Type your search query...")
+                               .AutoFocus()
+                       ),
+                       new DialogFooter(
+                           new Button("Cancel", _ => isOpen.Set(false), variant: ButtonVariant.Outline)
                        )
                    )
                    : null);

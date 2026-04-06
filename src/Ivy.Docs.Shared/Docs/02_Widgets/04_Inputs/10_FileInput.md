@@ -162,7 +162,7 @@ public class FileInputVariantsDemo : ViewBase
     {
         var file1 = UseState<FileUpload<byte[]>?>();
         var upload1 = UseUpload(MemoryStreamUploadHandler.Create(file1));
-        
+
         var file2 = UseState<FileUpload<byte[]>?>();
         var upload2 = UseUpload(MemoryStreamUploadHandler.Create(file2));
 
@@ -313,13 +313,13 @@ var binaryUpload = UseUpload(MemoryStreamUploadHandler.Create(binaryState));
 
 // Text content
 // encoding: text encoding (default: UTF-8, only for FileUpload<string>)
-// chunkSize: buffer size in bytes (default: 8192) 
+// chunkSize: buffer size in bytes (default: 8192)
 // larger chunks = fewer progress updates but potentially better performance
 // progressThreshold: minimum progress change to report (default: 0.05 = 5%)
 var textState = UseState<FileUpload<string>?>();
 var textUpload = UseUpload(
     MemoryStreamUploadHandler.Create(
-        textState, 
+        textState,
         encoding: System.Text.Encoding.UTF8,
         chunkSize: 16384,
         progressThreshold: 0.1f
@@ -383,7 +383,7 @@ public class DialogFileUpload : ViewBase
                         .Placeholder("Choose a file to upload")
                 ),
                 new DialogFooter(
-                    new Button("Cancel", 
+                    new Button("Cancel",
                         _ => { isOpen.Value = false; dialogFile.Reset(); })
                         .Outline(),
                     new Button("Ok", _ =>
@@ -398,7 +398,7 @@ public class DialogFileUpload : ViewBase
             : null;
 
         return Layout.Vertical()
-               | new Button("Open Dialog", 
+               | new Button("Open Dialog",
                     _ => { dialogFile.Reset(); isOpen.Value = true; })
                | (selectedFile.Value != null
                    ? selectedFile.ToDetails()
@@ -478,60 +478,6 @@ public class FileInputDisabledDemo : ViewBase
 }
 ```
 
-## Event Handlers
-
-FileInput supports event handlers to respond to user interactions:
-
-```mermaid
-graph LR
-    A[User Action] --> B{Event Type}
-    B -->|File dialog closes| C[OnBlur]
-    B -->|Cancel clicked| D[OnCancel]
-    C --> E[Handler]
-    D --> F[Handler]
-```
-
-```csharp demo-below
-public class FileInputEventHandlersDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var blurMessage = UseState("");
-        var cancelCount = UseState(0);
-        var upload = UseUpload(MemoryStreamUploadHandler.Create(files));
-
-        return Layout.Vertical()
-                | files.ToFileInput(upload)
-                    .Placeholder("Choose files")
-                    .OnBlur((Event<IAnyInput> e) =>
-                    {
-                        if (files.Value.Length > 0)
-                            blurMessage.Set($"Blur: {files.Value.Length} file(s) selected");
-                        else
-                            blurMessage.Set("Blur: No file selected");
-                    })
-                    .OnCancel((Guid fileId) =>
-                    {
-                        upload.Value.Cancel(fileId);
-                        files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());
-                        cancelCount.Set(cancelCount.Value + 1);
-                    })
-                | (blurMessage.Value != "" 
-                    ? Text.P(blurMessage.Value).Color(Colors.Success)
-                    : null)
-                | files.Value.ToTable()
-                    .Width(Size.Full())
-                    .Builder(e => e.FileName, e => e.Func((string x) => x))
-                    .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
-                    .Remove(e => e.Id)
-                | (cancelCount.Value > 0
-                    ? Text.P($"Cancelled {cancelCount.Value} file(s)").Color(Colors.Info)
-                    : null);
-    }
-}
-```
-
 ## Large File Uploads
 
 By default, the server limits file uploads to 30 MB. To allow larger file uploads, configure the server limits in your [Program.cs](../../01_Onboarding/02_Concepts/01_Program.md):
@@ -545,9 +491,9 @@ server.UseWebApplicationBuilder(builder =>
 {
     // Remove Kestrel request body size limit
     builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = null);
-    
+
     // Remove multipart form body length limit
-    builder.Services.Configure<FormOptions>(o => 
+    builder.Services.Configure<FormOptions>(o =>
         o.MultipartBodyLengthLimit = long.MaxValue);
 });
 ```
@@ -578,7 +524,7 @@ public class BasicUploadExample : ViewBase
     {
         var fileState = UseState<FileUpload<byte[]>?>();
         var upload = UseUpload(MemoryStreamUploadHandler.Create(fileState));
-        
+
         return fileState.ToFileInput(upload);
     }
 }
@@ -591,7 +537,6 @@ The `UseUpload` hook:
 1. **Registers an Upload Handler**: Takes an `IUploadHandler` (like `MemoryStreamUploadHandler`) that processes incoming file streams
 2. **Creates an Upload Endpoint**: Registers the handler with the upload service and generates a unique upload URL
 3. **Returns Upload Context**: Provides an `UploadContext` containing:
-
    - `UploadUrl`: The endpoint URL for file uploads
    - `Cancel`: Action to cancel an in-progress upload
    - Validation properties: `Accept`, `MaxFileSize`, `MaxFiles`
@@ -633,7 +578,7 @@ public class ConfiguredUploadExample : ViewBase
             .Accept("image/*")
             .MaxFileSize(FileSize.FromMegabytes(5))
             .MaxFiles(3);
-        
+
         return Layout.Vertical()
             | files.ToFileInput(upload).Placeholder("Choose up to 3 images")
             | files.Value.ToTable()
@@ -645,14 +590,52 @@ public class ConfiguredUploadExample : ViewBase
 
 ### UploadContext Properties
 
-| Property     | Type           | Description                                                      |
-| ------------ | -------------- | ---------------------------------------------------------------- |
-| `UploadUrl`  | `string`       | The endpoint URL for file uploads                                |
-| `Cancel`     | `Action<Guid>` | Cancels an in-progress upload by file ID                         |
-| `Accept`     | `string?`      | MIME type or file extension filter (e.g., `"image/*"`, `".pdf,.doc"`) |
-| `MaxFileSize`| `long?`        | Maximum file size in bytes                                       |
-| `MinFileSize`| `long?`        | Minimum file size in bytes                                       |
-| `MaxFiles`   | `int?`         | Maximum number of files (for multiple file uploads)              |
+| Property      | Type           | Description                                                           |
+| ------------- | -------------- | --------------------------------------------------------------------- |
+| `UploadUrl`   | `string`       | The endpoint URL for file uploads                                     |
+| `Cancel`      | `Action<Guid>` | Cancels an in-progress upload by file ID                              |
+| `Accept`      | `string?`      | MIME type or file extension filter (e.g., `"image/*"`, `".pdf,.doc"`) |
+| `MaxFileSize` | `long?`        | Maximum file size in bytes                                            |
+| `MinFileSize` | `long?`        | Minimum file size in bytes                                            |
+| `MaxFiles`    | `int?`         | Maximum number of files (for multiple file uploads)                   |
+
+## Event Handling
+
+File inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class FileInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(files));
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the file input gains focus.")
+                | files.ToFileInput(upload).Placeholder("Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the file input loses focus.")
+                | files.ToFileInput(upload).Placeholder("Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget upon mounting.")
+                | files.ToFileInput(upload).Placeholder("AutoFocused FileInput")
+                    .AutoFocus()
+                | Text.Lead("Focused & Dialog Opened!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
+}
+```
 
 <WidgetDocs Type="Ivy.FileInput" ExtensionTypes="Ivy.FileInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/FileInput.cs"/>
 
@@ -675,6 +658,7 @@ return fileState.ToFileInput(upload);
 Do NOT use `IUploadContext` — this type does not exist. The correct type is `UploadContext` (wrapped in `IState<>`).
 
 To access validation configuration, use extension methods that chain on `IState<UploadContext>`:
+
 ```csharp
 var upload = UseUpload(handler).Accept(".csv").MaxFileSize(FileSize.FromMegabytes(10));
 ```

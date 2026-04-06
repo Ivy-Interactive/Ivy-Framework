@@ -1,6 +1,4 @@
-﻿using Ivy.Core.Helpers;
-
-namespace Ivy.Test;
+﻿namespace Ivy.Test;
 
 public record Foo(string Bar, int Baz, int Boo, int[] Numbers);
 

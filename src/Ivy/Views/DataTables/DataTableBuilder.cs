@@ -325,6 +325,38 @@ public class DataTableBuilder<TModel>(
             column.Column.Precision = numRenderer.Precision;
             column.Column.Currency = numRenderer.Currency;
         }
+
+        if (renderer is LabelsDisplayRenderer labelsRenderer)
+        {
+            column.Column.Color = labelsRenderer.Color;
+            column.Column.CustomColor = labelsRenderer.CustomColor;
+            column.Column.BadgeColorMapping = labelsRenderer.BadgeColorMapping;
+        }
+
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Badges(Expression<Func<TModel, object>> field, Colors? color = null)
+    {
+        var column = GetColumn(field);
+        column.Column.ColType = ColType.Labels;
+        column.Column.Color = color;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Badges(Expression<Func<TModel, object>> field, string customColor)
+    {
+        var column = GetColumn(field);
+        column.Column.ColType = ColType.Labels;
+        column.Column.CustomColor = customColor;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Badges(Expression<Func<TModel, object>> field, Dictionary<string, Colors> mapping)
+    {
+        var column = GetColumn(field);
+        column.Column.ColType = ColType.Labels;
+        column.Column.BadgeColorMapping = mapping.ToDictionary(k => k.Key, v => v.Value.ToString());
         return this;
     }
 

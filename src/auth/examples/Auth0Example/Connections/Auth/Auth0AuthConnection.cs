@@ -1,5 +1,4 @@
 using Ivy;
-using Ivy.Auth;
 using Microsoft.Extensions.Configuration;
 using Ivy.Auth.Auth0;
 

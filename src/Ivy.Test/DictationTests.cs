@@ -1,9 +1,6 @@
 using System.Net;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
-using Ivy.Core;
-using Ivy.Core.Hooks;
-using Xunit;
 
 namespace Ivy.Test;
 

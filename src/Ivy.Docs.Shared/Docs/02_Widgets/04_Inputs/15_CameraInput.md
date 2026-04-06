@@ -99,4 +99,42 @@ if (photo.Value != null)
 }
 ```
 
+## Event Handling
+
+Camera inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class CameraInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var photo = UseState<FileUpload<byte[]>?>();
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(photo));
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the camera input gains focus.")
+                | new CameraInput(upload.Value, "Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the camera input loses focus.")
+                | new CameraInput(upload.Value, "Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget upon mounting.")
+                | new CameraInput(upload.Value, "AutoFocused CameraInput")
+                    .AutoFocus()
+                | Text.Lead("Focused!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.CameraInput" ExtensionTypes="Ivy.CameraInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/CameraInput.cs"/>

@@ -114,4 +114,24 @@ public class FormDialogExample : ViewBase
 }
 ```
 
-<WidgetDocs Type="Ivy.Dialog" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Dialogs/Dialog.cs"/>
+## Dialog Component Properties
+
+### DialogHeader
+
+| Property | Description |
+|----------|-------------|
+| `title` (constructor) | The title text displayed at the top of the dialog |
+| `.HideCloseButton` | When set to `true`, hides the default close button in the header |
+
+### DialogBody
+
+Container for the main content of the dialog. Accepts any widgets or [views](../../01_Onboarding/02_Concepts/02_Views.md) as children via the constructor.
+
+### DialogFooter
+
+Container for action buttons at the bottom of the dialog. Typically contains Cancel and Confirm/Save [buttons](01_Button.md).
+
+<WidgetDocs Type="Ivy.Dialog" ExtensionTypes="Ivy.DialogExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Dialogs/Dialog.cs"/>
+<WidgetDocs Type="Ivy.DialogHeader" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Dialogs/DialogHeader.cs"/>
+<WidgetDocs Type="Ivy.DialogBody" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Dialogs/DialogBody.cs"/>
+<WidgetDocs Type="Ivy.DialogFooter" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Dialogs/DialogFooter.cs"/>

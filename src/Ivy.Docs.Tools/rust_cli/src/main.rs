@@ -5,7 +5,6 @@ use std::path::{Path, PathBuf};
 
 mod utils;
 mod link_converter;
-mod file_hash;
 mod converter;
 
 #[derive(Parser)]

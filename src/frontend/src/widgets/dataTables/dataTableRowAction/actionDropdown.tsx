@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getActionId, ACTION_BUTTON_CLASSES } from "./utils";
+import { getColor } from "@/lib/styles";
 
 interface ActionDropdownProps {
   action: MenuItem;
@@ -26,10 +27,11 @@ interface TriggerButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
   ({ action, actionId, ...props }, ref) => {
     const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-      // Stop propagation to prevent grid interactions
       e.stopPropagation();
       props.onMouseDown?.(e);
     };
+
+    const colorStyle = action.color ? getColor(action.color, "color") : {};
 
     return (
       <button
@@ -41,7 +43,7 @@ const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
         title={action.tooltip}
         type="button"
       >
-        {action.icon && <Icon name={action.icon} size={16} className="text-(--color-foreground)" />}
+        {action.icon && <Icon name={action.icon} size={16} style={colorStyle} />}
       </button>
     );
   },
@@ -66,24 +68,19 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
       <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
         {validChildren.map((childAction) => {
           const childId = getActionId(childAction);
-          const isDestructive = childAction.color === "Destructive";
+          const colorStyle = childAction.color ? getColor(childAction.color, "color") : {};
+
           return (
             <DropdownMenuItem
               key={childId}
-              className={isDestructive ? "text-destructive focus:text-destructive" : undefined}
+              style={colorStyle}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick(childAction);
               }}
             >
               {childAction.icon && (
-                <Icon
-                  name={childAction.icon}
-                  size={16}
-                  className={
-                    isDestructive ? "mr-2 text-destructive" : "mr-2 text-(--color-foreground)"
-                  }
-                />
+                <Icon name={childAction.icon} size={16} className="mr-2" style={colorStyle} />
               )}
               {childAction.label || childId}
             </DropdownMenuItem>

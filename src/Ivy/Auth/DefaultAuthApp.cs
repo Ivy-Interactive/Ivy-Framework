@@ -1,9 +1,5 @@
 using System.Reflection;
-using Ivy.Core;
 using Ivy.Core.Auth;
-using Ivy.Core.Hooks;
-using Microsoft.AspNetCore.Mvc;
-using AppContext = Ivy.AppContext;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

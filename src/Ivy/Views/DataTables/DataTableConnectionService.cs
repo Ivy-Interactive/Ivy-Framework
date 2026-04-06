@@ -10,6 +10,7 @@ public interface IDataTableService
     (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector);
     (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames);
     (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors);
+    (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors, DataTableConfig? config);
 }
 
 public class DataTableConnectionService(IQueryableRegistry queryableRegistry, ServerArgs serverArgs, string connectionId, ILogger<DataTableConnectionService>? logger = null) : IDataTableService
@@ -31,8 +32,13 @@ public class DataTableConnectionService(IQueryableRegistry queryableRegistry, Se
 
     public (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors)
     {
+        return AddQueryable(queryable, idSelector, columnNames, valueAccessors, null);
+    }
+
+    public (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors, DataTableConfig? config)
+    {
         logger?.LogInformation("Adding queryable with connectionId: {ConnectionId}", connectionId);
-        var sourceId = queryableRegistry.RegisterQueryable(queryable, idSelector, columnNames, valueAccessors);
+        var sourceId = queryableRegistry.RegisterQueryable(queryable, idSelector, columnNames, valueAccessors, config);
 
         var cleanup = queryableRegistry.AddCleanup(sourceId, Disposable.Empty);
 

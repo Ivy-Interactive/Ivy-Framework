@@ -47,7 +47,6 @@ var intState = UseState(0);
 var intInput = intState.ToBoolInput(); // For integer-based boolean (0/1)
 ```
 
-
 <Callout variant="info" title="Extension Methods">
 Use extension methods `ToBoolInput()`, `ToSwitchInput()`, and `ToToggleInput()` to quickly create BoolInput from state. See examples in the Variants section below.
 </Callout>
@@ -68,14 +67,14 @@ public class NullableBoolDemo: ViewBase
         var status = UseState("");
         if(going.Value == null)
             status.Set("Not answered");
-        else 
+        else
             status.Set(going.Value == true ? "Yes!" : "No, not yet!");
         return Layout.Vertical()
                 | Text.Html($"<i>{status}</i>")
                 | going.ToSwitchInput()
                        .WithField()
-                       .Label("Have you booked return tickets?");        
-    }    
+                       .Label("Have you booked return tickets?");
+    }
 }
 ```
 
@@ -93,7 +92,7 @@ public class CheckBoxDemo : ViewBase
     public override object? Build()
     {
         var agreed = UseState(false);
-        
+
         return Layout.Horizontal()
             | agreed.ToBoolInput()
                 .Variant(BoolInputVariant.Checkbox)
@@ -106,7 +105,7 @@ public class CheckBoxDemo : ViewBase
 ### Switch
 
 To make the bool input appear like a switch, this variant should be used. This is most suitable for toggling
-some settings values on and off.  
+some settings values on and off.
 
 ```csharp demo-below
 public class BoolInputSwitchDemo : ViewBase
@@ -118,7 +117,7 @@ public class BoolInputSwitchDemo : ViewBase
         var write = UseState(false);
         var delete = UseState(false);
         var dark =  UseState(false);
-        
+
         return Layout.Vertical()
                | (Layout.Horizontal()
                  | read.ToSwitchInput(Icons.Eye).Label("Readonly")
@@ -147,18 +146,18 @@ This is represented by `BoolInputVariant.Toggle`
 The following is a small demo showing how such a control may be used.
 
 ```csharp demo-below
-public class SingleToggleDemo : ViewBase 
+public class SingleToggleDemo : ViewBase
 {
     public override object? Build()
-    {        
-        var isFavorite = UseState(false);        
-        return Layout.Vertical()            
+    {
+        var isFavorite = UseState(false);
+        return Layout.Vertical()
                 | (Layout.Horizontal()
                     |  isFavorite.ToToggleInput(isFavorite.Value ? Icons.Heart : Icons.HeartOff)
                                  .Label(isFavorite.Value ? "Remove from Favorites" : "Add to Favorites")
-                    | Text.Block(isFavorite.Value ? "❤️ Favorited!" : "🤍 Not favourite!"))            
-                | Text.P(isFavorite.Value 
-                    ? "This article has been added to your favorites." 
+                    | Text.Block(isFavorite.Value ? "❤️ Favorited!" : "🤍 Not favourite!"))
+                | Text.P(isFavorite.Value
+                    ? "This article has been added to your favorites."
                     : "Click the heart to save this article.").Small();
     }
 }
@@ -203,6 +202,43 @@ public class BoolInputStylingDemo : ViewBase
 BoolInput also supports integer-based boolean values (0 = false, 1 = true) for compatibility with legacy systems. Simply use `UseState(0)` or `UseState(1)` with standard extension methods like `ToBoolInput()`, `ToSwitchInput()`, or `ToToggleInput()`.
 </Callout>
 
+## Event Handling
+
+Boolean inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class BoolInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState(false);
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the checkbox or switch gains focus.")
+                | state.ToBoolInput().Label("Focus me (Tab to me)")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the boolean input loses focus.")
+                | state.ToBoolInput().Label("Blur me")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the component and shows a visual focus ring.")
+                | state.ToBoolInput().Label("AutoFocused Input")
+                    .AutoFocus()
+                | Text.Lead("Focused!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.BoolInput" ExtensionTypes="Ivy.BoolInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/BoolInput.cs"/>
 
 ## Examples
@@ -219,7 +255,7 @@ to do so.
 public class SimpleFlightBooking : ViewBase
 {
     public override object? Build()
-    {        
+    {
         var isRoundTrip = UseState(false);
         var departureDate = UseState(DateTime.Today.AddDays(1));
         var returnDate = UseState(DateTime.Today.AddDays(7));

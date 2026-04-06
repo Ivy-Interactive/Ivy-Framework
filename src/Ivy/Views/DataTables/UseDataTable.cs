@@ -1,7 +1,5 @@
 using System.Reactive.Disposables;
 using Ivy.Core;
-using Ivy.Core.Hooks;
-using Ivy;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -18,7 +16,7 @@ public static class UseDataTableExtensions
         return UseDataTable(context, queryable, idSelector, null, refreshToken);
     }
 
-    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, Func<object, object?>? idSelector, DataTableColumn[]? columns, RefreshToken? refreshToken = null)
+    public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable, Func<object, object?>? idSelector, DataTableColumn[]? columns, RefreshToken? refreshToken = null, DataTableConfig? config = null)
     {
         var connection = context.UseState<DataTableConnection?>(buildOnChange: false);
         var lastQueryable = context.UseState<object?>(buildOnChange: false);
@@ -46,7 +44,7 @@ public static class UseDataTableExtensions
                 .Where(c => c.ValueAccessor != null)
                 .ToDictionary(c => c.Name, c => c.ValueAccessor!);
             if (valueAccessors?.Count == 0) valueAccessors = null;
-            var (newCleanup, newConnection) = dataTableService.AddQueryable(queryable, idSelector, columnNames, valueAccessors);
+            var (newCleanup, newConnection) = dataTableService.AddQueryable(queryable, idSelector, columnNames, valueAccessors, config);
             resultConnection = newConnection with { VersionToken = versionToken };
 
             connection.Set(resultConnection);

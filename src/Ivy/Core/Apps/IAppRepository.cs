@@ -1,5 +1,3 @@
-using System.Reactive;
-
 namespace Ivy.Core.Apps;
 
 public interface IAppRepository
