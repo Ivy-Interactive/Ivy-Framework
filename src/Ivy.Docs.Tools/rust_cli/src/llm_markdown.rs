@@ -1,5 +1,6 @@
 use lazy_static::lazy_static;
 use regex::Regex;
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -15,10 +16,34 @@ lazy_static! {
     static ref WIDGET_DOCS_BLOCK: Regex = Regex::new(r"<WidgetDocs\s+[^>]*/>").unwrap();
     static ref ATTR_TYPE: Regex =
         Regex::new(r#"(?i)Type\s*=\s*["']([^"']*)["']"#).unwrap();
+    static ref ATTR_EXTENSION_TYPES: Regex =
+        Regex::new(r#"(?i)ExtensionTypes\s*=\s*["']([^"']*)["']"#).unwrap();
+    static ref ATTR_SOURCE_URL: Regex =
+        Regex::new(r#"(?i)SourceUrl\s*=\s*["']([^"']*)["']"#).unwrap();
     static ref ATTR_URL: Regex =
         Regex::new(r#"(?i)Url\s*=\s*["']([^"']*)["']"#).unwrap();
     static ref CALLOUT_TYPE_ATTR: Regex =
         Regex::new(r#"(?i)<Callout[^>]*Type\s*=\s*["']([^"']*)["']"#).unwrap();
+}
+
+/// Load an API docs manifest from a JSON file.
+/// Returns an empty HashMap if the path is None or the file doesn't exist.
+pub fn load_api_docs_manifest(path: Option<&Path>) -> HashMap<String, String> {
+    let Some(path) = path else {
+        return HashMap::new();
+    };
+    if !path.exists() {
+        return HashMap::new();
+    }
+    match fs::read_to_string(path) {
+        Ok(content) => serde_json::from_str(&content).unwrap_or_default(),
+        Err(_) => HashMap::new(),
+    }
+}
+
+/// Build a manifest lookup key matching the C# GenerateApiDocsCommand.BuildKey format.
+fn build_manifest_key(type_name: &str, extension_types: &str, source_url: &str) -> String {
+    format!("{}|{}|{}", type_name, extension_types, source_url)
 }
 
 /// Generate a clean LLM-friendly markdown file from a source markdown file.
@@ -27,6 +52,7 @@ pub fn generate(
     input_path: &Path,
     output_path: &Path,
     skip_if_not_changed: bool,
+    api_docs: &HashMap<String, String>,
 ) -> Result<(), String> {
     let markdown_content =
         fs::read_to_string(input_path).map_err(|e| format!("Failed to read {}: {}", input_path.display(), e))?;
@@ -41,7 +67,7 @@ pub fn generate(
         }
     }
 
-    let output_content = generate_markdown(&markdown_content);
+    let output_content = generate_markdown(&markdown_content, api_docs);
 
     fs::write(output_path, &output_content)
         .map_err(|e| format!("Failed to write {}: {}", output_path.display(), e))?;
@@ -52,10 +78,10 @@ pub fn generate(
 }
 
 /// Core transformation: strip frontmatter and process custom blocks.
-fn generate_markdown(source: &str) -> String {
+fn generate_markdown(source: &str, api_docs: &HashMap<String, String>) -> String {
     let content = strip_frontmatter(source);
     let content = expand_details_blocks(&content);
-    let content = process_widget_docs_blocks(&content);
+    let content = process_widget_docs_blocks(&content, api_docs);
     let content = clean_code_block_arguments(&content);
     let content = process_custom_blocks(&content);
     content.trim().to_string()
@@ -131,14 +157,28 @@ fn expand_single_details_block(details_html: &str) -> String {
     format!("\n### {}\n\n{}\n\n", summary, body_content)
 }
 
-/// Replace <WidgetDocs Type="X" /> with a placeholder
-fn process_widget_docs_blocks(markdown: &str) -> String {
+/// Replace <WidgetDocs Type="X" /> with API docs from manifest or a placeholder
+fn process_widget_docs_blocks(markdown: &str, api_docs: &HashMap<String, String>) -> String {
     WIDGET_DOCS_BLOCK
         .replace_all(markdown, |caps: &regex::Captures| {
             let tag = &caps[0];
             if let Some(type_caps) = ATTR_TYPE.captures(tag) {
                 let type_name = &type_caps[1];
-                format!("## API\n\n(See widget documentation for {})", type_name)
+                let extension_types = ATTR_EXTENSION_TYPES
+                    .captures(tag)
+                    .map(|c| c[1].to_string())
+                    .unwrap_or_default();
+                let source_url = ATTR_SOURCE_URL
+                    .captures(tag)
+                    .map(|c| c[1].to_string())
+                    .unwrap_or_default();
+
+                let key = build_manifest_key(type_name, &extension_types, &source_url);
+                if let Some(api_doc) = api_docs.get(&key) {
+                    api_doc.clone()
+                } else {
+                    format!("## API\n\n(See widget documentation for {})", type_name)
+                }
             } else {
                 String::new()
             }
@@ -372,10 +412,37 @@ mod tests {
     }
 
     #[test]
-    fn test_widget_docs_block() {
+    fn test_widget_docs_block_placeholder() {
         let input = "<WidgetDocs Type=\"Button\" />";
-        let result = process_widget_docs_blocks(input);
+        let empty_manifest = HashMap::new();
+        let result = process_widget_docs_blocks(input, &empty_manifest);
         assert_eq!(result, "## API\n\n(See widget documentation for Button)");
+    }
+
+    #[test]
+    fn test_widget_docs_block_with_manifest() {
+        let input = "<WidgetDocs Type=\"Ivy.Button\" ExtensionTypes=\"Ivy.ButtonExtensions\" SourceUrl=\"https://example.com/Button.cs\"/>";
+        let mut manifest = HashMap::new();
+        manifest.insert(
+            "Ivy.Button|Ivy.ButtonExtensions|https://example.com/Button.cs".to_string(),
+            "## API\n\n### Constructors\n\n| Signature |\n|---|\n| `new Button()` |".to_string(),
+        );
+        let result = process_widget_docs_blocks(input, &manifest);
+        assert!(result.contains("### Constructors"));
+        assert!(result.contains("new Button()"));
+        assert!(!result.contains("(See widget documentation"));
+    }
+
+    #[test]
+    fn test_widget_docs_block_manifest_fallback() {
+        let input = "<WidgetDocs Type=\"Ivy.Unknown\" />";
+        let mut manifest = HashMap::new();
+        manifest.insert(
+            "Ivy.Button||".to_string(),
+            "## API\n\nButton docs".to_string(),
+        );
+        let result = process_widget_docs_blocks(input, &manifest);
+        assert_eq!(result, "## API\n\n(See widget documentation for Ivy.Unknown)");
     }
 
     #[test]
@@ -397,7 +464,8 @@ var x = 1;
 
 <WidgetDocs Type="Button" />
 "#;
-        let result = generate_markdown(input);
+        let empty_manifest = HashMap::new();
+        let result = generate_markdown(input, &empty_manifest);
         assert!(result.contains("*Welcome to the docs*"));
         assert!(result.contains("# Hello World"));
         assert!(result.contains("```csharp\n"));
@@ -415,11 +483,12 @@ var x = 1;
 
         let input_path = dir.join("test_input.md");
         let output_path = dir.join("test_output.md");
+        let empty_manifest = HashMap::new();
 
         fs::write(&input_path, "# Hello\n\nWorld").unwrap();
 
         // First generate
-        generate(&input_path, &output_path, true).unwrap();
+        generate(&input_path, &output_path, true, &empty_manifest).unwrap();
         assert!(output_path.exists());
         let _content1 = fs::read_to_string(&output_path).unwrap();
 
@@ -430,13 +499,13 @@ var x = 1;
         write_hash(&output_path, &hash);
 
         // Should skip since hash matches
-        generate(&input_path, &output_path, true).unwrap();
+        generate(&input_path, &output_path, true, &empty_manifest).unwrap();
         let content2 = fs::read_to_string(&output_path).unwrap();
         assert_eq!(content2, "MODIFIED"); // Not regenerated
 
         // Change source, should regenerate
         fs::write(&input_path, "# Changed\n\nContent").unwrap();
-        generate(&input_path, &output_path, true).unwrap();
+        generate(&input_path, &output_path, true, &empty_manifest).unwrap();
         let content3 = fs::read_to_string(&output_path).unwrap();
         assert_ne!(content3, "MODIFIED"); // Was regenerated
 

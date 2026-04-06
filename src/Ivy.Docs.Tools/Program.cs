@@ -11,6 +11,8 @@ public static class Program
             config.SetApplicationName("Ivy.Docs.Tools");
             config.AddCommand<ConvertCommand>("convert")
                 .WithDescription("Converts markdown files to Ivy C# App.");
+            config.AddCommand<GenerateApiDocsCommand>("generate-api-docs")
+                .WithDescription("Generates a JSON manifest of API documentation for WidgetDocs tags.");
             config.PropagateExceptions();
         });
 
