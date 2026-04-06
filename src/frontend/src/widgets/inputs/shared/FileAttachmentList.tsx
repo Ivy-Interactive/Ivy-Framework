@@ -6,12 +6,12 @@ import { Densities } from "@/types/density";
 import { FileItem, FileUploadStatus } from "./types";
 import { formatBytes } from "../file-input-validation";
 
-const compactContainerVariant = cva("flex flex-wrap", {
+const compactContainerVariant = cva("flex flex-nowrap overflow-x-auto flex-1 min-w-0", {
   variants: {
     density: {
-      Small: "gap-1 px-2 pb-1",
-      Medium: "gap-2 px-3 pb-2",
-      Large: "gap-2 px-3 pb-2",
+      Small: "gap-1 py-1",
+      Medium: "gap-2 py-1.5",
+      Large: "gap-2 py-2",
     },
   },
   defaultVariants: { density: "Medium" },
