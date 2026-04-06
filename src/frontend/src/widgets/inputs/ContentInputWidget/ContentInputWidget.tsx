@@ -52,6 +52,8 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
     openFilePicker,
     handleFileInputChange,
     fileInputRef,
+    uploadProgress,
+    cancelUpload,
   } = useFileAttachments({
     uploadUrl,
     accept,
@@ -109,11 +111,16 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
 
   const handleCancel = useCallback(
     (fileId: string) => {
+      // Check if this is a client-side upload in progress
+      if (uploadProgress.has(fileId)) {
+        cancelUpload(fileId);
+        return;
+      }
       if (hasCancelHandler) {
         handleEvent("OnCancel", id, [fileId]);
       }
     },
-    [hasCancelHandler, handleEvent, id],
+    [hasCancelHandler, handleEvent, id, uploadProgress, cancelUpload],
   );
 
   useEffect(() => {
@@ -203,9 +210,10 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
           )}
         </div>
 
-        {fileList.length > 0 && (
+        {(fileList.length > 0 || uploadProgress.size > 0) && (
           <FileAttachmentList
             files={fileList}
+            uploadProgress={uploadProgress}
             onCancel={handleCancel}
             hasCancelHandler={hasCancelHandler}
           />

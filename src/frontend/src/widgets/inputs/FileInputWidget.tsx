@@ -14,6 +14,7 @@ import {
   textVariant,
 } from "@/components/ui/input/file-input-variant";
 import { validateFileWithToast, validateFileCount } from "./file-input-validation";
+import { uploadFileWithProgress } from "@/widgets/filePicker/shared";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { FileItem } from "./shared/types";
 import { FileAttachmentList } from "./shared/FileAttachmentList";
@@ -57,10 +58,19 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<Map<string, number>>(new Map());
   const inputRef = useRef<HTMLInputElement>(null);
   const filesSelectedInCurrentDialogRef = useRef(false);
   const dialogWasOpenRef = useRef(false);
   const blurFiredRef = useRef(false);
+  const abortControllersRef = useRef<Map<string, () => void>>(new Map());
+
+  // Abort any pending uploads when the component unmounts
+  useEffect(() => {
+    return () => {
+      abortControllersRef.current.forEach((abort) => abort());
+    };
+  }, []);
 
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes("OnCancel");
@@ -75,31 +85,34 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         return;
       }
 
-      // Get the correct host from meta tag or use relative URL
-      const getUploadUrl = () => {
-        const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-        if (ivyHostMeta) {
-          const host = ivyHostMeta.getAttribute("content");
-          return host + uploadUrl;
-        }
-        // If no meta tag, use relative URL (should work in production)
-        return uploadUrl;
-      };
+      const clientFileId = `upload-${crypto.randomUUID()}-${file.size}-${file.name}`;
 
-      const formData = new FormData();
-      formData.append("file", file);
+      setUploadProgress((prev) => new Map(prev).set(clientFileId, 0));
+
+      const { promise, abort } = uploadFileWithProgress(uploadUrl, file, (progress) => {
+        setUploadProgress((prev) => new Map(prev).set(clientFileId, progress));
+      });
+
+      abortControllersRef.current.set(clientFileId, abort);
 
       try {
-        const response = await fetch(getUploadUrl(), {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
+        await promise;
+      } catch (error: any) {
+        if (error.message !== "Upload aborted") {
+          console.error("File upload error:", error);
+          toast({
+            title: "Upload failed",
+            description: error.message || `Could not upload ${file.name}`,
+            variant: "destructive",
+          });
         }
-      } catch (error) {
-        console.error("File upload error:", error);
+      } finally {
+        setUploadProgress((prev) => {
+          const next = new Map(prev);
+          next.delete(clientFileId);
+          return next;
+        });
+        abortControllersRef.current.delete(clientFileId);
       }
     },
     [uploadUrl, accept, maxFileSize, minFileSize],
@@ -188,7 +201,12 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
   const handleCancel = useCallback(
     (fileId: string) => {
-      if (hasCancelHandler) {
+      // Check if this is a client-side upload in progress
+      const abort = abortControllersRef.current.get(fileId);
+      if (abort) {
+        abort();
+        abortControllersRef.current.delete(fileId);
+      } else if (hasCancelHandler) {
         handleEvent("OnCancel", id, [fileId]);
       }
       // Also clear file input to allow re-selecting same file
@@ -312,7 +330,14 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
   // Check if we have any files to display
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
-  const fileList = Array.isArray(value) ? value : value ? [value] : [];
+  const hasUploadingFiles = uploadProgress && uploadProgress.size > 0;
+  const fileList = Array.isArray(value)
+    ? (value as FileItem[])
+    : value
+      ? ([value] as FileItem[])
+      : [];
+
+  const shouldShowFileList = hasFiles || hasUploadingFiles;
 
   return (
     <div
@@ -396,10 +421,11 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
                 </div>
               )}
             </div>
-            {hasFiles && (
+            {shouldShowFileList && (
               <div className="w-full">
                 <FileAttachmentList
                   files={fileList}
+                  uploadProgress={uploadProgress}
                   onCancel={handleCancel}
                   hasCancelHandler={hasCancelHandler}
                   variant="card"
@@ -411,21 +437,22 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           <div
             className={cn(
               "flex flex-col items-center justify-center text-center w-full",
-              hasFiles ? "p-0" : "p-4",
+              shouldShowFileList ? "p-0" : "p-4",
             )}
           >
             <Upload className={uploadIconVariant({ density })} />
-            {!hasFiles && (
+            {!shouldShowFileList && (
               <p className={textVariant({ density })}>
                 {placeholder ||
                   `Drag and drop your ${multiple ? "files" : "file"} here or click to select`}
               </p>
             )}
             {/* Show file list when files are present in Drop variant */}
-            {hasFiles && (
+            {shouldShowFileList && (
               <div className="w-full mt-4">
                 <FileAttachmentList
                   files={fileList}
+                  uploadProgress={uploadProgress}
                   onCancel={handleCancel}
                   hasCancelHandler={hasCancelHandler}
                   variant="card"

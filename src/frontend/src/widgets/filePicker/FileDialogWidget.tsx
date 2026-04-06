@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { hasFileSystemAccess } from "./browserSupport";
-import { validateFile, uploadFile, acceptToPickerTypes } from "./shared";
+import { uploadFile, acceptToPickerTypes } from "./shared";
+import { validateFileWithToast } from "@/widgets/inputs/file-input-validation";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface FileDialogFileInfo {
@@ -50,7 +51,9 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
   const handleFiles = useCallback(
     async (files: File[]) => {
       // Validate all files
-      const validFiles = files.filter((f) => validateFile(f, accept, maxFileSize, minFileSize));
+      const validFiles = files.filter((f) =>
+        validateFileWithToast({ file: f, accept, maxFileSize, minFileSize }),
+      );
       if (validFiles.length === 0) return;
 
       if (mode === "Upload" && uploadUrl) {

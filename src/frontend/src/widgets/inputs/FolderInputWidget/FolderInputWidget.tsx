@@ -110,6 +110,7 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
           }
         }}
         role="button"
+        aria-label="Browse for folder"
         onBlur={() => {
           if (hasOnBlur) handleEvent("OnBlur", id, []);
         }}
