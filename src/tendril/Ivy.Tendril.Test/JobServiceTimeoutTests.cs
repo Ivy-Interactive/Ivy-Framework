@@ -6,6 +6,8 @@ public class JobServiceTimeoutTests
 {
     private static JobService CreateService(TimeSpan jobTimeout, TimeSpan staleOutputTimeout)
     {
+        // Clear sync context so notifications fire synchronously during tests
+        SynchronizationContext.SetSynchronizationContext(null);
         return new JobService(jobTimeout, staleOutputTimeout);
     }
 
@@ -14,7 +16,7 @@ public class JobServiceTimeoutTests
     {
         var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
 
-        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
         var job = service.GetJob(id);
         Assert.NotNull(job);
         Assert.Equal("Running", job.Status);
@@ -22,7 +24,6 @@ public class JobServiceTimeoutTests
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
 
-        // Simulate timeout completion
         service.CompleteJob(id, exitCode: null, timedOut: true, staleOutput: false);
 
         job = service.GetJob(id);
@@ -41,12 +42,11 @@ public class JobServiceTimeoutTests
     {
         var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
 
-        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
 
-        // Simulate stale output timeout
         service.CompleteJob(id, exitCode: null, timedOut: true, staleOutput: true);
 
         var job = service.GetJob(id);
@@ -63,7 +63,7 @@ public class JobServiceTimeoutTests
     {
         var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
 
-        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
@@ -84,7 +84,7 @@ public class JobServiceTimeoutTests
     {
         var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
 
-        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
@@ -104,9 +104,8 @@ public class JobServiceTimeoutTests
     {
         var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
 
-        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
 
-        // Complete it first
         service.CompleteJob(id, exitCode: 0);
         var job = service.GetJob(id);
         Assert.Equal("Completed", job!.Status);
@@ -123,7 +122,7 @@ public class JobServiceTimeoutTests
     {
         var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
 
-        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
         var job = service.GetJob(id);
         Assert.NotNull(job!.TimeoutCts);
 
@@ -138,10 +137,10 @@ public class JobServiceTimeoutTests
     {
         var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
 
-        var runningId = service.StartJob("ExecutePlan", Path.GetTempPath());
-        var completedId = service.StartJob("ExecutePlan", Path.GetTempPath());
-        var failedId = service.StartJob("ExecutePlan", Path.GetTempPath());
-        var timeoutId = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var runningId = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
+        var completedId = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
+        var failedId = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
+        var timeoutId = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
 
         service.CompleteJob(completedId, exitCode: 0);
         service.CompleteJob(failedId, exitCode: 1);
@@ -160,7 +159,7 @@ public class JobServiceTimeoutTests
     {
         var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
 
-        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
         service.CompleteJob(id, exitCode: 0);
 
         service.ClearFailedJobs();
@@ -207,24 +206,15 @@ agentCommand: claude
     {
         var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
 
-        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
         var job = service.GetJob(id);
         Assert.NotNull(job);
 
-        // Wait briefly for process to start producing output
-        Thread.Sleep(500);
-
-        // Record LastOutputAt before heartbeat simulation
-        var beforeHeartbeat = job.LastOutputAt;
-
         // The OutputDataReceived handler filters heartbeat lines from OutputLines
-        // but still updates LastOutputAt. We can verify the filtering logic by
-        // checking that heartbeat-containing strings would be excluded from output
-        // while normal lines are included.
+        // but still updates LastOutputAt. Verify the filtering logic:
         var heartbeatLine = "{\"type\":\"heartbeat\",\"timestamp\":\"2026-04-02T07:00:00Z\"}";
         var normalLine = "{\"type\":\"assistant\",\"message\":\"hello\"}";
 
-        // Verify filtering logic: heartbeat lines contain the marker
         Assert.Contains("\"type\":\"heartbeat\"", heartbeatLine);
         Assert.DoesNotContain("\"type\":\"heartbeat\"", normalLine);
 

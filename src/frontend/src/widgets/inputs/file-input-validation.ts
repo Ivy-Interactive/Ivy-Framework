@@ -1,3 +1,5 @@
+import { toast } from "@/hooks/use-toast";
+
 export const formatBytes = (bytes: number): string => {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   if (bytes === 0) return "0 B";
@@ -75,6 +77,19 @@ export function validateSingleFile(ctx: FileValidationContext): ValidationResult
   }
 
   return { valid: true };
+}
+
+export function validateFileWithToast(ctx: FileValidationContext): boolean {
+  const result = validateSingleFile(ctx);
+  if (!result.valid) {
+    toast({
+      title: result.title || "Validation Error",
+      description: result.error,
+      variant: "destructive",
+    });
+    return false;
+  }
+  return true;
 }
 
 export function validateFileCount(

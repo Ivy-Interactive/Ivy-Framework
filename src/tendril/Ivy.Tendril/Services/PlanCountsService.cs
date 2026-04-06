@@ -25,6 +25,7 @@ public class PlanCountsService : IPlanCountsService
 
     private void OnSourceChanged()
     {
+        _planReaderService.InvalidateCaches();
         Refresh();
     }
 
@@ -44,9 +45,9 @@ public class PlanCountsService : IPlanCountsService
         var jobs = _jobService.GetJobs();
 
         return new PlanCounts(
-            Drafts: snapshot.Drafts + snapshot.Failed,
+            Drafts: snapshot.Drafts,
             ActiveJobs: jobs.Count(j => j.Status == "Running" || j.Status == "Queued"),
-            Reviews: snapshot.ReadyForReview,
+            Reviews: snapshot.ReadyForReview + snapshot.Failed,
             Icebox: snapshot.Icebox,
             Recommendations: snapshot.PendingRecommendations
         );

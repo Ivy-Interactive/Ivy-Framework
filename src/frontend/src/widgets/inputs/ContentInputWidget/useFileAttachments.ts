@@ -1,6 +1,6 @@
 import { useCallback, useState, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
-import { validateSingleFile, validateFileCount } from "../file-input-validation";
+import { validateFileWithToast, validateFileCount } from "../file-input-validation";
 import { uploadFileWithProgress } from "@/widgets/filePicker/shared";
 
 interface UseFileAttachmentsOptions {
@@ -27,26 +27,10 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
     };
   }, []);
 
-  const validateFile = useCallback(
-    (file: File): boolean => {
-      const result = validateSingleFile({ file, accept, maxFileSize });
-      if (!result.valid) {
-        toast({
-          title: result.title || "Validation Error",
-          description: result.error,
-          variant: "destructive",
-        });
-        return false;
-      }
-      return true;
-    },
-    [accept, maxFileSize],
-  );
-
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {
       if (!uploadUrl) return;
-      if (!validateFile(file)) return;
+      if (!validateFileWithToast({ file, accept, maxFileSize })) return;
 
       const clientFileId = `upload-${crypto.randomUUID()}-${file.size}-${file.name}`;
 
@@ -78,7 +62,7 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
         abortControllersRef.current.delete(clientFileId);
       }
     },
-    [uploadUrl, validateFile],
+    [uploadUrl, accept, maxFileSize],
   );
 
   const cancelUpload = useCallback((clientFileId: string) => {

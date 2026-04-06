@@ -507,114 +507,14 @@ public class Server
 
     internal ManifestOptions? GetManifestOptions() => _manifestOptions;
 
-    public async Task RunAsync(CancellationTokenSource? cts = null)
+    internal WebApplication? BuildWebApplication(CancellationTokenSource? cts = null)
     {
         var sessionStore = new AppSessionStore();
+        return BuildWebApplication(sessionStore, cts);
+    }
 
-        cts ??= new CancellationTokenSource();
-        Console.CancelKeyPress += (_, e) =>
-        {
-            e.Cancel = true;
-            cts.Cancel();
-        };
-
-        if (!_args.Verbose)
-        {
-            // In production mode, prevent termination from unhandled exceptions
-            AppDomain.CurrentDomain.SetData("HACK_SKIP_THROW_UNOBSERVED_TASK_EXCEPTIONS", true);
-        }
-
-        // Handle unobserved task exceptions to prevent process termination
-        TaskScheduler.UnobservedTaskException += (sender, e) =>
-        {
-            Console.WriteLine($@"[CRITICAL] Unobserved Task Exception: {e.Exception}");
-            e.SetObserved(); // Prevents process termination
-        };
-
-        AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
-        {
-            var ex = (Exception)e.ExceptionObject;
-            Console.WriteLine($@"[CRITICAL] Unhandled Domain Exception - IsTerminating: {e.IsTerminating}");
-            Console.WriteLine($@"[CRITICAL] Exception: {ex}");
-        };
-
-#if (DEBUG)
-        // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
-        _ = Task.Factory.StartNew(() =>
-        {
-            try
-            {
-                while (!cts.Token.IsCancellationRequested)
-                {
-                    if (Console.IsInputRedirected)
-                    {
-                        // Cannot read keys if input is redirected
-                        Thread.Sleep(1000); // Check again later or just exit? Exit is safer.
-                        break;
-                    }
-
-                    var key = Console.ReadKey(intercept: true);
-                    if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
-                    {
-                        sessionStore.Dump();
-                    }
-                }
-            }
-            catch (IOException ex)
-            {
-                // Console not available or detached
-                Console.WriteLine($"[Warning] Debug key listener stopped: {ex.Message}");
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Console not available
-                Console.WriteLine($"[Warning] Debug key listener stopped: {ex.Message}");
-            }
-        }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-#endif
-
-        // CLI-only commands (--describe, --describe-connection, --test-connection) never start
-        // the web host, so skip port checks entirely. Port 0 will be used below.
-        if (!_args.IsCliCommand && ProcessHelper.IsPortInUse(_args.Port))
-        {
-            if (_args.IKillForThisPort)
-            {
-                ProcessHelper.KillProcessUsingPort(_args.Port);
-            }
-            else if (_args.FindAvailablePort)
-            {
-                var originalPort = _args.Port;
-                var maxAttempts = 100;
-                var attemptCount = 0;
-
-                while (ProcessHelper.IsPortInUse(_args.Port) && attemptCount < maxAttempts)
-                {
-                    _args = _args with { Port = _args.Port + 1 };
-                    attemptCount++;
-                }
-
-                if (attemptCount >= maxAttempts)
-                {
-                    Console.WriteLine($"\x1b[31mCould not find an available port after checking {maxAttempts} ports starting from {originalPort}.\x1b[0m");
-                    return;
-                }
-
-                if (_args.Port != originalPort && !_args.Silent)
-                {
-                    Console.WriteLine($"\x1b[33mPort {originalPort} is in use. Using port {_args.Port} instead.\x1b[0m");
-                }
-            }
-            else
-            {
-                Console.WriteLine($@"Port {_args.Port} is already in use on this machine.");
-
-                Console.WriteLine(
-                    "Specify a different port using '--port <number>', '--find-available-port', or '--i-kill-for-this-port' to just take it.");
-
-                return;
-            }
-        }
-
+    internal WebApplication? BuildWebApplication(AppSessionStore sessionStore, CancellationTokenSource? cts = null)
+    {
         if (!string.IsNullOrEmpty(_args.DefaultAppId))
         {
             DefaultAppId = _args.DefaultAppId;
@@ -763,7 +663,7 @@ public class Server
         if (AppRepository.InvalidAppIds.Count > 0)
         {
             Console.WriteLine($@"[CRITICAL] Failed to start Ivy server due to {AppRepository.InvalidAppIds.Count} invalid app ID(s).");
-            return;
+            return null;
         }
 
         app.UseExceptionHandler(error =>
@@ -795,7 +695,7 @@ public class Server
             app.UseHttpsRedirection();
         }
 
-        var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
+        var logger2 = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
         // Configure ForwardedHeaders middleware to process X-Forwarded-* headers from reverse proxies
         var forwardedHeadersOptions = new ForwardedHeadersOptions
@@ -831,6 +731,123 @@ public class Server
         app.MapHealthChecks("/ivy/health");
         app.MapGrpcService<DataTableService>().EnableGrpcWeb();
 
+        app.UseFrontend(_args, logger2);
+        app.UseAssets(_args, logger2, "Assets", "ivy/assets");
+
+        return app;
+    }
+
+    public async Task RunAsync(CancellationTokenSource? cts = null)
+    {
+        var sessionStore = new AppSessionStore();
+
+        cts ??= new CancellationTokenSource();
+        Console.CancelKeyPress += (_, e) =>
+        {
+            e.Cancel = true;
+            cts.Cancel();
+        };
+
+        if (!_args.Verbose)
+        {
+            // In production mode, prevent termination from unhandled exceptions
+            AppDomain.CurrentDomain.SetData("HACK_SKIP_THROW_UNOBSERVED_TASK_EXCEPTIONS", true);
+        }
+
+        // Handle unobserved task exceptions to prevent process termination
+        TaskScheduler.UnobservedTaskException += (sender, e) =>
+        {
+            Console.WriteLine($@"[CRITICAL] Unobserved Task Exception: {e.Exception}");
+            e.SetObserved(); // Prevents process termination
+        };
+
+        AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+        {
+            var ex = (Exception)e.ExceptionObject;
+            Console.WriteLine($@"[CRITICAL] Unhandled Domain Exception - IsTerminating: {e.IsTerminating}");
+            Console.WriteLine($@"[CRITICAL] Exception: {ex}");
+        };
+
+#if (DEBUG)
+        // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
+        _ = Task.Factory.StartNew(() =>
+        {
+            try
+            {
+                while (!cts.Token.IsCancellationRequested)
+                {
+                    if (Console.IsInputRedirected)
+                    {
+                        // Cannot read keys if input is redirected
+                        Thread.Sleep(1000); // Check again later or just exit? Exit is safer.
+                        break;
+                    }
+
+                    var key = Console.ReadKey(intercept: true);
+                    if (key is { Modifiers: ConsoleModifiers.Control, Key: ConsoleKey.S })
+                    {
+                        sessionStore.Dump();
+                    }
+                }
+            }
+            catch (IOException ex)
+            {
+                // Console not available or detached
+                Console.WriteLine($"[Warning] Debug key listener stopped: {ex.Message}");
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Console not available
+                Console.WriteLine($"[Warning] Debug key listener stopped: {ex.Message}");
+            }
+        }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+#endif
+
+        // CLI-only commands (--describe, --describe-connection, --test-connection) never start
+        // the web host, so skip port checks entirely. Port 0 will be used below.
+        if (!_args.IsCliCommand && ProcessHelper.IsPortInUse(_args.Port))
+        {
+            if (_args.IKillForThisPort)
+            {
+                ProcessHelper.KillProcessUsingPort(_args.Port);
+            }
+            else if (_args.FindAvailablePort)
+            {
+                var originalPort = _args.Port;
+                var maxAttempts = 100;
+                var attemptCount = 0;
+
+                while (ProcessHelper.IsPortInUse(_args.Port) && attemptCount < maxAttempts)
+                {
+                    _args = _args with { Port = _args.Port + 1 };
+                    attemptCount++;
+                }
+
+                if (attemptCount >= maxAttempts)
+                {
+                    Console.WriteLine($"\x1b[31mCould not find an available port after checking {maxAttempts} ports starting from {originalPort}.\x1b[0m");
+                    return;
+                }
+
+                if (_args.Port != originalPort && !_args.Silent)
+                {
+                    Console.WriteLine($"\x1b[33mPort {originalPort} is in use. Using port {_args.Port} instead.\x1b[0m");
+                }
+            }
+            else
+            {
+                Console.WriteLine($@"Port {_args.Port} is already in use on this machine.");
+
+                Console.WriteLine(
+                    "Specify a different port using '--port <number>', '--find-available-port', or '--i-kill-for-this-port' to just take it.");
+
+                return;
+            }
+        }
+
+        var app = BuildWebApplication(sessionStore, cts);
+        if (app == null) return;
+
         if (_useHotReload)
         {
             HotReloadService.UpdateApplicationEvent += (types) =>
@@ -849,9 +866,6 @@ public class Server
                 }
             };
         }
-
-        app.UseFrontend(_args, logger);
-        app.UseAssets(_args, logger, "Assets", "ivy/assets");
 
         app.Lifetime.ApplicationStarted.Register(() =>
         {

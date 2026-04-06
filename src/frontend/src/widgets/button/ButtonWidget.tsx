@@ -17,11 +17,7 @@ import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BorderRadius, getColor, getWidth } from "@/lib/styles";
 import { Densities } from "@/types/density";
-import {
-  parseShortcut,
-  formatShortcutForDisplay,
-  keyToCode,
-} from "@/widgets/inputs/TextInputWidget/utils/shortcut";
+import { parseShortcut, formatShortcutForDisplay, keyToCode } from "@/lib/shortcut";
 
 const ButtonWithTooltip = withTooltip(Button);
 
