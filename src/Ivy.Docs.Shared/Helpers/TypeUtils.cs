@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Ivy.Core.Docs;
+using Ivy.Docs.Shared.Apps.ApiReference.Ivy;
 
 namespace Ivy.Docs.Shared.Helpers;
 
