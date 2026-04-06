@@ -143,7 +143,8 @@ public class AuthController() : Controller
             cookies.AddCookiesForBrokeredSessions(tempSession.BrokeredSessions);
             cookies.WriteToResponse(Response);
 
-            var redirectUrl = serverArgs.BasePath != null ? $"{serverArgs.BasePath}/?oauthLogin=1" : "/?oauthLogin=1";
+            var path = (serverArgs.BasePath ?? "").Trim().Replace('\\', '/').TrimStart('/').TrimEnd('/');
+            var redirectUrl = string.IsNullOrEmpty(path) ? "/?oauthLogin=1" : $"/{path}/?oauthLogin=1";
             return Redirect(redirectUrl);
         }
         catch (Exception ex)
