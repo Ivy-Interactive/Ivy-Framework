@@ -55,8 +55,7 @@ public class IceboxApp : ViewBase
 
         return new SidebarLayout(
             mainContent: new Icebox.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
-            sidebarContent: sidebar.BuildContent(),
-            sidebarHeader: sidebar.BuildHeader()
+            sidebarContent: sidebar
         );
     }
 }

@@ -83,6 +83,8 @@ public class BarChartBuilder<TSource>(
     private Func<Toolbox, Toolbox>? _toolboxFactory;
     private Expression<Func<TSource, object>>? _sortSelector;
     private SortOrder _sortOrder = SortOrder.None;
+    private bool _fillGaps;
+    private object? _gapFillInterval;
     private Size? _height;
     private Size? _width;
 
@@ -98,7 +100,7 @@ public class BarChartBuilder<TSource>(
             throw new InvalidOperationException("At least one measure is required.");
         }
 
-        var lineChartData = UseState(ImmutableArray.Create<Dictionary<string, object>>);
+        var barChartData = UseState(ImmutableArray.Create<Dictionary<string, object>>);
         var loading = UseState(true);
 
         UseEffect(async () =>
@@ -109,6 +111,11 @@ public class BarChartBuilder<TSource>(
                     .ToPivotTable()
                     .Dimension(dimension).Measures(_measures);
 
+                if (_fillGaps)
+                {
+                    pivotBuilder = pivotBuilder.FillGaps(_gapFillInterval);
+                }
+
                 if (_sortOrder != SortOrder.None)
                 {
                     pivotBuilder = _sortSelector != null
@@ -117,7 +124,7 @@ public class BarChartBuilder<TSource>(
                 }
 
                 var results = await pivotBuilder.ExecuteAsync();
-                lineChartData.Set([.. results]);
+                barChartData.Set([.. results]);
             }
             finally
             {
@@ -133,7 +140,7 @@ public class BarChartBuilder<TSource>(
         var resolvedDesigner = style ?? BarChartStyleHelpers.GetStyle<TSource>(BarChartStyles.Default);
 
         var scaffolded = resolvedDesigner.Design(
-            lineChartData.Value.ToExpando(),
+            barChartData.Value.ToExpando(),
             dimension,
             _measures.ToArray()
         );
@@ -216,6 +223,13 @@ public class BarChartBuilder<TSource>(
     {
         _sortOrder = order;
         _sortSelector = null;
+        return this;
+    }
+
+    public BarChartBuilder<TSource> FillGaps(object? interval = null)
+    {
+        _fillGaps = true;
+        _gapFillInterval = interval;
         return this;
     }
 }

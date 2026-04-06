@@ -37,7 +37,7 @@ public class ProjectsSettingsView : ViewBase
         };
 
         var rows = projects.Select((p, i) => new ProjectRow(
-            i, p.Name, p.Color, p.Repos.Count, p.Verifications.Count
+            i, p.Name, p.Color, p.GetMeta("slackEmoji"), p.Repos.Count, p.Verifications.Count
         )).ToList();
 
         var table = new TableBuilder<ProjectRow>(rows)
@@ -52,9 +52,15 @@ public class ProjectsSettingsView : ViewBase
                     {
                         deleteIndex.Set(idx);
                     })
+            ))
+            .Header(t => t.Icon, "Icon")
+            .Builder(t => t.Icon, f => f.Func<ProjectRow, string?>(emoji =>
+                !string.IsNullOrEmpty(emoji)
+                    ? (object)Text.Block(emoji)
+                    : new Spacer()
             ));
 
-        var content = Layout.Vertical().Gap(4).Padding(4)
+        var content = Layout.Vertical().Gap(4).Padding(4).Width(Size.Auto().Max(Size.Units(120)))
             | Text.Block("Projects").Bold()
             | table
             | new Button("Add Project").Icon(Icons.Plus).Outline().OnClick(() =>
@@ -299,5 +305,5 @@ public class ProjectsSettingsView : ViewBase
         }
     }
 
-    private record ProjectRow(int Index, string Name, string Color, int RepoCount, int VerificationCount);
+    private record ProjectRow(int Index, string Name, string Color, string? Icon, int RepoCount, int VerificationCount);
 }

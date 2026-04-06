@@ -2,386 +2,442 @@ agentCommand: claude --print --verbose --output-format stream-json
 jobTimeout: 30
 staleOutputTimeout: 10
 maxConcurrentJobs: 10
+projects:
+- name: Framework
+  color: Blue
+  meta:
+    slackEmoji: ':hammer_and_wrench:'
+  repos:
+  - &o5
+    path: D:\Repos\_Ivy\Ivy-Framework
+    prRule: yolo
+  verifications:
+  - &o0
+    name: DotnetBuild
+    required: true
+  - &o1
+    name: DotnetFormat
+    required: true
+  - &o2
+    name: DotnetTest
+    required: true
+  - name: FrontendLint
+    required: true
+  - name: IvyFrameworkVerification
+    required: true
+  - name: NewWidgetChecklist
+  - &o3
+    name: CheckResult
+    required: true
+  context: >
+    Ivy Framework is the core UI framework. Key folders:
 
+    - src\Ivy\Widgets\ — backend widget classes
+
+    - src\frontend\src\widgets\ — React widget components
+
+    - src\Ivy.Docs.Shared\Docs\ — documentation
+
+    - src\Ivy.Samples.Shared\ — sample apps
+
+    Instructions: See AGENTS.md in repo root
+  reviewActions:
+  - name: Sample
+    condition: Test-Path "artifacts\sample\*.csproj"
+    action: dotnet run --project artifacts\sample --browse --find-available-port
+  - name: Docs
+    condition: Test-Path "worktrees\Ivy-Framework\src\Ivy.Docs"
+    action: dotnet run --project worktrees\Ivy-Framework\src\Ivy.Docs --browse --find-available-port
+  - name: Samples
+    condition: Test-Path "worktrees\Ivy-Framework\src\Ivy.Samples"
+    action: dotnet run --project worktrees\Ivy-Framework\src\Ivy.Samples --browse --find-available-port
+  hooks:
+  - name: SlackNotify
+    when: after
+    promptwares:
+    - MakePr
+    condition: ''
+    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+  repoPaths:
+  - D:\Repos\_Ivy\Ivy-Framework
+- name: Agent
+  color: Purple
+  meta:
+    slackEmoji: ':robot_face:'
+  repos:
+  - path: D:\Repos\_Ivy\Ivy-Agent
+    prRule: yolo
+  - &o4
+    path: D:\Repos\_Ivy\Ivy
+    prRule: yolo
+  verifications:
+  - *o0
+  - *o1
+  - *o2
+  - *o3
+  context: >
+    Ivy Agent is the AI agent server. Key folders:
+
+    - Ivy.Agent.Server\ — agent server
+
+    - Ivy.Agent\Agents\Personas\Prompts\ — persona prompts
+
+    - Ivy.Internals\Workflows\ — workflow definitions
+
+    - Ivy.Agent\Tools\ — tool implementations
+  reviewActions: []
+  hooks:
+  - name: SlackNotify
+    when: after
+    promptwares:
+    - MakePr
+    condition: ''
+    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+  repoPaths:
+  - D:\Repos\_Ivy\Ivy-Agent
+  - D:\Repos\_Ivy\Ivy
+- name: TestManager
+  color: Rose
+  meta:
+    slackEmoji: ':test_tube:'
+  repos:
+  - path: D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Studio
+    prRule: yolo
+  - path: D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Manager
+    prRule: yolo
+  verifications:
+  - *o0
+  - *o1
+  - *o2
+  - *o3
+  context: >
+    Test Manager for Ivy Agent. Key folders:
+
+    - Ivy.Agent.Test.Manager\ — CLI for managing test cases, runs, and scoring
+
+    - Ivy.Agent.Test.Studio\ — TUI app for test management UI
+
+    See AGENTS.md in Ivy.Agent.Test.Manager folder for CLI reference.
+  reviewActions: []
+  hooks:
+  - name: SlackNotify
+    when: after
+    promptwares:
+    - MakePr
+    condition: ''
+    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+  repoPaths:
+  - D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Studio
+  - D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Manager
+- name: Console
+  color: Teal
+  meta:
+    slackEmoji: ':desktop_computer:'
+  repos:
+  - *o4
+  verifications:
+  - *o0
+  - *o1
+  - *o2
+  - *o3
+  context: >
+    - Ivy.Console\ — desktop CLI and TUI client
+
+    - Ivy.Internals\ — shared internals
+
+    - Ivy.Studio\ — vibe-coding agent
+  reviewActions: []
+  hooks:
+  - name: SlackNotify
+    when: after
+    promptwares:
+    - MakePr
+    condition: ''
+    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+  repoPaths:
+  - D:\Repos\_Ivy\Ivy
+- name: Tendril
+  color: Emerald
+  meta:
+    slackEmoji: ':seedling:'
+  repos:
+  - *o5
+  verifications:
+  - *o0
+  - *o1
+  - name: DotnetTest
+  - *o3
+  context: >
+    Plan management TUI. Key folders:
+
+    - Services\ — ConfigService, PlanReaderService, JobService
+
+    - Apps\ — PlansApp, JobsApp UI
+
+    - .promptwares\ — MakePlan, UpdatePlan, SplitPlan, ExpandPlan
+
+    This project uses the Ivy Framework - there's CLI helper methods you can use: 
+
+    ivy docs AGENTS.md 
+
+    ivy question "How do I make a button in Ivy?"
+  reviewActions: []
+  hooks:
+  - name: SlackNotify
+    when: after
+    promptwares:
+    - MakePr
+    condition: ''
+    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+  repoPaths:
+  - D:\Repos\_Ivy\Ivy-Framework
+- name: Mcp
+  color: Sky
+  meta:
+    slackEmoji: ':electric_plug:'
+  repos:
+  - path: D:\Repos\_Ivy\Ivy-Mcp
+    prRule: yolo
+  verifications:
+  - *o0
+  - *o1
+  - *o2
+  - *o3
+  context: >
+    MCP service for IvyQuestions and IvyDocs.
+  reviewActions: []
+  hooks:
+  - name: SlackNotify
+    when: after
+    promptwares:
+    - MakePr
+    condition: ''
+    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+  repoPaths:
+  - D:\Repos\_Ivy\Ivy-Mcp
+verifications:
+- name: DotnetBuild
+  prompt: Run `dotnet build --warnaserror` in the project repo and verify it succeeds with zero errors and zero warnings.
+- name: DotnetTest
+  prompt: >
+    Run dotnet tests in the project repo.
+
+
+    1. Read the plan revision's **## Tests** section for test scope instructions.
+
+    2. If the plan specifies specific test classes, namespaces, or filter expressions, run:
+       `dotnet test --filter "<filter from plan>"`
+       Common filter examples:
+       - By class: `dotnet test --filter "FullyQualifiedName~MyTestClass"`
+       - By namespace: `dotnet test --filter "Namespace~MyNamespace"`
+       - Multiple: `dotnet test --filter "FullyQualifiedName~TestA|FullyQualifiedName~TestB"`
+    3. If the plan does not specify any test scope, run `dotnet test` (all tests).
+
+    4. Verify all executed tests pass.
+- name: DotnetFormat
+  prompt: Run `dotnet format` in the project repo. If it modifies any files, stage and commit them.
+- name: FrontendLint
+  prompt: Run `cd src\frontend && npm run lint && npm run format:check` and verify no errors.
+- name: IvyFrameworkVerification
+  prompt: 'Run the IvyFrameworkVerification promptware to visually verify UI changes. Execute: `pwsh -NoProfile -File "$TENDRIL_HOME\Promptwares\IvyFrameworkVerification.ps1" -PlanPath "<PlanFolder>"`. Creates a temp project with demo apps, runs Playwright tests, and copies artifacts to <PlanFolder>\artifacts\. Write the verification report to <PlanFolder>\verification\IvyFrameworkVerification.md.'
+- name: CheckResult
+  prompt: >
+    Verify the implementation matches what was requested in the plan.
+
+
+    1. Read the plan revision from `<PlanFolder>\revisions\` (latest numbered .md file)
+
+    2. Read all commits made by this execution from `plan.yaml` `commits` list
+
+    3. For each commit, review the diff (`git show <hash>`) in the worktree
+
+    4. Compare the plan's **Problem** and **Solution** sections against the actual changes:
+       - Are all described changes present?
+       - Are there unexpected\unrelated changes?
+       - Do the changes solve the stated problem?
+    5. If the plan has a **Tests** section, verify those tests were actually written
+
+    6. Write the verification report to `<PlanFolder>\verification\CheckResult.md`
+
+
+    Report format:
+
+    ```
+
+    # CheckResult
+
+
+    - **Date:** <CurrentTime>
+
+    - **Result:** Pass \ Fail
+
+    - **Attempts:** 1
+
+
+    ## Requested vs Delivered
+
+
+    | Requirement | Status | Notes |
+
+    |-------------|--------|-------|
+
+    | <from plan> | Done \ Missing \ Partial | <details> |
+
+
+    ## Unexpected Changes
+
+
+    <list any changes not described in the plan, or "None">
+
+
+    ## Output
+
+
+    <summary assessment>
+
+
+    ## Fixes Applied
+
+
+    None
+
+
+    ## Issues Found
+
+
+    <any gaps between plan and implementation, or "None">
+
+    ```
+- name: NewWidgetChecklist
+  prompt: >
+    Verify all 6 required elements exist for any new widget created by this plan:
+
+    1. Backend widget class — src\Ivy\Widgets\<WidgetName>.cs with [Prop]\[Event] attributes, [JsonIgnore] on delegates, Has* booleans
+
+    2. Frontend React component — src\frontend\src\widgets\<widgetName>\<WidgetName>Widget.tsx
+
+    3. Index export — src\frontend\src\widgets\<widgetName>\index.ts
+
+    4. Widget map registration — import + entry in src\frontend\src\widgets\widgetMap.ts
+
+    5. Sample app — src\Ivy.Samples.Shared\Apps\Widgets\<WidgetName>App.cs
+
+    6. Documentation page — src\Ivy.Docs.Shared\Docs\02_Widgets\<category>\<WidgetName>.md
+
+    Check each file exists and follows conventions. Report which elements are present vs missing.
+planTemplate: >
+  # {title}
+
+
+  ## Problem
+
+
+  ## Solution
+
+
+  ## Tests
+
+
+  **New tests:**
+
+  (specify tests to write for new functionality, or "None" if no new tests needed)
+
+
+  **Test scope (dotnet test --filter):**
+
+  (specify filter expression to limit DotnetTest to relevant tests, e.g. `FullyQualifiedName~Namespace.TestClass`)
+
+
+  ## Verification
+editor:
+  command: code
+  label: VS Code
 llm:
   endpoint: DotnetUserSecrets:OpenAi:Endpoint
   apiKey: DotnetUserSecrets:OpenAi:ApiKey
   model: gpt-4o-mini
-
-editor:
-  command: code
-  label: VS Code
-
 promptwares:
   MakePlan:
     model: sonnet
     allowedTools:
-      - Read
-      - Glob
-      - Grep
-      - Bash
-      - Write
-      - Edit
+    - Read
+    - Glob
+    - Grep
+    - Bash
+    - Write
+    - Edit
   ExecutePlan:
     model: opus
     allowedTools:
-      - Read
-      - Write
-      - Edit
-      - Glob
-      - Grep
-      - Bash
-      - WebFetch
-      - WebSearch
+    - Read
+    - Write
+    - Edit
+    - Glob
+    - Grep
+    - Bash
+    - WebFetch
+    - WebSearch
   ExpandPlan:
     model: sonnet
     allowedTools:
-      - Read
-      - Glob
-      - Grep
-      - Bash
-      - Write
-      - Edit
+    - Read
+    - Glob
+    - Grep
+    - Bash
+    - Write
+    - Edit
   MakePr:
     model: sonnet
     allowedTools:
-      - Read
-      - Glob
-      - Grep
-      - Bash
-      - Write
-      - Edit
+    - Read
+    - Glob
+    - Grep
+    - Bash
+    - Write
+    - Edit
   UpdatePlan:
     model: sonnet
     allowedTools:
-      - Read
-      - Glob
-      - Grep
-      - Bash
-      - Write
-      - Edit
+    - Read
+    - Glob
+    - Grep
+    - Bash
+    - Write
+    - Edit
   SplitPlan:
     model: sonnet
     allowedTools:
-      - Read
-      - Glob
-      - Grep
-      - Bash
-      - Write
-      - Edit
+    - Read
+    - Glob
+    - Grep
+    - Bash
+    - Write
+    - Edit
   CreateIssue:
     model: sonnet
     allowedTools:
-      - Read
-      - Glob
-      - Grep
-      - Bash
-      - Write
-      - Edit
+    - Read
+    - Glob
+    - Grep
+    - Bash
+    - Write
+    - Edit
   IvyFrameworkVerification:
     model: sonnet
     allowedTools:
-      - Read
-      - Write
-      - Edit
-      - Glob
-      - Grep
-      - Bash
-
+    - Read
+    - Write
+    - Edit
+    - Glob
+    - Grep
+    - Bash
+telemetry: true
 levels:
-  - name: Critical
-    badge: Warning
-  - name: Bug
-    badge: Destructive
-  - name: NiceToHave
-    badge: Outline
-  - name: Epic
-    badge: Info
-
-projects:
-  - name: Framework
-    color: Blue
-    meta:
-      slackEmoji: ":hammer_and_wrench:"
-    repos:
-      - path: "%REPOS_HOME%/Ivy-Framework"
-        prRule: yolo
-    hooks:
-      - name: SlackNotify
-        when: after
-        promptwares:
-          - MakePr
-        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
-    reviewActions:
-      - name: "Sample"
-        condition: 'Test-Path "artifacts/sample/*.csproj"'
-        action: 'dotnet run --project artifacts/sample --browse --find-available-port'
-      - name: "Docs"
-        condition: 'Test-Path "worktrees/Ivy-Framework/src/Ivy.Docs"'
-        action: 'dotnet run --project worktrees/Ivy-Framework/src/Ivy.Docs --browse --find-available-port'
-      - name: "Samples"
-        condition: 'Test-Path "worktrees/Ivy-Framework/src/Ivy.Samples"'
-        action: 'dotnet run --project worktrees/Ivy-Framework/src/Ivy.Samples --browse --find-available-port'
-    verifications:
-      - name: DotnetBuild
-        required: true
-      - name: DotnetFormat
-        required: true
-      - name: DotnetTest
-        required: true
-      - name: FrontendLint
-        required: true
-      - name: IvyFrameworkVerification
-        required: true
-      - name: NewWidgetChecklist
-        required: false
-      - name: CheckResult
-        required: true
-    context: |
-      Ivy Framework is the core UI framework. Key folders:
-      - src/Ivy/Widgets/ — backend widget classes
-      - src/frontend/src/widgets/ — React widget components
-      - src/Ivy.Docs.Shared/Docs/ — documentation
-      - src/Ivy.Samples.Shared/ — sample apps
-      Instructions: See AGENTS.md in repo root
-
-  - name: Agent
-    color: Purple
-    meta:
-      slackEmoji: ":robot_face:"
-    repos:
-      - path: "%REPOS_HOME%/Ivy-Agent"
-        prRule: yolo
-      - path: "%REPOS_HOME%/Ivy"
-        prRule: yolo
-    hooks:
-      - name: SlackNotify
-        when: after
-        promptwares:
-          - MakePr
-        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
-    verifications:
-      - name: DotnetBuild
-        required: true
-      - name: DotnetFormat
-        required: true
-      - name: DotnetTest
-        required: true
-      - name: CheckResult
-        required: true
-    context: |
-      Ivy Agent is the AI agent server. Key folders:
-      - Ivy.Agent.Server/ — agent server
-      - Ivy.Agent/Agents/Personas/Prompts/ — persona prompts
-      - Ivy.Internals/Workflows/ — workflow definitions
-      - Ivy.Agent/Tools/ — tool implementations
-
-  - name: TestManager
-    color: Rose
-    meta:
-      slackEmoji: ":test_tube:"
-    repos:
-      - path: "%REPOS_HOME%/Ivy-Agent/Ivy.Agent.Test.Studio"
-        prRule: yolo
-      - path: "%REPOS_HOME%/Ivy-Agent/Ivy.Agent.Test.Manager"
-        prRule: yolo
-    hooks:
-      - name: SlackNotify
-        when: after
-        promptwares:
-          - MakePr
-        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
-    verifications:
-      - name: DotnetBuild
-        required: true
-      - name: DotnetFormat
-        required: true
-      - name: DotnetTest
-        required: true
-      - name: CheckResult
-        required: true
-    context: |
-      Test Manager for Ivy Agent. Key folders:
-      - Ivy.Agent.Test.Manager/ — CLI for managing test cases, runs, and scoring
-      - Ivy.Agent.Test.Studio/ — TUI app for test management UI
-      See AGENTS.md in Ivy.Agent.Test.Manager folder for CLI reference.
-
-  - name: Console
-    color: Teal
-    meta:
-      slackEmoji: ":desktop_computer:"
-    repos:
-      - path: "%REPOS_HOME%/Ivy"
-        prRule: yolo
-    hooks:
-      - name: SlackNotify
-        when: after
-        promptwares:
-          - MakePr
-        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
-    verifications:
-      - name: DotnetBuild
-        required: true
-      - name: DotnetFormat
-        required: true
-      - name: DotnetTest
-        required: true
-      - name: CheckResult
-        required: true
-    context: |
-      - Ivy.Console/ — desktop CLI and TUI client
-      - Ivy.Internals/ — shared internals
-      - Ivy.Studio/ — vibe-coding agent
-
-  - name: Tendril
-    color: Emerald
-    meta:
-      slackEmoji: ":seedling:"
-    repos:
-      # NOTE: Tendril code lives at src/tendril/Ivy.Tendril/ inside Ivy-Framework repo.
-      # There is a deprecated Ivy-Tendril repo on GitHub - do NOT use it for new plans.
-      # All Tendril plans MUST target Ivy-Framework repo only.
-      - path: "%REPOS_HOME%/Ivy-Framework"
-        prRule: yolo
-    hooks:
-      - name: SlackNotify
-        when: after
-        promptwares:
-          - MakePr
-        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
-    verifications:
-      - name: DotnetBuild
-        required: true
-      - name: DotnetFormat
-        required: true
-      - name: DotnetTest
-        required: false
-      - name: CheckResult
-        required: true
-    context: |
-      Plan management TUI. Key folders:
-      - Services/ — ConfigService, PlanReaderService, JobService
-      - Apps/ — PlansApp, JobsApp UI
-      - .promptwares/ — MakePlan, UpdatePlan, SplitPlan, ExpandPlan
-      This project uses the Ivy Framework - there's CLI helper methods you can use: 
-      ivy docs AGENTS.md 
-      ivy question "How do I make a button in Ivy?"
-
-  - name: Mcp
-    color: Sky
-    meta:
-      slackEmoji: ":electric_plug:"
-    repos:
-      - path: "%REPOS_HOME%/Ivy-Mcp"
-        prRule: yolo
-    hooks:
-      - name: SlackNotify
-        when: after
-        promptwares:
-          - MakePr
-        action: 'pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1'
-    verifications:
-      - name: DotnetBuild
-        required: true
-      - name: DotnetFormat
-        required: true
-      - name: DotnetTest
-        required: true
-      - name: CheckResult
-        required: true
-    context: |
-      MCP service for IvyQuestions and IvyDocs.
-
-verifications:
-  - name: DotnetBuild
-    prompt: "Run `dotnet build --warnaserror` in the project repo and verify it succeeds with zero errors and zero warnings."
-  - name: DotnetTest
-    prompt: |
-      Run dotnet tests in the project repo.
-
-      1. Read the plan revision's **## Tests** section for test scope instructions.
-      2. If the plan specifies specific test classes, namespaces, or filter expressions, run:
-         `dotnet test --filter "<filter from plan>"`
-         Common filter examples:
-         - By class: `dotnet test --filter "FullyQualifiedName~MyTestClass"`
-         - By namespace: `dotnet test --filter "Namespace~MyNamespace"`
-         - Multiple: `dotnet test --filter "FullyQualifiedName~TestA|FullyQualifiedName~TestB"`
-      3. If the plan does not specify any test scope, run `dotnet test` (all tests).
-      4. Verify all executed tests pass.
-  - name: DotnetFormat
-    prompt: "Run `dotnet format` in the project repo. If it modifies any files, stage and commit them."
-  - name: FrontendLint
-    prompt: "Run `cd src/frontend && npm run lint && npm run format:check` and verify no errors."
-  - name: IvyFrameworkVerification
-    prompt: "Run the IvyFrameworkVerification promptware to visually verify UI changes. Execute: `pwsh -NoProfile -File \"$TENDRIL_HOME/Promptwares/IvyFrameworkVerification.ps1\" -PlanPath \"<PlanFolder>\"`. Creates a temp project with demo apps, runs Playwright tests, and copies artifacts to <PlanFolder>/artifacts/. Write the verification report to <PlanFolder>/verification/IvyFrameworkVerification.md."
-  - name: CheckResult
-    prompt: |
-      Verify the implementation matches what was requested in the plan.
-
-      1. Read the plan revision from `<PlanFolder>/revisions/` (latest numbered .md file)
-      2. Read all commits made by this execution from `plan.yaml` `commits` list
-      3. For each commit, review the diff (`git show <hash>`) in the worktree
-      4. Compare the plan's **Problem** and **Solution** sections against the actual changes:
-         - Are all described changes present?
-         - Are there unexpected/unrelated changes?
-         - Do the changes solve the stated problem?
-      5. If the plan has a **Tests** section, verify those tests were actually written
-      6. Write the verification report to `<PlanFolder>/verification/CheckResult.md`
-
-      Report format:
-      ```
-      # CheckResult
-
-      - **Date:** <CurrentTime>
-      - **Result:** Pass / Fail
-      - **Attempts:** 1
-
-      ## Requested vs Delivered
-
-      | Requirement | Status | Notes |
-      |-------------|--------|-------|
-      | <from plan> | Done / Missing / Partial | <details> |
-
-      ## Unexpected Changes
-
-      <list any changes not described in the plan, or "None">
-
-      ## Output
-
-      <summary assessment>
-
-      ## Fixes Applied
-
-      None
-
-      ## Issues Found
-
-      <any gaps between plan and implementation, or "None">
-      ```
-  - name: NewWidgetChecklist
-    prompt: |
-      Verify all 6 required elements exist for any new widget created by this plan:
-      1. Backend widget class — src/Ivy/Widgets/<WidgetName>.cs with [Prop]/[Event] attributes, [JsonIgnore] on delegates, Has* booleans
-      2. Frontend React component — src/frontend/src/widgets/<widgetName>/<WidgetName>Widget.tsx
-      3. Index export — src/frontend/src/widgets/<widgetName>/index.ts
-      4. Widget map registration — import + entry in src/frontend/src/widgets/widgetMap.ts
-      5. Sample app — src/Ivy.Samples.Shared/Apps/Widgets/<WidgetName>App.cs
-      6. Documentation page — src/Ivy.Docs.Shared/Docs/02_Widgets/<category>/<WidgetName>.md
-      Check each file exists and follows conventions. Report which elements are present vs missing.
-
-planTemplate: |
-  # {title}
-
-  ## Problem
-
-  ## Solution
-
-  ## Tests
-
-  **New tests:**
-  (specify tests to write for new functionality, or "None" if no new tests needed)
-
-  **Test scope (dotnet test --filter):**
-  (specify filter expression to limit DotnetTest to relevant tests, e.g. `FullyQualifiedName~Namespace.TestClass`)
-
-  ## Verification
+- name: Bug
+  badge: Destructive
+- name: Critical
+  badge: Warning
+- name: NiceToHave
+  badge: Outline
+- name: Epic
+  badge: Info

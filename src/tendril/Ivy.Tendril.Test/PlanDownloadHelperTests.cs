@@ -57,7 +57,7 @@ public class PlanDownloadHelperTests
             await Task.Delay(100);
 
             ctx.Reset();
-            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow);
+            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null);
             var testPlan = new PlanFile(metadata, "", Path.Combine(tempDir, "00001-TestPlan"), "");
 
             PlanDownloadHelper.UsePlanDownload(ctx, planService, testPlan);
@@ -84,7 +84,7 @@ public class PlanDownloadHelperTests
             var planService = ctx.UseService<PlanReaderService>();
 
             // First render with plan 1
-            var metadata1 = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow);
+            var metadata1 = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null);
             var plan1 = new PlanFile(metadata1, "", Path.Combine(tempDir, "00001-TestPlan"), "");
             PlanDownloadHelper.UsePlanDownload(ctx, planService, plan1);
 
@@ -93,7 +93,7 @@ public class PlanDownloadHelperTests
 
             // Second render with plan 2
             ctx.Reset();
-            var metadata2 = new PlanMetadata(2, "Test", "Test", "Other Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow);
+            var metadata2 = new PlanMetadata(2, "Test", "Test", "Other Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null);
             var plan2 = new PlanFile(metadata2, "", Path.Combine(tempDir, "00002-OtherPlan"), "");
             PlanDownloadHelper.UsePlanDownload(ctx, planService, plan2);
 
@@ -140,7 +140,7 @@ public class PlanDownloadHelperTests
         try
         {
             var planService = ctx.UseService<PlanReaderService>();
-            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow);
+            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null);
             var testPlan = new PlanFile(metadata, "", Path.Combine(tempDir, "00001-TestPlan"), "");
 
             var result = PlanDownloadHelper.UsePlanDownload(ctx, planService, testPlan);

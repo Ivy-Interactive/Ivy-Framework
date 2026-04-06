@@ -104,6 +104,8 @@ public class LineChartBuilder<TSource>(
     private Func<Toolbox, Toolbox>? _toolboxFactory;
     private Expression<Func<TSource, object>>? _sortSelector;
     private SortOrder _sortOrder = SortOrder.None;
+    private bool _fillGaps;
+    private object? _gapFillInterval;
     private Size? _height;
     private Size? _width;
 
@@ -129,6 +131,11 @@ public class LineChartBuilder<TSource>(
                 var pivotBuilder = data
                     .ToPivotTable()
                     .Dimension(dimension).Measures(_measures).TableCalculations(_calculations);
+
+                if (_fillGaps)
+                {
+                    pivotBuilder = pivotBuilder.FillGaps(_gapFillInterval);
+                }
 
                 if (_sortOrder != SortOrder.None)
                 {
@@ -244,6 +251,13 @@ public class LineChartBuilder<TSource>(
     {
         _sortOrder = order;
         _sortSelector = null;
+        return this;
+    }
+
+    public LineChartBuilder<TSource> FillGaps(object? interval = null)
+    {
+        _fillGaps = true;
+        _gapFillInterval = interval;
         return this;
     }
 }

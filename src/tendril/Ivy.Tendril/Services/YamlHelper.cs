@@ -28,6 +28,7 @@ public static class YamlHelper
     /// <summary>
     /// Compact serializer that omits default values for cleaner output.
     /// Use this for writing config files where brevity is desired.
+    /// Note: Does not sort collections - order is preserved as-is (important for levels).
     /// </summary>
     public static readonly ISerializer SerializerCompact = new SerializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)

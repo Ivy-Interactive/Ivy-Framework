@@ -20,6 +20,12 @@ Read `config.yaml` from the `TENDRIL_CONFIG` environment variable (absolute path
 
 ## Execution Steps
 
+### 0. Check Plan State
+
+Before processing, read `plan.yaml` and check the `state` field:
+- If `state: Completed`, the plan was already processed. Exit early with a message indicating the plan is already completed and showing the existing PR URLs from the `prs` list.
+- Otherwise, proceed with step 1.
+
 ### 1. Read Plan
 
 - Read `plan.yaml` from the plan folder (project, commits, repos)

@@ -139,9 +139,9 @@ public class ContentView(
 
             verificationsTable |= new TableRow(
                 new TableCell(new Badge(v.Status).Variant(
-                    v.Status == "Pass" ? BadgeVariant.Success
-                    : v.Status == "Fail" ? BadgeVariant.Destructive
-                    : BadgeVariant.Outline)),
+                    StatusMappings.VerificationStatusBadgeVariants.TryGetValue(v.Status, out var variant)
+                        ? variant
+                        : BadgeVariant.Outline)),
                 new TableCell(nameCell)
             );
         }

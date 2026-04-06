@@ -15,19 +15,19 @@ public class VerificationsSettingsView : ViewBase
 
         var verifications = config.Settings.Verifications;
 
-        var rows = verifications.Select((v, i) => new VerificationRow(i, v.Name, v.Prompt)).ToList();
+        var rows = verifications.Select((v, i) => new VerificationRow(v.Name, v.Prompt, i)).ToList();
 
         var table = new TableBuilder<VerificationRow>(rows)
-            .Header(t => t.Index, "Actions")
+            .Header(t => t.Index, "")
             .Builder(t => t.Index, f => f.Func<VerificationRow, int>(idx =>
                 Layout.Horizontal().Gap(1)
-                    | new Button("Edit").Outline().Small().OnClick(() =>
+                    | new Button().Icon(Icons.Pencil).Outline().Small().Tooltip("Edit this verification").OnClick(() =>
                     {
                         editIndex.Set(idx);
                         editName.Set(verifications[idx].Name);
                         editPrompt.Set(verifications[idx].Prompt);
                     })
-                    | new Button("Delete").Outline().Small().OnClick(() =>
+                    | new Button().Icon(Icons.Trash).Outline().Small().Tooltip("Delete this verification").OnClick(() =>
                     {
                         var name = verifications[idx].Name;
                         verifications.RemoveAt(idx);
@@ -37,7 +37,7 @@ public class VerificationsSettingsView : ViewBase
                     })
             ));
 
-        var content = Layout.Vertical().Gap(4).Padding(4)
+        var content = Layout.Vertical().Gap(4).Padding(4).Width(Size.Auto().Max(Size.Units(120)))
             | Text.Block("Verification Definitions").Bold()
             | table
             | new Button("Add Verification").Icon(Icons.Plus).Outline().OnClick(() =>
@@ -88,5 +88,5 @@ public class VerificationsSettingsView : ViewBase
         return content;
     }
 
-    private record VerificationRow(int Index, string Name, string Prompt);
+    private record VerificationRow(string Name, string Prompt, int Index);
 }

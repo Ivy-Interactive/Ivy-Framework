@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { convertToHex, getThemeColorHex } from "../color-utils";
+import { convertToHex, getThemeColorHex, getDisplayColor } from "../color-utils";
 
 // ---------------------------------------------------------------------------
 // convertToHex
@@ -58,6 +58,16 @@ describe("convertToHex", () => {
     // Without a proper DOM (getComputedStyle returns empty), named colors fall through
     expect(convertToHex("red")).toBe("red");
   });
+
+  it("resolves named colors to hex via theme color lookup when DOM is available", () => {
+    vi.spyOn(globalThis, "getComputedStyle").mockReturnValue({
+      getPropertyValue: () => "#ef4444",
+    } as unknown as CSSStyleDeclaration);
+
+    expect(convertToHex("red")).toBe("#ef4444");
+
+    vi.restoreAllMocks();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -98,5 +108,37 @@ describe("getThemeColorHex", () => {
     } as unknown as CSSStyleDeclaration);
 
     expect(getThemeColorHex("--color-red")).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getDisplayColor
+// ---------------------------------------------------------------------------
+
+describe("getDisplayColor", () => {
+  it("returns #000000 for empty string", () => {
+    expect(getDisplayColor("")).toBe("#000000");
+  });
+
+  it("returns valid hex color as-is", () => {
+    expect(getDisplayColor("#ff0000")).toBe("#ff0000");
+  });
+
+  it("strips alpha channel from 9-char hex", () => {
+    expect(getDisplayColor("#ff000080")).toBe("#ff0000");
+  });
+
+  it("returns #000000 for CSS var result", () => {
+    // convertToHex returns "var(--color-red)" for named colors without DOM
+    // but getDisplayColor should fall back since var( prefix
+    expect(getDisplayColor("oklch(0.5 0.2 30)")).toBe("#000000");
+  });
+
+  it("returns #000000 for non-hex string", () => {
+    expect(getDisplayColor("not-a-color")).toBe("#000000");
+  });
+
+  it("converts rgb value to hex and returns it", () => {
+    expect(getDisplayColor("rgb(255, 0, 0)")).toBe("#ff0000");
   });
 });

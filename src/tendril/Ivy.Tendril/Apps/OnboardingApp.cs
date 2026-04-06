@@ -10,7 +10,7 @@ namespace Ivy.Tendril.Apps;
 #endif
 public class OnboardingApp : ViewBase
 {
-    private StepperItem[] GetSteps(int selectedIndex) =>
+    private static StepperItem[] GetSteps(int selectedIndex) =>
     [
         new("1", selectedIndex > 0 ? Icons.Check : null, "Welcome"),
         new("2", selectedIndex > 1 ? Icons.Check : null, "Software Check"),
@@ -19,7 +19,7 @@ public class OnboardingApp : ViewBase
         new("5", selectedIndex > 4 ? Icons.Check : null, "Complete")
     ];
 
-    private object GetStepViews(IState<int> stepperIndex) => stepperIndex.Value switch
+    private static object GetStepViews(IState<int> stepperIndex) => stepperIndex.Value switch
     {
         0 => new WelcomeStepView(stepperIndex),
         1 => new SoftwareCheckStepView(stepperIndex),
@@ -36,6 +36,7 @@ public class OnboardingApp : ViewBase
 
         return Layout.TopCenter() |
                (Layout.Vertical().Margin(0, 20).Width(150)
+                | new Image("/tendril/assets/Tendril.svg").Width(Size.Units(20)).Height(Size.Auto())
                 | new Stepper(OnSelect, stepperIndex.Value, steps).Width(Size.Full())
                 | GetStepViews(stepperIndex)
                );
@@ -53,14 +54,16 @@ public class WelcomeStepView(IState<int> stepperIndex) : ViewBase
     public override object? Build()
     {
         return Layout.Vertical()
-               | new Image("/tendril/assets/Tendril.svg").Width(Size.Units(20)).Height(Size.Auto())
-               | Text.H1("Welcome to Tendril")
+               | Text.H1("Welcome to Ivy Tendril")
                | Text.Markdown(
-                   "Ivy Tendril is a coding orchestrator.\n\n" +
-                   "To get started, we need to set up a few things:\n" +
-                   "- Where to store your Tendril data\n" +
-                   "- Create necessary folders and configuration\n\n" +
-                   "Let's begin!")
+                   """
+                   To get started, we need to set up a few things:
+                   - Check that you have all necessary software installed
+                   - Where to store your Tendril data
+                   - Define a first project
+
+                   Let's begin!
+                   """)
                | new Button("Get Started").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
                    .OnClick(() => stepperIndex.Set(stepperIndex.Value + 1));
     }
@@ -76,14 +79,15 @@ public class SoftwareCheckStepView(IState<int> stepperIndex) : ViewBase
         async Task CheckSoftware()
         {
             isChecking.Set(true);
-            var results = new Dictionary<string, bool>();
-
-            results["gh"] = await CheckCommand("gh", "--version");
-            results["claude"] = await CheckCommand("claude", "--version");
-            results["git"] = await CheckCommand("git", "--version");
-            results["powershell"] = await CheckCommand("pwsh", "-Version")
-                                    || await CheckCommand("powershell", "-Version");
-            results["pandoc"] = await CheckCommand("pandoc", "--version");
+            var results = new Dictionary<string, bool>
+            {
+                ["gh"] = await CheckCommand("gh", "--version"),
+                ["claude"] = await CheckCommand("claude", "--version"),
+                ["git"] = await CheckCommand("git", "--version"),
+                ["powershell"] = await CheckCommand("pwsh", "-Version")
+                                 || await CheckCommand("powershell", "-Version"),
+                ["pandoc"] = await CheckCommand("pandoc", "--version")
+            };
 
             checkResults.Set(results);
             isChecking.Set(false);
@@ -123,15 +127,15 @@ public class SoftwareCheckStepView(IState<int> stepperIndex) : ViewBase
                           : Text.Danger("\u2717 PowerShell not found - Install PowerShell Core from https://github.com/PowerShell/PowerShell"))
                       | Text.H3("Optional")
                       | (checkResults.Value["pandoc"]
-                          ? Text.Success("\u2713 pandoc is installed")
-                          : Text.Muted("\u24d8 pandoc not found - Install from https://pandoc.org/installing.html for PDF export"))
+                          ? Text.Success("\u2713 Pandoc is installed")
+                          : Text.Muted("\u24d8 Pandoc not found - Install from https://pandoc.org/installing.html for PDF export"))
                      )
                    : null!)
                | (checkResults.Value == null
                    ? new Button("Check Software")
                        .Primary()
                        .Large()
-                       .Icon(Icons.CirclePlay, Align.Right)
+                       .Icon(Icons.CheckCheck, Align.Right)
                        .Loading(isChecking.Value)
                        .Disabled(isChecking.Value)
                        .OnClick(async () => await CheckSoftware())
@@ -146,7 +150,7 @@ public class SoftwareCheckStepView(IState<int> stepperIndex) : ViewBase
                          | (Layout.Horizontal().Gap(2)
                            | new Button("Check Again")
                                .Outline()
-                               .Icon(Icons.RefreshCw, Align.Right)
+                               .Icon(Icons.CheckCheck, Align.Right)
                                .OnClick(async () => await CheckSoftware())
                            | new Button("Skip Anyway")
                                .Destructive()

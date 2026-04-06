@@ -15,6 +15,8 @@ public class LevelsSettingsView : ViewBase
 
         var badgeOptions = Enum.GetNames<BadgeVariant>().ToList();
 
+        // Use levels in config.yaml order (not alphabetically sorted).
+        // The order is controlled by the user via up/down arrows in the UI.
         var levels = config.Settings.Levels;
 
         var rows = levels.Select((level, i) => new LevelRow(i, level.Name, level.Badge)).ToList();

@@ -49,12 +49,12 @@ public class DashboardApp : ViewBase
             : 0;
 
         var statsRow = Layout.Horizontal().Gap(2).Padding(2)
-            | BuildStatCard(totalCount, "Total Plans")
-            | BuildStatCard(draftCount, "Draft")
-            | BuildStatCard(inProgressCount, "In Progress")
-            | BuildStatCard(reviewCount, "Ready for Review")
-            | BuildStatCard(completedCount, "Completed")
-            | BuildStatCard(failedCount, "Failed")
+            | BuildStatCard(totalCount.ToString(), "Total Plans")
+            | BuildStatCard(draftCount.ToString(), "Draft")
+            | BuildStatCard(inProgressCount.ToString(), "In Progress")
+            | BuildStatCard(reviewCount.ToString(), "Ready for Review")
+            | BuildStatCard(completedCount.ToString(), "Completed")
+            | BuildStatCard(failedCount.ToString(), "Failed")
             | BuildStatCard($"${avgCost:F2}", "Avg Cost/Plan");
 
         var today = DateTime.UtcNow.Date;
@@ -91,7 +91,7 @@ public class DashboardApp : ViewBase
                 Failed = dayFailedCount,
                 Cost = dayCost > 0 ? $"${dayCost:F2}" : "",
                 CostPerPlan = costPerPlan,
-                Tokens = dayTokens > 0 ? FormatTokens(dayTokens) : ""
+                Tokens = dayTokens > 0 ? FormatHelper.FormatTokens(dayTokens) : ""
             };
         }).ToList();
 
@@ -103,7 +103,7 @@ public class DashboardApp : ViewBase
             .Header(t => t.Date, "Date")
             .Header(t => t.Created, "Created")
             .Header(t => t.Completed, "Completed")
-            .Header(t => t.PrsMerged, "PRs Merged")
+            .Header(t => t.PrsMerged, "PRs / Merged")
             .Header(t => t.Failed, "Failed")
             .Header(t => t.Cost, "Cost")
             .Header(t => t.CostPerPlan, "Cost/Plan")
@@ -130,7 +130,7 @@ public class DashboardApp : ViewBase
             projectData.Select(p => new ProgressSegment(
                 Value: p.Count,
                 Color: configService.GetProjectColor(p.Project),
-                Label: p.Project
+                Label: $"{p.Project} ({p.Count})"
             )).ToArray()
         )
         .Selected(selectedProject.Value != null
@@ -178,6 +178,7 @@ public class DashboardApp : ViewBase
                         new YAxis("Tokens").Orientation(YAxis.Orientations.Right).Hide(),
                     ]
                 })
+            .FillGaps(TimeSpan.FromHours(1))
             .Dimension("Hour", e => e.Hour.ToString("MM/dd HH"))
             .Measure("Cost ($)", e => e.Sum(f => (double)f.Cost))
             .Measure("Tokens", e => e.Sum(f => (double)f.Tokens))
@@ -195,18 +196,6 @@ public class DashboardApp : ViewBase
             header: statsRow,
             content: content
         );
-    }
-
-    private static string FormatTokens(int tokens)
-    {
-        return tokens >= 1_000_000 ? $"{tokens / 1_000_000.0:F1}M"
-             : tokens >= 1_000 ? $"{tokens / 1_000.0:F0}K"
-             : tokens.ToString();
-    }
-
-    private static object BuildStatCard(int count, string label)
-    {
-        return BuildStatCard(count.ToString(), label);
     }
 
     private static object BuildStatCard(string value, string label)

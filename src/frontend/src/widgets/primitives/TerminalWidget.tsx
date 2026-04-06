@@ -55,7 +55,7 @@ const TerminalWidget = ({
             />
           </div>
         )}
-        <div className="bg-zinc-900 p-4 font-mono text-body overflow-x-auto">
+        <div className="bg-zinc-900 p-4 font-mono text-body overflow-x-auto slim-scrollbar">
           {lines.map((line, i) => {
             const lineKey = `term-line-${i}`;
             return (

@@ -32,8 +32,8 @@ Tendril is a terminal UI application built on [Ivy Framework](https://github.com
 1. **Clone the repo**
 
    ```bash
-   git clone https://github.com/Ivy-Interactive/Ivy-Tendril.git
-   cd Ivy-Tendril
+   git clone https://github.com/Ivy-Interactive/Ivy-Framework.git
+   cd Ivy-Framework/src/tendril/Ivy.Tendril
    ```
 
 2. **Configure `config.yaml`**
@@ -41,7 +41,7 @@ Tendril is a terminal UI application built on [Ivy Framework](https://github.com
    Copy the example config and edit it:
 
    ```bash
-   cp example.config.yaml config.yaml
+   cp example.config.yaml ~/.tendril/config.yaml
    ```
 
    Key fields:

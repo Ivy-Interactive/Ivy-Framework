@@ -2,11 +2,16 @@ using Ivy;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Ivy.Tendril.AppShell;
+using Ivy.Tendril.Database;
 using Ivy.Tendril.Services;
 using Microsoft.Extensions.Logging;
 using OpenAI;
 using System.ClientModel;
 
+// Handle database CLI commands before starting the server
+var dbExitCode = DatabaseCommands.Handle(args);
+if (dbExitCode >= 0)
+    return dbExitCode;
 
 AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
 {
@@ -125,7 +130,7 @@ server.UseWebApplication(app =>
         Environment.SetEnvironmentVariable("TENDRIL_URL", serverUrl);
 
     // Eagerly resolve watcher services so their FileSystemWatchers start immediately
-    app.Services.GetRequiredService<PlanWatcherService>();
+    app.Services.GetRequiredService<IPlanWatcherService>();
     app.Services.GetRequiredService<IInboxWatcherService>();
 
     // Start database sync in background
@@ -152,3 +157,4 @@ var appShellSettings = new AppShellSettings()
     .UseTabs(preventDuplicates: true);
 server.UseAppShell(() => new TendrilAppShell(appShellSettings));
 await server.RunAsync();
+return 0;

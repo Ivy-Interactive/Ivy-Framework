@@ -9,14 +9,24 @@ namespace Ivy.Tendril.Apps;
 [App(title: "Jobs", icon: Icons.Activity, group: new[] { "Tools" }, order: MenuOrder.Jobs)]
 public class JobsApp : ViewBase
 {
+    private static readonly Dictionary<string, Colors> StatusColors = new()
+    {
+        ["Running"] = Colors.Blue,
+        ["Completed"] = Colors.Green,
+        ["Failed"] = Colors.Red,
+        ["Timeout"] = Colors.Red,
+        ["Queued"] = Colors.Amber,
+        ["Pending"] = Colors.Amber,
+        ["Stopped"] = Colors.Gray,
+        ["Blocked"] = Colors.Orange
+    };
+
     public override object? Build()
     {
         var jobService = UseService<IJobService>();
         var planService = UseService<IPlanReaderService>();
         var client = UseService<IClientProvider>();
         var refreshToken = UseRefreshToken();
-        var showCommand = UseState<string?>(null);
-        var showOutput = UseState<string?>(null);
         var showPlan = UseState<string?>(null);
         var openFile = UseState<string?>(null);
         var config = UseService<IConfigService>();
@@ -91,7 +101,13 @@ public class JobsApp : ViewBase
             .Width(t => t.LastOutput, Size.Px(90))
             .Width(t => t.Cost, Size.Px(80))
             .Width(t => t.StatusMessage, Size.Auto())
-            .Renderer(t => t.Status, new LabelsDisplayRenderer())
+            .Renderer(t => t.Status, new LabelsDisplayRenderer
+            {
+                BadgeColorMapping = StatusColors.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.ToString()
+                )
+            })
             .Renderer(t => t.PlanId, new LinkDisplayRenderer())
             .Hidden(t => t.Id)
             .Hidden(t => t.LastOutputTimestamp)
@@ -128,8 +144,6 @@ public class JobsApp : ViewBase
                 return ValueTask.CompletedTask;
             })
             .RowActions(
-                new MenuItem(Label: "Show Command", Icon: Icons.Terminal, Tag: "show-command").Tooltip("Show the PowerShell command"),
-                new MenuItem(Label: "View Output", Icon: Icons.ScrollText, Tag: "view-output").Tooltip("View full job output"),
                 new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
                 new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
                 new MenuItem(Label: "Rerun", Icon: Icons.RotateCw, Tag: "rerun-job").Tooltip("Rerun this job"),
@@ -158,18 +172,6 @@ public class JobsApp : ViewBase
                         {
                             jobService.StopJob(job.Id);
                             refreshToken.Refresh();
-                        }
-                    }
-                    else if (tag == "show-command")
-                    {
-                        var command = $"pwsh -NoProfile -File \"{job.ScriptPath}\" {string.Join(" ", job.Args.Select(a => $"\"{a}\""))}";
-                        showCommand.Set(command);
-                    }
-                    else if (tag == "view-output")
-                    {
-                        if (job.Status != "Running" && job.OutputLines.Count > 0)
-                        {
-                            showOutput.Set(string.Join("\n", job.OutputLines));
                         }
                     }
                     else if (tag == "rerun-job")
@@ -217,30 +219,6 @@ public class JobsApp : ViewBase
                 ));
 
         var layout = Layout.Vertical().Height(Size.Full());
-
-        if (showCommand.Value is { } cmd)
-        {
-            return layout | new Fragment(
-                dataTable,
-                new Sheet(
-                    onClose: () => showCommand.Set(null),
-                    content: new Markdown($"```\n{cmd}\n```"),
-                    title: "Promptware Command"
-                ).Width(Size.Half()).Resizable()
-            );
-        }
-
-        if (showOutput.Value is { } output)
-        {
-            return layout | new Fragment(
-                dataTable,
-                new Sheet(
-                    onClose: () => showOutput.Set(null),
-                    content: new Markdown($"```\n{output}\n```"),
-                    title: "Job Output"
-                ).Width(Size.Half()).Resizable()
-            );
-        }
 
         if (showPlan.Value is { } planPath)
         {
@@ -315,16 +293,6 @@ public class JobsApp : ViewBase
         return $"{span.Minutes}m {span.Seconds:D2}s";
     }
 
-    private static Colors GetStatusColor(string status) => status switch
-    {
-        "Running" => Colors.Blue,
-        "Completed" => Colors.Green,
-        "Failed" => Colors.Red,
-        "Timeout" => Colors.Red,
-        "Queued" => Colors.Amber,
-        "Pending" => Colors.Amber,
-        "Stopped" => Colors.Gray,
-        "Blocked" => Colors.Orange,
-        _ => Colors.Slate
-    };
+    private static Colors GetStatusColor(string status) =>
+        StatusColors.TryGetValue(status, out var color) ? color : Colors.Slate;
 }

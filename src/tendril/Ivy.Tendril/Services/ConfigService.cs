@@ -110,6 +110,7 @@ public class ConfigService : IConfigService
     private string _tendrilHome;
     private string? _pendingTendrilHome;
     private ProjectConfig? _pendingProject;
+    private string[]? _levelNamesCache;
 
     internal ConfigService(TendrilSettings settings, string tendrilHome = "")
     {
@@ -201,8 +202,20 @@ public class ConfigService : IConfigService
     public string ConfigPath => _configPath;
     public string PlanFolder => string.IsNullOrEmpty(_tendrilHome) ? "" : Path.Combine(_tendrilHome, "Plans");
     public List<ProjectConfig> Projects => _settings.Projects;
+    // Levels are returned in the order defined in config.yaml (not sorted).
+    // Users can reorder levels in the Settings UI, and the order is preserved.
     public List<LevelConfig> Levels => _settings.Levels;
-    public string[] LevelNames => _settings.Levels.Select(l => l.Name).ToArray();
+    public string[] LevelNames
+    {
+        get
+        {
+            if (_levelNamesCache == null)
+            {
+                _levelNamesCache = _settings.Levels.Select(l => l.Name).ToArray();
+            }
+            return _levelNamesCache;
+        }
+    }
     public EditorConfig Editor => _settings.Editor;
     public ProjectConfig? GetProject(string name) => _settings.Projects.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
@@ -217,6 +230,7 @@ public class ConfigService : IConfigService
 
     public void SaveSettings()
     {
+        _levelNamesCache = null;
         var yaml = YamlHelper.SerializerCompact.Serialize(_settings);
         File.WriteAllText(_configPath, yaml);
     }
@@ -259,6 +273,7 @@ public class ConfigService : IConfigService
             }
         }
 
+        _levelNamesCache = null;
         VariableExpansion.InitializeUserSecrets(_tendrilHome);
         ExpandSettingsVariables();
     }
