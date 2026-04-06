@@ -18,20 +18,40 @@ const normalizeSide = (side?: string): SheetSide => {
   return side.toLowerCase() as SheetSide;
 };
 
-// Helper to parse a Size string to pixels
-const parseSizeToPixels = (sizeStr: string | undefined, defaultPx: number): number => {
+// Helper to parse an Ivy Size token to pixels for resize math.
+const parseSizeToPixels = (
+  sizeStr: string | undefined,
+  defaultPx: number,
+  axis: "width" | "height",
+): number => {
   if (!sizeStr) return defaultPx;
   const [sizeType, value] = sizeStr.split(":");
+  const normalizedType = sizeType.toLowerCase();
   const numValue = parseFloat(value);
-  if (isNaN(numValue)) return defaultPx;
+  const viewportPx =
+    typeof window === "undefined"
+      ? defaultPx
+      : axis === "width"
+        ? window.innerWidth || document.documentElement.clientWidth || defaultPx
+        : window.innerHeight || document.documentElement.clientHeight || defaultPx;
 
-  switch (sizeType.toLowerCase()) {
+  switch (normalizedType) {
     case "px":
-      return numValue;
+      return isNaN(numValue) ? defaultPx : numValue;
     case "rem":
-      return numValue * 16;
+      return isNaN(numValue) ? defaultPx : numValue * 16;
     case "units":
-      return numValue * 4;
+      return isNaN(numValue) ? defaultPx : numValue * 4;
+    case "fraction":
+      return isNaN(numValue) ? defaultPx : numValue * viewportPx;
+    case "full":
+    case "screen":
+      return viewportPx;
+    case "fit":
+    case "auto":
+    case "mincontent":
+    case "maxcontent":
+      return defaultPx;
     default:
       return defaultPx;
   }
@@ -82,12 +102,13 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
 
   // Use width for horizontal sheets, height for vertical sheets
   const sizeStr = isHorizontal ? width : height;
+  const axis: "width" | "height" = isHorizontal ? "width" : "height";
 
   // Parse size parts for resize constraints
   const sizeParts = (sizeStr ?? "").split(",");
-  const initialPx = parseSizeToPixels(sizeParts[0], isHorizontal ? 384 : 256);
-  const minPx = parseSizeToPixels(sizeParts[1], isHorizontal ? 200 : 100);
-  const maxPx = parseSizeToPixels(sizeParts[2], isHorizontal ? 1200 : 900);
+  const initialPx = parseSizeToPixels(sizeParts[0], isHorizontal ? 384 : 256, axis);
+  const minPx = parseSizeToPixels(sizeParts[1], isHorizontal ? 200 : 100, axis);
+  const maxPx = parseSizeToPixels(sizeParts[2], isHorizontal ? 1200 : 900, axis);
 
   const [currentSize, setCurrentSize] = useState(initialPx);
 
@@ -179,13 +200,13 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
             : "max-h-none",
         )}
         data-sheet-side={normalizedSide}
-        onInteractOutside={(e) => {
+        onInteractOutside={(e: Event) => {
           if (isResizingRef.current) e.preventDefault();
         }}
-        onPointerDownOutside={(e) => {
+        onPointerDownOutside={(e: Event) => {
           if (isResizingRef.current) e.preventDefault();
         }}
-        onOpenAutoFocus={(e) => {
+        onOpenAutoFocus={(e: Event) => {
           const container = e.currentTarget as HTMLElement | null;
           const target = container?.querySelector<HTMLElement>("[autofocus]");
           if (target) {
