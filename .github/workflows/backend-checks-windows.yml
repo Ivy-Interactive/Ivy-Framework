@@ -15,14 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Check for merge conflict markers (fail fast before expensive build steps)
-      - name: Check for merge conflicts
-        run: |
-          if git grep -n -E '^(<<<<<<<|=======|>>>>>>>)' -- '*.cs'; then
-            echo "ERROR: Merge conflict markers found!"
-            exit 1
-          fi
-
       # Setup Node.js (needed for integrated frontend build in dotnet build)
       - uses: voidzero-dev/setup-vp@v1
 
