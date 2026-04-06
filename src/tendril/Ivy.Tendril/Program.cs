@@ -87,7 +87,8 @@ server.Services.AddSingleton<PlanDatabaseSyncService>(sp =>
 server.Services.AddSingleton<ITelemetryService>(sp =>
 {
     var config = sp.GetRequiredService<IConfigService>();
-    return new TelemetryService(config.Settings.Telemetry);
+    var logger = sp.GetRequiredService<ILogger<TelemetryService>>();
+    return new TelemetryService(config.Settings.Telemetry, logger);
 });
 server.Services.AddSingleton<TelemetryService>(sp =>
     (TelemetryService)sp.GetRequiredService<ITelemetryService>());
@@ -136,7 +137,9 @@ server.UseWebApplication(app =>
     // Start database sync in background
     var syncService = app.Services.GetRequiredService<PlanDatabaseSyncService>();
     Task.Run(syncService.PerformInitialSync);
-    app.Services.GetRequiredService<TelemetryService>().TrackAppStarted();
+    var telemetryService = app.Services.GetRequiredService<TelemetryService>();
+    telemetryService.TrackAppStarted();
+    _ = Task.Run(async () => await telemetryService.FlushAsync());
     app.UseAssets(server.Args, app.Services.GetRequiredService<ILogger<Server>>(), "Assets", "tendril/assets");
 });
 server.AddAppsFromAssembly();
