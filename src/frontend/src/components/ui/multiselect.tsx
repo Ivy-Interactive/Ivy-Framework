@@ -46,38 +46,6 @@ const badgeVariant = cva("hover:bg-secondary", {
   },
 });
 
-/** Space below trigger, min of viewport and overflow-clipping ancestors (e.g. dialogs). */
-function getClippedSpaceBelow(element: HTMLElement): number {
-  const rect = element.getBoundingClientRect();
-  let space = window.innerHeight - rect.bottom;
-
-  let parent: HTMLElement | null = element.parentElement;
-  while (parent) {
-    const style = getComputedStyle(parent);
-    const oy = style.overflowY;
-    const ox = style.overflowX;
-    const o = style.overflow;
-    const clips =
-      oy === "auto" ||
-      oy === "scroll" ||
-      oy === "hidden" ||
-      oy === "overlay" ||
-      ox === "auto" ||
-      ox === "scroll" ||
-      ox === "hidden" ||
-      o === "auto" ||
-      o === "scroll" ||
-      o === "hidden";
-    if (clips) {
-      const pr = parent.getBoundingClientRect();
-      space = Math.min(space, pr.bottom - rect.bottom);
-    }
-    parent = parent.parentElement;
-  }
-
-  return Math.max(0, space);
-}
-
 export interface Option {
   label: string;
   value: string;
@@ -150,9 +118,16 @@ const MultipleSelector = React.forwardRef<
     const [visibleCount, setVisibleCount] = React.useState(maxVisibleBadges ?? 1);
 
     const updateOpenDirection = React.useCallback(() => {
-      if (!triggerWrapperRef.current) return;
-      const spaceBelow = getClippedSpaceBelow(triggerWrapperRef.current);
+      const trigger = triggerWrapperRef.current;
+      if (!trigger) return;
+
+      const triggerRect = trigger.getBoundingClientRect();
       const dropdownHeight = dropdownRef.current?.offsetHeight ?? 0;
+
+      const dialogBoundary = trigger.closest<HTMLElement>("[role='dialog']");
+      const boundaryBottom = dialogBoundary?.getBoundingClientRect().bottom ?? window.innerHeight;
+      const spaceBelow = Math.max(0, boundaryBottom - triggerRect.bottom);
+
       setOpenUpward(spaceBelow < dropdownHeight + 8);
     }, []);
 
