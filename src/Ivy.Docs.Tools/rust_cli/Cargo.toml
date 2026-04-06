@@ -14,5 +14,7 @@ regex = "1.12.3"
 roxmltree = "0.21.1"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_yaml_ng = "0.10"
+sha2 = "0.10"
+base64 = "0.22"
 walkdir = "2.5.0"
 

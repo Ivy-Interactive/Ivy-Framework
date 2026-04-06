@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 mod utils;
 mod link_converter;
 mod converter;
+mod llm_markdown;
 
 #[derive(Parser)]
 #[command(name = "ivy_docs_cli")]
@@ -134,7 +135,10 @@ fn main() {
                 
                 let mut ivy_output = folder.clone();
                 ivy_output.push(format!("{}.g.cs", name));
-                
+
+                let mut md_output = folder.clone();
+                md_output.push(format!("{}.md", name));
+
                 let mut namespace_suffix = relative_output_path.replace("/", ".").replace("\\", ".");
                 if namespace_suffix.starts_with("Generated.") {
                     namespace_suffix = namespace_suffix["Generated.".len()..].to_string();
@@ -156,6 +160,14 @@ fn main() {
                     order
                 ) {
                     println!("Error converting {}: {}", name, e);
+                }
+
+                if let Err(e) = llm_markdown::generate(
+                    absolute_input_path,
+                    &md_output,
+                    skip_if_not_changed,
+                ) {
+                    println!("Error generating LLM markdown for {}: {}", name, e);
                 }
             });
         }
