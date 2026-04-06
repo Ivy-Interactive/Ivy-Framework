@@ -6,7 +6,7 @@ import { X, Check } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useOptimisticValue } from "./shared/useOptimisticValue";
 import { cn } from "@/lib/utils";
-import { enumColorsToCssVar, convertToHex } from "./color-utils";
+import { enumColorsToCssVar, convertToHex, parseHexAlpha, combineHexAlpha } from "./color-utils";
 import {
   colorInputVariant,
   colorInputPickerVariant,
@@ -84,26 +84,6 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
     </div>
   );
 };
-
-export function parseHexAlpha(hex: string): { rgb: string; alpha: number } {
-  if (!hex || !hex.startsWith("#")) return { rgb: hex || "#000000", alpha: 255 };
-  const clean = hex.slice(1);
-  if (clean.length === 8) {
-    return {
-      rgb: "#" + clean.slice(0, 6),
-      alpha: parseInt(clean.slice(6, 8), 16),
-    };
-  }
-  return { rgb: hex.length === 7 ? hex : "#000000", alpha: 255 };
-}
-
-export function combineHexAlpha(rgb: string, alpha: number): string {
-  const base = rgb.startsWith("#") ? rgb : "#" + rgb;
-  const hex6 = base.length === 7 ? base : "#000000";
-  if (alpha >= 255) return hex6; // fully opaque → keep 6-char hex
-  const aa = Math.max(0, Math.min(255, alpha)).toString(16).padStart(2, "0");
-  return hex6 + aa;
-}
 
 interface AlphaSliderProps {
   color: string;

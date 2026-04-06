@@ -113,3 +113,23 @@ export function convertToHex(colorValue: string): string {
   }
   return colorValue;
 }
+
+export function parseHexAlpha(hex: string): { rgb: string; alpha: number } {
+  if (!hex || !hex.startsWith("#")) return { rgb: hex || "#000000", alpha: 255 };
+  const clean = hex.slice(1);
+  if (clean.length === 8) {
+    return {
+      rgb: "#" + clean.slice(0, 6),
+      alpha: parseInt(clean.slice(6, 8), 16),
+    };
+  }
+  return { rgb: hex.length === 7 ? hex : "#000000", alpha: 255 };
+}
+
+export function combineHexAlpha(rgb: string, alpha: number): string {
+  const base = rgb.startsWith("#") ? rgb : "#" + rgb;
+  const hex6 = base.length === 7 ? base : "#000000";
+  if (alpha >= 255) return hex6; // fully opaque → keep 6-char hex
+  const aa = Math.max(0, Math.min(255, alpha)).toString(16).padStart(2, "0");
+  return hex6 + aa;
+}
