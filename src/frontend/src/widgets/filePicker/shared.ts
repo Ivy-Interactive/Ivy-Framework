@@ -1,5 +1,3 @@
-import { validateFileWithToast } from "@/widgets/inputs/file-input-validation";
-
 /**
  * Get the full upload URL, accounting for the ivy-host meta tag.
  */
@@ -10,19 +8,6 @@ export function getFullUrl(path: string): string {
     return host + path;
   }
   return path;
-}
-
-/**
- * Validate a file against accept, maxFileSize, and minFileSize constraints.
- * Shows a toast on validation failure and returns false.
- */
-export function validateFile(
-  file: File,
-  accept?: string,
-  maxFileSize?: number,
-  minFileSize?: number,
-): boolean {
-  return validateFileWithToast({ file, accept, maxFileSize, minFileSize });
 }
 
 /**
