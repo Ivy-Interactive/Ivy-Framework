@@ -866,9 +866,9 @@ public class Server
                 }
             };
         }
-      
 
-      
+
+
         app.Lifetime.ApplicationStarted.Register(() =>
         {
             var url = app.Urls.FirstOrDefault() ?? "unknown";
