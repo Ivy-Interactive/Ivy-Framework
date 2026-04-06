@@ -247,6 +247,8 @@ const MonthDayCell: React.FC<MonthDayCellProps> = ({
   return (
     <div
       role="gridcell"
+      tabIndex={0}
+      aria-label={format(day, "EEEE, MMMM d, yyyy")}
       className={cn(
         "border-r border-border last:border-r-0 p-1 overflow-hidden cursor-pointer hover:bg-accent/30 transition-colors min-h-[4.5rem]",
         !inMonth && "bg-muted/30",
@@ -255,6 +257,13 @@ const MonthDayCell: React.FC<MonthDayCellProps> = ({
       onClick={() => {
         const dayStart = startOfDay(day);
         onSelectSlot(dayStart.toISOString(), endOfDay(day).toISOString());
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          const dayStart = startOfDay(day);
+          onSelectSlot(dayStart.toISOString(), endOfDay(day).toISOString());
+        }
       }}
       onDragOver={
         enableDragDrop
@@ -502,6 +511,9 @@ const TimeGridDayColumn: React.FC<TimeGridDayColumnProps> = ({
       {HOURS.map((hour) => (
         <div
           key={hour}
+          role="button"
+          tabIndex={0}
+          aria-label={`${format(day, "EEEE, MMMM d")} at ${format(new Date(2000, 0, 1, hour), "HH:mm")}`}
           className="absolute w-full border-t border-border/50 cursor-pointer hover:bg-accent/20"
           style={{
             top: hour * HOUR_HEIGHT,
@@ -513,6 +525,16 @@ const TimeGridDayColumn: React.FC<TimeGridDayColumnProps> = ({
             const slotEnd = new Date(day);
             slotEnd.setHours(hour + 1, 0, 0, 0);
             onSelectSlot(slotStart.toISOString(), slotEnd.toISOString());
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              const slotStart = new Date(day);
+              slotStart.setHours(hour, 0, 0, 0);
+              const slotEnd = new Date(day);
+              slotEnd.setHours(hour + 1, 0, 0, 0);
+              onSelectSlot(slotStart.toISOString(), slotEnd.toISOString());
+            }
           }}
           onDragOver={
             enableDragDrop

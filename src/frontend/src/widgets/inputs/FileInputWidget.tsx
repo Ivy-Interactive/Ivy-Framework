@@ -332,6 +332,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         )}
         onClick={handleClick}
         role="button"
+        aria-label="Browse for files"
         tabIndex={disabled ? -1 : 0}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {

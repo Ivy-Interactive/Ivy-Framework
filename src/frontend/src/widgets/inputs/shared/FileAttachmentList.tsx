@@ -6,16 +6,19 @@ import { Densities } from "@/types/density";
 import { FileItem, FileUploadStatus } from "./types";
 import { formatBytes } from "../file-input-validation";
 
-const compactContainerVariant = cva("flex flex-wrap", {
-  variants: {
-    density: {
-      Small: "gap-1 px-2 pb-1",
-      Medium: "gap-2 px-3 pb-2",
-      Large: "gap-2 px-3 pb-2",
+const compactContainerVariant = cva(
+  "flex flex-nowrap overflow-x-auto flex-1 min-w-0 slim-scrollbar",
+  {
+    variants: {
+      density: {
+        Small: "gap-1 py-1",
+        Medium: "gap-2 py-1.5",
+        Large: "gap-2 py-2",
+      },
     },
+    defaultVariants: { density: "Medium" },
   },
-  defaultVariants: { density: "Medium" },
-});
+);
 
 const compactItemVariant = cva(
   "flex items-center border border-muted-foreground/25 rounded-md bg-muted/30",
@@ -119,6 +122,7 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
             type="button"
             variant="ghost"
             size="icon"
+            aria-label="Cancel upload"
             className={`${cancelBtnSize} shrink-0`}
             onClick={(e) => {
               e.stopPropagation();
@@ -146,6 +150,7 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
           type="button"
           variant="ghost"
           size="icon"
+          aria-label="Cancel upload"
           className={compactCancelVariant({ density })}
           onClick={(e) => {
             e.stopPropagation();
@@ -222,6 +227,7 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
                   type="button"
                   variant="ghost"
                   size="icon"
+                  aria-label="Remove file"
                   className={`${cancelBtnSize} shrink-0`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -270,6 +276,7 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
                 type="button"
                 variant="ghost"
                 size="icon"
+                aria-label="Remove file"
                 className={compactCancelVariant({ density })}
                 onClick={(e) => {
                   e.stopPropagation();

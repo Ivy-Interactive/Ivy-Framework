@@ -225,9 +225,9 @@ public class TextInputAffixes : ViewBase
                | nullableState.ToTextInput().Prefix("https://").Suffix(".com").Placeholder("domain")
 
                | Text.Monospaced("Nullable + Invalid + ShortcutKey")
-               | nullableState.ToTextInput().Prefix("@").Invalid("Required field").ShortcutKey("Ctrl+U")
+               | nullableState.ToTextInput().Prefix("@").Invalid("Required field").ShortcutKey("Ctrl+P")
                | nullableState.ToTextInput().Suffix(Icons.Search).Invalid("Invalid input").ShortcutKey("Ctrl+F")
-               | nullableState.ToTextInput().Prefix(Icons.Mail).Suffix(".com").Invalid("Error").ShortcutKey("Ctrl+E");
+               | nullableState.ToTextInput().Prefix(Icons.Mail).Suffix(".com").Invalid("Error").ShortcutKey("Ctrl+B");
     }
 }
 

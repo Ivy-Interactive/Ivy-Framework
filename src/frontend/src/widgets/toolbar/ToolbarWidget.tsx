@@ -30,7 +30,12 @@ const ToolbarItemGroup: React.FC<ToolbarItemGroupProps> = ({
     if (item.variant === "Group" && item.children) {
       const groupKey = item.label || `group-${i}`;
       return (
-        <div key={groupKey} className="flex items-center gap-1" role="group">
+        <div
+          key={groupKey}
+          className="flex items-center gap-1"
+          role="group"
+          aria-label={item.label || "Toolbar group"}
+        >
           <ToolbarItemGroup
             items={item.children}
             onItemClick={onItemClick}
@@ -100,6 +105,7 @@ export const ToolbarWidget: React.FC<ToolbarWidgetProps> = ({
   return (
     <div
       role="toolbar"
+      aria-label="Toolbar"
       aria-disabled={disabled}
       className={cn(
         "flex items-center gap-2 p-2 bg-background border rounded-md",

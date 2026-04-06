@@ -179,10 +179,18 @@ const FooterCell: React.FC<{
             key={i}
             role="option"
             aria-selected={i === selectedIndex}
+            tabIndex={0}
             onMouseDown={(e) => {
               e.preventDefault();
               setSelectedIndex(i);
               setOpen(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setSelectedIndex(i);
+                setOpen(false);
+              }
             }}
             className={cn(
               "px-2 py-1 text-xs cursor-pointer whitespace-nowrap transition-colors",

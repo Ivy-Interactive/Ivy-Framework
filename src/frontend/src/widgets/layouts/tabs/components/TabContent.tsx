@@ -13,7 +13,7 @@ interface TabContentRendererProps {
   tabOrder: string[];
   isUserInitiatedChangeRef: React.MutableRefObject<boolean>;
   safeEvent: (
-    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+    name: "OnSelect" | "OnClose" | "OnCloseOthers" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
     args: unknown[],
   ) => void;
 }
@@ -52,6 +52,7 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
         {isActive && showRefresh && (
           <button
             type="button"
+            aria-label="Refresh tab"
             onClick={(e) => {
               e.stopPropagation();
               isUserInitiatedChangeRef.current = true;
@@ -65,6 +66,7 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
         {showClose && (
           <button
             type="button"
+            aria-label="Close tab"
             onClick={(e) => {
               e.stopPropagation();
               isUserInitiatedChangeRef.current = true;

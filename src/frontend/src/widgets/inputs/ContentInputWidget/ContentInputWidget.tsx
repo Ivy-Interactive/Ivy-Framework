@@ -233,6 +233,37 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
           invalid && "border-destructive",
         )}
       >
+        {(uploadUrl || fileList.length > 0) && (
+          <div className={cn("flex items-center", toolbarVariant({ density }))}>
+            {uploadUrl && (
+              <button
+                type="button"
+                tabIndex={-1}
+                disabled={disabled}
+                onClick={openFilePicker}
+                className={cn(
+                  paperclipButtonVariant({ density }),
+                  "shrink-0",
+                  disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+                )}
+                aria-label="Attach file"
+              >
+                <Paperclip className={paperclipIconVariant({ density })} />
+              </button>
+            )}
+            {fileList.length > 0 && (
+              <div className="flex-1 min-w-0 overflow-x-auto slim-scrollbar">
+                <FileAttachmentList
+                  files={fileList}
+                  onCancel={handleCancel}
+                  hasCancelHandler={hasCancelHandler}
+                  density={density}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="relative">
           <textarea
             ref={textareaRef}
@@ -262,36 +293,14 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
           )}
         </div>
 
-        {fileList.length > 0 && (
-          <FileAttachmentList
-            files={fileList}
-            onCancel={handleCancel}
-            hasCancelHandler={hasCancelHandler}
-            density={density}
-          />
+        {(isDragging || (shortcutKey && !isFocused)) && (
+          <div className={toolbarVariant({ density })}>
+            {isDragging && <span className={dropTextVariant({ density })}>Drop files here</span>}
+            {shortcutKey && !isFocused && (
+              <kbd className={shortcutBadgeVariant({ density })}>{shortcutDisplay}</kbd>
+            )}
+          </div>
         )}
-
-        <div className={toolbarVariant({ density })}>
-          {uploadUrl && (
-            <button
-              type="button"
-              tabIndex={-1}
-              disabled={disabled}
-              onClick={openFilePicker}
-              className={cn(
-                paperclipButtonVariant({ density }),
-                disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
-              )}
-              aria-label="Attach file"
-            >
-              <Paperclip className={paperclipIconVariant({ density })} />
-            </button>
-          )}
-          {isDragging && <span className={dropTextVariant({ density })}>Drop files here</span>}
-          {shortcutKey && !isFocused && (
-            <kbd className={shortcutBadgeVariant({ density })}>{shortcutDisplay}</kbd>
-          )}
-        </div>
 
         <input
           ref={fileInputRef}

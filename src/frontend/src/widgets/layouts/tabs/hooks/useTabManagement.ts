@@ -56,7 +56,13 @@ export function useTabManagement(
 
   const safeEvent = React.useCallback(
     (
-      name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+      name:
+        | "OnSelect"
+        | "OnClose"
+        | "OnCloseOthers"
+        | "OnRefresh"
+        | "OnReorder"
+        | "OnAddButtonClick",
       args: unknown[],
     ) => {
       if (Array.isArray(events) && events.includes(name)) {

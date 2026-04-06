@@ -61,6 +61,8 @@ public record TabsLayout : WidgetBase<TabsLayout>
 
     [Event] public EventHandler<Event<TabsLayout, int[]>>? OnReorder { get; set; }
 
+    [Event] public EventHandler<Event<TabsLayout, int>>? OnCloseOthers { get; set; }
+
     [Event] public EventHandler<Event<TabsLayout, int>>? OnAddButtonClick { get; set; }
 }
 

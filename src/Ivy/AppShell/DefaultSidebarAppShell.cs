@@ -342,6 +342,22 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
             selectedIndex.Set(@event.Value);
         }
 
+        void OnTabCloseOthers(Event<TabsLayout, int> @event)
+        {
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
+            var keptTab = tabs.Value[@event.Value];
+            tabs.Set([keptTab]);
+            selectedIndex.Set(0);
+
+            // Update browser URL to the kept tab's app
+            SetAppTitle(keptTab.AppId);
+            RedirectToAppIfNotError(new NavigateArgs(keptTab.AppId), tabId: keptTab.Id);
+        }
+
         void OnTabReorder(Event<TabsLayout, int[]> @event)
         {
             var newOrder = @event.Value;
@@ -381,7 +397,9 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
             {
                 body = new TabsLayout(OnTabSelect, OnTabClose, OnTabRefresh, OnTabReorder, selectedIndex.Value,
                     tabs.Value.ToArray().Select(e => e.ToTab()).ToArray()
-                ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0);
+                ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0)
+                    with
+                { OnCloseOthers = ((Action<Event<TabsLayout, int>>)OnTabCloseOthers).ToEventHandler() };
             }
         }
 

@@ -17,15 +17,35 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = "Au
     [],
   );
 
+  const colors = useMemo(() => {
+    if (typeof document === "undefined") return ["#00CC92", "#0D4A2F"];
+    const emerald = getComputedStyle(document.documentElement).getPropertyValue("--emerald").trim();
+    if (!emerald) return ["#00CC92", "#0D4A2F"];
+    const darken = (hex: string): string => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      const f = 0.4;
+      return `#${Math.round(r * f)
+        .toString(16)
+        .padStart(2, "0")}${Math.round(g * f)
+        .toString(16)
+        .padStart(2, "0")}${Math.round(b * f)
+        .toString(16)
+        .padStart(2, "0")}`;
+    };
+    return [emerald, darken(emerald)];
+  }, []);
+
   const confettiConfig = useMemo(
     () => ({
       particleCount: 75,
       spread: 70,
       ticks: 133,
       shapes: [quadrant],
-      colors: ["#00CC92", "#0D4A2F"],
+      colors,
     }),
-    [quadrant],
+    [quadrant, colors],
   );
 
   const triggerConfetti = useCallback(

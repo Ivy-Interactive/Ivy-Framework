@@ -4,7 +4,6 @@ import { uploadFile } from "@/widgets/filePicker/shared";
 
 interface UseDictationOptions {
   dictationUploadUrl?: string;
-  onTranscription?: (text: string) => void;
 }
 
 interface UseDictationResult {
@@ -22,10 +21,7 @@ const supportedMimeTypes = [
   "audio/wav",
 ];
 
-export function useDictation({
-  dictationUploadUrl,
-  onTranscription,
-}: UseDictationOptions): UseDictationResult {
+export function useDictation({ dictationUploadUrl }: UseDictationOptions): UseDictationResult {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -99,7 +95,7 @@ export function useDictation({
       logger.error("Error accessing microphone for dictation:", err);
       setIsRecording(false);
     }
-  }, [dictationUploadUrl, onTranscription]);
+  }, [dictationUploadUrl]);
 
   return { isRecording, startRecording, stopRecording };
 }

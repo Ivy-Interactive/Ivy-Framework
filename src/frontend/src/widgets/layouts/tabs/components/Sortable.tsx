@@ -94,6 +94,7 @@ export function SortableDropdownMenuItem({
       {showClose && (
         <button
           type="button"
+          aria-label="Close tab"
           className="ml-auto opacity-60 p-1 hover:opacity-100 invisible group-hover:visible cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();

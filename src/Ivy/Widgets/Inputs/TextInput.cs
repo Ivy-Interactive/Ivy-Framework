@@ -79,7 +79,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? DictationUploadUrl { get; set; }
 
-    [Prop] public string? DictationLanguage { get; set; }
+    public string? DictationLanguage { get; set; }
 
     [Prop] public string? DictationTranscription { get; set; }
 

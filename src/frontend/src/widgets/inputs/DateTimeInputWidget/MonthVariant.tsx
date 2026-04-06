@@ -136,6 +136,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
+                aria-label="Previous year"
                 onClick={() => setViewYear((y) => y - 1)}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -145,6 +146,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
+                aria-label="Next year"
                 onClick={() => setViewYear((y) => y + 1)}
               >
                 <ChevronRight className="h-4 w-4" />

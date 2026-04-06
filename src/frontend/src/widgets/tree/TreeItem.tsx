@@ -108,6 +108,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
               onKeyDown={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
               role="toolbar"
+              aria-label="Row actions"
             >
               {rowActions.map((action) => (
                 <ActionRenderer
@@ -166,6 +167,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
           onKeyDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
           role="toolbar"
+          aria-label="Row actions"
         >
           {rowActions.map((action) => (
             <ActionRenderer
