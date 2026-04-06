@@ -896,6 +896,13 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
         _planCountsCache.Invalidate();
     }
 
+    public void InvalidateCaches()
+    {
+        _planCountsCache.Invalidate();
+        _recommendationsCache.Invalidate();
+        _hourlyBurnCache.Invalidate();
+    }
+
     private static DateTime? ExtractCompletedTimestamp(string logFilePath)
         => FileHelper.ExtractCompletedTimestamp(logFilePath);
 

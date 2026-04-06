@@ -11,11 +11,7 @@ import { useFileAttachments } from "./useFileAttachments";
 import { FileAttachmentList } from "./FileAttachmentList";
 import { ContentInputWidgetProps } from "./types";
 import { EMPTY_ARRAY } from "@/lib/constants";
-import {
-  formatShortcutForDisplay,
-  parseShortcut,
-  keyToCode,
-} from "@/widgets/inputs/TextInputWidget/utils/shortcut";
+import { formatShortcutForDisplay, parseShortcut, keyToCode } from "@/lib/shortcut";
 
 export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
   id,

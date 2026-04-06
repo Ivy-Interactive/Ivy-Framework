@@ -34,10 +34,6 @@ export const parseShortcut = (shortcutStr?: string): ParsedShortcut | null => {
 };
 
 /**
- * Formats a shortcut string for display as React nodes.
- * Converts modifier keys to platform-appropriate symbols (e.g., ⌘ on Mac).
- */
-/**
  * Maps a key name to a KeyboardEvent.code value.
  * Uses event.code for matching so modifiers like Alt don't produce special characters on Mac.
  */
@@ -80,6 +76,10 @@ export const keyToCode = (key: string): string => {
   return specialKeys[k] ?? key;
 };
 
+/**
+ * Formats a shortcut string for display as React nodes.
+ * Converts modifier keys to platform-appropriate symbols (e.g., ⌘ on Mac).
+ */
 export const formatShortcutForDisplay = (shortcutStr?: string): React.ReactNode[] => {
   if (!shortcutStr) return [];
   const parts = shortcutStr.split("+").map((p) => p.trim());

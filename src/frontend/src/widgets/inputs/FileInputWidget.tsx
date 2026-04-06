@@ -13,7 +13,7 @@ import {
   uploadIconVariant,
   textVariant,
 } from "@/components/ui/input/file-input-variant";
-import { validateSingleFile, validateFileCount } from "./file-input-validation";
+import { validateFileWithToast, validateFileCount } from "./file-input-validation";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { FileItem } from "./shared/types";
 import { FileAttachmentList } from "./shared/FileAttachmentList";
@@ -66,34 +66,12 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const hasCancelHandler = Array.isArray(events) && events.includes("OnCancel");
   const hasBlurHandler = Array.isArray(events) && events.includes("OnBlur");
 
-  const validateFile = useCallback(
-    (file: File): boolean => {
-      const result = validateSingleFile({
-        file,
-        accept,
-        maxFileSize,
-        minFileSize,
-      });
-
-      if (!result.valid) {
-        toast({
-          title: result.title || "Validation Error",
-          description: result.error,
-          variant: "destructive",
-        });
-        return false;
-      }
-      return true;
-    },
-    [accept, maxFileSize, minFileSize],
-  );
-
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {
       if (!uploadUrl) return;
 
       // Validate file before upload - show toast on error
-      if (!validateFile(file)) {
+      if (!validateFileWithToast({ file, accept, maxFileSize, minFileSize })) {
         return;
       }
 
@@ -124,7 +102,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         console.error("File upload error:", error);
       }
     },
-    [uploadUrl, validateFile],
+    [uploadUrl, accept, maxFileSize, minFileSize],
   );
 
   const handleBlur = useCallback(() => {

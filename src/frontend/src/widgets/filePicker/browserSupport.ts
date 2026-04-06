@@ -6,7 +6,7 @@ export const hasSaveFilePicker = typeof window !== "undefined" && "showSaveFileP
 export const hasDirectoryPicker = typeof window !== "undefined" && "showDirectoryPicker" in window;
 
 export type PickDirectoryResult =
-  | { kind: "selected"; name: string }
+  | { kind: "selected"; name: string; path?: string }
   | { kind: "cancelled" }
   | { kind: "error"; error: unknown };
 
@@ -24,4 +24,19 @@ export async function pickDirectory(): Promise<PickDirectoryResult> {
     }
     return { kind: "error", error: err };
   }
+}
+
+export async function pickDirectoryFullPath(): Promise<PickDirectoryResult> {
+  if (typeof window !== "undefined" && (window as any).__ivy_desktop?.showDirectoryPicker) {
+    try {
+      const result = await (window as any).__ivy_desktop.showDirectoryPicker();
+      if (result) {
+        return { kind: "selected", name: result.name, path: result.path };
+      }
+      return { kind: "cancelled" };
+    } catch (err) {
+      return { kind: "error", error: err };
+    }
+  }
+  return pickDirectory();
 }

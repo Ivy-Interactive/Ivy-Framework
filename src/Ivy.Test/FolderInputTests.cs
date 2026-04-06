@@ -99,4 +99,26 @@ public class FolderInputTests
 
         Assert.Null(result.Invalid);
     }
+
+    [Fact]
+    public void FolderInput_DefaultMode_IsName()
+    {
+        var input = new FolderInput();
+        Assert.Equal(FolderInputMode.Name, input.Mode);
+    }
+
+    [Fact]
+    public void FolderInputExtensions_Mode_SetsMode()
+    {
+        var input = new FolderInput().Mode(FolderInputMode.FullPath);
+        Assert.Equal(FolderInputMode.FullPath, input.Mode);
+    }
+
+    [Fact]
+    public void FolderInput_ToFolderInput_WithMode_SetsMode()
+    {
+        var state = new MockState<string?>(null);
+        var input = state.ToFolderInput(mode: FolderInputMode.FullPath);
+        Assert.Equal(FolderInputMode.FullPath, input.Mode);
+    }
 }

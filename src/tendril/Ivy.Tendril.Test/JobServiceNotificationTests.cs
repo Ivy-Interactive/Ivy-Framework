@@ -6,6 +6,8 @@ public class JobServiceNotificationTests
 {
     private static JobService CreateService()
     {
+        // Clear sync context so notifications fire synchronously during tests
+        SynchronizationContext.SetSynchronizationContext(null);
         return new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
     }
 
@@ -13,7 +15,7 @@ public class JobServiceNotificationTests
     public void CompleteJob_Success_NotificationTitleIncludesJobType()
     {
         var service = CreateService();
-        var id = service.StartJob("MakePr", Path.GetTempPath());
+        var id = service.CreateTestJob("MakePr", Path.GetTempPath());
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
@@ -28,7 +30,7 @@ public class JobServiceNotificationTests
     public void CompleteJob_Failure_NotificationTitleIncludesJobType()
     {
         var service = CreateService();
-        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
@@ -43,7 +45,7 @@ public class JobServiceNotificationTests
     public void CompleteJob_Timeout_NotificationTitleIncludesJobType()
     {
         var service = CreateService();
-        var id = service.StartJob("ExpandPlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExpandPlan", Path.GetTempPath());
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;

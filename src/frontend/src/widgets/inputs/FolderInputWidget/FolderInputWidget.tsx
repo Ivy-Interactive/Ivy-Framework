@@ -1,7 +1,11 @@
 import React, { useCallback, useRef } from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { InvalidIcon } from "@/components/InvalidIcon";
-import { hasDirectoryPicker, pickDirectory } from "@/widgets/filePicker/browserSupport";
+import {
+  hasDirectoryPicker,
+  pickDirectory,
+  pickDirectoryFullPath,
+} from "@/widgets/filePicker/browserSupport";
 import { inputVariant } from "@/components/ui/input/variant";
 import { inputStyles } from "@/lib/styles";
 import { cn } from "@/lib/utils";
@@ -17,6 +21,7 @@ interface FolderInputWidgetProps {
   placeholder?: string;
   nullable?: boolean;
   autoFocus?: boolean;
+  mode?: "Name" | "FullPath";
   events?: string[];
   density?: Densities;
 }
@@ -29,6 +34,7 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
   placeholder = "Select a folder...",
   nullable = true,
   autoFocus = false,
+  mode = "Name",
   events = EMPTY_ARRAY,
   density,
 }) => {
@@ -49,11 +55,11 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
   );
 
   const openModernPicker = useCallback(async () => {
-    const result = await pickDirectory();
+    const result = mode === "FullPath" ? await pickDirectoryFullPath() : await pickDirectory();
     if (result.kind === "selected") {
-      emitChange(result.name);
+      emitChange(mode === "FullPath" && result.path ? result.path : result.name);
     }
-  }, [emitChange]);
+  }, [emitChange, mode]);
 
   const handleFallbackChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,6 +103,14 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
           disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
         )}
         onClick={handleBrowse}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleBrowse();
+          }
+        }}
+        role="button"
+        aria-label="Browse for folder"
         onBlur={() => {
           if (hasOnBlur) handleEvent("OnBlur", id, []);
         }}
