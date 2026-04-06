@@ -99,7 +99,7 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
                     FileHelper.WriteAllText(planYamlPath, repaired);
             }
         }
-        catch { }
+        catch { /* Best-effort repair on startup; individual plan errors are non-fatal */ }
     }
 
     /// <summary>
@@ -501,16 +501,12 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
     public decimal GetPlanTotalCost(string folderPath)
     {
         var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
-        if (dict.TryGetValue(folderPath, out var cached))
+        if (!dict.TryGetValue(folderPath, out var cached))
         {
-            return cached.Cost;
+            cached = ComputePlanCostAndTokens(folderPath);
+            dict[folderPath] = cached;
         }
-
-        var cost = ComputePlanCost(folderPath);
-        var tokens = ComputePlanTokens(folderPath);
-        dict[folderPath] = (cost, tokens);
-
-        return cost;
+        return cached.Cost;
     }
 
     /// <summary>
@@ -522,56 +518,42 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
     public int GetPlanTotalTokens(string folderPath)
     {
         var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
-        if (dict.TryGetValue(folderPath, out var cached))
+        if (!dict.TryGetValue(folderPath, out var cached))
         {
-            return cached.Tokens;
+            cached = ComputePlanCostAndTokens(folderPath);
+            dict[folderPath] = cached;
         }
-
-        var cost = ComputePlanCost(folderPath);
-        var tokens = ComputePlanTokens(folderPath);
-        dict[folderPath] = (cost, tokens);
-
-        return tokens;
+        return cached.Tokens;
     }
 
-    private static decimal ComputePlanCost(string folderPath)
+    /// <summary>
+    /// Parses costs.csv once to compute both total cost and total tokens.
+    /// CSV format: Promptware,Tokens,Cost (fields must not contain commas).
+    /// </summary>
+    private static (decimal Cost, int Tokens) ComputePlanCostAndTokens(string folderPath)
     {
         var costsPath = Path.Combine(folderPath, "costs.csv");
-        if (!File.Exists(costsPath)) return 0m;
+        if (!File.Exists(costsPath)) return (0m, 0);
 
         var lines = FileHelper.ReadAllLines(costsPath);
-        decimal total = 0m;
+        decimal totalCost = 0m;
+        int totalTokens = 0;
         foreach (var line in lines.Skip(1)) // skip header
         {
             var parts = line.Split(',');
-            if (parts.Length >= 3 && decimal.TryParse(parts[2],
-                System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out var cost))
+            if (parts.Length >= 3)
             {
-                total += cost;
+                if (int.TryParse(parts[1],
+                    System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var tokens))
+                    totalTokens += tokens;
+                if (decimal.TryParse(parts[2],
+                    System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var cost))
+                    totalCost += cost;
             }
         }
-        return total;
-    }
-
-    private static int ComputePlanTokens(string folderPath)
-    {
-        var costsPath = Path.Combine(folderPath, "costs.csv");
-        if (!File.Exists(costsPath)) return 0;
-
-        var lines = FileHelper.ReadAllLines(costsPath);
-        int total = 0;
-        foreach (var line in lines.Skip(1))
-        {
-            var parts = line.Split(',');
-            if (parts.Length >= 2 && int.TryParse(parts[1],
-                System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out var tokens))
-            {
-                total += tokens;
-            }
-        }
-        return total;
+        return (totalCost, totalTokens);
     }
 
     /// <summary>
@@ -900,23 +882,7 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
     }
 
     private static DateTime? ExtractCompletedTimestamp(string logFilePath)
-    {
-        try
-        {
-            foreach (var line in File.ReadLines(logFilePath))
-            {
-                var match = Regex.Match(line, @"\*\*Completed:\*\*\s*(.+)");
-                if (match.Success && DateTime.TryParse(match.Groups[1].Value.Trim(),
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.AdjustToUniversal, out var dt))
-                {
-                    return dt;
-                }
-            }
-        }
-        catch { }
-        return null;
-    }
+        => FileHelper.ExtractCompletedTimestamp(logFilePath);
 
     private static int GetNextRevisionNumber(string revisionsDir)
     {

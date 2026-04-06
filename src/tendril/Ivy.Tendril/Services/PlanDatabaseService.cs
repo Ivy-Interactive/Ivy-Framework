@@ -133,7 +133,7 @@ public class PlanDatabaseService : IPlanDatabaseService
     {
         var sql = """
             SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
-                   YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
+                   YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated
             FROM Plans
             """;
 
@@ -148,13 +148,47 @@ public class PlanDatabaseService : IPlanDatabaseService
         if (statusFilter.HasValue)
             cmd.Parameters.AddWithValue("@state", statusFilter.Value.ToString());
 
+        // Collect plan rows first
+        var planRows = new List<(int Id, SqliteDataReader Reader)>();
+        var planIds = new List<int>();
         var plans = new List<PlanFile>();
+
         using var reader = cmd.ExecuteReader();
+        var rawPlans = new List<(int Id, string Title, string Project, string Level, string State,
+            string FolderPath, string FolderName, string YamlRaw, int RevisionCount,
+            string LatestContent, string Created, string Updated)>();
 
         while (reader.Read())
         {
             var planId = reader.GetInt32(0);
-            var plan = BuildPlanFile(planId, reader);
+            planIds.Add(planId);
+            rawPlans.Add((planId, reader.GetString(1), reader.GetString(2), reader.GetString(3),
+                reader.GetString(4), reader.GetString(5), reader.GetString(6), reader.GetString(7),
+                reader.GetInt32(8), reader.GetString(9), reader.GetString(10), reader.GetString(11)));
+        }
+
+        if (rawPlans.Count == 0)
+            return plans;
+
+        // Batch-fetch all child table data
+        var allRepos = BatchGetList(planIds, "Repos", "RepoPath");
+        var allCommits = BatchGetList(planIds, "Commits", "CommitHash");
+        var allPrs = BatchGetList(planIds, "PullRequests", "PrUrl");
+        var allVerifications = BatchGetVerifications(planIds);
+        var allRelatedPlans = BatchGetList(planIds, "RelatedPlans", "RelatedPlanPath");
+        var allDependsOn = BatchGetList(planIds, "DependsOn", "DependsOnPlanPath");
+
+        foreach (var row in rawPlans)
+        {
+            var plan = BuildPlanFileFromRow(row.Id, row.Title, row.Project, row.Level, row.State,
+                row.FolderPath, row.FolderName, row.YamlRaw, row.RevisionCount, row.LatestContent,
+                row.Created, row.Updated,
+                allRepos.GetValueOrDefault(row.Id, []),
+                allCommits.GetValueOrDefault(row.Id, []),
+                allPrs.GetValueOrDefault(row.Id, []),
+                allVerifications.GetValueOrDefault(row.Id, []),
+                allRelatedPlans.GetValueOrDefault(row.Id, []),
+                allDependsOn.GetValueOrDefault(row.Id, []));
             if (plan != null)
                 plans.Add(plan);
         }
@@ -167,7 +201,7 @@ public class PlanDatabaseService : IPlanDatabaseService
         using var cmd = _connection.CreateCommand();
         cmd.CommandText = """
             SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
-                   YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
+                   YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated
             FROM Plans WHERE FolderPath = @folderPath
             """;
         cmd.Parameters.AddWithValue("@folderPath", folderPath);
@@ -184,7 +218,7 @@ public class PlanDatabaseService : IPlanDatabaseService
         using var cmd = _connection.CreateCommand();
         cmd.CommandText = """
             SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
-                   YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
+                   YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated
             FROM Plans WHERE Id = @id
             """;
         cmd.Parameters.AddWithValue("@id", planId);
@@ -196,44 +230,40 @@ public class PlanDatabaseService : IPlanDatabaseService
         return null;
     }
 
+    /// <summary>
+    /// Builds a PlanFile for a single plan query. Fetches child tables individually.
+    /// For bulk queries, use BuildPlanFileFromRow with pre-fetched child data instead.
+    /// </summary>
     private PlanFile? BuildPlanFile(int planId, SqliteDataReader reader)
     {
-        if (!Enum.TryParse<PlanStatus>(reader.GetString(4), ignoreCase: true, out var status))
+        return BuildPlanFileFromRow(planId,
+            reader.GetString(1), reader.GetString(2), reader.GetString(3), reader.GetString(4),
+            reader.GetString(5), reader.GetString(6), reader.GetString(7), reader.GetInt32(8),
+            reader.GetString(9), reader.GetString(10), reader.GetString(11),
+            GetListForPlan(planId, "Repos", "RepoPath"),
+            GetListForPlan(planId, "Commits", "CommitHash"),
+            GetListForPlan(planId, "PullRequests", "PrUrl"),
+            GetVerificationsForPlan(planId),
+            GetListForPlan(planId, "RelatedPlans", "RelatedPlanPath"),
+            GetListForPlan(planId, "DependsOn", "DependsOnPlanPath"));
+    }
+
+    private static PlanFile? BuildPlanFileFromRow(int planId, string title, string project, string level,
+        string state, string folderPath, string folderName, string yamlRaw, int revisionCount,
+        string latestContent, string createdStr, string updatedStr,
+        List<string> repos, List<string> commits, List<string> prs,
+        List<PlanVerificationEntry> verifications, List<string> relatedPlans, List<string> dependsOn)
+    {
+        if (!Enum.TryParse<PlanStatus>(state, ignoreCase: true, out var status))
             status = PlanStatus.Draft;
 
-        var repos = GetListForPlan(planId, "Repos", "RepoPath");
-        var commits = GetListForPlan(planId, "Commits", "CommitHash");
-        var prs = GetListForPlan(planId, "PullRequests", "PrUrl");
-        var verifications = GetVerificationsForPlan(planId);
-        var relatedPlans = GetListForPlan(planId, "RelatedPlans", "RelatedPlanPath");
-        var dependsOn = GetListForPlan(planId, "DependsOn", "DependsOnPlanPath");
+        var created = DateTime.Parse(createdStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+        var updated = DateTime.Parse(updatedStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
 
-        var created = DateTime.Parse(reader.GetString(10), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
-        var updated = DateTime.Parse(reader.GetString(11), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+        var metadata = new PlanMetadata(planId, project, level, title, status,
+            repos, commits, prs, verifications, relatedPlans, dependsOn, created, updated);
 
-        var metadata = new PlanMetadata(
-            planId,
-            reader.GetString(2),  // Project
-            reader.GetString(3),  // Level
-            reader.GetString(1),  // Title
-            status,
-            repos,
-            commits,
-            prs,
-            verifications,
-            relatedPlans,
-            dependsOn,
-            created,
-            updated
-        );
-
-        return new PlanFile(
-            metadata,
-            reader.GetString(9),  // LatestRevisionContent
-            reader.GetString(5),  // FolderPath
-            reader.GetString(7),  // YamlRaw
-            reader.GetInt32(8)    // RevisionCount
-        );
+        return new PlanFile(metadata, latestContent, folderPath, yamlRaw, revisionCount);
     }
 
     private List<string> GetListForPlan(int planId, string table, string column)
@@ -260,6 +290,54 @@ public class PlanDatabaseService : IPlanDatabaseService
         while (reader.Read())
             list.Add(new PlanVerificationEntry { Name = reader.GetString(0), Status = reader.GetString(1) });
         return list;
+    }
+
+    /// <summary>Batch-fetches a string child table for multiple plan IDs in one query.</summary>
+    private Dictionary<int, List<string>> BatchGetList(List<int> planIds, string table, string column)
+    {
+        var result = new Dictionary<int, List<string>>();
+        if (planIds.Count == 0) return result;
+
+        using var cmd = _connection.CreateCommand();
+        var idList = string.Join(",", planIds);
+        cmd.CommandText = $"SELECT PlanId, {column} FROM {table} WHERE PlanId IN ({idList})";
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var planId = reader.GetInt32(0);
+            if (!result.TryGetValue(planId, out var list))
+            {
+                list = new List<string>();
+                result[planId] = list;
+            }
+            list.Add(reader.GetString(1));
+        }
+        return result;
+    }
+
+    /// <summary>Batch-fetches verifications for multiple plan IDs in one query.</summary>
+    private Dictionary<int, List<PlanVerificationEntry>> BatchGetVerifications(List<int> planIds)
+    {
+        var result = new Dictionary<int, List<PlanVerificationEntry>>();
+        if (planIds.Count == 0) return result;
+
+        using var cmd = _connection.CreateCommand();
+        var idList = string.Join(",", planIds);
+        cmd.CommandText = $"SELECT PlanId, Name, Status FROM Verifications WHERE PlanId IN ({idList})";
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var planId = reader.GetInt32(0);
+            if (!result.TryGetValue(planId, out var list))
+            {
+                list = new List<PlanVerificationEntry>();
+                result[planId] = list;
+            }
+            list.Add(new PlanVerificationEntry { Name = reader.GetString(1), Status = reader.GetString(2) });
+        }
+        return result;
     }
 
     public PlanReaderService.PlanCountSnapshot ComputePlanCounts()
@@ -394,7 +472,7 @@ public class PlanDatabaseService : IPlanDatabaseService
         using var cmd = _connection.CreateCommand();
         cmd.CommandText = """
             SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
-                   YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
+                   YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated
             FROM Plans
             WHERE Title LIKE @search OR LatestRevisionContent LIKE @search
                   OR CAST(Id AS TEXT) LIKE @search OR Project LIKE @search
@@ -402,11 +480,43 @@ public class PlanDatabaseService : IPlanDatabaseService
             """;
         cmd.Parameters.AddWithValue("@search", search);
 
-        var plans = new List<PlanFile>();
+        var planIds = new List<int>();
+        var rawPlans = new List<(int Id, string Title, string Project, string Level, string State,
+            string FolderPath, string FolderName, string YamlRaw, int RevisionCount,
+            string LatestContent, string Created, string Updated)>();
+
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            var plan = BuildPlanFile(reader.GetInt32(0), reader);
+            var planId = reader.GetInt32(0);
+            planIds.Add(planId);
+            rawPlans.Add((planId, reader.GetString(1), reader.GetString(2), reader.GetString(3),
+                reader.GetString(4), reader.GetString(5), reader.GetString(6), reader.GetString(7),
+                reader.GetInt32(8), reader.GetString(9), reader.GetString(10), reader.GetString(11)));
+        }
+
+        if (rawPlans.Count == 0)
+            return [];
+
+        var allRepos = BatchGetList(planIds, "Repos", "RepoPath");
+        var allCommits = BatchGetList(planIds, "Commits", "CommitHash");
+        var allPrs = BatchGetList(planIds, "PullRequests", "PrUrl");
+        var allVerifications = BatchGetVerifications(planIds);
+        var allRelatedPlans = BatchGetList(planIds, "RelatedPlans", "RelatedPlanPath");
+        var allDependsOn = BatchGetList(planIds, "DependsOn", "DependsOnPlanPath");
+
+        var plans = new List<PlanFile>();
+        foreach (var row in rawPlans)
+        {
+            var plan = BuildPlanFileFromRow(row.Id, row.Title, row.Project, row.Level, row.State,
+                row.FolderPath, row.FolderName, row.YamlRaw, row.RevisionCount, row.LatestContent,
+                row.Created, row.Updated,
+                allRepos.GetValueOrDefault(row.Id, []),
+                allCommits.GetValueOrDefault(row.Id, []),
+                allPrs.GetValueOrDefault(row.Id, []),
+                allVerifications.GetValueOrDefault(row.Id, []),
+                allRelatedPlans.GetValueOrDefault(row.Id, []),
+                allDependsOn.GetValueOrDefault(row.Id, []));
             if (plan != null)
                 plans.Add(plan);
         }
@@ -434,9 +544,9 @@ public class PlanDatabaseService : IPlanDatabaseService
         using var cmd = _connection.CreateCommand();
         cmd.CommandText = """
             INSERT INTO Plans (Id, Title, Project, Level, State, FolderPath, FolderName,
-                               YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt)
+                               YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated)
             VALUES (@id, @title, @project, @level, @state, @folderPath, @folderName,
-                    @yamlRaw, @revisionCount, @latestContent, @created, @updated, @initialPrompt)
+                    @yamlRaw, @revisionCount, @latestContent, @created, @updated)
             ON CONFLICT(Id) DO UPDATE SET
                 Title = excluded.Title,
                 Project = excluded.Project,
@@ -448,8 +558,7 @@ public class PlanDatabaseService : IPlanDatabaseService
                 RevisionCount = excluded.RevisionCount,
                 LatestRevisionContent = excluded.LatestRevisionContent,
                 Created = excluded.Created,
-                Updated = excluded.Updated,
-                InitialPrompt = excluded.InitialPrompt
+                Updated = excluded.Updated
             """;
 
         cmd.Parameters.AddWithValue("@id", plan.Id);
@@ -464,7 +573,6 @@ public class PlanDatabaseService : IPlanDatabaseService
         cmd.Parameters.AddWithValue("@latestContent", plan.LatestRevisionContent);
         cmd.Parameters.AddWithValue("@created", plan.Created.ToString("O", CultureInfo.InvariantCulture));
         cmd.Parameters.AddWithValue("@updated", plan.Updated.ToString("O", CultureInfo.InvariantCulture));
-        cmd.Parameters.AddWithValue("@initialPrompt", (object?)null ?? DBNull.Value);
 
         cmd.ExecuteNonQuery();
 

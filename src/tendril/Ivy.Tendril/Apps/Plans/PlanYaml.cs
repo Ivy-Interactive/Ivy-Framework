@@ -15,7 +15,6 @@ public class PlanYaml
     public List<string> Repos { get; set; } = new();
     public DateTime Created { get; set; } = DateTime.UtcNow;
     public DateTime Updated { get; set; } = DateTime.UtcNow;
-    public string InitialPrompt { get; set; } = "";
     public List<string> Prs { get; set; } = new();
     public List<string> Commits { get; set; } = new();
     public List<PlanVerificationEntry> Verifications { get; set; } = new();

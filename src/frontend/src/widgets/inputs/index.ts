@@ -15,3 +15,4 @@ export { SignatureInputWidget } from "./SignatureInputWidget";
 export { FieldWidget } from "./FieldWidget";
 export { ContentInputWidget } from "./ContentInputWidget";
 export { CodeInputWidget } from "./code";
+export { FolderInputWidget } from "./FolderInputWidget";
