@@ -6,6 +6,7 @@ global using Microsoft.Extensions.DependencyInjection;
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using Ivy;
+global using Ivy.Docs.Helpers;
 global using Ivy.Docs.Shared.Helpers;
 
 namespace Ivy.Docs.Shared;

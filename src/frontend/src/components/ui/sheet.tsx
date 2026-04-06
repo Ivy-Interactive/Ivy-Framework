@@ -46,8 +46,10 @@ const sheetVariant = cva("fixed z-50 gap-4 bg-background p-6 shadow-lg outline-n
 
 interface SheetContentProps
   extends
-    React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariant> {}
+    Omit<React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>, "children">,
+    VariantProps<typeof sheetVariant> {
+  children?: React.ReactNode;
+}
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,

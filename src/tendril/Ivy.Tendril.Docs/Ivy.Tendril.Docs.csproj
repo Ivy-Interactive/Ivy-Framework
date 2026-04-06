@@ -1,36 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../../Ivy/Directory.Build.props" Condition="Exists('../../../Ivy/Directory.Build.props')" />
-  
+
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Ivy.Docs.Shared</RootNamespace>
+    <RootNamespace>Ivy.Tendril.Docs</RootNamespace>
     <NoWarn>CS1591;CS8618;CS8603;CS8602;CS8604;CS8669;CS9113;NETSDK1187</NoWarn>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(IvyPackageVersion)' != ''">
-    <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
-    <ProjectReference Include="../Ivy/Ivy.csproj" />
-  </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="../Ivy.Docs.Helpers/Ivy.Docs.Helpers.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5" />
+    <ProjectReference Include="../../Ivy/Ivy.csproj" />
+    <ProjectReference Include="../../Ivy.Docs.Helpers/Ivy.Docs.Helpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Assets/**/*" />
     <EmbeddedResource Include="Generated/**/*.md" />
-    <EmbeddedResource Include="../../AGENTS.md" Link="Assets/AGENTS.md" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,15 +26,12 @@
     <Compile Include="**/*.cs" Exclude="obj/**/*.cs;bin/**/*.cs;Generated/**/*.cs" />
   </ItemGroup>
 
-
-
   <Target Name="TransformMarkdown" AfterTargets="ResolveProjectReferences" BeforeTargets="CoreCompile">
     <PropertyGroup>
-      <DocsToolPath>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine($(MSBuildProjectDirectory), '..', 'Ivy.Docs.Tools', 'bin', $(Configuration), $(TargetFramework), 'Ivy.Docs.Tools.dll'))'))</DocsToolPath>
       <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs', '*.md'))</DocsInputPath>
       <DocsOutputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Generated'))</DocsOutputPath>
     </PropertyGroup>
-    <Exec Command="cargo run --release --manifest-path &quot;../Ivy.Docs.Tools/rust_cli/Cargo.toml&quot; -- convert &quot;$(DocsInputPath)&quot; &quot;$(DocsOutputPath)&quot; --skip-if-not-changed" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Exec Command="cargo run --release --manifest-path &quot;../../Ivy.Docs.Tools/rust_cli/Cargo.toml&quot; -- convert &quot;$(DocsInputPath)&quot; &quot;$(DocsOutputPath)&quot; --skip-if-not-changed" WorkingDirectory="$(MSBuildProjectDirectory)" />
     <ItemGroup>
       <Compile Include="Generated/**/*.g.cs" />
       <EmbeddedResource Remove="Generated/**/*.md" />
@@ -59,16 +44,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Ivy.Docs.Test" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Generated/" />
   </ItemGroup>
 
-  <!-- enable ivy analyzer for docs -->
+  <!-- enable ivy analyzer -->
   <ItemGroup>
-    <ProjectReference Include="../Ivy.Analyser/Ivy.Analyser.csproj">
+    <ProjectReference Include="../../Ivy.Analyser/Ivy.Analyser.csproj">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

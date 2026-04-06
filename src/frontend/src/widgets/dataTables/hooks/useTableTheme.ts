@@ -52,6 +52,7 @@ export const useTableTheme = ({
         (showVerticalBorders ?? false)
           ? colors.border || (isDark ? "#404045" : "#d1d5db")
           : "transparent",
+      bgSearchResult: isDark ? "#3f3520" : "#fff9e3",
       cellHorizontalPadding: 8,
       cellVerticalPadding: 8,
       headerIconSize: 20,

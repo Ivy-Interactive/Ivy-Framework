@@ -40,6 +40,7 @@
   </Folder>
   <Project Path="Ivy.Benchmarks.Docs/Ivy.Benchmarks.Docs.csproj" />
   <Project Path="Ivy.Desktop/Ivy.Desktop.csproj" />
+  <Project Path="Ivy.Docs.Helpers/Ivy.Docs.Helpers.csproj" />
   <Project Path="Ivy.Docs.Shared/Ivy.Docs.Shared.csproj" />
   <Project Path="Ivy.Docs.Test/Ivy.Docs.Test.csproj" />
   <Project Path="Ivy.Docs/Ivy.Docs.csproj" />
