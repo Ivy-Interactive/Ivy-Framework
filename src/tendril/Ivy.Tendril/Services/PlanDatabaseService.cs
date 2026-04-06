@@ -646,21 +646,28 @@ public class PlanDatabaseService : IPlanDatabaseService
         deleteCmd.Parameters.AddWithValue("@planId", planId);
         deleteCmd.ExecuteNonQuery();
 
+        if (costs.Count == 0) return;
+
+        using var insertCmd = _connection.CreateCommand();
+        insertCmd.CommandText = """
+            INSERT INTO Costs (PlanId, Promptware, Tokens, Cost, LogTimestamp)
+            VALUES (@planId, @promptware, @tokens, @cost, @logTimestamp)
+            """;
+        insertCmd.Parameters.AddWithValue("@planId", planId);
+        insertCmd.Parameters.AddWithValue("@promptware", string.Empty);
+        insertCmd.Parameters.AddWithValue("@tokens", 0);
+        insertCmd.Parameters.AddWithValue("@cost", 0.0);
+        insertCmd.Parameters.AddWithValue("@logTimestamp", DBNull.Value);
+
         foreach (var cost in costs)
         {
-            using var insertCmd = _connection.CreateCommand();
-            insertCmd.CommandText = """
-                INSERT INTO Costs (PlanId, Promptware, Tokens, Cost, LogTimestamp)
-                VALUES (@planId, @promptware, @tokens, @cost, @logTimestamp)
-                """;
-            insertCmd.Parameters.AddWithValue("@planId", planId);
-            insertCmd.Parameters.AddWithValue("@promptware", cost.Promptware);
-            insertCmd.Parameters.AddWithValue("@tokens", cost.Tokens);
-            insertCmd.Parameters.AddWithValue("@cost", (double)cost.Cost);
-            insertCmd.Parameters.AddWithValue("@logTimestamp",
-                cost.LogTimestamp.HasValue
-                    ? cost.LogTimestamp.Value.ToString("O", CultureInfo.InvariantCulture)
-                    : DBNull.Value);
+            insertCmd.Parameters["@planId"].Value = planId;
+            insertCmd.Parameters["@promptware"].Value = cost.Promptware;
+            insertCmd.Parameters["@tokens"].Value = cost.Tokens;
+            insertCmd.Parameters["@cost"].Value = (double)cost.Cost;
+            insertCmd.Parameters["@logTimestamp"].Value = cost.LogTimestamp.HasValue
+                ? cost.LogTimestamp.Value.ToString("O", CultureInfo.InvariantCulture)
+                : DBNull.Value;
             insertCmd.ExecuteNonQuery();
         }
     }
@@ -673,25 +680,38 @@ public class PlanDatabaseService : IPlanDatabaseService
         deleteCmd.Parameters.AddWithValue("@planId", planId);
         deleteCmd.ExecuteNonQuery();
 
+        if (recommendations.Count == 0) return;
+
+        using var insertCmd = _connection.CreateCommand();
+        insertCmd.CommandText = """
+            INSERT INTO Recommendations (PlanId, Title, Description, State, DeclineReason,
+                                         PlanTitle, PlanFolderName, Project, Date, SourcePlanStatus)
+            VALUES (@planId, @title, @description, @state, @declineReason,
+                    @planTitle, @planFolderName, @project, @date, @sourcePlanStatus)
+            """;
+        insertCmd.Parameters.AddWithValue("@planId", planId);
+        insertCmd.Parameters.AddWithValue("@title", string.Empty);
+        insertCmd.Parameters.AddWithValue("@description", string.Empty);
+        insertCmd.Parameters.AddWithValue("@state", string.Empty);
+        insertCmd.Parameters.AddWithValue("@declineReason", DBNull.Value);
+        insertCmd.Parameters.AddWithValue("@planTitle", string.Empty);
+        insertCmd.Parameters.AddWithValue("@planFolderName", string.Empty);
+        insertCmd.Parameters.AddWithValue("@project", string.Empty);
+        insertCmd.Parameters.AddWithValue("@date", string.Empty);
+        insertCmd.Parameters.AddWithValue("@sourcePlanStatus", string.Empty);
+
         foreach (var rec in recommendations)
         {
-            using var insertCmd = _connection.CreateCommand();
-            insertCmd.CommandText = """
-                INSERT INTO Recommendations (PlanId, Title, Description, State, DeclineReason,
-                                             PlanTitle, PlanFolderName, Project, Date, SourcePlanStatus)
-                VALUES (@planId, @title, @description, @state, @declineReason,
-                        @planTitle, @planFolderName, @project, @date, @sourcePlanStatus)
-                """;
-            insertCmd.Parameters.AddWithValue("@planId", planId);
-            insertCmd.Parameters.AddWithValue("@title", rec.Title);
-            insertCmd.Parameters.AddWithValue("@description", rec.Description);
-            insertCmd.Parameters.AddWithValue("@state", string.IsNullOrWhiteSpace(rec.State) ? "Pending" : rec.State);
-            insertCmd.Parameters.AddWithValue("@declineReason", (object?)rec.DeclineReason ?? DBNull.Value);
-            insertCmd.Parameters.AddWithValue("@planTitle", planTitle);
-            insertCmd.Parameters.AddWithValue("@planFolderName", folderName);
-            insertCmd.Parameters.AddWithValue("@project", project);
-            insertCmd.Parameters.AddWithValue("@date", updated.ToString("O", CultureInfo.InvariantCulture));
-            insertCmd.Parameters.AddWithValue("@sourcePlanStatus", status.ToString());
+            insertCmd.Parameters["@planId"].Value = planId;
+            insertCmd.Parameters["@title"].Value = rec.Title;
+            insertCmd.Parameters["@description"].Value = rec.Description;
+            insertCmd.Parameters["@state"].Value = string.IsNullOrWhiteSpace(rec.State) ? "Pending" : rec.State;
+            insertCmd.Parameters["@declineReason"].Value = (object?)rec.DeclineReason ?? DBNull.Value;
+            insertCmd.Parameters["@planTitle"].Value = planTitle;
+            insertCmd.Parameters["@planFolderName"].Value = folderName;
+            insertCmd.Parameters["@project"].Value = project;
+            insertCmd.Parameters["@date"].Value = updated.ToString("O", CultureInfo.InvariantCulture);
+            insertCmd.Parameters["@sourcePlanStatus"].Value = status.ToString();
             insertCmd.ExecuteNonQuery();
         }
     }

@@ -23,6 +23,8 @@ public abstract record ContentInputBase : WidgetBase<ContentInputBase>, IAnyInpu
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public string? ShortcutKey { get; set; }
+
     // File attachment props
     [Prop] public string? UploadUrl { get; set; }
 
@@ -204,6 +206,11 @@ public static class ContentInputExtensions
     public static ContentInputBase Invalid(this ContentInputBase widget, string invalid)
     {
         return widget with { Invalid = invalid };
+    }
+
+    public static ContentInputBase ShortcutKey(this ContentInputBase widget, string shortcutKey)
+    {
+        return widget with { ShortcutKey = shortcutKey };
     }
 
     public static ContentInputBase Nullable(this ContentInputBase widget, bool? nullable = true)

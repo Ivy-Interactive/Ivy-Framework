@@ -493,13 +493,18 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
     }
 
     /// <summary>
-    /// Calculates the total cost for a plan by summing all entries in its <c>costs.csv</c> file.
-    /// Results are cached for 90 seconds to reduce file I/O during dashboard polling.
+    /// Calculates the total cost for a plan. Delegates to database when available,
+    /// otherwise parses costs.csv with a short cache to reduce file I/O.
     /// </summary>
-    /// <param name="folderPath">Absolute path to the plan folder.</param>
-    /// <returns>Total cost in dollars, or <c>0</c> if no costs file exists.</returns>
     public decimal GetPlanTotalCost(string folderPath)
     {
+        if (_useDatabaseForReads && _database != null)
+        {
+            var planId = ExtractPlanId(folderPath);
+            if (planId.HasValue)
+                return _database.GetPlanTotalCost(planId.Value);
+        }
+
         var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
         if (!dict.TryGetValue(folderPath, out var cached))
         {
@@ -510,13 +515,18 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
     }
 
     /// <summary>
-    /// Calculates the total token usage for a plan by summing all entries in its <c>costs.csv</c> file.
-    /// Results are cached for 90 seconds to reduce file I/O during dashboard polling.
+    /// Calculates the total token usage for a plan. Delegates to database when available,
+    /// otherwise parses costs.csv with a short cache to reduce file I/O.
     /// </summary>
-    /// <param name="folderPath">Absolute path to the plan folder.</param>
-    /// <returns>Total token count, or <c>0</c> if no costs file exists.</returns>
     public int GetPlanTotalTokens(string folderPath)
     {
+        if (_useDatabaseForReads && _database != null)
+        {
+            var planId = ExtractPlanId(folderPath);
+            if (planId.HasValue)
+                return _database.GetPlanTotalTokens(planId.Value);
+        }
+
         var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
         if (!dict.TryGetValue(folderPath, out var cached))
         {
@@ -524,6 +534,13 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
             dict[folderPath] = cached;
         }
         return cached.Tokens;
+    }
+
+    private static int? ExtractPlanId(string folderPath)
+    {
+        var folderName = Path.GetFileName(folderPath);
+        var match = FolderNameRegex.Match(folderName);
+        return match.Success && int.TryParse(match.Groups[1].Value, out var id) ? id : null;
     }
 
     /// <summary>
@@ -780,11 +797,9 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
     );
 
     /// <summary>
-    /// Efficiently computes plan counts by status and pending recommendation count
-    /// using regex-based state extraction instead of full YAML deserialization.
-    /// Results are cached for 2 minutes to reduce disk I/O during dashboard polling.
+    /// Efficiently computes plan counts by status and pending recommendation count.
+    /// Delegates to database when available; falls back to regex-based file scanning with caching.
     /// </summary>
-    /// <returns>A <see cref="PlanCountSnapshot"/> with counts for each status category and pending recommendations.</returns>
     public PlanCountSnapshot ComputePlanCounts()
     {
         if (_useDatabaseForReads && _database != null)

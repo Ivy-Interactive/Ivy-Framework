@@ -321,9 +321,11 @@ public class RecommendationServiceTests : IDisposable
         Assert.Single(result2);
         Assert.Same(result1, result2);
 
-        // Simulate cache expiration by setting _recommendationsCacheTime to 3 minutes ago
-        var cacheTimeField = typeof(PlanReaderService).GetField("_recommendationsCacheTime", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        cacheTimeField.SetValue(_service, DateTime.UtcNow.AddMinutes(-3));
+        // Simulate cache expiration by setting the TimeCache's _timestamp to 3 minutes ago
+        var cacheField = typeof(PlanReaderService).GetField("_recommendationsCache", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var cache = cacheField.GetValue(_service)!;
+        var timestampField = cache.GetType().GetField("_timestamp", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        timestampField.SetValue(cache, DateTime.UtcNow.AddMinutes(-3));
 
         // Third call after expiration recomputes (now sees both items)
         var result3 = _service.GetRecommendations();
