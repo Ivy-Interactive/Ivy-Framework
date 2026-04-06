@@ -72,7 +72,7 @@ public class ClerkAuthTokenHandler : IAuthTokenHandler
 
     public async Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, string? basePath = null, CancellationToken cancellationToken = default)
     {
-        _origin = basePath != null ? $"{requestScheme}://{requestHost}{basePath}" : $"{requestScheme}://{requestHost}";
+        _origin = $"{requestScheme}://{requestHost}";
         _callbackBaseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost, basePath);
 
         var frontendClient = MakeFrontendApiClient(authSession);
