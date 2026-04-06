@@ -42,7 +42,6 @@
 
   <Target Name="TransformMarkdown" AfterTargets="ResolveProjectReferences" BeforeTargets="CoreCompile">
     <PropertyGroup>
-      <DocsToolPath>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine($(MSBuildProjectDirectory), '..', 'Ivy.Docs.Tools', 'bin', $(Configuration), $(TargetFramework), 'Ivy.Docs.Tools.dll'))'))</DocsToolPath>
       <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs', '*.md'))</DocsInputPath>
       <DocsOutputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Generated'))</DocsOutputPath>
     </PropertyGroup>
