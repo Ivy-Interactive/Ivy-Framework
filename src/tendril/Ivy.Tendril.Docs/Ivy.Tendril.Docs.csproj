@@ -26,7 +26,19 @@
     <Compile Include="**/*.cs" Exclude="obj/**/*.cs;bin/**/*.cs;Generated/**/*.cs" />
   </ItemGroup>
 
-  <Target Name="TransformMarkdown" AfterTargets="ResolveProjectReferences" BeforeTargets="CoreCompile">
+  <PropertyGroup>
+    <SkipDocsTransform Condition="'$(SkipDocsTransform)' == ''">false</SkipDocsTransform>
+  </PropertyGroup>
+
+  <Target Name="CheckCargoInstalled" BeforeTargets="TransformMarkdown" Condition="'$(SkipDocsTransform)' != 'true'">
+    <Exec Command="cargo --version" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low" ConsoleToMSBuild="true">
+      <Output TaskParameter="ExitCode" PropertyName="_CargoExitCode" />
+    </Exec>
+    <Error Condition="'$(_CargoExitCode)' != '0'"
+           Text="Rust toolchain (cargo) is required to build docs. Install from https://rustup.rs/ or set SkipDocsTransform=true to skip." />
+  </Target>
+
+  <Target Name="TransformMarkdown" AfterTargets="ResolveProjectReferences" BeforeTargets="CoreCompile" Condition="'$(SkipDocsTransform)' != 'true'">
     <PropertyGroup>
       <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs', '*.md'))</DocsInputPath>
       <DocsOutputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Generated'))</DocsOutputPath>
