@@ -53,6 +53,39 @@ export async function uploadFile(uploadUrl: string, file: File): Promise<void> {
 }
 
 /**
+ * Upload a file using XMLHttpRequest with progress tracking.
+ * Returns a promise that resolves on success and an abort function.
+ */
+export function uploadFileWithProgress(
+  uploadUrl: string,
+  file: File,
+  onProgress?: (progress: number) => void,
+): { promise: Promise<void>; abort: () => void } {
+  const xhr = new XMLHttpRequest();
+  const fullUrl = getFullUrl(uploadUrl);
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const promise = new Promise<void>((resolve, reject) => {
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(e.loaded / e.total);
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(`Upload failed: ${xhr.statusText}`));
+    };
+    xhr.onerror = () => reject(new Error("Upload failed"));
+    xhr.onabort = () => reject(new Error("Upload aborted"));
+    xhr.open("POST", fullUrl);
+    xhr.send(formData);
+  });
+
+  return { promise, abort: () => xhr.abort() };
+}
+
+/**
  * Convert an accept string (e.g. "image/*,.pdf") to the FileSystemAccess API types format.
  */
 export function acceptToPickerTypes(accept?: string): FilePickerAcceptType[] | undefined {

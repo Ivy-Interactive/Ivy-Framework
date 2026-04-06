@@ -14,6 +14,7 @@ import {
   textVariant,
 } from "@/components/ui/input/file-input-variant";
 import { validateSingleFile, validateFileCount } from "./file-input-validation";
+import { uploadFileWithProgress } from "@/widgets/filePicker/shared";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
 enum FileInputStatus {
@@ -72,10 +73,12 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<Map<string, number>>(new Map());
   const inputRef = useRef<HTMLInputElement>(null);
   const filesSelectedInCurrentDialogRef = useRef(false);
   const dialogWasOpenRef = useRef(false);
   const blurFiredRef = useRef(false);
+  const abortControllersRef = useRef<Map<string, () => void>>(new Map());
 
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes("OnCancel");
@@ -112,31 +115,27 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         return;
       }
 
-      // Get the correct host from meta tag or use relative URL
-      const getUploadUrl = () => {
-        const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-        if (ivyHostMeta) {
-          const host = ivyHostMeta.getAttribute("content");
-          return host + uploadUrl;
-        }
-        // If no meta tag, use relative URL (should work in production)
-        return uploadUrl;
-      };
+      const clientFileId = `upload-${Date.now()}-${file.name}`;
 
-      const formData = new FormData();
-      formData.append("file", file);
+      setUploadProgress((prev) => new Map(prev).set(clientFileId, 0));
+
+      const { promise, abort } = uploadFileWithProgress(uploadUrl, file, (progress) => {
+        setUploadProgress((prev) => new Map(prev).set(clientFileId, progress));
+      });
+
+      abortControllersRef.current.set(clientFileId, abort);
 
       try {
-        const response = await fetch(getUploadUrl(), {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
-        }
+        await promise;
       } catch (error) {
         console.error("File upload error:", error);
+      } finally {
+        setUploadProgress((prev) => {
+          const next = new Map(prev);
+          next.delete(clientFileId);
+          return next;
+        });
+        abortControllersRef.current.delete(clientFileId);
       }
     },
     [uploadUrl, validateFile],
@@ -225,7 +224,12 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
   const handleCancel = useCallback(
     (fileId: string) => {
-      if (hasCancelHandler) {
+      // Check if this is a client-side upload in progress
+      const abort = abortControllersRef.current.get(fileId);
+      if (abort) {
+        abort();
+        abortControllersRef.current.delete(fileId);
+      } else if (hasCancelHandler) {
         handleEvent("OnCancel", id, [fileId]);
       }
       // Also clear file input to allow re-selecting same file
@@ -350,7 +354,14 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   // Render individual file item for multiple files view
   const renderFileItem = (file: FileInput) => {
     const isFileLoading = file.status === FileInputStatus.Loading;
-    const fileProgress = file.progress ?? 0;
+    // Prefer server-side progress when available, fall back to any client-side progress
+    const clientProgress = Array.from(uploadProgress.entries()).find(([key]) =>
+      key.endsWith(`-${file.fileName}`),
+    );
+    const fileProgress =
+      isFileLoading && file.progress === 0 && clientProgress
+        ? clientProgress[1]
+        : (file.progress ?? 0);
 
     return (
       <div
