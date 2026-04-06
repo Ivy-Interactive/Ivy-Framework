@@ -5,10 +5,11 @@ using Ivy.Tendril.Apps.Plans;
 
 namespace Ivy.Tendril.Services;
 
-public class PlanReaderService(IConfigService config, ILogger<PlanReaderService> logger) : IPlanReaderService
+public class PlanReaderService(IConfigService config, ILogger<PlanReaderService> logger, ITelemetryService? telemetryService = null) : IPlanReaderService
 {
     private readonly IConfigService _config = config;
     private readonly ILogger<PlanReaderService> _logger = logger;
+    private readonly ITelemetryService? _telemetryService = telemetryService;
 
     private readonly TimeCache<List<HourlyTokenBurn>> _hourlyBurnCache = new(TimeSpan.FromMinutes(2));
 
@@ -223,8 +224,17 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
     /// <param name="newState">The target state to transition to.</param>
     public void TransitionState(string folderName, PlanStatus newState)
     {
-        // Update database first for instant UI feedback.
         var planId = ExtractPlanId(folderName);
+
+        // Track state transition in telemetry before making the change.
+        if (planId.HasValue)
+        {
+            var currentPlan = GetPlanByFolder(Path.Combine(PlansDirectory, folderName));
+            var oldState = currentPlan?.Status.ToString() ?? "Unknown";
+            _telemetryService?.TrackPlanStateTransition(planId.Value, oldState, newState.ToString());
+        }
+
+        // Update database first for instant UI feedback.
         if (planId.HasValue && _database != null)
             _database.UpdatePlanState(planId.Value, newState);
 

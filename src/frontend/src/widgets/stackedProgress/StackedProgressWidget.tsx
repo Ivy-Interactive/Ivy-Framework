@@ -164,7 +164,7 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
                       backgroundColor: color,
                     }}
                   />
-                  <span>{segment.label}</span>
+                  <span>{segment.label || segment.value}</span>
                 </div>
               );
             })}

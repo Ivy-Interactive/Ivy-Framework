@@ -185,6 +185,30 @@ public class PivotTableTests
         Assert.Equal(300, results[2]["Score"]);
     }
 
+    public record StringDimensionData(string Hour, int Count);
+
+    [Fact]
+    public async Task FillGaps_ThrowsForUnsupportedDimensionType()
+    {
+        var data = new[]
+        {
+            new StringDimensionData("2026-04-06 10:00", 5),
+            new StringDimensionData("2026-04-06 12:00", 3),
+        };
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
+        {
+            await data.ToPivotTable()
+                .Dimension("Hour", e => e.Hour)
+                .Measure("Count", e => e.Sum(f => f.Count))
+                .FillGaps(TimeSpan.FromHours(1))
+                .ExecuteAsync();
+        });
+
+        Assert.Contains("FillGaps() is only supported for DateTime and int dimensions", exception.Message);
+        Assert.Contains("Dimension 'Hour' has type 'String'", exception.Message);
+    }
+
     [Fact]
     public async Task PivotTable_FillGaps_MixedTypesDontInterfere()
     {

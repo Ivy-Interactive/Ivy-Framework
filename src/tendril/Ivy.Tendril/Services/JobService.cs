@@ -524,11 +524,47 @@ public class JobService : IJobService
         {
             VerifyMakePlanResult(job);
             if (job.Status == JobStatus.Completed)
-                _telemetryService?.TrackPlanCreated();
+            {
+                var planFolder = job.Args.Length > 0 ? job.Args[0] : "";
+                var level = "NiceToHave";
+                if (Directory.Exists(planFolder))
+                {
+                    var planYamlPath = Path.Combine(planFolder, "plan.yaml");
+                    if (File.Exists(planYamlPath))
+                    {
+                        var yaml = FileHelper.ReadAllText(planYamlPath);
+                        var match = Regex.Match(yaml, @"(?m)^level:\s*(.+)$");
+                        if (match.Success) level = match.Groups[1].Value.Trim();
+                    }
+                }
+
+                _telemetryService?.TrackPlanCreated(new PlanCreatedContext(
+                    Project: job.Project,
+                    Level: level,
+                    DurationSeconds: job.DurationSeconds));
+            }
         }
 
         if (isSuccess && job.Type == "MakePr")
-            _telemetryService?.TrackPrCreated();
+        {
+            var planFolder = job.Args.Length > 0 ? job.Args[0] : "";
+            var repoUrl = "";
+            if (Directory.Exists(planFolder))
+            {
+                var planYamlPath = Path.Combine(planFolder, "plan.yaml");
+                if (File.Exists(planYamlPath))
+                {
+                    var yaml = FileHelper.ReadAllText(planYamlPath);
+                    var prMatch = Regex.Match(yaml, @"(?m)^- (https://github\.com/.+/pull/\d+)$");
+                    if (prMatch.Success) repoUrl = prMatch.Groups[1].Value.Trim();
+                }
+            }
+
+            _telemetryService?.TrackPrCreated(new PrCreatedContext(
+                Project: job.Project,
+                RepoUrl: repoUrl,
+                DurationSeconds: job.DurationSeconds));
+        }
 
         _telemetryService?.TrackJobCompleted(job.Type, job.Status, job.DurationSeconds);
 
