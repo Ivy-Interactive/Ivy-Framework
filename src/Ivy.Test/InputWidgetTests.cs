@@ -3,31 +3,6 @@ namespace Ivy.Test;
 public class InputWidgetTests
 {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     [Theory]
     [InlineData(typeof(short), (short)1)]
     [InlineData(typeof(short?), null)]

@@ -1,15 +1,5 @@
-/**
- * Get the full upload URL, accounting for the ivy-host meta tag.
- */
-export function getFullUrl(path: string): string {
-  const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-  if (ivyHostMeta) {
-    const host = ivyHostMeta.getAttribute("content");
-    return host + path;
-  }
-  return path;
-}
-
+import { getFullUrl } from "@/lib/url";
+export { getFullUrl };
 /**
  * Upload a file to the given upload URL using FormData.
  */

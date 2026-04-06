@@ -13,6 +13,8 @@ public class ContentInputApp : SampleBase
                | Layout.Tabs(
                    new Tab("Basic", new ContentInputBasicExample()),
                    new Tab("With Files", new ContentInputWithFilesExample()),
+                   new Tab("Scale", new ContentInputScaleExample()),
+                   new Tab("Invalid", new ContentInputInvalidExample()),
                    new Tab("Configured", new ContentInputConfiguredExample()),
                    new Tab("Submit", new ContentInputSubmitExample())
                ).Variant(TabsVariant.Content);
@@ -65,6 +67,42 @@ public class ContentInputWithFilesExample : ViewBase
                        .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
                        .Remove(e => e.Id)
                    : (object)Text.Muted("No files attached"));
+    }
+}
+
+public class ContentInputScaleExample : ViewBase
+{
+    public override object? Build()
+    {
+        var text = UseState("");
+        var files = UseState(ImmutableArray<FileUpload<byte[]>>.Empty);
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(files));
+
+        return Layout.Grid().Columns(3)
+               | Text.Monospaced("Small")
+               | Text.Monospaced("Medium")
+               | Text.Monospaced("Large")
+               | text.ToContentInput(upload).Files(files.Value).Placeholder("Small...").Small()
+               | text.ToContentInput(upload).Files(files.Value).Placeholder("Medium...")
+               | text.ToContentInput(upload).Files(files.Value).Placeholder("Large...").Large();
+    }
+}
+
+public class ContentInputInvalidExample : ViewBase
+{
+    public override object? Build()
+    {
+        var text = UseState("");
+        var files = UseState(ImmutableArray<FileUpload<byte[]>>.Empty);
+        var upload = UseUpload(MemoryStreamUploadHandler.Create(files));
+
+        return Layout.Vertical()
+               | Text.H2("Invalid State")
+               | Text.P("Content input with validation error. Hover the icon to see the error message.")
+               | text.ToContentInput(upload)
+                   .Files(files.Value)
+                   .Placeholder("Type a message...")
+                   .Invalid("Message is required and must be at least 10 characters");
     }
 }
 

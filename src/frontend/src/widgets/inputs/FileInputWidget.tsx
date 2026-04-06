@@ -14,10 +14,10 @@ import {
   textVariant,
 } from "@/components/ui/input/file-input-variant";
 import { validateFileWithToast, validateFileCount } from "./file-input-validation";
-import { uploadFileWithProgress } from "@/widgets/filePicker/shared";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { FileItem } from "./shared/types";
 import { FileAttachmentList } from "./shared/FileAttachmentList";
+import { useUploadWithProgress } from "./shared/useUploadWithProgress";
 
 interface FileInputWidgetProps {
   id: string;
@@ -58,19 +58,15 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<Map<string, number>>(new Map());
+  const {
+    uploadProgress,
+    uploadSingleFile,
+    cancelUpload: cancelClientUpload,
+  } = useUploadWithProgress();
   const inputRef = useRef<HTMLInputElement>(null);
   const filesSelectedInCurrentDialogRef = useRef(false);
   const dialogWasOpenRef = useRef(false);
   const blurFiredRef = useRef(false);
-  const abortControllersRef = useRef<Map<string, () => void>>(new Map());
-
-  // Abort any pending uploads when the component unmounts
-  useEffect(() => {
-    return () => {
-      abortControllersRef.current.forEach((abort) => abort());
-    };
-  }, []);
 
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes("OnCancel");
@@ -85,37 +81,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         return;
       }
 
-      const clientFileId = `upload-${crypto.randomUUID()}-${file.size}-${file.name}`;
-
-      setUploadProgress((prev) => new Map(prev).set(clientFileId, 0));
-
-      const { promise, abort } = uploadFileWithProgress(uploadUrl, file, (progress) => {
-        setUploadProgress((prev) => new Map(prev).set(clientFileId, progress));
-      });
-
-      abortControllersRef.current.set(clientFileId, abort);
-
-      try {
-        await promise;
-      } catch (error: any) {
-        if (error.message !== "Upload aborted") {
-          console.error("File upload error:", error);
-          toast({
-            title: "Upload failed",
-            description: error.message || `Could not upload ${file.name}`,
-            variant: "destructive",
-          });
-        }
-      } finally {
-        setUploadProgress((prev) => {
-          const next = new Map(prev);
-          next.delete(clientFileId);
-          return next;
-        });
-        abortControllersRef.current.delete(clientFileId);
-      }
+      await uploadSingleFile(uploadUrl, file);
     },
-    [uploadUrl, accept, maxFileSize, minFileSize],
+    [uploadUrl, accept, maxFileSize, minFileSize, uploadSingleFile],
   );
 
   const handleBlur = useCallback(() => {
@@ -202,10 +170,8 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const handleCancel = useCallback(
     (fileId: string) => {
       // Check if this is a client-side upload in progress
-      const abort = abortControllersRef.current.get(fileId);
-      if (abort) {
-        abort();
-        abortControllersRef.current.delete(fileId);
+      if (uploadProgress.has(fileId)) {
+        cancelClientUpload(fileId);
       } else if (hasCancelHandler) {
         handleEvent("OnCancel", id, [fileId]);
       }
@@ -214,7 +180,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         inputRef.current.value = "";
       }
     },
-    [hasCancelHandler, handleEvent, id],
+    [uploadProgress, cancelClientUpload, hasCancelHandler, handleEvent, id],
   );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
@@ -429,6 +395,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
                   onCancel={handleCancel}
                   hasCancelHandler={hasCancelHandler}
                   variant="card"
+                  density={density}
                 />
               </div>
             )}
@@ -456,6 +423,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
                   onCancel={handleCancel}
                   hasCancelHandler={hasCancelHandler}
                   variant="card"
+                  density={density}
                 />
               </div>
             )}
