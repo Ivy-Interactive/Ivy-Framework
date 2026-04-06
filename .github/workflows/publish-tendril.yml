@@ -2,6 +2,7 @@ name: Publish Ivy.Tendril
 
 permissions:
   contents: read
+  id-token: write
 
 on:
   workflow_dispatch:
@@ -46,5 +47,11 @@ jobs:
           fi
           dotnet pack tendril/Ivy.Tendril/Ivy.Tendril.csproj --configuration Release --no-build --output ./nupkg $VERSION_ARG
 
+      - name: NuGet login (trusted publishing)
+        uses: NuGet/login@v1
+        id: nuget-auth
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push to NuGet
-        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ steps.nuget-auth.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
