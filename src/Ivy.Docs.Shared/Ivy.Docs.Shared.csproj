@@ -15,6 +15,11 @@
     <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="System.ComponentModel.DataAnnotations" />
+    <Using Include="System.ComponentModel" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
     <ProjectReference Include="../Ivy/Ivy.csproj" />
   </ItemGroup>
