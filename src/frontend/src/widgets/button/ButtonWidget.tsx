@@ -189,12 +189,14 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const eventTarget = event.target as HTMLElement;
+      const shortcutUsesModifierChord = shortcutObj.ctrl || shortcutObj.meta || shortcutObj.alt;
       if (
-        eventTarget.tagName === "INPUT" ||
-        eventTarget.tagName === "TEXTAREA" ||
-        eventTarget.isContentEditable
+        !shortcutUsesModifierChord &&
+        (eventTarget.tagName === "INPUT" ||
+          eventTarget.tagName === "TEXTAREA" ||
+          eventTarget.isContentEditable)
       ) {
-        return; // Don't intercept shortcuts while typing
+        return;
       }
 
       const modifierMatch =
