@@ -1,7 +1,7 @@
 import { useCallback, useState, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
 import { getFullUrl } from "@/lib/url";
-import { validateSingleFile, validateFileCount } from "../file-input-validation";
+import { validateFileWithToast, validateFileCount } from "../file-input-validation";
 
 interface UseFileAttachmentsOptions {
   uploadUrl?: string;
@@ -18,26 +18,10 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateFile = useCallback(
-    (file: File): boolean => {
-      const result = validateSingleFile({ file, accept, maxFileSize });
-      if (!result.valid) {
-        toast({
-          title: result.title || "Validation Error",
-          description: result.error,
-          variant: "destructive",
-        });
-        return false;
-      }
-      return true;
-    },
-    [accept, maxFileSize],
-  );
-
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {
       if (!uploadUrl) return;
-      if (!validateFile(file)) return;
+      if (!validateFileWithToast({ file, accept, maxFileSize })) return;
 
       const formData = new FormData();
       formData.append("file", file);
@@ -54,7 +38,7 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
         console.error("File upload error:", error);
       }
     },
-    [uploadUrl, validateFile],
+    [uploadUrl, accept, maxFileSize],
   );
 
   const uploadFiles = useCallback(

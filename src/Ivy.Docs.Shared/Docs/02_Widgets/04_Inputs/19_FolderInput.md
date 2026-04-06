@@ -70,4 +70,23 @@ public class FolderInputValidationDemo : ViewBase
 }
 ```
 
+## Mode
+
+By default, `FolderInput` returns only the folder name (web-safe). In desktop environments (Electron/Tauri), you can use `FolderInputMode.FullPath` to get the full filesystem path.
+
+```csharp demo-below
+public class FolderInputModeDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var folder = UseState<string?>();
+        return Layout.Vertical()
+               | folder.ToFolderInput(mode: FolderInputMode.FullPath)
+               | Text.P($"Path: {folder.Value ?? "None"}");
+    }
+}
+```
+
+> **Note:** In browser environments, `FullPath` mode falls back to returning the folder name only, since the File System Access API does not expose full paths.
+
 <WidgetDocs Type="Ivy.FolderInput" ExtensionTypes="Ivy.FolderInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/FolderInput.cs"/>

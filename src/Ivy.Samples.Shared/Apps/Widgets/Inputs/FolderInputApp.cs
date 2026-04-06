@@ -12,7 +12,9 @@ public class FolderInputApp : SampleBase
                | Text.H2("Disabled")
                | new DisabledFolderInputDemo()
                | Text.H2("Validation")
-               | new ValidationFolderInputDemo();
+               | new ValidationFolderInputDemo()
+               | Text.H2("Full Path Mode (Desktop)")
+               | new FullPathFolderInputDemo();
     }
 }
 
@@ -47,5 +49,17 @@ public class ValidationFolderInputDemo : ViewBase
         return Layout.Vertical()
                | folder.ToFolderInput().Invalid(invalid)
                | Text.P($"Selected: {folder.Value ?? "None"}");
+    }
+}
+
+public class FullPathFolderInputDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var folder = UseState<string?>();
+        return Layout.Vertical()
+               | folder.ToFolderInput(mode: FolderInputMode.FullPath)
+               | Text.P($"Full path: {folder.Value ?? "None"}")
+               | Text.Muted("Full path mode requires a desktop environment (Electron/Tauri). In browsers, falls back to folder name.");
     }
 }

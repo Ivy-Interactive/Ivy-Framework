@@ -38,9 +38,9 @@ public class MicrosoftEntraAuthTokenHandler : IAuthTokenHandler
         );
     }
 
-    public Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    public Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, string? basePath = null, CancellationToken cancellationToken = default)
     {
-        var baseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost);
+        var baseUrl = WebhookEndpoint.BuildAuthCallbackBaseUrl(requestScheme, requestHost, basePath);
         SetBaseUrl(baseUrl);
         return Task.CompletedTask;
     }

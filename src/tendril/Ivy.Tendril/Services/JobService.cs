@@ -59,7 +59,9 @@ public class JobService : IJobService
         _jobTimeout = TimeSpan.FromMinutes(configService.Settings.JobTimeout);
         _staleOutputTimeout = TimeSpan.FromMinutes(configService.Settings.StaleOutputTimeout);
         _maxConcurrentJobs = configService.Settings.MaxConcurrentJobs;
-        _jobSlotSemaphore = new SemaphoreSlim(Math.Max(1, _maxConcurrentJobs), Math.Max(1, _maxConcurrentJobs));
+        _jobSlotSemaphore = _maxConcurrentJobs > 0
+            ? new SemaphoreSlim(_maxConcurrentJobs, _maxConcurrentJobs)
+            : new SemaphoreSlim(0, 1);
         _inboxPath = Path.Combine(configService.TendrilHome, "Inbox");
     }
 
@@ -75,7 +77,9 @@ public class JobService : IJobService
         _jobTimeout = jobTimeout;
         _staleOutputTimeout = staleOutputTimeout;
         _maxConcurrentJobs = maxConcurrentJobs;
-        _jobSlotSemaphore = new SemaphoreSlim(Math.Max(1, maxConcurrentJobs), Math.Max(1, maxConcurrentJobs));
+        _jobSlotSemaphore = maxConcurrentJobs > 0
+            ? new SemaphoreSlim(maxConcurrentJobs, maxConcurrentJobs)
+            : new SemaphoreSlim(0, 1);
         _inboxPath = inboxPath;
         _planReaderService = planReaderService;
         _telemetryService = telemetryService;
@@ -219,6 +223,29 @@ public class JobService : IJobService
         }
 
         LaunchJob(job);
+        return id;
+    }
+
+    /// <summary>
+    /// Creates a job in "Running" state without launching a real process.
+    /// Used by tests to exercise CompleteJob without background monitor races.
+    /// </summary>
+    internal string CreateTestJob(string type, params string[] args)
+    {
+        var id = $"job-{Interlocked.Increment(ref _counter):D3}";
+        var job = new JobItem
+        {
+            Id = id,
+            Type = type,
+            PlanFile = args.Length > 0 ? args[0] : type,
+            Status = "Running",
+            StartedAt = DateTime.UtcNow,
+            ScriptPath = "",
+            Args = args,
+            TimeoutCts = new CancellationTokenSource(),
+        };
+        _jobs[id] = job;
+        _jobSlotSemaphore.Wait(0); // Acquire slot so CompleteJob can release it
         return id;
     }
 

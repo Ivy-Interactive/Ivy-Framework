@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback } from "react";
 
-export { parseShortcut, formatShortcutForDisplay } from "../utils/shortcut";
+export { parseShortcut, formatShortcutForDisplay } from "@/lib/shortcut";
 
 export const useCursorPosition = (
   value?: string,
