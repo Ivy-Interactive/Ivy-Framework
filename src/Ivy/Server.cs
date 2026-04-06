@@ -557,6 +557,16 @@ public class Server
             mod(builder);
         }
 
+        // CLI-only commands need DI but never call app.StartAsync(),
+        // so use port 0 to avoid conflicts with a running instance.
+        // Bind to localhost for local dev (avoids Windows Firewall prompt),
+        // but use wildcard in containers so health probes can reach the app.
+        // On Sliplane or other hosted environments, we usually have PORT set and need to listen on 0.0.0.0.
+        var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+        var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
+        var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
+        var isLocalDev = !isContainer && !hasPortEnv && !_args.IsCliCommand;
+
         if (_args.IsCliCommand)
         {
             builder.WebHost.UseUrls("http://localhost:0");
@@ -806,16 +816,6 @@ public class Server
             }
         }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 #endif
-
-        // CLI-only commands need DI but never call app.StartAsync(),
-        // so use port 0 to avoid conflicts with a running instance.
-        // Bind to localhost for local dev (avoids Windows Firewall prompt),
-        // but use wildcard in containers so health probes can reach the app.
-        // On Sliplane or other hosted environments, we usually have PORT set and need to listen on 0.0.0.0.
-        var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
-        var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
-        var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
-        var isLocalDev = !isContainer && !hasPortEnv && !_args.IsCliCommand;
 
         // CLI-only commands (--describe, --describe-connection, --test-connection) never start
         // the web host, so skip port checks entirely. Port 0 will be used below.
