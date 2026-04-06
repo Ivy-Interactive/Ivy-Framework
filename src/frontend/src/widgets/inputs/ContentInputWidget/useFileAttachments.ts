@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { validateSingleFile, validateFileCount } from "../file-input-validation";
 import { uploadFileWithProgress } from "@/widgets/filePicker/shared";
@@ -19,6 +19,13 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
   const [uploadProgress, setUploadProgress] = useState<Map<string, number>>(new Map());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllersRef = useRef<Map<string, () => void>>(new Map());
+
+  // Abort any pending uploads when the component unmounts
+  useEffect(() => {
+    return () => {
+      abortControllersRef.current.forEach((abort) => abort());
+    };
+  }, []);
 
   const validateFile = useCallback(
     (file: File): boolean => {
@@ -41,7 +48,7 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
       if (!uploadUrl) return;
       if (!validateFile(file)) return;
 
-      const clientFileId = `upload-${Date.now()}-${file.name}`;
+      const clientFileId = `upload-${crypto.randomUUID()}-${file.size}-${file.name}`;
 
       setUploadProgress((prev) => new Map(prev).set(clientFileId, 0));
 
@@ -53,8 +60,15 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
 
       try {
         await promise;
-      } catch (error) {
-        console.error("File upload error:", error);
+      } catch (error: any) {
+        if (error.message !== "Upload aborted") {
+          console.error("File upload error:", error);
+          toast({
+            title: "Upload failed",
+            description: error.message || `Could not upload ${file.name}`,
+            variant: "destructive",
+          });
+        }
       } finally {
         setUploadProgress((prev) => {
           const next = new Map(prev);

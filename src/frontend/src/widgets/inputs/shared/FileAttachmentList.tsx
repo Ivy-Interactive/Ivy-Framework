@@ -105,7 +105,9 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
           // Prefer server-side progress when available, fall back to any client-side progress
           const clientProgress =
             uploadProgress &&
-            Array.from(uploadProgress.entries()).find(([key]) => key.endsWith(`-${file.fileName}`));
+            Array.from(uploadProgress.entries()).find(([key]) =>
+              key.endsWith(`-${file.length}-${file.fileName}`),
+            );
           const fileProgress =
             isLoading && file.progress === 0 && clientProgress
               ? clientProgress[1]
@@ -178,7 +180,7 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
               <div className="w-12 bg-muted rounded-full h-1">
                 <div
                   className="bg-primary h-1 rounded-full transition-all duration-300"
-                  style={{ width: `${file.progress * 100}%` }}
+                  style={{ width: `${(file.progress ?? 0) * 100}%` }}
                 />
               </div>
             )}

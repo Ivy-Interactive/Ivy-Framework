@@ -65,6 +65,13 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const blurFiredRef = useRef(false);
   const abortControllersRef = useRef<Map<string, () => void>>(new Map());
 
+  // Abort any pending uploads when the component unmounts
+  useEffect(() => {
+    return () => {
+      abortControllersRef.current.forEach((abort) => abort());
+    };
+  }, []);
+
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes("OnCancel");
   const hasBlurHandler = Array.isArray(events) && events.includes("OnBlur");
@@ -100,7 +107,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         return;
       }
 
-      const clientFileId = `upload-${Date.now()}-${file.name}`;
+      const clientFileId = `upload-${crypto.randomUUID()}-${file.size}-${file.name}`;
 
       setUploadProgress((prev) => new Map(prev).set(clientFileId, 0));
 
@@ -112,8 +119,15 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
       try {
         await promise;
-      } catch (error) {
-        console.error("File upload error:", error);
+      } catch (error: any) {
+        if (error.message !== "Upload aborted") {
+          console.error("File upload error:", error);
+          toast({
+            title: "Upload failed",
+            description: error.message || `Could not upload ${file.name}`,
+            variant: "destructive",
+          });
+        }
       } finally {
         setUploadProgress((prev) => {
           const next = new Map(prev);
