@@ -170,7 +170,7 @@ public class DashboardApp : ViewBase
                     ],
                     XAxis =
                     [
-                        new XAxis().Hide()
+                        new XAxis().TickFormatter("MM/dd HH").Hide()
                     ],
                     YAxis =
                     [
@@ -179,7 +179,7 @@ public class DashboardApp : ViewBase
                     ]
                 })
             .FillGaps(TimeSpan.FromHours(1))
-            .Dimension("Hour", e => e.Hour.ToString("MM/dd HH"))
+            .Dimension("Hour", e => e.Hour)
             .Measure("Cost ($)", e => e.Sum(f => (double)f.Cost))
             .Measure("Tokens", e => e.Sum(f => (double)f.Tokens))
             .Height(Size.Px(350))

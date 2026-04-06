@@ -23,7 +23,6 @@ namespace Ivy
 static class UseEffectExtensions
 {
     public static void UseEffect(this Ivy.ViewBase view, Func<IDisposable> callback, params object[] deps) { }
-    public static void UseEffect(this Ivy.ViewBase view, Func<IAsyncDisposable> callback, params object[] deps) { }
 }
 ";
 
@@ -37,7 +36,7 @@ public class MyView : Ivy.ViewBase
     {
         this.UseEffect(() => {
             {|IVYEFFECT001:Task.Delay(300).ContinueWith(_ => { })|};
-            return (IDisposable)null;
+            return null;
         });
         return null;
     }
@@ -110,7 +109,7 @@ public class MyView : Ivy.ViewBase
         var x = 1;
         this.UseEffect(() => {
             {|IVYEFFECT001:Task.Delay(300).ContinueWith(_ => { })|};
-            return (IDisposable)null;
+            return null;
         }, x);
         return null;
     }
