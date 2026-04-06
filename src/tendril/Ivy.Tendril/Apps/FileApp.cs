@@ -36,6 +36,8 @@ public class FileApp : ViewBase
         { ".sln", Languages.Text },
         { ".ps1", Languages.Powershell },
         { ".psm1", Languages.Powershell },
+        { ".sh", Languages.Bash },
+        { ".bash", Languages.Bash },
     };
 
     public static Languages GetLanguage(string extension)

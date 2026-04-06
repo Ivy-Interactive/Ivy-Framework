@@ -99,7 +99,7 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
                     FileHelper.WriteAllText(planYamlPath, repaired);
             }
         }
-        catch { }
+        catch { /* Best-effort repair on startup; individual plan errors are non-fatal */ }
     }
 
     /// <summary>
@@ -493,85 +493,84 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
     }
 
     /// <summary>
-    /// Calculates the total cost for a plan by summing all entries in its <c>costs.csv</c> file.
-    /// Results are cached for 90 seconds to reduce file I/O during dashboard polling.
+    /// Calculates the total cost for a plan. Delegates to database when available,
+    /// otherwise parses costs.csv with a short cache to reduce file I/O.
     /// </summary>
-    /// <param name="folderPath">Absolute path to the plan folder.</param>
-    /// <returns>Total cost in dollars, or <c>0</c> if no costs file exists.</returns>
     public decimal GetPlanTotalCost(string folderPath)
     {
-        var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
-        if (dict.TryGetValue(folderPath, out var cached))
+        if (_useDatabaseForReads && _database != null)
         {
-            return cached.Cost;
+            var planId = ExtractPlanId(folderPath);
+            if (planId.HasValue)
+                return _database.GetPlanTotalCost(planId.Value);
         }
 
-        var cost = ComputePlanCost(folderPath);
-        var tokens = ComputePlanTokens(folderPath);
-        dict[folderPath] = (cost, tokens);
-
-        return cost;
+        var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
+        if (!dict.TryGetValue(folderPath, out var cached))
+        {
+            cached = ComputePlanCostAndTokens(folderPath);
+            dict[folderPath] = cached;
+        }
+        return cached.Cost;
     }
 
     /// <summary>
-    /// Calculates the total token usage for a plan by summing all entries in its <c>costs.csv</c> file.
-    /// Results are cached for 90 seconds to reduce file I/O during dashboard polling.
+    /// Calculates the total token usage for a plan. Delegates to database when available,
+    /// otherwise parses costs.csv with a short cache to reduce file I/O.
     /// </summary>
-    /// <param name="folderPath">Absolute path to the plan folder.</param>
-    /// <returns>Total token count, or <c>0</c> if no costs file exists.</returns>
     public int GetPlanTotalTokens(string folderPath)
     {
-        var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
-        if (dict.TryGetValue(folderPath, out var cached))
+        if (_useDatabaseForReads && _database != null)
         {
-            return cached.Tokens;
+            var planId = ExtractPlanId(folderPath);
+            if (planId.HasValue)
+                return _database.GetPlanTotalTokens(planId.Value);
         }
 
-        var cost = ComputePlanCost(folderPath);
-        var tokens = ComputePlanTokens(folderPath);
-        dict[folderPath] = (cost, tokens);
-
-        return tokens;
+        var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
+        if (!dict.TryGetValue(folderPath, out var cached))
+        {
+            cached = ComputePlanCostAndTokens(folderPath);
+            dict[folderPath] = cached;
+        }
+        return cached.Tokens;
     }
 
-    private static decimal ComputePlanCost(string folderPath)
+    private static int? ExtractPlanId(string folderPath)
+    {
+        var folderName = Path.GetFileName(folderPath);
+        var match = FolderNameRegex.Match(folderName);
+        return match.Success && int.TryParse(match.Groups[1].Value, out var id) ? id : null;
+    }
+
+    /// <summary>
+    /// Parses costs.csv once to compute both total cost and total tokens.
+    /// CSV format: Promptware,Tokens,Cost (fields must not contain commas).
+    /// </summary>
+    private static (decimal Cost, int Tokens) ComputePlanCostAndTokens(string folderPath)
     {
         var costsPath = Path.Combine(folderPath, "costs.csv");
-        if (!File.Exists(costsPath)) return 0m;
+        if (!File.Exists(costsPath)) return (0m, 0);
 
         var lines = FileHelper.ReadAllLines(costsPath);
-        decimal total = 0m;
+        decimal totalCost = 0m;
+        int totalTokens = 0;
         foreach (var line in lines.Skip(1)) // skip header
         {
             var parts = line.Split(',');
-            if (parts.Length >= 3 && decimal.TryParse(parts[2],
-                System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out var cost))
+            if (parts.Length >= 3)
             {
-                total += cost;
+                if (int.TryParse(parts[1],
+                    System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var tokens))
+                    totalTokens += tokens;
+                if (decimal.TryParse(parts[2],
+                    System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var cost))
+                    totalCost += cost;
             }
         }
-        return total;
-    }
-
-    private static int ComputePlanTokens(string folderPath)
-    {
-        var costsPath = Path.Combine(folderPath, "costs.csv");
-        if (!File.Exists(costsPath)) return 0;
-
-        var lines = FileHelper.ReadAllLines(costsPath);
-        int total = 0;
-        foreach (var line in lines.Skip(1))
-        {
-            var parts = line.Split(',');
-            if (parts.Length >= 2 && int.TryParse(parts[1],
-                System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out var tokens))
-            {
-                total += tokens;
-            }
-        }
-        return total;
+        return (totalCost, totalTokens);
     }
 
     /// <summary>
@@ -798,11 +797,9 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
     );
 
     /// <summary>
-    /// Efficiently computes plan counts by status and pending recommendation count
-    /// using regex-based state extraction instead of full YAML deserialization.
-    /// Results are cached for 2 minutes to reduce disk I/O during dashboard polling.
+    /// Efficiently computes plan counts by status and pending recommendation count.
+    /// Delegates to database when available; falls back to regex-based file scanning with caching.
     /// </summary>
-    /// <returns>A <see cref="PlanCountSnapshot"/> with counts for each status category and pending recommendations.</returns>
     public PlanCountSnapshot ComputePlanCounts()
     {
         if (_useDatabaseForReads && _database != null)
@@ -900,23 +897,7 @@ public class PlanReaderService(IConfigService config) : IPlanReaderService
     }
 
     private static DateTime? ExtractCompletedTimestamp(string logFilePath)
-    {
-        try
-        {
-            foreach (var line in File.ReadLines(logFilePath))
-            {
-                var match = Regex.Match(line, @"\*\*Completed:\*\*\s*(.+)");
-                if (match.Success && DateTime.TryParse(match.Groups[1].Value.Trim(),
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.AdjustToUniversal, out var dt))
-                {
-                    return dt;
-                }
-            }
-        }
-        catch { }
-        return null;
-    }
+        => FileHelper.ExtractCompletedTimestamp(logFilePath);
 
     private static int GetNextRevisionNumber(string revisionsDir)
     {

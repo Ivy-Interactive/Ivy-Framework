@@ -34,3 +34,6 @@ doctor.txt
 doctor-output.json
 
 package-lock.json
+
+# Worktree artifact (pnpm compatibility)
+.npmrc

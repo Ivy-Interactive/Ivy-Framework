@@ -114,13 +114,12 @@ public static class VariableExpansion
             value = value.Replace('\\', '/');
         }
 
-        // Remove double separators (e.g., \\ or //)
+        // Remove double separators (e.g., \\ or //) — single Replace call
+        // suffices because variable expansion produces at most one extra separator
         var sep = Path.DirectorySeparatorChar.ToString();
         var doubleSep = sep + sep;
-        while (value.Contains(doubleSep))
-        {
+        if (value.Contains(doubleSep))
             value = value.Replace(doubleSep, sep);
-        }
 
         return value;
     }

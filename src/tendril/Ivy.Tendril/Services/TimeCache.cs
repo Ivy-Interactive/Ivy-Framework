@@ -2,7 +2,7 @@ namespace Ivy.Tendril.Services;
 
 /// <summary>
 /// Generic time-based cache that stores a value with an expiration time.
-/// Thread-safe for single-writer scenarios (typical for service instances).
+/// Thread-safe.
 ///
 /// Use GetOrCompute for synchronous computations and GetOrComputeAsync for async operations.
 /// </summary>
@@ -12,6 +12,7 @@ public class TimeCache<T>
     private T? _value;
     private DateTime? _timestamp;
     private readonly TimeSpan _expiration;
+    private readonly object _lock = new();
 
     public TimeCache(TimeSpan expiration)
     {
@@ -25,16 +26,23 @@ public class TimeCache<T>
     /// <returns>The cached or newly computed value.</returns>
     public T GetOrCompute(Func<T> compute)
     {
-        if (_value != null &&
-            _timestamp != null &&
-            DateTime.UtcNow - _timestamp.Value < _expiration)
+        lock (_lock)
         {
-            return _value;
+            if (_timestamp != null &&
+                DateTime.UtcNow - _timestamp.Value < _expiration)
+            {
+                return _value!;
+            }
         }
 
         var result = compute();
-        _value = result;
-        _timestamp = DateTime.UtcNow;
+
+        lock (_lock)
+        {
+            _value = result;
+            _timestamp = DateTime.UtcNow;
+        }
+
         return result;
     }
 
@@ -45,16 +53,23 @@ public class TimeCache<T>
     /// <returns>The cached or newly computed value.</returns>
     public async Task<T> GetOrComputeAsync(Func<Task<T>> computeAsync)
     {
-        if (_value != null &&
-            _timestamp != null &&
-            DateTime.UtcNow - _timestamp.Value < _expiration)
+        lock (_lock)
         {
-            return _value;
+            if (_timestamp != null &&
+                DateTime.UtcNow - _timestamp.Value < _expiration)
+            {
+                return _value!;
+            }
         }
 
         var result = await computeAsync();
-        _value = result;
-        _timestamp = DateTime.UtcNow;
+
+        lock (_lock)
+        {
+            _value = result;
+            _timestamp = DateTime.UtcNow;
+        }
+
         return result;
     }
 
@@ -63,15 +78,25 @@ public class TimeCache<T>
     /// </summary>
     public void Invalidate()
     {
-        _value = default;
-        _timestamp = null;
+        lock (_lock)
+        {
+            _value = default;
+            _timestamp = null;
+        }
     }
 
     /// <summary>
     /// Gets whether the cache currently holds a valid value.
     /// </summary>
-    public bool IsValid =>
-        _value != null &&
-        _timestamp != null &&
-        DateTime.UtcNow - _timestamp.Value < _expiration;
+    public bool IsValid
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _timestamp != null &&
+                       DateTime.UtcNow - _timestamp.Value < _expiration;
+            }
+        }
+    }
 }

@@ -55,6 +55,14 @@ DataTable uses Glide Data Grid — renders as `<canvas>`, NOT HTML `<table>`.
 - `state.ToSliderInput()` renders as Radix UI slider with `role="slider"`, NOT `<input type="range">`
 - Keyboard: ArrowRight/Left (step), Home/End (min/max)
 
+### ContentInput
+
+- `state.ToContentInput(uploadContext)` — requires `IState<UploadContext>` from `UseUpload(MemoryStreamUploadHandler.Create(filesState))`
+- `.ShortcutKey("Ctrl+Enter")` renders `<kbd>` badge in bottom toolbar when not focused
+- **macOS shortcut key mapping**: `parseShortcut("Ctrl+X")` maps `Ctrl` to `meta` (Cmd key) on macOS. In Playwright tests, use `Meta+Enter` (not `Control+Enter`) on macOS to trigger `Ctrl+Enter` shortcuts. Detect with `process.platform === 'darwin'`.
+- kbd badge locator: `page.locator('kbd')`
+- When `shortcutKey` is set, the inline `Ctrl/Cmd+Enter` handler is disabled — only the global `useEffect` listener fires
+
 ### TextInput / TextareaInput
 
 - `state.ToTextareaInput()` → `<textarea>`, `state.ToTextInput()` → `role="textbox"`

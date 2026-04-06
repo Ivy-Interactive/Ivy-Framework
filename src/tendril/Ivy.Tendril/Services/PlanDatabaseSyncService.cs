@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text.RegularExpressions;
 using Ivy.Tendril.Apps.Plans;
 using Microsoft.Extensions.Logging;
 
@@ -172,23 +171,7 @@ public class PlanDatabaseSyncService : IDisposable
     }
 
     private static DateTime? ExtractCompletedTimestamp(string logFilePath)
-    {
-        try
-        {
-            foreach (var line in File.ReadLines(logFilePath))
-            {
-                var match = Regex.Match(line, @"\*\*Completed:\*\*\s*(.+)");
-                if (match.Success && DateTime.TryParse(match.Groups[1].Value.Trim(),
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.AdjustToUniversal, out var dt))
-                {
-                    return dt;
-                }
-            }
-        }
-        catch { }
-        return null;
-    }
+        => FileHelper.ExtractCompletedTimestamp(logFilePath);
 
     public void Dispose()
     {
