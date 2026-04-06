@@ -224,7 +224,7 @@ public class JobsApp : ViewBase
                 dataTable,
                 new Sheet(
                     onClose: () => showCommand.Set(null),
-                    content: new Markdown($"```\n{cmd}\n```"),
+                    content: new CodeBlock(cmd, Languages.Text).WrapLines(),
                     title: "Promptware Command"
                 ).Width(Size.Half()).Resizable()
             );
