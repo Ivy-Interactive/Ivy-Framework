@@ -1,6 +1,5 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
-using Ivy;
 
 namespace Ivy.Auth.Examples.Shared;
 

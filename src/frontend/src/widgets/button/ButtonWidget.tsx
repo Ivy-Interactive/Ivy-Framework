@@ -20,6 +20,7 @@ import { Densities } from "@/types/density";
 import {
   parseShortcut,
   formatShortcutForDisplay,
+  keyToCode,
 } from "@/widgets/inputs/TextInputWidget/utils/shortcut";
 
 const ButtonWithTooltip = withTooltip(Button);
@@ -188,12 +189,14 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const eventTarget = event.target as HTMLElement;
+      const shortcutUsesModifierChord = shortcutObj.ctrl || shortcutObj.meta || shortcutObj.alt;
       if (
-        eventTarget.tagName === "INPUT" ||
-        eventTarget.tagName === "TEXTAREA" ||
-        eventTarget.isContentEditable
+        !shortcutUsesModifierChord &&
+        (eventTarget.tagName === "INPUT" ||
+          eventTarget.tagName === "TEXTAREA" ||
+          eventTarget.isContentEditable)
       ) {
-        return; // Don't intercept shortcuts while typing
+        return;
       }
 
       const modifierMatch =
@@ -201,11 +204,13 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
         (shortcutObj.ctrl && event.ctrlKey) ||
         (!shortcutObj.meta && !shortcutObj.ctrl && !event.metaKey && !event.ctrlKey);
 
+      const expectedCode = keyToCode(shortcutObj.key);
+
       const isShortcutPressed =
         modifierMatch &&
         event.shiftKey === shortcutObj.shift &&
         event.altKey === shortcutObj.alt &&
-        event.key.toLowerCase() === shortcutObj.key.toLowerCase();
+        event.code === expectedCode;
 
       if (isShortcutPressed) {
         event.preventDefault();

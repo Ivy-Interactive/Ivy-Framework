@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Ivy;
 
 namespace Ivy.Test.Helpers;
 
@@ -208,6 +207,30 @@ public class TypeHelperTests
     {
         Expression<Func<TestModel, object>> expr = m => m.Owner != null ? m.Owner.Name : "";
         Assert.True(TypeHelper.IsComplexExpression(expr.Body));
+    }
+
+    [Fact]
+    public void GetFullPathFromMemberExpression_SimpleProperty_ReturnsName()
+    {
+        Expression<Func<TestModel, object>> expr = m => m.Name;
+        var name = TypeHelper.GetFullPathFromMemberExpression(expr.Body);
+        Assert.Equal("Name", name);
+    }
+
+    [Fact]
+    public void GetFullPathFromMemberExpression_NavigationProperty_ReturnsFullPath()
+    {
+        Expression<Func<TestModel, object>> expr = m => m.Owner!.Name;
+        var name = TypeHelper.GetFullPathFromMemberExpression(expr.Body);
+        Assert.Equal("Owner.Name", name);
+    }
+
+    [Fact]
+    public void GetFullPathFromMemberExpression_DeepNavigation_ReturnsFullPath()
+    {
+        Expression<Func<TestModel, object>> expr = m => m.Owner!.Address!.City;
+        var name = TypeHelper.GetFullPathFromMemberExpression(expr.Body);
+        Assert.Equal("Owner.Address.City", name);
     }
 
     private class TestModel

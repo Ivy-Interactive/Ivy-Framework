@@ -1,5 +1,7 @@
-import { GridCell, GridCellKind, Item } from "@glideapps/glide-data-grid";
+import { GridCell, GridCellKind, Item, Theme } from "@glideapps/glide-data-grid";
 import { Align, DataColumn, DataRow } from "../types/types";
+import { getCSSVariable } from "@/lib/theme";
+import type { LabelsBadgesCellData } from "./customRenderers";
 
 /**
  * Converts Align enum to contentAlign value for GridCell
@@ -211,10 +213,29 @@ export function createTextCell(cellValue: unknown, editable: boolean, align?: Al
   };
 }
 
+export function lookupBadgeColorMapping(
+  mapping: Record<string, string> | null | undefined,
+  label: string,
+): string | undefined {
+  if (!mapping) return undefined;
+  if (mapping[label]) return mapping[label];
+  const lower = label.toLowerCase();
+  for (const [key, value] of Object.entries(mapping)) {
+    if (key.toLowerCase() === lower) return value;
+  }
+  return undefined;
+}
+
 /**
  * Creates a labels/bubble cell for displaying multiple labels as chips
  */
-export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
+export function createLabelsCell(
+  cellValue: unknown,
+  align?: Align,
+  color?: string | null,
+  customColor?: string | null,
+  badgeColorMapping?: Record<string, string> | null,
+): GridCell {
   // Handle different input formats
   let labels: readonly string[];
 
@@ -246,11 +267,55 @@ export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
     labels = [];
   }
 
+  const contentAlign = align === "Left" ? "left" : align === "Right" ? "right" : "center";
+
+  // Per-label colors require a custom renderer: Bubble cells share one theme for all bubbles.
+  if (badgeColorMapping && labels.length > 1) {
+    const items = labels.map((label) => {
+      const raw = lookupBadgeColorMapping(badgeColorMapping, label) ?? customColor ?? color ?? null;
+      const { bg, text } = resolveBadgeColor(raw);
+      return { text: label, bg, fg: text };
+    });
+    const data: LabelsBadgesCellData = {
+      kind: "labels-badges-cell",
+      items,
+      align: contentAlign,
+    };
+    return {
+      kind: GridCellKind.Custom,
+      data,
+      allowOverlay: false,
+      readonly: true,
+      copyData: labels.join(", "),
+      contentAlign,
+    };
+  }
+
+  // Resolve effective color from mapping if possible
+  let effectiveColor = customColor || color;
+  if (!effectiveColor && badgeColorMapping && labels.length > 0) {
+    for (const label of labels) {
+      const mapped = lookupBadgeColorMapping(badgeColorMapping, label);
+      if (mapped) {
+        effectiveColor = mapped;
+        break;
+      }
+    }
+  }
+
+  const themeOverride: Partial<Theme> = {};
+  if (effectiveColor) {
+    const { bg, text } = resolveBadgeColor(effectiveColor);
+    if (bg) themeOverride.bgBubble = bg;
+    if (text) themeOverride.textBubble = text;
+  }
+
   return {
     kind: GridCellKind.Bubble,
     data: labels as string[],
     allowOverlay: false,
-    contentAlign: align ? getContentAlign(align) : undefined,
+    themeOverride,
+    contentAlign,
   };
 }
 
@@ -332,7 +397,13 @@ export function getCellContent(
 
   // Handle Labels type - supports arrays or comma-separated strings
   if (column.type === "Labels") {
-    return createLabelsCell(cellValue, align);
+    return createLabelsCell(
+      cellValue,
+      align,
+      column.color,
+      column.customColor,
+      column.badgeColorMapping,
+    );
   }
 
   // Handle explicit link type from backend metadata
@@ -364,4 +435,45 @@ export function getCellContent(
 
   // Default to text
   return createTextCell(cellValue, editable, align);
+}
+
+/**
+ * Resolves a color name or custom color string to background and text colors
+ */
+export function resolveBadgeColor(colorValue: string | null | undefined): {
+  bg: string | undefined;
+  text: string | undefined;
+} {
+  if (!colorValue) return { bg: undefined, text: undefined };
+
+  const isDirectColor =
+    colorValue.startsWith("#") ||
+    colorValue.startsWith("rgb") ||
+    colorValue.startsWith("hsl") ||
+    colorValue.includes("(");
+
+  if (isDirectColor) {
+    return { bg: colorValue, text: undefined };
+  }
+
+  const lowerColor = colorValue.toLowerCase().replace(/\s+/g, "-");
+  const bgVar = `--${lowerColor}`;
+  const fgVar = `--${lowerColor}-foreground`;
+
+  let bgColor = getCSSVariable(bgVar) || getCSSVariable(`--color-${lowerColor}`);
+  let fgColor = getCSSVariable(fgVar) || getCSSVariable(`--color-${lowerColor}-foreground`);
+
+  // Shadcn/Tailwind often use raw HSL components in variables
+  const wrapInHsl = (val: string) => {
+    if (!val) return val;
+    if (val.startsWith("#") || val.startsWith("rgb") || val.startsWith("hsl") || val.includes("("))
+      return val;
+    if (val.split(/[\s,]+/).filter(Boolean).length >= 3) return `hsl(${val})`;
+    return val;
+  };
+
+  return {
+    bg: wrapInHsl(bgColor) || undefined,
+    text: wrapInHsl(fgColor) || undefined,
+  };
 }

@@ -10,10 +10,12 @@ public interface IQueryableRegistry
     string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector);
     string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames);
     string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors);
+    string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors, DataTableConfig? config);
     IQueryable? GetQueryable(string sourceId);
     Func<object, object?>? GetIdSelector(string sourceId);
     string[]? GetColumnNames(string sourceId);
     Dictionary<string, Func<object, object?>>? GetValueAccessors(string sourceId);
+    DataTableConfig? GetConfig(string sourceId);
     IDisposable AddCleanup(string sourceId, IDisposable cleanup);
 }
 
@@ -24,6 +26,7 @@ public class QueryableRegistry : IQueryableRegistry
     private readonly ConcurrentDictionary<string, Func<object, object?>?> _idSelectors = new();
     private readonly ConcurrentDictionary<string, string[]?> _columnNames = new();
     private readonly ConcurrentDictionary<string, Dictionary<string, Func<object, object?>>?> _valueAccessors = new();
+    private readonly ConcurrentDictionary<string, DataTableConfig?> _configs = new();
 
     public string RegisterQueryable(IQueryable queryable)
     {
@@ -42,12 +45,18 @@ public class QueryableRegistry : IQueryableRegistry
 
     public string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors)
     {
+        return RegisterQueryable(queryable, idSelector, columnNames, valueAccessors, null);
+    }
+
+    public string RegisterQueryable(IQueryable queryable, Func<object, object?>? idSelector, string[]? columnNames, Dictionary<string, Func<object, object?>>? valueAccessors, DataTableConfig? config)
+    {
         var sourceId = Guid.NewGuid().ToString();
         _queryables[sourceId] = queryable;
         _cleanups[sourceId] = new CompositeDisposable();
         _idSelectors[sourceId] = idSelector;
         _columnNames[sourceId] = columnNames;
         _valueAccessors[sourceId] = valueAccessors;
+        _configs[sourceId] = config;
         return sourceId;
     }
 
@@ -71,6 +80,11 @@ public class QueryableRegistry : IQueryableRegistry
         return _valueAccessors.GetValueOrDefault(sourceId);
     }
 
+    public DataTableConfig? GetConfig(string sourceId)
+    {
+        return _configs.GetValueOrDefault(sourceId);
+    }
+
     public IDisposable AddCleanup(string sourceId, IDisposable cleanup)
     {
         if (_cleanups.TryGetValue(sourceId, out var compositeDisposable))
@@ -88,6 +102,7 @@ public class QueryableRegistry : IQueryableRegistry
             _idSelectors.TryRemove(sourceId, out _);
             _columnNames.TryRemove(sourceId, out _);
             _valueAccessors.TryRemove(sourceId, out _);
+            _configs.TryRemove(sourceId, out _);
         });
     }
 }

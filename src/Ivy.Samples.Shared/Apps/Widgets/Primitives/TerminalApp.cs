@@ -1,5 +1,3 @@
-using Ivy.Widgets.Internal;
-
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.Terminal, group: ["Widgets", "Primitives"], searchHints: ["terminal", "console", "command", "cli", "shell", "bash"])]

@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
 using Ivy.Core.Helpers;
-using Ivy.Core.Hooks;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

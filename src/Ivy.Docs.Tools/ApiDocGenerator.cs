@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Text;
 using Ivy.Core;
-using Ivy.Core.Hooks;
 
 namespace Ivy.Docs.Tools;
 

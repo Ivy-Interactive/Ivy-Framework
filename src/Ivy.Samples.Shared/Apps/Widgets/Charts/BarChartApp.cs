@@ -17,6 +17,7 @@ public class BarChartApp : SampleBase
             | new BarChart7()
             | new BarChart8()
             | new BarChart9()
+            | new BarChart10()
         ;
     }
 }
@@ -276,6 +277,40 @@ public class BarChart9 : ViewBase
                 .CartesianGrid(new CartesianGrid().Horizontal().Stroke(Colors.Red))
                 .Tooltip()
                 .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
+                .Legend()
+        ;
+    }
+}
+
+public class BarChart10 : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Month = "Jan", Revenue = 4500, GrowthRate = 5 },
+            new { Month = "Feb", Revenue = 5200, GrowthRate = 15 },
+            new { Month = "Mar", Revenue = 5800, GrowthRate = 12 },
+            new { Month = "Apr", Revenue = 5400, GrowthRate = -7 },
+            new { Month = "May", Revenue = 6100, GrowthRate = 13 },
+            new { Month = "Jun", Revenue = 6700, GrowthRate = 10 },
+        };
+
+        return new Card().Title("Dual Axis (Revenue vs Growth Rate)")
+            | new BarChart(data)
+                .ColorScheme(ColorScheme.Default)
+                .Bar(new Bar("Revenue", 1).YAxisIndex(0).Radius(8).LegendType(LegendTypes.Square))
+                .Bar(new Bar("GrowthRate", 2).YAxisIndex(1).Radius(8).LegendType(LegendTypes.Square))
+                .CartesianGrid(new CartesianGrid().Horizontal())
+                .Tooltip()
+                .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
+                .YAxis(new YAxis("Revenue")
+                    .Orientation(YAxis.Orientations.Left)
+                    .TickFormatter("C0"))
+                .YAxis(new YAxis("GrowthRate")
+                    .Orientation(YAxis.Orientations.Right)
+                    .TickFormatter("P0")
+                    .Domain(-0.1, 0.2))
                 .Legend()
         ;
     }

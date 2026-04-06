@@ -1,8 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
-using Ivy.Core;
-using Ivy.Core.Hooks;
 using Ivy.Views.Builders;
 
 // ReSharper disable once CheckNamespace

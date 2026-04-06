@@ -1,5 +1,4 @@
 using Ivy.Samples.Shared.Helpers;
-using System.Reflection;
 
 namespace Ivy.Samples.Shared.Apps;
 

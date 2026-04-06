@@ -7,6 +7,7 @@ import DataEditor, {
   GridMouseEventArgs,
   GridSelection,
   GroupHeaderClickedEventArgs,
+  Highlight,
   Item,
   SpriteMap,
   Theme,
@@ -46,6 +47,8 @@ interface GridContainerProps {
   onGroupHeaderClicked?: (colIndex: number, event: GroupHeaderClickedEventArgs) => void;
   showSearch: boolean;
   onSearchClose: () => void;
+  onSearchResultsChanged?: (results: readonly Item[], navIndex: number) => void;
+  highlightRegions?: readonly Highlight[];
   onItemHovered?: (args: GridMouseEventArgs) => void;
   getRowThemeOverride?: ((row: number) => Partial<Theme> | undefined) | undefined;
   rowActions?: MenuItem[];
@@ -92,6 +95,8 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   onGroupHeaderClicked,
   showSearch,
   onSearchClose,
+  onSearchResultsChanged,
+  highlightRegions,
   onItemHovered,
   getRowThemeOverride,
   rowActions,
@@ -156,6 +161,8 @@ export const GridContainer: React.FC<GridContainerProps> = ({
           onGroupHeaderClicked={onGroupHeaderClicked}
           showSearch={showSearch}
           onSearchClose={onSearchClose}
+          onSearchResultsChanged={onSearchResultsChanged}
+          highlightRegions={highlightRegions}
           onItemHovered={onItemHovered}
           getRowThemeOverride={getRowThemeOverride}
         />

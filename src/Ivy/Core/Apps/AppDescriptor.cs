@@ -59,6 +59,8 @@ public class AppDescriptor : IAppRepositoryNode
 
     public string[]? SearchHints { get; set; }
 
+    public bool AllowDuplicateTabs { get; init; }
+
     public ViewBase CreateApp()
     {
         if (ViewFactory != null)

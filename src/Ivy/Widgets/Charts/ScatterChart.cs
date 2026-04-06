@@ -1,5 +1,3 @@
-using Ivy.Core;
-
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
@@ -54,6 +52,26 @@ public record ScatterChart : WidgetBase<ScatterChart>
 
 public static partial class ScatterChartExtensions
 {
+    private static void ValidateAxisType(AxisBase<XAxis> axis, string axisName)
+    {
+        if (axis.Type == AxisTypes.Category)
+        {
+            throw new InvalidOperationException(
+                $"ScatterChart requires numeric axes. {axisName} has Type=Category, which causes rendering failures. " +
+                $"Use {axisName}(...).Type(AxisTypes.Number) or omit the Type() call (defaults to Number).");
+        }
+    }
+
+    private static void ValidateAxisType(AxisBase<YAxis> axis, string axisName)
+    {
+        if (axis.Type == AxisTypes.Category)
+        {
+            throw new InvalidOperationException(
+                $"ScatterChart requires numeric axes. {axisName} has Type=Category, which causes rendering failures. " +
+                $"Use {axisName}(...).Type(AxisTypes.Number) or omit the Type() call (defaults to Number).");
+        }
+    }
+
     public static ScatterChart Scatter(this ScatterChart chart, Scatter scatter)
     {
         return chart with { Scatters = [.. chart.Scatters, scatter] };
@@ -81,27 +99,29 @@ public static partial class ScatterChartExtensions
 
     public static ScatterChart XAxis(this ScatterChart chart, XAxis xAxis)
     {
+        ValidateAxisType(xAxis, "XAxis");
         return chart with { XAxis = [.. chart.XAxis, xAxis] };
     }
 
     public static ScatterChart XAxis(this ScatterChart chart, string dataKey)
     {
-        return chart with { XAxis = [.. chart.XAxis, new XAxis(dataKey)] };
+        return chart with { XAxis = [.. chart.XAxis, new XAxis(dataKey) { Type = AxisTypes.Number }] };
     }
 
     public static ScatterChart YAxis(this ScatterChart chart, YAxis yAxis)
     {
+        ValidateAxisType(yAxis, "YAxis");
         return chart with { YAxis = [.. chart.YAxis, yAxis] };
     }
 
     public static ScatterChart YAxis(this ScatterChart chart, string dataKey)
     {
-        return chart with { YAxis = [.. chart.YAxis, new YAxis(dataKey)] };
+        return chart with { YAxis = [.. chart.YAxis, new YAxis(dataKey) { Type = AxisTypes.Number }] };
     }
 
     public static ScatterChart YAxis(this ScatterChart chart)
     {
-        return chart with { YAxis = [.. chart.YAxis, new YAxis()] };
+        return chart with { YAxis = [.. chart.YAxis, new YAxis() { Type = AxisTypes.Number }] };
     }
 
     public static ScatterChart ZAxis(this ScatterChart chart, ZAxis zAxis)

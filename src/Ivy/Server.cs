@@ -13,7 +13,6 @@ using Ivy.Core.Server.Formatters;
 using MessagePack;
 using MessagePack.Resolvers;
 using MessagePack.Formatters;
-using Ivy.Themes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE

@@ -1,6 +1,4 @@
 #if DEBUG
-using Ivy.Core;
-
 namespace Ivy.Core.Auth;
 
 public class CheckedAuthTokenHandler(IAuthTokenHandler innerAuthTokenHandler) : IAuthTokenHandler

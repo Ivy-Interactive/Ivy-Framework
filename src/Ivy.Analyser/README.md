@@ -234,6 +234,39 @@ This means any custom hooks you create following the `UseX` pattern will be auto
 **Message:** `Ivy hook '{hookName}' must be called at the top of the Build() method, before any other statements.`  
 **Description:** All hooks must be called at the very top of the Build() method, before any other non-hook statements. This ensures hooks are called in a consistent order on every render.
 
+### IVYSERVICE001 - UseService Should Use Interface (Warning)
+
+**Severity:** Warning  
+**Message:** `UseService<{ConcreteType}> should use interface I{ConcreteType} instead. Using concrete types breaks testability and violates dependency inversion.`  
+**Description:** When calling UseService<T>(), always prefer interface types over concrete types when an interface is available. This ensures proper dependency injection, testability, and adherence to SOLID principles.
+
+#### ✅ Valid Usage
+
+```csharp
+public override object? Build()
+{
+    var config = UseService<IConfigService>();     // ✅ Valid - using interface
+    var job = UseService<IJobService>();           // ✅ Valid - using interface
+    var git = UseService<IGitService>();           // ✅ Valid - using interface
+    
+    return new Button();
+}
+```
+
+#### ❌ Invalid Usage
+
+```csharp
+public override object? Build()
+{
+    var config = UseService<ConfigService>();     // ⚠️ Warning IVYSERVICE001 - use IConfigService
+    var job = UseService<JobService>();           // ⚠️ Warning IVYSERVICE001 - use IJobService
+    
+    return new Button();
+}
+```
+
+**Note:** This warning only appears when a corresponding interface (prefixed with 'I') exists in the same namespace. If no interface exists, no warning is shown.
+
 ## Configuration
 
 The analyzer runs automatically when you build your project. No additional configuration is needed.
@@ -248,12 +281,14 @@ If you need to suppress the analyzer for specific cases, you can use:
 #pragma warning disable IVYHOOK003  // Suppress loop warning
 #pragma warning disable IVYHOOK004  // Suppress switch warning
 #pragma warning disable IVYHOOK005  // Suppress not-at-top warning
+#pragma warning disable IVYSERVICE001  // Suppress UseService interface warning
 var state = UseState(false); // This will not trigger the analyzer
 #pragma warning restore IVYHOOK001
 #pragma warning restore IVYHOOK002
 #pragma warning restore IVYHOOK003
 #pragma warning restore IVYHOOK004
 #pragma warning restore IVYHOOK005
+#pragma warning restore IVYSERVICE001
 ```
 
 However, this is **not recommended** as it may lead to runtime errors.

@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
 [App(icon: Icons.TextCursorInput, group: ["Widgets", "Inputs"], searchHints: ["password", "textarea", "search", "email"])]

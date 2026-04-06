@@ -37,6 +37,49 @@ export const parseShortcut = (shortcutStr?: string): ParsedShortcut | null => {
  * Formats a shortcut string for display as React nodes.
  * Converts modifier keys to platform-appropriate symbols (e.g., ⌘ on Mac).
  */
+/**
+ * Maps a key name to a KeyboardEvent.code value.
+ * Uses event.code for matching so modifiers like Alt don't produce special characters on Mac.
+ */
+export const keyToCode = (key: string): string => {
+  const k = key.toLowerCase();
+  // Single letter keys: a-z → KeyA-KeyZ
+  if (k.length === 1 && k >= "a" && k <= "z") {
+    return `Key${k.toUpperCase()}`;
+  }
+  // Single digit keys: 0-9 → Digit0-Digit9
+  if (k.length === 1 && k >= "0" && k <= "9") {
+    return `Digit${k}`;
+  }
+  // Special keys
+  const specialKeys: Record<string, string> = {
+    enter: "Enter",
+    return: "Enter",
+    delete: "Delete",
+    backspace: "Backspace",
+    space: "Space",
+    " ": "Space",
+    tab: "Tab",
+    escape: "Escape",
+    esc: "Escape",
+    arrowup: "ArrowUp",
+    arrowdown: "ArrowDown",
+    arrowleft: "ArrowLeft",
+    arrowright: "ArrowRight",
+    home: "Home",
+    end: "End",
+    pageup: "PageUp",
+    pagedown: "PageDown",
+    insert: "Insert",
+  };
+  // F-keys: f1-f12
+  const fKeyMatch = k.match(/^f(\d{1,2})$/);
+  if (fKeyMatch) {
+    return `F${fKeyMatch[1]}`;
+  }
+  return specialKeys[k] ?? key;
+};
+
 export const formatShortcutForDisplay = (shortcutStr?: string): React.ReactNode[] => {
   if (!shortcutStr) return [];
   const parts = shortcutStr.split("+").map((p) => p.trim());

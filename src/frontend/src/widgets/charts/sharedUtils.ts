@@ -160,13 +160,21 @@ export const generateDataProps = (data: Record<string, unknown>[]) => {
 export function generateEChartGrid(
   cartesianGrid?: CartesianGridProps,
   hasToolbox: boolean = false,
+  yAxis?: YAxisProps[],
+  xAxis?: XAxisProps[],
 ) {
+  // When all Y axes are hidden, remove left/right padding so the chart uses full width
+  const allYAxesHidden = yAxis && yAxis.length > 0 && yAxis.every((axis) => axis.hide === true);
+
+  // When all X axes are hidden, remove bottom padding
+  const allXAxesHidden = xAxis && xAxis.length > 0 && xAxis.every((axis) => axis.hide === true);
+
   const defaultGrid = {
     show: false, // Hide grid border to remove the square frame
-    left: "3%",
-    right: "4%",
+    left: allYAxesHidden ? 0 : "3%",
+    right: allYAxesHidden ? 0 : "4%",
     top: hasToolbox ? 40 : 15,
-    bottom: 50, // Space for legend below axis labels
+    bottom: allXAxesHidden ? 10 : 50, // Reduce bottom padding when X axis is hidden
     containLabel: true,
     borderWidth: 0, // Ensure no border is drawn
   };
@@ -400,68 +408,79 @@ export const generateYAxis = (
   cartesianGrid?: CartesianGridProps,
 ) => {
   const safeTransform = transformValue ?? ((v: number) => v);
-  const axis = yAxis?.[0] || ({} as Partial<YAxisProps>);
-  const allowDataOverflow = axis.allowDataOverflow ?? false;
 
-  let minOpt = getAxisDomainBound("min", axis.domainMin, allowDataOverflow, safeTransform);
-  let maxOpt = getAxisDomainBound("max", axis.domainMax, allowDataOverflow, safeTransform);
+  const buildAxisConfig = (axis: Partial<YAxisProps>, skipLargeSpread: boolean = false) => {
+    const effectiveLargeSpread = largeSpread && !skipLargeSpread;
+    const allowDataOverflow = axis.allowDataOverflow ?? false;
 
-  if (largeSpread) {
-    if (minOpt === undefined) minOpt = safeTransform(minValue);
-    if (maxOpt === undefined) maxOpt = safeTransform(maxValue);
+    let minOpt = getAxisDomainBound("min", axis.domainMin, allowDataOverflow, safeTransform);
+    let maxOpt = getAxisDomainBound("max", axis.domainMax, allowDataOverflow, safeTransform);
+
+    if (effectiveLargeSpread) {
+      if (minOpt === undefined) minOpt = safeTransform(minValue);
+      if (maxOpt === undefined) maxOpt = safeTransform(maxValue);
+    }
+
+    return {
+      show: axis.hide ? false : true,
+      type: isVertical ? "value" : "category",
+      data: isVertical ? undefined : categories,
+      ...(minOpt !== undefined && { min: minOpt }),
+      ...(maxOpt !== undefined && { max: maxOpt }),
+      axisLabel: {
+        show: axis.hideTickLabels ? false : true,
+        formatter: (value: number) => {
+          if (axis.tickFormatter) {
+            return formatTickLabel(value, axis.tickFormatter);
+          }
+          if (effectiveLargeSpread) {
+            const unscaled = Math.sign(value) * (10 ** Math.abs(value) - 1);
+            if (Math.abs(unscaled) >= 1e9) return (unscaled / 1e9).toFixed(0) + "B";
+            if (Math.abs(unscaled) >= 1e6) return (unscaled / 1e6).toFixed(0) + "M";
+            if (Math.abs(unscaled) >= 1e3) return (unscaled / 1e3).toFixed(0) + "K";
+            return unscaled.toFixed(0);
+          }
+          if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(0) + "B";
+          if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(0) + "M";
+          if (Math.abs(value) >= 1e3) return (value / 1e3).toFixed(0) + "K";
+          return value;
+        },
+        ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
+      },
+      splitNumber: effectiveLargeSpread ? 3 : 5,
+      position: axis.orientation === "Right" ? "right" : "left",
+      axisLine: {
+        show: true,
+        lineStyle: {
+          type: "dashed",
+          color: themeColors?.mutedForeground,
+          opacity: 0.1,
+        },
+      },
+      axisTick: {
+        show: true,
+        lineStyle: {
+          color: themeColors?.mutedForeground,
+          opacity: 0.4,
+        },
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          type: "dashed",
+          color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
+          opacity: 0.4,
+        },
+      },
+    };
+  };
+
+  if (yAxis && yAxis.length > 1) {
+    // Each axis auto-scales independently; global largeSpread is misleading for multi-axis charts
+    return yAxis.map((axis) => buildAxisConfig(axis, /* skipLargeSpread: */ true));
   }
 
-  return {
-    type: isVertical ? "value" : "category",
-    data: isVertical ? undefined : categories,
-    ...(minOpt !== undefined && { min: minOpt }),
-    ...(maxOpt !== undefined && { max: maxOpt }),
-    axisLabel: {
-      show: axis.hideTickLabels ? false : true,
-      formatter: (value: number) => {
-        if (axis.tickFormatter) {
-          return formatTickLabel(value, axis.tickFormatter);
-        }
-        if (largeSpread) {
-          const unscaled = Math.sign(value) * (10 ** Math.abs(value) - 1);
-          if (Math.abs(unscaled) >= 1e9) return (unscaled / 1e9).toFixed(0) + "B";
-          if (Math.abs(unscaled) >= 1e6) return (unscaled / 1e6).toFixed(0) + "M";
-          if (Math.abs(unscaled) >= 1e3) return (unscaled / 1e3).toFixed(0) + "K";
-          return unscaled.toFixed(0);
-        }
-        if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(0) + "B";
-        if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(0) + "M";
-        if (Math.abs(value) >= 1e3) return (value / 1e3).toFixed(0) + "K";
-        return value;
-      },
-      ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
-    },
-    splitNumber: largeSpread ? 3 : 5,
-    position: axis.orientation === "Right" ? "right" : "left",
-    axisLine: {
-      show: true,
-      lineStyle: {
-        type: "dashed",
-        color: themeColors?.mutedForeground,
-        opacity: 0.1,
-      },
-    },
-    axisTick: {
-      show: true,
-      lineStyle: {
-        color: themeColors?.mutedForeground,
-        opacity: 0.4,
-      },
-    },
-    splitLine: {
-      show: true,
-      lineStyle: {
-        type: "dashed",
-        color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
-        opacity: 0.4,
-      },
-    },
-  };
+  return buildAxisConfig(yAxis?.[0] || ({} as Partial<YAxisProps>));
 };
 
 export const generateTooltip = (

@@ -46,11 +46,11 @@ public class TreeApp : SampleBase
                 new MenuItem("README.md").Icon(Icons.BookOpen).Tag("README.md")
             )
             .RowActions([
-                new MenuItem("Edit").Icon(Icons.Pencil).Tag("edit"),
-                new MenuItem("More").Icon(Icons.Ellipsis).Children(
-                    new MenuItem("Duplicate").Icon(Icons.Copy).Tag("duplicate"),
-                    new MenuItem("Share").Icon(Icons.Share).Tag("share"),
-                    new MenuItem("Delete").Icon(Icons.Trash).Tag("delete")
+                MenuItem.Default("Edit").Icon(Icons.Pencil).Tag("edit").Color(Colors.Violet),
+                MenuItem.Default("More").Icon(Icons.Ellipsis).Children(
+                    MenuItem.Default("Duplicate").Icon(Icons.Copy).Tag("duplicate").Color(Colors.Amber),
+                    MenuItem.Default("Share").Icon(Icons.Share).Tag("share"),
+                    MenuItem.Default("Delete").Icon(Icons.Trash).Tag("delete").Destructive()
                 )
             ])
             .OnSelect(e => selectedItem.Set(e.Value?.ToString() ?? ""))

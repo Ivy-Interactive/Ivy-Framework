@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using System.Reactive.Subjects;
 
 // ReSharper disable once CheckNamespace

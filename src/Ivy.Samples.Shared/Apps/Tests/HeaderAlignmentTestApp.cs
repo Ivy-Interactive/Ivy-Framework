@@ -1,8 +1,3 @@
-using Ivy;
-using Ivy.Core;
-using Ivy.Core.Hooks;
-using Ivy.Samples.Shared.Apps;
-
 namespace Ivy.Samples.Shared.Apps.Tests;
 
 public record Plan(int Id, string Title, string Queue, string Level);

@@ -244,4 +244,61 @@ test.describe("Button Widget Tests", () => {
     const textContent = await primaryButton.textContent();
     expect(textContent?.trim()).toBe("Primary");
   });
+
+  test.describe("Keyboard Shortcuts", () => {
+    test("should trigger button via Alt+letter shortcut", async ({ page }) => {
+      // The "Copy" button has shortcut Alt+C
+      const copyButton = page.getByRole("button", { name: /Copy/ }).first();
+      await copyButton.scrollIntoViewIfNeeded();
+      await expect(copyButton).toBeVisible();
+
+      // Press Alt+C to trigger the shortcut
+      await page.keyboard.press("Alt+KeyC");
+
+      // Should trigger the click handler and update the demo label
+      await expect(page.locator("text=/Button Copy was clicked/")).toBeVisible();
+    });
+
+    test("should trigger button via Ctrl+letter shortcut", async ({ page }) => {
+      // The "Search" button has shortcut Ctrl+K
+      const searchButton = page.getByRole("button", { name: /Search/ }).first();
+      await searchButton.scrollIntoViewIfNeeded();
+      await expect(searchButton).toBeVisible();
+
+      // Press Ctrl+K (or Meta+K on Mac — Playwright handles platform mapping)
+      await page.keyboard.press("Control+KeyK");
+
+      await expect(page.locator("text=/Button Search was clicked/")).toBeVisible();
+    });
+
+    test("should trigger button via special key shortcut", async ({ page }) => {
+      // The "Delete" button has shortcut Delete
+      const deleteButton = page.getByRole("button", { name: /Delete/ }).first();
+      await deleteButton.scrollIntoViewIfNeeded();
+      await expect(deleteButton).toBeVisible();
+
+      await page.keyboard.press("Delete");
+
+      await expect(page.locator("text=/Button Delete was clicked/")).toBeVisible();
+    });
+
+    test("should trigger button via Ctrl+Enter shortcut", async ({ page }) => {
+      // The "Submit" button has shortcut Ctrl+Enter
+      const submitButton = page.getByRole("button", { name: /Submit/ }).first();
+      await submitButton.scrollIntoViewIfNeeded();
+      await expect(submitButton).toBeVisible();
+
+      await page.keyboard.press("Control+Enter");
+
+      await expect(page.locator("text=/Button Submit was clicked/")).toBeVisible();
+    });
+
+    test("should display shortcut key labels on buttons", async ({ page }) => {
+      // Verify shortcut badges are rendered on buttons
+      const searchButton = page.getByRole("button", { name: /Search/ }).first();
+      await searchButton.scrollIntoViewIfNeeded();
+      const kbd = searchButton.locator("kbd");
+      await expect(kbd).toBeVisible();
+    });
+  });
 });

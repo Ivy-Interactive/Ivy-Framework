@@ -1,6 +1,5 @@
 
 using Ivy.Views.Builders;
-using Xunit;
 
 namespace Ivy.Test;
 
@@ -11,6 +10,81 @@ public class TableBuilderTests
         public string Name { get; set; } = string.Empty;
         public int Age { get; set; }
         public bool IsActive { get; set; }
+    }
+
+    private class CustomerModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public AddressModel Address { get; set; } = new();
+    }
+
+    private class AddressModel
+    {
+        public string City { get; set; } = string.Empty;
+        public string Region { get; set; } = string.Empty;
+    }
+
+    [Fact]
+    public void SubProperty_MultipleHeaderCalls_CreatesSeparateColumns()
+    {
+        var data = new[]
+        {
+            new CustomerModel { Name = "Alice", Address = new AddressModel { City = "NYC", Region = "NY" } }
+        };
+
+        var builder = new TableBuilder<CustomerModel>(data);
+        builder.Header(c => c.Address.City, "City");
+        builder.Header(c => c.Address.Region, "Region");
+
+        var columnsField = typeof(TableBuilder<CustomerModel>)
+            .GetField("_columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var columns = (System.Collections.IDictionary)columnsField!.GetValue(builder)!;
+
+        Assert.True(columns.Contains("Address.City"));
+        Assert.True(columns.Contains("Address.Region"));
+    }
+
+    [Fact]
+    public void SubProperty_DifferentAccessors_BothWork()
+    {
+        var data = new[]
+        {
+            new CustomerModel { Name = "Alice", Address = new AddressModel { City = "NYC", Region = "NY" } }
+        };
+
+        var builder = new TableBuilder<CustomerModel>(data);
+        builder.Header(c => c.Address.City, "City");
+        builder.Header(c => c.Address.Region, "Region");
+
+        var columnsField = typeof(TableBuilder<CustomerModel>)
+            .GetField("_columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var columns = (System.Collections.IDictionary)columnsField!.GetValue(builder)!;
+
+        var cityColumn = columns["Address.City"]!;
+        var regionColumn = columns["Address.Region"]!;
+
+        var getValueMethod = cityColumn.GetType().GetMethod("GetValue");
+        Assert.Equal("NYC", getValueMethod!.Invoke(cityColumn, new object[] { data[0] }));
+        Assert.Equal("NY", getValueMethod!.Invoke(regionColumn, new object[] { data[0] }));
+    }
+
+    [Fact]
+    public void SimpleProperty_BackwardCompatibility_UsesSimpleName()
+    {
+        var data = new[]
+        {
+            new CustomerModel { Name = "Alice", Address = new AddressModel { City = "NYC", Region = "NY" } }
+        };
+
+        var builder = new TableBuilder<CustomerModel>(data);
+
+        var columnsField = typeof(TableBuilder<CustomerModel>)
+            .GetField("_columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var columns = (System.Collections.IDictionary)columnsField!.GetValue(builder)!;
+
+        // Scaffolded columns should use simple property names
+        Assert.True(columns.Contains("Name"));
+        Assert.True(columns.Contains("Address"));
     }
 
     [Fact]

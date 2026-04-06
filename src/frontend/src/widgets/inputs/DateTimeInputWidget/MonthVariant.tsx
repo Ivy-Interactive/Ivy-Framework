@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -33,6 +33,14 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   onFocusChange,
 }) => {
   const [open, setOpen] = useState(false);
+
+  const hasAutoFocusedRef = useRef(false);
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      setOpen(true);
+    }
+  }, [autoFocus, disabled]);
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
 
   const handleOpenChange = useCallback(

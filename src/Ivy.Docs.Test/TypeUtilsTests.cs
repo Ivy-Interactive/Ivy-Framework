@@ -1,5 +1,4 @@
 using System.Reflection;
-using Ivy.Core;
 using Ivy.Core.Docs;
 using Ivy.Docs.Shared.Helpers;
 

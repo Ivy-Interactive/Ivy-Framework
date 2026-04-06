@@ -1,5 +1,3 @@
-using Ivy.Core;
-
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
@@ -8,7 +6,7 @@ namespace Ivy;
 /// </summary>
 public record Detail : WidgetBase<Detail>
 {
-    public Detail(string? label, object? value, bool multiline) : base(value != null ? [value] : [])
+    public Detail(string? label, object? value, bool multiline = false) : base(value != null ? [value] : [])
     {
         Label = label;
         Multiline = multiline;

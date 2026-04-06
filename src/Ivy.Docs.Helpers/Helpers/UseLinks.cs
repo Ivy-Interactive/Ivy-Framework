@@ -1,5 +1,6 @@
+using Ivy.Core;
 
-namespace Ivy.Docs.Shared.Helpers;
+namespace Ivy.Docs.Helpers;
 
 public static class Hooks
 {

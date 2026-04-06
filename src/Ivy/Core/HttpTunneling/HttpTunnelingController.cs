@@ -54,13 +54,13 @@ public class HttpTunnelingController : Controller
         }
 
         logger.LogDebug("HttpResponse: {RequestId} with status {StatusCode} for connection {ConnectionId}",
-            response.RequestId, response.StatusCode, connectionId);
+            response.RequestId.Replace("\n", "").Replace("\r", ""), response.StatusCode, connectionId.Replace("\n", "").Replace("\r", ""));
 
         var fullRequestId = $"{connectionId}:{response.RequestId}";
 
         if (!_pendingRequests.TryRemove(fullRequestId, out var pendingRequest))
         {
-            logger.LogWarning("HttpResponse: Request {RequestId} not found or already completed", response.RequestId);
+            logger.LogWarning("HttpResponse: Request {RequestId} not found or already completed", response.RequestId.Replace("\n", "").Replace("\r", ""));
             return NotFound("Request not found");
         }
 
@@ -74,7 +74,7 @@ public class HttpTunnelingController : Controller
             pendingRequest.CompletionSource.TrySetException(ex);
         }
 
-        logger.LogDebug("HttpResponse: Successfully completed request {RequestId}", response.RequestId);
+        logger.LogDebug("HttpResponse: Successfully completed request {RequestId}", response.RequestId.Replace("\n", "").Replace("\r", ""));
         return Ok();
     }
 

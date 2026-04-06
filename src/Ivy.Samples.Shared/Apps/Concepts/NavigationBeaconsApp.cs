@@ -1,5 +1,3 @@
-using Ivy;
-
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 // Define entity types for this demo

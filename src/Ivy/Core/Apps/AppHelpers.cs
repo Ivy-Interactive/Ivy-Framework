@@ -67,6 +67,7 @@ public static class AppHelpers
                 GroupExpanded = appAttribute.GroupExpanded,
                 DocumentSource = appAttribute.DocumentSource,
                 SearchHints = appAttribute.SearchHints,
+                AllowDuplicateTabs = appAttribute.AllowDuplicateTabs,
             };
         }
         throw new InvalidOperationException($"Type '{type.FullName}' is missing the [App] attribute.");

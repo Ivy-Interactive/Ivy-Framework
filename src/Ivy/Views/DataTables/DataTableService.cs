@@ -40,6 +40,7 @@ public class DataTableService(
             var idSelector = queryableRegistry.GetIdSelector(request.SourceId);
             var columnNames = queryableRegistry.GetColumnNames(request.SourceId);
             var valueAccessors = queryableRegistry.GetValueAccessors(request.SourceId);
+            var config = queryableRegistry.GetConfig(request.SourceId);
 
             // If column names are stored, use them; otherwise fall back to request's SelectColumns
             DataTableQuery queryToUse = request;
@@ -51,7 +52,7 @@ public class DataTableService(
             }
 
             var queryProcessor = new QueryProcessor(logger: null, cache: cache);
-            var queryResult = queryProcessor.ProcessQuery(queryable, queryToUse, idSelector, valueAccessors);
+            var queryResult = queryProcessor.ProcessQuery(queryable, queryToUse, config, idSelector, valueAccessors);
 
             var tableResult = new DataTableResult
             {

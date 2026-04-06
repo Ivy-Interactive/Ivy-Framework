@@ -37,6 +37,7 @@ interface CodeInputWidgetProps {
   width?: string;
   height?: string;
   density?: Densities;
+  autoFocus?: boolean;
 }
 
 const languageExtensions = {
@@ -68,6 +69,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   height,
   density = Densities.Medium,
   events = EMPTY_ARRAY,
+  autoFocus,
 }) => {
   const eventHandler = useEventHandler();
   const [isFocused, setIsFocused] = useState(false);
@@ -185,6 +187,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         onFocus={handleFocus}
         placeholder={placeholder}
         editable={!disabled}
+        autoFocus={autoFocus}
         data-gramm="false"
         className={cn(
           "h-full",

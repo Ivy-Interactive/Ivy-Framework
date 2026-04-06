@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Text.Json.Nodes;
-using Ivy.Core;
 using Ivy.Core.Apps;
 using Ivy.Core.Auth;
 using Ivy.Core.ExternalWidgets;
@@ -11,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using AppContext = Ivy.AppContext;
 
 namespace Ivy.Core.Server;
 

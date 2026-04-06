@@ -25,6 +25,7 @@ export type BarProps = {
   strokeDashArray?: string | null;
   strokeWidth?: number;
   unit?: string | null;
+  yAxisIndex?: number | null;
 };
 
 interface PieChartTotalProps {
@@ -348,6 +349,7 @@ export interface ScatterProps {
   strokeDashArray?: string | null;
   strokeWidth?: number;
   unit?: string | null;
+  yAxisIndex?: number | null;
 }
 
 export interface ScatterChartWidgetProps {

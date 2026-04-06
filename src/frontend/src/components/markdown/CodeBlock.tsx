@@ -108,6 +108,28 @@ export const CodeBlock = memo(
         );
       }
 
+      const language = match ? match[1] : "text";
+      const useHighlighter = language !== "markdown" && language !== "md";
+
+      if (!useHighlighter) {
+        return (
+          <div className="relative">
+            <div className="absolute top-2 right-2 z-10">
+              <CopyToClipboardButton textToCopy={content} />
+            </div>
+            <ScrollArea className="w-full border border-border rounded-md">
+              <pre
+                className="p-4 rounded-md font-mono text-sm"
+                style={{ margin: 0, whiteSpace: "pre", overflowX: "auto" }}
+              >
+                {content}
+              </pre>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </div>
+        );
+      }
+
       return (
         <Suspense
           fallback={
@@ -128,7 +150,7 @@ export const CodeBlock = memo(
             </div>
             <ScrollArea className="w-full border border-border rounded-md">
               <SyntaxHighlighter
-                language={match ? match[1] : "text"}
+                language={language}
                 style={dynamicTheme}
                 customStyle={{
                   margin: 0,

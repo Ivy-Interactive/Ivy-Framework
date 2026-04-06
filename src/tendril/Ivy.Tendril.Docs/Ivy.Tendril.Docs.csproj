@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Ivy.Tendril.Docs</RootNamespace>
+    <NoWarn>CS1591;CS8618;CS8603;CS8602;CS8604;CS8669;CS9113;NETSDK1187</NoWarn>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Ivy/Ivy.csproj" />
+    <ProjectReference Include="../../Ivy.Docs.Helpers/Ivy.Docs.Helpers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets/**/*" />
+    <EmbeddedResource Include="Generated/**/*.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Docs/*.md" />
+    <Compile Include="**/*.cs" Exclude="obj/**/*.cs;bin/**/*.cs;Generated/**/*.cs" />
+  </ItemGroup>
+
+  <Target Name="TransformMarkdown" AfterTargets="ResolveProjectReferences" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs', '*.md'))</DocsInputPath>
+      <DocsOutputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Generated'))</DocsOutputPath>
+    </PropertyGroup>
+    <Exec Command="cargo run --release --manifest-path &quot;../../Ivy.Docs.Tools/rust_cli/Cargo.toml&quot; -- convert &quot;$(DocsInputPath)&quot; &quot;$(DocsOutputPath)&quot; --skip-if-not-changed" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <ItemGroup>
+      <Compile Include="Generated/**/*.g.cs" />
+      <EmbeddedResource Remove="Generated/**/*.md" />
+      <EmbeddedResource Include="Generated/**/*.md" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <Watch Remove="Docs/**/*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Generated/" />
+  </ItemGroup>
+
+  <!-- enable ivy analyzer -->
+  <ItemGroup>
+    <ProjectReference Include="../../Ivy.Analyser/Ivy.Analyser.csproj">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
+  </ItemGroup>
+
+</Project>

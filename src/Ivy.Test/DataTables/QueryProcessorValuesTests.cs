@@ -1,11 +1,8 @@
-using Google.Protobuf.WellKnownTypes;
 using Ivy.Protos.DataTable;
 using Ivy.Test.DataTables.TestHelpers;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Ivy.Test.DataTables;

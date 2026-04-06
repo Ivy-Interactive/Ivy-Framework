@@ -11,7 +11,7 @@
   <Target Name="NpmInstall" BeforeTargets="BuildFrontend" Condition="Exists('frontend/package.json')"
           Inputs="frontend\package.json;frontend\pnpm-lock.yaml"
           Outputs="frontend\node_modules\.modules.yaml">
-    <Exec Command="npx -y pnpm@10.32.1 install" WorkingDirectory="frontend" />
+    <Exec Command="npx -y pnpm@10.32.1 install --frozen-lockfile" WorkingDirectory="frontend" />
   </Target>
 
   <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths" Condition="Exists('frontend/package.json')"

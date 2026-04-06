@@ -37,6 +37,8 @@ public record Line
     public bool Animated { get; set; } = false;
 
     public Label? Label { get; set; } = null;
+
+    public int? YAxisIndex { get; set; } = null;
 }
 
 public static class LineExtensions
@@ -94,6 +96,11 @@ public static class LineExtensions
     public static Line Scale(this Line line, Scales scale)
     {
         return line with { Scale = scale };
+    }
+
+    public static Line YAxisIndex(this Line line, int yAxisIndex)
+    {
+        return line with { YAxisIndex = yAxisIndex };
     }
 }
 

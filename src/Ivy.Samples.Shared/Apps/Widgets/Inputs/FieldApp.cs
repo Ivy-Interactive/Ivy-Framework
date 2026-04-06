@@ -1,10 +1,3 @@
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
 [App(icon: Icons.TextSelect, title: "Field Input ", group: ["Widgets", "Inputs"], searchHints: ["label", "wrapper", "form-field", "input", "description", "help"])]
