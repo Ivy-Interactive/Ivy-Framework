@@ -3,39 +3,40 @@
 > [!NOTE]
 > We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
 
-This week’s notes cover **Ivy Framework** changes **excluding** the Tendril apps and tooling. **Frontend-only fixes** are omitted from **Bug fixes** (see that section).
+This week’s notes cover **Ivy Framework** changes **excluding** the Tendril apps and tooling. **Frontend-only** fixes are omitted from **Bug fixes** (see that section).
 
 The sections below walk through changes **day by day**; later days are appended as the week progresses.
 
----
+### [01255] Button badge outline variant
 
-### Button badge uses outline variant — [#2892](https://github.com/Ivy-Interactive/Ivy-Framework/pull/2892)
-
-Badges on [**Button**](https://docs.ivy.app/widgets/common/button) now render with the **outline** badge style so they read clearly on both **solid** and **outline** button variants.
+Badges on [**Button**](https://docs.ivy.app/widgets/common/button) now render with the **outline** badge style so they read clearly on both **solid** and **outline** button variants. Unit tests lock in the behavior.
 
 ```csharp
 new Button("Inbox", OnOpenInbox, variant: ButtonVariant.Primary).Badge("12");
 new Button("Updates", OnCheckUpdates, variant: ButtonVariant.Outline).Badge("3");
 ```
 
-### [01278] `CardHoverVariant` → `HoverEffect` in shared — [#2887](https://github.com/Ivy-Interactive/Ivy-Framework/pull/2887)
+You still use **`.Badge(string)`** on the button; only the default visual treatment of the badge chip changed.
 
-The hover enum was **renamed** from **`CardHoverVariant`** to **`HoverEffect`** and moved to **shared** (`Ivy` namespace) so Card, Box, Image, and other widgets share one type.
+### [01269] DataTable decimal scaling
+
+[**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) column formatting for **decimal** values is more reliable when the runtime exposes values through **`valueOf`**: the pipeline falls back to **string** when needed so scaling and display stay consistent.
+
+### [01278] `CardHoverVariant` renamed to `HoverEffect`
+
+The hover enum was renamed from **`CardHoverVariant`** to **`HoverEffect`** and moved to shared APIs (`Ivy` namespace) so Card, Box, Image, and other widgets share one type.
 
 ```csharp
-// After
 new Card(Text.Block("Hello")).Hover(HoverEffect.Shadow);
 new Box(Text.Block("Click me")).Hover(HoverEffect.PointerAndTranslate);
 new Image("photo.jpg").Hover(HoverEffect.Pointer);
 ```
 
-Replace any remaining **`CardHoverVariant`** references with **`HoverEffect`**; member names (`Shadow`, `Pointer`, …) align with the old enum.
+Replace any remaining **`CardHoverVariant`** references with **`HoverEffect`**.
 
----
+### [01276] Image `Overlay` for lightbox
 
-### [01276] Image `Overlay` for lightbox — [#2890](https://github.com/Ivy-Interactive/Ivy-Framework/pull/2890)
-
-[**Image**](https://docs.ivy.app/widgets/primitives/image) has a boolean **`Overlay`** property. When **true**, the image opens in a **lightbox-style overlay** instead of only inline (full-screen viewer on the client).
+[**Image**](https://docs.ivy.app/widgets/primitives/image) has a boolean **`Overlay`** property. When **true**, the image opens in a **lightbox-style** full-screen viewer on the client.
 
 ```csharp
 new Image("https://example.com/diagram.png")
@@ -45,9 +46,42 @@ new Image("https://example.com/diagram.png")
 };
 ```
 
-Use this for documentation thumbnails, galleries, or any image that should expand on click without leaving the page. (Later in the week, keyboard navigation between sibling overlays was added on top of this.)
+Later in the week, keyboard navigation between sibling overlays was added on top of this.
 
----
+## Day 2
+
+### [01296] Badges on Tab Content and DropdownMenu
+
+When using [**TabsLayout**](https://docs.ivy.app/widgets/layouts/tabs-layout) with the **Content** tab variant, each [**Tab**](https://docs.ivy.app/widgets/layouts/tabs-layout) can show a **badge** (counts, “New”, and so on). [**MenuItem**](https://docs.ivy.app/widgets/common/menu-item) entries used in [**DropDownMenu**](https://docs.ivy.app/widgets/common/drop-down-menu) also **render badges** in the menu UI, aligned with sidebar and button badge patterns.
+
+```csharp
+new Tab("Inbox", inboxView).Badge("12");
+MenuItem.Default("Exports").Badge("3");
+```
+
+### [01321] `?chrome=false` and shell URL compatibility
+
+The **`?chrome=false`** query parameter remains **supported** alongside newer **shell / chrome** URL flags so existing bookmarks and integrations keep working. **Tests** cover chrome and shell parameter combinations. **AppRouter** tests were moved into the **`Ivy.Test`** project so they can use **internals** from the router assembly via **`InternalsVisibleTo`**.
+
+### [01356] Markdown code blocks without a language
+
+Fenced **code blocks** in the [**Markdown**](https://docs.ivy.app/widgets/primitives/markdown) widget that **omit a language** specifier now render reliably instead of breaking or appearing blank.
+
+### [01372] `IBladeService` renamed to `IBladeContext`
+
+The blades API type was renamed from **`IBladeService`** to **`IBladeContext`**. Update dependency injection registrations and **`UseService`** / constructor parameters to the new interface name; documentation and hallucination entries were updated accordingly.
+
+### [01403] Resizable Sheet drag handle
+
+The [**Sheet**](https://docs.ivy.app/widgets/advanced/sheet) widget supports a **resizable drag handle** so users can adjust height (or width, depending on configuration) by dragging.
+
+### [01407] `Languages` enum `Description` attributes
+
+The **Languages** enum used for syntax highlighting and samples now has **`Description`** attributes for **human-readable labels** in UI and docs where the raw enum name is not ideal.
+
+### [01263] Grid default alignment
+
+**Layout.Grid** defaults to **top-left** alignment instead of **center**, which matches typical forms and dashboards. If you relied on centered grid content, set **AlignContent** explicitly.
 
 ## Buttons, badges, and navigation
 
@@ -59,23 +93,17 @@ Use this for documentation thumbnails, galleries, or any image that should expan
 - **ThemeCustomizer**: visual treatment for **empty** placeholder boxes.
 - **Confetti** animation: **shorter duration** and **fewer particles**.
 
----
-
 ## Image, Markdown, and tables
 
 - [**Image**](https://docs.ivy.app/widgets/primitives/image): **`Overlay`** for **lightbox**-style viewing; **arrow keys** move between sibling images in a group.
 - [**Markdown**](https://docs.ivy.app/widgets/primitives/markdown): **light border** on embedded images; **Graphviz** rendering; **samples and docs** for Graphviz; **spacing** refined (including **element-specific** gaps instead of one uniform markdown gap).
 - [**Table**](https://docs.ivy.app/widgets/common/table) **border styling** aligned with **Markdown** tables.
 
----
-
 ## Sheet, dialog, tabs, and loading
 
 - [**Sheet**](https://docs.ivy.app/widgets/advanced/sheet): **resizable drag handle**; **size handling** improvements; wiring for **resizable sheets** with explicit width (see also Bug fixes for non-FE items).
 - **Dialog / Sheet** work better with **AutoFocus** on child inputs.
 - **TabsLayout**: **`OnCloseOthers`** and **Close other tabs**; **tab order** synced on refresh to reduce flicker.
-
----
 
 ## Layout and chrome
 
@@ -85,8 +113,6 @@ Use this for documentation thumbnails, galleries, or any image that should expan
 - Shared **`useScrollShadow`** hook: **direction** parameter; **MutationObserver** + **requestAnimationFrame** optimizations for dynamic content; extracted from layout widgets and reused.
 - **Container size**: **retry** of initial measurement for **nested flex** layouts.
 
----
-
 ## Widgets: progress, terminal, detail, diff
 
 - **StackedProgress**: new **segmented** progress bar widget; **`OnSelect`** / **`Selected`**; labels can **auto-enable** segment labels; samples and layout polish (including wrapping in **Box** where appropriate).
@@ -94,16 +120,12 @@ Use this for documentation thumbnails, galleries, or any image that should expan
 - **Detail**: **`Multiline`** is optional and defaults to **`false`**.
 - **DiffView**: **smaller** default font for denser diffs.
 
----
-
 ## Charts
 
 - **Bar**, **Line**, **Area**, **Scatter**: **`YAxisIndex`** and **dual-axis** support; **`generateYAxis`** updates (including multi-axis and **largeSpread** behavior); **grid padding** and **whitespace** when axes are hidden.
 - **BarChart**: vertical bar layout and **axis** behavior refined; **YAxis** **Hide** honored; documentation for **YAxisIndex** and dual-axis **Bar** records.
 - **Line / Area / Scatter**: **`YAxisIndex`** on series types; **Scatter** avoids **category** axes where **numeric** axes are required; **ScatterChart** sample **dual-axis** example; **tests** and coverage for **ScatterChart**.
 - **PieChart**: **tooltip** uses a **formatter** with **marker** styling.
-
----
 
 ## DataTable and querying
 
@@ -118,8 +140,6 @@ Use this for documentation thumbnails, galleries, or any image that should expan
 - **Link cells**: interaction when **links** and **`OnCellClick`** are both in play.
 - **Tooltips**: **DataTable** uses the shared **tooltip** wrapper instead of relying on the native **`title`** attribute alone.
 
----
-
 ## Inputs and file uploads
 
 - [**ContentInput**](https://docs.ivy.app/widgets/inputs/content-input): attachments, optional **`ShortcutKey`**, **density** scaling, **invalid** state samples, shared **FileAttachmentList**, **`validateFileWithToast`**, consolidated **upload URL** helpers, **`useUploadWithProgress`**, **client-side progress** via **`XMLHttpRequest`**, **FileDialog** integration, docs and **Playwright** notes.
@@ -130,21 +150,15 @@ Use this for documentation thumbnails, galleries, or any image that should expan
 - **SignatureInput**: **dark mode** via theme service; **unit tests** for color resolution.
 - **Select**: list **placement** when items include placeholders (treated as a **behavior** improvement, not listed under Bug fixes).
 
----
-
 ## Code blocks and languages
 
 - **Languages** enum: **`Description`** attributes for **display labels**; **Bash/Shell**, **PowerShell** (also in **CodeBlock** samples); **PowerShell** added in related enums/maps where applicable.
 - **CodeBlock** sample: language grid layout and sample snippets updated.
 
----
-
 ## Accessibility
 
 - Broad **WCAG**-oriented pass: **`aria-label`** on **tooltip** targets, **`role="button"`** surfaces, **browse** buttons on **FileInput** / **FolderInput**, and related **keyboard** affordances.
 - **Tooltip**-wrapped components expose appropriate **accessible names** where needed.
-
----
 
 ## Routing, shell, and apps
 
@@ -153,13 +167,9 @@ Use this for documentation thumbnails, galleries, or any image that should expan
 - **Routing dots** / breadcrumb indicator behavior **restored**.
 - **Samples**: **Setup** sample renamed to **Settings** with **cogs** icon (where applicable in shared samples).
 
----
-
 ## Blades
 
 - **`IBladeService`** renamed to **`IBladeContext`**. Update types and registrations; **hallucinations** / docs updated.
-
----
 
 ## Server, auth, and HTTP
 
@@ -167,8 +177,6 @@ Use this for documentation thumbnails, galleries, or any image that should expan
 - **SignalR** / **MessagePack** and hub **integration tests** for **`/ivy/messages`**.
 - **WebApplicationFactory**-style **HTTP endpoint** integration tests; shared **test server** infrastructure consolidated (**Ivy.Integration.Tests**).
 - **Mock HTTP** helpers shared for tests.
-
----
 
 ## Build, packaging, and native assets
 
@@ -179,14 +187,10 @@ Use this for documentation thumbnails, galleries, or any image that should expan
 - **Markdown** doc pipeline: converter **caching** uses **file content** (not only hash) for invalidation.
 - **`KillProcessUsingPort`** supported on **macOS** and **Linux** (dev workflow).
 
----
-
 ## Diagnostics and client logging
 
 - Client **diagnostic** **`logger.info`** downgraded to **`logger.debug`** to reduce noise.
 - **Widget tree** refresh: exceptions in **`RefreshRequested`** and **`_RefreshView`** are caught so one failure does not tear down the tree.
-
----
 
 ## Tooling, analyzers, and repo hygiene
 
@@ -198,22 +202,16 @@ Use this for documentation thumbnails, galleries, or any image that should expan
 - **Security** / **code scanning** warning cleanups.
 - **Local development**: **Ivy.Agent.Filter.Tests** setup; **ivy** command-not-found **Mac** troubleshooting doc.
 
----
-
 ## Documentation and AI guidance
 
 - **Hallucinations** / **AGENTS** docs reorganized and expanded (including **IBladeContext**, **`Server.StartAsync`**, **`SelectOption<T>`**, **session** references, **compound widgets**, **UseLoading** page, chart **polish** callbacks, **BarChart** dual-axis, **Line/Area/Scatter** docs, **IvyFrameworkGotchas** consolidation, **Playwright** knowledge split into **focused files** and **widgets** consolidation, obsolete redirects removed).
 - **IvyFrameworkVerification** updated for split Playwright knowledge; **prerequisite** steps and **process timeout** patterns documented.
 - **Docs middleware**: **Ivy.Docs.Shared** delegates shared behavior to **Ivy.Docs.Helpers** to remove duplication.
-- **Ivy Studio (cloud)**: stability and integration fixes for cloud-oriented Studio workflows (**#2899**).
-
----
+- **Ivy Studio (cloud)**: stability and integration fixes for cloud-oriented Studio workflows.
 
 ## Tests (high level)
 
 - **AppRouter** tests in **`Ivy.Test`**; **`Ivy.Tests`** added to the solution where introduced; **QueryProcessor**, **DataTable** container styles, **ScatterChart**, **useScrollShadow** / **MutationObserver**, **SignatureInput**, **useDictation**, **TextInput** keyboard, **shortcut** modules, **SignalR**, **HTTP** integration, **vite** test includes for **`.test.tsx`**, shared **MockState**, **coverlet** cleanup in **Ivy.Test** csproj, and other test **refactors** and **stability** work.
-
----
 
 ## Bug fixes
 
