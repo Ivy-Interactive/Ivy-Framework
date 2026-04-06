@@ -1,6 +1,7 @@
 import { toast } from "@/hooks/use-toast";
 import { validateSingleFile } from "@/widgets/inputs/file-input-validation";
-export { getFullUrl } from "@/lib/url";
+import { getFullUrl } from "@/lib/url";
+export { getFullUrl };
 
 /**
  * Validate a file against accept, maxFileSize, and minFileSize constraints.
