@@ -117,6 +117,18 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
         isClickable && "cursor-pointer hover:opacity-80 transition-opacity",
       )}
       onClick={isClickable ? handleClick : undefined}
+      {...(isClickable
+        ? {
+            role: "button",
+            tabIndex: 0,
+            onKeyDown: (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick();
+              }
+            },
+          }
+        : {})}
     >
       {iconPosition === "Left" && icon && icon !== "None" && (
         <Icon style={iconStyles} name={icon} />

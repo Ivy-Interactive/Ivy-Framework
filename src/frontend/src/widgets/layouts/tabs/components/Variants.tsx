@@ -139,6 +139,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
                   tabRefs.current[index] = el;
                 }}
                 role="tab"
+                id={`tab-${id}`}
                 value={id}
                 aria-selected={index === activeIndex}
                 tabIndex={0}
@@ -197,6 +198,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
             <div
               key={id}
               role="tabpanel"
+              aria-labelledby={`tab-${id}`}
               aria-hidden={!isActive}
               className={cn(
                 "overflow-auto border-none",

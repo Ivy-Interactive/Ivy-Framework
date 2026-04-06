@@ -141,6 +141,7 @@ export const YearVariant: React.FC<YearVariantProps> = ({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
+                aria-label="Previous decade"
                 onClick={() => setDecadeStart((d) => d - 10)}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -152,6 +153,7 @@ export const YearVariant: React.FC<YearVariantProps> = ({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
+                aria-label="Next decade"
                 onClick={() => setDecadeStart((d) => d + 10)}
               >
                 <ChevronRight className="h-4 w-4" />

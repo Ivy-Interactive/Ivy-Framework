@@ -119,6 +119,7 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
             type="button"
             variant="ghost"
             size="icon"
+            aria-label="Cancel upload"
             className={`${cancelBtnSize} shrink-0`}
             onClick={(e) => {
               e.stopPropagation();
@@ -146,6 +147,7 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
           type="button"
           variant="ghost"
           size="icon"
+          aria-label="Cancel upload"
           className={compactCancelVariant({ density })}
           onClick={(e) => {
             e.stopPropagation();
@@ -222,6 +224,7 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
                   type="button"
                   variant="ghost"
                   size="icon"
+                  aria-label="Remove file"
                   className={`${cancelBtnSize} shrink-0`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -270,6 +273,7 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
                 type="button"
                 variant="ghost"
                 size="icon"
+                aria-label="Remove file"
                 className={compactCancelVariant({ density })}
                 onClick={(e) => {
                   e.stopPropagation();

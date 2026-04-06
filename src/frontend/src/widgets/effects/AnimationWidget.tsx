@@ -354,6 +354,18 @@ const AnimationWidget: React.FC<AnimationWidgetProps> = (props) => {
             onHoverStart={handleHoverStart}
             onHoverEnd={handleHoverEnd}
             onAnimationComplete={handleAnimationComplete}
+            {...(trigger === "Click"
+              ? {
+                  role: "button",
+                  tabIndex: 0,
+                  onKeyDown: (e: React.KeyboardEvent) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleClick();
+                    }
+                  },
+                }
+              : {})}
             style={{
               cursor: trigger === "Click" ? "pointer" : "default",
               display: "inline-block",

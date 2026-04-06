@@ -70,6 +70,7 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
             <React.Fragment key={item.label || item.symbol}>
               <button
                 type="button"
+                aria-label={item.label || `Step ${index + 1}`}
                 onClick={() => handleSelect(index)}
                 disabled={!isClickable}
                 className={cn(
