@@ -1,5 +1,4 @@
-import { toast } from "@/hooks/use-toast";
-import { validateSingleFile } from "@/widgets/inputs/file-input-validation";
+import { validateFileWithToast } from "@/widgets/inputs/file-input-validation";
 
 /**
  * Get the full upload URL, accounting for the ivy-host meta tag.
@@ -23,16 +22,7 @@ export function validateFile(
   maxFileSize?: number,
   minFileSize?: number,
 ): boolean {
-  const result = validateSingleFile({ file, accept, maxFileSize, minFileSize });
-  if (!result.valid) {
-    toast({
-      title: result.title || "Validation Error",
-      description: result.error,
-      variant: "destructive",
-    });
-    return false;
-  }
-  return true;
+  return validateFileWithToast({ file, accept, maxFileSize, minFileSize });
 }
 
 /**
