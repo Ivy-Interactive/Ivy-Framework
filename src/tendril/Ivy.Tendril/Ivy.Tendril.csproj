@@ -8,6 +8,18 @@
     <RootNamespace>Ivy.Tendril</RootNamespace>
     <UserSecretsId>a8f3c2e1-4b7d-4e9f-a1c3-8d6e2f5b9a7c</UserSecretsId>
   </PropertyGroup>
+  <PropertyGroup>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>tendril</ToolCommandName>
+    <PackageId>Ivy.Tendril</PackageId>
+    <IsPackable>true</IsPackable>
+    <Company>Ivy</Company>
+    <Description>Tendril — AI-powered plan management TUI built on Ivy Framework</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Ivy.Tendril.Test" />
   </ItemGroup>
