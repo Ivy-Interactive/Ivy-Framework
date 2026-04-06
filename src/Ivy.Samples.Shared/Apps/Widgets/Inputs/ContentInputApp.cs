@@ -144,23 +144,15 @@ public class ContentInputSubmitExample : ViewBase
         var text = UseState("");
         var files = UseState(ImmutableArray<FileUpload<byte[]>>.Empty);
         var upload = UseUpload(MemoryStreamUploadHandler.Create(files));
-        var lastSubmission = UseState("");
+        var client = UseService<IClientProvider>();
 
         return Layout.Vertical()
-               | Text.H2("ShortcutKey + OnSubmit")
-               | Text.P("Press Ctrl+Enter (or Cmd+Enter on Mac) to submit. The shortcut badge appears on the send button.")
+               | Text.H2("Submit on Enter")
+               | Text.P("By default, ContentInput submits on Cmd+Enter (Ctrl+Enter on Windows).")
                | text.ToContentInput(upload)
                    .Files(files.Value)
-                   .Placeholder("Type and press Ctrl+Enter to submit...")
-                   .ShortcutKey("Ctrl+Enter")
-                   .OnSubmit(() =>
-                   {
-                       lastSubmission.Set($"Submitted: \"{text.Value}\" with {files.Value.Length} file(s)");
-                       text.Set("");
-                       files.Set(ImmutableArray<FileUpload<byte[]>>.Empty);
-                   })
-               | (string.IsNullOrEmpty(lastSubmission.Value)
-                   ? (object)Text.Muted("Nothing submitted yet")
-                   : Callout.Success(lastSubmission.Value));
+                   .Placeholder("Type something and press Cmd+Enter...")
+                   .OnSubmit((value) => client.Toast($"Value: {value}", "Submitted"))
+               | Text.Muted("Use Shift+Enter for new lines.");
     }
 }

@@ -14,6 +14,7 @@ import {
   textVariant,
 } from "@/components/ui/input/file-input-variant";
 import { validateFileWithToast, validateFileCount } from "./file-input-validation";
+
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { FileItem } from "./shared/types";
 import { FileAttachmentList } from "./shared/FileAttachmentList";
@@ -72,7 +73,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const hasCancelHandler = Array.isArray(events) && events.includes("OnCancel");
   const hasBlurHandler = Array.isArray(events) && events.includes("OnBlur");
 
-  const uploadFile = useCallback(
+  const handleUploadFile = useCallback(
     async (file: File): Promise<void> => {
       if (!uploadUrl) return;
 
@@ -120,9 +121,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       }
 
       if (multiple) {
-        await Promise.all(Array.from(files).map(uploadFile));
+        await Promise.all(Array.from(files).map(handleUploadFile));
       } else {
-        await uploadFile(files[0]);
+        await handleUploadFile(files[0]);
       }
 
       // Reset the input so selecting the same file again triggers onChange
@@ -136,7 +137,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         handleBlur();
       }
     },
-    [multiple, uploadFile, maxFiles, value, handleBlur],
+    [multiple, handleUploadFile, maxFiles, value, handleBlur],
   );
 
   // Detect when file dialog closes without selection (cancel case only)
@@ -236,12 +237,12 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       }
 
       if (multiple) {
-        await Promise.all(files.map(uploadFile));
+        await Promise.all(files.map(handleUploadFile));
       } else {
-        await uploadFile(files[0]);
+        await handleUploadFile(files[0]);
       }
     },
-    [multiple, disabled, uploadFile, maxFiles, value],
+    [multiple, disabled, handleUploadFile, maxFiles, value],
   );
 
   const openFileDialog = useCallback(() => {
@@ -296,14 +297,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
   // Check if we have any files to display
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
-  const hasUploadingFiles = uploadProgress && uploadProgress.size > 0;
-  const fileList = Array.isArray(value)
-    ? (value as FileItem[])
-    : value
-      ? ([value] as FileItem[])
-      : [];
-
-  const shouldShowFileList = hasFiles || hasUploadingFiles;
+  const fileList = Array.isArray(value) ? value : value ? [value] : [];
 
   return (
     <div
@@ -387,15 +381,15 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
                 </div>
               )}
             </div>
-            {shouldShowFileList && (
+            {hasFiles && (
               <div className="w-full">
                 <FileAttachmentList
                   files={fileList}
-                  uploadProgress={uploadProgress}
                   onCancel={handleCancel}
                   hasCancelHandler={hasCancelHandler}
                   variant="card"
                   density={density}
+                  uploadProgress={uploadProgress}
                 />
               </div>
             )}
@@ -404,26 +398,26 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           <div
             className={cn(
               "flex flex-col items-center justify-center text-center w-full",
-              shouldShowFileList ? "p-0" : "p-4",
+              hasFiles ? "p-0" : "p-4",
             )}
           >
             <Upload className={uploadIconVariant({ density })} />
-            {!shouldShowFileList && (
+            {!hasFiles && (
               <p className={textVariant({ density })}>
                 {placeholder ||
                   `Drag and drop your ${multiple ? "files" : "file"} here or click to select`}
               </p>
             )}
             {/* Show file list when files are present in Drop variant */}
-            {shouldShowFileList && (
+            {hasFiles && (
               <div className="w-full mt-4">
                 <FileAttachmentList
                   files={fileList}
-                  uploadProgress={uploadProgress}
                   onCancel={handleCancel}
                   hasCancelHandler={hasCancelHandler}
                   variant="card"
                   density={density}
+                  uploadProgress={uploadProgress}
                 />
               </div>
             )}

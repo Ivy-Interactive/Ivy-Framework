@@ -8,8 +8,8 @@ import { toast } from "@/hooks/use-toast";
 import { Densities } from "@/types/density";
 import { cva } from "class-variance-authority";
 import { useEventHandler } from "@/components/event-handler";
+import { uploadFile } from "@/widgets/filePicker/shared";
 import { EMPTY_ARRAY } from "@/lib/constants";
-import { getFullUrl } from "@/lib/url";
 
 const containerVariant = cva(
   "relative rounded-field border-dashed transition-colors border-muted-foreground/25 overflow-hidden flex flex-col items-center justify-center",
@@ -186,17 +186,8 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
     canvas.toBlob(async (blob) => {
       if (!blob || !uploadUrl) return;
 
-      const formData = new FormData();
-      formData.append("file", blob, "capture.png");
-
       try {
-        const response = await fetch(getFullUrl(uploadUrl), {
-          method: "POST",
-          body: formData,
-        });
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
-        }
+        await uploadFile(uploadUrl, blob, { filename: "capture.png" });
       } catch (error) {
         logger.error("Photo upload error:", error);
         toast({

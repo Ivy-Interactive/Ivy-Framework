@@ -19,7 +19,7 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
   const { uploadProgress, uploadSingleFile, cancelUpload } = useUploadWithProgress();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const uploadFile = useCallback(
+  const handleUploadFile = useCallback(
     async (file: File): Promise<void> => {
       if (!uploadUrl) return;
       if (!validateFileWithToast({ file, accept, maxFileSize })) return;
@@ -43,9 +43,9 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
         return;
       }
 
-      await Promise.all(files.map(uploadFile));
+      await Promise.all(files.map(handleUploadFile));
     },
-    [currentFileCount, maxFiles, uploadFile],
+    [currentFileCount, maxFiles, handleUploadFile],
   );
 
   const handlePaste = useCallback(

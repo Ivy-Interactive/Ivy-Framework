@@ -230,7 +230,7 @@ public class CodeBlockApp : SampleBase
             );
         }
 
-        return Layout.Grid().Columns(3).Gap(4) | cards.ToArray();
+        return Layout.Grid().Columns(2).Gap(4) | cards.ToArray();
     }
 
     private object CreateOptionsVariants()
