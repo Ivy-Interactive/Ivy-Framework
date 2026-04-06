@@ -1,5 +1,6 @@
 import { useCallback, useState, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
+import { getFullUrl } from "@/lib/url";
 import { validateSingleFile, validateFileCount } from "../file-input-validation";
 
 interface UseFileAttachmentsOptions {
@@ -38,20 +39,11 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
       if (!uploadUrl) return;
       if (!validateFile(file)) return;
 
-      const getUploadUrl = () => {
-        const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-        if (ivyHostMeta) {
-          const host = ivyHostMeta.getAttribute("content");
-          return host + uploadUrl;
-        }
-        return uploadUrl;
-      };
-
       const formData = new FormData();
       formData.append("file", file);
 
       try {
-        const response = await fetch(getUploadUrl(), {
+        const response = await fetch(getFullUrl(uploadUrl), {
           method: "POST",
           body: formData,
         });

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/input/file-input-variant";
 import { validateSingleFile, validateFileCount } from "./file-input-validation";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { getFullUrl } from "@/lib/url";
 import { FileItem } from "./shared/types";
 import { FileAttachmentList } from "./shared/FileAttachmentList";
 
@@ -97,22 +98,11 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         return;
       }
 
-      // Get the correct host from meta tag or use relative URL
-      const getUploadUrl = () => {
-        const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-        if (ivyHostMeta) {
-          const host = ivyHostMeta.getAttribute("content");
-          return host + uploadUrl;
-        }
-        // If no meta tag, use relative URL (should work in production)
-        return uploadUrl;
-      };
-
       const formData = new FormData();
       formData.append("file", file);
 
       try {
-        const response = await fetch(getUploadUrl(), {
+        const response = await fetch(getFullUrl(uploadUrl), {
           method: "POST",
           body: formData,
         });

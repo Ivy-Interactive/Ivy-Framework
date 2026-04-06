@@ -1,17 +1,6 @@
 import { toast } from "@/hooks/use-toast";
 import { validateSingleFile } from "@/widgets/inputs/file-input-validation";
-
-/**
- * Get the full upload URL, accounting for the ivy-host meta tag.
- */
-export function getFullUrl(path: string): string {
-  const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-  if (ivyHostMeta) {
-    const host = ivyHostMeta.getAttribute("content");
-    return host + path;
-  }
-  return path;
-}
+export { getFullUrl } from "@/lib/url";
 
 /**
  * Validate a file against accept, maxFileSize, and minFileSize constraints.
