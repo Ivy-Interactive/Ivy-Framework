@@ -127,6 +127,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
   const { onSearchResultsChanged, onSearchClose, highlightRegions } = useSearchNavigation(
     gridRef,
+    containerRef,
     setGridSelection,
     isDark,
     showSearch,
