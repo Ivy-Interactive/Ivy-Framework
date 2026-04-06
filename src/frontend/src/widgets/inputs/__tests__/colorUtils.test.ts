@@ -68,6 +68,26 @@ describe("convertToHex", () => {
 
     vi.restoreAllMocks();
   });
+
+  it("falls back to raw color name when theme returns rgb instead of hex", () => {
+    vi.spyOn(globalThis, "getComputedStyle").mockReturnValue({
+      getPropertyValue: () => "rgb(255, 0, 0)",
+    } as unknown as CSSStyleDeclaration);
+
+    expect(convertToHex("red")).toBe("red");
+
+    vi.restoreAllMocks();
+  });
+
+  it("falls back to raw color name when theme returns empty string", () => {
+    vi.spyOn(globalThis, "getComputedStyle").mockReturnValue({
+      getPropertyValue: () => "",
+    } as unknown as CSSStyleDeclaration);
+
+    expect(convertToHex("red")).toBe("red");
+
+    vi.restoreAllMocks();
+  });
 });
 
 // ---------------------------------------------------------------------------
