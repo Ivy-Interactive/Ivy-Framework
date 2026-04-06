@@ -429,6 +429,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
                   onCancel={handleCancel}
                   hasCancelHandler={hasCancelHandler}
                   variant="card"
+                  density={density}
                 />
               </div>
             )}
@@ -456,6 +457,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
                   onCancel={handleCancel}
                   hasCancelHandler={hasCancelHandler}
                   variant="card"
+                  density={density}
                 />
               </div>
             )}
