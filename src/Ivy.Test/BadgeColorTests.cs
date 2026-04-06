@@ -1,6 +1,3 @@
-using Ivy;
-using Xunit;
-
 namespace Ivy.Test;
 
 public class BadgeColorTests

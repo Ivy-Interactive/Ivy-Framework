@@ -1,5 +1,4 @@
 using System.Reactive.Disposables;
-using Ivy.Core.Apps;
 using Ivy.Core.Auth;
 using Ivy.Core.Server;
 using Microsoft.AspNetCore.Mvc;

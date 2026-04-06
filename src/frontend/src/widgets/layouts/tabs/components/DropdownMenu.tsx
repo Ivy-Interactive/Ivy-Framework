@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -28,6 +30,11 @@ interface TabsDropdownMenuProps {
   }) => void;
   handleTabSelect: (tabId: string) => void;
   isUserInitiatedChangeRef: React.MutableRefObject<boolean>;
+  showCloseOthers: boolean;
+  safeEvent: (
+    name: "OnSelect" | "OnClose" | "OnCloseOthers" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+    args: unknown[],
+  ) => void;
 }
 
 /**
@@ -48,6 +55,8 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
   handleDragEnd,
   handleTabSelect,
   isUserInitiatedChangeRef,
+  showCloseOthers,
+  safeEvent,
 }) => {
   const menuContent =
     hiddenTabs.length > 0 ? (
@@ -90,6 +99,20 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
             </div>
           </SortableContext>
         </DndContext>
+        {showCloseOthers && tabOrder.length >= 2 && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                const activeIndex = activeTabId ? tabOrder.indexOf(activeTabId) : 0;
+                safeEvent("OnCloseOthers", [activeIndex >= 0 ? activeIndex : 0]);
+                setDropdownOpen(false);
+              }}
+            >
+              Close other tabs
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     ) : null;
 

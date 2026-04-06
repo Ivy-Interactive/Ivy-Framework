@@ -1,5 +1,3 @@
-using Ivy;
-
 namespace SliplaneExample;
 
 [App(id: "auth-test", title: "Auth Test")]

@@ -411,3 +411,4 @@ public class SimpleStatusBoard : ViewBase
 </Details>
 
 <WidgetDocs Type="Ivy.Kanban" ExtensionTypes="Ivy.KanbanColumnExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Kanban/Kanban.cs"/>
+<WidgetDocs Type="Ivy.KanbanCard" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Kanban/KanbanCard.cs"/>

@@ -23,6 +23,7 @@ import {
 import { getWidth, getHeight } from "@/lib/styles";
 import { useCalendarData } from "./useCalendarData";
 import { useCalendarHandlers } from "./useCalendarHandlers";
+import { useRovingTabIndex } from "./useRovingTabIndex";
 import type { CalendarWidgetProps, CalendarView, CalendarEvent } from "./types";
 import { cn } from "@/lib/utils";
 
@@ -152,58 +153,186 @@ interface EventPillProps {
   compact?: boolean;
   draggable?: boolean;
   onDragStart?: () => void;
+  tabIndex?: number;
+  onKeyDown?: React.KeyboardEventHandler;
 }
 
-const EventPill: React.FC<EventPillProps> = ({
-  event,
-  onClick,
-  compact,
-  draggable,
-  onDragStart,
+const EventPill = React.forwardRef<HTMLButtonElement, EventPillProps>(
+  ({ event, onClick, compact, draggable, onDragStart, tabIndex, onKeyDown }, ref) => {
+    const bgColor = event.color
+      ? `var(--${event.color.toLowerCase()}, var(--primary))`
+      : "var(--primary)";
+    const fgColor = "var(--primary-foreground)";
+
+    return (
+      <button
+        ref={ref}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.(event.id);
+        }}
+        draggable={draggable}
+        onDragStart={
+          draggable
+            ? (e) => {
+                e.dataTransfer.setData("text/plain", event.id);
+                e.dataTransfer.effectAllowed = "move";
+                onDragStart?.();
+              }
+            : undefined
+        }
+        className={cn(
+          "w-full text-left rounded px-1.5 truncate cursor-pointer transition-opacity hover:opacity-80",
+          compact ? "text-[11px] py-px leading-snug" : "text-xs py-0.5",
+          draggable && "cursor-grab active:cursor-grabbing",
+        )}
+        style={{
+          backgroundColor: bgColor,
+          color: fgColor,
+        }}
+        title={event.title}
+        tabIndex={tabIndex}
+        onKeyDown={onKeyDown}
+      >
+        {event.content ? (
+          <div className="w-full">{event.content}</div>
+        ) : (
+          <>
+            {!compact && !event.allDay && (
+              <span className="mr-1 opacity-80">{format(event.start, "HH:mm")}</span>
+            )}
+            {event.title}
+          </>
+        )}
+      </button>
+    );
+  },
+);
+EventPill.displayName = "EventPill";
+
+// ─── Month Day Cell (extracted for per-cell hook usage) ───────────────────────
+
+interface MonthDayCellProps {
+  day: Date;
+  dayEvents: CalendarEvent[];
+  inMonth: boolean;
+  today: boolean;
+  maxVisible: number;
+  onSelectSlot: (start: string, end: string) => void;
+  onEventClick: (eventId: string) => void;
+  enableDragDrop?: boolean;
+  events: CalendarEvent[];
+  onEventMove?: (eventId: string, newStart: string, newEnd: string) => void;
+  draggedEventId: string | null;
+  setDraggedEventId: (id: string | null) => void;
+}
+
+const MonthDayCell: React.FC<MonthDayCellProps> = ({
+  day,
+  dayEvents,
+  inMonth,
+  today,
+  maxVisible,
+  onSelectSlot,
+  onEventClick,
+  enableDragDrop,
+  events,
+  onEventMove,
+  draggedEventId,
+  setDraggedEventId,
 }) => {
-  const bgColor = event.color
-    ? `var(--${event.color.toLowerCase()}, var(--primary))`
-    : "var(--primary)";
-  const fgColor = "var(--primary-foreground)";
+  const visibleEvents = dayEvents.slice(0, maxVisible);
+  const { setItemRef, getTabIndex, onKeyDown } = useRovingTabIndex(visibleEvents.length);
 
   return (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.(event.id);
+    <div
+      role="gridcell"
+      tabIndex={0}
+      aria-label={format(day, "EEEE, MMMM d, yyyy")}
+      className={cn(
+        "border-r border-border last:border-r-0 p-1 overflow-hidden cursor-pointer hover:bg-accent/30 transition-colors min-h-[4.5rem]",
+        !inMonth && "bg-muted/30",
+        draggedEventId && "hover:bg-primary/10",
+      )}
+      onClick={() => {
+        const dayStart = startOfDay(day);
+        onSelectSlot(dayStart.toISOString(), endOfDay(day).toISOString());
       }}
-      draggable={draggable}
-      onDragStart={
-        draggable
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          const dayStart = startOfDay(day);
+          onSelectSlot(dayStart.toISOString(), endOfDay(day).toISOString());
+        }
+      }}
+      onDragOver={
+        enableDragDrop
           ? (e) => {
-              e.dataTransfer.setData("text/plain", event.id);
-              e.dataTransfer.effectAllowed = "move";
-              onDragStart?.();
+              e.preventDefault();
+              e.currentTarget.classList.add("bg-primary/10");
             }
           : undefined
       }
-      className={cn(
-        "w-full text-left rounded px-1.5 truncate cursor-pointer transition-opacity hover:opacity-80",
-        compact ? "text-[11px] py-px leading-snug" : "text-xs py-0.5",
-        draggable && "cursor-grab active:cursor-grabbing",
-      )}
-      style={{
-        backgroundColor: bgColor,
-        color: fgColor,
-      }}
-      title={event.title}
+      onDragLeave={
+        enableDragDrop
+          ? (e) => {
+              e.currentTarget.classList.remove("bg-primary/10");
+            }
+          : undefined
+      }
+      onDrop={
+        enableDragDrop
+          ? (e) => {
+              e.preventDefault();
+              e.currentTarget.classList.remove("bg-primary/10");
+              const eventId = e.dataTransfer.getData("text/plain");
+              if (eventId && onEventMove) {
+                const droppedEvent = events.find((ev) => ev.id === eventId);
+                if (droppedEvent) {
+                  const duration = droppedEvent.end.getTime() - droppedEvent.start.getTime();
+                  const newStart = new Date(day);
+                  newStart.setHours(droppedEvent.start.getHours(), droppedEvent.start.getMinutes());
+                  const newEnd = new Date(newStart.getTime() + duration);
+                  onEventMove(eventId, newStart.toISOString(), newEnd.toISOString());
+                }
+              }
+              setDraggedEventId(null);
+            }
+          : undefined
+      }
     >
-      {event.content ? (
-        <div className="w-full">{event.content}</div>
-      ) : (
-        <>
-          {!compact && !event.allDay && (
-            <span className="mr-1 opacity-80">{format(event.start, "HH:mm")}</span>
+      <div className="flex justify-end mb-0.5">
+        <span
+          className={cn(
+            "text-xs w-6 h-6 flex items-center justify-center rounded-full",
+            today && "bg-primary text-primary-foreground font-bold",
+            !inMonth && !today && "text-muted-foreground/50",
           )}
-          {event.title}
-        </>
-      )}
-    </button>
+        >
+          {format(day, "d")}
+        </span>
+      </div>
+      <div className="flex flex-col gap-0.5">
+        {visibleEvents.map((event, idx) => (
+          <EventPill
+            key={event.id}
+            ref={setItemRef(idx)}
+            event={event}
+            onClick={onEventClick}
+            compact
+            draggable={enableDragDrop}
+            onDragStart={enableDragDrop ? () => setDraggedEventId(event.id) : undefined}
+            tabIndex={getTabIndex(idx)}
+            onKeyDown={(e) => onKeyDown(e, idx)}
+          />
+        ))}
+        {dayEvents.length > maxVisible && (
+          <span className="text-[10px] text-muted-foreground pl-1">
+            +{dayEvents.length - maxVisible} more
+          </span>
+        )}
+      </div>
+    </div>
   );
 };
 
@@ -278,9 +407,17 @@ const MonthView: React.FC<MonthViewProps> = ({
       </div>
 
       {/* Weeks */}
-      <div className="grid flex-1" style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}>
+      <div
+        className="grid flex-1"
+        style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}
+        role="grid"
+      >
         {weeks.map((week, wi) => (
-          <div key={wi} className="grid grid-cols-7 border-b border-border last:border-b-0">
+          <div
+            key={wi}
+            className="grid grid-cols-7 border-b border-border last:border-b-0"
+            role="row"
+          >
             {week.map((day) => {
               const key = format(day, "yyyy-MM-dd");
               const dayEvents = eventsByDay.get(key) || [];
@@ -289,91 +426,214 @@ const MonthView: React.FC<MonthViewProps> = ({
               const MAX_VISIBLE = 3;
 
               return (
-                <div
+                <MonthDayCell
                   key={key}
-                  className={cn(
-                    "border-r border-border last:border-r-0 p-1 overflow-hidden cursor-pointer hover:bg-accent/30 transition-colors min-h-[4.5rem]",
-                    !inMonth && "bg-muted/30",
-                    draggedEventId && "hover:bg-primary/10",
-                  )}
-                  onClick={() => {
-                    const dayStart = startOfDay(day);
-                    onSelectSlot(dayStart.toISOString(), endOfDay(day).toISOString());
-                  }}
-                  onDragOver={
-                    enableDragDrop
-                      ? (e) => {
-                          e.preventDefault();
-                          e.currentTarget.classList.add("bg-primary/10");
-                        }
-                      : undefined
-                  }
-                  onDragLeave={
-                    enableDragDrop
-                      ? (e) => {
-                          e.currentTarget.classList.remove("bg-primary/10");
-                        }
-                      : undefined
-                  }
-                  onDrop={
-                    enableDragDrop
-                      ? (e) => {
-                          e.preventDefault();
-                          e.currentTarget.classList.remove("bg-primary/10");
-                          const eventId = e.dataTransfer.getData("text/plain");
-                          if (eventId && onEventMove) {
-                            const droppedEvent = events.find((ev) => ev.id === eventId);
-                            if (droppedEvent) {
-                              const duration =
-                                droppedEvent.end.getTime() - droppedEvent.start.getTime();
-                              const newStart = new Date(day);
-                              newStart.setHours(
-                                droppedEvent.start.getHours(),
-                                droppedEvent.start.getMinutes(),
-                              );
-                              const newEnd = new Date(newStart.getTime() + duration);
-                              onEventMove(eventId, newStart.toISOString(), newEnd.toISOString());
-                            }
-                          }
-                          setDraggedEventId(null);
-                        }
-                      : undefined
-                  }
-                >
-                  <div className="flex justify-end mb-0.5">
-                    <span
-                      className={cn(
-                        "text-xs w-6 h-6 flex items-center justify-center rounded-full",
-                        today && "bg-primary text-primary-foreground font-bold",
-                        !inMonth && !today && "text-muted-foreground/50",
-                      )}
-                    >
-                      {format(day, "d")}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    {dayEvents.slice(0, MAX_VISIBLE).map((event) => (
-                      <EventPill
-                        key={event.id}
-                        event={event}
-                        onClick={onEventClick}
-                        compact
-                        draggable={enableDragDrop}
-                        onDragStart={enableDragDrop ? () => setDraggedEventId(event.id) : undefined}
-                      />
-                    ))}
-                    {dayEvents.length > MAX_VISIBLE && (
-                      <span className="text-[10px] text-muted-foreground pl-1">
-                        +{dayEvents.length - MAX_VISIBLE} more
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  day={day}
+                  dayEvents={dayEvents}
+                  inMonth={inMonth}
+                  today={today}
+                  maxVisible={MAX_VISIBLE}
+                  onSelectSlot={onSelectSlot}
+                  onEventClick={onEventClick}
+                  enableDragDrop={enableDragDrop}
+                  events={events}
+                  onEventMove={onEventMove}
+                  draggedEventId={draggedEventId}
+                  setDraggedEventId={setDraggedEventId}
+                />
               );
             })}
           </div>
         ))}
       </div>
+    </div>
+  );
+};
+
+// ─── All-Day Cell (extracted for per-cell hook usage) ─────────────────────────
+
+interface AllDayCellProps {
+  day: Date;
+  allDayEvents: CalendarEvent[];
+  onEventClick: (eventId: string) => void;
+}
+
+const AllDayCell: React.FC<AllDayCellProps> = ({ day, allDayEvents, onEventClick }) => {
+  const { setItemRef, getTabIndex, onKeyDown } = useRovingTabIndex(allDayEvents.length);
+
+  return (
+    <div
+      key={day.toISOString()}
+      className="flex-1 border-l border-border p-0.5 flex flex-col gap-0.5"
+    >
+      {allDayEvents.map((event, idx) => (
+        <EventPill
+          key={event.id}
+          ref={setItemRef(idx)}
+          event={event}
+          onClick={onEventClick}
+          compact
+          tabIndex={getTabIndex(idx)}
+          onKeyDown={(e) => onKeyDown(e, idx)}
+        />
+      ))}
+    </div>
+  );
+};
+
+// ─── TimeGrid Day Column (extracted for per-column hook usage) ────────────────
+
+interface TimeGridDayColumnProps {
+  day: Date;
+  dayEvents: CalendarEvent[];
+  events: CalendarEvent[];
+  onEventClick: (eventId: string) => void;
+  onSelectSlot: (start: string, end: string) => void;
+  onEventMove?: (eventId: string, newStart: string, newEnd: string) => void;
+  enableDragDrop?: boolean;
+}
+
+const TimeGridDayColumn: React.FC<TimeGridDayColumnProps> = ({
+  day,
+  dayEvents,
+  events,
+  onEventClick,
+  onSelectSlot,
+  onEventMove,
+  enableDragDrop,
+}) => {
+  const dayStart = startOfDay(day);
+  const { setItemRef, getTabIndex, onKeyDown } = useRovingTabIndex(dayEvents.length);
+
+  return (
+    <div key={day.toISOString()} className="flex-1 border-l border-border relative">
+      {/* Hour grid lines */}
+      {HOURS.map((hour) => (
+        <div
+          key={hour}
+          role="button"
+          tabIndex={0}
+          aria-label={`${format(day, "EEEE, MMMM d")} at ${format(new Date(2000, 0, 1, hour), "HH:mm")}`}
+          className="absolute w-full border-t border-border/50 cursor-pointer hover:bg-accent/20"
+          style={{
+            top: hour * HOUR_HEIGHT,
+            height: HOUR_HEIGHT,
+          }}
+          onClick={() => {
+            const slotStart = new Date(day);
+            slotStart.setHours(hour, 0, 0, 0);
+            const slotEnd = new Date(day);
+            slotEnd.setHours(hour + 1, 0, 0, 0);
+            onSelectSlot(slotStart.toISOString(), slotEnd.toISOString());
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              const slotStart = new Date(day);
+              slotStart.setHours(hour, 0, 0, 0);
+              const slotEnd = new Date(day);
+              slotEnd.setHours(hour + 1, 0, 0, 0);
+              onSelectSlot(slotStart.toISOString(), slotEnd.toISOString());
+            }
+          }}
+          onDragOver={
+            enableDragDrop
+              ? (e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.add("bg-primary/10");
+                }
+              : undefined
+          }
+          onDragLeave={
+            enableDragDrop
+              ? (e) => {
+                  e.currentTarget.classList.remove("bg-primary/10");
+                }
+              : undefined
+          }
+          onDrop={
+            enableDragDrop
+              ? (e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove("bg-primary/10");
+                  const eventId = e.dataTransfer.getData("text/plain");
+                  if (eventId && onEventMove) {
+                    const droppedEvent = events.find((ev) => ev.id === eventId);
+                    if (droppedEvent) {
+                      const duration = droppedEvent.end.getTime() - droppedEvent.start.getTime();
+                      const newStart = new Date(day);
+                      newStart.setHours(hour, 0, 0, 0);
+                      const newEnd = new Date(newStart.getTime() + duration);
+                      onEventMove(eventId, newStart.toISOString(), newEnd.toISOString());
+                    }
+                  }
+                }
+              : undefined
+          }
+        />
+      ))}
+
+      {/* Events */}
+      {dayEvents.map((event, idx) => {
+        const evtStart = max([event.start, dayStart]);
+        const evtEnd = min([event.end, endOfDay(day)]);
+        const startMin = differenceInMinutes(evtStart, dayStart);
+        const durationMin = Math.max(differenceInMinutes(evtEnd, evtStart), 30);
+        const topPx = (startMin / 60) * HOUR_HEIGHT;
+        const heightPx = (durationMin / 60) * HOUR_HEIGHT;
+
+        const bgColor = event.color
+          ? `var(--${event.color.toLowerCase()}, var(--primary))`
+          : "var(--primary)";
+        const fgColor = "var(--primary-foreground)";
+
+        return (
+          <button
+            key={event.id}
+            ref={setItemRef(idx)}
+            draggable={enableDragDrop}
+            onDragStart={
+              enableDragDrop
+                ? (e) => {
+                    e.dataTransfer.setData("text/plain", event.id);
+                    e.dataTransfer.effectAllowed = "move";
+                  }
+                : undefined
+            }
+            className={cn(
+              "absolute left-0.5 right-1 rounded px-1.5 py-0.5 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity text-left",
+              enableDragDrop && "cursor-grab active:cursor-grabbing",
+            )}
+            style={{
+              top: topPx,
+              height: heightPx,
+              backgroundColor: bgColor,
+              color: fgColor,
+              zIndex: 1,
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEventClick(event.id);
+            }}
+            title={event.title}
+            tabIndex={getTabIndex(idx)}
+            onKeyDown={(e) => onKeyDown(e, idx)}
+          >
+            {event.content ? (
+              <div className="w-full h-full overflow-hidden">{event.content}</div>
+            ) : (
+              <>
+                <div className="font-medium truncate">{event.title}</div>
+                {heightPx > 30 && (
+                  <div className="opacity-80 truncate">
+                    {format(event.start, "HH:mm")} - {format(event.end, "HH:mm")}
+                  </div>
+                )}
+              </>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 };
@@ -453,14 +713,12 @@ const TimeGrid: React.FC<TimeGridProps> = ({
           {days.map((day) => {
             const allDayEvts = getAllDayEvents(day);
             return (
-              <div
+              <AllDayCell
                 key={day.toISOString()}
-                className="flex-1 border-l border-border p-0.5 flex flex-col gap-0.5"
-              >
-                {allDayEvts.map((event) => (
-                  <EventPill key={event.id} event={event} onClick={onEventClick} compact />
-                ))}
-              </div>
+                day={day}
+                allDayEvents={allDayEvts}
+                onEventClick={onEventClick}
+              />
             );
           })}
         </div>
@@ -485,123 +743,17 @@ const TimeGrid: React.FC<TimeGridProps> = ({
           {/* Day columns */}
           {days.map((day) => {
             const dayEvents = getEventsForDay(day);
-            const dayStart = startOfDay(day);
-
             return (
-              <div key={day.toISOString()} className="flex-1 border-l border-border relative">
-                {/* Hour grid lines */}
-                {HOURS.map((hour) => (
-                  <div
-                    key={hour}
-                    className="absolute w-full border-t border-border/50 cursor-pointer hover:bg-accent/20"
-                    style={{
-                      top: hour * HOUR_HEIGHT,
-                      height: HOUR_HEIGHT,
-                    }}
-                    onClick={() => {
-                      const slotStart = new Date(day);
-                      slotStart.setHours(hour, 0, 0, 0);
-                      const slotEnd = new Date(day);
-                      slotEnd.setHours(hour + 1, 0, 0, 0);
-                      onSelectSlot(slotStart.toISOString(), slotEnd.toISOString());
-                    }}
-                    onDragOver={
-                      enableDragDrop
-                        ? (e) => {
-                            e.preventDefault();
-                            e.currentTarget.classList.add("bg-primary/10");
-                          }
-                        : undefined
-                    }
-                    onDragLeave={
-                      enableDragDrop
-                        ? (e) => {
-                            e.currentTarget.classList.remove("bg-primary/10");
-                          }
-                        : undefined
-                    }
-                    onDrop={
-                      enableDragDrop
-                        ? (e) => {
-                            e.preventDefault();
-                            e.currentTarget.classList.remove("bg-primary/10");
-                            const eventId = e.dataTransfer.getData("text/plain");
-                            if (eventId && onEventMove) {
-                              const droppedEvent = events.find((ev) => ev.id === eventId);
-                              if (droppedEvent) {
-                                const duration =
-                                  droppedEvent.end.getTime() - droppedEvent.start.getTime();
-                                const newStart = new Date(day);
-                                newStart.setHours(hour, 0, 0, 0);
-                                const newEnd = new Date(newStart.getTime() + duration);
-                                onEventMove(eventId, newStart.toISOString(), newEnd.toISOString());
-                              }
-                            }
-                          }
-                        : undefined
-                    }
-                  />
-                ))}
-
-                {/* Events */}
-                {dayEvents.map((event) => {
-                  const evtStart = max([event.start, dayStart]);
-                  const evtEnd = min([event.end, endOfDay(day)]);
-                  const startMin = differenceInMinutes(evtStart, dayStart);
-                  const durationMin = Math.max(differenceInMinutes(evtEnd, evtStart), 30);
-                  const topPx = (startMin / 60) * HOUR_HEIGHT;
-                  const heightPx = (durationMin / 60) * HOUR_HEIGHT;
-
-                  const bgColor = event.color
-                    ? `var(--${event.color.toLowerCase()}, var(--primary))`
-                    : "var(--primary)";
-                  const fgColor = "var(--primary-foreground)";
-
-                  return (
-                    <button
-                      key={event.id}
-                      draggable={enableDragDrop}
-                      onDragStart={
-                        enableDragDrop
-                          ? (e) => {
-                              e.dataTransfer.setData("text/plain", event.id);
-                              e.dataTransfer.effectAllowed = "move";
-                            }
-                          : undefined
-                      }
-                      className={cn(
-                        "absolute left-0.5 right-1 rounded px-1.5 py-0.5 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity text-left",
-                        enableDragDrop && "cursor-grab active:cursor-grabbing",
-                      )}
-                      style={{
-                        top: topPx,
-                        height: heightPx,
-                        backgroundColor: bgColor,
-                        color: fgColor,
-                        zIndex: 1,
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEventClick(event.id);
-                      }}
-                      title={event.title}
-                    >
-                      {event.content ? (
-                        <div className="w-full h-full overflow-hidden">{event.content}</div>
-                      ) : (
-                        <>
-                          <div className="font-medium truncate">{event.title}</div>
-                          {heightPx > 30 && (
-                            <div className="opacity-80 truncate">
-                              {format(event.start, "HH:mm")} - {format(event.end, "HH:mm")}
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+              <TimeGridDayColumn
+                key={day.toISOString()}
+                day={day}
+                dayEvents={dayEvents}
+                events={events}
+                onEventClick={onEventClick}
+                onSelectSlot={onSelectSlot}
+                onEventMove={onEventMove}
+                enableDragDrop={enableDragDrop}
+              />
             );
           })}
         </div>
@@ -665,6 +817,66 @@ const DayView: React.FC<DayViewProps> = (props) => {
   );
 };
 
+// ─── Agenda Date Group (extracted for per-group hook usage) ───────────────────
+
+interface AgendaDateGroupProps {
+  dayEvents: CalendarEvent[];
+  onEventClick: (eventId: string) => void;
+}
+
+const AgendaDateGroup: React.FC<AgendaDateGroupProps> = ({ dayEvents, onEventClick }) => {
+  const date = dayEvents[0].start;
+  const { setItemRef, getTabIndex, onKeyDown } = useRovingTabIndex(dayEvents.length);
+
+  return (
+    <div className="border-b border-border">
+      <div className="flex">
+        {/* Date column */}
+        <div className="w-32 flex-shrink-0 py-3 px-3 border-r border-border">
+          <div className="text-sm font-semibold">{format(date, "EEE")}</div>
+          <div className={cn("text-2xl font-bold", isToday(date) && "text-primary")}>
+            {format(date, "d")}
+          </div>
+          <div className="text-xs text-muted-foreground">{format(date, "MMM yyyy")}</div>
+        </div>
+
+        {/* Events column */}
+        <div className="flex-1 py-2 px-2 flex flex-col gap-1">
+          {dayEvents.map((event, idx) => {
+            const bgColor = event.color
+              ? `var(--${event.color.toLowerCase()}, var(--primary))`
+              : "var(--primary)";
+
+            return (
+              <button
+                key={event.id}
+                ref={setItemRef(idx)}
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent transition-colors w-full text-left"
+                onClick={() => onEventClick(event.id)}
+                tabIndex={getTabIndex(idx)}
+                onKeyDown={(e) => onKeyDown(e, idx)}
+              >
+                <div
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: bgColor }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium truncate">{event.title}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {event.allDay
+                      ? "All day"
+                      : `${format(event.start, "HH:mm")} - ${format(event.end, "HH:mm")}`}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Agenda View ───────────────────────────────────────────────────────────────
 
 interface AgendaViewProps {
@@ -704,53 +916,9 @@ const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, events, onEventCli
 
   return (
     <div className="flex-1 overflow-y-auto">
-      {grouped.map(([dateKey, dayEvents]) => {
-        const date = dayEvents[0].start;
-        return (
-          <div key={dateKey} className="border-b border-border">
-            <div className="flex">
-              {/* Date column */}
-              <div className="w-32 flex-shrink-0 py-3 px-3 border-r border-border">
-                <div className="text-sm font-semibold">{format(date, "EEE")}</div>
-                <div className={cn("text-2xl font-bold", isToday(date) && "text-primary")}>
-                  {format(date, "d")}
-                </div>
-                <div className="text-xs text-muted-foreground">{format(date, "MMM yyyy")}</div>
-              </div>
-
-              {/* Events column */}
-              <div className="flex-1 py-2 px-2 flex flex-col gap-1">
-                {dayEvents.map((event) => {
-                  const bgColor = event.color
-                    ? `var(--${event.color.toLowerCase()}, var(--primary))`
-                    : "var(--primary)";
-
-                  return (
-                    <button
-                      key={event.id}
-                      className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent transition-colors w-full text-left"
-                      onClick={() => onEventClick(event.id)}
-                    >
-                      <div
-                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: bgColor }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{event.title}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {event.allDay
-                            ? "All day"
-                            : `${format(event.start, "HH:mm")} - ${format(event.end, "HH:mm")}`}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        );
-      })}
+      {grouped.map(([dateKey, dayEvents]) => (
+        <AgendaDateGroup key={dateKey} dayEvents={dayEvents} onEventClick={onEventClick} />
+      ))}
     </div>
   );
 };

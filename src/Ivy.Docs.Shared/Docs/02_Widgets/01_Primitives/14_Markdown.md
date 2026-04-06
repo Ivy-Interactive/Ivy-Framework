@@ -145,6 +145,35 @@ public class MermaidView : ViewBase
 }
 ```
 
+### Graphviz Diagrams
+
+Graphviz diagrams let you create directed and undirected graphs using the DOT language. Use ` ```dot ` or ` ```graphviz ` code fences. For the full DOT language reference, see the [Graphviz documentation](https://graphviz.org/doc/info/lang.html).
+
+```csharp demo-tabs
+public class GraphvizView : ViewBase
+{
+    public override object? Build()
+    {
+        var markdownContent = 
+            """
+            ```dot
+            digraph G {
+                rankdir=LR;
+                node [shape=box, style="rounded,filled", fillcolor="#f0f0f0"];
+                
+                Client -> Server [label="Request"];
+                Server -> Database [label="Query"];
+                Database -> Server [label="Result"];
+                Server -> Client [label="Response"];
+            }
+            ```
+            """;
+            
+        return new Markdown(markdownContent);
+    }
+}
+```
+
 ### Emojis
 
 Emoji support enhances content with visual elements and expressions. You can use standard emoji shortcodes to add personality and visual appeal to your markdown content.
@@ -161,6 +190,63 @@ public class EmojiView : ViewBase
             **People:** :smile: :wink: :heart_eyes: :thumbsup:
             **Nature:** :sunny: :cloud: :zap: :snowflake:
             **Objects:** :computer: :phone: :bulb: :gear:
+            """;
+            
+        return new Markdown(markdownContent);
+    }
+}
+```
+
+### GitHub Callouts
+
+GitHub-style callouts allow you to highlight important information using blockquote syntax with special type markers. Five callout types are supported, each with distinct styling and icons.
+
+```csharp demo-tabs
+public class CalloutsView : ViewBase
+{
+    public override object? Build()
+    {
+        var markdownContent = 
+            """
+            > [!NOTE]
+            > Useful information that users should know, even when skimming content.
+
+            > [!TIP]
+            > Helpful advice for doing things better or more easily.
+
+            > [!IMPORTANT]
+            > Key information users need to know to achieve their goal.
+
+            > [!WARNING]
+            > Urgent info that needs immediate user attention to avoid problems.
+
+            > [!CAUTION]
+            > Advises about risks or negative outcomes of certain actions.
+            """;
+            
+        return new Markdown(markdownContent);
+    }
+}
+```
+
+Callouts can contain multiple paragraphs, formatted text, links, and other markdown elements:
+
+```csharp demo-tabs
+public class ComplexCalloutView : ViewBase
+{
+    public override object? Build()
+    {
+        var markdownContent = 
+            """
+            > [!WARNING]
+            > **This action is irreversible!**
+            >
+            > Deleting this resource will:
+            > - Remove all associated data
+            > - Break existing integrations
+            > - Cannot be undone
+            >
+            > [Learn more about data retention](https://example.com)
             """;
             
         return new Markdown(markdownContent);

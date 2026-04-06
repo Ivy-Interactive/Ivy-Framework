@@ -1,9 +1,7 @@
 using System.Net;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
-using Ivy.Core;
-using Ivy.Core.Hooks;
-using Xunit;
+using Ivy.Test.TestHelpers;
 
 namespace Ivy.Test;
 
@@ -110,21 +108,5 @@ public class DictationTests
         public IDisposable SubscribeAny(Action<object?> action) => _subject.Subscribe(x => action(x));
         public IEffectTrigger ToTrigger() => EffectTrigger.OnStateChange(this);
         public object? GetValueAsObject() => Value;
-    }
-
-    private class MockHttpHandler(string responseContent, HttpStatusCode statusCode) : HttpMessageHandler
-    {
-        public HttpRequestMessage? LastRequest { get; private set; }
-        public Uri? LastRequestUri { get; private set; }
-
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            LastRequest = request;
-            LastRequestUri = request.RequestUri;
-            return new HttpResponseMessage(statusCode)
-            {
-                Content = new StringContent(responseContent)
-            };
-        }
     }
 }

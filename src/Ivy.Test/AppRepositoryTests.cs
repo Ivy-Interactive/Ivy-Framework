@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Ivy.Core;
 using Ivy.Core.Apps;
 using Ivy.Test.Apps.Foo.Bar;
 using Xunit.Abstractions;

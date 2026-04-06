@@ -1,9 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Ivy.Core;
-using Ivy.Core.Hooks;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

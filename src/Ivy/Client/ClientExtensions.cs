@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Ivy.Core;
 using Ivy.Core.Auth;
 
 // ReSharper disable once CheckNamespace

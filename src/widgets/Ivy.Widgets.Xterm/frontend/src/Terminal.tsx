@@ -53,6 +53,8 @@ interface TerminalProps {
   stream?: { id: string };
   closed?: boolean;
   allowClipboard?: boolean;
+  background?: string;
+  foreground?: string;
 }
 
 const defaultTheme: TerminalTheme = {
@@ -110,6 +112,8 @@ export const Terminal: React.FC<TerminalProps> = ({
   stream,
   closed = false,
   allowClipboard = true,
+  background,
+  foreground,
 }) => {
   const hostRef = useRef<HTMLDivElement>(null);
   const shadowRootRef = useRef<ShadowRoot | null>(null);
@@ -229,6 +233,24 @@ export const Terminal: React.FC<TerminalProps> = ({
     terminalReadyRef.current = false;
 
     const mergedTheme = { ...defaultTheme, ...theme };
+
+    // Set CSS variables on the container to scope them to the terminal
+    if (background) {
+      const bg = `var(--${background.toLowerCase()})`;
+      container.style.setProperty("--background", bg);
+      const computedBg = getComputedStyle(container).getPropertyValue("--" + background.toLowerCase()).trim();
+      if (computedBg) mergedTheme.background = computedBg;
+    } else {
+      container.style.setProperty("--background", mergedTheme.background || "#000000");
+    }
+    if (foreground) {
+      const fg = `var(--${foreground.toLowerCase()})`;
+      container.style.setProperty("--foreground", fg);
+      const computedFg = getComputedStyle(container).getPropertyValue("--" + foreground.toLowerCase()).trim();
+      if (computedFg) mergedTheme.foreground = computedFg;
+    } else {
+      container.style.setProperty("--foreground", mergedTheme.foreground || "#d4d4d4");
+    }
 
     const term = new XTerm({
       ...(cols !== undefined && { cols }),

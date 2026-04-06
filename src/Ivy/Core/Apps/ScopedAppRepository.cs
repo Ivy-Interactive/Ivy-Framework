@@ -1,6 +1,4 @@
-﻿using System.Reactive;
-
-namespace Ivy.Core.Apps;
+﻿namespace Ivy.Core.Apps;
 
 internal class ScopedAppRepository(IAppRepository inner, string targetId, AppDescriptor? overrideApp) : IAppRepository
 {

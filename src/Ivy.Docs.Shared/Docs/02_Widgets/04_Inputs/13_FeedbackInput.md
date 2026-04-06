@@ -68,34 +68,6 @@ public class FeedbackDemo : ViewBase
 }
 ```
 
-## Event Handling
-
-The following example shows how change events can be handled for `FeedbackInput`s.
-
-```csharp demo-below
-public class FeedbackHandling: ViewBase
-{
-    public override object? Build()
-    {
-        var feedbackState = UseState(1);
-        var exclamation = UseState("");
-        exclamation.Set(feedbackState.Value switch
-        {
-            0 => "No rating yet",
-            1 => "Seriously?",
-            2 => "Oh! is it that bad?",
-            3 => "Ah! you almost liked it!",
-            4 => "Cool! Tell me more!",
-            5 => "WOW! Would you recommend it?",
-            _ => "Invalid rating"
-        });
-        return Layout.Vertical()
-                | feedbackState.ToFeedbackInput()
-                | Text.Block(exclamation);
-    }
-}
-```
-
 ## Half-value Ratings
 
 The `AllowHalf` property enables users to select half-star or half-emoji ratings by clicking on the left or right side of a rating item. This is particularly useful for star ratings where 3.5 or 4.5 stars provide more granular feedback.
@@ -147,6 +119,42 @@ public class StyledFeedbackDemo : ViewBase
                 | state.ToFeedbackInput()
                       .Invalid("Validation error")
                       .WithField().Label("Invalid");
+    }
+}
+```
+
+## Event Handling
+
+Feedback inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class FeedbackInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState(3);
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the feedback input gains focus.")
+                | state.ToFeedbackInput()
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the feedback input loses focus.")
+                | state.ToFeedbackInput()
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget upon mounting.")
+                | state.ToFeedbackInput().AutoFocus()
+                | Text.Lead("Focused!")
+            )
+        ).Variant(TabsVariant.Tabs);
     }
 }
 ```

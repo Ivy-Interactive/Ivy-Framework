@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
 public class EmployeeRecord

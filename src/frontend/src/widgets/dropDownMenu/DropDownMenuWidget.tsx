@@ -18,6 +18,7 @@ import {
 import { MenuItem } from "@/types/widgets";
 import Icon from "@/components/Icon";
 import { camelCase } from "@/lib/utils";
+import { getColor } from "@/lib/styles";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -40,6 +41,8 @@ interface DropDownMenuItemGroupProps {
 
 const DropDownMenuItemGroup = ({ items, onItemClick }: DropDownMenuItemGroupProps) => {
   return items.map((item, i) => {
+    const colorStyle = item.color ? getColor(item.color, "color") : {};
+
     // Handle group variant
     if (item.variant === "Group" && item.children) {
       const groupKey = item.label || `group-${i}`;
@@ -65,10 +68,10 @@ const DropDownMenuItemGroup = ({ items, onItemClick }: DropDownMenuItemGroupProp
           key={item.label}
           onClick={() => onItemClick(item)}
           disabled={item.disabled}
-          variant={(item.color?.toLowerCase() as any) || "default"}
+          style={colorStyle}
           className={item.checked ? "bg-accent" : ""}
         >
-          {item.icon && <Icon name={item.icon} size={14} />}
+          {item.icon && <Icon name={item.icon} size={14} style={colorStyle} />}
           {item.label}
           {item.checked && <span className="ml-auto">✓</span>}
           {item.shortcut && <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>}
@@ -82,10 +85,10 @@ const DropDownMenuItemGroup = ({ items, onItemClick }: DropDownMenuItemGroupProp
           key={item.label}
           onClick={() => onItemClick(item)}
           disabled={item.disabled}
-          variant={(item.color?.toLowerCase() as any) || "default"}
+          style={colorStyle}
           className={item.checked ? "bg-accent" : ""}
         >
-          {item.icon && <Icon name={item.icon} size={14} />}
+          {item.icon && <Icon name={item.icon} size={14} style={colorStyle} />}
           {item.label}
           {item.checked && <span className="ml-auto">●</span>}
           {item.shortcut && <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>}
@@ -97,11 +100,8 @@ const DropDownMenuItemGroup = ({ items, onItemClick }: DropDownMenuItemGroupProp
     if (item.children && item.children.length > 0) {
       return (
         <DropdownMenuSub key={item.label}>
-          <DropdownMenuSubTrigger
-            disabled={item.disabled}
-            variant={(item.color?.toLowerCase() as any) || "default"}
-          >
-            {item.icon && <Icon name={item.icon} size={14} />}
+          <DropdownMenuSubTrigger disabled={item.disabled} style={colorStyle}>
+            {item.icon && <Icon name={item.icon} size={14} style={colorStyle} />}
             {item.label}
             {item.shortcut && <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>}
           </DropdownMenuSubTrigger>
@@ -120,9 +120,9 @@ const DropDownMenuItemGroup = ({ items, onItemClick }: DropDownMenuItemGroupProp
         key={item.label}
         onClick={() => onItemClick(item)}
         disabled={item.disabled}
-        variant={(item.color?.toLowerCase() as any) || "default"}
+        style={colorStyle}
       >
-        {item.icon && <Icon name={item.icon} size={14} />}
+        {item.icon && <Icon name={item.icon} size={14} style={colorStyle} />}
         {item.label}
         {item.shortcut && <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>}
       </DropdownMenuItem>

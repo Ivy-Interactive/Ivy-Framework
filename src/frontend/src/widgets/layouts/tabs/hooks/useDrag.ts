@@ -33,7 +33,7 @@ export function useDrag(
   setTabOrder: React.Dispatch<React.SetStateAction<string[]>>,
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>,
   safeEvent: (
-    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+    name: "OnSelect" | "OnClose" | "OnCloseOthers" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
     args: unknown[],
   ) => void,
 ) {

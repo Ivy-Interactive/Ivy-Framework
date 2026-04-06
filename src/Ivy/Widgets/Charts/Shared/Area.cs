@@ -42,6 +42,8 @@ public record Area
     public Label? Label { get; set; } = null;
 
     public string? StackId { get; set; }
+
+    public int? YAxisIndex { get; set; } = null;
 }
 
 public static class AreaExtensions
@@ -109,6 +111,11 @@ public static class AreaExtensions
     public static Area FillOpacity(this Area area, double fillOpacity)
     {
         return area with { FillOpacity = fillOpacity };
+    }
+
+    public static Area YAxisIndex(this Area area, int yAxisIndex)
+    {
+        return area with { YAxisIndex = yAxisIndex };
     }
 }
 

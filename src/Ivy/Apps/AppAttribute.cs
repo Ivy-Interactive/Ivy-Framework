@@ -13,7 +13,8 @@ public class AppAttribute(
     int order = 0,
     bool groupExpanded = false,
     string? documentSource = null,
-    string[]? searchHints = null
+    string[]? searchHints = null,
+    bool allowDuplicateTabs = false
 )
     : Attribute
 {
@@ -36,4 +37,6 @@ public class AppAttribute(
     public string? DocumentSource { get; set; } = documentSource;
 
     public string[]? SearchHints { get; set; } = searchHints;
+
+    public bool AllowDuplicateTabs { get; set; } = allowDuplicateTabs;
 }

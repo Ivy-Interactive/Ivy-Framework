@@ -17,12 +17,30 @@ import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BorderRadius, getColor, getWidth } from "@/lib/styles";
 import { Densities } from "@/types/density";
-import {
-  parseShortcut,
-  formatShortcutForDisplay,
-} from "@/widgets/inputs/TextInputWidget/utils/shortcut";
+import { parseShortcut, formatShortcutForDisplay, keyToCode } from "@/lib/shortcut";
 
 const ButtonWithTooltip = withTooltip(Button);
+
+// Debounce state for keyboard shortcuts to prevent duplicate triggers during UI transitions
+const recentShortcuts = new Map<string, number>();
+const DEBOUNCE_MS = 300;
+const SWEEP_INTERVAL_MS = 5 * DEBOUNCE_MS; // 1500ms
+let sweepTimerId: number | null = null;
+
+// Periodic sweep to remove stale entries as defense-in-depth
+// This catches any entries missed by the unmount cleanup (e.g., error boundaries, race conditions)
+function startSweepIfNeeded() {
+  if (sweepTimerId !== null) return;
+
+  sweepTimerId = window.setInterval(() => {
+    const now = Date.now();
+    for (const [id, timestamp] of recentShortcuts.entries()) {
+      if (now - timestamp > SWEEP_INTERVAL_MS) {
+        recentShortcuts.delete(id);
+      }
+    }
+  }, SWEEP_INTERVAL_MS);
+}
 
 interface ButtonWidgetProps {
   id: string;
@@ -183,17 +201,21 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   useEffect(() => {
     if (!shortcutKey || disabled) return;
 
+    startSweepIfNeeded(); // Ensure sweep timer is running
+
     const shortcutObj = parseShortcut(shortcutKey);
     if (!shortcutObj) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const eventTarget = event.target as HTMLElement;
+      const shortcutUsesModifierChord = shortcutObj.ctrl || shortcutObj.meta || shortcutObj.alt;
       if (
-        eventTarget.tagName === "INPUT" ||
-        eventTarget.tagName === "TEXTAREA" ||
-        eventTarget.isContentEditable
+        !shortcutUsesModifierChord &&
+        (eventTarget.tagName === "INPUT" ||
+          eventTarget.tagName === "TEXTAREA" ||
+          eventTarget.isContentEditable)
       ) {
-        return; // Don't intercept shortcuts while typing
+        return;
       }
 
       const modifierMatch =
@@ -201,13 +223,23 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
         (shortcutObj.ctrl && event.ctrlKey) ||
         (!shortcutObj.meta && !shortcutObj.ctrl && !event.metaKey && !event.ctrlKey);
 
+      const expectedCode = keyToCode(shortcutObj.key);
+
       const isShortcutPressed =
         modifierMatch &&
         event.shiftKey === shortcutObj.shift &&
         event.altKey === shortcutObj.alt &&
-        event.key.toLowerCase() === shortcutObj.key.toLowerCase();
+        event.code === expectedCode;
 
       if (isShortcutPressed) {
+        const now = Date.now();
+        const lastTrigger = recentShortcuts.get(id) || 0;
+
+        if (now - lastTrigger < DEBOUNCE_MS) {
+          return; // Ignore rapid-fire triggers
+        }
+
+        recentShortcuts.set(id, now);
         event.preventDefault();
         if (!effectiveUrl) {
           eventHandler("OnClick", id, []);
@@ -226,6 +258,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      recentShortcuts.delete(id);
     };
   }, [shortcutKey, disabled, id, effectiveUrl, eventHandler]);
 

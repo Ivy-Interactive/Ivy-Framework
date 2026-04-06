@@ -49,6 +49,7 @@ export function BladeWidget({ index, title, children, id, width, slots }: BladeW
         </div>
         <div className="flex items-center h-[70px]">
           <button
+            aria-label="Refresh"
             onClick={() => eventHandler("OnRefresh", id, [])}
             className={buttonVariant({ variant: "ghost", size: "icon" })}
           >
@@ -56,6 +57,7 @@ export function BladeWidget({ index, title, children, id, width, slots }: BladeW
           </button>
           {index > 0 && (
             <button
+              aria-label="Close"
               onClick={() => eventHandler("OnClose", id, [])}
               className={buttonVariant({ variant: "ghost", size: "icon" })}
             >

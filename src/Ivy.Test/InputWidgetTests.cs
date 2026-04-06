@@ -1,10 +1,5 @@
-using System;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
-using System.Collections.Generic;
-using Ivy.Core;
-using Ivy.Core.Hooks;
-using Xunit;
 
 namespace Ivy.Test;
 
@@ -33,31 +28,6 @@ public class InputWidgetTests
         public IEffectTrigger ToTrigger() => EffectTrigger.OnStateChange(this);
         public object? GetValueAsObject() => Value;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     [Theory]
     [InlineData(typeof(short), (short)1)]

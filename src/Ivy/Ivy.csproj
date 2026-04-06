@@ -80,6 +80,7 @@
     <InternalsVisibleTo Include="Ivy.Docs" />
     <InternalsVisibleTo Include="Ivy.XamlBuilder" />
     <InternalsVisibleTo Include="Ivy.XamlBuilder.Test" />
+    <InternalsVisibleTo Include="Ivy.Integration.Tests" />
   </ItemGroup>
   
   <ItemGroup>
@@ -118,7 +119,7 @@
     <ItemGroup>
       <_FrontendDistFile Include="../frontend/dist/**/*" />
       <EmbeddedResource Include="@(_FrontendDistFile)" Visible="false"
-                        LogicalName="Ivy.$([System.String]::Copy('%(Identity)').Replace('..\frontend\dist\','').Replace('../frontend/dist/','').Replace('\','.'))" />
+                        LogicalName="Ivy.$([System.String]::Copy('%(Identity)').Replace('..\frontend\dist\','').Replace('../frontend/dist/','').Replace('\','.').Replace('/','.'))" />
     </ItemGroup>
   </Target>
 

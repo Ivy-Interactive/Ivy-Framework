@@ -1,5 +1,3 @@
-using Ivy.Core;
-
 namespace Ivy.Widgets.Internal;
 
 /// <summary>

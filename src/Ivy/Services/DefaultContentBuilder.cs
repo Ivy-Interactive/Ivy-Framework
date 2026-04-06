@@ -6,7 +6,6 @@ using System.Text.Json.Nodes;
 using System.Xml.Linq;
 using Ivy.Core;
 using Ivy.Core.Helpers;
-using Ivy.Core.Hooks;
 
 // Resharper disable once CheckNamespace
 namespace Ivy;

@@ -1,13 +1,8 @@
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
 using System.Text.Json.JsonDiffPatch;
-using System.Text.Json.JsonDiffPatch.Diffs.Formatters;
 using System.Text.Json.Nodes;
-using Ivy;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 
@@ -143,6 +138,11 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         {
             //ignore
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] WidgetTree.RefreshRequested failed: {ex}");
+            // Don't rethrow — this runs from async void, rethrowing would crash the process
+        }
         finally
         {
             try
@@ -158,54 +158,54 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
     private WidgetTreeChanged? _RefreshView(string viewId, bool isHotReload)
     {
+        try
+        {
 #if DEBUG
-        var stopWatch = Stopwatch.StartNew();
+            var stopWatch = Stopwatch.StartNew();
 #endif
 
-        if (!_nodes.TryGetValue(viewId, out var node))
-            throw new NotSupportedException($"Node '{viewId}' not found.");
+            if (!_nodes.TryGetValue(viewId, out var node))
+                throw new NotSupportedException($"Node '{viewId}' not found.");
 
-        if (!node.IsView)
-            throw new NotSupportedException($"Node '{viewId}' is not a view.");
+            if (!node.IsView)
+                throw new NotSupportedException($"Node '{viewId}' is not a view.");
 
-        var parentId = node.ParentId;
+            var parentId = node.ParentId;
 
-        var indices = node.GetWidgetTreeIndices();
+            var indices = node.GetWidgetTreeIndices();
 
-        var previous = node.GetSerializedWidgetTree();
+            var previous = node.GetSerializedWidgetTree();
 
-        var partial = BuildView(node.View!, node.ParentTreePath.Clone(), node.Index, parentId, node.AncestorContext, isRefreshingView: true, isHotReload);
+            var partial = BuildView(node.View!, node.ParentTreePath.Clone(), node.Index, parentId, node.AncestorContext, isRefreshingView: true, isHotReload);
 
-        if (partial == null) throw new NotSupportedException("View must return an IWidget.");
+            if (partial == null) throw new NotSupportedException("View must return an IWidget.");
 
-        if (parentId == null)
-        {
-            NodeTree = partial;
-        }
-        else
-        {
-            if (_nodes.TryGetValue(parentId, out var parent))
+            if (parentId == null)
             {
-                if (parent.Children.Length <= node.Index)
-                {
-                    // Silent bound guard check
-                }
-                else
-                {
-                    parent.Children[node.Index] = partial;
-
-                    // Invalidate serialization cache for all ancestors since their child changed
-                    InvalidateAncestorCaches(parentId);
-                }
+                NodeTree = partial;
             }
             else
             {
-                // Unresolved parent during active flush loop
-            }
-        }
+                if (_nodes.TryGetValue(parentId, out var parent))
+                {
+                    if (parent.Children.Length <= node.Index)
+                    {
+                        // Silent bound guard check
+                    }
+                    else
+                    {
+                        parent.Children[node.Index] = partial;
 
-        try
-        {
+                        // Invalidate serialization cache for all ancestors since their child changed
+                        InvalidateAncestorCaches(parentId);
+                    }
+                }
+                else
+                {
+                    // Unresolved parent during active flush loop
+                }
+            }
+
             var update = partial.GetSerializedWidgetTree();
 
             var previousId = previous?["id"]?.GetValue<string>();
@@ -256,6 +256,10 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         catch (ObjectDisposedException)
         {
             //ignore
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] WidgetTree._RefreshView failed for {viewId}: {ex}");
         }
         return null!;
     }

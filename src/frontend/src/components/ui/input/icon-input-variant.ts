@@ -55,7 +55,7 @@ export const iconInputPopoverVariant = cva("p-0", {
   },
 });
 
-export const iconInputPopoverScrollVariant = cva("overflow-auto", {
+export const iconInputPopoverScrollVariant = cva("overflow-auto slim-scrollbar", {
   variants: {
     density: {
       Small: "h-[240px]",

@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Text.Json.Nodes;
-using Ivy.Core;
 using Ivy.Core.Apps;
 using Ivy.Core.Auth;
 using Ivy.Core.ExternalWidgets;
@@ -11,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using AppContext = Ivy.AppContext;
 
 namespace Ivy.Core.Server;
 
@@ -114,6 +112,13 @@ public class AppHub(
                 requestScheme = forwardedProto.ToString();
             }
 
+            // Get base path from X-Forwarded-Prefix header (for reverse proxy), or fall back to server.Args
+            var basePath = server.Args?.BasePath;
+            if (httpContext.Request.Headers.TryGetValue("X-Forwarded-Prefix", out var forwardedPrefix) && !string.IsNullOrEmpty(forwardedPrefix.ToString()))
+            {
+                basePath = forwardedPrefix.ToString().Trim('/');
+            }
+
             var machineId = AppRouter.GetMachineId(httpContext);
 
             // Resolve route before auth so we can avoid reload loop on error page (skip LogoutAsync) and avoid overriding to Auth app
@@ -134,7 +139,7 @@ public class AppHub(
 
                 var oldSession = authSession.TakeSnapshot();
                 await TimeoutHelper.WithTimeoutAsync(
-                    ct => authProvider.InitializeAsync(authSession, requestScheme, request.Host.Value!, ct),
+                    ct => authProvider.InitializeAsync(authSession, requestScheme, request.Host.Value!, basePath, ct),
                     Context.ConnectionAborted);
                 if (authSession.HasChangedSince(oldSession))
                 {
@@ -193,7 +198,7 @@ public class AppHub(
 
             if (routeResult.AppDescriptor.Title is { } title && routeResult.AppId != AppIds.AppShell && parentId == null)
             {
-                clientProvider.SetTitle(title, server.Args.Metadata.Title);
+                clientProvider.SetTitle(title, server.Args?.Metadata?.Title);
             }
 
             appServices.AddSingleton(routeResult.AppRepository);
@@ -699,7 +704,7 @@ public class AppHub(
             var appContext = session.AppServices.GetService<AppContext>();
             if (appContext != null)
             {
-                await handler.InitializeAsync(providerSession, appContext.Scheme, appContext.Host, cancellationToken);
+                await handler.InitializeAsync(providerSession, appContext.Scheme, appContext.Host, appContext.BasePath, cancellationToken);
             }
 
             var client = session.AppServices.GetRequiredService<IClientProvider>();

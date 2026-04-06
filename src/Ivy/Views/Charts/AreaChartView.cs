@@ -1,11 +1,8 @@
-using System;
 using System.Collections.Immutable;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using Ivy.Core;
 using Ivy.Core.Helpers;
-using Ivy.Core.Hooks;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -76,6 +73,8 @@ public class AreaChartBuilder<TSource>(
     private Func<Toolbox, Toolbox>? _toolboxFactory;
     private Expression<Func<TSource, object>>? _sortSelector;
     private SortOrder _sortOrder = SortOrder.None;
+    private bool _fillGaps;
+    private object? _gapFillInterval;
     private Size? _height;
     private Size? _width;
 
@@ -91,7 +90,7 @@ public class AreaChartBuilder<TSource>(
             throw new InvalidOperationException("At least one measure is required.");
         }
 
-        var lineChartData = UseState(ImmutableArray.Create<Dictionary<string, object>>);
+        var areaChartData = UseState(ImmutableArray.Create<Dictionary<string, object>>);
         var loading = UseState(true);
 
         UseEffect(async () =>
@@ -102,6 +101,11 @@ public class AreaChartBuilder<TSource>(
                     .ToPivotTable()
                     .Dimension(dimension).Measures(_measures);
 
+                if (_fillGaps)
+                {
+                    pivotBuilder = pivotBuilder.FillGaps(_gapFillInterval);
+                }
+
                 if (_sortOrder != SortOrder.None)
                 {
                     pivotBuilder = _sortSelector != null
@@ -110,7 +114,7 @@ public class AreaChartBuilder<TSource>(
                 }
 
                 var results = await pivotBuilder.ExecuteAsync();
-                lineChartData.Set([.. results]);
+                areaChartData.Set([.. results]);
             }
             finally
             {
@@ -126,7 +130,7 @@ public class AreaChartBuilder<TSource>(
         var resolvedDesigner = style ?? AreaChartStyleHelpers.GetStyle<TSource>(AreaChartStyles.Default);
 
         var scaffolded = resolvedDesigner.Design(
-            lineChartData.Value.ToExpando(),
+            areaChartData.Value.ToExpando(),
             dimension,
             _measures.ToArray()
         );
@@ -209,6 +213,13 @@ public class AreaChartBuilder<TSource>(
     {
         _sortOrder = order;
         _sortSelector = null;
+        return this;
+    }
+
+    public AreaChartBuilder<TSource> FillGaps(object? interval = null)
+    {
+        _fillGaps = true;
+        _gapFillInterval = interval;
         return this;
     }
 }

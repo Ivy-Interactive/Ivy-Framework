@@ -38,6 +38,8 @@ const languageMap: Record<string, string> = {
   Xml: "xml",
   Yaml: "yaml",
   Csv: "text",
+  Powershell: "powershell",
+  Bash: "bash",
 };
 
 const mapLanguageToPrism = (language: string): string | undefined => {

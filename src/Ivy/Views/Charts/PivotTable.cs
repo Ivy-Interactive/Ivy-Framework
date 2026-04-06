@@ -1,7 +1,6 @@
-using System.Collections;
 using System.Linq.Expressions;
+using System.Numerics;
 using System.Runtime.CompilerServices;
-using Ivy.Core.Helpers;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -35,6 +34,8 @@ public class PivotTable<T>
 
     public async Task<Dictionary<string, object>[]> ExecuteAsync(
     IQueryable<T> data,
+    bool fillGaps = false,
+    object? gapFillInterval = null,
     CancellationToken cancellationToken = default)
     {
         if (Dimensions.Count == 0)
@@ -73,6 +74,11 @@ public class PivotTable<T>
                 }
 
                 result.Add(row);
+            }
+
+            if (fillGaps)
+            {
+                result = FillDimensionGaps(result, Dimensions[0], gapFillInterval, Measures);
             }
         }
         else if (Dimensions.Count == 2)
@@ -134,6 +140,104 @@ public class PivotTable<T>
         return result.ToArray();
     }
 
+    private static List<Dictionary<string, object>> FillDimensionGaps(
+        List<Dictionary<string, object>> result,
+        Dimension<T> dimension,
+        object? interval,
+        IList<Measure<T>> measures)
+    {
+        if (result.Count == 0) return result;
+
+        var dimensionName = dimension.Name;
+        var firstValue = result[0][dimensionName];
+        var lastValue = result[^1][dimensionName];
+
+        return firstValue switch
+        {
+            DateTime startTime when lastValue is DateTime endTime =>
+                FillDateTimeGaps(result, dimensionName, measures, startTime, endTime,
+                    interval as TimeSpan? ?? TimeSpan.FromHours(1)),
+
+            int startInt when lastValue is int endInt =>
+                FillGaps(result, dimensionName, measures, startInt, endInt,
+                    interval as int? ?? 1),
+
+            _ => throw new ArgumentException(
+                $"FillGaps() is only supported for DateTime and int dimensions. " +
+                $"Dimension '{dimensionName}' has type '{firstValue.GetType().Name}'. " +
+                $"Use a DateTime or int dimension instead of formatting the value as a string.",
+                nameof(dimension))
+        };
+    }
+
+    private static List<Dictionary<string, object>> FillDateTimeGaps(
+        List<Dictionary<string, object>> result,
+        string dimensionName,
+        IList<Measure<T>> measures,
+        DateTime start,
+        DateTime end,
+        TimeSpan step)
+    {
+        var lookup = result.ToDictionary(r => (DateTime)r[dimensionName]);
+        var filled = new List<Dictionary<string, object>>();
+
+        for (var current = start; current <= end; current += step)
+        {
+            if (lookup.TryGetValue(current, out var existing))
+            {
+                filled.Add(existing);
+            }
+            else
+            {
+                var row = new Dictionary<string, object>
+                {
+                    [dimensionName] = current
+                };
+                foreach (var measure in measures)
+                {
+                    row[measure.Name] = 0;
+                }
+                filled.Add(row);
+            }
+        }
+
+        return filled;
+    }
+
+    private static List<Dictionary<string, object>> FillGaps<TValue>(
+        List<Dictionary<string, object>> result,
+        string dimensionName,
+        IList<Measure<T>> measures,
+        TValue start,
+        TValue end,
+        TValue step) where TValue : struct, INumber<TValue>
+    {
+        var lookup = result.ToDictionary(r => (TValue)r[dimensionName]);
+        var filled = new List<Dictionary<string, object>>();
+
+        for (var current = start; current <= end; current += step)
+        {
+            if (lookup.TryGetValue(current, out var existing))
+            {
+                filled.Add(existing);
+            }
+            else
+            {
+                var row = new Dictionary<string, object>
+                {
+                    [dimensionName] = current
+                };
+                foreach (var measure in measures)
+                {
+                    row[measure.Name] = 0;
+                }
+                filled.Add(row);
+            }
+        }
+
+        return filled;
+    }
+
     private static Expression ReplaceParameter(Expression expr, ParameterExpression oldParam,
         ParameterExpression newParam)
     {
@@ -157,6 +261,8 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
     private IQueryable<TSource> Data { get; } = data;
     private Expression<Func<TSource, object>>? _sortSelector;
     private SortOrder _sortOrder = SortOrder.None;
+    private bool _fillGaps;
+    private object? _gapFillInterval;
 
     public PivotTableBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
     {
@@ -221,10 +327,17 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
         return this;
     }
 
+    public PivotTableBuilder<TSource> FillGaps(object? interval = null)
+    {
+        _fillGaps = true;
+        _gapFillInterval = interval;
+        return this;
+    }
+
     public async Task<Dictionary<string, object>[]> ExecuteAsync(CancellationToken cancellationToken = default)
     {
         var pivotTable = new PivotTable<TSource>(_dimensions, _measures, _calculations);
-        var results = await pivotTable.ExecuteAsync(Data, cancellationToken);
+        var results = await pivotTable.ExecuteAsync(Data, _fillGaps, _gapFillInterval, cancellationToken);
 
         if (_sortOrder != SortOrder.None)
         {

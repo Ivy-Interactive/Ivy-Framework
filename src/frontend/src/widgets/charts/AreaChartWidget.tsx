@@ -187,7 +187,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   // Memoize complete option configuration
   const option = useMemo(
     () => ({
-      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false),
+      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false, yAxis, xAxis),
       color: chartColors,
       tooltip: generateTooltip(tooltip, "cross", {
         foreground: themeColors.foreground,

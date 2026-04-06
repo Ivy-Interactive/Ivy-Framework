@@ -30,13 +30,13 @@ public class BasicDateUsageDemo : ViewBase
     {
         var dateState = UseState(DateTime.Today);
         var daysBetween = dateState.Value.Subtract(DateTime.Today).Days;
-        return Layout.Vertical() 
+        return Layout.Vertical()
                 | dateState.ToDateInput()
                            .WithField()
                            .Label("When is your birthday?")
                 | Text.Html($"<i>That's <b>{daysBetween}</b> days from now!");
     }
-}    
+}
 ```
 
 ## Variants
@@ -54,16 +54,16 @@ The following demo shows the core variants in action:
 
 ```csharp demo-below
 public class DateTimeVariantsDemo : ViewBase
-{    
+{
     public override object? Build()
-    {    
+    {
         var dateState = UseState(DateTime.Today.Date);
         var timeState = UseState(DateTime.Now);
         var dateTimeState = UseState(DateTime.Today);
         var monthState = UseState(DateTime.Today);
         var weekState = UseState(DateTime.Today);
         var yearState = UseState(DateTime.Today);
-        
+
         return Layout.Vertical()
                 | dateState.ToDateInput()
                        .Format("dd/MM/yyyy")
@@ -85,8 +85,8 @@ public class DateTimeVariantsDemo : ViewBase
                 | yearState.ToYearInput()
                        .WithField()
                        .Label("Year");
-    }    
-}                
+    }
+}
 ```
 
 ## Supported State Types
@@ -99,19 +99,6 @@ public class DateTimeVariantsDemo : ViewBase
 - `TimeOnly` and `TimeOnly?`
 - `string` (for ISO format)
 
-## Event Handling
-
-`DateTimeInput` can handle change and blur events:
-
-```csharp
-var dateState = UseState(DateTime.Now);
-var onChangeHandler = (Event<IInput<DateTime>, DateTime> e) =>
-{
-    dateState.Set(e.Value);
-};
-return dateState.ToDateTimeInput().OnChange(onChangeHandler);
-```
-
 ## Format
 
 `DateTimeInput` can be customized with various formats. So the captured value can be
@@ -121,10 +108,10 @@ expressed in any format as supported by .NET.
 public class FormatDemo : ViewBase
 {
      public override object? Build()
-     {    
+     {
          var monthDateYear = UseState(DateTime.Today.Date);
          var yearMonthDate = UseState(DateTime.Today.Date);
-         
+
          return Layout.Vertical()
                 | monthDateYear.ToDateInput()
                                 .Format("MM/dd/yyyy")
@@ -136,7 +123,44 @@ public class FormatDemo : ViewBase
                                 .WithField()
                                 .Label("yyyy/MMM/dd");
     }
-}    
+}
+```
+
+## Event Handling
+
+Date and time inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class DateTimeInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState(DateTime.Now);
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the date picker gains focus.")
+                | state.ToDateInput().Placeholder("Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the date picker loses focus.")
+                | state.ToDateInput().Placeholder("Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the date input and opens the calendar popover upon mounting.")
+                | state.ToDateInput().Placeholder("AutoFocused DatePicker")
+                    .AutoFocus()
+                | Text.Lead("Focused & Open!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
+}
 ```
 
 <WidgetDocs Type="Ivy.DateTimeInput" ExtensionTypes="Ivy.DateTimeInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/DateTimeInput.cs"/>

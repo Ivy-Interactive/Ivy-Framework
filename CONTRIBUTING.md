@@ -207,6 +207,20 @@ Before submitting your widget PR, ensure you have:
 - [ ] Code follows project style guidelines
 - [ ] All existing tests still pass
 
+## Merge Conflict Resolution
+
+When resolving merge conflicts:
+
+1. Ensure all conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) are removed
+2. Test that code builds and passes tests after resolution
+3. Use `git diff --check` to verify no conflict markers remain
+4. Prefer PR workflow over direct pushes to main
+
+The repository has automated protections against unresolved conflict markers:
+
+- **Pre-commit hook** — blocks commits containing conflict markers
+- **CI check** — a dedicated workflow scans all source files for conflict markers on every push and PR to main
+
 ## Pull Request Process
 
 1. **Create a descriptive branch name:**

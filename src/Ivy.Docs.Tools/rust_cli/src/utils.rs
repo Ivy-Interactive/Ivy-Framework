@@ -53,15 +53,6 @@ pub fn rename_class(code: &str, old_class: &str, new_class: &str) -> String {
     ctor_re.replace(&code, format!("public {new_class}(")).to_string()
 }
 
-pub fn get_short_hash(input: &str) -> String {
-    use sha2::{Sha256, Digest};
-    let mut hasher = Sha256::new();
-    hasher.update(input.as_bytes());
-    let result = hasher.finalize();
-    use base64::{engine::general_purpose::STANDARD, Engine as _};
-    let b64 = STANDARD.encode(result);
-    b64.replace('+', "-").replace('/', "_").to_lowercase().chars().filter(|c| c.is_alphanumeric()).take(8).collect()
-}
 
 lazy_static! { static ref GIT_INFO: Mutex<Option<(String, String, String)>> = Mutex::new(None); }
 

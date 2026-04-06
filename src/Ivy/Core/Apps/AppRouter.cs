@@ -1,6 +1,5 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
-using Ivy;
 
 namespace Ivy.Core.Apps;
 

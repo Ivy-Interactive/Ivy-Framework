@@ -39,6 +39,8 @@ public record Scatter
     public ScatterLineType LineType { get; set; } = ScatterLineType.Joint;
 
     public double? FillOpacity { get; set; } = null;
+
+    public int? YAxisIndex { get; set; } = null;
 }
 
 public static class ScatterExtensions
@@ -101,5 +103,10 @@ public static class ScatterExtensions
     public static Scatter FillOpacity(this Scatter scatter, double fillOpacity)
     {
         return scatter with { FillOpacity = fillOpacity };
+    }
+
+    public static Scatter YAxisIndex(this Scatter scatter, int yAxisIndex)
+    {
+        return scatter with { YAxisIndex = yAxisIndex };
     }
 }

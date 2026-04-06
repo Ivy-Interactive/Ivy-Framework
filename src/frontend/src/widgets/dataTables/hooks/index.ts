@@ -1,6 +1,7 @@
 export { useColumnGroups } from "./useColumnGroups";
 export { useContainerSize } from "./useContainerSize";
 export { useSearch } from "./useSearch";
+export { useSearchNavigation } from "./useSearchNavigation";
 export { useTableTheme } from "./useTableTheme";
 export { useGridSelection } from "./useGridSelection";
 export { useCellInteractions } from "./useCellInteractions";

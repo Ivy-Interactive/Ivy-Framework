@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

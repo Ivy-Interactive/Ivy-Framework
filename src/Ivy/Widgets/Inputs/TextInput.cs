@@ -1,10 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
-using Ivy.Core.Hooks;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -82,7 +79,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? DictationUploadUrl { get; set; }
 
-    [Prop] public string? DictationLanguage { get; set; }
+    public string? DictationLanguage { get; set; }
 
     [Prop] public string? DictationTranscription { get; set; }
 

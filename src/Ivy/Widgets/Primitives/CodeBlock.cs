@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -34,6 +33,10 @@ public enum Languages
     Yaml,
     [Description("CSV")]
     Csv,
+    [Description("PowerShell")]
+    Powershell,
+    [Description("Bash")]
+    Bash,
 }
 
 /// <summary>
