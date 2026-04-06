@@ -1,5 +1,5 @@
 /** Formats a byte count into a human-readable string (e.g. 1536 → "1.50 KB").
- *  Non-positive values return "0 B". */
+ *  Non-positive and non-finite values return "0 B". */
 export const formatBytes = (bytes: number, precision?: number): string => {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
 
