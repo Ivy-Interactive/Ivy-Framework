@@ -38,6 +38,8 @@
     <Project Path="Ivy.Docs.Tools.Test/Ivy.Docs.Tools.Test.csproj" />
     <Project Path="Ivy.Docs.Tools/Ivy.Docs.Tools.csproj" />
   </Folder>
+  <Project Path="Ivy.Analyser.Tests/Ivy.Analyser.Tests.csproj" />
+  <Project Path="Ivy.Analyser/Ivy.Analyser.csproj" />
   <Project Path="Ivy.Benchmarks.Docs/Ivy.Benchmarks.Docs.csproj" />
   <Project Path="Ivy.Desktop/Ivy.Desktop.csproj" />
   <Project Path="Ivy.Docs.Helpers/Ivy.Docs.Helpers.csproj" />

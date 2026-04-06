@@ -23,6 +23,8 @@ enum Commands {
         output_folder: String,
         #[arg(long)]
         skip_if_not_changed: bool,
+        #[arg(long)]
+        api_docs: Option<String>,
     },
 }
 
@@ -63,7 +65,10 @@ fn get_project_file(start_folder: &Path) -> Option<PathBuf> {
 fn main() {
     let cli = Cli::parse();
     match cli.command {
-        Commands::Convert { input_folder, output_folder, skip_if_not_changed } => {
+        Commands::Convert { input_folder, output_folder, skip_if_not_changed, api_docs } => {
+            let api_docs_manifest = llm_markdown::load_api_docs_manifest(
+                api_docs.as_ref().map(|p| Path::new(p.as_str()))
+            );
             let is_glob = input_folder.contains('*') || input_folder.contains('?');
             let (input_dir, pattern) = if is_glob {
                 let p = Path::new(&input_folder);
@@ -166,6 +171,7 @@ fn main() {
                     absolute_input_path,
                     &md_output,
                     skip_if_not_changed,
+                    &api_docs_manifest,
                 ) {
                     println!("Error generating LLM markdown for {}: {}", name, e);
                 }

@@ -91,7 +91,20 @@ public class JobsApp : ViewBase
             .Width(t => t.LastOutput, Size.Px(90))
             .Width(t => t.Cost, Size.Px(80))
             .Width(t => t.StatusMessage, Size.Auto())
-            .Renderer(t => t.Status, new LabelsDisplayRenderer())
+            .Renderer(t => t.Status, new LabelsDisplayRenderer
+            {
+                BadgeColorMapping = new Dictionary<string, string>
+                {
+                    ["Running"] = "Blue",
+                    ["Completed"] = "Green",
+                    ["Failed"] = "Red",
+                    ["Timeout"] = "Red",
+                    ["Queued"] = "Amber",
+                    ["Pending"] = "Amber",
+                    ["Stopped"] = "Gray",
+                    ["Blocked"] = "Orange"
+                }
+            })
             .Renderer(t => t.PlanId, new LinkDisplayRenderer())
             .Hidden(t => t.Id)
             .Hidden(t => t.LastOutputTimestamp)

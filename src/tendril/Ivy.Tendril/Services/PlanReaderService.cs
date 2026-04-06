@@ -123,6 +123,15 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
             if (!File.Exists(planYamlPath))
                 continue;
 
+            // Ensure at least one revision file exists before yielding the plan
+            var revisionsDir = Path.Combine(dir, "revisions");
+            if (!Directory.Exists(revisionsDir))
+                continue;
+
+            var hasRevision = Directory.GetFiles(revisionsDir, "*.md").Length > 0;
+            if (!hasRevision)
+                continue;
+
             yield return (dir, folderName, planYamlPath);
         }
     }
@@ -537,7 +546,7 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
             if (!Enum.TryParse<PlanStatus>(planYaml.State, ignoreCase: true, out var status))
                 status = PlanStatus.Draft;
 
-            var metadata = new PlanMetadata(id, planYaml.Project ?? "", planYaml.Level ?? "NiceToHave", planYaml.Title ?? "", status, planYaml.Repos ?? new(), planYaml.Commits ?? new(), planYaml.Prs ?? new(), planYaml.Verifications ?? new(), planYaml.RelatedPlans ?? new(), planYaml.DependsOn ?? new(), planYaml.Created, planYaml.Updated);
+            var metadata = new PlanMetadata(id, planYaml.Project ?? "", planYaml.Level ?? "NiceToHave", planYaml.Title ?? "", status, planYaml.Repos ?? new(), planYaml.Commits ?? new(), planYaml.Prs ?? new(), planYaml.Verifications ?? new(), planYaml.RelatedPlans ?? new(), planYaml.DependsOn ?? new(), planYaml.Created, planYaml.Updated, planYaml.InitialPrompt);
             var latestContent = ReadLatestRevisionFromFileSystem(folderName);
 
             var revisionsDir = Path.Combine(folderPath, "revisions");

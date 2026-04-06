@@ -39,6 +39,18 @@ describe("formatBytes", () => {
   it("formats negative fractional bytes as 0 B", () => {
     expect(formatBytes(-0.5)).toBe("0 B");
   });
+
+  it("formats NaN as 0 B", () => {
+    expect(formatBytes(NaN)).toBe("0 B");
+  });
+
+  it("formats Infinity as 0 B", () => {
+    expect(formatBytes(Infinity)).toBe("0 B");
+  });
+
+  it("formats -Infinity as 0 B", () => {
+    expect(formatBytes(-Infinity)).toBe("0 B");
+  });
 });
 
 // ---------------------------------------------------------------------------

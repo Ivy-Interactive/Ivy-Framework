@@ -124,7 +124,7 @@ public class ContentView(
                     new DialogBody(
                         Layout.Vertical()
                             | Text.P("Optionally provide a reason for declining this recommendation.")
-                            | declineReason.ToTextareaInput("Enter reason (optional)...").Rows(4).AutoFocus()
+                            | declineReason.ToTextareaInput("Enter reason (optional)...").Rows(4)
                     ),
                     new DialogFooter(
                         new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() =>

@@ -1,7 +1,7 @@
 /** Formats a byte count into a human-readable string (e.g. 1536 → "1.50 KB").
  *  Non-positive values return "0 B". */
 export const formatBytes = (bytes: number, precision?: number): string => {
-  if (bytes <= 0) return "0 B";
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
 
   const units = ["B", "KB", "MB", "GB", "TB", "PB"];
   const base = 1024;

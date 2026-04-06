@@ -62,8 +62,7 @@ public class ReviewApp : ViewBase
 
         return new SidebarLayout(
             mainContent: new Review.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService, gitService),
-            sidebarContent: sidebar.BuildContent(),
-            sidebarHeader: sidebar.BuildHeader()
+            sidebarContent: sidebar
         );
     }
 }

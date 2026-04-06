@@ -58,6 +58,16 @@ describe("convertToHex", () => {
     // Without a proper DOM (getComputedStyle returns empty), named colors fall through
     expect(convertToHex("red")).toBe("red");
   });
+
+  it("resolves named colors to hex via theme color lookup when DOM is available", () => {
+    vi.spyOn(globalThis, "getComputedStyle").mockReturnValue({
+      getPropertyValue: () => "#ef4444",
+    } as unknown as CSSStyleDeclaration);
+
+    expect(convertToHex("red")).toBe("#ef4444");
+
+    vi.restoreAllMocks();
+  });
 });
 
 // ---------------------------------------------------------------------------

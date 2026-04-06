@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseHexAlpha, combineHexAlpha } from "../ColorInputWidget";
-import { enumColorsToCssVar } from "../color-utils";
+import { parseHexAlpha, combineHexAlpha, enumColorsToCssVar } from "../color-utils";
 
 // ---------------------------------------------------------------------------
 // parseHexAlpha

@@ -23,7 +23,7 @@ public class TrashApp : ViewBase
         var trashDir = Path.Combine(configService.TendrilHome, "Trash");
         var files = LoadTrashFiles(trashDir);
 
-        // Apply search filter
+        // Apply search filter for selection logic
         var filteredFiles = files.AsEnumerable();
         if (!string.IsNullOrWhiteSpace(searchFilter.Value))
         {
@@ -44,29 +44,7 @@ public class TrashApp : ViewBase
 
         var selected = filteredList.FirstOrDefault(f => f.FilePath == selectedFile.Value);
 
-        // Sidebar content - search input + file list
-        var sidebarHeader = searchFilter.ToSearchInput().Placeholder("Search trash...");
-
-        object sidebarList;
-        if (filteredList.Count == 0)
-        {
-            sidebarList = Layout.Vertical().AlignContent(Align.Center).Gap(2).Padding(4)
-                | new Icon(Icons.Trash2).Size(Size.Units(6)).Color(Colors.Gray)
-                | Text.Muted("No trash items")
-                | Text.Muted("Duplicate plans will appear here").Small();
-        }
-        else
-        {
-            sidebarList = new List(filteredList.Select(f =>
-            {
-                var item = f;
-                return new ListItem(item.FileName.Replace(".md", ""))
-                    .Content(Layout.Horizontal().Gap(1)
-                        | new Badge(item.Project).Variant(BadgeVariant.Outline).Small()
-                        | Text.Muted(item.Date.ToString("yyyy-MM-dd")).Small())
-                    .OnClick(() => selectedFile.Set(item.FilePath));
-            }));
-        }
+        var sidebar = new Trash.SidebarView(files, selectedFile, searchFilter);
 
         // Main content
         object mainContent;
@@ -121,8 +99,7 @@ public class TrashApp : ViewBase
         {
             new SidebarLayout(
                 mainContent: mainContent,
-                sidebarContent: sidebarList,
-                sidebarHeader: sidebarHeader
+                sidebarContent: sidebar
             )
         };
 

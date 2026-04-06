@@ -4,8 +4,6 @@ namespace Ivy.Tendril.Services;
 
 public interface IPlanDatabaseService : IDisposable
 {
-    void EnsureSchema();
-
     // Plan queries
     List<PlanFile> GetPlans(PlanStatus? statusFilter = null);
     PlanFile? GetPlanByFolder(string folderPath);
@@ -25,6 +23,7 @@ public interface IPlanDatabaseService : IDisposable
 
     // Search
     List<PlanFile> SearchPlans(string query);
+    void RebuildFtsIndex();
 
     // Immediate mutations (DB-first for UI responsiveness)
     void UpdatePlanState(int planId, PlanStatus state);

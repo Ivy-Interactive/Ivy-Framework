@@ -267,6 +267,36 @@ public override object? Build()
 
 **Note:** This warning only appears when a corresponding interface (prefixed with 'I') exists in the same namespace. If no interface exists, no warning is shown.
 
+#### Quick Fix
+
+The analyzer includes a CodeFixProvider that can automatically fix IVYSERVICE001 warnings with a single click.
+
+**How to use:**
+1. Place your cursor on the warning (red/yellow squiggle)
+2. Trigger the quick action menu:
+   - **Visual Studio:** Press `Ctrl+.` or click the lightbulb/screwdriver icon
+   - **VS Code:** Press `Ctrl+.` or click the lightbulb icon
+   - **Rider:** Press `Alt+Enter` or click the lightbulb icon
+3. Select **"Use interface I{ConcreteType}"** from the menu
+4. The concrete type will be automatically replaced with its interface
+
+**Example:**
+```csharp
+// Before fix:
+var config = UseService<ConfigService>();  // ⚠️ Warning IVYSERVICE001
+
+// After applying quick fix:
+var config = UseService<IConfigService>(); // ✅ Fixed
+```
+
+**Fix All:**
+You can apply the fix to multiple violations at once using "Fix All" in Visual Studio:
+- **Fix All in Document:** Fixes all IVYSERVICE001 warnings in the current file
+- **Fix All in Project:** Fixes all IVYSERVICE001 warnings in the project
+- **Fix All in Solution:** Fixes all IVYSERVICE001 warnings in the solution
+
+**Note:** The quick fix only appears when the corresponding interface (prefixed with 'I') exists in the same namespace. If no interface exists, the warning will still appear but no automatic fix will be offered.
+
 ## Configuration
 
 The analyzer runs automatically when you build your project. No additional configuration is needed.
