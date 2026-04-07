@@ -1,8 +1,6 @@
-using Ivy;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Ivy.Tendril.AppShell;
-using Ivy.Tendril.Database;
 using Ivy.Tendril.Services;
 using Microsoft.Extensions.Logging;
 using OpenAI;
@@ -21,11 +19,11 @@ public static class TendrilServer
         server.UseHotReload();
 #endif
         server.SetMetaTitle("Ivy Tendril");
-        
+
         var configService = new ConfigService();
         server.Services.AddSingleton<IConfigService>(configService);
         server.Services.AddSingleton<ConfigService>(configService);
-        
+
         var modelPricingService = new ModelPricingService();
         server.Services.AddSingleton<IModelPricingService>(modelPricingService);
         server.Services.AddSingleton<ModelPricingService>(modelPricingService);
@@ -115,7 +113,7 @@ public static class TendrilServer
             return new InboxWatcherService(config, jobService);
         });
         server.Services.AddSingleton<IInboxWatcherService>(sp => sp.GetRequiredService<InboxWatcherService>());
-        
+
         server.UseWebApplication(app =>
         {
             // Publish the actual bound URL so child processes can reach this server
@@ -130,7 +128,7 @@ public static class TendrilServer
             // Start database sync in background
             var syncService = app.Services.GetRequiredService<PlanDatabaseSyncService>();
             Task.Run(syncService.PerformInitialSync);
-            
+
             var telemetryService = app.Services.GetRequiredService<TelemetryService>();
             var appVersion = typeof(TendrilAppShell).Assembly.GetName().Version!.ToString(3);
             telemetryService.TrackAppStarted(new AppStartContext(
@@ -158,9 +156,9 @@ public static class TendrilServer
             )
             .DefaultAppId("dashboard")
             .UseTabs(preventDuplicates: true);
-        
+
         server.UseAppShell(() => new TendrilAppShell(appShellSettings));
-        
+
         return server;
     }
 }
