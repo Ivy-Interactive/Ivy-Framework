@@ -9,11 +9,28 @@
 
 Bar, Line, Area, and [Scatter](https://docs.ivy.app/widgets/charts/scatter-chart) series support `YAxisIndex` so each series can bind to the correct Y axis in a dual-axis chart.
 
+```csharp
+new BarChart(data)
+    .Bar(new Bar("Revenue", 1).YAxisIndex(0))
+    .Bar(new Bar("GrowthRate", 2).YAxisIndex(1));
+// Line / Area: chain .Line(new Line("Key").YAxisIndex(n)) the same way
+```
+
 ### Axis generation and layout
 
 `generateYAxis` skips `largeSpread` heuristics when multiple axes are active. Cartesian charts reclaim plot width when axes are hidden, and grid padding no longer reserves space for hidden axes.
 
-Dual-axis bar chart (`BarChartApp.cs`, `BarChart10`):
+Hidden axes (horizontal bar sample, `BarChartApp.cs`, `BarChart3`):
+
+```csharp
+new BarChart(data)
+    .Vertical()
+    .Bar(new Bar("Desktop", 1).Radius(4) /* … */)
+    .YAxis(new YAxis("Month").TickLine(false).AxisLine(false).Type(AxisTypes.Category).Hide())
+    .XAxis(new XAxis("Desktop").Type(AxisTypes.Number).Hide());
+```
+
+Full dual-axis bar example (`BarChartApp.cs`, `BarChart10`):
 
 ```csharp
 var data = new[]
@@ -45,9 +62,22 @@ return new Card().Title("Dual Axis (Revenue vs Growth Rate)")
 
 Vertical bar orientation and ECharts axis pairing were fixed. `YAxis.Hide` and grid padding behave correctly with hidden axes; docs cover `YAxisIndex` on `Bar` and dual-axis setups.
 
+```csharp
+.YAxis(new YAxis("Labels").Hide());
+```
+
 ### Scatter chart
 
 Scatter rejects a category axis where a value axis is required. [ScatterChartApp](https://docs.ivy.app/widgets/charts/scatter-chart) includes a dual-axis example with a numeric X axis for continuous data.
+
+Numeric value axes (`ScatterChartApp.cs`, `ScatterChart1View`):
+
+```csharp
+new ScatterChart(data)
+    .Scatter(new Scatter("Value").Name("People"))
+    .XAxis(new XAxis("Height").Type(AxisTypes.Number))
+    .YAxis(new YAxis("Weight").Type(AxisTypes.Number));
+```
 
 ### Scatter tests and validation
 
@@ -83,11 +113,27 @@ return new Card().Title("Dual Axis (Revenue vs Market Share)")
 
 ### Line and area series
 
-Line and Area series expose `YAxisIndex` and documentation covers polish callbacks.
+Line and Area use the same `YAxisIndex` extension as `Bar`.
+
+```csharp
+new LineChart(data)
+    .Line(new Line("SeriesA").YAxisIndex(0))
+    .Line(new Line("SeriesB").YAxisIndex(1))
+    .XAxis(new XAxis("Month"))
+    .YAxis(new YAxis("Left"))
+    .YAxis(new YAxis("Right").Orientation(YAxis.Orientations.Right));
+```
 
 ### Pie chart
 
 [PieChart](https://docs.ivy.app/widgets/charts/pie-chart) tooltips use a formatter with marker styling for clearer series labels and values.
+
+```csharp
+data.ToPieChart(
+    e => e.Category,
+    e => e.Sum(f => f.Value),
+    PieChartStyles.Default);
+```
 
 ## DataTable and querying
 
@@ -115,6 +161,10 @@ You can define multiple virtual columns from the same root property.
 
 When `AllowSorting` is false, `ToDataTable` keeps the query’s order. For paging, the query processor adds a default `OrderBy` when a stable sort is required.
 
+```csharp
+.Sortable(e => e.Email, sortable: false);
+```
+
 ### UseDataTable config
 
 `UseDataTable` takes an optional `DataTableConfig` (same shapes on `ViewBase` and `IViewContext`) so options such as sorting and search ride with the connection:
@@ -137,9 +187,17 @@ var connection = UseDataTable(
 
 Search includes match navigation, highlights, and a progress indicator for large tables.
 
+```csharp
+.Config(c => { c.ShowSearch = true; });
+```
+
 ### Badge and link cells
 
 Badge cells can use per-value colors. Link cells cooperate with `OnCellClick` without double navigation.
+
+```csharp
+.Badges(e => e.Skills, Colors.Sky);
+```
 
 ### Tooltips on cells
 
@@ -173,19 +231,16 @@ mockService.GetEmployees().AsQueryable().ToDataTable(idSelector: e => e.Id)
 
 UseQuery + DataTable anti-patterns are clarified for authors and AGENTS (prefer `IQueryable` / `ToDataTable()` where appropriate).
 
+```csharp
+// Prefer server-side tables from IQueryable:
+entities.AsQueryable().ToDataTable(idSelector: e => e.Id);
+```
+
 ## Markdown and tables
 
 ### Diagrams and fenced code
 
 The [Markdown](https://docs.ivy.app/widgets/primitives/markdown) widget renders Graphviz from ` ```dot ` or ` ```graphviz ` fences (`MarkdownApp.cs`, Diagrams tab). Fences without a language render reliably.
-
-### Tables, images, and spacing
-
-Embedded images use a light border; the Table widget matches markdown table borders. Literal tables inside fences are not rendered as HTML.
-
-### Markdown block spacing
-
-Default container gap is tighter; spacing is tuned per block type instead of one gap everywhere.
 
 ```dot
 digraph G {
@@ -194,6 +249,14 @@ digraph G {
     API -> DB [label="Query"];
 }
 ```
+
+### Tables, images, and spacing
+
+Embedded images use a light border; the Table widget matches markdown table borders. Literal tables inside fences are not rendered as HTML.
+
+### Markdown block spacing
+
+Default container gap is tighter; spacing is tuned per block type instead of one gap everywhere.
 
 ## Image
 
@@ -226,6 +289,12 @@ new Button("Right (Default)").WithSheet(
 ## Dialog and AutoFocus
 
 Dialog and Sheet no longer swallow AutoFocus on child inputs (the client may cast to `HTMLElement` where needed). See DialogApp for AutoFocus.
+
+```csharp
+searchQuery.ToSearchInput()
+    .Placeholder("Type your search query...")
+    .AutoFocus();
+```
 
 ## Tabs and loading
 
@@ -316,9 +385,23 @@ record.ToDetails()
 
 [DiffView](https://docs.ivy.app/widgets/primitives/diff-view) uses a smaller default font.
 
+```csharp
+using Ivy.Widgets.DiffView;
+
+new DiffView()
+    .Diff(myDiffString)
+    .Language("typescript");
+```
+
 ## Confetti
 
 Confetti uses a shorter duration and fewer particles.
+
+```csharp
+new Button("Click")
+    .OnClick(() => { /* action */ })
+    .WithConfetti(AnimationTrigger.Click);
+```
 
 ## Buttons and badges
 
@@ -389,6 +472,16 @@ folder.ToFolderInput(mode: FolderInputMode.FullPath);
 
 The Languages enum uses `Description` for display labels. CodeBlock and samples add PowerShell, Bash/Shell, and FileApp mappings; some samples use a three-column language grid.
 
+```csharp
+public enum Languages
+{
+    [Description("PowerShell")]
+    Powershell,
+    [Description("Bash")]
+    Bash,
+}
+```
+
 ## Accessibility
 
 WCAG work adds `aria-label`s on tooltips, `role="button"` surfaces, and browse controls. DataTable uses the design-system tooltip instead of the native `title` attribute.
@@ -444,6 +537,24 @@ Client `logger.info` is now `logger.debug`. `WidgetTree` refresh paths catch err
 ### Hooks and onboarding
 
 Pre-commit can target frontend paths. Hooks use a barrel export. Agent filter tests and `ivy` CLI Mac notes help onboarding.
+
+## Documentation and AI guidance
+
+### AGENTS and docs content
+
+AGENTS and anti-hallucination docs expand (for example `IBladeContext`, `Server.StartAsync`, and compound widgets). Playwright and widget guidance were split; stale redirects were removed.
+
+### Sidebar and verification
+
+Input doc files were renumbered for stable sidebar order. IvyFrameworkVerification documents process timeouts.
+
+## Ivy Studio and developer workflows
+
+Ivy Studio cloud integration is more stable. IvyFrameworkVerification avoids stuck processes; Cleanup-WorktreeFrontend uses cross-platform path separators.
+
+## Tests (high level)
+
+New or expanded coverage includes AppRouter (`Ivy.Test`), QueryProcessor, DataTable, ScatterChart, `useScrollShadow`, inputs, SignalR, HTTP integration, vite `.test.tsx`, mocks, and coverlet cleanup.
 
 ## Breaking changes
 
