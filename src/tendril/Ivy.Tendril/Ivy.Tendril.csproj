@@ -39,6 +39,7 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
     <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
     <PackageReference Include="PostHog" Version="1.0.8" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.53.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Ivy/Ivy.csproj" />
