@@ -59,7 +59,6 @@ interface GridContainerProps {
   footer?: React.ReactNode;
   height?: number;
   hasEmptyRows?: boolean;
-  linkTooltip?: React.ReactNode;
 }
 
 /**
@@ -108,7 +107,6 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   footer,
   height,
   hasEmptyRows = false,
-  linkTooltip,
 }) => {
   const containerStyle = hasOptions
     ? tableStyles.tableEditor.gridContainerWithOptions
@@ -168,8 +166,6 @@ export const GridContainer: React.FC<GridContainerProps> = ({
           onItemHovered={onItemHovered}
           getRowThemeOverride={getRowThemeOverride}
         />
-
-        {linkTooltip}
 
         {rowActions && rowActions.length > 0 && (
           <RowActionButtons

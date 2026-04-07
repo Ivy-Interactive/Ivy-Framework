@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { GridCellKind, GridMouseEventArgs } from "@glideapps/glide-data-grid";
 import { GridCell, Item } from "@glideapps/glide-data-grid";
 
@@ -9,6 +9,8 @@ interface UseLinkCellHoverProps {
 
 export const useLinkCellHover = ({ getCellContent, visibleRows }: UseLinkCellHoverProps) => {
   const [linkTooltipPos, setLinkTooltipPos] = useState<{ x: number; y: number } | null>(null);
+  const posRef = useRef(linkTooltipPos);
+  posRef.current = linkTooltipPos;
 
   const onItemHovered = useCallback(
     (args: GridMouseEventArgs) => {
@@ -34,5 +36,17 @@ export const useLinkCellHover = ({ getCellContent, visibleRows }: UseLinkCellHov
     [getCellContent, visibleRows],
   );
 
-  return { linkTooltipPos, onItemHovered };
+  const virtualRef = useMemo(
+    () => ({
+      getBoundingClientRect: () => {
+        const pos = posRef.current;
+        const x = pos?.x ?? 0;
+        const y = pos?.y ?? 0;
+        return new DOMRect(x, y, 0, 0);
+      },
+    }),
+    [],
+  );
+
+  return { isLinkHovered: linkTooltipPos !== null, virtualRef, onItemHovered };
 };
