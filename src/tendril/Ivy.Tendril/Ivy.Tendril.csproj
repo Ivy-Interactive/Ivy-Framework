@@ -11,12 +11,10 @@
     <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
   </PropertyGroup>
   <PropertyGroup>
-    <PackAsTool>true</PackAsTool>
-    <ToolCommandName>tendril</ToolCommandName>
     <PackageId>Ivy.Tendril</PackageId>
     <IsPackable>true</IsPackable>
     <Company>Ivy</Company>
-    <Description>Ivy Tendril — Coding Orchestrator</Description>
+    <Description>Ivy Tendril — Core Library</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework</RepositoryUrl>

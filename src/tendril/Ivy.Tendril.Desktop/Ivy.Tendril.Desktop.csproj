@@ -1,12 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Ivy.Tendril.Desktop</RootNamespace>
     <NoWarn>CS8618;CS8603;CS8602;CS8604;CS9113</NoWarn>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>tendril</ToolCommandName>
+    <PackageId>Ivy.Tendril.Desktop</PackageId>
+    <IsPackable>true</IsPackable>
+    <Company>Ivy</Company>
+    <Description>Ivy Tendril — Multi-host AI Tool (Desktop)</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Ivy.Tendril/Ivy.Tendril.csproj" />
