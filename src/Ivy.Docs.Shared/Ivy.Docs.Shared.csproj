@@ -41,6 +41,15 @@
 
 
 
+
+  <Target Name="GenerateApiDocsManifest">
+    <PropertyGroup>
+      <ApiDocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs'))</ApiDocsInputPath>
+      <ApiDocsManifestPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(IntermediateOutputPath), 'api-docs.json'))</ApiDocsManifestPath>
+    </PropertyGroup>
+    <Exec Command="dotnet run --project ../Ivy.Docs.Tools/Ivy.Docs.Tools.csproj -- generate-api-docs &quot;$(ApiDocsInputPath)&quot; &quot;$(ApiDocsManifestPath)&quot;" />
+  </Target>
+
   <Target Name="TransformMarkdown" AfterTargets="GenerateApiDocsManifest" BeforeTargets="CoreCompile">
     <PropertyGroup>
       <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs', '*.md'))</DocsInputPath>

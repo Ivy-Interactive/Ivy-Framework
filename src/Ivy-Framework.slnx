@@ -49,4 +49,5 @@
   <Project Path="Ivy/Ivy.csproj" />
   <Project Path="Ivy.Agent.EfQuery/Ivy.Agent.EfQuery.csproj" />
   <Project Path="Ivy.Agent.EfQuery.Test/Ivy.Agent.EfQuery.Test.csproj" />
+  <Project Path="Ivy.Docs.Tools/Ivy.Docs.Tools.csproj" />
 </Solution>
