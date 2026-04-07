@@ -15,14 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Check for merge conflict markers (fail fast before expensive build steps)
-      - name: Check for merge conflicts
-        run: |
-          if git grep -n -E '^(<<<<<<<|=======|>>>>>>>)' -- '*.cs'; then
-            echo "ERROR: Merge conflict markers found!"
-            exit 1
-          fi
-
       # Install required packages
       - name: Install required packages
         run: sudo apt-get update && sudo apt-get install -y attr
@@ -51,21 +43,9 @@ jobs:
       - name: Restore packages
         run: dotnet restore
 
-      # Check code formatting (only changed files)
+      # Check code formatting
       - name: Check code formatting
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          else
-            BASE_SHA="${{ github.event.before }}"
-          fi
-          CHANGED_CS=$(git diff --name-only --diff-filter=ACM "$BASE_SHA" HEAD -- '*.cs' | tr '\n' ' ')
-          if [ -n "$CHANGED_CS" ]; then
-            dotnet format --verify-no-changes --include $CHANGED_CS
-          else
-            echo "No C# files changed, skipping format check."
-          fi
-        shell: bash
+        run: dotnet format --verify-no-changes
 
       # Build solution
       - name: Build solution
