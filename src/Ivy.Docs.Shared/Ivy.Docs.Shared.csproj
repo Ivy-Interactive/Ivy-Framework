@@ -52,7 +52,7 @@
 
   <Target Name="TransformMarkdown" AfterTargets="GenerateApiDocsManifest" BeforeTargets="CoreCompile">
     <PropertyGroup>
-      <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs', '*.md'))</DocsInputPath>
+      <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs'))</DocsInputPath>
       <DocsOutputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Generated'))</DocsOutputPath>
       <ApiDocsManifestPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(IntermediateOutputPath), 'api-docs.json'))</ApiDocsManifestPath>
     </PropertyGroup>
