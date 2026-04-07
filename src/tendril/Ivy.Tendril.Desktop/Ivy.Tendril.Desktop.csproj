@@ -10,7 +10,8 @@
 
   <ItemGroup>
     <ProjectReference Include="../Ivy.Tendril/Ivy.Tendril.csproj" />
-    <ProjectReference Include="../../Ivy.Desktop/Ivy.Desktop.csproj" />
+    <ProjectReference Include="../../Ivy.Desktop/Ivy.Desktop.csproj" Condition="'$(IvySource)' == 'true'" />
+    <PackageReference Include="Ivy.Desktop" Version="1.2.36-pre-20260407134014" Condition="'$(IvySource)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup>

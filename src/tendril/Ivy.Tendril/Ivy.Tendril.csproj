@@ -43,7 +43,8 @@
     <PackageReference Include="Spectre.Console.Cli" Version="0.53.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../Ivy/Ivy.csproj" />
+    <ProjectReference Include="../../Ivy/Ivy.csproj" Condition="'$(IvySource)' == 'true'" />
+    <PackageReference Include="Ivy" Version="1.2.36-pre-20260407134014" Condition="'$(IvySource)' != 'true'" />
     <ProjectReference Include="../../Ivy.Hooks.Pty/Ivy.Hooks.Pty.csproj" />
     <ProjectReference Include="../../widgets/Ivy.Widgets.Xterm/Ivy.Widgets.Xterm.csproj" />
 
