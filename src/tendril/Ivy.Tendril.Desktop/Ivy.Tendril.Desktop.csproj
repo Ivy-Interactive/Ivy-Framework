@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Ivy.Tendril.Desktop</RootNamespace>
+    <NoWarn>CS8618;CS8603;CS8602;CS8604;CS9113</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Ivy.Tendril/Ivy.Tendril.csproj" />
+    <ProjectReference Include="../../Ivy.Desktop/Ivy.Desktop.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Assets/**/*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

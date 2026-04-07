@@ -306,7 +306,10 @@ export function createLabelsCell(
   const themeOverride: Partial<Theme> = {};
   if (effectiveColor) {
     const { bg, text } = resolveBadgeColor(effectiveColor);
-    if (bg) themeOverride.bgBubble = bg;
+    if (bg) {
+      themeOverride.bgBubble = bg;
+      themeOverride.bgBubbleSelected = bg;
+    }
     if (text) themeOverride.textBubble = text;
   }
 
