@@ -156,14 +156,15 @@ jobs:
             --runtime ${{ matrix.rid }} \
             --output ./publish/desktop/${{ matrix.rid }} \
             -p:PublishSingleFile=true \
+            -p:ReadyToRun=false \
             --self-contained true
 
       - name: Zip Artifact
         run: |
           cd publish/desktop/${{ matrix.rid }}
           if [[ "${{ matrix.os }}" == windows-* ]]; then
-            # Using standard zip which is available in bash on windows runners
-            zip -r "$GITHUB_WORKSPACE/tendril-desktop-${{ matrix.rid }}.zip" .
+            # Using 7z which is available on all GitHub runners
+            7z a "$GITHUB_WORKSPACE/tendril-desktop-${{ matrix.rid }}.zip" .
           else
             chmod +x Ivy.Tendril.Desktop || true
             zip -r "$GITHUB_WORKSPACE/tendril-desktop-${{ matrix.rid }}.zip" .
