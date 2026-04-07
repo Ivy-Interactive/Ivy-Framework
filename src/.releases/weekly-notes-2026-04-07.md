@@ -169,6 +169,14 @@ Docs and tooling add short **troubleshooting** for the common case where the **`
 
 **ScatterChartApp** includes a **dual-axis** example aligned with **`YAxisIndex`**. The sample’s **X** axis uses a **numeric** scale instead of **category** so point series behave like continuous data.
 
+### StackedProgress selection API
+
+**StackedProgress** exposes **`OnSelect`** and **`Selected`** for interactive segments. The **StackedProgress** sample no longer calls **`Client.Toast`** from **`SampleBase`**.
+
+### Tab badges on Content variant
+
+For the **Content** tab style, **badges** use the **secondary** color and a **smaller** size so they stay subtle next to titles.
+
 ## Buttons, badges, and navigation
 
 - [**Button**](https://docs.ivy.app/widgets/common/button) **badges** use the **outline** variant for clearer contrast; **unit tests** were added.
