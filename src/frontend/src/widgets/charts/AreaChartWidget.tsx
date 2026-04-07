@@ -49,6 +49,7 @@ interface AreaChartWidgetProps {
   referenceAreas?: MarkArea[];
   referenceDots?: ReferenceDot[];
   colorScheme: ColorScheme;
+  layout?: "Horizontal" | "Vertical";
 }
 
 const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
@@ -66,6 +67,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   referenceAreas = EMPTY_ARRAY,
   referenceDots = EMPTY_ARRAY,
   colorScheme = "Default",
+  layout = "Vertical",
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -95,6 +97,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
 
   // Chart colors depend on theme (chromatic colors automatically adapt to light/dark mode)
   const chartColors = useMemo(() => getColors(colorScheme, colors), [colorScheme, colors]);
+  const isVertical = layout?.toLowerCase() === "vertical";
 
   const { transform, largeSpread, minValue, maxValue } = getTransformValueFn(data);
 
@@ -205,7 +208,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
         ChartType.Line,
         categories as string[],
         xAxis,
-        false,
+        isVertical,
         {
           mutedForeground: themeColors.mutedForeground,
           fontSans: themeColors.fontSans,
@@ -218,7 +221,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
         minValue,
         maxValue,
         yAxis,
-        false,
+        isVertical,
         undefined,
         {
           mutedForeground: themeColors.mutedForeground,
@@ -240,12 +243,14 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       toolbox,
       categories,
       xAxis,
+      isVertical,
       largeSpread,
       transform,
       minValue,
       maxValue,
       yAxis,
       series,
+      layout,
     ],
   );
   const containerRef = useRef<HTMLDivElement>(null);
