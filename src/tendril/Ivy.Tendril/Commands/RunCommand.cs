@@ -22,7 +22,7 @@ public class RunCommand : AsyncCommand<RunCommand.Settings>
         public int? Port { get; set; }
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var config = _serviceProvider.GetRequiredService<IConfigService>();
         var dbPath = Path.Combine(config.TendrilHome, "tendril.db");

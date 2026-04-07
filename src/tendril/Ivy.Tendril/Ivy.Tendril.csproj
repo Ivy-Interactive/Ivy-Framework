@@ -9,6 +9,7 @@
     <UserSecretsId>a8f3c2e1-4b7d-4e9f-a1c3-8d6e2f5b9a7c</UserSecretsId>
     <MinVerTagPrefix>tendril/v</MinVerTagPrefix>
     <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+    <Version>1.0.0</Version>
   </PropertyGroup>
   <PropertyGroup>
     <PackAsTool>true</PackAsTool>
