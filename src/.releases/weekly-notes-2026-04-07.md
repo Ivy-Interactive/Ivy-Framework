@@ -119,7 +119,7 @@ The **confetti** celebration uses a **shorter** duration and **fewer particles**
 
 ### [01598] AutoFocus inside Dialog and Sheet
 
-**Dialog** and **Sheet** no longer block **AutoFocus** on nested **inputs**;
+**Dialog** and **Sheet** no longer block **AutoFocus** on nested **inputs**; the client casts **`EventTarget`** to **`HTMLElement`** where the focus helper requires it.
 
 ### [01600] Header chrome shadow
 
@@ -131,7 +131,7 @@ Global shortcuts use **`event.code`** (physical key) instead of **`key`**, so **
 
 ### [01089] DataTable tooltips
 
-**DataTable** cell chrome uses the shared **`withTooltip`** wrapper instead of the native **`title`** attribute, so tooltips are consistent with the rest of the design system and easier to style.s
+**DataTable** cell chrome uses the shared **`withTooltip`** wrapper instead of the native **`title`** attribute, so tooltips are consistent with the rest of the design system and easier to style.
 
 ### Badge widget empty state
 
@@ -140,6 +140,30 @@ Global shortcuts use **`event.code`** (physical key) instead of **`key`**, so **
 ### Embedded assets and tooling
 
 **Blank screens** and **404** embedded resources on **macOS** and **Linux** were addressed by fixing how **static assets** are resolved cross-platform.
+
+### [01651] StackedProgress sample layout
+
+The **StackedProgress** sample wraps the widget in a **Box** with **padding** so the segmented bar aligns cleanly with surrounding layout.
+
+### [01666] DataTable source order and `UseDataTable` config
+
+When **`AllowSorting`** is **false**, **`ToDataTable`** now **preserves the source sequence** of rows instead of reordering unexpectedly.
+
+### [01703] Multiple virtual columns from one root
+
+[**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) supports **more than one virtual column** that project from the **same root property** (for example different facets of one navigation object).
+
+### Charts: `YAxisIndex`
+
+**Line** and **Area** series expose **`YAxisIndex`** for **dual-axis** charts, matching the **Bar** and **Scatter** work.
+
+### [01696] Dialog sample and AutoFocus
+
+**DialogApp** includes an **AutoFocus** example showing how the first input can take focus when a dialog opens.
+
+### CLI troubleshooting on macOS
+
+Docs and tooling add short **troubleshooting** for the common case where the **`ivy`** CLI is **not found** on **macOS** (PATH or install location).
 
 ## Buttons, badges, and navigation
 
