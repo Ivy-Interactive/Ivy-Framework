@@ -54,11 +54,16 @@ pub fn generate(
     output_path: &Path,
     skip_if_not_changed: bool,
     api_docs: &HashMap<String, String>,
+    manifest_hash: Option<&str>,
 ) -> Result<(), String> {
     let markdown_content =
         fs::read_to_string(input_path).map_err(|e| format!("Failed to read {}: {}", input_path.display(), e))?;
 
-    let hash = get_short_hash(&markdown_content, 8);
+    let mut combined_content = markdown_content.clone();
+    if let Some(h) = manifest_hash {
+        combined_content.push_str(h);
+    }
+    let hash = get_short_hash(&combined_content, 8);
 
     if output_path.exists() && skip_if_not_changed {
         if let Some(old_hash) = read_hash(output_path) {
@@ -237,7 +242,7 @@ fn process_custom_blocks(markdown: &str) -> String {
 
 /// Compute a short hash matching the C# Utils.GetShortHash behavior:
 /// SHA256 -> Base64 -> replace +/- _/ -> lowercase -> filter alphanumeric -> take first N chars
-fn get_short_hash(input: &str, length: usize) -> String {
+pub fn get_short_hash(input: &str, length: usize) -> String {
     use sha2::{Digest, Sha256};
 
     let mut hasher = Sha256::new();
@@ -489,7 +494,7 @@ var x = 1;
         fs::write(&input_path, "# Hello\n\nWorld").unwrap();
 
         // First generate
-        generate(&input_path, &output_path, true, &empty_manifest).unwrap();
+        generate(&input_path, &output_path, true, &empty_manifest, None).unwrap();
         assert!(output_path.exists());
         let _content1 = fs::read_to_string(&output_path).unwrap();
 
@@ -500,7 +505,7 @@ var x = 1;
         write_hash(&output_path, &hash);
 
         // Should skip since hash matches
-        generate(&input_path, &output_path, true, &empty_manifest).unwrap();
+        generate(&input_path, &output_path, true, &empty_manifest, None).unwrap();
         let content2 = fs::read_to_string(&output_path).unwrap();
         assert_eq!(content2, "MODIFIED"); // Not regenerated
 
