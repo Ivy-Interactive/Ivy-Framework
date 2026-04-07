@@ -8,20 +8,14 @@ namespace Ivy.Tendril.Services;
 
 public class PlanDatabaseService : IPlanDatabaseService, IDisposable
 {
-    private SqliteConnection _connection;
-    private readonly object _lock = new();
-
     private static readonly HashSet<string> AllowedTableColumns = new(StringComparer.Ordinal)
     {
         "Repos", "RepoPath", "Commits", "CommitHash", "PullRequests", "PrUrl",
         "RelatedPlans", "RelatedPlanPath", "DependsOn", "DependsOnPlanPath", "Verifications"
     };
 
-    private static void ValidateIdentifier(string name)
-    {
-        if (!AllowedTableColumns.Contains(name))
-            throw new ArgumentException($"Invalid SQL identifier: {name}");
-    }
+    private readonly SqliteConnection _connection;
+    private readonly object _lock = new();
 
     public PlanDatabaseService(string databasePath)
     {
@@ -71,10 +65,10 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
         lock (_lock)
         {
             var sql = """
-                SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
-                       YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
-                FROM Plans
-                """;
+                      SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
+                             YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
+                      FROM Plans
+                      """;
 
             if (statusFilter.HasValue)
                 sql += " WHERE State = @state";
@@ -139,10 +133,10 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
         {
             using var cmd = _connection.CreateCommand();
             cmd.CommandText = """
-                SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
-                       YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
-                FROM Plans WHERE FolderPath = @folderPath
-                """;
+                              SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
+                                     YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
+                              FROM Plans WHERE FolderPath = @folderPath
+                              """;
             cmd.Parameters.AddWithValue("@folderPath", folderPath);
 
             using var reader = cmd.ExecuteReader();
@@ -159,10 +153,10 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
         {
             using var cmd = _connection.CreateCommand();
             cmd.CommandText = """
-                SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
-                       YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
-                FROM Plans WHERE Id = @id
-                """;
+                              SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
+                                     YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
+                              FROM Plans WHERE Id = @id
+                              """;
             cmd.Parameters.AddWithValue("@id", planId);
 
             using var reader = cmd.ExecuteReader();
@@ -173,211 +167,20 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
         }
     }
 
-    /// <summary>
-    /// Builds a PlanFile for a single plan query. Fetches child tables individually.
-    /// For bulk queries, use BuildPlanFileFromRow with pre-fetched child data instead.
-    /// Must be called within _lock.
-    /// </summary>
-    private PlanFile? BuildPlanFile(SqliteDataReader reader)
-    {
-        var ordinals = GetPlanRowOrdinals(reader);
-        var row = ReadPlanRow(reader, ordinals);
-        return BuildPlanFileFromRow(row.Id, row.Title, row.Project, row.Level, row.State,
-            row.FolderPath, row.FolderName, row.YamlRaw, row.RevisionCount, row.LatestContent,
-            row.Created, row.Updated, row.InitialPrompt,
-            GetListForPlan(row.Id, "Repos", "RepoPath"),
-            GetListForPlan(row.Id, "Commits", "CommitHash"),
-            GetListForPlan(row.Id, "PullRequests", "PrUrl"),
-            GetVerificationsForPlan(row.Id),
-            GetListForPlan(row.Id, "RelatedPlans", "RelatedPlanPath"),
-            GetListForPlan(row.Id, "DependsOn", "DependsOnPlanPath"));
-    }
-
-    private static PlanRowOrdinals GetPlanRowOrdinals(SqliteDataReader reader) => new(
-        Id: reader.GetOrdinal("Id"),
-        Title: reader.GetOrdinal("Title"),
-        Project: reader.GetOrdinal("Project"),
-        Level: reader.GetOrdinal("Level"),
-        State: reader.GetOrdinal("State"),
-        FolderPath: reader.GetOrdinal("FolderPath"),
-        FolderName: reader.GetOrdinal("FolderName"),
-        YamlRaw: reader.GetOrdinal("YamlRaw"),
-        RevisionCount: reader.GetOrdinal("RevisionCount"),
-        LatestContent: reader.GetOrdinal("LatestRevisionContent"),
-        Created: reader.GetOrdinal("Created"),
-        Updated: reader.GetOrdinal("Updated"),
-        InitialPrompt: reader.GetOrdinal("InitialPrompt")
-    );
-
-    private static (int Id, string Title, string Project, string Level, string State,
-        string FolderPath, string FolderName, string YamlRaw, int RevisionCount,
-        string LatestContent, string Created, string Updated, string? InitialPrompt)
-        ReadPlanRow(SqliteDataReader reader, PlanRowOrdinals o)
-    {
-        return (
-            Id: reader.GetInt32(o.Id),
-            Title: reader.GetString(o.Title),
-            Project: reader.GetString(o.Project),
-            Level: reader.GetString(o.Level),
-            State: reader.GetString(o.State),
-            FolderPath: reader.GetString(o.FolderPath),
-            FolderName: reader.GetString(o.FolderName),
-            YamlRaw: reader.GetString(o.YamlRaw),
-            RevisionCount: reader.GetInt32(o.RevisionCount),
-            LatestContent: reader.GetString(o.LatestContent),
-            Created: reader.GetString(o.Created),
-            Updated: reader.GetString(o.Updated),
-            InitialPrompt: reader.GetStringOrNull(o.InitialPrompt)
-        );
-    }
-
-    private readonly record struct PlanRowOrdinals(
-        int Id, int Title, int Project, int Level, int State,
-        int FolderPath, int FolderName, int YamlRaw, int RevisionCount,
-        int LatestContent, int Created, int Updated, int InitialPrompt);
-
-    private static PlanFile? BuildPlanFileFromRow(int planId, string title, string project, string level,
-        string state, string folderPath, string folderName, string yamlRaw, int revisionCount,
-        string latestContent, string createdStr, string updatedStr, string? initialPrompt,
-        List<string> repos, List<string> commits, List<string> prs,
-        List<PlanVerificationEntry> verifications, List<string> relatedPlans, List<string> dependsOn)
-    {
-        if (!Enum.TryParse<PlanStatus>(state, ignoreCase: true, out var status))
-            status = PlanStatus.Draft;
-
-        var created = DateTime.Parse(createdStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
-        var updated = DateTime.Parse(updatedStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
-
-        var metadata = new PlanMetadata(planId, project, level, title, status,
-            repos, commits, prs, verifications, relatedPlans, dependsOn, created, updated, initialPrompt);
-
-        return new PlanFile(metadata, latestContent, folderPath, yamlRaw, revisionCount);
-    }
-
-    private List<string> GetListForPlan(int planId, string table, string column)
-    {
-        ValidateIdentifier(table);
-        ValidateIdentifier(column);
-        using var cmd = _connection.CreateCommand();
-        cmd.CommandText = $"SELECT {column} FROM {table} WHERE PlanId = @planId";
-        cmd.Parameters.AddWithValue("@planId", planId);
-
-        var list = new List<string>();
-        using var reader = cmd.ExecuteReader();
-        var columnOrdinal = -1;
-        while (reader.Read())
-        {
-            if (columnOrdinal == -1)
-                columnOrdinal = reader.GetOrdinal(column);
-            list.Add(reader.GetString(columnOrdinal));
-        }
-        return list;
-    }
-
-    private List<PlanVerificationEntry> GetVerificationsForPlan(int planId)
-    {
-        using var cmd = _connection.CreateCommand();
-        cmd.CommandText = "SELECT Name, Status FROM Verifications WHERE PlanId = @planId";
-        cmd.Parameters.AddWithValue("@planId", planId);
-
-        var list = new List<PlanVerificationEntry>();
-        using var reader = cmd.ExecuteReader();
-        int nameOrdinal = -1, statusOrdinal = -1;
-        while (reader.Read())
-        {
-            if (nameOrdinal == -1)
-            {
-                nameOrdinal = reader.GetOrdinal("Name");
-                statusOrdinal = reader.GetOrdinal("Status");
-            }
-            list.Add(new PlanVerificationEntry
-            {
-                Name = reader.GetString(nameOrdinal),
-                Status = reader.GetString(statusOrdinal)
-            });
-        }
-        return list;
-    }
-
-    private Dictionary<int, List<string>> BatchGetList(List<int> planIds, string table, string column)
-    {
-        ValidateIdentifier(table);
-        ValidateIdentifier(column);
-        var result = new Dictionary<int, List<string>>();
-        if (planIds.Count == 0) return result;
-
-        using var cmd = _connection.CreateCommand();
-        var idList = string.Join(",", planIds);
-        cmd.CommandText = $"SELECT PlanId, {column} FROM {table} WHERE PlanId IN ({idList})";
-
-        using var reader = cmd.ExecuteReader();
-        int planIdOrdinal = -1, columnOrdinal = -1;
-        while (reader.Read())
-        {
-            if (planIdOrdinal == -1)
-            {
-                planIdOrdinal = reader.GetOrdinal("PlanId");
-                columnOrdinal = reader.GetOrdinal(column);
-            }
-            var planId = reader.GetInt32(planIdOrdinal);
-            if (!result.TryGetValue(planId, out var list))
-            {
-                list = new List<string>();
-                result[planId] = list;
-            }
-            list.Add(reader.GetString(columnOrdinal));
-        }
-        return result;
-    }
-
-    private Dictionary<int, List<PlanVerificationEntry>> BatchGetVerifications(List<int> planIds)
-    {
-        var result = new Dictionary<int, List<PlanVerificationEntry>>();
-        if (planIds.Count == 0) return result;
-
-        using var cmd = _connection.CreateCommand();
-        var idList = string.Join(",", planIds);
-        cmd.CommandText = $"SELECT PlanId, Name, Status FROM Verifications WHERE PlanId IN ({idList})";
-
-        using var reader = cmd.ExecuteReader();
-        int planIdOrdinal = -1, nameOrdinal = -1, statusOrdinal = -1;
-        while (reader.Read())
-        {
-            if (planIdOrdinal == -1)
-            {
-                planIdOrdinal = reader.GetOrdinal("PlanId");
-                nameOrdinal = reader.GetOrdinal("Name");
-                statusOrdinal = reader.GetOrdinal("Status");
-            }
-            var planId = reader.GetInt32(planIdOrdinal);
-            if (!result.TryGetValue(planId, out var list))
-            {
-                list = new List<PlanVerificationEntry>();
-                result[planId] = list;
-            }
-            list.Add(new PlanVerificationEntry
-            {
-                Name = reader.GetString(nameOrdinal),
-                Status = reader.GetString(statusOrdinal)
-            });
-        }
-        return result;
-    }
-
     public PlanReaderService.PlanCountSnapshot ComputePlanCounts()
     {
         lock (_lock)
         {
             using var cmd = _connection.CreateCommand();
             cmd.CommandText = """
-                SELECT
-                    COALESCE(SUM(CASE WHEN State IN ('Draft', 'Blocked') THEN 1 ELSE 0 END), 0) AS DraftCount,
-                    COALESCE(SUM(CASE WHEN State = 'ReadyForReview' THEN 1 ELSE 0 END), 0) AS ReadyForReviewCount,
-                    COALESCE(SUM(CASE WHEN State = 'Failed' THEN 1 ELSE 0 END), 0) AS FailedCount,
-                    COALESCE(SUM(CASE WHEN State = 'Icebox' THEN 1 ELSE 0 END), 0) AS IceboxCount,
-                    (SELECT COUNT(*) FROM Recommendations WHERE State = 'Pending') AS PendingRecommendationsCount
-                FROM Plans
-                """;
+                              SELECT
+                                  COALESCE(SUM(CASE WHEN State IN ('Draft', 'Blocked') THEN 1 ELSE 0 END), 0) AS DraftCount,
+                                  COALESCE(SUM(CASE WHEN State = 'ReadyForReview' THEN 1 ELSE 0 END), 0) AS ReadyForReviewCount,
+                                  COALESCE(SUM(CASE WHEN State = 'Failed' THEN 1 ELSE 0 END), 0) AS FailedCount,
+                                  COALESCE(SUM(CASE WHEN State = 'Icebox' THEN 1 ELSE 0 END), 0) AS IceboxCount,
+                                  (SELECT COUNT(*) FROM Recommendations WHERE State = 'Pending') AS PendingRecommendationsCount
+                              FROM Plans
+                              """;
 
             using var reader = cmd.ExecuteReader();
             if (reader.Read())
@@ -433,17 +236,17 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
 
             using var cmd = _connection.CreateCommand();
             cmd.CommandText = """
-                SELECT
-                    strftime('%Y-%m-%d %H:00:00', c.LogTimestamp) as Hour,
-                    p.Project,
-                    SUM(c.Cost) as TotalCost,
-                    SUM(c.Tokens) as TotalTokens
-                FROM Costs c
-                JOIN Plans p ON p.Id = c.PlanId
-                WHERE c.LogTimestamp IS NOT NULL AND c.LogTimestamp >= @cutoff
-                GROUP BY Hour, p.Project
-                ORDER BY Hour, p.Project
-                """;
+                              SELECT
+                                  strftime('%Y-%m-%d %H:00:00', c.LogTimestamp) as Hour,
+                                  p.Project,
+                                  SUM(c.Cost) as TotalCost,
+                                  SUM(c.Tokens) as TotalTokens
+                              FROM Costs c
+                              JOIN Plans p ON p.Id = c.PlanId
+                              WHERE c.LogTimestamp IS NOT NULL AND c.LogTimestamp >= @cutoff
+                              GROUP BY Hour, p.Project
+                              ORDER BY Hour, p.Project
+                              """;
             cmd.Parameters.AddWithValue("@cutoff", cutoff.ToString("O", CultureInfo.InvariantCulture));
 
             var result = new List<HourlyTokenBurn>();
@@ -458,9 +261,10 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
                     totalCostOrdinal = reader.GetOrdinal("TotalCost");
                     totalTokensOrdinal = reader.GetOrdinal("TotalTokens");
                 }
+
                 var hourStr = reader.GetString(hourOrdinal);
-                if (DateTime.TryParse(hourStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var hour))
-                {
+                if (DateTime.TryParse(hourStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal,
+                        out var hour))
                     result.Add(new HourlyTokenBurn
                     {
                         Hour = DateTime.SpecifyKind(hour, DateTimeKind.Utc),
@@ -468,7 +272,6 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
                         Cost = Convert.ToDecimal(reader.GetDouble(totalCostOrdinal), CultureInfo.InvariantCulture),
                         Tokens = reader.GetInt32(totalTokensOrdinal)
                     });
-                }
             }
 
             return result;
@@ -481,17 +284,24 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
         {
             using var cmd = _connection.CreateCommand();
             cmd.CommandText = """
-                SELECT r.Title, r.Description, r.State, r.PlanId, r.PlanTitle,
-                       r.PlanFolderName, r.Project, r.Date, r.SourcePlanStatus, r.DeclineReason
-                FROM Recommendations r
-                ORDER BY r.Date DESC
-                """;
+                              SELECT r.Title, r.Description, r.State, r.PlanId, r.PlanTitle,
+                                     r.PlanFolderName, r.Project, r.Date, r.SourcePlanStatus, r.DeclineReason
+                              FROM Recommendations r
+                              ORDER BY r.Date DESC
+                              """;
 
             var result = new List<Recommendation>();
             using var reader = cmd.ExecuteReader();
-            int titleOrdinal = -1, descOrdinal = -1, stateOrdinal = -1, planIdOrdinal = -1,
-                planTitleOrdinal = -1, planFolderNameOrdinal = -1, projectOrdinal = -1,
-                dateOrdinal = -1, sourcePlanStatusOrdinal = -1, declineReasonOrdinal = -1;
+            int titleOrdinal = -1,
+                descOrdinal = -1,
+                stateOrdinal = -1,
+                planIdOrdinal = -1,
+                planTitleOrdinal = -1,
+                planFolderNameOrdinal = -1,
+                projectOrdinal = -1,
+                dateOrdinal = -1,
+                sourcePlanStatusOrdinal = -1,
+                declineReasonOrdinal = -1;
             while (reader.Read())
             {
                 if (titleOrdinal == -1)
@@ -509,20 +319,21 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
                 }
 
                 var sourcePlanStatusStr = reader.GetString(sourcePlanStatusOrdinal);
-                if (!Enum.TryParse<PlanStatus>(sourcePlanStatusStr, ignoreCase: true, out var sourceStatus))
+                if (!Enum.TryParse<PlanStatus>(sourcePlanStatusStr, true, out var sourceStatus))
                     sourceStatus = PlanStatus.Draft;
 
                 result.Add(new Recommendation(
-                    Title: reader.GetString(titleOrdinal),
-                    Description: reader.GetString(descOrdinal),
-                    State: reader.GetString(stateOrdinal),
-                    PlanId: reader.GetInt32(planIdOrdinal).ToString("D5"),
-                    PlanTitle: reader.GetString(planTitleOrdinal),
-                    PlanFolderName: reader.GetString(planFolderNameOrdinal),
-                    Project: reader.GetString(projectOrdinal),
-                    Date: DateTime.Parse(reader.GetString(dateOrdinal), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal),
-                    SourcePlanStatus: sourceStatus,
-                    DeclineReason: reader.GetStringOrNull(declineReasonOrdinal)
+                    reader.GetString(titleOrdinal),
+                    reader.GetString(descOrdinal),
+                    reader.GetString(stateOrdinal),
+                    reader.GetInt32(planIdOrdinal).ToString("D5"),
+                    reader.GetString(planTitleOrdinal),
+                    reader.GetString(planFolderNameOrdinal),
+                    reader.GetString(projectOrdinal),
+                    DateTime.Parse(reader.GetString(dateOrdinal), CultureInfo.InvariantCulture,
+                        DateTimeStyles.AdjustToUniversal),
+                    sourceStatus,
+                    reader.GetStringOrNull(declineReasonOrdinal)
                 ));
             }
 
@@ -547,13 +358,13 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
             // Try FTS5 first
             using var ftsCmd = _connection.CreateCommand();
             ftsCmd.CommandText = """
-                SELECT p.Id, p.Title, p.Project, p.Level, p.State, p.FolderPath, p.FolderName,
-                       p.YamlRaw, p.RevisionCount, p.LatestRevisionContent, p.Created, p.Updated, p.InitialPrompt
-                FROM Plans p
-                INNER JOIN PlanSearch fts ON fts.rowid = p.Id
-                WHERE PlanSearch MATCH @query
-                ORDER BY rank, p.Id
-                """;
+                                 SELECT p.Id, p.Title, p.Project, p.Level, p.State, p.FolderPath, p.FolderName,
+                                        p.YamlRaw, p.RevisionCount, p.LatestRevisionContent, p.Created, p.Updated, p.InitialPrompt
+                                 FROM Plans p
+                                 INNER JOIN PlanSearch fts ON fts.rowid = p.Id
+                                 WHERE PlanSearch MATCH @query
+                                 ORDER BY rank, p.Id
+                                 """;
             ftsCmd.Parameters.AddWithValue("@query", query);
 
             var plans = ExecuteSearchQuery(ftsCmd);
@@ -564,19 +375,553 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
                 var search = $"%{query}%";
                 using var likeCmd = _connection.CreateCommand();
                 likeCmd.CommandText = """
-                    SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
-                           YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
-                    FROM Plans
-                    WHERE Title LIKE @search OR LatestRevisionContent LIKE @search
-                          OR CAST(Id AS TEXT) LIKE @search OR Project LIKE @search
-                    ORDER BY Id
-                    """;
+                                      SELECT Id, Title, Project, Level, State, FolderPath, FolderName,
+                                             YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt
+                                      FROM Plans
+                                      WHERE Title LIKE @search OR LatestRevisionContent LIKE @search
+                                            OR CAST(Id AS TEXT) LIKE @search OR Project LIKE @search
+                                      ORDER BY Id
+                                      """;
                 likeCmd.Parameters.AddWithValue("@search", search);
                 plans = ExecuteSearchQuery(likeCmd);
             }
 
             return plans;
         }
+    }
+
+    public void UpsertPlan(PlanFile plan)
+    {
+        lock (_lock)
+        {
+            using var transaction = _connection.BeginTransaction();
+            try
+            {
+                UpsertPlanInternal(plan);
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+    }
+
+    public void DeletePlan(int planId)
+    {
+        lock (_lock)
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "DELETE FROM Plans WHERE Id = @id";
+            cmd.Parameters.AddWithValue("@id", planId);
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    public void UpdatePlanState(int planId, PlanStatus state)
+    {
+        lock (_lock)
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "UPDATE Plans SET State = @state, Updated = @updated WHERE Id = @id";
+            cmd.Parameters.AddWithValue("@state", state.ToString());
+            cmd.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture));
+            cmd.Parameters.AddWithValue("@id", planId);
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    public void UpdatePlanContent(int planId, string latestRevisionContent, int revisionCount)
+    {
+        lock (_lock)
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText =
+                "UPDATE Plans SET LatestRevisionContent = @content, RevisionCount = @count, Updated = @updated WHERE Id = @id";
+            cmd.Parameters.AddWithValue("@content", latestRevisionContent);
+            cmd.Parameters.AddWithValue("@count", revisionCount);
+            cmd.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture));
+            cmd.Parameters.AddWithValue("@id", planId);
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    public void UpdateRecommendationState(int planId, string recommendationTitle, string newState,
+        string? declineReason)
+    {
+        lock (_lock)
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = """
+                              UPDATE Recommendations SET State = @state, DeclineReason = @reason
+                              WHERE PlanId = @planId AND Title = @title
+                              """;
+            cmd.Parameters.AddWithValue("@state", newState);
+            cmd.Parameters.AddWithValue("@reason", (object?)declineReason ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@planId", planId);
+            cmd.Parameters.AddWithValue("@title", recommendationTitle);
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    public void UpsertCosts(int planId, List<CostEntry> costs)
+    {
+        lock (_lock)
+        {
+            using var deleteCmd = _connection.CreateCommand();
+            deleteCmd.CommandText = "DELETE FROM Costs WHERE PlanId = @planId";
+            deleteCmd.Parameters.AddWithValue("@planId", planId);
+            deleteCmd.ExecuteNonQuery();
+
+            if (costs.Count == 0) return;
+
+            using var insertCmd = _connection.CreateCommand();
+            insertCmd.CommandText = """
+                                    INSERT INTO Costs (PlanId, Promptware, Tokens, Cost, LogTimestamp)
+                                    VALUES (@planId, @promptware, @tokens, @cost, @logTimestamp)
+                                    """;
+            insertCmd.Parameters.AddWithValue("@planId", planId);
+            insertCmd.Parameters.AddWithValue("@promptware", string.Empty);
+            insertCmd.Parameters.AddWithValue("@tokens", 0);
+            insertCmd.Parameters.AddWithValue("@cost", 0.0);
+            insertCmd.Parameters.AddWithValue("@logTimestamp", DBNull.Value);
+
+            foreach (var cost in costs)
+            {
+                insertCmd.Parameters["@planId"].Value = planId;
+                insertCmd.Parameters["@promptware"].Value = cost.Promptware;
+                insertCmd.Parameters["@tokens"].Value = cost.Tokens;
+                insertCmd.Parameters["@cost"].Value = (double)cost.Cost;
+                insertCmd.Parameters["@logTimestamp"].Value = cost.LogTimestamp.HasValue
+                    ? cost.LogTimestamp.Value.ToString("O", CultureInfo.InvariantCulture)
+                    : DBNull.Value;
+                insertCmd.ExecuteNonQuery();
+            }
+        }
+    }
+
+    public void UpsertRecommendations(int planId, string folderName, List<RecommendationYaml> recommendations,
+        string project, string planTitle, DateTime updated, PlanStatus status)
+    {
+        lock (_lock)
+        {
+            using var deleteCmd = _connection.CreateCommand();
+            deleteCmd.CommandText = "DELETE FROM Recommendations WHERE PlanId = @planId";
+            deleteCmd.Parameters.AddWithValue("@planId", planId);
+            deleteCmd.ExecuteNonQuery();
+
+            if (recommendations.Count == 0) return;
+
+            using var insertCmd = _connection.CreateCommand();
+            insertCmd.CommandText = """
+                                    INSERT INTO Recommendations (PlanId, Title, Description, State, DeclineReason,
+                                                                 PlanTitle, PlanFolderName, Project, Date, SourcePlanStatus)
+                                    VALUES (@planId, @title, @description, @state, @declineReason,
+                                            @planTitle, @planFolderName, @project, @date, @sourcePlanStatus)
+                                    """;
+            insertCmd.Parameters.AddWithValue("@planId", planId);
+            insertCmd.Parameters.AddWithValue("@title", string.Empty);
+            insertCmd.Parameters.AddWithValue("@description", string.Empty);
+            insertCmd.Parameters.AddWithValue("@state", string.Empty);
+            insertCmd.Parameters.AddWithValue("@declineReason", DBNull.Value);
+            insertCmd.Parameters.AddWithValue("@planTitle", string.Empty);
+            insertCmd.Parameters.AddWithValue("@planFolderName", string.Empty);
+            insertCmd.Parameters.AddWithValue("@project", string.Empty);
+            insertCmd.Parameters.AddWithValue("@date", string.Empty);
+            insertCmd.Parameters.AddWithValue("@sourcePlanStatus", string.Empty);
+
+            foreach (var rec in recommendations)
+            {
+                insertCmd.Parameters["@planId"].Value = planId;
+                insertCmd.Parameters["@title"].Value = rec.Title;
+                insertCmd.Parameters["@description"].Value = rec.Description;
+                insertCmd.Parameters["@state"].Value = string.IsNullOrWhiteSpace(rec.State) ? "Pending" : rec.State;
+                insertCmd.Parameters["@declineReason"].Value = (object?)rec.DeclineReason ?? DBNull.Value;
+                insertCmd.Parameters["@planTitle"].Value = planTitle;
+                insertCmd.Parameters["@planFolderName"].Value = folderName;
+                insertCmd.Parameters["@project"].Value = project;
+                insertCmd.Parameters["@date"].Value = updated.ToString("O", CultureInfo.InvariantCulture);
+                insertCmd.Parameters["@sourcePlanStatus"].Value = status.ToString();
+                insertCmd.ExecuteNonQuery();
+            }
+        }
+    }
+
+    public void BulkUpsertPlans(List<PlanFile> plans, bool forceOverwrite = false)
+    {
+        lock (_lock)
+        {
+            if (plans.Count == 0) return;
+
+            using var transaction = _connection.BeginTransaction();
+            try
+            {
+                foreach (var plan in plans)
+                    UpsertPlanInternal(plan, forceOverwrite);
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+    }
+
+    public void UpsertJob(JobItem job)
+    {
+        lock (_lock)
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = """
+                              INSERT OR REPLACE INTO Jobs (Id, Type, PlanFile, Project, Status, Provider, SessionId, StartedAt, CompletedAt, DurationSeconds, Cost, Tokens, StatusMessage)
+                              VALUES (@id, @type, @planFile, @project, @status, @provider, @sessionId, @startedAt, @completedAt, @durationSeconds, @cost, @tokens, @statusMessage)
+                              """;
+            cmd.Parameters.AddWithValue("@id", job.Id);
+            cmd.Parameters.AddWithValue("@type", job.Type);
+            cmd.Parameters.AddWithValue("@planFile", job.PlanFile);
+            cmd.Parameters.AddWithValue("@project", job.Project);
+            cmd.Parameters.AddWithValue("@status", job.Status.ToString());
+            cmd.Parameters.AddWithValue("@provider", job.Provider);
+            cmd.Parameters.AddWithValue("@sessionId", (object?)job.SessionId ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@startedAt",
+                job.StartedAt?.ToString("O", CultureInfo.InvariantCulture) ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@completedAt",
+                job.CompletedAt?.ToString("O", CultureInfo.InvariantCulture) ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@durationSeconds", (object?)job.DurationSeconds ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@cost", job.Cost.HasValue ? (double)job.Cost.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@tokens", (object?)job.Tokens ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@statusMessage", (object?)job.StatusMessage ?? DBNull.Value);
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    public List<JobItem> GetRecentJobs(int limit = 100)
+    {
+        lock (_lock)
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "SELECT * FROM Jobs ORDER BY CompletedAt DESC LIMIT @limit";
+            cmd.Parameters.AddWithValue("@limit", limit);
+
+            var jobs = new List<JobItem>();
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                jobs.Add(new JobItem
+                {
+                    Id = reader.GetString(reader.GetOrdinal("Id")),
+                    Type = reader.GetString(reader.GetOrdinal("Type")),
+                    PlanFile = reader.GetString(reader.GetOrdinal("PlanFile")),
+                    Project = reader.GetString(reader.GetOrdinal("Project")),
+                    Status = Enum.Parse<JobStatus>(reader.GetString(reader.GetOrdinal("Status"))),
+                    Provider = reader.GetString(reader.GetOrdinal("Provider")),
+                    SessionId = reader.IsDBNull(reader.GetOrdinal("SessionId"))
+                        ? null
+                        : reader.GetString(reader.GetOrdinal("SessionId")),
+                    StartedAt = reader.IsDBNull(reader.GetOrdinal("StartedAt"))
+                        ? null
+                        : DateTime.Parse(reader.GetString(reader.GetOrdinal("StartedAt")), CultureInfo.InvariantCulture,
+                            DateTimeStyles.RoundtripKind),
+                    CompletedAt = reader.IsDBNull(reader.GetOrdinal("CompletedAt"))
+                        ? null
+                        : DateTime.Parse(reader.GetString(reader.GetOrdinal("CompletedAt")),
+                            CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
+                    DurationSeconds = reader.IsDBNull(reader.GetOrdinal("DurationSeconds"))
+                        ? null
+                        : reader.GetInt32(reader.GetOrdinal("DurationSeconds")),
+                    Cost = reader.IsDBNull(reader.GetOrdinal("Cost"))
+                        ? null
+                        : (decimal)reader.GetDouble(reader.GetOrdinal("Cost")),
+                    Tokens = reader.IsDBNull(reader.GetOrdinal("Tokens"))
+                        ? null
+                        : reader.GetInt32(reader.GetOrdinal("Tokens")),
+                    StatusMessage = reader.IsDBNull(reader.GetOrdinal("StatusMessage"))
+                        ? null
+                        : reader.GetString(reader.GetOrdinal("StatusMessage"))
+                });
+            return jobs;
+        }
+    }
+
+    public void PurgeOldJobs(int keepCount = 500)
+    {
+        lock (_lock)
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = """
+                              DELETE FROM Jobs
+                              WHERE Id NOT IN (
+                                  SELECT Id FROM Jobs
+                                  ORDER BY CompletedAt DESC
+                                  LIMIT @keepCount
+                              )
+                              """;
+            cmd.Parameters.AddWithValue("@keepCount", keepCount);
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    public long GetDatabaseSize()
+    {
+        lock (_lock)
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "SELECT page_count * page_size FROM pragma_page_count(), pragma_page_size()";
+            var result = cmd.ExecuteScalar();
+            return result != null ? Convert.ToInt64(result, CultureInfo.InvariantCulture) : 0;
+        }
+    }
+
+    public DateTime GetLastSyncTime()
+    {
+        lock (_lock)
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "SELECT Value FROM SyncMetadata WHERE Key = 'LastSyncTime'";
+            var result = cmd.ExecuteScalar();
+            if (result is string s && DateTime.TryParse(s, CultureInfo.InvariantCulture,
+                    DateTimeStyles.AdjustToUniversal, out var dt))
+                return dt;
+            return DateTime.MinValue;
+        }
+    }
+
+    public void SetLastSyncTime(DateTime time)
+    {
+        lock (_lock)
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = """
+                              INSERT INTO SyncMetadata (Key, Value) VALUES ('LastSyncTime', @value)
+                              ON CONFLICT(Key) DO UPDATE SET Value = excluded.Value
+                              """;
+            cmd.Parameters.AddWithValue("@value", time.ToString("O", CultureInfo.InvariantCulture));
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    public void RebuildFtsIndex()
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = "INSERT INTO PlanSearch(PlanSearch) VALUES('delete-all');";
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = """
+                          INSERT INTO PlanSearch(rowid, Title, LatestRevisionContent, Project, InitialPrompt)
+                          SELECT Id, Title, LatestRevisionContent, Project, InitialPrompt
+                          FROM Plans;
+                          """;
+        cmd.ExecuteNonQuery();
+    }
+
+    public void Dispose()
+    {
+        _connection.Dispose();
+    }
+
+    private static void ValidateIdentifier(string name)
+    {
+        if (!AllowedTableColumns.Contains(name))
+            throw new ArgumentException($"Invalid SQL identifier: {name}");
+    }
+
+    /// <summary>
+    ///     Builds a PlanFile for a single plan query. Fetches child tables individually.
+    ///     For bulk queries, use BuildPlanFileFromRow with pre-fetched child data instead.
+    ///     Must be called within _lock.
+    /// </summary>
+    private PlanFile? BuildPlanFile(SqliteDataReader reader)
+    {
+        var ordinals = GetPlanRowOrdinals(reader);
+        var row = ReadPlanRow(reader, ordinals);
+        return BuildPlanFileFromRow(row.Id, row.Title, row.Project, row.Level, row.State,
+            row.FolderPath, row.FolderName, row.YamlRaw, row.RevisionCount, row.LatestContent,
+            row.Created, row.Updated, row.InitialPrompt,
+            GetListForPlan(row.Id, "Repos", "RepoPath"),
+            GetListForPlan(row.Id, "Commits", "CommitHash"),
+            GetListForPlan(row.Id, "PullRequests", "PrUrl"),
+            GetVerificationsForPlan(row.Id),
+            GetListForPlan(row.Id, "RelatedPlans", "RelatedPlanPath"),
+            GetListForPlan(row.Id, "DependsOn", "DependsOnPlanPath"));
+    }
+
+    private static PlanRowOrdinals GetPlanRowOrdinals(SqliteDataReader reader)
+    {
+        return new PlanRowOrdinals(
+            reader.GetOrdinal("Id"),
+            reader.GetOrdinal("Title"),
+            reader.GetOrdinal("Project"),
+            reader.GetOrdinal("Level"),
+            reader.GetOrdinal("State"),
+            reader.GetOrdinal("FolderPath"),
+            reader.GetOrdinal("FolderName"),
+            reader.GetOrdinal("YamlRaw"),
+            reader.GetOrdinal("RevisionCount"),
+            reader.GetOrdinal("LatestRevisionContent"),
+            reader.GetOrdinal("Created"),
+            reader.GetOrdinal("Updated"),
+            reader.GetOrdinal("InitialPrompt")
+        );
+    }
+
+    private static (int Id, string Title, string Project, string Level, string State,
+        string FolderPath, string FolderName, string YamlRaw, int RevisionCount,
+        string LatestContent, string Created, string Updated, string? InitialPrompt)
+        ReadPlanRow(SqliteDataReader reader, PlanRowOrdinals o)
+    {
+        return (
+            Id: reader.GetInt32(o.Id),
+            Title: reader.GetString(o.Title),
+            Project: reader.GetString(o.Project),
+            Level: reader.GetString(o.Level),
+            State: reader.GetString(o.State),
+            FolderPath: reader.GetString(o.FolderPath),
+            FolderName: reader.GetString(o.FolderName),
+            YamlRaw: reader.GetString(o.YamlRaw),
+            RevisionCount: reader.GetInt32(o.RevisionCount),
+            LatestContent: reader.GetString(o.LatestContent),
+            Created: reader.GetString(o.Created),
+            Updated: reader.GetString(o.Updated),
+            InitialPrompt: reader.GetStringOrNull(o.InitialPrompt)
+        );
+    }
+
+    private static PlanFile? BuildPlanFileFromRow(int planId, string title, string project, string level,
+        string state, string folderPath, string folderName, string yamlRaw, int revisionCount,
+        string latestContent, string createdStr, string updatedStr, string? initialPrompt,
+        List<string> repos, List<string> commits, List<string> prs,
+        List<PlanVerificationEntry> verifications, List<string> relatedPlans, List<string> dependsOn)
+    {
+        if (!Enum.TryParse<PlanStatus>(state, true, out var status))
+            status = PlanStatus.Draft;
+
+        var created = DateTime.Parse(createdStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+        var updated = DateTime.Parse(updatedStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+
+        var metadata = new PlanMetadata(planId, project, level, title, status,
+            repos, commits, prs, verifications, relatedPlans, dependsOn, created, updated, initialPrompt);
+
+        return new PlanFile(metadata, latestContent, folderPath, yamlRaw, revisionCount);
+    }
+
+    private List<string> GetListForPlan(int planId, string table, string column)
+    {
+        ValidateIdentifier(table);
+        ValidateIdentifier(column);
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = $"SELECT {column} FROM {table} WHERE PlanId = @planId";
+        cmd.Parameters.AddWithValue("@planId", planId);
+
+        var list = new List<string>();
+        using var reader = cmd.ExecuteReader();
+        var columnOrdinal = -1;
+        while (reader.Read())
+        {
+            if (columnOrdinal == -1)
+                columnOrdinal = reader.GetOrdinal(column);
+            list.Add(reader.GetString(columnOrdinal));
+        }
+
+        return list;
+    }
+
+    private List<PlanVerificationEntry> GetVerificationsForPlan(int planId)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = "SELECT Name, Status FROM Verifications WHERE PlanId = @planId";
+        cmd.Parameters.AddWithValue("@planId", planId);
+
+        var list = new List<PlanVerificationEntry>();
+        using var reader = cmd.ExecuteReader();
+        int nameOrdinal = -1, statusOrdinal = -1;
+        while (reader.Read())
+        {
+            if (nameOrdinal == -1)
+            {
+                nameOrdinal = reader.GetOrdinal("Name");
+                statusOrdinal = reader.GetOrdinal("Status");
+            }
+
+            list.Add(new PlanVerificationEntry
+            {
+                Name = reader.GetString(nameOrdinal),
+                Status = reader.GetString(statusOrdinal)
+            });
+        }
+
+        return list;
+    }
+
+    private Dictionary<int, List<string>> BatchGetList(List<int> planIds, string table, string column)
+    {
+        ValidateIdentifier(table);
+        ValidateIdentifier(column);
+        var result = new Dictionary<int, List<string>>();
+        if (planIds.Count == 0) return result;
+
+        using var cmd = _connection.CreateCommand();
+        var idList = string.Join(",", planIds);
+        cmd.CommandText = $"SELECT PlanId, {column} FROM {table} WHERE PlanId IN ({idList})";
+
+        using var reader = cmd.ExecuteReader();
+        int planIdOrdinal = -1, columnOrdinal = -1;
+        while (reader.Read())
+        {
+            if (planIdOrdinal == -1)
+            {
+                planIdOrdinal = reader.GetOrdinal("PlanId");
+                columnOrdinal = reader.GetOrdinal(column);
+            }
+
+            var planId = reader.GetInt32(planIdOrdinal);
+            if (!result.TryGetValue(planId, out var list))
+            {
+                list = new List<string>();
+                result[planId] = list;
+            }
+
+            list.Add(reader.GetString(columnOrdinal));
+        }
+
+        return result;
+    }
+
+    private Dictionary<int, List<PlanVerificationEntry>> BatchGetVerifications(List<int> planIds)
+    {
+        var result = new Dictionary<int, List<PlanVerificationEntry>>();
+        if (planIds.Count == 0) return result;
+
+        using var cmd = _connection.CreateCommand();
+        var idList = string.Join(",", planIds);
+        cmd.CommandText = $"SELECT PlanId, Name, Status FROM Verifications WHERE PlanId IN ({idList})";
+
+        using var reader = cmd.ExecuteReader();
+        int planIdOrdinal = -1, nameOrdinal = -1, statusOrdinal = -1;
+        while (reader.Read())
+        {
+            if (planIdOrdinal == -1)
+            {
+                planIdOrdinal = reader.GetOrdinal("PlanId");
+                nameOrdinal = reader.GetOrdinal("Name");
+                statusOrdinal = reader.GetOrdinal("Status");
+            }
+
+            var planId = reader.GetInt32(planIdOrdinal);
+            if (!result.TryGetValue(planId, out var list))
+            {
+                list = new List<PlanVerificationEntry>();
+                result[planId] = list;
+            }
+
+            list.Add(new PlanVerificationEntry
+            {
+                Name = reader.GetString(nameOrdinal),
+                Status = reader.GetString(statusOrdinal)
+            });
+        }
+
+        return result;
     }
 
     private List<PlanFile> ExecuteSearchQuery(SqliteCommand cmd)
@@ -625,48 +970,30 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
         return plans;
     }
 
-    public void UpsertPlan(PlanFile plan)
-    {
-        lock (_lock)
-        {
-            using var transaction = _connection.BeginTransaction();
-            try
-            {
-                UpsertPlanInternal(plan);
-                transaction.Commit();
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-        }
-    }
-
     private void UpsertPlanInternal(PlanFile plan, bool forceOverwrite = false)
     {
         var updateGuard = forceOverwrite ? "" : "WHERE excluded.Updated >= Plans.Updated";
         using var cmd = _connection.CreateCommand();
         cmd.CommandText = $"""
-            INSERT INTO Plans (Id, Title, Project, Level, State, FolderPath, FolderName,
-                               YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt)
-            VALUES (@id, @title, @project, @level, @state, @folderPath, @folderName,
-                    @yamlRaw, @revisionCount, @latestContent, @created, @updated, @initialPrompt)
-            ON CONFLICT(Id) DO UPDATE SET
-                Title = excluded.Title,
-                Project = excluded.Project,
-                Level = excluded.Level,
-                State = excluded.State,
-                FolderPath = excluded.FolderPath,
-                FolderName = excluded.FolderName,
-                YamlRaw = excluded.YamlRaw,
-                RevisionCount = excluded.RevisionCount,
-                LatestRevisionContent = excluded.LatestRevisionContent,
-                Created = excluded.Created,
-                Updated = excluded.Updated,
-                InitialPrompt = excluded.InitialPrompt
-            {updateGuard}
-            """;
+                           INSERT INTO Plans (Id, Title, Project, Level, State, FolderPath, FolderName,
+                                              YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt)
+                           VALUES (@id, @title, @project, @level, @state, @folderPath, @folderName,
+                                   @yamlRaw, @revisionCount, @latestContent, @created, @updated, @initialPrompt)
+                           ON CONFLICT(Id) DO UPDATE SET
+                               Title = excluded.Title,
+                               Project = excluded.Project,
+                               Level = excluded.Level,
+                               State = excluded.State,
+                               FolderPath = excluded.FolderPath,
+                               FolderName = excluded.FolderName,
+                               YamlRaw = excluded.YamlRaw,
+                               RevisionCount = excluded.RevisionCount,
+                               LatestRevisionContent = excluded.LatestRevisionContent,
+                               Created = excluded.Created,
+                               Updated = excluded.Updated,
+                               InitialPrompt = excluded.InitialPrompt
+                           {updateGuard}
+                           """;
 
         cmd.Parameters.AddWithValue("@id", plan.Id);
         cmd.Parameters.AddWithValue("@title", plan.Title);
@@ -741,296 +1068,18 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
         }
     }
 
-    public void DeletePlan(int planId)
-    {
-        lock (_lock)
-        {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = "DELETE FROM Plans WHERE Id = @id";
-            cmd.Parameters.AddWithValue("@id", planId);
-            cmd.ExecuteNonQuery();
-        }
-    }
-
-    public void UpdatePlanState(int planId, PlanStatus state)
-    {
-        lock (_lock)
-        {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = "UPDATE Plans SET State = @state, Updated = @updated WHERE Id = @id";
-            cmd.Parameters.AddWithValue("@state", state.ToString());
-            cmd.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture));
-            cmd.Parameters.AddWithValue("@id", planId);
-            cmd.ExecuteNonQuery();
-        }
-    }
-
-    public void UpdatePlanContent(int planId, string latestRevisionContent, int revisionCount)
-    {
-        lock (_lock)
-        {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = "UPDATE Plans SET LatestRevisionContent = @content, RevisionCount = @count, Updated = @updated WHERE Id = @id";
-            cmd.Parameters.AddWithValue("@content", latestRevisionContent);
-            cmd.Parameters.AddWithValue("@count", revisionCount);
-            cmd.Parameters.AddWithValue("@updated", DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture));
-            cmd.Parameters.AddWithValue("@id", planId);
-            cmd.ExecuteNonQuery();
-        }
-    }
-
-    public void UpdateRecommendationState(int planId, string recommendationTitle, string newState, string? declineReason)
-    {
-        lock (_lock)
-        {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = """
-                UPDATE Recommendations SET State = @state, DeclineReason = @reason
-                WHERE PlanId = @planId AND Title = @title
-                """;
-            cmd.Parameters.AddWithValue("@state", newState);
-            cmd.Parameters.AddWithValue("@reason", (object?)declineReason ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@planId", planId);
-            cmd.Parameters.AddWithValue("@title", recommendationTitle);
-            cmd.ExecuteNonQuery();
-        }
-    }
-
-    public void UpsertCosts(int planId, List<CostEntry> costs)
-    {
-        lock (_lock)
-        {
-            using var deleteCmd = _connection.CreateCommand();
-            deleteCmd.CommandText = "DELETE FROM Costs WHERE PlanId = @planId";
-            deleteCmd.Parameters.AddWithValue("@planId", planId);
-            deleteCmd.ExecuteNonQuery();
-
-            if (costs.Count == 0) return;
-
-            using var insertCmd = _connection.CreateCommand();
-            insertCmd.CommandText = """
-                INSERT INTO Costs (PlanId, Promptware, Tokens, Cost, LogTimestamp)
-                VALUES (@planId, @promptware, @tokens, @cost, @logTimestamp)
-                """;
-            insertCmd.Parameters.AddWithValue("@planId", planId);
-            insertCmd.Parameters.AddWithValue("@promptware", string.Empty);
-            insertCmd.Parameters.AddWithValue("@tokens", 0);
-            insertCmd.Parameters.AddWithValue("@cost", 0.0);
-            insertCmd.Parameters.AddWithValue("@logTimestamp", DBNull.Value);
-
-            foreach (var cost in costs)
-            {
-                insertCmd.Parameters["@planId"].Value = planId;
-                insertCmd.Parameters["@promptware"].Value = cost.Promptware;
-                insertCmd.Parameters["@tokens"].Value = cost.Tokens;
-                insertCmd.Parameters["@cost"].Value = (double)cost.Cost;
-                insertCmd.Parameters["@logTimestamp"].Value = cost.LogTimestamp.HasValue
-                    ? cost.LogTimestamp.Value.ToString("O", CultureInfo.InvariantCulture)
-                    : DBNull.Value;
-                insertCmd.ExecuteNonQuery();
-            }
-        }
-    }
-
-    public void UpsertRecommendations(int planId, string folderName, List<RecommendationYaml> recommendations,
-        string project, string planTitle, DateTime updated, PlanStatus status)
-    {
-        lock (_lock)
-        {
-            using var deleteCmd = _connection.CreateCommand();
-            deleteCmd.CommandText = "DELETE FROM Recommendations WHERE PlanId = @planId";
-            deleteCmd.Parameters.AddWithValue("@planId", planId);
-            deleteCmd.ExecuteNonQuery();
-
-            if (recommendations.Count == 0) return;
-
-            using var insertCmd = _connection.CreateCommand();
-            insertCmd.CommandText = """
-                INSERT INTO Recommendations (PlanId, Title, Description, State, DeclineReason,
-                                             PlanTitle, PlanFolderName, Project, Date, SourcePlanStatus)
-                VALUES (@planId, @title, @description, @state, @declineReason,
-                        @planTitle, @planFolderName, @project, @date, @sourcePlanStatus)
-                """;
-            insertCmd.Parameters.AddWithValue("@planId", planId);
-            insertCmd.Parameters.AddWithValue("@title", string.Empty);
-            insertCmd.Parameters.AddWithValue("@description", string.Empty);
-            insertCmd.Parameters.AddWithValue("@state", string.Empty);
-            insertCmd.Parameters.AddWithValue("@declineReason", DBNull.Value);
-            insertCmd.Parameters.AddWithValue("@planTitle", string.Empty);
-            insertCmd.Parameters.AddWithValue("@planFolderName", string.Empty);
-            insertCmd.Parameters.AddWithValue("@project", string.Empty);
-            insertCmd.Parameters.AddWithValue("@date", string.Empty);
-            insertCmd.Parameters.AddWithValue("@sourcePlanStatus", string.Empty);
-
-            foreach (var rec in recommendations)
-            {
-                insertCmd.Parameters["@planId"].Value = planId;
-                insertCmd.Parameters["@title"].Value = rec.Title;
-                insertCmd.Parameters["@description"].Value = rec.Description;
-                insertCmd.Parameters["@state"].Value = string.IsNullOrWhiteSpace(rec.State) ? "Pending" : rec.State;
-                insertCmd.Parameters["@declineReason"].Value = (object?)rec.DeclineReason ?? DBNull.Value;
-                insertCmd.Parameters["@planTitle"].Value = planTitle;
-                insertCmd.Parameters["@planFolderName"].Value = folderName;
-                insertCmd.Parameters["@project"].Value = project;
-                insertCmd.Parameters["@date"].Value = updated.ToString("O", CultureInfo.InvariantCulture);
-                insertCmd.Parameters["@sourcePlanStatus"].Value = status.ToString();
-                insertCmd.ExecuteNonQuery();
-            }
-        }
-    }
-
-    public void BulkUpsertPlans(List<PlanFile> plans, bool forceOverwrite = false)
-    {
-        lock (_lock)
-        {
-            if (plans.Count == 0) return;
-
-            using var transaction = _connection.BeginTransaction();
-            try
-            {
-                foreach (var plan in plans)
-                    UpsertPlanInternal(plan, forceOverwrite);
-                transaction.Commit();
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-        }
-    }
-
-    public void UpsertJob(JobItem job)
-    {
-        lock (_lock)
-        {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = """
-                INSERT OR REPLACE INTO Jobs (Id, Type, PlanFile, Project, Status, Provider, SessionId, StartedAt, CompletedAt, DurationSeconds, Cost, Tokens, StatusMessage)
-                VALUES (@id, @type, @planFile, @project, @status, @provider, @sessionId, @startedAt, @completedAt, @durationSeconds, @cost, @tokens, @statusMessage)
-                """;
-            cmd.Parameters.AddWithValue("@id", job.Id);
-            cmd.Parameters.AddWithValue("@type", job.Type);
-            cmd.Parameters.AddWithValue("@planFile", job.PlanFile);
-            cmd.Parameters.AddWithValue("@project", job.Project);
-            cmd.Parameters.AddWithValue("@status", job.Status.ToString());
-            cmd.Parameters.AddWithValue("@provider", job.Provider);
-            cmd.Parameters.AddWithValue("@sessionId", (object?)job.SessionId ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@startedAt", job.StartedAt?.ToString("O", CultureInfo.InvariantCulture) ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@completedAt", job.CompletedAt?.ToString("O", CultureInfo.InvariantCulture) ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@durationSeconds", (object?)job.DurationSeconds ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@cost", job.Cost.HasValue ? (object)(double)job.Cost.Value : DBNull.Value);
-            cmd.Parameters.AddWithValue("@tokens", (object?)job.Tokens ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@statusMessage", (object?)job.StatusMessage ?? DBNull.Value);
-            cmd.ExecuteNonQuery();
-        }
-    }
-
-    public List<JobItem> GetRecentJobs(int limit = 100)
-    {
-        lock (_lock)
-        {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Jobs ORDER BY CompletedAt DESC LIMIT @limit";
-            cmd.Parameters.AddWithValue("@limit", limit);
-
-            var jobs = new List<JobItem>();
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                jobs.Add(new JobItem
-                {
-                    Id = reader.GetString(reader.GetOrdinal("Id")),
-                    Type = reader.GetString(reader.GetOrdinal("Type")),
-                    PlanFile = reader.GetString(reader.GetOrdinal("PlanFile")),
-                    Project = reader.GetString(reader.GetOrdinal("Project")),
-                    Status = Enum.Parse<JobStatus>(reader.GetString(reader.GetOrdinal("Status"))),
-                    Provider = reader.GetString(reader.GetOrdinal("Provider")),
-                    SessionId = reader.IsDBNull(reader.GetOrdinal("SessionId")) ? null : reader.GetString(reader.GetOrdinal("SessionId")),
-                    StartedAt = reader.IsDBNull(reader.GetOrdinal("StartedAt")) ? null : DateTime.Parse(reader.GetString(reader.GetOrdinal("StartedAt")), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
-                    CompletedAt = reader.IsDBNull(reader.GetOrdinal("CompletedAt")) ? null : DateTime.Parse(reader.GetString(reader.GetOrdinal("CompletedAt")), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
-                    DurationSeconds = reader.IsDBNull(reader.GetOrdinal("DurationSeconds")) ? null : reader.GetInt32(reader.GetOrdinal("DurationSeconds")),
-                    Cost = reader.IsDBNull(reader.GetOrdinal("Cost")) ? null : (decimal)reader.GetDouble(reader.GetOrdinal("Cost")),
-                    Tokens = reader.IsDBNull(reader.GetOrdinal("Tokens")) ? null : reader.GetInt32(reader.GetOrdinal("Tokens")),
-                    StatusMessage = reader.IsDBNull(reader.GetOrdinal("StatusMessage")) ? null : reader.GetString(reader.GetOrdinal("StatusMessage")),
-                });
-            }
-            return jobs;
-        }
-    }
-
-    public void PurgeOldJobs(int keepCount = 500)
-    {
-        lock (_lock)
-        {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = """
-                DELETE FROM Jobs
-                WHERE Id NOT IN (
-                    SELECT Id FROM Jobs
-                    ORDER BY CompletedAt DESC
-                    LIMIT @keepCount
-                )
-                """;
-            cmd.Parameters.AddWithValue("@keepCount", keepCount);
-            cmd.ExecuteNonQuery();
-        }
-    }
-
-    public long GetDatabaseSize()
-    {
-        lock (_lock)
-        {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = "SELECT page_count * page_size FROM pragma_page_count(), pragma_page_size()";
-            var result = cmd.ExecuteScalar();
-            return result != null ? Convert.ToInt64(result, CultureInfo.InvariantCulture) : 0;
-        }
-    }
-
-    public DateTime GetLastSyncTime()
-    {
-        lock (_lock)
-        {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = "SELECT Value FROM SyncMetadata WHERE Key = 'LastSyncTime'";
-            var result = cmd.ExecuteScalar();
-            if (result is string s && DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dt))
-                return dt;
-            return DateTime.MinValue;
-        }
-    }
-
-    public void SetLastSyncTime(DateTime time)
-    {
-        lock (_lock)
-        {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = """
-                INSERT INTO SyncMetadata (Key, Value) VALUES ('LastSyncTime', @value)
-                ON CONFLICT(Key) DO UPDATE SET Value = excluded.Value
-                """;
-            cmd.Parameters.AddWithValue("@value", time.ToString("O", CultureInfo.InvariantCulture));
-            cmd.ExecuteNonQuery();
-        }
-    }
-
-    public void RebuildFtsIndex()
-    {
-        using var cmd = _connection.CreateCommand();
-        cmd.CommandText = "INSERT INTO PlanSearch(PlanSearch) VALUES('delete-all');";
-        cmd.ExecuteNonQuery();
-
-        cmd.CommandText = """
-            INSERT INTO PlanSearch(rowid, Title, LatestRevisionContent, Project, InitialPrompt)
-            SELECT Id, Title, LatestRevisionContent, Project, InitialPrompt
-            FROM Plans;
-            """;
-        cmd.ExecuteNonQuery();
-    }
-
-    public void Dispose()
-    {
-        _connection.Dispose();
-    }
+    private readonly record struct PlanRowOrdinals(
+        int Id,
+        int Title,
+        int Project,
+        int Level,
+        int State,
+        int FolderPath,
+        int FolderName,
+        int YamlRaw,
+        int RevisionCount,
+        int LatestContent,
+        int Created,
+        int Updated,
+        int InitialPrompt);
 }

@@ -1,10 +1,13 @@
 using System.Reactive.Disposables;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
+using ContentView = Ivy.Tendril.Apps.Review.ContentView;
+using SidebarView = Ivy.Tendril.Apps.Review.SidebarView;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Review", icon: Icons.ThumbsUp, group: new[] { "Tools" }, order: MenuOrder.Review, allowDuplicateTabs: true)]
+[App(title: "Review", icon: Icons.ThumbsUp, group: new[] { "Tools" }, order: MenuOrder.Review,
+    allowDuplicateTabs: true)]
 public class ReviewApp : ViewBase
 {
     public override object? Build()
@@ -20,22 +23,23 @@ public class ReviewApp : ViewBase
 
         UseEffect(() =>
         {
-            void OnChanged(string? _) => refreshToken.Refresh();
+            void OnChanged(string? _)
+            {
+                refreshToken.Refresh();
+            }
+
             planWatcher.PlansChanged += OnChanged;
             return Disposable.Create(() => planWatcher.PlansChanged -= OnChanged);
         });
 
-        var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
+        var previousPlans = UseRef(new List<PlanFile>());
 
         var plans = planService.GetPlans()
             .Where(p => p.Status is PlanStatus.ReadyForReview or PlanStatus.Failed)
             .ToList();
         var filteredPlans = PlanFilters.ApplyFilters(plans, null, null, textFilter.Value).ToList();
 
-        if (selectedPlanState.Value == null && filteredPlans.Count > 0)
-        {
-            selectedPlanState.Set(filteredPlans[0]);
-        }
+        if (selectedPlanState.Value == null && filteredPlans.Count > 0) selectedPlanState.Set(filteredPlans[0]);
 
         if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
@@ -58,11 +62,12 @@ public class ReviewApp : ViewBase
             refreshToken.Refresh();
         }
 
-        var sidebar = new Review.SidebarView(plans, selectedPlanState, textFilter, configService);
+        var sidebar = new SidebarView(plans, selectedPlanState, textFilter, configService);
 
         return new SidebarLayout(
-            mainContent: new Review.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService, gitService),
-            sidebarContent: sidebar
+            new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService,
+                RefreshPlans, configService, gitService),
+            sidebar
         );
     }
 }

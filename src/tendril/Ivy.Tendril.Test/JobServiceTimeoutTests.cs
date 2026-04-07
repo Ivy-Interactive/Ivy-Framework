@@ -1,5 +1,7 @@
 using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Services;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Ivy.Tendril.Test;
 
@@ -25,7 +27,7 @@ public class JobServiceTimeoutTests
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
 
-        service.CompleteJob(id, exitCode: null, timedOut: true, staleOutput: false);
+        service.CompleteJob(id, null, true, false);
 
         job = service.GetJob(id);
         Assert.NotNull(job);
@@ -48,7 +50,7 @@ public class JobServiceTimeoutTests
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
 
-        service.CompleteJob(id, exitCode: null, timedOut: true, staleOutput: true);
+        service.CompleteJob(id, null, true, true);
 
         var job = service.GetJob(id);
         Assert.NotNull(job);
@@ -69,7 +71,7 @@ public class JobServiceTimeoutTests
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
 
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         var job = service.GetJob(id);
         Assert.NotNull(job);
@@ -90,7 +92,7 @@ public class JobServiceTimeoutTests
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
 
-        service.CompleteJob(id, exitCode: 1);
+        service.CompleteJob(id, 1);
 
         var job = service.GetJob(id);
         Assert.NotNull(job);
@@ -107,12 +109,12 @@ public class JobServiceTimeoutTests
 
         var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
 
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
         var job = service.GetJob(id);
         Assert.Equal(JobStatus.Completed, job!.Status);
 
         // Try to complete again (e.g. from stale watchdog racing with normal completion)
-        service.CompleteJob(id, exitCode: null, timedOut: true, staleOutput: true);
+        service.CompleteJob(id, null, true, true);
 
         job = service.GetJob(id);
         Assert.Equal(JobStatus.Completed, job!.Status); // Should not change
@@ -143,9 +145,9 @@ public class JobServiceTimeoutTests
         var failedId = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
         var timeoutId = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
 
-        service.CompleteJob(completedId, exitCode: 0);
-        service.CompleteJob(failedId, exitCode: 1);
-        service.CompleteJob(timeoutId, exitCode: null, timedOut: true);
+        service.CompleteJob(completedId, 0);
+        service.CompleteJob(failedId, 1);
+        service.CompleteJob(timeoutId, null, true);
 
         service.ClearFailedJobs();
 
@@ -161,7 +163,7 @@ public class JobServiceTimeoutTests
         var service = CreateService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
 
         var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         service.ClearFailedJobs();
 
@@ -177,8 +179,8 @@ jobTimeout: 45
 staleOutputTimeout: 15
 ";
 
-        var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
-            .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.CamelCaseNamingConvention.Instance)
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
         var settings = deserializer.Deserialize<TendrilSettings>(yaml);
 
@@ -193,8 +195,8 @@ staleOutputTimeout: 15
 codingAgent: claude
 ";
 
-        var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
-            .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.CamelCaseNamingConvention.Instance)
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
         var settings = deserializer.Deserialize<TendrilSettings>(yaml);
 
@@ -219,6 +221,6 @@ codingAgent: claude
         Assert.Contains("\"type\":\"heartbeat\"", heartbeatLine);
         Assert.DoesNotContain("\"type\":\"heartbeat\"", normalLine);
 
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
     }
 }

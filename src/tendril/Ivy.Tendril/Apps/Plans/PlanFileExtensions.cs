@@ -5,8 +5,8 @@ namespace Ivy.Tendril.Apps.Plans;
 public static class PlanFileExtensions
 {
     /// <summary>
-    /// Gets the effective repository paths for this plan.
-    /// Returns the plan's explicit repos if set, otherwise falls back to the project's default repos from config.
+    ///     Gets the effective repository paths for this plan.
+    ///     Returns the plan's explicit repos if set, otherwise falls back to the project's default repos from config.
     /// </summary>
     public static List<string> GetEffectiveRepoPaths(this PlanFile plan, IConfigService config)
     {

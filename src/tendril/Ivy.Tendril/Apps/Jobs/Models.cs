@@ -1,3 +1,6 @@
+using System.Collections.Concurrent;
+using System.Diagnostics;
+
 namespace Ivy.Tendril.Apps.Jobs;
 
 public enum JobStatus
@@ -31,9 +34,9 @@ public record JobItem
     public int? Tokens { get; set; }
 
     // Process handle for non-interactive execution
-    public System.Diagnostics.Process? Process { get; set; }
+    public Process? Process { get; set; }
     public string? StatusMessage { get; set; }
-    public System.Collections.Concurrent.ConcurrentQueue<string> OutputLines { get; set; } = new();
+    public ConcurrentQueue<string> OutputLines { get; set; } = new();
     public DateTime? LastOutputAt { get; set; }
     public CancellationTokenSource? TimeoutCts { get; set; }
     public bool StaleOutputDetected { get; set; }

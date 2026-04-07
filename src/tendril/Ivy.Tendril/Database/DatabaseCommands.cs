@@ -5,8 +5,8 @@ namespace Ivy.Tendril.Database;
 public static class DatabaseCommands
 {
     /// <summary>
-    /// Handles database CLI commands. Returns exit code (0 = success, 1 = error),
-    /// or -1 if the args don't match a database command.
+    ///     Handles database CLI commands. Returns exit code (0 = success, 1 = error),
+    ///     or -1 if the args don't match a database command.
     /// </summary>
     public static int Handle(string[] args)
     {

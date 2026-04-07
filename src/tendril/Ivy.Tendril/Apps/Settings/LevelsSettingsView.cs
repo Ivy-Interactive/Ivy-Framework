@@ -29,45 +29,42 @@ public class LevelsSettingsView : ViewBase
             .Header(t => t.Index, "")
             .Builder(t => t.Index, f => f.Func<LevelRow, int>(idx =>
                 Layout.Horizontal().Gap(1)
-                    | new Button().Icon(Icons.Pencil).Outline().Small().Tooltip("Edit this level").OnClick(() =>
-                    {
-                        editIndex.Set(idx);
-                        editName.Set(levels[idx].Name);
-                        editBadge.Set(levels[idx].Badge);
-                    })
-                    | new Button().Icon(Icons.Trash).Outline().Small().Tooltip("Delete this level").OnClick(() =>
-                    {
-                        var name = levels[idx].Name;
-                        levels.RemoveAt(idx);
-                        config.SaveSettings();
-                        client.Toast($"Level '{name}' deleted", "Deleted");
-                        refreshToken.Refresh();
-                    })
+                | new Button().Icon(Icons.Pencil).Outline().Small().Tooltip("Edit this level").OnClick(() =>
+                {
+                    editIndex.Set(idx);
+                    editName.Set(levels[idx].Name);
+                    editBadge.Set(levels[idx].Badge);
+                })
+                | new Button().Icon(Icons.Trash).Outline().Small().Tooltip("Delete this level").OnClick(() =>
+                {
+                    var name = levels[idx].Name;
+                    levels.RemoveAt(idx);
+                    config.SaveSettings();
+                    client.Toast($"Level '{name}' deleted", "Deleted");
+                    refreshToken.Refresh();
+                })
             ));
 
         var content = Layout.Vertical().Gap(4).Padding(4).Width(Size.Auto().Max(Size.Units(120)))
-            | Text.Block("Priority Levels").Bold()
-            | table
-            | new Button("Add Level").Icon(Icons.Plus).Outline().OnClick(() =>
-            {
-                editIndex.Set(null);
-                editName.Set("");
-                editBadge.Set("Outline");
-            });
+                      | Text.Block("Priority Levels").Bold()
+                      | table
+                      | new Button("Add Level").Icon(Icons.Plus).Outline().OnClick(() =>
+                      {
+                          editIndex.Set(null);
+                          editName.Set("");
+                          editBadge.Set("Outline");
+                      });
 
         if (editIndex.Value != -1)
         {
             var isNew = editIndex.Value == null;
             content |= new Dialog(
-                _ =>
-                {
-                    editIndex.Set(-1);
-                },
+                _ => { editIndex.Set(-1); },
                 new DialogHeader(isNew ? "Add Level" : "Edit Level"),
                 new DialogBody(
                     Layout.Vertical().Gap(2)
-                        | editName.ToTextInput("Level name...").WithField().Label("Name")
-                        | editBadge.ToSelectInput(badgeOptions).WithField().Label("Badge Variant")
+                    | editName.ToTextInput("Level name...").WithField().Label("Name")
+                    | editBadge.ToSelectInput(badgeOptions).WithField().Label("Badge Variant")
                 ),
                 new DialogFooter(
                     new Button("Cancel").Outline().OnClick(() => editIndex.Set(-1)),
@@ -84,6 +81,7 @@ public class LevelsSettingsView : ViewBase
                             level.Name = editName.Value;
                             level.Badge = editBadge.Value;
                         }
+
                         config.SaveSettings();
                         editIndex.Set(-1);
                         refreshToken.Refresh();

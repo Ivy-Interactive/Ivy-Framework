@@ -21,31 +21,31 @@ public class VerificationsSettingsView : ViewBase
             .Header(t => t.Index, "")
             .Builder(t => t.Index, f => f.Func<VerificationRow, int>(idx =>
                 Layout.Horizontal().Gap(1)
-                    | new Button().Icon(Icons.Pencil).Outline().Small().Tooltip("Edit this verification").OnClick(() =>
-                    {
-                        editIndex.Set(idx);
-                        editName.Set(verifications[idx].Name);
-                        editPrompt.Set(verifications[idx].Prompt);
-                    })
-                    | new Button().Icon(Icons.Trash).Outline().Small().Tooltip("Delete this verification").OnClick(() =>
-                    {
-                        var name = verifications[idx].Name;
-                        verifications.RemoveAt(idx);
-                        config.SaveSettings();
-                        client.Toast($"Verification '{name}' deleted", "Deleted");
-                        refreshToken.Refresh();
-                    })
+                | new Button().Icon(Icons.Pencil).Outline().Small().Tooltip("Edit this verification").OnClick(() =>
+                {
+                    editIndex.Set(idx);
+                    editName.Set(verifications[idx].Name);
+                    editPrompt.Set(verifications[idx].Prompt);
+                })
+                | new Button().Icon(Icons.Trash).Outline().Small().Tooltip("Delete this verification").OnClick(() =>
+                {
+                    var name = verifications[idx].Name;
+                    verifications.RemoveAt(idx);
+                    config.SaveSettings();
+                    client.Toast($"Verification '{name}' deleted", "Deleted");
+                    refreshToken.Refresh();
+                })
             ));
 
         var content = Layout.Vertical().Gap(4).Padding(4).Width(Size.Auto().Max(Size.Units(120)))
-            | Text.Block("Verification Definitions").Bold()
-            | table
-            | new Button("Add Verification").Icon(Icons.Plus).Outline().OnClick(() =>
-            {
-                editIndex.Set(null);
-                editName.Set("");
-                editPrompt.Set("");
-            });
+                      | Text.Block("Verification Definitions").Bold()
+                      | table
+                      | new Button("Add Verification").Icon(Icons.Plus).Outline().OnClick(() =>
+                      {
+                          editIndex.Set(null);
+                          editName.Set("");
+                          editPrompt.Set("");
+                      });
 
         if (editIndex.Value != -1)
         {
@@ -55,8 +55,8 @@ public class VerificationsSettingsView : ViewBase
                 new DialogHeader(isNew ? "Add Verification" : "Edit Verification"),
                 new DialogBody(
                     Layout.Vertical().Gap(2)
-                        | editName.ToTextInput("Verification name...").WithField().Label("Name")
-                        | editPrompt.ToTextareaInput("Verification prompt...").Rows(8).WithField().Label("Prompt")
+                    | editName.ToTextInput("Verification name...").WithField().Label("Name")
+                    | editPrompt.ToTextareaInput("Verification prompt...").Rows(8).WithField().Label("Prompt")
                 ),
                 new DialogFooter(
                     new Button("Cancel").Outline().OnClick(() => editIndex.Set(-1)),
@@ -76,6 +76,7 @@ public class VerificationsSettingsView : ViewBase
                             verifications[editIndex.Value!.Value].Name = editName.Value;
                             verifications[editIndex.Value!.Value].Prompt = editPrompt.Value;
                         }
+
                         config.SaveSettings();
                         editIndex.Set(-1);
                         refreshToken.Refresh();

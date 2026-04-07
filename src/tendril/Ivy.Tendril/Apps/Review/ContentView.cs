@@ -1,4 +1,4 @@
-using Ivy;
+using System.Diagnostics;
 using Ivy.Core;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Apps.Review.Dialogs;
@@ -17,14 +17,14 @@ public class ContentView(
     IConfigService config,
     IGitService gitService) : ViewBase
 {
-    private readonly PlanFile? _selectedPlan = selectedPlan;
     private readonly List<PlanFile> _allPlans = allPlans;
-    private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
-    private readonly IPlanReaderService _planService = planService;
-    private readonly IJobService _jobService = jobService;
-    private readonly Action _refreshPlans = refreshPlans;
     private readonly IConfigService _config = config;
     private readonly IGitService _gitService = gitService;
+    private readonly IJobService _jobService = jobService;
+    private readonly IPlanReaderService _planService = planService;
+    private readonly Action _refreshPlans = refreshPlans;
+    private readonly PlanFile? _selectedPlan = selectedPlan;
+    private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
 
     public override object? Build()
     {
@@ -87,13 +87,15 @@ public class ContentView(
                 return await Task.Run(() =>
                 {
                     if (_selectedPlan is null)
-                        return new PlanContentData(new(), null, new(), new(), new(), new());
+                        return new PlanContentData(new List<RecommendationYaml>(), null,
+                            new Dictionary<string, List<string>>(), new List<CommitRow>(),
+                            new Dictionary<string, bool>(), new List<(string Name, bool ConditionMet)>());
 
                     // Recommendations
                     var recsPath = Path.Combine(folderPath, "artifacts", "recommendations.yaml");
                     var recs = File.Exists(recsPath)
                         ? YamlHelper.Deserializer.Deserialize<List<RecommendationYaml>>(
-                            FileHelper.ReadAllText(recsPath)) ?? new()
+                            FileHelper.ReadAllText(recsPath)) ?? new List<RecommendationYaml>()
                         : new List<RecommendationYaml>();
 
                     // Summary
@@ -121,72 +123,77 @@ public class ContentView(
 
                     // Review action conditions
                     var projectConfig = _config.GetProject(_selectedPlan.Project);
-                    var reviewActions = projectConfig?.ReviewActions ?? new();
+                    var reviewActions = projectConfig?.ReviewActions ?? new List<ReviewActionConfig>();
                     var actionStates = reviewActions.Select(action =>
                     {
                         if (string.IsNullOrEmpty(action.Condition)) return (action.Name, true);
                         try
                         {
-                            var psi = new System.Diagnostics.ProcessStartInfo
+                            var psi = new ProcessStartInfo
                             {
                                 FileName = "pwsh",
-                                Arguments = $"-NoProfile -Command \"if ({action.Condition}) {{ exit 0 }} else {{ exit 1 }}\"",
+                                Arguments =
+                                    $"-NoProfile -Command \"if ({action.Condition}) {{ exit 0 }} else {{ exit 1 }}\"",
                                 WorkingDirectory = folderPath,
                                 RedirectStandardOutput = true,
                                 RedirectStandardError = true,
                                 UseShellExecute = false,
                                 CreateNoWindow = true
                             };
-                            var proc = System.Diagnostics.Process.Start(psi);
+                            var proc = Process.Start(psi);
                             proc?.WaitForExit(5000);
                             return (action.Name, proc?.ExitCode == 0);
                         }
-                        catch { return (action.Name, false); }
+                        catch
+                        {
+                            return (action.Name, false);
+                        }
                     }).ToList();
 
                     return new PlanContentData(recs, summaryMd, artifacts, commitRows, verReports, actionStates);
                 }, ct);
             },
-            initialValue: new PlanContentData(new(), null, new(), new(), new(), new())
+            initialValue: new PlanContentData(new List<RecommendationYaml>(), null,
+                new Dictionary<string, List<string>>(), new List<CommitRow>(), new Dictionary<string, bool>(),
+                new List<(string Name, bool ConditionMet)>())
         );
 
-        UseEffect(() =>
-        {
-            selectedTab.Set(0);
-        }, _selectedPlanState);
+        UseEffect(() => { selectedTab.Set(0); }, _selectedPlanState);
 
         if (_selectedPlan is null)
         {
             if (_allPlans.Count == 0)
-            {
                 return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full()).Gap(2)
-                    | new Icon(Icons.Inbox).Large().Color(Colors.Gray)
-                    | Text.Muted("No plans to review");
-            }
+                       | new Icon(Icons.Inbox).Large().Color(Colors.Gray)
+                       | Text.Muted("No plans to review");
 
             return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
-                | Text.Muted("Select a completed plan to review");
+                   | Text.Muted("Select a completed plan to review");
         }
 
         var currentIndex = _allPlans.FindIndex(p => p.FolderName == _selectedPlan.FolderName);
 
         // Header
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
-            | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
-            | new Spacer().Width(Size.Grow())
-            | Text.Rich()
-                .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
-                .Muted("plans", word: true)
-            | new Button("Make PR").Icon(Icons.GitPullRequest).Primary().OnClick(() =>
-            {
-                _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
-                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
-                _refreshPlans();
-            }).ShortcutKey("m").WithConfetti(AnimationTrigger.Click);
+                     | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
+                     | new Spacer().Width(Size.Grow())
+                     | Text.Rich()
+                         .Bold($"{currentIndex + 1}/{_allPlans.Count}", word: true)
+                         .Muted("plans", word: true)
+                     | new Button("Make PR").Icon(Icons.GitPullRequest).Primary().OnClick(() =>
+                     {
+                         _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
+                         _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
+                         _refreshPlans();
+                     }).ShortcutKey("m").WithConfetti(AnimationTrigger.Click);
 
         // Content sections
         var content = Layout.Vertical();
-        object Cap(object inner) => Layout.Vertical().Width(Size.Auto().Max(Size.Units(200))) | inner;
+
+        object Cap(object inner)
+        {
+            return Layout.Vertical().Width(Size.Auto().Max(Size.Units(200))) | inner;
+        }
 
         var planData = planContentQuery.Value;
 
@@ -198,7 +205,7 @@ public class ContentView(
         if (planContentQuery.Loading)
         {
             content |= Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
-                | Text.Muted("Loading...");
+                       | Text.Muted("Loading...");
         }
         else
         {
@@ -218,16 +225,16 @@ public class ContentView(
             // Verifications tab content
             var verificationsTable = new Table(
                 new TableRow(
-                    new TableCell("Status").IsHeader(),
-                    new TableCell("Name").IsHeader()
-                )
-                { IsHeader = true }
+                        new TableCell("Status").IsHeader(),
+                        new TableCell("Name").IsHeader()
+                    )
+                    { IsHeader = true }
             );
             foreach (var v in _selectedPlan.Verifications)
             {
                 var hasReport = planData.VerificationReports.TryGetValue(v.Name, out var exists) && exists;
                 var nameCapture = v.Name;
-                object nameCell = hasReport
+                var nameCell = hasReport
                     ? new Button(v.Name).Inline().OnClick(() => openVerification.Set(nameCapture))
                     : (object)Text.Block(v.Name);
 
@@ -243,18 +250,16 @@ public class ContentView(
             // Commits tab content
             var commitsTable = new Table(
                 new TableRow(
-                    new TableCell("Commit").IsHeader(),
-                    new TableCell("Message").IsHeader()
-                )
-                { IsHeader = true }
+                        new TableCell("Commit").IsHeader(),
+                        new TableCell("Message").IsHeader()
+                    )
+                    { IsHeader = true }
             );
             foreach (var row in planData.CommitRows)
-            {
                 commitsTable |= new TableRow(
                     new TableCell(new Button(row.ShortHash).Inline().OnClick(() => openCommit.Set(row.Hash))),
                     new TableCell(row.Title)
                 );
-            }
 
             // PRs tab content
             object prsContent;
@@ -262,10 +267,10 @@ public class ContentView(
             {
                 var prsTable = new Table(
                     new TableRow(
-                        new TableCell("Repository").IsHeader(),
-                        new TableCell("PR").IsHeader()
-                    )
-                    { IsHeader = true }
+                            new TableCell("Repository").IsHeader(),
+                            new TableCell("PR").IsHeader()
+                        )
+                        { IsHeader = true }
                 );
                 foreach (var pr in _selectedPlan.Prs)
                 {
@@ -275,6 +280,7 @@ public class ContentView(
                         new TableCell(new Button(pr).Link().OnClick(() => client.OpenUrl(prCapture)))
                     );
                 }
+
                 prsContent = prsTable;
             }
             else
@@ -291,23 +297,25 @@ public class ContentView(
                 foreach (var file in screenshotFiles)
                 {
                     var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(file)}";
-                    screenshotsLayout |= new Image(imageUrl) { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(file), Overlay = true }
+                    screenshotsLayout |= new Image(imageUrl)
+                            { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(file), Overlay = true }
                         .Height(Size.Units(15)).Width(Size.Units(22))
                         .BorderColor(Colors.Neutral)
                         .BorderStyle(BorderStyle.Solid)
                         .BorderThickness(1)
                         .BorderRadius(BorderRadius.Rounded);
                 }
+
                 artifactsLayout |= screenshotsLayout;
             }
 
             var totalArtifacts = (planData.Artifacts.GetValueOrDefault("screenshots")?.Count ?? 0)
-                + (planData.Artifacts.ContainsKey("sample") ? 1 : 0);
+                                 + (planData.Artifacts.ContainsKey("sample") ? 1 : 0);
 
             // Review actions
             var reviewActionStates = planData.ReviewActionStates;
             var projectConfig = _config.GetProject(_selectedPlan.Project);
-            var reviewActions = projectConfig?.ReviewActions ?? new();
+            var reviewActions = projectConfig?.ReviewActions ?? new List<ReviewActionConfig>();
             if (reviewActions.Count > 0)
             {
                 var actionsBar = Layout.Horizontal().Gap(2).Padding(1);
@@ -326,7 +334,7 @@ public class ContentView(
                         var actionCapture = action;
                         btn = btn.OnClick(() =>
                         {
-                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            Process.Start(new ProcessStartInfo
                             {
                                 FileName = "pwsh",
                                 Arguments = $"-NoProfile -Command \"{actionCapture.Action}\"",
@@ -335,36 +343,34 @@ public class ContentView(
                             });
                         });
                     }
+
                     actionsBar |= btn;
                 }
+
                 content |= actionsBar;
             }
 
             // Recommendations tab content
             var recommendationsLayout = Layout.Vertical().Gap(4).Padding(2);
             if (planData.Recommendations.Count == 0)
-            {
                 recommendationsLayout |= Text.Muted("No recommendations.");
-            }
             else
-            {
                 foreach (var rec in planData.Recommendations)
                 {
                     var card = Layout.Vertical().Gap(1)
-                        | Text.Block(rec.Title).Bold()
-                        | new Markdown(rec.Description).DangerouslyAllowLocalFiles();
+                               | Text.Block(rec.Title).Bold()
+                               | new Markdown(rec.Description).DangerouslyAllowLocalFiles();
                     recommendationsLayout |= card;
                     recommendationsLayout |= new Separator();
                 }
-            }
 
             // Build tabs
             var tabs = new TabsLayout(
-                onSelect: e => selectedTab.Set(e.Value),
-                onClose: null,
-                onRefresh: null,
-                onReorder: null,
-                selectedIndex: selectedTab.Value,
+                e => selectedTab.Set(e.Value),
+                null,
+                null,
+                null,
+                selectedTab.Value,
                 new Tab("Summary", Cap(summaryTabContent)),
                 new Tab("Verifications", Cap(verificationsTable)).Badge(_selectedPlan.Verifications.Count.ToString()),
                 new Tab("Commits", Cap(commitsTable)).Badge(_selectedPlan.Commits.Count.ToString()),
@@ -379,15 +385,13 @@ public class ContentView(
 
         // Sheet modals (outside TabsLayout so they render as overlays)
         if (openVerification.Value is { } verName)
-        {
             content |= new Sheet(
-                onClose: () => openVerification.Set(null),
-                content: verificationReportQuery.Loading
-                    ? (object)Text.Muted("Loading...")
+                () => openVerification.Set(null),
+                verificationReportQuery.Loading
+                    ? Text.Muted("Loading...")
                     : new Markdown(verificationReportQuery.Value).DangerouslyAllowLocalFiles(),
-                title: verName
+                verName
             ).Width(Size.Half()).Resizable();
-        }
 
         if (openCommit.Value is { } commitHash && _selectedPlan is not null)
         {
@@ -423,9 +427,10 @@ public class ContentView(
                         _ => ("Modified", BadgeVariant.Outline)
                     };
                     filesLayout |= Layout.Horizontal().Gap(2)
-                        | new Badge(label).Variant(variant).Small()
-                        | Text.Block(filePath);
+                                   | new Badge(label).Variant(variant).Small()
+                                   | Text.Block(filePath);
                 }
+
                 commitSheetContent |= filesLayout;
             }
 
@@ -436,9 +441,9 @@ public class ContentView(
             }
 
             content |= new Sheet(
-                onClose: () => openCommit.Set(null),
-                content: commitSheetContent,
-                title: $"Commit {shortHash} — {commitTitle}"
+                () => openCommit.Set(null),
+                commitSheetContent,
+                $"Commit {shortHash} — {commitTitle}"
             ).Width(Size.Half()).Resizable();
         }
 
@@ -446,89 +451,94 @@ public class ContentView(
         {
             var language = FileApp.GetLanguage(Path.GetExtension(artifactPath));
             content |= new Sheet(
-                onClose: () => openArtifact.Set(null),
-                content: artifactContentQuery.Loading
-                    ? (object)Text.Muted("Loading...")
+                () => openArtifact.Set(null),
+                artifactContentQuery.Loading
+                    ? Text.Muted("Loading...")
                     : new Markdown($"```{language.ToString().ToLowerInvariant()}\n{artifactContentQuery.Value}\n```"),
-                title: Path.GetFileName(artifactPath)
+                Path.GetFileName(artifactPath)
             ).Width(Size.Half()).Resizable();
         }
 
         if (_selectedPlan is not null)
         {
             var fileRepoPaths = _selectedPlan.GetEffectiveRepoPaths(_config);
-            var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(openFile.Value, () => openFile.Set(null), fileRepoPaths);
+            var fileLinkSheet =
+                FileLinkHelper.BuildFileLinkSheet(openFile.Value, () => openFile.Set(null), fileRepoPaths);
             if (fileLinkSheet != null) content |= fileLinkSheet;
         }
 
         // Dialogs
-        content |= new SuggestChangesDialog(suggestChangesOpen, suggestChangesText, _selectedPlan, _jobService, _planService, _refreshPlans);
-        content |= new CustomPrDialog(customPrOpen, _selectedPlan, _jobService, _planService, _refreshPlans, assigneesQuery);
+        content |= new SuggestChangesDialog(suggestChangesOpen, suggestChangesText, _selectedPlan, _jobService,
+            _planService, _refreshPlans);
+        content |= new CustomPrDialog(customPrOpen, _selectedPlan, _jobService, _planService, _refreshPlans,
+            assigneesQuery);
 
         // Discard confirmation dialog
         content |= new DiscardPlanDialog(discardDialogOpen, _selectedPlan, _planService, _refreshPlans);
 
         // Action bar
         var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
-            | new Button("Suggest Changes").Icon(Icons.MessageSquare).Outline().OnClick(() =>
-            {
-                suggestChangesOpen.Set(true);
-            }).ShortcutKey("d")
-            | new Button("Discard").Icon(Icons.Trash).Outline().OnClick(() =>
-            {
-                discardDialogOpen.Set(true);
-            })
-            | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
-            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
-            | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
-                new MenuItem("Custom PR", Icon: Icons.GitPullRequest, Tag: "CustomPR").OnSelect(() =>
-                {
-                    customPrOpen.Set(true);
-                }),
-                new MenuItem("Set Completed", Icon: Icons.CircleCheck, Tag: "SetCompleted").OnSelect(() =>
-                {
-                    _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
-                    _refreshPlans();
-                }),
-                new MenuItem("Open in File Manager", Icon: Icons.FolderOpen, Tag: "OpenInExplorer").OnSelect(() =>
-                {
-                    PlatformHelper.OpenInFileManager(_selectedPlan.FolderPath);
-                }),
-                new MenuItem("Open in Terminal", Icon: Icons.Terminal, Tag: "OpenInTerminal").OnSelect(() =>
-                {
-                    PlatformHelper.OpenInTerminal(_selectedPlan.FolderPath);
-                }),
-                new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath").OnSelect(() =>
-                {
-                    copyToClipboard(_selectedPlan.FolderPath);
-                    client.Toast("Copied path to clipboard", "Path Copied");
-                }),
-                new MenuItem($"Open in {_config.Editor.Label}", Icon: Icons.Code, Tag: "OpenInEditor").OnSelect(() =>
-                {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = _config.Editor.Command,
-                        Arguments = $"\"{_selectedPlan.FolderPath}\"",
-                        UseShellExecute = true
-                    });
-                }),
-                new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
-                {
-                    var yamlPath = System.IO.Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = _config.Editor.Command,
-                        Arguments = yamlPath,
-                        UseShellExecute = true
-                    });
-                })
-            );
+                        | new Button("Suggest Changes").Icon(Icons.MessageSquare).Outline().OnClick(() =>
+                        {
+                            suggestChangesOpen.Set(true);
+                        }).ShortcutKey("d")
+                        | new Button("Discard").Icon(Icons.Trash).Outline().OnClick(() =>
+                        {
+                            discardDialogOpen.Set(true);
+                        })
+                        | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious())
+                            .ShortcutKey("p")
+                        | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext())
+                            .ShortcutKey("n")
+                        | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                            new MenuItem("Custom PR", Icon: Icons.GitPullRequest, Tag: "CustomPR").OnSelect(() =>
+                            {
+                                customPrOpen.Set(true);
+                            }),
+                            new MenuItem("Set Completed", Icon: Icons.CircleCheck, Tag: "SetCompleted").OnSelect(() =>
+                            {
+                                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
+                                _refreshPlans();
+                            }),
+                            new MenuItem("Open in File Manager", Icon: Icons.FolderOpen, Tag: "OpenInExplorer")
+                                .OnSelect(() => { PlatformHelper.OpenInFileManager(_selectedPlan.FolderPath); }),
+                            new MenuItem("Open in Terminal", Icon: Icons.Terminal, Tag: "OpenInTerminal").OnSelect(() =>
+                            {
+                                PlatformHelper.OpenInTerminal(_selectedPlan.FolderPath);
+                            }),
+                            new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath")
+                                .OnSelect(() =>
+                                {
+                                    copyToClipboard(_selectedPlan.FolderPath);
+                                    client.Toast("Copied path to clipboard", "Path Copied");
+                                }),
+                            new MenuItem($"Open in {_config.Editor.Label}", Icon: Icons.Code, Tag: "OpenInEditor")
+                                .OnSelect(() =>
+                                {
+                                    Process.Start(new ProcessStartInfo
+                                    {
+                                        FileName = _config.Editor.Command,
+                                        Arguments = $"\"{_selectedPlan.FolderPath}\"",
+                                        UseShellExecute = true
+                                    });
+                                }),
+                            new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
+                            {
+                                var yamlPath = Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
+                                Process.Start(new ProcessStartInfo
+                                {
+                                    FileName = _config.Editor.Command,
+                                    Arguments = yamlPath,
+                                    UseShellExecute = true
+                                });
+                            })
+                        );
 
         return new HeaderLayout(
-            header: header,
-            content: new FooterLayout(
-                footer: actionBar,
-                content: content
+            header,
+            new FooterLayout(
+                actionBar,
+                content
             ).Size(Size.Full())
         ).Scroll(Scroll.None).Size(Size.Full()).Key(_selectedPlan.Id);
     }

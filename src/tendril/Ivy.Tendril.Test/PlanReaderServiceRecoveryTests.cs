@@ -1,11 +1,13 @@
+using System.Text.RegularExpressions;
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
 public class PlanReaderServiceRecoveryTests : IDisposable
 {
-    private readonly string _tempDir;
     private readonly PlanReaderService _service;
+    private readonly string _tempDir;
 
     public PlanReaderServiceRecoveryTests()
     {
@@ -14,13 +16,13 @@ public class PlanReaderServiceRecoveryTests : IDisposable
 
         var settings = new TendrilSettings();
         var configService = new ConfigService(settings, _tempDir);
-        _service = new PlanReaderService(configService, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlanReaderService>.Instance);
+        _service = new PlanReaderService(configService, NullLogger<PlanReaderService>.Instance);
     }
 
     public void Dispose()
     {
         if (Directory.Exists(_tempDir))
-            Directory.Delete(_tempDir, recursive: true);
+            Directory.Delete(_tempDir, true);
     }
 
     private void CreatePlan(string folderName, string state)
@@ -34,7 +36,7 @@ public class PlanReaderServiceRecoveryTests : IDisposable
     private string ReadState(string folderName)
     {
         var yaml = File.ReadAllText(Path.Combine(_service.PlansDirectory, folderName, "plan.yaml"));
-        var match = System.Text.RegularExpressions.Regex.Match(yaml, @"(?m)^state:\s*(.+)$");
+        var match = Regex.Match(yaml, @"(?m)^state:\s*(.+)$");
         return match.Success ? match.Groups[1].Value.Trim() : "";
     }
 

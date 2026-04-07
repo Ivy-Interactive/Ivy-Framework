@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 
 namespace Ivy.Tendril.Services;
 
@@ -14,14 +15,17 @@ public class GitService : IGitService
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                StandardOutputEncoding = System.Text.Encoding.UTF8,
+                StandardOutputEncoding = Encoding.UTF8
             };
             using var process = Process.Start(psi);
             var title = process?.StandardOutput.ReadLine();
             process?.WaitForExit();
             return process?.ExitCode == 0 ? title : null;
         }
-        catch { return null; /* git may not be installed, or repo path invalid */ }
+        catch
+        {
+            return null; /* git may not be installed, or repo path invalid */
+        }
     }
 
     public string? GetCommitDiff(string repoPath, string commitHash)
@@ -34,14 +38,17 @@ public class GitService : IGitService
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                StandardOutputEncoding = System.Text.Encoding.UTF8,
+                StandardOutputEncoding = Encoding.UTF8
             };
             using var process = Process.Start(psi);
             var output = process?.StandardOutput.ReadToEnd();
             process?.WaitForExit();
             return process?.ExitCode == 0 ? output : null;
         }
-        catch { return null; /* git may not be installed, or repo path invalid */ }
+        catch
+        {
+            return null; /* git may not be installed, or repo path invalid */
+        }
     }
 
     public List<(string Status, string FilePath)>? GetCommitFiles(string repoPath, string commitHash)
@@ -54,7 +61,7 @@ public class GitService : IGitService
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                StandardOutputEncoding = System.Text.Encoding.UTF8,
+                StandardOutputEncoding = Encoding.UTF8
             };
             using var process = Process.Start(psi);
             var output = process?.StandardOutput.ReadToEnd();
@@ -68,8 +75,12 @@ public class GitService : IGitService
                 if (parts.Length == 2)
                     files.Add((parts[0].Trim(), parts[1].Trim()));
             }
+
             return files;
         }
-        catch { return null; /* git may not be installed, or repo path invalid */ }
+        catch
+        {
+            return null; /* git may not be installed, or repo path invalid */
+        }
     }
 }

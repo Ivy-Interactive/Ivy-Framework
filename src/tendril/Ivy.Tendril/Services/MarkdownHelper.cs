@@ -9,8 +9,8 @@ public static class MarkdownHelper
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     /// <summary>
-    /// Annotates broken file:/// links in markdown content with a warning indicator.
-    /// Valid links are left unchanged.
+    ///     Annotates broken file:/// links in markdown content with a warning indicator.
+    ///     Valid links are left unchanged.
     /// </summary>
     public static string AnnotateBrokenFileLinks(string markdownContent)
     {
@@ -31,7 +31,7 @@ public static class MarkdownHelper
     }
 
     /// <summary>
-    /// Searches for files with the given filename in the specified repo directories.
+    ///     Searches for files with the given filename in the specified repo directories.
     /// </summary>
     public static List<string> FindFilesInRepos(IEnumerable<string> repoPaths, string fileName)
     {

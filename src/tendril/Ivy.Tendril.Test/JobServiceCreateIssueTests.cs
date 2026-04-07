@@ -4,8 +4,8 @@ namespace Ivy.Tendril.Test;
 
 public class JobServiceCreateIssueTests : IDisposable
 {
-    private readonly string _tempDir;
     private readonly string _planYamlPath;
+    private readonly string _tempDir;
 
     public JobServiceCreateIssueTests()
     {
@@ -17,7 +17,7 @@ public class JobServiceCreateIssueTests : IDisposable
     public void Dispose()
     {
         if (Directory.Exists(_tempDir))
-            Directory.Delete(_tempDir, recursive: true);
+            Directory.Delete(_tempDir, true);
     }
 
     private static JobService CreateService()
@@ -28,14 +28,14 @@ public class JobServiceCreateIssueTests : IDisposable
     private void WritePlanYaml(string state)
     {
         File.WriteAllText(_planYamlPath, $"""
-            state: {state}
-            project: Tendril
-            title: Test Plan
-            created: 2026-04-01T00:00:00Z
-            updated: 2026-04-01T00:00:00Z
-            commits: []
-            verifications: []
-            """);
+                                          state: {state}
+                                          project: Tendril
+                                          title: Test Plan
+                                          created: 2026-04-01T00:00:00Z
+                                          updated: 2026-04-01T00:00:00Z
+                                          commits: []
+                                          verifications: []
+                                          """);
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class JobServiceCreateIssueTests : IDisposable
         var service = CreateService();
 
         var id = service.StartJob("CreateIssue", _tempDir, "-Repo", "owner/repo", "-Assignee", "", "-Labels", "");
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         var content = File.ReadAllText(_planYamlPath);
         Assert.Contains("state: Completed", content);
@@ -58,7 +58,7 @@ public class JobServiceCreateIssueTests : IDisposable
         var service = CreateService();
 
         var id = service.StartJob("CreateIssue", _tempDir, "-Repo", "owner/repo", "-Assignee", "", "-Labels", "");
-        service.CompleteJob(id, exitCode: 1);
+        service.CompleteJob(id, 1);
 
         var content = File.ReadAllText(_planYamlPath);
         Assert.Contains("state: Draft", content);

@@ -1,5 +1,7 @@
-using Ivy.Tendril.Services;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
@@ -10,26 +12,32 @@ namespace Ivy.Tendril.Apps;
 #endif
 public class OnboardingApp : ViewBase
 {
-    private static StepperItem[] GetSteps(int selectedIndex) =>
-    [
-        new("1", selectedIndex > 0 ? Icons.Check : null, "Welcome"),
-        new("2", selectedIndex > 1 ? Icons.Check : null, "Software Check"),
-        new("3", selectedIndex > 2 ? Icons.Check : null, "Coding Agent"),
-        new("4", selectedIndex > 3 ? Icons.Check : null, "Tendril Home"),
-        new("5", selectedIndex > 4 ? Icons.Check : null, "Project Setup"),
-        new("6", selectedIndex > 5 ? Icons.Check : null, "Complete")
-    ];
-
-    private static object GetStepViews(IState<int> stepperIndex) => stepperIndex.Value switch
+    private static StepperItem[] GetSteps(int selectedIndex)
     {
-        0 => new WelcomeStepView(stepperIndex),
-        1 => new SoftwareCheckStepView(stepperIndex),
-        2 => new CodingAgentStepView(stepperIndex),
-        3 => new TendrilHomeStepView(stepperIndex),
-        4 => new ProjectSetupStepView(stepperIndex),
-        5 => new CompleteStepView(stepperIndex),
-        _ => throw new ArgumentOutOfRangeException()
-    };
+        return
+        [
+            new("1", selectedIndex > 0 ? Icons.Check : null, "Welcome"),
+            new("2", selectedIndex > 1 ? Icons.Check : null, "Software Check"),
+            new("3", selectedIndex > 2 ? Icons.Check : null, "Coding Agent"),
+            new("4", selectedIndex > 3 ? Icons.Check : null, "Tendril Home"),
+            new("5", selectedIndex > 4 ? Icons.Check : null, "Project Setup"),
+            new("6", selectedIndex > 5 ? Icons.Check : null, "Complete")
+        ];
+    }
+
+    private static object GetStepViews(IState<int> stepperIndex)
+    {
+        return stepperIndex.Value switch
+        {
+            0 => new WelcomeStepView(stepperIndex),
+            1 => new SoftwareCheckStepView(stepperIndex),
+            2 => new CodingAgentStepView(stepperIndex),
+            3 => new TendrilHomeStepView(stepperIndex),
+            4 => new ProjectSetupStepView(stepperIndex),
+            5 => new CompleteStepView(stepperIndex),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
 
     public override object? Build()
     {
@@ -94,13 +102,14 @@ public class SoftwareCheckStepView(IState<int> stepperIndex) : ViewBase
         }
 
         var hasAnyCodingAgent = checkResults.Value != null
-            && (checkResults.Value["claude"] || checkResults.Value["codex"] || checkResults.Value["gemini"]);
+                                && (checkResults.Value["claude"] || checkResults.Value["codex"] ||
+                                    checkResults.Value["gemini"]);
 
         var allRequiredPassed = checkResults.Value != null
-            && checkResults.Value["gh"]
-            && hasAnyCodingAgent
-            && checkResults.Value["git"]
-            && checkResults.Value["powershell"];
+                                && checkResults.Value["gh"]
+                                && hasAnyCodingAgent
+                                && checkResults.Value["git"]
+                                && checkResults.Value["powershell"];
 
         return Layout.Vertical()
                | Text.H2("Required Software")
@@ -115,67 +124,66 @@ public class SoftwareCheckStepView(IState<int> stepperIndex) : ViewBase
 
                    **Optional:**
                    - **Pandoc** - For PDF export functionality
-                   """ )
+                   """)
                | (checkResults.Value != null
-                   ? (Layout.Vertical()
-                      | Text.H3("Results")
-                      | new Table(
-                          new TableRow(
-                              new TableCell("Software").IsHeader(),
-                              new TableCell("Status").IsHeader(),
-                              new TableCell("Notes").IsHeader()
-                          ).IsHeader(),
-                          new TableRow(
-                              new TableCell("GitHub CLI"),
-                              new TableCell(checkResults.Value["gh"] ? "\u2713 Installed" : "\u2717 Not Found"),
-                              checkResults.Value["gh"]
-                                  ? new TableCell("")
-                                  : new TableCell("Install from https://cli.github.com/")
-                          ),
-                          new TableRow(
-                              new TableCell("Claude CLI"),
-                              new TableCell(checkResults.Value["claude"] ? "\u2713 Installed" : "\u24d8 Not Installed"),
-                              checkResults.Value["claude"]
-                                  ? new TableCell("")
-                                  : new TableCell("Install from https://docs.anthropic.com/en/docs/claude-code")
-                          ),
-                          new TableRow(
-                              new TableCell("Codex CLI"),
-                              new TableCell(checkResults.Value["codex"] ? "\u2713 Installed" : "\u24d8 Not Installed"),
-                              checkResults.Value["codex"]
-                                  ? new TableCell("")
-                                  : new TableCell("Install from https://openai.com/index/codex/")
-                          ),
-                          new TableRow(
-                              new TableCell("Gemini CLI"),
-                              new TableCell(checkResults.Value["gemini"] ? "\u2713 Installed" : "\u24d8 Not Installed"),
-                              checkResults.Value["gemini"]
-                                  ? new TableCell("")
-                                  : new TableCell("Install from https://github.com/google-gemini/gemini-cli")
-                          ),
-                          new TableRow(
-                              new TableCell("Git"),
-                              new TableCell(checkResults.Value["git"] ? "\u2713 Installed" : "\u2717 Not Found"),
-                              checkResults.Value["git"]
-                                  ? new TableCell("")
-                                  : new TableCell("Install from https://git-scm.com/downloads")
-                          ),
-                          new TableRow(
-                              new TableCell("PowerShell"),
-                              new TableCell(checkResults.Value["powershell"] ? "\u2713 Installed" : "\u2717 Not Found"),
-                              checkResults.Value["powershell"]
-                                  ? new TableCell("")
-                                  : new TableCell("Install from https://github.com/PowerShell/PowerShell")
-                          ),
-                          new TableRow(
-                              new TableCell("Pandoc (Optional)"),
-                              new TableCell(checkResults.Value["pandoc"] ? "\u2713 Installed" : "\u24d8 Not Found"),
-                              checkResults.Value["pandoc"]
-                                  ? new TableCell("")
-                                  : new TableCell("Install from https://pandoc.org/installing.html")
-                          )
-                      ).Width(Size.Full())
-                     )
+                   ? Layout.Vertical()
+                     | Text.H3("Results")
+                     | new Table(
+                         new TableRow(
+                             new TableCell("Software").IsHeader(),
+                             new TableCell("Status").IsHeader(),
+                             new TableCell("Notes").IsHeader()
+                         ).IsHeader(),
+                         new TableRow(
+                             new TableCell("GitHub CLI"),
+                             new TableCell(checkResults.Value["gh"] ? "\u2713 Installed" : "\u2717 Not Found"),
+                             checkResults.Value["gh"]
+                                 ? new TableCell("")
+                                 : new TableCell("Install from https://cli.github.com/")
+                         ),
+                         new TableRow(
+                             new TableCell("Claude CLI"),
+                             new TableCell(checkResults.Value["claude"] ? "\u2713 Installed" : "\u24d8 Not Installed"),
+                             checkResults.Value["claude"]
+                                 ? new TableCell("")
+                                 : new TableCell("Install from https://docs.anthropic.com/en/docs/claude-code")
+                         ),
+                         new TableRow(
+                             new TableCell("Codex CLI"),
+                             new TableCell(checkResults.Value["codex"] ? "\u2713 Installed" : "\u24d8 Not Installed"),
+                             checkResults.Value["codex"]
+                                 ? new TableCell("")
+                                 : new TableCell("Install from https://openai.com/index/codex/")
+                         ),
+                         new TableRow(
+                             new TableCell("Gemini CLI"),
+                             new TableCell(checkResults.Value["gemini"] ? "\u2713 Installed" : "\u24d8 Not Installed"),
+                             checkResults.Value["gemini"]
+                                 ? new TableCell("")
+                                 : new TableCell("Install from https://github.com/google-gemini/gemini-cli")
+                         ),
+                         new TableRow(
+                             new TableCell("Git"),
+                             new TableCell(checkResults.Value["git"] ? "\u2713 Installed" : "\u2717 Not Found"),
+                             checkResults.Value["git"]
+                                 ? new TableCell("")
+                                 : new TableCell("Install from https://git-scm.com/downloads")
+                         ),
+                         new TableRow(
+                             new TableCell("PowerShell"),
+                             new TableCell(checkResults.Value["powershell"] ? "\u2713 Installed" : "\u2717 Not Found"),
+                             checkResults.Value["powershell"]
+                                 ? new TableCell("")
+                                 : new TableCell("Install from https://github.com/PowerShell/PowerShell")
+                         ),
+                         new TableRow(
+                             new TableCell("Pandoc (Optional)"),
+                             new TableCell(checkResults.Value["pandoc"] ? "\u2713 Installed" : "\u24d8 Not Found"),
+                             checkResults.Value["pandoc"]
+                                 ? new TableCell("")
+                                 : new TableCell("Install from https://pandoc.org/installing.html")
+                         )
+                     ).Width(Size.Full())
                    : null!)
                | (checkResults.Value == null
                    ? new Button("Check Software")
@@ -185,25 +193,25 @@ public class SoftwareCheckStepView(IState<int> stepperIndex) : ViewBase
                        .Loading(isChecking.Value)
                        .Disabled(isChecking.Value)
                        .OnClick(async () => await CheckSoftware())
-                   : (allRequiredPassed
+                   : allRequiredPassed
                        ? new Button("Continue")
                            .Primary()
                            .Large()
                            .Icon(Icons.ArrowRight, Align.Right)
                            .OnClick(() => stepperIndex.Set(stepperIndex.Value + 1))
                        : Layout.Vertical()
-                         | Text.Warning("Please install missing required software before continuing. At least one coding agent (Claude, Codex, or Gemini) must be installed.")
+                         | Text.Warning(
+                             "Please install missing required software before continuing. At least one coding agent (Claude, Codex, or Gemini) must be installed.")
                          | (Layout.Horizontal().Gap(2)
-                           | new Button("Check Again")
-                               .Outline()
-                               .Icon(Icons.CheckCheck, Align.Right)
-                               .OnClick(async () => await CheckSoftware())
-                           | new Button("Skip Anyway")
-                               .Destructive()
-                               .OnClick(() => stepperIndex.Set(stepperIndex.Value + 1))
+                            | new Button("Check Again")
+                                .Outline()
+                                .Icon(Icons.CheckCheck, Align.Right)
+                                .OnClick(async () => await CheckSoftware())
+                            | new Button("Skip Anyway")
+                                .Destructive()
+                                .OnClick(() => stepperIndex.Set(stepperIndex.Value + 1))
                          )
-                     )
-                  );
+               );
     }
 
     private static async Task<bool> CheckCommand(string fileName, string arguments)
@@ -212,7 +220,7 @@ public class SoftwareCheckStepView(IState<int> stepperIndex) : ViewBase
         {
             return await Task.Run(() =>
             {
-                var proc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                var proc = Process.Start(new ProcessStartInfo
                 {
                     FileName = fileName,
                     Arguments = arguments,
@@ -281,10 +289,10 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
         var details = UseState(new TendrilHomeDetails
         {
             TendrilHome = Environment.GetEnvironmentVariable("TENDRIL_HOME")
-                ?? Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    ".tendril"
-                )
+                          ?? Path.Combine(
+                              Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                              ".tendril"
+                          )
         });
         var error = UseState<string?>(null);
         var config = UseService<IConfigService>();
@@ -294,7 +302,7 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
                | Text.Muted("This folder will store your plans, inbox, trash, and other Tendril data.")
                | (error.Value != null ? Text.Danger(error.Value) : null!)
                | details.ToForm().Large()
-                   .SubmitBuilder((saving) => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving))
+                   .SubmitBuilder(saving => new Button("Next").Icon(Icons.ArrowRight, Align.Right).Disabled(saving))
                    .OnSubmit(OnSubmit)
             ;
 
@@ -319,30 +327,23 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
                     var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                     if (tendrilHome == "~") tendrilHome = home;
                     else if (tendrilHome.StartsWith("~/") || tendrilHome.StartsWith("~\\"))
-                    {
                         tendrilHome = Path.Combine(home, tendrilHome.Substring(2));
-                    }
                 }
                 else if (tendrilHome.StartsWith("$"))
                 {
                     // Handle $HOME style expansion if missed by ExpandEnvironmentVariables
-                    var match = System.Text.RegularExpressions.Regex.Match(tendrilHome, @"^\$([A-Za-z_][A-Za-z0-9_]*)");
+                    var match = Regex.Match(tendrilHome, @"^\$([A-Za-z_][A-Za-z0-9_]*)");
                     if (match.Success)
                     {
                         var varName = match.Groups[1].Value;
                         var varValue = Environment.GetEnvironmentVariable(varName);
                         if (!string.IsNullOrEmpty(varValue))
-                        {
                             tendrilHome = varValue + tendrilHome.Substring(match.Length);
-                        }
                     }
                 }
 
                 // Normalize and root
-                if (!Path.IsPathRooted(tendrilHome))
-                {
-                    tendrilHome = Path.GetFullPath(tendrilHome);
-                }
+                if (!Path.IsPathRooted(tendrilHome)) tendrilHome = Path.GetFullPath(tendrilHome);
 
                 // Final normalization
                 tendrilHome = Path.GetFullPath(tendrilHome);
@@ -364,8 +365,6 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
 
 public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
 {
-    private record VerificationEntry(string Name, string Prompt, bool Required);
-
     public override object? Build()
     {
         var config = UseService<IConfigService>();
@@ -391,26 +390,27 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
         {
             var ri = i;
             reposLayout |= Layout.Horizontal().Gap(2).AlignContent(Align.Center)
-                | Text.Block(currentRepos[ri]).Width(Size.Grow())
-                | new Button().Icon(Icons.Trash).Ghost().Small().OnClick(() =>
-                {
-                    var list = new List<string>(repoPaths.Value);
-                    list.RemoveAt(ri);
-                    repoPaths.Set(list);
-                });
+                           | Text.Block(currentRepos[ri]).Width(Size.Grow())
+                           | new Button().Icon(Icons.Trash).Ghost().Small().OnClick(() =>
+                           {
+                               var list = new List<string>(repoPaths.Value);
+                               list.RemoveAt(ri);
+                               repoPaths.Set(list);
+                           });
         }
 
         reposLayout |= Layout.Horizontal().Gap(2).AlignContent(Align.Center)
-            | newRepoPath.ToFolderInput("Select repository folder...", mode: FolderInputMode.FullPath).Width(Size.Grow())
-            | new Button("Add").Outline().Small().OnClick(() =>
-            {
-                if (!string.IsNullOrWhiteSpace(newRepoPath.Value))
-                {
-                    var list = new List<string>(repoPaths.Value) { newRepoPath.Value };
-                    repoPaths.Set(list);
-                    newRepoPath.Set(null);
-                }
-            });
+                       | newRepoPath.ToFolderInput("Select repository folder...", mode: FolderInputMode.FullPath)
+                           .Width(Size.Grow())
+                       | new Button("Add").Outline().Small().OnClick(() =>
+                       {
+                           if (!string.IsNullOrWhiteSpace(newRepoPath.Value))
+                           {
+                               var list = new List<string>(repoPaths.Value) { newRepoPath.Value };
+                               repoPaths.Set(list);
+                               newRepoPath.Set(null);
+                           }
+                       });
 
         // Verification list
         var verificationsLayout = Layout.Vertical().Gap(2);
@@ -420,93 +420,95 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
             var vi = i;
             var v = currentVerifications[vi];
             verificationsLayout |= Layout.Horizontal().Gap(2).AlignContent(Align.Center)
-                | Text.Block(v.Name).Width(Size.Grow())
-                | (v.Required ? new Badge("Required") : null!)
-                | new Button().Icon(Icons.Pencil).Ghost().Small().OnClick(() =>
-                {
-                    editIndex.Set(vi);
-                    editName.Set(verifications.Value[vi].Name);
-                    editPrompt.Set(verifications.Value[vi].Prompt);
-                    editRequired.Set(verifications.Value[vi].Required);
-                })
-                | new Button().Icon(Icons.Trash).Ghost().Small().OnClick(() =>
-                {
-                    var list = new List<VerificationEntry>(verifications.Value);
-                    list.RemoveAt(vi);
-                    verifications.Set(list);
-                });
+                                   | Text.Block(v.Name).Width(Size.Grow())
+                                   | (v.Required ? new Badge("Required") : null!)
+                                   | new Button().Icon(Icons.Pencil).Ghost().Small().OnClick(() =>
+                                   {
+                                       editIndex.Set(vi);
+                                       editName.Set(verifications.Value[vi].Name);
+                                       editPrompt.Set(verifications.Value[vi].Prompt);
+                                       editRequired.Set(verifications.Value[vi].Required);
+                                   })
+                                   | new Button().Icon(Icons.Trash).Ghost().Small().OnClick(() =>
+                                   {
+                                       var list = new List<VerificationEntry>(verifications.Value);
+                                       list.RemoveAt(vi);
+                                       verifications.Set(list);
+                                   });
         }
 
         var content = Layout.Vertical().Gap(4)
-               | Text.H2("Project Setup")
-               | Text.Muted("Set up your first project. You can add more projects later in Settings.")
-               | (error.Value != null ? Text.Danger(error.Value) : null!)
-               | projectName.ToTextInput("Project name...").WithField().Label("Project Name")
-               | projectContext.ToTextareaInput("Project context or prompt for AI agents (optional)...")
-                   .Rows(4)
-                   .WithField()
-                   .Label("Context / Prompt (Optional)")
-               | (Layout.Vertical().Gap(2)
-                   | Text.Block("Repositories").Bold()
-                   | Text.Muted("Add at least one repository path for this project.")
-                   | reposLayout)
-               | (Layout.Vertical().Gap(2)
-                   | Text.Block("Verifications").Bold()
-                   | Text.Muted("Define verifications to run for this project.")
-                   | verificationsLayout
-                   | new Button("Add Verification").Icon(Icons.Plus).Outline().Small().OnClick(() =>
-                   {
-                       editIndex.Set(null);
-                       editName.Set("");
-                       editPrompt.Set("");
-                       editRequired.Set(false);
-                   }))
-               | (Layout.Horizontal().Gap(2)
-                   | new Button("Skip for now").Outline().Large()
-                       .OnClick(() => stepperIndex.Set(stepperIndex.Value + 1))
-                   | new Button("Next").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
-                       .OnClick(() =>
-                       {
-                           if (string.IsNullOrWhiteSpace(projectName.Value))
-                           {
-                               error.Set("Please enter a project name.");
-                               return;
-                           }
-                           if (repoPaths.Value.Count == 0)
-                           {
-                               error.Set("Please add at least one repository path.");
-                               return;
-                           }
+                      | Text.H2("Project Setup")
+                      | Text.Muted("Set up your first project. You can add more projects later in Settings.")
+                      | (error.Value != null ? Text.Danger(error.Value) : null!)
+                      | projectName.ToTextInput("Project name...").WithField().Label("Project Name")
+                      | projectContext.ToTextareaInput("Project context or prompt for AI agents (optional)...")
+                          .Rows(4)
+                          .WithField()
+                          .Label("Context / Prompt (Optional)")
+                      | (Layout.Vertical().Gap(2)
+                         | Text.Block("Repositories").Bold()
+                         | Text.Muted("Add at least one repository path for this project.")
+                         | reposLayout)
+                      | (Layout.Vertical().Gap(2)
+                         | Text.Block("Verifications").Bold()
+                         | Text.Muted("Define verifications to run for this project.")
+                         | verificationsLayout
+                         | new Button("Add Verification").Icon(Icons.Plus).Outline().Small().OnClick(() =>
+                         {
+                             editIndex.Set(null);
+                             editName.Set("");
+                             editPrompt.Set("");
+                             editRequired.Set(false);
+                         }))
+                      | (Layout.Horizontal().Gap(2)
+                         | new Button("Skip for now").Outline().Large()
+                             .OnClick(() => stepperIndex.Set(stepperIndex.Value + 1))
+                         | new Button("Next").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
+                             .OnClick(() =>
+                             {
+                                 if (string.IsNullOrWhiteSpace(projectName.Value))
+                                 {
+                                     error.Set("Please enter a project name.");
+                                     return;
+                                 }
 
-                           var validVerifications = verifications.Value
-                               .Where(v => !string.IsNullOrWhiteSpace(v.Name))
-                               .ToList();
+                                 if (repoPaths.Value.Count == 0)
+                                 {
+                                     error.Set("Please add at least one repository path.");
+                                     return;
+                                 }
 
-                           var project = new ProjectConfig
-                           {
-                               Name = projectName.Value.Trim(),
-                               Color = "Green",
-                               Repos = repoPaths.Value.Select(p => new RepoRef { Path = p, PrRule = "default" }).ToList(),
-                               Context = projectContext.Value?.Trim() ?? "",
-                               Verifications = validVerifications.Select(v => new ProjectVerificationRef
-                               {
-                                   Name = v.Name,
-                                   Required = v.Required
-                               }).ToList()
-                           };
+                                 var validVerifications = verifications.Value
+                                     .Where(v => !string.IsNullOrWhiteSpace(v.Name))
+                                     .ToList();
 
-                           config.SetPendingProject(project);
-                           config.SetPendingVerificationDefinitions(validVerifications
-                               .Select(v => new VerificationConfig
-                               {
-                                   Name = v.Name,
-                                   Prompt = v.Prompt
-                               }).ToList());
+                                 var project = new ProjectConfig
+                                 {
+                                     Name = projectName.Value.Trim(),
+                                     Color = "Green",
+                                     Repos = repoPaths.Value.Select(p => new RepoRef { Path = p, PrRule = "default" })
+                                         .ToList(),
+                                     Context = projectContext.Value?.Trim() ?? "",
+                                     Verifications = validVerifications.Select(v => new ProjectVerificationRef
+                                     {
+                                         Name = v.Name,
+                                         Required = v.Required
+                                     }).ToList()
+                                 };
 
-                           error.Set(null);
-                           stepperIndex.Set(stepperIndex.Value + 1);
-                       })
-                 );
+                                 config.SetPendingProject(project);
+                                 config.SetPendingVerificationDefinitions(validVerifications
+                                     .Select(v => new VerificationConfig
+                                     {
+                                         Name = v.Name,
+                                         Prompt = v.Prompt
+                                     }).ToList());
+
+                                 error.Set(null);
+                                 stepperIndex.Set(stepperIndex.Value + 1);
+                             })
+                      );
 
         // Verification edit dialog
         if (editIndex.Value != -1)
@@ -517,9 +519,9 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
                 new DialogHeader(isNew ? "Add Verification" : "Edit Verification"),
                 new DialogBody(
                     Layout.Vertical().Gap(2)
-                        | editName.ToTextInput("Verification name...").WithField().Label("Name")
-                        | editPrompt.ToTextareaInput("Verification prompt...").Rows(6).WithField().Label("Prompt")
-                        | editRequired.ToBoolInput("Required")
+                    | editName.ToTextInput("Verification name...").WithField().Label("Name")
+                    | editPrompt.ToTextareaInput("Verification prompt...").Rows(6).WithField().Label("Prompt")
+                    | editRequired.ToBoolInput("Required")
                 ),
                 new DialogFooter(
                     new Button("Cancel").Outline().OnClick(() => editIndex.Set(-1)),
@@ -528,13 +530,10 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
                         if (string.IsNullOrWhiteSpace(editName.Value)) return;
                         var list = new List<VerificationEntry>(verifications.Value);
                         if (isNew)
-                        {
                             list.Add(new VerificationEntry(editName.Value, editPrompt.Value, editRequired.Value));
-                        }
                         else
-                        {
-                            list[editIndex.Value!.Value] = new VerificationEntry(editName.Value, editPrompt.Value, editRequired.Value);
-                        }
+                            list[editIndex.Value!.Value] =
+                                new VerificationEntry(editName.Value, editPrompt.Value, editRequired.Value);
                         verifications.Set(list);
                         editIndex.Set(-1);
                     })
@@ -544,6 +543,8 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
 
         return content;
     }
+
+    private record VerificationEntry(string Name, string Prompt, bool Required);
 }
 
 public class CompleteStepView(IState<int> stepperIndex) : ViewBase
@@ -582,9 +583,7 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
                 // Copy template or create basic config
                 var projectDir = Path.GetDirectoryName(System.AppContext.BaseDirectory); // Go up from bin/Debug/...
                 while (projectDir != null && !File.Exists(Path.Combine(projectDir, "example.config.yaml")))
-                {
                     projectDir = Path.GetDirectoryName(projectDir);
-                }
 
                 var exampleConfigPath = projectDir != null
                     ? Path.Combine(projectDir, "example.config.yaml")
@@ -613,22 +612,22 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
 
                 // Persist to shell for Mac users
                 if (OperatingSystem.IsMacOS())
-                {
                     try
                     {
-                        var zshrc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".zshrc");
+                        var zshrc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                            ".zshrc");
                         var exportLine = $"export TENDRIL_HOME=\"{tendrilHome}\"";
                         if (File.Exists(zshrc))
                         {
                             var content = await FileHelper.ReadAllTextAsync(zshrc);
                             if (!content.Contains(exportLine))
-                            {
                                 await File.AppendAllLinesAsync(zshrc, new[] { "", "# Tendril Home", exportLine });
-                            }
                         }
                     }
-                    catch { /* Best effort */ }
-                }
+                    catch
+                    {
+                        /* Best effort */
+                    }
 
                 // Mark onboarding complete (this reloads config from the file we just wrote)
                 config.CompleteOnboarding(tendrilHome);
@@ -636,15 +635,9 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
                 // Add pending verification definitions to global config
                 var pendingDefinitions = config.GetPendingVerificationDefinitions();
                 if (pendingDefinitions != null)
-                {
                     foreach (var def in pendingDefinitions)
-                    {
                         if (!config.Settings.Verifications.Any(v => v.Name == def.Name))
-                        {
                             config.Settings.Verifications.Add(def);
-                        }
-                    }
-                }
 
                 // Add pending project if one was configured
                 var pendingProject = config.GetPendingProject();

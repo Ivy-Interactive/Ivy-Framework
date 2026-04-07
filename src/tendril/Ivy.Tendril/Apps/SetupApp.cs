@@ -10,11 +10,11 @@ public class SetupApp : ViewBase
         var selectedTab = UseState(0);
 
         return new TabsLayout(
-            onSelect: e => selectedTab.Set(e.Value),
-            onClose: null,
-            onRefresh: null,
-            onReorder: null,
-            selectedIndex: selectedTab.Value,
+            e => selectedTab.Set(e.Value),
+            null,
+            null,
+            null,
+            selectedTab.Value,
             new Tab("General", new GeneralSettingsView()),
             new Tab("Levels", new LevelsSettingsView()),
             new Tab("Verifications", new VerificationsSettingsView()),

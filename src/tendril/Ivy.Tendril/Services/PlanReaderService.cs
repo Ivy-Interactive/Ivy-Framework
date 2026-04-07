@@ -1,23 +1,29 @@
+using System.Diagnostics;
+using System.Globalization;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
-
 using Ivy.Tendril.Apps.Plans;
+using Microsoft.Extensions.Logging;
 
 namespace Ivy.Tendril.Services;
 
-public class PlanReaderService(IConfigService config, ILogger<PlanReaderService> logger, ITelemetryService? telemetryService = null) : IPlanReaderService
+public class PlanReaderService(
+    IConfigService config,
+    ILogger<PlanReaderService> logger,
+    ITelemetryService? telemetryService = null) : IPlanReaderService
 {
+    private static readonly Regex FolderNameRegex = new(@"^(\d{5})-(.+)$", RegexOptions.Compiled);
     private readonly IConfigService _config = config;
-    private readonly ILogger<PlanReaderService> _logger = logger;
-    private readonly ITelemetryService? _telemetryService = telemetryService;
 
     private readonly TimeCache<List<HourlyTokenBurn>> _hourlyBurnCache = new(TimeSpan.FromMinutes(2));
+    private readonly ILogger<PlanReaderService> _logger = logger;
 
-    private static readonly Regex FolderNameRegex = new(@"^(\d{5})-(.+)$", RegexOptions.Compiled);
+    private readonly TimeCache<Dictionary<string, (decimal Cost, int Tokens)>> _planCostCache =
+        new(TimeSpan.FromSeconds(90));
+
+    private readonly TimeCache<PlanCountSnapshot> _planCountsCache = new(TimeSpan.FromMinutes(2));
 
     private readonly TimeCache<List<Recommendation>> _recommendationsCache = new(TimeSpan.FromMinutes(2));
-    private readonly TimeCache<PlanCountSnapshot> _planCountsCache = new(TimeSpan.FromMinutes(2));
-    private readonly TimeCache<Dictionary<string, (decimal Cost, int Tokens)>> _planCostCache = new(TimeSpan.FromSeconds(90));
+    private readonly ITelemetryService? _telemetryService = telemetryService;
 
     private IPlanDatabaseService? _database;
     private volatile bool _useDatabaseForReads;
@@ -25,17 +31,8 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
     public string PlansDirectory => _config.PlanFolder;
 
     /// <summary>
-    /// Enables database-backed reads. Called by the sync service after initial sync completes.
-    /// </summary>
-    internal void EnableDatabaseReads(IPlanDatabaseService database)
-    {
-        _database = database;
-        _useDatabaseForReads = true;
-    }
-
-    /// <summary>
-    /// On startup, reset any plans stuck in transient states (Building, Executing, Updating)
-    /// back to Failed. These are leftovers from a previous Tendril shutdown.
+    ///     On startup, reset any plans stuck in transient states (Building, Executing, Updating)
+    ///     back to Failed. These are leftovers from a previous Tendril shutdown.
     /// </summary>
     public void RecoverStuckPlans()
     {
@@ -45,7 +42,6 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
         if (!Directory.Exists(PlansDirectory)) return;
 
         foreach (var dir in Directory.GetDirectories(PlansDirectory))
-        {
             try
             {
                 var planYamlPath = Path.Combine(dir, "plan.yaml");
@@ -59,7 +55,8 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                 if (stuckStates.Contains(state))
                 {
                     var newState = state.Equals("Executing", StringComparison.OrdinalIgnoreCase)
-                        ? "Failed" : "Draft";
+                        ? "Failed"
+                        : "Draft";
                     var updated = Regex.Replace(yaml, @"(?m)^state:\s*.*$", $"state: {newState}");
                     updated = Regex.Replace(updated, @"(?m)^updated:\s*.*$",
                         $"updated: {DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}");
@@ -70,15 +67,14 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(
+                Debug.WriteLine(
                     $"Failed to recover plan {Path.GetFileName(dir)}: {ex.Message}");
             }
-        }
     }
 
     /// <summary>
-    /// On startup, fix plan.yaml files that have structured repos (path: + prRule:)
-    /// by normalizing them to plain path strings.
+    ///     On startup, fix plan.yaml files that have structured repos (path: + prRule:)
+    ///     by normalizing them to plain path strings.
     /// </summary>
     public void RepairPlans()
     {
@@ -87,7 +83,6 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
             if (!Directory.Exists(PlansDirectory)) return;
 
             foreach (var dir in Directory.GetDirectories(PlansDirectory))
-            {
                 try
                 {
                     var planYamlPath = Path.Combine(dir, "plan.yaml");
@@ -106,13 +101,497 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                 {
                     _logger.LogWarning(ex, "Failed to repair plan in {Folder}", Path.GetFileName(dir));
                 }
-            }
         }
-        catch { /* Best-effort repair on startup; individual plan errors are non-fatal */ }
+        catch
+        {
+            /* Best-effort repair on startup; individual plan errors are non-fatal */
+        }
     }
 
     /// <summary>
-    /// Repairs common YAML issues in plan.yaml content so that YamlDotNet can parse them.
+    ///     Retrieves all plans, optionally filtered by status.
+    ///     Delegates to database when available, otherwise reads from file system.
+    /// </summary>
+    public List<PlanFile> GetPlans(PlanStatus? statusFilter = null)
+    {
+        if (_useDatabaseForReads && _database != null)
+            try
+            {
+                return _database.GetPlans(statusFilter);
+            }
+            catch
+            {
+                // Fall back to file system on database errors
+            }
+
+        return GetPlansFromFileSystem(statusFilter);
+    }
+
+    /// <summary>
+    ///     Retrieves a single plan by its folder path.
+    ///     Delegates to database when available, otherwise reads from file system.
+    /// </summary>
+    public PlanFile? GetPlanByFolder(string folderPath)
+    {
+        if (_useDatabaseForReads && _database != null)
+            try
+            {
+                return _database.GetPlanByFolder(folderPath);
+            }
+            catch
+            {
+                // Fall back to file system
+            }
+
+        if (!Directory.Exists(folderPath)) return null;
+        return ParsePlanFolder(folderPath);
+    }
+
+    /// <summary>
+    ///     Retrieves all plans that are in the <see cref="PlanStatus.Icebox" /> state.
+    /// </summary>
+    /// <returns>List of icebox plans ordered by ID.</returns>
+    public List<PlanFile> GetIceboxPlans()
+    {
+        return GetPlans(PlanStatus.Icebox);
+    }
+
+    /// <summary>
+    ///     Transitions a plan to a new state by updating its <c>plan.yaml</c> file.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder (e.g. <c>01105-TestPlan</c>).</param>
+    /// <param name="newState">The target state to transition to.</param>
+    public void TransitionState(string folderName, PlanStatus newState)
+    {
+        var planId = ExtractPlanId(folderName);
+
+        // Track state transition in telemetry before making the change.
+        if (planId.HasValue)
+        {
+            var currentPlan = GetPlanByFolder(Path.Combine(PlansDirectory, folderName));
+            var oldState = currentPlan?.Status.ToString() ?? "Unknown";
+            _telemetryService?.TrackPlanStateTransition(oldState, newState.ToString());
+
+            // Flush telemetry events to ensure they reach PostHog
+            if (_telemetryService != null)
+                _ = Task.Run(async () => await _telemetryService.FlushAsync());
+        }
+
+        // Update database first for instant UI feedback.
+        if (planId.HasValue && _database != null)
+            _database.UpdatePlanState(planId.Value, newState);
+
+        _planCountsCache.Invalidate();
+        _recommendationsCache.Invalidate();
+
+        // Write to disk in background for durability.
+        WriteFileInBackground(() =>
+        {
+            var planYamlPath = Path.Combine(PlansDirectory, folderName, "plan.yaml");
+            if (!File.Exists(planYamlPath)) return;
+
+            var yaml = FileHelper.ReadAllText(planYamlPath);
+            var planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(yaml) ?? new PlanYaml();
+            planYaml.State = newState.ToString();
+            planYaml.Updated = DateTime.UtcNow;
+            FileHelper.WriteAllText(planYamlPath, YamlHelper.Serializer.Serialize(planYaml));
+        });
+    }
+
+    /// <summary>
+    ///     Creates a new revision file for a plan and updates the plan's timestamp.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <param name="content">Markdown content of the new revision.</param>
+    public void SaveRevision(string folderName, string content)
+    {
+        // Update database first for instant UI feedback.
+        var planId = ExtractPlanId(folderName);
+        if (planId.HasValue && _database != null)
+        {
+            var plan = _database.GetPlanById(planId.Value);
+            var newCount = (plan?.RevisionCount ?? 0) + 1;
+            _database.UpdatePlanContent(planId.Value, content, newCount);
+        }
+
+        _planCountsCache.Invalidate();
+
+        // Write to disk in background for durability.
+        WriteFileInBackground(() =>
+        {
+            var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
+            Directory.CreateDirectory(revisionsDir);
+
+            var nextNumber = GetNextRevisionNumber(revisionsDir);
+            var revisionPath = Path.Combine(revisionsDir, $"{nextNumber:D3}.md");
+            FileHelper.WriteAllText(revisionPath, content);
+
+            var planYamlPath = Path.Combine(PlansDirectory, folderName, "plan.yaml");
+            if (File.Exists(planYamlPath))
+            {
+                var yaml = FileHelper.ReadAllText(planYamlPath);
+                var planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(yaml) ?? new PlanYaml();
+                planYaml.Updated = DateTime.UtcNow;
+                FileHelper.WriteAllText(planYamlPath, YamlHelper.Serializer.Serialize(planYaml));
+            }
+        });
+    }
+
+    /// <summary>
+    ///     Reads the content of the most recent revision file for a plan.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <returns>The markdown content of the latest revision, or <see cref="string.Empty" /> if no revisions exist.</returns>
+    public string ReadLatestRevision(string folderName)
+    {
+        // Read from database when available for maximum performance.
+        if (_useDatabaseForReads && _database != null)
+        {
+            var planId = ExtractPlanId(folderName);
+            if (planId.HasValue)
+            {
+                var plan = _database.GetPlanById(planId.Value);
+                if (plan != null)
+                    return plan.LatestRevisionContent;
+            }
+        }
+
+        return ReadLatestRevisionFromFileSystem(folderName);
+    }
+
+    /// <summary>
+    ///     Gets all revisions for a plan, ordered by revision number.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <returns>List of tuples containing revision number, content, and last-modified timestamp (UTC).</returns>
+    public List<(int Number, string Content, DateTime Modified)> GetRevisions(string folderName)
+    {
+        var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
+        if (!Directory.Exists(revisionsDir)) return new List<(int, string, DateTime)>();
+
+        return Directory.GetFiles(revisionsDir, "*.md")
+            .Select(f =>
+            {
+                var name = Path.GetFileNameWithoutExtension(f);
+                if (int.TryParse(name, out var num))
+                    return (Number: num, Content: FileHelper.ReadAllText(f), Modified: File.GetLastWriteTimeUtc(f));
+                return (Number: -1, Content: "", Modified: DateTime.MinValue);
+            })
+            .Where(r => r.Number >= 0)
+            .OrderBy(r => r.Number)
+            .ToList();
+    }
+
+    /// <summary>
+    ///     Appends a log entry to a plan's logs directory.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <param name="action">Action name used in the log filename (e.g. <c>ExecutePlan</c>).</param>
+    /// <param name="content">Markdown content of the log entry.</param>
+    public void AddLog(string folderName, string action, string content)
+    {
+        var logsDir = Path.Combine(PlansDirectory, folderName, "logs");
+        Directory.CreateDirectory(logsDir);
+
+        var nextNumber = 1;
+        var existingLogs = Directory.GetFiles(logsDir, "*.md");
+        if (existingLogs.Length > 0)
+            nextNumber = existingLogs
+                .Select(f => Path.GetFileNameWithoutExtension(f))
+                .Select(n =>
+                {
+                    var dashIdx = n.IndexOf('-');
+                    var numPart = dashIdx >= 0 ? n.Substring(0, dashIdx) : n;
+                    return int.TryParse(numPart, out var num) ? num : 0;
+                })
+                .DefaultIfEmpty(0)
+                .Max() + 1;
+
+        var logPath = Path.Combine(logsDir, $"{nextNumber:D3}-{action}.md");
+        FileHelper.WriteAllText(logPath, content);
+    }
+
+    /// <summary>
+    ///     Deletes a plan folder and all its contents, including any associated git worktrees.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <remarks>
+    ///     Removes git worktrees first to avoid locked file issues on Windows, then clears
+    ///     read-only attributes before deleting the directory tree.
+    /// </remarks>
+    public void DeletePlan(string folderName)
+    {
+        // Delete from database first for instant UI feedback.
+        var planId = ExtractPlanId(folderName);
+        if (planId.HasValue && _database != null)
+            _database.DeletePlan(planId.Value);
+
+        _planCountsCache.Invalidate();
+        _recommendationsCache.Invalidate();
+
+        // Delete folder in background (can be slow due to git worktree removal).
+        var folderPath = Path.Combine(PlansDirectory, folderName);
+        WriteFileInBackground(() =>
+        {
+            if (!Directory.Exists(folderPath)) return;
+            RemoveWorktrees(folderPath);
+            ClearReadOnlyAttributes(folderPath);
+            Directory.Delete(folderPath, true);
+        });
+    }
+
+    /// <summary>
+    ///     Reads the raw content of a plan's latest revision.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <returns>The markdown content of the latest revision.</returns>
+    public string ReadRawPlan(string folderName)
+    {
+        return ReadLatestRevision(folderName);
+    }
+
+    /// <summary>
+    ///     Saves content to a plan by overwriting its latest revision.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <param name="fullContent">The full markdown content to write.</param>
+    public void SavePlan(string folderName, string fullContent)
+    {
+        UpdateLatestRevision(folderName, fullContent);
+    }
+
+    /// <summary>
+    ///     Overwrites the most recent revision file for a plan and updates the plan's timestamp.
+    /// </summary>
+    /// <param name="folderName">Name of the plan folder.</param>
+    /// <param name="content">The updated markdown content to write.</param>
+    public void UpdateLatestRevision(string folderName, string content)
+    {
+        // Update database first for instant UI feedback.
+        var planId = ExtractPlanId(folderName);
+        if (planId.HasValue && _database != null)
+        {
+            var plan = _database.GetPlanById(planId.Value);
+            _database.UpdatePlanContent(planId.Value, content, plan?.RevisionCount ?? 1);
+        }
+
+        _planCountsCache.Invalidate();
+
+        // Write to disk in background for durability.
+        WriteFileInBackground(() =>
+        {
+            var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
+            if (!Directory.Exists(revisionsDir)) return;
+
+            var latestFile = Directory.GetFiles(revisionsDir, "*.md")
+                .OrderByDescending(f => f)
+                .FirstOrDefault();
+
+            if (latestFile != null)
+            {
+                FileHelper.WriteAllText(latestFile, content);
+
+                var planYamlPath = Path.Combine(PlansDirectory, folderName, "plan.yaml");
+                if (File.Exists(planYamlPath))
+                {
+                    var yaml = FileHelper.ReadAllText(planYamlPath);
+                    var planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(yaml) ?? new PlanYaml();
+                    planYaml.Updated = DateTime.UtcNow;
+                    FileHelper.WriteAllText(planYamlPath, YamlHelper.Serializer.Serialize(planYaml));
+                }
+            }
+        });
+    }
+
+    /// <summary>
+    ///     Calculates the total cost for a plan. Delegates to database when available,
+    ///     otherwise parses costs.csv with a short cache to reduce file I/O.
+    /// </summary>
+    public decimal GetPlanTotalCost(string folderPath)
+    {
+        if (_useDatabaseForReads && _database != null)
+        {
+            var planId = ExtractPlanId(folderPath);
+            if (planId.HasValue)
+                return _database.GetPlanTotalCost(planId.Value);
+        }
+
+        var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
+        if (!dict.TryGetValue(folderPath, out var cached))
+        {
+            cached = ComputePlanCostAndTokens(folderPath);
+            dict[folderPath] = cached;
+        }
+
+        return cached.Cost;
+    }
+
+    /// <summary>
+    ///     Calculates the total token usage for a plan. Delegates to database when available,
+    ///     otherwise parses costs.csv with a short cache to reduce file I/O.
+    /// </summary>
+    public int GetPlanTotalTokens(string folderPath)
+    {
+        if (_useDatabaseForReads && _database != null)
+        {
+            var planId = ExtractPlanId(folderPath);
+            if (planId.HasValue)
+                return _database.GetPlanTotalTokens(planId.Value);
+        }
+
+        var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
+        if (!dict.TryGetValue(folderPath, out var cached))
+        {
+            cached = ComputePlanCostAndTokens(folderPath);
+            dict[folderPath] = cached;
+        }
+
+        return cached.Tokens;
+    }
+
+    /// <summary>
+    ///     Computes hourly token usage and cost statistics across all plans over a given time window.
+    /// </summary>
+    /// <param name="days">Number of days to look back from now. Defaults to 7.</param>
+    /// <returns>List of hourly buckets with aggregated cost and token counts, ordered chronologically.</returns>
+    /// <remarks>
+    ///     Correlates <c>costs.csv</c> entries with log file timestamps to determine when tokens were consumed.
+    ///     Plans without both a costs file and a logs directory are skipped.
+    /// </remarks>
+    public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7)
+    {
+        if (_useDatabaseForReads && _database != null)
+            try
+            {
+                return _database.GetHourlyTokenBurn(days);
+            }
+            catch
+            {
+                // Fall back to file system
+            }
+
+        return _hourlyBurnCache.GetOrCompute(() => ComputeHourlyTokenBurn(days));
+    }
+
+    /// <summary>
+    ///     Gets all recommendations from all plans. This method reads and deserializes all
+    ///     recommendations.yaml files in the plans directory, which can be expensive.
+    /// </summary>
+    /// <remarks>
+    ///     If you only need the count of pending recommendations, use <see cref="GetPendingRecommendationsCount" />
+    ///     instead, which uses an optimized path via <see cref="ComputePlanCounts" /> that counts
+    ///     without full deserialization.
+    /// </remarks>
+    /// <returns>List of all recommendations ordered by date (most recent first).</returns>
+    public List<Recommendation> GetRecommendations()
+    {
+        if (_useDatabaseForReads && _database != null)
+            try
+            {
+                return _database.GetRecommendations();
+            }
+            catch
+            {
+                // Fall back to file system
+            }
+
+        return _recommendationsCache.GetOrCompute(ComputeRecommendations);
+    }
+
+    /// <summary>
+    ///     Gets the count of pending recommendations efficiently without deserializing full recommendation objects.
+    /// </summary>
+    /// <remarks>
+    ///     This method delegates to <see cref="ComputePlanCounts" /> which only counts pending items
+    ///     without building full Recommendation objects, making it much more efficient than calling
+    ///     <c>GetRecommendations().Count(r => r.State == "Pending")</c>.
+    /// </remarks>
+    /// <returns>Number of pending recommendations.</returns>
+    public int GetPendingRecommendationsCount()
+    {
+        return ComputePlanCounts().PendingRecommendations;
+    }
+
+    /// <summary>
+    ///     Efficiently computes plan counts by status and pending recommendation count.
+    ///     Delegates to database when available; falls back to regex-based file scanning with caching.
+    /// </summary>
+    public PlanCountSnapshot ComputePlanCounts()
+    {
+        if (_useDatabaseForReads && _database != null)
+            try
+            {
+                return _database.ComputePlanCounts();
+            }
+            catch
+            {
+                // Fall back to file system
+            }
+
+        return _planCountsCache.GetOrCompute(ComputePlanCountsInternal);
+    }
+
+    /// <summary>
+    ///     Updates the state of a specific recommendation within a plan's <c>recommendations.yaml</c> file.
+    /// </summary>
+    /// <param name="planFolderName">Name of the plan folder containing the recommendation.</param>
+    /// <param name="recommendationTitle">Exact title of the recommendation to update.</param>
+    /// <param name="newState">The new state value (e.g. <c>Pending</c>, <c>Accepted</c>, <c>Dismissed</c>).</param>
+    /// <param name="declineReason">Optional reason for declining the recommendation.</param>
+    public void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState,
+        string? declineReason = null)
+    {
+        // Update database first for instant UI feedback.
+        var planId = ExtractPlanId(planFolderName);
+        if (planId.HasValue && _database != null)
+            _database.UpdateRecommendationState(planId.Value, recommendationTitle, newState, declineReason);
+
+        _recommendationsCache.Invalidate();
+        _hourlyBurnCache.Invalidate();
+        _planCountsCache.Invalidate();
+
+        // Without a backing database, writes need to complete before the next read.
+        WriteFile(() =>
+        {
+            var recommendationsPath = Path.Combine(PlansDirectory, planFolderName, "artifacts", "recommendations.yaml");
+            if (!File.Exists(recommendationsPath)) return;
+
+            var yaml = FileHelper.ReadAllText(recommendationsPath);
+            var items = YamlHelper.Deserializer.Deserialize<List<RecommendationYaml>>(yaml);
+            if (items == null) return;
+
+            var item = items.FirstOrDefault(r => r.Title == recommendationTitle);
+            if (item == null) return;
+
+            item.State = newState;
+            if (newState == "Declined" && !string.IsNullOrWhiteSpace(declineReason))
+                item.DeclineReason = declineReason;
+            else
+                item.DeclineReason = null;
+
+            FileHelper.WriteAllText(recommendationsPath, YamlHelper.Serializer.Serialize(items));
+        });
+    }
+
+    public void InvalidateCaches()
+    {
+        _planCountsCache.Invalidate();
+        _recommendationsCache.Invalidate();
+        _hourlyBurnCache.Invalidate();
+        _planCostCache.Invalidate();
+    }
+
+    /// <summary>
+    ///     Enables database-backed reads. Called by the sync service after initial sync completes.
+    /// </summary>
+    internal void EnableDatabaseReads(IPlanDatabaseService database)
+    {
+        _database = database;
+        _useDatabaseForReads = true;
+    }
+
+    /// <summary>
+    ///     Repairs common YAML issues in plan.yaml content so that YamlDotNet can parse them.
     /// </summary>
     internal static string RepairPlanYaml(string yaml)
     {
@@ -158,6 +637,7 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                 var escaped = inner.Replace("'", "''");
                 return $"{prefix}'{escaped}'{suffix}";
             }
+
             return m.Value;
         });
 
@@ -172,6 +652,7 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                 var escaped = inner.Replace("'", "''");
                 return $"{prefix}'{escaped}'{suffix}";
             }
+
             return m.Value;
         });
 
@@ -203,6 +684,7 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                 var escaped = value.Replace("'", "''");
                 return $"{prefix}'{escaped}'";
             }
+
             return m.Value;
         });
 
@@ -236,7 +718,9 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
         string? currentBlockScalarKey = null;
 
         static bool IsBlockScalarValue(string value)
-            => value is "|" or "|-" or ">" or ">-";
+        {
+            return value is "|" or "|-" or ">" or ">-";
+        }
 
         string? TryExtractTopLevelKey(string trimmedLine, out string normalizedLine)
         {
@@ -282,7 +766,8 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                 inBlockScalar = false;
                 currentBlockScalarKey = null;
 
-                if (currentListKey != null && Regex.IsMatch(normalizedTopLevelLine, @"^[A-Za-z][A-Za-z0-9]*:\s*\[\]\s*$"))
+                if (currentListKey != null &&
+                    Regex.IsMatch(normalizedTopLevelLine, @"^[A-Za-z][A-Za-z0-9]*:\s*\[\]\s*$"))
                     output.Add($"{key}:");
                 else
                     output.Add(normalizedTopLevelLine);
@@ -329,8 +814,8 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
     }
 
     /// <summary>
-    /// Enumerates all directories in PlansDirectory that match the plan folder
-    /// naming pattern ({5digits}-{name}) and contain a plan.yaml file.
+    ///     Enumerates all directories in PlansDirectory that match the plan folder
+    ///     naming pattern ({5digits}-{name}) and contain a plan.yaml file.
     /// </summary>
     private IEnumerable<(string FolderPath, string FolderName, string PlanYamlPath)> EnumerateValidPlanFolders()
     {
@@ -361,28 +846,7 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
     }
 
     /// <summary>
-    /// Retrieves all plans, optionally filtered by status.
-    /// Delegates to database when available, otherwise reads from file system.
-    /// </summary>
-    public List<PlanFile> GetPlans(PlanStatus? statusFilter = null)
-    {
-        if (_useDatabaseForReads && _database != null)
-        {
-            try
-            {
-                return _database.GetPlans(statusFilter);
-            }
-            catch
-            {
-                // Fall back to file system on database errors
-            }
-        }
-
-        return GetPlansFromFileSystem(statusFilter);
-    }
-
-    /// <summary>
-    /// Always reads plans from the file system. Used by the sync service to populate the database.
+    ///     Always reads plans from the file system. Used by the sync service to populate the database.
     /// </summary>
     internal List<PlanFile> GetPlansFromFileSystem(PlanStatus? statusFilter = null)
     {
@@ -410,142 +874,8 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
     }
 
     /// <summary>
-    /// Retrieves a single plan by its folder path.
-    /// Delegates to database when available, otherwise reads from file system.
-    /// </summary>
-    public PlanFile? GetPlanByFolder(string folderPath)
-    {
-        if (_useDatabaseForReads && _database != null)
-        {
-            try
-            {
-                return _database.GetPlanByFolder(folderPath);
-            }
-            catch
-            {
-                // Fall back to file system
-            }
-        }
-
-        if (!Directory.Exists(folderPath)) return null;
-        return ParsePlanFolder(folderPath);
-    }
-
-    /// <summary>
-    /// Retrieves all plans that are in the <see cref="PlanStatus.Icebox"/> state.
-    /// </summary>
-    /// <returns>List of icebox plans ordered by ID.</returns>
-    public List<PlanFile> GetIceboxPlans()
-    {
-        return GetPlans(PlanStatus.Icebox);
-    }
-
-    /// <summary>
-    /// Transitions a plan to a new state by updating its <c>plan.yaml</c> file.
-    /// </summary>
-    /// <param name="folderName">Name of the plan folder (e.g. <c>01105-TestPlan</c>).</param>
-    /// <param name="newState">The target state to transition to.</param>
-    public void TransitionState(string folderName, PlanStatus newState)
-    {
-        var planId = ExtractPlanId(folderName);
-
-        // Track state transition in telemetry before making the change.
-        if (planId.HasValue)
-        {
-            var currentPlan = GetPlanByFolder(Path.Combine(PlansDirectory, folderName));
-            var oldState = currentPlan?.Status.ToString() ?? "Unknown";
-            _telemetryService?.TrackPlanStateTransition(oldState, newState.ToString());
-
-            // Flush telemetry events to ensure they reach PostHog
-            if (_telemetryService != null)
-                _ = Task.Run(async () => await _telemetryService.FlushAsync());
-        }
-
-        // Update database first for instant UI feedback.
-        if (planId.HasValue && _database != null)
-            _database.UpdatePlanState(planId.Value, newState);
-
-        _planCountsCache.Invalidate();
-        _recommendationsCache.Invalidate();
-
-        // Write to disk in background for durability.
-        WriteFileInBackground(() =>
-        {
-            var planYamlPath = Path.Combine(PlansDirectory, folderName, "plan.yaml");
-            if (!File.Exists(planYamlPath)) return;
-
-            var yaml = FileHelper.ReadAllText(planYamlPath);
-            var planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(yaml) ?? new PlanYaml();
-            planYaml.State = newState.ToString();
-            planYaml.Updated = DateTime.UtcNow;
-            FileHelper.WriteAllText(planYamlPath, YamlHelper.Serializer.Serialize(planYaml));
-        });
-    }
-
-    /// <summary>
-    /// Creates a new revision file for a plan and updates the plan's timestamp.
-    /// </summary>
-    /// <param name="folderName">Name of the plan folder.</param>
-    /// <param name="content">Markdown content of the new revision.</param>
-    public void SaveRevision(string folderName, string content)
-    {
-        // Update database first for instant UI feedback.
-        var planId = ExtractPlanId(folderName);
-        if (planId.HasValue && _database != null)
-        {
-            var plan = _database.GetPlanById(planId.Value);
-            var newCount = (plan?.RevisionCount ?? 0) + 1;
-            _database.UpdatePlanContent(planId.Value, content, newCount);
-        }
-
-        _planCountsCache.Invalidate();
-
-        // Write to disk in background for durability.
-        WriteFileInBackground(() =>
-        {
-            var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
-            Directory.CreateDirectory(revisionsDir);
-
-            var nextNumber = GetNextRevisionNumber(revisionsDir);
-            var revisionPath = Path.Combine(revisionsDir, $"{nextNumber:D3}.md");
-            FileHelper.WriteAllText(revisionPath, content);
-
-            var planYamlPath = Path.Combine(PlansDirectory, folderName, "plan.yaml");
-            if (File.Exists(planYamlPath))
-            {
-                var yaml = FileHelper.ReadAllText(planYamlPath);
-                var planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(yaml) ?? new PlanYaml();
-                planYaml.Updated = DateTime.UtcNow;
-                FileHelper.WriteAllText(planYamlPath, YamlHelper.Serializer.Serialize(planYaml));
-            }
-        });
-    }
-
-    /// <summary>
-    /// Reads the content of the most recent revision file for a plan.
-    /// </summary>
-    /// <param name="folderName">Name of the plan folder.</param>
-    /// <returns>The markdown content of the latest revision, or <see cref="string.Empty"/> if no revisions exist.</returns>
-    public string ReadLatestRevision(string folderName)
-    {
-        // Read from database when available for maximum performance.
-        if (_useDatabaseForReads && _database != null)
-        {
-            var planId = ExtractPlanId(folderName);
-            if (planId.HasValue)
-            {
-                var plan = _database.GetPlanById(planId.Value);
-                if (plan != null)
-                    return plan.LatestRevisionContent;
-            }
-        }
-
-        return ReadLatestRevisionFromFileSystem(folderName);
-    }
-
-    /// <summary>
-    /// Always reads from the file system. Used by ParsePlanFolder during sync
-    /// to avoid circular reads from the database.
+    ///     Always reads from the file system. Used by ParsePlanFolder during sync
+    ///     to avoid circular reads from the database.
     /// </summary>
     private string ReadLatestRevisionFromFileSystem(string folderName)
     {
@@ -557,89 +887,6 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
             .FirstOrDefault();
 
         return latestFile != null ? FileHelper.ReadAllText(latestFile) : string.Empty;
-    }
-
-    /// <summary>
-    /// Gets all revisions for a plan, ordered by revision number.
-    /// </summary>
-    /// <param name="folderName">Name of the plan folder.</param>
-    /// <returns>List of tuples containing revision number, content, and last-modified timestamp (UTC).</returns>
-    public List<(int Number, string Content, DateTime Modified)> GetRevisions(string folderName)
-    {
-        var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
-        if (!Directory.Exists(revisionsDir)) return new List<(int, string, DateTime)>();
-
-        return Directory.GetFiles(revisionsDir, "*.md")
-            .Select(f =>
-            {
-                var name = Path.GetFileNameWithoutExtension(f);
-                if (int.TryParse(name, out var num))
-                    return (Number: num, Content: FileHelper.ReadAllText(f), Modified: File.GetLastWriteTimeUtc(f));
-                return (Number: -1, Content: "", Modified: DateTime.MinValue);
-            })
-            .Where(r => r.Number >= 0)
-            .OrderBy(r => r.Number)
-            .ToList();
-    }
-
-    /// <summary>
-    /// Appends a log entry to a plan's logs directory.
-    /// </summary>
-    /// <param name="folderName">Name of the plan folder.</param>
-    /// <param name="action">Action name used in the log filename (e.g. <c>ExecutePlan</c>).</param>
-    /// <param name="content">Markdown content of the log entry.</param>
-    public void AddLog(string folderName, string action, string content)
-    {
-        var logsDir = Path.Combine(PlansDirectory, folderName, "logs");
-        Directory.CreateDirectory(logsDir);
-
-        var nextNumber = 1;
-        var existingLogs = Directory.GetFiles(logsDir, "*.md");
-        if (existingLogs.Length > 0)
-        {
-            nextNumber = existingLogs
-                .Select(f => Path.GetFileNameWithoutExtension(f))
-                .Select(n =>
-                {
-                    var dashIdx = n.IndexOf('-');
-                    var numPart = dashIdx >= 0 ? n.Substring(0, dashIdx) : n;
-                    return int.TryParse(numPart, out var num) ? num : 0;
-                })
-                .DefaultIfEmpty(0)
-                .Max() + 1;
-        }
-
-        var logPath = Path.Combine(logsDir, $"{nextNumber:D3}-{action}.md");
-        FileHelper.WriteAllText(logPath, content);
-    }
-
-    /// <summary>
-    /// Deletes a plan folder and all its contents, including any associated git worktrees.
-    /// </summary>
-    /// <param name="folderName">Name of the plan folder.</param>
-    /// <remarks>
-    /// Removes git worktrees first to avoid locked file issues on Windows, then clears
-    /// read-only attributes before deleting the directory tree.
-    /// </remarks>
-    public void DeletePlan(string folderName)
-    {
-        // Delete from database first for instant UI feedback.
-        var planId = ExtractPlanId(folderName);
-        if (planId.HasValue && _database != null)
-            _database.DeletePlan(planId.Value);
-
-        _planCountsCache.Invalidate();
-        _recommendationsCache.Invalidate();
-
-        // Delete folder in background (can be slow due to git worktree removal).
-        var folderPath = Path.Combine(PlansDirectory, folderName);
-        WriteFileInBackground(() =>
-        {
-            if (!Directory.Exists(folderPath)) return;
-            RemoveWorktrees(folderPath);
-            ClearReadOnlyAttributes(folderPath);
-            Directory.Delete(folderPath, recursive: true);
-        });
     }
 
     private static void RemoveWorktrees(string planFolderPath)
@@ -666,15 +913,15 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
 
             try
             {
-                var psi = new System.Diagnostics.ProcessStartInfo("git", $"worktree remove --force \"{wtDir}\"")
+                var psi = new ProcessStartInfo("git", $"worktree remove --force \"{wtDir}\"")
                 {
                     WorkingDirectory = repoRoot,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
-                    CreateNoWindow = true,
+                    CreateNoWindow = true
                 };
-                using var process = System.Diagnostics.Process.Start(psi);
+                using var process = Process.Start(psi);
                 process?.WaitForExit(10000);
             }
             catch
@@ -703,72 +950,12 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
     }
 
     /// <summary>
-    /// Reads the raw content of a plan's latest revision.
+    ///     Parses a single plan folder from the file system. Used by the sync service for incremental updates.
     /// </summary>
-    /// <param name="folderName">Name of the plan folder.</param>
-    /// <returns>The markdown content of the latest revision.</returns>
-    public string ReadRawPlan(string folderName)
+    internal PlanFile? ParseSinglePlanFolder(string folderPath)
     {
-        return ReadLatestRevision(folderName);
+        return ParsePlanFolder(folderPath);
     }
-
-    /// <summary>
-    /// Saves content to a plan by overwriting its latest revision.
-    /// </summary>
-    /// <param name="folderName">Name of the plan folder.</param>
-    /// <param name="fullContent">The full markdown content to write.</param>
-    public void SavePlan(string folderName, string fullContent)
-    {
-        UpdateLatestRevision(folderName, fullContent);
-    }
-
-    /// <summary>
-    /// Overwrites the most recent revision file for a plan and updates the plan's timestamp.
-    /// </summary>
-    /// <param name="folderName">Name of the plan folder.</param>
-    /// <param name="content">The updated markdown content to write.</param>
-    public void UpdateLatestRevision(string folderName, string content)
-    {
-        // Update database first for instant UI feedback.
-        var planId = ExtractPlanId(folderName);
-        if (planId.HasValue && _database != null)
-        {
-            var plan = _database.GetPlanById(planId.Value);
-            _database.UpdatePlanContent(planId.Value, content, plan?.RevisionCount ?? 1);
-        }
-
-        _planCountsCache.Invalidate();
-
-        // Write to disk in background for durability.
-        WriteFileInBackground(() =>
-        {
-            var revisionsDir = Path.Combine(PlansDirectory, folderName, "revisions");
-            if (!Directory.Exists(revisionsDir)) return;
-
-            var latestFile = Directory.GetFiles(revisionsDir, "*.md")
-                .OrderByDescending(f => f)
-                .FirstOrDefault();
-
-            if (latestFile != null)
-            {
-                FileHelper.WriteAllText(latestFile, content);
-
-                var planYamlPath = Path.Combine(PlansDirectory, folderName, "plan.yaml");
-                if (File.Exists(planYamlPath))
-                {
-                    var yaml = FileHelper.ReadAllText(planYamlPath);
-                    var planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(yaml) ?? new PlanYaml();
-                    planYaml.Updated = DateTime.UtcNow;
-                    FileHelper.WriteAllText(planYamlPath, YamlHelper.Serializer.Serialize(planYaml));
-                }
-            }
-        });
-    }
-
-    /// <summary>
-    /// Parses a single plan folder from the file system. Used by the sync service for incremental updates.
-    /// </summary>
-    internal PlanFile? ParseSinglePlanFolder(string folderPath) => ParsePlanFolder(folderPath);
 
     private PlanFile? ParsePlanFolder(string folderPath)
     {
@@ -800,7 +987,7 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
 
             var id = int.Parse(match.Groups[1].Value);
 
-            if (!Enum.TryParse<PlanStatus>(planYaml.State, ignoreCase: true, out var status))
+            if (!Enum.TryParse<PlanStatus>(planYaml.State, true, out var status))
                 status = PlanStatus.Draft;
 
             var metadata = new PlanMetadata(
@@ -836,50 +1023,6 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
         }
     }
 
-    /// <summary>
-    /// Calculates the total cost for a plan. Delegates to database when available,
-    /// otherwise parses costs.csv with a short cache to reduce file I/O.
-    /// </summary>
-    public decimal GetPlanTotalCost(string folderPath)
-    {
-        if (_useDatabaseForReads && _database != null)
-        {
-            var planId = ExtractPlanId(folderPath);
-            if (planId.HasValue)
-                return _database.GetPlanTotalCost(planId.Value);
-        }
-
-        var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
-        if (!dict.TryGetValue(folderPath, out var cached))
-        {
-            cached = ComputePlanCostAndTokens(folderPath);
-            dict[folderPath] = cached;
-        }
-        return cached.Cost;
-    }
-
-    /// <summary>
-    /// Calculates the total token usage for a plan. Delegates to database when available,
-    /// otherwise parses costs.csv with a short cache to reduce file I/O.
-    /// </summary>
-    public int GetPlanTotalTokens(string folderPath)
-    {
-        if (_useDatabaseForReads && _database != null)
-        {
-            var planId = ExtractPlanId(folderPath);
-            if (planId.HasValue)
-                return _database.GetPlanTotalTokens(planId.Value);
-        }
-
-        var dict = _planCostCache.GetOrCompute(() => new Dictionary<string, (decimal, int)>());
-        if (!dict.TryGetValue(folderPath, out var cached))
-        {
-            cached = ComputePlanCostAndTokens(folderPath);
-            dict[folderPath] = cached;
-        }
-        return cached.Tokens;
-    }
-
     private static int? ExtractPlanId(string folderPath)
     {
         var folderName = Path.GetFileName(folderPath);
@@ -888,8 +1031,8 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
     }
 
     /// <summary>
-    /// Parses costs.csv once to compute both total cost and total tokens.
-    /// CSV format: Promptware,Tokens,Cost (fields must not contain commas).
+    ///     Parses costs.csv once to compute both total cost and total tokens.
+    ///     CSV format: Promptware,Tokens,Cost (fields must not contain commas).
     /// </summary>
     private static (decimal Cost, int Tokens) ComputePlanCostAndTokens(string folderPath)
     {
@@ -897,50 +1040,25 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
         if (!File.Exists(costsPath)) return (0m, 0);
 
         var lines = FileHelper.ReadAllLines(costsPath);
-        decimal totalCost = 0m;
-        int totalTokens = 0;
+        var totalCost = 0m;
+        var totalTokens = 0;
         foreach (var line in lines.Skip(1)) // skip header
         {
             var parts = line.Split(',');
             if (parts.Length >= 3)
             {
                 if (int.TryParse(parts[1],
-                    System.Globalization.NumberStyles.Any,
-                    System.Globalization.CultureInfo.InvariantCulture, out var tokens))
+                        NumberStyles.Any,
+                        CultureInfo.InvariantCulture, out var tokens))
                     totalTokens += tokens;
                 if (decimal.TryParse(parts[2],
-                    System.Globalization.NumberStyles.Any,
-                    System.Globalization.CultureInfo.InvariantCulture, out var cost))
+                        NumberStyles.Any,
+                        CultureInfo.InvariantCulture, out var cost))
                     totalCost += cost;
             }
         }
+
         return (totalCost, totalTokens);
-    }
-
-    /// <summary>
-    /// Computes hourly token usage and cost statistics across all plans over a given time window.
-    /// </summary>
-    /// <param name="days">Number of days to look back from now. Defaults to 7.</param>
-    /// <returns>List of hourly buckets with aggregated cost and token counts, ordered chronologically.</returns>
-    /// <remarks>
-    /// Correlates <c>costs.csv</c> entries with log file timestamps to determine when tokens were consumed.
-    /// Plans without both a costs file and a logs directory are skipped.
-    /// </remarks>
-    public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7)
-    {
-        if (_useDatabaseForReads && _database != null)
-        {
-            try
-            {
-                return _database.GetHourlyTokenBurn(days);
-            }
-            catch
-            {
-                // Fall back to file system
-            }
-        }
-
-        return _hourlyBurnCache.GetOrCompute(() => ComputeHourlyTokenBurn(days));
     }
 
     private List<HourlyTokenBurn> ComputeHourlyTokenBurn(int days)
@@ -951,7 +1069,6 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
         if (!Directory.Exists(PlansDirectory)) return new List<HourlyTokenBurn>();
 
         foreach (var dir in Directory.GetDirectories(PlansDirectory))
-        {
             try
             {
                 var costsPath = Path.Combine(dir, "costs.csv");
@@ -1000,10 +1117,10 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                     if (parts.Length < 3) continue;
 
                     var promptware = parts[0].Trim();
-                    if (!int.TryParse(parts[1].Trim(), System.Globalization.NumberStyles.Any,
-                        System.Globalization.CultureInfo.InvariantCulture, out var tokens)) continue;
-                    if (!decimal.TryParse(parts[2].Trim(), System.Globalization.NumberStyles.Any,
-                        System.Globalization.CultureInfo.InvariantCulture, out var cost)) continue;
+                    if (!int.TryParse(parts[1].Trim(), NumberStyles.Any,
+                            CultureInfo.InvariantCulture, out var tokens)) continue;
+                    if (!decimal.TryParse(parts[2].Trim(), NumberStyles.Any,
+                            CultureInfo.InvariantCulture, out var cost)) continue;
 
                     if (!logsByPromptware.TryGetValue(promptware, out var queue) || queue.Count == 0)
                         continue;
@@ -1026,7 +1143,6 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
             {
                 // Skip problematic plan folders
             }
-        }
 
         return buckets
             .OrderBy(b => b.Key.Hour)
@@ -1039,33 +1155,6 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                 Tokens = b.Value.Tokens
             })
             .ToList();
-    }
-
-    /// <summary>
-    /// Gets all recommendations from all plans. This method reads and deserializes all
-    /// recommendations.yaml files in the plans directory, which can be expensive.
-    /// </summary>
-    /// <remarks>
-    /// If you only need the count of pending recommendations, use <see cref="GetPendingRecommendationsCount"/>
-    /// instead, which uses an optimized path via <see cref="ComputePlanCounts"/> that counts
-    /// without full deserialization.
-    /// </remarks>
-    /// <returns>List of all recommendations ordered by date (most recent first).</returns>
-    public List<Recommendation> GetRecommendations()
-    {
-        if (_useDatabaseForReads && _database != null)
-        {
-            try
-            {
-                return _database.GetRecommendations();
-            }
-            catch
-            {
-                // Fall back to file system
-            }
-        }
-
-        return _recommendationsCache.GetOrCompute(ComputeRecommendations);
     }
 
     private List<Recommendation> ComputeRecommendations()
@@ -1090,24 +1179,22 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                 var match = FolderNameRegex.Match(folderName);
                 var planId = match.Groups[1].Value;
 
-                if (!Enum.TryParse<PlanStatus>(plan.State, ignoreCase: true, out var status))
+                if (!Enum.TryParse<PlanStatus>(plan.State, true, out var status))
                     status = PlanStatus.Draft;
 
                 foreach (var item in items)
-                {
                     recommendations.Add(new Recommendation(
-                        Title: item.Title,
-                        Description: item.Description,
-                        State: string.IsNullOrWhiteSpace(item.State) ? "Pending" : item.State,
-                        PlanId: planId,
-                        PlanTitle: plan.Title ?? "",
-                        PlanFolderName: folderName,
-                        Project: plan.Project ?? "",
-                        Date: plan.Updated,
-                        SourcePlanStatus: status,
-                        DeclineReason: item.DeclineReason
+                        item.Title,
+                        item.Description,
+                        string.IsNullOrWhiteSpace(item.State) ? "Pending" : item.State,
+                        planId,
+                        plan.Title ?? "",
+                        folderName,
+                        plan.Project ?? "",
+                        plan.Updated,
+                        status,
+                        item.DeclineReason
                     ));
-                }
             }
             catch
             {
@@ -1118,55 +1205,11 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
         return recommendations.OrderByDescending(r => r.Date).ToList();
     }
 
-    /// <summary>
-    /// Gets the count of pending recommendations efficiently without deserializing full recommendation objects.
-    /// </summary>
-    /// <remarks>
-    /// This method delegates to <see cref="ComputePlanCounts"/> which only counts pending items
-    /// without building full Recommendation objects, making it much more efficient than calling
-    /// <c>GetRecommendations().Count(r => r.State == "Pending")</c>.
-    /// </remarks>
-    /// <returns>Number of pending recommendations.</returns>
-    public int GetPendingRecommendationsCount()
-    {
-        return ComputePlanCounts().PendingRecommendations;
-    }
-
-    public record PlanCountSnapshot(
-        int Drafts,
-        int ReadyForReview,
-        int Failed,
-        int Icebox,
-        int PendingRecommendations
-    );
-
-    /// <summary>
-    /// Efficiently computes plan counts by status and pending recommendation count.
-    /// Delegates to database when available; falls back to regex-based file scanning with caching.
-    /// </summary>
-    public PlanCountSnapshot ComputePlanCounts()
-    {
-        if (_useDatabaseForReads && _database != null)
-        {
-            try
-            {
-                return _database.ComputePlanCounts();
-            }
-            catch
-            {
-                // Fall back to file system
-            }
-        }
-
-        return _planCountsCache.GetOrCompute(ComputePlanCountsInternal);
-    }
-
     private PlanCountSnapshot ComputePlanCountsInternal()
     {
         int drafts = 0, reviews = 0, failed = 0, icebox = 0, pendingRecs = 0;
 
         foreach (var (folderPath, _, planYamlPath) in EnumerateValidPlanFolders())
-        {
             try
             {
                 var yaml = FileHelper.ReadAllText(planYamlPath);
@@ -1190,83 +1233,34 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                     var recYaml = FileHelper.ReadAllText(recommendationsPath);
                     var items = YamlHelper.Deserializer.Deserialize<List<RecommendationYaml>>(recYaml);
                     if (items != null)
-                    {
                         foreach (var item in items)
                         {
                             var state = string.IsNullOrWhiteSpace(item.State) ? "Pending" : item.State;
                             if (state.Equals("Pending", StringComparison.OrdinalIgnoreCase))
                                 pendingRecs++;
                         }
-                    }
                 }
             }
             catch
             {
                 // Skip malformed plans
             }
-        }
 
         return new PlanCountSnapshot(drafts, reviews, failed, icebox, pendingRecs);
     }
 
     /// <summary>
-    /// Updates the state of a specific recommendation within a plan's <c>recommendations.yaml</c> file.
-    /// </summary>
-    /// <param name="planFolderName">Name of the plan folder containing the recommendation.</param>
-    /// <param name="recommendationTitle">Exact title of the recommendation to update.</param>
-    /// <param name="newState">The new state value (e.g. <c>Pending</c>, <c>Accepted</c>, <c>Dismissed</c>).</param>
-    /// <param name="declineReason">Optional reason for declining the recommendation.</param>
-    public void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState, string? declineReason = null)
-    {
-        // Update database first for instant UI feedback.
-        var planId = ExtractPlanId(planFolderName);
-        if (planId.HasValue && _database != null)
-            _database.UpdateRecommendationState(planId.Value, recommendationTitle, newState, declineReason);
-
-        _recommendationsCache.Invalidate();
-        _hourlyBurnCache.Invalidate();
-        _planCountsCache.Invalidate();
-
-        // Without a backing database, writes need to complete before the next read.
-        WriteFile(() =>
-        {
-            var recommendationsPath = Path.Combine(PlansDirectory, planFolderName, "artifacts", "recommendations.yaml");
-            if (!File.Exists(recommendationsPath)) return;
-
-            var yaml = FileHelper.ReadAllText(recommendationsPath);
-            var items = YamlHelper.Deserializer.Deserialize<List<RecommendationYaml>>(yaml);
-            if (items == null) return;
-
-            var item = items.FirstOrDefault(r => r.Title == recommendationTitle);
-            if (item == null) return;
-
-            item.State = newState;
-            if (newState == "Declined" && !string.IsNullOrWhiteSpace(declineReason))
-                item.DeclineReason = declineReason;
-            else
-                item.DeclineReason = null;
-
-            FileHelper.WriteAllText(recommendationsPath, YamlHelper.Serializer.Serialize(items));
-        });
-    }
-
-    public void InvalidateCaches()
-    {
-        _planCountsCache.Invalidate();
-        _recommendationsCache.Invalidate();
-        _hourlyBurnCache.Invalidate();
-        _planCostCache.Invalidate();
-    }
-
-    /// <summary>
-    /// Runs a file write operation in the background (fire-and-forget).
-    /// The database is the primary data source; file writes are for durability only.
+    ///     Runs a file write operation in the background (fire-and-forget).
+    ///     The database is the primary data source; file writes are for durability only.
     /// </summary>
     private void WriteFileInBackground(Action action)
     {
         Task.Run(() =>
         {
-            try { action(); }
+            try
+            {
+                action();
+            }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Background file write failed");
@@ -1278,11 +1272,15 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
     {
         if (_database == null)
         {
-            try { action(); }
+            try
+            {
+                action();
+            }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "File write failed");
             }
+
             return;
         }
 
@@ -1290,7 +1288,9 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
     }
 
     private static DateTime? ExtractCompletedTimestamp(string logFilePath)
-        => FileHelper.ExtractCompletedTimestamp(logFilePath);
+    {
+        return FileHelper.ExtractCompletedTimestamp(logFilePath);
+    }
 
     private static int GetNextRevisionNumber(string revisionsDir)
     {
@@ -1303,6 +1303,14 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
             .DefaultIfEmpty(0)
             .Max() + 1;
     }
+
+    public record PlanCountSnapshot(
+        int Drafts,
+        int ReadyForReview,
+        int Failed,
+        int Icebox,
+        int PendingRecommendations
+    );
 }
 
 public class HourlyTokenBurn

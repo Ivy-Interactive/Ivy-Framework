@@ -1,4 +1,5 @@
-using Ivy;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Ivy.Core;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
@@ -14,13 +15,13 @@ public class ContentView(
     Action refreshPlans,
     IConfigService config) : ViewBase
 {
-    private readonly PlanFile? _selectedPlan = selectedPlan;
     private readonly List<PlanFile> _allPlans = allPlans;
-    private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
-    private readonly IPlanReaderService _planService = planService;
-    private readonly IJobService _jobService = jobService;
-    private readonly Action _refreshPlans = refreshPlans;
     private readonly IConfigService _config = config;
+    private readonly IJobService _jobService = jobService;
+    private readonly IPlanReaderService _planService = planService;
+    private readonly Action _refreshPlans = refreshPlans;
+    private readonly PlanFile? _selectedPlan = selectedPlan;
+    private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
 
     public override object? Build()
     {
@@ -69,6 +70,7 @@ public class ContentView(
                     _refreshPlans();
                 }
             }
+
             isEditingPrev.Set(isEditing.Value);
         }, isEditing);
 
@@ -85,20 +87,18 @@ public class ContentView(
         if (_selectedPlan is null)
         {
             if (_allPlans.Count == 0)
-            {
                 return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full()).Gap(2)
-                    | new Icon(Icons.Inbox).Large().Color(Colors.Gray)
-                    | Text.Muted("No draft plans yet");
-            }
+                       | new Icon(Icons.Inbox).Large().Color(Colors.Gray)
+                       | Text.Muted("No draft plans yet");
 
             return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
-                | Text.Muted("Select a plan from the sidebar");
+                   | Text.Muted("Select a plan from the sidebar");
         }
 
         var currentIndex = _allPlans.FindIndex(p => p.FolderName == _selectedPlan.FolderName);
 
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
-            | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold();
+                     | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold();
         header |= Text.Muted($"rev:{_selectedPlan.RevisionCount}");
 
         if (_selectedPlan.DependsOn.Count > 0)
@@ -126,96 +126,96 @@ public class ContentView(
 
         var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)));
 
-        if (_selectedPlan.Status == PlanStatus.Failed)
-        {
-            scrollableContent |= BuildFailureCallout(_selectedPlan);
-        }
+        if (_selectedPlan.Status == PlanStatus.Failed) scrollableContent |= BuildFailureCallout(_selectedPlan);
 
         if (isEditing.Value)
-        {
             scrollableContent |= editContent.ToCodeInput()
                 .Language(Languages.Markdown)
                 .Width(Size.Full());
-        }
         else
-        {
-            scrollableContent |= new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
-                .DangerouslyAllowLocalFiles()
-                .OnLinkClick(FileLinkHelper.CreateFileLinkClickHandler(openFile));
-        }
+            scrollableContent |=
+                new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(_selectedPlan.LatestRevisionContent))
+                    .DangerouslyAllowLocalFiles()
+                    .OnLinkClick(FileLinkHelper.CreateFileLinkClickHandler(openFile));
 
         var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
-            | new Button("Update").Icon(Icons.Pencil).Outline().ShortcutKey("u").OnClick(() => updateDialogOpen.Set(true))
-            | new Button("Split").Icon(Icons.Scissors).Outline().ShortcutKey("s").OnClick(() =>
-            {
-                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Updating);
-                _jobService.StartJob("SplitPlan", _selectedPlan.FolderPath);
-                _refreshPlans();
-            })
-            | new Button("Expand").Icon(Icons.UnfoldVertical).Outline().ShortcutKey("x").OnClick(() =>
-            {
-                _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
-                var planPath = _selectedPlan.FolderPath;
-                _jobService.StartJob("ExpandPlan", planPath);
-                _refreshPlans();
-            })
-            | new Button("Delete").Icon(Icons.Trash).Outline().ShortcutKey("Delete").OnClick(() => deleteDialogOpen.Set(true))
-            | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious()).ShortcutKey("p")
-            | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext()).ShortcutKey("n")
-            | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
-                new MenuItem("Create Issue", Icon: Icons.Github, Tag: "CreateIssue").OnSelect(() => createIssueDialogOpen.Set(true)),
-                new MenuItem("Download", Icon: Icons.Download, Tag: "Download").OnSelect(() =>
-                {
-                    var url = downloadUrl.Value;
-                    if (!string.IsNullOrEmpty(url)) client.OpenUrl(url);
-                }),
-                new MenuItem("Open in File Manager", Icon: Icons.FolderOpen, Tag: "OpenInExplorer").OnSelect(() =>
-                {
-                    PlatformHelper.OpenInFileManager(_selectedPlan.FolderPath);
-                }),
-                new MenuItem("Open in Terminal", Icon: Icons.Terminal, Tag: "OpenInTerminal").OnSelect(() =>
-                {
-                    PlatformHelper.OpenInTerminal(_selectedPlan.FolderPath);
-                }),
-                new MenuItem($"Open in {_config.Editor.Label}", Icon: Icons.Code, Tag: "OpenInEditor").OnSelect(() =>
-                {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = _config.Editor.Command,
-                        Arguments = $"\"{_selectedPlan.FolderPath}\"",
-                        UseShellExecute = true
-                    });
-                }),
-                new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath").OnSelect(() =>
-                {
-                    copyToClipboard(_selectedPlan.FolderPath);
-                    client.Toast("Copied path to clipboard", "Path Copied");
-                }),
-                new MenuItem("Mark as Completed", Icon: Icons.CircleCheck, Tag: "MarkCompleted").OnSelect(() =>
-                {
-                    _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
-                    _refreshPlans();
-                }),
-                new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
-                {
-                    var yamlPath = System.IO.Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = _config.Editor.Command,
-                        Arguments = yamlPath,
-                        UseShellExecute = true
-                    });
-                })
-            );
+                        | new Button("Update").Icon(Icons.Pencil).Outline().ShortcutKey("u")
+                            .OnClick(() => updateDialogOpen.Set(true))
+                        | new Button("Split").Icon(Icons.Scissors).Outline().ShortcutKey("s").OnClick(() =>
+                        {
+                            _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Updating);
+                            _jobService.StartJob("SplitPlan", _selectedPlan.FolderPath);
+                            _refreshPlans();
+                        })
+                        | new Button("Expand").Icon(Icons.UnfoldVertical).Outline().ShortcutKey("x").OnClick(() =>
+                        {
+                            _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
+                            var planPath = _selectedPlan.FolderPath;
+                            _jobService.StartJob("ExpandPlan", planPath);
+                            _refreshPlans();
+                        })
+                        | new Button("Delete").Icon(Icons.Trash).Outline().ShortcutKey("Delete")
+                            .OnClick(() => deleteDialogOpen.Set(true))
+                        | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious())
+                            .ShortcutKey("p")
+                        | new Button("Next").Icon(Icons.ChevronRight, Align.Right).Outline().OnClick(() => GoToNext())
+                            .ShortcutKey("n")
+                        | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                            new MenuItem("Create Issue", Icon: Icons.Github, Tag: "CreateIssue").OnSelect(() =>
+                                createIssueDialogOpen.Set(true)),
+                            new MenuItem("Download", Icon: Icons.Download, Tag: "Download").OnSelect(() =>
+                            {
+                                var url = downloadUrl.Value;
+                                if (!string.IsNullOrEmpty(url)) client.OpenUrl(url);
+                            }),
+                            new MenuItem("Open in File Manager", Icon: Icons.FolderOpen, Tag: "OpenInExplorer")
+                                .OnSelect(() => { PlatformHelper.OpenInFileManager(_selectedPlan.FolderPath); }),
+                            new MenuItem("Open in Terminal", Icon: Icons.Terminal, Tag: "OpenInTerminal").OnSelect(() =>
+                            {
+                                PlatformHelper.OpenInTerminal(_selectedPlan.FolderPath);
+                            }),
+                            new MenuItem($"Open in {_config.Editor.Label}", Icon: Icons.Code, Tag: "OpenInEditor")
+                                .OnSelect(() =>
+                                {
+                                    Process.Start(new ProcessStartInfo
+                                    {
+                                        FileName = _config.Editor.Command,
+                                        Arguments = $"\"{_selectedPlan.FolderPath}\"",
+                                        UseShellExecute = true
+                                    });
+                                }),
+                            new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath")
+                                .OnSelect(() =>
+                                {
+                                    copyToClipboard(_selectedPlan.FolderPath);
+                                    client.Toast("Copied path to clipboard", "Path Copied");
+                                }),
+                            new MenuItem("Mark as Completed", Icon: Icons.CircleCheck, Tag: "MarkCompleted")
+                                .OnSelect(() =>
+                                {
+                                    _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Completed);
+                                    _refreshPlans();
+                                }),
+                            new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
+                            {
+                                var yamlPath = Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
+                                Process.Start(new ProcessStartInfo
+                                {
+                                    FileName = _config.Editor.Command,
+                                    Arguments = yamlPath,
+                                    UseShellExecute = true
+                                });
+                            })
+                        );
 
         var mainContent = Layout.Vertical()
-            | scrollableContent;
+                          | scrollableContent;
 
         var mainLayout = new HeaderLayout(
-            header: header,
-            content: new FooterLayout(
-                footer: actionBar,
-                content: mainContent
+            header,
+            new FooterLayout(
+                actionBar,
+                mainContent
             ).Size(Size.Full())
         ).Scroll(Scroll.None).Size(Size.Full()).Key(_selectedPlan.Id);
 
@@ -224,7 +224,8 @@ public class ContentView(
             mainLayout,
             new UpdatePlanDialog(updateDialogOpen, updateText, _selectedPlan, _jobService, _planService, _refreshPlans),
             new DeletePlanDialog(deleteDialogOpen, _selectedPlan, _planService, _refreshPlans),
-            new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState, issueCommentState, _selectedPlan, _jobService)
+            new CreateIssueDialog(createIssueDialogOpen, selectedRepoState, issueAssigneeState, issueLabelsState,
+                issueCommentState, _selectedPlan, _jobService)
         };
 
         var repoPaths = _selectedPlan.GetEffectiveRepoPaths(_config);
@@ -258,14 +259,14 @@ public class ContentView(
                 var report = FileHelper.ReadAllText(reportPath);
 
                 // Extract the Output section content
-                var outputMatch = System.Text.RegularExpressions.Regex.Match(
+                var outputMatch = Regex.Match(
                     report, @"## Output\s*\n([\s\S]*?)(?=\n## |\z)");
                 var output = outputMatch.Success
                     ? outputMatch.Groups[1].Value.Trim()
                     : null;
 
                 // Extract Issues Found section
-                var issuesMatch = System.Text.RegularExpressions.Regex.Match(
+                var issuesMatch = Regex.Match(
                     report, @"## Issues Found\s*\n([\s\S]*?)(?=\n## |\z)");
                 var issues = issuesMatch.Success
                     ? issuesMatch.Groups[1].Value.Trim()
@@ -288,18 +289,20 @@ public class ContentView(
             if (lastLog != null)
             {
                 var logContent = FileHelper.ReadAllText(lastLog);
-                var summaryMatch = System.Text.RegularExpressions.Regex.Match(
+                var summaryMatch = Regex.Match(
                     logContent, @"## Summary\s*\n([\s\S]*?)(?=\n## |\z)");
                 if (summaryMatch.Success)
                     return Callout.Destructive(summaryMatch.Groups[1].Value.Trim(), "Execution Failed");
 
-                var statusMatch = System.Text.RegularExpressions.Regex.Match(
+                var statusMatch = Regex.Match(
                     logContent, @"\*\*Status:\*\*\s*(.+)");
                 if (statusMatch.Success)
                 {
                     var status = statusMatch.Groups[1].Value.Trim();
                     if (status == "Completed")
-                        return Callout.Warning("Execution reported as completed but plan is in Failed state. The process may have crashed during state transition.", "State Mismatch");
+                        return Callout.Warning(
+                            "Execution reported as completed but plan is in Failed state. The process may have crashed during state transition.",
+                            "State Mismatch");
                     return Callout.Destructive($"Last execution status: {status}", "Execution Failed");
                 }
             }

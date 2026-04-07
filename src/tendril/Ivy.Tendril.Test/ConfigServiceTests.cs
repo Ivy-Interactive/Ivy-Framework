@@ -33,7 +33,7 @@ projects:
 ";
 
         var tempDir = CreateTempConfigFile(yaml);
-        var service = new ConfigService(new TendrilSettings(), "");
+        var service = new ConfigService(new TendrilSettings());
 
         try
         {
@@ -67,7 +67,7 @@ codingAgent: claude
 ";
 
         var tempDir = CreateTempConfigFile(yaml);
-        var service = new ConfigService(new TendrilSettings(), "");
+        var service = new ConfigService(new TendrilSettings());
 
         try
         {
@@ -99,25 +99,29 @@ projects:
 ";
 
         var tempDir = CreateTempConfigFile(yaml);
-        var service = new ConfigService(new TendrilSettings(), "");
+        var service = new ConfigService(new TendrilSettings());
 
         try
         {
             service.SetTendrilHome(tempDir);
 
             // Test exact match
-            var project = service.Settings.Projects.FirstOrDefault(p => p.Name.Equals("IvyFramework", StringComparison.OrdinalIgnoreCase));
+            var project = service.Settings.Projects.FirstOrDefault(p =>
+                p.Name.Equals("IvyFramework", StringComparison.OrdinalIgnoreCase));
             Assert.NotNull(project);
             Assert.Equal("IvyFramework", project.Name);
             Assert.Contains("Framework context", project.Context);
 
             // Test case-insensitive match
-            var project2 = service.Settings.Projects.FirstOrDefault(p => p.Name.Equals("ivyagent", StringComparison.OrdinalIgnoreCase));
+            var project2 =
+                service.Settings.Projects.FirstOrDefault(p =>
+                    p.Name.Equals("ivyagent", StringComparison.OrdinalIgnoreCase));
             Assert.NotNull(project2);
             Assert.Equal("IvyAgent", project2.Name);
 
             // Test non-existent project
-            var project3 = service.Settings.Projects.FirstOrDefault(p => p.Name.Equals("NonExistent", StringComparison.OrdinalIgnoreCase));
+            var project3 = service.Settings.Projects.FirstOrDefault(p =>
+                p.Name.Equals("NonExistent", StringComparison.OrdinalIgnoreCase));
             Assert.Null(project3);
         }
         finally
@@ -144,7 +148,7 @@ projects:
 ";
 
         var tempDir = CreateTempConfigFile(yaml);
-        var service = new ConfigService(new TendrilSettings(), "");
+        var service = new ConfigService(new TendrilSettings());
 
         try
         {
@@ -180,7 +184,7 @@ projects:
 ";
 
         var tempDir = CreateTempConfigFile(yaml);
-        var service = new ConfigService(new TendrilSettings(), "");
+        var service = new ConfigService(new TendrilSettings());
 
         try
         {
@@ -241,7 +245,7 @@ projects:
     verifications: []
 ");
 
-        var service = new ConfigService(new TendrilSettings { CodingAgent = "initial" }, "");
+        var service = new ConfigService(new TendrilSettings { CodingAgent = "initial" });
 
         try
         {
@@ -277,7 +281,7 @@ verifications: []
             var serviceViaConstructor = new ConfigService();
 
             // Load via SetTendrilHome
-            var serviceViaSetHome = new ConfigService(new TendrilSettings(), "");
+            var serviceViaSetHome = new ConfigService(new TendrilSettings());
             serviceViaSetHome.SetTendrilHome(tempDir);
 
             // Both should succeed and load the same settings
@@ -319,7 +323,7 @@ projects:
     verifications: []
 ");
 
-        var service = new ConfigService(new TendrilSettings(), "");
+        var service = new ConfigService(new TendrilSettings());
 
         try
         {
@@ -348,7 +352,7 @@ projects:
     verifications: []
 ");
 
-        var service = new ConfigService(new TendrilSettings(), "");
+        var service = new ConfigService(new TendrilSettings());
 
         try
         {

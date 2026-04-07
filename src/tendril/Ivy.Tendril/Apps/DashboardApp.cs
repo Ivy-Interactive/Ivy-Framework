@@ -11,10 +11,7 @@ public class DashboardApp : ViewBase
         var planService = UseService<IPlanReaderService>();
         var configService = UseService<IConfigService>();
         var refreshToken = UseRefreshToken();
-        UseInterval(() =>
-        {
-            refreshToken.Refresh();
-        }, TimeSpan.FromSeconds(60));
+        UseInterval(() => { refreshToken.Refresh(); }, TimeSpan.FromSeconds(60));
 
         var selectedProject = UseState<string?>(null);
 
@@ -28,7 +25,8 @@ public class DashboardApp : ViewBase
         // Statistics cards
         var totalCount = filteredPlans.Count;
         var draftCount = filteredPlans.Count(p => p.Status is PlanStatus.Draft or PlanStatus.Blocked);
-        var inProgressCount = filteredPlans.Count(p => p.Status is PlanStatus.Building or PlanStatus.Executing or PlanStatus.Updating);
+        var inProgressCount = filteredPlans.Count(p =>
+            p.Status is PlanStatus.Building or PlanStatus.Executing or PlanStatus.Updating);
         var reviewCount = filteredPlans.Count(p => p.Status == PlanStatus.ReadyForReview);
         var completedCount = filteredPlans.Count(p => p.Status == PlanStatus.Completed);
         var failedCount = filteredPlans.Count(p => p.Status == PlanStatus.Failed);
@@ -49,13 +47,13 @@ public class DashboardApp : ViewBase
             : 0;
 
         var statsRow = Layout.Horizontal().Gap(2).Padding(2)
-            | BuildStatCard(totalCount.ToString(), "Total Plans")
-            | BuildStatCard(draftCount.ToString(), "Draft")
-            | BuildStatCard(inProgressCount.ToString(), "In Progress")
-            | BuildStatCard(reviewCount.ToString(), "Ready for Review")
-            | BuildStatCard(completedCount.ToString(), "Completed")
-            | BuildStatCard(failedCount.ToString(), "Failed")
-            | BuildStatCard(FormatHelper.FormatCost(avgCost), "Avg Cost/Plan");
+                       | BuildStatCard(totalCount.ToString(), "Total Plans")
+                       | BuildStatCard(draftCount.ToString(), "Draft")
+                       | BuildStatCard(inProgressCount.ToString(), "In Progress")
+                       | BuildStatCard(reviewCount.ToString(), "Ready for Review")
+                       | BuildStatCard(completedCount.ToString(), "Completed")
+                       | BuildStatCard(failedCount.ToString(), "Failed")
+                       | BuildStatCard(FormatHelper.FormatCost(avgCost), "Avg Cost/Plan");
 
         var today = DateTime.UtcNow.Date;
         var days = Enumerable.Range(0, 7).Select(i => today.AddDays(-i)).ToList();
@@ -68,11 +66,13 @@ public class DashboardApp : ViewBase
 
             var createdCount = filteredPlans.Count(p => p.Created.Date == day);
             var dayCompletedCount = filteredPlans.Count(p => p.Status == PlanStatus.Completed && p.Updated.Date == day);
-            var prsMerged = filteredPlans.Where(p => p.Status == PlanStatus.Completed && p.Updated.Date == day).Sum(p => p.Prs.Count);
+            var prsMerged = filteredPlans.Where(p => p.Status == PlanStatus.Completed && p.Updated.Date == day)
+                .Sum(p => p.Prs.Count);
             var dayFailedCount = filteredPlans.Count(p => p.Status == PlanStatus.Failed && p.Updated.Date == day);
 
             var completedOrFailedPlans = filteredPlans
-                .Where(p => p.Updated.Date == day && p.Status is PlanStatus.Completed or PlanStatus.Failed or PlanStatus.ReadyForReview)
+                .Where(p => p.Updated.Date == day &&
+                            p.Status is PlanStatus.Completed or PlanStatus.Failed or PlanStatus.ReadyForReview)
                 .ToList();
 
             var dayCost = completedOrFailedPlans.Sum(p => costCache.GetValueOrDefault(p.FolderPath, 0m));
@@ -95,10 +95,10 @@ public class DashboardApp : ViewBase
             };
         }).ToList();
 
-        Size colWidth = Size.Fraction(1 / 8f);
-        
+        var colWidth = Size.Fraction(1 / 8f);
+
         var dataTable = rows.AsQueryable()
-            .ToDataTable(idSelector: t => t.SortDate)
+            .ToDataTable(t => t.SortDate)
             .RefreshToken(refreshToken)
             .Width(Size.Full())
             .Height(Size.Px(307))
@@ -138,31 +138,31 @@ public class DashboardApp : ViewBase
             .ToArray();
 
         var projectProgress = new StackedProgress(
-            projectData.Select(p => new ProgressSegment(
-                Value: p.Count,
-                Color: configService.GetProjectColor(p.Project),
-                Label: $"{p.Project}"
-            )).ToArray()
-        )
-        .Selected(selectedProject.Value != null
-            ? Array.FindIndex(projectData, p => p.Project == selectedProject.Value)
-            : null)
-        .OnSelect(e =>
-        {
-            try
+                projectData.Select(p => new ProgressSegment(
+                    p.Count,
+                    configService.GetProjectColor(p.Project),
+                    $"{p.Project}"
+                )).ToArray()
+            )
+            .Selected(selectedProject.Value != null
+                ? Array.FindIndex(projectData, p => p.Project == selectedProject.Value)
+                : null)
+            .OnSelect(e =>
             {
-                var clickedProject = projectData[e.Value].Project;
-                selectedProject.Set(selectedProject.Value == clickedProject ? null : clickedProject);
-                return ValueTask.CompletedTask;
-            }
-            catch (Exception exception)
-            {
-                return ValueTask.FromException(exception);
-            }
-        });
+                try
+                {
+                    var clickedProject = projectData[e.Value].Project;
+                    selectedProject.Set(selectedProject.Value == clickedProject ? null : clickedProject);
+                    return ValueTask.CompletedTask;
+                }
+                catch (Exception exception)
+                {
+                    return ValueTask.FromException(exception);
+                }
+            });
 
         // Hourly cost & tokens combined bar chart
-        var allHourlyBurn = planService.GetHourlyTokenBurn(days: 7);
+        var allHourlyBurn = planService.GetHourlyTokenBurn();
         var hourlyBurn = selectedProject.Value != null
             ? allHourlyBurn.Where(h => h.Project == selectedProject.Value).ToList()
             : allHourlyBurn
@@ -184,7 +184,7 @@ public class DashboardApp : ViewBase
                     Bars =
                     [
                         new Bar("Cost ($)").Radius(4).YAxisIndex(0),
-                        new Bar("Tokens").Radius(4).YAxisIndex(1),
+                        new Bar("Tokens").Radius(4).YAxisIndex(1)
                     ],
                     XAxis =
                     [
@@ -193,7 +193,7 @@ public class DashboardApp : ViewBase
                     YAxis =
                     [
                         new YAxis("Cost ($)").TickFormatter("C2").Hide(),
-                        new YAxis("Tokens").Orientation(YAxis.Orientations.Right).Hide(),
+                        new YAxis("Tokens").Orientation(YAxis.Orientations.Right).Hide()
                     ]
                 })
             .FillGaps(TimeSpan.FromHours(1))
@@ -204,24 +204,24 @@ public class DashboardApp : ViewBase
             .Width(Size.Full());
 
         var content = Layout.Vertical().Gap(2)
-            | dataTable
-            | combinedChart;
+                      | dataTable
+                      | combinedChart;
 
         var header = Layout.Vertical()
-            | statsRow
-            | new Box(projectProgress).Margin(2);
+                     | statsRow
+                     | new Box(projectProgress).Margin(2);
 
         return new HeaderLayout(
-            header: header,
-            content: content
+            header,
+            content
         );
     }
 
     private static object BuildStatCard(string value, string label)
     {
         return Layout.Vertical().Padding(1)
-            | Text.Block(value).Bold()
-            | Text.Muted(label);
+               | Text.Block(value).Bold()
+               | Text.Muted(label);
     }
 }
 

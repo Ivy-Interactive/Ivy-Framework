@@ -187,32 +187,32 @@ public class DatabaseMigratorTests : IDisposable
         // Create the Plans table manually (simulating existing database)
         using var createCmd = _connection.CreateCommand();
         createCmd.CommandText = """
-            CREATE TABLE Plans (
-                Id INTEGER PRIMARY KEY,
-                Title TEXT NOT NULL,
-                FolderPath TEXT NOT NULL UNIQUE,
-                FolderName TEXT NOT NULL,
-                Project TEXT NOT NULL,
-                Level TEXT NOT NULL,
-                State TEXT NOT NULL,
-                YamlRaw TEXT NOT NULL,
-                RevisionCount INTEGER NOT NULL DEFAULT 1,
-                LatestRevisionContent TEXT NOT NULL DEFAULT '',
-                Created TEXT NOT NULL,
-                Updated TEXT NOT NULL,
-                InitialPrompt TEXT
-            );
-            """;
+                                CREATE TABLE Plans (
+                                    Id INTEGER PRIMARY KEY,
+                                    Title TEXT NOT NULL,
+                                    FolderPath TEXT NOT NULL UNIQUE,
+                                    FolderName TEXT NOT NULL,
+                                    Project TEXT NOT NULL,
+                                    Level TEXT NOT NULL,
+                                    State TEXT NOT NULL,
+                                    YamlRaw TEXT NOT NULL,
+                                    RevisionCount INTEGER NOT NULL DEFAULT 1,
+                                    LatestRevisionContent TEXT NOT NULL DEFAULT '',
+                                    Created TEXT NOT NULL,
+                                    Updated TEXT NOT NULL,
+                                    InitialPrompt TEXT
+                                );
+                                """;
         createCmd.ExecuteNonQuery();
 
         // Insert a row to verify data survives
         using var insertCmd = _connection.CreateCommand();
         insertCmd.CommandText = """
-            INSERT INTO Plans (Id, Title, Project, Level, State, FolderPath, FolderName,
-                               YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated)
-            VALUES (1, 'Test', 'Tendril', 'NiceToHave', 'Draft', '/test', 'test',
-                    'yaml', 1, 'content', '2026-01-01', '2026-01-01')
-            """;
+                                INSERT INTO Plans (Id, Title, Project, Level, State, FolderPath, FolderName,
+                                                   YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated)
+                                VALUES (1, 'Test', 'Tendril', 'NiceToHave', 'Draft', '/test', 'test',
+                                        'yaml', 1, 'content', '2026-01-01', '2026-01-01')
+                                """;
         insertCmd.ExecuteNonQuery();
 
         // Apply migration 001
@@ -249,8 +249,6 @@ public class DatabaseMigratorTests : IDisposable
     private class FakeMigration : IMigration
     {
         private readonly List<int>? _tracker;
-        public int Version { get; }
-        public string Description { get; }
 
         public FakeMigration(int version, string description, List<int>? tracker = null)
         {
@@ -258,6 +256,9 @@ public class DatabaseMigratorTests : IDisposable
             Description = description;
             _tracker = tracker;
         }
+
+        public int Version { get; }
+        public string Description { get; }
 
         public void Apply(SqliteConnection connection)
         {
@@ -270,14 +271,14 @@ public class DatabaseMigratorTests : IDisposable
 
     private class FailingMigration : IMigration
     {
-        public int Version { get; }
-        public string Description { get; }
-
         public FailingMigration(int version, string description)
         {
             Version = version;
             Description = description;
         }
+
+        public int Version { get; }
+        public string Description { get; }
 
         public void Apply(SqliteConnection connection)
         {

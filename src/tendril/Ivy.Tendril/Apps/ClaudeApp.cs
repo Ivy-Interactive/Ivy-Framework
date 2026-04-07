@@ -10,22 +10,20 @@ public class ClaudeApp : ViewBase
         var isOpen = UseState(false);
 
         if (!isOpen.Value)
-        {
             return new Button("Open Claude")
                 .OnClick(() => isOpen.Set(true));
-        }
 
-        var pty = this.Context.UsePty(
+        var pty = Context.UsePty(
             ["claude"],
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
         );
 
-        var terminal = new Ivy.Widgets.Xterm.Terminal();
-        terminal = Ivy.Widgets.Xterm.TerminalExtensions.Stream(terminal, pty.Stream);
-        terminal = Ivy.Widgets.Xterm.TerminalExtensions.OnInput(terminal, pty.HandleInput);
-        terminal = Ivy.Widgets.Xterm.TerminalExtensions.OnResize(terminal, pty.HandleResize);
-        terminal = Ivy.Widgets.Xterm.TerminalExtensions.Closed(terminal, pty.Closed);
-        terminal = Ivy.Widgets.Xterm.TerminalExtensions.AllowClipboard(terminal, true);
+        var terminal = new Widgets.Xterm.Terminal();
+        terminal = Widgets.Xterm.TerminalExtensions.Stream(terminal, pty.Stream);
+        terminal = Widgets.Xterm.TerminalExtensions.OnInput(terminal, pty.HandleInput);
+        terminal = Widgets.Xterm.TerminalExtensions.OnResize(terminal, pty.HandleResize);
+        terminal = Widgets.Xterm.TerminalExtensions.Closed(terminal, pty.Closed);
+        terminal = Widgets.Xterm.TerminalExtensions.AllowClipboard(terminal);
 
         return terminal
             .WithLayout()

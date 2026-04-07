@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Ivy.Tendril.Apps;
 
 namespace Ivy.Tendril.Services;
@@ -56,24 +57,24 @@ public static class FileLinkHelper
         }
 
         var finalContent = File.Exists(filePath)
-            ? (object)new HeaderLayout(
-                header: new Button($"Open in {editorLabel}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
+            ? new HeaderLayout(
+                new Button($"Open in {editorLabel}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    Process.Start(new ProcessStartInfo
                     {
                         FileName = editorCommand,
                         Arguments = $"\"{filePath}\"",
                         UseShellExecute = true
                     });
                 }),
-                content: sheetContent
+                sheetContent
             )
             : sheetContent;
 
         return new Sheet(
-            onClose: onClose,
-            content: finalContent,
-            title: Path.GetFileName(filePath)
+            onClose,
+            finalContent,
+            Path.GetFileName(filePath)
         ).Width(Size.Half()).Resizable();
     }
 }

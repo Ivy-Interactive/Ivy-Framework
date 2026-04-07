@@ -21,22 +21,24 @@ public class PlansApp : ViewBase
 
         UseEffect(() =>
         {
-            void OnChanged(string? _) => refreshToken.Refresh();
+            void OnChanged(string? _)
+            {
+                refreshToken.Refresh();
+            }
+
             planWatcher.PlansChanged += OnChanged;
             return Disposable.Create(() => planWatcher.PlansChanged -= OnChanged);
         });
 
-        var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
+        var previousPlans = UseRef(new List<PlanFile>());
 
         var plans = planService.GetPlans()
             .Where(p => p.Status is PlanStatus.Draft or PlanStatus.Blocked)
             .ToList();
-        var filteredPlans = PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value).ToList();
+        var filteredPlans = PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value)
+            .ToList();
 
-        if (selectedPlanState.Value == null && filteredPlans.Count > 0)
-        {
-            selectedPlanState.Set(filteredPlans[0]);
-        }
+        if (selectedPlanState.Value == null && filteredPlans.Count > 0) selectedPlanState.Set(filteredPlans[0]);
 
         if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
@@ -63,8 +65,9 @@ public class PlansApp : ViewBase
         var sidebar = new SidebarView(plans, selectedPlanState, projectFilter, levelFilter, textFilter, configService);
 
         return new SidebarLayout(
-            mainContent: new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
-            sidebarContent: sidebar
+            new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService,
+                RefreshPlans, configService),
+            sidebar
         );
     }
 }

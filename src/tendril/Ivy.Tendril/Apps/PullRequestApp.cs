@@ -11,7 +11,7 @@ public class PullRequestApp : ViewBase
     {
         var planService = UseService<IPlanReaderService>();
         var refreshToken = UseRefreshToken();
-        var nav = this.UseNavigation();
+        var nav = UseNavigation();
         var showPlan = UseState<string?>(null);
         var openFile = UseState<string?>(null);
         var config = UseService<IConfigService>();
@@ -41,7 +41,7 @@ public class PullRequestApp : ViewBase
         }).ToList();
 
         var dataTable = rows.AsQueryable()
-            .ToDataTable(idSelector: t => t.Id)
+            .ToDataTable(t => t.Id)
             .RefreshToken(refreshToken)
             .Width(Size.Full())
             .Height(Size.Full())
@@ -76,14 +76,17 @@ public class PullRequestApp : ViewBase
                 if (e.Value.ColumnName == "Plan")
                 {
                     var row = rows.ElementAtOrDefault(e.Value.RowIndex);
-                    if (row != null && !string.IsNullOrEmpty(row.PlanFolderPath) && Directory.Exists(row.PlanFolderPath))
+                    if (row != null && !string.IsNullOrEmpty(row.PlanFolderPath) &&
+                        Directory.Exists(row.PlanFolderPath))
                         showPlan.Set(row.PlanFolderPath);
                 }
+
                 return ValueTask.CompletedTask;
             })
             .RowActions(
-                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
-                new MenuItem(Label: "Open PR", Icon: Icons.ExternalLink, Tag: "open-pr").Tooltip("Open the pull request in browser")
+                new MenuItem("View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
+                new MenuItem("Open PR", Icon: Icons.ExternalLink, Tag: "open-pr").Tooltip(
+                    "Open the pull request in browser")
             )
             .OnRowAction(e =>
             {
@@ -103,6 +106,7 @@ public class PullRequestApp : ViewBase
                         nav.Navigate(row.Pr);
                     }
                 }
+
                 return ValueTask.CompletedTask;
             });
 
@@ -123,15 +127,13 @@ public class PullRequestApp : ViewBase
                 openFile.Value, () => openFile.Set(null), repoPaths);
 
             var planSheet = new Sheet(
-                onClose: () => showPlan.Set(null),
-                content: sheetContent,
-                title: plan?.Title ?? folderName
+                () => showPlan.Set(null),
+                sheetContent,
+                plan?.Title ?? folderName
             ).Width(Size.Half()).Resizable();
 
             if (fileLinkSheet is not null)
-            {
                 return Layout.Vertical().Height(Size.Full()) | new Fragment(dataTable, planSheet, fileLinkSheet);
-            }
 
             return Layout.Vertical().Height(Size.Full()) | new Fragment(dataTable, planSheet);
         }
@@ -140,8 +142,8 @@ public class PullRequestApp : ViewBase
     }
 
     /// <summary>
-    /// Extracts "owner/repo" from a GitHub PR URL.
-    /// E.g. "https://github.com/owner/repo/pull/123" -> "owner/repo"
+    ///     Extracts "owner/repo" from a GitHub PR URL.
+    ///     E.g. "https://github.com/owner/repo/pull/123" -> "owner/repo"
     /// </summary>
     internal static string ExtractRepo(string prUrl)
     {
@@ -152,7 +154,10 @@ public class PullRequestApp : ViewBase
             if (segments.Length >= 2)
                 return $"{segments[0]}/{segments[1]}";
         }
-        catch { }
+        catch
+        {
+        }
+
         return prUrl;
     }
 }

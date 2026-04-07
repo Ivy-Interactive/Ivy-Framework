@@ -16,7 +16,7 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
     public void Dispose()
     {
         if (Directory.Exists(_plansDir))
-            Directory.Delete(_plansDir, recursive: true);
+            Directory.Delete(_plansDir, true);
     }
 
     private JobService CreateService()
@@ -35,25 +35,21 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
 
         var depsYaml = "";
         if (dependsOn is { Count: > 0 })
-        {
             depsYaml = "dependsOn:\n" + string.Join("\n", dependsOn.Select(d => $"- '{d}'"));
-        }
         else
-        {
             depsYaml = "dependsOn: []";
-        }
 
         File.WriteAllText(Path.Combine(folder, "plan.yaml"), $"""
-            state: {state}
-            project: Tendril
-            title: {name}
-            created: 2026-04-01T00:00:00Z
-            updated: 2026-04-01T00:00:00Z
-            prs: []
-            commits: []
-            verifications: []
-            {depsYaml}
-            """);
+                                                              state: {state}
+                                                              project: Tendril
+                                                              title: {name}
+                                                              created: 2026-04-01T00:00:00Z
+                                                              updated: 2026-04-01T00:00:00Z
+                                                              prs: []
+                                                              commits: []
+                                                              verifications: []
+                                                              {depsYaml}
+                                                              """);
 
         return folder;
     }
@@ -62,22 +58,20 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
     public void RetryBlockedDependents_WhenDependencyCompletes_RequeuesBlockedPlan()
     {
         var planB = CreatePlanFolder("02100-PlanB", "Completed");
-        var planA = CreatePlanFolder("02101-PlanA", "Blocked", dependsOn: ["02100-PlanB"]);
+        var planA = CreatePlanFolder("02101-PlanA", "Blocked", ["02100-PlanB"]);
 
         var service = CreateService();
         var startedJobs = new List<string>();
         service.JobsChanged += () =>
         {
             foreach (var job in service.GetJobs())
-            {
                 if (job.Type == "ExecutePlan" && !startedJobs.Contains(job.Id))
                     startedJobs.Add(job.Id);
-            }
         };
 
         // Simulate CreateIssue completing for PlanB
         var id = service.StartJob("CreateIssue", planB, "-Repo", "owner/repo", "-Assignee", "", "-Labels", "");
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         // PlanA should have been auto-queued
         var jobs = service.GetJobs();
@@ -89,12 +83,12 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
     {
         var planB = CreatePlanFolder("02200-PlanB", "Completed");
         var planC = CreatePlanFolder("02201-PlanC", "Executing"); // Not completed
-        var planA = CreatePlanFolder("02202-PlanA", "Blocked", dependsOn: ["02200-PlanB", "02201-PlanC"]);
+        var planA = CreatePlanFolder("02202-PlanA", "Blocked", ["02200-PlanB", "02201-PlanC"]);
 
         var service = CreateService();
 
         var id = service.StartJob("CreateIssue", planB, "-Repo", "owner/repo", "-Assignee", "", "-Labels", "");
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         var jobs = service.GetJobs();
         Assert.DoesNotContain(jobs, j => j.Type == "ExecutePlan" && j.Args.Contains(planA));
@@ -105,12 +99,12 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
     {
         var planB = CreatePlanFolder("02500-PlanB", "Completed");
         // Create planA as Draft (not Blocked) — it should NOT be picked up
-        var planA = CreatePlanFolder("02501-PlanA", "Draft", dependsOn: ["02500-PlanB"]);
+        var planA = CreatePlanFolder("02501-PlanA", "Draft", ["02500-PlanB"]);
 
         var service = CreateService();
 
         var id = service.StartJob("CreateIssue", planB, "-Repo", "owner/repo", "-Assignee", "", "-Labels", "");
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         var jobs = service.GetJobs();
         Assert.DoesNotContain(jobs, j => j.Type == "ExecutePlan" && j.Args.Contains(planA));
@@ -120,12 +114,12 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
     public void RetryBlockedDependents_TransitionsBlockedToDraft_WhenUnblocked()
     {
         var planB = CreatePlanFolder("02600-PlanB", "Completed");
-        var planA = CreatePlanFolder("02601-PlanA", "Blocked", dependsOn: ["02600-PlanB"]);
+        var planA = CreatePlanFolder("02601-PlanA", "Blocked", ["02600-PlanB"]);
 
         var service = CreateService();
 
         var id = service.StartJob("CreateIssue", planB, "-Repo", "owner/repo", "-Assignee", "", "-Labels", "");
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         // Verify plan.yaml was updated to Draft
         var planYamlContent = File.ReadAllText(Path.Combine(planA, "plan.yaml"));
@@ -137,7 +131,7 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
     {
         // Create a plan with an unmet dependency
         var depPlan = CreatePlanFolder("02700-DepPlan", "Executing"); // Not completed
-        var planA = CreatePlanFolder("02701-PlanA", "Draft", dependsOn: ["02700-DepPlan"]);
+        var planA = CreatePlanFolder("02701-PlanA", "Draft", ["02700-DepPlan"]);
 
         var service = CreateService();
 
@@ -153,12 +147,12 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
     public void RetryBlockedDependents_WhenPlanNotInDraftState_DoesNotRequeue()
     {
         var planB = CreatePlanFolder("02300-PlanB", "Completed");
-        var planA = CreatePlanFolder("02301-PlanA", "Building", dependsOn: ["02300-PlanB"]);
+        var planA = CreatePlanFolder("02301-PlanA", "Building", ["02300-PlanB"]);
 
         var service = CreateService();
 
         var id = service.StartJob("CreateIssue", planB, "-Repo", "owner/repo", "-Assignee", "", "-Labels", "");
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         var jobs = service.GetJobs();
         Assert.DoesNotContain(jobs, j => j.Type == "ExecutePlan" && j.Args.Contains(planA));
@@ -168,12 +162,12 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
     public void RetryBlockedDependents_WhenPlanInDraftState_DoesNotRequeue()
     {
         var planB = CreatePlanFolder("02300-PlanB", "Completed");
-        var planA = CreatePlanFolder("02302-PlanA", "Draft", dependsOn: ["02300-PlanB"]);
+        var planA = CreatePlanFolder("02302-PlanA", "Draft", ["02300-PlanB"]);
 
         var service = CreateService();
 
         var id = service.StartJob("CreateIssue", planB, "-Repo", "owner/repo", "-Assignee", "", "-Labels", "");
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         var jobs = service.GetJobs();
         Assert.DoesNotContain(jobs, j => j.Type == "ExecutePlan" && j.Args.Contains(planA));
@@ -188,7 +182,7 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
         var service = CreateService();
 
         var id = service.StartJob("CreateIssue", planB, "-Repo", "owner/repo", "-Assignee", "", "-Labels", "");
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         var jobs = service.GetJobs();
         Assert.DoesNotContain(jobs, j => j.Type == "ExecutePlan");
@@ -196,34 +190,112 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
 
     private class StubPlanReaderService : IPlanReaderService
     {
-        public string PlansDirectory { get; }
-
         public StubPlanReaderService(string plansDirectory)
         {
             PlansDirectory = plansDirectory;
         }
 
-        public void RecoverStuckPlans() { }
-        public void RepairPlans() { }
-        public List<PlanFile> GetPlans(PlanStatus? statusFilter = null) => [];
-        public PlanFile? GetPlanByFolder(string folderPath) => null;
-        public List<PlanFile> GetIceboxPlans() => [];
-        public void TransitionState(string folderName, PlanStatus newState) { }
-        public void SaveRevision(string folderName, string content) { }
-        public string ReadLatestRevision(string folderName) => "";
-        public List<(int Number, string Content, DateTime Modified)> GetRevisions(string folderName) => [];
-        public void AddLog(string folderName, string action, string content) { }
-        public void DeletePlan(string folderName) { }
-        public string ReadRawPlan(string folderName) => "";
-        public void SavePlan(string folderName, string fullContent) { }
-        public void UpdateLatestRevision(string folderName, string content) { }
-        public decimal GetPlanTotalCost(string folderPath) => 0;
-        public int GetPlanTotalTokens(string folderPath) => 0;
-        public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7) => [];
-        public List<Recommendation> GetRecommendations() => [];
-        public int GetPendingRecommendationsCount() => 0;
-        public PlanReaderService.PlanCountSnapshot ComputePlanCounts() => new(0, 0, 0, 0, 0);
-        public void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState, string? declineReason = null) { }
-        public void InvalidateCaches() { }
+        public string PlansDirectory { get; }
+
+        public void RecoverStuckPlans()
+        {
+        }
+
+        public void RepairPlans()
+        {
+        }
+
+        public List<PlanFile> GetPlans(PlanStatus? statusFilter = null)
+        {
+            return [];
+        }
+
+        public PlanFile? GetPlanByFolder(string folderPath)
+        {
+            return null;
+        }
+
+        public List<PlanFile> GetIceboxPlans()
+        {
+            return [];
+        }
+
+        public void TransitionState(string folderName, PlanStatus newState)
+        {
+        }
+
+        public void SaveRevision(string folderName, string content)
+        {
+        }
+
+        public string ReadLatestRevision(string folderName)
+        {
+            return "";
+        }
+
+        public List<(int Number, string Content, DateTime Modified)> GetRevisions(string folderName)
+        {
+            return [];
+        }
+
+        public void AddLog(string folderName, string action, string content)
+        {
+        }
+
+        public void DeletePlan(string folderName)
+        {
+        }
+
+        public string ReadRawPlan(string folderName)
+        {
+            return "";
+        }
+
+        public void SavePlan(string folderName, string fullContent)
+        {
+        }
+
+        public void UpdateLatestRevision(string folderName, string content)
+        {
+        }
+
+        public decimal GetPlanTotalCost(string folderPath)
+        {
+            return 0;
+        }
+
+        public int GetPlanTotalTokens(string folderPath)
+        {
+            return 0;
+        }
+
+        public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7)
+        {
+            return [];
+        }
+
+        public List<Recommendation> GetRecommendations()
+        {
+            return [];
+        }
+
+        public int GetPendingRecommendationsCount()
+        {
+            return 0;
+        }
+
+        public PlanReaderService.PlanCountSnapshot ComputePlanCounts()
+        {
+            return new PlanReaderService.PlanCountSnapshot(0, 0, 0, 0, 0);
+        }
+
+        public void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState,
+            string? declineReason = null)
+        {
+        }
+
+        public void InvalidateCaches()
+        {
+        }
     }
 }

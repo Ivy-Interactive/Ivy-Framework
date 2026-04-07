@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Ivy.Tendril.Services;
@@ -6,7 +7,7 @@ public static class PlatformHelper
 {
     public static void OpenInTerminal(string workingDirectory)
     {
-        var psi = new System.Diagnostics.ProcessStartInfo { UseShellExecute = true };
+        var psi = new ProcessStartInfo { UseShellExecute = true };
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             psi.FileName = "wt.exe";
@@ -22,12 +23,13 @@ public static class PlatformHelper
             psi.FileName = "xdg-open";
             psi.Arguments = workingDirectory;
         }
-        System.Diagnostics.Process.Start(psi);
+
+        Process.Start(psi);
     }
 
     public static void OpenInFileManager(string folderPath)
     {
-        var psi = new System.Diagnostics.ProcessStartInfo { UseShellExecute = true };
+        var psi = new ProcessStartInfo { UseShellExecute = true };
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             psi.FileName = "explorer.exe";
@@ -43,6 +45,7 @@ public static class PlatformHelper
             psi.FileName = "xdg-open";
             psi.Arguments = folderPath;
         }
-        System.Diagnostics.Process.Start(psi);
+
+        Process.Start(psi);
     }
 }

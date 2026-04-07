@@ -1,15 +1,15 @@
 using System.Reflection;
-
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
 public class RecommendationServiceTests : IDisposable
 {
-    private readonly string _tempDir;
     private readonly string _plansDir;
     private readonly PlanReaderService _service;
+    private readonly string _tempDir;
 
     public RecommendationServiceTests()
     {
@@ -20,21 +20,23 @@ public class RecommendationServiceTests : IDisposable
 
         var settings = new TendrilSettings();
         var configService = new ConfigService(settings, _tempDir);
-        _service = new PlanReaderService(configService, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlanReaderService>.Instance);
+        _service = new PlanReaderService(configService, NullLogger<PlanReaderService>.Instance);
     }
 
     public void Dispose()
     {
         if (Directory.Exists(_tempDir))
-            Directory.Delete(_tempDir, recursive: true);
+            Directory.Delete(_tempDir, true);
     }
 
-    private string CreatePlanWithRecommendations(string folderName, string recommendationsYaml, string project = "Tendril", string state = "Completed")
+    private string CreatePlanWithRecommendations(string folderName, string recommendationsYaml,
+        string project = "Tendril", string state = "Completed")
     {
         var dir = Path.Combine(_plansDir, folderName);
         Directory.CreateDirectory(dir);
 
-        var planYaml = $"state: {state}\nproject: {project}\ntitle: Test Plan\nrepos: []\ncommits: []\nprs: []\nverifications: []\nrelatedPlans: []\ndependsOn: []\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\n";
+        var planYaml =
+            $"state: {state}\nproject: {project}\ntitle: Test Plan\nrepos: []\ncommits: []\nprs: []\nverifications: []\nrelatedPlans: []\ndependsOn: []\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\n";
         File.WriteAllText(Path.Combine(dir, "plan.yaml"), planYaml);
 
         var revisionsDir = Path.Combine(dir, "revisions");
@@ -90,7 +92,8 @@ public class RecommendationServiceTests : IDisposable
     [Fact]
     public void UpdateRecommendationState_PersistsToYaml()
     {
-        var yaml = "- title: Item One\n  description: First\n  state: Pending\n- title: Item Two\n  description: Second\n  state: Pending\n";
+        var yaml =
+            "- title: Item One\n  description: First\n  state: Pending\n- title: Item Two\n  description: Second\n  state: Pending\n";
         CreatePlanWithRecommendations("01603-PersistTest", yaml);
 
         _service.UpdateRecommendationState("01603-PersistTest", "Item Two", "Declined");
@@ -136,7 +139,8 @@ public class RecommendationServiceTests : IDisposable
     [Fact]
     public void GetPendingRecommendationsCount_MatchesFullDeserializationCount()
     {
-        var yaml1 = "- title: Pending item\n  description: Needs work\n  state: Pending\n- title: Accepted item\n  description: Done\n  state: Accepted\n";
+        var yaml1 =
+            "- title: Pending item\n  description: Needs work\n  state: Pending\n- title: Accepted item\n  description: Done\n  state: Accepted\n";
         var yaml2 = "- title: No state item\n  description: Defaults to Pending\n";
         CreatePlanWithRecommendations("01610-CountTest1", yaml1);
         CreatePlanWithRecommendations("01611-CountTest2", yaml2);
@@ -152,7 +156,8 @@ public class RecommendationServiceTests : IDisposable
     [Fact]
     public void GetPendingRecommendationsCount_ReturnsZero_WhenNoPendingItems()
     {
-        var yaml = "- title: Accepted item\n  description: Done\n  state: Accepted\n- title: Declined item\n  description: Nope\n  state: Declined\n";
+        var yaml =
+            "- title: Accepted item\n  description: Done\n  state: Accepted\n- title: Declined item\n  description: Nope\n  state: Declined\n";
         CreatePlanWithRecommendations("01612-NoPending", yaml);
 
         var count = _service.GetPendingRecommendationsCount();
@@ -172,7 +177,7 @@ public class RecommendationServiceTests : IDisposable
     public void GetRecommendations_PopulatesSourcePlanStatus()
     {
         var yaml = "- title: Item\n  description: Desc\n  state: Pending\n";
-        CreatePlanWithRecommendations("01620-StatusTest", yaml, project: "Framework", state: "Completed");
+        CreatePlanWithRecommendations("01620-StatusTest", yaml, "Framework", "Completed");
 
         var recommendations = _service.GetRecommendations();
 
@@ -184,9 +189,9 @@ public class RecommendationServiceTests : IDisposable
     public void GetRecommendations_FilterByProject_ReturnsOnlyMatchingProject()
     {
         var yaml = "- title: Rec A\n  description: Desc\n  state: Pending\n";
-        CreatePlanWithRecommendations("01621-Framework", yaml, project: "Framework");
-        CreatePlanWithRecommendations("01622-Tendril", yaml, project: "Tendril");
-        CreatePlanWithRecommendations("01623-Agent", yaml, project: "Agent");
+        CreatePlanWithRecommendations("01621-Framework", yaml, "Framework");
+        CreatePlanWithRecommendations("01622-Tendril", yaml, "Tendril");
+        CreatePlanWithRecommendations("01623-Agent", yaml, "Agent");
 
         var recommendations = _service.GetRecommendations();
         var frameworkOnly = recommendations.Where(r => r.Project == "Framework").ToList();
@@ -216,9 +221,9 @@ public class RecommendationServiceTests : IDisposable
     public void GetRecommendations_CombinedFilters_ApplyAndLogic()
     {
         var yaml = "- title: Rec\n  description: Desc\n  state: Pending\n";
-        CreatePlanWithRecommendations("01627-FwCompleted", yaml, project: "Framework", state: "Completed");
-        CreatePlanWithRecommendations("01628-FwFailed", yaml, project: "Framework", state: "Failed");
-        CreatePlanWithRecommendations("01629-TdCompleted", yaml, project: "Tendril", state: "Completed");
+        CreatePlanWithRecommendations("01627-FwCompleted", yaml, "Framework", "Completed");
+        CreatePlanWithRecommendations("01628-FwFailed", yaml, "Framework", "Failed");
+        CreatePlanWithRecommendations("01629-TdCompleted", yaml, "Tendril", "Completed");
 
         var recommendations = _service.GetRecommendations();
         var filtered = recommendations
@@ -268,10 +273,12 @@ public class RecommendationServiceTests : IDisposable
     [Fact]
     public void UpdateRecommendationState_DeclineReasonPersistsAndCanBeReadBack()
     {
-        var yaml = "- title: Item A\n  description: First\n  state: Pending\n- title: Item B\n  description: Second\n  state: Pending\n";
+        var yaml =
+            "- title: Item A\n  description: First\n  state: Pending\n- title: Item B\n  description: Second\n  state: Pending\n";
         CreatePlanWithRecommendations("01642-DeclinePersist", yaml);
 
-        _service.UpdateRecommendationState("01642-DeclinePersist", "Item A", "Declined", "Duplicate of another recommendation");
+        _service.UpdateRecommendationState("01642-DeclinePersist", "Item A", "Declined",
+            "Duplicate of another recommendation");
 
         var recommendations = _service.GetRecommendations();
         var itemA = recommendations.First(r => r.Title == "Item A");
@@ -287,8 +294,8 @@ public class RecommendationServiceTests : IDisposable
     public void GetRecommendations_NullFilters_ReturnsAll()
     {
         var yaml = "- title: Rec\n  description: Desc\n  state: Pending\n";
-        CreatePlanWithRecommendations("01630-All1", yaml, project: "Framework", state: "Completed");
-        CreatePlanWithRecommendations("01631-All2", yaml, project: "Tendril", state: "Failed");
+        CreatePlanWithRecommendations("01630-All1", yaml, "Framework", "Completed");
+        CreatePlanWithRecommendations("01631-All2", yaml, "Tendril", "Failed");
 
         var recommendations = _service.GetRecommendations();
         string? projectFilter = null;
@@ -322,7 +329,9 @@ public class RecommendationServiceTests : IDisposable
         Assert.Same(result1, result2);
 
         // Simulate cache expiration by setting the TimeCache's _timestamp to 3 minutes ago
-        var cacheField = typeof(PlanReaderService).GetField("_recommendationsCache", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var cacheField =
+            typeof(PlanReaderService).GetField("_recommendationsCache",
+                BindingFlags.NonPublic | BindingFlags.Instance)!;
         var cache = cacheField.GetValue(_service)!;
         var timestampField = cache.GetType().GetField("_timestamp", BindingFlags.NonPublic | BindingFlags.Instance)!;
         timestampField.SetValue(cache, DateTime.UtcNow.AddMinutes(-3));

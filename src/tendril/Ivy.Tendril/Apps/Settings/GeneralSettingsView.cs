@@ -17,22 +17,22 @@ public class GeneralSettingsView : ViewBase
                          || planTemplate.Value != config.Settings.PlanTemplate;
 
         var form = Layout.Vertical().Gap(4).Padding(4).Width(Size.Auto().Max(Size.Units(120)))
-            | Text.Block("General Settings").Bold()
-            | codingAgent.ToSelectInput(CodingAgentOptions)
-                .WithField().Label("Coding Agent")
-            | planTemplate.ToCodeInput("Plan template...")
-                .Language(Languages.Markdown)
-                .Height(Size.Units(40))
-                .WithField().Label("Plan Template")
-            | new Button("Save").Primary()
-                .Disabled(!hasChanges)
-                .OnClick(() =>
-                {
-                    config.Settings.CodingAgent = codingAgent.Value;
-                    config.Settings.PlanTemplate = planTemplate.Value;
-                    config.SaveSettings();
-                    client.Toast("Settings saved successfully", "Saved");
-                });
+                   | Text.Block("General Settings").Bold()
+                   | codingAgent.ToSelectInput(CodingAgentOptions)
+                       .WithField().Label("Coding Agent")
+                   | planTemplate.ToCodeInput("Plan template...")
+                       .Language(Languages.Markdown)
+                       .Height(Size.Units(40))
+                       .WithField().Label("Plan Template")
+                   | new Button("Save").Primary()
+                       .Disabled(!hasChanges)
+                       .OnClick(() =>
+                       {
+                           config.Settings.CodingAgent = codingAgent.Value;
+                           config.Settings.PlanTemplate = planTemplate.Value;
+                           config.SaveSettings();
+                           client.Toast("Settings saved successfully", "Saved");
+                       });
 
         return form;
     }

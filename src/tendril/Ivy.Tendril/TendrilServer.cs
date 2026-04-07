@@ -1,10 +1,10 @@
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
+using System.ClientModel;
 using Ivy.Tendril.AppShell;
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenAI;
-using System.ClientModel;
 
 namespace Ivy.Tendril;
 
@@ -26,11 +26,10 @@ public static class TendrilServer
 
         var modelPricingService = new ModelPricingService();
         server.Services.AddSingleton<IModelPricingService>(modelPricingService);
-        server.Services.AddSingleton<ModelPricingService>(modelPricingService);
+        server.Services.AddSingleton(modelPricingService);
 
         // Register IChatClient if LLM is configured
         if (configService.Settings.Llm is { } llmConfig && !string.IsNullOrEmpty(llmConfig.ApiKey))
-        {
             server.Services.AddSingleton<IChatClient>(sp =>
             {
                 var config = sp.GetRequiredService<IConfigService>();
@@ -41,7 +40,6 @@ public static class TendrilServer
                     new OpenAIClientOptions { Endpoint = new Uri(endpoint) });
                 return client.GetChatClient(llm.Model).AsIChatClient();
             });
-        }
 
         server.Services.AddSingleton<GithubService>();
         server.Services.AddSingleton<IGithubService>(sp => sp.GetRequiredService<GithubService>());
@@ -134,9 +132,9 @@ public static class TendrilServer
             var telemetryService = app.Services.GetRequiredService<TelemetryService>();
             var appVersion = typeof(TendrilAppShell).Assembly.GetName().Version!.ToString(3);
             telemetryService.TrackAppStarted(new AppStartContext(
-                Version: appVersion,
-                ProjectCount: configService.Settings.Projects.Count,
-                LlmConfigured: configService.Settings.Llm?.ApiKey != null));
+                appVersion,
+                configService.Settings.Projects.Count,
+                configService.Settings.Llm?.ApiKey != null));
             _ = Task.Run(async () => await telemetryService.FlushAsync());
             app.UseAssets(server.Args, app.Services.GetRequiredService<ILogger<Server>>(), "Assets", "tendril/assets");
         });
@@ -157,7 +155,7 @@ public static class TendrilServer
                 ).Gap(2).Padding(2).AlignContent(Align.BottomLeft)
             )
             .DefaultAppId("dashboard")
-            .UseTabs(preventDuplicates: true);
+            .UseTabs(true);
 
         server.UseAppShell(() => new TendrilAppShell(appShellSettings));
 

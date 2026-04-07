@@ -12,12 +12,12 @@ public class CreateIssueDialog(
     IJobService jobService) : ViewBase
 {
     private readonly IState<bool> _dialogOpen = dialogOpen;
-    private readonly IState<string?> _selectedRepoState = selectedRepoState;
     private readonly IState<string?> _issueAssigneeState = issueAssigneeState;
-    private readonly IState<string[]> _issueLabelsState = issueLabelsState;
     private readonly IState<string> _issueCommentState = issueCommentState;
-    private readonly PlanFile _selectedPlan = selectedPlan;
+    private readonly IState<string[]> _issueLabelsState = issueLabelsState;
     private readonly IJobService _jobService = jobService;
+    private readonly PlanFile _selectedPlan = selectedPlan;
+    private readonly IState<string?> _selectedRepoState = selectedRepoState;
 
     public override object? Build()
     {
@@ -62,13 +62,13 @@ public class CreateIssueDialog(
             new DialogHeader($"Create GitHub Issue #{_selectedPlan.Id}"),
             new DialogBody(
                 Layout.Vertical().Gap(3)
-                    | _selectedRepoState.ToSelectInput(repositoryOptions.ToOptions())
-                        .AutoFocus().WithField().Label("Repository").Required()
-                    | _issueAssigneeState.ToSelectInput(assignees.ToOptions())
-                        .Nullable().WithField().Label("Assignee")
-                    | _issueLabelsState.ToSelectInput(labels.ToOptions())
-                        .Placeholder("Select labels...").WithField().Label("Labels")
-                    | _issueCommentState.ToTextInput().Multiline().WithField().Label("Comment")
+                | _selectedRepoState.ToSelectInput(repositoryOptions.ToOptions())
+                    .AutoFocus().WithField().Label("Repository").Required()
+                | _issueAssigneeState.ToSelectInput(assignees.ToOptions())
+                    .Nullable().WithField().Label("Assignee")
+                | _issueLabelsState.ToSelectInput(labels.ToOptions())
+                    .Placeholder("Select labels...").WithField().Label("Labels")
+                | _issueCommentState.ToTextInput().Multiline().WithField().Label("Comment")
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
@@ -83,9 +83,11 @@ public class CreateIssueDialog(
                             var repoPath = selectedRepo.FullName;
                             var assignee = _issueAssigneeState.Value ?? "";
                             var labels = string.Join(",", _issueLabelsState.Value ?? Array.Empty<string>());
-                            _jobService.StartJob("CreateIssue", _selectedPlan.FolderPath, "-Repo", repoPath, "-Assignee", assignee, "-Comment", _issueCommentState.Value ?? "", "-Labels", labels);
+                            _jobService.StartJob("CreateIssue", _selectedPlan.FolderPath, "-Repo", repoPath,
+                                "-Assignee", assignee, "-Comment", _issueCommentState.Value ?? "", "-Labels", labels);
                         }
                     }
+
                     _dialogOpen.Set(false);
                 })
             )

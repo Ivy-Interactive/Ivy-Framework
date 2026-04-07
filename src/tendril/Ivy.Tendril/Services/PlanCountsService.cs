@@ -6,26 +6,35 @@ public record PlanCounts(int Drafts, int ActiveJobs, int Reviews, int Icebox, in
 
 public class PlanCountsService : IPlanCountsService, IDisposable
 {
-    private readonly IPlanReaderService _planReaderService;
     private readonly IJobService _jobService;
+    private readonly IPlanReaderService _planReaderService;
     private readonly IPlanWatcherService _planWatcher;
-    private PlanCounts _current;
 
-    public event Action? CountsChanged;
-
-    public PlanCounts Current => _current;
-
-    public PlanCountsService(IPlanReaderService planReaderService, IJobService jobService, IPlanWatcherService planWatcher)
+    public PlanCountsService(IPlanReaderService planReaderService, IJobService jobService,
+        IPlanWatcherService planWatcher)
     {
         _planReaderService = planReaderService;
         _jobService = jobService;
         _planWatcher = planWatcher;
-        _current = ComputeCounts();
+        Current = ComputeCounts();
         _planWatcher.PlansChanged += OnPlansSourceChanged;
         _jobService.JobsChanged += OnSourceChanged;
     }
 
-    private void OnPlansSourceChanged(string? _) => OnSourceChanged();
+    public event Action? CountsChanged;
+
+    public PlanCounts Current { get; private set; }
+
+    public void Dispose()
+    {
+        _planWatcher.PlansChanged -= OnPlansSourceChanged;
+        _jobService.JobsChanged -= OnSourceChanged;
+    }
+
+    private void OnPlansSourceChanged(string? _)
+    {
+        OnSourceChanged();
+    }
 
     private void OnSourceChanged()
     {
@@ -36,9 +45,9 @@ public class PlanCountsService : IPlanCountsService, IDisposable
     private void Refresh()
     {
         var updated = ComputeCounts();
-        if (updated != _current)
+        if (updated != Current)
         {
-            _current = updated;
+            Current = updated;
             CountsChanged?.Invoke();
         }
     }
@@ -49,17 +58,11 @@ public class PlanCountsService : IPlanCountsService, IDisposable
         var jobs = _jobService.GetJobs();
 
         return new PlanCounts(
-            Drafts: snapshot.Drafts,
-            ActiveJobs: jobs.Count(j => j.Status is JobStatus.Running or JobStatus.Queued or JobStatus.Blocked),
-            Reviews: snapshot.ReadyForReview + snapshot.Failed,
-            Icebox: snapshot.Icebox,
-            Recommendations: snapshot.PendingRecommendations
+            snapshot.Drafts,
+            jobs.Count(j => j.Status is JobStatus.Running or JobStatus.Queued or JobStatus.Blocked),
+            snapshot.ReadyForReview + snapshot.Failed,
+            snapshot.Icebox,
+            snapshot.PendingRecommendations
         );
-    }
-
-    public void Dispose()
-    {
-        _planWatcher.PlansChanged -= OnPlansSourceChanged;
-        _jobService.JobsChanged -= OnSourceChanged;
     }
 }

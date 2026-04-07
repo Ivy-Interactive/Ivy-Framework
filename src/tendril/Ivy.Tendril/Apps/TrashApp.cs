@@ -1,8 +1,16 @@
+using Ivy.Tendril.Apps.Trash;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-public record TrashFileInfo(string FilePath, string FileName, DateTime Date, string OriginalRequest, string DuplicateOf, string Project, string Content);
+public record TrashFileInfo(
+    string FilePath,
+    string FileName,
+    DateTime Date,
+    string OriginalRequest,
+    string DuplicateOf,
+    string Project,
+    string Content);
 
 [App(title: "Trash", icon: Icons.Trash2, group: new[] { "Tools" }, order: MenuOrder.Trash, isVisible: false)]
 public class TrashApp : ViewBase
@@ -44,53 +52,54 @@ public class TrashApp : ViewBase
 
         var selected = filteredList.FirstOrDefault(f => f.FilePath == selectedFile.Value);
 
-        var sidebar = new Trash.SidebarView(files, selectedFile, searchFilter);
+        var sidebar = new SidebarView(files, selectedFile, searchFilter);
 
         // Main content
         object mainContent;
         if (files.Count == 0)
         {
             mainContent = Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
-                | new Icon(Icons.Trash2).Size(Size.Units(8)).Color(Colors.Gray)
-                | Text.Muted("No trash files yet")
-                | Text.Muted("Duplicate plans will appear here").Small();
+                          | new Icon(Icons.Trash2).Size(Size.Units(8)).Color(Colors.Gray)
+                          | Text.Muted("No trash files yet")
+                          | Text.Muted("Duplicate plans will appear here").Small();
         }
         else if (selected is null)
         {
             mainContent = Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
-                | Text.Muted("Select a file from the sidebar");
+                          | Text.Muted("Select a file from the sidebar");
         }
         else
         {
             var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
-                | Text.Block(selected.FileName).Bold()
-                | new Badge(selected.Project).Variant(BadgeVariant.Outline)
-                | (string.IsNullOrEmpty(selected.DuplicateOf)
-                    ? (object)new Fragment()
-                    : Text.Muted($"Duplicate of: {selected.DuplicateOf}"));
+                         | Text.Block(selected.FileName).Bold()
+                         | new Badge(selected.Project).Variant(BadgeVariant.Outline)
+                         | (string.IsNullOrEmpty(selected.DuplicateOf)
+                             ? new Fragment()
+                             : Text.Muted($"Duplicate of: {selected.DuplicateOf}"));
 
             var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
-                | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => confirmDelete.Set(true))
-                | new Button("Force Plan").Icon(Icons.Zap).Primary().OnClick(() =>
-                {
-                    if (!string.IsNullOrEmpty(selected.OriginalRequest))
-                    {
-                        var project = string.IsNullOrEmpty(selected.Project) ? "[Auto]" : selected.Project;
-                        jobService.StartJob("MakePlan", "-Description", $"{selected.OriginalRequest} [FORCE]", "-Project", project);
-                        client.Toast("MakePlan job started", "Force Plan");
-                    }
-                });
+                            | new Button("Delete").Icon(Icons.Trash).Outline().OnClick(() => confirmDelete.Set(true))
+                            | new Button("Force Plan").Icon(Icons.Zap).Primary().OnClick(() =>
+                            {
+                                if (!string.IsNullOrEmpty(selected.OriginalRequest))
+                                {
+                                    var project = string.IsNullOrEmpty(selected.Project) ? "[Auto]" : selected.Project;
+                                    jobService.StartJob("MakePlan", "-Description",
+                                        $"{selected.OriginalRequest} [FORCE]", "-Project", project);
+                                    client.Toast("MakePlan job started", "Force Plan");
+                                }
+                            });
 
             var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)))
-                | new Markdown(selected.Content)
-                    .DangerouslyAllowLocalFiles()
-                    .OnLinkClick(FileLinkHelper.CreateFileLinkClickHandler(openFile));
+                                    | new Markdown(selected.Content)
+                                        .DangerouslyAllowLocalFiles()
+                                        .OnLinkClick(FileLinkHelper.CreateFileLinkClickHandler(openFile));
 
             mainContent = new HeaderLayout(
-                header: header,
-                content: new FooterLayout(
-                    footer: actionBar,
-                    content: scrollableContent
+                header,
+                new FooterLayout(
+                    actionBar,
+                    scrollableContent
                 ).Size(Size.Full())
             ).Scroll(Scroll.None).Size(Size.Full());
         }
@@ -98,8 +107,8 @@ public class TrashApp : ViewBase
         var elements = new List<object>
         {
             new SidebarLayout(
-                mainContent: mainContent,
-                sidebarContent: sidebar
+                mainContent,
+                sidebar
             )
         };
 

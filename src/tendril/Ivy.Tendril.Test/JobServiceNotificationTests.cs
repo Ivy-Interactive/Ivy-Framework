@@ -19,7 +19,7 @@ public class JobServiceNotificationTests
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         Assert.NotNull(notification);
         Assert.Equal("MakePr Completed", notification.Title);
@@ -34,7 +34,7 @@ public class JobServiceNotificationTests
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
-        service.CompleteJob(id, exitCode: 1);
+        service.CompleteJob(id, 1);
 
         Assert.NotNull(notification);
         Assert.Equal("ExecutePlan Failed", notification.Title);
@@ -49,7 +49,7 @@ public class JobServiceNotificationTests
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
-        service.CompleteJob(id, exitCode: null, timedOut: true);
+        service.CompleteJob(id, null, true);
 
         Assert.NotNull(notification);
         Assert.Equal("ExpandPlan Timed Out", notification.Title);

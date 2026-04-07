@@ -1,6 +1,8 @@
 using System.Reactive.Disposables;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
+using ContentView = Ivy.Tendril.Apps.Icebox.ContentView;
+using SidebarView = Ivy.Tendril.Apps.Icebox.SidebarView;
 
 namespace Ivy.Tendril.Apps;
 
@@ -21,14 +23,19 @@ public class IceboxApp : ViewBase
 
         UseEffect(() =>
         {
-            void OnChanged(string? _) => refreshToken.Refresh();
+            void OnChanged(string? _)
+            {
+                refreshToken.Refresh();
+            }
+
             planWatcher.PlansChanged += OnChanged;
             return Disposable.Create(() => planWatcher.PlansChanged -= OnChanged);
         });
 
-        var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
+        var previousPlans = UseRef(new List<PlanFile>());
         var plans = planService.GetPlans(PlanStatus.Icebox);
-        var filteredPlans = PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value).ToList();
+        var filteredPlans = PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value)
+            .ToList();
 
         if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
         {
@@ -51,11 +58,12 @@ public class IceboxApp : ViewBase
             refreshToken.Refresh();
         }
 
-        var sidebar = new Icebox.SidebarView(plans, selectedPlanState, projectFilter, levelFilter, textFilter, configService);
+        var sidebar = new SidebarView(plans, selectedPlanState, projectFilter, levelFilter, textFilter, configService);
 
         return new SidebarLayout(
-            mainContent: new Icebox.ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
-            sidebarContent: sidebar
+            new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService,
+                RefreshPlans, configService),
+            sidebar
         );
     }
 }

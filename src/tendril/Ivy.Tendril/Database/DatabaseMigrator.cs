@@ -46,11 +46,9 @@ public class DatabaseMigrator
         }
 
         if (currentVersion > latestVersion)
-        {
             throw new InvalidOperationException(
                 $"Database version ({currentVersion}) is newer than application version ({latestVersion}). " +
                 "Please update the application.");
-        }
 
         Console.WriteLine($"Migrating database from version {currentVersion} to {latestVersion}...");
 
@@ -70,11 +68,9 @@ public class DatabaseMigrator
 
                 var newVersion = GetCurrentVersion();
                 if (newVersion != migration.Version)
-                {
                     throw new InvalidOperationException(
                         $"Migration {migration.Version} did not set PRAGMA user_version correctly. " +
                         $"Expected {migration.Version}, got {newVersion}");
-                }
             }
 
             transaction.Commit();
@@ -113,22 +109,18 @@ public class DatabaseMigrator
             .ToList();
 
         if (duplicates.Count > 0)
-        {
             throw new InvalidOperationException(
                 $"Duplicate migration versions found: {string.Join(", ", duplicates)}");
-        }
 
-        for (int i = 0; i < migrations.Count; i++)
+        for (var i = 0; i < migrations.Count; i++)
         {
             var expected = i + 1;
             var actual = migrations[i].Version;
 
             if (actual != expected)
-            {
                 throw new InvalidOperationException(
                     $"Migration sequence is invalid. Expected version {expected}, found {actual}. " +
                     "Migrations must be numbered sequentially starting from 1.");
-            }
         }
     }
 }

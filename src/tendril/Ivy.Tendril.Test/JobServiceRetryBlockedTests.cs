@@ -13,25 +13,18 @@ public class JobServiceRetryBlockedTests
 
         var depsYaml = "";
         if (dependsOn is { Count: > 0 })
-        {
             depsYaml = "dependsOn:\n" + string.Join("\n", dependsOn.Select(d => $"- {d}"));
-        }
         else
-        {
             depsYaml = "dependsOn: []";
-        }
 
         var prsYaml = "";
         if (prs is { Count: > 0 })
-        {
             prsYaml = "prs:\n" + string.Join("\n", prs.Select(p => $"- {p}"));
-        }
         else
-        {
             prsYaml = "prs: []";
-        }
 
-        var yaml = $"state: {state}\nproject: TestProject\nlevel: NiceToHave\ntitle: Test\nupdated: 2026-01-01T00:00:00Z\n{depsYaml}\n{prsYaml}\ncommits: []\nverifications: []\nrelatedPlans: []\nrepos: []\n";
+        var yaml =
+            $"state: {state}\nproject: TestProject\nlevel: NiceToHave\ntitle: Test\nupdated: 2026-01-01T00:00:00Z\n{depsYaml}\n{prsYaml}\ncommits: []\nverifications: []\nrelatedPlans: []\nrepos: []\n";
         File.WriteAllText(Path.Combine(tempDir, "plan.yaml"), yaml);
         return tempDir;
     }
@@ -45,7 +38,8 @@ public class JobServiceRetryBlockedTests
         {
             var planDir = Path.Combine(plansDir, folderName);
             Directory.CreateDirectory(planDir);
-            var yaml = $"state: {state}\nproject: TestProject\nlevel: NiceToHave\ntitle: {folderName}\nupdated: 2026-01-01T00:00:00Z\ndependsOn: []\nprs: []\ncommits: []\nverifications: []\nrelatedPlans: []\nrepos: []\n";
+            var yaml =
+                $"state: {state}\nproject: TestProject\nlevel: NiceToHave\ntitle: {folderName}\nupdated: 2026-01-01T00:00:00Z\ndependsOn: []\nprs: []\ncommits: []\nverifications: []\nrelatedPlans: []\nrepos: []\n";
             File.WriteAllText(Path.Combine(planDir, "plan.yaml"), yaml);
         }
 
@@ -61,7 +55,7 @@ public class JobServiceRetryBlockedTests
         var plansDir = CreatePlansDirectory(("01100-DepPlan", "Completed"));
 
         // Create the dependent plan that depends on 01100-DepPlan
-        var dependentPlan = CreatePlanFolder("Draft", dependsOn: ["01100-DepPlan"]);
+        var dependentPlan = CreatePlanFolder("Draft", ["01100-DepPlan"]);
 
         var planReader = new FakePlanReaderService(plansDir);
         var service = new JobService(
@@ -81,7 +75,7 @@ public class JobServiceRetryBlockedTests
         service.NotificationReady += n => notifications.Add(n);
 
         // Complete the MakePr job successfully — this should trigger RetryBlockedJobs
-        service.CompleteJob(completingId, exitCode: 0);
+        service.CompleteJob(completingId, 0);
 
         // The blocked job should have been removed
         Assert.Null(service.GetJob(blockedId));
@@ -111,7 +105,7 @@ public class JobServiceRetryBlockedTests
         var plansDir = CreatePlansDirectory(("01100-DepPlan", "Executing"));
 
         // Create the dependent plan
-        var dependentPlan = CreatePlanFolder("Draft", dependsOn: ["01100-DepPlan"]);
+        var dependentPlan = CreatePlanFolder("Draft", ["01100-DepPlan"]);
 
         var planReader = new FakePlanReaderService(plansDir);
         var service = new JobService(
@@ -131,7 +125,7 @@ public class JobServiceRetryBlockedTests
         service.NotificationReady += n => notifications.Add(n);
 
         // Complete the MakePr job
-        service.CompleteJob(completingId, exitCode: 0);
+        service.CompleteJob(completingId, 0);
 
         // The blocked job should still exist and still be blocked
         var stillBlocked = service.GetJob(blockedId);
@@ -147,38 +141,116 @@ public class JobServiceRetryBlockedTests
     }
 
     /// <summary>
-    /// Minimal fake that provides PlansDirectory for dependency checking.
+    ///     Minimal fake that provides PlansDirectory for dependency checking.
     /// </summary>
     private class FakePlanReaderService : IPlanReaderService
     {
-        public string PlansDirectory { get; }
-
         public FakePlanReaderService(string plansDirectory)
         {
             PlansDirectory = plansDirectory;
         }
 
-        public void RecoverStuckPlans() { }
-        public void RepairPlans() { }
-        public List<PlanFile> GetPlans(PlanStatus? statusFilter = null) => [];
-        public PlanFile? GetPlanByFolder(string folderPath) => null;
-        public List<PlanFile> GetIceboxPlans() => [];
-        public void TransitionState(string folderName, PlanStatus newState) { }
-        public void SaveRevision(string folderName, string content) { }
-        public string ReadLatestRevision(string folderName) => "";
-        public List<(int Number, string Content, DateTime Modified)> GetRevisions(string folderName) => [];
-        public void AddLog(string folderName, string action, string content) { }
-        public void DeletePlan(string folderName) { }
-        public string ReadRawPlan(string folderName) => "";
-        public void SavePlan(string folderName, string fullContent) { }
-        public void UpdateLatestRevision(string folderName, string content) { }
-        public decimal GetPlanTotalCost(string folderPath) => 0;
-        public int GetPlanTotalTokens(string folderPath) => 0;
-        public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7) => [];
-        public List<Recommendation> GetRecommendations() => [];
-        public int GetPendingRecommendationsCount() => 0;
-        public PlanReaderService.PlanCountSnapshot ComputePlanCounts() => new(0, 0, 0, 0, 0);
-        public void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState, string? declineReason = null) { }
-        public void InvalidateCaches() { }
+        public string PlansDirectory { get; }
+
+        public void RecoverStuckPlans()
+        {
+        }
+
+        public void RepairPlans()
+        {
+        }
+
+        public List<PlanFile> GetPlans(PlanStatus? statusFilter = null)
+        {
+            return [];
+        }
+
+        public PlanFile? GetPlanByFolder(string folderPath)
+        {
+            return null;
+        }
+
+        public List<PlanFile> GetIceboxPlans()
+        {
+            return [];
+        }
+
+        public void TransitionState(string folderName, PlanStatus newState)
+        {
+        }
+
+        public void SaveRevision(string folderName, string content)
+        {
+        }
+
+        public string ReadLatestRevision(string folderName)
+        {
+            return "";
+        }
+
+        public List<(int Number, string Content, DateTime Modified)> GetRevisions(string folderName)
+        {
+            return [];
+        }
+
+        public void AddLog(string folderName, string action, string content)
+        {
+        }
+
+        public void DeletePlan(string folderName)
+        {
+        }
+
+        public string ReadRawPlan(string folderName)
+        {
+            return "";
+        }
+
+        public void SavePlan(string folderName, string fullContent)
+        {
+        }
+
+        public void UpdateLatestRevision(string folderName, string content)
+        {
+        }
+
+        public decimal GetPlanTotalCost(string folderPath)
+        {
+            return 0;
+        }
+
+        public int GetPlanTotalTokens(string folderPath)
+        {
+            return 0;
+        }
+
+        public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7)
+        {
+            return [];
+        }
+
+        public List<Recommendation> GetRecommendations()
+        {
+            return [];
+        }
+
+        public int GetPendingRecommendationsCount()
+        {
+            return 0;
+        }
+
+        public PlanReaderService.PlanCountSnapshot ComputePlanCounts()
+        {
+            return new PlanReaderService.PlanCountSnapshot(0, 0, 0, 0, 0);
+        }
+
+        public void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState,
+            string? declineReason = null)
+        {
+        }
+
+        public void InvalidateCaches()
+        {
+        }
     }
 }

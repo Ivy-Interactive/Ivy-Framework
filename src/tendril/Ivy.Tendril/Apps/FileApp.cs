@@ -39,11 +39,13 @@ public class FileApp : ViewBase
         { ".ps1", Languages.Powershell },
         { ".psm1", Languages.Powershell },
         { ".sh", Languages.Bash },
-        { ".bash", Languages.Bash },
+        { ".bash", Languages.Bash }
     };
 
     public static Languages GetLanguage(string extension)
-        => LanguageMap.GetValueOrDefault(extension, Languages.Text);
+    {
+        return LanguageMap.GetValueOrDefault(extension, Languages.Text);
+    }
 
     public override object? Build()
     {
@@ -71,6 +73,7 @@ public class FileApp : ViewBase
             {
                 errorState.Set($"Failed to read file: {ex.Message}");
             }
+
             previousUrl.Value = url;
         }
 
@@ -80,13 +83,11 @@ public class FileApp : ViewBase
 
         // Display image
         if (isImage)
-        {
             return new Image(url)
             {
                 ObjectFit = ImageFit.Contain,
                 Alt = Path.GetFileName(url)
             };
-        }
 
         // Display code editor
         var language = GetLanguage(extension);

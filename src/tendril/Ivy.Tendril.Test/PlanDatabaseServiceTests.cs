@@ -7,8 +7,8 @@ namespace Ivy.Tendril.Test;
 
 public class PlanDatabaseServiceTests : IDisposable
 {
-    private readonly string _dbPath;
     private readonly PlanDatabaseService _db;
+    private readonly string _dbPath;
 
     public PlanDatabaseServiceTests()
     {
@@ -48,8 +48,7 @@ public class PlanDatabaseServiceTests : IDisposable
             metadata,
             latestContent,
             $"D:\\Plans\\{id:D5}-{title.Replace(" ", "")}",
-            "state: Draft\ntitle: Test Plan",
-            1
+            "state: Draft\ntitle: Test Plan"
         );
     }
 
@@ -109,7 +108,7 @@ public class PlanDatabaseServiceTests : IDisposable
     [Fact]
     public void GetPlans_FiltersbyStatus()
     {
-        _db.UpsertPlan(CreateTestPlan(1500, "Draft Plan", PlanStatus.Draft));
+        _db.UpsertPlan(CreateTestPlan(1500, "Draft Plan"));
         _db.UpsertPlan(CreateTestPlan(1501, "Completed Plan", PlanStatus.Completed));
         _db.UpsertPlan(CreateTestPlan(1502, "Failed Plan", PlanStatus.Failed));
 
@@ -149,8 +148,8 @@ public class PlanDatabaseServiceTests : IDisposable
     [Fact]
     public void ComputePlanCounts_ReturnsCorrectCounts()
     {
-        _db.UpsertPlan(CreateTestPlan(1500, "Draft1", PlanStatus.Draft));
-        _db.UpsertPlan(CreateTestPlan(1501, "Draft2", PlanStatus.Draft));
+        _db.UpsertPlan(CreateTestPlan(1500, "Draft1"));
+        _db.UpsertPlan(CreateTestPlan(1501, "Draft2"));
         _db.UpsertPlan(CreateTestPlan(1502, "Review", PlanStatus.ReadyForReview));
         _db.UpsertPlan(CreateTestPlan(1503, "Failed", PlanStatus.Failed));
         _db.UpsertPlan(CreateTestPlan(1504, "Icebox", PlanStatus.Icebox));
@@ -185,7 +184,7 @@ public class PlanDatabaseServiceTests : IDisposable
     [Fact]
     public void UpsertRecommendations_AndGetRecommendations()
     {
-        _db.UpsertPlan(CreateTestPlan(1500, "Test Plan"));
+        _db.UpsertPlan(CreateTestPlan(1500));
 
         var recs = new List<RecommendationYaml>
         {
@@ -368,7 +367,7 @@ public class PlanDatabaseServiceTests : IDisposable
         };
         _db.UpsertCosts(1500, costs);
 
-        var burn = _db.GetHourlyTokenBurn(7);
+        var burn = _db.GetHourlyTokenBurn();
         Assert.NotEmpty(burn);
         Assert.Equal("Tendril", burn[0].Project);
         Assert.Equal(60000, burn[0].Tokens);
@@ -468,7 +467,7 @@ public class PlanDatabaseServiceTests : IDisposable
             DurationSeconds = 900,
             Cost = 1.50m,
             Tokens = 50000,
-            StatusMessage = null,
+            StatusMessage = null
         };
 
         _db.UpsertJob(job);
@@ -503,7 +502,7 @@ public class PlanDatabaseServiceTests : IDisposable
             Project = "Tendril",
             Status = JobStatus.Completed,
             Provider = "claude",
-            CompletedAt = new DateTime(2026, 4, 7, 10, 0, 0, DateTimeKind.Utc),
+            CompletedAt = new DateTime(2026, 4, 7, 10, 0, 0, DateTimeKind.Utc)
         });
         _db.UpsertJob(new JobItem
         {
@@ -513,7 +512,7 @@ public class PlanDatabaseServiceTests : IDisposable
             Project = "Tendril",
             Status = JobStatus.Completed,
             Provider = "claude",
-            CompletedAt = new DateTime(2026, 4, 7, 12, 0, 0, DateTimeKind.Utc),
+            CompletedAt = new DateTime(2026, 4, 7, 12, 0, 0, DateTimeKind.Utc)
         });
         _db.UpsertJob(new JobItem
         {
@@ -523,7 +522,7 @@ public class PlanDatabaseServiceTests : IDisposable
             Project = "Tendril",
             Status = JobStatus.Completed,
             Provider = "claude",
-            CompletedAt = new DateTime(2026, 4, 7, 11, 0, 0, DateTimeKind.Utc),
+            CompletedAt = new DateTime(2026, 4, 7, 11, 0, 0, DateTimeKind.Utc)
         });
 
         var jobs = _db.GetRecentJobs();
@@ -546,7 +545,7 @@ public class PlanDatabaseServiceTests : IDisposable
             Provider = "claude",
             CompletedAt = new DateTime(2026, 4, 7, 10, 0, 0, DateTimeKind.Utc),
             Cost = null,
-            Tokens = null,
+            Tokens = null
         };
         _db.UpsertJob(job);
 
@@ -566,7 +565,6 @@ public class PlanDatabaseServiceTests : IDisposable
     {
         // Insert 600 jobs with distinct CompletedAt times
         for (var i = 0; i < 600; i++)
-        {
             _db.UpsertJob(new JobItem
             {
                 Id = $"job-{i:D4}",
@@ -575,13 +573,12 @@ public class PlanDatabaseServiceTests : IDisposable
                 Project = "Tendril",
                 Status = JobStatus.Completed,
                 Provider = "claude",
-                CompletedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMinutes(i),
+                CompletedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMinutes(i)
             });
-        }
 
         Assert.Equal(600, _db.GetRecentJobs(1000).Count);
 
-        _db.PurgeOldJobs(500);
+        _db.PurgeOldJobs();
 
         var remaining = _db.GetRecentJobs(1000);
         Assert.Equal(500, remaining.Count);
@@ -598,7 +595,6 @@ public class PlanDatabaseServiceTests : IDisposable
     public void PurgeOldJobs_NoOpWhenUnderLimit()
     {
         for (var i = 0; i < 10; i++)
-        {
             _db.UpsertJob(new JobItem
             {
                 Id = $"job-{i}",
@@ -607,11 +603,10 @@ public class PlanDatabaseServiceTests : IDisposable
                 Project = "Tendril",
                 Status = JobStatus.Completed,
                 Provider = "claude",
-                CompletedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMinutes(i),
+                CompletedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMinutes(i)
             });
-        }
 
-        _db.PurgeOldJobs(500);
+        _db.PurgeOldJobs();
 
         var remaining = _db.GetRecentJobs(1000);
         Assert.Equal(10, remaining.Count);
@@ -629,7 +624,7 @@ public class PlanDatabaseServiceTests : IDisposable
             PlanFile = "test",
             Project = "Test",
             Status = JobStatus.Completed,
-            Provider = "claude",
+            Provider = "claude"
         });
 
         var jobs = _db.GetRecentJobs();

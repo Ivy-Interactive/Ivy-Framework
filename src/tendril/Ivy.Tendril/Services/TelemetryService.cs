@@ -1,6 +1,6 @@
 using Ivy.Tendril.Apps.Jobs;
-using PostHog;
 using Microsoft.Extensions.Logging;
+using PostHog;
 
 namespace Ivy.Tendril.Services;
 
@@ -37,6 +37,20 @@ public class TelemetryService : ITelemetryService, IAsyncDisposable
             _client = null;
             _distinctId = "";
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_client != null)
+            try
+            {
+                await FlushAsync();
+                await _client.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error during telemetry service disposal");
+            }
     }
 
     public void TrackAppStarted(AppStartContext context)
@@ -157,21 +171,5 @@ public class TelemetryService : ITelemetryService, IAsyncDisposable
         var newId = Guid.NewGuid().ToString();
         FileHelper.WriteAllText(idFile, newId);
         return newId;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_client != null)
-        {
-            try
-            {
-                await FlushAsync();
-                await _client.DisposeAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "Error during telemetry service disposal");
-            }
-        }
     }
 }

@@ -26,6 +26,9 @@ public interface IPlanReaderService
     List<Recommendation> GetRecommendations();
     int GetPendingRecommendationsCount();
     PlanReaderService.PlanCountSnapshot ComputePlanCounts();
-    void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState, string? declineReason = null);
+
+    void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState,
+        string? declineReason = null);
+
     void InvalidateCaches();
 }

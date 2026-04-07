@@ -21,7 +21,7 @@ public class JobServiceFailureReasonTests
             "[stderr] warning: something minor",
             "Processing...",
             "[stderr] error: connection refused",
-            "[stderr] fatal: cannot continue",
+            "[stderr] fatal: cannot continue"
         };
 
         var result = JobService.ExtractFailureReason(lines);
@@ -36,7 +36,7 @@ public class JobServiceFailureReasonTests
         {
             "Step 1 done",
             "Step 2 done",
-            "Build failed with 3 errors",
+            "Build failed with 3 errors"
         };
 
         var result = JobService.ExtractFailureReason(lines);
@@ -70,7 +70,7 @@ public class JobServiceFailureReasonTests
         {
             "[stderr] ",
             "[stderr] actual error message",
-            "[stderr]  ",
+            "[stderr]  "
         };
 
         var result = JobService.ExtractFailureReason(lines);
@@ -84,7 +84,7 @@ public class JobServiceFailureReasonTests
         {
             "Some regular output",
             "[stderr] the real error",
-            "More regular output after stderr",
+            "More regular output after stderr"
         };
 
         var result = JobService.ExtractFailureReason(lines);
@@ -99,7 +99,7 @@ public class JobServiceFailureReasonTests
         var job = service.GetJob(id)!;
         job.OutputLines.Enqueue("[stderr] something went wrong");
 
-        service.CompleteJob(id, exitCode: 1);
+        service.CompleteJob(id, 1);
 
         job = service.GetJob(id)!;
         Assert.Equal(JobStatus.Failed, job.Status);
@@ -113,7 +113,7 @@ public class JobServiceFailureReasonTests
         var service = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
         var id = service.StartJob("ExecutePlan", Path.GetTempPath());
 
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         var job = service.GetJob(id)!;
         Assert.Equal(JobStatus.Completed, job.Status);

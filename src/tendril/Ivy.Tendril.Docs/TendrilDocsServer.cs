@@ -1,14 +1,15 @@
 using System.Reflection;
+using Ivy.Docs.Helpers.Middleware;
+using Ivy.Tendril.Docs.Apps.GettingStarted;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Ivy.Docs.Helpers.Middleware;
 
 namespace Ivy.Tendril.Docs;
 
 public static class TendrilDocsServer
 {
-    private static readonly Assembly DocsAssembly = typeof(TendrilDocsServer).Assembly;
     private const string ResourcePrefix = "Ivy.Tendril.Docs.Generated.";
+    private static readonly Assembly DocsAssembly = typeof(TendrilDocsServer).Assembly;
 
     public static async Task RunAsync(ServerArgs? args = null)
     {
@@ -23,7 +24,8 @@ public static class TendrilDocsServer
             app.UseSitemap();
             app.UseSsrMarkdown(DocsAssembly, ResourcePrefix);
             app.UseMarkdownFiles(DocsAssembly, ResourcePrefix);
-            app.UseAssets(server.Args, app.Services.GetRequiredService<ILogger<Server>>(), "Assets", "tendril-docs/assets");
+            app.UseAssets(server.Args, app.Services.GetRequiredService<ILogger<Server>>(), "Assets",
+                "tendril-docs/assets");
         });
 
         var version = DocsAssembly.GetName().Version?.ToString()?.EatRight(".0") ?? "0.0.1";
@@ -39,7 +41,7 @@ public static class TendrilDocsServer
                     ).Gap(0)
                 ).Gap(2).Padding(2).AlignContent(Align.BottomLeft)
             )
-            .DefaultApp<Apps.GettingStarted.IntroductionApp>()
+            .DefaultApp<IntroductionApp>()
             .UsePages();
         server.UseAppShell(() => new DefaultSidebarAppShell(appShellSettings));
 

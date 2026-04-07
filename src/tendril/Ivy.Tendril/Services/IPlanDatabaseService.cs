@@ -35,7 +35,10 @@ public interface IPlanDatabaseService : IDisposable
     void UpsertPlan(PlanFile plan);
     void DeletePlan(int planId);
     void UpsertCosts(int planId, List<CostEntry> costs);
-    void UpsertRecommendations(int planId, string folderName, List<RecommendationYaml> recommendations, string project, string planTitle, DateTime updated, PlanStatus status);
+
+    void UpsertRecommendations(int planId, string folderName, List<RecommendationYaml> recommendations, string project,
+        string planTitle, DateTime updated, PlanStatus status);
+
     void BulkUpsertPlans(List<PlanFile> plans, bool forceOverwrite = false);
 
     // Jobs

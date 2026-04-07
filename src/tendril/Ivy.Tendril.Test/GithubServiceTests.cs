@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Test;
@@ -112,7 +113,7 @@ public class GithubServiceTests
 
     private static void RunGit(string workingDir, string args)
     {
-        var psi = new System.Diagnostics.ProcessStartInfo("git", args)
+        var psi = new ProcessStartInfo("git", args)
         {
             WorkingDirectory = workingDir,
             RedirectStandardOutput = true,
@@ -120,7 +121,7 @@ public class GithubServiceTests
             UseShellExecute = false,
             CreateNoWindow = true
         };
-        using var process = System.Diagnostics.Process.Start(psi)!;
+        using var process = Process.Start(psi)!;
         process.WaitForExit();
     }
 }

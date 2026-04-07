@@ -50,25 +50,25 @@ public class JobServicePlanYamlTests
         try
         {
             var yamlContent = """
-                state: Executing
-                project: Framework
-                level: Critical
-                title: Test Plan
-                repos:
-                - D:\Repos\TestRepo
-                prs:
-                - https://github.com/test/repo/pull/42
-                commits:
-                - abc1234
-                verifications:
-                - name: DotnetBuild
-                  status: Pass
-                - name: DotnetTest
-                  status: Pending
-                dependsOn:
-                - 01100-OtherPlan
-                relatedPlans: []
-                """;
+                              state: Executing
+                              project: Framework
+                              level: Critical
+                              title: Test Plan
+                              repos:
+                              - D:\Repos\TestRepo
+                              prs:
+                              - https://github.com/test/repo/pull/42
+                              commits:
+                              - abc1234
+                              verifications:
+                              - name: DotnetBuild
+                                status: Pass
+                              - name: DotnetTest
+                                status: Pending
+                              dependsOn:
+                              - 01100-OtherPlan
+                              relatedPlans: []
+                              """;
             File.WriteAllText(Path.Combine(tempDir, "plan.yaml"), yamlContent);
 
             var result = JobService.ReadPlanYaml(tempDir);
@@ -203,7 +203,8 @@ public class JobServicePlanYamlTests
         Directory.CreateDirectory(tempDir);
         try
         {
-            var yamlContent = "state: Draft\nproject: TestProject\nlevel: Critical\ntitle: My Plan\nupdated: 2026-01-01T00:00:00Z\nrepos:\n- D:\\Repos\\Test\n";
+            var yamlContent =
+                "state: Draft\nproject: TestProject\nlevel: Critical\ntitle: My Plan\nupdated: 2026-01-01T00:00:00Z\nrepos:\n- D:\\Repos\\Test\n";
             File.WriteAllText(Path.Combine(tempDir, "plan.yaml"), yamlContent);
 
             JobService.UpdatePlanYamlFields(tempDir, ("state", "Completed"));

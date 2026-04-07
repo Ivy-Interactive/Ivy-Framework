@@ -4,11 +4,11 @@ namespace Ivy.Tendril.Services;
 
 public class InboxWatcherService : IInboxWatcherService, IDisposable
 {
-    private readonly IJobService _jobService;
-    private readonly FileSystemWatcher? _watcher;
     private readonly string _inboxPath;
+    private readonly IJobService _jobService;
     private readonly Timer _pollTimer;
     private readonly ConcurrentDictionary<string, byte> _processing = new();
+    private readonly FileSystemWatcher? _watcher;
 
     public InboxWatcherService(IConfigService config, IJobService jobService)
     {
@@ -34,28 +34,31 @@ public class InboxWatcherService : IInboxWatcherService, IDisposable
         _pollTimer = new Timer(_ => ProcessExistingFiles(), null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
     }
 
+    public void Dispose()
+    {
+        _pollTimer.Dispose();
+        _watcher?.Dispose();
+    }
+
     internal void RecoverProcessingFiles()
     {
         if (!Directory.Exists(_inboxPath))
             return;
 
         foreach (var file in Directory.GetFiles(_inboxPath, "*.md.processing"))
-        {
             try
             {
                 var mdPath = file[..^".processing".Length];
                 if (File.Exists(mdPath))
-                {
                     // .md already exists — just delete the stale .processing file
                     File.Delete(file);
-                }
                 else
-                {
                     File.Move(file, mdPath);
-                }
             }
-            catch { /* Will be retried on next startup */ }
-        }
+            catch
+            {
+                /* Will be retried on next startup */
+            }
     }
 
     internal void ProcessExistingFiles()
@@ -63,10 +66,7 @@ public class InboxWatcherService : IInboxWatcherService, IDisposable
         if (!Directory.Exists(_inboxPath))
             return;
 
-        foreach (var file in Directory.GetFiles(_inboxPath, "*.md"))
-        {
-            _ = Task.Run(() => ProcessFileAsync(file));
-        }
+        foreach (var file in Directory.GetFiles(_inboxPath, "*.md")) _ = Task.Run(() => ProcessFileAsync(file));
     }
 
     private async Task ProcessFileAsync(string filePath)
@@ -153,11 +153,5 @@ public class InboxWatcherService : IInboxWatcherService, IDisposable
         }
 
         return ("[Auto]", content, null);
-    }
-
-    public void Dispose()
-    {
-        _pollTimer.Dispose();
-        _watcher?.Dispose();
     }
 }

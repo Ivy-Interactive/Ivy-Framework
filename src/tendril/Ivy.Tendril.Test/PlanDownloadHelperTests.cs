@@ -4,6 +4,7 @@ using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
@@ -20,13 +21,15 @@ public class PlanDownloadHelperTests
         Directory.CreateDirectory(planFolder);
         Directory.CreateDirectory(Path.Combine(planFolder, "revisions"));
         File.WriteAllText(Path.Combine(planFolder, "revisions", "001.md"), "# Test Plan\n\nTest content");
-        File.WriteAllText(Path.Combine(planFolder, "plan.yaml"), "state: Draft\nproject: Test\nlevel: Test\ntitle: Test Plan\nrepos: []\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\ninitialPrompt: test\nprs: []\ncommits: []\n");
+        File.WriteAllText(Path.Combine(planFolder, "plan.yaml"),
+            "state: Draft\nproject: Test\nlevel: Test\ntitle: Test Plan\nrepos: []\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\ninitialPrompt: test\nprs: []\ncommits: []\n");
 
         var planFolder2 = Path.Combine(tempDir, "00002-OtherPlan");
         Directory.CreateDirectory(planFolder2);
         Directory.CreateDirectory(Path.Combine(planFolder2, "revisions"));
         File.WriteAllText(Path.Combine(planFolder2, "revisions", "001.md"), "# Other Plan\n\nOther content");
-        File.WriteAllText(Path.Combine(planFolder2, "plan.yaml"), "state: Draft\nproject: Test\nlevel: Test\ntitle: Other Plan\nrepos: []\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\ninitialPrompt: test\nprs: []\ncommits: []\n");
+        File.WriteAllText(Path.Combine(planFolder2, "plan.yaml"),
+            "state: Draft\nproject: Test\nlevel: Test\ntitle: Other Plan\nrepos: []\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\ninitialPrompt: test\nprs: []\ncommits: []\n");
 
         File.WriteAllText(Path.Combine(tempDir, ".counter"), "3");
 
@@ -37,7 +40,7 @@ public class PlanDownloadHelperTests
         var testConfig = new TestConfigService(tempDir);
         services.AddSingleton<IConfigService>(testConfig);
         services.AddSingleton<ConfigService>(testConfig);
-        services.AddSingleton<Microsoft.Extensions.Logging.ILogger<PlanReaderService>>(NullLogger<PlanReaderService>.Instance);
+        services.AddSingleton<ILogger<PlanReaderService>>(NullLogger<PlanReaderService>.Instance);
         services.AddSingleton<PlanReaderService>();
         var provider = services.BuildServiceProvider();
         var context = new ViewContext(() => { }, null, provider);
@@ -59,7 +62,8 @@ public class PlanDownloadHelperTests
             await Task.Delay(100);
 
             ctx.Reset();
-            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null);
+            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [],
+                DateTime.UtcNow, DateTime.UtcNow, null);
             var testPlan = new PlanFile(metadata, "", Path.Combine(tempDir, "00001-TestPlan"), "");
 
             PlanDownloadHelper.UsePlanDownload(ctx, planService, testPlan);
@@ -86,7 +90,8 @@ public class PlanDownloadHelperTests
             var planService = ctx.UseService<PlanReaderService>();
 
             // First render with plan 1
-            var metadata1 = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null);
+            var metadata1 = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [],
+                DateTime.UtcNow, DateTime.UtcNow, null);
             var plan1 = new PlanFile(metadata1, "", Path.Combine(tempDir, "00001-TestPlan"), "");
             PlanDownloadHelper.UsePlanDownload(ctx, planService, plan1);
 
@@ -95,7 +100,8 @@ public class PlanDownloadHelperTests
 
             // Second render with plan 2
             ctx.Reset();
-            var metadata2 = new PlanMetadata(2, "Test", "Test", "Other Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null);
+            var metadata2 = new PlanMetadata(2, "Test", "Test", "Other Plan", PlanStatus.Draft, [], [], [], [], [], [],
+                DateTime.UtcNow, DateTime.UtcNow, null);
             var plan2 = new PlanFile(metadata2, "", Path.Combine(tempDir, "00002-OtherPlan"), "");
             PlanDownloadHelper.UsePlanDownload(ctx, planService, plan2);
 
@@ -142,7 +148,8 @@ public class PlanDownloadHelperTests
         try
         {
             var planService = ctx.UseService<PlanReaderService>();
-            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null);
+            var metadata = new PlanMetadata(1, "Test", "Test", "Test Plan", PlanStatus.Draft, [], [], [], [], [], [],
+                DateTime.UtcNow, DateTime.UtcNow, null);
             var testPlan = new PlanFile(metadata, "", Path.Combine(tempDir, "00001-TestPlan"), "");
 
             var result = PlanDownloadHelper.UsePlanDownload(ctx, planService, testPlan);
@@ -158,7 +165,10 @@ public class PlanDownloadHelperTests
 
     private class StubExceptionHandler : IExceptionHandler
     {
-        public bool HandleException(Exception exception) => false;
+        public bool HandleException(Exception exception)
+        {
+            return false;
+        }
     }
 
     internal class TrackingDownloadService : IDownloadService
@@ -166,14 +176,16 @@ public class PlanDownloadHelperTests
         public List<string> RegisteredFileNames { get; } = [];
         public Func<Task<byte[]>>? LastFactory { get; private set; }
 
-        public (IDisposable cleanup, string url) AddDownload(Func<Task<byte[]>> factory, string mimeType, string fileName)
+        public (IDisposable cleanup, string url) AddDownload(Func<Task<byte[]>> factory, string mimeType,
+            string fileName)
         {
             RegisteredFileNames.Add(fileName);
             LastFactory = factory;
             return (new StubDisposable(), $"blob:stub-url-{fileName}");
         }
 
-        public (IDisposable cleanup, string url) AddStreamDownload(Func<Task<Stream>> factory, string mimeType, string fileName)
+        public (IDisposable cleanup, string url) AddStreamDownload(Func<Task<Stream>> factory, string mimeType,
+            string fileName)
         {
             return (new StubDisposable(), "blob:stub-url");
         }
@@ -185,20 +197,21 @@ public class PlanDownloadHelperTests
 
         private class StubDisposable : IDisposable
         {
-            public void Dispose() { }
+            public void Dispose()
+            {
+            }
         }
     }
 
     private class TestConfigService : ConfigService, IConfigService
     {
-        private readonly string _planFolder;
-
         public TestConfigService(string planFolder)
         {
-            _planFolder = planFolder;
+            PlanFolder = planFolder;
         }
 
-        public new string PlanFolder => _planFolder;
-        string IConfigService.PlanFolder => _planFolder;
+        public new string PlanFolder { get; }
+
+        string IConfigService.PlanFolder => PlanFolder;
     }
 }

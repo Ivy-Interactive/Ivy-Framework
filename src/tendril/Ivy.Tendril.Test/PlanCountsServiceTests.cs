@@ -1,16 +1,17 @@
 using System.Collections.Concurrent;
 using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
 public class PlanCountsServiceTests : IDisposable
 {
-    private readonly string _tempDir;
-    private readonly string _plansDir;
-    private readonly PlanReaderService _planReader;
     private readonly FakeJobService _jobService;
+    private readonly PlanReaderService _planReader;
     private readonly FakePlanWatcherService _planWatcher;
+    private readonly string _plansDir;
+    private readonly string _tempDir;
 
     public PlanCountsServiceTests()
     {
@@ -20,7 +21,7 @@ public class PlanCountsServiceTests : IDisposable
 
         var settings = new TendrilSettings();
         var configService = new ConfigService(settings, _tempDir);
-        _planReader = new PlanReaderService(configService, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlanReaderService>.Instance);
+        _planReader = new PlanReaderService(configService, NullLogger<PlanReaderService>.Instance);
         _jobService = new FakeJobService();
         _planWatcher = new FakePlanWatcherService();
     }
@@ -28,7 +29,7 @@ public class PlanCountsServiceTests : IDisposable
     public void Dispose()
     {
         if (Directory.Exists(_tempDir))
-            Directory.Delete(_tempDir, recursive: true);
+            Directory.Delete(_tempDir, true);
     }
 
     private void CreatePlan(string folderName, string state)
@@ -105,13 +106,14 @@ public class PlanCountsServiceTests : IDisposable
 
         // Recommendations (pending on a completed plan)
         CreatePlan("00007-WithRecs", "Completed");
-        CreateRecommendations("00007-WithRecs", "- title: Fix something\n  description: |\n    Details here.\n  state: Pending\n");
+        CreateRecommendations("00007-WithRecs",
+            "- title: Fix something\n  description: |\n    Details here.\n  state: Pending\n");
 
         // Jobs
         AddJob("job-1", JobStatus.Running);
         AddJob("job-2", JobStatus.Queued);
         AddJob("job-3", JobStatus.Completed); // should not count as active
-        AddJob("job-4", JobStatus.Blocked);   // should count as active
+        AddJob("job-4", JobStatus.Blocked); // should count as active
 
         using var service = CreateService();
 
@@ -171,41 +173,87 @@ public class PlanCountsServiceTests : IDisposable
     {
         private readonly List<JobItem> _jobs = new();
 
-#pragma warning disable CS0067
-        public event Action? JobsChanged;
-        public event Action<JobNotification>? NotificationReady;
-#pragma warning restore CS0067
-
 #pragma warning disable CS0618
         public ConcurrentQueue<JobNotification> PendingNotifications { get; } = new();
 #pragma warning restore CS0618
+
+        public List<JobItem> GetJobs()
+        {
+            return _jobs;
+        }
+
+        public JobItem? GetJob(string id)
+        {
+            return _jobs.FirstOrDefault(j => j.Id == id);
+        }
+
+        public string StartJob(string type, string[] args, string? inboxFilePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string StartJob(string type, params string[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CompleteJob(string id, int? exitCode, bool timedOut = false, bool staleOutput = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void StopJob(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteJob(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ClearCompletedJobs()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ClearFailedJobs()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsInboxFileTracked(string filePath)
+        {
+            throw new NotImplementedException();
+        }
 
         public void AddJob(string id, JobStatus status)
         {
             _jobs.Add(new JobItem { Id = id, Status = status });
         }
 
-        public List<JobItem> GetJobs() => _jobs;
-        public JobItem? GetJob(string id) => _jobs.FirstOrDefault(j => j.Id == id);
-
-        public string StartJob(string type, string[] args, string? inboxFilePath) => throw new NotImplementedException();
-        public string StartJob(string type, params string[] args) => throw new NotImplementedException();
-        public void CompleteJob(string id, int? exitCode, bool timedOut = false, bool staleOutput = false) => throw new NotImplementedException();
-        public void StopJob(string id) => throw new NotImplementedException();
-        public void DeleteJob(string id) => throw new NotImplementedException();
-        public void ClearCompletedJobs() => throw new NotImplementedException();
-        public void ClearFailedJobs() => throw new NotImplementedException();
-        public bool IsInboxFileTracked(string filePath) => throw new NotImplementedException();
+#pragma warning disable CS0067
+        public event Action? JobsChanged;
+        public event Action<JobNotification>? NotificationReady;
+#pragma warning restore CS0067
     }
 
     private class FakePlanWatcherService : IPlanWatcherService
     {
         public event Action<string?>? PlansChanged;
 
-        public void RaisePlansChanged() => PlansChanged?.Invoke(null);
+        public void NotifyChanged(string? changedPlanFolder = null)
+        {
+            PlansChanged?.Invoke(changedPlanFolder);
+        }
 
-        public void NotifyChanged(string? changedPlanFolder = null) => PlansChanged?.Invoke(changedPlanFolder);
+        public void Dispose()
+        {
+        }
 
-        public void Dispose() { }
+        public void RaisePlansChanged()
+        {
+            PlansChanged?.Invoke(null);
+        }
     }
 }

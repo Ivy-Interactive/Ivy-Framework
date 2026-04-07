@@ -11,13 +11,13 @@ public class SidebarView(
     bool hasActiveFilters,
     IState<string?> textFilter) : ViewBase
 {
+    private readonly bool _hasActiveFilters = hasActiveFilters;
+    private readonly IState<string?> _planStatusFilter = planStatusFilter;
+    private readonly IState<string?> _projectFilter = projectFilter;
     private readonly List<Recommendation> _recommendations = recommendations;
     private readonly IState<Recommendation?> _selectedState = selectedState;
-    private readonly IState<string?> _projectFilter = projectFilter;
-    private readonly IState<string?> _planStatusFilter = planStatusFilter;
-    private readonly int _totalCount = totalCount;
-    private readonly bool _hasActiveFilters = hasActiveFilters;
     private readonly IState<string?> _textFilter = textFilter;
+    private readonly int _totalCount = totalCount;
 
     public object BuildHeader()
     {
@@ -35,13 +35,15 @@ public class SidebarView(
             .ToArray<IAnyOption>();
 
         return Layout.Vertical()
-            | _textFilter.ToSearchInput().Placeholder("Search recommendations...")
-            | new Expandable(
-                header: "Filters",
-                content: Layout.Vertical()
-                    | _projectFilter.ToSelectInput(projectOptions).Placeholder("All Projects").Nullable().WithField().Label("Project")
-                    | _planStatusFilter.ToSelectInput(statusOptions).Placeholder("All Statuses").Nullable().WithField().Label("Plan Status")
-            ).Open(false).Ghost();
+               | _textFilter.ToSearchInput().Placeholder("Search recommendations...")
+               | new Expandable(
+                   "Filters",
+                   Layout.Vertical()
+                   | _projectFilter.ToSelectInput(projectOptions).Placeholder("All Projects").Nullable().WithField()
+                       .Label("Project")
+                   | _planStatusFilter.ToSelectInput(statusOptions).Placeholder("All Statuses").Nullable().WithField()
+                       .Label("Plan Status")
+               ).Open(false).Ghost();
     }
 
     public object BuildContent()
@@ -61,12 +63,10 @@ public class SidebarView(
             .ToList();
 
         if (filtered.Count == 0 && _hasActiveFilters && _totalCount > 0)
-        {
             return Layout.Vertical().AlignContent(Align.Center).Gap(2).Padding(4)
-                | new Icon(Icons.ListFilterPlus).Size(Size.Units(6)).Color(Colors.Gray)
-                | Text.Muted("No matching recommendations")
-                | Text.Muted("Try adjusting your filters").Small();
-        }
+                   | new Icon(Icons.ListFilterPlus).Size(Size.Units(6)).Color(Colors.Gray)
+                   | Text.Muted("No matching recommendations")
+                   | Text.Muted("Try adjusting your filters").Small();
 
         return new List(filtered.Select(rec =>
         {
@@ -76,7 +76,7 @@ public class SidebarView(
                 ? rec.Description[..120] + "…"
                 : rec.Description;
 
-            return new ListItem($"#{rec.PlanId} {rec.Title}", subtitle: preview)
+            return new ListItem($"#{rec.PlanId} {rec.Title}", preview)
                 .OnClick(() => _selectedState.Set(clickableRec));
         }));
     }

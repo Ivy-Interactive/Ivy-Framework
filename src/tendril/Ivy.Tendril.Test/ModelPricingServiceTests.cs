@@ -49,8 +49,8 @@ public class ModelPricingServiceTests
         try
         {
             File.WriteAllText(tempFile, """
-                {"type":"assistant","message":{"model":"claude-sonnet-4","usage":{"input_tokens":1000,"output_tokens":500,"cache_read_input_tokens":200}}}
-                """);
+                                        {"type":"assistant","message":{"model":"claude-sonnet-4","usage":{"input_tokens":1000,"output_tokens":500,"cache_read_input_tokens":200}}}
+                                        """);
 
             var result = _service.CalculateFromFile(tempFile);
 
@@ -59,7 +59,7 @@ public class ModelPricingServiceTests
 
             // Expected: 1000 * 3.00/1M + 500 * 15.00/1M + 200 * 0.30/1M
             var expectedCost = 1000 * 3.00e-6 + 500 * 15.00e-6 + 200 * 0.30e-6;
-            Assert.Equal(expectedCost, result.TotalCost, precision: 10);
+            Assert.Equal(expectedCost, result.TotalCost, 10);
         }
         finally
         {
@@ -74,8 +74,8 @@ public class ModelPricingServiceTests
         try
         {
             File.WriteAllText(tempFile, """
-                {"type":"assistant","message":{"model":"claude-opus-4","usage":{"input_tokens":500,"output_tokens":100,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":300,"ephemeral_1h_input_tokens":200}}}}
-                """);
+                                        {"type":"assistant","message":{"model":"claude-opus-4","usage":{"input_tokens":500,"output_tokens":100,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":300,"ephemeral_1h_input_tokens":200}}}}
+                                        """);
 
             var result = _service.CalculateFromFile(tempFile);
 
@@ -83,7 +83,7 @@ public class ModelPricingServiceTests
             Assert.Equal(1100, result.TotalTokens);
 
             var expectedCost = 500 * 15.00e-6 + 100 * 75.00e-6 + (300 + 200) * 18.75e-6;
-            Assert.Equal(expectedCost, result.TotalCost, precision: 10);
+            Assert.Equal(expectedCost, result.TotalCost, 10);
         }
         finally
         {
@@ -98,15 +98,15 @@ public class ModelPricingServiceTests
         try
         {
             File.WriteAllText(tempFile, """
-                {"type":"assistant","message":{"model":"claude-opus-4","usage":{"input_tokens":500,"output_tokens":100,"cache_read_input_tokens":0,"cache_creation_input_tokens":400}}}
-                """);
+                                        {"type":"assistant","message":{"model":"claude-opus-4","usage":{"input_tokens":500,"output_tokens":100,"cache_read_input_tokens":0,"cache_creation_input_tokens":400}}}
+                                        """);
 
             var result = _service.CalculateFromFile(tempFile);
 
             Assert.Equal(1000, result.TotalTokens);
 
             var expectedCost = 500 * 15.00e-6 + 100 * 75.00e-6 + 400 * 18.75e-6;
-            Assert.Equal(expectedCost, result.TotalCost, precision: 10);
+            Assert.Equal(expectedCost, result.TotalCost, 10);
         }
         finally
         {
@@ -121,11 +121,11 @@ public class ModelPricingServiceTests
         try
         {
             File.WriteAllText(tempFile, """
-                {"type":"assistant","message":{"model":"claude-sonnet-4","usage":{"input_tokens":1000,"output_tokens":500,"cache_read_input_tokens":0}}}
-                this is not json
-                {"type":"user","message":"hello"}
-                {"type":"assistant","message":{"model":"claude-sonnet-4","usage":{"input_tokens":2000,"output_tokens":1000,"cache_read_input_tokens":0}}}
-                """);
+                                        {"type":"assistant","message":{"model":"claude-sonnet-4","usage":{"input_tokens":1000,"output_tokens":500,"cache_read_input_tokens":0}}}
+                                        this is not json
+                                        {"type":"user","message":"hello"}
+                                        {"type":"assistant","message":{"model":"claude-sonnet-4","usage":{"input_tokens":2000,"output_tokens":1000,"cache_read_input_tokens":0}}}
+                                        """);
 
             var result = _service.CalculateFromFile(tempFile);
 
@@ -165,7 +165,7 @@ public class ModelPricingServiceTests
             var expectedCost =
                 1000 * 15.00e-6 + 200 * 75.00e-6 +
                 500 * 15.00e-6 + 100 * 75.00e-6 + 300 * 1.50e-6;
-            Assert.Equal(expectedCost, result.TotalCost, precision: 10);
+            Assert.Equal(expectedCost, result.TotalCost, 10);
         }
         finally
         {
@@ -195,7 +195,7 @@ public class ModelPricingServiceTests
             // o4-mini pricing: input=1.10, output=4.40, cacheRead=0.275
             // output includes reasoning: 500 + 100 = 600
             var expectedCost = 5000 * 1.10e-6 + 600 * 4.40e-6 + 2000 * 0.275e-6;
-            Assert.Equal(expectedCost, result.TotalCost, precision: 10);
+            Assert.Equal(expectedCost, result.TotalCost, 10);
         }
         finally
         {
@@ -223,7 +223,7 @@ public class ModelPricingServiceTests
 
             // o3 pricing: input=10.00, output=40.00, cacheRead=2.50
             var expectedCost = 3000 * 10.00e-6 + 350 * 40.00e-6 + 1000 * 2.50e-6;
-            Assert.Equal(expectedCost, result.TotalCost, precision: 10);
+            Assert.Equal(expectedCost, result.TotalCost, 10);
         }
         finally
         {
@@ -238,25 +238,25 @@ public class ModelPricingServiceTests
         try
         {
             var json = """
-                {
-                  "sessionId": "test-session",
-                  "messages": [
-                    {"type": "user", "content": [{"text": "hello"}]},
-                    {
-                      "type": "gemini",
-                      "model": "gemini-2.5-pro",
-                      "tokens": {"input": 1000, "output": 200, "cached": 500, "thoughts": 50, "tool": 0, "total": 1750},
-                      "content": "response"
-                    },
-                    {
-                      "type": "gemini",
-                      "model": "gemini-2.5-pro",
-                      "tokens": {"input": 2000, "output": 400, "cached": 300, "thoughts": 100, "tool": 0, "total": 2800},
-                      "content": "another response"
-                    }
-                  ]
-                }
-                """;
+                       {
+                         "sessionId": "test-session",
+                         "messages": [
+                           {"type": "user", "content": [{"text": "hello"}]},
+                           {
+                             "type": "gemini",
+                             "model": "gemini-2.5-pro",
+                             "tokens": {"input": 1000, "output": 200, "cached": 500, "thoughts": 50, "tool": 0, "total": 1750},
+                             "content": "response"
+                           },
+                           {
+                             "type": "gemini",
+                             "model": "gemini-2.5-pro",
+                             "tokens": {"input": 2000, "output": 400, "cached": 300, "thoughts": 100, "tool": 0, "total": 2800},
+                             "content": "another response"
+                           }
+                         ]
+                       }
+                       """;
             File.WriteAllText(tempFile, json);
 
             var result = _service.ParseGeminiSessionFile(tempFile);
@@ -269,7 +269,7 @@ public class ModelPricingServiceTests
                 (1000 + 2000) * 1.25e-6 +
                 (200 + 400) * 10.00e-6 +
                 (500 + 300) * 0.315e-6;
-            Assert.Equal(expectedCost, result.TotalCost, precision: 10);
+            Assert.Equal(expectedCost, result.TotalCost, 10);
         }
         finally
         {
@@ -284,19 +284,19 @@ public class ModelPricingServiceTests
         try
         {
             var json = """
-                {
-                  "sessionId": "test-session",
-                  "messages": [
-                    {"type": "user", "content": [{"text": "hello"}]},
-                    {
-                      "type": "gemini",
-                      "model": "gemini-2.5-flash",
-                      "tokens": {"input": 500, "output": 100, "cached": 0, "thoughts": 10, "tool": 0, "total": 610},
-                      "content": "response"
-                    }
-                  ]
-                }
-                """;
+                       {
+                         "sessionId": "test-session",
+                         "messages": [
+                           {"type": "user", "content": [{"text": "hello"}]},
+                           {
+                             "type": "gemini",
+                             "model": "gemini-2.5-flash",
+                             "tokens": {"input": 500, "output": 100, "cached": 0, "thoughts": 10, "tool": 0, "total": 610},
+                             "content": "response"
+                           }
+                         ]
+                       }
+                       """;
             File.WriteAllText(tempFile, json);
 
             var result = _service.ParseGeminiSessionFile(tempFile);
@@ -305,7 +305,7 @@ public class ModelPricingServiceTests
 
             // gemini-2.5-flash pricing: input=0.15, output=0.60, cacheRead=0.0375
             var expectedCost = 500 * 0.15e-6 + 100 * 0.60e-6;
-            Assert.Equal(expectedCost, result.TotalCost, precision: 10);
+            Assert.Equal(expectedCost, result.TotalCost, 10);
         }
         finally
         {

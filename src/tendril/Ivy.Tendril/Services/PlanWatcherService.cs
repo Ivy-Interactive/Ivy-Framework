@@ -1,16 +1,22 @@
+using Timer = System.Timers.Timer;
+
 namespace Ivy.Tendril.Services;
 
 public class PlanWatcherService : IPlanWatcherService, IDisposable
 {
-    private readonly FileSystemWatcher? _watcher;
-    private readonly System.Timers.Timer _debounceTimer;
-    private string? _pendingPlanFolder;
+    private static readonly HashSet<string> WatchedFiles = new(StringComparer.OrdinalIgnoreCase)
+        { "plan.yaml" };
 
-    public event Action<string?>? PlansChanged;
+    private static readonly HashSet<string> WatchedFolders = new(StringComparer.OrdinalIgnoreCase)
+        { "revisions", "logs", "verification", "artifacts" };
+
+    private readonly Timer _debounceTimer;
+    private readonly FileSystemWatcher? _watcher;
+    private string? _pendingPlanFolder;
 
     public PlanWatcherService(IConfigService config)
     {
-        _debounceTimer = new System.Timers.Timer(500);
+        _debounceTimer = new Timer(500);
         _debounceTimer.AutoReset = false;
         _debounceTimer.Elapsed += (_, _) =>
         {
@@ -36,11 +42,18 @@ public class PlanWatcherService : IPlanWatcherService, IDisposable
         _watcher.Renamed += (_, _) => ScheduleDebounce(null);
     }
 
-    private static readonly HashSet<string> WatchedFiles = new(StringComparer.OrdinalIgnoreCase)
-        { "plan.yaml" };
+    public event Action<string?>? PlansChanged;
 
-    private static readonly HashSet<string> WatchedFolders = new(StringComparer.OrdinalIgnoreCase)
-        { "revisions", "logs", "verification", "artifacts" };
+    public void NotifyChanged(string? changedPlanFolder = null)
+    {
+        ScheduleDebounce(changedPlanFolder);
+    }
+
+    public void Dispose()
+    {
+        _watcher?.Dispose();
+        _debounceTimer.Dispose();
+    }
 
     private void OnFileEvent(object sender, FileSystemEventArgs e)
     {
@@ -64,7 +77,7 @@ public class PlanWatcherService : IPlanWatcherService, IDisposable
     }
 
     /// <summary>
-    /// Walk up from the changed file path to find the plan folder (direct child of the plans directory).
+    ///     Walk up from the changed file path to find the plan folder (direct child of the plans directory).
     /// </summary>
     private string? ResolvePlanFolder(string changedPath)
     {
@@ -73,43 +86,24 @@ public class PlanWatcherService : IPlanWatcherService, IDisposable
         var plansRoot = _watcher.Path;
         var dir = Path.GetDirectoryName(changedPath);
         while (dir != null && !string.Equals(Path.GetDirectoryName(dir), plansRoot, StringComparison.OrdinalIgnoreCase))
-        {
             dir = Path.GetDirectoryName(dir);
-        }
 
         return dir;
-    }
-
-    public void NotifyChanged(string? changedPlanFolder = null)
-    {
-        ScheduleDebounce(changedPlanFolder);
     }
 
     private void ScheduleDebounce(string? planFolder)
     {
         // If we already have a pending folder and a different one arrives, escalate to full rescan
         if (_pendingPlanFolder != null && planFolder != null
-            && !string.Equals(_pendingPlanFolder, planFolder, StringComparison.OrdinalIgnoreCase))
-        {
+                                       && !string.Equals(_pendingPlanFolder, planFolder,
+                                           StringComparison.OrdinalIgnoreCase))
             _pendingPlanFolder = null; // null = full rescan
-        }
         else if (_pendingPlanFolder == null && planFolder != null && !_debounceTimer.Enabled)
-        {
             _pendingPlanFolder = planFolder;
-        }
         // If planFolder is null (full rescan requested), override any specific folder
-        else if (planFolder == null)
-        {
-            _pendingPlanFolder = null;
-        }
+        else if (planFolder == null) _pendingPlanFolder = null;
 
         _debounceTimer.Stop();
         _debounceTimer.Start();
-    }
-
-    public void Dispose()
-    {
-        _watcher?.Dispose();
-        _debounceTimer.Dispose();
     }
 }
