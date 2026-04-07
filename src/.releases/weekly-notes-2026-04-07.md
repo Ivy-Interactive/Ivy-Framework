@@ -3,30 +3,181 @@
 > [!NOTE]
 > We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
 
-This week’s notes cover **Ivy Framework** changes **excluding** the Tendril apps and tooling. **Frontend-only** fixes are omitted from **Bug fixes** (see that section).
+This release covers Ivy Framework changes from late March through early April 2026. Updates that belong only to Tendril apps or internal plan tooling are omitted. Bug fixes focus on server, .NET, and build issues; routine frontend-only fixes are not listed exhaustively.
 
-The sections below walk through changes **day by day**; later days are appended as the week progresses.
+## Charts
 
-## Day 1
+### Dual-axis and axis generation
 
-### [01255] Button badge outline variant
+Bar, Line, Area, and [Scatter](https://docs.ivy.app/widgets/charts/scatter-chart) series support `YAxisIndex` for dual-axis layouts. `generateYAxis` was refined for multi-axis charts (including skipping `largeSpread` when multiple axes are active). Cartesian charts reclaim plot width when X axes are hidden, and grid padding was tuned so hidden axes do not waste space.
 
-Badges on [**Button**](https://docs.ivy.app/widgets/common/button) now render with the **outline** badge style so they read clearly on both **solid** and **outline** button variants. Unit tests lock in the behavior.
+### Bar chart
 
-```csharp
-new Button("Inbox", OnOpenInbox, variant: ButtonVariant.Primary).Badge("12");
-new Button("Updates", OnCheckUpdates, variant: ButtonVariant.Outline).Badge("3");
-```
+BarChart vertical bar orientation and ECharts axis pairing were corrected. `YAxis.Hide` is honored reliably, and grid padding behaves correctly with hidden axes. Documentation describes the `YAxisIndex` pattern on `Bar` records and dual-axis setups.
 
-You still use **`.Badge(string)`** on the button; only the default visual treatment of the badge chip changed.
+### Scatter chart
 
-### [01269] DataTable decimal scaling
+Scatter avoids category axes where a value axis is required. [ScatterChartApp](https://docs.ivy.app/widgets/charts/scatter-chart) includes a dual-axis sample; the sample uses a numeric X axis (not category) for continuous data. Widget tests cover ScatterChart, and the implementation blocks inappropriate category axis typing for scatter data.
 
-[**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) column formatting for **decimal** values is more reliable when the runtime exposes values through **`valueOf`**: the pipeline falls back to **string** when needed so scaling and display stay consistent.
+### Line and area series
 
-### [01278] `CardHoverVariant` renamed to `HoverEffect`
+Line and Area series expose `YAxisIndex` and documentation covers polish callbacks.
 
-The hover enum was renamed from **`CardHoverVariant`** to **`HoverEffect`** and moved to shared APIs (`Ivy` namespace) so Card, Box, Image, and other widgets share one type.
+### Pie chart
+
+[PieChart](https://docs.ivy.app/widgets/charts/pie-chart) tooltips use a formatter with marker styling for clearer series labels and values.
+
+## DataTable and querying
+
+### Decimal and footer formatting
+
+[DataTable](https://docs.ivy.app/widgets/advanced/data-table) decimal columns handle `valueOf` more reliably with a string fallback. Footer cells format currency and numeric aggregates to match column rules.
+
+### Column expressions
+
+Navigation properties and ternary expressions work more predictably in column expressions.
+
+### Column scaling
+
+Optional auto-exclusion of navigation collection columns from scaling avoids distorted layouts.
+
+### ToDetails and navigation properties
+
+`ToDetails()` no longer shows raw CLR type names for navigation properties.
+
+### Virtual columns
+
+You can define multiple virtual columns from the same root property.
+
+### Sorting and stable order
+
+When `AllowSorting` is false, `ToDataTable` preserves source order. The query processor applies a default `OrderBy` when pagination needs a stable order.
+
+### UseDataTable config
+
+`ViewBase.UseDataTable` accepts a config parameter to forward options from one place.
+
+### Search
+
+Search includes match navigation, highlights, and a progress indicator for large tables.
+
+### Badge and link cells
+
+Badge cells can use per-value colors. Link cells cooperate with `OnCellClick` without double navigation.
+
+### Tooltips on cells
+
+Cells use the shared `withTooltip` wrapper instead of the native `title` attribute.
+
+### Virtual scrolling and height
+
+Virtual scrolling paints rows reliably; height behavior in unconstrained parents was fixed, including a zero-height regression follow-up with container style tests.
+
+### Documentation
+
+UseQuery + DataTable anti-patterns are clarified for authors and AGENTS (prefer `IQueryable` / `ToDataTable()` where appropriate).
+
+## Markdown and tables
+
+The [Markdown](https://docs.ivy.app/widgets/primitives/markdown) widget renders Graphviz diagrams (samples and docs ship in the same period). Images embedded in markdown use a light border. Table widget borders align with markdown-rendered tables. Fenced code blocks without a language render reliably; markdown tables inside fenced code stay literal (not rendered as HTML tables). Default container gap is tighter, with element-specific spacing instead of one uniform gap for every block.
+
+## Image
+
+[Image](https://docs.ivy.app/widgets/primitives/image) supports `Overlay` for lightbox viewing. Arrow keys move between sibling overlays. Earlier in the cycle, `Overlay` was introduced as a boolean on the widget record.
+
+## Sheet
+
+[Sheet](https://docs.ivy.app/widgets/advanced/sheet) has a resizable drag handle, improved width handling (including vs Tailwind variants and follow-up size fixes), and works with explicit width plus resize.
+
+## Dialog and AutoFocus
+
+Dialog and Sheet no longer block AutoFocus on child inputs (with a client `HTMLElement` cast where needed). DialogApp demonstrates AutoFocus.
+
+## Tabs and loading
+
+[TabsLayout](https://docs.ivy.app/widgets/layouts/tabs-layout) adds `OnCloseOthers` (close other tabs), syncs tab order on refresh to avoid flicker, and supports badges on the Content tab variant (secondary, smaller).
+
+## Layout and chrome
+
+Layout.Grid defaults to top-left alignment (use `AlignContent` if you relied on center). [HeaderLayout](https://docs.ivy.app/widgets/layouts/header-layout) and [FooterLayout](https://docs.ivy.app/widgets/layouts/footer-layout) support scroll-triggered drop shadows. The shared `useScrollShadow` hook adds a `direction` parameter, uses `MutationObserver` (batched with `requestAnimationFrame`) for dynamic content, and was extracted from header/footer implementations. Container size measurement retries for nested flex layouts.
+
+## StackedProgress
+
+[StackedProgress](https://docs.ivy.app/widgets/common/progress) is a segmented colored bar with `OnSelect` / `Selected`; ShowLabels turns on automatically when a segment has a label. Samples wrap it in Box with padding and avoid `Client.Toast` from `SampleBase`.
+
+## Terminal
+
+The Terminal widget exposes `Background` and `Foreground`.
+
+## Detail helper
+
+The Detail helper’s `Multiline` option defaults to `false`.
+
+## DiffView
+
+[DiffView](https://docs.ivy.app/widgets/primitives/diff-view) uses a smaller default font.
+
+## Confetti
+
+Confetti uses a shorter duration and fewer particles.
+
+## Buttons and badges
+
+[Button](https://docs.ivy.app/widgets/common/button) badges use the outline chip style (with unit tests). [Tab](https://docs.ivy.app/widgets/layouts/tabs-layout) (Content variant) and [DropDownMenu](https://docs.ivy.app/widgets/common/drop-down-menu) items support badges. [Badge](https://docs.ivy.app/widgets/common/badge) renders nothing for empty text. Menu items support extra color options. ThemeCustomizer improves empty placeholders. `CardHoverVariant` is renamed to `HoverEffect` in shared APIs—update Card, Box, and Image hover calls accordingly.
+
+## Inputs and file uploads
+
+[ContentInput](https://docs.ivy.app/widgets/inputs/content-input) supports attachments, optional `ShortcutKey`, density-scaled sub-widgets, invalid state samples, shared `FileAttachmentList`, `validateFileWithToast`, `useUploadWithProgress`, `XMLHttpRequest` upload progress, and FileDialog integration—plus docs, Playwright patterns, and a three-column CodeBlock-style language grid in related samples. [FolderInput](https://docs.ivy.app/widgets/inputs/folder-input) supports `FolderInputMode` (including full path), full-row click, Enter/Space, and browse `aria-label`. FileInput browse controls expose `aria-label`. Password, email, tel, url, and textarea samples show `ShortcutKey`; textarea supports Ctrl+Enter / Cmd+Enter to submit and blur. TextInput has keyboard tests and cleaner affix shortcut demos. SignatureInput supports dark mode and color tests. `useDictation` gains tests and drops unused surface area; `dictationLanguage` was removed from the TextInput widget where redundant. [Select](https://docs.ivy.app/widgets/inputs/select-input) fixes dropdown placement when both placeholder and items are present.
+
+## Code blocks and languages
+
+The Languages enum carries `Description` attributes for labels. CodeBlock and samples add PowerShell, Bash/Shell, and related FileApp language mapping. The CodeBlock sample uses a three-column language grid in places.
+
+## Accessibility
+
+A broad WCAG pass adds `aria-label`s (including tooltip targets, `role="button"` surfaces, and browse buttons). DataTable uses the design-system tooltip instead of raw `title`.
+
+## Routing, shell, and apps
+
+`?chrome=false` remains compatible with newer shell flags; AppRouter tests live in `Ivy.Test` (internals). Apps may set `allowDuplicateTabs` (e.g. FileApp in samples). Routing dots in the shell were restored. The samples Setup app is renamed Settings with a cogs icon.
+
+## Blades
+
+`IBladeService` is renamed to `IBladeContext`—update DI and `UseService` usages.
+
+## Branding and theming
+
+ivy-green and related brand tokens land in CSS; sidebar can use `bg-secondary`. ThemeCustomizer empty states are clearer.
+
+## Keyboard and shortcuts
+
+Global shortcuts use `event.code` on macOS for reliable Option/Command chords. Modifier shortcuts still fire when focus is inside multi-line text areas. Shortcut helpers consolidate under `@/lib/shortcut`.
+
+## Server, auth, and HTTP
+
+OAuth callbacks use `LocalRedirect`. SignalR hub tests cover `/ivy/messages`. WebApplicationFactory-style HTTP tests and shared Ivy.Integration.Tests infrastructure land alongside Mock HTTP helpers. Ivy.Docs.Shared delegates to Ivy.Docs.Helpers to deduplicate middleware.
+
+## Build, packaging, and native assets
+
+Docker images retain the rustserver binary on clean builds. Embedded resource logical names work cross-platform; Vite EmbeddedResource races (CS1566) are addressed; macOS/Linux 404s and blank screens from assets are fixed; duplicate `UseFrontend`/`UseAssets` and App ID `assets` collisions are resolved. CI fixes NuGet markdown globbing with native targets. `pnpm` `--frozen-lockfile`, lockfile regeneration, NuGet lock files for core packages, and docs embedded in nupkg improve reproducible builds. `KillProcessUsingPort` works on macOS and Linux. `.gitattributes` enforces LF (including widget frontends); `.npmrc` is ignored in frontend and widget trees. Markdown converter cache keys on file content.
+
+## Diagnostics and client logging
+
+Client `logger.info` is downgraded to `logger.debug`. `WidgetTree` `RefreshRequested` and `_RefreshView` wrap try/catch so one bad view does not tear down the tree.
+
+## Tooling, analyzers, and repository hygiene
+
+Roslyn analyzer `IVYSERVICE001` requires `UseService` at the top of `Build()` (see [AGENTS.md](https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/AGENTS.md)). IDE0005 and bulk unused `using` cleanup run across the repo. Pre-commit can scope to frontend paths. Hooks use a barrel export (with duplicate export fixes). Security/code scanning warnings are addressed. Ivy.Agent.Filter.Tests local setup and `ivy` CLI “command not found” Mac notes help onboarding.
+
+## Documentation and AI guidance
+
+Hallucinations / AGENTS docs expand (`IBladeContext`, `Server.StartAsync`, `SelectOption<T>`, compound widgets, UseLoading page, chart polish, IvyFrameworkGotchas trimming, RadialBarChart outdated notes removed). Playwright knowledge splits into focused files; widgets guidance consolidates; obsolete redirect files are removed. Input doc filenames are renumbered so the sidebar order is unique. IvyFrameworkVerification follows the split knowledge layout and documents process timeout guards.
+
+## Breaking changes
+
+### `CardHoverVariant` → `HoverEffect`
+
+The hover enum was renamed and moved to shared APIs. Replace `CardHoverVariant` with `HoverEffect` on Card, Box, and Image.
 
 ```csharp
 new Card(Text.Block("Hello")).Hover(HoverEffect.Shadow);
@@ -34,344 +185,16 @@ new Box(Text.Block("Click me")).Hover(HoverEffect.PointerAndTranslate);
 new Image("photo.jpg").Hover(HoverEffect.Pointer);
 ```
 
-Replace any remaining **`CardHoverVariant`** references with **`HoverEffect`**.
+### `IBladeService` → `IBladeContext`
 
-### [01276] Image `Overlay` for lightbox
-
-[**Image**](https://docs.ivy.app/widgets/primitives/image) has a boolean **`Overlay`** property. When **true**, the image opens in a **lightbox-style** full-screen viewer on the client.
-
-```csharp
-new Image("https://example.com/diagram.png")
-{
-    Alt = "Architecture",
-    Overlay = true
-};
-```
-
-Later in the week, keyboard navigation between sibling overlays was added on top of this.
-
-## Day 2
-
-### [01296] Badges on Tab Content and DropdownMenu
-
-When using [**TabsLayout**](https://docs.ivy.app/widgets/layouts/tabs-layout) with the **Content** tab variant, each [**Tab**](https://docs.ivy.app/widgets/layouts/tabs-layout) can show a **badge** (counts, “New”, and so on). [**MenuItem**](https://docs.ivy.app/widgets/common/menu-item) entries used in [**DropDownMenu**](https://docs.ivy.app/widgets/common/drop-down-menu) also **render badges** in the menu UI, aligned with sidebar and button badge patterns.
-
-```csharp
-new Tab("Inbox", inboxView).Badge("12");
-MenuItem.Default("Exports").Badge("3");
-```
-
-### [01321] `?chrome=false` and shell URL compatibility
-
-The **`?chrome=false`** query parameter remains **supported** alongside newer **shell / chrome** URL flags so existing bookmarks and integrations keep working. **Tests** cover chrome and shell parameter combinations. **AppRouter** tests were moved into the **`Ivy.Test`** project so they can use **internals** from the router assembly via **`InternalsVisibleTo`**.
-
-### [01356] Markdown code blocks without a language
-
-Fenced **code blocks** in the [**Markdown**](https://docs.ivy.app/widgets/primitives/markdown) widget that **omit a language** specifier now render reliably instead of breaking or appearing blank.
-
-### [01372] `IBladeService` renamed to `IBladeContext`
-
-The blades API type was renamed from **`IBladeService`** to **`IBladeContext`**. Update dependency injection registrations and **`UseService`** / constructor parameters to the new interface name; documentation and hallucination entries were updated accordingly.
-
-### [01403] Resizable Sheet drag handle
-
-The [**Sheet**](https://docs.ivy.app/widgets/advanced/sheet) widget supports a **resizable drag handle** so users can adjust height (or width, depending on configuration) by dragging.
-
-### [01407] `Languages` enum `Description` attributes
-
-The **Languages** enum used for syntax highlighting and samples now has **`Description`** attributes for **human-readable labels** in UI and docs where the raw enum name is not ideal.
-
-### [01263] Grid default alignment
-
-**Layout.Grid** defaults to **top-left** alignment instead of **center**, which matches typical forms and dashboards. If you relied on centered grid content, set **AlignContent** explicitly.
-
-### [01415] DataTable footer aggregates
-
-[**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) **footer** cells now **format currency and numeric aggregates** consistently with column formatting (for example sums and averages in money and number columns).
-
-### Image overlay keyboard navigation
-
-When [**Image**](https://docs.ivy.app/widgets/primitives/image) **`Overlay`** is enabled, **arrow keys** move between **sibling** overlay images in sequence (for example gallery or documentation figures).
-
-### Branding and shell colors
-
-CSS adds an **`ivy-green`** (and related) **branding variable** for consistent Ivy identity. Follow-up tweaks **hard-code** or wire the **ivy brand** color where theme tokens needed it, and the **sidebar** uses the **`bg-secondary`** semantic variable for its background. **ThemeCustomizer** shows clearer **placeholders** in empty option boxes.
-
-### AutoFocus on buttons and inputs
-
-[**Button**](https://docs.ivy.app/widgets/common/button) and **input** widgets support **`AutoFocus`**, including focus when opening **Dialog** and **Sheet** content so the first field can take focus without an extra click.
-
-### Tooling and security
-
-The **`KillProcessUsingPort`** helper used in dev workflows now runs on **macOS** and **Linux** as well as Windows. **Security**-related analyzer and dependency **warnings** were addressed.
-
-### [01535] Detail `Multiline` optional
-
-The **Detail** row helper’s **`Multiline`** flag is **optional** and defaults to **`false`**, so single-line details stay compact unless you opt into wrapped text.
-
-### [01542] StackedProgress widget
-
-A new [**StackedProgress**](https://docs.ivy.app/widgets/common/progress) widget shows a **segmented** bar with multiple **colored** sections for split metrics or multi-part status. A small follow-up fixed a **`BarHeight`** naming clash and an **Icons** reference in the sample wiring.
-
-### [01595] Confetti
-
-The **confetti** celebration uses a **shorter** duration and **fewer particles** for a lighter effect.
-
-### [01598] AutoFocus inside Dialog and Sheet
-
-**Dialog** and **Sheet** no longer block **AutoFocus** on nested **inputs**; the client casts **`EventTarget`** to **`HTMLElement`** where the focus helper requires it.
-
-### [01600] Header chrome shadow
-
-**HeaderLayout** picks up a **scroll-triggered drop shadow** when the page content scrolls under the header (same pattern as the footer shadow added elsewhere).
-
-### [01088] Keyboard shortcuts on macOS
-
-Global shortcuts use **`event.code`** (physical key) instead of **`key`**, so **Option / Command** combinations behave reliably on **Mac**.
-
-### [01089] DataTable tooltips
-
-**DataTable** cell chrome uses the shared **`withTooltip`** wrapper instead of the native **`title`** attribute, so tooltips are consistent with the rest of the design system and easier to style.
-
-### Badge widget empty state
-
-[**Badge**](https://docs.ivy.app/widgets/common/badge) renders **nothing** when the label is **empty** instead of a tiny blank pill.
-
-### Embedded assets and tooling
-
-**Blank screens** and **404** embedded resources on **macOS** and **Linux** were addressed by fixing how **static assets** are resolved cross-platform.
-
-### [01651] StackedProgress sample layout
-
-The **StackedProgress** sample wraps the widget in a **Box** with **padding** so the segmented bar aligns cleanly with surrounding layout.
-
-### [01666] DataTable source order and `UseDataTable` config
-
-When **`AllowSorting`** is **false**, **`ToDataTable`** now **preserves the source sequence** of rows instead of reordering unexpectedly.
-
-### [01703] Multiple virtual columns from one root
-
-[**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) supports **more than one virtual column** that project from the **same root property** (for example different facets of one navigation object).
-
-### Charts: `YAxisIndex`
-
-**Line** and **Area** series expose **`YAxisIndex`** for **dual-axis** charts, matching the **Bar** and **Scatter** work.
-
-### [01696] Dialog sample and AutoFocus
-
-**DialogApp** includes an **AutoFocus** example showing how the first input can take focus when a dialog opens.
-
-### CLI troubleshooting on macOS
-
-Docs and tooling add short **troubleshooting** for the common case where the **`ivy`** CLI is **not found** on **macOS** (PATH or install location).
-
-### [01743] Scatter chart sample and X-axis typing
-
-**ScatterChartApp** includes a **dual-axis** example aligned with **`YAxisIndex`**. The sample’s **X** axis uses a **numeric** scale instead of **category** so point series behave like continuous data.
-
-### StackedProgress selection API
-
-**StackedProgress** exposes **`OnSelect`** and **`Selected`** for interactive segments. The **StackedProgress** sample no longer calls **`Client.Toast`** from **`SampleBase`**.
-
-### Tab badges on Content variant
-
-For the **Content** tab style, **badges** use the **secondary** color and a **smaller** size so they stay subtle next to titles.
-
-### DataTable link cells and row actions
-
-**Link** cells no longer **navigate** in a way that fights a configured **`OnCellClick`** handler: clicks respect the table’s **cell-click** contract when both features are used together.
-
-### StackedProgress labels
-
-If a **segment** defines a **label**, **ShowLabels** turns on **automatically** so short segments still show their caption without extra boilerplate.
-
-### Sheet width and resizing
-
-**Sheet** sizing was fixed when combining **explicit width** with the **resizable** handle so width constraints and drag-to-resize behave together.
-
-### Roslyn analyzer IVYSERVICE001
-
-A new **Roslyn** diagnostic **`IVYSERVICE001`** flags **`UseService`** calls that are not at the **top** of **`Build()`**, matching the hook rules in [**AGENTS.md**](https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/AGENTS.md) and keeping views easy to reason about.
-
-### Navigation menu colors
-
-**Menu** items (sidebar and related chrome) support **additional color** options for clearer emphasis and grouping.
-
-### DataTable: search, badges, and columns
-
-**DataTable** gains **search match navigation** with **highlights** and a **progress** indicator while scanning large result sets. **Badge** cells in columns can use **per-value colors** so status-like fields stay scannable.
-
-### Select list placement
-
-**Select** fixes **dropdown placement** when the control shows both a **placeholder** and **items**, so the list panel lines up predictably with the trigger.
-
-### Text inputs and global shortcuts
-
-**Modifier shortcuts** (for example **Ctrl**/**Cmd** combinations) continue to work when focus is inside **multi-line text areas**, without the browser swallowing the chord. This complements the earlier **global shortcut** work that uses **`event.code`** on **macOS**.
-
-### ContentInput and FolderInput
-
-[**ContentInput**](https://docs.ivy.app/widgets/inputs/content-input) ships with **file attachment** support, an optional **`ShortcutKey`**, a dedicated **sample app**, **documentation**, **Playwright** patterns, and a shared **`FileAttachmentList`** component for attachment chips. [**FolderInput**](https://docs.ivy.app/widgets/inputs/folder-input) supports **`FolderInputMode`** (including **full path**), the **entire row** opens the directory picker, and **Enter** / **Space** activate the control for keyboard users.
-
-### Languages and FileApp
-
-**CodeBlock** and related enums add **PowerShell**, **Bash/Shell**, and **FileApp**’s language map recognizes them for file-type detection where applicable.
-
-### ContentInput and uploads
-
-**ContentInput** sub-widgets **scale with density**, and the sample adds **Scale** and **Invalid** tabs plus **tests** and **Playwright** notes for those states. **`ShortcutKey`** is documented in the props table and demonstrated in the sample. Shared **`validateFileWithToast`** removes duplicated validation code. **`FileAttachmentList`** card sizing respects **density**. Client uploads use a shared **`useUploadWithProgress`** hook and a single **upload URL** helper; **`XMLHttpRequest`** reports **upload progress**; **FileDialog** uses the same progress path.
-
-### CodeBlock sample
-
-The **CodeBlock** sample adds **Bash** and **PowerShell** snippets and uses a **three-column** language grid for quicker scanning.
-
-### Tabs
-
-**TabsLayout** exposes **`OnCloseOthers`** with a **Close other tabs** action; wiring uses record **with-expressions** correctly after an initial fix pass.
-
-### Dictation hook
-
-**`useDictation`** drops an unused callback, adds **tests**, and the **TextInput** widget removes the redundant **`dictationLanguage`** prop (language comes from elsewhere).
-
-## Buttons, badges, and navigation
-
-- [**Button**](https://docs.ivy.app/widgets/common/button) **badges** use the **outline** variant for clearer contrast; **unit tests** were added.
-- [**Badge**](https://docs.ivy.app/widgets/common/badge): **empty** badge text renders **nothing** instead of a tiny pill.
-- **Tab** (Content variant) and [**DropDownMenu**](https://docs.ivy.app/widgets/common/drop-down-menu) items support **badges** like other chrome.
-- **Menu** items support **additional colors** for richer navigation.
-- **Hover effects**: **`CardHoverVariant`** was renamed to **`HoverEffect`** and consolidated in **shared** APIs (used by Card, Box, Image, etc.); update call sites if you still reference the old name.
-- **ThemeCustomizer**: visual treatment for **empty** placeholder boxes.
-- **Confetti** animation: **shorter duration** and **fewer particles**.
-
-## Image, Markdown, and tables
-
-- [**Image**](https://docs.ivy.app/widgets/primitives/image): **`Overlay`** for **lightbox**-style viewing; **arrow keys** move between sibling images in a group.
-- [**Markdown**](https://docs.ivy.app/widgets/primitives/markdown): **light border** on embedded images; **Graphviz** rendering; **samples and docs** for Graphviz; **spacing** refined (including **element-specific** gaps instead of one uniform markdown gap).
-- [**Table**](https://docs.ivy.app/widgets/common/table) **border styling** aligned with **Markdown** tables.
-
-## Sheet, dialog, tabs, and loading
-
-- [**Sheet**](https://docs.ivy.app/widgets/advanced/sheet): **resizable drag handle**; **size handling** improvements; wiring for **resizable sheets** with explicit width (see also Bug fixes for non-FE items).
-- **Dialog / Sheet** work better with **AutoFocus** on child inputs.
-- **TabsLayout**: **`OnCloseOthers`** and **Close other tabs**; **tab order** synced on refresh to reduce flicker.
-
-## Layout and chrome
-
-- **Layout.Grid**: default alignment is **top-left** instead of center (set **AlignContent** if you depended on the old default).
-- **HeaderLayout**: **scroll-triggered drop shadow** on the header.
-- **FooterLayout**: same **scroll-triggered shadow** pattern.
-- Shared **`useScrollShadow`** hook: **direction** parameter; **MutationObserver** + **requestAnimationFrame** optimizations for dynamic content; extracted from layout widgets and reused.
-- **Container size**: **retry** of initial measurement for **nested flex** layouts.
-
-## Widgets: progress, terminal, detail, diff
-
-- **StackedProgress**: new **segmented** progress bar widget; **`OnSelect`** / **`Selected`**; labels can **auto-enable** segment labels; samples and layout polish (including wrapping in **Box** where appropriate).
-- **Terminal**: **`Background`** and **`Foreground`** for theme-aware terminal colors.
-- **Detail**: **`Multiline`** is optional and defaults to **`false`**.
-- **DiffView**: **smaller** default font for denser diffs.
-
-## Charts
-
-- **Bar**, **Line**, **Area**, **Scatter**: **`YAxisIndex`** and **dual-axis** support; **`generateYAxis`** updates (including multi-axis and **largeSpread** behavior); **grid padding** and **whitespace** when axes are hidden.
-- **BarChart**: vertical bar layout and **axis** behavior refined; **YAxis** **Hide** honored; documentation for **YAxisIndex** and dual-axis **Bar** records.
-- **Line / Area / Scatter**: **`YAxisIndex`** on series types; **Scatter** avoids **category** axes where **numeric** axes are required; **ScatterChart** sample **dual-axis** example; **tests** and coverage for **ScatterChart**.
-- **PieChart**: **tooltip** uses a **formatter** with **marker** styling.
-
-## DataTable and querying
-
-- **Search**: **match navigation**, **highlights**, and a **progress** indicator for large tables.
-- **Columns**: **multiple virtual columns** from the same **root** property; **badge** **colors** in cells.
-- **Scaling / schema**: optional **auto-exclusion** of **navigation collection** columns from scaling; **decimal** display improvements (**valueOf** with string fallback).
-- **Expressions**: better support for **navigation properties** and **ternary** expressions in column expressions.
-- **ToDetails()**: does not surface raw **type names** for navigation properties inappropriately.
-- **Footer**: **currency / number** aggregates formatted correctly.
-- **Query processor**: **default `OrderBy`** when pagination needs a stable order; **source order** preserved when sorting is disabled; tests and **`ViewBase.UseDataTable`** configuration surface.
-- **Docs / agents**: **UseQuery + DataTable** anti-pattern clarified in documentation and agent instructions.
-- **Link cells**: interaction when **links** and **`OnCellClick`** are both in play.
-- **Tooltips**: **DataTable** uses the shared **tooltip** wrapper instead of relying on the native **`title`** attribute alone.
-
-## Inputs and file uploads
-
-- [**ContentInput**](https://docs.ivy.app/widgets/inputs/content-input): attachments, optional **`ShortcutKey`**, **density** scaling, **invalid** state samples, shared **FileAttachmentList**, **`validateFileWithToast`**, consolidated **upload URL** helpers, **`useUploadWithProgress`**, **client-side progress** via **`XMLHttpRequest`**, **FileDialog** integration, docs and **Playwright** notes.
-- [**FolderInput**](https://docs.ivy.app/widgets/inputs/folder-input): **full-row** click to open picker; **`FolderInputMode`** and **full path** mode; **keyboard** (**Enter** / **Space**); **aria-label** on browse control; docs renumbered alongside other input docs.
-- **FileInput**: **aria-label** on browse.
-- **PasswordInput**, **Email**, **Tel**, **Url**, **Textarea**: **ShortcutKey** demos; **Ctrl+Enter / Cmd+Enter** to submit and blur **textarea** where applicable.
-- **TextInput**: **keyboard** interaction **unit tests**; **shortcut** deduplication in affix demos; **dictation** hook cleanup; **modifier shortcuts** respected when focus is inside **text areas**.
-- **SignatureInput**: **dark mode** via theme service; **unit tests** for color resolution.
-- **Select**: list **placement** when items include placeholders (treated as a **behavior** improvement, not listed under Bug fixes).
-
-## Code blocks and languages
-
-- **Languages** enum: **`Description`** attributes for **display labels**; **Bash/Shell**, **PowerShell** (also in **CodeBlock** samples); **PowerShell** added in related enums/maps where applicable.
-- **CodeBlock** sample: language grid layout and sample snippets updated.
-
-## Accessibility
-
-- Broad **WCAG**-oriented pass: **`aria-label`** on **tooltip** targets, **`role="button"`** surfaces, **browse** buttons on **FileInput** / **FolderInput**, and related **keyboard** affordances.
-- **Tooltip**-wrapped components expose appropriate **accessible names** where needed.
-
-## Routing, shell, and apps
-
-- **URL**: **`?chrome=false`** **backwards compatibility** with newer shell/chrome flags; **AppRouter** tests moved into **`Ivy.Test`** (internals visibility).
-- **Apps**: optional **`allowDuplicateTabs`** (opt out of duplicate-tab prevention) for apps that need multiple instances.
-- **Routing dots** / breadcrumb indicator behavior **restored**.
-- **Samples**: **Setup** sample renamed to **Settings** with **cogs** icon (where applicable in shared samples).
-
-## Blades
-
-- **`IBladeService`** renamed to **`IBladeContext`**. Update types and registrations; **hallucinations** / docs updated.
-
-## Server, auth, and HTTP
-
-- **OAuth** callback uses **`LocalRedirect`** instead of **`Redirect`** to avoid open-redirect issues.
-- **SignalR** / **MessagePack** and hub **integration tests** for **`/ivy/messages`**.
-- **WebApplicationFactory**-style **HTTP endpoint** integration tests; shared **test server** infrastructure consolidated (**Ivy.Integration.Tests**).
-- **Mock HTTP** helpers shared for tests.
-
-## Build, packaging, and native assets
-
-- **Docker** publish: **rustserver** native binary retained on **clean** builds.
-- **Embedded resources**: **logical names** normalized **cross-platform**; **Vite** **EmbeddedResource** race (**CS1566**) addressed; fixes for **macOS/Linux** asset **404s** and **blank screens**; duplicate **`app.UseFrontend` / `UseAssets`** removed; **App ID** **`assets`** collision resolved.
-- **CI**: **NuGet** markdown **globbing** with **native target** injection; **pnpm** **`--frozen-lockfile`**; **frontend** **`package-lock.json`** / **`.npmrc`** ignored where appropriate; **widget** frontend **`.gitignore`** updates; **lockfile** regeneration for widget frontends.
-- **NuGet**: **lock files** for **Ivy**, **Ivy.Agent.Filter**, **Ivy.Analyser**; **embed** source **docs** in packages so **nupkg** content stays complete after Rust/tooling changes.
-- **Markdown** doc pipeline: converter **caching** uses **file content** (not only hash) for invalidation.
-- **`KillProcessUsingPort`** supported on **macOS** and **Linux** (dev workflow).
-
-## Diagnostics and client logging
-
-- Client **diagnostic** **`logger.info`** downgraded to **`logger.debug`** to reduce noise.
-- **Widget tree** refresh: exceptions in **`RefreshRequested`** and **`_RefreshView`** are caught so one failure does not tear down the tree.
-
-## Tooling, analyzers, and repo hygiene
-
-- **Roslyn**: **`IVYSERVICE001`** enforces calling **`UseService`** at the **top** of **`Build()`**.
-- **IDE0005**: **unused `using`** cleanup configured; automated removal in many files.
-- **Pre-commit** hook scoped to **frontend** files where appropriate.
-- **`.gitattributes`**: **LF** line endings for **frontend** and **widget** frontends; line-ending **normalization** pass.
-- **Hooks** directory **barrel** export (frontend); duplicate export fixes in barrel.
-- **Security** / **code scanning** warning cleanups.
-- **Local development**: **Ivy.Agent.Filter.Tests** setup; **ivy** command-not-found **Mac** troubleshooting doc.
-
-## Documentation and AI guidance
-
-- **Hallucinations** / **AGENTS** docs reorganized and expanded (including **IBladeContext**, **`Server.StartAsync`**, **`SelectOption<T>`**, **session** references, **compound widgets**, **UseLoading** page, chart **polish** callbacks, **BarChart** dual-axis, **Line/Area/Scatter** docs, **IvyFrameworkGotchas** consolidation, **Playwright** knowledge split into **focused files** and **widgets** consolidation, obsolete redirects removed).
-- **IvyFrameworkVerification** updated for split Playwright knowledge; **prerequisite** steps and **process timeout** patterns documented.
-- **Docs middleware**: **Ivy.Docs.Shared** delegates shared behavior to **Ivy.Docs.Helpers** to remove duplication.
-- **Ivy Studio (cloud)**: stability and integration fixes for cloud-oriented Studio workflows.
-
-## Tests (high level)
-
-- **AppRouter** tests in **`Ivy.Test`**; **`Ivy.Tests`** added to the solution where introduced; **QueryProcessor**, **DataTable** container styles, **ScatterChart**, **useScrollShadow** / **MutationObserver**, **SignatureInput**, **useDictation**, **TextInput** keyboard, **shortcut** modules, **SignalR**, **HTTP** integration, **vite** test includes for **`.test.tsx`**, shared **MockState**, **coverlet** cleanup in **Ivy.Test** csproj, and other test **refactors** and **stability** work.
+Rename DI registrations and `UseService` types from `IBladeService` to `IBladeContext`.
 
 ## Bug fixes
 
-The following are **server, .NET, build, or non–UI-layer** fixes. **Frontend-only** widget/CSS/TypeScript fixes are **not** listed here per release policy.
-
-- **DataTable (logic / serialization)**: **decimal** scaling with **`valueOf`** fallback; **footer** aggregates for **currency** and **numbers**; **navigation** properties and **ternary** expressions in column expressions; **link** cells when **`OnCellClick`** is configured; **source order** when sorting is disabled; **default `OrderBy`** for paged queries; **virtual columns** from the same root property behavior.
-- **ToDetails()**: no longer shows **type names** for **navigation** properties in place of sensible display.
-- **Arrow** serialization: **widget** objects serialize safely via **`ToString`** / sealed patterns where applicable.
-- **Markdown pipeline (build/tooling)**: converter **cache** invalidation uses **file content** so edits are picked up reliably.
-- **OAuth**: **LocalRedirect** in callback (see Server).
-- **CI / build**: **NuGet** markdown globbing with **native** targets; **Docker** image includes **rustserver** binary on clean builds; **CS1566** **EmbeddedResource** race with **Vite**; **embedded resource** logical names **cross-platform**; **App ID** collision for **`assets`**.
-- **Server / routing**: duplicate middleware registration for **frontend**/**assets** removed (stability).
-- **C# / tests**: various **compilation** and **test project** reference fixes tied to **API** renames and **package** layout (non-FE).
+- DataTable: decimal `valueOf` fallback; footer aggregates; navigation/ternary expressions; link cells with `OnCellClick`; source order when sorting is off; default `OrderBy` for paging; virtual columns from one root; virtual row rendering and height in unconstrained layouts.
+- ToDetails(): no raw type names for navigation properties.
+- Arrow serialization for widget payloads via safer `ToString` paths.
+- Markdown converter cache invalidation by file content.
+- OAuth: `LocalRedirect` on callback.
+- CI / build: NuGet globbing with native targets; Docker rustserver on clean builds; CS1566 EmbeddedResource/Vite; embedded names cross-platform; App ID `assets` collision; duplicate middleware registration.
+- C# / tests: compilation and project reference fixes for API moves and packages.
