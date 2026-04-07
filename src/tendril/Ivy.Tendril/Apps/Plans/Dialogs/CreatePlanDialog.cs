@@ -1,9 +1,9 @@
 namespace Ivy.Tendril.Apps.Plans.Dialogs;
 
-public class CreatePlanDialog(List<string> projectNames, Action<string, string> onCreatePlan, Action onClose, string defaultProject = "[Auto]") : ViewBase
+public class CreatePlanDialog(List<string> projectNames, Action<string, string, bool> onCreatePlan, Action onClose, string defaultProject = "[Auto]") : ViewBase
 {
     private readonly List<string> _projectNames = projectNames;
-    private readonly Action<string, string> _onCreatePlan = onCreatePlan;
+    private readonly Action<string, string, bool> _onCreatePlan = onCreatePlan;
     private readonly Action _onClose = onClose;
     private readonly string _defaultProject = defaultProject;
 
@@ -11,6 +11,7 @@ public class CreatePlanDialog(List<string> projectNames, Action<string, string> 
     {
         var createPlanText = UseState("");
         var selectedProject = UseState(_defaultProject);
+        var sendToImplementation = UseState(false);
 
         var options = new List<string> { "[Auto]" };
         options.AddRange(_projectNames);
@@ -22,6 +23,7 @@ public class CreatePlanDialog(List<string> projectNames, Action<string, string> 
                 Layout.Vertical()
                     | selectedProject.ToSelectInput(options).Variant(SelectInputVariant.Toggle).WithLabel("Select project")
                     | createPlanText.ToTextareaInput("Enter task description...").Rows(6).AutoFocus().WithField().Label("Describe the task for the new plan")
+                    | sendToImplementation.ToBoolInput().Label("Send to implementation automatically")
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _onClose()),
@@ -29,7 +31,7 @@ public class CreatePlanDialog(List<string> projectNames, Action<string, string> 
                 {
                     if (!string.IsNullOrWhiteSpace(createPlanText.Value))
                     {
-                        _onCreatePlan(createPlanText.Value, selectedProject.Value);
+                        _onCreatePlan(createPlanText.Value, selectedProject.Value, sendToImplementation.Value);
                         _onClose();
                     }
                 })

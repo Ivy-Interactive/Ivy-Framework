@@ -28,10 +28,11 @@ public class NewPlanButton : ViewBase
         {
             elements.Add(new CreatePlanDialog(
                 projectNames: projectNames,
-                onCreatePlan: (description, project) =>
+                onCreatePlan: (description, project, yolo) =>
                 {
                     lastSelectedProject.Set(project);
-                    jobService.StartJob("MakePlan", "-Description", $"{description} [FORCE]", "-Project", project);
+                    var flags = "[FORCE]" + (yolo ? " [YOLO]" : "");
+                    jobService.StartJob("MakePlan", "-Description", $"{description} {flags}", "-Project", project);
                 },
                 onClose: () => dialogOpen.Set(false),
                 defaultProject: lastSelectedProject.Value
