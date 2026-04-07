@@ -177,6 +177,18 @@ Docs and tooling add short **troubleshooting** for the common case where the **`
 
 For the **Content** tab style, **badges** use the **secondary** color and a **smaller** size so they stay subtle next to titles.
 
+### DataTable link cells and row actions
+
+**Link** cells no longer **navigate** in a way that fights a configured **`OnCellClick`** handler: clicks respect the table’s **cell-click** contract when both features are used together.
+
+### StackedProgress labels
+
+If a **segment** defines a **label**, **ShowLabels** turns on **automatically** so short segments still show their caption without extra boilerplate.
+
+### Sheet width and resizing
+
+**Sheet** sizing was fixed when combining **explicit width** with the **resizable** handle so width constraints and drag-to-resize behave together.
+
 ## Buttons, badges, and navigation
 
 - [**Button**](https://docs.ivy.app/widgets/common/button) **badges** use the **outline** variant for clearer contrast; **unit tests** were added.
