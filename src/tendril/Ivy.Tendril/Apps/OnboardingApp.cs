@@ -58,7 +58,8 @@ public class WelcomeStepView(IState<int> stepperIndex) : ViewBase
                | Text.Markdown(
                    """
                    
-                   TRY TO REMOVE THESE CHANGES
+                   >[!NOTE]
+                   >Ivy Tendril is a coding orchestrator that uses an underlying coding agent such as Claude Code. With Tendril you can get a lot of work done really fast. This means using Tendril can consume a lot of credits in a short period.
                    
                    To get started, we need to set up a few things:
                    - Check that you have all necessary software installed
