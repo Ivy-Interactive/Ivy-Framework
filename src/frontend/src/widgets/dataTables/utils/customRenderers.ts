@@ -100,7 +100,7 @@ export const labelsBadgesCellRenderer: CustomRenderer<LabelsBadgesCell> = {
       if (renderX > x + w) break;
       const textW = ctx.measureText(item.text).width;
       const boxW = textW + pad * 2;
-      const bg = item.bg ?? (highlighted ? theme.bgBubbleSelected : theme.bgBubble);
+      const bg = item.bg ?? theme.bgBubble;
       const fg = item.fg ?? theme.textBubble;
 
       ctx.fillStyle = bg;
