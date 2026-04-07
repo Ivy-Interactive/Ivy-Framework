@@ -141,21 +141,44 @@ data.ToPieChart(
 
 [DataTable](https://docs.ivy.app/widgets/advanced/data-table) decimal columns use a more reliable `valueOf` path with a string fallback. Footer aggregates match column formatting rules for currency and numbers.
 
-### Column expressions
-
-Navigation properties and ternary expressions work more predictably in column expressions.
+```csharp
+.Builder(e => e.Amount, f => f.Decimal().Format("C2"))
+.Footer(e => e.Amount, f => f.Sum().Format("C2"));
+```
 
 ### Column scaling
 
 Optional auto-exclusion of navigation collection columns from scaling avoids distorted layouts.
 
+```csharp
+entities.AsQueryable().ToDataTable(idSelector: e => e.Id)
+    .Width(e => e.Customer, Size.Px(220))
+    .Width(e => e.CustomerOrders, Size.Px(180));
+```
+
 ### ToDetails and navigation properties
 
 `ToDetails()` no longer shows raw CLR type names for navigation properties.
 
+```csharp
+var details = order.ToDetails().RemoveEmpty();
+new Card(details);
+```
+
 ### Virtual columns
 
 You can define multiple virtual columns from the same root property.
+
+```csharp
+orders.AsQueryable()
+    .Select(o => new
+    {
+        o.Id,
+        CustomerName = o.Customer.Name,
+        CustomerEmail = o.Customer.Email
+    })
+    .ToDataTable(idSelector: e => e.Id);
+```
 
 ### Sorting and stable order
 
@@ -203,6 +226,11 @@ Badge cells can use per-value colors. Link cells cooperate with `OnCellClick` wi
 
 Cells use the shared `withTooltip` wrapper instead of the native `title` attribute.
 
+```csharp
+// DataTable uses design-system tooltip rendering for cell text.
+new LinkDisplayRenderer { Type = LinkDisplayType.Url };
+```
+
 ### Virtual scrolling and height
 
 Virtual scrolling renders rows reliably. Height in unconstrained parents was fixed, with follow-up coverage for a zero-height regression.
@@ -249,14 +277,6 @@ digraph G {
     API -> DB [label="Query"];
 }
 ```
-
-### Tables, images, and spacing
-
-Embedded images use a light border; the Table widget matches markdown table borders. Literal tables inside fences are not rendered as HTML.
-
-### Markdown block spacing
-
-Default container gap is tighter; spacing is tuned per block type instead of one gap everywhere.
 
 ## Image
 
@@ -330,18 +350,21 @@ new Tab("Customers", "Customers").Icon(Icons.User).Badge("10");
 Layout.Grid defaults to top-left alignment; use `AlignContent` if you depended on centered grid content.
 
 ```csharp
-Layout.Grid().Columns(3).AlignContent(Align.TopLeft)
+Layout.Grid().Columns(3)
     | widget1
     | widget2;
 ```
 
 ### Header, footer, and scroll shadow
 
-[HeaderLayout](https://docs.ivy.app/widgets/layouts/header-layout) and [FooterLayout](https://docs.ivy.app/widgets/layouts/footer-layout) add scroll-triggered drop shadows. The shared `useScrollShadow` hook takes a `direction` argument and observes DOM updates (batched with `requestAnimationFrame`).
+[HeaderLayout](https://docs.ivy.app/widgets/layouts/header-layout) and [FooterLayout](https://docs.ivy.app/widgets/layouts/footer-layout) add scroll-triggered drop shadows.
 
-### Container measurement
-
-Container size measurement retries for nested flex layouts.
+```csharp
+new HeaderLayout(
+    left: Text.H3("Dashboard"),
+    right: new Button("Refresh"))
+    .Height(Size.Units(500));
+```
 
 ## StackedProgress
 
@@ -381,41 +404,32 @@ record.ToDetails()
     .Multiline(x => x.Description, x => x.Notes);
 ```
 
-## DiffView
-
-[DiffView](https://docs.ivy.app/widgets/primitives/diff-view) uses a smaller default font.
-
-```csharp
-using Ivy.Widgets.DiffView;
-
-new DiffView()
-    .Diff(myDiffString)
-    .Language("typescript");
-```
-
-## Confetti
-
-Confetti uses a shorter duration and fewer particles.
-
-```csharp
-new Button("Click")
-    .OnClick(() => { /* action */ })
-    .WithConfetti(AnimationTrigger.Click);
-```
-
 ## Buttons and badges
 
 ### Badges on controls
 
 [Button](https://docs.ivy.app/widgets/common/button) badges use the outline chip style. [Tab](https://docs.ivy.app/widgets/layouts/tabs-layout) (Content) and [DropDownMenu](https://docs.ivy.app/widgets/common/drop-down-menu) items support badges.
 
+```csharp
+new Button("Inbox", onClick: _ => { }).Badge("3");
+new Tab("Customers", "Customers").Icon(Icons.User).Badge("10");
+```
+
 ### Badge widget
 
 [Badge](https://docs.ivy.app/widgets/common/badge) renders nothing when text is empty.
 
+```csharp
+new Badge("");
+```
+
 ### Menu and theme
 
 Menu items accept more color options. ThemeCustomizer empty placeholders are clearer.
+
+```csharp
+MenuItem.Default(Icons.Download).Label("Export").Color(Colors.Cyan);
+```
 
 ### Hover rename
 
@@ -433,19 +447,30 @@ new Button("Updates", eventHandler, variant: ButtonVariant.Outline).Badge("New")
 
 ### Upload helpers and samples
 
-Upload helpers include `FileAttachmentList`, `validateFileWithToast`, and `useUploadWithProgress` (XMLHttpRequest progress). Samples add Playwright coverage and CodeBlock language grids.
+Upload helpers include `FileAttachmentList`, `validateFileWithToast`, and `useUploadWithProgress` (XMLHttpRequest progress).
+
+```csharp
+var upload = UseUpload(MemoryStreamUploadHandler.Create(files));
+return text.ToContentInput(upload).Files(files.Value);
+```
 
 ### FolderInput and FileInput
 
 [FolderInput](https://docs.ivy.app/widgets/inputs/folder-input) supports `FolderInputMode` (including full path), full-row activation, and browse `aria-label`. FileInput browse controls expose `aria-label`.
 
-### Other inputs
-
-Textarea submits on Ctrl+Enter / Cmd+Enter. TextInput and SignatureInput gained tests and cleaner demos.
+```csharp
+folder.ToFolderInput(mode: FolderInputMode.FullPath);
+```
 
 ### Dictation and Select
 
 `useDictation` was trimmed; redundant `dictationLanguage` on TextInput was removed. [Select](https://docs.ivy.app/widgets/inputs/select-input) fixes placement when both placeholder and items are set.
+
+```csharp
+status.ToSelectInput()
+    .Placeholder("Select status")
+    .Options(["Open", "Closed"]);
+```
 
 Content input with uploads (`ContentInputApp.cs`):
 
@@ -482,79 +507,28 @@ public enum Languages
 }
 ```
 
-## Accessibility
-
-WCAG work adds `aria-label`s on tooltips, `role="button"` surfaces, and browse controls. DataTable uses the design-system tooltip instead of the native `title` attribute.
-
 ## Routing, shell, and apps
 
 ### Chrome and tabs
 
-`?chrome=false` stays compatible with newer shell flags. Apps may set `allowDuplicateTabs` (see FileApp in samples).
-
-### Navigation and samples
-
-Shell routing dots were restored. The samples “Setup” app is renamed Settings with a cogs icon. AppRouter tests live in `Ivy.Test`.
-
-## Blades
-
-`IBladeService` is renamed to `IBladeContext`—update DI and `UseService` usages.
+`?chrome=false` stays compatible with newer shell flags. Apps may set `allowDuplicateTabs`.
 
 ```csharp
-var bladeController = UseContext<IBladeContext>();
-var index = bladeController.GetIndex(this);
-bladeController.Push(this, new OtherView(), "Next blade");
+[App(allowDuplicateTabs: true)]
+public class FileApp : ViewBase { }
 ```
 
-## Branding and theming
+### Branding and theming
 
-ivy-green and related brand tokens land in CSS; sidebar can use `bg-secondary`. ThemeCustomizer empty states are clearer.
-
-## Keyboard and shortcuts
-
-Global shortcuts use `event.code` on macOS for reliable Option/Command chords. Modifier shortcuts still fire when focus is inside multi-line text areas. Shortcut helpers consolidate under `@/lib/shortcut`.
+ivy-green and related brand tokens land in CSS;
 
 ## Server, auth, and HTTP
-
-### OAuth and SignalR
-
-OAuth callbacks use `LocalRedirect`. SignalR hub tests cover `/ivy/messages`.
-
-### Integration tests and docs middleware
-
-HTTP tests use WebApplicationFactory-style helpers, Ivy.Integration.Tests, and Mock HTTP utilities. Ivy.Docs.Shared forwards to Ivy.Docs.Helpers to avoid duplicate middleware.
-
-## Diagnostics and client logging
-
-Client `logger.info` is now `logger.debug`. `WidgetTree` refresh paths catch errors so a failing view does not collapse the whole tree.
-
-## Tooling, analyzers, and repository hygiene
 
 ### Analyzers and style
 
 `IVYSERVICE001` requires `UseService` at the start of `Build()` ([AGENTS.md](https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/AGENTS.md)). IDE0005 and unused-`using` cleanup ran repo-wide.
 
-### Hooks and onboarding
-
-Pre-commit can target frontend paths. Hooks use a barrel export. Agent filter tests and `ivy` CLI Mac notes help onboarding.
-
 ## Documentation and AI guidance
-
-### AGENTS and docs content
-
-AGENTS and anti-hallucination docs expand (for example `IBladeContext`, `Server.StartAsync`, and compound widgets). Playwright and widget guidance were split; stale redirects were removed.
-
-### Sidebar and verification
-
-Input doc files were renumbered for stable sidebar order. IvyFrameworkVerification documents process timeouts.
-
-## Ivy Studio and developer workflows
-
-Ivy Studio cloud integration is more stable. IvyFrameworkVerification avoids stuck processes; Cleanup-WorktreeFrontend uses cross-platform path separators.
-
-## Tests (high level)
-
-New or expanded coverage includes AppRouter (`Ivy.Test`), QueryProcessor, DataTable, ScatterChart, `useScrollShadow`, inputs, SignalR, HTTP integration, vite `.test.tsx`, mocks, and coverlet cleanup.
 
 ## Breaking changes
 
@@ -570,7 +544,13 @@ new Image("photo.jpg").Hover(HoverEffect.Pointer);
 
 ### `IBladeService` → `IBladeContext`
 
-Rename DI registrations and `UseService` types from `IBladeService` to `IBladeContext`.
+`IBladeService` is renamed to `IBladeContext`—update DI and `UseService` usages.
+
+```csharp
+var bladeController = UseContext<IBladeContext>();
+var index = bladeController.GetIndex(this);
+bladeController.Push(this, new OtherView(), "Next blade");
+```
 
 ## Bug fixes
 
