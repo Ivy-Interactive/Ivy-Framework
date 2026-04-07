@@ -189,6 +189,8 @@ public class PlanCountsServiceTests : IDisposable
 
         public void RaisePlansChanged() => PlansChanged?.Invoke();
 
+        public void NotifyChanged() => PlansChanged?.Invoke();
+
         public void Dispose() { }
     }
 }

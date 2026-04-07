@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import Icon from "@/components/Icon";
 import { cn } from "@/lib/utils";
 import { MenuItem } from "@/types/widgets";
-import { ActionRenderer } from "../dataTables/dataTableRowAction/actionRenderer";
+import { ActionRenderer } from "@/widgets/rowAction";
 
 interface TreeItemWidgetProps {
   item: MenuItem;
@@ -115,6 +115,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
                   key={action.tag || action.label}
                   action={action}
                   onActionClick={(clickedAction) => onRowActionClick(item, clickedAction)}
+                  variant="ghost"
                 />
               ))}
             </div>
@@ -174,6 +175,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
               key={action.tag || action.label}
               action={action}
               onActionClick={(clickedAction) => onRowActionClick(item, clickedAction)}
+              variant="ghost"
             />
           ))}
         </div>

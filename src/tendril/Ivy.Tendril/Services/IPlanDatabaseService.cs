@@ -35,7 +35,7 @@ public interface IPlanDatabaseService : IDisposable
     void DeletePlan(int planId);
     void UpsertCosts(int planId, List<CostEntry> costs);
     void UpsertRecommendations(int planId, string folderName, List<RecommendationYaml> recommendations, string project, string planTitle, DateTime updated, PlanStatus status);
-    void BulkUpsertPlans(List<PlanFile> plans);
+    void BulkUpsertPlans(List<PlanFile> plans, bool forceOverwrite = false);
 
     // Diagnostics
     long GetDatabaseSize();

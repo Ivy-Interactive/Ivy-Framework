@@ -88,21 +88,125 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
 
             foreach (var dir in Directory.GetDirectories(PlansDirectory))
             {
-                var planYamlPath = Path.Combine(dir, "plan.yaml");
-                if (!File.Exists(planYamlPath)) continue;
+                try
+                {
+                    var planYamlPath = Path.Combine(dir, "plan.yaml");
+                    if (!File.Exists(planYamlPath)) continue;
 
-                var yaml = FileHelper.ReadAllText(planYamlPath);
+                    var yaml = FileHelper.ReadAllText(planYamlPath);
+                    var repaired = RepairPlanYaml(yaml);
 
-                // Fix structured repos (path: + optional prRule:) → plain path strings
-                var repaired = Regex.Replace(yaml,
-                    @"(?m)^(\s*)-\s+path:\s*(.+?)(?:\r?\n\s+prRule:\s*.+)?$",
-                    "$1- $2");
-
-                if (repaired != yaml)
-                    FileHelper.WriteAllText(planYamlPath, repaired);
+                    if (repaired != yaml)
+                    {
+                        FileHelper.WriteAllText(planYamlPath, repaired);
+                        _logger.LogInformation("Repaired plan.yaml in {Folder}", Path.GetFileName(dir));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to repair plan in {Folder}", Path.GetFileName(dir));
+                }
             }
         }
         catch { /* Best-effort repair on startup; individual plan errors are non-fatal */ }
+    }
+
+    /// <summary>
+    /// Repairs common YAML issues in plan.yaml content so that YamlDotNet can parse them.
+    /// </summary>
+    internal static string RepairPlanYaml(string yaml)
+    {
+        var repaired = yaml;
+
+        // 1. Remove YAML document markers (--- at start and end)
+        repaired = Regex.Replace(repaired, @"^---\s*\r?\n", "");
+        repaired = Regex.Replace(repaired, @"\r?\n---\s*$", "");
+
+        // 2. Convert object-style repos (- name: X\n    path: Y\n    branch: ...) to plain path strings
+        repaired = Regex.Replace(repaired,
+            @"(?m)^(\s*)-\s+name:\s*.+\r?\n\s+path:\s*(.+?)(?:\r?\n\s+(?:branch|prRule):\s*.+)*$",
+            "$1- $2");
+
+        // 3. Fix structured repos (- path: X + optional prRule:/branch:) → plain path strings
+        repaired = Regex.Replace(repaired,
+            @"(?m)^(\s*)-\s+path:\s*(.+?)(?:\r?\n\s+(?:prRule|branch):\s*.+)*$",
+            "$1- $2");
+
+        // 4. Convert object-style commits (- hash: X\n  repo: ...\n  message: ...) to plain hash strings
+        repaired = Regex.Replace(repaired,
+            @"(?m)^(\s*)-\s+hash:\s*(.+?)(?:\r?\n\s+(?:repo|message):\s*.+)*$",
+            "$1- $2");
+
+        // 5. Convert object-style prs (- note: X) to plain strings
+        repaired = Regex.Replace(repaired,
+            @"(?m)^(\s*)-\s+note:\s*(.+)$",
+            "$1- $2");
+
+        // 6. Remove orphan branch: lines attached to string list items (e.g. - "path"\n    branch: "")
+        repaired = Regex.Replace(repaired,
+            @"(?m)^(\s*-\s+(?:""[^""]*""|'[^']*'|%\S+).*)\r?\n\s+branch:\s*.*$",
+            "$1");
+
+        // 7. Fix double-quoted strings containing unescaped backslashes → single quotes
+        repaired = Regex.Replace(repaired, @"(?m)^([^:]+:\s+)""(.+)""(\s*)$", m =>
+        {
+            var prefix = m.Groups[1].Value;
+            var inner = m.Groups[2].Value;
+            var suffix = m.Groups[3].Value;
+            if (Regex.IsMatch(inner, @"\\[^""\\nt/abfre0 UNLP_xu]"))
+            {
+                var escaped = inner.Replace("'", "''");
+                return $"{prefix}'{escaped}'{suffix}";
+            }
+            return m.Value;
+        });
+
+        // 8. Fix double-quoted list items with bad escapes
+        repaired = Regex.Replace(repaired, @"(?m)^(\s*-\s+)""(.+)""(\s*)$", m =>
+        {
+            var prefix = m.Groups[1].Value;
+            var inner = m.Groups[2].Value;
+            var suffix = m.Groups[3].Value;
+            if (Regex.IsMatch(inner, @"\\[^""\\nt/abfre0 UNLP_xu]"))
+            {
+                var escaped = inner.Replace("'", "''");
+                return $"{prefix}'{escaped}'{suffix}";
+            }
+            return m.Value;
+        });
+
+        // 9. Quote unquoted Windows paths in list items: - D:\something → - 'D:\something'
+        repaired = Regex.Replace(repaired, @"(?m)^(\s*-\s+)([A-Za-z]:\\[^\s].*)$", m =>
+        {
+            var prefix = m.Groups[1].Value;
+            var path = m.Groups[2].Value.TrimEnd();
+            if (path.StartsWith("\"") || path.StartsWith("'")) return m.Value;
+            var escaped = path.Replace("'", "''");
+            return $"{prefix}'{escaped}'";
+        });
+
+        // 10. Quote unquoted scalar values that contain ': ' (colon-space), which YAML
+        //     misinterprets as nested mappings. Targets freeform text fields like initialPrompt.
+        repaired = Regex.Replace(repaired, @"(?m)^(\s*\w+:\s+)(.+)$", m =>
+        {
+            var prefix = m.Groups[1].Value;
+            var value = m.Groups[2].Value.TrimEnd();
+            // Skip if already quoted, is a block scalar indicator, or is a list/mapping
+            if (value.StartsWith("\"") || value.StartsWith("'") ||
+                value.StartsWith("|") || value.StartsWith(">") ||
+                value.StartsWith("-") || value.StartsWith("{") || value.StartsWith("["))
+                return m.Value;
+            // Only fix if the value contains an embedded ': ' that would confuse the parser
+            // (but not the first colon which is the key separator — we're already past it)
+            if (value.Contains(": "))
+            {
+                var escaped = value.Replace("'", "''");
+                return $"{prefix}'{escaped}'";
+            }
+            return m.Value;
+        });
+
+        return repaired;
     }
 
     /// <summary>
@@ -548,7 +652,13 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
         {
             var planYamlPath = Path.Combine(folderPath, "plan.yaml");
             var yamlContent = FileHelper.ReadAllText(planYamlPath);
-            var planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(yamlContent);
+
+            // Apply YAML repairs inline before parsing (handles agent-generated quirks)
+            var repaired = RepairPlanYaml(yamlContent);
+            if (repaired != yamlContent)
+                FileHelper.WriteAllText(planYamlPath, repaired);
+
+            var planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(repaired);
             if (planYaml == null) return null;
 
             var folderName = Path.GetFileName(folderPath);
@@ -571,8 +681,9 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
 
             return new PlanFile(metadata, latestContent, folderPath, yamlContent, revisionCount);
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Failed to parse plan folder: {FolderPath}", folderPath);
             return null;
         }
     }

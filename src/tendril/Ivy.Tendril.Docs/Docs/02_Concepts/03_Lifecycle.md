@@ -1,4 +1,5 @@
 ---
+icon: RefreshCw
 searchHints:
   - jobs
   - execution

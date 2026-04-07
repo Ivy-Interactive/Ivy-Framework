@@ -4,7 +4,7 @@ using Ivy.Core.Apps;
 using Ivy.Tendril.Apps;
 using Ivy.Tendril.Services;
 using Ivy.Widgets.Internal;
-using Ivy.Widgets.ScreenshotFeedback;
+
 using System.Collections.Immutable;
 using System.Reactive.Disposables;
 using Ivy.Tendril.Views;
@@ -65,10 +65,6 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         var serverArgs = UseService<ServerArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
         var navigator = UseNavigation();
-        var feedbackOpen = UseState(false);
-        var feedbackScreenshot = UseState<FileUpload<byte[]>?>();
-        var feedbackUploadCtx = UseUpload(MemoryStreamUploadHandler.Create(feedbackScreenshot));
-
         UseEffect(() =>
         {
             void OnChanged() => counts.Set(countsService.Current);
@@ -416,10 +412,6 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 .Tag("$trash")
                 .Icon(Icons.Trash2)
                 .OnSelect(() => navigator.Navigate<TrashApp>()),
-            // MenuItem.Default("Tendril Feedback")
-            //     .Tag("$feedback")
-            //     .Icon(Icons.MessageSquare)
-            //     .OnSelect(() => feedbackOpen.Set(true)),
             MenuItem.Default("Theme")
                 .Tag("$theme")
                 .Icon(Icons.SunMoon)
@@ -498,57 +490,19 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             return new OnboardingApp();
         }
 
-        return new Fragment(
-            new SidebarLayout(
-                body ?? null!,
-                sidebarMenu,
-                Layout.Vertical().Gap(2)
-                    | settings.Header
-                    | new NewPlanButton()
-                ,
-                Layout.Vertical(
-                    new SidebarNews("https://ivy.app/news.json"),
-                    settings.Footer,
-                    footer
-                ),
-                settings.Width
-            ).Open(sidebarOpen.Value).MainAppSidebar(true),
-            ScreenshotFeedbackExtensions.OnCancel(
-                ScreenshotFeedbackExtensions.OnSave(
-                    new ScreenshotFeedback()
-                        .UploadUrl(feedbackUploadCtx.Value.UploadUrl)
-                        .Open(feedbackOpen.Value),
-                    data =>
-                    {
-                        feedbackOpen.Set(false);
-
-                        if (feedbackScreenshot.Value?.Content != null)
-                        {
-                            var tempPath = Path.Combine(Path.GetTempPath(), $"tendril-feedback-{DateTime.UtcNow:yyyyMMdd-HHmmss}.png");
-                            File.WriteAllBytes(tempPath, feedbackScreenshot.Value.Content);
-
-                            var texts = data.Shapes
-                                .Select(s => s switch
-                                {
-                                    CalloutAnnotation c => $"[{c.Number}] {c.Text}",
-                                    TextAnnotation t => t.Text,
-                                    _ => null
-                                })
-                                .Where(t => !string.IsNullOrWhiteSpace(t))
-                                .ToList();
-
-                            var description = string.Join("\n", texts);
-                            if (string.IsNullOrWhiteSpace(description))
-                                description = "Visual feedback";
-
-                            description = $"Screenshot feedback:\n\n{description}\n\nScreenshot: {tempPath}";
-
-                            jobService.StartJob("MakePlan", "-Description", description, "-Project", "Tendril");
-                        }
-
-                        feedbackScreenshot.Set(null);
-                    }),
-                () => feedbackOpen.Set(false))
-        );
+        return new SidebarLayout(
+            body ?? null!,
+            sidebarMenu,
+            Layout.Vertical().Gap(2)
+                | settings.Header
+                | new NewPlanButton()
+            ,
+            Layout.Vertical(
+                new SidebarNews("https://ivy.app/news.json"),
+                settings.Footer,
+                footer
+            ),
+            settings.Width
+        ).Open(sidebarOpen.Value).MainAppSidebar(true);
     }
 }

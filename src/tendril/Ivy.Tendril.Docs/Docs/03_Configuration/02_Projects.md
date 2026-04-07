@@ -1,4 +1,5 @@
 ---
+icon: FolderGit
 searchHints:
   - project
   - repo

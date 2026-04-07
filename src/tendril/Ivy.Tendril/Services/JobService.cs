@@ -17,6 +17,7 @@ public class JobService : IJobService
     private readonly IConfigService? _configService;
     private readonly ModelPricingService? _modelPricingService;
     private readonly ITelemetryService? _telemetryService;
+    private readonly IPlanWatcherService? _planWatcherService;
     private readonly TimeSpan _jobTimeout;
     private readonly TimeSpan _staleOutputTimeout;
     private readonly int _maxConcurrentJobs;
@@ -49,13 +50,15 @@ public class JobService : IJobService
         IConfigService configService,
         ModelPricingService? modelPricingService = null,
         IPlanReaderService? planReaderService = null,
-        ITelemetryService? telemetryService = null)
+        ITelemetryService? telemetryService = null,
+        IPlanWatcherService? planWatcherService = null)
     {
         _syncContext = SynchronizationContext.Current;
         _configService = configService;
         _modelPricingService = modelPricingService;
         _planReaderService = planReaderService;
         _telemetryService = telemetryService;
+        _planWatcherService = planWatcherService;
         _jobTimeout = TimeSpan.FromMinutes(configService.Settings.JobTimeout);
         _staleOutputTimeout = TimeSpan.FromMinutes(configService.Settings.StaleOutputTimeout);
         _maxConcurrentJobs = configService.Settings.MaxConcurrentJobs;
@@ -548,6 +551,9 @@ public class JobService : IJobService
 
         CleanupInboxFile(job);
         WriteJobLog(job);
+
+        // Notify plan watcher so the database sync picks up any new/changed plans
+        _planWatcherService?.NotifyChanged();
 
         // Calculate and log costs automatically (delayed to allow session to complete)
         if (isSuccess && _modelPricingService != null && !string.IsNullOrEmpty(job.SessionId))

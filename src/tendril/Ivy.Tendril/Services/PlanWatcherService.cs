@@ -59,6 +59,11 @@ public class PlanWatcherService : IPlanWatcherService, IDisposable
         }
     }
 
+    public void NotifyChanged()
+    {
+        ScheduleDebounce();
+    }
+
     private void ScheduleDebounce()
     {
         _debounceTimer.Stop();

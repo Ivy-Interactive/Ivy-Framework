@@ -644,10 +644,11 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
         }
     }
 
-    private void UpsertPlanInternal(PlanFile plan)
+    private void UpsertPlanInternal(PlanFile plan, bool forceOverwrite = false)
     {
+        var updateGuard = forceOverwrite ? "" : "WHERE excluded.Updated >= Plans.Updated";
         using var cmd = _connection.CreateCommand();
-        cmd.CommandText = """
+        cmd.CommandText = $"""
             INSERT INTO Plans (Id, Title, Project, Level, State, FolderPath, FolderName,
                                YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated, InitialPrompt)
             VALUES (@id, @title, @project, @level, @state, @folderPath, @folderName,
@@ -665,7 +666,7 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
                 Created = excluded.Created,
                 Updated = excluded.Updated,
                 InitialPrompt = excluded.InitialPrompt
-            WHERE excluded.Updated >= Plans.Updated
+            {updateGuard}
             """;
 
         cmd.Parameters.AddWithValue("@id", plan.Id);
@@ -879,7 +880,7 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
         }
     }
 
-    public void BulkUpsertPlans(List<PlanFile> plans)
+    public void BulkUpsertPlans(List<PlanFile> plans, bool forceOverwrite = false)
     {
         lock (_lock)
         {
@@ -889,7 +890,7 @@ public class PlanDatabaseService : IPlanDatabaseService, IDisposable
             try
             {
                 foreach (var plan in plans)
-                    UpsertPlanInternal(plan);
+                    UpsertPlanInternal(plan, forceOverwrite);
                 transaction.Commit();
             }
             catch

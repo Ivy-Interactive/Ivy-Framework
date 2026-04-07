@@ -44,7 +44,7 @@
     <ProjectReference Include="../../Ivy/Ivy.csproj" />
     <ProjectReference Include="../../Ivy.Hooks.Pty/Ivy.Hooks.Pty.csproj" />
     <ProjectReference Include="../../widgets/Ivy.Widgets.Xterm/Ivy.Widgets.Xterm.csproj" />
-    <ProjectReference Include="../../widgets/Ivy.Widgets.ScreenshotFeedback/Ivy.Widgets.ScreenshotFeedback.csproj" />
+
     <ProjectReference Include="../../widgets/Ivy.Widgets.DiffView/Ivy.Widgets.DiffView.csproj" />
   </ItemGroup>
   <ItemGroup>

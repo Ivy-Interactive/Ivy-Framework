@@ -1,4 +1,5 @@
 ---
+icon: Wrench
 searchHints:
   - config
   - yaml

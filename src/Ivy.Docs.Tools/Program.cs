@@ -1,4 +1,4 @@
-﻿using Ivy.Docs.Tools;
+using Ivy.Docs.Tools;
 using Spectre.Console.Cli;
 
 public static class Program
@@ -9,8 +9,6 @@ public static class Program
         app.Configure(config =>
         {
             config.SetApplicationName("Ivy.Docs.Tools");
-            config.AddCommand<ConvertCommand>("convert")
-                .WithDescription("Converts markdown files to Ivy C# App.");
             config.AddCommand<GenerateApiDocsCommand>("generate-api-docs")
                 .WithDescription("Generates a JSON manifest of API documentation for WidgetDocs tags.");
             config.PropagateExceptions();

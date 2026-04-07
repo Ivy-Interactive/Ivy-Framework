@@ -1,4 +1,5 @@
 ---
+icon: FileText
 searchHints:
   - plan
   - lifecycle
@@ -9,7 +10,7 @@ searchHints:
   - states
 ---
 
-# Plan Lifecycle
+# Plans
 
 <Ingress>
 Plans are the core unit of work in Tendril. Each plan moves through a series of states from creation to completion.
@@ -18,6 +19,27 @@ Plans are the core unit of work in Tendril. Each plan moves through a series of 
 ## Plan States
 
 A plan progresses through the following states:
+
+```dot
+digraph PlanLifecycle {
+    rankdir=LR
+    node [shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11, fillcolor="#E8F0FE", color="#4285F4"]
+    edge [fontname="Segoe UI", fontsize=9, color="#666666"]
+
+    Draft [fillcolor="#E8F0FE"]
+    Executing [fillcolor="#FFF3E0"]
+    Review [fillcolor="#E8F5E9"]
+    Completed [fillcolor="#C8E6C9"]
+    Icebox [fillcolor="#F3E5F5"]
+
+    Draft -> Executing [label="Execute"]
+    Executing -> Review [label="Done"]
+    Review -> Completed [label="Approve"]
+    Review -> Draft [label="Revise"]
+    Draft -> Icebox [label="Shelve"]
+    Icebox -> Draft [label="Restore"]
+}
+```
 
 | State | Description |
 |-------|-------------|

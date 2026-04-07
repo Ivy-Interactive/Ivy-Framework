@@ -35,9 +35,12 @@ public class PlanDatabaseSyncService : IDisposable
             _logger.LogInformation("Starting initial database sync...");
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-            // Read directly from file system to avoid circular dependency
+            // Read directly from file system to avoid circular dependency.
+            // Force overwrite to ensure filesystem is source of truth on startup,
+            // even if the DB has newer timestamps from prior state transitions.
             var plans = _planReader.GetPlansFromFileSystem();
-            _database.BulkUpsertPlans(plans);
+            _logger.LogInformation("Filesystem returned {Count} plans for sync", plans.Count);
+            _database.BulkUpsertPlans(plans, forceOverwrite: true);
 
             foreach (var plan in plans)
             {
@@ -59,6 +62,7 @@ public class PlanDatabaseSyncService : IDisposable
         {
             _logger.LogError(ex, "Initial database sync failed");
             _isInitialSyncComplete = true;
+            // Don't enable database reads — fall back to filesystem
         }
     }
 

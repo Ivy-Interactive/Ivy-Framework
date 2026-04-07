@@ -1,4 +1,5 @@
 ---
+icon: Terminal
 searchHints:
   - promptware
   - agent
