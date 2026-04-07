@@ -574,7 +574,7 @@ public class Server
         {
             var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
             var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
-                ? ivyTlsEnv is "1" or "true" or "yes" or "on" (StringComparison.OrdinalIgnoreCase)
+                ? ivyTlsEnv?.ToLowerInvariant() is "1" or "true" or "yes" or "on"
                 : !isContainer && !hasPortEnv && !_args.IsCliCommand; // default: TLS for local dev only
             var scheme = useTls ? "https" : "http";
             builder.WebHost.UseUrls($"{scheme}://{host}:{_args.Port}");
