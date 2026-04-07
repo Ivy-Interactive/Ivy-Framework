@@ -89,6 +89,22 @@ The **Languages** enum used for syntax highlighting and samples now has **`Descr
 
 [**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) **footer** cells now **format currency and numeric aggregates** consistently with column formatting (for example sums and averages in money and number columns).
 
+### Image overlay keyboard navigation
+
+When [**Image**](https://docs.ivy.app/widgets/primitives/image) **`Overlay`** is enabled, **arrow keys** move between **sibling** overlay images in sequence (for example gallery or documentation figures).
+
+### Branding and shell colors
+
+CSS adds an **`ivy-green`** (and related) **branding variable** for consistent Ivy identity. Follow-up tweaks **hard-code** or wire the **ivy brand** color where theme tokens needed it, and the **sidebar** uses the **`bg-secondary`** semantic variable for its background. **ThemeCustomizer** shows clearer **placeholders** in empty option boxes.
+
+### AutoFocus on buttons and inputs
+
+[**Button**](https://docs.ivy.app/widgets/common/button) and **input** widgets support **`AutoFocus`**, including focus when opening **Dialog** and **Sheet** content so the first field can take focus without an extra click.
+
+### Tooling and security
+
+The **`KillProcessUsingPort`** helper used in dev workflows now runs on **macOS** and **Linux** as well as Windows. **Security**-related analyzer and dependency **warnings** were addressed.
+
 ## Buttons, badges, and navigation
 
 - [**Button**](https://docs.ivy.app/widgets/common/button) **badges** use the **outline** variant for clearer contrast; **unit tests** were added.
