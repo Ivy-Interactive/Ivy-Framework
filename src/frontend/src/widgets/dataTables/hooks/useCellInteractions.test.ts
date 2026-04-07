@@ -9,16 +9,15 @@ import * as path from "path";
  * @testing-library/react is not available, we verify the source code
  * contains the correct conditional logic for link-cell handling.
  *
- * The key behavior: link-cell clicks should always open links, regardless
- * of whether enableCellClickEvents is true or false.
+ * The key behavior: link-cell clicks should only open links when
+ * cmd+click (metaKey) or ctrl+click (ctrlKey) is used.
  */
 describe("useCellInteractions - link cell click behavior", () => {
   const hookSource = fs.readFileSync(path.resolve(__dirname, "./useCellInteractions.ts"), "utf-8");
 
-  it("should open link cells without checking enableCellClickEvents", () => {
-    // The link-cell handling block should NOT be gated behind enableCellClickEvents.
-    // Previously, the condition included `!(enableCellClickEvents ?? false)` which
-    // prevented links from opening when OnCellClick events were enabled.
+  it("should require cmd/ctrl+click to open link cells", () => {
+    // The link-cell handling block should check for modifier keys (metaKey or ctrlKey).
+    // Plain clicks should NOT open links — only cmd+click or ctrl+click.
 
     // Find the link-cell condition block
     const linkCellConditionMatch = hookSource.match(
@@ -26,12 +25,45 @@ describe("useCellInteractions - link cell click behavior", () => {
     );
     expect(linkCellConditionMatch).not.toBeNull();
 
-    // Extract the full if-condition (from 'if (' to the closing ')')
+    // Extract the full if-condition (from 'if (' to well past the closing ')')
     const conditionStart = linkCellConditionMatch!.index!;
-    const conditionBlock = hookSource.slice(conditionStart, conditionStart + 200);
+    const conditionBlock = hookSource.slice(conditionStart, conditionStart + 300);
 
-    // Verify enableCellClickEvents is NOT part of the link-cell condition
-    expect(conditionBlock).not.toContain("enableCellClickEvents");
+    // Verify modifier key check is part of the link-cell condition
+    expect(conditionBlock).toContain("args.metaKey || args.ctrlKey");
+  });
+
+  it("should NOT open link cells on plain click (no modifier key)", () => {
+    // The condition requires (args.metaKey || args.ctrlKey), so without
+    // either modifier, the if-block is not entered and the link is not opened.
+    // We verify this by checking that metaKey/ctrlKey are required conditions.
+
+    const linkCellConditionMatch = hookSource.match(
+      /if\s*\(\s*\n?\s*cellContent\.kind === GridCellKind\.Custom &&\s*\n?\s*\(cellContent\.data as \{ kind\?: string \}\)\?\.kind === "link-cell" &&\s*\n?\s*\(args\.metaKey \|\| args\.ctrlKey\)/,
+    );
+    expect(linkCellConditionMatch).not.toBeNull();
+  });
+
+  it("should open link cells on cmd+click (metaKey: true)", () => {
+    // The condition includes args.metaKey, which is true on cmd+click (macOS)
+    expect(hookSource).toContain("args.metaKey");
+  });
+
+  it("should open link cells on ctrl+click (ctrlKey: true)", () => {
+    // The condition includes args.ctrlKey, which is true on ctrl+click (Windows/Linux)
+    expect(hookSource).toContain("args.ctrlKey");
+  });
+
+  it("should accept GridMouseEventArgs as second parameter", () => {
+    // The handleCellClicked callback should accept args: GridMouseEventArgs
+    expect(hookSource).toContain("(cell: Item, args: GridMouseEventArgs)");
+  });
+
+  it("should import GridMouseEventArgs from glide-data-grid", () => {
+    expect(hookSource).toContain("GridMouseEventArgs");
+    expect(hookSource).toMatch(
+      /import\s*\{[^}]*GridMouseEventArgs[^}]*\}\s*from\s*"@glideapps\/glide-data-grid"/,
+    );
   });
 
   it("should still fire OnCellClick events when enableCellClickEvents is true", () => {
