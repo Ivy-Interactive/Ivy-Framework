@@ -83,10 +83,13 @@ export function createIvyCodeTheme(density: Densities = Densities.Medium): Exten
       color: "var(--foreground)",
       fontWeight: "bold",
     },
-    // Custom selection highlighting
-    ".cm-content ::selection": {
-      backgroundColor: "color-mix(in srgb, var(--input) 50%, transparent)",
-      color: "var(--input-accent)",
+    // CodeMirror selection layer
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground": {
+      backgroundColor: "color-mix(in srgb, var(--primary) 25%, transparent) !important",
+    },
+    // Fallback native selection (for non-focused state)
+    "& ::selection": {
+      backgroundColor: "color-mix(in srgb, var(--primary) 25%, transparent)",
     },
     ".cm-cursor, .cm-dropCursor, .cm-cursor-primary": {
       borderLeftColor: "var(--foreground) !important",
