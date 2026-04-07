@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { GridCellKind, GridMouseEventArgs } from "@glideapps/glide-data-grid";
 import { GridCell, Item } from "@glideapps/glide-data-grid";
-import { useDebounce } from "../../hooks/use-debounce";
+import { useDebounce } from "../../../hooks/use-debounce";
 
 interface UseLinkCellHoverProps {
   getCellContent: (cell: Item) => GridCell;
@@ -13,7 +13,10 @@ export const useLinkCellHover = ({ getCellContent, visibleRows }: UseLinkCellHov
   const posRef = useRef(linkTooltipPos);
   posRef.current = linkTooltipPos;
 
-  const setPos = useCallback((pos: { x: number; y: number } | null) => setLinkTooltipPos(pos), []);
+  const setPos = useCallback(
+    (...args: unknown[]) => setLinkTooltipPos(args[0] as { x: number; y: number } | null),
+    [],
+  );
   const debouncedSetPos = useDebounce(setPos, 50);
 
   const onItemHovered = useCallback(
