@@ -1,5 +1,5 @@
-import React, { useMemo, useRef } from "react";
-import { CustomRenderer, DataEditorRef } from "@glideapps/glide-data-grid";
+import React, { useCallback, useMemo, useRef } from "react";
+import { CustomRenderer, DataEditorRef, GridMouseEventArgs } from "@glideapps/glide-data-grid";
 import { useTable } from "../dataTableContext";
 import { getSelectionProps } from "../utils/selectionModes";
 import {
@@ -18,6 +18,7 @@ import {
   useRowHover,
   useEmptyRows,
   useDataLoading,
+  useLinkCellHover,
 } from "../hooks";
 import { useFooterColumnLayout } from "../hooks/useFooterColumnLayout";
 import { GridContainer } from "../components/GridContainer";
@@ -122,6 +123,21 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       arrowTableRef,
     });
 
+  // Link cell hover tooltip
+  const { linkTooltipPos, onItemHovered: onLinkCellHovered } = useLinkCellHover({
+    getCellContent,
+    visibleRows,
+  });
+
+  // Compose onItemHovered: always call link hover, additionally call row hover when enabled
+  const handleItemHovered = useCallback(
+    (args: GridMouseEventArgs) => {
+      onLinkCellHovered(args);
+      onItemHovered(args);
+    },
+    [onLinkCellHovered, onItemHovered],
+  );
+
   // Table theme
   const { tableTheme, getRowThemeOverride, isDark } = useTableTheme({
     showVerticalBorders: showVerticalBorders ?? false,
@@ -219,6 +235,25 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     footer
   );
 
+  const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+  const tooltipLabel = isMac ? "\u2318+click to open link" : "Ctrl+click to open link";
+
+  const linkTooltipNode = linkTooltipPos ? (
+    <div
+      style={{
+        position: "absolute",
+        left: linkTooltipPos.x,
+        top: linkTooltipPos.y - 28,
+        transform: "translateX(-50%)",
+        pointerEvents: "none",
+        zIndex: 10,
+      }}
+      className="rounded bg-popover text-popover-foreground text-xs px-2 py-1 shadow-md border border-border whitespace-nowrap"
+    >
+      {tooltipLabel}
+    </div>
+  ) : null;
+
   return (
     <GridContainer
       gridRef={gridRef}
@@ -262,7 +297,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       onSearchClose={onSearchClose}
       onSearchResultsChanged={showSearchConfig ? onSearchResultsChanged : undefined}
       highlightRegions={showSearchConfig ? highlightRegions : undefined}
-      onItemHovered={enableRowHover ? onItemHovered : undefined}
+      onItemHovered={handleItemHovered}
       getRowThemeOverride={enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined}
       rowActions={rowActions}
       actionButtonsTop={actionButtonsTop}
@@ -271,6 +306,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       onRowActionClick={handleRowActionClick}
       footer={footerNode}
       hasEmptyRows={emptyRowsCount > 0}
+      linkTooltip={linkTooltipNode}
     />
   );
 };

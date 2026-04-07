@@ -8,3 +8,4 @@ export { useCellInteractions } from "./useCellInteractions";
 export { useRowHover } from "./useRowHover";
 export { useEmptyRows } from "./useEmptyRows";
 export { useDataLoading } from "./useDataLoading";
+export { useLinkCellHover } from "./useLinkCellHover";
