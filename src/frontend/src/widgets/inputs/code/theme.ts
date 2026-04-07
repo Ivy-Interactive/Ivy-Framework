@@ -33,7 +33,7 @@ export function createIvyCodeTheme(density: Densities = Densities.Medium): Exten
       fontFamily: "var(--font-mono)",
       fontSize: getFontSize(density),
       lineHeight: "1.5",
-      backgroundColor: "var(--background)",
+      backgroundColor: "transparent",
       color: "var(--foreground)",
     },
     ".cm-scroller": {
@@ -41,7 +41,7 @@ export function createIvyCodeTheme(density: Densities = Densities.Medium): Exten
       overflow: "auto",
       width: "100%",
       maxWidth: "100%",
-      backgroundColor: "var(--background)",
+      backgroundColor: "transparent",
     },
     ".cm-content": {
       padding: "10px",
@@ -51,14 +51,14 @@ export function createIvyCodeTheme(density: Densities = Densities.Medium): Exten
       maxWidth: "calc(min(90vw, 100% - 2rem))",
       boxSizing: "border-box",
       color: "var(--foreground)",
-      backgroundColor: "var(--background)",
+      backgroundColor: "transparent",
       caretColor: "var(--foreground) !important",
     },
     ".cm-line": {
       whiteSpace: "pre-wrap",
       wordBreak: "break-word",
       maxWidth: "100%",
-      backgroundColor: "var(--background)",
+      backgroundColor: "transparent",
     },
     ".cm-gutters": {
       height: "100%",
@@ -94,13 +94,13 @@ export function createIvyCodeTheme(density: Densities = Densities.Medium): Exten
     },
     // Ensure all editor areas have proper background
     ".cm-editor .cm-content": {
-      backgroundColor: "var(--background)",
+      backgroundColor: "transparent",
     },
     ".cm-editor .cm-scroller": {
-      backgroundColor: "var(--background)",
+      backgroundColor: "transparent",
     },
     ".cm-editor": {
-      backgroundColor: "var(--background)",
+      backgroundColor: "transparent",
     },
     // Container classes for proper sizing
     ".w-tc-editor": {
@@ -110,14 +110,14 @@ export function createIvyCodeTheme(density: Densities = Densities.Medium): Exten
       display: "flex",
       flexDirection: "column",
       boxSizing: "border-box",
-      backgroundColor: "var(--background)",
+      backgroundColor: "transparent",
     },
     ".w-tc-editor-text": {
       flex: "1",
       overflow: "auto",
       width: "100%",
       maxWidth: "100%",
-      backgroundColor: "var(--background)",
+      backgroundColor: "transparent",
     },
   });
 
