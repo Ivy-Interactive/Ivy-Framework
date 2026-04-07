@@ -78,11 +78,10 @@ export const useCellInteractions = ({
         ]);
       }
 
-      // Handle click on custom link cells (only if no OnCellClick handler is configured)
+      // Handle click on custom link cells
       if (
         cellContent.kind === GridCellKind.Custom &&
-        (cellContent.data as { kind?: string })?.kind === "link-cell" &&
-        !(enableCellClickEvents ?? false)
+        (cellContent.data as { kind?: string })?.kind === "link-cell"
       ) {
         const url = (cellContent.data as { url?: string })?.url;
 
