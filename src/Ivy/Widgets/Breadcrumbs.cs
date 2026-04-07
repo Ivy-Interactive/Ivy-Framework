@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
-using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

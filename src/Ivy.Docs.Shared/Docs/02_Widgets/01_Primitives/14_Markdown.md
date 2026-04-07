@@ -197,6 +197,63 @@ public class EmojiView : ViewBase
 }
 ```
 
+### GitHub Callouts
+
+GitHub-style callouts allow you to highlight important information using blockquote syntax with special type markers. Five callout types are supported, each with distinct styling and icons.
+
+```csharp demo-tabs
+public class CalloutsView : ViewBase
+{
+    public override object? Build()
+    {
+        var markdownContent = 
+            """
+            > [!NOTE]
+            > Useful information that users should know, even when skimming content.
+
+            > [!TIP]
+            > Helpful advice for doing things better or more easily.
+
+            > [!IMPORTANT]
+            > Key information users need to know to achieve their goal.
+
+            > [!WARNING]
+            > Urgent info that needs immediate user attention to avoid problems.
+
+            > [!CAUTION]
+            > Advises about risks or negative outcomes of certain actions.
+            """;
+            
+        return new Markdown(markdownContent);
+    }
+}
+```
+
+Callouts can contain multiple paragraphs, formatted text, links, and other markdown elements:
+
+```csharp demo-tabs
+public class ComplexCalloutView : ViewBase
+{
+    public override object? Build()
+    {
+        var markdownContent = 
+            """
+            > [!WARNING]
+            > **This action is irreversible!**
+            >
+            > Deleting this resource will:
+            > - Remove all associated data
+            > - Break existing integrations
+            > - Cannot be undone
+            >
+            > [Learn more about data retention](https://example.com)
+            """;
+            
+        return new Markdown(markdownContent);
+    }
+}
+```
+
 ### Text Alignment
 
 Align the whole markdown block within its container using `.Align(TextAlignment)` with `TextAlignment.Left`, `TextAlignment.Center`, `TextAlignment.Right`, or `TextAlignment.Justify`, or use the shorthand methods `.Left()`, `.Center()`, `.Right()`, `.Justify()`. Default is left.

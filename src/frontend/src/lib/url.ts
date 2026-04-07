@@ -1,4 +1,17 @@
 /**
+ * Resolve a relative path against the ivy-host meta tag.
+ * Used for upload URLs when running behind a reverse proxy.
+ */
+export function getFullUrl(path: string): string {
+  const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
+  if (ivyHostMeta) {
+    const host = ivyHostMeta.getAttribute("content");
+    return host + path;
+  }
+  return path;
+}
+
+/**
  * Extracts the content after the app:// protocol prefix using regex.
  * @param url - URL starting with app://
  * @returns Content after app://, or empty string if not an app:// URL

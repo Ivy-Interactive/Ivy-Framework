@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Ivy;
 
 namespace Ivy.Tests.Extensions;
 

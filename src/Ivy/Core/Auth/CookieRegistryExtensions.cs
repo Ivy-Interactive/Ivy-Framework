@@ -185,7 +185,7 @@ public static class CookieRegistryExtensions
         {
             HttpOnly = true,
             Secure = isProduction,
-            SameSite = SameSiteMode.Lax,
+            SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddYears(1),
             Path = "/",
         };

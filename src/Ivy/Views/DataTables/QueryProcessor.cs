@@ -77,7 +77,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             (openMethod, typeArgs[0], typeArgs.Length > 1 ? typeArgs[1] : typeof(void)),
             _ => openMethod.MakeGenericMethod(typeArgs));
 
-    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query, Func<object, object?>? idSelector = null, Dictionary<string, Func<object, object?>>? valueAccessors = null)
+    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query, DataTableConfig? config = null, Func<object, object?>? idSelector = null, Dictionary<string, Func<object, object?>>? valueAccessors = null)
     {
         try
         {
@@ -114,6 +114,12 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             if (query.Sort.Any())
             {
                 processedQuery = ApplySort(processedQuery, query.Sort);
+            }
+            else if (ShouldApplyDefaultSort(queryable, config))
+            {
+                // Apply default ordering by first property to prevent EF Core Query[10102]
+                // warnings when Skip/Take are used without an explicit OrderBy.
+                processedQuery = ApplyDefaultSort(processedQuery);
             }
 
             // Serialize count + data queries for EF Core providers to prevent concurrent DbContext access.
@@ -273,6 +279,37 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         }
 
         return query;
+    }
+
+    private IQueryable ApplyDefaultSort(IQueryable query)
+    {
+        var elementType = query.ElementType;
+        var firstProperty = elementType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .FirstOrDefault();
+
+        if (firstProperty == null)
+            return query;
+
+        var parameter = System.Linq.Expressions.Expression.Parameter(elementType, "x");
+        var propertyAccess = System.Linq.Expressions.Expression.Property(parameter, firstProperty);
+        var lambda = System.Linq.Expressions.Expression.Lambda(propertyAccess, parameter);
+
+        var method = GetGenericMethod(s_orderByMethod, elementType, firstProperty.PropertyType);
+        return (IQueryable)method.Invoke(null, new object[] { query, lambda })!;
+    }
+
+    private bool ShouldApplyDefaultSort(IQueryable queryable, DataTableConfig? config)
+    {
+        // If sorting is disabled, preserve source order
+        if (config?.AllowSorting == false)
+            return false;
+
+        // For EF Core providers, always apply default sort to avoid Query[10102] warnings
+        if (IsEfCoreProvider(queryable))
+            return true;
+
+        // For in-memory queryables, preserve source order
+        return false;
     }
 
     private IQueryable ApplyFilter(IQueryable query, Filter filter)

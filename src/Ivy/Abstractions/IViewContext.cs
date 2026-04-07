@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Ivy.Core.Hooks;
 
 // Resharper disable once CheckNamespace
 namespace Ivy;

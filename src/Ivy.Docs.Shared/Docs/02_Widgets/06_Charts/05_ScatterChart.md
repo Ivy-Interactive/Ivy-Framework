@@ -16,6 +16,8 @@ searchHints:
 Visualize correlations and distributions with interactive scatter plots that support bubble charts, multiple series, and customizable point shapes.
 </Ingress>
 
+> **Important:** ScatterChart requires numeric axes for both X and Y. Always use `.Type(AxisTypes.Number)` on axes, or omit the `.Type()` call (YAxis defaults to Number). Do NOT use `AxisTypes.Category` — it will cause "NaN" rendering and data clustering. If you have categorical data (e.g., "Q1", "Q2"), convert it to numeric values before using ScatterChart.
+
 Scatter charts display data points on a two-dimensional coordinate system, making them ideal for showing correlations between two numeric variables. Build chart [views](../../01_Onboarding/02_Concepts/02_Views.md) inside [layouts](../../01_Onboarding/02_Concepts/04_Layout.md) and use [state](../../03_Hooks/02_Core/03_UseState.md) for dynamic data. See [Charts](../../01_Onboarding/02_Concepts/18_Charts.md) for an overview of Ivy chart widgets. The example below renders a basic scatter plot showing the relationship between height and weight.
 
 ```csharp demo-tabs
@@ -180,6 +182,61 @@ public class ZAxisRangeDemo : ViewBase
     }
 }
 ```
+
+## Customizing with polish
+
+When building charts from queryable data with `ToScatterChart()`, use the `polish` callback to customize the scaffolded chart before it renders. The callback receives the fully built `ScatterChart` with scatter series already configured by the selected style.
+
+Common use cases for `polish`:
+- Override scatter point colors, shapes, or fill opacity
+- Add reference lines or grid customization
+- Replace the default scatters array with custom configurations
+- Add or modify tooltips, legends, or grids
+
+### Example: Custom scatter styling
+
+```csharp demo-below
+public class PolishScatterChartDemo : ViewBase
+{
+    record CityData(string City, int Population, int Area, int GreenSpace);
+
+    public override object? Build()
+    {
+        var data = new CityData[]
+        {
+            new("Oslo", 700, 480, 68),
+            new("Berlin", 3600, 892, 44),
+            new("Paris", 2100, 105, 21),
+            new("London", 8900, 1572, 33),
+            new("Rome", 2800, 1285, 52),
+        };
+
+        return Layout.Vertical()
+            | data.ToScatterChart(
+                polish: chart =>
+                {
+                    // Replace the scaffolded scatters with custom styling
+                    return chart with
+                    {
+                        Scatters = chart.Scatters.Select(s =>
+                            s with
+                            {
+                                Shape = ScatterShape.Diamond,
+                                Fill = Colors.Teal,
+                                FillOpacity = 0.7
+                            }
+                        ).ToArray()
+                    };
+                }
+            )
+            .Dimension("City", e => e.City)
+            .Measure("Population", e => e.Population)
+            .Size("Area", e => e.Area);
+    }
+}
+```
+
+> **Note:** The `polish` callback receives the fully scaffolded `ScatterChart` which already includes scatters from the style. Use `chart with { ... }` syntax to replace or modify chart properties while preserving others.
 
 <WidgetDocs Type="Ivy.ScatterChart" ExtensionTypes="Ivy.ScatterChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Charts/ScatterChart.cs"/>
 

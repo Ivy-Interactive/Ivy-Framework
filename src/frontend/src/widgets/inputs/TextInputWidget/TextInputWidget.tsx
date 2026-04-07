@@ -28,9 +28,9 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   pattern,
   rows,
   autoFocus,
+  ghost = false,
   dictation,
   dictationUploadUrl,
-  dictationLanguage: _dictationLanguage,
   dictationTranscription,
   dictationTranscriptionVersion,
   "data-testid": dataTestId,
@@ -60,16 +60,6 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
 
   const { isRecording, startRecording, stopRecording } = useDictation({
     dictationUploadUrl,
-    onTranscription: useCallback(
-      (text: string) => {
-        const current = localValue;
-        const separator = current.length > 0 && !current.endsWith(" ") ? " " : "";
-        const newValue = current + separator + text;
-        setLocalValue(newValue);
-        if (events.includes("OnChange")) eventHandler("OnChange", id, [newValue]);
-      },
-      [localValue, setLocalValue, events, eventHandler, id],
-    ),
   });
 
   // Handle transcription results pushed from the server
@@ -192,6 +182,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       pattern,
       rows,
       autoFocus,
+      ghost,
       dictation,
       isRecording,
       onDictationToggle: handleDictationToggle,
@@ -216,6 +207,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       pattern,
       rows,
       autoFocus,
+      ghost,
       dictation,
       isRecording,
       handleDictationToggle,
@@ -245,6 +237,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           onClear={handleClear}
+          onSubmit={handleSubmit}
           inputRef={inputRef}
           isFocused={isFocused}
           density={density}

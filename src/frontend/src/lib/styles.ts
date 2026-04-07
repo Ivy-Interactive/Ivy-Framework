@@ -645,7 +645,9 @@ export const getColor = (
 ) => {
   if (!color) return {};
 
-  const lowerColor = color.toLowerCase();
+  // Convert PascalCase to kebab-case so multi-word colors like "IvyGreen" → "ivy-green"
+  // match their CSS variable names (--ivy-green).
+  const lowerColor = color.replace(/([A-Z])/g, (_m, l, i) => (i === 0 ? l : "-" + l)).toLowerCase();
 
   // When a surface color is used as a text color (like Muted, Background, Card),
   // it should map to its foreground variant (muted-foreground) to ensure readability,
@@ -768,7 +770,7 @@ export const typography: Record<string, string> = {
   hr: "border-t border-border",
 
   // Expandable sections
-  details: "my-2 rounded-lg border border-border bg-card shadow-sm overflow-hidden",
+  details: "rounded-lg border border-border bg-card shadow-sm overflow-hidden",
   summary:
     "cursor-pointer select-none px-4 py-3 font-medium hover:bg-accent/50 transition-colors list-none [&::-webkit-details-marker]:hidden",
 };

@@ -306,6 +306,29 @@ public class ManualTableDemo : ViewBase
 }
 ```
 
+#### TableRow Properties
+
+| Method | Description |
+|--------|-------------|
+| `.IsHeader(bool)` | Marks the entire row as a header row |
+
+`TableRow` accepts `TableCell` elements as children. Use the `|` operator to pipe cells into a row:
+
+```csharp
+var row = new TableRow()
+    | new TableCell("Name")
+    | new TableCell("Email");
+```
+
+#### TableCell Properties
+
+| Method | Description |
+|--------|-------------|
+| `.IsHeader(bool)` | Marks the cell as a header cell (renders with bold/emphasis) |
+| `.IsFooter(bool)` | Marks the cell as a footer cell |
+| `.AlignContent(Align)` | Controls text alignment within the cell (`Align.Left`, `Align.Center`, `Align.Right`) |
+| `.Multiline(bool)` | Enables multi-line text wrapping instead of truncation with ellipsis |
+
 ### Builder Factory Methods
 
 The `Builder()` method allows you to specify how different data types should be rendered. Use the builder factory methods to create appropriate renderers for your data.
@@ -511,3 +534,5 @@ See [DataTable](../07_Advanced/01_DataTable.md) for full grid capabilities.
 </Details>
 
 <WidgetDocs Type="Ivy.Table" ExtensionTypes="Ivy.TableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Tables/Table.cs"/>
+<WidgetDocs Type="Ivy.TableRow" ExtensionTypes="Ivy.TableRowExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Tables/TableRow.cs"/>
+<WidgetDocs Type="Ivy.TableCell" ExtensionTypes="Ivy.TableCellExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Tables/TableCell.cs"/>

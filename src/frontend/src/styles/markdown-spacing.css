@@ -1,0 +1,24 @@
+/* Element-specific spacing for markdown widget content.
+   Replaces the uniform flex gap with contextual margins based on adjacent elements. */
+
+.markdown-widget > * + * {
+  margin-top: 0.5rem; /* Default spacing between elements */
+}
+
+/* Tighter spacing between consecutive details blocks */
+.markdown-widget > details + details {
+  margin-top: 0.25rem;
+}
+
+/* Larger spacing after headings for visual hierarchy */
+.markdown-widget > h1 + *,
+.markdown-widget > h2 + *,
+.markdown-widget > h3 + * {
+  margin-top: 0.75rem;
+}
+
+/* Tighter spacing around code blocks */
+.markdown-widget > pre + p,
+.markdown-widget > p + pre {
+  margin-top: 0.375rem;
+}

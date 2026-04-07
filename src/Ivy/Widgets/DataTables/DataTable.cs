@@ -1,5 +1,3 @@
-using Ivy.Core;
-
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
@@ -9,6 +7,7 @@ public class CellClickEventArgs
     public int ColumnIndex { get; set; }
     public string ColumnName { get; set; } = "";
     public object? CellValue { get; set; }
+    public object? RowId { get; set; }
 }
 
 public class RowActionClickEventArgs

@@ -1,6 +1,5 @@
 using Apache.Arrow;
 using Apache.Arrow.Ipc;
-using Apache.Arrow.Types;
 using System.Text;
 
 namespace Ivy.Test.DataTables.TestHelpers;

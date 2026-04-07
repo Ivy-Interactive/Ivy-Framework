@@ -828,6 +828,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         containerRef.current = el;
       }}
       role="menu"
+      aria-label="Sidebar menu"
       tabIndex={0}
       onFocus={() => {
         if (searchActive && flatItems.length > 0) setSelectedIndex(0);

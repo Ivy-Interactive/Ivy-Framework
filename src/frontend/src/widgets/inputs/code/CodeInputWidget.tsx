@@ -19,7 +19,13 @@ import { createIvyCodeTheme } from "./theme";
 import { Densities } from "@/types/density";
 import { X, Copy } from "lucide-react";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
-import { keymap, EditorView, lineNumbers, highlightActiveLine } from "@codemirror/view";
+import {
+  keymap,
+  EditorView,
+  lineNumbers,
+  highlightActiveLine,
+  drawSelection,
+} from "@codemirror/view";
 import { history } from "@codemirror/commands";
 
 import { useDebouncedCallback } from "use-debounce";
@@ -37,6 +43,7 @@ interface CodeInputWidgetProps {
   width?: string;
   height?: string;
   density?: Densities;
+  autoFocus?: boolean;
 }
 
 const languageExtensions = {
@@ -68,6 +75,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   height,
   density = Densities.Medium,
   events = EMPTY_ARRAY,
+  autoFocus,
 }) => {
   const eventHandler = useEventHandler();
   const [isFocused, setIsFocused] = useState(false);
@@ -131,6 +139,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     return [
       lineNumbers(),
       highlightActiveLine(),
+      drawSelection(),
       history(),
       keymap.of([
         { key: "Ctrl-d", run: () => false },
@@ -185,10 +194,12 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         onFocus={handleFocus}
         placeholder={placeholder}
         editable={!disabled}
+        autoFocus={autoFocus}
         data-gramm="false"
         className={cn(
           "h-full",
-          "border",
+          "border border-input shadow-sm rounded-field",
+          "dark:border-white/10",
           invalid && inputStyles.invalid,
           disabled && "opacity-50 cursor-not-allowed",
         )}

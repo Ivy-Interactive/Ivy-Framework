@@ -35,9 +35,9 @@ export interface TextInputWidgetProps {
   pattern?: string;
   rows?: number;
   autoFocus?: boolean;
+  ghost?: boolean;
   dictation?: boolean;
   dictationUploadUrl?: string;
-  dictationLanguage?: string;
   dictationTranscription?: string;
   dictationTranscriptionVersion?: number;
   "data-testid"?: string;

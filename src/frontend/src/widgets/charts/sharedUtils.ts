@@ -14,6 +14,8 @@ import {
 } from "./chartTypes";
 import { ChartData } from "./chartTypes";
 import { generateTextStyle, generateAxisLabelStyle, type ChartThemeColors } from "./styles/theme";
+import { format as dateFnsFormat } from "date-fns";
+import { TZDate } from "@date-fns/tz";
 import {
   CARTESIAN_GRID_DEFAULTS,
   LEGEND_DEFAULTS,
@@ -68,45 +70,79 @@ export const getAxisDomainBound = (
   };
 };
 
-export const formatTickLabel = (value: number | string, formatter?: string | null) => {
+export const formatTickLabel = (
+  value: number | string,
+  formatter?: string | null,
+  timeZone?: string | null,
+  formatterType?: "Auto" | "Number" | "Date" | null,
+) => {
   if (!formatter) return String(value);
 
-  if (formatter.startsWith("C")) {
-    const parts = formatter.split(":");
-    const currency = parts.length > 1 ? parts[1] : "USD";
-    const fractionDigits = parseInt(parts[0].substring(1));
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: isNaN(fractionDigits) ? 0 : fractionDigits,
-    }).format(Number(value));
+  const type = formatterType ?? "Auto";
+
+  // Number formatting helpers
+  const tryNumberFormat = (): string | null => {
+    if (formatter.startsWith("C")) {
+      const parts = formatter.split(":");
+      const currency = parts.length > 1 ? parts[1] : "USD";
+      const fractionDigits = parseInt(parts[0].substring(1));
+      return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency,
+        maximumFractionDigits: isNaN(fractionDigits) ? 0 : fractionDigits,
+      }).format(Number(value));
+    }
+    if (formatter.startsWith("P")) {
+      const fractionDigits = parseInt(formatter.substring(1));
+      return new Intl.NumberFormat(undefined, {
+        style: "percent",
+        maximumFractionDigits: isNaN(fractionDigits) ? 0 : fractionDigits,
+      }).format(Number(value) / 100);
+    }
+    if (formatter.startsWith("N") || formatter.startsWith("F")) {
+      const fractionDigits = parseInt(formatter.substring(1));
+      return new Intl.NumberFormat(undefined, {
+        maximumFractionDigits: isNaN(fractionDigits) ? 2 : fractionDigits,
+      }).format(Number(value));
+    }
+    if (formatter === "#,##0,,M") {
+      return (Number(value) / 1000000).toFixed(0) + "M";
+    }
+    if (formatter === "#,##0,K") {
+      return (Number(value) / 1000).toFixed(0) + "K";
+    }
+    return null;
+  };
+
+  // Date formatting helper
+  const tryDateFormat = (): string | null => {
+    if (/(?:^|[^a-zA-Z])(?:yyyy|yy|MMMM|MMM|MM|dd|d|HH|hh|mm|ss)(?:[^a-zA-Z]|$)/.test(formatter)) {
+      try {
+        const tz =
+          timeZone === "local"
+            ? Intl.DateTimeFormat().resolvedOptions().timeZone
+            : timeZone || "UTC";
+        const date = new TZDate(new Date(value), tz);
+        if (!isNaN(date.getTime())) {
+          return dateFnsFormat(date, formatter);
+        }
+      } catch {
+        // Fall through
+      }
+    }
+    return null;
+  };
+
+  if (type === "Number") {
+    return tryNumberFormat() ?? String(value);
   }
-  if (formatter.startsWith("P")) {
-    const fractionDigits = parseInt(formatter.substring(1));
-    return new Intl.NumberFormat(undefined, {
-      style: "percent",
-      maximumFractionDigits: isNaN(fractionDigits) ? 0 : fractionDigits,
-    }).format(Number(value) / 100);
+
+  if (type === "Date") {
+    return tryDateFormat() ?? String(value);
   }
-  if (formatter.startsWith("N") || formatter.startsWith("F")) {
-    const fractionDigits = parseInt(formatter.substring(1));
-    return new Intl.NumberFormat(undefined, {
-      maximumFractionDigits: isNaN(fractionDigits) ? 2 : fractionDigits,
-    }).format(Number(value));
-  }
-  if (formatter === "MMM yyyy") {
-    return new Intl.DateTimeFormat(undefined, {
-      month: "short",
-      year: "numeric",
-    }).format(new Date(value));
-  }
-  if (formatter === "#,##0,,M") {
-    return (Number(value) / 1000000).toFixed(0) + "M";
-  }
-  if (formatter === "#,##0,K") {
-    return (Number(value) / 1000).toFixed(0) + "K";
-  }
-  return String(value);
+
+  // Auto: try number first, then date (original behavior)
+  return tryNumberFormat() ?? tryDateFormat() ?? String(value);
 };
 
 export const generateDataProps = (data: Record<string, unknown>[]) => {
@@ -160,13 +196,21 @@ export const generateDataProps = (data: Record<string, unknown>[]) => {
 export function generateEChartGrid(
   cartesianGrid?: CartesianGridProps,
   hasToolbox: boolean = false,
+  yAxis?: YAxisProps[],
+  xAxis?: XAxisProps[],
 ) {
+  // When all Y axes are hidden, remove left/right padding so the chart uses full width
+  const allYAxesHidden = yAxis && yAxis.length > 0 && yAxis.every((axis) => axis.hide === true);
+
+  // When all X axes are hidden, remove bottom padding
+  const allXAxesHidden = xAxis && xAxis.length > 0 && xAxis.every((axis) => axis.hide === true);
+
   const defaultGrid = {
     show: false, // Hide grid border to remove the square frame
-    left: "3%",
-    right: "4%",
+    left: allYAxesHidden ? 0 : "3%",
+    right: allYAxesHidden ? 0 : "4%",
     top: hasToolbox ? 40 : 15,
-    bottom: 50, // Space for legend below axis labels
+    bottom: allXAxesHidden ? 10 : 50, // Reduce bottom padding when X axis is hidden
     containLabel: true,
     borderWidth: 0, // Ensure no border is drawn
   };
@@ -326,44 +370,64 @@ export const generateXAxis = (
   themeColors?: { mutedForeground: string; fontSans: string },
   cartesianGrid?: CartesianGridProps,
 ) => {
-  const axis = xAxis?.[0] || ({} as Partial<XAxisProps>);
+  const axis = xAxis?.[0] || ({} as XAxisProps);
   const allowDataOverflow = axis.allowDataOverflow ?? false;
 
   const minOpt = getAxisDomainBound("min", axis.domainMin, allowDataOverflow);
   const maxOpt = getAxisDomainBound("max", axis.domainMax, allowDataOverflow);
 
+  // Map scale to ECharts axis type when explicitly set
+  const scaleType = axis.scale && axis.scale !== "Auto" ? axis.scale.toLowerCase() : undefined;
+
   return {
+    show: !axis.hide,
     position: axis.orientation?.toLowerCase() === "top" ? "top" : "bottom",
-    type: isVertical ? "category" : "value",
+    type: scaleType ?? (isVertical ? "category" : "value"),
     boundaryGap: chartType === "bar" ? true : false,
     data: isVertical ? categories : undefined,
+    inverse: axis.reversed ?? false,
+    ...(axis.name != null && { name: axis.name }),
     ...(minOpt !== undefined && { min: minOpt }),
     ...(maxOpt !== undefined && { max: maxOpt }),
+    ...(axis.tickCount != null && { splitNumber: axis.tickCount }),
     axisLabel: {
       show: axis.hideTickLabels ? false : true,
+      rotate: axis.angle ?? 0,
       formatter: isVertical
         ? (value: string | number) => {
-            if (axis.tickFormatter) {
-              return formatTickLabel(value, axis.tickFormatter);
-            }
-            const strVal = String(value);
-            return strVal.length > 10 ? strVal.match(/.{1,10}/g)?.join("\n") : strVal;
+            const formatted = axis.tickFormatter
+              ? formatTickLabel(value, axis.tickFormatter, axis.timeZone, axis.tickFormatterType)
+              : String(value).length > 10
+                ? String(value)
+                    .match(/.{1,10}/g)
+                    ?.join("\n")
+                : String(value);
+            return axis.unit ? `${formatted}${axis.unit}` : formatted;
           }
         : (value: number | string) => {
+            let formatted: string;
             if (axis.tickFormatter) {
-              return formatTickLabel(value, axis.tickFormatter);
+              formatted = formatTickLabel(
+                value,
+                axis.tickFormatter,
+                axis.timeZone,
+                axis.tickFormatterType,
+              );
+            } else {
+              const numVal = Number(value);
+              if (Math.abs(numVal) >= 1e9) formatted = (numVal / 1e9).toFixed(0) + "B";
+              else if (Math.abs(numVal) >= 1e6) formatted = (numVal / 1e6).toFixed(0) + "M";
+              else if (Math.abs(numVal) >= 1e3) formatted = (numVal / 1e3).toFixed(0) + "K";
+              else formatted = String(value);
             }
-            const numVal = Number(value);
-            if (Math.abs(numVal) >= 1e9) return (numVal / 1e9).toFixed(0) + "B";
-            if (Math.abs(numVal) >= 1e6) return (numVal / 1e6).toFixed(0) + "M";
-            if (Math.abs(numVal) >= 1e3) return (numVal / 1e3).toFixed(0) + "K";
-            return String(value);
+            return axis.unit ? `${formatted}${axis.unit}` : formatted;
           },
-      interval: "auto",
+      ...(axis.minTickGap != null && { interval: axis.minTickGap }),
+      ...(!axis.minTickGap && { interval: "auto" as const }),
       ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
     },
     axisLine: {
-      show: true,
+      show: axis.axisLine === true,
       lineStyle: {
         type: "dashed",
         color: themeColors?.mutedForeground,
@@ -371,7 +435,8 @@ export const generateXAxis = (
       },
     },
     axisTick: {
-      show: true,
+      show: axis.tickLine === true,
+      length: axis.tickSize ?? 6,
       lineStyle: {
         color: themeColors?.mutedForeground,
         opacity: 0.4,
@@ -400,68 +465,95 @@ export const generateYAxis = (
   cartesianGrid?: CartesianGridProps,
 ) => {
   const safeTransform = transformValue ?? ((v: number) => v);
-  const axis = yAxis?.[0] || ({} as Partial<YAxisProps>);
-  const allowDataOverflow = axis.allowDataOverflow ?? false;
 
-  let minOpt = getAxisDomainBound("min", axis.domainMin, allowDataOverflow, safeTransform);
-  let maxOpt = getAxisDomainBound("max", axis.domainMax, allowDataOverflow, safeTransform);
+  const buildAxisConfig = (axis: YAxisProps, skipLargeSpread: boolean = false) => {
+    const effectiveLargeSpread = largeSpread && !skipLargeSpread;
+    const allowDataOverflow = axis.allowDataOverflow ?? false;
 
-  if (largeSpread) {
-    if (minOpt === undefined) minOpt = safeTransform(minValue);
-    if (maxOpt === undefined) maxOpt = safeTransform(maxValue);
+    let minOpt = getAxisDomainBound("min", axis.domainMin, allowDataOverflow, safeTransform);
+    let maxOpt = getAxisDomainBound("max", axis.domainMax, allowDataOverflow, safeTransform);
+
+    if (effectiveLargeSpread) {
+      if (minOpt === undefined) minOpt = safeTransform(minValue);
+      if (maxOpt === undefined) maxOpt = safeTransform(maxValue);
+    }
+
+    // Map scale to ECharts axis type when explicitly set
+    const scaleType = axis.scale && axis.scale !== "Auto" ? axis.scale.toLowerCase() : undefined;
+
+    return {
+      show: axis.hide ? false : true,
+      type: scaleType ?? (isVertical ? "value" : "category"),
+      data: isVertical ? undefined : categories,
+      inverse: axis.reversed ?? false,
+      ...(axis.name != null && { name: axis.name }),
+      ...(minOpt !== undefined && { min: minOpt }),
+      ...(maxOpt !== undefined && { max: maxOpt }),
+      axisLabel: {
+        show: axis.hideTickLabels ? false : true,
+        rotate: axis.angle ?? 0,
+        formatter: (value: number) => {
+          let formatted: string | number;
+          if (axis.tickFormatter) {
+            formatted = formatTickLabel(
+              value,
+              axis.tickFormatter,
+              axis.timeZone,
+              axis.tickFormatterType,
+            );
+          } else if (effectiveLargeSpread) {
+            const unscaled = Math.sign(value) * (10 ** Math.abs(value) - 1);
+            if (Math.abs(unscaled) >= 1e9) formatted = (unscaled / 1e9).toFixed(0) + "B";
+            else if (Math.abs(unscaled) >= 1e6) formatted = (unscaled / 1e6).toFixed(0) + "M";
+            else if (Math.abs(unscaled) >= 1e3) formatted = (unscaled / 1e3).toFixed(0) + "K";
+            else formatted = unscaled.toFixed(0);
+          } else {
+            if (Math.abs(value) >= 1e9) formatted = (value / 1e9).toFixed(0) + "B";
+            else if (Math.abs(value) >= 1e6) formatted = (value / 1e6).toFixed(0) + "M";
+            else if (Math.abs(value) >= 1e3) formatted = (value / 1e3).toFixed(0) + "K";
+            else formatted = value;
+          }
+          return axis.unit ? `${formatted}${axis.unit}` : formatted;
+        },
+        ...(axis.minTickGap != null && { interval: axis.minTickGap }),
+        ...(!axis.minTickGap && {}),
+        ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
+      },
+      splitNumber: axis.tickCount ?? (effectiveLargeSpread ? 3 : 5),
+      position: axis.orientation === "Right" ? "right" : "left",
+      axisLine: {
+        show: axis.axisLine === true,
+        lineStyle: {
+          type: "dashed",
+          color: themeColors?.mutedForeground,
+          opacity: 0.1,
+        },
+      },
+      axisTick: {
+        show: axis.tickLine === true,
+        length: axis.tickSize ?? 6,
+        lineStyle: {
+          color: themeColors?.mutedForeground,
+          opacity: 0.4,
+        },
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          type: "dashed",
+          color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
+          opacity: 0.4,
+        },
+      },
+    };
+  };
+
+  if (yAxis && yAxis.length > 1) {
+    // Each axis auto-scales independently; global largeSpread is misleading for multi-axis charts
+    return yAxis.map((axis) => buildAxisConfig(axis, /* skipLargeSpread: */ true));
   }
 
-  return {
-    type: isVertical ? "value" : "category",
-    data: isVertical ? undefined : categories,
-    ...(minOpt !== undefined && { min: minOpt }),
-    ...(maxOpt !== undefined && { max: maxOpt }),
-    axisLabel: {
-      show: axis.hideTickLabels ? false : true,
-      formatter: (value: number) => {
-        if (axis.tickFormatter) {
-          return formatTickLabel(value, axis.tickFormatter);
-        }
-        if (largeSpread) {
-          const unscaled = Math.sign(value) * (10 ** Math.abs(value) - 1);
-          if (Math.abs(unscaled) >= 1e9) return (unscaled / 1e9).toFixed(0) + "B";
-          if (Math.abs(unscaled) >= 1e6) return (unscaled / 1e6).toFixed(0) + "M";
-          if (Math.abs(unscaled) >= 1e3) return (unscaled / 1e3).toFixed(0) + "K";
-          return unscaled.toFixed(0);
-        }
-        if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(0) + "B";
-        if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(0) + "M";
-        if (Math.abs(value) >= 1e3) return (value / 1e3).toFixed(0) + "K";
-        return value;
-      },
-      ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
-    },
-    splitNumber: largeSpread ? 3 : 5,
-    position: axis.orientation === "Right" ? "right" : "left",
-    axisLine: {
-      show: true,
-      lineStyle: {
-        type: "dashed",
-        color: themeColors?.mutedForeground,
-        opacity: 0.1,
-      },
-    },
-    axisTick: {
-      show: true,
-      lineStyle: {
-        color: themeColors?.mutedForeground,
-        opacity: 0.4,
-      },
-    },
-    splitLine: {
-      show: true,
-      lineStyle: {
-        type: "dashed",
-        color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
-        opacity: 0.4,
-      },
-    },
-  };
+  return buildAxisConfig(yAxis?.[0] || ({} as YAxisProps));
 };
 
 export const generateTooltip = (
@@ -511,7 +603,7 @@ export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
 
   const features: ToolboxFeatures = {};
 
-  if (box.dataView !== false) {
+  if (box.dataView === true) {
     const cardBg = getComputedStyle(document.documentElement).getPropertyValue("--card").trim();
     const foreground = getComputedStyle(document.documentElement)
       .getPropertyValue("--foreground")
@@ -531,14 +623,14 @@ export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
     };
   }
 
-  if (box.magicType !== false) {
+  if (box.magicType === true) {
     features.magicType = {
       show: true,
       type: ["line", "bar"],
     };
   }
 
-  if (box.saveAsImage !== false) {
+  if (box.saveAsImage === true) {
     features.saveAsImage = {
       show: true,
     };

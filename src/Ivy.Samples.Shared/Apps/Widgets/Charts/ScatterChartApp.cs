@@ -19,6 +19,7 @@ public class ScatterChartApp : SampleBase
             | new ScatterChart9View()
             | new ScatterChart10View()
             | new ScatterChart11View()
+            | new ScatterChart12View()
         ;
     }
 }
@@ -388,5 +389,40 @@ public class ScatterChart11View : ViewBase
 
         return new Card().Title("Scatter with Toolbox (Save, Zoom, etc.)")
             | chart;
+    }
+}
+
+// Example 13: Dual Axis Scatter (Revenue vs Market Share)
+public class ScatterChart12View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Month = 1, Revenue = 150, MarketShare = 12 },
+            new { Month = 2, Revenue = 280, MarketShare = 18 },
+            new { Month = 3, Revenue = 420, MarketShare = 25 },
+            new { Month = 4, Revenue = 380, MarketShare = 22 },
+            new { Month = 5, Revenue = 510, MarketShare = 28 },
+            new { Month = 6, Revenue = 650, MarketShare = 35 },
+        };
+
+        return new Card().Title("Dual Axis (Revenue vs Market Share)")
+            | new ScatterChart(data)
+                .ColorScheme(ColorScheme.Default)
+                .Scatter(new Scatter("Revenue").Name("Revenue ($K)").YAxisIndex(0).Shape(ScatterShape.Circle))
+                .Scatter(new Scatter("MarketShare").Name("Market Share (%)").YAxisIndex(1).Shape(ScatterShape.Diamond))
+                .XAxis(new XAxis("Month").Type(AxisTypes.Number).TickLine(false).AxisLine(false))
+                .YAxis(new YAxis("Revenue")
+                    .Orientation(YAxis.Orientations.Left)
+                    .TickFormatter("C0", TickFormatterType.Number))
+                .YAxis(new YAxis("MarketShare")
+                    .Orientation(YAxis.Orientations.Right)
+                    .TickFormatter("P0", TickFormatterType.Number)
+                    .Domain(0, 0.5))
+                .CartesianGrid(new CartesianGrid().Horizontal())
+                .Tooltip(new ChartTooltip().Animated(true))
+                .Legend()
+        ;
     }
 }

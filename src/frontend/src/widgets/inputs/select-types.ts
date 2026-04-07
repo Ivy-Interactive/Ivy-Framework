@@ -37,4 +37,5 @@ export interface SelectInputWidgetProps {
   density?: Densities;
   width?: string;
   events?: string[];
+  autoFocus?: boolean;
 }

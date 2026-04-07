@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
@@ -61,6 +60,8 @@ internal record TabsLayout : WidgetBase<TabsLayout>
     [Event] public EventHandler<Event<TabsLayout, int>>? OnRefresh { get; set; }
 
     [Event] public EventHandler<Event<TabsLayout, int[]>>? OnReorder { get; set; }
+
+    [Event] public EventHandler<Event<TabsLayout, int>>? OnCloseOthers { get; set; }
 
     [Event] public EventHandler<Event<TabsLayout, int>>? OnAddButtonClick { get; set; }
 }

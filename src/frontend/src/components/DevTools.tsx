@@ -1,15 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useReducer } from "react";
 import "./devtools.css";
 import { CallSite } from "@/types/widgets";
-import {
-  widgetCallSiteRegistry,
-  setWidgetContentOverride,
-  clearWidgetContentOverride,
-} from "@/widgets/widgetRenderer";
-import { LuTrash2, LuTextCursor, LuSend, LuPlus } from "react-icons/lu";
-import { FaMagic } from "react-icons/fa";
-
-type DialogAction = "modify" | "delete" | "text-edit";
+import { widgetCallSiteRegistry } from "@/widgets/widgetRenderer";
+import { LuSend, LuPlus, LuChevronUp } from "react-icons/lu";
 
 interface WidgetInfo {
   id: string;
@@ -48,8 +41,8 @@ function formatWidgetType(type: string): string {
 }
 
 function getDialogPosition(clickPos: { x: number; y: number }) {
-  const dialogWidth = 320;
-  const dialogHeight = 280;
+  const dialogWidth = 380;
+  const dialogHeight = 48;
   return {
     top: Math.min(clickPos.y + 8, window.innerHeight - dialogHeight),
     left: Math.min(clickPos.x, window.innerWidth - dialogWidth),
@@ -84,7 +77,6 @@ export function DevTools() {
         highlightedWidget: WidgetInfo | null;
         widgetStack: HTMLElement[];
         dialogWidget: WidgetInfo | null;
-        dialogAction: DialogAction;
         dialogText: string;
         clickPosition: { x: number; y: number };
       },
@@ -97,15 +89,13 @@ export function DevTools() {
       highlightedWidget: null,
       widgetStack: [],
       dialogWidget: null,
-      dialogAction: "modify",
       dialogText: "",
       clickPosition: { x: 0, y: 0 },
     },
   );
-  const { highlightedWidget, widgetStack, dialogWidget, dialogAction, dialogText, clickPosition } =
-    devState;
+  const { highlightedWidget, widgetStack, dialogWidget, dialogText, clickPosition } = devState;
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const getWidgetInfo = useCallback((element: HTMLElement): WidgetInfo => {
     const widgetId = element.getAttribute("id")!;
@@ -116,24 +106,17 @@ export function DevTools() {
   }, []);
 
   const closeDialog = useCallback(() => {
-    if (dialogWidget && dialogAction === "text-edit") {
-      clearWidgetContentOverride(dialogWidget.id);
-    }
     dispatchDev({
       dialogWidget: null,
       dialogText: "",
-      dialogAction: "modify",
       highlightedWidget: null,
     });
-  }, [dialogWidget, dialogAction, dispatchDev]);
+  }, [dispatchDev]);
 
   const postChange = useCallback(
     (forward: boolean) => {
       if (!dialogWidget) return;
-      const finalText = dialogText;
-
-      const prompt =
-        dialogAction === "delete" ? finalText.trim() || "Delete this widget" : finalText.trim();
+      const prompt = dialogText.trim();
 
       if (!prompt) {
         closeDialog();
@@ -146,7 +129,7 @@ export function DevTools() {
           widgetType: dialogWidget.type,
           prompt,
           callSite: dialogWidget.callSite,
-          action: dialogAction,
+          action: "modify",
           currentContent: getTextContent(dialogWidget.element, dialogWidget.type),
           forward,
         },
@@ -155,47 +138,20 @@ export function DevTools() {
       window.parent.postMessage({ type: "DEVTOOLS_APPLY_CHANGES", payload, forward }, "*");
       closeDialog();
     },
-    [dialogWidget, dialogAction, dialogText, closeDialog],
+    [dialogWidget, dialogText, closeDialog],
   );
 
   const handleAdd = useCallback(() => postChange(false), [postChange]);
   const handleSend = useCallback(() => postChange(true), [postChange]);
 
-  const handleActionChange = useCallback(
-    (action: DialogAction) => {
-      if (!dialogWidget) return;
-
-      if (dialogAction === "text-edit" && action !== "text-edit") {
-        clearWidgetContentOverride(dialogWidget.id);
-      }
-
-      if (action === "text-edit") {
-        const text =
-          dialogWidget.element.getAttribute("data-content") ||
-          dialogWidget.element.textContent ||
-          "";
-        dispatchDev({ dialogText: text });
-        setWidgetContentOverride(dialogWidget.id, text);
-      } else if (dialogAction === action) {
-        return;
-      } else {
-        dispatchDev({ dialogText: "" });
-      }
-
-      dispatchDev({ dialogAction: action });
-    },
-    [dialogWidget, dialogAction, dispatchDev],
-  );
-
-  const handleTextChange = useCallback(
-    (value: string) => {
-      dispatchDev({ dialogText: value });
-      if (dialogAction === "text-edit" && dialogWidget) {
-        setWidgetContentOverride(dialogWidget.id, value);
-      }
-    },
-    [dialogAction, dialogWidget, dispatchDev],
-  );
+  const handleSelectParent = useCallback(() => {
+    if (!dialogWidget) return;
+    const currentIndex = widgetStack.findIndex((el) => el === dialogWidget.element);
+    const parentIndex = currentIndex + 1;
+    if (parentIndex < widgetStack.length) {
+      dispatchDev({ dialogWidget: getWidgetInfo(widgetStack[parentIndex]) });
+    }
+  }, [dialogWidget, widgetStack, getWidgetInfo, dispatchDev]);
 
   const handleMouseOver = useCallback(
     (e: MouseEvent) => {
@@ -270,10 +226,9 @@ export function DevTools() {
       dispatchDev({
         clickPosition: { x: e.clientX, y: e.clientY },
         dialogWidget: highlightedWidget,
-        dialogAction: "modify",
         dialogText: "",
       });
-      setTimeout(() => textareaRef.current?.focus(), 0);
+      setTimeout(() => inputRef.current?.focus(), 0);
     },
     [highlightedWidget, dialogWidget, dispatchDev],
   );
@@ -283,12 +238,16 @@ export function DevTools() {
       if (e.key === "Escape" && dialogWidget) {
         closeDialog();
       }
-      if (e.key === "Enter" && e.ctrlKey && dialogWidget) {
+      if (e.key === "Enter" && !e.shiftKey && dialogWidget) {
+        e.preventDefault();
+        handleSend();
+      }
+      if (e.key === "Enter" && e.shiftKey && dialogWidget) {
         e.preventDefault();
         handleAdd();
       }
     },
-    [dialogWidget, closeDialog, handleAdd],
+    [dialogWidget, closeDialog, handleSend, handleAdd],
   );
 
   useEffect(() => {
@@ -339,56 +298,33 @@ export function DevTools() {
     return () => overlay.remove();
   }, [enabled, highlightedWidget, dialogWidget]);
 
-  const displayValue = dialogText;
-
   if (!enabled) return null;
 
   return (
     <div className="ivy-devtools-container">
       {dialogWidget && (
         <div className="ivy-devtools ivy-devtools-dialog" style={getDialogPosition(clickPosition)}>
-          <div className="ivy-devtools-dialog-toggles">
-            <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === "modify" ? "ivy-devtools-toggle-active" : ""}`}
-              onClick={() => handleActionChange("modify")}
-            >
-              <FaMagic size={12} />
-              Change
-            </button>
-            <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === "text-edit" ? "ivy-devtools-toggle-active" : ""}`}
-              onClick={() => handleActionChange("text-edit")}
-            >
-              <LuTextCursor size={14} />
-              Edit Text
-            </button>
-            <button
-              className={`ivy-devtools-toggle-btn ${dialogAction === "delete" ? "ivy-devtools-toggle-active" : ""}`}
-              onClick={() => handleActionChange("delete")}
-            >
-              <LuTrash2 size={14} />
-              Delete
-            </button>
-          </div>
-          <div className="ivy-devtools-textarea-wrapper">
-            <textarea
-              ref={textareaRef}
-              value={displayValue}
-              onChange={(e) => handleTextChange(e.target.value)}
-              placeholder="Write anything..."
-              className="ivy-devtools-textarea"
-            />
-          </div>
-          <div className="ivy-devtools-dialog-actions">
-            <button onClick={handleAdd} className="ivy-devtools-btn ivy-devtools-btn-muted">
-              <LuPlus size={14} />
-              Add To Prompt
-            </button>
-            <button onClick={handleSend} className="ivy-devtools-btn ivy-devtools-btn-outlined">
-              <LuSend size={14} />
-              Send direct
-            </button>
-          </div>
+          <input
+            ref={inputRef}
+            type="text"
+            value={dialogText}
+            onChange={(e) => dispatchDev({ dialogText: e.target.value })}
+            placeholder="Write anything..."
+            className="ivy-devtools-input"
+          />
+          <button onClick={handleSend} className="ivy-devtools-icon-btn" title="Send (Enter)">
+            <LuSend size={14} />
+          </button>
+          <button onClick={handleAdd} className="ivy-devtools-icon-btn" title="Queue (Shift+Enter)">
+            <LuPlus size={14} />
+          </button>
+          <button
+            onClick={handleSelectParent}
+            className="ivy-devtools-icon-btn"
+            title="Select parent"
+          >
+            <LuChevronUp size={14} />
+          </button>
         </div>
       )}
     </div>

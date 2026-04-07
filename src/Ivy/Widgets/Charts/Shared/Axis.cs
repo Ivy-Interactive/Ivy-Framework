@@ -3,6 +3,13 @@
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+public enum TickFormatterType
+{
+    Auto,
+    Number,
+    Date
+}
+
 public enum AxisScales
 {
     Auto,
@@ -115,6 +122,10 @@ public abstract record AxisBase<T> where T : AxisBase<T>
     public bool HideTickLabels { get; set; } = false;
 
     public string? TickFormatter { get; set; } = null;
+
+    public TickFormatterType TickFormatterType { get; set; } = TickFormatterType.Auto;
+
+    public string? TimeZone { get; set; } = null;
 }
 
 public record XAxis : AxisBase<XAxis>
@@ -283,5 +294,15 @@ public static class AxisExtensions
     public static T TickFormatter<T>(this T axis, string format) where T : AxisBase<T>
     {
         return axis with { TickFormatter = format };
+    }
+
+    public static T TickFormatter<T>(this T axis, string format, TickFormatterType type) where T : AxisBase<T>
+    {
+        return axis with { TickFormatter = format, TickFormatterType = type };
+    }
+
+    public static T TimeZone<T>(this T axis, string timeZone) where T : AxisBase<T>
+    {
+        return axis with { TimeZone = timeZone };
     }
 }

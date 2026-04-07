@@ -196,7 +196,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
   return (
     <div
-      className="flex-1 min-h-48 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent"
+      className="flex-1 min-h-48 overflow-y-auto overflow-x-hidden slim-scrollbar"
       data-toc-container
     >
       <nav className="relative pr-2">

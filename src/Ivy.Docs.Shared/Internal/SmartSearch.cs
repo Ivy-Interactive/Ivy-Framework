@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using Ivy.Core.Apps;
 using Ivy.Core.AppShell;
 using Ivy.Docs.Shared.Services;
@@ -232,7 +228,7 @@ public class SmartSearchView : ViewBase
             _ => { ClearResults(); return ValueTask.CompletedTask; },
             sheetContent,
             "Answer",
-            null).Width(Size.Fraction(0.4f));
+            null).Width(Size.Fraction(0.5f)).Resizable();
 
         return new Fragment(
             new SmartSearch(baseSlots.ToArray()),

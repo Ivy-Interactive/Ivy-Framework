@@ -1,5 +1,3 @@
-using Ivy;
-
 namespace Ivy.Auth.Examples.Shared;
 
 /// <summary>

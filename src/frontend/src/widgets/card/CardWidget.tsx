@@ -72,6 +72,17 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       disabled={disabled}
       className={cn(cardStyles.container, hoverClass)}
       onClick={disabled ? undefined : handleClick}
+      {...(events.includes("OnClick") && !disabled
+        ? {
+            tabIndex: 0,
+            onKeyDown: (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick();
+              }
+            },
+          }
+        : {})}
     >
       {!headerIsEmpty ? (
         <CardHeader className={cn(cardStyles.header.base, sizeClasses.header)}>

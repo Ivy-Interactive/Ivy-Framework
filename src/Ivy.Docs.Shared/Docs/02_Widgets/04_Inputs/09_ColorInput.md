@@ -97,37 +97,6 @@ public class ColorSwatchDemo : ViewBase
 }
 ```
 
-## Event Handling
-
-ColorInput typically handles state automatically through `UseState`. If you need to perform actions when the color changes, use the [UseEffect](../../03_Hooks/02_Core/04_UseEffect.md) hook to watch the state.
-The following demo shows how the `Picker` variant can be used with a code
-block.
-
-```csharp demo-below
-public class ColorChangedDemo : ViewBase
-{
-
-    public override object? Build()
-    {
-        var colorState = UseState("#ff0000");
-        var colorName = UseState(colorState.Value);
-        
-        UseEffect(() => {
-            colorName.Set(colorState.Value);
-        }, colorState);
-
-        return Layout.Vertical()
-                | H3("Hex Color Picker")
-                | (Layout.Horizontal()
-                | colorState.ToColorInput()
-                      .Variant(ColorInputVariant.Picker)
-                | new CodeBlock(colorName.Value)
-                    .ShowCopyButton()
-                    .ShowBorder());
-    }
-}
-```
-
 ## Styling
 
 `ColorInput` can be customized with various styling options, such as setting a placeholder or disabling the input.
@@ -158,6 +127,43 @@ public class ColorAlphaDemo : ViewBase
         return Layout.Vertical()
             | colorState.ToColorInput().AllowAlpha()
             | Text.P($"Selected: {colorState.Value}");
+    }
+}
+```
+
+## Event Handling
+
+Color inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class ColorInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState("#ff0000");
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the color input gains focus.")
+                | state.ToColorInput().Placeholder("Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the color input loses focus.")
+                | state.ToColorInput().Placeholder("Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget upon mounting.")
+                | state.ToColorInput().Placeholder("AutoFocused ColorInput")
+                    .AutoFocus()
+                | Text.Lead("Focused & Open!")
+            )
+        ).Variant(TabsVariant.Tabs);
     }
 }
 ```

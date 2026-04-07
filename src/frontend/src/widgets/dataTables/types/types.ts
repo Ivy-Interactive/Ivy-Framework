@@ -39,6 +39,9 @@ export interface DataColumn {
   help?: string | null;
   footer?: string[] | null;
   iconSet?: "lucide" | "custom";
+  color?: string | null;
+  customColor?: string | null;
+  badgeColorMapping?: Record<string, string> | null;
 }
 
 export interface DataTableConnection {

@@ -19,6 +19,7 @@ interface TextareaVariantProps {
   onBlur: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onClear: (e: React.MouseEvent) => void;
+  onSubmit?: () => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
@@ -32,6 +33,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   onBlur,
   onFocus,
   onClear,
+  onSubmit,
   inputRef,
   isFocused,
   density = Densities.Medium,
@@ -41,6 +43,14 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     savePosition();
     onChange(e);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      onSubmit?.();
+      e.currentTarget.blur();
+    }
   };
 
   const handlePaste = usePasteHandler(props.maxLength, (value) => {
@@ -66,7 +76,11 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   return (
     <div className="relative w-full select-none">
       <div
-        className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10"
+        className={cn(
+          "rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
+          props.ghost &&
+            "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+        )}
         style={wrapperStyles}
       >
         <Textarea
@@ -82,6 +96,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           onChange={handleChange}
           onBlur={onBlur}
           onFocus={onFocus}
+          onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           style={textareaStyles}
           className={cn(

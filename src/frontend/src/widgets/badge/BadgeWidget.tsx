@@ -15,6 +15,7 @@ interface BadgeWidgetProps {
   iconPosition?: "Left" | "Right";
   variant?: "Primary" | "Destructive" | "Outline" | "Secondary" | "Success" | "Warning" | "Info";
   color?: string;
+  customColor?: string;
   density?: Densities;
   id: string;
   events?: string[];
@@ -26,6 +27,7 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   iconPosition = "Left",
   variant = "Primary",
   color,
+  customColor,
   density = Densities.Medium,
   id,
   events = EMPTY_ARRAY,
@@ -38,6 +40,10 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
       eventHandler("OnClick", id, []);
     }
   }, [id, isClickable, eventHandler]);
+
+  const hasIcon = icon && icon !== "None";
+  if (!title?.trim() && !hasIcon) return null;
+
   let iconSize: number = 4;
 
   switch (density) {
@@ -85,12 +91,11 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
     }
   };
 
-  const hasIcon = icon && icon !== "None";
-
-  const colorStyles: React.CSSProperties = color
+  const effectiveColor = customColor || color;
+  const colorStyles: React.CSSProperties = effectiveColor
     ? {
-        ...getColor(color, "backgroundColor", "background"),
-        ...getColor(color, "color", "foreground"),
+        ...getColor(effectiveColor, "backgroundColor", "background"),
+        ...getColor(effectiveColor, "color", "foreground"),
       }
     : {};
 
@@ -98,7 +103,7 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
     <Badge
       variant={getBadgeVariant(variant)}
       density={density.toLowerCase() as "small" | "medium" | "large"}
-      style={color ? colorStyles : undefined}
+      style={effectiveColor ? colorStyles : undefined}
       className={cn(
         "whitespace-nowrap gap-1",
         hasIcon &&
@@ -112,6 +117,18 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
         isClickable && "cursor-pointer hover:opacity-80 transition-opacity",
       )}
       onClick={isClickable ? handleClick : undefined}
+      {...(isClickable
+        ? {
+            role: "button",
+            tabIndex: 0,
+            onKeyDown: (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick();
+              }
+            },
+          }
+        : {})}
     >
       {iconPosition === "Left" && icon && icon !== "None" && (
         <Icon style={iconStyles} name={icon} />

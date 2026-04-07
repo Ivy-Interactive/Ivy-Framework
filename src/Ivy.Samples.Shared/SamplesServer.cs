@@ -4,7 +4,6 @@ using Ivy.Samples.Shared.Apps.Demos;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using OpenAI;
-using Ivy;
 
 namespace Ivy.Samples.Shared;
 

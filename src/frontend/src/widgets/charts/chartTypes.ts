@@ -25,6 +25,7 @@ export type BarProps = {
   strokeDashArray?: string | null;
   strokeWidth?: number;
   unit?: string | null;
+  yAxisIndex?: number | null;
 };
 
 interface PieChartTotalProps {
@@ -45,33 +46,35 @@ export interface PieChartWidgetProps {
   toolbox?: ToolboxProps;
 }
 
-export type YAxisProps = {
-  allowDataOverflow: boolean;
-  allowDecimals: boolean;
-  allowDuplicatedCategory: boolean;
-  angle: number;
-  axisLine: boolean;
-  dataKey: string;
+export interface YAxisProps {
+  allowDataOverflow?: boolean;
+  allowDecimals?: boolean;
+  allowDuplicatedCategory?: boolean;
+  angle?: number;
+  axisLine?: boolean;
+  dataKey?: string;
   domainMin?: number | string | { value: number | string };
   domainMax?: number | string | { value: number | string };
-  hide: boolean;
-  includeHidden: boolean;
-  label: null;
-  minTickGap: number;
-  mirror: boolean;
-  name: null;
-  orientation: string;
-  reversed: boolean;
-  scale: string;
-  tickCount: number;
-  tickLine: boolean;
-  tickSize: number;
-  type: string;
-  unit: null;
-  width: number;
+  hide?: boolean;
+  includeHidden?: boolean;
+  label?: string | null;
+  minTickGap?: number;
+  mirror?: boolean;
+  name?: string | null;
+  orientation?: "Left" | "Right";
+  reversed?: boolean;
+  scale?: "Auto" | "Linear" | "Log" | "Time" | "Ordinal";
+  tickCount?: number;
+  tickLine?: boolean;
+  tickSize?: number;
+  type?: "Category" | "Number" | "Time";
+  unit?: string | null;
+  width?: number;
   hideTickLabels?: boolean;
   tickFormatter?: string | null;
-};
+  tickFormatterType?: "Auto" | "Number" | "Date" | null;
+  timeZone?: string | null;
+}
 
 export interface XAxisProps {
   allowDataOverflow?: boolean;
@@ -99,28 +102,30 @@ export interface XAxisProps {
   unit?: string | null;
   hideTickLabels?: boolean;
   tickFormatter?: string | null;
+  tickFormatterType?: "Auto" | "Number" | "Date" | null;
+  timeZone?: string | null;
 }
 
-export type CartesianGridProps = {
-  fill: string | null;
-  fillOpacity: number | null;
-  height: number | null;
-  horizontal: boolean;
-  stroke: string | null;
-  strokeDashArray: string | null;
-  vertical: boolean;
-  width: number | null;
-  x: number | null;
-  y: number | null;
-};
+export interface CartesianGridProps {
+  fill?: string | null;
+  fillOpacity?: number | null;
+  height?: number | null;
+  horizontal?: boolean;
+  stroke?: string | null;
+  strokeDashArray?: string | null;
+  vertical?: boolean;
+  width?: number | null;
+  x?: number | null;
+  y?: number | null;
+}
 
-export type LegendProps = {
+export interface LegendProps {
   align?: "Left" | "Center" | "Right";
   iconSize?: number;
   iconType?: string | null;
   layout?: "Horizontal" | "Vertical";
   verticalAlign?: "Top" | "Middle" | "Bottom";
-};
+}
 
 type ToolboxFeatureDataView = {
   show?: boolean;
@@ -282,6 +287,7 @@ export interface LineChartWidgetProps {
   referenceAreas?: MarkArea[];
   referenceDots?: ReferenceDot[];
   colorScheme: ColorScheme;
+  layout?: "Horizontal" | "Vertical";
 }
 
 export interface ReferenceDot {
@@ -348,6 +354,7 @@ export interface ScatterProps {
   strokeDashArray?: string | null;
   strokeWidth?: number;
   unit?: string | null;
+  yAxisIndex?: number | null;
 }
 
 export interface ScatterChartWidgetProps {
@@ -367,6 +374,7 @@ export interface ScatterChartWidgetProps {
   referenceAreas?: MarkArea[];
   referenceDots?: ReferenceDot[];
   colorScheme: ColorScheme;
+  layout?: "Horizontal" | "Vertical";
 }
 
 export type PolarGridTypes = "Polygon" | "Circle";

@@ -20,8 +20,6 @@ RUN test -n "$IVY_PACKAGE_VERSION" || (echo "IVY_PACKAGE_VERSION build-arg is re
 WORKDIR /src
 COPY ["src/Ivy.Docs/Ivy.Docs.csproj", "src/Ivy.Docs/"]
 COPY ["src/Ivy.Docs.Shared/Ivy.Docs.Shared.csproj", "src/Ivy.Docs.Shared/"]
-COPY ["src/Ivy.Docs.Tools/Ivy.Docs.Tools.csproj", "src/Ivy.Docs.Tools/"]
-RUN dotnet restore "src/Ivy.Docs.Tools/Ivy.Docs.Tools.csproj"
 RUN dotnet restore "src/Ivy.Docs.Shared/Ivy.Docs.Shared.csproj" -p:IvyPackageVersion=$IVY_PACKAGE_VERSION
 RUN dotnet restore "src/Ivy.Docs/Ivy.Docs.csproj" -p:IvyPackageVersion=$IVY_PACKAGE_VERSION
 COPY . .

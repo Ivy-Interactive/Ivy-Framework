@@ -239,7 +239,7 @@ const GraphvizRenderer = memo(({ content }: GraphvizRendererProps) => {
       <div className="absolute top-2 right-2 z-10">
         <CopyToClipboardButton textToCopy={content} />
       </div>
-      <div className="graphviz-container rounded-md border bg-background p-4 overflow-x-auto">
+      <div className="graphviz-container rounded-md border bg-background p-4 overflow-x-auto slim-scrollbar">
         {isLoading && (
           <div className="flex items-center justify-center p-8 text-muted-foreground">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>

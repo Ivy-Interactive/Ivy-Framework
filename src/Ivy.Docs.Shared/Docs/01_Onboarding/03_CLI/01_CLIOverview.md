@@ -95,6 +95,10 @@ See [Program](../02_Concepts/01_Program.md) for the entry point, [Apps](../02_Co
 
 Most Ivy commands require authentication. Use `ivy login` to authenticate with your Ivy account.
 
+<Callout Type="tip">
+On macOS, if you get a `command not found: ivy` error, you likely need to add the .NET tools directory to your PATH by adding `export PATH="$PATH:$HOME/.dotnet/tools"` to your `~/.zshrc`.
+</Callout>
+
 ## Next Steps
 
 1. **Initialize a project**: `ivy init`

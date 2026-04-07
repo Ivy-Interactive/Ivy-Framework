@@ -199,20 +199,37 @@ public class NumberRangeStepDemo : ViewBase
 
 ## Event Handling
 
-NumberRangeInput supports change events that receive the full tuple value:
+Number range inputs support focus, blur, and manual `AutoFocus` behavior.
 
-```csharp
-var rangeState = UseState<(int, int)>(() => (0, 100));
-var changeLabel = UseState("");
+```csharp demo-tabs
+public class NumberRangeInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState(() => (25, 75));
 
-new NumberRangeInput<int>(rangeState.Value, e =>
-{
-    rangeState.Set(e);
-    changeLabel.Set($"Range changed to: {e.Item1} - {e.Item2}");
-})
-{
-    Min = 0,
-    Max = 100
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the number range slider gains focus.")
+                | state.ToNumberRangeInput().Min(0).Max(100)
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the number range slider loses focus.")
+                | state.ToNumberRangeInput().Min(0).Max(100)
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the slider upon mounting.")
+                | state.ToNumberRangeInput().Min(0).Max(100).AutoFocus()
+                | Text.Lead("Focused!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
 }
 ```
 

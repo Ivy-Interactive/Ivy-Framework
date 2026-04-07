@@ -1,4 +1,3 @@
-using Ivy;
 using Ivy.Auth.Sliplane;
 
 var server = new Server();

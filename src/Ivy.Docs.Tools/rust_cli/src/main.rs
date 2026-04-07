@@ -5,8 +5,8 @@ use std::path::{Path, PathBuf};
 
 mod utils;
 mod link_converter;
-mod file_hash;
 mod converter;
+mod llm_markdown;
 
 #[derive(Parser)]
 #[command(name = "ivy_docs_cli")]
@@ -23,6 +23,8 @@ enum Commands {
         output_folder: String,
         #[arg(long)]
         skip_if_not_changed: bool,
+        #[arg(long)]
+        api_docs: Option<String>,
     },
 }
 
@@ -63,7 +65,10 @@ fn get_project_file(start_folder: &Path) -> Option<PathBuf> {
 fn main() {
     let cli = Cli::parse();
     match cli.command {
-        Commands::Convert { input_folder, output_folder, skip_if_not_changed } => {
+        Commands::Convert { input_folder, output_folder, skip_if_not_changed, api_docs } => {
+            let api_docs_manifest = llm_markdown::load_api_docs_manifest(
+                api_docs.as_ref().map(|p| Path::new(p.as_str()))
+            );
             let is_glob = input_folder.contains('*') || input_folder.contains('?');
             let (input_dir, pattern) = if is_glob {
                 let p = Path::new(&input_folder);
@@ -108,6 +113,9 @@ fn main() {
             
             println!("Converting {} files...", paths.len());
             
+            let manifest_content = api_docs.as_ref().and_then(|p| fs::read_to_string(p).ok());
+            let manifest_hash = manifest_content.as_ref().map(|c| llm_markdown::get_short_hash(c, 8));
+
             // Parallel processing
             paths.par_iter().for_each(|absolute_input_path| {
                 let filename = absolute_input_path.file_name().unwrap().to_str().unwrap();
@@ -135,7 +143,10 @@ fn main() {
                 
                 let mut ivy_output = folder.clone();
                 ivy_output.push(format!("{}.g.cs", name));
-                
+
+                let mut md_output = folder.clone();
+                md_output.push(format!("{}.md", name));
+
                 let mut namespace_suffix = relative_output_path.replace("/", ".").replace("\\", ".");
                 if namespace_suffix.starts_with("Generated.") {
                     namespace_suffix = namespace_suffix["Generated.".len()..].to_string();
@@ -157,6 +168,16 @@ fn main() {
                     order
                 ) {
                     println!("Error converting {}: {}", name, e);
+                }
+
+                if let Err(e) = llm_markdown::generate(
+                    absolute_input_path,
+                    &md_output,
+                    skip_if_not_changed,
+                    &api_docs_manifest,
+                    manifest_hash.as_deref(),
+                ) {
+                    println!("Error generating LLM markdown for {}: {}", name, e);
                 }
             });
         }

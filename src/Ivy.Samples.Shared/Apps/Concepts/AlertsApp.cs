@@ -1,5 +1,3 @@
-using Ivy;
-
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 [App(icon: Icons.Bell, searchHints: ["notification", "dialog", "modal", "message", "popup", "confirm"])]

@@ -1,5 +1,23 @@
 #!/bin/sh
 
-echo "Running Vite+ linter and formatter..."
-cd src/frontend
-vp exec lint-staged -- --relative
+# Check for merge conflict markers in staged files
+CONFLICT_FILES=$(git diff --cached --name-only | xargs grep -l -E '^(<<<<<<<|=======|>>>>>>>)' 2>/dev/null || true)
+if [ -n "$CONFLICT_FILES" ]; then
+  echo "ERROR: Merge conflict markers detected in staged files!"
+  echo ""
+  git diff --cached --name-only | xargs grep -n -E '^(<<<<<<<|=======|>>>>>>>)' 2>/dev/null
+  echo ""
+  echo "Please resolve all conflicts before committing."
+  exit 1
+fi
+
+# Check if any frontend files are staged
+FRONTEND_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep "^src/frontend/" || true)
+
+if [ -n "$FRONTEND_FILES" ]; then
+  echo "Running Vite+ linter and formatter on staged frontend files..."
+  cd src/frontend
+  vp exec lint-staged -- --relative
+else
+  echo "No frontend files staged, skipping lint-staged."
+fi

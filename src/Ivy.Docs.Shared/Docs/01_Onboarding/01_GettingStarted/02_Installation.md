@@ -114,22 +114,22 @@ The primary Ivy Framework package is installed via NuGet and provides the founda
 >dotnet add package Ivy
 ```
 
-| Component | Description |
-| :--- | :--- |
-| **Core Framework** | High-performance server-side engine and application system |
-| **Widget System** | Library of strongly-typed UI components (Shadcn/Tailwind) |
-| **SignalR Hub** | Real-time state synchronization between C# and React |
-| **Embedded Assets** | Pre-built frontend bundle embedded in the DLL |
-| **Auth Interfaces** | extensible framework for security and identity |
+| Component           | Description                                                |
+| :------------------ | :--------------------------------------------------------- |
+| **Core Framework**  | High-performance server-side engine and application system |
+| **Widget System**   | Library of strongly-typed UI components (Shadcn/Tailwind)  |
+| **SignalR Hub**     | Real-time state synchronization between C# and React       |
+| **Embedded Assets** | Pre-built frontend bundle embedded in the DLL              |
+| **Auth Interfaces** | extensible framework for security and identity             |
 
 Extend Ivy's functionality with official extension packages for authentication and data management.
 
-| Package | Purpose |
-| :--- | :--- |
-| `Ivy.Auth.Supabase` | Identity management via [Supabase](../03_CLI/04_Authentication/02_Supabase.md) |
-| `Ivy.Auth.Authelia` | Single Sign-On and 2FA via [Authelia](../03_CLI/04_Authentication/02_Authelia.md) |
-| `Ivy.Auth.Entra` | Microsoft [Entra](../03_CLI/04_Authentication/02_MicrosoftEntra.md) ID (Azure AD) integration |
-| `Ivy.Database.Generator.Toolkit` | Utilities for AI-powered schema and code generation |
+| Package                          | Purpose                                                                                       |
+| :------------------------------- | :-------------------------------------------------------------------------------------------- |
+| `Ivy.Auth.Supabase`              | Identity management via [Supabase](../03_CLI/04_Authentication/02_Supabase.md)                |
+| `Ivy.Auth.Authelia`              | Single Sign-On and 2FA via [Authelia](../03_CLI/04_Authentication/02_Authelia.md)             |
+| `Ivy.Auth.Entra`                 | Microsoft [Entra](../03_CLI/04_Authentication/02_MicrosoftEntra.md) ID (Azure AD) integration |
+| `Ivy.Database.Generator.Toolkit` | Utilities for AI-powered schema and code generation                                           |
 
 ```terminal
 >dotnet add package Ivy.Auth.Supabase
@@ -148,12 +148,12 @@ The Ivy package abstracts away several modern technologies to provide its seamle
 
 A standard Ivy project follows a clean, flattened structure designed for clarity.
 
-| File/Folder | Description |
-| :--- | :--- |
-| **`Project.csproj`** | Matches the .NET 10.0 target and contains Ivy references |
-| **`Program.cs`** | The entry point where you configure and run the Ivy server |
-| **`Apps/`** | Where your Views and business logic reside |
-| **`Assets/`** | Optional static files (images, custom CSS) |
+| File/Folder          | Description                                                |
+| :------------------- | :--------------------------------------------------------- |
+| **`Project.csproj`** | Matches the .NET 10.0 target and contains Ivy references   |
+| **`Program.cs`**     | The entry point where you configure and run the Ivy server |
+| **`Apps/`**          | Where your Views and business logic reside                 |
+| **`Assets/`**        | Optional static files (images, custom CSS)                 |
 
 ### Multi-Project Solutions
 
@@ -173,10 +173,22 @@ For detailed server configuration options, including `ServerArgs` properties and
 
 The server automatically optimizes its behavior based on the current environment.
 
-| Feature | Development | Production |
-| :--- | :--- | :--- |
-| **Hot Reload** | Enabled (instant UI updates) | Disabled (optimized performance) |
-| **Error Handling** | Detailed stack traces | Secure, logged exceptions |
-| **Caching** | Disabled for immediate changes | Aggressive ETag & compression |
-| **Logging** | Debug & Information | Warning & Error only |
-| **Port Management** | Conflict detection & auto-shift | Strict port binding |
+| Feature             | Development                     | Production                       |
+| :------------------ | :------------------------------ | :------------------------------- |
+| **Hot Reload**      | Enabled (instant UI updates)    | Disabled (optimized performance) |
+| **Error Handling**  | Detailed stack traces           | Secure, logged exceptions        |
+| **Caching**         | Disabled for immediate changes  | Aggressive ETag & compression    |
+| **Logging**         | Debug & Information             | Warning & Error only             |
+| **Port Management** | Conflict detection & auto-shift | Strict port binding              |
+
+### Troubleshooting "command not found"
+
+If you have installed the tool but receive a `command not found: ivy` error, you likely need to add the .NET global tools directory to your system's PATH.
+
+For macOS (using the default Zsh shell), add the following line to your `~/.zshrc` file:
+
+```bash
+export PATH="$PATH:$HOME/.dotnet/tools"
+```
+
+After adding the line, restart your terminal or run `source ~/.zshrc` to apply the changes.

@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Ivy.Test")]
 [assembly: InternalsVisibleTo("Ivy.Docs")]
+[assembly: InternalsVisibleTo("Ivy.Integration.Tests")]
 [assembly: InternalsVisibleTo("Ivy.XamlBuilder")]
 [assembly: InternalsVisibleTo("Ivy.XamlBuilder.Test")]
 // [assembly: InternalsVisibleTo("Ivy.Docs.Shared")]

@@ -1,5 +1,8 @@
-import { CustomRenderer, GridCellKind, CustomCell } from "@glideapps/glide-data-grid";
+import { CustomRenderer, GridCellKind, CustomCell, type Theme } from "@glideapps/glide-data-grid";
 import { getIconImage, isValidIconName } from "./iconRenderer";
+
+/** Glide passes a realized theme with computed `baseFontFull` to measure/draw. */
+type GridDrawTheme = Theme & { baseFontFull: string };
 
 /**
  * Data structure for icon cells
@@ -28,6 +31,104 @@ export interface LinkCellData {
  * Type definition for link custom cells
  */
 export type LinkCell = CustomCell<LinkCellData>;
+
+/**
+ * Multi-badge cell: per-label background/text (Bubble cells only support one theme per cell).
+ */
+export interface LabelsBadgesCellData {
+  kind: "labels-badges-cell";
+  items: { text: string; bg?: string; fg?: string }[];
+  align?: "left" | "center" | "right";
+}
+
+export type LabelsBadgesCell = CustomCell<LabelsBadgesCellData>;
+
+function measureLabelsBadgesWidth(
+  ctx: CanvasRenderingContext2D,
+  items: LabelsBadgesCellData["items"],
+  theme: GridDrawTheme,
+): number {
+  if (items.length === 0) return theme.cellHorizontalPadding * 2;
+  ctx.font = theme.baseFontFull;
+  let w = theme.cellHorizontalPadding * 2 - theme.bubbleMargin;
+  for (const item of items) {
+    w += ctx.measureText(item.text).width + theme.bubblePadding * 2 + theme.bubbleMargin;
+  }
+  return w;
+}
+
+/**
+ * Custom cell renderer for label columns with per-badge colors (badge color mapping).
+ */
+export const labelsBadgesCellRenderer: CustomRenderer<LabelsBadgesCell> = {
+  kind: GridCellKind.Custom,
+
+  isMatch: (cell: CustomCell): cell is LabelsBadgesCell =>
+    cell.kind === GridCellKind.Custom &&
+    (cell.data as LabelsBadgesCellData | undefined)?.kind === "labels-badges-cell",
+
+  measure: (ctx, cell, theme) => measureLabelsBadgesWidth(ctx, cell.data.items, theme),
+
+  draw: (args, cell) => {
+    const { ctx, rect, theme } = args;
+    const { items, align = "left" } = cell.data;
+    if (items.length === 0) return true;
+
+    const { x, y, width: w, height: h } = rect;
+    ctx.font = theme.baseFontFull;
+    ctx.textBaseline = "middle";
+
+    const bubbleH = theme.bubbleHeight;
+    const pad = theme.bubblePadding;
+    const margin = theme.bubbleMargin;
+    const radius = theme.roundingRadius ?? bubbleH / 2;
+    const hPad = theme.cellHorizontalPadding;
+
+    let rowWidth = -margin;
+    for (const item of items) {
+      rowWidth += ctx.measureText(item.text).width + pad * 2 + margin;
+    }
+
+    let renderX = x + hPad;
+    if (align === "center") {
+      renderX = x + (w - rowWidth) / 2;
+    } else if (align === "right") {
+      renderX = x + w - rowWidth - hPad;
+    }
+
+    for (const item of items) {
+      if (renderX > x + w) break;
+      const textW = ctx.measureText(item.text).width;
+      const boxW = textW + pad * 2;
+      const bg = item.bg ?? theme.bgBubble;
+      const fg = item.fg ?? theme.textBubble;
+
+      ctx.fillStyle = bg;
+      const bx = renderX;
+      const by = y + (h - bubbleH) / 2;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(bx, by, boxW, bubbleH, radius);
+      } else {
+        const r = Math.min(radius, bubbleH / 2, boxW / 2);
+        ctx.moveTo(bx + r, by);
+        ctx.arcTo(bx + boxW, by, bx + boxW, by + bubbleH, r);
+        ctx.arcTo(bx + boxW, by + bubbleH, bx, by + bubbleH, r);
+        ctx.arcTo(bx, by + bubbleH, bx, by, r);
+        ctx.arcTo(bx, by, bx + boxW, by, r);
+        ctx.closePath();
+      }
+      ctx.fill();
+
+      ctx.fillStyle = fg;
+      ctx.fillText(item.text, bx + pad, y + h / 2);
+
+      renderX += boxW + margin;
+    }
+
+    return true;
+  },
+};
 
 /**
  * Custom cell renderer for displaying Lucide icons in table cells

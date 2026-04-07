@@ -1,8 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Ivy.Protos.DataTable;
 using Ivy.Test.DataTables.TestHelpers;
-using Microsoft.Extensions.Logging;
-using Xunit;
 using Xunit.Abstractions;
 using Any = Google.Protobuf.WellKnownTypes.Any;
 

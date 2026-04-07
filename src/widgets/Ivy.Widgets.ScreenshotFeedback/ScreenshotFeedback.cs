@@ -1,6 +1,4 @@
 using System.Text.Json.Serialization;
-using Ivy;
-using Ivy.Core;
 
 namespace Ivy.Widgets.ScreenshotFeedback;
 

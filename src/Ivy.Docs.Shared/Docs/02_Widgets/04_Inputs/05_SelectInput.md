@@ -32,7 +32,7 @@ public class SelectVariantDemo : ViewBase
                          .WithField()
                          .Label("Select your favourite programming language")
                          .Width(Size.Full());
-    }    
+    }
 }
 ```
 
@@ -105,75 +105,30 @@ public class MultiSelectDemo : ViewBase
         Go,
         Rust
     }
-    
+
     public override object? Build()
     {
         var languagesSelect = UseState<ProgrammingLanguages[]>([]);
         var stringArray = UseState<string[]>([]);
         var intArray = UseState<int[]>([]);
-        
+
         var languageOptions = typeof(ProgrammingLanguages).ToOptions();
         var stringOptions = new[] { "Option A", "Option B", "Option C", "Option D" };
         var intOptions = new[] { 1, 2, 3, 4, 5 }.ToOptions();
-        
+
         return Layout.Vertical()
             | Text.Monospaced("Select Variant (Enum)")
             | languagesSelect.ToSelectInput(languageOptions)
                 .Variant(SelectInputVariant.Select)
                 .Placeholder("Choose languages...")
-            
+
             | Text.Monospaced("List Variant (String Array)")
             | stringArray.ToSelectInput(stringOptions.ToOptions())
                 .Variant(SelectInputVariant.List)
-            
+
             | Text.Monospaced("Toggle Variant (Integer Array)")
             | intArray.ToSelectInput(intOptions)
                 .Variant(SelectInputVariant.Toggle);
-    }
-}
-```
-
-## Event Handling
-
-Handle change events and create dynamic option lists that respond to user selections:
-
-```csharp demo-tabs
-public class EventHandlingDemo : ViewBase
-{
-    private static readonly Dictionary<string, string[]> CategoryOptions = new()
-    {
-        ["Programming"] = new[]{"C#", "Java", "Python", "JavaScript"},
-        ["Design"] = new[]{"Photoshop", "Figma", "Sketch"},
-        ["Database"] = new[]{"SQL Server", "PostgreSQL", "MongoDB"}
-    };
-    
-    public override object? Build()
-    {
-        var selectedCategory = UseState("Programming");
-        var selectedSkill = UseState("");
-        
-        var categoryOptions = CategoryOptions.Keys.ToOptions();
-        var skillOptions = CategoryOptions[selectedCategory.Value].ToOptions();
-        
-        UseEffect(() => {
-            selectedSkill.Set("");
-        }, selectedCategory);
-        
-        return Layout.Vertical()
-            | Layout.Grid().Columns(2)
-                | selectedCategory.ToSelectInput(categoryOptions)
-                    .Placeholder("Choose a category...")
-                    .WithField()
-                    .Label("Category:")
-                
-                | selectedSkill.ToSelectInput(skillOptions)
-                    .Placeholder("Select a skill...")
-                    .WithField()
-                    .Label("Skill:")
-            
-            | (!string.IsNullOrEmpty(selectedSkill.Value) 
-                ? Text.Block($"Selected: {selectedCategory.Value} → {selectedSkill.Value}") 
-                : null);
     }
 }
 ```
@@ -326,7 +281,7 @@ public class SelectActionsDemo : ViewBase
     {
         var selected = UseState<string[]>([]);
         var options = new[] { "C#", "Java", "Python", "JavaScript", "Go", "Rust", "F#", "Kotlin", "TypeScript" }.ToOptions();
-        
+
         return selected.ToSelectInput(options)
             .Variant(SelectInputVariant.Select)
             .ShowActions()
@@ -423,6 +378,45 @@ public class DisabledOptionsDemo : ViewBase
 Use Select for single choice dropdowns, List for multiple selection with checkboxes, Toggle for visual button-based selection, and Radio for single-select radio buttons in forms. The Radio variant is particularly useful for settings and configuration UIs where all options should be visible.
 </Callout>
 
+## Event Handling
+
+Select inputs support focus, blur, and manual `AutoFocus` behavior.
+
+```csharp demo-tabs
+public class SelectInputEventsDemo : ViewBase
+{
+    public enum Fruits { Apple, Banana, Orange }
+
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState(Fruits.Apple);
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the select input gains focus.")
+                | state.ToSelectInput().Placeholder("Focus me (Tab to me)")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the selection menu loses focus.")
+                | state.ToSelectInput().Placeholder("Blur me")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the select input and opens the dropdown list upon mounting.")
+                | state.ToSelectInput().Placeholder("AutoFocused Select")
+                    .AutoFocus()
+                | Text.Lead("Focused & Open!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.SelectInput" ExtensionTypes="Ivy.SelectInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/SelectInput.cs"/>
 
 ## Examples
@@ -439,74 +433,74 @@ public class CoffeeShopDemo: ViewBase
 {
     private static readonly Dictionary<string, List<string>> CoffeeAccompaniments = new()
     {
-        ["Cappuccino"] = new List<string> 
-        { 
-            "Cinnamon powder", "Cocoa powder", "Sugar cubes", "Biscotti", 
-            "Cantuccini", "Amaretti", "Whipped cream" 
+        ["Cappuccino"] = new List<string>
+        {
+            "Cinnamon powder", "Cocoa powder", "Sugar cubes", "Biscotti",
+            "Cantuccini", "Amaretti", "Whipped cream"
         },
-        ["Espresso"] = new List<string> 
-        { 
-            "Lemon peel", "Sugar cubes", "Water", "Chocolate square", 
-            "Praline", "Biscotti" 
+        ["Espresso"] = new List<string>
+        {
+            "Lemon peel", "Sugar cubes", "Water", "Chocolate square",
+            "Praline", "Biscotti"
         },
-        ["Latte"] = new List<string> 
-        { 
-            "Vanilla syrup", "Caramel syrup", "Hazelnut syrup", "Cocoa powder", 
-            "Cinnamon", "Croissant", "Muffin", "Steamed milk art" 
+        ["Latte"] = new List<string>
+        {
+            "Vanilla syrup", "Caramel syrup", "Hazelnut syrup", "Cocoa powder",
+            "Cinnamon", "Croissant", "Muffin", "Steamed milk art"
         },
-        ["Mocha"] = new List<string> 
-        { 
-            "Whipped cream", "Chocolate shavings", "Cocoa powder", "Marshmallows", 
-            "Cinnamon stick", "Caramel drizzle", "Vanilla syrup" 
+        ["Mocha"] = new List<string>
+        {
+            "Whipped cream", "Chocolate shavings", "Cocoa powder", "Marshmallows",
+            "Cinnamon stick", "Caramel drizzle", "Vanilla syrup"
         }
     };
-    
+
     string[] coffeeSizes = new string[]{"Short", "Tall", "Grande", "Venti"};
-    
+
     public override object? Build()
     {
         var coffee = UseState("Cappuccino");
         var coffeeSize = UseState("Tall");
         var selectedCondiments = UseState(new string[]{});
         var previousCoffee = UseState("Cappuccino");
-        
+
         if (previousCoffee.Value != coffee.Value)
         {
             selectedCondiments.Set(new string[]{});
             previousCoffee.Set(coffee.Value);
         }
-        
+
         var coffeeSizeMenu = coffeeSize.ToSelectInput(coffeeSizes)
                                        .Variant(SelectInputVariant.List);
         var availableCondiments = CoffeeAccompaniments[coffee.Value];
-        
+
         var condimentMenu = selectedCondiments.ToSelectInput(availableCondiments.ToOptions())
             .Variant(SelectInputVariant.Toggle);
-        
+
         var orderSummary = BuildOrderSummary(coffee.Value, coffeeSize.Value, selectedCondiments.Value);
-        
+
         return Layout.Vertical()
                 | Layout.Grid().Columns(2)
                     | coffee.ToSelectInput(CoffeeAccompaniments.Keys.ToOptions())
                             .WithField()
                             .Label("Coffee Type:")
-                    
+
                     | coffeeSizeMenu
                         .WithField()
                         .Label("Size:")
-                    
+
                     | condimentMenu
                         .WithField()
                         .Label("Condiments:")
-                    
-                | new Icon(Icons.Coffee) 
+
+                | new Icon(Icons.Coffee)
                 | Text.Block(orderSummary);
     }
-    
+
     private string BuildOrderSummary(string coffee, string size, string[] condiments)
     {
         var summary = $"{size} {coffee}";
-        
+
         if (condiments.Length > 0)
         {
             if(condiments.Length == 1)
@@ -514,14 +508,14 @@ public class CoffeeShopDemo: ViewBase
                 summary += $" with {condiments[0]}";
             }
             else
-            {                  
+            {
                  summary += " with " + condiments
                                                  .Take(condiments.Length - 1)
                                                  .Aggregate((a,b) =>  a + ", " + b)
                                                  + " and " + condiments[condiments.Length - 1];
             }
         }
-        
+
         return summary;
     }
 }

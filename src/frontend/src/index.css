@@ -329,6 +329,26 @@ ivy-widget {
   pointer-events: none !important;
 }
 
+/* Slim scrollbar for compact inline areas (~4px) */
+.slim-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.slim-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.slim-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+.slim-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+.slim-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
 /* Native scrollbar styling for theme consistency */
 @layer base {
   /* Webkit browsers (Chrome, Safari, Edge) */

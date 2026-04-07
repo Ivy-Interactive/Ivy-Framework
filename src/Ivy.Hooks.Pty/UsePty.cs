@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Reactive.Disposables;
 using System.Text;
-using Ivy;
 using Porta.Pty;
 
 namespace Ivy.Hooks.Pty;

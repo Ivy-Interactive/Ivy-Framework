@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { Densities } from "@/types/density";
 import { cva } from "class-variance-authority";
 import { useEventHandler } from "@/components/event-handler";
+import { uploadFile } from "@/widgets/filePicker/shared";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
 const containerVariant = cva(
@@ -55,6 +56,7 @@ interface CameraInputWidgetProps {
   width?: string;
   density?: Densities;
   events?: string[];
+  autoFocus?: boolean;
 }
 
 type CameraState = "idle" | "active" | "captured";
@@ -68,8 +70,11 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
   width,
   density = Densities.Medium,
   events = EMPTY_ARRAY,
+  autoFocus,
 }) => {
   const eventHandler = useEventHandler();
+  const hasAutoFocusedRef = useRef(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const isFocusedRef = useRef(false);
   const [cameraState, setCameraState] = useState<CameraState>("idle");
@@ -84,15 +89,6 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
       streamRef.current = null;
     }
   }, []);
-
-  const getUploadUrl = useCallback(() => {
-    const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-    if (ivyHostMeta) {
-      const host = ivyHostMeta.getAttribute("content");
-      return host + uploadUrl;
-    }
-    return uploadUrl;
-  }, [uploadUrl]);
 
   const startCamera = useCallback(async () => {
     if (disabled) return;
@@ -118,6 +114,13 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
       });
     }
   }, [disabled, facingMode]);
+
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      startCamera();
+    }
+  }, [autoFocus, disabled, startCamera]);
 
   const onFocus = useCallback(() => {
     if (disabled) return;
@@ -183,17 +186,8 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
     canvas.toBlob(async (blob) => {
       if (!blob || !uploadUrl) return;
 
-      const formData = new FormData();
-      formData.append("file", blob, "capture.png");
-
       try {
-        const response = await fetch(getUploadUrl(), {
-          method: "POST",
-          body: formData,
-        });
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
-        }
+        await uploadFile(uploadUrl, blob, { filename: "capture.png" });
       } catch (error) {
         logger.error("Photo upload error:", error);
         toast({
@@ -203,7 +197,7 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
         });
       }
     }, "image/png");
-  }, [stopStream, uploadUrl, getUploadUrl]);
+  }, [stopStream, uploadUrl]);
 
   const retake = useCallback(() => {
     setCapturedImage(null);
@@ -253,6 +247,7 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
             className={cn("flex flex-col items-center gap-2", !disabled && "cursor-pointer")}
             onClick={disabled ? undefined : startCamera}
             role="button"
+            aria-label="Start camera"
             tabIndex={disabled ? -1 : 0}
             onKeyDown={(e) => {
               if (disabled) return;

@@ -1,7 +1,3 @@
-using Ivy;
-using Ivy.Core;
-using Xunit;
-
 namespace Ivy.Test;
 
 /// <summary>

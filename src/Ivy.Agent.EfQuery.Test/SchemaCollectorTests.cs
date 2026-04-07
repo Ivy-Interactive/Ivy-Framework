@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Ivy.Agent.EfQuery;
 using Ivy.Samples.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
 

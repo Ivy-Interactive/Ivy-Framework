@@ -1,0 +1,65 @@
+# TENDRIL_HOME environment variable is required (points to this config directory)
+# REPOS_HOME environment variable is optional (base path for relative repo paths)
+
+codingAgent: claude
+jobTimeout: 30
+staleOutputTimeout: 10
+maxConcurrentJobs: 5  # Maximum number of jobs to run concurrently (default: 5)
+
+# Variable Expansion Support:
+# - %DotnetUserSecrets:Section:Key% - Read from .NET user secrets (requires .csproj with UserSecretsId)
+# - %TENDRIL_HOME% - Expands to TENDRIL_HOME env var (useful in hooks, verification prompts, and allowedTools paths)
+# - %ANY_ENV_VAR% - Standard environment variable expansion (e.g., %REPOS_HOME% for repo paths)
+# Common uses: repo paths, hook script paths, allowedTools file patterns
+# See VARIABLE_EXPANSION.md for details
+
+# Example with user secrets for sensitive data:
+# llm:
+#   endpoint: %DotnetUserSecrets:OpenAi:Endpoint%
+#   apiKey: %DotnetUserSecrets:OpenAi:ApiKey%
+#   model: gpt-4o-mini
+
+# Per-promptware tool permissions (allowedTools) provide least-privilege access control.
+# Without allowedTools, promptwares inherit global permissions from codingAgent.
+# Example promptware configuration with per-agent tool permissions:
+# promptwares:
+#   MakePlan:
+#     model: sonnet
+#     allowedTools:
+#       - Read
+#       - Glob
+#       - Grep
+#       - Bash
+#       - Write
+#       - Edit
+#   ExecutePlan:
+#     model: opus
+#     allowedTools:
+#       - Read
+#       - Write
+#       - Edit
+#       - Glob
+#       - Grep
+#       - Bash
+#       - WebFetch
+#       - WebSearch
+
+projects: []
+verifications: []
+
+editor:
+  command: code
+  label: VS Code
+
+telemetry: true
+
+# Example project configuration:
+# projects:
+#   - name: MyProject
+#     color: Blue
+#     repos:
+#       - path: /absolute/path/to/repo
+#       - path: "%REPOS_HOME%/my-repo"  # Uses env var expansion
+#     verifications:
+#       - name: DotnetBuild
+#         required: true

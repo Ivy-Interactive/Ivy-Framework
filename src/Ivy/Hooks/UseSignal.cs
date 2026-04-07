@@ -2,9 +2,7 @@ using System.Collections.Concurrent;
 using System.Reactive.Disposables;
 using System.Reflection;
 using Ivy.Core.Apps;
-using Ivy.Core.Hooks;
 using Ivy.Core.Server;
-using AppContext = Ivy.AppContext;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

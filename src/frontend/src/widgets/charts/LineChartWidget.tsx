@@ -35,6 +35,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   referenceAreas = EMPTY_ARRAY,
   referenceDots = EMPTY_ARRAY,
   colorScheme = "Default",
+  layout = "Vertical",
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -64,18 +65,19 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
 
   // Chart colors depend on theme (chromatic colors automatically adapt to light/dark mode)
   const chartColors = useMemo(() => getColors(colorScheme, colors), [colorScheme, colors]);
+  const isVertical = layout?.toLowerCase() === "vertical";
 
   const { transform, largeSpread, minValue, maxValue } = getTransformValueFn(data);
 
   // Memoize option configuration
   const option = useMemo(
     () => ({
-      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false),
+      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false, yAxis, xAxis),
       xAxis: generateXAxis(
         ChartType.Line,
         categories as string[],
         xAxis,
-        false,
+        isVertical,
         {
           mutedForeground: themeColors.mutedForeground,
           fontSans: themeColors.fontSans,
@@ -88,7 +90,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         minValue,
         maxValue,
         yAxis,
-        false,
+        isVertical,
         undefined,
         {
           mutedForeground: themeColors.mutedForeground,
@@ -139,6 +141,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
       referenceLines,
       referenceAreas,
       toolbox,
+      layout,
     ],
   );
 

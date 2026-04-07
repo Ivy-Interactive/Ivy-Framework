@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
 [App(icon: Icons.ChartArea, searchHints: ["visualization", "graph", "analytics", "data", "trends", "statistics"])]

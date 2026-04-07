@@ -122,6 +122,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
           }
         }}
         role="button"
+        aria-label="Interactive region"
         tabIndex={0}
       >
         {children}

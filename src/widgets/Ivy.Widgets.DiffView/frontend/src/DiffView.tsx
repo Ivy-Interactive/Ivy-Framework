@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { parseDiff, Diff, Hunk, type ChangeData } from "react-diff-view";
 import "react-diff-view/style/index.css";
+import "./custom-diff.css";
 import type { EventHandler } from "./types";
 import { getWidth, getHeight } from "./styles";
 
@@ -15,6 +16,7 @@ interface DiffViewProps {
   language?: string;
   oldRevision?: string;
   newRevision?: string;
+  wordWrap?: boolean;
 }
 
 function getLineNumber(change: ChangeData | null): number {
@@ -33,6 +35,7 @@ export const DiffView: React.FC<DiffViewProps> = ({
   viewType = "Unified",
   oldRevision,
   newRevision,
+  wordWrap,
 }) => {
   const files = useMemo(() => {
     if (!diff) return [];
@@ -60,7 +63,7 @@ export const DiffView: React.FC<DiffViewProps> = ({
   }
 
   return (
-    <div style={style} className="text-xs">
+    <div style={style} className={`text-xs${wordWrap ? " diff-wrap" : ""}`}>
       {files.map((file, fileIndex) => {
         const hasHeader = oldRevision || newRevision || file.oldPath || file.newPath;
         return (

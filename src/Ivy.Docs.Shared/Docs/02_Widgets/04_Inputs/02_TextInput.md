@@ -10,7 +10,6 @@ searchHints:
   - search
 ---
 
-
 # TextInput
 
 <Ingress>
@@ -27,7 +26,7 @@ Here's a simple example of a text input with a placeholder:
 public class BasicUsageDemo : ViewBase
 {
     public override object? Build()
-    { 
+    {
         var text = UseState("");
         return text.ToTextInput().Placeholder("Enter text here...");
     }
@@ -59,7 +58,7 @@ public class PasswordCaptureDemo: ViewBase
         return password.ToPasswordInput()
                      .Placeholder("Password")
                      .WithField()
-                     .Label("Enter Password");         
+                     .Label("Enter Password");
     }
 }
 ```
@@ -82,7 +81,7 @@ public class CaptureAddressDemo: ViewBase
                                .Height(Size.Units(30))
                                .Width(Size.Units(100))
                                .WithField()
-                               .Label("Address");         
+                               .Label("Address");
     }
 }
 ```
@@ -117,7 +116,7 @@ public class SearchBarDemo: ViewBase
 
 ### Email
 
-To capture the emails `TextInputVariant.Email` variant should be used.  
+To capture the emails `TextInputVariant.Email` variant should be used.
 
 See it in action here.
 
@@ -137,7 +136,7 @@ public class EmailEnterDemo: ViewBase
 
 ### Telephone
 
-To capture the phone numbers `TextInputVariant.Tel` variant needs to be used.  
+To capture the phone numbers `TextInputVariant.Tel` variant needs to be used.
 
 see it in action here.
 
@@ -157,7 +156,7 @@ public class PhoneEnterDemo: ViewBase
 
 ### URL
 
-To capture the URLs/Links  `TextInputVariant.Url` variant needs to be used.
+To capture the URLs/Links `TextInputVariant.Url` variant needs to be used.
 
 see it in action here.
 
@@ -191,24 +190,6 @@ public class MinLengthValidationDemo : ViewBase
             .MaxLength(10)
             .WithField()
             .Label("Username");
-    }
-}
-```
-
-## Event Handling
-
-Use the [`OnChange`](../../01_Onboarding/02_Concepts/05_EventHandlers.md) callback to react to text input changes. The callback receives an event with the current value.
-
-```csharp demo-tabs
-public class EventsDemoApp : ViewBase
-{
-    public override object? Build()
-    {
-        var name = UseState("");
-        return Layout.Vertical()
-            | name.ToTextInput()
-                  .Placeholder("Enter your name...").WithField().Label("Name")
-            | (name.Value.Length > 0 ? $"Hello, {name.Value}!" : "");
     }
 }
 ```
@@ -258,7 +239,7 @@ We can use associate keyboard shortcuts to text inputs the following way.
 ```csharp
  name.ToTextInput()
     .Placeholder("Name (Ctrl+S)")
-    .ShortcutKey("Ctrl+S")   
+    .ShortcutKey("Ctrl+S")
 ```
 
 The following demo shows this in action with multiple `TextInput`s each
@@ -268,16 +249,16 @@ with different shortcut keys.
 public class ShortCutDemo : ViewBase
 {
     public override object? Build()
-    { 
+    {
         var name = UseState("");
         var email = UseState("");
         var message = UseState("");
         return Layout.Vertical()
                 | Text.Inline("Keyboard Shortcuts Demo")
-                | Text.Inline("Ctrl+J - Focus Name, Ctrl+E - Focus Email, Ctrl+M - Focus Message")  
+                | Text.Inline("Ctrl+J - Focus Name, Ctrl+E - Focus Email, Ctrl+M - Focus Message")
                 | name.ToTextInput()
                       .Placeholder("Name (Ctrl+J)")
-                      .ShortcutKey("Ctrl+J")    
+                      .ShortcutKey("Ctrl+J")
                 | email.ToEmailInput()
                       .Placeholder("Email (Ctrl+E)")
                       .ShortcutKey("Ctrl+E")
@@ -331,7 +312,7 @@ public class DataCaptureUsingExtensionDemo: ViewBase
                 | website.ToUrlInput()
                          .Placeholder("https://ivy.app/")
                          .WithField()
-                         .Label("Website");                             
+                         .Label("Website");
     }
 }
 ```
@@ -342,28 +323,65 @@ Here is how it can be used.
 
 ```csharp demo-below
 
-public class BasicFilter : ViewBase 
-{      
+public class BasicFilter : ViewBase
+{
     public override object Build()
-    {         
+    {
         var searchState = UseState("");
         var result = UseState("");
-        var fruits = new[] { 
-            "Apple", "Banana", "Cherry", "Date", "Elderberry", 
+        var fruits = new[] {
+            "Apple", "Banana", "Cherry", "Date", "Elderberry",
             "Stawberry", "Blueberry", "Watermelon", "Muskmelon",
-            "Fig", "Grape", "Kiwi", "Lemon", "Mango" 
+            "Fig", "Grape", "Kiwi", "Lemon", "Mango"
         };
 
         var filtered = fruits
             .Where(fruit => fruit.ToLower().Contains(searchState.Value.ToLower()))
             .ToArray();
-            
+
         var content = string.Join("\n", filtered);
-        
+
         return Layout.Vertical()
             | searchState.ToSearchInput().Placeholder("Which fruit you like?")
             | result.ToTextareaInput(content);
-    }     
+    }
+}
+```
+
+## Event Handling
+
+Input widgets support standard focus and blur events, along with the `AutoFocus` property.
+
+```csharp demo-tabs
+public class TextInputEventsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState("");
+
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the input gains focus.")
+                | state.ToTextInput().Placeholder("Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the input loses focus.")
+                | state.ToTextInput().Placeholder("Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget upon mounting.")
+                | state.ToTextInput().Placeholder("AutoFocused Input")
+                    .AutoFocus()
+                | Text.Lead("Focused!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
 }
 ```
 
@@ -380,26 +398,26 @@ Validate Email Demo
 In this example, if the email format is wrong, the input is invalidated and a message is shown.
 
 ```csharp demo-tabs
-public class EmailValidationDemo : ViewBase 
-{      
+public class EmailValidationDemo : ViewBase
+{
     // Email regex pattern
-    private static readonly System.Text.RegularExpressions.Regex EmailRegex = new 
+    private static readonly System.Text.RegularExpressions.Regex EmailRegex = new
         System.Text.RegularExpressions.Regex(
         @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
-        System.Text.RegularExpressions.RegexOptions.Compiled | 
+        System.Text.RegularExpressions.RegexOptions.Compiled |
         System.Text.RegularExpressions.RegexOptions.IgnoreCase
     );
 
     public override object? Build()
-    {         
-        var email = UseState("");         
+    {
+        var email = UseState("");
         var isValid = string.IsNullOrWhiteSpace(email.Value) || EmailRegex.IsMatch(email.Value);
-        
+
         return email.ToTextInput()
               .Invalid(isValid ? "" : "Invalid email address")
               .WithField()
               .Label("Email");
-    }     
+    }
 }
 ```
 
@@ -415,13 +433,13 @@ In this demo, password field is enabled only when the username field has a value
 
 ```csharp demo-tabs
 
-public class LoginForm : ViewBase 
-{      
+public class LoginForm : ViewBase
+{
     public override object Build()
-    {         
-        var usernameState = UseState("");         
-        var passwordState = UseState("");         
-        
+    {
+        var usernameState = UseState("");
+        var passwordState = UseState("");
+
         return Layout.Vertical()
             | Text.Label("Login")
             | Layout.Vertical()
@@ -436,7 +454,7 @@ public class LoginForm : ViewBase
                     .WithField()
                     .Label("Password")
                 | new Button("Login")
-                    .Disabled(string.IsNullOrWhiteSpace(usernameState.Value) || 
+                    .Disabled(string.IsNullOrWhiteSpace(usernameState.Value) ||
                         string.IsNullOrWhiteSpace(passwordState.Value));
     }
 }
@@ -479,5 +497,3 @@ input.ToTextInput()
 
 </Body>
 </Details>
-
-

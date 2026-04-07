@@ -53,17 +53,17 @@ This creates the `NumberInputVariant.Slider` variant.
 The following demo shows how a slider can be used to give a visual clue.
 
 ```csharp demo-below
-public class NumberSliderInput : ViewBase 
+public class NumberSliderInput : ViewBase
 {
     public override object? Build()
-    {        
+    {
         var tapes = UseState(1.0);
         var cart = UseState("");
-        
+
         UseEffect(() => {
-            cart.Set($"Added {tapes.Value} cm tape to your cart"); 
+            cart.Set($"Added {tapes.Value} cm tape to your cart");
         }, tapes);
-        
+
         return Layout.Vertical()
                 | tapes.ToNumberInput()
                      .Min(30.0)
@@ -87,7 +87,7 @@ The following demo uses `NumberInputVariant.Number` with `NumberFormatStyle.Curr
 `NumberInput`s that can take money inputs. `ToMoneyInput` hides all these complexities.
 
 ```csharp demo-below
-public class MoneyInputDemo : ViewBase 
+public class MoneyInputDemo : ViewBase
 {
     public override object? Build()
     {
@@ -98,12 +98,12 @@ public class MoneyInputDemo : ViewBase
         // Currency Conversion Rates
         var euroToUSD = 1.80M;
         var euroToGBP = 0.86M;
-        
+
         UseEffect(() => {
             moneyInUSD.Set(moneyInEUR.Value * euroToUSD);
             moneyInGBP.Set(moneyInEUR.Value * euroToGBP);
         }, moneyInEUR);
-        
+
         return Layout.Vertical()
                 | Text.H3("Simple Currency Converter")
                 | moneyInEUR.ToNumberInput()
@@ -112,13 +112,13 @@ public class MoneyInputDemo : ViewBase
                 .Placeholder("€0.00")
                 .WithField()
                 .Label("Enter EUR amount:")
-                    
+
                 | moneyInUSD.ToMoneyInput()
                             .Currency("USD")
                             .Disabled()
                             .WithField()
                             .Label("USD:")
-                    
+
                 | moneyInGBP.ToMoneyInput()
                             .Currency("GBP")
                             .Disabled()
@@ -162,7 +162,7 @@ public class MoneyPrecisionDemo : ViewBase
     public override object? Build()
     {
         var precValue = UseState(0.50M);
-        return Layout.Horizontal() 
+        return Layout.Horizontal()
                 | precValue.ToNumberInput()
                      .Min(0.0)
                      .Max(100.0)
@@ -243,6 +243,7 @@ public class AdvancedFormatStylesDemo : ViewBase
 ```
 
 Available `NumberFormatStyle` values:
+
 - `Decimal` (default) — "1,234.56"
 - `Currency` — "$1,234.56"
 - `Percent` — "56%"
@@ -289,18 +290,39 @@ The `Prefix` and `Suffix` methods accept either a `string` or an `Icons` value, 
 
 ## Event Handling
 
-`NumberInput`s can handle change and blur events:
+`NumberInput` widgets support focus, blur, and manual `AutoFocus` behavior.
 
-```csharp
-var onChangedState = UseState(0);
-var onChangeLabel = UseState("");
-
-UseEffect(() =>
+```csharp demo-tabs
+public class NumberInputEventsDemo : ViewBase
 {
-    onChangeLabel.Set("Changed");
-}, onChangedState);
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState(0.0);
 
-onChangedState.ToNumberInput();
+        return Layout.Tabs(
+            new Tab("OnFocus", Layout.Vertical()
+                | Text.P("The OnFocus event fires when the number input gains focus.")
+                | state.ToNumberInput().Placeholder("Focus me...")
+                    .OnFocus(() => focusCount.Set(focusCount.Value + 1))
+                | Text.Literal($"Focus Count {focusCount.Value}")
+            ),
+            new Tab("OnBlur", Layout.Vertical()
+                | Text.P("The OnBlur event fires when the number input loses focus.")
+                | state.ToNumberInput().Placeholder("Blur me...")
+                    .OnBlur(() => blurCount.Set(blurCount.Value + 1))
+                | Text.Literal($"Blur Count {blurCount.Value}")
+            ),
+            new Tab("AutoFocus", Layout.Vertical()
+                | Text.P("The AutoFocus property automatically focuses the widget upon mounting.")
+                | state.ToNumberInput().Placeholder("AutoFocused NumberInput")
+                    .AutoFocus()
+                | Text.Lead("Focused!")
+            )
+        ).Variant(TabsVariant.Tabs);
+    }
+}
 ```
 
 <WidgetDocs Type="Ivy.NumberInput" ExtensionTypes="Ivy.NumberInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Inputs/NumberInput.cs"/>
@@ -324,13 +346,13 @@ public class GroceryAppDemo : ViewBase
         var eggCost = 3.45M;
         var breadCost = 6.13M;
         var total = UseState(eggs.Value * eggCost + breadCost * breads.Value);
-        
+
         UseEffect(() => {
             total.Set(eggs.Value * eggCost + breadCost * breads.Value);
         }, eggs, breads);
-        
+
         return Layout.Vertical()
-                | (Layout.Horizontal() 
+                | (Layout.Horizontal()
                    | eggs.ToNumberInput()
                          .Min(0)
                          .Max(12)
@@ -338,7 +360,7 @@ public class GroceryAppDemo : ViewBase
                          .WithField()
                          .Label("Egg")
                          .Description("Maximum 12"))
-        
+
                 | (Layout.Horizontal()
                    | breads.ToNumberInput()
                               .Min(0)
@@ -357,7 +379,7 @@ public class GroceryAppDemo : ViewBase
                                      .Precision(2)
                                      .FormatStyle(NumberFormatStyle.Currency)
                                      .Currency("EUR"));
-                   
+
     }
 }
 

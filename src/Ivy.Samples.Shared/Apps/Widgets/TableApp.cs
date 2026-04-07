@@ -1,5 +1,3 @@
-using System.Reflection.Emit;
-
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
 public class Product

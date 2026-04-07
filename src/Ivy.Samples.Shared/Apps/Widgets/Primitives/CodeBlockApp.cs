@@ -184,6 +184,37 @@ public class CodeBlockApp : SampleBase
                     <Nullable>enable</Nullable>
                   </PropertyGroup>
                 </Project>
+                """,
+
+            [Languages.Powershell] = """
+                function Get-Fibonacci {
+                    param([int]$Count = 10)
+                    $a, $b = 0, 1
+                    for ($i = 0; $i -lt $Count; $i++) {
+                        $a
+                        $a, $b = $b, ($a + $b)
+                    }
+                }
+
+                # Usage
+                Get-Fibonacci -Count 10
+                """,
+
+            [Languages.Bash] = """
+                #!/bin/bash
+                fibonacci() {
+                    local count=${1:-10}
+                    local a=0 b=1
+                    for ((i = 0; i < count; i++)); do
+                        echo $a
+                        local temp=$((a + b))
+                        a=$b
+                        b=$temp
+                    done
+                }
+
+                # Usage
+                fibonacci 10
                 """
         };
 

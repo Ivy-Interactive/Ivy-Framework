@@ -152,3 +152,57 @@ public class ImmigrationToEurope : ViewBase
 
 </Body>
 </Details>
+
+## Customizing with polish
+
+When building charts from queryable data with `ToAreaChart()`, use the `polish` callback to customize the scaffolded chart before it renders. The callback receives the fully built `AreaChart` with areas from your measures already configured by the selected style.
+
+Common use cases for `polish`:
+- Override area colors, opacity, or curve types
+- Add reference lines or grids
+- Replace the default areas array with custom area configurations
+- Modify stacking behavior
+- Add or modify tooltips, legends
+
+### Example: Custom area styling
+
+```csharp demo-below
+public class PolishAreaChartDemo : ViewBase
+{
+    record SalesData(string Month, int Desktop, int Mobile);
+
+    public override object? Build()
+    {
+        var data = new SalesData[]
+        {
+            new("Jan", 186, 80),
+            new("Feb", 305, 200),
+            new("Mar", 237, 120),
+            new("Apr", 186, 100),
+            new("May", 325, 180),
+        };
+
+        return Layout.Vertical()
+            | data.ToAreaChart(
+                polish: chart =>
+                {
+                    // Replace the scaffolded areas with custom styling
+                    return chart with
+                    {
+                        Areas =
+                        [
+                            new Area("Desktop", 1).Fill(Colors.Blue).FillOpacity(0.6),
+                            new Area("Mobile", 1).Fill(Colors.Orange).FillOpacity(0.4)
+                        ]
+                    };
+                }
+            )
+            .Dimension("Month", e => e.Month)
+            .Measure("Desktop", e => e.Sum(f => f.Desktop))
+            .Measure("Mobile", e => e.Sum(f => f.Mobile))
+            .Toolbox();
+    }
+}
+```
+
+> **Note:** The `polish` callback receives the fully scaffolded `AreaChart` which already includes areas from the style. Use `chart with { ... }` syntax to replace or modify chart properties while preserving others.

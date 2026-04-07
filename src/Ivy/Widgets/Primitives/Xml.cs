@@ -1,5 +1,4 @@
 using System.Xml.Linq;
-using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;

@@ -87,7 +87,7 @@ const generateScatterXAxis = (
       fontFamily: themeColors?.fontSans,
     },
     axisLine: {
-      show: axisConfig.axisLine !== false,
+      show: axisConfig.axisLine === true,
       lineStyle: {
         type: "solid",
         color: themeColors?.mutedForeground,
@@ -95,7 +95,7 @@ const generateScatterXAxis = (
       },
     },
     axisTick: {
-      show: axisConfig.tickLine !== false,
+      show: axisConfig.tickLine === true,
       lineStyle: {
         color: themeColors?.mutedForeground,
         opacity: 0.4,
@@ -113,7 +113,7 @@ const generateScatterXAxis = (
 };
 
 const generateScatterYAxis = (
-  yAxis?: Array<Partial<YAxisProps>>,
+  yAxis?: YAxisProps[],
   themeColors?: { mutedForeground: string; fontSans: string },
 ) => {
   const axisConfig = yAxis?.[0] || {};
@@ -137,7 +137,7 @@ const generateScatterYAxis = (
       fontFamily: themeColors?.fontSans,
     },
     axisLine: {
-      show: axisConfig.axisLine !== false,
+      show: axisConfig.axisLine === true,
       lineStyle: {
         type: "solid",
         color: themeColors?.mutedForeground,
@@ -145,7 +145,7 @@ const generateScatterYAxis = (
       },
     },
     axisTick: {
-      show: axisConfig.tickLine !== false,
+      show: axisConfig.tickLine === true,
       lineStyle: {
         color: themeColors?.mutedForeground,
         opacity: 0.4,
@@ -286,6 +286,7 @@ const generateScatterSeries = (
         data: scatterData,
         symbol: customPath || symbol,
         symbolSize,
+        yAxisIndex: scatter.yAxisIndex ?? 0,
         itemStyle: {
           color: scatter.fill || undefined,
           opacity: scatter.fillOpacity !== null ? scatter.fillOpacity : 0.8,
@@ -300,7 +301,7 @@ const generateScatterSeries = (
             shadowColor: "rgba(0, 0, 0, 0.3)",
           },
         },
-        animation: scatter.animated !== false,
+        animation: scatter.animated === true,
         animationDuration: 800,
         markPoint: index === 0 ? markPoint : undefined,
         markLine: index === 0 ? markLine : undefined,
@@ -384,7 +385,7 @@ const ScatterChartWidget: React.FC<ScatterChartWidgetProps> = ({
   // Memoize option configuration
   const option = useMemo(
     () => ({
-      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false),
+      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false, yAxis, xAxis),
       xAxis: generateScatterXAxis(xAxis, {
         mutedForeground: themeColors.mutedForeground,
         fontSans: themeColors.fontSans,
