@@ -16,6 +16,7 @@ public class JobsApp : ViewBase
         var client = UseService<IClientProvider>();
         var refreshToken = UseRefreshToken();
         var showPlan = UseState<string?>(null);
+        var showOutput = UseState<string?>(null);
         var openFile = UseState<string?>(null);
         var config = UseService<IConfigService>();
         UseEffect(() =>
@@ -160,6 +161,12 @@ public class JobsApp : ViewBase
                         }
                     }
                 }
+                else if (e.Value.ColumnName == "LastOutput")
+                {
+                    var id = e.Value.RowId?.ToString();
+                    if (!string.IsNullOrEmpty(id))
+                        showOutput.Set(id);
+                }
                 return ValueTask.CompletedTask;
             })
             .RowActions(
@@ -267,6 +274,22 @@ public class JobsApp : ViewBase
             }
 
             return layout | new Fragment(dataTable, planSheet);
+        }
+
+        if (showOutput.Value is { } jobId)
+        {
+            var job = jobService.GetJob(jobId);
+            var outputText = job is not null && job.OutputLines.Count > 0
+                ? string.Join("\n", job.OutputLines)
+                : "No output available.";
+
+            var outputSheet = new Sheet(
+                onClose: () => showOutput.Set(null),
+                content: new Markdown($"```\n{outputText}\n```"),
+                title: job is not null ? $"{job.Type} — {ExtractPlanId(job.PlanFile)}" : "Job Output"
+            ).Width(Size.Half()).Resizable();
+
+            return layout | new Fragment(dataTable, outputSheet);
         }
 
         return layout | dataTable;
