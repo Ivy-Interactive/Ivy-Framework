@@ -565,21 +565,19 @@ public class Server
         var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
         var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
         var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
-        var isLocalDev = !isContainer && !hasPortEnv && !_args.IsCliCommand;
 
         if (_args.IsCliCommand)
         {
             builder.WebHost.UseUrls("http://localhost:0");
         }
-        else if (isLocalDev)
-        {
-            // Local development: HTTPS using the ASP.NET Core dev certificate
-            builder.WebHost.UseUrls($"https://{host}:{_args.Port}");
-        }
         else
         {
-            // Containers / hosted environments: HTTP only (reverse proxy handles TLS).
-            builder.WebHost.UseUrls($"http://{host}:{_args.Port}");
+            var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
+            var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
+                ? ivyTlsEnv is "1" or "true" or "yes" or "on" (StringComparison.OrdinalIgnoreCase)
+                : !isContainer && !hasPortEnv && !_args.IsCliCommand; // default: TLS for local dev only
+            var scheme = useTls ? "https" : "http";
+            builder.WebHost.UseUrls($"{scheme}://{host}:{_args.Port}");
         }
 
         builder.Services.AddSignalR(options =>

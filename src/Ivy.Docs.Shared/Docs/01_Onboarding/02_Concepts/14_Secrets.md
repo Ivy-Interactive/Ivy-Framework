@@ -144,5 +144,6 @@ Common runtime variables include:
 - `PORT` - Server port override.
 - `BASE_PATH` - URL prefix to serve the app under (for example `/my-app`).
 - `VERBOSE` - Enable verbose startup logging.
+- `IVY_TLS` - Force HTTPS on (`true`) or off (`false`). Defaults to HTTPS for local dev, HTTP in containers/hosted environments.
 
 Use `BASE_PATH` when deploying behind a reverse proxy or ingress that routes your app from a sub-path instead of `/`.
