@@ -105,6 +105,42 @@ CSS adds an **`ivy-green`** (and related) **branding variable** for consistent I
 
 The **`KillProcessUsingPort`** helper used in dev workflows now runs on **macOS** and **Linux** as well as Windows. **Security**-related analyzer and dependency **warnings** were addressed.
 
+### [01535] Detail `Multiline` optional
+
+The **Detail** row helper’s **`Multiline`** flag is **optional** and defaults to **`false`**, so single-line details stay compact unless you opt into wrapped text.
+
+### [01542] StackedProgress widget
+
+A new [**StackedProgress**](https://docs.ivy.app/widgets/common/progress) widget shows a **segmented** bar with multiple **colored** sections for split metrics or multi-part status. A small follow-up fixed a **`BarHeight`** naming clash and an **Icons** reference in the sample wiring.
+
+### [01595] Confetti
+
+The **confetti** celebration uses a **shorter** duration and **fewer particles** for a lighter effect.
+
+### [01598] AutoFocus inside Dialog and Sheet
+
+**Dialog** and **Sheet** no longer block **AutoFocus** on nested **inputs**;
+
+### [01600] Header chrome shadow
+
+**HeaderLayout** picks up a **scroll-triggered drop shadow** when the page content scrolls under the header (same pattern as the footer shadow added elsewhere).
+
+### [01088] Keyboard shortcuts on macOS
+
+Global shortcuts use **`event.code`** (physical key) instead of **`key`**, so **Option / Command** combinations behave reliably on **Mac**.
+
+### [01089] DataTable tooltips
+
+**DataTable** cell chrome uses the shared **`withTooltip`** wrapper instead of the native **`title`** attribute, so tooltips are consistent with the rest of the design system and easier to style.s
+
+### Badge widget empty state
+
+[**Badge**](https://docs.ivy.app/widgets/common/badge) renders **nothing** when the label is **empty** instead of a tiny blank pill.
+
+### Embedded assets and tooling
+
+**Blank screens** and **404** embedded resources on **macOS** and **Linux** were addressed by fixing how **static assets** are resolved cross-platform.
+
 ## Buttons, badges, and navigation
 
 - [**Button**](https://docs.ivy.app/widgets/common/button) **badges** use the **outline** variant for clearer contrast; **unit tests** were added.
