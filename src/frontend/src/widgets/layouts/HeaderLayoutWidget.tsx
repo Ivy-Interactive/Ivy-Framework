@@ -41,7 +41,7 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
     <div className="remove-parent-padding flex flex-col w-full h-full" style={styles}>
       <div
         className={cn(
-          "flex-none p-2 bg-background w-full transition-shadow",
+          "flex-none p-2 w-full transition-shadow",
           showHeaderDivider && "border-b",
           isScrolled && "shadow-sm",
         )}
