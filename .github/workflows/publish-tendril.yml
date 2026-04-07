@@ -36,6 +36,17 @@ jobs:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Install vite-plus (vp)
+        run: npm install -g vite-plus@0.1.13
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Setup Java (for ANTLR4)
         uses: actions/setup-java@v4
         with:
@@ -43,7 +54,7 @@ jobs:
           java-version: 17
 
       - name: Restore
-        run: dotnet restore tendril/Ivy.Tendril/Ivy.Tendril.csproj
+        run: dotnet restore
 
       - name: Determine version
         id: version
@@ -77,8 +88,6 @@ jobs:
         run: |
           cd tendril
           npm version ${{ steps.version.outputs.version }} --no-git-tag-version
-          # Using --provenance for trusted publishing. 
-          # The user mentioned they will handle the token/auth later.
           npm publish --provenance --access public --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -87,7 +96,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rid: [win-x64, win-arm64, linux-x64, osx-x64, osx-arm64]
+        include:
+          - rid: win-x64
+            target: x86_64-pc-windows-msvc
+          - rid: win-arm64
+            target: aarch64-pc-windows-msvc
+          - rid: linux-x64
+            target: x86_64-unknown-linux-gnu
+          - rid: osx-x64
+            target: x86_64-apple-darwin
+          - rid: osx-arm64
+            target: aarch64-apple-darwin
     defaults:
       run:
         working-directory: src
@@ -100,11 +119,31 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Install vite-plus (vp)
+        run: npm install -g vite-plus@0.1.13
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
       - name: Restore
         run: dotnet restore
 
       - name: Publish Desktop Binary
+        # We set CARGO_BUILD_TARGET so that cargo inside MSBuild targets the right platform
         run: |
+          export CARGO_BUILD_TARGET=${{ matrix.target }}
           dotnet publish tendril/Ivy.Tendril.Desktop/Ivy.Tendril.Desktop.csproj \
             --configuration Release \
             --runtime ${{ matrix.rid }} \
@@ -147,7 +186,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG_NAME="${GITHUB_REF#refs/tags/}"
-          # Collect all zips from the root
           gh release create "$TAG_NAME" \
             --title "Tendril $TAG_NAME" \
             --generate-notes \
