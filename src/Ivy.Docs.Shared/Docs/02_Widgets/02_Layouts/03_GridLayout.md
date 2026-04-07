@@ -149,26 +149,6 @@ Layout.Grid()
     | content3
 ```
 
-### Using GridLayout Directly
-
-For more control, you can use the GridLayout class directly:
-
-```csharp
-new GridLayout(
-    new GridDefinition
-    {
-        Columns = 2,
-        Rows = 2,
-        Gap = 4,
-        Padding = 8,
-        AutoFlow = AutoFlow.Row
-    },
-    content1,
-    content2,
-    content3
-)
-```
-
 ## Examples
 
 <Details>
