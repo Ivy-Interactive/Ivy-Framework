@@ -165,6 +165,10 @@ When **`AllowSorting`** is **false**, **`ToDataTable`** now **preserves the sour
 
 Docs and tooling add short **troubleshooting** for the common case where the **`ivy`** CLI is **not found** on **macOS** (PATH or install location).
 
+### [01743] Scatter chart sample and X-axis typing
+
+**ScatterChartApp** includes a **dual-axis** example aligned with **`YAxisIndex`**. The sample’s **X** axis uses a **numeric** scale instead of **category** so point series behave like continuous data.
+
 ## Buttons, badges, and navigation
 
 - [**Button**](https://docs.ivy.app/widgets/common/button) **badges** use the **outline** variant for clearer contrast; **unit tests** were added.
