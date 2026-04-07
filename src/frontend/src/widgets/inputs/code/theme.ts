@@ -216,5 +216,14 @@ export function createIvyCodeTheme(density: Densities = Densities.Medium): Exten
     { tag: tags.changed, color: "var(--orange)" },
   ]);
 
-  return [baseTheme, syntaxHighlighting(highlightStyle)];
+  // Dark mode background — applied via .dark ancestor class so it only
+  // activates in dark mode.  Using baseTheme (low-specificity) so app
+  // themes can still override if needed.
+  const darkBgTheme = EditorView.baseTheme({
+    ".dark &": {
+      backgroundColor: "color-mix(in srgb, white 5%, transparent)",
+    },
+  });
+
+  return [baseTheme, darkBgTheme, syntaxHighlighting(highlightStyle)];
 }
