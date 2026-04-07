@@ -4,6 +4,7 @@ using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
@@ -36,6 +37,7 @@ public class PlanDownloadHelperTests
         var testConfig = new TestConfigService(tempDir);
         services.AddSingleton<IConfigService>(testConfig);
         services.AddSingleton<ConfigService>(testConfig);
+        services.AddSingleton<Microsoft.Extensions.Logging.ILogger<PlanReaderService>>(NullLogger<PlanReaderService>.Instance);
         services.AddSingleton<PlanReaderService>();
         var provider = services.BuildServiceProvider();
         var context = new ViewContext(() => { }, null, provider);

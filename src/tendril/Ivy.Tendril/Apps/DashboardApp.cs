@@ -3,7 +3,7 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Dashboard", icon: Icons.ChartBar, group: new[] { "Tools" }, order: MenuOrder.Dashboard)]
+[App(title: "Dashboard", icon: Icons.ChartBar, group: ["Tools"], order: MenuOrder.Dashboard)]
 public class DashboardApp : ViewBase
 {
     public override object? Build()
@@ -95,24 +95,35 @@ public class DashboardApp : ViewBase
             };
         }).ToList();
 
+        Size colWidth = Size.Fraction(1 / 8f);
+        
         var dataTable = rows.AsQueryable()
             .ToDataTable(idSelector: t => t.SortDate)
             .RefreshToken(refreshToken)
             .Width(Size.Full())
-            .Height(Size.Px(320))
+            .Height(Size.Px(307))
             .Header(t => t.Date, "Date")
             .Header(t => t.Created, "Created")
             .Header(t => t.Completed, "Completed")
-            .Header(t => t.PrsMerged, "PRs / Merged")
+            .Header(t => t.PrsMerged, "PRs")
             .Header(t => t.Failed, "Failed")
             .Header(t => t.Cost, "Cost")
             .Header(t => t.CostPerPlan, "Cost/Plan")
             .Header(t => t.Tokens, "Tokens")
             .Hidden(t => t.SortDate)
+            .Width(e => e.Date, colWidth)
+            .Width(e => e.Created, colWidth)
+            .Width(e => e.Completed, colWidth)
+            .Width(e => e.PrsMerged, colWidth)
+            .Width(e => e.Failed, colWidth)
+            .Width(e => e.Cost, colWidth)
+            .Width(e => e.CostPerPlan, colWidth)
+            .Width(e => e.Tokens, colWidth)
             .Config(c =>
             {
                 c.AllowSorting = false;
                 c.AllowFiltering = false;
+                c.AllowColumnReordering = false;
                 c.ShowSearch = false;
                 c.SelectionMode = SelectionModes.None;
                 c.ShowIndexColumn = false;
@@ -136,10 +147,18 @@ public class DashboardApp : ViewBase
         .Selected(selectedProject.Value != null
             ? Array.FindIndex(projectData, p => p.Project == selectedProject.Value)
             : null)
-        .OnSelect(async e =>
+        .OnSelect(e =>
         {
-            var clickedProject = projectData[e.Value].Project;
-            selectedProject.Set(selectedProject.Value == clickedProject ? null : clickedProject);
+            try
+            {
+                var clickedProject = projectData[e.Value].Project;
+                selectedProject.Set(selectedProject.Value == clickedProject ? null : clickedProject);
+                return ValueTask.CompletedTask;
+            }
+            catch (Exception exception)
+            {
+                return ValueTask.FromException(exception);
+            }
         });
 
         // Hourly cost & tokens combined bar chart
@@ -162,15 +181,14 @@ public class DashboardApp : ViewBase
                 style: BarChartStyles.Default,
                 polish: chart => chart with
                 {
-                    CartesianGrid = null,
                     Bars =
                     [
-                        new Bar("Cost ($)").Radius(4).FillOpacity(0.8).YAxisIndex(0),
-                        new Bar("Tokens").Radius(4).FillOpacity(0.8).YAxisIndex(1),
+                        new Bar("Cost ($)").Radius(4).YAxisIndex(0),
+                        new Bar("Tokens").Radius(4).YAxisIndex(1),
                     ],
                     XAxis =
                     [
-                        new XAxis().TickFormatter("MM/dd HH").Hide()
+                        new XAxis().TickFormatter("MM/dd HH")
                     ],
                     YAxis =
                     [
@@ -191,7 +209,7 @@ public class DashboardApp : ViewBase
 
         var header = Layout.Vertical()
             | statsRow
-            | new Box(projectProgress).Padding(new Thickness(2, 2, 0, 2));
+            | new Box(projectProgress).Margin(2);
 
         return new HeaderLayout(
             header: header,

@@ -60,7 +60,7 @@ public class WelcomeStepView(IState<int> stepperIndex) : ViewBase
                | Text.Markdown(
                    """
                    >[!NOTE]
-                   >Ivy Tendril is a coding orchestrator that uses an underlying coding agent such as Claude Code, Codex or Gemini. With Tendril you can get a lot of work done really fast. This means using Tendril can consume a lot of credits in a short period.
+                   >Ivy Tendril is a coding orchestrator powered by agents like Claude Code, Codex, or Gemini. It’s designed to help you complete large amounts of work quickly—often much faster than traditional workflows. Because of this speed, Tendril can also use credits rapidly.
                    """)
                | new Button("Get Started").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
                    .OnClick(() => stepperIndex.Set(stepperIndex.Value + 1));
@@ -105,14 +105,17 @@ public class SoftwareCheckStepView(IState<int> stepperIndex) : ViewBase
         return Layout.Vertical()
                | Text.H2("Required Software")
                | Text.Markdown(
-                   "Tendril requires the following software to be installed:\n\n" +
-                   "- **Coding Agent** - At least one of: Claude CLI, Codex CLI, or Gemini CLI\n" +
-                   "- **GitHub CLI** - For PR creation and GitHub integration\n" +
-                   "- **Git** - For version control\n" +
-                   "- **PowerShell** - For running scripts and hooks\n\n" +
-                   "**Optional:**\n" +
-                   "- **pandoc** - For PDF export functionality\n\n" +
-                   "Click 'Check Software' to verify your system.")
+                   """
+                   Tendril requires the following software to be installed:
+
+                   - **Coding Agent** - At least one of: Claude CLI, Codex CLI, or Gemini CLI
+                   - **GitHub CLI** - For PR creation and GitHub integration
+                   - **Git** - For version control
+                   - **PowerShell** - For running scripts and hooks
+
+                   **Optional:**
+                   - **Pandoc** - For PDF export functionality
+                   """ )
                | (checkResults.Value != null
                    ? (Layout.Vertical()
                       | Text.H3("Results")

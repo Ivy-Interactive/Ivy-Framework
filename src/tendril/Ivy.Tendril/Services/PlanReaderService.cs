@@ -206,7 +206,126 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
             return m.Value;
         });
 
-        return repaired;
+        repaired = Regex.Replace(
+            repaired,
+            @"(?m)^(\s*)(repos|commits|prs|verifications|relatedPlans|dependsOn):\s*\r?\n(?!\s*-)",
+            "$1$2: []\n");
+
+        return NormalizePlanYamlStructure(repaired);
+    }
+
+    private static string NormalizePlanYamlStructure(string yaml)
+    {
+        var topLevelKeys = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "state", "project", "level", "title", "sessionId",
+            "repos", "created", "updated", "initialPrompt",
+            "prs", "commits", "verifications", "relatedPlans", "dependsOn"
+        };
+        var listKeys = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "repos", "prs", "commits", "verifications", "relatedPlans", "dependsOn"
+        };
+
+        var normalized = yaml.Replace("\r\n", "\n");
+        var lines = normalized.Split('\n');
+        var output = new List<string>(lines.Length);
+        string? currentListKey = null;
+        var inVerificationItem = false;
+        var inBlockScalar = false;
+        string? currentBlockScalarKey = null;
+
+        static bool IsBlockScalarValue(string value)
+            => value is "|" or "|-" or ">" or ">-";
+
+        string? TryExtractTopLevelKey(string trimmedLine, out string normalizedLine)
+        {
+            normalizedLine = trimmedLine;
+
+            var keyMatch = Regex.Match(trimmedLine, @"^([A-Za-z][A-Za-z0-9]*):");
+            if (keyMatch.Success && topLevelKeys.Contains(keyMatch.Groups[1].Value))
+                return keyMatch.Groups[1].Value;
+
+            var quotedMatch = Regex.Match(trimmedLine, @"^'([A-Za-z][A-Za-z0-9]*):\s*(.*)'$");
+            if (!quotedMatch.Success || !topLevelKeys.Contains(quotedMatch.Groups[1].Value))
+                return null;
+
+            var key = quotedMatch.Groups[1].Value;
+            var value = quotedMatch.Groups[2].Value.Replace("''", "'");
+            normalizedLine = $"{key}: {value}".TrimEnd();
+            return key;
+        }
+
+        foreach (var rawLine in lines)
+        {
+            var line = rawLine.TrimEnd('\r');
+            var trimmed = line.TrimStart();
+
+            if (trimmed.Length == 0)
+            {
+                output.Add(inBlockScalar ? "  " : string.Empty);
+                continue;
+            }
+
+            var detectedKey = TryExtractTopLevelKey(trimmed, out var normalizedTopLevelLine);
+            if (inBlockScalar && detectedKey == null)
+            {
+                output.Add($"  {line}");
+                continue;
+            }
+
+            if (detectedKey != null)
+            {
+                var key = detectedKey;
+                currentListKey = listKeys.Contains(key) ? key : null;
+                inVerificationItem = false;
+                inBlockScalar = false;
+                currentBlockScalarKey = null;
+
+                if (currentListKey != null && Regex.IsMatch(normalizedTopLevelLine, @"^[A-Za-z][A-Za-z0-9]*:\s*\[\]\s*$"))
+                    output.Add($"{key}:");
+                else
+                    output.Add(normalizedTopLevelLine);
+
+                var scalarValue = normalizedTopLevelLine[(key.Length + 1)..].Trim();
+                if (IsBlockScalarValue(scalarValue))
+                {
+                    inBlockScalar = true;
+                    currentBlockScalarKey = key;
+                }
+
+                continue;
+            }
+
+            if (inBlockScalar)
+            {
+                output.Add($"  {line}");
+                continue;
+            }
+
+            if (currentListKey != null)
+            {
+                if (trimmed.StartsWith("-"))
+                {
+                    output.Add($"  {trimmed}");
+                    inVerificationItem = currentListKey == "verifications";
+                }
+                else if (currentListKey == "verifications" && inVerificationItem)
+                {
+                    output.Add($"    {trimmed}");
+                }
+                else
+                {
+                    output.Add($"  {trimmed}");
+                }
+
+                continue;
+            }
+
+            output.Add(trimmed);
+        }
+
+        return string.Join(Environment.NewLine, output);
     }
 
     /// <summary>
@@ -657,13 +776,22 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
         {
             var planYamlPath = Path.Combine(folderPath, "plan.yaml");
             var yamlContent = FileHelper.ReadAllText(planYamlPath);
+            PlanYaml? planYaml;
 
-            // Apply YAML repairs inline before parsing (handles agent-generated quirks)
-            var repaired = RepairPlanYaml(yamlContent);
-            if (repaired != yamlContent)
-                FileHelper.WriteAllText(planYamlPath, repaired);
+            try
+            {
+                planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(yamlContent);
+            }
+            catch
+            {
+                // Fall back to the repair pass for malformed agent-generated YAML.
+                var repaired = RepairPlanYaml(yamlContent);
+                if (repaired != yamlContent)
+                    FileHelper.WriteAllText(planYamlPath, repaired);
 
-            var planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(repaired);
+                planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(repaired);
+            }
+
             if (planYaml == null) return null;
 
             var folderName = Path.GetFileName(folderPath);
@@ -675,7 +803,22 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
             if (!Enum.TryParse<PlanStatus>(planYaml.State, ignoreCase: true, out var status))
                 status = PlanStatus.Draft;
 
-            var metadata = new PlanMetadata(id, planYaml.Project ?? "", planYaml.Level ?? "NiceToHave", planYaml.Title ?? "", status, planYaml.Repos ?? new(), planYaml.Commits ?? new(), planYaml.Prs ?? new(), planYaml.Verifications ?? new(), planYaml.RelatedPlans ?? new(), planYaml.DependsOn ?? new(), planYaml.Created, planYaml.Updated, planYaml.InitialPrompt);
+            var metadata = new PlanMetadata(
+                id,
+                string.IsNullOrWhiteSpace(planYaml.Project) ? "" : planYaml.Project,
+                string.IsNullOrWhiteSpace(planYaml.Level) ? "NiceToHave" : planYaml.Level,
+                string.IsNullOrWhiteSpace(planYaml.Title) ? "" : planYaml.Title,
+                status,
+                planYaml.Repos ?? [],
+                planYaml.Commits ?? [],
+                planYaml.Prs ?? [],
+                planYaml.Verifications ?? [],
+                planYaml.RelatedPlans ?? [],
+                planYaml.DependsOn ?? [],
+                planYaml.Created,
+                planYaml.Updated,
+                planYaml.InitialPrompt
+            );
             var latestContent = ReadLatestRevisionFromFileSystem(folderName);
 
             var revisionsDir = Path.Combine(folderPath, "revisions");
@@ -1084,8 +1227,8 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
         _hourlyBurnCache.Invalidate();
         _planCountsCache.Invalidate();
 
-        // Write to disk in background for durability.
-        WriteFileInBackground(() =>
+        // Without a backing database, writes need to complete before the next read.
+        WriteFile(() =>
         {
             var recommendationsPath = Path.Combine(PlansDirectory, planFolderName, "artifacts", "recommendations.yaml");
             if (!File.Exists(recommendationsPath)) return;
@@ -1100,6 +1243,8 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
             item.State = newState;
             if (newState == "Declined" && !string.IsNullOrWhiteSpace(declineReason))
                 item.DeclineReason = declineReason;
+            else
+                item.DeclineReason = null;
 
             FileHelper.WriteAllText(recommendationsPath, YamlHelper.Serializer.Serialize(items));
         });
@@ -1127,6 +1272,21 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
                 _logger.LogWarning(ex, "Background file write failed");
             }
         });
+    }
+
+    private void WriteFile(Action action)
+    {
+        if (_database == null)
+        {
+            try { action(); }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "File write failed");
+            }
+            return;
+        }
+
+        WriteFileInBackground(action);
     }
 
     private static DateTime? ExtractCompletedTimestamp(string logFilePath)
