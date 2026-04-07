@@ -3,11 +3,19 @@
 > [!NOTE]
 > We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
 
-## Charts
+## New Features
 
-### Dual-axis series
+### Bar Chart
 
-Bar, Line, Area, and [Scatter](https://docs.ivy.app/widgets/charts/scatter-chart) series support `YAxisIndex` so each series can bind to the correct Y axis in a dual-axis chart.
+Vertical bar orientation and ECharts axis pairing were fixed. `YAxis.Hide` and grid padding behave correctly with hidden axes; docs cover `YAxisIndex` on `Bar` and dual-axis setups.
+
+```csharp
+.YAxis(new YAxis("Labels").Hide());
+```
+
+### Dual-Axis Series
+
+Bar, Line, Area, and [**Scatter**](https://docs.ivy.app/widgets/charts/scatter-chart) series support `YAxisIndex` so each series can bind to the correct Y axis in a dual-axis chart.
 
 ```csharp
 new BarChart(data)
@@ -16,7 +24,7 @@ new BarChart(data)
 // Line / Area: chain .Line(new Line("Key").YAxisIndex(n)) the same way
 ```
 
-### Axis generation and layout
+### Axis Generation and Layout
 
 `generateYAxis` skips `largeSpread` heuristics when multiple axes are active. Cartesian charts reclaim plot width when axes are hidden, and grid padding no longer reserves space for hidden axes.
 
@@ -58,17 +66,9 @@ return new Card().Title("Dual Axis (Revenue vs Growth Rate)")
         .Legend();
 ```
 
-### Bar chart
+### Scatter Chart
 
-Vertical bar orientation and ECharts axis pairing were fixed. `YAxis.Hide` and grid padding behave correctly with hidden axes; docs cover `YAxisIndex` on `Bar` and dual-axis setups.
-
-```csharp
-.YAxis(new YAxis("Labels").Hide());
-```
-
-### Scatter chart
-
-Scatter rejects a category axis where a value axis is required. [ScatterChartApp](https://docs.ivy.app/widgets/charts/scatter-chart) includes a dual-axis example with a numeric X axis for continuous data.
+Scatter rejects a category axis where a value axis is required. [**ScatterChartApp**](https://docs.ivy.app/widgets/charts/scatter-chart) includes a dual-axis example with a numeric X axis for continuous data.
 
 Numeric value axes (`ScatterChartApp.cs`, `ScatterChart1View`):
 
@@ -79,7 +79,7 @@ new ScatterChart(data)
     .YAxis(new YAxis("Weight").Type(AxisTypes.Number));
 ```
 
-### Scatter tests and validation
+### Scatter Tests and Validation
 
 Widget tests cover ScatterChart; the implementation blocks invalid category-axis use for scatter series.
 
@@ -111,7 +111,7 @@ return new Card().Title("Dual Axis (Revenue vs Market Share)")
         .Legend();
 ```
 
-### Line and area series
+### Line and Area Series
 
 Line and Area use the same `YAxisIndex` extension as `Bar`.
 
@@ -124,9 +124,9 @@ new LineChart(data)
     .YAxis(new YAxis("Right").Orientation(YAxis.Orientations.Right));
 ```
 
-### Pie chart
+### Pie Chart
 
-[PieChart](https://docs.ivy.app/widgets/charts/pie-chart) tooltips use a formatter with marker styling for clearer series labels and values.
+The [**PieChart**](https://docs.ivy.app/widgets/charts/pie-chart) tooltip uses a formatter with marker styling for clearer series labels and values.
 
 ```csharp
 data.ToPieChart(
@@ -135,18 +135,18 @@ data.ToPieChart(
     PieChartStyles.Default);
 ```
 
-## DataTable and querying
+## DataTable and Querying
 
-### Decimal and footer formatting
+### Decimal and Footer Formatting
 
-[DataTable](https://docs.ivy.app/widgets/advanced/data-table) decimal columns use a more reliable `valueOf` path with a string fallback. Footer aggregates match column formatting rules for currency and numbers.
+The [**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) decimal path now handles `valueOf` with a safer string fallback. Footer aggregates also follow the same currency and number formatting rules as the column.
 
 ```csharp
 .Builder(e => e.Amount, f => f.Decimal().Format("C2"))
 .Footer(e => e.Amount, f => f.Sum().Format("C2"));
 ```
 
-### Column scaling
+### Column Scaling
 
 Optional auto-exclusion of navigation collection columns from scaling avoids distorted layouts.
 
@@ -156,7 +156,7 @@ entities.AsQueryable().ToDataTable(idSelector: e => e.Id)
     .Width(e => e.CustomerOrders, Size.Px(180));
 ```
 
-### ToDetails and navigation properties
+### ToDetails and Navigation Properties
 
 `ToDetails()` no longer shows raw CLR type names for navigation properties.
 
@@ -165,7 +165,7 @@ var details = order.ToDetails().RemoveEmpty();
 new Card(details);
 ```
 
-### Virtual columns
+### Virtual Columns
 
 You can define multiple virtual columns from the same root property.
 
@@ -180,7 +180,7 @@ orders.AsQueryable()
     .ToDataTable(idSelector: e => e.Id);
 ```
 
-### Sorting and stable order
+### Sorting and Stable Order
 
 When `AllowSorting` is false, `ToDataTable` keeps the query’s order. For paging, the query processor adds a default `OrderBy` when a stable sort is required.
 
@@ -188,7 +188,7 @@ When `AllowSorting` is false, `ToDataTable` keeps the query’s order. For pagin
 .Sortable(e => e.Email, sortable: false);
 ```
 
-### UseDataTable config
+### UseDataTable Config
 
 `UseDataTable` takes an optional `DataTableConfig` (same shapes on `ViewBase` and `IViewContext`) so options such as sorting and search ride with the connection:
 
@@ -214,7 +214,7 @@ Search includes match navigation, highlights, and a progress indicator for large
 .Config(c => { c.ShowSearch = true; });
 ```
 
-### Badge and link cells
+### Badge and Link Cells
 
 Badge cells can use per-value colors. Link cells cooperate with `OnCellClick` without double navigation.
 
@@ -222,7 +222,7 @@ Badge cells can use per-value colors. Link cells cooperate with `OnCellClick` wi
 .Badges(e => e.Skills, Colors.Sky);
 ```
 
-### Tooltips on cells
+### Tooltips on Cells
 
 Cells use the shared `withTooltip` wrapper instead of the native `title` attribute.
 
@@ -231,11 +231,11 @@ Cells use the shared `withTooltip` wrapper instead of the native `title` attribu
 new LinkDisplayRenderer { Type = LinkDisplayType.Url };
 ```
 
-### Virtual scrolling and height
+### Virtual Scrolling and Height
 
 Virtual scrolling renders rows reliably. Height in unconstrained parents was fixed, with follow-up coverage for a zero-height regression.
 
-### Configuration on fluent `ToDataTable`
+### Fluent `ToDataTable` Configuration
 
 For the fluent API, use `.Config(...)` on the table builder (`DataTableApp.cs`, `DataTableMainSample`):
 
@@ -255,20 +255,9 @@ mockService.GetEmployees().AsQueryable().ToDataTable(idSelector: e => e.Id)
     });
 ```
 
-### Documentation
+### Diagrams and Fenced Code
 
-UseQuery + DataTable anti-patterns are clarified for authors and AGENTS (prefer `IQueryable` / `ToDataTable()` where appropriate).
-
-```csharp
-// Prefer server-side tables from IQueryable:
-entities.AsQueryable().ToDataTable(idSelector: e => e.Id);
-```
-
-## Markdown and tables
-
-### Diagrams and fenced code
-
-The [Markdown](https://docs.ivy.app/widgets/primitives/markdown) widget renders Graphviz from ` ```dot ` or ` ```graphviz ` fences (`MarkdownApp.cs`, Diagrams tab). Fences without a language render reliably.
+The [**Markdown**](https://docs.ivy.app/widgets/primitives/markdown) widget renders Graphviz from ` ```dot ` or ` ```graphviz ` fences (`MarkdownApp.cs`, Diagrams tab). Fences without a language render reliably.
 
 ```dot
 digraph G {
@@ -278,9 +267,9 @@ digraph G {
 }
 ```
 
-## Image
+### Image
 
-[Image](https://docs.ivy.app/widgets/primitives/image) supports `Overlay` for lightbox viewing; arrow keys move between sibling overlays. Set `Overlay` on the image record (or via the API your version exposes).
+The [**Image**](https://docs.ivy.app/widgets/primitives/image) widget supports `Overlay` for lightbox viewing, and arrow keys move between sibling overlays.
 
 ```csharp
 new Image("https://example.com/photo.jpg")
@@ -291,9 +280,9 @@ new Image("https://example.com/photo.jpg")
 };
 ```
 
-## Sheet
+### Sheet
 
-[Sheet](https://docs.ivy.app/widgets/advanced/sheet) adds a resizable drag handle and more predictable width behavior with explicit sizes and Tailwind-related edge cases.
+The [**Sheet**](https://docs.ivy.app/widgets/advanced/sheet) widget adds a resizable drag handle and more predictable width behavior with explicit sizes and Tailwind-related edge cases.
 
 Opening a sheet from a button (`SheetApp.cs`):
 
@@ -306,7 +295,7 @@ new Button("Right (Default)").WithSheet(
     side: SheetSide.Right);
 ```
 
-## Dialog and AutoFocus
+### Dialog and AutoFocus
 
 Dialog and Sheet no longer swallow AutoFocus on child inputs (the client may cast to `HTMLElement` where needed). See DialogApp for AutoFocus.
 
@@ -316,13 +305,11 @@ searchQuery.ToSearchInput()
     .AutoFocus();
 ```
 
-## Tabs and loading
+### Close Others and Tab Order
 
-### Close others and tab order
+The [**TabsLayout**](https://docs.ivy.app/widgets/layouts/tabs-layout) widget adds `OnCloseOthers` and refreshes tab order without flicker.
 
-[TabsLayout](https://docs.ivy.app/widgets/layouts/tabs-layout) adds `OnCloseOthers` and refreshes tab order without flicker.
-
-### Tab badges
+### Tab Badges
 
 The Content tab variant supports secondary, smaller badges on tabs.
 
@@ -343,8 +330,6 @@ Tab badges in the same sample:
 new Tab("Customers", "Customers").Icon(Icons.User).Badge("10");
 ```
 
-## Layout and chrome
-
 ### Layout.Grid
 
 Layout.Grid defaults to top-left alignment; use `AlignContent` if you depended on centered grid content.
@@ -355,9 +340,9 @@ Layout.Grid().Columns(3)
     | widget2;
 ```
 
-### Header, footer, and scroll shadow
+### Header, Footer, and Scroll Shadow
 
-[HeaderLayout](https://docs.ivy.app/widgets/layouts/header-layout) and [FooterLayout](https://docs.ivy.app/widgets/layouts/footer-layout) add scroll-triggered drop shadows.
+The [**HeaderLayout**](https://docs.ivy.app/widgets/layouts/header-layout) and [**FooterLayout**](https://docs.ivy.app/widgets/layouts/footer-layout) widgets add scroll-triggered drop shadows.
 
 ```csharp
 new HeaderLayout(
@@ -366,7 +351,7 @@ new HeaderLayout(
     .Height(Size.Units(500));
 ```
 
-## StackedProgress
+### StackedProgress
 
 [StackedProgress](https://docs.ivy.app/widgets/common/progress) is a segmented bar with `OnSelect` / `Selected`. Labels show automatically when any segment has a label.
 
@@ -383,7 +368,7 @@ new StackedProgress(segments)
     .Selected(1);
 ```
 
-## Terminal
+### Terminal
 
 The Terminal widget exposes `Background` and `Foreground` for surface and text colors. Basic usage (`TerminalApp.cs`):
 
@@ -395,7 +380,7 @@ new Terminal()
     .ShowCopyButton(true);
 ```
 
-## Detail helper
+### Detail Helper
 
 `Multiline` defaults to `false`. Opt in per field with `ToDetails().Multiline(...)` (`DetailsApp.cs`):
 
@@ -404,26 +389,26 @@ record.ToDetails()
     .Multiline(x => x.Description, x => x.Notes);
 ```
 
-## Buttons and badges
+## Buttons and Badges
 
-### Badges on controls
+### Badges on Controls
 
-[Button](https://docs.ivy.app/widgets/common/button) badges use the outline chip style. [Tab](https://docs.ivy.app/widgets/layouts/tabs-layout) (Content) and [DropDownMenu](https://docs.ivy.app/widgets/common/drop-down-menu) items support badges.
+[**Button**](https://docs.ivy.app/widgets/common/button) badges use the outline chip style. [**Tab**](https://docs.ivy.app/widgets/layouts/tabs-layout) (Content) and [**DropDownMenu**](https://docs.ivy.app/widgets/common/drop-down-menu) items also support badges.
 
 ```csharp
 new Button("Inbox", onClick: _ => { }).Badge("3");
 new Tab("Customers", "Customers").Icon(Icons.User).Badge("10");
 ```
 
-### Badge widget
+### Badge Widget
 
-[Badge](https://docs.ivy.app/widgets/common/badge) renders nothing when text is empty.
+The [**Badge**](https://docs.ivy.app/widgets/common/badge) widget renders nothing when text is empty.
 
 ```csharp
 new Badge("");
 ```
 
-### Menu and theme
+### Menu and Theme
 
 Menu items accept more color options. ThemeCustomizer empty placeholders are clearer.
 
@@ -431,7 +416,7 @@ Menu items accept more color options. ThemeCustomizer empty placeholders are cle
 MenuItem.Default(Icons.Download).Label("Export").Color(Colors.Cyan);
 ```
 
-### Hover rename
+### Hover Rename
 
 `CardHoverVariant` is now `HoverEffect` on Card, Box, and Image.
 
@@ -439,13 +424,11 @@ MenuItem.Default(Icons.Download).Label("Export").Color(Colors.Cyan);
 new Button("Updates", eventHandler, variant: ButtonVariant.Outline).Badge("New");
 ```
 
-## Inputs and file uploads
-
 ### ContentInput
 
 [ContentInput](https://docs.ivy.app/widgets/inputs/content-input) adds attachments, optional `ShortcutKey`, density variants, and invalid states.
 
-### Upload helpers and samples
+### Upload Helpers and Samples
 
 Upload helpers include `FileAttachmentList`, `validateFileWithToast`, and `useUploadWithProgress` (XMLHttpRequest progress).
 
@@ -493,7 +476,7 @@ Folder input, full path mode (`FolderInputApp.cs`):
 folder.ToFolderInput(mode: FolderInputMode.FullPath);
 ```
 
-## Code blocks and languages
+### Code Blocks and Languages
 
 The Languages enum uses `Description` for display labels. CodeBlock and samples add PowerShell, Bash/Shell, and FileApp mappings; some samples use a three-column language grid.
 
@@ -507,9 +490,7 @@ public enum Languages
 }
 ```
 
-## Routing, shell, and apps
-
-### Chrome and tabs
+### Chrome and Tabs
 
 `?chrome=false` stays compatible with newer shell flags. Apps may set `allowDuplicateTabs`.
 
@@ -518,19 +499,11 @@ public enum Languages
 public class FileApp : ViewBase { }
 ```
 
-### Branding and theming
-
-ivy-green and related brand tokens land in CSS;
-
-## Server, auth, and HTTP
-
-### Analyzers and style
+### Analyzers and Style
 
 `IVYSERVICE001` requires `UseService` at the start of `Build()` ([AGENTS.md](https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/AGENTS.md)). IDE0005 and unused-`using` cleanup ran repo-wide.
 
-## Documentation and AI guidance
-
-## Breaking changes
+## Breaking Changes
 
 ### `CardHoverVariant` → `HoverEffect`
 
@@ -552,7 +525,7 @@ var index = bladeController.GetIndex(this);
 bladeController.Push(this, new OtherView(), "Next blade");
 ```
 
-## Bug fixes
+## Bug Fixes
 
 - DataTable: decimal `valueOf` fallback; footer aggregates; navigation/ternary expressions; link cells with `OnCellClick`; source order when sorting is off; default `OrderBy` for paging; virtual columns from one root; virtual row rendering and height in unconstrained layouts.
 - ToDetails(): no raw type names for navigation properties.
