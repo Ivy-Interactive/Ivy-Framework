@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { GridCellKind, GridMouseEventArgs } from "@glideapps/glide-data-grid";
 import { GridCell, Item } from "@glideapps/glide-data-grid";
+import { useDebounce } from "../../hooks/use-debounce";
 
 interface UseLinkCellHoverProps {
   getCellContent: (cell: Item) => GridCell;
@@ -12,15 +13,18 @@ export const useLinkCellHover = ({ getCellContent, visibleRows }: UseLinkCellHov
   const posRef = useRef(linkTooltipPos);
   posRef.current = linkTooltipPos;
 
+  const setPos = useCallback((pos: { x: number; y: number } | null) => setLinkTooltipPos(pos), []);
+  const debouncedSetPos = useDebounce(setPos, 50);
+
   const onItemHovered = useCallback(
     (args: GridMouseEventArgs) => {
       if (args.kind !== "cell") {
-        setLinkTooltipPos(null);
+        debouncedSetPos(null);
         return;
       }
       const [, row] = args.location;
       if (row >= visibleRows) {
-        setLinkTooltipPos(null);
+        debouncedSetPos(null);
         return;
       }
       const cell = getCellContent(args.location);
@@ -31,12 +35,12 @@ export const useLinkCellHover = ({ getCellContent, visibleRows }: UseLinkCellHov
       const isLinkCell = cellData?.kind === "link-cell" && !!cellData?.url;
 
       if (isLinkCell) {
-        setLinkTooltipPos({ x: args.bounds.x + args.bounds.width / 2, y: args.bounds.y });
+        debouncedSetPos({ x: args.bounds.x + args.bounds.width / 2, y: args.bounds.y });
       } else {
-        setLinkTooltipPos(null);
+        debouncedSetPos(null);
       }
     },
-    [getCellContent, visibleRows],
+    [getCellContent, visibleRows, debouncedSetPos],
   );
 
   const virtualRef = useMemo(
