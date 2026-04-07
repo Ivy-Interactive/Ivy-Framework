@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getActionId, ACTION_BUTTON_CLASSES } from "./utils";
 import { getColor } from "@/lib/styles";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ActionDropdownProps {
   action: MenuItem;
@@ -40,7 +41,6 @@ const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
         {...props}
         onMouseDown={handleMouseDown}
         aria-label={action.label || actionId}
-        title={action.tooltip}
         type="button"
       >
         {action.icon && <Icon name={action.icon} size={16} style={colorStyle} />}
@@ -61,32 +61,43 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
   const validChildren = action.children?.filter((child) => child.variant !== "Separator") || [];
 
   return (
-    <DropdownMenu key={actionId}>
-      <DropdownMenuTrigger asChild>
-        <TriggerButton action={action} actionId={actionId} />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
-        {validChildren.map((childAction) => {
-          const childId = getActionId(childAction);
-          const colorStyle = childAction.color ? getColor(childAction.color, "color") : {};
+    <TooltipProvider>
+      <Tooltip>
+        <DropdownMenu key={actionId}>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <TriggerButton action={action} actionId={actionId} />
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          {action.tooltip && (
+            <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+              {action.tooltip}
+            </TooltipContent>
+          )}
+          <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
+            {validChildren.map((childAction) => {
+              const childId = getActionId(childAction);
+              const colorStyle = childAction.color ? getColor(childAction.color, "color") : {};
 
-          return (
-            <DropdownMenuItem
-              key={childId}
-              style={colorStyle}
-              onClick={(e) => {
-                e.stopPropagation();
-                onActionClick(childAction);
-              }}
-            >
-              {childAction.icon && (
-                <Icon name={childAction.icon} size={16} className="mr-2" style={colorStyle} />
-              )}
-              {childAction.label || childId}
-            </DropdownMenuItem>
-          );
-        })}
-      </DropdownMenuContent>
-    </DropdownMenu>
+              return (
+                <DropdownMenuItem
+                  key={childId}
+                  style={colorStyle}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onActionClick(childAction);
+                  }}
+                >
+                  {childAction.icon && (
+                    <Icon name={childAction.icon} size={16} className="mr-2" style={colorStyle} />
+                  )}
+                  {childAction.label || childId}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
