@@ -1,7 +1,7 @@
 name: Publish Ivy.Tendril
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 on:
@@ -14,12 +14,11 @@ on:
         required: false
 
 jobs:
-  publish:
+  publish-nuget-npm:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: src
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,6 +30,12 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
       - name: Setup Java (for ANTLR4)
         uses: actions/setup-java@v4
         with:
@@ -39,9 +44,6 @@ jobs:
 
       - name: Restore
         run: dotnet restore tendril/Ivy.Tendril/Ivy.Tendril.csproj
-
-      - name: Build
-        run: dotnet build tendril/Ivy.Tendril/Ivy.Tendril.csproj --configuration Release --no-restore
 
       - name: Determine version
         id: version
@@ -53,13 +55,13 @@ jobs:
             echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Pack
+      - name: Pack NuGet
         run: |
           VERSION_ARG=""
           if [ -n "${{ steps.version.outputs.version }}" ]; then
             VERSION_ARG="/p:Version=${{ steps.version.outputs.version }}"
           fi
-          dotnet pack tendril/Ivy.Tendril/Ivy.Tendril.csproj --configuration Release --no-build --output ./nupkg $VERSION_ARG
+          dotnet pack tendril/Ivy.Tendril/Ivy.Tendril.csproj --configuration Release --output ./nupkg $VERSION_ARG
 
       - name: NuGet login (trusted publishing)
         uses: NuGet/login@v1
@@ -69,3 +71,84 @@ jobs:
 
       - name: Push to NuGet
         run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ steps.nuget-auth.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Publish NPM
+        if: steps.version.outputs.version != ''
+        run: |
+          cd tendril
+          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+          # Using --provenance for trusted publishing. 
+          # The user mentioned they will handle the token/auth later.
+          npm publish --provenance --access public --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-desktop:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rid: [win-x64, win-arm64, linux-x64, osx-x64, osx-arm64]
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Publish Desktop Binary
+        run: |
+          dotnet publish tendril/Ivy.Tendril.Desktop/Ivy.Tendril.Desktop.csproj \
+            --configuration Release \
+            --runtime ${{ matrix.rid }} \
+            --output ./publish/desktop/${{ matrix.rid }} \
+            -p:PublishSingleFile=true \
+            --self-contained true
+
+      - name: Zip Artifact
+        run: |
+          cd publish/desktop/${{ matrix.rid }}
+          if [[ "${{ matrix.rid }}" == win-* ]]; then
+            zip -r "$GITHUB_WORKSPACE/tendril-desktop-${{ matrix.rid }}.zip" .
+          else
+            chmod +x Ivy.Tendril.Desktop || true
+            zip -r "$GITHUB_WORKSPACE/tendril-desktop-${{ matrix.rid }}.zip" .
+          fi
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tendril-desktop-${{ matrix.rid }}
+          path: tendril-desktop-${{ matrix.rid }}.zip
+
+  release:
+    needs: [publish-nuget-npm, publish-desktop]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/tendril/v')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: tendril-desktop-*
+          merge-multiple: true
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          # Collect all zips from the root
+          gh release create "$TAG_NAME" \
+            --title "Tendril $TAG_NAME" \
+            --generate-notes \
+            ./tendril-desktop-*.zip
