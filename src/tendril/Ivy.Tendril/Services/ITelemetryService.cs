@@ -8,7 +8,7 @@ public interface ITelemetryService
     void TrackPlanCreated(PlanCreatedContext context);
     void TrackPrCreated(PrCreatedContext context);
     void TrackJobCompleted(string jobType, JobStatus status, int? durationSeconds);
-    void TrackPlanStateTransition(int planId, string fromState, string toState);
+    void TrackPlanStateTransition(string fromState, string toState);
     Task FlushAsync();
 }
 
@@ -18,11 +18,8 @@ public record AppStartContext(
     bool LlmConfigured);
 
 public record PlanCreatedContext(
-    string Project,
     string Level,
     int? DurationSeconds);
 
 public record PrCreatedContext(
-    string Project,
-    string RepoUrl,
     int? DurationSeconds);

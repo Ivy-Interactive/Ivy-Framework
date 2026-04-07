@@ -47,6 +47,11 @@ public class JobsApp : ViewBase
             }
         }, TimeSpan.FromSeconds(5));
 
+        var projectColors = config.Projects
+            .Select(p => new { p.Name, Color = config.GetProjectColor(p.Name) })
+            .Where(x => x.Color.HasValue)
+            .ToDictionary(x => x.Name, x => x.Color!.Value.ToString());
+
         var jobs = jobService.GetJobs();
         var rows = jobs.Select(j => new JobItemRow
         {
@@ -117,6 +122,10 @@ public class JobsApp : ViewBase
                     kvp => kvp.Key,
                     kvp => kvp.Value.ToString()
                 )
+            })
+            .Renderer(t => t.Project, new LabelsDisplayRenderer
+            {
+                BadgeColorMapping = projectColors
             })
             .Renderer(t => t.PlanId, new LinkDisplayRenderer())
             .Hidden(t => t.Id)

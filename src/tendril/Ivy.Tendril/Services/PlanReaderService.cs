@@ -231,7 +231,11 @@ public class PlanReaderService(IConfigService config, ILogger<PlanReaderService>
         {
             var currentPlan = GetPlanByFolder(Path.Combine(PlansDirectory, folderName));
             var oldState = currentPlan?.Status.ToString() ?? "Unknown";
-            _telemetryService?.TrackPlanStateTransition(planId.Value, oldState, newState.ToString());
+            _telemetryService?.TrackPlanStateTransition(oldState, newState.ToString());
+
+            // Flush telemetry events to ensure they reach PostHog
+            if (_telemetryService != null)
+                _ = Task.Run(async () => await _telemetryService.FlushAsync());
         }
 
         // Update database first for instant UI feedback.

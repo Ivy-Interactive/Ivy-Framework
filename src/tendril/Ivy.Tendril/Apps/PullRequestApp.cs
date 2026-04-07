@@ -42,20 +42,19 @@ public class PullRequestApp : ViewBase
             .RefreshToken(refreshToken)
             .Width(Size.Full())
             .Height(Size.Full())
-            .Header(t => t.PlanId, "Plan")
             .Header(t => t.Repository, "Repository")
             .Header(t => t.Cost, "Cost")
             .Header(t => t.Pr, "PR")
             .Header(t => t.Plan, "Plan")
-            .Width(t => t.PlanId, Size.Px(90))
-            .Width(t => t.Repository, Size.Fraction(1/3f))
-            .Width(t => t.Pr, Size.Fraction(1/3f))
-            .Width(t => t.Plan, Size.Fraction(1/3f))
+            .Width(t => t.Repository, Size.Fraction(1 / 3f))
+            .Width(t => t.Pr, Size.Fraction(1 / 3f))
+            .Width(t => t.Plan, Size.Fraction(1 / 3f))
             .Width(t => t.Cost, Size.Px(90))
-            .Renderer(t => t.PlanId, new LinkDisplayRenderer())
+            .Renderer(t => t.Plan, new LinkDisplayRenderer())
             .Renderer(t => t.Pr, new LinkDisplayRenderer())
             .SortDirection(t => t.PlanId, SortDirection.Descending)
             .Hidden(t => t.Id)
+            .Hidden(t => t.PlanId)
             .Hidden(t => t.PlanFolderPath)
             .Config(c =>
             {
@@ -69,10 +68,9 @@ public class PullRequestApp : ViewBase
             })
             .OnCellClick(e =>
             {
-                if (e.Value.ColumnName == "PlanId")
+                if (e.Value.ColumnName == "Plan")
                 {
-                    var planId = e.Value.CellValue?.ToString();
-                    var row = rows.FirstOrDefault(r => r.PlanId == planId);
+                    var row = rows.ElementAtOrDefault(e.Value.RowIndex);
                     if (row != null && !string.IsNullOrEmpty(row.PlanFolderPath) && Directory.Exists(row.PlanFolderPath))
                         showPlan.Set(row.PlanFolderPath);
                 }

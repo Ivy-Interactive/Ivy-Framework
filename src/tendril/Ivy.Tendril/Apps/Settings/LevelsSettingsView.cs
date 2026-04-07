@@ -16,7 +16,6 @@ public class LevelsSettingsView : ViewBase
         var badgeOptions = Enum.GetNames<BadgeVariant>().ToList();
 
         // Use levels in config.yaml order (not alphabetically sorted).
-        // The order is controlled by the user via up/down arrows in the UI.
         var levels = config.Settings.Levels;
 
         var rows = levels.Select((level, i) => new LevelRow(i, level.Name, level.Badge)).ToList();
@@ -44,22 +43,6 @@ public class LevelsSettingsView : ViewBase
                         client.Toast($"Level '{name}' deleted", "Deleted");
                         refreshToken.Refresh();
                     })
-                    | (idx > 0
-                        ? (object)new Button().Icon(Icons.ChevronUp).Ghost().Small().Tooltip("Move up").OnClick(() =>
-                        {
-                            (levels[idx], levels[idx - 1]) = (levels[idx - 1], levels[idx]);
-                            config.SaveSettings();
-                            refreshToken.Refresh();
-                        })
-                        : new Spacer().Width(Size.Units(0)))
-                    | (idx < levels.Count - 1
-                        ? (object)new Button().Icon(Icons.ChevronDown).Ghost().Small().Tooltip("Move down").OnClick(() =>
-                        {
-                            (levels[idx], levels[idx + 1]) = (levels[idx + 1], levels[idx]);
-                            config.SaveSettings();
-                            refreshToken.Refresh();
-                        })
-                        : new Spacer().Width(Size.Units(0)))
             ));
 
         var content = Layout.Vertical().Gap(4).Padding(4).Width(Size.Auto().Max(Size.Units(120)))

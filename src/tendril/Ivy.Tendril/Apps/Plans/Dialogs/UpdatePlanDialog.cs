@@ -26,7 +26,7 @@ public class UpdatePlanDialog(
             new DialogHeader($"Update Plan #{_selectedPlan.Id}"),
             new DialogBody(
                 Layout.Vertical()
-                    | Text.P("Provide instructions for updating this plan.")
+                    | Text.P("Provide instructions for revising this draft plan.")
                     | _updateText.ToTextareaInput("Enter update instructions...").Rows(6).AutoFocus()
             ),
             new DialogFooter(

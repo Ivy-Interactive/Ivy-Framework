@@ -23,8 +23,6 @@ Args contains the user's task description. If it references related plans with `
 
 **Extract Force Flag**: If args starts with `[FORCE] `, set an internal flag to skip duplicate detection (see Step 3), then strip `[FORCE] ` entirely from the description. The cleaned description should be used for all subsequent steps (title, plan.yaml, etc.). Never let `[FORCE]` appear in any plan field or title.
 
-**Extract Criticality Level**: Look for a criticality or priority level indicator in Args.
-
 ### 1.5. Load Project Context
 
 Read `config.yaml` (at the path from `TENDRIL_CONFIG` environment variable) to understand all available projects, their repos, and context.

@@ -63,11 +63,10 @@ public class TelemetryService : ITelemetryService, IAsyncDisposable
         {
             _client?.Capture(_distinctId, "plan_created", new Dictionary<string, object>
             {
-                ["project"] = context.Project,
                 ["level"] = context.Level,
                 ["duration_seconds"] = context.DurationSeconds ?? 0
             });
-            _logger?.LogDebug("Tracked plan_created event for project {Project}", context.Project);
+            _logger?.LogDebug("Tracked plan_created event");
         }
         catch (Exception ex)
         {
@@ -81,11 +80,9 @@ public class TelemetryService : ITelemetryService, IAsyncDisposable
         {
             _client?.Capture(_distinctId, "pr_created", new Dictionary<string, object>
             {
-                ["project"] = context.Project,
-                ["repo_url"] = context.RepoUrl,
                 ["duration_seconds"] = context.DurationSeconds ?? 0
             });
-            _logger?.LogDebug("Tracked pr_created event for project {Project}", context.Project);
+            _logger?.LogDebug("Tracked pr_created event");
         }
         catch (Exception ex)
         {
@@ -111,17 +108,16 @@ public class TelemetryService : ITelemetryService, IAsyncDisposable
         }
     }
 
-    public void TrackPlanStateTransition(int planId, string fromState, string toState)
+    public void TrackPlanStateTransition(string fromState, string toState)
     {
         try
         {
             _client?.Capture(_distinctId, "plan_state_transition", new Dictionary<string, object>
             {
-                ["plan_id"] = planId,
                 ["from_state"] = fromState,
                 ["to_state"] = toState
             });
-            _logger?.LogDebug("Tracked plan_state_transition event: {PlanId} {FromState} -> {ToState}", planId, fromState, toState);
+            _logger?.LogDebug("Tracked plan_state_transition event: {FromState} -> {ToState}", fromState, toState);
         }
         catch (Exception ex)
         {
