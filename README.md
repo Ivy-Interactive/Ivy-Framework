@@ -103,13 +103,13 @@ Make sure you have the following prerequisites installed:
     ivy init --hello
     ```
 
-3. **Run**:
+4. **Run**:
 
    ```bash
    ivy run --browse
    ```
 
-4. **Open** [http://localhost:5010](http://localhost:5010) in your browser.
+5. **Open** [http://localhost:5010](http://localhost:5010) in your browser.
 
 You can also run `ivy samples` to see all the components that Ivy offers and `ivy docs` for documentation.
 
