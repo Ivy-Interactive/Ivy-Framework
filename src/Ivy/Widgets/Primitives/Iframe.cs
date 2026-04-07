@@ -33,6 +33,18 @@ public record Iframe : WidgetBase<Iframe>
 
 public static class IframeExtensions
 {
+    public static Iframe OutboundMessageType(this Iframe widget, string? type)
+    {
+        widget.OutboundMessageType = type;
+        return widget;
+    }
+
+    public static Iframe OutboundMessageToken(this Iframe widget, string? token)
+    {
+        widget.OutboundMessageToken = token;
+        return widget;
+    }
+
     public static Iframe OnMessageReceived(
         this Iframe widget,
         Func<Event<Iframe, (string type, JsonNode payload)>, ValueTask> callback)
