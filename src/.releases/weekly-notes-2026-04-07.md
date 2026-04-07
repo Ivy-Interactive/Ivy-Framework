@@ -189,6 +189,50 @@ If a **segment** defines a **label**, **ShowLabels** turns on **automatically** 
 
 **Sheet** sizing was fixed when combining **explicit width** with the **resizable** handle so width constraints and drag-to-resize behave together.
 
+### Roslyn analyzer IVYSERVICE001
+
+A new **Roslyn** diagnostic **`IVYSERVICE001`** flags **`UseService`** calls that are not at the **top** of **`Build()`**, matching the hook rules in [**AGENTS.md**](https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/AGENTS.md) and keeping views easy to reason about.
+
+### Navigation menu colors
+
+**Menu** items (sidebar and related chrome) support **additional color** options for clearer emphasis and grouping.
+
+### DataTable: search, badges, and columns
+
+**DataTable** gains **search match navigation** with **highlights** and a **progress** indicator while scanning large result sets. **Badge** cells in columns can use **per-value colors** so status-like fields stay scannable.
+
+### Select list placement
+
+**Select** fixes **dropdown placement** when the control shows both a **placeholder** and **items**, so the list panel lines up predictably with the trigger.
+
+### Text inputs and global shortcuts
+
+**Modifier shortcuts** (for example **Ctrl**/**Cmd** combinations) continue to work when focus is inside **multi-line text areas**, without the browser swallowing the chord. This complements the earlier **global shortcut** work that uses **`event.code`** on **macOS**.
+
+### ContentInput and FolderInput
+
+[**ContentInput**](https://docs.ivy.app/widgets/inputs/content-input) ships with **file attachment** support, an optional **`ShortcutKey`**, a dedicated **sample app**, **documentation**, **Playwright** patterns, and a shared **`FileAttachmentList`** component for attachment chips. [**FolderInput**](https://docs.ivy.app/widgets/inputs/folder-input) supports **`FolderInputMode`** (including **full path**), the **entire row** opens the directory picker, and **Enter** / **Space** activate the control for keyboard users.
+
+### Languages and FileApp
+
+**CodeBlock** and related enums add **PowerShell**, **Bash/Shell**, and **FileApp**’s language map recognizes them for file-type detection where applicable.
+
+### ContentInput and uploads
+
+**ContentInput** sub-widgets **scale with density**, and the sample adds **Scale** and **Invalid** tabs plus **tests** and **Playwright** notes for those states. **`ShortcutKey`** is documented in the props table and demonstrated in the sample. Shared **`validateFileWithToast`** removes duplicated validation code. **`FileAttachmentList`** card sizing respects **density**. Client uploads use a shared **`useUploadWithProgress`** hook and a single **upload URL** helper; **`XMLHttpRequest`** reports **upload progress**; **FileDialog** uses the same progress path.
+
+### CodeBlock sample
+
+The **CodeBlock** sample adds **Bash** and **PowerShell** snippets and uses a **three-column** language grid for quicker scanning.
+
+### Tabs
+
+**TabsLayout** exposes **`OnCloseOthers`** with a **Close other tabs** action; wiring uses record **with-expressions** correctly after an initial fix pass.
+
+### Dictation hook
+
+**`useDictation`** drops an unused callback, adds **tests**, and the **TextInput** widget removes the redundant **`dictationLanguage`** prop (language comes from elsewhere).
+
 ## Buttons, badges, and navigation
 
 - [**Button**](https://docs.ivy.app/widgets/common/button) **badges** use the **outline** variant for clearer contrast; **unit tests** were added.
