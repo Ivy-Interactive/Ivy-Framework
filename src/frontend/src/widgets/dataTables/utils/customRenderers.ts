@@ -70,7 +70,7 @@ export const labelsBadgesCellRenderer: CustomRenderer<LabelsBadgesCell> = {
   measure: (ctx, cell, theme) => measureLabelsBadgesWidth(ctx, cell.data.items, theme),
 
   draw: (args, cell) => {
-    const { ctx, rect, theme, highlighted } = args;
+    const { ctx, rect, theme } = args;
     const { items, align = "left" } = cell.data;
     if (items.length === 0) return true;
 
