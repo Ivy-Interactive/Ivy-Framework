@@ -162,7 +162,8 @@ projects:
   meta:
     slackEmoji: ':seedling:'
   repos:
-  - *o5
+  - path: %REPOS_HOME%/Ivy-Framework
+    prRule: default
   verifications:
   - *o0
   - *o1
