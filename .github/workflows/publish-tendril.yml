@@ -38,7 +38,7 @@ jobs:
           java-version: 17
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore tendril/Ivy.Tendril/Ivy.Tendril.csproj
 
       - name: Build
         run: dotnet build tendril/Ivy.Tendril/Ivy.Tendril.csproj --configuration Release --no-restore
