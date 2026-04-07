@@ -192,36 +192,6 @@ projects:
     action: pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1
   repoPaths:
   - %REPOS_HOME%/Ivy-Framework
-- name: DesignSystem
-  color: Amber
-  meta:
-    slackEmoji: ':art:'
-  repos:
-  - path: "%REPOS_HOME%/Ivy-Design-System"
-    prRule: yolo
-  verifications:
-  - *o0
-  - *o3
-  context: >
-    Ivy Design System — design tokens, fonts, and shared styles.
-
-    - tokens/ — design token definitions
-
-    - figma-tokens/ — Figma token exports
-
-    - dist/ — compiled output
-
-    - demo/ — demo/preview app
-  reviewActions: []
-  hooks:
-  - name: SlackNotify
-    when: after
-    promptwares:
-    - MakePr
-    condition: ''
-    action: pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1
-  repoPaths:
-  - %REPOS_HOME%/Ivy-Design-System
 - name: Mcp
   color: Sky
   meta:
