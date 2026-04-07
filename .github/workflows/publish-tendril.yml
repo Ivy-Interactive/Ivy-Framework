@@ -84,14 +84,14 @@ jobs:
       - name: Push to NuGet
         run: dotnet nuget push ./nupkg/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
 
-      - name: Publish NPM
-        if: steps.version.outputs.version != ''
-        run: |
-          cd tendril
-          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
-          npm publish --provenance --access public --ignore-scripts
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+#      - name: Publish NPM
+#        if: steps.version.outputs.version != ''
+#        run: |
+#          cd tendril
+#          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+#          npm publish --provenance --access public --ignore-scripts
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish summary
         if: always()
@@ -103,7 +103,7 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ **NuGet**: [Ivy.Tendril](https://www.nuget.org/packages/Ivy.Tendril)" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **NPM**: [@ivy/tendril](https://www.npmjs.com/package/@ivy/tendril)" >> $GITHUB_STEP_SUMMARY
+#          echo "✅ **NPM**: [@ivy/tendril](https://www.npmjs.com/package/@ivy/tendril)" >> $GITHUB_STEP_SUMMARY
 
   publish-desktop:
     runs-on: ${{ matrix.os }}
