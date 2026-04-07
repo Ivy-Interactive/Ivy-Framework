@@ -19,6 +19,7 @@ jobs:
     defaults:
       run:
         working-directory: src
+        shell: bash
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -93,23 +94,30 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-desktop:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - rid: win-x64
             target: x86_64-pc-windows-msvc
+            os: windows-latest
           - rid: win-arm64
             target: aarch64-pc-windows-msvc
+            os: windows-latest
           - rid: linux-x64
             target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
           - rid: osx-x64
             target: x86_64-apple-darwin
+            os: macos-latest
           - rid: osx-arm64
             target: aarch64-apple-darwin
+            os: macos-latest
     defaults:
       run:
         working-directory: src
+        shell: bash
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -141,7 +149,6 @@ jobs:
         run: dotnet restore
 
       - name: Publish Desktop Binary
-        # We set CARGO_BUILD_TARGET so that cargo inside MSBuild targets the right platform
         run: |
           export CARGO_BUILD_TARGET=${{ matrix.target }}
           dotnet publish tendril/Ivy.Tendril.Desktop/Ivy.Tendril.Desktop.csproj \
@@ -154,7 +161,8 @@ jobs:
       - name: Zip Artifact
         run: |
           cd publish/desktop/${{ matrix.rid }}
-          if [[ "${{ matrix.rid }}" == win-* ]]; then
+          if [[ "${{ matrix.os }}" == windows-* ]]; then
+            # Using standard zip which is available in bash on windows runners
             zip -r "$GITHUB_WORKSPACE/tendril-desktop-${{ matrix.rid }}.zip" .
           else
             chmod +x Ivy.Tendril.Desktop || true
