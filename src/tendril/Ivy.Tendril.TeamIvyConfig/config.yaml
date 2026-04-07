@@ -10,7 +10,7 @@ projects:
     slackEmoji: ':hammer_and_wrench:'
   repos:
   - &o5
-    path: D:\Repos\_Ivy\Ivy-Framework
+    path: %REPOS_HOME%/Ivy-Framework
     prRule: yolo
   verifications:
   - &o0
@@ -33,43 +33,43 @@ projects:
   context: >
     Ivy Framework is the core UI framework. Key folders:
 
-    - src\Ivy\Widgets\ — backend widget classes
+    - src/Ivy/Widgets/ — backend widget classes
 
-    - src\frontend\src\widgets\ — React widget components
+    - src/frontend/src/widgets/ — React widget components
 
-    - src\Ivy.Docs.Shared\Docs\ — documentation
+    - src/Ivy.Docs.Shared/Docs/ — documentation
 
-    - src\Ivy.Samples.Shared\ — sample apps
+    - src/Ivy.Samples.Shared/ — sample apps
 
     Instructions: See AGENTS.md in repo root
   reviewActions:
   - name: Sample
-    condition: Test-Path "artifacts\sample\*.csproj"
-    action: dotnet run --project artifacts\sample --browse --find-available-port
+    condition: Test-Path "artifacts/sample/*.csproj"
+    action: dotnet run --project artifacts/sample --browse --find-available-port
   - name: Docs
-    condition: Test-Path "worktrees\Ivy-Framework\src\Ivy.Docs"
-    action: dotnet run --project worktrees\Ivy-Framework\src\Ivy.Docs --browse --find-available-port
+    condition: Test-Path "worktrees/Ivy-Framework/src/Ivy.Docs"
+    action: dotnet run --project worktrees/Ivy-Framework/src/Ivy.Docs --browse --find-available-port
   - name: Samples
-    condition: Test-Path "worktrees\Ivy-Framework\src\Ivy.Samples"
-    action: dotnet run --project worktrees\Ivy-Framework\src\Ivy.Samples --browse --find-available-port
+    condition: Test-Path "worktrees/Ivy-Framework/src/Ivy.Samples"
+    action: dotnet run --project worktrees/Ivy-Framework/src/Ivy.Samples --browse --find-available-port
   hooks:
   - name: SlackNotify
     when: after
     promptwares:
     - MakePr
     condition: ''
-    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+    action: pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1
   repoPaths:
-  - D:\Repos\_Ivy\Ivy-Framework
+  - %REPOS_HOME%/Ivy-Framework
 - name: Agent
   color: Purple
   meta:
     slackEmoji: ':robot_face:'
   repos:
-  - path: D:\Repos\_Ivy\Ivy-Agent
+  - path: %REPOS_HOME%/Ivy-Agent
     prRule: yolo
   - &o4
-    path: D:\Repos\_Ivy\Ivy
+    path: %REPOS_HOME%/Ivy
     prRule: yolo
   verifications:
   - *o0
@@ -79,13 +79,13 @@ projects:
   context: >
     Ivy Agent is the AI agent server. Key folders:
 
-    - Ivy.Agent.Server\ — agent server
+    - Ivy.Agent.Server/ — agent server
 
-    - Ivy.Agent\Agents\Personas\Prompts\ — persona prompts
+    - Ivy.Agent/Agents/Personas/Prompts/ — persona prompts
 
-    - Ivy.Internals\Workflows\ — workflow definitions
+    - Ivy.Internals/Workflows/ — workflow definitions
 
-    - Ivy.Agent\Tools\ — tool implementations
+    - Ivy.Agent/Tools/ — tool implementations
   reviewActions: []
   hooks:
   - name: SlackNotify
@@ -93,18 +93,18 @@ projects:
     promptwares:
     - MakePr
     condition: ''
-    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+    action: pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1
   repoPaths:
-  - D:\Repos\_Ivy\Ivy-Agent
-  - D:\Repos\_Ivy\Ivy
+  - %REPOS_HOME%/Ivy-Agent
+  - %REPOS_HOME%/Ivy
 - name: TestManager
   color: Rose
   meta:
     slackEmoji: ':test_tube:'
   repos:
-  - path: D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Studio
+  - path: %REPOS_HOME%/Ivy-Agent/Ivy.Agent.Test.Studio
     prRule: yolo
-  - path: D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Manager
+  - path: %REPOS_HOME%/Ivy-Agent/Ivy.Agent.Test.Manager
     prRule: yolo
   verifications:
   - *o0
@@ -114,9 +114,9 @@ projects:
   context: >
     Test Manager for Ivy Agent. Key folders:
 
-    - Ivy.Agent.Test.Manager\ — CLI for managing test cases, runs, and scoring
+    - Ivy.Agent.Test.Manager/ — CLI for managing test cases, runs, and scoring
 
-    - Ivy.Agent.Test.Studio\ — TUI app for test management UI
+    - Ivy.Agent.Test.Studio/ — TUI app for test management UI
 
     See AGENTS.md in Ivy.Agent.Test.Manager folder for CLI reference.
   reviewActions: []
@@ -126,10 +126,10 @@ projects:
     promptwares:
     - MakePr
     condition: ''
-    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+    action: pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1
   repoPaths:
-  - D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Studio
-  - D:\Repos\_Ivy\Ivy-Agent\Ivy.Agent.Test.Manager
+  - %REPOS_HOME%/Ivy-Agent/Ivy.Agent.Test.Studio
+  - %REPOS_HOME%/Ivy-Agent/Ivy.Agent.Test.Manager
 - name: Console
   color: Teal
   meta:
@@ -142,11 +142,11 @@ projects:
   - *o2
   - *o3
   context: >
-    - Ivy.Console\ — desktop CLI and TUI client
+    - Ivy.Console/ — desktop CLI and TUI client
 
-    - Ivy.Internals\ — shared internals
+    - Ivy.Internals/ — shared internals
 
-    - Ivy.Studio\ — vibe-coding agent
+    - Ivy.Studio/ — vibe-coding agent
   reviewActions: []
   hooks:
   - name: SlackNotify
@@ -154,9 +154,9 @@ projects:
     promptwares:
     - MakePr
     condition: ''
-    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+    action: pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1
   repoPaths:
-  - D:\Repos\_Ivy\Ivy
+  - %REPOS_HOME%/Ivy
 - name: Tendril
   color: Emerald
   meta:
@@ -171,11 +171,11 @@ projects:
   context: >
     Plan management TUI. Key folders:
 
-    - Services\ — ConfigService, PlanReaderService, JobService
+    - Services/ — ConfigService, PlanReaderService, JobService
 
-    - Apps\ — PlansApp, JobsApp UI
+    - Apps/ — PlansApp, JobsApp UI
 
-    - .promptwares\ — MakePlan, UpdatePlan, SplitPlan, ExpandPlan
+    - .promptwares/ — MakePlan, UpdatePlan, SplitPlan, ExpandPlan
 
     This project uses the Ivy Framework - there's CLI helper methods you can use: 
 
@@ -189,15 +189,15 @@ projects:
     promptwares:
     - MakePr
     condition: ''
-    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+    action: pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1
   repoPaths:
-  - D:\Repos\_Ivy\Ivy-Framework
+  - %REPOS_HOME%/Ivy-Framework
 - name: Mcp
   color: Sky
   meta:
     slackEmoji: ':electric_plug:'
   repos:
-  - path: D:\Repos\_Ivy\Ivy-Mcp
+  - path: %REPOS_HOME%/Ivy-Mcp
     prRule: yolo
   verifications:
   - *o0
@@ -213,9 +213,9 @@ projects:
     promptwares:
     - MakePr
     condition: ''
-    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+    action: pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1
   repoPaths:
-  - D:\Repos\_Ivy\Ivy-Mcp
+  - %REPOS_HOME%/Ivy-Mcp
 verifications:
 - name: DotnetBuild
   prompt: Run `dotnet build --warnaserror` in the project repo and verify it succeeds with zero errors and zero warnings.
@@ -238,15 +238,15 @@ verifications:
 - name: DotnetFormat
   prompt: Run `dotnet format` in the project repo. If it modifies any files, stage and commit them.
 - name: FrontendLint
-  prompt: Run `cd src\frontend && npm run lint && npm run format:check` and verify no errors.
+  prompt: Run `cd src/frontend && npm run lint && npm run format:check` and verify no errors.
 - name: IvyFrameworkVerification
-  prompt: 'Run the IvyFrameworkVerification promptware to visually verify UI changes. Execute: `pwsh -NoProfile -File "$TENDRIL_HOME\Promptwares\IvyFrameworkVerification.ps1" -PlanPath "<PlanFolder>"`. Creates a temp project with demo apps, runs Playwright tests, and copies artifacts to <PlanFolder>\artifacts\. Write the verification report to <PlanFolder>\verification\IvyFrameworkVerification.md.'
+  prompt: 'Run the IvyFrameworkVerification promptware to visually verify UI changes. Execute: `pwsh -NoProfile -File "$TENDRIL_HOME/Promptwares/IvyFrameworkVerification.ps1" -PlanPath "<PlanFolder>"`. Creates a temp project with demo apps, runs Playwright tests, and copies artifacts to <PlanFolder>/artifacts/. Write the verification report to <PlanFolder>/verification/IvyFrameworkVerification.md.'
 - name: CheckResult
   prompt: >
     Verify the implementation matches what was requested in the plan.
 
 
-    1. Read the plan revision from `<PlanFolder>\revisions\` (latest numbered .md file)
+    1. Read the plan revision from `<PlanFolder>/revisions/` (latest numbered .md file)
 
     2. Read all commits made by this execution from `plan.yaml` `commits` list
 
@@ -254,11 +254,11 @@ verifications:
 
     4. Compare the plan's **Problem** and **Solution** sections against the actual changes:
        - Are all described changes present?
-       - Are there unexpected\unrelated changes?
+       - Are there unexpected/unrelated changes?
        - Do the changes solve the stated problem?
     5. If the plan has a **Tests** section, verify those tests were actually written
 
-    6. Write the verification report to `<PlanFolder>\verification\CheckResult.md`
+    6. Write the verification report to `<PlanFolder>/verification/CheckResult.md`
 
 
     Report format:
@@ -270,7 +270,7 @@ verifications:
 
     - **Date:** <CurrentTime>
 
-    - **Result:** Pass \ Fail
+    - **Result:** Pass / Fail
 
     - **Attempts:** 1
 
@@ -282,7 +282,7 @@ verifications:
 
     |-------------|--------|-------|
 
-    | <from plan> | Done \ Missing \ Partial | <details> |
+    | <from plan> | Done / Missing / Partial | <details> |
 
 
     ## Unexpected Changes
@@ -313,17 +313,17 @@ verifications:
   prompt: >
     Verify all 6 required elements exist for any new widget created by this plan:
 
-    1. Backend widget class — src\Ivy\Widgets\<WidgetName>.cs with [Prop]\[Event] attributes, [JsonIgnore] on delegates, Has* booleans
+    1. Backend widget class — src/Ivy/Widgets/<WidgetName>.cs with [Prop]/[Event] attributes, [JsonIgnore] on delegates, Has* booleans
 
-    2. Frontend React component — src\frontend\src\widgets\<widgetName>\<WidgetName>Widget.tsx
+    2. Frontend React component — src/frontend/src/widgets/<widgetName>/<WidgetName>Widget.tsx
 
-    3. Index export — src\frontend\src\widgets\<widgetName>\index.ts
+    3. Index export — src/frontend/src/widgets/<widgetName>/index.ts
 
-    4. Widget map registration — import + entry in src\frontend\src\widgets\widgetMap.ts
+    4. Widget map registration — import + entry in src/frontend/src/widgets/widgetMap.ts
 
-    5. Sample app — src\Ivy.Samples.Shared\Apps\Widgets\<WidgetName>App.cs
+    5. Sample app — src/Ivy.Samples.Shared/Apps/Widgets/<WidgetName>App.cs
 
-    6. Documentation page — src\Ivy.Docs.Shared\Docs\02_Widgets\<category>\<WidgetName>.md
+    6. Documentation page — src/Ivy.Docs.Shared/Docs/02_Widgets/<category>/<WidgetName>.md
 
     Check each file exists and follows conventions. Report which elements are present vs missing.
 planTemplate: >
