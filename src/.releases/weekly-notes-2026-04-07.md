@@ -7,6 +7,8 @@ This week’s notes cover **Ivy Framework** changes **excluding** the Tendril ap
 
 The sections below walk through changes **day by day**; later days are appended as the week progresses.
 
+## Day 1
+
 ### [01255] Button badge outline variant
 
 Badges on [**Button**](https://docs.ivy.app/widgets/common/button) now render with the **outline** badge style so they read clearly on both **solid** and **outline** button variants. Unit tests lock in the behavior.
@@ -82,6 +84,10 @@ The **Languages** enum used for syntax highlighting and samples now has **`Descr
 ### [01263] Grid default alignment
 
 **Layout.Grid** defaults to **top-left** alignment instead of **center**, which matches typical forms and dashboards. If you relied on centered grid content, set **AlignContent** explicitly.
+
+### [01415] DataTable footer aggregates
+
+[**DataTable**](https://docs.ivy.app/widgets/advanced/data-table) **footer** cells now **format currency and numeric aggregates** consistently with column formatting (for example sums and averages in money and number columns).
 
 ## Buttons, badges, and navigation
 
