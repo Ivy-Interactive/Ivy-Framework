@@ -77,6 +77,8 @@ jobs:
 
       - name: NuGet login
         uses: NuGet/login@v1
+        with:
+          user: rorychatt-ivy
 
       - name: Push to NuGet
         run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
