@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
     <Version>1.0.1</Version>
-    <!-- Use local Ivy source by default for development, but use NuGet packages in CI -->
+    <!-- Use local Ivy source by default for development, but use NuGet packages in CI or for release builds -->
     <IvySource Condition="'$(IvySource)' == ''">true</IvySource>
-    <IvySource Condition="'$(GITHUB_ACTIONS)' == 'true'">false</IvySource>
+    <IvySource Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Publishing)' == 'true'">false</IvySource>
   </PropertyGroup>
 </Project>

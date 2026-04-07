@@ -42,13 +42,17 @@
     <PackageReference Include="PostHog" Version="1.0.8" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.53.1" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="../../Ivy/Ivy.csproj" Condition="'$(IvySource)' == 'true'" />
-    <PackageReference Include="Ivy" Version="1.2.36-pre-20260407134014" Condition="'$(IvySource)' != 'true'" />
+  <ItemGroup Condition="'$(IvySource)' == 'true'">
+    <ProjectReference Include="../../Ivy/Ivy.csproj" />
     <ProjectReference Include="../../Ivy.Hooks.Pty/Ivy.Hooks.Pty.csproj" />
     <ProjectReference Include="../../widgets/Ivy.Widgets.Xterm/Ivy.Widgets.Xterm.csproj" />
-
     <ProjectReference Include="../../widgets/Ivy.Widgets.DiffView/Ivy.Widgets.DiffView.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IvySource)' != 'true'">
+    <PackageReference Include="Ivy" Version="1.2.36-pre-20260407134014" />
+    <PackageReference Include="Ivy.Hooks.Pty" Version="1.2.36-pre-20260407134014" />
+    <PackageReference Include="Ivy.Widgets.Xterm" Version="1.2.36-pre-20260407134014" />
+    <PackageReference Include="Ivy.Widgets.DiffView" Version="1.2.36-pre-20260407134014" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Ivy.Analyser/Ivy.Analyser.csproj">

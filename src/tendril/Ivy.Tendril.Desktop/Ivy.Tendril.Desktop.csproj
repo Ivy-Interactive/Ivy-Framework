@@ -8,10 +8,13 @@
     <NoWarn>CS8618;CS8603;CS8602;CS8604;CS9113</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(IvySource)' == 'true'">
     <ProjectReference Include="../Ivy.Tendril/Ivy.Tendril.csproj" />
-    <ProjectReference Include="../../Ivy.Desktop/Ivy.Desktop.csproj" Condition="'$(IvySource)' == 'true'" />
-    <PackageReference Include="Ivy.Desktop" Version="1.2.36-pre-20260407134014" Condition="'$(IvySource)' != 'true'" />
+    <ProjectReference Include="../../Ivy.Desktop/Ivy.Desktop.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IvySource)' != 'true'">
+    <ProjectReference Include="../Ivy.Tendril/Ivy.Tendril.csproj" />
+    <PackageReference Include="Ivy.Desktop" Version="1.2.36-pre-20260407134014" />
   </ItemGroup>
 
   <ItemGroup>
