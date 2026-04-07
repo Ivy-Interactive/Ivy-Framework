@@ -1,4 +1,5 @@
 using Ivy.Tendril.Apps.Plans;
+using ReviewContentView = Ivy.Tendril.Apps.Review.ContentView;
 
 namespace Ivy.Tendril.Test;
 
@@ -113,5 +114,26 @@ public class ContentViewTests
             if (Directory.Exists(tempDir))
                 Directory.Delete(tempDir, true);
         }
+    }
+
+    [Fact]
+    public void ValidateArtifactPath_WithValidPath_ReturnsTrue()
+    {
+        Assert.True(ReviewContentView.ValidateArtifactPath(
+            "D:/plans/001/artifacts/screenshots/img.png", "D:/plans/001"));
+    }
+
+    [Fact]
+    public void ValidateArtifactPath_WithTraversalPath_ReturnsFalse()
+    {
+        Assert.False(ReviewContentView.ValidateArtifactPath(
+            "D:/plans/001/artifacts/../plan.yaml", "D:/plans/001"));
+    }
+
+    [Fact]
+    public void ValidateArtifactPath_WithExternalPath_ReturnsFalse()
+    {
+        Assert.False(ReviewContentView.ValidateArtifactPath(
+            "C:/Windows/System32/config", "D:/plans/001"));
     }
 }

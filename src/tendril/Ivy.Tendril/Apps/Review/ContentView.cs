@@ -74,8 +74,12 @@ public class ContentView(
             async (filePath, ct) =>
             {
                 if (string.IsNullOrEmpty(filePath)) return "";
+                var artifactsDir = Path.GetFullPath(Path.Combine(_selectedPlan!.FolderPath, "artifacts"));
+                var resolvedPath = Path.GetFullPath(filePath);
+                if (!resolvedPath.StartsWith(artifactsDir, StringComparison.OrdinalIgnoreCase))
+                    return "Access denied: file is outside the artifacts folder.";
                 return await Task.Run(() =>
-                    File.Exists(filePath) ? FileHelper.ReadAllText(filePath) : "File not found.", ct);
+                    File.Exists(resolvedPath) ? FileHelper.ReadAllText(resolvedPath) : "File not found.", ct);
             },
             initialValue: ""
         );
@@ -110,6 +114,7 @@ public class ContentView(
                     var commitRows = _selectedPlan.Commits.Select(commit =>
                     {
                         var title = repoPaths
+                            .AsParallel()
                             .Select(repo => _gitService.GetCommitTitle(repo, commit))
                             .FirstOrDefault(t => t != null) ?? "";
                         var shortHash = commit.Length > 7 ? commit[..7] : commit;
@@ -402,15 +407,31 @@ public class ContentView(
             string? commitDiff = null;
             List<(string Status, string FilePath)>? commitFiles = null;
             string? commitTitle = null;
-            foreach (var repo in repoPaths2)
+            var cts = new CancellationTokenSource();
+            try
             {
-                commitTitle = _gitService.GetCommitTitle(repo, commitHash);
-                if (commitTitle != null)
+                Parallel.ForEach(repoPaths2, new ParallelOptions { CancellationToken = cts.Token }, repo =>
                 {
-                    commitDiff = _gitService.GetCommitDiff(repo, commitHash);
-                    commitFiles = _gitService.GetCommitFiles(repo, commitHash);
-                    break;
-                }
+                    if (cts.IsCancellationRequested) return;
+                    var title = _gitService.GetCommitTitle(repo, commitHash);
+                    if (title != null)
+                    {
+                        lock (cts)
+                        {
+                            if (commitTitle == null)
+                            {
+                                commitTitle = title;
+                                commitDiff = _gitService.GetCommitDiff(repo, commitHash);
+                                commitFiles = _gitService.GetCommitFiles(repo, commitHash);
+                            }
+                        }
+                        cts.Cancel();
+                    }
+                });
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected when a repo is found and cts.Cancel() is called
             }
 
             var shortHash = commitHash.Length > 7 ? commitHash[..7] : commitHash;
@@ -543,6 +564,13 @@ public class ContentView(
                 content
             ).Size(Size.Full())
         ).Scroll(Scroll.None).Size(Size.Full()).Key(_selectedPlan.Id);
+    }
+
+    internal static bool ValidateArtifactPath(string filePath, string planFolderPath)
+    {
+        var artifactsDir = Path.GetFullPath(Path.Combine(planFolderPath, "artifacts"));
+        var resolvedPath = Path.GetFullPath(filePath);
+        return resolvedPath.StartsWith(artifactsDir, StringComparison.OrdinalIgnoreCase);
     }
 
     private static Dictionary<string, List<string>> GetArtifacts(string folderPath)

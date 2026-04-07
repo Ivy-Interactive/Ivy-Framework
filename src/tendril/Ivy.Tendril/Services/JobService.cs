@@ -518,6 +518,11 @@ public class JobService : IJobService
         return id;
     }
 
+    /// <summary>
+    ///     Removes a job from the dictionary. Used by tests to simulate concurrent removal.
+    /// </summary>
+    internal bool RemoveJob(string id) => _jobs.TryRemove(id, out _);
+
     private void LaunchJob(JobItem job)
     {
         var id = job.Id;
@@ -764,8 +769,13 @@ public class JobService : IJobService
             var (ok, _) = CheckDependencies(planFolder);
             if (ok)
             {
-                // Remove the blocked job entry
-                _jobs.TryRemove(blockedJob.Id, out _);
+                // Remove the blocked job entry — only one thread succeeds
+                if (!_jobs.TryRemove(blockedJob.Id, out _))
+                    continue; // Another thread already handled this job
+
+                // Skip if there's already an active job for this plan
+                if (HasActiveJobForPlan(planFolder))
+                    continue;
 
                 // Re-start the job — skip dependency check since we just verified
                 StartJobSkipDepCheck(blockedJob.Type, blockedJob.Args);
@@ -777,6 +787,15 @@ public class JobService : IJobService
                 RaiseNotification(notification);
             }
         }
+    }
+
+    private bool HasActiveJobForPlan(string planFolder)
+    {
+        return _jobs.Values.Any(j =>
+            j.Type == "ExecutePlan" &&
+            j.Status is JobStatus.Running or JobStatus.Queued or JobStatus.Pending &&
+            j.Args.Length > 0 &&
+            j.Args[0].Equals(planFolder, StringComparison.OrdinalIgnoreCase));
     }
 
     private void ProcessJobQueue()
@@ -1071,13 +1090,8 @@ public class JobService : IJobService
                 if (!planYaml.State.Equals("Blocked", StringComparison.OrdinalIgnoreCase)) continue;
                 if (!planYaml.DependsOn.Contains(completedFolderName, StringComparer.OrdinalIgnoreCase)) continue;
 
-                // Skip if there's already a blocked or running job for this plan
-                var existingJob = _jobs.Values.Any(j =>
-                    j.Type == "ExecutePlan" &&
-                    j.Status is JobStatus.Blocked or JobStatus.Running or JobStatus.Queued &&
-                    j.Args.Length > 0 &&
-                    j.Args[0].Equals(dir, StringComparison.OrdinalIgnoreCase));
-                if (existingJob) continue;
+                // Skip if there's already an active job for this plan
+                if (HasActiveJobForPlan(dir)) continue;
 
                 var (allMet, _) = CheckDependencies(dir);
                 if (allMet)

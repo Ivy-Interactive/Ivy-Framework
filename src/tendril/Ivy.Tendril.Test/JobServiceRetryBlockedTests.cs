@@ -140,6 +140,97 @@ public class JobServiceRetryBlockedTests
         Directory.Delete(plansDir, true);
     }
 
+    [Fact]
+    public void RetryBlockedJobs_WhenJobAlreadyRemoved_DoesNotCreateDuplicate()
+    {
+        SynchronizationContext.SetSynchronizationContext(null);
+
+        // Create plans directory with a completed dependency
+        var plansDir = CreatePlansDirectory(("01100-DepPlan", "Completed"));
+
+        // Create two dependent plans that depend on the same dep
+        var dependentPlan1 = CreatePlanFolder("Draft", ["01100-DepPlan"]);
+        var dependentPlan2 = CreatePlanFolder("Draft", ["01100-DepPlan"]);
+
+        var planReader = new FakePlanReaderService(plansDir);
+        var service = new JobService(
+            TimeSpan.FromMinutes(30),
+            TimeSpan.FromMinutes(10),
+            planReaderService: planReader);
+
+        // Create a blocked job for plan1
+        var blockedId = service.CreateTestJob("ExecutePlan", dependentPlan1);
+        var blockedJob = service.GetJob(blockedId)!;
+        blockedJob.Status = JobStatus.Blocked;
+
+        // Manually remove the blocked job before CompleteJob triggers RetryBlockedJobs
+        // This simulates another thread having already handled it
+        service.GetJobs(); // ensure enumeration snapshot
+        var removed = service.RemoveJob(blockedId);
+        Assert.True(removed);
+
+        // Create a completing job to trigger RetryBlockedJobs
+        var completingId = service.CreateTestJob("MakePr", Path.GetTempPath());
+        service.CompleteJob(completingId, 0);
+
+        // Since the blocked job was already removed, no new ExecutePlan job should be created for it
+        var jobs = service.GetJobs();
+        var executePlanJobs = jobs.Where(j => j.Type == "ExecutePlan" && j.Args.Length > 0 && j.Args[0] == dependentPlan1).ToList();
+        Assert.Empty(executePlanJobs);
+
+        // Cleanup
+        Directory.Delete(dependentPlan1, true);
+        Directory.Delete(dependentPlan2, true);
+        Directory.Delete(plansDir, true);
+    }
+
+    [Fact]
+    public void RetryBlockedJobs_WhenActiveJobExistsForSamePlan_SkipsRetry()
+    {
+        SynchronizationContext.SetSynchronizationContext(null);
+
+        // Create plans directory with a completed dependency
+        var plansDir = CreatePlansDirectory(("01100-DepPlan", "Completed"));
+
+        // Create the dependent plan
+        var dependentPlan = CreatePlanFolder("Draft", ["01100-DepPlan"]);
+
+        var planReader = new FakePlanReaderService(plansDir);
+        var service = new JobService(
+            TimeSpan.FromMinutes(30),
+            TimeSpan.FromMinutes(10),
+            planReaderService: planReader);
+
+        // Create a Running ExecutePlan job for the same plan folder (simulating an already active job)
+        var activeId = service.CreateTestJob("ExecutePlan", dependentPlan);
+        Assert.Equal(JobStatus.Running, service.GetJob(activeId)!.Status);
+
+        // Create a blocked job for the same plan folder
+        var blockedId = service.CreateTestJob("ExecutePlan", dependentPlan);
+        var blockedJob = service.GetJob(blockedId)!;
+        blockedJob.Status = JobStatus.Blocked;
+
+        // Create a completing job to trigger RetryBlockedJobs
+        var completingId = service.CreateTestJob("MakePr", Path.GetTempPath());
+        service.CompleteJob(completingId, 0);
+
+        // The blocked job should have been removed (TryRemove succeeds)
+        Assert.Null(service.GetJob(blockedId));
+
+        // But no NEW ExecutePlan job should be created because HasActiveJobForPlan returns true
+        var executePlanJobs = service.GetJobs()
+            .Where(j => j.Type == "ExecutePlan" && j.Args.Length > 0 && j.Args[0] == dependentPlan)
+            .ToList();
+
+        // Only the original active job should exist
+        Assert.Single(executePlanJobs);
+        Assert.Equal(activeId, executePlanJobs[0].Id);
+
+        // Cleanup
+        Directory.Delete(dependentPlan, true);
+        Directory.Delete(plansDir, true);
+    }
+
     /// <summary>
     ///     Minimal fake that provides PlansDirectory for dependency checking.
     /// </summary>

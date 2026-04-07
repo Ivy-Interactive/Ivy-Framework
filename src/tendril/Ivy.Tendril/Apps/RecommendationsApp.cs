@@ -64,8 +64,7 @@ public class RecommendationsApp : ViewBase
 
         return new SidebarLayout(
             new ContentView(selectedState.Value, filtered, selectedState, planService, jobService, Refresh),
-            sidebar,
-            sidebar.BuildHeader()
+            sidebar
         );
     }
 }

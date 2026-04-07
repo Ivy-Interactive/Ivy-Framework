@@ -243,6 +243,32 @@ public class JobServiceDependencyAutoRetryTests : IDisposable
         Assert.NotEqual(JobStatus.Blocked, planAJob.Status);
     }
 
+    [Fact]
+    public void RetryBlockedDependents_WhenActiveJobExistsForSamePlan_SkipsRetry()
+    {
+        var planB = CreatePlanFolder("03000-PlanB", "Completed");
+        var planA = CreatePlanFolder("03001-PlanA", "Blocked", ["03000-PlanB"]);
+
+        var service = CreateService();
+
+        // Create a Running ExecutePlan job for planA (simulating an already active job)
+        var activeId = service.CreateTestJob("ExecutePlan", planA);
+        Assert.Equal(JobStatus.Running, service.GetJob(activeId)!.Status);
+
+        // Trigger RetryBlockedDependents by completing a job for PlanB
+        var id = service.StartJob("CreateIssue", planB, "-Repo", "owner/repo", "-Assignee", "", "-Labels", "");
+        service.CompleteJob(id, 0);
+
+        // Should NOT create a duplicate ExecutePlan job for planA
+        var executePlanJobs = service.GetJobs()
+            .Where(j => j.Type == "ExecutePlan" && j.Args.Length > 0 && j.Args[0] == planA)
+            .ToList();
+
+        // Only the original active job should exist
+        Assert.Single(executePlanJobs);
+        Assert.Equal(activeId, executePlanJobs[0].Id);
+    }
+
     private class StubPlanReaderService : IPlanReaderService
     {
         public StubPlanReaderService(string plansDirectory)

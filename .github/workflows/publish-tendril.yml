@@ -160,6 +160,24 @@ jobs:
       - name: Restore
         run: dotnet restore
 
+      - name: Install vpk tool
+        run: dotnet tool install -g vpk
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/tags/tendril/v* ]]; then
+            TAG_VERSION="${GITHUB_REF#refs/tags/tendril/v}"
+            echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          else
+            # Try to get version from Directory.Build.props if not tagged
+            VERSION=$(grep -oP "(?<=<Version>)[^<]+" tendril/Directory.Build.props || echo "1.0.0")
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish Desktop Binary
         run: |
           export CARGO_BUILD_TARGET=${{ matrix.target }}
@@ -171,22 +189,26 @@ jobs:
             -p:ReadyToRun=false \
             --self-contained true
 
-      - name: Zip Artifact
+      - name: Pack Installer (Velopack)
         run: |
-          cd publish/desktop/${{ matrix.rid }}
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          EXE_NAME="Ivy.Tendril.Desktop"
           if [[ "${{ matrix.os }}" == windows-* ]]; then
-            # Using 7z which is available on all GitHub runners
-            7z a "$GITHUB_WORKSPACE/tendril-desktop-${{ matrix.rid }}.zip" .
-          else
-            chmod +x Ivy.Tendril.Desktop || true
-            zip -r "$GITHUB_WORKSPACE/tendril-desktop-${{ matrix.rid }}.zip" .
+            EXE_NAME="Ivy.Tendril.Desktop.exe"
           fi
+          
+          vpk pack \
+            --packId IvyTendril \
+            --packVersion ${{ steps.version.outputs.version }} \
+            --packDir ./publish/desktop/${{ matrix.rid }} \
+            --mainExe $EXE_NAME \
+            --outputDir ./releases
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tendril-desktop-${{ matrix.rid }}
-          path: tendril-desktop-${{ matrix.rid }}.zip
+          name: tendril-installer-${{ matrix.rid }}
+          path: src/releases/*
 
   release:
     needs: [publish-nuget-npm, publish-desktop]
@@ -199,7 +221,7 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: tendril-desktop-*
+          pattern: tendril-installer-*
           merge-multiple: true
 
       - name: Create Release
@@ -210,4 +232,4 @@ jobs:
           gh release create "$TAG_NAME" \
             --title "Tendril $TAG_NAME" \
             --generate-notes \
-            ./tendril-desktop-*.zip
+            ./*

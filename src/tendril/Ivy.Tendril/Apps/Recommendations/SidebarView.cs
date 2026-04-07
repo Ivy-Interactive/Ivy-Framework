@@ -19,7 +19,7 @@ public class SidebarView(
     private readonly IState<string?> _textFilter = textFilter;
     private readonly int _totalCount = totalCount;
 
-    public object BuildHeader()
+    private object BuildHeader()
     {
         var projectOptions = _recommendations
             .GroupBy(r => r.Project)
@@ -46,7 +46,7 @@ public class SidebarView(
                ).Open(false).Ghost();
     }
 
-    public object BuildContent()
+    private object BuildContent()
     {
         var filtered = _recommendations
             .Where(r => _projectFilter.Value == null || r.Project == _projectFilter.Value)
@@ -83,6 +83,6 @@ public class SidebarView(
 
     public override object Build()
     {
-        return BuildContent();
+        return new HeaderLayout(BuildHeader(), BuildContent());
     }
 }
