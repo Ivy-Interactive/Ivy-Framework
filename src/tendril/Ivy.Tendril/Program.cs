@@ -13,6 +13,13 @@ public class Program
 {
     public static async Task<int> Main(string[] args)
     {
+        // Restore original database command handling
+        var dbExitCode = DatabaseCommands.Handle(args);
+        if (dbExitCode >= 0)
+        {
+            return dbExitCode;
+        }
+
         if (!Console.IsOutputRedirected)
         {
             Console.OutputEncoding = Encoding.UTF8;
@@ -31,10 +38,6 @@ public class Program
                 .WithDescription("Start the Tendril web server on localhost:5010");
             config.AddCommand<VersionCommand>("version")
                 .WithDescription("Show the current version of Tendril");
-            
-            // Set default command to 'run' if no command is specified but there's a --port or similar
-            // or just always default to run.
-            // config.SetDefaultCommand<RunCommand>();
         });
 
         return await app.RunAsync(args);
