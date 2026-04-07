@@ -129,6 +129,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     isLinkHovered,
     virtualRef,
     onItemHovered: onLinkCellHovered,
+    linkTooltipPos,
   } = useLinkCellHover({
     getCellContent,
     visibleRows,
@@ -244,7 +245,10 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const tooltipLabel = isMac ? "\u2318+click to open link" : "Ctrl+click to open link";
 
   const linkTooltipNode = (
-    <TooltipProvider delayDuration={0}>
+    <TooltipProvider
+      key={linkTooltipPos ? `${linkTooltipPos.x},${linkTooltipPos.y}` : "hidden"}
+      delayDuration={0}
+    >
       <Tooltip open={isLinkHovered}>
         <TooltipTrigger asChild>
           <div
