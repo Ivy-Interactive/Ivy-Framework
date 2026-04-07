@@ -79,6 +79,8 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
           isFocused && "outline-none ring-1 ring-ring",
           props.invalid && "border-destructive",
           props.disabled && "cursor-not-allowed opacity-50",
+          props.ghost &&
+            "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
         )}
       >
         {/* Prefix with background and separator */}
