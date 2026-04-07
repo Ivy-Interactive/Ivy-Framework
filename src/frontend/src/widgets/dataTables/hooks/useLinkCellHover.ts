@@ -24,9 +24,11 @@ export const useLinkCellHover = ({ getCellContent, visibleRows }: UseLinkCellHov
         return;
       }
       const cell = getCellContent(args.location);
-      const cellData = cell.data as { kind?: string; url?: string };
-      const isLinkCell =
-        cell.kind === GridCellKind.Custom && cellData?.kind === "link-cell" && !!cellData?.url;
+      const cellData =
+        cell.kind === GridCellKind.Custom
+          ? (cell.data as { kind?: string; url?: string })
+          : undefined;
+      const isLinkCell = cellData?.kind === "link-cell" && !!cellData?.url;
 
       if (isLinkCell) {
         setLinkTooltipPos({ x: args.bounds.x + args.bounds.width / 2, y: args.bounds.y });
