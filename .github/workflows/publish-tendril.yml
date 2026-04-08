@@ -178,6 +178,10 @@ jobs:
             echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Install ImageMagick
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y imagemagick librsvg2-bin
+
       - name: Prepare Icons
         run: |
           mkdir -p tendril/Ivy.Tendril/Assets
@@ -201,7 +205,7 @@ jobs:
             $IFX "$SVG_PATH" -resize 1024x1024 tendril/Ivy.Tendril/Assets/Tendril.icns
             $IFX "$SVG_PATH" tendril/Ivy.Tendril/Assets/Tendril.png
             
-            # Set the ICON_PATH based on platform
+            # Set the ICON_PATH based on platform for vpk
             if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
               echo "ICON_PATH=tendril/Ivy.Tendril/Assets/Tendril.ico" >> $GITHUB_ENV
             elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
