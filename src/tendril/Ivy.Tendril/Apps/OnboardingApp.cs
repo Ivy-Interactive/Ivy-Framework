@@ -435,8 +435,6 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
                              editRequired.Set(false);
                          }))
                       | (Layout.Horizontal().Gap(2)
-                         | new Button("Skip for now").Outline().Large()
-                             .OnClick(() => stepperIndex.Set(stepperIndex.Value + 1))
                          | new Button("Next").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
                              .OnClick(() =>
                              {
