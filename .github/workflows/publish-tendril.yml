@@ -178,6 +178,25 @@ jobs:
             echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Prepare Icons
+        run: |
+          mkdir -p tendril/Ivy.Tendril/Assets
+          SVG_PATH="tendril/Ivy.Tendril/Assets/Tendril.svg"
+          if [ -f "$SVG_PATH" ]; then
+            if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+              magick "$SVG_PATH" tendril/Ivy.Tendril/Assets/Tendril.ico
+              echo "ICON_PATH=tendril/Ivy.Tendril/Assets/Tendril.ico" >> $GITHUB_ENV
+            elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+              magick "$SVG_PATH" -resize 1024x1024 tendril/Ivy.Tendril/Assets/Tendril.icns
+              echo "ICON_PATH=tendril/Ivy.Tendril/Assets/Tendril.icns" >> $GITHUB_ENV
+            else
+              magick "$SVG_PATH" tendril/Ivy.Tendril/Assets/Tendril.png
+              echo "ICON_PATH=tendril/Ivy.Tendril/Assets/Tendril.png" >> $GITHUB_ENV
+            fi
+          else
+            echo "Warning: Tendril.svg not found at $SVG_PATH"
+          fi
+
       - name: Publish Desktop Binary
         run: |
           export CARGO_BUILD_TARGET=${{ matrix.target }}
@@ -202,13 +221,22 @@ jobs:
             --packVersion ${{ steps.version.outputs.version }} \
             --packDir ./publish/desktop/${{ matrix.rid }} \
             --mainExe $EXE_NAME \
-            --outputDir ./releases
+            --outputDir ./releases \
+            --icon "$ICON_PATH" \
+            --noPortable \
+            --delta None \
+            $( [[ "${{ matrix.rid }}" == osx-* ]] && echo "--pkg com.ivy.tendril" )
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: tendril-installer-${{ matrix.rid }}
-          path: src/releases/*
+          path: |
+            src/releases/*.exe
+            src/releases/*.pkg
+            src/releases/*.AppImage
+            src/releases/*.nupkg
+            src/releases/RELEASES
 
   release:
     needs: [publish-nuget-npm, publish-desktop]
