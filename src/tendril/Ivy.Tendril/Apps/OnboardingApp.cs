@@ -220,18 +220,22 @@ public class CodingAgentStepView(IState<int> stepperIndex, IReadOnlyDictionary<s
 {
     private static readonly (string Label, string Name)[] AgentOptions = [("Claude Code", "claude"), ("Codex", "codex"), ("Gemini", "gemini")];
 
+    private string GetDefaultLabel(IConfigService config)
+    {
+        var options = AgentOptions.Where(a => checkResults.ContainsKey(a.Name) && checkResults[a.Name]).ToArray();
+        if (options.Length == 0) options = AgentOptions;
+        return options.Any(a => a.Name == config.Settings.CodingAgent)
+            ? options.First(a => a.Name == config.Settings.CodingAgent).Label
+            : options.First().Label;
+    }
+
     public override object Build()
     {
         var config = UseService<IConfigService>();
+        var selectedAgent = UseState(GetDefaultLabel(config));
 
         var installedOptions = AgentOptions.Where(a => checkResults.ContainsKey(a.Name) && checkResults[a.Name]).ToArray();
         if (installedOptions.Length == 0) installedOptions = AgentOptions;
-
-        var defaultLabel = installedOptions.Any(a => a.Name == config.Settings.CodingAgent)
-            ? installedOptions.First(a => a.Name == config.Settings.CodingAgent).Label
-            : installedOptions.First().Label;
-
-        var selectedAgent = UseState(defaultLabel);
 
         return Layout.Vertical()
                 | Text.H2("Choose Your Coding Agent")
