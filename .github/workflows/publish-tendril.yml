@@ -195,7 +195,7 @@ jobs:
       - name: Publish Desktop Binary
         run: |
           export CARGO_BUILD_TARGET=${{ matrix.target }}
-          dotnet publish tendril/Ivy.Tendril.Desktop/Ivy.Tendril.Desktop.csproj \
+          dotnet publish tendril/Ivy.Tendril/Ivy.Tendril.csproj \
             --configuration Release \
             --runtime ${{ matrix.rid }} \
             --output ./publish/desktop/${{ matrix.rid }} \
@@ -206,9 +206,9 @@ jobs:
       - name: Pack Installer (Velopack)
         run: |
           export PATH="$PATH:$HOME/.dotnet/tools"
-          EXE_NAME="Ivy.Tendril.Desktop"
+          EXE_NAME="Ivy.Tendril"
           if [[ "${{ matrix.os }}" == windows-* ]]; then
-            EXE_NAME="Ivy.Tendril.Desktop.exe"
+            EXE_NAME="Ivy.Tendril.exe"
           fi
           
           vpk pack \
@@ -218,7 +218,7 @@ jobs:
             --mainExe $EXE_NAME \
             --outputDir ./releases \
             --icon "$ICON_PATH" \
-            --noPortable \
+            $( [[ "${{ matrix.os }}" != "ubuntu-latest" ]] && echo "--noPortable" ) \
             --delta None \
             $( [[ "${{ matrix.rid }}" == osx-* ]] && echo "--bundleId com.ivy.tendril" )
 
