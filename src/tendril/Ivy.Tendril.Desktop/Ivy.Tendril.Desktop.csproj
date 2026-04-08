@@ -25,7 +25,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(IvySource)' != 'true'">
     <ProjectReference Include="../Ivy.Tendril/Ivy.Tendril.csproj" />
-    <PackageReference Include="Ivy.Desktop" Version="1.2.37-pre-20260408132826" />
+    <PackageReference Include="Ivy.Desktop" Version="1.2.37-pre-20260408144108" />
   </ItemGroup>
 
   <ItemGroup>

@@ -47,10 +47,10 @@
     <ProjectReference Include="../../widgets/Ivy.Widgets.DiffView/Ivy.Widgets.DiffView.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(IvySource)' != 'true'">
-    <PackageReference Include="Ivy" Version="1.2.37-pre-20260408132826" />
-    <PackageReference Include="Ivy.Hooks.Pty" Version="1.2.37-pre-20260408132826" />
-    <PackageReference Include="Ivy.Widgets.Xterm" Version="1.2.37-pre-20260408132826" />
-    <PackageReference Include="Ivy.Widgets.DiffView" Version="1.2.37-pre-20260408132826" />
+    <PackageReference Include="Ivy" Version="1.2.37-pre-20260408144108" />
+    <PackageReference Include="Ivy.Hooks.Pty" Version="1.2.37-pre-20260408144108" />
+    <PackageReference Include="Ivy.Widgets.Xterm" Version="1.2.37-pre-20260408144108" />
+    <PackageReference Include="Ivy.Widgets.DiffView" Version="1.2.37-pre-20260408144108" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Ivy.Analyser/Ivy.Analyser.csproj">
