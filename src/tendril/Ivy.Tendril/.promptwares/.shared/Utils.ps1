@@ -432,7 +432,10 @@ function InvokePromptwareAgent {
     # Create raw output log
     $rawLogFile = [System.IO.Path]::ChangeExtension($LogFile, ".raw.jsonl")
 
-    Write-Host "Starting Agent ($codingAgent)..."
+    $agentInfo = $codingAgent
+    if ($agent.Model) { $agentInfo += ", model=$($agent.Model)" }
+    if ($agent.Effort) { $agentInfo += ", effort=$($agent.Effort)" }
+    Write-Host "Starting Agent ($agentInfo)..."
     if ($Action) { SendStatusMessage "Running $Action ($codingAgent)" }
     Push-Location $WorkDir
     $heartbeat = Start-Heartbeat
@@ -571,6 +574,7 @@ function GetAgentCommand {
     $allowedTools = @()
     $codingAgent = "claude"
     $model = ""
+    $effort = ""
 
     if (Test-Path $configPath) {
         try {
@@ -589,6 +593,11 @@ function GetAgentCommand {
                     $model = $pwConfig.model
                 }
 
+                # Apply effort override
+                if ($pwConfig.effort) {
+                    $effort = $pwConfig.effort
+                }
+
                 # Apply allowedTools with environment variable expansion
                 if ($pwConfig.allowedTools) {
                     foreach ($tool in $pwConfig.allowedTools) {
@@ -598,6 +607,11 @@ function GetAgentCommand {
                         $allowedTools += $resolvedTool
                     }
                 }
+            }
+
+            # Fall back to defaultEffort if no per-promptware effort set
+            if (-not $effort -and $config.defaultEffort) {
+                $effort = $config.defaultEffort
             }
         }
         catch {
@@ -617,6 +631,11 @@ function GetAgentCommand {
     if ($model) {
         $raw = $raw -replace '--model\s+\S+', ''
         $raw += " --model $model"
+    }
+
+    # Apply effort override if set
+    if ($effort -and $codingAgent -eq "claude") {
+        $raw += " --effort $effort"
     }
 
     # Build args with quote-aware parsing
@@ -647,6 +666,7 @@ function GetAgentCommand {
         Args         = $cmdArgs
         CodingAgent  = $codingAgent
         Model        = $model
+        Effort       = $effort
         AllowedTools = $allowedTools
     }
 }
