@@ -222,6 +222,7 @@ public class CodingAgentStepView(IState<int> stepperIndex, IReadOnlyDictionary<s
 
     public override object Build()
     {
+        var selectedAgent = UseState("");
         var config = UseService<IConfigService>();
 
         var installedOptions = AgentOptions.Where(a => checkResults.ContainsKey(a.Name) && checkResults[a.Name]).ToArray();
@@ -231,18 +232,18 @@ public class CodingAgentStepView(IState<int> stepperIndex, IReadOnlyDictionary<s
             ? installedOptions.First(a => a.Name == config.Settings.CodingAgent).Label
             : installedOptions.First().Label;
 
-        var selectedAgent = UseState(defaultLabel);
+        var effectiveAgent = string.IsNullOrEmpty(selectedAgent.Value) ? defaultLabel : selectedAgent.Value;
 
         return Layout.Vertical()
                 | Text.H2("Choose Your Coding Agent")
-                | selectedAgent.ToSelectInput(installedOptions.Select(a => a.Label).ToArray())
+                | selectedAgent.ToSelectInput(installedOptions.Select(a => a.Label).ToArray(), defaultLabel)
                    .Variant(SelectInputVariant.Toggle)
                    .WithField()
                    .Label("Coding Agent")
                 | new Button("Continue").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
                    .OnClick(() =>
                    {
-                       config.Settings.CodingAgent = installedOptions.First(a => a.Label == selectedAgent.Value).Name;
+                       config.Settings.CodingAgent = installedOptions.First(a => a.Label == effectiveAgent).Name;
                        stepperIndex.Set(stepperIndex.Value + 1);
                    });
     }
