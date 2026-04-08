@@ -166,7 +166,9 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger ref={triggerRef} asChild>
-        <div>{slots.Trigger}</div>
+        <button type="button" className="hover:bg-accent rounded-md transition-colors w-full">
+          {slots.Trigger}
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         onClick={(e) => e.stopPropagation()}
