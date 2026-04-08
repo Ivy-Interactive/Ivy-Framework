@@ -35,10 +35,9 @@ public class AvatarApp : SampleBase
 
                | Text.H2("Sizes")
                | Layout.Horizontal()
-                   | new Avatar("S", "https://api.images.cat/150/150?1").Width(Size.Units(6)).Height(Size.Units(6))
-                   | new Avatar("M", "https://api.images.cat/150/150?2").Width(Size.Units(10)).Height(Size.Units(10))
-                   | new Avatar("L", "https://api.images.cat/150/150?3").Width(Size.Units(16)).Height(Size.Units(16))
-                   | new Avatar("XL", "https://api.images.cat/150/150?4").Width(Size.Units(24)).Height(Size.Units(24))
+                   | new Avatar("Small", "https://api.images.cat/150/150?1").Small()
+                   | new Avatar("Medium", "https://api.images.cat/150/150?2").Medium()
+                   | new Avatar("Large", "https://api.images.cat/150/150?3").Large()
 
                | Text.H2("Colors")
                | Text.Muted("When the image fails to load (or is not provided), the fallback uses the specified color.")

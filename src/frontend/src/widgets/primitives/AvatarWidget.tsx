@@ -1,21 +1,27 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getColor } from "@/lib/styles";
+import { getColor, getHeight, getWidth } from "@/lib/styles";
 import React from "react";
 
 interface AvatarWidgetProps {
   image: string;
   fallback: string;
   color?: string;
+  width?: string;
+  height?: string;
 }
 
-// Utility function to extract initials from a full name
 const getInitials = (name: string): string => {
   const words = name.split(" ");
-  const initials = words.map((word) => word.charAt(0).toUpperCase()).join("");
-  return initials;
+  return words.map((word) => word.charAt(0).toUpperCase()).join("");
 };
 
-export const AvatarWidget: React.FC<AvatarWidgetProps> = ({ image, fallback, color }) => {
+export const AvatarWidget: React.FC<AvatarWidgetProps> = ({
+  image,
+  fallback,
+  color,
+  width,
+  height,
+}) => {
   const displayFallback = fallback?.length === 2 ? fallback : getInitials(fallback || "");
 
   const colorStyles: React.CSSProperties = color
@@ -25,8 +31,13 @@ export const AvatarWidget: React.FC<AvatarWidgetProps> = ({ image, fallback, col
       }
     : {};
 
+  const sizeStyle: React.CSSProperties = {
+    ...getWidth(width),
+    ...getHeight(height),
+  };
+
   return (
-    <Avatar>
+    <Avatar style={sizeStyle}>
       <AvatarImage src={image} title={fallback} />
       <AvatarFallback title={fallback} style={colorStyles}>
         {displayFallback}
