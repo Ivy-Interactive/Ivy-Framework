@@ -10,7 +10,8 @@ public class BadgeColorsTestApp : SampleBase
         ("Destructive", Colors.Destructive),
         ("Primary", Colors.Primary),
         ("Secondary", Colors.Secondary),
-        ("Muted", Colors.Muted)
+        ("Muted", Colors.Muted),
+        ("IvyGreen", Colors.IvyGreen)
     ];
 
     private static readonly (string Label, Colors Color)[] EnumColors = [
@@ -48,6 +49,9 @@ public class BadgeColorsTestApp : SampleBase
                | Text.H2("Color via String Value (Hex, RGB, HSL)")
                | Layout.Wrap(
                    StringColors.Select(x => new Badge(x.Label).Color(x.Value))
-               );
+               )
+               | Layout.Wrap(
+                new Badge("IvyGreen").Color("ivy-green")
+                );
     }
 }
