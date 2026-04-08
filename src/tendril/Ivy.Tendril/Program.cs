@@ -1,5 +1,4 @@
 using Ivy.Desktop;
-using Ivy.Tendril;
 using Ivy.Tendril.Database;
 using Velopack;
 
