@@ -60,7 +60,7 @@ public class JobsApp : ViewBase
             Id = j.Id,
             Status = j.Status,
             PlanId = ExtractPlanId(j.PlanFile),
-            Plan = j.PlanFile.Length > 50 ? j.PlanFile[..50] + "..." : j.PlanFile,
+            Plan = GetPromptDisplay(j, planService),
             Type = j.Type,
             Project = j.Project,
             Timer = FormatTimer(j),
@@ -339,6 +339,32 @@ public class JobsApp : ViewBase
         if (span.TotalHours >= 1)
             return $"{(int)span.TotalHours}h {span.Minutes:D2}m";
         return $"{span.Minutes}m {span.Seconds:D2}s";
+    }
+
+    private static string GetPromptDisplay(JobItem j, IPlanReaderService planService)
+    {
+        // MakePlan jobs already have the description in PlanFile
+        if (j.Type == "MakePlan")
+        {
+            var desc = j.PlanFile;
+            return desc.Length > 50 ? desc[..50] + "..." : desc;
+        }
+
+        // For other jobs, try to read the plan title
+        if (!string.IsNullOrEmpty(j.PlanFile))
+        {
+            var fullPath = Path.Combine(planService.PlansDirectory, j.PlanFile);
+            var plan = planService.GetPlanByFolder(fullPath);
+            if (plan != null && !string.IsNullOrEmpty(plan.Title))
+            {
+                var title = plan.Title;
+                return title.Length > 50 ? title[..50] + "..." : title;
+            }
+        }
+
+        // Fallback to folder name
+        var pf = j.PlanFile;
+        return pf.Length > 50 ? pf[..50] + "..." : pf;
     }
 
     private static Colors GetStatusColor(JobStatus status)
