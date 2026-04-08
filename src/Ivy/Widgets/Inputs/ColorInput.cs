@@ -121,16 +121,24 @@ public static class ColorInputExtensions
     private static readonly Regex HexColorPattern = new(
         @"^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
         RegexOptions.Compiled);
+    private static readonly Regex FunctionalColorPattern = new(
+        @"^(rgb|rgba|hsl|hsla|hwb|lab|lch|oklab|oklch|color)\s*\(.+\)$",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static string? ValidateColorFormat(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        if (value.StartsWith("#"))
-            return HexColorPattern.IsMatch(value) ? null : "Invalid color format";
+        var normalized = value.Trim();
 
-        if (Enum.TryParse<Colors>(value, ignoreCase: true, out _))
+        if (normalized.StartsWith("#"))
+            return HexColorPattern.IsMatch(normalized) ? null : "Invalid color format";
+
+        if (FunctionalColorPattern.IsMatch(normalized))
+            return null;
+
+        if (Enum.TryParse<Colors>(normalized, ignoreCase: true, out _))
             return null;
 
         return "Invalid color format";

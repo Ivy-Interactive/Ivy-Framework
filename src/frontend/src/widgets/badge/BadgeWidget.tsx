@@ -9,6 +9,16 @@ import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
+const BADGE_VARIANT_MAP = {
+  Primary: "primary",
+  Destructive: "destructive",
+  Outline: "outline",
+  Secondary: "secondary",
+  Success: "success",
+  Warning: "warning",
+  Info: "info",
+} as const;
+
 interface BadgeWidgetProps {
   title: string;
   icon?: string;
@@ -64,46 +74,30 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
 
   // Map backend variant names to frontend badge variants
   const getBadgeVariant = (variant: string) => {
-    switch (variant) {
-      case "Primary":
-        return "primary";
-      case "Destructive":
-        return "destructive";
-      case "Outline":
-        return "outline";
-      case "Secondary":
-        return "secondary";
-      case "Success":
-        return "success";
-      case "Warning":
-        return "warning";
-      case "Info":
-        return "info";
-      default:
-        return camelCase(variant) as
-          | "primary"
-          | "destructive"
-          | "outline"
-          | "secondary"
-          | "success"
-          | "warning"
-          | "info";
+    if (variant in BADGE_VARIANT_MAP) {
+      return BADGE_VARIANT_MAP[variant as keyof typeof BADGE_VARIANT_MAP];
     }
+    return camelCase(variant) as
+      | "primary"
+      | "destructive"
+      | "outline"
+      | "secondary"
+      | "success"
+      | "warning"
+      | "info";
   };
 
   const effectiveColor = customColor || color;
-  const colorStyles: React.CSSProperties = effectiveColor
-    ? {
-        ...getColor(effectiveColor, "backgroundColor", "background"),
-        ...getColor(effectiveColor, "color", "foreground"),
-      }
-    : {};
+  const colorStyles: React.CSSProperties = {
+    ...getColor(effectiveColor, "backgroundColor", "background"),
+    ...getColor(effectiveColor, "color", "foreground"),
+  };
 
   return (
     <Badge
       variant={getBadgeVariant(variant)}
       density={density.toLowerCase() as "small" | "medium" | "large"}
-      style={effectiveColor ? colorStyles : undefined}
+      style={colorStyles}
       className={cn(
         "whitespace-nowrap gap-1",
         hasIcon &&

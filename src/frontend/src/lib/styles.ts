@@ -645,9 +645,35 @@ export const getColor = (
 ) => {
   if (!color) return {};
 
+  const trimmedColor = color.trim();
+  const isDirectCssColor =
+    trimmedColor.startsWith("#") ||
+    trimmedColor.startsWith("rgb(") ||
+    trimmedColor.startsWith("rgba(") ||
+    trimmedColor.startsWith("hsl(") ||
+    trimmedColor.startsWith("hsla(") ||
+    trimmedColor.startsWith("oklch(") ||
+    trimmedColor.startsWith("oklab(") ||
+    trimmedColor.startsWith("lab(") ||
+    trimmedColor.startsWith("lch(") ||
+    trimmedColor.startsWith("hwb(") ||
+    trimmedColor.startsWith("color(") ||
+    trimmedColor.startsWith("var(");
+
+  // Direct CSS values (hex/rgb/hsl/var/...) should be applied as-is, not mapped to theme tokens.
+  if (isDirectCssColor) {
+    if (cssProperty === "color") return {};
+
+    return {
+      [cssProperty]: trimmedColor,
+    };
+  }
+
   // Convert PascalCase to kebab-case so multi-word colors like "IvyGreen" → "ivy-green"
   // match their CSS variable names (--ivy-green).
-  const lowerColor = color.replace(/([A-Z])/g, (_m, l, i) => (i === 0 ? l : "-" + l)).toLowerCase();
+  const lowerColor = trimmedColor
+    .replace(/([A-Z])/g, (_m, l, i) => (i === 0 ? l : "-" + l))
+    .toLowerCase();
 
   // When a surface color is used as a text color (like Muted, Background, Card),
   // it should map to its foreground variant (muted-foreground) to ensure readability,
