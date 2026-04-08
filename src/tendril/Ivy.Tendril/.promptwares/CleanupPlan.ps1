@@ -6,7 +6,7 @@ param(
 . "$PSScriptRoot/.shared/Utils.ps1"
 
 $planYamlPath = ValidatePlanPath $PlanPath
-$planInfo = ReadPlanProject $planYamlPath
+$planInfo = ReadPlanYaml $planYamlPath
 
 # Check plan state
 $currentState = if ($planInfo.Yaml.state) { $planInfo.Yaml.state } else { "Unknown" }

@@ -13,12 +13,12 @@ public class CustomPrDialog(
     Action refreshPlans,
     QueryResult<string[]> assigneesQuery) : ViewBase
 {
+    private readonly QueryResult<string[]> _assigneesQuery = assigneesQuery;
     private readonly IState<bool> _dialogOpen = dialogOpen;
-    private readonly PlanFile _selectedPlan = selectedPlan;
     private readonly IJobService _jobService = jobService;
     private readonly IPlanReaderService _planService = planService;
     private readonly Action _refreshPlans = refreshPlans;
-    private readonly QueryResult<string[]> _assigneesQuery = assigneesQuery;
+    private readonly PlanFile _selectedPlan = selectedPlan;
 
     public override object? Build()
     {
@@ -40,10 +40,7 @@ public class CustomPrDialog(
 
         UseEffect(() =>
         {
-            if (!customPrMerge.Value)
-            {
-                customPrDeleteBranch.Set(false);
-            }
+            if (!customPrMerge.Value) customPrDeleteBranch.Set(false);
         }, customPrMerge);
 
         if (!_dialogOpen.Value) return null;
@@ -53,13 +50,14 @@ public class CustomPrDialog(
             new DialogHeader($"Custom PR for #{_selectedPlan.Id}"),
             new DialogBody(
                 Layout.Vertical().Gap(2)
-                    | customPrApprove.ToBoolInput("Approve").AutoFocus()
-                    | customPrMerge.ToBoolInput("Merge").Disabled(!customPrApprove.Value)
-                    | customPrDeleteBranch.ToBoolInput("Delete Branch").Disabled(!customPrMerge.Value || !customPrApprove.Value)
-                    | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
-                    | customPrAssignee.ToSelectInput((_assigneesQuery.Value ?? Array.Empty<string>()).ToOptions())
-                        .Nullable().WithField().Label("Assignee")
-                    | customPrComment.ToTextareaInput("Comment").Rows(3)
+                | customPrApprove.ToBoolInput("Approve").AutoFocus()
+                | customPrMerge.ToBoolInput("Merge").Disabled(!customPrApprove.Value)
+                | customPrDeleteBranch.ToBoolInput("Delete Branch")
+                    .Disabled(!customPrMerge.Value || !customPrApprove.Value)
+                | customPrIncludeArtifacts.ToBoolInput("Include Artifacts")
+                | customPrAssignee.ToSelectInput((_assigneesQuery.Value ?? Array.Empty<string>()).ToOptions())
+                    .Nullable().WithField().Label("Assignee")
+                | customPrComment.ToTextareaInput("Comment").Rows(3)
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() => _dialogOpen.Set(false)),
@@ -78,7 +76,7 @@ public class CustomPrDialog(
                         .WithNamingConvention(CamelCaseNamingConvention.Instance)
                         .Build();
                     var optionsPath = Path.Combine(_selectedPlan.FolderPath, ".custom-pr-options.yaml");
-                    File.WriteAllText(optionsPath, serializer.Serialize(options));
+                    FileHelper.WriteAllText(optionsPath, serializer.Serialize(options));
                     _jobService.StartJob("MakePr", _selectedPlan.FolderPath);
                     _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
                     _refreshPlans();

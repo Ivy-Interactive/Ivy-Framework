@@ -1,3 +1,4 @@
+using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Apps.Plans;
 
 namespace Ivy.Tendril.Services;
@@ -11,6 +12,7 @@ public interface IPlanDatabaseService : IDisposable
 
     // Aggregates
     PlanReaderService.PlanCountSnapshot ComputePlanCounts();
+    DashboardStats GetDashboardData(string? projectFilter);
 
     // Costs and tokens
     decimal GetPlanTotalCost(int planId);
@@ -34,8 +36,16 @@ public interface IPlanDatabaseService : IDisposable
     void UpsertPlan(PlanFile plan);
     void DeletePlan(int planId);
     void UpsertCosts(int planId, List<CostEntry> costs);
-    void UpsertRecommendations(int planId, string folderName, List<RecommendationYaml> recommendations, string project, string planTitle, DateTime updated, PlanStatus status);
-    void BulkUpsertPlans(List<PlanFile> plans);
+
+    void UpsertRecommendations(int planId, string folderName, List<RecommendationYaml> recommendations, string project,
+        string planTitle, DateTime updated, PlanStatus status);
+
+    void BulkUpsertPlans(List<PlanFile> plans, bool forceOverwrite = false);
+
+    // Jobs
+    void UpsertJob(JobItem job);
+    List<JobItem> GetRecentJobs(int limit = 100);
+    void PurgeOldJobs(int keepCount = 500);
 
     // Diagnostics
     long GetDatabaseSize();

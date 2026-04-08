@@ -5,7 +5,7 @@ searchHints:
   - approve
   - reject
   - verification
-icon: Eye
+icon: ThumbsUp
 ---
 
 # Review

@@ -401,6 +401,14 @@ new DiffView().Diff(diff) with
 ✅ **`f.Func((string val) => (object)widget)`**
 📝 Available: `Default()`, `Text()`, `Link()`, `CopyToClipboard()`, `Func<TIn>()`, `Progress()`
 
+## Chart Builder vs Constructor — XAxis/YAxis Availability
+
+### `.ToLineChart()` / `.ToAreaChart()` builders do NOT support `.XAxis()` / `.YAxis()`
+❌ **`data.ToLineChart().Dimension(...).Measure(...).XAxis(new XAxis().Hide())`** — CS1929, `.XAxis()` is not on the builder type
+✅ **`new LineChart(data).Line(new Line("Key")).XAxis(new XAxis("Month").Hide())`** — use the constructor directly
+📝 `.XAxis()` and `.YAxis()` extension methods exist on `BarChart`, `LineChart`, `AreaChart` types, NOT on their builders (`LineChartBuilder<T>`, etc.)
+📝 Similarly, `Line(dataKey, name?)` and `Area(dataKey, stackId?, name?)` — second arg is string, not int index (unlike `Bar(dataKey, colorIndex)`)
+
 ## Component API Quick Reference
 
 | Widget/Type | Missing API | Use Instead |

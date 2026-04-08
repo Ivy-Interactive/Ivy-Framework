@@ -19,9 +19,11 @@ if (-not (Test-Path $planYamlPath)) {
     exit 1
 }
 
-# Bootstrap required PowerShell modules
-$sharedPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "Ivy.Tendril/.promptwares/.shared"
-. (Join-Path $sharedPath "Bootstrap-Modules.ps1")
+# Ensure powershell-yaml is available
+if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
+    Install-Module -Name powershell-yaml -RequiredVersion 0.4.12 -Force -Scope CurrentUser
+}
+Import-Module powershell-yaml -ErrorAction Stop
 
 $planContent = Get-Content $planYamlPath -Raw
 $plan = ConvertFrom-Yaml $planContent
@@ -51,18 +53,6 @@ if (Test-Path $configPath) {
         $slackEmoji = $projectConfig.meta.slackEmoji
     }
 }
-
-# Check for custom PR options (slackComment)
-$slackComment = ""
-$customOptionsPath = Join-Path $planFolder ".custom-pr-options.yaml"
-if (Test-Path $customOptionsPath) {
-    $optionsContent = Get-Content $customOptionsPath -Raw
-    $options = ConvertFrom-Yaml $optionsContent
-    if ($options.slackComment) {
-        $slackComment = $options.slackComment
-    }
-}
-
 # Build PR links for Slack
 $prLinks = @()
 foreach ($pr in $prs) {
@@ -98,9 +88,6 @@ if (Test-Path $screenshotsDir) {
 
 # Build message text
 $messageText = "*Title:* $title`n*Project:* $projectDisplay`n*PR:* $prLinksText"
-if ($slackComment) {
-    $messageText += "`n$slackComment"
-}
 
 if ($screenshotUrl) {
     # Block Kit JSON with image accessory

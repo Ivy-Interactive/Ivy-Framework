@@ -4,12 +4,12 @@ using Ivy.Tendril.Apps.Plans;
 namespace Ivy.Tendril.Apps;
 
 /// <summary>
-/// Shared mappings for status to badge variant styling across Tendril views.
+///     Shared mappings for status to badge variant styling across Tendril views.
 /// </summary>
 internal static class StatusMappings
 {
     /// <summary>
-    /// Maps plan status to badge variant for consistent styling.
+    ///     Maps plan status to badge variant for consistent styling.
     /// </summary>
     public static readonly Dictionary<PlanStatus, BadgeVariant> PlanStatusBadgeVariants = new()
     {
@@ -21,11 +21,12 @@ internal static class StatusMappings
         [PlanStatus.Draft] = BadgeVariant.Outline,
         [PlanStatus.Completed] = BadgeVariant.Success,
         [PlanStatus.Skipped] = BadgeVariant.Outline,
-        [PlanStatus.Icebox] = BadgeVariant.Outline
+        [PlanStatus.Icebox] = BadgeVariant.Outline,
+        [PlanStatus.Blocked] = BadgeVariant.Warning
     };
 
     /// <summary>
-    /// Maps verification status strings to badge variants for consistent styling.
+    ///     Maps verification status strings to badge variants for consistent styling.
     /// </summary>
     public static readonly Dictionary<string, BadgeVariant> VerificationStatusBadgeVariants = new()
     {
@@ -36,7 +37,7 @@ internal static class StatusMappings
     };
 
     /// <summary>
-    /// Maps job status to color for consistent styling.
+    ///     Maps job status to color for consistent styling.
     /// </summary>
     public static readonly Dictionary<JobStatus, Colors> JobStatusColors = new()
     {
@@ -51,7 +52,7 @@ internal static class StatusMappings
     };
 
     /// <summary>
-    /// Maps job type strings to colors for consistent styling.
+    ///     Maps job type strings to colors for consistent styling.
     /// </summary>
     public static readonly Dictionary<string, Colors> JobTypeColors = new()
     {

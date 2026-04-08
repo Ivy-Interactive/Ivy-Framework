@@ -100,7 +100,6 @@ It reads `plan.yaml` to extract the plan title, project name, and PR URLs, then 
 - Plan title and project name (with the project's `slackEmoji` from config)
 - Clickable PR links
 - A screenshot from `artifacts/screenshots/` if one exists (uploaded to blob storage)
-- An optional comment from `.custom-pr-options.yaml` (`slackComment` field)
 
 ### 4. Run Tendril
 

@@ -76,7 +76,7 @@ EOF
 )"
 ```
 
-- **Base branch:** `gh repo view --repo <owner/repo> --json defaultBranchRef -q .defaultBranchRef.name`
+- **Base branch:** `gh repo view <owner/repo> --json defaultBranchRef -q .defaultBranchRef.name`
 - **Title:** `[<planId>] <plan title>`
 - **Body:** If `<PlanFolder>/artifacts/summary.md` exists, use its content as the PR body (followed by list of commits). Otherwise, fall back to summary from Problem + Solution sections. If `$artifactMarkdown` from step 2.5 is non-empty, append it under an `## Artifacts` heading after the commits list.
 - **Assignee (custom options):** If custom options exist and `assignee` is non-empty, add `--assignee <assignee>` to the `gh pr create` command.
@@ -101,12 +101,42 @@ If no custom options or `comment` is empty, skip this step.
 - If `merge` is `true` but `deleteBranch` is `false`: merge without `--delete-branch` flag
 - If all flags are `true`: behave exactly like `yolo`
 
+**Merge conflict guard (applies to ALL merge paths below):**
+
+Before calling `gh pr merge`, check for merge conflicts:
+
+```bash
+# Poll mergeability (GitHub computes it asynchronously)
+for i in $(seq 1 6); do
+  MERGEABLE=$(gh pr view <pr-number> --repo <owner/repo> --json mergeable -q '.mergeable')
+  if [[ "$MERGEABLE" != "UNKNOWN" ]]; then break; fi
+  sleep 5
+done
+
+# Abort if conflicts or unknown
+if [[ "$MERGEABLE" != "MERGEABLE" ]]; then
+  echo "ERROR: PR #<pr-number> has merge conflicts or mergeability is unknown (status: $MERGEABLE). Cannot merge."
+  exit 1
+fi
+```
+
+If the check fails, do NOT merge. Leave the PR open and fail the MakePr execution so the plan can be retried after conflict resolution.
+
+| Mergeable status | Action |
+|---|---|
+| `MERGEABLE` | Proceed with merge |
+| `CONFLICTING` | Fail with error, PR stays open |
+| `UNKNOWN` (after 30s timeout) | Fail conservatively |
+
 **If `yolo` (and no custom options overriding):**
 ```bash
 gh pr merge <pr-number> --repo <owner/repo> --merge --delete-branch --admin
 cd <original-repo-path>
 git pull origin <default-branch>
 ```
+
+> **Note:** If `--merge` fails with "Merge commits are not allowed", retry with `--squash` instead.
+
 
 **If `default`:** PR stays open for manual review.
 

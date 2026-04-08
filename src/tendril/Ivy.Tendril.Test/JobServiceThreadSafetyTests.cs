@@ -9,7 +9,7 @@ public class JobServiceThreadSafetyTests
         // Use maxConcurrentJobs=1 and start a fake job that gets queued by filling the slot first
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 1);
+            null, 1);
 
         // Start a job that will try to launch (and fail since no script exists).
         // Use try/catch since process launch may throw in test environment.
@@ -37,7 +37,7 @@ public class JobServiceThreadSafetyTests
         {
             var service = new JobService(
                 TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-                inboxPath: null, maxConcurrentJobs: 1);
+                null, 1);
 
             var invoked = false;
             service.JobsChanged += () => invoked = true;
@@ -66,7 +66,7 @@ public class JobServiceThreadSafetyTests
 
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 1);
+            null, 1);
 
         var invoked = false;
         service.JobsChanged += () => invoked = true;
@@ -86,7 +86,7 @@ public class JobServiceThreadSafetyTests
         {
             var service = new JobService(
                 TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-                inboxPath: null, maxConcurrentJobs: 1);
+                null, 1);
 
             var invokeCount = 0;
             service.JobsChanged += () => Interlocked.Increment(ref invokeCount);

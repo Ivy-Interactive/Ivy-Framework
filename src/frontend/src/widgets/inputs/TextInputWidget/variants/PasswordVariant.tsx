@@ -85,7 +85,13 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
 
   return (
     <div className="relative w-full select-none" style={styles} ref={containerRef}>
-      <div className="rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10">
+      <div
+        className={cn(
+          "rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
+          props.ghost &&
+            "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+        )}
+      >
         <Input
           ref={elementRef}
           id={props.id}

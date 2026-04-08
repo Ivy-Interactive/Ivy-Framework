@@ -276,7 +276,11 @@ cd src/frontend && npm run format && npm run lint:fix && cd ../..
 **C# files**:
 
 ```bash
-dotnet format
+# Get changed .cs files from this execution's commits
+CHANGED_CS=$(git diff --name-only --diff-filter=ACM HEAD~1 -- '*.cs' | tr '\n' ' ')
+if [ -n "$CHANGED_CS" ]; then
+  dotnet format --include $CHANGED_CS
+fi
 ```
 
 Commit messages should reference the plan ID:
@@ -338,6 +342,8 @@ If you identified items in ANY category, write them to `<PlanFolder>/artifacts/r
 ```
 
 Do NOT include items that are part of the current plan's scope.
+
+Do NOT include recommendations about code formatting, linting, or style issues (e.g., line wrapping, indentation, trailing whitespace, import ordering). These are handled automatically by DotnetFormat and FrontendLint verifications.
 
 If after genuine reflection you found nothing noteworthy, skip the file — but this should be rare. Most plans touch enough code to surface at least one observation.
 

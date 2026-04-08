@@ -1261,11 +1261,19 @@ public static class WebApplicationExtensions
                     MaxAge = TimeSpan.FromDays(365),
                     MustRevalidate = true
                 };
-                ctx.Context.Response.Headers.ETag = assembly.GetName().Version + ":" +
-                                                    (!string.IsNullOrEmpty(assembly.Location) &&
-                                                     File.Exists(assembly.Location)
-                                                        ? File.GetLastWriteTimeUtc(assembly.Location).Ticks.ToString()
-                                                        : "");
+                var version = assembly.GetName().Version?.ToString() ?? "0.0.0.0";
+                var lastWrite = "";
+
+                // In single-file publishing, assembly.Location might be empty.
+                // We fallback to just the version in those cases.
+#pragma warning disable IL3000
+                if (!string.IsNullOrEmpty(assembly.Location) && File.Exists(assembly.Location))
+                {
+                    lastWrite = File.GetLastWriteTimeUtc(assembly.Location).Ticks.ToString();
+                }
+#pragma warning restore IL3000
+
+                ctx.Context.Response.Headers.ETag = version + ":" + lastWrite;
 #endif
             }
         };

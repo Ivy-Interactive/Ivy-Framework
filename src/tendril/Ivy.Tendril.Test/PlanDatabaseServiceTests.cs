@@ -1,18 +1,20 @@
+using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
 public class PlanDatabaseServiceTests : IDisposable
 {
-    private readonly string _dbPath;
     private readonly PlanDatabaseService _db;
+    private readonly string _dbPath;
 
     public PlanDatabaseServiceTests()
     {
         _dbPath = Path.Combine(Path.GetTempPath(), $"tendril-test-{Guid.NewGuid()}.db");
-        _db = new PlanDatabaseService(_dbPath);
+        _db = new PlanDatabaseService(_dbPath, NullLogger<PlanDatabaseService>.Instance);
     }
 
     public void Dispose()
@@ -47,8 +49,7 @@ public class PlanDatabaseServiceTests : IDisposable
             metadata,
             latestContent,
             $"D:\\Plans\\{id:D5}-{title.Replace(" ", "")}",
-            "state: Draft\ntitle: Test Plan",
-            1
+            "state: Draft\ntitle: Test Plan"
         );
     }
 
@@ -108,7 +109,7 @@ public class PlanDatabaseServiceTests : IDisposable
     [Fact]
     public void GetPlans_FiltersbyStatus()
     {
-        _db.UpsertPlan(CreateTestPlan(1500, "Draft Plan", PlanStatus.Draft));
+        _db.UpsertPlan(CreateTestPlan(1500, "Draft Plan"));
         _db.UpsertPlan(CreateTestPlan(1501, "Completed Plan", PlanStatus.Completed));
         _db.UpsertPlan(CreateTestPlan(1502, "Failed Plan", PlanStatus.Failed));
 
@@ -148,8 +149,8 @@ public class PlanDatabaseServiceTests : IDisposable
     [Fact]
     public void ComputePlanCounts_ReturnsCorrectCounts()
     {
-        _db.UpsertPlan(CreateTestPlan(1500, "Draft1", PlanStatus.Draft));
-        _db.UpsertPlan(CreateTestPlan(1501, "Draft2", PlanStatus.Draft));
+        _db.UpsertPlan(CreateTestPlan(1500, "Draft1"));
+        _db.UpsertPlan(CreateTestPlan(1501, "Draft2"));
         _db.UpsertPlan(CreateTestPlan(1502, "Review", PlanStatus.ReadyForReview));
         _db.UpsertPlan(CreateTestPlan(1503, "Failed", PlanStatus.Failed));
         _db.UpsertPlan(CreateTestPlan(1504, "Icebox", PlanStatus.Icebox));
@@ -184,7 +185,7 @@ public class PlanDatabaseServiceTests : IDisposable
     [Fact]
     public void UpsertRecommendations_AndGetRecommendations()
     {
-        _db.UpsertPlan(CreateTestPlan(1500, "Test Plan"));
+        _db.UpsertPlan(CreateTestPlan(1500));
 
         var recs = new List<RecommendationYaml>
         {
@@ -367,7 +368,7 @@ public class PlanDatabaseServiceTests : IDisposable
         };
         _db.UpsertCosts(1500, costs);
 
-        var burn = _db.GetHourlyTokenBurn(7);
+        var burn = _db.GetHourlyTokenBurn();
         Assert.NotEmpty(burn);
         Assert.Equal("Tendril", burn[0].Project);
         Assert.Equal(60000, burn[0].Tokens);
@@ -383,7 +384,7 @@ public class PlanDatabaseServiceTests : IDisposable
             File.WriteAllBytes(corruptDbPath, new byte[] { 0x00, 0x01, 0x02, 0x03, 0xFF, 0xFE, 0xFD });
 
             // Constructor should detect corruption and recreate the database
-            using var db = new PlanDatabaseService(corruptDbPath);
+            using var db = new PlanDatabaseService(corruptDbPath, NullLogger<PlanDatabaseService>.Instance);
 
             // Verify the service initialized successfully — tables exist and we can query
             var plans = db.GetPlans();
@@ -448,5 +449,187 @@ public class PlanDatabaseServiceTests : IDisposable
         Assert.Equal(2, results.Count);
         // Higher term frequency ranks first in FTS5
         Assert.Equal(1500, results[0].Id);
+    }
+
+    [Fact]
+    public void UpsertJob_PersistsAndRetrievesJobData()
+    {
+        var job = new JobItem
+        {
+            Id = "job-001",
+            Type = "ExecutePlan",
+            PlanFile = "01500-TestPlan",
+            Project = "Tendril",
+            Status = JobStatus.Completed,
+            Provider = "claude",
+            SessionId = "session-abc",
+            StartedAt = new DateTime(2026, 4, 7, 10, 0, 0, DateTimeKind.Utc),
+            CompletedAt = new DateTime(2026, 4, 7, 10, 15, 0, DateTimeKind.Utc),
+            DurationSeconds = 900,
+            Cost = 1.50m,
+            Tokens = 50000,
+            StatusMessage = null
+        };
+
+        _db.UpsertJob(job);
+
+        var jobs = _db.GetRecentJobs();
+        Assert.Single(jobs);
+
+        var result = jobs[0];
+        Assert.Equal("job-001", result.Id);
+        Assert.Equal("ExecutePlan", result.Type);
+        Assert.Equal("01500-TestPlan", result.PlanFile);
+        Assert.Equal("Tendril", result.Project);
+        Assert.Equal(JobStatus.Completed, result.Status);
+        Assert.Equal("claude", result.Provider);
+        Assert.Equal("session-abc", result.SessionId);
+        Assert.Equal(job.StartedAt, result.StartedAt);
+        Assert.Equal(job.CompletedAt, result.CompletedAt);
+        Assert.Equal(900, result.DurationSeconds);
+        Assert.Equal(1.50m, result.Cost);
+        Assert.Equal(50000, result.Tokens);
+        Assert.Null(result.StatusMessage);
+    }
+
+    [Fact]
+    public void GetRecentJobs_ReturnsOrderedByCompletedAt()
+    {
+        _db.UpsertJob(new JobItem
+        {
+            Id = "job-001",
+            Type = "ExecutePlan",
+            PlanFile = "plan-a",
+            Project = "Tendril",
+            Status = JobStatus.Completed,
+            Provider = "claude",
+            CompletedAt = new DateTime(2026, 4, 7, 10, 0, 0, DateTimeKind.Utc)
+        });
+        _db.UpsertJob(new JobItem
+        {
+            Id = "job-003",
+            Type = "ExecutePlan",
+            PlanFile = "plan-c",
+            Project = "Tendril",
+            Status = JobStatus.Completed,
+            Provider = "claude",
+            CompletedAt = new DateTime(2026, 4, 7, 12, 0, 0, DateTimeKind.Utc)
+        });
+        _db.UpsertJob(new JobItem
+        {
+            Id = "job-002",
+            Type = "MakePr",
+            PlanFile = "plan-b",
+            Project = "Tendril",
+            Status = JobStatus.Completed,
+            Provider = "claude",
+            CompletedAt = new DateTime(2026, 4, 7, 11, 0, 0, DateTimeKind.Utc)
+        });
+
+        var jobs = _db.GetRecentJobs();
+        Assert.Equal(3, jobs.Count);
+        Assert.Equal("job-003", jobs[0].Id); // Most recent first
+        Assert.Equal("job-002", jobs[1].Id);
+        Assert.Equal("job-001", jobs[2].Id);
+    }
+
+    [Fact]
+    public void UpsertJob_UpdatesExistingJob()
+    {
+        var job = new JobItem
+        {
+            Id = "job-001",
+            Type = "ExecutePlan",
+            PlanFile = "plan-a",
+            Project = "Tendril",
+            Status = JobStatus.Completed,
+            Provider = "claude",
+            CompletedAt = new DateTime(2026, 4, 7, 10, 0, 0, DateTimeKind.Utc),
+            Cost = null,
+            Tokens = null
+        };
+        _db.UpsertJob(job);
+
+        // Update with cost and tokens
+        job.Cost = 2.50m;
+        job.Tokens = 75000;
+        _db.UpsertJob(job);
+
+        var jobs = _db.GetRecentJobs();
+        Assert.Single(jobs);
+        Assert.Equal(2.50m, jobs[0].Cost);
+        Assert.Equal(75000, jobs[0].Tokens);
+    }
+
+    [Fact]
+    public void PurgeOldJobs_RemovesExcessJobs()
+    {
+        // Insert 600 jobs with distinct CompletedAt times
+        for (var i = 0; i < 600; i++)
+            _db.UpsertJob(new JobItem
+            {
+                Id = $"job-{i:D4}",
+                Type = "ExecutePlan",
+                PlanFile = $"plan-{i}",
+                Project = "Tendril",
+                Status = JobStatus.Completed,
+                Provider = "claude",
+                CompletedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMinutes(i)
+            });
+
+        Assert.Equal(600, _db.GetRecentJobs(1000).Count);
+
+        _db.PurgeOldJobs();
+
+        var remaining = _db.GetRecentJobs(1000);
+        Assert.Equal(500, remaining.Count);
+
+        // The oldest jobs (lowest i) should have been removed
+        Assert.DoesNotContain(remaining, j => j.Id == "job-0000");
+        Assert.DoesNotContain(remaining, j => j.Id == "job-0099");
+        // The newest jobs should remain
+        Assert.Contains(remaining, j => j.Id == "job-0599");
+        Assert.Contains(remaining, j => j.Id == "job-0100");
+    }
+
+    [Fact]
+    public void PurgeOldJobs_NoOpWhenUnderLimit()
+    {
+        for (var i = 0; i < 10; i++)
+            _db.UpsertJob(new JobItem
+            {
+                Id = $"job-{i}",
+                Type = "ExecutePlan",
+                PlanFile = $"plan-{i}",
+                Project = "Tendril",
+                Status = JobStatus.Completed,
+                Provider = "claude",
+                CompletedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMinutes(i)
+            });
+
+        _db.PurgeOldJobs();
+
+        var remaining = _db.GetRecentJobs(1000);
+        Assert.Equal(10, remaining.Count);
+    }
+
+    [Fact]
+    public void Migration_003_CreatesJobsTable()
+    {
+        // The _db created in constructor already ran all migrations.
+        // Verify Jobs table exists by inserting and querying.
+        _db.UpsertJob(new JobItem
+        {
+            Id = "migration-test",
+            Type = "Test",
+            PlanFile = "test",
+            Project = "Test",
+            Status = JobStatus.Completed,
+            Provider = "claude"
+        });
+
+        var jobs = _db.GetRecentJobs();
+        Assert.Single(jobs);
+        Assert.Equal("migration-test", jobs[0].Id);
     }
 }

@@ -1,7 +1,7 @@
 # TENDRIL_HOME environment variable is required (points to this config directory)
 # REPOS_HOME environment variable is optional (base path for relative repo paths)
 
-agentCommand: claude
+codingAgent: claude
 jobTimeout: 30
 staleOutputTimeout: 10
 maxConcurrentJobs: 5  # Maximum number of jobs to run concurrently (default: 5)
@@ -20,7 +20,7 @@ maxConcurrentJobs: 5  # Maximum number of jobs to run concurrently (default: 5)
 #   model: gpt-4o-mini
 
 # Per-promptware tool permissions (allowedTools) provide least-privilege access control.
-# Without allowedTools, promptwares inherit global permissions from agentCommand.
+# Without allowedTools, promptwares inherit global permissions from codingAgent.
 # Example promptware configuration with per-agent tool permissions:
 # promptwares:
 #   MakePlan:
@@ -52,9 +52,6 @@ editor:
   label: VS Code
 
 telemetry: true
-
-# Model pricing is now embedded in Assets/models.yaml and managed by ModelPricingService.
-# No configuration needed — costs are calculated automatically when jobs complete.
 
 # Example project configuration:
 # projects:

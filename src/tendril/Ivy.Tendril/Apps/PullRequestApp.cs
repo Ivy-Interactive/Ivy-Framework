@@ -7,11 +7,11 @@ namespace Ivy.Tendril.Apps;
 [App(title: "Pull Requests", icon: Icons.GitPullRequest, group: new[] { "Tools" }, order: MenuOrder.PullRequests)]
 public class PullRequestApp : ViewBase
 {
-    public override object? Build()
+    public override object Build()
     {
         var planService = UseService<IPlanReaderService>();
         var refreshToken = UseRefreshToken();
-        var nav = this.UseNavigation();
+        var nav = UseNavigation();
         var showPlan = UseState<string?>(null);
         var openFile = UseState<string?>(null);
         var config = UseService<IConfigService>();
@@ -25,7 +25,9 @@ public class PullRequestApp : ViewBase
         {
             var costValue = planService.GetPlanTotalCost(plan.FolderPath);
             var cost = costValue > 0 ? $"${costValue:F2}" : "";
-            return plan.Prs.Select((pr, i) => new PrRow
+            var tokenValue = planService.GetPlanTotalTokens(plan.FolderPath);
+            var tokens = tokenValue > 0 ? FormatHelper.FormatTokens(tokenValue) : "";
+            return plan.Prs.Where(IsValidUrl).Select((pr, i) => new PrRow
             {
                 Id = $"{plan.Id}-{i}",
                 PlanId = $"{plan.Id:D5}",
@@ -33,23 +35,26 @@ public class PullRequestApp : ViewBase
                 Pr = pr,
                 Plan = $"#{plan.Id:D5} {plan.Title}",
                 Cost = cost,
+                Tokens = tokens,
                 PlanFolderPath = plan.FolderPath
             });
         }).ToList();
 
         var dataTable = rows.AsQueryable()
-            .ToDataTable(idSelector: t => t.Id)
+            .ToDataTable(t => t.Id)
             .RefreshToken(refreshToken)
             .Width(Size.Full())
             .Height(Size.Full())
             .Header(t => t.Repository, "Repository")
             .Header(t => t.Cost, "Cost")
+            .Header(t => t.Tokens, "Tokens")
             .Header(t => t.Pr, "PR")
             .Header(t => t.Plan, "Plan")
             .Width(t => t.Repository, Size.Fraction(1 / 3f))
             .Width(t => t.Pr, Size.Fraction(1 / 3f))
             .Width(t => t.Plan, Size.Fraction(1 / 3f))
             .Width(t => t.Cost, Size.Px(90))
+            .Width(t => t.Tokens, Size.Px(90))
             .Renderer(t => t.Plan, new LinkDisplayRenderer())
             .Renderer(t => t.Pr, new LinkDisplayRenderer())
             .SortDirection(t => t.PlanId, SortDirection.Descending)
@@ -71,14 +76,17 @@ public class PullRequestApp : ViewBase
                 if (e.Value.ColumnName == "Plan")
                 {
                     var row = rows.ElementAtOrDefault(e.Value.RowIndex);
-                    if (row != null && !string.IsNullOrEmpty(row.PlanFolderPath) && Directory.Exists(row.PlanFolderPath))
+                    if (row != null && !string.IsNullOrEmpty(row.PlanFolderPath) &&
+                        Directory.Exists(row.PlanFolderPath))
                         showPlan.Set(row.PlanFolderPath);
                 }
+
                 return ValueTask.CompletedTask;
             })
             .RowActions(
-                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
-                new MenuItem(Label: "Open PR", Icon: Icons.ExternalLink, Tag: "open-pr").Tooltip("Open the pull request in browser")
+                new MenuItem("View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
+                new MenuItem("Open PR", Icon: Icons.ExternalLink, Tag: "open-pr").Tooltip(
+                    "Open the pull request in browser")
             )
             .OnRowAction(e =>
             {
@@ -98,6 +106,7 @@ public class PullRequestApp : ViewBase
                         nav.Navigate(row.Pr);
                     }
                 }
+
                 return ValueTask.CompletedTask;
             });
 
@@ -118,15 +127,13 @@ public class PullRequestApp : ViewBase
                 openFile.Value, () => openFile.Set(null), repoPaths);
 
             var planSheet = new Sheet(
-                onClose: () => showPlan.Set(null),
-                content: sheetContent,
-                title: plan?.Title ?? folderName
+                () => showPlan.Set(null),
+                sheetContent,
+                plan?.Title ?? folderName
             ).Width(Size.Half()).Resizable();
 
             if (fileLinkSheet is not null)
-            {
                 return Layout.Vertical().Height(Size.Full()) | new Fragment(dataTable, planSheet, fileLinkSheet);
-            }
 
             return Layout.Vertical().Height(Size.Full()) | new Fragment(dataTable, planSheet);
         }
@@ -135,9 +142,13 @@ public class PullRequestApp : ViewBase
     }
 
     /// <summary>
-    /// Extracts "owner/repo" from a GitHub PR URL.
-    /// E.g. "https://github.com/owner/repo/pull/123" -> "owner/repo"
+    ///     Extracts "owner/repo" from a GitHub PR URL.
+    ///     E.g. "https://github.com/owner/repo/pull/123" -> "owner/repo"
     /// </summary>
+    internal static bool IsValidUrl(string value) =>
+        Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
+        (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
     internal static string ExtractRepo(string prUrl)
     {
         try
@@ -147,7 +158,11 @@ public class PullRequestApp : ViewBase
             if (segments.Length >= 2)
                 return $"{segments[0]}/{segments[1]}";
         }
-        catch { }
+        catch (UriFormatException ex)
+        {
+            Console.Error.WriteLine($"Failed to parse PR URL '{prUrl}': {ex.Message}");
+        }
+
         return prUrl;
     }
 }

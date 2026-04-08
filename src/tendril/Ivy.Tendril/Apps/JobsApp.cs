@@ -9,13 +9,14 @@ namespace Ivy.Tendril.Apps;
 [App(title: "Jobs", icon: Icons.Activity, group: new[] { "Tools" }, order: MenuOrder.Jobs)]
 public class JobsApp : ViewBase
 {
-    public override object? Build()
+    public override object Build()
     {
         var jobService = UseService<IJobService>();
         var planService = UseService<IPlanReaderService>();
         var client = UseService<IClientProvider>();
         var refreshToken = UseRefreshToken();
         var showPlan = UseState<string?>(null);
+        var showOutput = UseState<string?>(null);
         var openFile = UseState<string?>(null);
         var config = UseService<IConfigService>();
         UseEffect(() =>
@@ -34,17 +35,18 @@ public class JobsApp : ViewBase
 
         UseEffect(() =>
         {
-            void OnJobsChanged() => refreshToken.Refresh();
+            void OnJobsChanged()
+            {
+                refreshToken.Refresh();
+            }
+
             jobService.JobsChanged += OnJobsChanged;
             return Disposable.Create(() => jobService.JobsChanged -= OnJobsChanged);
         });
 
         UseInterval(() =>
         {
-            if (jobService.GetJobs().Any(j => j.Status == JobStatus.Running))
-            {
-                refreshToken.Refresh();
-            }
+            if (jobService.GetJobs().Any(j => j.Status == JobStatus.Running)) refreshToken.Refresh();
         }, TimeSpan.FromSeconds(5));
 
         var projectColors = config.Projects
@@ -63,12 +65,13 @@ public class JobsApp : ViewBase
             Project = j.Project,
             Timer = FormatTimer(j),
             Cost = j.Cost.HasValue ? $"${j.Cost.Value:F2}" : "",
+            Tokens = j.Tokens.HasValue ? FormatHelper.FormatTokens(j.Tokens.Value) : "",
             LastOutput = FormatLastOutput(j),
             LastOutputTimestamp = j.LastOutputAt,
             StatusMessage = j.StatusMessage ?? ""
         })
-        .OrderByDescending(r => r.LastOutputTimestamp ?? DateTime.MinValue)
-        .ToList();
+            .OrderByDescending(r => r.LastOutputTimestamp ?? DateTime.MinValue)
+            .ToList();
 
         var statusGroups = jobs
             .GroupBy(j => j.Status)
@@ -78,37 +81,39 @@ public class JobsApp : ViewBase
 
         var statusSegments = statusGroups
             .Select(g => new ProgressSegment(
-                Value: g.Count,
-                Color: GetStatusColor(g.Status),
-                Label: g.Status.ToString()
+                g.Count,
+                GetStatusColor(g.Status),
+                g.Status.ToString()
             ))
             .ToArray();
 
         var jobsProgress = new StackedProgress(statusSegments).ShowLabels();
 
         var dataTable = rows.AsQueryable()
-            .ToDataTable(idSelector: t => t.Id)
+            .ToDataTable(t => t.Id)
             .RefreshToken(refreshToken)
             .Width(Size.Full())
             .Height(Size.Full())
             .Header(t => t.Status, "Status")
             .Header(t => t.Type, "Type")
             .Header(t => t.PlanId, "Plan")
-            .Header(t => t.Plan, "Plan")
+            .Header(t => t.Plan, "Prompt")
             .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
             .Header(t => t.Cost, "Cost")
+            .Header(t => t.Tokens, "Tokens")
             .Header(t => t.LastOutput, "Last Output")
             .Header(t => t.StatusMessage, "Status Message")
             .Width(t => t.Status, Size.Px(90))
             .Width(t => t.PlanId, Size.Px(90))
             .Width(t => t.Type, Size.Px(90))
-            .Width(t => t.Plan, Size.Fraction(0.5f))
+            .Width(t => t.Plan, Size.Auto())
             .Width(t => t.Project, Size.Px(90))
             .Width(t => t.Timer, Size.Px(90))
             .Width(t => t.LastOutput, Size.Px(90))
             .Width(t => t.Cost, Size.Px(90))
-            .Width(t => t.StatusMessage, Size.Fraction(0.5f))
+            .Width(t => t.Tokens, Size.Px(90))
+            .Width(t => t.StatusMessage, Size.Auto())
             .Renderer(t => t.Status, new LabelsDisplayRenderer
             {
                 BadgeColorMapping = StatusMappings.JobStatusColors.ToDictionary(
@@ -160,13 +165,20 @@ public class JobsApp : ViewBase
                         }
                     }
                 }
+                else if (e.Value.ColumnName == "LastOutput")
+                {
+                    var id = e.Value.RowId?.ToString();
+                    if (!string.IsNullOrEmpty(id))
+                        showOutput.Set(id);
+                }
+
                 return ValueTask.CompletedTask;
             })
             .RowActions(
-                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
-                new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
-                new MenuItem(Label: "Rerun", Icon: Icons.RotateCw, Tag: "rerun-job").Tooltip("Rerun this job"),
-                new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job").Tooltip("Delete this job")
+                new MenuItem("View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
+                new MenuItem("Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
+                new MenuItem("Rerun", Icon: Icons.RotateCw, Tag: "rerun-job").Tooltip("Rerun this job"),
+                new MenuItem("Delete", Icon: Icons.Trash, Tag: "delete-job").Tooltip("Delete this job")
             )
             .OnRowAction(e =>
             {
@@ -200,13 +212,15 @@ public class JobsApp : ViewBase
                             if (job.Type is "ExecutePlan" or "ExpandPlan" && job.Args.Length > 0)
                             {
                                 var folderName = Path.GetFileName(job.Args[0]);
-                                planService.TransitionState(folderName, Plans.PlanStatus.Building);
+                                planService.TransitionState(folderName, PlanStatus.Building);
                             }
                             else if (job.Type == "UpdatePlan" && job.Args.Length > 0)
                             {
                                 var folderName = Path.GetFileName(job.Args[0]);
-                                planService.TransitionState(folderName, Plans.PlanStatus.Updating);
+                                planService.TransitionState(folderName, PlanStatus.Updating);
                             }
+
+                            jobService.DeleteJob(job.Id);
                             jobService.StartJob(job.Type, job.Args);
                             refreshToken.Refresh();
                         }
@@ -220,22 +234,24 @@ public class JobsApp : ViewBase
                         }
                     }
                 }
+
                 return ValueTask.CompletedTask;
             })
-            .HeaderRight(ctx => Layout.Horizontal().Gap(2)
-                | jobsProgress
-                | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
-                    new MenuItem("Clear Completed", Icon: Icons.Trash, Tag: "ClearCompleted").OnSelect(() =>
-                    {
-                        jobService.ClearCompletedJobs();
-                        refreshToken.Refresh();
-                    }),
-                    new MenuItem("Clear Failed", Icon: Icons.Trash, Tag: "ClearFailed").OnSelect(() =>
-                    {
-                        jobService.ClearFailedJobs();
-                        refreshToken.Refresh();
-                    })
-                ));
+            .HeaderRight(_ => Layout.Horizontal().Gap(2)
+                                 | jobsProgress
+                                 | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                                    new MenuItem("Clear Completed", Icon: Icons.Trash, Tag: "ClearCompleted")
+                                        .OnSelect(() =>
+                                        {
+                                            jobService.ClearCompletedJobs();
+                                            refreshToken.Refresh();
+                                        }),
+                                    new MenuItem("Clear Failed", Icon: Icons.Trash, Tag: "ClearFailed").OnSelect(() =>
+                                    {
+                                        jobService.ClearFailedJobs();
+                                        refreshToken.Refresh();
+                                    })
+                                ));
 
         var layout = Layout.Vertical().Height(Size.Full());
 
@@ -256,17 +272,30 @@ public class JobsApp : ViewBase
                 openFile.Value, () => openFile.Set(null), repoPaths);
 
             var planSheet = new Sheet(
-                onClose: () => showPlan.Set(null),
-                content: sheetContent,
-                title: plan?.Title ?? folderName
+                () => showPlan.Set(null),
+                sheetContent,
+                plan?.Title ?? folderName
             ).Width(Size.Half()).Resizable();
 
-            if (fileLinkSheet is not null)
-            {
-                return layout | new Fragment(dataTable, planSheet, fileLinkSheet);
-            }
+            if (fileLinkSheet is not null) return layout | new Fragment(dataTable, planSheet, fileLinkSheet);
 
             return layout | new Fragment(dataTable, planSheet);
+        }
+
+        if (showOutput.Value is { } jobId)
+        {
+            var job = jobService.GetJob(jobId);
+            var outputText = job is not null && job.OutputLines.Count > 0
+                ? string.Join("\n", job.OutputLines)
+                : "No output available.";
+
+            var outputSheet = new Sheet(
+                () => showOutput.Set(null),
+                new Markdown($"```\n{outputText}\n```"),
+                job is not null ? $"{job.Type} — {ExtractPlanId(job.PlanFile)}" : "Job Output"
+            ).Width(Size.Half()).Resizable();
+
+            return layout | new Fragment(dataTable, outputSheet);
         }
 
         return layout | dataTable;
@@ -286,6 +315,7 @@ public class JobsApp : ViewBase
             var elapsed = DateTime.UtcNow - job.LastOutputAt.Value;
             return FormatTimeSpan(elapsed);
         }
+
         return "-";
     }
 
@@ -297,10 +327,8 @@ public class JobsApp : ViewBase
             return FormatTimeSpan(elapsed);
         }
 
-        if (job.Status is JobStatus.Completed or JobStatus.Failed or JobStatus.Timeout or JobStatus.Stopped && job.DurationSeconds.HasValue)
-        {
-            return FormatTimeSpan(TimeSpan.FromSeconds(job.DurationSeconds.Value));
-        }
+        if (job.Status is JobStatus.Completed or JobStatus.Failed or JobStatus.Timeout or JobStatus.Stopped &&
+            job.DurationSeconds.HasValue) return FormatTimeSpan(TimeSpan.FromSeconds(job.DurationSeconds.Value));
 
         return "-";
     }
@@ -312,6 +340,8 @@ public class JobsApp : ViewBase
         return $"{span.Minutes}m {span.Seconds:D2}s";
     }
 
-    private static Colors GetStatusColor(JobStatus status) =>
-        StatusMappings.JobStatusColors.TryGetValue(status, out var color) ? color : Colors.Slate;
+    private static Colors GetStatusColor(JobStatus status)
+    {
+        return StatusMappings.JobStatusColors.TryGetValue(status, out var color) ? color : Colors.Slate;
+    }
 }

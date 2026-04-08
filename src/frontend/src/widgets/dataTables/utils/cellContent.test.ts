@@ -634,7 +634,12 @@ describe("cellContent utilities", () => {
           width: 100,
           alignContent: "Center",
         },
-        { name: "Right", type: ColType.Text, width: 100, alignContent: "Right" },
+        {
+          name: "Right",
+          type: ColType.Text,
+          width: 100,
+          alignContent: "Right",
+        },
       ];
 
       const alignData: DataRow[] = [{ values: ["left text", 42, "right text"] }];
@@ -743,6 +748,15 @@ describe("cellContent utilities", () => {
       }
     });
 
+    it("should set bgBubbleSelected to match bgBubble when a custom color is provided", () => {
+      const cell = createLabelsCell(["Tag1"], undefined, "#FF0000");
+      expect(cell.kind).toBe(GridCellKind.Bubble);
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.themeOverride?.bgBubble).toBe("#FF0000");
+        expect(cell.themeOverride?.bgBubbleSelected).toBe("#FF0000");
+      }
+    });
+
     it("should filter out empty strings from comma-separated input", () => {
       const cell = createLabelsCell("Tag1,  ,Tag2,,Tag3,");
       if (cell.kind === GridCellKind.Bubble) {
@@ -786,7 +800,12 @@ describe("cellContent utilities", () => {
 
     it("should respect alignment for Labels column type", () => {
       const labelsColumns: DataColumn[] = [
-        { name: "tags", type: ColType.Labels, width: 200, alignContent: "Right" },
+        {
+          name: "tags",
+          type: ColType.Labels,
+          width: 200,
+          alignContent: "Right",
+        },
       ];
 
       const labelsData: DataRow[] = [{ values: [["Tag1", "Tag2"]] }];

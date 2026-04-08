@@ -31,7 +31,7 @@ if ($SourcePath) { $firmwareValues["SourcePath"] = $SourcePath }
 
 $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder $firmwareValues
 
-$agent = GetAgentCommandFromConfig -Promptware "MakePlan"
+$agent = GetAgentCommand -Promptware "MakePlan"
 
 Write-Host "Starting Agent..."
 SendStatusMessage "Creating Plan"
@@ -66,6 +66,9 @@ Pop-Location
 
 Remove-Item $promptFile
 
+# Wait for any buffered file writes to complete
+Start-Sleep -Milliseconds 200
+
 # Verify the agent actually created a plan folder or a trash entry (duplicate)
 $planIdFormatted = "{0:D5}" -f $planId
 $planFolder = Get-ChildItem -Path $script:PlansDir -Filter "$planIdFormatted-*" -Directory | Select-Object -First 1
@@ -75,6 +78,13 @@ if ($planFolder) {
 else {
     # Check if it was a duplicate (written to Trash)
     $trashDir = if ($env:TENDRIL_HOME) { Join-Path $env:TENDRIL_HOME "Trash" } else { $null }
+    if (-not $trashDir) {
+        Write-Host "WARNING: TENDRIL_HOME environment variable not set" -ForegroundColor Yellow
+    }
+    elseif (-not (Test-Path $trashDir)) {
+        Write-Host "WARNING: Trash directory does not exist: $trashDir" -ForegroundColor Yellow
+    }
+
     $trashEntry = if ($trashDir -and (Test-Path $trashDir)) {
         Get-ChildItem -Path $trashDir -Filter "$planIdFormatted-*" | Select-Object -First 1
     }

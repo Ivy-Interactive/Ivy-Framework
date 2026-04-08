@@ -14,14 +14,14 @@ public class JobServiceNotificationThreadSafetyTests
         {
             var service = new JobService(
                 TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-                inboxPath: null, maxConcurrentJobs: 1);
+                null, 1);
 
             JobNotification? received = null;
             service.NotificationReady += n => received = n;
 
             // Start a job and complete it to trigger notification
             var id = service.StartJob("MakePr", Path.GetTempPath());
-            service.CompleteJob(id, exitCode: 0);
+            service.CompleteJob(id, 0);
 
             // The notification should have been posted to the sync context, not invoked directly
             Assert.Null(received);
@@ -46,13 +46,13 @@ public class JobServiceNotificationThreadSafetyTests
 
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 1);
+            null, 1);
 
         JobNotification? received = null;
         service.NotificationReady += n => received = n;
 
         var id = service.StartJob("MakePr", Path.GetTempPath());
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         Assert.NotNull(received);
         Assert.Equal("MakePr Completed", received.Title);
@@ -66,22 +66,16 @@ public class JobServiceNotificationThreadSafetyTests
 
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 10);
+            null, 10);
 
         var notifications = new ConcurrentQueue<JobNotification>();
         service.NotificationReady += n => notifications.Enqueue(n);
 
         // Complete multiple jobs rapidly
         var ids = new List<string>();
-        for (var i = 0; i < 5; i++)
-        {
-            ids.Add(service.StartJob("MakePr", Path.GetTempPath()));
-        }
+        for (var i = 0; i < 5; i++) ids.Add(service.StartJob("MakePr", Path.GetTempPath()));
 
-        foreach (var id in ids)
-        {
-            service.CompleteJob(id, exitCode: 0);
-        }
+        foreach (var id in ids) service.CompleteJob(id, 0);
 
         Assert.Equal(5, notifications.Count);
 
@@ -100,13 +94,13 @@ public class JobServiceNotificationThreadSafetyTests
 
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 1);
+            null, 1);
 
         JobNotification? received = null;
         service.NotificationReady += n => received = n;
 
         var id = service.StartJob("ExecutePlan", Path.GetTempPath());
-        service.CompleteJob(id, exitCode: 1);
+        service.CompleteJob(id, 1);
 
         Assert.NotNull(received);
         Assert.Equal("ExecutePlan Failed", received.Title);

@@ -8,8 +8,8 @@ public class AcceptWithNotesDialog(
     Action<string> onAccept) : ViewBase
 {
     private readonly IState<bool> _dialogOpen = dialogOpen;
-    private readonly Recommendation _recommendation = recommendation;
     private readonly Action<string> _onAccept = onAccept;
+    private readonly Recommendation _recommendation = recommendation;
 
     public override object? Build()
     {
@@ -22,9 +22,9 @@ public class AcceptWithNotesDialog(
             new DialogHeader("Accept with Notes"),
             new DialogBody(
                 Layout.Vertical().Gap(2)
-                    | Text.Block("Add notes to include with this recommendation:").Muted()
-                    | new Markdown(_recommendation.Description)
-                    | notesText.ToTextareaInput("Enter your notes...").Rows(6).AutoFocus()
+                | Text.Block("Add notes to include with this recommendation:").Muted()
+                | new Markdown(_recommendation.Description)
+                | notesText.ToTextareaInput("Enter your notes...").Rows(6).AutoFocus()
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() => _dialogOpen.Set(false)),

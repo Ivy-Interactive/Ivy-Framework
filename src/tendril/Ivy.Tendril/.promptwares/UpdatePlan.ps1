@@ -19,7 +19,7 @@ if ($latestRevision) {
     }
 }
 
-$planInfo = ReadPlanProject $planYamlPath
+$planInfo = ReadPlanYaml $planYamlPath
 
 UpdatePlanState $PlanPath "Updating"
 

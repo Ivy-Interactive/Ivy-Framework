@@ -1,6 +1,7 @@
-# Source: https://www.anthropic.com/pricing
-# Last verified: 2026-04-03
+# Source: https://www.anthropic.com/pricing, https://openai.com/api/pricing/, https://ai.google.dev/pricing
+# Last verified: 2026-04-07
 models:
+  # Claude (Anthropic)
   claude-opus-4:
     input: 15.00
     output: 75.00
@@ -16,3 +17,37 @@ models:
     output: 4.00
     cacheWrite: 1.00
     cacheRead: 0.08
+
+  # OpenAI (Codex / GPT)
+  o3:
+    input: 10.00
+    output: 40.00
+    cacheWrite: 0.0
+    cacheRead: 2.50
+  o4-mini:
+    input: 1.10
+    output: 4.40
+    cacheWrite: 0.0
+    cacheRead: 0.275
+  gpt-4.1:
+    input: 2.00
+    output: 8.00
+    cacheWrite: 0.0
+    cacheRead: 0.50
+  codex-mini:
+    input: 1.50
+    output: 6.00
+    cacheWrite: 0.0
+    cacheRead: 0.375
+
+  # Google (Gemini)
+  gemini-2.5-pro:
+    input: 1.25
+    output: 10.00
+    cacheWrite: 0.0
+    cacheRead: 0.315
+  gemini-2.5-flash:
+    input: 0.15
+    output: 0.60
+    cacheWrite: 0.0
+    cacheRead: 0.0375

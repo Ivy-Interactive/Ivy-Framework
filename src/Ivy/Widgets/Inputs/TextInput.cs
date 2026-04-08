@@ -70,6 +70,8 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public bool AutoFocus { get; set; }
 
+    [Prop] public bool Ghost { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
     [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
@@ -240,6 +242,8 @@ public static class TextInputExtensions
     public static TextInputBase Placeholder(this TextInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 
     public static TextInputBase Disabled(this TextInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
+
+    public static TextInputBase Ghost(this TextInputBase widget, bool ghost = true) => widget with { Ghost = ghost };
 
     public static TextInputBase Variant(this TextInputBase widget, TextInputVariant variant)
     {

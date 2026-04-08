@@ -146,9 +146,10 @@ DataTable uses Glide Data Grid — renders as `<canvas>`, NOT HTML `<table>`.
 
 ### ECharts
 
-- Uses **echarts-for-react** rendering as **SVG** by default — `page.locator('canvas')` won't work
+- Uses **echarts-for-react** rendering as **canvas** (not SVG) — `querySelectorAll('text')` won't find axis labels
 - Locate via: `page.locator('[_echarts_instance_]')`; `data-chart-rendered="true"` indicates ready
-- Use React fiber to read chart data (walk from canvas to `memoizedProps.option`), not `__ec_instance__`/`_ec_`
+- Use React fiber to read chart options: walk `__reactFiber` tree from `[_echarts_instance_]` element to find `memoizedProps.option`, then inspect `option.xAxis`, `option.yAxis`, etc.
+- To verify axis properties (e.g., `show: false` for hidden axes), read the ECharts option object via React fiber — DOM text inspection doesn't work with canvas rendering
 - `option.radar` can be object or array — always normalize with `Array.isArray`
 - Case sensitivity: axes/labels visible but no data lines → suspect dataKey case mismatch
 - Screenshot-based verification needs 3s+ waits

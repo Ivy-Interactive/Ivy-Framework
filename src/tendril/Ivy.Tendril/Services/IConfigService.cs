@@ -20,5 +20,7 @@ public interface IConfigService
     string? GetPendingTendrilHome();
     void SetPendingProject(ProjectConfig project);
     ProjectConfig? GetPendingProject();
+    void SetPendingVerificationDefinitions(List<VerificationConfig> definitions);
+    List<VerificationConfig>? GetPendingVerificationDefinitions();
     void CompleteOnboarding(string tendrilHome);
 }

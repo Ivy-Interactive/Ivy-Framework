@@ -17,7 +17,7 @@ public class JobServiceHookTests
                 new()
                 {
                     Name = projectName,
-                    Hooks = hooks,
+                    Hooks = hooks
                 }
             }
         };
@@ -40,7 +40,7 @@ public class JobServiceHookTests
         var hooks = new List<PromptwareHookConfig>
         {
             new() { Name = "Before Hook", When = "before", Action = "Write-Host before" },
-            new() { Name = "After Hook", When = "after", Action = "Write-Host after" },
+            new() { Name = "After Hook", When = "after", Action = "Write-Host after" }
         };
         var (service, _) = CreateServiceWithHooks(hooks);
         var planFolder = CreateTempPlanFolder();
@@ -54,7 +54,7 @@ public class JobServiceHookTests
             Assert.Contains(job.OutputLines, l => l.Contains("[hook:Before Hook]"));
             Assert.DoesNotContain(job.OutputLines, l => l.Contains("[hook:After Hook]"));
 
-            service.CompleteJob(id, exitCode: 0);
+            service.CompleteJob(id, 0);
 
             // After hooks should now have run
             Assert.Contains(job.OutputLines, l => l.Contains("[hook:After Hook]"));
@@ -70,7 +70,10 @@ public class JobServiceHookTests
     {
         var hooks = new List<PromptwareHookConfig>
         {
-            new() { Name = "Global Hook", When = "before", Promptwares = new(), Action = "Write-Host global" },
+            new()
+            {
+                Name = "Global Hook", When = "before", Promptwares = new List<string>(), Action = "Write-Host global"
+            }
         };
         var (service, _) = CreateServiceWithHooks(hooks);
         var planFolder = CreateTempPlanFolder();
@@ -82,7 +85,7 @@ public class JobServiceHookTests
 
             Assert.Contains(job.OutputLines, l => l.Contains("[hook:Global Hook]"));
 
-            service.CompleteJob(id, exitCode: 0);
+            service.CompleteJob(id, 0);
         }
         finally
         {
@@ -100,8 +103,8 @@ public class JobServiceHookTests
                 Name = "Execute Only",
                 When = "before",
                 Promptwares = new List<string> { "ExecutePlan" },
-                Action = "Write-Host execute-only",
-            },
+                Action = "Write-Host execute-only"
+            }
         };
         var (service, _) = CreateServiceWithHooks(hooks);
         var planFolder = CreateTempPlanFolder();
@@ -114,7 +117,7 @@ public class JobServiceHookTests
 
             Assert.DoesNotContain(job.OutputLines, l => l.Contains("[hook:Execute Only]"));
 
-            service.CompleteJob(id, exitCode: 0);
+            service.CompleteJob(id, 0);
         }
         finally
         {
@@ -131,8 +134,8 @@ public class JobServiceHookTests
             {
                 Name = "Bad Hook",
                 When = "before",
-                Action = "exit 1",
-            },
+                Action = "exit 1"
+            }
         };
         var (service, _) = CreateServiceWithHooks(hooks);
         var planFolder = CreateTempPlanFolder();
@@ -145,7 +148,7 @@ public class JobServiceHookTests
             // Job should still be running despite hook failure
             Assert.Equal(JobStatus.Running, job.Status);
 
-            service.CompleteJob(id, exitCode: 0);
+            service.CompleteJob(id, 0);
             Assert.Equal(JobStatus.Completed, job.Status);
         }
         finally
@@ -164,8 +167,8 @@ public class JobServiceHookTests
                 Name = "Conditional Hook",
                 When = "before",
                 Condition = "$false",
-                Action = "Write-Host should-not-run",
-            },
+                Action = "Write-Host should-not-run"
+            }
         };
         var (service, _) = CreateServiceWithHooks(hooks);
         var planFolder = CreateTempPlanFolder();
@@ -175,10 +178,11 @@ public class JobServiceHookTests
             var id = service.StartJob("ExecutePlan", planFolder);
             var job = service.GetJob(id)!;
 
-            Assert.Contains(job.OutputLines, l => l.Contains("[hook:Conditional Hook]") && l.Contains("Condition not met"));
+            Assert.Contains(job.OutputLines,
+                l => l.Contains("[hook:Conditional Hook]") && l.Contains("Condition not met"));
             Assert.DoesNotContain(job.OutputLines, l => l.Contains("should-not-run"));
 
-            service.CompleteJob(id, exitCode: 0);
+            service.CompleteJob(id, 0);
         }
         finally
         {
@@ -200,7 +204,7 @@ public class JobServiceHookTests
             [JobStatus.Failed] = "Failed",
             [JobStatus.Timeout] = "Timeout",
             [JobStatus.Stopped] = "Stopped",
-            [JobStatus.Blocked] = "Blocked",
+            [JobStatus.Blocked] = "Blocked"
         };
 
         foreach (var (status, expectedString) in expected)
@@ -227,8 +231,8 @@ public class JobServiceHookTests
                     } else {
                         Write-Host ""Job status: $env:TENDRIL_JOB_STATUS""
                     }
-                ",
-            },
+                "
+            }
         };
         var (service, _) = CreateServiceWithHooks(hooks);
         var planFolder = CreateTempPlanFolder();
@@ -236,7 +240,7 @@ public class JobServiceHookTests
         try
         {
             var id = service.StartJob("ExecutePlan", planFolder);
-            service.CompleteJob(id, exitCode: 0);
+            service.CompleteJob(id, 0);
 
             var job = service.GetJob(id)!;
             Assert.Contains(job.OutputLines, l => l.Contains("Job completed successfully"));
@@ -264,8 +268,8 @@ public class JobServiceHookTests
                     } else {
                         Write-Host ""Job status: $env:TENDRIL_JOB_STATUS""
                     }
-                ",
-            },
+                "
+            }
         };
         var (service, _) = CreateServiceWithHooks(hooks);
         var planFolder = CreateTempPlanFolder();
@@ -273,7 +277,7 @@ public class JobServiceHookTests
         try
         {
             var id = service.StartJob("ExecutePlan", planFolder);
-            service.CompleteJob(id, exitCode: 1);
+            service.CompleteJob(id, 1);
 
             var job = service.GetJob(id)!;
             Assert.Contains(job.OutputLines, l => l.Contains("Job failed"));
@@ -295,8 +299,8 @@ public class JobServiceHookTests
             {
                 Name = "Status Hook",
                 When = "after",
-                Action = "Write-Host $env:TENDRIL_JOB_STATUS",
-            },
+                Action = "Write-Host $env:TENDRIL_JOB_STATUS"
+            }
         };
         var (service, _) = CreateServiceWithHooks(hooks);
         var planFolder = CreateTempPlanFolder();
@@ -304,7 +308,7 @@ public class JobServiceHookTests
         try
         {
             var id = service.StartJob("ExecutePlan", planFolder);
-            service.CompleteJob(id, exitCode: 0);
+            service.CompleteJob(id, 0);
 
             var job = service.GetJob(id)!;
             Assert.Contains(job.OutputLines, l => l.Contains("[hook:Status Hook]") && l.Contains("Completed"));
@@ -327,6 +331,6 @@ public class JobServiceHookTests
         // Should not throw, just silently skip hooks
         Assert.Equal(JobStatus.Running, job.Status);
 
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
     }
 }

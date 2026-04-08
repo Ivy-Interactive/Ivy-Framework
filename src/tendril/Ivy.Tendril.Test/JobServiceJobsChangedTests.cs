@@ -18,7 +18,7 @@ public class JobServiceJobsChangedTests
 
         var fired = false;
         service.JobsChanged += () => fired = true;
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         Assert.True(fired);
     }
@@ -31,7 +31,7 @@ public class JobServiceJobsChangedTests
 
         var fired = false;
         service.JobsChanged += () => fired = true;
-        service.CompleteJob(id, exitCode: 1);
+        service.CompleteJob(id, 1);
 
         Assert.True(fired);
     }

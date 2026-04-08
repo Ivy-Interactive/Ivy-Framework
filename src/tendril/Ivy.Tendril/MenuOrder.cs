@@ -1,8 +1,8 @@
 namespace Ivy.Tendril;
 
 /// <summary>
-/// Defines the menu ordering for Tendril apps.
-/// Lower values appear first in the menu.
+///     Defines the menu ordering for Tendril apps.
+///     Lower values appear first in the menu.
 /// </summary>
 public static class MenuOrder
 {

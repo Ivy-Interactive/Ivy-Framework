@@ -25,7 +25,7 @@ public class JobServiceConcurrencyTests
         // maxConcurrentJobs=0 means all jobs get queued
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 0);
+            null, 0);
 
         var id = service.StartJob("MakePlan", "-Description", "Test Job");
         var job = service.GetJob(id);
@@ -41,7 +41,7 @@ public class JobServiceConcurrencyTests
         // maxConcurrentJobs=10 and no running jobs — should not queue
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 10);
+            null, 10);
 
         // This will try to launch a process which will fail,
         // but the initial status should be "Running" not "Queued"
@@ -63,7 +63,7 @@ public class JobServiceConcurrencyTests
     {
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 0);
+            null, 0);
 
         service.StartJob("MakePlan", "-Description", "Job 1");
         service.StartJob("MakePlan", "-Description", "Job 2");
@@ -78,7 +78,7 @@ public class JobServiceConcurrencyTests
     {
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 0);
+            null, 0);
 
         var id = service.StartJob("MakePlan", "-Description", "Test Job");
         service.StopJob(id);

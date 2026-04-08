@@ -6,6 +6,11 @@ end_of_line = lf
 # IDE0005: Remove unnecessary using directives
 dotnet_diagnostic.IDE0005.severity = warning
 
+[**/GlobalUsings.cs]
+# GlobalUsings.cs files contain shared usings consumed by other projects.
+# Suppress IDE0005 to prevent dotnet format from removing them.
+dotnet_diagnostic.IDE0005.severity = none
+
 [*.tsx]
 end_of_line = lf
 

@@ -113,6 +113,9 @@ fn main() {
             
             println!("Converting {} files...", paths.len());
             
+            let manifest_content = api_docs.as_ref().and_then(|p| fs::read_to_string(p).ok());
+            let manifest_hash = manifest_content.as_ref().map(|c| llm_markdown::get_short_hash(c, 8));
+
             // Parallel processing
             paths.par_iter().for_each(|absolute_input_path| {
                 let filename = absolute_input_path.file_name().unwrap().to_str().unwrap();
@@ -172,6 +175,7 @@ fn main() {
                     &md_output,
                     skip_if_not_changed,
                     &api_docs_manifest,
+                    manifest_hash.as_deref(),
                 ) {
                     println!("Error generating LLM markdown for {}: {}", name, e);
                 }

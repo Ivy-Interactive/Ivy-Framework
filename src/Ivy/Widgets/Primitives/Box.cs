@@ -67,9 +67,17 @@ public static class BoxExtensions
 
     public static Box Padding(this Box box, Thickness padding) => box with { Padding = padding };
 
+    public static Box Padding(this Box box, int horizontal, int vertical) => box with { Padding = new(horizontal, vertical) };
+
+    public static Box Padding(this Box box, int left, int top, int right, int bottom) => box with { Padding = new(left, top, right, bottom) };
+
     public static Box Margin(this Box box, int margin) => box with { Margin = new(margin) };
 
     public static Box Margin(this Box box, Thickness margin) => box with { Margin = margin };
+
+    public static Box Margin(this Box box, int horizontal, int vertical) => box with { Margin = new(horizontal, vertical) };
+
+    public static Box Margin(this Box box, int left, int top, int right, int bottom) => box with { Margin = new(left, top, right, bottom) };
 
     public static Box Content(this Box box, params object[] content) => box with { Children = content };
 

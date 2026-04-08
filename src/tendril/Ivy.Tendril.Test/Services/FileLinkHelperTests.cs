@@ -108,18 +108,53 @@ public class FileLinkHelperTests
 
         public T Value { get; set; }
 
-        public T Set(T value) => Value = value;
+        public T Set(T value)
+        {
+            return Value = value;
+        }
 
-        public T Set(Func<T, T> setter) => Value = setter(Value);
+        public T Set(Func<T, T> setter)
+        {
+            return Value = setter(Value);
+        }
 
-        public T Reset() => Value = _initial;
+        public T Reset()
+        {
+            return Value = _initial;
+        }
 
-        public IDisposable Subscribe(IObserver<T> observer) => throw new NotImplementedException();
-        public IDisposable SubscribeAny(Action action) => throw new NotImplementedException();
-        public IDisposable SubscribeAny(Action<object?> action) => throw new NotImplementedException();
-        public Type GetStateType() => typeof(T);
-        public object? GetValueAsObject() => Value;
-        public void Dispose() { }
-        public IEffectTrigger ToTrigger() => throw new NotImplementedException();
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IDisposable SubscribeAny(Action action)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IDisposable SubscribeAny(Action<object?> action)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Type GetStateType()
+        {
+            return typeof(T);
+        }
+
+        public object? GetValueAsObject()
+        {
+            return Value;
+        }
+
+        public void Dispose()
+        {
+        }
+
+        public IEffectTrigger ToTrigger()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

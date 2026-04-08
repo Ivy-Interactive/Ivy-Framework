@@ -21,7 +21,12 @@ Read the project configuration from the `TENDRIL_CONFIG` environment variable (a
 
 Args contains the user's task description. If it references related plans with `[number]` syntax (e.g. `[01205]`), find and read those plan files from `PlansDirectory` for context.
 
-**Extract Force Flag**: If args starts with `[FORCE] `, set an internal flag to skip duplicate detection (see Step 3), then strip `[FORCE] ` entirely from the description. The cleaned description should be used for all subsequent steps (title, plan.yaml, etc.). Never let `[FORCE]` appear in any plan field or title.
+**Extract Flags**: Check for special flags at the end of args:
+
+- **Force Flag**: If args ends with ` [FORCE]`, set an internal flag to skip duplicate detection (see Step 3), then strip ` [FORCE]` from the description.
+- **YOLO Flag**: If args ends with ` [YOLO]` (or appears before ` [FORCE]`), set an internal flag to auto-execute the plan after creation (see Step 6), then strip ` [YOLO]` from the description.
+
+Flags can be combined (e.g., `task description [YOLO] [FORCE]` or `task description [FORCE] [YOLO]`). Strip all flags. The cleaned description should be used for all subsequent steps (title, plan.yaml, etc.). Never let flags appear in any plan field or title.
 
 ### 1.5. Load Project Context
 
@@ -42,7 +47,7 @@ The plan ID is pre-allocated by the launcher script and provided in the firmware
 
 ### 3. Research
 
-- **Check for duplicate plans** first — **unless the force flag was set in Step 1** (args started with `[FORCE]`), in which case skip duplicate detection entirely. List existing plan folders in `PlansDirectory` and scan their `plan.yaml` titles. If an existing plan already covers the same issue (same problem, same project), perform **state-aware duplicate detection** before deciding:
+- **Check for duplicate plans** first — **unless the force flag was set in Step 1** (args ended with ` [FORCE]`), in which case skip duplicate detection entirely. List existing plan folders in `PlansDirectory` and scan their `plan.yaml` titles. If an existing plan already covers the same issue (same problem, same project), perform **state-aware duplicate detection** before deciding:
 
   #### Step 1: Read existing plan state
   
@@ -104,6 +109,9 @@ The plan ID is pre-allocated by the launcher script and provided in the firmware
   ```
 
   The Trash directory is at `$env:TENDRIL_HOME/Trash`.
+
+  **Note:** When writing trash files, use `-Force` with `Set-Content` or `Out-File` to ensure synchronous writes, as the parent process checks for the file immediately after exit.
+
 - Read relevant source files to understand the codebase areas involved
 - **Search GitHub issues** before creating plans to avoid duplicates or workaround plans for features already being built. Example:
   ```bash
@@ -176,14 +184,12 @@ If the plan references other plans (from `[number]` syntax in args), add them to
 - If any repo path doesn't exist, fail with error: "Repository path does not exist: `<path>`. Check config.yaml project configuration."
 - This prevents creating plans targeting non-existent repo paths (e.g. a deprecated `Ivy-Tendril` repo when the code actually lives in `Ivy-Framework/src/tendril/`)
 
-**Interface extraction plans**: When creating plans that extract interfaces from concrete service types, perform an exhaustive consumer audit:
-1. Use grep to find ALL consumers across ALL resolution patterns:
-   - `UseService<ConcreteType>()`
-   - Constructor parameter injection: `ConcreteType paramName`
-   - Field/property declarations: `_concreteType` or `concreteType:`
-2. List EVERY consumer with file path and line number in the plan revision
-3. Validate count: grep results should match documented consumers
-4. Incomplete consumer lists cause follow-up plans during execution (see Memory/interface-extraction-consumer-audit.md)
+**Rename/refactor plans (caller enumeration)**: When creating plans that rename functions, change method signatures, extract interfaces, or otherwise require updating callers:
+1. Use `Grep` to search the **entire repo root** (not just the expected directory) for all usage patterns of the symbol being changed
+2. For interface extractions, also search DI-specific patterns: `UseService<ConcreteType>()`, constructor parameter injection, field/property declarations
+3. List EVERY caller with file path and line number in the plan revision
+4. Validate count: grep results must match documented callers
+5. Incomplete caller lists cause follow-up fixes during execution (see Memory/caller-audit-pattern.md)
 
 ### 4.5. Questions Section
 
@@ -245,6 +251,20 @@ Example for a Framework project plan:
 If the project has no verifications (e.g. `[Auto]`), leave the section empty or omit it.
 
 The user can edit the checklist before execution — unchecking a required verification or checking an optional one. ExecutePlan will run only the checked items.
+
+### 6. Auto-Execute Plan (YOLO Mode)
+
+If the YOLO flag was detected in Step 1, automatically execute the plan after creation:
+
+1. **Verify plan was created**: Confirm the plan folder exists at `PlansDirectory/<PlanId>-<SafeTitle>/`
+2. **Update plan state**: Change the plan's state from `Draft` to `Building` in `plan.yaml`
+3. **Invoke ExecutePlan**: Use `Tools/Invoke-ExecutePlan.ps1` to trigger plan execution:
+   ```powershell
+   & Tools/Invoke-ExecutePlan.ps1 -PlanPath "PlansDirectory/<PlanId>-<SafeTitle>"
+   ```
+4. **Report execution status**: Include the result of ExecutePlan in your summary to the user
+
+**Note**: If the plan was trashed in Step 3 (duplicate detection), skip this step entirely — there is no plan to execute.
 
 ### Rules
 

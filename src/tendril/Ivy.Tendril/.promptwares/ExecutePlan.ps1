@@ -7,7 +7,7 @@ param(
 
 $programFolder = GetProgramFolder $PSCommandPath
 $planYamlPath = ValidatePlanPath $PlanPath
-$planInfo = ReadPlanProject $planYamlPath
+$planInfo = ReadPlanYaml $planYamlPath
 
 # Verify plan is in Building state
 $currentState = if ($planInfo.Yaml.state) { $planInfo.Yaml.state } else { "Unknown" }
@@ -31,7 +31,7 @@ $promptFile = PrepareFirmware $PSScriptRoot $logFile $programFolder @{
     Project    = $planInfo.Project
 }
 
-$agent = GetAgentCommandFromConfig -Promptware "ExecutePlan"
+$agent = GetAgentCommand -Promptware "ExecutePlan"
 $sessionId = $env:TENDRIL_SESSION_ID
 if (-not $sessionId) {
     $sessionId = [guid]::NewGuid().ToString()
@@ -94,11 +94,21 @@ try {
             $verificationStatuses = $planYamlParsed.verifications | ForEach-Object { $_.status }
         }
 
-        $hasFailed = $verificationStatuses | Where-Object { $_ -eq "Fail" }
-        $hasPending = $verificationStatuses | Where-Object { $_ -eq "Pending" }
+        $failedNames = @()
+        $pendingNames = @()
+        foreach ($v in $planYamlParsed.verifications) {
+            if ($v.status -eq "Fail") { $failedNames += $v.name }
+            if ($v.status -eq "Pending") { $pendingNames += $v.name }
+        }
 
-        if ($hasFailed -or $hasPending) {
+        if ($failedNames.Count -gt 0 -or $pendingNames.Count -gt 0) {
             UpdatePlanState $PlanPath "Failed"
+            if ($failedNames.Count -gt 0) {
+                Write-Host "Failed verifications: $($failedNames -join ', ')" -ForegroundColor Red
+            }
+            if ($pendingNames.Count -gt 0) {
+                Write-Host "Incomplete verifications (still Pending): $($pendingNames -join ', ')" -ForegroundColor Yellow
+            }
             Write-Host "Plan has incomplete or failed verifications" -ForegroundColor Red
             exit 1  # Signal failure to JobService
         }

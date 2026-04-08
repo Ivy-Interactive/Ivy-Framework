@@ -34,6 +34,7 @@ const languageMap: Record<string, string> = {
   Css: "css",
   Json: "json",
   Dbml: "sql",
+  Markdown: "markdown",
   Text: "text",
   Xml: "xml",
   Yaml: "yaml",

@@ -1,12 +1,14 @@
+using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
 public class PlanReaderServiceComputePlanCountsTests : IDisposable
 {
-    private readonly string _tempDir;
     private readonly string _plansDir;
     private readonly PlanReaderService _service;
+    private readonly string _tempDir;
 
     public PlanReaderServiceComputePlanCountsTests()
     {
@@ -16,13 +18,13 @@ public class PlanReaderServiceComputePlanCountsTests : IDisposable
 
         var settings = new TendrilSettings();
         var configService = new ConfigService(settings, _tempDir);
-        _service = new PlanReaderService(configService, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlanReaderService>.Instance);
+        _service = new PlanReaderService(configService, NullLogger<PlanReaderService>.Instance);
     }
 
     public void Dispose()
     {
         if (Directory.Exists(_tempDir))
-            Directory.Delete(_tempDir, recursive: true);
+            Directory.Delete(_tempDir, true);
     }
 
     private void CreatePlan(string folderName, string state)
@@ -89,6 +91,19 @@ public class PlanReaderServiceComputePlanCountsTests : IDisposable
     }
 
     [Fact]
+    public void ComputePlanCounts_CountsBlockedPlansInDrafts()
+    {
+        CreatePlan("01030-Draft", "Draft");
+        CreatePlan("01031-Blocked1", "Blocked");
+        CreatePlan("01032-Blocked2", "Blocked");
+
+        var snapshot = _service.ComputePlanCounts();
+
+        // Blocked plans should count alongside drafts
+        Assert.Equal(3, snapshot.Drafts);
+    }
+
+    [Fact]
     public void ComputePlanCounts_MatchesIndividualMethods()
     {
         CreatePlan("01020-Draft", "Draft");
@@ -96,6 +111,7 @@ public class PlanReaderServiceComputePlanCountsTests : IDisposable
         CreatePlan("01022-Failed", "Failed");
         CreatePlan("01023-Icebox", "Icebox");
         CreatePlan("01024-Completed", "Completed");
+        CreatePlan("01025-Blocked", "Blocked");
         CreateRecommendations("01024-Completed",
             "- title: R1\n  description: d\n  state: Pending\n- title: R2\n  description: d\n  state: Resolved\n");
 
@@ -103,10 +119,10 @@ public class PlanReaderServiceComputePlanCountsTests : IDisposable
         var plans = _service.GetPlans();
         var pendingRecs = _service.GetPendingRecommendationsCount();
 
-        Assert.Equal(plans.Count(p => p.Status == Apps.Plans.PlanStatus.Draft), snapshot.Drafts);
-        Assert.Equal(plans.Count(p => p.Status == Apps.Plans.PlanStatus.ReadyForReview), snapshot.ReadyForReview);
-        Assert.Equal(plans.Count(p => p.Status == Apps.Plans.PlanStatus.Failed), snapshot.Failed);
-        Assert.Equal(plans.Count(p => p.Status == Apps.Plans.PlanStatus.Icebox), snapshot.Icebox);
+        Assert.Equal(plans.Count(p => p.Status is PlanStatus.Draft or PlanStatus.Blocked), snapshot.Drafts);
+        Assert.Equal(plans.Count(p => p.Status == PlanStatus.ReadyForReview), snapshot.ReadyForReview);
+        Assert.Equal(plans.Count(p => p.Status == PlanStatus.Failed), snapshot.Failed);
+        Assert.Equal(plans.Count(p => p.Status == PlanStatus.Icebox), snapshot.Icebox);
         Assert.Equal(pendingRecs, snapshot.PendingRecommendations);
     }
 }

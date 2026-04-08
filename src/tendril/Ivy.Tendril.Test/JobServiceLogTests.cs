@@ -1,5 +1,6 @@
 using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
@@ -13,8 +14,9 @@ public class JobServiceLogTests
         try
         {
             var configService = new ConfigService(new TendrilSettings(), tempDir);
-            var planReaderService = new PlanReaderService(configService, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlanReaderService>.Instance);
-            var jobService = new JobService(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(1), planReaderService: planReaderService);
+            var planReaderService = new PlanReaderService(configService, NullLogger<PlanReaderService>.Instance);
+            var jobService = new JobService(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(1),
+                planReaderService: planReaderService);
 
             var sessionId = Guid.NewGuid().ToString();
             var job = new JobItem
@@ -53,8 +55,9 @@ public class JobServiceLogTests
         try
         {
             var configService = new ConfigService(new TendrilSettings(), tempDir);
-            var planReaderService = new PlanReaderService(configService, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlanReaderService>.Instance);
-            var jobService = new JobService(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(1), planReaderService: planReaderService);
+            var planReaderService = new PlanReaderService(configService, NullLogger<PlanReaderService>.Instance);
+            var jobService = new JobService(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(1),
+                planReaderService: planReaderService);
 
             var job = new JobItem
             {

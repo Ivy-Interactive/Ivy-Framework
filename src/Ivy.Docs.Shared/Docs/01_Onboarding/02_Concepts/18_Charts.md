@@ -245,7 +245,7 @@ public class TickFormatterDemo : ViewBase
             .Line(new Line("Revenue"))
             .CartesianGrid(new CartesianGrid().Horizontal())
             .XAxis(new XAxis("Year").TickLine(false))
-            .YAxis(new YAxis("Revenue").TickFormatter("C0"))
+            .YAxis(new YAxis("Revenue").TickFormatter("C0", TickFormatterType.Number))
             .Tooltip();
     }
 }

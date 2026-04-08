@@ -29,6 +29,9 @@ public record DiffView : WidgetBase<DiffView>
     /// <summary>New file revision name displayed in the header</summary>
     [Prop] public string? NewRevision { get; init; }
 
+    /// <summary>Whether to wrap long lines instead of scrolling horizontally</summary>
+    [Prop] public bool WordWrap { get; init; } = false;
+
     [Event] public Func<Event<DiffView, int>, ValueTask>? OnLineClick { get; init; }
 }
 
@@ -51,6 +54,9 @@ public static class DiffViewExtensions
 
     public static DiffView NewRevision(this DiffView w, string name) =>
         w with { NewRevision = name };
+
+    public static DiffView WordWrap(this DiffView w, bool wordWrap = true) =>
+        w with { WordWrap = wordWrap };
 
     public static DiffView OnLineClick(
         this DiffView w,

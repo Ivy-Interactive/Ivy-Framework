@@ -1,7 +1,7 @@
 $scriptDir = $PSScriptRoot
 $docsPath = Join-Path $scriptDir "Docs"
 $outputPath = Join-Path $scriptDir "Generated"
-$toolProject = Join-Path $scriptDir "..\Ivy.Docs.Tools\Ivy.Docs.Tools.csproj"
+$rustToolCrate = Join-Path $scriptDir "..\Ivy.Docs.Tools\rust_cli\Cargo.toml"
 
 Write-Host "Watching for .md changes in $docsPath" -ForegroundColor Green
 Write-Host "Output: $outputPath" -ForegroundColor Gray
@@ -27,7 +27,7 @@ function Invoke-Compile {
     # Run from the Ivy.Docs.Shared directory with relative paths (matching how MSBuild runs it)
     Push-Location $scriptDir
     try {
-        & dotnet run --project $toolProject -- convert "Docs\*.md" "Generated" --skip-if-not-changed
+        & cargo run --release --manifest-path $rustToolCrate -- convert "Docs\*.md" "Generated" --skip-if-not-changed
     }
     finally {
         Pop-Location

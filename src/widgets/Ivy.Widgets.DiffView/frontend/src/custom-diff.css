@@ -1,0 +1,32 @@
+/* Force equal row heights in split mode */
+.diff[data-view-type="split"] tbody tr {
+  display: table-row;
+  height: auto;
+}
+
+.diff[data-view-type="split"] td {
+  vertical-align: top;
+  line-height: 1.5;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Ensure gutter and code cells have consistent height */
+.diff-gutter,
+.diff-code {
+  line-height: 1.5;
+  min-height: 1.5em;
+}
+
+/* Word wrap support */
+.diff-wrap .diff-code {
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.diff-wrap .diff-code-text {
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}

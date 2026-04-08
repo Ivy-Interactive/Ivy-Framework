@@ -41,13 +41,13 @@
 
 
 
-  <Target Name="TransformMarkdown" AfterTargets="GenerateApiDocsManifest" BeforeTargets="CoreCompile">
+
+  <Target Name="TransformMarkdown" BeforeTargets="CoreCompile">
     <PropertyGroup>
-      <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs', '*.md'))</DocsInputPath>
+      <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs'))</DocsInputPath>
       <DocsOutputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Generated'))</DocsOutputPath>
-      <ApiDocsManifestPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(IntermediateOutputPath), 'api-docs.json'))</ApiDocsManifestPath>
     </PropertyGroup>
-    <Exec Command="cargo run --release --manifest-path &quot;../Ivy.Docs.Tools/rust_cli/Cargo.toml&quot; -- convert &quot;$(DocsInputPath)&quot; &quot;$(DocsOutputPath)&quot; --skip-if-not-changed --api-docs &quot;$(ApiDocsManifestPath)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Exec Command="cargo run --release --manifest-path &quot;../Ivy.Docs.Tools/rust_cli/Cargo.toml&quot; -- convert &quot;$(DocsInputPath)&quot; &quot;$(DocsOutputPath)&quot; --skip-if-not-changed" WorkingDirectory="$(MSBuildProjectDirectory)" />
     <ItemGroup>
       <Compile Include="Generated/**/*.g.cs" />
       <EmbeddedResource Remove="Generated/**/*.md" />

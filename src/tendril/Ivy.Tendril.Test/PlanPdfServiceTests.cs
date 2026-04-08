@@ -1,3 +1,4 @@
+using System.Text;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Test;
@@ -35,7 +36,7 @@ public class PlanPdfServiceTests
 
         // Assert - PDF files start with "%PDF"
         Assert.True(result.Length >= 4, "PDF should be at least 4 bytes");
-        var header = System.Text.Encoding.ASCII.GetString(result, 0, 4);
+        var header = Encoding.ASCII.GetString(result, 0, 4);
         Assert.Equal("%PDF", header);
     }
 
@@ -54,7 +55,7 @@ public class PlanPdfServiceTests
         // Assert - Should not throw and should produce valid PDF
         Assert.NotNull(result);
         Assert.NotEmpty(result);
-        var header = System.Text.Encoding.ASCII.GetString(result, 0, 4);
+        var header = Encoding.ASCII.GetString(result, 0, 4);
         Assert.Equal("%PDF", header);
     }
 }

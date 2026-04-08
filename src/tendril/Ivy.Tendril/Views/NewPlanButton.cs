@@ -5,7 +5,7 @@ namespace Ivy.Tendril.Views;
 
 public class NewPlanButton : ViewBase
 {
-    public override object? Build()
+    public override object Build()
     {
         var jobService = UseService<IJobService>();
         var configService = UseService<IConfigService>();
@@ -25,18 +25,16 @@ public class NewPlanButton : ViewBase
         };
 
         if (dialogOpen.Value)
-        {
             elements.Add(new CreatePlanDialog(
-                projectNames: projectNames,
-                onCreatePlan: (description, project) =>
+                projectNames,
+                (description, project) =>
                 {
                     lastSelectedProject.Set(project);
-                    jobService.StartJob("MakePlan", "-Description", $"[FORCE] {description}", "-Project", project);
+                    jobService.StartJob("MakePlan", "-Description", $"{description} [FORCE]", "-Project", project);
                 },
-                onClose: () => dialogOpen.Set(false),
-                defaultProject: lastSelectedProject.Value
+                () => dialogOpen.Set(false),
+                lastSelectedProject.Value
             ));
-        }
 
         return new Fragment(elements.ToArray());
     }

@@ -9,6 +9,7 @@ public interface ITelemetryService
     void TrackPrCreated(PrCreatedContext context);
     void TrackJobCompleted(string jobType, JobStatus status, int? durationSeconds);
     void TrackPlanStateTransition(string fromState, string toState);
+    Task IdentifyAsync(string appVersion);
     Task FlushAsync();
 }
 

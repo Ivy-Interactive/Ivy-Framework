@@ -134,33 +134,3 @@ projects:
         $projectConfig | Should -BeNullOrEmpty
     }
 }
-
-Describe "custom-pr-options.yaml parsing with ConvertFrom-Yaml" {
-    It "extracts slackComment" {
-        $yaml = @"
-slackComment: "Great work on this feature!"
-"@
-        $options = ConvertFrom-Yaml $yaml
-        $options.slackComment | Should -Be "Great work on this feature!"
-    }
-
-    It "handles missing slackComment" {
-        $yaml = @"
-otherOption: value
-"@
-        $options = ConvertFrom-Yaml $yaml
-        $slackComment = ""
-        if ($options.slackComment) {
-            $slackComment = $options.slackComment
-        }
-        $slackComment | Should -Be ""
-    }
-
-    It "handles slackComment with special characters" {
-        $yaml = @"
-slackComment: "Contains: colons and *markdown*"
-"@
-        $options = ConvertFrom-Yaml $yaml
-        $options.slackComment | Should -Be "Contains: colons and *markdown*"
-    }
-}

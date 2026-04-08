@@ -1,13 +1,14 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Ivy.Tendril.Services;
 
 public class GithubService(IConfigService config) : IGithubService
 {
-    private readonly IConfigService _config = config;
     private readonly ConcurrentDictionary<string, List<string>> _assigneeCache = new();
+    private readonly IConfigService _config = config;
     private readonly ConcurrentDictionary<string, List<string>> _labelCache = new();
     private List<RepoConfig>? _repoCache;
 
@@ -33,6 +34,28 @@ public class GithubService(IConfigService config) : IGithubService
         return repos;
     }
 
+    public async Task<List<string>> GetAssigneesAsync(string owner, string repo)
+    {
+        var key = $"{owner}/{repo}";
+        if (_assigneeCache.TryGetValue(key, out var cached))
+            return cached;
+
+        var assignees = await FetchAssigneesFromGhCliAsync(owner, repo);
+        _assigneeCache[key] = assignees;
+        return assignees;
+    }
+
+    public async Task<List<string>> GetLabelsAsync(string owner, string repo)
+    {
+        var key = $"{owner}/{repo}";
+        if (_labelCache.TryGetValue(key, out var cached))
+            return cached;
+
+        var labels = await FetchLabelsFromGhCliAsync(owner, repo);
+        _labelCache[key] = labels;
+        return labels;
+    }
+
     internal static RepoConfig? GetRepoConfigFromPath(string repoPath)
     {
         try
@@ -44,8 +67,8 @@ public class GithubService(IConfigService config) : IGithubService
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                StandardOutputEncoding = System.Text.Encoding.UTF8,
-                StandardErrorEncoding = System.Text.Encoding.UTF8,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8
             };
 
             using var process = Process.Start(psi);
@@ -75,28 +98,6 @@ public class GithubService(IConfigService config) : IGithubService
         };
     }
 
-    public async Task<List<string>> GetAssigneesAsync(string owner, string repo)
-    {
-        var key = $"{owner}/{repo}";
-        if (_assigneeCache.TryGetValue(key, out var cached))
-            return cached;
-
-        var assignees = await FetchAssigneesFromGhCliAsync(owner, repo);
-        _assigneeCache[key] = assignees;
-        return assignees;
-    }
-
-    public async Task<List<string>> GetLabelsAsync(string owner, string repo)
-    {
-        var key = $"{owner}/{repo}";
-        if (_labelCache.TryGetValue(key, out var cached))
-            return cached;
-
-        var labels = await FetchLabelsFromGhCliAsync(owner, repo);
-        _labelCache[key] = labels;
-        return labels;
-    }
-
     private static async Task<List<string>> FetchLabelsFromGhCliAsync(string owner, string repo)
     {
         try
@@ -107,12 +108,12 @@ public class GithubService(IConfigService config) : IGithubService
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                StandardOutputEncoding = System.Text.Encoding.UTF8,
-                StandardErrorEncoding = System.Text.Encoding.UTF8,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8
             };
 
             using var process = Process.Start(psi);
-            if (process is null) return new();
+            if (process is null) return new List<string>();
 
             var output = await process.StandardOutput.ReadToEndAsync();
             var stderr = await process.StandardError.ReadToEndAsync();
@@ -121,7 +122,7 @@ public class GithubService(IConfigService config) : IGithubService
             if (process.ExitCode != 0)
             {
                 Console.Error.WriteLine($"[GithubService] gh api labels failed for {owner}/{repo}: {stderr}");
-                return new();
+                return new List<string>();
             }
 
             return output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -131,7 +132,7 @@ public class GithubService(IConfigService config) : IGithubService
         catch (Exception ex)
         {
             Console.Error.WriteLine($"[GithubService] Failed to fetch labels for {owner}/{repo}: {ex.Message}");
-            return new();
+            return new List<string>();
         }
     }
 
@@ -145,12 +146,12 @@ public class GithubService(IConfigService config) : IGithubService
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                StandardOutputEncoding = System.Text.Encoding.UTF8,
-                StandardErrorEncoding = System.Text.Encoding.UTF8,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8
             };
 
             using var process = Process.Start(psi);
-            if (process is null) return new();
+            if (process is null) return new List<string>();
 
             var output = await process.StandardOutput.ReadToEndAsync();
             var stderr = await process.StandardError.ReadToEndAsync();
@@ -159,7 +160,7 @@ public class GithubService(IConfigService config) : IGithubService
             if (process.ExitCode != 0)
             {
                 Console.Error.WriteLine($"[GithubService] gh api assignees failed for {owner}/{repo}: {stderr}");
-                return new();
+                return new List<string>();
             }
 
             return output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -169,7 +170,7 @@ public class GithubService(IConfigService config) : IGithubService
         catch (Exception ex)
         {
             Console.Error.WriteLine($"[GithubService] Failed to fetch assignees for {owner}/{repo}: {ex.Message}");
-            return new();
+            return new List<string>();
         }
     }
 }

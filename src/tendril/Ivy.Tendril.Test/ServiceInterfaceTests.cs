@@ -1,4 +1,5 @@
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
@@ -15,7 +16,7 @@ public class ServiceInterfaceTests : IDisposable
     public void Dispose()
     {
         if (Directory.Exists(_tempDir))
-            Directory.Delete(_tempDir, recursive: true);
+            Directory.Delete(_tempDir, true);
     }
 
     [Fact]
@@ -23,7 +24,7 @@ public class ServiceInterfaceTests : IDisposable
     {
         var settings = new TendrilSettings();
         var config = new ConfigService(settings, _tempDir);
-        var service = new PlanReaderService(config, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlanReaderService>.Instance);
+        var service = new PlanReaderService(config, NullLogger<PlanReaderService>.Instance);
 
         Assert.IsAssignableFrom<IPlanReaderService>(service);
     }

@@ -1,7 +1,7 @@
 import React from "react";
 import { MenuItem } from "@/types/widgets";
-import { ActionRenderer } from "./actionRenderer";
-import { getActionId } from "./utils";
+import { ActionRenderer } from "@/widgets/rowAction";
+import { getActionId } from "@/widgets/rowAction/utils";
 
 interface RowActionButtonsProps {
   /**

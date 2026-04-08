@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Ivy.Tendril.Apps.Plans;
 using Microsoft.Extensions.Logging;
@@ -6,10 +7,10 @@ namespace Ivy.Tendril.Services;
 
 public class PlanDatabaseSyncService : IDisposable
 {
-    private readonly PlanReaderService _planReader;
     private readonly IPlanDatabaseService _database;
-    private readonly IPlanWatcherService _watcher;
     private readonly ILogger<PlanDatabaseSyncService> _logger;
+    private readonly PlanReaderService _planReader;
+    private readonly IPlanWatcherService _watcher;
     private volatile bool _isInitialSyncComplete;
 
     public PlanDatabaseSyncService(
@@ -28,16 +29,24 @@ public class PlanDatabaseSyncService : IDisposable
 
     public bool IsInitialSyncComplete => _isInitialSyncComplete;
 
+    public void Dispose()
+    {
+        _watcher.PlansChanged -= OnPlansChanged;
+    }
+
     public void PerformInitialSync()
     {
         try
         {
             _logger.LogInformation("Starting initial database sync...");
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var stopwatch = Stopwatch.StartNew();
 
-            // Read directly from file system to avoid circular dependency
+            // Read directly from file system to avoid circular dependency.
+            // Force overwrite to ensure filesystem is source of truth on startup,
+            // even if the DB has newer timestamps from prior state transitions.
             var plans = _planReader.GetPlansFromFileSystem();
-            _database.BulkUpsertPlans(plans);
+            _logger.LogInformation("Filesystem returned {Count} plans for sync", plans.Count);
+            _database.BulkUpsertPlans(plans, true);
 
             foreach (var plan in plans)
             {
@@ -45,6 +54,7 @@ public class PlanDatabaseSyncService : IDisposable
                 SyncPlanRecommendations(plan);
             }
 
+            _database.PurgeOldJobs();
             _database.SetLastSyncTime(DateTime.UtcNow);
             _isInitialSyncComplete = true;
 
@@ -59,30 +69,49 @@ public class PlanDatabaseSyncService : IDisposable
         {
             _logger.LogError(ex, "Initial database sync failed");
             _isInitialSyncComplete = true;
+            // Don't enable database reads — fall back to filesystem
         }
     }
 
-    private void OnPlansChanged()
+    private void OnPlansChanged(string? changedPlanFolder)
     {
         if (!_isInitialSyncComplete) return;
 
         try
         {
-            // Read from file system for sync
-            var plans = _planReader.GetPlansFromFileSystem();
-            _database.BulkUpsertPlans(plans);
-
-            foreach (var plan in plans)
-            {
-                SyncPlanCosts(plan);
-                SyncPlanRecommendations(plan);
-            }
+            if (changedPlanFolder != null && Directory.Exists(changedPlanFolder))
+                SyncSinglePlan(changedPlanFolder);
+            else
+                SyncAllPlans();
 
             _database.SetLastSyncTime(DateTime.UtcNow);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Incremental sync failed");
+        }
+    }
+
+    private void SyncSinglePlan(string planFolder)
+    {
+        var plan = _planReader.ParseSinglePlanFolder(planFolder);
+        if (plan != null)
+        {
+            _database.UpsertPlan(plan);
+            SyncPlanCosts(plan);
+            SyncPlanRecommendations(plan);
+        }
+    }
+
+    private void SyncAllPlans()
+    {
+        var plans = _planReader.GetPlansFromFileSystem();
+        _database.BulkUpsertPlans(plans);
+
+        foreach (var plan in plans)
+        {
+            SyncPlanCosts(plan);
+            SyncPlanRecommendations(plan);
         }
     }
 
@@ -97,7 +126,8 @@ public class PlanDatabaseSyncService : IDisposable
             var logsDir = Path.Combine(plan.FolderPath, "logs");
 
             // Build log file map for timestamp correlation
-            var logsByPromptware = new Dictionary<string, Queue<(string Path, int Num)>>(StringComparer.OrdinalIgnoreCase);
+            var logsByPromptware =
+                new Dictionary<string, Queue<(string Path, int Num)>>(StringComparer.OrdinalIgnoreCase);
             if (Directory.Exists(logsDir))
             {
                 var logFiles = Directory.GetFiles(logsDir, "*.md")
@@ -129,8 +159,10 @@ public class PlanDatabaseSyncService : IDisposable
                 if (parts.Length < 3) continue;
 
                 var promptware = parts[0].Trim();
-                if (!int.TryParse(parts[1].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out var tokens)) continue;
-                if (!decimal.TryParse(parts[2].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out var cost)) continue;
+                if (!int.TryParse(parts[1].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture,
+                        out var tokens)) continue;
+                if (!decimal.TryParse(parts[2].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture,
+                        out var cost)) continue;
 
                 DateTime? timestamp = null;
                 if (logsByPromptware.TryGetValue(promptware, out var queue) && queue.Count > 0)
@@ -171,10 +203,7 @@ public class PlanDatabaseSyncService : IDisposable
     }
 
     private static DateTime? ExtractCompletedTimestamp(string logFilePath)
-        => FileHelper.ExtractCompletedTimestamp(logFilePath);
-
-    public void Dispose()
     {
-        _watcher.PlansChanged -= OnPlansChanged;
+        return FileHelper.ExtractCompletedTimestamp(logFilePath);
     }
 }

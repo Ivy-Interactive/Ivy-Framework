@@ -34,7 +34,6 @@
   <Folder Name="/Auth/examples/">
     <Project Path="auth/examples/SliplaneExample/SliplaneExample.csproj" />
   </Folder>
-  <Project Path="Ivy.Benchmarks.Docs/Ivy.Benchmarks.Docs.csproj" />
   <Project Path="Ivy.Desktop/Ivy.Desktop.csproj" />
   <Project Path="Ivy.Docs.Helpers/Ivy.Docs.Helpers.csproj" />
   <Project Path="Ivy.Docs.Shared/Ivy.Docs.Shared.csproj" />

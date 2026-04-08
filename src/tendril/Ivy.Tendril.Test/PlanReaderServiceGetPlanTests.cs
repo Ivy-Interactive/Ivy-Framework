@@ -1,11 +1,12 @@
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
 public class PlanReaderServiceGetPlanTests : IDisposable
 {
-    private readonly string _tempDir;
     private readonly PlanReaderService _service;
+    private readonly string _tempDir;
 
     public PlanReaderServiceGetPlanTests()
     {
@@ -14,13 +15,13 @@ public class PlanReaderServiceGetPlanTests : IDisposable
 
         var settings = new TendrilSettings();
         var configService = new ConfigService(settings, _tempDir);
-        _service = new PlanReaderService(configService, Microsoft.Extensions.Logging.Abstractions.NullLogger<PlanReaderService>.Instance);
+        _service = new PlanReaderService(configService, NullLogger<PlanReaderService>.Instance);
     }
 
     public void Dispose()
     {
         if (Directory.Exists(_tempDir))
-            Directory.Delete(_tempDir, recursive: true);
+            Directory.Delete(_tempDir, true);
     }
 
     private string CreatePlanWithRevision(string folderName, string yaml, string? revisionContent = null)
@@ -42,7 +43,8 @@ public class PlanReaderServiceGetPlanTests : IDisposable
     [Fact]
     public void GetPlanByFolder_Returns_PlanFile_For_Existing_Folder()
     {
-        var yaml = "state: Draft\nproject: Tendril\ntitle: Test Plan\nrepos:\n- D:\\Repos\\Test\ncommits: []\nprs: []\nverifications: []\nrelatedPlans: []\ndependsOn: []\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\n";
+        var yaml =
+            "state: Draft\nproject: Tendril\ntitle: Test Plan\nrepos:\n- D:\\Repos\\Test\ncommits: []\nprs: []\nverifications: []\nrelatedPlans: []\ndependsOn: []\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\n";
         var folderPath = CreatePlanWithRevision("01500-TestPlan", yaml, "# Test");
 
         var result = _service.GetPlanByFolder(folderPath);
@@ -65,7 +67,8 @@ public class PlanReaderServiceGetPlanTests : IDisposable
     public void ParsePlanFolder_Handles_Null_Yaml_Lists()
     {
         // YAML with empty list fields — YamlDotNet may deserialize these as null
-        var yaml = "state: Draft\nproject:\ntitle:\nlevel:\nrepos:\ncommits:\nprs:\nverifications:\nrelatedPlans:\ndependsOn:\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\n";
+        var yaml =
+            "state: Draft\nproject:\ntitle:\nlevel:\nrepos:\ncommits:\nprs:\nverifications:\nrelatedPlans:\ndependsOn:\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\n";
         var folderPath = CreatePlanWithRevision("01501-NullLists", yaml, "# Content");
 
         var result = _service.GetPlanByFolder(folderPath);

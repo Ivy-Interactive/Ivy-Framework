@@ -1,7 +1,7 @@
 name: Publish Ivy.Tendril
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 on:
@@ -14,12 +14,12 @@ on:
         required: false
 
 jobs:
-  publish:
+  publish-nuget-npm:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: src
-
+        shell: bash
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,6 +31,23 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Install vite-plus (vp)
+        run: npm install -g vite-plus@0.1.13
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Setup Java (for ANTLR4)
         uses: actions/setup-java@v4
         with:
@@ -39,9 +56,6 @@ jobs:
 
       - name: Restore
         run: dotnet restore
-
-      - name: Build
-        run: dotnet build tendril/Ivy.Tendril/Ivy.Tendril.csproj --configuration Release --no-restore
 
       - name: Determine version
         id: version
@@ -53,19 +67,169 @@ jobs:
             echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Pack
+      - name: Pack NuGet
         run: |
           VERSION_ARG=""
           if [ -n "${{ steps.version.outputs.version }}" ]; then
             VERSION_ARG="/p:Version=${{ steps.version.outputs.version }}"
           fi
-          dotnet pack tendril/Ivy.Tendril/Ivy.Tendril.csproj --configuration Release --no-build --output ./nupkg $VERSION_ARG
+          dotnet pack tendril/Ivy.Tendril/Ivy.Tendril.csproj --configuration Release --output ./nupkg $VERSION_ARG
 
-      - name: NuGet login (trusted publishing)
+      - name: NuGet login
         uses: NuGet/login@v1
-        id: nuget-auth
+        id: login
         with:
-          user: ${{ secrets.NUGET_USER }}
+          user: rorychatt-ivy
 
       - name: Push to NuGet
-        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ steps.nuget-auth.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+#      - name: Publish NPM
+#        if: steps.version.outputs.version != ''
+#        run: |
+#          cd tendril
+#          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+#          npm publish --provenance --access public --ignore-scripts
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish summary
+        if: always()
+        run: |
+          echo "## 🎉 Ivy.Tendril Published!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ steps.version.outputs.version }}" ]; then
+            echo "### Version: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **NuGet**: [Ivy.Tendril](https://www.nuget.org/packages/Ivy.Tendril)" >> $GITHUB_STEP_SUMMARY
+#          echo "✅ **NPM**: [@ivy/tendril](https://www.npmjs.com/package/@ivy/tendril)" >> $GITHUB_STEP_SUMMARY
+
+  publish-desktop:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - rid: win-arm64
+            target: aarch64-pc-windows-msvc
+            os: windows-latest
+          - rid: linux-x64
+            target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - rid: osx-x64
+            target: x86_64-apple-darwin
+            os: macos-latest
+          - rid: osx-arm64
+            target: aarch64-apple-darwin
+            os: macos-latest
+    defaults:
+      run:
+        working-directory: src
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Install vite-plus (vp)
+        run: npm install -g vite-plus@0.1.13
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Install vpk tool
+        run: dotnet tool install -g vpk
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/tags/tendril/v* ]]; then
+            TAG_VERSION="${GITHUB_REF#refs/tags/tendril/v}"
+            echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          else
+            # Try to get version from Directory.Build.props if not tagged
+            VERSION=$(grep -oP "(?<=<Version>)[^<]+" tendril/Directory.Build.props || echo "1.0.0")
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish Desktop Binary
+        run: |
+          export CARGO_BUILD_TARGET=${{ matrix.target }}
+          dotnet publish tendril/Ivy.Tendril.Desktop/Ivy.Tendril.Desktop.csproj \
+            --configuration Release \
+            --runtime ${{ matrix.rid }} \
+            --output ./publish/desktop/${{ matrix.rid }} \
+            -p:PublishSingleFile=true \
+            -p:ReadyToRun=false \
+            --self-contained true
+
+      - name: Pack Installer (Velopack)
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          EXE_NAME="Ivy.Tendril.Desktop"
+          if [[ "${{ matrix.os }}" == windows-* ]]; then
+            EXE_NAME="Ivy.Tendril.Desktop.exe"
+          fi
+          
+          vpk pack \
+            --packId IvyTendril \
+            --packVersion ${{ steps.version.outputs.version }} \
+            --packDir ./publish/desktop/${{ matrix.rid }} \
+            --mainExe $EXE_NAME \
+            --outputDir ./releases
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tendril-installer-${{ matrix.rid }}
+          path: src/releases/*
+
+  release:
+    needs: [publish-nuget-npm, publish-desktop]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/tendril/v')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: tendril-installer-*
+          merge-multiple: true
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          gh release create "$TAG_NAME" \
+            --title "Tendril $TAG_NAME" \
+            --generate-notes \
+            ./*

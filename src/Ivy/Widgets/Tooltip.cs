@@ -31,4 +31,14 @@ public static class TooltipExtensions
     {
         return new Tooltip(view, toolTip);
     }
+
+    public static IWidget WithTooltip(this IWidget widget, IWidget content)
+    {
+        return new Tooltip(widget, content);
+    }
+
+    public static IWidget WithTooltip(this IView view, IWidget content)
+    {
+        return new Tooltip(view, content);
+    }
 }

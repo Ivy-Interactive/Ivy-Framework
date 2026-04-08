@@ -22,10 +22,14 @@ public class DatabaseCommandsTests : IDisposable
         Environment.SetEnvironmentVariable("TENDRIL_HOME", _originalTendrilHome);
         var dir = Path.GetDirectoryName(_dbPath)!;
         if (Directory.Exists(dir))
-        {
-            try { Directory.Delete(dir, true); }
-            catch { /* best effort cleanup */ }
-        }
+            try
+            {
+                Directory.Delete(dir, true);
+            }
+            catch
+            {
+                /* best effort cleanup */
+            }
     }
 
     [Fact]
@@ -128,19 +132,13 @@ public class DatabaseCommandsTests : IDisposable
     [Fact]
     public void Handle_DbVersion_ReturnsZero()
     {
-        var result = CaptureConsoleOutput(() =>
-        {
-            Assert.Equal(0, DatabaseCommands.Handle(["db-version"]));
-        });
+        var result = CaptureConsoleOutput(() => { Assert.Equal(0, DatabaseCommands.Handle(["db-version"])); });
     }
 
     [Fact]
     public void Handle_DbMigrate_ReturnsZero()
     {
-        var result = CaptureConsoleOutput(() =>
-        {
-            Assert.Equal(0, DatabaseCommands.Handle(["db-migrate"]));
-        });
+        var result = CaptureConsoleOutput(() => { Assert.Equal(0, DatabaseCommands.Handle(["db-migrate"])); });
     }
 
     [Fact]
@@ -148,10 +146,7 @@ public class DatabaseCommandsTests : IDisposable
     {
         DatabaseCommands.DbMigrate(_dbPath);
 
-        var output = CaptureConsoleOutput(() =>
-        {
-            Assert.Equal(0, DatabaseCommands.Handle(["db-reset", "--force"]));
-        });
+        var output = CaptureConsoleOutput(() => { Assert.Equal(0, DatabaseCommands.Handle(["db-reset", "--force"])); });
     }
 
     private static string CaptureConsoleOutput(Action action)

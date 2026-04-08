@@ -89,6 +89,9 @@ MakePlan ──► Draft
                ├─ UpdatePlan ──► Updating ──► Draft
                ├─ SplitPlan  ──► Updating ──► Skipped
                │
+               ├─ ExecutePlan (dependencies unmet)
+               │    Draft ──► Blocked ──► Draft (when unblocked) ──► Building ──► ...
+               │
                ├─ ExecutePlan (Execute button)
                │    Draft ──► Building ──► Executing ──► ReadyForReview
                │                                    └──► Failed
@@ -110,6 +113,7 @@ MakePlan ──► Draft
 | `Failed`         | ExecutePlan errored                         | Review          |
 | `Completed`      | PR created, plan done                       | —               |
 | `Skipped`        | Manually dismissed or split                 | —               |
+| `Blocked`        | Waiting for dependency plans to complete     | Plans           |
 | `Icebox`         | Parked for later                            | Icebox          |
 
 ## Revisions

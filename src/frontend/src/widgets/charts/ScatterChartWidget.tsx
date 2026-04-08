@@ -87,7 +87,7 @@ const generateScatterXAxis = (
       fontFamily: themeColors?.fontSans,
     },
     axisLine: {
-      show: axisConfig.axisLine !== false,
+      show: axisConfig.axisLine === true,
       lineStyle: {
         type: "solid",
         color: themeColors?.mutedForeground,
@@ -95,7 +95,7 @@ const generateScatterXAxis = (
       },
     },
     axisTick: {
-      show: axisConfig.tickLine !== false,
+      show: axisConfig.tickLine === true,
       lineStyle: {
         color: themeColors?.mutedForeground,
         opacity: 0.4,
@@ -113,7 +113,7 @@ const generateScatterXAxis = (
 };
 
 const generateScatterYAxis = (
-  yAxis?: Array<Partial<YAxisProps>>,
+  yAxis?: YAxisProps[],
   themeColors?: { mutedForeground: string; fontSans: string },
 ) => {
   const axisConfig = yAxis?.[0] || {};
@@ -137,7 +137,7 @@ const generateScatterYAxis = (
       fontFamily: themeColors?.fontSans,
     },
     axisLine: {
-      show: axisConfig.axisLine !== false,
+      show: axisConfig.axisLine === true,
       lineStyle: {
         type: "solid",
         color: themeColors?.mutedForeground,
@@ -145,7 +145,7 @@ const generateScatterYAxis = (
       },
     },
     axisTick: {
-      show: axisConfig.tickLine !== false,
+      show: axisConfig.tickLine === true,
       lineStyle: {
         color: themeColors?.mutedForeground,
         opacity: 0.4,
@@ -301,7 +301,7 @@ const generateScatterSeries = (
             shadowColor: "rgba(0, 0, 0, 0.3)",
           },
         },
-        animation: scatter.animated !== false,
+        animation: scatter.animated === true,
         animationDuration: 800,
         markPoint: index === 0 ? markPoint : undefined,
         markLine: index === 0 ? markLine : undefined,
