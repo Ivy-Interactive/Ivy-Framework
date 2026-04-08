@@ -57,28 +57,15 @@ jobs:
       - name: Restore
         run: dotnet restore
 
-      - name: Determine version and update props
+      - name: Determine version
         id: version
         run: |
-          VERSION=""
           if [ -n "${{ github.event.inputs.version }}" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-            echo "Updating Directory.Build.props to $VERSION"
-            sed -i "s|<Version>.*</Version>|<Version>$VERSION</Version>|" tendril/Directory.Build.props
-            
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            git add tendril/Directory.Build.props
-            if git diff --staged --quiet; then
-              echo "No changes to Directory.Build.props"
-            else
-              git commit -m "chore: update tendril version to $VERSION"
-              git push
-            fi
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
           elif [[ "$GITHUB_REF" == refs/tags/tendril/v* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/tendril/v}"
+            TAG_VERSION="${GITHUB_REF#refs/tags/tendril/v}"
+            echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
           fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Pack NuGet
         run: |
