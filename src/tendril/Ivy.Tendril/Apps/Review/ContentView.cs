@@ -153,9 +153,15 @@ public class ContentView(
                     // Review action conditions
                     var projectConfig = _config.GetProject(_selectedPlan.Project);
                     var reviewActions = projectConfig?.ReviewActions ?? [];
-                    var actionStates = reviewActions.Select(action =>
+                    var actionStates = new (string Name, bool ConditionMet)[reviewActions.Count];
+                    Parallel.For(0, reviewActions.Count, i =>
                     {
-                        if (string.IsNullOrEmpty(action.Condition)) return (action.Name, true);
+                        var action = reviewActions[i];
+                        if (string.IsNullOrEmpty(action.Condition))
+                        {
+                            actionStates[i] = (action.Name, true);
+                            return;
+                        }
                         try
                         {
                             var psi = new ProcessStartInfo
@@ -171,17 +177,17 @@ public class ContentView(
                             };
                             var proc = Process.Start(psi);
                             proc?.WaitForExit(5000);
-                            return (action.Name, proc?.ExitCode == 0);
+                            actionStates[i] = (action.Name, proc?.ExitCode == 0);
                         }
                         catch (Exception ex)
                         {
                             Console.Error.WriteLine(
                                 $"Failed to evaluate review action '{action.Name}' for plan '{_selectedPlan.FolderName}': {ex.Message}");
-                            return (action.Name, false);
+                            actionStates[i] = (action.Name, false);
                         }
-                    }).ToList();
+                    });
 
-                    return new PlanContentData(recs, summaryMd, artifacts, commitRows, verReports, actionStates);
+                    return new PlanContentData(recs, summaryMd, artifacts, commitRows, verReports, actionStates.ToList());
                 }, ct);
             },
             initialValue: new PlanContentData(new List<RecommendationYaml>(), null,
