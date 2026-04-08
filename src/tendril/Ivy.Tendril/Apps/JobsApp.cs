@@ -1,4 +1,5 @@
 using System.Reactive.Disposables;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Apps.Plans;
@@ -286,13 +287,13 @@ public class JobsApp : ViewBase
         if (showOutput.Value is { } jobId)
         {
             var job = jobService.GetJob(jobId);
-            var outputText = job is not null && job.OutputLines.Count > 0
-                ? string.Join("\n", job.OutputLines)
+            var outputMarkdown = job is not null && job.OutputLines.Count > 0
+                ? FormatJobOutput(job.OutputLines)
                 : "No output available.";
 
             var outputSheet = new Sheet(
                 () => showOutput.Set(null),
-                new Markdown($"```\n{outputText}\n```"),
+                new Markdown(outputMarkdown),
                 job is not null ? $"{job.Type} — {ExtractPlanId(job.PlanFile)}" : "Job Output"
             ).Width(Size.Half()).Resizable();
 
@@ -344,5 +345,86 @@ public class JobsApp : ViewBase
     private static Colors GetStatusColor(JobStatus status)
     {
         return StatusMappings.JobStatusColors.TryGetValue(status, out var color) ? color : Colors.Slate;
+    }
+
+    internal static string FormatJobOutput(IEnumerable<string> lines)
+    {
+        var sb = new System.Text.StringBuilder();
+        var seenInit = false;
+
+        foreach (var line in lines)
+        {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            // Stderr lines
+            if (line.StartsWith("[stderr] "))
+            {
+                var msg = line["[stderr] ".Length..].Trim();
+                if (msg.Length > 0)
+                    sb.AppendLine($"> ⚠ {msg}");
+                continue;
+            }
+
+            // Try to parse as JSON
+            try
+            {
+                using var doc = JsonDocument.Parse(line);
+                var root = doc.RootElement;
+                if (!root.TryGetProperty("type", out var typeProp)) continue;
+                var type = typeProp.GetString();
+
+                switch (type)
+                {
+                    case "system":
+                        if (!seenInit && root.TryGetProperty("session_id", out var sid))
+                        {
+                            sb.AppendLine($"> Session: `{sid.GetString()}`");
+                            seenInit = true;
+                        }
+                        break;
+
+                    case "assistant":
+                        if (!root.TryGetProperty("message", out var msg)) break;
+                        if (!msg.TryGetProperty("content", out var content)) break;
+                        foreach (var block in content.EnumerateArray())
+                        {
+                            if (!block.TryGetProperty("type", out var blockType)) continue;
+                            var bt = blockType.GetString();
+                            if (bt == "text" && block.TryGetProperty("text", out var text))
+                            {
+                                var t = text.GetString()?.Trim();
+                                if (!string.IsNullOrEmpty(t))
+                                    sb.AppendLine(t);
+                            }
+                            else if (bt == "tool_use" && block.TryGetProperty("name", out var name))
+                            {
+                                sb.AppendLine($"**→ {name.GetString()}**");
+                            }
+                        }
+                        break;
+
+                    case "result":
+                        var subtype = root.TryGetProperty("subtype", out var st) ? st.GetString() : null;
+                        if (subtype == "success" && root.TryGetProperty("result", out var result))
+                        {
+                            var r = result.GetString()?.Trim();
+                            if (!string.IsNullOrEmpty(r))
+                                sb.AppendLine($"\n---\n\n{r}");
+                        }
+                        else if (subtype == "error" && root.TryGetProperty("error", out var err))
+                        {
+                            sb.AppendLine($"> **Error:** {err.GetString()}");
+                        }
+                        break;
+                }
+            }
+            catch (JsonException)
+            {
+                // Non-JSON line — skip silently
+            }
+        }
+
+        var formatted = sb.ToString().Trim();
+        return formatted.Length > 0 ? formatted : "No readable output.";
     }
 }
