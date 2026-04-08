@@ -55,20 +55,28 @@ public class JobsApp : ViewBase
             .ToDictionary(x => x.Name, x => x.Color!.Value.ToString());
 
         var jobs = jobService.GetJobs();
-        var rows = jobs.Select(j => new JobItemRow
+        var rows = jobs.Select(j =>
         {
-            Id = j.Id,
-            Status = j.Status,
-            PlanId = ExtractPlanId(j.PlanFile),
-            Plan = j.PlanFile.Length > 50 ? j.PlanFile[..50] + "..." : j.PlanFile,
-            Type = j.Type,
-            Project = j.Project,
-            Timer = FormatTimer(j),
-            Cost = j.Cost.HasValue ? $"${j.Cost.Value:F2}" : "",
-            Tokens = j.Tokens.HasValue ? FormatHelper.FormatTokens(j.Tokens.Value) : "",
-            LastOutput = FormatLastOutput(j),
-            LastOutputTimestamp = j.LastOutputAt,
-            StatusMessage = j.StatusMessage ?? ""
+            var planId = ExtractPlanId(j.PlanFile);
+            var displayPlanId = string.IsNullOrEmpty(planId) && j.Type == "MakePlan"
+                ? "Creating..."
+                : planId;
+
+            return new JobItemRow
+            {
+                Id = j.Id,
+                Status = j.Status,
+                PlanId = displayPlanId,
+                Plan = j.PlanFile.Length > 50 ? j.PlanFile[..50] + "..." : j.PlanFile,
+                Type = j.Type,
+                Project = j.Project,
+                Timer = FormatTimer(j),
+                Cost = j.Cost.HasValue ? $"${j.Cost.Value:F2}" : "",
+                Tokens = j.Tokens.HasValue ? FormatHelper.FormatTokens(j.Tokens.Value) : "",
+                LastOutput = FormatLastOutput(j),
+                LastOutputTimestamp = j.LastOutputAt,
+                StatusMessage = GetStatusMessage(j)
+            };
         })
             .OrderByDescending(r => r.LastOutputTimestamp ?? DateTime.MinValue)
             .ToList();
@@ -95,6 +103,7 @@ public class JobsApp : ViewBase
             .Width(Size.Full())
             .Height(Size.Full())
             .Header(t => t.Status, "Status")
+            .Help(t => t.Status, "Blocked = waiting for dependencies · Failed = error during execution · Timeout = exceeded time limit · Queued = waiting for a job slot")
             .Header(t => t.Type, "Type")
             .Header(t => t.PlanId, "Plan")
             .Header(t => t.Plan, "Prompt")
@@ -300,6 +309,21 @@ public class JobsApp : ViewBase
         }
 
         return layout | dataTable;
+    }
+
+    private static string GetStatusMessage(JobItem job)
+    {
+        if (!string.IsNullOrEmpty(job.StatusMessage))
+            return job.StatusMessage;
+
+        return job.Status switch
+        {
+            JobStatus.Blocked => "Waiting for dependency plan(s) to complete",
+            JobStatus.Failed => "Job encountered an error during execution",
+            JobStatus.Timeout => "Job exceeded the configured timeout",
+            JobStatus.Queued => "Waiting for a job slot to become available",
+            _ => ""
+        };
     }
 
     private static string ExtractPlanId(string planFile)
