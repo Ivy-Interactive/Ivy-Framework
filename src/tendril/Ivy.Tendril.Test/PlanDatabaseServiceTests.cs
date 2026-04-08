@@ -728,4 +728,50 @@ public class PlanDatabaseServiceTests : IDisposable
         Assert.Single(jobs);
         Assert.Equal("migration-test", jobs[0].Id);
     }
+
+    [Fact]
+    public void ConcurrentReads_DoNotBlockEachOther()
+    {
+        // Seed some data so reads return non-empty results
+        for (var i = 0; i < 10; i++)
+            _db.UpsertPlan(CreateTestPlan(2000 + i, $"Concurrent Plan {i}",
+                status: i % 2 == 0 ? PlanStatus.Draft : PlanStatus.Completed));
+
+        const int threadCount = 10;
+        var barrier = new Barrier(threadCount);
+        var exceptions = new System.Collections.Concurrent.ConcurrentBag<Exception>();
+        var threads = new Thread[threadCount];
+
+        for (var t = 0; t < threadCount; t++)
+        {
+            var threadIndex = t;
+            threads[t] = new Thread(() =>
+            {
+                try
+                {
+                    barrier.SignalAndWait(TimeSpan.FromSeconds(5));
+                    // Alternate between GetPlans and ComputePlanCounts
+                    if (threadIndex % 2 == 0)
+                    {
+                        var plans = _db.GetPlans();
+                        Assert.Equal(10, plans.Count);
+                    }
+                    else
+                    {
+                        var counts = _db.ComputePlanCounts();
+                        Assert.True(counts.Drafts + counts.ReadyForReview + counts.Failed + counts.Icebox >= 0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+            });
+        }
+
+        foreach (var t in threads) t.Start();
+        foreach (var t in threads) Assert.True(t.Join(TimeSpan.FromSeconds(10)), "Thread timed out — possible deadlock");
+
+        Assert.Empty(exceptions);
+    }
 }
