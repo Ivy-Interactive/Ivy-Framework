@@ -182,15 +182,31 @@ jobs:
         run: |
           mkdir -p tendril/Ivy.Tendril/Assets
           SVG_PATH="tendril/Ivy.Tendril/Assets/Tendril.svg"
+          
+          # Find ImageMagick command
+          IFX="magick"
+          if ! command -v magick &> /dev/null; then
+            if command -v convert &> /dev/null; then
+              IFX="convert"
+            else
+              echo "Error: ImageMagick (magick or convert) not found."
+              exit 1
+            fi
+          fi
+          echo "Using ImageMagick command: $IFX"
+
           if [ -f "$SVG_PATH" ]; then
+            # Generate all icon formats
+            $IFX "$SVG_PATH" tendril/Ivy.Tendril/Assets/Tendril.ico
+            $IFX "$SVG_PATH" -resize 1024x1024 tendril/Ivy.Tendril/Assets/Tendril.icns
+            $IFX "$SVG_PATH" tendril/Ivy.Tendril/Assets/Tendril.png
+            
+            # Set the ICON_PATH based on platform
             if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-              magick "$SVG_PATH" tendril/Ivy.Tendril/Assets/Tendril.ico
               echo "ICON_PATH=tendril/Ivy.Tendril/Assets/Tendril.ico" >> $GITHUB_ENV
             elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-              magick "$SVG_PATH" -resize 1024x1024 tendril/Ivy.Tendril/Assets/Tendril.icns
               echo "ICON_PATH=tendril/Ivy.Tendril/Assets/Tendril.icns" >> $GITHUB_ENV
             else
-              magick "$SVG_PATH" tendril/Ivy.Tendril/Assets/Tendril.png
               echo "ICON_PATH=tendril/Ivy.Tendril/Assets/Tendril.png" >> $GITHUB_ENV
             fi
           else
