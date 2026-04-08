@@ -201,9 +201,9 @@ jobs:
 
           if [ -f "$SVG_PATH" ]; then
             # Generate all icon formats
-            $IFX "$SVG_PATH" tendril/Ivy.Tendril/Assets/Tendril.ico
-            $IFX "$SVG_PATH" -resize 1024x1024 tendril/Ivy.Tendril/Assets/Tendril.icns
-            $IFX "$SVG_PATH" tendril/Ivy.Tendril/Assets/Tendril.png
+            $IFX "$SVG_PATH" -background none -define icon:auto-resize=256,128,64,48,32,16 tendril/Ivy.Tendril/Assets/Tendril.ico
+            $IFX "$SVG_PATH" -background none -resize 1024x1024 tendril/Ivy.Tendril/Assets/Tendril.icns
+            $IFX "$SVG_PATH" -background none -resize 512x512 tendril/Ivy.Tendril/Assets/Tendril.png
             
             # Set the ICON_PATH based on platform for vpk
             if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
