@@ -191,9 +191,12 @@ jobs:
             echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install ImageMagick
+      - name: Setup ImageMagick
+        uses: mfinelli/setup-imagemagick@v5
+
+      - name: Install SVG Delegate (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y imagemagick librsvg2-bin
+        run: sudo apt-get update && sudo apt-get install -y librsvg2-bin
 
       - name: Prepare Icons
         run: |
@@ -207,10 +210,12 @@ jobs:
               IFX="convert"
             else
               echo "Error: ImageMagick (magick or convert) not found."
+              echo "PATH: $PATH"
               exit 1
             fi
           fi
           echo "Using ImageMagick command: $IFX"
+          $IFX -version
 
           if [ -f "$SVG_PATH" ]; then
             # Generate all icon formats
