@@ -45,6 +45,12 @@ public class PullRequestApp : ViewBase
             initialValue: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         );
 
+        if (statusQuery.Loading)
+        {
+            return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
+                   | Text.Muted("Loading...");
+        }
+
         var plans = planService.GetPlans()
             .Where(p => p.Prs.Count > 0)
             .OrderByDescending(p => p.Id)
@@ -63,7 +69,7 @@ public class PullRequestApp : ViewBase
                 Id = $"{plan.Id}-{i}",
                 PlanId = $"{plan.Id:D5}",
                 Repository = ExtractRepo(pr),
-                Status = prStatuses.TryGetValue(pr, out var status) ? status : (statusQuery.Loading ? "Loading..." : ""),
+                Status = prStatuses.TryGetValue(pr, out var status) ? status : "",
                 Pr = pr,
                 Plan = $"#{plan.Id:D5} {plan.Title}",
                 Cost = cost,
