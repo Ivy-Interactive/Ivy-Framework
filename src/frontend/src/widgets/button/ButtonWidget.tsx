@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useRef } from "react";
 import { m, LazyMotion, domAnimation } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/Icon";
@@ -17,30 +17,10 @@ import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BorderRadius, getColor, getWidth } from "@/lib/styles";
 import { Densities } from "@/types/density";
-import { parseShortcut, formatShortcutForDisplay, keyToCode } from "@/lib/shortcut";
+import { parseShortcut, formatShortcutForDisplay } from "@/lib/shortcut";
+import { useShortcut } from "@/lib/useShortcut";
 
 const ButtonWithTooltip = withTooltip(Button);
-
-// Debounce state for keyboard shortcuts to prevent duplicate triggers during UI transitions
-const recentShortcuts = new Map<string, number>();
-const DEBOUNCE_MS = 300;
-const SWEEP_INTERVAL_MS = 5 * DEBOUNCE_MS; // 1500ms
-let sweepTimerId: number | null = null;
-
-// Periodic sweep to remove stale entries as defense-in-depth
-// This catches any entries missed by the unmount cleanup (e.g., error boundaries, race conditions)
-function startSweepIfNeeded() {
-  if (sweepTimerId !== null) return;
-
-  sweepTimerId = window.setInterval(() => {
-    const now = Date.now();
-    for (const [id, timestamp] of recentShortcuts.entries()) {
-      if (now - timestamp > SWEEP_INTERVAL_MS) {
-        recentShortcuts.delete(id);
-      }
-    }
-  }, SWEEP_INTERVAL_MS);
-}
 
 interface ButtonWidgetProps {
   id: string;
@@ -198,75 +178,36 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   // Check if URL is a mailto link (should not open in new tab)
   const isMailto = validatedHref ? isMailtoUrl(validatedHref) : false;
 
-  useEffect(() => {
-    if (!shortcutKey || disabled) return;
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-    startSweepIfNeeded(); // Ensure sweep timer is running
+  const parsedShortcut = shortcutKey ? parseShortcut(shortcutKey) : null;
+  const hasModifierChord = !!(
+    parsedShortcut &&
+    (parsedShortcut.ctrl || parsedShortcut.meta || parsedShortcut.alt)
+  );
 
-    const shortcutObj = parseShortcut(shortcutKey);
-    if (!shortcutObj) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const eventTarget = event.target as HTMLElement;
-      const shortcutUsesModifierChord = shortcutObj.ctrl || shortcutObj.meta || shortcutObj.alt;
-      if (
-        !shortcutUsesModifierChord &&
-        (eventTarget.tagName === "INPUT" ||
-          eventTarget.tagName === "TEXTAREA" ||
-          eventTarget.isContentEditable)
-      ) {
-        return;
-      }
-
-      const modifierMatch =
-        (shortcutObj.meta && event.metaKey) ||
-        (shortcutObj.ctrl && event.ctrlKey) ||
-        (!shortcutObj.meta && !shortcutObj.ctrl && !event.metaKey && !event.ctrlKey);
-
-      const expectedCode = keyToCode(shortcutObj.key);
-
-      const isShortcutPressed =
-        modifierMatch &&
-        event.shiftKey === shortcutObj.shift &&
-        event.altKey === shortcutObj.alt &&
-        event.code === expectedCode;
-
-      if (isShortcutPressed) {
-        // Skip if button is in a hidden/inactive tab (e.g., aria-hidden container)
-        const buttonEl = document.querySelector(`[data-shortcut-id="${id}"]`);
-        if (buttonEl?.closest('[aria-hidden="true"]')) {
-          return;
-        }
-
-        const now = Date.now();
-        const lastTrigger = recentShortcuts.get(id) || 0;
-
-        if (now - lastTrigger < DEBOUNCE_MS) {
-          return; // Ignore rapid-fire triggers
-        }
-
-        recentShortcuts.set(id, now);
-        event.preventDefault();
-        if (!effectiveUrl) {
-          eventHandler("OnClick", id, []);
-        } else if (validatedHref) {
-          if (isDownloadUrl || isMailto) {
-            window.location.href = validatedHref;
-          } else if (target === "Blank") {
-            window.open(validatedHref, "_blank", "noopener,noreferrer");
-          } else {
-            window.location.href = validatedHref;
-          }
+  useShortcut(
+    id,
+    shortcutKey,
+    () => {
+      if (!effectiveUrl) {
+        eventHandler("OnClick", id, []);
+      } else if (validatedHref) {
+        if (isDownloadUrl || isMailto) {
+          window.location.href = validatedHref;
+        } else if (target === "Blank") {
+          window.open(validatedHref, "_blank", "noopener,noreferrer");
+        } else {
+          window.location.href = validatedHref;
         }
       }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      recentShortcuts.delete(id);
-    };
-  }, [shortcutKey, disabled, id, effectiveUrl, eventHandler]);
+    },
+    {
+      disabled,
+      skipInInputs: !hasModifierChord,
+      elementRef: buttonRef,
+    },
+  );
 
   const hasChildren = !!children;
 
@@ -382,6 +323,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           />
         </LazyMotion>
         <ButtonWithTooltip
+          ref={buttonRef}
           asChild={hasUrl}
           size={buttonSize}
           onClick={hasUrl ? undefined : handleClick}
@@ -422,6 +364,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
 
   return (
     <ButtonWithTooltip
+      ref={buttonRef}
       asChild={hasUrl}
       style={styles}
       size={buttonSize}

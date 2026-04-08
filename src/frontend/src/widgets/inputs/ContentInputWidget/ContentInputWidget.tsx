@@ -12,7 +12,8 @@ import { useFileAttachments } from "./useFileAttachments";
 import { FileAttachmentList } from "./FileAttachmentList";
 import { ContentInputWidgetProps } from "./types";
 import { EMPTY_ARRAY } from "@/lib/constants";
-import { formatShortcutForDisplay, parseShortcut, keyToCode } from "@/lib/shortcut";
+import { formatShortcutForDisplay } from "@/lib/shortcut";
+import { useShortcut } from "@/lib/useShortcut";
 
 const toolbarVariant = cva("flex items-center gap-1", {
   variants: {
@@ -183,39 +184,16 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
 
   const shortcutDisplay = formatShortcutForDisplay(shortcutKey);
 
-  useEffect(() => {
-    if (!shortcutKey || disabled) return;
-
-    const shortcutObj = parseShortcut(shortcutKey);
-    if (!shortcutObj) return;
-
-    const handleShortcut = (event: KeyboardEvent) => {
-      const modifierMatch =
-        (shortcutObj.meta && event.metaKey) ||
-        (shortcutObj.ctrl && event.ctrlKey) ||
-        (!shortcutObj.meta && !shortcutObj.ctrl && !event.metaKey && !event.ctrlKey);
-
-      const expectedCode = keyToCode(shortcutObj.key);
-
-      const isShortcutPressed =
-        modifierMatch &&
-        event.shiftKey === shortcutObj.shift &&
-        event.altKey === shortcutObj.alt &&
-        event.code === expectedCode;
-
-      if (isShortcutPressed) {
-        event.preventDefault();
-        if (hasSubmitHandler) {
-          handleEvent("OnSubmit", id, []);
-        }
+  useShortcut(
+    id,
+    shortcutKey,
+    () => {
+      if (hasSubmitHandler) {
+        handleEvent("OnSubmit", id, []);
       }
-    };
-
-    window.addEventListener("keydown", handleShortcut);
-    return () => {
-      window.removeEventListener("keydown", handleShortcut);
-    };
-  }, [shortcutKey, disabled, hasSubmitHandler, handleEvent, id]);
+    },
+    { disabled },
+  );
 
   return (
     <div

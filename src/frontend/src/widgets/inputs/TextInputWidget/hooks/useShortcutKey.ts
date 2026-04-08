@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { parseShortcut, keyToCode } from "@/lib/shortcut";
+import React from "react";
+import { useShortcut } from "@/lib/useShortcut";
 
 interface UseShortcutKeyParams {
   shortcutKey: string | undefined;
@@ -22,39 +22,11 @@ export const useShortcutKey = ({
   events,
   eventHandler,
 }: UseShortcutKeyParams): void => {
-  useEffect(() => {
-    if (!shortcutKey) return;
-
-    const shortcutObj = parseShortcut(shortcutKey);
-    if (!shortcutObj) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const modifierMatch =
-        (shortcutObj.meta && event.metaKey) ||
-        (shortcutObj.ctrl && event.ctrlKey) ||
-        (!shortcutObj.meta && !shortcutObj.ctrl && !event.metaKey && !event.ctrlKey);
-
-      const expectedCode = keyToCode(shortcutObj.key);
-
-      const isShortcutPressed =
-        modifierMatch &&
-        event.shiftKey === shortcutObj.shift &&
-        event.altKey === shortcutObj.alt &&
-        event.code === expectedCode;
-
-      if (isShortcutPressed) {
-        event.preventDefault();
-        if (inputRef.current) {
-          inputRef.current.focus();
-          setIsFocused(true);
-          if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [shortcutKey, id, events, eventHandler, inputRef, setIsFocused]);
+  useShortcut(id, shortcutKey, () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      setIsFocused(true);
+      if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+    }
+  });
 };
