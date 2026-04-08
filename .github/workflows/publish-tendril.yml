@@ -160,8 +160,12 @@ jobs:
       - name: Restore
         run: dotnet restore
 
-      - name: Install vpk tool
-        run: dotnet tool install -g vpk
+      - name: Install vpk tool and dependencies
+        run: |
+          dotnet tool install -g vpk
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo apt-get update && sudo apt-get install -y libfuse2
+          fi
 
       - name: Determine version
         id: version
@@ -216,7 +220,7 @@ jobs:
             --icon "$ICON_PATH" \
             --noPortable \
             --delta None \
-            $( [[ "${{ matrix.rid }}" == osx-* ]] && echo "--pkg com.ivy.tendril" )
+            $( [[ "${{ matrix.rid }}" == osx-* ]] && echo "--bundleId com.ivy.tendril" )
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
