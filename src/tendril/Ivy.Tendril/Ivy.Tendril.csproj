@@ -9,12 +9,14 @@
     <UserSecretsId>a8f3c2e1-4b7d-4e9f-a1c3-8d6e2f5b9a7c</UserSecretsId>
     <MinVerTagPrefix>tendril/v</MinVerTagPrefix>
     <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>tendril</ToolCommandName>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>Ivy.Tendril</PackageId>
     <IsPackable>true</IsPackable>
     <Company>Ivy</Company>
-    <Description>Ivy Tendril — Core Library</Description>
+    <Description>Ivy Tendril — Multi-host AI Tool (CLI)</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework</RepositoryUrl>
