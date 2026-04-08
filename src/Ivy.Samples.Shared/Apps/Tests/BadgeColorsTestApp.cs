@@ -50,8 +50,12 @@ public class BadgeColorsTestApp : SampleBase
                | Layout.Wrap(
                    StringColors.Select(x => new Badge(x.Label).Color(x.Value))
                )
-               | Layout.Wrap(
-                new Badge("IvyGreen").Color("ivy-green")
-                );
+               | Text.H2("API Usage")
+               | (Layout.Horizontal()
+                   | new Badge("Semantic via helper").Success()
+                   | new Badge("Enum via Color()").Color(Colors.Cyan)
+                   | new Badge("Hex via Color()").Color("#22C55E")
+                   | new Badge("RGB via Color()").Color("rgb(99, 102, 241)")
+                   | new Badge("HSL via Color()").Color("hsl(332, 84%, 48%)"));
     }
 }
