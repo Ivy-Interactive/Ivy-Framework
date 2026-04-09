@@ -51,7 +51,8 @@ public class PlanContentHelpersTests
     [Fact]
     public void BuildCommitRows_ReturnsCorrectShortHash()
     {
-        var gitService = new StubGitService("Test commit");
+        var gitService = new StubGitService("Test commit",
+            [("M", "file.cs")]);
         var config = new StubConfigService();
 
         var metadata = new PlanMetadata(
@@ -65,6 +66,43 @@ public class PlanContentHelpersTests
         Assert.Equal("abcdef1", rows[0].ShortHash);
         Assert.Equal("abcdef1234567890", rows[0].Hash);
         Assert.Equal("Test commit", rows[0].Title);
+        Assert.Equal(1, rows[0].FileCount);
+    }
+
+    [Fact]
+    public void BuildCommitRows_WithNullTitle_SetsEmptyTitleAndNullFileCount()
+    {
+        var gitService = new StubGitService(null, null);
+        var config = new StubConfigService();
+
+        var metadata = new PlanMetadata(
+            1, "Test", "Bug", "Test Plan", PlanStatus.Draft,
+            ["/fake/repo"], ["abcdef1234567890"], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null, null);
+        var plan = new PlanFile(metadata, "", Path.GetTempPath(), "");
+
+        var rows = PlanContentHelpers.BuildCommitRows(plan, config, gitService);
+
+        Assert.Single(rows);
+        Assert.Equal("", rows[0].Title);
+        Assert.Null(rows[0].FileCount);
+    }
+
+    [Fact]
+    public void BuildCommitRows_WithEmptyFiles_SetsZeroFileCount()
+    {
+        var gitService = new StubGitService("Some commit", []);
+        var config = new StubConfigService();
+
+        var metadata = new PlanMetadata(
+            1, "Test", "Bug", "Test Plan", PlanStatus.Draft,
+            ["/fake/repo"], ["abcdef1234567890"], [], [], [], [], DateTime.UtcNow, DateTime.UtcNow, null, null);
+        var plan = new PlanFile(metadata, "", Path.GetTempPath(), "");
+
+        var rows = PlanContentHelpers.BuildCommitRows(plan, config, gitService);
+
+        Assert.Single(rows);
+        Assert.Equal("Some commit", rows[0].Title);
+        Assert.Equal(0, rows[0].FileCount);
     }
 
     [Fact]
@@ -122,12 +160,13 @@ public class PlanContentHelpersTests
         Assert.Null(result);
     }
 
-    private class StubGitService(string? commitTitle = null, int? fileCount = null) : IGitService
+    private class StubGitService(string? commitTitle = null,
+        List<(string Status, string FilePath)>? commitFiles = null) : IGitService
     {
         public string? GetCommitTitle(string repoPath, string commitHash) => commitTitle;
         public string? GetCommitDiff(string repoPath, string commitHash) => null;
-        public List<(string Status, string FilePath)>? GetCommitFiles(string repoPath, string commitHash) => null;
-        public int? GetCommitFileCount(string repoPath, string commitHash) => fileCount;
+        public List<(string Status, string FilePath)>? GetCommitFiles(string repoPath, string commitHash) => commitFiles;
+        public int? GetCommitFileCount(string repoPath, string commitHash) => commitFiles?.Count;
     }
 
     private class StubConfigService : IConfigService

@@ -5,36 +5,49 @@ searchHints:
   - tendril
   - agent
   - orchestration
+  - architecture
 ---
 
 # Welcome to Tendril
 
 <Ingress>
-Tendril is a TUI-based agent orchestration platform for managing AI-driven development plans. Built on the Ivy Framework, it orchestrates Claude-based agents through a structured lifecycle — from plan creation and expansion to execution, verification, and PR generation.
+Tendril is an advanced, multi-host AI orchestration platform designed to automate and manage complex software development lifecycles. Built on the Ivy Framework, it blends an intuitive cross-platform desktop interface with autonomous agent capabilities.
 </Ingress>
+
+Tendril gives you full visibility and control over your AI-assisted development workflow. By breaking down engineering tasks into discrete, transparent stages, it orchestrates Claude-based agents to perform high-fidelity code generation, verification, and pull request management without hiding the details from you.
 
 <Embed Url="https://www.youtube.com/watch?v=PLACEHOLDER"/>
 
-Tendril gives you full visibility into your AI-assisted development workflow. It tracks jobs, costs, tokens, and verification results, and presents everything in a terminal UI that lets you stay in control.
+## The Concept
+
+At its core, Tendril is built around **Plans**. A Plan is a structured representation of a desired change—whether it's fixing a bug, refactoring a module, or building a new feature. Tendril manages these Plans through a rigorous lifecycle, passing them to highly specialized, isolated AI agents called **Promptwares**.
 
 ## Key Features
 
-- **Plan lifecycle management** — Draft, Execute, Review, and PR stages with state tracking
-- **Multi-project support** — Configure multiple repos with per-project verifications
-- **Job monitoring** — Live cost and token tracking for running agents
-- **Claude agent orchestration** — Promptwares for each stage (MakePlan, ExecutePlan, ExpandPlan, MakePr, etc.)
-- **Dashboard** — Activity statistics and plan counts at a glance
-- **GitHub PR integration** — Automated pull request creation from completed plans
-- **Plan review workflow** — Review diffs, run sample apps, approve or send back for revision
+- **Plan Lifecycle Management** — Robust tracking of work across stages: Draft, Executing, Review, and PR generation.
+- **Multi-Project Orchestration** — Configure and run agents across multiple repositories simultaneously, with per-project verification rules.
+- **High-Fidelity Agent Jobs** — Live monitoring of agent status, execution time, token usage, and cost tracking.
+- **Specialized Promptwares** — Purpose-built routines that govern specific tasks like `MakePlan`, `ExecutePlan`, `ExpandPlan`, and `MakePr`.
+- **Integrated Git Worktrees** — Safely isolates AI execution within git worktrees, ensuring your primary development branch remains untouched.
+- **Built-In Terminal & Tools** — A fully-featured embedded terminal (running Claude Code underneath) and a fast local File Viewer.
+- **Advanced Verification** — Native integration with your build, test, and formatting pipelines to automatically verify AI-generated code.
 
-## How It Works
+## The Tendril Loop
 
-Tendril manages plans through a structured lifecycle:
+Tendril is designed to augment, not replace, the developer. The core loop looks like this:
 
-1. **MakePlan** — An agent drafts a plan from a description or issue, producing a structured revision with problem, solution, tests, and verification steps.
-2. **ExpandPlan** — Optionally expands a plan with more detail, or splits large plans into smaller ones.
-3. **ExecutePlan** — An agent creates a git worktree, implements the plan, runs verifications (build, format, tests), and commits the result.
-4. **Review** — You review the diff, run sample apps, and approve or send back with comments.
-5. **MakePr** — An agent creates a GitHub pull request from the worktree branch.
+1. **Ideation (`MakePlan`)**: You provide a prompt or an issue URL. The agent drafts a detailed, multi-step implementation plan.
+2. **Expansion (`ExpandPlan`)**: For large features, Tendril can automatically split and expand the plan into smaller, executable chunks.
+3. **Execution (`ExecutePlan`)**: The agent creates an isolated git worktree, implements the solution, builds it, runs your tests, and iterates until the verifications pass.
+4. **Human Review (`Review`)**: You inspect the final diff and run the application. You can approve the work, or reject it with feedback for the agent to try again.
+5. **Integration (`MakePr`)**: Once approved, Tendril automatically creates a GitHub Pull Request with the completed work.
 
-Each stage is powered by a **promptware** — a structured prompt with tools and memory that runs via the Claude CLI. Jobs are tracked with live status, cost, and token metrics.
+By structuring the workflow this way, Tendril transforms AI from a basic code autocomplete tool into an autonomous engineering partner.
+
+## Quick Install 
+
+The easiest way to install Tendril and all of its required components on macOS or Linux is via our streamlined install script:
+
+```bash
+curl -sSf https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/tendril/install.sh | sh
+```

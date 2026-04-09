@@ -81,7 +81,7 @@ public class Program
         if (usePhotino)
         {
             var window = new DesktopWindow(server)
-                .Title("Ivy Tendril — Multi-host AI Tool")
+                .Title("Ivy Tendril")
                 .Size(1400, 900);
 
             return window.Run();

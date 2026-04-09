@@ -144,8 +144,15 @@ public static class TendrilServer
                 configService.Settings.Llm?.ApiKey != null));
             _ = Task.Run(async () =>
             {
-                await telemetryService.IdentifyAsync(appVersion);
-                await telemetryService.FlushAsync();
+                try
+                {
+                    await telemetryService.IdentifyAsync(appVersion);
+                    await telemetryService.FlushAsync();
+                }
+                catch (Exception ex)
+                {
+                    Program.WriteCrashLog($"[{DateTime.UtcNow:O}] Telemetry startup exception: {ex}");
+                }
             });
             app.UseAssets(server.Args, app.Services.GetRequiredService<ILogger<Server>>(), "Assets", "tendril/assets");
         });

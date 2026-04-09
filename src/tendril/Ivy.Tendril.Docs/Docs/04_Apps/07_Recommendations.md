@@ -2,28 +2,24 @@
 searchHints:
   - recommendations
   - suggestions
-  - improvements
-  - ideas
+  - auto
 icon: Lightbulb
 ---
 
 # Recommendations
 
 <Ingress>
-The Recommendations app displays AI-generated suggestions for improvements based on completed plan reviews.
+The Recommendations App proactively suggests automated improvements, updates, and maintenance pathways for your tracked code repositories without requiring manual specification.
 </Ingress>
 
-## Overview
+## Proactive Scanning
 
-As agents work through plans, they may identify opportunities for follow-up work. These appear as recommendations that you can:
+A central piece of the AI Orchestrator's puzzle focuses on alleviating rote task planning. Tendril actively observes structural anomalies or out-of-date practices across tracked systems.
 
-- Review and accept as new plans
-- Dismiss if not relevant
-- Filter by project or plan status
+This app surfaces generative insights based on tracked context (such as standard updates, syntax modernization, or test suite regressions) and bundles them into manageable tasks.
 
-## Filtering
+## Accepting Suggestions
 
-You can filter recommendations by:
+When you **Accept** an integration recommendation, Tendril bypasses the manual drafting architecture conceptually and automatically scaffolds a new valid `Draft` directly.
 
-- **Project** — Show only recommendations for a specific project
-- **Plan status** — Filter by the status of the originating plan
+This creates a seamless pipeline where an engine recognizes a problem natively, writes the technical architecture for the fix, and then pipelines it down the standard route enabling `Execution` and verification.

@@ -5,42 +5,47 @@ searchHints:
   - repo
   - repository
   - multi-project
+  - isolation
+  - worktree
 ---
 
 # Project Setup
 
 <Ingress>
-Tendril supports managing multiple projects simultaneously. Each project maps to a git repository and has its own verification and configuration settings.
+Tendril natively manages multiple software projects. Each Project maps entirely to a dedicated git repository and enforces its own strict validation and agent behavior settings.
 </Ingress>
 
-## Adding a Project
+## Registering a Project
 
-Add a new project entry to the `projects` array in `config.yaml`:
+Add a new project in the **Setup App** -> **Projects** tab, or modify `config.yaml`:
 
 ```yaml
 projects:
-  - name: My App
-    repo: D:\Repos\MyApp
+  - name: Global Engine
+    repo: ~/git/global-engine
     verifications:
-      - DotnetBuild
-      - DotnetFormat
+      - NpmBuild
+      - NpmTest
       - CheckResult
 ```
 
-## Project Isolation
+## Worktree Isolation
 
-When a plan is executed, Tendril creates a **git worktree** for the target project. This provides complete isolation:
+When an execution phase begins (`ExecutePlan`), Tendril fundamentally protects your code. Instead of mutating your active repository checkout, Tendril generates an isolated, headless **Git Worktree**:
 
-- The main branch remains untouched during execution
-- Multiple plans can execute in parallel on different worktrees
-- Failed executions don't affect your working copy
+1. Tendril clones your repository locally via standard git worktree hooks.
+2. An isolated environment is passed to the Claude Agent.
+3. Your main branch remains completely untouched while agents build code.
+4. Multiple different Plans can execute across different projects simultaneously cleanly.
+5. Failed agent executions are safely wiped off disk without polluting your IDE workspace.
 
-Worktrees are created under the plan's folder at `worktrees/` and are cleaned up after the PR is merged or the plan is discarded.
+When you approve a Plan, the worktree is transformed into a clean git branch and pushed, then deleted safely.
 
-## Per-Project Verifications
+## Project Context Overrides
 
-Each project can have its own set of verifications. After an agent completes execution, Tendril runs the configured verifications in order. If any verification fails, the plan is flagged for review.
+Every project comes with distinct coding conventions. Tendril allows overriding behavior on a per-project basis. Drop context files directly into the root of your target repository:
 
-## Context Files
+- `CLAUDE.md`: Broad system guidelines picked up automatically by Claude Code.
+- `AGENTS.md` / `DEVELOPER.md`: Domain-specific coding practices.
 
-Projects can include context files (like `CLAUDE.md` or `DEVELOPER.md`) that are automatically included in the agent's prompt. These files provide project-specific instructions and conventions that guide the agent's behavior.
+When initializing the Promptware environment, Tendril scans for these files and prefixes the agent execution with your project-specific standards.

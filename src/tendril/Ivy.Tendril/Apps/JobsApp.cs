@@ -77,7 +77,7 @@ public class JobsApp : ViewBase
                 StatusMessage = GetStatusMessage(j)
             };
         })
-            .OrderByDescending(r => r.LastOutputTimestamp ?? DateTime.MinValue)
+            .OrderBy(r => r.Id)
             .ToList();
 
         var statusGroups = jobs
@@ -102,7 +102,6 @@ public class JobsApp : ViewBase
             .Width(Size.Full())
             .Height(Size.Full())
             .Header(t => t.Status, "Status")
-            .Help(t => t.Status, "Blocked = waiting for dependencies · Failed = error during execution · Timeout = exceeded time limit · Queued = waiting for a job slot")
             .Header(t => t.Type, "Type")
             .Header(t => t.PlanId, "Plan")
             .Header(t => t.Plan, "Prompt/Title")
@@ -121,7 +120,7 @@ public class JobsApp : ViewBase
             .Width(t => t.LastOutput, Size.Px(100))
             .Width(t => t.Cost, Size.Px(100))
             .Width(t => t.Tokens, Size.Px(100))
-            .Width(t => t.StatusMessage, Size.Px(300))
+            .Width(t => t.StatusMessage, Size.Px(250))
             .Renderer(t => t.Status, new LabelsDisplayRenderer
             {
                 BadgeColorMapping = StatusMappings.JobStatusColors.ToDictionary(
@@ -145,11 +144,9 @@ public class JobsApp : ViewBase
             .Hidden(t => t.LastOutputTimestamp)
             .Filterable(t => t.Timer, false)
             .Filterable(t => t.LastOutput, false)
-            .Sortable(t => t.Timer, false)
-            .Sortable(t => t.LastOutput, false)
             .Config(c =>
             {
-                c.AllowSorting = true;
+                c.AllowSorting = false;
                 c.AllowFiltering = true;
                 c.ShowSearch = false;
                 c.SelectionMode = SelectionModes.None;
@@ -184,7 +181,8 @@ public class JobsApp : ViewBase
             })
             .RowActions(
                 new MenuItem("View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
-                new MenuItem("Show Prompt", Icon: Icons.MessageSquare, Tag: "show-prompt").Tooltip("Show the full prompt text"),
+                new MenuItem("Show Prompt", Icon: Icons.MessageSquare, Tag: "show-prompt").Tooltip(
+                    "Show the full prompt text"),
                 new MenuItem("Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
                 new MenuItem("Rerun", Icon: Icons.RotateCw, Tag: "rerun-job").Tooltip("Rerun this job"),
                 new MenuItem("Delete", Icon: Icons.Trash, Tag: "delete-job").Tooltip("Delete this job")
@@ -246,6 +244,7 @@ public class JobsApp : ViewBase
                         {
                             jobService.StopJob(job.Id);
                         }
+
                         jobService.DeleteJob(job.Id);
                         refreshToken.Refresh();
                     }
@@ -254,20 +253,20 @@ public class JobsApp : ViewBase
                 return ValueTask.CompletedTask;
             })
             .HeaderRight(_ => Layout.Horizontal().Gap(2)
-                                 | jobsProgress
-                                 | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
-                                    new MenuItem("Clear Completed", Icon: Icons.Trash, Tag: "ClearCompleted")
-                                        .OnSelect(() =>
-                                        {
-                                            jobService.ClearCompletedJobs();
-                                            refreshToken.Refresh();
-                                        }),
-                                    new MenuItem("Clear Failed", Icon: Icons.Trash, Tag: "ClearFailed").OnSelect(() =>
-                                    {
-                                        jobService.ClearFailedJobs();
-                                        refreshToken.Refresh();
-                                    })
-                                ));
+                              | jobsProgress
+                              | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                                  new MenuItem("Clear Completed", Icon: Icons.Trash, Tag: "ClearCompleted")
+                                      .OnSelect(() =>
+                                      {
+                                          jobService.ClearCompletedJobs();
+                                          refreshToken.Refresh();
+                                      }),
+                                  new MenuItem("Clear Failed", Icon: Icons.Trash, Tag: "ClearFailed").OnSelect(() =>
+                                  {
+                                      jobService.ClearFailedJobs();
+                                      refreshToken.Refresh();
+                                  })
+                              ));
 
         var layout = Layout.Vertical().Height(Size.Full());
 
@@ -360,7 +359,7 @@ public class JobsApp : ViewBase
 
     private static string FormatTimer(JobItem job)
     {
-        if (job.Status == JobStatus.Running && job.StartedAt.HasValue)
+        if (job is { Status: JobStatus.Running, StartedAt: not null })
         {
             var elapsed = DateTime.UtcNow - job.StartedAt.Value;
             return FormatTimeSpan(elapsed);
@@ -422,6 +421,6 @@ public class JobsApp : ViewBase
 
     private static Colors GetStatusColor(JobStatus status)
     {
-        return StatusMappings.JobStatusColors.TryGetValue(status, out var color) ? color : Colors.Slate;
+        return StatusMappings.JobStatusColors.GetValueOrDefault(status, Colors.Slate);
     }
 }

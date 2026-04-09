@@ -11,28 +11,29 @@ icon: ChartBar
 # Dashboard
 
 <Ingress>
-The Dashboard provides a high-level overview of your Tendril activity, including plan counts, cost tracking, and token usage charts.
+The Dashboard provides a panoramic, high-level overview of an entire Tendril ecosystem. It tracks cumulative plan states, live cost estimations, token charts, and immediate activity across all integrated projects.
 </Ingress>
 
-## Overview
+## Executive Overview
 
-The Dashboard is the default landing page when you open Tendril. It shows:
+The Dashboard is the default landing app when you boot Tendril. It gives you instant situational awareness using the following visual layouts:
 
-- **Plan counts by state** — A stacked progress bar showing how many plans are in each lifecycle state
-- **Cost and token charts** — Bar charts showing spending and token usage over time
-- **Activity table** — Recent plans with their status, project, cost, and timestamps
+- **Plan Count Statistics** — A stacked progress bar visually demonstrating the health pipeline of your repository (e.g. how many plans are in Draft, Executing, Review, or Completed).
+- **Cost and Token Analytics** — Rendered, real-time Bar charts evaluating system spend rates. Identifies potential AI-budget drain dynamically.
+- **Activity Feed** — A detailed diagnostic table of all recently mutated plans detailing Status, target Project, exact Job Cost, and creation Timestamps.
 
-## Filtering
+## Deep-Filtering Navigation
 
-You can filter the dashboard by:
+The Dashboard isn't static—it's fully interactable:
 
-- **Project** — Click on a project segment in the stacked progress bar
-- **Time period** — Select a date range to focus on specific activity
+- **By Project** — Select a designated project segment from the Stacked Progress visualizer, instantly constraining the entire view to metrics associated only with that codebase.
+- **By Time Period** — Use the bounding constraints to specify "Last 24 Hours", "This Week", or discrete data focuses.
 
-## Cost Tracking
+## Cost Architecture
 
-The dashboard aggregates cost data from all plan `costs.csv` files. Costs are broken down by:
+The dashboard compiles financial metrics directly from the root filesystem. Every executed job continuously aggregates and dumps a standardized row to the `costs.csv` file within a Plan's secure folder. 
 
-- Project (color-coded)
-- Time period (hourly/daily)
-- Promptware type
+When the Dashboard initializes, it recursively sweeps these files within `TENDRIL_HOME` to generate granular burn-down charts sliced by:
+- Targeted Project (automatically color-coded by the Setting App preferences)
+- Promptware Runtime (Evaluating whether `ExecutePlan` or `MakePlan` consumed the most volume)
+- Raw input versus Raw output tokens.
