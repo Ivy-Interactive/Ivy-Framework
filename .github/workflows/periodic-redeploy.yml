@@ -1,0 +1,36 @@
+# Refreshes staging (docs + samples) on Sliplane via the deploy API. Does not touch git.
+# Runs every 10 minutes on a schedule, or manually from the Actions tab (no push trigger).
+
+name: Staging periodic redeploy
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy docs (Sliplane API)
+        env:
+          SLIPLANE_API_TOKEN: ${{ secrets.SLIPLANE_API_TOKEN }}
+          DEPLOY_URL: ${{ secrets.SLIPLANE_DOCS_DEPLOY_URL }}
+        run: |
+          curl -fsS -X POST "$DEPLOY_URL" \
+            -H "Authorization: Bearer ${SLIPLANE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"tag":"latest"}'
+
+      - name: Deploy samples (Sliplane API)
+        env:
+          SLIPLANE_API_TOKEN: ${{ secrets.SLIPLANE_API_TOKEN }}
+          DEPLOY_URL: ${{ secrets.SLIPLANE_SAMPLES_DEPLOY_URL }}
+        run: |
+          curl -fsS -X POST "$DEPLOY_URL" \
+            -H "Authorization: Bearer ${SLIPLANE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"tag":"latest"}'
