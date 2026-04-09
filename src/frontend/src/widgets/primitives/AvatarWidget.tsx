@@ -8,6 +8,8 @@ interface AvatarWidgetProps {
   fallback: string;
   color?: string;
   density?: Densities;
+  width?: string;
+  height?: string;
 }
 
 const getInitials = (name: string): string => {
@@ -26,7 +28,14 @@ const getSizeClass = (density?: Densities): string => {
   }
 };
 
-export const AvatarWidget: React.FC<AvatarWidgetProps> = ({ image, fallback, color, density }) => {
+export const AvatarWidget: React.FC<AvatarWidgetProps> = ({
+  image,
+  fallback,
+  color,
+  density,
+  width,
+  height,
+}) => {
   const displayFallback = fallback?.length === 2 ? fallback : getInitials(fallback || "");
 
   const colorStyles: React.CSSProperties = color
@@ -36,8 +45,13 @@ export const AvatarWidget: React.FC<AvatarWidgetProps> = ({ image, fallback, col
       }
     : {};
 
+  const sizeStyles: React.CSSProperties = {
+    ...(width && { width }),
+    ...(height && { height }),
+  };
+
   return (
-    <Avatar className={getSizeClass(density)}>
+    <Avatar className={getSizeClass(density)} style={sizeStyles}>
       <AvatarImage src={image} title={fallback} />
       <AvatarFallback title={fallback} style={colorStyles}>
         {displayFallback}

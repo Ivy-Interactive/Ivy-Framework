@@ -35,9 +35,9 @@ public class AvatarApp : SampleBase
 
                | Text.H2("Sizes")
                | Layout.Horizontal()
-                   | new Avatar("Small", "https://api.images.cat/150/150?1").Density(Density.Small)
-                   | new Avatar("Medium", "https://api.images.cat/150/150?2").Density(Density.Medium)
-                   | new Avatar("Large", "https://api.images.cat/150/150?3").Density(Density.Large)
+                   | new Avatar("Small", "https://api.images.cat/150/150?1").Small()
+                   | new Avatar("Medium", "https://api.images.cat/150/150?2").Medium()
+                   | new Avatar("Large", "https://api.images.cat/150/150?3").Large()
 
                | Text.H2("Colors")
                | Text.Muted("When the image fails to load (or is not provided), the fallback uses the specified color.")
