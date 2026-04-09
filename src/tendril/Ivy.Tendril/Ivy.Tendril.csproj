@@ -7,8 +7,6 @@
     <NoWarn>CS8618;CS8603;CS8602;CS8604;CS9113</NoWarn>
     <RootNamespace>Ivy.Tendril</RootNamespace>
     <UserSecretsId>a8f3c2e1-4b7d-4e9f-a1c3-8d6e2f5b9a7c</UserSecretsId>
-    <MinVerTagPrefix>tendril/v</MinVerTagPrefix>
-    <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>tendril</ToolCommandName>
   </PropertyGroup>
@@ -38,7 +36,6 @@
     <PackageReference Include="OpenAI" Version="2.9.1" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
-    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
     <PackageReference Include="PostHog" Version="1.0.8" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.53.1" />
     <PackageReference Include="Velopack" Version="0.0.1298" />

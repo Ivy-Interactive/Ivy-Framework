@@ -8,10 +8,6 @@ on:
   push:
     tags: ['tendril/v*']
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to publish (e.g. 1.0.2). Leave empty to use Directory.Build.props version.'
-        required: false
 
 jobs:
   publish-nuget-npm:
@@ -60,12 +56,8 @@ jobs:
       - name: Determine version
         id: version
         run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
-          elif [[ "$GITHUB_REF" == refs/tags/tendril/v* ]]; then
-            TAG_VERSION="${GITHUB_REF#refs/tags/tendril/v}"
-            echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
-          fi
+          VERSION=$(grep -oP "(?<=<Version>)[^<]+" tendril/Directory.Build.props || echo "1.0.0")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Pack NuGet
         run: |
@@ -182,16 +174,8 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
-          elif [[ "$GITHUB_REF" == refs/tags/tendril/v* ]]; then
-            TAG_VERSION="${GITHUB_REF#refs/tags/tendril/v}"
-            echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
-          else
-            # Try to get version from Directory.Build.props if not tagged
-            VERSION=$(grep -oP "(?<=<Version>)[^<]+" tendril/Directory.Build.props || echo "1.0.0")
-            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          fi
+          VERSION=$(grep -oP "(?<=<Version>)[^<]+" tendril/Directory.Build.props || echo "1.0.0")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Set Icon Path
         run: |
