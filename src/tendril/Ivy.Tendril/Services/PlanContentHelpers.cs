@@ -1,4 +1,3 @@
-using Ivy.Core;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Widgets.DiffView;
 
@@ -6,7 +5,7 @@ namespace Ivy.Tendril.Services;
 
 public static class PlanContentHelpers
 {
-    public record CommitRow(string Hash, string ShortHash, string Title);
+    public record CommitRow(string Hash, string ShortHash, string Title, int? FileCount);
 
     public record CommitDetailData(
         string Title,
@@ -40,13 +39,39 @@ public static class PlanContentHelpers
         var repoPaths = plan.GetEffectiveRepoPaths(config);
         return plan.Commits.Select(commit =>
         {
-            var title = repoPaths
-                .AsParallel()
-                .Select(repo => gitService.GetCommitTitle(repo, commit))
-                .FirstOrDefault(t => t != null) ?? "";
+            string? title = null;
+            int? fileCount = null;
+            foreach (var repo in repoPaths)
+            {
+                var t = gitService.GetCommitTitle(repo, commit);
+                if (t != null)
+                {
+                    title = t;
+                    fileCount = gitService.GetCommitFileCount(repo, commit);
+                    break;
+                }
+            }
             var shortHash = commit.Length > 7 ? commit[..7] : commit;
-            return new CommitRow(commit, shortHash, title);
+            return new CommitRow(commit, shortHash, title ?? "", fileCount);
         }).ToList();
+    }
+
+    public static object? BuildCommitWarningCallout(List<CommitRow> commitRows)
+    {
+        var issues = new List<string>();
+        foreach (var row in commitRows)
+        {
+            if (string.IsNullOrWhiteSpace(row.Title))
+                issues.Add($"Commit `{row.ShortHash}` has no message");
+            if (row.FileCount == 0)
+                issues.Add($"Commit `{row.ShortHash}` has no file changes");
+        }
+
+        if (issues.Count == 0)
+            return null;
+
+        var message = string.Join("\n\n", issues);
+        return Callout.Warning(message, "Commit Warning");
     }
 
     public static object RenderCommitDetailSheet(CommitDetailData? data, bool loading, string? commitHash,

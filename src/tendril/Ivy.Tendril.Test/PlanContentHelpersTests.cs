@@ -67,11 +67,67 @@ public class PlanContentHelpersTests
         Assert.Equal("Test commit", rows[0].Title);
     }
 
-    private class StubGitService(string? commitTitle = null) : IGitService
+    [Fact]
+    public void BuildCommitWarningCallout_WithEmptyTitle_ReturnsWarning()
+    {
+        var rows = new List<PlanContentHelpers.CommitRow>
+        {
+            new("abc123", "abc123", "", 5),
+        };
+
+        var result = PlanContentHelpers.BuildCommitWarningCallout(rows);
+
+        Assert.NotNull(result);
+        Assert.IsType<Callout>(result);
+    }
+
+    [Fact]
+    public void BuildCommitWarningCallout_WithZeroFileCount_ReturnsWarning()
+    {
+        var rows = new List<PlanContentHelpers.CommitRow>
+        {
+            new("abc123", "abc123", "Some commit", 0),
+        };
+
+        var result = PlanContentHelpers.BuildCommitWarningCallout(rows);
+
+        Assert.NotNull(result);
+        Assert.IsType<Callout>(result);
+    }
+
+    [Fact]
+    public void BuildCommitWarningCallout_WithNullFileCount_ReturnsNull()
+    {
+        var rows = new List<PlanContentHelpers.CommitRow>
+        {
+            new("abc123", "abc123", "Some commit", null),
+        };
+
+        var result = PlanContentHelpers.BuildCommitWarningCallout(rows);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void BuildCommitWarningCallout_AllHealthy_ReturnsNull()
+    {
+        var rows = new List<PlanContentHelpers.CommitRow>
+        {
+            new("abc123", "abc123", "First commit", 3),
+            new("def456", "def456", "Second commit", 1),
+        };
+
+        var result = PlanContentHelpers.BuildCommitWarningCallout(rows);
+
+        Assert.Null(result);
+    }
+
+    private class StubGitService(string? commitTitle = null, int? fileCount = null) : IGitService
     {
         public string? GetCommitTitle(string repoPath, string commitHash) => commitTitle;
         public string? GetCommitDiff(string repoPath, string commitHash) => null;
         public List<(string Status, string FilePath)>? GetCommitFiles(string repoPath, string commitHash) => null;
+        public int? GetCommitFileCount(string repoPath, string commitHash) => fileCount;
     }
 
     private class StubConfigService : IConfigService
