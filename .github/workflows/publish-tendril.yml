@@ -50,6 +50,11 @@ jobs:
           distribution: microsoft
           java-version: 17
 
+      - name: Install PowerShell
+        run: |
+          dotnet tool install --global PowerShell
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
       - name: Restore
         run: dotnet restore
 
@@ -169,6 +174,11 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+
+      - name: Install PowerShell
+        run: |
+          dotnet tool install --global PowerShell
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Restore
         run: dotnet restore
