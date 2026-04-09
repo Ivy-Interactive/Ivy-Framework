@@ -11,6 +11,8 @@ public class OnboardingSetupService(IConfigService config, IServiceProvider serv
         await FileHelper.WriteAllTextAsync(Path.Combine(tendrilHome, "Plans", ".counter"), "1");
         Directory.CreateDirectory(Path.Combine(tendrilHome, "Trash"));
         Directory.CreateDirectory(Path.Combine(tendrilHome, "Promptwares"));
+        if (PromptwareDeployer.IsEmbeddedAvailable())
+            PromptwareDeployer.Deploy(Path.Combine(tendrilHome, "Promptwares"));
         Directory.CreateDirectory(Path.Combine(tendrilHome, "Hooks"));
 
         // Copy template or create basic config

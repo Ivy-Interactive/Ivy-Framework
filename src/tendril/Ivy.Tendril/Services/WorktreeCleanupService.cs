@@ -26,7 +26,7 @@ public class WorktreeCleanupService : IStartable, IDisposable
 
     public void Start()
     {
-        _timer = new Timer(_ => RunCleanup(), null, TimerInterval, TimerInterval);
+        _timer = new Timer(_ => RunCleanup(), null, TimeSpan.Zero, TimerInterval);
     }
 
     public void Dispose()
@@ -92,15 +92,30 @@ public class WorktreeCleanupService : IStartable, IDisposable
 
         PlanReaderService.RemoveWorktrees(planFolderPath);
 
-        // Remove the empty worktrees directory if all worktrees were cleaned
+        // Force-delete any remaining worktree directories that git couldn't remove
+        // (orphaned .git files, missing entries, Windows file locks, etc.)
+        foreach (var wtDir in Directory.GetDirectories(worktreesDir))
+        {
+            try
+            {
+                PlanReaderService.ClearReadOnlyAttributes(wtDir);
+                Directory.Delete(wtDir, true);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogWarning(ex, "Failed to force-delete worktree directory {Dir}", Path.GetFileName(wtDir));
+            }
+        }
+
+        // Remove the worktrees directory itself
         try
         {
-            if (Directory.Exists(worktreesDir) && Directory.GetDirectories(worktreesDir).Length == 0)
-                Directory.Delete(worktreesDir, false);
+            if (Directory.Exists(worktreesDir))
+                Directory.Delete(worktreesDir, true);
         }
         catch
         {
-            // Best-effort: directory may not be empty or may be locked
+            // Best-effort: directory may be locked
         }
     }
 

@@ -23,4 +23,5 @@ public interface IConfigService
     void SetPendingVerificationDefinitions(List<VerificationConfig> definitions);
     List<VerificationConfig>? GetPendingVerificationDefinitions();
     void CompleteOnboarding(string tendrilHome);
+    void OpenInEditor(string path);
 }

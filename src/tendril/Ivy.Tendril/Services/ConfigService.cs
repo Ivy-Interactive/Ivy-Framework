@@ -1,4 +1,7 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using YamlDotNet.Serialization;
 
 namespace Ivy.Tendril.Services;
 
@@ -77,11 +80,13 @@ public record EditorConfig
 {
     public string Command { get; set; } = "code";
     public string Label { get; set; } = "VS Code";
+    [YamlIgnore] public bool IsAvailable { get; set; } = true;
 }
 
 public record PromptwareConfig
 {
     public string Model { get; set; } = "";
+    public string Effort { get; set; } = "";
     public List<string> AllowedTools { get; set; } = new();
 }
 
@@ -98,6 +103,7 @@ public class TendrilSettings
     public int JobTimeout { get; set; } = 30;
     public int StaleOutputTimeout { get; set; } = 10;
     public int MaxConcurrentJobs { get; set; } = 5;
+    public string DefaultEffort { get; set; } = "high";
     public List<ProjectConfig> Projects { get; set; } = new();
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
@@ -286,6 +292,11 @@ public class ConfigService : IConfigService
         return _pendingVerificationDefinitions;
     }
 
+    public void OpenInEditor(string path)
+    {
+        PlatformHelper.OpenInEditor(Editor.Command, path);
+    }
+
     public void CompleteOnboarding(string tendrilHome)
     {
         // Update paths
@@ -296,6 +307,29 @@ public class ConfigService : IConfigService
         SaveSettings();
 
         NeedsOnboarding = false;
+    }
+
+    internal static bool IsCommandAvailable(string command)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "where" : "which",
+                Arguments = command,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using var process = Process.Start(psi);
+            process?.WaitForExit(3000);
+            return process?.ExitCode == 0;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     internal static string? MigrateProjectColor(string? colorValue)
@@ -377,7 +411,13 @@ public class ConfigService : IConfigService
         {
             Settings.Editor.Command = VariableExpansion.ExpandVariables(Settings.Editor.Command, TendrilHome);
             Settings.Editor.Label = VariableExpansion.ExpandVariables(Settings.Editor.Label, TendrilHome);
+
+            // Validate editor command exists on PATH (non-blocking)
+            Settings.Editor.IsAvailable = IsCommandAvailable(Settings.Editor.Command);
         }
+
+        // Expand default effort
+        Settings.DefaultEffort = VariableExpansion.ExpandVariables(Settings.DefaultEffort, TendrilHome);
 
         // Expand promptware configs
         if (Settings.Promptwares != null)
@@ -385,6 +425,7 @@ public class ConfigService : IConfigService
             {
                 var config = kvp.Value;
                 config.Model = VariableExpansion.ExpandVariables(config.Model, TendrilHome);
+                config.Effort = VariableExpansion.ExpandVariables(config.Effort, TendrilHome);
 
                 if (config.AllowedTools != null)
                     for (var i = 0; i < config.AllowedTools.Count; i++)

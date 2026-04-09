@@ -165,7 +165,7 @@ public static class TendrilServer
                     ).Gap(0)
                 ).Gap(2).Padding(2).AlignContent(Align.BottomLeft)
             )
-            .DefaultAppId("dashboard")
+            .WallpaperApp<Apps.WallpaperApp>()
             .UseTabs(true);
 
         server.UseAppShell(() => new TendrilAppShell(appShellSettings));

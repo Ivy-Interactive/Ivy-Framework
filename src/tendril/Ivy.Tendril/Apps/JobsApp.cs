@@ -105,7 +105,7 @@ public class JobsApp : ViewBase
             .Help(t => t.Status, "Blocked = waiting for dependencies · Failed = error during execution · Timeout = exceeded time limit · Queued = waiting for a job slot")
             .Header(t => t.Type, "Type")
             .Header(t => t.PlanId, "Plan")
-            .Header(t => t.Plan, "Prompt")
+            .Header(t => t.Plan, "Prompt/Title")
             .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
             .Header(t => t.Cost, "Cost")
@@ -381,10 +381,10 @@ public class JobsApp : ViewBase
 
     private static string GetPromptDisplay(JobItem j, IPlanReaderService planService)
     {
-        // MakePlan jobs already have the description in PlanFile
+        // MakePlan jobs: use the -Description arg for display (PlanFile may now hold the folder name)
         if (j.Type == "MakePlan")
         {
-            var desc = j.PlanFile;
+            var desc = GetFullPrompt(j) ?? j.PlanFile;
             return desc.Length > 50 ? desc[..50] + "..." : desc;
         }
 

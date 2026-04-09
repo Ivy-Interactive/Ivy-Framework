@@ -991,6 +991,57 @@ public class PlanDatabaseServiceTests : IDisposable
     }
 
     [Fact]
+    public void GetDashboardData_EmptyDatabase_ReturnsZeroCounts()
+    {
+        var stats = _db.GetDashboardData(null);
+
+        Assert.Equal(0, stats.TotalCount);
+        Assert.Equal(0, stats.DraftCount);
+        Assert.Equal(0, stats.InProgressCount);
+        Assert.Equal(0, stats.ReviewCount);
+        Assert.Equal(0, stats.CompletedCount);
+        Assert.Equal(0, stats.FailedCount);
+        Assert.Equal(0m, stats.AvgCostPerPlan);
+        Assert.Equal(7, stats.DailyStats.Count);
+        Assert.All(stats.DailyStats, d =>
+        {
+            Assert.Equal(0, d.Created);
+            Assert.Equal(0, d.Completed);
+            Assert.Equal(0, d.Failed);
+            Assert.Equal(0, d.PrsMerged);
+            Assert.Equal(0m, d.Cost);
+            Assert.Equal(0, d.Tokens);
+        });
+        Assert.Empty(stats.ProjectCounts);
+    }
+
+    [Fact]
+    public void GetDashboardData_ProjectFilterNoMatch_ReturnsZeroCounts()
+    {
+        _db.UpsertPlan(CreateTestPlan(2100, "Tendril Plan", project: "Tendril"));
+
+        var stats = _db.GetDashboardData("NonExistent");
+
+        Assert.Equal(0, stats.TotalCount);
+        Assert.Equal(0, stats.DraftCount);
+        Assert.Equal(0, stats.InProgressCount);
+        Assert.Equal(0, stats.ReviewCount);
+        Assert.Equal(0, stats.CompletedCount);
+        Assert.Equal(0, stats.FailedCount);
+        Assert.Equal(0m, stats.AvgCostPerPlan);
+        Assert.Equal(7, stats.DailyStats.Count);
+        Assert.All(stats.DailyStats, d =>
+        {
+            Assert.Equal(0, d.Created);
+            Assert.Equal(0, d.Completed);
+            Assert.Equal(0, d.Failed);
+            Assert.Equal(0, d.PrsMerged);
+            Assert.Equal(0m, d.Cost);
+            Assert.Equal(0, d.Tokens);
+        });
+    }
+
+    [Fact]
     public void SearchPlans_FindsBySourceUrl()
     {
         var metadata = new PlanMetadata(

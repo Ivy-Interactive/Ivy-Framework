@@ -25,7 +25,7 @@ public class ModelPricingServiceTests
     }
 
     [Theory]
-    [InlineData("us.anthropic.claude-opus-4-6-v1", 15.00)]
+    [InlineData("us.anthropic.claude-opus-4-6-v1", 5.00)]
     [InlineData("claude-opus-4-20260301", 15.00)]
     [InlineData("claude-sonnet-4-latest", 3.00)]
     public void GetPricing_MatchesSubstrings(string model, double expectedInput)
@@ -35,11 +35,11 @@ public class ModelPricingServiceTests
     }
 
     [Fact]
-    public void GetPricing_FallsBackToOpus4ForUnknownModels()
+    public void GetPricing_FallsBackToOpus46ForUnknownModels()
     {
         var pricing = _service.GetPricing("gpt-4o-unknown");
-        Assert.Equal(15.00, pricing.Input);
-        Assert.Equal(75.00, pricing.Output);
+        Assert.Equal(5.00, pricing.Input);
+        Assert.Equal(25.00, pricing.Output);
     }
 
     [Fact]
@@ -55,9 +55,10 @@ public class ModelPricingServiceTests
             var result = _service.CalculateFromFile(tempFile);
 
             Assert.True(result.TotalTokens > 0);
-            Assert.Equal(1700, result.TotalTokens);
+            // TotalTokens = input + output only (cache tokens excluded)
+            Assert.Equal(1500, result.TotalTokens);
 
-            // Expected: 1000 * 3.00/1M + 500 * 15.00/1M + 200 * 0.30/1M
+            // Cost still includes cache reads at their discounted rate
             var expectedCost = 1000 * 3.00e-6 + 500 * 15.00e-6 + 200 * 0.30e-6;
             Assert.Equal(expectedCost, result.TotalCost, 10);
         }
@@ -79,8 +80,8 @@ public class ModelPricingServiceTests
 
             var result = _service.CalculateFromFile(tempFile);
 
-            // 500 input + 100 output + 0 cache_read + 300 + 200 cache_creation = 1100
-            Assert.Equal(1100, result.TotalTokens);
+            // TotalTokens = input + output only (cache tokens excluded)
+            Assert.Equal(600, result.TotalTokens);
 
             var expectedCost = 500 * 15.00e-6 + 100 * 75.00e-6 + (300 + 200) * 18.75e-6;
             Assert.Equal(expectedCost, result.TotalCost, 10);
@@ -103,7 +104,8 @@ public class ModelPricingServiceTests
 
             var result = _service.CalculateFromFile(tempFile);
 
-            Assert.Equal(1000, result.TotalTokens);
+            // TotalTokens = input + output only (cache tokens excluded)
+            Assert.Equal(600, result.TotalTokens);
 
             var expectedCost = 500 * 15.00e-6 + 100 * 75.00e-6 + 400 * 18.75e-6;
             Assert.Equal(expectedCost, result.TotalCost, 10);
@@ -160,7 +162,8 @@ public class ModelPricingServiceTests
 
             var result = _service.CalculateFromFile(tempFile);
 
-            Assert.Equal(2100, result.TotalTokens);
+            // TotalTokens = input + output only: (1000+200) + (500+100) = 1800
+            Assert.Equal(1800, result.TotalTokens);
 
             var expectedCost =
                 1000 * 15.00e-6 + 200 * 75.00e-6 +
@@ -189,8 +192,8 @@ public class ModelPricingServiceTests
 
             var result = _service.ParseCodexSessionFile(tempFile);
 
-            // 5000 input + 500 output + 100 reasoning + 2000 cached = 7600
-            Assert.Equal(7600, result.TotalTokens);
+            // TotalTokens = input + output only: 5000 + 500 + 100 reasoning = 5600
+            Assert.Equal(5600, result.TotalTokens);
 
             // o4-mini pricing: input=1.10, output=4.40, cacheRead=0.275
             // output includes reasoning: 500 + 100 = 600
@@ -218,8 +221,8 @@ public class ModelPricingServiceTests
 
             var result = _service.ParseCodexSessionFile(tempFile);
 
-            // Should use the LAST token_count entry (cumulative): 3000 + 350 + 1000 = 4350
-            Assert.Equal(4350, result.TotalTokens);
+            // Should use the LAST entry; TotalTokens = input + output only: 3000 + 350 = 3350
+            Assert.Equal(3350, result.TotalTokens);
 
             // o3 pricing: input=10.00, output=40.00, cacheRead=2.50
             var expectedCost = 3000 * 10.00e-6 + 350 * 40.00e-6 + 1000 * 2.50e-6;
@@ -261,14 +264,14 @@ public class ModelPricingServiceTests
 
             var result = _service.ParseGeminiSessionFile(tempFile);
 
-            // (1000 + 200 + 500) + (2000 + 400 + 300) = 4400
-            Assert.Equal(4400, result.TotalTokens);
+            // TotalTokens = input + output only: (1000+200) + (2000+400) = 3600
+            Assert.Equal(3600, result.TotalTokens);
 
-            // gemini-2.5-pro pricing: input=1.25, output=10.00, cacheRead=0.315
+            // gemini-2.5-pro pricing: input=1.25, output=10.00, cacheRead=0.125
             var expectedCost =
                 (1000 + 2000) * 1.25e-6 +
                 (200 + 400) * 10.00e-6 +
-                (500 + 300) * 0.315e-6;
+                (500 + 300) * 0.125e-6;
             Assert.Equal(expectedCost, result.TotalCost, 10);
         }
         finally
@@ -303,8 +306,8 @@ public class ModelPricingServiceTests
 
             Assert.Equal(600, result.TotalTokens);
 
-            // gemini-2.5-flash pricing: input=0.15, output=0.60, cacheRead=0.0375
-            var expectedCost = 500 * 0.15e-6 + 100 * 0.60e-6;
+            // gemini-2.5-flash pricing: input=0.30, output=2.50, cacheRead=0.03
+            var expectedCost = 500 * 0.30e-6 + 100 * 2.50e-6;
             Assert.Equal(expectedCost, result.TotalCost, 10);
         }
         finally
@@ -329,8 +332,8 @@ public class ModelPricingServiceTests
 
             var result = _service.CalculateFromFile(tempFile);
 
-            // Should count only ONCE despite 3 lines
-            Assert.Equal(1700, result.TotalTokens);
+            // Should count only ONCE despite 3 lines; TotalTokens = input + output only
+            Assert.Equal(1200, result.TotalTokens);
 
             var expectedCost = 1000 * 3.00e-6 + 200 * 15.00e-6 + 500 * 0.30e-6;
             Assert.Equal(expectedCost, result.TotalCost, 10);
@@ -358,7 +361,7 @@ public class ModelPricingServiceTests
 
             var result = _service.CalculateFromFile(tempFile);
 
-            // msg_001: 1200 tokens, msg_002: 600 tokens = 1800 total
+            // msg_001: 1000+200=1200, msg_002: 500+100=600 (cache excluded) = 1800
             Assert.Equal(1800, result.TotalTokens);
 
             var expectedCost =

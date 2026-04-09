@@ -16,7 +16,7 @@ if (-not $env:TENDRIL_CONFIG -and $env:TENDRIL_HOME) {
 }
 
 # Bootstrap shared utilities (includes Bootstrap-Modules.ps1 and ExtractRepoPathsFromYaml)
-$sharedPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "Ivy.Tendril/.promptwares/.shared"
+$sharedPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "Ivy.Tendril/Promptwares/.shared"
 . (Join-Path $sharedPath "Utils.ps1")
 
 $plansDir = Join-Path $env:TENDRIL_HOME "Plans"

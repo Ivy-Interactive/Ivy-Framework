@@ -35,10 +35,10 @@ public class ModelPricingService : IModelPricingService
             if (modelName.Contains(key, StringComparison.OrdinalIgnoreCase))
                 return Pricing[key];
 
-        // Fallback to Opus 4
-        return Pricing.TryGetValue("claude-opus-4", out var fallback)
+        // Fallback to Opus 4.6 (current default model)
+        return Pricing.TryGetValue("claude-opus-4-6", out var fallback)
             ? fallback
-            : new ModelPricing { Input = 15.0, Output = 75.0, CacheWrite = 18.75, CacheRead = 1.50 };
+            : new ModelPricing { Input = 5.0, Output = 25.0, CacheWrite = 6.25, CacheRead = 0.50 };
     }
 
     public CostCalculation CalculateSessionCost(string sessionId)
@@ -198,7 +198,7 @@ public class ModelPricingService : IModelPricingService
         }
 
         var pricing = GetPricing(model);
-        var totalTokens = totalInputTokens + totalOutputTokens + totalCachedTokens;
+        var totalTokens = totalInputTokens + totalOutputTokens;
         var totalCost = totalInputTokens * pricing.Input * 1e-6
                         + totalOutputTokens * pricing.Output * 1e-6
                         + totalCachedTokens * pricing.CacheRead * 1e-6;
@@ -234,7 +234,7 @@ public class ModelPricingService : IModelPricingService
                 var outputTokens = tokens.TryGetProperty("output", out var ot) ? ot.GetInt32() : 0;
                 var cachedTokens = tokens.TryGetProperty("cached", out var ct) ? ct.GetInt32() : 0;
 
-                totalTokens += inputTokens + outputTokens + cachedTokens;
+                totalTokens += inputTokens + outputTokens;
                 totalCost += inputTokens * pricing.Input * 1e-6;
                 totalCost += outputTokens * pricing.Output * 1e-6;
                 totalCost += cachedTokens * pricing.CacheRead * 1e-6;
@@ -305,7 +305,10 @@ public class ModelPricingService : IModelPricingService
                 var outputTokens = usage.TryGetProperty("output_tokens", out var ot) ? ot.GetInt32() : 0;
                 var cacheReadTokens = usage.TryGetProperty("cache_read_input_tokens", out var cr) ? cr.GetInt32() : 0;
 
-                totalTokens += inputTokens + outputTokens + cacheReadTokens;
+                // TotalTokens tracks actual work (non-cached input + output) so the
+                // number shown to the user reflects what the model genuinely processed,
+                // not the much larger cache-dominated throughput.
+                totalTokens += inputTokens + outputTokens;
                 totalCost += inputTokens * priceInput;
                 totalCost += outputTokens * priceOutput;
                 totalCost += cacheReadTokens * priceCacheRead;
@@ -318,13 +321,11 @@ public class ModelPricingService : IModelPricingService
                     var cacheOneHour = cacheCreation.TryGetProperty("ephemeral_1h_input_tokens", out var c1)
                         ? c1.GetInt32()
                         : 0;
-                    totalTokens += cacheFiveMinutes + cacheOneHour;
                     totalCost += (cacheFiveMinutes + cacheOneHour) * priceCacheWrite;
                 }
                 else if (usage.TryGetProperty("cache_creation_input_tokens", out var ccTokens))
                 {
                     var cacheCreationTokens = ccTokens.GetInt32();
-                    totalTokens += cacheCreationTokens;
                     totalCost += cacheCreationTokens * priceCacheWrite;
                 }
             }

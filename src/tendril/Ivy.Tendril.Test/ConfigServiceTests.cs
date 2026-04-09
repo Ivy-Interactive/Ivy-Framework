@@ -430,4 +430,183 @@ projects:
         Assert.NotNull(result);
         Assert.Equal("yolo", result.PrRule);
     }
+
+    [Fact]
+    public void Should_Deserialize_PromptwareConfig_Effort()
+    {
+        var yaml = @"
+promptwares:
+  MakePlan:
+    model: sonnet
+    effort: high
+    allowedTools:
+      - Read
+      - Write
+  ExecutePlan:
+    model: opus
+    effort: max
+    allowedTools:
+      - Read
+      - Bash
+";
+
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            Assert.NotNull(service.Settings.Promptwares);
+            Assert.Equal(2, service.Settings.Promptwares.Count);
+
+            var makePlan = service.Settings.Promptwares["MakePlan"];
+            Assert.Equal("sonnet", makePlan.Model);
+            Assert.Equal("high", makePlan.Effort);
+            Assert.Equal(new List<string> { "Read", "Write" }, makePlan.AllowedTools);
+
+            var executePlan = service.Settings.Promptwares["ExecutePlan"];
+            Assert.Equal("opus", executePlan.Model);
+            Assert.Equal("max", executePlan.Effort);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void Should_Deserialize_DefaultEffort()
+    {
+        var yaml = @"
+defaultEffort: medium
+";
+
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            Assert.Equal("medium", service.Settings.DefaultEffort);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void DefaultEffort_DefaultsToHigh()
+    {
+        var settings = new TendrilSettings();
+        Assert.Equal("high", settings.DefaultEffort);
+    }
+
+    [Fact]
+    public void PromptwareConfig_Effort_DefaultsToEmpty()
+    {
+        var config = new PromptwareConfig();
+        Assert.Equal("", config.Effort);
+    }
+
+    [Fact]
+    public void Should_Expand_Effort_Variables()
+    {
+        var yaml = @"
+defaultEffort: high
+promptwares:
+  TestPw:
+    model: sonnet
+    effort: high
+    allowedTools:
+      - Read
+";
+
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            // Verify effort values survive expansion (non-variable values pass through unchanged)
+            Assert.Equal("high", service.Settings.DefaultEffort);
+            Assert.Equal("high", service.Settings.Promptwares["TestPw"].Effort);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void Should_Parse_Default_Key_In_Promptwares()
+    {
+        var yaml = @"
+promptwares:
+  _default:
+    model: sonnet
+    effort: high
+    allowedTools:
+      - Read
+      - Glob
+  ExecutePlan:
+    model: opus
+    effort: max
+    allowedTools:
+      - Read
+      - Write
+";
+
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            Assert.NotNull(service.Settings.Promptwares);
+            Assert.True(service.Settings.Promptwares.ContainsKey("_default"));
+            Assert.True(service.Settings.Promptwares.ContainsKey("ExecutePlan"));
+
+            var defaultConfig = service.Settings.Promptwares["_default"];
+            Assert.Equal("sonnet", defaultConfig.Model);
+            Assert.Equal("high", defaultConfig.Effort);
+            Assert.Equal(2, defaultConfig.AllowedTools.Count);
+            Assert.Contains("Read", defaultConfig.AllowedTools);
+            Assert.Contains("Glob", defaultConfig.AllowedTools);
+
+            var execConfig = service.Settings.Promptwares["ExecutePlan"];
+            Assert.Equal("opus", execConfig.Model);
+            Assert.Equal("max", execConfig.Effort);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void EditorConfig_IsAvailable_WhenCommandExists()
+    {
+        // "dotnet" should be available on any machine running these tests
+        var result = ConfigService.IsCommandAvailable("dotnet");
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void EditorConfig_IsAvailable_WhenCommandMissing()
+    {
+        var result = ConfigService.IsCommandAvailable("nonexistent-command-xyz-12345");
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void PlatformHelper_OpenInEditor_ReturnsFalse_WhenCommandInvalid()
+    {
+        var result = PlatformHelper.OpenInEditor("nonexistent-editor-xyz-12345", "somefile.txt");
+        Assert.False(result);
+    }
 }

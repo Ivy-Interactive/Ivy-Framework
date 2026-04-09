@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Ivy.Core;
 using Ivy.Tendril.Apps.Icebox.Dialogs;
 using Ivy.Tendril.Apps.Plans;
@@ -146,12 +145,7 @@ public class ContentView(
                             new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
                             {
                                 var yamlPath = Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
-                                Process.Start(new ProcessStartInfo
-                                {
-                                    FileName = _config.Editor.Command,
-                                    Arguments = yamlPath,
-                                    UseShellExecute = true
-                                });
+                                _config.OpenInEditor(yamlPath);
                             })
                         );
 

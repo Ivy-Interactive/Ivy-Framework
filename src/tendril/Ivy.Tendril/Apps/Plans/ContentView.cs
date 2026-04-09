@@ -1,9 +1,7 @@
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Ivy.Core;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
-using Ivy.Widgets.DiffView;
 
 namespace Ivy.Tendril.Apps.Plans;
 
@@ -68,7 +66,7 @@ public class ContentView(
             initialValue: ""
         );
 
-        var commitQuery = UseQuery<CommitDetailData?, string>(
+        var commitQuery = UseQuery<PlanContentHelpers.CommitDetailData?, string>(
             openCommit.Value ?? "",
             async (hash, ct) =>
             {
@@ -83,7 +81,7 @@ public class ContentView(
                         {
                             var diff = _gitService.GetCommitDiff(repo, hash);
                             var files = _gitService.GetCommitFiles(repo, hash);
-                            return new CommitDetailData(title, diff, files);
+                            return new PlanContentHelpers.CommitDetailData(title, diff, files);
                         }
                     }
                     return null;
@@ -100,7 +98,7 @@ public class ContentView(
                 {
                     if (_selectedPlan is null)
                         return new PlanContentData(null,
-                            new Dictionary<string, List<string>>(), new List<CommitRow>(),
+                            new Dictionary<string, List<string>>(), new List<PlanContentHelpers.CommitRow>(),
                             new Dictionary<string, bool>());
 
                     // Summary
@@ -108,19 +106,10 @@ public class ContentView(
                     var summaryMd = File.Exists(summPath) ? FileHelper.ReadAllText(summPath) : null;
 
                     // Artifacts
-                    var artifacts = GetArtifacts(folderPath);
+                    var artifacts = PlanContentHelpers.GetArtifacts(folderPath);
 
                     // Commit rows
-                    var repoPaths = _selectedPlan!.GetEffectiveRepoPaths(_config);
-                    var commitRows = _selectedPlan.Commits.Select(commit =>
-                    {
-                        var title = repoPaths
-                            .AsParallel()
-                            .Select(repo => _gitService.GetCommitTitle(repo, commit))
-                            .FirstOrDefault(t => t != null) ?? "";
-                        var shortHash = commit.Length > 7 ? commit[..7] : commit;
-                        return new CommitRow(commit, shortHash, title);
-                    }).ToList();
+                    var commitRows = PlanContentHelpers.BuildCommitRows(_selectedPlan!, _config, _gitService);
 
                     // Verification report existence
                     var verReports = _selectedPlan.Verifications.ToDictionary(
@@ -131,7 +120,7 @@ public class ContentView(
                 }, ct);
             },
             initialValue: new PlanContentData(null,
-                new Dictionary<string, List<string>>(), new List<CommitRow>(), new Dictionary<string, bool>())
+                new Dictionary<string, List<string>>(), new List<PlanContentHelpers.CommitRow>(), new Dictionary<string, bool>())
         );
 
         UseEffect(() =>
@@ -320,24 +309,7 @@ public class ContentView(
 
             // Artifacts tab content
             var artifactsLayout = Layout.Vertical().Gap(2);
-
-            if (planData.Artifacts.TryGetValue("screenshots", out var screenshotFiles))
-            {
-                var screenshotsLayout = Layout.Horizontal().Gap(2).Wrap();
-                foreach (var file in screenshotFiles)
-                {
-                    var imageUrl = $"/ivy/local-file?path={Uri.EscapeDataString(file)}";
-                    screenshotsLayout |= new Image(imageUrl)
-                    { ObjectFit = ImageFit.Contain, Alt = Path.GetFileName(file), Overlay = true }
-                        .Height(Size.Units(15)).Width(Size.Units(22))
-                        .BorderColor(Colors.Neutral)
-                        .BorderStyle(BorderStyle.Solid)
-                        .BorderThickness(1)
-                        .BorderRadius(BorderRadius.Rounded);
-                }
-
-                artifactsLayout |= screenshotsLayout;
-            }
+            artifactsLayout |= PlanContentHelpers.RenderArtifactScreenshots(planData.Artifacts);
 
             var totalArtifacts = (planData.Artifacts.GetValueOrDefault("screenshots")?.Count ?? 0)
                                  + (planData.Artifacts.ContainsKey("sample") ? 1 : 0);
@@ -368,51 +340,11 @@ public class ContentView(
 
         if (openCommit.Value is { } commitHash && _selectedPlan is not null)
         {
-            var shortHash = commitHash.Length > 7 ? commitHash[..7] : commitHash;
-            object sheetContent;
-
-            if (commitQuery.Loading || commitQuery.Value is null && !string.IsNullOrEmpty(openCommit.Value))
-            {
-                sheetContent = Text.Muted("Loading...");
-            }
-            else
-            {
-                var data = commitQuery.Value;
-                var commitSheetContent = Layout.Vertical().Gap(4).Padding(2);
-
-                if (data?.Files is { Count: > 0 })
-                {
-                    var filesLayout = Layout.Vertical().Gap(1);
-                    filesLayout |= Text.Block("Changed Files").Bold();
-                    foreach (var (status, filePath) in data.Files)
-                    {
-                        var (label, variant) = status switch
-                        {
-                            "A" => ("Added", BadgeVariant.Success),
-                            "D" => ("Deleted", BadgeVariant.Destructive),
-                            _ => ("Modified", BadgeVariant.Outline)
-                        };
-                        filesLayout |= Layout.Horizontal().Gap(2)
-                            | new Badge(label).Variant(variant).Small()
-                            | Text.Block(filePath);
-                    }
-                    commitSheetContent |= filesLayout;
-                }
-
-                if (!string.IsNullOrWhiteSpace(data?.Diff))
-                {
-                    commitSheetContent |= Text.Block("Diff").Bold();
-                    commitSheetContent |= new DiffView().Diff(data.Diff).Split();
-                }
-
-                sheetContent = commitSheetContent;
-            }
-
-            content |= new Sheet(
-                onClose: () => openCommit.Set(null),
-                content: sheetContent,
-                title: $"Commit {shortHash} — {commitQuery.Value?.Title ?? ""}"
-            ).Width(Size.Half()).Resizable();
+            content |= PlanContentHelpers.RenderCommitDetailSheet(
+                commitQuery.Value,
+                commitQuery.Loading || commitQuery.Value is null && !string.IsNullOrEmpty(openCommit.Value),
+                commitHash,
+                () => openCommit.Set(null));
         }
 
         var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
@@ -452,15 +384,7 @@ public class ContentView(
                                 PlatformHelper.OpenInTerminal(_selectedPlan.FolderPath);
                             }),
                             new MenuItem($"Open in {_config.Editor.Label}", Icon: Icons.Code, Tag: "OpenInEditor")
-                                .OnSelect(() =>
-                                {
-                                    Process.Start(new ProcessStartInfo
-                                    {
-                                        FileName = _config.Editor.Command,
-                                        Arguments = $"\"{_selectedPlan.FolderPath}\"",
-                                        UseShellExecute = true
-                                    });
-                                }),
+                                .OnSelect(() => { _config.OpenInEditor(_selectedPlan.FolderPath); }),
                             new MenuItem("Copy Path to Clipboard", Icon: Icons.ClipboardCopy, Tag: "CopyPath")
                                 .OnSelect(() =>
                                 {
@@ -476,12 +400,7 @@ public class ContentView(
                             new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
                             {
                                 var yamlPath = Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
-                                Process.Start(new ProcessStartInfo
-                                {
-                                    FileName = _config.Editor.Command,
-                                    Arguments = yamlPath,
-                                    UseShellExecute = true
-                                });
+                                _config.OpenInEditor(yamlPath);
                             })
                         );
 
@@ -587,27 +506,6 @@ public class ContentView(
         return Callout.Destructive("No details available. Check the logs folder.", "Execution Failed");
     }
 
-    private static Dictionary<string, List<string>> GetArtifacts(string folderPath)
-    {
-        var artifactsDir = Path.Combine(folderPath, "artifacts");
-        var result = new Dictionary<string, List<string>>();
-        if (!Directory.Exists(artifactsDir)) return result;
-
-        foreach (var subDir in Directory.GetDirectories(artifactsDir))
-        {
-            var category = Path.GetFileName(subDir);
-            var files = Directory.GetFiles(subDir, "*", SearchOption.AllDirectories).ToList();
-            if (files.Count > 0)
-                result[category] = files;
-        }
-
-        var rootFiles = Directory.GetFiles(artifactsDir).ToList();
-        if (rootFiles.Count > 0)
-            result["other"] = rootFiles;
-
-        return result;
-    }
-
     private void GoToNext()
     {
         if (_allPlans.Count == 0) return;
@@ -624,17 +522,9 @@ public class ContentView(
         _selectedPlanState.Set(_allPlans[prevIndex]);
     }
 
-    private record CommitRow(string Hash, string ShortHash, string Title);
-
-    private record CommitDetailData(
-        string Title,
-        string? Diff,
-        List<(string Status, string FilePath)>? Files
-    );
-
     private record PlanContentData(
         string? SummaryMarkdown,
         Dictionary<string, List<string>> Artifacts,
-        List<CommitRow> CommitRows,
+        List<PlanContentHelpers.CommitRow> CommitRows,
         Dictionary<string, bool> VerificationReports);
 }

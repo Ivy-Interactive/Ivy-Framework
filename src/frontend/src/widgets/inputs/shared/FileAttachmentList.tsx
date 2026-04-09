@@ -108,7 +108,9 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
           className={`flex items-center gap-3 ${cardPadding} border border-muted-foreground/25 rounded-md bg-transparent`}
         >
           <div className="flex-1 min-w-0">
-            <p className={`${cardText} font-medium truncate`} title={fileName}>{fileName}</p>
+            <p className={`${cardText} font-medium truncate`} title={fileName}>
+              {fileName}
+            </p>
             <div className="mt-2">
               <div className="w-full bg-muted rounded-full h-1.5">
                 <div
@@ -210,7 +212,9 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
               className={`flex items-center gap-3 ${cardPadding} border border-muted-foreground/25 rounded-md bg-transparent`}
             >
               <div className="flex-1 min-w-0">
-                <p className={`${cardText} font-medium truncate`} title={file.fileName}>{file.fileName}</p>
+                <p className={`${cardText} font-medium truncate`} title={file.fileName}>
+                  {file.fileName}
+                </p>
                 {isLoading && (
                   <div className="mt-2">
                     <div className="w-full bg-muted rounded-full h-1.5">

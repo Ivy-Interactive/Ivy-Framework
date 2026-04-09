@@ -246,6 +246,38 @@ describe("generateYAxis", () => {
       expect(axis).toHaveProperty("type", "log");
     });
   });
+
+  describe("axisPointer.label.formatter", () => {
+    const callSingleYAxis = (props: Record<string, unknown>) =>
+      generateYAxis(false, undefined, 0, 100, [props as unknown as YAxisProps]) as Record<
+        string,
+        unknown
+      >;
+
+    it("should set axisPointer.label.formatter when tickFormatter is configured", () => {
+      const axis = callSingleYAxis({ tickFormatter: "C2" });
+      const axisPointer = (axis as { axisPointer: { label: { formatter?: unknown } } }).axisPointer;
+      expect(axisPointer.label.formatter).toBeDefined();
+      expect(typeof axisPointer.label.formatter).toBe("function");
+    });
+
+    it("should produce the same output as the axis tick label formatter", () => {
+      const axis = callSingleYAxis({ tickFormatter: "C2" });
+      const typed = axis as {
+        axisLabel: { formatter: (v: number) => string | number };
+        axisPointer: { label: { formatter: (params: { value: number }) => string } };
+      };
+      const tickFormatted = typed.axisLabel.formatter(4.5);
+      const pointerFormatted = typed.axisPointer.label.formatter({ value: 4.5 });
+      expect(pointerFormatted).toBe(tickFormatted);
+    });
+
+    it("should not set a custom axisPointer.label.formatter when tickFormatter is not set", () => {
+      const axis = callSingleYAxis({});
+      const axisPointer = (axis as { axisPointer: { label: { formatter?: unknown } } }).axisPointer;
+      expect(axisPointer.label.formatter).toBeUndefined();
+    });
+  });
 });
 
 describe("generateXAxis", () => {
@@ -306,6 +338,26 @@ describe("generateXAxis", () => {
     const result = callGenerateXAxis({ unit: "kg" });
     const formatted = result.axisLabel.formatter(500);
     expect(formatted).toBe("500kg");
+  });
+
+  describe("axisPointer.label.formatter", () => {
+    it("should set axisPointer.label.formatter when tickFormatter is configured", () => {
+      const result = callGenerateXAxis({ tickFormatter: "N2" });
+      expect(result.axisPointer.label.formatter).toBeDefined();
+      expect(typeof result.axisPointer.label.formatter).toBe("function");
+    });
+
+    it("should produce the same output as the axis tick label formatter", () => {
+      const result = callGenerateXAxis({ tickFormatter: "N2" });
+      const tickFormatted = result.axisLabel.formatter(1234.5);
+      const pointerFormatted = result.axisPointer.label.formatter!({ value: 1234.5 });
+      expect(pointerFormatted).toBe(tickFormatted);
+    });
+
+    it("should not set a custom axisPointer.label.formatter when tickFormatter is not set", () => {
+      const result = callGenerateXAxis({});
+      expect(result.axisPointer.label.formatter).toBeUndefined();
+    });
   });
 });
 

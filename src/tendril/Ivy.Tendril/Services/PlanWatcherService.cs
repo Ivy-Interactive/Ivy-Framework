@@ -20,9 +20,17 @@ public class PlanWatcherService : IPlanWatcherService
         _debounceTimer.AutoReset = false;
         _debounceTimer.Elapsed += (_, _) =>
         {
-            var folder = _pendingPlanFolder;
-            _pendingPlanFolder = null;
-            PlansChanged?.Invoke(folder);
+            try
+            {
+                var folder = _pendingPlanFolder;
+                _pendingPlanFolder = null;
+                PlansChanged?.Invoke(folder);
+            }
+            catch
+            {
+                // Swallow to prevent unhandled exceptions on the timer's thread-pool
+                // thread from terminating the process.
+            }
         };
 
         var planFolder = config.PlanFolder;

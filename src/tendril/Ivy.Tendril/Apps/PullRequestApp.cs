@@ -30,26 +30,23 @@ public class PullRequestApp : ViewBase
                     .Distinct()
                     .ToList();
 
-                var allStatuses = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var repoKey in keys)
+                var tasks = keys.Select(async repoKey =>
                 {
                     var parts = repoKey.Split('/');
-                    if (parts.Length != 2) continue;
-                    var statuses = await githubService.GetPrStatusesAsync(parts[0], parts[1]);
+                    if (parts.Length != 2) return new Dictionary<string, string>();
+                    return await githubService.GetPrStatusesAsync(parts[0], parts[1]);
+                }).ToList();
+
+                var results = await Task.WhenAll(tasks);
+                var allStatuses = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var statuses in results)
                     foreach (var kvp in statuses)
                         allStatuses[kvp.Key] = kvp.Value;
-                }
 
                 return allStatuses;
             },
             initialValue: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         );
-
-        if (statusQuery.Loading)
-        {
-            return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
-                   | Text.Muted("Loading...");
-        }
 
         var plans = planService.GetPlans()
             .Where(p => p.Prs.Count > 0)
@@ -95,6 +92,15 @@ public class PullRequestApp : ViewBase
             .Width(t => t.Plan, Size.Fraction(1 / 3f))
             .Width(t => t.Cost, Size.Px(90))
             .Width(t => t.Tokens, Size.Px(90))
+            .Renderer(t => t.Status, new LabelsDisplayRenderer
+            {
+                BadgeColorMapping = new Dictionary<string, string>
+                {
+                    ["Open"] = Colors.Green.ToString(),
+                    ["Merged"] = Colors.Purple.ToString(),
+                    ["Closed"] = Colors.Zinc.ToString()
+                }
+            })
             .Renderer(t => t.Plan, new LinkDisplayRenderer())
             .Renderer(t => t.Pr, new LinkDisplayRenderer())
             .SortDirection(t => t.PlanId, SortDirection.Descending)

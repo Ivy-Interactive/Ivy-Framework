@@ -1,7 +1,7 @@
 codingAgent: claude
 jobTimeout: 30
 staleOutputTimeout: 10
-maxConcurrentJobs: 20
+maxConcurrentJobs: 10
 defaultEffort: high
 projects:
 - name: Framework
@@ -169,7 +169,7 @@ projects:
     Plan management TUI. Key folders:
     - Services/ — ConfigService, PlanReaderService, JobService
     - Apps/ — PlansApp, JobsApp UI
-    - .promptwares/ — MakePlan, UpdatePlan, SplitPlan, ExpandPlan
+    - Promptwares/ — MakePlan, UpdatePlan, SplitPlan, ExpandPlan
     This project uses the Ivy Framework - there's CLI helper methods you can use: 
     ivy docs AGENTS.md 
     ivy question "How do I make a button in Ivy?"

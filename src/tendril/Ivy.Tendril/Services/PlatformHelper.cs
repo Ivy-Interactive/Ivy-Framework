@@ -27,6 +27,39 @@ public static class PlatformHelper
         Process.Start(psi);
     }
 
+    public static bool OpenInEditor(string editorCommand, string target)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = editorCommand,
+                Arguments = $"\"{target}\"",
+                UseShellExecute = true
+            });
+            return true;
+        }
+        catch (Exception)
+        {
+            // On macOS, fall back to 'open' which opens with the default app
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "open",
+                        Arguments = $"\"{target}\"",
+                        UseShellExecute = true
+                    });
+                    return true;
+                }
+                catch { }
+            }
+            return false;
+        }
+    }
+
     public static void OpenInFileManager(string folderPath)
     {
         var psi = new ProcessStartInfo { UseShellExecute = true };

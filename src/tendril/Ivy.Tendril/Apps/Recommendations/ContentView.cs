@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Apps.Recommendations.Dialogs;
 using Ivy.Tendril.Services;
@@ -113,12 +112,7 @@ public class ContentView(
                             {
                                 var fullPath = Path.Combine(_planService.PlansDirectory, _selected.PlanFolderName);
                                 var yamlPath = Path.Combine(fullPath, "plan.yaml");
-                                Process.Start(new ProcessStartInfo
-                                {
-                                    FileName = config.Editor.Command,
-                                    Arguments = yamlPath,
-                                    UseShellExecute = true
-                                });
+                                config.OpenInEditor(yamlPath);
                             })
                         );
 

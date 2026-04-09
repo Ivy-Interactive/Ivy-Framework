@@ -450,6 +450,19 @@ export const generateXAxis = (
         opacity: 0.4,
       },
     },
+    axisPointer: {
+      label: {
+        ...(axis.tickFormatter && {
+          formatter: (params: { value: string | number }) =>
+            formatTickLabel(
+              params.value,
+              axis.tickFormatter!,
+              axis.timeZone,
+              axis.tickFormatterType,
+            ),
+        }),
+      },
+    },
   };
 };
 
@@ -543,6 +556,19 @@ export const generateYAxis = (
           type: "dashed",
           color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
           opacity: 0.4,
+        },
+      },
+      axisPointer: {
+        label: {
+          ...(axis.tickFormatter && {
+            formatter: (params: { value: string | number }) =>
+              formatTickLabel(
+                params.value,
+                axis.tickFormatter!,
+                axis.timeZone,
+                axis.tickFormatterType,
+              ),
+          }),
         },
       },
     };

@@ -117,7 +117,7 @@ fn main() {
             let manifest_hash = manifest_content.as_ref().map(|c| llm_markdown::get_short_hash(c, 8));
 
             // Parallel processing
-            paths.par_iter().for_each(|absolute_input_path| {
+            let generated_files: std::collections::HashSet<PathBuf> = paths.par_iter().flat_map(|absolute_input_path| {
                 let filename = absolute_input_path.file_name().unwrap().to_str().unwrap();
                 let (mut order, name) = utils::get_order_from_file_name(filename);
                 
@@ -179,7 +179,25 @@ fn main() {
                 ) {
                     println!("Error generating LLM markdown for {}: {}", name, e);
                 }
-            });
+                
+                vec![ivy_output, md_output]
+            }).collect();
+            
+            // Prune old files
+            for entry in walkdir::WalkDir::new(&output_dir) {
+                if let Ok(e) = entry {
+                    let p = e.path();
+                    if p.is_file() {
+                        let file_name = p.file_name().unwrap_or_default().to_string_lossy();
+                        if file_name.ends_with(".g.cs") || file_name.ends_with(".md") {
+                            if !generated_files.contains(p) {
+                                println!("Pruning stale output file: {:?}", p);
+                                let _ = fs::remove_file(p);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

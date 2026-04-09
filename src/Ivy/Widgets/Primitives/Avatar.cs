@@ -30,4 +30,10 @@ public static class AvatarExtensions
     public static Avatar Image(this Avatar avatar, string? image) => avatar with { Image = image };
 
     public static Avatar Color(this Avatar avatar, Colors color) => avatar with { Color = color };
+
+    public static Avatar Small(this Avatar avatar) => avatar.Density(Density.Small);
+
+    public static Avatar Medium(this Avatar avatar) => avatar.Density(Density.Medium);
+
+    public static Avatar Large(this Avatar avatar) => avatar.Density(Density.Large);
 }

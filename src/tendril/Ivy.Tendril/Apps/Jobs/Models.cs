@@ -25,7 +25,7 @@ public record JobItem
 
     public string Id { get; init; } = "";
     public string Type { get; init; } = "";
-    public string PlanFile { get; init; } = "";
+    public string PlanFile { get; set; } = "";
     public string Project { get; init; } = "";
     public JobStatus Status { get; set; } = JobStatus.Pending;
     public DateTime? StartedAt { get; set; }

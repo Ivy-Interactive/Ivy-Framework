@@ -5,6 +5,7 @@ codingAgent: claude
 jobTimeout: 30
 staleOutputTimeout: 10
 maxConcurrentJobs: 5  # Maximum number of jobs to run concurrently (default: 5)
+defaultEffort: high    # Default effort level for promptwares (low/medium/high/max)
 
 # Variable Expansion Support:
 # - %DotnetUserSecrets:Section:Key% - Read from .NET user secrets (requires .csproj with UserSecretsId)
@@ -19,34 +20,103 @@ maxConcurrentJobs: 5  # Maximum number of jobs to run concurrently (default: 5)
 #   apiKey: %DotnetUserSecrets:OpenAi:ApiKey%
 #   model: gpt-4o-mini
 
-# Per-promptware tool permissions (allowedTools) provide least-privilege access control.
-# Without allowedTools, promptwares inherit global permissions from codingAgent.
-# Example promptware configuration with per-agent tool permissions:
-# promptwares:
-#   MakePlan:
-#     model: sonnet
-#     allowedTools:
-#       - Read
-#       - Glob
-#       - Grep
-#       - Bash
-#       - Write
-#       - Edit
-#   ExecutePlan:
-#     model: opus
-#     allowedTools:
-#       - Read
-#       - Write
-#       - Edit
-#       - Glob
-#       - Grep
-#       - Bash
-#       - WebFetch
-#       - WebSearch
+# Default promptware configuration — controls model, effort, and tool permissions per promptware.
+# Without these, promptwares inherit global permissions from codingAgent.
+# Use _default as a fallback for any promptware not explicitly listed.
+promptwares:
+  MakePlan:
+    model: sonnet
+    effort: high
+    allowedTools: [Read, Glob, Grep, Bash, Write, Edit]
+  ExecutePlan:
+    model: opus
+    effort: max
+    allowedTools: [Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch]
+  ExpandPlan:
+    model: sonnet
+    effort: high
+    allowedTools: [Read, Glob, Grep, Bash, Write, Edit]
+  MakePr:
+    model: sonnet
+    effort: medium
+    allowedTools: [Read, Glob, Grep, Bash, Write, Edit]
 
+# Projects — add your projects here. Each project groups repos, verifications, and context.
+# projects:
+#   - name: MyProject
+#     color: Blue           # UI color: Blue, Emerald, Rose, Purple, Teal, Sky, Slate, etc.
+#     repos:
+#       - path: /absolute/path/to/repo
+#         prRule: default    # PR merge strategy: default or yolo (auto-merge)
+#       - path: "%REPOS_HOME%/my-repo"
+#     verifications:
+#       - name: DotnetBuild
+#         required: true
+#       - name: DotnetFormat
+#         required: true
+#       - name: CheckResult
+#         required: true
+#     context: >
+#       Description of the project for AI context.
+#       Key folders and instructions go here.
+#     reviewActions:
+#       - name: Sample
+#         condition: Test-Path "artifacts/sample/*.csproj"
+#         action: dotnet run --project artifacts/sample --browse
+#     hooks:
+#       - name: SlackNotify
+#         when: after
+#         promptwares: [MakePr]
+#         condition: ''
+#         action: pwsh -NoProfile -File %TENDRIL_HOME%/Hooks/NotifySlack.ps1
 projects: []
-verifications: []
 
+# Standard verification definitions — these prompts are used when verifications are referenced by projects.
+verifications:
+- name: DotnetBuild
+  prompt: Run `dotnet build --warnaserror` in the project repo and verify it succeeds with zero errors and zero warnings.
+- name: DotnetFormat
+  prompt: >
+    Run `dotnet format` in the project repo, scoped to only the files changed by this plan's commits.
+    Get the list of changed .cs files with `git diff --name-only --diff-filter=ACM HEAD~<N> -- '*.cs'`
+    (where N is the number of commits in this execution), then run `dotnet format --include <files>`.
+    If it modifies any files, stage and commit them. If no .cs files were changed, skip this verification.
+- name: DotnetTest
+  prompt: >
+    Run dotnet tests in the project repo.
+    1. Read the plan revision's **## Tests** section for test scope instructions.
+    2. If the plan specifies a `dotnet test --filter` expression, run it.
+    3. If the plan says "No existing test coverage" or "No dotnet tests needed", skip with Pass.
+    4. If the plan says "Run all tests", run `dotnet test` (all tests).
+    5. Verify all executed tests pass.
+- name: CheckResult
+  prompt: >
+    Verify the implementation matches what was requested in the plan.
+    1. Read the plan revision from `<PlanFolder>/revisions/` (latest numbered .md file)
+    2. Review all commits made by this execution
+    3. Compare the plan's Problem and Solution sections against the actual changes
+    4. Write the verification report to `<PlanFolder>/verification/CheckResult.md`
+
+levels:
+  - name: Bug
+    badge: Destructive
+  - name: Critical
+    badge: Warning
+  - name: NiceToHave
+    badge: Outline
+  - name: Epic
+    badge: Info
+
+# Editor configuration for opening files and folders.
+# The 'command' must be available on your system's PATH.
+#
+# Common editors:
+#   VS Code:    command: code         (Windows: auto. macOS: run "Shell Command: Install 'code' command in PATH" from VS Code)
+#   Cursor:     command: cursor
+#   Zed:        command: zed
+#   Sublime:    command: subl
+#   Vim:        command: vim
+#   Nano:       command: nano
 editor:
   command: code
   label: VS Code
@@ -71,14 +141,3 @@ planTemplate: >
   `FullyQualifiedName~Namespace.SpecificTestClass` (or "No existing test coverage" / "Run all tests — <justification>")
 
   ## Verification
-
-# Example project configuration:
-# projects:
-#   - name: MyProject
-#     color: Blue
-#     repos:
-#       - path: /absolute/path/to/repo
-#       - path: "%REPOS_HOME%/my-repo"  # Uses env var expansion
-#     verifications:
-#       - name: DotnetBuild
-#         required: true

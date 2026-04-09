@@ -58,7 +58,13 @@ public class CreateIssueDialog(
         var labels = labelsQuery.Value;
 
         return new Dialog(
-            _ => _dialogOpen.Set(false),
+            _ =>
+            {
+                _issueCommentState.Set("");
+                _issueAssigneeState.Set(null);
+                _issueLabelsState.Set(Array.Empty<string>());
+                _dialogOpen.Set(false);
+            },
             new DialogHeader($"Create GitHub Issue #{_selectedPlan.Id}"),
             new DialogBody(
                 Layout.Vertical().Gap(3)
@@ -71,7 +77,13 @@ public class CreateIssueDialog(
                 | _issueCommentState.ToTextInput().Multiline().WithField().Label("Comment")
             ),
             new DialogFooter(
-                new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
+                new Button("Cancel").Outline().OnClick(() =>
+                {
+                    _issueCommentState.Set("");
+                    _issueAssigneeState.Set(null);
+                    _issueLabelsState.Set(Array.Empty<string>());
+                    _dialogOpen.Set(false);
+                }),
                 new Button("Create Issue").Primary().OnClick(() =>
                 {
                     if (_selectedRepoState.Value is { } repo)
@@ -88,6 +100,9 @@ public class CreateIssueDialog(
                         }
                     }
 
+                    _issueCommentState.Set("");
+                    _issueAssigneeState.Set(null);
+                    _issueLabelsState.Set(Array.Empty<string>());
                     _dialogOpen.Set(false);
                 })
             )

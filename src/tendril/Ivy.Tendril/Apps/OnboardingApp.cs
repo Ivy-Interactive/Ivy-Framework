@@ -22,13 +22,16 @@ public class OnboardingApp : ViewBase
         ];
     }
 
-    private static object GetStepViews(IState<int> stepperIndex, IState<Dictionary<string, bool>?> checkResults)
+    private static object GetStepViews(
+        IState<int> stepperIndex,
+        IState<Dictionary<string, bool>?> checkResults,
+        IState<Dictionary<string, bool?>?> healthResults)
     {
         return stepperIndex.Value switch
         {
             0 => new WelcomeStepView(stepperIndex),
-            1 => new SoftwareCheckStepView(stepperIndex, checkResults),
-            2 => new CodingAgentStepView(stepperIndex, checkResults.Value ?? new Dictionary<string, bool>()),
+            1 => new SoftwareCheckStepView(stepperIndex, checkResults, healthResults),
+            2 => new CodingAgentStepView(stepperIndex, checkResults.Value ?? new Dictionary<string, bool>(), healthResults.Value),
             3 => new TendrilHomeStepView(stepperIndex),
             4 => new ProjectSetupStepView(stepperIndex),
             5 => new CompleteStepView(stepperIndex),
@@ -40,13 +43,14 @@ public class OnboardingApp : ViewBase
     {
         var stepperIndex = UseState(0);
         var checkResults = UseState<Dictionary<string, bool>?>(null);
+        var healthResults = UseState<Dictionary<string, bool?>?>(null);
         var steps = GetSteps(stepperIndex.Value);
 
         return Layout.TopCenter() |
                (Layout.Vertical().Margin(0, 20).Width(150)
                 | new Image("/tendril/assets/Tendril.svg").Width(Size.Units(20)).Height(Size.Auto())
                 | new Stepper(OnSelect, stepperIndex.Value, steps).Width(Size.Full())
-                | GetStepViews(stepperIndex, checkResults)
+                | GetStepViews(stepperIndex, checkResults, healthResults)
                );
 
         ValueTask OnSelect(Event<Stepper, int> e)

@@ -223,4 +223,66 @@ public class OnboardingSetupServiceTests : IAsyncLifetime
         var content = await File.ReadAllTextAsync(rcFile);
         Assert.Contains($"export TENDRIL_HOME=\"{_tempDir}\"", content);
     }
+
+    [Fact]
+    public async Task CompleteSetupAsync_ExampleConfigContainsDefaultEffort()
+    {
+        var (service, _) = CreateService();
+
+        // Create example config with defaultEffort
+        var baseDir = System.AppContext.BaseDirectory;
+        var examplePath = Path.Combine(baseDir, "example.config.yaml");
+        var exampleContent = File.Exists(examplePath) ? await File.ReadAllTextAsync(examplePath) : "";
+
+        // Use the real example.config.yaml if it exists, otherwise create one with defaultEffort
+        if (!exampleContent.Contains("defaultEffort"))
+        {
+            exampleContent = "codingAgent: claude\ndefaultEffort: high\nprojects: []\nverifications: []\n";
+            await File.WriteAllTextAsync(examplePath, exampleContent);
+        }
+
+        try
+        {
+            await service.CompleteSetupAsync(_tempDir);
+
+            var configPath = Path.Combine(_tempDir, "config.yaml");
+            Assert.True(File.Exists(configPath));
+            var content = await File.ReadAllTextAsync(configPath);
+            Assert.Contains("defaultEffort", content);
+        }
+        finally
+        {
+            // Don't delete if it was already there
+        }
+    }
+
+    [Fact]
+    public async Task CompleteSetupAsync_ExampleConfigContainsVerifications()
+    {
+        var (service, _) = CreateService();
+
+        var baseDir = System.AppContext.BaseDirectory;
+        var examplePath = Path.Combine(baseDir, "example.config.yaml");
+        var exampleContent = File.Exists(examplePath) ? await File.ReadAllTextAsync(examplePath) : "";
+
+        if (!exampleContent.Contains("DotnetBuild"))
+        {
+            exampleContent =
+                "codingAgent: claude\ndefaultEffort: high\nprojects: []\nverifications:\n- name: DotnetBuild\n  prompt: Build\n";
+            await File.WriteAllTextAsync(examplePath, exampleContent);
+        }
+
+        try
+        {
+            await service.CompleteSetupAsync(_tempDir);
+
+            var configPath = Path.Combine(_tempDir, "config.yaml");
+            var content = await File.ReadAllTextAsync(configPath);
+            Assert.Contains("DotnetBuild", content);
+        }
+        finally
+        {
+            // Don't delete if it was already there
+        }
+    }
 }

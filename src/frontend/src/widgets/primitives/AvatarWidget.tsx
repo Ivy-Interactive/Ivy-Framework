@@ -1,21 +1,41 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getColor } from "@/lib/styles";
+import { Densities } from "@/types/density";
 import React from "react";
 
 interface AvatarWidgetProps {
   image: string;
   fallback: string;
   color?: string;
+  density?: Densities;
+  width?: string;
+  height?: string;
 }
 
-// Utility function to extract initials from a full name
 const getInitials = (name: string): string => {
   const words = name.split(" ");
-  const initials = words.map((word) => word.charAt(0).toUpperCase()).join("");
-  return initials;
+  return words.map((word) => word.charAt(0).toUpperCase()).join("");
 };
 
-export const AvatarWidget: React.FC<AvatarWidgetProps> = ({ image, fallback, color }) => {
+const getSizeClass = (density?: Densities): string => {
+  switch (density) {
+    case Densities.Small:
+      return "h-6 w-6 text-xs";
+    case Densities.Large:
+      return "h-12 w-12 text-lg";
+    default:
+      return "h-10 w-10";
+  }
+};
+
+export const AvatarWidget: React.FC<AvatarWidgetProps> = ({
+  image,
+  fallback,
+  color,
+  density,
+  width,
+  height,
+}) => {
   const displayFallback = fallback?.length === 2 ? fallback : getInitials(fallback || "");
 
   const colorStyles: React.CSSProperties = color
@@ -25,8 +45,13 @@ export const AvatarWidget: React.FC<AvatarWidgetProps> = ({ image, fallback, col
       }
     : {};
 
+  const sizeStyles: React.CSSProperties = {
+    ...(width && { width }),
+    ...(height && { height }),
+  };
+
   return (
-    <Avatar>
+    <Avatar className={getSizeClass(density)} style={sizeStyles}>
       <AvatarImage src={image} title={fallback} />
       <AvatarFallback title={fallback} style={colorStyles}>
         {displayFallback}

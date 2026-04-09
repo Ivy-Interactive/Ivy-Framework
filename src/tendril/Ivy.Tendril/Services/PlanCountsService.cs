@@ -38,8 +38,16 @@ public class PlanCountsService : IPlanCountsService
 
     private void OnSourceChanged()
     {
-        _planReaderService.InvalidateCaches();
-        Refresh();
+        try
+        {
+            _planReaderService.InvalidateCaches();
+            Refresh();
+        }
+        catch
+        {
+            // Swallow to prevent unhandled exceptions on timer/thread-pool threads
+            // from terminating the process.
+        }
     }
 
     private void Refresh()

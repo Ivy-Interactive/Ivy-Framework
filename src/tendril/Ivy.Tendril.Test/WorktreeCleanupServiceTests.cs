@@ -163,4 +163,61 @@ public class WorktreeCleanupServiceTests : IDisposable
         // but the method should not throw
         Assert.True(Directory.Exists(worktreeDir));
     }
+
+    [Fact]
+    public void CleanupPlanWorktrees_ForceDeletes_Orphan_Without_GitFile()
+    {
+        // Worktree directory with no .git file — RemoveWorktrees skips it,
+        // but the force-delete fallback should clean it up
+        var dir = CreatePlan("09000-OrphanNoGit", "Completed", DateTime.UtcNow.AddHours(-2));
+        var worktreeDir = Path.Combine(dir, "worktrees", "TestRepo");
+        Directory.CreateDirectory(worktreeDir);
+        File.WriteAllText(Path.Combine(worktreeDir, "file.txt"), "orphaned content");
+
+        WorktreeCleanupService.CleanupPlanWorktrees(dir);
+
+        Assert.False(Directory.Exists(worktreeDir), "Orphan directory without .git should be force-deleted");
+        Assert.False(Directory.Exists(Path.Combine(dir, "worktrees")), "Worktrees directory should be removed");
+    }
+
+    [Fact]
+    public void CleanupPlanWorktrees_ForceDeletes_Orphan_With_Stale_GitFile()
+    {
+        // Worktree directory with a .git file pointing to a non-existent repo entry —
+        // git worktree remove will fail, but force-delete fallback should clean it up
+        var dir = CreatePlan("09001-OrphanStaleGit", "Failed", DateTime.UtcNow.AddHours(-2));
+        var worktreeDir = Path.Combine(dir, "worktrees", "TestRepo");
+        Directory.CreateDirectory(worktreeDir);
+        File.WriteAllText(Path.Combine(worktreeDir, ".git"),
+            "gitdir: /nonexistent/path/.git/worktrees/TestRepo");
+        File.WriteAllText(Path.Combine(worktreeDir, "source.cs"), "// stale code");
+
+        WorktreeCleanupService.CleanupPlanWorktrees(dir);
+
+        Assert.False(Directory.Exists(worktreeDir), "Orphan directory with stale .git should be force-deleted");
+        Assert.False(Directory.Exists(Path.Combine(dir, "worktrees")), "Worktrees directory should be removed");
+    }
+
+    [Fact]
+    public void CleanupPlanWorktrees_ForceDeletes_ReadOnly_Files()
+    {
+        // Worktree directory with read-only files (common in git objects) —
+        // ClearReadOnlyAttributes should make them deletable
+        var dir = CreatePlan("09002-ReadOnlyFiles", "Completed", DateTime.UtcNow.AddHours(-2));
+        var worktreeDir = Path.Combine(dir, "worktrees", "TestRepo");
+        var subDir = Path.Combine(worktreeDir, "objects");
+        Directory.CreateDirectory(subDir);
+
+        var readOnlyFile = Path.Combine(subDir, "pack.idx");
+        File.WriteAllText(readOnlyFile, "binary content");
+        File.SetAttributes(readOnlyFile, FileAttributes.ReadOnly);
+
+        var normalFile = Path.Combine(worktreeDir, "HEAD");
+        File.WriteAllText(normalFile, "ref: refs/heads/main");
+
+        WorktreeCleanupService.CleanupPlanWorktrees(dir);
+
+        Assert.False(Directory.Exists(worktreeDir), "Directory with read-only files should be force-deleted");
+        Assert.False(Directory.Exists(Path.Combine(dir, "worktrees")), "Worktrees directory should be removed");
+    }
 }
