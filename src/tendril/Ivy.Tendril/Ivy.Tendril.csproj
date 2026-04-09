@@ -75,17 +75,7 @@
 
   <Target Name="PackPromptwaresZip" BeforeTargets="PrepareForBuild"
           Condition="'$(Configuration)' == 'Release'">
-    <Exec Command="pwsh -NoProfile -Command &quot;
-      $$src = 'Promptwares';
-      $$staging = '$(IntermediateOutputPath)promptwares-staging';
-      $$zip = '$(IntermediateOutputPath)promptwares.zip';
-      if (Test-Path $$staging) { Remove-Item $$staging -Recurse -Force }
-      Copy-Item $$src $$staging -Recurse -Force;
-      Get-ChildItem $$staging -Recurse -Directory | Where-Object { $$_.Name -in 'Logs','Memory' } | Remove-Item -Recurse -Force;
-      if (Test-Path $$zip) { Remove-Item $$zip -Force }
-      [System.IO.Compression.ZipFile]::CreateFromDirectory($$staging, $$zip);
-      Remove-Item $$staging -Recurse -Force;
-    &quot;" />
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildThisFileDirectory)pack-promptwares.ps1&quot; -IntermediateOutputPath &quot;$(IntermediateOutputPath)&quot;" />
   </Target>
 
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
