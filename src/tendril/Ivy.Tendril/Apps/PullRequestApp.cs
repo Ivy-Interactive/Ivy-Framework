@@ -26,7 +26,7 @@ public class PullRequestApp : ViewBase
 
                 var keys = allPlans
                     .SelectMany(p => p.Prs.Where(IsValidUrl))
-                    .Select(pr => ExtractRepo(pr))
+                    .Select(ExtractRepo)
                     .Distinct()
                     .ToList();
 
@@ -66,7 +66,7 @@ public class PullRequestApp : ViewBase
                 Id = $"{plan.Id}-{i}",
                 PlanId = $"{plan.Id:D5}",
                 Repository = ExtractRepo(pr),
-                Status = prStatuses.TryGetValue(pr, out var status) ? status : "",
+                Status = prStatuses.GetValueOrDefault(pr, ""),
                 Pr = pr,
                 Plan = $"#{plan.Id:D5} {plan.Title}",
                 Cost = cost,
@@ -96,9 +96,9 @@ public class PullRequestApp : ViewBase
             {
                 BadgeColorMapping = new Dictionary<string, string>
                 {
-                    ["Open"] = Colors.Green.ToString(),
-                    ["Merged"] = Colors.Purple.ToString(),
-                    ["Closed"] = Colors.Zinc.ToString()
+                    ["Open"] = nameof(Colors.Green),
+                    ["Merged"] = nameof(Colors.Purple),
+                    ["Closed"] = nameof(Colors.Zinc)
                 }
             })
             .Renderer(t => t.Plan, new LinkDisplayRenderer())

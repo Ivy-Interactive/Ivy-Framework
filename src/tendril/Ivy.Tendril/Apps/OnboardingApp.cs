@@ -3,7 +3,7 @@ using Ivy.Tendril.Apps.Onboarding;
 namespace Ivy.Tendril.Apps;
 
 #if DEBUG
-[App(title: "Onboarding", icon: Icons.Rocket, group: new[] { "Debug" }, isVisible: true, order: MenuOrder.Onboarding)]
+[App(title: "Onboarding", icon: Icons.Rocket, group: ["Debug"], isVisible: true, order: MenuOrder.Onboarding)]
 #else
 [App(icon: Icons.Rocket, isVisible: false, order: MenuOrder.Onboarding)]
 #endif
