@@ -114,6 +114,7 @@ describe("enumColorsToCssVar", () => {
     "warning",
     "info",
     "muted",
+    "ivygreen",
   ];
 
   it("contains all expected color names", () => {

@@ -33,6 +33,7 @@ export const enumColorsToCssVar: Record<string, string> = {
   warning: "var(--color-warning)",
   info: "var(--color-info)",
   muted: "var(--color-muted)",
+  ivygreen: "var(--color-ivygreen)",
 };
 
 export function getThemeColorHex(cssVar: string): string | undefined {
