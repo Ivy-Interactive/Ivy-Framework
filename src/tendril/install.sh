@@ -12,7 +12,6 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}=== Ivy-Tendril Installer for macOS ===${NC}"
 
-# 1. System Check
 if [[ "$OSTYPE" != "darwin"* ]]; then
     echo -e "${RED}Error: This script is only for macOS.${NC}"
     exit 1
@@ -30,7 +29,6 @@ else
     exit 1
 fi
 
-# 2. .NET 10 SDK Installation
 echo -e "\n${BLUE}Step 1: Checking for .NET 10 SDK...${NC}"
 if command -v dotnet &> /dev/null && dotnet --version | grep -q "^10\."; then
     echo -e "${GREEN}✓ .NET 10 SDK is already installed.${NC}"
@@ -44,7 +42,6 @@ else
     echo -e "${GREEN}✓ .NET 10 SDK installed successfully.${NC}"
 fi
 
-# 3. GitHub CLI Installation
 echo -e "\n${BLUE}Step 2: Checking for GitHub CLI (gh)...${NC}"
 if command -v gh &> /dev/null; then
     echo -e "${GREEN}✓ GitHub CLI is already installed.${NC}"
@@ -55,13 +52,13 @@ else
     GH_VERSION=${LATEST_GH#v}
     
     GH_TEMP=$(mktemp -d)
-    GH_TAR="gh_${GH_VERSION}_macOS_${GH_ARCH}.tar.gz"
+    GH_ZIP="gh_${GH_VERSION}_macOS_${GH_ARCH}.zip"
     
     echo -e "Downloading gh ${GH_VERSION}..."
-    curl -sSL -o "$GH_TEMP/$GH_TAR" "https://github.com/cli/cli/releases/download/${LATEST_GH}/${GH_TAR}"
+    curl -sSL -o "$GH_TEMP/$GH_ZIP" "https://github.com/cli/cli/releases/download/${LATEST_GH}/${GH_ZIP}"
     
     cd "$GH_TEMP"
-    tar xzf "$GH_TAR"
+    unzip -q "$GH_ZIP"
     
     # Install binary
     sudo mkdir -p /usr/local/bin
@@ -72,7 +69,6 @@ else
     echo -e "${GREEN}✓ GitHub CLI installed to /usr/local/bin/gh.${NC}"
 fi
 
-# 4. Ivy-Tendril Installation
 echo -e "\n${BLUE}Step 3: Installing Ivy-Tendril...${NC}"
 # Use the internal source if provided, otherwise secondary
 # We'll try official NuGet first, then fallback to Ivy feed if requested
@@ -113,7 +109,6 @@ else
     echo -e "${RED}Warning: Could not detect shell profile. Manually add $DOTNET_TOOLS_PATH to your PATH.${NC}"
 fi
 
-# 6. Final Verification
 echo -e "\n${GREEN}=== Installation Complete! ===${NC}"
 echo -e "You can now run Ivy-Tendril by typing: ${BLUE}tendril${NC}"
 echo -e "To launch the GUI, use: ${BLUE}tendril --photino${NC}"
