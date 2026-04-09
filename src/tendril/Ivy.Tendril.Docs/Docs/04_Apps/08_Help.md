@@ -4,7 +4,7 @@ searchHints:
   - support
   - docs
   - shortcuts
-icon: HelpCircle
+icon: CircleQuestionMark
 ---
 
 # Help & Support
