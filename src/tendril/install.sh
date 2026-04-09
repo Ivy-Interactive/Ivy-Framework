@@ -79,7 +79,16 @@ else
     echo -e "${GREEN}✓ GitHub CLI installed to /usr/local/bin/gh.${NC}"
 fi
 
-echo -e "\n${BLUE}Step 4: Installing Ivy-Tendril...${NC}"
+echo -e "\n${BLUE}Step 4: Checking for PowerShell (pwsh)...${NC}"
+if command -v pwsh &> /dev/null || dotnet tool list -g | grep -qi "powershell"; then
+    echo -e "${GREEN}✓ PowerShell is already installed.${NC}"
+else
+    echo -e "Installing PowerShell (pwsh)..."
+    dotnet tool install --global PowerShell
+    echo -e "${GREEN}✓ PowerShell installed successfully.${NC}"
+fi
+
+echo -e "\n${BLUE}Step 5: Installing Ivy-Tendril...${NC}"
 # Use the internal source if provided, otherwise secondary
 # We'll try official NuGet first, then fallback to Ivy feed if requested
 IVY_SOURCE="https://api.nuget.org/v3/index.json"
@@ -92,8 +101,8 @@ else
     dotnet tool install -g Ivy.Tendril --add-source "$IVY_SOURCE"
 fi
 
-# 5. PATH Configuration
-echo -e "\n${BLUE}Step 5: Configuring PATH...${NC}"
+# 6. PATH Configuration
+echo -e "\n${BLUE}Step 6: Configuring PATH...${NC}"
 DOTNET_TOOLS_PATH="$HOME/.dotnet/tools"
 SHELL_PROFILE=""
 
