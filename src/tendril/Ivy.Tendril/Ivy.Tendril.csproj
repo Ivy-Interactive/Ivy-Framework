@@ -75,7 +75,7 @@
 
   <Target Name="PackPromptwaresZip" BeforeTargets="PrepareForBuild"
           Condition="'$(Configuration)' == 'Release'">
-    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildThisFileDirectory)pack-promptwares.ps1&quot; -IntermediateOutputPath &quot;$(IntermediateOutputPath)&quot;" />
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildThisFileDirectory)pack-promptwares.ps1&quot; -IntermediateOutputPath '$(IntermediateOutputPath)'" />
   </Target>
 
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
