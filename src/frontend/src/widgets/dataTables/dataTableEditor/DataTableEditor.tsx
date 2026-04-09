@@ -202,7 +202,6 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     columns,
     columnOrder,
     columnWidths,
-    containerWidth,
     showGroups: showGroups ?? false,
     showColumnTypeIcons: showColumnTypeIcons ?? true,
   });
@@ -297,7 +296,6 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         rangeSelect={selectionProps.rangeSelect}
         gridSelection={gridSelection}
         onGridSelectionChange={handleGridSelectionChange}
-        width={containerWidth}
         height={
           containerHeight > 0 ? containerHeight : containerRef.current?.clientHeight || undefined
         }

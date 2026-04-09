@@ -38,7 +38,6 @@ interface GridContainerProps {
   rangeSelect: "none" | "cell" | "rect" | "multi-cell" | "multi-rect";
   gridSelection: GridSelection;
   onGridSelectionChange: (newSelection: GridSelection) => void;
-  width: number;
   rowMarkers: "number" | "checkbox" | "both" | "none";
   onColumnMoved?: (startIndex: number, endIndex: number) => void;
   groupHeaderHeight?: number;
@@ -86,7 +85,6 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   rangeSelect,
   gridSelection,
   onGridSelectionChange,
-  width,
   rowMarkers,
   onColumnMoved,
   groupHeaderHeight,
@@ -150,7 +148,6 @@ export const GridContainer: React.FC<GridContainerProps> = ({
           rangeSelect={rangeSelect}
           gridSelection={gridSelection}
           onGridSelectionChange={onGridSelectionChange}
-          width={width}
           height={height}
           rowMarkers={rowMarkers}
           onColumnMoved={onColumnMoved}

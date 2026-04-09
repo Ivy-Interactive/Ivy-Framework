@@ -114,7 +114,6 @@ export function convertToGridColumns(
   columns: DataColumn[],
   columnOrder: number[],
   columnWidths: Record<string, number>,
-  containerWidth: number,
   showGroups: boolean,
   showColumnTypeIcons: boolean = true,
   headerFont?: string,
@@ -137,7 +136,7 @@ export function convertToGridColumns(
     }
 
     const grow = parseSizeGrow(col.originalWidth);
-    const isLastColumn = index === orderedColumns.length - 1 && containerWidth > 0;
+    const isLastColumn = index === orderedColumns.length - 1;
 
     // Determine effective grow: explicit Size-based grow, or default last column to 1
     const effectiveGrow = grow !== undefined ? grow : isLastColumn ? 1 : undefined;
