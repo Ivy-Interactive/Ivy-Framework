@@ -56,6 +56,8 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
     display: "flex",
     overflow: "hidden",
     borderRadius: rounded ? `${barHeight / 2}px` : undefined,
+    minWidth: 0,
+    maxWidth: "100%",
   };
 
   const handleSelect = (index: number) => {
@@ -71,7 +73,10 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-1" style={{ ...getWidth(width), height: "fit-content" }}>
+      <div
+        className="flex flex-col gap-1"
+        style={{ ...getWidth(width), height: "fit-content", minWidth: 0, maxWidth: "100%" }}
+      >
         <div className="bg-neutral/10" style={containerStyles}>
           {segments.map((segment, index) => {
             const percentage = (segment.value / total) * 100;
