@@ -64,6 +64,7 @@ public class TypeUtilsTests
             typeof(XYZ), typeof(WidgetBaseExtensions), typeof(XYZ).GetProperty("Width")!,
             """
             Width(Size width)
+            Width(Responsive<Size> width)
             """
         );
 
