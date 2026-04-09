@@ -324,6 +324,11 @@ public class ContentView(
                     new TableCell(row.Title)
                 );
 
+            var commitWarning = PlanContentHelpers.BuildCommitWarningCallout(planData.CommitRows);
+            object commitsContent = commitWarning != null
+                ? Layout.Vertical().Gap(2) | commitWarning | commitsTable
+                : commitsTable;
+
             // PRs tab content
             object prsContent;
             if (_selectedPlan.Prs.Count > 0)
@@ -419,7 +424,7 @@ public class ContentView(
                 selectedTab.Value,
                 new Tab("Summary", Cap(summaryTabContent)),
                 new Tab("Verifications", Cap(verificationsTable)).Badge(_selectedPlan.Verifications.Count.ToString()),
-                new Tab("Commits", Cap(commitsTable)).Badge(_selectedPlan.Commits.Count.ToString()),
+                new Tab("Commits", Cap(commitsContent)).Badge(_selectedPlan.Commits.Count.ToString()),
                 new Tab("PRs", Cap(prsContent)).Badge(_selectedPlan.Prs.Count.ToString()),
                 new Tab("Artifacts", Cap(artifactsLayout)).Badge(totalArtifacts.ToString()),
                 new Tab("Recommendations", Cap(recommendationsLayout)).Badge(planData.Recommendations.Count.ToString()),
