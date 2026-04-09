@@ -133,7 +133,7 @@ function AllocatePlanId {
             exit 1
         }
 
-        $counter = if (Test-Path $counterFile) { [int](Get-Content $counterFile).Trim() } else { 1087 }
+        $counter = if (Test-Path $counterFile) { [int](Get-Content $counterFile).Trim() } else { 1 }
         $id = $counter
         Set-Content -Path $counterFile -Value ($counter + 1).ToString() -Encoding UTF8
         return $id
