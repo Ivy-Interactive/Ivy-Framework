@@ -48,4 +48,7 @@
   <Project Path="Ivy/Ivy.csproj" />
   <Project Path="Ivy.Agent.EfQuery/Ivy.Agent.EfQuery.csproj" />
   <Project Path="Ivy.Agent.EfQuery.Test/Ivy.Agent.EfQuery.Test.csproj" />
+  <Folder Name="/Demos/">
+    <Project Path="Ivy.Demo.Todo/Ivy.Demo.Todo.csproj" />
+  </Folder>
 </Solution>
