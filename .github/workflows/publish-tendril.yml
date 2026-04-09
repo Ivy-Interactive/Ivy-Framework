@@ -87,8 +87,8 @@ jobs:
           credential_id: ${{ secrets.SSL_COM_CREDENTIAL_ID }}
           totp_secret: ${{ secrets.SSL_COM_TOTP_SECRET }}
           malware_block: true
-          dir_path: ./nupkg
-          output_path: ./nupkg_signed
+          dir_path: src/nupkg
+          output_path: src/nupkg_signed
 
       - name: Overwrite origin with signed nuget
         run: |
