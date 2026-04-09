@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Palette, group: ["Tests"], isVisible: true, searchHints: ["badge", "color", "semantic", "enum", "ivygreen"])]
+[App(icon: Icons.Palette, group: ["Tests"], isVisible: false, searchHints: ["badge", "color", "semantic", "enum", "ivygreen"])]
 public class BadgeColorsTestApp : SampleBase
 {
     private static readonly (string Label, Colors Color)[] SemanticColors = [
