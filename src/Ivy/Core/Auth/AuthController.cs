@@ -111,6 +111,14 @@ public class AuthController() : Controller
             return BadRequest("Invalid or expired OAuth state. Please try logging in again.");
         }
 
+        // Verify the callback originates from a valid context
+        // The connectionId from the pending callback must correspond to an active session
+        if (!sessionStore.Sessions.ContainsKey(pending.ConnectionId))
+        {
+            logger.LogWarning("OAuth callback failed: Originating session '{ConnectionId}' no longer exists", SanitizeForLog(pending.ConnectionId));
+            return BadRequest("Authentication session expired. Please try logging in again.");
+        }
+
         try
         {
             TunneledHttpMessageHandler? httpMessageHandler;

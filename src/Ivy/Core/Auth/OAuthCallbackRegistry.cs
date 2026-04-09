@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 
 namespace Ivy.Core.Auth;
 
@@ -22,7 +23,8 @@ public class OAuthCallbackRegistry : IOAuthCallbackRegistry
     {
         CleanupExpiredIfNeeded();
 
-        var state = Guid.NewGuid().ToString();
+        var bytes = RandomNumberGenerator.GetBytes(32);
+        var state = Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
         _pending[state] = new PendingOAuthCallback(connectionId, optionId, DateTime.UtcNow);
         return state;
     }
