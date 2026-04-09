@@ -4,7 +4,7 @@ namespace Ivy;
 /// <summary>
 /// Arranges items sequentially in a horizontal or vertical stack.
 /// </summary>
-public record StackLayout : WidgetBase<StackLayout>
+internal record StackLayout : WidgetBase<StackLayout>
 {
     public StackLayout(object[] children, Orientation orientation = Orientation.Vertical, int gap = 4, Thickness? padding = null, Thickness? margin = null, Colors? background = null, Align? alignContent = null, bool removeParentPadding = false, bool wrap = false) : base(children)
     {
