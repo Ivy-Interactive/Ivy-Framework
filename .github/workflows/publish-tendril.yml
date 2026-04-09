@@ -81,6 +81,7 @@ jobs:
           password: ${{ secrets.SSL_COM_PASSWORD }}
           credential_id: ${{ secrets.SSL_COM_CREDENTIAL_ID }}
           totp_secret: ${{ secrets.SSL_COM_TOTP_SECRET }}
+          malware_block: true
           dir_path: ./nupkg
           output_path: ./nupkg
 
@@ -226,6 +227,7 @@ jobs:
           password: ${{ secrets.SSL_COM_PASSWORD }}
           credential_id: ${{ secrets.SSL_COM_CREDENTIAL_ID }}
           totp_secret: ${{ secrets.SSL_COM_TOTP_SECRET }}
+          malware_block: true
           dir_path: src/releases
           output_path: src/releases
 
