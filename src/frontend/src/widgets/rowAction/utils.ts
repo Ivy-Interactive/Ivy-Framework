@@ -13,7 +13,7 @@ export const getActionId = (action: MenuItem): string => {
  * Shared button styles for action buttons
  */
 export const ACTION_BUTTON_CLASSES =
-  "flex items-center justify-center p-1.5 rounded bg-background hover:bg-(--color-muted) transition-colors cursor-pointer border border-[var(--color-border)]";
+  "flex items-center justify-center p-1.5 rounded bg-secondary hover:bg-(--color-muted) transition-colors cursor-pointer border border-[var(--color-border)]";
 
 export const ACTION_BUTTON_GHOST_CLASSES =
   "flex items-center justify-center p-1.5 rounded hover:bg-accent transition-colors cursor-pointer text-muted-foreground hover:text-foreground";
