@@ -732,7 +732,7 @@ public class Server
         app.MapGrpcService<DataTableService>().EnableGrpcWeb();
 
         app.UseFrontend(_args, logger2);
-        app.UseAssets(_args, logger2, "Assets", "ivy-assets");
+        app.UseAssets(_args, logger2, "Assets", "ivy/assets");
 
         return app;
     }
