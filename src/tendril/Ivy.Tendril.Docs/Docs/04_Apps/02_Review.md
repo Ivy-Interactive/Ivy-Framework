@@ -1,42 +1,38 @@
 ---
 searchHints:
   - review
-  - diff
   - approve
   - reject
-  - verification
+  - diff
+  - verify
 icon: ThumbsUp
 ---
 
 # Review
 
 <Ingress>
-The Review app is where you inspect completed plans, review diffs, check verification results, and approve or send plans back for revision.
+The Review app guarantees that no AI-generated code is ever integrated blindly. It presents you with an actionable queue of finished executions ready for human evaluation.
 </Ingress>
 
-## Review Workflow
+## Objective
 
-When a plan completes execution, it moves to the **Review** state. The Review app shows:
+The Review App continuously aggregates all Plans that have successfully entered the `ReadyForReview` or `Failed` status. Once an agent job like `ExecutePlan` finishes its operation, Tendril freezes the background git worktree and serves the generated payload up within this panel.
 
-1. **Summary** — The plan's description, problem statement, and proposed solution
-2. **Commits** — List of commits made during execution with diff views
-3. **Verifications** — Results of build, format, and test checks
-4. **Artifacts** — Screenshots and other outputs from the execution
-5. **Recommendations** — AI-generated suggestions for improvements
+## The Review Interface
 
-## Actions
+Selecting an item from the Review Sidebar exposes a comprehensive breakdown pane containing:
 
-From the Review app, you can:
+1. **The Core Diff**: A syntax-highlighted snapshot of the exact code delta proposed by the Agent against your repository's tracked branch.
+2. **Terminal Verifications**: Direct outputs of executed validation hooks (`DotnetBuild`, `NpmTest`).
+3. **Task Instructions**: The AI’s stated intent derived from the `revisions/*.md` trace.
 
-| Action | Description |
-|--------|-------------|
-| **Approve** | Mark the plan as ready for PR creation |
-| **Suggest Changes** | Send the plan back to Draft with feedback |
-| **Discard** | Move the plan to Trash |
-| **Make PR** | Create a GitHub pull request directly |
-| **Open in VS Code** | Open the worktree in your editor |
-| **Open in Terminal** | Open a terminal at the worktree path |
+## Human Interventions
 
-## Verification Results
+From the Action Bar, you can dictate the outcome of the proposed work:
 
-Each verification shows a pass/fail/skip status. Click on a verification to see detailed output. Failed verifications are highlighted and should be addressed before creating a PR.
+| Action | Result |
+|--------|--------|
+| **Approved (Make PR)** | Greenlights the plan content, shifting state to `Completed` and launching the asynchronous `MakePr` job via GitHub. |
+| **Needs Work (Revise)** | Rejects the implementation. Bootstraps the `UpdatePlan` job recursively to command the AI to iterate over the identical worktree based on human guidance. |
+| **Decline (Discard)** | Shelves the execution definitively, transitioning the Plan state quietly to `Skipped` and deleting the associated worktree to free resources. |
+| **Manually Resolve** | Transitions into a File Edit state allowing direct human patching of minor logical faults inside the workspace without requiring AI cycle looping. |

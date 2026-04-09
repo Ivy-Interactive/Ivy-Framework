@@ -7,29 +7,42 @@ searchHints:
   - cost
   - tokens
   - monitoring
+  - verification
 ---
 
-# Jobs
+# Lifecycle & Jobs
 
 <Ingress>
-Jobs are the execution units in Tendril. Every time a promptware runs, it creates a job that tracks progress, cost, and output.
+Jobs represent the tangible, running execution units in Tendril's continuous lifecycle. Every time a promptware runs, a real-time Job is spawned to monitor the agent state, cost, and telemetry.
 </Ingress>
 
 ## Job Tracking
 
-Each job captures:
+Each job provides high-fidelity insight into the running Promptware:
 
-- **Status** — Pending, Running, Completed, Failed, or Timed Out
-- **Type** — Which promptware is running (MakePlan, ExecutePlan, etc.)
-- **Plan** — The plan this job belongs to
-- **Cost** — Token usage and estimated cost
-- **Duration** — How long the job has been running
-- **Output** — Live status messages from the agent
+- **Status** — `Pending`, `Running`, `Completed`, `Failed`, `Timeout`, `Queued`, `Stopped`, or `Blocked`.
+- **Type** — Which promptware job is executing (`MakePlan`, `ExecutePlan`, `MakePr`, etc.).
+- **Associated Plan** — A link backing the job to its architectural Plan and branch context.
+- **Cost Analytics** — Real-time tracking of token inputs, outputs, and financial estimated costs.
+- **Duration** — Active running time.
+- **Output** — Live status messages and command telemetry streaming natively from the agent constraints.
 
-## Job Concurrency
+## Verification Pipeline
 
-Tendril supports configurable concurrent job limits. Multiple plans can be executed in parallel, each in its own isolated git worktree. The concurrency limit is set in `config.yaml`.
+Tendril enforces a strict **Verification** pipeline at the end of each `ExecutePlan` or `UpdatePlan` job. Instead of hoping the AI wrote good code, Tendril *tests* it.
+
+1. **Build Rules**: Tendril runs the configured build commands (e.g., `dotnet build` or `npm run typecheck`). If the build fails, the agent is fed the compiler logs and instructed to loop and fix the compilation errors.
+2. **Formatting Rules**: Tendril runs auto-formatters (e.g., `dotnet format` or `prettier`).
+3. **Test Rules**: Tendril runs unit testing commands.
+
+If Verification persistently fails beyond the configured recursion limits, the Plan transitions to the **Failed** state, preventing broken code from advancing to Review.
+
+## Job Concurrency and Isolation
+
+Tendril is designed for massive multiprocessing. It supports configurable parallel execution channels. 
+
+When a Plan is executed, Tendril intelligently checks out a **Git Worktree** (a secondary isolated working directory linked to your repo) instead of modifying your active branch. This means you can have 3, 5, or 10 agents writing code in the background simultaneously without creating file-locks or disrupting the code you are currently editing in your editor.
 
 ## Cost Tracking
 
-Every job logs its token usage to a `costs.csv` file in the plan folder. The dashboard aggregates these costs across all plans, giving you visibility into your AI spending by project, time period, and promptware type.
+Every job logs its usage payload directly to a `costs.csv` file embedded securely in the Plan folder. Tendril’s dashboard automatically aggregates these logs, allowing you to slice your AI spend by project, by time-period, and by promptware type.
