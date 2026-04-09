@@ -63,16 +63,22 @@ export const DiffView: React.FC<DiffViewProps> = ({
   }
 
   return (
-    <div style={style} className={`text-xs${wordWrap ? " diff-wrap" : ""}`}>
+    <div style={style} className={`ivy-diff-view text-xs${wordWrap ? " diff-wrap" : ""}`}>
       {files.map((file, fileIndex) => {
         const hasHeader = oldRevision || newRevision || file.oldPath || file.newPath;
         return (
           <div key={fileIndex}>
             {hasHeader && (
-              <div className="flex gap-4 px-3 py-2 text-xs font-mono bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)]">
-                <span>{oldRevision || file.oldPath}</span>
-                <span>&rarr;</span>
-                <span>{newRevision || file.newPath}</span>
+              <div className="flex items-center gap-4 px-3 py-2 text-[10px] font-mono bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)] sticky top-0 z-10">
+                <div className="flex items-center gap-2">
+                  <span className="opacity-50">OLD:</span>
+                  <span className="font-bold">{oldRevision || file.oldPath || "none"}</span>
+                </div>
+                <span className="opacity-30">&rarr;</span>
+                <div className="flex items-center gap-2">
+                  <span className="opacity-50">NEW:</span>
+                  <span className="font-bold">{newRevision || file.newPath || "none"}</span>
+                </div>
               </div>
             )}
             <Diff

@@ -9,15 +9,15 @@
   </ItemGroup>
 
   <Target Name="NpmInstall" BeforeTargets="BuildFrontend" Condition="Exists('frontend/package.json')"
-          Inputs="frontend\package.json;frontend\pnpm-lock.yaml"
-          Outputs="frontend\node_modules\.modules.yaml">
-    <Exec Command="pnpm install --frozen-lockfile" WorkingDirectory="frontend" />
+          Inputs="frontend\package.json;frontend\package-lock.json"
+          Outputs="frontend\node_modules\.package-lock.json">
+    <Exec Command="npm install --legacy-peer-deps" WorkingDirectory="frontend" />
   </Target>
 
   <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths" Condition="Exists('frontend/package.json')"
           Inputs="@(FrontendSourceFiles)"
           Outputs="frontend\dist\.build-stamp">
-    <Exec Command="pnpm run build" WorkingDirectory="frontend" />
+    <Exec Command="npm run build" WorkingDirectory="frontend" />
     <Touch Files="frontend\dist\.build-stamp" AlwaysCreate="true" />
   </Target>
 
