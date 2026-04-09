@@ -267,7 +267,7 @@ fn handle_blocks(
                 },
                 Node::Yaml(_) => { /* Ignore frontmatter */ },
                 _ => {
-                    section_builder.push_str("\n");
+                    section_builder.push_str("\n\n");
                     section_builder.push_str(&markdown_content[start..end].trim());
                 }
             }
