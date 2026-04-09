@@ -42,7 +42,17 @@ else
     echo -e "${GREEN}✓ .NET 10 SDK installed successfully.${NC}"
 fi
 
-echo -e "\n${BLUE}Step 2: Checking for GitHub CLI (gh)...${NC}"
+echo -e "\n${BLUE}Step 2: Checking for Git...${NC}"
+if command -v git &> /dev/null; then
+    echo -e "${GREEN}✓ Git is already installed.${NC}"
+else
+    echo -e "Installing Git (via Xcode Command Line Tools)..."
+    xcode-select --install
+    echo -e "${RED}Please complete the GUI installation prompt, then run this script again.${NC}"
+    exit 1
+fi
+
+echo -e "\n${BLUE}Step 3: Checking for GitHub CLI (gh)...${NC}"
 if command -v gh &> /dev/null; then
     echo -e "${GREEN}✓ GitHub CLI is already installed.${NC}"
 else
@@ -69,7 +79,7 @@ else
     echo -e "${GREEN}✓ GitHub CLI installed to /usr/local/bin/gh.${NC}"
 fi
 
-echo -e "\n${BLUE}Step 3: Installing Ivy-Tendril...${NC}"
+echo -e "\n${BLUE}Step 4: Installing Ivy-Tendril...${NC}"
 # Use the internal source if provided, otherwise secondary
 # We'll try official NuGet first, then fallback to Ivy feed if requested
 IVY_SOURCE="https://api.nuget.org/v3/index.json"
@@ -83,7 +93,7 @@ else
 fi
 
 # 5. PATH Configuration
-echo -e "\n${BLUE}Step 4: Configuring PATH...${NC}"
+echo -e "\n${BLUE}Step 5: Configuring PATH...${NC}"
 DOTNET_TOOLS_PATH="$HOME/.dotnet/tools"
 SHELL_PROFILE=""
 
