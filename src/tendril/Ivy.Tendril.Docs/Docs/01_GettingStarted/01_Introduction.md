@@ -43,3 +43,11 @@ Tendril is designed to augment, not replace, the developer. The core loop looks 
 5. **Integration (`MakePr`)**: Once approved, Tendril automatically creates a GitHub Pull Request with the completed work.
 
 By structuring the workflow this way, Tendril transforms AI from a basic code autocomplete tool into an autonomous engineering partner.
+
+## Quick Install 
+
+The easiest way to install Tendril and all of its required components on macOS or Linux is via our streamlined install script:
+
+```bash
+curl -sSf https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/tendril/install.sh | sh
+```

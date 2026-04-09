@@ -15,37 +15,25 @@ icon: Download
 Tendril is distributed as a multi-platform application. Follow these instructions to get Tendril up and running on your device.
 </Ingress>
 
-## Prerequisites
+## Quick Install (macOS / Linux)
 
-Before installing Tendril, ensure your system has the following requirements:
-
-- **.NET 10.0 SDK** (Required for the Tendril runtime)
-- **GitHub CLI** (`gh` for automated Pull Request interactions)
-- **Claude CLI** (`claude` for the default coding agent execution)
-- **Git** (Required for worktree isolation)
-- **PowerShell** (Used internally for Promptware scripts)
-
-## System Installation
-
-### macOS (One-Liner)
-
-For macOS users, we provide a streamlined, automated installation script that sets up Tendril and its dependencies (including the GitHub CLI and .NET 10 if missing).
+The easiest way to install Tendril on macOS or Linux is via our automated install script. It automatically sets up Tendril and ensures all required backend tools come preinstalled.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/scripts/install.sh | sh
+curl -sSf https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/tendril/install.sh | sh
 ```
 
-### Windows & Linux (.NET Tool)
+## .NET Tool Installation
 
-Tendril can be installed globally as a .NET Tool from the provided NuGet packages.
+Tendril can also be installed globally as a native .NET Tool from the provided NuGet packages (useful for Windows environments).
 
 ```bash
 dotnet tool install -g Ivy.Tendril --prerelease
 ```
 
-*Note: You may need to specify a custom NuGet feed if the package is hosted on an internal registry or GitHub Packages.*
+*Note: If you only use the `dotnet tool` command, you must manually ensure that PowerShell 7+, Git, the `gh` CLI, and the `claude` CLI are installed on your system to get started.*
 
-## Initial Setup
+## Booting Tendril
 
 Once installed, you can launch Tendril by simply typing `tendril` in your terminal.
 
@@ -62,34 +50,4 @@ The wizard will guide you through:
 2. Providing your necessary API keys (Anthropic, GitHub).
 3. Configuring your first project.
 
-### Manual Configuration
 
-If you prefer to set up manually:
-
-```bash
-export TENDRIL_HOME=~/.tendril
-mkdir -p "$TENDRIL_HOME"
-```
-
-Then, you can utilize the internal **Setup App** inside Tendril to edit your `config.yaml` file visually.
-
-## Development Setup
-
-If you are contributing to the Ivy Framework and want to build Tendril from source:
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Ivy-Interactive/Ivy-Framework.git
-   cd Ivy-Framework/src/tendril/Ivy.Tendril
-   ```
-
-2. **Configure your development environment:**
-   Copy the example config to your local environment.
-   ```bash
-   cp example.config.yaml config.yaml
-   ```
-
-3. **Run from source:**
-   ```bash
-   dotnet run
-   ```
