@@ -1,13 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getColor, getHeight, getWidth } from "@/lib/styles";
+import { getColor } from "@/lib/styles";
+import { Densities } from "@/types/density";
 import React from "react";
 
 interface AvatarWidgetProps {
   image: string;
   fallback: string;
   color?: string;
-  width?: string;
-  height?: string;
+  density?: Densities;
 }
 
 const getInitials = (name: string): string => {
@@ -15,13 +15,18 @@ const getInitials = (name: string): string => {
   return words.map((word) => word.charAt(0).toUpperCase()).join("");
 };
 
-export const AvatarWidget: React.FC<AvatarWidgetProps> = ({
-  image,
-  fallback,
-  color,
-  width,
-  height,
-}) => {
+const getSizeClass = (density?: Densities): string => {
+  switch (density) {
+    case Densities.Small:
+      return "h-6 w-6 text-xs";
+    case Densities.Large:
+      return "h-12 w-12 text-lg";
+    default:
+      return "h-10 w-10";
+  }
+};
+
+export const AvatarWidget: React.FC<AvatarWidgetProps> = ({ image, fallback, color, density }) => {
   const displayFallback = fallback?.length === 2 ? fallback : getInitials(fallback || "");
 
   const colorStyles: React.CSSProperties = color
@@ -31,13 +36,8 @@ export const AvatarWidget: React.FC<AvatarWidgetProps> = ({
       }
     : {};
 
-  const sizeStyle: React.CSSProperties = {
-    ...getWidth(width),
-    ...getHeight(height),
-  };
-
   return (
-    <Avatar style={sizeStyle}>
+    <Avatar className={getSizeClass(density)}>
       <AvatarImage src={image} title={fallback} />
       <AvatarFallback title={fallback} style={colorStyles}>
         {displayFallback}
