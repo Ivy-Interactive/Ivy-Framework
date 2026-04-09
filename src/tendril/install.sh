@@ -43,7 +43,7 @@ else
 fi
 
 printf "%b\\n" "\n${BLUE}Step 2: Checking for Git...${NC}"
-if command -v git &> /dev/null; then
+if xcode-select -p &> /dev/null; then
     printf "%b\\n" "${GREEN}✓ Git is already installed.${NC}"
 else
     printf "%b\\n" "Installing Git (via Xcode Command Line Tools)..."
