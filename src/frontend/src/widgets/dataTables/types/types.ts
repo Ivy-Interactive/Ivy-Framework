@@ -41,7 +41,6 @@ export interface DataColumn {
   footer?: string[] | null;
   iconSet?: "lucide" | "custom";
   color?: string | null;
-  customColor?: string | null;
   badgeColorMapping?: Record<string, string> | null;
 }
 

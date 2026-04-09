@@ -736,7 +736,7 @@ describe("cellContent utilities", () => {
     });
 
     it("should use custom cell when badge mapping exists and multiple labels (per-badge colors)", () => {
-      const cell = createLabelsCell(["Python", "React"], undefined, null, null, {
+      const cell = createLabelsCell(["Python", "React"], undefined, null, {
         python: "Sky",
         react: "Blue",
       });
