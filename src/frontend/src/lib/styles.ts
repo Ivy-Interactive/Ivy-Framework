@@ -646,28 +646,6 @@ export const getColor = (
   if (!color) return {};
 
   const trimmedColor = color.trim();
-  const isDirectCssColor =
-    trimmedColor.startsWith("#") ||
-    trimmedColor.startsWith("rgb(") ||
-    trimmedColor.startsWith("rgba(") ||
-    trimmedColor.startsWith("hsl(") ||
-    trimmedColor.startsWith("hsla(") ||
-    trimmedColor.startsWith("oklch(") ||
-    trimmedColor.startsWith("oklab(") ||
-    trimmedColor.startsWith("lab(") ||
-    trimmedColor.startsWith("lch(") ||
-    trimmedColor.startsWith("hwb(") ||
-    trimmedColor.startsWith("color(") ||
-    trimmedColor.startsWith("var(");
-
-  // Direct CSS values (hex/rgb/hsl/var/...) should be applied as-is, not mapped to theme tokens.
-  if (isDirectCssColor) {
-    if (cssProperty === "color") return {};
-
-    return {
-      [cssProperty]: trimmedColor,
-    };
-  }
 
   // Convert PascalCase to kebab-case so multi-word colors like "IvyGreen" → "ivy-green"
   // match their CSS variable names (--ivy-green).

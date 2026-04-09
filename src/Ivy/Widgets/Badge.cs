@@ -37,7 +37,6 @@ public record Badge : WidgetBase<Badge>
     [Prop] public Icons? Icon { get; set; }
 
     [Prop] public Colors? Color { get; set; }
-    [Prop] public string? CustomColor { get; set; }
 
     [Prop] public Align IconPosition { get; set; } = Align.Left;
 
@@ -65,11 +64,6 @@ public static class BadgeExtensions
     public static Badge Color(this Badge badge, Colors color)
     {
         return badge with { Color = color };
-    }
-
-    public static Badge Color(this Badge badge, string color)
-    {
-        return badge with { CustomColor = color };
     }
 
     [RelatedTo(nameof(Badge.Color))]

@@ -1,6 +1,6 @@
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Palette, group: ["Tests"], isVisible: false, searchHints: ["badge", "color", "semantic", "hex", "rgb", "hsl"])]
+[App(icon: Icons.Palette, group: ["Tests"], isVisible: true, searchHints: ["badge", "color", "semantic", "enum", "ivygreen"])]
 public class BadgeColorsTestApp : SampleBase
 {
     private static readonly (string Label, Colors Color)[] SemanticColors = [
@@ -24,20 +24,11 @@ public class BadgeColorsTestApp : SampleBase
         ("Slate", Colors.Slate)
     ];
 
-    private static readonly (string Label, string Value)[] StringColors = [
-        ("Hex #22C55E", "#22C55E"),
-        ("Hex #06B6D4", "#06B6D4"),
-        ("RGB 245, 158, 11", "rgb(245, 158, 11)"),
-        ("RGB 99, 102, 241", "rgb(99, 102, 241)"),
-        ("HSL 142, 71%, 45%", "hsl(142, 71%, 45%)"),
-        ("HSL 332, 84%, 48%", "hsl(332, 84%, 48%)")
-    ];
-
     protected override object? BuildSample()
     {
         return Layout.Vertical()
                | Text.H1("Badge Colors Test")
-               | Text.P("Examples for semantic colors, enum colors, and string colors.")
+               | Text.P("Examples for semantic colors and enum colors.")
                | Text.H2("Semantic Colors (Success, Warning, etc.)")
                | Layout.Wrap(
                    SemanticColors.Select(x => new Badge(x.Label).Color(x.Color))
@@ -46,16 +37,10 @@ public class BadgeColorsTestApp : SampleBase
                | Layout.Wrap(
                    EnumColors.Select(x => new Badge(x.Label).Color(x.Color))
                )
-               | Text.H2("Color via String Value (Hex, RGB, HSL)")
-               | Layout.Wrap(
-                   StringColors.Select(x => new Badge(x.Label).Color(x.Value))
-               )
                | Text.H2("API Usage")
                | (Layout.Horizontal()
                    | new Badge("Semantic via helper").Success()
                    | new Badge("Enum via Color()").Color(Colors.Cyan)
-                   | new Badge("Hex via Color()").Color("#22C55E")
-                   | new Badge("RGB via Color()").Color("rgb(99, 102, 241)")
-                   | new Badge("HSL via Color()").Color("hsl(332, 84%, 48%)"));
+                   | new Badge("Ivy Green via Color()").Color(Colors.IvyGreen));
     }
 }

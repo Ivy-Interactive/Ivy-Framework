@@ -25,7 +25,6 @@ interface BadgeWidgetProps {
   iconPosition?: "Left" | "Right";
   variant?: "Primary" | "Destructive" | "Outline" | "Secondary" | "Success" | "Warning" | "Info";
   color?: string;
-  customColor?: string;
   density?: Densities;
   id: string;
   events?: string[];
@@ -37,7 +36,6 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   iconPosition = "Left",
   variant = "Primary",
   color,
-  customColor,
   density = Densities.Medium,
   id,
   events = EMPTY_ARRAY,
@@ -87,10 +85,9 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
       | "info";
   };
 
-  const effectiveColor = customColor || color;
   const colorStyles: React.CSSProperties = {
-    ...getColor(effectiveColor, "backgroundColor", "background"),
-    ...getColor(effectiveColor, "color", "foreground"),
+    ...getColor(color, "backgroundColor", "background"),
+    ...getColor(color, "color", "foreground"),
   };
 
   return (
