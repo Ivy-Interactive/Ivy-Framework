@@ -5,7 +5,7 @@ name: Merge main into development
 
 on:
   schedule:
-    - cron: "0 */2 * * *"
+    - cron: "0 */6 * * *"
   workflow_dispatch:
   push:
     branches:
