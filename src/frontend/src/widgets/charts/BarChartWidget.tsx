@@ -1,16 +1,15 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import {
   ColorScheme,
-  generateTooltip,
-  generateTextStyle,
-  generateXAxis,
-  generateYAxis,
-} from "./sharedUtils";
-import {
+  buildMarkLineConfig,
   generateDataProps,
   generateEChartGrid,
   generateEChartLegend,
   generateEChartToolbox,
+  generateTooltip,
+  generateTextStyle,
+  generateXAxis,
+  generateYAxis,
   getColors,
 } from "./sharedUtils";
 import { useThemeWithMonitoring } from "@/components/theme-provider";
@@ -31,7 +30,7 @@ import {
   YAxisProps,
 } from "./chartTypes";
 import { ChartData } from "./chartTypes";
-import { BAR_DEFAULTS, REFERENCE_LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { BAR_DEFAULTS, applyDefaults } from "./chartDefaults";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -125,21 +124,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
     [referenceDots],
   );
 
-  // Merge MarkLine[] into single markLine config with C# defaults
-  const markLine = useMemo(
-    () =>
-      referenceLines.length > 0
-        ? {
-            ...referenceLines[0],
-            lineStyle: {
-              width: referenceLines[0]?.lineStyle?.width ?? REFERENCE_LINE_DEFAULTS.strokeWidth,
-              ...referenceLines[0]?.lineStyle,
-            },
-            data: referenceLines.flatMap((ml) => ml.data),
-          }
-        : {},
-    [referenceLines],
-  );
+  const markLine = useMemo(() => buildMarkLineConfig(referenceLines), [referenceLines]);
 
   // Merge MarkArea[] into single markArea config
   const markAreaConfig = useMemo(

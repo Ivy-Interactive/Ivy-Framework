@@ -272,6 +272,62 @@ export const getTransformValueFn = (data: ChartData[]) => {
   return { transform, largeSpread, minValue, maxValue };
 };
 
+/**
+ * C# `ReferenceLine` serializes as `{ x?, y?, label?, strokeWidth? }`.
+ * ECharts `markLine` expects `{ data: [...] }`. Scatter charts already normalized
+ * this in the widget; line/area/bar used to assume pre-built MarkLine only.
+ */
+export const buildMarkLineConfig = (
+  referenceLines: MarkLine[] | undefined,
+): Record<string, unknown> => {
+  if (!referenceLines?.length) return {};
+
+  const first = referenceLines[0] as unknown as Record<string, unknown>;
+  const usesEChartsMarkLineShape =
+    first != null && "data" in first && Array.isArray(first.data as unknown[]);
+
+  if (usesEChartsMarkLineShape) {
+    return {
+      ...referenceLines[0],
+      lineStyle: {
+        width: referenceLines[0]?.lineStyle?.width ?? REFERENCE_LINE_DEFAULTS.strokeWidth,
+        ...referenceLines[0]?.lineStyle,
+      },
+      data: referenceLines.flatMap((ml) => (ml as MarkLine).data ?? []),
+    };
+  }
+
+  const strokeWidth =
+    (first?.strokeWidth as number | undefined) ?? REFERENCE_LINE_DEFAULTS.strokeWidth;
+  return {
+    silent: true,
+    symbol: ["none", "none"] as [string, string],
+    label: { show: true, position: "end" as const },
+    lineStyle: {
+      type: "dashed" as const,
+      width: strokeWidth,
+    },
+    data: referenceLines
+      .map((line) => {
+        const l = line as unknown as Record<string, unknown>;
+        const x = l.x;
+        const y = l.y;
+        const name = l.label as string | undefined;
+        if (x != null && y == null) return { xAxis: x as number | string, name };
+        if (y != null && x == null) return { yAxis: y as number, name };
+        if (x != null && y != null) {
+          return [
+            { coord: [x, y] as [number, number], name },
+            { coord: [x, y] as [number, number] },
+          ];
+        }
+        return null;
+      })
+      .flat()
+      .filter(Boolean),
+  };
+};
+
 // Text and axis styles are now imported from './styles/theme'
 
 export const generateSeries = (
@@ -294,18 +350,7 @@ export const generateSeries = (
         }
       : {};
 
-  // Merge MarkLine[] into single markLine config with defaults
-  const markLine =
-    referenceLines && referenceLines.length > 0
-      ? {
-          ...referenceLines[0],
-          lineStyle: {
-            width: referenceLines[0]?.lineStyle?.width ?? REFERENCE_LINE_DEFAULTS.strokeWidth,
-            ...referenceLines[0]?.lineStyle,
-          },
-          data: referenceLines.flatMap((ml) => ml.data),
-        }
-      : {};
+  const markLine = buildMarkLineConfig(referenceLines);
 
   // Merge MarkArea[] into single markArea config
   const markArea =
