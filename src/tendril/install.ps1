@@ -10,8 +10,8 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "=== Ivy-Tendril Installer for Windows ===" -ForegroundColor Blue
 
-$isWindows = ([System.Environment]::OSVersion.Platform -eq "Win32NT")
-if (-not $isWindows) {
+$isWinOS = ([System.Environment]::OSVersion.Platform -eq "Win32NT")
+if (-not $isWinOS) {
     Write-Host "Error: This script is only for Windows." -ForegroundColor Red
     exit 1
 }
@@ -19,8 +19,8 @@ if (-not $isWindows) {
 Write-Host "`nStep 1: Checking for .NET 10 SDK..." -ForegroundColor Blue
 $hasDotNet10 = $false
 if (Get-Command dotnet -ErrorAction SilentlyContinue) {
-    $version = (dotnet --version 2>$null)
-    if ($version -match "^10\.") {
+    $version = (dotnet --version 2>$null) -join ""
+    if ($version -like "10.*") {
         $hasDotNet10 = $true
     }
 }
@@ -82,7 +82,7 @@ if (Get-Command pwsh -ErrorAction SilentlyContinue) {
     $hasPwsh = $true
 } elseif (Get-Command dotnet -ErrorAction SilentlyContinue) {
     $toolList = (dotnet tool list -g 2>$null) -join " "
-    if ($toolList -match "(?i)powershell") {
+    if ($toolList -match "powershell") {
         $hasPwsh = $true
     }
 }
@@ -101,7 +101,7 @@ $IVY_SOURCE = "https://api.nuget.org/v3/index.json"
 $hasTendril = $false
 if (Get-Command dotnet -ErrorAction SilentlyContinue) {
     $toolList = (dotnet tool list -g 2>$null) -join " "
-    if ($toolList -match "(?i)ivy\.tendril") {
+    if ($toolList -match "ivy\.tendril") {
         $hasTendril = $true
     }
 }
