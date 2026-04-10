@@ -30,7 +30,6 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
                            {
                                Value = currentRepos[ri],
                                Placeholder = "Select repository folder...",
-                               Mode = FolderInputMode.FullPath,
                                OnChange = new(e =>
                                {
                                    var list = new List<string>(repoPaths.Value);

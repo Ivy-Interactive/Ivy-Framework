@@ -21,7 +21,7 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
                | Text.H2("Tendril Data Location")
                | Text.Muted("This folder will store your plans, inbox, trash, and other Tendril data.")
                | (error.Value != null ? Text.Danger(error.Value) : null!)
-               | folderPath.ToFolderInput("Select Tendril data folder...", mode: FolderInputMode.FullPath)
+               | folderPath.ToFolderInput("Select Tendril data folder...")
                    .WithField().Label("Tendril Home")
                | new Button("Next").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
                    .OnClick(() =>

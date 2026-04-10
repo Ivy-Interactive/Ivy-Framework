@@ -90,7 +90,7 @@ public class EditProjectDialog(
                                            : $"Not a git repository: {expandedPath}")
                                    : new Spacer().Width(Size.Units(4)))
                                | editingRepoPath
-                                   .ToFolderInput("Select repository folder...", mode: FolderInputMode.FullPath)
+                                   .ToFolderInput("Select repository folder...")
                                    .Width(Size.Grow())
                                | new Badge(repo.PrRule).Variant(BadgeVariant.Outline)
                                | new Button().Icon(Icons.Check).Ghost().Small().OnClick(() =>
@@ -163,7 +163,7 @@ public class EditProjectDialog(
         if (repoPathError.Value != null) reposLayout |= Text.Danger(repoPathError.Value);
 
         reposLayout |= Layout.Horizontal().Gap(2).AlignContent(Align.Center)
-                       | newRepoPath.ToFolderInput("Select repository folder...", mode: FolderInputMode.FullPath)
+                       | newRepoPath.ToFolderInput("Select repository folder...")
                            .Width(Size.Grow())
                        | newRepoPrRule.ToSelectInput(new List<string> { "default", "yolo" }).Width(Size.Units(20))
                        | new Button("Add").Outline().Small().OnClick(() =>
