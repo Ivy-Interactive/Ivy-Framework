@@ -10,21 +10,19 @@ icon: CircleQuestionMark
 # Help & Support
 
 <Ingress>
-The Help App provides localized, in-system access to comprehensive documentation (what you are reading right now!), graphical telemetry overlays, and developer shortcuts.
+In-app docs (this site), shortcuts, and pointers to behavior without a separate browser.
 </Ingress>
 
-## Documentation Embedded
+## Docs
 
-The Tendril Docs are integrated directly within the platform. If you're encountering an architectural friction point or trying to understand Job lifecycles, you don't need an active external browser or internet connection to triage standard behavior.
+Tendril ships documentation offline inside the app.
 
-## Application Shortcuts
+## Shortcuts
 
-Tendril enforces a high-speed, keyboard-friendly navigation paradigm geared at engineers:
+- `Ctrl+D` — Dashboard
+- `Ctrl+P` — Drafts / plans
+- `Ctrl+J` — Jobs
+- `Ctrl+R` — Review
+- `Ctrl+M` — **MakePlan** overlay
 
-- `Ctrl + D` — Instantly navigate to the centralized Dashboard App.
-- `Ctrl + P` — Jump directly into Drafts/Plans creation panel.
-- `Ctrl + J` — Shift view immediately to active running Jobs.
-- `Ctrl + R` — Review queue hotkey.
-- `Ctrl + M` — Spawn manual `MakePlan` overlay directly from current screen space.
-
-Detailed bindings can be viewed inside this Help App context at runtime.
+Full bindings appear in Help at runtime.

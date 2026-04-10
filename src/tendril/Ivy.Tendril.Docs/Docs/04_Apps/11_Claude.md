@@ -11,17 +11,15 @@ icon: Terminal
 # Embedded Claude
 
 <Ingress>
-The Claude App integrates a fully functional, headless instance of the Anthropic `claude-code` CLI, housed within a high-speed Xterm instance directly inside the Tendril Desktop.
+Interactive **claude-code** in an embedded terminal (Xterm) inside Tendril.
 </Ingress>
 
-## Autonomous Execution
+## When to use
 
-While Tendril primarily relies on defined background Promptwares for structural jobs (`ExecutePlan`, `MakePlan`), you frequently need isolated generative investigation tools.
+Background promptware handles structured work (`ExecutePlan`, `MakePlan`). **Open Claude** is for ad hoc exploration in a real PTY (stdin/stdout to the CLI).
 
-Clicking **Open Claude** triggers a native Pseudo-terminal (PTY) binding mapping stdin/stdout streams directly to an underlying Claude executable. 
+## Notes
 
-## Xterm Layout & Capabilities
-
-- **Deep Context Pipeline**: It shares the working directory boundaries and credential architecture utilized by standard terminal environments.
-- **Copy / Paste Integrity**: Native clipboard polling permissions enabled.
-- **Session Continuity**: Discarding or collapsing the Tendril window preserves your underlying Claude conversational history efficiently, mimicking an IDE's terminal drawer architecture cleanly.
+- Same working directory and credentials as your normal terminal context.
+- Copy/paste works as expected.
+- Closing the window does not necessarily wipe the session—similar to an IDE terminal panel.

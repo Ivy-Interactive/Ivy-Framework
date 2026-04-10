@@ -9,17 +9,13 @@ icon: Lightbulb
 # Recommendations
 
 <Ingress>
-The Recommendations App proactively suggests automated improvements, updates, and maintenance pathways for your tracked code repositories without requiring manual specification.
+Suggested follow-ups (refactors, hygiene, tests) inferred from your repos—no manual ticket required.
 </Ingress>
 
-## Proactive Scanning
+## Sourcing
 
-A central piece of the AI Orchestrator's puzzle focuses on alleviating rote task planning. Tendril actively observes structural anomalies or out-of-date practices across tracked systems.
+Tendril surfaces items from execution context (outdated patterns, missing tests, etc.) as actionable items.
 
-This app surfaces generative insights based on tracked context (such as standard updates, syntax modernization, or test suite regressions) and bundles them into manageable tasks.
+## Accept
 
-## Accepting Suggestions
-
-When you **Accept** an integration recommendation, Tendril bypasses the manual drafting architecture conceptually and automatically scaffolds a new valid `Draft` directly.
-
-This creates a seamless pipeline where an engine recognizes a problem natively, writes the technical architecture for the fix, and then pipelines it down the standard route enabling `Execution` and verification.
+**Accept** scaffolds a new **Draft** with the suggested work so it follows the normal Expand – Execute – Review path.

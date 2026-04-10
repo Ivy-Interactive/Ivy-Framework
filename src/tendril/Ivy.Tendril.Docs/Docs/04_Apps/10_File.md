@@ -10,17 +10,15 @@ icon: File
 # File Viewer
 
 <Ingress>
-The native File App enables you to rapidly parse local assets, configuration snippets, and generated code logs without leaving the Tendril orchestration window.
+Open paths from Review, Jobs, or links: code, images, and logs without leaving Tendril.
 </Ingress>
 
-## Integrated Asset Support
+## Behavior
 
-During the `Review` phase or inside `Job` logs, you will commonly encounter references to specific physical paths. Clicking these references routes them to the File App dynamically.
+Click a **file** link to open the File app.
 
-Features include:
+- **Code** — Highlighting for common extensions (`.cs`, `.js`, `.ts`, `.tsx`, `.py`, `.sql`, …).
+- **Images** — `.png`, `.svg`, `.webp`, `.jpg` in-app.
+- **Errors** — Parse failures show in the UI instead of failing silently.
 
-- **Syntax Highlighted Code**: Full code visualization mappings for `.cs`, `.js`, `.py`, `.sql`, `.tsx`, and a dozen other extensions, providing rich colorized readability.
-- **Image Previews**: Native parsing for generated UI visual snapshots (`.png`, `.svg`, `.webp`, `.jpg`) without defaulting to system application popups.
-- **Error Transparency**: Hard failures when parsing local state are trapped and displayed logically to identify corrupted execution outputs.
-
-Because the component maps paths exclusively via absolute local system routes managed by `TENDRIL_HOME`, files stay securely air-gapped on your computer.
+Paths are local and resolved under your machine / `TENDRIL_HOME`; nothing is uploaded for viewing.
