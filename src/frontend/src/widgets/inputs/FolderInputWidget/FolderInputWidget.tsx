@@ -172,7 +172,7 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
           {showClear && (
             <button
               type="button"
-              className="flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 handleClear();
@@ -187,7 +187,7 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
 
           <button
             type="button"
-            className="flex h-6 w-6 items-center justify-center text-muted-foreground hover:text-foreground transition-colors rounded-sm"
+            className="flex h-6 w-6 items-center justify-center text-muted-foreground hover:text-foreground transition-colors rounded-sm cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               handleBrowse();
