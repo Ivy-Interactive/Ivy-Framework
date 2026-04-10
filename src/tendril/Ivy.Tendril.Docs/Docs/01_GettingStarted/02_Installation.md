@@ -49,6 +49,4 @@ dotnet tool install -g Ivy.Tendril --prerelease
 tendril
 ```
 
-### First run
 
-No `TENDRIL_HOME` yet – the **Onboarding** app opens: set home (default `~/.tendril`), add API keys (Anthropic, GitHub), and configure a project.
