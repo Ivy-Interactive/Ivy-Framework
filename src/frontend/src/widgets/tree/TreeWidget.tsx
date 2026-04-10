@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { MenuItem } from "@/types/widgets";
 import { TreeItem } from "./TreeItem";
 import { useEventHandler } from "@/components/event-handler";
-import "./tree.css";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -39,7 +38,7 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({ id, items = EMPTY_ARRAY,
   );
 
   return (
-    <div className={cn("ivy-tree w-full")} role="tree">
+    <div className={cn("ivy-tree flex flex-col gap-1 w-full")} role="tree">
       {items.map((item) => (
         <TreeItem
           key={item.tag || item.label}
