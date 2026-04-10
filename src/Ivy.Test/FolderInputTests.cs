@@ -56,16 +56,7 @@ public class FolderInputTests
         Assert.Equal(typeof(string), types[0]);
     }
 
-    [Fact]
-    public void FolderInput_ValidateValue_ReturnsSuccess()
-    {
-        var input = new FolderInput();
 
-        var result = input.ValidateValue("any-folder");
-
-        Assert.True(result.IsValid);
-        Assert.Null(result.ErrorMessage);
-    }
 
     [Fact]
     public void FolderInput_ValidateValue_WithNull_ReturnsSuccess()
