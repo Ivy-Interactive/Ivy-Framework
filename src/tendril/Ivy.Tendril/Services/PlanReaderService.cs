@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Ivy.Helpers;
 using Ivy.Tendril.Apps.Plans;
 using Microsoft.Extensions.Logging;
 
@@ -14,8 +15,13 @@ public class PlanReaderService(
     private static readonly Regex FolderNameRegex = new(@"^(\d{5})-(.+)$", RegexOptions.Compiled);
     private readonly IConfigService _config = config;
 
-    private readonly TimeCache<List<HourlyTokenBurn>> _hourlyBurnCache = new(TimeSpan.FromMinutes(2));
     private readonly ILogger<PlanReaderService> _logger = logger;
+
+    private readonly TimeCache<Dictionary<string, DashboardStats>> _dashboardCache =
+        new(TimeSpan.FromSeconds(10));
+
+    private readonly TimeCache<Dictionary<string, List<HourlyTokenBurn>>> _hourlyBurnCache =
+        new(TimeSpan.FromSeconds(10));
 
     private readonly TimeCache<Dictionary<string, (decimal Cost, int Tokens)>> _planCostCache =
         new(TimeSpan.FromSeconds(90));
@@ -29,6 +35,7 @@ public class PlanReaderService(
     private volatile bool _useDatabaseForReads;
 
     public string PlansDirectory => _config.PlanFolder;
+    public bool IsDatabaseReady => _useDatabaseForReads;
 
     /// <summary>
     ///     On startup, reset any plans stuck in transient states (Building, Executing, Updating)
@@ -115,14 +122,7 @@ public class PlanReaderService(
     public List<PlanFile> GetPlans(PlanStatus? statusFilter = null)
     {
         if (_useDatabaseForReads && _database != null)
-            try
-            {
-                return _database.GetPlans(statusFilter);
-            }
-            catch
-            {
-                // Fall back to file system on database errors
-            }
+            return _database.GetPlans(statusFilter);
 
         return GetPlansFromFileSystem(statusFilter);
     }
@@ -134,14 +134,7 @@ public class PlanReaderService(
     public PlanFile? GetPlanByFolder(string folderPath)
     {
         if (_useDatabaseForReads && _database != null)
-            try
-            {
-                return _database.GetPlanByFolder(folderPath);
-            }
-            catch
-            {
-                // Fall back to file system
-            }
+            return _database.GetPlanByFolder(folderPath);
 
         if (!Directory.Exists(folderPath)) return null;
         return ParsePlanFolder(folderPath);
@@ -334,7 +327,7 @@ public class PlanReaderService(
         WriteFileInBackground(() =>
         {
             if (!Directory.Exists(folderPath)) return;
-            RemoveWorktrees(folderPath);
+            RemoveWorktrees(folderPath, _logger);
             ClearReadOnlyAttributes(folderPath);
             Directory.Delete(folderPath, true);
         });
@@ -405,80 +398,24 @@ public class PlanReaderService(
 
     /// <summary>
     ///     Returns pre-aggregated dashboard data. Delegates to database when available,
-    ///     otherwise falls back to in-memory computation over all plans.
+    ///     otherwise returns empty stats.
     /// </summary>
     public DashboardStats GetDashboardData(string? projectFilter)
     {
         if (_useDatabaseForReads && _database != null)
-            try
-            {
-                return _database.GetDashboardData(projectFilter);
-            }
-            catch
-            {
-                // Fall back to in-memory computation
-            }
-
-        return ComputeDashboardDataFromPlans(projectFilter);
-    }
-
-    private DashboardStats ComputeDashboardDataFromPlans(string? projectFilter)
-    {
-        var plans = GetPlans();
-        var filtered = projectFilter != null
-            ? plans.Where(p => p.Project == projectFilter).ToList()
-            : plans;
-
-        var totalCount = filtered.Count;
-        var draftCount = filtered.Count(p => p.Status is PlanStatus.Draft or PlanStatus.Blocked);
-        var inProgressCount = filtered.Count(p =>
-            p.Status is PlanStatus.Building or PlanStatus.Executing or PlanStatus.Updating);
-        var reviewCount = filtered.Count(p => p.Status == PlanStatus.ReadyForReview);
-        var completedCount = filtered.Count(p => p.Status == PlanStatus.Completed);
-        var failedCount = filtered.Count(p => p.Status == PlanStatus.Failed);
-
-        var completedOrFailed = filtered
-            .Where(p => p.Status is PlanStatus.Completed or PlanStatus.Failed or PlanStatus.ReadyForReview)
-            .ToList();
-
-        var costCache = completedOrFailed
-            .ToDictionary(p => p.FolderPath, p => GetPlanTotalCost(p.FolderPath));
-        var tokenCache = completedOrFailed
-            .ToDictionary(p => p.FolderPath, p => GetPlanTotalTokens(p.FolderPath));
-
-        var totalCost = costCache.Values.Sum();
-        var avgCost = completedOrFailed.Count > 0 ? totalCost / completedOrFailed.Count : 0;
-
-        var today = DateTime.UtcNow.Date;
-        var dailyStats = Enumerable.Range(0, 7).Select(i =>
         {
-            var day = today.AddDays(-i);
-            var dayCompletedOrFailed = filtered
-                .Where(p => p.Updated.Date == day &&
-                            p.Status is PlanStatus.Completed or PlanStatus.Failed or PlanStatus.ReadyForReview)
-                .ToList();
+            var cache = _dashboardCache.GetOrCompute(() => new Dictionary<string, DashboardStats>());
+            var key = projectFilter ?? "__all__";
+            if (!cache.TryGetValue(key, out var stats))
+            {
+                stats = _database.GetDashboardData(projectFilter);
+                cache[key] = stats;
+            }
 
-            return new DashboardDayStats(
-                day,
-                filtered.Count(p => p.Created.Date == day),
-                filtered.Count(p => p.Status == PlanStatus.Completed && p.Updated.Date == day),
-                filtered.Where(p => p.Status == PlanStatus.Completed && p.Updated.Date == day)
-                    .Sum(p => p.Prs.Count),
-                filtered.Count(p => p.Status == PlanStatus.Failed && p.Updated.Date == day),
-                dayCompletedOrFailed.Sum(p => costCache.GetValueOrDefault(p.FolderPath, 0m)),
-                dayCompletedOrFailed.Sum(p => tokenCache.GetValueOrDefault(p.FolderPath, 0))
-            );
-        }).ToList();
+            return stats;
+        }
 
-        var projectCounts = plans
-            .GroupBy(p => p.Project)
-            .Select(g => new ProjectCount(g.Key, g.Count()))
-            .OrderByDescending(g => g.Count)
-            .ToList();
-
-        return new DashboardStats(
-            totalCount, draftCount, inProgressCount, reviewCount, completedCount, failedCount,
-            avgCost, dailyStats, projectCounts);
+        return new DashboardStats(0, 0, 0, 0, 0, 0, 0, [], []);
     }
 
     /// <summary>
@@ -528,27 +465,25 @@ public class PlanReaderService(
     }
 
     /// <summary>
-    ///     Computes hourly token usage and cost statistics across all plans over a given time window.
+    ///     Returns hourly token usage and cost statistics. Delegates to database when available,
+    ///     otherwise returns empty list.
     /// </summary>
-    /// <param name="days">Number of days to look back from now. Defaults to 7.</param>
-    /// <returns>List of hourly buckets with aggregated cost and token counts, ordered chronologically.</returns>
-    /// <remarks>
-    ///     Correlates <c>costs.csv</c> entries with log file timestamps to determine when tokens were consumed.
-    ///     Plans without both a costs file and a logs directory are skipped.
-    /// </remarks>
-    public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7)
+    public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7, string? projectFilter = null)
     {
         if (_useDatabaseForReads && _database != null)
-            try
+        {
+            var cache = _hourlyBurnCache.GetOrCompute(() => new Dictionary<string, List<HourlyTokenBurn>>());
+            var key = $"{days}_{projectFilter ?? "__all__"}";
+            if (!cache.TryGetValue(key, out var result))
             {
-                return _database.GetHourlyTokenBurn(days);
-            }
-            catch
-            {
-                // Fall back to file system
+                result = _database.GetHourlyTokenBurn(days, projectFilter);
+                cache[key] = result;
             }
 
-        return _hourlyBurnCache.GetOrCompute(() => ComputeHourlyTokenBurn(days));
+            return result;
+        }
+
+        return [];
     }
 
     /// <summary>
@@ -564,14 +499,7 @@ public class PlanReaderService(
     public List<Recommendation> GetRecommendations()
     {
         if (_useDatabaseForReads && _database != null)
-            try
-            {
-                return _database.GetRecommendations();
-            }
-            catch
-            {
-                // Fall back to file system
-            }
+            return _database.GetRecommendations();
 
         return _recommendationsCache.GetOrCompute(ComputeRecommendations);
     }
@@ -597,14 +525,7 @@ public class PlanReaderService(
     public PlanCountSnapshot ComputePlanCounts()
     {
         if (_useDatabaseForReads && _database != null)
-            try
-            {
-                return _database.ComputePlanCounts();
-            }
-            catch
-            {
-                // Fall back to file system
-            }
+            return _database.ComputePlanCounts();
 
         return _planCountsCache.GetOrCompute(ComputePlanCountsInternal);
     }
@@ -625,7 +546,6 @@ public class PlanReaderService(
             _database.UpdateRecommendationState(planId.Value, recommendationTitle, newState, declineReason);
 
         _recommendationsCache.Invalidate();
-        _hourlyBurnCache.Invalidate();
         _planCountsCache.Invalidate();
 
         // Without a backing database, writes need to complete before the next read.
@@ -655,8 +575,9 @@ public class PlanReaderService(
     {
         _planCountsCache.Invalidate();
         _recommendationsCache.Invalidate();
-        _hourlyBurnCache.Invalidate();
         _planCostCache.Invalidate();
+        _dashboardCache.Invalidate();
+        _hourlyBurnCache.Invalidate();
     }
 
     /// <summary>
@@ -779,7 +700,7 @@ public class PlanReaderService(
         var topLevelKeys = new HashSet<string>(StringComparer.Ordinal)
         {
             "state", "project", "level", "title", "sessionId",
-            "repos", "created", "updated", "initialPrompt",
+            "repos", "created", "updated", "initialPrompt", "sourceUrl",
             "prs", "commits", "verifications", "relatedPlans", "dependsOn"
         };
         var listKeys = new HashSet<string>(StringComparer.Ordinal)
@@ -962,7 +883,7 @@ public class PlanReaderService(
         return latestFile != null ? FileHelper.ReadAllText(latestFile) : string.Empty;
     }
 
-    private static void RemoveWorktrees(string planFolderPath)
+    internal static void RemoveWorktrees(string planFolderPath, ILogger? logger = null)
     {
         var worktreesDir = Path.Combine(planFolderPath, "worktrees");
         if (!Directory.Exists(worktreesDir)) return;
@@ -970,7 +891,11 @@ public class PlanReaderService(
         foreach (var wtDir in Directory.GetDirectories(worktreesDir))
         {
             var gitFile = Path.Combine(wtDir, ".git");
-            if (!File.Exists(gitFile)) continue;
+            if (!File.Exists(gitFile))
+            {
+                logger?.LogWarning("Worktree directory has no .git file, skipping git removal: {Path}", wtDir);
+                continue;
+            }
 
             // Read the .git file to find which repo this worktree belongs to.
             // Format: "gitdir: <path-to-repo>/.git/worktrees/<name>"
@@ -995,7 +920,7 @@ public class PlanReaderService(
                     CreateNoWindow = true
                 };
                 using var process = Process.Start(psi);
-                process?.WaitForExit(10000);
+                process.WaitForExitOrKill(10000);
             }
             catch
             {
@@ -1005,7 +930,7 @@ public class PlanReaderService(
         }
     }
 
-    private static void ClearReadOnlyAttributes(string directoryPath)
+    internal static void ClearReadOnlyAttributes(string directoryPath)
     {
         try
         {
@@ -1078,7 +1003,8 @@ public class PlanReaderService(
                 planYaml.DependsOn ?? [],
                 planYaml.Created,
                 planYaml.Updated,
-                planYaml.InitialPrompt
+                planYaml.InitialPrompt,
+                planYaml.SourceUrl
             );
             var latestContent = ReadLatestRevisionFromFileSystem(folderName);
 
@@ -1133,102 +1059,6 @@ public class PlanReaderService(
         }
 
         return (totalCost, totalTokens);
-    }
-
-    private List<HourlyTokenBurn> ComputeHourlyTokenBurn(int days)
-    {
-        var cutoff = DateTime.UtcNow.AddDays(-days);
-        var buckets = new Dictionary<(DateTime Hour, string Project), (decimal Cost, int Tokens)>();
-
-        if (!Directory.Exists(PlansDirectory)) return new List<HourlyTokenBurn>();
-
-        foreach (var dir in Directory.GetDirectories(PlansDirectory))
-            try
-            {
-                var costsPath = Path.Combine(dir, "costs.csv");
-                var logsDir = Path.Combine(dir, "logs");
-                if (!File.Exists(costsPath) || !Directory.Exists(logsDir)) continue;
-
-                var planYamlPath = Path.Combine(dir, "plan.yaml");
-                if (!File.Exists(planYamlPath)) continue;
-
-                var planYaml = YamlHelper.Deserializer.Deserialize<PlanYaml>(FileHelper.ReadAllText(planYamlPath));
-                if (planYaml == null) continue;
-
-                var project = planYaml.Project ?? "";
-
-                var costLines = FileHelper.ReadAllLines(costsPath).Skip(1).ToList();
-                if (costLines.Count == 0) continue;
-
-                // Build a map: promptware name -> list of log files (ordered by number)
-                var logFiles = Directory.GetFiles(logsDir, "*.md")
-                    .Select(f =>
-                    {
-                        var name = Path.GetFileNameWithoutExtension(f);
-                        var dashIdx = name.IndexOf('-');
-                        if (dashIdx < 0) return (Promptware: name, Path: f, Num: 0);
-                        var numPart = name.Substring(0, dashIdx);
-                        var pwName = name.Substring(dashIdx + 1);
-                        int.TryParse(numPart, out var num);
-                        return (Promptware: pwName, Path: f, Num: num);
-                    })
-                    .OrderBy(l => l.Num)
-                    .ToList();
-
-                // Group log files by promptware name, preserving order
-                var logsByPromptware = new Dictionary<string, Queue<string>>(StringComparer.OrdinalIgnoreCase);
-                foreach (var log in logFiles)
-                {
-                    if (!logsByPromptware.ContainsKey(log.Promptware))
-                        logsByPromptware[log.Promptware] = new Queue<string>();
-                    logsByPromptware[log.Promptware].Enqueue(log.Path);
-                }
-
-                // Correlate each cost row with its log file
-                foreach (var line in costLines)
-                {
-                    var parts = line.Split(',');
-                    if (parts.Length < 3) continue;
-
-                    var promptware = parts[0].Trim();
-                    if (!int.TryParse(parts[1].Trim(), NumberStyles.Any,
-                            CultureInfo.InvariantCulture, out var tokens)) continue;
-                    if (!decimal.TryParse(parts[2].Trim(), NumberStyles.Any,
-                            CultureInfo.InvariantCulture, out var cost)) continue;
-
-                    if (!logsByPromptware.TryGetValue(promptware, out var queue) || queue.Count == 0)
-                        continue;
-
-                    var logPath = queue.Dequeue();
-                    var timestamp = ExtractCompletedTimestamp(logPath);
-                    if (timestamp == null || timestamp.Value < cutoff) continue;
-
-                    var hour = new DateTime(timestamp.Value.Year, timestamp.Value.Month,
-                        timestamp.Value.Day, timestamp.Value.Hour, 0, 0, DateTimeKind.Utc);
-
-                    var key = (hour, project);
-                    if (buckets.TryGetValue(key, out var existing))
-                        buckets[key] = (existing.Cost + cost, existing.Tokens + tokens);
-                    else
-                        buckets[key] = (cost, tokens);
-                }
-            }
-            catch
-            {
-                // Skip problematic plan folders
-            }
-
-        return buckets
-            .OrderBy(b => b.Key.Hour)
-            .ThenBy(b => b.Key.Project)
-            .Select(b => new HourlyTokenBurn
-            {
-                Hour = b.Key.Hour,
-                Project = b.Key.Project,
-                Cost = b.Value.Cost,
-                Tokens = b.Value.Tokens
-            })
-            .ToList();
     }
 
     private List<Recommendation> ComputeRecommendations()

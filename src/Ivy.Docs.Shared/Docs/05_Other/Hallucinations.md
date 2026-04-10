@@ -1269,15 +1269,14 @@ new TabsLayout(
 **Correct API:**
 
 ```csharp
-new TabsLayout(
-    onSelect: null, onClose: null, onRefresh: null, onReorder: null, selectedIndex: null,
+Layout.Tabs(
     new Tab("Markets", new MarketsView()),
     new Tab("Chart", new ChartView()),
     new Tab("Portfolio", new PortfolioView())
 )
 ```
 
-`TabsLayout` has no simplified `(params Tab[])` constructor. The public constructor requires 5 positional parameters before the `params Tab[]`: `onSelect`, `onClose`, `onRefresh`, `onReorder`, `selectedIndex`. Pass `null` for all event handlers and selectedIndex when only tabs are needed. The agent tried to skip these parameters, causing repeated build failures (5 times in a single session).
+`TabsLayout` is now `internal` — external consumers must use `Layout.Tabs(params Tab[])` instead. The fluent API on `TabView` (returned by `Layout.Tabs()`) supports `.OnSelect()`, `.OnClose()`, `.OnCloseOthers()`, `.OnRefresh()`, `.AddButton()`, and `.SelectedIndex()` for advanced use cases.
 
 **Found In:**
 3d2cdc9c-aad3-410e-a1e4-7c007529077a

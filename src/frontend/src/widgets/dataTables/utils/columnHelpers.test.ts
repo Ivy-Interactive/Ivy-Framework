@@ -270,5 +270,138 @@ describe("columnHelpers", () => {
       expect(result.map((r) => r.title)).toContain("NoOrder1");
       expect(result.map((r) => r.title)).toContain("NoOrder2");
     });
+
+    it("should apply grow: 0.5 for Fraction:0.5 column", () => {
+      const columns: DataColumn[] = [
+        { name: "Fixed", type: ColType.Text, width: 200 },
+        { name: "Frac", type: ColType.Text, width: 60, originalWidth: "Fraction:0.5" },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[1].grow).toBe(0.5);
+    });
+
+    it("should apply grow: 1 for Auto column", () => {
+      const columns: DataColumn[] = [
+        { name: "Fixed", type: ColType.Text, width: 200 },
+        { name: "AutoCol", type: ColType.Text, width: 60, originalWidth: "Auto" },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[1].grow).toBe(1);
+    });
+
+    it("should apply grow: 2 for Grow:2 column", () => {
+      const columns: DataColumn[] = [
+        { name: "Fixed", type: ColType.Text, width: 200 },
+        { name: "GrowCol", type: ColType.Text, width: 60, originalWidth: "Grow:2" },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[1].grow).toBe(2);
+    });
+
+    it("should apply grow: 1 for Full column", () => {
+      const columns: DataColumn[] = [
+        { name: "Fixed", type: ColType.Text, width: 200 },
+        { name: "FullCol", type: ColType.Text, width: 60, originalWidth: "Full" },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[1].grow).toBe(1);
+    });
+
+    it("should apply grow: 1 for Screen column", () => {
+      const columns: DataColumn[] = [
+        { name: "Fixed", type: ColType.Text, width: 200 },
+        { name: "ScreenCol", type: ColType.Text, width: 60, originalWidth: "Screen" },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[1].grow).toBe(1);
+    });
+
+    it("should NOT apply grow for Px column", () => {
+      const columns: DataColumn[] = [
+        { name: "PxCol", type: ColType.Text, width: 200, originalWidth: "Px:200" },
+        { name: "Other", type: ColType.Text, width: 100 },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[0].grow).toBeUndefined();
+    });
+
+    it("should NOT apply grow for Fit column", () => {
+      const columns: DataColumn[] = [
+        { name: "FitCol", type: ColType.Text, width: 60, originalWidth: "Fit" },
+        { name: "Other", type: ColType.Text, width: 100 },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[0].grow).toBeUndefined();
+    });
+
+    it("should NOT apply grow for MinContent column", () => {
+      const columns: DataColumn[] = [
+        { name: "MinCol", type: ColType.Text, width: 60, originalWidth: "MinContent" },
+        { name: "Other", type: ColType.Text, width: 100 },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[0].grow).toBeUndefined();
+    });
+
+    it("should apply grow and respect min constraint", () => {
+      const columns: DataColumn[] = [
+        { name: "Fixed", type: ColType.Text, width: 200 },
+        {
+          name: "FracMin",
+          type: ColType.Text,
+          width: 60,
+          originalWidth: "Fraction:0.5,Px:100,Px:500",
+        },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[1].grow).toBe(0.5);
+      expect("width" in result[1] && result[1].width).toBeGreaterThanOrEqual(100);
+    });
+
+    it("should apply grow only to fraction/grow columns in a mix", () => {
+      const columns: DataColumn[] = [
+        { name: "Fixed", type: ColType.Number, width: 200, originalWidth: "Px:200" },
+        { name: "Auto", type: ColType.Text, width: 60, originalWidth: "Auto" },
+        { name: "Frac", type: ColType.Text, width: 60, originalWidth: "Fraction:0.3" },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[0].grow).toBeUndefined(); // Px: no grow
+      expect(result[1].grow).toBe(1); // Auto: grow 1
+      expect(result[2].grow).toBe(0.3); // Fraction: grow 0.3
+    });
+
+    it("should still default last column to grow: 1 when no column has explicit grow type", () => {
+      const columns: DataColumn[] = [
+        { name: "A", type: ColType.Text, width: 100 },
+        { name: "B", type: ColType.Text, width: 100 },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[0].grow).toBeUndefined();
+      expect(result[1].grow).toBe(1);
+    });
+
+    it("should assign equal grow to all Fraction:0.25 columns", () => {
+      const columns: DataColumn[] = [
+        { name: "A", type: ColType.Text, width: 60, originalWidth: "Fraction:0.25" },
+        { name: "B", type: ColType.Text, width: 60, originalWidth: "Fraction:0.25" },
+        { name: "C", type: ColType.Text, width: 60, originalWidth: "Fraction:0.25" },
+        { name: "D", type: ColType.Text, width: 60, originalWidth: "Fraction:0.25" },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[0].grow).toBe(0.25);
+      expect(result[1].grow).toBe(0.25);
+      expect(result[2].grow).toBe(0.25);
+      expect(result[3].grow).toBe(0.25);
+    });
+
+    it("should preserve 2:1 ratio for Grow:2 + Grow:1", () => {
+      const columns: DataColumn[] = [
+        { name: "Wide", type: ColType.Text, width: 60, originalWidth: "Grow:2" },
+        { name: "Narrow", type: ColType.Text, width: 60, originalWidth: "Grow:1" },
+      ];
+      const result = convertToGridColumns(columns, [], {}, 600, false);
+      expect(result[0].grow).toBe(2);
+      expect(result[1].grow).toBe(1);
+    });
   });
 });

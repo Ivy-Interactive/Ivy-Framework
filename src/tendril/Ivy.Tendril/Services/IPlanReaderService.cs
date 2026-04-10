@@ -5,6 +5,7 @@ namespace Ivy.Tendril.Services;
 public interface IPlanReaderService
 {
     string PlansDirectory { get; }
+    bool IsDatabaseReady { get; }
 
     void RecoverStuckPlans();
     void RepairPlans();
@@ -23,7 +24,7 @@ public interface IPlanReaderService
     DashboardStats GetDashboardData(string? projectFilter);
     decimal GetPlanTotalCost(string folderPath);
     int GetPlanTotalTokens(string folderPath);
-    List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7);
+    List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7, string? projectFilter = null);
     List<Recommendation> GetRecommendations();
     int GetPendingRecommendationsCount();
     PlanReaderService.PlanCountSnapshot ComputePlanCounts();

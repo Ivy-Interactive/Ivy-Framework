@@ -45,6 +45,14 @@ public class DatabaseMigratorTests : IDisposable
         return cmd.ExecuteScalar() != null;
     }
 
+    private bool IndexExists(string indexName)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='index' AND name=@name;";
+        cmd.Parameters.AddWithValue("@name", indexName);
+        return cmd.ExecuteScalar() != null;
+    }
+
     [Fact]
     public void GetCurrentVersion_NewDatabase_ReturnsZero()
     {
@@ -244,6 +252,69 @@ public class DatabaseMigratorTests : IDisposable
         Assert.True(TableExists("Recommendations"));
         Assert.True(TableExists("SyncMetadata"));
         Assert.Equal(1, GetUserVersion());
+    }
+
+    [Fact]
+    public void Migration006_CreatesCompositeIndex_AndDropsSingleColumnIndexes()
+    {
+        // Apply migrations 1 through 5 first to set up schema and individual indexes
+        new Migration_001_InitialSchema().Apply(_connection);
+        new Migration_002_Fts5Search().Apply(_connection);
+        new Migration_003_JobsTable().Apply(_connection);
+        new Migration_004_SourceUrl().Apply(_connection);
+        new Migration_005_CostsLogTimestampIndex().Apply(_connection);
+
+        // Verify preconditions: single-column indexes exist
+        Assert.True(IndexExists("idx_costs_plan"));
+        Assert.True(IndexExists("idx_costs_logtimestamp"));
+
+        // Apply Migration_006
+        new Migration_006_CostsCompositeIndex().Apply(_connection);
+
+        // Composite index should exist
+        Assert.True(IndexExists("idx_costs_plan_logtimestamp"));
+
+        // Single-column indexes should be gone
+        Assert.False(IndexExists("idx_costs_plan"));
+        Assert.False(IndexExists("idx_costs_logtimestamp"));
+
+        Assert.Equal(6, GetUserVersion());
+    }
+
+    [Fact]
+    public void Migration006_PlanIdOnlyLookups_StillWorkAfterDroppingPlanIndex()
+    {
+        // Apply all migrations up to 6
+        new Migration_001_InitialSchema().Apply(_connection);
+        new Migration_002_Fts5Search().Apply(_connection);
+        new Migration_003_JobsTable().Apply(_connection);
+        new Migration_004_SourceUrl().Apply(_connection);
+        new Migration_005_CostsLogTimestampIndex().Apply(_connection);
+        new Migration_006_CostsCompositeIndex().Apply(_connection);
+
+        // Insert a plan
+        using var insertPlan = _connection.CreateCommand();
+        insertPlan.CommandText = """
+            INSERT INTO Plans (Id, Title, Project, Level, State, FolderPath, FolderName,
+                               YamlRaw, RevisionCount, LatestRevisionContent, Created, Updated)
+            VALUES (1, 'Test', 'Tendril', 'NiceToHave', 'Draft', '/test', 'test',
+                    'yaml', 1, 'content', '2026-01-01', '2026-01-01')
+            """;
+        insertPlan.ExecuteNonQuery();
+
+        // Insert costs for that plan
+        using var insertCost = _connection.CreateCommand();
+        insertCost.CommandText = """
+            INSERT INTO Costs (PlanId, Promptware, Cost, Tokens, LogTimestamp)
+            VALUES (1, 'TestPW', 0.50, 1000, '2026-01-01T12:00:00Z')
+            """;
+        insertCost.ExecuteNonQuery();
+
+        // PlanId-only lookup should work (composite index leftmost prefix)
+        using var queryCmd = _connection.CreateCommand();
+        queryCmd.CommandText = "SELECT SUM(Cost) FROM Costs WHERE PlanId = 1;";
+        var result = Convert.ToDecimal(queryCmd.ExecuteScalar());
+        Assert.Equal(0.50m, result);
     }
 
     private class FakeMigration : IMigration

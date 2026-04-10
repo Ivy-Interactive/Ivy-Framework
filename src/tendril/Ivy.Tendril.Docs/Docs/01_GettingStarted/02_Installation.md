@@ -4,60 +4,50 @@ searchHints:
   - setup
   - prerequisites
   - getting-started
+  - macos
+  - windows
 icon: Download
 ---
 
 # Installation
 
 <Ingress>
-Get Tendril up and running on your machine.
+Tendril is distributed as a multi-platform application. Follow these instructions to get Tendril up and running on your device.
 </Ingress>
 
-## Prerequisites
+## Quick Install (macOS / Linux)
 
-### For Running Tendril
-- [Claude CLI](https://docs.anthropic.com/en/docs/claude-code) (`claude`)
-- [GitHub CLI](https://cli.github.com/) (`gh`)
-- PowerShell
-- Git
-
-### For Development
-- [.NET 10.0 SDK](https://dotnet.microsoft.com/download)
-
-## Setup
-
-### 1. Clone the repo
+The easiest way to install Tendril on macOS or Linux is via our automated install script. It automatically sets up Tendril and ensures all required backend tools come preinstalled.
 
 ```bash
-git clone https://github.com/Ivy-Interactive/Ivy-Framework.git
-cd Ivy-Framework/src/tendril/Ivy.Tendril
+curl -sSf https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/tendril/install.sh | sh
 ```
 
-### 2. Configure `config.yaml`
+## .NET Tool Installation
 
-Copy the example config and edit it:
+Tendril can also be installed globally as a native .NET Tool from the provided NuGet packages (useful for Windows environments).
 
 ```bash
-cp example.config.yaml config.yaml
+dotnet tool install -g Ivy.Tendril --prerelease
 ```
 
-Key fields:
-- `projects` — List of projects with their repo paths, verifications, and context
-- `codingAgent` — The coding agent to use (claude, codex, or gemini)
+*Note: If you only use the `dotnet tool` command, you must manually ensure that PowerShell 7+, Git, the `gh` CLI, and the `claude` CLI are installed on your system to get started.*
 
-### 3. Set `TENDRIL_HOME` environment variable
+## Booting Tendril
 
-Point `TENDRIL_HOME` to your Tendril data directory:
+Once installed, you can launch Tendril by simply typing `tendril` in your terminal.
 
 ```bash
-export TENDRIL_HOME=~/.tendril
-mkdir -p "$TENDRIL_HOME"
+tendril
 ```
 
-Tendril will populate this with `Plans/`, `Inbox/`, `Trash/`, and `config.yaml` at runtime. If `TENDRIL_HOME` is not set, Tendril will launch the onboarding wizard.
+### Onboarding Wizard
 
-### 4. Run
+If you are running Tendril for the first time or do not have a configured `TENDRIL_HOME` directory, Tendril will automatically launch the **Onboarding App**.
 
-```bash
-dotnet run
-```
+The wizard will guide you through:
+1. Setting up your `TENDRIL_HOME` directory (defaults to `~/.tendril`).
+2. Providing your necessary API keys (Anthropic, GitHub).
+3. Configuring your first project.
+
+

@@ -71,6 +71,7 @@ namespace Ivy
     {
         public Text(string text) { }
     }
+    public class Spacer : AbstractWidget { }
 }
 ";
 
@@ -310,6 +311,21 @@ public class Test
     public void M()
     {
         var result = {|IVYCHILD001:new Ivy.FooterLayout() | ""child""|};
+    }
+}
+";
+        await VerifyCS.VerifyAnalyzerAsync(test);
+    }
+
+    [Fact]
+    public async Task Spacer_WithChild_ReportsError()
+    {
+        var test = Stubs + @"
+public class Test
+{
+    public void M()
+    {
+        var result = {|IVYCHILD001:new Ivy.Spacer() | ""child""|};
     }
 }
 ";

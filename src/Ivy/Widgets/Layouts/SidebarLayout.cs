@@ -12,10 +12,18 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
     public static Size DefaultWidth => Size.Rem(16);
 
     public SidebarLayout(object mainContent, object sidebarContent, object? sidebarHeader = null, object? sidebarFooter = null, Size? width = null)
-    : base([new Slot("MainContent", mainContent), new Slot("SidebarContent", sidebarContent), new Slot("SidebarHeader", sidebarHeader), new Slot("SidebarFooter", sidebarFooter)])
+    : base(BuildSlots(mainContent, sidebarContent, sidebarHeader, sidebarFooter))
     {
         Width = width ?? DefaultWidth;
     }
+
+    private static Slot[] BuildSlots(object mainContent, object sidebarContent, object? sidebarHeader, object? sidebarFooter) =>
+    [
+        new Slot("MainContent", mainContent),
+        new Slot("SidebarContent", sidebarContent),
+        sidebarHeader != null ? new Slot("SidebarHeader", sidebarHeader) : new Slot("SidebarHeader"),
+        sidebarFooter != null ? new Slot("SidebarFooter", sidebarFooter) : new Slot("SidebarFooter")
+    ];
 
     internal SidebarLayout() { }
 

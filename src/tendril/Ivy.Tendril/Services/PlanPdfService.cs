@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using Ivy.Helpers;
 
 namespace Ivy.Tendril.Services;
 
@@ -70,12 +71,8 @@ public class PlanPdfService
         var stderrTask = process.StandardError.ReadToEndAsync();
         var stdoutTask = process.StandardOutput.ReadToEndAsync();
 
-        var exited = process.WaitForExit(30000);
-        if (!exited)
-        {
-            process.Kill();
+        if (!process.WaitForExitOrKill(30000))
             throw new InvalidOperationException("pandoc timed out after 30 seconds");
-        }
 
         var output = stdoutTask.Result;
         var error = stderrTask.Result;

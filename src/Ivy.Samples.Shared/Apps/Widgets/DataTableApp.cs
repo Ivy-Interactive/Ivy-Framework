@@ -109,7 +109,21 @@ public class DataTableMainSample : ViewBase
             .Group(e => e.Notes, "Other")
             .Group(e => e.OptionalId, "Other")
             .Group(e => e.Skills, "Personal")
-            .Badges(e => e.Skills, Colors.Sky)
+            .Badges(e => e.Skills, new Dictionary<string, Colors>
+            {
+                // Languages & tech
+                ["C#"] = Colors.Indigo,
+                ["JavaScript"] = Colors.Amber,
+                ["Python"] = Colors.Emerald,
+                ["SQL"] = Colors.Cyan,
+                ["React"] = Colors.Sky,
+                // Soft skills
+                ["Leadership"] = Colors.Violet,
+                ["Communication"] = Colors.Rose,
+                ["Problem Solving"] = Colors.Orange,
+                ["Team Player"] = Colors.Teal,
+                ["Agile"] = Colors.Lime,
+            })
             .Group(e => e.WidgetLink, "Links")
             .Group(e => e.ProfileLink, "Links")
 

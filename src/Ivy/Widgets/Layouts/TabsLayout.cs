@@ -13,7 +13,7 @@ public enum TabsVariant
 /// <summary>
 /// Organizes content into separate views accessible via tabs.
 /// </summary>
-public record TabsLayout : WidgetBase<TabsLayout>
+internal record TabsLayout : WidgetBase<TabsLayout>
 {
     [OverloadResolutionPriority(1)]
     public TabsLayout(Func<Event<TabsLayout, int>, ValueTask>? onSelect, Func<Event<TabsLayout, int>, ValueTask>? onClose, Func<Event<TabsLayout, int>, ValueTask>? onRefresh, Func<Event<TabsLayout, int[]>, ValueTask>? onReorder, int? selectedIndex, params Tab[] tabs) : base(tabs.Cast<object>().ToArray())
@@ -66,7 +66,7 @@ public record TabsLayout : WidgetBase<TabsLayout>
     [Event] public EventHandler<Event<TabsLayout, int>>? OnAddButtonClick { get; set; }
 }
 
-public static class TabsLayoutExtensions
+internal static class TabsLayoutExtensions
 {
     public static TabsLayout Variant(this TabsLayout tabsLayout, TabsVariant variant)
     {

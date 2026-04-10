@@ -419,3 +419,6 @@ Ivy.Samples/.claude/settings.local.json
 .ivy/
 **/tmp_out/
 
+# Claude Code worktrees
+.worktrees/
+

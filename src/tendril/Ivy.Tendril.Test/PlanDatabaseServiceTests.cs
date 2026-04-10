@@ -42,6 +42,7 @@ public class PlanDatabaseServiceTests : IDisposable
             new List<string>(),
             DateTime.UtcNow.AddDays(-1),
             DateTime.UtcNow,
+            null,
             null
         );
 
@@ -375,6 +376,149 @@ public class PlanDatabaseServiceTests : IDisposable
     }
 
     [Fact]
+    public void GetHourlyTokenBurn_WithProjectFilter_ReturnsOnlyMatchingProject()
+    {
+        _db.UpsertPlan(CreateTestPlan(1600, "Plan A", project: "Tendril"));
+        _db.UpsertPlan(CreateTestPlan(1601, "Plan B", project: "Framework"));
+
+        var now = DateTime.UtcNow;
+        _db.UpsertCosts(1600, [new("ExecutePlan", 50000, 1.50m, now)]);
+        _db.UpsertCosts(1601, [new("ExecutePlan", 30000, 0.90m, now)]);
+
+        var burn = _db.GetHourlyTokenBurn(projectFilter: "Tendril");
+        Assert.NotEmpty(burn);
+        Assert.All(burn, b => Assert.Equal("Tendril", b.Project));
+        Assert.Equal(50000, burn.Sum(b => b.Tokens));
+    }
+
+    [Fact]
+    public void GetHourlyTokenBurn_WithNullFilter_ReturnsAllProjects()
+    {
+        _db.UpsertPlan(CreateTestPlan(1700, "Plan A", project: "Tendril"));
+        _db.UpsertPlan(CreateTestPlan(1701, "Plan B", project: "Framework"));
+
+        var now = DateTime.UtcNow;
+        _db.UpsertCosts(1700, [new("ExecutePlan", 50000, 1.50m, now)]);
+        _db.UpsertCosts(1701, [new("ExecutePlan", 30000, 0.90m, now)]);
+
+        var burn = _db.GetHourlyTokenBurn(projectFilter: null);
+        Assert.NotEmpty(burn);
+        var projects = burn.Select(b => b.Project).Distinct().OrderBy(p => p).ToList();
+        Assert.Contains("Tendril", projects);
+        Assert.Contains("Framework", projects);
+    }
+
+    [Fact]
+    public void GetHourlyTokenBurn_NullLogTimestamp_FallsBackToPlanUpdated()
+    {
+        _db.UpsertPlan(CreateTestPlan(1750, "Test", project: "Tendril"));
+        _db.UpsertCosts(1750, [new("ExecutePlan", 50000, 1.50m, null)]);
+
+        var burn = _db.GetHourlyTokenBurn();
+        Assert.NotEmpty(burn);
+        Assert.Equal(50000, burn[0].Tokens);
+    }
+
+    [Fact]
+    public void GetHourlyTokenBurn_MixedTimestamps_UsesCorrectTimestamp()
+    {
+        _db.UpsertPlan(CreateTestPlan(1760, "Plan A", project: "Tendril"));
+
+        var now = DateTime.UtcNow;
+        _db.UpsertCosts(1760, [
+            new("ExecutePlan", 40000, 1.00m, now),
+            new("MakePr", 20000, 0.50m, null)
+        ]);
+
+        var burn = _db.GetHourlyTokenBurn();
+        Assert.NotEmpty(burn);
+        Assert.Equal(60000, burn.Sum(b => b.Tokens));
+    }
+
+    [Fact]
+    public void GetDashboardData_FiltersCorrectlyByProject()
+    {
+        _db.UpsertPlan(CreateTestPlan(1800, "Plan A", project: "Tendril", status: PlanStatus.Completed));
+        _db.UpsertPlan(CreateTestPlan(1801, "Plan B", project: "Framework", status: PlanStatus.Draft));
+        _db.UpsertPlan(CreateTestPlan(1802, "Plan C", project: "Tendril", status: PlanStatus.Draft));
+
+        var stats = _db.GetDashboardData("Tendril");
+        Assert.Equal(2, stats.TotalCount);
+        Assert.Equal(1, stats.CompletedCount);
+        Assert.Equal(1, stats.DraftCount);
+    }
+
+    [Fact]
+    public void GetDashboardData_FilteredStats_ReturnsCorrectCounts()
+    {
+        // Arrange: plans across two projects with varied statuses
+        _db.UpsertPlan(CreateTestPlan(1900, "Draft Tendril", status: PlanStatus.Draft, project: "Tendril"));
+        _db.UpsertPlan(CreateTestPlan(1901, "Completed Tendril", status: PlanStatus.Completed, project: "Tendril"));
+        _db.UpsertPlan(CreateTestPlan(1902, "Failed Tendril", status: PlanStatus.Failed, project: "Tendril"));
+        _db.UpsertPlan(CreateTestPlan(1903, "Review Framework", status: PlanStatus.ReadyForReview,
+            project: "Framework"));
+        _db.UpsertPlan(CreateTestPlan(1904, "InProgress Tendril", status: PlanStatus.Executing, project: "Tendril"));
+
+        // Add costs for avg cost calculation
+        _db.UpsertCosts(1901, [new("ExecutePlan", 50000, 2.00m, DateTime.UtcNow)]);
+        _db.UpsertCosts(1902, [new("ExecutePlan", 30000, 1.00m, DateTime.UtcNow)]);
+
+        // Act: filter to Tendril project
+        var stats = _db.GetDashboardData("Tendril");
+
+        // Assert
+        Assert.Equal(4, stats.TotalCount);
+        Assert.Equal(1, stats.DraftCount);
+        Assert.Equal(1, stats.CompletedCount);
+        Assert.Equal(1, stats.FailedCount);
+        Assert.Equal(1, stats.InProgressCount);
+        Assert.Equal(0, stats.ReviewCount);
+        // Avg cost: (2.00 + 1.00) / 2 plans = 1.50
+        Assert.Equal(1.50m, stats.AvgCostPerPlan);
+    }
+
+    [Fact]
+    public void GetDashboardData_DailyStats_Returns7DayWindow()
+    {
+        // Arrange: create plans with explicit Created/Updated dates
+        var today = DateTime.UtcNow.Date;
+
+        // Plan created today, completed today (Updated=today)
+        var todayPlan = new PlanFile(
+            new PlanMetadata(2000, "Tendril", "NiceToHave", "Today Plan", PlanStatus.Completed,
+                [], [], [], [], [], [],
+                today, today, null, null),
+            "# Content", "D:\\Plans\\02000-TodayPlan", "state: Completed");
+        _db.UpsertPlan(todayPlan);
+
+        // Plan created 2 days ago, still draft
+        var twoDaysAgoPlan = new PlanFile(
+            new PlanMetadata(2001, "Tendril", "NiceToHave", "Two Days Ago", PlanStatus.Draft,
+                [], [], [], [], [], [],
+                today.AddDays(-2), today.AddDays(-2), null, null),
+            "# Content", "D:\\Plans\\02001-TwoDaysAgo", "state: Draft");
+        _db.UpsertPlan(twoDaysAgoPlan);
+
+        // Act
+        var stats = _db.GetDashboardData(null);
+
+        // Assert: daily stats should have 7 entries
+        Assert.Equal(7, stats.DailyStats.Count);
+
+        // Today's entry should have 1 created and 1 completed
+        var todayStats = stats.DailyStats.First(d => d.Date == today);
+        Assert.True(todayStats.Created >= 1);
+        Assert.True(todayStats.Completed >= 1);
+
+        // 2 days ago should have 1 created
+        var twoDaysAgoStats = stats.DailyStats.First(d => d.Date == today.AddDays(-2));
+        Assert.True(twoDaysAgoStats.Created >= 1);
+
+        // All unfiltered, so project counts should include Tendril
+        Assert.Contains(stats.ProjectCounts, pc => pc.Project == "Tendril");
+    }
+
+    [Fact]
     public void Constructor_DetectsAndHandlesCorruptedDatabase()
     {
         var corruptDbPath = Path.Combine(Path.GetTempPath(), $"tendril-corrupt-{Guid.NewGuid()}.db");
@@ -437,6 +581,49 @@ public class PlanDatabaseServiceTests : IDisposable
     }
 
     [Fact]
+    public void SearchPlans_LikeFallbackFindsSourceUrl()
+    {
+        var metadata = new PlanMetadata(
+            1500, "Tendril", "NiceToHave", "Source URL Plan", PlanStatus.Draft,
+            new List<string> { "D:\\Repos\\Test" },
+            new List<string>(), new List<string>(),
+            new List<PlanVerificationEntry>(),
+            new List<string>(), new List<string>(),
+            DateTime.UtcNow, DateTime.UtcNow, null,
+            "https://github.com/Ivy-Interactive/Ivy-Framework/issues/42"
+        );
+        var plan = new PlanFile(metadata, "# Content", "D:\\Plans\\01500-SourceUrlPlan", "state: Draft");
+        _db.UpsertPlan(plan);
+
+        // "issues/42" is a substring — FTS5 won't match, should fall back to LIKE
+        var results = _db.SearchPlans("issues/42");
+        Assert.Single(results);
+        Assert.Equal("Source URL Plan", results[0].Title);
+    }
+
+    [Fact]
+    public void SearchPlans_LikeFallbackFindsInitialPrompt()
+    {
+        var metadata = new PlanMetadata(
+            1501, "Tendril", "NiceToHave", "InitialPrompt Plan", PlanStatus.Draft,
+            new List<string> { "D:\\Repos\\Test" },
+            new List<string>(), new List<string>(),
+            new List<PlanVerificationEntry>(),
+            new List<string>(), new List<string>(),
+            DateTime.UtcNow, DateTime.UtcNow,
+            "Fix the widget rendering/pipeline issue",
+            null
+        );
+        var plan = new PlanFile(metadata, "# Content", "D:\\Plans\\01501-InitialPromptPlan", "state: Draft");
+        _db.UpsertPlan(plan);
+
+        // "rendering/pipeline" contains a slash — FTS5 won't match as substring, should fall back to LIKE
+        var results = _db.SearchPlans("rendering/pipeline");
+        Assert.Single(results);
+        Assert.Equal("InitialPrompt Plan", results[0].Title);
+    }
+
+    [Fact]
     public void SearchPlans_PrefersFts5OverLike()
     {
         _db.UpsertPlan(CreateTestPlan(1500, "Widget Feature",
@@ -449,6 +636,81 @@ public class PlanDatabaseServiceTests : IDisposable
         Assert.Equal(2, results.Count);
         // Higher term frequency ranks first in FTS5
         Assert.Equal(1500, results[0].Id);
+    }
+
+    [Fact]
+    public void SearchPlans_SanitizesSlashForFts5()
+    {
+        _db.UpsertPlan(CreateTestPlan(1600, "Fix issues for release",
+            latestContent: "Resolved 42 open issues before release"));
+
+        // "issues/42" contains a slash — sanitizer converts to "issues 42"
+        // FTS5 implicit AND matches both "issues" and "42" from title/content
+        var results = _db.SearchPlans("issues/42");
+        Assert.Single(results);
+        Assert.Equal("Fix issues for release", results[0].Title);
+    }
+
+    [Fact]
+    public void SearchPlans_SanitizesUnbalancedQuoteForFts5()
+    {
+        _db.UpsertPlan(CreateTestPlan(1600, "Button widget feature",
+            latestContent: "Add a button widget to the dashboard"));
+
+        // Unbalanced quote should be stripped, leaving "button widget"
+        var results = _db.SearchPlans("button\"widget");
+        Assert.Single(results);
+        Assert.Equal("Button widget feature", results[0].Title);
+    }
+
+    [Fact]
+    public void SearchPlans_SanitizesBareAsterisk()
+    {
+        _db.UpsertPlan(CreateTestPlan(1600, "Button component",
+            latestContent: "Add a button component"));
+
+        // Bare asterisk should be stripped, leaving "button"
+        var results = _db.SearchPlans("* button");
+        Assert.Single(results);
+        Assert.Equal("Button component", results[0].Title);
+    }
+
+    [Fact]
+    public void SanitizeFts5Query_ReplacesPathSeparators()
+    {
+        Assert.Equal("issues 42", PlanDatabaseService.SanitizeFts5Query("issues/42"));
+        Assert.Equal("path to file", PlanDatabaseService.SanitizeFts5Query("path\\to\\file"));
+    }
+
+    [Fact]
+    public void SanitizeFts5Query_RemovesGroupingChars()
+    {
+        Assert.Equal("hello world", PlanDatabaseService.SanitizeFts5Query("(hello) world^"));
+    }
+
+    [Fact]
+    public void SanitizeFts5Query_HandlesBareAsterisk()
+    {
+        Assert.Equal("button", PlanDatabaseService.SanitizeFts5Query("* button"));
+        // Prefix wildcard is preserved
+        Assert.Equal("button*", PlanDatabaseService.SanitizeFts5Query("button*"));
+    }
+
+    [Fact]
+    public void SanitizeFts5Query_BalancesQuotes()
+    {
+        // Odd quotes — all removed
+        Assert.Equal("button widget", PlanDatabaseService.SanitizeFts5Query("button\"widget"));
+        // Even quotes — preserved
+        Assert.Equal("\"button widget\"", PlanDatabaseService.SanitizeFts5Query("\"button widget\""));
+    }
+
+    [Fact]
+    public void SanitizeFts5Query_PreservesBooleanOperators()
+    {
+        Assert.Equal("button OR grid", PlanDatabaseService.SanitizeFts5Query("button OR grid"));
+        Assert.Equal("button AND widget", PlanDatabaseService.SanitizeFts5Query("button AND widget"));
+        Assert.Equal("NOT broken", PlanDatabaseService.SanitizeFts5Query("NOT broken"));
     }
 
     [Fact]
@@ -614,6 +876,55 @@ public class PlanDatabaseServiceTests : IDisposable
     }
 
     [Fact]
+    public void UpsertPlan_WithSourceUrl_PreservesValue()
+    {
+        var metadata = new PlanMetadata(
+            1600, "Tendril", "NiceToHave", "Source URL Plan", PlanStatus.Draft,
+            new List<string>(), new List<string>(), new List<string>(),
+            new List<PlanVerificationEntry>(), new List<string>(), new List<string>(),
+            DateTime.UtcNow.AddDays(-1), DateTime.UtcNow, null,
+            "https://github.com/Ivy-Interactive/Ivy-Framework/pull/42"
+        );
+        var plan = new PlanFile(metadata, "# Content", "D:\\Plans\\01600-SourceUrlPlan", "state: Draft");
+        _db.UpsertPlan(plan);
+
+        var result = _db.GetPlanById(1600);
+        Assert.NotNull(result);
+        Assert.Equal("https://github.com/Ivy-Interactive/Ivy-Framework/pull/42", result.SourceUrl);
+    }
+
+    [Fact]
+    public void UpsertPlan_WithNullSourceUrl_ReturnsNull()
+    {
+        var plan = CreateTestPlan(1601, "No Source URL Plan");
+        _db.UpsertPlan(plan);
+
+        var result = _db.GetPlanById(1601);
+        Assert.NotNull(result);
+        Assert.Null(result.SourceUrl);
+    }
+
+    [Fact]
+    public void Migration_004_AddsSourceUrlColumn()
+    {
+        // The _db created in constructor already ran all migrations including 004.
+        // Verify SourceUrl column exists by inserting and querying a plan with it.
+        var metadata = new PlanMetadata(
+            1602, "Tendril", "NiceToHave", "Migration Test", PlanStatus.Draft,
+            new List<string>(), new List<string>(), new List<string>(),
+            new List<PlanVerificationEntry>(), new List<string>(), new List<string>(),
+            DateTime.UtcNow, DateTime.UtcNow, null,
+            "https://github.com/test/repo/issues/99"
+        );
+        var plan = new PlanFile(metadata, "# Test", "D:\\Plans\\01602-MigrationTest", "state: Draft");
+        _db.UpsertPlan(plan);
+
+        var result = _db.GetPlanById(1602);
+        Assert.NotNull(result);
+        Assert.Equal("https://github.com/test/repo/issues/99", result.SourceUrl);
+    }
+
+    [Fact]
     public void Migration_003_CreatesJobsTable()
     {
         // The _db created in constructor already ran all migrations.
@@ -631,5 +942,126 @@ public class PlanDatabaseServiceTests : IDisposable
         var jobs = _db.GetRecentJobs();
         Assert.Single(jobs);
         Assert.Equal("migration-test", jobs[0].Id);
+    }
+
+    [Fact]
+    public void ConcurrentReads_DoNotBlockEachOther()
+    {
+        // Seed some data so reads return non-empty results
+        for (var i = 0; i < 10; i++)
+            _db.UpsertPlan(CreateTestPlan(2000 + i, $"Concurrent Plan {i}",
+                status: i % 2 == 0 ? PlanStatus.Draft : PlanStatus.Completed));
+
+        const int threadCount = 10;
+        var barrier = new Barrier(threadCount);
+        var exceptions = new System.Collections.Concurrent.ConcurrentBag<Exception>();
+        var threads = new Thread[threadCount];
+
+        for (var t = 0; t < threadCount; t++)
+        {
+            var threadIndex = t;
+            threads[t] = new Thread(() =>
+            {
+                try
+                {
+                    barrier.SignalAndWait(TimeSpan.FromSeconds(5));
+                    // Alternate between GetPlans and ComputePlanCounts
+                    if (threadIndex % 2 == 0)
+                    {
+                        var plans = _db.GetPlans();
+                        Assert.Equal(10, plans.Count);
+                    }
+                    else
+                    {
+                        var counts = _db.ComputePlanCounts();
+                        Assert.True(counts.Drafts + counts.ReadyForReview + counts.Failed + counts.Icebox >= 0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+            });
+        }
+
+        foreach (var t in threads) t.Start();
+        foreach (var t in threads) Assert.True(t.Join(TimeSpan.FromSeconds(10)), "Thread timed out — possible deadlock");
+
+        Assert.Empty(exceptions);
+    }
+
+    [Fact]
+    public void GetDashboardData_EmptyDatabase_ReturnsZeroCounts()
+    {
+        var stats = _db.GetDashboardData(null);
+
+        Assert.Equal(0, stats.TotalCount);
+        Assert.Equal(0, stats.DraftCount);
+        Assert.Equal(0, stats.InProgressCount);
+        Assert.Equal(0, stats.ReviewCount);
+        Assert.Equal(0, stats.CompletedCount);
+        Assert.Equal(0, stats.FailedCount);
+        Assert.Equal(0m, stats.AvgCostPerPlan);
+        Assert.Equal(7, stats.DailyStats.Count);
+        Assert.All(stats.DailyStats, d =>
+        {
+            Assert.Equal(0, d.Created);
+            Assert.Equal(0, d.Completed);
+            Assert.Equal(0, d.Failed);
+            Assert.Equal(0, d.PrsMerged);
+            Assert.Equal(0m, d.Cost);
+            Assert.Equal(0, d.Tokens);
+        });
+        Assert.Empty(stats.ProjectCounts);
+    }
+
+    [Fact]
+    public void GetDashboardData_ProjectFilterNoMatch_ReturnsZeroCounts()
+    {
+        _db.UpsertPlan(CreateTestPlan(2100, "Tendril Plan", project: "Tendril"));
+
+        var stats = _db.GetDashboardData("NonExistent");
+
+        Assert.Equal(0, stats.TotalCount);
+        Assert.Equal(0, stats.DraftCount);
+        Assert.Equal(0, stats.InProgressCount);
+        Assert.Equal(0, stats.ReviewCount);
+        Assert.Equal(0, stats.CompletedCount);
+        Assert.Equal(0, stats.FailedCount);
+        Assert.Equal(0m, stats.AvgCostPerPlan);
+        Assert.Equal(7, stats.DailyStats.Count);
+        Assert.All(stats.DailyStats, d =>
+        {
+            Assert.Equal(0, d.Created);
+            Assert.Equal(0, d.Completed);
+            Assert.Equal(0, d.Failed);
+            Assert.Equal(0, d.PrsMerged);
+            Assert.Equal(0m, d.Cost);
+            Assert.Equal(0, d.Tokens);
+        });
+    }
+
+    [Fact]
+    public void SearchPlans_FindsBySourceUrl()
+    {
+        var metadata = new PlanMetadata(
+            1700, "Tendril", "NiceToHave", "Plan With Source", PlanStatus.Draft,
+            new List<string>(), new List<string>(), new List<string>(),
+            new List<PlanVerificationEntry>(), new List<string>(), new List<string>(),
+            DateTime.UtcNow.AddDays(-1), DateTime.UtcNow, null,
+            "https://github.com/Ivy-Interactive/Ivy-Framework/issues/42"
+        );
+        var plan = new PlanFile(metadata, "# Some content", "D:\\Plans\\01700-PlanWithSource", "state: Draft");
+        _db.UpsertPlan(plan);
+
+        // Search by term from the URL (FTS5 tokenizes on punctuation)
+        var results = _db.SearchPlans("Interactive");
+        Assert.Single(results);
+        Assert.Equal("Plan With Source", results[0].Title);
+
+        // Search by another URL token
+        results = _db.SearchPlans("issues");
+        Assert.Single(results);
+        Assert.Equal(1700, results[0].Id);
     }
 }

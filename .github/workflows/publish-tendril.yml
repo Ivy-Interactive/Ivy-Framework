@@ -8,10 +8,6 @@ on:
   push:
     tags: ['tendril/v*']
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to publish (e.g. 1.0.2). Leave empty to use Directory.Build.props version.'
-        required: false
 
 jobs:
   publish-nuget-npm:
@@ -54,18 +50,19 @@ jobs:
           distribution: microsoft
           java-version: 17
 
+      - name: Install PowerShell
+        run: |
+          dotnet tool install --global PowerShell
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
       - name: Restore
         run: dotnet restore
 
       - name: Determine version
         id: version
         run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
-          elif [[ "$GITHUB_REF" == refs/tags/tendril/v* ]]; then
-            TAG_VERSION="${GITHUB_REF#refs/tags/tendril/v}"
-            echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
-          fi
+          VERSION=$(grep -oP "(?<=<Version>)[^<]+" tendril/Directory.Build.props || echo "1.0.0")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Pack NuGet
         run: |
@@ -80,6 +77,27 @@ jobs:
         id: login
         with:
           user: rorychatt-ivy
+
+      - name: Clean NuGet output before signing
+        run: |
+          find ./nupkg -mindepth 1 -maxdepth 1 -not -name "*.nupkg" -exec rm -rf {} +
+          mkdir -p ./nupkg_signed
+
+      - name: Sign NuGet packages
+        uses: sslcom/esigner-codesign@develop
+        with:
+          command: batch_sign
+          username: ${{ secrets.SSL_COM_USERNAME }}
+          password: ${{ secrets.SSL_COM_PASSWORD }}
+          credential_id: ${{ secrets.SSL_COM_CREDENTIAL_ID }}
+          totp_secret: ${{ secrets.SSL_COM_TOTP_SECRET }}
+          malware_block: true
+          dir_path: src/nupkg
+          output_path: src/nupkg_signed
+
+      - name: Overwrite origin with signed nuget
+        run: |
+          cp -f ./nupkg_signed/*.nupkg ./nupkg/
 
       - name: Push to NuGet
         run: dotnet nuget push ./nupkg/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
@@ -157,31 +175,42 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      - name: Install PowerShell
+        run: |
+          dotnet tool install --global PowerShell
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
       - name: Restore
         run: dotnet restore
 
-      - name: Install vpk tool
-        run: dotnet tool install -g vpk
+      - name: Install vpk tool and dependencies
+        run: |
+          dotnet tool install -g vpk
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo apt-get update && sudo apt-get install -y libfuse2
+          fi
 
       - name: Determine version
         id: version
         shell: bash
         run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
-          elif [[ "$GITHUB_REF" == refs/tags/tendril/v* ]]; then
-            TAG_VERSION="${GITHUB_REF#refs/tags/tendril/v}"
-            echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          VERSION=$(grep -oP "(?<=<Version>)[^<]+" tendril/Directory.Build.props || echo "1.0.0")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set Icon Path
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            echo "ICON_PATH=tendril/Ivy.Tendril/Assets/Tendril.ico" >> $GITHUB_ENV
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            echo "ICON_PATH=tendril/Ivy.Tendril/Assets/Tendril.icns" >> $GITHUB_ENV
           else
-            # Try to get version from Directory.Build.props if not tagged
-            VERSION=$(grep -oP "(?<=<Version>)[^<]+" tendril/Directory.Build.props || echo "1.0.0")
-            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "ICON_PATH=tendril/Ivy.Tendril/Assets/Tendril.png" >> $GITHUB_ENV
           fi
 
       - name: Publish Desktop Binary
         run: |
           export CARGO_BUILD_TARGET=${{ matrix.target }}
-          dotnet publish tendril/Ivy.Tendril.Desktop/Ivy.Tendril.Desktop.csproj \
+          dotnet publish tendril/Ivy.Tendril/Ivy.Tendril.csproj \
             --configuration Release \
             --runtime ${{ matrix.rid }} \
             --output ./publish/desktop/${{ matrix.rid }} \
@@ -192,9 +221,9 @@ jobs:
       - name: Pack Installer (Velopack)
         run: |
           export PATH="$PATH:$HOME/.dotnet/tools"
-          EXE_NAME="Ivy.Tendril.Desktop"
+          EXE_NAME="Ivy.Tendril"
           if [[ "${{ matrix.os }}" == windows-* ]]; then
-            EXE_NAME="Ivy.Tendril.Desktop.exe"
+            EXE_NAME="Ivy.Tendril.exe"
           fi
           
           vpk pack \
@@ -202,13 +231,46 @@ jobs:
             --packVersion ${{ steps.version.outputs.version }} \
             --packDir ./publish/desktop/${{ matrix.rid }} \
             --mainExe $EXE_NAME \
-            --outputDir ./releases
+            --outputDir ./releases \
+            --icon "$ICON_PATH" \
+            $( [[ "${{ matrix.os }}" != "ubuntu-latest" ]] && echo "--noPortable" ) \
+            --delta None \
+            $( [[ "${{ matrix.rid }}" == osx-* ]] && echo "--bundleId com.ivy.tendril" )
+
+      - name: Prepare Windows installer for signing
+        if: startsWith(matrix.rid, 'win-')
+        run: |
+          mkdir -p unsigned_releases signed_releases
+          find releases -maxdepth 1 -type f \( -name "*.exe" \) -exec cp {} unsigned_releases/ \;
+
+      - name: Sign Windows installer
+        if: startsWith(matrix.rid, 'win-')
+        uses: sslcom/esigner-codesign@develop
+        with:
+          command: batch_sign
+          username: ${{ secrets.SSL_COM_USERNAME }}
+          password: ${{ secrets.SSL_COM_PASSWORD }}
+          credential_id: ${{ secrets.SSL_COM_CREDENTIAL_ID }}
+          totp_secret: ${{ secrets.SSL_COM_TOTP_SECRET }}
+          malware_block: true
+          dir_path: src/unsigned_releases
+          output_path: src/signed_releases
+
+      - name: Overwrite origin with signed installer
+        if: startsWith(matrix.rid, 'win-')
+        run: |
+          cp -f signed_releases/*.exe releases/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: tendril-installer-${{ matrix.rid }}
-          path: src/releases/*
+          path: |
+            src/releases/*.exe
+            src/releases/*.pkg
+            src/releases/*.AppImage
+            src/releases/*.nupkg
+            src/releases/RELEASES
 
   release:
     needs: [publish-nuget-npm, publish-desktop]
@@ -233,3 +295,49 @@ jobs:
             --title "Tendril $TAG_NAME" \
             --generate-notes \
             ./*
+
+  deploy-docs:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
+      APP_SERVICE_NAME: ${{ vars.TENDRIL_DOCS_SERVICE_NAME }}
+      ACR_NAME: ${{ vars.ACR_NAME }}
+      ACR_LOGIN_SERVER: ${{ vars.ACR_NAME }}.azurecr.io
+      IMAGE_NAME: ${{ vars.TENDRIL_DOCS_IMAGE_NAME }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 'Az login with OIDC'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: 'ACR Login'
+        run: az acr login --name $ACR_NAME
+
+      - name: 'Build and Push'
+        run: |
+          docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} \
+            -f .github/docker/Dockerfile.tendril-docs .
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
+
+      - name: 'Deploy to Preproduction Slot'
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.APP_SERVICE_NAME }}
+          images: '${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}'
+          slot-name: 'preproduction'
+
+      - name: 'Swap Preproduction with Production'
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az webapp deployment slot swap \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --name ${{ env.APP_SERVICE_NAME }} \
+              --slot preproduction \
+              --target-slot production

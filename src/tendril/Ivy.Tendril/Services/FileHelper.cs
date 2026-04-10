@@ -128,6 +128,32 @@ internal static class FileHelper
             }
     }
 
+    /// <summary>
+    ///     Streams lines from a file one at a time without loading the entire file into memory.
+    ///     Uses the same FileShare.ReadWrite and retry semantics as ReadAllLines.
+    /// </summary>
+    public static IEnumerable<string> EnumerateLines(string path)
+    {
+        FileStream? stream = null;
+        for (var attempt = 0; ; attempt++)
+            try
+            {
+                stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                break;
+            }
+            catch (IOException) when (attempt < MaxRetries)
+            {
+                Thread.Sleep(RetryDelaysMs[attempt]);
+            }
+
+        using (stream)
+        using (var reader = new StreamReader(stream!))
+        {
+            while (reader.ReadLine() is { } line)
+                yield return line;
+        }
+    }
+
     public static void AppendAllText(string path, string contents)
     {
         for (var attempt = 0; ; attempt++)

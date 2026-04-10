@@ -25,7 +25,8 @@ public class TableApp : SampleBase
             new Tab("Table Sizes", new TableSizesExample()),
             new Tab("Column Widths", new ColumnWidthsExample()),
             new Tab("Alignment", new AlignmentExample()),
-            new Tab("Progress Builder", new ProgressBuilderExample())
+            new Tab("Progress Builder", new ProgressBuilderExample()),
+            new Tab("Image Builder", new ImageBuilderExample())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -374,5 +375,84 @@ public class ProgressBuilderExample : ViewBase
                 .ColumnWidth(e => e.Name, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Progress, Size.Fraction(0.4f))
                 .ColumnWidth(e => e.Priority, Size.Fraction(0.2f));
+    }
+}
+
+public class ImageBuilderExample : ViewBase
+{
+    public override object? Build()
+    {
+        var team = new[]
+        {
+            new { Name = "Alice Johnson", Role = "Engineer", Avatar = "https://picsum.photos/seed/alice/200/200" },
+            new { Name = "Bob Smith", Role = "Designer", Avatar = "https://picsum.photos/seed/bob/200/200" },
+            new { Name = "Charlie Brown", Role = "PM", Avatar = "https://picsum.photos/seed/charlie/200/200" },
+            new { Name = "Diana Prince", Role = "Lead", Avatar = "https://picsum.photos/seed/diana/200/200" },
+            new { Name = "Eve Williams", Role = "QA", Avatar = "https://picsum.photos/seed/eve/200/200" }
+        };
+
+        var products = new[]
+        {
+            new { Sku = "PRD-001", Title = "T-Shirt", Price = 29.99, Thumbnail = "https://picsum.photos/seed/tshirt/200/200" },
+            new { Sku = "PRD-002", Title = "Jeans", Price = 59.99, Thumbnail = "https://picsum.photos/seed/jeans/200/200" },
+            new { Sku = "PRD-003", Title = "Sneakers", Price = 89.99, Thumbnail = "https://picsum.photos/seed/sneakers/200/200" },
+            new { Sku = "PRD-004", Title = "Hat", Price = 19.99, Thumbnail = "https://picsum.photos/seed/hat/200/200" }
+        };
+
+        var nullTest = new[]
+        {
+            new { Name = "With Image", ImageUrl = (string?)"https://picsum.photos/seed/test1/200/200" },
+            new { Name = "Null Image", ImageUrl = (string?)null },
+            new { Name = "Empty Image", ImageUrl = (string?)"" },
+            new { Name = "With Image", ImageUrl = (string?)"https://picsum.photos/seed/test2/200/200" }
+        };
+
+        return Layout.Vertical()
+            | Text.H3("Image Builder for Table Cells")
+            | Text.P("Use .Builder(column, f => f.Image()) to render string values as inline images.")
+
+            | Text.Label("Example 1: Basic Image Builder (default size 8 units = 32px)")
+            | team
+                .ToTable()
+                .Width(Size.Full())
+                .Builder(e => e.Avatar, f => f.Image())
+                .ColumnWidth(e => e.Name, Size.Fraction(0.3f))
+                .ColumnWidth(e => e.Role, Size.Fraction(0.3f))
+                .ColumnWidth(e => e.Avatar, Size.Fraction(0.4f))
+
+            | Text.Label("Example 2: Custom Size with Size API")
+            | Text.P("Larger thumbnails using .Width(Size.Units(12)).Height(Size.Units(12))")
+            | products
+                .ToTable()
+                .Width(Size.Full())
+                .Builder(e => e.Thumbnail, f => f.Image()
+                    .Width(Size.Units(12))
+                    .Height(Size.Units(12)))
+                .ColumnWidth(e => e.Sku, Size.Fraction(0.15f))
+                .ColumnWidth(e => e.Title, Size.Fraction(0.3f))
+                .ColumnWidth(e => e.Price, Size.Fraction(0.15f))
+                .ColumnWidth(e => e.Thumbnail, Size.Fraction(0.4f))
+
+            | Text.Label("Example 3: ObjectFit.Cover (crop to fill)")
+            | Text.P("Using .ObjectFit(ImageFit.Cover) to fill the image area")
+            | team
+                .ToTable()
+                .Width(Size.Full())
+                .Builder(e => e.Avatar, f => f.Image()
+                    .Width(Size.Units(10))
+                    .Height(Size.Units(10))
+                    .ObjectFit(ImageFit.Cover))
+                .ColumnWidth(e => e.Name, Size.Fraction(0.3f))
+                .ColumnWidth(e => e.Role, Size.Fraction(0.3f))
+                .ColumnWidth(e => e.Avatar, Size.Fraction(0.4f))
+
+            | Text.Label("Example 4: Null/Empty Handling")
+            | Text.P("Null or empty string values render as empty cells")
+            | nullTest
+                .ToTable()
+                .Width(Size.Full())
+                .Builder(e => e.ImageUrl!, f => f.Image())
+                .ColumnWidth(e => e.Name, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.ImageUrl!, Size.Fraction(0.6f));
     }
 }

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Ivy.Tendril.Apps;
 
 namespace Ivy.Tendril.Services;
@@ -60,12 +59,7 @@ public static class FileLinkHelper
             ? new HeaderLayout(
                 new Button($"Open in {editorLabel}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
                 {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = editorCommand,
-                        Arguments = $"\"{filePath}\"",
-                        UseShellExecute = true
-                    });
+                    PlatformHelper.OpenInEditor(editorCommand, filePath);
                 }),
                 sheetContent
             )

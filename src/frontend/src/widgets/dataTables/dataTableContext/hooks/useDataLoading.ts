@@ -3,7 +3,7 @@ import * as arrow from "apache-arrow";
 import { Filter, SortOrder } from "@/services/grpcTableService";
 import { DataColumn, DataTableConnection, DataTableConfig } from "../../types/types";
 import { fetchTableData } from "../../utils/tableDataFetcher";
-import { parseSize } from "../utils/parseSize";
+import { parseSize } from "../utils/columnSizing";
 
 interface UseDataLoadingProps {
   connection: DataTableConnection;
@@ -17,7 +17,7 @@ interface UseDataLoadingProps {
   setVisibleRows: (rows: number) => void;
   setError: (error: string | null) => void;
   initializeColumnOrder: (columns: DataColumn[]) => void;
-  initializeColumnWidths: (columns: DataColumn[]) => void;
+  initializeColumnWidths: (columns: DataColumn[], arrowTable?: arrow.Table | null) => void;
   initializeSortFromColumns: (columns: DataColumn[]) => boolean;
 }
 
@@ -93,6 +93,8 @@ export const useDataLoading = ({
           const parsedWidth = parseSize(propCol.width);
           return {
             ...propCol,
+            // Preserve original Size string for grow factor extraction in convertToGridColumns
+            originalWidth: typeof propCol.width === "string" ? propCol.width : undefined,
             // Use parsed width from prop, or calculated width from Arrow, or default
             width: parsedWidth || parseSize(arrowCol?.width) || 150,
             // IMPORTANT: Keep type from propCol, never override with Arrow's inferred type
@@ -122,8 +124,8 @@ export const useDataLoading = ({
           return;
         }
 
-        // Initialize column widths only if not already set (first load)
-        initializeColumnWidths(mergedColumns);
+        // Initialize column widths, passing Arrow data for content-based sizing
+        initializeColumnWidths(mergedColumns, result.arrowTable);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to load data";
         setError(errorMessage);
@@ -196,6 +198,7 @@ export const useDataLoading = ({
     activeSort,
     batchSize,
     config.loadAllRows,
+    columnsProp,
     setVisibleRows,
     setError,
     arrowTableRef,

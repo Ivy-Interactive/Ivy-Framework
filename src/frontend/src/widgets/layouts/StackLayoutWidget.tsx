@@ -20,6 +20,8 @@ import {
 } from "@/lib/styles";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ImageOverlayProvider } from "@/components/markdown/ImageOverlayContext";
+import { type Responsive, resolveResponsive } from "@/hooks/use-responsive";
+import { useCurrentBreakpoint } from "@/hooks/use-breakpoint-context";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -44,6 +46,10 @@ interface StackLayoutWidgetProps {
   borderStyle?: BorderStyle;
   borderThickness?: string;
   aspectRatio?: number;
+  responsiveOrientation?: Responsive<Orientation>;
+  responsiveRowGap?: Responsive<number>;
+  responsiveColumnGap?: Responsive<number>;
+  responsivePadding?: Responsive<string>;
 }
 
 export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
@@ -67,13 +73,33 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
   borderStyle = "None",
   borderThickness,
   aspectRatio,
+  responsiveOrientation,
+  responsiveRowGap,
+  responsiveColumnGap,
+  responsivePadding,
 }) => {
+  const bp = useCurrentBreakpoint();
+
+  // Resolve layout-specific responsive values with mobile-first cascading
+  const resolvedOrientation = responsiveOrientation
+    ? resolveResponsive(responsiveOrientation, bp, orientation)
+    : orientation;
+  const resolvedRowGap = responsiveRowGap
+    ? resolveResponsive(responsiveRowGap, bp, rowGap)
+    : rowGap;
+  const resolvedColumnGap = responsiveColumnGap
+    ? resolveResponsive(responsiveColumnGap, bp, columnGap)
+    : columnGap;
+  const resolvedPadding = responsivePadding
+    ? resolveResponsive(responsivePadding, bp, padding as string)
+    : padding;
+
   const baseStyles: React.CSSProperties = {
-    ...getPadding(padding),
+    ...getPadding(resolvedPadding),
     ...getMargin(margin),
-    ...getRowGap(rowGap),
-    ...getColumnGap(columnGap),
-    ...getAlign(orientation, alignContent),
+    ...getRowGap(resolvedRowGap),
+    ...getColumnGap(resolvedColumnGap),
+    ...getAlign(resolvedOrientation, alignContent),
     ...getWidth(width),
     ...getHeight(height),
     ...getAspectRatio(aspectRatio),

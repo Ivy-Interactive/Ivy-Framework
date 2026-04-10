@@ -10,8 +10,8 @@ public static class MenuOrder
     public const int Recommendations = 20;
     public const int Drafts = 30;
     public const int Review = 40;
-    public const int PullRequests = 50;
-    public const int Jobs = 60;
+    public const int Jobs = 50;
+    public const int PullRequests = 60;
     public const int Icebox = 70;
     public const int Claude = 80;
     public const int Trash = 90;

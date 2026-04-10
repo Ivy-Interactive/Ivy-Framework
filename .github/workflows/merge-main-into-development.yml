@@ -1,0 +1,70 @@
+# Merges main into the development branch and pushes. Then triggers Sliplane staging deploys via API.
+# Runs every 2 hours on a schedule (UTC), on push to `development`, or manually. On failure, a short summary is added to the workflow run.
+
+name: Merge main into development
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - development
+
+concurrency:
+  group: merge-main-into-development
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  merge-and-redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout development
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: development
+
+      - name: Merge main into development and push
+        run: |
+          set -euo pipefail
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git fetch origin main
+          git merge origin/main --no-edit
+          git push origin development
+
+      - name: Deploy docs (Sliplane API)
+        env:
+          SLIPLANE_API_TOKEN: ${{ secrets.SLIPLANE_API_TOKEN }}
+          DEPLOY_URL: ${{ secrets.SLIPLANE_DOCS_DEPLOY_URL }}
+        run: |
+          curl -fsS -X POST "$DEPLOY_URL" \
+            -H "Authorization: Bearer ${SLIPLANE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"tag":"latest"}'
+
+      - name: Deploy samples (Sliplane API)
+        env:
+          SLIPLANE_API_TOKEN: ${{ secrets.SLIPLANE_API_TOKEN }}
+          DEPLOY_URL: ${{ secrets.SLIPLANE_SAMPLES_DEPLOY_URL }}
+        run: |
+          curl -fsS -X POST "$DEPLOY_URL" \
+            -H "Authorization: Bearer ${SLIPLANE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"tag":"latest"}'
+
+      - name: Write merge failure summary
+        if: failure()
+        run: |
+          {
+            echo "## Merge main → development failed"
+            echo ""
+            echo "A previous step failed (merge conflict, push rejected, or Sliplane deploy error)."
+            echo "For merge conflicts: resolve locally or open a PR into \`development\`, then push."
+            echo ""
+            echo "Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } >> "$GITHUB_STEP_SUMMARY"

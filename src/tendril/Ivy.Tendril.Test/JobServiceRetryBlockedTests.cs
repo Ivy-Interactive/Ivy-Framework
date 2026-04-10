@@ -242,6 +242,7 @@ public class JobServiceRetryBlockedTests
         }
 
         public string PlansDirectory { get; }
+        public bool IsDatabaseReady => true;
 
         public void RecoverStuckPlans()
         {
@@ -320,7 +321,7 @@ public class JobServiceRetryBlockedTests
             return 0;
         }
 
-        public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7)
+        public List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7, string? projectFilter = null)
         {
             return [];
         }

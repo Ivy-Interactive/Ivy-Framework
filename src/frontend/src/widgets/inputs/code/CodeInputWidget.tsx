@@ -199,7 +199,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         className={cn(
           "h-full",
           "border border-input shadow-sm rounded-field",
-          "dark:border-white/10",
+          "dark:bg-white/5 dark:border-white/10",
           invalid && inputStyles.invalid,
           disabled && "opacity-50 cursor-not-allowed",
         )}

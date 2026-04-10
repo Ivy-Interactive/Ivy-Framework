@@ -1,17 +1,18 @@
-import React, { memo, useMemo, lazy, Suspense } from "react";
+import React, { memo, useMemo, Suspense } from "react";
 import { cn } from "@/lib/utils";
 import { createPrismTheme } from "@/lib/prismTheme";
 import { useTypography } from "@/contexts/TypographyContext";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
-const SyntaxHighlighter = lazy(() =>
+const SyntaxHighlighter = lazyWithRetry(() =>
   import("react-syntax-highlighter").then((mod) => ({ default: mod.Prism })),
 );
 
-const MermaidRenderer = lazy(() => import("../MermaidRenderer"));
-const GraphvizRenderer = lazy(() => import("../GraphvizRenderer"));
+const MermaidRenderer = lazyWithRetry(() => import("../MermaidRenderer"));
+const GraphvizRenderer = lazyWithRetry(() => import("../GraphvizRenderer"));
 
 interface CodeBlockProps {
   className?: string;

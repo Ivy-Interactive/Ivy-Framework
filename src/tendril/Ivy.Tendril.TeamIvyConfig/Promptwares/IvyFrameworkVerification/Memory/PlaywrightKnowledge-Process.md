@@ -13,7 +13,8 @@
 
 ## App Lifecycle in Tests
 
-- `beforeAll`: find free port via `net.createServer()`, spawn `dotnet run -- --port <port>`, wait for HTTP 200
+- `beforeAll`: find free port via `net.createServer()`, spawn `dotnet run -- --port <port>`, wait for server ready
+- **Health check must accept any HTTP status** — with `UseAppShell()`, the root URL returns HTTP 500 (no default app). Accept any status `< 600` to confirm server is up, not just 200
 - `afterAll`: kill the spawned process
 - `beforeEach`: navigate to `http://localhost:<port>`
 - Use `cwd: process.cwd().replace(/[/\\]\.ivy[/\\]tests$/, "")` to resolve project root from test dir

@@ -4,7 +4,7 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Pull Requests", icon: Icons.GitPullRequest, group: new[] { "Tools" }, order: MenuOrder.PullRequests)]
+[App(title: "Pull Requests", icon: Icons.GitPullRequest, group: ["Apps"], order: MenuOrder.PullRequests)]
 public class PullRequestApp : ViewBase
 {
     public override object Build()
@@ -15,11 +15,52 @@ public class PullRequestApp : ViewBase
         var showPlan = UseState<string?>(null);
         var openFile = UseState<string?>(null);
         var config = UseService<IConfigService>();
+        var githubService = UseService<IGithubService>();
+        var statusQuery = UseQuery<Dictionary<string, string>, string>(
+            "pr-statuses",
+            async (_, ct) =>
+            {
+                var allPlans = planService.GetPlans()
+                    .Where(p => p.Prs.Count > 0)
+                    .ToList();
+
+                var keys = allPlans
+                    .SelectMany(p => p.Prs.Where(IsValidUrl))
+                    .Select(ExtractRepo)
+                    .Distinct()
+                    .ToList();
+
+                var tasks = keys.Select(async repoKey =>
+                {
+                    var parts = repoKey.Split('/');
+                    if (parts.Length != 2) return new Dictionary<string, string>();
+                    try
+                    {
+                        return await githubService.GetPrStatusesAsync(parts[0], parts[1]);
+                    }
+                    catch
+                    {
+                        return new Dictionary<string, string>();
+                    }
+                }).ToList();
+
+                var results = await Task.WhenAll(tasks);
+                var allStatuses = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var statuses in results)
+                    foreach (var kvp in statuses)
+                        allStatuses[kvp.Key] = kvp.Value;
+
+                return allStatuses;
+            },
+            initialValue: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        );
 
         var plans = planService.GetPlans()
             .Where(p => p.Prs.Count > 0)
             .OrderByDescending(p => p.Id)
             .ToList();
+
+        var prStatuses = statusQuery.Value ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         var rows = plans.SelectMany(plan =>
         {
@@ -32,6 +73,7 @@ public class PullRequestApp : ViewBase
                 Id = $"{plan.Id}-{i}",
                 PlanId = $"{plan.Id:D5}",
                 Repository = ExtractRepo(pr),
+                Status = prStatuses.GetValueOrDefault(pr, ""),
                 Pr = pr,
                 Plan = $"#{plan.Id:D5} {plan.Title}",
                 Cost = cost,
@@ -46,15 +88,26 @@ public class PullRequestApp : ViewBase
             .Width(Size.Full())
             .Height(Size.Full())
             .Header(t => t.Repository, "Repository")
+            .Header(t => t.Status, "Status")
             .Header(t => t.Cost, "Cost")
             .Header(t => t.Tokens, "Tokens")
             .Header(t => t.Pr, "PR")
             .Header(t => t.Plan, "Plan")
             .Width(t => t.Repository, Size.Fraction(1 / 3f))
+            .Width(t => t.Status, Size.Px(90))
             .Width(t => t.Pr, Size.Fraction(1 / 3f))
             .Width(t => t.Plan, Size.Fraction(1 / 3f))
             .Width(t => t.Cost, Size.Px(90))
             .Width(t => t.Tokens, Size.Px(90))
+            .Renderer(t => t.Status, new LabelsDisplayRenderer
+            {
+                BadgeColorMapping = new Dictionary<string, string>
+                {
+                    ["Open"] = nameof(Colors.Green),
+                    ["Merged"] = nameof(Colors.Purple),
+                    ["Closed"] = nameof(Colors.Zinc)
+                }
+            })
             .Renderer(t => t.Plan, new LinkDisplayRenderer())
             .Renderer(t => t.Pr, new LinkDisplayRenderer())
             .SortDirection(t => t.PlanId, SortDirection.Descending)

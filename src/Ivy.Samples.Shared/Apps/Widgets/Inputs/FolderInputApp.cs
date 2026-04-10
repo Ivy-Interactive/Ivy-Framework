@@ -58,7 +58,7 @@ public class FullPathFolderInputDemo : ViewBase
     {
         var folder = UseState<string?>();
         return Layout.Vertical()
-               | folder.ToFolderInput(mode: FolderInputMode.FullPath)
+               | folder.ToFolderInput(mode: FolderInputMode.FullPath).ValidatePath()
                | Text.P($"Full path: {folder.Value ?? "None"}")
                | Text.Muted("Full path mode requires a desktop environment (Electron/Tauri). In browsers, falls back to folder name.");
     }

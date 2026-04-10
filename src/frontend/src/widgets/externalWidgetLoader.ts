@@ -1,6 +1,7 @@
 import React from "react";
 import { logger } from "@/lib/logger";
 import { getIvyHost } from "@/lib/utils";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 /**
  * External widget registration info received from the backend.
@@ -243,7 +244,7 @@ export const createLazyExternalWidget = (
 ): React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>> => {
   let lazy = lazyComponents.get(typeName);
   if (!lazy) {
-    lazy = React.lazy(() =>
+    lazy = lazyWithRetry(() =>
       loadExternalWidget(typeName).then((Component) => ({
         default: Component,
       })),

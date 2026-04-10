@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import {
@@ -40,6 +40,13 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
 }) => {
   const handleEvent = useEventHandler();
   const inputRef = useRef<HTMLInputElement>(null);
+  const isFullPath = mode === "FullPath";
+
+  const [localValue, setLocalValue] = useState(value ?? "");
+
+  useEffect(() => {
+    setLocalValue(value ?? "");
+  }, [value]);
 
   const hasOnChange = Array.isArray(events) && events.includes("OnChange");
   const hasOnBlur = Array.isArray(events) && events.includes("OnBlur");
@@ -55,11 +62,13 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
   );
 
   const openModernPicker = useCallback(async () => {
-    const result = mode === "FullPath" ? await pickDirectoryFullPath() : await pickDirectory();
+    const result = isFullPath ? await pickDirectoryFullPath() : await pickDirectory();
     if (result.kind === "selected") {
-      emitChange(mode === "FullPath" && result.path ? result.path : result.name);
+      const picked = isFullPath && result.path ? result.path : result.name;
+      setLocalValue(picked);
+      emitChange(picked);
     }
-  }, [emitChange, mode]);
+  }, [emitChange, isFullPath]);
 
   const handleFallbackChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,30 +107,66 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
       <div
         className={cn(
           inputVariant({ density }),
-          "flex items-center gap-2 bg-background pr-1",
+          "flex items-center gap-2 bg-background dark:bg-white/5 pr-1",
           isInvalid && inputStyles.invalidInput,
-          disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+          disabled
+            ? "cursor-not-allowed opacity-50"
+            : isFullPath
+              ? "cursor-text"
+              : "cursor-pointer",
         )}
-        onClick={handleBrowse}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleBrowse();
-          }
-        }}
-        role="button"
-        onBlur={() => {
-          if (hasOnBlur) handleEvent("OnBlur", id, []);
-        }}
-        onFocus={() => {
-          if (hasOnFocus) handleEvent("OnFocus", id, []);
-        }}
-        tabIndex={disabled ? undefined : 0}
-        autoFocus={autoFocus}
+        onClick={isFullPath ? undefined : handleBrowse}
+        onKeyDown={
+          isFullPath
+            ? undefined
+            : (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleBrowse();
+                }
+              }
+        }
+        role={isFullPath ? undefined : "button"}
+        onBlur={
+          isFullPath
+            ? undefined
+            : () => {
+                if (hasOnBlur) handleEvent("OnBlur", id, []);
+              }
+        }
+        onFocus={
+          isFullPath
+            ? undefined
+            : () => {
+                if (hasOnFocus) handleEvent("OnFocus", id, []);
+              }
+        }
+        tabIndex={isFullPath || disabled ? undefined : 0}
+        autoFocus={!isFullPath && autoFocus ? true : undefined}
       >
-        <span className={cn("flex-1 truncate", !value && "text-muted-foreground")}>
-          {value || placeholder}
-        </span>
+        {isFullPath ? (
+          <input
+            type="text"
+            className="flex-1 truncate bg-transparent outline-none border-none p-0 text-sm"
+            value={localValue}
+            placeholder={placeholder}
+            onChange={(e) => setLocalValue(e.target.value)}
+            onBlur={(e) => {
+              emitChange(e.target.value || null);
+              if (hasOnBlur) handleEvent("OnBlur", id, []);
+            }}
+            onFocus={() => {
+              if (hasOnFocus) handleEvent("OnFocus", id, []);
+            }}
+            onClick={(e) => e.stopPropagation()}
+            disabled={disabled}
+            autoFocus={autoFocus}
+          />
+        ) : (
+          <span className={cn("flex-1 truncate", !value && "text-muted-foreground")}>
+            {value || placeholder}
+          </span>
+        )}
 
         <div className="flex items-center gap-0.5">
           {isInvalid && <InvalidIcon message={invalid} />}
@@ -133,6 +178,7 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
               onClick={(e) => {
                 e.stopPropagation();
                 handleClear();
+                if (isFullPath) setLocalValue("");
               }}
               tabIndex={-1}
               aria-label="Clear selection"
@@ -141,9 +187,19 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
             </button>
           )}
 
-          <span className="flex h-6 w-6 items-center justify-center text-muted-foreground">
+          <button
+            type="button"
+            className="flex h-6 w-6 items-center justify-center text-muted-foreground hover:text-foreground transition-colors rounded-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleBrowse();
+            }}
+            tabIndex={-1}
+            aria-label="Browse for folder"
+            disabled={disabled}
+          >
             <FolderOpen className="h-4 w-4" />
-          </span>
+          </button>
         </div>
       </div>
 

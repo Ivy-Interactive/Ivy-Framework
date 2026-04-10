@@ -104,7 +104,7 @@ You can run Tendril from any directory using `npx` or by installing it globally 
 | `Services/` | Core services -- config loading, plan reading, job management, Git/GitHub integration |
 | `Apps/` | TUI app screens -- plans list, jobs view, dashboard, review, PR creation |
 | `AppShell/` | Application shell and navigation |
-| `.promptwares/` | Agent promptwares for each lifecycle stage (MakePlan, ExecutePlan, etc.) |
+| `Promptwares/` | Agent promptwares for each lifecycle stage (MakePlan, ExecutePlan, etc.) |
 | `Views/` | Shared UI components and views |
 | `Controllers/` | Action controllers for plan operations |
 | `Database/` | SQLite database schema and migrations |

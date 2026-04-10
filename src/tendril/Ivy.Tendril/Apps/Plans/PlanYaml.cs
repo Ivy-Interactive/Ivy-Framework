@@ -21,4 +21,5 @@ public class PlanYaml
     public List<string> RelatedPlans { get; set; } = new();
     public List<string> DependsOn { get; set; } = new();
     public string? InitialPrompt { get; set; }
+    public string? SourceUrl { get; set; }
 }

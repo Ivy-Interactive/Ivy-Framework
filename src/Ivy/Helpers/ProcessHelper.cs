@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Ivy.Helpers;
 
 namespace Ivy;
 
@@ -51,7 +52,7 @@ public static class ProcessHelper
         };
         netstat.Start();
         string output = netstat.StandardOutput.ReadToEnd();
-        netstat.WaitForExit();
+        netstat.WaitForExitOrKill(10000);
 
         var lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
         var regex = new Regex(@"\s+");
@@ -98,7 +99,7 @@ public static class ProcessHelper
         };
         lsof.Start();
         string output = lsof.StandardOutput.ReadToEnd();
-        lsof.WaitForExit();
+        lsof.WaitForExitOrKill(10000);
 
         if (lsof.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
             return;

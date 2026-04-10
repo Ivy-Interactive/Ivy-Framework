@@ -2,7 +2,7 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Dashboard", icon: Icons.ChartBar, group: ["Tools"], order: MenuOrder.Dashboard)]
+[App(title: "Dashboard", icon: Icons.ChartBar, group: ["Apps"], order: MenuOrder.Dashboard)]
 public class DashboardApp : ViewBase
 {
     public override object Build()
@@ -10,9 +10,16 @@ public class DashboardApp : ViewBase
         var planService = UseService<IPlanReaderService>();
         var configService = UseService<IConfigService>();
         var refreshToken = UseRefreshToken();
-        UseInterval(() => { refreshToken.Refresh(); }, TimeSpan.FromSeconds(60));
+        UseInterval(() => { refreshToken.Refresh(); },
+            planService.IsDatabaseReady ? TimeSpan.FromSeconds(60) : TimeSpan.FromSeconds(2));
 
         var selectedProject = UseState<string?>(null);
+
+        if (!planService.IsDatabaseReady)
+        {
+            return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full()).Gap(2)
+                   | Text.Muted("Loading Dashboard Data...");
+        }
 
         var stats = planService.GetDashboardData(selectedProject.Value);
 
@@ -91,34 +98,35 @@ public class DashboardApp : ViewBase
         var projectData = stats.ProjectCounts;
 
         var projectProgress = new StackedProgress(
-                projectData.Select(p => new ProgressSegment(
-                    p.Count,
-                    configService.GetProjectColor(p.Project),
-                    p.Project
-                )).ToArray()
-            )
-            .Selected(selectedProject.Value != null
-                ? projectData.FindIndex(p => p.Project == selectedProject.Value)
-                : null)
-            .OnSelect(e =>
-            {
-                try
-                {
-                    var clickedProject = projectData[e.Value].Project;
-                    selectedProject.Set(selectedProject.Value == clickedProject ? null : clickedProject);
-                    return ValueTask.CompletedTask;
-                }
-                catch (Exception exception)
-                {
-                    return ValueTask.FromException(exception);
-                }
-            });
+                    projectData.Select(p => new ProgressSegment(
+                        p.Count,
+                        configService.GetProjectColor(p.Project),
+                        p.Project
+                    )).ToArray()
+                )
+                .Selected(selectedProject.Value != null
+                    ? projectData.FindIndex(p => p.Project == selectedProject.Value)
+                    : null)
+            // .OnSelect(e =>
+            // {
+            //     try
+            //     {
+            //         var clickedProject = projectData[e.Value].Project;
+            //         selectedProject.Set(selectedProject.Value == clickedProject ? null : clickedProject);
+            //         return ValueTask.CompletedTask;
+            //     }
+            //     catch (Exception exception)
+            //     {
+            //         return ValueTask.FromException(exception);
+            //     }
+            // })
+            ;
 
         // Hourly cost & tokens combined bar chart
-        var allHourlyBurn = planService.GetHourlyTokenBurn();
-        var hourlyBurn = selectedProject.Value != null
-            ? allHourlyBurn.Where(h => h.Project == selectedProject.Value).ToList()
-            : allHourlyBurn
+        var hourlyBurn = planService.GetHourlyTokenBurn(projectFilter: selectedProject.Value);
+        if (selectedProject.Value == null)
+        {
+            hourlyBurn = hourlyBurn
                 .GroupBy(h => h.Hour)
                 .Select(g => new HourlyTokenBurn
                 {
@@ -129,6 +137,10 @@ public class DashboardApp : ViewBase
                 })
                 .OrderBy(h => h.Hour)
                 .ToList();
+        }
+
+        const string costMeasureName = "Cost ($)";
+        const string tokensMeasureName = "Tokens";
 
         var combinedChart = hourlyBurn.ToBarChart(
                 style: BarChartStyles.Default,
@@ -136,23 +148,23 @@ public class DashboardApp : ViewBase
                 {
                     Bars =
                     [
-                        new Bar("Cost ($)").Radius(4).YAxisIndex(0),
-                        new Bar("Tokens").Radius(4).YAxisIndex(1)
+                        new Bar(costMeasureName).Radius(0).YAxisIndex(0),
+                        new Bar(tokensMeasureName).Radius(0).YAxisIndex(1)
                     ],
                     XAxis =
                     [
-                        new XAxis().TickFormatter("MM/dd HH", TickFormatterType.Date)
+                        new XAxis().TickFormatter("MM/dd HH:mm", TickFormatterType.Date).MinTickGap(15)
                     ],
                     YAxis =
                     [
-                        new YAxis("Cost ($)").TickFormatter("C2", TickFormatterType.Number).Hide(),
-                        new YAxis("Tokens").Orientation(YAxis.Orientations.Right).Hide()
+                        new YAxis(costMeasureName).TickFormatter("C2", TickFormatterType.Number).Hide(),
+                        new YAxis(tokensMeasureName).Orientation(YAxis.Orientations.Right).Hide()
                     ]
                 })
             .FillGaps(TimeSpan.FromHours(1))
             .Dimension("Hour", e => e.Hour)
-            .Measure("Cost ($)", e => e.Sum(f => (double)f.Cost))
-            .Measure("Tokens", e => e.Sum(f => (double)f.Tokens))
+            .Measure(costMeasureName, e => e.Sum(f => (double)f.Cost))
+            .Measure(tokensMeasureName, e => e.Sum(f => (double)f.Tokens))
             .Height(Size.Px(350))
             .Width(Size.Full());
 
@@ -162,7 +174,7 @@ public class DashboardApp : ViewBase
 
         var header = Layout.Vertical()
                      | statsRow
-                     | new Box(projectProgress).Margin(2);
+                     | projectProgress.Width(Size.Full()).WithLayout().Margin(2);
 
         return new HeaderLayout(
             header,

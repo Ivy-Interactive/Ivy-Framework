@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Apps.Recommendations.Dialogs;
 using Ivy.Tendril.Services;
@@ -29,7 +28,6 @@ public class ContentView(
         var openFile = UseState<string?>(null);
         var showNotesDialog = UseState(false);
         var showDeclineDialog = UseState<bool>();
-        var declineReason = UseState<string?>("");
 
         if (_selected is null)
         {
@@ -81,7 +79,6 @@ public class ContentView(
         var actionBar = Layout.Horizontal().AlignContent(Align.Center).Gap(2).Padding(1)
                         | new Button("Decline").Icon(Icons.X).Outline().ShortcutKey("x").OnClick(() =>
                         {
-                            declineReason.Set("");
                             showDeclineDialog.Set(true);
                         })
                         | new Button("Accept with Notes").Icon(Icons.CircleCheck).Outline().ShortcutKey("w")
@@ -115,12 +112,7 @@ public class ContentView(
                             {
                                 var fullPath = Path.Combine(_planService.PlansDirectory, _selected.PlanFolderName);
                                 var yamlPath = Path.Combine(fullPath, "plan.yaml");
-                                Process.Start(new ProcessStartInfo
-                                {
-                                    FileName = config.Editor.Command,
-                                    Arguments = yamlPath,
-                                    UseShellExecute = true
-                                });
+                                config.OpenInEditor(yamlPath);
                             })
                         );
 
@@ -145,47 +137,8 @@ public class ContentView(
                 GoToNext();
             });
 
-        if (showDeclineDialog.Value)
-        {
-            var selectedForDecline = _selected;
-            return new Fragment(
-                mainLayout,
-                new Dialog(
-                    _ =>
-                    {
-                        declineReason.Set("");
-                        showDeclineDialog.Set(false);
-                    },
-                    new DialogHeader("Decline Recommendation"),
-                    new DialogBody(
-                        Layout.Vertical()
-                        | Text.P("Optionally provide a reason for declining this recommendation.")
-                        | declineReason.ToTextareaInput("Enter reason (optional)...").Rows(4)
-                    ),
-                    new DialogFooter(
-                        new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() =>
-                        {
-                            declineReason.Set("");
-                            showDeclineDialog.Set(false);
-                        }),
-                        new Button("Decline").Destructive().ShortcutKey("Enter").OnClick(() =>
-                        {
-                            _planService.UpdateRecommendationState(
-                                selectedForDecline.PlanFolderName,
-                                selectedForDecline.Title,
-                                "Declined",
-                                declineReason.Value
-                            );
-                            _refresh();
-                            showDeclineDialog.Set(false);
-                            declineReason.Set("");
-                            GoToNext();
-                        })
-                    )
-                ).Width(Size.Rem(40)),
-                notesDialog
-            );
-        }
+        var declineDialog = new DeclineRecommendationDialog(
+            showDeclineDialog, _selected, _planService, _refresh, GoToNext);
 
         if (showPlan.Value is { } planPath)
         {
@@ -218,13 +171,14 @@ public class ContentView(
                     mainLayout,
                     planSheet,
                     fileLinkSheet,
-                    notesDialog
+                    notesDialog,
+                    declineDialog
                 );
 
-            return new Fragment(mainLayout, planSheet, notesDialog);
+            return new Fragment(mainLayout, planSheet, notesDialog, declineDialog);
         }
 
-        return new Fragment(mainLayout, notesDialog);
+        return new Fragment(mainLayout, notesDialog, declineDialog);
     }
 
     private void GoToNext()

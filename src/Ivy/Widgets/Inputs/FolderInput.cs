@@ -24,7 +24,18 @@ public record FolderInput : WidgetBase<FolderInput>, IAnyInput
     [Event] public EventHandler<Event<FolderInput, string?>>? OnChange { get; set; }
 
     public Type[] SupportedStateTypes() => [typeof(string)];
-    public ValidationResult ValidateValue(object? value) => ValidationResult.Success();
+    public ValidationResult ValidateValue(object? value)
+    {
+        if (Mode == FolderInputMode.FullPath
+            && value is string path
+            && !string.IsNullOrEmpty(path)
+            && !Directory.Exists(path))
+        {
+            return ValidationResult.Error("Directory does not exist");
+        }
+
+        return ValidationResult.Success();
+    }
 }
 
 public static class FolderInputExtensions
@@ -52,4 +63,16 @@ public static class FolderInputExtensions
 
     public static FolderInput Mode(this FolderInput widget, FolderInputMode mode)
         => widget with { Mode = mode };
+
+    public static FolderInput ValidatePath(this FolderInput widget)
+    {
+        if (widget.Mode == FolderInputMode.FullPath
+            && !string.IsNullOrEmpty(widget.Value)
+            && !Directory.Exists(widget.Value))
+        {
+            return widget with { Invalid = "Directory does not exist" };
+        }
+
+        return widget;
+    }
 }

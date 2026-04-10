@@ -4,7 +4,7 @@ namespace Ivy;
 /// <summary>
 /// Arranges items sequentially in a horizontal or vertical stack.
 /// </summary>
-public record StackLayout : WidgetBase<StackLayout>
+internal record StackLayout : WidgetBase<StackLayout>
 {
     public StackLayout(object[] children, Orientation orientation = Orientation.Vertical, int gap = 4, Thickness? padding = null, Thickness? margin = null, Colors? background = null, Align? alignContent = null, bool removeParentPadding = false, bool wrap = false) : base(children)
     {
@@ -45,6 +45,14 @@ public record StackLayout : WidgetBase<StackLayout>
     [Prop] public Thickness BorderThickness { get; set; } = new(0);
 
     [Prop] public Scroll Scroll { get; set; } = Scroll.None;
+
+    [Prop] public Responsive<Orientation?>? ResponsiveOrientation { get; set; }
+
+    [Prop] public Responsive<int?>? ResponsiveRowGap { get; set; }
+
+    [Prop] public Responsive<int?>? ResponsiveColumnGap { get; set; }
+
+    [Prop] public Responsive<Thickness?>? ResponsivePadding { get; set; }
 
     [Prop(attached: nameof(StackLayoutExtensions.AlignSelf))] public Align?[] ChildAlignSelf { get; set; } = null!;
 }

@@ -47,6 +47,9 @@ if (-not $configPath -or -not (Test-Path $configPath)) {
 $slackEmoji = ""
 if (Test-Path $configPath) {
     $configContent = Get-Content $configPath -Raw
+    # Quote unquoted %VAR% patterns that YAML rejects (% is a directive indicator)
+    $configContent = $configContent -replace '(?m)(?<=:\s+)(%\w+%.*)$', '''$1'''
+    $configContent = $configContent -replace '(?m)^(\s*-\s+)(%\w+%.*)$', '$1''$2'''
     $config = ConvertFrom-Yaml $configContent
     $projectConfig = $config.projects | Where-Object { $_.name -eq $project } | Select-Object -First 1
     if ($projectConfig -and $projectConfig.meta -and $projectConfig.meta.slackEmoji) {

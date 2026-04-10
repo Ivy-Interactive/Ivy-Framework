@@ -20,6 +20,12 @@ public class GridView : ViewBase, IStateless
         return this;
     }
 
+    public GridView Columns(Responsive<int?> columns)
+    {
+        _definition.ResponsiveColumns = columns;
+        return this;
+    }
+
     public GridView Rows(int rows)
     {
         _definition.Rows = rows;

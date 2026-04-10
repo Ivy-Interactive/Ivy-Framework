@@ -90,8 +90,8 @@ import {
 } from "@/widgets/primitives";
 import { DataTable } from "@/widgets/dataTables";
 import { TableWidget, TableRowWidget, TableCellWidget } from "@/widgets/tables";
-import React from "react";
 import { SmartSearch } from "@/docs-internal/SmartSearch";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 export const widgetMap = {
   $loading: LoadingScreen,
@@ -99,22 +99,22 @@ export const widgetMap = {
   // Primitives
   "Ivy.TextBlock": TextBlockWidget,
   "Ivy.RichTextBlock": RichTextBlockWidget,
-  "Ivy.Markdown": React.lazy(() => import("@/widgets/primitives/MarkdownWidget")),
-  "Ivy.Json": React.lazy(() => import("@/widgets/primitives/JsonWidget")),
+  "Ivy.Markdown": lazyWithRetry(() => import("@/widgets/primitives/MarkdownWidget")),
+  "Ivy.Json": lazyWithRetry(() => import("@/widgets/primitives/JsonWidget")),
   "Ivy.Html": HtmlWidget,
-  "Ivy.Xml": React.lazy(() => import("@/widgets/primitives/XmlWidget")),
+  "Ivy.Xml": lazyWithRetry(() => import("@/widgets/primitives/XmlWidget")),
   "Ivy.Error": ErrorWidget,
   "Ivy.Svg": SvgWidget,
   "Ivy.Image": ImageWidget,
   "Ivy.Iframe": IframeWidget,
-  "Ivy.CodeBlock": React.lazy(() => import("@/widgets/primitives/CodeBlockWidget")),
+  "Ivy.CodeBlock": lazyWithRetry(() => import("@/widgets/primitives/CodeBlockWidget")),
   "Ivy.Fragment": FragmentWidget,
   "Ivy.Separator": SeparatorWidget,
   "Ivy.Skeleton": SkeletonWidget,
   "Ivy.Icon": IconWidget,
   "Ivy.Box": BoxWidget,
-  "Ivy.Embed": React.lazy(() => import("@/widgets/primitives/EmbedWidget")),
-  "Ivy.Script": React.lazy(() => import("@/widgets/primitives/ScriptWidget")),
+  "Ivy.Embed": lazyWithRetry(() => import("@/widgets/primitives/EmbedWidget")),
+  "Ivy.Script": lazyWithRetry(() => import("@/widgets/primitives/ScriptWidget")),
   "Ivy.Callout": CalloutWidget,
   "Ivy.Kbd": KbdWidget,
   "Ivy.Empty": EmptyWidget,
@@ -126,8 +126,8 @@ export const widgetMap = {
   "Ivy.AutoScroll": AutoScrollWidget,
   "Ivy.AudioPlayer": AudioPlayerWidget,
   "Ivy.VideoPlayer": VideoPlayerWidget,
-  "Ivy.Stepper": React.lazy(() => import("@/widgets/primitives/StepperWidget")),
-  "Ivy.Terminal": React.lazy(() => import("@/widgets/primitives/TerminalWidget")),
+  "Ivy.Stepper": lazyWithRetry(() => import("@/widgets/primitives/StepperWidget")),
+  "Ivy.Terminal": lazyWithRetry(() => import("@/widgets/primitives/TerminalWidget")),
 
   // Widgets
   "Ivy.Article": ArticleWidget,
@@ -148,22 +148,22 @@ export const widgetMap = {
   "Ivy.ChatStatus": ChatStatusWidget,
   "Ivy.DropDownMenu": DropDownMenuWidget,
   "Ivy.Pagination": PaginationWidget,
-  "Ivy.Kanban": React.lazy(() =>
+  "Ivy.Kanban": lazyWithRetry(() =>
     import("@/widgets/kanban/KanbanWidget").then((m) => ({
       default: m.KanbanWidget,
     })),
   ),
-  "Ivy.KanbanCard": React.lazy(() =>
+  "Ivy.KanbanCard": lazyWithRetry(() =>
     import("@/widgets/kanban/KanbanCardWidget").then((m) => ({
       default: m.KanbanCardWidget,
     })),
   ),
-  "Ivy.Calendar": React.lazy(() =>
+  "Ivy.Calendar": lazyWithRetry(() =>
     import("@/widgets/calendar/CalendarWidget").then((m) => ({
       default: m.CalendarWidget,
     })),
   ),
-  "Ivy.CalendarEvent": React.lazy(() =>
+  "Ivy.CalendarEvent": lazyWithRetry(() =>
     import("@/widgets/calendar/CalendarEventWidget").then((m) => ({
       default: m.CalendarEventWidget,
     })),
@@ -200,9 +200,9 @@ export const widgetMap = {
   "Ivy.ContentInput": ContentInputWidget,
   "Ivy.SignatureInput": SignatureInputWidget,
   "Ivy.FolderInput": FolderInputWidget,
-  "Ivy.CodeInput": React.lazy(() => import("@/widgets/inputs/code/CodeInputWidget")),
-  "Ivy.AudioInput": React.lazy(() => import("@/widgets/inputs/AudioInputWidget")),
-  "Ivy.CameraInput": React.lazy(() => import("@/widgets/cameraInput/CameraInputWidget")),
+  "Ivy.CodeInput": lazyWithRetry(() => import("@/widgets/inputs/code/CodeInputWidget")),
+  "Ivy.AudioInput": lazyWithRetry(() => import("@/widgets/inputs/AudioInputWidget")),
+  "Ivy.CameraInput": lazyWithRetry(() => import("@/widgets/cameraInput/CameraInputWidget")),
 
   // Forms
   "Ivy.Form": FormWidget,
@@ -242,27 +242,27 @@ export const widgetMap = {
   "Ivy.Detail": DetailWidget,
 
   // Charts
-  "Ivy.LineChart": React.lazy(() => import("@/widgets/charts/LineChartWidget")),
-  "Ivy.PieChart": React.lazy(() => import("@/widgets/charts/PieChartWidget")),
-  "Ivy.AreaChart": React.lazy(() => import("@/widgets/charts/AreaChartWidget")),
-  "Ivy.BarChart": React.lazy(() => import("@/widgets/charts/BarChartWidget")),
-  "Ivy.ScatterChart": React.lazy(() => import("@/widgets/charts/ScatterChartWidget")),
-  "Ivy.RadarChart": React.lazy(() => import("@/widgets/charts/RadarChartWidget")),
-  "Ivy.SankeyChart": React.lazy(() => import("@/widgets/charts/SankeyChartWidget")),
-  "Ivy.ChordChart": React.lazy(() => import("@/widgets/charts/ChordChartWidget")),
-  "Ivy.FunnelChart": React.lazy(() => import("@/widgets/charts/FunnelChartWidget")),
-  "Ivy.GaugeChart": React.lazy(() => import("@/widgets/charts/GaugeChartWidget")),
+  "Ivy.LineChart": lazyWithRetry(() => import("@/widgets/charts/LineChartWidget")),
+  "Ivy.PieChart": lazyWithRetry(() => import("@/widgets/charts/PieChartWidget")),
+  "Ivy.AreaChart": lazyWithRetry(() => import("@/widgets/charts/AreaChartWidget")),
+  "Ivy.BarChart": lazyWithRetry(() => import("@/widgets/charts/BarChartWidget")),
+  "Ivy.ScatterChart": lazyWithRetry(() => import("@/widgets/charts/ScatterChartWidget")),
+  "Ivy.RadarChart": lazyWithRetry(() => import("@/widgets/charts/RadarChartWidget")),
+  "Ivy.SankeyChart": lazyWithRetry(() => import("@/widgets/charts/SankeyChartWidget")),
+  "Ivy.ChordChart": lazyWithRetry(() => import("@/widgets/charts/ChordChartWidget")),
+  "Ivy.FunnelChart": lazyWithRetry(() => import("@/widgets/charts/FunnelChartWidget")),
+  "Ivy.GaugeChart": lazyWithRetry(() => import("@/widgets/charts/GaugeChartWidget")),
 
   // Effects
-  "Ivy.Confetti": React.lazy(() => import("@/widgets/effects/ConfettiWidget")),
-  "Ivy.Animation": React.lazy(() => import("@/widgets/effects/AnimationWidget")),
+  "Ivy.Confetti": lazyWithRetry(() => import("@/widgets/effects/ConfettiWidget")),
+  "Ivy.Animation": lazyWithRetry(() => import("@/widgets/effects/AnimationWidget")),
 
   // Internal
   "Ivy.Docs.Shared.Internal.SmartSearch": SmartSearch,
-  "Ivy.Widgets.Internal.SidebarNews": React.lazy(
+  "Ivy.Widgets.Internal.SidebarNews": lazyWithRetry(
     () => import("@/widgets/internal/SidebarNewsWidget"),
   ),
-  "Ivy.Widgets.Internal.ThemeColorPicker": React.lazy(() =>
+  "Ivy.Widgets.Internal.ThemeColorPicker": lazyWithRetry(() =>
     import("@/widgets/internal/ThemeColorPickerWidget").then((m) => ({
       default: m.ThemeColorPickerWidget,
     })),

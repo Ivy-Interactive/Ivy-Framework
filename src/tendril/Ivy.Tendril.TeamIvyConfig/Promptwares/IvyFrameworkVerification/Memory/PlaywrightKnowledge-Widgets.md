@@ -20,6 +20,8 @@ DataTable uses Glide Data Grid — renders as `<canvas>`, NOT HTML `<table>`.
 - `decimal` columns display as `0000000000000000` (framework bug in `useRowData.ts` Decimal128 handling)
 - `.dispatchEvent("click")` on gridcells bypasses visibility but does NOT trigger Ivy's `OnCellClick`
 - Kill stale `.exe` processes before tests — they lock DLLs
+- **Multiple grids on same page**: React fiber walks from different `<canvas>` elements may find the same parent component's `columns` prop. Deduplicate grids by creating a key from column titles (`props.columns.map(c => c.title).join(',')`) and skipping duplicates.
+- **Column widths in fiber tree reflect post-grow rendered widths**, not configured widths. The last column always gets `grow: 1` by default. For test assertions: check `grow` factor presence/value, not exact pixel width on grow columns.
 
 ## Input Widgets
 

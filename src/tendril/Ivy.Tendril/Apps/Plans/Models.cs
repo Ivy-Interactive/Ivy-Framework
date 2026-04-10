@@ -28,7 +28,8 @@ public record PlanMetadata(
     List<string> DependsOn,
     DateTime Created,
     DateTime Updated,
-    string? InitialPrompt);
+    string? InitialPrompt,
+    string? SourceUrl);
 
 public record PlanFile(
     PlanMetadata Metadata,
@@ -52,6 +53,7 @@ public record PlanFile(
     public DateTime Created => Metadata.Created;
     public DateTime Updated => Metadata.Updated;
     public string? InitialPrompt => Metadata.InitialPrompt;
+    public string? SourceUrl => Metadata.SourceUrl;
     public string FolderName => Path.GetFileName(FolderPath);
 }
 

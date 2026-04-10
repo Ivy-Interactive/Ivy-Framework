@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from "react"
 import { useEventHandler } from "@/components/event-handler";
 import { Densities } from "@/types/density";
 import { TextInputWidgetProps, TextInputVariant } from "./types";
-import { useShortcutKey } from "./hooks";
+import { useShortcut } from "@/lib/useShortcut";
 import { useOptimisticValue } from "../shared/useOptimisticValue";
 import { DefaultVariant, TextareaVariant, PasswordVariant, SearchVariant } from "./variants";
 import { EMPTY_ARRAY } from "@/lib/constants";
@@ -49,13 +49,12 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     (a: string, b: string) => a === b,
   );
 
-  useShortcutKey({
-    shortcutKey,
-    inputRef,
-    setIsFocused,
-    id,
-    events,
-    eventHandler,
+  useShortcut(id, shortcutKey, () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      setIsFocused(true);
+      if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+    }
   });
 
   const { isRecording, startRecording, stopRecording } = useDictation({

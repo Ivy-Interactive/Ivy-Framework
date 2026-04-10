@@ -1,7 +1,9 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
+using Ivy.Helpers;
 
 namespace Ivy.Tendril.Services;
 
@@ -10,6 +12,7 @@ public class GithubService(IConfigService config) : IGithubService
     private readonly ConcurrentDictionary<string, List<string>> _assigneeCache = new();
     private readonly IConfigService _config = config;
     private readonly ConcurrentDictionary<string, List<string>> _labelCache = new();
+    private readonly ConcurrentDictionary<string, Dictionary<string, string>> _prStatusCache = new();
     private List<RepoConfig>? _repoCache;
 
     public List<RepoConfig> GetRepos()
@@ -56,6 +59,17 @@ public class GithubService(IConfigService config) : IGithubService
         return labels;
     }
 
+    public async Task<Dictionary<string, string>> GetPrStatusesAsync(string owner, string repo)
+    {
+        var key = $"{owner}/{repo}";
+        if (_prStatusCache.TryGetValue(key, out var cached))
+            return cached;
+
+        var statuses = await FetchPrStatusesFromGhCliAsync(owner, repo);
+        _prStatusCache[key] = statuses;
+        return statuses;
+    }
+
     internal static RepoConfig? GetRepoConfigFromPath(string repoPath)
     {
         try
@@ -75,7 +89,7 @@ public class GithubService(IConfigService config) : IGithubService
             if (process is null) return null;
 
             var url = process.StandardOutput.ReadToEnd().Trim();
-            process.WaitForExit();
+            process.WaitForExitOrKill(10000);
             if (process.ExitCode != 0) return null;
 
             return ParseRepoConfigFromUrl(url);
@@ -117,7 +131,7 @@ public class GithubService(IConfigService config) : IGithubService
 
             var output = await process.StandardOutput.ReadToEndAsync();
             var stderr = await process.StandardError.ReadToEndAsync();
-            await process.WaitForExitAsync();
+            await process.WaitForExitOrKillAsync(60000);
 
             if (process.ExitCode != 0)
             {
@@ -133,6 +147,64 @@ public class GithubService(IConfigService config) : IGithubService
         {
             Console.Error.WriteLine($"[GithubService] Failed to fetch labels for {owner}/{repo}: {ex.Message}");
             return new List<string>();
+        }
+    }
+
+    private static async Task<Dictionary<string, string>> FetchPrStatusesFromGhCliAsync(string owner, string repo)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo("gh",
+                $"pr list --repo {owner}/{repo} --limit 100 --state all --json url,state")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8
+            };
+
+            using var process = Process.Start(psi);
+            if (process is null) return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            var output = await process.StandardOutput.ReadToEndAsync();
+            var stderr = await process.StandardError.ReadToEndAsync();
+            await process.WaitForExitOrKillAsync(60000);
+
+            if (process.ExitCode != 0)
+            {
+                Console.Error.WriteLine(
+                    $"[GithubService] gh pr list failed for {owner}/{repo}: {stderr}");
+                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            }
+
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            using var doc = JsonDocument.Parse(output);
+            foreach (var element in doc.RootElement.EnumerateArray())
+            {
+                var url = element.GetProperty("url").GetString();
+                var state = element.GetProperty("state").GetString();
+                if (url is not null && state is not null)
+                {
+                    var titleCase = state switch
+                    {
+                        "OPEN" => "Open",
+                        "CLOSED" => "Closed",
+                        "MERGED" => "Merged",
+                        _ => state
+                    };
+                    result[url] = titleCase;
+                }
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(
+                $"[GithubService] Failed to fetch PR statuses for {owner}/{repo}: {ex.Message}");
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
     }
 
@@ -155,7 +227,7 @@ public class GithubService(IConfigService config) : IGithubService
 
             var output = await process.StandardOutput.ReadToEndAsync();
             var stderr = await process.StandardError.ReadToEndAsync();
-            await process.WaitForExitAsync();
+            await process.WaitForExitOrKillAsync(60000);
 
             if (process.ExitCode != 0)
             {

@@ -17,7 +17,7 @@ public interface IPlanDatabaseService : IDisposable
     // Costs and tokens
     decimal GetPlanTotalCost(int planId);
     int GetPlanTotalTokens(int planId);
-    List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7);
+    List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7, string? projectFilter = null);
 
     // Recommendations
     List<Recommendation> GetRecommendations();
@@ -46,6 +46,7 @@ public interface IPlanDatabaseService : IDisposable
     void UpsertJob(JobItem job);
     List<JobItem> GetRecentJobs(int limit = 100);
     void PurgeOldJobs(int keepCount = 500);
+    void DeleteJob(string id);
 
     // Diagnostics
     long GetDatabaseSize();

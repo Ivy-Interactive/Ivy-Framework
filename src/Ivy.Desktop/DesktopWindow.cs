@@ -85,18 +85,25 @@ public class DesktopWindow(Server server)
         // Wait for the server to become ready (or detect early failure).
         WaitForServerReady(serverTask, url);
 
-        var window = CreateWindow();
-        var loadingHtml = GetLoadingHtml(url);
-        var tempLoadingPath = Path.Combine(Path.GetTempPath(), $"ivy_loading_{Guid.NewGuid():N}.html");
-        File.WriteAllText(tempLoadingPath, loadingHtml);
-        window.Load(new Uri(tempLoadingPath));
+        string? tempLoadingPath = null;
+        try
+        {
+            var window = CreateWindow();
+            var loadingHtml = GetLoadingHtml(url);
+            tempLoadingPath = Path.Combine(Path.GetTempPath(), $"ivy_loading_{Guid.NewGuid():N}.html");
+            File.WriteAllText(tempLoadingPath, loadingHtml);
+            window.Load(new Uri(tempLoadingPath));
 
-        window.WaitForClose();
+            window.WaitForClose();
+        }
+        finally
+        {
+            if (tempLoadingPath != null)
+                try { File.Delete(tempLoadingPath); } catch { }
 
-        try { File.Delete(tempLoadingPath); } catch { }
-
-        cts.Cancel();
-        serverTask.GetAwaiter().GetResult();
+            cts.Cancel();
+            serverTask.GetAwaiter().GetResult();
+        }
 
         return 0;
     }

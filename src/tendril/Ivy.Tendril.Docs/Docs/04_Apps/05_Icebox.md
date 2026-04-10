@@ -1,32 +1,22 @@
 ---
 searchHints:
   - icebox
-  - frozen
-  - deferred
-  - parked
-icon: Snowflake
+  - shelving
+  - backlog
+icon: Archive
 ---
 
 # Icebox
 
 <Ingress>
-The Icebox holds plans that have been deferred or parked for later consideration.
+The Icebox provides an organized cold-storage facility for Plans that are architecturally sound but deemed a lower priority to mitigate Draft clutter.
 </Ingress>
 
-## Overview
+## Purpose
 
-Plans in the Icebox are not actively being worked on but are preserved for future reference. This is useful for ideas that aren't ready for execution or plans that need to wait for other work to complete first.
+Maintaining an effective pipeline means not polluting the active Draft environment. When ideas are proposed via 'Recommendations' or created broadly via team discussion, they can be staged quickly and shelved securely into the Icebox structure.
 
-## Filtering
+## Mechanism
 
-You can filter icebox plans by:
-
-- **Project** — Show only plans for a specific project
-- **Level** — Filter by plan complexity level
-
-## Actions
-
-| Action | Description |
-|--------|-------------|
-| **Thaw** | Move the plan back to Drafts for execution |
-| **Discard** | Move the plan to Trash |
+- **Shelving** — Moves a Plan's explicit underlying directory configurations under the `Icebox` state map. Doing this flags the project metadata locally and hides the UI rendering across active tools like Drafts or Dashboards.
+- **Restoration** — Unfreezes the context scope. The Plan inherits an identical metadata structure it formally retained, dumping it instantly into the active `Draft` ecosystem ready to invoke `ExecutePlan` bindings.

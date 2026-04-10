@@ -6,3 +6,5 @@
 **/.vscode/
 **/.git/
 **/RustServer/target/
+**/worktrees/
+**/Plans/

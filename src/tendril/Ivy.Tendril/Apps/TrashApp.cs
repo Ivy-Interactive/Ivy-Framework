@@ -1,4 +1,5 @@
 using Ivy.Tendril.Apps.Trash;
+using Ivy.Tendril.Apps.Trash.Dialogs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
@@ -12,7 +13,7 @@ public record TrashFileInfo(
     string Project,
     string Content);
 
-[App(title: "Trash", icon: Icons.Trash2, group: new[] { "Tools" }, order: MenuOrder.Trash, isVisible: false)]
+[App(title: "Trash", icon: Icons.Trash2, group: ["Apps"], order: MenuOrder.Trash, isVisible: false)]
 public class TrashApp : ViewBase
 {
     public override object Build()
@@ -47,7 +48,7 @@ public class TrashApp : ViewBase
         var filteredList = filteredFiles.ToList();
 
         // Auto-select first file if selection is invalid
-        if (selectedFile.Value is { } sel && !filteredList.Any(f => f.FilePath == sel))
+        if (selectedFile.Value is { } sel && filteredList.All(f => f.FilePath != sel))
             selectedFile.Set(filteredList.FirstOrDefault()?.FilePath);
 
         var selected = filteredList.FirstOrDefault(f => f.FilePath == selectedFile.Value);
@@ -124,28 +125,7 @@ public class TrashApp : ViewBase
                 elements.Add(fileLinkSheet);
         }
 
-        if (confirmDelete.Value && selected is not null)
-        {
-            var deletePath = selected.FilePath;
-            elements.Add(new Dialog(
-                _ => confirmDelete.Set(false),
-                new DialogHeader("Delete Trash File"),
-                new DialogBody(
-                    Text.P($"Permanently delete {selected.FileName}?")
-                ),
-                new DialogFooter(
-                    new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() => confirmDelete.Set(false)),
-                    new Button("Delete").Destructive().ShortcutKey("Enter").AutoFocus().OnClick(() =>
-                    {
-                        if (File.Exists(deletePath))
-                            File.Delete(deletePath);
-                        selectedFile.Set(null);
-                        confirmDelete.Set(false);
-                        refreshToken.Refresh();
-                    })
-                )
-            ).Width(Size.Rem(40)));
-        }
+        elements.Add(new DeleteTrashFileDialog(confirmDelete, selected, selectedFile, refreshToken));
 
         return new Fragment(elements.ToArray());
     }

@@ -127,12 +127,13 @@ public class JobServiceTimeoutTests
 
         var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
         var job = service.GetJob(id);
-        Assert.NotNull(job!.TimeoutCts);
+        var cts = job!.TimeoutCts;
+        Assert.NotNull(cts);
 
         service.StopJob(id);
 
         Assert.Equal(JobStatus.Stopped, job.Status);
-        Assert.True(job.TimeoutCts!.IsCancellationRequested);
+        Assert.True(cts!.IsCancellationRequested);
     }
 
     [Fact]

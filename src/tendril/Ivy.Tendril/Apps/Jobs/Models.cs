@@ -17,9 +17,15 @@ public enum JobStatus
 
 public record JobItem
 {
+    private const int MaxOutputLines = 10_000;
+    private int _completionGuard;
+
+    public bool TryClaimCompletion() =>
+        Interlocked.CompareExchange(ref _completionGuard, 1, 0) == 0;
+
     public string Id { get; init; } = "";
     public string Type { get; init; } = "";
-    public string PlanFile { get; init; } = "";
+    public string PlanFile { get; set; } = "";
     public string Project { get; init; } = "";
     public JobStatus Status { get; set; } = JobStatus.Pending;
     public DateTime? StartedAt { get; set; }
@@ -39,10 +45,43 @@ public record JobItem
     public ConcurrentQueue<string> OutputLines { get; set; } = new();
     public DateTime? LastOutputAt { get; set; }
     public CancellationTokenSource? TimeoutCts { get; set; }
-    public bool StaleOutputDetected { get; set; }
+    private volatile bool _staleOutputDetected;
+    public bool StaleOutputDetected
+    {
+        get => _staleOutputDetected;
+        set => _staleOutputDetected = value;
+    }
 
     // Path to the .processing inbox file for MakePlan job recovery
     public string? InboxFile { get; set; }
+
+    public void EnqueueOutput(string line)
+    {
+        OutputLines.Enqueue(line);
+        while (OutputLines.Count > MaxOutputLines)
+            OutputLines.TryDequeue(out _);
+    }
+
+    public void DisposeResources()
+    {
+        try { Process?.Dispose(); } catch { }
+        try { TimeoutCts?.Dispose(); } catch { }
+        Process = null;
+        TimeoutCts = null;
+    }
+
+    /// <summary>
+    ///     Trims the output buffer to the most recent lines to free memory after completion.
+    ///     Called after all completion logic (failure reason extraction, log writing, hooks)
+    ///     has finished. Retains a small tail for UI inspection of recent hook/status output.
+    /// </summary>
+    public void TrimOutput()
+    {
+        const int keepLines = 50;
+        if (OutputLines.Count <= keepLines) return;
+        var trimmed = new ConcurrentQueue<string>(OutputLines.Skip(OutputLines.Count - keepLines));
+        OutputLines = trimmed;
+    }
 }
 
 public record JobItemRow

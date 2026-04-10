@@ -511,7 +511,7 @@ var x = 1;
 
         // Change source, should regenerate
         fs::write(&input_path, "# Changed\n\nContent").unwrap();
-        generate(&input_path, &output_path, true, &empty_manifest).unwrap();
+        generate(&input_path, &output_path, true, &empty_manifest, None).unwrap();
         let content3 = fs::read_to_string(&output_path).unwrap();
         assert_ne!(content3, "MODIFIED"); // Was regenerated
 

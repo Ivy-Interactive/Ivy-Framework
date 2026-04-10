@@ -2,7 +2,7 @@ using Ivy.Hooks.Pty;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Claude", icon: Icons.Terminal, group: new[] { "Tools" }, order: MenuOrder.Claude, isVisible: false)]
+[App(title: "Claude", icon: Icons.Terminal, group: ["Apps"], order: MenuOrder.Claude, isVisible: false)]
 public class ClaudeApp : ViewBase
 {
     public override object Build()

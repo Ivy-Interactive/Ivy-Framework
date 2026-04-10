@@ -41,6 +41,8 @@ public static class TendrilServer
                 return client.GetChatClient(llm.Model).AsIChatClient();
             });
 
+        server.Services.AddSingleton<OnboardingSetupService>();
+        server.Services.AddSingleton<IOnboardingSetupService>(sp => sp.GetRequiredService<OnboardingSetupService>());
         server.Services.AddSingleton<GithubService>();
         server.Services.AddSingleton<IGithubService>(sp => sp.GetRequiredService<GithubService>());
         server.Services.AddSingleton<GitService>();
@@ -61,6 +63,8 @@ public static class TendrilServer
         server.Services.AddSingleton<IPlanDatabaseService>(sp =>
         {
             var cfg = sp.GetRequiredService<IConfigService>();
+            if (string.IsNullOrEmpty(cfg.TendrilHome))
+                throw new InvalidOperationException("Cannot create PlanDatabaseService: TendrilHome is not configured. Complete onboarding first.");
             var dbPath = Path.Combine(cfg.TendrilHome, "tendril.db");
             var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger<PlanDatabaseService>();
             return new PlanDatabaseService(dbPath, logger);
@@ -114,6 +118,13 @@ public static class TendrilServer
             return new InboxWatcherService(config, jobService);
         });
         server.Services.AddSingleton<IInboxWatcherService>(sp => sp.GetRequiredService<InboxWatcherService>());
+        server.Services.AddSingleton<WorktreeCleanupService>(sp =>
+        {
+            var config = sp.GetRequiredService<IConfigService>();
+            var logger = sp.GetRequiredService<ILogger<WorktreeCleanupService>>();
+            return new WorktreeCleanupService(config.PlanFolder, logger);
+        });
+        server.Services.AddSingleton<IStartable>(sp => sp.GetRequiredService<WorktreeCleanupService>());
 
         server.UseWebApplication(app =>
         {
@@ -122,13 +133,8 @@ public static class TendrilServer
             if (serverUrl != null)
                 Environment.SetEnvironmentVariable("TENDRIL_URL", serverUrl);
 
-            // Eagerly resolve watcher services
-            app.Services.GetRequiredService<IPlanWatcherService>();
-            app.Services.GetRequiredService<IInboxWatcherService>();
-
-            // Start database sync in background
-            var syncService = app.Services.GetRequiredService<PlanDatabaseSyncService>();
-            Task.Run(syncService.PerformInitialSync);
+            if (!configService.NeedsOnboarding)
+                BackgroundServiceActivator.Start(app.Services);
 
             var telemetryService = app.Services.GetRequiredService<TelemetryService>();
             var appVersion = typeof(TendrilAppShell).Assembly.GetName().Version!.ToString(3);
@@ -138,8 +144,15 @@ public static class TendrilServer
                 configService.Settings.Llm?.ApiKey != null));
             _ = Task.Run(async () =>
             {
-                await telemetryService.IdentifyAsync(appVersion);
-                await telemetryService.FlushAsync();
+                try
+                {
+                    await telemetryService.IdentifyAsync(appVersion);
+                    await telemetryService.FlushAsync();
+                }
+                catch (Exception ex)
+                {
+                    Program.WriteCrashLog($"[{DateTime.UtcNow:O}] Telemetry startup exception: {ex}");
+                }
             });
             app.UseAssets(server.Args, app.Services.GetRequiredService<ILogger<Server>>(), "Assets", "tendril/assets");
         });
@@ -159,7 +172,7 @@ public static class TendrilServer
                     ).Gap(0)
                 ).Gap(2).Padding(2).AlignContent(Align.BottomLeft)
             )
-            .DefaultAppId("dashboard")
+            .WallpaperApp<Apps.WallpaperApp>()
             .UseTabs(true);
 
         server.UseAppShell(() => new TendrilAppShell(appShellSettings));

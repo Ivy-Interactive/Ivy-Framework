@@ -30,13 +30,15 @@ const SheetOverlay = React.forwardRef<
 ));
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
-const sheetVariant = cva("fixed z-50 gap-4 bg-background p-6 shadow-lg outline-none", {
+const sheetVariant = cva("fixed z-50 gap-4 bg-background p-6 outline-none", {
   variants: {
     side: {
-      top: "inset-x-0 top-0 border-b",
-      bottom: "inset-x-0 bottom-0 border-t",
-      left: "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
-      right: "inset-y-0 right-0 h-full w-3/4 border-l",
+      top: "inset-x-0 top-0 border-b shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1),inset_0_-8px_8px_-8px_rgba(0,0,0,0.04)]",
+      bottom:
+        "inset-x-0 bottom-0 border-t shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1),0_-4px_6px_-4px_rgba(0,0,0,0.1),inset_0_8px_8px_-8px_rgba(0,0,0,0.04)]",
+      left: "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm shadow-[10px_0_15px_-3px_rgba(0,0,0,0.1),4px_0_6px_-4px_rgba(0,0,0,0.1),inset_-8px_0_8px_-8px_rgba(0,0,0,0.04)]",
+      right:
+        "inset-y-0 right-0 h-full w-3/4 border-l shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.1),-4px_0_6px_-4px_rgba(0,0,0,0.1),inset_8px_0_8px_-8px_rgba(0,0,0,0.04)]",
     },
   },
   defaultVariants: {

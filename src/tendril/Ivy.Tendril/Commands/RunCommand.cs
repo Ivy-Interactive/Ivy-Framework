@@ -25,6 +25,11 @@ public class RunCommand : AsyncCommand<RunCommand.Settings>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var config = _serviceProvider.GetRequiredService<IConfigService>();
+        if (string.IsNullOrEmpty(config.TendrilHome))
+        {
+            AnsiConsole.MarkupLine("[red]Error: TENDRIL_HOME is not configured. Run onboarding first.[/]");
+            return 1;
+        }
         var dbPath = Path.Combine(config.TendrilHome, "tendril.db");
 
         // Ensure directory exists

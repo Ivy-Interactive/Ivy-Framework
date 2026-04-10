@@ -41,4 +41,20 @@ public static class TooltipExtensions
     {
         return new Tooltip(view, content);
     }
+
+    /// <summary>
+    /// Wraps the widget with a tooltip whose content is built from a view.
+    /// </summary>
+    public static IWidget WithTooltip(this IWidget widget, IView content)
+    {
+        return new Tooltip(widget, content);
+    }
+
+    /// <summary>
+    /// Wraps the view with a tooltip whose content is built from a view.
+    /// </summary>
+    public static IWidget WithTooltip(this IView view, IView content)
+    {
+        return new Tooltip(view, content);
+    }
 }

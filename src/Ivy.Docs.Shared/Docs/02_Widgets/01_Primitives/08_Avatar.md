@@ -29,6 +29,20 @@ Layout.Horizontal()
     | new Avatar("Niels Bosma")
 ```
 
+## Colors
+
+Use `.Color()` to set the background color of the fallback display. This affects initials and placeholder rendering when no image is provided.
+
+```csharp demo-tabs
+Layout.Horizontal()
+    | new Avatar("Primary").Color(Colors.Primary)
+    | new Avatar("Secondary").Color(Colors.Secondary)
+    | new Avatar("Destructive").Color(Colors.Destructive)
+    | new Avatar("Success").Color(Colors.Success)
+    | new Avatar("Warning").Color(Colors.Warning)
+    | new Avatar("Info").Color(Colors.Info)
+```
+
 ## Practical Usage
 
 It's possible to create a dictionary where each object contains a name and an associated avatar.

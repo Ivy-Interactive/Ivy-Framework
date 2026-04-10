@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { GridColumn } from "@glideapps/glide-data-grid";
+import { GridColumn, getDefaultTheme } from "@glideapps/glide-data-grid";
 import { DataColumn } from "../../types/types";
-import { parseSize, estimateHeaderWidth } from "../utils/parseSize";
+import {
+  parseSize,
+  estimateHeaderWidth,
+  estimateContentWidth,
+  getSizeMode,
+} from "../utils/columnSizing";
+import type * as arrow from "apache-arrow";
 
 interface UseColumnManagementProps {
   columnsProp: DataColumn[];
@@ -58,27 +64,42 @@ export const useColumnManagement = ({
   );
 
   // Initialize column widths only if not already set (first load)
-  const initializeColumnWidths = useCallback((mergedColumns: DataColumn[]) => {
-    setColumnWidths((prevWidths) => {
-      // If we already have column widths, preserve them
-      if (Object.keys(prevWidths).length > 0) {
-        return prevWidths;
-      }
+  const initializeColumnWidths = useCallback(
+    (mergedColumns: DataColumn[], arrowTable?: arrow.Table | null) => {
+      setColumnWidths((prevWidths) => {
+        // If we already have column widths, preserve them
+        if (Object.keys(prevWidths).length > 0) {
+          return prevWidths;
+        }
 
-      // First time loading, initialize with default widths
-      const widths: Record<string, number> = {};
-      mergedColumns.forEach((col, index) => {
-        const explicitWidth = parseSize(col.width);
-        const headerMinWidth = estimateHeaderWidth(col.header || col.name);
-        // Use explicit width if set, otherwise use header-based width
-        // If explicit width is the default (150), use the larger of explicit and header-based
-        widths[index.toString()] = col.width
-          ? explicitWidth
-          : Math.max(explicitWidth, headerMinWidth);
+        // First time loading, initialize with default widths
+        const defaultTheme = getDefaultTheme();
+        const headerFont = `${defaultTheme.headerFontStyle} ${defaultTheme.fontFamily}`;
+        const contentFont = `${defaultTheme.baseFontStyle} ${defaultTheme.fontFamily}`;
+        const widths: Record<string, number> = {};
+        mergedColumns.forEach((col, index) => {
+          const explicitWidth = parseSize(col.width);
+          const headerMinWidth = estimateHeaderWidth(col.header || col.name, headerFont);
+
+          // For content-based size types (Fit, MinContent, MaxContent),
+          // sample actual data if available
+          const sizeMode = getSizeMode(col.originalWidth ?? col.width);
+          if (sizeMode && arrowTable) {
+            const contentWidth = estimateContentWidth(arrowTable, index, sizeMode, contentFont);
+            if (contentWidth !== undefined) {
+              widths[index.toString()] = Math.max(headerMinWidth, contentWidth);
+              return;
+            }
+          }
+
+          // For grow/fraction/auto/etc types, parseSize returns 0 — use header width as minimum
+          widths[index.toString()] = Math.max(explicitWidth, headerMinWidth);
+        });
+        return widths;
       });
-      return widths;
-    });
-  }, []);
+    },
+    [],
+  );
 
   // Handle column resize
   const handleColumnResize = useCallback(

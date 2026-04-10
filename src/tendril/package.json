@@ -1,6 +1,6 @@
 {
   "name": "@ivy/tendril",
-  "version": "1.0.0",
+  "version": "1.0.9",
   "description": "NPM wrapper for Ivy.Tendril — AI-powered plan management CLI",
   "main": "bin/tendril.js",
   "bin": {

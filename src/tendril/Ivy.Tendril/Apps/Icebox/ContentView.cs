@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Ivy.Core;
 using Ivy.Tendril.Apps.Icebox.Dialogs;
 using Ivy.Tendril.Apps.Plans;
@@ -17,6 +16,7 @@ public class ContentView(
 {
     private readonly List<PlanFile> _allPlans = allPlans;
     private readonly IConfigService _config = config;
+    private readonly IJobService _jobService = jobService;
     private readonly IPlanReaderService _planService = planService;
     private readonly Action _refreshPlans = refreshPlans;
     private readonly PlanFile? _selectedPlan = selectedPlan;
@@ -84,9 +84,6 @@ public class ContentView(
 
         var header = Layout.Horizontal().Width(Size.Full()).Padding(1).Gap(2)
                      | Text.Block($"#{_selectedPlan.Id} {_selectedPlan.Title}").Bold()
-                     | new Badge(_selectedPlan.Project).Variant(BadgeVariant.Outline)
-                         .WithProjectColor(_config, _selectedPlan.Project)
-                     | new Badge(_selectedPlan.Level).Variant(_config.GetBadgeVariant(_selectedPlan.Level))
                      | isEditing.ToSwitchInput(Icons.Pencil).Label("Edit")
                      | new Spacer().Width(Size.Grow())
                      | Text.Rich()
@@ -127,6 +124,12 @@ public class ContentView(
                             _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Draft);
                             _refreshPlans();
                         })
+                        | new Button("Execute").Icon(Icons.Rocket).Outline().ShortcutKey("e").OnClick(() =>
+                        {
+                            _planService.TransitionState(_selectedPlan.FolderName, PlanStatus.Building);
+                            _jobService.StartJob("ExecutePlan", _selectedPlan.FolderPath);
+                            _refreshPlans();
+                        })
                         | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
                             new MenuItem("Download", Icon: Icons.Download, Tag: "Download").OnSelect(() =>
                             {
@@ -142,12 +145,7 @@ public class ContentView(
                             new MenuItem("Open plan.yaml", Icon: Icons.FileText, Tag: "OpenPlanYaml").OnSelect(() =>
                             {
                                 var yamlPath = Path.Combine(_selectedPlan.FolderPath, "plan.yaml");
-                                Process.Start(new ProcessStartInfo
-                                {
-                                    FileName = _config.Editor.Command,
-                                    Arguments = yamlPath,
-                                    UseShellExecute = true
-                                });
+                                _config.OpenInEditor(yamlPath);
                             })
                         );
 

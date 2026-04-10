@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using Ivy.Helpers;
 
 namespace Ivy.Tendril.Services;
 
@@ -19,7 +20,7 @@ public class GitService : IGitService
             };
             using var process = Process.Start(psi);
             var title = process?.StandardOutput.ReadLine();
-            process?.WaitForExit();
+            process.WaitForExitOrKill(10000);
             return process?.ExitCode == 0 ? title : null;
         }
         catch
@@ -42,12 +43,37 @@ public class GitService : IGitService
             };
             using var process = Process.Start(psi);
             var output = process?.StandardOutput.ReadToEnd();
-            process?.WaitForExit();
+            process.WaitForExitOrKill(10000);
             return process?.ExitCode == 0 ? output : null;
         }
         catch
         {
             return null; /* git may not be installed, or repo path invalid */
+        }
+    }
+
+    public int? GetCommitFileCount(string repoPath, string commitHash)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo("git", $"diff-tree --no-commit-id --name-only -r {commitHash}")
+            {
+                WorkingDirectory = repoPath,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.UTF8
+            };
+            using var process = Process.Start(psi);
+            var output = process?.StandardOutput.ReadToEnd();
+            process.WaitForExitOrKill(10000);
+            if (process?.ExitCode != 0 || output == null) return null;
+
+            return output.Split('\n', StringSplitOptions.RemoveEmptyEntries).Length;
+        }
+        catch
+        {
+            return null;
         }
     }
 
@@ -65,7 +91,7 @@ public class GitService : IGitService
             };
             using var process = Process.Start(psi);
             var output = process?.StandardOutput.ReadToEnd();
-            process?.WaitForExit();
+            process.WaitForExitOrKill(10000);
             if (process?.ExitCode != 0 || output == null) return null;
 
             var files = new List<(string Status, string FilePath)>();

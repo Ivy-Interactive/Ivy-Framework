@@ -1,3 +1,4 @@
+using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Test;
@@ -108,6 +109,29 @@ public class JobServiceThreadSafetyTests
         {
             SynchronizationContext.SetSynchronizationContext(null);
         }
+    }
+
+    [Fact]
+    public void CompleteJob_CalledTwice_DoesNotThrowSemaphoreFullException()
+    {
+        SynchronizationContext.SetSynchronizationContext(null);
+
+        var service = new JobService(
+            TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
+            null, 2);
+
+        var jobId = service.CreateTestJob("ExecutePlan", "test-plan");
+
+        // First call should succeed and transition the job out of Running
+        service.CompleteJob(jobId, 0);
+
+        var job = service.GetJob(jobId);
+        Assert.NotNull(job);
+        Assert.Equal(JobStatus.Completed, job.Status);
+
+        // Second call should be a no-op (status guard prevents double release)
+        var ex = Record.Exception(() => service.CompleteJob(jobId, null, true, true));
+        Assert.Null(ex);
     }
 
     private class TestSynchronizationContext : SynchronizationContext

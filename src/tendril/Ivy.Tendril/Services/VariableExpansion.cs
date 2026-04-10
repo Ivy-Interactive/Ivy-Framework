@@ -90,12 +90,11 @@ public static class VariableExpansion
         else
             value = value.Replace('\\', '/');
 
-        // Remove double separators (e.g., \\ or //) — single Replace call
-        // suffices because variable expansion produces at most one extra separator
+        // Remove double separators (e.g., \\ or //) — but skip URI scheme separators (e.g., https://)
         var sep = Path.DirectorySeparatorChar.ToString();
         var doubleSep = sep + sep;
         if (value.Contains(doubleSep))
-            value = value.Replace(doubleSep, sep);
+            value = Regex.Replace(value, @"(?<!:)(" + Regex.Escape(doubleSep) + @")", sep);
 
         return value;
     }
