@@ -1,9 +1,9 @@
-using Ivy.Tendril.Apps.Settings.Dialogs;
+using Ivy.Tendril.Apps.Setup.Dialogs;
 using Ivy.Tendril.Services;
 
-namespace Ivy.Tendril.Apps.Settings;
+namespace Ivy.Tendril.Apps.Setup;
 
-public class VerificationsSettingsView : ViewBase
+public class VerificationsSetupView : ViewBase
 {
     public override object Build()
     {

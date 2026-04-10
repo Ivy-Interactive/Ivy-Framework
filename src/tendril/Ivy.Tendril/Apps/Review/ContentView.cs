@@ -449,7 +449,7 @@ public class ContentView(
         {
             var fileRepoPaths = _selectedPlan.GetEffectiveRepoPaths(_config);
             var fileLinkSheet =
-                FileLinkHelper.BuildFileLinkSheet(openFile.Value, () => openFile.Set(null), fileRepoPaths);
+                FileLinkHelper.BuildFileLinkSheet(openFile.Value, () => openFile.Set(null), fileRepoPaths, _config);
             if (fileLinkSheet != null) content |= fileLinkSheet;
         }
 

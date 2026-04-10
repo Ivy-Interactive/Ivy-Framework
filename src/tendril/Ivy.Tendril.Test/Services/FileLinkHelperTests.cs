@@ -4,6 +4,8 @@ namespace Ivy.Tendril.Test.Services;
 
 public class FileLinkHelperTests
 {
+    private static readonly IConfigService TestConfig = new TestConfigService();
+
     [Fact]
     public void CreateFileLinkClickHandler_CapturesFilePath_WhenFileUrlProvided()
     {
@@ -40,7 +42,7 @@ public class FileLinkHelperTests
     [Fact]
     public void BuildFileLinkSheet_ReturnsNull_WhenFilePathIsNull()
     {
-        var result = FileLinkHelper.BuildFileLinkSheet(null, () => { }, []);
+        var result = FileLinkHelper.BuildFileLinkSheet(null, () => { }, [], TestConfig);
         Assert.Null(result);
     }
 
@@ -51,7 +53,7 @@ public class FileLinkHelperTests
         File.WriteAllBytes(tempFile, [0x89, 0x50, 0x4E, 0x47]); // PNG header
         try
         {
-            var result = FileLinkHelper.BuildFileLinkSheet(tempFile, () => { }, []);
+            var result = FileLinkHelper.BuildFileLinkSheet(tempFile, () => { }, [], TestConfig);
             Assert.NotNull(result);
             Assert.IsType<Sheet>(result);
         }
@@ -68,7 +70,7 @@ public class FileLinkHelperTests
         File.WriteAllText(tempFile, "public class Foo { }");
         try
         {
-            var result = FileLinkHelper.BuildFileLinkSheet(tempFile, () => { }, []);
+            var result = FileLinkHelper.BuildFileLinkSheet(tempFile, () => { }, [], TestConfig);
             Assert.NotNull(result);
             Assert.IsType<Sheet>(result);
         }
@@ -82,7 +84,7 @@ public class FileLinkHelperTests
     public void BuildFileLinkSheet_ShowsSuggestions_WhenFileNotFound()
     {
         var result = FileLinkHelper.BuildFileLinkSheet(
-            "/nonexistent/path/foo.cs", () => { }, []);
+            "/nonexistent/path/foo.cs", () => { }, [], TestConfig);
         Assert.NotNull(result);
         Assert.IsType<Sheet>(result);
     }
@@ -91,9 +93,35 @@ public class FileLinkHelperTests
     public void BuildFileLinkSheet_ReturnsSheet_WhenFileNotFound()
     {
         var result = FileLinkHelper.BuildFileLinkSheet(
-            "/nonexistent/file.txt", () => { }, []);
+            "/nonexistent/file.txt", () => { }, [], TestConfig);
         Assert.NotNull(result);
         Assert.IsType<Sheet>(result);
+    }
+
+    private class TestConfigService : IConfigService
+    {
+        public TendrilSettings Settings => new();
+        public string TendrilHome => "";
+        public string ConfigPath => "";
+        public string PlanFolder => "";
+        public List<ProjectConfig> Projects => [];
+        public List<LevelConfig> Levels => [];
+        public string[] LevelNames => [];
+        public EditorConfig Editor => new() { Command = "code", Label = "VS Code" };
+        public bool NeedsOnboarding => false;
+
+        public ProjectConfig? GetProject(string name) => null;
+        public BadgeVariant GetBadgeVariant(string level) => BadgeVariant.Outline;
+        public Colors? GetProjectColor(string projectName) => null;
+        public void SaveSettings() { }
+        public void SetPendingTendrilHome(string path) { }
+        public string? GetPendingTendrilHome() => null;
+        public void SetPendingProject(ProjectConfig project) { }
+        public ProjectConfig? GetPendingProject() => null;
+        public void SetPendingVerificationDefinitions(List<VerificationConfig> definitions) { }
+        public List<VerificationConfig>? GetPendingVerificationDefinitions() => null;
+        public void CompleteOnboarding(string tendrilHome) { }
+        public void OpenInEditor(string path) { }
     }
 
     private class TestState<T> : IState<T>

@@ -1,16 +1,16 @@
 using Ivy.Tendril.Services;
 
-namespace Ivy.Tendril.Apps.Settings.Dialogs;
+namespace Ivy.Tendril.Apps.Setup.Dialogs;
 
-public class EditVerificationDialog(
+public class EditLevelDialog(
     IState<int?> editIndex,
-    List<VerificationConfig> verifications,
+    List<LevelConfig> levels,
     IConfigService config,
     IClientProvider client,
     RefreshToken refreshToken) : ViewBase
 {
     private readonly IState<int?> _editIndex = editIndex;
-    private readonly List<VerificationConfig> _verifications = verifications;
+    private readonly List<LevelConfig> _levels = levels;
     private readonly IConfigService _config = config;
     private readonly IClientProvider _client = client;
     private readonly RefreshToken _refreshToken = refreshToken;
@@ -18,33 +18,34 @@ public class EditVerificationDialog(
     public override object? Build()
     {
         var editName = UseState("");
-        var editPrompt = UseState("");
+        var editBadge = UseState("Outline");
 
         UseEffect(() =>
         {
             if (_editIndex.Value == null)
             {
                 editName.Set("");
-                editPrompt.Set("");
+                editBadge.Set("Outline");
             }
             else if (_editIndex.Value >= 0)
             {
-                editName.Set(_verifications[_editIndex.Value.Value].Name);
-                editPrompt.Set(_verifications[_editIndex.Value.Value].Prompt);
+                editName.Set(_levels[_editIndex.Value.Value].Name);
+                editBadge.Set(_levels[_editIndex.Value.Value].Badge);
             }
         }, _editIndex);
 
         if (_editIndex.Value == -1) return null;
 
+        var badgeOptions = Enum.GetNames<BadgeVariant>().ToList();
         var isNew = _editIndex.Value == null;
 
         return new Dialog(
-            _ => _editIndex.Set(-1),
-            new DialogHeader(isNew ? "Add Verification" : "Edit Verification"),
+            _ => { _editIndex.Set(-1); },
+            new DialogHeader(isNew ? "Add Level" : "Edit Level"),
             new DialogBody(
                 Layout.Vertical().Gap(2)
-                | editName.ToTextInput("Verification name...").WithField().Label("Name")
-                | editPrompt.ToTextareaInput("Verification prompt...").Rows(8).WithField().Label("Prompt")
+                | editName.ToTextInput("Level name...").WithField().Label("Name")
+                | editBadge.ToSelectInput(badgeOptions).WithField().Label("Badge Variant")
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() => _editIndex.Set(-1)),
@@ -53,24 +54,21 @@ public class EditVerificationDialog(
                     if (string.IsNullOrWhiteSpace(editName.Value)) return;
                     if (isNew)
                     {
-                        _verifications.Add(new VerificationConfig
-                        {
-                            Name = editName.Value,
-                            Prompt = editPrompt.Value
-                        });
+                        _levels.Add(new LevelConfig { Name = editName.Value, Badge = editBadge.Value });
                     }
                     else
                     {
-                        _verifications[_editIndex.Value!.Value].Name = editName.Value;
-                        _verifications[_editIndex.Value!.Value].Prompt = editPrompt.Value;
+                        var level = _levels[_editIndex.Value!.Value];
+                        level.Name = editName.Value;
+                        level.Badge = editBadge.Value;
                     }
 
                     _config.SaveSettings();
                     _editIndex.Set(-1);
                     _refreshToken.Refresh();
-                    _client.Toast("Verification saved", "Saved");
+                    _client.Toast("Level saved", "Saved");
                 })
             )
-        ).Width(Size.Rem(35));
+        ).Width(Size.Rem(25));
     }
 }

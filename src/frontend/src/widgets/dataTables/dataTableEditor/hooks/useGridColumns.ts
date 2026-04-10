@@ -8,7 +8,6 @@ interface UseGridColumnsProps {
   columns: DataColumn[];
   columnOrder: number[];
   columnWidths: Record<string, number>;
-  containerWidth: number;
   showGroups?: boolean;
   showColumnTypeIcons?: boolean;
 }
@@ -20,7 +19,6 @@ export const useGridColumns = ({
   columns,
   columnOrder,
   columnWidths,
-  containerWidth,
   showGroups = false,
   showColumnTypeIcons = true,
 }: UseGridColumnsProps) => {
@@ -37,20 +35,11 @@ export const useGridColumns = ({
         columns,
         columnOrder,
         columnWidths,
-        containerWidth,
         showGroups,
         showColumnTypeIcons,
         headerFont,
       ),
-    [
-      columns,
-      columnOrder,
-      columnWidths,
-      containerWidth,
-      showGroups,
-      showColumnTypeIcons,
-      headerFont,
-    ],
+    [columns, columnOrder, columnWidths, showGroups, showColumnTypeIcons, headerFont],
   );
 
   // Use column groups hook when showGroups is enabled

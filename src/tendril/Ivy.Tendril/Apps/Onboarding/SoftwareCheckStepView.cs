@@ -96,16 +96,25 @@ public class SoftwareCheckStepView(
         {
             isChecking.Set(true);
 
+            var ghTask = CheckCommand("gh", "--version");
+            var claudeTask = CheckCommand("claude", "--version");
+            var codexTask = CheckCommand("codex", "--version");
+            var geminiTask = CheckCommand("gemini", "--version");
+            var gitTask = CheckCommand("git", "--version");
+            var powershellTask = CheckPowerShell();
+            var pandocTask = CheckCommand("pandoc", "--version");
+
+            await Task.WhenAll(ghTask, claudeTask, codexTask, geminiTask, gitTask, powershellTask, pandocTask);
+
             var results = new Dictionary<string, bool>
             {
-                ["gh"] = await CheckCommand("gh", "--version"),
-                ["claude"] = await CheckCommand("claude", "--version"),
-                ["codex"] = await CheckCommand("codex", "--version"),
-                ["gemini"] = await CheckCommand("gemini", "--version"),
-                ["git"] = await CheckCommand("git", "--version"),
-                ["powershell"] = await CheckCommand("pwsh", "-Version")
-                                 || await CheckCommand("powershell", "-Version"),
-                ["pandoc"] = await CheckCommand("pandoc", "--version")
+                ["gh"] = ghTask.Result,
+                ["claude"] = claudeTask.Result,
+                ["codex"] = codexTask.Result,
+                ["gemini"] = geminiTask.Result,
+                ["git"] = gitTask.Result,
+                ["powershell"] = powershellTask.Result,
+                ["pandoc"] = pandocTask.Result
             };
 
             checkResults.Set(results);
@@ -163,6 +172,11 @@ public class SoftwareCheckStepView(
             new TableCell(statusText),
             notesCell
         );
+    }
+
+    private static async Task<bool> CheckPowerShell()
+    {
+        return await CheckCommand("pwsh", "-Version") || await CheckCommand("powershell", "-Version");
     }
 
     private static Task<bool> CheckCommand(string fileName, string arguments)

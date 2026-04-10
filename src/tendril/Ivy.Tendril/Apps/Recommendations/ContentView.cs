@@ -163,8 +163,7 @@ public class ContentView(
                 openFile.Value,
                 () => openFile.Set(null),
                 repoPaths,
-                config.Editor.Command,
-                config.Editor.Label);
+                config);
 
             if (fileLinkSheet is not null)
                 return new Fragment(

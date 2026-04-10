@@ -328,8 +328,7 @@ public class PlanReaderService(
         {
             if (!Directory.Exists(folderPath)) return;
             RemoveWorktrees(folderPath, _logger);
-            ClearReadOnlyAttributes(folderPath);
-            Directory.Delete(folderPath, true);
+            WorktreeCleanupService.ForceDeleteDirectory(folderPath, _logger);
         });
     }
 

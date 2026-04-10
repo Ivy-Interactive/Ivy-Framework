@@ -223,6 +223,59 @@ public class WorktreeCleanupServiceTests : IDisposable
     }
 
     [Fact]
+    public void ForceDeleteDirectory_Deletes_Normal_Directory()
+    {
+        var dir = Path.Combine(_tempDir, "force-delete-normal");
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, "file.txt"), "content");
+
+        WorktreeCleanupService.ForceDeleteDirectory(dir);
+
+        Assert.False(Directory.Exists(dir), "Normal directory should be deleted by ForceDeleteDirectory");
+    }
+
+    [Fact]
+    public void ForceDeleteDirectory_Deletes_ReadOnly_Directory()
+    {
+        var dir = Path.Combine(_tempDir, "force-delete-readonly");
+        var subDir = Path.Combine(dir, "sub");
+        Directory.CreateDirectory(subDir);
+
+        var roFile = Path.Combine(subDir, "readonly.dat");
+        File.WriteAllText(roFile, "locked content");
+        File.SetAttributes(roFile, FileAttributes.ReadOnly);
+
+        WorktreeCleanupService.ForceDeleteDirectory(dir);
+
+        Assert.False(Directory.Exists(dir), "Directory with read-only files should be deleted by ForceDeleteDirectory");
+    }
+
+    [Fact]
+    public void ForceDeleteDirectory_Handles_Nonexistent_Path_Gracefully()
+    {
+        var dir = Path.Combine(_tempDir, "force-delete-nonexistent");
+
+        // DirectoryNotFoundException inherits from IOException, so the first catch handles it.
+        // The Windows rmdir fallback also tolerates missing paths.
+        // Verify the method does not throw on nonexistent directories.
+        var ex = Record.Exception(() => WorktreeCleanupService.ForceDeleteDirectory(dir));
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void ForceDeleteDirectory_Deletes_Deeply_Nested_Directory()
+    {
+        var dir = Path.Combine(_tempDir, "force-delete-deep");
+        var deep = Path.Combine(dir, "a", "b", "c", "d");
+        Directory.CreateDirectory(deep);
+        File.WriteAllText(Path.Combine(deep, "leaf.txt"), "deep");
+
+        WorktreeCleanupService.ForceDeleteDirectory(dir);
+
+        Assert.False(Directory.Exists(dir), "Deeply nested directory should be deleted by ForceDeleteDirectory");
+    }
+
+    [Fact]
     public void RemoveWorktrees_Logs_Warning_When_GitFile_Missing()
     {
         var dir = CreatePlan("10000-LogWarningTest", "Failed", DateTime.UtcNow.AddHours(-2));
@@ -238,6 +291,67 @@ public class WorktreeCleanupServiceTests : IDisposable
         Assert.Single(logEntries);
         Assert.Contains("has no .git file", logEntries[0]);
         Assert.Contains("TestRepo", logEntries[0]);
+    }
+
+    [Fact]
+    public void CleanupPlanWorktrees_ForceDeletes_DeepNodeModulesPath()
+    {
+        // Simulates the real-world failure: cleanup must succeed over a deeply nested
+        // node_modules tree like the one that crashed on 'helper-string-parser'.
+        var dir = CreatePlan("11000-DeepNodeModules", "Completed", DateTime.UtcNow.AddHours(-2));
+        var worktreeDir = Path.Combine(dir, "worktrees", "TestRepo");
+
+        var deep = Path.Combine(
+            worktreeDir,
+            "frontend", "node_modules", "some-pkg", "node_modules",
+            "helper-string-parser", "lib", "esm", "helpers");
+        Directory.CreateDirectory(deep);
+
+        // Spread several files at different depths.
+        File.WriteAllText(Path.Combine(worktreeDir, "package.json"), "{}");
+        File.WriteAllText(
+            Path.Combine(worktreeDir, "frontend", "node_modules", "some-pkg", "index.js"),
+            "module.exports = {};");
+        File.WriteAllText(Path.Combine(deep, "parse-array.js"), "exports.parseArray = () => [];");
+        File.WriteAllText(Path.Combine(deep, "parse-object.js"), "exports.parseObject = () => ({});");
+
+        WorktreeCleanupService.CleanupPlanWorktrees(dir);
+
+        Assert.False(Directory.Exists(worktreeDir),
+            "Deeply nested node_modules worktree should be force-deleted");
+        Assert.False(Directory.Exists(Path.Combine(dir, "worktrees")),
+            "Worktrees directory should be removed");
+    }
+
+    [Fact]
+    public void ForceDeleteDirectory_Logs_Fallback_When_Initial_Delete_Fails()
+    {
+        // Windows-only: holding a file handle open forces Directory.Delete to throw,
+        // which should trigger the rmdir fallback and produce a log entry.
+        if (!OperatingSystem.IsWindows()) return;
+
+        var testDir = Path.Combine(_tempDir, "force-delete-fallback");
+        Directory.CreateDirectory(testDir);
+        var lockedFile = Path.Combine(testDir, "locked.txt");
+        File.WriteAllText(lockedFile, "content");
+
+        var logEntries = new List<string>();
+        var logger = new CapturingLogger(logEntries);
+
+        // Open the file with exclusive access to force Directory.Delete to fail.
+        using (var stream = new FileStream(lockedFile, FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            // Expect IOException: Directory.Delete fails because of the lock, and
+            // rmdir /s /q also can't delete the file while it's held open.
+            Assert.Throws<IOException>(() =>
+                WorktreeCleanupService.ForceDeleteDirectory(testDir, logger));
+        }
+
+        Assert.Contains(logEntries, e => e.Contains("falling back to rmdir"));
+
+        // Cleanup after the stream is released.
+        if (Directory.Exists(testDir))
+            Directory.Delete(testDir, true);
     }
 
     private class CapturingLogger(List<string> entries) : ILogger

@@ -202,7 +202,6 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     columns,
     columnOrder,
     columnWidths,
-    containerWidth,
     showGroups: showGroups ?? false,
     showColumnTypeIcons: showColumnTypeIcons ?? true,
   });

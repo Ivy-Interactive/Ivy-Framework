@@ -119,8 +119,7 @@ public class TrashApp : ViewBase
                 filePath,
                 () => openFile.Set(null),
                 [],
-                configService.Editor.Command,
-                configService.Editor.Label);
+                configService);
             if (fileLinkSheet is not null)
                 elements.Add(fileLinkSheet);
         }

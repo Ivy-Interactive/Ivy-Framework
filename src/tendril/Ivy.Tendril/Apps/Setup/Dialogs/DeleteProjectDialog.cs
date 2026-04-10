@@ -1,6 +1,6 @@
 using Ivy.Tendril.Services;
 
-namespace Ivy.Tendril.Apps.Settings.Dialogs;
+namespace Ivy.Tendril.Apps.Setup.Dialogs;
 
 public class DeleteProjectDialog(
     IState<int?> deleteIndex,

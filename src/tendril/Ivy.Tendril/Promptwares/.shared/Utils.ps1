@@ -595,11 +595,27 @@ function GetAgentCommand {
                 $codingAgent = $config.codingAgent.ToLower()
             }
 
+            # Start with _default as base, then overlay specific promptware entry
             $pwConfig = $null
-            if ($Promptware -and $config.promptwares.$Promptware) {
-                $pwConfig = $config.promptwares.$Promptware
-            } elseif ($config.promptwares._default) {
-                $pwConfig = $config.promptwares._default
+            $defaultConfig = $config.promptwares._default
+            $specificConfig = if ($Promptware) { $config.promptwares.$Promptware } else { $null }
+
+            if ($defaultConfig -or $specificConfig) {
+                $pwConfig = @{}
+
+                # Layer 1: _default values
+                if ($defaultConfig) {
+                    if ($defaultConfig.model) { $pwConfig.model = $defaultConfig.model }
+                    if ($defaultConfig.effort) { $pwConfig.effort = $defaultConfig.effort }
+                    if ($defaultConfig.allowedTools) { $pwConfig.allowedTools = $defaultConfig.allowedTools }
+                }
+
+                # Layer 2: specific promptware values override
+                if ($specificConfig) {
+                    if ($specificConfig.model) { $pwConfig.model = $specificConfig.model }
+                    if ($specificConfig.effort) { $pwConfig.effort = $specificConfig.effort }
+                    if ($specificConfig.allowedTools) { $pwConfig.allowedTools = $specificConfig.allowedTools }
+                }
             }
 
             if ($pwConfig) {

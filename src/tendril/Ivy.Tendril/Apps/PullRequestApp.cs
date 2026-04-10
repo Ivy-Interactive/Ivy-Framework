@@ -177,7 +177,7 @@ public class PullRequestApp : ViewBase
 
             var repoPaths = plan?.GetEffectiveRepoPaths(config) ?? [];
             var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(
-                openFile.Value, () => openFile.Set(null), repoPaths);
+                openFile.Value, () => openFile.Set(null), repoPaths, config);
 
             var planSheet = new Sheet(
                 () => showPlan.Set(null),

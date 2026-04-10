@@ -589,6 +589,44 @@ promptwares:
     }
 
     [Fact]
+    public void Should_Parse_Partial_Promptware_Entry_Alongside_Default()
+    {
+        var yaml = @"
+promptwares:
+  _default:
+    model: sonnet
+    effort: high
+    allowedTools:
+      - Read
+      - Glob
+  ExecutePlan:
+    model: opus
+";
+
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            var defaultConfig = service.Settings.Promptwares["_default"];
+            Assert.Equal("sonnet", defaultConfig.Model);
+            Assert.Equal("high", defaultConfig.Effort);
+            Assert.Equal(2, defaultConfig.AllowedTools.Count);
+
+            var execConfig = service.Settings.Promptwares["ExecutePlan"];
+            Assert.Equal("opus", execConfig.Model);
+            Assert.Equal("", execConfig.Effort); // Not specified — PowerShell merge will inherit from _default
+            Assert.Empty(execConfig.AllowedTools); // Not specified — PowerShell merge will inherit from _default
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
     public void EditorConfig_IsAvailable_WhenCommandExists()
     {
         // "dotnet" should be available on any machine running these tests

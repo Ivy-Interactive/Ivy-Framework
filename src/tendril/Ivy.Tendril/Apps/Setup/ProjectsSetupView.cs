@@ -1,9 +1,9 @@
-using Ivy.Tendril.Apps.Settings.Dialogs;
+using Ivy.Tendril.Apps.Setup.Dialogs;
 using Ivy.Tendril.Services;
 
-namespace Ivy.Tendril.Apps.Settings;
+namespace Ivy.Tendril.Apps.Setup;
 
-public class ProjectsSettingsView : ViewBase
+public class ProjectsSetupView : ViewBase
 {
     public override object Build()
     {

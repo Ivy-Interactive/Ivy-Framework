@@ -1,3 +1,4 @@
+using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
@@ -7,9 +8,14 @@ public class WallpaperApp : ViewBase
 {
     public override object Build()
     {
-        var navigator = UseNavigation();
+        var jobService = UseService<IJobService>();
+        var configService = UseService<IConfigService>();
         var countsService = UseService<IPlanCountsService>();
+        var dialogOpen = UseState(false);
+        var lastSelectedProject = UseState("[Auto]");
+
         var counts = countsService.Current;
+        var projectNames = configService.Projects.Select(p => p.Name).ToList();
 
         var hasActivity = counts.Drafts > 0 || counts.ActiveJobs > 0 || counts.Reviews > 0;
 
@@ -17,14 +23,31 @@ public class WallpaperApp : ViewBase
         var subtitle = hasActivity ? BuildSummary(counts) : "Manage your plans, track jobs, and review pull requests.";
         var buttonLabel = hasActivity ? "New Plan" : "Create your first Plan";
 
-        return Layout.Center()
-               | (Layout.Vertical().Gap(2).AlignContent(Align.Center)
-                  | new Image("/tendril/assets/Tendril.svg").Width(Size.Units(30)).Height(Size.Auto())
-                  | Text.H2(heading)
-                  | Text.Muted(subtitle)
-                  | new Button(buttonLabel, () => navigator.Navigate<PlansApp>())
-                      .Variant(ButtonVariant.Primary)
-               );
+        var elements = new List<object>
+        {
+            Layout.Center()
+                | (Layout.Vertical().Gap(2).AlignContent(Align.Center)
+                   | new Image("/tendril/assets/Tendril.svg").Width(Size.Units(30)).Height(Size.Auto())
+                   | Text.H2(heading)
+                   | Text.Muted(subtitle)
+                   | new Button(buttonLabel, () => dialogOpen.Set(true))
+                       .Variant(ButtonVariant.Primary)
+                )
+        };
+
+        if (dialogOpen.Value)
+            elements.Add(new CreatePlanDialog(
+                projectNames,
+                (description, project) =>
+                {
+                    lastSelectedProject.Set(project);
+                    jobService.StartJob("MakePlan", "-Description", $"{description} [FORCE]", "-Project", project);
+                },
+                () => dialogOpen.Set(false),
+                lastSelectedProject.Value
+            ));
+
+        return new Fragment(elements.ToArray());
     }
 
     private static string BuildSummary(PlanCounts counts)

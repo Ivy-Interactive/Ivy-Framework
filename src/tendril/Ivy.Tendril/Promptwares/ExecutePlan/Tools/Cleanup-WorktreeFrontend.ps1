@@ -31,9 +31,12 @@ if ($worktrees.Count -eq 0) {
 foreach ($worktree in $worktrees) {
     Write-Host "`nProcessing worktree: $($worktree.Name)"
 
-    # Find all .npmrc files in frontend directories
+    # Find all .npmrc files anywhere in the worktree (except inside node_modules).
+    # Program.md's Setup step creates .npmrc next to every package.json that isn't under
+    # node_modules — which includes non-"frontend" dirs like src/tendril. Matching the
+    # creation scope here prevents stray .npmrc files from being left behind.
     [array]$npmrcFiles = @(Get-ChildItem -Path $worktree.FullName -Recurse -Filter ".npmrc" |
-        Where-Object { $_.Directory.Name -eq "frontend" })
+        Where-Object { $_.FullName -notmatch '[\\/]node_modules[\\/]' })
 
     foreach ($npmrcFile in $npmrcFiles) {
         $relativePath = $npmrcFile.FullName.Replace($worktree.FullName + "\", "").Replace("\", "/")

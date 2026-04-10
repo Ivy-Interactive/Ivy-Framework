@@ -17,6 +17,8 @@ The launcher script sets the working directory to the project's primary repo.
 
 **Note:** Plans are often executed multiple times. For example, a reviewer may not be satisfied with the first execution and sends the plan back to Draft with comments (via UpdatePlan). When re-executing, the worktree branch from the previous run may already exist — handle this gracefully (delete old worktree first, or create with a new branch suffix). Check for existing artifacts and verification reports from prior runs.
 
+**Resume-vs-redo on re-execution:** Before deleting anything, run an integrity check on the prior run. If `plan.yaml` has commits populated and all verifications `Pass`, every `Pass` verification has a report, `artifacts/summary.md` exists, the worktree is clean with HEAD matching the last recorded commit, and the expected code changes are present in the files — then **resume** (log it and exit successfully) rather than redoing work. Redoing creates new commit hashes and breaks downstream MakePr references. Only fall back to the full re-execution flow if any of those checks fail.
+
 ## Time Budget Awareness
 
 **You have a 30-minute hard timeout.** Plan your time carefully:
@@ -171,12 +173,15 @@ For each repo listed in `plan.yaml` `repos` (or the project's repos from `config
 
 1. Fetch latest from remote: `git fetch origin`
 2. Detect the default branch: `git symbolic-ref refs/remotes/origin/HEAD | sed 's|refs/remotes/origin/||'` (usually `master` or `main`)
-3. If the worktree or branch already exists from a prior execution, remove it first:
+3. If the worktree or branch already exists from a prior execution, remove it first. A prior run may have left a **stale directory** (the filesystem tree still exists but git no longer tracks it as a worktree — there's no `.git` file at the worktree root). In that case `git worktree remove` will fail with "is not a working tree"; you must also `rm -rf` the directory. **Do all three unconditionally** so the next `git worktree add` starts from a clean slate:
 
 ```bash
 git worktree remove "<PlanFolder>/worktrees/<repo-folder-name>" --force 2>/dev/null
 git branch -D "plan-<planId>-<repo-folder-name>" 2>/dev/null
+rm -rf "<PlanFolder>/worktrees/<repo-folder-name>"
 ```
+
+**Note on stale directories:** If a stale worktree directory exists and you run `git -C <stale-dir> status`, git silently walks up the parent chain and reports the state of the main repo — making it look like the "worktree" is simply on `main`. Do not trust that output. Before assuming a prior worktree is intact, verify with `git -C <main-repo> worktree list | grep <path>` or check that `<worktree-path>/.git` exists.
 
 1. Create worktree branching from the remote default branch:
 

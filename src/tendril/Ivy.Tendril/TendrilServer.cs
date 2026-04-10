@@ -88,13 +88,14 @@ public static class TendrilServer
             (TelemetryService)sp.GetRequiredService<ITelemetryService>());
         server.Services.AddSingleton<JobService>(sp =>
         {
+            var cfg = sp.GetRequiredService<IConfigService>();
             return new JobService(
-                sp.GetRequiredService<IConfigService>(),
+                cfg,
                 sp.GetRequiredService<ModelPricingService>(),
                 sp.GetRequiredService<IPlanReaderService>(),
                 sp.GetRequiredService<ITelemetryService>(),
                 sp.GetRequiredService<IPlanWatcherService>(),
-                sp.GetRequiredService<IPlanDatabaseService>());
+                string.IsNullOrEmpty(cfg.TendrilHome) ? null : sp.GetRequiredService<IPlanDatabaseService>());
         });
         server.Services.AddSingleton<IJobService>(sp => sp.GetRequiredService<JobService>());
         server.Services.AddSingleton<PlanWatcherService>(sp =>

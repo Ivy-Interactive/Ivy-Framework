@@ -104,6 +104,91 @@ public class BackgroundServiceActivatorTests : IAsyncLifetime
     }
 
     [Fact]
+    public void JobService_Resolves_WhenTendrilHomeEmpty_WithoutTouchingPlanDatabaseService()
+    {
+        // Simulates fresh-install DI resolution: TendrilHome is empty,
+        // so IPlanDatabaseService registration would throw if resolved.
+        // The JobService factory in TendrilServer must avoid that resolution
+        // when TendrilHome is empty, and pass null for the database dependency.
+
+        var settings = new TendrilSettings();
+        var config = new FreshInstallConfigService(settings);
+
+        var services = new ServiceCollection();
+        services.AddSingleton<IConfigService>(config);
+        services.AddSingleton(new ModelPricingService());
+        services.AddSingleton<IPlanReaderService>(sp =>
+            new PlanReaderService(sp.GetRequiredService<IConfigService>(), NullLogger<PlanReaderService>.Instance));
+        services.AddSingleton<ITelemetryService>(sp => new TelemetryService(false));
+        services.AddSingleton<IPlanWatcherService>(new PlanWatcherService(config));
+
+        // Mirrors TendrilServer line 63-71: factory throws when TendrilHome is empty.
+        services.AddSingleton<IPlanDatabaseService>(sp =>
+        {
+            var cfg = sp.GetRequiredService<IConfigService>();
+            if (string.IsNullOrEmpty(cfg.TendrilHome))
+                throw new InvalidOperationException("Cannot create PlanDatabaseService: TendrilHome is not configured. Complete onboarding first.");
+            throw new InvalidOperationException("Test should not reach database construction.");
+        });
+
+        // Mirrors TendrilServer line 89-99: fixed factory that conditionally resolves the database.
+        services.AddSingleton<JobService>(sp =>
+        {
+            var cfg = sp.GetRequiredService<IConfigService>();
+            return new JobService(
+                cfg,
+                sp.GetRequiredService<ModelPricingService>(),
+                sp.GetRequiredService<IPlanReaderService>(),
+                sp.GetRequiredService<ITelemetryService>(),
+                sp.GetRequiredService<IPlanWatcherService>(),
+                string.IsNullOrEmpty(cfg.TendrilHome) ? null : sp.GetRequiredService<IPlanDatabaseService>());
+        });
+
+        _serviceProvider = services.BuildServiceProvider();
+
+        // Resolution must NOT throw — this is the crash we're fixing.
+        var jobService = _serviceProvider.GetRequiredService<JobService>();
+        Assert.NotNull(jobService);
+
+        // Verify the database field is null so JobService won't crash at runtime.
+        var databaseField = typeof(JobService).GetField("_database",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        Assert.NotNull(databaseField);
+        Assert.Null(databaseField!.GetValue(jobService));
+    }
+
+    private sealed class FreshInstallConfigService : IConfigService
+    {
+        public FreshInstallConfigService(TendrilSettings settings)
+        {
+            Settings = settings;
+        }
+
+        public TendrilSettings Settings { get; }
+        public string TendrilHome => "";
+        public string ConfigPath => "";
+        public string PlanFolder => "";
+        public List<ProjectConfig> Projects => Settings.Projects;
+        public List<LevelConfig> Levels => Settings.Levels;
+        public string[] LevelNames => Array.Empty<string>();
+        public EditorConfig Editor => Settings.Editor ?? new EditorConfig();
+        public bool NeedsOnboarding => true;
+
+        public ProjectConfig? GetProject(string name) => null;
+        public BadgeVariant GetBadgeVariant(string level) => BadgeVariant.Outline;
+        public Colors? GetProjectColor(string projectName) => null;
+        public void SaveSettings() { }
+        public void SetPendingTendrilHome(string path) { }
+        public string? GetPendingTendrilHome() => null;
+        public void SetPendingProject(ProjectConfig project) { }
+        public ProjectConfig? GetPendingProject() => null;
+        public void SetPendingVerificationDefinitions(List<VerificationConfig> definitions) { }
+        public List<VerificationConfig>? GetPendingVerificationDefinitions() => null;
+        public void CompleteOnboarding(string tendrilHome) { }
+        public void OpenInEditor(string path) { }
+    }
+
+    [Fact]
     public void Start_CallsStartOnAllRegisteredIStartables()
     {
         var startable1 = new MockStartable();

@@ -22,7 +22,8 @@ defaultEffort: high    # Default effort level for promptwares (low/medium/high/m
 
 # Default promptware configuration — controls model, effort, and tool permissions per promptware.
 # Without these, promptwares inherit global permissions from codingAgent.
-# Use _default as a fallback for any promptware not explicitly listed.
+# _default provides base values. Specific entries override only the fields they define;
+# unspecified fields are inherited from _default.
 promptwares:
   MakePlan:
     model: sonnet

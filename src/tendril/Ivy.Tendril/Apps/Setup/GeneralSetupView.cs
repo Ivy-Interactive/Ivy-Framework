@@ -1,8 +1,8 @@
 using Ivy.Tendril.Services;
 
-namespace Ivy.Tendril.Apps.Settings;
+namespace Ivy.Tendril.Apps.Setup;
 
-public class GeneralSettingsView : ViewBase
+public class GeneralSetupView : ViewBase
 {
     private static readonly string[] CodingAgentOptions = ["claude", "codex", "gemini"];
     private static readonly string[] EffortOptions = ["low", "medium", "high", "max"];
