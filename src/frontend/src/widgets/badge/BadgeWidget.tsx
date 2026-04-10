@@ -94,10 +94,14 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   const effectiveColor = customColor || color;
   const colorStyles: React.CSSProperties = effectiveColor
     ? {
-        ...getColor(effectiveColor, "backgroundColor", "background"),
-        ...getColor(effectiveColor, "color", "foreground"),
+        backgroundColor: `var(--${effectiveColor.toLowerCase()}-400)`,
+        color: `var(--${effectiveColor.toLowerCase()}-900)`,
       }
     : {};
+
+  const darkModeClasses = effectiveColor
+    ? `dark:bg-[var(--${effectiveColor.toLowerCase()}-800)] dark:text-[var(--${effectiveColor.toLowerCase()}-100)]`
+    : "";
 
   return (
     <Badge
@@ -115,6 +119,7 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
           iconPosition === "Right" &&
           (density === Densities.Small ? "pr-1" : density === Densities.Large ? "pr-2" : "pr-1.5"),
         isClickable && "cursor-pointer hover:opacity-80 transition-opacity",
+        darkModeClasses,
       )}
       onClick={isClickable ? handleClick : undefined}
       {...(isClickable
