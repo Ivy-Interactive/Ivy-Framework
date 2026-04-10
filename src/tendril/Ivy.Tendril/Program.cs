@@ -117,7 +117,8 @@ public class Program
         {
             var window = new DesktopWindow(server)
                 .Title("Ivy Tendril")
-                .Size(1400, 900);
+                .Size(1400, 900)
+                .UseDevTools();
 
             return window.Run();
         }

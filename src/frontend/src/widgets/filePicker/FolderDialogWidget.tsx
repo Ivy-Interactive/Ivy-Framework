@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { useEventHandler } from "@/components/event-handler";
-import { hasDirectoryPicker } from "./browserSupport";
+import { hasDirectoryPicker, pickDirectoryFullPath } from "./browserSupport";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface FolderDialogEntry {
@@ -30,16 +30,24 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
 
   const openModernDialog = useCallback(async () => {
     try {
-      const dirHandle = await showDirectoryPicker();
-      const entries: FolderDialogEntry[] = [];
-
-      for await (const [name, handle] of dirHandle.entries()) {
-        entries.push({
-          name,
-          kind: handle.kind, // "file" or "directory"
-          relativePath: name,
-        });
+      const result = await pickDirectoryFullPath();
+      if (result.kind !== "selected") {
+        if (result.kind === "cancelled" && hasOnCancel) {
+          handleEvent("OnCancel", id, []);
+        }
+        return;
       }
+
+      // Note: pickDirectoryFullPath returns a custom result, but FolderDialogWidget
+      // expects to iterate over entries. Since the desktop bridge returns a single folder,
+      // we wrap it in a mock handle for backward compatibility in this widget.
+      const entries: FolderDialogEntry[] = [
+        {
+          name: result.name,
+          kind: "directory",
+          relativePath: result.path || result.name,
+        },
+      ];
 
       if (hasOnFolderSelected) {
         handleEvent("OnFolderSelected", id, [entries]);
