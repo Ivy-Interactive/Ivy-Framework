@@ -93,6 +93,11 @@ public class BadgeApp : SampleBase
                    new Badge("99+", variant: BadgeVariant.Success)
                )
 
+               | Text.H2("Colors")
+               | Layout.Wrap(
+                   Enum.GetValues<Colors>().Select(color => new Badge(color.ToString()).Color(color)).ToArray()
+               )
+
                | Text.H2("Clickable Badges")
                | new ClickableBadgesExample()
             ;
