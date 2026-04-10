@@ -73,6 +73,11 @@ public record ServerArgs
     /// that needs DI but should not bind a real port.
     /// </summary>
     public bool IsCliCommand => Describe || DescribeConnection != null || TestConnection != null;
+
+    /// <summary>
+    /// True when running as a native desktop application (e.g., via Ivy.Desktop).
+    /// </summary>
+    public bool IsDesktop { get; set; } = false;
 }
 
 public class Server
@@ -1180,6 +1185,7 @@ public static class WebApplicationExtensions
                 .Use<ThemeFilter>()
                 .Use<ManifestFilter>()
                 .Use<OpenGraphFilter>()
+                .Use<DesktopBridgeFilter>()
                 .Use<BasePathFilter>();
 
             foreach (var filter in server.GetCustomFilters())

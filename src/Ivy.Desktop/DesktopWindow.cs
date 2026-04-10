@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Reflection;
+using System.Text.Json;
 using Photino.NET;
 
 namespace Ivy.Desktop;
@@ -74,6 +75,7 @@ public class DesktopWindow(Server server)
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
         var cts = new CancellationTokenSource();
+        server.Args.IsDesktop = true;
         var serverTask = server.RunAsync(cts);
 
         // Read port AFTER RunAsync returns — the synchronous portion (including
@@ -145,6 +147,53 @@ public class DesktopWindow(Server server)
         }
 
         if (_center) window.Center();
+
+        window.RegisterWebMessageReceivedHandler((sender, message) =>
+        {
+            try
+            {
+                using var json = JsonDocument.Parse(message);
+                var root = json.RootElement;
+                if (!root.TryGetProperty("type", out var typeProp) || !root.TryGetProperty("id", out var idProp))
+                    return;
+
+                var type = typeProp.GetString();
+                var id = idProp.GetString();
+
+                if (type == "showDirectoryPicker")
+                {
+                    var results = window.ShowOpenFolder("Select Folder", "");
+                    if (results != null && results.Length > 0)
+                    {
+                        var path = results[0];
+                        var name = Path.GetFileName(path);
+                        if (string.IsNullOrEmpty(name)) name = path;
+
+                        var response = JsonSerializer.Serialize(new
+                        {
+                            type = "showDirectoryPickerRes",
+                            id = id,
+                            result = new { name = name, path = path }
+                        });
+                        window.SendWebMessage(response);
+                    }
+                    else
+                    {
+                        var response = JsonSerializer.Serialize(new
+                        {
+                            type = "showDirectoryPickerRes",
+                            id = id,
+                            result = (object?)null
+                        });
+                        window.SendWebMessage(response);
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore malformed messages
+            }
+        });
 
         return window;
     }
