@@ -12,12 +12,12 @@ searchHints:
 # Project Setup
 
 <Ingress>
-Tendril natively manages multiple software projects. Each Project maps entirely to a dedicated git repository and enforces its own strict validation and agent behavior settings.
+Each **project** is a git repo with its own verifications and agent context. Tendril runs many projects side by side.
 </Ingress>
 
-## Registering a Project
+## Adding a project
 
-Add a new project in the **Setup App** -> **Projects** tab, or modify `config.yaml`:
+**Settings** – **Projects**, or edit `config.yaml`:
 
 ```yaml
 projects:
@@ -29,23 +29,20 @@ projects:
       - CheckResult
 ```
 
-## Worktree Isolation
+## Worktrees
 
-When an execution phase begins (`ExecutePlan`), Tendril fundamentally protects your code. Instead of mutating your active repository checkout, Tendril generates an isolated, headless **Git Worktree**:
+`ExecutePlan` does not edit your normal working tree. It uses a **git worktree**: separate checkout, same repo, isolated from the branch you have open.
 
-1. Tendril clones your repository locally via standard git worktree hooks.
-2. An isolated environment is passed to the Claude Agent.
-3. Your main branch remains completely untouched while agents build code.
-4. Multiple different Plans can execute across different projects simultaneously cleanly.
-5. Failed agent executions are safely wiped off disk without polluting your IDE workspace.
+- Worktree is created for the agent; your main checkout stays as-is.
+- Several plans can run across different projects concurrently.
+- Failed runs are discarded without touching your IDE folder.
+- After you approve, changes become a branch / PR as usual; the worktree is removed when done.
 
-When you approve a Plan, the worktree is transformed into a clean git branch and pushed, then deleted safely.
+## Repo-local context
 
-## Project Context Overrides
+Optional files in the **repo root** (picked up when the agent runs):
 
-Every project comes with distinct coding conventions. Tendril allows overriding behavior on a per-project basis. Drop context files directly into the root of your target repository:
+- **`CLAUDE.md`** — High-level guidance for Claude Code.
+- **`AGENTS.md` / `DEVELOPER.md`** — Team conventions and practices.
 
-- `CLAUDE.md`: Broad system guidelines picked up automatically by Claude Code.
-- `AGENTS.md` / `DEVELOPER.md`: Domain-specific coding practices.
-
-When initializing the Promptware environment, Tendril scans for these files and prefixes the agent execution with your project-specific standards.
+Tendril loads these and prepends them to the promptware context for that repo.

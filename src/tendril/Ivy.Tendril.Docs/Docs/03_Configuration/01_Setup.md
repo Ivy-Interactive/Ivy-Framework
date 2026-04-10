@@ -12,24 +12,24 @@ searchHints:
 # Setup & Settings
 
 <Ingress>
-Tendril can be configured via a visually intuitive Settings App (Setup Menu) inside the GUI, or manually by editing the `config.yaml` file in the `TENDRIL_HOME` directory. It defines your projects, agent tool chains, runtime levels, and system preferences.
+Configure Tendril in the in-app **Settings** UI or by editing `TENDRIL_HOME/config.yaml` (projects, agents, levels, verifications, preferences).
 </Ingress>
 
-## The Settings App
+## Settings app
 
-You can open the setup screen directly from Tendril to configure all system settings without touching a configuration file. It provides separate views for:
+From Tendril, open setup without hand-editing YAML. Sections include:
 
-- **General Settings**: Select your default coding agent (e.g., `claude`, `codex`), adjust concurrent job limits, and register Slack emojis/team members.
-- **Levels**: Define architectural complexity levels (e.g., L1, L2, L3) with customized prompt weighting to determine how agents treat large vs small features.
-- **Verifications**: Setup strict testing and linting commands (`DotnetBuild`, `NpmTest`) that agents must pass.
-- **Promptwares**: Register paths to your custom Agent Prompts and Tool sets.
-- **Projects**: Register new Git repositories that agents can check out and mutate.
+- **General** — Default coding agent (`claude`, `codex`, …), max concurrent jobs, Slack emoji / coworkers.
+- **Levels** — Complexity tiers (e.g. L1–L3) and how agents weight large vs. small work.
+- **Verifications** — Build / test / lint commands agents must satisfy.
+- **Promptwares** — Paths to custom promptware folders and tools.
+- **Projects** — Repos agents may clone and change.
 
-## Manual Configuration (`config.yaml`)
+## `config.yaml`
 
-If you prefer Infrastructure-as-Code, Tendril looks for `config.yaml` in the `TENDRIL_HOME` directory. Any change made in the visual Settings App is written to this YAML file instantly.
+Same data lives in `TENDRIL_HOME/config.yaml`. Changes in the UI write here immediately.
 
-### Structure Example
+### Example
 
 ```yaml
 codingAgent: claude
@@ -52,23 +52,23 @@ coworkers:
     name: Display Name
 ```
 
-### Key Fields
+### Common fields
 
-| Field | Description |
-|-------|-------------|
-| `codingAgent` | The provider agent logic (supported: `claude`, `codex`, `gemini`). |
-| `maxConcurrentJobs` | Maximum number of executing agents that can run simultaneously across worktrees. |
-| `projects` | Array of tracked git repositories |
-| `coworkers` | Team members for assigning AI-created PRs. |
+| Field | Purpose |
+|-------|---------|
+| `codingAgent` | Agent runtime (`claude`, `codex`, `gemini`, …). |
+| `maxConcurrentJobs` | Cap on parallel agent runs (worktrees). |
+| `projects` | Registered repositories and their settings. |
+| `coworkers` | GitHub users for PR assignment / team features. |
 
 ## Verifications
 
-Available verification types to plug into the pipeline:
+Wire these names into project `verifications` (and define behavior in config as needed):
 
-| Type | Description |
-|------|-------------|
-| `DotnetBuild` | Runs `dotnet build` |
-| `DotnetFormat` | Checks code formatting with `dotnet format` |
-| `DotnetTest` | Runs the automated test suite |
-| `Npm*` / `Cargo*` | Ecosystem equivalent hooks to validate success |
-| `CheckResult` | Internally analyses standard IO to validate agent success parameters |
+| Name | Role |
+|------|------|
+| `DotnetBuild` | `dotnet build` |
+| `DotnetFormat` | `dotnet format` checks |
+| `DotnetTest` | Test suite |
+| `Npm*` / `Cargo*` | Same idea for other stacks |
+| `CheckResult` | Parse stdout/stderr to decide pass/fail |
