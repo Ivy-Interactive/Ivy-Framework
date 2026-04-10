@@ -21,7 +21,6 @@ interface FolderInputWidgetProps {
   placeholder?: string;
   nullable?: boolean;
   autoFocus?: boolean;
-  mode?: "Name" | "FullPath";
   events?: string[];
   density?: Densities;
 }
@@ -34,13 +33,12 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
   placeholder = "Select a folder...",
   nullable = true,
   autoFocus = false,
-  mode = "Name",
   events = EMPTY_ARRAY,
   density,
 }) => {
   const handleEvent = useEventHandler();
   const inputRef = useRef<HTMLInputElement>(null);
-  const isFullPath = mode === "FullPath";
+  const isFullPath = true;
 
   const [localValue, setLocalValue] = useState(value ?? "");
 

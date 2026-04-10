@@ -127,32 +127,12 @@ public class FolderInputTests
         Assert.Null(result.Invalid);
     }
 
-    [Fact]
-    public void FolderInput_DefaultMode_IsName()
-    {
-        var input = new FolderInput();
-        Assert.Equal(FolderInputMode.Name, input.Mode);
-    }
+
 
     [Fact]
-    public void FolderInputExtensions_Mode_SetsMode()
+    public void ValidatePath_NonExistentPath_SetsInvalid()
     {
-        var input = new FolderInput().Mode(FolderInputMode.FullPath);
-        Assert.Equal(FolderInputMode.FullPath, input.Mode);
-    }
-
-    [Fact]
-    public void FolderInput_ToFolderInput_WithMode_SetsMode()
-    {
-        var state = new MockState<string?>(null);
-        var input = state.ToFolderInput(mode: FolderInputMode.FullPath);
-        Assert.Equal(FolderInputMode.FullPath, input.Mode);
-    }
-
-    [Fact]
-    public void ValidatePath_FullPathMode_NonExistentPath_SetsInvalid()
-    {
-        var input = new FolderInput { Value = @"C:\NonExistent\Path\That\Does\Not\Exist", Mode = FolderInputMode.FullPath };
+        var input = new FolderInput { Value = @"C:\NonExistent\Path\That\Does\Not\Exist" };
 
         var result = input.ValidatePath();
 
@@ -160,29 +140,21 @@ public class FolderInputTests
     }
 
     [Fact]
-    public void ValidatePath_FullPathMode_ExistingPath_NoInvalid()
+    public void ValidatePath_ExistingPath_NoInvalid()
     {
-        var input = new FolderInput { Value = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar), Mode = FolderInputMode.FullPath };
+        var input = new FolderInput { Value = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) };
 
         var result = input.ValidatePath();
 
         Assert.Null(result.Invalid);
     }
 
-    [Fact]
-    public void ValidatePath_NameMode_DoesNotValidate()
-    {
-        var input = new FolderInput { Value = @"C:\NonExistent\Path", Mode = FolderInputMode.Name };
 
-        var result = input.ValidatePath();
-
-        Assert.Null(result.Invalid);
-    }
 
     [Fact]
     public void ValidatePath_NullValue_DoesNotValidate()
     {
-        var input = new FolderInput { Value = null, Mode = FolderInputMode.FullPath };
+        var input = new FolderInput { Value = null };
 
         var result = input.ValidatePath();
 
@@ -192,7 +164,7 @@ public class FolderInputTests
     [Fact]
     public void ValidatePath_EmptyValue_DoesNotValidate()
     {
-        var input = new FolderInput { Value = "", Mode = FolderInputMode.FullPath };
+        var input = new FolderInput { Value = "" };
 
         var result = input.ValidatePath();
 
@@ -200,9 +172,9 @@ public class FolderInputTests
     }
 
     [Fact]
-    public void ValidateValue_FullPathMode_NonExistentPath_ReturnsError()
+    public void ValidateValue_NonExistentPath_ReturnsError()
     {
-        var input = new FolderInput { Mode = FolderInputMode.FullPath };
+        var input = new FolderInput();
 
         var result = input.ValidateValue(@"C:\NonExistent\Path\That\Does\Not\Exist");
 
@@ -211,22 +183,14 @@ public class FolderInputTests
     }
 
     [Fact]
-    public void ValidateValue_FullPathMode_ExistingPath_ReturnsSuccess()
+    public void ValidateValue_ExistingPath_ReturnsSuccess()
     {
-        var input = new FolderInput { Mode = FolderInputMode.FullPath };
+        var input = new FolderInput();
 
         var result = input.ValidateValue(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar));
 
         Assert.True(result.IsValid);
     }
 
-    [Fact]
-    public void ValidateValue_NameMode_AlwaysReturnsSuccess()
-    {
-        var input = new FolderInput { Mode = FolderInputMode.Name };
 
-        var result = input.ValidateValue(@"C:\NonExistent\Path");
-
-        Assert.True(result.IsValid);
-    }
 }
