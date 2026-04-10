@@ -159,13 +159,17 @@ public class DesktopWindow(Server server)
 
                 var type = typeProp.GetString();
                 var id = idProp.GetString();
+                Console.WriteLine($"[DesktopWindow] Received message: type={type}, id={id}");
 
                 if (type == "showDirectoryPicker")
                 {
+                    Console.WriteLine("[DesktopWindow] Opening folder dialog...");
                     var results = window.ShowOpenFolder("Select Folder", "");
+                    Console.WriteLine($"[DesktopWindow] Dialog result: {(results == null ? "null" : results.Length + " items")}");
                     if (results != null && results.Length > 0)
                     {
                         var path = results[0];
+                        Console.WriteLine($"[DesktopWindow] Selected path: {path}");
                         var name = Path.GetFileName(path);
                         if (string.IsNullOrEmpty(name)) name = path;
 
@@ -175,6 +179,7 @@ public class DesktopWindow(Server server)
                             id = id,
                             result = new { name = name, path = path }
                         });
+                        Console.WriteLine($"[DesktopWindow] Sending response: {response}");
                         window.SendWebMessage(response);
                     }
                     else

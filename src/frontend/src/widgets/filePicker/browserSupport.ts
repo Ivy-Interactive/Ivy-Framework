@@ -3,7 +3,9 @@ export const hasFileSystemAccess = typeof window !== "undefined" && "showOpenFil
 
 export const hasSaveFilePicker = typeof window !== "undefined" && "showSaveFilePicker" in window;
 
-export const hasDirectoryPicker = typeof window !== "undefined" && "showDirectoryPicker" in window;
+export const hasDirectoryPicker =
+  typeof window !== "undefined" &&
+  ("showDirectoryPicker" in window || !!(window as any).__ivy_desktop?.showDirectoryPicker);
 
 export type PickDirectoryResult =
   | { kind: "selected"; name: string; path?: string }

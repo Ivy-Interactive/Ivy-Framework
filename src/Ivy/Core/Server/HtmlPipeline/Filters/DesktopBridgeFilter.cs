@@ -35,9 +35,11 @@ public class DesktopBridgeFilter : IHtmlFilter
             const pendingRequests = new Map();
             window.__ivy_desktop = {
                 showDirectoryPicker: function() {
+                    console.log('[Ivy Desktop] showDirectoryPicker called');
                     const id = Math.random().toString(36).substr(2, 9);
                     return new Promise((resolve) => {
                         pendingRequests.set(id, resolve);
+                        console.log('[Ivy Desktop] Requesting folder picker from C#, id:', id);
                         window.external.sendMessage(JSON.stringify({
                             type: 'showDirectoryPicker',
                             id: id
@@ -47,17 +49,21 @@ public class DesktopBridgeFilter : IHtmlFilter
             };
 
             const handleResponse = (msg) => {
+                console.log('[Ivy Desktop] Message received from C#:', msg);
                 try {
-                    const data = typeof msg === 'string' ? JSON.parse(msg) : msg;
+                    const data = (typeof msg === 'string') ? JSON.parse(msg) : msg;
                     if (data && data.type === 'showDirectoryPickerRes') {
                         const resolve = pendingRequests.get(data.id);
                         if (resolve) {
                             pendingRequests.delete(data.id);
+                            console.log('[Ivy Desktop] Resolving request', data.id, 'with', data.result);
                             resolve(data.result);
+                        } else {
+                            console.warn('[Ivy Desktop] No pending request found for id:', data.id);
                         }
                     }
                 } catch (e) {
-                    // Ignore non-bridge messages
+                    console.error('[Ivy Desktop] Error parsing response from C#:', e);
                 }
             };
 
