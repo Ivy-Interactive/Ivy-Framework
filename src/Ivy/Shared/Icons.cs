@@ -658,7 +658,7 @@ public enum Icons
     FolderGit,
     FolderGit2,
     FolderHeart,
-
+    FolderInput,
     FolderKanban,
     FolderKey,
     FolderLock,
