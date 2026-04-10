@@ -23,9 +23,17 @@ The easiest way to install Tendril on macOS or Linux is via our automated instal
 curl -sSf https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/tendril/install.sh | sh
 ```
 
+## Quick Install (Windows)
+
+For Windows environments, run our automated PowerShell install script. It natively sets up Tendril along with required dependencies like Git, GitHub CLI, and the .NET SDK.
+
+```powershell
+Invoke-RestMethod -Uri https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/tendril/install.ps1 | Invoke-Expression
+```
+
 ## .NET Tool Installation
 
-Tendril can also be installed globally as a native .NET Tool from the provided NuGet packages (useful for Windows environments).
+Tendril can also be installed globally as a native .NET Tool from the provided NuGet packages.
 
 ```bash
 dotnet tool install -g Ivy.Tendril --prerelease
