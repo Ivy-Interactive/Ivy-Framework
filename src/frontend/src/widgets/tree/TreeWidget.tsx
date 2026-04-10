@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { MenuItem } from "@/types/widgets";
 import { TreeItem } from "./TreeItem";
 import { useEventHandler } from "@/components/event-handler";
+import "./tree.css";
 
 const EMPTY_ARRAY: never[] = [];
 
