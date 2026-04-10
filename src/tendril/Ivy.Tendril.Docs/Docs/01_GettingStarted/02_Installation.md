@@ -40,7 +40,8 @@ dotnet tool install -g Ivy.Tendril --prerelease
 ```
 
 <Callout type="Tip">
-*With `dotnet tool` only, install PowerShell 7+, Git, `gh`, and `claude` yourself.*
+Powershell 7, Git and gh CLI need to be present on your machine if you install using `dotnet tool` command
+
 </Callout>
 
 ## Run
@@ -48,5 +49,3 @@ dotnet tool install -g Ivy.Tendril --prerelease
 ```bash
 tendril
 ```
-
-

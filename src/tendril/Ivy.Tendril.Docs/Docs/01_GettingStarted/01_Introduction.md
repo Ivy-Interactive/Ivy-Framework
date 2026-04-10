@@ -37,7 +37,7 @@ You see each stage of the work. Tasks are **Plans**; orchestrated **Promptwares*
 1. **`MakePlan`** — Prompt or issue – implementation plan.
 2. **`ExpandPlan`** — Split large work into smaller chunks (optional).
 3. **`ExecutePlan`** — Worktree, implement, build, test, iterate until verifications pass.
-4. **Review** — You approve or send feedback for another pass.
+4. **`Review`** — You approve or send feedback for another pass.
 5. **`MakePr`** — Approved work – GitHub PR.
 
 That loop turns the assistant from autocomplete into something you can ship with.
