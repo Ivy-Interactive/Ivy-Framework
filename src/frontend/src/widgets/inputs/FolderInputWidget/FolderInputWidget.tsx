@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import {
-  hasDirectoryPicker,
+  getHasDirectoryPicker,
   pickDirectory,
   pickDirectoryFullPath,
 } from "@/widgets/filePicker/browserSupport";
@@ -85,7 +85,7 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
 
   const handleBrowse = useCallback(() => {
     if (disabled) return;
-    if (hasDirectoryPicker) {
+    if (getHasDirectoryPicker()) {
       openModernPicker();
     } else {
       inputRef.current?.click();
@@ -202,7 +202,7 @@ export const FolderInputWidget: React.FC<FolderInputWidgetProps> = ({
       </div>
 
       {/* Hidden file input for fallback (non-Chromium) browsers */}
-      {!hasDirectoryPicker && (
+      {!getHasDirectoryPicker() && (
         <input
           ref={inputRef}
           type="file"

@@ -3,7 +3,11 @@ export const hasFileSystemAccess = typeof window !== "undefined" && "showOpenFil
 
 export const hasSaveFilePicker = typeof window !== "undefined" && "showSaveFilePicker" in window;
 
-export const hasDirectoryPicker =
+/**
+ * Checks if the browser or desktop bridge supports directory picking.
+ * Uses a function to ensure we catch the desktop bridge if it's injected after load.
+ */
+export const getHasDirectoryPicker = () =>
   typeof window !== "undefined" &&
   ("showDirectoryPicker" in window || !!(window as any).__ivy_desktop?.showDirectoryPicker);
 

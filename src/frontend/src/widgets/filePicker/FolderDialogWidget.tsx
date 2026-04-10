@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { useEventHandler } from "@/components/event-handler";
-import { hasDirectoryPicker, pickDirectoryFullPath } from "./browserSupport";
+import { getHasDirectoryPicker, pickDirectoryFullPath } from "./browserSupport";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface FolderDialogEntry {
@@ -134,7 +134,7 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
     if (triggerCount > lastTriggerRef.current) {
       lastTriggerRef.current = triggerCount;
 
-      if (hasDirectoryPicker) {
+      if (getHasDirectoryPicker()) {
         openModernDialog();
       } else {
         openFallbackDialog();
@@ -142,20 +142,17 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
     }
   }, [triggerCount, openModernDialog, openFallbackDialog]);
 
-  // Render hidden input for fallback path
-  if (!hasDirectoryPicker) {
-    return (
-      <input
-        ref={inputRef}
-        type="file"
-        // @ts-expect-error webkitdirectory is non-standard but widely supported
-        webkitdirectory=""
-        onChange={handleInputChange}
-        style={{ display: "none" }}
-      />
-    );
-  }
-
-  // Modern path renders nothing
-  return null;
+  return (
+    <div className="hidden">
+      {!getHasDirectoryPicker() && (
+        <input
+          ref={inputRef}
+          type="file"
+          // @ts-expect-error webkitdirectory is non-standard but widely supported
+          webkitdirectory=""
+          onChange={handleInputChange}
+        />
+      )}
+    </div>
+  );
 };
