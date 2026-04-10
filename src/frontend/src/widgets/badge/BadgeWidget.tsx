@@ -3,7 +3,6 @@ import { useEventHandler } from "@/components/event-handler";
 import Icon from "@/components/Icon";
 import { camelCase } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { getColor } from "@/lib/styles";
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
 
