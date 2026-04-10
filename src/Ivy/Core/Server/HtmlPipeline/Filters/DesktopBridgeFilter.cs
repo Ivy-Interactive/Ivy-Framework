@@ -9,9 +9,29 @@ namespace Ivy.Core.Server.HtmlPipeline.Filters;
 /// </summary>
 public class DesktopBridgeFilter : IHtmlFilter
 {
-    private const string BridgeScript = @"
+    public static readonly string BridgeScript = @"
         (function() {
             if (window.__ivy_desktop) return;
+            
+            // macOS Shim: Redirect window.external.sendMessage to webkit message handler
+            if (!window.external || !window.external.sendMessage) {
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.photino) {
+                    window.external = window.external || {};
+                    window.external.sendMessage = function(msg) {
+                        try {
+                            window.webkit.messageHandlers.photino.postMessage(msg);
+                        } catch (e) {
+                            console.error('[Ivy Desktop] Failed to post message to photino handler:', e);
+                        }
+                    };
+                }
+            }
+
+            if (!window.external || !window.external.sendMessage) {
+                console.warn('[Ivy Desktop] Photino native bridge not found. Full path picking will not work.');
+                return;
+            }
+
             const pendingRequests = new Map();
             window.__ivy_desktop = {
                 showDirectoryPicker: function() {
@@ -47,6 +67,8 @@ public class DesktopBridgeFilter : IHtmlFilter
             } else {
                 window.addEventListener('message', arg => handleResponse(arg.data));
             }
+            
+            console.log('[Ivy Desktop] Bridge initialized.');
         })();
     ";
 
@@ -58,7 +80,6 @@ public class DesktopBridgeFilter : IHtmlFilter
         if (head == null) return;
 
         head.Add(new XElement("script",
-            new XAttribute("type", "text/javascript"),
-            new XText(BridgeScript)));
+            new XAttribute("src", "/ivy/desktop-bridge.js")));
     }
 }

@@ -1101,6 +1101,12 @@ public static class WebApplicationExtensions
         app.MapGet("/", async context =>
             await ServeIndexHtml(context, app, serverArgs, assembly, resourceName));
 
+        app.MapGet("/ivy/desktop-bridge.js", async context =>
+        {
+            context.Response.ContentType = "text/javascript";
+            await context.Response.WriteAsync(DesktopBridgeFilter.BridgeScript);
+        });
+
         // SPA fallback: serve index.html for any path not matched by other routes
         // (enables client-side routing for /sign-in, /foo/bar/sign-in, etc.)
         app.MapFallback(async context =>
