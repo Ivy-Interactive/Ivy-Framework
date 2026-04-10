@@ -46,7 +46,6 @@ import {
   FileInputWidget,
   SignatureInputWidget,
   ContentInputWidget,
-  FolderInputWidget,
 } from "@/widgets/inputs";
 import {
   StackLayoutWidget,
@@ -199,7 +198,7 @@ export const widgetMap = {
   "Ivy.FileInput": FileInputWidget,
   "Ivy.ContentInput": ContentInputWidget,
   "Ivy.SignatureInput": SignatureInputWidget,
-  "Ivy.FolderInput": FolderInputWidget,
+
   "Ivy.CodeInput": lazyWithRetry(() => import("@/widgets/inputs/code/CodeInputWidget")),
   "Ivy.AudioInput": lazyWithRetry(() => import("@/widgets/inputs/AudioInputWidget")),
   "Ivy.CameraInput": lazyWithRetry(() => import("@/widgets/cameraInput/CameraInputWidget")),
