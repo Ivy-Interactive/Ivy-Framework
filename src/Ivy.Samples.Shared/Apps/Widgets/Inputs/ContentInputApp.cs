@@ -13,7 +13,7 @@ public class ContentInputApp : SampleBase
                | Layout.Tabs(
                    new Tab("Basic", new ContentInputBasicExample()),
                    new Tab("With Files", new ContentInputWithFilesExample()),
-                   new Tab("Scale", new ContentInputScaleExample()),
+                   new Tab("Density", new ContentInputDensityExample()),
                    new Tab("Invalid", new ContentInputInvalidExample()),
                    new Tab("Configured", new ContentInputConfiguredExample()),
                    new Tab("Submit", new ContentInputSubmitExample())
@@ -70,7 +70,7 @@ public class ContentInputWithFilesExample : ViewBase
     }
 }
 
-public class ContentInputScaleExample : ViewBase
+public class ContentInputDensityExample : ViewBase
 {
     public override object? Build()
     {

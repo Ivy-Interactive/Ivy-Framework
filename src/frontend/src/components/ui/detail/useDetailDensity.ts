@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { DetailContext } from "./DetailContext";
 
-export const useDetailScale = () => {
+export const useDetailDensity = () => {
   const context = useContext(DetailContext);
   return context.density;
 };

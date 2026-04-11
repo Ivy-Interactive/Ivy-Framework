@@ -9,7 +9,7 @@ import {
   detailsSizeVariant,
 } from "./detail/detail-variant";
 import { DetailProvider } from "./detail/DetailContext";
-import { useDetailScale } from "./detail/useDetailScale";
+import { useDetailDensity } from "./detail/useDetailDensity";
 import { Densities } from "@/types/density";
 
 export interface DetailsProps
@@ -19,7 +19,7 @@ export interface DetailsProps
 
 const Details = React.forwardRef<HTMLDivElement, DetailsProps>(
   ({ className, density: propDensity, children, ...props }, ref) => {
-    const contextDensity = useDetailScale();
+    const contextDensity = useDetailDensity();
     const density = propDensity ?? contextDensity ?? Densities.Medium;
 
     return (
@@ -41,7 +41,7 @@ export interface DetailItemProps extends Omit<React.HTMLAttributes<HTMLDivElemen
 
 const DetailItem = React.forwardRef<HTMLDivElement, DetailItemProps>(
   ({ className, label, multiline, density: propDensity, children, ...props }, ref) => {
-    const contextDensity = useDetailScale();
+    const contextDensity = useDetailDensity();
     const density = propDensity ?? contextDensity;
 
     return (

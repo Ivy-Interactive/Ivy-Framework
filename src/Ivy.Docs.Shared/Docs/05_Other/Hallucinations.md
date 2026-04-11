@@ -1910,7 +1910,7 @@ Text.P(frequencyText).Small().Muted()
 Text.Block(frequencyText).Small().Muted()
 ```
 
-`Small()` is an instance modifier on `TextBuilder` (returns `Scale(Ivy.Scale.Small)`), not a static factory. The static factories are `Text.P()`, `Text.H1()`, `Text.H2()`, `Text.H3()`, `Text.H4()`, `Text.Block()`, `Text.Label()`, etc. Chain `.Small()` after creating the text.
+`Small()` is an instance modifier on `TextBuilder` (returns `Density(Ivy.Density.Small)`), not a static factory. The static factories are `Text.P()`, `Text.H1()`, `Text.H2()`, `Text.H3()`, `Text.H4()`, `Text.Block()`, `Text.Label()`, etc. Chain `.Small()` after creating the text.
 
 **Found In:**
 ce144de9-0688-490a-bef6-b2766e323154
