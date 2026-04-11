@@ -148,7 +148,8 @@ public class BitcoinChart : ViewBase
                  | Text.P($"Showing {bitcoinData.Length} days of data").Small()
                  | Text.Html($"<i>From {bitcoinData.First().Date:yyyy-MM-dd} to {bitcoinData.Last().Date:yyyy-MM-dd}</i>")
                  | bitcoinData.ToLineChart(
-                        style: LineChartStyles.Dashboard)
+                        style: LineChartStyles.Dashboard,
+                        polish: c => c.ReferenceLine(50, null, null))
                     .Dimension("Date", e => e.Date)
                     .Measure("Price", e => e.Sum(f => f.Price))
                     .Toolbox();
@@ -165,7 +166,7 @@ When building charts from queryable data with `ToLineChart()`, use the `polish` 
 
 Common use cases for `polish`:
 - Override line colors, widths, or curve types
-- Add reference lines or areas
+- Add reference lines or reference areas
 - Replace the default lines array with custom line configurations
 - Add or modify tooltips, legends, or grids
 
@@ -191,15 +192,14 @@ public class PolishLineChartDemo : ViewBase
             | data.ToLineChart(
                 polish: chart =>
                 {
-                    // Replace the scaffolded lines with custom styling
-                    return chart with
+                    return (chart with
                     {
                         Lines =
                         [
                             new Line("Desktop").Stroke(Colors.Blue).StrokeWidth(3).CurveType(CurveTypes.Step),
                             new Line("Mobile").Stroke(Colors.Orange).StrokeWidth(2).StrokeDashArray("5 5")
                         ]
-                    };
+                    }).ReferenceLine(null, 300, null);
                 }
             )
             .Dimension("Month", e => e.Month)

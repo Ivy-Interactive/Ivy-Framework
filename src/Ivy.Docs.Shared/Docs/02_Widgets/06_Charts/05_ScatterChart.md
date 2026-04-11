@@ -43,6 +43,7 @@ public class BasicScatterChartDemo : ViewBase
                 .Scatter(new Scatter("Value").Name("Height vs Weight"))
                 .XAxis(new XAxis("Height").Type(AxisTypes.Number))
                 .YAxis(new YAxis("Weight").Type(AxisTypes.Number))
+                .ReferenceLine(170, null, null)
                 .Tooltip(new ChartTooltip().Animated(true))
                 .Legend()
                 .CartesianGrid();
@@ -77,6 +78,7 @@ public class BubbleChartDemo : ViewBase
                 .XAxis(new XAxis("Height").Type(AxisTypes.Number))
                 .YAxis(new YAxis("Weight").Type(AxisTypes.Number))
                 .ZAxis(new ZAxis("Age").Range(40, 200))
+                .ReferenceLine(null, 70, null)
                 .Tooltip(new ChartTooltip().Animated(true))
                 .Legend()
                 .CartesianGrid(new CartesianGrid().Horizontal().Vertical());
@@ -110,6 +112,7 @@ public class ScatterShapesDemo : ViewBase
                     .Fill(Colors.Blue))
                 .XAxis(new XAxis("X").Type(AxisTypes.Number))
                 .YAxis(new YAxis("Y").Type(AxisTypes.Number))
+                .ReferenceLine(20, null, null)
                 .Tooltip(new ChartTooltip().Animated(true))
                 .Legend()
                 .CartesianGrid();
@@ -144,6 +147,7 @@ public class ConnectedScatterDemo : ViewBase
                     .LineType(ScatterLineType.Fitting))
                 .XAxis(new XAxis("Temperature").Type(AxisTypes.Number))
                 .YAxis(new YAxis("Humidity").Type(AxisTypes.Number))
+                .ReferenceLine(null, 55, null)
                 .Tooltip(new ChartTooltip().Animated(true))
                 .Legend()
                 .CartesianGrid(new CartesianGrid().Horizontal().Vertical());
@@ -176,6 +180,7 @@ public class ZAxisRangeDemo : ViewBase
                 .XAxis(new XAxis("Income").Type(AxisTypes.Number))
                 .YAxis(new YAxis("Savings").Type(AxisTypes.Number))
                 .ZAxis(new ZAxis("Expenses").Range(50, 300))
+                .ReferenceLine(75_000, null, null)
                 .Tooltip(new ChartTooltip().Animated(true))
                 .Legend()
                 .CartesianGrid(new CartesianGrid().Horizontal().Vertical());
@@ -215,8 +220,7 @@ public class PolishScatterChartDemo : ViewBase
             | data.ToScatterChart(
                 polish: chart =>
                 {
-                    // Replace the scaffolded scatters with custom styling
-                    return chart with
+                    return (chart with
                     {
                         Scatters = chart.Scatters.Select(s =>
                             s with
@@ -226,7 +230,7 @@ public class PolishScatterChartDemo : ViewBase
                                 FillOpacity = 0.7
                             }
                         ).ToArray()
-                    };
+                    }).ReferenceLine(null, 1000, null);
                 }
             )
             .Dimension("City", e => e.City)
@@ -273,6 +277,7 @@ public class CorrelationAnalysisDemo : ViewBase
                 .XAxis(new XAxis("StudyHours").Type(AxisTypes.Number))
                 .YAxis(new YAxis("TestScore").Type(AxisTypes.Number))
                 .ZAxis(new ZAxis("AttendancePercent").Range(60, 250))
+                .ReferenceLine(30, null, null)
                 .Tooltip(new ChartTooltip().Animated(true))
                 .Legend()
                 .Toolbox(new Toolbox())
