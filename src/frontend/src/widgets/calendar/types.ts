@@ -1,4 +1,5 @@
 import React from "react";
+import { Densities } from "@/types/density";
 
 export type CalendarView = "month" | "week" | "day" | "agenda";
 
@@ -43,6 +44,7 @@ export interface CalendarWidgetProps {
   events?: string[];
   width?: string;
   height?: string;
+  density?: Densities;
   children?: React.ReactNode;
   slots?: {
     default?: React.ReactNode[];

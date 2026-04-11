@@ -26,6 +26,7 @@ import { useCalendarHandlers } from "./useCalendarHandlers";
 import { useRovingTabIndex } from "./useRovingTabIndex";
 import type { CalendarWidgetProps, CalendarView, CalendarEvent } from "./types";
 import { cn } from "@/lib/utils";
+import { Densities } from "@/types/density";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const HOUR_HEIGHT = 60; // px per hour in time grid views
@@ -933,6 +934,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   showToolbar = true,
   width,
   height,
+  density = Densities.Medium,
   slots,
   widgetNodeChildren,
 }) => {

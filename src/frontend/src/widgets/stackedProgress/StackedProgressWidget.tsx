@@ -3,6 +3,7 @@ import { useEventHandler } from "@/components/event-handler";
 import { getWidth } from "@/lib/styles";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -21,6 +22,7 @@ interface StackedProgressWidgetProps {
   selected?: number;
   width?: string;
   events?: string[];
+  density?: Densities;
 }
 
 export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
@@ -32,10 +34,22 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
   selected,
   width = "Full",
   events = EMPTY_ARRAY,
+  density = Densities.Medium,
 }) => {
   const eventHandler = useEventHandler();
   const hasSelectHandler = events.includes("OnSelect");
   const total = segments.reduce((sum, s) => sum + s.value, 0);
+
+  const labelGapClass =
+    density === Densities.Small ? "gap-2" : density === Densities.Large ? "gap-4" : "gap-3";
+  const dotSize =
+    density === Densities.Small ? "6px" : density === Densities.Large ? "10px" : "8px";
+  const labelTextClass =
+    density === Densities.Small
+      ? "text-[10px]"
+      : density === Densities.Large
+        ? "text-sm"
+        : "text-xs";
 
   if (total === 0) {
     return (
@@ -134,7 +148,7 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
           })}
         </div>
         {showLabels && (
-          <div className="flex gap-3 flex-wrap">
+          <div className={cn("flex flex-wrap", labelGapClass)}>
             {labelSegments.map(({ segment, originalIndex }) => {
               const color = segment.color
                 ? `var(--${segment.color.toLowerCase()})`
@@ -158,7 +172,8 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
                       : undefined
                   }
                   className={cn(
-                    "flex items-center gap-1.5 text-xs text-muted-foreground",
+                    "flex items-center gap-1.5 text-muted-foreground",
+                    labelTextClass,
                     hasSelectHandler && "cursor-pointer hover:text-foreground",
                     isSelected && "text-foreground font-semibold",
                   )}
@@ -166,8 +181,8 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
                   <div
                     className={cn("rounded-full", isSelected && "ring-2 ring-foreground")}
                     style={{
-                      width: "8px",
-                      height: "8px",
+                      width: dotSize,
+                      height: dotSize,
                       backgroundColor: color,
                     }}
                   />
