@@ -637,6 +637,13 @@ export const getAlign = (orientation: Orientation, align?: Align): React.CSSProp
   return styles;
 };
 
+/** Same token rules as {@link getColor} (e.g. IvyGreen → ivy-green). */
+export const colorNameToCssToken = (color: string): string =>
+  color
+    .trim()
+    .replace(/([A-Z])/g, (_m, l, i) => (i === 0 ? l : "-" + l))
+    .toLowerCase();
+
 export const getColor = (
   color?: string,
   cssProperty: "color" | "backgroundColor" | "borderColor" = "color",
@@ -649,9 +656,7 @@ export const getColor = (
 
   // Convert PascalCase to kebab-case so multi-word colors like "IvyGreen" → "ivy-green"
   // match their CSS variable names (--ivy-green).
-  const lowerColor = trimmedColor
-    .replace(/([A-Z])/g, (_m, l, i) => (i === 0 ? l : "-" + l))
-    .toLowerCase();
+  const lowerColor = colorNameToCssToken(trimmedColor);
 
   // When a surface color is used as a text color (like Muted, Background, Card),
   // it should map to its foreground variant (muted-foreground) to ensure readability,

@@ -4,6 +4,7 @@ import Icon from "@/components/Icon";
 import { camelCase } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { getColor } from "@/lib/styles";
 import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
@@ -84,17 +85,10 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
       | "info";
   };
 
-  const effectiveColor = customColor || color;
-  const colorStyles: React.CSSProperties = effectiveColor
-    ? {
-        backgroundColor: `var(--${effectiveColor.toLowerCase()}-400)`,
-        color: `var(--${effectiveColor.toLowerCase()}-900)`,
-      }
-    : {};
-
-  const darkModeClasses = effectiveColor
-    ? `dark:bg-[var(--${effectiveColor.toLowerCase()}-800)] dark:text-[var(--${effectiveColor.toLowerCase()}-100)]`
-    : "";
+  const colorStyles: React.CSSProperties = {
+    ...getColor(color, "backgroundColor", "background"),
+    ...getColor(color, "color", "foreground"),
+  };
 
   return (
     <Badge
@@ -112,7 +106,6 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
           iconPosition === "Right" &&
           (density === Densities.Small ? "pr-1" : density === Densities.Large ? "pr-2" : "pr-1.5"),
         isClickable && "cursor-pointer hover:opacity-80 transition-opacity",
-        darkModeClasses,
       )}
       onClick={isClickable ? handleClick : undefined}
       {...(isClickable
