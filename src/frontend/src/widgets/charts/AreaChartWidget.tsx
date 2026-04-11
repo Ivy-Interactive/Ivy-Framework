@@ -31,7 +31,7 @@ import {
 } from "./chartTypes";
 import { ChartData } from "./chartTypes";
 import { ReferenceDot } from "./chartTypes";
-import { LINE_DEFAULTS, REFERENCE_LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
 import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
@@ -123,7 +123,10 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
     [referenceDots],
   );
 
-  const markLine = useMemo(() => buildMarkLineConfig(referenceLines), [referenceLines]);
+  const markLine = useMemo(
+    () => buildMarkLineConfig(referenceLines, themeColors),
+    [referenceLines, themeColors],
+  );
 
   // Merge MarkArea[] into single markArea config
   const markAreaConfig = useMemo(

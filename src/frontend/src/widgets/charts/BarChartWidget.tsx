@@ -30,7 +30,7 @@ import {
   YAxisProps,
 } from "./chartTypes";
 import { ChartData } from "./chartTypes";
-import { BAR_DEFAULTS, REFERENCE_LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { BAR_DEFAULTS, applyDefaults } from "./chartDefaults";
 import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
@@ -127,7 +127,10 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
     [referenceDots],
   );
 
-  const markLine = useMemo(() => buildMarkLineConfig(referenceLines), [referenceLines]);
+  const markLine = useMemo(
+    () => buildMarkLineConfig(referenceLines, themeColors),
+    [referenceLines, themeColors],
+  );
 
   // Merge MarkArea[] into single markArea config
   const markAreaConfig = useMemo(

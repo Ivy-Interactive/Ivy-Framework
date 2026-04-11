@@ -121,6 +121,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         referenceDots,
         referenceLines,
         referenceAreas,
+        themeColors,
       ),
     }),
     [

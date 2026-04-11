@@ -3,6 +3,7 @@ import ReactECharts from "echarts-for-react";
 import { getHeight, getWidth } from "@/lib/styles";
 import { useThemeWithMonitoring } from "@/components/theme-provider";
 import {
+  buildMarkLineConfig,
   generateEChartGrid,
   generateEChartLegend,
   generateTooltip,
@@ -10,7 +11,7 @@ import {
   getColors,
   generateEChartToolbox,
 } from "./sharedUtils";
-import { getChartThemeColors } from "./styles";
+import { getChartThemeColors, type ChartThemeColors } from "./styles";
 import {
   ScatterChartWidgetProps,
   ChartType,
@@ -173,6 +174,7 @@ const generateScatterSeries = (
   referenceDots?: ReferenceDot[],
   referenceLines?: MarkLine[],
   referenceAreas?: MarkArea[],
+  markLineTheme?: ChartThemeColors,
 ) => {
   if (!scatters || scatters.length === 0 || !xAxisDataKey || !yAxisDataKey) {
     return [];
@@ -191,30 +193,10 @@ const generateScatterSeries = (
         }
       : undefined;
 
-  // Convert C# ReferenceLine[] to ECharts markLine format
-  // C# sends: { x?, y?, label?, strokeWidth } — NOT ECharts MarkLine objects
+  // Convert C# ReferenceLine[] to ECharts markLine format (same as line/area/bar via buildMarkLineConfig)
   const markLine =
     referenceLines && referenceLines.length > 0
-      ? {
-          silent: true,
-          symbol: ["none", "none"] as [string, string],
-          label: { show: true, position: "end" as const },
-          lineStyle: {
-            type: "dashed" as const,
-            // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-            width: (referenceLines[0] as any)?.strokeWidth ?? 1,
-          },
-          // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-          data: referenceLines.map((line: any) => {
-            if (line.x != null && line.y == null) {
-              return { xAxis: line.x, name: line.label };
-            } else if (line.y != null && line.x == null) {
-              return { yAxis: line.y, name: line.label };
-            }
-            // Both x and y specified — point-to-point line
-            return [{ coord: [line.x, line.y], name: line.label }, { coord: [line.x, line.y] }];
-          }),
-        }
+      ? buildMarkLineConfig(referenceLines, markLineTheme)
       : undefined;
 
   // Convert C# ReferenceArea[] to ECharts markArea format
@@ -419,6 +401,7 @@ const ScatterChartWidget: React.FC<ScatterChartWidgetProps> = ({
         referenceDots,
         referenceLines,
         referenceAreas,
+        themeColors,
       ),
     }),
     [

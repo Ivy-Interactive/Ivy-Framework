@@ -31,6 +31,22 @@ export type { ColorScheme } from "./styles/colors";
 export { getChartColors as getColors } from "./styles/colors";
 export { generateTextStyle, generateAxisLabelStyle, type ChartThemeColors };
 
+/** Default `name` on markLine data when missing (ECharts shows nothing if empty). */
+function enrichMarkLineDatum(item: {
+  name?: string;
+  xAxis?: number | string;
+  yAxis?: number;
+  type?: "min" | "max" | "average";
+  value?: number;
+}) {
+  if (item.name != null && String(item.name).trim() !== "") return item;
+  if (item.type === "min" || item.type === "max" || item.type === "average") return item;
+  if (item.xAxis != null && item.yAxis == null) return { ...item, name: String(item.xAxis) };
+  if (item.yAxis != null && item.xAxis == null) return { ...item, name: String(item.yAxis) };
+  if (item.value != null) return { ...item, name: String(item.value) };
+  return item;
+}
+
 export const getAxisDomainBound = (
   type: "min" | "max",
   rawValue: unknown,
@@ -279,6 +295,7 @@ export const getTransformValueFn = (data: ChartData[]) => {
  */
 export const buildMarkLineConfig = (
   referenceLines: MarkLine[] | undefined,
+  theme?: ChartThemeColors,
 ): Record<string, unknown> => {
   if (!referenceLines?.length) return {};
 
@@ -286,14 +303,28 @@ export const buildMarkLineConfig = (
   const usesEChartsMarkLineShape =
     first != null && "data" in first && Array.isArray(first.data as unknown[]);
 
+  // Same as axis tick labels (`generateXAxis` / `generateYAxis`); resolved colors — canvas ignores `var()`.
+  const markLineLabel = {
+    show: true,
+    position: "end" as const,
+    ...generateAxisLabelStyle(theme?.mutedForeground ?? "#888888", theme?.fontSans ?? "sans-serif"),
+    textBorderWidth: 0,
+  };
+
   if (usesEChartsMarkLineShape) {
+    const ml0 = referenceLines[0] as MarkLine & { label?: Record<string, unknown> };
+    const rawData = referenceLines.flatMap((ml) => (ml as MarkLine).data ?? []);
     return {
       ...referenceLines[0],
       lineStyle: {
         width: referenceLines[0]?.lineStyle?.width ?? REFERENCE_LINE_DEFAULTS.strokeWidth,
         ...referenceLines[0]?.lineStyle,
       },
-      data: referenceLines.flatMap((ml) => (ml as MarkLine).data ?? []),
+      data: rawData.map((d) => enrichMarkLineDatum(d)),
+      label: {
+        ...ml0.label,
+        ...markLineLabel,
+      },
     };
   }
 
@@ -302,7 +333,7 @@ export const buildMarkLineConfig = (
   return {
     silent: true,
     symbol: ["none", "none"] as [string, string],
-    label: { show: true, position: "end" as const },
+    label: markLineLabel,
     lineStyle: {
       type: "dashed" as const,
       width: strokeWidth,
@@ -310,12 +341,19 @@ export const buildMarkLineConfig = (
     data: referenceLines
       .map((line) => {
         const l = line as unknown as Record<string, unknown>;
-        const x = l.x;
-        const y = l.y;
-        const name = l.label as string | undefined;
-        if (x != null && y == null) return { xAxis: x as number | string, name };
-        if (y != null && x == null) return { yAxis: y as number, name };
+        const x = l.x ?? l.X;
+        const y = l.y ?? l.Y;
+        const labelText = l.label ?? l.Label;
+        const nameFromLabel =
+          typeof labelText === "string" && labelText.trim() !== "" ? labelText : undefined;
+        if (x != null && y == null) {
+          return { xAxis: x as number | string, name: nameFromLabel ?? String(x) };
+        }
+        if (y != null && x == null) {
+          return { yAxis: y as number, name: nameFromLabel ?? String(y) };
+        }
         if (x != null && y != null) {
+          const name = nameFromLabel ?? `${x}, ${y}`;
           return [
             { coord: [x, y] as [number, number], name },
             { coord: [x, y] as [number, number] },
@@ -338,6 +376,7 @@ export const generateSeries = (
   referenceDots?: ReferenceDot[],
   referenceLines?: MarkLine[],
   referenceAreas?: MarkArea[],
+  markLineTheme?: ChartThemeColors,
 ) => {
   // Convert ReferenceDot[] to ECharts markPoint format
   const markPoint =
@@ -350,7 +389,7 @@ export const generateSeries = (
         }
       : {};
 
-  const markLine = buildMarkLineConfig(referenceLines);
+  const markLine = buildMarkLineConfig(referenceLines, markLineTheme);
 
   // Merge MarkArea[] into single markArea config
   const markArea =
