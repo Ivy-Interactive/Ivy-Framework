@@ -1,6 +1,6 @@
 # Plans File Structure
 
-Plans are stored in the folder specified by `planFolder` in `config.yaml`.
+Plans live under `planFolder` from `config.yaml`.
 
 ## Directory Layout
 
@@ -34,8 +34,8 @@ Plans are stored in the folder specified by `planFolder` in `config.yaml`.
 
 `{ID:D5}-{SafeTitle}` — e.g. `01098-MakeAnEmptyAppCalledReview`
 
-- **ID**: 5-digit zero-padded integer from `.counter`
-- **SafeTitle**: Title-cased, first 60 chars of description, non-alphanumeric characters stripped, spaces removed (e.g. "Fix login bug" → `FixLoginBug`)
+- **ID**: 5-digit value from `.counter`
+- **SafeTitle**: Title-cased, first 60 chars of description, alphanumeric only, no spaces (e.g. `"Fix login bug"` – `FixLoginBug`)
 
 ## plan.yaml
 
@@ -128,32 +128,19 @@ Subsequent revisions are written by ExpandPlan, UpdatePlan, or SplitPlan agents.
 
 ## Logs
 
-Each promptware run writes a log entry to `logs/` as `{NNN}-{Action}.md`:
-
-```markdown
-# MakePlan
-
-- **Completed:** 2026-03-28T20:36:41Z
-- **Status:** Completed
-```
+`logs/{NNN}-{Action}.md` per promptware run (Completed time, status, …).
 
 ## temp/
 
-Scratch space for promptware agents. Use this for any intermediate data needed during execution:
-- Cloned external repos
-- Downloaded files
-- Generated intermediary files (e.g. pandoc input for PDF generation)
-- Any temporary data the agent needs during the session
-
-Contents are not tracked or committed. Can be safely deleted after the plan is completed.
+Scratch for clones, downloads, intermediates. Safe to delete after the plan finishes.
 
 ## .counter
 
-A single integer in `{planFolder}/.counter`. Read and incremented by the MakePlan agent when creating a new plan.
+Single integer in `{planFolder}/.counter`; MakePlan reads and increments for new IDs.
 
 ## Verifications
 
-Each plan revision has a `## Verification` section with a checklist of verification steps from `config.yaml`:
+Each revision can include `## Verification` with checkboxes from `config.yaml`:
 
 ```markdown
 ## Verification
@@ -163,16 +150,10 @@ Each plan revision has a `## Verification` section with a checklist of verificat
 - [ ] FrontendLint
 ```
 
-- `- [x]` = will be run by ExecutePlan after committing
-- `- [ ]` = skipped
-
-Required verifications are pre-checked by MakePlan based on the project's config. The user can edit the checklist before execution.
-
-Verification definitions (name + prompt) live in the top-level `verifications` section of `config.yaml`. Projects reference them by name with a `required` flag.
+`- [x]` = ExecutePlan will run; `- [ ]` = skipped. Definitions live in top-level `config.yaml` `verifications`; projects reference by name + `required`.
 
 ## Notes
 
-- **When referencing local files, folders, or screenshots in plans, use markdown links with the filename as display text: `[Button.cs](file:///path/to/repo/src/components/Button.cs)`. This allows the user to open files directly in VS Code by clicking the link while keeping plans readable.**
-- Use markdown format for images ![alt text](image-url) for images.
-- **Diagrams**: Our Markdown renderer supports Graphviz/DOT (```dot or ```graphviz code blocks) and Mermaid (```mermaid code blocks). **Prefer Graphviz/DOT over Mermaid** — it produces cleaner, more predictable layouts. Use diagrams sparingly — only when a visual genuinely clarifies architecture, data flow, or state transitions. Most plans don't need diagrams.
-
+- **Local file links in plans:** `[Button.cs](file:///path/to/...)` so VS Code opens the path; keep the path as link text.
+- Images: normal markdown `![alt](url)`.
+- **Diagrams:** Graphviz/DOT (```dot / ```graphviz) or Mermaid (```mermaid). **Prefer DOT** for layout. Use only when a diagram really helps.

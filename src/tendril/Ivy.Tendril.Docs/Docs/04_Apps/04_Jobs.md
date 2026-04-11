@@ -11,24 +11,25 @@ icon: Activity
 # Jobs
 
 <Ingress>
-The Jobs app monitors running agent sessions, showing live cost, token usage, and status for each active job.
+Running and past promptware runs: status, cost, duration, and live output.
 </Ingress>
 
 ## Overview
 
-When a plan is sent for execution, it appears in the Jobs app as an active job. Each job shows:
+Any dispatched promptware (Execute from Drafts, Revise from Review, …) shows up as a job with:
 
-- **Status** — Current state of the agent (running, completed, failed)
-- **Cost** — Live cost tracking for the session
-- **Tokens** — Input and output token counts
-- **Duration** — How long the job has been running
+- **Status** — `Running`, `Completed`, `Failed`, `Pending`, …
+- **Type** — e.g. `MakePlan`, `ExecutePlan`, `UpdatePlan`, `MakePr`
+- **Tokens** — Usage vs. your provider quota
 
-## Job Control
+## Live output
 
-From the Jobs app, you can:
+Built-in terminal shows **stdout/stderr** from the agent (builds, logs, errors)—not only a spinner.
 
-| Action | Description |
-|--------|-------------|
-| **Stop** | Cancel a running job |
-| **View Logs** | See the agent's output and progress |
-| **Retry** | Re-run a failed job |
+## Controls
+
+| Action | Effect |
+|--------|--------|
+| **Stop** | End the run; release worktree locks. |
+| **Logs** | Open `logs/` for that plan. |
+| **Retry** | Re-run when a transition is stuck. |

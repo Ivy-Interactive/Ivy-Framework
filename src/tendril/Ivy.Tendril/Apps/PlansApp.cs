@@ -41,7 +41,7 @@ public class PlansApp : ViewBase
 
         if (selectedPlanState.Value == null && filteredPlans.Count > 0) selectedPlanState.Set(filteredPlans[0]);
 
-        if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
+        if (selectedPlanState.Value is { } selected && filteredPlans.All(p => p.FolderName != selected.FolderName))
         {
             var oldIndex = previousPlans.Value.FindIndex(p => p.FolderName == selected.FolderName);
 
@@ -58,11 +58,6 @@ public class PlansApp : ViewBase
 
         previousPlans.Value = filteredPlans;
 
-        void RefreshPlans()
-        {
-            refreshToken.Refresh();
-        }
-
         var sidebar = new SidebarView(plans, selectedPlanState, projectFilter, levelFilter, textFilter, configService);
 
         return new SidebarLayout(
@@ -70,5 +65,10 @@ public class PlansApp : ViewBase
                 RefreshPlans, configService, gitService),
             sidebar
         );
+
+        void RefreshPlans()
+        {
+            refreshToken.Refresh();
+        }
     }
 }

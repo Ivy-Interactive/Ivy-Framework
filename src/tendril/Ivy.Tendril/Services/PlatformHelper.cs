@@ -1,30 +1,107 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Ivy.Helpers;
 
 namespace Ivy.Tendril.Services;
 
 public static class PlatformHelper
 {
-    public static void OpenInTerminal(string workingDirectory)
+    /// <summary>
+    /// Returns true if condition evaluates to exit code 0, false otherwise.
+    /// </summary>
+    public static bool EvaluatePowerShellCondition(string condition, string workingDirectory, int timeoutMs = 5000)
     {
-        var psi = new ProcessStartInfo { UseShellExecute = true };
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        try
         {
-            psi.FileName = "wt.exe";
-            psi.Arguments = $"-d \"{workingDirectory}\"";
+            var psi = new ProcessStartInfo
+            {
+                FileName = "pwsh",
+                Arguments = $"-NoProfile -Command \"if ({condition}) {{ exit 0 }} else {{ exit 1 }}\"",
+                WorkingDirectory = workingDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using var proc = Process.Start(psi);
+            if (proc is not null)
+            {
+                if (!proc.WaitForExitOrKill(timeoutMs))
+                    return false;
+                return proc.ExitCode == 0;
+            }
+            return false;
         }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        catch (Exception ex)
         {
-            psi.FileName = "open";
-            psi.Arguments = $"-a Terminal \"{workingDirectory}\"";
+            Console.Error.WriteLine($"Failed to evaluate PowerShell condition: {ex.Message}");
+            return false;
         }
-        else
-        {
-            psi.FileName = "xdg-open";
-            psi.Arguments = workingDirectory;
-        }
+    }
 
-        Process.Start(psi);
+    /// <summary>
+    /// Launches a PowerShell action. Returns false if pwsh is not found or the launch fails.
+    /// </summary>
+    public static bool RunPowerShellAction(string action, string workingDirectory)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "pwsh",
+                Arguments = $"-NoProfile -Command \"{action}\"",
+                WorkingDirectory = workingDirectory,
+                UseShellExecute = true
+            });
+            return true;
+        }
+        catch (Win32Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to run PowerShell action: {ex.Message}");
+            return false;
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.Error.WriteLine($"Failed to run PowerShell action: {ex.Message}");
+            return false;
+        }
+    }
+
+    public static bool OpenInTerminal(string workingDirectory)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo { UseShellExecute = true };
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                psi.FileName = "wt.exe";
+                psi.Arguments = $"-d \"{workingDirectory}\"";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                psi.FileName = "open";
+                psi.Arguments = $"-a Terminal \"{workingDirectory}\"";
+            }
+            else
+            {
+                psi.FileName = "xdg-open";
+                psi.Arguments = workingDirectory;
+            }
+
+            Process.Start(psi);
+            return true;
+        }
+        catch (Win32Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to open terminal: {ex.Message}");
+            return false;
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.Error.WriteLine($"Failed to open terminal: {ex.Message}");
+            return false;
+        }
     }
 
     public static bool OpenInEditor(string editorCommand, string target)
@@ -60,25 +137,39 @@ public static class PlatformHelper
         }
     }
 
-    public static void OpenInFileManager(string folderPath)
+    public static bool OpenInFileManager(string folderPath)
     {
-        var psi = new ProcessStartInfo { UseShellExecute = true };
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        try
         {
-            psi.FileName = "explorer.exe";
-            psi.Arguments = folderPath;
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            psi.FileName = "open";
-            psi.Arguments = folderPath;
-        }
-        else
-        {
-            psi.FileName = "xdg-open";
-            psi.Arguments = folderPath;
-        }
+            var psi = new ProcessStartInfo { UseShellExecute = true };
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                psi.FileName = "explorer.exe";
+                psi.Arguments = folderPath;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                psi.FileName = "open";
+                psi.Arguments = folderPath;
+            }
+            else
+            {
+                psi.FileName = "xdg-open";
+                psi.Arguments = folderPath;
+            }
 
-        Process.Start(psi);
+            Process.Start(psi);
+            return true;
+        }
+        catch (Win32Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to open file manager: {ex.Message}");
+            return false;
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.Error.WriteLine($"Failed to open file manager: {ex.Message}");
+            return false;
+        }
     }
 }

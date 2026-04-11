@@ -5,9 +5,110 @@ public class TextInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
+        return Layout.Vertical()
+               | Text.H1("Text Input")
+               | Layout.Tabs(
+                   new Tab("Variants", new TextInputVariants()),
+                   new Tab("Sizes", new TextInputSizes()),
+                   new Tab("Affixes", new TextInputAffixes()),
+                   new Tab("Data Binding", new TextInputDataBinding()),
+                   new Tab("Length Constraints", new TextInputLengthConstraints()),
+                   new Tab("Events", new TextInputEventsTab())
+               ).Variant(TabsVariant.Content);
+    }
+}
+
+public class TextInputVariants : ViewBase
+{
+    public override object Build()
+    {
         var withoutValue = UseState((string?)null);
         var withValue = UseState("Hello");
 
+        return Layout.Grid().Columns(5)
+               | null!
+               | Text.Monospaced("Empty")
+               | Text.Monospaced("With Value")
+               | Text.Monospaced("Disabled")
+               | Text.Monospaced("Invalid")
+
+               | Text.Monospaced("TextInputVariant.Text")
+               | withoutValue.ToTextInput().Placeholder("Placeholder")
+               | withValue.ToTextInput()
+               | withValue.ToTextInput().Disabled()
+               | withValue.ToTextInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+               | Text.Monospaced("TextInputVariant.Password")
+               | withoutValue.ToPasswordInput().Placeholder("Placeholder").ShortcutKey("Ctrl+L")
+               | withValue.ToPasswordInput()
+               | withValue.ToPasswordInput().Disabled()
+               | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+               | Text.Monospaced("TextInputVariant.Textarea")
+               | withoutValue.ToTextareaInput().Placeholder("Placeholder").ShortcutKey("Ctrl+T")
+               | withValue.ToTextareaInput()
+               | withValue.ToTextareaInput().Disabled()
+               | withValue.ToTextareaInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+               | Text.Monospaced("TextInputVariant.Search")
+               | withoutValue.ToSearchInput().Placeholder("Placeholder").ShortcutKey("Ctrl+K")
+               | withValue.ToSearchInput()
+               | withValue.ToSearchInput().Disabled()
+               | withValue.ToSearchInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+               | Text.Monospaced("TextInputVariant.Email")
+               | withoutValue.ToEmailInput().Placeholder("Placeholder").ShortcutKey("Ctrl+E")
+               | withValue.ToEmailInput()
+               | withValue.ToEmailInput().Disabled()
+               | withValue.ToEmailInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+               | Text.Monospaced("TextInputVariant.Tel")
+               | withoutValue.ToTelInput().Placeholder("Placeholder").ShortcutKey("Ctrl+J")
+               | withValue.ToTelInput()
+               | withValue.ToTelInput().Disabled()
+               | withValue.ToTelInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
+
+               | Text.Monospaced("TextInputVariant.Url")
+               | withoutValue.ToUrlInput().Placeholder("Placeholder").ShortcutKey("Ctrl+U")
+               | withValue.ToUrlInput()
+               | withValue.ToUrlInput().Disabled()
+               | withValue.ToUrlInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros");
+    }
+}
+
+public class TextInputDataBinding : ViewBase
+{
+    public override object Build()
+    {
+        var stringState = UseState("");
+        var nullStringState = UseState<string?>();
+
+        return Layout.Grid().Columns(3)
+
+               | Text.Monospaced("string")
+               | (Layout.Vertical()
+                  | stringState.ToTextInput()
+                  | stringState.ToTextareaInput()
+                  | stringState.ToPasswordInput()
+                  | stringState.ToSearchInput()
+               )
+               | stringState
+
+               | Text.Monospaced("string?")
+               | (Layout.Vertical()
+                  | nullStringState.ToTextInput()
+                  | nullStringState.ToTextareaInput()
+                  | nullStringState.ToPasswordInput()
+                  | nullStringState.ToSearchInput()
+               )
+               | nullStringState;
+    }
+}
+
+public class TextInputEventsTab : ViewBase
+{
+    public override object Build()
+    {
         var onChangedState = UseState("");
         var onChangeLabel = UseState("");
         UseEffect(() => { onChangeLabel.Set(string.IsNullOrEmpty(onChangedState.Value) ? "" : "Changed"); }, onChangedState);
@@ -15,100 +116,14 @@ public class TextInputApp : SampleBase
         var onBlurLabel = UseState("");
         var onFocusState = UseState("");
         var onFocusLabel = UseState("");
-
-        var stringState = UseState("");
-        var nullStringState = UseState<string?>();
-
-        var dataBinding = Layout.Grid().Columns(3)
-
-                          | Text.Monospaced("string")
-                          | (Layout.Vertical()
-                             | stringState.ToTextInput()
-                             | stringState.ToTextareaInput()
-                             | stringState.ToPasswordInput()
-                             | stringState.ToSearchInput()
-                          )
-                          | stringState
-
-                          | Text.Monospaced("string?")
-                          | (Layout.Vertical()
-                             | nullStringState.ToTextInput()
-                             | nullStringState.ToTextareaInput()
-                             | nullStringState.ToPasswordInput()
-                             | nullStringState.ToSearchInput()
-                          )
-                          | nullStringState
-            ;
+        var searchQuery = UseState("");
+        var searchResult = UseState("");
+        var tag = UseState("");
+        var tags = UseState<List<string>>(new List<string>());
+        var password = UseState("");
+        var loginResult = UseState("");
 
         return Layout.Vertical()
-               | Text.H1("Text Input")
-               | Text.H2("Sizes")
-               | new TextInputSizes()
-               | Text.H2("Variants")
-               | (Layout.Grid().Columns(5)
-                  | null!
-                  | Text.Monospaced("Empty")
-                  | Text.Monospaced("With Value")
-                  | Text.Monospaced("Disabled")
-                  | Text.Monospaced("Invalid")
-
-                  | Text.Monospaced("TextInputVariant.Text")
-                  | withoutValue.ToTextInput().Placeholder("Placeholder")
-                  | withValue.ToTextInput()
-                  | withValue.ToTextInput().Disabled()
-                  | withValue.ToTextInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
-
-                  | Text.Monospaced("TextInputVariant.Password")
-                  | withoutValue.ToPasswordInput().Placeholder("Placeholder").ShortcutKey("Ctrl+L")
-                  | withValue.ToPasswordInput()
-                  | withValue.ToPasswordInput().Disabled()
-                  | withValue.ToPasswordInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
-
-                  | Text.Monospaced("TextInputVariant.Textarea")
-                  | withoutValue.ToTextareaInput().Placeholder("Placeholder").ShortcutKey("Ctrl+T")
-                  | withValue.ToTextareaInput()
-                  | withValue.ToTextareaInput().Disabled()
-                  | withValue.ToTextareaInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
-
-                  | Text.Monospaced("TextInputVariant.Search")
-                  | withoutValue.ToSearchInput().Placeholder("Placeholder").ShortcutKey("Ctrl+K")
-                  | withValue.ToSearchInput()
-                  | withValue.ToSearchInput().Disabled()
-                  | withValue.ToSearchInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
-
-                  | Text.Monospaced("TextInputVariant.Email")
-                  | withoutValue.ToEmailInput().Placeholder("Placeholder").ShortcutKey("Ctrl+E")
-                  | withValue.ToEmailInput()
-                  | withValue.ToEmailInput().Disabled()
-                  | withValue.ToEmailInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
-
-                  | Text.Monospaced("TextInputVariant.Tel")
-                  | withoutValue.ToTelInput().Placeholder("Placeholder").ShortcutKey("Ctrl+J")
-                  | withValue.ToTelInput()
-                  | withValue.ToTelInput().Disabled()
-                  | withValue.ToTelInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
-
-                  | Text.Monospaced("TextInputVariant.Url")
-                  | withoutValue.ToUrlInput().Placeholder("Placeholder").ShortcutKey("Ctrl+U")
-                  | withValue.ToUrlInput()
-                  | withValue.ToUrlInput().Disabled()
-                  | withValue.ToUrlInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
-               )
-
-               | Text.H2("Affixes")
-               | new TextInputAffixes()
-
-               //Data Binding:
-
-               | Text.H2("Data Binding")
-               | dataBinding
-
-               | Text.H2("Length constraints")
-               | new TextInputLengthConstraints()
-
-               //Events: 
-
-               | Text.H2("Events")
                | Text.H3("OnChange")
                | Layout.Horizontal(
                    onChangedState.ToTextInput(),
@@ -133,12 +148,39 @@ public class TextInputApp : SampleBase
                    ).Title("OnFocus Handler")
                )
                | Text.H3("OnSubmit (press Enter)")
-               | new TextInputSubmitDemo()
-               | new Spacer().Height(Size.Units(15))
-            ;
+               | Text.P("Search example (type and press Enter):")
+               | Layout.Horizontal(
+                   searchQuery.ToSearchInput()
+                       .Placeholder("Search...")
+                       .OnSubmit(() => searchResult.Set($"Searched for: {searchQuery.Value}")),
+                   searchResult
+               )
+               | Text.P("Quick-add tags (type and press Enter to add):")
+               | Layout.Horizontal(
+                   tag.ToTextInput()
+                       .Placeholder("Add a tag...")
+                       .OnSubmit(() =>
+                       {
+                           if (!string.IsNullOrWhiteSpace(tag.Value))
+                           {
+                               tags.Set(new List<string>(tags.Value) { tag.Value });
+                               tag.Set("");
+                           }
+                       }),
+                   Layout.Horizontal().Gap(2) | tags.Value.Select(t => new Badge(t))
+               )
+               | Text.P("Password submit (type and press Enter to login):")
+               | Layout.Horizontal(
+                   password.ToPasswordInput()
+                       .Placeholder("Enter password...")
+                       .ShortcutKey("Ctrl+Enter")
+                       .OnSubmit(() => loginResult.Set(
+                           string.IsNullOrWhiteSpace(password.Value)
+                               ? "Password cannot be empty"
+                               : "Login submitted")),
+                   loginResult
+               );
     }
-
-    // Helper methods moved to TextInputSizes and TextInputPrefixSuffix classes
 }
 
 public class TextInputLengthConstraints : ViewBase
@@ -228,52 +270,5 @@ public class TextInputAffixes : ViewBase
                | nullableState.ToTextInput().Prefix("@").Invalid("Required field").ShortcutKey("Ctrl+P")
                | nullableState.ToTextInput().Suffix(Icons.Search).Invalid("Invalid input").ShortcutKey("Ctrl+F")
                | nullableState.ToTextInput().Prefix(Icons.Mail).Suffix(".com").Invalid("Error").ShortcutKey("Ctrl+B");
-    }
-}
-
-public class TextInputSubmitDemo : ViewBase
-{
-    public override object Build()
-    {
-        var searchQuery = UseState("");
-        var searchResult = UseState("");
-        var tag = UseState("");
-        var tags = UseState<List<string>>(new List<string>());
-        var password = UseState("");
-        var loginResult = UseState("");
-
-        return Layout.Vertical()
-               | Text.P("Search example (type and press Enter):")
-               | Layout.Horizontal(
-                   searchQuery.ToSearchInput()
-                       .Placeholder("Search...")
-                       .OnSubmit(() => searchResult.Set($"Searched for: {searchQuery.Value}")),
-                   searchResult
-               )
-               | Text.P("Quick-add tags (type and press Enter to add):")
-               | Layout.Horizontal(
-                   tag.ToTextInput()
-                       .Placeholder("Add a tag...")
-                       .OnSubmit(() =>
-                       {
-                           if (!string.IsNullOrWhiteSpace(tag.Value))
-                           {
-                               tags.Set(new List<string>(tags.Value) { tag.Value });
-                               tag.Set("");
-                           }
-                       }),
-                   Layout.Horizontal().Gap(2) | tags.Value.Select(t => new Badge(t))
-               )
-               | Text.P("Password submit (type and press Enter to login):")
-               | Layout.Horizontal(
-                   password.ToPasswordInput()
-                       .Placeholder("Enter password...")
-                       .ShortcutKey("Ctrl+Enter")
-                       .OnSubmit(() => loginResult.Set(
-                           string.IsNullOrWhiteSpace(password.Value)
-                               ? "Password cannot be empty"
-                               : "Login submitted")),
-                   loginResult
-               );
     }
 }

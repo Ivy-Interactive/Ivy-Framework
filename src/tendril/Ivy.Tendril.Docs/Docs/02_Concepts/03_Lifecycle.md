@@ -7,29 +7,38 @@ searchHints:
   - cost
   - tokens
   - monitoring
+  - verification
 ---
 
-# Jobs
+# Lifecycle & Jobs
 
 <Ingress>
-Jobs are the execution units in Tendril. Every time a promptware runs, it creates a job that tracks progress, cost, and output.
+Each promptware run is a **Job**: live status, cost, and telemetry for that agent.
 </Ingress>
 
-## Job Tracking
+## What you see per job
 
-Each job captures:
+- **Status** — `Pending`, `Running`, `Completed`, `Failed`, `Timeout`, `Queued`, `Stopped`, `Blocked`
+- **Type** — e.g. `MakePlan`, `ExecutePlan`, `MakePr`
+- **Plan** — Which plan and branch context
+- **Cost** — Tokens and estimated spend
+- **Duration** — Wall time
+- **Output** — Streamed messages and command output
 
-- **Status** — Pending, Running, Completed, Failed, or Timed Out
-- **Type** — Which promptware is running (MakePlan, ExecutePlan, etc.)
-- **Plan** — The plan this job belongs to
-- **Cost** — Token usage and estimated cost
-- **Duration** — How long the job has been running
-- **Output** — Live status messages from the agent
+## Verification
 
-## Job Concurrency
+After `ExecutePlan` / `UpdatePlan`, Tendril runs your **Verification** steps (not guesswork):
 
-Tendril supports configurable concurrent job limits. Multiple plans can be executed in parallel, each in its own isolated git worktree. The concurrency limit is set in `config.yaml`.
+1. **Build** — e.g. `dotnet build`, `npm run typecheck`. Failures go back to the agent with logs.
+2. **Format** — e.g. `dotnet format`, `prettier`.
+3. **Tests** — Unit (or configured) test commands.
 
-## Cost Tracking
+Too many failures vs. limits – plan **Failed**; nothing broken moves to Review by default.
 
-Every job logs its token usage to a `costs.csv` file in the plan folder. The dashboard aggregates these costs across all plans, giving you visibility into your AI spending by project, time period, and promptware type.
+## Concurrency & worktrees
+
+Parallel job slots are configurable. Execution uses a **git worktree** (separate working tree), not your current branch—so several agents can run without fighting your editor.
+
+## Cost
+
+Each job appends to the plan’s `costs.csv`. The UI aggregates by project, time, and promptware type.

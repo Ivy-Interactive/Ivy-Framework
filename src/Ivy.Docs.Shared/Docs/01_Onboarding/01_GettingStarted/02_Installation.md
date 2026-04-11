@@ -55,6 +55,24 @@ Ivy Framework strictly requires the following toolchains to develop applications
 - **Rust Toolchain**: Required for the underlying high-performance JSON-diffing engine. Ensure you have the latest stable compiler installed via [rustup](https://rustup.rs/).
 - **vp CLI (Vite+)**: Required for frontend orchestration. Install globally via `npm install -g vite-plus`.
 
+Ivy serves over HTTPS in local development. On macOS and Windows, run the following once to trust the development certificate:
+
+```terminal
+>dotnet dev-certs https --trust
+```
+
+On Linux, `--trust` is not supported directly. You must manually trust the certificate with your browser or OS certificate store. First, generate the certificate:
+
+```terminal
+>dotnet dev-certs https
+```
+
+Then follow the steps for your distribution to trust the generated certificate. See [Microsoft's documentation on HTTPS in Linux](https://learn.microsoft.com/en-us/aspnet/core/security/enforcing-ssl#linux-specific-considerations) for detailed instructions.
+
+<Callout Type="warning">
+If you skip this step, your browser will show a certificate warning and authentication cookies will not work. You must trust the dev certificate for auth to function in local development.
+</Callout>
+
 ## Manual Setup: Creating Your First Project
 
 If you prefer to set up a project manually, follow these steps:
@@ -180,6 +198,7 @@ The server automatically optimizes its behavior based on the current environment
 | **Caching**         | Disabled for immediate changes  | Aggressive ETag & compression    |
 | **Logging**         | Debug & Information             | Warning & Error only             |
 | **Port Management** | Conflict detection & auto-shift | Strict port binding              |
+| **HTTPS** | Dev certificate (`dotnet dev-certs https --trust`) | Reverse proxy handles TLS |
 
 ### Troubleshooting "command not found"
 

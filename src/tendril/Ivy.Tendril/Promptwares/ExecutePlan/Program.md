@@ -1,5 +1,7 @@
 # ExecutePlan
 
+**Note:** This promptware is stack-agnostic. Stack-specific operations (build, format, test) are defined in `config.yaml` under `verifications`. Examples in this document use multiple tech stacks for illustration.
+
 Execute an approved plan in isolated git worktrees.
 
 ## Context
@@ -16,6 +18,8 @@ Read `config.yaml` from the `TENDRIL_CONFIG` environment variable (absolute path
 The launcher script sets the working directory to the project's primary repo.
 
 **Note:** Plans are often executed multiple times. For example, a reviewer may not be satisfied with the first execution and sends the plan back to Draft with comments (via UpdatePlan). When re-executing, the worktree branch from the previous run may already exist — handle this gracefully (delete old worktree first, or create with a new branch suffix). Check for existing artifacts and verification reports from prior runs.
+
+**Resume-vs-redo on re-execution:** Before deleting anything, run an integrity check on the prior run. If `plan.yaml` has commits populated and all verifications `Pass`, every `Pass` verification has a report, `artifacts/summary.md` exists, the worktree is clean with HEAD matching the last recorded commit, and the expected code changes are present in the files — then **resume** (log it and exit successfully) rather than redoing work. Redoing creates new commit hashes and breaks downstream MakePr references. Only fall back to the full re-execution flow if any of those checks fail.
 
 ## Time Budget Awareness
 
@@ -53,6 +57,43 @@ If `plan.yaml` has a `dependsOn` list, for each entry:
 4. If any dependency is unmet (not completed or PRs not merged), **fail immediately** with a clear message explaining which dependency isn't ready and why.
 
 **Note:** The JobService also performs this check before launching ExecutePlan, but this step acts as a safety net in case the dependency state changed between job launch and execution.
+
+### 1.6. Validate Worktree Isolation
+
+Before creating worktrees, verify the execution environment is safe:
+
+1. **Check each repo is not itself a worktree** — If `<repo-path>/.git` is a file containing `gitdir:`, the repo is a worktree. Fail with error:
+   > ERROR: Repository at <repo-path> is itself a worktree. ExecutePlan cannot create worktrees inside worktrees. Update config.yaml to use the main repo path.
+
+2. **Check Plans directory is not inside a worktree** — If `$TENDRIL_HOME` or its parent contains a worktree `.git` file, fail with error:
+   > ERROR: TENDRIL_HOME is inside a git worktree. Move your Tendril installation or change the Plans directory.
+
+```bash
+# For each repo in plan.yaml repos (or project repos if empty):
+cd <repo-path>
+
+# Check if current directory is a worktree
+if [ -f .git ] && grep -q "gitdir:" .git; then
+    echo "ERROR: Repository at <repo-path> is itself a worktree."
+    echo "ExecutePlan cannot create worktrees inside worktrees."
+    echo "Check that config.yaml repo paths point to main repositories, not worktrees."
+    exit 1
+fi
+
+# Check if Plans directory would be created inside a worktree
+PLANS_DIR_PARENT=$(dirname "$TENDRIL_HOME")
+cd "$PLANS_DIR_PARENT"
+if git rev-parse --is-inside-work-tree 2>/dev/null && [ -f "$PLANS_DIR_PARENT/.git" ]; then
+    if grep -q "gitdir:" "$PLANS_DIR_PARENT/.git"; then
+        echo "ERROR: TENDRIL_HOME ($TENDRIL_HOME) is inside a git worktree."
+        echo "Plans and their worktrees cannot be created inside worktrees."
+        echo "Move your Tendril installation outside the worktree or use a different Plans directory."
+        exit 1
+    fi
+fi
+```
+
+This prevents recursive worktree scenarios that would corrupt git state and cause massive repo bloat.
 
 ### 1.7. Validate Code State
 
@@ -102,6 +143,12 @@ After reading the plan revision, scan it for code validation markers to detect s
 
 **Note:** This step runs against the original repo (before worktrees are created), since it validates whether the plan's assumptions about the codebase are still accurate.
 
+5. **Self-flagged redundancy check** — In addition to code block validation, scan the plan revision for markers where the plan itself admits it is already done:
+   - A `<details><summary>Still relevant?</summary>` block whose body starts with `No.`
+   - Phrases like *"Already applied"*, *"This plan is redundant"*, *"This plan is superseded"*, or *"previously attempted … was merged to main via PR #NNNN"* in the `## Problem` or `## Solution` sections.
+
+   If any marker is found, verify the claim: run `gh pr view <cited PR> --json state,mergeCommit` (must be `MERGED`), confirm the cited commit is in `git log origin/<default-branch>`, and byte-compare the plan's proposed code against the current file contents. If all three checks pass, write `verification/PreExecution.md` with `Result: Fail`, write `artifacts/summary.md` documenting the no-op, set every `plan.yaml` verification to `Skipped`, and fail the plan **without creating a worktree** — running verifications on unchanged code wastes the time budget and produces a 0-commit PR that MakePr cannot process.
+
 ### 1.8. Auto-Commit Uncommitted Changes
 
 Before creating worktrees, check each repo for uncommitted changes and automatically commit them. This prevents silent data loss when worktrees are created from `origin/<default-branch>` and later merged back.
@@ -147,6 +194,7 @@ if [[ -n $(git status --porcelain) ]]; then
   # After resolving stale files, check if there are still changes to commit
   if [[ -n $(git status --porcelain) ]]; then
     git add -A
+    git reset -- '*.bak_*' 2>/dev/null || true
     git commit -m "WIP: Auto-commit before plan execution [$(date -u +%Y-%m-%dT%H:%M:%SZ)]"
     git push origin $(git branch --show-current)
     echo "Changes committed and pushed successfully"
@@ -162,6 +210,7 @@ fi
 - Auto-committing and pushing ensures all local work is preserved and visible to worktrees
 - The `WIP:` prefix makes auto-commits easily identifiable for later cleanup (squash/amend)
 - **Revert detection with auto-resolve:** Before committing, each dirty tracked file — whether unstaged (`git diff --name-only HEAD`) or staged (`git diff --cached --name-only`) — is checked against the last 5 commits. If the working tree version matches the file's state *before* a recent commit (i.e., it's stale), the file is automatically restored to its HEAD version via `git checkout HEAD -- <file>`. This prevents silent reverts while keeping the process fully autonomous. Any remaining non-stale dirty files are committed normally.
+- **Backup file exclusion:** After staging all changes with `git add -A`, the command `git reset -- '*.bak_*'` explicitly unstages any files matching the backup pattern. This prevents temporary backup files (created by FileHelper.ReadAllText's defensive copy mechanism in plan 03055) from being committed to version control. Backup files serve only as local recovery points and should not pollute the repository history.
 
 **Note:** This step runs in the original repo directories, before worktree creation.
 
@@ -171,12 +220,15 @@ For each repo listed in `plan.yaml` `repos` (or the project's repos from `config
 
 1. Fetch latest from remote: `git fetch origin`
 2. Detect the default branch: `git symbolic-ref refs/remotes/origin/HEAD | sed 's|refs/remotes/origin/||'` (usually `master` or `main`)
-3. If the worktree or branch already exists from a prior execution, remove it first:
+3. If the worktree or branch already exists from a prior execution, remove it first. A prior run may have left a **stale directory** (the filesystem tree still exists but git no longer tracks it as a worktree — there's no `.git` file at the worktree root). In that case `git worktree remove` will fail with "is not a working tree"; you must also `rm -rf` the directory. **Do all three unconditionally** so the next `git worktree add` starts from a clean slate:
 
 ```bash
 git worktree remove "<PlanFolder>/worktrees/<repo-folder-name>" --force 2>/dev/null
 git branch -D "plan-<planId>-<repo-folder-name>" 2>/dev/null
+rm -rf "<PlanFolder>/worktrees/<repo-folder-name>"
 ```
+
+**Note on stale directories:** If a stale worktree directory exists and you run `git -C <stale-dir> status`, git silently walks up the parent chain and reports the state of the main repo — making it look like the "worktree" is simply on `main`. Do not trust that output. Before assuming a prior worktree is intact, verify with `git -C <main-repo> worktree list | grep <path>` or check that `<worktree-path>/.git` exists.
 
 1. Create worktree branching from the remote default branch:
 
@@ -196,7 +248,22 @@ git worktree add "<PlanFolder>/worktrees/<RepoName>" -b "plan-<PlanId>-<RepoName
 
 **Important:** Always branch from `origin/<default-branch>`, not local HEAD. This ensures the PR only contains the plan's commits, not any unpushed local work.
 
-### 2.5. Setup Frontend Dependencies
+4. After creating the worktree, **verify the `.git` file exists** and fail fast if it's missing:
+
+```bash
+if [ ! -f "<PlanFolder>/worktrees/<repo-folder-name>/.git" ]; then
+    echo "ERROR: Worktree creation failed - .git file missing at <PlanFolder>/worktrees/<repo-folder-name>/.git"
+    echo "This indicates git worktree add did not fully initialize the worktree."
+    exit 1
+fi
+cat "<PlanFolder>/worktrees/<repo-folder-name>/.git"
+```
+
+This ensures ExecutePlan fails immediately if worktree creation is incomplete, rather than leaving orphaned directories that trigger warnings during cleanup.
+
+### 2.5. Setup Frontend Dependencies (JavaScript/TypeScript Projects Only)
+
+**Note:** This section applies only to projects using npm/pnpm. Skip if not applicable.
 
 **!CRITICAL: Frontend builds in worktrees have known issues with npm package module resolution that cause 15-25 minute timeouts. Follow this workaround to avoid them.**
 
@@ -255,7 +322,7 @@ If the plan **modifies frontend code** (adding/editing `.tsx`, `.ts`, `.css` fil
 
 ### 3. Handle Cross-Repo References
 
-Projects may reference other repos via absolute paths in `.csproj` files (e.g. `<ProjectReference Include="/path/to/other-repo/src/Project.csproj" />`).
+Projects may reference other repos via absolute paths in project files (e.g. `.csproj`, `go.mod`, `package.json`).
 
 These paths point to the original repos, not the worktree copies. Since we only modify files in the worktree, this is usually fine — the build references the original (stable) code.
 
@@ -273,23 +340,22 @@ Work exclusively in the worktree directories. Follow the plan's latest revision:
 
 Make logically grouped commits in the worktree(s). Each commit should be a coherent unit of work.
 
-Before each commit, run formatting/linting as defined by the project's verifications in `config.yaml`. Common patterns:
+Before each commit, run formatting/linting as defined by the project's verifications in `config.yaml`. The exact commands depend on your stack's verification definitions.
 
-**Frontend files** (in directories containing `package.json`):
-
-```bash
-cd <frontend-dir> && npm run format && npm run lint:fix && cd <back-to-root>
-```
-
-**C# files**:
+**Example patterns** (actual commands come from config.yaml verifications):
 
 ```bash
-# Get changed .cs files from this execution's commits
-CHANGED_CS=$(git diff --name-only --diff-filter=ACM HEAD~1 -- '*.cs' | tr '\n' ' ')
-if [ -n "$CHANGED_CS" ]; then
-  dotnet format --include $CHANGED_CS
-fi
+# Get changed files from this execution's commits
+CHANGED_FILES=$(git diff --name-only --diff-filter=ACM HEAD~1)
+
+# Run your formatter on changed files (examples):
+# - .NET: dotnet format --include <files>
+# - JavaScript: npm run format <files>
+# - Python: black <files>
+# - Go: gofmt -w <files>
 ```
+
+If your formatter requires a workspace/solution file that isn't in the current directory, pass it as an explicit argument. Check `Memory/` for repo-specific workspace paths.
 
 Commit messages should reference the plan ID:
 
@@ -348,6 +414,8 @@ If you identified items in ANY category, write them to `<PlanFolder>/artifacts/r
     Markdown description with context and location.
   state: Pending
 ```
+
+**YAML quoting rules:** Titles containing backticks, colons, brackets, braces, or other YAML special characters MUST be double-quoted. Alternatively, use block scalar style (`>` or `|`) for values with special characters.
 
 Do NOT include items that are part of the current plan's scope.
 
@@ -438,6 +506,19 @@ After all verifications pass:
    ```
 
 3. Run `git status` in every worktree. If there are any uncommitted files (from verification fixes, generated files, etc.), commit or discard them. The worktrees must be completely clean before finishing.
+
+### 8.5. Clean Up Worktrees
+
+After all verifications pass and the worktrees are clean, the launcher script automatically removes all worktree directories to free disk space.
+
+**Worktree cleanup includes:**
+1. Deregister each worktree from git via `git worktree remove --force`
+2. Force-delete the worktree directory (with Windows `rmdir /s /q` fallback for locked files)
+3. Remove the parent `worktrees/` directory
+
+**Git branches are preserved** — MakePr uses the `plan-<ID>-<repo>` branch to create pull requests. Only the worktree filesystem directories are removed.
+
+**Debugging tip:** To keep worktrees for manual inspection after failure, set the `KEEP_WORKTREES=1` environment variable before running ExecutePlan. The WorktreeCleanupService will still clean them up after the grace period (10 minutes + 30 minute cycle).
 
 ### 9. Plan State
 

@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Ivy.Desktop;
+using Ivy.Tendril.Commands;
 using Ivy.Tendril.Database;
 using Ivy.Tendril.Services;
 using Velopack;
@@ -8,6 +10,17 @@ namespace Ivy.Tendril;
 
 public class Program
 {
+    // Native console control handler to detect why the process is being killed.
+    // This fires BEFORE .NET's ProcessExit and catches CTRL_CLOSE_EVENT which
+    // .NET's AppDomain.ProcessExit may not see (Windows force-kills after 5s).
+    private delegate bool ConsoleCtrlHandlerDelegate(int ctrlType);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool SetConsoleCtrlHandler(ConsoleCtrlHandlerDelegate handler, bool add);
+
+    // Must be a static field to prevent GC from collecting the delegate
+    private static ConsoleCtrlHandlerDelegate? _consoleCtrlHandler;
+
     [STAThread]
     public static async Task<int> Main(string[] args)
     {
@@ -36,8 +49,35 @@ public class Program
         if (pwExitCode >= 0)
             return pwExitCode;
 
+        var doctorExitCode = DoctorCommand.Handle(filteredArgs);
+        if (doctorExitCode >= 0)
+            return doctorExitCode;
+
         var crashLogPath = GetCrashLogPath();
         WriteCrashLog(crashLogPath, $"[{DateTime.UtcNow:O}] Tendril starting (PID {Environment.ProcessId}) | {GetMemoryStats()}");
+
+        // Install native console control handler FIRST — this catches CTRL_CLOSE_EVENT
+        // (console window closed), CTRL_C_EVENT, CTRL_BREAK_EVENT, CTRL_LOGOFF_EVENT,
+        // and CTRL_SHUTDOWN_EVENT. Logging here tells us exactly WHY the process is dying.
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            _consoleCtrlHandler = ctrlType =>
+            {
+                var name = ctrlType switch
+                {
+                    0 => "CTRL_C_EVENT",
+                    1 => "CTRL_BREAK_EVENT",
+                    2 => "CTRL_CLOSE_EVENT",
+                    5 => "CTRL_LOGOFF_EVENT",
+                    6 => "CTRL_SHUTDOWN_EVENT",
+                    _ => $"UNKNOWN({ctrlType})"
+                };
+                WriteCrashLog(crashLogPath,
+                    $"[{DateTime.UtcNow:O}] ConsoleCtrlHandler: {name} (PID {Environment.ProcessId}) | {GetMemoryStats()}");
+                return false; // Let default handling proceed
+            };
+            SetConsoleCtrlHandler(_consoleCtrlHandler, true);
+        }
 
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
@@ -81,7 +121,7 @@ public class Program
         if (usePhotino)
         {
             var window = new DesktopWindow(server)
-                .Title("Ivy Tendril — Multi-host AI Tool")
+                .Title("Ivy Tendril")
                 .Size(1400, 900);
 
             return window.Run();
@@ -99,6 +139,10 @@ public class Program
         var logDir = !string.IsNullOrEmpty(tendrilHome) ? tendrilHome : Path.GetTempPath();
         return Path.Combine(logDir, "crash.log");
     }
+
+    internal static string CrashLogPath { get; } = GetCrashLogPath();
+
+    internal static void WriteCrashLog(string message) => WriteCrashLog(CrashLogPath, message);
 
     private static void WriteCrashLog(string path, string message)
     {

@@ -128,7 +128,7 @@ From `<ArtifactsDir>/sample/`:
 Before building, kill any leftover processes from previous runs that may lock DLLs (scoped to this plan's artifacts only):
 
 ```bash
-powershell.exe -NoProfile -Command "$escaped = [regex]::Escape('<ArtifactsDir>'); Get-Process -ErrorAction SilentlyContinue | Where-Object { \$_.Path -and \$_.Path -match \"^\$escaped\" } | ForEach-Object { Write-Host \"Killing \$(\$_.ProcessName) (PID \$(\$_.Id))\"; \$_ | Stop-Process -Force -ErrorAction Stop } ; Start-Sleep -Milliseconds 2000"
+powershell.exe -NoProfile -Command "Get-Process -ErrorAction SilentlyContinue | Where-Object { \$_.Path -and \$_.Path -like '<ArtifactsDir>*' } | ForEach-Object { Write-Host \"Killing \$(\$_.ProcessName) (PID \$(\$_.Id))\"; \$_ | Stop-Process -Force -ErrorAction Stop }; Start-Sleep -Milliseconds 2000"
 ```
 
 Use the pre-flight build validation tool:
@@ -227,7 +227,7 @@ process.on('exit', () => {
 - `beforeAll`: find free port, spawn `dotnet run -- --port <port>`, **call `trackProcess(proc)`**, wait for HTTP 200
 - `afterAll`: kill process with `killAllTrackedProcesses()` (also kills any other tracked processes)
 - Set `test.setTimeout(60000)` (60s) to catch hung tests before Playwright's default timeout
-- Test each app at `http://localhost:<port>/<app-id>?shell=false`
+- Test each app at `https://localhost:<port>/<app-id>?shell=false`
 - Take screenshots directly to `<ArtifactsDir>/screenshots/` with descriptive names. **Before taking each screenshot, check if the page has meaningful content (visible text > 20 chars or > 5 visible elements). Skip screenshots of empty/blank pages** — these add no verification value. Use a `takeScreenshotIfNotEmpty()` helper (see PlaywrightKnowledge.md)
 - Capture browser console logs → `<ArtifactsDir>/tests/console.log`
 - Capture backend stdout/stderr → `<ArtifactsDir>/tests/backend.log`
@@ -320,7 +320,7 @@ npx playwright test
 Even if tests pass, kill this plan's sample processes to ensure clean state:
 
 ```bash
-powershell.exe -NoProfile -Command "$escaped = [regex]::Escape('<ArtifactsDir>'); Get-Process -ErrorAction SilentlyContinue | Where-Object { \$_.Path -and \$_.Path -match \"^\$escaped\" } | Stop-Process -Force -ErrorAction SilentlyContinue"
+powershell.exe -NoProfile -Command "Get-Process -ErrorAction SilentlyContinue | Where-Object { \$_.Path -and \$_.Path -like '<ArtifactsDir>*' } | Stop-Process -Force -ErrorAction SilentlyContinue"
 ```
 
 ### 9. Fix Loop (up to 10 rounds)

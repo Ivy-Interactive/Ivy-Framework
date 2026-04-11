@@ -106,6 +106,17 @@ const applyFontToSvg = (svgString: string): string => {
   const textElements = svgElement.querySelectorAll("text");
   textElements.forEach((el) => {
     el.setAttribute("font-family", fontSans);
+
+    const fontSize = el.getAttribute("font-size");
+    if (fontSize) {
+      const match = fontSize.match(/^([\d.]+)(.*)$/);
+      if (match) {
+        const value = parseFloat(match[1]);
+        const unit = match[2] || "";
+        const scaledValue = (value * 0.8).toFixed(2);
+        el.setAttribute("font-size", `${scaledValue}${unit}`);
+      }
+    }
   });
 
   return new XMLSerializer().serializeToString(svgElement);

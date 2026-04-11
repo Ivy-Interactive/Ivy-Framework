@@ -30,8 +30,8 @@ public class CreateIssueDialog(
                 var repos = githubService.GetRepos();
                 var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == repoName);
                 if (selectedRepo is null) return Array.Empty<string>();
-                var result = await githubService.GetAssigneesAsync(selectedRepo.Owner, selectedRepo.Name);
-                return result.ToArray();
+                var (assignees, _) = await githubService.GetAssigneesAsync(selectedRepo.Owner, selectedRepo.Name);
+                return assignees.ToArray();
             },
             initialValue: Array.Empty<string>()
         );
@@ -44,8 +44,8 @@ public class CreateIssueDialog(
                 var repos = githubService.GetRepos();
                 var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == repoName);
                 if (selectedRepo is null) return Array.Empty<string>();
-                var result = await githubService.GetLabelsAsync(selectedRepo.Owner, selectedRepo.Name);
-                return result.ToArray();
+                var (labels, _) = await githubService.GetLabelsAsync(selectedRepo.Owner, selectedRepo.Name);
+                return labels.ToArray();
             },
             initialValue: Array.Empty<string>()
         );

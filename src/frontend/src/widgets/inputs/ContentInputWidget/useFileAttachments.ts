@@ -50,7 +50,6 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
 
   const handlePaste = useCallback(
     (e: React.ClipboardEvent) => {
-      if (disabled || !uploadUrl) return;
       const items = e.clipboardData?.items;
       if (!items) return;
 
@@ -62,11 +61,22 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
         }
       }
 
-      if (files.length > 0) {
-        e.preventDefault();
-        uploadFiles(files);
+      if (files.length === 0) return; // No files — let normal text paste proceed
+
+      e.preventDefault(); // Prevent binary garbage in textarea
+
+      if (disabled || !uploadUrl) {
+        if (!uploadUrl) {
+          toast({
+            title: "Upload not available",
+            description: "File attachments require an upload URL to be configured.",
+            variant: "destructive",
+          });
+        }
+        return;
       }
-      // If no file items, allow normal text paste to proceed
+
+      uploadFiles(files);
     },
     [disabled, uploadUrl, uploadFiles],
   );
@@ -101,11 +111,19 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
       e.stopPropagation();
       setIsDragging(false);
       if (disabled) return;
+      if (!uploadUrl) {
+        toast({
+          title: "Upload not available",
+          description: "File uploads are not configured for this input.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       const files = Array.from(e.dataTransfer.files);
       await uploadFiles(files);
     },
-    [disabled, uploadFiles],
+    [disabled, uploadUrl, uploadFiles],
   );
 
   const openFilePicker = useCallback(() => {
@@ -118,10 +136,19 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const fileList = e.target.files;
       if (!fileList || fileList.length === 0) return;
+      if (!uploadUrl) {
+        toast({
+          title: "Upload not available",
+          description: "File uploads are not configured for this input.",
+          variant: "destructive",
+        });
+        e.target.value = "";
+        return;
+      }
       await uploadFiles(Array.from(fileList));
       e.target.value = "";
     },
-    [uploadFiles],
+    [uploadUrl, uploadFiles],
   );
 
   const dragHandlers = {

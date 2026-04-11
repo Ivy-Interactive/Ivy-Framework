@@ -2,6 +2,8 @@ import CopyToClipboardButton from "@/components/CopyToClipboardButton";
 import React from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { Densities } from "@/types/density";
+import { cn } from "@/lib/utils";
 
 interface ReadOnlyInputWidgetProps {
   id: string;
@@ -9,7 +11,14 @@ interface ReadOnlyInputWidgetProps {
   showCopyButton?: boolean;
   autoFocus?: boolean;
   events?: string[];
+  density?: Densities;
 }
+
+const textSizeMap: Record<Densities, string> = {
+  [Densities.Small]: "text-sm",
+  [Densities.Medium]: "text-body",
+  [Densities.Large]: "text-lg",
+};
 
 export const ReadOnlyInputWidget: React.FC<ReadOnlyInputWidgetProps> = ({
   id,
@@ -17,12 +26,16 @@ export const ReadOnlyInputWidget: React.FC<ReadOnlyInputWidgetProps> = ({
   showCopyButton = true,
   events = EMPTY_ARRAY,
   autoFocus,
+  density = Densities.Medium,
 }) => {
   const eventHandler = useEventHandler();
   return (
     <div
       key={id}
-      className="text-body text-muted-foreground flex flex-row items-center w-full focus:outline-none"
+      className={cn(
+        textSizeMap[density],
+        "text-muted-foreground flex flex-row items-center w-full focus:outline-none",
+      )}
       onBlur={() => {
         if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
       }}

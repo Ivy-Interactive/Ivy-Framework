@@ -6,252 +6,232 @@ public class BoolInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
+        return Layout.Vertical()
+               | Text.H1("Bool Input")
+               | Layout.Tabs(
+                   new Tab("Variants", new BoolInputVariantsTab()),
+                   new Tab("Sizes", new BoolInputSizes()),
+                   new Tab("Icons", new BoolInputIcons()),
+                   new Tab("Data Binding", new BoolInputDataBinding()),
+                   new Tab("Events", new BoolInputEventsTab())
+               ).Variant(TabsVariant.Content);
+    }
+}
+
+public class BoolInputVariantsTab : ViewBase
+{
+    public override object Build()
+    {
         var falseState = UseState(false);
         var trueState = UseState(true);
         var nullState = UseState((bool?)null);
         var loadingState = UseState(true);
+
+        return Layout.Grid().Columns(7)
+               | null!
+               | Text.Monospaced("True")
+               | Text.Monospaced("False")
+               | Text.Monospaced("Disabled")
+               | Text.Monospaced("Invalid")
+               | Text.Monospaced("Nullable")
+               | Text.Monospaced("Loading")
+               | Text.Monospaced("BoolInputVariant.Checkbox")
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .TestId("checkbox-true-state-width-description")
+               | falseState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .TestId("checkbox-false-state-width-description")
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .Disabled()
+                   .TestId("checkbox-true-state-width-description-disabled")
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .Invalid("Invalid")
+                   .TestId("checkbox-true-state-width-description-invalid")
+               | nullState.ToBoolInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .TestId("checkbox-null-state-width-description")
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .Loading(loadingState.Value)
+                   .TestId("checkbox-loading-state-width-description")
+               | null!
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .TestId("checkbox-true-state-width")
+               | falseState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .TestId("checkbox-false-state-width")
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label").Disabled()
+                   .TestId("checkbox-true-state-width-disabled")
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label").Invalid("Invalid")
+                   .TestId("checkbox-true-state-width-invalid")
+               | nullState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .TestId("checkbox-null-state-width")
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .Loading(loadingState.Value)
+                   .TestId("checkbox-loading-state-width")
+               | Text.Monospaced("BoolInputVariant.Switch")
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .TestId("switch-true-state-width-description")
+               | falseState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .TestId("switch-false-state-width-description")
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .Disabled()
+                   .TestId("switch-true-state-width-description-disabled")
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .Invalid("Invalid")
+                   .TestId("switch-true-state-width-description-invalid")
+               | new Box("N/A")
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .Description("Description")
+                   .Loading(loadingState.Value)
+                   .TestId("switch-loading-state-width-description")
+               | null!
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .TestId("switch-true-state-width")
+               | falseState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .TestId("switch-false-state-width")
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .Disabled()
+                   .TestId("switch-true-state-width-disabled")
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .Invalid("Invalid")
+                   .TestId("switch-true-state-width-invalid")
+               | new Box("N/A")
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .Loading(loadingState.Value)
+                   .TestId("switch-loading-state-width")
+               | Text.Monospaced("BoolInputVariant.Toggle")
+               | trueState
+                   .ToToggleInput(Icons.Magnet)
+                   .Label("Label")
+                   .Description("Description")
+                   .TestId("toggle-true-state-width-description")
+               | falseState
+                   .ToToggleInput(Icons.Magnet)
+                   .Label("Label")
+                   .Description("Description")
+                   .TestId("toggle-false-state-width-description")
+               | trueState
+                   .ToToggleInput(Icons.Magnet)
+                   .Label("Label")
+                   .Description("Description")
+                   .Disabled()
+                   .TestId("toggle-true-state-width-description-disabled")
+               | trueState
+                   .ToToggleInput(Icons.Magnet)
+                   .Label("Label")
+                   .Description("Description")
+                   .Invalid("Invalid")
+                   .TestId("toggle-true-state-width-description-invalid")
+               | new Box("N/A")
+               | trueState
+                   .ToToggleInput(Icons.Magnet)
+                   .Label("Label")
+                   .Description("Description")
+                   .Loading(loadingState.Value)
+                   .TestId("toggle-loading-state-width-description")
+               | null!
+               | trueState
+                   .ToToggleInput(Icons.Baby)
+                   .Label("Label")
+                   .TestId("toggle-true-state-width")
+               | falseState
+                   .ToToggleInput(Icons.Baby)
+                   .Label("Label")
+                   .TestId("toggle-false-state-width")
+               | trueState
+                   .ToToggleInput(Icons.Baby)
+                   .Label("Label").Disabled()
+                   .TestId("toggle-true-state-width-disabled")
+               | trueState
+                   .ToToggleInput(Icons.Baby)
+                   .Label("Label")
+                   .Invalid("Invalid")
+                   .TestId("toggle-true-state-width-invalid")
+               | new Box("N/A")
+               | trueState
+                   .ToToggleInput(Icons.Baby)
+                   .Label("Label")
+                   .Loading(loadingState.Value)
+                   .TestId("toggle-loading-state-width");
+    }
+}
+
+public class BoolInputEventsTab : ViewBase
+{
+    public override object Build()
+    {
         var onBlurState = UseState(false);
         var onBlurLabel = UseState("");
         var onFocusState = UseState(false);
         var onFocusLabel = UseState("");
 
-        var variants = Layout.Grid().Columns(7)
-                       | null!
-                       | Text.Monospaced("True")
-                       | Text.Monospaced("False")
-                       | Text.Monospaced("Disabled")
-                       | Text.Monospaced("Invalid")
-                       | Text.Monospaced("Nullable")
-                       | Text.Monospaced("Loading")
-                       | Text.Monospaced("BoolInputVariant.Checkbox")
-                       | trueState
-                           .ToBoolInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .TestId("checkbox-true-state-width-description")
-                       | falseState
-                           .ToBoolInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .TestId("checkbox-false-state-width-description")
-                       | trueState
-                           .ToBoolInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .Disabled()
-                           .TestId("checkbox-true-state-width-description-disabled")
-                       | trueState
-                           .ToBoolInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .Invalid("Invalid")
-                           .TestId("checkbox-true-state-width-description-invalid")
-                       | nullState.ToBoolInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .TestId("checkbox-null-state-width-description")
-                       | trueState
-                           .ToBoolInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .Loading(loadingState.Value)
-                           .TestId("checkbox-loading-state-width-description")
-                       | null!
-                       | trueState
-                           .ToBoolInput()
-                           .Label("Label")
-                           .TestId("checkbox-true-state-width")
-                       | falseState
-                           .ToBoolInput()
-                           .Label("Label")
-                           .TestId("checkbox-false-state-width")
-                       | trueState
-                           .ToBoolInput()
-                           .Label("Label").Disabled()
-                           .TestId("checkbox-true-state-width-disabled")
-                       | trueState
-                           .ToBoolInput()
-                           .Label("Label").Invalid("Invalid")
-                           .TestId("checkbox-true-state-width-invalid")
-                       | nullState
-                           .ToBoolInput()
-                           .Label("Label")
-                           .TestId("checkbox-null-state-width")
-                       | trueState
-                           .ToBoolInput()
-                           .Label("Label")
-                           .Loading(loadingState.Value)
-                           .TestId("checkbox-loading-state-width")
-                       | Text.Monospaced("BoolInputVariant.Switch")
-                       | trueState
-                           .ToSwitchInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .TestId("switch-true-state-width-description")
-                       | falseState
-                           .ToSwitchInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .TestId("switch-false-state-width-description")
-                       | trueState
-                           .ToSwitchInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .Disabled()
-                           .TestId("switch-true-state-width-description-disabled")
-                       | trueState
-                           .ToSwitchInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .Invalid("Invalid")
-                           .TestId("switch-true-state-width-description-invalid")
-                       | new Box("N/A")
-                       | trueState
-                           .ToSwitchInput()
-                           .Label("Label")
-                           .Description("Description")
-                           .Loading(loadingState.Value)
-                           .TestId("switch-loading-state-width-description")
-                       | null!
-                       | trueState
-                           .ToSwitchInput()
-                           .Label("Label")
-                           .TestId("switch-true-state-width")
-                       | falseState
-                           .ToSwitchInput()
-                           .Label("Label")
-                           .TestId("switch-false-state-width")
-                       | trueState
-                           .ToSwitchInput()
-                           .Label("Label")
-                           .Disabled()
-                           .TestId("switch-true-state-width-disabled")
-                       | trueState
-                           .ToSwitchInput()
-                           .Label("Label")
-                           .Invalid("Invalid")
-                           .TestId("switch-true-state-width-invalid")
-                       | new Box("N/A")
-                       | trueState
-                           .ToSwitchInput()
-                           .Label("Label")
-                           .Loading(loadingState.Value)
-                           .TestId("switch-loading-state-width")
-                       | Text.Monospaced("BoolInputVariant.Toggle")
-                       | trueState
-                           .ToToggleInput(Icons.Magnet)
-                           .Label("Label")
-                           .Description("Description")
-                           .TestId("toggle-true-state-width-description")
-
-
-                       | falseState
-                           .ToToggleInput(Icons.Magnet)
-                           .Label("Label")
-                           .Description("Description")
-                           .TestId("toggle-false-state-width-description")
-                       | trueState
-                           .ToToggleInput(Icons.Magnet)
-                           .Label("Label")
-                           .Description("Description")
-                           .Disabled()
-                           .TestId("toggle-true-state-width-description-disabled")
-                       | trueState
-                           .ToToggleInput(Icons.Magnet)
-                           .Label("Label")
-                           .Description("Description")
-                           .Invalid("Invalid")
-                           .TestId("toggle-true-state-width-description-invalid")
-                       | new Box("N/A")
-                       | trueState
-                           .ToToggleInput(Icons.Magnet)
-                           .Label("Label")
-                           .Description("Description")
-                           .Loading(loadingState.Value)
-                           .TestId("toggle-loading-state-width-description")
-                       | null!
-                       | trueState
-                           .ToToggleInput(Icons.Baby)
-                           .Label("Label")
-                           .TestId("toggle-true-state-width")
-                       | falseState
-                           .ToToggleInput(Icons.Baby)
-                           .Label("Label")
-                           .TestId("toggle-false-state-width")
-                       | trueState
-                           .ToToggleInput(Icons.Baby)
-                           .Label("Label").Disabled()
-                           .TestId("toggle-true-state-width-disabled")
-                       | trueState
-                           .ToToggleInput(Icons.Baby)
-                           .Label("Label")
-                           .Invalid("Invalid")
-                           .TestId("toggle-true-state-width-invalid")
-                       | new Box("N/A")
-                       | trueState
-                           .ToToggleInput(Icons.Baby)
-                           .Label("Label")
-                           .Loading(loadingState.Value)
-                           .TestId("toggle-loading-state-width")
-
-            ;
-
         return Layout.Vertical()
-               | Text.H1("Bool Input")
-               | Text.H2("Sizes")
-               | new BoolInputSizes()
-               | Text.H2("Icons")
-               | new BoolInputIcons()
-               | Text.H2("Variants")
-               | variants
-               | Text.H2("Data Binding")
-               | new BoolInputDataBinding()
-               | Text.H2("Events")
-               | (Layout.Vertical()
-                   | new Card(
-                       Layout.Vertical().Gap(2)
-                           | Text.P("The blur event fires when the checkbox loses focus.").Small()
-                           | onBlurState.ToBoolInput().Label("Label").OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
-                           | (onBlurLabel.Value != ""
-                               ? Callout.Success(onBlurLabel.Value)
-                               : Callout.Info("Interact then click away to see blur events"))
-                   ).Title("OnBlur Handler")
-                   | new Card(
-                       Layout.Vertical().Gap(2)
-                           | Text.P("The focus event fires when you click on or tab into the checkbox.").Small()
-                           | onFocusState.ToBoolInput().Label("Label").OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
-                           | (onFocusLabel.Value != ""
-                               ? Callout.Success(onFocusLabel.Value)
-                               : Callout.Info("Click or tab into the input to see focus events"))
-                   ).Title("OnFocus Handler")
-               )
-            ;
-    }
-
-    private static object CreateBoolInputVariants(object state)
-    {
-        if (state is not IAnyState anyState)
-            return Text.Block("Not an IAnyState");
-
-        var stateType = anyState.GetStateType();
-        var isNullable = stateType.IsNullableType();
-
-        if (isNullable)
-        {
-            // For nullable states, only show checkbox variant
-            return anyState.ToBoolInput();
-        }
-
-        // For non-nullable states, show all three variants
-        return Layout.Vertical()
-               | anyState.ToBoolInput()
-               | anyState
-                   .ToBoolInput()
-                   .Variant(BoolInputVariant.Switch)
-               | anyState
-                   .ToBoolInput()
-                   .Variant(BoolInputVariant.Toggle)
-                   .Icon(Icons.Star);
+               | new Card(
+                   Layout.Vertical().Gap(2)
+                       | Text.P("The blur event fires when the checkbox loses focus.").Small()
+                       | onBlurState.ToBoolInput().Label("Label").OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                       | (onBlurLabel.Value != ""
+                           ? Callout.Success(onBlurLabel.Value)
+                           : Callout.Info("Interact then click away to see blur events"))
+               ).Title("OnBlur Handler")
+               | new Card(
+                   Layout.Vertical().Gap(2)
+                       | Text.P("The focus event fires when you click on or tab into the checkbox.").Small()
+                       | onFocusState.ToBoolInput().Label("Label").OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                       | (onFocusLabel.Value != ""
+                           ? Callout.Success(onFocusLabel.Value)
+                           : Callout.Info("Click or tab into the input to see focus events"))
+               ).Title("OnFocus Handler");
     }
 }
 
@@ -353,31 +333,13 @@ public class BoolInputDataBinding : ViewBase
         }
     }
 
-    private static object CreateBoolInputVariants(object state)
-    {
-        if (state is not IAnyState anyState)
-            return Text.Block("Not an IAnyState");
-
-        var stateType = anyState.GetStateType();
-        var isNullable = stateType.IsNullableType();
-
-        if (isNullable)
-        {
-            // For nullable states, only show checkbox variant
-            return anyState.ToBoolInput();
-        }
-
-        // For non-nullable states, show all three variants
-        return Layout.Vertical()
-               | anyState.ToBoolInput()
-               | anyState
-                   .ToBoolInput()
-                   .Variant(BoolInputVariant.Switch)
-               | anyState
-                   .ToBoolInput()
-                   .Variant(BoolInputVariant.Toggle)
-                   .Icon(Icons.Star);
-    }
+    private static object CreateBoolInputVariants(object state) =>
+        InputDataBindingHelper.CreateInputVariants(state,
+            anyState => Layout.Vertical()
+                | anyState.ToBoolInput()
+                | anyState.ToBoolInput().Variant(BoolInputVariant.Switch)
+                | anyState.ToBoolInput().Variant(BoolInputVariant.Toggle).Icon(Icons.Star),
+            anyState => anyState.ToBoolInput());
 }
 
 public class BoolInputSizes : ViewBase
@@ -433,8 +395,6 @@ public class BoolInputSizes : ViewBase
                    .Label("Label")
                    .Large();
     }
-
-
 }
 
 public class BoolInputIcons : ViewBase

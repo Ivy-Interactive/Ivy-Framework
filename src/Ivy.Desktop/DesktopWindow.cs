@@ -80,7 +80,7 @@ public class DesktopWindow(Server server)
         // FindAvailablePort) completes before the first await, so Args.Port is
         // already updated to the actual port the server will bind to.
         var port = server.Args.Port;
-        var url = $"http://localhost:{port}";
+        var url = $"https://localhost:{port}";
 
         // Wait for the server to become ready (or detect early failure).
         WaitForServerReady(serverTask, url);

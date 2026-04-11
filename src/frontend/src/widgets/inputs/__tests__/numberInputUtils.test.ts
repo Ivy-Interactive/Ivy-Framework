@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateAndCapValue, TYPE_LIMITS, renderAffix } from "../NumberInputWidget";
+import { validateAndCapValue, TYPE_LIMITS } from "../NumberInputWidget";
 
 // ---------------------------------------------------------------------------
 // validateAndCapValue
@@ -125,37 +125,5 @@ describe("TYPE_LIMITS", () => {
     expect(TYPE_LIMITS.ushort.min).toBe(0);
     expect(TYPE_LIMITS.uint.min).toBe(0);
     expect(TYPE_LIMITS.ulong.min).toBe(0);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// renderAffix
-// ---------------------------------------------------------------------------
-
-describe("renderAffix", () => {
-  it("returns null for undefined", () => {
-    expect(renderAffix(undefined)).toBeNull();
-  });
-
-  it("returns null for empty object", () => {
-    expect(renderAffix({})).toBeNull();
-  });
-
-  it("returns a React element for icon affix", () => {
-    const result = renderAffix({ icon: "star" });
-    expect(result).not.toBeNull();
-    expect(result).toBeTruthy();
-  });
-
-  it("returns a React element for text affix", () => {
-    const result = renderAffix({ text: "USD" });
-    expect(result).not.toBeNull();
-    expect(result).toBeTruthy();
-  });
-
-  it("prefers icon over text when both present", () => {
-    const result = renderAffix({ icon: "star", text: "USD" });
-    // When icon is present, it takes precedence
-    expect(result).not.toBeNull();
   });
 });

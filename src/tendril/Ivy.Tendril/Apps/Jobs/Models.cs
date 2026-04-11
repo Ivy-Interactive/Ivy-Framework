@@ -36,6 +36,7 @@ public record JobItem
     public bool CancellationRequested { get; set; }
     public string? SessionId { get; set; }
     public string Provider { get; init; } = "claude";
+    public int Priority { get; init; }
     public decimal? Cost { get; set; }
     public int? Tokens { get; set; }
 

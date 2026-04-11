@@ -1,2 +1,9 @@
 **/Logs/
-**/Memory/
+**/Memory/*
+# Exception for shipped guidance files:
+!**/Memory/PlanExpansionPatterns.md
+
+# Ignore stray generated markdown files (e.g. corrupted log names, temp outputs)
+**/*.md
+!**/Program.md
+!.shared/*.md

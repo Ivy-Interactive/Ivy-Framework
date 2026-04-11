@@ -15,6 +15,7 @@ public class TabView : ViewBase
     private Action<int>? _onClose;
     private Action<int>? _onCloseOthers;
     private Action<int>? _onRefresh;
+    private Action<int[]>? _onReorder;
     private string? _addButtonText;
     private Action? _onAddButtonClick;
     private int? _externalSelectedIndex;
@@ -174,6 +175,12 @@ public class TabView : ViewBase
         return this;
     }
 
+    public TabView OnReorder(Action<int[]>? onReorder)
+    {
+        _onReorder = onReorder;
+        return this;
+    }
+
     public TabView AddButton(string text, Action? onAddButtonClick = null)
     {
         _addButtonText = text;
@@ -204,13 +211,14 @@ public class TabView : ViewBase
         void HandleClose(Event<TabsLayout, int> @event) => _onClose?.Invoke(@event.Value);
         void HandleCloseOthers(Event<TabsLayout, int> @event) => _onCloseOthers?.Invoke(@event.Value);
         void HandleRefresh(Event<TabsLayout, int> @event) => _onRefresh?.Invoke(@event.Value);
+        void HandleReorder(Event<TabsLayout, int[]> @event) => _onReorder?.Invoke(@event.Value);
         void HandleAddButtonClick(Event<TabsLayout, int> @event) => _onAddButtonClick?.Invoke();
 
         var layout = new TabsLayout(
             HandleSelect,
             _onClose != null ? HandleClose : null,
             _onRefresh != null ? HandleRefresh : null,
-            null,
+            _onReorder != null ? HandleReorder : null,
             currentIndex,
             _tabs.ToArray()
         ).Variant(_variant).Width(_width).Height(_height).RemoveParentPadding(_removeParentPadding).Padding(_padding);

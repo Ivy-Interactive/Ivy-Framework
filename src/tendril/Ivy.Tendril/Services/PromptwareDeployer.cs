@@ -4,6 +4,10 @@ namespace Ivy.Tendril.Services;
 
 internal static class PromptwareDeployer
 {
+    /// <summary>
+    ///     Embedded promptwares zip resource. Uses lowercase "promptwares" for historical reasons;
+    ///     the directory structure was migrated from .promptwares/ to Promptwares/ in plan 02306.
+    /// </summary>
     private const string ResourceName = "Ivy.Tendril.promptwares.zip";
 
     /// <summary>

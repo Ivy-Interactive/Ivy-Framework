@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Ivy.Core;
 using Ivy.Tendril.Apps.Plans.Dialogs;
 using Ivy.Tendril.Services;
+using Ivy.Tendril.Views;
 
 namespace Ivy.Tendril.Apps.Plans;
 
@@ -166,9 +167,12 @@ public class ContentView(
         if (_selectedPlan is null)
         {
             if (_allPlans.Count == 0)
-                return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full()).Gap(2)
-                       | new Icon(Icons.Inbox).Large().Color(Colors.Gray)
-                       | Text.Muted("No draft plans yet");
+                return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full()).Gap(4).Padding(8)
+                       | new Icon(Icons.Feather).Large().Color(Colors.Gray)
+                       | Text.H3("No draft plans yet")
+                       | Text.Muted("Create your first plan to start tracking implementation work")
+                       | new NewPlanButton()
+                       | Text.Muted("or press Ctrl+Alt+N").Small();
 
             return Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
                    | Text.Muted("Select a plan from the sidebar");
@@ -270,15 +274,22 @@ public class ContentView(
             var commitsTable = new Table(
                 new TableRow(
                         new TableCell("Commit").IsHeader(),
-                        new TableCell("Message").IsHeader()
+                        new TableCell("Message").IsHeader(),
+                        new TableCell("Files").IsHeader()
                     )
                 { IsHeader = true }
             );
             foreach (var row in planData.CommitRows)
                 commitsTable |= new TableRow(
                     new TableCell(new Button(row.ShortHash).Inline().OnClick(() => openCommit.Set(row.Hash))),
-                    new TableCell(row.Title)
+                    new TableCell(row.Title),
+                    new TableCell(row.FileCount?.ToString() ?? "–")
                 );
+
+            var commitWarning = PlanContentHelpers.BuildCommitWarningCallout(planData.CommitRows);
+            object commitsContent = commitWarning != null
+                ? Layout.Vertical().Gap(2) | commitWarning | commitsTable
+                : commitsTable;
 
             // PRs tab content
             object prsContent;
@@ -315,15 +326,14 @@ public class ContentView(
                                  + (planData.Artifacts.ContainsKey("sample") ? 1 : 0);
 
             // Build tabs
-            var tabs = new TabsLayout(
-                e => selectedTab.Set(e.Value), null, null, null, selectedTab.Value,
+            var tabs = Layout.Tabs(
                 new Tab("Plan", Cap(planTabContent)),
                 new Tab("Summary", Cap(summaryTabContent)),
                 new Tab("Verifications", Cap(verificationsTable)).Badge(_selectedPlan.Verifications.Count.ToString()),
-                new Tab("Commits", Cap(commitsTable)).Badge(_selectedPlan.Commits.Count.ToString()),
+                new Tab("Commits", Cap(commitsContent)).Badge(_selectedPlan.Commits.Count.ToString()),
                 new Tab("PRs", Cap(prsContent)).Badge(_selectedPlan.Prs.Count.ToString()),
                 new Tab("Artifacts", Cap(artifactsLayout)).Badge(totalArtifacts.ToString())
-            ).Variant(TabsVariant.Content);
+            ).OnSelect(v => selectedTab.Set(v)).SelectedIndex(selectedTab.Value).Variant(TabsVariant.Content);
 
             content |= tabs;
         }
@@ -363,7 +373,7 @@ public class ContentView(
                             _jobService.StartJob("ExpandPlan", planPath);
                             _refreshPlans();
                         })
-                        | new Button("Delete").Icon(Icons.Trash).Outline().ShortcutKey("Delete")
+                        | new Button("Delete").Icon(Icons.Trash).Outline().ShortcutKey("Backspace")
                             .OnClick(() => deleteDialogOpen.Set(true))
                         | new Button("Previous").Icon(Icons.ChevronLeft).Outline().OnClick(() => GoToPrevious())
                             .ShortcutKey("p")
@@ -390,6 +400,13 @@ public class ContentView(
                                 {
                                     copyToClipboard(_selectedPlan.FolderPath);
                                     client.Toast("Copied path to clipboard", "Path Copied");
+                                }),
+                            new MenuItem("Copy Plan to Clipboard", Icon: Icons.Share, Tag: "CopyPlan")
+                                .OnSelect(() =>
+                                {
+                                    var exported = PlanExportHelper.ExportToClipboard(_selectedPlan);
+                                    copyToClipboard(exported);
+                                    client.Toast("Plan copied to clipboard", "Plan Exported");
                                 }),
                             new MenuItem("Mark as Completed", Icon: Icons.CircleCheck, Tag: "MarkCompleted")
                                 .OnSelect(() =>
@@ -423,7 +440,7 @@ public class ContentView(
 
         var repoPaths = _selectedPlan.GetEffectiveRepoPaths(_config);
         var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(
-            openFile.Value, () => openFile.Set(null), repoPaths, _config.Editor.Command, _config.Editor.Label);
+            openFile.Value, () => openFile.Set(null), repoPaths, _config);
         if (fileLinkSheet is not null)
             elements.Add(fileLinkSheet);
 

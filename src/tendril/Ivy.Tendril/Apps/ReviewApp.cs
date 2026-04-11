@@ -41,7 +41,7 @@ public class ReviewApp : ViewBase
 
         if (selectedPlanState.Value == null && filteredPlans.Count > 0) selectedPlanState.Set(filteredPlans[0]);
 
-        if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
+        if (selectedPlanState.Value is { } selected && filteredPlans.All(p => p.FolderName != selected.FolderName))
         {
             var oldIndex = previousPlans.Value.FindIndex(p => p.FolderName == selected.FolderName);
             if (filteredPlans.Count > 0 && oldIndex >= 0)
@@ -57,11 +57,6 @@ public class ReviewApp : ViewBase
 
         previousPlans.Value = filteredPlans;
 
-        void RefreshPlans()
-        {
-            refreshToken.Refresh();
-        }
-
         var sidebar = new SidebarView(plans, selectedPlanState, textFilter, configService);
 
         return new SidebarLayout(
@@ -69,5 +64,10 @@ public class ReviewApp : ViewBase
                 RefreshPlans, configService, gitService),
             sidebar
         );
+
+        void RefreshPlans()
+        {
+            refreshToken.Refresh();
+        }
     }
 }

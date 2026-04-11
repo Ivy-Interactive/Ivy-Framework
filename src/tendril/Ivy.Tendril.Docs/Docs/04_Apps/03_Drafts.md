@@ -1,34 +1,35 @@
 ---
 searchHints:
-  - drafts
-  - plans
-  - backlog
-  - queue
+  - draft
+  - plan
+  - ideation
+  - blocked
+  - makeplan
 icon: Feather
 ---
 
 # Drafts
 
 <Ingress>
-The Drafts app shows plans that are in the Draft state, ready to be expanded or sent for execution.
+Plans in **Draft** (or **Blocked**): shape the work before execution (`PlansApp`).
 </Ingress>
 
-## Overview
+## Role
 
-Drafts is where new plans land after being created via `MakePlan`. From here you can review the plan's structure, refine it, or queue it for execution.
+New plans start here. Refine the plan with the UI and promptwares before heavy coding.
 
-## Filtering
+## UI
 
-You can filter drafts by:
-
-- **Project** — Show only plans belonging to a specific project
-- **Level** — Filter by plan complexity level
+- **Sidebar** — Filtered draft list; main pane shows the selected plan.
+- **Content** — Latest revision markdown (problem, approach, tests).
+- **Project** — Settings from `config.yaml` for that repo.
 
 ## Actions
 
-| Action | Description |
-|--------|-------------|
-| **Execute** | Send the plan to the execution queue |
-| **Expand** | Run the ExpandPlan promptware to add more detail |
-| **Edit** | Modify the plan description or details |
-| **Discard** | Move the plan to Trash |
+1. **ExecutePlan** — Lock revision, create worktree, run the main execution agent.
+2. **ExpandPlan** — Flesh out a thin plan with more implementation detail.
+3. **Shelve to Icebox** — Move to **Icebox** to clear the draft list.
+
+## Files on disk
+
+Edits under `TENDRIL_HOME/Inbox` or in a plan folder in your editor sync back via filesystem watchers—no manual refresh needed.

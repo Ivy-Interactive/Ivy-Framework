@@ -1,18 +1,21 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import { ColorScheme, generateEChartToolbox } from "./sharedUtils";
+import {
+  ColorScheme,
+  buildMarkLineConfig,
+  generateDataProps,
+  generateEChartGrid,
+  generateEChartLegend,
+  generateEChartToolbox,
+  generateTooltip,
+  generateTextStyle,
+  generateXAxis,
+  generateYAxis,
+  getColors,
+  getTransformValueFn,
+} from "./sharedUtils";
 import { getHeight, getWidth } from "@/lib/styles";
 import { useThemeWithMonitoring } from "@/components/theme-provider";
 import ReactECharts from "echarts-for-react";
-import {
-  generateDataProps,
-  getColors,
-  generateXAxis,
-  generateEChartLegend,
-  generateTooltip,
-  generateTextStyle,
-  generateEChartGrid,
-  generateYAxis,
-} from "./sharedUtils";
 import { generateGradientColors, getChartThemeColors } from "./styles";
 import {
   ChartType,
@@ -27,9 +30,9 @@ import {
   ToolboxProps,
 } from "./chartTypes";
 import { ChartData } from "./chartTypes";
-import { getTransformValueFn } from "./sharedUtils";
 import { ReferenceDot } from "./chartTypes";
-import { LINE_DEFAULTS, REFERENCE_LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -50,6 +53,7 @@ interface AreaChartWidgetProps {
   referenceDots?: ReferenceDot[];
   colorScheme: ColorScheme;
   layout?: "Horizontal" | "Vertical";
+  density?: Densities;
 }
 
 const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
@@ -68,6 +72,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   referenceDots = EMPTY_ARRAY,
   colorScheme = "Default",
   layout = "Vertical",
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -118,20 +123,9 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
     [referenceDots],
   );
 
-  // Merge MarkLine[] into single markLine config with C# defaults
   const markLine = useMemo(
-    () =>
-      referenceLines.length > 0
-        ? {
-            ...referenceLines[0],
-            lineStyle: {
-              width: referenceLines[0]?.lineStyle?.width ?? REFERENCE_LINE_DEFAULTS.strokeWidth,
-              ...referenceLines[0]?.lineStyle,
-            },
-            data: referenceLines.flatMap((ml) => ml.data),
-          }
-        : {},
-    [referenceLines],
+    () => buildMarkLineConfig(referenceLines, themeColors),
+    [referenceLines, themeColors],
   );
 
   // Merge MarkArea[] into single markArea config

@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Channels;
 using Ivy.Helpers;
 using Ivy.Tendril.Apps;
 using Ivy.Tendril.Apps.Jobs;
@@ -57,17 +56,19 @@ public class JobService : IJobService
     private readonly IPlanDatabaseService? _database;
 
     private readonly string? _inboxPath;
-    private readonly Channel<string> _jobQueue = Channel.CreateUnbounded<string>();
+    private readonly PriorityQueue<string, int> _jobQueue = new();
+    private readonly object _queueLock = new();
     private readonly SemaphoreSlim _jobSlotSemaphore;
-    private readonly TimeSpan _jobTimeout;
+    private TimeSpan _jobTimeout;
     private readonly ConcurrentDictionary<string, JobItem> _jobs = new();
-    private readonly int _maxConcurrentJobs;
+    private int _maxConcurrentJobs;
     private readonly ModelPricingService? _modelPricingService;
     private readonly IPlanReaderService? _planReaderService;
     private readonly IPlanWatcherService? _planWatcherService;
-    private readonly TimeSpan _staleOutputTimeout;
+    private TimeSpan _staleOutputTimeout;
     private readonly SynchronizationContext? _syncContext;
     private readonly ITelemetryService? _telemetryService;
+    private readonly IWorktreeLifecycleLogger? _worktreeLifecycleLogger;
     private int _counter;
 
     public JobService(
@@ -76,7 +77,8 @@ public class JobService : IJobService
         IPlanReaderService? planReaderService = null,
         ITelemetryService? telemetryService = null,
         IPlanWatcherService? planWatcherService = null,
-        IPlanDatabaseService? database = null)
+        IPlanDatabaseService? database = null,
+        IWorktreeLifecycleLogger? worktreeLifecycleLogger = null)
     {
         _syncContext = SynchronizationContext.Current;
         _configService = configService;
@@ -85,6 +87,7 @@ public class JobService : IJobService
         _telemetryService = telemetryService;
         _planWatcherService = planWatcherService;
         _database = database;
+        _worktreeLifecycleLogger = worktreeLifecycleLogger;
         _jobTimeout = TimeSpan.FromMinutes(configService.Settings.JobTimeout);
         _staleOutputTimeout = TimeSpan.FromMinutes(configService.Settings.StaleOutputTimeout);
         _maxConcurrentJobs = configService.Settings.MaxConcurrentJobs;
@@ -92,6 +95,7 @@ public class JobService : IJobService
             ? new SemaphoreSlim(_maxConcurrentJobs, _maxConcurrentJobs)
             : new SemaphoreSlim(0, 1);
         _inboxPath = Path.Combine(configService.TendrilHome, "Inbox");
+        configService.SettingsReloaded += OnSettingsReloaded;
         LoadHistoricalJobs();
     }
 
@@ -217,7 +221,7 @@ public class JobService : IJobService
 
         // Flush telemetry events to ensure they reach PostHog
         if (_telemetryService != null)
-            _ = Task.Run(async () => await _telemetryService.FlushAsync());
+            _ = Task.Run(async () => { try { await _telemetryService.FlushAsync(); } catch { /* best-effort */ } });
 
         CleanupInboxFile(job);
         WriteJobLog(job);
@@ -287,8 +291,6 @@ public class JobService : IJobService
         // Try to start queued jobs now that a slot is free
         ProcessJobQueue();
 
-        if (!_jobs.Values.Any(j => j.Status == JobStatus.Running))
-            SendNativeNotification();
     }
 
     public void StopJob(string id)
@@ -483,12 +485,15 @@ public class JobService : IJobService
 
         // For MakePlan: args are named params like -Description "..." -Project "..."
         // For others: args[0] is the plan folder path
+        var priority = 0;
         if (type == "MakePlan")
         {
             planFile = GetNamedArg(args, "-Description") is { Length: > 0 } desc
                 ? desc.Length > 50 ? desc[..50] + "..." : desc
                 : "New Plan";
             project = GetNamedArg(args, "-Project") ?? "[Auto]";
+            if (int.TryParse(GetNamedArg(args, "-Priority"), out var parsedPriority))
+                priority = parsedPriority;
         }
         else
         {
@@ -497,7 +502,11 @@ public class JobService : IJobService
             if (Directory.Exists(planFolder))
             {
                 var plan = ReadPlanYaml(planFolder);
-                if (plan != null) project = plan.Project;
+                if (plan != null)
+                {
+                    project = plan.Project;
+                    priority = plan.Priority;
+                }
             }
         }
 
@@ -510,7 +519,8 @@ public class JobService : IJobService
             Status = JobStatus.Pending,
             ScriptPath = scriptPath,
             Args = args,
-            Provider = _configService?.Settings.CodingAgent ?? "claude"
+            Provider = _configService?.Settings.CodingAgent ?? "claude",
+            Priority = priority
         };
 
         // For MakePlan jobs: track the inbox file for crash recovery
@@ -565,7 +575,7 @@ public class JobService : IJobService
         {
             job.Status = JobStatus.Queued;
             job.StatusMessage = $"Waiting (max {_maxConcurrentJobs} concurrent jobs)";
-            _jobQueue.Writer.TryWrite(id);
+            lock (_queueLock) { _jobQueue.Enqueue(id, -job.Priority); }
             RaiseJobsChanged();
             return id;
         }
@@ -602,6 +612,21 @@ public class JobService : IJobService
     /// </summary>
     internal bool RemoveJob(string id) => _jobs.TryRemove(id, out _);
 
+    public void Dispose()
+    {
+        if (_configService != null)
+            _configService.SettingsReloaded -= OnSettingsReloaded;
+        _jobSlotSemaphore.Dispose();
+    }
+
+    private void OnSettingsReloaded(object? sender, EventArgs e)
+    {
+        if (_configService == null) return;
+        _jobTimeout = TimeSpan.FromMinutes(_configService.Settings.JobTimeout);
+        _staleOutputTimeout = TimeSpan.FromMinutes(_configService.Settings.StaleOutputTimeout);
+        _maxConcurrentJobs = _configService.Settings.MaxConcurrentJobs;
+    }
+
     private void LaunchJob(JobItem job)
     {
         var id = job.Id;
@@ -618,7 +643,7 @@ public class JobService : IJobService
         RunHooks("before", type, planFolderForHooks, job.Project, job);
 
         // Launch process
-        var processArgs = new List<string> { "-NoProfile", "-File", scriptPath };
+        var processArgs = new List<string> { "-NoProfile", "-NonInteractive", "-File", scriptPath };
         processArgs.AddRange(args);
 
         var workingDirectory = Path.GetFullPath(
@@ -630,6 +655,7 @@ public class JobService : IJobService
             WorkingDirectory = workingDirectory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            RedirectStandardInput = true,
             UseShellExecute = false,
             CreateNoWindow = true,
             StandardOutputEncoding = Encoding.UTF8,
@@ -639,7 +665,7 @@ public class JobService : IJobService
         job.SessionId = Guid.NewGuid().ToString();
 
         psi.Environment["TENDRIL_JOB_ID"] = id;
-        psi.Environment["TENDRIL_URL"] = Environment.GetEnvironmentVariable("TENDRIL_URL") ?? "http://localhost:5010";
+        psi.Environment["TENDRIL_URL"] = Environment.GetEnvironmentVariable("TENDRIL_URL") ?? "https://localhost:5010";
         psi.Environment["TENDRIL_SHARED"] = SharedRoot;
         psi.Environment["TENDRIL_SESSION_ID"] = job.SessionId;
         if (_configService != null)
@@ -651,18 +677,32 @@ public class JobService : IJobService
         var process = new Process { StartInfo = psi };
         process.OutputDataReceived += (_, e) =>
         {
-            if (e.Data != null)
+            try
             {
-                job.LastOutputAt = DateTime.UtcNow;
-                if (!e.Data.Contains("\"type\":\"heartbeat\"")) job.EnqueueOutput(e.Data);
+                if (e.Data != null)
+                {
+                    job.LastOutputAt = DateTime.UtcNow;
+                    if (!e.Data.Contains("\"type\":\"heartbeat\"")) job.EnqueueOutput(e.Data);
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.WriteCrashLog($"[{DateTime.UtcNow:O}] OutputDataReceived exception for job {id}: {ex}");
             }
         };
         process.ErrorDataReceived += (_, e) =>
         {
-            if (e.Data != null)
+            try
             {
-                job.EnqueueOutput($"[stderr] {e.Data}");
-                job.LastOutputAt = DateTime.UtcNow;
+                if (e.Data != null)
+                {
+                    job.EnqueueOutput($"[stderr] {e.Data}");
+                    job.LastOutputAt = DateTime.UtcNow;
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.WriteCrashLog($"[{DateTime.UtcNow:O}] ErrorDataReceived exception for job {id}: {ex}");
             }
         };
 
@@ -677,16 +717,25 @@ public class JobService : IJobService
 
         Task.Run(async () =>
         {
-            if (await process.WaitForExitOrKillAsync(cts.Token))
+            try
             {
-                if (_jobs.TryGetValue(id, out var j) && j.StaleOutputDetected)
-                    CompleteJob(id, null, timedOut: true, staleOutput: true);
+                if (await process.WaitForExitOrKillAsync(cts.Token))
+                {
+                    if (_jobs.TryGetValue(id, out var j) && j.StaleOutputDetected)
+                        CompleteJob(id, null, timedOut: true, staleOutput: true);
+                    else
+                        CompleteJob(id, process.ExitCode);
+                }
                 else
-                    CompleteJob(id, process.ExitCode);
+                {
+                    CompleteJob(id, null, timedOut: true);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                CompleteJob(id, null, timedOut: true);
+                // CompleteJob failures are non-recoverable — the job will appear stuck
+                // but the process survives.
+                Program.WriteCrashLog($"[{DateTime.UtcNow:O}] JobService process monitor exception for job {id}: {ex}");
             }
         });
 
@@ -717,10 +766,11 @@ public class JobService : IJobService
                     var condPsi = new ProcessStartInfo
                     {
                         FileName = "pwsh",
-                        Arguments = $"-NoProfile -EncodedCommand {EncodeForPowerShell(hook.Condition)}",
+                        Arguments = $"-NoProfile -NonInteractive -EncodedCommand {EncodeForPowerShell(hook.Condition)}",
                         WorkingDirectory = string.IsNullOrEmpty(planFolder) ? "." : planFolder,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
+                        RedirectStandardInput = true,
                         UseShellExecute = false,
                         CreateNoWindow = true
                     };
@@ -740,10 +790,11 @@ public class JobService : IJobService
                 var actionPsi = new ProcessStartInfo
                 {
                     FileName = "pwsh",
-                    Arguments = $"-NoProfile -EncodedCommand {EncodeForPowerShell(hook.Action)}",
+                    Arguments = $"-NoProfile -NonInteractive -EncodedCommand {EncodeForPowerShell(hook.Action)}",
                     WorkingDirectory = string.IsNullOrEmpty(planFolder) ? "." : planFolder,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
+                    RedirectStandardInput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
@@ -853,22 +904,23 @@ public class JobService : IJobService
 
     private void ProcessJobQueue()
     {
-        while (_jobQueue.Reader.TryPeek(out var queuedId))
+        while (true)
         {
-            // Try to acquire a job slot (non-blocking)
             if (!_jobSlotSemaphore.Wait(0))
                 break;
 
-            if (!_jobQueue.Reader.TryRead(out queuedId))
+            string? queuedId;
+            lock (_queueLock)
             {
-                // Failed to dequeue — release the slot we just acquired
-                _jobSlotSemaphore.Release();
-                break;
+                if (!_jobQueue.TryDequeue(out queuedId, out _))
+                {
+                    _jobSlotSemaphore.Release();
+                    break;
+                }
             }
 
             if (!_jobs.TryGetValue(queuedId, out var queuedJob) || queuedJob.Status != JobStatus.Queued)
             {
-                // Job was removed or state changed — release the slot
                 _jobSlotSemaphore.Release();
                 continue;
             }
@@ -1089,7 +1141,7 @@ public class JobService : IJobService
         }
     }
 
-    private static void ScheduleWorktreeCleanup(JobItem job)
+    private void ScheduleWorktreeCleanup(JobItem job)
     {
         if (job.Type != "ExecutePlan") return;
 
@@ -1099,13 +1151,14 @@ public class JobService : IJobService
         var worktreesDir = Path.Combine(planFolder, "worktrees");
         if (!Directory.Exists(worktreesDir)) return;
 
-        // Clean up immediately after failure — no grace period needed since the plan just failed
+        var lifecycleLogger = _worktreeLifecycleLogger;
+
         Task.Run(async () =>
         {
             await Task.Delay(TimeSpan.FromSeconds(30));
             try
             {
-                PlanReaderService.RemoveWorktrees(planFolder);
+                PlanReaderService.RemoveWorktrees(planFolder, lifecycleLogger: lifecycleLogger);
 
                 if (Directory.Exists(worktreesDir) && Directory.GetDirectories(worktreesDir).Length == 0)
                     Directory.Delete(worktreesDir, false);
@@ -1240,37 +1293,6 @@ public class JobService : IJobService
         }
     }
 
-    private void SendNativeNotification()
-    {
-        if (!OperatingSystem.IsWindows())
-            return;
-
-        var completed = _jobs.Values.Count(j => j.Status == JobStatus.Completed);
-        var failed = _jobs.Values.Count(j => j.Status is JobStatus.Failed or JobStatus.Timeout);
-        var title = "Tendril \u2014 All Jobs Finished";
-        var body = failed > 0
-            ? $"{completed} completed, {failed} failed"
-            : $"{completed} job(s) completed successfully";
-
-        Task.Run(() =>
-        {
-            try
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "pwsh",
-                    Arguments = $"-NoProfile -Command \"New-BurntToastNotification -Text '{title}', '{body}'\"",
-                    CreateNoWindow = true,
-                    UseShellExecute = false
-                };
-                Process.Start(psi);
-            }
-            catch
-            {
-                /* Notification is best-effort */
-            }
-        });
-    }
 
     internal static void LogCostToCsv(string planFolder, string jobType, int tokens, double cost)
     {

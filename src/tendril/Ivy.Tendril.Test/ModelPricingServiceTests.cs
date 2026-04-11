@@ -1,10 +1,12 @@
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
 public class ModelPricingServiceTests
 {
-    private readonly ModelPricingService _service = new();
+    private readonly ModelPricingService _service = new(NullLogger<ModelPricingService>.Instance);
 
     [Fact]
     public void LoadsEmbeddedModelsYaml()
@@ -389,5 +391,77 @@ public class ModelPricingServiceTests
         var result = _service.CalculateSessionCost("nonexistent-gemini-session-12345", "gemini");
         Assert.Equal(0, result.TotalTokens);
         Assert.Equal(0.0, result.TotalCost);
+    }
+
+    [Fact]
+    public void GetPricing_ReturnsCorrectPricing_ForCodexPlaceholderModels()
+    {
+        var gpt54 = _service.GetPricing("gpt-5.4");
+        var gpt54Mini = _service.GetPricing("gpt-5.4-mini");
+        var gpt53Codex = _service.GetPricing("gpt-5.3-codex");
+
+        Assert.Equal(10.0, gpt54.Input);
+        Assert.Equal(1.10, gpt54Mini.Input);
+        Assert.Equal(1.50, gpt53Codex.Input);
+    }
+
+    [Fact]
+    public void GetPricing_ReturnsCorrectPricing_ForGeminiPlaceholderModels()
+    {
+        var gemini3 = _service.GetPricing("gemini-3-flash-preview");
+        var gemini25Lite = _service.GetPricing("gemini-2.5-flash-lite");
+
+        Assert.Equal(1.50, gemini3.Input);
+        Assert.Equal(0.15, gemini25Lite.Input);
+    }
+
+    [Fact]
+    public void GetPricing_LongestMatchFirst_SelectsMostSpecificKey()
+    {
+        var mini = _service.GetPricing("gpt-5.4-mini");
+        Assert.Equal(1.10, mini.Input);
+
+        var baseModel = _service.GetPricing("gpt-5.4");
+        Assert.Equal(10.00, baseModel.Input);
+    }
+
+    [Fact]
+    public void GetPricing_LogsWarning_WhenModelNotFound()
+    {
+        var logger = new CapturingLogger<ModelPricingService>();
+        var service = new ModelPricingService(logger);
+
+        service.GetPricing("totally-unknown-model");
+
+        Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Warning, logger.Entries[0].Level);
+        Assert.Contains("totally-unknown-model", logger.Entries[0].Message);
+        Assert.Contains("not found in pricing database", logger.Entries[0].Message);
+    }
+
+    [Fact]
+    public void GetPricing_DoesNotLogWarning_WhenModelFound()
+    {
+        var logger = new CapturingLogger<ModelPricingService>();
+        var service = new ModelPricingService(logger);
+
+        service.GetPricing("claude-opus-4");
+
+        Assert.Empty(logger.Entries);
+    }
+
+    private class CapturingLogger<T> : ILogger<T>
+    {
+        public List<(LogLevel Level, string Message)> Entries { get; } = new();
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            Entries.Add((logLevel, formatter(state, exception)));
+        }
     }
 }

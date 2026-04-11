@@ -23,6 +23,9 @@ public class PlanDatabaseService : IPlanDatabaseService
     public PlanDatabaseService(string databasePath, ILogger<PlanDatabaseService> logger)
     {
         _logger = logger;
+        var directory = Path.GetDirectoryName(databasePath);
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
         _connection = new SqliteConnection($"Data Source={databasePath};Mode=ReadWriteCreate");
         _connection.Open();
 
@@ -335,7 +338,10 @@ public class PlanDatabaseService : IPlanDatabaseService
                     """;
 
                 cmd.Parameters.AddWithValue("@cutoff", cutoff);
-                if (projectFilter != null) cmd.Parameters.AddWithValue("@project", projectFilter);
+                if (projectFilter != null)
+                {
+                    cmd.Parameters.AddWithValue("@project", projectFilter);
+                }
                 for (var i = 0; i < days.Count; i++)
                     cmd.Parameters.AddWithValue($"@day{i}", days[i]);
 
@@ -445,7 +451,9 @@ public class PlanDatabaseService : IPlanDatabaseService
                                """;
             cmd.Parameters.AddWithValue("@cutoff", cutoff.ToString("O", CultureInfo.InvariantCulture));
             if (projectFilter != null)
+            {
                 cmd.Parameters.AddWithValue("@project", projectFilter);
+            }
 
             var result = new List<HourlyTokenBurn>();
             using var reader = cmd.ExecuteReader();
@@ -1038,6 +1046,70 @@ public class PlanDatabaseService : IPlanDatabaseService
         finally
         {
             _lock.ExitWriteLock();
+        }
+    }
+
+    public Dictionary<string, string> GetAllPrStatuses()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "SELECT PrUrl, Status FROM PrStatuses";
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                result[reader.GetString(0)] = reader.GetString(1);
+            return result;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    public void UpsertPrStatus(string prUrl, string owner, string repo, string status, DateTime lastChecked)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = """
+                              INSERT INTO PrStatuses (PrUrl, Owner, Repo, Status, LastChecked)
+                              VALUES (@url, @owner, @repo, @status, @checked)
+                              ON CONFLICT(PrUrl) DO UPDATE SET
+                                  Status = excluded.Status,
+                                  LastChecked = excluded.LastChecked
+                              """;
+            cmd.Parameters.AddWithValue("@url", prUrl);
+            cmd.Parameters.AddWithValue("@owner", owner);
+            cmd.Parameters.AddWithValue("@repo", repo);
+            cmd.Parameters.AddWithValue("@status", status);
+            cmd.Parameters.AddWithValue("@checked", lastChecked.ToString("O", CultureInfo.InvariantCulture));
+            cmd.ExecuteNonQuery();
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public List<string> GetNonMergedPrUrls()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "SELECT PrUrl FROM PrStatuses WHERE Status != 'Merged'";
+            var result = new List<string>();
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                result.Add(reader.GetString(0));
+            return result;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
         }
     }
 

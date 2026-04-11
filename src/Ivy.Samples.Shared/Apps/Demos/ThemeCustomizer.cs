@@ -13,6 +13,7 @@ public class ThemeCustomizer : SampleBase
         var client = UseService<IClientProvider>();
         var selectedMode = UseState("light"); // "light" or "dark"
         var editingTheme = UseState(CloneTheme(Theme.Default));
+        var initialized = UseState(false);
         var themeQuery = UseQuery(
             key: editingTheme.Value,
             fetcher: async ct =>
@@ -24,6 +25,14 @@ public class ThemeCustomizer : SampleBase
                 await Task.CompletedTask;
                 return true;
             });
+
+        // Synchronize client theme mode on mount so color pickers match the rendered preview
+        if (!initialized.Value)
+        {
+            initialized.Set(true);
+            var mode = selectedMode.Value == "dark" ? ThemeMode.Dark : ThemeMode.Light;
+            client.SetThemeMode(mode);
+        }
 
         void LoadPreset(Theme preset)
         {

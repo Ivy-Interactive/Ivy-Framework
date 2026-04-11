@@ -6,19 +6,30 @@ searchHints:
   - configuration
   - settings
   - projects
+  - gui
 ---
 
-# config.yaml
+# Setup & Settings
 
 <Ingress>
-The `config.yaml` file is the primary configuration file for Tendril. It defines your projects, agent settings, and system preferences.
+Configure Tendril in the in-app **Settings** UI or by editing `TENDRIL_HOME/config.yaml` (projects, agents, levels, verifications, preferences).
 </Ingress>
 
-## Location
+## Settings app
 
-Tendril looks for `config.yaml` in the `TENDRIL_HOME` directory. If it doesn't exist, the onboarding wizard will help you create one.
+From Tendril, open setup without hand-editing YAML. Sections include:
 
-## Structure
+- **General** — Default coding agent (`claude`, `codex`, …), max concurrent jobs, Slack emoji / coworkers.
+- **Levels** — Complexity tiers (e.g. L1–L3) and how agents weight large vs. small work.
+- **Verifications** — Build / test / lint commands agents must satisfy.
+- **Promptwares** — Paths to custom promptware folders and tools.
+- **Projects** — Repos agents may clone and change.
+
+## `config.yaml`
+
+Same data lives in `TENDRIL_HOME/config.yaml`. Changes in the UI write here immediately.
+
+### Example
 
 ```yaml
 codingAgent: claude
@@ -41,36 +52,23 @@ coworkers:
     name: Display Name
 ```
 
-## Key Fields
+### Common fields
 
-### `codingAgent`
-The coding agent to use. Supported values: `claude`, `codex`, `gemini`.
-
-### `maxConcurrentJobs`
-Maximum number of promptware jobs that can run simultaneously.
-
-### `projects`
-Array of project configurations. Each project defines:
-
-| Field | Description |
-|-------|-------------|
-| `name` | Display name for the project |
-| `repo` | Absolute path to the repository |
-| `verifications` | List of verification steps to run after execution |
-| `meta.slackEmoji` | Emoji used in Slack notifications |
-| `meta.color` | Color used in the dashboard and badges |
-
-### `coworkers`
-List of team members for PR assignment and collaboration features.
+| Field | Purpose |
+|-------|---------|
+| `codingAgent` | Agent runtime (`claude`, `codex`, `gemini`, …). |
+| `maxConcurrentJobs` | Cap on parallel agent runs (worktrees). |
+| `projects` | Registered repositories and their settings. |
+| `coworkers` | GitHub users for PR assignment / team features. |
 
 ## Verifications
 
-Available verification types:
+Wire these names into project `verifications` (and define behavior in config as needed):
 
-| Type | Description |
-|------|-------------|
-| `DotnetBuild` | Runs `dotnet build` on the project |
-| `DotnetFormat` | Checks code formatting with `dotnet format` |
-| `DotnetTest` | Runs the project's test suite |
-| `CheckResult` | Validates the agent's execution result |
-| `IvyFramework` | Ivy-specific checks (samples, docs) |
+| Name | Role |
+|------|------|
+| `DotnetBuild` | `dotnet build` |
+| `DotnetFormat` | `dotnet format` checks |
+| `DotnetTest` | Test suite |
+| `Npm*` / `Cargo*` | Same idea for other stacks |
+| `CheckResult` | Parse stdout/stderr to decide pass/fail |

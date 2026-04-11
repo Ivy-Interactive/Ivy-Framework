@@ -3,6 +3,7 @@ import { TableCell } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { Align, getWidth } from "@/lib/styles";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Densities } from "@/types/density";
 import "./table.css";
 
 interface TableCellWidgetProps {
@@ -12,6 +13,7 @@ interface TableCellWidgetProps {
   alignContent: Align;
   width?: string;
   multiline?: boolean;
+  density?: Densities;
   children?: React.ReactNode;
 }
 
@@ -43,6 +45,7 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   alignContent,
   width,
   multiline,
+  density: _density = Densities.Medium,
 }) => {
   const cellStyles = {
     ...getWidth(width),

@@ -4,14 +4,9 @@ namespace Ivy.Tendril.Services;
 
 public class PlanWatcherService : IPlanWatcherService
 {
-    private static readonly HashSet<string> WatchedFiles = new(StringComparer.OrdinalIgnoreCase)
-        { "plan.yaml" };
-
-    private static readonly HashSet<string> WatchedFolders = new(StringComparer.OrdinalIgnoreCase)
-        { "revisions", "logs", "verification", "artifacts" };
-
     private readonly Timer _debounceTimer;
     private readonly FileSystemWatcher? _watcher;
+    private readonly System.Threading.Timer? _pollTimer;
     private string? _pendingPlanFolder;
 
     public PlanWatcherService(IConfigService config)
@@ -37,17 +32,35 @@ public class PlanWatcherService : IPlanWatcherService
         if (!Directory.Exists(planFolder))
             return;
 
+        // Only watch the top-level Plans directory (no subdirectories) to detect
+        // new/deleted plan folders. This avoids the massive file event storm from
+        // worktree operations (git checkout, npm install) that was overflowing
+        // the FSW buffer and destabilizing explorer.exe.
         _watcher = new FileSystemWatcher(planFolder)
         {
-            IncludeSubdirectories = true,
-            NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.DirectoryName,
+            NotifyFilter = NotifyFilters.DirectoryName,
             EnableRaisingEvents = true
         };
 
-        _watcher.Changed += OnFileEvent;
-        _watcher.Created += OnFileEvent;
-        _watcher.Deleted += OnFileEvent;
+        _watcher.Created += (_, _) => ScheduleDebounce(null);
+        _watcher.Deleted += (_, _) => ScheduleDebounce(null);
         _watcher.Renamed += (_, _) => ScheduleDebounce(null);
+        _watcher.Error += (_, e) =>
+            Program.WriteCrashLog($"[{DateTime.UtcNow:O}] PlanWatcher FSW error: {e.GetException()}");
+
+        // Poll as a safety net for external edits to plan.yaml or metadata files
+        // that aren't covered by explicit NotifyChanged() calls from JobService.
+        _pollTimer = new System.Threading.Timer(_ =>
+        {
+            try
+            {
+                ScheduleDebounce(null);
+            }
+            catch
+            {
+                // Best-effort polling
+            }
+        }, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
     }
 
     public event Action<string?>? PlansChanged;
@@ -59,44 +72,9 @@ public class PlanWatcherService : IPlanWatcherService
 
     public void Dispose()
     {
+        _pollTimer?.Dispose();
         _watcher?.Dispose();
         _debounceTimer.Dispose();
-    }
-
-    private void OnFileEvent(object sender, FileSystemEventArgs e)
-    {
-        // Only react to plan-relevant changes, not worktree/temp/artifact churn
-        var fileName = Path.GetFileName(e.FullPath);
-        var parentFolder = Path.GetFileName(Path.GetDirectoryName(e.FullPath) ?? "");
-
-        // New plan folder created at top level
-        if (e.ChangeType == WatcherChangeTypes.Created && parentFolder == Path.GetFileName(_watcher!.Path))
-        {
-            ScheduleDebounce(null); // full rescan for new plan
-            return;
-        }
-
-        // plan.yaml changed, or files in watched folders (revisions/logs/verification/artifacts)
-        if (WatchedFiles.Contains(fileName) || WatchedFolders.Contains(parentFolder))
-        {
-            var planFolder = ResolvePlanFolder(e.FullPath);
-            ScheduleDebounce(planFolder);
-        }
-    }
-
-    /// <summary>
-    ///     Walk up from the changed file path to find the plan folder (direct child of the plans directory).
-    /// </summary>
-    private string? ResolvePlanFolder(string changedPath)
-    {
-        if (_watcher == null) return null;
-
-        var plansRoot = _watcher.Path;
-        var dir = Path.GetDirectoryName(changedPath);
-        while (dir != null && !string.Equals(Path.GetDirectoryName(dir), plansRoot, StringComparison.OrdinalIgnoreCase))
-            dir = Path.GetDirectoryName(dir);
-
-        return dir;
     }
 
     private void ScheduleDebounce(string? planFolder)

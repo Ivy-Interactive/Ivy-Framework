@@ -42,6 +42,12 @@ internal static class FileHelper
         return null;
     }
 
+    /// <summary>
+    ///     Reads all text from a file with retry logic for transient IO errors.
+    ///     Callers should check <see cref="File.Exists(string)"/> before calling unless
+    ///     the path comes from <c>Directory.GetFiles</c>/<c>EnumerateFiles</c> or an
+    ///     explicit try-catch handles <see cref="FileNotFoundException"/>.
+    /// </summary>
     public static string ReadAllText(string path)
     {
         for (var attempt = 0; ; attempt++)
@@ -91,6 +97,7 @@ internal static class FileHelper
             }
     }
 
+    /// <inheritdoc cref="ReadAllText"/>
     public static async Task<string> ReadAllTextAsync(string path)
     {
         for (var attempt = 0; ; attempt++)

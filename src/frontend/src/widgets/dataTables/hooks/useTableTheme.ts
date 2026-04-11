@@ -2,12 +2,15 @@ import { useCallback } from "react";
 import { Theme } from "@glideapps/glide-data-grid";
 import { useThemeWithMonitoring } from "@/components/theme-provider";
 import { ThemeColors } from "@/lib/theme";
+import { Densities } from "@/types/density";
+import { DENSITY_CONFIG } from "../dataTableEditor/constants";
 
 interface UseTableThemeProps {
   showVerticalBorders: boolean | undefined;
   enableRowHover: boolean | undefined;
   visibleRows: number;
   hoverRow: number | undefined;
+  density?: Densities;
 }
 
 /**
@@ -18,7 +21,9 @@ export const useTableTheme = ({
   enableRowHover,
   visibleRows,
   hoverRow,
+  density = Densities.Medium,
 }: UseTableThemeProps) => {
+  const densityConfig = DENSITY_CONFIG[density];
   const {
     customTheme: tableTheme,
     colors: themeColors,
@@ -53,9 +58,9 @@ export const useTableTheme = ({
           ? colors.border || (isDark ? "#404045" : "#d1d5db")
           : "transparent",
       bgSearchResult: isDark ? "#3f3520" : "#fff9e3",
-      cellHorizontalPadding: 8,
-      cellVerticalPadding: 8,
-      headerIconSize: 20,
+      cellHorizontalPadding: densityConfig.cellHorizontalPadding,
+      cellVerticalPadding: densityConfig.cellVerticalPadding,
+      headerIconSize: densityConfig.headerIconSize,
       // Add proper text colors for group headers and icons
       textGroupHeader: colors.mutedForeground || (isDark ? "#a1a1aa" : "#6b7280"),
       // Icon foreground color

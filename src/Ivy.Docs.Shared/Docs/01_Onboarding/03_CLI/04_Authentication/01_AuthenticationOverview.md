@@ -306,8 +306,8 @@ Ivy allows you to customize authentication cookie settings globally from your [P
 
 By default, Ivy authentication cookies are configured with:
 - **HttpOnly**: `true` (prevents JavaScript access)
-- **Secure**: `true` in production, `false` in development (requires HTTPS)
-- **SameSite**: `Lax` (provides CSRF protection while allowing cross-site navigation)
+- **Secure**: `true` (requires HTTPS — see [HTTPS in Development](#https-in-development) below)
+- **SameSite**: `Strict` or `Lax` depending on the cookie (provides CSRF protection while allowing OAuth redirects)
 - **Expires**: 1 year from creation
 - **Path**: `/` (available site-wide)
 
@@ -323,6 +323,24 @@ Server.ConfigureAuthCookieOptions = options =>
 ```
 
 > **Note**: Custom configuration is applied after Ivy sets the default values, allowing you to override any setting. It's recommended to keep `HttpOnly = true` for security.
+
+## HTTPS in Development
+
+Ivy uses secure (`Secure = true`) authentication cookies, which means your browser will only send them over HTTPS. In local development, Ivy automatically serves over HTTPS using the ASP.NET Core development certificate.
+
+### macOS and Windows
+
+Run the following command once to generate and trust the development certificate:
+
+```terminal
+>dotnet dev-certs https --trust
+```
+
+After this, your app will be accessible at `https://localhost:5010`.
+
+### Linux
+
+Linux requires additional manual steps to trust the development certificate — see [Installation](../../01_GettingStarted/02_Installation.md#prerequisites) for details.
 
 ## Best Practices
 

@@ -28,7 +28,7 @@ Sliplane does not offer a self-service developer portal for OAuth apps. To get a
 1. **Reach out to Sliplane** (e.g. via [sliplane.io](https://sliplane.io) or their support).
 2. **Request OAuth credentials** for your application.
 3. **Provide your callback URL** so Sliplane can redirect users after sign-in. Ivy uses the standard auth callback path:
-   - **Local:** `http://localhost:PORT/ivy/auth/callback` (replace `PORT` with your app’s port)
+   - **Local:** `https://localhost:PORT/ivy/auth/callback` (replace `PORT` with your app’s port)
    - **Production:** `https://your-domain.com/ivy/auth/callback`
 4. **Save the Client ID and Client Secret** that Sliplane sends you — you’ll use them in Step 2.
 
@@ -38,7 +38,7 @@ Once Sliplane has given you credentials:
 
 1. **Client ID** — use as `Sliplane:ClientId` in configuration.
 2. **Client Secret** — use as `Sliplane:ClientSecret` in configuration. Store it securely (e.g. [.NET user secrets](../../02_Concepts/14_Secrets.md) or environment variables); never commit it to version control.
-3. **Callback URL** — ensure the URL you registered with Sliplane matches your app exactly (e.g. `https://your-domain.com/ivy/auth/callback`). For local development, use `http://localhost:PORT/ivy/auth/callback`.
+3. **Callback URL** — ensure the URL you registered with Sliplane matches your app exactly (e.g. `https://your-domain.com/ivy/auth/callback`). For local development, use `https://localhost:PORT/ivy/auth/callback`.
 
 ## Adding Authentication
 

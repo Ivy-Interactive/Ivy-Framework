@@ -1,7 +1,10 @@
 # Source: https://www.anthropic.com/pricing, https://openai.com/api/pricing/, https://ai.google.dev/pricing
 # Last verified: 2026-04-09
-# IMPORTANT: Entries are ordered most-specific first because GetPricing() uses
-# Contains-based matching and returns the first hit.
+# IMPORTANT: GetPricing() uses longest-match-first ordering to ensure
+# deterministic matching when model names contain multiple keys as substrings.
+# NOTE: Some entries below (gpt-5.4*, gpt-5.3-codex, gemini-3-flash-preview,
+# gemini-2.5-flash-lite) are fictional placeholder models used in example.config.yaml.
+# Replace with actual model names and pricing when configuring real agents.
 models:
   # Claude — current generation
   claude-opus-4-6:
@@ -73,6 +76,21 @@ models:
     output: 6.00
     cacheWrite: 0.0
     cacheRead: 0.375
+  gpt-5.4-mini:
+    input: 1.10
+    output: 4.40
+    cacheWrite: 0.0
+    cacheRead: 0.275
+  gpt-5.4:
+    input: 10.00
+    output: 40.00
+    cacheWrite: 0.0
+    cacheRead: 2.50
+  gpt-5.3-codex:
+    input: 1.50
+    output: 6.00
+    cacheWrite: 0.0
+    cacheRead: 0.375
 
   # Google (Gemini) — prices for prompts ≤200k tokens
   gemini-2.5-pro:
@@ -80,6 +98,16 @@ models:
     output: 10.00
     cacheWrite: 0.0
     cacheRead: 0.125
+  gemini-3-flash-preview:
+    input: 1.50
+    output: 12.00
+    cacheWrite: 0.0
+    cacheRead: 0.15
+  gemini-2.5-flash-lite:
+    input: 0.15
+    output: 1.25
+    cacheWrite: 0.0
+    cacheRead: 0.015
   gemini-2.5-flash:
     input: 0.30
     output: 2.50

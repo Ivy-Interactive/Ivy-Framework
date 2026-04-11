@@ -135,10 +135,9 @@ public class WidgetSerializerTests(ITestOutputHelper output)
     [Fact]
     public void Serialize_GridLayout_ColumnsAreSerialized()
     {
-        var def = new GridDefinition { Columns = 2 };
         var child1 = new TextBlock("A") { Id = "a" };
         var child2 = new TextBlock("B") { Id = "b" };
-        var widget = new GridLayout(def, child1, child2);
+        var widget = (IWidget)Layout.Grid(child1, child2).Columns(2).Build()!;
         widget.Id = Guid.NewGuid().ToString();
 
         var result = WidgetSerializer.Serialize(widget);

@@ -13,6 +13,7 @@ import { ChartType, PieChartWidgetProps } from "./chartTypes";
 import { generateDataProps } from "./sharedUtils";
 import { getChartThemeColors } from "./styles";
 import { PIE_DEFAULTS, PIE_LEGEND_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -26,6 +27,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   legend,
   colorScheme = "Default",
   total,
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

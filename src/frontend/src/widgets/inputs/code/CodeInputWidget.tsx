@@ -1,23 +1,11 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, Suspense, lazy, useEffect } from "react";
 import { useOptimisticValue } from "../shared/useOptimisticValue";
-import CodeMirror from "@uiw/react-codemirror";
-import { javascript } from "@codemirror/lang-javascript";
-import { python } from "@codemirror/lang-python";
-import { sql } from "@codemirror/lang-sql";
-import { html } from "@codemirror/lang-html";
-import { css } from "@codemirror/lang-css";
-import { json } from "@codemirror/lang-json";
-import { markdown } from "@codemirror/lang-markdown";
-import { yaml } from "@codemirror/lang-yaml";
 import { useEventHandler } from "@/components/event-handler";
 import { cn } from "@/lib/utils";
 import { getHeight, getWidth, inputStyles } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
-import { cpp } from "@codemirror/lang-cpp";
-import { dbml } from "./dbml-language";
-import { createIvyCodeTheme } from "./theme";
 import { Densities } from "@/types/density";
-import { X, Copy } from "lucide-react";
+import { X, Copy, Loader2 } from "lucide-react";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
 import {
   keymap,
@@ -31,6 +19,20 @@ import { history } from "@codemirror/commands";
 import { useDebouncedCallback } from "use-debounce";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
+// Lazy load CodeMirror and language extensions
+const CodeMirror = lazy(() => import("@uiw/react-codemirror"));
+const javascript = (options?: any) =>
+  import("@codemirror/lang-javascript").then((m) => m.javascript(options));
+const python = () => import("@codemirror/lang-python").then((m) => m.python());
+const sql = () => import("@codemirror/lang-sql").then((m) => m.sql());
+const html = () => import("@codemirror/lang-html").then((m) => m.html());
+const css = () => import("@codemirror/lang-css").then((m) => m.css());
+const json = () => import("@codemirror/lang-json").then((m) => m.json());
+const markdown = () => import("@codemirror/lang-markdown").then((m) => m.markdown());
+const yaml = () => import("@codemirror/lang-yaml").then((m) => m.yaml());
+const cpp = () => import("@codemirror/lang-cpp").then((m) => m.cpp());
+import { dbml } from "./dbml-language";
+import { createIvyCodeTheme } from "./theme";
 interface CodeInputWidgetProps {
   id: string;
   placeholder?: string;
@@ -48,9 +50,9 @@ interface CodeInputWidgetProps {
 
 const languageExtensions = {
   Csharp: cpp,
-  Javascript: javascript,
-  Typescript: javascript({ typescript: true }),
-  Tsx: javascript({ typescript: true, jsx: true }),
+  Javascript: () => javascript(),
+  Typescript: () => javascript({ typescript: true }),
+  Tsx: () => javascript({ typescript: true, jsx: true }),
   Python: python,
   Sql: sql,
   Html: html,
@@ -149,13 +151,26 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     ];
   }, []);
 
+  const [langExtensions, setLangExtensions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadLang = async () => {
+      const lang = language
+        ? languageExtensions[language as keyof typeof languageExtensions]
+        : undefined;
+      if (lang) {
+        const ext = typeof lang === "function" ? await (lang as any)() : lang;
+        setLangExtensions([ext]);
+      } else {
+        setLangExtensions([]);
+      }
+    };
+    loadLang();
+  }, [language]);
+
   const extensions = useMemo(() => {
-    const lang = language
-      ? languageExtensions[language as keyof typeof languageExtensions]
-      : undefined;
-    const langExtension = lang ? [typeof lang === "function" ? lang() : lang] : [];
-    return [...langExtension, minimalSetup, themeExtension];
-  }, [language, minimalSetup, themeExtension]);
+    return [...langExtensions, minimalSetup, themeExtension];
+  }, [langExtensions, minimalSetup, themeExtension]);
 
   return (
     <div style={styles} className="relative w-full h-full overflow-hidden">
@@ -186,26 +201,34 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           {invalid && <InvalidIcon message={invalid} className="pointer-events-auto p-1" />}
         </div>
       )}
-      <CodeMirror
-        value={localValue}
-        extensions={extensions}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-        placeholder={placeholder}
-        editable={!disabled}
-        autoFocus={autoFocus}
-        data-gramm="false"
-        className={cn(
-          "h-full",
-          "border border-input shadow-sm rounded-field",
-          "dark:bg-white/5 dark:border-white/10",
-          invalid && inputStyles.invalid,
-          disabled && "opacity-50 cursor-not-allowed",
-        )}
-        height="100%"
-        basicSetup={false}
-      />
+      <Suspense
+        fallback={
+          <div className="h-full flex items-center justify-center bg-muted/20 animate-pulse rounded-field border border-input">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        }
+      >
+        <CodeMirror
+          value={localValue}
+          extensions={extensions}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          placeholder={placeholder}
+          editable={!disabled}
+          autoFocus={autoFocus}
+          data-gramm="false"
+          className={cn(
+            "h-full",
+            "border border-input shadow-sm rounded-field",
+            "dark:bg-white/5 dark:border-white/10",
+            invalid && inputStyles.invalid,
+            disabled && "opacity-50 cursor-not-allowed",
+          )}
+          height="100%"
+          basicSetup={false}
+        />
+      </Suspense>
     </div>
   );
 };

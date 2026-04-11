@@ -14,7 +14,12 @@ public static class ProcessExtensions
         if (process is null) return true;
         if (!process.WaitForExit(timeoutMs))
         {
-            try { process.Kill(true); } catch { /* already exited */ }
+            try
+            {
+                process.Kill(true);
+                process.WaitForExit(); // Ensure HasExited is true
+            }
+            catch { /* already exited */ }
             return false;
         }
         return true;
@@ -36,7 +41,12 @@ public static class ProcessExtensions
         }
         catch (OperationCanceledException)
         {
-            try { process.Kill(true); } catch { /* already exited */ }
+            try
+            {
+                process.Kill(true);
+                await process.WaitForExitAsync(); // Ensure HasExited is true
+            }
+            catch { /* already exited */ }
             return false;
         }
     }
@@ -56,7 +66,12 @@ public static class ProcessExtensions
         }
         catch (OperationCanceledException)
         {
-            try { process.Kill(true); } catch { /* already exited */ }
+            try
+            {
+                process.Kill(true);
+                await process.WaitForExitAsync(); // Ensure HasExited is true
+            }
+            catch { /* already exited */ }
             return false;
         }
     }

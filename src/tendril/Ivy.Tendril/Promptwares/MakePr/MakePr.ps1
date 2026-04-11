@@ -35,10 +35,16 @@ try {
     }
     $rawLogFile = [System.IO.Path]::ChangeExtension($logFile, ".raw.jsonl")
     $startTs = (Get-Date).ToUniversalTime().ToString("o")
-    Add-Content -Path $rawLogFile -Value "[tendril] Claude invocation started at $startTs" -Encoding UTF8
+    Add-Content -Path $rawLogFile -Value "[tendril] Agent invocation started at $startTs (provider: $($agent.CodingAgent))" -Encoding UTF8
     Add-Content -Path $rawLogFile -Value "[tendril] Command: $($agent.Executable) $($agent.Args -join ' ') $($extraArgs -join ' ')" -Encoding UTF8
 
-    $output = & $agent.Executable @($agent.Args) @extraArgs -- (Get-Content $promptFile -Raw) 2>&1 |
+    $promptContent = Get-Content $promptFile -Raw
+    $agentArgs = if ($agent.CodingAgent -eq "claude") {
+        @($agent.Args) + $extraArgs + @("--", $promptContent)
+    } else {
+        @($agent.Args) + $extraArgs + @($promptContent)
+    }
+    $output = & $agent.Executable @agentArgs 2>&1 |
     ForEach-Object {
         $line = if ($_ -is [System.Management.Automation.ErrorRecord]) {
             "[stderr] $_"
@@ -62,6 +68,9 @@ try {
                 $summary = $resultJson.result
             }
             catch { }
+        }
+        elseif ($agent.CodingAgent -ne "claude") {
+            $summary = ($output | Where-Object { "$_".Trim() } | Select-Object -Last 1) -as [string]
         }
     }
 

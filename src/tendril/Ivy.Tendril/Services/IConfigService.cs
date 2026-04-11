@@ -11,15 +11,23 @@ public interface IConfigService
     string[] LevelNames { get; }
     EditorConfig Editor { get; }
     bool NeedsOnboarding { get; }
+    ConfigParseError? ParseError { get; }
 
     ProjectConfig? GetProject(string name);
+    bool TryAutoHeal();
+    void ResetToDefaults();
+    void RetryLoadConfig();
     BadgeVariant GetBadgeVariant(string level);
     Colors? GetProjectColor(string projectName);
     void SaveSettings();
+    void ReloadSettings();
+    event EventHandler? SettingsReloaded;
     void SetPendingTendrilHome(string path);
     string? GetPendingTendrilHome();
     void SetPendingProject(ProjectConfig project);
     ProjectConfig? GetPendingProject();
+    void SetPendingCodingAgent(string name);
+    string? GetPendingCodingAgent();
     void SetPendingVerificationDefinitions(List<VerificationConfig> definitions);
     List<VerificationConfig>? GetPendingVerificationDefinitions();
     void CompleteOnboarding(string tendrilHome);

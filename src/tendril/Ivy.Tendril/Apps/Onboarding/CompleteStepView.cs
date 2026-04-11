@@ -39,7 +39,7 @@ public class CompleteStepView(IState<int> stepperIndex) : ViewBase
             }
         }
 
-        return Layout.Vertical()
+        return Layout.Vertical().Margin(0, 0, 0, 20)
                | Text.H2("Ready to Go!")
                | Text.Markdown(
                    "We'll now:\n" +

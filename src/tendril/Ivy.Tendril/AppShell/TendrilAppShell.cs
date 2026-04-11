@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Reactive.Disposables;
 using Ivy.Core;
 using Ivy.Core.Apps;
+using Ivy.Tendril.AppShell.Dialogs;
 using Ivy.Tendril.Apps;
 using Ivy.Tendril.Services;
 using Ivy.Tendril.Views;
@@ -57,6 +58,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         var serverArgs = UseService<ServerArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
         var navigator = UseNavigation();
+        var importIssuesDialogOpen = UseState(false);
         UseEffect(() =>
         {
             void OnChanged()
@@ -250,24 +252,23 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             return ValueTask.CompletedTask;
         }
 
-        void OnTabSelect(Event<TabsLayout, int> @event)
+        void OnTabSelect(int tabIndex)
         {
-            if (!CheckTabExists(@event.Value)) return;
+            if (!CheckTabExists(tabIndex)) return;
 
-            if (selectedIndex.Value != @event.Value)
+            if (selectedIndex.Value != tabIndex)
             {
-                selectedIndex.Set(@event.Value);
-                var tab = tabs.Value[@event.Value];
+                selectedIndex.Set(tabIndex);
+                var tab = tabs.Value[tabIndex];
                 SetAppTitle(tab.AppId);
                 RedirectToAppIfNotError(new NavigateArgs(tab.AppId), tabId: tab.Id);
             }
         }
 
-        void OnTabClose(Event<TabsLayout, int> @event)
+        void OnTabClose(int closedIndex)
         {
-            if (!CheckTabExists(@event.Value)) return;
+            if (!CheckTabExists(closedIndex)) return;
 
-            var closedIndex = @event.Value;
             var wasSelected = selectedIndex.Value == closedIndex;
             var newTabs = tabs.Value.RemoveAt(closedIndex);
             int? newIndex = null;
@@ -302,19 +303,18 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             tabs.Set(newTabs);
         }
 
-        void OnTabRefresh(Event<TabsLayout, int> @event)
+        void OnTabRefresh(int tabIndex)
         {
-            if (!CheckTabExists(@event.Value)) return;
+            if (!CheckTabExists(tabIndex)) return;
 
-            var tab = tabs.Value[@event.Value];
-            tabs.Set(tabs.Value.RemoveAt(@event.Value)
-                .Insert(@event.Value, tab with { RefreshToken = Guid.NewGuid().ToString() }));
-            selectedIndex.Set(@event.Value);
+            var tab = tabs.Value[tabIndex];
+            tabs.Set(tabs.Value.RemoveAt(tabIndex)
+                .Insert(tabIndex, tab with { RefreshToken = Guid.NewGuid().ToString() }));
+            selectedIndex.Set(tabIndex);
         }
 
-        void OnTabReorder(Event<TabsLayout, int[]> @event)
+        void OnTabReorder(int[] newOrder)
         {
-            var newOrder = @event.Value;
             var reorderedTabs = newOrder.Select(index => tabs.Value[index]).ToArray();
             tabs.Set([.. reorderedTabs]);
 
@@ -342,9 +342,15 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             }
             else
             {
-                body = new TabsLayout(OnTabSelect, OnTabClose, OnTabRefresh, OnTabReorder, selectedIndex.Value,
-                    tabs.Value.ToArray().Select(e => e.ToTab()).ToArray()
-                ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0);
+                body = Layout.Tabs(tabs.Value.ToArray().Select(e => e.ToTab()).ToArray())
+                    .OnSelect(OnTabSelect)
+                    .OnClose(OnTabClose)
+                    .OnRefresh(OnTabRefresh)
+                    .OnReorder(OnTabReorder)
+                    .SelectedIndex(selectedIndex.Value)
+                    .RemoveParentPadding()
+                    .Variant(TabsVariant.Tabs)
+                    .Padding(0);
             }
         }
 
@@ -358,6 +364,10 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         var commonMenuItems = new[]
         {
+            MenuItem.Default("Import Issues from GitHub")
+                .Tag("$import-issues")
+                .Icon(Icons.Download)
+                .OnSelect(() => importIssuesDialogOpen.Set(true)),
             MenuItem.Default("Setup")
                 .Tag("$setup")
                 .Icon(Icons.Construction)
@@ -451,22 +461,28 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 );
         }
 
+        if (config.ParseError != null)
+            return new ConfigErrorApp(config);
+
         if (config.NeedsOnboarding) return new OnboardingApp();
 
-        return new SidebarLayout(
-            body ?? null!,
-            sidebarMenu,
-            Layout.Vertical().Gap(2)
-            | settings.Header
-            | new NewPlanButton()
-            ,
-            Layout.Vertical(
-                new SidebarNews("https://ivy.app/news.json"),
-                settings.Footer,
-                footer
-            ),
-            settings.Width
-        ).Open(sidebarOpen.Value).MainAppSidebar();
+        return new Fragment(
+            new SidebarLayout(
+                body ?? null!,
+                sidebarMenu,
+                Layout.Vertical().Gap(2)
+                | settings.Header
+                | new NewPlanButton()
+                ,
+                Layout.Vertical(
+                    new SidebarNews("https://ivy.app/news.json"),
+                    settings.Footer,
+                    footer
+                ),
+                settings.Width
+            ).Open(sidebarOpen.Value).MainAppSidebar(),
+            new ImportIssuesDialog(importIssuesDialogOpen, config)
+        );
     }
 
     private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)

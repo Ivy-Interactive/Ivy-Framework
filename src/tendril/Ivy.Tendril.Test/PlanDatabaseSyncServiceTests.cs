@@ -131,6 +131,29 @@ public class PlanDatabaseSyncServiceTests : IDisposable
     }
 
     [Fact]
+    public void PerformInitialSync_HandlesmalformedRecommendationsYaml()
+    {
+        var yaml =
+            "state: Completed\nproject: Tendril\ntitle: Bad Recs Plan\nlevel: NiceToHave\nrepos: []\ncommits: []\nprs: []\nverifications: []\nrelatedPlans: []\ndependsOn: []\ncreated: 2026-01-01T00:00:00Z\nupdated: 2026-01-01T00:00:00Z\n";
+        var dir = Path.Combine(_planReader.PlansDirectory, "01502-BadRecsPlan");
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, "plan.yaml"), yaml);
+        var revisionsDir = Path.Combine(dir, "revisions");
+        Directory.CreateDirectory(revisionsDir);
+        File.WriteAllText(Path.Combine(revisionsDir, "001.md"), "# Bad Recs Plan");
+        var artifactsDir = Path.Combine(dir, "artifacts");
+        Directory.CreateDirectory(artifactsDir);
+        File.WriteAllText(Path.Combine(artifactsDir, "recommendations.yaml"),
+            "- title: `Backtick title` causes parse failure\n  description: This breaks\n  state: Pending\n");
+
+        _syncService.PerformInitialSync();
+
+        Assert.True(_syncService.IsInitialSyncComplete);
+        var recs = _database.GetRecommendations();
+        Assert.Empty(recs);
+    }
+
+    [Fact]
     public void PlanWatcher_WatchedFolders_IncludesArtifacts()
     {
         // Verify that PlanWatcherService watches the artifacts folder so that

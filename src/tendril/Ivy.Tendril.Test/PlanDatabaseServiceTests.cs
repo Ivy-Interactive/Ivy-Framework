@@ -1042,6 +1042,37 @@ public class PlanDatabaseServiceTests : IDisposable
     }
 
     [Fact]
+    public void GetDashboardData_ProjectFilter_DoesNotMatchSubstrings()
+    {
+        _db.UpsertPlan(CreateTestPlan(3000, "Plan A", project: "Framework", status: PlanStatus.Completed));
+        _db.UpsertPlan(CreateTestPlan(3001, "Plan B", project: "FrameworkExtended", status: PlanStatus.Draft));
+        _db.UpsertPlan(CreateTestPlan(3002, "Plan C", project: "MyFramework", status: PlanStatus.Draft));
+
+        var stats = _db.GetDashboardData("Framework");
+
+        Assert.Equal(1, stats.TotalCount);
+        Assert.Equal(1, stats.CompletedCount);
+        Assert.Equal(0, stats.DraftCount);
+    }
+
+    [Fact]
+    public void GetHourlyTokenBurn_ProjectFilter_DoesNotMatchSubstrings()
+    {
+        _db.UpsertPlan(CreateTestPlan(3100, "Plan A", project: "Console"));
+        _db.UpsertPlan(CreateTestPlan(3101, "Plan B", project: "ConsoleApp"));
+
+        var now = DateTime.UtcNow;
+        _db.UpsertCosts(3100, [new("ExecutePlan", 50000, 1.50m, now)]);
+        _db.UpsertCosts(3101, [new("ExecutePlan", 30000, 0.90m, now)]);
+
+        var burn = _db.GetHourlyTokenBurn(projectFilter: "Console");
+
+        Assert.NotEmpty(burn);
+        Assert.All(burn, b => Assert.Equal("Console", b.Project));
+        Assert.Equal(50000, burn.Sum(b => b.Tokens));
+    }
+
+    [Fact]
     public void SearchPlans_FindsBySourceUrl()
     {
         var metadata = new PlanMetadata(

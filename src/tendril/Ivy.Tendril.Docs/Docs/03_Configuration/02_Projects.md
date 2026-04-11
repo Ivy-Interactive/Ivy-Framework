@@ -5,42 +5,44 @@ searchHints:
   - repo
   - repository
   - multi-project
+  - isolation
+  - worktree
 ---
 
 # Project Setup
 
 <Ingress>
-Tendril supports managing multiple projects simultaneously. Each project maps to a git repository and has its own verification and configuration settings.
+Each **project** is a git repo with its own verifications and agent context. Tendril runs many projects side by side.
 </Ingress>
 
-## Adding a Project
+## Adding a project
 
-Add a new project entry to the `projects` array in `config.yaml`:
+**Settings** – **Projects**, or edit `config.yaml`:
 
 ```yaml
 projects:
-  - name: My App
-    repo: D:\Repos\MyApp
+  - name: Global Engine
+    repo: ~/git/global-engine
     verifications:
-      - DotnetBuild
-      - DotnetFormat
+      - NpmBuild
+      - NpmTest
       - CheckResult
 ```
 
-## Project Isolation
+## Worktrees
 
-When a plan is executed, Tendril creates a **git worktree** for the target project. This provides complete isolation:
+`ExecutePlan` does not edit your normal working tree. It uses a **git worktree**: separate checkout, same repo, isolated from the branch you have open.
 
-- The main branch remains untouched during execution
-- Multiple plans can execute in parallel on different worktrees
-- Failed executions don't affect your working copy
+- Worktree is created for the agent; your main checkout stays as-is.
+- Several plans can run across different projects concurrently.
+- Failed runs are discarded without touching your IDE folder.
+- After you approve, changes become a branch / PR as usual; the worktree is removed when done.
 
-Worktrees are created under the plan's folder at `worktrees/` and are cleaned up after the PR is merged or the plan is discarded.
+## Repo-local context
 
-## Per-Project Verifications
+Optional files in the **repo root** (picked up when the agent runs):
 
-Each project can have its own set of verifications. After an agent completes execution, Tendril runs the configured verifications in order. If any verification fails, the plan is flagged for review.
+- **`CLAUDE.md`** — High-level guidance for Claude Code.
+- **`AGENTS.md` / `DEVELOPER.md`** — Team conventions and practices.
 
-## Context Files
-
-Projects can include context files (like `CLAUDE.md` or `DEVELOPER.md`) that are automatically included in the agent's prompt. These files provide project-specific instructions and conventions that guide the agent's behavior.
+Tendril loads these and prepends them to the promptware context for that repo.

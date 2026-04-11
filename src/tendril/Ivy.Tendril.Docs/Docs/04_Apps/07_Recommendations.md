@@ -2,28 +2,20 @@
 searchHints:
   - recommendations
   - suggestions
-  - improvements
-  - ideas
+  - auto
 icon: Lightbulb
 ---
 
 # Recommendations
 
 <Ingress>
-The Recommendations app displays AI-generated suggestions for improvements based on completed plan reviews.
+Suggested follow-ups (refactors, hygiene, tests) inferred from your repos—no manual ticket required.
 </Ingress>
 
-## Overview
+## Sourcing
 
-As agents work through plans, they may identify opportunities for follow-up work. These appear as recommendations that you can:
+Tendril surfaces items from execution context (outdated patterns, missing tests, etc.) as actionable items.
 
-- Review and accept as new plans
-- Dismiss if not relevant
-- Filter by project or plan status
+## Accept
 
-## Filtering
-
-You can filter recommendations by:
-
-- **Project** — Show only recommendations for a specific project
-- **Plan status** — Filter by the status of the originating plan
+**Accept** scaffolds a new **Draft** with the suggested work so it follows the normal Expand – Execute – Review path.

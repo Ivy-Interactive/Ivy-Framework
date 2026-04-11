@@ -20,6 +20,7 @@ public class PlanYaml
     public List<PlanVerificationEntry> Verifications { get; set; } = new();
     public List<string> RelatedPlans { get; set; } = new();
     public List<string> DependsOn { get; set; } = new();
+    public int Priority { get; set; }
     public string? InitialPrompt { get; set; }
     public string? SourceUrl { get; set; }
 }

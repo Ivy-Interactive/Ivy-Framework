@@ -1,3 +1,5 @@
+using Ivy.Tendril.Helpers;
+
 namespace Ivy.Tendril.Apps.Plans;
 
 public enum PlanStatus
@@ -79,7 +81,7 @@ public static class PlanFilters
             filtered = filtered.Where(p => p.Level == level);
 
         if (projectFilter is { } project)
-            filtered = filtered.Where(p => p.Project == project);
+            filtered = filtered.Where(p => ProjectHelper.ContainsProject(p.Project, project));
 
         if (!string.IsNullOrWhiteSpace(textFilter))
         {

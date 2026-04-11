@@ -1,4 +1,4 @@
-using Ivy.Tendril.Apps.Settings;
+using Ivy.Tendril.Apps.Setup;
 
 namespace Ivy.Tendril.Apps;
 
@@ -9,17 +9,13 @@ public class SetupApp : ViewBase
     {
         var selectedTab = UseState(0);
 
-        return new TabsLayout(
-            e => selectedTab.Set(e.Value),
-            null,
-            null,
-            null,
-            selectedTab.Value,
-            new Tab("General", new GeneralSettingsView()),
-            new Tab("Levels", new LevelsSettingsView()),
-            new Tab("Verifications", new VerificationsSettingsView()),
-            new Tab("Promptwares", new PromptwaresSettingsView()),
-            new Tab("Projects", new ProjectsSettingsView())
-        ).Variant(TabsVariant.Content);
+        return Layout.Tabs(
+            new Tab("General", new GeneralSetupView()),
+            new Tab("Levels", new LevelsSetupView()),
+            new Tab("Verifications", new VerificationsSetupView()),
+            new Tab("Promptwares", new PromptwaresSetupView()),
+            new Tab("Projects", new ProjectsSetupView()),
+            new Tab("Advanced", new AdvancedSetupView())
+        ).OnSelect(v => selectedTab.Set(v)).SelectedIndex(selectedTab.Value).Variant(TabsVariant.Content);
     }
 }

@@ -4,60 +4,56 @@ searchHints:
   - setup
   - prerequisites
   - getting-started
+  - macos
+  - windows
 icon: Download
 ---
 
 # Installation
 
 <Ingress>
-Get Tendril up and running on your machine.
+Install Tendril on macOS, Linux, or Windows using one of the methods below.
 </Ingress>
 
-## Prerequisites
+## Quick Install
 
-### For Running Tendril
-- [Claude CLI](https://docs.anthropic.com/en/docs/claude-code) (`claude`)
-- [GitHub CLI](https://cli.github.com/) (`gh`)
-- PowerShell
-- Git
+One-liner: installs Tendril and required backend tools.
 
-### For Development
-- [.NET 10.0 SDK](https://dotnet.microsoft.com/download)
-
-## Setup
-
-### 1. Clone the repo
+### macOS / Linux
 
 ```bash
-git clone https://github.com/Ivy-Interactive/Ivy-Framework.git
-cd Ivy-Framework/src/tendril/Ivy.Tendril
+curl -sSf https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/tendril/install.sh | sh
 ```
 
-### 2. Configure `config.yaml`
+### Windows
 
-Copy the example config and edit it:
-
-```bash
-cp example.config.yaml config.yaml
+```powershell
+Invoke-RestMethod -Uri https://raw.githubusercontent.com/Ivy-Interactive/Ivy-Framework/main/src/tendril/install.ps1 | Invoke-Expression
 ```
 
-Key fields:
-- `projects` — List of projects with their repo paths, verifications, and context
-- `codingAgent` — The coding agent to use (claude, codex, or gemini)
+## .NET Tool
 
-### 3. Set `TENDRIL_HOME` environment variable
-
-Point `TENDRIL_HOME` to your Tendril data directory:
+Global install from NuGet:
 
 ```bash
-export TENDRIL_HOME=~/.tendril
-mkdir -p "$TENDRIL_HOME"
+dotnet tool install --g Ivy.Tendril
 ```
 
-Tendril will populate this with `Plans/`, `Inbox/`, `Trash/`, and `config.yaml` at runtime. If `TENDRIL_HOME` is not set, Tendril will launch the onboarding wizard.
+<Callout type="Tip">
+Powershell 7, Git and gh CLI need to be present on your machine if you install using `dotnet tool` command
 
-### 4. Run
+</Callout>
+
+## Run
 
 ```bash
-dotnet run
+tendril
+```
+
+## Update
+
+You can update Ivy Tendril at anytime after the initial install using the dotnet tool update command:
+
+```bash
+dotnet tool install --g Ivy.Tendril
 ```

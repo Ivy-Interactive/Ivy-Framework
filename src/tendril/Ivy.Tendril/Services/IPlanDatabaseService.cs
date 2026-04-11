@@ -48,6 +48,11 @@ public interface IPlanDatabaseService : IDisposable
     void PurgeOldJobs(int keepCount = 500);
     void DeleteJob(string id);
 
+    // PR statuses
+    Dictionary<string, string> GetAllPrStatuses();
+    void UpsertPrStatus(string prUrl, string owner, string repo, string status, DateTime lastChecked);
+    List<string> GetNonMergedPrUrls();
+
     // Diagnostics
     long GetDatabaseSize();
     DateTime GetLastSyncTime();

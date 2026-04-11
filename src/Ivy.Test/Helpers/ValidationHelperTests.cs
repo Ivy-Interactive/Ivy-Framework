@@ -122,14 +122,14 @@ public class ValidationHelperTests
     [Fact]
     public void ValidateRedirectUrl_SameOrigin_ReturnsUrl()
     {
-        var result = ValidationHelper.ValidateRedirectUrl("http://localhost:5000", allowExternal: false, "http://localhost:5000");
+        var result = ValidationHelper.ValidateRedirectUrl("https://localhost:5000", allowExternal: false, "https://localhost:5000");
         Assert.NotNull(result);
     }
 
     [Fact]
     public void ValidateRedirectUrl_DifferentOrigin_ReturnsNull()
     {
-        Assert.Null(ValidationHelper.ValidateRedirectUrl("http://localhost:5001", allowExternal: false, "http://localhost:5000"));
+        Assert.Null(ValidationHelper.ValidateRedirectUrl("https://localhost:5001", allowExternal: false, "https://localhost:5000"));
     }
 
     #endregion

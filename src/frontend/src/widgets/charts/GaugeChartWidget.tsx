@@ -6,6 +6,7 @@ import { generateTextStyle } from "./sharedUtils";
 import { getChartThemeColors } from "./styles";
 import { getColors } from "./sharedUtils";
 import type { GaugeChartWidgetProps } from "./chartTypes";
+import { Densities } from "@/types/density";
 
 const GAUGE_DEFAULTS = {
   min: 0,
@@ -33,6 +34,7 @@ const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
   colorScheme = "Default",
   width = "Full",
   height = "Full",
+  density: _density = Densities.Medium,
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
     monitorDOM: false,

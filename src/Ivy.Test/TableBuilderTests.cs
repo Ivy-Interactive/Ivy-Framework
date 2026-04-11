@@ -24,6 +24,48 @@ public class TableBuilderTests
         public string Region { get; set; } = string.Empty;
     }
 
+    private static Density GetDensity<T>(TableBuilder<T> builder)
+    {
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+        var field = builder.GetType().GetField("_density", flags)!;
+        return (Density)field.GetValue(builder)!;
+    }
+
+    [Fact]
+    public void Density_DefaultsToMedium()
+    {
+        var data = new[] { new TestModel { Name = "Alice", Age = 30, IsActive = true } };
+        var builder = new TableBuilder<TestModel>(data);
+        Assert.Equal(Density.Medium, GetDensity(builder));
+    }
+
+    [Fact]
+    public void Density_SetsValue()
+    {
+        var data = new[] { new TestModel { Name = "Alice", Age = 30, IsActive = true } };
+        var builder = new TableBuilder<TestModel>(data);
+        builder.Density(Density.Small);
+        Assert.Equal(Density.Small, GetDensity(builder));
+    }
+
+    [Fact]
+    public void Small_SetsDensityToSmall()
+    {
+        var data = new[] { new TestModel { Name = "Alice", Age = 30, IsActive = true } };
+        var builder = new TableBuilder<TestModel>(data);
+        builder.Small();
+        Assert.Equal(Density.Small, GetDensity(builder));
+    }
+
+    [Fact]
+    public void Large_SetsDensityToLarge()
+    {
+        var data = new[] { new TestModel { Name = "Alice", Age = 30, IsActive = true } };
+        var builder = new TableBuilder<TestModel>(data);
+        builder.Large();
+        Assert.Equal(Density.Large, GetDensity(builder));
+    }
+
     [Fact]
     public void SubProperty_MultipleHeaderCalls_CreatesSeparateColumns()
     {

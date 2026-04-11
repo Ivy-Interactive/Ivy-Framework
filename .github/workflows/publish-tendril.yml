@@ -50,6 +50,11 @@ jobs:
           distribution: microsoft
           java-version: 17
 
+      - name: Install PowerShell
+        run: |
+          dotnet tool install --global PowerShell
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
       - name: Restore
         run: dotnet restore
 
@@ -73,6 +78,11 @@ jobs:
         with:
           user: rorychatt-ivy
 
+      - name: Clean NuGet output before signing
+        run: |
+          find ./nupkg -mindepth 1 -maxdepth 1 -not -name "*.nupkg" -exec rm -rf {} +
+          mkdir -p ./nupkg_signed
+
       - name: Sign NuGet packages
         uses: sslcom/esigner-codesign@develop
         with:
@@ -81,8 +91,13 @@ jobs:
           password: ${{ secrets.SSL_COM_PASSWORD }}
           credential_id: ${{ secrets.SSL_COM_CREDENTIAL_ID }}
           totp_secret: ${{ secrets.SSL_COM_TOTP_SECRET }}
-          dir_path: ./nupkg
-          output_path: ./nupkg
+          malware_block: true
+          dir_path: src/nupkg
+          output_path: src/nupkg_signed
+
+      - name: Overwrite origin with signed nuget
+        run: |
+          cp -f ./nupkg_signed/*.nupkg ./nupkg/
 
       - name: Push to NuGet
         run: dotnet nuget push ./nupkg/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
@@ -160,6 +175,11 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      - name: Install PowerShell
+        run: |
+          dotnet tool install --global PowerShell
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
       - name: Restore
         run: dotnet restore
 
@@ -217,6 +237,12 @@ jobs:
             --delta None \
             $( [[ "${{ matrix.rid }}" == osx-* ]] && echo "--bundleId com.ivy.tendril" )
 
+      - name: Prepare Windows installer for signing
+        if: startsWith(matrix.rid, 'win-')
+        run: |
+          mkdir -p unsigned_releases signed_releases
+          find releases -maxdepth 1 -type f \( -name "*.exe" \) -exec cp {} unsigned_releases/ \;
+
       - name: Sign Windows installer
         if: startsWith(matrix.rid, 'win-')
         uses: sslcom/esigner-codesign@develop
@@ -226,8 +252,14 @@ jobs:
           password: ${{ secrets.SSL_COM_PASSWORD }}
           credential_id: ${{ secrets.SSL_COM_CREDENTIAL_ID }}
           totp_secret: ${{ secrets.SSL_COM_TOTP_SECRET }}
-          dir_path: src/releases
-          output_path: src/releases
+          malware_block: true
+          dir_path: src/unsigned_releases
+          output_path: src/signed_releases
+
+      - name: Overwrite origin with signed installer
+        if: startsWith(matrix.rid, 'win-')
+        run: |
+          cp -f signed_releases/*.exe releases/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

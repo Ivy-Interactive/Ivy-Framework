@@ -21,8 +21,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   events = EMPTY_ARRAY,
   shortcutKey,
   density = Densities.Medium,
-  prefix,
-  suffix,
+  slots,
   maxLength,
   minLength,
   pattern,
@@ -56,6 +55,14 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
     }
   });
+
+  const hasAutoFocusedRef = useRef(false);
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current && inputRef.current) {
+      hasAutoFocusedRef.current = true;
+      inputRef.current.focus();
+    }
+  }, [autoFocus, disabled]);
 
   const { isRecording, startRecording, stopRecording } = useDictation({
     dictationUploadUrl,
@@ -174,8 +181,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       events,
       shortcutKey,
       density,
-      prefix,
-      suffix,
+      slots,
       maxLength,
       minLength,
       pattern,
@@ -199,8 +205,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       height,
       shortcutKey,
       density,
-      prefix,
-      suffix,
+      slots,
       maxLength,
       minLength,
       pattern,

@@ -39,6 +39,8 @@ param(
 
     [string]$Model = "",
 
+    [string]$Effort = "",
+
     [string]$Prompt = "",
 
     [string]$PromptFile = "",
@@ -63,6 +65,10 @@ try {
 
             if ($Model) {
                 $cliArgs += @("--model", $Model)
+            }
+
+            if ($Effort) {
+                $cliArgs += @("--effort", $Effort)
             }
 
             if ($SessionId) {
@@ -96,6 +102,10 @@ try {
 
             if ($Model) {
                 $cliArgs += @("--model", $Model)
+            }
+
+            if ($Effort) {
+                $cliArgs += @("--reasoning-effort", $Effort)
             }
 
             # Codex uses --approval-mode with tool groups

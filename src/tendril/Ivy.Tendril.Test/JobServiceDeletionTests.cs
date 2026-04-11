@@ -134,6 +134,9 @@ public class JobServiceDeletionTests
         public void UpsertJob(JobItem job) { }
         public List<JobItem> GetRecentJobs(int limit = 100) => new();
         public void PurgeOldJobs(int keepCount = 500) { }
+        public Dictionary<string, string> GetAllPrStatuses() => new();
+        public void UpsertPrStatus(string prUrl, string owner, string repo, string status, DateTime lastChecked) { }
+        public List<string> GetNonMergedPrUrls() => new();
         public long GetDatabaseSize() => 0;
         public DateTime GetLastSyncTime() => DateTime.MinValue;
         public void SetLastSyncTime(DateTime time) { }

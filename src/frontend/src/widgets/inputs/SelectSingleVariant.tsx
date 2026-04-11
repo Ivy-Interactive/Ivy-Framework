@@ -45,6 +45,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
+      triggerRef.current?.focus();
       setIsOpen(true);
     }
   }, [autoFocus, disabled]);

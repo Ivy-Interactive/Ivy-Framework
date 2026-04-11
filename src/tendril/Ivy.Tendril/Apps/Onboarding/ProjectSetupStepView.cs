@@ -25,20 +25,7 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
         for (var i = 0; i < currentRepos.Count; i++)
         {
             var ri = i;
-            reposLayout |= Layout.Horizontal().Gap(2).AlignContent(Align.Center)
-                           | new FolderInput
-                           {
-                               Value = currentRepos[ri],
-                               Placeholder = "Select repository folder...",
-                               Mode = FolderInputMode.FullPath,
-                               OnChange = new(e =>
-                               {
-                                   var list = new List<string>(repoPaths.Value);
-                                   list[ri] = e.Value ?? "";
-                                   repoPaths.Set(list);
-                                   return ValueTask.CompletedTask;
-                               })
-                           }.Width(Size.Grow());
+            reposLayout |= new RepoPathInputView(repoPaths, ri);
         }
 
         reposLayout |= new Button("Add").Outline().OnClick(() =>
@@ -69,7 +56,7 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
                                    });
         }
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical().Gap(4).Margin(0, 0, 0, 20)
                | Text.H2("Project Setup")
                | Text.Muted("Set up your first project. You can add more projects later in Settings.")
                | (error.Value != null ? Text.Danger(error.Value) : null!)
@@ -78,10 +65,12 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
                    .Rows(4)
                    .WithField()
                    .Label("Context (Optional)")
+               | new Separator()
                | (Layout.Vertical().Gap(2)
                   | Text.Block("Repositories").Bold()
                   | Text.Muted("Add at least one repository path for this project.")
                   | reposLayout)
+               | new Separator()
                | (Layout.Vertical().Gap(2)
                   | Text.Block("Verifications").Bold()
                   | Text.Muted("Define verifications to run for this project.")
@@ -90,6 +79,7 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
                   {
                       editIndex.Set(null);
                   }))
+               | new Separator()
                | (Layout.Horizontal().Gap(2)
                   | new Button("Next").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
                       .OnClick(() =>
@@ -109,12 +99,12 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
 
                           var invalidRepo = filledRepos.FirstOrDefault(p =>
                           {
-                              var expanded = Environment.ExpandEnvironmentVariables(p);
+                              var expanded = VariableExpansion.ExpandVariables(p, "");
                               return !Directory.Exists(expanded) || !Path.Exists(Path.Combine(expanded, ".git"));
                           });
                           if (invalidRepo != null)
                           {
-                              var expanded = Environment.ExpandEnvironmentVariables(invalidRepo);
+                              var expanded = VariableExpansion.ExpandVariables(invalidRepo, "");
                               error.Set(!Directory.Exists(expanded)
                                   ? $"Directory does not exist: {expanded}"
                                   : $"Directory is not a git repository: {expanded}");
@@ -158,3 +148,20 @@ public class ProjectSetupStepView(IState<int> stepperIndex) : ViewBase
 }
 
 internal record VerificationEntry(string Name, string Prompt, bool Required);
+
+internal class RepoPathInputView(IState<List<string>> repoPaths, int index) : ViewBase
+{
+    public override object Build()
+    {
+        var repoPath = UseState(repoPaths.Value[index]);
+        UseEffect(() =>
+        {
+            var list = new List<string>(repoPaths.Value);
+            list[index] = repoPath.Value ?? "";
+            repoPaths.Set(list);
+        }, repoPath);
+
+        return repoPath.ToTextInput("Select repository folder...")
+            .Width(Size.Grow());
+    }
+}

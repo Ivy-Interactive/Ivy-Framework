@@ -5,41 +5,83 @@ codingAgent: claude
 jobTimeout: 30
 staleOutputTimeout: 10
 maxConcurrentJobs: 5  # Maximum number of jobs to run concurrently (default: 5)
-defaultEffort: high    # Default effort level for promptwares (low/medium/high/max)
 
 # Variable Expansion Support:
-# - %DotnetUserSecrets:Section:Key% - Read from .NET user secrets (requires .csproj with UserSecretsId)
 # - %TENDRIL_HOME% - Expands to TENDRIL_HOME env var (useful in hooks, verification prompts, and allowedTools paths)
 # - %ANY_ENV_VAR% - Standard environment variable expansion (e.g., %REPOS_HOME% for repo paths)
 # Common uses: repo paths, hook script paths, allowedTools file patterns
 # See VARIABLE_EXPANSION.md for details
+#
+# Stack-specific expansion (optional):
+# - %DotnetUserSecrets:Section:Key% - Read from .NET user secrets (requires .csproj with UserSecretsId)
 
-# Example with user secrets for sensitive data:
+# Example with environment variables for sensitive data:
 # llm:
-#   endpoint: %DotnetUserSecrets:OpenAi:Endpoint%
-#   apiKey: %DotnetUserSecrets:OpenAi:ApiKey%
+#   endpoint: %OPENAI_ENDPOINT%
+#   apiKey: %OPENAI_API_KEY%
 #   model: gpt-4o-mini
 
-# Default promptware configuration — controls model, effort, and tool permissions per promptware.
-# Without these, promptwares inherit global permissions from codingAgent.
-# Use _default as a fallback for any promptware not explicitly listed.
-promptwares:
-  MakePlan:
-    model: sonnet
-    effort: high
-    allowedTools: [Read, Glob, Grep, Bash, Write, Edit]
-  ExecutePlan:
+# Agent profiles — each agent has three profiles: deep, balanced, quick.
+# Promptwares reference profiles by name so switching codingAgent automatically
+# picks the right model and effort without per-promptware changes.
+codingAgents:
+- name: claude
+  profiles:
+  - name: deep
     model: opus
     effort: max
-    allowedTools: [Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch]
-  ExpandPlan:
+  - name: balanced
     model: sonnet
     effort: high
-    allowedTools: [Read, Glob, Grep, Bash, Write, Edit]
-  MakePr:
-    model: sonnet
+  - name: quick
+    model: haiku
+    effort: low
+- name: codex
+  profiles:
+  - name: deep
+    model: gpt-5.4
+    effort: high
+  - name: balanced
+    model: gpt-5.4-mini
     effort: medium
+  - name: quick
+    model: gpt-5.3-codex
+    effort: low
+- name: gemini
+  profiles:
+  - name: deep
+    model: gemini-3-flash-preview
+  - name: balanced
+    model: gemini-2.5-flash
+  - name: quick
+    model: gemini-2.5-flash-lite
+
+# Each promptware is connected to a profile (deep/balanced/quick).
+# The profile determines model and effort from the active coding agent above.
+# _default provides base values. Specific entries override only the fields they define;
+# unspecified fields are inherited from _default.
+promptwares:
+  MakePlan:
+    profile: balanced
     allowedTools: [Read, Glob, Grep, Bash, Write, Edit]
+  ExecutePlan:
+    profile: deep
+    allowedTools: [Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch]
+  ExpandPlan:
+    profile: balanced
+    allowedTools: [Read, Glob, Grep, Bash, Write, Edit]
+  UpdatePlan:
+    profile: balanced
+    allowedTools: [Read, Glob, Grep, Bash, Write]
+  SplitPlan:
+    profile: balanced
+    allowedTools: [Read, Bash, Write]
+  MakePr:
+    profile: balanced
+    allowedTools: [Read, Glob, Grep, Bash, Write, Edit]
+  CreateIssue:
+    profile: balanced
+    allowedTools: [Read, Bash]
 
 # Projects — add your projects here. Each project groups repos, verifications, and context.
 # projects:
@@ -50,9 +92,11 @@ promptwares:
 #         prRule: default    # PR merge strategy: default or yolo (auto-merge)
 #       - path: "%REPOS_HOME%/my-repo"
 #     verifications:
-#       - name: DotnetBuild
+#       - name: Build
 #         required: true
-#       - name: DotnetFormat
+#       - name: Format
+#         required: true
+#       - name: Test
 #         required: true
 #       - name: CheckResult
 #         required: true
@@ -60,9 +104,9 @@ promptwares:
 #       Description of the project for AI context.
 #       Key folders and instructions go here.
 #     reviewActions:
-#       - name: Sample
-#         condition: Test-Path "artifacts/sample/*.csproj"
-#         action: dotnet run --project artifacts/sample --browse
+#       - name: RunSample
+#         condition: Test-Path "artifacts/sample"
+#         action: <command to run your sample app>
 #     hooks:
 #       - name: SlackNotify
 #         when: after
@@ -72,23 +116,31 @@ promptwares:
 projects: []
 
 # Standard verification definitions — these prompts are used when verifications are referenced by projects.
+# Define verifications appropriate for your tech stack.
 verifications:
-- name: DotnetBuild
-  prompt: Run `dotnet build --warnaserror` in the project repo and verify it succeeds with zero errors and zero warnings.
-- name: DotnetFormat
+- name: Build
   prompt: >
-    Run `dotnet format` in the project repo, scoped to only the files changed by this plan's commits.
-    Get the list of changed .cs files with `git diff --name-only --diff-filter=ACM HEAD~<N> -- '*.cs'`
-    (where N is the number of commits in this execution), then run `dotnet format --include <files>`.
-    If it modifies any files, stage and commit them. If no .cs files were changed, skip this verification.
-- name: DotnetTest
+    Run the build command for your project in the plan's worktree directory (not the original repo)
+    and verify it succeeds with zero errors and zero warnings.
+- name: Format
   prompt: >
-    Run dotnet tests in the project repo.
+    Run the code formatter for your project in the plan's worktree directory (not the original repo),
+    scoped to only the files changed by this plan's commits.
+    Get the list of changed files with `git diff --name-only --diff-filter=ACM HEAD~<N>`
+    (where N is the number of commits in this execution), then run your formatter on those files.
+    If it modifies any files, stage and commit them.
+- name: Test
+  prompt: >
+    Run tests in the plan's worktree directory (not the original repo).
     1. Read the plan revision's **## Tests** section for test scope instructions.
-    2. If the plan specifies a `dotnet test --filter` expression, run it.
-    3. If the plan says "No existing test coverage" or "No dotnet tests needed", skip with Pass.
-    4. If the plan says "Run all tests", run `dotnet test` (all tests).
+    2. If the plan specifies a test filter/scope expression, run it.
+    3. If the plan says "No existing test coverage" or "No tests needed", skip with Pass.
+    4. If the plan says "Run all tests", run all tests.
     5. Verify all executed tests pass.
+- name: Lint
+  prompt: >
+    Run the linter for your project in the plan's worktree directory (not the original repo).
+    If it reports any errors, fix them, commit the fixes, and re-run until it passes.
 - name: CheckResult
   prompt: >
     Verify the implementation matches what was requested in the plan.
@@ -96,6 +148,40 @@ verifications:
     2. Review all commits made by this execution
     3. Compare the plan's Problem and Solution sections against the actual changes
     4. Write the verification report to `<PlanFolder>/verification/CheckResult.md`
+
+# Stack-specific verification examples (uncomment and customize for your stack):
+
+# .NET:
+# - name: DotnetBuild
+#   prompt: Run `dotnet build --warnaserror` in the plan's worktree directory and verify it succeeds.
+# - name: DotnetFormat
+#   prompt: >
+#     Run `dotnet format` on changed .cs files. Get changed files with
+#     `git diff --name-only --diff-filter=ACM HEAD~<N> -- '*.cs'`, then run `dotnet format --include <files>`.
+# - name: DotnetTest
+#   prompt: >
+#     Run dotnet tests using the filter from the plan's **## Tests** section.
+#     If plan specifies `dotnet test --filter <expression>`, run it. Verify all tests pass.
+
+# JavaScript/TypeScript:
+# - name: NpmBuild
+#   prompt: Run `npm run build` in the plan's worktree directory and verify it succeeds.
+# - name: NpmLint
+#   prompt: Run `npm run lint` on changed files and fix any errors.
+# - name: NpmTest
+#   prompt: Run `npm test` with the filter from the plan's **## Tests** section.
+
+# Python:
+# - name: PythonLint
+#   prompt: Run `black --check .` and `flake8` on changed .py files.
+# - name: PythonTest
+#   prompt: Run `pytest <files>` with the filter from the plan's **## Tests** section.
+
+# Go:
+# - name: GoBuild
+#   prompt: Run `go build ./...` and verify it succeeds.
+# - name: GoTest
+#   prompt: Run `go test <packages>` with the filter from the plan's **## Tests** section.
 
 levels:
   - name: Bug
@@ -136,8 +222,8 @@ planTemplate: >
 
   (specify tests to write for new functionality, or "None" if no new tests needed)
 
-  **Test scope (dotnet test --filter):**
+  **Test scope:**
 
-  `FullyQualifiedName~Namespace.SpecificTestClass` (or "No existing test coverage" / "Run all tests — <justification>")
+  Specify which tests to run using your test framework's syntax (e.g., `dotnet test --filter "..."`, `jest --testPathPattern=...`, `pytest tests/specific/`, or "No existing test coverage" / "Run all tests — <justification>")
 
   ## Verification

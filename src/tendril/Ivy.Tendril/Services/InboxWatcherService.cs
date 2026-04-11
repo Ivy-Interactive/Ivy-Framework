@@ -25,11 +25,14 @@ public class InboxWatcherService : IInboxWatcherService
 
         _watcher = new FileSystemWatcher(_inboxPath, "*.md")
         {
+            InternalBufferSize = 65536,
             NotifyFilter = NotifyFilters.FileName,
             EnableRaisingEvents = true
         };
 
         _watcher.Created += OnFileCreated;
+        _watcher.Error += (_, e) =>
+            Program.WriteCrashLog($"[{DateTime.UtcNow:O}] InboxWatcher FSW error: {e.GetException()}");
 
         _pollTimer = new Timer(OnPollTimer, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
     }
@@ -42,12 +45,26 @@ public class InboxWatcherService : IInboxWatcherService
 
     private void OnFileCreated(object sender, FileSystemEventArgs e)
     {
-        _ = ProcessFileAsync(e.FullPath);
+        try
+        {
+            _ = ProcessFileAsync(e.FullPath);
+        }
+        catch (Exception ex)
+        {
+            Program.WriteCrashLog($"[{DateTime.UtcNow:O}] InboxWatcher.OnFileCreated exception: {ex}");
+        }
     }
 
     private void OnPollTimer(object? state)
     {
-        ProcessExistingFiles();
+        try
+        {
+            ProcessExistingFiles();
+        }
+        catch (Exception ex)
+        {
+            Program.WriteCrashLog($"[{DateTime.UtcNow:O}] InboxWatcher.OnPollTimer exception: {ex}");
+        }
     }
 
     internal void RecoverProcessingFiles()
