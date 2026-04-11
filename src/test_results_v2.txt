@@ -1,3 +1,0 @@
-VITE+ - The Unified Toolchain for the Web
-
-error: Package not found in workspace: `AbsolutePathBuf("/Users/rorychatt/git/ivy-bot1/Ivy-Framework/src")`
