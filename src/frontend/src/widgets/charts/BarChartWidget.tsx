@@ -32,6 +32,7 @@ import {
 } from "./chartTypes";
 import { ChartData } from "./chartTypes";
 import { BAR_DEFAULTS, REFERENCE_LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -56,6 +57,7 @@ interface BarChartWidgetProps {
   maxBarSize?: number;
   reverseStackOrder?: boolean;
   layout?: "Horizontal" | "Vertical";
+  density?: Densities;
 }
 
 const BarChartWidget: React.FC<BarChartWidgetProps> = ({
@@ -79,6 +81,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   maxBarSize,
   reverseStackOrder,
   layout = "Vertical",
+  density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
