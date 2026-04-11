@@ -65,14 +65,14 @@ export function useFileAttachments(options: UseFileAttachmentsOptions) {
 
       e.preventDefault(); // Prevent binary garbage in textarea
 
-      if (disabled) return;
-
-      if (!uploadUrl) {
-        toast({
-          title: "Upload not available",
-          description: "File attachments require an upload URL to be configured.",
-          variant: "destructive",
-        });
+      if (disabled || !uploadUrl) {
+        if (!uploadUrl) {
+          toast({
+            title: "Upload not available",
+            description: "File attachments require an upload URL to be configured.",
+            variant: "destructive",
+          });
+        }
         return;
       }
 

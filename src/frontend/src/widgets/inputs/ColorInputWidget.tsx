@@ -3,7 +3,7 @@ import { InvalidIcon } from "@/components/InvalidIcon";
 import { inputStyles } from "@/lib/styles";
 import { Input } from "@/components/ui/input";
 import { X, Check } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useOptimisticValue } from "./shared/useOptimisticValue";
 import { cn } from "@/lib/utils";
 import {

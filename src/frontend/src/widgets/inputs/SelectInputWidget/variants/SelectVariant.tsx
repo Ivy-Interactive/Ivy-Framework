@@ -1,5 +1,5 @@
 import React from "react";
-import { SelectInputWidgetProps } from "../select-types";
+import { SelectInputWidgetProps } from "../../select-types";
 import { EventHandler } from "@/components/event-handler";
 import { SelectMultiVariant } from "../../SelectMultiVariant";
 import { SelectSingleVariant } from "../../SelectSingleVariant";
