@@ -184,6 +184,10 @@ public class PlanContentHelpersTests
         public BadgeVariant GetBadgeVariant(string level) => BadgeVariant.Outline;
         public Colors? GetProjectColor(string projectName) => null;
         public void SaveSettings() { }
+        public void ReloadSettings() { }
+#pragma warning disable CS0067
+        public event EventHandler? SettingsReloaded;
+#pragma warning restore CS0067
         public void SetPendingCodingAgent(string name) { }
         public string? GetPendingCodingAgent() => null;
         public void SetPendingTendrilHome(string path) { }

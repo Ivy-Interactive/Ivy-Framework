@@ -47,7 +47,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
     private bool _removeEmpty;
     private readonly Dictionary<string, Item> _items;
     private readonly TModel _model;
-    private Density _density = Density.Medium;
+    private Density _density = Ivy.Density.Medium;
 
     public DetailsBuilder(TModel model)
     {
@@ -103,23 +103,17 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    public DetailsBuilder<TModel> Large()
+    public DetailsBuilder<TModel> Density(Density density)
     {
-        _density = Density.Large;
+        _density = density;
         return this;
     }
 
-    public DetailsBuilder<TModel> Small()
-    {
-        _density = Density.Small;
-        return this;
-    }
+    public DetailsBuilder<TModel> Large() => Density(Ivy.Density.Large);
 
-    public DetailsBuilder<TModel> Medium()
-    {
-        _density = Density.Medium;
-        return this;
-    }
+    public DetailsBuilder<TModel> Small() => Density(Ivy.Density.Small);
+
+    public DetailsBuilder<TModel> Medium() => Density(Ivy.Density.Medium);
 
     public DetailsBuilder<TModel> Remove(params Expression<Func<TModel, object>>[] fields)
     {

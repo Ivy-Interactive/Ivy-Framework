@@ -659,6 +659,104 @@ promptwares:
     }
 
     [Fact]
+    public void ReloadSettings_FiresEvent()
+    {
+        var yaml = @"
+jobTimeout: 30
+maxConcurrentJobs: 5
+";
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+            var eventFired = false;
+            service.SettingsReloaded += (s, e) => eventFired = true;
+
+            service.ReloadSettings();
+
+            Assert.True(eventFired);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void SaveSettings_FiresReloadEvent()
+    {
+        var yaml = @"
+jobTimeout: 30
+maxConcurrentJobs: 5
+";
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+            var eventFired = false;
+            service.SettingsReloaded += (s, e) => eventFired = true;
+
+            service.Settings.JobTimeout = 45;
+            service.SaveSettings();
+
+            Assert.True(eventFired);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void ReloadSettings_UpdatesSettingsFromDisk()
+    {
+        var yaml = @"
+jobTimeout: 30
+maxConcurrentJobs: 5
+";
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+            Assert.Equal(30, service.Settings.JobTimeout);
+
+            File.WriteAllText(Path.Combine(tempDir, "config.yaml"), @"
+jobTimeout: 60
+maxConcurrentJobs: 10
+");
+            service.ReloadSettings();
+
+            Assert.Equal(60, service.Settings.JobTimeout);
+            Assert.Equal(10, service.Settings.MaxConcurrentJobs);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void Constructor_WithEmptyString_SetsNoHome()
+    {
+        var service = new ConfigService(new TendrilSettings(), "");
+        Assert.Equal("", service.TendrilHome);
+    }
+
+    [Fact]
+    public void Constructor_WithNull_FallsBackToEnvVar()
+    {
+        var service = new ConfigService(new TendrilSettings(), null);
+        var expected = Environment.GetEnvironmentVariable("TENDRIL_HOME") ?? "";
+        Assert.Equal(expected, service.TendrilHome);
+    }
+
+    [Fact]
     public void SaveSettings_PersistsAdvancedSettings()
     {
         var yaml = @"

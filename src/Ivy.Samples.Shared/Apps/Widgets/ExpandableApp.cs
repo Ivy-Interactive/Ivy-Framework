@@ -120,7 +120,7 @@ public class ExpandableApp : SampleBase
             | mediumIconExpandable
             | largeIconExpandable
             | Text.H2("Density Variations")
-            | Text.Block("Use the Scale helpers (Small / Medium / Large) to match the density of the surrounding layout.")
+            | Text.Block("Use the Density helpers (Small / Medium / Large) to match the density of the surrounding layout.")
             | smallDensityExpandable
             | mediumDensityExpandable
             | largeDensityExpandable

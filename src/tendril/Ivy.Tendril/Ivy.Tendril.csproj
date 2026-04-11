@@ -9,6 +9,7 @@
     <UserSecretsId>a8f3c2e1-4b7d-4e9f-a1c3-8d6e2f5b9a7c</UserSecretsId>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>tendril</ToolCommandName>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Promptwares\**</DefaultItemExcludes>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>Ivy.Tendril</PackageId>
@@ -64,9 +65,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Apps" />
-  </ItemGroup>
-  <ItemGroup>
-    <Watch Remove="Promptwares\**" />
   </ItemGroup>
 
   <ItemGroup>

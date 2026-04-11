@@ -565,8 +565,20 @@ public class Server
         var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
         var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
         var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
-        var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://{host}:{_args.Port}";
-        builder.WebHost.UseUrls(bindUrl);
+
+        if (_args.IsCliCommand)
+        {
+            builder.WebHost.UseUrls("http://localhost:0");
+        }
+        else
+        {
+            var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
+            var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
+                ? ivyTlsEnv?.ToLowerInvariant() is "1" or "true" or "yes" or "on"
+                : !isContainer && !hasPortEnv && !_args.IsCliCommand; // default: TLS for local dev only
+            var scheme = useTls ? "https" : "http";
+            builder.WebHost.UseUrls($"{scheme}://{host}:{_args.Port}");
+        }
 
         builder.Services.AddSignalR(options =>
         {
@@ -870,8 +882,8 @@ public class Server
         app.Lifetime.ApplicationStarted.Register(() =>
         {
             var url = app.Urls.FirstOrDefault() ?? "unknown";
-            var port = new Uri(url).Port;
-            var localUrl = $"http://localhost:{port}";
+            var uri = new Uri(url);
+            var localUrl = $"{uri.Scheme}://localhost:{uri.Port}";
             if (!_args.Silent)
             {
                 Console.WriteLine($@"Ivy is running on {localUrl} [{Process.GetCurrentProcess().Id}]. Press Ctrl+C to stop.");

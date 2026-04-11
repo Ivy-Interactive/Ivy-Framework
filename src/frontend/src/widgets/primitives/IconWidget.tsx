@@ -1,5 +1,6 @@
 import Icon from "@/components/Icon";
 import { getColor, getHeight, getWidth } from "@/lib/styles";
+import { Densities } from "@/types/density";
 import React from "react";
 
 interface IconWidgetProps {
@@ -8,9 +9,17 @@ interface IconWidgetProps {
   color?: string;
   width?: string;
   height?: string;
+  density?: Densities;
 }
 
-export const IconWidget: React.FC<IconWidgetProps> = ({ id, name, color, height, width }) => {
+export const IconWidget: React.FC<IconWidgetProps> = ({
+  id,
+  name,
+  color,
+  height,
+  width,
+  density: _density = Densities.Medium,
+}) => {
   const styles = {
     ...getWidth(width),
     ...getHeight(height),

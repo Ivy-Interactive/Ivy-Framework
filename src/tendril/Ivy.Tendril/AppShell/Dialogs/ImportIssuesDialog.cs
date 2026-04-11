@@ -18,6 +18,7 @@ public class ImportIssuesDialog(IState<bool> dialogOpen, IConfigService config) 
         var selectedAssignee = UseState<string?>(null);
         var selectedLabels = UseState(Array.Empty<string>());
         var fetchedIssues = UseState<List<GitHubIssue>?>(null);
+        var errorMessage = UseState<string?>(null);
         var isFetching = UseState(false);
         var isImporting = UseState(false);
 
@@ -50,6 +51,7 @@ public class ImportIssuesDialog(IState<bool> dialogOpen, IConfigService config) 
         UseEffect(() =>
         {
             fetchedIssues.Set(null);
+            errorMessage.Set(null);
             selectedAssignee.Set(null);
             selectedLabels.Set(Array.Empty<string>());
         }, selectedRepo);
@@ -66,20 +68,30 @@ public class ImportIssuesDialog(IState<bool> dialogOpen, IConfigService config) 
             if (repo is null) return;
 
             isFetching.Set(true);
+            errorMessage.Set(null);
             try
             {
                 var labels = selectedLabels.Value.Length > 0 ? selectedLabels.Value : null;
-                var issues = await githubService.SearchIssuesAsync(
+                var (issues, error) = await githubService.SearchIssuesAsync(
                     repo.Owner, repo.Name,
                     string.IsNullOrWhiteSpace(searchQuery.Value) ? null : searchQuery.Value,
                     selectedAssignee.Value,
                     labels);
-                fetchedIssues.Set(issues);
+
+                if (error is not null)
+                {
+                    errorMessage.Set(error);
+                    fetchedIssues.Set(null);
+                }
+                else
+                {
+                    fetchedIssues.Set(issues);
+                }
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"[ImportIssuesDialog] Fetch failed: {ex.Message}");
-                fetchedIssues.Set([]);
+                errorMessage.Set($"Failed to fetch issues: {ex.Message}");
+                fetchedIssues.Set(null);
             }
             finally
             {
@@ -164,6 +176,7 @@ public class ImportIssuesDialog(IState<bool> dialogOpen, IConfigService config) 
             _ =>
             {
                 fetchedIssues.Set(null);
+                errorMessage.Set(null);
                 searchQuery.Set("");
                 selectedAssignee.Set(null);
                 selectedLabels.Set(Array.Empty<string>());
@@ -182,12 +195,16 @@ public class ImportIssuesDialog(IState<bool> dialogOpen, IConfigService config) 
                     .Placeholder("Select labels...").WithField().Label("Labels")
                 | new Button("Fetch Issues").Outline().Loading(isFetching.Value)
                     .OnClick(async () => await FetchIssues())
+                | (errorMessage.Value is { } error
+                    ? Text.Danger(error).Small()
+                    : null)
                 | issuesList
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(() =>
                 {
                     fetchedIssues.Set(null);
+                    errorMessage.Set(null);
                     searchQuery.Set("");
                     selectedAssignee.Set(null);
                     selectedLabels.Set(Array.Empty<string>());

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getWidth } from "@/lib/styles";
+import { Densities } from "@/types/density";
 
 interface ProgressWidgetProps {
   id: string;
@@ -12,6 +13,7 @@ interface ProgressWidgetProps {
   color?: string;
   width?: string;
   indeterminate?: boolean;
+  density?: Densities;
 }
 
 const SparkleStyles = () => (
@@ -48,9 +50,19 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   color,
   width = "Full",
   indeterminate = false,
+  density = Densities.Medium,
 }) => {
   const isIndeterminate = indeterminate || value === null || value === undefined;
   const isCompleted = !isIndeterminate && value && value >= 100;
+
+  const targetSize = density === Densities.Small ? 12 : density === Densities.Large ? 16 : 14;
+  const checkSize = density === Densities.Small ? 14 : density === Densities.Large ? 18 : 16;
+  const badgeClasses =
+    density === Densities.Small
+      ? "px-1.5 py-1 text-xs"
+      : density === Densities.Large
+        ? "px-2.5 py-2 text-base"
+        : "px-2 py-1.5 text-sm";
 
   const containerStyles: React.CSSProperties = {
     ...getWidth(width),
@@ -67,14 +79,15 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
           <Badge
             variant="secondary"
             className={cn(
-              "px-2 py-1.5 text-sm absolute bottom-full right-0 mb-2 transition-opacity pointer-events-none font-medium",
+              badgeClasses,
+              "absolute bottom-full right-0 mb-2 transition-opacity pointer-events-none font-medium",
               "opacity-0 group-hover:opacity-100",
             )}
           >
-            {!isCompleted && <Target size={14} className="mr-1" strokeWidth={1.5} />}
+            {!isCompleted && <Target size={targetSize} className="mr-1" strokeWidth={1.5} />}
             {goal}
             {isCompleted && (
-              <Check size={16} className="ml-1" strokeWidth={4} color="var(--primary)" />
+              <Check size={checkSize} className="ml-1" strokeWidth={4} color="var(--primary)" />
             )}
           </Badge>
         )}

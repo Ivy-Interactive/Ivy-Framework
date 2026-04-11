@@ -9,18 +9,13 @@ public class SetupApp : ViewBase
     {
         var selectedTab = UseState(0);
 
-        return new TabsLayout(
-            e => selectedTab.Set(e.Value),
-            null,
-            null,
-            null,
-            selectedTab.Value,
+        return Layout.Tabs(
             new Tab("General", new GeneralSetupView()),
             new Tab("Levels", new LevelsSetupView()),
             new Tab("Verifications", new VerificationsSetupView()),
             new Tab("Promptwares", new PromptwaresSetupView()),
             new Tab("Projects", new ProjectsSetupView()),
             new Tab("Advanced", new AdvancedSetupView())
-        ).Variant(TabsVariant.Content);
+        ).OnSelect(v => selectedTab.Set(v)).SelectedIndex(selectedTab.Value).Variant(TabsVariant.Content);
     }
 }

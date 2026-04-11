@@ -154,4 +154,16 @@ finally {
     Stop-Heartbeat $heartbeat
     Pop-Location
     Remove-Item $promptFile -ErrorAction SilentlyContinue
+
+    if (-not $env:KEEP_WORKTREES) {
+        Write-Host "Cleaning up worktrees..." -ForegroundColor Gray
+        try {
+            $cleanupScript = Join-Path $PSScriptRoot "Tools" "Cleanup-Worktrees.ps1"
+            & $cleanupScript -PlanPath $PlanPath
+        } catch {
+            Write-Warning "Worktree cleanup failed (non-fatal): $_"
+        }
+    } else {
+        Write-Host "KEEP_WORKTREES is set - skipping worktree cleanup" -ForegroundColor Gray
+    }
 }

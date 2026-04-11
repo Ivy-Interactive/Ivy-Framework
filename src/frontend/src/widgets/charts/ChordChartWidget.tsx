@@ -11,6 +11,7 @@ import {
 } from "./sharedUtils";
 import { ChordChartWidgetProps } from "./chartTypes";
 import { getChartThemeColors } from "./styles";
+import { Densities } from "@/types/density";
 
 const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
   data,
@@ -21,6 +22,7 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
   tooltip,
   legend,
   toolbox,
+  density: _density = Densities.Medium,
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
     monitorDOM: false,

@@ -6,48 +6,17 @@ public class ColorInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var onBlurState = UseState("#ff0000");
-        var onBlurLabel = UseState("");
-        var onFocusState = UseState("#ff0000");
-        var onFocusLabel = UseState("");
-
         return Layout.Vertical()
                | Text.H1("Color Input")
-               | Text.H2("Size Variants")
-               | new ColorInputSizeVariants()
-               | Text.H2("Non-Generic Constructor")
-               | new ColorInputConstructorTests()
-               | Text.H2("Variants")
-               | new ColorInputVariantTests()
-               | Text.H2("Alpha Channel")
-               | new ColorInputAlphaTests()
-               | Text.H2("Format Tests")
-               | new ColorInputFormatTests()
-               | Text.H2("Data Binding")
-               | new ColorInputDataBindings()
-               | Text.H2("Events")
-               | (Layout.Vertical()
-                   | new Card(
-                       Layout.Vertical().Gap(2)
-                           | Text.P("The blur event fires when the color input loses focus.").Small()
-                           | onBlurState.ToColorInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
-                           | (onBlurLabel.Value != ""
-                               ? Callout.Success(onBlurLabel.Value)
-                               : Callout.Info("Interact then click away to see blur events"))
-                   ).Title("OnBlur Handler")
-                   | new Card(
-                       Layout.Vertical().Gap(2)
-                           | Text.P("The focus event fires when you click on or tab into the color input.").Small()
-                           | onFocusState.ToColorInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
-                           | (onFocusLabel.Value != ""
-                               ? Callout.Success(onFocusLabel.Value)
-                               : Callout.Info("Click or tab into the input to see focus events"))
-                   ).Title("OnFocus Handler")
-               )
-            ;
+               | Layout.Tabs(
+                   new Tab("Variants", new ColorInputVariants()),
+                   new Tab("Size Variants", new ColorInputSizeVariants()),
+                   new Tab("Alpha Channel", new ColorInputAlphaTests()),
+                   new Tab("Format Tests", new ColorInputFormatTests()),
+                   new Tab("Data Binding", new ColorInputDataBindings()),
+                   new Tab("Events", new ColorInputEvents())
+               ).Variant(TabsVariant.Content);
     }
-
-    // Helper methods moved to respective classes
 }
 
 public class ColorInputSizeVariants : ViewBase
@@ -293,26 +262,13 @@ public class ColorInputDataBindings : ViewBase
         return Layout.Grid().Columns(6) | gridItems.ToArray();
     }
 
-    private static object CreateColorInputVariants(object state)
-    {
-        if (state is not IAnyState anyState)
-            return Text.Block("Not an IAnyState");
-
-        var stateType = anyState.GetStateType();
-        var isNullable = stateType.IsNullableType();
-
-        if (isNullable)
-        {
-            // For nullable states, show basic variant
-            return anyState.ToColorInput();
-        }
-
-        // For non-nullable states, show all variants
-        return Layout.Vertical()
-               | anyState.ToColorInput()
-               | anyState.ToColorInput().Placeholder("Select color")
-               | anyState.ToColorInput().Disabled();
-    }
+    private static object CreateColorInputVariants(object state) =>
+        InputDataBindingHelper.CreateInputVariants(state,
+            anyState => Layout.Vertical()
+                | anyState.ToColorInput()
+                | anyState.ToColorInput().Placeholder("Select color")
+                | anyState.ToColorInput().Disabled(),
+            anyState => anyState.ToColorInput());
 
     private static object FormatStateValue(string typeName, object? value, bool isNullable)
     {
@@ -352,3 +308,59 @@ public class ColorInputAlphaTests : ViewBase
             | Text.Monospaced(bothAlphaState.Value ?? "null");
     }
 }
+
+public class ColorInputVariants : ViewBase
+{
+    public override object Build()
+    {
+        return Layout.Vertical()
+               | Text.H3("Variants")
+               | new ColorInputVariantTests()
+               | Text.H3("Non-Generic Constructor")
+               | new ColorInputConstructorTests();
+    }
+}
+
+public class ColorInputEvents : ViewBase
+{
+    public override object? Build()
+    {
+        var blurCount = UseState(0);
+        var focusCount = UseState(0);
+        var state = UseState("#6366f1");
+
+        return Layout.Vertical().Gap(6)
+            | Layout.Tabs(
+                new Tab("OnFocus", Layout.Vertical().Gap(4)
+                    | Text.P("The **OnFocus** event fires when the ColorInput gains focus (via mouse or keyboard tab).")
+                    | new Card(
+                        Layout.Vertical().Center().Gap(6)
+                            | ((IAnyInput)state.ToColorInput()).OnFocus(_ => focusCount.Set(focusCount.Value + 1))
+                            | Layout.Vertical().Center().Gap(1)
+                                | Text.H2(focusCount.Value.ToString()).Color(Colors.Primary)
+                                | Text.Muted("Focus Count")
+                      ).Width(Size.Units(120))
+                ),
+                new Tab("OnBlur", Layout.Vertical().Gap(4)
+                    | Text.P("The **OnBlur** event fires when the ColorInput loses focus.")
+                    | new Card(
+                        Layout.Vertical().Center().Gap(6)
+                            | ((IAnyInput)state.ToColorInput()).OnBlur(_ => blurCount.Set(blurCount.Value + 1))
+                            | Layout.Vertical().Center().Gap(1)
+                                | Text.H2(blurCount.Value.ToString()).Color(Colors.Orange)
+                                | Text.Muted("Blur Count")
+                      ).Width(Size.Units(120))
+                ),
+                new Tab("AutoFocus", Layout.Vertical().Gap(4)
+                    | Text.P("The **AutoFocus** property should automatically focus the ColorInput when it is mounted.")
+                    | new Card(
+                        Layout.Vertical().Center().Gap(6)
+                            | ((IAnyInput)state.ToColorInput()).AutoFocus()
+                            | Text.Lead("Focused!").Color(Colors.Green)
+                            | Text.P("The field above should have a focus ring immediately.").Small().Muted()
+                      ).Width(Size.Units(120))
+                )
+            ).Variant(TabsVariant.Tabs);
+    }
+}
+

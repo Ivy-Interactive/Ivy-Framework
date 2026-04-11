@@ -2,7 +2,7 @@ using Ivy.Tendril.Apps.Jobs;
 
 namespace Ivy.Tendril.Services;
 
-public interface IJobService
+public interface IJobService : IDisposable
 {
     event Action? JobsChanged;
     event Action<JobNotification>? NotificationReady;

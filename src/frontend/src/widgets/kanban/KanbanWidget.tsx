@@ -1,6 +1,7 @@
 import React from "react";
 import { Kanban, type Task } from "@/components/ui/shadcn-io/kanban";
 import { getWidth, getHeight } from "@/lib/styles";
+import { Densities } from "@/types/density";
 import { useKanbanData } from "./useKanbanData";
 import { useKanbanHandlers } from "./useKanbanHandlers";
 import { KanbanEmptyState } from "./KanbanEmptyState";
@@ -17,6 +18,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   height,
   columnWidth,
   showCounts = true,
+  density: _density = Densities.Medium,
   slots,
   widgetNodeChildren,
 }) => {

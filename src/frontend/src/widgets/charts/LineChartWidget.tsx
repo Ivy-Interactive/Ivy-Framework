@@ -17,6 +17,7 @@ import {
 } from "./sharedUtils";
 import { getChartThemeColors } from "./styles";
 import { LineChartWidgetProps, ChartType } from "./chartTypes";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -36,6 +37,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   referenceDots = EMPTY_ARRAY,
   colorScheme = "Default",
   layout = "Vertical",
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

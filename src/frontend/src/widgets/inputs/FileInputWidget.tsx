@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect } from "react";
+import { useDialogBlurTracking } from "./shared/useDialogBlurTracking";
 import { Input } from "@/components/ui/input";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -65,17 +66,26 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     cancelUpload: cancelClientUpload,
   } = useUploadWithProgress();
   const inputRef = useRef<HTMLInputElement>(null);
-  const filesSelectedInCurrentDialogRef = useRef(false);
-  const dialogWasOpenRef = useRef(false);
-  const blurFiredRef = useRef(false);
 
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes("OnCancel");
   const hasBlurHandler = Array.isArray(events) && events.includes("OnBlur");
 
+  const { markDialogOpened, markFilesSelected, markBlurFired } = useDialogBlurTracking({
+    enabled: hasBlurHandler,
+    onBlur: () => handleEvent("OnBlur", id, []),
+  });
+
   const handleUploadFile = useCallback(
     async (file: File): Promise<void> => {
-      if (!uploadUrl) return;
+      if (!uploadUrl) {
+        toast({
+          title: "Upload not available",
+          description: "File uploads are not configured for this input.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Validate file before upload - show toast on error
       if (!validateFileWithToast({ file, accept, maxFileSize, minFileSize })) {
@@ -87,24 +97,17 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     [uploadUrl, accept, maxFileSize, minFileSize, uploadSingleFile],
   );
 
-  const handleBlur = useCallback(() => {
-    if (hasBlurHandler) {
-      handleEvent("OnBlur", id, []);
-    }
-  }, [hasBlurHandler, handleEvent, id]);
-
   const handleChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files || files.length === 0) {
         // No files selected - dialog was likely cancelled
         // Blur will be handled by the window focus event listener
-        filesSelectedInCurrentDialogRef.current = false;
         return;
       }
 
       // Mark that files were selected in this dialog session
-      filesSelectedInCurrentDialogRef.current = true;
+      markFilesSelected();
 
       // Check max files limit (including already uploaded files)
       const currentFileCount = Array.isArray(value) ? value.length : value ? 1 : 0;
@@ -132,41 +135,10 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       // Dialog closed after file selection - trigger blur after upload completes
       // This ensures the server state is updated before blur fires
       // Only fire blur if window focus handler hasn't already fired it
-      if (!blurFiredRef.current) {
-        blurFiredRef.current = true;
-        handleBlur();
-      }
+      markBlurFired();
     },
-    [multiple, handleUploadFile, maxFiles, value, handleBlur],
+    [multiple, handleUploadFile, maxFiles, value, markBlurFired],
   );
-
-  // Detect when file dialog closes without selection (cancel case only)
-  useEffect(() => {
-    if (!hasBlurHandler) return;
-
-    const handleWindowFocus = () => {
-      if (dialogWasOpenRef.current) {
-        dialogWasOpenRef.current = false;
-        // Use queueMicrotask to allow onChange to run first
-        // This prevents double blur when files are selected
-        queueMicrotask(() => {
-          // Check if files were actually selected by looking at the flag
-          // If files were selected, blur will be handled by handleChange after upload
-          // Only fire blur if no files were selected (cancel case) and we haven't already fired
-          if (!filesSelectedInCurrentDialogRef.current && !blurFiredRef.current) {
-            blurFiredRef.current = true;
-            handleEvent("OnBlur", id, []);
-          }
-        });
-      }
-    };
-
-    window.addEventListener("focus", handleWindowFocus);
-
-    return () => {
-      window.removeEventListener("focus", handleWindowFocus);
-    };
-  }, [hasBlurHandler, handleEvent, id]);
 
   const handleCancel = useCallback(
     (fileId: string) => {
@@ -248,13 +220,11 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const openFileDialog = useCallback(() => {
     if (!disabled && inputRef.current) {
       if (hasBlurHandler) {
-        dialogWasOpenRef.current = true;
-        filesSelectedInCurrentDialogRef.current = false;
-        blurFiredRef.current = false;
+        markDialogOpened();
       }
       inputRef.current.click();
     }
-  }, [disabled, hasBlurHandler]);
+  }, [disabled, hasBlurHandler, markDialogOpened]);
 
   const hasAutoFocusedRef = useRef(false);
   useEffect(() => {

@@ -11,6 +11,7 @@ import {
 } from "./sharedUtils";
 import { SankeyChartWidgetProps } from "./chartTypes";
 import { getChartThemeColors } from "./styles";
+import { Densities } from "@/types/density";
 
 const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
   data,
@@ -25,6 +26,7 @@ const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
   tooltip,
   legend,
   toolbox,
+  density: _density = Densities.Medium,
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
     monitorDOM: false,

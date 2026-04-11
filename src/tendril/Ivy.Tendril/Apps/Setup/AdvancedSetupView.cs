@@ -44,7 +44,7 @@ public class AdvancedSetupView : ViewBase
                            config.Settings.Editor.Command = editorCommand.Value;
                            config.Settings.Editor.Label = editorLabel.Value;
                            config.SaveSettings();
-                           client.Toast("Settings saved successfully", "Saved");
+                           client.Toast("Settings saved and applied", "Saved");
                        });
 
         return form;

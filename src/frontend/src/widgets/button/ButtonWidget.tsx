@@ -110,6 +110,15 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
   const shortcutDisplay = formatShortcutForDisplay(shortcutKey);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const hasAutoFocusedRef = useRef(false);
+
+  React.useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      buttonRef.current?.focus();
+    }
+  }, [autoFocus, disabled]);
 
   // For 'Rounded' (default), rely on the 'rounded-field' class from buttonVariant.
   // Only add inline style to override the class for 'None'/'Full'.
@@ -177,8 +186,6 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
 
   // Check if URL is a mailto link (should not open in new tab)
   const isMailto = validatedHref ? isMailtoUrl(validatedHref) : false;
-
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const parsedShortcut = shortcutKey ? parseShortcut(shortcutKey) : null;
   const hasModifierChord = !!(
@@ -338,7 +345,6 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           )}
           style={borderRadiusClasses.buttonStyle}
           tooltipText={tooltip || undefined}
-          autoFocus={autoFocus}
           data-testid={dataTestId}
           data-shortcut-id={shortcutKey ? id : undefined}
         >
@@ -369,7 +375,6 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       style={styles}
       size={buttonSize}
       onClick={hasUrl ? undefined : handleClick}
-      autoFocus={autoFocus}
       variant={
         (variant === "Primary" ? "default" : camelCase(variant)) as
           | "default"

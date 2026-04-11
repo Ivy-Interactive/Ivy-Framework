@@ -13,7 +13,7 @@ public class SoftwareCheckStepView(
         ["gh"] = "Run `gh auth login` to authenticate",
         ["claude"] = "Run `claude` to log in, or check your plan/credits",
         ["codex"] = "Run `codex login` to authenticate",
-        ["gemini"] = "Run `gemini` to log in, or check your API key"
+        ["gemini"] = "Run `gemini` to authenticate (opens browser). Verify auth before selecting Gemini as your coding agent."
     };
 
     public override object Build()
@@ -25,10 +25,10 @@ public class SoftwareCheckStepView(
                                     checkResults.Value["gemini"]);
 
         var ghHealthy = healthResults.Value?.GetValueOrDefault("gh") == HealthCheckStatus.Authenticated;
-        var anyAgentHealthy = healthResults.Value != null
-                              && (healthResults.Value.GetValueOrDefault("claude") == HealthCheckStatus.Authenticated
-                                  || healthResults.Value.GetValueOrDefault("codex") == HealthCheckStatus.Authenticated
-                                  || healthResults.Value.GetValueOrDefault("gemini") == HealthCheckStatus.Authenticated);
+        var anyAgentHealthy = (healthResults.Value != null
+                               && (healthResults.Value.GetValueOrDefault("claude") == HealthCheckStatus.Authenticated
+                                   || healthResults.Value.GetValueOrDefault("codex") == HealthCheckStatus.Authenticated))
+                              || (checkResults.Value != null && checkResults.Value.GetValueOrDefault("gemini"));
 
         var allRequiredPassed = checkResults.Value != null
                                 && checkResults.Value["gh"] && ghHealthy
@@ -133,21 +133,24 @@ public class SoftwareCheckStepView(
             // verify --max-turns is still a recognized flag (`claude --help | grep max-turns`).
             var claudeHealthTask = results["claude"] ? CheckHealth("claude", "-p \"ping\" --max-turns 1") : null;
             var codexHealthTask = results["codex"] ? CheckHealth("codex", "login status") : null;
-            var geminiHealthTask = results["gemini"] ? CheckHealth("gemini", "-p \"Reply OK\"") : null;
 
-            var activeHealthTasks = new[] { ghHealthTask, claudeHealthTask, codexHealthTask, geminiHealthTask }
-                .OfType<Task<HealthCheckStatus>>()
-                .ToArray();
-            if (activeHealthTasks.Length > 0)
-                await Task.WhenAll(activeHealthTasks);
+            var pendingTasks = new List<(string key, Task<HealthCheckStatus> task)>();
+            if (ghHealthTask != null) pendingTasks.Add(("gh", ghHealthTask));
+            if (claudeHealthTask != null) pendingTasks.Add(("claude", claudeHealthTask));
+            if (codexHealthTask != null) pendingTasks.Add(("codex", codexHealthTask));
 
             var health = new Dictionary<string, HealthCheckStatus?>();
-            if (ghHealthTask != null) health["gh"] = ghHealthTask.Result;
-            if (claudeHealthTask != null) health["claude"] = claudeHealthTask.Result;
-            if (codexHealthTask != null) health["codex"] = codexHealthTask.Result;
-            if (geminiHealthTask != null) health["gemini"] = geminiHealthTask.Result;
 
-            healthResults.Set(health);
+            while (pendingTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(pendingTasks.Select(t => t.task));
+                var (key, _) = pendingTasks.First(t => t.task == completedTask);
+                pendingTasks.RemoveAll(t => t.task == completedTask);
+
+                health[key] = await completedTask;
+                healthResults.Set(new Dictionary<string, HealthCheckStatus?>(health));
+            }
+
             isChecking.Set(false);
         }
     }
@@ -160,7 +163,7 @@ public class SoftwareCheckStepView(
         string installUrl,
         bool isRequired)
     {
-        var installed = results[key];
+        var installed = results.GetValueOrDefault(key);
         var healthStatus = health?.GetValueOrDefault(key);
 
         string statusText;

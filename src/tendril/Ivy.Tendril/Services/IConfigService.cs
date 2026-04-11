@@ -16,6 +16,8 @@ public interface IConfigService
     BadgeVariant GetBadgeVariant(string level);
     Colors? GetProjectColor(string projectName);
     void SaveSettings();
+    void ReloadSettings();
+    event EventHandler? SettingsReloaded;
     void SetPendingTendrilHome(string path);
     string? GetPendingTendrilHome();
     void SetPendingProject(ProjectConfig project);

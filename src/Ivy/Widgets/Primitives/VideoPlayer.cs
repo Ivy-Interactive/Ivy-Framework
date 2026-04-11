@@ -106,27 +106,27 @@ public static class VideoPlayerExtensions
 
     public static VideoPlayer Id(this VideoPlayer widget, string id) => widget with { Id = id };
 
-    public static VideoPlayer HandlePlay(this VideoPlayer widget, Func<Event<VideoPlayer>, ValueTask> onPlay) => widget with { OnPlay = new(onPlay) };
+    public static VideoPlayer OnPlay(this VideoPlayer widget, Func<Event<VideoPlayer>, ValueTask> onPlay) => widget with { OnPlay = new(onPlay) };
 
-    public static VideoPlayer HandlePlay(this VideoPlayer widget, Action<Event<VideoPlayer>> onPlay) => widget with { OnPlay = new(onPlay.ToValueTask()) };
+    public static VideoPlayer OnPlay(this VideoPlayer widget, Action<Event<VideoPlayer>> onPlay) => widget with { OnPlay = new(onPlay.ToValueTask()) };
 
-    public static VideoPlayer HandlePlay(this VideoPlayer widget, Action onPlay) => widget with { OnPlay = new(_ => { onPlay(); return ValueTask.CompletedTask; }) };
+    public static VideoPlayer OnPlay(this VideoPlayer widget, Action onPlay) => widget with { OnPlay = new(_ => { onPlay(); return ValueTask.CompletedTask; }) };
 
-    public static VideoPlayer HandlePause(this VideoPlayer widget, Func<Event<VideoPlayer>, ValueTask> onPause) => widget with { OnPause = new(onPause) };
+    public static VideoPlayer OnPause(this VideoPlayer widget, Func<Event<VideoPlayer>, ValueTask> onPause) => widget with { OnPause = new(onPause) };
 
-    public static VideoPlayer HandlePause(this VideoPlayer widget, Action<Event<VideoPlayer>> onPause) => widget with { OnPause = new(onPause.ToValueTask()) };
+    public static VideoPlayer OnPause(this VideoPlayer widget, Action<Event<VideoPlayer>> onPause) => widget with { OnPause = new(onPause.ToValueTask()) };
 
-    public static VideoPlayer HandlePause(this VideoPlayer widget, Action onPause) => widget with { OnPause = new(_ => { onPause(); return ValueTask.CompletedTask; }) };
+    public static VideoPlayer OnPause(this VideoPlayer widget, Action onPause) => widget with { OnPause = new(_ => { onPause(); return ValueTask.CompletedTask; }) };
 
-    public static VideoPlayer HandleEnded(this VideoPlayer widget, Func<Event<VideoPlayer>, ValueTask> onEnded) => widget with { OnEnded = new(onEnded) };
+    public static VideoPlayer OnEnded(this VideoPlayer widget, Func<Event<VideoPlayer>, ValueTask> onEnded) => widget with { OnEnded = new(onEnded) };
 
-    public static VideoPlayer HandleEnded(this VideoPlayer widget, Action<Event<VideoPlayer>> onEnded) => widget with { OnEnded = new(onEnded.ToValueTask()) };
+    public static VideoPlayer OnEnded(this VideoPlayer widget, Action<Event<VideoPlayer>> onEnded) => widget with { OnEnded = new(onEnded.ToValueTask()) };
 
-    public static VideoPlayer HandleEnded(this VideoPlayer widget, Action onEnded) => widget with { OnEnded = new(_ => { onEnded(); return ValueTask.CompletedTask; }) };
+    public static VideoPlayer OnEnded(this VideoPlayer widget, Action onEnded) => widget with { OnEnded = new(_ => { onEnded(); return ValueTask.CompletedTask; }) };
 
-    public static VideoPlayer HandleLoaded(this VideoPlayer widget, Func<Event<VideoPlayer>, ValueTask> onLoaded) => widget with { OnLoaded = new(onLoaded) };
+    public static VideoPlayer OnLoaded(this VideoPlayer widget, Func<Event<VideoPlayer>, ValueTask> onLoaded) => widget with { OnLoaded = new(onLoaded) };
 
-    public static VideoPlayer HandleLoaded(this VideoPlayer widget, Action<Event<VideoPlayer>> onLoaded) => widget with { OnLoaded = new(onLoaded.ToValueTask()) };
+    public static VideoPlayer OnLoaded(this VideoPlayer widget, Action<Event<VideoPlayer>> onLoaded) => widget with { OnLoaded = new(onLoaded.ToValueTask()) };
 
-    public static VideoPlayer HandleLoaded(this VideoPlayer widget, Action onLoaded) => widget with { OnLoaded = new(_ => { onLoaded(); return ValueTask.CompletedTask; }) };
+    public static VideoPlayer OnLoaded(this VideoPlayer widget, Action onLoaded) => widget with { OnLoaded = new(_ => { onLoaded(); return ValueTask.CompletedTask; }) };
 }

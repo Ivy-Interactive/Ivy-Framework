@@ -1,8 +1,10 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import React from "react";
+import { Densities } from "@/types/density";
 
 interface TooltipWidgetProps {
   id: string;
+  density?: Densities;
   slots?: {
     Trigger?: React.ReactNode[];
     Content?: React.ReactNode[];
@@ -18,7 +20,10 @@ function extractText(nodes: React.ReactNode[]): string | undefined {
   return parts.length > 0 ? parts.join("") : undefined;
 }
 
-export const TooltipWidget: React.FC<TooltipWidgetProps> = ({ slots }) => {
+export const TooltipWidget: React.FC<TooltipWidgetProps> = ({
+  slots,
+  density: _density = Densities.Medium,
+}) => {
   if (!slots?.Trigger || !slots?.Content) {
     return (
       <div className="text-red-500">Error: Tooltip requires both Trigger and Content slots.</div>

@@ -54,16 +54,16 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   };
 
   const [isOpen, setIsOpen] = React.useState(open);
+  const [prevOpen, setPrevOpen] = React.useState(open);
 
-  React.useEffect(() => {
+  if (open !== prevOpen) {
     setIsOpen(open);
-  }, [open]);
+    setPrevOpen(open);
+  }
 
-  React.useEffect(() => {
-    if (disabled && isOpen) {
-      setIsOpen(false);
-    }
-  }, [disabled, isOpen]);
+  if (disabled && isOpen) {
+    setIsOpen(false);
+  }
 
   const handleOpenChange = (newOpen: boolean) => {
     // Prevent toggle if disabled

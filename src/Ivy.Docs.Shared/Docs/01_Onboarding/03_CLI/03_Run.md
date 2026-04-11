@@ -130,7 +130,7 @@ dotnet watch 🔥 Hot reload enabled.
 dotnet watch 💡 Press Ctrl+R to restart.
 dotnet watch 🔨 Building /path/to/Project.csproj ...
 dotnet watch 🔨 Build succeeded
-Ivy is running on http://localhost:5010
+Ivy is running on https://localhost:5010
 ```
 
 ## Common Scenarios

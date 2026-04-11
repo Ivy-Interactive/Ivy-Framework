@@ -13,6 +13,7 @@ import {
 import { RadarChartWidgetProps, RadarProps, RadarIndicatorProps } from "./chartTypes";
 import { getChartThemeColors } from "./styles";
 import { RADAR_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { Densities } from "@/types/density";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
 // Case-insensitive property lookup to handle CamelCase JSON serialization
@@ -42,6 +43,7 @@ const RadarChartWidget: React.FC<RadarChartWidgetProps> = ({
   splitLine = true,
   splitArea = false,
   axisLine = true,
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

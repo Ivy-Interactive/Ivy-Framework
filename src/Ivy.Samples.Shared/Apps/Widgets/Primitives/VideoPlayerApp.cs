@@ -15,10 +15,10 @@ public class VideoPlayerApp : SampleBase
         var loadedState = UseState(false);
 
         var eventVideo = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
-            .HandlePlay(_ => playCount.Set(playCount.Value + 1))
-            .HandlePause(_ => pauseCount.Set(pauseCount.Value + 1))
-            .HandleEnded(_ => completedState.Set(true))
-            .HandleLoaded(_ => loadedState.Set(true))
+            .OnPlay(_ => playCount.Set(playCount.Value + 1))
+            .OnPause(_ => pauseCount.Set(pauseCount.Value + 1))
+            .OnEnded(_ => completedState.Set(true))
+            .OnLoaded(_ => loadedState.Set(true))
             .Height(Size.Units(50));
 
         // Basic video player

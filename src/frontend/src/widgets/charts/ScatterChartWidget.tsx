@@ -22,6 +22,7 @@ import {
   XAxisProps,
   YAxisProps,
 } from "./chartTypes";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -350,6 +351,7 @@ const ScatterChartWidget: React.FC<ScatterChartWidgetProps> = ({
   referenceAreas = EMPTY_ARRAY,
   referenceDots = EMPTY_ARRAY,
   colorScheme = "Default",
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

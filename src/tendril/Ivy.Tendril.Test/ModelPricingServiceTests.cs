@@ -1,10 +1,12 @@
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
 public class ModelPricingServiceTests
 {
-    private readonly ModelPricingService _service = new();
+    private readonly ModelPricingService _service = new(NullLogger<ModelPricingService>.Instance);
 
     [Fact]
     public void LoadsEmbeddedModelsYaml()
@@ -418,5 +420,45 @@ public class ModelPricingServiceTests
     {
         var mini = _service.GetPricing("gpt-5.4-mini");
         Assert.Equal(1.10, mini.Input);
+    }
+
+    [Fact]
+    public void GetPricing_LogsWarning_WhenModelNotFound()
+    {
+        var logger = new CapturingLogger<ModelPricingService>();
+        var service = new ModelPricingService(logger);
+
+        service.GetPricing("totally-unknown-model");
+
+        Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Warning, logger.Entries[0].Level);
+        Assert.Contains("totally-unknown-model", logger.Entries[0].Message);
+        Assert.Contains("not found in pricing database", logger.Entries[0].Message);
+    }
+
+    [Fact]
+    public void GetPricing_DoesNotLogWarning_WhenModelFound()
+    {
+        var logger = new CapturingLogger<ModelPricingService>();
+        var service = new ModelPricingService(logger);
+
+        service.GetPricing("claude-opus-4");
+
+        Assert.Empty(logger.Entries);
+    }
+
+    private class CapturingLogger<T> : ILogger<T>
+    {
+        public List<(LogLevel Level, string Message)> Entries { get; } = new();
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            Entries.Add((logLevel, formatter(state, exception)));
+        }
     }
 }

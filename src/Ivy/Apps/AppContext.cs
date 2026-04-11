@@ -38,7 +38,7 @@ public class AppContext
                 return $"{Scheme}://{Host}/{BasePath.Trim('/')}/";
             }
 
-            return $"{Scheme}://{Host}";
+            return $"{Scheme}://{Host}/";
         }
     }
 

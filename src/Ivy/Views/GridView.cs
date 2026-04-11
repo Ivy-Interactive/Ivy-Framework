@@ -57,6 +57,18 @@ public class GridView : ViewBase, IStateless
         return this;
     }
 
+    public GridView Padding(int horizontal, int vertical)
+    {
+        _definition.Padding = new(horizontal, vertical);
+        return this;
+    }
+
+    public GridView Padding(int left, int top, int right, int bottom)
+    {
+        _definition.Padding = new(left, top, right, bottom);
+        return this;
+    }
+
     public GridView AlignContent(Align align)
     {
         _definition.AlignContent = align;

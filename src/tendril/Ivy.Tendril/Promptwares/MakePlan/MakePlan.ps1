@@ -2,7 +2,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Description,
     [string]$Project = "[Auto]",
-    [string]$SourcePath = ""
+    [string]$SourcePath = "",
+    [int]$Priority = 0
 )
 
 . "$PSScriptRoot/../.shared/Utils.ps1"
@@ -28,6 +29,32 @@ $firmwareValues = @{
     Project         = $Project
 }
 if ($SourcePath) { $firmwareValues["SourcePath"] = $SourcePath }
+if ($Priority -ne 0) { $firmwareValues["Priority"] = $Priority }
+
+# Parse multi-project selection and aggregate repos for overlap detection
+$repos = @()
+if ($Project -ne "[Auto]") {
+    $projectNames = $Project -split ',' | ForEach-Object { $_.Trim() }
+
+    if (Test-Path $script:ConfigPath) {
+        try {
+            $config = Get-Content $script:ConfigPath -Raw | ConvertFrom-Yaml
+
+            foreach ($projName in $projectNames) {
+                $projectEntry = $config.projects | Where-Object { $_.name -eq $projName } | Select-Object -First 1
+                if ($projectEntry -and $projectEntry.repos) {
+                    $projectRepos = ExtractRepoPathsFromYaml $projectEntry.repos
+                    $repos += $projectRepos
+                }
+            }
+
+            $repos = $repos | Select-Object -Unique
+        }
+        catch {
+            Write-Warning "Failed to parse config.yaml for multi-project repos: $_"
+        }
+    }
+}
 
 # Pre-compute duplicate detection and active plans (skip duplicates if FORCE flag)
 if ($Description -notmatch '\[FORCE\]') {
@@ -42,7 +69,7 @@ if ($Description -notmatch '\[FORCE\]') {
 }
 
 $activePlans = & "$programFolder/Tools/Find-ActivePlans.ps1" `
-    -PlansDirectory $script:PlansDir -Repos @()
+    -PlansDirectory $script:PlansDir -Repos $repos
 if ($activePlans) {
     $firmwareValues["ActivePlans"] = $activePlans
 }
@@ -98,6 +125,19 @@ $planIdFormatted = "{0:D5}" -f $planId
 $planFolder = Get-ChildItem -Path $script:PlansDir -Filter "$planIdFormatted-*" -Directory | Select-Object -First 1
 if ($planFolder) {
     Write-Host "Plan created: $($planFolder.Name)" -ForegroundColor Green
+    if ($Priority -ne 0) {
+        $planYamlPath = Join-Path $planFolder.FullName "plan.yaml"
+        if (Test-Path $planYamlPath) {
+            $content = Get-Content $planYamlPath -Raw
+            if ($content -match '(?m)^priority:\s') {
+                $content = $content -replace '(?m)^priority:\s.*$', "priority: $Priority"
+            } else {
+                $content = $content -replace '(?m)^(level:\s)', "priority: $Priority`n`$1"
+            }
+            Set-Content $planYamlPath $content -NoNewline
+            Write-Host "Set priority: $Priority" -ForegroundColor Cyan
+        }
+    }
 }
 else {
     # Check if it was a duplicate (written to Trash)

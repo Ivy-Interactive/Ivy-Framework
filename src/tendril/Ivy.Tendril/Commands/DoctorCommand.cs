@@ -25,8 +25,7 @@ public static class DoctorCommand
     {
         ["gh"] = "auth status",
         ["claude"] = "-p \"ping\" --max-turns 1",
-        ["codex"] = "login status",
-        ["gemini"] = "-p \"Reply OK\""
+        ["codex"] = "login status"
     };
 
     public static int Handle(string[] args)

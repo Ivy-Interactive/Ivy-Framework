@@ -236,6 +236,8 @@ public class PlanCountsServiceTests : IDisposable
         public event Action? JobsChanged;
         public event Action<JobNotification>? NotificationReady;
 #pragma warning restore CS0067
+
+        public void Dispose() { }
     }
 
     private class FakePlanWatcherService : IPlanWatcherService

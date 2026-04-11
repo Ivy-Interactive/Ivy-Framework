@@ -2,6 +2,7 @@ using System.Reactive.Disposables;
 using System.Text.RegularExpressions;
 using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Apps.Plans;
+using Ivy.Tendril.Helpers;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
@@ -68,7 +69,7 @@ public class JobsApp : ViewBase
                 PlanId = displayPlanId,
                 Plan = GetPromptDisplay(j, planService),
                 Type = j.Type,
-                Project = j.Project,
+                Project = string.Join(", ", ProjectHelper.ParseProjects(j.Project)),
                 Timer = FormatTimer(j),
                 Cost = j.Cost.HasValue ? $"${j.Cost.Value:F2}" : "",
                 Tokens = j.Tokens.HasValue ? FormatHelper.FormatTokens(j.Tokens.Value) : "",

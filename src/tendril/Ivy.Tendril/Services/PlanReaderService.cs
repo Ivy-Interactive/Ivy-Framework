@@ -10,12 +10,14 @@ namespace Ivy.Tendril.Services;
 public class PlanReaderService(
     IConfigService config,
     ILogger<PlanReaderService> logger,
-    ITelemetryService? telemetryService = null) : IPlanReaderService
+    ITelemetryService? telemetryService = null,
+    IWorktreeLifecycleLogger? worktreeLifecycleLogger = null) : IPlanReaderService
 {
     private static readonly Regex FolderNameRegex = new(@"^(\d{5})-(.+)$", RegexOptions.Compiled);
     private readonly IConfigService _config = config;
 
     private readonly ILogger<PlanReaderService> _logger = logger;
+    private readonly IWorktreeLifecycleLogger? _worktreeLifecycleLogger = worktreeLifecycleLogger;
 
     private readonly TimeCache<Dictionary<string, DashboardStats>> _dashboardCache =
         new(TimeSpan.FromSeconds(10));
@@ -327,7 +329,7 @@ public class PlanReaderService(
         WriteFileInBackground(() =>
         {
             if (!Directory.Exists(folderPath)) return;
-            RemoveWorktrees(folderPath, _logger);
+            RemoveWorktrees(folderPath, _logger, _worktreeLifecycleLogger);
             WorktreeCleanupService.ForceDeleteDirectory(folderPath, _logger);
         });
     }
@@ -882,17 +884,23 @@ public class PlanReaderService(
         return latestFile != null ? FileHelper.ReadAllText(latestFile) : string.Empty;
     }
 
-    internal static void RemoveWorktrees(string planFolderPath, ILogger? logger = null)
+    internal static void RemoveWorktrees(string planFolderPath, ILogger? logger = null, IWorktreeLifecycleLogger? lifecycleLogger = null)
     {
         var worktreesDir = Path.Combine(planFolderPath, "worktrees");
         if (!Directory.Exists(worktreesDir)) return;
+
+        var planId = WorktreeLifecycleLogger.ExtractPlanId(planFolderPath);
 
         foreach (var wtDir in Directory.GetDirectories(worktreesDir))
         {
             var gitFile = Path.Combine(wtDir, ".git");
             if (!File.Exists(gitFile))
             {
-                logger?.LogWarning("Worktree directory has no .git file, skipping git removal: {Path}", wtDir);
+                var dirAge = DateTime.UtcNow - new DirectoryInfo(wtDir).CreationTimeUtc;
+                logger?.LogWarning(
+                    "Worktree directory has no .git file (created {Age} ago), skipping git removal: {Path}",
+                    dirAge, wtDir);
+                lifecycleLogger?.LogCleanupAttempt(planId, wtDir, "RemoveWorktrees", gitFileExists: false);
                 continue;
             }
 
@@ -908,6 +916,8 @@ public class PlanReaderService(
             var repoRoot = Path.GetDirectoryName(repoGitDir);
             if (repoRoot == null || !Directory.Exists(repoRoot)) continue;
 
+            lifecycleLogger?.LogCleanupAttempt(planId, wtDir, "RemoveWorktrees", gitFileExists: true);
+
             try
             {
                 var psi = new ProcessStartInfo("git", $"worktree remove --force \"{wtDir}\"")
@@ -920,11 +930,11 @@ public class PlanReaderService(
                 };
                 using var process = Process.Start(psi);
                 process.WaitForExitOrKill(10000);
+                lifecycleLogger?.LogCleanupSuccess(planId, wtDir);
             }
-            catch
+            catch (Exception ex)
             {
-                // Best-effort: if git worktree remove fails, the fallback
-                // ClearReadOnlyAttributes + Directory.Delete may still work.
+                lifecycleLogger?.LogCleanupFailed(planId, wtDir, ex.Message);
             }
         }
     }
@@ -959,6 +969,13 @@ public class PlanReaderService(
         try
         {
             var planYamlPath = Path.Combine(folderPath, "plan.yaml");
+
+            if (!File.Exists(planYamlPath))
+            {
+                _logger.LogWarning("Plan folder is missing plan.yaml: {FolderPath}", folderPath);
+                return null;
+            }
+
             var yamlContent = FileHelper.ReadAllText(planYamlPath);
             PlanYaml? planYaml;
 

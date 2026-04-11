@@ -93,4 +93,32 @@ public class DataTableScaffoldTests
         Assert.False(IsColumnRemoved(builder, "CreatedAt"));
         Assert.False(IsColumnRemoved(builder, "Amount"));
     }
+
+    private static Density GetDensity<T>(DataTableBuilder<T> builder)
+    {
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+        var field = builder.GetType().GetField("_density", flags)!;
+        return (Density)field.GetValue(builder)!;
+    }
+
+    [Fact]
+    public void Density_DefaultsToMedium()
+    {
+        var builder = new[] { new EntityWithPrimitives() }.AsQueryable().ToDataTable();
+        Assert.Equal(Density.Medium, GetDensity(builder));
+    }
+
+    [Fact]
+    public void Small_SetsDensityToSmall()
+    {
+        var builder = new[] { new EntityWithPrimitives() }.AsQueryable().ToDataTable().Small();
+        Assert.Equal(Density.Small, GetDensity(builder));
+    }
+
+    [Fact]
+    public void Large_SetsDensityToLarge()
+    {
+        var builder = new[] { new EntityWithPrimitives() }.AsQueryable().ToDataTable().Large();
+        Assert.Equal(Density.Large, GetDensity(builder));
+    }
 }

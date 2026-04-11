@@ -11,6 +11,7 @@ import { DataTableOption } from "./DataTableOption";
 import { DataTableFilterOption } from "./options/DataTableFilterOption";
 import { Filter as FilterIcon } from "lucide-react";
 import { tableStyles } from "./styles/style";
+import { Densities } from "@/types/density";
 import { TableProps } from "./types/types";
 import { getWidth, getHeight } from "@/lib/styles";
 import { applyConfigDefaults, applyColumnsDefaults } from "./DataTableDefaults";
@@ -37,6 +38,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children, emptyView }) => {
 };
 
 interface DataTableWidgetProps extends TableProps {
+  density?: Densities;
   slots?: {
     EmptyView?: React.ReactNode[];
     HeaderLeft?: React.ReactNode[];
@@ -52,6 +54,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
   editable = false,
   width = "Full",
   height = "Full",
+  density,
   rowActions,
   slots,
   "data-testid": dataTestId,
@@ -99,6 +102,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
         connection={connection}
         config={finalConfig}
         editable={editable}
+        density={density}
       >
         <TableLayout emptyView={slots?.EmptyView}>
           <DataTableHeader>

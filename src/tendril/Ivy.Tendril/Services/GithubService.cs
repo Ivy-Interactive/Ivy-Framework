@@ -12,7 +12,6 @@ public class GithubService(IConfigService config) : IGithubService
     private readonly ConcurrentDictionary<string, List<string>> _assigneeCache = new();
     private readonly IConfigService _config = config;
     private readonly ConcurrentDictionary<string, List<string>> _labelCache = new();
-    private readonly ConcurrentDictionary<string, Dictionary<string, string>> _prStatusCache = new();
     private List<RepoConfig>? _repoCache;
 
     public List<RepoConfig> GetRepos()
@@ -61,21 +60,16 @@ public class GithubService(IConfigService config) : IGithubService
 
     public async Task<Dictionary<string, string>> GetPrStatusesAsync(string owner, string repo)
     {
-        var key = $"{owner}/{repo}";
-        if (_prStatusCache.TryGetValue(key, out var cached))
-            return cached;
-
-        var statuses = await FetchPrStatusesFromGhCliAsync(owner, repo);
-        _prStatusCache[key] = statuses;
-        return statuses;
+        return await FetchPrStatusesFromGhCliAsync(owner, repo);
     }
 
-    public async Task<List<GitHubIssue>> SearchIssuesAsync(string owner, string repo, string? query, string? assignee,
-        string[]? labels)
+    public async Task<(List<GitHubIssue> issues, string? error)> SearchIssuesAsync(string owner, string repo,
+        string? query, string? assignee, string[]? labels)
     {
         try
         {
-            var args = $"issue list --repo {owner}/{repo} --state open --limit 100 --json number,title,body,labels,assignees";
+            var args =
+                $"issue list --repo {owner}/{repo} --state open --limit 100 --json number,title,body,labels,assignees";
             if (!string.IsNullOrWhiteSpace(query))
                 args += $" --search \"{query}\"";
             if (!string.IsNullOrWhiteSpace(assignee))
@@ -94,7 +88,8 @@ public class GithubService(IConfigService config) : IGithubService
             };
 
             using var process = Process.Start(psi);
-            if (process is null) return [];
+            if (process is null)
+                return ([], "GitHub CLI (gh) is not available. Please install it from https://cli.github.com/");
 
             var output = await process.StandardOutput.ReadToEndAsync();
             var stderr = await process.StandardError.ReadToEndAsync();
@@ -103,32 +98,46 @@ public class GithubService(IConfigService config) : IGithubService
             if (process.ExitCode != 0)
             {
                 Console.Error.WriteLine($"[GithubService] gh issue list failed for {owner}/{repo}: {stderr}");
-                return [];
+                var errorMsg = !string.IsNullOrWhiteSpace(stderr)
+                    ? stderr.Trim()
+                    : $"GitHub CLI exited with code {process.ExitCode}";
+                return ([], errorMsg);
             }
 
-            var issues = new List<GitHubIssue>();
-            using var doc = JsonDocument.Parse(output);
-            foreach (var element in doc.RootElement.EnumerateArray())
-            {
-                var number = element.GetProperty("number").GetInt32();
-                var title = element.GetProperty("title").GetString() ?? "";
-                var body = element.TryGetProperty("body", out var bodyProp) ? bodyProp.GetString() : null;
-                var issueLabels = element.GetProperty("labels").EnumerateArray()
-                    .Select(l => l.GetProperty("name").GetString() ?? "")
-                    .ToArray();
-                var issueAssignees = element.GetProperty("assignees").EnumerateArray()
-                    .Select(a => a.GetProperty("login").GetString() ?? "")
-                    .ToArray();
-                issues.Add(new GitHubIssue(number, title, body, issueLabels, issueAssignees));
-            }
-
-            return issues;
+            var issues = ParseIssuesFromJson(output);
+            return (issues, null);
+        }
+        catch (JsonException ex)
+        {
+            Console.Error.WriteLine($"[GithubService] Failed to parse issues for {owner}/{repo}: {ex.Message}");
+            return ([], "Invalid response from GitHub CLI. The output could not be parsed.");
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"[GithubService] Failed to search issues for {owner}/{repo}: {ex.Message}");
-            return [];
+            return ([], $"Failed to fetch issues: {ex.Message}");
         }
+    }
+
+    internal static List<GitHubIssue> ParseIssuesFromJson(string json)
+    {
+        var issues = new List<GitHubIssue>();
+        using var doc = JsonDocument.Parse(json);
+        foreach (var element in doc.RootElement.EnumerateArray())
+        {
+            var number = element.GetProperty("number").GetInt32();
+            var title = element.GetProperty("title").GetString() ?? "";
+            var body = element.TryGetProperty("body", out var bodyProp) ? bodyProp.GetString() : null;
+            var issueLabels = element.GetProperty("labels").EnumerateArray()
+                .Select(l => l.GetProperty("name").GetString() ?? "")
+                .ToArray();
+            var issueAssignees = element.GetProperty("assignees").EnumerateArray()
+                .Select(a => a.GetProperty("login").GetString() ?? "")
+                .ToArray();
+            issues.Add(new GitHubIssue(number, title, body, issueLabels, issueAssignees));
+        }
+
+        return issues;
     }
 
     internal static RepoConfig? GetRepoConfigFromPath(string repoPath)

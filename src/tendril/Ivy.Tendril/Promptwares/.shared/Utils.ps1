@@ -445,6 +445,7 @@ function InvokePromptwareAgent {
     $agentInfo = $codingAgent
     if ($agent.Model) { $agentInfo += ", model=$($agent.Model)" }
     if ($agent.Effort) { $agentInfo += ", effort=$($agent.Effort)" }
+    if ($agent.Arguments -and $agent.Arguments.Count -gt 0) { $agentInfo += ", args=$($agent.Arguments -join ' ')" }
     Write-Host "Starting Agent ($agentInfo)..."
     if ($Action) { SendStatusMessage "Running $Action" }
     Push-Location $WorkDir

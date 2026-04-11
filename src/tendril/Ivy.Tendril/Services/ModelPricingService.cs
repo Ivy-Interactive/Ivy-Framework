@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using YamlDotNet.Serialization;
 
 namespace Ivy.Tendril.Services;
@@ -21,9 +22,11 @@ public record CostCalculation
 public class ModelPricingService : IModelPricingService
 {
     private static readonly IDeserializer DefaultDeserializer = new DeserializerBuilder().Build();
+    private readonly ILogger<ModelPricingService> _logger;
 
-    public ModelPricingService()
+    public ModelPricingService(ILogger<ModelPricingService> logger)
     {
+        _logger = logger;
         Pricing = LoadEmbeddedPricing();
     }
 
@@ -36,6 +39,11 @@ public class ModelPricingService : IModelPricingService
                 return Pricing[key];
 
         // Fallback to Opus 4.6 (current default model)
+        _logger.LogWarning(
+            "Model '{ModelName}' not found in pricing database. Falling back to Claude Opus 4.6 pricing ($5.00/$25.00). " +
+            "Check config.yaml for typos or add the model to Assets/models.yaml.",
+            modelName);
+
         return Pricing.TryGetValue("claude-opus-4-6", out var fallback)
             ? fallback
             : new ModelPricing { Input = 5.0, Output = 25.0, CacheWrite = 6.25, CacheRead = 0.50 };

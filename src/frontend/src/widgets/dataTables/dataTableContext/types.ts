@@ -2,6 +2,7 @@ import React from "react";
 import * as arrow from "apache-arrow";
 import { Filter, SortOrder } from "@/services/grpcTableService";
 import { GridColumn } from "@glideapps/glide-data-grid";
+import { Densities } from "@/types/density";
 import { DataColumn, DataRow, DataTableConfig, DataTableConnection } from "../types/types";
 
 export interface TableContextType {
@@ -18,6 +19,7 @@ export interface TableContextType {
   activeFilter: Filter | null;
   activeSort: SortOrder[] | null;
   columnOrder: number[];
+  density: Densities;
   // Arrow table accessor - data is accessed directly from Arrow table via gRPC
   getRowData: (rowIndex: number) => DataRow | null;
   arrowTableRef: React.RefObject<arrow.Table | null>;
@@ -37,4 +39,5 @@ export interface TableProviderProps {
   connection: DataTableConnection;
   config: DataTableConfig;
   editable?: boolean;
+  density?: Densities;
 }

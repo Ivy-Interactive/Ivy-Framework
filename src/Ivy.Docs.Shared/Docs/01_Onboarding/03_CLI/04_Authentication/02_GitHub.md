@@ -28,11 +28,11 @@ Before using GitHub authentication with Ivy, you'll need to create a GitHub OAut
 2. **Click "New OAuth App"**
 3. Fill in the application details:
    - **Application name**: Your application name (e.g., "My Ivy Application")
-   - **Homepage URL**: Your application URL (e.g., `http://localhost:5010` for local development or `https://your-app.com` for production)
-   - **Authorization callback URL**: Your application's callback endpoint (e.g., `http://localhost:5010/ivy/auth/callback` for local development or `https://your-app.com/ivy/auth/callback` for production)
+   - **Homepage URL**: Your application URL (e.g., `https://localhost:5010` for local development or `https://your-app.com` for production)
+   - **Authorization callback URL**: Your application's callback endpoint (e.g., `https://localhost:5010/ivy/auth/callback` for local development or `https://your-app.com/ivy/auth/callback` for production)
 4. **Click "Register application"**
 
-> **Note**: The Authorization callback URL must match your application's auth callback endpoint. For local development, this is typically `http://localhost:PORT/ivy/auth/callback` where PORT is your application's port.
+> **Note**: The Authorization callback URL must match your application's auth callback endpoint. For local development, this is typically `https://localhost:PORT/ivy/auth/callback` where PORT is your application's port.
 
 ### Step 2: Get Your Configuration Values
 
@@ -40,7 +40,7 @@ After creating your OAuth App, you'll see the application's settings page. Copy 
 
 - **Client ID**: Found in the "Client ID" field
 - **Client Secret**: Click "Generate a new client secret" to create one, then copy it immediately (you won't be able to see it again)
-- **Redirect Uri**: The authorization callback URL you configured during OAuth App creation (e.g., `http://localhost:5010/ivy/auth/callback` for local development or `https://your-domain.com/ivy/auth/callback` for production)
+- **Redirect Uri**: The authorization callback URL you configured during OAuth App creation (e.g., `https://localhost:5010/ivy/auth/callback` for local development or `https://your-domain.com/ivy/auth/callback` for production)
 
 > **Important**: Store your Client Secret securely. The Client Secret is sensitive and won't be retrievable from GitHub after creation - if you lose it, you'll need to generate a new one. Use [.NET user secrets](../../02_Concepts/14_Secrets.md) for local development and environment variables or secure key management for production. Never commit secrets to version control.
 
@@ -142,7 +142,7 @@ The GitHub OAuth app requests the following scopes:
 
 **Callback URL Mismatch**
 
-- Verify Authorization callback URL in GitHub OAuth App settings matches your application's auth callback endpoint (e.g., `http://localhost:5010/ivy/auth/callback`)
+- Verify Authorization callback URL in GitHub OAuth App settings matches your application's auth callback endpoint (e.g., `https://localhost:5010/ivy/auth/callback`)
 - Check that the URL matches exactly, including the protocol (`http://` vs `https://`) and port number
 - Ensure HTTPS is used in production
 

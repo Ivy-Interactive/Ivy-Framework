@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Eraser } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { Densities } from "@/types/density";
 
 interface Point {
   x: number;
@@ -23,8 +24,27 @@ interface SignatureInputWidgetProps {
   background?: string;
   penThickness?: number;
   placeholder?: string;
+  density?: Densities;
   "data-testid"?: string;
 }
+
+const placeholderTextMap: Record<Densities, string> = {
+  [Densities.Small]: "text-xs",
+  [Densities.Medium]: "text-sm",
+  [Densities.Large]: "text-base",
+};
+
+const clearButtonMap: Record<Densities, string> = {
+  [Densities.Small]: "p-1 top-1 right-1",
+  [Densities.Medium]: "p-1.5 top-2 right-2",
+  [Densities.Large]: "p-2 top-3 right-3",
+};
+
+const clearIconMap: Record<Densities, string> = {
+  [Densities.Small]: "h-3 w-3",
+  [Densities.Medium]: "h-4 w-4",
+  [Densities.Large]: "h-5 w-5",
+};
 
 export function resolveColor(color: string | undefined, fallback: string): string {
   if (!color) return fallback;
@@ -43,6 +63,7 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
   background,
   penThickness = 2,
   placeholder,
+  density = Densities.Medium,
   "data-testid": dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -260,7 +281,12 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
 
       {/* Placeholder */}
       {!hasDrawn && placeholder && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-muted-foreground text-sm">
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center pointer-events-none text-muted-foreground",
+            placeholderTextMap[density],
+          )}
+        >
           {placeholder}
         </div>
       )}
@@ -270,10 +296,13 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
         <button
           type="button"
           onClick={handleClear}
-          className="absolute top-2 right-2 p-1.5 rounded-md bg-background/80 border border-input hover:bg-accent transition-colors cursor-pointer"
+          className={cn(
+            "absolute rounded-md bg-background/80 border border-input hover:bg-accent transition-colors cursor-pointer",
+            clearButtonMap[density],
+          )}
           aria-label="Clear signature"
         >
-          <Eraser className="h-4 w-4 text-muted-foreground" />
+          <Eraser className={cn(clearIconMap[density], "text-muted-foreground")} />
         </button>
       )}
 

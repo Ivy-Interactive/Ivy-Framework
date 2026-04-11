@@ -238,9 +238,9 @@ public class PlanDatabaseService : IPlanDatabaseService
         try
         {
             var cutoff = DateTime.UtcNow.Date.AddDays(-6).ToString("yyyy-MM-dd");
-            var pf = projectFilter != null ? " AND Project = @project" : "";
-            var pfAlias = projectFilter != null ? " AND p.Project = @project" : "";
-            var pfAlias2 = projectFilter != null ? " AND p2.Project = @project2" : "";
+            var pf = projectFilter != null ? " AND (Project = @project OR Project LIKE @projectPattern)" : "";
+            var pfAlias = projectFilter != null ? " AND (p.Project = @project OR p.Project LIKE @projectPattern)" : "";
+            var pfAlias2 = projectFilter != null ? " AND (p2.Project = @project2 OR p2.Project LIKE @projectPattern2)" : "";
 
             // Query 1: Status counts + avg cost
             int totalCount, draftCount, inProgressCount, reviewCount, completedCount, failedCount;
@@ -265,7 +265,9 @@ public class PlanDatabaseService : IPlanDatabaseService
                 if (projectFilter != null)
                 {
                     cmd.Parameters.AddWithValue("@project", projectFilter);
+                    cmd.Parameters.AddWithValue("@projectPattern", $"%{projectFilter}%");
                     cmd.Parameters.AddWithValue("@project2", projectFilter);
+                    cmd.Parameters.AddWithValue("@projectPattern2", $"%{projectFilter}%");
                 }
 
                 using var r = cmd.ExecuteReader();
@@ -338,7 +340,11 @@ public class PlanDatabaseService : IPlanDatabaseService
                     """;
 
                 cmd.Parameters.AddWithValue("@cutoff", cutoff);
-                if (projectFilter != null) cmd.Parameters.AddWithValue("@project", projectFilter);
+                if (projectFilter != null)
+                {
+                    cmd.Parameters.AddWithValue("@project", projectFilter);
+                    cmd.Parameters.AddWithValue("@projectPattern", $"%{projectFilter}%");
+                }
                 for (var i = 0; i < days.Count; i++)
                     cmd.Parameters.AddWithValue($"@day{i}", days[i]);
 
@@ -433,7 +439,7 @@ public class PlanDatabaseService : IPlanDatabaseService
             var cutoff = DateTime.UtcNow.AddDays(-days);
 
             using var cmd = _connection.CreateCommand();
-            var projectClause = projectFilter != null ? " AND p.Project = @project" : "";
+            var projectClause = projectFilter != null ? " AND (p.Project = @project OR p.Project LIKE @projectPattern)" : "";
             cmd.CommandText = $"""
                                SELECT
                                    strftime('%Y-%m-%d %H:00:00', COALESCE(c.LogTimestamp, p.Updated)) as Hour,
@@ -448,7 +454,10 @@ public class PlanDatabaseService : IPlanDatabaseService
                                """;
             cmd.Parameters.AddWithValue("@cutoff", cutoff.ToString("O", CultureInfo.InvariantCulture));
             if (projectFilter != null)
+            {
                 cmd.Parameters.AddWithValue("@project", projectFilter);
+                cmd.Parameters.AddWithValue("@projectPattern", $"%{projectFilter}%");
+            }
 
             var result = new List<HourlyTokenBurn>();
             using var reader = cmd.ExecuteReader();
@@ -1041,6 +1050,70 @@ public class PlanDatabaseService : IPlanDatabaseService
         finally
         {
             _lock.ExitWriteLock();
+        }
+    }
+
+    public Dictionary<string, string> GetAllPrStatuses()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "SELECT PrUrl, Status FROM PrStatuses";
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                result[reader.GetString(0)] = reader.GetString(1);
+            return result;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    public void UpsertPrStatus(string prUrl, string owner, string repo, string status, DateTime lastChecked)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = """
+                              INSERT INTO PrStatuses (PrUrl, Owner, Repo, Status, LastChecked)
+                              VALUES (@url, @owner, @repo, @status, @checked)
+                              ON CONFLICT(PrUrl) DO UPDATE SET
+                                  Status = excluded.Status,
+                                  LastChecked = excluded.LastChecked
+                              """;
+            cmd.Parameters.AddWithValue("@url", prUrl);
+            cmd.Parameters.AddWithValue("@owner", owner);
+            cmd.Parameters.AddWithValue("@repo", repo);
+            cmd.Parameters.AddWithValue("@status", status);
+            cmd.Parameters.AddWithValue("@checked", lastChecked.ToString("O", CultureInfo.InvariantCulture));
+            cmd.ExecuteNonQuery();
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public List<string> GetNonMergedPrUrls()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "SELECT PrUrl FROM PrStatuses WHERE Status != 'Merged'";
+            var result = new List<string>();
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                result.Add(reader.GetString(0));
+            return result;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
         }
     }
 

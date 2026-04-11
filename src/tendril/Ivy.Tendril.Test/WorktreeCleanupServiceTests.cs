@@ -91,8 +91,8 @@ public class WorktreeCleanupServiceTests : IDisposable
     [Fact]
     public void RunCleanup_Respects_Grace_Period()
     {
-        // Plan just failed 10 minutes ago — should NOT be cleaned
-        var dir = CreatePlan("03000-RecentFail", "Failed", DateTime.UtcNow.AddMinutes(-10));
+        // Plan just failed 5 minutes ago — should NOT be cleaned (grace period is 10 minutes)
+        var dir = CreatePlan("03000-RecentFail", "Failed", DateTime.UtcNow.AddMinutes(-5));
         CreateWorktreeDir(dir, "Repo");
 
         _service.RunCleanup();
@@ -386,7 +386,206 @@ public class WorktreeCleanupServiceTests : IDisposable
             Directory.Delete(testDir, true);
     }
 
+    [Fact]
+    public void CleanupPlanWorktrees_LogsMissingGitFileAge()
+    {
+        var dir = CreatePlan("12000-MissingGitAge", "Completed", DateTime.UtcNow.AddHours(-2));
+        var worktreeDir = Path.Combine(dir, "worktrees", "TestRepo");
+        Directory.CreateDirectory(worktreeDir);
+        File.WriteAllText(Path.Combine(worktreeDir, "file.txt"), "content");
+
+        var logEntries = new List<string>();
+        var logger = new CapturingLogger(logEntries);
+
+        WorktreeCleanupService.CleanupPlanWorktrees(dir, logger);
+
+        Assert.Contains(logEntries, e => e.Contains("no .git file") && e.Contains("ago"));
+        Assert.False(Directory.Exists(worktreeDir), "Orphan directory should still be cleaned up");
+    }
+
+    [Fact]
+    public void CleanupPlanWorktrees_HandlesVeryRecentOrphanedDirectory()
+    {
+        var dir = CreatePlan("12001-RecentOrphan", "Completed", DateTime.UtcNow.AddHours(-2));
+        var worktreeDir = Path.Combine(dir, "worktrees", "TestRepo");
+        Directory.CreateDirectory(worktreeDir);
+        File.WriteAllText(Path.Combine(worktreeDir, "file.txt"), "content");
+
+        var logEntries = new List<string>();
+        var logger = new CapturingLogger(logEntries);
+
+        WorktreeCleanupService.CleanupPlanWorktrees(dir, logger);
+
+        var ageLog = logEntries.FirstOrDefault(e => e.Contains("no .git file") && e.Contains("ago"));
+        Assert.NotNull(ageLog);
+        Assert.False(Directory.Exists(worktreeDir), "Very recent orphan should still be cleaned up");
+    }
+
+    [Fact]
+    public void CleanupRecursiveArtifacts_Removes_Nested_Plans_In_Worktrees()
+    {
+        var dir = CreatePlan("13000-RecursiveTest", "Executing");
+        var worktreeDir = Path.Combine(dir, "worktrees", "TestRepo");
+        var nestedPlans = Path.Combine(worktreeDir, "src", "tendril", "Plans", "01234-OldPlan");
+        Directory.CreateDirectory(nestedPlans);
+        File.WriteAllText(Path.Combine(nestedPlans, "plan.yaml"), "state: Completed");
+
+        _service.RunCleanup();
+
+        Assert.False(Directory.Exists(Path.Combine(worktreeDir, "src", "tendril", "Plans")),
+            "Nested Plans directory should be deleted");
+        Assert.True(Directory.Exists(worktreeDir),
+            "Worktree repo directory should remain");
+    }
+
+    [Fact]
+    public void CleanupRecursiveArtifacts_Handles_Multiple_Nesting_Levels()
+    {
+        var dir = CreatePlan("13001-MultiLevel", "Executing");
+        var worktreeDir = Path.Combine(dir, "worktrees", "Repo");
+
+        // Level 1: Plans/B inside worktree
+        var level1 = Path.Combine(worktreeDir, "Plans", "B-Plan", "worktrees", "Repo");
+        Directory.CreateDirectory(level1);
+
+        // Level 2: Plans/C nested inside level 1
+        var level2 = Path.Combine(level1, "Plans", "C-Plan");
+        Directory.CreateDirectory(level2);
+        File.WriteAllText(Path.Combine(level2, "plan.yaml"), "state: Failed");
+
+        _service.RunCleanup();
+
+        Assert.False(Directory.Exists(Path.Combine(worktreeDir, "Plans")),
+            "All nested Plans directories should be removed");
+        Assert.True(Directory.Exists(worktreeDir),
+            "Top-level worktree directory should remain");
+    }
+
+    [Fact]
+    public void CleanupRecursiveArtifacts_Skips_Plans_With_No_Worktrees()
+    {
+        CreatePlan("13002-NoWorktrees", "Executing");
+
+        var ex = Record.Exception(() => _service.RunCleanup());
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void CleanupLegacyPromptwaresDirs_Removes_DotPromptwaresInWorktrees()
+    {
+        var dir = CreatePlan("13010-LegacyCleanup", "Executing");
+        var promptwaresDir = Path.Combine(dir, "worktrees", "TestRepo", ".promptwares");
+        Directory.CreateDirectory(promptwaresDir);
+
+        _service.CleanupLegacyPromptwaresDirs();
+
+        Assert.False(Directory.Exists(promptwaresDir), ".promptwares directory should be removed");
+    }
+
+    [Fact]
+    public void CleanupLegacyPromptwaresDirs_Handles_Nested_DotPromptwaresDirs()
+    {
+        var dir = CreatePlan("13011-NestedLegacy", "Executing");
+        var nestedDir = Path.Combine(dir, "worktrees", "Repo", "src", "tendril", ".promptwares");
+        Directory.CreateDirectory(nestedDir);
+        File.WriteAllText(Path.Combine(nestedDir, "leftover.md"), "old content");
+
+        _service.CleanupLegacyPromptwaresDirs();
+
+        Assert.False(Directory.Exists(nestedDir), "Nested .promptwares directory should be removed");
+    }
+
+    [Fact]
+    public void CleanupLegacyPromptwaresDirs_Skips_Plans_With_No_Worktrees()
+    {
+        CreatePlan("13012-NoWorktrees", "Executing");
+
+        var ex = Record.Exception(() => _service.CleanupLegacyPromptwaresDirs());
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void CleanupRecursiveArtifacts_Logs_On_Delete_Failure()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        var logEntries = new List<string>();
+        var logger = new CapturingLogger(logEntries);
+        var service = new WorktreeCleanupService(_plansDir, new LoggerAdapter(logger));
+
+        var dir = CreatePlan("13003-LockedNested", "Executing");
+        var worktreeDir = Path.Combine(dir, "worktrees", "Repo");
+        var nestedPlans = Path.Combine(worktreeDir, "src", "Plans", "OldPlan");
+        Directory.CreateDirectory(nestedPlans);
+        var lockedFile = Path.Combine(nestedPlans, "locked.txt");
+        File.WriteAllText(lockedFile, "content");
+
+        using (var stream = new FileStream(lockedFile, FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            service.RunCleanup();
+        }
+
+        Assert.Contains(logEntries, e => e.Contains("Removing recursive Plans artifact") || e.Contains("Failed to delete nested Plans"));
+
+        // Cleanup
+        if (Directory.Exists(nestedPlans))
+            Directory.Delete(nestedPlans, true);
+
+        service.Dispose();
+    }
+
+    [Fact]
+    public void CleanupLegacyPromptwaresDirs_Logs_On_Delete_Failure()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        var dir = CreatePlan("13013-LockedLegacy", "Executing");
+        var promptwaresDir = Path.Combine(dir, "worktrees", "TestRepo", ".promptwares");
+        Directory.CreateDirectory(promptwaresDir);
+        var lockedFile = Path.Combine(promptwaresDir, "locked.txt");
+        File.WriteAllText(lockedFile, "content");
+
+        var logEntries = new List<string>();
+        var logger = new CapturingLogger(logEntries);
+        var service = new WorktreeCleanupService(_plansDir, new CapturingLogger<WorktreeCleanupService>(logEntries));
+
+        using (var stream = new FileStream(lockedFile, FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            service.CleanupLegacyPromptwaresDirs();
+        }
+
+        Assert.Contains(logEntries, e => e.Contains("Failed to delete legacy .promptwares"));
+
+        // Cleanup
+        if (Directory.Exists(promptwaresDir))
+            Directory.Delete(promptwaresDir, true);
+    }
+
+    private class LoggerAdapter(ILogger inner) : ILogger<WorktreeCleanupService>
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => inner.BeginScope(state);
+        public bool IsEnabled(LogLevel logLevel) => inner.IsEnabled(logLevel);
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            inner.Log(logLevel, eventId, state, exception, formatter);
+        }
+    }
+
     private class CapturingLogger(List<string> entries) : ILogger
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            entries.Add(formatter(state, exception));
+        }
+    }
+
+    private class CapturingLogger<T>(List<string> entries) : ILogger<T>
     {
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
         public bool IsEnabled(LogLevel logLevel) => true;

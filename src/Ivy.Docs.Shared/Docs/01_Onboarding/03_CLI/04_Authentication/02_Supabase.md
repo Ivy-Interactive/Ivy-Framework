@@ -59,8 +59,8 @@ To customize your authentication settings:
 1. **Go to Authentication** in the sidebar
 2. **Click "URL Configuration"**
 3. **Configure**:
-   - **Site URL**: Your application's URL (e.g., `http://localhost:5010`)
-   - **Redirect URLs**: Add your callback URLs (e.g., `http://localhost:5010/ivy/auth/callback/*`)
+   - **Site URL**: Your application's URL (e.g., `https://localhost:5010`)
+   - **Redirect URLs**: Add your callback URLs (e.g., `https://localhost:5010/ivy/auth/callback/*`)
 
 ### Step 4: Enable Social Providers (Optional)
 

@@ -12,6 +12,7 @@ import { ChartType, FunnelChartWidgetProps } from "./chartTypes";
 import { generateDataProps } from "./sharedUtils";
 import { getChartThemeColors } from "./styles";
 import { FUNNEL_DEFAULTS, FUNNEL_LEGEND_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { Densities } from "@/types/density";
 
 import { EMPTY_ARRAY } from "@/lib/constants";
 
@@ -27,6 +28,7 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
   sort = "Descending",
   orientation = "Vertical",
   gap = 0,
+  density: _density = Densities.Medium,
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
     monitorDOM: false,

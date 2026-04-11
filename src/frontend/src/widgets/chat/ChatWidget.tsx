@@ -9,28 +9,39 @@ import React, { FormEvent, useState, KeyboardEvent, ReactNode } from "react";
 import { User, LucideStars } from "lucide-react";
 import { TextShimmer } from "@/components/TextShimmer";
 import { getHeight, getWidth } from "@/lib/styles";
+import { Densities } from "@/types/density";
+import { cn } from "@/lib/utils";
 
 interface ChatMessageWidgetProps {
   id: number;
   children?: ReactNode[];
   sender: "User" | "Assistant";
+  density?: Densities;
 }
 
 export const ChatMessageWidget: React.FC<ChatMessageWidgetProps> = ({
   id,
   sender = "User",
   children,
+  density = Densities.Medium,
 }) => {
+  const avatarClass =
+    density === Densities.Small
+      ? "h-7 w-7 p-1.5"
+      : density === Densities.Large
+        ? "h-11 w-11 p-2.5"
+        : "h-9 w-9 p-2";
+
   return (
     <ChatBubble key={id} variant={sender === "User" ? "sent" : "received"}>
       {sender == "Assistant" && (
-        <div className="bg-muted p-2 rounded-full h-9 w-9 flex items-center justify-center">
+        <div className={cn("bg-muted rounded-full flex items-center justify-center", avatarClass)}>
           <LucideStars />
         </div>
       )}
 
       {sender == "User" && (
-        <div className="bg-muted p-2 rounded-full h-9 w-9 flex items-center justify-center">
+        <div className={cn("bg-muted rounded-full flex items-center justify-center", avatarClass)}>
           <User />
         </div>
       )}
@@ -51,6 +62,7 @@ interface ChatWidgetProps {
   children: React.ReactElement<ChatMessageWidgetProps>[];
   width?: string;
   height?: string;
+  density?: Densities;
 }
 
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
@@ -60,7 +72,15 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   streaming = false,
   width = "Full",
   height = "Full",
+  density = Densities.Medium,
 }) => {
+  const inputMinHeightClass =
+    density === Densities.Small
+      ? "min-h-10"
+      : density === Densities.Large
+        ? "min-h-14"
+        : "min-h-12";
+
   const eventHandler = useEventHandler();
 
   const messageWidgets = React.Children.toArray(children).filter((child) => {
@@ -146,7 +166,10 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="min-h-12 resize-none rounded-box bg-background border-0 p-3 shadow-none focus-visible:ring-0"
+            className={cn(
+              inputMinHeightClass,
+              "resize-none rounded-box bg-background border-0 p-3 shadow-none focus-visible:ring-0",
+            )}
           />
           <div className="flex items-center p-3 pt-0 justify-between">
             {isLoading ? (

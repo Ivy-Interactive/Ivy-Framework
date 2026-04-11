@@ -90,7 +90,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     }
 
     private Size? _width;
-    private Density _density = Density.Medium;
+    private Density _density = Ivy.Density.Medium;
     private readonly IEnumerable<TModel> _records;
     private readonly Dictionary<string, TableBuilderColumn> _columns;
     private readonly BuilderFactory<TModel> _builderFactory;
@@ -223,21 +223,27 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    public TableBuilder<TModel> Density(Ivy.Density density)
+    {
+        _density = density;
+        return this;
+    }
+
     public TableBuilder<TModel> Large()
     {
-        _density = Density.Large;
+        _density = Ivy.Density.Large;
         return this;
     }
 
     public TableBuilder<TModel> Small()
     {
-        _density = Density.Small;
+        _density = Ivy.Density.Small;
         return this;
     }
 
     public TableBuilder<TModel> Medium()
     {
-        _density = Density.Medium;
+        _density = Ivy.Density.Medium;
         return this;
     }
 

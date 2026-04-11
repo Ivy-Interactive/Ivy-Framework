@@ -77,7 +77,8 @@ public class ContentView(
             async (filePath, ct) =>
             {
                 if (string.IsNullOrEmpty(filePath)) return "";
-                var artifactsDir = Path.GetFullPath(Path.Combine(_selectedPlan!.FolderPath, "artifacts"));
+                if (_selectedPlan is null) return "";
+                var artifactsDir = Path.GetFullPath(Path.Combine(_selectedPlan.FolderPath, "artifacts"));
                 var resolvedPath = Path.GetFullPath(filePath);
                 if (!resolvedPath.StartsWith(artifactsDir, StringComparison.OrdinalIgnoreCase))
                     return "Access denied: file is outside the artifacts folder.";
@@ -92,7 +93,8 @@ public class ContentView(
             async (hash, ct) =>
             {
                 if (string.IsNullOrEmpty(hash)) return null;
-                var repoPaths2 = _selectedPlan!.GetEffectiveRepoPaths(_config);
+                if (_selectedPlan is null) return null;
+                var repoPaths2 = _selectedPlan.GetEffectiveRepoPaths(_config);
                 return await Task.Run(() =>
                 {
                     foreach (var repo in repoPaths2)
@@ -400,12 +402,7 @@ public class ContentView(
                 }
 
             // Build tabs
-            var tabs = new TabsLayout(
-                e => selectedTab.Set(e.Value),
-                null,
-                null,
-                null,
-                selectedTab.Value,
+            var tabs = Layout.Tabs(
                 new Tab("Summary", Cap(summaryTabContent)),
                 new Tab("Verifications", Cap(verificationsTable)).Badge(_selectedPlan.Verifications.Count.ToString()),
                 new Tab("Commits", Cap(commitsLayout)).Badge(_selectedPlan.Commits.Count.ToString()),
@@ -413,7 +410,7 @@ public class ContentView(
                 new Tab("Artifacts", Cap(artifactsLayout)).Badge(totalArtifacts.ToString()),
                 new Tab("Recommendations", Cap(recommendationsLayout)).Badge(planData.Recommendations.Count.ToString()),
                 new Tab("Plan", Cap(planTabContent))
-            ).Variant(TabsVariant.Content);
+            ).OnSelect(v => selectedTab.Set(v)).SelectedIndex(selectedTab.Value).Variant(TabsVariant.Content);
 
             content |= tabs;
         }
@@ -479,7 +476,7 @@ public class ContentView(
                         {
                             suggestChangesOpen.Set(true);
                         }).ShortcutKey("d")
-                        | new Button("Discard").Icon(Icons.Trash).Outline().ShortcutKey("Delete").OnClick(() =>
+                        | new Button("Discard").Icon(Icons.Trash).Outline().ShortcutKey("Backspace").OnClick(() =>
                         {
                             discardDialogOpen.Set(true);
                         })

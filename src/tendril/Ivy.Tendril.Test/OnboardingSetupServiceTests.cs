@@ -223,10 +223,10 @@ public class OnboardingSetupServiceTests : IAsyncLifetime
         var examplePath = Path.Combine(baseDir, "example.config.yaml");
         var exampleContent = File.Exists(examplePath) ? await File.ReadAllTextAsync(examplePath) : "";
 
-        if (!exampleContent.Contains("DotnetBuild"))
+        if (!exampleContent.Contains("Build"))
         {
             exampleContent =
-                "codingAgent: claude\nprojects: []\nverifications:\n- name: DotnetBuild\n  prompt: Build\n";
+                "codingAgent: claude\nprojects: []\nverifications:\n- name: Build\n  prompt: Build\n";
             await File.WriteAllTextAsync(examplePath, exampleContent);
         }
 
@@ -236,7 +236,7 @@ public class OnboardingSetupServiceTests : IAsyncLifetime
 
             var configPath = Path.Combine(_tempDir, "config.yaml");
             var content = await File.ReadAllTextAsync(configPath);
-            Assert.Contains("DotnetBuild", content);
+            Assert.Contains("Build", content);
         }
         finally
         {

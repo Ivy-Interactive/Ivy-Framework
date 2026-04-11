@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { MenuItem } from "@/types/widgets";
 import { TreeItem } from "./TreeItem";
 import { useEventHandler } from "@/components/event-handler";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -10,9 +11,15 @@ interface TreeWidgetProps {
   id: string;
   items?: MenuItem[];
   rowActions?: MenuItem[];
+  density?: Densities;
 }
 
-export const TreeWidget: React.FC<TreeWidgetProps> = ({ id, items = EMPTY_ARRAY, rowActions }) => {
+export const TreeWidget: React.FC<TreeWidgetProps> = ({
+  id,
+  items = EMPTY_ARRAY,
+  rowActions,
+  density = Densities.Medium,
+}) => {
   const eventHandler = useEventHandler();
 
   const onItemClick = React.useCallback(
@@ -37,8 +44,11 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({ id, items = EMPTY_ARRAY,
     [eventHandler, id],
   );
 
+  const gapClass =
+    density === Densities.Small ? "gap-0.5" : density === Densities.Large ? "gap-1.5" : "gap-1";
+
   return (
-    <div className={cn("ivy-tree flex flex-col gap-1 w-full")} role="tree">
+    <div className={cn("ivy-tree flex flex-col w-full", gapClass)} role="tree">
       {items.map((item) => (
         <TreeItem
           key={item.tag || item.label}

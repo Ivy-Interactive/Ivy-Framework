@@ -31,7 +31,8 @@ import {
 } from "./chartTypes";
 import { ChartData } from "./chartTypes";
 import { ReferenceDot } from "./chartTypes";
-import { LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { LINE_DEFAULTS, REFERENCE_LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -52,6 +53,7 @@ interface AreaChartWidgetProps {
   referenceDots?: ReferenceDot[];
   colorScheme: ColorScheme;
   layout?: "Horizontal" | "Vertical";
+  density?: Densities;
 }
 
 const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
@@ -70,6 +72,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   referenceDots = EMPTY_ARRAY,
   colorScheme = "Default",
   layout = "Vertical",
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

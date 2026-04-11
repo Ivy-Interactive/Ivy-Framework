@@ -36,7 +36,7 @@ public class GeneralSetupView : ViewBase
                            config.Settings.CodingAgent = codingAgent.Value;
                            config.Settings.PlanTemplate = planTemplate.Value;
                            config.SaveSettings();
-                           client.Toast("Settings saved successfully", "Saved");
+                           client.Toast("Settings saved and applied", "Saved");
                        });
 
         return form;

@@ -25,7 +25,7 @@ public class SimpleCounterApp : ViewBase
    public override object? Build()
    {
        var count = UseState(0);
-       
+
        UseEffect(() =>
        {
            Console.WriteLine($"Count changed to: {count.Value}");
@@ -118,11 +118,11 @@ Make sure you have the following prerequisites installed:
    ivy run --browse
    ```
 
-5. **Open** [http://localhost:5010](http://localhost:5010) in your browser.
+5. **Open** [https://localhost:5010](https://localhost:5010) in your browser.
 
 You can also run `ivy samples` to see all the components that Ivy offers and `ivy docs` for documentation.
 
 ## Want to help build Ivy Framework?
 
-- [Contribution Guidelines](CONTRIBUTING.md)  
+- [Contribution Guidelines](CONTRIBUTING.md)
 - [Internal Developer Wiki](https://github.com/Ivy-Interactive/Ivy-Framework/wiki)

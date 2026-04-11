@@ -3,7 +3,7 @@ import { InvalidIcon } from "@/components/InvalidIcon";
 import { inputStyles } from "@/lib/styles";
 import { Input } from "@/components/ui/input";
 import { X, Check } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useOptimisticValue } from "./shared/useOptimisticValue";
 import { cn } from "@/lib/utils";
 import {
@@ -114,12 +114,9 @@ const AlphaSlider: React.FC<AlphaSliderProps> = ({
   const height = density === Densities.Small ? 24 : density === Densities.Large ? 36 : 30;
   const percentage = Math.round((displayAlpha / 255) * 100);
 
-  const gradientStyle: React.CSSProperties = useMemo(
-    () => ({
-      background: `linear-gradient(to right, transparent, ${color})`,
-    }),
-    [color],
-  );
+  const gradientStyle: React.CSSProperties = {
+    background: `linear-gradient(to right, transparent, ${color})`,
+  };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalAlpha(Number(e.target.value));
@@ -242,6 +239,15 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   autoFocus,
 }) => {
   const eventHandler = useEventHandler();
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const hasAutoFocusedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      inputRef.current?.focus();
+    }
+  }, [autoFocus, disabled]);
 
   const [localValue, setLocalColorValue] = useOptimisticValue(value, false);
 
@@ -300,13 +306,13 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
       <div className="flex items-center space-x-2">
         <div className="relative">
           <Input
+            ref={inputRef}
             type="text"
             value={inputValue}
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             onFocus={handleInputFocus}
             onKeyDown={handleInputKeyDown}
-            autoFocus={autoFocus}
             placeholder={
               placeholder || (allowAlpha ? "Enter color (e.g. #FF0000CC)" : "Enter color")
             }
@@ -412,13 +418,13 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
       />
       <div className="relative">
         <Input
+          ref={inputRef}
           type="text"
           value={inputValue}
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onFocus={handleInputFocus}
           onKeyDown={handleInputKeyDown}
-          autoFocus={autoFocus}
           placeholder={placeholder || (allowAlpha ? "Enter color (e.g. #FF0000CC)" : "Enter color")}
           disabled={disabled}
           className={cn(

@@ -10,7 +10,7 @@ public class NewPlanButton : ViewBase
         var jobService = UseService<IJobService>();
         var configService = UseService<IConfigService>();
         var dialogOpen = UseState(false);
-        var lastSelectedProject = UseState("[Auto]");
+        var lastSelectedProjects = UseState<string[]>(["[Auto]"]);
 
         var projectNames = configService.Projects.Select(p => p.Name).ToList();
 
@@ -27,13 +27,14 @@ public class NewPlanButton : ViewBase
         if (dialogOpen.Value)
             elements.Add(new CreatePlanDialog(
                 projectNames,
-                (description, project) =>
+                (description, projects, priority) =>
                 {
-                    lastSelectedProject.Set(project);
-                    jobService.StartJob("MakePlan", "-Description", $"{description} [FORCE]", "-Project", project);
+                    lastSelectedProjects.Set(projects);
+                    var project = string.Join(",", projects);
+                    jobService.StartJob("MakePlan", "-Description", $"{description} [FORCE]", "-Project", project, "-Priority", priority.ToString());
                 },
                 () => dialogOpen.Set(false),
-                lastSelectedProject.Value
+                lastSelectedProjects.Value
             ));
 
         return new Fragment(elements.ToArray());
