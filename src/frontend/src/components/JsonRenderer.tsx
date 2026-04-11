@@ -133,14 +133,10 @@ export const JsonRenderer = ({ data, initialExpanded }: JsonRendererProps) => {
     computeExpandedPaths(parsedData, initialExpanded),
   );
 
-  // Track previous props to detect changes during render (React-recommended pattern)
-  const [prevData, setPrevData] = useState(data);
-  const [prevInitialExpanded, setPrevInitialExpanded] = useState(initialExpanded);
-
-  // Reset expansion state when data or initialExpanded changes (during render, not in effect)
-  if (data !== prevData || initialExpanded !== prevInitialExpanded) {
-    setPrevData(data);
-    setPrevInitialExpanded(initialExpanded);
+  // Reset expansion state when data or initialExpanded changes
+  const [prevId, setPrevId] = useState({ data, initialExpanded });
+  if (data !== prevId.data || initialExpanded !== prevId.initialExpanded) {
+    setPrevId({ data, initialExpanded });
     setExpanded(computeExpandedPaths(parsedData, initialExpanded));
   }
 

@@ -45,7 +45,6 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
   const handleKeyDown = useEnterKeyBlur(onSubmit);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     savePosition();
     onChange(e);
@@ -102,7 +101,6 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             maxLength={props.maxLength}
             minLength={props.minLength}
             pattern={props.pattern}
-            autoFocus={props.autoFocus}
             onChange={handleChange}
             onBlur={onBlur}
             onFocus={onFocus}

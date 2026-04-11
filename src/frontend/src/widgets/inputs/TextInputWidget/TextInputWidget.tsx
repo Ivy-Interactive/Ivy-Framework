@@ -56,6 +56,14 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     }
   });
 
+  const hasAutoFocusedRef = useRef(false);
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current && inputRef.current) {
+      hasAutoFocusedRef.current = true;
+      inputRef.current.focus();
+    }
+  }, [autoFocus, disabled]);
+
   const { isRecording, startRecording, stopRecording } = useDictation({
     dictationUploadUrl,
   });

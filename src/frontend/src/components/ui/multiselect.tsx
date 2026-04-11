@@ -116,6 +116,14 @@ const MultipleSelector = React.forwardRef<
     const [inputValue, setInputValue] = React.useState("");
     const measureRef = React.useRef<HTMLDivElement>(null);
     const [visibleCount, setVisibleCount] = React.useState(maxVisibleBadges ?? 1);
+    const hasAutoFocusedRef = React.useRef(false);
+
+    React.useEffect(() => {
+      if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+        hasAutoFocusedRef.current = true;
+        inputRef.current?.focus();
+      }
+    }, [autoFocus, disabled]);
 
     const updateOpenDirection = React.useCallback(() => {
       const trigger = triggerWrapperRef.current;
@@ -452,7 +460,6 @@ const MultipleSelector = React.forwardRef<
                   });
                   onFocus?.(e);
                 }}
-                autoFocus={autoFocus}
                 placeholder={
                   hidePlaceholderWhenSelected && value.length > 0 ? undefined : placeholder
                 }

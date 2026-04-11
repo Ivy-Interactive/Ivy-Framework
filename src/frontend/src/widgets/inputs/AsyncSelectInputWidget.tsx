@@ -75,10 +75,12 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
     eventHandler("OnSelect", id, []);
   };
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const hasAutoFocusedRef = useRef(false);
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
+      buttonRef.current?.focus();
       handleSelect();
     }
   }, [autoFocus, disabled, handleSelect]);
@@ -152,9 +154,9 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   return (
     <div>
       <button
+        ref={buttonRef}
         type="button"
         disabled={disabled}
-        autoFocus={autoFocus}
         onClick={handleSelect}
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget)) {

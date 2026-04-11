@@ -7,6 +7,7 @@ import { useEventHandler } from "@/components/event-handler";
 import { MenuItem } from "@/types/widgets";
 
 const ButtonWithTooltip = withTooltip(Button);
+const EMPTY_ITEMS: MenuItem[] = [];
 
 interface ToolbarWidgetProps {
   id: string;
@@ -82,7 +83,7 @@ const ToolbarItemGroup: React.FC<ToolbarItemGroupProps> = ({
 
 export const ToolbarWidget: React.FC<ToolbarWidgetProps> = ({
   id,
-  items = [],
+  items = EMPTY_ITEMS,
   disabled = false,
 }) => {
   const eventHandler = useEventHandler();

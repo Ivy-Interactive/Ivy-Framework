@@ -162,6 +162,112 @@ interface GroupedBlock {
   runs: { run: TextRun; index: number }[];
 }
 
+function renderGroup(
+  group: GroupedBlock,
+  groupIndex: number,
+  events: string[],
+  eventHandler: ReturnType<typeof useEventHandler>,
+  id: string,
+) {
+  if (group.type === "bullet") {
+    return (
+      <ul key={`ul-${groupIndex}`} className={typography.ul}>
+        {group.runs.map(({ run, index }) => (
+          <li
+            key={`li-${index}-${run.content.length}`}
+            className={run.bulletItem && run.bulletItem > 1 ? "ml-4" : undefined}
+          >
+            {renderInlineContent(run, index, events, eventHandler, id)}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (group.type === "ordered") {
+    return (
+      <ol key={`ol-${groupIndex}`} className={typography.ol}>
+        {group.runs.map(({ run, index }) => (
+          <li key={`li-${index}-${run.content.length}`}>
+            {renderInlineContent(run, index, events, eventHandler, id)}
+          </li>
+        ))}
+      </ol>
+    );
+  }
+
+  // Inline group — render each run individually with block-level wrappers
+  return group.runs.map(({ run, index }) => {
+    const key = `run-${index}-${run.content.length}`;
+    if (run.lineBreak) {
+      return <br key={key} />;
+    }
+
+    if (run.horizontalRule) {
+      return <hr key={key} className={typography.hr} />;
+    }
+
+    if (run.heading && run.heading >= 1 && run.heading <= 6) {
+      const Tag = `h${run.heading}` as keyof React.JSX.IntrinsicElements;
+      const hClass = headingClasses[run.heading] || "";
+      return (
+        <Tag key={key} className={hClass}>
+          {renderInlineContent(run, index, events, eventHandler, id)}
+        </Tag>
+      );
+    }
+
+    if (run.codeBlock !== undefined) {
+      return (
+        <pre key={key} className="rounded-md bg-muted p-4 overflow-x-auto slim-scrollbar">
+          <code className={run.codeBlock ? `language-${run.codeBlock}` : undefined}>
+            {run.content}
+          </code>
+        </pre>
+      );
+    }
+
+    if (run.blockquote) {
+      return (
+        <blockquote key={key} className={typography.blockquote}>
+          {renderInlineContent(run, index, events, eventHandler, id)}
+        </blockquote>
+      );
+    }
+
+    if (run.table) {
+      return <MarkdownRenderer key={key} content={run.table} />;
+    }
+
+    if (run.math === "display") {
+      try {
+        const html = katex.renderToString(run.content, {
+          throwOnError: false,
+          displayMode: true,
+        });
+        return <div key={key} className="my-4" dangerouslySetInnerHTML={{ __html: html }} />;
+      } catch {
+        // If KaTeX rendering fails, display raw content
+        return (
+          <div key={key} className="my-4">
+            {run.content}
+          </div>
+        );
+      }
+    }
+
+    if (run.paragraph) {
+      return (
+        <p key={key} className={typography.p}>
+          {renderInlineContent(run, index, events, eventHandler, id)}
+        </p>
+      );
+    }
+
+    return renderInlineContent(run, index, events, eventHandler, id);
+  });
+}
+
 function groupRuns(allRuns: TextRun[]): GroupedBlock[] {
   const groups: GroupedBlock[] = [];
   let currentGroup: GroupedBlock | null = null;
@@ -254,113 +360,11 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
       style={styles}
       className={cn(noWrap && "whitespace-nowrap", density && scaleClasses[density])}
     >
-      {groups.map((group, groupIndex) => {
-        if (group.type === "bullet") {
-          return (
-            <ul key={`group-${groupIndex}`} className={typography.ul}>
-              {group.runs.map(({ run, index }) => (
-                <li
-                  key={`run-${index}`}
-                  className={run.bulletItem && run.bulletItem > 1 ? "ml-4" : undefined}
-                >
-                  {renderInlineContent(run, index, events, eventHandler, id)}
-                </li>
-              ))}
-            </ul>
-          );
-        }
-
-        if (group.type === "ordered") {
-          return (
-            <ol key={`group-${groupIndex}`} className={typography.ol}>
-              {group.runs.map(({ run, index }) => (
-                <li key={`run-${index}`}>
-                  {renderInlineContent(run, index, events, eventHandler, id)}
-                </li>
-              ))}
-            </ol>
-          );
-        }
-
-        // Inline group — render each run individually with block-level wrappers
-        return group.runs.map(({ run, index }) => {
-          if (run.lineBreak) {
-            return <br key={`run-${index}`} />;
-          }
-
-          if (run.horizontalRule) {
-            return <hr key={`run-${index}`} className={typography.hr} />;
-          }
-
-          if (run.heading && run.heading >= 1 && run.heading <= 6) {
-            const Tag = `h${run.heading}` as keyof React.JSX.IntrinsicElements;
-            const hClass = headingClasses[run.heading] || "";
-            return (
-              <Tag key={`run-${index}`} className={hClass}>
-                {renderInlineContent(run, index, events, eventHandler, id)}
-              </Tag>
-            );
-          }
-
-          if (run.codeBlock !== undefined) {
-            return (
-              <pre
-                key={`run-${index}`}
-                className="rounded-md bg-muted p-4 overflow-x-auto slim-scrollbar"
-              >
-                <code className={run.codeBlock ? `language-${run.codeBlock}` : undefined}>
-                  {run.content}
-                </code>
-              </pre>
-            );
-          }
-
-          if (run.blockquote) {
-            return (
-              <blockquote key={`run-${index}`} className={typography.blockquote}>
-                {renderInlineContent(run, index, events, eventHandler, id)}
-              </blockquote>
-            );
-          }
-
-          if (run.table) {
-            return <MarkdownRenderer key={`run-${index}`} content={run.table} />;
-          }
-
-          if (run.math === "display") {
-            try {
-              const html = katex.renderToString(run.content, {
-                throwOnError: false,
-                displayMode: true,
-              });
-              return (
-                <div
-                  key={`run-${index}`}
-                  className="my-4"
-                  dangerouslySetInnerHTML={{ __html: html }}
-                />
-              );
-            } catch {
-              // If KaTeX rendering fails, display raw content
-              return (
-                <div key={`run-${index}`} className="my-4">
-                  {run.content}
-                </div>
-              );
-            }
-          }
-
-          if (run.paragraph) {
-            return (
-              <p key={`run-${index}`} className={typography.p}>
-                {renderInlineContent(run, index, events, eventHandler, id)}
-              </p>
-            );
-          }
-
-          return renderInlineContent(run, index, events, eventHandler, id);
-        });
-      })}
+      {groups.map((group, groupIndex) => (
+        <React.Fragment key={`group-${groupIndex}`}>
+          {renderGroup(group, groupIndex, events, eventHandler, id)}
+        </React.Fragment>
+      ))}
     </div>
   );
 };

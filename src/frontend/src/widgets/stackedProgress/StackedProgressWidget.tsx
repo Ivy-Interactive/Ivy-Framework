@@ -25,7 +25,7 @@ interface StackedProgressWidgetProps {
 
 export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
   id,
-  segments = [],
+  segments = EMPTY_ARRAY,
   barHeight = 8,
   showLabels = false,
   rounded = true,
