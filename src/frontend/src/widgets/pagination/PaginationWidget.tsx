@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/pagination";
 import { useEventHandler } from "@/components/event-handler";
 import { cn } from "@/lib/utils";
+import { Densities } from "@/types/density";
 
 interface PaginationWidgetProps {
   id: string;
@@ -18,6 +19,7 @@ interface PaginationWidgetProps {
   siblings?: number;
   boundaries?: number;
   disabled?: boolean;
+  density?: Densities;
 }
 
 export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
@@ -27,6 +29,7 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
   siblings = 1,
   boundaries = 1,
   disabled = false,
+  density,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -57,6 +60,7 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
+            density={density}
             aria-disabled={disabled || !page || page === 1}
             className={cn(
               "select-none",
@@ -76,6 +80,7 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
                 (isOneGap ? (
                   <PaginationItem>
                     <PaginationLink
+                      density={density}
                       aria-disabled={disabled}
                       className={disabled ? "pointer-events-none opacity-50" : undefined}
                       onClick={
@@ -88,11 +93,12 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
                   </PaginationItem>
                 ) : (
                   <PaginationItem>
-                    <PaginationEllipsis />
+                    <PaginationEllipsis density={density} />
                   </PaginationItem>
                 ))}
               <PaginationItem>
                 <PaginationLink
+                  density={density}
                   aria-disabled={disabled}
                   className={disabled ? "pointer-events-none opacity-50" : undefined}
                   onClick={p === page ? undefined : () => eventHandler("OnChange", id, [p])}
@@ -106,6 +112,7 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
         })}
         <PaginationItem>
           <PaginationNext
+            density={density}
             aria-disabled={disabled || !page || page === numPages}
             className={cn(
               "select-none",
