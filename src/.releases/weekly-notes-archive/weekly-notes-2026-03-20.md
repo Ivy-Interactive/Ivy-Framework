@@ -7,7 +7,7 @@
 
 ### VideoPlayer: time range, events, and playback speed
 
-The [**VideoPlayer**](https://docs.ivy.app/widgets/primitives/video-player) widget now supports **time range** (`StartTime` / `EndTime` in seconds), **playback events** (`OnPlay`, `OnPause`, `OnEnded`, `OnLoaded`—each with async, sync-with-event, and parameterless overloads), and **playback speed** (`PlaybackRate`, minimum 0.25×).
+The [**VideoPlayer**](https://docs.ivy.app/widgets/primitives/video-player) widget now supports **time range** (`StartTime` / `EndTime` in seconds), **playback events** (`HandlePlay`, `HandlePause`, `HandleEnded`, `HandleLoaded`—each with async, sync-with-event, and parameterless overloads), and **playback speed** (`PlaybackRate`, minimum 0.25×).
 
 **Note:** Time ranges use Media Fragments (HTML5) and embed parameters (YouTube). `PlaybackRate` applies to native HTML5 video only; YouTube embeds do not change speed.
 
@@ -19,10 +19,10 @@ var video = new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .StartTime(2)  // time range
     .EndTime(6)  // time range
     .PlaybackRate(1.5)  // playback speed
-    .OnPlay(_ => playCount.Set(playCount.Value + 1))  // event: play
-    .OnPause(_ => Console.WriteLine("Video paused"))  // event: pause
-    .OnEnded(_ => completed.Set(true))  // event: ended
-    .OnLoaded(_ => Console.WriteLine("Video ready"))  // event: metadata loaded
+    .HandlePlay(_ => playCount.Set(playCount.Value + 1))  // event: play
+    .HandlePause(_ => Console.WriteLine("Video paused"))  // event: pause
+    .HandleEnded(_ => completed.Set(true))  // event: ended
+    .HandleLoaded(_ => Console.WriteLine("Video ready"))  // event: metadata loaded
     .Height(Size.Units(50));  // layout
 ```
 
