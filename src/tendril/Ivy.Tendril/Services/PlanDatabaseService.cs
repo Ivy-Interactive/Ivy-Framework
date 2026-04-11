@@ -1044,6 +1044,70 @@ public class PlanDatabaseService : IPlanDatabaseService
         }
     }
 
+    public Dictionary<string, string> GetAllPrStatuses()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "SELECT PrUrl, Status FROM PrStatuses";
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                result[reader.GetString(0)] = reader.GetString(1);
+            return result;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    public void UpsertPrStatus(string prUrl, string owner, string repo, string status, DateTime lastChecked)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = """
+                              INSERT INTO PrStatuses (PrUrl, Owner, Repo, Status, LastChecked)
+                              VALUES (@url, @owner, @repo, @status, @checked)
+                              ON CONFLICT(PrUrl) DO UPDATE SET
+                                  Status = excluded.Status,
+                                  LastChecked = excluded.LastChecked
+                              """;
+            cmd.Parameters.AddWithValue("@url", prUrl);
+            cmd.Parameters.AddWithValue("@owner", owner);
+            cmd.Parameters.AddWithValue("@repo", repo);
+            cmd.Parameters.AddWithValue("@status", status);
+            cmd.Parameters.AddWithValue("@checked", lastChecked.ToString("O", CultureInfo.InvariantCulture));
+            cmd.ExecuteNonQuery();
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public List<string> GetNonMergedPrUrls()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "SELECT PrUrl FROM PrStatuses WHERE Status != 'Merged'";
+            var result = new List<string>();
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+                result.Add(reader.GetString(0));
+            return result;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
     public void RebuildFtsIndex()
     {
         _lock.EnterWriteLock();

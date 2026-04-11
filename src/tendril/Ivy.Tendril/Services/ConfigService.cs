@@ -85,9 +85,23 @@ public record EditorConfig
 
 public record PromptwareConfig
 {
+    public string Profile { get; set; } = "";
+    public List<string> AllowedTools { get; set; } = new();
+}
+
+public record AgentProfileConfig
+{
+    public string Name { get; set; } = "";
     public string Model { get; set; } = "";
     public string Effort { get; set; } = "";
-    public List<string> AllowedTools { get; set; } = new();
+    public string Arguments { get; set; } = "";
+}
+
+public record AgentConfig
+{
+    public string Name { get; set; } = "";
+    public string Arguments { get; set; } = "";
+    public List<AgentProfileConfig> Profiles { get; set; } = new();
 }
 
 public record LlmConfig
@@ -103,13 +117,13 @@ public class TendrilSettings
     public int JobTimeout { get; set; } = 30;
     public int StaleOutputTimeout { get; set; } = 10;
     public int MaxConcurrentJobs { get; set; } = 5;
-    public string DefaultEffort { get; set; } = "high";
     public List<ProjectConfig> Projects { get; set; } = new();
     public List<VerificationConfig> Verifications { get; set; } = new();
     public string PlanTemplate { get; set; } = "";
     public EditorConfig Editor { get; set; } = new();
     public LlmConfig? Llm { get; set; }
     public Dictionary<string, PromptwareConfig> Promptwares { get; set; } = new();
+    public List<AgentConfig> CodingAgents { get; set; } = new();
     public bool Telemetry { get; set; } = true;
 
     public List<LevelConfig> Levels { get; set; } = new()
@@ -124,6 +138,7 @@ public class TendrilSettings
 public class ConfigService : IConfigService
 {
     private string[]? _levelNamesCache;
+    private string? _pendingCodingAgent;
     private ProjectConfig? _pendingProject;
     private string? _pendingTendrilHome;
     private List<VerificationConfig>? _pendingVerificationDefinitions;
@@ -272,6 +287,16 @@ public class ConfigService : IConfigService
         return _pendingTendrilHome;
     }
 
+    public void SetPendingCodingAgent(string name)
+    {
+        _pendingCodingAgent = name;
+    }
+
+    public string? GetPendingCodingAgent()
+    {
+        return _pendingCodingAgent;
+    }
+
     public void SetPendingProject(ProjectConfig project)
     {
         _pendingProject = project;
@@ -299,13 +324,12 @@ public class ConfigService : IConfigService
 
     public void CompleteOnboarding(string tendrilHome)
     {
-        // Update paths
         SetTendrilHome(tendrilHome);
 
-        // Use current settings (already initialized or updated during onboarding)
-        // If they are empty, serialize defaults
-        SaveSettings();
+        if (_pendingCodingAgent != null)
+            Settings.CodingAgent = _pendingCodingAgent;
 
+        SaveSettings();
         NeedsOnboarding = false;
     }
 
@@ -423,17 +447,11 @@ public class ConfigService : IConfigService
             Settings.Editor.IsAvailable = IsCommandAvailable(Settings.Editor.Command);
         }
 
-        // Expand default effort
-        Settings.DefaultEffort = VariableExpansion.ExpandVariables(Settings.DefaultEffort, TendrilHome);
-
         // Expand promptware configs
         if (Settings.Promptwares != null)
             foreach (var kvp in Settings.Promptwares.ToList())
             {
                 var config = kvp.Value;
-                config.Model = VariableExpansion.ExpandVariables(config.Model, TendrilHome);
-                config.Effort = VariableExpansion.ExpandVariables(config.Effort, TendrilHome);
-
                 if (config.AllowedTools != null)
                     for (var i = 0; i < config.AllowedTools.Count; i++)
                         config.AllowedTools[i] = VariableExpansion.ExpandVariables(config.AllowedTools[i], TendrilHome);

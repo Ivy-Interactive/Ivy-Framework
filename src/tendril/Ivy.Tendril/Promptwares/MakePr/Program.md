@@ -1,5 +1,7 @@
 # MakePr
 
+**Note:** This promptware is stack-agnostic. Stack-specific operations (build, format, test) are defined in `config.yaml` under `verifications`. Examples in this document use multiple tech stacks for illustration.
+
 Create GitHub pull requests and apply PR rules.
 
 **!CRITICAL: ALL steps are mandatory. Do not skip PR rule application.**
@@ -57,6 +59,8 @@ For each worktree:
 4. `git push -u origin <branch>`
 
 > **Stale remote tracking refs warning:** A ref appearing in `git branch -a` as `remotes/origin/<branch>` does NOT guarantee the branch exists on GitHub. Always verify with `gh api repos/<owner>/<repo>/branches/<branch>` or `git ls-remote origin <branch>` before assuming the push succeeded.
+>
+> **Push rejected (non-fast-forward) with diverged history:** If `git push` fails with non-fast-forward and the remote branch contains commits from a different plan (plan ID reuse or prior aborted execution), **force-push** with `git push -f -u origin <branch>`. This is safe because the plan branch is private to this plan's execution and any diverged remote state is stale.
 
 ### 2.5. Upload Artifacts
 
@@ -150,9 +154,13 @@ When the PR status is `CONFLICTING`, resolve the conflict locally before retryin
    git commit -m "[<planId>] Resolve merge conflicts with <default-branch>"
    ```
 
-6. **Quick build check** (if C# files were involved in conflicts):
+6. **Quick build check** (if build-critical files were involved in conflicts):
    ```bash
-   dotnet build --warnaserror
+   # Run your project's build command from config.yaml verifications
+   # Examples:
+   # - .NET: dotnet build --warnaserror
+   # - JavaScript: npm run build
+   # - Go: go build ./...
    ```
    If the build fails, fix the issue and amend the merge commit.
 

@@ -19,6 +19,8 @@ public class SidebarView(
 
     public override object Build()
     {
+        var filtersOpen = UseState(false);
+
         var filteredPlans =
             PlanFilters.ApplyFilters(_plans, _projectFilter.Value, _levelFilter.Value, _textFilter.Value);
 
@@ -34,16 +36,26 @@ public class SidebarView(
             .Select(g => new Option<string>($"{g.Key} ({g.Count()})", g.Key))
             .ToArray<IAnyOption>();
 
-        var header = Layout.Vertical()
-                     | _textFilter.ToSearchInput().Placeholder("Search plans...")
-                     | new Expandable(
-                         "Filters",
-                         Layout.Vertical()
-                         | _projectFilter.ToSelectInput(projectCounts).Placeholder("All Projects").Nullable()
-                             .WithField().Label("Project")
-                         | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable()
-                             .WithField().Label("Level")
-                     ).Open(false).Ghost();
+        var searchInput = _textFilter.ToSearchInput()
+            .Placeholder("Search plans...")
+            .Suffix(
+                new Button()
+                    .Icon(filtersOpen.Value ? Icons.ChevronUp : Icons.ChevronDown)
+                    .Ghost()
+                    .Small()
+                    .OnClick(() => filtersOpen.Set(!filtersOpen.Value))
+            );
+
+        var header = Layout.Vertical() | searchInput;
+
+        if (filtersOpen.Value)
+        {
+            header |= Layout.Vertical()
+                      | _projectFilter.ToSelectInput(projectCounts).Placeholder("All Projects").Nullable()
+                          .WithField().Label("Project")
+                      | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable()
+                          .WithField().Label("Level");
+        }
 
         var content = new List(filteredPlans.Select(plan =>
         {

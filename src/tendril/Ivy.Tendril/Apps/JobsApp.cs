@@ -284,7 +284,7 @@ public class JobsApp : ViewBase
 
             var repoPaths = plan?.GetEffectiveRepoPaths(config) ?? [];
             var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(
-                openFile.Value, () => openFile.Set(null), repoPaths);
+                openFile.Value, () => openFile.Set(null), repoPaths, config);
 
             var planSheet = new Sheet(
                 () => showPlan.Set(null),
@@ -378,13 +378,24 @@ public class JobsApp : ViewBase
         return $"{span.Minutes}m {span.Seconds:D2}s";
     }
 
+    private const int PromptDisplayMaxLength = 150;
+
+    private static string CleanPromptText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return text;
+        var replaced = text.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ");
+        var collapsed = Regex.Replace(replaced, @"\s+", " ");
+        return collapsed.Trim();
+    }
+
     private static string GetPromptDisplay(JobItem j, IPlanReaderService planService)
     {
         // MakePlan jobs: use the -Description arg for display (PlanFile may now hold the folder name)
         if (j.Type == "MakePlan")
         {
-            var desc = GetFullPrompt(j) ?? j.PlanFile;
-            return desc.Length > 50 ? desc[..50] + "..." : desc;
+            var desc = CleanPromptText(GetFullPrompt(j) ?? j.PlanFile);
+            return desc.Length > PromptDisplayMaxLength ? desc[..PromptDisplayMaxLength] + "..." : desc;
         }
 
         // For other jobs, try to read the plan title
@@ -394,14 +405,14 @@ public class JobsApp : ViewBase
             var plan = planService.GetPlanByFolder(fullPath);
             if (plan != null && !string.IsNullOrEmpty(plan.Title))
             {
-                var title = plan.Title;
-                return title.Length > 50 ? title[..50] + "..." : title;
+                var title = CleanPromptText(plan.Title);
+                return title.Length > PromptDisplayMaxLength ? title[..PromptDisplayMaxLength] + "..." : title;
             }
         }
 
         // Fallback to folder name
-        var pf = j.PlanFile;
-        return pf.Length > 50 ? pf[..50] + "..." : pf;
+        var pf = CleanPromptText(j.PlanFile);
+        return pf.Length > PromptDisplayMaxLength ? pf[..PromptDisplayMaxLength] + "..." : pf;
     }
 
     private static string GetStatusMessage(JobItem job)

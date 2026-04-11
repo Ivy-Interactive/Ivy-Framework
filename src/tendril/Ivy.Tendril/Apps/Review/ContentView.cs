@@ -2,6 +2,7 @@ using Ivy.Core;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Apps.Review.Dialogs;
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Ivy.Tendril.Apps.Review;
 
@@ -27,6 +28,7 @@ public class ContentView(
     public override object Build()
     {
         var client = UseService<IClientProvider>();
+        var logger = UseService<ILogger<ContentView>>();
         var copyToClipboard = UseClipboard();
         var openVerification = UseState<string?>(null);
         var openArtifact = UseState<string?>(null);
@@ -130,9 +132,9 @@ public class ContentView(
                                 FileHelper.ReadAllText(recsPath)) ?? new List<RecommendationYaml>()
                             : new List<RecommendationYaml>();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Malformed YAML must not crash the process — file may be partially written by a promptware.
+                        logger.LogWarning(ex, "Failed to parse recommendations.yaml for plan {FolderPath}", folderPath);
                         recs = new List<RecommendationYaml>();
                     }
 
@@ -300,14 +302,16 @@ public class ContentView(
             var commitsTable = new Table(
                 new TableRow(
                         new TableCell("Commit").IsHeader(),
-                        new TableCell("Message").IsHeader()
+                        new TableCell("Message").IsHeader(),
+                        new TableCell("Files").IsHeader()
                     )
                 { IsHeader = true }
             );
             foreach (var row in planData.CommitRows)
                 commitsTable |= new TableRow(
                     new TableCell(new Button(row.ShortHash).Inline().OnClick(() => openCommit.Set(row.Hash))),
-                    new TableCell(row.Title)
+                    new TableCell(row.Title),
+                    new TableCell(row.FileCount?.ToString() ?? "–")
                 );
 
             commitsLayout |= commitsTable;
@@ -449,7 +453,7 @@ public class ContentView(
         {
             var fileRepoPaths = _selectedPlan.GetEffectiveRepoPaths(_config);
             var fileLinkSheet =
-                FileLinkHelper.BuildFileLinkSheet(openFile.Value, () => openFile.Set(null), fileRepoPaths);
+                FileLinkHelper.BuildFileLinkSheet(openFile.Value, () => openFile.Set(null), fileRepoPaths, _config);
             if (fileLinkSheet != null) content |= fileLinkSheet;
         }
 

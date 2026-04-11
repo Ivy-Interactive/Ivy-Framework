@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Ivy.Desktop;
+using Ivy.Tendril.Commands;
 using Ivy.Tendril.Database;
 using Ivy.Tendril.Services;
 using Velopack;
@@ -47,6 +48,10 @@ public class Program
         var pwExitCode = PromptwareCommands.Handle(filteredArgs);
         if (pwExitCode >= 0)
             return pwExitCode;
+
+        var doctorExitCode = DoctorCommand.Handle(filteredArgs);
+        if (doctorExitCode >= 0)
+            return doctorExitCode;
 
         var crashLogPath = GetCrashLogPath();
         WriteCrashLog(crashLogPath, $"[{DateTime.UtcNow:O}] Tendril starting (PID {Environment.ProcessId}) | {GetMemoryStats()}");

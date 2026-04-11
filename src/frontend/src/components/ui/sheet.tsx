@@ -30,7 +30,7 @@ const SheetOverlay = React.forwardRef<
 ));
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
-const sheetVariant = cva("fixed z-50 gap-4 bg-background p-6 outline-none", {
+const sheetVariant = cva("fixed z-50 gap-4 bg-card p-6 outline-none", {
   variants: {
     side: {
       top: "inset-x-0 top-0 border-b shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1),inset_0_-8px_8px_-8px_rgba(0,0,0,0.04)]",

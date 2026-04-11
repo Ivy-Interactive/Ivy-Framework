@@ -5,21 +5,16 @@ namespace Ivy.Tendril.Test;
 public class DatabaseCommandsTests : IDisposable
 {
     private readonly string _dbPath;
-    private readonly string _originalTendrilHome;
 
     public DatabaseCommandsTests()
     {
         var tempDir = Path.Combine(Path.GetTempPath(), $"tendril-test-{Guid.NewGuid():N}");
         Directory.CreateDirectory(tempDir);
         _dbPath = Path.Combine(tempDir, "tendril.db");
-
-        _originalTendrilHome = Environment.GetEnvironmentVariable("TENDRIL_HOME") ?? "";
-        Environment.SetEnvironmentVariable("TENDRIL_HOME", tempDir);
     }
 
     public void Dispose()
     {
-        Environment.SetEnvironmentVariable("TENDRIL_HOME", _originalTendrilHome);
         var dir = Path.GetDirectoryName(_dbPath)!;
         if (Directory.Exists(dir))
             try
@@ -132,21 +127,21 @@ public class DatabaseCommandsTests : IDisposable
     [Fact]
     public void Handle_DbVersion_ReturnsZero()
     {
-        var result = CaptureConsoleOutput(() => { Assert.Equal(0, DatabaseCommands.Handle(["db-version"])); });
+        DatabaseCommands.DbMigrate(_dbPath);
+        CaptureConsoleOutput(() => { Assert.Equal(0, DatabaseCommands.DbVersion(_dbPath)); });
     }
 
     [Fact]
     public void Handle_DbMigrate_ReturnsZero()
     {
-        var result = CaptureConsoleOutput(() => { Assert.Equal(0, DatabaseCommands.Handle(["db-migrate"])); });
+        CaptureConsoleOutput(() => { Assert.Equal(0, DatabaseCommands.DbMigrate(_dbPath)); });
     }
 
     [Fact]
     public void Handle_DbReset_WithForce_ReturnsZero()
     {
         DatabaseCommands.DbMigrate(_dbPath);
-
-        var output = CaptureConsoleOutput(() => { Assert.Equal(0, DatabaseCommands.Handle(["db-reset", "--force"])); });
+        CaptureConsoleOutput(() => { Assert.Equal(0, DatabaseCommands.DbReset(_dbPath, ["db-reset", "--force"])); });
     }
 
     private static string CaptureConsoleOutput(Action action)

@@ -9,7 +9,7 @@ icon: Archive
 # Icebox
 
 <Ingress>
-The Icebox provides an organized cold-storage facility for Plans that are architecturally sound but deemed a lower priority to mitigate Draft clutter.
+Low-priority or “later” plans: **Icebox** state so Drafts stays focused.
 </Ingress>
 
 ## Purpose

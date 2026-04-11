@@ -38,7 +38,7 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({ id, items = EMPTY_ARRAY,
   );
 
   return (
-    <div className={cn("ivy-tree w-full")} role="tree">
+    <div className={cn("ivy-tree flex flex-col gap-1 w-full")} role="tree">
       {items.map((item) => (
         <TreeItem
           key={item.tag || item.label}

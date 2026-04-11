@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Reactive.Disposables;
 using Ivy.Core;
 using Ivy.Core.Apps;
+using Ivy.Tendril.AppShell.Dialogs;
 using Ivy.Tendril.Apps;
 using Ivy.Tendril.Services;
 using Ivy.Tendril.Views;
@@ -57,6 +58,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         var serverArgs = UseService<ServerArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
         var navigator = UseNavigation();
+        var importIssuesDialogOpen = UseState(false);
         UseEffect(() =>
         {
             void OnChanged()
@@ -358,6 +360,10 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         var commonMenuItems = new[]
         {
+            MenuItem.Default("Import Issues from GitHub")
+                .Tag("$import-issues")
+                .Icon(Icons.Download)
+                .OnSelect(() => importIssuesDialogOpen.Set(true)),
             MenuItem.Default("Setup")
                 .Tag("$setup")
                 .Icon(Icons.Construction)
@@ -453,20 +459,23 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         if (config.NeedsOnboarding) return new OnboardingApp();
 
-        return new SidebarLayout(
-            body ?? null!,
-            sidebarMenu,
-            Layout.Vertical().Gap(2)
-            | settings.Header
-            | new NewPlanButton()
-            ,
-            Layout.Vertical(
-                new SidebarNews("https://ivy.app/news.json"),
-                settings.Footer,
-                footer
-            ),
-            settings.Width
-        ).Open(sidebarOpen.Value).MainAppSidebar();
+        return new Fragment(
+            new SidebarLayout(
+                body ?? null!,
+                sidebarMenu,
+                Layout.Vertical().Gap(2)
+                | settings.Header
+                | new NewPlanButton()
+                ,
+                Layout.Vertical(
+                    new SidebarNews("https://ivy.app/news.json"),
+                    settings.Footer,
+                    footer
+                ),
+                settings.Width
+            ).Open(sidebarOpen.Value).MainAppSidebar(),
+            new ImportIssuesDialog(importIssuesDialogOpen, config)
+        );
     }
 
     private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)

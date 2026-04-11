@@ -1,8 +1,38 @@
 codingAgent: claude
+codingAgents:
+- name: claude
+  profiles:
+  - name: deep
+    model: opus
+    effort: max
+  - name: balanced
+    model: sonnet
+    effort: high
+  - name: quick
+    model: haiku
+    effort: low
+- name: codex
+  profiles:
+  - name: deep
+    model: gpt-5.4
+    effort: high
+  - name: balanced
+    model: gpt-5.4-mini
+    effort: medium
+  - name: quick
+    model: gpt-5.3-codex
+    effort: low
+- name: gemini
+  profiles:
+  - name: deep
+    model: gemini-3-flash-preview
+  - name: balanced
+    model: gemini-2.5-flash
+  - name: quick
+    model: gemini-2.5-flash-lite
 jobTimeout: 30
 staleOutputTimeout: 10
 maxConcurrentJobs: 10
-defaultEffort: high
 projects:
 - name: Framework
   color: Blue
@@ -178,10 +208,10 @@ projects:
   - D:\Repos\_Ivy\Ivy-Mcp
 verifications:
 - name: DotnetBuild
-  prompt: Run `dotnet build --warnaserror` in the project repo and verify it succeeds with zero errors and zero warnings.
+  prompt: Run `dotnet build --warnaserror` in the plan's worktree directory (not the original repo) and verify it succeeds with zero errors and zero warnings.
 - name: DotnetTest
   prompt: >
-    Run dotnet tests in the project repo. 1. Read the plan revision's **## Tests** section for test scope instructions. 2. If the plan specifies a `dotnet test --filter` expression, run:
+    Run dotnet tests in the plan's worktree directory (not the original repo). 1. Read the plan revision's **## Tests** section for test scope instructions. 2. If the plan specifies a `dotnet test --filter` expression, run:
        `dotnet test --filter "<filter from plan>"`
        Common filter examples:
        - By class: `dotnet test --filter "FullyQualifiedName~MyTestClass"`
@@ -191,7 +221,7 @@ verifications:
        "No test filter specified in plan. Plans must specify a dotnet test --filter expression in the ## Tests section."
     6. Verify all executed tests pass.
 - name: DotnetFormat
-  prompt: Run `dotnet format` in the project repo, scoped to only the files changed by this plan's commits. Get the list of changed .cs files with `git diff --name-only --diff-filter=ACM HEAD~<N> -- '*.cs'` (where N is the number of commits in this execution), then run `dotnet format --include <files>`. If it modifies any files, stage and commit them. If no .cs files were changed, skip this verification.
+  prompt: Run `dotnet format` in the plan's worktree directory (not the original repo), scoped to only the files changed by this plan's commits. Get the list of changed .cs files with `git diff --name-only --diff-filter=ACM HEAD~<N> -- '*.cs'` (where N is the number of commits in this execution), then run `dotnet format --include <files>`. If it modifies any files, stage and commit them. If no .cs files were changed, skip this verification.
 - name: FrontendLint
   prompt: Run `cd src\frontend && npm run lint && npm run format:check` and verify no errors.
 - name: IvyFrameworkVerification
@@ -253,8 +283,7 @@ llm:
   model: gpt-4o-mini
 promptwares:
   MakePlan:
-    model: sonnet
-    effort: high
+    profile: balanced
     allowedTools:
     - Read
     - Glob
@@ -263,8 +292,7 @@ promptwares:
     - Write
     - Edit
   ExecutePlan:
-    model: opus
-    effort: max
+    profile: deep
     allowedTools:
     - Read
     - Write
@@ -273,8 +301,7 @@ promptwares:
     - Grep
     - Bash
   ExpandPlan:
-    model: sonnet
-    effort: high
+    profile: balanced
     allowedTools:
     - Read
     - Glob
@@ -282,16 +309,14 @@ promptwares:
     - Bash
     - Write
   MakePr:
-    model: sonnet
-    effort: medium
+    profile: balanced
     allowedTools:
     - Read
     - Bash
     - Write
     - Edit
   UpdatePlan:
-    model: sonnet
-    effort: high
+    profile: balanced
     allowedTools:
     - Read
     - Glob
@@ -299,21 +324,18 @@ promptwares:
     - Bash
     - Write
   SplitPlan:
-    model: sonnet
-    effort: medium
+    profile: balanced
     allowedTools:
     - Read
     - Bash
     - Write
   CreateIssue:
-    model: sonnet
-    effort: medium
+    profile: balanced
     allowedTools:
     - Read
     - Bash
   IvyFrameworkVerification:
-    model: sonnet
-    effort: high
+    profile: balanced
     allowedTools:
     - Read
     - Write

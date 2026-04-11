@@ -11,30 +11,25 @@ icon: Feather
 # Drafts
 
 <Ingress>
-The Drafts application (Internally tracked as `PlansApp`) serves as the ideation funnel for Tendril. It collects raw user requirements and translates them into actionable architectural guidelines.
+Plans in **Draft** (or **Blocked**): shape the work before execution (`PlansApp`).
 </Ingress>
 
-## Purpose
+## Role
 
-Any new Plan born from the Tendril environment initializes in the `Draft` state (or `Blocked` if awaiting clarification). This view ensures that humans and promptwares collaborate actively to refine requirements before writing a single line of application source code.
+New plans start here. Refine the plan with the UI and promptwares before heavy coding.
 
-## The Draft Interface
+## UI
 
-The view contains a real-time reactive Sidebar tracking filtered Draft states against the main reading pane.
+- **Sidebar** — Filtered draft list; main pane shows the selected plan.
+- **Content** — Latest revision markdown (problem, approach, tests).
+- **Project** — Settings from `config.yaml` for that repo.
 
-When viewing an active draft, the tool presents:
+## Actions
 
-- **The Objective File**: Sourced directly from `revisions/revision-{idx}.md` outlining the structured Problem, Architectural Solution, and target Tests.
-- **Project Overrides**: Read-outs of designated `config.yaml` target parameters governing execution boundaries.
+1. **ExecutePlan** — Lock revision, create worktree, run the main execution agent.
+2. **ExpandPlan** — Flesh out a thin plan with more implementation detail.
+3. **Shelve to Icebox** — Move to **Icebox** to clear the draft list.
 
-## Plan Action Triggers
+## Files on disk
 
-The Draft view governs the invocation triggers that physically turn text into running agents:
-
-1. **Launch ExecutePlan** — Commits the current drafted revision format, establishes the headless git worktree isolation sandbox, and dispatches the main execution Agent.
-2. **Launch ExpandPlan** — Interrogates a thin architectural concept through a heavier Promptware specifically designed to inject rigid implementation specifics if the user hasn't provided enough guidance.
-3. **Shelve to Icebox** — Sends an active Draft directly to cold storage (`Icebox`) reducing UI clutter.
-
-## Synchronization
-
-Because Tendril is tightly integrated with the Host OS infrastructure, you can manually compose an `.md` document inside the `TENDRIL_HOME/Inbox` folder, or modify an existing Draft markdown with your favorite IDE (like VSCode). The Drafts App utilizes active filesystem watchers to propagate external text modifications onto your graphical interface recursively without needing manual refreshes.
+Edits under `TENDRIL_HOME/Inbox` or in a plan folder in your editor sync back via filesystem watchers—no manual refresh needed.

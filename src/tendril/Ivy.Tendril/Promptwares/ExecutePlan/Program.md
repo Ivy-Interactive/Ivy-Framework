@@ -1,5 +1,7 @@
 # ExecutePlan
 
+**Note:** This promptware is stack-agnostic. Stack-specific operations (build, format, test) are defined in `config.yaml` under `verifications`. Examples in this document use multiple tech stacks for illustration.
+
 Execute an approved plan in isolated git worktrees.
 
 ## Context
@@ -16,6 +18,8 @@ Read `config.yaml` from the `TENDRIL_CONFIG` environment variable (absolute path
 The launcher script sets the working directory to the project's primary repo.
 
 **Note:** Plans are often executed multiple times. For example, a reviewer may not be satisfied with the first execution and sends the plan back to Draft with comments (via UpdatePlan). When re-executing, the worktree branch from the previous run may already exist — handle this gracefully (delete old worktree first, or create with a new branch suffix). Check for existing artifacts and verification reports from prior runs.
+
+**Resume-vs-redo on re-execution:** Before deleting anything, run an integrity check on the prior run. If `plan.yaml` has commits populated and all verifications `Pass`, every `Pass` verification has a report, `artifacts/summary.md` exists, the worktree is clean with HEAD matching the last recorded commit, and the expected code changes are present in the files — then **resume** (log it and exit successfully) rather than redoing work. Redoing creates new commit hashes and breaks downstream MakePr references. Only fall back to the full re-execution flow if any of those checks fail.
 
 ## Time Budget Awareness
 
@@ -102,6 +106,12 @@ After reading the plan revision, scan it for code validation markers to detect s
 
 **Note:** This step runs against the original repo (before worktrees are created), since it validates whether the plan's assumptions about the codebase are still accurate.
 
+5. **Self-flagged redundancy check** — In addition to code block validation, scan the plan revision for markers where the plan itself admits it is already done:
+   - A `<details><summary>Still relevant?</summary>` block whose body starts with `No.`
+   - Phrases like *"Already applied"*, *"This plan is redundant"*, *"This plan is superseded"*, or *"previously attempted … was merged to main via PR #NNNN"* in the `## Problem` or `## Solution` sections.
+
+   If any marker is found, verify the claim: run `gh pr view <cited PR> --json state,mergeCommit` (must be `MERGED`), confirm the cited commit is in `git log origin/<default-branch>`, and byte-compare the plan's proposed code against the current file contents. If all three checks pass, write `verification/PreExecution.md` with `Result: Fail`, write `artifacts/summary.md` documenting the no-op, set every `plan.yaml` verification to `Skipped`, and fail the plan **without creating a worktree** — running verifications on unchanged code wastes the time budget and produces a 0-commit PR that MakePr cannot process.
+
 ### 1.8. Auto-Commit Uncommitted Changes
 
 Before creating worktrees, check each repo for uncommitted changes and automatically commit them. This prevents silent data loss when worktrees are created from `origin/<default-branch>` and later merged back.
@@ -147,6 +157,7 @@ if [[ -n $(git status --porcelain) ]]; then
   # After resolving stale files, check if there are still changes to commit
   if [[ -n $(git status --porcelain) ]]; then
     git add -A
+    git reset -- '*.bak_*' 2>/dev/null || true
     git commit -m "WIP: Auto-commit before plan execution [$(date -u +%Y-%m-%dT%H:%M:%SZ)]"
     git push origin $(git branch --show-current)
     echo "Changes committed and pushed successfully"
@@ -171,12 +182,15 @@ For each repo listed in `plan.yaml` `repos` (or the project's repos from `config
 
 1. Fetch latest from remote: `git fetch origin`
 2. Detect the default branch: `git symbolic-ref refs/remotes/origin/HEAD | sed 's|refs/remotes/origin/||'` (usually `master` or `main`)
-3. If the worktree or branch already exists from a prior execution, remove it first:
+3. If the worktree or branch already exists from a prior execution, remove it first. A prior run may have left a **stale directory** (the filesystem tree still exists but git no longer tracks it as a worktree — there's no `.git` file at the worktree root). In that case `git worktree remove` will fail with "is not a working tree"; you must also `rm -rf` the directory. **Do all three unconditionally** so the next `git worktree add` starts from a clean slate:
 
 ```bash
 git worktree remove "<PlanFolder>/worktrees/<repo-folder-name>" --force 2>/dev/null
 git branch -D "plan-<planId>-<repo-folder-name>" 2>/dev/null
+rm -rf "<PlanFolder>/worktrees/<repo-folder-name>"
 ```
+
+**Note on stale directories:** If a stale worktree directory exists and you run `git -C <stale-dir> status`, git silently walks up the parent chain and reports the state of the main repo — making it look like the "worktree" is simply on `main`. Do not trust that output. Before assuming a prior worktree is intact, verify with `git -C <main-repo> worktree list | grep <path>` or check that `<worktree-path>/.git` exists.
 
 1. Create worktree branching from the remote default branch:
 
@@ -196,7 +210,9 @@ git worktree add "<PlanFolder>/worktrees/<RepoName>" -b "plan-<PlanId>-<RepoName
 
 **Important:** Always branch from `origin/<default-branch>`, not local HEAD. This ensures the PR only contains the plan's commits, not any unpushed local work.
 
-### 2.5. Setup Frontend Dependencies
+### 2.5. Setup Frontend Dependencies (JavaScript/TypeScript Projects Only)
+
+**Note:** This section applies only to projects using npm/pnpm. Skip if not applicable.
 
 **!CRITICAL: Frontend builds in worktrees have known issues with npm package module resolution that cause 15-25 minute timeouts. Follow this workaround to avoid them.**
 
@@ -255,7 +271,7 @@ If the plan **modifies frontend code** (adding/editing `.tsx`, `.ts`, `.css` fil
 
 ### 3. Handle Cross-Repo References
 
-Projects may reference other repos via absolute paths in `.csproj` files (e.g. `<ProjectReference Include="/path/to/other-repo/src/Project.csproj" />`).
+Projects may reference other repos via absolute paths in project files (e.g. `.csproj`, `go.mod`, `package.json`).
 
 These paths point to the original repos, not the worktree copies. Since we only modify files in the worktree, this is usually fine — the build references the original (stable) code.
 
@@ -273,23 +289,22 @@ Work exclusively in the worktree directories. Follow the plan's latest revision:
 
 Make logically grouped commits in the worktree(s). Each commit should be a coherent unit of work.
 
-Before each commit, run formatting/linting as defined by the project's verifications in `config.yaml`. Common patterns:
+Before each commit, run formatting/linting as defined by the project's verifications in `config.yaml`. The exact commands depend on your stack's verification definitions.
 
-**Frontend files** (in directories containing `package.json`):
-
-```bash
-cd <frontend-dir> && npm run format && npm run lint:fix && cd <back-to-root>
-```
-
-**C# files**:
+**Example patterns** (actual commands come from config.yaml verifications):
 
 ```bash
-# Get changed .cs files from this execution's commits
-CHANGED_CS=$(git diff --name-only --diff-filter=ACM HEAD~1 -- '*.cs' | tr '\n' ' ')
-if [ -n "$CHANGED_CS" ]; then
-  dotnet format --include $CHANGED_CS
-fi
+# Get changed files from this execution's commits
+CHANGED_FILES=$(git diff --name-only --diff-filter=ACM HEAD~1)
+
+# Run your formatter on changed files (examples):
+# - .NET: dotnet format --include <files>
+# - JavaScript: npm run format <files>
+# - Python: black <files>
+# - Go: gofmt -w <files>
 ```
+
+If your formatter requires a workspace/solution file that isn't in the current directory, pass it as an explicit argument. Check `Memory/` for repo-specific workspace paths.
 
 Commit messages should reference the plan ID:
 
@@ -348,6 +363,8 @@ If you identified items in ANY category, write them to `<PlanFolder>/artifacts/r
     Markdown description with context and location.
   state: Pending
 ```
+
+**YAML quoting rules:** Titles containing backticks, colons, brackets, braces, or other YAML special characters MUST be double-quoted. Alternatively, use block scalar style (`>` or `|`) for values with special characters.
 
 Do NOT include items that are part of the current plan's scope.
 

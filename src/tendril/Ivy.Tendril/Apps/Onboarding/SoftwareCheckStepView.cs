@@ -6,14 +6,14 @@ namespace Ivy.Tendril.Apps.Onboarding;
 public class SoftwareCheckStepView(
     IState<int> stepperIndex,
     IState<Dictionary<string, bool>?> checkResults,
-    IState<Dictionary<string, bool?>?> healthResults) : ViewBase
+    IState<Dictionary<string, HealthCheckStatus?>?> healthResults) : ViewBase
 {
     private static readonly Dictionary<string, string> HealthCheckHints = new()
     {
         ["gh"] = "Run `gh auth login` to authenticate",
         ["claude"] = "Run `claude` to log in, or check your plan/credits",
         ["codex"] = "Run `codex login` to authenticate",
-        ["gemini"] = "Run `gemini` to log in, or check your API key"
+        ["gemini"] = "Run `gemini` to authenticate (opens browser). Verify auth before selecting Gemini as your coding agent."
     };
 
     public override object Build()
@@ -24,11 +24,11 @@ public class SoftwareCheckStepView(
                                 && (checkResults.Value["claude"] || checkResults.Value["codex"] ||
                                     checkResults.Value["gemini"]);
 
-        var ghHealthy = healthResults.Value?.GetValueOrDefault("gh") == true;
+        var ghHealthy = healthResults.Value?.GetValueOrDefault("gh") == HealthCheckStatus.Authenticated;
         var anyAgentHealthy = healthResults.Value != null
-                              && (healthResults.Value.GetValueOrDefault("claude") == true
-                                  || healthResults.Value.GetValueOrDefault("codex") == true
-                                  || healthResults.Value.GetValueOrDefault("gemini") == true);
+                              && (healthResults.Value.GetValueOrDefault("claude") == HealthCheckStatus.Authenticated
+                                  || healthResults.Value.GetValueOrDefault("codex") == HealthCheckStatus.Authenticated
+                                  || healthResults.Value.GetValueOrDefault("gemini") == HealthCheckStatus.Authenticated);
 
         var allRequiredPassed = checkResults.Value != null
                                 && checkResults.Value["gh"] && ghHealthy
@@ -36,7 +36,7 @@ public class SoftwareCheckStepView(
                                 && checkResults.Value["git"]
                                 && checkResults.Value["powershell"];
 
-        return Layout.Vertical()
+        return Layout.Vertical().Margin(0, 0, 0, 20)
                | Text.H2("Required Software")
                | Text.Markdown(
                    """
@@ -53,12 +53,22 @@ public class SoftwareCheckStepView(
                    """)
                | (checkResults.Value != null
                    ? Layout.Vertical()
-                     | Text.H3("Results")
+                     | new Separator()
+                     | (Layout.Horizontal()
+                        | Text.H3("Results")
+                        | new Spacer()
+                        | new Button(!isChecking.Value ? "Recheck" : "Checking...")
+                            .Outline()
+                            .Small()
+                            .Icon(Icons.RefreshCw, Align.Right)
+                            .Loading(isChecking.Value)
+                            .Disabled(isChecking.Value)
+                            .OnClick(async () => await CheckSoftware()))
                      | new Table(
                          new TableRow(
                              new TableCell("Software").IsHeader(),
                              new TableCell("Status").IsHeader(),
-                             new TableCell("Notes").IsHeader()
+                             new TableCell("Instructions").IsHeader()
                          ).IsHeader(),
                          MakeSoftwareRow(checkResults.Value, healthResults.Value, "GitHub CLI", "gh", "https://cli.github.com/", true),
                          MakeSoftwareRow(checkResults.Value, healthResults.Value, "Claude CLI", "claude", "https://docs.anthropic.com/en/docs/claude-code", false),
@@ -73,7 +83,7 @@ public class SoftwareCheckStepView(
                    ? new Button("Check Software")
                        .Primary()
                        .Large()
-                       .Icon(Icons.CheckCheck, Align.Right)
+                       .Icon(Icons.ArrowRight, Align.Right)
                        .Loading(isChecking.Value)
                        .Disabled(isChecking.Value)
                        .OnClick(async () => await CheckSoftware())
@@ -83,46 +93,57 @@ public class SoftwareCheckStepView(
                            .Large()
                            .Icon(Icons.ArrowRight, Align.Right)
                            .OnClick(() => stepperIndex.Set(stepperIndex.Value + 1))
-                       : Layout.Vertical()
-                         | Text.Warning(
-                             "Please install and authenticate all required software before continuing. GitHub CLI must be logged in, and at least one coding agent must be working.")
-                            | new Button("Check Again")
-                                .Outline()
-                                .Icon(Icons.CheckCheck, Align.Right)
-                                .OnClick(async () => await CheckSoftware())
+                       : Text.Muted("Please Wait...")
                );
 
         async Task CheckSoftware()
         {
             isChecking.Set(true);
 
+            var ghTask = CheckCommand("gh", "--version");
+            var claudeTask = CheckCommand("claude", "--version");
+            var codexTask = CheckCommand("codex", "--version");
+            var geminiTask = CheckCommand("gemini", "--version");
+            var gitTask = CheckCommand("git", "--version");
+            var powershellTask = CheckPowerShell();
+            var pandocTask = CheckCommand("pandoc", "--version");
+
+            await Task.WhenAll(ghTask, claudeTask, codexTask, geminiTask, gitTask, powershellTask, pandocTask);
+
             var results = new Dictionary<string, bool>
             {
-                ["gh"] = await CheckCommand("gh", "--version"),
-                ["claude"] = await CheckCommand("claude", "--version"),
-                ["codex"] = await CheckCommand("codex", "--version"),
-                ["gemini"] = await CheckCommand("gemini", "--version"),
-                ["git"] = await CheckCommand("git", "--version"),
-                ["powershell"] = await CheckCommand("pwsh", "-Version")
-                                 || await CheckCommand("powershell", "-Version"),
-                ["pandoc"] = await CheckCommand("pandoc", "--version")
+                ["gh"] = ghTask.Result,
+                ["claude"] = claudeTask.Result,
+                ["codex"] = codexTask.Result,
+                ["gemini"] = geminiTask.Result,
+                ["git"] = gitTask.Result,
+                ["powershell"] = powershellTask.Result,
+                ["pandoc"] = pandocTask.Result
             };
 
             checkResults.Set(results);
 
-            var health = new Dictionary<string, bool?>();
+            var ghHealthTask = results["gh"] ? CheckHealth("gh", "auth status") : null;
+            // --max-turns 1 caps Claude at a single agentic turn so the process exits cleanly.
+            // Without it, `claude -p` still starts an interactive session on some versions and
+            // blocks until the 30 s timeout fires, falsely reporting "not authenticated".
+            // NOTE: --max-turns is undocumented in `claude --help` (Claude Code 2.1.100) and
+            // could be silently removed in a future release — exactly what happened to Gemini CLI
+            // in 0.37.1+ (see plan 00030). If this check starts failing without auth changes,
+            // verify --max-turns is still a recognized flag (`claude --help | grep max-turns`).
+            var claudeHealthTask = results["claude"] ? CheckHealth("claude", "-p \"ping\" --max-turns 1") : null;
+            var codexHealthTask = results["codex"] ? CheckHealth("codex", "login status") : null;
 
-            if (results["gh"])
-                health["gh"] = await CheckHealth("gh", "auth status");
+            var activeHealthTasks = new[] { ghHealthTask, claudeHealthTask, codexHealthTask }
+                .OfType<Task<HealthCheckStatus>>()
+                .ToArray();
+            if (activeHealthTasks.Length > 0)
+                await Task.WhenAll(activeHealthTasks);
 
-            if (results["claude"])
-                health["claude"] = await CheckHealth("claude", "-p \"ping\" --max-turns 1");
-
-            if (results["codex"])
-                health["codex"] = await CheckHealth("codex", "login status");
-
-            if (results["gemini"])
-                health["gemini"] = await CheckHealth("gemini", "-p \"Reply OK\" --max-turns 0");
+            var health = new Dictionary<string, HealthCheckStatus?>();
+            if (ghHealthTask != null) health["gh"] = ghHealthTask.Result;
+            if (claudeHealthTask != null) health["claude"] = claudeHealthTask.Result;
+            if (codexHealthTask != null) health["codex"] = codexHealthTask.Result;
 
             healthResults.Set(health);
             isChecking.Set(false);
@@ -131,7 +152,7 @@ public class SoftwareCheckStepView(
 
     private static TableRow MakeSoftwareRow(
         Dictionary<string, bool> results,
-        Dictionary<string, bool?>? health,
+        Dictionary<string, HealthCheckStatus?>? health,
         string displayName,
         string key,
         string installUrl,
@@ -143,18 +164,22 @@ public class SoftwareCheckStepView(
         string statusText;
         if (!installed)
             statusText = isRequired ? "❌ Not Found" : "❌ Not Installed";
-        else if (healthStatus == true)
+        else if (healthStatus == HealthCheckStatus.Authenticated)
             statusText = "✅ Ready";
-        else if (healthStatus == false)
+        else if (healthStatus == HealthCheckStatus.NotAuthenticated)
             statusText = "⚠️ Installed but not authenticated";
+        else if (healthStatus == HealthCheckStatus.CheckFailed)
+            statusText = "⚠️ Health check failed";
         else
             statusText = "✅ Installed";
 
         TableCell notesCell;
         if (!installed)
             notesCell = new TableCell(new Button("Install").Inline().Url(installUrl));
-        else if (healthStatus == false && HealthCheckHints.TryGetValue(key, out var hint))
+        else if (healthStatus == HealthCheckStatus.NotAuthenticated && HealthCheckHints.TryGetValue(key, out var hint))
             notesCell = new TableCell(hint);
+        else if (healthStatus == HealthCheckStatus.CheckFailed)
+            notesCell = new TableCell("Try clicking Recheck");
         else
             notesCell = new TableCell("");
 
@@ -165,11 +190,42 @@ public class SoftwareCheckStepView(
         );
     }
 
+    private static async Task<bool> CheckPowerShell()
+    {
+        return await CheckCommand("pwsh", "-Version") || await CheckCommand("powershell", "-Version");
+    }
+
     private static Task<bool> CheckCommand(string fileName, string arguments)
         => CheckProcess(fileName, arguments, 10000);
 
-    private static Task<bool> CheckHealth(string fileName, string arguments)
-        => CheckProcess(fileName, arguments, 15000);
+    private static async Task<HealthCheckStatus> CheckHealth(string fileName, string arguments)
+    {
+        try
+        {
+            return await Task.Run(() =>
+            {
+                var proc = Process.Start(new ProcessStartInfo
+                {
+                    FileName = OperatingSystem.IsWindows() ? "cmd.exe" : fileName,
+                    Arguments = OperatingSystem.IsWindows() ? $"/S /c \"{fileName} {arguments}\"" : arguments,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+                if (proc is null) return HealthCheckStatus.CheckFailed;
+                var exited = proc.WaitForExitOrKill(30000);
+                if (!exited) return HealthCheckStatus.CheckFailed;
+                return proc.ExitCode == 0
+                    ? HealthCheckStatus.Authenticated
+                    : HealthCheckStatus.NotAuthenticated;
+            });
+        }
+        catch
+        {
+            return HealthCheckStatus.CheckFailed;
+        }
+    }
 
     private static async Task<bool> CheckProcess(string fileName, string arguments, int timeoutMs)
     {
@@ -180,7 +236,7 @@ public class SoftwareCheckStepView(
                 var proc = Process.Start(new ProcessStartInfo
                 {
                     FileName = OperatingSystem.IsWindows() ? "cmd.exe" : fileName,
-                    Arguments = OperatingSystem.IsWindows() ? $"/c \"{fileName}\" {arguments}" : arguments,
+                    Arguments = OperatingSystem.IsWindows() ? $"/S /c \"{fileName} {arguments}\"" : arguments,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,

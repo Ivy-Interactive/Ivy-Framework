@@ -22,8 +22,7 @@ public static class FileLinkHelper
         string? filePath,
         Action onClose,
         IEnumerable<string> repoPaths,
-        string editorCommand = "code",
-        string editorLabel = "VS Code")
+        IConfigService config)
     {
         if (filePath is null)
             return null;
@@ -57,9 +56,9 @@ public static class FileLinkHelper
 
         var finalContent = File.Exists(filePath)
             ? new HeaderLayout(
-                new Button($"Open in {editorLabel}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
+                new Button($"Open in {config.Editor.Label}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
                 {
-                    PlatformHelper.OpenInEditor(editorCommand, filePath);
+                    config.OpenInEditor(filePath);
                 }),
                 sheetContent
             )

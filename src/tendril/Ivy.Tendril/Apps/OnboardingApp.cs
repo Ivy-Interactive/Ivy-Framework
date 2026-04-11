@@ -25,7 +25,7 @@ public class OnboardingApp : ViewBase
     private static object GetStepViews(
         IState<int> stepperIndex,
         IState<Dictionary<string, bool>?> checkResults,
-        IState<Dictionary<string, bool?>?> healthResults)
+        IState<Dictionary<string, HealthCheckStatus?>?> healthResults)
     {
         return stepperIndex.Value switch
         {
@@ -43,7 +43,7 @@ public class OnboardingApp : ViewBase
     {
         var stepperIndex = UseState(0);
         var checkResults = UseState<Dictionary<string, bool>?>(null);
-        var healthResults = UseState<Dictionary<string, bool?>?>(null);
+        var healthResults = UseState<Dictionary<string, HealthCheckStatus?>?>(null);
         var steps = GetSteps(stepperIndex.Value);
 
         return Layout.TopCenter() |

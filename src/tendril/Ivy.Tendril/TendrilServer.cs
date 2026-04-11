@@ -88,13 +88,14 @@ public static class TendrilServer
             (TelemetryService)sp.GetRequiredService<ITelemetryService>());
         server.Services.AddSingleton<JobService>(sp =>
         {
+            var cfg = sp.GetRequiredService<IConfigService>();
             return new JobService(
-                sp.GetRequiredService<IConfigService>(),
+                cfg,
                 sp.GetRequiredService<ModelPricingService>(),
                 sp.GetRequiredService<IPlanReaderService>(),
                 sp.GetRequiredService<ITelemetryService>(),
                 sp.GetRequiredService<IPlanWatcherService>(),
-                sp.GetRequiredService<IPlanDatabaseService>());
+                string.IsNullOrEmpty(cfg.TendrilHome) ? null : sp.GetRequiredService<IPlanDatabaseService>());
         });
         server.Services.AddSingleton<IJobService>(sp => sp.GetRequiredService<JobService>());
         server.Services.AddSingleton<PlanWatcherService>(sp =>
@@ -125,6 +126,15 @@ public static class TendrilServer
             return new WorktreeCleanupService(config.PlanFolder, logger);
         });
         server.Services.AddSingleton<IStartable>(sp => sp.GetRequiredService<WorktreeCleanupService>());
+        server.Services.AddSingleton<PrStatusSyncService>(sp =>
+        {
+            var database = sp.GetRequiredService<IPlanDatabaseService>();
+            var githubService = sp.GetRequiredService<IGithubService>();
+            var planReader = sp.GetRequiredService<IPlanReaderService>();
+            var logger = sp.GetRequiredService<ILogger<PrStatusSyncService>>();
+            return new PrStatusSyncService(database, githubService, planReader, logger);
+        });
+        server.Services.AddSingleton<IStartable>(sp => sp.GetRequiredService<PrStatusSyncService>());
 
         server.UseWebApplication(app =>
         {

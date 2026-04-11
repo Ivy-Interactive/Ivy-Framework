@@ -1486,7 +1486,7 @@ new Button("Encrypt & Share").Prefix(Icons.Lock)
 new Button("Copy Link").Prefix(Icons.Copy)
 ```
 
-**Error:** `CS1929: 'Button' does not contain a definition for 'Prefix' and the best extension method overload 'NumberInputExtensions.Prefix(NumberInputBase, string)' requires a receiver of type 'Ivy.NumberInputBase'`
+**Error:** `CS1929: 'Button' does not contain a definition for 'Prefix' and the best extension method overload 'NumberInputExtensions.Prefix(NumberInputBase, object)' requires a receiver of type 'Ivy.NumberInputBase'`
 
 **Correct API:**
 

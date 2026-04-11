@@ -1,5 +1,7 @@
 # MakePlan
 
+**Note:** This promptware is stack-agnostic. Stack-specific operations (build, format, test) are defined in `config.yaml` under `verifications`. Examples in this document use multiple tech stacks for illustration.
+
 **🚫 FORBIDDEN: Do NOT modify, create, or delete any source code files (.cs, .ts, .ps1, etc.). Do NOT implement the plan. You are a PLANNER, not an executor. Your ONLY output is plan files (plan.yaml, revisions/*.md) inside PlansDirectory. If you catch yourself writing code to a repo, STOP IMMEDIATELY.**
 
 Create an implementation plan for a task described in args.
@@ -193,18 +195,18 @@ Only include `## Questions` if you have genuine questions for the user that bloc
 The `## Tests` section MUST include two parts:
 
 1. **New tests to write** — describe any new test cases needed for the feature/fix
-2. **Test scope** — specify a `dotnet test --filter` expression that limits DotnetTest to relevant tests only. 
+2. **Test scope** — specify which tests to run using your test framework's filter/selector syntax.
    
    To determine scope:
-   - Identify the namespaces/classes being modified
+   - Identify the modules/classes being modified
    - Search for existing test classes that cover those areas
-   - **Filters MUST target specific test classes, not broad namespaces.** 
-     - Good: `FullyQualifiedName~MyApp.Tests.CommandParserTests`
-     - Good: `FullyQualifiedName~MyApp.Tests.StringHelperTests|FullyQualifiedName~MyApp.Tests.ValidationHelperTests`
-     - Bad: `FullyQualifiedName~MyApp` (matches entire project including E2E)
-     - Bad: `FullyQualifiedName~MyApp.Tests` (matches hundreds of unrelated tests)
+   - **Filters MUST target specific test classes, not broad namespaces/directories.** 
+     Examples:
+     - .NET: `dotnet test --filter "FullyQualifiedName~MyApp.Tests.CommandParserTests"`
+     - JavaScript: `jest --testPathPattern=CommandParser.test.ts`
+     - Python: `pytest tests/test_command_parser.py`
+     - Go: `go test ./pkg/parser/...`
    - **Exclude E2E/integration test classes** unless the plan specifically changes E2E-level behavior. E2E tests are environment-dependent and should only run when explicitly needed.
-   - When multiple test classes are relevant, combine with `|` operator: `FullyQualifiedName~ClassA|FullyQualifiedName~ClassB`
    - If no existing tests cover the changed code, state: "No existing test coverage for this area."
    - If the change is so broad that all tests are genuinely needed, explicitly state: "Run all tests (broad cross-cutting change)." and justify why.
    

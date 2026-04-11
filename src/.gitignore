@@ -419,6 +419,9 @@ Ivy.Samples/.claude/settings.local.json
 .ivy/
 **/tmp_out/
 
+# Tendril backup files
+*.bak_*
+
 # Claude Code worktrees
 .worktrees/
 

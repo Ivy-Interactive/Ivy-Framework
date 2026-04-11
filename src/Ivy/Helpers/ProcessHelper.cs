@@ -86,29 +86,14 @@ public static class ProcessHelper
 
     private static void KillProcessUsingPortUnix(int port)
     {
-        using var lsof = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "lsof",
-                Arguments = $"-ti tcp:{port}",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        lsof.Start();
-        string output = lsof.StandardOutput.ReadToEnd();
-        lsof.WaitForExitOrKill(10000);
+        var pids = GetPidsOnPort("lsof", $"-ti tcp:{port}", ParseLsofOutput)
+                   ?? GetPidsOnPort("ss", $"-tlnp sport = :{port}", ParseSsOutput);
 
-        if (lsof.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
-            return;
+        if (pids == null) return;
 
-        var pids = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        foreach (var pidStr in pids)
+        foreach (var pid in pids)
         {
-            if (!int.TryParse(pidStr.Trim(), out int pid) || pid == 0)
-                continue;
+            if (pid == 0) continue;
             try
             {
                 using var proc = Process.GetProcessById(pid);
@@ -121,22 +106,56 @@ public static class ProcessHelper
         }
     }
 
+    private static List<int>? GetPidsOnPort(string fileName, string arguments, Func<string, IEnumerable<int>> parser)
+    {
+        try
+        {
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = fileName,
+                    Arguments = arguments,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            process.Start();
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExitOrKill(10000);
+
+            if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
+                return null;
+
+            return parser(output).ToList();
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return null;
+        }
+    }
+
+    private static IEnumerable<int> ParseLsofOutput(string output)
+    {
+        return output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => int.TryParse(line.Trim(), out var pid) ? pid : 0)
+            .Where(pid => pid != 0);
+    }
+
+    private static IEnumerable<int> ParseSsOutput(string output)
+    {
+        return Regex.Matches(output, @"pid=(\d+)")
+            .Select(m => int.TryParse(m.Groups[1].Value, out var pid) ? pid : 0)
+            .Where(pid => pid != 0)
+            .Distinct();
+    }
+
     public static void OpenBrowser(string localUrl)
     {
         if (string.IsNullOrWhiteSpace(localUrl))
             throw new ArgumentNullException(nameof(localUrl));
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {localUrl}") { CreateNoWindow = true });
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            Process.Start("xdg-open", localUrl);
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            Process.Start("open", localUrl);
-        }
+        Process.Start(new ProcessStartInfo(localUrl) { UseShellExecute = true });
     }
 }

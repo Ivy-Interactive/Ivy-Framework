@@ -184,6 +184,8 @@ public class PlanContentHelpersTests
         public BadgeVariant GetBadgeVariant(string level) => BadgeVariant.Outline;
         public Colors? GetProjectColor(string projectName) => null;
         public void SaveSettings() { }
+        public void SetPendingCodingAgent(string name) { }
+        public string? GetPendingCodingAgent() => null;
         public void SetPendingTendrilHome(string path) { }
         public string? GetPendingTendrilHome() => null;
         public void SetPendingProject(ProjectConfig project) { }

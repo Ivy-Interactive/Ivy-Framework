@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Ivy.Tendril.Apps.Plans;
 using Microsoft.Extensions.Logging;
@@ -98,8 +99,7 @@ public class WorktreeCleanupService : IStartable, IDisposable
         {
             try
             {
-                PlanReaderService.ClearReadOnlyAttributes(wtDir);
-                Directory.Delete(wtDir, true);
+                ForceDeleteDirectory(wtDir, logger);
             }
             catch (Exception ex)
             {
@@ -111,11 +111,95 @@ public class WorktreeCleanupService : IStartable, IDisposable
         try
         {
             if (Directory.Exists(worktreesDir))
-                Directory.Delete(worktreesDir, true);
+                ForceDeleteDirectory(worktreesDir, logger);
+        }
+        catch (Exception ex)
+        {
+            logger?.LogWarning(ex, "Failed to force-delete worktrees directory {Dir}", worktreesDir);
+        }
+    }
+
+    /// <summary>
+    ///     Recursively deletes a directory, falling back to <c>cmd /c rmdir /s /q</c> on
+    ///     Windows when <see cref="Directory.Delete(string, bool)"/> fails with
+    ///     <see cref="UnauthorizedAccessException"/> or <see cref="IOException"/>.
+    /// </summary>
+    /// <remarks>
+    ///     Windows <c>Directory.Delete</c> can fail on deeply nested paths (such as
+    ///     <c>node_modules</c>) due to long-path limits, transient file locks, or
+    ///     NTFS permission quirks. <c>rmdir /s /q</c> handles these cases more robustly.
+    /// </remarks>
+    internal static void ForceDeleteDirectory(string path, ILogger? logger = null)
+    {
+        const int maxRetries = 3;
+        int[] delaysMs = [500, 1000, 1500];
+
+        for (int attempt = 0; attempt <= maxRetries; attempt++)
+        {
+            if (attempt > 0)
+            {
+                logger?.LogDebug("ForceDeleteDirectory retry {Attempt}/{Max} for {Dir}",
+                    attempt, maxRetries, Path.GetFileName(path));
+                Thread.Sleep(delaysMs[attempt - 1]);
+            }
+
+            PlanReaderService.ClearReadOnlyAttributes(path);
+            try
+            {
+                Directory.Delete(path, true);
+                return;
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+            {
+                if (!OperatingSystem.IsWindows()) throw;
+
+                logger?.LogInformation("Directory.Delete failed for {Dir}, falling back to rmdir /s /q",
+                    Path.GetFileName(path));
+
+                var psi = new ProcessStartInfo("cmd.exe", $"/c rmdir /s /q \"{path}\"")
+                {
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                using var process = Process.Start(psi);
+                process?.WaitForExit(30000);
+
+                if (!Directory.Exists(path))
+                    return;
+
+                if (attempt < maxRetries)
+                    continue;
+
+                TryLogHandleHolders(path, logger);
+                throw new IOException($"rmdir /s /q also failed to delete '{Path.GetFileName(path)}' after {maxRetries} retries", ex);
+            }
+        }
+    }
+
+    private static void TryLogHandleHolders(string path, ILogger? logger)
+    {
+        if (logger == null || !OperatingSystem.IsWindows()) return;
+        try
+        {
+            var psi = new ProcessStartInfo("handle.exe", $"-accepteula -nobanner \"{path}\"")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using var proc = Process.Start(psi);
+            if (proc == null) return;
+            var output = proc.StandardOutput.ReadToEnd();
+            proc.WaitForExit(5000);
+            if (!string.IsNullOrWhiteSpace(output))
+                logger.LogWarning("Processes holding handles on {Dir}:\n{Output}", Path.GetFileName(path), output);
         }
         catch
         {
-            // Best-effort: directory may be locked
+            // handle.exe not installed or failed — silently skip
         }
     }
 

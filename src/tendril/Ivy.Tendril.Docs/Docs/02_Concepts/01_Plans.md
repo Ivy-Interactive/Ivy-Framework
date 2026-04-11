@@ -20,41 +20,46 @@ Plans are the core unit of work in Tendril. Each plan moves through a rigorous s
 
 A plan progresses through the following comprehensive set of states:
 
-```dot
-digraph PlanLifecycle {
-    rankdir=LR
-    node [shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11, fillcolor="#E8F0FE", color="#4285F4"]
-    edge [fontname="Segoe UI", fontsize=9, color="#666666"]
+```mermaid
+flowchart LR
+    Draft:::defaultStyle
+    Blocked:::blockedStyle
+    Building:::buildingStyle
+    Executing:::executingStyle
+    Updating:::executingStyle
+    ReadyForReview:::readyStyle
+    Failed:::failedStyle
+    Completed:::completedStyle
+    Icebox:::iceboxStyle
+    Skipped:::skippedStyle
 
-    Draft [fillcolor="#E8F0FE"]
-    Blocked [fillcolor="#FFF9C4"]
-    Building [fillcolor="#E1F5FE"]
-    Executing [fillcolor="#FFF3E0"]
-    Updating [fillcolor="#FFF3E0"]
-    ReadyForReview [fillcolor="#E8F5E9"]
-    Failed [fillcolor="#FFEBEE", color="#E53935"]
-    Completed [fillcolor="#C8E6C9"]
-    Icebox [fillcolor="#F3E5F5"]
-    Skipped [fillcolor="#F5F5F5", color="#9E9E9E"]
+    Draft -->|MakePlan| Building
+    Draft -->|Execute| Executing
+    Draft -->|Missing Context| Blocked
+    Blocked -->|Resolved| Draft
+    Building -->|Drafted| Draft
+    Draft -->|Shelve| Icebox
+    Icebox -->|Restore| Draft
 
-    Draft -> Building [label="MakePlan"]
-    Draft -> Executing [label="Execute"]
-    Draft -> Blocked [label="Missing Context"]
-    Blocked -> Draft [label="Resolved"]
-    Building -> Draft [label="Drafted"]
-    Draft -> Icebox [label="Shelve"]
-    Icebox -> Draft [label="Restore"]
+    Executing -->|Iterate| Updating
+    Updating -->|Continue| Executing
+    Executing -->|Success| ReadyForReview
+    Executing -->|Error/Timeout| Failed
+    Failed -->|Retry| Executing
 
-    Executing -> Updating [label="Iterate"]
-    Updating -> Executing [label="Continue"]
-    Executing -> ReadyForReview [label="Success"]
-    Executing -> Failed [label="Error/Timeout"]
-    Failed -> Executing [label="Retry"]
+    ReadyForReview -->|Approve| Completed
+    ReadyForReview -->|Revise| Draft
+    ReadyForReview -->|Discard| Skipped
 
-    ReadyForReview -> Completed [label="Approve"]
-    ReadyForReview -> Draft [label="Revise"]
-    ReadyForReview -> Skipped [label="Discard"]
-}
+    classDef defaultStyle fill:#E8F0FE,stroke:#4285F4,color:#000
+    classDef blockedStyle fill:#FFF9C4,stroke:#4285F4,color:#000
+    classDef buildingStyle fill:#E1F5FE,stroke:#4285F4,color:#000
+    classDef executingStyle fill:#FFF3E0,stroke:#4285F4,color:#000
+    classDef readyStyle fill:#E8F5E9,stroke:#4285F4,color:#000
+    classDef failedStyle fill:#FFEBEE,stroke:#E53935,color:#000
+    classDef completedStyle fill:#C8E6C9,stroke:#4285F4,color:#000
+    classDef iceboxStyle fill:#F3E5F5,stroke:#4285F4,color:#000
+    classDef skippedStyle fill:#F5F5F5,stroke:#9E9E9E,color:#000
 ```
 
 | State | Description |

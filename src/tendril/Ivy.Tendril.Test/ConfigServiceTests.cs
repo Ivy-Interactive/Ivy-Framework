@@ -214,20 +214,16 @@ projects:
     verifications: []
 ");
 
-        var previousHome = Environment.GetEnvironmentVariable("TENDRIL_HOME");
-        Environment.SetEnvironmentVariable("TENDRIL_HOME", tempDir);
-
         try
         {
-            var service = new ConfigService();
+            var service = new ConfigService(new TendrilSettings());
+            service.SetTendrilHome(tempDir);
 
             Assert.NotNull(service.Settings);
             Assert.Equal("claude", service.Settings.CodingAgent);
-            Assert.False(service.NeedsOnboarding);
         }
         finally
         {
-            Environment.SetEnvironmentVariable("TENDRIL_HOME", previousHome);
             Directory.Delete(tempDir, true);
         }
     }
@@ -262,7 +258,7 @@ projects:
     }
 
     [Fact]
-    public void Constructor_And_SetTendrilHome_BehaviorIsConsistent()
+    public void SetTendrilHome_LoadsSettingsConsistently()
     {
         var tempDir = CreateTempConfigFile(@"
 codingAgent: consistent-agent
@@ -272,50 +268,17 @@ projects: []
 verifications: []
 ");
 
-        var previousHome = Environment.GetEnvironmentVariable("TENDRIL_HOME");
-        Environment.SetEnvironmentVariable("TENDRIL_HOME", tempDir);
-
         try
         {
-            // Load via constructor
-            var serviceViaConstructor = new ConfigService();
+            var service = new ConfigService(new TendrilSettings());
+            service.SetTendrilHome(tempDir);
 
-            // Load via SetTendrilHome
-            var serviceViaSetHome = new ConfigService(new TendrilSettings());
-            serviceViaSetHome.SetTendrilHome(tempDir);
-
-            // Both should succeed and load the same settings
-            Assert.Equal("consistent-agent", serviceViaConstructor.Settings.CodingAgent);
-            Assert.Equal("consistent-agent", serviceViaSetHome.Settings.CodingAgent);
-
-            Assert.Equal(10, serviceViaConstructor.Settings.MaxConcurrentJobs);
-            Assert.Equal(10, serviceViaSetHome.Settings.MaxConcurrentJobs);
+            Assert.Equal("consistent-agent", service.Settings.CodingAgent);
+            Assert.Equal(10, service.Settings.MaxConcurrentJobs);
         }
         finally
         {
-            Environment.SetEnvironmentVariable("TENDRIL_HOME", previousHome);
             Directory.Delete(tempDir, true);
-        }
-    }
-
-    [Fact]
-    public void NeedsOnboarding_IsTrueWhenNoTendrilHomeSet()
-    {
-        // When TENDRIL_HOME is not set, ConfigService should indicate onboarding is needed.
-        // TendrilServer uses this flag to defer database and watcher service initialization
-        // until onboarding completes and a valid TendrilHome is established.
-        var previousHome = Environment.GetEnvironmentVariable("TENDRIL_HOME");
-        Environment.SetEnvironmentVariable("TENDRIL_HOME", null);
-
-        try
-        {
-            var service = new ConfigService();
-            Assert.True(service.NeedsOnboarding);
-            Assert.Equal("", service.TendrilHome);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("TENDRIL_HOME", previousHome);
         }
     }
 
@@ -432,129 +395,17 @@ projects:
     }
 
     [Fact]
-    public void Should_Deserialize_PromptwareConfig_Effort()
-    {
-        var yaml = @"
-promptwares:
-  MakePlan:
-    model: sonnet
-    effort: high
-    allowedTools:
-      - Read
-      - Write
-  ExecutePlan:
-    model: opus
-    effort: max
-    allowedTools:
-      - Read
-      - Bash
-";
-
-        var tempDir = CreateTempConfigFile(yaml);
-        var service = new ConfigService(new TendrilSettings());
-
-        try
-        {
-            service.SetTendrilHome(tempDir);
-
-            Assert.NotNull(service.Settings.Promptwares);
-            Assert.Equal(2, service.Settings.Promptwares.Count);
-
-            var makePlan = service.Settings.Promptwares["MakePlan"];
-            Assert.Equal("sonnet", makePlan.Model);
-            Assert.Equal("high", makePlan.Effort);
-            Assert.Equal(new List<string> { "Read", "Write" }, makePlan.AllowedTools);
-
-            var executePlan = service.Settings.Promptwares["ExecutePlan"];
-            Assert.Equal("opus", executePlan.Model);
-            Assert.Equal("max", executePlan.Effort);
-        }
-        finally
-        {
-            Directory.Delete(tempDir, true);
-        }
-    }
-
-    [Fact]
-    public void Should_Deserialize_DefaultEffort()
-    {
-        var yaml = @"
-defaultEffort: medium
-";
-
-        var tempDir = CreateTempConfigFile(yaml);
-        var service = new ConfigService(new TendrilSettings());
-
-        try
-        {
-            service.SetTendrilHome(tempDir);
-
-            Assert.Equal("medium", service.Settings.DefaultEffort);
-        }
-        finally
-        {
-            Directory.Delete(tempDir, true);
-        }
-    }
-
-    [Fact]
-    public void DefaultEffort_DefaultsToHigh()
-    {
-        var settings = new TendrilSettings();
-        Assert.Equal("high", settings.DefaultEffort);
-    }
-
-    [Fact]
-    public void PromptwareConfig_Effort_DefaultsToEmpty()
-    {
-        var config = new PromptwareConfig();
-        Assert.Equal("", config.Effort);
-    }
-
-    [Fact]
-    public void Should_Expand_Effort_Variables()
-    {
-        var yaml = @"
-defaultEffort: high
-promptwares:
-  TestPw:
-    model: sonnet
-    effort: high
-    allowedTools:
-      - Read
-";
-
-        var tempDir = CreateTempConfigFile(yaml);
-        var service = new ConfigService(new TendrilSettings());
-
-        try
-        {
-            service.SetTendrilHome(tempDir);
-
-            // Verify effort values survive expansion (non-variable values pass through unchanged)
-            Assert.Equal("high", service.Settings.DefaultEffort);
-            Assert.Equal("high", service.Settings.Promptwares["TestPw"].Effort);
-        }
-        finally
-        {
-            Directory.Delete(tempDir, true);
-        }
-    }
-
-    [Fact]
     public void Should_Parse_Default_Key_In_Promptwares()
     {
         var yaml = @"
 promptwares:
   _default:
-    model: sonnet
-    effort: high
+    profile: balanced
     allowedTools:
       - Read
       - Glob
   ExecutePlan:
-    model: opus
-    effort: max
+    profile: deep
     allowedTools:
       - Read
       - Write
@@ -572,15 +423,48 @@ promptwares:
             Assert.True(service.Settings.Promptwares.ContainsKey("ExecutePlan"));
 
             var defaultConfig = service.Settings.Promptwares["_default"];
-            Assert.Equal("sonnet", defaultConfig.Model);
-            Assert.Equal("high", defaultConfig.Effort);
+            Assert.Equal("balanced", defaultConfig.Profile);
             Assert.Equal(2, defaultConfig.AllowedTools.Count);
             Assert.Contains("Read", defaultConfig.AllowedTools);
             Assert.Contains("Glob", defaultConfig.AllowedTools);
 
             var execConfig = service.Settings.Promptwares["ExecutePlan"];
-            Assert.Equal("opus", execConfig.Model);
-            Assert.Equal("max", execConfig.Effort);
+            Assert.Equal("deep", execConfig.Profile);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void Should_Parse_Partial_Promptware_Entry_Alongside_Default()
+    {
+        var yaml = @"
+promptwares:
+  _default:
+    profile: balanced
+    allowedTools:
+      - Read
+      - Glob
+  ExecutePlan:
+    profile: deep
+";
+
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            var defaultConfig = service.Settings.Promptwares["_default"];
+            Assert.Equal("balanced", defaultConfig.Profile);
+            Assert.Equal(2, defaultConfig.AllowedTools.Count);
+
+            var execConfig = service.Settings.Promptwares["ExecutePlan"];
+            Assert.Equal("deep", execConfig.Profile);
+            Assert.Empty(execConfig.AllowedTools); // Not specified — PowerShell merge will inherit from _default
         }
         finally
         {
@@ -608,5 +492,210 @@ promptwares:
     {
         var result = PlatformHelper.OpenInEditor("nonexistent-editor-xyz-12345", "somefile.txt");
         Assert.False(result);
+    }
+
+    [Fact]
+    public void Should_Deserialize_Agents_Section_With_Profiles()
+    {
+        var yaml = @"
+codingAgents:
+  - name: ClaudeCode
+    profiles:
+      - name: deep
+        model: claude-opus-4-6
+        effort: max
+      - name: balanced
+        model: claude-sonnet-4-6
+        effort: high
+      - name: quick
+        model: claude-haiku-4-5
+        effort: low
+  - name: Codex
+    profiles:
+      - name: deep
+        model: gpt-5.4
+        effort: high
+      - name: balanced
+        model: gpt-5.4-mini
+        effort: medium
+";
+
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            Assert.NotNull(service.Settings.CodingAgents);
+            Assert.Equal(2, service.Settings.CodingAgents.Count);
+
+            var claude = service.Settings.CodingAgents[0];
+            Assert.Equal("ClaudeCode", claude.Name);
+            Assert.Equal(3, claude.Profiles.Count);
+
+            var claudeDeep = claude.Profiles[0];
+            Assert.Equal("deep", claudeDeep.Name);
+            Assert.Equal("claude-opus-4-6", claudeDeep.Model);
+            Assert.Equal("max", claudeDeep.Effort);
+
+            var claudeBalanced = claude.Profiles[1];
+            Assert.Equal("balanced", claudeBalanced.Name);
+            Assert.Equal("claude-sonnet-4-6", claudeBalanced.Model);
+            Assert.Equal("high", claudeBalanced.Effort);
+
+            var codex = service.Settings.CodingAgents[1];
+            Assert.Equal("Codex", codex.Name);
+            Assert.Equal(2, codex.Profiles.Count);
+            Assert.Equal("gpt-5.4", codex.Profiles[0].Model);
+            Assert.Equal("high", codex.Profiles[0].Effort);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void Should_Deserialize_AgentConfig_Arguments()
+    {
+        var yaml = @"
+codingAgent: claude
+codingAgents:
+  - name: ClaudeCode
+    arguments: --global-flag
+    profiles:
+      - name: deep
+        model: claude-opus-4-6
+        effort: max
+        arguments: --temperature 0.2
+";
+
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            Assert.NotNull(service.Settings.CodingAgents);
+            Assert.Single(service.Settings.CodingAgents);
+
+            var agent = service.Settings.CodingAgents[0];
+            Assert.Equal("ClaudeCode", agent.Name);
+            Assert.Equal("--global-flag", agent.Arguments);
+
+            Assert.Single(agent.Profiles);
+            var deep = agent.Profiles[0];
+            Assert.Equal("deep", deep.Name);
+            Assert.Equal("claude-opus-4-6", deep.Model);
+            Assert.Equal("max", deep.Effort);
+            Assert.Equal("--temperature 0.2", deep.Arguments);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void Should_Deserialize_PromptwareConfig_Profile_Field()
+    {
+        var yaml = @"
+promptwares:
+  ExecutePlan:
+    profile: deep
+    allowedTools:
+      - Read
+      - Bash
+  MakePlan:
+    profile: balanced
+    allowedTools:
+      - Read
+";
+
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            var execute = service.Settings.Promptwares["ExecutePlan"];
+            Assert.Equal("deep", execute.Profile);
+
+            var make = service.Settings.Promptwares["MakePlan"];
+            Assert.Equal("balanced", make.Profile);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void Agents_DefaultsToEmptyList()
+    {
+        var settings = new TendrilSettings();
+        Assert.NotNull(settings.CodingAgents);
+        Assert.Empty(settings.CodingAgents);
+    }
+
+    [Fact]
+    public void PromptwareConfig_Profile_DefaultsToEmpty()
+    {
+        var config = new PromptwareConfig();
+        Assert.Equal("", config.Profile);
+    }
+
+    [Fact]
+    public void AgentProfileConfig_Fields_DefaultsToEmpty()
+    {
+        var profile = new AgentProfileConfig();
+        Assert.Equal("", profile.Name);
+        Assert.Equal("", profile.Model);
+        Assert.Equal("", profile.Effort);
+        Assert.Equal("", profile.Arguments);
+    }
+
+    [Fact]
+    public void SaveSettings_PersistsAdvancedSettings()
+    {
+        var yaml = @"
+jobTimeout: 30
+staleOutputTimeout: 10
+maxConcurrentJobs: 5
+editor:
+  command: code
+  label: VS Code
+";
+
+        var tempDir = CreateTempConfigFile(yaml);
+        var service = new ConfigService(new TendrilSettings());
+
+        try
+        {
+            service.SetTendrilHome(tempDir);
+
+            service.Settings.JobTimeout = 45;
+            service.Settings.StaleOutputTimeout = 15;
+            service.Settings.MaxConcurrentJobs = 8;
+            service.Settings.Editor.Command = "vim";
+            service.Settings.Editor.Label = "Vim";
+            service.SaveSettings();
+
+            var reloaded = new ConfigService(new TendrilSettings());
+            reloaded.SetTendrilHome(tempDir);
+
+            Assert.Equal(45, reloaded.Settings.JobTimeout);
+            Assert.Equal(15, reloaded.Settings.StaleOutputTimeout);
+            Assert.Equal(8, reloaded.Settings.MaxConcurrentJobs);
+            Assert.Equal("vim", reloaded.Settings.Editor.Command);
+            Assert.Equal("Vim", reloaded.Settings.Editor.Label);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
     }
 }

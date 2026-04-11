@@ -68,26 +68,40 @@ public static class PlatformHelper
         }
     }
 
-    public static void OpenInTerminal(string workingDirectory)
+    public static bool OpenInTerminal(string workingDirectory)
     {
-        var psi = new ProcessStartInfo { UseShellExecute = true };
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        try
         {
-            psi.FileName = "wt.exe";
-            psi.Arguments = $"-d \"{workingDirectory}\"";
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            psi.FileName = "open";
-            psi.Arguments = $"-a Terminal \"{workingDirectory}\"";
-        }
-        else
-        {
-            psi.FileName = "xdg-open";
-            psi.Arguments = workingDirectory;
-        }
+            var psi = new ProcessStartInfo { UseShellExecute = true };
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                psi.FileName = "wt.exe";
+                psi.Arguments = $"-d \"{workingDirectory}\"";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                psi.FileName = "open";
+                psi.Arguments = $"-a Terminal \"{workingDirectory}\"";
+            }
+            else
+            {
+                psi.FileName = "xdg-open";
+                psi.Arguments = workingDirectory;
+            }
 
-        Process.Start(psi);
+            Process.Start(psi);
+            return true;
+        }
+        catch (Win32Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to open terminal: {ex.Message}");
+            return false;
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.Error.WriteLine($"Failed to open terminal: {ex.Message}");
+            return false;
+        }
     }
 
     public static bool OpenInEditor(string editorCommand, string target)
@@ -123,25 +137,39 @@ public static class PlatformHelper
         }
     }
 
-    public static void OpenInFileManager(string folderPath)
+    public static bool OpenInFileManager(string folderPath)
     {
-        var psi = new ProcessStartInfo { UseShellExecute = true };
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        try
         {
-            psi.FileName = "explorer.exe";
-            psi.Arguments = folderPath;
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            psi.FileName = "open";
-            psi.Arguments = folderPath;
-        }
-        else
-        {
-            psi.FileName = "xdg-open";
-            psi.Arguments = folderPath;
-        }
+            var psi = new ProcessStartInfo { UseShellExecute = true };
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                psi.FileName = "explorer.exe";
+                psi.Arguments = folderPath;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                psi.FileName = "open";
+                psi.Arguments = folderPath;
+            }
+            else
+            {
+                psi.FileName = "xdg-open";
+                psi.Arguments = folderPath;
+            }
 
-        Process.Start(psi);
+            Process.Start(psi);
+            return true;
+        }
+        catch (Win32Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to open file manager: {ex.Message}");
+            return false;
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.Error.WriteLine($"Failed to open file manager: {ex.Message}");
+            return false;
+        }
     }
 }

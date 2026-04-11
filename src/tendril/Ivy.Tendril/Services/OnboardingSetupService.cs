@@ -36,6 +36,37 @@ public class OnboardingSetupService(IConfigService config, IServiceProvider serv
             var basicConfig = "codingAgent: claude\n" +
                               "jobTimeout: 30\n" +
                               "staleOutputTimeout: 10\n" +
+                              "codingAgents:\n" +
+                              "- name: ClaudeCode\n" +
+                              "  profiles:\n" +
+                              "  - name: deep\n" +
+                              "    model: claude-opus-4-6\n" +
+                              "    effort: max\n" +
+                              "  - name: balanced\n" +
+                              "    model: claude-sonnet-4-6\n" +
+                              "    effort: high\n" +
+                              "  - name: quick\n" +
+                              "    model: claude-haiku-4-5\n" +
+                              "    effort: low\n" +
+                              "- name: Codex\n" +
+                              "  profiles:\n" +
+                              "  - name: deep\n" +
+                              "    model: gpt-5.4\n" +
+                              "    effort: high\n" +
+                              "  - name: balanced\n" +
+                              "    model: gpt-5.4-mini\n" +
+                              "    effort: medium\n" +
+                              "  - name: quick\n" +
+                              "    model: gpt-5.3-codex\n" +
+                              "    effort: low\n" +
+                              "- name: Gemini\n" +
+                              "  profiles:\n" +
+                              "  - name: deep\n" +
+                              "    model: gemini-3-flash-preview\n" +
+                              "  - name: balanced\n" +
+                              "    model: gemini-2.5-flash\n" +
+                              "  - name: quick\n" +
+                              "    model: gemini-2.5-flash-lite\n" +
                               "projects: []\n" +
                               "verifications: []\n";
             await FileHelper.WriteAllTextAsync(configPath, basicConfig);

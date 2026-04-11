@@ -70,6 +70,67 @@ public class GithubService(IConfigService config) : IGithubService
         return statuses;
     }
 
+    public async Task<List<GitHubIssue>> SearchIssuesAsync(string owner, string repo, string? query, string? assignee,
+        string[]? labels)
+    {
+        try
+        {
+            var args = $"issue list --repo {owner}/{repo} --state open --limit 100 --json number,title,body,labels,assignees";
+            if (!string.IsNullOrWhiteSpace(query))
+                args += $" --search \"{query}\"";
+            if (!string.IsNullOrWhiteSpace(assignee))
+                args += $" --assignee {assignee}";
+            if (labels is { Length: > 0 })
+                args += $" --label \"{string.Join(",", labels)}\"";
+
+            var psi = new ProcessStartInfo("gh", args)
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8
+            };
+
+            using var process = Process.Start(psi);
+            if (process is null) return [];
+
+            var output = await process.StandardOutput.ReadToEndAsync();
+            var stderr = await process.StandardError.ReadToEndAsync();
+            await process.WaitForExitOrKillAsync(60000);
+
+            if (process.ExitCode != 0)
+            {
+                Console.Error.WriteLine($"[GithubService] gh issue list failed for {owner}/{repo}: {stderr}");
+                return [];
+            }
+
+            var issues = new List<GitHubIssue>();
+            using var doc = JsonDocument.Parse(output);
+            foreach (var element in doc.RootElement.EnumerateArray())
+            {
+                var number = element.GetProperty("number").GetInt32();
+                var title = element.GetProperty("title").GetString() ?? "";
+                var body = element.TryGetProperty("body", out var bodyProp) ? bodyProp.GetString() : null;
+                var issueLabels = element.GetProperty("labels").EnumerateArray()
+                    .Select(l => l.GetProperty("name").GetString() ?? "")
+                    .ToArray();
+                var issueAssignees = element.GetProperty("assignees").EnumerateArray()
+                    .Select(a => a.GetProperty("login").GetString() ?? "")
+                    .ToArray();
+                issues.Add(new GitHubIssue(number, title, body, issueLabels, issueAssignees));
+            }
+
+            return issues;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[GithubService] Failed to search issues for {owner}/{repo}: {ex.Message}");
+            return [];
+        }
+    }
+
     internal static RepoConfig? GetRepoConfigFromPath(string repoPath)
     {
         try

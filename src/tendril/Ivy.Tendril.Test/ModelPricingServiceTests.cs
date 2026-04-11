@@ -390,4 +390,33 @@ public class ModelPricingServiceTests
         Assert.Equal(0, result.TotalTokens);
         Assert.Equal(0.0, result.TotalCost);
     }
+
+    [Fact]
+    public void GetPricing_ReturnsCorrectPricing_ForCodexPlaceholderModels()
+    {
+        var gpt54 = _service.GetPricing("gpt-5.4");
+        var gpt54Mini = _service.GetPricing("gpt-5.4-mini");
+        var gpt53Codex = _service.GetPricing("gpt-5.3-codex");
+
+        Assert.Equal(10.0, gpt54.Input);
+        Assert.Equal(1.10, gpt54Mini.Input);
+        Assert.Equal(1.50, gpt53Codex.Input);
+    }
+
+    [Fact]
+    public void GetPricing_ReturnsCorrectPricing_ForGeminiPlaceholderModels()
+    {
+        var gemini3 = _service.GetPricing("gemini-3-flash-preview");
+        var gemini25Lite = _service.GetPricing("gemini-2.5-flash-lite");
+
+        Assert.Equal(1.50, gemini3.Input);
+        Assert.Equal(0.15, gemini25Lite.Input);
+    }
+
+    [Fact]
+    public void GetPricing_OrderMatters_MiniBeforeBase()
+    {
+        var mini = _service.GetPricing("gpt-5.4-mini");
+        Assert.Equal(1.10, mini.Input);
+    }
 }

@@ -9,31 +9,8 @@ import { InvalidIcon } from "@/components/InvalidIcon";
 import { X } from "lucide-react";
 import { Densities } from "@/types/density";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
-import Icon from "@/components/Icon";
 import { formatBytes } from "@/lib/formatters";
 import { EMPTY_ARRAY } from "@/lib/constants";
-
-interface Affix {
-  icon?: string;
-  text?: string;
-}
-
-export const renderAffix = (affix?: Affix): React.ReactNode => {
-  if (!affix) return null;
-
-  if (affix.icon) {
-    return React.createElement(Icon, {
-      name: affix.icon,
-      className: "w-4 h-4",
-    });
-  }
-
-  if (affix.text) {
-    return React.createElement("span", { className: "text-sm" }, affix.text);
-  }
-
-  return null;
-};
 
 const formatStyleMap = {
   Decimal: "decimal",
@@ -83,11 +60,10 @@ interface NumberInputBaseProps {
   // Add type information for validation
   targetType?: string;
   density?: Densities;
-  prefix?: Affix;
-  suffix?: Affix;
   noGrouping?: boolean;
   autoFocus?: boolean;
   events?: string[];
+  slots?: { Prefix?: React.ReactNode[]; Suffix?: React.ReactNode[] };
 }
 
 interface NumberInputWidgetProps extends Omit<NumberInputBaseProps, "onValueChange"> {
@@ -95,6 +71,7 @@ interface NumberInputWidgetProps extends Omit<NumberInputBaseProps, "onValueChan
   targetType?: string;
   width?: string;
   autoFocus?: boolean;
+  slots?: { Prefix?: React.ReactNode[]; Suffix?: React.ReactNode[] };
 }
 
 // Function to validate and cap values based on target type
@@ -245,8 +222,7 @@ const NumberVariant = memo(
     onFocus,
     currency,
     density = Densities.Medium,
-    prefix,
-    suffix,
+    slots,
     noGrouping,
     autoFocus,
     "data-testid": dataTestId,
@@ -296,8 +272,10 @@ const NumberVariant = memo(
       [onValueChange, nullable],
     );
 
-    const prefixContent = renderAffix(prefix);
-    const suffixContent = renderAffix(suffix);
+    const prefixContent = slots?.Prefix;
+    const suffixContent = slots?.Suffix;
+    const hasPrefix = (prefixContent?.length ?? 0) > 0;
+    const hasSuffix = (suffixContent?.length ?? 0) > 0;
 
     return (
       <div
@@ -307,7 +285,7 @@ const NumberVariant = memo(
         )}
       >
         {/* Prefix with background and separator */}
-        {prefixContent && (
+        {hasPrefix && (
           <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
             {prefixContent}
           </div>
@@ -333,8 +311,8 @@ const NumberVariant = memo(
               invalid && inputStyles.invalidInput,
               (invalid || (nullable && value !== null && !disabled)) && "pr-8",
               nullable && value !== null && !disabled && invalid && "pr-16",
-              prefixContent && "rounded-l-none",
-              suffixContent && "rounded-r-none",
+              hasPrefix && "rounded-l-none",
+              hasSuffix && "rounded-r-none",
             )}
             data-testid={dataTestId}
           />
@@ -360,7 +338,7 @@ const NumberVariant = memo(
         </div>
 
         {/* Suffix with background and separator */}
-        {suffixContent && (
+        {hasSuffix && (
           <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
             {suffixContent}
           </div>

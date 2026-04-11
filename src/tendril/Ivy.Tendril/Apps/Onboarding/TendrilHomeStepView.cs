@@ -17,11 +17,11 @@ public class TendrilHomeStepView(IState<int> stepperIndex) : ViewBase
         var error = UseState<string?>(null);
         var config = UseService<IConfigService>();
 
-        return Layout.Vertical()
+        return Layout.Vertical().Margin(0, 0, 0, 20)
                | Text.H2("Tendril Data Location")
                | Text.Muted("This folder will store your plans, inbox, trash, and other Tendril data.")
                | (error.Value != null ? Text.Danger(error.Value) : null!)
-               | folderPath.ToFolderInput("Select Tendril data folder...", mode: FolderInputMode.FullPath)
+               | folderPath.ToTextInput("Select Tendril data folder...")
                    .WithField().Label("Tendril Home")
                | new Button("Next").Primary().Large().Icon(Icons.ArrowRight, Align.Right)
                    .OnClick(() =>

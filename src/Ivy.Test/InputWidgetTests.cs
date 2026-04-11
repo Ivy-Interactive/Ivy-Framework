@@ -214,3 +214,110 @@ public class InputWidgetTests
         [typeof((double?, double?)), ((double?)null, (double?)null)]
     ];
 }
+
+public class InputPrefixSuffixSlotTests
+{
+    private static Slot? FindSlot(WidgetBase widget, string name)
+        => widget.Children.OfType<Slot>().FirstOrDefault(s => s.Name == name);
+
+    [Fact]
+    public void TextInput_Prefix_AddsPrefixSlot()
+    {
+        TextInputBase input = new TextInput<string>();
+        var withPrefix = input.Prefix("$");
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Single(slot!.Children);
+        Assert.Equal("$", slot.Children[0]);
+    }
+
+    [Fact]
+    public void TextInput_Suffix_AddsSuffixSlot()
+    {
+        TextInputBase input = new TextInput<string>();
+        var withSuffix = input.Suffix("USD");
+
+        var slot = FindSlot(withSuffix, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Single(slot!.Children);
+        Assert.Equal("USD", slot.Children[0]);
+    }
+
+    [Fact]
+    public void TextInput_Prefix_ReplacesPreviousPrefix()
+    {
+        TextInputBase input = new TextInput<string>();
+        var replaced = input.Prefix("$").Prefix("€");
+
+        var prefixSlots = replaced.Children.OfType<Slot>().Where(s => s.Name == "Prefix").ToArray();
+        Assert.Single(prefixSlots);
+        Assert.Equal("€", prefixSlots[0].Children[0]);
+    }
+
+    [Fact]
+    public void TextInput_Prefix_AcceptsWidgetContent()
+    {
+        TextInputBase input = new TextInput<string>();
+        var button = new Button("Click");
+        var withPrefix = input.Prefix(button);
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
+    }
+
+    [Fact]
+    public void TextInput_PrefixAndSuffix_Coexist()
+    {
+        TextInputBase input = new TextInput<string>();
+        var both = input.Prefix("$").Suffix("USD");
+
+        Assert.NotNull(FindSlot(both, "Prefix"));
+        Assert.NotNull(FindSlot(both, "Suffix"));
+    }
+
+    [Fact]
+    public void NumberInput_Prefix_AddsPrefixSlot()
+    {
+        NumberInputBase input = new NumberInput<int>();
+        var withPrefix = input.Prefix("$");
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("$", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void NumberInput_Suffix_AddsSuffixSlot()
+    {
+        NumberInputBase input = new NumberInput<int>();
+        var withSuffix = input.Suffix("kg");
+
+        var slot = FindSlot(withSuffix, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("kg", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void NumberRangeInput_Prefix_AddsPrefixSlot()
+    {
+        NumberRangeInputBase input = new NumberRangeInput<int>();
+        var withPrefix = input.Prefix("$");
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("$", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void NumberRangeInput_Suffix_AddsSuffixSlot()
+    {
+        NumberRangeInputBase input = new NumberRangeInput<int>();
+        var withSuffix = input.Suffix("USD");
+
+        var slot = FindSlot(withSuffix, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("USD", slot!.Children[0]);
+    }
+}

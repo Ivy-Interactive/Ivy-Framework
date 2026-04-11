@@ -11,28 +11,24 @@ icon: ThumbsUp
 # Review
 
 <Ingress>
-The Review app guarantees that no AI-generated code is ever integrated blindly. It presents you with an actionable queue of finished executions ready for human evaluation.
+Queue of finished work: **ReadyForReview** or **Failed** plans. Nothing merges without you.
 </Ingress>
 
-## Objective
+## What shows up
 
-The Review App continuously aggregates all Plans that have successfully entered the `ReadyForReview` or `Failed` status. Once an agent job like `ExecutePlan` finishes its operation, Tendril freezes the background git worktree and serves the generated payload up within this panel.
+`ExecutePlan` (and similar) finishes in a frozen worktree. Review lists those plans and shows the result here.
 
-## The Review Interface
+## In the panel
 
-Selecting an item from the Review Sidebar exposes a comprehensive breakdown pane containing:
+- **Diff** — Changes vs. your tracked branch.
+- **Verification output** — Logs from hooks (`DotnetBuild`, `NpmTest`, …).
+- **Plan text** — Latest `revisions/*.md` (what the agent was implementing).
 
-1. **The Core Diff**: A syntax-highlighted snapshot of the exact code delta proposed by the Agent against your repository's tracked branch.
-2. **Terminal Verifications**: Direct outputs of executed validation hooks (`DotnetBuild`, `NpmTest`).
-3. **Task Instructions**: The AI’s stated intent derived from the `revisions/*.md` trace.
+## Actions
 
-## Human Interventions
-
-From the Action Bar, you can dictate the outcome of the proposed work:
-
-| Action | Result |
+| Action | Effect |
 |--------|--------|
-| **Approved (Make PR)** | Greenlights the plan content, shifting state to `Completed` and launching the asynchronous `MakePr` job via GitHub. |
-| **Needs Work (Revise)** | Rejects the implementation. Bootstraps the `UpdatePlan` job recursively to command the AI to iterate over the identical worktree based on human guidance. |
-| **Decline (Discard)** | Shelves the execution definitively, transitioning the Plan state quietly to `Skipped` and deleting the associated worktree to free resources. |
-| **Manually Resolve** | Transitions into a File Edit state allowing direct human patching of minor logical faults inside the workspace without requiring AI cycle looping. |
+| **Approve (Make PR)** | Marks **Completed**, starts **MakePr** on GitHub. |
+| **Needs work (Revise)** | **UpdatePlan** on the same worktree with your feedback. |
+| **Decline (Discard)** | **Skipped**, worktree removed. |
+| **Manually resolve** | Edit files in the workspace for small fixes without another full agent loop. |

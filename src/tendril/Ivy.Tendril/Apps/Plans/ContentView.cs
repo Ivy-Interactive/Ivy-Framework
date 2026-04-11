@@ -270,14 +270,16 @@ public class ContentView(
             var commitsTable = new Table(
                 new TableRow(
                         new TableCell("Commit").IsHeader(),
-                        new TableCell("Message").IsHeader()
+                        new TableCell("Message").IsHeader(),
+                        new TableCell("Files").IsHeader()
                     )
                 { IsHeader = true }
             );
             foreach (var row in planData.CommitRows)
                 commitsTable |= new TableRow(
                     new TableCell(new Button(row.ShortHash).Inline().OnClick(() => openCommit.Set(row.Hash))),
-                    new TableCell(row.Title)
+                    new TableCell(row.Title),
+                    new TableCell(row.FileCount?.ToString() ?? "–")
                 );
 
             var commitWarning = PlanContentHelpers.BuildCommitWarningCallout(planData.CommitRows);
@@ -428,7 +430,7 @@ public class ContentView(
 
         var repoPaths = _selectedPlan.GetEffectiveRepoPaths(_config);
         var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(
-            openFile.Value, () => openFile.Set(null), repoPaths, _config.Editor.Command, _config.Editor.Label);
+            openFile.Value, () => openFile.Set(null), repoPaths, _config);
         if (fileLinkSheet is not null)
             elements.Add(fileLinkSheet);
 

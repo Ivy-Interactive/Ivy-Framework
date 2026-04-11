@@ -138,23 +138,35 @@ public class OnboardingSetupServiceTests : IAsyncLifetime
         var content = await File.ReadAllTextAsync(configPath);
         Assert.Contains("codingAgent: claude", content);
         Assert.Contains("projects: []", content);
+        Assert.Contains("codingAgents:", content);
+        Assert.Contains("ClaudeCode", content);
+        Assert.Contains("Codex", content);
+        Assert.Contains("Gemini", content);
     }
 
     [Fact]
-    public async Task CompleteSetupAsync_SetsEnvironmentVariable()
+    public async Task CompleteSetupAsync_PreservesPendingCodingAgent()
     {
-        var (service, _) = CreateService();
-        var originalValue = Environment.GetEnvironmentVariable("TENDRIL_HOME");
+        var (service, config) = CreateService();
+
+        var baseDir = System.AppContext.BaseDirectory;
+        var examplePath = Path.Combine(baseDir, "example.config.yaml");
+        var exampleContent = "codingAgent: claude\nprojects: []\nverifications: []\n";
+        await File.WriteAllTextAsync(examplePath, exampleContent);
 
         try
         {
+            config.SetPendingCodingAgent("codex");
+
             await service.CompleteSetupAsync(_tempDir);
 
-            Assert.Equal(_tempDir, Environment.GetEnvironmentVariable("TENDRIL_HOME"));
+            Assert.Equal("codex", config.Settings.CodingAgent);
+            var savedContent = await File.ReadAllTextAsync(Path.Combine(_tempDir, "config.yaml"));
+            Assert.Contains("codingAgent: codex", savedContent);
         }
         finally
         {
-            Environment.SetEnvironmentVariable("TENDRIL_HOME", originalValue);
+            File.Delete(examplePath);
         }
     }
 
@@ -183,28 +195,6 @@ public class OnboardingSetupServiceTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task CompleteSetupAsync_PersistsEnvironmentVariable_Windows()
-    {
-        if (!OperatingSystem.IsWindows())
-            return;
-
-        var (service, _) = CreateService();
-        var originalValue = Environment.GetEnvironmentVariable("TENDRIL_HOME", EnvironmentVariableTarget.User);
-
-        try
-        {
-            await service.CompleteSetupAsync(_tempDir);
-
-            var persisted = Environment.GetEnvironmentVariable("TENDRIL_HOME", EnvironmentVariableTarget.User);
-            Assert.Equal(_tempDir, persisted);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("TENDRIL_HOME", originalValue, EnvironmentVariableTarget.User);
-        }
-    }
-
-    [Fact]
     public async Task CompleteSetupAsync_PersistsEnvironmentVariable_UnixShellRc()
     {
         if (OperatingSystem.IsWindows())
@@ -225,38 +215,6 @@ public class OnboardingSetupServiceTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task CompleteSetupAsync_ExampleConfigContainsDefaultEffort()
-    {
-        var (service, _) = CreateService();
-
-        // Create example config with defaultEffort
-        var baseDir = System.AppContext.BaseDirectory;
-        var examplePath = Path.Combine(baseDir, "example.config.yaml");
-        var exampleContent = File.Exists(examplePath) ? await File.ReadAllTextAsync(examplePath) : "";
-
-        // Use the real example.config.yaml if it exists, otherwise create one with defaultEffort
-        if (!exampleContent.Contains("defaultEffort"))
-        {
-            exampleContent = "codingAgent: claude\ndefaultEffort: high\nprojects: []\nverifications: []\n";
-            await File.WriteAllTextAsync(examplePath, exampleContent);
-        }
-
-        try
-        {
-            await service.CompleteSetupAsync(_tempDir);
-
-            var configPath = Path.Combine(_tempDir, "config.yaml");
-            Assert.True(File.Exists(configPath));
-            var content = await File.ReadAllTextAsync(configPath);
-            Assert.Contains("defaultEffort", content);
-        }
-        finally
-        {
-            // Don't delete if it was already there
-        }
-    }
-
-    [Fact]
     public async Task CompleteSetupAsync_ExampleConfigContainsVerifications()
     {
         var (service, _) = CreateService();
@@ -268,7 +226,7 @@ public class OnboardingSetupServiceTests : IAsyncLifetime
         if (!exampleContent.Contains("DotnetBuild"))
         {
             exampleContent =
-                "codingAgent: claude\ndefaultEffort: high\nprojects: []\nverifications:\n- name: DotnetBuild\n  prompt: Build\n";
+                "codingAgent: claude\nprojects: []\nverifications:\n- name: DotnetBuild\n  prompt: Build\n";
             await File.WriteAllTextAsync(examplePath, exampleContent);
         }
 

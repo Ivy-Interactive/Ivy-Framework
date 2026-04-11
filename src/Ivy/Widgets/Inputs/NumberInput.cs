@@ -71,11 +71,7 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 
     [Prop] public string? TargetType { get; set; }
 
-    [Prop] public Affix? Prefix { get; set; }
-
     [Prop] public bool NoGrouping { get; init; }
-
-    [Prop] public Affix? Suffix { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
     [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
@@ -246,17 +242,18 @@ public static class NumberInputExtensions
         return widget with { Invalid = invalid };
     }
 
-    public static NumberInputBase Prefix(this NumberInputBase widget, string prefixText)
-        => widget with { Prefix = prefixText.ToAffix() };
+    private static object[] WithSlot(NumberInputBase widget, string slotName, object? value)
+    {
+        var others = widget.Children.Where(c => c is not Slot s || s.Name != slotName);
+        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
+        return result.ToArray();
+    }
 
-    public static NumberInputBase Prefix(this NumberInputBase widget, Icons prefixIcon)
-        => widget with { Prefix = prefixIcon.ToAffix() };
+    public static NumberInputBase Prefix(this NumberInputBase widget, object prefix)
+        => widget with { Children = WithSlot(widget, "Prefix", prefix) };
 
-    public static NumberInputBase Suffix(this NumberInputBase widget, string suffixText)
-        => widget with { Suffix = suffixText.ToAffix() };
-
-    public static NumberInputBase Suffix(this NumberInputBase widget, Icons suffixIcon)
-        => widget with { Suffix = suffixIcon.ToAffix() };
+    public static NumberInputBase Suffix(this NumberInputBase widget, object suffix)
+        => widget with { Children = WithSlot(widget, "Suffix", suffix) };
 
     [OverloadResolutionPriority(1)]
     public static NumberInputBase OnBlur(this NumberInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

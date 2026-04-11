@@ -168,7 +168,7 @@ public class ContentView(
 
         var repoPaths = _selectedPlan.GetEffectiveRepoPaths(_config);
         var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(
-            openFile.Value, () => openFile.Set(null), repoPaths, _config.Editor.Command, _config.Editor.Label);
+            openFile.Value, () => openFile.Set(null), repoPaths, _config);
         if (fileLinkSheet is not null)
             elements.Add(fileLinkSheet);
 
