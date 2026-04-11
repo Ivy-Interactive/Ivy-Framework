@@ -29,10 +29,7 @@ type PaginationLinkProps = {
 } & Pick<ButtonProps, "size"> &
   React.ComponentProps<"a">;
 
-function getLinkSize(
-  density: Densities | undefined,
-  isIconOnly: boolean,
-): ButtonProps["size"] {
+function getLinkSize(density: Densities | undefined, isIconOnly: boolean): ButtonProps["size"] {
   if (density === Densities.Small) return isIconOnly ? "icon-sm" : "sm";
   if (density === Densities.Large) return "lg";
   return isIconOnly ? "icon" : "default";
@@ -44,13 +41,7 @@ function getIconClass(density: Densities | undefined): string {
   return "h-4 w-4";
 }
 
-const PaginationLink = ({
-  className,
-  isActive,
-  density,
-  size,
-  ...props
-}: PaginationLinkProps) => (
+const PaginationLink = ({ className, isActive, density, size, ...props }: PaginationLinkProps) => (
   <a
     aria-current={isActive ? "page" : undefined}
     className={cn(
@@ -70,8 +61,10 @@ type PaginationNavProps = {
 } & React.ComponentProps<typeof PaginationLink>;
 
 const PaginationPrevious = ({ className, density, ...props }: PaginationNavProps) => {
-  const gapClass = density === Densities.Small ? "gap-0.5" : density === Densities.Large ? "gap-1.5" : "gap-1";
-  const paddingClass = density === Densities.Small ? "pl-1.5" : density === Densities.Large ? "pl-3" : "pl-2.5";
+  const gapClass =
+    density === Densities.Small ? "gap-0.5" : density === Densities.Large ? "gap-1.5" : "gap-1";
+  const paddingClass =
+    density === Densities.Small ? "pl-1.5" : density === Densities.Large ? "pl-3" : "pl-2.5";
   return (
     <PaginationLink
       aria-label="Go to previous page"
@@ -88,8 +81,10 @@ const PaginationPrevious = ({ className, density, ...props }: PaginationNavProps
 PaginationPrevious.displayName = "PaginationPrevious";
 
 const PaginationNext = ({ className, density, ...props }: PaginationNavProps) => {
-  const gapClass = density === Densities.Small ? "gap-0.5" : density === Densities.Large ? "gap-1.5" : "gap-1";
-  const paddingClass = density === Densities.Small ? "pr-1.5" : density === Densities.Large ? "pr-3" : "pr-2.5";
+  const gapClass =
+    density === Densities.Small ? "gap-0.5" : density === Densities.Large ? "gap-1.5" : "gap-1";
+  const paddingClass =
+    density === Densities.Small ? "pr-1.5" : density === Densities.Large ? "pr-3" : "pr-2.5";
   return (
     <PaginationLink
       aria-label="Go to next page"
@@ -110,7 +105,8 @@ type PaginationEllipsisProps = {
 } & React.ComponentProps<"span">;
 
 const PaginationEllipsis = ({ className, density, ...props }: PaginationEllipsisProps) => {
-  const containerClass = density === Densities.Small ? "h-6 w-6" : density === Densities.Large ? "h-11 w-11" : "h-9 w-9";
+  const containerClass =
+    density === Densities.Small ? "h-6 w-6" : density === Densities.Large ? "h-11 w-11" : "h-9 w-9";
   return (
     <span
       aria-hidden
