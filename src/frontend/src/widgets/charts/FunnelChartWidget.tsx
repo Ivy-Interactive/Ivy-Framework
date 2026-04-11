@@ -28,7 +28,7 @@ const FunnelChartWidget: React.FC<FunnelChartWidgetProps> = ({
   sort = "Descending",
   orientation = "Vertical",
   gap = 0,
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
     monitorDOM: false,

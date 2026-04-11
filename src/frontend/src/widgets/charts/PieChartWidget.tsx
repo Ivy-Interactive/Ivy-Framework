@@ -27,7 +27,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   legend,
   colorScheme = "Default",
   total,
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

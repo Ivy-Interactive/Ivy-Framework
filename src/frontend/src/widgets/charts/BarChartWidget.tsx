@@ -81,7 +81,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   maxBarSize,
   reverseStackOrder,
   layout = "Vertical",
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

@@ -70,7 +70,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   referenceDots = EMPTY_ARRAY,
   colorScheme = "Default",
   layout = "Vertical",
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

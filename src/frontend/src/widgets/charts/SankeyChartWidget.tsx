@@ -26,7 +26,7 @@ const SankeyChartWidget: React.FC<SankeyChartWidgetProps> = ({
   tooltip,
   legend,
   toolbox,
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
     monitorDOM: false,

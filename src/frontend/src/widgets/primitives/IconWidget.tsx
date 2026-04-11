@@ -12,7 +12,14 @@ interface IconWidgetProps {
   density?: Densities;
 }
 
-export const IconWidget: React.FC<IconWidgetProps> = ({ id, name, color, height, width, density = Densities.Medium }) => {
+export const IconWidget: React.FC<IconWidgetProps> = ({
+  id,
+  name,
+  color,
+  height,
+  width,
+  density: _density = Densities.Medium,
+}) => {
   const styles = {
     ...getWidth(width),
     ...getHeight(height),

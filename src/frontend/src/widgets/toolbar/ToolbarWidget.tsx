@@ -30,10 +30,18 @@ const ToolbarItemGroup: React.FC<ToolbarItemGroupProps> = ({
   disabled = false,
   density = Densities.Medium,
 }) => {
-  const separatorClass = density === Densities.Small ? "h-4 mx-0.5" : density === Densities.Large ? "h-8 mx-1.5" : "h-6 mx-1";
-  const buttonSize = density === Densities.Small ? "xs" : density === Densities.Large ? "default" : "sm";
-  const iconButtonSize = density === Densities.Small ? "icon-xs" : density === Densities.Large ? "icon-md" : "icon-sm";
-  const iconDimension = density === Densities.Small ? "0.75rem" : density === Densities.Large ? "1.25rem" : "1rem";
+  const separatorClass =
+    density === Densities.Small
+      ? "h-4 mx-0.5"
+      : density === Densities.Large
+        ? "h-8 mx-1.5"
+        : "h-6 mx-1";
+  const buttonSize =
+    density === Densities.Small ? "sm" : density === Densities.Large ? "default" : "sm";
+  const iconButtonSize =
+    density === Densities.Small ? "icon-sm" : density === Densities.Large ? "icon" : "icon-sm";
+  const iconDimension =
+    density === Densities.Small ? "0.75rem" : density === Densities.Large ? "1.25rem" : "1rem";
 
   return items.map((item, i) => {
     // Handle group variant
@@ -84,7 +92,9 @@ const ToolbarItemGroup: React.FC<ToolbarItemGroupProps> = ({
         className={cn(item.checked && "bg-accent")}
         tooltipText={item.tooltip}
       >
-        {item.icon && <Icon name={item.icon} style={{ width: iconDimension, height: iconDimension }} />}
+        {item.icon && (
+          <Icon name={item.icon} style={{ width: iconDimension, height: iconDimension }} />
+        )}
         {item.label && <span>{item.label}</span>}
       </ButtonWithTooltip>
     );
@@ -99,7 +109,12 @@ export const ToolbarWidget: React.FC<ToolbarWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
 
-  const containerGapClass = density === Densities.Small ? "gap-1 p-1" : density === Densities.Large ? "gap-3 p-3" : "gap-2 p-2";
+  const containerGapClass =
+    density === Densities.Small
+      ? "gap-1 p-1"
+      : density === Densities.Large
+        ? "gap-3 p-3"
+        : "gap-2 p-2";
 
   const onItemClick = useCallback(
     (item: MenuItem) => {
@@ -127,7 +142,12 @@ export const ToolbarWidget: React.FC<ToolbarWidgetProps> = ({
         disabled && "opacity-50 pointer-events-none",
       )}
     >
-      <ToolbarItemGroup items={items} onItemClick={onItemClick} disabled={disabled} density={density} />
+      <ToolbarItemGroup
+        items={items}
+        onItemClick={onItemClick}
+        disabled={disabled}
+        density={density}
+      />
     </div>
   );
 };

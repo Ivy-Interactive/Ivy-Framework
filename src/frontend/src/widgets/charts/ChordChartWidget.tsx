@@ -22,7 +22,7 @@ const ChordChartWidget: React.FC<ChordChartWidgetProps> = ({
   tooltip,
   legend,
   toolbox,
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
     monitorDOM: false,

@@ -43,7 +43,7 @@ const RadarChartWidget: React.FC<RadarChartWidgetProps> = ({
   splitLine = true,
   splitArea = false,
   axisLine = true,
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

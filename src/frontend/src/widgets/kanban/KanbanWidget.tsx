@@ -18,7 +18,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   height,
   columnWidth,
   showCounts = true,
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
   slots,
   widgetNodeChildren,
 }) => {

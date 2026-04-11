@@ -45,7 +45,7 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   alignContent,
   width,
   multiline,
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   const cellStyles = {
     ...getWidth(width),

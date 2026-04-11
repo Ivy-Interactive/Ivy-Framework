@@ -34,7 +34,7 @@ const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
   colorScheme = "Default",
   width = "Full",
   height = "Full",
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   const { colors, isDark } = useThemeWithMonitoring({
     monitorDOM: false,

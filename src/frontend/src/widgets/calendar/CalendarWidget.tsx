@@ -934,7 +934,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   showToolbar = true,
   width,
   height,
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
   slots,
   widgetNodeChildren,
 }) => {

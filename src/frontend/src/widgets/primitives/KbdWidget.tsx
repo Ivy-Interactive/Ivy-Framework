@@ -7,4 +7,7 @@ interface KbdWidgetProps {
   density?: Densities;
 }
 
-export const KbdWidget: React.FC<KbdWidgetProps> = ({ children, density = Densities.Medium }) => <Kbd>{children}</Kbd>;
+export const KbdWidget: React.FC<KbdWidgetProps> = ({
+  children,
+  density: _density = Densities.Medium,
+}) => <Kbd>{children}</Kbd>;

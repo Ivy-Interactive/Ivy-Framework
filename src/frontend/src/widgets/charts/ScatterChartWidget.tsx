@@ -351,7 +351,7 @@ const ScatterChartWidget: React.FC<ScatterChartWidgetProps> = ({
   referenceAreas = EMPTY_ARRAY,
   referenceDots = EMPTY_ARRAY,
   colorScheme = "Default",
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

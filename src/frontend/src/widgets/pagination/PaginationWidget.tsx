@@ -29,7 +29,7 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
   siblings = 1,
   boundaries = 1,
   disabled = false,
-  density = Densities.Medium,
+  density: _density = Densities.Medium,
 }) => {
   const eventHandler = useEventHandler();
 
