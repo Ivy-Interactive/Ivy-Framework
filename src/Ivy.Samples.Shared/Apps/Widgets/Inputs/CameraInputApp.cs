@@ -11,6 +11,7 @@ public class CameraInputApp() : SampleBase
                | Text.H1("Camera Input")
                | Layout.Tabs(
                    new Tab("Examples", new CameraInputBasic()),
+                   new Tab("States", new CameraInputStates()),
                    new Tab("Validation", new CameraInputValidation()),
                    new Tab("Sizes", new CameraInputSizes()),
                    new Tab("Events", new CameraInputEvents())
@@ -47,7 +48,7 @@ public class CameraInputBasic : ViewBase
     }
 }
 
-public class CameraInputDisabledState : ViewBase
+public class CameraInputStates : ViewBase
 {
     public override object? Build()
     {
@@ -56,9 +57,16 @@ public class CameraInputDisabledState : ViewBase
             defaultContentType: "image/png"
         );
 
-        return Layout.Vertical()
-               | Text.P("Demonstrates the CameraInput widget in a disabled state. The camera cannot be activated.")
-               | new CameraInput(dummyUpload.Value, "Take a photo", disabled: true);
+        return Layout.Grid().Columns(4)
+               | Text.Monospaced("Description")
+               | Text.Monospaced("Default")
+               | Text.Monospaced("Disabled")
+               | Text.Monospaced("Invalid")
+
+               | Text.Monospaced("Camera Input")
+               | new CameraInput(dummyUpload.Value, "Take a photo")
+               | new CameraInput(dummyUpload.Value, "Take a photo", disabled: true)
+               | new CameraInput(dummyUpload.Value, "Take a photo").Invalid("Camera input is required");
     }
 }
 

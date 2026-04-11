@@ -5,19 +5,17 @@ public class FieldApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return Layout.Vertical().Center()
-            | Text.H1("Field")
-            | Layout.Tabs(
-                new Tab("Vertical Labels", new FieldVerticalLabelsTab()),
-                new Tab("Horizontal Labels", new FieldHorizontalLabelsTab()),
-                new Tab("Events", new FieldEventsTab())
-            ).Variant(TabsVariant.Content);
+        return Layout.Tabs(
+            new Tab("Field", new FieldBasicSample()),
+            new Tab("Horizontal Labels", new FieldHorizontalLabelsSample()),
+            new Tab("Events", new FieldEventsSample())
+        ).Variant(TabsVariant.Content);
     }
 }
 
-public class FieldVerticalLabelsTab : ViewBase
+public class FieldBasicSample : ViewBase
 {
-    public override object Build()
+    public override object? Build()
     {
         var nameState = UseState<string>();
         var emailState = UseState<string>();
@@ -86,9 +84,9 @@ public class FieldVerticalLabelsTab : ViewBase
     }
 }
 
-public class FieldHorizontalLabelsTab : ViewBase
+public class FieldHorizontalLabelsSample : ViewBase
 {
-    public override object Build()
+    public override object? Build()
     {
         var emailState = UseState<string>();
         var passwordState = UseState<string>();
@@ -111,9 +109,9 @@ public class FieldHorizontalLabelsTab : ViewBase
     }
 }
 
-public class FieldEventsTab : ViewBase
+public class FieldEventsSample : ViewBase
 {
-    public override object Build()
+    public override object? Build()
     {
         var eventsState = UseState<string>();
         var eventsOnBlurLabel = UseState("");
