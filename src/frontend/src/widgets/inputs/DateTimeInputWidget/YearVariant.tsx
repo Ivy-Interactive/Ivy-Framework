@@ -37,9 +37,11 @@ export const YearVariant: React.FC<YearVariantProps> = ({
   const [open, setOpen] = useState(false);
 
   const hasAutoFocusedRef = useRef(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
+      buttonRef.current?.focus();
       setOpen(true);
     }
   }, [autoFocus, disabled]);
@@ -59,10 +61,14 @@ export const YearVariant: React.FC<YearVariantProps> = ({
   const [decadeStart, setDecadeStart] = useState(() =>
     getDecadeStart(date ? date.getFullYear() : new Date().getFullYear()),
   );
+  const [prevYear, setPrevYear] = useState(date?.getFullYear());
 
-  React.useEffect(() => {
-    if (date) setDecadeStart(getDecadeStart(date.getFullYear()));
-  }, [date]);
+  if (date?.getFullYear() !== prevYear) {
+    setPrevYear(date?.getFullYear());
+    if (date) {
+      setDecadeStart(getDecadeStart(date.getFullYear()));
+    }
+  }
 
   const showClear = nullable && !disabled && value != null && value !== "";
 
@@ -102,9 +108,9 @@ export const YearVariant: React.FC<YearVariantProps> = ({
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
+            ref={buttonRef}
             disabled={disabled}
             variant="outline"
-            autoFocus={autoFocus}
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),

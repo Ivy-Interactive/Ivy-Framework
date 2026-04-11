@@ -29,41 +29,40 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
   "data-testid": dataTestId,
   onFocusChange,
 }) => {
-  // Use local state for the input value to make it uncontrolled
-  const [localTimeValue, setLocalTimeValue] = useState(() => {
-    if (value && typeof value === "string") {
-      const date = new Date(value);
-      if (!isNaN(date.getTime())) {
-        return format(date, "HH:mm:ss");
-      }
-      // Fallback for simple time strings that new Date() might fail on
-      if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(value)) {
-        return value.split(":").length === 2 ? value + ":00" : value;
-      }
-    }
-    // When nullable and no value, return empty string to show placeholder
-    return nullable && (value === undefined || value === null || value === "") ? "" : "00:00:00";
-  });
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const hasAutoFocusedRef = React.useRef(false);
 
-  // Update local state when value prop changes (from parent)
   React.useEffect(() => {
-    if (value && typeof value === "string") {
-      const date = new Date(value);
-      if (!isNaN(date.getTime())) {
-        const newTimeValue = format(date, "HH:mm:ss");
-        setLocalTimeValue(newTimeValue);
-      } else if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(value)) {
-        // Handle direct time strings
-        const newTimeValue = value.split(":").length === 2 ? value + ":00" : value;
-        setLocalTimeValue(newTimeValue);
-      }
-    } else if (nullable && (value === undefined || value === null || value === "")) {
-      setLocalTimeValue("");
-    } else {
-      // When not nullable and no value, default to '00:00:00'
-      setLocalTimeValue("00:00:00");
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      inputRef.current?.focus();
     }
-  }, [value, nullable]);
+  }, [autoFocus, disabled]);
+
+  // Use local state for the input value to make it uncontrolled
+  const deriveTimeValue = useCallback(
+    (val: string | undefined | null) => {
+      if (val && typeof val === "string") {
+        const date = new Date(val);
+        if (!isNaN(date.getTime())) {
+          return format(date, "HH:mm:ss");
+        }
+        if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(val)) {
+          return val.split(":").length === 2 ? val + ":00" : val;
+        }
+      }
+      return nullable && (val === undefined || val === null || val === "") ? "" : "00:00:00";
+    },
+    [nullable],
+  );
+
+  const [localTimeValue, setLocalTimeValue] = useState(() => deriveTimeValue(value));
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (value !== prevValue) {
+    setPrevValue(value);
+    setLocalTimeValue(deriveTimeValue(value));
+  }
 
   const { timeStepSeconds, timeMin, timeMax, getSnappedTime } = useTimeConstraints(min, max, step);
 
@@ -130,7 +129,7 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
           onBlur={handleTimeBlur}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          autoFocus={autoFocus}
+          ref={inputRef}
           placeholder={placeholder || "Select time"}
           className={cn(
             "bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0",
