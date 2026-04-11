@@ -75,14 +75,22 @@ export const ListItemWidget: React.FC<ListItemWidgetProps> = ({
       <div className="flex flex-col items-start text-body w-full flex-1 min-w-0 text-left">
         <span className="block w-full truncate text-left">{title}</span>
         {subtitle && (
-          <span className={cn("block text-muted-foreground w-full truncate text-left", subtitleSizeMap[density])}>
+          <span
+            className={cn(
+              "block text-muted-foreground w-full truncate text-left",
+              subtitleSizeMap[density],
+            )}
+          >
             {subtitle}
           </span>
         )}
         {children && <div className="w-full py-1">{children}</div>}
       </div>
       {icon && icon != "None" && (
-        <Icon className={cn(iconSizeMap[density], "text-muted-foreground ml-auto flex-none")} name={icon} />
+        <Icon
+          className={cn(iconSizeMap[density], "text-muted-foreground ml-auto flex-none")}
+          name={icon}
+        />
       )}
       {badge && (
         <Badge variant="primary" className="ml-auto flex-none">

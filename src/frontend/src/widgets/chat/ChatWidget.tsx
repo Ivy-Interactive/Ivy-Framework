@@ -166,7 +166,10 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className={cn(inputMinHeightClass, "resize-none rounded-box bg-background border-0 p-3 shadow-none focus-visible:ring-0")}
+            className={cn(
+              inputMinHeightClass,
+              "resize-none rounded-box bg-background border-0 p-3 shadow-none focus-visible:ring-0",
+            )}
           />
           <div className="flex items-center p-3 pt-0 justify-between">
             {isLoading ? (

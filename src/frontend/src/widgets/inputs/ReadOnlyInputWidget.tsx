@@ -32,7 +32,10 @@ export const ReadOnlyInputWidget: React.FC<ReadOnlyInputWidgetProps> = ({
   return (
     <div
       key={id}
-      className={cn(textSizeMap[density], "text-muted-foreground flex flex-row items-center w-full focus:outline-none")}
+      className={cn(
+        textSizeMap[density],
+        "text-muted-foreground flex flex-row items-center w-full focus:outline-none",
+      )}
       onBlur={() => {
         if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
       }}

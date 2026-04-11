@@ -53,7 +53,11 @@ const DropDownMenuItemGroup = ({ items, onItemClick, iconSize }: DropDownMenuIte
         <React.Fragment key={groupKey}>
           {item.label && <DropdownMenuLabel>{item.label}</DropdownMenuLabel>}
           <DropdownMenuGroup>
-            <DropDownMenuItemGroup items={item.children} onItemClick={onItemClick} iconSize={iconSize} />
+            <DropDownMenuItemGroup
+              items={item.children}
+              onItemClick={onItemClick}
+              iconSize={iconSize}
+            />
           </DropdownMenuGroup>
         </React.Fragment>
       );
@@ -110,7 +114,11 @@ const DropDownMenuItemGroup = ({ items, onItemClick, iconSize }: DropDownMenuIte
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent className="m-2">
-              <DropDownMenuItemGroup items={item.children} onItemClick={onItemClick} iconSize={iconSize} />
+              <DropDownMenuItemGroup
+                items={item.children}
+                onItemClick={onItemClick}
+                iconSize={iconSize}
+              />
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
         </DropdownMenuSub>
@@ -147,7 +155,8 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const iconSize = density === Densities.Small ? 12 : density === Densities.Large ? 16 : 14;
-  const contentMarginClass = density === Densities.Small ? "m-1" : density === Densities.Large ? "m-3" : "m-2";
+  const contentMarginClass =
+    density === Densities.Small ? "m-1" : density === Densities.Large ? "m-3" : "m-2";
 
   if (!slots?.Trigger) {
     return <div className="text-red-500">Error: DropDownMenu requires Trigger slot.</div>;

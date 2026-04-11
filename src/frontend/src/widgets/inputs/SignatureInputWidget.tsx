@@ -281,7 +281,12 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
 
       {/* Placeholder */}
       {!hasDrawn && placeholder && (
-        <div className={cn("absolute inset-0 flex items-center justify-center pointer-events-none text-muted-foreground", placeholderTextMap[density])}>
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center pointer-events-none text-muted-foreground",
+            placeholderTextMap[density],
+          )}
+        >
           {placeholder}
         </div>
       )}
@@ -291,7 +296,10 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
         <button
           type="button"
           onClick={handleClear}
-          className={cn("absolute rounded-md bg-background/80 border border-input hover:bg-accent transition-colors cursor-pointer", clearButtonMap[density])}
+          className={cn(
+            "absolute rounded-md bg-background/80 border border-input hover:bg-accent transition-colors cursor-pointer",
+            clearButtonMap[density],
+          )}
           aria-label="Clear signature"
         >
           <Eraser className={cn(clearIconMap[density], "text-muted-foreground")} />

@@ -14,7 +14,12 @@ interface TreeWidgetProps {
   density?: Densities;
 }
 
-export const TreeWidget: React.FC<TreeWidgetProps> = ({ id, items = EMPTY_ARRAY, rowActions, density = Densities.Medium }) => {
+export const TreeWidget: React.FC<TreeWidgetProps> = ({
+  id,
+  items = EMPTY_ARRAY,
+  rowActions,
+  density = Densities.Medium,
+}) => {
   const eventHandler = useEventHandler();
 
   const onItemClick = React.useCallback(
@@ -39,7 +44,8 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({ id, items = EMPTY_ARRAY,
     [eventHandler, id],
   );
 
-  const gapClass = density === Densities.Small ? "gap-0.5" : density === Densities.Large ? "gap-1.5" : "gap-1";
+  const gapClass =
+    density === Densities.Small ? "gap-0.5" : density === Densities.Large ? "gap-1.5" : "gap-1";
 
   return (
     <div className={cn("ivy-tree flex flex-col w-full", gapClass)} role="tree">

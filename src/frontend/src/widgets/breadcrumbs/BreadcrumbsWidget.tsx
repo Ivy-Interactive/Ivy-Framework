@@ -43,9 +43,12 @@ export const BreadcrumbsWidget: React.FC<BreadcrumbsWidgetProps> = ({
     [id, disabled, hasItemClickHandler, eventHandler],
   );
 
-  const olGapClass = density === Densities.Small ? "gap-1" : density === Densities.Large ? "gap-2" : "gap-1.5";
-  const textSizeClass = density === Densities.Small ? "text-xs" : density === Densities.Large ? "text-base" : "text-sm";
-  const liGapClass = density === Densities.Small ? "gap-1" : density === Densities.Large ? "gap-2" : "gap-1.5";
+  const olGapClass =
+    density === Densities.Small ? "gap-1" : density === Densities.Large ? "gap-2" : "gap-1.5";
+  const textSizeClass =
+    density === Densities.Small ? "text-xs" : density === Densities.Large ? "text-base" : "text-sm";
+  const liGapClass =
+    density === Densities.Small ? "gap-1" : density === Densities.Large ? "gap-2" : "gap-1.5";
   const iconSize = density === Densities.Small ? 12 : density === Densities.Large ? 16 : 14;
 
   return (
@@ -66,7 +69,9 @@ export const BreadcrumbsWidget: React.FC<BreadcrumbsWidgetProps> = ({
                     title={item.tooltip}
                   >
                     <span className="flex items-center gap-1">
-                      {item.icon && item.icon !== "None" && <Icon name={item.icon} size={iconSize} />}
+                      {item.icon && item.icon !== "None" && (
+                        <Icon name={item.icon} size={iconSize} />
+                      )}
                       {item.label}
                     </span>
                   </button>
