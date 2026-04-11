@@ -50,7 +50,9 @@ describe("FileInputWidget", () => {
   describe("handleUploadFile", () => {
     it("should contain !uploadUrl guard for early return", () => {
       const block = extractBlock("handleUploadFile");
-      expect(block).toContain("if (!uploadUrl) return");
+      expect(block).toContain("if (!uploadUrl)");
+      expect(block).toContain("toast({");
+      expect(block).toContain("return;");
     });
 
     it("should call validateFileWithToast with file, accept, maxFileSize, minFileSize", () => {
