@@ -57,7 +57,7 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
 
   return (
     <Pagination>
-      <PaginationContent>
+      <PaginationContent density={density}>
         <PaginationItem>
           <PaginationPrevious
             aria-disabled={disabled || !page || page === 1}

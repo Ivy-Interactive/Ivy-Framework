@@ -1,5 +1,5 @@
 
-namespace Ivy.Samples.Shared.Apps.Widgets;
+namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.Gauge, group: ["Widgets"], searchHints: ["loading", "percentage", "bar", "indicator", "status", "completion"])]
 public class ProgressApp : SampleBase

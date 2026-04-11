@@ -25,11 +25,12 @@ import { useCalendarData } from "./useCalendarData";
 import { useCalendarHandlers } from "./useCalendarHandlers";
 import { useRovingTabIndex } from "./useRovingTabIndex";
 import type { CalendarWidgetProps, CalendarView, CalendarEvent } from "./types";
+import { Densities } from "@/types/density";
+import { CALENDAR_DENSITY_CONFIG } from "./constants";
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
-const HOUR_HEIGHT = 60; // px per hour in time grid views
 
 // ─── Toolbar ───────────────────────────────────────────────────────────────────
 
@@ -38,9 +39,10 @@ interface ToolbarProps {
   view: CalendarView;
   onNavigate: (action: "prev" | "next" | "today") => void;
   onViewChange: (view: CalendarView) => void;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ currentDate, view, onNavigate, onViewChange }) => {
+const Toolbar: React.FC<ToolbarProps> = ({ currentDate, view, onNavigate, onViewChange, dc }) => {
   const label = useMemo(() => {
     switch (view) {
       case "month":
@@ -74,7 +76,11 @@ const Toolbar: React.FC<ToolbarProps> = ({ currentDate, view, onNavigate, onView
       <div className="flex items-center gap-1">
         <button
           onClick={() => onNavigate("today")}
-          className="px-3 py-1.5 text-sm font-medium rounded-md border border-border bg-background hover:bg-accent transition-colors"
+          className={cn(
+            dc.toolbarButtonPadding,
+            dc.toolbarButtonText,
+            "font-medium rounded-md border border-border bg-background hover:bg-accent transition-colors",
+          )}
         >
           Today
         </button>
@@ -92,7 +98,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ currentDate, view, onNavigate, onView
         >
           <ChevronRight />
         </button>
-        <span className="ml-2 text-base font-semibold">{label}</span>
+        <span className={cn("ml-2", dc.toolbarTitleText)}>{label}</span>
       </div>
       <div className="flex items-center rounded-md border border-border overflow-hidden">
         {views.map((v) => (
@@ -100,7 +106,9 @@ const Toolbar: React.FC<ToolbarProps> = ({ currentDate, view, onNavigate, onView
             key={v.key}
             onClick={() => onViewChange(v.key)}
             className={cn(
-              "px-3 py-1.5 text-sm font-medium transition-colors",
+              dc.toolbarButtonPadding,
+              dc.toolbarButtonText,
+              "font-medium transition-colors",
               view === v.key
                 ? "bg-primary text-primary-foreground"
                 : "bg-background hover:bg-accent",
@@ -156,10 +164,11 @@ interface EventPillProps {
   onDragStart?: () => void;
   tabIndex?: number;
   onKeyDown?: React.KeyboardEventHandler;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
 const EventPill = React.forwardRef<HTMLButtonElement, EventPillProps>(
-  ({ event, onClick, compact, draggable, onDragStart, tabIndex, onKeyDown }, ref) => {
+  ({ event, onClick, compact, draggable, onDragStart, tabIndex, onKeyDown, dc }, ref) => {
     const bgColor = event.color
       ? `var(--${event.color.toLowerCase()}, var(--primary))`
       : "var(--primary)";
@@ -183,8 +192,9 @@ const EventPill = React.forwardRef<HTMLButtonElement, EventPillProps>(
             : undefined
         }
         className={cn(
-          "w-full text-left rounded px-1.5 truncate cursor-pointer transition-opacity hover:opacity-80",
-          compact ? "text-[11px] py-px leading-snug" : "text-xs py-0.5",
+          "w-full text-left rounded truncate cursor-pointer transition-opacity hover:opacity-80",
+          dc.eventPillPadding,
+          compact ? cn(dc.eventPillText, "leading-snug") : dc.eventPillText,
           draggable && "cursor-grab active:cursor-grabbing",
         )}
         style={{
@@ -226,6 +236,7 @@ interface MonthDayCellProps {
   onEventMove?: (eventId: string, newStart: string, newEnd: string) => void;
   draggedEventId: string | null;
   setDraggedEventId: (id: string | null) => void;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
 const MonthDayCell: React.FC<MonthDayCellProps> = ({
@@ -241,6 +252,7 @@ const MonthDayCell: React.FC<MonthDayCellProps> = ({
   onEventMove,
   draggedEventId,
   setDraggedEventId,
+  dc,
 }) => {
   const visibleEvents = dayEvents.slice(0, maxVisible);
   const { setItemRef, getTabIndex, onKeyDown } = useRovingTabIndex(visibleEvents.length);
@@ -251,7 +263,8 @@ const MonthDayCell: React.FC<MonthDayCellProps> = ({
       tabIndex={0}
       aria-label={format(day, "EEEE, MMMM d, yyyy")}
       className={cn(
-        "border-r border-border last:border-r-0 p-1 overflow-hidden cursor-pointer hover:bg-accent/30 transition-colors min-h-[4.5rem]",
+        "border-r border-border last:border-r-0 p-1 overflow-hidden cursor-pointer hover:bg-accent/30 transition-colors",
+        dc.monthCellMinHeight,
         !inMonth && "bg-muted/30",
         draggedEventId && "hover:bg-primary/10",
       )}
@@ -305,7 +318,8 @@ const MonthDayCell: React.FC<MonthDayCellProps> = ({
       <div className="flex justify-end mb-0.5">
         <span
           className={cn(
-            "text-xs w-6 h-6 flex items-center justify-center rounded-full",
+            dc.dayBadgeSize,
+            "flex items-center justify-center rounded-full",
             today && "bg-primary text-primary-foreground font-bold",
             !inMonth && !today && "text-muted-foreground/50",
           )}
@@ -325,6 +339,7 @@ const MonthDayCell: React.FC<MonthDayCellProps> = ({
             onDragStart={enableDragDrop ? () => setDraggedEventId(event.id) : undefined}
             tabIndex={getTabIndex(idx)}
             onKeyDown={(e) => onKeyDown(e, idx)}
+            dc={dc}
           />
         ))}
         {dayEvents.length > maxVisible && (
@@ -346,6 +361,7 @@ interface MonthViewProps {
   onSelectSlot: (start: string, end: string) => void;
   onEventMove?: (eventId: string, newStart: string, newEnd: string) => void;
   enableDragDrop?: boolean;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
 const MonthView: React.FC<MonthViewProps> = ({
@@ -355,6 +371,7 @@ const MonthView: React.FC<MonthViewProps> = ({
   onSelectSlot,
   onEventMove,
   enableDragDrop,
+  dc,
 }) => {
   const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
   const weeks = useMemo(() => {
@@ -441,6 +458,7 @@ const MonthView: React.FC<MonthViewProps> = ({
                   onEventMove={onEventMove}
                   draggedEventId={draggedEventId}
                   setDraggedEventId={setDraggedEventId}
+                  dc={dc}
                 />
               );
             })}
@@ -457,9 +475,10 @@ interface AllDayCellProps {
   day: Date;
   allDayEvents: CalendarEvent[];
   onEventClick: (eventId: string) => void;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
-const AllDayCell: React.FC<AllDayCellProps> = ({ day, allDayEvents, onEventClick }) => {
+const AllDayCell: React.FC<AllDayCellProps> = ({ day, allDayEvents, onEventClick, dc }) => {
   const { setItemRef, getTabIndex, onKeyDown } = useRovingTabIndex(allDayEvents.length);
 
   return (
@@ -476,6 +495,7 @@ const AllDayCell: React.FC<AllDayCellProps> = ({ day, allDayEvents, onEventClick
           compact
           tabIndex={getTabIndex(idx)}
           onKeyDown={(e) => onKeyDown(e, idx)}
+          dc={dc}
         />
       ))}
     </div>
@@ -492,6 +512,7 @@ interface TimeGridDayColumnProps {
   onSelectSlot: (start: string, end: string) => void;
   onEventMove?: (eventId: string, newStart: string, newEnd: string) => void;
   enableDragDrop?: boolean;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
 const TimeGridDayColumn: React.FC<TimeGridDayColumnProps> = ({
@@ -502,6 +523,7 @@ const TimeGridDayColumn: React.FC<TimeGridDayColumnProps> = ({
   onSelectSlot,
   onEventMove,
   enableDragDrop,
+  dc,
 }) => {
   const dayStart = startOfDay(day);
   const { setItemRef, getTabIndex, onKeyDown } = useRovingTabIndex(dayEvents.length);
@@ -517,8 +539,8 @@ const TimeGridDayColumn: React.FC<TimeGridDayColumnProps> = ({
           aria-label={`${format(day, "EEEE, MMMM d")} at ${format(new Date(2000, 0, 1, hour), "HH:mm")}`}
           className="absolute w-full border-t border-border/50 cursor-pointer hover:bg-accent/20"
           style={{
-            top: hour * HOUR_HEIGHT,
-            height: HOUR_HEIGHT,
+            top: hour * dc.hourHeight,
+            height: dc.hourHeight,
           }}
           onClick={() => {
             const slotStart = new Date(day);
@@ -580,8 +602,8 @@ const TimeGridDayColumn: React.FC<TimeGridDayColumnProps> = ({
         const evtEnd = min([event.end, endOfDay(day)]);
         const startMin = differenceInMinutes(evtStart, dayStart);
         const durationMin = Math.max(differenceInMinutes(evtEnd, evtStart), 30);
-        const topPx = (startMin / 60) * HOUR_HEIGHT;
-        const heightPx = (durationMin / 60) * HOUR_HEIGHT;
+        const topPx = (startMin / 60) * dc.hourHeight;
+        const heightPx = (durationMin / 60) * dc.hourHeight;
 
         const bgColor = event.color
           ? `var(--${event.color.toLowerCase()}, var(--primary))`
@@ -602,7 +624,8 @@ const TimeGridDayColumn: React.FC<TimeGridDayColumnProps> = ({
                 : undefined
             }
             className={cn(
-              "absolute left-0.5 right-1 rounded px-1.5 py-0.5 text-xs overflow-hidden cursor-pointer hover:opacity-80 transition-opacity text-left",
+              "absolute left-0.5 right-1 rounded overflow-hidden cursor-pointer hover:opacity-80 transition-opacity text-left",
+              dc.timeEventPadding,
               enableDragDrop && "cursor-grab active:cursor-grabbing",
             )}
             style={{
@@ -648,6 +671,7 @@ interface TimeGridProps {
   onSelectSlot: (start: string, end: string) => void;
   onEventMove?: (eventId: string, newStart: string, newEnd: string) => void;
   enableDragDrop?: boolean;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
 const TimeGrid: React.FC<TimeGridProps> = ({
@@ -657,6 +681,7 @@ const TimeGrid: React.FC<TimeGridProps> = ({
   onSelectSlot,
   onEventMove,
   enableDragDrop,
+  dc,
 }) => {
   // Get events that overlap a given day (non-allDay events only)
   const getEventsForDay = useCallback(
@@ -689,13 +714,14 @@ const TimeGrid: React.FC<TimeGridProps> = ({
     <div className="flex flex-col flex-1 overflow-hidden">
       {/* Header: day names */}
       <div className="flex border-b border-border flex-shrink-0">
-        <div className="w-16 flex-shrink-0" />
+        <div className={cn(dc.timeGutterWidth, "flex-shrink-0")} />
         {days.map((day) => (
           <div key={day.toISOString()} className="flex-1 text-center py-1.5 border-l border-border">
             <div className="text-xs text-muted-foreground">{format(day, "EEE")}</div>
             <div
               className={cn(
-                "text-lg font-semibold mx-auto w-8 h-8 flex items-center justify-center rounded-full",
+                "font-semibold mx-auto flex items-center justify-center rounded-full",
+                dc.dayHeaderBadge,
                 isToday(day) && "bg-primary text-primary-foreground",
               )}
             >
@@ -708,7 +734,9 @@ const TimeGrid: React.FC<TimeGridProps> = ({
       {/* All-day row */}
       {hasAnyAllDay && (
         <div className="flex border-b border-border flex-shrink-0">
-          <div className="w-16 flex-shrink-0 flex items-center justify-end pr-2">
+          <div
+            className={cn(dc.timeGutterWidth, "flex-shrink-0 flex items-center justify-end pr-2")}
+          >
             <span className="text-[10px] text-muted-foreground">all-day</span>
           </div>
           {days.map((day) => {
@@ -719,6 +747,7 @@ const TimeGrid: React.FC<TimeGridProps> = ({
                 day={day}
                 allDayEvents={allDayEvts}
                 onEventClick={onEventClick}
+                dc={dc}
               />
             );
           })}
@@ -727,14 +756,14 @@ const TimeGrid: React.FC<TimeGridProps> = ({
 
       {/* Time grid body */}
       <div className="flex-1 overflow-y-auto">
-        <div className="flex relative" style={{ height: HOURS.length * HOUR_HEIGHT }}>
+        <div className="flex relative" style={{ height: HOURS.length * dc.hourHeight }}>
           {/* Time labels */}
-          <div className="w-16 flex-shrink-0 relative">
+          <div className={cn(dc.timeGutterWidth, "flex-shrink-0 relative")}>
             {HOURS.map((hour) => (
               <div
                 key={hour}
                 className="absolute right-2 text-xs text-muted-foreground"
-                style={{ top: hour * HOUR_HEIGHT - 6 }}
+                style={{ top: hour * dc.hourHeight - 6 }}
               >
                 {hour === 0 ? "" : format(new Date(2000, 0, 1, hour), "HH:mm")}
               </div>
@@ -754,6 +783,7 @@ const TimeGrid: React.FC<TimeGridProps> = ({
                 onSelectSlot={onSelectSlot}
                 onEventMove={onEventMove}
                 enableDragDrop={enableDragDrop}
+                dc={dc}
               />
             );
           })}
@@ -772,6 +802,7 @@ interface WeekViewProps {
   onSelectSlot: (start: string, end: string) => void;
   onEventMove?: (eventId: string, newStart: string, newEnd: string) => void;
   enableDragDrop?: boolean;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
 const WeekView: React.FC<WeekViewProps> = (props) => {
@@ -788,6 +819,7 @@ const WeekView: React.FC<WeekViewProps> = (props) => {
       onSelectSlot={props.onSelectSlot}
       onEventMove={props.onEventMove}
       enableDragDrop={props.enableDragDrop}
+      dc={props.dc}
     />
   );
 };
@@ -801,6 +833,7 @@ interface DayViewProps {
   onSelectSlot: (start: string, end: string) => void;
   onEventMove?: (eventId: string, newStart: string, newEnd: string) => void;
   enableDragDrop?: boolean;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
 const DayView: React.FC<DayViewProps> = (props) => {
@@ -814,6 +847,7 @@ const DayView: React.FC<DayViewProps> = (props) => {
       onSelectSlot={props.onSelectSlot}
       onEventMove={props.onEventMove}
       enableDragDrop={props.enableDragDrop}
+      dc={props.dc}
     />
   );
 };
@@ -823,9 +857,10 @@ const DayView: React.FC<DayViewProps> = (props) => {
 interface AgendaDateGroupProps {
   dayEvents: CalendarEvent[];
   onEventClick: (eventId: string) => void;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
-const AgendaDateGroup: React.FC<AgendaDateGroupProps> = ({ dayEvents, onEventClick }) => {
+const AgendaDateGroup: React.FC<AgendaDateGroupProps> = ({ dayEvents, onEventClick, dc }) => {
   const date = dayEvents[0].start;
   const { setItemRef, getTabIndex, onKeyDown } = useRovingTabIndex(dayEvents.length);
 
@@ -833,7 +868,7 @@ const AgendaDateGroup: React.FC<AgendaDateGroupProps> = ({ dayEvents, onEventCli
     <div className="border-b border-border">
       <div className="flex">
         {/* Date column */}
-        <div className="w-32 flex-shrink-0 py-3 px-3 border-r border-border">
+        <div className={cn(dc.agendaDateWidth, "flex-shrink-0 py-3 px-3 border-r border-border")}>
           <div className="text-sm font-semibold">{format(date, "EEE")}</div>
           <div className={cn("text-2xl font-bold", isToday(date) && "text-primary")}>
             {format(date, "d")}
@@ -852,13 +887,16 @@ const AgendaDateGroup: React.FC<AgendaDateGroupProps> = ({ dayEvents, onEventCli
               <button
                 key={event.id}
                 ref={setItemRef(idx)}
-                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent transition-colors w-full text-left"
+                className={cn(
+                  "flex items-center gap-3 rounded-md hover:bg-accent transition-colors w-full text-left",
+                  dc.agendaRowPadding,
+                )}
                 onClick={() => onEventClick(event.id)}
                 tabIndex={getTabIndex(idx)}
                 onKeyDown={(e) => onKeyDown(e, idx)}
               >
                 <div
-                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  className={cn(dc.agendaDotSize, "rounded-full flex-shrink-0")}
                   style={{ backgroundColor: bgColor }}
                 />
                 <div className="flex-1 min-w-0">
@@ -884,9 +922,10 @@ interface AgendaViewProps {
   currentDate: Date;
   events: CalendarEvent[];
   onEventClick: (eventId: string) => void;
+  dc: (typeof CALENDAR_DENSITY_CONFIG)[Densities];
 }
 
-const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, events, onEventClick }) => {
+const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, events, onEventClick, dc }) => {
   // Show events for the next 30 days from current date
   const filteredEvents = useMemo(() => {
     const rangeStart = startOfDay(currentDate);
@@ -918,7 +957,7 @@ const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, events, onEventCli
   return (
     <div className="flex-1 overflow-y-auto">
       {grouped.map(([dateKey, dayEvents]) => (
-        <AgendaDateGroup key={dateKey} dayEvents={dayEvents} onEventClick={onEventClick} />
+        <AgendaDateGroup key={dateKey} dayEvents={dayEvents} onEventClick={onEventClick} dc={dc} />
       ))}
     </div>
   );
@@ -932,12 +971,14 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   defaultDate,
   enableDragDrop = false,
   showToolbar = true,
+  density,
   width,
   height,
   density: _density = Densities.Medium,
   slots,
   widgetNodeChildren,
 }) => {
+  const dc = CALENDAR_DENSITY_CONFIG[density ?? Densities.Medium];
   const [currentDate, setCurrentDate] = useState(() => {
     if (defaultDate) {
       try {
@@ -999,6 +1040,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
           view={view}
           onNavigate={onNavigate}
           onViewChange={setView}
+          dc={dc}
         />
       ) : null}
 
@@ -1010,6 +1052,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
           onSelectSlot={handleSelectSlot}
           onEventMove={enableDragDrop ? handleEventMove : undefined}
           enableDragDrop={enableDragDrop}
+          dc={dc}
         />
       )}
       {view === "week" && (
@@ -1020,6 +1063,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
           onSelectSlot={handleSelectSlot}
           onEventMove={enableDragDrop ? handleEventMove : undefined}
           enableDragDrop={enableDragDrop}
+          dc={dc}
         />
       )}
       {view === "day" && (
@@ -1030,6 +1074,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
           onSelectSlot={handleSelectSlot}
           onEventMove={enableDragDrop ? handleEventMove : undefined}
           enableDragDrop={enableDragDrop}
+          dc={dc}
         />
       )}
       {view === "agenda" && (
@@ -1037,6 +1082,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
           currentDate={currentDate}
           events={calendarEvents}
           onEventClick={handleEventClick}
+          dc={dc}
         />
       )}
     </div>

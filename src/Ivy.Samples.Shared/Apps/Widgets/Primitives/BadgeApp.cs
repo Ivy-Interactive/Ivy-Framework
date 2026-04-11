@@ -1,4 +1,4 @@
-namespace Ivy.Samples.Shared.Apps.Widgets;
+namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.Pill, group: ["Widgets"], searchHints: ["tag", "label", "chip", "status", "indicator", "pill"])]
 public class BadgeApp : SampleBase

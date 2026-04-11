@@ -1,4 +1,4 @@
-namespace Ivy.Samples.Shared.Apps.Widgets;
+namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.ChartBarStacked, group: ["Widgets"], searchHints: ["stacked", "segmented", "multi", "progress", "bar"])]
 public class StackedProgressApp : SampleBase

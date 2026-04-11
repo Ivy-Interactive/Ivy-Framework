@@ -41,6 +41,7 @@ export interface CalendarWidgetProps {
   defaultDate?: string;
   enableDragDrop?: boolean;
   showToolbar?: boolean;
+  density?: Densities;
   events?: string[];
   width?: string;
   height?: string;

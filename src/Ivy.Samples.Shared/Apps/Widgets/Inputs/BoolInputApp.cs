@@ -333,31 +333,13 @@ public class BoolInputDataBinding : ViewBase
         }
     }
 
-    private static object CreateBoolInputVariants(object state)
-    {
-        if (state is not IAnyState anyState)
-            return Text.Block("Not an IAnyState");
-
-        var stateType = anyState.GetStateType();
-        var isNullable = stateType.IsNullableType();
-
-        if (isNullable)
-        {
-            // For nullable states, only show checkbox variant
-            return anyState.ToBoolInput();
-        }
-
-        // For non-nullable states, show all three variants
-        return Layout.Vertical()
-               | anyState.ToBoolInput()
-               | anyState
-                   .ToBoolInput()
-                   .Variant(BoolInputVariant.Switch)
-               | anyState
-                   .ToBoolInput()
-                   .Variant(BoolInputVariant.Toggle)
-                   .Icon(Icons.Star);
-    }
+    private static object CreateBoolInputVariants(object state) =>
+        InputDataBindingHelper.CreateInputVariants(state,
+            anyState => Layout.Vertical()
+                | anyState.ToBoolInput()
+                | anyState.ToBoolInput().Variant(BoolInputVariant.Switch)
+                | anyState.ToBoolInput().Variant(BoolInputVariant.Toggle).Icon(Icons.Star),
+            anyState => anyState.ToBoolInput());
 }
 
 public class BoolInputSizes : ViewBase

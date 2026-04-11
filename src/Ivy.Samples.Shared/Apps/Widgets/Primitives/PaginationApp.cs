@@ -1,5 +1,5 @@
 
-namespace Ivy.Samples.Shared.Apps.Widgets;
+namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.SquareChevronRight, group: ["Widgets"], searchHints: ["paging", "navigation", "pages", "next", "previous", "numbers"])]
 public class PaginationApp() : SampleBase

@@ -1,5 +1,5 @@
 
-namespace Ivy.Samples.Shared.Apps.Widgets;
+namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.SquareChevronRight, group: ["Widgets"], searchHints: ["click", "action", "submit", "cta", "interactive", "control"])]
 public class ButtonApp() : SampleBase
