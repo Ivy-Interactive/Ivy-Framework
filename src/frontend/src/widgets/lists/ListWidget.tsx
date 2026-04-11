@@ -1,12 +1,20 @@
 import React, { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn } from "@/lib/utils";
+import { Densities } from "@/types/density";
 
 type ListWidgetProps = {
   children: React.ReactNode;
+  density?: Densities;
 };
 
-export const ListWidget = ({ children }: ListWidgetProps) => {
+const estimateSizeMap: Record<Densities, number> = {
+  [Densities.Small]: 44,
+  [Densities.Medium]: 60,
+  [Densities.Large]: 76,
+};
+
+export const ListWidget = ({ children, density = Densities.Medium }: ListWidgetProps) => {
   const parentRef = useRef<HTMLDivElement | null>(null);
   const childArray = React.Children.toArray(children);
 
@@ -14,7 +22,7 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
   const rowVirtualizer = useVirtualizer({
     count: childArray.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 60,
+    estimateSize: () => estimateSizeMap[density],
     overscan: 6,
   });
 

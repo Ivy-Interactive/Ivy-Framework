@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/pagination";
 import { useEventHandler } from "@/components/event-handler";
 import { cn } from "@/lib/utils";
+import { Densities } from "@/types/density";
 
 interface PaginationWidgetProps {
   id: string;
@@ -18,6 +19,7 @@ interface PaginationWidgetProps {
   siblings?: number;
   boundaries?: number;
   disabled?: boolean;
+  density?: Densities;
 }
 
 export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
@@ -27,6 +29,7 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
   siblings = 1,
   boundaries = 1,
   disabled = false,
+  density = Densities.Medium,
 }) => {
   const eventHandler = useEventHandler();
 
