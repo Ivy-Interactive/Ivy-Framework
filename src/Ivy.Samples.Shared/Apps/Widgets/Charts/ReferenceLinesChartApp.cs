@@ -2,7 +2,7 @@ namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
 [App(
     icon: Icons.Milestone,
-    isVisible: true,
+    isVisible: false,
     searchHints: ["reference line", "release", "marker", "vertical line", "annotation", "chart", "nuget"])]
 public class ReferenceLinesChartApp : SampleBase
 {
