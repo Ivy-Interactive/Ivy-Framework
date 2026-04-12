@@ -429,7 +429,11 @@ public class DesktopWindow(Server server)
     private static void WaitForServerReady(Task serverTask, string url, int timeoutMs = 30_000)
     {
         var healthUrl = $"{url}/ivy/health";
-        using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+        var handler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        };
+        using var http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(2) };
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
         while (sw.ElapsedMilliseconds < timeoutMs)
