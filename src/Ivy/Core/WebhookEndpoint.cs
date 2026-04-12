@@ -22,10 +22,10 @@ public record WebhookEndpoint
     }
 
     public static string BuildWebhookBaseUrl(string scheme, string host, string? basePath = null)
-        => basePath != null ? $"{scheme}://{host}/{basePath.TrimStart('/')}/ivy/webhook" : $"{scheme}://{host}/ivy/webhook";
+        => basePath != null ? $"{scheme}://{host}/{basePath.Trim('/')}/ivy/webhook" : $"{scheme}://{host}/ivy/webhook";
 
     public static string BuildAuthCallbackBaseUrl(string scheme, string host, string? basePath = null)
-        => basePath != null ? $"{scheme}://{host}/{basePath.TrimStart('/')}/ivy/auth/callback" : $"{scheme}://{host}/ivy/auth/callback";
+        => basePath != null ? $"{scheme}://{host}/{basePath.Trim('/')}/ivy/auth/callback" : $"{scheme}://{host}/ivy/auth/callback";
 
     public Uri GetUri(bool includeIdInPath = true) => includeIdInPath
         ? new Uri($"{BaseUrl}/{Id}")
