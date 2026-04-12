@@ -955,6 +955,52 @@ describe("getIvyHost", () => {
       expect(utils.getIvyHost()).toBe("https://example.com");
     });
   });
+
+  describe("with ivy-path-base meta tag (base path behind reverse proxy)", () => {
+    const setIvyBasePathMeta = (value: string) => {
+      const meta = document.createElement("meta");
+      meta.setAttribute("name", "ivy-path-base");
+      meta.setAttribute("content", value);
+      document.head.appendChild(meta);
+    };
+
+    it("appends base path with leading slash to origin", () => {
+      setIvyBasePathMeta("/studio");
+      expect(utils.getIvyHost()).toBe(defaultOrigin + "/studio");
+    });
+
+    it("appends base path to meta host origin", () => {
+      const originalOrigin = window.location.origin;
+      Object.defineProperty(window, "location", {
+        value: {
+          ...window.location,
+          origin: "https://example.com",
+          hostname: "example.com",
+        },
+        writable: true,
+        configurable: true,
+      });
+      try {
+        setIvyHostMeta("https://example.com");
+        setIvyBasePathMeta("/ivy");
+        expect(utils.getIvyHost()).toBe("https://example.com/ivy");
+      } finally {
+        Object.defineProperty(window, "location", {
+          value: {
+            ...window.location,
+            origin: originalOrigin,
+          },
+          writable: true,
+          configurable: true,
+        });
+      }
+    });
+
+    it("returns origin without base path when no base path meta", () => {
+      // No ivy-path-base meta tag set
+      expect(utils.getIvyHost()).toBe(defaultOrigin);
+    });
+  });
 });
 
 const mediaValidationCases = [
