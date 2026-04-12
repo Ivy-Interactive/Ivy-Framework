@@ -227,7 +227,11 @@ public class DesktopWindow(Server server)
         // FindAvailablePort) completes before the first await, so Args.Port is
         // already updated to the actual port the server will bind to.
         var port = server.Args.Port;
-        var url = $"https://localhost:{port}";
+        var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
+        var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
+            ? ivyTlsEnv?.ToLowerInvariant() is "1" or "true" or "yes" or "on"
+            : true; // Default to true if not overridden
+        var url = $"{(useTls ? "https" : "http")}://localhost:{port}";
 
         // Wait for the server to become ready (or detect early failure).
         WaitForServerReady(serverTask, url);
@@ -429,7 +433,11 @@ public class DesktopWindow(Server server)
     private static void WaitForServerReady(Task serverTask, string url, int timeoutMs = 30_000)
     {
         var healthUrl = $"{url}/ivy/health";
-        using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+        var handler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        };
+        using var http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(2) };
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
         while (sw.ElapsedMilliseconds < timeoutMs)

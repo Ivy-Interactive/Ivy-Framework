@@ -115,6 +115,13 @@ public class Program
             }
         });
 
+        if (useDesktop && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("IVY_TLS")))
+        {
+            // WKWebView on macOS does not support ignoring invalid developer certificates natively.
+            // When running bundled in the Desktop container, simply fall back to HTTP to bypass cert issues.
+            Environment.SetEnvironmentVariable("IVY_TLS", "0");
+        }
+
         var server = TendrilServer.Create(filteredArgs);
 
         if (useDesktop)
