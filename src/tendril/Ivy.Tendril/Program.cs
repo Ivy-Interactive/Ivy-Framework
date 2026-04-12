@@ -28,12 +28,12 @@ public class Program
 
         var fileName = Path.GetFileNameWithoutExtension(Environment.ProcessPath ?? "");
         bool isTool = fileName.Equals("tendril", StringComparison.OrdinalIgnoreCase);
-        bool forceDesktop = args.Contains("--desktop");
+        bool forceDesktop = args.Contains("--desktop") || args.Contains("--photino");
         bool forceWeb = args.Contains("--web");
 
         bool useDesktop = (isTool || forceDesktop) && !forceWeb;
 
-        var filteredArgs = args.Where(a => a != "--desktop" && a != "--web").ToArray();
+        var filteredArgs = args.Where(a => a != "--desktop" && a != "--photino" && a != "--web").ToArray();
 
         // Handle database CLI commands before starting the server/GUI
         var dbExitCode = DatabaseCommands.Handle(filteredArgs);
