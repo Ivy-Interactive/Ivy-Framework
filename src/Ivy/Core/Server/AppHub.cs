@@ -64,7 +64,7 @@ public class AppHub(
         var basePath = server.Args?.BasePath;
         if (httpContext.Request.Headers.TryGetValue("X-Forwarded-Prefix", out var forwardedPrefix) && !string.IsNullOrEmpty(forwardedPrefix.ToString()))
         {
-            basePath = forwardedPrefix.ToString().Trim('/');
+            basePath = "/" + forwardedPrefix.ToString().Trim('/');
         }
 
         var requestHost = httpContext.Request.Host.Value!;
@@ -116,7 +116,7 @@ public class AppHub(
             var basePath = server.Args?.BasePath;
             if (httpContext.Request.Headers.TryGetValue("X-Forwarded-Prefix", out var forwardedPrefix) && !string.IsNullOrEmpty(forwardedPrefix.ToString()))
             {
-                basePath = forwardedPrefix.ToString().Trim('/');
+                basePath = "/" + forwardedPrefix.ToString().Trim('/');
             }
 
             var machineId = AppRouter.GetMachineId(httpContext);

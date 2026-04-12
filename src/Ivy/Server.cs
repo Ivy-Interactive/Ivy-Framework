@@ -119,7 +119,7 @@ public class Server
 
         if (_args.BasePath == null && Environment.GetEnvironmentVariable("BASE_PATH") is { } basePath)
         {
-            _args = _args with { BasePath = basePath };
+            _args = _args with { BasePath = "/" + basePath.TrimStart('/') };
         }
 
         _args = _args with
