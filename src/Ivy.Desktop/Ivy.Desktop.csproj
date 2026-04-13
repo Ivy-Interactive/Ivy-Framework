@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
     <PackageId>Ivy.Desktop</PackageId>
     <Company>Ivy</Company>
-    <Description>Run Ivy apps as native desktop applications using Photino</Description>
+    <Description>Run Ivy apps as native desktop applications using Rustino</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Photino.NET" Version="4.0.16" />
+    <PackageReference Include="Rustino.NET" Version="0.2.1-dev" />
   </ItemGroup>
 
   <ItemGroup>

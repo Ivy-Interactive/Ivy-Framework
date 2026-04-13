@@ -1,152 +1,158 @@
-using Ivy;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
-using Ivy.Tendril.AppShell;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using Ivy.Desktop;
+using Ivy.Helpers;
+using Ivy.Tendril.Commands;
+using Ivy.Tendril.Database;
 using Ivy.Tendril.Services;
-using Microsoft.Extensions.Logging;
-using OpenAI;
-using System.ClientModel;
+using Velopack;
 
+namespace Ivy.Tendril;
 
-AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+public class Program
 {
-    Console.WriteLine($"[FATAL] Unhandled exception: {e.ExceptionObject}");
-};
+    // Native console control handler to detect why the process is being killed.
+    // This fires BEFORE .NET's ProcessExit and catches CTRL_CLOSE_EVENT which
+    // .NET's AppDomain.ProcessExit may not see (Windows force-kills after 5s).
+    private delegate bool ConsoleCtrlHandlerDelegate(int ctrlType);
 
-TaskScheduler.UnobservedTaskException += (sender, e) =>
-{
-    Console.WriteLine($"[FATAL] Unobserved task exception: {e.Exception}");
-    e.SetObserved();
-};
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool SetConsoleCtrlHandler(ConsoleCtrlHandlerDelegate handler, bool add);
 
-var server = new Server();
-server.DangerouslyAllowLocalFiles();
-server.UseCulture("en-US");
-#if DEBUG
-server.UseHotReload();
-#endif
-server.SetMetaTitle("Ivy Tendril");
-var configService = new ConfigService();
-server.Services.AddSingleton<IConfigService>(configService);
-server.Services.AddSingleton<ConfigService>(configService);
-var modelPricingService = new ModelPricingService();
-server.Services.AddSingleton<IModelPricingService>(modelPricingService);
-server.Services.AddSingleton<ModelPricingService>(modelPricingService);
+    // Must be a static field to prevent GC from collecting the delegate
+    private static ConsoleCtrlHandlerDelegate? _consoleCtrlHandler;
 
-// Register IChatClient if LLM is configured
-if (configService.Settings.Llm is { } llmConfig && !string.IsNullOrEmpty(llmConfig.ApiKey))
-{
-    server.Services.AddSingleton<IChatClient>(sp =>
+    [STAThread]
+    public static async Task<int> Main(string[] args)
     {
-        var config = sp.GetRequiredService<IConfigService>();
-        var llm = config.Settings.Llm!;
-        var endpoint = !string.IsNullOrEmpty(llm.Endpoint) ? llm.Endpoint : "https://api.openai.com/v1";
-        var client = new OpenAIClient(
-            new ApiKeyCredential(llm.ApiKey),
-            new OpenAIClientOptions { Endpoint = new Uri(endpoint) });
-        return client.GetChatClient(llm.Model).AsIChatClient();
-    });
+        VelopackApp.Build().Run();
+
+        var fileName = Path.GetFileNameWithoutExtension(Environment.ProcessPath ?? "");
+        bool isTool = fileName.Equals("tendril", StringComparison.OrdinalIgnoreCase);
+        bool forceDesktop = args.Contains("--desktop") || args.Contains("--photino");
+        bool forceWeb = args.Contains("--web");
+
+        bool useDesktop = (isTool || forceDesktop) && !forceWeb;
+
+        var filteredArgs = args.Where(a => a != "--desktop" && a != "--photino" && a != "--web").ToArray();
+
+        // Handle database CLI commands before starting the server/GUI
+        var dbExitCode = DatabaseCommands.Handle(filteredArgs);
+        if (dbExitCode >= 0)
+            return dbExitCode;
+
+        var pwExitCode = PromptwareCommands.Handle(filteredArgs);
+        if (pwExitCode >= 0)
+            return pwExitCode;
+
+        var doctorExitCode = DoctorCommand.Handle(filteredArgs);
+        if (doctorExitCode >= 0)
+            return doctorExitCode;
+
+        var hashExitCode = HashPasswordCommand.Handle(filteredArgs);
+        if (hashExitCode >= 0)
+            return hashExitCode;
+
+        CrashLog.Write($"[{DateTime.UtcNow:O}] Tendril starting (PID {Environment.ProcessId}) | {GetMemoryStats()}");
+
+        // Install native console control handler FIRST — this catches CTRL_CLOSE_EVENT
+        // (console window closed), CTRL_C_EVENT, CTRL_BREAK_EVENT, CTRL_LOGOFF_EVENT,
+        // and CTRL_SHUTDOWN_EVENT. Logging here tells us exactly WHY the process is dying.
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            _consoleCtrlHandler = ctrlType =>
+            {
+                var name = ctrlType switch
+                {
+                    0 => "CTRL_C_EVENT",
+                    1 => "CTRL_BREAK_EVENT",
+                    2 => "CTRL_CLOSE_EVENT",
+                    5 => "CTRL_LOGOFF_EVENT",
+                    6 => "CTRL_SHUTDOWN_EVENT",
+                    _ => $"UNKNOWN({ctrlType})"
+                };
+                CrashLog.Write(
+                    $"[{DateTime.UtcNow:O}] ConsoleCtrlHandler: {name} (PID {Environment.ProcessId}) | {GetMemoryStats()}");
+                return false; // Let default handling proceed
+            };
+            SetConsoleCtrlHandler(_consoleCtrlHandler, true);
+        }
+
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            var msg = $"[{DateTime.UtcNow:O}] FATAL UnhandledException (IsTerminating={e.IsTerminating}) | {GetMemoryStats()}\n  {e.ExceptionObject}";
+            Console.WriteLine($"[FATAL] Unhandled exception: {e.ExceptionObject}");
+            CrashLog.Write(msg);
+        };
+
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            var msg = $"[{DateTime.UtcNow:O}] FATAL UnobservedTaskException | {GetMemoryStats()}\n  {e.Exception}";
+            Console.WriteLine($"[FATAL] Unobserved task exception: {e.Exception}");
+            CrashLog.Write(msg);
+            e.SetObserved();
+        };
+
+        AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+        {
+            CrashLog.Write($"[{DateTime.UtcNow:O}] ProcessExit event fired (PID {Environment.ProcessId}) | {GetMemoryStats()}");
+        };
+
+        // Periodic memory watchdog — logs a warning when working set exceeds 1 GB
+        _ = Task.Run(async () =>
+        {
+            const long warningThresholdBytes = 1L * 1024 * 1024 * 1024; // 1 GB
+            while (true)
+            {
+                await Task.Delay(TimeSpan.FromMinutes(5));
+                try
+                {
+                    using var proc = Process.GetCurrentProcess();
+                    if (proc.WorkingSet64 > warningThresholdBytes)
+                        CrashLog.Write($"[{DateTime.UtcNow:O}] MEMORY WARNING | {GetMemoryStats()}");
+                }
+                catch { /* best-effort */ }
+            }
+        });
+
+        if (useDesktop && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("IVY_TLS")))
+        {
+            // WKWebView on macOS does not support ignoring invalid developer certificates natively.
+            // When running bundled in the Desktop container, simply fall back to HTTP to bypass cert issues.
+            Environment.SetEnvironmentVariable("IVY_TLS", "0");
+        }
+
+        var server = TendrilServer.Create(filteredArgs);
+
+        if (useDesktop)
+        {
+            var window = new DesktopWindow(server)
+                .Title("Ivy Tendril")
+                .Size(1400, 900);
+
+            return window.Run();
+        }
+        else
+        {
+            await server.RunAsync();
+            return 0;
+        }
+    }
+
+    internal static void WriteCrashLog(string message) => CrashLog.Write(message);
+
+    private static string GetMemoryStats()
+    {
+        try
+        {
+            using var proc = Process.GetCurrentProcess();
+            var workingSet = proc.WorkingSet64;
+            var gcHeap = GC.GetTotalMemory(false);
+            return $"WorkingSet={workingSet / (1024 * 1024)}MB, GCHeap={gcHeap / (1024 * 1024)}MB, Gen0={GC.CollectionCount(0)}, Gen1={GC.CollectionCount(1)}, Gen2={GC.CollectionCount(2)}";
+        }
+        catch
+        {
+            return "Memory stats unavailable";
+        }
+    }
 }
-
-server.Services.AddSingleton<GithubService>();
-server.Services.AddSingleton<IGithubService>(sp => sp.GetRequiredService<GithubService>());
-server.Services.AddSingleton<GitService>();
-server.Services.AddSingleton<IGitService>(sp => sp.GetRequiredService<GitService>());
-server.Services.AddSingleton<PlanReaderService>(sp =>
-{
-    var planService = new PlanReaderService(sp.GetRequiredService<IConfigService>());
-    planService.RepairPlans();
-    planService.RecoverStuckPlans();
-    return planService;
-});
-server.Services.AddSingleton<IPlanReaderService>(sp => sp.GetRequiredService<PlanReaderService>());
-
-// SQLite database service
-server.Services.AddSingleton<IPlanDatabaseService>(sp =>
-{
-    var cfg = sp.GetRequiredService<IConfigService>();
-    var dbPath = Path.Combine(cfg.TendrilHome, "tendril.db");
-    return new PlanDatabaseService(dbPath);
-});
-server.Services.AddSingleton<PlanDatabaseSyncService>(sp =>
-{
-    var planReader = sp.GetRequiredService<PlanReaderService>();
-    var database = sp.GetRequiredService<IPlanDatabaseService>();
-    var watcher = sp.GetRequiredService<IPlanWatcherService>();
-    var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-    return new PlanDatabaseSyncService(planReader, database, watcher,
-        loggerFactory.CreateLogger<PlanDatabaseSyncService>());
-});
-server.Services.AddSingleton<ITelemetryService>(sp =>
-{
-    var config = sp.GetRequiredService<IConfigService>();
-    return new TelemetryService(config.Settings.Telemetry);
-});
-server.Services.AddSingleton<TelemetryService>(sp =>
-    (TelemetryService)sp.GetRequiredService<ITelemetryService>());
-server.Services.AddSingleton<JobService>(sp =>
-{
-    return new JobService(
-        sp.GetRequiredService<IConfigService>(),
-        sp.GetRequiredService<ModelPricingService>(),
-        sp.GetRequiredService<IPlanReaderService>(),
-        sp.GetRequiredService<ITelemetryService>());
-});
-server.Services.AddSingleton<IJobService>(sp => sp.GetRequiredService<JobService>());
-server.Services.AddSingleton<PlanWatcherService>(sp =>
-{
-    var config = sp.GetRequiredService<IConfigService>();
-    return new PlanWatcherService(config);
-});
-server.Services.AddSingleton<IPlanWatcherService>(sp => sp.GetRequiredService<PlanWatcherService>());
-server.Services.AddSingleton<PlanCountsService>(sp =>
-{
-    var planReader = sp.GetRequiredService<IPlanReaderService>();
-    var jobService = sp.GetRequiredService<IJobService>();
-    var planWatcher = sp.GetRequiredService<IPlanWatcherService>();
-    return new PlanCountsService(planReader, jobService, planWatcher);
-});
-server.Services.AddSingleton<IPlanCountsService>(sp => sp.GetRequiredService<PlanCountsService>());
-server.Services.AddSingleton<InboxWatcherService>(sp =>
-{
-    var config = sp.GetRequiredService<IConfigService>();
-    var jobService = sp.GetRequiredService<IJobService>();
-    return new InboxWatcherService(config, jobService);
-});
-server.Services.AddSingleton<IInboxWatcherService>(sp => sp.GetRequiredService<InboxWatcherService>());
-server.UseWebApplication(app =>
-{
-    // Publish the actual bound URL so child processes can reach this server,
-    // even when --find-available-port shifts the port away from the default.
-    var serverUrl = app.Urls.FirstOrDefault();
-    if (serverUrl != null)
-        Environment.SetEnvironmentVariable("TENDRIL_URL", serverUrl);
-
-    // Eagerly resolve watcher services so their FileSystemWatchers start immediately
-    app.Services.GetRequiredService<PlanWatcherService>();
-    app.Services.GetRequiredService<IInboxWatcherService>();
-
-    // Start database sync in background
-    var syncService = app.Services.GetRequiredService<PlanDatabaseSyncService>();
-    Task.Run(syncService.PerformInitialSync);
-    app.Services.GetRequiredService<TelemetryService>().TrackAppStarted();
-    app.UseAssets(server.Args, app.Services.GetRequiredService<ILogger<Server>>(), "Assets", "tendril/assets");
-});
-server.AddAppsFromAssembly();
-server.AddConnectionsFromAssembly();
-var version = typeof(TendrilAppShell).Assembly.GetName().Version!;
-var versionString = version.ToString(3);
-var appShellSettings = new AppShellSettings()
-    .Header(
-        Layout.Horizontal(
-            new Image("/tendril/assets/Tendril.svg").Width(Size.Units(15)).Height(Size.Auto()),
-            Layout.Vertical(
-                Text.Block("Ivy Tendril"),
-                Text.Muted($"v{versionString}")
-            ).Gap(0)
-        ).Gap(2).Padding(2).AlignContent(Align.BottomLeft)
-    )
-    .DefaultAppId("dashboard")
-    .UseTabs(preventDuplicates: true);
-server.UseAppShell(() => new TendrilAppShell(appShellSettings));
-await server.RunAsync();

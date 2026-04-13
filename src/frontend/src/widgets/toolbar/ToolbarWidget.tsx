@@ -5,36 +5,60 @@ import Icon from "@/components/Icon";
 import withTooltip from "@/hoc/withTooltip";
 import { useEventHandler } from "@/components/event-handler";
 import { MenuItem } from "@/types/widgets";
+import { Densities } from "@/types/density";
 
 const ButtonWithTooltip = withTooltip(Button);
+const EMPTY_ITEMS: MenuItem[] = [];
 
 interface ToolbarWidgetProps {
   id: string;
   items: MenuItem[];
   disabled?: boolean;
+  density?: Densities;
 }
 
 interface ToolbarItemGroupProps {
   items: MenuItem[];
   onItemClick: (item: MenuItem) => void;
   disabled?: boolean;
+  density?: Densities;
 }
 
 const ToolbarItemGroup: React.FC<ToolbarItemGroupProps> = ({
   items,
   onItemClick,
   disabled = false,
+  density = Densities.Medium,
 }) => {
+  const separatorClass =
+    density === Densities.Small
+      ? "h-4 mx-0.5"
+      : density === Densities.Large
+        ? "h-8 mx-1.5"
+        : "h-6 mx-1";
+  const buttonSize =
+    density === Densities.Small ? "sm" : density === Densities.Large ? "default" : "sm";
+  const iconButtonSize =
+    density === Densities.Small ? "icon-sm" : density === Densities.Large ? "icon" : "icon-sm";
+  const iconDimension =
+    density === Densities.Small ? "0.75rem" : density === Densities.Large ? "1.25rem" : "1rem";
+
   return items.map((item, i) => {
     // Handle group variant
     if (item.variant === "Group" && item.children) {
       const groupKey = item.label || `group-${i}`;
       return (
-        <div key={groupKey} className="flex items-center gap-1" role="group">
+        <div
+          key={groupKey}
+          className="flex items-center gap-1"
+          role="group"
+          aria-label={item.label || "Toolbar group"}
+        >
           <ToolbarItemGroup
             items={item.children}
             onItemClick={onItemClick}
             disabled={disabled || item.disabled}
+            density={density}
           />
         </div>
       );
@@ -48,7 +72,7 @@ const ToolbarItemGroup: React.FC<ToolbarItemGroupProps> = ({
           key={sepKey}
           role="separator"
           aria-orientation="vertical"
-          className="h-6 w-px bg-border mx-1"
+          className={cn("w-px bg-border", separatorClass)}
         />
       );
     }
@@ -61,14 +85,16 @@ const ToolbarItemGroup: React.FC<ToolbarItemGroupProps> = ({
     return (
       <ButtonWithTooltip
         key={itemKey}
-        size={isIconOnly ? "icon-sm" : "sm"}
+        size={isIconOnly ? iconButtonSize : buttonSize}
         variant="ghost"
         onClick={() => !isDisabled && onItemClick(item)}
         disabled={isDisabled}
         className={cn(item.checked && "bg-accent")}
         tooltipText={item.tooltip}
       >
-        {item.icon && <Icon name={item.icon} style={{ width: "1rem", height: "1rem" }} />}
+        {item.icon && (
+          <Icon name={item.icon} style={{ width: iconDimension, height: iconDimension }} />
+        )}
         {item.label && <span>{item.label}</span>}
       </ButtonWithTooltip>
     );
@@ -77,10 +103,18 @@ const ToolbarItemGroup: React.FC<ToolbarItemGroupProps> = ({
 
 export const ToolbarWidget: React.FC<ToolbarWidgetProps> = ({
   id,
-  items = [],
+  items = EMPTY_ITEMS,
   disabled = false,
+  density = Densities.Medium,
 }) => {
   const eventHandler = useEventHandler();
+
+  const containerGapClass =
+    density === Densities.Small
+      ? "gap-1 p-1"
+      : density === Densities.Large
+        ? "gap-3 p-3"
+        : "gap-2 p-2";
 
   const onItemClick = useCallback(
     (item: MenuItem) => {
@@ -100,13 +134,20 @@ export const ToolbarWidget: React.FC<ToolbarWidgetProps> = ({
   return (
     <div
       role="toolbar"
+      aria-label="Toolbar"
       aria-disabled={disabled}
       className={cn(
-        "flex items-center gap-2 p-2 bg-background border rounded-md",
+        "flex items-center bg-background border rounded-md",
+        containerGapClass,
         disabled && "opacity-50 pointer-events-none",
       )}
     >
-      <ToolbarItemGroup items={items} onItemClick={onItemClick} disabled={disabled} />
+      <ToolbarItemGroup
+        items={items}
+        onItemClick={onItemClick}
+        disabled={disabled}
+        density={density}
+      />
     </div>
   );
 };

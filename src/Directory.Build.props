@@ -2,4 +2,17 @@
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <!--
+    Guard: when IvyPackageVersion is set (Docker/NuGet builds), no project should
+    have an unconditional ProjectReference to Ivy.csproj. Projects must use the
+    conditional IvyPackageVersion pattern instead.
+  -->
+  <Target Name="WarnUnconditionalIvyProjectRef"
+          BeforeTargets="ResolveProjectReferences"
+          Condition="'$(IvyPackageVersion)' != ''">
+    <Warning Code="IVY001"
+             Text="Project '$(MSBuildProjectName)' has a ProjectReference to Ivy.csproj but IvyPackageVersion is set. Use the conditional IvyPackageVersion pattern (PackageReference when set, ProjectReference when empty)."
+             Condition="'%(ProjectReference.Filename)' == 'Ivy' And '%(ProjectReference.Extension)' == '.csproj'" />
+  </Target>
 </Project>

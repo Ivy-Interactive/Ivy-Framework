@@ -7,7 +7,7 @@ export const fileInputVariant = cva(
     variants: {
       variant: {
         Default: "border-transparent bg-transparent p-0 min-h-0",
-        Drop: "border-2 border-muted-foreground/25 bg-transparent min-h-[100px] max-h-[300px] p-4",
+        Drop: "border-2 border-muted-foreground/25 bg-transparent dark:bg-white/5 dark:border-white/10 min-h-[100px] max-h-[300px] p-4",
       },
       density: {
         Small: "gap-2",

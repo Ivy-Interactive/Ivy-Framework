@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { getDefaultTheme } from "@glideapps/glide-data-grid";
 import { convertToGridColumns } from "../../utils/columnHelpers";
 import { useColumnGroups } from "../../hooks/useColumnGroups";
 import { DataColumn } from "../../types/types";
@@ -7,7 +8,6 @@ interface UseGridColumnsProps {
   columns: DataColumn[];
   columnOrder: number[];
   columnWidths: Record<string, number>;
-  containerWidth: number;
   showGroups?: boolean;
   showColumnTypeIcons?: boolean;
 }
@@ -19,10 +19,14 @@ export const useGridColumns = ({
   columns,
   columnOrder,
   columnWidths,
-  containerWidth,
   showGroups = false,
   showColumnTypeIcons = true,
 }: UseGridColumnsProps) => {
+  const headerFont = useMemo(() => {
+    const t = getDefaultTheme();
+    return `${t.headerFontStyle} ${t.fontFamily}`;
+  }, []);
+
   // Convert columns to grid format with proper widths
   // Memoize to prevent recalculation on every render
   const gridColumns = useMemo(
@@ -31,11 +35,11 @@ export const useGridColumns = ({
         columns,
         columnOrder,
         columnWidths,
-        containerWidth,
         showGroups,
         showColumnTypeIcons,
+        headerFont,
       ),
-    [columns, columnOrder, columnWidths, containerWidth, showGroups, showColumnTypeIcons],
+    [columns, columnOrder, columnWidths, showGroups, showColumnTypeIcons, headerFont],
   );
 
   // Use column groups hook when showGroups is enabled

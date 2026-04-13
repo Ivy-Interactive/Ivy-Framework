@@ -11,82 +11,129 @@ public class CreateIssueDialog(
     PlanFile selectedPlan,
     IJobService jobService) : ViewBase
 {
-    private readonly IState<bool> _dialogOpen = dialogOpen;
-    private readonly IState<string?> _selectedRepoState = selectedRepoState;
-    private readonly IState<string?> _issueAssigneeState = issueAssigneeState;
-    private readonly IState<string[]> _issueLabelsState = issueLabelsState;
-    private readonly IState<string> _issueCommentState = issueCommentState;
-    private readonly PlanFile _selectedPlan = selectedPlan;
-    private readonly IJobService _jobService = jobService;
-
     public override object? Build()
     {
         var githubService = UseService<IGithubService>();
+        var assigneesError = UseState<string?>(null);
+        var labelsError = UseState<string?>(null);
+
         var assigneesQuery = UseQuery<string[], string>(
-            _selectedRepoState.Value ?? "",
-            async (repoName, ct) =>
+            selectedRepoState.Value ?? "",
+            async (repoName, _) =>
             {
-                if (string.IsNullOrEmpty(repoName)) return Array.Empty<string>();
+                if (string.IsNullOrEmpty(repoName))
+                {
+                    assigneesError.Set(null);
+                    return [];
+                }
                 var repos = githubService.GetRepos();
                 var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == repoName);
-                if (selectedRepo is null) return Array.Empty<string>();
-                var result = await githubService.GetAssigneesAsync(selectedRepo.Owner, selectedRepo.Name);
-                return result.ToArray();
+                if (selectedRepo is null)
+                {
+                    assigneesError.Set(null);
+                    return [];
+                }
+                var (assignees, error) = await githubService.GetAssigneesAsync(selectedRepo.Owner, selectedRepo.Name);
+                assigneesError.Set(error);
+                return assignees.ToArray();
             },
-            initialValue: Array.Empty<string>()
+            initialValue: []
         );
 
         var labelsQuery = UseQuery<string[], string>(
-            _selectedRepoState.Value ?? "",
-            async (repoName, ct) =>
+            selectedRepoState.Value ?? "",
+            async (repoName, _) =>
             {
-                if (string.IsNullOrEmpty(repoName)) return Array.Empty<string>();
+                if (string.IsNullOrEmpty(repoName))
+                {
+                    labelsError.Set(null);
+                    return [];
+                }
                 var repos = githubService.GetRepos();
                 var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == repoName);
-                if (selectedRepo is null) return Array.Empty<string>();
-                var result = await githubService.GetLabelsAsync(selectedRepo.Owner, selectedRepo.Name);
-                return result.ToArray();
+                if (selectedRepo is null)
+                {
+                    labelsError.Set(null);
+                    return [];
+                }
+                var (labels, error) = await githubService.GetLabelsAsync(selectedRepo.Owner, selectedRepo.Name);
+                labelsError.Set(error);
+                return labels.ToArray();
             },
-            initialValue: Array.Empty<string>()
+            initialValue: []
         );
 
-        if (!_dialogOpen.Value) return null;
+        UseEffect(() =>
+        {
+            assigneesError.Set(null);
+            labelsError.Set(null);
+        }, selectedRepoState);
+
+        if (!dialogOpen.Value) return null;
 
         var repos = githubService.GetRepos();
         var repositoryOptions = repos.Select(r => r.DisplayName).ToArray();
-        var assignees = assigneesQuery.Value ?? Array.Empty<string>();
-        var labels = labelsQuery.Value ?? Array.Empty<string>();
+        var assignees = assigneesQuery.Value;
+        var labels = labelsQuery.Value;
 
         return new Dialog(
-            _ => _dialogOpen.Set(false),
-            new DialogHeader($"Create GitHub Issue #{_selectedPlan.Id}"),
+            _ =>
+            {
+                issueCommentState.Set("");
+                issueAssigneeState.Set(null);
+                issueLabelsState.Set(Array.Empty<string>());
+                assigneesError.Set(null);
+                labelsError.Set(null);
+                dialogOpen.Set(false);
+            },
+            new DialogHeader($"Create GitHub Issue #{selectedPlan.Id}"),
             new DialogBody(
                 Layout.Vertical().Gap(3)
-                    | _selectedRepoState.ToSelectInput(repositoryOptions.ToOptions())
-                        .AutoFocus().WithField().Label("Repository").Required()
-                    | _issueAssigneeState.ToSelectInput(assignees.ToOptions())
-                        .Nullable().WithField().Label("Assignee")
-                    | _issueLabelsState.ToSelectInput(labels.ToOptions())
-                        .Placeholder("Select labels...").WithField().Label("Labels")
-                    | _issueCommentState.ToTextInput().Multiline().WithField().Label("Comment")
+                | selectedRepoState.ToSelectInput(repositoryOptions.ToOptions())
+                    .AutoFocus().WithField().Label("Repository").Required()
+                | issueAssigneeState.ToSelectInput(assignees.ToOptions())
+                    .Nullable().WithField().Label("Assignee")
+                | issueLabelsState.ToSelectInput(labels.ToOptions())
+                    .Placeholder("Select labels...").WithField().Label("Labels")
+                | (assigneesError.Value is { } assigneeErr
+                    ? Text.Danger(assigneeErr).Small()
+                    : null)
+                | (labelsError.Value is { } labelErr
+                    ? Text.Danger(labelErr).Small()
+                    : null)
+                | issueCommentState.ToTextInput().Multiline().WithField().Label("Comment")
             ),
             new DialogFooter(
-                new Button("Cancel").Outline().OnClick(() => _dialogOpen.Set(false)),
+                new Button("Cancel").Outline().OnClick(() =>
+                {
+                    issueCommentState.Set("");
+                    issueAssigneeState.Set(null);
+                    issueLabelsState.Set(Array.Empty<string>());
+                    assigneesError.Set(null);
+                    labelsError.Set(null);
+                    dialogOpen.Set(false);
+                }),
                 new Button("Create Issue").Primary().OnClick(() =>
                 {
-                    if (_selectedRepoState.Value is { } repo)
+                    if (selectedRepoState.Value is { } repo)
                     {
-                        var repos = githubService.GetRepos();
                         var selectedRepo = repos.FirstOrDefault(r => r.DisplayName == repo);
                         if (selectedRepo != null)
                         {
                             var repoPath = selectedRepo.FullName;
-                            var assignee = _issueAssigneeState.Value ?? "";
-                            var labels = string.Join(",", _issueLabelsState.Value ?? Array.Empty<string>());
-                            _jobService.StartJob("CreateIssue", _selectedPlan.FolderPath, "-Repo", repoPath, "-Assignee", assignee, "-Comment", _issueCommentState.Value ?? "", "-Labels", labels);
+                            var assignee = issueAssigneeState.Value ?? "";
+                            var selectedLabels = string.Join(",", issueLabelsState.Value);
+                            jobService.StartJob("CreateIssue", selectedPlan.FolderPath, "-Repo", repoPath,
+                                "-Assignee", assignee, "-Comment", issueCommentState.Value, "-Labels", selectedLabels);
                         }
                     }
-                    _dialogOpen.Set(false);
+
+                    issueCommentState.Set("");
+                    issueAssigneeState.Set(null);
+                    issueLabelsState.Set(Array.Empty<string>());
+                    assigneesError.Set(null);
+                    labelsError.Set(null);
+                    dialogOpen.Set(false);
                 })
             )
         ).Width(Size.Rem(30));

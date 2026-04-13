@@ -37,152 +37,46 @@
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.4),
     0 4px 12px rgba(0, 0, 0, 0.2);
-  padding: 12px;
-  width: 340px;
-  font-family: var(--font-sans);
-}
-
-.ivy-devtools-dialog-toggles {
-  display: flex;
-  gap: 2px;
-  margin-bottom: 12px;
-}
-
-.ivy-devtools-toggle-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 4px;
+  padding: 6px 8px;
+  width: auto;
+  min-width: 280px;
+  font-family: var(--font-sans);
+}
+
+.ivy-devtools-input {
+  flex: 1;
   border: none;
-  border-radius: var(--radius-selectors);
   background: transparent;
-  color: var(--muted-foreground);
+  color: var(--foreground);
   font-size: 14px;
-  font-weight: 500;
   font-family: var(--font-sans);
-  cursor: pointer;
-  transition: all 0.15s ease;
+  outline: none;
+  padding: 0 8px;
 }
 
-.ivy-devtools-toggle-btn:hover {
-  color: var(--foreground);
-  background: var(--accent);
-}
-
-.ivy-devtools-toggle-active {
-  background: color-mix(in srgb, var(--primary) 15%, transparent);
-  color: var(--primary);
-}
-
-.ivy-devtools-toggle-active:hover {
-  background: color-mix(in srgb, var(--primary) 22%, transparent);
-  color: var(--primary);
-}
-
-.ivy-devtools-textarea-wrapper {
-  position: relative;
-}
-
-.ivy-devtools-textarea {
-  width: 100%;
-  height: 64px;
-  padding: 10px 12px;
-  padding-right: 36px;
-  border: none;
-  border-radius: var(--radius-fields);
-  font-size: 15px;
-  resize: none;
-  font-family: var(--font-sans);
-  background: transparent;
-  color: var(--foreground);
-  box-sizing: border-box;
-}
-
-.ivy-devtools-textarea::placeholder {
+.ivy-devtools-input::placeholder {
   color: var(--muted-foreground);
 }
 
-.ivy-devtools-textarea:focus {
-  outline: none;
-}
-
-.ivy-devtools-mic-btn {
-  position: absolute;
-  right: 6px;
-  top: 6px;
-  width: 28px;
-  height: 28px;
+.ivy-devtools-icon-btn {
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: var(--radius-selectors);
-  background: var(--accent);
+  background: transparent;
   color: var(--muted-foreground);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: all 0.15s;
 }
 
-.ivy-devtools-mic-btn:hover {
-  background: var(--border);
-}
-
-.ivy-devtools-mic-active {
-  background: var(--destructive);
-  color: var(--destructive-foreground);
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
-}
-
-.ivy-devtools-dialog-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.ivy-devtools-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: var(--radius-fields);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: var(--font-sans);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.15s ease;
-}
-
-.ivy-devtools-btn-muted {
-  background: transparent;
-  color: var(--muted-foreground);
-}
-
-.ivy-devtools-btn-muted:hover {
+.ivy-devtools-icon-btn:hover {
   color: var(--foreground);
-}
-
-.ivy-devtools-btn-outlined {
   background: var(--accent);
-  color: var(--foreground);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 8px 20px;
-}
-
-.ivy-devtools-btn-outlined:hover {
-  background: var(--muted);
-  border-color: var(--muted-foreground);
 }

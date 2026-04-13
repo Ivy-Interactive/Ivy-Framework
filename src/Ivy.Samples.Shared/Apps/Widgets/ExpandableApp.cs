@@ -110,29 +110,36 @@ public class ExpandableApp : SampleBase
             .Ghost()
             .Icon(Icons.Ghost);
 
-        return Layout.Vertical()
-            | Text.H2("Original Basic Expandable")
-            | basicExpandable
-            | Text.H2("Expandable with Icon")
-            | iconExpandable
-            | Text.H2("Expandable with Icon + Density Variations")
-            | smallIconExpandable
-            | mediumIconExpandable
-            | largeIconExpandable
-            | Text.H2("Density Variations")
-            | Text.Block("Use the Scale helpers (Small / Medium / Large) to match the density of the surrounding layout.")
-            | smallDensityExpandable
-            | mediumDensityExpandable
-            | largeDensityExpandable
-            | Text.H2("Problematic Case - Switch in Header")
-            | Text.Block("Nested switches should not be blocked by the expandable:")
-            | Text.Block($"Switch states: {headerSwitchState1.Value}, {headerSwitchState2.Value}, {headerSwitchState3.Value}, {headerSwitchState4.Value}")
-            | switchInHeaderExpandable1
-            | switchInHeaderExpandable2
-            | switchInHeaderExpandable3
-            | switchInHeaderExpandable4
-            | Text.H2("Ghost Variant")
-            | ghostExpandable
-            | ghostWithIconExpandable;
+        return Layout.Tabs(
+            new Tab("Basic",
+                Layout.Vertical()
+                | basicExpandable
+                | iconExpandable
+            ),
+            new Tab("Density",
+                Layout.Vertical()
+                | Text.Block("Use the Density helpers (Small / Medium / Large) to match the density of the surrounding layout.")
+                | smallDensityExpandable
+                | mediumDensityExpandable
+                | largeDensityExpandable
+                | smallIconExpandable
+                | mediumIconExpandable
+                | largeIconExpandable
+            ),
+            new Tab("Switch in Header",
+                Layout.Vertical()
+                | Text.Block("Nested switches should not be blocked by the expandable:")
+                | Text.Block($"Switch states: {headerSwitchState1.Value}, {headerSwitchState2.Value}, {headerSwitchState3.Value}, {headerSwitchState4.Value}")
+                | switchInHeaderExpandable1
+                | switchInHeaderExpandable2
+                | switchInHeaderExpandable3
+                | switchInHeaderExpandable4
+            ),
+            new Tab("Ghost",
+                Layout.Vertical()
+                | ghostExpandable
+                | ghostWithIconExpandable
+            )
+        );
     }
 }

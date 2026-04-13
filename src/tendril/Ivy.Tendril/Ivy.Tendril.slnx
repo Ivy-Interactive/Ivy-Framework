@@ -6,5 +6,6 @@
   </Configurations>
   <Project Path="Ivy.Tendril.csproj" />
   <Project Path="../Ivy.Tendril.Test/Ivy.Tendril.Test.csproj" />
+  <Project Path="../../Ivy/Ivy.csproj" />
   <Project Path="../Ivy.Tendril.Docs/Ivy.Tendril.Docs.csproj" />
 </Solution>

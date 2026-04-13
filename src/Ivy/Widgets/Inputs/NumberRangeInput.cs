@@ -49,11 +49,7 @@ public abstract record NumberRangeInputBase : WidgetBase<NumberRangeInputBase>, 
 
     [Prop] public string? TargetType { get; set; }
 
-    [Prop] public Affix? Prefix { get; set; }
-
     [Prop] public bool NoGrouping { get; init; }
-
-    [Prop] public Affix? Suffix { get; set; }
 
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
     [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
@@ -228,17 +224,18 @@ public static class NumberRangeInputExtensions
         return widget with { Invalid = invalid };
     }
 
-    public static NumberRangeInputBase Prefix(this NumberRangeInputBase widget, string prefixText)
-        => widget with { Prefix = prefixText.ToAffix() };
+    private static object[] WithSlot(NumberRangeInputBase widget, string slotName, object? value)
+    {
+        var others = widget.Children.Where(c => c is not Slot s || s.Name != slotName);
+        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
+        return result.ToArray();
+    }
 
-    public static NumberRangeInputBase Prefix(this NumberRangeInputBase widget, Icons prefixIcon)
-        => widget with { Prefix = prefixIcon.ToAffix() };
+    public static NumberRangeInputBase Prefix(this NumberRangeInputBase widget, object prefix)
+        => widget with { Children = WithSlot(widget, "Prefix", prefix) };
 
-    public static NumberRangeInputBase Suffix(this NumberRangeInputBase widget, string suffixText)
-        => widget with { Suffix = suffixText.ToAffix() };
-
-    public static NumberRangeInputBase Suffix(this NumberRangeInputBase widget, Icons suffixIcon)
-        => widget with { Suffix = suffixIcon.ToAffix() };
+    public static NumberRangeInputBase Suffix(this NumberRangeInputBase widget, object suffix)
+        => widget with { Children = WithSlot(widget, "Suffix", suffix) };
 
     [OverloadResolutionPriority(1)]
     public static NumberRangeInputBase OnBlur(this NumberRangeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

@@ -9,28 +9,23 @@ public class DeletePlanDialog(
     IPlanReaderService planService,
     Action refreshPlans) : ViewBase
 {
-    private readonly IState<bool> _dialogOpen = dialogOpen;
-    private readonly PlanFile _selectedPlan = selectedPlan;
-    private readonly IPlanReaderService _planService = planService;
-    private readonly Action _refreshPlans = refreshPlans;
-
     public override object? Build()
     {
-        if (!_dialogOpen.Value) return null;
+        if (!dialogOpen.Value) return null;
 
         return new Dialog(
-            _ => _dialogOpen.Set(false),
+            _ => dialogOpen.Set(false),
             new DialogHeader("Delete Plan"),
             new DialogBody(
-                Text.P($"Are you sure you want to permanently delete plan #{_selectedPlan.Id}?")
+                Text.P($"Are you sure you want to permanently delete plan #{selectedPlan.Id}?")
             ),
             new DialogFooter(
-                new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() => _dialogOpen.Set(false)),
+                new Button("Cancel").Outline().ShortcutKey("Escape").OnClick(() => dialogOpen.Set(false)),
                 new Button("Delete").Destructive().ShortcutKey("Enter").AutoFocus().OnClick(() =>
                 {
-                    _planService.DeletePlan(_selectedPlan.FolderName);
-                    _refreshPlans();
-                    _dialogOpen.Set(false);
+                    planService.DeletePlan(selectedPlan.FolderName);
+                    refreshPlans();
+                    dialogOpen.Set(false);
                 })
             )
         ).Width(Size.Rem(40));

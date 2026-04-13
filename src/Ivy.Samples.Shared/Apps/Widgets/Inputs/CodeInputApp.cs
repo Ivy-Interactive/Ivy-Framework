@@ -6,6 +6,22 @@ public class CodeInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
+        return Layout.Vertical()
+               | Text.H1("Code Input")
+               | Layout.Tabs(
+                   new Tab("Variants", new CodeInputVariants()),
+                   new Tab("Sizes", new CodeInputSizes()),
+                   new Tab("Data Binding", new CodeInputDataBindings()),
+                   new Tab("CodeInput in Card", new CodeInputInCard()),
+                   new Tab("Events", new CodeInputEventsTab())
+               ).Variant(TabsVariant.Content);
+    }
+}
+
+public class CodeInputVariants : ViewBase
+{
+    public override object Build()
+    {
         var csharpCode = UseState(
             """
             public class Program
@@ -69,22 +85,6 @@ public class CodeInputApp : SampleBase
         var emptySqlState = UseState("");
         var emptyHtmlState = UseState("");
         var emptyYamlState = UseState("");
-
-        var onBlurState = UseState("");
-        var onBlurLabel = UseState("");
-        var onFocusState = UseState("");
-        var onFocusLabel = UseState("");
-
-        var cardCode = UseState(
-            """
-            public class Example
-            {
-                public void DoWork()
-                {
-                    Console.WriteLine("Code inside Card");
-                }
-            }
-            """);
 
         var firstGrid = Layout.Grid().Columns(4)
                | null!
@@ -182,7 +182,76 @@ public class CodeInputApp : SampleBase
                | null!
             ;
 
-        var sizeGrid = Layout.Grid().Columns(4)
+        return Layout.Vertical()
+               | firstGrid
+               | secondGrid
+               | thirdGrid;
+    }
+}
+
+public class CodeInputSizes : ViewBase
+{
+    public override object Build()
+    {
+        var csharpCode = UseState(
+            """
+            public class Program
+            {
+                public static void Main(string[] args)
+                {
+                    Console.WriteLine("Hello, World!");
+                }
+            }
+            """);
+
+        var jsonCode = UseState(
+            """
+            {
+              "name": "John Doe",
+              "age": 30,
+              "email": "john@example.com"
+            }
+            """);
+
+        var sqlCode = UseState(
+            """
+            SELECT u.name, u.email, p.title
+            FROM users u
+            JOIN posts p ON u.id = p.user_id
+            WHERE u.active = true
+            ORDER BY p.created_at DESC;
+            """);
+
+        var htmlCode = UseState(
+            """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>My Page</title>
+            </head>
+            <body>
+                <h1>Hello World</h1>
+            </body>
+            </html>
+            """);
+
+        var yamlCode = UseState(
+            """
+            name: my-app
+            version: 1.0.0
+            services:
+              web:
+                image: nginx:latest
+                ports:
+                  - "80:80"
+              database:
+                image: postgres:15
+                environment:
+                  POSTGRES_USER: admin
+                  POSTGRES_PASSWORD: secret
+            """);
+
+        return Layout.Grid().Columns(4)
                | null!
                | Text.Monospaced("Small")
                | Text.Monospaced("Medium")
@@ -213,12 +282,24 @@ public class CodeInputApp : SampleBase
                | yamlCode.ToCodeInput().Language(Languages.Yaml)
                | yamlCode.ToCodeInput().Language(Languages.Yaml).Large()
             ;
+    }
+}
 
-        var dataBinding = new CodeInputDataBindings();
+public class CodeInputInCard : ViewBase
+{
+    public override object Build()
+    {
+        var cardCode = UseState(
+            """
+            public class Example
+            {
+                public void DoWork()
+                {
+                    Console.WriteLine("Code inside Card");
+                }
+            }
+            """);
 
-
-
-        // Links with copy functionality using one Code block inside Card
         var socialMediaLinksContent = """
             discord.gg: https://discord.gg/62DYrqEX
             github.com: https://github.com/Ivy-Interactive/Ivy-Framework
@@ -234,43 +315,40 @@ public class CodeInputApp : SampleBase
         );
 
         return Layout.Vertical()
-               | Text.H1("Code Input")
-               | Text.H2("Sizes")
-               | sizeGrid
-               | Text.H2("Variants")
-               | firstGrid
-               | secondGrid
-               | thirdGrid
-               | Text.H2("Data Binding")
-               | dataBinding
-               | Text.H2("CodeInput in Card")
                | new Card(
                    cardCode.ToCodeInput().Language(Languages.Csharp).ShowCopyButton().Height(Size.Auto())
                ).Title("Code Example").Description("Testing copy button visibility with card background")
-               | socialMediaLinks
-               | Text.H2("Events")
-               | (Layout.Vertical()
-                   | new Card(
-                       Layout.Vertical().Gap(2)
-                           | Text.P("The blur event fires when the code input loses focus.").Small()
-                           | onBlurState.ToCodeInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
-                           | (onBlurLabel.Value != ""
-                               ? Callout.Success(onBlurLabel.Value)
-                               : Callout.Info("Interact then click away to see blur events"))
-                   ).Title("OnBlur Handler")
-                   | new Card(
-                       Layout.Vertical().Gap(2)
-                           | Text.P("The focus event fires when you click on or tab into the code input.").Small()
-                           | onFocusState.ToCodeInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
-                           | (onFocusLabel.Value != ""
-                               ? Callout.Success(onFocusLabel.Value)
-                               : Callout.Info("Click or tab into the input to see focus events"))
-                   ).Title("OnFocus Handler")
-               )
-               ;
+               | socialMediaLinks;
     }
+}
 
-    // Helper methods moved to CodeInputDataBindings class
+public class CodeInputEventsTab : ViewBase
+{
+    public override object Build()
+    {
+        var onBlurState = UseState("");
+        var onBlurLabel = UseState("");
+        var onFocusState = UseState("");
+        var onFocusLabel = UseState("");
+
+        return Layout.Vertical()
+               | new Card(
+                   Layout.Vertical().Gap(2)
+                       | Text.P("The blur event fires when the code input loses focus.").Small()
+                       | onBlurState.ToCodeInput().OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                       | (onBlurLabel.Value != ""
+                           ? Callout.Success(onBlurLabel.Value)
+                           : Callout.Info("Interact then click away to see blur events"))
+               ).Title("OnBlur Handler")
+               | new Card(
+                   Layout.Vertical().Gap(2)
+                       | Text.P("The focus event fires when you click on or tab into the code input.").Small()
+                       | onFocusState.ToCodeInput().OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                       | (onFocusLabel.Value != ""
+                           ? Callout.Success(onFocusLabel.Value)
+                           : Callout.Info("Click or tab into the input to see focus events"))
+               ).Title("OnFocus Handler");
+    }
 }
 
 public class CodeInputDataBindings : ViewBase
@@ -327,26 +405,13 @@ public class CodeInputDataBindings : ViewBase
         return Layout.Grid().Columns(6) | gridItems.ToArray();
     }
 
-    private static object CreateCodeInputVariants(object state)
-    {
-        if (state is not IAnyState anyState)
-            return Text.Block("Not an IAnyState");
-
-        var stateType = anyState.GetStateType();
-        var isNullable = stateType.IsNullableType();
-
-        if (isNullable)
-        {
-            // For nullable states, show with placeholder
-            return anyState.ToCodeInput().Placeholder("Enter code here...");
-        }
-
-        // For non-nullable states, show all variants
-        return Layout.Vertical()
-               | anyState.ToCodeInput()
-               | anyState.ToCodeInput().Language(Languages.Csharp)
-               | anyState.ToCodeInput().Language(Languages.Csharp).ShowCopyButton();
-    }
+    private static object CreateCodeInputVariants(object state) =>
+        InputDataBindingHelper.CreateInputVariants(state,
+            anyState => Layout.Vertical()
+                | anyState.ToCodeInput()
+                | anyState.ToCodeInput().Language(Languages.Csharp)
+                | anyState.ToCodeInput().Language(Languages.Csharp).ShowCopyButton(),
+            anyState => anyState.ToCodeInput().Placeholder("Enter code here..."));
 
     private object FormatStateValue(string typeName, object? value, bool isNullable)
     {

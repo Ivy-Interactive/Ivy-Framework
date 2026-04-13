@@ -1,3 +1,5 @@
+using Ivy.Tendril.Services;
+
 namespace Ivy.Tendril.Apps;
 
 public record FileAppArgs(string Url);
@@ -36,12 +38,16 @@ public class FileApp : ViewBase
         { ".sln", Languages.Text },
         { ".ps1", Languages.Powershell },
         { ".psm1", Languages.Powershell },
+        { ".sh", Languages.Bash },
+        { ".bash", Languages.Bash }
     };
 
     public static Languages GetLanguage(string extension)
-        => LanguageMap.GetValueOrDefault(extension, Languages.Text);
+    {
+        return LanguageMap.GetValueOrDefault(extension, Languages.Text);
+    }
 
-    public override object? Build()
+    public override object Build()
     {
         var args = UseArgs<FileAppArgs>();
         var contentState = UseState("");
@@ -59,7 +65,7 @@ public class FileApp : ViewBase
         {
             try
             {
-                var content = File.ReadAllText(url);
+                var content = FileHelper.ReadAllText(url);
                 contentState.Set(content);
                 errorState.Set(null);
             }
@@ -67,6 +73,7 @@ public class FileApp : ViewBase
             {
                 errorState.Set($"Failed to read file: {ex.Message}");
             }
+
             previousUrl.Value = url;
         }
 
@@ -76,13 +83,11 @@ public class FileApp : ViewBase
 
         // Display image
         if (isImage)
-        {
             return new Image(url)
             {
                 ObjectFit = ImageFit.Contain,
                 Alt = Path.GetFileName(url)
             };
-        }
 
         // Display code editor
         var language = GetLanguage(extension);

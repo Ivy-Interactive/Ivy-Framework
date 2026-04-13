@@ -8,9 +8,13 @@ public class TimeCacheTests
     public void GetOrCompute_CallsComputeOnFirstAccess()
     {
         var cache = new TimeCache<int>(TimeSpan.FromMinutes(1));
-        int callCount = 0;
+        var callCount = 0;
 
-        var result = cache.GetOrCompute(() => { callCount++; return 42; });
+        var result = cache.GetOrCompute(() =>
+        {
+            callCount++;
+            return 42;
+        });
 
         Assert.Equal(42, result);
         Assert.Equal(1, callCount);
@@ -20,10 +24,18 @@ public class TimeCacheTests
     public void GetOrCompute_ReturnsCachedValueWithinExpiration()
     {
         var cache = new TimeCache<int>(TimeSpan.FromSeconds(1));
-        int callCount = 0;
+        var callCount = 0;
 
-        cache.GetOrCompute(() => { callCount++; return 42; });
-        var result = cache.GetOrCompute(() => { callCount++; return 99; });
+        cache.GetOrCompute(() =>
+        {
+            callCount++;
+            return 42;
+        });
+        var result = cache.GetOrCompute(() =>
+        {
+            callCount++;
+            return 99;
+        });
 
         Assert.Equal(42, result);
         Assert.Equal(1, callCount);
@@ -33,11 +45,19 @@ public class TimeCacheTests
     public void GetOrCompute_RecomputesAfterExpiration()
     {
         var cache = new TimeCache<int>(TimeSpan.FromMilliseconds(100));
-        int callCount = 0;
+        var callCount = 0;
 
-        cache.GetOrCompute(() => { callCount++; return 42; });
+        cache.GetOrCompute(() =>
+        {
+            callCount++;
+            return 42;
+        });
         Thread.Sleep(150);
-        var result = cache.GetOrCompute(() => { callCount++; return 99; });
+        var result = cache.GetOrCompute(() =>
+        {
+            callCount++;
+            return 99;
+        });
 
         Assert.Equal(99, result);
         Assert.Equal(2, callCount);
@@ -47,11 +67,19 @@ public class TimeCacheTests
     public void Invalidate_ForcesCacheRecompute()
     {
         var cache = new TimeCache<int>(TimeSpan.FromMinutes(1));
-        int callCount = 0;
+        var callCount = 0;
 
-        cache.GetOrCompute(() => { callCount++; return 42; });
+        cache.GetOrCompute(() =>
+        {
+            callCount++;
+            return 42;
+        });
         cache.Invalidate();
-        var result = cache.GetOrCompute(() => { callCount++; return 99; });
+        var result = cache.GetOrCompute(() =>
+        {
+            callCount++;
+            return 99;
+        });
 
         Assert.Equal(99, result);
         Assert.Equal(2, callCount);
@@ -80,7 +108,7 @@ public class TimeCacheTests
     public async Task GetOrComputeAsync_CallsComputeOnFirstAccess()
     {
         var cache = new TimeCache<int>(TimeSpan.FromMinutes(1));
-        int callCount = 0;
+        var callCount = 0;
 
         var result = await cache.GetOrComputeAsync(async () =>
         {
@@ -97,7 +125,7 @@ public class TimeCacheTests
     public async Task GetOrComputeAsync_ReturnsCachedValueWithinExpiration()
     {
         var cache = new TimeCache<int>(TimeSpan.FromSeconds(1));
-        int callCount = 0;
+        var callCount = 0;
 
         await cache.GetOrComputeAsync(async () =>
         {
@@ -121,7 +149,7 @@ public class TimeCacheTests
     public async Task GetOrComputeAsync_RecomputesAfterExpiration()
     {
         var cache = new TimeCache<int>(TimeSpan.FromMilliseconds(100));
-        int callCount = 0;
+        var callCount = 0;
 
         await cache.GetOrComputeAsync(async () =>
         {

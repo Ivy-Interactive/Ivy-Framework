@@ -14,9 +14,11 @@ import {
   getColors,
   getTransformValueFn,
   generateEChartToolbox,
+  formatTooltipValue,
 } from "./sharedUtils";
 import { getChartThemeColors } from "./styles";
 import { LineChartWidgetProps, ChartType } from "./chartTypes";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -35,6 +37,8 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   referenceAreas = EMPTY_ARRAY,
   referenceDots = EMPTY_ARRAY,
   colorScheme = "Default",
+  layout = "Vertical",
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -64,6 +68,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
 
   // Chart colors depend on theme (chromatic colors automatically adapt to light/dark mode)
   const chartColors = useMemo(() => getColors(colorScheme, colors), [colorScheme, colors]);
+  const isVertical = layout?.toLowerCase() === "vertical";
 
   const { transform, largeSpread, minValue, maxValue } = getTransformValueFn(data);
 
@@ -75,7 +80,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         ChartType.Line,
         categories as string[],
         xAxis,
-        false,
+        isVertical,
         {
           mutedForeground: themeColors.mutedForeground,
           fontSans: themeColors.fontSans,
@@ -88,7 +93,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         minValue,
         maxValue,
         yAxis,
-        false,
+        isVertical,
         undefined,
         {
           mutedForeground: themeColors.mutedForeground,
@@ -96,12 +101,26 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         },
         cartesianGrid,
       ),
-      tooltip: generateTooltip(tooltip, "shadow", {
-        foreground: themeColors.foreground,
-        fontSans: themeColors.fontSans,
-        background: themeColors.background,
-        mutedForeground: themeColors.mutedForeground,
-      }),
+      tooltip: {
+        ...generateTooltip(tooltip, "shadow", {
+          foreground: themeColors.foreground,
+          fontSans: themeColors.fontSans,
+          background: themeColors.background,
+          mutedForeground: themeColors.mutedForeground,
+        }),
+        formatter: (params: any) => {
+          if (Array.isArray(params)) {
+            return params
+              .map((p) => {
+                const value = formatTooltipValue(p.value[isVertical ? 0 : 1], tooltip);
+                return `${p.marker} ${p.seriesName}: <strong>${value}</strong>`;
+              })
+              .join("<br/>");
+          }
+          const value = formatTooltipValue(params.value[isVertical ? 0 : 1], tooltip);
+          return `${params.marker} ${params.seriesName}: <strong>${value}</strong>`;
+        },
+      },
       toolbox: generateEChartToolbox(toolbox),
       legend: generateEChartLegend(legend, {
         foreground: themeColors.foreground,
@@ -117,6 +136,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         referenceDots,
         referenceLines,
         referenceAreas,
+        themeColors,
       ),
     }),
     [
@@ -139,6 +159,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
       referenceLines,
       referenceAreas,
       toolbox,
+      layout,
     ],
   );
 

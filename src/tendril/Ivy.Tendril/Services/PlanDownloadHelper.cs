@@ -23,7 +23,8 @@ public static class PlanDownloadHelper
             var fileName = currentPlan != null ? currentPlan.FolderName + ".pdf" : "empty.pdf";
             var (cleanup, downloadUrl) = downloadService.AddDownload(
                 () => currentPlan != null
-                    ? Task.FromResult(pdfService.GeneratePdf(currentPlan.Title, currentPlan.Id, planService.ReadRawPlan(currentPlan.FolderName)))
+                    ? Task.FromResult(pdfService.GeneratePdf(currentPlan.Title, currentPlan.Id,
+                        planService.ReadRawPlan(currentPlan.FolderName)))
                     : Task.FromResult(Array.Empty<byte>()),
                 "application/pdf",
                 fileName

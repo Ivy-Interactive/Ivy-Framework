@@ -1,24 +1,22 @@
-using Ivy.Tendril.Apps.Settings;
+using Ivy.Tendril.Apps.Setup;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Settings", icon: Icons.Settings, isVisible: false)]
+[App(title: "Setup", icon: Icons.Construction, isVisible: false)]
 public class SetupApp : ViewBase
 {
-    public override object? Build()
+    public override object Build()
     {
         var selectedTab = UseState(0);
 
-        return new TabsLayout(
-            onSelect: e => selectedTab.Set(e.Value),
-            onClose: null,
-            onRefresh: null,
-            onReorder: null,
-            selectedIndex: selectedTab.Value,
-            new Tab("General", new GeneralSettingsView()),
-            new Tab("Levels", new LevelsSettingsView()),
-            new Tab("Verifications", new VerificationsSettingsView()),
-            new Tab("Projects", new ProjectsSettingsView())
-        ).Variant(TabsVariant.Content);
+        return Layout.Tabs(
+            new Tab("General", new GeneralSetupView()),
+            new Tab("Security", new SecuritySetupView()),
+            new Tab("Levels", new LevelsSetupView()),
+            new Tab("Verifications", new VerificationsSetupView()),
+            new Tab("Promptwares", new PromptwaresSetupView()),
+            new Tab("Projects", new ProjectsSetupView()),
+            new Tab("Advanced", new AdvancedSetupView())
+        ).OnSelect(v => selectedTab.Set(v)).SelectedIndex(selectedTab.Value).Variant(TabsVariant.Content);
     }
 }

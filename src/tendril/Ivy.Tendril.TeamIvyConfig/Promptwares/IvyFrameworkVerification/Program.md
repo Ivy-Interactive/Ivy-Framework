@@ -11,6 +11,7 @@ The firmware header contains:
 - **CurrentTime** — current UTC timestamp
 - **VerificationDir** — path to write the verification report
 - **ArtifactsDir** — path to store test artifacts (screenshots, videos, sample apps)
+- **IvyFrameworkPath** — pre-resolved path to the Ivy Framework source (worktree or main repo). The launcher has already pre-built the frontend and Ivy.dll from this path. Use this for ProjectReference paths — do NOT rebuild the frontend yourself.
 
 ## Execution Steps
 
@@ -70,11 +71,9 @@ Record results for the report. For missing artifacts on new features, flag as a 
 
 Create everything directly in `<ArtifactsDir>/sample/` so the plan folder is self-contained and runnable.
 
-**Important: Check which branch has the fix.** If the plan's commit is on a feature branch (check `plan.yaml` commits + `git branch --contains <commit>`), the worktree at `<PlanFolder>/worktrees/<RepoName>` has the correct code. Use that path for ProjectReference, NOT the main repo. If the commit is on main/master, use `~/git/ivy/Ivy-Framework`.
+**Important: Use the `IvyFrameworkPath` firmware value** for the ProjectReference path. The launcher script has already pre-built the frontend and Ivy.dll from the correct source (worktree or main repo). Do NOT rebuild the frontend yourself — no `vp build`, no `npx vite build`, no `rm -rf obj/Debug`.
 
-**If referencing a worktree and it has frontend (.ts) changes:** rebuild frontend from the worktree path (`cd <worktree>/src/frontend && vp build`), then clean the Ivy obj dir (`rm -rf <worktree>/src/Ivy/obj/Debug`) before building the sample project.
-
-**`<ArtifactsDir>/sample/<FeatureName>.csproj`:**
+**`<ArtifactsDir>/sample/Sample.csproj`:**
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -90,6 +89,8 @@ Create everything directly in `<ArtifactsDir>/sample/` so the plan folder is sel
   </ItemGroup>
 </Project>
 ```
+
+**Note:** Always use the filename `Sample.csproj` (not `<FeatureName>.csproj`) to ensure reruns with "Suggested Changes" overwrite the same file instead of creating multiple .csproj files.
 
 **`<ArtifactsDir>/sample/Program.cs`:**
 
@@ -124,11 +125,21 @@ Each app must:
 
 From `<ArtifactsDir>/sample/`:
 
-Before building, kill any leftover processes from previous runs that may lock DLLs:
+Before building, kill any leftover processes from previous runs that may lock DLLs (scoped to this plan's artifacts only):
 
 ```bash
-powershell.exe -NoProfile -Command "Get-Process -ErrorAction SilentlyContinue | Where-Object { \$_.Path -and \$_.Path -match '\\\\artifacts\\\\sample\\\\bin\\\\' } | ForEach-Object { Write-Host \"Killing \$(\$_.ProcessName) (PID \$(\$_.Id))\"; \$_ | Stop-Process -Force -ErrorAction Stop } ; Start-Sleep -Milliseconds 2000"
+powershell.exe -NoProfile -Command "Get-Process -ErrorAction SilentlyContinue | Where-Object { \$_.Path -and \$_.Path -like '<ArtifactsDir>*' } | ForEach-Object { Write-Host \"Killing \$(\$_.ProcessName) (PID \$(\$_.Id))\"; \$_ | Stop-Process -Force -ErrorAction Stop }; Start-Sleep -Milliseconds 2000"
 ```
+
+Use the pre-flight build validation tool:
+
+```bash
+pwsh -NoProfile -File "<PromptwareDir>/Tools/Test-SampleBuild.ps1" -SampleProjectDir "<ArtifactsDir>/sample"
+```
+
+The tool runs `dotnet build` and `dotnet run --describe`, returning JSON with `success`, `apps`, and `errors` fields. If it fails, fix the **sample project code** (not the framework build) and re-run. The framework is already pre-built by the launcher.
+
+If the tool is unavailable, fall back to:
 
 ```bash
 dotnet build
@@ -145,7 +156,7 @@ Create `<ArtifactsDir>/sample/.ivy/tests/` directory with:
 
 **playwright.config.ts** — Chromium only, single worker, no retries, viewport `{ width: 1920, height: 1920 }` (set in both `use` and `projects[0].use`), uses `process.env.APP_PORT`
 
-**IMPORTANT:** Screenshots must be written to `<ArtifactsDir>/screenshots/` (sibling to `sample/`), not inside `sample/`.
+**IMPORTANT:** Screenshots must be written to `<ArtifactsDir>/screenshots/` (sibling to `sample/`), not inside `sample/`. Since `projectRoot` resolves to `<ArtifactsDir>/sample/`, use `path.resolve(projectRoot, '..', 'screenshots')` (single `..`) — NOT double `..` which goes above `<ArtifactsDir>`.
 
 **test-utils.ts** — process tracking utility for cleanup on timeout/crash:
 
@@ -216,7 +227,7 @@ process.on('exit', () => {
 - `beforeAll`: find free port, spawn `dotnet run -- --port <port>`, **call `trackProcess(proc)`**, wait for HTTP 200
 - `afterAll`: kill process with `killAllTrackedProcesses()` (also kills any other tracked processes)
 - Set `test.setTimeout(60000)` (60s) to catch hung tests before Playwright's default timeout
-- Test each app at `http://localhost:<port>/<app-id>?shell=false`
+- Test each app at `https://localhost:<port>/<app-id>?shell=false`
 - Take screenshots directly to `<ArtifactsDir>/screenshots/` with descriptive names. **Before taking each screenshot, check if the page has meaningful content (visible text > 20 chars or > 5 visible elements). Skip screenshots of empty/blank pages** — these add no verification value. Use a `takeScreenshotIfNotEmpty()` helper (see PlaywrightKnowledge.md)
 - Capture browser console logs → `<ArtifactsDir>/tests/console.log`
 - Capture backend stdout/stderr → `<ArtifactsDir>/tests/backend.log`
@@ -299,17 +310,17 @@ test.describe('Feature Tests', () => {
 
 ```bash
 cd <ArtifactsDir>/sample/.ivy/tests
-vp install
+npm install
 npx playwright install chromium
-vp run test
+npx playwright test
 ```
 
 ### 8.5. Post-Test Cleanup
 
-Even if tests pass, kill all sample processes to ensure clean state:
+Even if tests pass, kill this plan's sample processes to ensure clean state:
 
 ```bash
-powershell.exe -NoProfile -Command "Get-Process -ErrorAction SilentlyContinue | Where-Object { \$_.Path -and \$_.Path -match '\\\\artifacts\\\\sample\\\\bin\\\\' } | Stop-Process -Force -ErrorAction SilentlyContinue"
+powershell.exe -NoProfile -Command "Get-Process -ErrorAction SilentlyContinue | Where-Object { \$_.Path -and \$_.Path -like '<ArtifactsDir>*' } | Stop-Process -Force -ErrorAction SilentlyContinue"
 ```
 
 ### 9. Fix Loop (up to 10 rounds)

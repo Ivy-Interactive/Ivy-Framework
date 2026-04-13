@@ -1,21 +1,7 @@
 import { Densities } from "@/types/density";
+import { FileUploadStatus, FileItem } from "../shared/types";
 
-export enum FileUploadStatus {
-  Pending = "Pending",
-  Aborted = "Aborted",
-  Loading = "Loading",
-  Failed = "Failed",
-  Finished = "Finished",
-}
-
-export interface FileItem {
-  id: string;
-  fileName: string;
-  contentType: string;
-  length: number;
-  progress: number;
-  status: FileUploadStatus;
-}
+export { FileUploadStatus, type FileItem };
 
 export interface ContentInputWidgetProps {
   id: string;
@@ -34,6 +20,7 @@ export interface ContentInputWidgetProps {
   accept?: string;
   maxFileSize?: number;
   maxFiles?: number;
+  shortcutKey?: string;
   files?: FileItem[];
   "data-testid"?: string;
 }

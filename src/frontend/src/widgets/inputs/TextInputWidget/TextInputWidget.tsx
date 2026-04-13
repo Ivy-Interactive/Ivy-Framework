@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from "react"
 import { useEventHandler } from "@/components/event-handler";
 import { Densities } from "@/types/density";
 import { TextInputWidgetProps, TextInputVariant } from "./types";
-import { useShortcutKey } from "./hooks";
+import { useShortcut } from "@/lib/useShortcut";
 import { useOptimisticValue } from "../shared/useOptimisticValue";
 import { DefaultVariant, TextareaVariant, PasswordVariant, SearchVariant } from "./variants";
 import { EMPTY_ARRAY } from "@/lib/constants";
@@ -14,7 +14,6 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   value,
   variant = "Text",
   disabled = false,
-  ghost,
   invalid,
   nullable = false,
   width,
@@ -22,16 +21,15 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   events = EMPTY_ARRAY,
   shortcutKey,
   density = Densities.Medium,
-  prefix,
-  suffix,
+  slots,
   maxLength,
   minLength,
   pattern,
   rows,
   autoFocus,
+  ghost = false,
   dictation,
   dictationUploadUrl,
-  dictationLanguage: _dictationLanguage,
   dictationTranscription,
   dictationTranscriptionVersion,
   "data-testid": dataTestId,
@@ -50,27 +48,24 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     (a: string, b: string) => a === b,
   );
 
-  useShortcutKey({
-    shortcutKey,
-    inputRef,
-    setIsFocused,
-    id,
-    events,
-    eventHandler,
+  useShortcut(id, shortcutKey, () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      setIsFocused(true);
+      if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+    }
   });
+
+  const hasAutoFocusedRef = useRef(false);
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current && inputRef.current) {
+      hasAutoFocusedRef.current = true;
+      inputRef.current.focus();
+    }
+  }, [autoFocus, disabled]);
 
   const { isRecording, startRecording, stopRecording } = useDictation({
     dictationUploadUrl,
-    onTranscription: useCallback(
-      (text: string) => {
-        const current = localValue;
-        const separator = current.length > 0 && !current.endsWith(" ") ? " " : "";
-        const newValue = current + separator + text;
-        setLocalValue(newValue);
-        if (events.includes("OnChange")) eventHandler("OnChange", id, [newValue]);
-      },
-      [localValue, setLocalValue, events, eventHandler, id],
-    ),
   });
 
   // Handle transcription results pushed from the server
@@ -187,13 +182,13 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       events,
       shortcutKey,
       density,
-      prefix,
-      suffix,
+      slots,
       maxLength,
       minLength,
       pattern,
       rows,
       autoFocus,
+      ghost,
       dictation,
       isRecording,
       onDictationToggle: handleDictationToggle,
@@ -212,13 +207,13 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       height,
       shortcutKey,
       density,
-      prefix,
-      suffix,
+      slots,
       maxLength,
       minLength,
       pattern,
       rows,
       autoFocus,
+      ghost,
       dictation,
       isRecording,
       handleDictationToggle,
@@ -249,6 +244,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           onClear={handleClear}
+          onSubmit={handleSubmit}
           inputRef={inputRef}
           isFocused={isFocused}
           density={density}

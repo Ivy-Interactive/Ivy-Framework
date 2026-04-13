@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import * as arrow from "apache-arrow";
 import { Filter } from "@/services/grpcTableService";
+import { Densities } from "@/types/density";
 import { TableContext } from "./tableContext";
 import { TableProviderProps, TableContextType } from "./types";
 import { useDataLoading, useColumnManagement, useSorting, useRowData } from "./hooks";
@@ -11,6 +12,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   connection,
   config,
   editable = false,
+  density = Densities.Medium,
 }) => {
   const [visibleRows, setVisibleRows] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +75,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       activeFilter,
       activeSort,
       columnOrder,
+      density,
       getRowData,
       arrowTableRef,
       loadMoreData,
@@ -96,6 +99,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     activeFilter,
     activeSort,
     columnOrder,
+    density,
     getRowData,
     arrowTableRef,
     loadMoreData,

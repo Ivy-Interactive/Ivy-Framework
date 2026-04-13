@@ -7,7 +7,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : CheckedAuthT
 {
     private readonly IAuthProvider _innerAuthProvider = innerAuthProvider;
 
-    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public Task<LoginResult> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)

@@ -25,6 +25,7 @@ import { CodeBlock } from "./markdown/CodeBlock";
 import { PopoverLink } from "./markdown/PopoverLink";
 import Icon from "@/components/Icon";
 import { Components } from "react-markdown";
+import { parseGitHubAlert, githubAlertStyles } from "@/lib/markdown-utils";
 
 interface MarkdownRendererProps {
   content: string;
@@ -227,9 +228,35 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         <em className={typography.em}>{children}</em>
       )),
       pre: memo(({ children }: { children: React.ReactNode }) => <>{children}</>),
-      blockquote: memo(({ children }: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
-        <blockquote className={typography.blockquote}>{children}</blockquote>
-      )),
+      blockquote: memo(({ children }: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => {
+        const alert = parseGitHubAlert(children);
+        if (alert) {
+          const style = githubAlertStyles[alert.type];
+          return (
+            <div
+              className={cn(
+                "flex items-start text-large-body rounded-box border transition-colors relative",
+                "py-4 px-4 my-4",
+                style.className,
+              )}
+              role="alert"
+            >
+              <Icon
+                name={style.icon}
+                size="24"
+                className={cn("mr-3.5 shrink-0 opacity-90", style.iconColor)}
+              />
+              <div className="flex flex-col min-w-0 flex-1">
+                <div className="font-medium mb-1 leading-6">{style.title}</div>
+                <div className="text-sm opacity-90 leading-relaxed [&_p]:text-sm [&_p]:mb-0">
+                  {alert.content}
+                </div>
+              </div>
+            </div>
+          );
+        }
+        return <blockquote className={typography.blockquote}>{children}</blockquote>;
+      }),
       table: memo(({ children }: { children: React.ReactNode }) => (
         <table className={typography.table}>{children}</table>
       )),

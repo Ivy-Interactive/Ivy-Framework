@@ -955,6 +955,52 @@ describe("getIvyHost", () => {
       expect(utils.getIvyHost()).toBe("https://example.com");
     });
   });
+
+  describe("with ivy-path-base meta tag (base path behind reverse proxy)", () => {
+    const setIvyBasePathMeta = (value: string) => {
+      const meta = document.createElement("meta");
+      meta.setAttribute("name", "ivy-path-base");
+      meta.setAttribute("content", value);
+      document.head.appendChild(meta);
+    };
+
+    it("appends base path with leading slash to origin", () => {
+      setIvyBasePathMeta("/studio");
+      expect(utils.getIvyHost()).toBe(defaultOrigin + "/studio");
+    });
+
+    it("appends base path to meta host origin", () => {
+      const originalOrigin = window.location.origin;
+      Object.defineProperty(window, "location", {
+        value: {
+          ...window.location,
+          origin: "https://example.com",
+          hostname: "example.com",
+        },
+        writable: true,
+        configurable: true,
+      });
+      try {
+        setIvyHostMeta("https://example.com");
+        setIvyBasePathMeta("/ivy");
+        expect(utils.getIvyHost()).toBe("https://example.com/ivy");
+      } finally {
+        Object.defineProperty(window, "location", {
+          value: {
+            ...window.location,
+            origin: originalOrigin,
+          },
+          writable: true,
+          configurable: true,
+        });
+      }
+    });
+
+    it("returns origin without base path when no base path meta", () => {
+      // No ivy-path-base meta tag set
+      expect(utils.getIvyHost()).toBe(defaultOrigin);
+    });
+  });
 });
 
 const mediaValidationCases = [
@@ -978,234 +1024,237 @@ const mediaValidationCases = [
   },
 ] as const;
 
-describe.each(mediaValidationCases)("$name", ({ validate, validDataUrl, invalidDataUrl }) => {
-  it("returns null for empty or non-string values", () => {
-    expect(validate(null)).toBeNull();
-    expect(validate(undefined)).toBeNull();
-    expect(validate("")).toBeNull();
-    expect(validate("   ")).toBeNull();
-  });
-
-  it("accepts valid https URLs", () => {
-    expect(validate("https://example.com/resource")).toBe("https://example.com/resource");
-  });
-
-  it("accepts valid relative paths", () => {
-    expect(validate("/media/resource.ext")).toBe("/media/resource.ext");
-  });
-
-  it("accepts valid data URLs of the correct media type", () => {
-    expect(validate(validDataUrl)).toBe(validDataUrl);
-  });
-
-  it("rejects data URLs that use the wrong media type", () => {
-    expect(validate(invalidDataUrl)).toBeNull();
-  });
-
-  describe("blob URL validation", () => {
-    let getCurrentOriginSpy: ReturnType<typeof vi.fn>;
-
-    beforeEach(() => {
-      // Create a mock function and replace the internal reference
-      const mockFn = vi.fn(() => "https://example.com");
-      urlValidation._getCurrentOriginRef.getCurrentOrigin = mockFn;
-      getCurrentOriginSpy = mockFn;
+describe.each(mediaValidationCases)(
+  "$name",
+  ({ validate, validDataUrl, invalidDataUrl }: (typeof mediaValidationCases)[number]) => {
+    it("returns null for empty or non-string values", () => {
+      expect(validate(null)).toBeNull();
+      expect(validate(undefined)).toBeNull();
+      expect(validate("")).toBeNull();
+      expect(validate("   ")).toBeNull();
     });
 
-    it("accepts blob URLs with matching origin", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      expect(validate("blob:https://example.com/1234-5678-90ab-cdef")).toBe(
-        "blob:https://example.com/1234-5678-90ab-cdef",
+    it("accepts valid https URLs", () => {
+      expect(validate("https://example.com/resource")).toBe("https://example.com/resource");
+    });
+
+    it("accepts valid relative paths", () => {
+      expect(validate("/media/resource.ext")).toBe("/media/resource.ext");
+    });
+
+    it("accepts valid data URLs of the correct media type", () => {
+      expect(validate(validDataUrl)).toBe(validDataUrl);
+    });
+
+    it("rejects data URLs that use the wrong media type", () => {
+      expect(validate(invalidDataUrl)).toBeNull();
+    });
+
+    describe("blob URL validation", () => {
+      let getCurrentOriginSpy: ReturnType<typeof vi.fn>;
+
+      beforeEach(() => {
+        // Create a mock function and replace the internal reference
+        const mockFn = vi.fn(() => "https://example.com");
+        urlValidation._getCurrentOriginRef.getCurrentOrigin = mockFn;
+        getCurrentOriginSpy = mockFn;
+      });
+
+      it("accepts blob URLs with matching origin", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        expect(validate("blob:https://example.com/1234-5678-90ab-cdef")).toBe(
+          "blob:https://example.com/1234-5678-90ab-cdef",
+        );
+      });
+
+      it("rejects blob URLs with different origin", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        expect(validate("blob:https://attacker.com/1234-5678-90ab-cdef")).toBeNull();
+      });
+
+      it("rejects blob URLs with different protocol", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        expect(validate("blob:http://example.com/1234-5678-90ab-cdef")).toBeNull();
+      });
+
+      it("rejects blob URLs with different port", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com:443");
+        expect(validate("blob:https://example.com:8080/1234-5678-90ab-cdef")).toBeNull();
+      });
+
+      it("accepts blob URLs with same origin but default port normalized", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        // Blob URL with explicit :443 should match origin without port
+        expect(validate("blob:https://example.com:443/1234-5678-90ab-cdef")).toBe(
+          "blob:https://example.com:443/1234-5678-90ab-cdef",
+        );
+      });
+
+      it("accepts blob URLs when both have default ports normalized", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com:443");
+        expect(validate("blob:https://example.com/1234-5678-90ab-cdef")).toBe(
+          "blob:https://example.com/1234-5678-90ab-cdef",
+        );
+      });
+
+      it("rejects blob URLs when current origin is missing (SSR scenario)", () => {
+        getCurrentOriginSpy.mockReturnValue("");
+        expect(validate("blob:https://example.com/1234-5678-90ab-cdef")).toBeNull();
+      });
+
+      it("rejects blob URLs with invalid format (no slash)", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        expect(validate("blob:https://example.com")).toBeNull();
+      });
+
+      it("rejects blob URLs with invalid format (no origin)", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        expect(validate("blob:/1234-5678-90ab-cdef")).toBeNull();
+      });
+
+      it("handles blob URLs with complex UUIDs", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        const complexBlobUrl = "blob:https://example.com/550e8400-e29b-41d4-a716-446655440000";
+        expect(validate(complexBlobUrl)).toBe(complexBlobUrl);
+      });
+
+      it("handles blob URLs with paths after UUID", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        // Blob URLs typically have format blob:origin/uuid, but we only extract up to first slash
+        const blobUrl = "blob:https://example.com/uuid-123";
+        expect(validate(blobUrl)).toBe(blobUrl);
+      });
+
+      it("handles http origins correctly", () => {
+        getCurrentOriginSpy.mockReturnValue("http://localhost:8080");
+        expect(validate("blob:http://localhost:8080/1234-5678-90ab-cdef")).toBe(
+          "blob:http://localhost:8080/1234-5678-90ab-cdef",
+        );
+      });
+
+      it("rejects blob URLs with http when current origin is https", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        expect(validate("blob:http://example.com/1234-5678-90ab-cdef")).toBeNull();
+      });
+
+      it("handles default http port normalization", () => {
+        getCurrentOriginSpy.mockReturnValue("http://example.com");
+        // Blob URL with explicit :80 should match origin without port
+        expect(validate("blob:http://example.com:80/1234-5678-90ab-cdef")).toBe(
+          "blob:http://example.com:80/1234-5678-90ab-cdef",
+        );
+      });
+
+      // Additional edge cases for comprehensive coverage
+      it("rejects blob URLs with different subdomain", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        expect(validate("blob:https://subdomain.example.com/uuid")).toBeNull();
+      });
+
+      it("rejects blob URLs with malformed origin (no protocol)", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        expect(validate("blob:example.com/uuid")).toBeNull();
+      });
+
+      it("rejects blob URLs with malformed origin (invalid protocol)", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        // The validateMediaUrl function should reject javascript: protocol
+        expect(validate("blob:javascript://example.com/uuid")).toBeNull();
+      });
+
+      it("handles blob URLs with custom ports correctly", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com:8443");
+        expect(validate("blob:https://example.com:8443/uuid-123")).toBe(
+          "blob:https://example.com:8443/uuid-123",
+        );
+      });
+
+      it("rejects blob URLs with same host but different port", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com:8443");
+        expect(validate("blob:https://example.com:9443/uuid-123")).toBeNull();
+      });
+
+      it("handles blob URLs with IPv4 addresses", () => {
+        getCurrentOriginSpy.mockReturnValue("http://192.168.1.1:8080");
+        expect(validate("blob:http://192.168.1.1:8080/uuid-123")).toBe(
+          "blob:http://192.168.1.1:8080/uuid-123",
+        );
+      });
+
+      it("rejects blob URLs with different IPv4 address", () => {
+        getCurrentOriginSpy.mockReturnValue("http://192.168.1.1:8080");
+        expect(validate("blob:http://192.168.1.2:8080/uuid-123")).toBeNull();
+      });
+
+      it("handles blob URLs with localhost variants", () => {
+        getCurrentOriginSpy.mockReturnValue("http://localhost:3000");
+        expect(validate("blob:http://localhost:3000/uuid-123")).toBe(
+          "blob:http://localhost:3000/uuid-123",
+        );
+      });
+
+      it("rejects blob URLs when blob origin is empty (double slash)", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        // This should be caught by the invalid format check
+        expect(validate("blob://uuid-123")).toBeNull();
+      });
+
+      it("rejects blob URLs with protocol injection attempt", () => {
+        getCurrentOriginSpy.mockReturnValue("https://example.com");
+        // Attempt to inject javascript: protocol
+        expect(validate("blob:javascript:alert(1)")).toBeNull();
+      });
+    });
+
+    it("accepts safe app:// URLs and rejects app:// URLs with colons in the path", () => {
+      expect(validate("app://media/resource")).toBe("app://media/resource");
+      expect(validate("app://media:fragment#bad")).toBeNull();
+    });
+
+    it("rejects javascript protocol attempts", () => {
+      expect(validate("javascript:alert(1)")).toBeNull();
+    });
+
+    it("rejects relative paths containing colons", () => {
+      expect(validate("/media:bad:path")).toBeNull();
+    });
+
+    it("coerces colon-free relative strings into rooted paths", () => {
+      expect(validate("images/resource.ext")).toBe("/images/resource.ext");
+    });
+
+    it("rejects file: protocol by default for security", () => {
+      expect(validate("file:///C:/Users/test/image.png")).toBeNull();
+      expect(validate("file:///D:/Screenshots/screenshot.png")).toBeNull();
+    });
+
+    it("accepts file: protocol when dangerouslyAllowLocalFiles is enabled", () => {
+      const validateWithLocalFiles = (url: string) =>
+        validateMediaUrl(url, { mediaType: "image", dangerouslyAllowLocalFiles: true });
+
+      expect(validateWithLocalFiles("file:///C:/Users/test/image.png")).toBe(
+        "file:///C:/Users/test/image.png",
+      );
+      expect(validateWithLocalFiles("file:///D:/Screenshots/screenshot.png")).toBe(
+        "file:///D:/Screenshots/screenshot.png",
       );
     });
 
-    it("rejects blob URLs with different origin", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      expect(validate("blob:https://attacker.com/1234-5678-90ab-cdef")).toBeNull();
+    it("accepts Windows absolute paths when dangerouslyAllowLocalFiles is enabled", () => {
+      const validateWithLocalFiles = (url: string) =>
+        validateMediaUrl(url, { mediaType: "image", dangerouslyAllowLocalFiles: true });
+
+      expect(validateWithLocalFiles("C:\\Foo\\bar.png")).toBe("file:///C:/Foo/bar.png");
+      expect(validateWithLocalFiles("D:\\Images\\test.jpg")).toBe("file:///D:/Images/test.jpg");
+      expect(validateWithLocalFiles("C:/Foo/bar.png")).toBe("file:///C:/Foo/bar.png");
     });
 
-    it("rejects blob URLs with different protocol", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      expect(validate("blob:http://example.com/1234-5678-90ab-cdef")).toBeNull();
+    it("rejects Windows absolute paths by default for security", () => {
+      expect(validate("C:\\Foo\\bar.png")).toBeNull();
+      expect(validate("D:\\Images\\test.jpg")).toBeNull();
     });
-
-    it("rejects blob URLs with different port", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com:443");
-      expect(validate("blob:https://example.com:8080/1234-5678-90ab-cdef")).toBeNull();
-    });
-
-    it("accepts blob URLs with same origin but default port normalized", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      // Blob URL with explicit :443 should match origin without port
-      expect(validate("blob:https://example.com:443/1234-5678-90ab-cdef")).toBe(
-        "blob:https://example.com:443/1234-5678-90ab-cdef",
-      );
-    });
-
-    it("accepts blob URLs when both have default ports normalized", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com:443");
-      expect(validate("blob:https://example.com/1234-5678-90ab-cdef")).toBe(
-        "blob:https://example.com/1234-5678-90ab-cdef",
-      );
-    });
-
-    it("rejects blob URLs when current origin is missing (SSR scenario)", () => {
-      getCurrentOriginSpy.mockReturnValue("");
-      expect(validate("blob:https://example.com/1234-5678-90ab-cdef")).toBeNull();
-    });
-
-    it("rejects blob URLs with invalid format (no slash)", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      expect(validate("blob:https://example.com")).toBeNull();
-    });
-
-    it("rejects blob URLs with invalid format (no origin)", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      expect(validate("blob:/1234-5678-90ab-cdef")).toBeNull();
-    });
-
-    it("handles blob URLs with complex UUIDs", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      const complexBlobUrl = "blob:https://example.com/550e8400-e29b-41d4-a716-446655440000";
-      expect(validate(complexBlobUrl)).toBe(complexBlobUrl);
-    });
-
-    it("handles blob URLs with paths after UUID", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      // Blob URLs typically have format blob:origin/uuid, but we only extract up to first slash
-      const blobUrl = "blob:https://example.com/uuid-123";
-      expect(validate(blobUrl)).toBe(blobUrl);
-    });
-
-    it("handles http origins correctly", () => {
-      getCurrentOriginSpy.mockReturnValue("http://localhost:8080");
-      expect(validate("blob:http://localhost:8080/1234-5678-90ab-cdef")).toBe(
-        "blob:http://localhost:8080/1234-5678-90ab-cdef",
-      );
-    });
-
-    it("rejects blob URLs with http when current origin is https", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      expect(validate("blob:http://example.com/1234-5678-90ab-cdef")).toBeNull();
-    });
-
-    it("handles default http port normalization", () => {
-      getCurrentOriginSpy.mockReturnValue("http://example.com");
-      // Blob URL with explicit :80 should match origin without port
-      expect(validate("blob:http://example.com:80/1234-5678-90ab-cdef")).toBe(
-        "blob:http://example.com:80/1234-5678-90ab-cdef",
-      );
-    });
-
-    // Additional edge cases for comprehensive coverage
-    it("rejects blob URLs with different subdomain", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      expect(validate("blob:https://subdomain.example.com/uuid")).toBeNull();
-    });
-
-    it("rejects blob URLs with malformed origin (no protocol)", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      expect(validate("blob:example.com/uuid")).toBeNull();
-    });
-
-    it("rejects blob URLs with malformed origin (invalid protocol)", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      // The validateMediaUrl function should reject javascript: protocol
-      expect(validate("blob:javascript://example.com/uuid")).toBeNull();
-    });
-
-    it("handles blob URLs with custom ports correctly", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com:8443");
-      expect(validate("blob:https://example.com:8443/uuid-123")).toBe(
-        "blob:https://example.com:8443/uuid-123",
-      );
-    });
-
-    it("rejects blob URLs with same host but different port", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com:8443");
-      expect(validate("blob:https://example.com:9443/uuid-123")).toBeNull();
-    });
-
-    it("handles blob URLs with IPv4 addresses", () => {
-      getCurrentOriginSpy.mockReturnValue("http://192.168.1.1:8080");
-      expect(validate("blob:http://192.168.1.1:8080/uuid-123")).toBe(
-        "blob:http://192.168.1.1:8080/uuid-123",
-      );
-    });
-
-    it("rejects blob URLs with different IPv4 address", () => {
-      getCurrentOriginSpy.mockReturnValue("http://192.168.1.1:8080");
-      expect(validate("blob:http://192.168.1.2:8080/uuid-123")).toBeNull();
-    });
-
-    it("handles blob URLs with localhost variants", () => {
-      getCurrentOriginSpy.mockReturnValue("http://localhost:3000");
-      expect(validate("blob:http://localhost:3000/uuid-123")).toBe(
-        "blob:http://localhost:3000/uuid-123",
-      );
-    });
-
-    it("rejects blob URLs when blob origin is empty (double slash)", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      // This should be caught by the invalid format check
-      expect(validate("blob://uuid-123")).toBeNull();
-    });
-
-    it("rejects blob URLs with protocol injection attempt", () => {
-      getCurrentOriginSpy.mockReturnValue("https://example.com");
-      // Attempt to inject javascript: protocol
-      expect(validate("blob:javascript:alert(1)")).toBeNull();
-    });
-  });
-
-  it("accepts safe app:// URLs and rejects app:// URLs with colons in the path", () => {
-    expect(validate("app://media/resource")).toBe("app://media/resource");
-    expect(validate("app://media:fragment#bad")).toBeNull();
-  });
-
-  it("rejects javascript protocol attempts", () => {
-    expect(validate("javascript:alert(1)")).toBeNull();
-  });
-
-  it("rejects relative paths containing colons", () => {
-    expect(validate("/media:bad:path")).toBeNull();
-  });
-
-  it("coerces colon-free relative strings into rooted paths", () => {
-    expect(validate("images/resource.ext")).toBe("/images/resource.ext");
-  });
-
-  it("rejects file: protocol by default for security", () => {
-    expect(validate("file:///C:/Users/test/image.png")).toBeNull();
-    expect(validate("file:///D:/Screenshots/screenshot.png")).toBeNull();
-  });
-
-  it("accepts file: protocol when dangerouslyAllowLocalFiles is enabled", () => {
-    const validateWithLocalFiles = (url: string) =>
-      validateMediaUrl(url, { mediaType: "image", dangerouslyAllowLocalFiles: true });
-
-    expect(validateWithLocalFiles("file:///C:/Users/test/image.png")).toBe(
-      "file:///C:/Users/test/image.png",
-    );
-    expect(validateWithLocalFiles("file:///D:/Screenshots/screenshot.png")).toBe(
-      "file:///D:/Screenshots/screenshot.png",
-    );
-  });
-
-  it("accepts Windows absolute paths when dangerouslyAllowLocalFiles is enabled", () => {
-    const validateWithLocalFiles = (url: string) =>
-      validateMediaUrl(url, { mediaType: "image", dangerouslyAllowLocalFiles: true });
-
-    expect(validateWithLocalFiles("C:\\Foo\\bar.png")).toBe("file:///C:/Foo/bar.png");
-    expect(validateWithLocalFiles("D:\\Images\\test.jpg")).toBe("file:///D:/Images/test.jpg");
-    expect(validateWithLocalFiles("C:/Foo/bar.png")).toBe("file:///C:/Foo/bar.png");
-  });
-
-  it("rejects Windows absolute paths by default for security", () => {
-    expect(validate("C:\\Foo\\bar.png")).toBeNull();
-    expect(validate("D:\\Images\\test.jpg")).toBeNull();
-  });
-});
+  },
+);
 
 describe("validateEmbedUrl", () => {
   describe("valid YouTube URLs", () => {

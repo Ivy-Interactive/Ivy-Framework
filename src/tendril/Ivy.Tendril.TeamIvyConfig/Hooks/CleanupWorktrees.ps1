@@ -16,7 +16,7 @@ if (-not $env:TENDRIL_CONFIG -and $env:TENDRIL_HOME) {
 }
 
 # Bootstrap shared utilities (includes Bootstrap-Modules.ps1 and ExtractRepoPathsFromYaml)
-$sharedPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "Ivy.Tendril/.promptwares/.shared"
+$sharedPath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) "Ivy.Tendril/Promptwares/.shared"
 . (Join-Path $sharedPath "Utils.ps1")
 
 $plansDir = Join-Path $env:TENDRIL_HOME "Plans"
@@ -68,7 +68,8 @@ foreach ($planFolder in $planFolders) {
         if ($originalRepo) {
             try {
                 Push-Location $originalRepo
-                $branchName = "plan-$planId-$repoName"
+                $safeTitle = if ($planFolder.Name -match '^\d+-(.+)') { $Matches[1] } else { "Unknown" }
+                $branchName = "tendril/$planId-$safeTitle"
                 git worktree remove $wtDir.FullName --force 2>&1 | Out-Null
                 git branch -D $branchName 2>&1 | Out-Null
                 Pop-Location

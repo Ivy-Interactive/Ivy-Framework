@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useEffect } from "react";
 import { Paperclip } from "lucide-react";
+import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
@@ -11,6 +12,66 @@ import { useFileAttachments } from "./useFileAttachments";
 import { FileAttachmentList } from "./FileAttachmentList";
 import { ContentInputWidgetProps } from "./types";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { formatShortcutForDisplay } from "@/lib/shortcut";
+import { useShortcut } from "@/lib/useShortcut";
+
+const toolbarVariant = cva("flex items-center gap-1", {
+  variants: {
+    density: {
+      Small: "px-1.5 pb-1",
+      Medium: "px-2 pb-1.5",
+      Large: "px-3 pb-2",
+    },
+  },
+  defaultVariants: { density: "Medium" },
+});
+
+const paperclipIconVariant = cva("text-muted-foreground", {
+  variants: {
+    density: {
+      Small: "h-3 w-3",
+      Medium: "h-4 w-4",
+      Large: "h-5 w-5",
+    },
+  },
+  defaultVariants: { density: "Medium" },
+});
+
+const paperclipButtonVariant = cva("rounded hover:bg-accent focus:outline-none transition-colors", {
+  variants: {
+    density: {
+      Small: "p-0.5",
+      Medium: "p-1",
+      Large: "p-1.5",
+    },
+  },
+  defaultVariants: { density: "Medium" },
+});
+
+const dropTextVariant = cva("text-primary ml-1", {
+  variants: {
+    density: {
+      Small: "text-[10px]",
+      Medium: "text-xs",
+      Large: "text-sm",
+    },
+  },
+  defaultVariants: { density: "Medium" },
+});
+
+const shortcutBadgeVariant = cva(
+  "ml-auto font-medium text-muted-foreground bg-muted border border-border rounded-field",
+  {
+    variants: {
+      density: {
+        Small: "text-[10px] px-0.5 py-0",
+        Medium: "text-xs px-1 py-0.5",
+        Large: "text-sm px-1.5 py-0.5",
+      },
+    },
+    defaultVariants: { density: "Medium" },
+  },
+);
 
 export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
   id,
@@ -27,6 +88,7 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
   uploadUrl,
   accept,
   maxFileSize,
+  shortcutKey,
   maxFiles,
   files = EMPTY_ARRAY,
 }) => {
@@ -96,12 +158,13 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (hasSubmitHandler && e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      // If shortcutKey is set, the global useEffect handles the shortcut instead
+      if (!shortcutKey && hasSubmitHandler && e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         handleEvent("OnSubmit", id, []);
       }
     },
-    [hasSubmitHandler, handleEvent, id],
+    [shortcutKey, hasSubmitHandler, handleEvent, id],
   );
 
   const handleCancel = useCallback(
@@ -119,6 +182,19 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
     }
   }, [autoFocus]);
 
+  const shortcutDisplay = formatShortcutForDisplay(shortcutKey);
+
+  useShortcut(
+    id,
+    shortcutKey,
+    () => {
+      if (hasSubmitHandler) {
+        handleEvent("OnSubmit", id, []);
+      }
+    },
+    { disabled },
+  );
+
   return (
     <div
       className="relative w-full"
@@ -135,6 +211,37 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
           invalid && "border-destructive",
         )}
       >
+        {(uploadUrl || fileList.length > 0) && (
+          <div className={cn("flex items-center", toolbarVariant({ density }))}>
+            {uploadUrl && (
+              <button
+                type="button"
+                tabIndex={-1}
+                disabled={disabled}
+                onClick={openFilePicker}
+                className={cn(
+                  paperclipButtonVariant({ density }),
+                  "shrink-0",
+                  disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+                )}
+                aria-label="Attach file"
+              >
+                <Paperclip className={paperclipIconVariant({ density })} />
+              </button>
+            )}
+            {fileList.length > 0 && (
+              <div className="flex-1 min-w-0 overflow-x-auto slim-scrollbar">
+                <FileAttachmentList
+                  files={fileList}
+                  onCancel={handleCancel}
+                  hasCancelHandler={hasCancelHandler}
+                  density={density}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="relative">
           <textarea
             ref={textareaRef}
@@ -164,32 +271,14 @@ export const ContentInputWidget: React.FC<ContentInputWidgetProps> = ({
           )}
         </div>
 
-        {fileList.length > 0 && (
-          <FileAttachmentList
-            files={fileList}
-            onCancel={handleCancel}
-            hasCancelHandler={hasCancelHandler}
-          />
+        {(isDragging || (shortcutKey && !isFocused)) && (
+          <div className={toolbarVariant({ density })}>
+            {isDragging && <span className={dropTextVariant({ density })}>Drop files here</span>}
+            {shortcutKey && !isFocused && (
+              <kbd className={shortcutBadgeVariant({ density })}>{shortcutDisplay}</kbd>
+            )}
+          </div>
         )}
-
-        <div className="flex items-center gap-1 px-2 pb-1.5">
-          {uploadUrl && (
-            <button
-              type="button"
-              tabIndex={-1}
-              disabled={disabled}
-              onClick={openFilePicker}
-              className={cn(
-                "p-1 rounded hover:bg-accent focus:outline-none transition-colors",
-                disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
-              )}
-              aria-label="Attach file"
-            >
-              <Paperclip className="h-4 w-4 text-muted-foreground" />
-            </button>
-          )}
-          {isDragging && <span className="text-xs text-primary ml-1">Drop files here</span>}
-        </div>
 
         <input
           ref={fileInputRef}

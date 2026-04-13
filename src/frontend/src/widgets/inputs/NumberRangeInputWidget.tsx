@@ -7,31 +7,8 @@ import { inputStyles } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { X } from "lucide-react";
 import { Densities } from "@/types/density";
-import Icon from "@/components/Icon";
 import { formatBytes } from "@/lib/formatters";
 import { EMPTY_ARRAY } from "@/lib/constants";
-
-interface Affix {
-  icon?: string;
-  text?: string;
-}
-
-const renderAffix = (affix?: Affix): React.ReactNode => {
-  if (!affix) return null;
-
-  if (affix.icon) {
-    return React.createElement(Icon, {
-      name: affix.icon,
-      className: "w-4 h-4",
-    });
-  }
-
-  if (affix.text) {
-    return React.createElement("span", { className: "text-sm" }, affix.text);
-  }
-
-  return null;
-};
 
 const formatStyleMap = {
   Decimal: "decimal",
@@ -74,8 +51,7 @@ interface NumberRangeInputWidgetProps {
   disabled?: boolean;
   invalid?: string;
   nullable?: boolean;
-  prefix?: Affix;
-  suffix?: Affix;
+  slots?: { Prefix?: React.ReactNode[]; Suffix?: React.ReactNode[] };
   noGrouping?: boolean;
   targetType?: string;
   density?: Densities;
@@ -185,8 +161,7 @@ export const NumberRangeInputWidget = memo(
     disabled = false,
     invalid,
     nullable = false,
-    prefix,
-    suffix,
+    slots,
     noGrouping,
     targetType,
     density = Densities.Medium,
@@ -290,8 +265,10 @@ export const NumberRangeInputWidget = memo(
 
     const showClear = nullable && !disabled && (lowerValue !== null || upperValue !== null);
 
-    const prefixContent = renderAffix(prefix);
-    const suffixContent = renderAffix(suffix);
+    const prefixContent = slots?.Prefix;
+    const suffixContent = slots?.Suffix;
+    const hasPrefix = (prefixContent?.length ?? 0) > 0;
+    const hasSuffix = (suffixContent?.length ?? 0) > 0;
 
     return (
       <div
@@ -314,12 +291,12 @@ export const NumberRangeInputWidget = memo(
         }}
       >
         {/* Prefix/Suffix labels */}
-        {(prefixContent || suffixContent) && (
+        {(hasPrefix || hasSuffix) && (
           <div className="flex items-center justify-between mb-2">
-            {prefixContent && (
+            {hasPrefix && (
               <div className="flex items-center gap-1 text-muted-foreground">{prefixContent}</div>
             )}
-            {suffixContent && (
+            {hasSuffix && (
               <div className="flex items-center gap-1 text-muted-foreground">{suffixContent}</div>
             )}
           </div>

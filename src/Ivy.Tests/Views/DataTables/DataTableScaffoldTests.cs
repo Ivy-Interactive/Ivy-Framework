@@ -1,3 +1,6 @@
+using Apache.Arrow.Ipc;
+using Ivy.Protos.DataTable;
+
 namespace Ivy.Tests.Views.DataTables;
 
 public class DataTableScaffoldTests
@@ -92,5 +95,65 @@ public class DataTableScaffoldTests
         Assert.False(IsColumnRemoved(builder, "Name"));
         Assert.False(IsColumnRemoved(builder, "CreatedAt"));
         Assert.False(IsColumnRemoved(builder, "Amount"));
+    }
+
+    private static Density GetDensity<T>(DataTableBuilder<T> builder)
+    {
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+        var field = builder.GetType().GetField("_density", flags)!;
+        return (Density)field.GetValue(builder)!;
+    }
+
+    [Fact]
+    public void Density_DefaultsToMedium()
+    {
+        var builder = new[] { new EntityWithPrimitives() }.AsQueryable().ToDataTable();
+        Assert.Equal(Density.Medium, GetDensity(builder));
+    }
+
+    [Fact]
+    public void Small_SetsDensityToSmall()
+    {
+        var builder = new[] { new EntityWithPrimitives() }.AsQueryable().ToDataTable().Small();
+        Assert.Equal(Density.Small, GetDensity(builder));
+    }
+
+    [Fact]
+    public void Large_SetsDensityToLarge()
+    {
+        var builder = new[] { new EntityWithPrimitives() }.AsQueryable().ToDataTable().Large();
+        Assert.Equal(Density.Large, GetDensity(builder));
+    }
+
+    private class ColumnOrderEntity
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public int Age { get; set; }
+        public string City { get; set; } = "";
+    }
+
+    [Fact]
+    public void ConvertToArrowTable_ShouldRespectSelectColumnsOrder()
+    {
+        var data = new[]
+        {
+            new ColumnOrderEntity { Id = "1", Name = "Alice", Age = 30, City = "NYC" }
+        }.AsQueryable();
+
+        var query = new DataTableQuery { Offset = 0, Limit = 100 };
+        query.SelectColumns.AddRange(["City", "Name", "Age"]);
+
+        var processor = new QueryProcessor();
+        var result = processor.ProcessQuery(data, query);
+
+        using var stream = new MemoryStream(result.ArrowData);
+        using var reader = new ArrowStreamReader(stream);
+        var batch = reader.ReadNextRecordBatch();
+
+        Assert.NotNull(batch);
+        Assert.Equal("City", batch.Schema.FieldsList[0].Name);
+        Assert.Equal("Name", batch.Schema.FieldsList[1].Name);
+        Assert.Equal("Age", batch.Schema.FieldsList[2].Name);
     }
 }

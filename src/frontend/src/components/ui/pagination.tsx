@@ -1,20 +1,23 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
+import { type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { ButtonProps } from "@/components/ui/button/button";
 import { buttonVariant } from "@/components/ui/button";
+import { paginationContentVariant } from "@/components/ui/pagination-variant";
 
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav aria-label="pagination" className={cn("flex w-fit justify-center", className)} {...props} />
 );
 Pagination.displayName = "Pagination";
 
-const PaginationContent = React.forwardRef<HTMLUListElement, React.ComponentProps<"ul">>(
-  ({ className, ...props }, ref) => (
-    <ul ref={ref} className={cn("flex flex-row items-center gap-1", className)} {...props} />
-  ),
-);
+const PaginationContent = React.forwardRef<
+  HTMLUListElement,
+  React.ComponentProps<"ul"> & VariantProps<typeof paginationContentVariant>
+>(({ className, density, ...props }, ref) => (
+  <ul ref={ref} className={cn(paginationContentVariant({ density }), className)} {...props} />
+));
 PaginationContent.displayName = "PaginationContent";
 
 const PaginationItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li">>(

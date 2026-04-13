@@ -1,3 +1,4 @@
+using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Test;
@@ -20,7 +21,7 @@ public class JobServiceFailureReasonTests
             "[stderr] warning: something minor",
             "Processing...",
             "[stderr] error: connection refused",
-            "[stderr] fatal: cannot continue",
+            "[stderr] fatal: cannot continue"
         };
 
         var result = JobService.ExtractFailureReason(lines);
@@ -35,7 +36,7 @@ public class JobServiceFailureReasonTests
         {
             "Step 1 done",
             "Step 2 done",
-            "Build failed with 3 errors",
+            "Build failed with 3 errors"
         };
 
         var result = JobService.ExtractFailureReason(lines);
@@ -69,7 +70,7 @@ public class JobServiceFailureReasonTests
         {
             "[stderr] ",
             "[stderr] actual error message",
-            "[stderr]  ",
+            "[stderr]  "
         };
 
         var result = JobService.ExtractFailureReason(lines);
@@ -83,7 +84,7 @@ public class JobServiceFailureReasonTests
         {
             "Some regular output",
             "[stderr] the real error",
-            "More regular output after stderr",
+            "More regular output after stderr"
         };
 
         var result = JobService.ExtractFailureReason(lines);
@@ -96,12 +97,12 @@ public class JobServiceFailureReasonTests
         var service = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
         var id = service.StartJob("ExecutePlan", Path.GetTempPath());
         var job = service.GetJob(id)!;
-        job.OutputLines.Add("[stderr] something went wrong");
+        job.OutputLines.Enqueue("[stderr] something went wrong");
 
-        service.CompleteJob(id, exitCode: 1);
+        service.CompleteJob(id, 1);
 
         job = service.GetJob(id)!;
-        Assert.Equal("Failed", job.Status);
+        Assert.Equal(JobStatus.Failed, job.Status);
         Assert.NotNull(job.StatusMessage);
         Assert.Contains("something went wrong", job.StatusMessage);
     }
@@ -112,10 +113,52 @@ public class JobServiceFailureReasonTests
         var service = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
         var id = service.StartJob("ExecutePlan", Path.GetTempPath());
 
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         var job = service.GetJob(id)!;
-        Assert.Equal("Completed", job.Status);
+        Assert.Equal(JobStatus.Completed, job.Status);
         Assert.Null(job.StatusMessage);
+    }
+
+    [Fact]
+    public void ExtractFailureReason_AnsiCodes_StripsEscapeSequences()
+    {
+        var lines = new List<string>
+        {
+            "[stderr] \x1B[31merror: build failed\x1B[0m"
+        };
+
+        var result = JobService.ExtractFailureReason(lines);
+        Assert.Equal("error: build failed", result);
+    }
+
+    [Fact]
+    public void ExtractFailureReason_ControlCharacters_NormalizesWhitespace()
+    {
+        var lines = new List<string>
+        {
+            "[stderr] error:\tfailed to\t\tcompile\nwith errors"
+        };
+
+        var result = JobService.ExtractFailureReason(lines);
+        Assert.Equal("error: failed to compile with errors", result);
+        Assert.DoesNotContain("\t", result);
+        Assert.DoesNotContain("\n", result);
+    }
+
+    [Fact]
+    public void CompleteJob_WithExistingStatusMessage_PreservesApiSetMessage()
+    {
+        var service = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
+        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var job = service.GetJob(id)!;
+        job.StatusMessage = "Execution failed (exit code: 1)";
+        job.OutputLines.Enqueue("[stderr] some raw stderr output");
+
+        service.CompleteJob(id, 1);
+
+        job = service.GetJob(id)!;
+        Assert.Equal(JobStatus.Failed, job.Status);
+        Assert.Equal("Execution failed (exit code: 1)", job.StatusMessage);
     }
 }

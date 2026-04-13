@@ -7,7 +7,7 @@ public class IConfigServiceTests
     [Fact]
     public void ConfigService_ImplementsInterface()
     {
-        var config = new ConfigService(new TendrilSettings(), "");
+        var config = new ConfigService(new TendrilSettings());
 
         Assert.IsAssignableFrom<IConfigService>(config);
     }
@@ -36,7 +36,7 @@ public class IConfigServiceTests
             {
                 new() { Name = "TestProject", Color = "Blue" }
             }
-        }, "");
+        });
 
         Assert.Equal("TestProject", config.GetProject("TestProject")?.Name);
         Assert.Null(config.GetProject("NonExistent"));
@@ -48,7 +48,7 @@ public class IConfigServiceTests
     [Fact]
     public void InterfaceExposes_PendingState()
     {
-        IConfigService config = new ConfigService(new TendrilSettings(), "");
+        IConfigService config = new ConfigService(new TendrilSettings());
 
         config.SetPendingTendrilHome("/tmp/pending");
         Assert.Equal("/tmp/pending", config.GetPendingTendrilHome());
@@ -56,5 +56,69 @@ public class IConfigServiceTests
         var project = new ProjectConfig { Name = "Test" };
         config.SetPendingProject(project);
         Assert.Equal("Test", config.GetPendingProject()?.Name);
+    }
+
+    [Fact]
+    public void LevelNames_ReturnsSameArrayOnSubsequentCalls()
+    {
+        var config = new ConfigService(new TendrilSettings
+        {
+            Levels = new List<LevelConfig>
+            {
+                new() { Name = "Bug" },
+                new() { Name = "Critical" }
+            }
+        });
+
+        var first = config.LevelNames;
+        var second = config.LevelNames;
+
+        Assert.Same(first, second);
+    }
+
+    [Fact]
+    public void LevelNames_InvalidatedAfterSaveSettings()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), $"tendril-test-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempDir);
+        try
+        {
+            var config = new ConfigService(new TendrilSettings
+            {
+                Levels = new List<LevelConfig>
+                {
+                    new() { Name = "Bug" },
+                    new() { Name = "Critical" }
+                }
+            }, tempDir);
+
+            var first = config.LevelNames;
+            config.SaveSettings();
+            var second = config.LevelNames;
+
+            Assert.NotSame(first, second);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void LevelNames_ReturnsCorrectNames()
+    {
+        var config = new ConfigService(new TendrilSettings
+        {
+            Levels = new List<LevelConfig>
+            {
+                new() { Name = "Bug", Badge = "Destructive" },
+                new() { Name = "Critical", Badge = "Warning" },
+                new() { Name = "NiceToHave", Badge = "Outline" }
+            }
+        });
+
+        var names = config.LevelNames;
+
+        Assert.Equal(new[] { "Bug", "Critical", "NiceToHave" }, names);
     }
 }

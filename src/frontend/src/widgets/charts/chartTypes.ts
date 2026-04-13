@@ -1,3 +1,5 @@
+import { Densities } from "@/types/density";
+
 export type ColorScheme = "Default" | "Rainbow";
 
 export enum ChartType {
@@ -44,35 +46,38 @@ export interface PieChartWidgetProps {
   colorScheme: ColorScheme;
   total?: PieChartTotalProps;
   toolbox?: ToolboxProps;
+  density?: Densities;
 }
 
-export type YAxisProps = {
-  allowDataOverflow: boolean;
-  allowDecimals: boolean;
-  allowDuplicatedCategory: boolean;
-  angle: number;
-  axisLine: boolean;
-  dataKey: string;
+export interface YAxisProps {
+  allowDataOverflow?: boolean;
+  allowDecimals?: boolean;
+  allowDuplicatedCategory?: boolean;
+  angle?: number;
+  axisLine?: boolean;
+  dataKey?: string;
   domainMin?: number | string | { value: number | string };
   domainMax?: number | string | { value: number | string };
-  hide: boolean;
-  includeHidden: boolean;
-  label: null;
-  minTickGap: number;
-  mirror: boolean;
-  name: null;
-  orientation: string;
-  reversed: boolean;
-  scale: string;
-  tickCount: number;
-  tickLine: boolean;
-  tickSize: number;
-  type: string;
-  unit: null;
-  width: number;
+  hide?: boolean;
+  includeHidden?: boolean;
+  label?: string | null;
+  minTickGap?: number;
+  mirror?: boolean;
+  name?: string | null;
+  orientation?: "Left" | "Right";
+  reversed?: boolean;
+  scale?: "Auto" | "Linear" | "Log" | "Time" | "Ordinal";
+  tickCount?: number;
+  tickLine?: boolean;
+  tickSize?: number;
+  type?: "Category" | "Number" | "Time";
+  unit?: string | null;
+  width?: number;
   hideTickLabels?: boolean;
   tickFormatter?: string | null;
-};
+  tickFormatterType?: "Auto" | "Number" | "Date" | null;
+  timeZone?: string | null;
+}
 
 export interface XAxisProps {
   allowDataOverflow?: boolean;
@@ -100,28 +105,30 @@ export interface XAxisProps {
   unit?: string | null;
   hideTickLabels?: boolean;
   tickFormatter?: string | null;
+  tickFormatterType?: "Auto" | "Number" | "Date" | null;
+  timeZone?: string | null;
 }
 
-export type CartesianGridProps = {
-  fill: string | null;
-  fillOpacity: number | null;
-  height: number | null;
-  horizontal: boolean;
-  stroke: string | null;
-  strokeDashArray: string | null;
-  vertical: boolean;
-  width: number | null;
-  x: number | null;
-  y: number | null;
-};
+export interface CartesianGridProps {
+  fill?: string | null;
+  fillOpacity?: number | null;
+  height?: number | null;
+  horizontal?: boolean;
+  stroke?: string | null;
+  strokeDashArray?: string | null;
+  vertical?: boolean;
+  width?: number | null;
+  x?: number | null;
+  y?: number | null;
+}
 
-export type LegendProps = {
+export interface LegendProps {
   align?: "Left" | "Center" | "Right";
   iconSize?: number;
   iconType?: string | null;
   layout?: "Horizontal" | "Vertical";
   verticalAlign?: "Top" | "Middle" | "Bottom";
-};
+}
 
 type ToolboxFeatureDataView = {
   show?: boolean;
@@ -283,6 +290,8 @@ export interface LineChartWidgetProps {
   referenceAreas?: MarkArea[];
   referenceDots?: ReferenceDot[];
   colorScheme: ColorScheme;
+  layout?: "Horizontal" | "Vertical";
+  density?: Densities;
 }
 
 export interface ReferenceDot {
@@ -312,6 +321,8 @@ export type PieProps = {
 
 export interface ToolTipProps {
   animated?: boolean;
+  valueFormat?: string | null;
+  valueFormatType?: "Auto" | "Number" | "Date" | null;
 }
 
 export interface PieLegendProps {
@@ -369,6 +380,8 @@ export interface ScatterChartWidgetProps {
   referenceAreas?: MarkArea[];
   referenceDots?: ReferenceDot[];
   colorScheme: ColorScheme;
+  layout?: "Horizontal" | "Vertical";
+  density?: Densities;
 }
 
 export type PolarGridTypes = "Polygon" | "Circle";
@@ -431,6 +444,7 @@ export interface RadarChartWidgetProps {
   splitLine?: boolean;
   splitArea?: boolean;
   axisLine?: boolean;
+  density?: Densities;
 }
 
 export interface SankeyNode {
@@ -464,6 +478,7 @@ export interface SankeyChartWidgetProps {
   tooltip?: ToolTipProps;
   legend?: LegendProps;
   toolbox?: ToolboxProps;
+  density?: Densities;
 }
 
 export interface ChordNode {
@@ -493,6 +508,7 @@ export interface ChordChartWidgetProps {
   tooltip?: ToolTipProps;
   legend?: LegendProps;
   toolbox?: ToolboxProps;
+  density?: Densities;
 }
 
 export interface FunnelChartWidgetProps {
@@ -508,6 +524,7 @@ export interface FunnelChartWidgetProps {
   sort?: "Descending" | "Ascending" | "None";
   orientation?: "Vertical" | "Horizontal";
   gap?: number;
+  density?: Densities;
 }
 
 export type FunnelProps = {
@@ -549,4 +566,5 @@ export interface GaugeChartWidgetProps {
   colorScheme?: ColorScheme;
   width?: string;
   height?: string;
+  density?: Densities;
 }

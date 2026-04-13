@@ -30,7 +30,7 @@ public class BasePathFilter : IHtmlFilter
         }
         else
         {
-            var trimmed = basePath.TrimEnd('/');
+            var trimmed = "/" + basePath.Trim('/');
             head.AddFirst(new XElement("meta",
                 new XAttribute("name", "ivy-path-base"),
                 new XAttribute("content", trimmed)));

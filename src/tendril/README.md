@@ -19,12 +19,14 @@ Tendril is a terminal UI application built on [Ivy Framework](https://github.com
 ## Prerequisites
 
 ### For Running Tendril
+
 - [Claude CLI](https://docs.anthropic.com/en/docs/claude-code) (`claude`)
 - [GitHub CLI](https://cli.github.com/) (`gh`)
 - PowerShell
 - Git
 
 ### For Development
+
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download)
 
 ## Setup
@@ -32,8 +34,8 @@ Tendril is a terminal UI application built on [Ivy Framework](https://github.com
 1. **Clone the repo**
 
    ```bash
-   git clone https://github.com/Ivy-Interactive/Ivy-Tendril.git
-   cd Ivy-Tendril
+   git clone https://github.com/Ivy-Interactive/Ivy-Framework.git
+   cd Ivy-Framework/src/tendril/Ivy.Tendril
    ```
 
 2. **Configure `config.yaml`**
@@ -41,12 +43,12 @@ Tendril is a terminal UI application built on [Ivy Framework](https://github.com
    Copy the example config and edit it:
 
    ```bash
-   cp example.config.yaml config.yaml
+   cp example.config.yaml ~/.tendril/config.yaml
    ```
 
    Key fields:
    - `projects` -- List of projects with their repo paths, verifications, and context
-   - `agentCommand` -- The Claude CLI command used to run agents
+   - `codingAgent` -- The coding agent to use (claude, codex, or gemini)
 
 3. **Set `TENDRIL_HOME` environment variable**
 
@@ -61,20 +63,51 @@ Tendril is a terminal UI application built on [Ivy Framework](https://github.com
 
 4. **Run**
 
+    ```bash
+    dotnet run --project Ivy.Tendril/Ivy.Tendril.csproj
+    ```
+
+### Running as Desktop App
+
+1. **Build and Run**
+
    ```bash
-   dotnet run
+   dotnet run --project Ivy.Tendril.Desktop/Ivy.Tendril.Desktop.csproj
    ```
+
+   This launches Tendril in a native cross-platform window using `Ivy.Desktop`.
+
+### Installing as Global CLI Tool (NPM)
+
+You can run Tendril from any directory using `npx` or by installing it globally via `npm`.
+
+1. **Via `npx`**
+
+   ```bash
+   npx @ivy/tendril
+   ```
+
+2. **Global Install**
+
+   ```bash
+   npm install -g @ivy/tendril
+   dotnet tool install -g Ivy.Tendril
+   tendril
+   ```
+
+   *(Note: The NPM package is a wrapper for the `dotnet tool`. Both must be available for the `tendril` command to work.)*
 
 ## Project Structure
 
 | Folder | Description |
-|--------|-------------|
+|---|---|
 | `Services/` | Core services -- config loading, plan reading, job management, Git/GitHub integration |
 | `Apps/` | TUI app screens -- plans list, jobs view, dashboard, review, PR creation |
 | `AppShell/` | Application shell and navigation |
-| `.promptwares/` | Agent promptwares for each lifecycle stage (MakePlan, ExecutePlan, etc.) |
+| `Promptwares/` | Agent promptwares for each lifecycle stage (MakePlan, ExecutePlan, etc.) |
 | `Views/` | Shared UI components and views |
 | `Controllers/` | Action controllers for plan operations |
+| `Database/` | SQLite database schema and migrations |
 
 ## How It Works
 

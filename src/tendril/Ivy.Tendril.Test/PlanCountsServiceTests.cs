@@ -1,16 +1,17 @@
 using System.Collections.Concurrent;
 using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy.Tendril.Test;
 
 public class PlanCountsServiceTests : IDisposable
 {
-    private readonly string _tempDir;
-    private readonly string _plansDir;
-    private readonly PlanReaderService _planReader;
     private readonly FakeJobService _jobService;
+    private readonly PlanReaderService _planReader;
     private readonly FakePlanWatcherService _planWatcher;
+    private readonly string _plansDir;
+    private readonly string _tempDir;
 
     public PlanCountsServiceTests()
     {
@@ -20,7 +21,7 @@ public class PlanCountsServiceTests : IDisposable
 
         var settings = new TendrilSettings();
         var configService = new ConfigService(settings, _tempDir);
-        _planReader = new PlanReaderService(configService);
+        _planReader = new PlanReaderService(configService, NullLogger<PlanReaderService>.Instance);
         _jobService = new FakeJobService();
         _planWatcher = new FakePlanWatcherService();
     }
@@ -28,7 +29,7 @@ public class PlanCountsServiceTests : IDisposable
     public void Dispose()
     {
         if (Directory.Exists(_tempDir))
-            Directory.Delete(_tempDir, recursive: true);
+            Directory.Delete(_tempDir, true);
     }
 
     private void CreatePlan(string folderName, string state)
@@ -50,7 +51,7 @@ public class PlanCountsServiceTests : IDisposable
         File.WriteAllText(Path.Combine(artifactsDir, "recommendations.yaml"), yaml);
     }
 
-    private void AddJob(string id, string status)
+    private void AddJob(string id, JobStatus status)
     {
         _jobService.AddJob(id, status);
     }
@@ -105,36 +106,52 @@ public class PlanCountsServiceTests : IDisposable
 
         // Recommendations (pending on a completed plan)
         CreatePlan("00007-WithRecs", "Completed");
-        CreateRecommendations("00007-WithRecs", "- title: Fix something\n  description: |\n    Details here.\n  state: Pending\n");
+        CreateRecommendations("00007-WithRecs",
+            "- title: Fix something\n  description: |\n    Details here.\n  state: Pending\n");
 
         // Jobs
-        AddJob("job-1", "Running");
-        AddJob("job-2", "Queued");
-        AddJob("job-3", "Completed"); // should not count as active
+        AddJob("job-1", JobStatus.Running);
+        AddJob("job-2", JobStatus.Queued);
+        AddJob("job-3", JobStatus.Completed); // should not count as active
+        AddJob("job-4", JobStatus.Blocked); // should count as active
 
         using var service = CreateService();
 
         Assert.Equal(2, service.Current.Drafts);
-        Assert.Equal(2, service.Current.ActiveJobs);
+        Assert.Equal(3, service.Current.ActiveJobs);
         Assert.Equal(2, service.Current.Reviews); // 1 ReadyForReview + 1 Failed
         Assert.Equal(1, service.Current.Icebox);
         Assert.Equal(1, service.Current.Recommendations);
     }
 
     [Fact]
-    public void ComputeCounts_WithRunningAndQueuedJobs_CountsActiveJobs()
+    public void ComputeCounts_BlockedPlansCountAsDrafts()
     {
-        AddJob("job-running-1", "Running");
-        AddJob("job-running-2", "Running");
-        AddJob("job-queued-1", "Queued");
-        AddJob("job-completed-1", "Completed");
-        AddJob("job-failed-1", "Failed");
-        AddJob("job-pending-1", "Pending");
+        CreatePlan("00010-DraftPlan", "Draft");
+        CreatePlan("00011-BlockedPlan1", "Blocked");
+        CreatePlan("00012-BlockedPlan2", "Blocked");
 
         using var service = CreateService();
 
-        // Only Running + Queued count as active
-        Assert.Equal(3, service.Current.ActiveJobs);
+        // Blocked plans should be counted together with drafts
+        Assert.Equal(3, service.Current.Drafts);
+    }
+
+    [Fact]
+    public void ComputeCounts_WithRunningQueuedAndBlockedJobs_CountsActiveJobs()
+    {
+        AddJob("job-running-1", JobStatus.Running);
+        AddJob("job-running-2", JobStatus.Running);
+        AddJob("job-queued-1", JobStatus.Queued);
+        AddJob("job-blocked-1", JobStatus.Blocked);
+        AddJob("job-completed-1", JobStatus.Completed);
+        AddJob("job-failed-1", JobStatus.Failed);
+        AddJob("job-pending-1", JobStatus.Pending);
+
+        using var service = CreateService();
+
+        // Running + Queued + Blocked count as active
+        Assert.Equal(4, service.Current.ActiveJobs);
     }
 
     [Fact]
@@ -156,39 +173,89 @@ public class PlanCountsServiceTests : IDisposable
     {
         private readonly List<JobItem> _jobs = new();
 
+#pragma warning disable CS0618
+        public ConcurrentQueue<JobNotification> PendingNotifications { get; } = new();
+#pragma warning restore CS0618
+
+        public List<JobItem> GetJobs()
+        {
+            return _jobs;
+        }
+
+        public JobItem? GetJob(string id)
+        {
+            return _jobs.FirstOrDefault(j => j.Id == id);
+        }
+
+        public string StartJob(string type, string[] args, string? inboxFilePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string StartJob(string type, params string[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CompleteJob(string id, int? exitCode, bool timedOut = false, bool staleOutput = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void StopJob(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteJob(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ClearCompletedJobs()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ClearFailedJobs()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsInboxFileTracked(string filePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddJob(string id, JobStatus status)
+        {
+            _jobs.Add(new JobItem { Id = id, Status = status });
+        }
+
 #pragma warning disable CS0067
         public event Action? JobsChanged;
         public event Action<JobNotification>? NotificationReady;
 #pragma warning restore CS0067
 
-#pragma warning disable CS0618
-        public ConcurrentQueue<JobNotification> PendingNotifications { get; } = new();
-#pragma warning restore CS0618
-
-        public void AddJob(string id, string status)
-        {
-            _jobs.Add(new JobItem { Id = id, Status = status });
-        }
-
-        public List<JobItem> GetJobs() => _jobs;
-        public JobItem? GetJob(string id) => _jobs.FirstOrDefault(j => j.Id == id);
-
-        public string StartJob(string type, string[] args, string? inboxFilePath) => throw new NotImplementedException();
-        public string StartJob(string type, params string[] args) => throw new NotImplementedException();
-        public void CompleteJob(string id, int? exitCode, bool timedOut = false, bool staleOutput = false) => throw new NotImplementedException();
-        public void StopJob(string id) => throw new NotImplementedException();
-        public void DeleteJob(string id) => throw new NotImplementedException();
-        public void ClearCompletedJobs() => throw new NotImplementedException();
-        public void ClearFailedJobs() => throw new NotImplementedException();
-        public bool IsInboxFileTracked(string filePath) => throw new NotImplementedException();
+        public void Dispose() { }
     }
 
     private class FakePlanWatcherService : IPlanWatcherService
     {
-        public event Action? PlansChanged;
+        public event Action<string?>? PlansChanged;
 
-        public void RaisePlansChanged() => PlansChanged?.Invoke();
+        public void NotifyChanged(string? changedPlanFolder = null)
+        {
+            PlansChanged?.Invoke(changedPlanFolder);
+        }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
+
+        public void RaisePlansChanged()
+        {
+            PlansChanged?.Invoke(null);
+        }
     }
 }

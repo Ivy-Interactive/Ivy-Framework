@@ -19,14 +19,18 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  // Limit workers to prevent CPU saturation when multiple test suites run concurrently.
+  // Override via PLAYWRIGHT_WORKERS env var (number or percentage string like '50%').
+  workers: process.env.CI ? 1 : process.env.PLAYWRIGHT_WORKERS || "25%",
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [["html"], ["list"], ["json", { outputFile: "test-results/results.json" }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:5173",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || "https://localhost:5173",
+
+    /* Accept self-signed dev certificates (e.g. dotnet dev-certs on Linux CI) */
+    ignoreHTTPSErrors: true,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "retain-on-failure",
@@ -45,7 +49,8 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: "vp dev",
-    url: "http://localhost:5173",
+    url: "https://localhost:5173",
+    ignoreHTTPSErrors: true,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },

@@ -19,8 +19,11 @@ import { ConnectionModal } from "./ConnectionModal";
 import { ThemeProvider } from "./theme-provider";
 import { EventHandlerProvider } from "./event-handler";
 import { StreamHandlerProvider } from "./stream-handler";
+import { BreakpointProvider } from "@/hooks/use-breakpoint-context";
 
 export function App() {
+  sessionStorage.removeItem("vite-chunk-reload");
+
   const appId = getAppId();
   const appArgs = getAppArgs();
   const parentId = getParentId();
@@ -54,18 +57,20 @@ export function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="ivy-ui-theme">
       <ErrorBoundary>
-        <EventHandlerProvider eventHandler={eventHandler}>
-          <StreamHandlerProvider subscribeToStream={subscribeToStream}>
-            <>
-              {!removeBranding && <MadeWithIvy />}
-              {isDevToolsEnabled() && <DevTools />}
-              {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
-              <ErrorSheet />
-              <Toaster />
-              {(disconnected || connectionState === "reconnecting") && <ConnectionModal />}
-            </>
-          </StreamHandlerProvider>
-        </EventHandlerProvider>
+        <BreakpointProvider>
+          <EventHandlerProvider eventHandler={eventHandler}>
+            <StreamHandlerProvider subscribeToStream={subscribeToStream}>
+              <>
+                {!removeBranding && <MadeWithIvy />}
+                {isDevToolsEnabled() && <DevTools />}
+                {wrapAppContent(renderWidgetTree(widgetTree || loadingState()))}
+                <ErrorSheet />
+                <Toaster />
+                {(disconnected || connectionState === "reconnecting") && <ConnectionModal />}
+              </>
+            </StreamHandlerProvider>
+          </EventHandlerProvider>
+        </BreakpointProvider>
       </ErrorBoundary>
     </ThemeProvider>
   );

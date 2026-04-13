@@ -8,47 +8,67 @@ public class AudioInputApp() : SampleBase
 {
     protected override object? BuildSample()
     {
-        // Create a dummy upload for display-only examples
+        return Layout.Tabs(
+            new Tab("Upload", new AudioInputUploadSample()),
+            new Tab("Validation", new AudioInputValidationSample()),
+            new Tab("Sizes", new AudioInputSizesSample()),
+            new Tab("Events", new AudioInputEventsSample())
+        ).Variant(TabsVariant.Content);
+    }
+}
+
+public class AudioInputUploadSample : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical()
+            | Text.P("Demonstrates the AudioInput widget for capturing audio input. This widget is for recording audio, not playing it. The recorder interface is theme-aware and adapts to light/dark themes.")
+            | (Layout.Horizontal()
+                | new Card(new AudioInputBasic()).Title("Basic")
+                | new Card(new AudioInputChunkedUpload()).Title("Chunked Upload")
+                | new Card(new AudioInputDisabledState()).Title("Disabled State")
+                | new Card(new AudioInputSampleRate(24000)).Title("24 kHz (speech)"));
+    }
+}
+
+public class AudioInputValidationSample : ViewBase
+{
+    public override object? Build()
+    {
         var dummyUpload = UseUpload(
             (fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask,
             defaultContentType: "audio/webm"
         );
 
         return Layout.Vertical()
-               | Text.H1("Audio Input")
-               | Text.P("Demonstrates the AudioInput widget for capturing audio input. This widget is for recording audio, not playing it. The recorder interface is theme-aware and adapts to light/dark themes.")
-               | Text.H2("Upload Examples")
-               | (Layout.Horizontal()
-                    | new Card(new AudioInputBasic()).Title("Basic")
-                    | new Card(new AudioInputChunkedUpload()).Title("Chunked Upload")
-                    | new Card(new AudioInputDisabledState()).Title("Disabled State")
-                    | new Card(new AudioInputSampleRate(24000)).Title("24 kHz (speech)"))
-               | Text.H2("Validation")
-               | new AudioInput(dummyUpload.Value, "Invalid Audio Input", "Recording...")
-                   .Invalid("Audio input is invalid")
-               | Text.H2("Sizes")
-               | CreateSizesSection(dummyUpload.Value)
-               | Text.H2("Events")
-               | new AudioInputEvents(dummyUpload.Value);
+            | Text.P("Demonstrates validation states on the AudioInput widget.")
+            | new AudioInput(dummyUpload.Value, "Invalid Audio Input", "Recording...")
+                .Invalid("Audio input is invalid");
     }
+}
 
-    private object CreateSizesSection(UploadContext upload)
+public class AudioInputSizesSample : ViewBase
+{
+    public override object? Build()
     {
+        var dummyUpload = UseUpload(
+            (fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask,
+            defaultContentType: "audio/webm"
+        );
+
         return Layout.Grid().Columns(4)
-               | Text.Monospaced("Description")
-               | Text.Monospaced("Small")
-               | Text.Monospaced("Medium")
-               | Text.Monospaced("Large")
-
-               | Text.Monospaced("Audio Input")
-               | new AudioInput(upload, "Start recording", "Recording audio...").Small()
-               | new AudioInput(upload, "Start recording", "Recording audio...")
-               | new AudioInput(upload, "Start recording", "Recording audio...").Large()
-
-               | Text.Monospaced("Disabled State")
-               | new AudioInput(upload, "Start recording", "Recording audio...", disabled: true).Small()
-               | new AudioInput(upload, "Start recording", "Recording audio...", disabled: true)
-               | new AudioInput(upload, "Start recording", "Recording audio...", disabled: true).Large();
+            | Text.Monospaced("Description")
+            | Text.Monospaced("Small")
+            | Text.Monospaced("Medium")
+            | Text.Monospaced("Large")
+            | Text.Monospaced("Audio Input")
+            | new AudioInput(dummyUpload.Value, "Start recording", "Recording audio...").Small()
+            | new AudioInput(dummyUpload.Value, "Start recording", "Recording audio...")
+            | new AudioInput(dummyUpload.Value, "Start recording", "Recording audio...").Large()
+            | Text.Monospaced("Disabled State")
+            | new AudioInput(dummyUpload.Value, "Start recording", "Recording audio...", disabled: true).Small()
+            | new AudioInput(dummyUpload.Value, "Start recording", "Recording audio...", disabled: true)
+            | new AudioInput(dummyUpload.Value, "Start recording", "Recording audio...", disabled: true).Large();
     }
 }
 
@@ -167,10 +187,15 @@ public class AudioInputDisabledState : ViewBase
                | new AudioInput(dummyUpload.Value, "Start recording", "Recording audio...", disabled: true);
     }
 }
-public class AudioInputEvents(UploadContext upload) : ViewBase
+public class AudioInputEventsSample : ViewBase
 {
-    public override object Build()
+    public override object? Build()
     {
+        var upload = UseUpload(
+            (fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask,
+            defaultContentType: "audio/webm"
+        );
+
         var onBlurLabel = UseState("");
         var onFocusLabel = UseState("");
 
@@ -178,7 +203,7 @@ public class AudioInputEvents(UploadContext upload) : ViewBase
             | new Card(
                 Layout.Vertical().Gap(2)
                     | Text.P("The blur event fires when the audio input loses focus.").Small()
-                    | new AudioInput(upload, "OnBlur Test", "Recording...").OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
+                    | new AudioInput(upload.Value, "OnBlur Test", "Recording...").OnBlur(e => onBlurLabel.Set("Blur Event Triggered"))
                     | (onBlurLabel.Value != ""
                         ? Callout.Success(onBlurLabel.Value)
                         : Callout.Info("Interact then click away to see blur events"))
@@ -186,7 +211,7 @@ public class AudioInputEvents(UploadContext upload) : ViewBase
             | new Card(
                 Layout.Vertical().Gap(2)
                     | Text.P("The focus event fires when you click on or tab into the audio input.").Small()
-                    | new AudioInput(upload, "OnFocus Test", "Recording...").OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
+                    | new AudioInput(upload.Value, "OnFocus Test", "Recording...").OnFocus(e => onFocusLabel.Set("Focus Event Triggered"))
                     | (onFocusLabel.Value != ""
                         ? Callout.Success(onFocusLabel.Value)
                         : Callout.Info("Click or tab into the input to see focus events"))

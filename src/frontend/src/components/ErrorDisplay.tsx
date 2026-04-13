@@ -28,25 +28,27 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ title, message, stac
   };
 
   return (
-    <div className="space-y-4">
-      {title && (
-        <div>
-          <h4 className="text-sm font-medium mb-2">Type</h4>
-          <p>{title}</p>
-        </div>
-      )}
+    <div className="flex flex-col h-full gap-4">
+      <div className="shrink-0">
+        {title && (
+          <div>
+            <h4 className="text-sm font-medium mb-2">Type</h4>
+            <p>{title}</p>
+          </div>
+        )}
 
-      {message && (
-        <div>
-          <h4 className="text-sm font-medium mb-2">Message</h4>
-          <p>{message}</p>
-        </div>
-      )}
+        {message && (
+          <div className="mt-4">
+            <h4 className="text-sm font-medium mb-2">Message</h4>
+            <p>{message}</p>
+          </div>
+        )}
+      </div>
 
       {stackTrace && (
-        <div>
+        <div className="flex-1 min-h-0 overflow-auto">
           <h4 className="text-sm font-medium mb-2">Stack Trace</h4>
-          <div className="w-full max-h-[50vh] overflow-auto border border-border rounded-md">
+          <div className="w-full overflow-auto border border-border rounded-md">
             <SyntaxHighlighter
               language="csharp"
               style={createPrismTheme()}
@@ -59,14 +61,16 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ title, message, stac
         </div>
       )}
 
-      <Button onClick={copyToClipboard} className="mt-4 flex items-center gap-2" variant="outline">
-        {copied ? (
-          <Check className="h-4 w-4 text-primary animate-in fade-in duration-500" />
-        ) : (
-          <ClipboardCopy className="h-4 w-4" />
-        )}
-        Copy Details
-      </Button>
+      <div className="shrink-0 pt-4 border-t">
+        <Button onClick={copyToClipboard} className="flex items-center gap-2" variant="outline">
+          {copied ? (
+            <Check className="h-4 w-4 text-primary animate-in fade-in duration-500" />
+          ) : (
+            <ClipboardCopy className="h-4 w-4" />
+          )}
+          Copy Details
+        </Button>
+      </div>
     </div>
   );
 };

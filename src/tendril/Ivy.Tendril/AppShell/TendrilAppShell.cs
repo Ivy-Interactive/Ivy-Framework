@@ -1,13 +1,12 @@
-using Ivy;
-using Ivy.Core;
-using Ivy.Core.Apps;
-using Ivy.Tendril.Apps;
-using Ivy.Tendril.Services;
-using Ivy.Widgets.Internal;
-using Ivy.Widgets.ScreenshotFeedback;
 using System.Collections.Immutable;
 using System.Reactive.Disposables;
+using Ivy.Core;
+using Ivy.Core.Apps;
+using Ivy.Tendril.AppShell.Dialogs;
+using Ivy.Tendril.Apps;
+using Ivy.Tendril.Services;
 using Ivy.Tendril.Views;
+using Ivy.Widgets.Internal;
 
 namespace Ivy.Tendril.AppShell;
 
@@ -17,11 +16,6 @@ namespace Ivy.Tendril.AppShell;
 public class TendrilAppShell(AppShellSettings settings) : ViewBase
 {
     internal AppShellSettings Settings => settings;
-
-    private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)
-    {
-        public Tab ToTab() => new Tab(Title, AppHost).Icon(Icon).Key(StringHelper.GetShortHash(Id + RefreshToken));
-    }
 
     private static MenuItem AddBadge(MenuItem item, Dictionary<string, int> badges)
     {
@@ -45,7 +39,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         return repo.GetMenuItems().Select(m => AddBadge(m, badges)).ToArray();
     }
 
-    public override object? Build()
+    public override object Build()
     {
         // All hooks must be at the top level of Build()
         var config = UseService<IConfigService>();
@@ -59,19 +53,19 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
         var countsService = UseService<IPlanCountsService>();
         var menuItems = UseState(() => BuildMenuItems(appRepository, countsService.Current));
         var counts = UseState(() => countsService.Current);
-        var jobService = UseService<IJobService>();
         var sidebarOpen = UseState(settings.SidebarOpen);
         var args = UseService<AppContext>();
         var serverArgs = UseService<ServerArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
         var navigator = UseNavigation();
-        var feedbackOpen = UseState(false);
-        var feedbackScreenshot = UseState<FileUpload<byte[]>?>();
-        var feedbackUploadCtx = UseUpload(MemoryStreamUploadHandler.Create(feedbackScreenshot));
-
+        var importIssuesDialogOpen = UseState(false);
         UseEffect(() =>
         {
-            void OnChanged() => counts.Set(countsService.Current);
+            void OnChanged()
+            {
+                counts.Set(countsService.Current);
+            }
+
             countsService.CountsChanged += OnChanged;
             return Disposable.Create(() => countsService.CountsChanged -= OnChanged);
         });
@@ -85,10 +79,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             });
         });
 
-        UseEffect(() =>
-        {
-            menuItems.Set(BuildMenuItems(appRepository, counts.Value));
-        }, appRepository.Reloaded.ToTrigger(), counts);
+        UseEffect(() => { menuItems.Set(BuildMenuItems(appRepository, counts.Value)); },
+            appRepository.Reloaded.ToTrigger(), counts);
 
         UseEffect(async () =>
         {
@@ -101,52 +93,50 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             }
 
             var initialAppId = args.NavigationAppId ?? settings.DefaultAppId;
-            if (!string.IsNullOrWhiteSpace(initialAppId))
+            var targetAppId = initialAppId;
+            if (!string.IsNullOrWhiteSpace(targetAppId))
             {
                 // Force redirect from onboarding if it's already done
-                if (!config.NeedsOnboarding && (initialAppId.Equals("onboarding", StringComparison.OrdinalIgnoreCase) ||
-                                              initialAppId.Equals("OnboardingApp", StringComparison.OrdinalIgnoreCase) ||
-                                              initialAppId.Equals("onboarding-app", StringComparison.OrdinalIgnoreCase)))
-                {
-                    initialAppId = settings.DefaultAppId ?? "dashboard";
-                }
+                if (!config.NeedsOnboarding && (targetAppId.Equals("onboarding", StringComparison.OrdinalIgnoreCase) ||
+                                                targetAppId.Equals("OnboardingApp",
+                                                    StringComparison.OrdinalIgnoreCase) ||
+                                                targetAppId.Equals("onboarding-app",
+                                                    StringComparison.OrdinalIgnoreCase)))
+                    targetAppId = settings.DefaultAppId;
 
                 var appArgs = args.GetArgs<object>();
-                OpenApp(new NavigateArgs(initialAppId, appArgs), replaceHistory: true);
+                OpenApp(new NavigateArgs(targetAppId, appArgs), true);
             }
             else
             {
-                client.Redirect("/", replaceHistory: true);
+                client.Redirect("/", true);
             }
         });
 
         // Auto-default: if there's exactly one visible app, select it and close sidebar
         var visibleApps = appRepository.GetMenuItems().FlattenWithPath().ToArray();
-        if (visibleApps.Length == 1 && visibleApps[0].Item.Tag is string singleAppId)
-        {
+        if (visibleApps is [{ Item.Tag: string singleAppId } _])
             settings = settings with
             {
                 DefaultAppId = settings.DefaultAppId ?? singleAppId,
                 SidebarOpen = false
             };
-        }
 
         void SetAppTitle(string appId)
         {
             var app = appRepository.GetAppOrDefault(appId);
-            if (app.Title is { } title)
-            {
-                client.SetTitle(title, serverArgs.Metadata.Title);
-            }
+            if (app.Title is { } title) client.SetTitle(title, serverArgs.Metadata.Title);
         }
 
-        bool IsErrorApp(string? appId) =>
-            appId != null && appRepository.GetAppOrDefault(appId).Id == AppIds.ErrorNotFound;
+        bool IsErrorApp(string? appId)
+        {
+            return appId != null && appRepository.GetAppOrDefault(appId).Id == AppIds.ErrorNotFound;
+        }
 
         void RedirectToAppIfNotError(NavigateArgs navigateArgs, bool replaceHistory = false, string? tabId = null)
         {
             if (IsErrorApp(navigateArgs.AppId)) return;
-            client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+            client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId);
         }
 
         void OpenApp(NavigateArgs navigateArgs, bool replaceHistory = false)
@@ -156,27 +146,20 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 if (settings.Navigation == AppShellNavigation.Pages)
                 {
                     var previousApp = currentApp.Value?.AppId;
+                    var effectiveNavigateArgs = navigateArgs.AppId == null
+                        ? navigateArgs with { AppId = settings.DefaultAppId }
+                        : navigateArgs;
 
-                    if (navigateArgs.AppId == null)
-                    {
-                        navigateArgs = navigateArgs with { AppId = settings.DefaultAppId };
-                    }
-
-                    var appHost = navigateArgs.AppId != null
-                        ? navigateArgs.ToAppHost(args.ConnectionId)
+                    var appHost = effectiveNavigateArgs.AppId != null
+                        ? effectiveNavigateArgs.ToAppHost(args.ConnectionId)
                         : null;
 
                     currentApp.Set(appHost);
 
-                    if (navigateArgs.AppId != null)
-                    {
-                        SetAppTitle(navigateArgs.AppId);
-                    }
+                    if (effectiveNavigateArgs.AppId != null) SetAppTitle(effectiveNavigateArgs.AppId);
 
-                    if (navigateArgs.HistoryOp is HistoryOp.Push && previousApp != navigateArgs.AppId)
-                    {
-                        RedirectToAppIfNotError(navigateArgs, replaceHistory);
-                    }
+                    if (effectiveNavigateArgs.HistoryOp is HistoryOp.Push && previousApp != effectiveNavigateArgs.AppId)
+                        RedirectToAppIfNotError(effectiveNavigateArgs, replaceHistory);
                 }
                 else
                 {
@@ -190,9 +173,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                             SetAppTitle(tab.AppId);
 
                             if (navigateArgs.HistoryOp is HistoryOp.Push)
-                            {
                                 RedirectToAppIfNotError(navigateArgs, replaceHistory, tab.Id);
-                            }
                             return;
                         }
 
@@ -203,41 +184,35 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                         }
                     }
 
-                    if (navigateArgs.AppId == null)
-                    {
-                        return;
-                    }
+                    if (navigateArgs.AppId == null) return;
 
                     var tabId = Guid.NewGuid().ToString();
                     var appHost = navigateArgs.ToAppHost(args.ConnectionId);
 
                     if (settings.PreventTabDuplicates)
                     {
-                        var appId = navigateArgs.AppId;
-                        var appDescriptor = appRepository.GetApp(appId);
+                        var targetAppId = navigateArgs.AppId;
+                        var appDescriptor = appRepository.GetApp(targetAppId);
                         if (appDescriptor?.AllowDuplicateTabs != true)
                         {
-                            int existingTabIndex = -1;
-                            for (int i = 0; i < tabs.Value.Length; i++)
-                            {
-                                if (tabs.Value[i].AppId == appId)
+                            var existingTabIndex = -1;
+                            for (var i = 0; i < tabs.Value.Length; i++)
+                                if (tabs.Value[i].AppId == targetAppId)
                                 {
                                     existingTabIndex = i;
                                     break;
                                 }
-                            }
 
                             if (existingTabIndex >= 0)
                             {
                                 var previousSelectedIndex = selectedIndex.Value;
                                 selectedIndex.Set(existingTabIndex);
-                                tabId = tabs.Value[existingTabIndex].Id;
-                                SetAppTitle(appId);
+                                var existingTabId = tabs.Value[existingTabIndex].Id;
+                                SetAppTitle(targetAppId);
 
-                                if (navigateArgs.HistoryOp is HistoryOp.Push && previousSelectedIndex != existingTabIndex)
-                                {
-                                    RedirectToAppIfNotError(navigateArgs, replaceHistory, tabId);
-                                }
+                                if (navigateArgs.HistoryOp is HistoryOp.Push &&
+                                    previousSelectedIndex != existingTabIndex)
+                                    RedirectToAppIfNotError(navigateArgs, replaceHistory, existingTabId);
                                 return;
                             }
                         }
@@ -246,7 +221,8 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                     if (navigateArgs.HistoryOp is HistoryOp.Push)
                     {
                         var app = appRepository!.GetAppOrDefault(navigateArgs.AppId);
-                        var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));
+                        var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon,
+                            Guid.NewGuid().ToString()));
                         tabs.Set(newTabs);
                         selectedIndex.Set(newTabs.Length - 1);
                         SetAppTitle(app.Id);
@@ -267,63 +243,45 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
 
         void OnMenuSelect(Event<SidebarMenu, object> @event)
         {
-            if (@event.Value is string appId)
-            {
-                OpenApp(new NavigateArgs(appId));
-            }
+            if (@event.Value is string appId) OpenApp(new NavigateArgs(appId));
         }
 
         ValueTask OnCtrlRightClickSelect(Event<SidebarMenu, object> @event)
         {
-            if (@event.Value is string appId)
-            {
-                client.OpenUrl(new NavigateArgs(appId, AppShell: false).GetUrl());
-            }
+            if (@event.Value is string appId) client.OpenUrl(new NavigateArgs(appId, AppShell: false).GetUrl());
             return ValueTask.CompletedTask;
         }
 
-        void OnTabSelect(Event<TabsLayout, int> @event)
+        void OnTabSelect(int tabIndex)
         {
-            if (!CheckTabExists(@event.Value))
-            {
-                return;
-            }
+            if (!CheckTabExists(tabIndex)) return;
 
-            if (selectedIndex.Value != @event.Value)
+            if (selectedIndex.Value != tabIndex)
             {
-                selectedIndex.Set(@event.Value);
-                var tab = tabs.Value[@event.Value];
+                selectedIndex.Set(tabIndex);
+                var tab = tabs.Value[tabIndex];
                 SetAppTitle(tab.AppId);
                 RedirectToAppIfNotError(new NavigateArgs(tab.AppId), tabId: tab.Id);
             }
         }
 
-        void OnTabClose(Event<TabsLayout, int> @event)
+        void OnTabClose(int closedIndex)
         {
-            if (!CheckTabExists(@event.Value))
-            {
-                return;
-            }
+            if (!CheckTabExists(closedIndex)) return;
 
-            var closedIndex = @event.Value;
             var wasSelected = selectedIndex.Value == closedIndex;
             var newTabs = tabs.Value.RemoveAt(closedIndex);
             int? newIndex = null;
             if (newTabs.Length > 0)
             {
                 if (wasSelected)
-                {
                     newIndex = Math.Min(closedIndex, newTabs.Length - 1);
-                }
                 else if (selectedIndex.Value > closedIndex)
-                {
                     newIndex = selectedIndex.Value - 1;
-                }
                 else
-                {
                     newIndex = selectedIndex.Value;
-                }
             }
+
             selectedIndex.Set(newIndex);
 
             if (wasSelected)
@@ -345,21 +303,18 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             tabs.Set(newTabs);
         }
 
-        void OnTabRefresh(Event<TabsLayout, int> @event)
+        void OnTabRefresh(int tabIndex)
         {
-            if (!CheckTabExists(@event.Value))
-            {
-                return;
-            }
+            if (!CheckTabExists(tabIndex)) return;
 
-            var tab = tabs.Value[@event.Value];
-            tabs.Set(tabs.Value.RemoveAt(@event.Value).Insert(@event.Value, tab with { RefreshToken = Guid.NewGuid().ToString() }));
-            selectedIndex.Set(@event.Value);
+            var tab = tabs.Value[tabIndex];
+            tabs.Set(tabs.Value.RemoveAt(tabIndex)
+                .Insert(tabIndex, tab with { RefreshToken = Guid.NewGuid().ToString() }));
+            selectedIndex.Set(tabIndex);
         }
 
-        void OnTabReorder(Event<TabsLayout, int[]> @event)
+        void OnTabReorder(int[] newOrder)
         {
-            var newOrder = @event.Value;
             var reorderedTabs = newOrder.Select(index => tabs.Value[index]).ToArray();
             tabs.Set([.. reorderedTabs]);
 
@@ -367,10 +322,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             {
                 var oldSelectedIndex = selectedIndex.Value.Value;
                 var newSelectedIndex = Array.IndexOf(newOrder, oldSelectedIndex);
-                if (newSelectedIndex >= 0)
-                {
-                    selectedIndex.Set(newSelectedIndex);
-                }
+                if (newSelectedIndex >= 0) selectedIndex.Set(newSelectedIndex);
             }
         }
 
@@ -386,15 +338,19 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             {
                 body = null;
                 if (settings.WallpaperAppId != null)
-                {
                     body = new AppHost(settings.WallpaperAppId, null, args.ConnectionId);
-                }
             }
             else
             {
-                body = new TabsLayout(OnTabSelect, OnTabClose, OnTabRefresh, OnTabReorder, selectedIndex.Value,
-                    tabs.Value.ToArray().Select(e => e.ToTab()).ToArray()
-                ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0);
+                body = Layout.Tabs(tabs.Value.ToArray().Select(e => e.ToTab()).ToArray())
+                    .OnSelect(OnTabSelect)
+                    .OnClose(OnTabClose)
+                    .OnRefresh(OnTabRefresh)
+                    .OnReorder(OnTabReorder)
+                    .SelectedIndex(selectedIndex.Value)
+                    .RemoveParentPadding()
+                    .Variant(TabsVariant.Tabs)
+                    .Padding(0);
             }
         }
 
@@ -403,11 +359,15 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             menuItems.Value
         )
         {
-            OnCtrlRightClickSelect = new(OnCtrlRightClickSelect)
+            OnCtrlRightClickSelect = new EventHandler<Event<SidebarMenu, object>>(OnCtrlRightClickSelect)
         };
 
         var commonMenuItems = new[]
         {
+            MenuItem.Default("Import Issues from GitHub")
+                .Tag("$import-issues")
+                .Icon(Icons.Download)
+                .OnSelect(() => importIssuesDialogOpen.Set(true)),
             MenuItem.Default("Setup")
                 .Tag("$setup")
                 .Icon(Icons.Construction)
@@ -416,34 +376,42 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 .Tag("$trash")
                 .Icon(Icons.Trash2)
                 .OnSelect(() => navigator.Navigate<TrashApp>()),
-            // MenuItem.Default("Tendril Feedback")
-            //     .Tag("$feedback")
-            //     .Icon(Icons.MessageSquare)
-            //     .OnSelect(() => feedbackOpen.Set(true)),
             MenuItem.Default("Theme")
                 .Tag("$theme")
                 .Icon(Icons.SunMoon)
                 .Children(
                     MenuItem.Checkbox("Light").Icon(Icons.Sun).OnSelect(() => client.SetThemeMode(ThemeMode.Light)),
                     MenuItem.Checkbox("Dark").Icon(Icons.Moon).OnSelect(() => client.SetThemeMode(ThemeMode.Dark)),
-                    MenuItem.Checkbox("System").Icon(Icons.SunMoon).OnSelect(() => client.SetThemeMode(ThemeMode.System))
-                )
+                    MenuItem.Checkbox("System").Icon(Icons.SunMoon)
+                        .OnSelect(() => client.SetThemeMode(ThemeMode.System))
+                ),
+            MenuItem.Default("Open config.yaml")
+                .Tag("$open-config")
+                .Icon(Icons.FileText)
+                .OnSelect(() => { config.OpenInEditor(config.ConfigPath); })
         };
 
         var authSession = auth?.GetAuthSession();
         var isLoggedIn = authSession != null;
 
-        var onLogout = new Action(async () =>
+        void OnLogout()
         {
+            _ = LogoutAsync();
+        }
+
+        async Task LogoutAsync()
+        {
+            if (auth == null) return;
+
             try
             {
-                if (auth == null) return;
                 await auth.LogoutAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.Error.WriteLine($"Logout failed: {ex}");
             }
-        });
+        }
 
         DropDownMenu? footer;
         if (user.Value != null)
@@ -451,14 +419,14 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             var trigger = new Button().Variant(ButtonVariant.Ghost)
                 .Content(
                     Layout.Horizontal().AlignContent(Align.Left).Width(Size.Full())
-                        | new Avatar(user.Value.Initials, user.Value.AvatarUrl)
-                        | (Layout.Vertical().Gap(1)
-                           | (user.Value.FullName != null
-                               ? Text.Muted(user.Value.FullName!).Overflow(Overflow.Ellipsis)
-                               : null!)
-                           | Text.Label(user.Value.Email).Overflow(Overflow.Ellipsis))
-                        .Grow()
-                        .Size(Size.Full().Min(0))
+                    | new Avatar(user.Value.Initials, user.Value.AvatarUrl)
+                    | (Layout.Vertical().Gap(1)
+                       | (user.Value.FullName != null
+                           ? Text.Muted(user.Value.FullName!).Overflow(Overflow.Ellipsis)
+                           : null!)
+                       | Text.Label(user.Value.Email).Overflow(Overflow.Ellipsis))
+                    .Grow()
+                    .Size(Size.Full().Min(0))
                 ).Width(Size.Full());
 
             footer = new DropDownMenu(
@@ -467,7 +435,7 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 .Top();
 
             footer = footer.Items(settings.FooterMenuItemsTransformer([
-                ..commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).OnSelect(onLogout)
+                ..commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).OnSelect(OnLogout)
             ], navigator));
         }
         else
@@ -475,13 +443,13 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
             var trigger = new Button("Settings")
                 .Content(
                     Layout.Horizontal().AlignContent(Align.Left)
-                        | Icons.Settings.ToIcon()
-                        | Text.P("Settings").Small().Muted()
-                    )
-                    .Variant(ButtonVariant.Ghost).Width(Size.Full());
+                    | Icons.Settings.ToIcon()
+                    | Text.P("Settings").Small().Muted()
+                )
+                .Variant(ButtonVariant.Ghost).Width(Size.Full());
 
             var footerMenuItems = isLoggedIn
-                ? [.. commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).OnSelect(onLogout)]
+                ? [.. commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).OnSelect(OnLogout)]
                 : commonMenuItems;
 
             footer = new DropDownMenu(
@@ -493,18 +461,18 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                 );
         }
 
-        if (config.NeedsOnboarding)
-        {
-            return new OnboardingApp();
-        }
+        if (config.ParseError != null)
+            return new ConfigErrorApp(config);
+
+        if (config.NeedsOnboarding) return new OnboardingApp();
 
         return new Fragment(
             new SidebarLayout(
                 body ?? null!,
                 sidebarMenu,
                 Layout.Vertical().Gap(2)
-                    | settings.Header
-                    | new NewPlanButton()
+                | settings.Header
+                | new NewPlanButton()
                 ,
                 Layout.Vertical(
                     new SidebarNews("https://ivy.app/news.json"),
@@ -512,43 +480,16 @@ public class TendrilAppShell(AppShellSettings settings) : ViewBase
                     footer
                 ),
                 settings.Width
-            ).Open(sidebarOpen.Value).MainAppSidebar(true),
-            ScreenshotFeedbackExtensions.OnCancel(
-                ScreenshotFeedbackExtensions.OnSave(
-                    new ScreenshotFeedback()
-                        .UploadUrl(feedbackUploadCtx.Value.UploadUrl)
-                        .Open(feedbackOpen.Value),
-                    data =>
-                    {
-                        feedbackOpen.Set(false);
-
-                        if (feedbackScreenshot.Value?.Content != null)
-                        {
-                            var tempPath = Path.Combine(Path.GetTempPath(), $"tendril-feedback-{DateTime.UtcNow:yyyyMMdd-HHmmss}.png");
-                            File.WriteAllBytes(tempPath, feedbackScreenshot.Value.Content);
-
-                            var texts = data.Shapes
-                                .Select(s => s switch
-                                {
-                                    CalloutAnnotation c => $"[{c.Number}] {c.Text}",
-                                    TextAnnotation t => t.Text,
-                                    _ => null
-                                })
-                                .Where(t => !string.IsNullOrWhiteSpace(t))
-                                .ToList();
-
-                            var description = string.Join("\n", texts);
-                            if (string.IsNullOrWhiteSpace(description))
-                                description = "Visual feedback";
-
-                            description = $"Screenshot feedback:\n\n{description}\n\nScreenshot: {tempPath}";
-
-                            jobService.StartJob("MakePlan", "-Description", description, "-Project", "Tendril");
-                        }
-
-                        feedbackScreenshot.Set(null);
-                    }),
-                () => feedbackOpen.Set(false))
+            ).Open(sidebarOpen.Value).MainAppSidebar(),
+            new ImportIssuesDialog(importIssuesDialogOpen, config)
         );
+    }
+
+    private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)
+    {
+        public Tab ToTab()
+        {
+            return new Tab(Title, AppHost).Icon(Icon).Key(StringHelper.GetShortHash(Id + RefreshToken));
+        }
     }
 }

@@ -111,8 +111,8 @@ public class UrlValidationTests
     [Fact]
     public void ValidateRedirectUrl_SameOriginDifferentPort_ReturnsNull()
     {
-        var url = "http://localhost:5001";
-        var currentOrigin = "http://localhost:5000";
+        var url = "https://localhost:5001";
+        var currentOrigin = "https://localhost:5000";
 
         var result = ValidationHelper.ValidateRedirectUrl(url, allowExternal: false, currentOrigin);
 
@@ -466,4 +466,3 @@ public class UrlValidationTests
 
     #endregion
 }
-

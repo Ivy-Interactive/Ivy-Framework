@@ -8,7 +8,7 @@ import { useEventHandler } from "@/components/event-handler";
 import { inputStyles } from "@/lib/styles";
 import { cn } from "@/lib/utils";
 import { Checkbox, NullableBoolean } from "@/components/ui/checkbox";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import withTooltip from "@/hoc/withTooltip";
 import { Loader2 } from "lucide-react";
 import { Densities } from "@/types/density";
 import {
@@ -87,20 +87,11 @@ const InputLabel: React.FC<{
   );
 });
 
-const withTooltip = (content: React.ReactNode, invalid?: string) => {
-  if (!invalid) return content;
-
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>{content}</TooltipTrigger>
-        <TooltipContent className="bg-popover text-popover-foreground shadow-md">
-          {invalid}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-};
+const DivWithTooltip = withTooltip(
+  React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>((props, ref) => (
+    <div {...props} ref={ref} />
+  )),
+);
 
 const LoadingOverlay: React.FC<{
   density?: Densities;
@@ -160,9 +151,12 @@ const VariantComponents = {
           onClick={(e) => e.stopPropagation()}
           role="presentation"
         >
-          <div className={cn(description && "mt-1.5", "flex shrink-0")}>
-            {withTooltip(checkboxElement, invalid)}
-          </div>
+          <DivWithTooltip
+            tooltipText={invalid}
+            className={cn(description && "mt-1.5", "flex shrink-0")}
+          >
+            {checkboxElement}
+          </DivWithTooltip>
           <InputLabel id={id} label={label} description={description} />
         </div>
       );
@@ -212,9 +206,12 @@ const VariantComponents = {
           onClick={(e) => e.stopPropagation()}
           role="presentation"
         >
-          <div className={cn(description && "mt-1.5", "flex shrink-0")}>
-            {withTooltip(switchElement, invalid)}
-          </div>
+          <DivWithTooltip
+            tooltipText={invalid}
+            className={cn(description && "mt-1.5", "flex shrink-0")}
+          >
+            {switchElement}
+          </DivWithTooltip>
           <InputLabel id={id} label={label} description={description} />
         </div>
       );
@@ -266,9 +263,12 @@ const VariantComponents = {
           onClick={(e) => e.stopPropagation()}
           role="presentation"
         >
-          <div className={cn(description && "mt-1.5", "flex shrink-0")}>
-            {withTooltip(toggleElement, invalid)}
-          </div>
+          <DivWithTooltip
+            tooltipText={invalid}
+            className={cn(description && "mt-1.5", "flex shrink-0")}
+          >
+            {toggleElement}
+          </DivWithTooltip>
           <InputLabel id={id} label={label} description={description} />
         </div>
       );

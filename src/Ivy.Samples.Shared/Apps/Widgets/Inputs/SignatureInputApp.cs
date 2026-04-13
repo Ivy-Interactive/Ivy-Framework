@@ -8,15 +8,12 @@ public class SignatureInputApp : SampleBase
     {
         return Layout.Vertical()
                | Text.H1("Signature Input")
-               | Text.H2("Basic Signature")
-               | new SignatureInputBasic()
-               | Text.H2("Custom Styling")
-               | new SignatureInputStyling()
-               | Text.H2("States")
-               | new SignatureInputStates()
-               | Text.H2("Events")
-               | new SignatureInputEvents()
-            ;
+               | Layout.Tabs(
+                   new Tab("Basic", new SignatureInputBasic()),
+                   new Tab("Custom Styling", new SignatureInputStyling()),
+                   new Tab("States", new SignatureInputStates()),
+                   new Tab("Events", new SignatureInputEvents())
+               ).Variant(TabsVariant.Content);
     }
 }
 

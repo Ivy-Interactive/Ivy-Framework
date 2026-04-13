@@ -233,7 +233,6 @@ export function createLabelsCell(
   cellValue: unknown,
   align?: Align,
   color?: string | null,
-  customColor?: string | null,
   badgeColorMapping?: Record<string, string> | null,
 ): GridCell {
   // Handle different input formats
@@ -272,7 +271,7 @@ export function createLabelsCell(
   // Per-label colors require a custom renderer: Bubble cells share one theme for all bubbles.
   if (badgeColorMapping && labels.length > 1) {
     const items = labels.map((label) => {
-      const raw = lookupBadgeColorMapping(badgeColorMapping, label) ?? customColor ?? color ?? null;
+      const raw = lookupBadgeColorMapping(badgeColorMapping, label) ?? color ?? null;
       const { bg, text } = resolveBadgeColor(raw);
       return { text: label, bg, fg: text };
     });
@@ -292,7 +291,7 @@ export function createLabelsCell(
   }
 
   // Resolve effective color from mapping if possible
-  let effectiveColor = customColor || color;
+  let effectiveColor = color;
   if (!effectiveColor && badgeColorMapping && labels.length > 0) {
     for (const label of labels) {
       const mapped = lookupBadgeColorMapping(badgeColorMapping, label);
@@ -306,7 +305,10 @@ export function createLabelsCell(
   const themeOverride: Partial<Theme> = {};
   if (effectiveColor) {
     const { bg, text } = resolveBadgeColor(effectiveColor);
-    if (bg) themeOverride.bgBubble = bg;
+    if (bg) {
+      themeOverride.bgBubble = bg;
+      themeOverride.bgBubbleSelected = bg;
+    }
     if (text) themeOverride.textBubble = text;
   }
 
@@ -337,7 +339,7 @@ export function createLinkCell(
     copyData: url,
     allowOverlay: false,
     readonly: true,
-    cursor: "pointer",
+    cursor: "default",
   };
 }
 
@@ -397,13 +399,7 @@ export function getCellContent(
 
   // Handle Labels type - supports arrays or comma-separated strings
   if (column.type === "Labels") {
-    return createLabelsCell(
-      cellValue,
-      align,
-      column.color,
-      column.customColor,
-      column.badgeColorMapping,
-    );
+    return createLabelsCell(cellValue, align, column.color, column.badgeColorMapping);
   }
 
   // Handle explicit link type from backend metadata

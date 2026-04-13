@@ -1,5 +1,6 @@
-import React, { useMemo, useRef } from "react";
-import { CustomRenderer, DataEditorRef } from "@glideapps/glide-data-grid";
+import React, { useCallback, useMemo, useRef } from "react";
+import { CustomRenderer, DataEditorRef, GridMouseEventArgs } from "@glideapps/glide-data-grid";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTable } from "../dataTableContext";
 import { getSelectionProps } from "../utils/selectionModes";
 import {
@@ -18,12 +19,13 @@ import {
   useRowHover,
   useEmptyRows,
   useDataLoading,
+  useLinkCellHover,
 } from "../hooks";
 import { useFooterColumnLayout } from "../hooks/useFooterColumnLayout";
 import { GridContainer } from "../components/GridContainer";
 import { AggregateFooter } from "../DataTableFooter";
 import { MenuItem } from "@/types/widgets";
-import { ROW_HEIGHT, GROUP_HEADER_HEIGHT } from "./constants";
+import { DENSITY_CONFIG } from "./constants";
 import { useCellContent, useGridColumns, useHeaderMenu } from "./hooks";
 import { getOrderedVisibleDataColumns } from "../utils/columnHelpers";
 
@@ -51,6 +53,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     editable,
     config,
     columnOrder,
+    density,
     getRowData,
     arrowTableRef,
     loadMoreData,
@@ -58,6 +61,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     handleSort,
     handleColumnReorder,
   } = useTable();
+
+  const densityConfig = DENSITY_CONFIG[density];
 
   const {
     allowColumnReordering,
@@ -108,6 +113,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     visibleRows,
     enableCellClickEvents: enableCellClickEvents ?? false,
     getCellContent,
+    arrowTableRef,
   });
 
   // Row hover and actions
@@ -121,12 +127,33 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       arrowTableRef,
     });
 
+  // Link cell hover tooltip
+  const {
+    isLinkHovered,
+    virtualRef,
+    onItemHovered: onLinkCellHovered,
+    linkTooltipPos,
+  } = useLinkCellHover({
+    getCellContent,
+    visibleRows,
+  });
+
+  // Compose onItemHovered: always call link hover, additionally call row hover when enabled
+  const handleItemHovered = useCallback(
+    (args: GridMouseEventArgs) => {
+      onLinkCellHovered(args);
+      onItemHovered(args);
+    },
+    [onLinkCellHovered, onItemHovered],
+  );
+
   // Table theme
   const { tableTheme, getRowThemeOverride, isDark } = useTableTheme({
     showVerticalBorders: showVerticalBorders ?? false,
     enableRowHover: enableRowHover ?? false,
     visibleRows,
     hoverRow,
+    density,
   });
 
   const { onSearchResultsChanged, onSearchClose, highlightRegions } = useSearchNavigation(
@@ -143,7 +170,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     visibleRows,
     hasMore,
     showGroups: showGroups ?? false,
-    rowHeight: ROW_HEIGHT,
+    rowHeight: densityConfig.rowHeight,
   });
 
   // Data loading
@@ -153,7 +180,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     isLoading,
     hasMore,
     loadMoreData,
-    rowHeight: ROW_HEIGHT,
+    rowHeight: densityConfig.rowHeight,
   });
 
   // Generate header icons map for all column icons
@@ -179,7 +206,6 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     columns,
     columnOrder,
     columnWidths,
-    containerWidth,
     showGroups: showGroups ?? false,
     showColumnTypeIcons: showColumnTypeIcons ?? true,
   });
@@ -218,58 +244,86 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     footer
   );
 
+  const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+  const tooltipLabel = isMac ? "\u2318+click to open link" : "Ctrl+click to open link";
+
+  const linkTooltipNode = (
+    <TooltipProvider
+      key={linkTooltipPos ? `${linkTooltipPos.x},${linkTooltipPos.y}` : "hidden"}
+      delayDuration={0}
+    >
+      <Tooltip open={isLinkHovered}>
+        <TooltipTrigger asChild>
+          <div
+            ref={(node) => {
+              if (node) {
+                node.getBoundingClientRect = virtualRef.getBoundingClientRect;
+              }
+            }}
+            style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
+          />
+        </TooltipTrigger>
+        <TooltipContent side="top" className="pointer-events-none">
+          {tooltipLabel}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+
   return (
-    <GridContainer
-      gridRef={gridRef}
-      containerRef={containerRef}
-      hasOptions={hasOptions}
-      columns={finalColumns}
-      rows={totalRows}
-      getCellContent={getCellContent}
-      customRenderers={
-        [
-          iconCellRenderer,
-          linkCellRenderer,
-          labelsBadgesCellRenderer,
-        ] as unknown as readonly CustomRenderer[]
-      }
-      headerIcons={headerIcons}
-      onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
-      onVisibleRegionChanged={handleVisibleRegionChanged}
-      onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}
-      theme={tableTheme}
-      rowHeight={ROW_HEIGHT}
-      headerHeight={ROW_HEIGHT}
-      freezeColumns={freezeColumns ?? 0}
-      getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
-      rowSelect={selectionProps.rowSelect}
-      columnSelect={selectionProps.columnSelect}
-      rangeSelect={selectionProps.rangeSelect}
-      gridSelection={gridSelection}
-      onGridSelectionChange={handleGridSelectionChange}
-      width={containerWidth}
-      height={
-        containerHeight > 0 ? containerHeight : containerRef.current?.clientHeight || undefined
-      }
-      rowMarkers={showIndexColumn ? "number" : "none"}
-      onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
-      groupHeaderHeight={showGroups ? GROUP_HEADER_HEIGHT : undefined}
-      onCellClicked={handleCellClicked}
-      onCellActivated={handleCellActivated}
-      onGroupHeaderClicked={shouldUseColumnGroups ? onGroupHeaderClicked : undefined}
-      showSearch={showSearchConfig ? showSearch : false}
-      onSearchClose={onSearchClose}
-      onSearchResultsChanged={showSearchConfig ? onSearchResultsChanged : undefined}
-      highlightRegions={showSearchConfig ? highlightRegions : undefined}
-      onItemHovered={enableRowHover ? onItemHovered : undefined}
-      getRowThemeOverride={enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined}
-      rowActions={rowActions}
-      actionButtonsTop={actionButtonsTop}
-      actionButtonsHeight={actionButtonsHeight}
-      hoverRow={hoverRow}
-      onRowActionClick={handleRowActionClick}
-      footer={footerNode}
-      hasEmptyRows={emptyRowsCount > 0}
-    />
+    <>
+      <GridContainer
+        gridRef={gridRef}
+        containerRef={containerRef}
+        hasOptions={hasOptions}
+        columns={finalColumns}
+        rows={totalRows}
+        getCellContent={getCellContent}
+        customRenderers={
+          [
+            iconCellRenderer,
+            linkCellRenderer,
+            labelsBadgesCellRenderer,
+          ] as unknown as readonly CustomRenderer[]
+        }
+        headerIcons={headerIcons}
+        onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
+        onVisibleRegionChanged={handleVisibleRegionChanged}
+        onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}
+        theme={tableTheme}
+        rowHeight={densityConfig.rowHeight}
+        headerHeight={densityConfig.rowHeight}
+        freezeColumns={freezeColumns ?? 0}
+        getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
+        rowSelect={selectionProps.rowSelect}
+        columnSelect={selectionProps.columnSelect}
+        rangeSelect={selectionProps.rangeSelect}
+        gridSelection={gridSelection}
+        onGridSelectionChange={handleGridSelectionChange}
+        height={
+          containerHeight > 0 ? containerHeight : containerRef.current?.clientHeight || undefined
+        }
+        rowMarkers={showIndexColumn ? "number" : "none"}
+        onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
+        groupHeaderHeight={showGroups ? densityConfig.groupHeaderHeight : undefined}
+        onCellClicked={handleCellClicked}
+        onCellActivated={handleCellActivated}
+        onGroupHeaderClicked={shouldUseColumnGroups ? onGroupHeaderClicked : undefined}
+        showSearch={showSearchConfig ? showSearch : false}
+        onSearchClose={onSearchClose}
+        onSearchResultsChanged={showSearchConfig ? onSearchResultsChanged : undefined}
+        highlightRegions={showSearchConfig ? highlightRegions : undefined}
+        onItemHovered={handleItemHovered}
+        getRowThemeOverride={enableRowHover || emptyRowsCount > 0 ? getRowThemeOverride : undefined}
+        rowActions={rowActions}
+        actionButtonsTop={actionButtonsTop}
+        actionButtonsHeight={actionButtonsHeight}
+        hoverRow={hoverRow}
+        onRowActionClick={handleRowActionClick}
+        footer={footerNode}
+        hasEmptyRows={emptyRowsCount > 0}
+      />
+      {linkTooltipNode}
+    </>
   );
 };

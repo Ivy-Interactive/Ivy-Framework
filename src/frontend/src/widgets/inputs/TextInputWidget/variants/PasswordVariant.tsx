@@ -87,10 +87,13 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
 
   return (
     <div className="relative w-full select-none" style={styles} ref={containerRef}>
-      <div className={cn(
+      <div
+        className={cn(
           "rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
-          ghost && "border-transparent shadow-none bg-transparent hover:bg-accent dark:border-transparent dark:bg-transparent dark:hover:bg-accent"
-        )}>
+          ghost &&
+            "border-transparent shadow-none bg-transparent hover:bg-accent dark:border-transparent dark:bg-transparent dark:hover:bg-accent",
+        )}
+      >
         <Input
           ref={elementRef}
           id={props.id}
@@ -101,7 +104,6 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           maxLength={props.maxLength}
           minLength={props.minLength}
           pattern={props.pattern}
-          autoFocus={props.autoFocus}
           onChange={handleChange}
           onBlur={onBlur}
           onFocus={onFocus}

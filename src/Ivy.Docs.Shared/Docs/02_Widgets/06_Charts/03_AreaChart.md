@@ -77,7 +77,8 @@ public class Covid19Demo : ViewBase
         };
 
         return new Card().Title("COVID-19 cases")
-            | data.ToAreaChart()
+            | data.ToAreaChart(
+                    polish: a => a.ReferenceLine(6, null, null))
                 .Dimension("Month", e => e.Month)
                 .Measure("Cases", e => e.Sum(f => f.Cases))
                 .Measure("Deaths", e => e.Sum(f => f.Deaths))
@@ -141,7 +142,8 @@ public class ImmigrationToEurope : ViewBase
                     .Area(new Area("Americas")
                         .LegendType(LegendTypes.Square)
                         .Fill(Colors.Rose)
-                        .FillOpacity(0.55))   
+                        .FillOpacity(0.55))
+                    .ReferenceLine(null, 35000, null)
                     .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
                     .Tooltip()
                     .Legend()
@@ -186,15 +188,14 @@ public class PolishAreaChartDemo : ViewBase
             | data.ToAreaChart(
                 polish: chart =>
                 {
-                    // Replace the scaffolded areas with custom styling
-                    return chart with
+                    return (chart with
                     {
                         Areas =
                         [
                             new Area("Desktop", 1).Fill(Colors.Blue).FillOpacity(0.6),
                             new Area("Mobile", 1).Fill(Colors.Orange).FillOpacity(0.4)
                         ]
-                    };
+                    }).ReferenceLine(2, null, null);
                 }
             )
             .Dimension("Month", e => e.Month)

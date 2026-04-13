@@ -36,11 +36,11 @@ export interface DataColumn {
   alignContent?: Align;
   order?: number;
   icon?: string | null;
+  originalWidth?: string; // Original Size string from backend, preserved for grow calculation
   help?: string | null;
   footer?: string[] | null;
   iconSet?: "lucide" | "custom";
   color?: string | null;
-  customColor?: string | null;
   badgeColorMapping?: Record<string, string> | null;
 }
 

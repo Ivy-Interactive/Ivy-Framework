@@ -27,6 +27,7 @@ public class DataTableBuilder<TModel>(
     private FuncViewBuilder? _headerLeftFactory;
     private FuncViewBuilder? _headerRightFactory;
     private Dictionary<string, object>? _footerValuesByColumn;
+    private Density _density = Ivy.Density.Medium;
 
     private readonly string? _idColumnName =
         idSelector != null ? TypeHelper.GetNameFromMemberExpression(idSelector.Body) : null;
@@ -329,7 +330,6 @@ public class DataTableBuilder<TModel>(
         if (renderer is LabelsDisplayRenderer labelsRenderer)
         {
             column.Column.Color = labelsRenderer.Color;
-            column.Column.CustomColor = labelsRenderer.CustomColor;
             column.Column.BadgeColorMapping = labelsRenderer.BadgeColorMapping;
         }
 
@@ -341,14 +341,6 @@ public class DataTableBuilder<TModel>(
         var column = GetColumn(field);
         column.Column.ColType = ColType.Labels;
         column.Column.Color = color;
-        return this;
-    }
-
-    public DataTableBuilder<TModel> Badges(Expression<Func<TModel, object>> field, string customColor)
-    {
-        var column = GetColumn(field);
-        column.Column.ColType = ColType.Labels;
-        column.Column.CustomColor = customColor;
         return this;
     }
 
@@ -476,6 +468,30 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
+    public DataTableBuilder<TModel> Density(Ivy.Density density)
+    {
+        _density = density;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Small()
+    {
+        _density = Ivy.Density.Small;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Medium()
+    {
+        _density = Ivy.Density.Medium;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Large()
+    {
+        _density = Ivy.Density.Large;
+        return this;
+    }
+
     public override object? Build()
     {
         Context.TryUseService<IChatClient>(out var chatClient);
@@ -540,6 +556,7 @@ public class DataTableBuilder<TModel>(
             _height,
             columns,
             configuration,
+            density: _density,
             onCellClick: onCellClick,
             onCellActivated: _onCellActivated,
             rowActions: _menuItemRowActions,

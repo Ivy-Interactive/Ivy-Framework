@@ -1,49 +1,29 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
+file static class CameraInputHelpers
+{
+    internal static readonly UploadDelegate NoOpUploadHandler =
+        (fileUpload, stream, cancellationToken) => Task.CompletedTask;
+
+    internal const string DefaultImageContentType = "image/png";
+}
+
 [App(icon: Icons.Camera, group: ["Widgets", "Inputs"], searchHints: ["camera", "webcam", "photo", "capture", "snapshot", "picture"])]
 
 public class CameraInputApp() : SampleBase
 {
     protected override object? BuildSample()
     {
-        var dummyUpload = UseUpload(
-            (fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask,
-            defaultContentType: "image/png"
-        );
-
         return Layout.Vertical()
                | Text.H1("Camera Input")
-               | Text.P("Demonstrates the CameraInput widget for capturing photos from the user's webcam/camera.")
-               | Text.H2("Examples")
-               | (Layout.Horizontal()
-                    | new Card(new CameraInputBasic()).Title("Basic")
-                    | new Card(new CameraInputEvents()).Title("OnFocus / OnBlur")
-                    | new Card(new CameraInputDisabledState()).Title("Disabled State"))
-               | Text.H2("Validation")
-               | new CameraInput(dummyUpload.Value, "Take a photo")
-                   .Invalid("Camera input is invalid")
-               | Text.H2("Sizes")
-               | CreateSizesSection(dummyUpload.Value);
-    }
-
-    private object CreateSizesSection(UploadContext upload)
-    {
-        return Layout.Grid().Columns(4)
-               | Text.Monospaced("Description")
-               | Text.Monospaced("Small")
-               | Text.Monospaced("Medium")
-               | Text.Monospaced("Large")
-
-               | Text.Monospaced("Camera Input")
-               | new CameraInput(upload, "Take a photo").Small()
-               | new CameraInput(upload, "Take a photo")
-               | new CameraInput(upload, "Take a photo").Large()
-
-               | Text.Monospaced("Disabled State")
-               | new CameraInput(upload, "Take a photo", disabled: true).Small()
-               | new CameraInput(upload, "Take a photo", disabled: true)
-               | new CameraInput(upload, "Take a photo", disabled: true).Large();
+               | Layout.Tabs(
+                   new Tab("Examples", new CameraInputBasic()),
+                   new Tab("States", new CameraInputStates()),
+                   new Tab("Validation", new CameraInputValidation()),
+                   new Tab("Sizes", new CameraInputSizes()),
+                   new Tab("Events", new CameraInputEvents())
+               ).Variant(TabsVariant.Content);
     }
 }
 
@@ -76,18 +56,68 @@ public class CameraInputBasic : ViewBase
     }
 }
 
-public class CameraInputDisabledState : ViewBase
+public class CameraInputStates : ViewBase
 {
     public override object? Build()
     {
         var dummyUpload = UseUpload(
-            (fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask,
-            defaultContentType: "image/png"
+            CameraInputHelpers.NoOpUploadHandler,
+            defaultContentType: CameraInputHelpers.DefaultImageContentType
         );
 
-        return Layout.Vertical()
-               | Text.P("Demonstrates the CameraInput widget in a disabled state. The camera cannot be activated.")
-               | new CameraInput(dummyUpload.Value, "Take a photo", disabled: true);
+        return Layout.Grid().Columns(4)
+               | Text.Monospaced("Description")
+               | Text.Monospaced("Default")
+               | Text.Monospaced("Disabled")
+               | Text.Monospaced("Invalid")
+
+               | Text.Monospaced("Camera Input")
+               | new CameraInput(dummyUpload.Value, "Take a photo")
+               | new CameraInput(dummyUpload.Value, "Take a photo", disabled: true)
+               | new CameraInput(dummyUpload.Value, "Take a photo").Invalid("Camera input is required");
+    }
+}
+
+public class CameraInputValidation : ViewBase
+{
+    public override object? Build()
+    {
+        var dummyUpload = UseUpload(
+            CameraInputHelpers.NoOpUploadHandler,
+            defaultContentType: CameraInputHelpers.DefaultImageContentType
+        );
+
+        return Layout.Vertical().Gap(4)
+               | Text.P("Demonstrates CameraInput with validation error state.")
+               | new CameraInput(dummyUpload.Value, "Take a photo")
+                   .Invalid("Camera input is invalid");
+    }
+}
+
+public class CameraInputSizes : ViewBase
+{
+    public override object? Build()
+    {
+        var dummyUpload = UseUpload(
+            CameraInputHelpers.NoOpUploadHandler,
+            defaultContentType: CameraInputHelpers.DefaultImageContentType
+        );
+
+        return Layout.Grid().Columns(4)
+               | Text.Monospaced("Description")
+               | Text.Monospaced("Small")
+               | Text.Monospaced("Medium")
+               | Text.Monospaced("Large")
+
+               | Text.Monospaced("Camera Input")
+               | new CameraInput(dummyUpload.Value, "Take a photo").Small()
+               | new CameraInput(dummyUpload.Value, "Take a photo")
+               | new CameraInput(dummyUpload.Value, "Take a photo").Large()
+
+               | Text.Monospaced("Disabled State")
+               | new CameraInput(dummyUpload.Value, "Take a photo", disabled: true).Small()
+               | new CameraInput(dummyUpload.Value, "Take a photo", disabled: true)
+               | new CameraInput(dummyUpload.Value, "Take a photo", disabled: true).Large();
     }
 }
 
@@ -97,11 +127,20 @@ public class CameraInputEvents : ViewBase
     {
         var focused = UseState(false);
         var lastEvent = UseState<string?>(() => null);
+        var photo = UseState<FileUpload<byte[]>?>();
 
-        var dummyUpload = UseUpload(
-            (fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask,
+        var upload = UseUpload(
+            MemoryStreamUploadHandler.Create(photo),
             defaultContentType: "image/png"
         );
+
+        UseEffect(() =>
+        {
+            if (photo.Value?.Status == FileUploadStatus.Finished)
+            {
+                lastEvent.Set("Captured");
+            }
+        }, photo);
 
         void onFocus()
         {
@@ -116,12 +155,12 @@ public class CameraInputEvents : ViewBase
         }
 
         return Layout.Vertical()
-               | Text.P("Focus the camera input (Tab / click), then blur it to trigger events.")
-               | new CameraInput(dummyUpload.Value, "Take a photo")
+               | Text.P("Focus, blur, and capture the camera input to trigger events.")
+               | new CameraInput(upload.Value, "Take a photo")
                    .OnFocus(onFocus)
                    .OnBlur(onBlur)
                | Text.P($"Focused: {focused.Value}").Small()
-               | Text.P($"Last event: {lastEvent.Value ?? "—"}").Small();
+               | Text.P($"Last event: {lastEvent.Value ?? "—"}").Small()
+               | Text.P($"Captured: {(photo.Value != null ? photo.Value.FileName : "—")}").Small();
     }
 }
-

@@ -25,7 +25,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
     {
     }
 
-    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
+    public async Task<LoginResult> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
     {
         var request = new ResourceOwnerTokenRequest
         {
@@ -39,7 +39,7 @@ public class Auth0AuthProvider : Auth0AuthTokenHandler, IAuthProvider
         };
 
         var response = await AuthClient.GetTokenAsync(request, cancellationToken);
-        return new AuthToken(response.AccessToken, response.RefreshToken);
+        return LoginResult.Success(new AuthToken(response.AccessToken, response.RefreshToken));
     }
 
     public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)

@@ -12,7 +12,6 @@ using Ivy.Core.Server.Middleware;
 using Ivy.Core.Server.Formatters;
 using MessagePack;
 using MessagePack.Resolvers;
-using MessagePack.Formatters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
@@ -119,7 +118,7 @@ public class Server
 
         if (_args.BasePath == null && Environment.GetEnvironmentVariable("BASE_PATH") is { } basePath)
         {
-            _args = _args with { BasePath = basePath };
+            _args = _args with { BasePath = "/" + basePath.TrimStart('/') };
         }
 
         _args = _args with
@@ -507,6 +506,254 @@ public class Server
 
     internal ManifestOptions? GetManifestOptions() => _manifestOptions;
 
+    internal WebApplication? BuildWebApplication(CancellationTokenSource? cts = null)
+    {
+        var sessionStore = new AppSessionStore();
+        return BuildWebApplication(sessionStore, cts);
+    }
+
+    internal WebApplication? BuildWebApplication(AppSessionStore sessionStore, CancellationTokenSource? cts = null)
+    {
+        if (!string.IsNullOrEmpty(_args.DefaultAppId))
+        {
+            DefaultAppId = _args.DefaultAppId;
+        }
+
+        // Initialize external widget registry by scanning loaded assemblies
+        ExternalWidgetRegistry.Instance.Initialize();
+
+        // Register navigation beacons from all loaded assemblies
+        var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => !a.IsDynamic && a.GetLoadableTypes().Any());
+        foreach (var assembly in loadedAssemblies)
+        {
+            try
+            {
+                AppHelpers.RegisterBeacons(assembly, NavigationBeaconRegistry);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[WARNING] Failed to register beacons from {assembly.GetName().Name}: {ex.Message}");
+            }
+        }
+
+        // Ensure sufficient ThreadPool workers to avoid heartbeat warnings under bursty loads
+        try
+        {
+            ThreadPool.GetMinThreads(out var workerMin, out var ioMin);
+            var target = Math.Max(workerMin, Environment.ProcessorCount * 16);
+            var targetIo = Math.Max(ioMin, Environment.ProcessorCount * 16);
+            ThreadPool.SetMinThreads(target, targetIo);
+        }
+        catch { /* best-effort */ }
+
+        var builder = WebApplication.CreateBuilder();
+
+        builder.Configuration.AddConfiguration(Configuration);
+
+        foreach (var mod in _builderMods)
+        {
+            mod(builder);
+        }
+
+        // CLI-only commands need DI but never call app.StartAsync(),
+        // so use port 0 to avoid conflicts with a running instance.
+        // Bind to localhost for local dev (avoids Windows Firewall prompt),
+        // but use wildcard in containers so health probes can reach the app.
+        // On Sliplane or other hosted environments, we usually have PORT set and need to listen on 0.0.0.0.
+        var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+        var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
+        var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
+
+        if (_args.IsCliCommand)
+        {
+            builder.WebHost.UseUrls("http://localhost:0");
+        }
+        else
+        {
+            var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
+            var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
+                ? ivyTlsEnv?.ToLowerInvariant() is "1" or "true" or "yes" or "on"
+                : !isContainer && !hasPortEnv && !_args.IsCliCommand; // default: TLS for local dev only
+            var scheme = useTls ? "https" : "http";
+            builder.WebHost.UseUrls($"{scheme}://{host}:{_args.Port}");
+        }
+
+        builder.Services.AddSignalR(options =>
+        {
+            options.EnableDetailedErrors = _args.Verbose;
+            options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
+            options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+            options.MaximumReceiveMessageSize = 1048576; // 1MB
+        }).AddJsonProtocol(options =>
+        {
+            options.PayloadSerializerOptions.TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver();
+        }).AddMessagePackProtocol(options =>
+        {
+            options.SerializerOptions = MessagePackSerializerOptions.Standard.WithResolver(
+                CompositeResolver.Create(
+                    [
+                        new JsonNodeMessagePackFormatter(),
+                        new JsonObjectMessagePackFormatter(),
+                        new JsonArrayMessagePackFormatter(),
+                        new JsonValueMessagePackFormatter()
+                    ],
+                    [
+                        JsonNodeResolver.Instance,
+                        ContractlessStandardResolver.Instance
+                    ]
+                )
+            );
+        });
+        builder.Services.AddSingleton(this);
+        builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
+        builder.Services.AddControllers()
+            .AddApplicationPart(Assembly.Load("Ivy"))
+            .AddControllersAsServices();
+        builder.Services.AddGrpc();
+        builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();
+        builder.Services.AddSingleton(_contentBuilder ?? new DefaultContentBuilder());
+        builder.Services.AddSingleton(sessionStore);
+        builder.Services.AddSingleton<IOAuthCallbackRegistry, OAuthCallbackRegistry>();
+        builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+        builder.Services.AddHealthChecks();
+        builder.Services.AddQueryManager();
+
+        // Register theme service if not already registered
+        if (Services.All(s => s.ServiceType != typeof(IThemeService)))
+        {
+            Services.AddSingleton<IThemeService, ThemeService>();
+        }
+
+        // Register NavigationBeaconRegistry as a singleton service
+        builder.Services.AddSingleton<INavigationBeaconRegistry>(NavigationBeaconRegistry);
+
+        // Register all services from this server's Services collection
+        foreach (var service in Services)
+        {
+            builder.Services.Add(service);
+        }
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.SetIsOriginAllowed(_ => true)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials(); // Required for SignalR
+            });
+        });
+
+        if (_useHttpRedirection)
+        {
+            builder.Services.AddHttpsRedirection(options =>
+            {
+                options.HttpsPort = 443;
+            });
+        }
+
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
+
+        builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Information);
+
+        // Suppress hosting startup errors when not verbose (we handle IOException with a friendly message)
+        if (!_args.Verbose)
+        {
+            builder.Logging.AddFilter("Microsoft.Extensions.Hosting.Internal.Host", LogLevel.None);
+        }
+
+        var app = builder.Build();
+        ServiceProvider = app.Services;
+
+        // Update reserved paths with discovered controller routes before reloading apps
+        UpdateReservedPaths(app);
+        AppRepository.ClearInvalidAppIds();
+        AppRepository.Reload(_reservedPaths);
+        if (AppRepository.InvalidAppIds.Count > 0)
+        {
+            Console.WriteLine($@"[CRITICAL] Failed to start Ivy server due to {AppRepository.InvalidAppIds.Count} invalid app ID(s).");
+            return null;
+        }
+
+        app.UseExceptionHandler(error =>
+        {
+            error.Run(async context =>
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "application/json";
+                var errorFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+                if (errorFeature != null)
+                {
+                    var ex = errorFeature.Error;
+
+                    var logger = app.Services.GetRequiredService<ILogger<Server>>();
+                    logger.LogError(ex, "An unhandled exception occurred.");
+
+                    var result = System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        error = ex.Message,
+                        detail = ex.StackTrace
+                    }, Ivy.Core.Helpers.JsonHelper.DefaultOptions);
+                    await context.Response.WriteAsync(result);
+                }
+            });
+        });
+
+        if (_useHttpRedirection)
+        {
+            app.UseHttpsRedirection();
+        }
+
+        var logger2 = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
+
+        // Configure ForwardedHeaders middleware to process X-Forwarded-* headers from reverse proxies
+        var forwardedHeadersOptions = new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                | ForwardedHeaders.XForwardedProto
+                | ForwardedHeaders.XForwardedHost
+                | ForwardedHeaders.XForwardedPrefix,
+        };
+        forwardedHeadersOptions.KnownIPNetworks.Clear();
+        forwardedHeadersOptions.KnownProxies.Clear();
+        app.UseForwardedHeaders(forwardedHeadersOptions);
+
+        if (!string.IsNullOrEmpty(_args.BasePath))
+        {
+            Console.WriteLine($"Using base path: {_args.BasePath}");
+            app.UsePathBase(_args.BasePath);
+        }
+
+        app.Use(async (context, next) =>
+        {
+            context.Response.Headers["X-Powered-By"] = "Ivy";
+            await next();
+        });
+
+        app.UseRouting(); // First routing pass - match explicit routes (gRPC, controllers)
+        app.UsePathToAppId(); // Rewrite path to appId if no endpoint matched
+        app.UseRouting(); // Second routing pass - route the rewritten path
+        app.UseCors();
+        app.UseGrpcWeb();
+
+        foreach (var mod in _appMods)
+        {
+            mod(app);
+        }
+
+        app.MapControllers();
+        app.MapHub<AppHub>("/ivy/messages");
+        app.MapHealthChecks("/ivy/health");
+        app.MapGrpcService<DataTableService>().EnableGrpcWeb();
+
+        app.UseFrontend(_args, logger2);
+        app.UseAssets(_args, logger2, "Assets", "ivy/assets");
+
+        return app;
+    }
+
     public async Task RunAsync(CancellationTokenSource? cts = null)
     {
         var sessionStore = new AppSessionStore();
@@ -615,221 +862,8 @@ public class Server
             }
         }
 
-        if (!string.IsNullOrEmpty(_args.DefaultAppId))
-        {
-            DefaultAppId = _args.DefaultAppId;
-        }
-
-        // Initialize external widget registry by scanning loaded assemblies
-        ExternalWidgetRegistry.Instance.Initialize();
-
-        // Register navigation beacons from all loaded assemblies
-        var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(a => !a.IsDynamic && a.GetLoadableTypes().Any());
-        foreach (var assembly in loadedAssemblies)
-        {
-            try
-            {
-                AppHelpers.RegisterBeacons(assembly, NavigationBeaconRegistry);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[WARNING] Failed to register beacons from {assembly.GetName().Name}: {ex.Message}");
-            }
-        }
-
-        // Ensure sufficient ThreadPool workers to avoid heartbeat warnings under bursty loads
-        try
-        {
-            ThreadPool.GetMinThreads(out var workerMin, out var ioMin);
-            var target = Math.Max(workerMin, Environment.ProcessorCount * 16);
-            var targetIo = Math.Max(ioMin, Environment.ProcessorCount * 16);
-            ThreadPool.SetMinThreads(target, targetIo);
-        }
-        catch { /* best-effort */ }
-
-        var builder = WebApplication.CreateBuilder();
-
-        builder.Configuration.AddConfiguration(Configuration);
-
-        foreach (var mod in _builderMods)
-        {
-            mod(builder);
-        }
-
-        // CLI-only commands need DI but never call app.StartAsync(),
-        // so use port 0 to avoid conflicts with a running instance.
-        // Bind to localhost for local dev (avoids Windows Firewall prompt),
-        // but use wildcard in containers so health probes can reach the app.
-        // On Sliplane or other hosted environments, we usually have PORT set and need to listen on 0.0.0.0.
-        var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
-        var hasPortEnv = Environment.GetEnvironmentVariable("PORT") != null;
-        var host = _args.Host ?? (isContainer || hasPortEnv ? "*" : "localhost");
-        var bindUrl = _args.IsCliCommand ? "http://localhost:0" : $"http://{host}:{_args.Port}";
-        builder.WebHost.UseUrls(bindUrl);
-
-        builder.Services.AddSignalR(options =>
-        {
-            options.EnableDetailedErrors = _args.Verbose;
-            options.ClientTimeoutInterval = TimeSpan.FromMinutes(3);
-            options.KeepAliveInterval = TimeSpan.FromSeconds(10);
-            options.MaximumReceiveMessageSize = 1048576; // 1MB
-        }).AddJsonProtocol(options =>
-        {
-            options.PayloadSerializerOptions.TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver();
-        }).AddMessagePackProtocol(options =>
-        {
-            options.SerializerOptions = MessagePackSerializerOptions.Standard.WithResolver(
-                CompositeResolver.Create(
-                    new IMessagePackFormatter[] {
-                        new JsonNodeMessagePackFormatter(),
-                        new JsonObjectMessagePackFormatter(),
-                        new JsonArrayMessagePackFormatter(),
-                        new JsonValueMessagePackFormatter()
-                    },
-                    new IFormatterResolver[] {
-                        JsonNodeResolver.Instance,
-                        ContractlessStandardResolver.Instance
-                    }
-                )
-            );
-        });
-        builder.Services.AddSingleton(this);
-        builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
-        builder.Services.AddControllers()
-            .AddApplicationPart(Assembly.Load("Ivy"))
-            .AddControllersAsServices();
-        builder.Services.AddGrpc();
-        builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();
-        builder.Services.AddSingleton(_contentBuilder ?? new DefaultContentBuilder());
-        builder.Services.AddSingleton(sessionStore);
-        builder.Services.AddSingleton<IOAuthCallbackRegistry, OAuthCallbackRegistry>();
-        builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-        builder.Services.AddHealthChecks();
-        builder.Services.AddQueryManager();
-
-        // Register theme service if not already registered
-        if (Services.All(s => s.ServiceType != typeof(IThemeService)))
-        {
-            Services.AddSingleton<IThemeService, ThemeService>();
-        }
-
-        // Register NavigationBeaconRegistry as a singleton service
-        builder.Services.AddSingleton<INavigationBeaconRegistry>(NavigationBeaconRegistry);
-
-        // Register all services from this server's Services collection
-        foreach (var service in Services)
-        {
-            builder.Services.Add(service);
-        }
-
-        builder.Services.AddCors(options =>
-        {
-            options.AddDefaultPolicy(policy =>
-            {
-                policy.SetIsOriginAllowed(_ => true)
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials(); // Required for SignalR
-            });
-        });
-
-        if (_useHttpRedirection)
-        {
-            builder.Services.AddHttpsRedirection(options =>
-            {
-                options.HttpsPort = 443;
-            });
-        }
-
-        builder.Logging.ClearProviders();
-        builder.Logging.AddConsole();
-
-        builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Information);
-
-        // Suppress hosting startup errors when not verbose (we handle IOException with a friendly message)
-        if (!_args.Verbose)
-        {
-            builder.Logging.AddFilter("Microsoft.Extensions.Hosting.Internal.Host", LogLevel.None);
-        }
-
-        var app = builder.Build();
-        ServiceProvider = app.Services;
-
-        // Update reserved paths with discovered controller routes before reloading apps
-        UpdateReservedPaths(app);
-        AppRepository.ClearInvalidAppIds();
-        AppRepository.Reload(_reservedPaths);
-        if (AppRepository.InvalidAppIds.Count > 0)
-        {
-            Console.WriteLine($@"[CRITICAL] Failed to start Ivy server due to {AppRepository.InvalidAppIds.Count} invalid app ID(s).");
-            return;
-        }
-
-        app.UseExceptionHandler(error =>
-        {
-            error.Run(async context =>
-            {
-                context.Response.StatusCode = 500;
-                context.Response.ContentType = "application/json";
-                var errorFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
-                if (errorFeature != null)
-                {
-                    var ex = errorFeature.Error;
-
-                    var logger = app.Services.GetRequiredService<ILogger<Server>>();
-                    logger.LogError(ex, "An unhandled exception occurred.");
-
-                    var result = System.Text.Json.JsonSerializer.Serialize(new
-                    {
-                        error = ex.Message,
-                        detail = ex.StackTrace
-                    }, Ivy.Core.Helpers.JsonHelper.DefaultOptions);
-                    await context.Response.WriteAsync(result);
-                }
-            });
-        });
-
-        if (_useHttpRedirection)
-        {
-            app.UseHttpsRedirection();
-        }
-
-        var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
-
-        // Configure ForwardedHeaders middleware to process X-Forwarded-* headers from reverse proxies
-        var forwardedHeadersOptions = new ForwardedHeadersOptions
-        {
-            ForwardedHeaders = ForwardedHeaders.XForwardedFor
-                | ForwardedHeaders.XForwardedProto
-                | ForwardedHeaders.XForwardedHost
-                | ForwardedHeaders.XForwardedPrefix,
-        };
-        forwardedHeadersOptions.KnownIPNetworks.Clear();
-        forwardedHeadersOptions.KnownProxies.Clear();
-        app.UseForwardedHeaders(forwardedHeadersOptions);
-
-        if (!string.IsNullOrEmpty(_args.BasePath))
-        {
-            Console.WriteLine($"Using base path: {_args.BasePath}");
-            app.UsePathBase(_args.BasePath);
-        }
-
-        app.UseRouting(); // First routing pass - match explicit routes (gRPC, controllers)
-        app.UsePathToAppId(); // Rewrite path to appId if no endpoint matched
-        app.UseRouting(); // Second routing pass - route the rewritten path
-        app.UseCors();
-        app.UseGrpcWeb();
-
-        foreach (var mod in _appMods)
-        {
-            mod(app);
-        }
-
-        app.MapControllers();
-        app.MapHub<AppHub>("/ivy/messages");
-        app.MapHealthChecks("/ivy/health");
-        app.MapGrpcService<DataTableService>().EnableGrpcWeb();
+        var app = BuildWebApplication(sessionStore, cts);
+        if (app == null) return;
 
         if (_useHotReload)
         {
@@ -850,14 +884,11 @@ public class Server
             };
         }
 
-        app.UseFrontend(_args, logger);
-        app.UseAssets(_args, logger, "Assets", "ivy/assets");
-
         app.Lifetime.ApplicationStarted.Register(() =>
         {
             var url = app.Urls.FirstOrDefault() ?? "unknown";
-            var port = new Uri(url).Port;
-            var localUrl = $"http://localhost:{port}";
+            var uri = new Uri(url);
+            var localUrl = $"{uri.Scheme}://localhost:{uri.Port}";
             if (!_args.Silent)
             {
                 Console.WriteLine($@"Ivy is running on {localUrl} [{Process.GetCurrentProcess().Id}]. Press Ctrl+C to stop.");
@@ -1140,11 +1171,12 @@ public static class WebApplicationExtensions
 
     private static async Task ServeIndexHtml(HttpContext context, WebApplication app, ServerArgs serverArgs, Assembly assembly, string resourceName)
     {
-        var version = assembly.GetName().Version?.ToString();
-        if (!string.IsNullOrEmpty(version))
-        {
-            context.Response.Headers["ivy-version"] = version;
-        }
+        //DO NOT ADD AS THIS CAN BE USED TO TARGET IN CASE OF A SECURITY HOLE
+        // var version = assembly.GetName().Version?.ToString();
+        // if (!string.IsNullOrEmpty(version))
+        // {
+        //     context.Response.Headers["ivy-version"] = version;
+        // }
 
         // Determine HTTP status code based on app routing
         var server = app.Services.GetRequiredService<Server>();
@@ -1235,11 +1267,19 @@ public static class WebApplicationExtensions
                     MaxAge = TimeSpan.FromDays(365),
                     MustRevalidate = true
                 };
-                ctx.Context.Response.Headers.ETag = assembly.GetName().Version + ":" +
-                                                    (!string.IsNullOrEmpty(assembly.Location) &&
-                                                     File.Exists(assembly.Location)
-                                                        ? File.GetLastWriteTimeUtc(assembly.Location).Ticks.ToString()
-                                                        : "");
+                var version = assembly.GetName().Version?.ToString() ?? "0.0.0.0";
+                var lastWrite = "";
+
+                // In single-file publishing, assembly.Location might be empty.
+                // We fallback to just the version in those cases.
+#pragma warning disable IL3000
+                if (!string.IsNullOrEmpty(assembly.Location) && File.Exists(assembly.Location))
+                {
+                    lastWrite = File.GetLastWriteTimeUtc(assembly.Location).Ticks.ToString();
+                }
+#pragma warning restore IL3000
+
+                ctx.Context.Response.Headers.ETag = version + ":" + lastWrite;
 #endif
             }
         };

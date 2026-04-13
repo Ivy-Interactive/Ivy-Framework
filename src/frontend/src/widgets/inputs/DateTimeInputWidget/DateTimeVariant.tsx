@@ -39,9 +39,11 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   const [open, setOpen] = useState(false);
 
   const hasAutoFocusedRef = React.useRef(false);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
   React.useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
+      buttonRef.current?.focus();
       setOpen(true);
     }
   }, [autoFocus, disabled]);
@@ -78,19 +80,18 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   const [isEditingTime, setIsEditingTime] = useState(false);
 
   // Update local time when date changes, but only if user is not actively editing
-  React.useEffect(() => {
-    if (!isEditingTime) {
-      if (date) {
-        const newTimeValue = format(date, formatProp || "HH:mm:ss");
-        setLocalTimeValue(newTimeValue);
-      } else if (nullable) {
-        // When nullable and no date, keep input empty instead of defaulting to '00:00:00'
-        setLocalTimeValue("");
-      } else {
-        setLocalTimeValue("00:00:00");
-      }
+  const [prevDate, setPrevDate] = useState(date);
+  if (date !== prevDate && !isEditingTime) {
+    setPrevDate(date);
+    if (date) {
+      const newTimeValue = format(date, formatProp || "HH:mm:ss");
+      setLocalTimeValue(newTimeValue);
+    } else if (nullable) {
+      setLocalTimeValue("");
+    } else {
+      setLocalTimeValue("00:00:00");
     }
-  }, [date, formatProp, isEditingTime, nullable]);
+  }
 
   const handleDateSelect = useCallback(
     (selectedDate: Date | undefined) => {
@@ -176,9 +177,9 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
+            ref={buttonRef}
             disabled={disabled}
             variant="outline"
-            autoFocus={autoFocus}
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),

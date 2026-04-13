@@ -1,3 +1,4 @@
+using Ivy.Tendril.Helpers;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps.Plans;
@@ -10,21 +11,17 @@ public class SidebarView(
     IState<string?> textFilter,
     IConfigService config) : ViewBase
 {
-    private readonly List<PlanFile> _plans = plans;
-    private readonly IState<PlanFile?> _selectedPlanState = selectedPlanState;
-    private readonly IState<string?> _projectFilter = projectFilter;
-    private readonly IState<string?> _levelFilter = levelFilter;
-    private readonly IState<string?> _textFilter = textFilter;
-    private readonly IConfigService _config = config;
-
     public override object Build()
     {
-        var filteredPlans = PlanFilters.ApplyFilters(_plans, _projectFilter.Value, _levelFilter.Value, _textFilter.Value);
+        var filtersOpen = UseState(false);
 
-        var levelOptions = _config.LevelNames;
+        var filteredPlans =
+            PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value);
 
-        var levelFilteredPlans = _plans.AsEnumerable();
-        if (_levelFilter.Value is { } level)
+        var levelOptions = config.LevelNames;
+
+        var levelFilteredPlans = plans.AsEnumerable();
+        if (levelFilter.Value is { } level)
             levelFilteredPlans = levelFilteredPlans.Where(p => p.Level == level);
 
         var projectCounts = levelFilteredPlans
@@ -33,34 +30,48 @@ public class SidebarView(
             .Select(g => new Option<string>($"{g.Key} ({g.Count()})", g.Key))
             .ToArray<IAnyOption>();
 
-        var header = Layout.Vertical()
-            | _textFilter.ToSearchInput().Placeholder("Search plans...")
-            | new Expandable(
-                header: "Filters",
-                content: Layout.Vertical()
-                    | _projectFilter.ToSelectInput(projectCounts).Placeholder("All Projects").Nullable().WithField().Label("Project")
-                    | _levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable().WithField().Label("Level")
-            ).Open(false).Ghost();
+        var searchInput = textFilter.ToSearchInput()
+            .Placeholder("Search plans...")
+            .Suffix(
+                new Button()
+                    .Icon(filtersOpen.Value ? Icons.ChevronUp : Icons.ChevronDown)
+                    .Ghost()
+                    .Small()
+                    .OnClick(() => filtersOpen.Set(!filtersOpen.Value))
+            );
+
+        var header = Layout.Vertical() | searchInput;
+
+        if (filtersOpen.Value)
+        {
+            header |= Layout.Vertical()
+                      | projectFilter.ToSelectInput(projectCounts).Placeholder("All Projects").Nullable()
+                          .WithField().Label("Project")
+                      | levelFilter.ToSelectInput(levelOptions.ToOptions()).Placeholder("All Levels").Nullable()
+                          .WithField().Label("Level");
+        }
 
         var content = new List(filteredPlans.Select(plan =>
         {
             var clickablePlan = plan;
-            var stateBadgeVariant = plan.Status switch
-            {
-                PlanStatus.Building or PlanStatus.Updating => BadgeVariant.Info,
-                PlanStatus.ReadyForReview => BadgeVariant.Success,
-                _ => BadgeVariant.Outline
-            };
+            var stateBadgeVariant = StatusMappings.PlanStatusBadgeVariants.TryGetValue(plan.Status, out var variant)
+                ? variant
+                : BadgeVariant.Outline;
 
             var badges = Layout.Horizontal().Gap(1);
             if (plan.Status != PlanStatus.Draft)
                 badges |= new Badge(plan.Status.ToString()).Variant(stateBadgeVariant).Small();
-            badges |= new Badge(plan.Project).Variant(BadgeVariant.Outline).Small().WithProjectColor(_config, plan.Project);
-            badges |= new Badge(plan.Level).Variant(_config.GetBadgeVariant(plan.Level)).Small();
+            var projects = ProjectHelper.ParseProjects(plan.Project);
+            foreach (var proj in projects)
+            {
+                badges |= new Badge(proj).Variant(BadgeVariant.Outline).Small()
+                    .WithProjectColor(config, proj);
+            }
+            badges |= new Badge(plan.Level).Variant(config.GetBadgeVariant(plan.Level)).Small();
 
             return new ListItem($"#{plan.Id} {plan.Title}")
                 .Content(badges)
-                .OnClick(() => _selectedPlanState.Set(clickablePlan));
+                .OnClick(() => selectedPlanState.Set(clickablePlan));
         }));
 
         return new HeaderLayout(header, content);

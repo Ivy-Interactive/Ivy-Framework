@@ -26,12 +26,12 @@ public class SupabaseAuthProvider : SupabaseAuthTokenHandler, IAuthProvider
     {
     }
 
-    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
+    public async Task<LoginResult> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
     {
         var session = await Client.Auth.SignIn(email, password)
             .WaitAsync(cancellationToken);
         var authToken = MakeAuthToken(session);
-        return authToken;
+        return authToken != null ? LoginResult.Success(authToken) : LoginResult.InvalidCredentials();
     }
 
     public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)

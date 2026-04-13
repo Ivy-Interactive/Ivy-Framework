@@ -35,9 +35,11 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   const [open, setOpen] = useState(false);
 
   const hasAutoFocusedRef = useRef(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
+      buttonRef.current?.focus();
       setOpen(true);
     }
   }, [autoFocus, disabled]);
@@ -57,10 +59,14 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   const [viewYear, setViewYear] = useState(() =>
     date ? date.getFullYear() : new Date().getFullYear(),
   );
+  const [prevYear, setPrevYear] = useState(date?.getFullYear());
 
-  React.useEffect(() => {
-    if (date) setViewYear(date.getFullYear());
-  }, [date]);
+  if (date?.getFullYear() !== prevYear) {
+    setPrevYear(date?.getFullYear());
+    if (date) {
+      setViewYear(date.getFullYear());
+    }
+  }
 
   const showClear = nullable && !disabled && value != null && value !== "";
 
@@ -97,9 +103,9 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
+            ref={buttonRef}
             disabled={disabled}
             variant="outline"
-            autoFocus={autoFocus}
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),
@@ -136,6 +142,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
+                aria-label="Previous year"
                 onClick={() => setViewYear((y) => y - 1)}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -145,6 +152,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
+                aria-label="Next year"
                 onClick={() => setViewYear((y) => y + 1)}
               >
                 <ChevronRight className="h-4 w-4" />

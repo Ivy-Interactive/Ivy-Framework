@@ -59,7 +59,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
         => ex.Errors?.Any(e => e.Code == "session_exists") == true;
 
 
-    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public async Task<LoginResult> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -76,7 +76,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
                 var restoredToken = await TryRestoreExistingSessionAsync(authSession, credentials, cancellationToken);
                 if (restoredToken != null)
                 {
-                    return restoredToken;
+                    return LoginResult.Success(restoredToken);
                 }
 
                 await frontendClient.RemoveAllSessionsAsync(credentials, cancellationToken);
@@ -85,7 +85,7 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
 
             if (signInResponse.Response?.CreatedSessionId is not { } sessionId)
             {
-                return null;
+                return LoginResult.InvalidCredentials();
             }
 
             var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
@@ -95,11 +95,11 @@ public class ClerkAuthProvider : ClerkAuthTokenHandler, IAuthProvider
                 throw new Exception("New JWT from Clerk is invalid.");
             }
 
-            return new AuthToken(newToken.Jwt!);
+            return LoginResult.Success(new AuthToken(newToken.Jwt!));
         }
         catch (Exception)
         {
-            return null;
+            return LoginResult.InvalidCredentials();
         }
     }
 

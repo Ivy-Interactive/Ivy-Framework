@@ -5,6 +5,8 @@ import { widgetMap } from "@/widgets/widgetMap";
 import { Densities } from "@/types/density";
 import { isExternalWidget, createLazyExternalWidget } from "@/widgets/externalWidgetLoader";
 import { ExternalWidgetWrapper } from "@/widgets/ExternalWidgetWrapper";
+import { useCurrentBreakpoint } from "@/hooks/use-breakpoint-context";
+import { resolveResponsive } from "@/hooks/use-responsive";
 
 const processWidgetProps = (
   node: WidgetNode,
@@ -54,6 +56,15 @@ export interface MemoizedWidgetProps {
 
 export const MemoizedWidget = React.memo(
   function MemoizedWidget({ node, inheritedScale }: MemoizedWidgetProps) {
+    const breakpoint = useCurrentBreakpoint();
+
+    // Resolve responsive visibility — hide widget if false
+    const responsiveVisible = node.props.responsiveVisible;
+    if (responsiveVisible) {
+      const visible = resolveResponsive(responsiveVisible as boolean, breakpoint, true);
+      if (visible === false) return null;
+    }
+
     const Component = widgetMap[node.type as keyof typeof widgetMap] as React.ComponentType<
       Record<string, unknown>
     >;
@@ -63,6 +74,39 @@ export const MemoizedWidget = React.memo(
     }
 
     const props = processWidgetProps(node, inheritedScale);
+
+    // Override width/height with resolved responsive values
+    const responsiveWidth = node.props.responsiveWidth;
+    if (responsiveWidth) {
+      const resolved = resolveResponsive(
+        responsiveWidth as string,
+        breakpoint,
+        undefined as unknown as string,
+      );
+      if (resolved !== undefined) props.width = resolved;
+    }
+
+    const responsiveHeight = node.props.responsiveHeight;
+    if (responsiveHeight) {
+      const resolved = resolveResponsive(
+        responsiveHeight as string,
+        breakpoint,
+        undefined as unknown as string,
+      );
+      if (resolved !== undefined) props.height = resolved;
+    }
+
+    // Override density with resolved responsive value
+    const responsiveDensity = node.props.responsiveDensity;
+    if (responsiveDensity) {
+      const resolved = resolveResponsive(
+        responsiveDensity as string,
+        breakpoint,
+        undefined as unknown as string,
+      );
+      if (resolved !== undefined) props.density = resolved;
+    }
+
     const children = flattenChildren(node.children || []);
     const scaleForChildren = (props.density as Densities) || inheritedScale;
     const slots = processSlots(children, scaleForChildren);

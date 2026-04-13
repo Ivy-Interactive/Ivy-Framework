@@ -5,6 +5,7 @@ namespace Ivy.Tendril.Services;
 public interface IPlanReaderService
 {
     string PlansDirectory { get; }
+    bool IsDatabaseReady { get; }
 
     void RecoverStuckPlans();
     void RepairPlans();
@@ -20,11 +21,17 @@ public interface IPlanReaderService
     string ReadRawPlan(string folderName);
     void SavePlan(string folderName, string fullContent);
     void UpdateLatestRevision(string folderName, string content);
+    DashboardStats GetDashboardData(string? projectFilter);
     decimal GetPlanTotalCost(string folderPath);
     int GetPlanTotalTokens(string folderPath);
-    List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7);
+    List<HourlyTokenBurn> GetHourlyTokenBurn(int days = 7, string? projectFilter = null);
     List<Recommendation> GetRecommendations();
     int GetPendingRecommendationsCount();
     PlanReaderService.PlanCountSnapshot ComputePlanCounts();
-    void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState, string? declineReason = null);
+
+    void UpdateRecommendationState(string planFolderName, string recommendationTitle, string newState,
+        string? declineReason = null);
+
+    void InvalidateCaches();
+    Task FlushPendingWritesAsync();
 }

@@ -49,52 +49,46 @@ public class CardApp : SampleBase
 
         return Layout.Vertical()
          | Text.H1("Card")
-         | Text.H2("Basic Examples")
-         | (Layout.Grid().Columns(3)
-            | card1
-            | card4
-            | disabledCard
-            )
-         | (Layout.Grid().Columns(4)
-            | new TotalSalesMetricView()
-            | new LongNumberMetricView()
-            | new HighPercentageMetricView()
-            | new TotalCommentsPerAuthorMetricView()
-            )
-         | (Layout.Grid().Columns(4)
-            | new VeryLongTitleMetricView()
-            | new UserEngagementWidget()
-            | new TaskCompletionWidget()
-            | new SystemHealthWidget()
-            )
-         | (Layout.Grid().Columns(4)
-            | new RevenueGrowthWidget()
-            | new IconTextShowcaseWidget()
-            | new ProgressBarVariationsWidget()
-            | new LayoutTestWidget()
-            )
-         | (Layout.Grid().Columns(3)
-            | new MixedContentWidget()
-            | new ResponsiveLayoutWidget()
-            | new TextSpacingDemoWidget()
-            )
-         | (Layout.Grid().Columns(3)
-            | new CardPaddingOverrideWidget()
-            | new LayoutSpacingControlWidget()
-            )
-         | Text.H2("Metric Cards with Different Sizes")
-         | (Layout.Grid().Columns(3)
-            | new SmallMetricView()
-            | new MediumMetricView()
-            | new LargeMetricView()
-            )
-        | Text.H2("Size Variants")
-         | (Layout.Grid().Columns(3)
-            | smallCard
-            | mediumCard
-            | largeCard
-            )
-      ;
+         | Layout.Tabs(
+            new Tab("Basic", Layout.Vertical()
+                | (Layout.Grid().Columns(3)
+                    | card1
+                    | card4
+                    | disabledCard)),
+            new Tab("Metrics", Layout.Vertical()
+                | (Layout.Grid().Columns(4)
+                    | new TotalSalesMetricView()
+                    | new LongNumberMetricView()
+                    | new HighPercentageMetricView()
+                    | new TotalCommentsPerAuthorMetricView())
+                | (Layout.Grid().Columns(4)
+                    | new VeryLongTitleMetricView()
+                    | new UserEngagementWidget()
+                    | new TaskCompletionWidget()
+                    | new SystemHealthWidget())),
+            new Tab("Showcase", Layout.Vertical()
+                | (Layout.Grid().Columns(4)
+                    | new RevenueGrowthWidget()
+                    | new IconTextShowcaseWidget()
+                    | new ProgressBarVariationsWidget()
+                    | new LayoutTestWidget())
+                | (Layout.Grid().Columns(3)
+                    | new MixedContentWidget()
+                    | new ResponsiveLayoutWidget()
+                    | new TextSpacingDemoWidget())),
+            new Tab("Sizing", Layout.Vertical()
+                | (Layout.Grid().Columns(3)
+                    | new CardPaddingOverrideWidget()
+                    | new LayoutSpacingControlWidget())
+                | (Layout.Grid().Columns(3)
+                    | new SmallMetricView()
+                    | new MediumMetricView()
+                    | new LargeMetricView())
+                | (Layout.Grid().Columns(3)
+                    | smallCard
+                    | mediumCard
+                    | largeCard))
+         ).Variant(TabsVariant.Content);
     }
 }
 

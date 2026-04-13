@@ -11,7 +11,7 @@ public class InboxWatcherServiceTests
 
         var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
 
-        Assert.Equal("[Auto]", project);
+        Assert.Equal("Auto", project);
         Assert.Equal(content, description);
         Assert.Null(sourcePath);
     }
@@ -35,20 +35,20 @@ public class InboxWatcherServiceTests
 
         var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
 
-        Assert.Equal("[Auto]", project);
+        Assert.Equal("Auto", project);
         Assert.Equal("Fix the login bug", description);
         Assert.Null(sourcePath);
     }
 
     [Fact]
-    public void ParseContent_EmptyDescriptionAfterFrontmatter_ReturnsFull()
+    public void ParseContent_EmptyDescriptionAfterFrontmatter_ReturnsEmpty()
     {
         var content = "---\nproject: Agent\n---\n";
 
         var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
 
         Assert.Equal("Agent", project);
-        Assert.Equal(content, description);
+        Assert.Equal("", description);
         Assert.Null(sourcePath);
     }
 
@@ -59,7 +59,7 @@ public class InboxWatcherServiceTests
 
         var (project, description, sourcePath) = InboxWatcherService.ParseContent(content);
 
-        Assert.Equal("[Auto]", project);
+        Assert.Equal("Auto", project);
         Assert.Equal(content, description);
         Assert.Null(sourcePath);
     }
@@ -89,6 +89,57 @@ public class InboxWatcherServiceTests
     }
 
     [Fact]
+    public void ParseContent_EmptyContent_ReturnsEmptyDescription()
+    {
+        var (project, description, sourcePath) = InboxWatcherService.ParseContent("");
+
+        Assert.Equal("Auto", project);
+        Assert.Equal("", description);
+        Assert.Null(sourcePath);
+    }
+
+    [Fact]
+    public void ParseContent_WhitespaceOnly_ReturnsWhitespaceDescription()
+    {
+        var (project, description, sourcePath) = InboxWatcherService.ParseContent("   \n  ");
+
+        Assert.Equal("Auto", project);
+        Assert.Equal("   \n  ", description);
+        Assert.Null(sourcePath);
+    }
+
+    [Fact]
+    public void ProcessFileAsync_EmptyContent_SkipsJob()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), $"inbox-test-{Guid.NewGuid():N}");
+        var inboxDir = Path.Combine(tempDir, "Inbox");
+        Directory.CreateDirectory(inboxDir);
+
+        try
+        {
+            // Place an empty file in the inbox
+            var filePath = Path.Combine(inboxDir, "empty-entry.md");
+            File.WriteAllText(filePath, "");
+
+            var config = new ConfigService(new TendrilSettings(), tempDir);
+            var jobService = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10), inboxDir);
+            using var watcher = new InboxWatcherService(config, jobService);
+
+            // Wait for async processing
+            Thread.Sleep(2000);
+
+            // The .md file should still be there (not renamed to .processing) because the description is empty
+            Assert.Single(Directory.GetFiles(inboxDir, "*.md"));
+            Assert.Empty(Directory.GetFiles(inboxDir, "*.processing"));
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+                Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
     public void ProcessExistingFiles_PicksUpFilesInInbox()
     {
         var tempDir = Path.Combine(Path.GetTempPath(), $"inbox-test-{Guid.NewGuid():N}");
@@ -100,7 +151,7 @@ public class InboxWatcherServiceTests
             // Place a file in the inbox before creating the service
             File.WriteAllText(Path.Combine(inboxDir, "test-entry.md"), "Test inbox entry");
 
-            var config = new ConfigService(new TendrilSettings(), tendrilHome: tempDir);
+            var config = new ConfigService(new TendrilSettings(), tempDir);
             var jobService = new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10), inboxDir);
             using var watcher = new InboxWatcherService(config, jobService);
 

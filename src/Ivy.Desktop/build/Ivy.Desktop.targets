@@ -2,31 +2,37 @@
   <PropertyGroup>
     <ApplicationIcon Condition="'$(ApplicationIcon)' == '' And Exists('$(MSBuildThisFileDirectory)ivy.ico')">$(MSBuildThisFileDirectory)ivy.ico</ApplicationIcon>
   </PropertyGroup>
-  <Target Name="CopyPhotinoNative" AfterTargets="Build;Publish">
+  <Target Name="CopyRustinoNativeMacOS" AfterTargets="Build;Publish">
     <PropertyGroup>
-      <PhotinoNativePath Condition="Exists('$(OutputPath)runtimes/osx-arm64/native/Photino.Native.dylib')">$(OutputPath)runtimes/osx-arm64/native/Photino.Native.dylib</PhotinoNativePath>
-      <PhotinoNativePath Condition="'$(PhotinoNativePath)' == '' And Exists('$(OutputPath)runtimes/osx-x64/native/Photino.Native.dylib')">$(OutputPath)runtimes/osx-x64/native/Photino.Native.dylib</PhotinoNativePath>
-      <PhotinoNativePath Condition="'$(PhotinoNativePath)' == '' And Exists('$(PublishDir)runtimes/osx-arm64/native/Photino.Native.dylib')">$(PublishDir)runtimes/osx-arm64/native/Photino.Native.dylib</PhotinoNativePath>
-      <PhotinoNativePath Condition="'$(PhotinoNativePath)' == '' And Exists('$(PublishDir)runtimes/osx-x64/native/Photino.Native.dylib')">$(PublishDir)runtimes/osx-x64/native/Photino.Native.dylib</PhotinoNativePath>
+      <RustinoNativePath Condition="Exists('$(OutputPath)runtimes/osx-arm64/native/librustino_native.dylib')">$(OutputPath)runtimes/osx-arm64/native/librustino_native.dylib</RustinoNativePath>
+      <RustinoNativePath Condition="'$(RustinoNativePath)' == '' And Exists('$(OutputPath)runtimes/osx-x64/native/librustino_native.dylib')">$(OutputPath)runtimes/osx-x64/native/librustino_native.dylib</RustinoNativePath>
+      <RustinoNativePath Condition="'$(RustinoNativePath)' == '' And Exists('$(PublishDir)runtimes/osx-arm64/native/librustino_native.dylib')">$(PublishDir)runtimes/osx-arm64/native/librustino_native.dylib</RustinoNativePath>
+      <RustinoNativePath Condition="'$(RustinoNativePath)' == '' And Exists('$(PublishDir)runtimes/osx-x64/native/librustino_native.dylib')">$(PublishDir)runtimes/osx-x64/native/librustino_native.dylib</RustinoNativePath>
       <DestinationPath Condition="'$(PublishDir)' != ''">$(PublishDir)</DestinationPath>
       <DestinationPath Condition="'$(DestinationPath)' == ''">$(OutputPath)</DestinationPath>
     </PropertyGroup>
-    <Copy SourceFiles="$(PhotinoNativePath)" DestinationFolder="$(DestinationPath)" Condition="'$(PhotinoNativePath)' != ''" />
+    <Copy SourceFiles="$(RustinoNativePath)" DestinationFolder="$(DestinationPath)" Condition="'$(RustinoNativePath)' != ''" />
   </Target>
-  <Target Name="CopyPhotinoNativeWindows" AfterTargets="Build;Publish">
+  <Target Name="CopyRustinoNativeWindows" AfterTargets="Build;Publish">
     <PropertyGroup>
-      <PhotinoNativePathWin Condition="Exists('$(OutputPath)runtimes/win-arm64/native/Photino.Native.dll')">$(OutputPath)runtimes/win-arm64/native/Photino.Native.dll</PhotinoNativePathWin>
-      <PhotinoNativePathWin Condition="'$(PhotinoNativePathWin)' == '' And Exists('$(OutputPath)runtimes/win-x64/native/Photino.Native.dll')">$(OutputPath)runtimes/win-x64/native/Photino.Native.dll</PhotinoNativePathWin>
-      <PhotinoNativePathWin Condition="'$(PhotinoNativePathWin)' == '' And Exists('$(PublishDir)runtimes/win-arm64/native/Photino.Native.dll')">$(PublishDir)runtimes/win-arm64/native/Photino.Native.dll</PhotinoNativePathWin>
-      <PhotinoNativePathWin Condition="'$(PhotinoNativePathWin)' == '' And Exists('$(PublishDir)runtimes/win-x64/native/Photino.Native.dll')">$(PublishDir)runtimes/win-x64/native/Photino.Native.dll</PhotinoNativePathWin>
-      <WebView2LoaderPathWin Condition="Exists('$(OutputPath)runtimes/win-arm64/native/WebView2Loader.dll')">$(OutputPath)runtimes/win-arm64/native/WebView2Loader.dll</WebView2LoaderPathWin>
-      <WebView2LoaderPathWin Condition="'$(WebView2LoaderPathWin)' == '' And Exists('$(OutputPath)runtimes/win-x64/native/WebView2Loader.dll')">$(OutputPath)runtimes/win-x64/native/WebView2Loader.dll</WebView2LoaderPathWin>
-      <WebView2LoaderPathWin Condition="'$(WebView2LoaderPathWin)' == '' And Exists('$(PublishDir)runtimes/win-arm64/native/WebView2Loader.dll')">$(PublishDir)runtimes/win-arm64/native/WebView2Loader.dll</WebView2LoaderPathWin>
-      <WebView2LoaderPathWin Condition="'$(WebView2LoaderPathWin)' == '' And Exists('$(PublishDir)runtimes/win-x64/native/WebView2Loader.dll')">$(PublishDir)runtimes/win-x64/native/WebView2Loader.dll</WebView2LoaderPathWin>
+      <RustinoNativePathWin Condition="Exists('$(OutputPath)runtimes/win-arm64/native/rustino_native.dll')">$(OutputPath)runtimes/win-arm64/native/rustino_native.dll</RustinoNativePathWin>
+      <RustinoNativePathWin Condition="'$(RustinoNativePathWin)' == '' And Exists('$(OutputPath)runtimes/win-x64/native/rustino_native.dll')">$(OutputPath)runtimes/win-x64/native/rustino_native.dll</RustinoNativePathWin>
+      <RustinoNativePathWin Condition="'$(RustinoNativePathWin)' == '' And Exists('$(PublishDir)runtimes/win-arm64/native/rustino_native.dll')">$(PublishDir)runtimes/win-arm64/native/rustino_native.dll</RustinoNativePathWin>
+      <RustinoNativePathWin Condition="'$(RustinoNativePathWin)' == '' And Exists('$(PublishDir)runtimes/win-x64/native/rustino_native.dll')">$(PublishDir)runtimes/win-x64/native/rustino_native.dll</RustinoNativePathWin>
       <DestinationPathWin Condition="'$(PublishDir)' != ''">$(PublishDir)</DestinationPathWin>
       <DestinationPathWin Condition="'$(DestinationPathWin)' == ''">$(OutputPath)</DestinationPathWin>
     </PropertyGroup>
-    <Copy SourceFiles="$(PhotinoNativePathWin)" DestinationFolder="$(DestinationPathWin)" Condition="'$(PhotinoNativePathWin)' != ''" />
-    <Copy SourceFiles="$(WebView2LoaderPathWin)" DestinationFolder="$(DestinationPathWin)" Condition="'$(WebView2LoaderPathWin)' != ''" />
+    <Copy SourceFiles="$(RustinoNativePathWin)" DestinationFolder="$(DestinationPathWin)" Condition="'$(RustinoNativePathWin)' != ''" />
+  </Target>
+  <Target Name="CopyRustinoNativeLinux" AfterTargets="Build;Publish">
+    <PropertyGroup>
+      <RustinoNativePathLinux Condition="Exists('$(OutputPath)runtimes/linux-arm64/native/librustino_native.so')">$(OutputPath)runtimes/linux-arm64/native/librustino_native.so</RustinoNativePathLinux>
+      <RustinoNativePathLinux Condition="'$(RustinoNativePathLinux)' == '' And Exists('$(OutputPath)runtimes/linux-x64/native/librustino_native.so')">$(OutputPath)runtimes/linux-x64/native/librustino_native.so</RustinoNativePathLinux>
+      <RustinoNativePathLinux Condition="'$(RustinoNativePathLinux)' == '' And Exists('$(PublishDir)runtimes/linux-arm64/native/librustino_native.so')">$(PublishDir)runtimes/linux-arm64/native/librustino_native.so</RustinoNativePathLinux>
+      <RustinoNativePathLinux Condition="'$(RustinoNativePathLinux)' == '' And Exists('$(PublishDir)runtimes/linux-x64/native/librustino_native.so')">$(PublishDir)runtimes/linux-x64/native/librustino_native.so</RustinoNativePathLinux>
+      <DestinationPathLinux Condition="'$(PublishDir)' != ''">$(PublishDir)</DestinationPathLinux>
+      <DestinationPathLinux Condition="'$(DestinationPathLinux)' == ''">$(OutputPath)</DestinationPathLinux>
+    </PropertyGroup>
+    <Copy SourceFiles="$(RustinoNativePathLinux)" DestinationFolder="$(DestinationPathLinux)" Condition="'$(RustinoNativePathLinux)' != ''" />
   </Target>
 </Project>

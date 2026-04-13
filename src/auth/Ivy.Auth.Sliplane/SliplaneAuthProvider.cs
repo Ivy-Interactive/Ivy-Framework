@@ -27,7 +27,7 @@ public class SliplaneAuthProvider : SliplaneAuthTokenHandler, IAuthProvider
     }
 
     /// <summary>Not supported — Sliplane only supports OAuth flow</summary>
-    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public Task<LoginResult> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         throw new NotSupportedException("Sliplane authentication only supports OAuth flow. Use GetOAuthUriAsync and HandleOAuthCallbackAsync instead.");
     }

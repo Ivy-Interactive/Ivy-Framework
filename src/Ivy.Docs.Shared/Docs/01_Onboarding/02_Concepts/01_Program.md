@@ -169,6 +169,7 @@ The server automatically reads configuration from environment variables:
 - `PORT` - Override the default port
 - `BASE_PATH` - Serve the app from a URL prefix
 - `VERBOSE` - Enable verbose logging
+- `IVY_TLS` - Control whether the server uses HTTPS (`true`, `1`, `yes`, `on`) or HTTP (`false`, `0`, `no`, `off`). When unset, Ivy defaults to HTTPS for local development and HTTP in containers or hosted environments (where a reverse proxy typically handles TLS).
 
 When `BasePath` is set (via `ServerArgs`, CLI, or environment variable), Ivy applies ASP.NET Core `UsePathBase()` middleware to ensure routing and link generation work correctly under that prefix.
 

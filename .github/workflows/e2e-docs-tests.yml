@@ -16,11 +16,21 @@ jobs:
       # Setup Node.js (needed for integrated frontend build in dotnet build)
       - uses: voidzero-dev/setup-vp@v1
 
+      # Setup Java (needed for ANTLR4)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+
       # Setup .NET and build backend (triggers frontend build automatically)
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
+
+      - name: Generate HTTPS dev certificate
+        run: dotnet dev-certs https
 
       - name: Build backend
         run: dotnet build src/Ivy.Docs/Ivy.Docs.csproj
@@ -30,7 +40,7 @@ jobs:
           dotnet run --project src/Ivy.Docs/Ivy.Docs.csproj -- --port 5010 --silent &
           echo $! > backend.pid
           # Wait for server to be ready
-          timeout 30 bash -c 'until curl -f http://localhost:5010/ > /dev/null 2>&1; do sleep 1; done'
+          timeout 30 bash -c 'until curl -fk https://localhost:5010/ > /dev/null 2>&1; do sleep 1; done'
 
       - name: Install Playwright Browsers
         working-directory: ./src/frontend
@@ -40,7 +50,7 @@ jobs:
         working-directory: ./src/frontend
         run: npm run e2e:docs
         env:
-          PLAYWRIGHT_BASE_URL: http://localhost:5010
+          PLAYWRIGHT_BASE_URL: https://localhost:5010
 
       # Cleanup backend server
       - name: Stop backend server

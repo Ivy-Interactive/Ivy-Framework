@@ -34,14 +34,14 @@ public class BasicAuthProvider : BasicAuthTokenHandler, IAuthProvider
         }
     }
 
-    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string user, string password, CancellationToken cancellationToken)
+    public Task<LoginResult> LoginAsync(IAuthSession authSession, string user, string password, CancellationToken cancellationToken)
     {
         var found = _users.Any(u => u.user == user && PasswordMatches(user, password, u.hash));
-        if (!found) return Task.FromResult<AuthToken?>(null);
+        if (!found) return Task.FromResult(LoginResult.InvalidCredentials());
 
         var now = DateTimeOffset.UtcNow;
         var authToken = CreateToken(user, now, now.ToUnixTimeSeconds());
-        return Task.FromResult<AuthToken?>(authToken);
+        return Task.FromResult(LoginResult.Success(authToken));
     }
 
     private bool PasswordMatches(string username, string password, string hash)

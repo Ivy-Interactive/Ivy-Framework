@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import Icon from "@/components/Icon";
 import { cn } from "@/lib/utils";
 import { MenuItem } from "@/types/widgets";
-import { ActionRenderer } from "../dataTables/dataTableRowAction/actionRenderer";
+import { ActionRenderer } from "@/widgets/rowAction";
 
 interface TreeItemWidgetProps {
   item: MenuItem;
@@ -70,7 +70,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
       <Collapsible open={isOpen} onOpenChange={(val) => !item.disabled && setIsOpen(val)}>
         <div
           className={cn(
-            "ivy-tree-item group flex items-center gap-1 flex-1 rounded-sm py-1 pr-1 text-sm cursor-pointer select-none outline-none",
+            "ivy-tree-item group flex items-center gap-1 flex-1 rounded-sm px-1 py-0 text-sm cursor-pointer select-none outline-none",
             "hover:bg-accent/50 transition-colors focus-visible:ring-1 focus-visible:ring-ring",
             item.disabled && "opacity-50 cursor-not-allowed",
           )}
@@ -108,12 +108,14 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
               onKeyDown={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
               role="toolbar"
+              aria-label="Row actions"
             >
               {rowActions.map((action) => (
                 <ActionRenderer
                   key={action.tag || action.label}
                   action={action}
                   onActionClick={(clickedAction) => onRowActionClick(item, clickedAction)}
+                  variant="ghost"
                 />
               ))}
             </div>
@@ -143,7 +145,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   return (
     <div
       className={cn(
-        "ivy-tree-item group flex items-center flex-1 gap-1 rounded-sm py-1 pr-1 text-sm cursor-pointer select-none outline-none",
+        "ivy-tree-item group flex items-center flex-1 gap-1 rounded-sm px-1 py-0 text-sm cursor-pointer select-none outline-none",
         "hover:bg-accent/50 transition-colors focus-visible:ring-1 focus-visible:ring-ring",
         item.disabled && "opacity-50 cursor-not-allowed",
       )}
@@ -166,12 +168,14 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
           onKeyDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
           role="toolbar"
+          aria-label="Row actions"
         >
           {rowActions.map((action) => (
             <ActionRenderer
               key={action.tag || action.label}
               action={action}
               onActionClick={(clickedAction) => onRowActionClick(item, clickedAction)}
+              variant="ghost"
             />
           ))}
         </div>

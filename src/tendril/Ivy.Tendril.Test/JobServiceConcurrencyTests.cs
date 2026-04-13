@@ -1,3 +1,4 @@
+using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Test;
@@ -24,13 +25,13 @@ public class JobServiceConcurrencyTests
         // maxConcurrentJobs=0 means all jobs get queued
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 0);
+            null, 0);
 
         var id = service.StartJob("MakePlan", "-Description", "Test Job");
         var job = service.GetJob(id);
 
         Assert.NotNull(job);
-        Assert.Equal("Queued", job.Status);
+        Assert.Equal(JobStatus.Queued, job.Status);
         Assert.Contains("max 0 concurrent jobs", job.StatusMessage);
     }
 
@@ -40,7 +41,7 @@ public class JobServiceConcurrencyTests
         // maxConcurrentJobs=10 and no running jobs — should not queue
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 10);
+            null, 10);
 
         // This will try to launch a process which will fail,
         // but the initial status should be "Running" not "Queued"
@@ -49,7 +50,7 @@ public class JobServiceConcurrencyTests
             var id = service.StartJob("MakePlan", "-Description", "Test Job");
             var job = service.GetJob(id);
             Assert.NotNull(job);
-            Assert.NotEqual("Queued", job.Status);
+            Assert.NotEqual(JobStatus.Queued, job.Status);
         }
         catch
         {
@@ -62,14 +63,14 @@ public class JobServiceConcurrencyTests
     {
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 0);
+            null, 0);
 
         service.StartJob("MakePlan", "-Description", "Job 1");
         service.StartJob("MakePlan", "-Description", "Job 2");
 
         var jobs = service.GetJobs();
         Assert.Equal(2, jobs.Count);
-        Assert.All(jobs, j => Assert.Equal("Queued", j.Status));
+        Assert.All(jobs, j => Assert.Equal(JobStatus.Queued, j.Status));
     }
 
     [Fact]
@@ -77,13 +78,13 @@ public class JobServiceConcurrencyTests
     {
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 0);
+            null, 0);
 
         var id = service.StartJob("MakePlan", "-Description", "Test Job");
         service.StopJob(id);
 
         var job = service.GetJob(id);
         Assert.NotNull(job);
-        Assert.Equal("Stopped", job.Status);
+        Assert.Equal(JobStatus.Stopped, job.Status);
     }
 }

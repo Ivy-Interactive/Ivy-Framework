@@ -4,34 +4,66 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 5010
+# Speeds up JIT for responsive spin-up
+ENV DOTNET_TieredPGO=1
+ENV DOTNET_TC_QuickJitForLoops=1
 
 # Build frontend (Ivy embeds frontend/dist)
 FROM node:24-bookworm-slim AS frontend
 WORKDIR /src
-COPY ["src/frontend/package.json", "src/frontend/pnpm-lock.yaml", "src/frontend/"]
-RUN apt-get update && apt-get install -y curl bash && rm -rf /var/lib/apt/lists/*
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+RUN --mount=type=cache,id=apt-docs-frontend,target=/var/cache/apt \
+    --mount=type=cache,id=apt-docs-frontend-lib,target=/var/lib/apt \
+    apt-get update && apt-get install -y curl bash
 RUN curl -fsSL https://vite.plus | bash
 ENV PATH="/root/.vite-plus/bin:${PATH}"
-RUN cd src/frontend && vp install
+COPY ["src/frontend/package.json", "src/frontend/pnpm-lock.yaml", "src/frontend/"]
+RUN --mount=type=cache,id=pnpm-docs,target=/root/.local/share/pnpm/store \
+    cd src/frontend && vp install
 COPY ["src/frontend/", "src/frontend/"]
 RUN cd src/frontend && vp build
 
 # Build .NET from source (no IVY_PACKAGE_VERSION = use ProjectReference, your changes apply)
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
+ARG TARGETARCH
 WORKDIR /src
-RUN apt-get update && apt-get install -y curl bash build-essential && rm -rf /var/lib/apt/lists/*
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs
-RUN curl -fsSL https://vite.plus | bash
-ENV PATH="/root/.vite-plus/bin:${PATH}"
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+RUN --mount=type=cache,id=apt-docs-build,target=/var/cache/apt \
+    --mount=type=cache,id=apt-docs-build-lib,target=/var/lib/apt \
+    apt-get update && apt-get install -y curl bash build-essential
+# --profile minimal skips rustfmt/clippy — not needed for a release build
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --profile minimal
+ENV PATH="/root/.cargo/bin:/root/.vite-plus/bin:${PATH}"
+
+# Copy only RustServer first so this layer stays cached when only .NET files change
+COPY src/RustServer/ src/RustServer/
+RUN --mount=type=cache,id=cargo-registry-docs,target=/root/.cargo/registry \
+    --mount=type=cache,id=cargo-git-docs,target=/root/.cargo/git \
+    --mount=type=cache,id=cargo-target-docs,target=/src/src/RustServer/target \
+    cd src/RustServer && cargo build --release && \
+    mkdir -p /tmp/rust-artifacts && \
+    find target/release -maxdepth 1 -type f ! -name "*.d" -exec cp {} /tmp/rust-artifacts/ \;
+
 COPY . .
 COPY --from=frontend /src/src/frontend/dist /src/src/frontend/dist
-# Build Rust native libraries before dotnet restore/publish so msbuild can properly pick them up in static ItemGroup evaluation
-RUN cd src/RustServer && cargo build --release
-RUN dotnet restore "src/Ivy.Docs/Ivy.Docs.csproj"
-RUN dotnet publish "src/Ivy.Docs/Ivy.Docs.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Reuse vp binary and already-installed node_modules from the frontend stage
+COPY --from=frontend /root/.vite-plus /root/.vite-plus
+COPY --from=frontend /src/src/frontend/node_modules /src/src/frontend/node_modules
+# Restore Rust artifacts; touch .build-stamp so MSBuild skips BuildFrontend (dist already built above)
+RUN mkdir -p src/RustServer/target/release && \
+    cp /tmp/rust-artifacts/* src/RustServer/target/release/ && \
+    touch src/frontend/dist/.build-stamp
+
+# Publish with ReadyToRun to pre-compile IL to native code for instant container spin-up
+# (restore is intentionally included so runtime packs required by ReadyToRun are downloaded)
+RUN --mount=type=cache,id=nuget-docs,target=/root/.nuget/packages \
+    dotnet publish "src/Ivy.Docs/Ivy.Docs.csproj" \
+    -a ${TARGETARCH:-x64} \
+    -c $BUILD_CONFIGURATION \
+    -o /app/publish \
+    /p:UseAppHost=false \
+    /p:PublishReadyToRun=true
 
 FROM base AS final
 WORKDIR /app

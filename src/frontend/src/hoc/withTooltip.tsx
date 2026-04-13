@@ -1,4 +1,4 @@
-import React, { ComponentType } from "react";
+import React, { ComponentType, forwardRef } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type WithTooltipProps<P> = P &
@@ -9,13 +9,19 @@ type WithTooltipProps<P> = P &
   };
 
 function withTooltip<P extends React.JSX.IntrinsicAttributes>(Component: ComponentType<P>) {
-  return function TooltipHOC(props: WithTooltipProps<P>) {
+  const WithTooltip = forwardRef<unknown, WithTooltipProps<P>>(function TooltipHOC(props, ref) {
     const { tooltipText, className, style, ...restProps } = props;
 
     const ariaLabel = tooltipText && !(restProps as any)["aria-label"] ? tooltipText : undefined;
 
     const componentWithStyles = (
-      <Component className={className} style={style} aria-label={ariaLabel} {...(restProps as P)} />
+      <Component
+        className={className}
+        style={style}
+        aria-label={ariaLabel}
+        ref={ref}
+        {...(restProps as unknown as P)}
+      />
     );
 
     if (!tooltipText) {
@@ -32,7 +38,11 @@ function withTooltip<P extends React.JSX.IntrinsicAttributes>(Component: Compone
         </Tooltip>
       </TooltipProvider>
     );
-  };
+  });
+
+  WithTooltip.displayName = `withTooltip(${Component.displayName || Component.name || "Component"})`;
+
+  return WithTooltip;
 }
 
 export default withTooltip;

@@ -216,6 +216,7 @@ public class TiobeIndexDemo : ViewBase
                             .Bar(new Bar("Rating", 1)
                                     .Radius(8).Fill(Colors.Purple).LegendType(LegendTypes.Square))
                             .Bar(new Bar("Change", 2).Radius(8).Fill(Colors.Orange).LegendType(LegendTypes.Square))
+                            .ReferenceLine(4, null, null)
                             .CartesianGrid(new CartesianGrid().Horizontal())
                             .Tooltip()
                             .XAxis(new XAxis("Language").TickLine(false).AxisLine(false))
@@ -258,6 +259,7 @@ public class DualAxisBarChart : ViewBase
                 .YAxis(new YAxis().Orientation(YAxis.Orientations.Left))
                 .YAxis(new YAxis().Orientation(YAxis.Orientations.Right))
                 .CartesianGrid(new CartesianGrid().Horizontal())
+                .ReferenceLine(null, 5000, null)
                 .Tooltip()
                 .Legend();
     }
@@ -289,7 +291,7 @@ public class DualAxisPolishBarChart : ViewBase
                 polish: chart =>
                 {
                     chart = chart.YAxis(new YAxis().Orientation(YAxis.Orientations.Right));
-                    return chart with
+                    return (chart with
                     {
                         Bars =
                         [
@@ -297,7 +299,7 @@ public class DualAxisPolishBarChart : ViewBase
                             new Bar("ConversionRate").YAxisIndex(1).Fill(Colors.Orange)
                                 .Name("Conversion Rate").Unit("%")
                         ]
-                    };
+                    }).ReferenceLine(2, null, null);
                 }
             )
             .Dimension("Month", e => e.Month)

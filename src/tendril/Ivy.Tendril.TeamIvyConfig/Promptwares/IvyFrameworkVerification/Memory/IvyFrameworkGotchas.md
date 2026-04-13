@@ -213,7 +213,7 @@ if (maxDate) disabledMatcher.push({ after: maxDate });
 - ❌ Don't test actual page navigation (URL change, new page content) in `chrome=false` mode
 - ✅ Test state feedback before navigation (click counters, action logs)
 - ✅ Test beacon discovery and availability (UseNavigationBeacon returns non-null)
-- ✅ Test target apps by navigating directly via URL: `page.goto(\`http://localhost:\${port}/app-id?chrome=false\`)`
+- ✅ Test target apps by navigating directly via URL: `page.goto(\`https://localhost:\${port}/app-id?chrome=false\`)`
 - ✅ Test button enabled/disabled state based on beacon availability
 
 ### Beacon AppId Must Match Full Registered ID
@@ -359,6 +359,7 @@ new DiffView().Diff(diff) with
 |--------|------------|
 | Badge | `getByText()` for text content |
 | ColorInput | `page.locator("input[type='color']")` |
+| FolderInput | `getByPlaceholder()` for text input, `ivy-widget[type="Ivy.FolderInput"]` for widget container |
 | VideoPlayer | `page.locator('video').nth(0)` or `page.locator('iframe').nth(0)` |
 
 📝 VideoPlayer's `.Id()` sets an Ivy-generated short hash, not the value you pass.
@@ -401,6 +402,14 @@ new DiffView().Diff(diff) with
 ✅ **`f.Func((string val) => (object)widget)`**
 📝 Available: `Default()`, `Text()`, `Link()`, `CopyToClipboard()`, `Func<TIn>()`, `Progress()`
 
+## Chart Builder vs Constructor — XAxis/YAxis Availability
+
+### `.ToLineChart()` / `.ToAreaChart()` builders do NOT support `.XAxis()` / `.YAxis()`
+❌ **`data.ToLineChart().Dimension(...).Measure(...).XAxis(new XAxis().Hide())`** — CS1929, `.XAxis()` is not on the builder type
+✅ **`new LineChart(data).Line(new Line("Key")).XAxis(new XAxis("Month").Hide())`** — use the constructor directly
+📝 `.XAxis()` and `.YAxis()` extension methods exist on `BarChart`, `LineChart`, `AreaChart` types, NOT on their builders (`LineChartBuilder<T>`, etc.)
+📝 Similarly, `Line(dataKey, name?)` and `Area(dataKey, stackId?, name?)` — second arg is string, not int index (unlike `Bar(dataKey, colorIndex)`)
+
 ## Component API Quick Reference
 
 | Widget/Type | Missing API | Use Instead |
@@ -415,6 +424,7 @@ new DiffView().Diff(diff) with
 | Layout.Gap() | `Size` param | `bool` or `int` param |
 | RefreshToken | `.Trigger()` | `.Refresh()` or `.Refresh(returnValue)` |
 | CodeInput | Direct instantiation | `.ToCodeInput()` on `IState<string>`, or use `Markdown` with fenced code block |
+| TextInput | `.Label()` | `.Placeholder()` — `.Label()` is `AxisExtensions.Label<T>` which requires `AxisBase<T>`, not `TextInputBase` |
 
 ### App Attribute: `group` Not `path`
 ❌ **`[App(path: new[] { "Tests" })]`** — CS1739
@@ -471,6 +481,14 @@ Don't use `?chrome=false` when testing sidebar labels or navigation items.
 - ✅ Test state feedback before navigation (click counters, action logs)
 - ✅ Test beacon discovery (`UseNavigationBeacon` returns non-null)
 - ✅ Test target apps by navigating directly: `page.goto(\`http://localhost:\${port}/app-id?chrome=false\`)`
+
+### App ID Generation Rules
+- Auto-generated from `namespace/classname` in kebab-case, with **"App" suffix stripped** from class name
+  - `StackedProgressTest.BasicApp` → `stacked-progress-test/basic`
+  - `StackedProgressTest.EdgeCasesApp` → `stacked-progress-test/edge-cases`
+- ❌ **`[App("My Title")]` with explicit title** — creates IDs with spaces (e.g., `My Title`), which causes URL routing issues
+- ✅ **`[App(icon: Icons.X)]` without title** — auto-generates clean kebab-case IDs from namespace/classname
+📝 Use `dotnet run -- --describe` to verify exact registered app IDs.
 
 ### Beacon AppId Must Match Full Registered ID
 ❌ `AppId: "customer-details"` → ✅ `AppId: "my-namespace/customer-details"`
@@ -546,36 +564,47 @@ When passing structured children to widgets:
 3. Register both parent and child in `widgetMap.ts`
 4. Check `widgetNode.children && widgetNode.children.length > 0` before using slot content (empty fragments are truthy)
 
-### Ivy.csproj Rust Binary Build — MSBuild Glob Issue
-❌ `dotnet build` fails with MSB3024 for `*rustserver*.dll` glob
-✅ Create CI/CD artifacts path: `mkdir -p src/RustServer/artifacts/native/win-x64 && cp src/RustServer/target/release/rustserver.dll src/RustServer/artifacts/native/win-x64/`
+## Responsive Design System — Widget-Level Props Not Consumed
 
-## Historical Issues (Fixed)
+### HideOn/ShowOn on Individual Widgets Has No Effect
+❌ **`new Badge("X").HideOn(Breakpoint.Mobile)`** — Badge remains visible at all viewports
+❌ **`new Button("X").ShowOn(Breakpoint.Wide)`** — Button always visible regardless of viewport
+✅ **Layout-level responsive props work**: `Layout.Grid().Columns(responsive)`, `Layout.Horizontal().Orientation(responsive)`, `Layout.Vertical().Gap(responsive)`
+📝 **Why**: Only `StackLayoutWidget.tsx` and `GridLayoutWidget.tsx` consume `responsiveVisible`, `responsiveWidth`, `responsiveHeight`, `responsiveDensity`. No common widget wrapper (widgetRenderer.tsx, ivy-widget) handles these props. Individual widget components (Badge, Button, Box, etc.) receive the props but don't process them.
 
-These bugs have been fixed. Kept for reference in case of regressions.
+### ResponsiveWidth/Height on Individual Widgets Not Effective
+❌ **`new Box(...).Width(Size.Full().At(Breakpoint.Mobile).And(Breakpoint.Desktop, Size.Half()))`** — Box ignores `responsiveWidth`
+✅ **`Layout.Vertical().Width(responsive)`** — StackLayout handles responsive width
+📝 Only StackLayout consumes `responsiveWidth`/`responsiveHeight` on the frontend.
 
-### RadarChart CamelCase Lookup (FIXED)
-`RadarChartWidget.tsx` line 122 used case-sensitive `item[ind.name]` for explicit `.Radar()` config. Fixed to use `getPropertyValue(item, ind.name)` (case-insensitive).
+### ResponsiveDensity Not Consumed Anywhere
+❌ **`new Button("X").Density(Density.Large.At(Breakpoint.Mobile).And(Breakpoint.Desktop, Density.Small))`** — no frontend component handles `responsiveDensity`
+📝 Prop is serialized but silently ignored by all widget components.
 
-### DayOfWeek Enum Serialization (FIXED)
-C# `DayOfWeek` serialized as string but `react-day-picker` `weekStartsOn` expects a number. Fixed with `resolveDayOfWeek()` in `DateTimeInputWidget.tsx` and `DateRangeInputWidget.tsx`.
+### Mobile-First Cascading May Surprise with HideOn
+📝 `HideOn(Breakpoint.Mobile)` creates `{ default: true, mobile: false }`. With mobile-first cascading, `false` cascades to tablet, desktop, and wide — effectively hiding at ALL viewports. The API name suggests "hide only on mobile" but the cascading behavior produces "hide everywhere."
 
-### Video PlaybackRate Browser Reset (FIXED)
-Setting only `videoElement.playbackRate` in useEffect was reset during media load. Fixed by setting both `defaultPlaybackRate` and `playbackRate`, plus re-applying in `onLoadedData` handler.
+## ImmutableArray Default Value Crash
 
-### SignatureInput OnChange Not Wired (FIXED)
-`OnChange => null` (expression-body) meant OnChange was never set. Fixed to `OnChange { get; }` with constructor wiring. Also: frontend must strip `data:` prefix from `canvas.toDataURL()` before sending to C# byte[] deserialization.
+### UseState<ImmutableArray<T>>() creates uninitialized array
+❌ **`UseState<ImmutableArray<FileUpload<byte[]>>>()`** — default `ImmutableArray<T>` is uninitialized (`IsDefault = true`); accessing `.Length`, iterating, or calling `.Select()` throws `InvalidOperationException: This operation cannot be performed on a default instance of ImmutableArray`
+✅ **`UseState(() => ImmutableArray<FileUpload<byte[]>>.Empty)`** — explicitly initialize with `.Empty`
+📝 **Why**: `default(ImmutableArray<T>)` has a null backing array (unlike `List<T>` which is just empty). The `UseState<T>()` overload without initializer uses `default(T)`, which for `ImmutableArray` produces an unusable instance. Always use the `Func<T>` overload with `.Empty`.
 
-### DataTable Custom Header Icons — Three Bugs (FIXED)
-1. `mapColumnIcon()` discarded custom icon names (returned `GridColumnIcon.HeaderString`)
-2. `showColumnTypeIcons` gate blocked explicit icons
-3. CamelCase mismatch between dictionary keys and Icon values
+## Ivy Server Always Uses HTTPS
 
-### FileDialog Upload Mode Prop Stripped (FIXED)
-`FileDialogMode.Upload` (enum value 0) was stripped by WidgetSerializer. Fixed with `mode = 'Upload'` default in `FileDialogWidget.tsx`.
+### Health check and Playwright must use HTTPS
+❌ **`http.get(\`http://localhost:\${port}\`)`** — connection refused or no response; Ivy binds to HTTPS only
+✅ **`https.get(\`https://localhost:\${port}\`, { rejectUnauthorized: false })`** — use `https` module with self-signed cert bypass
+✅ **`ignoreHTTPSErrors: true`** in Playwright config `use` block — required for all page navigation
+📝 **Why**: Ivy's `Server` class configures Kestrel with HTTPS by default (dev certificate). There is no HTTP endpoint. All `waitForServer` health checks, `page.goto()`, and WebSocket connections must use `https://` / `wss://`.
 
-### WidgetSerializer Default Enum Value Stripping (FIXED)
-Number columns had `type: undefined` because `ColType.Number` (enum 0) was stripped. Fixed with null guards in `calculateAutoWidth.ts` and `cellContent.ts`. See "Ongoing Pattern" in Serialization section for remaining guard needs.
+## TableBuilder.Header() Requires Label Parameter
+
+### `.Header(expr)` is not valid — second arg is mandatory
+❌ **`products.ToTable().Header(p => p.Name)`** — CS7036: no argument for required parameter `label`
+✅ **`products.ToTable().Header(p => p.Name, "Name")`** — always provide the display label
+📝 **Why**: `TableBuilder<T>.Header(Expression<Func<T, object>>, string)` has `label` as a required parameter, not optional. Unlike DataTable which auto-derives column names, the simple Table widget requires explicit labels.
 
 ## Future Gotchas
 

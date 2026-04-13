@@ -1,11 +1,7 @@
-using System.Collections.Immutable;
-using System.Linq;
 using System.Threading.Tasks;
-using Ivy.Analyser.Analyzers;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Xunit;
+using VerifyCS = Ivy.Analyser.Test.CSharpAnalyzerVerifier<
+    Ivy.Analyser.Analyzers.UseServiceInterfaceAnalyzer>;
 
 namespace Ivy.Analyser.Test;
 
@@ -36,50 +32,25 @@ namespace TestServices
 }
 ";
 
-    private static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source)
-    {
-        var syntaxTree = CSharpSyntaxTree.ParseText(Stubs + source);
-        var references = new[]
-        {
-            MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-        };
-
-        var runtimeDir = System.IO.Path.GetDirectoryName(typeof(object).Assembly.Location)!;
-        var runtimeRef = MetadataReference.CreateFromFile(System.IO.Path.Combine(runtimeDir, "System.Runtime.dll"));
-
-        var compilation = CSharpCompilation.Create("TestAssembly",
-            new[] { syntaxTree },
-            references.Append(runtimeRef),
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-        var analyzer = new UseServiceInterfaceAnalyzer();
-        var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
-        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-    }
-
     [Fact]
     public async Task ConcreteType_WithInterface_ReportsWarning()
     {
-        var source = @"
+        var test = Stubs + @"
 class MyView : Ivy.ViewBase
 {
     public override object Build()
     {
-        var config = UseService<ConfigService>();
+        var config = UseService<{|IVYSERVICE001:ConfigService|}>();
         return new object();
     }
 }";
-
-        var diagnostics = await GetDiagnosticsAsync(source);
-        Assert.Single(diagnostics);
-        Assert.Equal(UseServiceInterfaceAnalyzer.DiagnosticId, diagnostics[0].Id);
-        Assert.Contains("ConfigService", diagnostics[0].GetMessage());
+        await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
     [Fact]
     public async Task InterfaceType_NoDiagnostic()
     {
-        var source = @"
+        var test = Stubs + @"
 class MyView : Ivy.ViewBase
 {
     public override object Build()
@@ -88,15 +59,13 @@ class MyView : Ivy.ViewBase
         return new object();
     }
 }";
-
-        var diagnostics = await GetDiagnosticsAsync(source);
-        Assert.Empty(diagnostics);
+        await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
     [Fact]
     public async Task ConcreteType_WithoutInterface_NoDiagnostic()
     {
-        var source = @"
+        var test = Stubs + @"
 class MyView : Ivy.ViewBase
 {
     public override object Build()
@@ -105,65 +74,53 @@ class MyView : Ivy.ViewBase
         return new object();
     }
 }";
-
-        var diagnostics = await GetDiagnosticsAsync(source);
-        Assert.Empty(diagnostics);
+        await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
     [Fact]
     public async Task ThisQualified_ConcreteType_ReportsWarning()
     {
-        var source = @"
+        var test = Stubs + @"
 class MyView : Ivy.ViewBase
 {
     public override object Build()
     {
-        var job = this.UseService<JobService>();
+        var job = this.UseService<{|IVYSERVICE001:JobService|}>();
         return new object();
     }
 }";
-
-        var diagnostics = await GetDiagnosticsAsync(source);
-        Assert.Single(diagnostics);
-        Assert.Equal(UseServiceInterfaceAnalyzer.DiagnosticId, diagnostics[0].Id);
-        Assert.Contains("JobService", diagnostics[0].GetMessage());
+        await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
     [Fact]
     public async Task NonBuildMethod_StillChecked()
     {
-        var source = @"
+        var test = Stubs + @"
 class MyView : Ivy.ViewBase
 {
     public override object Build() { return new object(); }
 
     public void SomeMethod()
     {
-        var config = UseService<ConfigService>();
+        var config = UseService<{|IVYSERVICE001:ConfigService|}>();
     }
 }";
-
-        var diagnostics = await GetDiagnosticsAsync(source);
-        Assert.Single(diagnostics);
-        Assert.Equal(UseServiceInterfaceAnalyzer.DiagnosticId, diagnostics[0].Id);
+        await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
     [Fact]
     public async Task MultipleViolations_ReportsAll()
     {
-        var source = @"
+        var test = Stubs + @"
 class MyView : Ivy.ViewBase
 {
     public override object Build()
     {
-        var config = UseService<ConfigService>();
-        var job = UseService<JobService>();
+        var config = UseService<{|IVYSERVICE001:ConfigService|}>();
+        var job = UseService<{|IVYSERVICE001:JobService|}>();
         return new object();
     }
 }";
-
-        var diagnostics = await GetDiagnosticsAsync(source);
-        Assert.Equal(2, diagnostics.Length);
-        Assert.All(diagnostics, d => Assert.Equal(UseServiceInterfaceAnalyzer.DiagnosticId, d.Id));
+        await VerifyCS.VerifyAnalyzerAsync(test);
     }
 }

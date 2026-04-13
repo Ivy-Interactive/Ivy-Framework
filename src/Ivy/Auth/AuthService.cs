@@ -31,19 +31,19 @@ public class AuthService : AuthTokenHandlerService, IAuthService
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
+    public async Task<LoginResult> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
         var oldSession = _authSession.TakeSnapshot();
 
-        var token = await TimeoutHelper.WithTimeoutAsync(ct =>
+        var result = await TimeoutHelper.WithTimeoutAsync(ct =>
             _authProvider.LoginAsync(_authSession, email, password, ct), cancellationToken);
-        _authSession.AuthToken = token;
+        _authSession.AuthToken = result.Token;
 
         if (_authSession.HasChangedSince(oldSession))
         {
             SetAuthCookies(reloadPage: _authSession.AuthToken != oldSession.AuthToken);
         }
-        return token;
+        return result;
     }
 
     public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)

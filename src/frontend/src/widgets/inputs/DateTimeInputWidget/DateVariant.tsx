@@ -35,9 +35,11 @@ export const DateVariant: React.FC<DateVariantProps> = ({
   const [open, setOpen] = useState(false);
 
   const hasAutoFocusedRef = useRef(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
+      buttonRef.current?.focus();
       setOpen(true);
     }
   }, [autoFocus, disabled]);
@@ -79,9 +81,9 @@ export const DateVariant: React.FC<DateVariantProps> = ({
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
+            ref={buttonRef}
             disabled={disabled}
             variant="outline"
-            autoFocus={autoFocus}
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),

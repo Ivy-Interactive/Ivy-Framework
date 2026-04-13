@@ -20,6 +20,12 @@ public class GridView : ViewBase, IStateless
         return this;
     }
 
+    public GridView Columns(Responsive<int?> columns)
+    {
+        _definition.ResponsiveColumns = columns;
+        return this;
+    }
+
     public GridView Rows(int rows)
     {
         _definition.Rows = rows;
@@ -48,6 +54,18 @@ public class GridView : ViewBase, IStateless
     public GridView Padding(int padding)
     {
         _definition.Padding = new(padding);
+        return this;
+    }
+
+    public GridView Padding(int horizontal, int vertical)
+    {
+        _definition.Padding = new(horizontal, vertical);
+        return this;
+    }
+
+    public GridView Padding(int left, int top, int right, int bottom)
+    {
+        _definition.Padding = new(left, top, right, bottom);
         return this;
     }
 

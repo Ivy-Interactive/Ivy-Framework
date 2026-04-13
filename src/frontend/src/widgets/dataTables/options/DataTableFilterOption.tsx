@@ -277,6 +277,7 @@ export const DataTableFilterOption: React.FC<{
         }
       }}
       role="button"
+      aria-label="Edit filter"
       tabIndex={0}
       className={cn(
         "flex items-center w-full h-full justify-between",

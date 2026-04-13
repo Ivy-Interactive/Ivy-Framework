@@ -4,14 +4,15 @@ using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Drafts", icon: Icons.Feather, group: new[] { "Tools" }, order: MenuOrder.Drafts)]
+[App(title: "Drafts", icon: Icons.Feather, group: ["Apps"], order: MenuOrder.Drafts)]
 public class PlansApp : ViewBase
 {
-    public override object? Build()
+    public override object Build()
     {
         var planService = UseService<IPlanReaderService>();
         var jobService = UseService<IJobService>();
         var configService = UseService<IConfigService>();
+        var gitService = UseService<IGitService>();
         var planWatcher = UseService<IPlanWatcherService>();
         var selectedPlanState = UseState<PlanFile?>(null);
         var projectFilter = UseState<string?>(null);
@@ -21,24 +22,26 @@ public class PlansApp : ViewBase
 
         UseEffect(() =>
         {
-            void OnChanged() => refreshToken.Refresh();
+            void OnChanged(string? _)
+            {
+                refreshToken.Refresh();
+            }
+
             planWatcher.PlansChanged += OnChanged;
             return Disposable.Create(() => planWatcher.PlansChanged -= OnChanged);
         });
 
-        var previousPlans = UseRef<List<PlanFile>>(new List<PlanFile>());
+        var previousPlans = UseRef(new List<PlanFile>());
 
         var plans = planService.GetPlans()
-            .Where(p => p.Status is PlanStatus.Draft or PlanStatus.Failed)
+            .Where(p => p.Status is PlanStatus.Draft or PlanStatus.Blocked)
             .ToList();
-        var filteredPlans = PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value).ToList();
+        var filteredPlans = PlanFilters.ApplyFilters(plans, projectFilter.Value, levelFilter.Value, textFilter.Value)
+            .ToList();
 
-        if (selectedPlanState.Value == null && filteredPlans.Count > 0)
-        {
-            selectedPlanState.Set(filteredPlans[0]);
-        }
+        if (selectedPlanState.Value == null && filteredPlans.Count > 0) selectedPlanState.Set(filteredPlans[0]);
 
-        if (selectedPlanState.Value is { } selected && !filteredPlans.Any(p => p.FolderName == selected.FolderName))
+        if (selectedPlanState.Value is { } selected && filteredPlans.All(p => p.FolderName != selected.FolderName))
         {
             var oldIndex = previousPlans.Value.FindIndex(p => p.FolderName == selected.FolderName);
 
@@ -55,16 +58,17 @@ public class PlansApp : ViewBase
 
         previousPlans.Value = filteredPlans;
 
+        var sidebar = new SidebarView(plans, selectedPlanState, projectFilter, levelFilter, textFilter, configService);
+
+        return new SidebarLayout(
+            new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService,
+                RefreshPlans, configService, gitService),
+            sidebar
+        );
+
         void RefreshPlans()
         {
             refreshToken.Refresh();
         }
-
-        var sidebar = new SidebarView(plans, selectedPlanState, projectFilter, levelFilter, textFilter, configService);
-
-        return new SidebarLayout(
-            mainContent: new ContentView(selectedPlanState.Value, filteredPlans, selectedPlanState, planService, jobService, RefreshPlans, configService),
-            sidebarContent: sidebar
-        );
     }
 }

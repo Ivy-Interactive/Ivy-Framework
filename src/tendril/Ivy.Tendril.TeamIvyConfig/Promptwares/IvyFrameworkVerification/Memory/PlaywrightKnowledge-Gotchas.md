@@ -87,6 +87,8 @@
 
 - `Layout.Horizontal().Gap()` takes `bool`, not `Size` — use `Gap(true)` or omit
 - **Stale obj cache**: When switching branches in worktrees, `src/Ivy/obj/` can reference old frontend asset filenames. Delete obj/bin and rebuild.
+- **Worktree deep path breaks `vp run build`**: MSBuild's `BuildFrontend` target runs `vp run build` (which calls `tsc -b && vp build`) and fails in deep worktree paths because vite emits relative `../` paths. Workaround: (1) build frontend manually `cd worktree/src/frontend && vp build` (or `npx vite build` to skip tsc), (2) create stamp `touch worktree/src/frontend/dist/.build-stamp` **AFTER** the build (vp build cleans dist/), (3) clean Ivy obj/bin `rm -rf worktree/src/Ivy/obj/Debug worktree/src/Ivy/bin/Debug`, (4) build Ivy.dll from worktree `cd worktree/src/Ivy && dotnet build`, (5) then build sample project.
+- **Launcher pre-build may silently fail**: If the worktree frontend build fails, `dist/` contains only SVGs and `.build-stamp` but no `index.html` or JS bundles. The Ivy.dll gets built without frontend assets, causing `Error: Ivy.index.html not found.` at runtime. **Detection**: Check if `dist/index.html` exists. If not, manually run `npx vite build` in `src/frontend/`, then clean and rebuild Ivy.dll.
 - `test.use({ video })` CANNOT be inside `test.describe()` — must be top-level in the file
 - `Dictionary<TKey, TValue>.ToDetails()` crashes with `TargetParameterCountException` — convert to anonymous object first
 - `DataTableBuilder.Header(r => r.Values[colIndex], ...)` crashes — `GetNameFromMemberExpression` only handles simple member access, not indexers

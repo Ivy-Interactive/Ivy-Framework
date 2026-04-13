@@ -58,6 +58,12 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   showLabel = true,
 }) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const [prevDefaultExpanded, setPrevDefaultExpanded] = useState(defaultExpanded);
+
+  if (defaultExpanded !== prevDefaultExpanded) {
+    setPrevDefaultExpanded(defaultExpanded);
+    setExpanded(defaultExpanded);
+  }
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to collapse

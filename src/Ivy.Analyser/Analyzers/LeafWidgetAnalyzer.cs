@@ -62,7 +62,8 @@ namespace Ivy.Analyser.Analyzers
             "Ivy.PieChart",
             "Ivy.BarChart",
             "Ivy.AreaChart",
-            "Ivy.Tooltip"
+            "Ivy.Tooltip",
+            "Ivy.Spacer"
         ];
 
         private static readonly HashSet<string> LeafInterfaceTypes = new()

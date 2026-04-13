@@ -11,28 +11,20 @@ icon: ChartBar
 # Dashboard
 
 <Ingress>
-The Dashboard provides a high-level overview of your Tendril activity, including plan counts, cost tracking, and token usage charts.
+Landing view: plan counts, spend and tokens, and recent activity across projects.
 </Ingress>
 
-## Overview
+## What you see
 
-The Dashboard is the default landing page when you open Tendril. It shows:
+- **Plan counts** — Stacked bar by state (Draft, in flight, Review, Completed, …).
+- **Cost / tokens** — Bars for burn rate and where spend goes.
+- **Activity** — Recent plan changes with status, project, cost, timestamps.
 
-- **Plan counts by state** — A stacked progress bar showing how many plans are in each lifecycle state
-- **Cost and token charts** — Bar charts showing spending and token usage over time
-- **Activity table** — Recent plans with their status, project, cost, and timestamps
+## Filters
 
-## Filtering
+- **Project** — Click a segment in the stacked bar to scope metrics to one repo.
+- **Time** — e.g. last 24 hours, this week.
 
-You can filter the dashboard by:
+## Where costs come from
 
-- **Project** — Click on a project segment in the stacked progress bar
-- **Time period** — Select a date range to focus on specific activity
-
-## Cost Tracking
-
-The dashboard aggregates cost data from all plan `costs.csv` files. Costs are broken down by:
-
-- Project (color-coded)
-- Time period (hourly/daily)
-- Promptware type
+Each job appends rows to that plan’s `costs.csv`. The Dashboard reads these under `TENDRIL_HOME` and charts by project (colors from Settings), promptware type, and input vs. output tokens.

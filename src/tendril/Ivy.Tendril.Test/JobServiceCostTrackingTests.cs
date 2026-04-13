@@ -5,6 +5,40 @@ namespace Ivy.Tendril.Test;
 
 public class JobServiceCostTrackingTests
 {
+    private static string? FindTestScriptPath()
+    {
+        var relativeCandidates = new[]
+        {
+            Path.Combine("TestScripts", "TestSessionId.ps1"),
+            Path.Combine("Ivy.Tendril.Test", "TestScripts", "TestSessionId.ps1"),
+            Path.Combine("src", "tendril", "Ivy.Tendril.Test", "TestScripts", "TestSessionId.ps1")
+        };
+
+        var candidateRoots = new[]
+        {
+            System.AppContext.BaseDirectory,
+            Directory.GetCurrentDirectory()
+        };
+
+        foreach (var root in candidateRoots)
+        {
+            var dir = new DirectoryInfo(root);
+            while (dir != null)
+            {
+                foreach (var relativeCandidate in relativeCandidates)
+                {
+                    var candidate = Path.Combine(dir.FullName, relativeCandidate);
+                    if (File.Exists(candidate))
+                        return candidate;
+                }
+
+                dir = dir.Parent;
+            }
+        }
+
+        return null;
+    }
+
     private static JobService CreateService()
     {
         return new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
@@ -41,16 +75,58 @@ public class JobServiceCostTrackingTests
     }
 
     [Fact]
+    public void StartJob_SetsProviderFromConfig()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), $"tendril-test-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempDir);
+        try
+        {
+            var settings = new TendrilSettings { CodingAgent = "codex" };
+            var configService = new ConfigService(settings, tempDir);
+            var service = new JobService(configService);
+
+            var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+            var job = service.GetJob(id);
+
+            Assert.NotNull(job);
+            Assert.Equal("codex", job.Provider);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void StartJob_DefaultsProviderToClaude()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), $"tendril-test-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempDir);
+        try
+        {
+            var settings = new TendrilSettings();
+            var configService = new ConfigService(settings, tempDir);
+            var service = new JobService(configService);
+
+            var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+            var job = service.GetJob(id);
+
+            Assert.NotNull(job);
+            Assert.Equal("claude", job.Provider);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
     public async Task LaunchJob_PassesSessionIdToChildProcess()
     {
         // Arrange
-        var testScriptPath = Path.Combine(
-            System.AppContext.BaseDirectory,
-            "..", "..", "..",
-            "TestScripts",
-            "TestSessionId.ps1");
+        var testScriptPath = FindTestScriptPath();
 
-        Assert.True(File.Exists(testScriptPath),
+        Assert.True(testScriptPath != null && File.Exists(testScriptPath),
             $"Test script not found at {testScriptPath}");
 
         var sessionId = Guid.NewGuid().ToString();

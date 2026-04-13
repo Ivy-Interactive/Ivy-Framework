@@ -44,10 +44,6 @@
     <None Include=".samples\**\*" CopyToOutputDirectory="Never" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include=".samples\.console\" />
-  </ItemGroup>
-
   <Import Project="..\..\Ivy\Build\Ivy.ExternalWidget.targets" />
 
 </Project>

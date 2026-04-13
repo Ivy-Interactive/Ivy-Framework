@@ -1,3 +1,4 @@
+using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Test;
@@ -9,7 +10,7 @@ public class JobServiceThreadSafetyTests
         // Use maxConcurrentJobs=1 and start a fake job that gets queued by filling the slot first
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 1);
+            null, 1);
 
         // Start a job that will try to launch (and fail since no script exists).
         // Use try/catch since process launch may throw in test environment.
@@ -37,7 +38,7 @@ public class JobServiceThreadSafetyTests
         {
             var service = new JobService(
                 TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-                inboxPath: null, maxConcurrentJobs: 1);
+                null, 1);
 
             var invoked = false;
             service.JobsChanged += () => invoked = true;
@@ -66,7 +67,7 @@ public class JobServiceThreadSafetyTests
 
         var service = new JobService(
             TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-            inboxPath: null, maxConcurrentJobs: 1);
+            null, 1);
 
         var invoked = false;
         service.JobsChanged += () => invoked = true;
@@ -86,7 +87,7 @@ public class JobServiceThreadSafetyTests
         {
             var service = new JobService(
                 TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
-                inboxPath: null, maxConcurrentJobs: 1);
+                null, 1);
 
             var invokeCount = 0;
             service.JobsChanged += () => Interlocked.Increment(ref invokeCount);
@@ -108,6 +109,29 @@ public class JobServiceThreadSafetyTests
         {
             SynchronizationContext.SetSynchronizationContext(null);
         }
+    }
+
+    [Fact]
+    public void CompleteJob_CalledTwice_DoesNotThrowSemaphoreFullException()
+    {
+        SynchronizationContext.SetSynchronizationContext(null);
+
+        var service = new JobService(
+            TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10),
+            null, 2);
+
+        var jobId = service.CreateTestJob("ExecutePlan", "test-plan");
+
+        // First call should succeed and transition the job out of Running
+        service.CompleteJob(jobId, 0);
+
+        var job = service.GetJob(jobId);
+        Assert.NotNull(job);
+        Assert.Equal(JobStatus.Completed, job.Status);
+
+        // Second call should be a no-op (status guard prevents double release)
+        var ex = Record.Exception(() => service.CompleteJob(jobId, null, true, true));
+        Assert.Null(ex);
     }
 
     private class TestSynchronizationContext : SynchronizationContext

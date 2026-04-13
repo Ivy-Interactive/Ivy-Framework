@@ -12,6 +12,7 @@ import {
   timerSizeVariant,
   iconSizeVariant,
 } from "@/components/ui/input/audio-input-variant";
+import { uploadFile } from "@/widgets/filePicker/shared";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
 interface AudioInputWidgetProps {
@@ -40,6 +41,61 @@ const supportedMimeTypes = [
   "audio/wav", // uncompressed fallback (always supported, large files)
 ];
 
+type AudioState = {
+  recording: boolean;
+  error: boolean;
+  mimeSupportError: boolean;
+  recordingStartedAt: number | null;
+  recordingStoppedAt: number | null;
+  volume: number;
+};
+
+type AudioAction =
+  | { type: "START_RECORDING" }
+  | { type: "STOP_RECORDING" }
+  | { type: "SET_ERROR"; mimeSupport?: boolean }
+  | { type: "SET_VOLUME"; volume: number }
+  | { type: "SET_STARTED_AT"; timestamp: number | null }
+  | { type: "SET_STOPPED_AT"; timestamp: number | null }
+  | { type: "RESET" };
+
+const initialState: AudioState = {
+  recording: false,
+  error: false,
+  mimeSupportError: false,
+  recordingStartedAt: null,
+  recordingStoppedAt: null,
+  volume: 0,
+};
+
+function audioReducer(state: AudioState, action: AudioAction): AudioState {
+  switch (action.type) {
+    case "START_RECORDING":
+      return {
+        ...state,
+        recording: true,
+        error: false,
+        mimeSupportError: false,
+        recordingStartedAt: null,
+        recordingStoppedAt: null,
+      };
+    case "STOP_RECORDING":
+      return { ...state, recording: false };
+    case "SET_ERROR":
+      return { ...state, error: true, mimeSupportError: !!action.mimeSupport, recording: false };
+    case "SET_VOLUME":
+      return { ...state, volume: action.volume };
+    case "SET_STARTED_AT":
+      return { ...state, recordingStartedAt: action.timestamp };
+    case "SET_STOPPED_AT":
+      return { ...state, recordingStoppedAt: action.timestamp };
+    case "RESET":
+      return initialState;
+    default:
+      return state;
+  }
+}
+
 export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
   id,
   label,
@@ -57,14 +113,17 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
   const hasAutoFocusedRef = useRef(false);
+  const [state, dispatch] = React.useReducer(audioReducer, initialState);
+  const { recording, error, mimeSupportError, recordingStartedAt, recordingStoppedAt, volume } =
+    state;
 
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
-      setRecording(true);
-      setError(false);
+      dispatch({ type: "START_RECORDING" });
     }
   }, [autoFocus, disabled]);
+
   const normalizedMimeTypes = useMemo(() => {
     const candidates: string[] = [];
     const addCandidate = (value?: string) => {
@@ -86,33 +145,13 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
     async (chunk: Blob): Promise<void> => {
       if (!uploadUrl) return;
 
-      // Get the correct host from meta tag or use relative URL
-      const getUploadUrl = () => {
-        const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
-        if (ivyHostMeta) {
-          const host = ivyHostMeta.getAttribute("content");
-          return host + uploadUrl;
-        }
-        // If no meta tag, use relative URL (should work in production)
-        return uploadUrl;
-      };
-
       const selectedMime =
         selectedMimeTypeRef.current ?? normalizedMimeTypes[0] ?? supportedMimeTypes[0];
 
-      const formData = new FormData();
-      formData.append("file", chunk);
-      formData.append("mimeType", selectedMime);
-
       try {
-        const response = await fetch(getUploadUrl(), {
-          method: "POST",
-          body: formData,
+        await uploadFile(uploadUrl, chunk, {
+          extraFields: { mimeType: selectedMime },
         });
-
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
-        }
       } catch (error) {
         logger.error("File upload error:", error);
       }
@@ -120,22 +159,10 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
     [uploadUrl, normalizedMimeTypes],
   );
 
-  const [recording, setRecording] = useState(false);
-  const [error, setError] = useState(false);
-  const [mimeSupportError, setMimeSupportError] = useState(false);
-
-  const [recordingStartedAt, setRecordingStartedAt] = useState<number | null>(null);
-  const [recordingStoppedAt, setRecordingStoppedAt] = useState<number | null>(null);
-
-  const [volume, setVolume] = useState(0);
-
   useEffect(() => {
     if (!recording) {
       return;
     }
-    setRecordingStartedAt(null);
-    setRecordingStoppedAt(null);
-    setMimeSupportError(false);
 
     let cancelled = false;
     let onCancel = () => {};
@@ -175,9 +202,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
             mediaRecorderAvailable,
             canProbeTypeSupport,
           });
-          setError(true);
-          setMimeSupportError(true);
-          setRecording(false);
+          dispatch({ type: "SET_ERROR", mimeSupport: true });
           return;
         }
 
@@ -219,7 +244,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
         };
 
         mediaRecorder.start(chunkInterval);
-        setRecordingStartedAt(Date.now());
+        dispatch({ type: "SET_STARTED_AT", timestamp: Date.now() });
 
         const analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
@@ -229,7 +254,7 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
           if (cancelled) return;
           analyser.getByteFrequencyData(dataArray);
           const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-          setVolume(avg); // Range: 0 - 255
+          dispatch({ type: "SET_VOLUME", volume: avg });
           requestAnimationFrame(updateVolume);
         };
         updateVolume();
@@ -241,15 +266,14 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
         };
       } catch (err) {
         logger.error("Error accessing microphone:", err);
-        setError(true);
-        setRecording(false);
+        dispatch({ type: "SET_ERROR" });
       }
     })();
     return () => {
       cancelled = true;
       selectedMimeTypeRef.current = null;
       onCancel();
-      setRecordingStoppedAt(Date.now());
+      dispatch({ type: "SET_STOPPED_AT", timestamp: Date.now() });
     };
   }, [recording, chunkInterval, sampleRate, uploadChunk, normalizedMimeTypes]);
 
@@ -269,14 +293,14 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
             : (e) => {
                 e.stopPropagation();
                 if (recording) {
-                  setRecording(false);
+                  dispatch({ type: "STOP_RECORDING" });
                 } else {
-                  setRecording(true);
-                  setError(false);
+                  dispatch({ type: "START_RECORDING" });
                 }
               }
         }
         role="button"
+        aria-label={recording ? "Stop recording" : "Start recording"}
         tabIndex={disabled ? -1 : 0}
         onBlur={(e) => {
           if (disabled) return;
@@ -296,10 +320,9 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
             e.preventDefault();
             e.stopPropagation();
             if (recording) {
-              setRecording(false);
+              dispatch({ type: "STOP_RECORDING" });
             } else {
-              setRecording(true);
-              setError(false);
+              dispatch({ type: "START_RECORDING" });
             }
           }
         }}
@@ -349,27 +372,33 @@ function SecondsCounter(props: {
   density?: Densities;
 }) {
   const [seconds, setSeconds] = useState(0);
+  const prevStart = useRef(props.start);
+  const prevStopped = useRef(props.stopped);
+
   useEffect(() => {
-    if (typeof props.start !== "number") {
-      queueMicrotask(() => setSeconds(0));
-      return;
+    if (props.start !== prevStart.current || props.stopped !== prevStopped.current) {
+      prevStart.current = props.start;
+      prevStopped.current = props.stopped;
+
+      if (typeof props.start !== "number") {
+        setSeconds(0);
+        return;
+      }
+      if (typeof props.stopped === "number" && typeof props.start === "number") {
+        setSeconds(Math.floor((props.stopped - props.start) / 1000));
+        return;
+      }
     }
-    if (typeof props.stopped === "number" && typeof props.start === "number") {
-      const stopped = props.stopped;
+
+    if (typeof props.start === "number" && typeof props.stopped !== "number") {
       const start = props.start;
-      queueMicrotask(() => {
-        setSeconds(Math.floor((stopped - start) / 1000));
-      });
-      return;
+      const interval = setInterval(() => {
+        setSeconds(Math.floor((Date.now() - start) / 1000));
+      }, 100);
+      return () => clearInterval(interval);
     }
-    const start = props.start;
-    const interval = setInterval(() => {
-      setSeconds(Math.floor((Date.now() - start) / 1000));
-    }, 100);
-    return () => {
-      clearInterval(interval);
-    };
   }, [props.start, props.stopped]);
+
   return (
     <p className={cn("text-center", timerSizeVariant({ density: props.density }))}>
       {Math.floor(seconds / 60)

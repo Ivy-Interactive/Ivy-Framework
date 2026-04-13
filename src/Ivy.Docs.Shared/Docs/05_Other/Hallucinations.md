@@ -5,42 +5,6 @@ hidden: true
 
 Known cases where the agent hallucinated Ivy Framework APIs. Use this as a reference when debugging build errors in agent sessions.
 
-## Badge.Color(Colors.X) — non-existent fluent method
-
-**Hallucinated API:**
-
-```csharp
-new Badge(match.Value).Color(Colors.Green)
-new Badge("No match").Color(Colors.Red)
-```
-
-**Correct API:**
-
-```csharp
-// Via constructor variant parameter:
-new Badge(match.Value, BadgeVariant.Success)
-
-// Via fluent shortcut methods:
-new Badge(match.Value).Success()
-new Badge("No match").Destructive()
-
-// Via explicit Variant() method:
-new Badge(match.Value).Variant(BadgeVariant.Info)
-```
-
-Available `BadgeVariant` values: `Primary`, `Destructive`, `Secondary`, `Outline`, `Success`, `Warning`, `Info`. The agent confused `LabelExtensions.Color(Label, Colors)` (which exists for `Label`) with a Badge method. Badge uses `BadgeVariant`, not `Colors`.
-
-**Found In:**
-3c507fb4-71e1-4136-9d40-8eca6590250d
-ce144de9-0688-490a-bef6-b2766e323154
-642d3167-790d-48c4-a381-bfab78f928cc
-857de09c-ab87-49a5-aac4-394f7d0aa207
-86908281-cc6f-4973-a9c7-1c0186c013d2
-0c7c0b33-a500-45c2-911b-b33ca1f9662e
-6c834561-6c01-424b-b8fb-a4a473c1c86a
-c9185561-51f5-4c76-ae5b-7448f5a68a0f
-8b576f86-85cc-43b8-97e2-358bae83464a
-
 ## Details() — empty constructor instead of passing items
 
 **Hallucinated API:**
@@ -75,6 +39,47 @@ e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
 ee364ec5-064f-4d9c-a63c-b04a4a4bbbdc
 ba29e58f-4fb0-48ac-851d-0d88b390a03a
 7cac06c3-b2d0-406f-9271-24073cb42ef1
+6213854f-2a50-41a0-a31d-fc6106b73625
+
+## ChatMessage — ambiguous reference between Microsoft.Extensions.AI and Ivy
+
+**Hallucinated API:**
+
+```csharp
+var messages = new List<ChatMessage>
+{
+    new ChatMessage(ChatRole.System, "You are a helpful assistant."),
+    new ChatMessage(ChatRole.User, content)
+};
+```
+
+**Error:** `CS0104: 'ChatMessage' is an ambiguous reference between 'Microsoft.Extensions.AI.ChatMessage' and 'Ivy.ChatMessage'`
+
+**Correct API:**
+
+```csharp
+// Fully qualify the namespace:
+var messages = new List<Microsoft.Extensions.AI.ChatMessage>
+{
+    new(Microsoft.Extensions.AI.ChatRole.System, "You are a helpful assistant."),
+    new(Microsoft.Extensions.AI.ChatRole.User, content)
+};
+
+// Or add a using alias at the top of the file:
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
+using ChatRole = Microsoft.Extensions.AI.ChatRole;
+```
+
+When using `IChatClient` from `Microsoft.Extensions.AI` in an Ivy project, `ChatMessage` conflicts with `Ivy.ChatMessage` (the Chat widget's message record) which is available via global using. Always fully qualify or alias the `Microsoft.Extensions.AI` types.
+
+**Found In:**
+142f4e78-ada2-4bd6-8c9f-a8562c82afb7
+ab7c7708-b26c-49fa-83a4-176df47c5866
+f190873c-df6c-42a1-88fe-849c6b3ddbc5
+a8e15b46-41e2-4281-b570-6d46721e0425
+b73d8115-b4d2-45d5-926e-0a915c1dca63
+b16d95b1-ff2f-4db3-9c67-910e21eb0713
+295da84a-9e14-45e4-ac1f-337e04de2ca6
 
 ## SelectOption\<T\> — non-existent type
 
@@ -115,30 +120,6 @@ bc53ef0b-235f-4fba-a6bf-c3a9a9946e26
 6ab76176-bc16-456e-91c9-719bd84b05a6
 7622b8e9-9662-4bcf-8c4c-e7ad0cfb4ba1
 
-## AppAttribute.path — renamed to group
-
-**Hallucinated API:**
-
-```csharp
-[App(path: ["Tests"])]
-```
-
-**Error:** `'AppAttribute' does not contain a definition for 'path'`
-
-**Correct API:**
-
-```csharp
-[App(group: ["Tests"])]
-```
-
-The `path` parameter was renamed to `group` in v1.2.18 to better reflect that it defines the organizational group/folder in the sidebar, not a URL path. This applies to both the `[App]` attribute and the `AppDescriptor` class (`Path` property → `Group` property). (Note: This was part of a broader refactoring to rename "Chrome" to "AppShell").
-
-**Found In:**
-Ivy-Framework#2612
-55eafb82-2cc2-48ba-9a66-cd2ed8d38d67
-fd5baba6-72aa-4d28-ac10-72e1be86e494
-(multiple sessions — agent uses old API names from training data)
-
 ## Button onClick — wrong callback signature (method group)
 
 **Hallucinated API:**
@@ -168,44 +149,68 @@ The `Button` onClick parameter is `Func<Event<Button>, ValueTask>?`. The callbac
 4874e3a3-c6d8-4be5-b1b3-bc4209408343
 bedc0ee6-b915-45b0-ab3a-433e2ac5ff4a
 80f19121-bcf0-4899-abe2-9f1c439f4101
+6c7b9fb9-33c0-410e-b0a5-e66ff0b72c74
 
-## ChatMessage — ambiguous reference between Microsoft.Extensions.AI and Ivy
+## Callout constructor — wrong constructor + invented enum / wrong argument order
 
 **Hallucinated API:**
 
 ```csharp
-var messages = new List<ChatMessage>
-{
-    new ChatMessage(ChatRole.System, "You are a helpful assistant."),
-    new ChatMessage(ChatRole.User, content)
-};
+// Variant 1: Invented enum (CalloutType does not exist)
+new Callout("No to-do items.", CalloutType.Info)
+
+// Variant 2: Correct enum but wrong argument position (CalloutVariant as 2nd arg instead of 3rd)
+new Callout("Warning!", CalloutVariant.Destructive)
+
+// Variant 3: Colors enum where CalloutVariant is expected
+new Callout("Error", "Something went wrong", Colors.Red)
 ```
 
-**Error:** `CS0104: 'ChatMessage' is an ambiguous reference between 'Microsoft.Extensions.AI.ChatMessage' and 'Ivy.ChatMessage'`
+**Error:** `The type or namespace 'CalloutType' could not be found` (variant 1) or `CS1503: Argument 2: cannot convert from 'Ivy.CalloutVariant' to 'string?'` (variant 2) or `CS1503: Argument 3: cannot convert from 'Ivy.Colors' to 'Ivy.CalloutVariant'` (variant 3)
 
 **Correct API:**
 
 ```csharp
-// Fully qualify the namespace:
-var messages = new List<Microsoft.Extensions.AI.ChatMessage>
-{
-    new(Microsoft.Extensions.AI.ChatRole.System, "You are a helpful assistant."),
-    new(Microsoft.Extensions.AI.ChatRole.User, content)
-};
+// Preferred: static factory methods
+Callout.Info("No to-do items.")
 
-// Or add a using alias at the top of the file:
-using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
-using ChatRole = Microsoft.Extensions.AI.ChatRole;
+// Constructor: (description, title, variant, icon) — title is the 2nd parameter, not variant
+new Callout("Warning!", "Title", CalloutVariant.Warning, Icons.AlertTriangle)
 ```
 
-When using `IChatClient` from `Microsoft.Extensions.AI` in an Ivy project, `ChatMessage` conflicts with `Ivy.ChatMessage` (the Chat widget's message record) which is available via global using. Always fully qualify or alias the `Microsoft.Extensions.AI` types.
+`Callout` uses static factory methods: `Callout.Info()`, `Callout.Warning()`, `Callout.Error()`, `Callout.Success()`, `Callout.Destructive()`. The `CalloutType` enum does not exist. Valid `CalloutVariant` values are `Info`, `Warning`, `Error`, `Success`, `Destructive`. `Destructive` was added to match agent expectations (previously hallucinated due to confusion with `BadgeVariant.Destructive`). It is styled identically to `Error`. When using the constructor directly, the parameter order is `(description, title, variant, icon)` — agents frequently put `CalloutVariant` as the 2nd argument where `title` (string) should be.
 
 **Found In:**
-142f4e78-ada2-4bd6-8c9f-a8562c82afb7
-ab7c7708-b26c-49fa-83a4-176df47c5866
-a8e15b46-41e2-4281-b570-6d46721e0425
-b73d8115-b4d2-45d5-926e-0a915c1dca63
-b16d95b1-ff2f-4db3-9c67-910e21eb0713
+bd5f45ac-569d-4be8-8ef8-882451e608a1
+0c7c0b33-a500-45c2-911b-b33ca1f9662e
+cdf77a72-658e-45df-9bdb-9bf7c79100b2
+a31113e3-0282-46f8-a78f-4bd42b9cebc2
+4874e3a3-c6d8-4be5-b1b3-bc4209408343
+32f27f88-9f28-4a60-85ef-0e41e317a170
+
+## AppAttribute.path — renamed to group
+
+**Hallucinated API:**
+
+```csharp
+[App(path: ["Tests"])]
+```
+
+**Error:** `'AppAttribute' does not contain a definition for 'path'`
+
+**Correct API:**
+
+```csharp
+[App(group: ["Tests"])]
+```
+
+The `path` parameter was renamed to `group` in v1.2.18 to better reflect that it defines the organizational group/folder in the sidebar, not a URL path. This applies to both the `[App]` attribute and the `AppDescriptor` class (`Path` property → `Group` property). (Note: This was part of a broader refactoring to rename "Chrome" to "AppShell").
+
+**Found In:**
+Ivy-Framework#2612
+55eafb82-2cc2-48ba-9a66-cd2ed8d38d67
+fd5baba6-72aa-4d28-ac10-72e1be86e494
+(multiple sessions — agent uses old API names from training data)
 
 ## ToDataTable() on List\<T\> or T[] — wrong receiver type
 
@@ -270,39 +275,6 @@ e8232f03-12c3-4c9c-bf1b-42bed9f6d44c
 ee364ec5-064f-4d9c-a63c-b04a4a4bbbdc
 563ac3be-4fe9-4612-9331-4eff47725fa6
 ba29e58f-4fb0-48ac-851d-0d88b390a03a
-
-## Callout constructor — wrong constructor + invented enum / wrong argument order
-
-**Hallucinated API:**
-
-```csharp
-// Variant 1: Invented enum (CalloutType does not exist)
-new Callout("No to-do items.", CalloutType.Info)
-
-// Variant 2: Correct enum but wrong argument position (CalloutVariant as 2nd arg instead of 3rd)
-new Callout("Warning!", CalloutVariant.Destructive)
-```
-
-**Error:** `The type or namespace 'CalloutType' could not be found` (variant 1) or `CS1503: Argument 2: cannot convert from 'Ivy.CalloutVariant' to 'string?'` (variant 2)
-
-**Correct API:**
-
-```csharp
-// Preferred: static factory methods
-Callout.Info("No to-do items.")
-
-// Constructor: (description, title, variant, icon) — title is the 2nd parameter, not variant
-new Callout("Warning!", "Title", CalloutVariant.Warning, Icons.AlertTriangle)
-```
-
-`Callout` uses static factory methods: `Callout.Info()`, `Callout.Warning()`, `Callout.Error()`, `Callout.Success()`, `Callout.Destructive()`. The `CalloutType` enum does not exist. Valid `CalloutVariant` values are `Info`, `Warning`, `Error`, `Success`, `Destructive`. `Destructive` was added to match agent expectations (previously hallucinated due to confusion with `BadgeVariant.Destructive`). It is styled identically to `Error`. When using the constructor directly, the parameter order is `(description, title, variant, icon)` — agents frequently put `CalloutVariant` as the 2nd argument where `title` (string) should be.
-
-**Found In:**
-bd5f45ac-569d-4be8-8ef8-882451e608a1
-0c7c0b33-a500-45c2-911b-b33ca1f9662e
-cdf77a72-658e-45df-9bdb-9bf7c79100b2
-a31113e3-0282-46f8-a78f-4bd42b9cebc2
-4874e3a3-c6d8-4be5-b1b3-bc4209408343
 
 ## InputBase.Label() — AxisExtensions method used on input
 
@@ -551,6 +523,56 @@ ab7c7708-b26c-49fa-83a4-176df47c5866
 fd4594df-0402-4f11-ad46-22165d480649
 7622b8e9-9662-4bcf-8c4c-e7ad0cfb4ba1
 
+## Button.WithIcon() — non-existent fluent method
+
+**Hallucinated API:**
+
+```csharp
+new Button("Share Link").WithIcon(Icons.Share)
+```
+
+**Error:** `'Button' does not contain a definition for 'WithIcon'`
+
+**Correct API:**
+
+```csharp
+new Button("Share Link").Icon(Icons.Share)
+```
+
+The fluent method is `.Icon(Icons.X)`, not `.WithIcon(Icons.X)`. The agent likely confused this with naming patterns from other UI frameworks or assumed a more verbose method name.
+
+**Found In:**
+8b93fae2-c7ce-4890-b0c0-43310c65dd00
+310e1e6a-facb-4caf-87b9-4f1422b51abc
+7c0abfe8-e16f-40d1-9323-95505a4697e7
+0aad3f88-fffe-4024-8d7d-fae268527d16
+
+## FileUpload\<T\>.Data — wrong property name
+
+**Hallucinated API:**
+
+```csharp
+var pdfData = fileState.Value.Data;  // fileState is IState<FileUpload<byte[]>?>
+if (upload.Data != null) { ... }
+```
+
+**Error:** `CS1061: 'FileUpload<byte[]>' does not contain a definition for 'Data'`
+
+**Correct API:**
+
+```csharp
+var pdfData = fileState.Value.Content;  // Use .Content property
+if (upload.Content != null) { ... }
+```
+
+`FileUpload<T>` stores file content in the `.Content` property (of type `T?`), not `.Data`. Other properties include: `FileName` (string?), `MimeType` (string?), `Size` (long?), `Status` (FileUploadStatus). The agent likely confused this with `QueryResult<T>.Value` (another commonly hallucinated property name, documented above as `QueryResult<T>.Data`).
+
+**Found In:**
+5862b5bd-65bd-41ce-ad07-02bd86897dc9
+9f10ed3d-11bc-40ba-903a-f446ff496f21
+6213854f-2a50-41a0-a31d-fc6106b73625
+cfe1ad68-eed8-4a6a-a3aa-9f23bb41010d
+
 ## DateTimeVariant — wrong enum name
 
 **Hallucinated API:**
@@ -643,7 +665,7 @@ Toast("Employee saved!");
 var client = UseService<IClientProvider>();
 client.Toast("Clocked in successfully");
 client.Toast("Employee saved!", "Success");  // with title
-client.Error("Something went wrong.");       // error toast
+client.Error(new Exception("Something went wrong."));  // error toast (takes Exception, not string)
 ```
 
 `Toast` is an extension method on `IClientProvider`, not a standalone/global function. The agent must first resolve the client via `UseService<IClientProvider>()`.
@@ -675,29 +697,6 @@ Layout.Vertical().Width(Size.Lg)
 a9ee3993-1cfb-4cba-9322-80a60b56c8d2
 9f10ed3d-11bc-40ba-903a-f446ff496f21
 b321412b-3b6c-4b50-b027-bc323db8fe98
-
-## Button.WithIcon() — non-existent fluent method
-
-**Hallucinated API:**
-
-```csharp
-new Button("Share Link").WithIcon(Icons.Share)
-```
-
-**Error:** `'Button' does not contain a definition for 'WithIcon'`
-
-**Correct API:**
-
-```csharp
-new Button("Share Link").Icon(Icons.Share)
-```
-
-The fluent method is `.Icon(Icons.X)`, not `.WithIcon(Icons.X)`. The agent likely confused this with naming patterns from other UI frameworks or assumed a more verbose method name.
-
-**Found In:**
-8b93fae2-c7ce-4890-b0c0-43310c65dd00
-310e1e6a-facb-4caf-87b9-4f1422b51abc
-7c0abfe8-e16f-40d1-9323-95505a4697e7
 
 ## Skeleton.List() — non-existent static method
 
@@ -834,6 +833,31 @@ items.ToDataTable(idSelector: e => e.Id)
 a31113e3-0282-46f8-a78f-4bd42b9cebc2
 fe86750a-00a8-454f-a252-d2064382e828
 
+## TextBuilder.Icon() — extension method receiver mismatch
+
+**Hallucinated API:**
+
+```csharp
+Text.H3("Task Hub").Icon(Icons.KanbanSquare)
+```
+
+**Error:** `CS1929: 'TextBuilder' does not contain a definition for 'Icon' and the best extension method overload 'MenuItemExtensions.Icon(MenuItem, Icons)' requires a receiver of type 'Ivy.MenuItem'`
+
+**Correct API:**
+
+```csharp
+// Icon() is only available on MenuItem, not on TextBuilder.
+// To show an icon next to text, use a layout:
+new Horizontal(new Icon(Icons.KanbanSquare), Text.H3("Task Hub"))
+```
+
+The agent assumed `.Icon()` was a chainable method on `TextBuilder`, but `Icon()` is an extension method that only applies to `MenuItem`. The `ReplaceInvalidIcons` refactoring rule caught and fixed the invalid icon name, but not the wrong receiver type.
+
+**Found In:**
+c1f8feae-b342-4bf1-a18c-9b88ee8d6d17
+fd4594df-0402-4f11-ad46-22165d480649
+513c6b12-5eae-430d-b539-633f50eaa310
+
 ## UseAlert().ShowInfo() — wrong API usage
 
 **Hallucinated API:**
@@ -958,34 +982,6 @@ items.ToTable()
 a9ee3993-1cfb-4cba-9322-80a60b56c8d2
 cab4c6bb-be1f-4fef-9d96-96c54e5f88ff
 
-## Box.Opacity() — property used as method call
-
-**Hallucinated API:**
-
-```csharp
-new Box(content).Opacity(0.3f)
-```
-
-**Error:** `CS1955: Non-invocable member 'Box.Opacity' cannot be used like a method.`
-
-**Correct API:**
-
-```csharp
-// Use object initializer or with-expression:
-new Box(content) { Opacity = 0.3f }
-
-// Or use the Background extension which accepts an opacity parameter:
-new Box(content).Background(Colors.Muted, 0.3f)
-```
-
-`Box.Opacity` is a property (`float?`), not a method. There is no `.Opacity()` extension method on `Box`. Use object initializer syntax or the `Background(Colors, float)` extension which sets both background color and opacity. This is the same CS1955 pattern as the `Image.ObjectFit("cover")` hallucination — the agent treats a settable property as a fluent method.
-
-**Found In:**
-15313dc3-1c7d-4af9-8998-8338a837d5fb
-
-**Found In:**
-7c547408-00b3-47e1-976e-59c9357c1e74
-
 ## WithMargin(top: 4) — Named parameters don't exist
 
 **Hallucinated API:**
@@ -1008,30 +1004,6 @@ widget.WithMargin(0, 4, 0, 0)   // left, top, right, bottom
 **Found In:**
 2e18b175-94ec-459c-94a5-8f28b81ecfdc
 6c834561-6c01-424b-b8fb-a4a473c1c86a
-
-## FileUpload\<T\>.Data — wrong property name
-
-**Hallucinated API:**
-
-```csharp
-var pdfData = fileState.Value.Data;  // fileState is IState<FileUpload<byte[]>?>
-if (upload.Data != null) { ... }
-```
-
-**Error:** `CS1061: 'FileUpload<byte[]>' does not contain a definition for 'Data'`
-
-**Correct API:**
-
-```csharp
-var pdfData = fileState.Value.Content;  // Use .Content property
-if (upload.Content != null) { ... }
-```
-
-`FileUpload<T>` stores file content in the `.Content` property (of type `T?`), not `.Data`. Other properties include: `FileName` (string?), `MimeType` (string?), `Size` (long?), `Status` (FileUploadStatus). The agent likely confused this with `QueryResult<T>.Value` (another commonly hallucinated property name, documented above as `QueryResult<T>.Data`).
-
-**Found In:**
-5862b5bd-65bd-41ce-ad07-02bd86897dc9
-9f10ed3d-11bc-40ba-903a-f446ff496f21
 
 ## Fragment.ForEach() — non-existent method
 
@@ -1176,30 +1148,6 @@ new TableRow(new TableCell("Item 1"), new TableCell("Active"))
 9e1cba6f-bd19-472e-83a3-8db63b4860f6
 2a35b6e1-43e2-4fac-aa54-29a680c6009a (traces 003, 004, 005)
 
-## TextBuilder.Icon() — extension method receiver mismatch
-
-**Hallucinated API:**
-
-```csharp
-Text.H3("Task Hub").Icon(Icons.KanbanSquare)
-```
-
-**Error:** `CS1929: 'TextBuilder' does not contain a definition for 'Icon' and the best extension method overload 'MenuItemExtensions.Icon(MenuItem, Icons)' requires a receiver of type 'Ivy.MenuItem'`
-
-**Correct API:**
-
-```csharp
-// Icon() is only available on MenuItem, not on TextBuilder.
-// To show an icon next to text, use a layout:
-new Horizontal(new Icon(Icons.KanbanSquare), Text.H3("Task Hub"))
-```
-
-The agent assumed `.Icon()` was a chainable method on `TextBuilder`, but `Icon()` is an extension method that only applies to `MenuItem`. The `ReplaceInvalidIcons` refactoring rule caught and fixed the invalid icon name, but not the wrong receiver type.
-
-**Found In:**
-c1f8feae-b342-4bf1-a18c-9b88ee8d6d17
-fd4594df-0402-4f11-ad46-22165d480649
-
 ## ToDialog/ToSheet non-existent named parameters (subtitle, footer)
 
 **Hallucinated API:**
@@ -1269,15 +1217,14 @@ new TabsLayout(
 **Correct API:**
 
 ```csharp
-new TabsLayout(
-    onSelect: null, onClose: null, onRefresh: null, onReorder: null, selectedIndex: null,
+Layout.Tabs(
     new Tab("Markets", new MarketsView()),
     new Tab("Chart", new ChartView()),
     new Tab("Portfolio", new PortfolioView())
 )
 ```
 
-`TabsLayout` has no simplified `(params Tab[])` constructor. The public constructor requires 5 positional parameters before the `params Tab[]`: `onSelect`, `onClose`, `onRefresh`, `onReorder`, `selectedIndex`. Pass `null` for all event handlers and selectedIndex when only tabs are needed. The agent tried to skip these parameters, causing repeated build failures (5 times in a single session).
+`TabsLayout` is now `internal` — external consumers must use `Layout.Tabs(params Tab[])` instead. The fluent API on `TabView` (returned by `Layout.Tabs()`) supports `.OnSelect()`, `.OnClose()`, `.OnCloseOthers()`, `.OnRefresh()`, `.AddButton()`, and `.SelectedIndex()` for advanced use cases.
 
 **Found In:**
 3d2cdc9c-aad3-410e-a1e4-7c007529077a
@@ -1386,6 +1333,43 @@ Callout.Success("Success message")
 3c507fb4-71e1-4136-9d40-8eca6590250d
 a31113e3-0282-46f8-a78f-4bd42b9cebc2
 
+## FileInput.MaxFiles(n) on single-file state — runtime error
+
+**Hallucinated API:**
+
+```csharp
+var fileState = UseState<FileUpload<byte[]>?>();
+fileState.ToFileInput(uploadContext, ...)
+    .Accept("application/pdf,.pdf")
+    .MaxFileSize(FileSize.FromMegabytes(50))
+    .MaxFiles(1);  // ❌ Invalid for single-file state
+```
+
+**Error:** `InvalidOperationException: MaxFiles can only be set on a multi-file input (IEnumerable). Use a collection state type for multiple files.`
+
+**Correct API:**
+
+```csharp
+// Single-file upload: DO NOT use MaxFiles (it's implicit)
+var fileState = UseState<FileUpload<byte[]>?>();
+fileState.ToFileInput(uploadContext, ...)
+    .Accept("application/pdf,.pdf")
+    .MaxFileSize(FileSize.FromMegabytes(50));
+
+// Multi-file upload: Use collection state + MaxFiles
+var filesState = UseState<ImmutableArray<FileUpload<byte[]>>>();
+filesState.ToFileInput(uploadContext, ...)
+    .Accept("application/pdf,.pdf")
+    .MaxFileSize(FileSize.FromMegabytes(50))
+    .MaxFiles(5);  // ✅ Valid for collection state
+```
+
+`.MaxFiles(n)` is only valid when the state type is a collection (`IEnumerable`, `List`, `ImmutableArray`, etc.). For single-file uploads using `UseState<FileUpload<T>?>()`, the `.MaxFiles(1)` call is redundant and invalid because the state type already enforces single-file behavior.
+
+**Found In:**
+d7b08ad1-178f-4949-9dcd-b19c13ef03f6
+cfe1ad68-eed8-4a6a-a3aa-9f23bb41010d
+
 ## UseDisposable — non-existent hook
 
 **Hallucinated API:**
@@ -1442,42 +1426,6 @@ items.ToTable()
 **Found In:**
 ba29e58f-4fb0-48ac-851d-0d88b390a03a
 
-## FileInput.MaxFiles(n) on single-file state — runtime error
-
-**Hallucinated API:**
-
-```csharp
-var fileState = UseState<FileUpload<byte[]>?>();
-fileState.ToFileInput(uploadContext, ...)
-    .Accept("application/pdf,.pdf")
-    .MaxFileSize(FileSize.FromMegabytes(50))
-    .MaxFiles(1);  // ❌ Invalid for single-file state
-```
-
-**Error:** `InvalidOperationException: MaxFiles can only be set on a multi-file input (IEnumerable). Use a collection state type for multiple files.`
-
-**Correct API:**
-
-```csharp
-// Single-file upload: DO NOT use MaxFiles (it's implicit)
-var fileState = UseState<FileUpload<byte[]>?>();
-fileState.ToFileInput(uploadContext, ...)
-    .Accept("application/pdf,.pdf")
-    .MaxFileSize(FileSize.FromMegabytes(50));
-
-// Multi-file upload: Use collection state + MaxFiles
-var filesState = UseState<ImmutableArray<FileUpload<byte[]>>>();
-filesState.ToFileInput(uploadContext, ...)
-    .Accept("application/pdf,.pdf")
-    .MaxFileSize(FileSize.FromMegabytes(50))
-    .MaxFiles(5);  // ✅ Valid for collection state
-```
-
-`.MaxFiles(n)` is only valid when the state type is a collection (`IEnumerable`, `List`, `ImmutableArray`, etc.). For single-file uploads using `UseState<FileUpload<T>?>()`, the `.MaxFiles(1)` call is redundant and invalid because the state type already enforces single-file behavior.
-
-**Found In:**
-d7b08ad1-178f-4949-9dcd-b19c13ef03f6
-
 ## Button.Prefix() — input extension used on Button
 
 **Hallucinated API:**
@@ -1487,7 +1435,7 @@ new Button("Encrypt & Share").Prefix(Icons.Lock)
 new Button("Copy Link").Prefix(Icons.Copy)
 ```
 
-**Error:** `CS1929: 'Button' does not contain a definition for 'Prefix' and the best extension method overload 'NumberInputExtensions.Prefix(NumberInputBase, string)' requires a receiver of type 'Ivy.NumberInputBase'`
+**Error:** `CS1929: 'Button' does not contain a definition for 'Prefix' and the best extension method overload 'NumberInputExtensions.Prefix(NumberInputBase, object)' requires a receiver of type 'Ivy.NumberInputBase'`
 
 **Correct API:**
 
@@ -1559,9 +1507,10 @@ new Callout("Error message").Destructive()
 
 ```csharp
 Callout.Error("Error message")
+Callout.Destructive("Error message")  // static factory — also valid
 ```
 
-`Callout` uses static factory methods (`Callout.Info()`, `Callout.Warning()`, `Callout.Error()`, `Callout.Success()`), not a constructor + fluent style chain. `.Destructive()` is a `Button` style method — the agent confused the two APIs. No auto-fix is possible because the intent (error vs warning vs info) is ambiguous.
+`Callout` uses static factory methods (`Callout.Info()`, `Callout.Warning()`, `Callout.Error()`, `Callout.Success()`, `Callout.Destructive()`), not a constructor + fluent style chain. The instance method `.Destructive()` does not exist — the hallucination is calling it on a `new Callout(...)` instance. Use the static factory `Callout.Destructive("message")` or `Callout.Error("message")` instead.
 
 **Found In:**
 d9116efb-830e-484a-a258-fc3193769158
@@ -1911,7 +1860,7 @@ Text.P(frequencyText).Small().Muted()
 Text.Block(frequencyText).Small().Muted()
 ```
 
-`Small()` is an instance modifier on `TextBuilder` (returns `Scale(Ivy.Scale.Small)`), not a static factory. The static factories are `Text.P()`, `Text.H1()`, `Text.H2()`, `Text.H3()`, `Text.H4()`, `Text.Block()`, `Text.Label()`, etc. Chain `.Small()` after creating the text.
+`Small()` is an instance modifier on `TextBuilder` (returns `Density(Ivy.Density.Small)`), not a static factory. The static factories are `Text.P()`, `Text.H1()`, `Text.H2()`, `Text.H3()`, `Text.H4()`, `Text.Block()`, `Text.Label()`, etc. Chain `.Small()` after creating the text.
 
 **Found In:**
 ce144de9-0688-490a-bef6-b2766e323154
@@ -2799,7 +2748,7 @@ if (upload.Status == FileUploadStatus.Finished)
 `FileUploadStatus` values are: `Pending`, `Aborted`, `Loading`, `Failed`, `Finished`. There is no `Completed` value. **Auto-fixed:** The refactoring service automatically rewrites `FileUploadStatus.Completed` → `FileUploadStatus.Finished`.
 
 **Found In:**
-(session not yet recorded)
+f190873c-df6c-42a1-88fe-849c6b3ddbc5
 
 ## UseDownload — ambiguous overload between sync and async
 
@@ -3020,7 +2969,7 @@ server.UseWebApplication(app =>
 await server.RunAsync();
 ```
 
-`Server` does not have `BuildAsync()` or a public `ServiceProvider` property. `ServiceProvider` exists but is `internal`. To run initialization code before the server starts, use `server.UseWebApplication(Action<WebApplication>)` which gives access to the `WebApplication` instance (and its `.Services` property) during startup. The agent confused ASP.NET Core's `WebApplicationBuilder.Build()` pattern with Ivy's `Server` API.
+`Server` does not have `BuildAsync()` and `ServiceProvider` is `internal`. However, `Server.Services` is a public `IServiceCollection` property that allows registering services before the server starts. To run initialization code with the built DI container, use `server.UseWebApplication(Action<WebApplication>)` which gives access to the `WebApplication` instance (and its resolved `.Services` property) during startup. The agent confused ASP.NET Core's `WebApplicationBuilder.Build()` pattern with Ivy's `Server` API.
 
 **Found In:**
 70f88d4c-298a-421b-8bd1-f7fc697c911e
@@ -3250,7 +3199,7 @@ server.UseWebApplication(app =>
 await server.RunAsync();
 ```
 
-The `Server` class does not have `StartAsync()` or `WaitForShutdownAsync()`. The agent confused ASP.NET Core's `IHost.StartAsync()` / `IHost.WaitForShutdownAsync()` pattern with Ivy's `Server` API. Use `server.RunAsync()` for the full lifecycle. See also: `Server.OnReady / Server.OnStartup` and `Server.BuildAsync()` entries.
+The `Server` class does not have `StartAsync()` or `WaitForShutdownAsync()`. The agent confused ASP.NET Core's `IHost.StartAsync()` / `IHost.WaitForShutdownAsync()` pattern with Ivy's `Server` API. Use `server.RunAsync()` for the full lifecycle. For DI access, `server.Services` (public `IServiceCollection`) is available directly; for runtime service resolution, use `server.UseWebApplication(app => ...)` to access `app.Services`. See also: `Server.OnReady / Server.OnStartup` and `Server.BuildAsync()` entries.
 
 **Found In:**
 2235e1c1-ab1e-4313-be50-995daa1be1f9
@@ -3361,51 +3310,78 @@ table.OnRowAction(e =>
 **Found In:**
 a31113e3-0282-46f8-a78f-4bd42b9cebc2
 
-## Detail(string, object) — missing required multiline parameter
+## IClientProvider.Error(string) — wrong argument type
 
 **Hallucinated API:**
 
 ```csharp
-new Detail("Author", post.Author.FirstName)
-new Detail("Status", post.Status)
+var client = UseService<IClientProvider>();
+client.Error("Something went wrong.");
 ```
 
-**Error:** `CS7036: There is no argument given that corresponds to the required parameter 'multiline' of 'Detail.Detail(string?, object?, bool)'`
+**Error:** `CS1503: Argument 2: cannot convert from 'string' to 'System.Exception'`
 
 **Correct API:**
 
 ```csharp
-new Detail("Author", post.Author.FirstName, false)
-new Detail("Status", post.Status, false)
-// For long text content:
-new Detail("Body", post.Body, true)
+var client = UseService<IClientProvider>();
+client.Error(new Exception("Something went wrong."));
 ```
 
-`Detail` constructor requires three parameters: `(string? label, object? value, bool multiline)`. The `multiline` parameter is not optional. The agent omits it because most UI frameworks default boolean display options to `false`.
+`IClientProvider.Error()` is an extension method defined on `ClientExtensions` that takes an `Exception`, not a `string`. It extracts the innermost exception's message and type name for the error display. Wrap the error message in `new Exception(...)` or pass an actual caught exception.
 
 **Found In:**
-a31113e3-0282-46f8-a78f-4bd42b9cebc2
+32f27f88-9f28-4a60-85ef-0e41e317a170
 
-## TextInput.Grow() — Box-only extension called on TextInput
+## Button.WithField() — WithField on non-input type
 
 **Hallucinated API:**
 
 ```csharp
-new TextInput(query).Grow()
+new Button("Extract Data", onClick).Primary().WithField()
 ```
 
-**Error:** `CS1929: 'TextInput' does not contain a definition for 'Grow'`
+**Error:** `CS1929: 'Button' does not contain a definition for 'WithField' and the best extension method overload 'FieldExtensions.WithField(IAnyInput)' requires a receiver of type 'Ivy.IAnyInput'`
 
 **Correct API:**
 
 ```csharp
-query.ToTextInput().Width(Size.Grow())
+// Don't use WithField on Button — it's only for input types (IAnyInput).
+// Just use the button directly:
+new Button("Extract Data", onClick).Primary()
 ```
 
-`Grow()` was originally defined only as a `Box`-specific extension method in `Box.cs`. It is not available on `TextInput` or other widget types. Use `.Width(Size.Grow())` directly, or note that `Grow()` has since been promoted to a generic `WidgetBase<T>` extension and is now available on all widgets.
+`.WithField()` is an extension method on `IAnyInput` that wraps an input in a `Field` with a label. It works on `NumberInputBase`, `TextInputBase`, `SelectInputBase`, `BoolInputBase`, `DateTimeInputBase`, `FileInputBase`, etc. — but NOT on `Button`, `Card`, `Text`, or other non-input widgets. The agent likely saw `.WithField()` in input examples and tried to apply it to a `Button` for layout alignment.
 
 **Found In:**
-7a9aadf3
+6213854f-2a50-41a0-a31d-fc6106b73625
+
+## DownloadContext — non-existent type
+
+**Hallucinated API:**
+
+```csharp
+var downloadContext = UseDownload(...);
+// Agent uses DownloadContext type in variable declaration or method signatures
+DownloadContext download = ...;
+```
+
+**Error:** `CS0246: The type or namespace name 'DownloadContext' could not be found`
+
+**Correct API:**
+
+```csharp
+// UseDownload returns IState<string?> — a URL to trigger the download
+var downloadUrl = UseDownload((Func<byte[]>)(() => csvBytes), "result.csv", "text/csv");
+
+// Render a download button using the URL
+new Button("Download CSV", () => downloadUrl.Value).Disabled(downloadUrl.Value == null);
+```
+
+`UseDownload` returns `IState<string?>` (a download URL), not a `DownloadContext` object. The agent likely invented `DownloadContext` by analogy with `UploadContext` (which does exist and is returned by `UseUpload`). To trigger the download, use the URL value from the returned state.
+
+**Found In:**
+cfe1ad68-eed8-4a6a-a3aa-9f23bb41010d
 
 ## Align.End / Align.Start — CSS-inspired enum values
 
@@ -3529,69 +3505,3 @@ UseEffect(() => { items.Set(GenerateUsers(count.Value)); }, count);
 ```
 
 This is a behavioral difference from React's `useEffect`, which fires on mount and on dependency changes. Ivy's `UseEffect` with state triggers uses `AfterChange` semantics only.
-
-## ToastVariant — non-existent enum — now supported
-
-**Hallucinated API:**
-
-```csharp
-client.Toast("Error!", ToastVariant.Destructive)
-```
-
-**Error:** `The name 'ToastVariant' does not exist in the current context`
-
-**Correct API:**
-
-```csharp
-client.Toast("Success message");       // neutral toast
-client.Toast("Done!", "Title");        // with title
-client.Error("Something went wrong."); // error toast
-```
-
-`ToastVariant` does not exist. The `IClientProvider.Toast()` method takes `(string message)` or `(string message, string title)`. For error toasts, use `client.Error(message)` instead.
-
-**Found In:**
-d90474ac-78b9-48c7-8317-3860ff36b9dd (sub-tasks 002–006, appeared in ALL sub-tasks)
-
-## SelectInputBase.Options() — chained options method — now supported
-
-**Hallucinated API:**
-
-```csharp
-defaultBehavior.ToSelectInput().Options(["Refused", "Allowed", "Ignored"])
-```
-
-**Error:** `'SelectInputBase' does not contain a definition for 'Options'`
-
-**Correct API:**
-
-```csharp
-defaultBehavior.ToSelectInput(new[] { "Refused", "Allowed", "Ignored" }.ToOptions())
-```
-
-Options are passed as `IEnumerable<IAnyOption>` to `ToSelectInput(options)`, not chained via a `.Options()` method. Use the `.ToOptions()` extension method on a string array to convert to the correct type.
-
-**Found In:**
-4eb1799f-39b2-4325-a0bd-37b769a33432
-30c1b273-c528-4496-b194-c98e0ffeaa23
-
-<https://github.com/Ivy-Interactive/Ivy-Framework/issues/2271>
-
-## IRef\<T\> — now supported
-
-`IRef<T>` was previously a hallucinated interface. It has since been added to the framework as `IRef<T> : IState<T>`. Both `UseRef<T>()` return types are now `IRef<T>`, while `UseState<T>()` continues to return `IState<T>`. The two interfaces are interchangeable — `IRef<T>` is a marker subtype used for clarity.
-
-## LayoutView.Border() — now supported
-
-LayoutView supports `.Border(color, thickness)` for adding borders. Example:
-
-```csharp
-new LayoutView()
-    .Border(Colors.Gray, 1)
-    .Padding(4)
-    .Vertical(content);
-```
-
-Individual properties are also available: `.BorderColor()`, `.BorderThickness()`, `.BorderStyle()`, `.BorderRadius()`.
-
-Note: `.Border()` expects a `Colors` enum as the first argument, not a string. Thickness accepts `int` (uniform) or `Thickness` struct — do NOT pass `Ivy.Thickness` where `int` is expected.

@@ -10,9 +10,9 @@ public class DiscardPlanDialog(
     Action refreshPlans) : ViewBase
 {
     private readonly IState<bool> _dialogOpen = dialogOpen;
-    private readonly PlanFile _selectedPlan = selectedPlan;
     private readonly IPlanReaderService _planService = planService;
     private readonly Action _refreshPlans = refreshPlans;
+    private readonly PlanFile _selectedPlan = selectedPlan;
 
     public override object? Build()
     {

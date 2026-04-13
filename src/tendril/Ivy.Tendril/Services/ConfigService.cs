@@ -1,3 +1,8 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using YamlDotNet.Serialization;
+
 namespace Ivy.Tendril.Services;
 
 public record RepoConfig
@@ -25,7 +30,16 @@ public record ProjectConfig
     public List<ReviewActionConfig> ReviewActions { get; set; } = new();
     public List<PromptwareHookConfig> Hooks { get; set; } = new();
     public List<string> RepoPaths => Repos.Select(r => r.Path).ToList();
-    public string? GetMeta(string key) => Meta.TryGetValue(key, out var v) ? v?.ToString() : null;
+
+    public string? GetMeta(string key)
+    {
+        return Meta.TryGetValue(key, out var v) ? v?.ToString() : null;
+    }
+
+    public RepoRef? GetRepoRef(string path)
+    {
+        return Repos.FirstOrDefault(r => r.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
+    }
 }
 
 public record LevelConfig
@@ -66,12 +80,28 @@ public record EditorConfig
 {
     public string Command { get; set; } = "code";
     public string Label { get; set; } = "VS Code";
+    [YamlIgnore] public bool IsAvailable { get; set; } = true;
 }
 
 public record PromptwareConfig
 {
-    public string Model { get; set; } = "";
+    public string Profile { get; set; } = "";
     public List<string> AllowedTools { get; set; } = new();
+}
+
+public record AgentProfileConfig
+{
+    public string Name { get; set; } = "";
+    public string Model { get; set; } = "";
+    public string Effort { get; set; } = "";
+    public string Arguments { get; set; } = "";
+}
+
+public record AgentConfig
+{
+    public string Name { get; set; } = "";
+    public string Arguments { get; set; } = "";
+    public List<AgentProfileConfig> Profiles { get; set; } = new();
 }
 
 public record LlmConfig
@@ -81,9 +111,21 @@ public record LlmConfig
     public string Model { get; set; } = "gpt-4o-mini";
 }
 
+public record AuthConfig
+{
+    public string Password { get; set; } = "";
+    public string HashSecret { get; set; } = "";
+    public Auth.LoginRateLimitConfig? RateLimit { get; set; }
+}
+
+public record ApiSettings
+{
+    public string? ApiKey { get; set; }
+}
+
 public class TendrilSettings
 {
-    public string AgentCommand { get; set; } = "claude";
+    public string CodingAgent { get; set; } = "claude";
     public int JobTimeout { get; set; } = 30;
     public int StaleOutputTimeout { get; set; } = 10;
     public int MaxConcurrentJobs { get; set; } = 5;
@@ -92,33 +134,37 @@ public class TendrilSettings
     public string PlanTemplate { get; set; } = "";
     public EditorConfig Editor { get; set; } = new();
     public LlmConfig? Llm { get; set; }
+    public AuthConfig? Auth { get; set; }
+    public ApiSettings? Api { get; set; }
     public Dictionary<string, PromptwareConfig> Promptwares { get; set; } = new();
+    public List<AgentConfig> CodingAgents { get; set; } = new();
     public bool Telemetry { get; set; } = true;
+
     public List<LevelConfig> Levels { get; set; } = new()
     {
-        new() { Name = "Critical", Badge = "Warning" },
-        new() { Name = "Bug", Badge = "Destructive" },
-        new() { Name = "NiceToHave", Badge = "Outline" },
-        new() { Name = "Epic", Badge = "Info" }
+        new LevelConfig { Name = "Bug", Badge = "Destructive" },
+        new LevelConfig { Name = "Critical", Badge = "Warning" },
+        new LevelConfig { Name = "NiceToHave", Badge = "Outline" },
+        new LevelConfig { Name = "Epic", Badge = "Info" }
     };
 }
 
+public record ConfigParseError(string Message, string FilePath, Exception? InnerException);
+
 public class ConfigService : IConfigService
 {
-    private TendrilSettings _settings;
-    private string _configPath;
-    private string _tendrilHome;
-    private string? _pendingTendrilHome;
+    private string[]? _levelNamesCache;
+    private string? _pendingCodingAgent;
     private ProjectConfig? _pendingProject;
+    private string? _pendingTendrilHome;
+    private List<VerificationConfig>? _pendingVerificationDefinitions;
 
-    internal ConfigService(TendrilSettings settings, string tendrilHome = "")
+    internal ConfigService(TendrilSettings settings, string? tendrilHome = null)
     {
-        _settings = settings;
-        _tendrilHome = !string.IsNullOrEmpty(tendrilHome)
-            ? tendrilHome
-            : Environment.GetEnvironmentVariable("TENDRIL_HOME") ?? "";
-        _configPath = !string.IsNullOrEmpty(_tendrilHome)
-            ? Path.Combine(_tendrilHome, "config.yaml")
+        Settings = settings;
+        TendrilHome = tendrilHome ?? Environment.GetEnvironmentVariable("TENDRIL_HOME") ?? "";
+        ConfigPath = !string.IsNullOrEmpty(TendrilHome)
+            ? Path.Combine(TendrilHome, "config.yaml")
             : Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
     }
 
@@ -128,86 +174,110 @@ public class ConfigService : IConfigService
 
         // Remove quotes if present
         if (!string.IsNullOrEmpty(tendrilHomeEnv) && tendrilHomeEnv.StartsWith("\"") && tendrilHomeEnv.EndsWith("\""))
-        {
             tendrilHomeEnv = tendrilHomeEnv.Substring(1, tendrilHomeEnv.Length - 2);
-        }
 
         if (string.IsNullOrEmpty(tendrilHomeEnv))
         {
             NeedsOnboarding = true;
-            _settings = new TendrilSettings();
-            _configPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
-            _tendrilHome = "";
+            Settings = new TendrilSettings();
+            ConfigPath = Path.Combine(System.AppContext.BaseDirectory, "config.yaml");
+            TendrilHome = "";
             return;
         }
 
-        _tendrilHome = tendrilHomeEnv;
-        _configPath = Path.Combine(_tendrilHome, "config.yaml");
+        TendrilHome = tendrilHomeEnv;
+        ConfigPath = Path.Combine(TendrilHome, "config.yaml");
 
-        if (File.Exists(_configPath))
+        if (File.Exists(ConfigPath))
         {
             try
             {
-                var yaml = File.ReadAllText(_configPath);
-                _settings = YamlHelper.Deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
+                var yaml = FileHelper.ReadAllText(ConfigPath);
+                // Quote unquoted %VAR% patterns that YAML rejects (% is a directive indicator)
+                yaml = Regex.Replace(yaml, @"(?m)(?<=:\s+)(%\w+%.*)$", "'$1'");
+                yaml = Regex.Replace(yaml, @"(?m)^(\s*-\s+)(%\w+%.*)$", "$1'$2'");
+                Settings = YamlHelper.Deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
+                MigrateProjectColors();
+                CreateConfigBackup();
                 NeedsOnboarding = false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.Error.WriteLine($"Failed to load Tendril config '{ConfigPath}': {ex}");
+                ParseError = new ConfigParseError(ex.Message, ConfigPath, ex);
+                BackupBrokenConfig();
+                Settings = new TendrilSettings();
                 NeedsOnboarding = true;
-                _settings = new TendrilSettings();
+
+                if (TryAutoHeal())
+                {
+                    ParseError = null;
+                    NeedsOnboarding = false;
+                }
             }
         }
         else
         {
             NeedsOnboarding = true;
-            _settings = new TendrilSettings();
+            Settings = new TendrilSettings();
             return;
         }
 
-        if (_settings != null && !NeedsOnboarding)
+        if (Settings != null && !NeedsOnboarding)
         {
-            // Initialize basic stuff
-            VariableExpansion.InitializeUserSecrets(_tendrilHome);
+            VariableExpansion.InitializeUserSecrets(TendrilHome);
             ExpandSettingsVariables();
+            ExpandRepoPaths();
 
-            // Expand repo paths
-            if (_settings.Projects != null)
-            {
-                foreach (var proj in _settings.Projects)
-                {
-                    if (proj.Repos != null)
-                    {
-                        foreach (var repo in proj.Repos)
-                        {
-                            repo.Path = VariableExpansion.ExpandVariables(repo.Path, _tendrilHome);
-                        }
-                    }
-                }
-            }
+            // Validate repo paths are not worktrees
+            ValidateRepoPathsAreNotWorktrees();
 
-            // Ensure directories exist
-            Directory.CreateDirectory(_tendrilHome);
-            Directory.CreateDirectory(Path.Combine(_tendrilHome, "Inbox"));
-            Directory.CreateDirectory(Path.Combine(_tendrilHome, "Plans"));
-            Directory.CreateDirectory(Path.Combine(_tendrilHome, "Trash"));
-            Directory.CreateDirectory(Path.Combine(_tendrilHome, "Promptwares"));
-            Directory.CreateDirectory(Path.Combine(_tendrilHome, "Hooks"));
+            Directory.CreateDirectory(TendrilHome);
+            Directory.CreateDirectory(Path.Combine(TendrilHome, "Inbox"));
+            Directory.CreateDirectory(Path.Combine(TendrilHome, "Plans"));
+            Directory.CreateDirectory(Path.Combine(TendrilHome, "Trash"));
+            Directory.CreateDirectory(Path.Combine(TendrilHome, "Promptwares"));
+            Directory.CreateDirectory(Path.Combine(TendrilHome, "Hooks"));
         }
     }
 
-    public TendrilSettings Settings => _settings;
-    public string TendrilHome => _tendrilHome;
-    public string ConfigPath => _configPath;
-    public string PlanFolder => string.IsNullOrEmpty(_tendrilHome) ? "" : Path.Combine(_tendrilHome, "Plans");
-    public List<ProjectConfig> Projects => _settings.Projects;
-    public List<LevelConfig> Levels => _settings.Levels;
-    public string[] LevelNames => _settings.Levels.Select(l => l.Name).ToArray();
-    public EditorConfig Editor => _settings.Editor;
-    public ProjectConfig? GetProject(string name) => _settings.Projects.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+    public TendrilSettings Settings { get; private set; }
 
-    public BadgeVariant GetBadgeVariant(string level) =>
-        Enum.TryParse<BadgeVariant>(_settings.Levels.FirstOrDefault(l => l.Name == level)?.Badge ?? "Outline", out var v) ? v : BadgeVariant.Outline;
+    public string TendrilHome { get; private set; }
+
+    public string ConfigPath { get; private set; }
+
+    public string PlanFolder => string.IsNullOrEmpty(TendrilHome) ? "" : Path.Combine(TendrilHome, "Plans");
+
+    public List<ProjectConfig> Projects => Settings.Projects;
+
+    // Levels are returned in the order defined in config.yaml (not sorted).
+    // Users can reorder levels in the Settings UI, and the order is preserved.
+    public List<LevelConfig> Levels => Settings.Levels;
+
+    public string[] LevelNames
+    {
+        get
+        {
+            if (_levelNamesCache == null) _levelNamesCache = Settings.Levels.Select(l => l.Name).ToArray();
+            return _levelNamesCache;
+        }
+    }
+
+    public EditorConfig Editor => Settings.Editor;
+
+    public ProjectConfig? GetProject(string name)
+    {
+        return Settings.Projects.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public BadgeVariant GetBadgeVariant(string level)
+    {
+        return Enum.TryParse<BadgeVariant>(Settings.Levels.FirstOrDefault(l => l.Name == level)?.Badge ?? "Outline",
+            out var v)
+            ? v
+            : BadgeVariant.Outline;
+    }
 
     public Colors? GetProjectColor(string projectName)
     {
@@ -215,14 +285,59 @@ public class ConfigService : IConfigService
         return !string.IsNullOrEmpty(colorStr) && Enum.TryParse<Colors>(colorStr, out var c) ? c : null;
     }
 
+    public event EventHandler? SettingsReloaded;
+
     public void SaveSettings()
     {
-        var yaml = YamlHelper.SerializerCompact.Serialize(_settings);
-        File.WriteAllText(_configPath, yaml);
+        _levelNamesCache = null;
+        var yaml = YamlHelper.SerializerCompact.Serialize(Settings);
+
+        // Validate the YAML can be deserialized back before writing
+        try
+        {
+            YamlHelper.Deserializer.Deserialize<TendrilSettings>(yaml);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"Generated YAML failed validation and was not saved: {ex.Message}", ex);
+        }
+
+        FileHelper.WriteAllText(ConfigPath, yaml);
+        CreateConfigBackup();
+        ReloadSettings();
+    }
+
+    public void ReloadSettings()
+    {
+        if (!File.Exists(ConfigPath))
+            return;
+
+        try
+        {
+            var yaml = FileHelper.ReadAllText(ConfigPath);
+            yaml = Regex.Replace(yaml, @"(?m)(?<=:\s+)(%\w+%.*)$", "'$1'");
+            yaml = Regex.Replace(yaml, @"(?m)^(\s*-\s+)(%\w+%.*)$", "$1'$2'");
+            Settings = YamlHelper.Deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
+
+            MigrateProjectColors();
+            _levelNamesCache = null;
+            VariableExpansion.InitializeUserSecrets(TendrilHome);
+            ExpandSettingsVariables();
+
+            SettingsReloaded?.Invoke(this, EventArgs.Empty);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to reload settings: {ex}");
+        }
     }
 
     // Onboarding support
     public bool NeedsOnboarding { get; private set; }
+
+    public ConfigParseError? ParseError { get; private set; }
+
     public void SetPendingTendrilHome(string path)
     {
         _pendingTendrilHome = path;
@@ -231,6 +346,16 @@ public class ConfigService : IConfigService
     public string? GetPendingTendrilHome()
     {
         return _pendingTendrilHome;
+    }
+
+    public void SetPendingCodingAgent(string name)
+    {
+        _pendingCodingAgent = name;
+    }
+
+    public string? GetPendingCodingAgent()
+    {
+        return _pendingCodingAgent;
     }
 
     public void SetPendingProject(ProjectConfig project)
@@ -243,132 +368,344 @@ public class ConfigService : IConfigService
         return _pendingProject;
     }
 
-    internal void SetTendrilHome(string tendrilHome)
+    public void SetPendingVerificationDefinitions(List<VerificationConfig> definitions)
     {
-        _tendrilHome = tendrilHome;
-        _configPath = Path.Combine(_tendrilHome, "config.yaml");
+        _pendingVerificationDefinitions = definitions;
+    }
 
-        // Load config if it exists at the new path
-        if (File.Exists(_configPath))
-        {
-            var yaml = File.ReadAllText(_configPath);
-            var loadedSettings = YamlHelper.Deserializer.Deserialize<TendrilSettings>(yaml);
-            if (loadedSettings != null)
-            {
-                _settings = loadedSettings;
-            }
-        }
+    public List<VerificationConfig>? GetPendingVerificationDefinitions()
+    {
+        return _pendingVerificationDefinitions;
+    }
 
-        VariableExpansion.InitializeUserSecrets(_tendrilHome);
-        ExpandSettingsVariables();
+    public void OpenInEditor(string path)
+    {
+        PlatformHelper.OpenInEditor(Editor.Command, path);
     }
 
     public void CompleteOnboarding(string tendrilHome)
     {
-        // Update paths
         SetTendrilHome(tendrilHome);
 
-        // Ensure directories exist
-        Directory.CreateDirectory(_tendrilHome);
-        Directory.CreateDirectory(Path.Combine(_tendrilHome, "Inbox"));
-        Directory.CreateDirectory(Path.Combine(_tendrilHome, "Plans"));
-        Directory.CreateDirectory(Path.Combine(_tendrilHome, "Trash"));
-        Directory.CreateDirectory(Path.Combine(_tendrilHome, "Promptwares"));
-        Directory.CreateDirectory(Path.Combine(_tendrilHome, "Hooks"));
+        if (_pendingCodingAgent != null)
+            Settings.CodingAgent = _pendingCodingAgent;
 
-        // Use current settings (already initialized or updated during onboarding)
-        // If they are empty, serialize defaults
         SaveSettings();
-
         NeedsOnboarding = false;
     }
 
-    /// <summary>
-    /// Expand variables in settings after loading config.
-    /// </summary>
-    private void ExpandSettingsVariables()
+    internal void ValidateRepoPathsAreNotWorktrees()
     {
-        if (_settings == null) return;
+        if (Settings?.Projects == null) return;
 
-        // Expand agent command
-        _settings.AgentCommand = VariableExpansion.ExpandVariables(_settings.AgentCommand, _tendrilHome);
-
-        // Expand plan template
-        _settings.PlanTemplate = VariableExpansion.ExpandVariables(_settings.PlanTemplate, _tendrilHome);
-
-        // Expand LLM config
-        if (_settings.Llm != null)
+        foreach (var project in Settings.Projects)
         {
-            _settings.Llm.Endpoint = VariableExpansion.ExpandVariables(_settings.Llm.Endpoint, _tendrilHome);
-            _settings.Llm.ApiKey = VariableExpansion.ExpandVariables(_settings.Llm.ApiKey, _tendrilHome);
-            _settings.Llm.Model = VariableExpansion.ExpandVariables(_settings.Llm.Model, _tendrilHome);
-        }
+            if (project.Repos == null) continue;
 
-        // Expand editor config
-        if (_settings.Editor != null)
-        {
-            _settings.Editor.Command = VariableExpansion.ExpandVariables(_settings.Editor.Command, _tendrilHome);
-            _settings.Editor.Label = VariableExpansion.ExpandVariables(_settings.Editor.Label, _tendrilHome);
-        }
-
-        // Expand promptware configs
-        if (_settings.Promptwares != null)
-        {
-            foreach (var kvp in _settings.Promptwares.ToList())
+            foreach (var repo in project.Repos)
             {
-                var config = kvp.Value;
-                config.Model = VariableExpansion.ExpandVariables(config.Model, _tendrilHome);
+                if (string.IsNullOrEmpty(repo.Path) || !Directory.Exists(repo.Path))
+                    continue;
 
-                if (config.AllowedTools != null)
+                if (WorktreeValidationHelper.IsWorktree(repo.Path))
                 {
-                    for (int i = 0; i < config.AllowedTools.Count; i++)
-                    {
-                        config.AllowedTools[i] = VariableExpansion.ExpandVariables(config.AllowedTools[i], _tendrilHome);
-                    }
+                    Console.Error.WriteLine(
+                        $"CRITICAL: Project '{project.Name}' repo path is a worktree, not a main repository: {repo.Path}. " +
+                        "This will cause nested worktrees during plan execution. " +
+                        "Update config.yaml to point to the main repo, not a worktree.");
                 }
-            }
-        }
-
-        // Expand project configs
-        if (_settings.Projects != null)
-        {
-            foreach (var project in _settings.Projects)
-            {
-                project.Context = VariableExpansion.ExpandVariables(project.Context, _tendrilHome);
-
-                // Expand review actions
-                if (project.ReviewActions != null)
-                {
-                    foreach (var action in project.ReviewActions)
-                    {
-                        action.Condition = VariableExpansion.ExpandVariables(action.Condition, _tendrilHome);
-                        action.Action = VariableExpansion.ExpandVariables(action.Action, _tendrilHome);
-                    }
-                }
-
-                // Expand hook actions
-                if (project.Hooks != null)
-                {
-                    foreach (var hook in project.Hooks)
-                    {
-                        hook.Condition = VariableExpansion.ExpandVariables(hook.Condition, _tendrilHome);
-                        hook.Action = VariableExpansion.ExpandVariables(hook.Action, _tendrilHome);
-                    }
-                }
-            }
-        }
-
-        // Expand verification prompts
-        if (_settings.Verifications != null)
-        {
-            foreach (var verification in _settings.Verifications)
-            {
-                verification.Prompt = VariableExpansion.ExpandVariables(verification.Prompt, _tendrilHome);
             }
         }
     }
-}
 
+    internal static bool IsCommandAvailable(string command)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "where" : "which",
+                Arguments = command,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using var process = Process.Start(psi);
+            process?.WaitForExit(3000);
+            return process?.ExitCode == 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public bool TryAutoHeal()
+    {
+        // Strategy 1: Restore from last known good backup
+        var backupPath = ConfigPath + ".backup";
+        if (File.Exists(backupPath))
+        {
+            try
+            {
+                var backupYaml = FileHelper.ReadAllText(backupPath);
+                var restored = YamlHelper.Deserializer.Deserialize<TendrilSettings>(backupYaml);
+                if (restored != null)
+                {
+                    FileHelper.WriteAllText(ConfigPath, backupYaml);
+                    Settings = restored;
+                    MigrateProjectColors();
+                    VariableExpansion.InitializeUserSecrets(TendrilHome);
+                    ExpandSettingsVariables();
+                    ExpandRepoPaths();
+                    return true;
+                }
+            }
+            catch
+            {
+                // Backup is also corrupt, fall through
+            }
+        }
+
+        // Strategy 2: Create minimal valid config
+        Settings = CreateMinimalSettings();
+        var minimalYaml = YamlHelper.SerializerCompact.Serialize(Settings);
+        FileHelper.WriteAllText(ConfigPath, minimalYaml);
+        return true;
+    }
+
+    public void ResetToDefaults()
+    {
+        BackupBrokenConfig();
+        Settings = CreateMinimalSettings();
+        var yaml = YamlHelper.SerializerCompact.Serialize(Settings);
+        FileHelper.WriteAllText(ConfigPath, yaml);
+        ParseError = null;
+        NeedsOnboarding = true;
+    }
+
+    public void RetryLoadConfig()
+    {
+        if (!File.Exists(ConfigPath)) return;
+
+        try
+        {
+            var yaml = FileHelper.ReadAllText(ConfigPath);
+            yaml = Regex.Replace(yaml, @"(?m)(?<=:\s+)(%\w+%.*)$", "'$1'");
+            yaml = Regex.Replace(yaml, @"(?m)^(\s*-\s+)(%\w+%.*)$", "$1'$2'");
+            Settings = YamlHelper.Deserializer.Deserialize<TendrilSettings>(yaml) ?? new TendrilSettings();
+            MigrateProjectColors();
+            CreateConfigBackup();
+            ParseError = null;
+            NeedsOnboarding = false;
+            _levelNamesCache = null;
+            VariableExpansion.InitializeUserSecrets(TendrilHome);
+            ExpandSettingsVariables();
+            ExpandRepoPaths();
+            SettingsReloaded?.Invoke(this, EventArgs.Empty);
+        }
+        catch (Exception ex)
+        {
+            BackupBrokenConfig();
+            ParseError = new ConfigParseError(ex.Message, ConfigPath, ex);
+        }
+    }
+
+    private void BackupBrokenConfig()
+    {
+        try
+        {
+            if (!File.Exists(ConfigPath)) return;
+            var timestamp = DateTime.UtcNow.ToString("yyyyMMddTHHmmss");
+            var brokenPath = Path.Combine(
+                Path.GetDirectoryName(ConfigPath)!,
+                $"config.yaml.broken.{timestamp}.bak");
+            File.Copy(ConfigPath, brokenPath, true);
+        }
+        catch
+        {
+            // Best-effort backup
+        }
+    }
+
+    private void CreateConfigBackup()
+    {
+        try
+        {
+            if (!File.Exists(ConfigPath)) return;
+            var backupPath = ConfigPath + ".backup";
+            File.Copy(ConfigPath, backupPath, true);
+        }
+        catch
+        {
+            // Best-effort backup
+        }
+    }
+
+    private static TendrilSettings CreateMinimalSettings()
+    {
+        return new TendrilSettings
+        {
+            CodingAgent = "claude",
+            Projects = new List<ProjectConfig>(),
+            Verifications = new List<VerificationConfig>(),
+            Levels = new List<LevelConfig>
+            {
+                new() { Name = "Bug", Badge = "Destructive" },
+                new() { Name = "Critical", Badge = "Warning" },
+                new() { Name = "NiceToHave", Badge = "Outline" },
+                new() { Name = "Epic", Badge = "Info" }
+            }
+        };
+    }
+
+    private void ExpandRepoPaths()
+    {
+        if (Settings.Projects != null)
+            foreach (var proj in Settings.Projects)
+                if (proj.Repos != null)
+                    foreach (var repo in proj.Repos)
+                        repo.Path = VariableExpansion.ExpandVariables(repo.Path, TendrilHome);
+    }
+
+    internal static string? MigrateProjectColor(string? colorValue)
+    {
+        if (string.IsNullOrEmpty(colorValue))
+            return null;
+
+        if (Enum.TryParse<Colors>(colorValue, out _))
+            return colorValue;
+
+        return Colors.Slate.ToString();
+    }
+
+    private void MigrateProjectColors()
+    {
+        if (Settings?.Projects == null) return;
+
+        var needsSave = false;
+        foreach (var project in Settings.Projects)
+        {
+            var migrated = MigrateProjectColor(project.Color);
+            var migratedStr = migrated ?? "";
+            if (migratedStr != project.Color)
+            {
+                project.Color = migratedStr;
+                needsSave = true;
+            }
+        }
+
+        if (needsSave && File.Exists(ConfigPath))
+        {
+            var yaml = YamlHelper.SerializerCompact.Serialize(Settings);
+            FileHelper.WriteAllText(ConfigPath, yaml);
+        }
+    }
+
+    internal void SetTendrilHome(string tendrilHome)
+    {
+        TendrilHome = tendrilHome;
+        ConfigPath = Path.Combine(TendrilHome, "config.yaml");
+
+        // Load config if it exists at the new path
+        if (File.Exists(ConfigPath))
+        {
+            try
+            {
+                var yaml = FileHelper.ReadAllText(ConfigPath);
+                var loadedSettings = YamlHelper.Deserializer.Deserialize<TendrilSettings>(yaml);
+                if (loadedSettings != null) Settings = loadedSettings;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Failed to load Tendril config from new path '{ConfigPath}': {ex}");
+                ParseError = new ConfigParseError(ex.Message, ConfigPath, ex);
+                BackupBrokenConfig();
+
+                if (TryAutoHeal())
+                {
+                    ParseError = null;
+                }
+            }
+        }
+
+        MigrateProjectColors();
+        _levelNamesCache = null;
+        VariableExpansion.InitializeUserSecrets(TendrilHome);
+        ExpandSettingsVariables();
+    }
+
+    /// <summary>
+    ///     Expand variables in settings after loading config.
+    /// </summary>
+    private void ExpandSettingsVariables()
+    {
+        if (Settings == null) return;
+
+        // Expand coding agent
+        Settings.CodingAgent = VariableExpansion.ExpandVariables(Settings.CodingAgent, TendrilHome);
+
+        // Expand plan template
+        Settings.PlanTemplate = VariableExpansion.ExpandVariables(Settings.PlanTemplate, TendrilHome);
+
+        // Expand LLM config
+        if (Settings.Llm != null)
+        {
+            Settings.Llm.Endpoint = VariableExpansion.ExpandVariables(Settings.Llm.Endpoint, TendrilHome);
+            Settings.Llm.ApiKey = VariableExpansion.ExpandVariables(Settings.Llm.ApiKey, TendrilHome);
+            Settings.Llm.Model = VariableExpansion.ExpandVariables(Settings.Llm.Model, TendrilHome);
+        }
+
+        // Expand editor config
+        if (Settings.Editor != null)
+        {
+            Settings.Editor.Command = VariableExpansion.ExpandVariables(Settings.Editor.Command, TendrilHome);
+            Settings.Editor.Label = VariableExpansion.ExpandVariables(Settings.Editor.Label, TendrilHome);
+
+            // Validate editor command exists on PATH (non-blocking)
+            Settings.Editor.IsAvailable = IsCommandAvailable(Settings.Editor.Command);
+        }
+
+        // Expand promptware configs
+        if (Settings.Promptwares != null)
+            foreach (var kvp in Settings.Promptwares.ToList())
+            {
+                var config = kvp.Value;
+                if (config.AllowedTools != null)
+                    for (var i = 0; i < config.AllowedTools.Count; i++)
+                        config.AllowedTools[i] = VariableExpansion.ExpandVariables(config.AllowedTools[i], TendrilHome);
+            }
+
+        // Expand project configs
+        if (Settings.Projects != null)
+            foreach (var project in Settings.Projects)
+            {
+                project.Context = VariableExpansion.ExpandVariables(project.Context, TendrilHome);
+
+                // Expand review actions
+                if (project.ReviewActions != null)
+                    foreach (var action in project.ReviewActions)
+                    {
+                        action.Condition = VariableExpansion.ExpandVariables(action.Condition, TendrilHome);
+                        action.Action = VariableExpansion.ExpandVariables(action.Action, TendrilHome);
+                    }
+
+                // Expand hook actions
+                if (project.Hooks != null)
+                    foreach (var hook in project.Hooks)
+                    {
+                        hook.Condition = VariableExpansion.ExpandVariables(hook.Condition, TendrilHome);
+                        hook.Action = VariableExpansion.ExpandVariables(hook.Action, TendrilHome);
+                    }
+            }
+
+        // Expand verification prompts
+        if (Settings.Verifications != null)
+            foreach (var verification in Settings.Verifications)
+                verification.Prompt = VariableExpansion.ExpandVariables(verification.Prompt, TendrilHome);
+    }
+}
 
 public static class ProjectBadgeExtensions
 {

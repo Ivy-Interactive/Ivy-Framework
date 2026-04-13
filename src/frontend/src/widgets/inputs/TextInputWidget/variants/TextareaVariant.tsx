@@ -19,6 +19,7 @@ interface TextareaVariantProps {
   onBlur: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onClear: (e: React.MouseEvent) => void;
+  onSubmit?: () => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
@@ -33,16 +34,24 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   onBlur,
   onFocus,
   onClear,
+  onSubmit,
   inputRef,
   isFocused,
   density = Densities.Medium,
   ghost,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
-
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     savePosition();
     onChange(e);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      onSubmit?.();
+      e.currentTarget.blur();
+    }
   };
 
   const handlePaste = usePasteHandler(props.maxLength, (value) => {
@@ -70,7 +79,8 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
       <div
         className={cn(
           "rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
-          ghost && "border-transparent shadow-none bg-transparent hover:bg-accent dark:border-transparent dark:bg-transparent dark:hover:bg-accent"
+          ghost &&
+            "border-transparent shadow-none bg-transparent hover:bg-accent dark:border-transparent dark:bg-transparent dark:hover:bg-accent",
         )}
         style={wrapperStyles}
       >
@@ -83,10 +93,10 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           maxLength={props.maxLength}
           minLength={props.minLength}
           rows={props.rows}
-          autoFocus={props.autoFocus}
           onChange={handleChange}
           onBlur={onBlur}
           onFocus={onFocus}
+          onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           style={textareaStyles}
           className={cn(

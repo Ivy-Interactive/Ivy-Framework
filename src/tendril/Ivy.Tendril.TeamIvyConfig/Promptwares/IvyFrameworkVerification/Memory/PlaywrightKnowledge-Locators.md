@@ -49,7 +49,7 @@
 
 - `page.goto()` with `waitUntil: "networkidle"` hangs on Ivy apps because WebSocket connections keep the network active — use `waitUntil: "domcontentloaded"` instead.
 - `page.goBack()` in Ivy SPA may not reliably restore blade state — prefer re-navigating or keeping blade context
-- `waitForServer` must use `http` module, not `fetch` — `fetch` may not be available in all Node.js versions used by Playwright. Use `http.get()` with polling loop instead
+- `waitForServer` must use `http`/`https` module, not `fetch` — `fetch` may not be available in all Node.js versions used by Playwright. Use polling loop instead. **On macOS, Ivy defaults to HTTPS** — use `https.get(url, { rejectUnauthorized: false }, ...)` and add `ignoreHTTPSErrors: true` to Playwright config (both `use` and `projects[0].use`). On Windows, Ivy uses HTTP by default.
 - Without `UseChrome()`, Ivy SPA doesn't support URL-based app routing — `/app-name` shows the default app. Must enable Chrome for multi-app navigation.
 - `baseURL` in `playwright.config.ts` is evaluated at import time, before `beforeAll` runs. When using dynamic ports, use full URLs in `page.goto()` calls instead of relative paths
 

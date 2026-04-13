@@ -106,6 +106,17 @@ const applyFontToSvg = (svgString: string): string => {
   const textElements = svgElement.querySelectorAll("text");
   textElements.forEach((el) => {
     el.setAttribute("font-family", fontSans);
+
+    const fontSize = el.getAttribute("font-size");
+    if (fontSize) {
+      const match = fontSize.match(/^([\d.]+)(.*)$/);
+      if (match) {
+        const value = parseFloat(match[1]);
+        const unit = match[2] || "";
+        const scaledValue = (value * 0.8).toFixed(2);
+        el.setAttribute("font-size", `${scaledValue}${unit}`);
+      }
+    }
   });
 
   return new XMLSerializer().serializeToString(svgElement);
@@ -239,7 +250,7 @@ const GraphvizRenderer = memo(({ content }: GraphvizRendererProps) => {
       <div className="absolute top-2 right-2 z-10">
         <CopyToClipboardButton textToCopy={content} />
       </div>
-      <div className="graphviz-container rounded-md border bg-background p-4 overflow-x-auto">
+      <div className="graphviz-container rounded-md border bg-background p-4 overflow-x-auto slim-scrollbar">
         {isLoading && (
           <div className="flex items-center justify-center p-8 text-muted-foreground">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>

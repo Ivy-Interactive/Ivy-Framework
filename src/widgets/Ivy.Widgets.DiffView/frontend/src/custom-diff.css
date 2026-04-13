@@ -1,0 +1,103 @@
+/* Force equal row heights in split mode */
+.diff[data-view-type="split"] tbody tr {
+  display: table-row;
+  height: auto;
+}
+
+.diff[data-view-type="split"] td {
+  vertical-align: top;
+  line-height: 1.5;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Ensure gutter and code cells have consistent height */
+.diff-gutter,
+.diff-code {
+  line-height: 1.5;
+  min-height: 1.5em;
+}
+
+/* Word wrap support */
+.diff-wrap .diff-code {
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.diff-wrap .diff-code-text {
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+/* Core colors */
+.diff {
+  background-color: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-boxes);
+  font-family: var(--font-mono);
+}
+
+.diff-gutter {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  border-right: 1px solid var(--border);
+  user-select: none;
+}
+
+.diff-code {
+  background-color: transparent;
+  color: inherit;
+}
+
+/* Hunk header */
+.diff-hunk-header {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+}
+
+.diff-hunk-header-gutter {
+  background-color: var(--muted);
+  border-right: 1px solid var(--border);
+}
+
+.diff-hunk-header-content {
+  padding: 4px 8px;
+  font-weight: 600;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Insertions */
+.diff-code-insert {
+  background-color: color-mix(in srgb, var(--success), transparent 85%) !important;
+}
+
+.diff-gutter-insert {
+  background-color: color-mix(in srgb, var(--success), transparent 75%) !important;
+  color: var(--success) !important;
+}
+
+/* Deletions */
+.diff-code-delete {
+  background-color: color-mix(in srgb, var(--destructive), transparent 85%) !important;
+}
+
+.diff-gutter-delete {
+  background-color: color-mix(in srgb, var(--destructive), transparent 75%) !important;
+  color: var(--destructive) !important;
+}
+
+/* Highlights within lines */
+.diff-code-edit-mark {
+  background-color: color-mix(in srgb, currentColor, transparent 70%);
+}
+
+/* Selection */
+.diff-code::selection,
+.diff-code *::selection {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}

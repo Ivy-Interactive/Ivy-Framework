@@ -5,14 +5,14 @@ public class CheckedAuthTokenHandler(IAuthTokenHandler innerAuthTokenHandler) : 
 {
     protected readonly IAuthTokenHandler _innerAuthTokenHandler = innerAuthTokenHandler;
 
-    public Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    public Task InitializeAsync(IAuthTokenHandlerSession authSession, string requestScheme, string requestHost, string? basePath = null, CancellationToken cancellationToken = default)
     {
         var checkedSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadWrite)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
             .WithBrokeredSessionsAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
-        return _innerAuthTokenHandler.InitializeAsync(checkedSession, requestScheme, requestHost, cancellationToken);
+        return _innerAuthTokenHandler.InitializeAsync(checkedSession, requestScheme, requestHost, basePath, cancellationToken);
     }
 
     public Task<AuthToken?> RefreshAccessTokenAsync(IAuthTokenHandlerSession authSession, CancellationToken cancellationToken = default)

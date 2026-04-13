@@ -14,21 +14,19 @@ public class AutheliaAuthProvider : AutheliaAuthTokenHandler, IAuthProvider
     {
     }
 
-    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string username, string password, CancellationToken cancellationToken)
+    public async Task<LoginResult> LoginAsync(IAuthSession authSession, string username, string password, CancellationToken cancellationToken)
     {
         var payload = new { username, password };
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
         var response = await HttpClient.PostAsync("/api/firstfactor", content, cancellationToken);
         if (response.IsSuccessStatusCode)
         {
-            // Return the "authelia_session" cookie value as our token.
             var cookies = CookieContainer.GetCookies(new Uri(BaseUrl));
             var session = cookies["authelia_session"]?.Value;
-            return session != null
-                ? new AuthToken(session)
-                : null;
+            if (session != null)
+                return LoginResult.Success(new AuthToken(session));
         }
-        return null;
+        return LoginResult.InvalidCredentials();
     }
 
     public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)

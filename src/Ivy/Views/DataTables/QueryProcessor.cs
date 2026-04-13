@@ -934,10 +934,14 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
         var properties = elementType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-        // Filter properties if selectColumns is specified
+        // Filter and order properties according to selectColumns
         if (selectColumns.Any())
         {
-            properties = properties.Where(p => selectColumns.Contains(p.Name)).ToArray();
+            var selectColumnsList = selectColumns.ToList();
+            properties = selectColumnsList
+                .Select(columnName => properties.FirstOrDefault(p => p.Name == columnName))
+                .Where(p => p != null)
+                .ToArray()!;
         }
 
         var fields = new List<ArrowField>();

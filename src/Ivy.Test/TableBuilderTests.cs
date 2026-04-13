@@ -24,6 +24,48 @@ public class TableBuilderTests
         public string Region { get; set; } = string.Empty;
     }
 
+    private static Density GetDensity<T>(TableBuilder<T> builder)
+    {
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+        var field = builder.GetType().GetField("_density", flags)!;
+        return (Density)field.GetValue(builder)!;
+    }
+
+    [Fact]
+    public void Density_DefaultsToMedium()
+    {
+        var data = new[] { new TestModel { Name = "Alice", Age = 30, IsActive = true } };
+        var builder = new TableBuilder<TestModel>(data);
+        Assert.Equal(Density.Medium, GetDensity(builder));
+    }
+
+    [Fact]
+    public void Density_SetsValue()
+    {
+        var data = new[] { new TestModel { Name = "Alice", Age = 30, IsActive = true } };
+        var builder = new TableBuilder<TestModel>(data);
+        builder.Density(Density.Small);
+        Assert.Equal(Density.Small, GetDensity(builder));
+    }
+
+    [Fact]
+    public void Small_SetsDensityToSmall()
+    {
+        var data = new[] { new TestModel { Name = "Alice", Age = 30, IsActive = true } };
+        var builder = new TableBuilder<TestModel>(data);
+        builder.Small();
+        Assert.Equal(Density.Small, GetDensity(builder));
+    }
+
+    [Fact]
+    public void Large_SetsDensityToLarge()
+    {
+        var data = new[] { new TestModel { Name = "Alice", Age = 30, IsActive = true } };
+        var builder = new TableBuilder<TestModel>(data);
+        builder.Large();
+        Assert.Equal(Density.Large, GetDensity(builder));
+    }
+
     [Fact]
     public void SubProperty_MultipleHeaderCalls_CreatesSeparateColumns()
     {
@@ -331,4 +373,113 @@ public class TableBuilderTests
         var result = builder.Build(50, new TestModel());
         Assert.IsType<LayoutView>(result);
     }
+
+    [Fact]
+    public void ImageBuilder_ShouldReturnImageWidgetForValidUrl()
+    {
+        var builder = new ImageBuilder<TestModel>();
+        var result = builder.Build("https://example.com/photo.jpg", new TestModel());
+        Assert.IsType<Image>(result);
+        var image = (Image)result!;
+        Assert.Equal("https://example.com/photo.jpg", image.Src);
+    }
+
+    [Fact]
+    public void ImageBuilder_ShouldReturnNullForNullValue()
+    {
+        var builder = new ImageBuilder<TestModel>();
+        var result = builder.Build(null, new TestModel());
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void ImageBuilder_ShouldReturnNullForEmptyString()
+    {
+        var builder = new ImageBuilder<TestModel>();
+        var result = builder.Build("", new TestModel());
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void ImageBuilder_ShouldReturnNullForWhitespaceString()
+    {
+        var builder = new ImageBuilder<TestModel>();
+        var result = builder.Build("   ", new TestModel());
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void ImageBuilder_ShouldApplyDefaultSize()
+    {
+        var builder = new ImageBuilder<TestModel>();
+        var result = builder.Build("https://example.com/photo.jpg", new TestModel()) as Image;
+        Assert.NotNull(result);
+        Assert.Equal(Size.Units(8), result.Width);
+        Assert.Equal(Size.Units(8), result.Height);
+    }
+
+    [Fact]
+    public void ImageBuilder_ShouldApplyCustomWidth()
+    {
+        var builder = new ImageBuilder<TestModel>().Width(Size.Units(12));
+        var result = builder.Build("https://example.com/photo.jpg", new TestModel()) as Image;
+        Assert.NotNull(result);
+        Assert.Equal(Size.Units(12), result.Width);
+        Assert.Equal(Size.Units(8), result.Height); // default height
+    }
+
+    [Fact]
+    public void ImageBuilder_ShouldApplyCustomHeight()
+    {
+        var builder = new ImageBuilder<TestModel>().Height(Size.Units(16));
+        var result = builder.Build("https://example.com/photo.jpg", new TestModel()) as Image;
+        Assert.NotNull(result);
+        Assert.Equal(Size.Units(8), result.Width); // default width
+        Assert.Equal(Size.Units(16), result.Height);
+    }
+
+    [Fact]
+    public void ImageBuilder_ShouldApplyAltText()
+    {
+        var builder = new ImageBuilder<TestModel>().Alt("Product thumbnail");
+        var result = builder.Build("https://example.com/photo.jpg", new TestModel()) as Image;
+        Assert.NotNull(result);
+        Assert.Equal("Product thumbnail", result.Alt);
+    }
+
+    [Fact]
+    public void ImageBuilder_ShouldApplyObjectFit()
+    {
+        var builder = new ImageBuilder<TestModel>().ObjectFit(ImageFit.Cover);
+        var result = builder.Build("https://example.com/photo.jpg", new TestModel()) as Image;
+        Assert.NotNull(result);
+        Assert.Equal(ImageFit.Cover, result.ObjectFit);
+    }
+
+    [Fact]
+    public void ImageBuilder_ShouldDefaultToContainObjectFit()
+    {
+        var builder = new ImageBuilder<TestModel>();
+        var result = builder.Build("https://example.com/photo.jpg", new TestModel()) as Image;
+        Assert.NotNull(result);
+        Assert.Equal(ImageFit.Contain, result.ObjectFit);
+    }
+
+    [Fact]
+    public void ImageBuilder_ShouldSupportFluentChaining()
+    {
+        var builder = new ImageBuilder<TestModel>()
+            .Width(Size.Units(10))
+            .Height(Size.Units(10))
+            .Alt("avatar")
+            .ObjectFit(ImageFit.Cover);
+
+        var result = builder.Build("https://example.com/photo.jpg", new TestModel()) as Image;
+        Assert.NotNull(result);
+        Assert.Equal(Size.Units(10), result.Width);
+        Assert.Equal(Size.Units(10), result.Height);
+        Assert.Equal("avatar", result.Alt);
+        Assert.Equal(ImageFit.Cover, result.ObjectFit);
+    }
 }
+

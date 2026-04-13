@@ -86,7 +86,7 @@ export const ImageOverlay: React.FC<ImageOverlayProps> = ({
   const content = (
     <div
       ref={overlayRef}
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 cursor-zoom-out"
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 cursor-zoom-out overflow-hidden"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

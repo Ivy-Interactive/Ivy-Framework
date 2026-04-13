@@ -65,6 +65,15 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const hasAutoFocusedRef = useRef(false);
+
+  useEffect(() => {
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      buttonRef.current?.focus();
+    }
+  }, [autoFocus, disabled]);
 
   const [localValue, setLocalValue] = useOptimisticValue(value, open);
 
@@ -165,10 +174,10 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
+            ref={buttonRef}
             type="button"
             variant="outline"
             disabled={disabled}
-            autoFocus={autoFocus}
             className={cn(
               iconInputTriggerVariant({ density }),
               !hasValue && "text-muted-foreground",

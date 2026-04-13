@@ -1,17 +1,17 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import {
   ColorScheme,
-  generateTooltip,
-  generateTextStyle,
-  generateXAxis,
-  generateYAxis,
-} from "./sharedUtils";
-import {
+  buildMarkLineConfig,
   generateDataProps,
   generateEChartGrid,
   generateEChartLegend,
   generateEChartToolbox,
+  generateTooltip,
+  generateTextStyle,
+  generateXAxis,
+  generateYAxis,
   getColors,
+  formatTooltipValue,
 } from "./sharedUtils";
 import { useThemeWithMonitoring } from "@/components/theme-provider";
 import { getHeight, getWidth } from "@/lib/styles";
@@ -31,7 +31,8 @@ import {
   YAxisProps,
 } from "./chartTypes";
 import { ChartData } from "./chartTypes";
-import { BAR_DEFAULTS, REFERENCE_LINE_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { BAR_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -56,6 +57,7 @@ interface BarChartWidgetProps {
   maxBarSize?: number;
   reverseStackOrder?: boolean;
   layout?: "Horizontal" | "Vertical";
+  density?: Densities;
 }
 
 const BarChartWidget: React.FC<BarChartWidgetProps> = ({
@@ -79,6 +81,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   maxBarSize,
   reverseStackOrder,
   layout = "Vertical",
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -125,20 +128,9 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
     [referenceDots],
   );
 
-  // Merge MarkLine[] into single markLine config with C# defaults
   const markLine = useMemo(
-    () =>
-      referenceLines.length > 0
-        ? {
-            ...referenceLines[0],
-            lineStyle: {
-              width: referenceLines[0]?.lineStyle?.width ?? REFERENCE_LINE_DEFAULTS.strokeWidth,
-              ...referenceLines[0]?.lineStyle,
-            },
-            data: referenceLines.flatMap((ml) => ml.data),
-          }
-        : {},
-    [referenceLines],
+    () => buildMarkLineConfig(referenceLines, themeColors),
+    [referenceLines, themeColors],
   );
 
   // Merge MarkArea[] into single markArea config
@@ -249,12 +241,26 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
       }),
-      tooltip: generateTooltip(tooltip, "shadow", {
-        foreground: themeColors.foreground,
-        fontSans: themeColors.fontSans,
-        background: themeColors.background,
-        mutedForeground: themeColors.mutedForeground,
-      }),
+      tooltip: {
+        ...generateTooltip(tooltip, "shadow", {
+          foreground: themeColors.foreground,
+          fontSans: themeColors.fontSans,
+          background: themeColors.background,
+          mutedForeground: themeColors.mutedForeground,
+        }),
+        formatter: (params: any) => {
+          if (Array.isArray(params)) {
+            return params
+              .map((p) => {
+                const value = formatTooltipValue(p.value[isVertical ? 0 : 1], tooltip);
+                return `${p.marker} ${p.seriesName}: <strong>${value}</strong>`;
+              })
+              .join("<br/>");
+          }
+          const value = formatTooltipValue(params.value[isVertical ? 0 : 1], tooltip);
+          return `${params.marker} ${params.seriesName}: <strong>${value}</strong>`;
+        },
+      },
       toolbox: generateEChartToolbox(toolbox),
     }),
     [

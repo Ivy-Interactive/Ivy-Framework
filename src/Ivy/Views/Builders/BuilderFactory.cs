@@ -43,4 +43,10 @@ public static class BuilderFactoryExtensions
     {
         return new ProgressBuilder<TModel>();
     }
+
+    public static ImageBuilder<TModel> Image<TModel>(
+        this IBuilderFactory<TModel> factory)
+    {
+        return new ImageBuilder<TModel>();
+    }
 }

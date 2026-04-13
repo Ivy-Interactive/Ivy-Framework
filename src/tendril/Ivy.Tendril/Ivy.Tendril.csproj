@@ -7,6 +7,20 @@
     <NoWarn>CS8618;CS8603;CS8602;CS8604;CS9113</NoWarn>
     <RootNamespace>Ivy.Tendril</RootNamespace>
     <UserSecretsId>a8f3c2e1-4b7d-4e9f-a1c3-8d6e2f5b9a7c</UserSecretsId>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>tendril</ToolCommandName>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Promptwares\**</DefaultItemExcludes>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>Ivy.Tendril</PackageId>
+    <IsPackable>true</IsPackable>
+    <Company>Ivy</Company>
+    <Description>Ivy Tendril</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Ivy.Tendril.Test" />
@@ -23,14 +37,23 @@
     <PackageReference Include="OpenAI" Version="2.9.1" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
-    <PackageReference Include="PostHog" Version="1.0.*" />
+    <PackageReference Include="PostHog" Version="1.0.8" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.53.1" />
+    <PackageReference Include="Velopack" Version="0.0.1298" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(IvySource)' == 'true'">
     <ProjectReference Include="../../Ivy/Ivy.csproj" />
     <ProjectReference Include="../../Ivy.Hooks.Pty/Ivy.Hooks.Pty.csproj" />
     <ProjectReference Include="../../widgets/Ivy.Widgets.Xterm/Ivy.Widgets.Xterm.csproj" />
-    <ProjectReference Include="../../widgets/Ivy.Widgets.ScreenshotFeedback/Ivy.Widgets.ScreenshotFeedback.csproj" />
     <ProjectReference Include="../../widgets/Ivy.Widgets.DiffView/Ivy.Widgets.DiffView.csproj" />
+    <ProjectReference Include="../../Ivy.Desktop/Ivy.Desktop.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IvySource)' != 'true'">
+    <PackageReference Include="Ivy" Version="1.2.37-pre-20260410110521" />
+    <PackageReference Include="Ivy.Hooks.Pty" Version="1.2.37-pre-20260410110521" />
+    <PackageReference Include="Ivy.Widgets.Xterm" Version="1.2.37-pre-20260410110521" />
+    <PackageReference Include="Ivy.Widgets.DiffView" Version="1.2.37-pre-20260410110521" />
+    <PackageReference Include="Ivy.Desktop" Version="1.2.37-pre-20260410110521" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Ivy.Analyser/Ivy.Analyser.csproj">
@@ -40,17 +63,20 @@
       <OutputItemType>Analyzer</OutputItemType>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Apps" />
-    <Folder Include="Connections" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Update="example.config.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="config.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <Target Name="PackPromptwaresZip" BeforeTargets="PrepareForBuild"
+          Condition="'$(Configuration)' == 'Release'">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildThisFileDirectory)pack-promptwares.ps1&quot; -IntermediateOutputPath &quot;$(IntermediateOutputPath).&quot;" />
+  </Target>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <EmbeddedResource Include="$(IntermediateOutputPath)promptwares.zip" LogicalName="Ivy.Tendril.promptwares.zip" />
   </ItemGroup>
 </Project>

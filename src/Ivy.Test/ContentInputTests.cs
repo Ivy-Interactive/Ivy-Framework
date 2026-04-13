@@ -130,6 +130,39 @@ public class ContentInputTests
         Assert.True(widget.Disabled);
     }
 
+    [Theory]
+    [InlineData(Density.Small)]
+    [InlineData(Density.Medium)]
+    [InlineData(Density.Large)]
+    public void Density_SetsBySmallMediumLarge(Density density)
+    {
+        var textState = new MockState<string>("");
+        var uploadContext = new MockState<UploadContext>(new UploadContext("/upload", _ => { }));
+
+        var widget = textState.ToContentInput(uploadContext);
+        widget = density switch
+        {
+            Density.Small => widget.Small(),
+            Density.Medium => widget.Medium(),
+            Density.Large => widget.Large(),
+            _ => widget
+        };
+
+        Assert.Equal(density, widget.Density);
+    }
+
+    [Fact]
+    public void Invalid_SetsInvalidProperty()
+    {
+        var textState = new MockState<string>("");
+        var uploadContext = new MockState<UploadContext>(new UploadContext("/upload", _ => { }));
+
+        var widget = textState.ToContentInput(uploadContext)
+            .Invalid("This field is required");
+
+        Assert.Equal("This field is required", widget.Invalid);
+    }
+
     [Fact]
     public void Files_GenericOverload_ProjectsFileUploadOfT()
     {

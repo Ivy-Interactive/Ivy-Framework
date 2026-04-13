@@ -1,7 +1,8 @@
 using System.Globalization;
 using System.Net;
 using System.Reflection;
-using Photino.NET;
+using Microsoft.Extensions.DependencyInjection;
+using Rustino.NET;
 
 namespace Ivy.Desktop;
 
@@ -18,6 +19,22 @@ public class DesktopWindow(Server server)
     private Assembly? _iconAssembly = null;
     private string? _iconResourceName = null;
     private bool _iconSet = false;
+    private string? _iconFilePath = null;
+    private (int X, int Y)? _position;
+    private (int W, int H)? _minSize;
+    private (int W, int H)? _maxSize;
+    private bool _chromeless;
+    private bool _transparent;
+    private bool _maximized;
+    private bool _fullscreen;
+    private (byte R, byte G, byte B, byte A)? _backgroundColor;
+    private string? _userAgent;
+    private bool _zoomHotkeys;
+    private bool _mediaAutoplay = true;
+    private readonly List<string> _initScripts = new();
+    private DesktopMenu? _menu;
+    private Action<DesktopWindow>? _onReady;
+    private RustinoWindow? _window;
 
     public DesktopWindow Title(string title) { _title = title; return this; }
     public DesktopWindow Size(int width, int height) { _width = width; _height = height; return this; }
@@ -26,6 +43,20 @@ public class DesktopWindow(Server server)
     public DesktopWindow UseDpiScaling(bool enabled = true) { _useDpiScaling = enabled; return this; }
     public DesktopWindow Center(bool center = true) { _center = center; return this; }
     public DesktopWindow UseDevTools(bool enabled = true) { _devTools = enabled; return this; }
+    public DesktopWindow Position(int x, int y) { _position = (x, y); return this; }
+    public DesktopWindow MinSize(int width, int height) { _minSize = (width, height); return this; }
+    public DesktopWindow MaxSize(int width, int height) { _maxSize = (width, height); return this; }
+    public DesktopWindow Chromeless(bool chromeless = true) { _chromeless = chromeless; return this; }
+    public DesktopWindow Transparent(bool transparent = true) { _transparent = transparent; return this; }
+    public DesktopWindow Maximized(bool maximized = true) { _maximized = maximized; return this; }
+    public DesktopWindow Fullscreen(bool fullscreen = true) { _fullscreen = fullscreen; return this; }
+    public DesktopWindow BackgroundColor(byte r, byte g, byte b, byte a = 255) { _backgroundColor = (r, g, b, a); return this; }
+    public DesktopWindow UserAgent(string userAgent) { _userAgent = userAgent; return this; }
+    public DesktopWindow ZoomHotkeys(bool enabled = true) { _zoomHotkeys = enabled; return this; }
+    public DesktopWindow MediaAutoplay(bool enabled = true) { _mediaAutoplay = enabled; return this; }
+    public DesktopWindow InitScript(string js) { _initScripts.Add(js); return this; }
+    public DesktopWindow Menu(DesktopMenu menu) { _menu = menu; return this; }
+    public DesktopWindow OnReady(Action<DesktopWindow> callback) { _onReady = callback; return this; }
 
     /// <summary>
     /// Sets the window icon from an embedded resource.
@@ -40,6 +71,120 @@ public class DesktopWindow(Server server)
         _iconSet = true;
         return this;
     }
+
+    public DesktopWindow IconFile(string path)
+    {
+        _iconFilePath = path;
+        _iconSet = true;
+        return this;
+    }
+
+    // ── Events ───────────────────────────────────────────────────────────
+
+    public event System.EventHandler<System.ComponentModel.CancelEventArgs>? WindowClosing;
+    public event System.EventHandler? WindowClosed;
+    public event System.EventHandler<DesktopSizeEventArgs>? SizeChanged;
+    public event System.EventHandler<DesktopPointEventArgs>? LocationChanged;
+    public event System.EventHandler<bool>? FocusChanged;
+    public event System.EventHandler<string>? WebMessageReceived;
+    public event System.EventHandler<DesktopPageLoadEventArgs>? PageLoaded;
+    public event System.EventHandler<DesktopNavigationEventArgs>? Navigating;
+    public event System.EventHandler<string>? MenuItemClicked;
+    public event System.EventHandler? TrayIconClicked;
+
+    // ── Post-run properties ──────────────────────────────────────────────
+
+    public bool IsMinimized => _window?.IsMinimized ?? false;
+    public bool IsMaximized => _window?.IsMaximized ?? false;
+    public bool IsFullscreen => _window?.IsFullscreen ?? false;
+    public (int X, int Y) GetPosition() => _window?.GetPosition() ?? (0, 0);
+    public (int Width, int Height) GetSize() => _window?.GetSize() ?? (_width, _height);
+
+    // ── Post-run window state ────────────────────────────────────────────
+
+    public void Minimize() => _window?.Minimize();
+    public void Maximize() => _window?.Maximize();
+    public void Restore() => _window?.Restore();
+    public void SetFullscreen(bool fullscreen) => _window?.SetFullscreen(fullscreen);
+    public void SetVisible(bool visible) => _window?.SetVisible(visible);
+    public void Focus() => _window?.Focus();
+    public void Close() => _window?.Close();
+
+    // ── Post-run webview ─────────────────────────────────────────────────
+
+    public void ExecuteScript(string js) => _window?.ExecuteScript(js);
+    public void SendWebMessage(string message) => _window?.SendWebMessage(message);
+    public void SetZoom(double factor) => _window?.SetZoom(factor);
+
+    // ── Post-run menus ───────────────────────────────────────────────────
+
+    public void SetMenu(DesktopMenu menu) => _window?.SetMenu(menu.ToRustinoMenu());
+    public void RemoveMenu() => _window?.RemoveMenu();
+    public void ShowContextMenu(DesktopMenu menu) => _window?.ShowContextMenu(menu.ToRustinoMenu());
+
+    // ── Post-run tray icon ───────────────────────────────────────────────
+
+    public void SetTrayIcon(string iconPath, string? tooltip = null, DesktopMenu? menu = null)
+        => _window?.SetTrayIcon(iconPath, tooltip, menu?.ToRustinoMenu());
+
+    public void SetTrayIcon(Type typeInAssembly, string resourceName, string? tooltip = null, DesktopMenu? menu = null)
+    {
+        var iconPath = ExtractEmbeddedIcon(typeInAssembly.Assembly, resourceName);
+        if (iconPath != null)
+            _window?.SetTrayIcon(iconPath, tooltip, menu?.ToRustinoMenu());
+    }
+
+    public void RemoveTrayIcon() => _window?.RemoveTrayIcon();
+
+    // ── Post-run badge ───────────────────────────────────────────────────
+
+    public void SetBadgeCount(int? count) => _window?.SetBadgeCount(count);
+    public void ClearBadge() => _window?.ClearBadge();
+
+    // ── Post-run dialogs ─────────────────────────────────────────────────
+
+    public string[]? ShowOpenFileDialog(
+        string? title = null, string? defaultPath = null,
+        DesktopFileFilter[]? filters = null, bool multiSelect = false)
+    {
+        var rf = filters?.Select(f => new FileFilter(f.Name, f.Extensions)).ToArray();
+        return _window?.ShowOpenFileDialog(title, defaultPath, rf, multiSelect);
+    }
+
+    public string? ShowSaveFileDialog(
+        string? title = null, string? defaultPath = null,
+        DesktopFileFilter[]? filters = null)
+    {
+        var rf = filters?.Select(f => new FileFilter(f.Name, f.Extensions)).ToArray();
+        return _window?.ShowSaveFileDialog(title, defaultPath, rf);
+    }
+
+    public string[]? ShowSelectFolderDialog(
+        string? title = null, string? defaultPath = null, bool multiSelect = false)
+        => _window?.ShowSelectFolderDialog(title, defaultPath, multiSelect);
+
+    // ── Post-run monitors ────────────────────────────────────────────────
+
+    public DesktopMonitorInfo[] GetMonitors()
+    {
+        var monitors = _window?.GetMonitors();
+        return monitors?
+            .Select(m => new DesktopMonitorInfo(m.Name, m.X, m.Y, m.Width, m.Height, m.ScaleFactor, m.IsPrimary))
+            .ToArray() ?? [];
+    }
+
+    public DesktopMonitorInfo? GetCurrentMonitor()
+    {
+        var m = _window?.GetCurrentMonitor();
+        return m == null ? null : new DesktopMonitorInfo(m.Name, m.X, m.Y, m.Width, m.Height, m.ScaleFactor, m.IsPrimary);
+    }
+
+    // ── Notifications (static) ───────────────────────────────────────────
+
+    public static bool ShowNotification(string title, string body, string? iconPath = null)
+        => RustinoWindow.ShowNotification(title, body, iconPath);
+
+    // ── Run ──────────────────────────────────────────────────────────────
 
     public int Run()
     {
@@ -73,6 +218,8 @@ public class DesktopWindow(Server server)
     {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
+        server.Services.AddSingleton(this);
+
         var cts = new CancellationTokenSource();
         var serverTask = server.RunAsync(cts);
 
@@ -80,28 +227,45 @@ public class DesktopWindow(Server server)
         // FindAvailablePort) completes before the first await, so Args.Port is
         // already updated to the actual port the server will bind to.
         var port = server.Args.Port;
-        var url = $"http://localhost:{port}";
+        var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
+        var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
+            ? ivyTlsEnv?.ToLowerInvariant() is "1" or "true" or "yes" or "on"
+            : true; // Default to true if not overridden
+        var url = $"{(useTls ? "https" : "http")}://localhost:{port}";
 
         // Wait for the server to become ready (or detect early failure).
         WaitForServerReady(serverTask, url);
 
-        var window = CreateWindow();
-        var loadingHtml = GetLoadingHtml(url);
-        var tempLoadingPath = Path.Combine(Path.GetTempPath(), $"ivy_loading_{Guid.NewGuid():N}.html");
-        File.WriteAllText(tempLoadingPath, loadingHtml);
-        window.Load(new Uri(tempLoadingPath));
+        string? tempLoadingPath = null;
+        try
+        {
+            _window = CreateWindow();
+            WireEvents();
 
-        window.WaitForClose();
+            var loadingHtml = GetLoadingHtml(url);
+            tempLoadingPath = Path.Combine(Path.GetTempPath(), $"ivy_loading_{Guid.NewGuid():N}.html");
+            File.WriteAllText(tempLoadingPath, loadingHtml);
+            _window.Load(new Uri(tempLoadingPath));
 
-        try { File.Delete(tempLoadingPath); } catch { }
+            _onReady?.Invoke(this);
 
-        cts.Cancel();
-        serverTask.GetAwaiter().GetResult();
+            _window.WaitForClose();
+        }
+        finally
+        {
+            _window = null;
+
+            if (tempLoadingPath != null)
+                try { File.Delete(tempLoadingPath); } catch { }
+
+            cts.Cancel();
+            serverTask.GetAwaiter().GetResult();
+        }
 
         return 0;
     }
 
-    private PhotinoWindow CreateWindow()
+    private RustinoWindow CreateWindow()
     {
         var windowWidth = _width;
         var windowHeight = _height;
@@ -113,7 +277,7 @@ public class DesktopWindow(Server server)
             windowHeight = (int)(_height * scalingFactor);
         }
 
-        var window = new PhotinoWindow() { LogVerbosity = 0 };
+        var window = new RustinoWindow() { LogVerbosity = 0 };
         window
             .SetUseOsDefaultSize(false)
             .SetSize(windowWidth, windowHeight)
@@ -125,7 +289,25 @@ public class DesktopWindow(Server server)
             .SetIgnoreCertificateErrorsEnabled(true)
             .SetWebSecurityEnabled(false);
 
-        if (_iconSet && _iconAssembly != null && _iconResourceName != null)
+        if (_position is { } pos) window.SetPosition(pos.X, pos.Y);
+        if (_minSize is { } min) window.SetMinSize(min.W, min.H);
+        if (_maxSize is { } max) window.SetMaxSize(max.W, max.H);
+        if (_chromeless) window.SetChromeless(true);
+        if (_transparent) window.SetTransparent(true);
+        if (_maximized) window.SetMaximized(true);
+        if (_fullscreen) window.SetFullscreen(true);
+        if (_backgroundColor is { } bg) window.SetBackgroundColor(bg.R, bg.G, bg.B, bg.A);
+        if (_userAgent != null) window.SetUserAgent(_userAgent);
+        if (_zoomHotkeys) window.SetZoomHotkeysEnabled(true);
+        if (!_mediaAutoplay) window.SetMediaAutoplayEnabled(false);
+        foreach (var script in _initScripts) window.AddInitScript(script);
+        if (_menu != null) window.SetMenu(_menu.ToRustinoMenu());
+
+        if (_iconFilePath != null)
+        {
+            window.SetIconFile(_iconFilePath);
+        }
+        else if (_iconSet && _iconAssembly != null && _iconResourceName != null)
         {
             var iconPath = ExtractEmbeddedIcon(_iconAssembly, _iconResourceName);
             if (iconPath != null) window.SetIconFile(iconPath);
@@ -140,6 +322,27 @@ public class DesktopWindow(Server server)
         if (_center) window.Center();
 
         return window;
+    }
+
+    private void WireEvents()
+    {
+        if (_window == null) return;
+
+        _window.WindowClosing += (_, e) => WindowClosing?.Invoke(this, e);
+        _window.WindowClosed += (_, _) => WindowClosed?.Invoke(this, EventArgs.Empty);
+        _window.SizeChanged += (_, e) => SizeChanged?.Invoke(this, new DesktopSizeEventArgs(e.Width, e.Height));
+        _window.LocationChanged += (_, e) => LocationChanged?.Invoke(this, new DesktopPointEventArgs(e.X, e.Y));
+        _window.FocusChanged += (_, focused) => FocusChanged?.Invoke(this, focused);
+        _window.WebMessageReceived += (_, msg) => WebMessageReceived?.Invoke(this, msg);
+        _window.PageLoaded += (_, e) => PageLoaded?.Invoke(this, new DesktopPageLoadEventArgs(e.IsStarted, e.Url));
+        _window.Navigating += (_, e) =>
+        {
+            var args = new DesktopNavigationEventArgs(e.Url);
+            Navigating?.Invoke(this, args);
+            e.Cancel = args.Cancel;
+        };
+        _window.MenuItemClicked += (_, id) => MenuItemClicked?.Invoke(this, id);
+        _window.TrayIconClicked += (_, _) => TrayIconClicked?.Invoke(this, EventArgs.Empty);
     }
 
     private static string GetLoadingHtml(string url)
@@ -206,7 +409,7 @@ public class DesktopWindow(Server server)
             var tempHtmlPath = Path.Combine(Path.GetTempPath(), $"ivy_error_{Guid.NewGuid():N}.html");
             File.WriteAllText(tempHtmlPath, errorHtml);
 
-            var errorWindow = new PhotinoWindow() { LogVerbosity = 0 };
+            var errorWindow = new RustinoWindow() { LogVerbosity = 0 };
             errorWindow
                 .SetUseOsDefaultSize(false)
                 .SetSize(700, 500)
@@ -230,7 +433,11 @@ public class DesktopWindow(Server server)
     private static void WaitForServerReady(Task serverTask, string url, int timeoutMs = 30_000)
     {
         var healthUrl = $"{url}/ivy/health";
-        using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+        var handler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        };
+        using var http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(2) };
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
         while (sw.ElapsedMilliseconds < timeoutMs)

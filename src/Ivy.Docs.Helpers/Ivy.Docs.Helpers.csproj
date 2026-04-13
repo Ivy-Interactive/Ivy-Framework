@@ -8,7 +8,11 @@
     <NoWarn>CS1591;CS8618;CS8603;CS8602;CS8604;CS8669;CS9113</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(IvyPackageVersion)' != ''">
+    <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
     <ProjectReference Include="../Ivy/Ivy.csproj" />
   </ItemGroup>
 

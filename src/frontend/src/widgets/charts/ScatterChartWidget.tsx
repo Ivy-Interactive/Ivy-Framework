@@ -3,14 +3,16 @@ import ReactECharts from "echarts-for-react";
 import { getHeight, getWidth } from "@/lib/styles";
 import { useThemeWithMonitoring } from "@/components/theme-provider";
 import {
+  buildMarkLineConfig,
   generateEChartGrid,
   generateEChartLegend,
   generateTooltip,
   generateTextStyle,
   getColors,
   generateEChartToolbox,
+  formatTooltipValue,
 } from "./sharedUtils";
-import { getChartThemeColors } from "./styles";
+import { getChartThemeColors, type ChartThemeColors } from "./styles";
 import {
   ScatterChartWidgetProps,
   ChartType,
@@ -22,6 +24,7 @@ import {
   XAxisProps,
   YAxisProps,
 } from "./chartTypes";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -87,7 +90,7 @@ const generateScatterXAxis = (
       fontFamily: themeColors?.fontSans,
     },
     axisLine: {
-      show: axisConfig.axisLine !== false,
+      show: axisConfig.axisLine === true,
       lineStyle: {
         type: "solid",
         color: themeColors?.mutedForeground,
@@ -95,7 +98,7 @@ const generateScatterXAxis = (
       },
     },
     axisTick: {
-      show: axisConfig.tickLine !== false,
+      show: axisConfig.tickLine === true,
       lineStyle: {
         color: themeColors?.mutedForeground,
         opacity: 0.4,
@@ -113,7 +116,7 @@ const generateScatterXAxis = (
 };
 
 const generateScatterYAxis = (
-  yAxis?: Array<Partial<YAxisProps>>,
+  yAxis?: YAxisProps[],
   themeColors?: { mutedForeground: string; fontSans: string },
 ) => {
   const axisConfig = yAxis?.[0] || {};
@@ -137,7 +140,7 @@ const generateScatterYAxis = (
       fontFamily: themeColors?.fontSans,
     },
     axisLine: {
-      show: axisConfig.axisLine !== false,
+      show: axisConfig.axisLine === true,
       lineStyle: {
         type: "solid",
         color: themeColors?.mutedForeground,
@@ -145,7 +148,7 @@ const generateScatterYAxis = (
       },
     },
     axisTick: {
-      show: axisConfig.tickLine !== false,
+      show: axisConfig.tickLine === true,
       lineStyle: {
         color: themeColors?.mutedForeground,
         opacity: 0.4,
@@ -172,6 +175,7 @@ const generateScatterSeries = (
   referenceDots?: ReferenceDot[],
   referenceLines?: MarkLine[],
   referenceAreas?: MarkArea[],
+  markLineTheme?: ChartThemeColors,
 ) => {
   if (!scatters || scatters.length === 0 || !xAxisDataKey || !yAxisDataKey) {
     return [];
@@ -190,30 +194,10 @@ const generateScatterSeries = (
         }
       : undefined;
 
-  // Convert C# ReferenceLine[] to ECharts markLine format
-  // C# sends: { x?, y?, label?, strokeWidth } — NOT ECharts MarkLine objects
+  // Convert C# ReferenceLine[] to ECharts markLine format (same as line/area/bar via buildMarkLineConfig)
   const markLine =
     referenceLines && referenceLines.length > 0
-      ? {
-          silent: true,
-          symbol: ["none", "none"] as [string, string],
-          label: { show: true, position: "end" as const },
-          lineStyle: {
-            type: "dashed" as const,
-            // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-            width: (referenceLines[0] as any)?.strokeWidth ?? 1,
-          },
-          // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-          data: referenceLines.map((line: any) => {
-            if (line.x != null && line.y == null) {
-              return { xAxis: line.x, name: line.label };
-            } else if (line.y != null && line.x == null) {
-              return { yAxis: line.y, name: line.label };
-            }
-            // Both x and y specified — point-to-point line
-            return [{ coord: [line.x, line.y], name: line.label }, { coord: [line.x, line.y] }];
-          }),
-        }
+      ? buildMarkLineConfig(referenceLines, markLineTheme)
       : undefined;
 
   // Convert C# ReferenceArea[] to ECharts markArea format
@@ -301,7 +285,7 @@ const generateScatterSeries = (
             shadowColor: "rgba(0, 0, 0, 0.3)",
           },
         },
-        animation: scatter.animated !== false,
+        animation: scatter.animated === true,
         animationDuration: 800,
         markPoint: index === 0 ? markPoint : undefined,
         markLine: index === 0 ? markLine : undefined,
@@ -350,6 +334,7 @@ const ScatterChartWidget: React.FC<ScatterChartWidgetProps> = ({
   referenceAreas = EMPTY_ARRAY,
   referenceDots = EMPTY_ARRAY,
   colorScheme = "Default",
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -394,12 +379,19 @@ const ScatterChartWidget: React.FC<ScatterChartWidgetProps> = ({
         mutedForeground: themeColors.mutedForeground,
         fontSans: themeColors.fontSans,
       }),
-      tooltip: generateTooltip(tooltip, "item", {
-        foreground: themeColors.foreground,
-        fontSans: themeColors.fontSans,
-        background: themeColors.background,
-        mutedForeground: themeColors.mutedForeground,
-      }),
+      tooltip: {
+        ...generateTooltip(tooltip, "item", {
+          foreground: themeColors.foreground,
+          fontSans: themeColors.fontSans,
+          background: themeColors.background,
+          mutedForeground: themeColors.mutedForeground,
+        }),
+        formatter: (params: any) => {
+          const xValue = formatTooltipValue(params.value[0], tooltip);
+          const yValue = formatTooltipValue(params.value[1], tooltip);
+          return `${params.marker} ${params.seriesName}<br/>X: ${xValue}<br/>Y: <strong>${yValue}</strong>`;
+        },
+      },
       toolbox: generateEChartToolbox(toolbox),
       legend: generateEChartLegend(legend, {
         foreground: themeColors.foreground,
@@ -417,6 +409,7 @@ const ScatterChartWidget: React.FC<ScatterChartWidgetProps> = ({
         referenceDots,
         referenceLines,
         referenceAreas,
+        themeColors,
       ),
     }),
     [

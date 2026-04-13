@@ -6,6 +6,8 @@ public class JobServiceNotificationTests
 {
     private static JobService CreateService()
     {
+        // Clear sync context so notifications fire synchronously during tests
+        SynchronizationContext.SetSynchronizationContext(null);
         return new JobService(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(10));
     }
 
@@ -13,11 +15,11 @@ public class JobServiceNotificationTests
     public void CompleteJob_Success_NotificationTitleIncludesJobType()
     {
         var service = CreateService();
-        var id = service.StartJob("MakePr", Path.GetTempPath());
+        var id = service.CreateTestJob("MakePr", Path.GetTempPath());
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
-        service.CompleteJob(id, exitCode: 0);
+        service.CompleteJob(id, 0);
 
         Assert.NotNull(notification);
         Assert.Equal("MakePr Completed", notification.Title);
@@ -28,11 +30,11 @@ public class JobServiceNotificationTests
     public void CompleteJob_Failure_NotificationTitleIncludesJobType()
     {
         var service = CreateService();
-        var id = service.StartJob("ExecutePlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExecutePlan", Path.GetTempPath());
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
-        service.CompleteJob(id, exitCode: 1);
+        service.CompleteJob(id, 1);
 
         Assert.NotNull(notification);
         Assert.Equal("ExecutePlan Failed", notification.Title);
@@ -43,11 +45,11 @@ public class JobServiceNotificationTests
     public void CompleteJob_Timeout_NotificationTitleIncludesJobType()
     {
         var service = CreateService();
-        var id = service.StartJob("ExpandPlan", Path.GetTempPath());
+        var id = service.CreateTestJob("ExpandPlan", Path.GetTempPath());
 
         JobNotification? notification = null;
         service.NotificationReady += n => notification = n;
-        service.CompleteJob(id, exitCode: null, timedOut: true);
+        service.CompleteJob(id, null, true);
 
         Assert.NotNull(notification);
         Assert.Equal("ExpandPlan Timed Out", notification.Title);

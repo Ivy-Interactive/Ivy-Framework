@@ -116,6 +116,14 @@ const MultipleSelector = React.forwardRef<
     const [inputValue, setInputValue] = React.useState("");
     const measureRef = React.useRef<HTMLDivElement>(null);
     const [visibleCount, setVisibleCount] = React.useState(maxVisibleBadges ?? 1);
+    const hasAutoFocusedRef = React.useRef(false);
+
+    React.useEffect(() => {
+      if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+        hasAutoFocusedRef.current = true;
+        inputRef.current?.focus();
+      }
+    }, [autoFocus, disabled]);
 
     const updateOpenDirection = React.useCallback(() => {
       const trigger = triggerWrapperRef.current;
@@ -285,7 +293,10 @@ const MultipleSelector = React.forwardRef<
     const handleBulkSelectAll = React.useCallback(() => {
       const merged = computeSelectAllValues(
         selectedValueStrings,
-        visibleEnabledForBulk.map((o) => ({ value: o.value, disabled: !!o.disable })),
+        visibleEnabledForBulk.map((o) => ({
+          value: o.value,
+          disabled: !!o.disable,
+        })),
         maxSelections,
       );
       const newOptions: Option[] = merged.map((v) => {
@@ -449,7 +460,6 @@ const MultipleSelector = React.forwardRef<
                   });
                   onFocus?.(e);
                 }}
-                autoFocus={autoFocus}
                 placeholder={
                   hidePlaceholderWhenSelected && value.length > 0 ? undefined : placeholder
                 }
@@ -503,7 +513,7 @@ const MultipleSelector = React.forwardRef<
             >
               {defaultOptions.length > 0 ? (
                 <>
-                  <CommandGroup className="h-full overflow-auto max-h-[300px]">
+                  <CommandGroup className="h-full overflow-auto max-h-[300px] slim-scrollbar">
                     {defaultOptions.map((option) => {
                       const selected = isSelected(option);
                       return (

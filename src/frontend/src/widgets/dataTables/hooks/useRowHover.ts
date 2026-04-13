@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { GridMouseCellEventArgs, GridMouseEventArgs } from "@glideapps/glide-data-grid";
 import { useEventHandler } from "@/components/event-handler";
 import { MenuItem } from "@/types/widgets";
+import { getHiddenKeyValue } from "../utils/arrowUtils";
 import * as arrow from "apache-arrow";
 
 interface UseRowHoverProps {
@@ -28,43 +29,6 @@ export const useRowHover = ({
   const [actionButtonsTop, setActionButtonsTop] = useState<number>(0);
   const [actionButtonsHeight, setActionButtonsHeight] = useState<number>(0);
   const eventHandler = useEventHandler();
-
-  // Extract _hiddenKey value directly from Arrow table
-  const getHiddenKeyValue = useCallback(
-    (rowIndex: number): string | number | null => {
-      const table = arrowTableRef.current;
-      if (!table) return null;
-
-      // Access schema fields directly to find _hiddenKey
-      const schema = table.schema;
-      if (!schema || !schema.fields) return null;
-
-      // Find the _hiddenKey column index
-      let hiddenKeyIndex = -1;
-      for (let i = 0; i < schema.fields.length; i++) {
-        const field = schema.fields[i];
-        if (field && field.name === "_hiddenKey") {
-          hiddenKeyIndex = i;
-          break;
-        }
-      }
-
-      if (hiddenKeyIndex === -1) return null;
-
-      // Get the column directly from the Arrow table
-      const column = table.getChildAt(hiddenKeyIndex);
-      if (!column) return null;
-
-      // Get the value for this row
-      const value = column.get(rowIndex);
-      if (value === null || value === undefined || value === "") {
-        return null;
-      }
-
-      return String(value);
-    },
-    [arrowTableRef],
-  );
 
   // Handle row hover
   const onItemHovered = useCallback(
@@ -110,7 +74,7 @@ export const useRowHover = ({
       if (hoverRow === undefined) return;
 
       // Extract _hiddenKey directly from Arrow table
-      const rowId = getHiddenKeyValue(hoverRow);
+      const rowId = getHiddenKeyValue(arrowTableRef.current, hoverRow);
 
       // Send event to backend's OnRowAction event with row ID and menu item tag
       eventHandler("OnRowAction", widgetId, [
@@ -120,7 +84,7 @@ export const useRowHover = ({
         },
       ]);
     },
-    [hoverRow, eventHandler, widgetId, getHiddenKeyValue],
+    [hoverRow, eventHandler, widgetId, arrowTableRef],
   );
 
   return {

@@ -14,18 +14,6 @@ internal static class TextInputBuildContext
     internal static IViewContext? GetCurrent() => Current.Value;
 }
 
-public record Affix
-{
-    public Icons? Icon { get; init; }
-    public string? Text { get; init; }
-}
-
-public static class AffixExtensions
-{
-    public static Affix ToAffix(this Icons icon) => new() { Icon = icon };
-    public static Affix ToAffix(this string text) => new() { Text = text };
-}
-
 public enum TextInputVariant
 {
     Text,
@@ -56,10 +44,6 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? ShortcutKey { get; set; }
 
-    [Prop] public Affix? Prefix { get; set; }
-
-    [Prop] public Affix? Suffix { get; set; }
-
     [Prop] public int? MaxLength { get; set; }
 
     [Prop] public int? MinLength { get; set; }
@@ -72,6 +56,8 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public bool AutoFocus { get; set; }
 
+    [Prop] public bool Ghost { get; set; }
+
     [Event] public EventHandler<Event<IAnyInput>>? OnBlur { get; set; }
     [Event] public EventHandler<Event<IAnyInput>>? OnFocus { get; set; }
 
@@ -81,7 +67,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? DictationUploadUrl { get; set; }
 
-    [Prop] public string? DictationLanguage { get; set; }
+    public string? DictationLanguage { get; set; }
 
     [Prop] public string? DictationTranscription { get; set; }
 
@@ -285,17 +271,18 @@ public static class TextInputExtensions
 
     public static TextInputBase Rows(this TextInputBase widget, int rows) => widget with { Rows = rows };
 
-    public static TextInputBase Prefix(this TextInputBase widget, string prefixText)
-        => widget with { Prefix = prefixText.ToAffix() };
+    private static object[] WithSlot(TextInputBase widget, string slotName, object? value)
+    {
+        var others = widget.Children.Where(c => c is not Slot s || s.Name != slotName);
+        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
+        return result.ToArray();
+    }
 
-    public static TextInputBase Prefix(this TextInputBase widget, Icons prefixIcon)
-        => widget with { Prefix = prefixIcon.ToAffix() };
+    public static TextInputBase Prefix(this TextInputBase widget, object prefix)
+        => widget with { Children = WithSlot(widget, "Prefix", prefix) };
 
-    public static TextInputBase Suffix(this TextInputBase widget, string suffixText)
-        => widget with { Suffix = suffixText.ToAffix() };
-
-    public static TextInputBase Suffix(this TextInputBase widget, Icons suffixIcon)
-        => widget with { Suffix = suffixIcon.ToAffix() };
+    public static TextInputBase Suffix(this TextInputBase widget, object suffix)
+        => widget with { Children = WithSlot(widget, "Suffix", suffix) };
 
     [OverloadResolutionPriority(1)]
     public static TextInputBase OnBlur(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

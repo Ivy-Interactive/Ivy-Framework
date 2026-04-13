@@ -2,22 +2,23 @@ using System.Reactive.Disposables;
 using System.Text.RegularExpressions;
 using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Apps.Plans;
+using Ivy.Tendril.Helpers;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Jobs", icon: Icons.Activity, group: new[] { "Tools" }, order: MenuOrder.Jobs)]
+[App(title: "Jobs", icon: Icons.Activity, group: ["Apps"], order: MenuOrder.Jobs)]
 public class JobsApp : ViewBase
 {
-    public override object? Build()
+    public override object Build()
     {
         var jobService = UseService<IJobService>();
         var planService = UseService<IPlanReaderService>();
         var client = UseService<IClientProvider>();
         var refreshToken = UseRefreshToken();
-        var showCommand = UseState<string?>(null);
-        var showOutput = UseState<string?>(null);
         var showPlan = UseState<string?>(null);
+        var showOutput = UseState<string?>(null);
+        var showPrompt = UseState<string?>(null);
         var openFile = UseState<string?>(null);
         var config = UseService<IConfigService>();
         UseEffect(() =>
@@ -34,23 +35,51 @@ public class JobsApp : ViewBase
             return Disposable.Create(() => jobService.NotificationReady -= OnNotification);
         });
 
-        var jobs = jobService.GetJobs();
-        var rows = jobs.Select(j => new JobItemRow
+        UseEffect(() =>
         {
-            Id = j.Id,
-            Status = j.Status,
-            PlanId = ExtractPlanId(j.PlanFile),
-            Plan = j.PlanFile,
-            Type = j.Type,
-            Project = j.Project,
-            Timer = FormatTimer(j),
-            Cost = j.Cost.HasValue ? $"${j.Cost.Value:F2}" : "",
-            LastOutput = FormatLastOutput(j),
-            LastOutputTimestamp = j.LastOutputAt,
-            StatusMessage = j.StatusMessage ?? ""
+            void OnJobsChanged()
+            {
+                refreshToken.Refresh();
+            }
+
+            jobService.JobsChanged += OnJobsChanged;
+            return Disposable.Create(() => jobService.JobsChanged -= OnJobsChanged);
+        });
+
+        UseInterval(() =>
+        {
+            if (jobService.GetJobs().Any(j => j.Status == JobStatus.Running)) refreshToken.Refresh();
+        }, TimeSpan.FromSeconds(5));
+
+        var projectColors = config.Projects
+            .Select(p => new { p.Name, Color = config.GetProjectColor(p.Name) })
+            .Where(x => x.Color.HasValue)
+            .ToDictionary(x => x.Name, x => x.Color!.Value.ToString());
+
+        var jobs = jobService.GetJobs();
+        var rows = jobs.Select(j =>
+        {
+            var planId = ExtractPlanId(j.PlanFile);
+            var displayPlanId = planId;
+
+            return new JobItemRow
+            {
+                Id = j.Id,
+                Status = j.Status,
+                PlanId = displayPlanId,
+                Plan = GetPromptDisplay(j, planService),
+                Type = j.Type,
+                Project = string.Join(", ", ProjectHelper.ParseProjects(j.Project)),
+                Timer = FormatTimer(j),
+                Cost = j.Cost.HasValue ? $"${j.Cost.Value:F2}" : "",
+                Tokens = j.Tokens.HasValue ? FormatHelper.FormatTokens(j.Tokens.Value) : "",
+                LastOutput = FormatLastOutput(j),
+                LastOutputTimestamp = j.LastOutputAt,
+                StatusMessage = GetStatusMessage(j)
+            };
         })
-        .OrderByDescending(r => r.LastOutputTimestamp ?? DateTime.MinValue)
-        .ToList();
+            .OrderBy(r => r.Id)
+            .ToList();
 
         var statusGroups = jobs
             .GroupBy(j => j.Status)
@@ -60,48 +89,65 @@ public class JobsApp : ViewBase
 
         var statusSegments = statusGroups
             .Select(g => new ProgressSegment(
-                Value: g.Count,
-                Color: GetStatusColor(g.Status),
-                Label: g.Status
+                g.Count,
+                GetStatusColor(g.Status),
+                g.Status.ToString()
             ))
             .ToArray();
 
         var jobsProgress = new StackedProgress(statusSegments).ShowLabels();
 
         var dataTable = rows.AsQueryable()
-            .ToDataTable(idSelector: t => t.Id)
+            .ToDataTable(t => t.Id)
             .RefreshToken(refreshToken)
             .Width(Size.Full())
             .Height(Size.Full())
             .Header(t => t.Status, "Status")
             .Header(t => t.Type, "Type")
-            .Header(t => t.PlanId, "Plan ID")
-            .Header(t => t.Plan, "Plan")
+            .Header(t => t.PlanId, "Plan")
+            .Header(t => t.Plan, "Prompt/Title")
             .Header(t => t.Project, "Project")
             .Header(t => t.Timer, "Timer")
             .Header(t => t.Cost, "Cost")
+            .Header(t => t.Tokens, "Tokens")
             .Header(t => t.LastOutput, "Last Output")
-            .Header(t => t.StatusMessage, "Status Message")
+            .Header(t => t.StatusMessage, "Status")
             .Width(t => t.Status, Size.Px(100))
-            .Width(t => t.PlanId, Size.Px(80))
-            .Width(t => t.Type, Size.Px(120))
-            .Width(t => t.Plan, Size.Auto())
-            .Width(t => t.Project, Size.Px(80))
-            .Width(t => t.Timer, Size.Px(90))
-            .Width(t => t.LastOutput, Size.Px(90))
-            .Width(t => t.Cost, Size.Px(80))
+            .Width(t => t.PlanId, Size.Px(100))
+            .Width(t => t.Type, Size.Px(100))
+            .Width(t => t.Plan, Size.Px(250))
+            .Width(t => t.Project, Size.Px(100))
+            .Width(t => t.Timer, Size.Px(100))
+            .Width(t => t.LastOutput, Size.Px(100))
+            .Width(t => t.Cost, Size.Px(100))
+            .Width(t => t.Tokens, Size.Px(100))
             .Width(t => t.StatusMessage, Size.Auto())
-            .Renderer(t => t.Status, new LabelsDisplayRenderer())
+            .Renderer(t => t.Status, new LabelsDisplayRenderer
+            {
+                BadgeColorMapping = StatusMappings.JobStatusColors.ToDictionary(
+                    kvp => kvp.Key.ToString(),
+                    kvp => kvp.Value.ToString()
+                )
+            })
+            .Renderer(t => t.Type, new LabelsDisplayRenderer
+            {
+                BadgeColorMapping = StatusMappings.JobTypeColors.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.ToString()
+                )
+            })
+            .Renderer(t => t.Project, new LabelsDisplayRenderer
+            {
+                BadgeColorMapping = projectColors
+            })
             .Renderer(t => t.PlanId, new LinkDisplayRenderer())
             .Hidden(t => t.Id)
             .Hidden(t => t.LastOutputTimestamp)
             .Filterable(t => t.Timer, false)
             .Filterable(t => t.LastOutput, false)
-            .Sortable(t => t.Timer, false)
-            .Sortable(t => t.LastOutput, false)
             .Config(c =>
             {
-                c.AllowSorting = true;
+                c.AllowSorting = false;
                 c.AllowFiltering = true;
                 c.ShowSearch = false;
                 c.SelectionMode = SelectionModes.None;
@@ -125,15 +171,22 @@ public class JobsApp : ViewBase
                         }
                     }
                 }
+                else if (e.Value.ColumnName == "LastOutput")
+                {
+                    var id = e.Value.RowId?.ToString();
+                    if (!string.IsNullOrEmpty(id))
+                        showOutput.Set(id);
+                }
+
                 return ValueTask.CompletedTask;
             })
             .RowActions(
-                new MenuItem(Label: "Show Command", Icon: Icons.Terminal, Tag: "show-command").Tooltip("Show the PowerShell command"),
-                new MenuItem(Label: "View Output", Icon: Icons.ScrollText, Tag: "view-output").Tooltip("View full job output"),
-                new MenuItem(Label: "View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
-                new MenuItem(Label: "Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
-                new MenuItem(Label: "Rerun", Icon: Icons.RotateCw, Tag: "rerun-job").Tooltip("Rerun this job"),
-                new MenuItem(Label: "Delete", Icon: Icons.Trash, Tag: "delete-job").Tooltip("Delete this job")
+                new MenuItem("View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
+                new MenuItem("Show Prompt", Icon: Icons.MessageSquare, Tag: "show-prompt").Tooltip(
+                    "Show the full prompt text"),
+                new MenuItem("Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
+                new MenuItem("Rerun", Icon: Icons.RotateCw, Tag: "rerun-job").Tooltip("Rerun this job"),
+                new MenuItem("Delete", Icon: Icons.Trash, Tag: "delete-job").Tooltip("Delete this job")
             )
             .OnRowAction(e =>
             {
@@ -152,95 +205,78 @@ public class JobsApp : ViewBase
                                 showPlan.Set(fullPath);
                         }
                     }
+                    else if (tag == "show-prompt")
+                    {
+                        var fullPrompt = GetFullPrompt(job);
+                        if (!string.IsNullOrEmpty(fullPrompt))
+                            showPrompt.Set(fullPrompt);
+                    }
                     else if (tag == "stop-job")
                     {
-                        if (job.Status is "Running" or "Queued")
+                        if (job.Status is JobStatus.Running or JobStatus.Queued)
                         {
                             jobService.StopJob(job.Id);
                             refreshToken.Refresh();
                         }
                     }
-                    else if (tag == "show-command")
-                    {
-                        var command = $"pwsh -NoProfile -File \"{job.ScriptPath}\" {string.Join(" ", job.Args.Select(a => $"\"{a}\""))}";
-                        showCommand.Set(command);
-                    }
-                    else if (tag == "view-output")
-                    {
-                        if (job.Status != "Running" && job.OutputLines.Count > 0)
-                        {
-                            showOutput.Set(string.Join("\n", job.OutputLines));
-                        }
-                    }
                     else if (tag == "rerun-job")
                     {
-                        if (job.Status is "Failed" or "Timeout" or "Stopped")
+                        if (job.Status is JobStatus.Failed or JobStatus.Timeout or JobStatus.Stopped)
                         {
+                            if (job.Type == "MakePlan" && !job.Args.Contains("-Description"))
+                            {
+                                client.Toast("Cannot rerun MakePlan: original description was not preserved.", "Rerun Failed");
+                                return ValueTask.CompletedTask;
+                            }
+
                             if (job.Type is "ExecutePlan" or "ExpandPlan" && job.Args.Length > 0)
                             {
                                 var folderName = Path.GetFileName(job.Args[0]);
-                                planService.TransitionState(folderName, Plans.PlanStatus.Building);
+                                planService.TransitionState(folderName, PlanStatus.Building);
                             }
                             else if (job.Type == "UpdatePlan" && job.Args.Length > 0)
                             {
                                 var folderName = Path.GetFileName(job.Args[0]);
-                                planService.TransitionState(folderName, Plans.PlanStatus.Updating);
+                                planService.TransitionState(folderName, PlanStatus.Updating);
                             }
+
+                            jobService.DeleteJob(job.Id);
                             jobService.StartJob(job.Type, job.Args);
+
                             refreshToken.Refresh();
                         }
                     }
                     else if (tag == "delete-job")
                     {
-                        if (job.Status != "Running")
+                        if (job.Status is JobStatus.Running or JobStatus.Queued)
                         {
-                            jobService.DeleteJob(job.Id);
-                            refreshToken.Refresh();
+                            jobService.StopJob(job.Id);
                         }
+
+                        jobService.DeleteJob(job.Id);
+                        refreshToken.Refresh();
                     }
                 }
+
                 return ValueTask.CompletedTask;
             })
-            .HeaderRight(ctx => Layout.Horizontal().Gap(2)
-                | jobsProgress
-                | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
-                    new MenuItem("Clear Completed", Icon: Icons.Trash, Tag: "ClearCompleted").OnSelect(() =>
-                    {
-                        jobService.ClearCompletedJobs();
-                        refreshToken.Refresh();
-                    }),
-                    new MenuItem("Clear Failed", Icon: Icons.Trash, Tag: "ClearFailed").OnSelect(() =>
-                    {
-                        jobService.ClearFailedJobs();
-                        refreshToken.Refresh();
-                    })
-                ));
+            .HeaderRight(_ => Layout.Horizontal().Gap(2)
+                              | jobsProgress
+                              | new Button().Icon(Icons.EllipsisVertical).Ghost().WithDropDown(
+                                  new MenuItem("Clear Completed", Icon: Icons.Trash, Tag: "ClearCompleted")
+                                      .OnSelect(() =>
+                                      {
+                                          jobService.ClearCompletedJobs();
+                                          refreshToken.Refresh();
+                                      }),
+                                  new MenuItem("Clear Failed", Icon: Icons.Trash, Tag: "ClearFailed").OnSelect(() =>
+                                  {
+                                      jobService.ClearFailedJobs();
+                                      refreshToken.Refresh();
+                                  })
+                              ));
 
         var layout = Layout.Vertical().Height(Size.Full());
-
-        if (showCommand.Value is { } cmd)
-        {
-            return layout | new Fragment(
-                dataTable,
-                new Sheet(
-                    onClose: () => showCommand.Set(null),
-                    content: new Markdown($"```\n{cmd}\n```"),
-                    title: "Promptware Command"
-                ).Width(Size.Half()).Resizable()
-            );
-        }
-
-        if (showOutput.Value is { } output)
-        {
-            return layout | new Fragment(
-                dataTable,
-                new Sheet(
-                    onClose: () => showOutput.Set(null),
-                    content: new Markdown($"```\n{output}\n```"),
-                    title: "Job Output"
-                ).Width(Size.Half()).Resizable()
-            );
-        }
 
         if (showPlan.Value is { } planPath)
         {
@@ -250,29 +286,67 @@ public class JobsApp : ViewBase
 
             var sheetContent = string.IsNullOrEmpty(content)
                 ? Text.P("Plan not found or empty.")
-                : (object)new Markdown(MarkdownHelper.AnnotateBrokenFileLinks(content))
+                : (object)new Markdown(MarkdownHelper.AnnotateBrokenPlanLinks(
+                        MarkdownHelper.AnnotateBrokenFileLinks(content),
+                        planService.PlansDirectory))
                     .DangerouslyAllowLocalFiles()
                     .OnLinkClick(FileLinkHelper.CreateFileLinkClickHandler(openFile));
 
             var repoPaths = plan?.GetEffectiveRepoPaths(config) ?? [];
             var fileLinkSheet = FileLinkHelper.BuildFileLinkSheet(
-                openFile.Value, () => openFile.Set(null), repoPaths);
+                openFile.Value, () => openFile.Set(null), repoPaths, config);
 
             var planSheet = new Sheet(
-                onClose: () => showPlan.Set(null),
-                content: sheetContent,
-                title: plan?.Title ?? folderName
+                () => showPlan.Set(null),
+                sheetContent,
+                plan?.Title ?? folderName
             ).Width(Size.Half()).Resizable();
 
-            if (fileLinkSheet is not null)
-            {
-                return layout | new Fragment(dataTable, planSheet, fileLinkSheet);
-            }
+            if (fileLinkSheet is not null) return layout | new Fragment(dataTable, planSheet, fileLinkSheet);
 
             return layout | new Fragment(dataTable, planSheet);
         }
 
+        if (showOutput.Value is { } jobId)
+        {
+            var job = jobService.GetJob(jobId);
+            var outputText = job is not null && job.OutputLines.Count > 0
+                ? string.Join("\n", job.OutputLines)
+                : "No output available.";
+
+            var outputSheet = new Sheet(
+                () => showOutput.Set(null),
+                new Markdown($"```\n{outputText}\n```"),
+                job is not null ? $"{job.Type} — {ExtractPlanId(job.PlanFile)}" : "Job Output"
+            ).Width(Size.Half()).Resizable();
+
+            return layout | new Fragment(dataTable, outputSheet);
+        }
+
+        if (showPrompt.Value is { } promptText)
+        {
+            var promptSheet = new Sheet(
+                () => showPrompt.Set(null),
+                new Markdown($"```\n{promptText}\n```"),
+                "Full Prompt"
+            ).Width(Size.Half()).Resizable();
+
+            return layout | new Fragment(dataTable, promptSheet);
+        }
+
         return layout | dataTable;
+    }
+
+    private static string? GetFullPrompt(JobItem job)
+    {
+        if (job.Type == "MakePlan")
+        {
+            for (var i = 0; i < job.Args.Length - 1; i++)
+                if (job.Args[i].Equals("-Description", StringComparison.OrdinalIgnoreCase))
+                    return job.Args[i + 1];
+        }
+
+        return job.PlanFile;
     }
 
     private static string ExtractPlanId(string planFile)
@@ -284,26 +358,25 @@ public class JobsApp : ViewBase
 
     private static string FormatLastOutput(JobItem job)
     {
-        if (job.LastOutputAt.HasValue && job.Status == "Running")
+        if (job.LastOutputAt.HasValue && job.Status == JobStatus.Running)
         {
             var elapsed = DateTime.UtcNow - job.LastOutputAt.Value;
             return FormatTimeSpan(elapsed);
         }
+
         return "-";
     }
 
     private static string FormatTimer(JobItem job)
     {
-        if (job.Status == "Running" && job.StartedAt.HasValue)
+        if (job is { Status: JobStatus.Running, StartedAt: not null })
         {
             var elapsed = DateTime.UtcNow - job.StartedAt.Value;
             return FormatTimeSpan(elapsed);
         }
 
-        if ((job.Status is "Completed" or "Failed" or "Timeout" or "Stopped") && job.DurationSeconds.HasValue)
-        {
-            return FormatTimeSpan(TimeSpan.FromSeconds(job.DurationSeconds.Value));
-        }
+        if (job.Status is JobStatus.Completed or JobStatus.Failed or JobStatus.Timeout or JobStatus.Stopped &&
+            job.DurationSeconds.HasValue) return FormatTimeSpan(TimeSpan.FromSeconds(job.DurationSeconds.Value));
 
         return "-";
     }
@@ -315,16 +388,60 @@ public class JobsApp : ViewBase
         return $"{span.Minutes}m {span.Seconds:D2}s";
     }
 
-    private static Colors GetStatusColor(string status) => status switch
+    private const int PromptDisplayMaxLength = 150;
+
+    private static string CleanPromptText(string text)
     {
-        "Running" => Colors.Blue,
-        "Completed" => Colors.Green,
-        "Failed" => Colors.Red,
-        "Timeout" => Colors.Red,
-        "Queued" => Colors.Amber,
-        "Pending" => Colors.Amber,
-        "Stopped" => Colors.Gray,
-        "Blocked" => Colors.Orange,
-        _ => Colors.Slate
-    };
+        if (string.IsNullOrEmpty(text))
+            return text;
+        var replaced = text.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ");
+        var collapsed = Regex.Replace(replaced, @"\s+", " ");
+        return collapsed.Trim();
+    }
+
+    private static string GetPromptDisplay(JobItem j, IPlanReaderService planService)
+    {
+        // MakePlan jobs: use the -Description arg for display (PlanFile may now hold the folder name)
+        if (j.Type == "MakePlan")
+        {
+            var desc = CleanPromptText(GetFullPrompt(j) ?? j.PlanFile);
+            return desc.Length > PromptDisplayMaxLength ? desc[..PromptDisplayMaxLength] + "..." : desc;
+        }
+
+        // For other jobs, try to read the plan title
+        if (!string.IsNullOrEmpty(j.PlanFile))
+        {
+            var fullPath = Path.Combine(planService.PlansDirectory, j.PlanFile);
+            var plan = planService.GetPlanByFolder(fullPath);
+            if (plan != null && !string.IsNullOrEmpty(plan.Title))
+            {
+                var title = CleanPromptText(plan.Title);
+                return title.Length > PromptDisplayMaxLength ? title[..PromptDisplayMaxLength] + "..." : title;
+            }
+        }
+
+        // Fallback to folder name
+        var pf = CleanPromptText(j.PlanFile);
+        return pf.Length > PromptDisplayMaxLength ? pf[..PromptDisplayMaxLength] + "..." : pf;
+    }
+
+    private static string GetStatusMessage(JobItem job)
+    {
+        if (!string.IsNullOrEmpty(job.StatusMessage))
+            return job.StatusMessage;
+
+        return job.Status switch
+        {
+            JobStatus.Blocked => "Waiting for dependency plan(s) to complete",
+            JobStatus.Failed => "Job encountered an error during execution",
+            JobStatus.Timeout => "Job exceeded the configured timeout",
+            JobStatus.Queued => "Waiting for a job slot to become available",
+            _ => ""
+        };
+    }
+
+    private static Colors GetStatusColor(JobStatus status)
+    {
+        return StatusMappings.JobStatusColors.GetValueOrDefault(status, Colors.Slate);
+    }
 }

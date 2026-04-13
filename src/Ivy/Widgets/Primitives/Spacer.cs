@@ -11,4 +11,9 @@ public record Spacer : WidgetBase<Spacer>
     {
         Width = Size.Grow();
     }
+
+    public static Spacer operator |(Spacer widget, object child)
+    {
+        throw new NotSupportedException("Spacer does not support children.");
+    }
 }

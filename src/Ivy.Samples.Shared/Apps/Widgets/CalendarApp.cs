@@ -21,7 +21,8 @@ public class CalendarApp : SampleBase
             new Tab("Builder Example", new CalendarBuilderExample()),
             new Tab("Week View", new CalendarWeekExample()),
             new Tab("Agenda View", new CalendarAgendaExample()),
-            new Tab("Event Handlers", new CalendarEventHandlerExample())
+            new Tab("Event Handlers", new CalendarEventHandlerExample()),
+            new Tab("Density", new CalendarDensityExample())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -242,5 +243,43 @@ public class CalendarEventHandlerExample : ViewBase
                 .Start(today).End(today.AddDays(1))
                 .AllDay(),
         ];
+    }
+}
+
+public class CalendarDensityExample : ViewBase
+{
+    public override object? Build()
+    {
+        var today = DateTime.Today;
+
+        CalendarEvent[] MakeEvents() =>
+        [
+            new CalendarEvent()
+                .EventId("1").Title("Team Standup")
+                .Start(today.AddHours(9))
+                .End(today.AddHours(9).AddMinutes(30)),
+            new CalendarEvent()
+                .EventId("2").Title("Sprint Planning")
+                .Start(today.AddDays(1).AddHours(10))
+                .End(today.AddDays(1).AddHours(12))
+                .Color("Blue"),
+            new CalendarEvent()
+                .EventId("3").Title("Company Retreat")
+                .Start(today.AddDays(3))
+                .End(today.AddDays(5))
+                .AllDay()
+                .Color("Purple"),
+        ];
+
+        return Layout.Horizontal().Gap(4)
+            | (Layout.Vertical().Width(Size.Full())
+                | Text.H4("Small")
+                | new Calendar(MakeEvents()).Small())
+            | (Layout.Vertical().Width(Size.Full())
+                | Text.H4("Medium")
+                | new Calendar(MakeEvents()).Medium())
+            | (Layout.Vertical().Width(Size.Full())
+                | Text.H4("Large")
+                | new Calendar(MakeEvents()).Large());
     }
 }

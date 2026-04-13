@@ -1,0 +1,20 @@
+{
+  "name": "@ivy/tendril",
+  "version": "1.0.9",
+  "description": "NPM wrapper for Ivy.Tendril — AI-powered plan management CLI",
+  "main": "bin/tendril.js",
+  "bin": {
+    "tendril": "bin/tendril.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ivy",
+    "tendril",
+    "ai",
+    "cli"
+  ],
+  "author": "Ivy",
+  "license": "Apache-2.0"
+}

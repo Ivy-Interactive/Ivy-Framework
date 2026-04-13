@@ -234,6 +234,84 @@ This means any custom hooks you create following the `UseX` pattern will be auto
 **Message:** `Ivy hook '{hookName}' must be called at the top of the Build() method, before any other statements.`  
 **Description:** All hooks must be called at the very top of the Build() method, before any other non-hook statements. This ensures hooks are called in a consistent order on every render.
 
+### IVYHOOK007 - Hook Called Inline in Expression (Warning)
+
+**Severity:** Warning  
+**Message:** `'{hookName}' should be assigned to a local variable at the top of the Build method, not called inline in an expression.`  
+**Description:** Hooks must be assigned to a top-level local variable or called as a standalone expression statement. Do not call hooks inline within widget construction expressions, pipe chains, constructor arguments, or return statements.
+
+#### Quick Fix
+
+The analyzer includes a CodeFixProvider that can automatically extract inline hook calls to variables.
+
+**How to use:**
+1. Place your cursor on the warning (yellow squiggle on the hook call)
+2. Trigger the quick action menu:
+   - **Visual Studio:** Press `Ctrl+.` or click the lightbulb icon
+   - **VS Code:** Press `Ctrl+.` or click the lightbulb icon
+   - **Rider:** Press `Alt+Enter` or click the lightbulb icon
+3. Select **"Extract hook to variable"** from the menu
+4. The hook call will be moved to the top of the Build() method and assigned to a variable
+
+**Example:**
+```csharp
+// Before fix:
+public override object Build()
+{
+    return new Text(UseState(0).Value.ToString());  // ⚠️ Warning IVYHOOK007
+}
+
+// After applying quick fix:
+public override object Build()
+{
+    var state = UseState(0);  // ✅ Extracted
+    return new Text(state.Value.ToString());
+}
+```
+
+**Note:** The quick fix generates variable names automatically (UseState -> state, UseEffect -> effect, etc.). If a variable with that name already exists, it will append a number (state2, state3, etc.).
+
+### IVYAPP001 - App Missing Parameterless Constructor (Error)
+
+**Severity:** Error  
+**Message:** `App '{AppName}' must have a parameterless constructor, use UseService<T>() inside Build() instead of constructor injection.`  
+**Description:** App classes are instantiated via Activator.CreateInstance and require a parameterless constructor. Use UseService<T>() inside Build() for dependency injection.
+
+#### Quick Fix
+
+The analyzer includes a CodeFixProvider that can automatically add a parameterless constructor.
+
+**How to use:**
+1. Place your cursor on the error (red squiggle on the class name)
+2. Trigger the quick action menu:
+   - **Visual Studio:** Press `Ctrl+.` or click the lightbulb/screwdriver icon
+   - **VS Code:** Press `Ctrl+.` or click the lightbulb icon
+   - **Rider:** Press `Alt+Enter` or click the lightbulb icon
+3. Select **"Add parameterless constructor"** from the menu
+4. An empty `public ClassName() { }` constructor will be added to your class
+
+**Example:**
+```csharp
+// Before fix:
+[App]
+public class MyApp  // ❌ Error IVYAPP001
+{
+    public MyApp(IConfigService config) { }
+    public override object Build() => new Text("Hello");
+}
+
+// After applying quick fix:
+[App]
+public class MyApp  // ✅ Fixed
+{
+    public MyApp() { }  // Added automatically
+    public MyApp(IConfigService config) { }
+    public override object Build() => new Text("Hello");
+}
+```
+
+**Note:** The quick fix adds an empty parameterless constructor. You'll need to manually update your code to use `UseService<T>()` inside the `Build()` method instead of constructor injection.
+
 ### IVYSERVICE001 - UseService Should Use Interface (Warning)
 
 **Severity:** Warning  
@@ -266,6 +344,36 @@ public override object? Build()
 ```
 
 **Note:** This warning only appears when a corresponding interface (prefixed with 'I') exists in the same namespace. If no interface exists, no warning is shown.
+
+#### Quick Fix
+
+The analyzer includes a CodeFixProvider that can automatically fix IVYSERVICE001 warnings with a single click.
+
+**How to use:**
+1. Place your cursor on the warning (red/yellow squiggle)
+2. Trigger the quick action menu:
+   - **Visual Studio:** Press `Ctrl+.` or click the lightbulb/screwdriver icon
+   - **VS Code:** Press `Ctrl+.` or click the lightbulb icon
+   - **Rider:** Press `Alt+Enter` or click the lightbulb icon
+3. Select **"Use interface I{ConcreteType}"** from the menu
+4. The concrete type will be automatically replaced with its interface
+
+**Example:**
+```csharp
+// Before fix:
+var config = UseService<ConfigService>();  // ⚠️ Warning IVYSERVICE001
+
+// After applying quick fix:
+var config = UseService<IConfigService>(); // ✅ Fixed
+```
+
+**Fix All:**
+You can apply the fix to multiple violations at once using "Fix All" in Visual Studio:
+- **Fix All in Document:** Fixes all IVYSERVICE001 warnings in the current file
+- **Fix All in Project:** Fixes all IVYSERVICE001 warnings in the project
+- **Fix All in Solution:** Fixes all IVYSERVICE001 warnings in the solution
+
+**Note:** The quick fix only appears when the corresponding interface (prefixed with 'I') exists in the same namespace. If no interface exists, the warning will still appear but no automatic fix will be offered.
 
 ## Configuration
 

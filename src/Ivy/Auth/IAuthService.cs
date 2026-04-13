@@ -6,7 +6,7 @@ namespace Ivy;
 
 public interface IAuthService : IAuthTokenHandlerService
 {
-    Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
+    Task<LoginResult> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
 
     Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default);
 

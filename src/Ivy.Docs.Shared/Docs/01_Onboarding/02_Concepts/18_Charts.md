@@ -83,14 +83,22 @@ data.ToLineChart(e => e.Date, LineChartStyles.Dashboard, [e => e.Sum(f => f.Amou
 
 Use this API when you want pre-styled charts with minimal configuration. For custom styling and additional configuration (sorting, toolbox, etc.), use the fluent API shown in "Basic Usage" above.
 
-Ivy supports four chart types — each optimized for different visualization needs:
+Chart widgets and the usual way to build them from data:
 
-| Chart | Best For | Builder Method |
-|-------|----------|----------------|
+| Chart | Best for | Typical API |
+|-------|----------|-------------|
 | [LineChart](../../02_Widgets/06_Charts/01_LineChart.md) | Trends over time | `.ToLineChart()` |
 | [BarChart](../../02_Widgets/06_Charts/02_BarChart.md) | Comparing categories | `.ToBarChart()` |
-| [AreaChart](../../02_Widgets/06_Charts/03_AreaChart.md) | Cumulative data | `.ToAreaChart()` |
+| [AreaChart](../../02_Widgets/06_Charts/03_AreaChart.md) | Volume / cumulative series | `.ToAreaChart()` |
 | [PieChart](../../02_Widgets/06_Charts/04_PieChart.md) | Parts of a whole | `.ToPieChart()` |
+| [ScatterChart](../../02_Widgets/06_Charts/05_ScatterChart.md) | Correlations, distributions | `.ToScatterChart()` |
+| [RadarChart](../../02_Widgets/06_Charts/06_RadarChart.md) | Multi-metric comparison | `.ToRadarChart()` |
+| [SankeyChart](../../02_Widgets/06_Charts/07_SankeyChart.md) | Flows between nodes | `.ToSankeyChart()` |
+| [ChordChart](../../02_Widgets/06_Charts/08_ChordChart.md) | Matrix / relationship strength | `.ToChordChart()` |
+| [FunnelChart](../../02_Widgets/06_Charts/09_FunnelChart.md) | Sequential conversion stages | `.ToFunnelChart()` |
+| [GaugeChart](../../02_Widgets/06_Charts/05_GaugeChart.md) | Single KPI / dial | `new GaugeChart(...)` |
+
+Use `.To*Chart()` on queryable data where a builder exists; gauges and some custom charts are constructed with `new` instead.
 
 ## Sorting
 
@@ -194,6 +202,7 @@ public class ColorSchemeDemo : ViewBase
                 | new BarChart(data)
                     .Bar("A").Bar("B").Bar("C")
                     .ColorScheme(ColorScheme.Default)
+                    .ReferenceLine(1, null, null)
                     .Legend())
             | (Layout.Vertical()
                 | Text.P("Rainbow").Small()
@@ -245,7 +254,8 @@ public class TickFormatterDemo : ViewBase
             .Line(new Line("Revenue"))
             .CartesianGrid(new CartesianGrid().Horizontal())
             .XAxis(new XAxis("Year").TickLine(false))
-            .YAxis(new YAxis("Revenue").TickFormatter("C0"))
+            .YAxis(new YAxis("Revenue").TickFormatter("C0", TickFormatterType.Number))
+            .ReferenceLine(null, 2_000_000, null)
             .Tooltip();
     }
 }
@@ -276,6 +286,7 @@ public class HideTickLabelsDemo : ViewBase
             .CartesianGrid(new CartesianGrid().Horizontal())
             .XAxis(new XAxis("Day").HideTickLabels())
             .YAxis(new YAxis("Users"))
+            .ReferenceLine(4, null, null)
             .Tooltip();
     }
 }
@@ -307,6 +318,7 @@ public class DomainAxisDemo : ViewBase
                 .Domain(0, 50) 
                 .AllowDataOverflow(true)
             )
+            .ReferenceLine(null, 40, null)
             .Tooltip();
     }
 }

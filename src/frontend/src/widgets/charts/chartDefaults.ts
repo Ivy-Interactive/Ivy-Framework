@@ -50,13 +50,13 @@ export const PIE_DEFAULTS: Partial<PieProps> = {
 };
 
 // CartesianGrid defaults (CartesianGrid.cs)
-export const CARTESIAN_GRID_DEFAULTS: Partial<CartesianGridProps> = {
+export const CARTESIAN_GRID_DEFAULTS: CartesianGridProps = {
   horizontal: true,
   vertical: true,
 };
 
 // Legend defaults (Legend.cs)
-export const LEGEND_DEFAULTS: Partial<LegendProps> = {
+export const LEGEND_DEFAULTS: LegendProps = {
   layout: "Horizontal",
   align: "Center",
   verticalAlign: "Bottom",
@@ -64,7 +64,7 @@ export const LEGEND_DEFAULTS: Partial<LegendProps> = {
 };
 
 // Pie Legend defaults (Legend.cs with string types for compatibility)
-export const PIE_LEGEND_DEFAULTS: Partial<PieLegendProps> = {
+export const PIE_LEGEND_DEFAULTS: PieLegendProps = {
   layout: "Horizontal",
   align: "Center",
   verticalAlign: "Bottom",
@@ -72,12 +72,12 @@ export const PIE_LEGEND_DEFAULTS: Partial<PieLegendProps> = {
 };
 
 // Tooltip defaults (Tooltip.cs)
-export const TOOLTIP_DEFAULTS: Partial<ToolTipProps> = {
+export const TOOLTIP_DEFAULTS: ToolTipProps = {
   animated: false,
 };
 
 // Toolbox defaults (Toolbox.cs)
-export const TOOLBOX_DEFAULTS: Partial<ToolboxProps> = {
+export const TOOLBOX_DEFAULTS: ToolboxProps = {
   enabled: true,
   orientation: "Horizontal",
   align: "Right",
@@ -89,7 +89,7 @@ export const TOOLBOX_DEFAULTS: Partial<ToolboxProps> = {
 };
 
 // XAxis defaults (Axis.cs)
-export const X_AXIS_DEFAULTS: Partial<XAxisProps> = {
+export const X_AXIS_DEFAULTS: XAxisProps = {
   type: "Category",
   scale: "Auto",
   allowDecimals: true,
@@ -109,12 +109,13 @@ export const X_AXIS_DEFAULTS: Partial<XAxisProps> = {
   hide: false,
   hideTickLabels: false,
   tickFormatter: undefined,
+  timeZone: undefined,
   height: 30,
   orientation: "Bottom",
 };
 
 // YAxis defaults (Axis.cs)
-export const Y_AXIS_DEFAULTS: Partial<YAxisProps> = {
+export const Y_AXIS_DEFAULTS: YAxisProps = {
   type: "Number",
   scale: "Auto",
   allowDecimals: true,
@@ -134,6 +135,7 @@ export const Y_AXIS_DEFAULTS: Partial<YAxisProps> = {
   hide: false,
   hideTickLabels: false,
   tickFormatter: undefined,
+  timeZone: undefined,
   width: 60,
   orientation: "Left",
 };
@@ -144,19 +146,19 @@ export const REFERENCE_LINE_DEFAULTS = {
 };
 
 // PolarGrid defaults (PolarGrid.cs)
-export const POLAR_GRID_DEFAULTS: Partial<PolarGridProps> = {
+export const POLAR_GRID_DEFAULTS: PolarGridProps = {
   gridType: "Polygon",
   radialLines: true,
 };
 
 // PolarAngleAxis defaults (PolarAngleAxis.cs)
-export const POLAR_ANGLE_AXIS_DEFAULTS: Partial<PolarAngleAxisProps> = {
+export const POLAR_ANGLE_AXIS_DEFAULTS: PolarAngleAxisProps = {
   axisLine: true,
   tickLine: true,
 };
 
 // PolarRadiusAxis defaults (PolarRadiusAxis.cs)
-export const POLAR_RADIUS_AXIS_DEFAULTS: Partial<PolarRadiusAxisProps> = {};
+export const POLAR_RADIUS_AXIS_DEFAULTS: PolarRadiusAxisProps = {};
 
 // Radar defaults (Radar.cs)
 export const RADAR_DEFAULTS: Partial<RadarProps> = {
@@ -176,7 +178,7 @@ export const FUNNEL_DEFAULTS: Partial<FunnelProps> = {
 };
 
 // Funnel Legend defaults
-export const FUNNEL_LEGEND_DEFAULTS: Partial<PieLegendProps> = {
+export const FUNNEL_LEGEND_DEFAULTS: PieLegendProps = {
   layout: "Horizontal",
   align: "Center",
   verticalAlign: "Bottom",

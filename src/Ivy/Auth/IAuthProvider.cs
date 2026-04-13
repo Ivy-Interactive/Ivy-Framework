@@ -20,7 +20,7 @@ public static class AuthProviderHelpers
 
 public interface IAuthProvider : IAuthTokenHandler
 {
-    Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default);
+    Task<LoginResult> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default);
 
     Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default);
 

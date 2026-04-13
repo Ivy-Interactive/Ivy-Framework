@@ -36,4 +36,4 @@ public override object? Build()
 ## See Also
 
 - [Card](../../../02_Widgets/03_Common/04_Card.md)
-- [Layouts](../../../02_Widgets/02_Layouts/01_StackLayout.md)
+- [Layouts](../../../02_Widgets/02_Layouts/_Index.md)

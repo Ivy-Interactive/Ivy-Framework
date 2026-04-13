@@ -35,7 +35,15 @@ public class TunneledHttpMessageHandler : HttpMessageHandler
 
         var tunnelRequest = await BuildRequestAsync(requestGuid, request, cancellationToken);
 
-        _clientProvider.Sender.Send("HttpRequest", tunnelRequest);
+        _clientProvider.Sender.Send("HttpRequest", new Dictionary<string, object?>
+        {
+            ["requestId"] = tunnelRequest.RequestId,
+            ["method"] = tunnelRequest.Method,
+            ["url"] = tunnelRequest.Url,
+            ["headers"] = tunnelRequest.Headers,
+            ["body"] = tunnelRequest.Body,
+            ["contentType"] = tunnelRequest.ContentType,
+        });
 
         return await pendingRequest.CompletionSource.Task;
     }

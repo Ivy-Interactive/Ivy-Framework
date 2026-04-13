@@ -8,11 +8,13 @@ import {
   generateTextStyle,
   generateEChartToolbox,
   generateTooltip,
+  formatTooltipValue,
 } from "./sharedUtils";
 import { ChartType, PieChartWidgetProps } from "./chartTypes";
 import { generateDataProps } from "./sharedUtils";
 import { getChartThemeColors } from "./styles";
 import { PIE_DEFAULTS, PIE_LEGEND_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -26,6 +28,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   legend,
   colorScheme = "Default",
   total,
+  density: _density = Densities.Medium,
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
@@ -165,7 +168,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
         }),
         trigger: "item",
         formatter: (params: { name: string; value: number; percent: number; marker: string }) => {
-          return `${params.marker} ${params.name}<br/><strong>${params.value.toLocaleString()}</strong> (${params.percent}%)`;
+          return `${params.marker} ${params.name}<br/><strong>${formatTooltipValue(params.value, tooltip)}</strong> (${params.percent}%)`;
         },
       },
       series: series,

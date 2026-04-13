@@ -33,7 +33,7 @@ public class GitHubAuthProvider : GitHubAuthTokenHandler, IAuthProvider
     }
 
     /// <summary>Not supported - use OAuth flow</summary>
-    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
+    public Task<LoginResult> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         throw new NotSupportedException("GitHub authentication only supports OAuth flow. Use GetOAuthUriAsync and HandleOAuthCallbackAsync instead.");
     }

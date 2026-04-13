@@ -4,6 +4,7 @@ import { loadingState, renderWidgetTree } from "../widgetRenderer";
 import { useBackend } from "@/hooks/use-backend";
 import { EventHandlerProvider } from "@/components/event-handler";
 import { StreamHandlerProvider } from "@/components/stream-handler";
+import { BreakpointProvider } from "@/hooks/use-breakpoint-context";
 
 interface AppHostWidgetProps {
   id: string;
@@ -45,11 +46,13 @@ export const AppHostWidget: React.FC<AppHostWidgetProps> = ({ appId, appArgs, pa
   return (
     <div ref={containerRef} className="w-full h-full p-4 overflow-y-auto">
       <ErrorBoundary>
-        <EventHandlerProvider eventHandler={eventHandler}>
-          <StreamHandlerProvider subscribeToStream={subscribeToStream}>
-            <>{renderWidgetTree(widgetTree || loadingState())}</>
-          </StreamHandlerProvider>
-        </EventHandlerProvider>
+        <BreakpointProvider>
+          <EventHandlerProvider eventHandler={eventHandler}>
+            <StreamHandlerProvider subscribeToStream={subscribeToStream}>
+              <>{renderWidgetTree(widgetTree || loadingState())}</>
+            </StreamHandlerProvider>
+          </EventHandlerProvider>
+        </BreakpointProvider>
       </ErrorBoundary>
     </div>
   );

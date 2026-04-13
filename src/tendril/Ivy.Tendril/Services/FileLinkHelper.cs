@@ -6,7 +6,9 @@ public static class FileLinkHelper
 {
     private static readonly string[] ImageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"];
 
-    public static Action<string> CreateFileLinkClickHandler(IState<string?> openFileState)
+    public static Action<string> CreateFileLinkClickHandler(
+        IState<string?> openFileState,
+        Action<int>? onPlanClick = null)
     {
         return url =>
         {
@@ -15,6 +17,12 @@ public static class FileLinkHelper
                 var filePath = url.Substring("file:///".Length);
                 openFileState.Set(filePath);
             }
+            else if (url.StartsWith("plan://", StringComparison.OrdinalIgnoreCase))
+            {
+                var planIdStr = url.Substring("plan://".Length);
+                if (int.TryParse(planIdStr, out var planId))
+                    onPlanClick?.Invoke(planId);
+            }
         };
     }
 
@@ -22,8 +30,7 @@ public static class FileLinkHelper
         string? filePath,
         Action onClose,
         IEnumerable<string> repoPaths,
-        string editorCommand = "code",
-        string editorLabel = "VS Code")
+        IConfigService config)
     {
         if (filePath is null)
             return null;
@@ -40,7 +47,7 @@ public static class FileLinkHelper
         {
             if (File.Exists(filePath))
             {
-                var fileContent = File.ReadAllText(filePath);
+                var fileContent = FileHelper.ReadAllText(filePath);
                 var language = FileApp.GetLanguage(ext);
                 sheetContent = new Markdown($"```{language.ToString().ToLowerInvariant()}\n{fileContent}\n```");
             }
@@ -56,24 +63,19 @@ public static class FileLinkHelper
         }
 
         var finalContent = File.Exists(filePath)
-            ? (object)new HeaderLayout(
-                header: new Button($"Open in {editorLabel}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
+            ? new HeaderLayout(
+                new Button($"Open in {config.Editor.Label}").Icon(Icons.ExternalLink).Outline().OnClick(() =>
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = editorCommand,
-                        Arguments = $"\"{filePath}\"",
-                        UseShellExecute = true
-                    });
+                    config.OpenInEditor(filePath);
                 }),
-                content: sheetContent
+                sheetContent
             )
             : sheetContent;
 
         return new Sheet(
-            onClose: onClose,
-            content: finalContent,
-            title: Path.GetFileName(filePath)
+            onClose,
+            finalContent,
+            Path.GetFileName(filePath)
         ).Width(Size.Half()).Resizable();
     }
 }

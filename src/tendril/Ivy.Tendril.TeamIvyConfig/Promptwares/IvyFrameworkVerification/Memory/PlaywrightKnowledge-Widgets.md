@@ -20,6 +20,8 @@ DataTable uses Glide Data Grid — renders as `<canvas>`, NOT HTML `<table>`.
 - `decimal` columns display as `0000000000000000` (framework bug in `useRowData.ts` Decimal128 handling)
 - `.dispatchEvent("click")` on gridcells bypasses visibility but does NOT trigger Ivy's `OnCellClick`
 - Kill stale `.exe` processes before tests — they lock DLLs
+- **Multiple grids on same page**: React fiber walks from different `<canvas>` elements may find the same parent component's `columns` prop. Deduplicate grids by creating a key from column titles (`props.columns.map(c => c.title).join(',')`) and skipping duplicates.
+- **Column widths in fiber tree reflect post-grow rendered widths**, not configured widths. The last column always gets `grow: 1` by default. For test assertions: check `grow` factor presence/value, not exact pixel width on grow columns.
 
 ## Input Widgets
 
@@ -54,6 +56,16 @@ DataTable uses Glide Data Grid — renders as `<canvas>`, NOT HTML `<table>`.
 
 - `state.ToSliderInput()` renders as Radix UI slider with `role="slider"`, NOT `<input type="range">`
 - Keyboard: ArrowRight/Left (step), Home/End (min/max)
+
+### ContentInput
+
+- `state.ToContentInput(uploadContext)` — requires `IState<UploadContext>` from `UseUpload(MemoryStreamUploadHandler.Create(filesState))`
+- `.ShortcutKey("Ctrl+Enter")` renders `<kbd>` badge in bottom toolbar when not focused
+- **macOS shortcut key mapping**: `parseShortcut("Ctrl+X")` maps `Ctrl` to `meta` (Cmd key) on macOS. In Playwright tests, use `Meta+Enter` (not `Control+Enter`) on macOS to trigger `Ctrl+Enter` shortcuts. Detect with `process.platform === 'darwin'`.
+- kbd badge locator: `page.locator('kbd')`
+- When `shortcutKey` is set, the inline `Ctrl/Cmd+Enter` handler is disabled — only the global `useEffect` listener fires
+- `.Invalid("message")` renders as `InvalidIcon` (info icon with `data-invalid-icon="true"`) in top-right corner, NOT visible text. The message is shown in a Radix tooltip on hover. To test: `page.locator('[data-invalid-icon="true"]').first().hover()` then assert tooltip text with `.first()` (Radix creates duplicate tooltip DOM elements). Invalid also adds `border-destructive` CSS class to the wrapper.
+- `.Small()` / `.Medium()` / `.Large()` density variants scale textarea size, toolbar padding, paperclip icon, and shortcut badge proportionally
 
 ### TextInput / TextareaInput
 
@@ -91,6 +103,7 @@ DataTable uses Glide Data Grid — renders as `<canvas>`, NOT HTML `<table>`.
 
 - `.ToDialog()`, `.WithConfirm()`, `.ToSheet()` all render as `<div role="dialog">`, NOT HTML `<dialog>`
 - **NEVER** use `page.locator("dialog")` — use `page.getByRole("dialog", { name: "Title" })` or `[role='dialog']`
+- **Sheet title strict mode**: `.WithSheet(title: "My Sheet")` renders the title as both button text ("Open My Sheet") and `<h2>` heading inside the sheet. `getByText("My Sheet")` matches both → strict mode violation. Use `getByRole('heading', { name: 'My Sheet' })` for the sheet heading.
 - `.WithConfirm("message", "title")` always uses **"Ok"** and **"Cancel"** buttons (hardcoded)
 - Edit sheets use "Save" button; create dialogs use entity action name (e.g., "Create")
 - `[Required]` fields render labels as "FieldName *" — `getByText("Code", { exact: true })` won't match "Code *"; use input element locators
@@ -135,9 +148,10 @@ DataTable uses Glide Data Grid — renders as `<canvas>`, NOT HTML `<table>`.
 
 ### ECharts
 
-- Uses **echarts-for-react** rendering as **SVG** by default — `page.locator('canvas')` won't work
+- Uses **echarts-for-react** rendering as **canvas** (not SVG) — `querySelectorAll('text')` won't find axis labels
 - Locate via: `page.locator('[_echarts_instance_]')`; `data-chart-rendered="true"` indicates ready
-- Use React fiber to read chart data (walk from canvas to `memoizedProps.option`), not `__ec_instance__`/`_ec_`
+- Use React fiber to read chart options: walk `__reactFiber` tree from `[_echarts_instance_]` element to find `memoizedProps.option`, then inspect `option.xAxis`, `option.yAxis`, etc.
+- To verify axis properties (e.g., `show: false` for hidden axes), read the ECharts option object via React fiber — DOM text inspection doesn't work with canvas rendering
 - `option.radar` can be object or array — always normalize with `Array.isArray`
 - Case sensitivity: axes/labels visible but no data lines → suspect dataKey case mismatch
 - Screenshot-based verification needs 3s+ waits

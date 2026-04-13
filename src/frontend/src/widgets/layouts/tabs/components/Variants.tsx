@@ -29,7 +29,7 @@ interface ContentVariantProps {
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   setActiveTabId: React.Dispatch<React.SetStateAction<string | null>>;
   safeEvent: (
-    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+    name: "OnSelect" | "OnClose" | "OnCloseOthers" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
     args: unknown[],
   ) => void;
   dropdownMenu: React.ReactNode;
@@ -61,7 +61,7 @@ interface TabsVariantProps {
   isUserInitiatedChangeRef: React.MutableRefObject<boolean>;
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   safeEvent: (
-    name: "OnSelect" | "OnClose" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
+    name: "OnSelect" | "OnClose" | "OnCloseOthers" | "OnRefresh" | "OnReorder" | "OnAddButtonClick",
     args: unknown[],
   ) => void;
   renderTabContent: (tabWidget: React.ReactElement) => React.ReactNode;
@@ -139,6 +139,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
                   tabRefs.current[index] = el;
                 }}
                 role="tab"
+                id={`tab-${id}`}
                 value={id}
                 aria-selected={index === activeIndex}
                 tabIndex={0}
@@ -197,6 +198,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
             <div
               key={id}
               role="tabpanel"
+              aria-labelledby={`tab-${id}`}
               aria-hidden={!isActive}
               className={cn(
                 "overflow-auto border-none",

@@ -1,11 +1,12 @@
+using Ivy.Tendril.Apps.Recommendations;
 using Ivy.Tendril.Services;
 
 namespace Ivy.Tendril.Apps;
 
-[App(title: "Recommendations", icon: Icons.Lightbulb, group: new[] { "Tools" }, order: MenuOrder.Recommendations)]
+[App(title: "Recommendations", icon: Icons.Lightbulb, group: ["Apps"], order: MenuOrder.Recommendations)]
 public class RecommendationsApp : ViewBase
 {
-    public override object? Build()
+    public override object Build()
     {
         var planService = UseService<IPlanReaderService>();
         var jobService = UseService<IJobService>();
@@ -35,23 +36,23 @@ public class RecommendationsApp : ViewBase
             })
             .ToList();
 
-        if (selectedState.Value == null && filtered.Count > 0)
-        {
-            selectedState.Set(filtered[0]);
-        }
+        if (selectedState.Value == null && filtered.Count > 0) selectedState.Set(filtered[0]);
 
         // If selected recommendation is no longer in filtered list, adjust selection
-        if (selectedState.Value is { } selected && !filtered.Any(r => r.PlanId == selected.PlanId && r.Title == selected.Title))
-        {
+        if (selectedState.Value is { } selected &&
+            !filtered.Any(r => r.PlanId == selected.PlanId && r.Title == selected.Title))
             selectedState.Set(filtered.Count > 0 ? filtered[0] : null);
+
+        void Refresh()
+        {
+            refreshToken.Refresh();
         }
 
-        void Refresh() => refreshToken.Refresh();
-
         var totalPendingCount = allPending.Count;
-        var hasActiveFilters = projectFilter.Value != null || planStatusFilter.Value != null || !string.IsNullOrWhiteSpace(textFilter.Value);
+        var hasActiveFilters = projectFilter.Value != null || planStatusFilter.Value != null ||
+                               !string.IsNullOrWhiteSpace(textFilter.Value);
 
-        var sidebar = new Recommendations.SidebarView(
+        var sidebar = new SidebarView(
             allPending,
             selectedState,
             projectFilter,
@@ -62,9 +63,8 @@ public class RecommendationsApp : ViewBase
         );
 
         return new SidebarLayout(
-            mainContent: new Recommendations.ContentView(selectedState.Value, filtered, selectedState, planService, jobService, Refresh),
-            sidebarContent: sidebar,
-            sidebarHeader: sidebar.BuildHeader()
+            new ContentView(selectedState.Value, filtered, selectedState, planService, jobService, Refresh),
+            sidebar
         );
     }
 }

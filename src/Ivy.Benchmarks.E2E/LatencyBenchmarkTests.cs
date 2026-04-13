@@ -19,8 +19,8 @@ public class LatencyBenchmarkTests : PageTest
 
         // Wait for both to boot
         using var client = new HttpClient();
-        await WaitForServerAsync(client, "http://localhost:5010/hello");
-        await WaitForServerAsync(client, "http://localhost:5011/hello");
+        await WaitForServerAsync(client, "https://localhost:5010/hello");
+        await WaitForServerAsync(client, "https://localhost:5011/hello");
     }
 
     private async Task WaitForServerAsync(HttpClient client, string url)
@@ -67,8 +67,8 @@ public class LatencyBenchmarkTests : PageTest
     [Test]
     public async Task CompareWebSocketLatency_NativeVsLegacy()
     {
-        var nativeLatency = await MeasureLatencyAsync("http://localhost:5010/hello");
-        var legacyLatency = await MeasureLatencyAsync("http://localhost:5011/hello");
+        var nativeLatency = await MeasureLatencyAsync("https://localhost:5010/hello");
+        var legacyLatency = await MeasureLatencyAsync("https://localhost:5011/hello");
 
         TestContext.Progress.WriteLine($"--- E2E WebSocket Latency (JSON-Patch Render Cycle) ---");
         TestContext.Progress.WriteLine($"[1.2.27 Legacy] Typing 'x' took: {legacyLatency:F2} ms on average.");
@@ -125,14 +125,14 @@ public class LatencyBenchmarkTests : PageTest
         // Type into input natively!
         var input = runPage.Locator("input");
         await input.WaitForAsync();
-        
+
         // Wait for SignalR to fully connect handshake
         await Task.Delay(1000);
-        
+
         // Warmup: type 'a' to trigger JIT and FFI loading
         await input.FillAsync("a");
         await Task.Delay(500);
-        
+
         // Reset metrics
         latencies.Clear();
         sentTime = 0;
@@ -142,7 +142,7 @@ public class LatencyBenchmarkTests : PageTest
 
         // Let trailing frames settle
         await Task.Delay(1000);
-        
+
         Assert.That(latencies, Is.Not.Empty, "No latency measurements were captured");
 
         await runPage.CloseAsync();
