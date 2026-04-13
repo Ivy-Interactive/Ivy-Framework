@@ -10,10 +10,23 @@
 
 # Build Full-Stack Applications in Pure C\#
 
-Ivy is a modern C# framework that lets you build reactive full-stack web applications entirely in pure C# - using familiar React-style components, hooks, and declarative patterns.
-No frontend/backend split, no HTML/CSS/JS - just write type-safe C# code and ship beautiful, production-ready internal tools at lightning speed.
+Ivy is a **C# full-stack web framework** — build reactive web apps, dashboards, and internal tools in pure C# with React-style hooks. No HTML, CSS, or JavaScript needed.
+Write pure C# using React-style components, hooks, and declarative patterns. Ship production-ready **internal tools, dashboards, admin panels, and CRUD apps** at lightning speed.
+
+> **No frontend/backend split. No TypeScript. Just C#.**
 
 [Quick Start](https://docs.ivy.app/onboarding/getting-started/introduction) &nbsp;&nbsp;•&nbsp;&nbsp; [Docs](https://docs.ivy.app) &nbsp;&nbsp;•&nbsp;&nbsp; [Samples](https://samples.ivy.app) &nbsp;&nbsp;•&nbsp;&nbsp; [Examples](https://github.com/Ivy-Interactive/Ivy-Examples) &nbsp;&nbsp;•&nbsp;&nbsp; [Current Sprint](https://github.com/orgs/Ivy-Interactive/projects/8) &nbsp;&nbsp;•&nbsp;&nbsp; [Roadmap](https://github.com/orgs/Ivy-Interactive/projects/7)
+
+## Why Ivy?
+
+| | Ivy | Blazor | React + ASP.NET |
+|---|---|---|---|
+| Language | C# only | C# + Razor | C# + TypeScript |
+| State model | React-style hooks | Component lifecycle | Separate client/server |
+| UI library | Built-in widget set | Community/third-party | Community/third-party |
+| Target use case | Internal tools & dashboards | General web apps | General web apps |
+
+Ivy is purpose-built for **.NET developers building internal tools, line-of-business apps, and dashboards** who want the productivity of React without leaving the C# ecosystem.
 
 ## Simple Example
 
@@ -39,7 +52,7 @@ public class SimpleCounterApp : ViewBase
 }
 ```
 
-## Features
+## Key Features
 
 ### ⚙️ Architecture
 - **Rich Widget Library:** Extensive set of pre-built widgets to build any app. If you need more, an external widget framework is coming soon, where you can integrate any React, Angular, or Vue component.
@@ -57,7 +70,15 @@ public class SimpleCounterApp : ViewBase
 
 Ivy maintains state on the server and sends updates over WebSocket. The frontend consists of a pre-built React-based rendering engine. With Ivy, you never need to touch any HTML, CSS, or JavaScript. Only if you want to add your own widgets.
 
-## Tools
+## Use Cases
+
+- **Admin panels & back-office tools** — build CRUD interfaces over any database in minutes
+- **Data dashboards** — render charts, tables, and KPIs with live WebSocket updates
+- **Internal tooling** — replace fragile spreadsheets and scripts with real C# apps
+- **Rapid prototyping** — go from idea to running app with a single `ivy init`
+- **AI-powered apps** — pair Ivy with LLMs to build chat interfaces, code tools, and agents
+
+## Developer Tools & CLI
 
 The Ivy.Console CLI provides a suite of tools to streamline your development workflow:
 
@@ -83,7 +104,7 @@ The Ivy.Console CLI provides a suite of tools to streamline your development wor
 - **Deployment Management:** Manage deployments to Azure, AWS, Google Cloud, or Sliplane with ease.
 - **Secrets Management:** Securely manage sensitive information within your applications.
 
-## Usage
+## Getting Started
 
 ### Quick Start
 
@@ -122,7 +143,7 @@ Make sure you have the following prerequisites installed:
 
 You can also run `ivy samples` to see all the components that Ivy offers and `ivy docs` for documentation.
 
-## Want to help build Ivy Framework?
+## Contributing to Ivy C# Framework
 
 - [Contribution Guidelines](CONTRIBUTING.md)
 - [Internal Developer Wiki](https://github.com/Ivy-Interactive/Ivy-Framework/wiki)
