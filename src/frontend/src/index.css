@@ -143,9 +143,9 @@ ivy-widget {
     --radius-boxes: var(--radius-boxes);
     --radius-fields: var(--radius-fields);
     --radius-selectors: var(--radius-selectors);
-    --font-sans: var(--font-sans);
-    --font-mono: var(--font-mono);
-    --font-serif: var(--font-serif);
+    --font-family-sans: var(--font-sans);
+    --font-family-mono: var(--font-mono);
+    --font-family-serif: var(--font-serif);
     --shadow-2xs: var(--shadow-2xs);
     --shadow-xs: var(--shadow-xs);
     --shadow-sm: var(--shadow-sm);
