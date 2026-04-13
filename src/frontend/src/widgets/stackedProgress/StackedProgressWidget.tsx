@@ -56,22 +56,25 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
       <div
         className="bg-neutral/10"
         style={{
+          minWidth: 0,
+          maxWidth: "100%",
           ...getWidth(width),
           height: `${barHeight}px`,
           borderRadius: rounded ? `${barHeight / 2}px` : undefined,
+          overflow: "hidden",
         }}
       />
     );
   }
 
   const containerStyles: React.CSSProperties = {
+    minWidth: 0,
+    maxWidth: "100%",
     ...getWidth(width),
     height: `${barHeight}px`,
     display: "flex",
     overflow: "hidden",
     borderRadius: rounded ? `${barHeight / 2}px` : undefined,
-    minWidth: 0,
-    maxWidth: "100%",
   };
 
   const handleSelect = (index: number) => {
@@ -89,7 +92,13 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
     <TooltipProvider>
       <div
         className="flex flex-col gap-1"
-        style={{ ...getWidth(width), height: "fit-content", minWidth: 0, maxWidth: "100%" }}
+        style={{
+          minWidth: 0,
+          maxWidth: "100%",
+          ...getWidth(width),
+          height: "fit-content",
+          overflow: "hidden",
+        }}
       >
         <div className="bg-neutral/10" style={containerStyles}>
           {segments.map((segment, index) => {
