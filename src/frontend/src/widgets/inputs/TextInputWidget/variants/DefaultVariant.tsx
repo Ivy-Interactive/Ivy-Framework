@@ -84,8 +84,6 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             "border-transparent shadow-none bg-transparent hover:bg-accent dark:border-transparent dark:bg-transparent dark:hover:bg-accent",
           props.invalid && "border-destructive",
           props.disabled && "cursor-not-allowed opacity-50",
-          props.ghost &&
-            "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
         )}
       >
         {/* Prefix with background and separator */}
