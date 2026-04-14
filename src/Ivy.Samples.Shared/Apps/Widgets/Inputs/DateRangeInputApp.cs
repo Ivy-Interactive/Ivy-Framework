@@ -13,7 +13,8 @@ public class DateRangeInputApp : SampleBase
                    new Tab("Sizes", new DateRangeInputSizesTab()),
                    new Tab("Constraints", new DateRangeInputConstraintsTab()),
                    new Tab("Data Binding", new DateRangeInputDataBindingTab()),
-                   new Tab("Events", new DateRangeInputEventsTab())
+                   new Tab("Events", new DateRangeInputEventsTab()),
+               new Tab("Affixes", new DateRangeInputAffixesExample())
                ).Variant(TabsVariant.Content);
     }
 }
@@ -151,5 +152,34 @@ public class DateRangeInputEventsTab : ViewBase
                | Text.Block($"DateOnly Range: {dateOnlyRangeState.Value.Item1:yyyy-MM-dd} to {dateOnlyRangeState.Value.Item2:yyyy-MM-dd}")
                | Text.Block($"Nullable DateOnly Range: {nullableDateOnlyRangeState.Value.Item1?.ToString("yyyy-MM-dd") ?? "null"} to {nullableDateOnlyRangeState.Value.Item2?.ToString("yyyy-MM-dd") ?? "null"}");
 
+    }
+}
+
+public class DateRangeInputAffixesExample : ViewBase
+{
+    public override object Build()
+    {
+        var rangeState = UseState<(DateOnly?, DateOnly?)>(() => (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today)));
+
+        return Layout.Grid().Columns(4)
+               | null!
+               | Text.Monospaced("Prefix only")
+               | Text.Monospaced("Suffix only")
+               | Text.Monospaced("Both")
+
+               | Text.Monospaced("Text prefix/suffix")
+               | rangeState.ToDateRangeInput().Prefix("From:")
+               | rangeState.ToDateRangeInput().Suffix("days")
+               | rangeState.ToDateRangeInput().Prefix("From:").Suffix("To:")
+
+               | Text.Monospaced("Icon prefix/suffix")
+               | rangeState.ToDateRangeInput().Prefix(Icons.CalendarRange)
+               | rangeState.ToDateRangeInput().Suffix(Icons.CalendarRange)
+               | rangeState.ToDateRangeInput().Prefix(Icons.CalendarRange).Suffix(Icons.CalendarRange)
+
+               | Text.Monospaced("Button prefix/suffix")
+               | rangeState.ToDateRangeInput().Prefix(new Button("Today", () => { }, icon: Icons.Calendar).Ghost().Small())
+               | rangeState.ToDateRangeInput().Suffix(new Button("Clear").Ghost().Small())
+               | rangeState.ToDateRangeInput().Prefix(new Button("Today", () => { }, icon: Icons.Calendar).Ghost().Small()).Suffix(new Button("Clear").Ghost().Small());
     }
 }

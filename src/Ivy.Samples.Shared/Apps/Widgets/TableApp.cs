@@ -38,11 +38,11 @@ public class TableSizesExample : ViewBase
         //Anonymous type array
 
         var products = new[] {
-            new {Sku = "1234", Foo = true, Name = "T-shirt", Price = 10.0, Url = "http://example.com/tshirt"},
-            new {Sku = "1235", Foo = true, Name = "Jeans", Price = 20.0, Url = "http://example.com/jeans"},
-            new {Sku = "1236", Foo = true, Name = "Sneakers", Price = 30.0, Url = "http://example.com/sneakers"},
-            new {Sku = "1237", Foo = true, Name = "Hat", Price = 5.0, Url = "http://example.com/hat"},
-            new {Sku = "1238", Foo = true, Name = "Premium Luxury Extra-Soft Organic Cotton Socks with Reinforced Heel and Toe - Perfect for All-Day Comfort and Athletic Performance - Available in Multiple Colors", Price = 2.0, Url = "http://example.com/socks"}
+            new {Sku = "1234", Foo = true, Name = "T-shirt", Price = 10.0, Url = "https://example.com/tshirt"},
+            new {Sku = "1235", Foo = true, Name = "Jeans", Price = 20.0, Url = "https://example.com/jeans"},
+            new {Sku = "1236", Foo = true, Name = "Sneakers", Price = 30.0, Url = "https://example.com/sneakers"},
+            new {Sku = "1237", Foo = true, Name = "Hat", Price = 5.0, Url = "https://example.com/hat"},
+            new {Sku = "1238", Foo = true, Name = "Premium Luxury Extra-Soft Organic Cotton Socks with Reinforced Heel and Toe - Perfect for All-Day Comfort and Athletic Performance - Available in Multiple Colors", Price = 2.0, Url = "https://example.com/socks"}
         };
 
         // Table with long headers to test overflow and tooltips

@@ -394,7 +394,7 @@ ivy app -p "Create a user management system" \
   --ignore-git
 
 # Run fix command without Git operations
-ivy fix --debug-agent-server http://localhost:5000 \
+ivy fix --debug-agent-server https://localhost:5000 \
   --ignore-git
 ```
 

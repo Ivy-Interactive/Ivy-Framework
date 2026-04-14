@@ -426,6 +426,46 @@ public class InputPrefixSuffixSlotTests
     }
 
     [Fact]
+    public void DateRangeInput_Prefix_AddsPrefixSlot()
+    {
+        var state = new MockState<(DateOnly, DateOnly)>((DateOnly.MinValue, DateOnly.MaxValue));
+        var input = state.ToDateRangeInput().Prefix("$");
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("$", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void DateRangeInput_Suffix_AddsSuffixSlot()
+    {
+        var state = new MockState<(DateOnly, DateOnly)>((DateOnly.MinValue, DateOnly.MaxValue));
+        var input = state.ToDateRangeInput().Suffix("days");
+        var slot = FindSlot(input, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("days", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void DateRangeInput_PrefixAndSuffix_Coexist()
+    {
+        var state = new MockState<(DateOnly, DateOnly)>((DateOnly.MinValue, DateOnly.MaxValue));
+        var input = state.ToDateRangeInput().Prefix("From").Suffix("To");
+        Assert.NotNull(FindSlot(input, "Prefix"));
+        Assert.NotNull(FindSlot(input, "Suffix"));
+    }
+
+    [Fact]
+    public void DateRangeInput_Prefix_AcceptsWidgetContent()
+    {
+        var state = new MockState<(DateOnly, DateOnly)>((DateOnly.MinValue, DateOnly.MaxValue));
+        var button = new Button("Click");
+        var input = state.ToDateRangeInput().Prefix(button);
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
+    }
+
+    [Fact]
     public void DateTimeInput_Prefix_AddsPrefixSlot()
     {
         DateTimeInputBase input = new DateTimeInput<DateTime>();

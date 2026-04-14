@@ -338,8 +338,8 @@ All Ivy framework endpoints have been reorganized under a single `/ivy` prefix:
 1. **Authentication Callback URLs** - Update redirect URIs in OAuth provider dashboards:
 
    ```
-   Before: http://localhost:5010/webhook
-   After:  http://localhost:5010/ivy/webhook
+   Before: https://localhost:5010/webhook
+   After:  https://localhost:5010/ivy/webhook
    ```
 
 2. **Image Paths** - Update asset references:
@@ -355,8 +355,8 @@ All Ivy framework endpoints have been reorganized under a single `/ivy` prefix:
 3. **Health Check Monitoring** - Update URLs in monitoring tools:
 
    ```
-   Before: http://localhost:5010/health
-   After:  http://localhost:5010/ivy/health
+   Before: https://localhost:5010/health
+   After:  https://localhost:5010/ivy/health
    ```
 
 ### Chart Toolboxes Now Opt-In

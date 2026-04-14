@@ -46,6 +46,7 @@ interface DateRangeInputWidgetProps {
   events: string[];
   autoFocus?: boolean;
   "data-testid"?: string;
+  slots?: { Prefix?: React.ReactNode[]; Suffix?: React.ReactNode[] };
 }
 
 type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -83,6 +84,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   events = EMPTY_ARRAY,
   autoFocus,
   "data-testid": dataTestId,
+  slots,
 }) => {
   const firstDayOfWeek = resolveDayOfWeek(firstDayOfWeekRaw);
   const eventHandler = useEventHandler();
@@ -190,118 +192,154 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   // Show clear button if nullable, not disabled, and has a value
   const showClear = nullable && !disabled && (date?.from || date?.to);
 
-  return (
-    <div className="relative w-full select-none">
-      <Popover open={isOpen} onOpenChange={handleOpenChange}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            disabled={disabled}
-            autoFocus={autoFocus}
-            data-testid={dataTestId}
-            data-slot="calendar"
-            className={cn(
-              dateRangeInputVariant({ density }),
-              "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
-              !date && "text-muted-foreground",
-              invalid && "border-destructive focus-visible:ring-destructive",
-              showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
-            )}
-            onBlur={() => {
-              if (disabled) return;
-              if (events.includes("OnBlur") && !isOpen) eventHandler("OnBlur", id, []);
-            }}
-            onFocus={() => {
-              if (disabled) return;
-              if (events.includes("OnFocus") && !isOpen) eventHandler("OnFocus", id, []);
-            }}
-          >
-            <CalendarIcon className={cn("mr-2 shrink-0", dateRangeInputIconVariant({ density }))} />
-            {date?.from ? (
-              date.to ? (
-                <span className={cn("truncate", dateRangeInputTextVariant({ density }))}>
-                  {format(date.from, displayFormat)} - {format(date.to, displayFormat)}
-                </span>
-              ) : (
-                <span className={cn("truncate", dateRangeInputTextVariant({ density }))}>
-                  {format(date.from, displayFormat)}
-                  {(endPlaceholder || startPlaceholder) && (
-                    <span className="text-muted-foreground">
-                      {" "}
-                      - {endPlaceholder || placeholder || "Pick a date range"}
-                    </span>
-                  )}
-                </span>
-              )
-            ) : startPlaceholder || endPlaceholder ? (
-              <span
-                className={cn(
-                  "truncate",
-                  dateRangeInputTextVariant({ density }),
-                  "text-muted-foreground",
-                )}
-              >
-                {startPlaceholder || placeholder || "Start"} -{" "}
-                {endPlaceholder || placeholder || "End"}
+  const prefixContent = slots?.Prefix;
+  const suffixContent = slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+
+  const triggerContent = (
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          disabled={disabled}
+          autoFocus={autoFocus}
+          data-testid={dataTestId}
+          data-slot="calendar"
+          className={cn(
+            dateRangeInputVariant({ density }),
+            "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
+            !date && "text-muted-foreground",
+            invalid && "border-destructive focus-visible:ring-destructive",
+            showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
+            hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
+            hasPrefix && "rounded-l-none",
+            hasSuffix && "rounded-r-none",
+          )}
+          onBlur={() => {
+            if (disabled) return;
+            if (events.includes("OnBlur") && !isOpen) eventHandler("OnBlur", id, []);
+          }}
+          onFocus={() => {
+            if (disabled) return;
+            if (events.includes("OnFocus") && !isOpen) eventHandler("OnFocus", id, []);
+          }}
+        >
+          <CalendarIcon className={cn("mr-2 shrink-0", dateRangeInputIconVariant({ density }))} />
+          {date?.from ? (
+            date.to ? (
+              <span className={cn("truncate", dateRangeInputTextVariant({ density }))}>
+                {format(date.from, displayFormat)} - {format(date.to, displayFormat)}
               </span>
             ) : (
-              <span
-                className={cn(
-                  "truncate",
-                  dateRangeInputTextVariant({ density }),
-                  "text-muted-foreground",
+              <span className={cn("truncate", dateRangeInputTextVariant({ density }))}>
+                {format(date.from, displayFormat)}
+                {(endPlaceholder || startPlaceholder) && (
+                  <span className="text-muted-foreground">
+                    {" "}
+                    - {endPlaceholder || placeholder || "Pick a date range"}
+                  </span>
                 )}
-              >
-                {placeholder}
               </span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="rounded-box">
-            <div className="flex max-sm:flex-col">
-              <div className="relative border-border py-4 max-sm:order-1 max-sm:border-t sm:w-32">
-                <div className="h-full border-border sm:border-e">
-                  <DateRangePresets
-                    density={density}
-                    onSelect={(range, left, right) => {
-                      handleChange(range);
-                      setLeftMonth(left);
-                      setRightMonth(right);
-                      setIsOpen(false);
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="flex">
-                <Calendar
-                  mode="range"
-                  selected={date}
-                  onSelect={(newDate) => newDate && handleChange(newDate)}
-                  month={leftMonth}
-                  onMonthChange={handleLeftMonthChange}
-                  className="p-2 bg-background"
-                  disabled={disabledMatchers}
-                  weekStartsOn={firstDayOfWeek}
+            )
+          ) : startPlaceholder || endPlaceholder ? (
+            <span
+              className={cn(
+                "truncate",
+                dateRangeInputTextVariant({ density }),
+                "text-muted-foreground",
+              )}
+            >
+              {startPlaceholder || placeholder || "Start"} -{" "}
+              {endPlaceholder || placeholder || "End"}
+            </span>
+          ) : (
+            <span
+              className={cn(
+                "truncate",
+                dateRangeInputTextVariant({ density }),
+                "text-muted-foreground",
+              )}
+            >
+              {placeholder}
+            </span>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <div className="rounded-box">
+          <div className="flex max-sm:flex-col">
+            <div className="relative border-border py-4 max-sm:order-1 max-sm:border-t sm:w-32">
+              <div className="h-full border-border sm:border-e">
+                <DateRangePresets
                   density={density}
-                />
-
-                <Calendar
-                  mode="range"
-                  selected={date}
-                  onSelect={(newDate) => newDate && handleChange(newDate)}
-                  month={rightMonth}
-                  onMonthChange={handleRightMonthChange}
-                  className="p-2 bg-background"
-                  disabled={disabledMatchers}
-                  weekStartsOn={firstDayOfWeek}
-                  density={density}
+                  onSelect={(range, left, right) => {
+                    handleChange(range);
+                    setLeftMonth(left);
+                    setRightMonth(right);
+                    setIsOpen(false);
+                  }}
                 />
               </div>
             </div>
+            <div className="flex">
+              <Calendar
+                mode="range"
+                selected={date}
+                onSelect={(newDate) => newDate && handleChange(newDate)}
+                month={leftMonth}
+                onMonthChange={handleLeftMonthChange}
+                className="p-2 bg-background"
+                disabled={disabledMatchers}
+                weekStartsOn={firstDayOfWeek}
+                density={density}
+              />
+
+              <Calendar
+                mode="range"
+                selected={date}
+                onSelect={(newDate) => newDate && handleChange(newDate)}
+                month={rightMonth}
+                onMonthChange={handleRightMonthChange}
+                className="p-2 bg-background"
+                disabled={disabledMatchers}
+                weekStartsOn={firstDayOfWeek}
+                density={density}
+              />
+            </div>
           </div>
-        </PopoverContent>
-      </Popover>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+
+  return (
+    <div className="relative w-full select-none">
+      {hasAffixes ? (
+        <div
+          className={cn(
+            "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+            isOpen && "ring-1 ring-ring",
+            invalid && "border-destructive",
+            disabled && "cursor-not-allowed opacity-50",
+          )}
+        >
+          {hasPrefix && (
+            <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+              {prefixContent}
+            </div>
+          )}
+          <div className="flex-1 relative w-full">{triggerContent}</div>
+          {hasSuffix && (
+            <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+              {suffixContent}
+            </div>
+          )}
+        </div>
+      ) : (
+        triggerContent
+      )}
       {/* Icons absolutely positioned */}
       {(showClear || invalid) && (
         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">

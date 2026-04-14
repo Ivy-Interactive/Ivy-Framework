@@ -70,7 +70,7 @@ new Button("Save").Icon(Icons.Save)
 
 The OAuth authentication callback URL has changed from `/ivy/webhook` to `/ivy/auth/callback`.
 
-- Local development: `http://localhost:5010/ivy/auth/callback`
+- Local development: `https://localhost:5010/ivy/auth/callback`
 - Production: `https://your-app.com/ivy/auth/callback`
 
 ### DesktopWindow API Improvements

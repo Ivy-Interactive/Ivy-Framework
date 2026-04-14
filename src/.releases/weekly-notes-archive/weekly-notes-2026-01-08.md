@@ -165,7 +165,7 @@ Configure your GitHub OAuth App credentials using .NET user secrets (development
 ```terminal
 dotnet user-secrets set "GitHub:ClientId" "your_client_id"
 dotnet user-secrets set "GitHub:ClientSecret" "your_client_secret"
-dotnet user-secrets set "GitHub:RedirectUri" "http://localhost:5010/ivy/webhook"
+dotnet user-secrets set "GitHub:RedirectUri" "https://localhost:5010/ivy/webhook"
 ```
 
 ### Dynamic Page Titles
