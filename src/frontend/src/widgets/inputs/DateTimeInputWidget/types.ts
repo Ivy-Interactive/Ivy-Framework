@@ -21,6 +21,7 @@ export interface DateTimeInputWidgetProps {
   autoFocus?: boolean;
   "data-testid"?: string;
   events?: string[];
+  slots?: { Prefix?: React.ReactNode[]; Suffix?: React.ReactNode[] };
 }
 
 export interface BaseVariantProps {
