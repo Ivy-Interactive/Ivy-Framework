@@ -31,7 +31,7 @@
 .ivy-devtools-dialog {
   position: fixed;
   z-index: 100001;
-  background: var(--popover);
+  background: var(--input);
   border: 2px solid var(--primary);
   border-radius: var(--radius-boxes);
   box-shadow:
