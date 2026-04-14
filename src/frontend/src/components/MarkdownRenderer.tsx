@@ -304,9 +304,13 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                 const normalizedSrc = validatedSrc.startsWith("/")
                   ? validatedSrc
                   : `/${validatedSrc}`;
-                const prefixedSrc = normalizedSrc.startsWith("/ivy/")
-                  ? normalizedSrc
-                  : `/ivy${normalizedSrc}`;
+                // Static file roots from UseAssets (see Server.UseAssets / app hosts). Only /ivy/ was
+                // handled initially; /tendril-docs/ and /tendril/ are separate embedded-asset mounts.
+                const isStaticAssetRoot =
+                  normalizedSrc.startsWith("/ivy/") ||
+                  normalizedSrc.startsWith("/tendril-docs/") ||
+                  normalizedSrc.startsWith("/tendril/");
+                const prefixedSrc = isStaticAssetRoot ? normalizedSrc : `/ivy${normalizedSrc}`;
                 return `${getIvyHost()}${prefixedSrc}`;
               })();
 
