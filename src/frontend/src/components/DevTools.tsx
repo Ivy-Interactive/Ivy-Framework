@@ -96,6 +96,7 @@ export function DevTools() {
   const { highlightedWidget, widgetStack, dialogWidget, dialogText, clickPosition } = devState;
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const getWidgetInfo = useCallback((element: HTMLElement): WidgetInfo => {
     const widgetId = element.getAttribute("id")!;
@@ -261,18 +262,31 @@ export function DevTools() {
         capture: true,
       });
       document.body.style.cursor = "crosshair";
+
+      document.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        document.removeEventListener("mouseover", handleMouseOver, true);
+        document.removeEventListener("click", handleClick, true);
+        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("wheel", handleWheel, true);
+        document.body.style.cursor = "";
+      };
+    } else {
+      const handleClickOutside = (e: MouseEvent) => {
+        if (dialogRef.current && !dialogRef.current.contains(e.target as Node)) {
+          closeDialog();
+        }
+      };
+      document.addEventListener("mousedown", handleClickOutside, true);
+      document.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside, true);
+        document.removeEventListener("keydown", handleKeyDown);
+      };
     }
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("mouseover", handleMouseOver, true);
-      document.removeEventListener("click", handleClick, true);
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("wheel", handleWheel, true);
-      document.body.style.cursor = "";
-    };
-  }, [enabled, dialogWidget, handleMouseOver, handleClick, handleKeyDown, handleWheel]);
+  }, [enabled, dialogWidget, handleMouseOver, handleClick, handleKeyDown, handleWheel, closeDialog]);
 
   useEffect(() => {
     if (!enabled || !highlightedWidget || dialogWidget) return;
@@ -303,7 +317,7 @@ export function DevTools() {
   return (
     <div className="ivy-devtools-container">
       {dialogWidget && (
-        <div className="ivy-devtools ivy-devtools-dialog" style={getDialogPosition(clickPosition)}>
+        <div ref={dialogRef} className="ivy-devtools ivy-devtools-dialog" style={getDialogPosition(clickPosition)}>
           <input
             ref={inputRef}
             type="text"
