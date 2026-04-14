@@ -286,7 +286,15 @@ export function DevTools() {
         document.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [enabled, dialogWidget, handleMouseOver, handleClick, handleKeyDown, handleWheel, closeDialog]);
+  }, [
+    enabled,
+    dialogWidget,
+    handleMouseOver,
+    handleClick,
+    handleKeyDown,
+    handleWheel,
+    closeDialog,
+  ]);
 
   useEffect(() => {
     if (!enabled || !highlightedWidget || dialogWidget) return;
@@ -317,7 +325,11 @@ export function DevTools() {
   return (
     <div className="ivy-devtools-container">
       {dialogWidget && (
-        <div ref={dialogRef} className="ivy-devtools ivy-devtools-dialog" style={getDialogPosition(clickPosition)}>
+        <div
+          ref={dialogRef}
+          className="ivy-devtools ivy-devtools-dialog"
+          style={getDialogPosition(clickPosition)}
+        >
           <input
             ref={inputRef}
             type="text"
