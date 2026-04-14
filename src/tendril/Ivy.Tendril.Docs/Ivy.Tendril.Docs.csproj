@@ -31,7 +31,7 @@
             <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs', '*.md'))</DocsInputPath>
             <DocsOutputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Generated'))</DocsOutputPath>
         </PropertyGroup>
-        <Exec Command="dotnet tool restore" WorkingDirectory="$(MSBuildProjectDirectory)/../../../../.." />
+        <Exec Command="dotnet tool restore" WorkingDirectory="$(MSBuildProjectDirectory)/../../" />
         <Exec Command="dotnet ivy-docs-cli convert &quot;$(DocsInputPath)&quot; &quot;$(DocsOutputPath)&quot; --skip-if-not-changed" WorkingDirectory="$(MSBuildProjectDirectory)" />
         <ItemGroup>
             <Compile Include="Generated/**/*.g.cs" />

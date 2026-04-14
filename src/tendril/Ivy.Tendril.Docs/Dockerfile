@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 ARG IVY_PACKAGE_VERSION
 
-WORKDIR /
+WORKDIR /src
 
 # Copy tool config and restore tools
 # Note: Use the Ivy-Framework root as build context
@@ -15,13 +15,14 @@ COPY [".config/dotnet-tools.json", ".config/"]
 RUN dotnet tool restore
 
 # Copy projects for restoration
-COPY ["src/tendril/Ivy.Tendril.Docs/Ivy.Tendril.Docs.csproj", "src/tendril/Ivy.Tendril.Docs/"]
-COPY ["src/Ivy/Ivy.csproj", "src/Ivy/"]
-COPY ["src/Ivy.Docs.Helpers/Ivy.Docs.Helpers.csproj", "src/Ivy.Docs.Helpers/"]
-COPY ["src/Ivy.Analyser/Ivy.Analyser.csproj", "src/Ivy.Analyser/"]
+COPY ["src/tendril/Ivy.Tendril.Docs/Ivy.Tendril.Docs.csproj", "tendril/Ivy.Tendril.Docs/"]
+COPY ["src/Ivy/Ivy.csproj", "Ivy/"]
+COPY ["src/Ivy.Docs.Helpers/Ivy.Docs.Helpers.csproj", "Ivy.Docs.Helpers/"]
+COPY ["src/Ivy.Analyser/Ivy.Analyser.csproj", "Ivy.Analyser/"]
+COPY ["src/Ivy.Agent.Filter/Ivy.Agent.Filter.csproj", "Ivy.Agent.Filter/"]
 
 # Restore
-RUN dotnet restore "src/tendril/Ivy.Tendril.Docs/Ivy.Tendril.Docs.csproj"
+RUN dotnet restore "tendril/Ivy.Tendril.Docs/Ivy.Tendril.Docs.csproj"
 
 # Copy the rest of the source code
 COPY . .
