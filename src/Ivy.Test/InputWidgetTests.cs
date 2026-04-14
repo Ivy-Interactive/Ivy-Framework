@@ -217,6 +217,30 @@ public class InputWidgetTests
 
 public class InputPrefixSuffixSlotTests
 {
+    private class MockState<T>(T value) : IState<T>
+    {
+        private readonly Subject<T> _subject = new();
+        public T Value { get; set; } = value;
+
+        [OverloadResolutionPriority(1)]
+        public T Set(T value) { Value = value; return Value; }
+        public T Set(Func<T, T> setter) { Value = setter(Value); return Value; }
+        public T Reset() => Set(default(T)!);
+        public Type GetStateType() => typeof(T);
+
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            observer.OnNext(Value);
+            return _subject.Subscribe(observer);
+        }
+
+        public void Dispose() => _subject.Dispose();
+        public IDisposable SubscribeAny(Action action) => _subject.Subscribe(_ => action());
+        public IDisposable SubscribeAny(Action<object?> action) => _subject.Subscribe(x => action(x));
+        public IEffectTrigger ToTrigger() => EffectTrigger.OnStateChange(this);
+        public object? GetValueAsObject() => Value;
+    }
+
     private static Slot? FindSlot(WidgetBase widget, string name)
         => widget.Children.OfType<Slot>().FirstOrDefault(s => s.Name == name);
 
@@ -319,6 +343,86 @@ public class InputPrefixSuffixSlotTests
         var slot = FindSlot(withSuffix, "Suffix");
         Assert.NotNull(slot);
         Assert.Equal("USD", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void SelectInput_Prefix_AddsPrefixSlot()
+    {
+        var state = new MockState<string>("a");
+        var input = state.ToSelectInput().Prefix("$");
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("$", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void SelectInput_Suffix_AddsSuffixSlot()
+    {
+        var state = new MockState<string>("a");
+        var input = state.ToSelectInput().Suffix(".00");
+        var slot = FindSlot(input, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal(".00", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void SelectInput_PrefixAndSuffix_Coexist()
+    {
+        var state = new MockState<string>("a");
+        var input = state.ToSelectInput().Prefix("$").Suffix("USD");
+        Assert.NotNull(FindSlot(input, "Prefix"));
+        Assert.NotNull(FindSlot(input, "Suffix"));
+    }
+
+    [Fact]
+    public void SelectInput_Prefix_AcceptsWidgetContent()
+    {
+        var state = new MockState<string>("a");
+        var button = new Button("Click");
+        var input = state.ToSelectInput().Prefix(button);
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
+    }
+
+    [Fact]
+    public void BoolInput_Prefix_AddsPrefixSlot()
+    {
+        var state = new MockState<bool>(false);
+        var input = state.ToBoolInput().Prefix("On");
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("On", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void BoolInput_Suffix_AddsSuffixSlot()
+    {
+        var state = new MockState<bool>(false);
+        var input = state.ToBoolInput().Suffix("Off");
+        var slot = FindSlot(input, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("Off", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void BoolInput_PrefixAndSuffix_Coexist()
+    {
+        var state = new MockState<bool>(false);
+        var input = state.ToBoolInput().Prefix("On").Suffix("Off");
+        Assert.NotNull(FindSlot(input, "Prefix"));
+        Assert.NotNull(FindSlot(input, "Suffix"));
+    }
+
+    [Fact]
+    public void BoolInput_Prefix_AcceptsWidgetContent()
+    {
+        var state = new MockState<bool>(false);
+        var button = new Button("Click");
+        var input = state.ToBoolInput().Prefix(button);
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
     }
 
     [Fact]

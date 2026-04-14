@@ -20,6 +20,7 @@ public class TrashApp : ViewBase
     {
         var configService = UseService<IConfigService>();
         var jobService = UseService<IJobService>();
+        var planService = UseService<IPlanReaderService>();
         var client = UseService<IClientProvider>();
         var refreshToken = UseRefreshToken();
         var selectedFile = UseState<string?>(null);
@@ -92,6 +93,7 @@ public class TrashApp : ViewBase
                             });
 
             var annotatedContent = MarkdownHelper.AnnotateBrokenFileLinks(selected.Content);
+            annotatedContent = MarkdownHelper.AnnotateBrokenPlanLinks(annotatedContent, planService.PlansDirectory);
             var scrollableContent = Layout.Vertical().Width(Size.Auto().Max(Size.Units(200)))
                                     | new Markdown(annotatedContent)
                                         .DangerouslyAllowLocalFiles()

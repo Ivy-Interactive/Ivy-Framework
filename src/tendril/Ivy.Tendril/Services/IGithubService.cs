@@ -11,6 +11,7 @@ public record GitHubIssue(
 public interface IGithubService
 {
     List<RepoConfig> GetRepos();
+    RepoConfig? GetRepoConfigFromPathCached(string repoPath);
     Task<(List<string> assignees, string? error)> GetAssigneesAsync(string owner, string repo);
     Task<(List<string> labels, string? error)> GetLabelsAsync(string owner, string repo);
     Task<(Dictionary<string, string> statuses, string? error)> GetPrStatusesAsync(string owner, string repo);

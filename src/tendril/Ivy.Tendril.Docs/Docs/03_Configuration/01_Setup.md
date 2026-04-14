@@ -70,5 +70,5 @@ Wire these names into project `verifications` (and define behavior in config as 
 | `DotnetBuild` | `dotnet build` |
 | `DotnetFormat` | `dotnet format` checks |
 | `DotnetTest` | Test suite |
-| `Npm*` / `Cargo*` | Same idea for other stacks |
+| `Npm*` | Same idea for other stacks |
 | `CheckResult` | Parse stdout/stderr to decide pass/fail |

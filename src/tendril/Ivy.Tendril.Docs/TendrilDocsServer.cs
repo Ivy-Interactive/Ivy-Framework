@@ -42,7 +42,15 @@ public static class TendrilDocsServer
                 ).Gap(2).Padding(2).AlignContent(Align.BottomLeft)
             )
             .DefaultApp<IntroductionApp>()
-            .UsePages();
+            .UsePages()
+            .UseFooterMenuItemsTransformer((items, navigator) =>
+            {
+                var githubItem = MenuItem.Default("View on Github")
+                    .Tag("$github")
+                    .Icon(Icons.Github)
+                    .OnSelect(() => navigator.Navigate("https://github.com/Ivy-Interactive/Ivy-Framework/tree/development/src/tendril"));
+                return new[] { githubItem }.Concat(items);
+            });
         server.UseAppShell(() => new DefaultSidebarAppShell(appShellSettings));
 
         await server.RunAsync();

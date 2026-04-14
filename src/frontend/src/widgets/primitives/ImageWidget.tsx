@@ -147,7 +147,7 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
         setShowOverlay(true);
       }
     } else if (hasOnClick) {
-      eventHandler("OnClick", id, []);
+      if (events?.includes("OnClick")) eventHandler("OnClick", id, []);
     }
   }, [id, eventHandler, hasOnClick, overlay, imageOverlayContext]);
 

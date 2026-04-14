@@ -232,6 +232,65 @@ public class GithubServiceTests
         Assert.Equal(error1, error2);
     }
 
+    [Fact]
+    public void GetRepoConfigFromPath_Returns_Null_For_NonExistent_Path()
+    {
+        var result = GithubService.GetRepoConfigFromPath(@"C:\nonexistent\path\xyz-999");
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void GetRepoConfigFromPath_Returns_Config_For_Valid_Repo()
+    {
+        var tempDir = CreateTempGitRepo("https://github.com/Test-Owner/Test-Repo.git");
+        try
+        {
+            var result = GithubService.GetRepoConfigFromPath(tempDir);
+            Assert.NotNull(result);
+            Assert.Equal("Test-Owner", result.Owner);
+            Assert.Equal("Test-Repo", result.Name);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void GetRepoConfigFromPathCached_Returns_Same_Instance_On_Repeated_Calls()
+    {
+        var tempDir = CreateTempGitRepo("https://github.com/Cache-Owner/Cache-Repo.git");
+        try
+        {
+            var settings = new TendrilSettings
+            {
+                Projects = [new ProjectConfig { Name = "CacheTest", Repos = [new RepoRef { Path = tempDir }] }]
+            };
+            var configService = new ConfigService(settings);
+            var githubService = new GithubService(configService);
+
+            var result1 = githubService.GetRepoConfigFromPathCached(tempDir);
+            var result2 = githubService.GetRepoConfigFromPathCached(tempDir);
+
+            Assert.NotNull(result1);
+            Assert.Same(result1, result2);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, true);
+        }
+    }
+
+    [Fact]
+    public void GetRepoConfigFromPathCached_Returns_Null_For_Invalid_Path()
+    {
+        var configService = new ConfigService(new TendrilSettings());
+        var githubService = new GithubService(configService);
+
+        var result = githubService.GetRepoConfigFromPathCached(@"C:\nonexistent\xyz-999");
+        Assert.Null(result);
+    }
+
     private static string CreateTempGitRepo(string remoteUrl)
     {
         var tempDir = Path.Combine(Path.GetTempPath(), $"ivy-github-test-{Guid.NewGuid()}");

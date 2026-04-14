@@ -31,7 +31,7 @@ export interface KanbanWidgetProps {
   id: string;
   columns?: Column[];
   tasks?: Task[];
-  events?: Record<string, unknown>;
+  events?: string[];
   width?: string;
   height?: string;
   columnWidth?: string;

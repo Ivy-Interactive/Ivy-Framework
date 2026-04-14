@@ -259,7 +259,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
 
   const fireColorChange = (newColor: string | null) => {
     setLocalColorValue(newColor);
-    eventHandler("OnChange", id, [newColor]);
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [newColor]);
   };
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {

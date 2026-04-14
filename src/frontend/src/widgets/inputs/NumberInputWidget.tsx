@@ -392,14 +392,14 @@ export const NumberInputWidget = memo(
           const validatedValue = validateAndCapValue(boundedValue, props.targetType);
 
           setLocalValue(validatedValue);
-          eventHandler("OnChange", id, [validatedValue]);
+          if (events.includes("OnChange")) eventHandler("OnChange", id, [validatedValue]);
         } else {
           // Pass null directly for nullable inputs
           setLocalValue(newValue);
-          eventHandler("OnChange", id, [newValue]);
+          if (events.includes("OnChange")) eventHandler("OnChange", id, [newValue]);
         }
       },
-      [eventHandler, id, props.min, props.max, props.targetType, setLocalValue],
+      [eventHandler, id, props.min, props.max, props.targetType, setLocalValue, events],
     );
 
     return (

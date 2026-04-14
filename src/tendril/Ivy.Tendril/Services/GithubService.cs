@@ -14,6 +14,7 @@ public class GithubService(IConfigService config) : IGithubService
     private readonly ConcurrentDictionary<string, List<string>> _assigneeCache = new();
     private readonly IConfigService _config = config;
     private readonly ConcurrentDictionary<string, List<string>> _labelCache = new();
+    private readonly ConcurrentDictionary<string, RepoConfig?> _repoPathCache = new();
     private List<RepoConfig>? _repoCache;
 
     public List<RepoConfig> GetRepos()
@@ -148,10 +149,21 @@ public class GithubService(IConfigService config) : IGithubService
         return issues;
     }
 
+    public RepoConfig? GetRepoConfigFromPathCached(string repoPath)
+    {
+        return _repoPathCache.GetOrAdd(repoPath, path => GetRepoConfigFromPath(path));
+    }
+
     internal static RepoConfig? GetRepoConfigFromPath(string repoPath)
     {
         try
         {
+            if (!Directory.Exists(repoPath))
+            {
+                Console.Error.WriteLine($"[GithubService] Repository path does not exist: {repoPath}");
+                return null;
+            }
+
             var psi = new ProcessStartInfo("git", "remote get-url origin")
             {
                 WorkingDirectory = repoPath,
@@ -164,16 +176,32 @@ public class GithubService(IConfigService config) : IGithubService
             };
 
             using var process = Process.Start(psi);
-            if (process is null) return null;
+            if (process is null)
+            {
+                Console.Error.WriteLine($"[GithubService] Failed to start git process for {repoPath}");
+                return null;
+            }
 
             var url = process.StandardOutput.ReadToEnd().Trim();
+            var stderr = process.StandardError.ReadToEnd();
             process.WaitForExitOrKill(10000);
-            if (process.ExitCode != 0) return null;
 
-            return ParseRepoConfigFromUrl(url);
+            if (process.ExitCode != 0)
+            {
+                Console.Error.WriteLine($"[GithubService] git remote get-url failed for {repoPath}: {stderr}");
+                return null;
+            }
+
+            var config = ParseRepoConfigFromUrl(url);
+            if (config is null)
+            {
+                Console.Error.WriteLine($"[GithubService] Failed to parse remote URL for {repoPath}: {url}");
+            }
+            return config;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.Error.WriteLine($"[GithubService] Exception getting repo config for {repoPath}: {ex.Message}");
             return null;
         }
     }

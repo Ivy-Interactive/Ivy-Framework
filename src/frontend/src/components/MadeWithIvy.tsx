@@ -46,7 +46,7 @@ export default function MadeWithIvy() {
 
   return (
     <div
-      className="bg-ivy-green fixed bottom-0 right-0 z-100 overflow-hidden rounded-tl-full "
+      className="fixed bottom-0 right-0 z-100 overflow-hidden rounded-tl-full "
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -62,7 +62,7 @@ export default function MadeWithIvy() {
           origin-bottom-right
           cursor-pointer
           ${isHovered ? "w-48 h-48" : "w-16 h-16"}
-          ${isHovered ? "bg-primary-foreground" : "bg-ivy-green"}
+          bg-ivy-green
         `}
         onClick={handleClick}
         role="button"
@@ -70,7 +70,6 @@ export default function MadeWithIvy() {
         onKeyDown={handleKeyDown}
       >
         <div
-          style={{ color: "var(--ivy-green)" }}
           className={`
             flex
             flex-col
@@ -79,10 +78,11 @@ export default function MadeWithIvy() {
             transition-opacity
             duration-300
             m-4
+            text-background
             ${isHovered ? "opacity-100" : "opacity-0"}
           `}
         >
-          <span className="font-mono font-bold text-gray-400">MADE WITH</span>
+          <span className="font-mono font-bold opacity-70">MADE WITH</span>
           <IvyLogo className="w-24" />
         </div>
       </div>

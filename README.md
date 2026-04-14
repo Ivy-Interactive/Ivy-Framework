@@ -45,6 +45,7 @@ public class SimpleCounterApp : ViewBase
 - **Rich Widget Library:** Extensive set of pre-built widgets to build any app. If you need more, an external widget framework is coming soon, where you can integrate any React, Angular, or Vue component.
 - **External Widget Framework:** Easily integrate any third-party React component.
 - **Hooks:** Familiar React-style hooks for state management, side effects, and lifecycle events.
+- **Rust-Optimized Core:** Under the hood, Ivy uses Rust-compiled native libraries for JSON diffing and document processing — delivering 5-10x better memory efficiency than traditional .NET solutions. No Rust installation required; these ship as precompiled NuGet packages.
 
 ### 🎨 UI Components
 - **Forms:** Create complex CRUD forms with validation and data binding.
@@ -91,7 +92,6 @@ The Ivy.Console CLI provides a suite of tools to streamline your development wor
 
 Make sure you have the following prerequisites installed:
 - [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
-- [Rust Toolchain](https://rustup.rs/) (latest stable via `rustup`)
 
 1. **Install Ivy CLI**:
 

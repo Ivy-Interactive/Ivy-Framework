@@ -95,7 +95,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
       // but only fire if interactive.
       if (isClickable) {
         e.stopPropagation();
-        eventHandler("OnClick", id, []);
+        if (events.includes("OnClick")) eventHandler("OnClick", id, []);
       }
     },
     [id, isClickable, eventHandler],

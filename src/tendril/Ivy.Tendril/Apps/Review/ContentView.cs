@@ -2,6 +2,7 @@ using Ivy.Core;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Apps.Review.Dialogs;
 using Ivy.Tendril.Services;
+using Ivy.Widgets.DiffView;
 using Microsoft.Extensions.Logging;
 
 namespace Ivy.Tendril.Apps.Review;
@@ -128,6 +129,19 @@ public class ContentView(
             initialValue: null
         );
 
+        var allChangesQuery = UseQuery<PlanContentHelpers.AllChangesData?, string>(
+            _selectedPlan?.FolderPath ?? "",
+            async (folderPath, ct) =>
+            {
+                return await Task.Run(() =>
+                {
+                    if (_selectedPlan is null) return null;
+                    return PlanContentHelpers.GetAllChangesData(_selectedPlan, _config, _gitService);
+                }, ct);
+            },
+            initialValue: null
+        );
+
         var planContentQuery = UseQuery<PlanContentData, string>(
             _selectedPlan?.FolderPath ?? "",
             async (folderPath, ct) =>
@@ -188,6 +202,7 @@ public class ContentView(
                     return new PlanContentData(recs, summaryMd, artifacts, commitRows, verReports, actionStates.ToList());
                 }, ct);
             },
+            options: QueryScope.View,
             initialValue: new PlanContentData(new List<RecommendationYaml>(), null,
                 new Dictionary<string, List<string>>(), new List<PlanContentHelpers.CommitRow>(), new Dictionary<string, bool>(),
                 new List<(string Name, bool ConditionMet)>())
@@ -268,6 +283,14 @@ public class ContentView(
             content |= Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
                        | Text.Muted("Loading...");
         }
+        else if (planData is null)
+        {
+            var errorMsg = planContentQuery.Error is { } err
+                ? $"Failed to load plan data: {err.Message}"
+                : "Failed to load plan data. Please try refreshing.";
+            content |= Layout.Vertical().AlignContent(Align.Center).Height(Size.Full())
+                       | Text.Muted(errorMsg);
+        }
         else
         {
             // Summary tab content
@@ -308,8 +331,8 @@ public class ContentView(
                 );
             }
 
-            // Commits tab content
-            var commitsLayout = Layout.Vertical().Gap(2);
+            // Git tab content (combines commits and PRs)
+            var gitLayout = Layout.Vertical().Gap(2);
 
             var problematicCommits = planData.CommitRows
                 .Where(r => string.IsNullOrEmpty(r.Title) || r.FileCount == 0)
@@ -323,32 +346,36 @@ public class ContentView(
                         return $"`{r.ShortHash}` — commit not found or has no message";
                     return $"`{r.ShortHash}` — commit has no file changes";
                 });
-                commitsLayout |= Callout.Warning(
+                gitLayout |= Callout.Warning(
                     string.Join("\n", warnings),
                     "Potentially corrupted commits");
             }
 
-            var commitsTable = new Table(
-                new TableRow(
-                        new TableCell("Commit").IsHeader(),
-                        new TableCell("Message").IsHeader(),
-                        new TableCell("Files").IsHeader()
-                    )
-                { IsHeader = true }
-            );
-            foreach (var row in planData.CommitRows)
-                commitsTable |= new TableRow(
-                    new TableCell(new Button(row.ShortHash).Inline().OnClick(() => openCommit.Set(row.Hash))),
-                    new TableCell(row.Title),
-                    new TableCell(row.FileCount?.ToString() ?? "–")
+            if (_selectedPlan.Commits.Count > 0)
+            {
+                gitLayout |= Text.Block("Commits").Bold();
+                var commitsTable = new Table(
+                    new TableRow(
+                            new TableCell("Commit").IsHeader(),
+                            new TableCell("Message").IsHeader(),
+                            new TableCell("Files").IsHeader()
+                        )
+                    { IsHeader = true }
                 );
-
-            commitsLayout |= commitsTable;
-
-            // PRs tab content
-            object prsContent;
+                foreach (var row in planData.CommitRows)
+                    commitsTable |= new TableRow(
+                        new TableCell(new Button(row.ShortHash).Inline().OnClick(() => openCommit.Set(row.Hash))),
+                        new TableCell(row.Title),
+                        new TableCell(row.FileCount?.ToString() ?? "–")
+                    );
+                gitLayout |= commitsTable;
+            }
             if (_selectedPlan.Prs.Count > 0)
             {
+                if (_selectedPlan.Commits.Count > 0)
+                    gitLayout |= new Separator();
+
+                gitLayout |= Text.Block("Pull Requests").Bold();
                 var prsTable = new Table(
                     new TableRow(
                             new TableCell("Repository").IsHeader(),
@@ -364,12 +391,12 @@ public class ContentView(
                         new TableCell(new Button(pr).Link().OnClick(() => client.OpenUrl(prCapture)))
                     );
                 }
-
-                prsContent = prsTable;
+                gitLayout |= prsTable;
             }
-            else
+
+            if (_selectedPlan.Commits.Count == 0 && _selectedPlan.Prs.Count == 0)
             {
-                prsContent = new Empty();
+                gitLayout |= Text.Muted("No commits or pull requests yet.");
             }
 
             // Artifacts tab content
@@ -428,12 +455,60 @@ public class ContentView(
                     recommendationsLayout |= new Separator();
                 }
 
+            // Changes tab content
+            object changesTabContent;
+            var changesData = allChangesQuery.Value;
+            var changesFileCount = 0;
+            if (allChangesQuery.Loading)
+            {
+                changesTabContent = Text.Muted("Loading...");
+            }
+            else if (changesData is null)
+            {
+                changesTabContent = Text.Muted("No commits yet.");
+            }
+            else
+            {
+                changesFileCount = changesData.Files.Count;
+                var changesLayout = Layout.Vertical().Gap(4).Padding(2);
+
+                var statsText =
+                    $"{changesData.Files.Count} files changed ({changesData.AddedCount} added, {changesData.ModifiedCount} modified, {changesData.DeletedCount} deleted)";
+                changesLayout |= Text.Block(statsText).Bold();
+
+                if (changesData.Files.Count > 0)
+                {
+                    var filesLayout = Layout.Vertical().Gap(1);
+                    foreach (var (status, filePath) in changesData.Files)
+                    {
+                        var (label, variant) = status switch
+                        {
+                            "A" => ("Added", BadgeVariant.Success),
+                            "D" => ("Deleted", BadgeVariant.Destructive),
+                            _ => ("Modified", BadgeVariant.Outline)
+                        };
+                        filesLayout |= Layout.Horizontal().Gap(2)
+                            | new Badge(label).Variant(variant).Small()
+                            | Text.Block(filePath);
+                    }
+
+                    changesLayout |= filesLayout;
+                }
+
+                if (!string.IsNullOrWhiteSpace(changesData.Diff))
+                {
+                    changesLayout |= new DiffView().Diff(changesData.Diff).Split();
+                }
+
+                changesTabContent = changesLayout;
+            }
+
             // Build tabs
             var tabs = Layout.Tabs(
                 new Tab("Summary", Cap(summaryTabContent)),
                 new Tab("Verifications", Cap(verificationsTable)).Badge(_selectedPlan.Verifications.Count.ToString()),
-                new Tab("Commits", Cap(commitsLayout)).Badge(_selectedPlan.Commits.Count.ToString()),
-                new Tab("PRs", Cap(prsContent)).Badge(_selectedPlan.Prs.Count.ToString()),
+                new Tab("Git", Cap(gitLayout)).Badge((_selectedPlan.Commits.Count + _selectedPlan.Prs.Count).ToString()),
+                new Tab("Changes", Cap(changesTabContent)).Badge(changesFileCount > 0 ? changesFileCount.ToString() : ""),
                 new Tab("Artifacts", Cap(artifactsLayout)).Badge(totalArtifacts.ToString()),
                 new Tab("Recommendations", Cap(recommendationsLayout)).Badge(planData.Recommendations.Count.ToString()),
                 new Tab("Plan", Cap(planTabContent))

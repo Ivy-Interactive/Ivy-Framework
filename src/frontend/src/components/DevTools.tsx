@@ -275,9 +275,12 @@ export function DevTools() {
   }, [enabled, dialogWidget, handleMouseOver, handleClick, handleKeyDown, handleWheel]);
 
   useEffect(() => {
-    if (!enabled || !highlightedWidget || dialogWidget) return;
+    if (!enabled) return;
 
-    const { bounds, type } = highlightedWidget;
+    const activeWidget = dialogWidget ?? highlightedWidget;
+    if (!activeWidget) return;
+
+    const { bounds, type } = activeWidget;
     if (bounds.width === 0 && bounds.height === 0) return;
 
     const overlay = document.createElement("div");

@@ -31,6 +31,7 @@ import { getOrderedVisibleDataColumns } from "../utils/columnHelpers";
 
 interface TableEditorProps {
   widgetId: string;
+  events: string[];
   hasOptions?: boolean;
   rowActions?: MenuItem[];
   footer?: React.ReactNode;
@@ -39,6 +40,7 @@ interface TableEditorProps {
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
   widgetId,
+  events,
   hasOptions = false,
   rowActions,
   footer,
@@ -109,6 +111,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Cell interactions
   const { handleCellClicked, handleCellActivated } = useCellInteractions({
     widgetId,
+    events,
     columns,
     visibleRows,
     enableCellClickEvents: enableCellClickEvents ?? false,
@@ -120,6 +123,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const { hoverRow, actionButtonsTop, actionButtonsHeight, onItemHovered, handleRowActionClick } =
     useRowHover({
       widgetId,
+      events,
       visibleRows,
       enableRowHover: enableRowHover ?? false,
       rowActions,

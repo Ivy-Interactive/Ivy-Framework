@@ -270,6 +270,17 @@ cat "<PlanFolder>/worktrees/<repo-folder-name>/.git"
 
 This ensures ExecutePlan fails immediately if worktree creation is incomplete, rather than leaving orphaned directories that trigger warnings during cleanup.
 
+5. Log the worktree creation event:
+
+```bash
+REPO_PATH="<original-repo-path>"
+WORKTREE_PATH="<PlanFolder>/worktrees/<repo-folder-name>"
+
+pwsh -NoProfile -Command '& "$env:TENDRIL_HOME/Promptwares/ExecutePlan/Tools/Log-WorktreeEvent.ps1" -Event Creation -PlanId "'"$PLAN_ID"'" -WorktreePath "'"$WORKTREE_PATH"'" -Metadata @{repo="'"$REPO_PATH"'"; branch="'"$BRANCH_NAME"'"}'
+```
+
+This creates a structured log entry in `$TENDRIL_HOME/Logs/worktrees.log` recording the worktree creation with repo path and branch metadata. Logging only happens after successful `.git` file verification (Step 2.4), ensuring only successfully created worktrees are recorded.
+
 ### 2.5. Setup Frontend Dependencies (JavaScript/TypeScript Projects Only)
 
 **Note:** This section applies only to projects using npm/pnpm. Skip if not applicable.

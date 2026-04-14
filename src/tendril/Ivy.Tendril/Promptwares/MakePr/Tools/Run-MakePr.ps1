@@ -77,6 +77,18 @@ if (Test-Path $worktreesDir) {
             $branch = git rev-parse --abbrev-ref HEAD
             Write-Host "  Branch: $branch"
 
+            # Get default branch to check commits ahead
+            $defaultBranch = gh repo view $ownerRepo --json defaultBranchRef -q .defaultBranchRef.name
+
+            # Check if there are commits ahead of base branch
+            $commitsAhead = git rev-list --count origin/$defaultBranch..HEAD
+            if ($commitsAhead -eq 0) {
+                Write-Host "  No commits ahead of $defaultBranch - skipping PR creation" -ForegroundColor Gray
+                Pop-Location
+                continue
+            }
+            Write-Host "  Commits ahead: $commitsAhead"
+
             # Find prRule for this repo
             $repoPath = $planYaml.repos | Where-Object { $_.Contains($repo) } | Select-Object -First 1
             if (-not $repoPath) {

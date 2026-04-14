@@ -175,6 +175,42 @@ projects:
     action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
   repoPaths:
   - D:\Repos\_Ivy\Ivy-Mcp
+- name: Services
+  color: Pink
+  meta:
+    slackEmoji: ':cloud:'
+  repos:
+  - path: D:\Repos\_Ivy\Ivy-Services
+    prRule: yolo
+  verifications:
+  - *o0
+  - *o1
+  - *o2
+  - *o3
+  - name: GoBuild
+    required: true
+  - name: GoVet
+    required: true
+  - name: GoTest
+  context: >
+    Ivy Services — backoffice .NET monorepo. Key folders:
+    - Ivy.Admin/ — Admin web app (Ivy Framework)
+    - Ivy.Billing/ — Billing API with Stripe integration
+    - Ivy.Data/ — Shared EF Core database layer
+    - Ivy.Services.Automation/ — Azure Functions
+    - Ivy.Email/ — Email templating (Resend API)
+    - ivy-proxy/ — Go reverse proxy
+    Instructions: See CLAUDE.md in repo root
+  reviewActions: []
+  hooks:
+  - name: SlackNotify
+    when: after
+    promptwares:
+    - MakePr
+    condition: ''
+    action: pwsh -NoProfile -File D:\Tendril\Hooks\NotifySlack.ps1
+  repoPaths:
+  - D:\Repos\_Ivy\Ivy-Services
 verifications:
 - name: DotnetBuild
   prompt: Run `dotnet build --warnaserror` in the plan's worktree directory (not the original repo) and verify it succeeds with zero errors and zero warnings.
@@ -225,6 +261,21 @@ verifications:
 - name: NewWidgetChecklist
   prompt: >
     Verify all 6 required elements exist for any new widget created by this plan: 1. Backend widget class — src\Ivy\Widgets\<WidgetName>.cs with [Prop]\[Event] attributes, [JsonIgnore] on delegates, Has* booleans 2. Frontend React component — src\frontend\src\widgets\<widgetName>\<WidgetName>Widget.tsx 3. Index export — src\frontend\src\widgets\<widgetName>\index.ts 4. Widget map registration — import + entry in src\frontend\src\widgets\widgetMap.ts 5. Sample app — src\Ivy.Samples.Shared\Apps\Widgets\<WidgetName>App.cs 6. Documentation page — src\Ivy.Docs.Shared\Docs\02_Widgets\<category>\<WidgetName>.md Check each file exists and follows conventions. Report which elements are present vs missing.
+- name: GoBuild
+  prompt: >
+    Run `go build ./...` in the Go source directory of the project repo.
+    For Services: `cd ivy-proxy && go build ./...`
+    Verify the build completes with zero errors.
+- name: GoTest
+  prompt: >
+    Run `go test ./...` in the Go source directory of the project repo.
+    For Services: `cd ivy-proxy && go test ./...`
+    Verify all tests pass. If no test files exist, report "No tests found" and pass.
+- name: GoVet
+  prompt: >
+    Run `go vet ./...` in the Go source directory of the project repo.
+    For Services: `cd ivy-proxy && go vet ./...`
+    Verify no issues are reported.
 planTemplate: >
   # {title}
 

@@ -125,6 +125,52 @@ public static class PlanContentHelpers
         ).Width(Size.Half()).Resizable();
     }
 
+    public record AllChangesData(
+        string? Diff,
+        List<(string Status, string FilePath)> Files,
+        int AddedCount,
+        int ModifiedCount,
+        int DeletedCount
+    );
+
+    public static AllChangesData? GetAllChangesData(PlanFile plan, IConfigService config, IGitService gitService)
+    {
+        if (plan.Commits.Count == 0) return null;
+
+        var repoPaths = plan.GetEffectiveRepoPaths(config);
+        var firstCommit = plan.Commits.First();
+        var lastCommit = plan.Commits.Last();
+
+        foreach (var repo in repoPaths)
+        {
+            var title = gitService.GetCommitTitle(repo, firstCommit);
+            if (title == null) continue;
+
+            string? diff;
+            List<(string Status, string FilePath)>? files;
+
+            if (plan.Commits.Count == 1)
+            {
+                diff = gitService.GetCommitDiff(repo, firstCommit);
+                files = gitService.GetCommitFiles(repo, firstCommit);
+            }
+            else
+            {
+                diff = gitService.GetCombinedDiff(repo, firstCommit, lastCommit);
+                files = gitService.GetCombinedChangedFiles(repo, firstCommit, lastCommit);
+            }
+
+            var fileList = files ?? [];
+            var added = fileList.Count(f => f.Status == "A");
+            var deleted = fileList.Count(f => f.Status == "D");
+            var modified = fileList.Count - added - deleted;
+
+            return new AllChangesData(diff, fileList, added, modified, deleted);
+        }
+
+        return null;
+    }
+
     public static object RenderArtifactScreenshots(Dictionary<string, List<string>> artifacts)
     {
         if (!artifacts.TryGetValue("screenshots", out var screenshotFiles))

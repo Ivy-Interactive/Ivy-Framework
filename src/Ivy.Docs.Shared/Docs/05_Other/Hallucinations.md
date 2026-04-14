@@ -858,6 +858,63 @@ c1f8feae-b342-4bf1-a18c-9b88ee8d6d17
 fd4594df-0402-4f11-ad46-22165d480649
 513c6b12-5eae-430d-b539-633f50eaa310
 
+## ConnectionBase — non-existent base class for database connections
+
+**Hallucinated API:**
+
+```csharp
+public class AccountingDbConnection : ConnectionBase
+{
+    // ...
+}
+```
+
+**Error:** `CS0246: The type or namespace name 'ConnectionBase' could not be found`
+
+**Correct API:**
+
+```csharp
+public class AccountingDbConnection : IConnection
+{
+    public string Name => "AccountingDb";
+    // Implement IConnection interface members
+}
+```
+
+`ConnectionBase` does not exist. Database connections must implement the `IConnection` interface directly. The agent hallucinated a base class pattern that doesn't exist in Ivy — there is no abstract base class for connections.
+
+**Found In:**
+2bcae879-5f09-4655-a74f-9371bc1d26e4
+7622b8e9-9662-4bcf-8c4c-e7ad0cfb4ba1
+860143f4-7a01-41d2-bd64-b140b2411021
+
+## AppContext.BaseDirectory — Ivy's AppContext shadows System.AppContext
+
+**Hallucinated API:**
+
+```csharp
+var dbPath = Path.Combine(AppContext.BaseDirectory, "MyDb.db");
+```
+
+**Error:** `CS0117: 'AppContext' does not contain a definition for 'BaseDirectory'`
+
+**Correct API:**
+
+```csharp
+// Use fully-qualified System.AppContext:
+var dbPath = Path.Combine(System.AppContext.BaseDirectory, "MyDb.db");
+
+// Or use Environment.CurrentDirectory:
+var dbPath = Path.Combine(Environment.CurrentDirectory, "MyDb.db");
+```
+
+Ivy has its own `AppContext` class (`Ivy.Apps.AppContext`) which is imported via global usings and shadows `System.AppContext`. The agent uses the standard .NET `AppContext.BaseDirectory` pattern for resolving file paths, but in an Ivy project this resolves to `Ivy.Apps.AppContext` which has no `BaseDirectory` property.
+
+**Found In:**
+ce2e89b0-1a7e-4823-9426-c8288ac4a6fa
+a31113e3-0282-46f8-a78f-4bd42b9cebc2
+860143f4-7a01-41d2-bd64-b140b2411021
+
 ## UseAlert().ShowInfo() — wrong API usage
 
 **Hallucinated API:**
@@ -1253,61 +1310,6 @@ Layout.Tabs(
 8b576f86-85cc-43b8-97e2-358bae83464a
 2bcae879-5f09-4655-a74f-9371bc1d26e4
 
-## ConnectionBase — non-existent base class for database connections
-
-**Hallucinated API:**
-
-```csharp
-public class AccountingDbConnection : ConnectionBase
-{
-    // ...
-}
-```
-
-**Error:** `CS0246: The type or namespace name 'ConnectionBase' could not be found`
-
-**Correct API:**
-
-```csharp
-public class AccountingDbConnection : IConnection
-{
-    public string Name => "AccountingDb";
-    // Implement IConnection interface members
-}
-```
-
-`ConnectionBase` does not exist. Database connections must implement the `IConnection` interface directly. The agent hallucinated a base class pattern that doesn't exist in Ivy — there is no abstract base class for connections.
-
-**Found In:**
-2bcae879-5f09-4655-a74f-9371bc1d26e4
-7622b8e9-9662-4bcf-8c4c-e7ad0cfb4ba1
-
-## AppContext.BaseDirectory — Ivy's AppContext shadows System.AppContext
-
-**Hallucinated API:**
-
-```csharp
-var dbPath = Path.Combine(AppContext.BaseDirectory, "MyDb.db");
-```
-
-**Error:** `CS0117: 'AppContext' does not contain a definition for 'BaseDirectory'`
-
-**Correct API:**
-
-```csharp
-// Use fully-qualified System.AppContext:
-var dbPath = Path.Combine(System.AppContext.BaseDirectory, "MyDb.db");
-
-// Or use Environment.CurrentDirectory:
-var dbPath = Path.Combine(Environment.CurrentDirectory, "MyDb.db");
-```
-
-Ivy has its own `AppContext` class (`Ivy.Apps.AppContext`) which is imported via global usings and shadows `System.AppContext`. The agent uses the standard .NET `AppContext.BaseDirectory` pattern for resolving file paths, but in an Ivy project this resolves to `Ivy.Apps.AppContext` which has no `BaseDirectory` property.
-
-**Found In:**
-ce2e89b0-1a7e-4823-9426-c8288ac4a6fa
-a31113e3-0282-46f8-a78f-4bd42b9cebc2
-
 ## Callout.Color(Colors.X) — non-existent fluent method
 
 **Hallucinated API:**
@@ -1369,6 +1371,66 @@ filesState.ToFileInput(uploadContext, ...)
 **Found In:**
 d7b08ad1-178f-4949-9dcd-b19c13ef03f6
 cfe1ad68-eed8-4a6a-a3aa-9f23bb41010d
+
+## DataTableBuilder.Builder() — TableBuilder method used on DataTableBuilder
+
+**Hallucinated API:**
+
+```csharp
+items.ToDataTable()
+    .Header(e => e.Status, "Status")
+    .Builder(b => b.Func<Employee, string>(e => new Badge(e.Status).Success()))
+```
+
+**Error:** `CS1061: 'DataTableBuilder<T>' does not contain a definition for 'Builder'`
+
+**Correct API:**
+
+```csharp
+// DataTableBuilder uses .Renderer(), not .Builder():
+items.ToDataTable()
+    .Header(e => e.Status, "Status")
+    .Renderer(e => e.Status, new MyCustomRenderer())
+
+// Or map data to display-friendly records before calling .ToDataTable():
+items.Select(e => new { e.Name, Status = e.IsActive ? "Active" : "Inactive" })
+    .AsQueryable()
+    .ToDataTable()
+```
+
+`.Builder()` is a method on `TableBuilder` (for the simple `Table` widget), not on `DataTableBuilder`. For `DataTable`, use `.Renderer()` which takes an `IDataTableColumnRenderer`. The simpler approach is to map data to display-friendly string properties before calling `.ToDataTable()`.
+
+**Source:** IvyMcp knowledge base (IvyQuestion answer explicitly shows `.Builder()` on DataTable chain — see Ivy-Interactive/Ivy-Mcp#161)
+
+**Found In:**
+b8d6684b-0759-4673-a060-032fce3c37d2
+860143f4-7a01-41d2-bd64-b140b2411021
+
+## ServerArgs.ContentRootPath — non-existent property
+
+**Hallucinated API:**
+
+```csharp
+var dbPath = Path.Combine(serverArgs.ContentRootPath, "NuclearDb.db");
+```
+
+**Error:** `CS1061: 'ServerArgs' does not contain a definition for 'ContentRootPath'`
+
+**Correct API:**
+
+```csharp
+// ServerArgs does not expose ContentRootPath.
+// Use the working directory or a relative path:
+var dbPath = Path.Combine(Directory.GetCurrentDirectory(), "NuclearDb.db");
+
+// Or simply use a relative path:
+var dbPath = "NuclearDb.db";
+```
+
+The agent assumes `ServerArgs` has a `ContentRootPath` property (similar to ASP.NET's `IWebHostEnvironment.ContentRootPath`). `ServerArgs` in Ivy does not have this property. Use `Directory.GetCurrentDirectory()` or a relative path instead.
+
+**Found In:**
+860143f4-7a01-41d2-bd64-b140b2411021
 
 ## UseDisposable — non-existent hook
 
@@ -3224,39 +3286,6 @@ The agent hallucinated `Languages.Bash` when displaying non-code content (e.g., 
 
 **Found In:**
 139008ad-82b6-441d-ab2f-ae26b56a6de2
-
-## DataTableBuilder.Builder() — TableBuilder method used on DataTableBuilder
-
-**Hallucinated API:**
-
-```csharp
-items.ToDataTable()
-    .Header(e => e.Status, "Status")
-    .Builder(b => b.Func<Employee, string>(e => new Badge(e.Status).Success()))
-```
-
-**Error:** `CS1061: 'DataTableBuilder<T>' does not contain a definition for 'Builder'`
-
-**Correct API:**
-
-```csharp
-// DataTableBuilder uses .Renderer(), not .Builder():
-items.ToDataTable()
-    .Header(e => e.Status, "Status")
-    .Renderer(e => e.Status, new MyCustomRenderer())
-
-// Or map data to display-friendly records before calling .ToDataTable():
-items.Select(e => new { e.Name, Status = e.IsActive ? "Active" : "Inactive" })
-    .AsQueryable()
-    .ToDataTable()
-```
-
-`.Builder()` is a method on `TableBuilder` (for the simple `Table` widget), not on `DataTableBuilder`. For `DataTable`, use `.Renderer()` which takes an `IDataTableColumnRenderer`. The simpler approach is to map data to display-friendly string properties before calling `.ToDataTable()`.
-
-**Source:** IvyMcp knowledge base (IvyQuestion answer explicitly shows `.Builder()` on DataTable chain — see Ivy-Interactive/Ivy-Mcp#161)
-
-**Found In:**
-b8d6684b-0759-4673-a060-032fce3c37d2
 
 ## UploadContext.Accept() — extension called on wrong receiver type
 

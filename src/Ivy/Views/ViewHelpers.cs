@@ -5,12 +5,7 @@ namespace Ivy;
 
 public static class ViewHelpers
 {
-    public static ViewBase WithLabel(this IWidget widget, string label)
-    {
-        return Layout.Vertical()
-            | Text.Label(label)
-            | widget;
-    }
+
 
     [Obsolete("Not needed anymore.")]
     public static Action HandleError(this Action action, IView view)

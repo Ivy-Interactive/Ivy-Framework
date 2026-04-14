@@ -20,7 +20,10 @@ interface PaginationWidgetProps {
   boundaries?: number;
   disabled?: boolean;
   density?: Densities;
+  events?: string[];
 }
+
+const EMPTY_ARRAY: never[] = [];
 
 export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
   id,
@@ -30,6 +33,7 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
   boundaries = 1,
   disabled = false,
   density: _density = Densities.Medium,
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -66,7 +70,11 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
               disabled || !page || page === 1 ? "pointer-events-none opacity-50" : null,
             )}
             onClick={
-              !page || page === 1 ? undefined : () => eventHandler("OnChange", id, [page - 1])
+              !page || page === 1
+                ? undefined
+                : () => {
+                    if (events.includes("OnChange")) eventHandler("OnChange", id, [page - 1]);
+                  }
             }
           />
         </PaginationItem>
@@ -82,7 +90,12 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
                       aria-disabled={disabled}
                       className={disabled ? "pointer-events-none opacity-50" : undefined}
                       onClick={
-                        p - 1 === page ? undefined : () => eventHandler("OnChange", id, [p - 1])
+                        p - 1 === page
+                          ? undefined
+                          : () => {
+                              if (events.includes("OnChange"))
+                                eventHandler("OnChange", id, [p - 1]);
+                            }
                       }
                       isActive={p - 1 === page}
                     >
@@ -98,7 +111,13 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
                 <PaginationLink
                   aria-disabled={disabled}
                   className={disabled ? "pointer-events-none opacity-50" : undefined}
-                  onClick={p === page ? undefined : () => eventHandler("OnChange", id, [p])}
+                  onClick={
+                    p === page
+                      ? undefined
+                      : () => {
+                          if (events.includes("OnChange")) eventHandler("OnChange", id, [p]);
+                        }
+                  }
                   isActive={p === page}
                 >
                   {p}
@@ -117,7 +136,9 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
             onClick={
               !page || page === numPages
                 ? undefined
-                : () => eventHandler("OnChange", id, [page + 1])
+                : () => {
+                    if (events.includes("OnChange")) eventHandler("OnChange", id, [page + 1]);
+                  }
             }
           />
         </PaginationItem>

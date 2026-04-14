@@ -31,6 +31,7 @@ $plan = ConvertFrom-Yaml $planContent
 $title = if ($plan.title) { $plan.title } else { "" }
 $project = if ($plan.project) { $plan.project } else { "" }
 $prs = if ($plan.prs) { @($plan.prs) } else { @() }
+$sourceUrl = if ($plan.sourceUrl) { $plan.sourceUrl } else { "" }
 
 if ($prs.Count -eq 0) {
     Write-Output "No PRs found in plan.yaml, skipping Slack notification"
@@ -70,6 +71,18 @@ foreach ($pr in $prs) {
 }
 $prLinksText = $prLinks -join ", "
 
+# Build issue link for Slack
+$issueLink = ""
+if ($sourceUrl) {
+    if ($sourceUrl -match "github\.com/([^/]+/[^/]+)/(issues|pull)/(\d+)") {
+        $repoSlug = $Matches[1]
+        $issueNumber = $Matches[3]
+        $issueLink = "<$sourceUrl|$repoSlug#$issueNumber>"
+    } else {
+        $issueLink = $sourceUrl
+    }
+}
+
 # Build project display with emoji
 $projectDisplay = if ($slackEmoji) { "$slackEmoji $project" } else { $project }
 
@@ -91,6 +104,9 @@ if (Test-Path $screenshotsDir) {
 
 # Build message text
 $messageText = "*Title:* $title`n*Project:* $projectDisplay`n*PR:* $prLinksText"
+if ($issueLink) {
+    $messageText += "`n*Issue:* $issueLink"
+}
 
 if ($screenshotUrl) {
     # Block Kit JSON with image accessory

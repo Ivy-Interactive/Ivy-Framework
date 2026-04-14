@@ -25,6 +25,7 @@ public class CreatePlanDialog(
         var createPlanText = UseState("");
         var selectedProjects = UseState(_defaultProjects);
         var selectedPriority = UseState("Normal");
+        var isCreating = UseState(false);
 
         var exclusiveProjects = new ConvertedState<string[], string[]>(
             selectedProjects,
@@ -55,10 +56,11 @@ public class CreatePlanDialog(
             ),
             new DialogFooter(
                 new Button("Cancel").Outline().OnClick(onClose),
-                new Button("Create").Primary().ShortcutKey("Ctrl+Enter").OnClick(() =>
+                new Button("Create").Primary().ShortcutKey("Ctrl+Enter").Disabled(isCreating.Value).OnClick(() =>
                 {
-                    if (!string.IsNullOrWhiteSpace(createPlanText.Value))
+                    if (!string.IsNullOrWhiteSpace(createPlanText.Value) && !isCreating.Value)
                     {
+                        isCreating.Set(true);
                         var projects = selectedProjects.Value.Any() ? selectedProjects.Value : ["Auto"];
                         onCreatePlan(createPlanText.Value, projects, ParsePriority(selectedPriority.Value));
                         onClose();

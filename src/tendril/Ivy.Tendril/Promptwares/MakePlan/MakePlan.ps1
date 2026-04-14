@@ -123,12 +123,10 @@ if ($planFolder) {
         $planYamlPath = Join-Path $planFolder.FullName "plan.yaml"
         if (Test-Path $planYamlPath) {
             $content = Get-Content $planYamlPath -Raw
-            if ($content -match '(?m)^priority:\s') {
-                $content = $content -replace '(?m)^priority:\s.*$', "priority: $Priority"
-            } else {
-                $content = $content -replace '(?m)^(level:\s)', "priority: $Priority`n`$1"
-            }
-            Set-Content $planYamlPath $content -NoNewline
+            $yaml = $content | ConvertFrom-Yaml -Ordered
+            $yaml["priority"] = $Priority
+            $content = ConvertTo-Yaml $yaml
+            Set-Content -Path $planYamlPath -Value $content -NoNewline -Encoding UTF8
             Write-Host "Set priority: $Priority" -ForegroundColor Cyan
         }
     }

@@ -263,4 +263,17 @@ public static class SelectInputExtensions
         return new SelectInput<string[]>(state, options.ToOptions(), placeholder ?? "Select options...", disabled, variant, true);
     }
 
+    private static object[] WithSlot(SelectInputBase widget, string slotName, object? value)
+    {
+        var others = widget.Children.Where(c => c is not Slot s || s.Name != slotName);
+        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
+        return result.ToArray();
+    }
+
+    public static SelectInputBase Prefix(this SelectInputBase widget, object prefix)
+        => widget with { Children = WithSlot(widget, "Prefix", prefix) };
+
+    public static SelectInputBase Suffix(this SelectInputBase widget, object suffix)
+        => widget with { Children = WithSlot(widget, "Suffix", suffix) };
+
 }

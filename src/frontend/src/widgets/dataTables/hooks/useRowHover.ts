@@ -7,6 +7,7 @@ import * as arrow from "apache-arrow";
 
 interface UseRowHoverProps {
   widgetId: string;
+  events: string[];
   visibleRows: number;
   enableRowHover: boolean | undefined;
   rowActions?: MenuItem[];
@@ -19,6 +20,7 @@ interface UseRowHoverProps {
  */
 export const useRowHover = ({
   widgetId,
+  events,
   visibleRows,
   enableRowHover,
   rowActions,
@@ -77,14 +79,15 @@ export const useRowHover = ({
       const rowId = getHiddenKeyValue(arrowTableRef.current, hoverRow);
 
       // Send event to backend's OnRowAction event with row ID and menu item tag
-      eventHandler("OnRowAction", widgetId, [
-        {
-          id: rowId !== null ? rowId : hoverRow,
-          tag: action.tag ?? null,
-        },
-      ]);
+      if (events.includes("OnRowAction"))
+        eventHandler("OnRowAction", widgetId, [
+          {
+            id: rowId !== null ? rowId : hoverRow,
+            tag: action.tag ?? null,
+          },
+        ]);
     },
-    [hoverRow, eventHandler, widgetId, arrowTableRef],
+    [hoverRow, events, eventHandler, widgetId, arrowTableRef],
   );
 
   return {

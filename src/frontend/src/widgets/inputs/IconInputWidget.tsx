@@ -86,7 +86,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   const handleSelect = useCallback(
     (iconName: string) => {
       setLocalValue(iconName);
-      eventHandler("OnChange", id, [iconName]);
+      if (events.includes("OnChange")) eventHandler("OnChange", id, [iconName]);
       setOpen(false);
       setSearch("");
     },
@@ -95,7 +95,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
 
   const handleClear = useCallback(() => {
     setLocalValue(null);
-    eventHandler("OnChange", id, [null]);
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
     if (events.includes("OnBlur")) eventHandler("OnBlur", id, [null]);
   }, [eventHandler, id, events, setLocalValue]);
 
@@ -265,7 +265,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
                   iconInputTextVariant({ density }),
                 )}
                 onClick={() => {
-                  eventHandler("OnChange", id, [null]);
+                  if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
                   setOpen(false);
                 }}
               >

@@ -32,7 +32,8 @@ public class DoctorCommandPlansTests : IDisposable
         state: Completed
         project: TestProject
         title: Test Plan
-        repos: []
+        repos:
+        - /dummy/repo
         commits: []
         """;
 
@@ -74,7 +75,7 @@ public class DoctorCommandPlansTests : IDisposable
 
         Assert.Single(results);
         Assert.False(results[0].IsHealthy);
-        Assert.Contains("YAML:Invalid structure", results[0].Health);
+        Assert.Contains("YAML:No repos", results[0].Health);
     }
 
     [Fact]
@@ -89,7 +90,8 @@ public class DoctorCommandPlansTests : IDisposable
 
         Assert.Single(results);
         Assert.Equal(2, results[0].Worktrees);
-        Assert.True(results[0].IsHealthy);
+        Assert.False(results[0].IsHealthy);
+        Assert.Contains("StaleWorktree", results[0].Health);
     }
 
     [Fact]
@@ -119,6 +121,92 @@ public class DoctorCommandPlansTests : IDisposable
         Assert.Equal(2, allResults.Count);
         Assert.Single(filtered);
         Assert.Equal("00011", filtered[0].Id);
+    }
+
+    [Fact]
+    public void HasNestedWorktrees_WithNestedGit_ReturnsTrue()
+    {
+        var planDir = CreatePlan("00020-WithNested", ValidYaml);
+        var wtRepoDir = Path.Combine(planDir, "worktrees", "SomeRepo");
+        Directory.CreateDirectory(wtRepoDir);
+        File.WriteAllText(Path.Combine(wtRepoDir, ".git"), "gitdir: /some/path");
+
+        var result = DoctorCommand.HasNestedWorktrees(planDir);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void HasNestedWorktrees_NoWorktrees_ReturnsFalse()
+    {
+        var planDir = CreatePlan("00021-NoWt", ValidYaml);
+
+        var result = DoctorCommand.HasNestedWorktrees(planDir);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void HasStaleWorktrees_WithStaleDir_ReturnsTrue()
+    {
+        var planDir = CreatePlan("00022-Stale", ValidYaml);
+        var wtDir = Path.Combine(planDir, "worktrees", "StaleRepo");
+        Directory.CreateDirectory(wtDir);
+
+        var result = DoctorCommand.HasStaleWorktrees(planDir);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void HasStaleWorktrees_WithValidGit_ReturnsFalse()
+    {
+        var planDir = CreatePlan("00023-Valid", ValidYaml);
+        var wtDir = Path.Combine(planDir, "worktrees", "ValidRepo");
+        Directory.CreateDirectory(wtDir);
+        File.WriteAllText(Path.Combine(wtDir, ".git"), "gitdir: /some/path");
+
+        var result = DoctorCommand.HasStaleWorktrees(planDir);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void RepairPlan_StaleWorktree_RemovesDirectory()
+    {
+        var planDir = CreatePlan("00024-RepairStale", ValidYaml);
+        var wtDir = Path.Combine(planDir, "worktrees", "StaleRepo");
+        Directory.CreateDirectory(wtDir);
+        File.WriteAllText(Path.Combine(wtDir, "dummy.txt"), "test");
+
+        var healthResult = new DoctorCommand.PlanHealthResult(
+            "00024", "RepairStale", "Draft", 1, "StaleWorktree", false);
+
+        var result = DoctorCommand.RepairPlan(planDir, healthResult);
+
+        Assert.True(result.Success);
+        Assert.Contains("removed stale worktrees", result.Message);
+        Assert.False(Directory.Exists(wtDir));
+    }
+
+    [Fact]
+    public void RepairPlan_NestedWorktree_RemovesNested()
+    {
+        var planDir = CreatePlan("00025-RepairNested", ValidYaml);
+        var wtDir = Path.Combine(planDir, "worktrees", "SomeRepo");
+        Directory.CreateDirectory(wtDir);
+        var nestedPlansDir = Path.Combine(wtDir, "Plans");
+        Directory.CreateDirectory(nestedPlansDir);
+        File.WriteAllText(Path.Combine(nestedPlansDir, "dummy.txt"), "test");
+
+        var healthResult = new DoctorCommand.PlanHealthResult(
+            "00025", "RepairNested", "Draft", 1, "NestedWorktree", false);
+
+        var result = DoctorCommand.RepairPlan(planDir, healthResult);
+
+        Assert.True(result.Success);
+        Assert.Contains("cleaned nested worktrees", result.Message);
+        Assert.False(Directory.Exists(nestedPlansDir));
     }
 
     [Fact]

@@ -472,6 +472,7 @@ public static class DoctorCommand
     internal static int DoctorPlans(string[] args)
     {
         var showAll = args.Contains("--all");
+        var fix = args.Contains("--fix");
         var stateFilter = GetArgValue(args, "--state");
         var worktreesOnly = args.Contains("--worktrees");
 
@@ -493,6 +494,46 @@ public static class DoctorCommand
         Console.WriteLine();
 
         var allResults = ScanPlans(plansDir);
+
+        if (fix)
+        {
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Repairing unhealthy plans...");
+            Console.ResetColor();
+            Console.WriteLine();
+
+            var repairedCount = 0;
+            var failedCount = 0;
+
+            foreach (var result in allResults.Where(r => !r.IsHealthy))
+            {
+                var matchingDir = Directory.GetDirectories(plansDir, $"{result.Id}-*").FirstOrDefault();
+                if (matchingDir == null) continue;
+
+                var repairResult = RepairPlan(matchingDir, result);
+                if (repairResult.Success)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"  ✓ {result.Id}: {repairResult.Message}");
+                    Console.ResetColor();
+                    repairedCount++;
+                }
+                else if (repairResult.Message != null)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"  ✗ {result.Id}: {repairResult.Message}");
+                    Console.ResetColor();
+                    failedCount++;
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine($"Repair summary: {repairedCount} repaired, {failedCount} failed");
+            Console.WriteLine();
+
+            allResults = ScanPlans(plansDir);
+        }
 
         IEnumerable<PlanHealthResult> results;
         if (showAll)
@@ -529,6 +570,8 @@ public static class DoctorCommand
             var yamlPath = Path.Combine(dir, "plan.yaml");
             var (yamlHealthy, yamlError, state) = CheckYamlHealth(yamlPath);
             var worktreeCount = CountWorktrees(dir);
+            var hasNestedWorktrees = HasNestedWorktrees(dir);
+            var hasStaleWorktrees = HasStaleWorktrees(dir);
 
             var recsError = CheckRecommendationsHealth(dir);
 
@@ -537,6 +580,10 @@ public static class DoctorCommand
                 healthIssues.Add($"YAML:{yamlError}");
             if (recsError != null)
                 healthIssues.Add($"Recs:{recsError}");
+            if (hasNestedWorktrees)
+                healthIssues.Add("NestedWorktree");
+            if (hasStaleWorktrees)
+                healthIssues.Add("StaleWorktree");
 
             var health = healthIssues.Count == 0 ? "OK" : string.Join(",", healthIssues);
 
@@ -614,6 +661,51 @@ public static class DoctorCommand
         return Directory.GetDirectories(worktreesPath).Length;
     }
 
+    internal static bool HasNestedWorktrees(string planPath)
+    {
+        var worktreesPath = Path.Combine(planPath, "worktrees");
+        if (!Directory.Exists(worktreesPath))
+            return false;
+
+        try
+        {
+            foreach (var wtDir in Directory.GetDirectories(worktreesPath))
+            {
+                var nestedGit = Directory.EnumerateFileSystemEntries(wtDir, ".git", SearchOption.AllDirectories).ToList();
+                if (nestedGit.Count > 1 || (nestedGit.Count == 1 && nestedGit[0] != Path.Combine(wtDir, ".git")))
+                    return true;
+            }
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    internal static bool HasStaleWorktrees(string planPath)
+    {
+        var worktreesPath = Path.Combine(planPath, "worktrees");
+        if (!Directory.Exists(worktreesPath))
+            return false;
+
+        try
+        {
+            foreach (var wtDir in Directory.GetDirectories(worktreesPath))
+            {
+                var gitFile = Path.Combine(wtDir, ".git");
+                if (!File.Exists(gitFile))
+                    return true;
+            }
+        }
+        catch
+        {
+            // Ignore access errors
+        }
+
+        return false;
+    }
+
     internal static string? CheckRecommendationsHealth(string planPath)
     {
         var recsPath = Path.Combine(planPath, "artifacts", "recommendations.yaml");
@@ -682,4 +774,54 @@ public static class DoctorCommand
         Console.WriteLine($"  Unhealthy: {allResults.Count(r => !r.IsHealthy)}");
         Console.WriteLine($"  With worktrees: {allResults.Count(r => r.Worktrees > 0)}");
     }
+
+    internal record RepairResult(bool Success, string? Message);
+
+    internal static RepairResult RepairPlan(string planPath, PlanHealthResult healthResult)
+    {
+        var repairs = new List<string>();
+
+        try
+        {
+            if (healthResult.Health.Contains("YAML:"))
+            {
+                var yamlPath = Path.Combine(planPath, "plan.yaml");
+                if (File.Exists(yamlPath))
+                {
+                    var content = File.ReadAllText(yamlPath);
+                    var repaired = PlanReaderService.RepairPlanYaml(content);
+                    if (repaired != content)
+                    {
+                        File.WriteAllText(yamlPath, repaired);
+                        repairs.Add("repaired plan.yaml");
+                    }
+                }
+            }
+
+            if (healthResult.Health.Contains("Recs:"))
+            {
+                var recsPath = Path.Combine(planPath, "artifacts", "recommendations.yaml");
+                if (File.Exists(recsPath))
+                {
+                    var content = File.ReadAllText(recsPath);
+                    var repaired = PlanReaderService.RepairPlanYaml(content);
+                    if (repaired != content)
+                    {
+                        File.WriteAllText(recsPath, repaired);
+                        repairs.Add("repaired recommendations.yaml");
+                    }
+                }
+            }
+
+            if (repairs.Count == 0)
+                return new RepairResult(false, null);
+
+            return new RepairResult(true, string.Join(", ", repairs));
+        }
+        catch (Exception ex)
+        {
+            return new RepairResult(false, $"repair failed: {ex.Message}");
+        }
+    }
+
 }

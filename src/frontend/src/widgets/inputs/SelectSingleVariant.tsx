@@ -40,6 +40,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   width,
   events = EMPTY_ARRAY,
   autoFocus,
+  slots,
 }) => {
   const hasAutoFocusedRef = useRef(false);
   useEffect(() => {
@@ -60,6 +61,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
     eventHandler,
     false,
     nullable,
+    events,
   );
 
   const stringValue =
@@ -124,6 +126,12 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   const hasValue = stringValue !== undefined;
   const styles = getWidth(width);
 
+  const prefixContent = slots?.Prefix;
+  const suffixContent = slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+
   const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen);
     if (newOpen) {
@@ -150,6 +158,9 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
         !hasValue && "text-muted-foreground",
         ghost &&
           "border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground",
+        hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
+        hasPrefix && "rounded-l-none",
+        hasSuffix && "rounded-r-none",
       )}
       density={density}
       onBlur={handleTriggerBlur}
@@ -171,14 +182,14 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                eventHandler("OnChange", id, [null]);
+                if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
               }}
               onPointerDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   e.stopPropagation();
-                  eventHandler("OnChange", id, [null]);
+                  if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
                 }
               }}
               className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6 pointer-events-auto"
@@ -199,101 +210,128 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
     </SelectTrigger>
   );
 
+  const selectContent = (
+    <Select
+      key={`${id}-${stringValue ?? "null"}`}
+      disabled={disabled}
+      value={stringValue}
+      onValueChange={handleValueChange}
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      data-testid={dataTestId}
+    >
+      {isEllipsed && selectedLabel ? (
+        <TooltipProvider>
+          <Tooltip delayDuration={300} open={isOpen ? false : undefined}>
+            <TooltipTrigger asChild>{selectTriggerElement}</TooltipTrigger>
+            <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
+              <div className="whitespace-pre-wrap break-words">{selectedLabel}</div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ) : (
+        selectTriggerElement
+      )}
+      <SelectContent density={density}>
+        {searchable && (
+          <div className="p-2 border-b">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                className="pl-9 h-9"
+                disabled={disabled || loading}
+              />
+            </div>
+          </div>
+        )}
+        {loading ? (
+          <div className="flex justify-center p-4">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : filteredOptions.length === 0 ? (
+          <div className="p-4 text-center text-sm text-muted-foreground">
+            {emptyMessage || "No options available"}
+          </div>
+        ) : (
+          Object.entries(groupedOptions).map(([group, options], index) => (
+            <React.Fragment key={group}>
+              {index > 0 && <SelectSeparator />}
+              <SelectGroup>
+                {group !== "default" && <SelectLabel>{group}</SelectLabel>}
+                {options.map((option) => (
+                  <SelectItem
+                    key={option.value}
+                    value={option.value.toString()}
+                    textValue={option.label}
+                    density={density}
+                    disabled={disabled || loading || option.disabled}
+                  >
+                    {option.tooltip ? (
+                      <TooltipProvider>
+                        <Tooltip delayDuration={300}>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-2">
+                              {option.icon && (
+                                <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                              )}
+                              {option.label}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>{option.tooltip}</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {option.icon && (
+                          <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                        )}
+                        {option.label}
+                      </div>
+                    )}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </React.Fragment>
+          ))
+        )}
+      </SelectContent>
+    </Select>
+  );
+
   return (
     <div className="flex items-center gap-2 w-full" style={styles}>
-      <div className="flex-1 relative w-full">
-        <Select
-          key={`${id}-${stringValue ?? "null"}`}
-          disabled={disabled}
-          value={stringValue}
-          onValueChange={handleValueChange}
-          open={isOpen}
-          onOpenChange={handleOpenChange}
-          data-testid={dataTestId}
-        >
-          {isEllipsed && selectedLabel ? (
-            <TooltipProvider>
-              <Tooltip delayDuration={300} open={isOpen ? false : undefined}>
-                <TooltipTrigger asChild>{selectTriggerElement}</TooltipTrigger>
-                <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-                  <div className="whitespace-pre-wrap break-words">{selectedLabel}</div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            selectTriggerElement
+      {hasAffixes ? (
+        <div
+          className={cn(
+            "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+            isOpen && "ring-1 ring-ring",
+            invalid && "border-destructive",
+            disabled && "cursor-not-allowed opacity-50",
+            ghost &&
+              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
           )}
-          <SelectContent density={density}>
-            {searchable && (
-              <div className="p-2 border-b">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    className="pl-9 h-9"
-                    disabled={disabled || loading}
-                  />
-                </div>
-              </div>
-            )}
-            {loading ? (
-              <div className="flex justify-center p-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : filteredOptions.length === 0 ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                {emptyMessage || "No options available"}
-              </div>
-            ) : (
-              Object.entries(groupedOptions).map(([group, options], index) => (
-                <React.Fragment key={group}>
-                  {index > 0 && <SelectSeparator />}
-                  <SelectGroup>
-                    {group !== "default" && <SelectLabel>{group}</SelectLabel>}
-                    {options.map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value.toString()}
-                        textValue={option.label}
-                        density={density}
-                        disabled={disabled || loading || option.disabled}
-                      >
-                        {option.tooltip ? (
-                          <TooltipProvider>
-                            <Tooltip delayDuration={300}>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center gap-2">
-                                  {option.icon && (
-                                    <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
-                                  )}
-                                  {option.label}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent>{option.tooltip}</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            {option.icon && (
-                              <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
-                            )}
-                            {option.label}
-                          </div>
-                        )}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </React.Fragment>
-              ))
-            )}
-          </SelectContent>
-        </Select>
-      </div>
+        >
+          {hasPrefix && (
+            <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+              {prefixContent}
+            </div>
+          )}
+          <div className="flex-1 relative w-full">{selectContent}</div>
+          {hasSuffix && (
+            <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+              {suffixContent}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex-1 relative w-full">{selectContent}</div>
+      )}
     </div>
   );
 };

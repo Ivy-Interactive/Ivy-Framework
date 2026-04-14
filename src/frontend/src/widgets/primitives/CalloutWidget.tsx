@@ -125,7 +125,9 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
       {showCloseButton && (
         <button
           type="button"
-          onClick={() => eventHandler("OnClose", id, [])}
+          onClick={() => {
+            if (events.includes("OnClose")) eventHandler("OnClose", id, []);
+          }}
           className="absolute top-3 right-3 p-1 rounded-md opacity-70 hover:opacity-100"
           aria-label="Dismiss"
         >

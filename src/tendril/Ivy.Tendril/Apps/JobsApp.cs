@@ -1,9 +1,11 @@
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using Ivy.Tendril.Apps.Jobs;
 using Ivy.Tendril.Apps.Plans;
 using Ivy.Tendril.Helpers;
 using Ivy.Tendril.Services;
+using Ivy.Widgets.ClaudeJsonRenderer;
 
 namespace Ivy.Tendril.Apps;
 
@@ -46,10 +48,26 @@ public class JobsApp : ViewBase
             return Disposable.Create(() => jobService.JobsChanged -= OnJobsChanged);
         });
 
-        UseInterval(() =>
-        {
-            if (jobService.GetJobs().Any(j => j.Status == JobStatus.Running)) refreshToken.Refresh();
-        }, TimeSpan.FromSeconds(5));
+        var updateStream = UseDataTableUpdates(
+            Observable.Interval(TimeSpan.FromSeconds(1))
+                .SelectMany(_ =>
+                {
+                    var currentJobs = jobService.GetJobs();
+                    return currentJobs
+                        .Where(j => j.Status == JobStatus.Running ||
+                                    ((j.Status is JobStatus.Stopped or JobStatus.Failed or JobStatus.Timeout or JobStatus.Completed)
+                                     && j.CompletedAt.HasValue
+                                     && DateTime.UtcNow - j.CompletedAt.Value < TimeSpan.FromSeconds(5)))
+                        .SelectMany(j => new[]
+                        {
+                            new DataTableCellUpdate(j.Id, "Timer", FormatTimer(j)),
+                            new DataTableCellUpdate(j.Id, "Cost", j.Cost.HasValue ? $"${j.Cost.Value:F2}" : ""),
+                            new DataTableCellUpdate(j.Id, "Tokens", j.Tokens.HasValue ? FormatHelper.FormatTokens(j.Tokens.Value) : ""),
+                            new DataTableCellUpdate(j.Id, "LastOutput", FormatLastOutput(j)),
+                            new DataTableCellUpdate(j.Id, "Status", j.Status),
+                            new DataTableCellUpdate(j.Id, "StatusMessage", GetStatusMessage(j))
+                        });
+                }));
 
         var projectColors = config.Projects
             .Select(p => new { p.Name, Color = config.GetProjectColor(p.Name) })
@@ -100,6 +118,7 @@ public class JobsApp : ViewBase
         var dataTable = rows.AsQueryable()
             .ToDataTable(t => t.Id)
             .RefreshToken(refreshToken)
+            .UpdateStream(updateStream)
             .Width(Size.Full())
             .Height(Size.Full())
             .Header(t => t.Status, "Status")
@@ -182,6 +201,8 @@ public class JobsApp : ViewBase
             })
             .RowActions(
                 new MenuItem("View Plan", Icon: Icons.FileText, Tag: "view-plan").Tooltip("Open the associated plan"),
+                new MenuItem("View Output", Icon: Icons.Terminal, Tag: "view-output").Tooltip(
+                    "View job output with Claude JSON rendering"),
                 new MenuItem("Show Prompt", Icon: Icons.MessageSquare, Tag: "show-prompt").Tooltip(
                     "Show the full prompt text"),
                 new MenuItem("Stop", Icon: Icons.Square, Tag: "stop-job").Tooltip("Stop this running job"),
@@ -204,6 +225,10 @@ public class JobsApp : ViewBase
                             if (Directory.Exists(fullPath))
                                 showPlan.Set(fullPath);
                         }
+                    }
+                    else if (tag == "view-output")
+                    {
+                        showOutput.Set(job.Id);
                     }
                     else if (tag == "show-prompt")
                     {
@@ -310,13 +335,26 @@ public class JobsApp : ViewBase
         if (showOutput.Value is { } jobId)
         {
             var job = jobService.GetJob(jobId);
-            var outputText = job is not null && job.OutputLines.Count > 0
-                ? string.Join("\n", job.OutputLines)
-                : "No output available.";
+            object outputContent;
+
+            if (job is not null && job.OutputLines.Count > 0)
+            {
+                var jsonStream = string.Join("\n", job.OutputLines);
+                outputContent = new ClaudeJsonRenderer()
+                    .JsonStream(jsonStream)
+                    .ShowThinking(true)
+                    .ShowSystemEvents(true)
+                    .AutoScroll(job.Status == JobStatus.Running)
+                    .Height(Size.Full());
+            }
+            else
+            {
+                outputContent = Text.P("No output available.");
+            }
 
             var outputSheet = new Sheet(
                 () => showOutput.Set(null),
-                new Markdown($"```\n{outputText}\n```"),
+                outputContent,
                 job is not null ? $"{job.Type} — {ExtractPlanId(job.PlanFile)}" : "Job Output"
             ).Width(Size.Half()).Resizable();
 
@@ -436,6 +474,7 @@ public class JobsApp : ViewBase
             JobStatus.Failed => "Job encountered an error during execution",
             JobStatus.Timeout => "Job exceeded the configured timeout",
             JobStatus.Queued => "Waiting for a job slot to become available",
+            JobStatus.Stopped => "Job was manually stopped",
             _ => ""
         };
     }

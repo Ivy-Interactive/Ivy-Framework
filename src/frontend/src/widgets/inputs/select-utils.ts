@@ -141,9 +141,11 @@ export const useSelectValueHandler = (
   eventHandler: EventHandler,
   selectMany: boolean = false,
   nullable: boolean = false,
+  events: string[] = [],
 ) => {
   return useCallback(
     (newValue: string | string[]) => {
+      if (!events.includes("OnChange")) return;
       // Radix ToggleGroup type="single" sends "" on deselect
       if (!selectMany && newValue === "") {
         if (nullable) {
@@ -156,6 +158,6 @@ export const useSelectValueHandler = (
       const convertedValue = convertValuesToOriginalType(stringValues, value, options, selectMany);
       eventHandler("OnChange", id, [convertedValue]);
     },
-    [id, value, options, eventHandler, selectMany, nullable],
+    [id, value, options, eventHandler, selectMany, nullable, events],
   );
 };

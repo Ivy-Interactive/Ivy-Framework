@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "ivy.docs.compiler": {
+      "version": "0.1.0",
+      "commands": ["ivy-docs-cli"]
+    }
+  }
+}

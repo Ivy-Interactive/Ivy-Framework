@@ -296,6 +296,8 @@ const ColorSlider = React.forwardRef<
 ));
 ColorSlider.displayName = SliderPrimitive.Root.displayName;
 
+const EMPTY_ARRAY: never[] = [];
+
 export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   id,
   value,
@@ -305,6 +307,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   density = Densities.Medium,
   foreground = false,
   allowAlpha = false,
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
   const displayValue = value ?? "";
@@ -384,10 +387,12 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     const newRgb = { ...rgbValues, [type]: value };
     setRgbValues(newRgb);
     const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
-    if (allowAlpha) {
-      eventHandler("OnChange", id, [combineWithAlpha(newHex, alphaValue)]);
-    } else {
-      eventHandler("OnChange", id, [newHex]);
+    if (events.includes("OnChange")) {
+      if (allowAlpha) {
+        eventHandler("OnChange", id, [combineWithAlpha(newHex, alphaValue)]);
+      } else {
+        eventHandler("OnChange", id, [newHex]);
+      }
     }
   };
 
@@ -398,7 +403,8 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   const handleAlphaCommit = () => {
     if (localDragAlpha !== null) {
       const baseHex = getDisplayColor();
-      eventHandler("OnChange", id, [combineWithAlpha(baseHex, localDragAlpha)]);
+      if (events.includes("OnChange"))
+        eventHandler("OnChange", id, [combineWithAlpha(baseHex, localDragAlpha)]);
     }
   };
 
@@ -489,14 +495,16 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     const val = e.target.value;
     // Support both 6-digit and 8-digit hex
     if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-      if (allowAlpha) {
-        eventHandler("OnChange", id, [combineWithAlpha(val, alphaValue)]);
-      } else {
-        eventHandler("OnChange", id, [val]);
+      if (events.includes("OnChange")) {
+        if (allowAlpha) {
+          eventHandler("OnChange", id, [combineWithAlpha(val, alphaValue)]);
+        } else {
+          eventHandler("OnChange", id, [val]);
+        }
       }
     } else if (/^#[0-9A-Fa-f]{8}$/.test(val)) {
       setAlphaValue(parseInt(val.slice(7, 9), 16));
-      eventHandler("OnChange", id, [val]);
+      if (events.includes("OnChange")) eventHandler("OnChange", id, [val]);
     }
   };
 
@@ -572,7 +580,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
               <ThemeColorGrid
                 selectedColor={getDisplayColor()}
                 onSelect={(color) => {
-                  eventHandler("OnChange", id, [color]);
+                  if (events.includes("OnChange")) eventHandler("OnChange", id, [color]);
                 }}
               />
 

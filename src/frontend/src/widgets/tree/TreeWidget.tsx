@@ -12,6 +12,7 @@ interface TreeWidgetProps {
   items?: MenuItem[];
   rowActions?: MenuItem[];
   density?: Densities;
+  events?: string[];
 }
 
 export const TreeWidget: React.FC<TreeWidgetProps> = ({
@@ -19,19 +20,21 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({
   items = EMPTY_ARRAY,
   rowActions,
   density = Densities.Medium,
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
 
   const onItemClick = React.useCallback(
     (item: MenuItem) => {
       if (!item.tag) return;
-      eventHandler("OnSelect", id, [item.tag]);
+      if (events.includes("OnSelect")) eventHandler("OnSelect", id, [item.tag]);
     },
-    [eventHandler, id],
+    [eventHandler, id, events],
   );
 
   const onRowActionClick = React.useCallback(
     (item: MenuItem, action: MenuItem) => {
+      if (!events.includes("OnRowAction")) return;
       // Both the item and the action might have tags (often undefined if just labels)
       // Send them via the payload of the TreeRowActionClickEventArgs
       eventHandler("OnRowAction", id, [
@@ -41,7 +44,7 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({
         },
       ]);
     },
-    [eventHandler, id],
+    [eventHandler, id, events],
   );
 
   const gapClass =

@@ -95,11 +95,20 @@ public class ImportIssuesDialog(IState<bool> dialogOpen, IConfigService config) 
 
             try
             {
-                reposState.Set(githubService.GetRepos());
+                var repos = githubService.GetRepos();
+                if (repos.Count == 0)
+                {
+                    reposError.Set("No GitHub repositories found. Check that your projects in config.yaml have valid git repositories with 'origin' remotes.");
+                }
+                else
+                {
+                    reposState.Set(repos);
+                }
             }
             catch (Exception ex)
             {
                 reposError.Set($"Failed to load repositories: {ex.Message}");
+                Console.Error.WriteLine($"[ImportIssuesDialog] Exception loading repos: {ex}");
             }
         }, _dialogOpen);
 
@@ -185,7 +194,7 @@ public class ImportIssuesDialog(IState<bool> dialogOpen, IConfigService config) 
                 var inboxPath = Path.Combine(_config.TendrilHome, "Inbox");
                 Directory.CreateDirectory(inboxPath);
 
-                var projectName = GetProjectForRepo(repo.Owner, repo.Name);
+                var projectName = GetProjectForRepo(githubService, repo.Owner, repo.Name);
                 var importedCount = 0;
 
                 foreach (var issue in issues)
@@ -298,12 +307,12 @@ public class ImportIssuesDialog(IState<bool> dialogOpen, IConfigService config) 
         ).Width(Size.Rem(36));
     }
 
-    private string GetProjectForRepo(string owner, string repo)
+    private string GetProjectForRepo(IGithubService githubService, string owner, string repo)
     {
         var repoPath = $"{owner}/{repo}";
         var matchingProjects = _config.Settings.Projects
             .Where(p => p.RepoPaths.Any(path =>
-                GithubService.GetRepoConfigFromPath(path)?.FullName
+                githubService.GetRepoConfigFromPathCached(path)?.FullName
                     .Equals(repoPath, StringComparison.OrdinalIgnoreCase) ?? false))
             .ToList();
 

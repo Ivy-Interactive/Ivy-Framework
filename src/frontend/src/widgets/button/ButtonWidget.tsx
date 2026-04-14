@@ -50,6 +50,7 @@ interface ButtonWidgetProps {
   badge?: string;
   children?: React.ReactNode;
   borderRadius?: BorderRadius;
+  events?: string[];
   "data-testid"?: string;
 }
 
@@ -106,6 +107,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   children,
   borderRadius = "Rounded",
   density = Densities.Medium,
+  events = [],
   "data-testid": dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -168,10 +170,10 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       }
       // Only call eventHandler for non-URL buttons
       if (!effectiveUrl) {
-        eventHandler("OnClick", id, []);
+        if (events.includes("OnClick")) eventHandler("OnClick", id, []);
       }
     },
-    [id, disabled, effectiveUrl, eventHandler],
+    [id, disabled, effectiveUrl, eventHandler, events],
   );
 
   const hasUrl = !!(effectiveUrl && !disabled);
@@ -198,7 +200,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     shortcutKey,
     () => {
       if (!effectiveUrl) {
-        eventHandler("OnClick", id, []);
+        if (events.includes("OnClick")) eventHandler("OnClick", id, []);
       } else if (validatedHref) {
         if (isDownloadUrl || isMailto) {
           window.location.href = validatedHref;
