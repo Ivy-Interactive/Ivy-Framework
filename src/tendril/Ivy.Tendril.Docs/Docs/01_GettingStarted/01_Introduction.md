@@ -92,7 +92,32 @@ See [Drafts](../04_Apps/03_Drafts.md) for the full picture.
 
 ### Review
 
-When verifications succeed, the plan moves to **Ready for review**. You inspect the diff, notes, and job output, then **approve** to ship, **request changes** (which can trigger another execution pass), or **discard** if the direction is wrong. Human review is the gate before a PR.
+Open the **Review** app to work through plans in **Ready for review** (and **Failed**, so you can inspect or rerun). The sidebar lists plans; use search and filters to narrow the list, then select a plan to load it in the main panel.
+
+![Review app: plan list, Verifications tab with pass/skip status, Make PR, and footer actions](/tendril-docs/assets/review-app.png "Review — sidebar, Verifications tab, Make PR, and toolbar")
+
+Use the **tabs** to inspect the run:
+
+- **Summary** — Agent-written summary from artifacts, when present.
+- **Verifications** — Status per check; **click a verification name** when a report exists to read it in a side sheet.
+- **Git** — Commits and linked **pull requests** (open a commit for message and diff; open PR URLs in the browser).
+- **Changes** — File list and **diff** across the plan’s commits.
+- **Artifacts** — Screenshots and other outputs, when present.
+- **Recommendations** — Structured follow-ups from `recommendations.yaml`, when present.
+- **Plan** — Latest plan revision markdown (problem, solution, tests).
+
+The **toolbar** at the bottom drives what happens next:
+
+- **Rerun** (**R**) — Run execution again (pick scope in the dialog).
+- **Suggest changes** (**D**) — Send feedback so the agent can revise the plan or code in another pass.
+- **Discard** — Move the plan to trash if you are abandoning it.
+- **Previous** (**P**) / **Next** (**N**) — Move between plans in the current list (the header also shows **n / total** plans).
+
+The header has **Make PR** (**M**), which starts the PR flow. The **⋯** (overflow) menu adds **Custom PR**, **Set completed**, and shortcuts to open the plan folder, terminal, editor, or `plan.yaml`.
+
+<Callout type="warning">
+If every configured repository for the plan uses the **yolo** PR rule, **Make PR** starts the **MakePr** job immediately—fully automated, and the result may **merge** per your repo and GitHub settings. To open a PR through the **Custom PR** dialog first (assignee, comment, merge options, and a normal review cycle), use **⋯ Custom PR** instead of **Make PR**. When any repo is **not** **yolo**, **Make PR** already opens that dialog.
+</Callout>
 
 ### MakePr
 
