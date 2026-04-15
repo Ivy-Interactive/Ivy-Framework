@@ -26,53 +26,66 @@ You see each stage of the work. Tasks are **Plans**; orchestrated **Promptwares*
 
 ## The Concept
 
-**Plans** are structured units of work (bugfix, refactor, feature). Tendril moves them through a defined lifecycle using isolated, single-purpose agents called **Promptwares**.
+**Plans** are structured units of work (bugfix, refactor, feature). Tendril moves them through a lifecycle using single-purpose agents called **Promptwares**.
 
-## Key Features
+## Key features
 
-- **Plan lifecycle** — Draft – execution – review – PR.
-- **Multi-project** — Several repos, per-project verification rules.
-- **Jobs** — Status, tokens, cost.
-- **Promptwares** — e.g. `MakePlan`, `ExecutePlan`, `ExpandPlan`, `MakePr`.
-- **Git worktrees** — Agent work stays off your main branch.
-- **Terminal & file viewer** — Embedded terminal (Claude Code under the hood) and fast local file access.
-- **Verification** — Hook your build, test, and format checks.
+| Area | What it does |
+|------|----------------|
+| **Plan lifecycle** | Draft – execution – review – PR. |
+| **Multi-project** | Several repos; per-project verification rules. |
+| **Jobs** | Status, tokens, cost per run. |
+| **Promptwares** | e.g. `MakePlan`, `ExecutePlan`, `ExpandPlan`, `MakePr`. |
+| **Git worktrees** | Agent work stays off your main branch. |
+| **Terminal & files** | Embedded terminal (Claude Code) and local file access. |
+| **Verification** | Your build, test, and format checks. |
 
-## The Tendril Loop
+## The Tendril loop
 
-Tendril runs work as a **pipeline**, not a single chat reply. Each stage is a **job** (status, logs, tokens, cost) so you always know what ran. The usual path looks like this:
+Work is a **pipeline**, not one chat reply. Each step is a **job** (status, logs, tokens, cost).
 
-1. **`MakePlan`** — Turn a brief or issue into a structured plan.
-2. **`ExpandPlan`** — Optionally break a large plan into smaller chunks.
-3. **`ExecutePlan`** — Implement in a **git worktree**, run **verifications**, iterate until checks pass.
-4. **`Review`** — You approve the result or send feedback for another pass.
-5. **`MakePr`** — Open a **GitHub PR** from the approved work.
+```mermaid
+flowchart LR
+    MP[MakePlan] --> EP[ExecutePlan]
+    EP --> RV[Review]
+    RV --> MPR[MakePr]
+```
 
-Below, each step is described the way you’ll use it in the UI—good anchors for screenshots.
+**ExpandPlan** can run after **MakePlan** to split or deepen work—it is optional and not shown in the diagram above.
+
+| Step | Promptware | Role |
+|------|------------|------|
+| 1 | **MakePlan** | Brief or issue – structured plan. |
+| 2 | **ExpandPlan** | Split a large plan into smaller chunks (optional). |
+| 3 | **ExecutePlan** | Implement in a **worktree**; run **verifications** until green. |
+| 4 | **Review** | You approve, suggest changes, or discard. |
+| 5 | **MakePr** | Open a **GitHub PR** from the result. |
+
+Below, each step matches how you use it in the UI (good anchors for screenshots).
 
 ### MakePlan
 
-You start from a short description, a pasted issue, or content from **Drafts** / **Inbox**. **MakePlan** produces a real plan: problem, proposed solution, tests, and verification commands. Nothing executes yet—you get a draft you can read and edit before any code runs.
+Start from a short description, an issue, or **Drafts** / **Inbox**. **MakePlan** outputs problem, solution, tests, and verification commands. Nothing runs yet—you get an editable draft.
 
-When you create a plan from the UI, **Create New Plan** walks through three fields (labels match the dialog):
+When you **Create New Plan** in the UI, the dialog uses three fields:
 
 ![Create New Plan: project, priority, and task description](/tendril-docs/assets/create-new-plan.png "Create New Plan dialog")
 
-- **Select project(s)** — Choose **Auto** or one or more **named projects**. Names come from the **projects** list in your Tendril config (`TENDRIL_HOME/config.yaml`; same entries as **Settings → Projects**). **Auto** and specific projects are mutually exclusive: selecting **Auto** clears named picks, and picking a named project clears **Auto**.
-- **Priority** — **Normal**, **High**, or **Urgent** is stored on the plan and used when **ordering jobs** in the queue—if several plans are waiting to run, higher priority is handled first.
-- **Describe the task for the new plan** — The large text area (“Enter task description…”) is where you describe the issue or work to do. **MakePlan** turns that text into the structured plan (problem, approach, tests).
+| Field | What to know |
+|-------|----------------|
+| **Select project(s)** | **Auto** or one+ **named projects** (from `TENDRIL_HOME/config.yaml`, same as **Settings – Projects**). **Auto** and named picks are mutually exclusive. |
+| **Priority** | **Normal**, **High**, **Urgent**—used to **order jobs** when several plans queue. |
+| **Describe the task** | Free text (“Enter task description…”). **MakePlan** turns it into the structured plan. |
 
 ### ExecutePlan
 
-After you **Create** a new plan, work is scheduled as **jobs** you follow under **Jobs** in the sidebar: one row per promptware run (**MakePlan** first, then **ExecutePlan**, **MakePr**, and others as the plan moves forward). The list is the live view of every plan’s execution—not a hidden background task.
+After **Create**, work appears as **Jobs** in the sidebar: one row per promptware run. The list is live—not a hidden background task.
 
 ![Jobs: executions with status, columns, and row actions](/tendril-docs/assets/jobs-dashboard.png "Jobs dashboard")
 
-For each job you typically see **status** (e.g. Running, Completed), the **plan** id (link), **prompt/title**, **type** (`MakePlan`, `ExecutePlan`, `MakePr`, …), **project**, **timer** and **last output** timing, **cost**, **tokens**, and a concise **status** message for what the agent is doing. A header summary shows aggregate progress (e.g. how many completed vs still running).
+Each row shows **status**, linked **plan** id, **prompt/title**, **type** (`MakePlan`, `ExecutePlan`, `MakePr`, …), **project**, timing, **cost** and **tokens**, and a short **message**. The list header summarizes overall progress. **Row actions** (right) open the plan, job output (**JSON** where relevant), full prompt, **stop**, refresh, and trash. Details: [Jobs](../04_Apps/04_Jobs.md).
 
-Row actions (icons on the right) let you **open the associated plan**, **view job output** (including **JSON** where applicable), **show the full prompt text**, **stop** a running job, **refresh** the list, and **move the job to trash**. See [Jobs](../04_Apps/04_Jobs.md) for more.
-
-**ExecutePlan** is where code changes happen. The agent works in an isolated **worktree** (not your main checkout), runs your **build / format / test** verification steps, and retries when something fails. Logs and command output stream into the job so failures are visible—not summarized away.
+**ExecutePlan** applies changes in an isolated **worktree**. It runs your **build / format / test** steps and retries on failure. Logs stream into the job.
 
 ### Drafts
 
@@ -80,56 +93,23 @@ Row actions (icons on the right) let you **open the associated plan**, **view jo
 
 ![Drafts: plan view with Execute and toolbar actions](/tendril-docs/assets/drafts-plan-view.png "Drafts — plan view")
 
-Common actions on the plan:
-
-- **Execute** — Start **ExecutePlan** against the current solution (creates a new job that implements the plan in a worktree).
-- **Update** — Open a dialog to describe what should change; Tendril runs **UpdatePlan** so the draft reflects your feedback.
-- **Split** — Run **SplitPlan** to break the work into separate plans.
-- **Expand** — Run **ExpandPlan** to add detail when the plan is too thin.
-- **Delete** — Remove the draft plan when you no longer need it.
-
-See [Drafts](../04_Apps/03_Drafts.md) for the full picture.
+Use **Execute** to run **ExecutePlan** in a worktree, **Update** to feed text and run **UpdatePlan**, **Split** / **Expand** for **SplitPlan** / **ExpandPlan**, or **Delete** to drop the draft. More: [Drafts](../04_Apps/03_Drafts.md).
 
 ### Review
 
-Open the **Review** app to work through plans in **Ready for review** (and **Failed**, so you can inspect or rerun). The sidebar lists plans; use search and filters to narrow the list, then select a plan to load it in the main panel.
+Open **Review** for **Ready for review** and **Failed** plans. Pick a plan in the sidebar (search and filters). Inspect or **Rerun** failures.
 
 ![Review app: plan list, Verifications tab with pass/skip status, Make PR, and footer actions](/tendril-docs/assets/review-app.png "Review — sidebar, Verifications tab, Make PR, and toolbar")
 
-Use the **tabs** to inspect the run:
-
-- **Summary** — Agent-written summary from artifacts, when present.
-- **Verifications** — Status per check; **click a verification name** when a report exists to read it in a side sheet.
-- **Git** — Commits and linked **pull requests** (open a commit for message and diff; open PR URLs in the browser).
-- **Changes** — File list and **diff** across the plan’s commits.
-- **Artifacts** — Screenshots and other outputs, when present.
-- **Recommendations** — Structured follow-ups from `recommendations.yaml`, when present.
-- **Plan** — Latest plan revision markdown (problem, solution, tests).
-
-The **toolbar** at the bottom drives what happens next:
-
-- **Rerun** (**R**) — Run execution again (pick scope in the dialog).
-- **Suggest changes** (**D**) — Send feedback so the agent can revise the plan or code in another pass.
-- **Discard** — Move the plan to trash if you are abandoning it.
-- **Previous** (**P**) / **Next** (**N**) — Move between plans in the current list (the header also shows **n / total** plans).
-
-The header has **Make PR** (**M**), which starts the PR flow. The **⋯** (overflow) menu adds **Custom PR**, **Set completed**, and shortcuts to open the plan folder, terminal, editor, or `plan.yaml`.
-
 <Callout type="warning">
-If every configured repository for the plan uses the **yolo** PR rule, **Make PR** starts the **MakePr** job immediately—fully automated, and the result may **merge** per your repo and GitHub settings. To open a PR through the **Custom PR** dialog first (assignee, comment, merge options, and a normal review cycle), use **⋯ Custom PR** instead of **Make PR**. When any repo is **not** **yolo**, **Make PR** already opens that dialog.
+**Yolo on all repos:** **Make PR** starts **MakePr** immediately—often auto-merge per automation. Prefer **⋯ – Custom PR** for the full dialog first. **Any repo not yolo:** **Make PR** already opens **Custom PR**.
 </Callout>
 
 ### MakePr
 
-**MakePr** turns the plan’s worktree changes into a **GitHub pull request** (via `gh` against your configured repo). The PR stays tied to the same plan and jobs that produced the branch.
+**MakePr** creates a **GitHub PR** from the plan’s worktree (`gh`, your configured repo). It stays linked to the same plan and jobs.
 
-When you use the **Custom PR** dialog (**Make PR** when not all repos are **yolo**, or **⋯ → Custom PR**), you can tune how the PR is opened:
-
-- **Merge** — When enabled, the automation requests **auto-merge** for the PR (subject to GitHub branch protections and repo settings).
-- **Delete branch** — When enabled (and **Merge** is on), the source branch can be removed after the PR merges. It is disabled until **Merge** is checked.
-- **Include artifacts** — Attach plan artifacts to the PR flow when your setup supports it.
-- **Assignee** — Optional GitHub assignee (from the repo’s collaborators when available).
-- **Comment** — This text is sent as the **PR body / description** on GitHub, not an internal note.
+**Custom PR** (when **Make PR** doesn’t skip straight to the job, or via **⋯ – Custom PR**) lets you turn on **Merge** (request auto-merge, subject to GitHub rules), **Delete branch** after merge (only when **Merge** is on), **Include artifacts**, an optional **Assignee**, and a **Comment**—that comment is the **PR body** on GitHub.
 
 ![Custom PR dialog: Merge, Delete branch, Include artifacts, Assignee, and Comment](/tendril-docs/assets/custom-pr-dialog.png "Custom PR — merge options, assignee, and description")
 
@@ -137,10 +117,17 @@ That loop turns the assistant from autocomplete into something you can ship with
 
 ### What stays on disk (after the loop)
 
-When you complete **onboarding**, you choose a directory for Tendril data—that directory becomes **`TENDRIL_HOME`** (also set in the environment so tools and promptware can find it). Everything Tendril persists on disk lives under that folder: **`config.yaml`**, **Plans**, **Inbox**, **Trash**, **Promptwares**, **Hooks**, and other top-level files (for example crash logs). It is the single root for your workspace data, not scattered across the repo.
+**Onboarding** picks your data directory. That path is **`TENDRIL_HOME`** (env + tools). Everything below lives there—not inside the git repo as scattered files.
 
-Each plan is a **folder under** `TENDRIL_HOME/Plans/` named like `00042-ShortTitle`. Inside you get metadata (`plan.yaml`), **revisions**, **verification** output, **logs** (Markdown files per job under `logs/`, e.g. `001-ExecutePlan.md`), **costs** (`costs.csv`), and **worktrees**. You can diff, grep, or back up plans like normal files; the UI is a lens on that data.
+| At `TENDRIL_HOME` | Examples |
+|-------------------|----------|
+| Config | `config.yaml`, backups |
+| Work areas | **Plans**, **Inbox**, **Trash** |
+| Tooling | **Promptwares**, **Hooks** |
+| Other | e.g. `crash.log` |
+
+Each plan: `TENDRIL_HOME/Plans/00042-ShortTitle/`. That folder holds `plan.yaml`, **revisions**, **verification** output, job logs under `logs/` (Markdown, e.g. `001-ExecutePlan.md`), token/cost rollups in `costs.csv`, and **worktrees** for the code. Treat plans like normal folders: diff, grep, backup. The UI reads the same files.
 
 ![Finder column view: TENDRIL_HOME, Plans, a plan folder, and logs with ExecutePlan markdown files](/tendril-docs/assets/tendril-home-plans-logs.png "Tendril data directory — plan folder and logs on disk")
 
-For the full layout and states, see [Plans](../02_Concepts/01_Plans.md) and [Lifecycle & Jobs](../02_Concepts/03_Lifecycle.md).
+States and layout: [Plans](../02_Concepts/01_Plans.md), [Lifecycle & Jobs](../02_Concepts/03_Lifecycle.md).
