@@ -127,4 +127,10 @@ That loop turns the assistant from autocomplete into something you can ship with
 
 ### What stays on disk (after the loop)
 
-Each plan is a **folder under** `TENDRIL_HOME/Plans/`—metadata (`plan.yaml`), **revisions**, **verification** output, **logs**, **costs**, and **worktree** paths. You can diff, grep, or back up plans like normal files; the UI is a lens on that data. For the full layout and states, see [Plans](../02_Concepts/01_Plans.md) and [Lifecycle & Jobs](../02_Concepts/03_Lifecycle.md).
+When you complete **onboarding**, you choose a directory for Tendril data—that directory becomes **`TENDRIL_HOME`** (also set in the environment so tools and promptware can find it). Everything Tendril persists on disk lives under that folder: **`config.yaml`**, **Plans**, **Inbox**, **Trash**, **Promptwares**, **Hooks**, and other top-level files (for example crash logs). It is the single root for your workspace data, not scattered across the repo.
+
+Each plan is a **folder under** `TENDRIL_HOME/Plans/` named like `00042-ShortTitle`. Inside you get metadata (`plan.yaml`), **revisions**, **verification** output, **logs** (Markdown files per job under `logs/`, e.g. `001-ExecutePlan.md`), **costs** (`costs.csv`), and **worktrees**. You can diff, grep, or back up plans like normal files; the UI is a lens on that data.
+
+![Finder column view: TENDRIL_HOME, Plans, a plan folder, and logs with ExecutePlan markdown files](/tendril-docs/assets/tendril-home-plans-logs.png "Tendril data directory — plan folder and logs on disk")
+
+For the full layout and states, see [Plans](../02_Concepts/01_Plans.md) and [Lifecycle & Jobs](../02_Concepts/03_Lifecycle.md).
