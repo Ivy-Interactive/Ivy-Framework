@@ -121,7 +121,17 @@ If every configured repository for the plan uses the **yolo** PR rule, **Make PR
 
 ### MakePr
 
-After approval, **MakePr** turns the worktree changes into a **GitHub pull request** (via `gh` with your configured repo). The PR carries the same transparency: you link review discussion to the plan and jobs that produced the branch.
+**MakePr** turns the plan’s worktree changes into a **GitHub pull request** (via `gh` against your configured repo). The PR stays tied to the same plan and jobs that produced the branch.
+
+When you use the **Custom PR** dialog (**Make PR** when not all repos are **yolo**, or **⋯ → Custom PR**), you can tune how the PR is opened:
+
+- **Merge** — When enabled, the automation requests **auto-merge** for the PR (subject to GitHub branch protections and repo settings).
+- **Delete branch** — When enabled (and **Merge** is on), the source branch can be removed after the PR merges. It is disabled until **Merge** is checked.
+- **Include artifacts** — Attach plan artifacts to the PR flow when your setup supports it.
+- **Assignee** — Optional GitHub assignee (from the repo’s collaborators when available).
+- **Comment** — This text is sent as the **PR body / description** on GitHub, not an internal note.
+
+![Custom PR dialog: Merge, Delete branch, Include artifacts, Assignee, and Comment](/tendril-docs/assets/custom-pr-dialog.png "Custom PR — merge options, assignee, and description")
 
 That loop turns the assistant from autocomplete into something you can ship with.
 
