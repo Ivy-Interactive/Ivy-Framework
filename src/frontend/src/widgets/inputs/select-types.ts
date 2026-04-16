@@ -38,4 +38,5 @@ export interface SelectInputWidgetProps {
   width?: string;
   events?: string[];
   autoFocus?: boolean;
+  slots?: { Prefix?: React.ReactNode[]; Suffix?: React.ReactNode[] };
 }

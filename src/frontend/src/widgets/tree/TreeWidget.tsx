@@ -4,6 +4,7 @@ import { MenuItem } from "@/types/widgets";
 import { TreeItem } from "./TreeItem";
 import { useEventHandler } from "@/components/event-handler";
 import { Densities } from "@/types/density";
+import { densityTreeGap } from "@/components/ui/density-scale";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -12,6 +13,7 @@ interface TreeWidgetProps {
   items?: MenuItem[];
   rowActions?: MenuItem[];
   density?: Densities;
+  events?: string[];
 }
 
 export const TreeWidget: React.FC<TreeWidgetProps> = ({
@@ -19,19 +21,21 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({
   items = EMPTY_ARRAY,
   rowActions,
   density = Densities.Medium,
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
 
   const onItemClick = React.useCallback(
     (item: MenuItem) => {
       if (!item.tag) return;
-      eventHandler("OnSelect", id, [item.tag]);
+      if (events.includes("OnSelect")) eventHandler("OnSelect", id, [item.tag]);
     },
-    [eventHandler, id],
+    [eventHandler, id, events],
   );
 
   const onRowActionClick = React.useCallback(
     (item: MenuItem, action: MenuItem) => {
+      if (!events.includes("OnRowAction")) return;
       // Both the item and the action might have tags (often undefined if just labels)
       // Send them via the payload of the TreeRowActionClickEventArgs
       eventHandler("OnRowAction", id, [
@@ -41,11 +45,10 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({
         },
       ]);
     },
-    [eventHandler, id],
+    [eventHandler, id, events],
   );
 
-  const gapClass =
-    density === Densities.Small ? "gap-0.5" : density === Densities.Large ? "gap-1.5" : "gap-1";
+  const gapClass = densityTreeGap[density];
 
   return (
     <div className={cn("ivy-tree flex flex-col w-full", gapClass)} role="tree">
@@ -53,6 +56,7 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({
         <TreeItem
           key={item.tag || item.label}
           item={item}
+          density={density}
           onItemClick={onItemClick}
           rowActions={rowActions}
           hasSiblingWithChildren={items.some((i) => i.children && i.children.length > 0)}

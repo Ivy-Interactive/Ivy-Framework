@@ -308,4 +308,10 @@ public static class DateTimeInputExtensions
     {
         return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
     }
+
+    public static DateTimeInputBase Prefix(this DateTimeInputBase widget, object prefix)
+        => widget with { Children = widget.WithSlot("Prefix", prefix) };
+
+    public static DateTimeInputBase Suffix(this DateTimeInputBase widget, object suffix)
+        => widget with { Children = widget.WithSlot("Suffix", suffix) };
 }

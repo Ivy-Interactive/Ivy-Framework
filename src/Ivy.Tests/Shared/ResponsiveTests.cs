@@ -138,6 +138,17 @@ public class ResponsiveTests
         AssertBreakpoint(responsive, bp, true);
     }
 
+    [Theory]
+    [InlineData(Breakpoint.Mobile)]
+    [InlineData(Breakpoint.Tablet)]
+    [InlineData(Breakpoint.Desktop)]
+    [InlineData(Breakpoint.Wide)]
+    public void Thickness_At_SetsCorrectBreakpoint(Breakpoint bp)
+    {
+        var responsive = new Thickness(4).At(bp);
+        AssertBreakpoint(responsive, bp, new Thickness(4));
+    }
+
     [Fact]
     public void AllValueTypes_At_And_Chain()
     {
@@ -156,6 +167,10 @@ public class ResponsiveTests
         var boolR = true.At(Breakpoint.Mobile).And(Breakpoint.Desktop, false);
         Assert.True(boolR.Mobile);
         Assert.False(boolR.Desktop);
+
+        var thicknessR = new Thickness(4).At(Breakpoint.Mobile).And(Breakpoint.Desktop, new Thickness(8));
+        Assert.Equal(new Thickness(4), thicknessR.Mobile);
+        Assert.Equal(new Thickness(8), thicknessR.Desktop);
     }
 
     private static void AssertBreakpoint<T>(Responsive<T> responsive, Breakpoint bp, T expected)

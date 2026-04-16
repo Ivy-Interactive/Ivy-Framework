@@ -5,18 +5,14 @@ public record Map : WidgetBase<Map>
 {
     public Map(LatLng? center = null, int zoom = 13)
     {
-        Center = center ?? new LatLng(51.505, -0.09); // Default to London
+        Center = center ?? new LatLng(51.505, -0.09);
         Zoom = zoom;
-        Width = Size.Full();
-        Height = Size.Full();
     }
 
     internal Map()
     {
         Center = new LatLng(51.505, -0.09);
         Zoom = 13;
-        Width = Size.Full();
-        Height = Size.Full();
     }
 
     [Prop] public LatLng Center { get; init; }

@@ -86,9 +86,9 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
         true,
       );
 
-      eventHandler("OnChange", id, [convertedValue]);
+      if (events.includes("OnChange")) eventHandler("OnChange", id, [convertedValue]);
     },
-    [value, validOptions, eventHandler, id, separator],
+    [value, validOptions, eventHandler, id, separator, events],
   );
 
   const hasValues = selectedValues.length > 0;
@@ -144,7 +144,7 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
       validOptions,
       true,
     );
-    eventHandler("OnChange", id, [converted]);
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [converted]);
   }, [
     selectedValues,
     filteredOptions,
@@ -155,9 +155,11 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
     validOptions,
     eventHandler,
     id,
+    events,
   ]);
 
   const handleBulkClearAllCheckbox = useCallback(() => {
+    if (!events.includes("OnChange")) return;
     const cleared = computeClearAllValues(selectedValues, minSelections);
     if (cleared.length === 0 && nullable) {
       eventHandler("OnChange", id, [null]);
@@ -170,7 +172,7 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
       true,
     );
     eventHandler("OnChange", id, [converted]);
-  }, [selectedValues, minSelections, nullable, value, validOptions, eventHandler, id]);
+  }, [selectedValues, minSelections, nullable, value, validOptions, eventHandler, id, events]);
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -361,7 +363,7 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                 aria-label="Clear All"
                 onClick={() => {
                   const clearedValue = nullable ? null : [];
-                  eventHandler("OnChange", id, [clearedValue]);
+                  if (events.includes("OnChange")) eventHandler("OnChange", id, [clearedValue]);
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none"
               >

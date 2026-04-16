@@ -53,7 +53,7 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
     if (!hasSelectHandler) return;
     if (index === selectedIndex) return; // Current step not clickable
     if (index > selectedIndex && !allowSelectForward) return; // Upcoming only if allowed
-    eventHandler("OnSelect", id, [index]);
+    if (events.includes("OnSelect")) eventHandler("OnSelect", id, [index]);
   };
 
   const styles: React.CSSProperties = {

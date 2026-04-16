@@ -15,4 +15,6 @@ server.UseAppShell(settings);
 
 server.SetMetaTitle("Authelia Example");
 
+Server.AuthCookiePrefix = "authelia";
+
 await server.RunAsync();

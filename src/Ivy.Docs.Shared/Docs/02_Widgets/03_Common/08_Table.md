@@ -35,9 +35,9 @@ public class BasicRowTable : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "http://example.com/tshirt"},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "http://example.com/jeans"},
-            new {Sku = "1236", Name = "Sneakers", Price = 30, Url = "http://example.com/sneakers"},
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "https://example.com/tshirt"},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "https://example.com/jeans"},
+            new {Sku = "1236", Name = "Sneakers", Price = 30, Url = "https://example.com/sneakers"},
         };
 
         return products.ToTable()
@@ -74,8 +74,8 @@ public class TableConfigurationExample : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "http://example.com/tshirt", _hiddenNotes = "archived"},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "http://example.com/jeans", _hiddenNotes = "best-seller"}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "https://example.com/tshirt", _hiddenNotes = "archived"},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "https://example.com/jeans", _hiddenNotes = "best-seller"}
         };
 
         return products.ToTable()
@@ -339,8 +339,8 @@ public class CellBuildersExample : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "http://example.com/tshirt", Description = "High quality cotton T-shirt with a comfortable fit and durable construction. Perfect for everyday wear and available in multiple colors."},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "http://example.com/jeans", Description = "Classic denim jeans with a modern cut and premium stitching. Features include reinforced pockets, comfortable waistband, and fade-resistant fabric."}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "https://example.com/tshirt", Description = "High quality cotton T-shirt with a comfortable fit and durable construction. Perfect for everyday wear and available in multiple colors."},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "https://example.com/jeans", Description = "Classic denim jeans with a modern cut and premium stitching. Features include reinforced pockets, comfortable waistband, and fade-resistant fabric."}
         };
 
         return products.ToTable()

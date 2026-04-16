@@ -15,6 +15,7 @@ interface ToolbarWidgetProps {
   items: MenuItem[];
   disabled?: boolean;
   density?: Densities;
+  events?: string[];
 }
 
 interface ToolbarItemGroupProps {
@@ -106,6 +107,7 @@ export const ToolbarWidget: React.FC<ToolbarWidgetProps> = ({
   items = EMPTY_ITEMS,
   disabled = false,
   density = Densities.Medium,
+  events = [],
 }) => {
   const eventHandler = useEventHandler();
 
@@ -121,7 +123,7 @@ export const ToolbarWidget: React.FC<ToolbarWidgetProps> = ({
       if (!item.tag) return;
 
       // First fire the widget's event
-      eventHandler("OnSelect", id, [item.tag]);
+      if (events.includes("OnSelect")) eventHandler("OnSelect", id, [item.tag]);
 
       // Then invoke the item's own OnSelect handler if present
       if (item.onSelect) {

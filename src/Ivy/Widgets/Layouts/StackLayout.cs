@@ -6,11 +6,11 @@ namespace Ivy;
 /// </summary>
 internal record StackLayout : WidgetBase<StackLayout>
 {
-    public StackLayout(object[] children, Orientation orientation = Orientation.Vertical, int gap = 4, Thickness? padding = null, Thickness? margin = null, Colors? background = null, Align? alignContent = null, bool removeParentPadding = false, bool wrap = false) : base(children)
+    public StackLayout(object[] children, Responsive<Orientation?>? orientation = null, Responsive<int?>? gap = null, Responsive<Thickness?>? padding = null, Thickness? margin = null, Colors? background = null, Align? alignContent = null, bool removeParentPadding = false, bool wrap = false) : base(children)
     {
-        Orientation = orientation;
-        RowGap = gap;
-        ColumnGap = gap;
+        Orientation = orientation ?? (Orientation?)Ivy.Orientation.Vertical;
+        RowGap = gap ?? (int?)4;
+        ColumnGap = gap ?? (int?)4;
         Padding = padding;
         Margin = margin;
         Background = background;
@@ -21,13 +21,13 @@ internal record StackLayout : WidgetBase<StackLayout>
 
     internal StackLayout() { }
 
-    [Prop] public Orientation Orientation { get; set; } = Orientation.Vertical;
+    [Prop] public Responsive<Orientation?>? Orientation { get; internal set; } = (Orientation?)Ivy.Orientation.Vertical;
 
-    [Prop] public int RowGap { get; set; } = 4;
+    [Prop] public Responsive<int?>? RowGap { get; internal set; } = (int?)4;
 
-    [Prop] public int ColumnGap { get; set; } = 4;
+    [Prop] public Responsive<int?>? ColumnGap { get; internal set; } = (int?)4;
 
-    [Prop] public Thickness? Padding { get; set; }
+    [Prop] public Responsive<Thickness?>? Padding { get; internal set; }
 
     [Prop] public Thickness? Margin { get; set; }
 
@@ -45,14 +45,6 @@ internal record StackLayout : WidgetBase<StackLayout>
     [Prop] public Thickness BorderThickness { get; set; } = new(0);
 
     [Prop] public Scroll Scroll { get; set; } = Scroll.None;
-
-    [Prop] public Responsive<Orientation?>? ResponsiveOrientation { get; set; }
-
-    [Prop] public Responsive<int?>? ResponsiveRowGap { get; set; }
-
-    [Prop] public Responsive<int?>? ResponsiveColumnGap { get; set; }
-
-    [Prop] public Responsive<Thickness?>? ResponsivePadding { get; set; }
 
     [Prop(attached: nameof(StackLayoutExtensions.AlignSelf))] public Align?[] ChildAlignSelf { get; set; } = null!;
 }

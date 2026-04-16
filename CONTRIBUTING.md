@@ -35,7 +35,6 @@ This project and everyone participating in it is governed by our [Code of Conduc
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
-- [Rust Toolchain](https://rustup.rs/) (latest stable via `rustup`)
 - [Node.js 22.12+ & vp CLI](https://github.com/voidzero-dev/vite-plus) (latest version)
 - **Ivy Console Tool** (for development):
 

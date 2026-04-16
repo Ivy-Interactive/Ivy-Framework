@@ -65,4 +65,6 @@ public static class FieldExtensions
     public static Field LabelPosition(this Field field, LabelPosition position) => field with { LabelPosition = position };
 
     public static Field WithField(this IAnyInput input) => new Field(input);
+
+    public static Field WithLabel(this IAnyInput input, string label) => new Field(input).Label(label);
 }

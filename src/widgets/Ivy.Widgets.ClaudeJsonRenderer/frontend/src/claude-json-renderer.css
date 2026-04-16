@@ -1,17 +1,16 @@
-@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 .claude-renderer {
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-  background-color: var(--background);
+  font-size: 0.875rem;
   color: var(--foreground);
 }
 
 .claude-renderer pre {
   margin: 0;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   line-height: 1.5;
   background-color: var(--muted);
   border: 1px solid var(--border);
@@ -29,7 +28,7 @@
 
 .claude-renderer code {
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   background-color: var(--muted);
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
@@ -68,9 +67,9 @@
   line-height: 1.375;
 }
 
-.claude-renderer h1 { font-size: 1.25rem; }
-.claude-renderer h2 { font-size: 1.125rem; }
-.claude-renderer h3 { font-size: 1rem; }
+.claude-renderer h1 { font-size: 0.875rem; }
+.claude-renderer h2 { font-size: 0.875rem; }
+.claude-renderer h3 { font-size: 0.875rem; }
 .claude-renderer h4 { font-size: 0.875rem; }
 
 .claude-renderer blockquote {
@@ -94,7 +93,6 @@
 .claude-renderer table {
   border-collapse: collapse;
   margin: 0.5rem 0;
-  font-size: 0.875rem;
 }
 
 .claude-renderer th,
@@ -123,7 +121,7 @@
   background-color: var(--muted);
   cursor: pointer;
   user-select: none;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -134,7 +132,9 @@
 .tool-card-body {
   padding: 0.75rem;
   border-top: 1px solid var(--border);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
+  max-height: 24rem;
+  overflow: auto;
 }
 
 .tool-card-body pre {
@@ -155,15 +155,12 @@
 
 .thinking-block {
   color: var(--muted-foreground);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
 }
 
 .system-event {
-  font-size: 0.75rem;
   color: var(--muted-foreground);
-  padding: 0.25rem 0.75rem;
-  background-color: color-mix(in srgb, var(--muted), transparent 50%);
-  border-radius: var(--radius-boxes, 0.375rem);
+  line-height: 1.5;
 }
 
 .chevron {

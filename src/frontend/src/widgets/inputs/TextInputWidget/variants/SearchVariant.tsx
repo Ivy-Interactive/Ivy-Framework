@@ -110,7 +110,8 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
     <div className="relative w-full select-none" style={styles}>
       <div
         className={cn(
-          "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
+          "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+          isFocused && "outline-none ring-1 ring-ring",
           props.invalid && "border-destructive",
           props.disabled && "cursor-not-allowed opacity-50",
           props.ghost &&
@@ -118,7 +119,12 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
       >
         {hasPrefix && (
-          <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+          <div
+            className={cn(
+              "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]",
+              !isFocused && "border-r border-input",
+            )}
+          >
             {prefixContent}
           </div>
         )}
@@ -190,7 +196,12 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         </div>
 
         {hasSuffix && (
-          <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+          <div
+            className={cn(
+              "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]",
+              !isFocused && "border-l border-input",
+            )}
+          >
             {suffixContent}
           </div>
         )}

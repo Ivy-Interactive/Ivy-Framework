@@ -964,6 +964,8 @@ const AgendaView: React.FC<AgendaViewProps> = ({ currentDate, events, onEventCli
 
 // ─── Main CalendarWidget ───────────────────────────────────────────────────────
 
+const EMPTY_EVENTS: string[] = [];
+
 export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   id,
   defaultView = "month",
@@ -974,6 +976,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   width,
   height,
   density: _density = Densities.Medium,
+  events = EMPTY_EVENTS,
   slots,
   widgetNodeChildren,
 }) => {
@@ -994,7 +997,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   );
 
   const calendarEvents = useCalendarData(slots, widgetNodeChildren);
-  const { handleEventClick, handleSelectSlot, handleEventMove } = useCalendarHandlers(id);
+  const { handleEventClick, handleSelectSlot, handleEventMove } = useCalendarHandlers(id, events);
 
   const onNavigate = useCallback(
     (action: "prev" | "next" | "today") => {

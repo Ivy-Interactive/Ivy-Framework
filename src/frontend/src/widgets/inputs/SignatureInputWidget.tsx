@@ -197,7 +197,7 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
     if (!canvas) return;
     const dataUrl = canvas.toDataURL("image/png");
     const base64 = dataUrl.split(",")[1] ?? dataUrl;
-    eventHandler("OnChange", id, [base64]);
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [base64]);
   };
 
   const handleClear = () => {
@@ -205,7 +205,7 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
     pathsRef.current = [];
     currentPathRef.current = [];
     setHasDrawn(false);
-    eventHandler("OnChange", id, [null]);
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
   };
 
   const handleBlur = useCallback(() => {

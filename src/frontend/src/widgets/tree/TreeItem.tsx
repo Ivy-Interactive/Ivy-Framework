@@ -5,9 +5,12 @@ import Icon from "@/components/Icon";
 import { cn } from "@/lib/utils";
 import { MenuItem } from "@/types/widgets";
 import { ActionRenderer } from "@/widgets/rowAction";
+import { Densities } from "@/types/density";
+import { densityTreeGap } from "@/components/ui/density-scale";
 
 interface TreeItemWidgetProps {
   item: MenuItem;
+  density?: Densities;
   rowActions?: MenuItem[];
   hasSiblingWithChildren?: boolean;
   isNested?: boolean;
@@ -17,6 +20,7 @@ interface TreeItemWidgetProps {
 
 export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   item,
+  density,
   rowActions,
   hasSiblingWithChildren,
   isNested,
@@ -24,7 +28,9 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   onRowActionClick,
 }) => {
   const [isOpen, setIsOpen] = React.useState(item.expanded ?? false);
+  const [hovered, setHovered] = React.useState(false);
   const hasChildren = item.children && item.children.length > 0;
+  const gapClass = densityTreeGap[density ?? Densities.Medium];
 
   React.useEffect(() => {
     setIsOpen(item.expanded ?? false);
@@ -80,24 +86,46 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
           tabIndex={item.disabled ? -1 : 0}
           onKeyDown={handleKeyDown}
           onClick={handleClick}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
         >
-          <CollapsibleTrigger asChild>
-            <button
-              className="flex items-center justify-center h-5 w-5 shrink-0 rounded-sm hover:bg-accent transition-colors"
-              onClick={handleToggle}
-              tabIndex={-1}
-              disabled={item.disabled}
-            >
-              <ChevronRight
-                className={cn(
-                  "h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
-                  isOpen && "rotate-90",
-                )}
-              />
-            </button>
-          </CollapsibleTrigger>
-          {item.icon && item.icon !== "None" && (
-            <Icon className="h-4 w-4 shrink-0 text-muted-foreground" name={item.icon} />
+          {item.icon && item.icon !== "None" ? (
+            <CollapsibleTrigger asChild>
+              <button
+                className="flex items-center justify-center h-5 w-5 shrink-0 rounded-sm hover:bg-accent transition-colors"
+                onClick={handleToggle}
+                tabIndex={-1}
+                disabled={item.disabled}
+              >
+                <span style={{ display: hovered ? "inline-flex" : "none" }}>
+                  <ChevronRight
+                    className={cn(
+                      "h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
+                      isOpen && "rotate-90",
+                    )}
+                  />
+                </span>
+                <span style={{ display: hovered ? "none" : "inline-flex" }}>
+                  <Icon className="h-4 w-4 shrink-0 text-muted-foreground" name={item.icon} />
+                </span>
+              </button>
+            </CollapsibleTrigger>
+          ) : (
+            <CollapsibleTrigger asChild>
+              <button
+                className="flex items-center justify-center h-5 w-5 shrink-0 rounded-sm hover:bg-accent transition-colors"
+                onClick={handleToggle}
+                tabIndex={-1}
+                disabled={item.disabled}
+              >
+                <ChevronRight
+                  className={cn(
+                    "h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
+                    isOpen && "rotate-90",
+                  )}
+                />
+              </button>
+            </CollapsibleTrigger>
           )}
           <span className="truncate flex-1">{item.label}</span>
 
@@ -122,11 +150,17 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
           )}
         </div>
         <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-          <div className="ivy-tree-children pl-[1rem] ml-2 border-l border-border/50">
+          <div
+            className={cn(
+              "ivy-tree-children flex flex-col pl-[1rem] ml-2 border-l border-border/50 mt-0.5",
+              gapClass,
+            )}
+          >
             {item.children!.map((child) => (
               <TreeItem
                 key={child.tag || child.label}
                 item={child}
+                density={density}
                 onItemClick={onItemClick}
                 rowActions={rowActions}
                 hasSiblingWithChildren={item.children!.some(

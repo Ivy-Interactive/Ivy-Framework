@@ -17,7 +17,10 @@ interface MarkdownWidgetProps {
   dangerouslyAllowLocalFiles?: boolean;
   width?: string;
   height?: string;
+  events?: string[];
 }
+
+const EMPTY_EVENTS: string[] = [];
 
 const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   id,
@@ -27,6 +30,7 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   dangerouslyAllowLocalFiles = false,
   width,
   height,
+  events = EMPTY_EVENTS,
 }) => {
   const eventHandler = useEventHandler();
   const [, forceUpdate] = useState(0);
@@ -37,8 +41,10 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   }, [id]);
 
   const handleLinkClick = useCallback(
-    (href: string) => eventHandler("OnLinkClick", id, [href]),
-    [eventHandler, id],
+    (href: string) => {
+      if (events.includes("OnLinkClick")) eventHandler("OnLinkClick", id, [href]);
+    },
+    [eventHandler, id, events],
   );
 
   // Use override content if available, otherwise use prop

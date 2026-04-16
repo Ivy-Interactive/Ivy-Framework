@@ -127,5 +127,16 @@ public static class IconInputExtensions
             return ValueTask.CompletedTask;
         });
 
+    private static object[] WithSlot(IconInputBase widget, string slotName, object? value)
+    {
+        var others = widget.Children.Where(c => c is not Slot s || s.Name != slotName);
+        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
+        return result.ToArray();
+    }
 
+    public static IconInputBase Prefix(this IconInputBase widget, object prefix)
+        => widget with { Children = WithSlot(widget, "Prefix", prefix) };
+
+    public static IconInputBase Suffix(this IconInputBase widget, object suffix)
+        => widget with { Children = WithSlot(widget, "Suffix", suffix) };
 }

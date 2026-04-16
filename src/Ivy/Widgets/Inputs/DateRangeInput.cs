@@ -184,5 +184,10 @@ public static class DateRangeInputExtensions
         return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
     }
 
+    public static DateRangeInputBase Prefix(this DateRangeInputBase widget, object prefix)
+        => widget with { Children = widget.WithSlot("Prefix", prefix) };
+
+    public static DateRangeInputBase Suffix(this DateRangeInputBase widget, object suffix)
+        => widget with { Children = widget.WithSlot("Suffix", suffix) };
 
 }

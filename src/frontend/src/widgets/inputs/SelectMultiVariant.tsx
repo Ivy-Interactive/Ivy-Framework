@@ -31,6 +31,7 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
   width,
   events = EMPTY_ARRAY,
   autoFocus,
+  slots,
 }) => {
   const validOptions = options.filter(
     (option) => option.value != null && option.value.toString().trim() !== "",
@@ -103,9 +104,18 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
         validOptions,
         selectMany,
       );
-      eventHandler("OnChange", id, [convertedValue]);
+      if (events.includes("OnChange")) eventHandler("OnChange", id, [convertedValue]);
     },
-    [minSelections, selectedValues.length, value, validOptions, selectMany, eventHandler, id],
+    [
+      minSelections,
+      selectedValues.length,
+      value,
+      validOptions,
+      selectMany,
+      eventHandler,
+      id,
+      events,
+    ],
   );
 
   const handleBlur = () => {
@@ -118,67 +128,113 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
 
   const styles = getWidth(width);
 
-  return (
-    <div className="flex items-center gap-2 w-full" style={styles}>
-      <div className="flex-1 relative w-full">
-        <MultipleSelector
-          value={selectedMultiSelectOptions}
-          defaultOptions={multiSelectOptions}
-          onValueChange={handleMultiSelectChange}
-          placeholder={placeholder}
-          disabled={disabled || loading}
-          className={cn("w-full", ghost && "ghost")}
-          invalid={!!invalid}
-          hidePlaceholderWhenSelected
-          density={density}
-          ghost={ghost}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
-          data-testid={dataTestId}
-          showActions={showActions && selectMany}
-          maxSelections={maxSelections}
-          minSelections={minSelections}
-          onNullableClear={nullable ? () => eventHandler("OnChange", id, [null]) : undefined}
-          autoFocus={autoFocus}
-        />
-        {(selectedMultiSelectOptions.length > 0 && !disabled) || invalid || loading ? (
-          <div className={selectIconContainerVariant({ density })} style={{ zIndex: 2 }}>
-            {loading && (
-              <div className="pointer-events-auto flex items-center h-6 p-1">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
-              </div>
-            )}
-            {selectedMultiSelectOptions.length > 0 && !disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear All"
-                onClick={(e) => {
+  const prefixContent = slots?.Prefix;
+  const suffixContent = slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+
+  const multiSelectorContent = (
+    <>
+      <MultipleSelector
+        value={selectedMultiSelectOptions}
+        defaultOptions={multiSelectOptions}
+        onValueChange={handleMultiSelectChange}
+        placeholder={placeholder}
+        disabled={disabled || loading}
+        className={cn(
+          "w-full",
+          ghost && "ghost",
+          hasAffixes && "border-0 shadow-none",
+          hasPrefix && "rounded-l-none",
+          hasSuffix && "rounded-r-none",
+        )}
+        invalid={!!invalid}
+        hidePlaceholderWhenSelected
+        density={density}
+        ghost={ghost}
+        onBlur={handleBlur}
+        onFocus={handleFocus}
+        data-testid={dataTestId}
+        showActions={showActions && selectMany}
+        maxSelections={maxSelections}
+        minSelections={minSelections}
+        onNullableClear={
+          nullable
+            ? () => {
+                if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+              }
+            : undefined
+        }
+        autoFocus={autoFocus}
+      />
+      {(selectedMultiSelectOptions.length > 0 && !disabled) || invalid || loading ? (
+        <div className={selectIconContainerVariant({ density })} style={{ zIndex: 2 }}>
+          {loading && (
+            <div className="pointer-events-auto flex items-center h-6 p-1">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
+            </div>
+          )}
+          {selectedMultiSelectOptions.length > 0 && !disabled && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear All"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                logger.debug("Select input clear button clicked (MultiSelect)", { id });
+                if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   e.stopPropagation();
-                  logger.debug("Select input clear button clicked (MultiSelect)", { id });
-                  eventHandler("OnChange", id, [null]);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    eventHandler("OnChange", id, [null]);
-                  }
-                }}
-                className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
-              >
-                <X className={xIconVariant({ density })} />
-              </button>
-            )}
-            {invalid && (
-              <div className="pointer-events-auto flex items-center h-6 p-1">
-                <InvalidIcon message={invalid} />
-              </div>
-            )}
-          </div>
-        ) : null}
-      </div>
+                  if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+                }
+              }}
+              className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
+            >
+              <X className={xIconVariant({ density })} />
+            </button>
+          )}
+          {invalid && (
+            <div className="pointer-events-auto flex items-center h-6 p-1">
+              <InvalidIcon message={invalid} />
+            </div>
+          )}
+        </div>
+      ) : null}
+    </>
+  );
+
+  return (
+    <div className="flex items-center gap-2 w-full" style={styles}>
+      {hasAffixes ? (
+        <div
+          className={cn(
+            "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+            invalid && "border-destructive",
+            (disabled || loading) && "cursor-not-allowed opacity-50",
+            ghost &&
+              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+          )}
+        >
+          {hasPrefix && (
+            <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+              {prefixContent}
+            </div>
+          )}
+          <div className="flex-1 relative w-full">{multiSelectorContent}</div>
+          {hasSuffix && (
+            <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+              {suffixContent}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex-1 relative w-full">{multiSelectorContent}</div>
+      )}
     </div>
   );
 };

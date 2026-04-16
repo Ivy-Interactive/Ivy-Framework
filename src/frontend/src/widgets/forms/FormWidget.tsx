@@ -4,9 +4,10 @@ import { useEventHandler } from "@/components/event-handler";
 interface FormWidgetProps {
   id: string;
   children?: React.ReactNode;
+  events?: string[];
 }
 
-export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
+export const FormWidget: React.FC<FormWidgetProps> = ({ id, children, events = [] }) => {
   const formRef = useRef<HTMLDivElement>(null);
   const eventHandler = useEventHandler();
 
@@ -51,7 +52,7 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
             invalidInputs[0].focus();
           } else {
             // All fields valid - submit the form
-            eventHandler("OnSubmit", id, []);
+            if (events.includes("OnSubmit")) eventHandler("OnSubmit", id, []);
           }
         }
       }

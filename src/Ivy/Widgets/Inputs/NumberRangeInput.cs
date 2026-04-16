@@ -224,18 +224,11 @@ public static class NumberRangeInputExtensions
         return widget with { Invalid = invalid };
     }
 
-    private static object[] WithSlot(NumberRangeInputBase widget, string slotName, object? value)
-    {
-        var others = widget.Children.Where(c => c is not Slot s || s.Name != slotName);
-        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
-        return result.ToArray();
-    }
-
     public static NumberRangeInputBase Prefix(this NumberRangeInputBase widget, object prefix)
-        => widget with { Children = WithSlot(widget, "Prefix", prefix) };
+        => widget with { Children = widget.WithSlot("Prefix", prefix) };
 
     public static NumberRangeInputBase Suffix(this NumberRangeInputBase widget, object suffix)
-        => widget with { Children = WithSlot(widget, "Suffix", suffix) };
+        => widget with { Children = widget.WithSlot("Suffix", suffix) };
 
     [OverloadResolutionPriority(1)]
     public static NumberRangeInputBase OnBlur(this NumberRangeInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

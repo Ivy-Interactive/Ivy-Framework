@@ -180,14 +180,22 @@ export function validateRedirectUrl(
   }
 }
 
+const DANGEROUS_PROTOCOLS = new Set(["javascript:", "data:", "vbscript:", "blob:"]);
+
 /**
  * Validates and sanitizes a URL for use in anchor tags or window.open.
  * Allows relative paths, external http/https URLs, and app:// URLs, but prevents dangerous protocols.
  *
  * @param url - The URL to validate
+ * @param options.allowCustomProtocols - When true, allows any URL scheme that isn't dangerous
+ *   (javascript:, data:, vbscript:, blob:). Useful when an onLinkClick handler intercepts all
+ *   navigation, so custom schemes like plan:// are passed to application code rather than the browser.
  * @returns The sanitized URL if valid, '#' otherwise
  */
-export function validateLinkUrl(url: string | null | undefined): string {
+export function validateLinkUrl(
+  url: string | null | undefined,
+  options?: { allowCustomProtocols?: boolean },
+): string {
   if (!url || typeof url !== "string") {
     return "#";
   }
@@ -266,9 +274,14 @@ export function validateLinkUrl(url: string | null | undefined): string {
   try {
     const urlObj = new URL(url);
 
-    // Only allow http and https protocols (prevent javascript:, data:, etc.)
-    if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
-      return "#";
+    if (options?.allowCustomProtocols) {
+      if (DANGEROUS_PROTOCOLS.has(urlObj.protocol)) {
+        return "#";
+      }
+    } else {
+      if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
+        return "#";
+      }
     }
 
     return urlObj.toString();

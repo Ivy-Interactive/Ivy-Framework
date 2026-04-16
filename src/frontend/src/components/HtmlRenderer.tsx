@@ -5,10 +5,12 @@ import { validateLinkUrl } from "@/lib/url";
 interface HtmlRendererProps {
   content: string;
   allowedTags?: string[];
+  onLinkClick?: (url: string) => void;
 }
 
 export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
   content,
+  onLinkClick,
   allowedTags = [
     "p",
     "div",
@@ -124,9 +126,20 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
             return <div>{children}</div>;
           case "a": {
             const href = element.getAttribute("href");
-            const safeHref = validateLinkUrl(href);
+            const safeHref = validateLinkUrl(href, { allowCustomProtocols: !!onLinkClick });
             return (
-              <a className={typography.a} href={safeHref} target="_blank" rel="noopener noreferrer">
+              <a
+                className={typography.a}
+                href={safeHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (onLinkClick) {
+                    e.preventDefault();
+                    onLinkClick(safeHref);
+                  }
+                }}
+              >
                 {children}
               </a>
             );

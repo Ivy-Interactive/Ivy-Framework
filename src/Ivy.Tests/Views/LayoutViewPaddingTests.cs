@@ -6,7 +6,9 @@ public class LayoutViewPaddingTests
     {
         var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
         var field = view.GetType().GetField("_padding", flags)!;
-        return (Thickness?)field.GetValue(view);
+        var value = field.GetValue(view);
+        if (value is null) return null;
+        return ((Responsive<Thickness?>)value).Default;
     }
 
     [Fact]

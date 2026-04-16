@@ -31,10 +31,8 @@ WORKDIR /src
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 RUN --mount=type=cache,id=apt-docs-build,target=/var/cache/apt \
     --mount=type=cache,id=apt-docs-build-lib,target=/var/lib/apt \
-    apt-get update && apt-get install -y curl bash build-essential
-# --profile minimal skips rustfmt/clippy — not needed for a release build
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --profile minimal
-ENV PATH="/root/.cargo/bin:/root/.vite-plus/bin:${PATH}"
+    apt-get update && apt-get install -y curl bash
+ENV PATH="/root/.vite-plus/bin:${PATH}"
 
 COPY . .
 COPY --from=frontend /src/src/frontend/dist /src/src/frontend/dist

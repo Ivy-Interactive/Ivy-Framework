@@ -12,6 +12,7 @@ public class BoolInputApp : SampleBase
                    new Tab("Variants", new BoolInputVariantsTab()),
                    new Tab("Sizes", new BoolInputSizes()),
                    new Tab("Icons", new BoolInputIcons()),
+                   new Tab("Affixes", new BoolInputAffixesExample()),
                    new Tab("Data Binding", new BoolInputDataBinding()),
                    new Tab("Events", new BoolInputEventsTab())
                ).Variant(TabsVariant.Content);
@@ -430,5 +431,34 @@ public class BoolInputIcons : ViewBase
                | trueState
                    .ToToggleInput(Icons.Star)
                    .Label("Label");
+    }
+}
+
+public class BoolInputAffixesExample : ViewBase
+{
+    public override object Build()
+    {
+        var state = UseState(false);
+
+        return Layout.Grid().Columns(4)
+               | null!
+               | Text.Monospaced("Prefix only")
+               | Text.Monospaced("Suffix only")
+               | Text.Monospaced("Both")
+
+               | Text.Monospaced("Text prefix/suffix")
+               | state.ToBoolInput().Label("Accept").Prefix("Terms")
+               | state.ToBoolInput().Label("Accept").Suffix("Required")
+               | state.ToBoolInput().Label("Accept").Prefix("Terms").Suffix("Required")
+
+               | Text.Monospaced("Icon prefix/suffix")
+               | state.ToBoolInput().Label("Notifications").Prefix(Icons.Bell)
+               | state.ToBoolInput().Label("Notifications").Suffix(Icons.Bell)
+               | state.ToBoolInput().Label("Notifications").Prefix(Icons.Bell).Suffix(Icons.Bell)
+
+               | Text.Monospaced("Button prefix/suffix")
+               | state.ToBoolInput().Label("Feature").Prefix(new Button("Info", () => { }, icon: Icons.Info).Ghost().Small())
+               | state.ToBoolInput().Label("Feature").Suffix(new Button("Help").Ghost().Small())
+               | state.ToBoolInput().Label("Feature").Prefix(new Button("Info", () => { }, icon: Icons.Info).Ghost().Small()).Suffix(new Button("Help").Ghost().Small());
     }
 }

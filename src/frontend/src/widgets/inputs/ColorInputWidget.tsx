@@ -36,6 +36,7 @@ interface ColorInputWidgetProps {
   ghost?: boolean;
   allowAlpha?: boolean;
   autoFocus?: boolean;
+  slots?: { Prefix?: React.ReactNode[]; Suffix?: React.ReactNode[] };
 }
 
 interface ColorSwatchGridProps {
@@ -237,7 +238,14 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   ghost = false,
   allowAlpha = false,
   autoFocus,
+  slots,
 }) => {
+  const prefixContent = slots?.Prefix;
+  const suffixContent = slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+
   const eventHandler = useEventHandler();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = React.useRef(false);
@@ -259,7 +267,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
 
   const fireColorChange = (newColor: string | null) => {
     setLocalColorValue(newColor);
-    eventHandler("OnChange", id, [newColor]);
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [newColor]);
   };
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -302,53 +310,82 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
 
   // --- Variant rendering logic ---
   if (variant === "Text") {
+    const textContent = (
+      <div className="relative flex-1">
+        <Input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onBlur={handleInputBlur}
+          onFocus={handleInputFocus}
+          onKeyDown={handleInputKeyDown}
+          placeholder={placeholder || (allowAlpha ? "Enter color (e.g. #FF0000CC)" : "Enter color")}
+          disabled={disabled}
+          className={cn(
+            colorInputVariant({ density }),
+            hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
+            hasPrefix && "rounded-l-none",
+            hasSuffix && "rounded-r-none",
+            ghost &&
+              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+            invalid && inputStyles.invalidInput,
+            (invalid || (nullable && localValue !== null && !disabled)) && "pr-8",
+          )}
+        />
+        {(invalid || (nullable && localValue !== null && !disabled)) && (
+          <div
+            className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
+            style={{ zIndex: 2 }}
+          >
+            {invalid && (
+              <span className="flex items-center">
+                <InvalidIcon message={invalid} />
+              </span>
+            )}
+            {nullable && localValue !== null && !disabled && (
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label="Clear"
+                onClick={handleClear}
+                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+              >
+                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+
     return (
       <div className="flex items-center space-x-2">
-        <div className="relative">
-          <Input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={handleInputChange}
-            onBlur={handleInputBlur}
-            onFocus={handleInputFocus}
-            onKeyDown={handleInputKeyDown}
-            placeholder={
-              placeholder || (allowAlpha ? "Enter color (e.g. #FF0000CC)" : "Enter color")
-            }
-            disabled={disabled}
+        {hasAffixes ? (
+          <div
             className={cn(
-              colorInputVariant({ density }),
+              "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+              invalid && "border-destructive",
+              disabled && "cursor-not-allowed opacity-50",
               ghost &&
                 "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
-              invalid && inputStyles.invalidInput,
-              (invalid || (nullable && localValue !== null && !disabled)) && "pr-8",
             )}
-          />
-          {(invalid || (nullable && localValue !== null && !disabled)) && (
-            <div
-              className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
-              style={{ zIndex: 2 }}
-            >
-              {invalid && (
-                <span className="flex items-center">
-                  <InvalidIcon message={invalid} />
-                </span>
-              )}
-              {nullable && localValue !== null && !disabled && (
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  aria-label="Clear"
-                  onClick={handleClear}
-                  className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-                >
-                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+          >
+            {hasPrefix && (
+              <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+                {prefixContent}
+              </div>
+            )}
+            {textContent}
+            {hasSuffix && (
+              <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+                {suffixContent}
+              </div>
+            )}
+          </div>
+        ) : (
+          textContent
+        )}
         {allowAlpha && (
           <AlphaSlider
             color={getDisplayColor(displayValue)}
@@ -406,8 +443,8 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   }
 
   // Default: TextAndPicker
-  return (
-    <div className="flex items-center space-x-2">
+  const defaultContent = (
+    <>
       <CustomColorPicker
         density={density}
         disabled={disabled}
@@ -416,7 +453,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
         actualColor={convertToHex(displayValue)}
         onChange={handleColorChange}
       />
-      <div className="relative">
+      <div className="relative flex-1">
         <Input
           ref={inputRef}
           type="text"
@@ -429,6 +466,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           disabled={disabled}
           className={cn(
             colorInputVariant({ density }),
+            hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
+            hasPrefix && "rounded-l-none",
+            hasSuffix && "rounded-r-none",
             ghost &&
               "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
             invalid && inputStyles.invalidInput,
@@ -456,6 +496,36 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           </div>
         )}
       </div>
+    </>
+  );
+
+  return (
+    <div className="flex items-center space-x-2">
+      {hasAffixes ? (
+        <div
+          className={cn(
+            "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+            invalid && "border-destructive",
+            disabled && "cursor-not-allowed opacity-50",
+            ghost &&
+              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+          )}
+        >
+          {hasPrefix && (
+            <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+              {prefixContent}
+            </div>
+          )}
+          <div className="flex flex-1 items-center">{defaultContent}</div>
+          {hasSuffix && (
+            <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+              {suffixContent}
+            </div>
+          )}
+        </div>
+      ) : (
+        <>{defaultContent}</>
+      )}
       {allowAlpha && (
         <AlphaSlider
           color={getDisplayColor(displayValue)}

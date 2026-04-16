@@ -77,6 +77,7 @@ interface SheetWidgetProps {
   height?: string;
   side?: SheetSide;
   resizable?: boolean;
+  events?: string[];
   slots?: {
     Content?: React.ReactNode[];
   };
@@ -91,6 +92,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
   height,
   side = "right",
   resizable: resizableProp = false,
+  events = [],
 }) => {
   const eventHandler = useEventHandler();
   const [isOpen, setIsOpen] = useState(true);
@@ -114,7 +116,9 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
 
   const handleClose = () => {
     setIsOpen(false);
-    setTimeout(() => eventHandler("OnClose", id, []), 300);
+    setTimeout(() => {
+      if (events.includes("OnClose")) eventHandler("OnClose", id, []);
+    }, 300);
   };
 
   const handleResizePointerDown = useCallback(

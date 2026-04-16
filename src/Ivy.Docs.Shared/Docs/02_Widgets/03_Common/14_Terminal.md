@@ -72,7 +72,7 @@ Layout.Vertical()
         .AddCommand("myapp init")
         .AddOutput("Configuration created at ./myapp.config.json")
         .AddCommand("myapp start")
-        .AddOutput("Server running at http://localhost:3000")
+        .AddOutput("Server running at https://localhost:3000")
 ```
 
 </Body>

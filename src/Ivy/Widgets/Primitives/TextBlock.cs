@@ -44,7 +44,7 @@ public record TextBlock : WidgetBase<TextBlock>
         Content = content;
         Variant = variant;
         StrikeThrough = strikeThrough;
-        Width = width;
+        Width = width.ToResponsive();
         Color = color;
         NoWrap = noWrap;
         Overflow = overflow;

@@ -75,36 +75,36 @@ export const MemoizedWidget = React.memo(
 
     const props = processWidgetProps(node, inheritedScale);
 
-    // Override width/height with resolved responsive values
-    const responsiveWidth = node.props.responsiveWidth;
-    if (responsiveWidth) {
+    // Resolve responsive width/height/density — these props may be plain values
+    // or responsive objects with breakpoint keys (default, mobile, tablet, desktop, wide)
+    if (props.width) {
       const resolved = resolveResponsive(
-        responsiveWidth as string,
+        props.width as string,
         breakpoint,
         undefined as unknown as string,
       );
       if (resolved !== undefined) props.width = resolved;
+      else delete props.width;
     }
 
-    const responsiveHeight = node.props.responsiveHeight;
-    if (responsiveHeight) {
+    if (props.height) {
       const resolved = resolveResponsive(
-        responsiveHeight as string,
+        props.height as string,
         breakpoint,
         undefined as unknown as string,
       );
       if (resolved !== undefined) props.height = resolved;
+      else delete props.height;
     }
 
-    // Override density with resolved responsive value
-    const responsiveDensity = node.props.responsiveDensity;
-    if (responsiveDensity) {
+    if (props.density && typeof props.density === "object") {
       const resolved = resolveResponsive(
-        responsiveDensity as string,
+        props.density as unknown as string,
         breakpoint,
         undefined as unknown as string,
       );
       if (resolved !== undefined) props.density = resolved;
+      else delete props.density;
     }
 
     const children = flattenChildren(node.children || []);

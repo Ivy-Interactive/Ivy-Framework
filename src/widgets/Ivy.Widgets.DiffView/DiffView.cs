@@ -9,10 +9,6 @@ public enum DiffViewType
 [ExternalWidget("frontend/dist/Ivy_Widgets_DiffView.js", StylePath = "frontend/dist/ivy-widgets-diffview.css", ExportName = "DiffView")]
 public record DiffView : WidgetBase<DiffView>
 {
-    public DiffView()
-    {
-        Width = Size.Full();
-    }
 
     /// <summary>The unified diff string (git diff output)</summary>
     [Prop] public string? Diff { get; init; }

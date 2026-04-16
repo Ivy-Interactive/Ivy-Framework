@@ -11,23 +11,13 @@ public enum AutoFlow
 
 public class GridDefinition
 {
-    public int? Columns { get; set; }
+    public Responsive<int?>? Columns { get; set; }
 
     public int? Rows { get; set; }
 
-    public int RowGap { get; set; } = 4;
+    public Responsive<int?>? RowGap { get; set; }
 
-    public int ColumnGap { get; set; } = 4;
-
-    /// <summary>
-    /// Sets both RowGap and ColumnGap to the same value. For backward compatibility.
-    /// </summary>
-    [Obsolete("Use RowGap and ColumnGap instead")]
-    public int Gap
-    {
-        get => RowGap;
-        set { RowGap = value; ColumnGap = value; }
-    }
+    public Responsive<int?>? ColumnGap { get; set; }
 
     public Thickness Padding { get; set; } = new(0);
 
@@ -42,12 +32,6 @@ public class GridDefinition
     public Size?[]? RowHeights { get; set; } = null;
 
     public Align? AlignContent { get; set; } = null;
-
-    public Responsive<int?>? ResponsiveColumns { get; set; } = null;
-
-    public Responsive<int?>? ResponsiveRowGap { get; set; } = null;
-
-    public Responsive<int?>? ResponsiveColumnGap { get; set; } = null;
 
     public Func<int, object, object>? HeaderBuilder { get; set; } = null;
 
@@ -70,26 +54,25 @@ internal record GridLayout : WidgetBase<GridLayout>
         Padding = def.Padding;
         AutoFlow = def.AutoFlow;
         AlignContent = def.AlignContent;
-        Width = def.Width;
-        Height = def.Height;
+        Width = def.Width.ToResponsive();
+        Height = def.Height.ToResponsive();
         ColumnWidths = def.ColumnWidths;
         RowHeights = def.RowHeights;
-        ResponsiveColumns = def.ResponsiveColumns;
-        ResponsiveRowGap = def.ResponsiveRowGap;
-        ResponsiveColumnGap = def.ResponsiveColumnGap;
     }
 
     internal GridLayout()
     {
+        RowGap = 4;
+        ColumnGap = 4;
     }
 
-    [Prop] public int? Columns { get; set; }
+    [Prop] public Responsive<int?>? Columns { get; set; }
 
     [Prop] public int? Rows { get; set; }
 
-    [Prop] public int RowGap { get; set; } = 4;
+    [Prop] public Responsive<int?>? RowGap { get; set; }
 
-    [Prop] public int ColumnGap { get; set; } = 4;
+    [Prop] public Responsive<int?>? ColumnGap { get; set; }
 
     [Prop] public Thickness Padding { get; set; } = new(0);
 
@@ -100,12 +83,6 @@ internal record GridLayout : WidgetBase<GridLayout>
     [Prop] public Size?[]? ColumnWidths { get; set; }
 
     [Prop] public Size?[]? RowHeights { get; set; }
-
-    [Prop] public Responsive<int?>? ResponsiveColumns { get; set; }
-
-    [Prop] public Responsive<int?>? ResponsiveRowGap { get; set; }
-
-    [Prop] public Responsive<int?>? ResponsiveColumnGap { get; set; }
 
     [Prop(attached: nameof(GridExtensions.GridColumn))] public int?[] ChildColumn { get; set; } = null!;
 

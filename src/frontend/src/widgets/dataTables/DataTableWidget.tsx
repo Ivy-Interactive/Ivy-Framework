@@ -38,6 +38,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children, emptyView }) => {
 };
 
 interface DataTableWidgetProps extends TableProps {
+  events?: string[];
   density?: Densities;
   slots?: {
     EmptyView?: React.ReactNode[];
@@ -45,6 +46,8 @@ interface DataTableWidgetProps extends TableProps {
     HeaderRight?: React.ReactNode[];
   };
 }
+
+const EMPTY_EVENTS: string[] = [];
 
 export const DataTable: React.FC<DataTableWidgetProps> = ({
   id,
@@ -55,6 +58,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
   width = "Full",
   height = "Full",
   density,
+  events = EMPTY_EVENTS,
   rowActions,
   updateStream,
   slots,
@@ -131,6 +135,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
 
           <DataTableEditor
             widgetId={id}
+            events={events}
             hasOptions={finalConfig.allowFiltering}
             rowActions={rowActions}
             showAggregateFooter={hasFooter}

@@ -63,6 +63,7 @@ interface ChatWidgetProps {
   width?: string;
   height?: string;
   density?: Densities;
+  events?: string[];
 }
 
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
@@ -73,6 +74,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   width = "Full",
   height = "Full",
   density = Densities.Medium,
+  events = [],
 }) => {
   const inputMinHeightClass =
     density === Densities.Small
@@ -130,12 +132,12 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     e.preventDefault();
     if (!input.trim()) return;
     setInput("");
-    eventHandler("OnSend", id, [input.trim()]);
+    if (events.includes("OnSend")) eventHandler("OnSend", id, [input.trim()]);
   };
 
   const handleCancel = (e: React.MouseEvent) => {
     e.preventDefault();
-    eventHandler("OnCancel", id, []);
+    if (events.includes("OnCancel")) eventHandler("OnCancel", id, []);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {

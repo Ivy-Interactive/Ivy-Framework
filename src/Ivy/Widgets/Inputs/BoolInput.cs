@@ -328,5 +328,10 @@ public static class BoolInputExtensions
         return widget with { OnFocus = new(_ => { onFocus(); return ValueTask.CompletedTask; }) };
     }
 
+    public static BoolInputBase Prefix(this BoolInputBase widget, object prefix)
+        => widget with { Children = widget.WithSlot("Prefix", prefix) };
+
+    public static BoolInputBase Suffix(this BoolInputBase widget, object suffix)
+        => widget with { Children = widget.WithSlot("Suffix", suffix) };
 
 }

@@ -765,14 +765,14 @@ export const typography: Record<string, string> = {
   blockquote: "border-l-2 pl-6 italic",
 
   // Code
-  code: "relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono text-sm font-semibold h-fit",
+  code: "relative rounded bg-muted px-[0.25rem] py-[0.05rem] font-mono text-[0.875em] font-semibold h-fit",
 
   // Table
   table: "w-full border-collapse border border-border",
   thead: "bg-muted",
   tr: "border border-border",
-  th: "border border-border px-4 py-2 text-left font-bold text-sm",
-  td: "border border-border px-4 py-2 text-sm",
+  th: "border border-border px-4 py-2 text-left font-bold text-[0.875em]",
+  td: "border border-border px-4 py-2 text-[0.875em]",
 
   // Media
   img: "max-w-full h-auto cursor-zoom-in border border-border rounded-md",

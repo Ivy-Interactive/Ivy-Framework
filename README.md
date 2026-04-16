@@ -45,6 +45,7 @@ public class SimpleCounterApp : ViewBase
 - **Rich Widget Library:** Extensive set of pre-built widgets to build any app. If you need more, an external widget framework is coming soon, where you can integrate any React, Angular, or Vue component.
 - **External Widget Framework:** Easily integrate any third-party React component.
 - **Hooks:** Familiar React-style hooks for state management, side effects, and lifecycle events.
+- **Rust-Optimized Core:** Under the hood, Ivy uses Rust-compiled native libraries for JSON diffing and document processing — delivering 5-10x better memory efficiency than traditional .NET solutions. No Rust installation required; these ship as precompiled NuGet packages.
 
 ### 🎨 UI Components
 - **Forms:** Create complex CRUD forms with validation and data binding.
@@ -71,8 +72,7 @@ The Ivy.Console CLI provides a suite of tools to streamline your development wor
 - **DevTools REST API:** When DevTools are enabled, `GET /ivy/dev-tools/widget-schema` returns a JSON Schema of all registered widgets and their props/events. `GET /ivy/dev-tools/env-info` returns environment details.
 - **Roslyn Analyzer (`Ivy.Analyser`):** Compile-time diagnostics that enforce Rules of Hooks, widget child constraints, constructor requirements, and service injection best practices — with auto-fix code actions.
 - **Hot Reload:** Method-level changes are injected instantly without losing state; structural changes trigger automatic rebuild/restart. Enabled by default with `ivy run`.
-- **`ivy fix`:** AI-powered build error diagnosis and auto-fix. Reads build output, sends it to an AI model, and applies corrections. Supports `--use-claude-code` for Claude Code integration.
-- **`ivy ask` / `ivy question`:** Q&A over the framework knowledge base. Ask natural-language questions about Ivy APIs, patterns, and best practices.
+- **`ivy ask` :** Q&A over the framework knowledge base. Ask natural-language questions about Ivy APIs, patterns, and best practices.
 - **`ivy docs`:** Browse framework documentation directly in the terminal. Use `ivy docs list` to see all topics.
 
 ### 🔌 Integrations
@@ -91,7 +91,6 @@ The Ivy.Console CLI provides a suite of tools to streamline your development wor
 
 Make sure you have the following prerequisites installed:
 - [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
-- [Rust Toolchain](https://rustup.rs/) (latest stable via `rustup`)
 
 1. **Install Ivy CLI**:
 

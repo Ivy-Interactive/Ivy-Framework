@@ -9,13 +9,13 @@ The OAuth callback URL has changed from `/ivy/webhook` to `/ivy/auth/callback`. 
 ### Before (v1.2.14 and earlier)
 
 ```
-http://localhost:5010/ivy/webhook
+https://localhost:5010/ivy/webhook
 ```
 
 ### After (v1.2.15+)
 
 ```
-http://localhost:5010/ivy/auth/callback
+https://localhost:5010/ivy/auth/callback
 ```
 
 ## How to Find Affected Code
@@ -44,7 +44,7 @@ You can also search your codebase for hardcoded webhook URLs:
 
 | Old URL | New URL |
 |---------|---------|
-| `http://localhost:5010/ivy/webhook` | `http://localhost:5010/ivy/auth/callback` |
+| `https://localhost:5010/ivy/webhook` | `https://localhost:5010/ivy/auth/callback` |
 | `https://myapp.com/ivy/webhook` | `https://myapp.com/ivy/auth/callback` |
 | `https://myapp.com/ivy/webhook/*` | `https://myapp.com/ivy/auth/callback/*` |
 

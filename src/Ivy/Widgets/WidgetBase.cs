@@ -11,23 +11,17 @@ public abstract record WidgetBase : AbstractWidget
     {
     }
 
-    [Prop] public Size? Width { get; set; }
+    [Prop] public Responsive<Size>? Width { get; internal set; }
 
-    [Prop] public Size? Height { get; set; }
+    [Prop] public Responsive<Size>? Height { get; internal set; }
 
     [Prop] public float? AspectRatio { get; set; }
 
-    [Prop] public Density? Density { get; set; }
+    [Prop] public Responsive<Density?>? Density { get; internal set; }
 
     [Prop, ScaffoldColumn(false)] public string? TestId { get; set; }
 
-    [Prop] public Responsive<Size>? ResponsiveWidth { get; set; }
-
-    [Prop] public Responsive<Size>? ResponsiveHeight { get; set; }
-
     [Prop] public Responsive<bool?>? ResponsiveVisible { get; set; }
-
-    [Prop] public Responsive<Density?>? ResponsiveDensity { get; set; }
 }
 
 public abstract record WidgetBase<T> : WidgetBase where T : WidgetBase<T>
@@ -39,9 +33,17 @@ public abstract record WidgetBase<T> : WidgetBase where T : WidgetBase<T>
 
 public static class WidgetBaseExtensions
 {
-    public static T Width<T>(this T widget, Size? width) where T : WidgetBase => widget with { Width = width };
+    public static T Width<T>(this T widget, Size? width) where T : WidgetBase
+        => widget with { Width = width is not null ? (Responsive<Size>)width : null };
 
-    public static T Height<T>(this T widget, Size? height) where T : WidgetBase => widget with { Height = height };
+    public static T Width<T>(this T widget, Responsive<Size> width) where T : WidgetBase
+        => widget with { Width = width };
+
+    public static T Height<T>(this T widget, Size? height) where T : WidgetBase
+        => widget with { Height = height is not null ? (Responsive<Size>)height : null };
+
+    public static T Height<T>(this T widget, Responsive<Size> height) where T : WidgetBase
+        => widget with { Height = height };
 
     public static T Size<T>(this T widget, Size? size) where T : WidgetBase => widget.Width(size).Height(size);
 
@@ -49,21 +51,16 @@ public static class WidgetBaseExtensions
 
     public static T Grow<T>(this T widget) where T : WidgetBase => widget.Width(Ivy.Size.Grow());
 
-    public static T Density<T>(this T widget, Density density) where T : WidgetBase => widget with { Density = density };
+    public static T Density<T>(this T widget, Density density) where T : WidgetBase
+        => widget with { Density = (Responsive<Density?>)(Density?)density };
 
-    public static T Small<T>(this T widget) where T : WidgetBase => widget with { Density = Ivy.Density.Small };
+    public static T Small<T>(this T widget) where T : WidgetBase => widget.Density(Ivy.Density.Small);
 
-    public static T Medium<T>(this T widget) where T : WidgetBase => widget with { Density = Ivy.Density.Medium };
+    public static T Medium<T>(this T widget) where T : WidgetBase => widget.Density(Ivy.Density.Medium);
 
-    public static T Large<T>(this T widget) where T : WidgetBase => widget with { Density = Ivy.Density.Large };
+    public static T Large<T>(this T widget) where T : WidgetBase => widget.Density(Ivy.Density.Large);
 
     public static T TestId<T>(this T widget, string testId) where T : WidgetBase => widget with { TestId = testId };
-
-    public static T Width<T>(this T widget, Responsive<Size> width) where T : WidgetBase
-        => widget with { ResponsiveWidth = width };
-
-    public static T Height<T>(this T widget, Responsive<Size> height) where T : WidgetBase
-        => widget with { ResponsiveHeight = height };
 
     public static T HideOn<T>(this T widget, params Breakpoint[] breakpoints) where T : WidgetBase
     {
@@ -82,7 +79,14 @@ public static class WidgetBaseExtensions
     }
 
     public static T Density<T>(this T widget, Responsive<Density?> density) where T : WidgetBase
-        => widget with { ResponsiveDensity = density };
+        => widget with { Density = density };
+
+    internal static object[] WithSlot<T>(this T widget, string slotName, object? value) where T : WidgetBase
+    {
+        var others = widget.Children.Where(c => c is not Slot s || s.Name != slotName);
+        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
+        return result.ToArray();
+    }
 
     internal static void SetDensityViaReflection(object input, Density? density)
     {
@@ -94,8 +98,15 @@ public static class WidgetBaseExtensions
 
         if (prop is null) return;
         if (!prop.CanWrite) return;
-        if (!prop.PropertyType.IsAssignableFrom(typeof(Density))) return;
 
-        prop.SetValue(input, density);
+        if (prop.PropertyType == typeof(Responsive<Density?>))
+        {
+            Responsive<Density?>? value = density.HasValue ? (Responsive<Density?>)(Density?)density.Value : null;
+            prop.SetValue(input, value);
+        }
+        else if (prop.PropertyType.IsAssignableFrom(typeof(Density)))
+        {
+            prop.SetValue(input, density);
+        }
     }
 }

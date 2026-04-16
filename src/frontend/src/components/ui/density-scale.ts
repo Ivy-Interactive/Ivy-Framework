@@ -17,3 +17,9 @@ export const densityText = {
   Medium: "text-sm",
   Large: "text-base",
 } as const;
+
+export const densityTreeGap = {
+  Small: "gap-0.5",
+  Medium: "gap-1",
+  Large: "gap-1.5",
+} as const;

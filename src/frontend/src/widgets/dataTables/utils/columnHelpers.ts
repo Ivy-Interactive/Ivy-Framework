@@ -1,5 +1,6 @@
 import { GridColumn, GridColumnIcon } from "@glideapps/glide-data-grid";
 import type { DataColumn } from "../types/types";
+import type { SortOrder } from "@/services/grpcTableService";
 import {
   estimateHeaderWidth,
   parseSizeGrow,
@@ -117,6 +118,7 @@ export function convertToGridColumns(
   showGroups: boolean,
   showColumnTypeIcons: boolean = true,
   headerFont?: string,
+  activeSort?: SortOrder[] | null,
 ): GridColumn[] {
   const orderedColumns = getOrderedVisibleDataColumns(columns, columnOrder);
 
@@ -141,12 +143,21 @@ export function convertToGridColumns(
     // Determine effective grow: explicit Size-based grow, or default last column to 1
     const effectiveGrow = grow !== undefined ? grow : isLastColumn ? 1 : undefined;
 
+    let columnIcon = showColumnTypeIcons ? mapColumnIcon(col) : undefined;
+
+    if (activeSort && activeSort.length > 0) {
+      const sortForColumn = activeSort.find((sort) => sort.column === col.name);
+      if (sortForColumn) {
+        columnIcon = sortForColumn.direction === "ASC" ? "ArrowUp" : "ArrowDown";
+      }
+    }
+
     return {
       title: col.header || col.name,
       width: numericBaseWidth,
       ...(effectiveGrow !== undefined && { grow: effectiveGrow }),
       group: showGroups ? col.group : undefined,
-      icon: showColumnTypeIcons ? mapColumnIcon(col) : undefined,
+      icon: columnIcon,
     };
   });
 }

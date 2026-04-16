@@ -324,6 +324,30 @@ Server.ConfigureAuthCookieOptions = options =>
 
 > **Note**: Custom configuration is applied after Ivy sets the default values, allowing you to override any setting. It's recommended to keep `HttpOnly = true` for security.
 
+### Namespacing Cookies for Multiple Apps
+
+When running multiple Ivy auth apps on the same domain (e.g., on different ports or subpaths), they would normally share cookies by domain, causing login conflicts. The `Server.AuthCookiePrefix` property solves this by namespacing cookies per app, ensuring that each app's authentication cookies remain isolated.
+
+**Configuration Example**:
+
+```csharp
+Server.AuthCookiePrefix = "clerk";
+```
+
+**Naming Scheme**: The prefix uses a double-underscore delimiter to avoid ambiguity with existing brokered session cookies (which use single underscore, e.g., `google_access_token`):
+
+| Cookie (no prefix) | Cookie (prefix = `"clerk"`) | Cookie (prefix = `"basic"`) |
+|---|---|---|
+| `access_token` | `clerk__access_token` | `basic__access_token` |
+| `refresh_token` | `clerk__refresh_token` | `basic__refresh_token` |
+| `auth_tag` | `clerk__auth_tag` | `basic__auth_tag` |
+| `auth_session_data` | `clerk__auth_session_data` | `basic__auth_session_data` |
+| `google_access_token` (brokered) | `clerk__google_access_token` | `basic__google_access_token` |
+
+**Brokered Session Isolation**: Brokered OAuth session cookies (e.g., for Google, GitHub) are also prefixed, maintaining isolation between apps even when using the same OAuth providers.
+
+**Typical Use Cases**: Container apps that embed multiple auth examples as iframes, or development scenarios where multiple Ivy apps run on `localhost` with different ports.
+
 ## HTTPS in Development
 
 Ivy uses secure (`Secure = true`) authentication cookies, which means your browser will only send them over HTTPS. In local development, Ivy automatically serves over HTTPS using the ASP.NET Core development certificate.

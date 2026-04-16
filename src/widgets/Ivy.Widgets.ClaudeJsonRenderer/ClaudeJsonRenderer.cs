@@ -5,10 +5,6 @@ namespace Ivy.Widgets.ClaudeJsonRenderer;
                 ExportName = "ClaudeJsonRenderer")]
 public record ClaudeJsonRenderer : WidgetBase<ClaudeJsonRenderer>
 {
-    public ClaudeJsonRenderer()
-    {
-        Width = Size.Full();
-    }
 
     /// <summary>Stream of newline-delimited JSON events from Claude Code</summary>
     [Prop] public string? JsonStream { get; init; }
@@ -23,6 +19,9 @@ public record ClaudeJsonRenderer : WidgetBase<ClaudeJsonRenderer>
 
     /// <summary>Show system events (init, tool results)</summary>
     [Prop] public bool ShowSystemEvents { get; init; } = false;
+
+    /// <summary>Changing this value clears all accumulated stream output</summary>
+    [Prop] public int ResetToken { get; init; } = 0;
 
     [Event] public Func<Event<ClaudeJsonRenderer, string>, ValueTask>? OnComplete { get; init; }
 }
@@ -43,6 +42,9 @@ public static class ClaudeJsonRendererExtensions
 
     public static ClaudeJsonRenderer ShowSystemEvents(this ClaudeJsonRenderer w, bool showSystemEvents = true) =>
         w with { ShowSystemEvents = showSystemEvents };
+
+    public static ClaudeJsonRenderer ResetToken(this ClaudeJsonRenderer w, int resetToken) =>
+        w with { ResetToken = resetToken };
 
     public static ClaudeJsonRenderer OnComplete(
         this ClaudeJsonRenderer w,

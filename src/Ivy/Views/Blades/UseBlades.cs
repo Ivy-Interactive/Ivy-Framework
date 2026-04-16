@@ -20,7 +20,7 @@ public interface IBladeContext
     int GetIndex(IView bladeView);
 }
 
-public class BladeContext : IBladeContext
+internal class BladeContext : IBladeContext
 {
     public BladeContext()
     {

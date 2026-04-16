@@ -14,7 +14,7 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
     public SidebarLayout(object mainContent, object sidebarContent, object? sidebarHeader = null, object? sidebarFooter = null, Size? width = null)
     : base(BuildSlots(mainContent, sidebarContent, sidebarHeader, sidebarFooter))
     {
-        Width = width ?? DefaultWidth;
+        Width = (width ?? DefaultWidth).ToResponsive();
     }
 
     private static Slot[] BuildSlots(object mainContent, object sidebarContent, object? sidebarHeader, object? sidebarFooter) =>
@@ -71,7 +71,7 @@ public static class SidebarLayoutExtensions
         }
 
         // Apply default min/max constraints if not already set on the Width
-        var width = sidebar.Width ?? SidebarLayout.DefaultWidth;
+        var width = sidebar.Width?.Default ?? SidebarLayout.DefaultWidth;
         if (width.Min == null)
         {
             width = width.Min(Size.Px(200));
@@ -81,11 +81,7 @@ public static class SidebarLayoutExtensions
             width = width.Max(Size.Px(600));
         }
 
-        return sidebar with
-        {
-            Resizable = true,
-            Width = width
-        };
+        return (sidebar with { Resizable = true }).Width(width);
     }
 }
 

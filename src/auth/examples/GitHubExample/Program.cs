@@ -15,4 +15,6 @@ server.UseAppShell(settings);
 
 server.SetMetaTitle("GitHub Example");
 
+Server.AuthCookiePrefix = "github";
+
 await server.RunAsync();

@@ -33,7 +33,7 @@ public static class HeaderLayoutExtensions
         // When scroll is disabled, automatically set height to Full if no height is explicitly set
         if (scroll == Ivy.Scroll.None && result.Height == null)
         {
-            return result with { Height = Size.Full() };
+            return result.Height(Size.Full());
         }
 
         return result;

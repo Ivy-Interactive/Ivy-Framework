@@ -47,6 +47,7 @@ interface IconInputWidgetProps {
   events?: string[];
   density?: Densities;
   autoFocus?: boolean;
+  slots?: { Prefix?: React.ReactNode[]; Suffix?: React.ReactNode[] };
 }
 
 const ICONS_PER_ROW = 8;
@@ -61,6 +62,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   events = EMPTY_ARRAY,
   density = Densities.Medium,
   autoFocus,
+  slots,
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
@@ -86,7 +88,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   const handleSelect = useCallback(
     (iconName: string) => {
       setLocalValue(iconName);
-      eventHandler("OnChange", id, [iconName]);
+      if (events.includes("OnChange")) eventHandler("OnChange", id, [iconName]);
       setOpen(false);
       setSearch("");
     },
@@ -95,7 +97,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
 
   const handleClear = useCallback(() => {
     setLocalValue(null);
-    eventHandler("OnChange", id, [null]);
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
     if (events.includes("OnBlur")) eventHandler("OnBlur", id, [null]);
   }, [eventHandler, id, events, setLocalValue]);
 
@@ -111,6 +113,12 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
     },
     [eventHandler, id, events],
   );
+
+  const prefixContent = slots?.Prefix;
+  const suffixContent = slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
 
   const hasValue = localValue != null && localValue !== "" && localValue !== "None";
 
@@ -169,7 +177,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
       valueTextSpan
     );
 
-  return (
+  const iconContent = (
     <div className="flex items-center gap-2 min-w-0">
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
@@ -265,7 +273,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
                   iconInputTextVariant({ density }),
                 )}
                 onClick={() => {
-                  eventHandler("OnChange", id, [null]);
+                  if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
                   setOpen(false);
                 }}
               >
@@ -293,6 +301,30 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
               <X className={xIconVariant({ density })} />
             </button>
           )}
+        </div>
+      )}
+    </div>
+  );
+
+  if (!hasAffixes) return iconContent;
+
+  return (
+    <div
+      className={cn(
+        "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+        invalid && "border-destructive",
+        disabled && "cursor-not-allowed opacity-50",
+      )}
+    >
+      {hasPrefix && (
+        <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+          {prefixContent}
+        </div>
+      )}
+      <div className="flex-1 px-3 py-2">{iconContent}</div>
+      {hasSuffix && (
+        <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+          {suffixContent}
         </div>
       )}
     </div>

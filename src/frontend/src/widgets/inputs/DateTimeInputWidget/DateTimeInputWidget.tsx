@@ -18,6 +18,7 @@ import { MonthVariant } from "./MonthVariant";
 import { WeekVariant } from "./WeekVariant";
 import { YearVariant } from "./YearVariant";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 const VariantComponents: Record<
   VariantType,
@@ -64,6 +65,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   autoFocus,
   events = EMPTY_ARRAY,
   "data-testid": dataTestId,
+  slots,
 }) => {
   const eventHandler = useEventHandler();
   const firstDayOfWeek = resolveDayOfWeek(firstDayOfWeekRaw);
@@ -78,9 +80,9 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       if (disabled) return;
       const isoString = selectedDate?.toISOString();
       setLocalValue(isoString);
-      eventHandler("OnChange", id, [isoString]);
+      if (events.includes("OnChange")) eventHandler("OnChange", id, [isoString]);
     },
-    [disabled, eventHandler, id, setLocalValue],
+    [disabled, eventHandler, id, setLocalValue, events],
   );
 
   const handleTimeChange = useCallback(
@@ -90,7 +92,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       // For Time variant, send the time string directly
       if (variant === "Time") {
         setLocalValue(time);
-        eventHandler("OnChange", id, [time]);
+        if (events.includes("OnChange")) eventHandler("OnChange", id, [time]);
       } else {
         // DateTime variant: merge time into current date so we don't overwrite with today
         if (!time?.trim()) return;
@@ -106,10 +108,10 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
         baseDate.setHours(hours, minutes, seconds);
         const isoString = baseDate.toISOString();
         setLocalValue(isoString);
-        eventHandler("OnChange", id, [isoString]);
+        if (events.includes("OnChange")) eventHandler("OnChange", id, [isoString]);
       }
     },
-    [disabled, eventHandler, id, variant, localValue, setLocalValue],
+    [disabled, eventHandler, id, variant, localValue, setLocalValue, events],
   );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);
@@ -126,27 +128,65 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
     [disabled, events, eventHandler, id],
   );
 
+  const prefixContent = slots?.Prefix;
+  const suffixContent = slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+
+  const variantElement = (
+    <VariantComponent
+      id={id}
+      value={localValue}
+      placeholder={placeholder}
+      disabled={disabled}
+      nullable={nullable}
+      invalid={invalid}
+      format={formatProp}
+      firstDayOfWeek={firstDayOfWeek}
+      min={min}
+      max={max}
+      step={step}
+      density={density}
+      autoFocus={autoFocus}
+      onDateChange={handleDateChange}
+      onTimeChange={handleTimeChange}
+      onFocusChange={handleFocusChange}
+      data-testid={dataTestId}
+    />
+  );
+
+  if (!hasAffixes) {
+    return <div className="relative w-full">{variantElement}</div>;
+  }
+
   return (
-    <div className="relative w-full">
-      <VariantComponent
-        id={id}
-        value={localValue}
-        placeholder={placeholder}
-        disabled={disabled}
-        nullable={nullable}
-        invalid={invalid}
-        format={formatProp}
-        firstDayOfWeek={firstDayOfWeek}
-        min={min}
-        max={max}
-        step={step}
-        density={density}
-        autoFocus={autoFocus}
-        onDateChange={handleDateChange}
-        onTimeChange={handleTimeChange}
-        onFocusChange={handleFocusChange}
-        data-testid={dataTestId}
-      />
+    <div
+      className={cn(
+        "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+        invalid && "border-destructive",
+        disabled && "opacity-50 cursor-not-allowed",
+      )}
+    >
+      {hasPrefix && (
+        <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+          {prefixContent}
+        </div>
+      )}
+      <div
+        className={cn(
+          "flex-1 relative w-full [&_button]:border-0 [&_button]:shadow-none [&_input]:border-0 [&_input]:shadow-none",
+          hasPrefix && "[&_button]:rounded-l-none [&_input]:rounded-l-none",
+          hasSuffix && "[&_button]:rounded-r-none [&_input]:rounded-r-none",
+        )}
+      >
+        {variantElement}
+      </div>
+      {hasSuffix && (
+        <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+          {suffixContent}
+        </div>
+      )}
     </div>
   );
 };

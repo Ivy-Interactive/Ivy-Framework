@@ -217,6 +217,30 @@ public class InputWidgetTests
 
 public class InputPrefixSuffixSlotTests
 {
+    private class MockState<T>(T value) : IState<T>
+    {
+        private readonly Subject<T> _subject = new();
+        public T Value { get; set; } = value;
+
+        [OverloadResolutionPriority(1)]
+        public T Set(T value) { Value = value; return Value; }
+        public T Set(Func<T, T> setter) { Value = setter(Value); return Value; }
+        public T Reset() => Set(default(T)!);
+        public Type GetStateType() => typeof(T);
+
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            observer.OnNext(Value);
+            return _subject.Subscribe(observer);
+        }
+
+        public void Dispose() => _subject.Dispose();
+        public IDisposable SubscribeAny(Action action) => _subject.Subscribe(_ => action());
+        public IDisposable SubscribeAny(Action<object?> action) => _subject.Subscribe(x => action(x));
+        public IEffectTrigger ToTrigger() => EffectTrigger.OnStateChange(this);
+        public object? GetValueAsObject() => Value;
+    }
+
     private static Slot? FindSlot(WidgetBase widget, string name)
         => widget.Children.OfType<Slot>().FirstOrDefault(s => s.Name == name);
 
@@ -300,6 +324,28 @@ public class InputPrefixSuffixSlotTests
     }
 
     [Fact]
+    public void SliderInput_Prefix_AddsPrefixSlot()
+    {
+        var state = new MockState<int>(50);
+        var input = state.ToSliderInput().Prefix("$");
+
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("$", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void SliderInput_Suffix_AddsSuffixSlot()
+    {
+        var state = new MockState<int>(50);
+        var input = state.ToSliderInput().Suffix("kg");
+
+        var slot = FindSlot(input, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("kg", slot!.Children[0]);
+    }
+
+    [Fact]
     public void NumberRangeInput_Prefix_AddsPrefixSlot()
     {
         NumberRangeInputBase input = new NumberRangeInput<int>();
@@ -319,5 +365,341 @@ public class InputPrefixSuffixSlotTests
         var slot = FindSlot(withSuffix, "Suffix");
         Assert.NotNull(slot);
         Assert.Equal("USD", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void SelectInput_Prefix_AddsPrefixSlot()
+    {
+        var state = new MockState<string>("a");
+        var input = state.ToSelectInput().Prefix("$");
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("$", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void SelectInput_Suffix_AddsSuffixSlot()
+    {
+        var state = new MockState<string>("a");
+        var input = state.ToSelectInput().Suffix(".00");
+        var slot = FindSlot(input, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal(".00", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void SelectInput_PrefixAndSuffix_Coexist()
+    {
+        var state = new MockState<string>("a");
+        var input = state.ToSelectInput().Prefix("$").Suffix("USD");
+        Assert.NotNull(FindSlot(input, "Prefix"));
+        Assert.NotNull(FindSlot(input, "Suffix"));
+    }
+
+    [Fact]
+    public void SelectInput_Prefix_AcceptsWidgetContent()
+    {
+        var state = new MockState<string>("a");
+        var button = new Button("Click");
+        var input = state.ToSelectInput().Prefix(button);
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
+    }
+
+    [Fact]
+    public void BoolInput_Prefix_AddsPrefixSlot()
+    {
+        var state = new MockState<bool>(false);
+        var input = state.ToBoolInput().Prefix("On");
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("On", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void BoolInput_Suffix_AddsSuffixSlot()
+    {
+        var state = new MockState<bool>(false);
+        var input = state.ToBoolInput().Suffix("Off");
+        var slot = FindSlot(input, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("Off", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void BoolInput_PrefixAndSuffix_Coexist()
+    {
+        var state = new MockState<bool>(false);
+        var input = state.ToBoolInput().Prefix("On").Suffix("Off");
+        Assert.NotNull(FindSlot(input, "Prefix"));
+        Assert.NotNull(FindSlot(input, "Suffix"));
+    }
+
+    [Fact]
+    public void BoolInput_Prefix_AcceptsWidgetContent()
+    {
+        var state = new MockState<bool>(false);
+        var button = new Button("Click");
+        var input = state.ToBoolInput().Prefix(button);
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
+    }
+
+    [Fact]
+    public void DateRangeInput_Prefix_AddsPrefixSlot()
+    {
+        var state = new MockState<(DateOnly, DateOnly)>((DateOnly.MinValue, DateOnly.MaxValue));
+        var input = state.ToDateRangeInput().Prefix("$");
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("$", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void DateRangeInput_Suffix_AddsSuffixSlot()
+    {
+        var state = new MockState<(DateOnly, DateOnly)>((DateOnly.MinValue, DateOnly.MaxValue));
+        var input = state.ToDateRangeInput().Suffix("days");
+        var slot = FindSlot(input, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("days", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void DateRangeInput_PrefixAndSuffix_Coexist()
+    {
+        var state = new MockState<(DateOnly, DateOnly)>((DateOnly.MinValue, DateOnly.MaxValue));
+        var input = state.ToDateRangeInput().Prefix("From").Suffix("To");
+        Assert.NotNull(FindSlot(input, "Prefix"));
+        Assert.NotNull(FindSlot(input, "Suffix"));
+    }
+
+    [Fact]
+    public void DateRangeInput_Prefix_AcceptsWidgetContent()
+    {
+        var state = new MockState<(DateOnly, DateOnly)>((DateOnly.MinValue, DateOnly.MaxValue));
+        var button = new Button("Click");
+        var input = state.ToDateRangeInput().Prefix(button);
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
+    }
+
+    [Fact]
+    public void DateTimeInput_Prefix_AddsPrefixSlot()
+    {
+        DateTimeInputBase input = new DateTimeInput<DateTime>();
+        var withPrefix = input.Prefix("$");
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("$", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void DateTimeInput_Suffix_AddsSuffixSlot()
+    {
+        DateTimeInputBase input = new DateTimeInput<DateTime>();
+        var withSuffix = input.Suffix("UTC");
+
+        var slot = FindSlot(withSuffix, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("UTC", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void DateTimeInput_PrefixAndSuffix_Coexist()
+    {
+        DateTimeInputBase input = new DateTimeInput<DateTime>();
+        var both = input.Prefix("From:").Suffix("UTC");
+
+        Assert.NotNull(FindSlot(both, "Prefix"));
+        Assert.NotNull(FindSlot(both, "Suffix"));
+    }
+
+    [Fact]
+    public void DateTimeInput_Prefix_AcceptsWidgetContent()
+    {
+        DateTimeInputBase input = new DateTimeInput<DateTime>();
+        var button = new Button("Pick");
+        var withPrefix = input.Prefix(button);
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
+    }
+
+    [Fact]
+    public void ColorInput_Prefix_AddsPrefixSlot()
+    {
+        var state = new MockState<string>("#ff0000");
+        var input = state.ToColorInput().Prefix("$");
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("$", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void ColorInput_Suffix_AddsSuffixSlot()
+    {
+        var state = new MockState<string>("#ff0000");
+        var input = state.ToColorInput().Suffix(".00");
+        var slot = FindSlot(input, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal(".00", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void ColorInput_PrefixAndSuffix_Coexist()
+    {
+        var state = new MockState<string>("#ff0000");
+        var input = state.ToColorInput().Prefix("$").Suffix("USD");
+        Assert.NotNull(FindSlot(input, "Prefix"));
+        Assert.NotNull(FindSlot(input, "Suffix"));
+    }
+
+    [Fact]
+    public void ColorInput_Prefix_AcceptsWidgetContent()
+    {
+        var state = new MockState<string>("#ff0000");
+        var button = new Button("Click");
+        var input = state.ToColorInput().Prefix(button);
+        var slot = FindSlot(input, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
+    }
+
+    [Fact]
+    public void CodeInput_Prefix_AddsPrefixSlot()
+    {
+        CodeInputBase input = new CodeInput<string>();
+        var withPrefix = input.Prefix("$");
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("$", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void CodeInput_Suffix_AddsSuffixSlot()
+    {
+        CodeInputBase input = new CodeInput<string>();
+        var withSuffix = input.Suffix("lang");
+
+        var slot = FindSlot(withSuffix, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("lang", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void CodeInput_PrefixAndSuffix_Coexist()
+    {
+        CodeInputBase input = new CodeInput<string>();
+        var both = input.Prefix("//").Suffix("lang");
+
+        Assert.NotNull(FindSlot(both, "Prefix"));
+        Assert.NotNull(FindSlot(both, "Suffix"));
+    }
+
+    [Fact]
+    public void CodeInput_Prefix_AcceptsWidgetContent()
+    {
+        CodeInputBase input = new CodeInput<string>();
+        var button = new Button("Click");
+        var withPrefix = input.Prefix(button);
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
+    }
+
+    [Fact]
+    public void FeedbackInput_Prefix_AddsPrefixSlot()
+    {
+        FeedbackInputBase input = new FeedbackInput<int>();
+        var withPrefix = input.Prefix("Rate:");
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("Rate:", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void FeedbackInput_Suffix_AddsSuffixSlot()
+    {
+        FeedbackInputBase input = new FeedbackInput<int>();
+        var withSuffix = input.Suffix("/5");
+
+        var slot = FindSlot(withSuffix, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("/5", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void FeedbackInput_PrefixAndSuffix_Coexist()
+    {
+        FeedbackInputBase input = new FeedbackInput<int>();
+        var both = input.Prefix("Rate:").Suffix("/5");
+
+        Assert.NotNull(FindSlot(both, "Prefix"));
+        Assert.NotNull(FindSlot(both, "Suffix"));
+    }
+
+    [Fact]
+    public void FeedbackInput_Prefix_AcceptsWidgetContent()
+    {
+        FeedbackInputBase input = new FeedbackInput<int>();
+        var button = new Button("Click");
+        var withPrefix = input.Prefix(button);
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
+    }
+
+    [Fact]
+    public void IconInput_Prefix_AddsPrefixSlot()
+    {
+        IconInputBase input = new IconInput<Icons>();
+        var withPrefix = input.Prefix("Icon:");
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Equal("Icon:", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void IconInput_Suffix_AddsSuffixSlot()
+    {
+        IconInputBase input = new IconInput<Icons>();
+        var withSuffix = input.Suffix("selected");
+
+        var slot = FindSlot(withSuffix, "Suffix");
+        Assert.NotNull(slot);
+        Assert.Equal("selected", slot!.Children[0]);
+    }
+
+    [Fact]
+    public void IconInput_PrefixAndSuffix_Coexist()
+    {
+        IconInputBase input = new IconInput<Icons>();
+        var both = input.Prefix("Icon:").Suffix("selected");
+
+        Assert.NotNull(FindSlot(both, "Prefix"));
+        Assert.NotNull(FindSlot(both, "Suffix"));
+    }
+
+    [Fact]
+    public void IconInput_Prefix_AcceptsWidgetContent()
+    {
+        IconInputBase input = new IconInput<Icons>();
+        var button = new Button("Click");
+        var withPrefix = input.Prefix(button);
+
+        var slot = FindSlot(withPrefix, "Prefix");
+        Assert.NotNull(slot);
+        Assert.Same(button, slot!.Children[0]);
     }
 }

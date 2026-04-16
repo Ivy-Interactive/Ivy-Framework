@@ -6,14 +6,25 @@
   pointer-events: none;
   z-index: 99999;
   box-sizing: border-box;
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ivy-devtools-overlay--selected {
+  border-style: solid;
+  border-width: 2px;
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 40%, transparent);
 }
 
 .ivy-devtools-label {
   position: absolute;
   top: 0;
   right: 0;
-  background-color: var(--popover);
-  color: var(--popover-foreground);
+  background-color: var(--input);
+  color: var(--foreground);
   padding: 4px 8px;
   font-size: 11px;
   font-family: var(--font-sans);
@@ -31,7 +42,7 @@
 .ivy-devtools-dialog {
   position: fixed;
   z-index: 100001;
-  background: var(--popover);
+  background: var(--input);
   border: 2px solid var(--primary);
   border-radius: var(--radius-boxes);
   box-shadow:

@@ -120,6 +120,7 @@ const SliderVariant = memo(
     onValueChange,
     onBlur,
     onFocus,
+    slots,
     "data-testid": dataTestId,
   }: NumberInputBaseProps) => {
     const isBytesFormat = formatStyle === "Bytes";
@@ -161,7 +162,13 @@ const SliderVariant = memo(
       [max, isBytesFormat],
     );
 
-    return (
+    const prefixContent = slots?.Prefix;
+    const suffixContent = slots?.Suffix;
+    const hasPrefix = (prefixContent?.length ?? 0) > 0;
+    const hasSuffix = (suffixContent?.length ?? 0) > 0;
+    const hasSlots = hasPrefix || hasSuffix;
+
+    const sliderContent = (
       <div className="relative w-full flex-1 flex flex-col gap-1 pt-6 pb-2 my-auto justify-center">
         <Slider
           min={min}
@@ -196,6 +203,31 @@ const SliderVariant = memo(
         {invalid && (
           <div className="absolute right-2.5 translate-y-1/2 -top-1.5">
             <InvalidIcon message={invalid} />
+          </div>
+        )}
+      </div>
+    );
+
+    if (!hasSlots) {
+      return sliderContent;
+    }
+
+    return (
+      <div
+        className={cn(
+          "flex items-stretch w-full flex-1 rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
+          disabled && "cursor-not-allowed opacity-50",
+        )}
+      >
+        {hasPrefix && (
+          <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+            {prefixContent}
+          </div>
+        )}
+        <div className="flex-1 px-3">{sliderContent}</div>
+        {hasSuffix && (
+          <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+            {suffixContent}
           </div>
         )}
       </div>
@@ -392,14 +424,14 @@ export const NumberInputWidget = memo(
           const validatedValue = validateAndCapValue(boundedValue, props.targetType);
 
           setLocalValue(validatedValue);
-          eventHandler("OnChange", id, [validatedValue]);
+          if (events.includes("OnChange")) eventHandler("OnChange", id, [validatedValue]);
         } else {
           // Pass null directly for nullable inputs
           setLocalValue(newValue);
-          eventHandler("OnChange", id, [newValue]);
+          if (events.includes("OnChange")) eventHandler("OnChange", id, [newValue]);
         }
       },
-      [eventHandler, id, props.min, props.max, props.targetType, setLocalValue],
+      [eventHandler, id, props.min, props.max, props.targetType, setLocalValue, events],
     );
 
     return (

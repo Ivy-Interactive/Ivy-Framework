@@ -18,14 +18,14 @@ The query parameter for controlling AppShell visibility has been shortened from 
 
 ```typescript
 const isAppShell = getAppShellParam();
-// URL: http://localhost:5000?appshell=false
+// URL: https://localhost:5000?appshell=false
 ```
 
 ## After
 
 ```typescript
 const isShell = getShellParam();
-// URL: http://localhost:5000?shell=false
+// URL: https://localhost:5000?shell=false
 ```
 
 ## Migration Path

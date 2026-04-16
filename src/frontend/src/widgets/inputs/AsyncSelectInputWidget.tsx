@@ -72,7 +72,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   const eventHandler = useEventHandler();
 
   const handleSelect = () => {
-    eventHandler("OnSelect", id, []);
+    if (events.includes("OnSelect")) eventHandler("OnSelect", id, []);
   };
 
   const buttonRef = useRef<HTMLButtonElement>(null);

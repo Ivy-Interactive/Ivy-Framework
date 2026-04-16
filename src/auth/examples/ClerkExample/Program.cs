@@ -16,6 +16,8 @@ server.UseAppShell(settings);
 
 server.SetMetaTitle("Clerk Example");
 
+Server.AuthCookiePrefix = "clerk";
+
 server.UseConfiguration(config =>
 {
     if (ProcessHelper.IsProduction())

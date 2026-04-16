@@ -33,16 +33,16 @@ public static class IconExtensions
 
     public static Icon Small(this Icon icon)
     {
-        return icon with { Width = Size.Units(4), Height = Size.Units(4) };
+        return icon.Width(Size.Units(4)).Height(Size.Units(4));
     }
 
     public static Icon Medium(this Icon icon)
     {
-        return icon with { Width = Size.Units(6), Height = Size.Units(6) };
+        return icon.Width(Size.Units(6)).Height(Size.Units(6));
     }
 
     public static Icon Large(this Icon icon)
     {
-        return icon with { Width = Size.Units(12), Height = Size.Units(12) };
+        return icon.Width(Size.Units(12)).Height(Size.Units(12));
     }
 }

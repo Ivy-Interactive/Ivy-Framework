@@ -6,7 +6,7 @@ namespace Ivy;
 public class LayoutView : ViewBase, IStateless
 {
     private readonly List<LayoutElement> _elements = new();
-    private OrientationEnum _orientation = OrientationEnum.Vertical;
+    private Responsive<OrientationEnum?>? _orientation = (OrientationEnum?)OrientationEnum.Vertical;
     private bool _wrap = false;
 
     private class LayoutElement(object content)
@@ -18,12 +18,12 @@ public class LayoutView : ViewBase, IStateless
     {
     }
 
-    private int _rowGap = 4;
-    private int _columnGap = 4;
-    private Thickness? _padding = null;
+    private Responsive<int?>? _rowGap = (int?)4;
+    private Responsive<int?>? _columnGap = (int?)4;
+    private Responsive<Thickness?>? _padding = null;
     private Thickness? _margin = null;
-    private Size? _width = null;
-    private Size? _height = null;
+    private Responsive<Size>? _width = null;
+    private Responsive<Size>? _height = null;
     private Colors? _background = null;
     private Align? _alignment = null;
     private Scroll _scroll = Ivy.Scroll.None;
@@ -34,62 +34,56 @@ public class LayoutView : ViewBase, IStateless
     private Thickness _borderThickness = new(0);
     private string? _testId = null;
     private GridView? _activeGrid = null;
-    private Responsive<Size>? _responsiveWidth = null;
-    private Responsive<Size>? _responsiveHeight = null;
-    private Responsive<OrientationEnum?>? _responsiveOrientation = null;
-    private Responsive<int?>? _responsiveRowGap = null;
-    private Responsive<int?>? _responsiveColumnGap = null;
-    private Responsive<Thickness?>? _responsivePadding = null;
 
     public LayoutView Gap(bool gap)
     {
-        _rowGap = gap ? 4 : 0;
-        _columnGap = gap ? 4 : 0;
+        _rowGap = (int?)(gap ? 4 : 0);
+        _columnGap = (int?)(gap ? 4 : 0);
         return this;
     }
 
     public LayoutView Gap(int gap)
+    {
+        _rowGap = (int?)gap;
+        _columnGap = (int?)gap;
+        return this;
+    }
+
+    public LayoutView Gap(int rowGap, int columnGap)
+    {
+        _rowGap = (int?)rowGap;
+        _columnGap = (int?)columnGap;
+        return this;
+    }
+
+    public LayoutView Width(Responsive<Size> width)
+    {
+        _width = width;
+        return this;
+    }
+
+    public LayoutView Height(Responsive<Size> height)
+    {
+        _height = height;
+        return this;
+    }
+
+    public LayoutView Orientation(Responsive<OrientationEnum?> orientation)
+    {
+        _orientation = orientation;
+        return this;
+    }
+
+    public LayoutView Gap(Responsive<int?> gap)
     {
         _rowGap = gap;
         _columnGap = gap;
         return this;
     }
 
-    public LayoutView Gap(int rowGap, int columnGap)
-    {
-        _rowGap = rowGap;
-        _columnGap = columnGap;
-        return this;
-    }
-
-    public LayoutView Width(Responsive<Size> width)
-    {
-        _responsiveWidth = width;
-        return this;
-    }
-
-    public LayoutView Height(Responsive<Size> height)
-    {
-        _responsiveHeight = height;
-        return this;
-    }
-
-    public LayoutView Orientation(Responsive<OrientationEnum?> orientation)
-    {
-        _responsiveOrientation = orientation;
-        return this;
-    }
-
-    public LayoutView Gap(Responsive<int?> gap)
-    {
-        _responsiveRowGap = gap;
-        _responsiveColumnGap = gap;
-        return this;
-    }
-
     public LayoutView Padding(Responsive<Thickness?> padding)
     {
-        _responsivePadding = padding;
+        _padding = padding;
         return this;
     }
 
@@ -101,7 +95,7 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Grow()
     {
-        if (_orientation == OrientationEnum.Vertical)
+        if (_orientation?.Default == OrientationEnum.Vertical)
         {
             _height = Ivy.Size.Grow();
         }
@@ -114,7 +108,7 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Shrink()
     {
-        if (_orientation == OrientationEnum.Vertical)
+        if (_orientation?.Default == OrientationEnum.Vertical)
         {
             _height = Ivy.Size.Shrink();
         }
@@ -204,37 +198,37 @@ public class LayoutView : ViewBase, IStateless
 
     public LayoutView Padding(int padding)
     {
-        _padding = new Thickness(padding);
+        _padding = (Thickness?)new Thickness(padding);
         return this;
     }
 
     public LayoutView Padding(int horizontal, int vertical)
     {
-        _padding = new Thickness(horizontal, vertical);
+        _padding = (Thickness?)new Thickness(horizontal, vertical);
         return this;
     }
 
     public LayoutView Padding(int left, int top, int right, int bottom)
     {
-        _padding = new Thickness(left, top, right, bottom);
+        _padding = (Thickness?)new Thickness(left, top, right, bottom);
         return this;
     }
 
     public LayoutView P(int padding)
     {
-        _padding = new Thickness(padding);
+        _padding = (Thickness?)new Thickness(padding);
         return this;
     }
 
     public LayoutView P(int horizontal, int vertical)
     {
-        _padding = new Thickness(horizontal, vertical);
+        _padding = (Thickness?)new Thickness(horizontal, vertical);
         return this;
     }
 
     public LayoutView P(int left, int top, int right, int bottom)
     {
-        _padding = new Thickness(left, top, right, bottom);
+        _padding = (Thickness?)new Thickness(left, top, right, bottom);
         return this;
     }
 
@@ -379,7 +373,7 @@ public class LayoutView : ViewBase, IStateless
     public LayoutView Vertical(params object[] elements)
     {
         _wrap = false;
-        _orientation = OrientationEnum.Vertical;
+        _orientation = (OrientationEnum?)OrientationEnum.Vertical;
         Add(elements);
         return this;
     }
@@ -392,7 +386,7 @@ public class LayoutView : ViewBase, IStateless
     public LayoutView Horizontal(params object[] elements)
     {
         _wrap = false;
-        _orientation = OrientationEnum.Horizontal;
+        _orientation = (OrientationEnum?)OrientationEnum.Horizontal;
         Add(elements);
         return this;
     }
@@ -405,7 +399,7 @@ public class LayoutView : ViewBase, IStateless
     public LayoutView Wrap(params object[] elements)
     {
         _wrap = true;
-        _orientation = OrientationEnum.Horizontal;
+        _orientation = (OrientationEnum?)OrientationEnum.Horizontal;
         Add(elements);
         return this;
     }
@@ -418,7 +412,7 @@ public class LayoutView : ViewBase, IStateless
     public LayoutView Wrap(OrientationEnum orientation, params object[] elements)
     {
         _wrap = true;
-        _orientation = orientation;
+        _orientation = (OrientationEnum?)orientation;
         Add(elements);
         return this;
     }
@@ -457,15 +451,9 @@ public class LayoutView : ViewBase, IStateless
             BorderRadius = _borderRadius,
             BorderStyle = _borderStyle,
             BorderThickness = _borderThickness,
-            ResponsiveOrientation = _responsiveOrientation,
-            ResponsiveRowGap = _responsiveRowGap,
-            ResponsiveColumnGap = _responsiveColumnGap,
-            ResponsivePadding = _responsivePadding,
-            ResponsiveWidth = _responsiveWidth,
-            ResponsiveHeight = _responsiveHeight
-        }
-            .Width(_width)
-            .Height(_height);
+            Width = _width,
+            Height = _height
+        };
 
         if (_testId != null) layout.TestId = _testId;
 

@@ -79,7 +79,7 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
 
   const handleSelect = (index: number) => {
     if (hasSelectHandler) {
-      eventHandler("OnSelect", id, [index]);
+      if (events.includes("OnSelect")) eventHandler("OnSelect", id, [index]);
     }
   };
 
@@ -131,10 +131,10 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
                   isSelected && "ring-2 ring-foreground ring-offset-1",
                 )}
                 style={{
-                  width: `${percentage}%`,
+                  flex: `${percentage} 1 0%`,
                   height: "100%",
                   backgroundColor: color,
-                  minWidth: segment.value > 0 ? "2px" : 0,
+                  minWidth: 0,
                   transform: isSelected ? "scaleY(1.2)" : undefined,
                 }}
               />
@@ -157,7 +157,7 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
           })}
         </div>
         {showLabels && (
-          <div className={cn("flex flex-wrap", labelGapClass)}>
+          <div className={cn("flex flex-wrap min-w-0", labelGapClass)}>
             {labelSegments.map(({ segment, originalIndex }) => {
               const color = segment.color
                 ? `var(--${segment.color.toLowerCase()})`

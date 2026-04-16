@@ -217,23 +217,23 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         switch (variant)
         {
             case TextVariant.Code:
-                return new CodeBlock(content, codeLanguage) { Width = _width, Height = _height, Density = _density, TestId = _testId };
+                return new CodeBlock(content, codeLanguage) { Width = _width.ToResponsive(), Height = _height.ToResponsive(), Density = _density.ToResponsiveDensity(), TestId = _testId };
             case TextVariant.Markdown:
-                return new Markdown(content) { Width = _width, Height = _height, Density = _density, TestId = _testId };
+                return new Markdown(content) { Width = _width.ToResponsive(), Height = _height.ToResponsive(), Density = _density.ToResponsiveDensity(), TestId = _testId };
             case TextVariant.Json:
-                return new Json(content) { Width = _width, Height = _height, Density = _density, TestId = _testId };
+                return new Json(content) { Width = _width.ToResponsive(), Height = _height.ToResponsive(), Density = _density.ToResponsiveDensity(), TestId = _testId };
             case TextVariant.Xml:
-                return new Xml(content) { Width = _width, Height = _height, Density = _density, TestId = _testId };
+                return new Xml(content) { Width = _width.ToResponsive(), Height = _height.ToResponsive(), Density = _density.ToResponsiveDensity(), TestId = _testId };
             case TextVariant.Html:
-                return new Html(content) { Width = _width, Height = _height, Density = _density, TestId = _testId };
+                return new Html(content) { Width = _width.ToResponsive(), Height = _height.ToResponsive(), Density = _density.ToResponsiveDensity(), TestId = _testId };
             case TextVariant.Latex:
-                return new Markdown("$$" + Environment.NewLine + content + Environment.NewLine + "$$") { Width = _width, Density = _density, TestId = _testId };
+                return new Markdown("$$" + Environment.NewLine + content + Environment.NewLine + "$$") { Width = _width.ToResponsive(), Density = _density.ToResponsiveDensity(), TestId = _testId };
             default:
                 {
                     var text = new TextBlock(
                         content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted, _textAlignment)
                     {
-                        Density = _density,
+                        Density = _density.ToResponsiveDensity(),
                         TestId = _testId,
                         Anchor = _anchor
                     };

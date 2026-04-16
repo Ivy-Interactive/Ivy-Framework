@@ -18,10 +18,10 @@ import { useCurrentBreakpoint } from "@/hooks/use-breakpoint-context";
 const EMPTY_ARRAY: never[] = [];
 
 interface GridLayoutWidgetProps {
-  columns?: number;
+  columns?: number | Responsive<number>;
   rows?: number;
-  rowGap?: number;
-  columnGap?: number;
+  rowGap?: number | Responsive<number>;
+  columnGap?: number | Responsive<number>;
   padding: string;
   alignContent?: Align;
   autoFlow?: "Row" | "Column" | "RowDense" | "ColumnDense";
@@ -36,9 +36,6 @@ interface GridLayoutWidgetProps {
   childRowSpan?: (number | undefined)[];
   childAlignSelf?: (Align | undefined)[];
   className?: string;
-  responsiveColumns?: Responsive<number>;
-  responsiveRowGap?: Responsive<number>;
-  responsiveColumnGap?: Responsive<number>;
 }
 
 interface GridLayoutCellProps {
@@ -80,14 +77,14 @@ const GridLayoutCell: React.FC<GridLayoutCellProps> = ({
 
 export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   children,
-  columns = 1,
+  columns,
   rows = 1,
   alignContent,
   autoFlow,
   width,
   height,
-  rowGap = 4,
-  columnGap = 4,
+  rowGap,
+  columnGap,
   padding = "0,0,0,0",
   columnWidths,
   rowHeights,
@@ -97,22 +94,12 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   childRowSpan = EMPTY_ARRAY,
   childAlignSelf = EMPTY_ARRAY,
   className = "",
-  responsiveColumns,
-  responsiveRowGap,
-  responsiveColumnGap,
 }) => {
   const bp = useCurrentBreakpoint();
 
-  // Resolve responsive values
-  const resolvedColumns = responsiveColumns
-    ? resolveResponsive(responsiveColumns, bp, columns)
-    : columns;
-  const resolvedRowGap = responsiveRowGap
-    ? resolveResponsive(responsiveRowGap, bp, rowGap)
-    : rowGap;
-  const resolvedColumnGap = responsiveColumnGap
-    ? resolveResponsive(responsiveColumnGap, bp, columnGap)
-    : columnGap;
+  const resolvedColumns = resolveResponsive(columns, bp, 1);
+  const resolvedRowGap = resolveResponsive(rowGap, bp, 4);
+  const resolvedColumnGap = resolveResponsive(columnGap, bp, 4);
 
   const styles: React.CSSProperties = {
     display: "grid",

@@ -680,6 +680,11 @@ export const generateTooltip = (
     background: string;
     mutedForeground?: string;
   },
+  valueFormat?: {
+    formatter?: string | null;
+    formatterType?: "Auto" | "Number" | "Date" | null;
+    timeZone?: string | null;
+  },
 ) => {
   // Apply defaults for tooltip
   const tip = tooltip ? applyDefaults(tooltip, TOOLTIP_DEFAULTS) : TOOLTIP_DEFAULTS;
@@ -702,6 +707,15 @@ export const generateTooltip = (
         color: "rgba(255, 255, 255, 0.9)",
       },
     },
+    ...(valueFormat?.formatter && {
+      valueFormatter: (value: number | string) =>
+        formatTickLabel(
+          value,
+          valueFormat.formatter!,
+          valueFormat.timeZone,
+          valueFormat.formatterType,
+        ),
+    }),
     textStyle: generateTextStyle(themeColors?.foreground, themeColors?.fontSans),
     backgroundColor: themeColors?.background || "rgba(255, 255, 255, 0.9)",
     borderColor: themeColors?.foreground || "#000",

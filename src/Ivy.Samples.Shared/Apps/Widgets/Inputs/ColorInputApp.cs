@@ -14,7 +14,8 @@ public class ColorInputApp : SampleBase
                    new Tab("Alpha Channel", new ColorInputAlphaTests()),
                    new Tab("Format Tests", new ColorInputFormatTests()),
                    new Tab("Data Binding", new ColorInputDataBindings()),
-                   new Tab("Events", new ColorInputEvents())
+                   new Tab("Events", new ColorInputEvents()),
+                   new Tab("Affixes", new ColorInputAffixesExample())
                ).Variant(TabsVariant.Content);
     }
 }
@@ -361,6 +362,35 @@ public class ColorInputEvents : ViewBase
                       ).Width(Size.Units(120))
                 )
             ).Variant(TabsVariant.Tabs);
+    }
+}
+
+public class ColorInputAffixesExample : ViewBase
+{
+    public override object? Build()
+    {
+        var colorState = UseState("#6366f1");
+
+        return Layout.Grid().Columns(4)
+               | null!
+               | Text.Monospaced("Prefix only")
+               | Text.Monospaced("Suffix only")
+               | Text.Monospaced("Both")
+
+               | Text.Monospaced("Text prefix/suffix")
+               | colorState.ToColorInput().Prefix("$")
+               | colorState.ToColorInput().Suffix("hex")
+               | colorState.ToColorInput().Prefix("$").Suffix("hex")
+
+               | Text.Monospaced("Icon prefix/suffix")
+               | colorState.ToColorInput().Prefix(Icons.Palette)
+               | colorState.ToColorInput().Suffix(Icons.Palette)
+               | colorState.ToColorInput().Prefix(Icons.Palette).Suffix(Icons.Palette)
+
+               | Text.Monospaced("Button prefix/suffix")
+               | colorState.ToColorInput().Prefix(new Button("Copy", () => { }, icon: Icons.Copy).Ghost().Small())
+               | colorState.ToColorInput().Suffix(new Button("Go").Ghost().Small())
+               | colorState.ToColorInput().Prefix(new Button("Copy", () => { }, icon: Icons.Copy).Ghost().Small()).Suffix(new Button("Go").Ghost().Small());
     }
 }
 

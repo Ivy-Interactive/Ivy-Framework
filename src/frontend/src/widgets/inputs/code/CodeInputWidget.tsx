@@ -46,6 +46,7 @@ interface CodeInputWidgetProps {
   height?: string;
   density?: Densities;
   autoFocus?: boolean;
+  slots?: { Prefix?: React.ReactNode[]; Suffix?: React.ReactNode[] };
 }
 
 const languageExtensions = {
@@ -78,6 +79,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   density = Densities.Medium,
   events = EMPTY_ARRAY,
   autoFocus,
+  slots,
 }) => {
   const eventHandler = useEventHandler();
   const [isFocused, setIsFocused] = useState(false);
@@ -172,7 +174,13 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     return [...langExtensions, minimalSetup, themeExtension];
   }, [langExtensions, minimalSetup, themeExtension]);
 
-  return (
+  const prefixContent = slots?.Prefix;
+  const suffixContent = slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+
+  const codeEditor = (
     <div style={styles} className="relative w-full h-full overflow-hidden">
       {(showCopy || showClear || invalid) && (
         <div className="absolute top-2 right-2 z-50 flex items-center">
@@ -229,6 +237,30 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           basicSetup={false}
         />
       </Suspense>
+    </div>
+  );
+
+  if (!hasAffixes) return codeEditor;
+
+  return (
+    <div
+      className={cn(
+        "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+        invalid && "border-destructive",
+        disabled && "cursor-not-allowed opacity-50",
+      )}
+    >
+      {hasPrefix && (
+        <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+          {prefixContent}
+        </div>
+      )}
+      <div className="flex-1 min-w-0">{codeEditor}</div>
+      {hasSuffix && (
+        <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+          {suffixContent}
+        </div>
+      )}
     </div>
   );
 };

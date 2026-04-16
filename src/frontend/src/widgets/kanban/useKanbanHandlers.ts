@@ -1,6 +1,6 @@
 import { useEventHandler } from "@/components/event-handler";
 
-export function useKanbanHandlers(widgetId: string) {
+export function useKanbanHandlers(widgetId: string, events: string[]) {
   const eventHandler = useEventHandler();
 
   const handleCardMove = (
@@ -9,7 +9,8 @@ export function useKanbanHandlers(widgetId: string) {
     toColumn: string,
     targetIndex?: number,
   ) => {
-    eventHandler("OnCardMove", widgetId, [cardId, toColumn, targetIndex]);
+    if (events.includes("OnCardMove"))
+      eventHandler("OnCardMove", widgetId, [cardId, toColumn, targetIndex]);
   };
 
   return {

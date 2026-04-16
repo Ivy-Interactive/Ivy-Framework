@@ -23,6 +23,12 @@ public class Theme
 
     public string? BorderRadiusSelectors { get; set; }
 
+    public bool ShadowBoxes { get; set; } = true;
+
+    public bool ShadowFields { get; set; } = true;
+
+    public bool ShadowSelectors { get; set; } = true;
+
     public static Theme Default => new()
     {
         Name = "Default",
@@ -31,7 +37,10 @@ public class Theme
         FontSize = "16px",
         BorderRadiusBoxes = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
         BorderRadiusFields = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
-        BorderRadiusSelectors = IvyFrameworkBorderRadiusTokens.BorderRadius.Md
+        BorderRadiusSelectors = IvyFrameworkBorderRadiusTokens.BorderRadius.Md,
+        ShadowBoxes = true,
+        ShadowFields = true,
+        ShadowSelectors = true
     };
 }
 

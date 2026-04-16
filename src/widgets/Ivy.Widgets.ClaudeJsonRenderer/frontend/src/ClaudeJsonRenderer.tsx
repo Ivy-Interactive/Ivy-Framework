@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useRef, useState, useCallback } from "react";
 import Markdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
+import remarkGfm from "remark-gfm";
 import "./claude-json-renderer.css";
 import type { EventHandler, ClaudeEvent, ContentBlock, AssistantEvent, ResultEvent } from "./types";
 import { getWidth, getHeight } from "./styles";
@@ -52,6 +53,7 @@ interface ClaudeJsonRendererProps {
   autoScroll?: boolean;
   showThinking?: boolean;
   showSystemEvents?: boolean;
+  resetToken?: number;
 }
 
 function parseEvents(jsonStream: string | undefined): ClaudeEvent[] {
@@ -104,11 +106,11 @@ function ToolUseCard({ name, input, result }: { name: string; input: Record<stri
       </div>
       {open && (
         <div className="tool-card-body">
-          <div className="opacity-50 text-xs mb-1">Input</div>
+          <div className="opacity-50 text-[0.875rem] mb-1">Input</div>
           <pre><code>{displayContent}</code></pre>
           {result != null && (
             <>
-              <div className="opacity-50 text-xs mb-1 mt-3">Output</div>
+              <div className="opacity-50 text-[0.875rem] mb-1 mt-3">Output</div>
               <pre><code>{result}</code></pre>
             </>
           )}
@@ -123,17 +125,19 @@ function ResultSummary({ event }: { event: ResultEvent }) {
   return (
     <div className={`result-card my-3 ${isError ? "error" : ""}`}>
       <div className="flex items-center gap-2 mb-2">
-        <span className="font-semibold text-sm">
+        <span className="font-semibold text-[0.875rem]">
           {isError ? "Error" : "Completed"}
         </span>
-        <span className="text-xs opacity-60">
+        <span className="text-[0.875rem] opacity-60">
           {event.num_turns} turn{event.num_turns !== 1 ? "s" : ""}
         </span>
       </div>
       {event.result && (
-        <div className="text-sm mb-2">{event.result}</div>
+        <div className="claude-renderer mb-2">
+          <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{event.result}</Markdown>
+        </div>
       )}
-      <div className="flex flex-wrap gap-4 text-xs opacity-70">
+      <div className="flex flex-wrap gap-4 text-[0.875rem] opacity-70">
         <span>Cost: ${(event.cost_usd ?? event.total_cost_usd ?? 0).toFixed(4)}</span>
         <span>Duration: {(event.duration_ms / 1000).toFixed(1)}s</span>
         {event.usage && (
@@ -164,7 +168,7 @@ function AssistantMessage({
         if (block.type === "text" && block.text) {
           return (
             <div key={i} className="claude-renderer">
-              <Markdown rehypePlugins={[rehypeHighlight]}>{block.text}</Markdown>
+              <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{block.text}</Markdown>
             </div>
           );
         }
@@ -198,9 +202,14 @@ export const ClaudeJsonRenderer: React.FC<ClaudeJsonRendererProps> = ({
   autoScroll = true,
   showThinking = false,
   showSystemEvents = false,
+  resetToken = 0,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [streamedLines, setStreamedLines] = useState<string[]>([]);
+
+  useEffect(() => {
+    setStreamedLines([]);
+  }, [resetToken]);
 
   useEffect(() => {
     if (!stream?.id || !subscribeToStream) return;
@@ -262,7 +271,7 @@ export const ClaudeJsonRenderer: React.FC<ClaudeJsonRendererProps> = ({
         if (event.type === "system") {
           if (!showSystemEvents) return null;
           return (
-            <div key={index} className="system-event my-1">
+            <div key={index} className="system-event">
               System: {event.subtype}
               {event.model && ` (${event.model})`}
             </div>

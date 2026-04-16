@@ -20,6 +20,7 @@ interface FeedbackInputWidgetProps {
   allowHalf?: boolean;
   max?: number;
   density?: Densities;
+  slots?: { Prefix?: React.ReactNode[]; Suffix?: React.ReactNode[] };
 }
 
 export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
@@ -33,6 +34,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   allowHalf = false,
   max = 5,
   density = Densities.Medium,
+  slots,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -179,7 +181,13 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
     return null;
   }, [variant, disabled, numericValue, handleChange, invalid, allowHalf, max, density]);
 
-  return (
+  const prefixContent = slots?.Prefix;
+  const suffixContent = slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+
+  const feedbackContent = (
     <div
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
@@ -199,6 +207,30 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
       )}
     >
       {ratingComponent}
+    </div>
+  );
+
+  if (!hasAffixes) return feedbackContent;
+
+  return (
+    <div
+      className={cn(
+        "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+        invalid && "border-destructive",
+        disabled && "cursor-not-allowed opacity-50",
+      )}
+    >
+      {hasPrefix && (
+        <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+          {prefixContent}
+        </div>
+      )}
+      <div className="flex-1 px-3 py-2">{feedbackContent}</div>
+      {hasSuffix && (
+        <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+          {suffixContent}
+        </div>
+      )}
     </div>
   );
 };

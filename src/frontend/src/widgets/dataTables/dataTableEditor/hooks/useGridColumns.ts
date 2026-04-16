@@ -3,6 +3,7 @@ import { getDefaultTheme } from "@glideapps/glide-data-grid";
 import { convertToGridColumns } from "../../utils/columnHelpers";
 import { useColumnGroups } from "../../hooks/useColumnGroups";
 import { DataColumn } from "../../types/types";
+import type { SortOrder } from "@/services/grpcTableService";
 
 interface UseGridColumnsProps {
   columns: DataColumn[];
@@ -10,6 +11,7 @@ interface UseGridColumnsProps {
   columnWidths: Record<string, number>;
   showGroups?: boolean;
   showColumnTypeIcons?: boolean;
+  activeSort?: SortOrder[] | null;
 }
 
 /**
@@ -21,6 +23,7 @@ export const useGridColumns = ({
   columnWidths,
   showGroups = false,
   showColumnTypeIcons = true,
+  activeSort,
 }: UseGridColumnsProps) => {
   const headerFont = useMemo(() => {
     const t = getDefaultTheme();
@@ -38,8 +41,9 @@ export const useGridColumns = ({
         showGroups,
         showColumnTypeIcons,
         headerFont,
+        activeSort,
       ),
-    [columns, columnOrder, columnWidths, showGroups, showColumnTypeIcons, headerFont],
+    [columns, columnOrder, columnWidths, showGroups, showColumnTypeIcons, headerFont, activeSort],
   );
 
   // Use column groups hook when showGroups is enabled

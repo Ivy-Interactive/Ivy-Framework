@@ -9,16 +9,20 @@ public class GridViewConventionTests
         return field.GetValue(view)!;
     }
 
-    private static int GetRowGap(GridView view)
+    private static int? GetRowGap(GridView view)
     {
         var def = GetDefinition(view);
-        return (int)def.GetType().GetProperty("RowGap")!.GetValue(def)!;
+        var value = def.GetType().GetProperty("RowGap")!.GetValue(def);
+        if (value is null) return null;
+        return ((Responsive<int?>)value).Default;
     }
 
-    private static int GetColumnGap(GridView view)
+    private static int? GetColumnGap(GridView view)
     {
         var def = GetDefinition(view);
-        return (int)def.GetType().GetProperty("ColumnGap")!.GetValue(def)!;
+        var value = def.GetType().GetProperty("ColumnGap")!.GetValue(def);
+        if (value is null) return null;
+        return ((Responsive<int?>)value).Default;
     }
 
     private static Thickness GetPadding(GridView view)
@@ -40,14 +44,14 @@ public class GridViewConventionTests
     {
         var view = Layout.Grid("item1").RowGap(6);
         Assert.Equal(6, GetRowGap(view));
-        Assert.Equal(4, GetColumnGap(view));
+        Assert.Null(GetColumnGap(view));
     }
 
     [Fact]
     public void ColumnGap_SetsOnlyColumnGap()
     {
         var view = Layout.Grid("item1").ColumnGap(6);
-        Assert.Equal(4, GetRowGap(view));
+        Assert.Null(GetRowGap(view));
         Assert.Equal(6, GetColumnGap(view));
     }
 

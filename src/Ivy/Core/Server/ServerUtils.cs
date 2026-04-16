@@ -5,10 +5,18 @@ namespace Ivy.Core.Server;
 
 public static class ServerUtils
 {
-    public static IConfiguration GetConfiguration(Action<IConfigurationBuilder>? configure = null)
+    public static IConfiguration GetConfiguration(
+        IEnumerable<KeyValuePair<string, string?>>? initialSources = null,
+        Action<IConfigurationBuilder>? configure = null)
     {
-        var builder = new ConfigurationBuilder()
-            .AddEnvironmentVariables()
+        var builder = new ConfigurationBuilder();
+
+        if (initialSources != null)
+        {
+            builder.AddInMemoryCollection(initialSources);
+        }
+
+        builder.AddEnvironmentVariables()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 

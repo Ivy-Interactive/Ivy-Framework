@@ -90,7 +90,7 @@ public static class SheetExtensions
 
         if (isHorizontal)
         {
-            var width = sheet.Width ?? Sheet.DefaultWidth;
+            var width = sheet.Width?.Default ?? Sheet.DefaultWidth;
             if (width.Min == null)
             {
                 width = width.Min(Size.Px(200));
@@ -99,11 +99,11 @@ public static class SheetExtensions
             {
                 width = width.Max(Size.Px(1200));
             }
-            return sheet with { Resizable = true, Width = width };
+            return (sheet with { Resizable = true }).Width(width);
         }
         else
         {
-            var height = sheet.Height ?? Sheet.DefaultHeight;
+            var height = sheet.Height?.Default ?? Sheet.DefaultHeight;
             if (height.Min == null)
             {
                 height = height.Min(Size.Px(100));
@@ -112,7 +112,7 @@ public static class SheetExtensions
             {
                 height = height.Max(Size.Px(900));
             }
-            return sheet with { Resizable = true, Height = height };
+            return (sheet with { Resizable = true }).Height(height);
         }
     }
 

@@ -21,7 +21,8 @@ public class SelectInputApp : SampleBase
             new Tab("Nullable & Edge Cases", new SelectInputAdvancedExample()),
             new Tab("Advanced Props", new SelectInputAdvancedPropsExample()),
             new Tab("Ghost", new SelectInputGhostExample()),
-            new Tab("Descriptions", new SelectInputDescriptionsExample())
+            new Tab("Descriptions", new SelectInputDescriptionsExample()),
+            new Tab("Affixes", new SelectInputAffixesExample())
         ).Variant(TabsVariant.Content)
         ;
     }
@@ -642,5 +643,37 @@ public class SelectInputRadioExample : ViewBase
                     | Text.Monospaced("String options")
                     | notificationFrequency.ToSelectInput(frequencyOptions).Radio()
                         .WithField().Label("Notification frequency"));
+    }
+}
+
+public class SelectInputAffixesExample : ViewBase
+{
+    private enum Currency { USD, EUR, GBP, JPY }
+
+    public override object? Build()
+    {
+        var currencyState = UseState(Currency.USD);
+        var currencyOptions = typeof(Currency).ToOptions();
+
+        return Layout.Grid().Columns(4)
+               | null!
+               | Text.Monospaced("Prefix only")
+               | Text.Monospaced("Suffix only")
+               | Text.Monospaced("Both")
+
+               | Text.Monospaced("Text prefix/suffix")
+               | currencyState.ToSelectInput(currencyOptions).Prefix("$")
+               | currencyState.ToSelectInput(currencyOptions).Suffix("USD")
+               | currencyState.ToSelectInput(currencyOptions).Prefix("$").Suffix("USD")
+
+               | Text.Monospaced("Icon prefix/suffix")
+               | currencyState.ToSelectInput(currencyOptions).Prefix(Icons.Mail)
+               | currencyState.ToSelectInput(currencyOptions).Suffix(Icons.Mail)
+               | currencyState.ToSelectInput(currencyOptions).Prefix(Icons.Mail).Suffix(Icons.Mail)
+
+               | Text.Monospaced("Button prefix/suffix")
+               | currencyState.ToSelectInput(currencyOptions).Prefix(new Button("Copy", () => { }, icon: Icons.Copy).Ghost().Small())
+               | currencyState.ToSelectInput(currencyOptions).Suffix(new Button("Go").Ghost().Small())
+               | currencyState.ToSelectInput(currencyOptions).Prefix(new Button("Copy", () => { }, icon: Icons.Copy).Ghost().Small()).Suffix(new Button("Go").Ghost().Small());
     }
 }

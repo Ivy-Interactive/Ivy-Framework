@@ -15,7 +15,8 @@ public class DateTimeInputApp : SampleBase
                 new Tab("Placeholders", new DateTimeInputPlaceholderSamples()),
                 new Tab("First Day of Week", new DateTimeInputFirstDayOfWeekSamples()),
                 new Tab("Min / Max / Step", new DateTimeInputConstraintSamples()),
-                new Tab("Events", new DateTimeInputEventSamples())
+                new Tab("Events", new DateTimeInputEventSamples()),
+                new Tab("Affixes", new DateTimeInputAffixesExample())
             ).Variant(TabsVariant.Content);
     }
 }
@@ -827,5 +828,34 @@ public class DateTimeInputEventSamples : ViewBase
             | Text.H2("Events")
             | Text.P("OnFocus and OnBlur event handlers.")
             | eventsGrid;
+    }
+}
+
+public class DateTimeInputAffixesExample : ViewBase
+{
+    public override object? Build()
+    {
+        var dateState = UseState(DateTime.Now);
+
+        return Layout.Grid().Columns(4)
+               | null!
+               | Text.Monospaced("Prefix only")
+               | Text.Monospaced("Suffix only")
+               | Text.Monospaced("Both")
+
+               | Text.Monospaced("Text prefix/suffix")
+               | dateState.ToDateTimeInput().Prefix("From:")
+               | dateState.ToDateTimeInput().Suffix("UTC")
+               | dateState.ToDateTimeInput().Prefix("From:").Suffix("UTC")
+
+               | Text.Monospaced("Icon prefix/suffix")
+               | dateState.ToDateTimeInput().Prefix(Icons.Calendar)
+               | dateState.ToDateTimeInput().Suffix(Icons.Clock)
+               | dateState.ToDateTimeInput().Prefix(Icons.Calendar).Suffix(Icons.Clock)
+
+               | Text.Monospaced("Button prefix/suffix")
+               | dateState.ToDateTimeInput().Prefix(new Button("Today", () => { dateState.Set(DateTime.Now); }, icon: Icons.Calendar).Ghost().Small())
+               | dateState.ToDateTimeInput().Suffix(new Button("Clear").Ghost().Small())
+               | dateState.ToDateTimeInput().Prefix(new Button("Today", () => { dateState.Set(DateTime.Now); }, icon: Icons.Calendar).Ghost().Small()).Suffix(new Button("Clear").Ghost().Small());
     }
 }

@@ -434,3 +434,6 @@ worktrees/
 # Stale Rust build artifacts (RustServer removed in plan 00130)
 RustServer/
 
+# Orphaned Rust build artifacts (source extracted to Ivy.Docs.Compiler repo)
+Ivy.Docs.Tools/rust_cli/
+

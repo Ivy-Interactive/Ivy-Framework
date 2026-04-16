@@ -72,4 +72,54 @@ public class ServerConfigurationTests
 
         Assert.Same(originalConfig, server.Configuration);
     }
+
+    [Fact]
+    public void AddConnectionsFromAssembly_CalledMultipleTimes_DoesNotCorruptConfiguration()
+    {
+        var server = new Server(new ServerArgs());
+
+        server.AddConnectionsFromAssembly(typeof(ServerConfigurationTests).Assembly);
+        server.AddConnectionsFromAssembly(typeof(ServerConfigurationTests).Assembly);
+
+        Assert.Equal("preset-api-key-123", server.Configuration["Test:ApiKey"]);
+        Assert.Equal("https://preset.example.com/", server.Configuration["Test:Endpoint"]);
+    }
+
+    [Fact]
+    public void AddConnectionsFromAssembly_CalledMultipleTimes_DoesNotRegisterServicesTwice()
+    {
+        var server = new Server(new ServerArgs());
+
+        server.AddConnectionsFromAssembly(typeof(ServerConfigurationTests).Assembly);
+        var serviceCountAfterFirstCall = server.Services.Count;
+
+        server.AddConnectionsFromAssembly(typeof(ServerConfigurationTests).Assembly);
+        var serviceCountAfterSecondCall = server.Services.Count;
+
+        Assert.Equal(serviceCountAfterFirstCall, serviceCountAfterSecondCall);
+    }
+
+    [Fact]
+    public void TestConnectionValidation_PresetSecrets_AvailableInConfigurationAfterLoading()
+    {
+        var server = new Server(new ServerArgs());
+        var connection = new TestConnectionWithPresets();
+        var hasSecrets = (IHaveSecrets)connection;
+
+        Assert.Null(server.Configuration["Test:ApiKey"]);
+
+        server.AddConnectionsFromAssembly(typeof(ServerConfigurationTests).Assembly);
+
+        var missing = hasSecrets.GetSecrets()
+            .Where(s => !s.Optional && s.Preset == null && string.IsNullOrEmpty(server.Configuration[s.Key]))
+            .Select(s => s.Key)
+            .ToList();
+        Assert.Empty(missing);
+
+        foreach (var secret in hasSecrets.GetSecrets().Where(s => s.Preset != null))
+        {
+            Assert.False(string.IsNullOrEmpty(server.Configuration[secret.Key]),
+                $"Preset secret '{secret.Key}' should have a value in Configuration");
+        }
+    }
 }

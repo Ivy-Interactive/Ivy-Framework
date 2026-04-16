@@ -141,10 +141,10 @@ public static class AuthHelper
     private static (string? AccessToken, string? RefreshToken, string? Tag, string? AuthSessionData, Dictionary<string, IAuthTokenHandlerSession> BrokeredSessions) GetAuthCookies(HttpContext context)
     {
         var cookies = context.Request.Cookies;
-        var accessToken = cookies["access_token"].NullIfEmpty();
-        var refreshToken = cookies["refresh_token"].NullIfEmpty();
-        var tag = cookies["auth_tag"].NullIfEmpty();
-        var authSessionDataValue = cookies["auth_session_data"].NullIfEmpty();
+        var accessToken = cookies[CookieRegistryExtensions.PrefixCookieName("access_token")].NullIfEmpty();
+        var refreshToken = cookies[CookieRegistryExtensions.PrefixCookieName("refresh_token")].NullIfEmpty();
+        var tag = cookies[CookieRegistryExtensions.PrefixCookieName("auth_tag")].NullIfEmpty();
+        var authSessionDataValue = cookies[CookieRegistryExtensions.PrefixCookieName("auth_session_data")].NullIfEmpty();
 
         var brokeredSessions = ExtractBrokeredSessionsFromCookies(cookies);
 
@@ -163,8 +163,9 @@ public static class AuthHelper
 
         string? GetCookie(string name)
         {
+            var prefixedName = CookieRegistryExtensions.PrefixCookieName(name);
             var rawValue = cookieHeader
-                .FirstOrDefault(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Value.Value;
+                .FirstOrDefault(c => c.Name.Equals(prefixedName, StringComparison.OrdinalIgnoreCase))?.Value.Value;
             return !string.IsNullOrEmpty(rawValue)
                 ? WebUtility.UrlDecode(rawValue)
                 : null;
@@ -198,20 +199,25 @@ public static class AuthHelper
         }
     }
 
-    private static Dictionary<string, IAuthTokenHandlerSession> ExtractBrokeredSessionsFromCookies(IRequestCookieCollection cookies)
+    internal static Dictionary<string, IAuthTokenHandlerSession> ExtractBrokeredSessionsFromCookies(IRequestCookieCollection cookies)
     {
         var brokeredSessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
-        // Discover OAuth provider cookies by scanning for the pattern: {provider}_access_token
+        var primaryAccessToken = CookieRegistryExtensions.PrefixCookieName("access_token");
+        var suffix = "_access_token";
+        var prefix = primaryAccessToken[..^"access_token".Length];
+
         var accessTokenCookies = cookies.Keys
-            .Where(key => key.EndsWith("_access_token") && key != "access_token")
+            .Where(key => key.EndsWith(suffix)
+                && key != primaryAccessToken
+                && (prefix.Length == 0 || key.StartsWith(prefix)))
             .ToList();
 
         foreach (var accessTokenName in accessTokenCookies)
         {
-            var provider = accessTokenName[..^"_access_token".Length];
-            var refreshTokenName = $"{provider}_refresh_token";
-            var tagName = $"{provider}_auth_tag";
+            // Extract provider by removing prefix and suffix
+            var cookieName = prefix.Length > 0 ? accessTokenName[prefix.Length..] : accessTokenName;
+            var provider = cookieName[..^suffix.Length];
 
             var accessToken = cookies[accessTokenName].NullIfEmpty();
             if (accessToken == null)
@@ -219,8 +225,8 @@ public static class AuthHelper
                 continue;
             }
 
-            var refreshToken = cookies[refreshTokenName].NullIfEmpty();
-            var tag = cookies[tagName].NullIfEmpty();
+            var refreshToken = cookies[CookieRegistryExtensions.PrefixCookieName($"{provider}_refresh_token")].NullIfEmpty();
+            var tag = cookies[CookieRegistryExtensions.PrefixCookieName($"{provider}_auth_tag")].NullIfEmpty();
 
             var authToken = new AuthToken(accessToken, refreshToken, tag);
             var session = new AuthTokenHandlerSession(authToken: authToken);
@@ -230,7 +236,7 @@ public static class AuthHelper
         return brokeredSessions;
     }
 
-    private static Dictionary<string, IAuthTokenHandlerSession> ExtractBrokeredSessionsFromCookieHeader(List<CookieHeaderValue> cookieHeader)
+    internal static Dictionary<string, IAuthTokenHandlerSession> ExtractBrokeredSessionsFromCookieHeader(List<CookieHeaderValue> cookieHeader)
     {
         var brokeredSessions = new Dictionary<string, IAuthTokenHandlerSession>();
 
@@ -243,17 +249,23 @@ public static class AuthHelper
                 : null;
         }
 
-        // Discover OAuth provider cookies by scanning for the pattern: {provider}_access_token
+        var primaryAccessToken = CookieRegistryExtensions.PrefixCookieName("access_token");
+        var suffix = "_access_token";
+        var prefix = primaryAccessToken[..^"access_token".Length];
+
         var accessTokenCookies = cookieHeader
-            .Where(c => c.Name.Value != null && c.Name.Value.EndsWith("_access_token") && c.Name.Value != "access_token")
+            .Where(c => c.Name.Value != null
+                && c.Name.Value.EndsWith(suffix)
+                && c.Name.Value != primaryAccessToken
+                && (prefix.Length == 0 || c.Name.Value.StartsWith(prefix)))
             .Select(c => c.Name.Value!)
             .ToList();
 
         foreach (var accessTokenName in accessTokenCookies)
         {
-            var provider = accessTokenName[..^"_access_token".Length];
-            var refreshTokenName = $"{provider}_refresh_token";
-            var tagName = $"{provider}_auth_tag";
+            // Extract provider by removing prefix and suffix
+            var cookieName = prefix.Length > 0 ? accessTokenName[prefix.Length..] : accessTokenName;
+            var provider = cookieName[..^suffix.Length];
 
             var accessToken = GetCookie(accessTokenName);
             if (accessToken == null)
@@ -261,8 +273,8 @@ public static class AuthHelper
                 continue;
             }
 
-            var refreshToken = GetCookie(refreshTokenName);
-            var tag = GetCookie(tagName);
+            var refreshToken = GetCookie(CookieRegistryExtensions.PrefixCookieName($"{provider}_refresh_token"));
+            var tag = GetCookie(CookieRegistryExtensions.PrefixCookieName($"{provider}_auth_tag"));
 
             var authToken = new AuthToken(accessToken, refreshToken, tag);
             var session = new AuthTokenHandlerSession(authToken: authToken);

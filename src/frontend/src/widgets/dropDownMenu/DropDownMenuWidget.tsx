@@ -31,6 +31,7 @@ interface DropDownMenuWidgetProps {
   side?: "Top" | "Right" | "Bottom" | "Left";
   alignOffset?: number;
   density?: Densities;
+  events?: string[];
   slots?: {
     Trigger?: React.ReactNode[];
     Header?: React.ReactNode[];
@@ -158,6 +159,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   side = "Bottom",
   alignOffset = 0,
   density = Densities.Medium,
+  events = [],
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
@@ -173,7 +175,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
 
   const onItemClick = (item: MenuItem) => {
     if (!item.tag) return;
-    eventHandler("OnSelect", id, [item.tag]);
+    if (events.includes("OnSelect")) eventHandler("OnSelect", id, [item.tag]);
   };
 
   const handleOpenChange = (isOpen: boolean) => {

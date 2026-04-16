@@ -164,9 +164,9 @@ public class ChordChartBuilder<TSource>(
         var result = polish?.Invoke(configuredChart) ?? configuredChart;
 
         if (_height is not null)
-            result = result with { Height = _height };
+            result = result.Height(_height);
         if (_width is not null)
-            result = result with { Width = _width };
+            result = result.Width(_width);
 
         return result;
     }

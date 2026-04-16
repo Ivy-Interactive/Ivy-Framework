@@ -1,22 +1,24 @@
 import { useEventHandler } from "@/components/event-handler";
 
-export function useCalendarHandlers(widgetId: string) {
+export function useCalendarHandlers(widgetId: string, events: string[]) {
   const eventHandler = useEventHandler();
 
   const handleEventClick = (eventId: string) => {
-    eventHandler("OnEventClick", widgetId, [eventId]);
+    if (events.includes("OnEventClick")) eventHandler("OnEventClick", widgetId, [eventId]);
   };
 
   const handleEventMove = (eventId: string, newStart: string, newEnd: string) => {
-    eventHandler("OnEventMove", widgetId, [eventId, newStart, newEnd]);
+    if (events.includes("OnEventMove"))
+      eventHandler("OnEventMove", widgetId, [eventId, newStart, newEnd]);
   };
 
   const handleEventResize = (eventId: string, newStart: string, newEnd: string) => {
-    eventHandler("OnEventResize", widgetId, [eventId, newStart, newEnd]);
+    if (events.includes("OnEventResize"))
+      eventHandler("OnEventResize", widgetId, [eventId, newStart, newEnd]);
   };
 
   const handleSelectSlot = (start: string, end: string) => {
-    eventHandler("OnSelectSlot", widgetId, [start, end]);
+    if (events.includes("OnSelectSlot")) eventHandler("OnSelectSlot", widgetId, [start, end]);
   };
 
   return {

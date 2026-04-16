@@ -250,15 +250,20 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         }),
         formatter: (params: any) => {
           if (Array.isArray(params)) {
-            return params
+            // Multi-series: add category header from first param
+            const header = params[0]?.name ? `<strong>${params[0].name}</strong><br/>` : "";
+            const lines = params
               .map((p) => {
                 const value = formatTooltipValue(p.value[isVertical ? 0 : 1], tooltip);
                 return `${p.marker} ${p.seriesName}: <strong>${value}</strong>`;
               })
               .join("<br/>");
+            return header + lines;
           }
+          // Single series: add category header
+          const header = params.name ? `<strong>${params.name}</strong><br/>` : "";
           const value = formatTooltipValue(params.value[isVertical ? 0 : 1], tooltip);
-          return `${params.marker} ${params.seriesName}: <strong>${value}</strong>`;
+          return `${header}${params.marker} ${params.seriesName}: <strong>${value}</strong>`;
         },
       },
       toolbox: generateEChartToolbox(toolbox),

@@ -43,6 +43,7 @@ export const RadioVariant: React.FC<SelectInputWidgetProps> = ({
     eventHandler,
     false, // Always single select for RadioVariant
     nullable,
+    events,
   );
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -169,7 +170,7 @@ export const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                 aria-label="Clear"
                 onClick={() => {
                   logger.debug("Select input clear button clicked", { id });
-                  eventHandler("OnChange", id, [null]);
+                  if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >

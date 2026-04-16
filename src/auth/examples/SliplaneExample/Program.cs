@@ -16,5 +16,7 @@ server.UseAppShell(settings);
 
 server.SetMetaTitle("Sliplane Example");
 
+Server.AuthCookiePrefix = "sliplane";
+
 await server.RunAsync();
 

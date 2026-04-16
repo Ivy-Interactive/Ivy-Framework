@@ -90,39 +90,37 @@ describe("MemoizedWidget responsive props", () => {
     expect(container.querySelector('[data-testid="test-widget"]')).not.toBeNull();
   });
 
-  it("overrides width from responsiveWidth", () => {
+  it("resolves responsive width for current breakpoint", () => {
     mockBreakpoint.mockReturnValue("mobile");
     const node = makeNode({
-      width: "50%",
-      responsiveWidth: { default: "50%", mobile: "100%" },
+      width: { default: "50%", mobile: "100%" },
     });
     mount(<MemoizedWidget node={node} />);
     const el = container.querySelector('[data-testid="test-widget"]');
     expect(el?.getAttribute("data-width")).toBe("100%");
   });
 
-  it("overrides height from responsiveHeight", () => {
+  it("resolves responsive height for current breakpoint", () => {
     mockBreakpoint.mockReturnValue("tablet");
     const node = makeNode({
-      height: "200px",
-      responsiveHeight: { default: "200px", tablet: "100px" },
+      height: { default: "200px", tablet: "100px" },
     });
     mount(<MemoizedWidget node={node} />);
     const el = container.querySelector('[data-testid="test-widget"]');
     expect(el?.getAttribute("data-height")).toBe("100px");
   });
 
-  it("overrides density from responsiveDensity", () => {
+  it("resolves responsive density for current breakpoint", () => {
     mockBreakpoint.mockReturnValue("mobile");
     const node = makeNode({
-      responsiveDensity: { default: "Normal", mobile: "Compact" },
+      density: { default: "Normal", mobile: "Compact" },
     });
     mount(<MemoizedWidget node={node} />);
     const el = container.querySelector('[data-testid="test-widget"]');
     expect(el?.getAttribute("data-density")).toBe("Compact");
   });
 
-  it("passes through props unchanged when no responsive props present", () => {
+  it("passes through plain string props unchanged", () => {
     const node = makeNode({
       width: "50%",
       height: "200px",

@@ -15,4 +15,6 @@ server.UseAppShell(settings);
 
 server.SetMetaTitle("Auth0 Example");
 
+Server.AuthCookiePrefix = "auth0";
+
 await server.RunAsync();

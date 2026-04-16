@@ -154,6 +154,50 @@ public class DependentQueryView : ViewBase
 }
 ```
 
+## Multiple Queries with Shared Dependencies
+
+When multiple queries depend on the same state value, use unique key prefixes to prevent cache collisions:
+
+```csharp demo-below
+public class MultiQueryView : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedRepo = UseState<string?>(null);
+
+        // WRONG: Both queries share the same cache key
+        // var assignees = UseQuery(selectedRepo.Value, FetchAssignees);
+        // var labels = UseQuery(selectedRepo.Value, FetchLabels);
+
+        // CORRECT: Each query has a unique prefix
+        var assignees = UseQuery<string[], string>(
+            $"assignees:{selectedRepo.Value ?? ""}",
+            async (key, ct) =>
+            {
+                if (string.IsNullOrEmpty(selectedRepo.Value)) return [];
+                await Task.Delay(500, ct);
+                return new[] { "alice", "bob", "charlie" };
+            });
+
+        var labels = UseQuery<string[], string>(
+            $"labels:{selectedRepo.Value ?? ""}",
+            async (key, ct) =>
+            {
+                if (string.IsNullOrEmpty(selectedRepo.Value)) return [];
+                await Task.Delay(500, ct);
+                return new[] { "bug", "feature", "enhancement" };
+            });
+
+        return Layout.Vertical()
+            | selectedRepo.ToTextInput().Placeholder("Enter repo name")
+            | Text.Literal($"Assignees: {string.Join(", ", assignees.Value ?? [])}")
+            | Text.Literal($"Labels: {string.Join(", ", labels.Value ?? [])}");
+    }
+}
+```
+
+Without unique prefixes, both queries would share the same cache entry (e.g., `"my-repo"`), and whichever query completes last would overwrite the other's data.
+
 ## Tag-Based Invalidation
 
 Assign tags to queries for bulk invalidation (using [UseService](./11_UseService.md)). Tags are serializable the same way as keys.

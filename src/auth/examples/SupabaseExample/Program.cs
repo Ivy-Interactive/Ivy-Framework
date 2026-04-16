@@ -15,4 +15,6 @@ server.UseAppShell(settings);
 
 server.SetMetaTitle("Supabase Example");
 
+Server.AuthCookiePrefix = "supabase";
+
 await server.RunAsync();

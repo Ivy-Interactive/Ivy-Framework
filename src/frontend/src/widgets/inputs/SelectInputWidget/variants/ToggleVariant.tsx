@@ -102,6 +102,7 @@ export const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
     eventHandler,
     selectMany,
     nullable,
+    events,
   );
 
   const visibleEnabledForBulk = useMemo(
@@ -129,7 +130,7 @@ export const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
       validOptions,
       selectMany,
     );
-    eventHandler("OnChange", id, [converted]);
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [converted]);
   }, [
     selectedValues,
     filteredOptions,
@@ -141,9 +142,11 @@ export const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
     selectMany,
     eventHandler,
     id,
+    events,
   ]);
 
   const handleBulkClearAllToggle = useCallback(() => {
+    if (!events.includes("OnChange")) return;
     const cleared = computeClearAllValues(selectedValues, minSelections);
     if (cleared.length === 0 && nullable) {
       eventHandler("OnChange", id, [null]);
@@ -156,7 +159,17 @@ export const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
       selectMany,
     );
     eventHandler("OnChange", id, [converted]);
-  }, [selectedValues, minSelections, nullable, value, validOptions, selectMany, eventHandler, id]);
+  }, [
+    selectedValues,
+    minSelections,
+    nullable,
+    value,
+    validOptions,
+    selectMany,
+    eventHandler,
+    id,
+    events,
+  ]);
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -283,7 +296,7 @@ export const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 tabIndex={-1}
                 aria-label="Clear All"
                 onClick={() => {
-                  eventHandler("OnChange", id, [null]);
+                  if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >

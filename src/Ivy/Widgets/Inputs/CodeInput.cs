@@ -174,5 +174,16 @@ public static class CodeInputExtensions
         return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
     }
 
+    private static object[] WithSlot(CodeInputBase widget, string slotName, object? value)
+    {
+        var others = widget.Children.Where(c => c is not Slot s || s.Name != slotName);
+        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
+        return result.ToArray();
+    }
 
+    public static CodeInputBase Prefix(this CodeInputBase widget, object prefix)
+        => widget with { Children = WithSlot(widget, "Prefix", prefix) };
+
+    public static CodeInputBase Suffix(this CodeInputBase widget, object suffix)
+        => widget with { Children = WithSlot(widget, "Suffix", suffix) };
 }

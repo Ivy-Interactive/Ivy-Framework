@@ -237,5 +237,9 @@ public static class ColorInputExtensions
         return widget.OnFocus(_ => { onFocus(); return ValueTask.CompletedTask; });
     }
 
+    public static ColorInputBase Prefix(this ColorInputBase widget, object prefix)
+        => widget with { Children = widget.WithSlot("Prefix", prefix) };
 
+    public static ColorInputBase Suffix(this ColorInputBase widget, object suffix)
+        => widget with { Children = widget.WithSlot("Suffix", suffix) };
 }

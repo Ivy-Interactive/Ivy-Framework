@@ -479,6 +479,16 @@ public class ThemeService : IThemeService
 
         if (!string.IsNullOrEmpty(_currentTheme.BorderRadiusSelectors))
             sb.AppendLine($"  --radius-selectors: {_currentTheme.BorderRadiusSelectors};");
+
+        // Shadow tokens from design system, controlled per element group
+        sb.AppendLine($"  --shadow-boxes: {(_currentTheme.ShadowBoxes ? IvyFrameworkShadowTokens.Shadow.Sm : "none")};");
+        sb.AppendLine($"  --shadow-fields: {(_currentTheme.ShadowFields ? IvyFrameworkShadowTokens.Shadow.Sm : "none")};");
+        sb.AppendLine($"  --shadow-selectors: {(_currentTheme.ShadowSelectors ? IvyFrameworkShadowTokens.Shadow.Sm : "none")};");
+
+        // Emit full shadow scale from design system (replacing hardcoded values in index.css)
+        sb.AppendLine($"  --shadow-sm: {IvyFrameworkShadowTokens.Shadow.Sm};");
+        sb.AppendLine($"  --shadow-md: {IvyFrameworkShadowTokens.Shadow.Md};");
+        sb.AppendLine($"  --shadow-lg: {IvyFrameworkShadowTokens.Shadow.Lg};");
     }
 
     private void AppendColorVariable(StringBuilder sb, string variableName, string? colorValue)

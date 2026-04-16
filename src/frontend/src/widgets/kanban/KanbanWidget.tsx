@@ -9,6 +9,7 @@ import { KanbanCardRenderer } from "./KanbanCardRenderer";
 import type { KanbanWidgetProps } from "./types";
 
 const EMPTY_ARRAY: never[] = [];
+const EMPTY_EVENTS: string[] = [];
 
 export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   id,
@@ -19,11 +20,12 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   columnWidth,
   showCounts = true,
   density: _density = Densities.Medium,
+  events = EMPTY_EVENTS,
   slots,
   widgetNodeChildren,
 }) => {
   const extractedData = useKanbanData(slots, tasks, columns, widgetNodeChildren);
-  const { handleCardMove } = useKanbanHandlers(id);
+  const { handleCardMove } = useKanbanHandlers(id, events);
 
   const sortedColumns = React.useMemo(() => {
     return [...extractedData.columns].sort((a, b) => {

@@ -22,7 +22,7 @@ public class GridView : ViewBase, IStateless
 
     public GridView Columns(Responsive<int?> columns)
     {
-        _definition.ResponsiveColumns = columns;
+        _definition.Columns = columns;
         return this;
     }
 
@@ -138,7 +138,7 @@ public class GridView : ViewBase, IStateless
     public override object? Build()
     {
         var cells = _cells.ToArray();
-        var columnsCount = _definition.Columns ?? 1;
+        var columnsCount = _definition.Columns?.Default ?? 1;
 
         // Apply builders to transform cells before creating GridLayout
         if (_definition.HeaderBuilder != null || _definition.FooterBuilder != null || _definition.CellBuilder != null)

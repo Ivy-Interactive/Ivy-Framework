@@ -3,9 +3,9 @@ permissions:
   contents: read
 on:
   push:
-    branches: [main, master]
+    branches: [main, development]
   pull_request:
-    branches: [main, master]
+    branches: [main, development]
 jobs:
   backend-checks:
     runs-on: windows-latest

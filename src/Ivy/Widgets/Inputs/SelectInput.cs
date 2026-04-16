@@ -263,4 +263,10 @@ public static class SelectInputExtensions
         return new SelectInput<string[]>(state, options.ToOptions(), placeholder ?? "Select options...", disabled, variant, true);
     }
 
+    public static SelectInputBase Prefix(this SelectInputBase widget, object prefix)
+        => widget with { Children = widget.WithSlot("Prefix", prefix) };
+
+    public static SelectInputBase Suffix(this SelectInputBase widget, object suffix)
+        => widget with { Children = widget.WithSlot("Suffix", suffix) };
+
 }

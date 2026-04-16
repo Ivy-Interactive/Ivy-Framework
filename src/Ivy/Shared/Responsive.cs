@@ -19,6 +19,12 @@ public record Responsive<T>
 
 public static class ResponsiveExtensions
 {
+    public static Responsive<T>? ToResponsive<T>(this T? value) where T : class
+        => value is not null ? new Responsive<T> { Default = value } : null;
+
+    public static Responsive<Density?>? ToResponsiveDensity(this Density? value)
+        => value.HasValue ? new Responsive<Density?> { Default = value } : null;
+
     // Reference type overloads (Size, etc.)
     public static Responsive<T> At<T>(this T value, Breakpoint bp) where T : class => bp switch
     {
@@ -74,6 +80,10 @@ public static class ResponsiveExtensions
     // bool overloads (for visibility)
     public static Responsive<bool?> At(this bool value, Breakpoint bp) => AtCore(value, bp);
     public static Responsive<bool?> And(this Responsive<bool?> r, Breakpoint bp, bool value) => AndCore(r, bp, value);
+
+    // Thickness overloads (for padding, margin)
+    public static Responsive<Thickness?> At(this Thickness value, Breakpoint bp) => AtCore(value, bp);
+    public static Responsive<Thickness?> And(this Responsive<Thickness?> r, Breakpoint bp, Thickness value) => AndCore(r, bp, value);
 }
 
 public class ResponsiveJsonConverterFactory : JsonConverterFactory

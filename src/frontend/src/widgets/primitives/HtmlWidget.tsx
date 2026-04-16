@@ -10,6 +10,7 @@ interface HtmlWidgetProps {
   dangerouslyAllowScripts?: boolean;
   width?: string;
   height?: string;
+  onLinkClick?: (url: string) => void;
 }
 
 export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
@@ -19,6 +20,7 @@ export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
   dangerouslyAllowScripts = false,
   width,
   height,
+  onLinkClick,
 }) => {
   const getScaleStyle = (s: Densities): React.CSSProperties => {
     switch (s) {
@@ -85,6 +87,7 @@ export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
       <HtmlRenderer
         content={content}
         key={id}
+        onLinkClick={onLinkClick}
         allowedTags={[
           "p",
           "div",

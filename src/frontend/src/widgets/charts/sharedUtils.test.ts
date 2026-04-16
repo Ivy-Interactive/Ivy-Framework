@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { formatTickLabel, generateEChartGrid, generateXAxis, generateYAxis } from "./sharedUtils";
+import {
+  formatTickLabel,
+  generateEChartGrid,
+  generateTooltip,
+  generateXAxis,
+  generateYAxis,
+} from "./sharedUtils";
 import type { XAxisProps, YAxisProps } from "./chartTypes";
 
 describe("formatTickLabel - date formats", () => {
@@ -406,5 +412,45 @@ describe("generateEChartGrid", () => {
     expect(result).toHaveProperty("left", "3%");
     expect(result).toHaveProperty("right", "4%");
     expect(result).toHaveProperty("containLabel", true);
+  });
+});
+
+describe("generateTooltip - valueFormatter", () => {
+  it("returns valueFormatter when valueFormat.formatter is provided", () => {
+    const result = generateTooltip(undefined, "shadow", undefined, {
+      formatter: "C2",
+      formatterType: "Number",
+    });
+    expect(result).toHaveProperty("valueFormatter");
+    expect(typeof result.valueFormatter).toBe("function");
+  });
+
+  it("valueFormatter produces same output as formatTickLabel", () => {
+    const result = generateTooltip(undefined, "shadow", undefined, {
+      formatter: "C2",
+      formatterType: "Number",
+    });
+    const fromTooltip = result.valueFormatter!(1234.5);
+    const fromTickLabel = formatTickLabel(1234.5, "C2", undefined, "Number");
+    expect(fromTooltip).toBe(fromTickLabel);
+  });
+
+  it("does not set valueFormatter when no valueFormat is provided", () => {
+    const result = generateTooltip(undefined, "shadow");
+    expect(result).not.toHaveProperty("valueFormatter");
+  });
+
+  it("does not set valueFormatter when valueFormat.formatter is null", () => {
+    const result = generateTooltip(undefined, "shadow", undefined, {
+      formatter: null,
+    });
+    expect(result).not.toHaveProperty("valueFormatter");
+  });
+
+  it("does not set valueFormatter when valueFormat.formatter is undefined", () => {
+    const result = generateTooltip(undefined, "shadow", undefined, {
+      formatter: undefined,
+    });
+    expect(result).not.toHaveProperty("valueFormatter");
   });
 });

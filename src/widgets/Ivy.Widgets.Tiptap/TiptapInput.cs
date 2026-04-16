@@ -66,8 +66,6 @@ public record TiptapInput<TString> : TiptapInputBase, IInput<TString>
 
     internal TiptapInput()
     {
-        Width = Size.Full();
-        Height = Size.Full();
     }
 
     [Prop] public TString Value { get; } = default!;

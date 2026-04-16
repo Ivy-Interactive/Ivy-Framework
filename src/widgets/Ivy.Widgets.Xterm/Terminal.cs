@@ -12,11 +12,6 @@ public enum CursorStyle
 [ExternalWidget("frontend/dist/Ivy_Widgets_Xterm.js", ExportName = "Terminal")]
 public record Terminal : WidgetBase<Terminal>
 {
-    public Terminal()
-    {
-        Width = Size.Full();
-        Height = Size.Full();
-    }
 
     [Prop] public int? Cols { get; init; }
     [Prop] public int? Rows { get; init; }

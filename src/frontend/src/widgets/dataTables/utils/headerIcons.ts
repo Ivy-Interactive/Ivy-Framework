@@ -39,6 +39,10 @@ const ICON_PATHS: Record<string, string> = {
     "M12 5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z M12 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2z",
   // HelpCircle
   HelpCircle: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M9 9a3 3 0 0 1 6 0c0 2-3 3-3 3 M12 17h.01",
+  // ArrowUp icon (Lucide)
+  ArrowUp: "M12 19V5 M5 12l7-7 7 7",
+  // ArrowDown icon (Lucide)
+  ArrowDown: "M12 5v14 M19 12l-7 7-7-7",
 };
 
 /**
@@ -95,6 +99,8 @@ export function generateHeaderIcons(columns: Array<{ icon?: string | null }>): S
  */
 export function addStandardIcons(baseIcons: SpriteMap): SpriteMap {
   const standardIcons = [
+    "ArrowUp",
+    "ArrowDown",
     "ChevronUp",
     "ChevronDown",
     "Filter",

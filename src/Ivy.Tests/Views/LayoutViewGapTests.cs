@@ -6,14 +6,16 @@ public class LayoutViewGapTests
     {
         var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
         var field = view.GetType().GetField("_rowGap", flags)!;
-        return (int)field.GetValue(view)!;
+        var responsive = (Responsive<int?>)field.GetValue(view)!;
+        return responsive.Default!.Value;
     }
 
     private static int GetColumnGap(LayoutView view)
     {
         var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
         var field = view.GetType().GetField("_columnGap", flags)!;
-        return (int)field.GetValue(view)!;
+        var responsive = (Responsive<int?>)field.GetValue(view)!;
+        return responsive.Default!.Value;
     }
 
     [Fact]

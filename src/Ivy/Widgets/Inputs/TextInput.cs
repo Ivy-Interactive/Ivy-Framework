@@ -269,18 +269,11 @@ public static class TextInputExtensions
 
     public static TextInputBase Rows(this TextInputBase widget, int rows) => widget with { Rows = rows };
 
-    private static object[] WithSlot(TextInputBase widget, string slotName, object? value)
-    {
-        var others = widget.Children.Where(c => c is not Slot s || s.Name != slotName);
-        var result = value != null ? others.Append(new Slot(slotName, value)) : others;
-        return result.ToArray();
-    }
-
     public static TextInputBase Prefix(this TextInputBase widget, object prefix)
-        => widget with { Children = WithSlot(widget, "Prefix", prefix) };
+        => widget with { Children = widget.WithSlot("Prefix", prefix) };
 
     public static TextInputBase Suffix(this TextInputBase widget, object suffix)
-        => widget with { Children = WithSlot(widget, "Suffix", suffix) };
+        => widget with { Children = widget.WithSlot("Suffix", suffix) };
 
     [OverloadResolutionPriority(1)]
     public static TextInputBase OnBlur(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

@@ -15,4 +15,6 @@ server.UseAppShell(settings);
 
 server.SetMetaTitle("BasicAuth Example");
 
+Server.AuthCookiePrefix = "basic";
+
 await server.RunAsync();

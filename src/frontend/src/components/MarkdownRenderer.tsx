@@ -159,7 +159,11 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
       // Validate URL to prevent open redirect vulnerabilities
       // validateLinkUrl always returns a string ('#' for invalid URLs)
-      const validatedHref = validateLinkUrl(href);
+      // When onLinkClick is registered, allow custom protocols (e.g. plan://)
+      // since the handler intercepts navigation rather than the browser
+      const validatedHref = validateLinkUrl(href, {
+        allowCustomProtocols: !!onLinkClick,
+      });
       if (validatedHref === "#") {
         event.preventDefault();
         return;
@@ -438,7 +442,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           // When local files are enabled, allow file:// URLs to render as clickable links
           const isLocalFileUrl = dangerouslyAllowLocalFiles && href?.startsWith("file:///");
 
-          const safeHref = isLocalFileUrl ? href! : validateLinkUrl(href);
+          const safeHref = isLocalFileUrl
+            ? href!
+            : validateLinkUrl(href, { allowCustomProtocols: !!onLinkClick });
           if (safeHref === "#") {
             return <span {...props}>{children}</span>;
           }

@@ -81,10 +81,16 @@ public class Server
     public AppRepository AppRepository { get; } = new();
     public NavigationBeaconRegistry NavigationBeaconRegistry { get; } = new();
     public IServiceCollection Services { get; } = new ServiceCollection();
-    public IConfiguration Configuration { get; private set; } = ServerUtils.GetConfiguration();
+    private IConfiguration? _configuration;
+    public IConfiguration Configuration
+    {
+        get => _configuration ??= ServerUtils.GetConfiguration();
+        private set => _configuration = value;
+    }
     public Type? AuthProviderType { get; private set; } = null;
     public ServerArgs Args => _args;
     public static Action<CookieOptions>? ConfigureAuthCookieOptions { get; set; }
+    public static string? AuthCookiePrefix { get; set; }
     private IContentBuilder? _contentBuilder;
     private bool _useHotReload;
     private bool _useHttpRedirection;
@@ -97,6 +103,7 @@ public class Server
     private Action<HtmlPipeline>? _pipelineConfigurator;
     private ManifestOptions? _manifestOptions;
     private ServerArgs _args;
+    private bool _presetsLoaded;
 
     public Server(ServerArgs? args = null)
     {
@@ -127,8 +134,8 @@ public class Server
         };
 
         Services.AddSingleton(_args);
-        // capture the latest Configuration value at resolution time in case it gets replaced by UseConfiguration()
-        Services.AddSingleton(_ => Configuration);
+        // Configuration is lazily initialized on first access
+        Services.AddSingleton<IConfiguration>(_ => Configuration);
 
         AddDefaultApps();
     }
@@ -175,6 +182,8 @@ public class Server
 
     public void AddConnectionsFromAssembly(Assembly? assembly = null)
     {
+        if (_presetsLoaded) return;
+        _presetsLoaded = true;
         assembly ??= Assembly.GetEntryAssembly();
 
         var connections = assembly!.GetLoadableTypes()
@@ -199,24 +208,19 @@ public class Server
 
         if (presets.Count > 0)
         {
-            var builder = new ConfigurationBuilder()
-                .AddInMemoryCollection(presets)
-                .AddEnvironmentVariables()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-
-            if (Assembly.GetEntryAssembly() is { } entryAssembly)
-            {
-                builder.AddUserSecrets(entryAssembly);
-            }
-
-            Configuration = builder.Build();
+            Configuration = ServerUtils.GetConfiguration(presets);
         }
 
         foreach (var connection in connections)
         {
             connection.RegisterServices(this);
         }
+    }
+
+    private void EnsurePresetsLoaded()
+    {
+        if (_presetsLoaded) return;
+        AddConnectionsFromAssembly();
     }
 
     public AppDescriptor GetApp(string id)
@@ -258,7 +262,7 @@ public class Server
 
     public Server UseConfiguration(Action<IConfigurationBuilder> configure)
     {
-        Configuration = ServerUtils.GetConfiguration(configure);
+        Configuration = ServerUtils.GetConfiguration(configure: configure);
         return this;
     }
 
@@ -938,6 +942,11 @@ public class Server
             return;
         }
 
+        if (_args.DescribeConnection != null || _args.TestConnection != null)
+        {
+            EnsurePresetsLoaded();
+        }
+
         if (_args.DescribeConnection != null)
         {
             var connection = ServerDescription.FindConnection(this, app.Services, _args.DescribeConnection);
@@ -995,7 +1004,7 @@ public class Server
             {
                 var config = app.Services.GetRequiredService<IConfiguration>();
                 var missing = hasSecrets.GetSecrets()
-                    .Where(s => !s.Optional && s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
+                    .Where(s => !s.Optional && string.IsNullOrEmpty(config[s.Key]))
                     .Select(s => s.Key)
                     .ToList();
 
@@ -1087,7 +1096,7 @@ public class Server
         Dictionary<string, List<string>> missingByProvider)
     {
         var missing = provider.GetSecrets()
-            .Where(s => !s.Optional && s.Preset == null && string.IsNullOrEmpty(config[s.Key]))
+            .Where(s => !s.Optional && string.IsNullOrEmpty(config[s.Key]))
             .Select(s => s.Key)
             .ToList();
 

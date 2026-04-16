@@ -15,4 +15,6 @@ server.UseAppShell(settings);
 
 server.SetMetaTitle("Microsoft Entra Example");
 
+Server.AuthCookiePrefix = "entra";
+
 await server.RunAsync();
