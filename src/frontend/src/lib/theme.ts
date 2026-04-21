@@ -56,6 +56,7 @@ export interface ThemeColors {
   input: string;
   ring: string;
   radius: string;
+  radiusSelectors: string;
 
   // Semantic colors
   success: string;
@@ -140,6 +141,7 @@ export function getThemeColors(): ThemeColors {
     input: getCSSVariable("--input"),
     ring: getCSSVariable("--ring"),
     radius: getCSSVariable("--radius"),
+    radiusSelectors: getCSSVariable("--radius-selectors"),
 
     // Semantic colors
     success: getCSSVariable("--success"),

@@ -65,6 +65,10 @@ export const useTableTheme = ({
       textGroupHeader: colors.mutedForeground || (isDark ? "#a1a1aa" : "#6b7280"),
       // Icon foreground color
       fgIconHeader: colors.mutedForeground || (isDark ? "#9ca3af" : "#6b7280"),
+      // Badge/bubble styling to match BadgeWidget
+      roundingRadius: parseFloat(colors.radiusSelectors) || 4,
+      bubbleHeight: 20,
+      bubblePadding: 8,
     }),
   });
 
