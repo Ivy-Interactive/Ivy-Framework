@@ -226,7 +226,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         style={{ width: effectiveSidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
-          <div className="flex flex-col shrink-0 p-2 space-y-4">{slots?.SidebarHeader}</div>
+          <div className="flex flex-col shrink-0 p-2 space-y-4 border-b">
+            {slots?.SidebarHeader}
+          </div>
         )}
         {slots?.SidebarContent && (
           <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
