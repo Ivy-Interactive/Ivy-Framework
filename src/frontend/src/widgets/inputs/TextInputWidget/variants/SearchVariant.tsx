@@ -121,7 +121,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         {hasPrefix && (
           <div
             className={cn(
-              "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]",
+              "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)] [&_button]:rounded [&_button]:px-1 [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors",
               !isFocused && "border-r border-input",
             )}
           >
@@ -198,7 +198,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         {hasSuffix && (
           <div
             className={cn(
-              "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]",
+              "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)] [&_button]:rounded [&_button]:px-1 [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors",
               !isFocused && "border-l border-input",
             )}
           >
