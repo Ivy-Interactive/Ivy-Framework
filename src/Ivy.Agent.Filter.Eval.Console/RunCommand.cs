@@ -17,7 +17,7 @@ public class RunCommand : AsyncCommand<RunCommand.Settings>
         public string TestFile { get; init; } = string.Empty;
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellation)
     {
         if (!File.Exists(settings.TestFile))
         {

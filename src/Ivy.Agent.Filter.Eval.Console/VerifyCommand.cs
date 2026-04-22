@@ -12,7 +12,7 @@ public class VerifyCommand : Command<VerifyCommand.Settings>
         public string TestFile { get; init; } = string.Empty;
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override int Execute(CommandContext context, Settings settings, CancellationToken cancellation)
     {
         if (!File.Exists(settings.TestFile))
         {
