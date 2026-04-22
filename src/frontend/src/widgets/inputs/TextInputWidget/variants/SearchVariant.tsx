@@ -151,7 +151,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             autoComplete="off"
             className={cn(
               textInputSizeVariant({ density }),
-              "pl-8 cursor-pointer border-0 shadow-none dark:bg-transparent",
+              "pl-8 cursor-pointer border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
               props.invalid && inputStyles.invalidInput,
               (props.invalid || showClear) && "pr-8",
               props.shortcutKey &&
