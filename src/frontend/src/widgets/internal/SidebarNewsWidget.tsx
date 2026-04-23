@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 
 export interface SidebarNewsWidgetProps {
   feedUrl: string;
+  imageBaseUrl?: string;
 }
 
 function baseUrlFromFeed(feedUrl: string): string {
@@ -27,7 +28,7 @@ const fetchNewsData = async (feedUrl: string): Promise<NewsArticle[]> => {
   return [];
 };
 
-const SidebarNewsWidget = ({ feedUrl }: SidebarNewsWidgetProps) => {
+const SidebarNewsWidget = ({ feedUrl, imageBaseUrl }: SidebarNewsWidgetProps) => {
   // const [removeBranding, setRemoveBranding] = useState(true); // TODO: Branding check commented out - can be re-enabled in the future
   const [articles, setArticles] = useState<NewsArticle[] | null>(null);
 
@@ -43,7 +44,7 @@ const SidebarNewsWidget = ({ feedUrl }: SidebarNewsWidgetProps) => {
 
   if (!articles || articles.length === 0) return null;
 
-  return <News articles={articles} imageBaseUrl={baseUrlFromFeed(feedUrl)} />;
+  return <News articles={articles} imageBaseUrl={imageBaseUrl ?? baseUrlFromFeed(feedUrl)} />;
 };
 
 export default SidebarNewsWidget;
