@@ -181,7 +181,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   const hasAffixes = hasPrefix || hasSuffix;
 
   const codeEditor = (
-    <div style={styles} className="relative w-full h-full overflow-hidden">
+    <div style={styles} className="relative w-full h-full overflow-hidden rounded-field">
       {(showCopy || showClear || invalid) && (
         <div className="absolute top-2 right-2 z-50 flex items-center">
           {showCopy && (
@@ -211,7 +211,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       )}
       <Suspense
         fallback={
-          <div className="h-full flex items-center justify-center bg-muted/20 animate-pulse rounded-field border border-input">
+          <div className="h-full flex items-center justify-center bg-muted/20 animate-pulse rounded-sm border border-input">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         }
@@ -228,7 +228,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           data-gramm="false"
           className={cn(
             "h-full",
-            "border border-input shadow-sm rounded-field",
+            "border border-input shadow-sm rounded-sm",
             "dark:bg-white/5 dark:border-white/10",
             invalid && inputStyles.invalid,
             disabled && "opacity-50 cursor-not-allowed",
