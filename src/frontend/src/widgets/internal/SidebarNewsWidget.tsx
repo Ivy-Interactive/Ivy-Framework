@@ -9,11 +9,14 @@ export interface SidebarNewsWidgetProps {
   feedUrl: string;
 }
 
-const BASE_URL = "https://ivy.app/news/";
+function baseUrlFromFeed(feedUrl: string): string {
+  const idx = feedUrl.lastIndexOf("/");
+  return idx >= 0 ? feedUrl.substring(0, idx + 1) : feedUrl + "/";
+}
 
-const fetchNewsData = async (): Promise<NewsArticle[]> => {
+const fetchNewsData = async (feedUrl: string): Promise<NewsArticle[]> => {
   try {
-    const response = await fetch(BASE_URL + "news.json");
+    const response = await fetch(feedUrl);
     const data = await response.json();
     if (Array.isArray(data) && data.length > 0) {
       return data;
@@ -33,14 +36,14 @@ const SidebarNewsWidget = ({ feedUrl }: SidebarNewsWidgetProps) => {
   // }, []);
 
   useEffect(() => {
-    fetchNewsData().then(setArticles);
+    fetchNewsData(feedUrl).then(setArticles);
   }, [feedUrl]);
 
   // if (removeBranding) return null; // TODO: Branding check commented out - can be re-enabled in the future
 
   if (!articles || articles.length === 0) return null;
 
-  return <News articles={articles} />;
+  return <News articles={articles} imageBaseUrl={baseUrlFromFeed(feedUrl)} />;
 };
 
 export default SidebarNewsWidget;
@@ -60,7 +63,7 @@ const SCALE_FACTOR = 0.03;
 const OPACITY_FACTOR = 0.1;
 const STORAGE_KEY = "ivy-dismissed-news";
 
-function News({ articles }: { articles: NewsArticle[] }) {
+function News({ articles, imageBaseUrl }: { articles: NewsArticle[]; imageBaseUrl: string }) {
   const cleanupDoneRef = React.useRef(false);
 
   // Initialize dismissed news from localStorage
@@ -139,6 +142,7 @@ function News({ articles }: { articles: NewsArticle[] }) {
               title={title}
               description={summary}
               image={image}
+              imageBaseUrl={imageBaseUrl}
               href={href}
               hideContent={cardCount - idx > 2}
               active={idx === cardCount - 1}
@@ -176,6 +180,7 @@ function NewsCard({
   title,
   description,
   image,
+  imageBaseUrl,
   onDismiss,
   hideContent,
   href,
@@ -184,6 +189,7 @@ function NewsCard({
   title: string;
   description: string;
   image?: string;
+  imageBaseUrl?: string;
   onDismiss?: () => void;
   hideContent?: boolean;
   href?: string;
@@ -325,7 +331,7 @@ function NewsCard({
           {image && (
             <a href={safeHref} target="_blank" rel="noopener noreferrer">
               <img
-                src={BASE_URL + image}
+                src={(imageBaseUrl ?? "") + image}
                 alt=""
                 className="h-full w-full rounded object-cover object-center"
                 draggable={false}
