@@ -1,55 +1,8 @@
 import { cn } from "@/lib/utils";
 import { validateLinkUrl } from "@/lib/url";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import * as React from "react";
-// import { hasLicensedFeature } from "@/lib/license"; // TODO: Branding check commented out - can be re-enabled in the future
 import { Card } from "@/components/ui/card";
-
-export interface SidebarNewsWidgetProps {
-  feedUrl: string;
-  imageBaseUrl?: string;
-}
-
-function baseUrlFromFeed(feedUrl: string): string {
-  const idx = feedUrl.lastIndexOf("/");
-  return idx >= 0 ? feedUrl.substring(0, idx + 1) : feedUrl + "/";
-}
-
-const fetchNewsData = async (feedUrl: string): Promise<NewsArticle[]> => {
-  try {
-    const response = await fetch(feedUrl);
-    const data = await response.json();
-    if (Array.isArray(data) && data.length > 0) {
-      return data;
-    }
-  } catch (error) {
-    console.error("Failed to fetch news:", error);
-  }
-  return [];
-};
-
-const SidebarNewsWidget = ({ feedUrl, imageBaseUrl }: SidebarNewsWidgetProps) => {
-  // const [removeBranding, setRemoveBranding] = useState(true); // TODO: Branding check commented out - can be re-enabled in the future
-  const [articles, setArticles] = useState<NewsArticle[] | null>(null);
-
-  // useEffect(() => { // TODO: Branding check commented out - can be re-enabled in the future
-  //   hasLicensedFeature("RemoveBranding").then(setRemoveBranding);
-  // }, []);
-
-  useEffect(() => {
-    fetchNewsData(feedUrl).then(setArticles);
-  }, [feedUrl]);
-
-  // if (removeBranding) return null; // TODO: Branding check commented out - can be re-enabled in the future
-
-  if (!articles || articles.length === 0) return null;
-
-  return <News articles={articles} imageBaseUrl={imageBaseUrl ?? baseUrlFromFeed(feedUrl)} />;
-};
-
-export default SidebarNewsWidget;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 interface NewsArticle {
   id: string;
@@ -59,15 +12,28 @@ interface NewsArticle {
   image: string;
 }
 
+export interface SidebarNewsWidgetProps {
+  articles?: NewsArticle[];
+}
+
+const SidebarNewsWidget = ({ articles }: SidebarNewsWidgetProps) => {
+  if (!articles || articles.length === 0) return null;
+
+  return <News articles={articles} />;
+};
+
+export default SidebarNewsWidget;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 const OFFSET_FACTOR = 4;
 const SCALE_FACTOR = 0.03;
 const OPACITY_FACTOR = 0.1;
 const STORAGE_KEY = "ivy-dismissed-news";
 
-function News({ articles, imageBaseUrl }: { articles: NewsArticle[]; imageBaseUrl: string }) {
+function News({ articles }: { articles: NewsArticle[] }) {
   const cleanupDoneRef = React.useRef(false);
 
-  // Initialize dismissed news from localStorage
   const [dismissedNews, setDismissedNews] = React.useState<string[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -143,7 +109,6 @@ function News({ articles, imageBaseUrl }: { articles: NewsArticle[]; imageBaseUr
               title={title}
               description={summary}
               image={image}
-              imageBaseUrl={imageBaseUrl}
               href={href}
               hideContent={cardCount - idx > 2}
               active={idx === cardCount - 1}
@@ -181,7 +146,6 @@ function NewsCard({
   title,
   description,
   image,
-  imageBaseUrl,
   onDismiss,
   hideContent,
   href,
@@ -190,16 +154,13 @@ function NewsCard({
   title: string;
   description: string;
   image?: string;
-  imageBaseUrl?: string;
   onDismiss?: () => void;
   hideContent?: boolean;
   href?: string;
   active?: boolean;
 }) {
-  // Validate URL to prevent open redirect vulnerabilities
   const safeHref = validateLinkUrl(href || "#");
 
-  //const { isMobile } = useMediaQuery();
   const isMobile = false;
 
   const ref = React.useRef<HTMLDivElement>(null);
@@ -232,7 +193,6 @@ function NewsCard({
     const cardWidth = ref.current.getBoundingClientRect().width;
     const translateX = Math.sign(drag.current.delta) * cardWidth;
 
-    // Dismiss card
     animation.current = ref.current.animate(
       { opacity: 0, transform: `translateX(${translateX}px)` },
       { duration: 150, easing: "ease-in-out", fill: "forwards" },
@@ -251,7 +211,6 @@ function NewsCard({
       return;
     }
 
-    // Animate back to original position
     animation.current = ref.current.animate(
       { transform: "translateX(0)" },
       { duration: 150, easing: "ease-in-out" },
@@ -294,7 +253,6 @@ function NewsCard({
       drag.current.maxDelta < ref.current.clientWidth / 10 &&
       (!drag.current.startTime || Date.now() - drag.current.startTime < 250)
     ) {
-      // Touch user didn't drag far or for long, open the link
       if (safeHref !== "#") {
         window.open(safeHref, "_blank", "noopener,noreferrer");
       }
@@ -332,7 +290,7 @@ function NewsCard({
           {image && (
             <a href={safeHref} target="_blank" rel="noopener noreferrer">
               <img
-                src={(imageBaseUrl ?? "") + image}
+                src={image}
                 alt=""
                 className="h-full w-full rounded object-cover object-center"
                 draggable={false}
