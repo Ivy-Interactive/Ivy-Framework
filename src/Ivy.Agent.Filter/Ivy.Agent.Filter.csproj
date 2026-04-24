@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
-    <PackageReference Include="Antlr4BuildTasks" Version="12.11.0" />
+    <PackageReference Include="Antlr4BuildTasks" Version="12.14.0" />
     <PackageReference Include="Google.Protobuf" Version="3.33.2" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.1" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.1" />
@@ -46,6 +46,7 @@
     <Antlr4 Include="Filters.g4">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>Ivy.Agent.Filter.Parser</CustomToolNamespace>
+      <AntlrToolJarDownloadDir>$(IntermediateOutputPath)</AntlrToolJarDownloadDir>
     </Antlr4>
   </ItemGroup>
 
