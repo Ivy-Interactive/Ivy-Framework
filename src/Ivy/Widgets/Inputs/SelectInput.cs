@@ -27,6 +27,8 @@ public interface IAnySelectInput : IAnyInput
     public SelectInputVariant Variant { get; set; }
 }
 
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelectInput
 {
     [Prop] public bool Disabled { get; set; }

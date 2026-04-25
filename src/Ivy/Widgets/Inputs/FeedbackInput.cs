@@ -19,6 +19,8 @@ public interface IAnyFeedbackInput : IAnyInput
     public FeedbackInputVariant Variant { get; set; }
 }
 
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFeedbackInput
 {
     [Prop] public bool Disabled { get; set; }

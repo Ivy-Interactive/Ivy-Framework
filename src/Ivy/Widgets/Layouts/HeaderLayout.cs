@@ -4,6 +4,8 @@ namespace Ivy;
 /// <summary>
 /// A standard header layout with branding and navigation areas.
 /// </summary>
+[Slot("Header")]
+[Slot("Content")]
 public record HeaderLayout : WidgetBase<HeaderLayout>
 {
     public HeaderLayout(object header, object content) : base([new Slot("Header", header), new Slot("Content", content)])

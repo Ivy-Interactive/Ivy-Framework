@@ -26,6 +26,8 @@ public interface IAnyBoolInput : IAnyInput
     public bool Loading { get; set; }
 }
 
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 {
     [Prop] public bool Disabled { get; set; }

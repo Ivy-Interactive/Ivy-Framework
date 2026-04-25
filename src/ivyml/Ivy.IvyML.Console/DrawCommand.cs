@@ -26,14 +26,45 @@ public sealed class DrawCommand : AsyncCommand<DrawCommand.Settings>
 
         [CommandOption("-i|--input <IVYML>")]
         [Description("IvyML markup string.")]
-        public required string IvyML { get; init; }
+        public string? IvyML { get; init; }
+
+        [CommandOption("-f|--file <PATH>")]
+        [Description("Path to an IvyML file.")]
+        public string? FilePath { get; init; }
+
+        [CommandOption("-d|--debug")]
+        [Description("Draw debug overlays showing widget bounds, sizes, and padding.")]
+        [DefaultValue(false)]
+        public bool Debug { get; init; }
     }
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(settings.IvyML))
+        if (!string.IsNullOrWhiteSpace(settings.IvyML) && !string.IsNullOrWhiteSpace(settings.FilePath))
         {
-            System.Console.Error.WriteLine("Error: IvyML input (-i) is required.");
+            System.Console.Error.WriteLine("Error: Specify either -i or -f, not both.");
+            return 1;
+        }
+
+        string? ivyml = null;
+
+        if (!string.IsNullOrWhiteSpace(settings.FilePath))
+        {
+            if (!File.Exists(settings.FilePath))
+            {
+                System.Console.Error.WriteLine($"Error: File not found: {settings.FilePath}");
+                return 1;
+            }
+            ivyml = await File.ReadAllTextAsync(settings.FilePath, ct);
+        }
+        else
+        {
+            ivyml = settings.IvyML;
+        }
+
+        if (string.IsNullOrWhiteSpace(ivyml))
+        {
+            System.Console.Error.WriteLine("Error: Provide IvyML markup via -i or -f.");
             return 1;
         }
 
@@ -57,8 +88,8 @@ public sealed class DrawCommand : AsyncCommand<DrawCommand.Settings>
         }
 
         var service = new IvyScreenshotService();
-        var options = new ScreenshotOptions(settings.Width, settings.Height, outputPath);
-        var result = await service.CaptureAsync(settings.IvyML, options, ct);
+        var options = new ScreenshotOptions(settings.Width, settings.Height, outputPath, settings.Debug);
+        var result = await service.CaptureAsync(ivyml, options, ct);
 
         if (result.Success)
         {

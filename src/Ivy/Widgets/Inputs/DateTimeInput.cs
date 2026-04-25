@@ -23,6 +23,8 @@ public interface IAnyDateTimeInput : IAnyInput
     public string? Format { get; set; }
 }
 
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDateTimeInput
 {
     [Prop] public DateTimeInputVariant Variant { get; set; } = DateTimeInputVariant.Date;

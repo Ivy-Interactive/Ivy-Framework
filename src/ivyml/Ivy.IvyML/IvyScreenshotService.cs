@@ -1,3 +1,4 @@
+using System.Reflection;
 using Ivy.Core.Apps;
 using Ivy.Core.Server;
 using Microsoft.Playwright;
@@ -14,6 +15,15 @@ public class IvyScreenshotService
         [".jpeg"] = SKEncodedImageFormat.Jpeg,
         [".webp"] = SKEncodedImageFormat.Webp,
     };
+
+    private static readonly Lazy<string> DebugOverlayScript = new(() =>
+    {
+        using var stream = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream("Ivy.IvyML.DebugOverlay.js");
+        if (stream is null) return "";
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
+    });
 
     public static bool IsSupportedFormat(string ext) => FormatMap.ContainsKey(ext);
 
@@ -75,6 +85,11 @@ public class IvyScreenshotService
             {
                 WaitUntil = WaitUntilState.NetworkIdle
             });
+
+            if (options.Debug)
+            {
+                await page.EvaluateAsync(DebugOverlayScript.Value);
+            }
 
             var fullPath = Path.GetFullPath(options.OutputPath);
             var dir = Path.GetDirectoryName(fullPath);

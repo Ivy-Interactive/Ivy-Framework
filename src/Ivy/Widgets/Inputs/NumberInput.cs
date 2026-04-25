@@ -43,6 +43,8 @@ public interface IAnyNumberInput : IAnyInput
     public string? TargetType { get; set; }
 }
 
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumberInput
 {
     [Prop] public bool Disabled { get; set; }

@@ -11,6 +11,8 @@ public interface IAnyDateRangeInput : IAnyInput
     public string? Format { get; set; }
 }
 
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAnyDateRangeInput
 {
     [Prop] public string? Placeholder { get; set; }

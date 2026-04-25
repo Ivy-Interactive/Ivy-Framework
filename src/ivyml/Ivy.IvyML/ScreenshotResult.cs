@@ -1,6 +1,6 @@
 namespace Ivy.IvyML;
 
-public record ScreenshotOptions(int Width, int Height, string OutputPath);
+public record ScreenshotOptions(int Width, int Height, string OutputPath, bool Debug = false);
 
 public record ScreenshotResult(bool Success, string? OutputPath, string? ErrorMessage)
 {

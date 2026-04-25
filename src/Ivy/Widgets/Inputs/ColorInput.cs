@@ -20,6 +20,8 @@ public interface IAnyColorInput : IAnyInput
     public ColorInputVariant Variant { get; set; }
 }
 
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInput
 {
     [Prop] public bool Disabled { get; set; }

@@ -16,6 +16,8 @@ public interface IAnyCodeInput : IAnyInput
     public CodeInputVariant Variant { get; set; }
 }
 
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 {
     [Prop] public bool Disabled { get; set; }

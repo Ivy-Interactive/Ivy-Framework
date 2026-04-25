@@ -23,6 +23,8 @@ public interface IAnyNumberRangeInput : IAnyInput
     public string? TargetType { get; set; }
 }
 
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record NumberRangeInputBase : WidgetBase<NumberRangeInputBase>, IAnyNumberRangeInput
 {
     [Prop] public bool Disabled { get; set; }

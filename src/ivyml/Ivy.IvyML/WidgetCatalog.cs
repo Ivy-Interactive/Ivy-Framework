@@ -8,7 +8,9 @@ public record WidgetPropInfo(string Name, string Type, bool IsNullable, string? 
 
 public record WidgetEventInfo(string Name);
 
-public record WidgetInfo(string Name, WidgetPropInfo[] Props, WidgetEventInfo[] Events);
+public record WidgetSlotInfo(string Name);
+
+public record WidgetInfo(string Name, WidgetPropInfo[] Props, WidgetEventInfo[] Events, WidgetSlotInfo[] Slots);
 
 public static class WidgetCatalog
 {
@@ -39,8 +41,9 @@ public static class WidgetCatalog
 
             var props = GetProps(type);
             var events = GetEvents(type);
+            var slots = GetSlots(type);
 
-            if (props.Length == 0 && events.Length == 0)
+            if (props.Length == 0 && events.Length == 0 && slots.Length == 0)
                 continue;
 
             var name = type.Name;
@@ -50,7 +53,7 @@ public static class WidgetCatalog
             if (catalog.ContainsKey(name))
                 continue;
 
-            catalog[name] = new WidgetInfo(name, props, events);
+            catalog[name] = new WidgetInfo(name, props, events, slots);
         }
 
         return catalog;
@@ -116,6 +119,11 @@ public static class WidgetCatalog
             .Select(p => new WidgetEventInfo(p.Name))
             .ToArray();
 
+    private static WidgetSlotInfo[] GetSlots(Type type) =>
+        type.GetCustomAttributes<SlotAttribute>()
+            .Select(a => new WidgetSlotInfo(a.Name))
+            .ToArray();
+
     private static string FormatTypeName(Type type)
     {
         if (type == typeof(string)) return "string";
@@ -177,9 +185,18 @@ public static class WidgetCatalog
             }
         }
 
-        if (widget.Events.Length > 0)
+        if (widget.Slots.Length > 0)
         {
             if (widget.Props.Length > 0)
+                sb.AppendLine();
+            sb.AppendLine("Slots:");
+            foreach (var slot in widget.Slots)
+                sb.AppendLine($"  {slot.Name}");
+        }
+
+        if (widget.Events.Length > 0)
+        {
+            if (widget.Props.Length > 0 || widget.Slots.Length > 0)
                 sb.AppendLine();
             sb.AppendLine("Events:");
             foreach (var evt in widget.Events)

@@ -30,6 +30,8 @@ public interface IAnyTextInput : IAnyInput
     public TextInputVariant Variant { get; set; }
 }
 
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 {
     [Prop] public bool Disabled { get; set; }

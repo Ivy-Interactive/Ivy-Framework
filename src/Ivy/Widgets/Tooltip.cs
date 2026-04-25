@@ -6,6 +6,8 @@ namespace Ivy;
 /// <summary>
 /// A brief informational message that appears when hovering over an element.
 /// </summary>
+[Slot("Trigger")]
+[Slot("Content")]
 public record Tooltip : WidgetBase<Tooltip>
 {
     public Tooltip(object trigger, object content) : base([new Slot("Trigger", trigger), new Slot("Content", content)])

@@ -6,6 +6,9 @@ namespace Ivy;
 /// <summary>
 /// A flexible container with a border and shadow for grouping related content.
 /// </summary>
+[Slot("Content")]
+[Slot("Header")]
+[Slot("Footer")]
 public record Card : WidgetBase<Card>
 {
     public Card(object? content = null, object? footer = null, object? header = null) : base(

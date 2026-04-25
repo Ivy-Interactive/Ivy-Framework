@@ -157,16 +157,78 @@ public class XamlBuilder
         return obj;
     }
 
+    private static readonly HashSet<string> Breakpoints = new(StringComparer.OrdinalIgnoreCase)
+        { "Mobile", "Tablet", "Desktop", "Wide" };
+
     private void SetAttributes(object target, XElement element)
     {
+        List<(string propName, string breakpoint, string value)>? responsiveAttrs = null;
+
         foreach (var attr in element.Attributes())
         {
-            var prop = FindProperty(target, attr.Name.LocalName)
+            var attrName = attr.Name.LocalName;
+            var dotIndex = attrName.IndexOf('.');
+
+            if (dotIndex > 0 && dotIndex < attrName.Length - 1)
+            {
+                var suffix = attrName[(dotIndex + 1)..];
+                if (Breakpoints.Contains(suffix))
+                {
+                    responsiveAttrs ??= [];
+                    responsiveAttrs.Add((attrName[..dotIndex], suffix, attr.Value));
+                    continue;
+                }
+            }
+
+            var prop = FindProperty(target, attrName)
                 ?? throw new InvalidOperationException(
-                    $"Unknown property '{attr.Name.LocalName}' on {target.GetType().Name}.");
+                    $"Unknown property '{attrName}' on {target.GetType().Name}.");
 
             var value = ConvertValue(attr.Value, prop.PropertyType);
             SetProperty(target, prop, value);
+        }
+
+        if (responsiveAttrs != null)
+            SetResponsiveBreakpoints(target, responsiveAttrs);
+    }
+
+    private void SetResponsiveBreakpoints(object target,
+        List<(string propName, string breakpoint, string value)> attrs)
+    {
+        foreach (var (propName, breakpoint, attrValue) in attrs)
+        {
+            var prop = FindProperty(target, propName)
+                ?? throw new InvalidOperationException(
+                    $"Unknown property '{propName}' on {target.GetType().Name}.");
+
+            var propType = prop.PropertyType;
+            var underlyingType = Nullable.GetUnderlyingType(propType) ?? propType;
+
+            if (!underlyingType.IsGenericType ||
+                underlyingType.GetGenericTypeDefinition() != typeof(Responsive<>))
+                throw new InvalidOperationException(
+                    $"Property '{propName}' on {target.GetType().Name} does not support responsive breakpoints.");
+
+            var innerType = underlyingType.GetGenericArguments()[0];
+            var innerValue = ConvertValue(attrValue, innerType);
+
+            var existing = prop.GetValue(target);
+            if (existing == null)
+            {
+                existing = Activator.CreateInstance(underlyingType)!;
+                SetProperty(target, prop, existing);
+            }
+
+            var bpName = Breakpoints.First(b => string.Equals(b, breakpoint, StringComparison.OrdinalIgnoreCase));
+            var bpField = underlyingType.GetField(
+                $"<{bpName}>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (bpField == null)
+                throw new InvalidOperationException(
+                    $"Unknown breakpoint '{breakpoint}' on Responsive<{innerType.Name}>.");
+
+            bpField.SetValue(existing, innerValue);
         }
     }
 

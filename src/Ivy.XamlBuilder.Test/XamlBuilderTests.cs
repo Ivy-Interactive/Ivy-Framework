@@ -393,6 +393,65 @@ public class XamlBuilderTests
         Assert.Single(chart.XAxis);
     }
 
+    // --- Responsive breakpoint syntax ---
+
+    [Fact]
+    public void Build_Responsive_SingleBreakpoint()
+    {
+        var widget = _builder.Build("<Badge Width.Mobile=\"Half\" />");
+        var badge = Assert.IsType<Badge>(widget);
+        Assert.NotNull(badge.Width);
+        Assert.Equal(Size.Half(), badge.Width!.Mobile);
+    }
+
+    [Fact]
+    public void Build_Responsive_DefaultAndBreakpoint()
+    {
+        var widget = _builder.Build("<Badge Width=\"Full\" Width.Mobile=\"Half\" />");
+        var badge = Assert.IsType<Badge>(widget);
+        Assert.NotNull(badge.Width);
+        Assert.Equal(Size.Full(), badge.Width!.Default);
+        Assert.Equal(Size.Half(), badge.Width!.Mobile);
+    }
+
+    [Fact]
+    public void Build_Responsive_MultipleBreakpoints()
+    {
+        var widget = _builder.Build("<Badge Width=\"Full\" Width.Mobile=\"200px\" Width.Tablet=\"Half\" Width.Desktop=\"80%\" />");
+        var badge = Assert.IsType<Badge>(widget);
+        Assert.NotNull(badge.Width);
+        Assert.Equal(Size.Full(), badge.Width!.Default);
+        Assert.Equal(Size.Px(200), badge.Width!.Mobile);
+        Assert.Equal(Size.Half(), badge.Width!.Tablet);
+        Assert.Equal(Size.Fraction(0.8f), badge.Width!.Desktop);
+    }
+
+    [Fact]
+    public void Build_Responsive_BreakpointOnly_NoDefault()
+    {
+        var widget = _builder.Build("<Badge Width.Desktop=\"Full\" />");
+        var badge = Assert.IsType<Badge>(widget);
+        Assert.NotNull(badge.Width);
+        Assert.Null(badge.Width!.Default);
+        Assert.Equal(Size.Full(), badge.Width!.Desktop);
+    }
+
+    [Fact]
+    public void Build_Responsive_CaseInsensitiveBreakpoint()
+    {
+        var widget = _builder.Build("<Badge Width.mobile=\"Half\" />");
+        var badge = Assert.IsType<Badge>(widget);
+        Assert.NotNull(badge.Width);
+        Assert.Equal(Size.Half(), badge.Width!.Mobile);
+    }
+
+    [Fact]
+    public void Build_Responsive_NonResponsiveProp_Throws()
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => _builder.Build("<Badge Title.Mobile=\"Hello\" />"));
+    }
+
     // --- Error cases ---
 
     [Fact]

@@ -9,6 +9,8 @@ namespace Ivy;
 /// <summary>
 /// An input field for selecting an icon from the Ivy icon set (Lucide icons).
 /// </summary>
+[Slot("Prefix")]
+[Slot("Suffix")]
 public abstract record IconInputBase : WidgetBase<IconInputBase>, IAnyInput
 {
     [Prop] public bool Disabled { get; set; }

@@ -15,6 +15,7 @@ public enum SheetSide
 /// <summary>
 /// A side-aligned modal panel for editing or displaying distinct sub-tasks.
 /// </summary>
+[Slot("Content")]
 public record Sheet : WidgetBase<Sheet>
 {
     public static Size DefaultWidth => Size.Rem(24);

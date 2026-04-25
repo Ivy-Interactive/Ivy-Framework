@@ -7,6 +7,10 @@ namespace Ivy;
 /// <summary>
 /// A common application layout with a collapsible sidebar and main content area.
 /// </summary>
+[Slot("MainContent")]
+[Slot("SidebarContent")]
+[Slot("SidebarHeader")]
+[Slot("SidebarFooter")]
 public record SidebarLayout : WidgetBase<SidebarLayout>
 {
     public static Size DefaultWidth => Size.Rem(16);

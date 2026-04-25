@@ -4,6 +4,8 @@ namespace Ivy;
 /// <summary>
 /// A widget that can expand or collapse its content.
 /// </summary>
+[Slot("Header")]
+[Slot("Content")]
 public record Expandable : WidgetBase<Expandable>
 {
     public Expandable(object header, object content) : base([new Slot("Header", header), new Slot("Content", content)])
