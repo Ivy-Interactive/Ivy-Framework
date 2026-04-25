@@ -268,7 +268,15 @@ public class XamlBuilder
             return double.Parse(value, CultureInfo.InvariantCulture);
 
         if (targetType.IsEnum)
-            return Enum.Parse(targetType, value, ignoreCase: true);
+        {
+            if (!Enum.TryParse(targetType, value, ignoreCase: true, out var enumResult))
+            {
+                var valid = string.Join(", ", Enum.GetNames(targetType));
+                throw new InvalidOperationException(
+                    $"Invalid value '{value}' for {targetType.Name}. Valid values: {valid}");
+            }
+            return enumResult!;
+        }
 
         if (targetType == typeof(Size))
             return ParseSize(value);

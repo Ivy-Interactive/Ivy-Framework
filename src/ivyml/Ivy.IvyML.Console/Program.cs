@@ -7,6 +7,8 @@ app.Configure(config =>
 {
     config.AddCommand<DrawCommand>("draw")
         .WithDescription("Render IvyML to a screenshot image.");
+    config.AddCommand<DocsCommand>("docs")
+        .WithDescription("Show IvyML documentation and widget reference.");
 });
 
 return await app.RunAsync(args);
