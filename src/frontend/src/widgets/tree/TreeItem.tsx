@@ -97,7 +97,8 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
                 tabIndex={-1}
                 disabled={item.disabled}
               >
-                <span style={{ display: hovered ? "inline-flex" : "none" }}>
+                {/* Show chevron on touch devices (always) or on hover (desktop) */}
+                <span className="inline-flex hover-device:hidden group-hover:inline-flex">
                   <ChevronRight
                     className={cn(
                       "h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
@@ -105,7 +106,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
                     )}
                   />
                 </span>
-                <span style={{ display: hovered ? "none" : "inline-flex" }}>
+                <span className="hidden hover-device:inline-flex group-hover:hidden">
                   <Icon className="h-4 w-4 shrink-0 text-muted-foreground" name={item.icon} />
                 </span>
               </button>
@@ -131,7 +132,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
 
           {rowActions && rowActions.length > 0 && onRowActionClick && (
             <div
-              className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 flex items-center shrink-0"
+              className="opacity-100 hover-device:opacity-0 hover-device:group-hover:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 flex items-center shrink-0"
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
@@ -197,7 +198,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
 
       {rowActions && rowActions.length > 0 && onRowActionClick && (
         <div
-          className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 flex items-center shrink-0 pr-1"
+          className="opacity-100 hover-device:opacity-0 hover-device:group-hover:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 flex items-center shrink-0 pr-1"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}

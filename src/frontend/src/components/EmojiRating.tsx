@@ -108,6 +108,9 @@ export function EmojiRating({
               onMouseEnter={(e) => !disabled && handleMouseMove(rating, e)}
               onMouseMove={(e) => allowHalf && !disabled && handleMouseMove(rating, e)}
               onMouseLeave={() => !disabled && setHover(0)}
+              onPointerEnter={(e) => !disabled && handleMouseMove(rating, e)}
+              onPointerMove={(e) => allowHalf && !disabled && handleMouseMove(rating, e)}
+              onPointerLeave={() => !disabled && setHover(0)}
               disabled={disabled}
             >
               <span

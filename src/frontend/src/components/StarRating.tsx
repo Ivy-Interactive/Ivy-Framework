@@ -88,6 +88,9 @@ export function StarRating({
                 onMouseEnter={(e) => !disabled && handleMouseMove(star, e)}
                 onMouseMove={(e) => allowHalf && !disabled && handleMouseMove(star, e)}
                 onMouseLeave={() => !disabled && setHover(0)}
+                onPointerEnter={(e) => !disabled && handleMouseMove(star, e)}
+                onPointerMove={(e) => allowHalf && !disabled && handleMouseMove(star, e)}
+                onPointerLeave={() => !disabled && setHover(0)}
                 whileHover={!disabled ? { scale: 1.3, rotate: -10 } : undefined}
                 whileTap={!disabled ? { scale: 0.9, rotate: 15 } : undefined}
                 disabled={disabled}

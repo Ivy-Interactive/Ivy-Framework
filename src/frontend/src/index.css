@@ -2,6 +2,7 @@
 @import "@ivy-interactive/ivy-design-system/css/fonts";
 
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant hover-device (@media (hover: hover));
 
 @theme {
   --color-scheme: light;
