@@ -28,7 +28,6 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   onRowActionClick,
 }) => {
   const [isOpen, setIsOpen] = React.useState(item.expanded ?? false);
-  const [hovered, setHovered] = React.useState(false);
   const hasChildren = item.children && item.children.length > 0;
   const gapClass = densityTreeGap[density ?? Densities.Medium];
 
@@ -86,8 +85,6 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
           tabIndex={item.disabled ? -1 : 0}
           onKeyDown={handleKeyDown}
           onClick={handleClick}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
         >
           {item.icon && item.icon !== "None" ? (
             <CollapsibleTrigger asChild>
