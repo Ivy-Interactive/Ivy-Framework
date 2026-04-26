@@ -158,6 +158,59 @@ Use `Color="Red"`, not `Color="Red500"`. Available values: Black, White, Slate, 
 - Use `<Separator />` between major sections to create visual hierarchy and prevent content from blending together.
 - Prefer semantic variants (`Primary`, `Success`, `Muted`) over raw colors when available on a widget.
 
+## Attached Properties
+
+Some layout widgets define properties that are set on **child** elements rather than the layout itself. These are called attached properties. In IvyML, use them as attributes on any child widget inside that layout.
+
+```xml
+<CanvasLayout Width="Full" Height="300px">
+  <TextBlock Content="Hello" CanvasLeft="50px" CanvasTop="20px" />
+</CanvasLayout>
+```
+
+Attached props are resolved automatically -- the child doesn't need to know about them.
+
+## Wireframe Widgets
+
+Wireframe widgets have a hand-drawn, Balsamiq-style appearance for sketching and prototyping.
+
+### WireframeNote
+
+A sticky note with a folded corner, drop shadow, and hand-drawn font.
+
+```xml
+<WireframeNote Text="Remember this" />
+<WireframeNote Text="Urgent item" Color="Pink" />
+```
+
+| Prop    | Type              | Default  | Values                                         |
+|---------|-------------------|----------|-------------------------------------------------|
+| `Text`  | string            |          | The note content. Use `&#10;` for line breaks.  |
+| `Color` | WireframeNoteColor| Yellow   | Yellow, Blue, Green, Pink, Orange, Purple       |
+
+### CanvasLayout
+
+A free-form layout that positions children at absolute coordinates using attached properties.
+
+```xml
+<CanvasLayout Width="Full" Height="400px">
+  <WireframeNote Text="Top left" CanvasLeft="20px" CanvasTop="20px" />
+  <WireframeNote Text="Center" CanvasLeft="200px" CanvasTop="150px" />
+</CanvasLayout>
+```
+
+| Prop         | Type      | Description                |
+|--------------|-----------|----------------------------|
+| `Padding`    | Thickness | Inner padding              |
+| `Background` | Colors    | Background color           |
+
+**Attached props** (set on children):
+
+| Prop         | Type | Description                         |
+|--------------|------|-------------------------------------|
+| `CanvasLeft` | Size | Horizontal offset from left edge    |
+| `CanvasTop`  | Size | Vertical offset from top edge       |
+
 ## Examples
 
 Simple text:
@@ -185,4 +238,14 @@ Badge:
 Progress bar:
 ```xml
 <Progress Value="75" />
+```
+
+Wireframe sketch:
+```xml
+<CanvasLayout Width="Full" Height="400px">
+  <WireframeNote Text="Step 1: User signs up" Color="Yellow" CanvasLeft="30px" CanvasTop="20px" />
+  <WireframeNote Text="Step 2: Verify email" Color="Blue" CanvasLeft="220px" CanvasTop="100px" />
+  <WireframeNote Text="Step 3: Onboarding" Color="Green" CanvasLeft="410px" CanvasTop="40px" />
+  <TextBlock Content="Signup Flow" Variant="H3" CanvasLeft="180px" CanvasTop="300px" />
+</CanvasLayout>
 ```

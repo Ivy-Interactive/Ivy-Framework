@@ -49,6 +49,11 @@ public static class Layout
         return new GridView(Flatten(elements));
     }
 
+    public static CanvasLayout Canvas(params IEnumerable<object?> elements)
+    {
+        return new CanvasLayout(Flatten(elements));
+    }
+
     public static Spacer Spacer()
     {
         return new Spacer();

@@ -36,6 +36,7 @@ import {
   ResizablePanelWidget,
 } from "@/widgets/layouts/ResizablePanelGroupWidget";
 import { FloatingPanelWidget } from "@/widgets/layouts/FloatingPanelWidget";
+import { CanvasLayoutWidget } from "@/widgets/layouts/CanvasLayoutWidget";
 import { ListItemWidget } from "@/widgets/lists";
 import { TreeWidget } from "@/widgets/tree";
 import { TextBlockWidget } from "@/widgets/primitives/TextBlockWidget";
@@ -179,6 +180,7 @@ export const widgetMap = {
   "Ivy.ResizablePanelGroup": ResizablePanelGroupWidget,
   "Ivy.ResizablePanel": ResizablePanelWidget,
   "Ivy.FloatingPanel": FloatingPanelWidget,
+  "Ivy.CanvasLayout": CanvasLayoutWidget,
 
   // Inputs
   "Ivy.Field": FieldWidget,

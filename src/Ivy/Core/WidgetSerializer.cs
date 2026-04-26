@@ -236,8 +236,8 @@ public static class WidgetSerializer
     {
         if (attribute.IsAttached)
         {
-            if (!property.PropertyType.IsArray || !property.PropertyType.GetElementType()!.IsGenericType)
-                throw new InvalidOperationException("Attached properties must be arrays of nullable types.");
+            if (!property.PropertyType.IsArray)
+                throw new InvalidOperationException("Attached properties must be arrays.");
 
             var children = widget.Children;
             var attachedValues = new object?[children.Length];

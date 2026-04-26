@@ -9,6 +9,7 @@ namespace Ivy;
 public class XamlBuilder
 {
     private readonly Dictionary<string, Type> _typeMap;
+    private readonly Dictionary<string, (Type ParentType, Type ValueType)> _attachedProps;
 
     public XamlBuilder(params Assembly[] assemblies)
     {
@@ -17,20 +18,38 @@ public class XamlBuilder
             : [typeof(AbstractWidget).Assembly];
 
         _typeMap = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+        _attachedProps = new Dictionary<string, (Type, Type)>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var assembly in assembliesToScan)
         {
             foreach (var type in assembly.GetTypes())
             {
-                if (type.IsAbstract || type.IsGenericTypeDefinition || type.IsEnum ||
+                if (type.IsGenericTypeDefinition || type.IsEnum ||
                     type.IsInterface || type.IsNested)
                     continue;
 
-                if (!HasUsableConstructor(type))
-                    continue;
+                if (!type.IsAbstract && HasUsableConstructor(type))
+                    _typeMap[type.Name] = type;
 
-                _typeMap[type.Name] = type;
+                if (typeof(AbstractWidget).IsAssignableFrom(type))
+                    ScanAttachedProps(type);
             }
+        }
+    }
+
+    private void ScanAttachedProps(Type parentType)
+    {
+        foreach (var prop in parentType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            var attr = prop.GetCustomAttribute<PropAttribute>();
+            if (attr?.AttachedName == null) continue;
+
+            var arrayElementType = prop.PropertyType.IsArray
+                ? prop.PropertyType.GetElementType()!
+                : prop.PropertyType;
+            var valueType = Nullable.GetUnderlyingType(arrayElementType) ?? arrayElementType;
+
+            _attachedProps[attr.AttachedName] = (parentType, valueType);
         }
     }
 
@@ -180,12 +199,22 @@ public class XamlBuilder
                 }
             }
 
-            var prop = FindProperty(target, attrName)
-                ?? throw new InvalidOperationException(
+            var prop = FindProperty(target, attrName);
+            if (prop != null)
+            {
+                var value = ConvertValue(attr.Value, prop.PropertyType);
+                SetProperty(target, prop, value);
+            }
+            else if (target is AbstractWidget widget && _attachedProps.TryGetValue(attrName, out var attached))
+            {
+                var value = ConvertValue(attr.Value, attached.ValueType);
+                widget.SetAttachedValue(attached.ParentType, attrName, value);
+            }
+            else
+            {
+                throw new InvalidOperationException(
                     $"Unknown property '{attrName}' on {target.GetType().Name}.");
-
-            var value = ConvertValue(attr.Value, prop.PropertyType);
-            SetProperty(target, prop, value);
+            }
         }
 
         if (responsiveAttrs != null)
