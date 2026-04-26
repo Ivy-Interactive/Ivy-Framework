@@ -17,7 +17,7 @@ export const tabTriggerVariant = cva(
     defaultVariants: {
       density: "Medium",
     },
-  }
+  },
 );
 
 /**
@@ -36,5 +36,5 @@ export const hoverHighlightVariant = cva(
     defaultVariants: {
       density: "Medium",
     },
-  }
+  },
 );

@@ -107,9 +107,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
       <div ref={containerRef} className="relative pb-[6px] w-full" style={getWidth(width)}>
         {/* Hover Highlight */}
         <div
-          className={cn(
-            hoverHighlightVariant({ density }),
-          )}
+          className={cn(hoverHighlightVariant({ density }))}
           style={{
             opacity: activeIndex !== null ? 1 : 0,
             pointerEvents: "none",

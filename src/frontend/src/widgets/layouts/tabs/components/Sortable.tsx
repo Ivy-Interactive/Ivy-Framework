@@ -27,10 +27,7 @@ export function SortableTabTrigger({
   });
 
   // Apply density-based height and text size
-  const densityClasses = cn(
-    densityHeight[density],
-    densityText[density]
-  );
+  const densityClasses = cn(densityHeight[density], densityText[density]);
 
   return (
     <TabsTrigger
