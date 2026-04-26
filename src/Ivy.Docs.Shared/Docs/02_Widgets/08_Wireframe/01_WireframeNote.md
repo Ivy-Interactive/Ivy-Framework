@@ -31,11 +31,11 @@ Six color variants are available to categorize and distinguish notes:
 ```csharp demo
 Layout.Horizontal().Gap(4)
     | new WireframeNote("Yellow (default)")
-    | new WireframeNote("Blue note", WireframeNoteColor.Blue)
-    | new WireframeNote("Green note", WireframeNoteColor.Green)
-    | new WireframeNote("Pink note", WireframeNoteColor.Pink)
-    | new WireframeNote("Orange note", WireframeNoteColor.Orange)
-    | new WireframeNote("Purple note", WireframeNoteColor.Purple)
+    | new WireframeNote("Blue note", Colors.Blue)
+    | new WireframeNote("Green note", Colors.Green)
+    | new WireframeNote("Pink note", Colors.Pink)
+    | new WireframeNote("Orange note", Colors.Orange)
+    | new WireframeNote("Purple note", Colors.Purple)
 ```
 
 | Color    | Typical Use                    |
@@ -54,8 +54,8 @@ Use newlines in the text string to create multi-line notes:
 ```csharp demo
 Layout.Horizontal().Gap(4)
     | new WireframeNote("Step 1:\nUser signs up")
-    | new WireframeNote("Step 2:\nVerify email", WireframeNoteColor.Blue)
-    | new WireframeNote("Step 3:\nOnboarding flow", WireframeNoteColor.Green)
+    | new WireframeNote("Step 2:\nVerify email", Colors.Blue)
+    | new WireframeNote("Step 3:\nOnboarding flow", Colors.Green)
 ```
 
 ## Sizing
@@ -74,13 +74,13 @@ Combine with `CanvasLayout` for free-form placement:
 
 ```csharp demo
 Layout.Canvas().Width(Size.Full()).Height(Size.Px(300))
-    | new WireframeNote("Login page", WireframeNoteColor.Yellow)
+    | new WireframeNote("Login page", Colors.Yellow)
         .CanvasLeft(Size.Px(20)).CanvasTop(Size.Px(20))
-    | new WireframeNote("Auth service", WireframeNoteColor.Blue)
+    | new WireframeNote("Auth service", Colors.Blue)
         .CanvasLeft(Size.Px(200)).CanvasTop(Size.Px(100))
-    | new WireframeNote("Dashboard", WireframeNoteColor.Green)
+    | new WireframeNote("Dashboard", Colors.Green)
         .CanvasLeft(Size.Px(380)).CanvasTop(Size.Px(30))
-    | new WireframeNote("Error handling", WireframeNoteColor.Pink)
+    | new WireframeNote("Error handling", Colors.Pink)
         .CanvasLeft(Size.Px(200)).CanvasTop(Size.Px(220))
 ```
 
@@ -95,14 +95,14 @@ Layout.Vertical().Gap(4)
         | (Layout.Vertical().Gap(3).Width(Size.Units(40))
             | Text.Strong("To Do")
             | new WireframeNote("Design login page").Width(Size.Full())
-            | new WireframeNote("Write API docs", WireframeNoteColor.Orange).Width(Size.Full()))
+            | new WireframeNote("Write API docs", Colors.Orange).Width(Size.Full()))
         | (Layout.Vertical().Gap(3).Width(Size.Units(40))
             | Text.Strong("In Progress")
-            | new WireframeNote("Build widgets", WireframeNoteColor.Blue).Width(Size.Full()))
+            | new WireframeNote("Build widgets", Colors.Blue).Width(Size.Full()))
         | (Layout.Vertical().Gap(3).Width(Size.Units(40))
             | Text.Strong("Done")
-            | new WireframeNote("DB schema", WireframeNoteColor.Green).Width(Size.Full())
-            | new WireframeNote("Scaffolding", WireframeNoteColor.Green).Width(Size.Full())))
+            | new WireframeNote("DB schema", Colors.Green).Width(Size.Full())
+            | new WireframeNote("Scaffolding", Colors.Green).Width(Size.Full())))
 ```
 
 <WidgetDocs Type="Ivy.WireframeNote" ExtensionTypes="Ivy.WireframeNoteExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/src/Ivy/Widgets/Wireframe/WireframeNote.cs"/>

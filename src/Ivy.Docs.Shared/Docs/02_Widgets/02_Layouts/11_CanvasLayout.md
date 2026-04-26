@@ -52,11 +52,11 @@ Layout.Canvas().Width(Size.Full()).Height(Size.Px(200))
 
 ```csharp demo
 Layout.Canvas().Width(Size.Full()).Height(Size.Px(300))
-    | new WireframeNote("Step 1: User signs up", WireframeNoteColor.Yellow)
+    | new WireframeNote("Step 1: User signs up", Colors.Yellow)
         .CanvasLeft(Size.Px(20)).CanvasTop(Size.Px(20))
-    | new WireframeNote("Step 2: Verify email", WireframeNoteColor.Blue)
+    | new WireframeNote("Step 2: Verify email", Colors.Blue)
         .CanvasLeft(Size.Px(200)).CanvasTop(Size.Px(80))
-    | new WireframeNote("Step 3: Dashboard", WireframeNoteColor.Green)
+    | new WireframeNote("Step 3: Dashboard", Colors.Green)
         .CanvasLeft(Size.Px(380)).CanvasTop(Size.Px(30))
 ```
 
@@ -71,9 +71,9 @@ Layout.Canvas()
     .Background(Colors.Neutral)
     .Padding(new Thickness(8))
     | new Badge("Whiteboard").Outline().CanvasLeft(Size.Px(20)).CanvasTop(Size.Px(20))
-    | new WireframeNote("Idea 1", WireframeNoteColor.Yellow)
+    | new WireframeNote("Idea 1", Colors.Yellow)
         .CanvasLeft(Size.Px(20)).CanvasTop(Size.Px(60))
-    | new WireframeNote("Idea 2", WireframeNoteColor.Pink)
+    | new WireframeNote("Idea 2", Colors.Pink)
         .CanvasLeft(Size.Px(200)).CanvasTop(Size.Px(60))
 ```
 

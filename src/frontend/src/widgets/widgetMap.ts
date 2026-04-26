@@ -57,6 +57,7 @@ import { AvatarWidget } from "@/widgets/primitives/AvatarWidget";
 import { IvyLogoWidget } from "@/widgets/primitives/IvyLogoWidget";
 import { SpacerWidget } from "@/widgets/primitives/SpacerWidget";
 import { WireframeNoteWidget } from "@/widgets/wireframe/WireframeNoteWidget";
+import { WireframeCalloutWidget } from "@/widgets/wireframe/WireframeCalloutWidget";
 import { LoadingWidget } from "@/widgets/primitives/LoadingWidget";
 import { AppHostWidget } from "@/widgets/primitives/AppHostWidget";
 import { AutoScrollWidget } from "@/widgets/primitives/AutoScrollWidget";
@@ -303,6 +304,7 @@ export const widgetMap = {
 
   // Wireframe
   "Ivy.WireframeNote": WireframeNoteWidget,
+  "Ivy.WireframeCallout": WireframeCalloutWidget,
 
   // Effects
   "Ivy.Confetti": lazyWithRetry(() => import("@/widgets/effects/ConfettiWidget")),

@@ -1,19 +1,9 @@
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public enum WireframeNoteColor
-{
-    Yellow,
-    Blue,
-    Green,
-    Pink,
-    Orange,
-    Purple
-}
-
 public record WireframeNote : WidgetBase<WireframeNote>
 {
-    public WireframeNote(string? text = null, WireframeNoteColor color = WireframeNoteColor.Yellow)
+    public WireframeNote(string? text = null, Colors color = Colors.Yellow)
     {
         Text = text;
         Color = color;
@@ -23,7 +13,7 @@ public record WireframeNote : WidgetBase<WireframeNote>
 
     [Prop] public string? Text { get; set; }
 
-    [Prop] public WireframeNoteColor Color { get; set; } = WireframeNoteColor.Yellow;
+    [Prop] public Colors Color { get; set; } = Colors.Yellow;
 
     public static WireframeNote operator |(WireframeNote widget, object child)
     {
@@ -36,6 +26,6 @@ public static class WireframeNoteExtensions
     public static WireframeNote Text(this WireframeNote note, string text)
         => note with { Text = text };
 
-    public static WireframeNote Color(this WireframeNote note, WireframeNoteColor color)
+    public static WireframeNote Color(this WireframeNote note, Colors color)
         => note with { Color = color };
 }

@@ -14,17 +14,17 @@ public class CanvasLayoutApp : SampleBase
 
         var wireframe = Layout.Canvas()
             .Width(Size.Full()).Height(Size.Px(350))
-            | new WireframeNote("User clicks Login", WireframeNoteColor.Yellow)
+            | new WireframeNote("User clicks Login", Colors.Yellow)
                 .CanvasLeft(Size.Px(20)).CanvasTop(Size.Px(10))
-            | new WireframeNote("Validate credentials\nagainst OAuth", WireframeNoteColor.Blue)
+            | new WireframeNote("Validate credentials\nagainst OAuth", Colors.Blue)
                 .CanvasLeft(Size.Px(200)).CanvasTop(Size.Px(70))
-            | new WireframeNote("Token exchange\n+ session create", WireframeNoteColor.Green)
+            | new WireframeNote("Token exchange\n+ session create", Colors.Green)
                 .CanvasLeft(Size.Px(380)).CanvasTop(Size.Px(20))
-            | new WireframeNote("Redirect to\ndashboard", WireframeNoteColor.Purple)
+            | new WireframeNote("Redirect to\ndashboard", Colors.Purple)
                 .CanvasLeft(Size.Px(380)).CanvasTop(Size.Px(170))
-            | new WireframeNote("Show error toast", WireframeNoteColor.Pink)
+            | new WireframeNote("Show error toast", Colors.Pink)
                 .CanvasLeft(Size.Px(200)).CanvasTop(Size.Px(230))
-            | new WireframeNote("Retry?", WireframeNoteColor.Orange)
+            | new WireframeNote("Retry?", Colors.Orange)
                 .CanvasLeft(Size.Px(20)).CanvasTop(Size.Px(250));
 
         return Layout.Vertical()

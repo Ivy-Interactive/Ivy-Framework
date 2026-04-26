@@ -186,7 +186,21 @@ A sticky note with a folded corner, drop shadow, and hand-drawn font.
 | Prop    | Type              | Default  | Values                                         |
 |---------|-------------------|----------|-------------------------------------------------|
 | `Text`  | string            |          | The note content. Use `&#10;` for line breaks.  |
-| `Color` | WireframeNoteColor| Yellow   | Yellow, Blue, Green, Pink, Orange, Purple       |
+| `Color` | Colors            | Yellow   | Any color from the Colors enum                  |
+
+### WireframeCallout
+
+A hand-drawn numbered circle for annotations and step markers.
+
+```xml
+<WireframeCallout Label="1" />
+<WireframeCallout Label="!" Color="Pink" />
+```
+
+| Prop    | Type              | Default  | Values                                         |
+|---------|-------------------|----------|-------------------------------------------------|
+| `Label` | string            |          | Short text shown inside the circle.             |
+| `Color` | Colors            | Yellow   | Any color from the Colors enum                  |
 
 ### CanvasLayout
 
