@@ -1,4 +1,5 @@
 import React from "react";
+import { Densities } from "@/types/density";
 
 /**
  * Props for the TabWidget component
@@ -24,6 +25,7 @@ export interface TabsLayoutWidgetProps {
   padding?: string;
   width?: string;
   addButtonText?: string;
+  density?: Densities;
 }
 
 /**
@@ -39,6 +41,7 @@ export interface SortableTabTriggerProps {
   onMouseLeave?: () => void;
   children: React.ReactNode;
   useRadix?: boolean;
+  density?: Densities;
 }
 
 /**

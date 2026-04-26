@@ -14,6 +14,7 @@ import { useAnimation } from "./hooks/useAnimation";
 import { useTabManagement } from "./hooks/useTabManagement";
 import { useTabCalculation } from "./hooks/useTabCalculation";
 import { useDrag } from "./hooks/useDrag";
+import { Densities } from "@/types/density";
 
 const EMPTY_ARRAY: never[] = [];
 
@@ -27,6 +28,7 @@ export const TabsLayoutWidget = ({
   padding = "4,4,4,4",
   width = "Full",
   addButtonText,
+  density = Densities.Medium,
 }: TabsLayoutWidgetProps) => {
   const tabWidgets = React.useMemo(() => filterTabWidgets(children), [children]);
 
@@ -183,6 +185,7 @@ export const TabsLayoutWidget = ({
         removeParentPadding={removeParentPadding}
         width={width}
         padding={padding}
+        density={density}
         containerRef={containerRef}
         tabsListRef={tabsListRef}
         tabRefs={tabRefs}
@@ -210,6 +213,7 @@ export const TabsLayoutWidget = ({
       removeParentPadding={removeParentPadding}
       width={width}
       padding={padding}
+      density={density}
       variant={variant}
       activeTabId={activeTabId}
       tabOrder={tabOrder}

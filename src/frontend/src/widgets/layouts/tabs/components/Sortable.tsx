@@ -4,6 +4,8 @@ import { TabsTrigger } from "@/components/ui/tabs";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SortableTabTriggerProps, SortableDropdownMenuItemProps } from "../types";
+import { Densities } from "@/types/density";
+import { densityHeight, densityText } from "@/components/ui/density-scale";
 
 /**
  * A draggable tab trigger component that integrates with dnd-kit
@@ -17,11 +19,18 @@ export function SortableTabTrigger({
   className,
   children,
   useRadix = false,
+  density = Densities.Medium,
   ...props
 }: SortableTabTriggerProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
   });
+
+  // Apply density-based height and text size
+  const densityClasses = cn(
+    densityHeight[density],
+    densityText[density]
+  );
 
   return (
     <TabsTrigger
@@ -36,7 +45,7 @@ export function SortableTabTrigger({
       value={value}
       onClick={onClick}
       onMouseDown={onMouseDown}
-      className={className}
+      className={cn(className, densityClasses)}
       useRadix={useRadix}
       {...attributes}
       {...listeners}

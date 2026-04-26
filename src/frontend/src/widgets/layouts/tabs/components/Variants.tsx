@@ -7,11 +7,14 @@ import { SortableContext } from "@dnd-kit/sortable";
 import { Badge } from "@/components/ui/badge";
 import { SortableTabTrigger } from "./Sortable";
 import { getTabProps } from "../utils/tabUtils";
+import { Densities } from "@/types/density";
+import { tabTriggerVariant, hoverHighlightVariant } from "../variants";
 
 interface ContentVariantProps {
   removeParentPadding?: boolean;
   width?: string;
   padding?: string;
+  density?: Densities;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   tabsListRef: React.MutableRefObject<HTMLDivElement | null>;
   tabRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>;
@@ -39,6 +42,7 @@ interface TabsVariantProps {
   removeParentPadding?: boolean;
   width?: string;
   padding?: string;
+  density?: Densities;
   variant: "Tabs" | "Content";
   activeTabId: string | null;
   tabOrder: string[];
@@ -76,6 +80,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
   removeParentPadding,
   width,
   padding,
+  density = Densities.Medium,
   containerRef,
   tabsListRef,
   tabRefs,
@@ -102,7 +107,9 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
       <div ref={containerRef} className="relative pb-[6px] w-full" style={getWidth(width)}>
         {/* Hover Highlight */}
         <div
-          className="absolute h-[26px] transition-all duration-300 ease-out bg-accent/20 rounded-[6px] flex items-center"
+          className={cn(
+            hoverHighlightVariant({ density }),
+          )}
           style={{
             opacity: activeIndex !== null ? 1 : 0,
             pointerEvents: "none",
@@ -144,7 +151,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
                 aria-selected={index === activeIndex}
                 tabIndex={0}
                 className={cn(
-                  "px-3 py-1.5 cursor-pointer transition-colors duration-300 h-[26px] rounded-selector hover:bg-secondary",
+                  tabTriggerVariant({ density }),
                   index === activeIndex ? "text-foreground" : "text-muted-foreground",
                 )}
                 onClick={() => {
@@ -157,7 +164,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
                   safeEvent("OnSelect", [index]);
                 }}
               >
-                <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center h-full">
+                <div className="font-medium leading-4 whitespace-nowrap flex items-center justify-center h-full">
                   {title}
                   {badge && (
                     <Badge
@@ -225,6 +232,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
   removeParentPadding,
   width,
   padding,
+  density = Densities.Medium,
   variant,
   activeTabId,
   tabOrder,
@@ -298,6 +306,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                       id={id}
                       value={id}
                       useRadix={useRadix}
+                      density={density}
                       onClick={() => {
                         // Mark as user-initiated to prevent flicker
                         isUserInitiatedChangeRef.current = true;
