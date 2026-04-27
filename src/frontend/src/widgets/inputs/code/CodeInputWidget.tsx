@@ -226,12 +226,12 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           editable={!disabled}
           autoFocus={autoFocus}
           data-gramm="false"
+          theme="none"
           className={cn(
-            "h-full",
-            "[&_.cm-theme-light]:overflow-hidden [&_.cm-theme-light]:bg-transparent",
+            "h-full overflow-hidden",
             "border border-input shadow-sm rounded-field",
             "dark:bg-white/5 dark:border-white/10",
-            invalid && inputStyles.invalid,
+            invalid && inputStyles.invalidInput,
             disabled && "opacity-50 cursor-not-allowed",
           )}
           height="100%"
