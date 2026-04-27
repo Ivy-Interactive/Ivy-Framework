@@ -135,6 +135,10 @@ internal static class FormScaffolder
             return (state) =>
             {
                 var input = ApplyMaxLength(state.ToPasswordInput(), field);
+                if (field.GetMinLength() is { } minLength)
+                {
+                    input = input.MinLength(minLength);
+                }
                 if (field.IsNullable && !field.Required) input.Nullable = true;
                 return input;
             };
@@ -293,13 +297,18 @@ internal static class FormScaffolder
             validators.Add(e => (ValidationHelper.IsValidRequired(e), "Required field"));
         }
 
+        // Password: skip duplicate [MinLength] from DA — scaffolded password validator covers it.
+        Func<ValidationAttribute, bool>? skipAttribute = field.IsPassword()
+            ? attr => attr is MinLengthAttribute
+            : null;
+
         if (field.PropertyInfo != null)
         {
-            validators.AddRange(FormHelpers.GetValidators(field.PropertyInfo));
+            validators.AddRange(FormHelpers.GetValidators(field.PropertyInfo, skipAttribute));
         }
         else if (field.FieldInfo != null)
         {
-            validators.AddRange(FormHelpers.GetValidators(field.FieldInfo));
+            validators.AddRange(FormHelpers.GetValidators(field.FieldInfo, skipAttribute));
         }
 
         if (field.IsEmail())
@@ -309,7 +318,7 @@ internal static class FormScaffolder
         if (field.IsUrl())
             validators.Add(Validators.CreateUrlValidator(field.Name));
         if (field.IsPassword())
-            validators.Add(Validators.CreatePasswordValidator(field.Name));
+            validators.Add(Validators.CreatePasswordValidator(field.Name, field.GetMinLength() ?? Validators.DefaultPasswordMinLength));
 
         return validators;
     }
@@ -342,6 +351,7 @@ internal static class FormScaffolder
         public FormHelpers.DisplayInfo GetDisplayInfo() => PropertyInfo != null ? FormHelpers.GetDisplayInfo(PropertyInfo) : FormHelpers.GetDisplayInfo(FieldInfo!);
         public FormHelpers.RangeInfo GetRangeInfo() => PropertyInfo != null ? FormHelpers.GetRangeInfo(PropertyInfo) : FormHelpers.GetRangeInfo(FieldInfo!);
         public int? GetMaxLength() => PropertyInfo != null ? FormHelpers.GetMaxLength(PropertyInfo) : FormHelpers.GetMaxLength(FieldInfo!);
+        public int? GetMinLength() => PropertyInfo != null ? FormHelpers.GetMinLength(PropertyInfo) : FormHelpers.GetMinLength(FieldInfo!);
         public object[]? GetAllowedValues() => PropertyInfo != null ? FormHelpers.GetAllowedValues(PropertyInfo) : FormHelpers.GetAllowedValues(FieldInfo!);
 
         public bool IsEmail() =>

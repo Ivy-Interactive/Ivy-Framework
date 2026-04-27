@@ -14,13 +14,15 @@ public static class FormHelpers
         return IsNonNullableString(propertyInfo);
     }
 
-    public static List<Func<object?, (bool, string)>> GetValidators(PropertyInfo propertyInfo)
+    public static List<Func<object?, (bool, string)>> GetValidators(PropertyInfo propertyInfo, Func<ValidationAttribute, bool>? skipAttribute = null)
     {
         var validators = new List<Func<object?, (bool, string)>>();
         var attributes = propertyInfo.GetCustomAttributes<ValidationAttribute>();
 
         foreach (var attr in attributes)
         {
+            if (skipAttribute != null && skipAttribute(attr)) continue;
+
             var capturedAttr = attr; // Capture for closure
 
             if (TryCreateCollectionValidator(attr, propertyInfo.PropertyType, out var collectionValidator))
@@ -54,13 +56,15 @@ public static class FormHelpers
         return validators;
     }
 
-    public static List<Func<object?, (bool, string)>> GetValidators(FieldInfo fieldInfo)
+    public static List<Func<object?, (bool, string)>> GetValidators(FieldInfo fieldInfo, Func<ValidationAttribute, bool>? skipAttribute = null)
     {
         var validators = new List<Func<object?, (bool, string)>>();
         var attributes = fieldInfo.GetCustomAttributes<ValidationAttribute>();
 
         foreach (var attr in attributes)
         {
+            if (skipAttribute != null && skipAttribute(attr)) continue;
+
             var capturedAttr = attr; // Capture for closure
 
             if (TryCreateCollectionValidator(attr, fieldInfo.FieldType, out var collectionValidator))
@@ -290,6 +294,52 @@ public static class FormHelpers
         if (lengthAttr is { MaximumLength: > 0 })
         {
             return lengthAttr.MaximumLength;
+        }
+
+        return null;
+    }
+
+    public static int? GetMinLength(PropertyInfo propertyInfo)
+    {
+        var minLengthAttr = propertyInfo.GetCustomAttribute<MinLengthAttribute>();
+        if (minLengthAttr is { Length: >= 0 })
+        {
+            return minLengthAttr.Length;
+        }
+
+        var stringLengthAttr = propertyInfo.GetCustomAttribute<StringLengthAttribute>();
+        if (stringLengthAttr is { MinimumLength: > 0 })
+        {
+            return stringLengthAttr.MinimumLength;
+        }
+
+        var lengthAttr = propertyInfo.GetCustomAttribute<LengthAttribute>();
+        if (lengthAttr is { MinimumLength: >= 0 })
+        {
+            return lengthAttr.MinimumLength;
+        }
+
+        return null;
+    }
+
+    public static int? GetMinLength(FieldInfo fieldInfo)
+    {
+        var minLengthAttr = fieldInfo.GetCustomAttribute<MinLengthAttribute>();
+        if (minLengthAttr is { Length: >= 0 })
+        {
+            return minLengthAttr.Length;
+        }
+
+        var stringLengthAttr = fieldInfo.GetCustomAttribute<StringLengthAttribute>();
+        if (stringLengthAttr is { MinimumLength: > 0 })
+        {
+            return stringLengthAttr.MinimumLength;
+        }
+
+        var lengthAttr = fieldInfo.GetCustomAttribute<LengthAttribute>();
+        if (lengthAttr is { MinimumLength: >= 0 })
+        {
+            return lengthAttr.MinimumLength;
         }
 
         return null;

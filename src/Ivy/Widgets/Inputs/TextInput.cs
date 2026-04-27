@@ -152,6 +152,7 @@ public static class TextInputExtensions
     internal static readonly Type ValidationOwner = typeof(TextInputExtensions);
     internal const string AttachedValidationState = "ValidationState";
     internal const string AttachedValidatedVariant = "ValidatedVariant";
+    internal const string AttachedMinLength = "MinLength";
 
     private static bool VariantHasBuiltInValidation(TextInputVariant variant) =>
         variant is TextInputVariant.Email or TextInputVariant.Tel or TextInputVariant.Url or TextInputVariant.Password;
@@ -164,10 +165,18 @@ public static class TextInputExtensions
 
         var invalidState = context.UseState(default(string?), true);
         var blurOnceState = context.UseState(false, true);
+        // Closure reads MinLength from attached props (updated by .MinLength() on record clones).
+        var widgetForAttached = widget;
         context.UseEffect(() =>
         {
             if (!blurOnceState.Value) return;
-            var (_, err) = Validators.ValidateForVariant(state.As<object>().Value, variant);
+            int? passwordMin = variant == TextInputVariant.Password
+                ? widgetForAttached.GetAttachedValue(ValidationOwner, AttachedMinLength) as int?
+                : null;
+            var (_, err) = Validators.ValidateForVariant(
+                state.As<object>().Value,
+                variant,
+                passwordMin ?? Validators.DefaultPasswordMinLength);
             invalidState.Set(string.IsNullOrEmpty(err) ? "" : err);
         }, state, blurOnceState);
 
@@ -265,7 +274,13 @@ public static class TextInputExtensions
 
     public static TextInputBase MaxLength(this TextInputBase widget, int maxLength) => widget with { MaxLength = maxLength };
 
-    public static TextInputBase MinLength(this TextInputBase widget, int minLength) => widget with { MinLength = minLength };
+    public static TextInputBase MinLength(this TextInputBase widget, int minLength)
+    {
+        var w = widget with { MinLength = minLength };
+        // So on-blur validation (wired before chaining) sees the same MinLength.
+        w.SetAttachedValue(ValidationOwner, AttachedMinLength, minLength);
+        return w;
+    }
 
     public static TextInputBase Pattern(this TextInputBase widget, string pattern) => widget with { Pattern = pattern };
 

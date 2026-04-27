@@ -9,8 +9,11 @@ namespace Ivy;
 /// </summary>
 public static class Validators
 {
+    /// <summary>Default min password length when the model/widget does not specify one.</summary>
+    public const int DefaultPasswordMinLength = 8;
+
     /// <summary>Returns (true, null) if valid, (false, errorMessage) if invalid. Empty/whitespace is treated as valid (required handled separately).</summary>
-    public static (bool isValid, string? errorMessage) ValidateForVariant(object? value, TextInputVariant variant, int passwordMinLength = 8)
+    public static (bool isValid, string? errorMessage) ValidateForVariant(object? value, TextInputVariant variant, int passwordMinLength = DefaultPasswordMinLength)
     {
         if (value is not string s || string.IsNullOrWhiteSpace(s))
             return (true, null);
@@ -39,9 +42,10 @@ public static class Validators
         }
     }
 
-    private static string? ValidatePassword(object? value, int minLength = 8)
+    private static string? ValidatePassword(object? value, int minLength = DefaultPasswordMinLength)
     {
         if (value is not string s || string.IsNullOrWhiteSpace(s)) return null;
+        if (minLength <= 0) return null;
         return s.Length >= minLength ? null : $"Password must be at least {minLength} characters";
     }
 
@@ -71,16 +75,16 @@ public static class Validators
     public static Func<object?, (bool, string)> CreateUrlValidator(string fieldName) =>
         v => { var (ok, err) = ValidateForVariant(v, TextInputVariant.Url); return (ok, err ?? ""); };
 
-    public static Func<object?, (bool, string)> CreatePasswordValidator(string fieldName, int minLength = 8) =>
+    public static Func<object?, (bool, string)> CreatePasswordValidator(string fieldName, int minLength = DefaultPasswordMinLength) =>
         v => { var (ok, err) = ValidateForVariant(v, TextInputVariant.Password, minLength); return (ok, err ?? ""); };
 
-    public static Func<object?, (bool, string)>? ForVariant(TextInputVariant variant, string fieldName) =>
+    public static Func<object?, (bool, string)>? ForVariant(TextInputVariant variant, string fieldName, int? passwordMinLength = null) =>
         variant switch
         {
             TextInputVariant.Email => CreateEmailValidator(fieldName),
             TextInputVariant.Tel => CreateTelValidator(fieldName),
             TextInputVariant.Url => CreateUrlValidator(fieldName),
-            TextInputVariant.Password => CreatePasswordValidator(fieldName),
+            TextInputVariant.Password => CreatePasswordValidator(fieldName, passwordMinLength ?? DefaultPasswordMinLength),
             _ => null
         };
 
@@ -92,7 +96,11 @@ public static class Validators
             .ToList();
         if (input is IAnyTextInput textInput)
         {
-            var v = ForVariant(textInput.Variant, label ?? "");
+            // Password: use widget MinLength if set, else default.
+            int? passwordMin = textInput.Variant == TextInputVariant.Password
+                ? (input as TextInputBase)?.MinLength
+                : null;
+            var v = ForVariant(textInput.Variant, label ?? "", passwordMin);
             if (v != null)
                 list.Add(v);
         }

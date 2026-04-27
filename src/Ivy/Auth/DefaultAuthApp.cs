@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Ivy.Core.Auth;
 
@@ -58,7 +59,7 @@ public class DefaultAuthApp : ViewBase
 
 public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 {
-    private record LoginFormModel(string User, string Password);
+    private record LoginFormModel(string User, [property: MinLength(0)] string Password);
 
     public override object Build()
     {
@@ -104,7 +105,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
             .Label(m => m.User, "User")
             .Label(m => m.Password, "Password")
             .Builder(m => m.User, state => state.ToTextInput())
-            .Builder(m => m.Password, state => state.ToPasswordInput())
+            .Builder(m => m.Password, state => state.ToPasswordInput().MinLength(0))
             .SubmitStrategy(FormSubmitStrategy.OnSubmit)
             .SubmitTitle("Login")
             .OnSubmit(async model => await HandleLoginAsync(model));
