@@ -16,7 +16,8 @@ public static class UseFolderDialogExtensions
     /// On other browsers, falls back to input[webkitdirectory].
     /// Returns (dialogView, showFolderDialog, selectedPath) tuple following the UseAlert pattern.
     /// Call showFolderDialog(callback) to open the dialog; the callback receives folder entries.
-    /// selectedPath is set when the desktop bridge provides the absolute folder path.
+    /// selectedPath holds the absolute folder path when the desktop bridge is available;
+    /// in browser mode it falls back to the folder name (web APIs do not expose absolute paths).
     /// </summary>
     public static (object? dialogView, ShowFolderDialogDelegate showFolderDialog, IState<string?> selectedPath) UseFolderDialog(
         this IViewContext context)

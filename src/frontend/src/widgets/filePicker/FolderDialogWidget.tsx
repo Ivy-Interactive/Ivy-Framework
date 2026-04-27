@@ -68,6 +68,9 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
         });
       }
 
+      if (hasOnPathSelected && dirHandle.name) {
+        handleEvent("OnPathSelected", id, [dirHandle.name]);
+      }
       if (hasOnFolderSelected) {
         handleEvent("OnFolderSelected", id, [entries]);
       }
@@ -112,10 +115,17 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
       // Extract folder entries from the file list
       const entryMap = new Map<string, FolderDialogEntry>();
       const files = Array.from(fileList);
+      let rootFolderName: string | undefined;
 
       for (const file of files) {
         const relativePath =
           (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+        if (!rootFolderName) {
+          const firstSegment = relativePath.split("/")[0];
+          if (firstSegment && firstSegment !== file.name) {
+            rootFolderName = firstSegment;
+          }
+        }
 
         // Add the file entry
         entryMap.set(relativePath, {
@@ -138,6 +148,9 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
         }
       }
 
+      if (hasOnPathSelected && rootFolderName) {
+        handleEvent("OnPathSelected", id, [rootFolderName]);
+      }
       if (hasOnFolderSelected) {
         handleEvent("OnFolderSelected", id, [Array.from(entryMap.values())]);
       }
@@ -145,7 +158,7 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
       // Reset input
       e.target.value = "";
     },
-    [hasOnFolderSelected, handleEvent, id],
+    [hasOnFolderSelected, hasOnPathSelected, handleEvent, id],
   );
 
   // Watch triggerCount for changes to open dialog
