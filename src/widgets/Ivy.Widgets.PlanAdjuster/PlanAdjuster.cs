@@ -1,3 +1,6 @@
+using Ivy.Core;
+using System.Runtime.CompilerServices;
+
 namespace Ivy.Widgets.PlanAdjuster;
 
 [ExternalWidget("frontend/dist/Ivy_Widgets_PlanAdjuster.js",
@@ -15,10 +18,10 @@ public record PlanAdjuster : WidgetBase<PlanAdjuster>
     /// Fires when the user clicks "Update" with all adjustments.
     /// Value is a JSON string: { "adjustments": [{ "paragraphIndex": 0, "text": "..." }, ...] }
     /// </summary>
-    [Event] public Func<Event<PlanAdjuster, string>, ValueTask>? OnUpdate { get; init; }
+    [Event] public EventHandler<Event<PlanAdjuster, string>>? OnUpdate { get; init; }
 
     /// <summary>Fires when a link is clicked in the markdown. Value is the URL.</summary>
-    [Event] public Func<Event<PlanAdjuster, string>, ValueTask>? OnLinkClick { get; init; }
+    [Event] public EventHandler<Event<PlanAdjuster, string>>? OnLinkClick { get; init; }
 }
 
 public static class PlanAdjusterExtensions
@@ -29,31 +32,25 @@ public static class PlanAdjusterExtensions
     public static PlanAdjuster DangerouslyAllowLocalFiles(this PlanAdjuster w, bool allow = true) =>
         w with { DangerouslyAllowLocalFiles = allow };
 
+    [OverloadResolutionPriority(1)]
     public static PlanAdjuster OnUpdate(this PlanAdjuster w,
         Func<Event<PlanAdjuster, string>, ValueTask> handler) =>
-        w with { OnUpdate = handler };
+        w with { OnUpdate = new(handler) };
+
+    public static PlanAdjuster OnUpdate(this PlanAdjuster w, Action<Event<PlanAdjuster, string>> handler) =>
+        w with { OnUpdate = new(handler.ToValueTask()) };
 
     public static PlanAdjuster OnUpdate(this PlanAdjuster w, Action<string> handler) =>
-        w with
-        {
-            OnUpdate = e =>
-            {
-                handler(e.Value);
-                return ValueTask.CompletedTask;
-            },
-        };
+        w with { OnUpdate = new(@event => { handler(@event.Value); return ValueTask.CompletedTask; }) };
 
+    [OverloadResolutionPriority(1)]
     public static PlanAdjuster OnLinkClick(this PlanAdjuster w,
         Func<Event<PlanAdjuster, string>, ValueTask> handler) =>
-        w with { OnLinkClick = handler };
+        w with { OnLinkClick = new(handler) };
+
+    public static PlanAdjuster OnLinkClick(this PlanAdjuster w, Action<Event<PlanAdjuster, string>> handler) =>
+        w with { OnLinkClick = new(handler.ToValueTask()) };
 
     public static PlanAdjuster OnLinkClick(this PlanAdjuster w, Action<string> handler) =>
-        w with
-        {
-            OnLinkClick = e =>
-            {
-                handler(e.Value);
-                return ValueTask.CompletedTask;
-            },
-        };
+        w with { OnLinkClick = new(@event => { handler(@event.Value); return ValueTask.CompletedTask; }) };
 }
