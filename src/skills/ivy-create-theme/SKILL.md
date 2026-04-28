@@ -13,6 +13,10 @@ effort: medium
 
 Create or modify a custom theme in an Ivy project.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-create-theme.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Getting Started
 
 1. Use `ivy docs` to read about theming (query: "theming" or "custom theme").
@@ -84,3 +88,11 @@ In `Program.cs`, add `.UseTheme(theme => { ... })` to the server builder chain. 
 2. If the user asks to commit, create a git commit with a descriptive message.
 
 3. Present a short summary to the user describing what was created or changed.
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-create-theme.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

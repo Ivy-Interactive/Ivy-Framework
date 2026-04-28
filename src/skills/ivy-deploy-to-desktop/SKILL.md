@@ -14,6 +14,10 @@ disable-model-invocation: true
 
 Deploy an Ivy project as a standalone desktop application using Ivy.Desktop.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-deploy-to-desktop.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Workflow
 
 1. **Verify the project** -- Confirm the working directory is a valid Ivy project and that it builds successfully with `dotnet build`. If it does not build, stop and ask the user to fix build errors first.
@@ -107,3 +111,11 @@ When the publish succeeds, inform the user:
 - The application name
 - The output location (on their desktop)
 - That it is ready to run
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-deploy-to-desktop.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

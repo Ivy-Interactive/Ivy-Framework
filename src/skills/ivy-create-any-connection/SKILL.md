@@ -14,6 +14,10 @@ argument-hint: "[name or URL of the API/service to connect to]"
 
 Create a connection to an external API or service inside an existing Ivy project. This produces connection files under `Connections/[ConnectionName]/` -- it does NOT create a separate project or catalog entry. Only use this skill when the user wants to connect to an API or service that does not already have a pre-built reference connection in the Ivy catalog.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-create-any-connection.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Step 1: Validate the Project
 
 1. Verify this is a valid Ivy project. Check for a `.csproj` file and `Program.cs` in the working directory. If this is not an Ivy project, tell the user and stop.
@@ -661,3 +665,11 @@ This section applies regardless of which approach was used above.
     - Secrets configured (list each secret key, not the values)
     - Demo apps created
     - Next steps: how to use the connection in their Ivy apps via `UseService<T>()`
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-create-any-connection.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

@@ -14,6 +14,10 @@ argument-hint: "[Airtable Base ID]"
 
 Convert an Airtable base to an Ivy project.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-convert-airtable.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Step 1: Gather Credentials
 
 You need an Airtable Base ID (e.g. `appXXXXXXXXXXXXXX`) and a Personal Access Token (PAT). Check if these were provided as arguments via `$ARGUMENTS`. If not, ask the user to provide them.
@@ -183,3 +187,11 @@ Overview dashboard showing key metrics: total customers, active customers, total
 ## Step 4: Implementation
 
 Implement the plan approved by the user in the previous step.
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-convert-airtable.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

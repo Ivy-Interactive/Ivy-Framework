@@ -15,6 +15,10 @@ argument-hint: "[description of the app to create]"
 
 Create an ad hoc Ivy app with any combination of views.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-create-app.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Reference Files
 
 Read these before implementing:
@@ -206,3 +210,11 @@ new MetricView("Sales", Icons.DollarSign,
 - **Toast after actions:** `client.Toast($"{item.Name} added!");`
 - **Confirm destructive actions:** Use `.WithConfirm()`
 - **Empty states:** Show guidance toward first action, not blank area
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-create-app.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

@@ -19,6 +19,10 @@ effort: high
 
 This skill creates an OpenAPI/REST API connection in an Ivy project using Refitter for typed client generation. It collects the spec URL, analyzes the spec for size, handles large specs with filtering or pivoting, and generates the connection.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-create-openapi-connection.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Prerequisites
 
 - The working directory must be a valid Ivy project.
@@ -106,3 +110,11 @@ If the connection setup fails, follow these recovery steps:
    - Test the connection with a sample API call
 
 3. **Do NOT proceed** to generating apps or widgets until the connection is successfully established and tested with a sample API call.
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-create-openapi-connection.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

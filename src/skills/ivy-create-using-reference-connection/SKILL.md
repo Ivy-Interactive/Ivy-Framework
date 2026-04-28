@@ -19,6 +19,10 @@ effort: medium
 
 This skill creates a connection in an Ivy project using a pre-built reference connection from the Ivy catalog. Reference connections provide templates with NuGet packages, secrets configuration, and example implementation files that guide the agent in building the actual connection.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-create-using-reference-connection.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Prerequisites
 
 - The working directory must be a valid Ivy project.
@@ -103,3 +107,11 @@ Report the results:
 - Reference files that were used as guidance
 
 The reference files remain available for building applications with this connection. Use the Read tool to review any reference file for implementation patterns.
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-create-using-reference-connection.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

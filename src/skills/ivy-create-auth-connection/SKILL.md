@@ -13,6 +13,10 @@ argument-hint: "[auth provider name, e.g. Auth0, Supabase, Clerk]"
 
 Add an authentication provider to an existing Ivy project. This skill guides you through selecting a provider, collecting the required credentials, and configuring the project.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-create-auth-connection.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Step 1: Validate the Project
 
 1. Verify this is a valid Ivy project. Check for a `.csproj` file and `Program.cs` in the working directory. If this is not an Ivy project, tell the user and stop.
@@ -117,3 +121,11 @@ If the setup fails:
 2. After fixing the underlying issue, either retry using the `/ivy-create-auth-connection` skill from scratch, or manually create the auth provider class and register it in `Program.cs`.
 
 3. Use `ivy ask "How do I configure [ProviderName] authentication?"` for provider-specific guidance.
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-create-auth-connection.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

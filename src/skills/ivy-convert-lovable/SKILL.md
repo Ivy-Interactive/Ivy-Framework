@@ -14,6 +14,10 @@ argument-hint: "[GitHub URL or local path]"
 
 Convert a Lovable (lovable.dev) application to an Ivy project. Lovable generates React+Vite+TypeScript apps with Supabase backends.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-convert-lovable.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Reference Files
 
 The [references/](references/) folder contains 31 reference files with React/shadcn-to-Ivy component mappings. Read the relevant reference files before implementing the conversion to understand how to map Lovable/React features to Ivy features.
@@ -163,3 +167,11 @@ The conversion guide should include:
 4. **Auth** -- How Supabase Auth maps to Ivy auth
 5. **Component mapping** -- Which React/shadcn components are used and their Ivy equivalents
 6. **Hooks and state** -- How React hooks and state management map to Ivy patterns
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-convert-lovable.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

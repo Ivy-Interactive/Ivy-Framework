@@ -13,6 +13,10 @@ effort: high
 
 Create a new Ivy External Widget that wraps React npm packages with C# bindings.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-create-external-widget.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Reference Files
 
 Before implementing, fetch the external widgets documentation using `ivy docs` with the query: "external widgets".
@@ -293,3 +297,11 @@ const handleChange = useCallback((newValue: string) => {
 - Default to full width and height (`Width = Size.Full()`, `Height = Size.Full()`)
 - Always include a default constructor (use `internal`)
 - Default prop values must be specified both in C# and React
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-create-external-widget.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

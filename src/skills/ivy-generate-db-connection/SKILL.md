@@ -19,6 +19,10 @@ effort: high
 
 This skill generates a complete database connection in an Ivy project using AI-assisted schema design. It walks through DBML schema generation, database provider configuration, EF Core entity generation, migrations, and Bogus data seeding.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-generate-db-connection.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Prerequisites
 
 - The working directory must be a valid Ivy project.
@@ -230,3 +234,11 @@ If the workflow fails at any point:
 - The `.csproj` file is rolled back to its pre-workflow state
 - The connection folder at `Connections/[ConnectionName]/` is cleaned up
 - The user can retry the skill from scratch
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-generate-db-connection.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

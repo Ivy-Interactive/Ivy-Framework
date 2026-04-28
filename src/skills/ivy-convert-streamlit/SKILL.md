@@ -13,6 +13,10 @@ argument-hint: "[path or GitHub URL]"
 
 Convert a Streamlit application to an Ivy project.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-convert-streamlit.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Reference Files
 
 The [references/](references/) folder contains 105 reference files with Streamlit-to-Ivy component mappings (one `.md` per `st.*` widget). Read the relevant reference files before implementing the conversion to understand how to map Streamlit features to Ivy features.
@@ -44,3 +48,11 @@ Present the plan to the user for approval before proceeding.
 Identify if there are any connections (db, auth, api) that should be set up using the appropriate connection skill (e.g., `/ivy-create-db-connection` for databases, `/ivy-create-auth-connection` for auth, `/ivy-create-any-connection` for APIs).
 
 Given the conversion guide from the previous step, implement the conversion of the Streamlit application to an Ivy application. Use the conversion guide and the reference files to map Streamlit features to Ivy features.
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-convert-streamlit.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.

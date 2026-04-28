@@ -14,6 +14,10 @@ argument-hint: "[path to .zip file]"
 
 Convert an exported Retool project to an Ivy project.
 
+## Pre-flight: Read Learnings
+
+If the file `.ivy/learnings/ivy-convert-retool.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
+
 ## Reference Files
 
 The [references/](references/) folder contains 134 reference files with Retool-to-Ivy component mappings (one `.md` per Retool widget). Read the relevant reference files before implementing the conversion to understand how to map Retool features to Ivy features.
@@ -129,3 +133,11 @@ Utility page for importing CSV data into the system.
 ## Step 4: Implementation
 
 Implement the plan approved by the user in the previous step.
+
+## Post-run: Evaluate and Improve
+
+After completing the task:
+
+1. **Evaluate**: Did the build succeed? Were there compilation errors, unexpected behavior, or manual corrections needed during this run?
+2. **Update learnings**: If anything required correction or was surprising, append a concise entry to `.ivy/learnings/ivy-convert-retool.md` (create the file and `.ivy/learnings/` directory if they don't exist). Each entry should note: the date, what went wrong, why, and what to do differently next time.
+3. **Skip if clean**: If everything succeeded without issues, do not update the learnings file.
