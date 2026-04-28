@@ -116,6 +116,7 @@ $FrameworkCopies = @(
     @{ Src = 'AGENTS.md'; Dst = 'ivy-create-dashboard\references\AGENTS.md' }
     @{ Src = 'AGENTS.md'; Dst = 'ivy-create-crud\references\AGENTS.md' }
     @{ Src = 'AGENTS.md'; Dst = 'ivy-create-app\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy\references\AGENTS.md' }
 )
 
 function Copy-WithRewrite {
