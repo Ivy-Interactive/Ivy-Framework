@@ -1,0 +1,49 @@
+---
+name: ivy-convert-streamlit
+description: >
+  Convert a Streamlit (Python) application to an Ivy project. Use when the user wants to
+  migrate from Streamlit, convert a Streamlit app, or build an Ivy app from Streamlit
+  Python source files. Handles .py files, folders, and GitHub URLs.
+allowed-tools: Bash(dotnet:*) Bash(git:*) Bash(test:*) Bash(mkdir:*) Read Write Edit Glob Grep
+effort: high
+argument-hint: "[path or GitHub URL]"
+---
+
+# ivy-convert-streamlit
+
+Convert a Streamlit application to an Ivy project.
+
+## Reference Files
+
+There are 105 reference files containing Streamlit to Ivy component mappings located at:
+`D:\Repos\_Ivy\Ivy\Ivy.Internals\Workflows\Conversion\Streamlit\References\`
+
+Read these reference files before implementing the conversion to understand how to map Streamlit features to Ivy features.
+
+## Step 1: Locate the Streamlit Application
+
+You need a path to a `.py` file, a folder, or a GitHub URL containing the Streamlit application. Check if a value was provided via `$ARGUMENTS`. If not, ask the user to provide one.
+
+- If it is a **GitHub URL** (starts with `https://github.com/`): Clone it to `.ivy/source/<repo-name>/` using `git clone <url> .ivy/source/<repo-name>/` and use that as the path going forward.
+- If it is a **local path**: Use it directly.
+- Verify the path exists with `test -f "<path>"` or `test -d "<path>"`.
+
+## Step 2: Research the Streamlit Application
+
+Read all the `.py` files and build a mental model of all Streamlit `st.*` features used in the application.
+
+Use the reference files listed above to learn how to map Streamlit features to Ivy features.
+
+Gather enough information to produce a complete conversion guide before proceeding to the next step.
+
+## Step 3: Write the Conversion Guide
+
+Write a summarized conversion guide that maps the Streamlit features used in the application to Ivy features. The conversion guide should be structured in a way that makes it easy to follow when implementing the conversion. Use markdown formatting to make it clear and organized -- but be concise and token efficient.
+
+Present the plan to the user for approval before proceeding.
+
+## Step 4: Implementation
+
+Identify if there are any connections (db, auth, api) that should be set up using the appropriate connection skill (e.g., `/ivy-create-db-connection` for databases, `/ivy-create-auth-connection` for auth, `/ivy-create-any-connection` for APIs).
+
+Given the conversion guide from the previous step, implement the conversion of the Streamlit application to an Ivy application. Use the conversion guide and the reference files to map Streamlit features to Ivy features.
