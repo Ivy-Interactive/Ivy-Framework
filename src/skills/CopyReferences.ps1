@@ -9,6 +9,7 @@
       - Ivy\Ivy.Internals\Workflows\Apps\CreateApp\AdHoc\References\  (AdHoc-specific .md)
       - Ivy-Framework\AGENTS.md  (framework documentation)
       - Ivy\Ivy.Internals\Workflows\Connections\GenerateDbConnection\  (DB generation references)
+      - Ivy\Ivy.Internals\Workflows\Conversion\*\References\  (conversion mapping references)
 
     This script copies those files into src/skills/*/references/ and rewrites the
     original namespaces to generic "MyProject" namespaces so they work as templates.
@@ -20,6 +21,7 @@ param(
     [string]$RefsRoot      = (Join-Path $PSScriptRoot '..\..\..\Ivy\Ivy.Internals.Workflows.References'),
     [string]$AdHocRoot     = (Join-Path $PSScriptRoot '..\..\..\Ivy\Ivy.Internals\Workflows\Apps\CreateApp\AdHoc\References'),
     [string]$GenDbRoot     = (Join-Path $PSScriptRoot '..\..\..\Ivy\Ivy.Internals\Workflows\Connections\GenerateDbConnection'),
+    [string]$ConvRoot      = (Join-Path $PSScriptRoot '..\..\..\Ivy\Ivy.Internals\Workflows\Conversion'),
     [string]$FrameworkRoot = (Join-Path $PSScriptRoot '..\..'),
     [string]$SkillsRoot    = $PSScriptRoot
 )
@@ -27,6 +29,7 @@ param(
 $RefsRoot      = (Resolve-Path $RefsRoot).Path
 $AdHocRoot     = (Resolve-Path $AdHocRoot).Path
 $GenDbRoot     = (Resolve-Path $GenDbRoot).Path
+$ConvRoot      = (Resolve-Path $ConvRoot).Path
 $FrameworkRoot = (Resolve-Path $FrameworkRoot).Path
 $SkillsRoot    = (Resolve-Path $SkillsRoot).Path
 
@@ -98,6 +101,16 @@ $GenDbCopies = @(
     @{ Src = 'GenerateCodeAndMigrate\CreateSeeder\References\DataSeeder-MySql.md';  Dst = 'ivy-generate-db-connection\references\DataSeeder-MySql.md' }
 )
 
+# Conversion workflow references (source is $ConvRoot/<Name>/References/)
+# Each conversion skill gets all .md files from its corresponding workflow References folder
+$ConversionSkills = @(
+    @{ Workflow = 'Streamlit'; Skill = 'ivy-convert-streamlit' }
+    @{ Workflow = 'Retool';    Skill = 'ivy-convert-retool' }
+    @{ Workflow = 'Lovable';   Skill = 'ivy-convert-lovable' }
+    @{ Workflow = 'Odoo';      Skill = 'ivy-convert-odoo' }
+    @{ Workflow = 'Reflex';    Skill = 'ivy-convert-reflex' }
+)
+
 # Framework-level files (source is $FrameworkRoot) — copied into each skill's references
 $FrameworkCopies = @(
     @{ Src = 'AGENTS.md'; Dst = 'ivy-create-dashboard\references\AGENTS.md' }
@@ -149,11 +162,12 @@ function Copy-WithRewrite {
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 Write-Host "Copying reference files..." -ForegroundColor Cyan
-Write-Host "  Source (shared):    $RefsRoot"
-Write-Host "  Source (adhoc):     $AdHocRoot"
-Write-Host "  Source (gendb):     $GenDbRoot"
-Write-Host "  Source (framework): $FrameworkRoot"
-Write-Host "  Destination:        $SkillsRoot"
+Write-Host "  Source (shared):     $RefsRoot"
+Write-Host "  Source (adhoc):      $AdHocRoot"
+Write-Host "  Source (gendb):      $GenDbRoot"
+Write-Host "  Source (conversion): $ConvRoot"
+Write-Host "  Source (framework):  $FrameworkRoot"
+Write-Host "  Destination:         $SkillsRoot"
 Write-Host ""
 
 $copied = 0
@@ -192,6 +206,25 @@ foreach ($entry in $GenDbCopies) {
         $copied++
     } else {
         $failed++
+    }
+}
+
+foreach ($conv in $ConversionSkills) {
+    $refsDir = Join-Path $ConvRoot "$($conv.Workflow)\References"
+    if (-not (Test-Path $refsDir)) {
+        Write-Warning "Conversion references not found: $refsDir"
+        $failed++
+        continue
+    }
+    $files = Get-ChildItem -Path $refsDir -File -Filter '*.md'
+    foreach ($file in $files) {
+        $dst = Join-Path $SkillsRoot "$($conv.Skill)\references\$($file.Name)"
+        if (Copy-WithRewrite -SourcePath $file.FullName -DestPath $dst) {
+            Write-Host "  OK  $($conv.Skill)\references\$($file.Name)" -ForegroundColor Green
+            $copied++
+        } else {
+            $failed++
+        }
     }
 }
 

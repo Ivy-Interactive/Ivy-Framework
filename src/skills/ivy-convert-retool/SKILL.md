@@ -16,10 +16,7 @@ Convert an exported Retool project to an Ivy project.
 
 ## Reference Files
 
-There are 134 reference files containing Retool to Ivy component mappings located at:
-`D:\Repos\_Ivy\Ivy\Ivy.Internals\Workflows\Conversion\Retool\References\`
-
-Read these reference files before implementing the conversion to understand how to map Retool features to Ivy features.
+The [references/](references/) folder contains 134 reference files with Retool-to-Ivy component mappings (one `.md` per Retool widget). Read the relevant reference files before implementing the conversion to understand how to map Retool features to Ivy features.
 
 ## Step 1: Locate the Retool Export
 

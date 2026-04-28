@@ -15,10 +15,7 @@ Convert a Reflex application to an Ivy project.
 
 ## Reference Files
 
-There are 94 reference files containing Reflex to Ivy component mappings located at:
-`D:\Repos\_Ivy\Ivy\Ivy.Internals\Workflows\Conversion\Reflex\References\`
-
-Read these reference files before implementing the conversion to understand how to map Reflex features to Ivy features.
+The [references/](references/) folder contains 94 reference files with Reflex-to-Ivy component mappings (one `.md` per `rx.*` component). Read the relevant reference files before implementing the conversion to understand how to map Reflex features to Ivy features.
 
 ## Step 1: Locate the Reflex Application
 
@@ -32,7 +29,7 @@ You need a path to a `.py` file, a folder, or a GitHub URL containing the Reflex
 
 Read all the `.py` files and build a mental model of all Reflex features used in the application (`rx.*` components, state classes, event handlers, etc.).
 
-Use the reference files listed above to learn how to map Reflex features to Ivy features.
+Use the reference files in [references/](references/) to learn how to map Reflex features to Ivy features.
 
 Gather enough information to produce a complete conversion guide before proceeding to the next step.
 

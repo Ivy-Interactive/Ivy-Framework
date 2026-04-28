@@ -1,4 +1,4 @@
-﻿using Ivy;
+using Ivy;
 using MyProject.Apps.Orders;
 
 namespace MyProject.Apps;

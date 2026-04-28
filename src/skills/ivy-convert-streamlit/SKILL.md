@@ -15,10 +15,7 @@ Convert a Streamlit application to an Ivy project.
 
 ## Reference Files
 
-There are 105 reference files containing Streamlit to Ivy component mappings located at:
-`D:\Repos\_Ivy\Ivy\Ivy.Internals\Workflows\Conversion\Streamlit\References\`
-
-Read these reference files before implementing the conversion to understand how to map Streamlit features to Ivy features.
+The [references/](references/) folder contains 105 reference files with Streamlit-to-Ivy component mappings (one `.md` per `st.*` widget). Read the relevant reference files before implementing the conversion to understand how to map Streamlit features to Ivy features.
 
 ## Step 1: Locate the Streamlit Application
 
@@ -32,7 +29,7 @@ You need a path to a `.py` file, a folder, or a GitHub URL containing the Stream
 
 Read all the `.py` files and build a mental model of all Streamlit `st.*` features used in the application.
 
-Use the reference files listed above to learn how to map Streamlit features to Ivy features.
+Use the reference files in [references/](references/) to learn how to map Streamlit features to Ivy features.
 
 Gather enough information to produce a complete conversion guide before proceeding to the next step.
 

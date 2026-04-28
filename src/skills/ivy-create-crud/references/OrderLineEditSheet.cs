@@ -1,4 +1,4 @@
-﻿using Ivy;
+using Ivy;
 using MyProject.Connections.MyDb;
 
 using Microsoft.EntityFrameworkCore;

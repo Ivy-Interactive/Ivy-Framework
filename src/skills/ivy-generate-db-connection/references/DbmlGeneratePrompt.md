@@ -1,4 +1,4 @@
-﻿# DBML Generation Guide
+# DBML Generation Guide
 
 You are generating DBML (Database Markup Language) code as specified by https://dbml.dbdiagram.io/docs/.
 
@@ -90,4 +90,4 @@ If enum values contain spaces, use double quotes: `"Not Yet Set"`
 
 ## After Generation
 
-Present the DBML schema to the user for review.
+Use the **PresentPlan** tool with `planType: "Dbml"` to display the schema to the user for review.

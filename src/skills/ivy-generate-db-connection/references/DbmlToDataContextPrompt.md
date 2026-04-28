@@ -1,4 +1,4 @@
-﻿# Entity Framework Core Code First Generation Guide
+# Entity Framework Core Code First Generation Guide
 
 Convert DBML specifications into EF Core Code First entities with data annotations and Fluent API.
 
@@ -29,7 +29,7 @@ Always include all required usings explicitly. Do not rely on global usings or i
 
 ## File Organization
 
-Generate individual files using the Write tool:
+Generate individual files using the WriteFile tool:
 - One `.cs` file per entity class
 - One `.cs` file for the DbContext class
 - Use file-scoped namespaces

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Ivy;
 using MyProject.Connections.MyDb;
 using Microsoft.EntityFrameworkCore;

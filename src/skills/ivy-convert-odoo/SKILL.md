@@ -15,10 +15,7 @@ Convert an Odoo application or module to an Ivy project.
 
 ## Reference Files
 
-There are 60 reference files containing Odoo to Ivy component mappings located at:
-`D:\Repos\_Ivy\Ivy\Ivy.Internals\Workflows\Conversion\Odoo\References\`
-
-Read these reference files before implementing the conversion to understand how to map Odoo features to Ivy features.
+The [references/](references/) folder contains 60 reference files with Odoo-to-Ivy component mappings (fields, views, components). Read the relevant reference files before implementing the conversion to understand how to map Odoo features to Ivy features.
 
 ## Step 1: Locate the Odoo Module
 

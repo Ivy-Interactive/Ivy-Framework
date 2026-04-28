@@ -1,4 +1,4 @@
-﻿# Introduction to the Ivy Framework for LLMs
+# Introduction to the Ivy Framework for LLMs
 
 - Ivy is a declarative full-stack UI framework that allows developers to build user interfaces using a component-based approach very similar to React.
 - In Ivy, you only write one application in pure C# and we don't have a BE and FE distinction.

@@ -1,4 +1,4 @@
-﻿# PostgreSQL Seeding Notes
+# PostgreSQL Seeding Notes
 
 The target database is PostgreSQL using Npgsql.EntityFrameworkCore.PostgreSQL.
 
