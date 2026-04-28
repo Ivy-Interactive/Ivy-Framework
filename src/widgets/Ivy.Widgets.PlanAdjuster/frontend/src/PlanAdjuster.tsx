@@ -2,6 +2,9 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from "react"
 import Markdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
+import { Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import "./plan-adjuster.css";
 
 type EventHandler = (eventName: string, widgetId: string, args: unknown[]) => void;
@@ -98,9 +101,8 @@ function AdjustmentPopover({
       className="plan-adjuster-popover"
       style={{ top, left }}
     >
-      <textarea
+      <Textarea
         ref={textareaRef}
-        className="plan-adjuster-textarea"
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -109,29 +111,28 @@ function AdjustmentPopover({
       />
       <div className="plan-adjuster-popover-actions">
         {existingText && (
-          <button
-            className="plan-adjuster-btn plan-adjuster-btn-remove"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:text-destructive"
             onClick={() => onRemove(paragraphIndex)}
           >
             Remove
-          </button>
+          </Button>
         )}
         <div className="plan-adjuster-popover-actions-right">
-          <button
-            className="plan-adjuster-btn plan-adjuster-btn-cancel"
-            onClick={onCancel}
-          >
+          <Button variant="ghost" size="sm" onClick={onCancel}>
             Cancel
-          </button>
-          <button
-            className="plan-adjuster-btn plan-adjuster-btn-save"
+          </Button>
+          <Button
+            size="sm"
             onClick={() => {
               if (text.trim()) onSave(paragraphIndex, text.trim());
             }}
             disabled={!text.trim()}
           >
             {existingText ? "Update" : "Add Adjustment"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -295,32 +296,15 @@ export const PlanAdjuster: React.FC<PlanAdjusterProps> = ({
               </div>
 
               {(isHovered || hasAdj) && (
-                <button
-                  className={`plan-adjuster-icon ${hasAdj ? "has-adjustment" : ""}`}
+                <Button
+                  variant={hasAdj ? "warning" : "ghost"}
+                  size="icon"
+                  className="plan-adjuster-icon"
                   onClick={(e) => handleIconClick(index, e.currentTarget)}
                   title={hasAdj ? "Edit adjustment" : "Add adjustment"}
                 >
-                  {hasAdj ? (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="currentColor"
-                    >
-                      <path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0 .708l-9.5 9.5a.5.5 0 0 1-.168.11l-4 1.5a.5.5 0 0 1-.638-.638l1.5-4a.5.5 0 0 1 .11-.168l9.5-9.5zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207l-8 8-.964 2.571 2.571-.964 8-8z" />
-                    </svg>
-                  ) : (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="currentColor"
-                      opacity="0.5"
-                    >
-                      <path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0 .708l-9.5 9.5a.5.5 0 0 1-.168.11l-4 1.5a.5.5 0 0 1-.638-.638l1.5-4a.5.5 0 0 1 .11-.168l9.5-9.5zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207l-8 8-.964 2.571 2.571-.964 8-8z" />
-                    </svg>
-                  )}
-                </button>
+                  <Pencil className={hasAdj ? undefined : "opacity-60"} />
+                </Button>
               )}
             </div>
           );
@@ -340,12 +324,14 @@ export const PlanAdjuster: React.FC<PlanAdjusterProps> = ({
 
       {adjustments.size > 0 && (
         <div className="plan-adjuster-update-bar">
-          <button
-            className="plan-adjuster-btn plan-adjuster-btn-update"
+          <Button
+            variant="warning"
+            size="lg"
+            className="plan-adjuster-update-btn"
             onClick={handleUpdate}
           >
             Update ({adjustments.size} adjustment{adjustments.size !== 1 ? "s" : ""})
-          </button>
+          </Button>
         </div>
       )}
     </div>
