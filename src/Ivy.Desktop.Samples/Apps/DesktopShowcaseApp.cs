@@ -12,6 +12,8 @@ public class DesktopShowcaseApp : ViewBase
         var log = UseState("");
         var zoomLevel = UseState(1.0);
         var badgeCount = UseState(0);
+        var textA = UseState("");
+        var textB = UseState("");
 
         void Log(string message) => log.Set(s =>
         {
@@ -244,6 +246,13 @@ public class DesktopShowcaseApp : ViewBase
                       Log("Executed document.title script");
                   })
                )
+
+               // ── Copy / Paste Test ────────────────────────────
+               | new Separator()
+               | Text.H2("Copy / Paste Test")
+               | Text.Markdown("Use these text fields to verify that Ctrl+C / Ctrl+V (copy/paste) work correctly.")
+               | textA.ToTextInput("Type or paste here...")
+               | textB.ToTextInput("Paste into this field...")
 
                // ── Splashscreen ─────────────────────────────────
                | new Separator()
