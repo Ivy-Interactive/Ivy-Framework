@@ -1,0 +1,313 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.plan-adjuster-root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+  color: var(--foreground, #1a1a1a);
+}
+
+.plan-adjuster-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Block wrapper */
+.plan-adjuster-block {
+  position: relative;
+  padding: 4px 8px;
+  padding-right: 36px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+  border-left: 3px solid transparent;
+}
+
+.plan-adjuster-block:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.plan-adjuster-block.has-adjustment {
+  border-left-color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.04);
+}
+
+.plan-adjuster-block.has-adjustment:hover {
+  background-color: rgba(245, 158, 11, 0.08);
+}
+
+.plan-adjuster-block-content {
+  overflow-wrap: break-word;
+}
+
+.plan-adjuster-block-content > :first-child {
+  margin-top: 0;
+}
+
+.plan-adjuster-block-content > :last-child {
+  margin-bottom: 0;
+}
+
+/* Icon button */
+.plan-adjuster-icon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.plan-adjuster-icon:hover {
+  background: #f3f4f6;
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #374151;
+}
+
+.plan-adjuster-icon.has-adjustment {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #d97706;
+}
+
+.plan-adjuster-icon.has-adjustment:hover {
+  background: #fde68a;
+  color: #b45309;
+}
+
+/* Popover */
+.plan-adjuster-popover {
+  position: fixed;
+  z-index: 10000;
+  width: 340px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.plan-adjuster-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.plan-adjuster-textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.plan-adjuster-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.plan-adjuster-popover-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plan-adjuster-popover-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+/* Buttons */
+.plan-adjuster-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  line-height: 1.4;
+}
+
+.plan-adjuster-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.plan-adjuster-btn-cancel {
+  background: transparent;
+  color: #6b7280;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.plan-adjuster-btn-cancel:hover {
+  background: #f3f4f6;
+}
+
+.plan-adjuster-btn-save {
+  background: #3b82f6;
+  color: white;
+}
+
+.plan-adjuster-btn-save:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.plan-adjuster-btn-remove {
+  background: transparent;
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.plan-adjuster-btn-remove:hover {
+  background: rgba(239, 68, 68, 0.05);
+}
+
+/* Update bar */
+.plan-adjuster-update-bar {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  background: linear-gradient(to top, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.plan-adjuster-btn-update {
+  pointer-events: auto;
+  background: #f59e0b;
+  color: white;
+  font-weight: 600;
+  padding: 8px 24px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.plan-adjuster-btn-update:hover {
+  background: #d97706;
+}
+
+/* Markdown content styling */
+.plan-adjuster-block-content h1,
+.plan-adjuster-block-content h2,
+.plan-adjuster-block-content h3,
+.plan-adjuster-block-content h4,
+.plan-adjuster-block-content h5,
+.plan-adjuster-block-content h6 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0.5em 0 0.25em;
+}
+
+.plan-adjuster-block-content h1 { font-size: 1.5em; }
+.plan-adjuster-block-content h2 { font-size: 1.25em; }
+.plan-adjuster-block-content h3 { font-size: 1.1em; }
+
+.plan-adjuster-block-content p {
+  margin: 0.25em 0;
+}
+
+.plan-adjuster-block-content ul,
+.plan-adjuster-block-content ol {
+  padding-left: 1.5em;
+  margin: 0.25em 0;
+}
+
+.plan-adjuster-block-content li {
+  margin: 0.125em 0;
+}
+
+.plan-adjuster-block-content pre {
+  background: #f8f9fa;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
+  font-size: 0.85em;
+  margin: 0.5em 0;
+}
+
+.plan-adjuster-block-content code {
+  font-family: "SF Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.plan-adjuster-block-content :not(pre) > code {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+
+.plan-adjuster-block-content a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.plan-adjuster-block-content a:hover {
+  text-decoration: underline;
+}
+
+.plan-adjuster-block-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5em 0;
+  font-size: 0.9em;
+}
+
+.plan-adjuster-block-content th,
+.plan-adjuster-block-content td {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.plan-adjuster-block-content th {
+  background: rgba(0, 0, 0, 0.03);
+  font-weight: 600;
+}
+
+.plan-adjuster-block-content blockquote {
+  border-left: 3px solid rgba(0, 0, 0, 0.15);
+  margin: 0.5em 0;
+  padding: 0.25em 1em;
+  color: #6b7280;
+}
+
+.plan-adjuster-block-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.plan-adjuster-block-content hr {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 0.75em 0;
+}
+
+.plan-adjuster-block-content input[type="checkbox"] {
+  margin-right: 0.5em;
+}
