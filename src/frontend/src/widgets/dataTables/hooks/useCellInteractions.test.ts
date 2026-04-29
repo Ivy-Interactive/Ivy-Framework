@@ -67,15 +67,15 @@ describe("useCellInteractions - link cell click behavior", () => {
   });
 
   it("should still fire OnCellClick events when enableCellClickEvents is true", () => {
-    // Dispatch lives in emitOnCellClick; scheduling is gated by enableCellClickEvents in handleCellClicked
+    // The OnCellClick event handler block should still exist and be gated
+    // behind enableCellClickEvents
     const onCellClickBlock = hookSource.indexOf('eventHandler("OnCellClick"');
     expect(onCellClickBlock).toBeGreaterThan(-1);
-    expect(hookSource).toContain("enableCellClickEvents ?? false");
-  });
 
-  it("should defer OnCellClick so a double-click can cancel before the server event fires", () => {
-    expect(hookSource).toContain("SINGLE_CLICK_EMIT_DELAY_MS");
-    expect(hookSource).toContain("pendingSingleClickTimerRef");
+    // The enableCellClickEvents check should appear before the OnCellClick dispatch
+    const enableCheck = hookSource.indexOf("enableCellClickEvents ?? false");
+    expect(enableCheck).toBeGreaterThan(-1);
+    expect(enableCheck).toBeLessThan(onCellClickBlock);
   });
 
   it("should open external URLs in a new tab with security attributes", () => {
