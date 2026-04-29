@@ -20,6 +20,9 @@ public class DataTableMainSample : ViewBase
 {
     private enum RowAction { Edit, Delete, View, Menu, Archive, Export, Share }
 
+    /// <summary>Opened when a data cell is single-clicked with <c>.OnCellClick()</c>.</summary>
+    private sealed record EmployeeSheetContext(EmployeeRecord Employee, string ColumnName, object? CellValue);
+
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
@@ -27,6 +30,7 @@ public class DataTableMainSample : ViewBase
 
         var editModalOpen = UseState(() => false);
         var editingEmployee = UseState<EmployeeRecord?>(() => null);
+        var employeeSheetContext = UseState<EmployeeSheetContext?>(() => null);
         var refreshToken = UseRefreshToken();
 
         var dataTable = mockService.GetEmployees().AsQueryable().ToDataTable(idSelector: e => e.Id)
@@ -200,16 +204,59 @@ public class DataTableMainSample : ViewBase
                         break;
                 }
                 return ValueTask.CompletedTask;
+            })
+            .OnCellClick(e =>
+            {
+                var args = e.Value;
+                EmployeeRecord? employee = null;
+
+                if (args.RowId is int idFromArrow)
+                    employee = mockService.GetEmployees().FirstOrDefault(emp => emp.Id == idFromArrow);
+                else if (args.RowId != null && int.TryParse(args.RowId.ToString(), out var parsedId))
+                    employee = mockService.GetEmployees().FirstOrDefault(emp => emp.Id == parsedId);
+
+                if (employee == null)
+                {
+                    var list = mockService.GetEmployees().ToList();
+                    if (args.RowIndex >= 0 && args.RowIndex < list.Count)
+                        employee = list[args.RowIndex];
+                }
+
+                if (employee != null)
+                    employeeSheetContext.Set(new EmployeeSheetContext(employee, args.ColumnName, args.CellValue));
+
+                return ValueTask.CompletedTask;
             });
 
         var content = Layout.Vertical().Width(Size.Full()).Height(Size.Full())
             | "This header demonstrates that the DataTable below correctly calculates its height even when placed inside a vertical layout with other elements."
+            | "Single-click any cell to open a side sheet with that employee row. The grid enables cell-click events automatically when you attach .OnCellClick()."
             | dataTable;
 
-        return new Fragment(content, new EmployeeEditDialog(editModalOpen, editingEmployee, refreshToken, updated =>
-        {
-            mockService.UpdateEmployee(updated);
-        }));
+        return new Fragment(
+            content,
+            new EmployeeEditDialog(editModalOpen, editingEmployee, refreshToken, updated =>
+            {
+                mockService.UpdateEmployee(updated);
+            }),
+            employeeSheetContext.Value != null ? BuildEmployeeDetailSheet(employeeSheetContext) : null);
+    }
+
+    private object BuildEmployeeDetailSheet(IState<EmployeeSheetContext?> context)
+    {
+        var sel = context.Value;
+        if (sel == null)
+            return new Fragment();
+
+        return new Sheet(
+                onClose: () => context.Set(null),
+                content: Layout.Vertical().Gap(4)
+                    | Text.P($"{sel.ColumnName}: {sel.CellValue}")
+                        .Muted()
+                    | new Card(sel.Employee.ToDetails().RemoveEmpty()),
+                title: sel.Employee.Name,
+                description: "Employee row")
+            .Width(Size.Rem(28));
     }
 }
 
