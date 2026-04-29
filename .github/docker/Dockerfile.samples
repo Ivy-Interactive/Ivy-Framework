@@ -9,12 +9,9 @@ ENV DOTNET_TieredPGO=1
 ENV DOTNET_TC_QuickJitForLoops=1
 
 # Build frontend (Ivy embeds frontend/dist)
-FROM node:24-bookworm-slim AS frontend
+FROM node:24-alpine AS frontend
 WORKDIR /src
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
-RUN --mount=type=cache,id=apt-samples-frontend,target=/var/cache/apt \
-    --mount=type=cache,id=apt-samples-frontend-lib,target=/var/lib/apt \
-    apt-get update && apt-get install -y curl bash
+RUN apk add --no-cache curl bash
 RUN curl -fsSL https://vite.plus | bash
 ENV PATH="/root/.vite-plus/bin:${PATH}"
 COPY ["src/frontend/package.json", "src/frontend/pnpm-lock.yaml", "src/frontend/"]
