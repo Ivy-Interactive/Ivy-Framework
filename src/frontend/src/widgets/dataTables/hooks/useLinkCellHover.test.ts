@@ -11,6 +11,12 @@ import * as path from "path";
 describe("useLinkCellHover", () => {
   const hookSource = fs.readFileSync(path.resolve(__dirname, "./useLinkCellHover.ts"), "utf-8");
 
+  it("should only enable tooltip positioning when hover + fine pointer media queries match", () => {
+    expect(hookSource).toContain("(hover: hover)");
+    expect(hookSource).toContain("(pointer: fine)");
+    expect(hookSource).toContain("linkTooltipSupported");
+  });
+
   it("should detect link cells by kind", () => {
     expect(hookSource).toContain('"link-cell"');
     expect(hookSource).toContain("GridCellKind.Custom");

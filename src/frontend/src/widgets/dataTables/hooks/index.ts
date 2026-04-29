@@ -9,4 +9,4 @@ export { useRowHover } from "./useRowHover";
 export { useEmptyRows } from "./useEmptyRows";
 export { useDataLoading } from "./useDataLoading";
 export { useLinkCellHover } from "./useLinkCellHover";
-export { useLongPressLink } from "./useLongPressLink";
+export { useDoubleTapLink } from "./useDoubleTapLink";

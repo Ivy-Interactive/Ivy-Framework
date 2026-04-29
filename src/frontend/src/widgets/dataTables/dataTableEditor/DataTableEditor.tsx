@@ -25,7 +25,7 @@ import {
   useEmptyRows,
   useDataLoading,
   useLinkCellHover,
-  useLongPressLink,
+  useDoubleTapLink,
 } from "../hooks";
 import { useFooterColumnLayout } from "../hooks/useFooterColumnLayout";
 import { GridContainer } from "../components/GridContainer";
@@ -162,6 +162,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     virtualRef,
     onItemHovered: onLinkCellHovered,
     linkTooltipPos,
+    supportsHoverTooltip,
   } = useLinkCellHover({
     getCellContent,
     visibleRows,
@@ -243,8 +244,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     activeSort,
   });
 
-  // Long press to open links on touch devices
-  useLongPressLink({
+  // Double-tap link cells on touch (desktop uses ⌘/Ctrl+click via useCellInteractions)
+  useDoubleTapLink({
     containerRef,
     gridRef,
     getCellContent,
@@ -307,13 +308,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     footer
   );
 
-  const hasTouchScreen = typeof navigator !== "undefined" && navigator.maxTouchPoints > 0;
   const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
-  const tooltipLabel = hasTouchScreen
-    ? "Hold to open link"
-    : isMac
-      ? "\u2318+click to open link"
-      : "Ctrl+click to open link";
+  const tooltipLabel = isMac ? "\u2318+click to open link" : "Ctrl+click to open link";
 
   const linkTooltipNode = (
     <TooltipProvider
@@ -391,7 +387,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         footer={footerNode}
         hasEmptyRows={emptyRowsCount > 0}
       />
-      {linkTooltipNode}
+      {supportsHoverTooltip ? linkTooltipNode : null}
     </>
   );
 };
