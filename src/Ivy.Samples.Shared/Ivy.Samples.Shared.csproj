@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../Ivy.XamlBuilder/Ivy.XamlBuilder.csproj" />
-    <ProjectReference Include="../widgets/Ivy.Widgets.PlanAdjuster/Ivy.Widgets.PlanAdjuster.csproj" />
   </ItemGroup>
   
   <!-- enable ivy analyzer for samples -->
