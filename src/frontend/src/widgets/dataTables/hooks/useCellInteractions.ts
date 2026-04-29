@@ -6,6 +6,17 @@ import { DataColumn } from "../types/types";
 import { getHiddenKeyValue } from "../utils/arrowUtils";
 import * as arrow from "apache-arrow";
 
+export function openLinkUrl(url: string | undefined) {
+  const validatedUrl = validateLinkUrl(url);
+  if (validatedUrl === "#") return;
+  if (validatedUrl.startsWith("http://") || validatedUrl.startsWith("https://")) {
+    window.open(validatedUrl, "_blank", "noopener,noreferrer")?.focus();
+  } else {
+    const redirectUrl = validateRedirectUrl(validatedUrl, false);
+    if (redirectUrl) window.location.href = redirectUrl;
+  }
+}
+
 interface UseCellInteractionsProps {
   widgetId: string;
   events: string[];
@@ -88,26 +99,7 @@ export const useCellInteractions = ({
         (args.metaKey || args.ctrlKey)
       ) {
         const url = (cellContent.data as { url?: string })?.url;
-
-        // Validate URL to prevent open redirect vulnerabilities
-        const validatedUrl = validateLinkUrl(url);
-        if (validatedUrl === "#") {
-          // Invalid URL, don't proceed
-          return;
-        }
-
-        // External URLs (http/https) open in new tab
-        if (validatedUrl.startsWith("http://") || validatedUrl.startsWith("https://")) {
-          const newWindow = window.open(validatedUrl, "_blank", "noopener,noreferrer");
-          newWindow?.focus();
-        } else {
-          // Internal relative URLs navigate in same tab
-          // Validate it's safe for redirect (relative path or same-origin)
-          const redirectUrl = validateRedirectUrl(validatedUrl, false);
-          if (redirectUrl) {
-            window.location.href = redirectUrl;
-          }
-        }
+        openLinkUrl(url);
       }
       // Do NOT prevent default - let selection happen normally!
     },
