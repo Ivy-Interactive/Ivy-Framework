@@ -459,7 +459,9 @@ public class DataTableBuilder<TModel>(
 
     public DataTableBuilder<TModel> OnCellAction(Expression<Func<TModel, object>> field, EventHandler<object> action)
     {
-        var columnName = TypeHelper.GetNameFromMemberExpression(field.Body);
+        var column = GetColumn(field);
+        var columnName = column.Column.Name;
+        column.Column.HasCellAction = true;
         _cellActions[columnName] = action;
         return this;
     }

@@ -1,11 +1,28 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using Ivy.Plugins;
+using Ivy.Plugins.Messaging;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Ivy.Core.Plugins;
+
+internal class PluginContextWithConfiguration(PluginContextBase inner, IConfiguration configuration) : IIvyPluginContext
+{
+    public IServiceCollection Services => inner.Services;
+    public IConfiguration Configuration => configuration;
+
+    public void AddApp(AppDescriptor descriptor) => inner.AddApp(descriptor);
+    public void AddAppsFromAssembly(Assembly assembly) => inner.AddAppsFromAssembly(assembly);
+    public void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer) => inner.AddMenuItems(transformer);
+    public void AddFooterMenuItems(Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer) => inner.AddFooterMenuItems(transformer);
+    public void AddBadgeProvider(string menuTag, Func<IServiceProvider, int> countProvider) => inner.AddBadgeProvider(menuTag, countProvider);
+    public void RegisterMessagingChannel(IMessagingChannel channel) => inner.RegisterMessagingChannel(channel);
+    public void UseWebApplication(Action<WebApplication> configure) => inner.UseWebApplication(configure);
+    public void UseWebApplicationBuilder(Action<WebApplicationBuilder> configure) => inner.UseWebApplicationBuilder(configure);
+}
 
 public class PluginLoader : IPluginManager
 {
@@ -14,11 +31,16 @@ public class PluginLoader : IPluginManager
     private readonly IReadOnlySet<string> _sharedAssemblyNames;
     private readonly List<LoadedPlugin> _plugins = [];
     private readonly Dictionary<string, string> _knownPlugins = new(); // id -> directory
+    private readonly Dictionary<string, (string Reason, DateTime FailedAt)> _failedPlugins = new(); // directory -> failure info
     private readonly ReaderWriterLockSlim _lock = new();
     private PluginContextBase? _pluginContext;
     private IConfiguration? _configuration;
     private Func<IServiceProvider>? _serviceProviderFactory;
     private Version? _hostVersion;
+
+    public event Action<string>? PluginLoaded;
+    public event Action<string>? PluginUnloaded;
+    public event Action<string>? PluginReloaded;
 
     internal PluginLoader(string pluginsDirectory, ILogger<PluginLoader> logger, IEnumerable<string>? sharedAssemblyNames = null)
     {
@@ -57,7 +79,22 @@ public class PluginLoader : IPluginManager
             try
             {
                 var loaded = LoadPluginFromDirectory(directory, serviceProvider);
-                if (loaded is null) continue;
+                if (loaded is null)
+                {
+                    // Track that this directory failed to load
+                    _lock.EnterWriteLock();
+                    try
+                    {
+                        _failedPlugins[directory] = (
+                            "No valid plugin found (no DLLs, no [IvyPlugin] attribute, or multiple attributes)",
+                            DateTime.UtcNow);
+                    }
+                    finally
+                    {
+                        _lock.ExitWriteLock();
+                    }
+                    continue;
+                }
 
                 var manifest = loaded.Value.Instance.Manifest;
 
@@ -75,6 +112,18 @@ public class PluginLoader : IPluginManager
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to load plugin from {Directory}. Skipping.", directory);
+
+                _lock.EnterWriteLock();
+                try
+                {
+                    _failedPlugins[directory] = (
+                        $"Exception during load: {ex.Message}",
+                        DateTime.UtcNow);
+                }
+                finally
+                {
+                    _lock.ExitWriteLock();
+                }
             }
         }
 
@@ -233,19 +282,69 @@ public class PluginLoader : IPluginManager
     public void Configure(PluginContextBase context)
     {
         _pluginContext = context;
+        var invalidPlugins = new List<LoadedPlugin>();
+
         _lock.EnterReadLock();
         try
         {
             foreach (var plugin in _plugins)
             {
+                IIvyPluginContext contextToUse = context;
+
+                if (plugin.Instance.ConfigurationSchema is { } schema)
+                {
+                    var errors = ValidatePluginConfiguration(
+                        plugin.Instance.Manifest.ConfigSectionName,
+                        schema,
+                        context.Configuration);
+
+                    if (errors.Count > 0)
+                    {
+                        _logger.LogError(
+                            "Plugin '{Id}' configuration is invalid: {Errors}",
+                            plugin.Instance.Manifest.Id,
+                            string.Join(", ", errors));
+                        invalidPlugins.Add(plugin);
+                        continue;
+                    }
+
+                    // Apply defaults before calling Configure
+                    var configWithDefaults = ApplyConfigurationDefaults(
+                        plugin.Instance.Manifest.ConfigSectionName,
+                        schema,
+                        context.Configuration);
+
+                    // Create context wrapper with defaults applied
+                    contextToUse = new PluginContextWithConfiguration(context, configWithDefaults);
+                }
+
                 context.SetCurrentPlugin(plugin.Instance.Manifest.Id, plugin.Directory);
-                plugin.Instance.Configure(context);
+                plugin.Instance.Configure(contextToUse);
                 context.ClearCurrentPlugin();
             }
         }
         finally
         {
             _lock.ExitReadLock();
+        }
+
+        if (invalidPlugins.Count > 0)
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                foreach (var plugin in invalidPlugins)
+                {
+                    _plugins.Remove(plugin);
+                    _failedPlugins[plugin.Directory] = (
+                        $"Configuration invalid for '{plugin.Instance.Manifest.Id}'",
+                        DateTime.UtcNow);
+                }
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
     }
 
@@ -287,12 +386,17 @@ public class PluginLoader : IPluginManager
 
             _plugins.Remove(plugin);
             _logger.LogInformation("Unloaded plugin: {Id}", pluginId);
-            return true;
         }
         finally
         {
             _lock.ExitWriteLock();
         }
+
+        // Fire event outside the lock to avoid deadlocks — subscribers may call
+        // GetLoadedPluginIds() which needs a read lock.
+        PluginUnloaded?.Invoke(pluginId);
+
+        return true;
     }
 
     public bool LoadPlugin(string pluginPath)
@@ -303,6 +407,7 @@ public class PluginLoader : IPluginManager
             return false;
         }
 
+        string? loadedPluginId = null;
         _lock.EnterWriteLock();
         try
         {
@@ -345,11 +450,45 @@ public class PluginLoader : IPluginManager
             if (_configuration is not null)
                 plugin.Instance.ConfigureServices(plugin.Services, _configuration);
 
+            // Validate configuration before Configure
+            if (plugin.Instance.ConfigurationSchema is { } schema && _configuration is not null)
+            {
+                var errors = ValidatePluginConfiguration(
+                    manifest.ConfigSectionName,
+                    schema,
+                    _configuration);
+
+                if (errors.Count > 0)
+                {
+                    _logger.LogError(
+                        "Plugin '{Id}' configuration is invalid: {Errors}. Plugin load failed.",
+                        manifest.Id,
+                        string.Join(", ", errors));
+
+                    (plugin.ServiceProvider as IDisposable)?.Dispose();
+                    plugin.LoadContext.Unload();
+                    return false;
+                }
+            }
+
             // Configure context
             if (_pluginContext is not null)
             {
+                IIvyPluginContext contextToUse = _pluginContext;
+
+                // Apply defaults if schema exists
+                if (plugin.Instance.ConfigurationSchema is { } configSchema && _configuration is not null)
+                {
+                    var configWithDefaults = ApplyConfigurationDefaults(
+                        manifest.ConfigSectionName,
+                        configSchema,
+                        _configuration);
+
+                    contextToUse = new PluginContextWithConfiguration(_pluginContext, configWithDefaults);
+                }
+
                 _pluginContext.SetCurrentPlugin(manifest.Id, pluginPath);
-                plugin.Instance.Configure(_pluginContext);
+                plugin.Instance.Configure(contextToUse);
                 _pluginContext.ClearCurrentPlugin();
                 _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
                 plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
@@ -357,13 +496,25 @@ public class PluginLoader : IPluginManager
 
             _knownPlugins[manifest.Id] = pluginPath;
             _plugins.Add(plugin);
+
+            // Clear from failed plugins if it was there
+            _failedPlugins.Remove(pluginPath);
+
             _logger.LogInformation("Loaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
-            return true;
+
+            loadedPluginId = manifest.Id;
         }
         finally
         {
             _lock.ExitWriteLock();
         }
+
+        // Fire event outside the lock to avoid deadlocks — subscribers may call
+        // GetLoadedPluginIds() which needs a read lock.
+        if (loadedPluginId is not null)
+            PluginLoaded?.Invoke(loadedPluginId);
+
+        return loadedPluginId is not null;
     }
 
     public bool ReloadPlugin(string pluginId)
@@ -386,7 +537,12 @@ public class PluginLoader : IPluginManager
         }
 
         if (!UnloadPlugin(pluginId)) return false;
-        return LoadPlugin(directory);
+        var loaded = LoadPlugin(directory);
+        if (loaded)
+        {
+            PluginReloaded?.Invoke(pluginId);
+        }
+        return loaded;
     }
 
     public IReadOnlyList<string> GetLoadedPluginIds()
@@ -408,15 +564,121 @@ public class PluginLoader : IPluginManager
         try
         {
             var loadedIds = _plugins.Select(p => p.Instance.Manifest.Id).ToHashSet();
-            return _knownPlugins
-                .Where(kv => !loadedIds.Contains(kv.Key))
-                .Select(kv => new PluginCandidate(kv.Key, kv.Value))
-                .ToList();
+            var result = new List<PluginCandidate>();
+
+            // Add known plugins that aren't loaded
+            foreach (var (id, directory) in _knownPlugins)
+            {
+                if (!loadedIds.Contains(id))
+                {
+                    result.Add(new PluginCandidate(id, directory));
+                }
+            }
+
+            // Add failed plugins
+            foreach (var (directory, (reason, failedAt)) in _failedPlugins)
+            {
+                // Extract ID from directory name or use directory name as fallback
+                var id = Path.GetFileName(directory);
+                result.Add(new PluginCandidate(id, directory, reason, failedAt));
+            }
+
+            return result;
         }
         finally
         {
             _lock.ExitReadLock();
         }
+    }
+
+    internal string? GetPluginIdByDirectory(string directory)
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            return _knownPlugins.FirstOrDefault(kv => kv.Value == directory).Key;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    internal void AddTestPlugin(IIvyPlugin instance, string directory)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _plugins.Add(new LoadedPlugin(instance, typeof(PluginLoader).Assembly, AssemblyLoadContext.Default, directory));
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    internal List<string> ValidatePluginConfiguration(
+        string configSectionName,
+        PluginConfigurationSchema schema,
+        IConfiguration config)
+    {
+        var errors = new List<string>();
+        var section = config.GetSection($"Plugins:{configSectionName}");
+
+        foreach (var field in schema.Fields)
+        {
+            var value = section[field.Key];
+
+            if (field.IsRequired && string.IsNullOrEmpty(value))
+            {
+                errors.Add($"Required field '{field.Key}' is missing");
+                continue;
+            }
+
+            if (!string.IsNullOrEmpty(value) && !ValidateFieldType(value, field.Type))
+            {
+                errors.Add($"Field '{field.Key}' has invalid type (expected {field.Type})");
+            }
+        }
+
+        return errors;
+    }
+
+    internal static bool ValidateFieldType(string value, ConfigFieldType type)
+    {
+        return type switch
+        {
+            ConfigFieldType.Integer => int.TryParse(value, out _),
+            ConfigFieldType.Boolean => bool.TryParse(value, out _),
+            _ => true // String and Secret are always valid if non-empty
+        };
+    }
+
+    internal IConfiguration ApplyConfigurationDefaults(
+        string configSectionName,
+        PluginConfigurationSchema schema,
+        IConfiguration config)
+    {
+        var defaults = new Dictionary<string, string?>();
+        var section = config.GetSection($"Plugins:{configSectionName}");
+
+        foreach (var field in schema.Fields.Where(f => f.DefaultValue is not null))
+        {
+            var value = section[field.Key];
+
+            // Only inject default if field is missing or empty
+            if (string.IsNullOrEmpty(value))
+            {
+                defaults[$"Plugins:{configSectionName}:{field.Key}"] = field.DefaultValue;
+            }
+        }
+
+        // Create a configuration that layers defaults under the actual config
+        // Actual config takes precedence over defaults
+        return new ConfigurationBuilder()
+            .AddInMemoryCollection(defaults)
+            .AddConfiguration(config)
+            .Build();
     }
 }
 

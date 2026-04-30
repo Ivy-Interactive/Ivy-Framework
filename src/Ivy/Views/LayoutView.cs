@@ -33,6 +33,7 @@ public class LayoutView : ViewBase, IStateless
     private Ivy.BorderStyle _borderStyle = Ivy.BorderStyle.None;
     private Thickness _borderThickness = new(0);
     private string? _testId = null;
+    private string? _scrollTarget = null;
     private GridView? _activeGrid = null;
 
     public LayoutView Gap(bool gap)
@@ -440,6 +441,12 @@ public class LayoutView : ViewBase, IStateless
         return this;
     }
 
+    public LayoutView ScrollTarget(string? target)
+    {
+        _scrollTarget = target;
+        return this;
+    }
+
     public override object? Build()
     {
         var layout = new StackLayout(_elements.Select(e => e.Content).ToArray(), _orientation, _rowGap, _padding, _margin, _background,
@@ -456,6 +463,7 @@ public class LayoutView : ViewBase, IStateless
         };
 
         if (_testId != null) layout.TestId = _testId;
+        if (_scrollTarget != null) layout.ScrollTarget = _scrollTarget;
 
         return layout;
     }

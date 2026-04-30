@@ -63,11 +63,22 @@ public static class ProcessExtensions
 
     private static void KillProcess(Process process)
     {
+        int? processId = null;
+        try
+        {
+            processId = process.Id;
+        }
+        catch (InvalidOperationException)
+        {
+            // Process already disposed/exited
+            return;
+        }
+
         try
         {
             process.Kill(true);
             if (!process.WaitForExit(5000))
-                CrashLog.Write($"[{DateTime.UtcNow:O}] Process {process.Id} did not exit within 5 seconds after Kill()");
+                CrashLog.Write($"[{DateTime.UtcNow:O}] Process {processId} did not exit within 5 seconds after Kill()");
         }
         catch (InvalidOperationException)
         {
@@ -75,12 +86,23 @@ public static class ProcessExtensions
         }
         catch (Exception ex)
         {
-            CrashLog.Write($"[{DateTime.UtcNow:O}] Exception killing process {process.Id}: {ex.GetType().Name}: {ex.Message}");
+            CrashLog.Write($"[{DateTime.UtcNow:O}] Exception killing process {processId}: {ex.GetType().Name}: {ex.Message}");
         }
     }
 
     private static async Task KillProcessAsync(Process process)
     {
+        int? processId = null;
+        try
+        {
+            processId = process.Id;
+        }
+        catch (InvalidOperationException)
+        {
+            // Process already disposed/exited
+            return;
+        }
+
         try
         {
             process.Kill(true);
@@ -89,7 +111,7 @@ public static class ProcessExtensions
         }
         catch (OperationCanceledException)
         {
-            CrashLog.Write($"[{DateTime.UtcNow:O}] Process {process.Id} did not exit within 5 seconds after Kill()");
+            CrashLog.Write($"[{DateTime.UtcNow:O}] Process {processId} did not exit within 5 seconds after Kill()");
         }
         catch (InvalidOperationException)
         {
@@ -97,7 +119,7 @@ public static class ProcessExtensions
         }
         catch (Exception ex)
         {
-            CrashLog.Write($"[{DateTime.UtcNow:O}] Exception killing process {process.Id}: {ex.GetType().Name}: {ex.Message}");
+            CrashLog.Write($"[{DateTime.UtcNow:O}] Exception killing process {processId}: {ex.GetType().Name}: {ex.Message}");
         }
     }
 }

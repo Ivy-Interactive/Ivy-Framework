@@ -50,6 +50,7 @@ interface StackLayoutWidgetProps {
   responsiveRowGap?: Responsive<number>;
   responsiveColumnGap?: Responsive<number>;
   responsivePadding?: Responsive<string>;
+  scrollTarget?: string | null;
 }
 
 export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
@@ -77,8 +78,20 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
   responsiveRowGap,
   responsiveColumnGap,
   responsivePadding,
+  scrollTarget,
 }) => {
   const bp = useCurrentBreakpoint();
+
+  React.useEffect(() => {
+    if (!scrollTarget) return;
+    const timer = setTimeout(() => {
+      const el = document.querySelector(`[data-testid="${CSS.escape(scrollTarget)}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [scrollTarget]);
 
   // Resolve layout-specific responsive values with mobile-first cascading
   const resolvedOrientation = responsiveOrientation

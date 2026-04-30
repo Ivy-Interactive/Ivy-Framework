@@ -350,6 +350,7 @@ public class DataTableDensitySample : ViewBase
     public override object? Build()
     {
         var density = UseState(() => Density.Medium);
+        var client = UseService<IClientProvider>();
 
         var data = new[]
         {
@@ -370,6 +371,16 @@ public class DataTableDensitySample : ViewBase
             .Width(x => x.Category, Size.Px(100))
             .Width(x => x.Price, Size.Px(100))
             .AlignContent(x => x.Price, Align.Right)
+            .OnCellAction(x => x.Name, (Func<object, ValueTask>)(e =>
+            {
+                client.Toast($"Name clicked: {e}");
+                return ValueTask.CompletedTask;
+            }))
+            .OnCellAction(x => x.Price, (Func<object, ValueTask>)(e =>
+            {
+                client.Toast($"Price clicked: {e}");
+                return ValueTask.CompletedTask;
+            }))
             .Density(density.Value)
             .Height(Size.Units(60));
 

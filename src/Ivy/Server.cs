@@ -112,6 +112,7 @@ public class Server
     private readonly List<IHtmlFilter> _customHtmlFilters = new();
     private Action<HtmlPipeline>? _pipelineConfigurator;
     private PluginLoader? _pluginLoader;
+    private PluginWatcher? _pluginWatcher;
     private Func<Server, WebApplicationBuilder, PluginContextBase>? _pluginContextFactory;
     private ManifestOptions? _manifestOptions;
     private ServerArgs _args;
@@ -565,7 +566,8 @@ public class Server
         string pluginsDirectory,
         Version? hostVersion = null,
         Func<Server, WebApplicationBuilder, PluginContextBase>? contextFactory = null,
-        IEnumerable<string>? sharedAssemblyNames = null)
+        IEnumerable<string>? sharedAssemblyNames = null,
+        bool enableHotReload = true)
     {
         using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
         var logger = loggerFactory.CreateLogger<PluginLoader>();
@@ -580,6 +582,18 @@ public class Server
 
         _pluginLoader = loader;
         _pluginContextFactory = contextFactory;
+
+        // Register Plugin Manager app (consolidates plugin management UI)
+        AddApp(typeof(Apps.PluginManagerApp));
+        AppRepository.Reload(new HashSet<string>());
+
+        if (enableHotReload)
+        {
+            var watcherLogger = loggerFactory.CreateLogger<PluginWatcher>();
+            _pluginWatcher = new PluginWatcher(pluginsDirectory, loader, watcherLogger);
+            _pluginWatcher.Start();
+        }
+
         return this;
     }
 
@@ -762,6 +776,8 @@ public class Server
             pluginContext.BuildServiceProvider();
             builder.Services.AddSingleton<IPluginServiceProvider>(pluginContext);
             builder.Services.AddSingleton<IPluginManager>(_pluginLoader);
+            builder.Services.AddSingleton<IPluginStateService>(sp =>
+                new PluginStateService(sp.GetRequiredService<IPluginManager>()));
         }
 
         var app = builder.Build();
@@ -1001,6 +1017,11 @@ public class Server
             {
                 ProcessHelper.OpenBrowser(localUrl);
             }
+        });
+
+        app.Lifetime.ApplicationStopping.Register(() =>
+        {
+            _pluginWatcher?.Dispose();
         });
 
         if (_args.Describe)

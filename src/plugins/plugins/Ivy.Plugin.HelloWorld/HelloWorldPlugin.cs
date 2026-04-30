@@ -12,8 +12,11 @@ public class HelloWorldPlugin : IIvyPlugin
     {
         Id = "Ivy.Plugin.HelloWorld",
         Name = "Hello World Plugin",
+        ConfigSectionName = "HelloWorld",
         Version = new Version(1, 0, 0),
     };
+
+    public PluginConfigurationSchema? ConfigurationSchema => null;
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {

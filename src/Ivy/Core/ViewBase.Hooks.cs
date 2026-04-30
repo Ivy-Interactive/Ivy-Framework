@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Ivy.Core;
+using Ivy.Core.Plugins;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -260,6 +261,25 @@ public abstract partial class ViewBase
         }, [EffectTrigger.OnMount()]);
 
         return isConnected;
+    }
+
+    protected IState<RefreshToken> UsePluginState()
+    {
+        var pluginStateService = UseService<IPluginStateService>();
+        var refreshToken = UseRefreshToken();
+
+        UseEffect(() =>
+        {
+            pluginStateService.PluginStateChanged += OnPluginStateChanged;
+            return System.Reactive.Disposables.Disposable.Create(() =>
+            {
+                pluginStateService.PluginStateChanged -= OnPluginStateChanged;
+            });
+
+            void OnPluginStateChanged() => refreshToken.Refresh();
+        }, [EffectTrigger.OnMount()]);
+
+        return UseState(refreshToken);
     }
 
     protected static EffectTrigger OnMount() =>

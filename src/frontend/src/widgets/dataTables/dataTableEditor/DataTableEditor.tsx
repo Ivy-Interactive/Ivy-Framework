@@ -35,6 +35,7 @@ import { DENSITY_CONFIG } from "./constants";
 import { useCellContent, useGridColumns, useHeaderMenu } from "./hooks";
 import { getOrderedVisibleDataColumns } from "../utils/columnHelpers";
 import type { SpriteMap } from "@glideapps/glide-data-grid";
+import { ExternalLink } from "lucide-react";
 
 interface TableEditorProps {
   widgetId: string;
@@ -77,6 +78,11 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   } = useTable();
 
   const densityConfig = DENSITY_CONFIG[density];
+  const actionIndicatorStyle = useMemo(() => {
+    if (density === "Small") return { iconSize: 10, top: 1, right: 2 };
+    if (density === "Large") return { iconSize: 14, top: 3, right: 4 };
+    return { iconSize: 12, top: 2, right: 3 };
+  }, [density]);
 
   const hasWrappingColumns = columns.some((c) => c.wrapText && !c.hidden);
   const effectiveRowHeight = hasWrappingColumns
@@ -168,15 +174,6 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     visibleRows,
   });
 
-  // Compose onItemHovered: always call link hover, additionally call row hover when enabled
-  const handleItemHovered = useCallback(
-    (args: GridMouseEventArgs) => {
-      onLinkCellHovered(args);
-      onItemHovered(args);
-    },
-    [onLinkCellHovered, onItemHovered],
-  );
-
   // Table theme
   const { tableTheme, getRowThemeOverride, isDark } = useTableTheme({
     showVerticalBorders: showVerticalBorders ?? false,
@@ -260,6 +257,44 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     [columns, columnOrder],
   );
 
+  const [cellActionIndicator, setCellActionIndicator] = React.useState<{
+    x: number;
+    y: number;
+    width: number;
+  } | null>(null);
+
+  // Compose onItemHovered: keep existing hover behavior and track actionable-cell affordance.
+  const handleItemHovered = useCallback(
+    (args: GridMouseEventArgs) => {
+      onLinkCellHovered(args);
+      onItemHovered(args);
+
+      if (args.kind !== "cell") {
+        setCellActionIndicator(null);
+        return;
+      }
+
+      const [col, row] = args.location;
+      if (row >= visibleRows) {
+        setCellActionIndicator(null);
+        return;
+      }
+
+      const hoveredColumn = orderedDataColumns[col];
+      if (!hoveredColumn?.hasCellAction) {
+        setCellActionIndicator(null);
+        return;
+      }
+
+      setCellActionIndicator({
+        x: args.bounds.x,
+        y: args.bounds.y,
+        width: args.bounds.width,
+      });
+    },
+    [onLinkCellHovered, onItemHovered, orderedDataColumns, visibleRows],
+  );
+
   const wantAggregateFooter =
     showAggregateFooter && orderedDataColumns.some((c) => c.footer && c.footer.length > 0);
 
@@ -334,6 +369,26 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     </TooltipProvider>
   );
 
+  const cellActionIndicatorNode = cellActionIndicator ? (
+    <div
+      style={{
+        position: "fixed",
+        left:
+          cellActionIndicator.x +
+          cellActionIndicator.width -
+          actionIndicatorStyle.iconSize -
+          actionIndicatorStyle.right,
+        top: cellActionIndicator.y + actionIndicatorStyle.top,
+        pointerEvents: "none",
+        zIndex: 20,
+        opacity: 0.7,
+      }}
+      aria-hidden
+    >
+      <ExternalLink size={actionIndicatorStyle.iconSize} />
+    </div>
+  ) : null;
+
   return (
     <>
       <GridContainer
@@ -388,6 +443,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         hasEmptyRows={emptyRowsCount > 0}
       />
       {supportsHoverTooltip ? linkTooltipNode : null}
+      {cellActionIndicatorNode}
     </>
   );
 };

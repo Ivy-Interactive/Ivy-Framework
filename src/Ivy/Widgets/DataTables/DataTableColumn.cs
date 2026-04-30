@@ -46,6 +46,12 @@ public class DataTableColumn
     /// Link type for LinkDisplayRenderer ("url", "email", "phone"). Sent to frontend for URL scheme handling.
     /// </summary>
     public string? LinkType { get; set; } = null;
+
+    /// <summary>
+    /// True when this column has a dedicated OnCellAction handler and should show
+    /// a visual affordance for clickability in the frontend.
+    /// </summary>
+    public bool HasCellAction { get; set; } = false;
 }
 
 public enum SortDirection

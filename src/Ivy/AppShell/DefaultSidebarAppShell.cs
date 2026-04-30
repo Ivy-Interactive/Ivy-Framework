@@ -414,7 +414,7 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
             SearchActive = !string.IsNullOrWhiteSpace(search.Value)
         };
 
-        var commonMenuItems = new[]
+        var commonMenuItemsList = new List<MenuItem>
         {
             // MenuItem.Default("Star on Github").Tag("$github").Icon(Icons.Github)
             //     .OnSelect(() => client.OpenUrl(Resources.IvyGitHubUrl)),
@@ -427,6 +427,17 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
                     MenuItem.Checkbox("System").Icon(Icons.SunMoon).OnSelect(() => client.SetThemeMode(ThemeMode.System))
                 )
         };
+
+        if (appRepository.GetApp(typeof(Apps.PluginManagerApp)) is { } pluginManagerApp)
+        {
+            commonMenuItemsList.Add(
+                MenuItem.Default("Plugins")
+                    .Tag("$plugins")
+                    .Icon(Icons.Plug)
+                    .OnSelect(() => navigator.Navigate(typeof(Apps.PluginManagerApp))));
+        }
+
+        var commonMenuItems = commonMenuItemsList.ToArray();
 
         var authSession = auth?.GetAuthSession();
         var isLoggedIn = authSession != null;

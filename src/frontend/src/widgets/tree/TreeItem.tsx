@@ -1,5 +1,6 @@
 import React from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ChevronRight } from "lucide-react";
 import Icon from "@/components/Icon";
 import { cn } from "@/lib/utils";
@@ -7,6 +8,46 @@ import { MenuItem } from "@/types/widgets";
 import { ActionRenderer } from "@/widgets/rowAction";
 import { Densities } from "@/types/density";
 import { densityTreeGap } from "@/components/ui/density-scale";
+
+const TreeItemLabel: React.FC<{ label: string; tooltip?: string }> = ({ label, tooltip }) => {
+  const spanRef = React.useRef<HTMLSpanElement>(null);
+  const [isTruncated, setIsTruncated] = React.useState(false);
+  const [showTooltip, setShowTooltip] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkTruncation = () => {
+      const el = spanRef.current;
+      if (el) {
+        setIsTruncated(el.scrollWidth > el.clientWidth);
+      }
+    };
+    checkTruncation();
+    window.addEventListener("resize", checkTruncation);
+    return () => window.removeEventListener("resize", checkTruncation);
+  }, [label]);
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span
+            ref={spanRef}
+            className="truncate flex-1"
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+          >
+            {label}
+          </span>
+        </TooltipTrigger>
+        {showTooltip && isTruncated && (
+          <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+            {tooltip ?? label}
+          </TooltipContent>
+        )}
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 interface TreeItemWidgetProps {
   item: MenuItem;
@@ -76,7 +117,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
       <Collapsible open={isOpen} onOpenChange={(val) => !item.disabled && setIsOpen(val)}>
         <div
           className={cn(
-            "ivy-tree-item group flex items-center gap-1 flex-1 rounded-sm px-1 py-0 text-sm cursor-pointer select-none outline-none",
+            "ivy-tree-item group flex items-center gap-1 flex-1 min-w-0 rounded-sm px-1 py-0 text-sm cursor-pointer select-none outline-none",
             "hover:bg-accent/50 transition-colors focus-visible:ring-1 focus-visible:ring-ring",
             item.disabled && "opacity-50 cursor-not-allowed",
           )}
@@ -127,7 +168,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
               </button>
             </CollapsibleTrigger>
           )}
-          <span className="truncate flex-1">{item.label}</span>
+          <TreeItemLabel label={item.label} tooltip={item.tooltip} />
 
           {rowActions && rowActions.length > 0 && onRowActionClick && (
             <div
@@ -179,7 +220,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   return (
     <div
       className={cn(
-        "ivy-tree-item group flex items-center flex-1 gap-1 rounded-sm px-1 py-0 text-sm cursor-pointer select-none outline-none",
+        "ivy-tree-item group flex items-center flex-1 min-w-0 gap-1 rounded-sm px-1 py-0 text-sm cursor-pointer select-none outline-none",
         "hover:bg-accent/50 transition-colors focus-visible:ring-1 focus-visible:ring-ring",
         item.disabled && "opacity-50 cursor-not-allowed",
       )}
@@ -193,7 +234,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
       {item.icon && item.icon !== "None" && (
         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" name={item.icon} />
       )}
-      <span className="truncate flex-1">{item.label}</span>
+      <TreeItemLabel label={item.label} tooltip={item.tooltip} />
 
       {rowActions && rowActions.length > 0 && onRowActionClick && (
         <div

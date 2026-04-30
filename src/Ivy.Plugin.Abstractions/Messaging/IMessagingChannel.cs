@@ -3,6 +3,7 @@ namespace Ivy.Plugins.Messaging;
 public interface IMessagingChannel
 {
     string Platform { get; }
+    string? DefaultChannel { get; }
 
     Task<MessageResult> SendMessageAsync(
         string channel,

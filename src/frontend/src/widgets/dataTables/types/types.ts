@@ -45,6 +45,7 @@ export interface DataColumn {
   badgeColorMapping?: Record<string, string> | null;
   linkType?: string | null; // Link type for LinkDisplayRenderer ("url", "email", "phone")
   wrapText?: boolean;
+  hasCellAction?: boolean;
 }
 
 export interface DataTableConnection {
