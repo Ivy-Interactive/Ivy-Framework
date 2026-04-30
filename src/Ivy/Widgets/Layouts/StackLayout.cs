@@ -46,6 +46,8 @@ internal record StackLayout : WidgetBase<StackLayout>
 
     [Prop] public Scroll Scroll { get; set; } = Scroll.None;
 
+    [Prop] public string? ScrollTarget { get; set; }
+
     [Prop(attached: nameof(StackLayoutExtensions.AlignSelf))] public Align?[] ChildAlignSelf { get; set; } = null!;
 }
 
