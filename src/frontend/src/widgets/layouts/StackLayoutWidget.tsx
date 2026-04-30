@@ -85,7 +85,7 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
   React.useEffect(() => {
     if (!scrollTarget) return;
     const timer = setTimeout(() => {
-      const el = document.querySelector(`[data-testid="${CSS.escape(scrollTarget)}"]`);
+      const el = document.querySelector(`[data-anchor="${CSS.escape(scrollTarget)}"]`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
       }

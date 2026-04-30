@@ -121,8 +121,10 @@ export const MemoizedWidget = React.memo(
       ? (node.props.content as string) || (node.props.text as string) || ""
       : undefined;
 
+    const anchor = props.anchor as string | undefined;
+
     const content = (
-      <ivy-widget id={node.id} type={node.type} data-content={rawContent}>
+      <ivy-widget id={node.id} type={node.type} data-content={rawContent} data-anchor={anchor}>
         <Component {...props} slots={slots}>
           {slots.default}
         </Component>
@@ -227,8 +229,10 @@ const renderExternalWidget = (node: WidgetNode, inheritedScale?: Densities): Rea
 
   registerCallSite(node);
 
+  const anchor = props.anchor as string | undefined;
+
   const content = (
-    <ivy-widget key={node.id} id={node.id} type={node.type}>
+    <ivy-widget key={node.id} id={node.id} type={node.type} data-anchor={anchor}>
       <ExternalWidgetWrapper Component={Component} props={props}>
         {slots.default}
       </ExternalWidgetWrapper>

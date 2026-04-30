@@ -78,6 +78,4 @@ public record TextBlock : WidgetBase<TextBlock>
 
     [Prop] public TextAlignment? TextAlignment { get; set; }
 
-    [Prop] public string? Anchor { get; set; }
-
 }

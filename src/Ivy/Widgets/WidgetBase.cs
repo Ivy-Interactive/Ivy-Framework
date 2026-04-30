@@ -21,6 +21,8 @@ public abstract record WidgetBase : AbstractWidget
 
     [Prop, ScaffoldColumn(false)] public string? TestId { get; set; }
 
+    [Prop, ScaffoldColumn(false)] public string? Anchor { get; set; }
+
     [Prop] public Responsive<bool?>? ResponsiveVisible { get; set; }
 }
 
@@ -61,6 +63,8 @@ public static class WidgetBaseExtensions
     public static T Large<T>(this T widget) where T : WidgetBase => widget.Density(Ivy.Density.Large);
 
     public static T TestId<T>(this T widget, string testId) where T : WidgetBase => widget with { TestId = testId };
+
+    public static T Anchor<T>(this T widget, string anchor) where T : WidgetBase => widget with { Anchor = anchor };
 
     public static T HideOn<T>(this T widget, params Breakpoint[] breakpoints) where T : WidgetBase
     {
