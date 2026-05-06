@@ -1,4 +1,4 @@
-# Date and Time Inputs
+﻿# Date and Time Inputs
 
 A family of input components for selecting or entering dates and times. Retool provides eight specialized sub-components (Date, DateTime, Date Range, Time, Calendar Input, Day, Month, Year), while Ivy covers this with two widgets: `DateTimeInput` (with Date, DateTime, and Time variants) and `DateRangeInput`.
 

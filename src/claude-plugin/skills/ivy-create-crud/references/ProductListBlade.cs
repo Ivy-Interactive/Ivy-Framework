@@ -1,4 +1,4 @@
-using MyProject.Connections.MyDb;
+﻿using MyProject.Connections.MyDb;
 using Microsoft.EntityFrameworkCore;
 
 namespace MyProject.Apps.Products;

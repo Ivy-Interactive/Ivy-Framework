@@ -1,4 +1,4 @@
-# Skeleton
+﻿# Skeleton
 
 A loading placeholder component that mimics content structure while data is being fetched. It improves perceived performance by showing users the layout of the page during loading.
 

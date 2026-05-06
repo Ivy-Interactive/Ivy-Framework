@@ -1,4 +1,4 @@
-# Field: URL
+﻿# Field: URL
 
 Odoo's URL widget for web address fields. Displays as a clickable hyperlink in read mode (auto-prepends `http://` if missing) and a text input in edit mode.
 

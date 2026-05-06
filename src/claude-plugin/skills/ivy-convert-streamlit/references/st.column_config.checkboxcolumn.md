@@ -1,4 +1,4 @@
-# CheckboxColumn
+﻿# CheckboxColumn
 
 Configures a checkbox column in a data table. This is the default column type for boolean values. When used with an editable table, it renders a checkbox widget for toggling values.
 

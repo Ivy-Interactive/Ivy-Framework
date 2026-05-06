@@ -1,4 +1,4 @@
-# Plotly JSON Chart
+﻿# Plotly JSON Chart
 
 Displays custom charts using raw Plotly JSON structured data. Provides full control over the data and layout of the chart, useful when you need customization beyond standard chart components.
 

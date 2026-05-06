@@ -23,6 +23,11 @@ This skill creates a connection in an Ivy project using a pre-built reference co
 
 If the file `.ivy/learnings/ivy-create-using-reference-connection.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
 
+## Reference Files
+
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
 ## Prerequisites
 
 - The working directory must be a valid Ivy project.

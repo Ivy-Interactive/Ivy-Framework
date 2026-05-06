@@ -1,4 +1,4 @@
-# Dialog
+﻿# Dialog
 
 A modal dialog overlay for confirmations, forms, or important content. In Lovable apps, this is the shadcn/ui Dialog component.
 

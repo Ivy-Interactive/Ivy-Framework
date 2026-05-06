@@ -1,4 +1,4 @@
-# Switch
+﻿# Switch
 
 A toggle switch for boolean values. In Lovable apps, this is the shadcn/ui Switch component.
 

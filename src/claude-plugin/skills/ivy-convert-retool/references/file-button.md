@@ -1,4 +1,4 @@
-# File Button
+﻿# File Button
 
 A button/input that allows users to select single or multiple files from their system, with configurable constraints like accepted file types, size limits, and optional upload handling.
 

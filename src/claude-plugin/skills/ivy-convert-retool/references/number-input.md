@@ -1,4 +1,4 @@
-# Number Input
+﻿# Number Input
 
 An input field to enter a number, with support for formatting (decimal, percent, currency), min/max constraints, and validation.
 

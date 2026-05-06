@@ -1,4 +1,4 @@
-# st.spinner
+﻿# st.spinner
 
 Displays a temporary loading spinner with a message while a block of code executes. Commonly used as a context manager to provide visual feedback during long-running operations.
 

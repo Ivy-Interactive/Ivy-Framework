@@ -1,4 +1,4 @@
-# Input
+﻿# Input
 
 A text input field for user data entry. In Lovable apps, this is the shadcn/ui Input component, often used with react-hook-form and zod validation.
 

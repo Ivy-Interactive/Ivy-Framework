@@ -1,4 +1,4 @@
-# Layout (Tailwind flex/grid)
+﻿# Layout (Tailwind flex/grid)
 
 Layout patterns using Tailwind CSS utility classes. Lovable apps use Tailwind for layout via `flex`, `grid`, `space-*`, and `gap-*` classes.
 

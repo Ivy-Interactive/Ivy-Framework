@@ -1,4 +1,4 @@
-# Badge
+﻿# Badge
 
 Badges are used to highlight an item's status for quick recognition, displaying small pieces of information such as counts or statuses in a compact form.
 

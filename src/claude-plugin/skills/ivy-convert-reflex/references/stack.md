@@ -1,4 +1,4 @@
-# Stack
+﻿# Stack
 
 A layout component that arranges child elements sequentially in a vertical or horizontal direction with configurable spacing and alignment. Reflex provides three variants (`stack`, `hstack`, `vstack`) while Ivy uses a single `StackLayout` with an `orientation` parameter.
 

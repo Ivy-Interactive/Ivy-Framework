@@ -1,4 +1,4 @@
-# Scatter Chart
+﻿# Scatter Chart
 
 Renders data as points on an x-axis and y-axis. Useful for visualizing how data moves between different stages or categories, identifying correlations, and spotting outliers.
 

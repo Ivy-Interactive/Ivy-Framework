@@ -1,4 +1,4 @@
-# Microphone
+﻿# Microphone
 
 A button to record audio. Recordings are stored in Base64-encoded WebM format, with playback featuring a progress bar and elapsed time display.
 

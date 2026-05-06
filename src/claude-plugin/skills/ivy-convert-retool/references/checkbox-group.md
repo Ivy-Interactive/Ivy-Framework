@@ -1,4 +1,4 @@
-# Checkbox Group
+﻿# Checkbox Group
 
 A component that allows users to toggle multiple boolean values through a collection of checkboxes, enabling multiple selections from a predefined set of options. Supports layouts like multi-column, single-column, wrap, and tree hierarchy.
 

@@ -1,4 +1,4 @@
-# Box
+﻿# Box
 
 A generic container component used to group other components together and apply styles. Rendered as a `div` element in Reflex; rendered as a styled panel with borders and colors in Ivy.
 

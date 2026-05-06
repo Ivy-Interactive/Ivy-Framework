@@ -1,4 +1,4 @@
-# Field: Email
+﻿# Field: Email
 
 Odoo's email widget for email address fields. Displays as a clickable `mailto:` link in read mode and a text input in edit mode.
 

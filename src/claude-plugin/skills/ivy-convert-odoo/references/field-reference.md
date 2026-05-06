@@ -1,4 +1,4 @@
-# Field: Reference
+﻿# Field: Reference
 
 Odoo's polymorphic reference field that can point to any model. Stores both the model name and record ID as a string (e.g., `sale.order,42`). Renders as a model selector dropdown plus a record selector.
 

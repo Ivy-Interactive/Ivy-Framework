@@ -1,4 +1,4 @@
-# st.selectbox
+﻿# st.selectbox
 
 Displays a dropdown selection widget that allows users to choose a single option from a list.
 

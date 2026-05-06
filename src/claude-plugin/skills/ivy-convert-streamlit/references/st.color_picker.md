@@ -1,4 +1,4 @@
-# st.color_picker
+﻿# st.color_picker
 
 Displays a color picker widget that allows users to select a color, returned as a hex string.
 

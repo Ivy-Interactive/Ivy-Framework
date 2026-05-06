@@ -1,4 +1,4 @@
-# Checkbox Tree
+﻿# Checkbox Tree
 
 A group of checkboxes to toggle boolean values in a multi-level tree. It displays options in a nested hierarchy where checking a parent can automatically check/uncheck its children, and child selections can propagate up to parents.
 

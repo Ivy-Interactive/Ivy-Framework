@@ -1,4 +1,4 @@
-# st.columns
+﻿# st.columns
 
 Inserts containers laid out side-by-side and returns a list of column objects. Elements can be added to each column using the `with` statement or by calling methods directly on the returned objects.
 

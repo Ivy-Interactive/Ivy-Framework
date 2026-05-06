@@ -1,4 +1,4 @@
-# Split Button
+﻿# Split Button
 
 A dropdown menu with buttons to trigger actions when clicked. Enables users to select from multiple action options via a dropdown interface.
 

@@ -1,4 +1,4 @@
-# Avatar
+﻿# Avatar
 
 A user avatar image with fallback initials. In Lovable apps, this is the shadcn/ui Avatar component.
 

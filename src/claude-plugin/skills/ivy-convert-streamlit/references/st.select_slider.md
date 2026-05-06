@@ -1,4 +1,4 @@
-# st.select_slider
+﻿# st.select_slider
 
 Displays a slider widget that allows users to select a value or range from an ordered list of options. Unlike `st.slider`, it accepts any datatype — not just numbers or dates. Passing a two-element tuple/list as the value creates a range slider.
 

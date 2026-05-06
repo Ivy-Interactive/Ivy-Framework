@@ -1,4 +1,4 @@
-# st.balloons
+﻿# st.balloons
 
 Draws celebratory balloons across the app. Used to celebrate achievements or milestones. The closest Ivy equivalent is the **Confetti** effect, which adds celebratory confetti to any widget with customizable triggers.
 

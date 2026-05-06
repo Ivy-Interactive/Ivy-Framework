@@ -1,4 +1,4 @@
-# Avatar
+﻿# Avatar
 
 Displays a user's profile picture with an automatic fallback to initials or a placeholder when the image is unavailable.
 

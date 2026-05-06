@@ -1,4 +1,4 @@
-# Field: Integer
+﻿# Field: Integer
 
 Odoo's integer field for whole number values. Used for quantities, counts, sequences, and IDs.
 

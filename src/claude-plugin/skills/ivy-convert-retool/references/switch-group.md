@@ -1,4 +1,4 @@
-# Switch Group
+﻿# Switch Group
 
 A selection component that displays a group of switches to toggle multiple boolean values simultaneously. Each switch in the group can be independently toggled on or off.
 

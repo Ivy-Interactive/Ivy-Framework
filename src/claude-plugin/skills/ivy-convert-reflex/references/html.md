@@ -1,4 +1,4 @@
-# Html
+﻿# Html
 
 Renders raw HTML content. In Reflex, `rx.el.html` represents the root `<html>` element of a document. In Ivy, `Html` renders a sanitized HTML string directly into the page.
 

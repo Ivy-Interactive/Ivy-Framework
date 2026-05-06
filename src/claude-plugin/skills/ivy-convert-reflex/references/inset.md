@@ -1,4 +1,4 @@
-# Inset
+﻿# Inset
 
 Applies a negative margin to allow content to bleed into the surrounding container. Commonly used inside a `Card` to render images or other content edge-to-edge, ignoring the card's default padding.
 

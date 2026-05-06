@@ -1,4 +1,4 @@
-# Field: Float
+﻿# Field: Float
 
 Odoo's decimal number field for values requiring fractional precision. Used for quantities, weights, percentages, and measurements. Supports configurable precision via digits parameter.
 

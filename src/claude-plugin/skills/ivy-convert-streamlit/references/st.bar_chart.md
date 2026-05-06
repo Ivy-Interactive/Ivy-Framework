@@ -1,4 +1,4 @@
-# st.bar_chart
+﻿# st.bar_chart
 
 Display a bar chart. Syntax sugar around `st.altair_chart` that uses the data's columns and indices to automatically determine the chart specification.
 

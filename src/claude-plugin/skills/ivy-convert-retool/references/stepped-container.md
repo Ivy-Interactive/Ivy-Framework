@@ -1,4 +1,4 @@
-# Stepped Container
+﻿# Stepped Container
 
 A container that groups components into a series of sequential steps. It is a preset version of Retool's Container component, preconfigured with multiple views and a Steps navigation component. Users can navigate between steps to complete multi-step workflows like wizards and forms.
 

@@ -1,4 +1,4 @@
-# Segmented Control
+﻿# Segmented Control
 
 A segmented control provides a set of mutually exclusive options displayed as adjacent buttons, allowing users to switch between predefined values or views. Only one option can be active at a time (or multiple, if configured).
 

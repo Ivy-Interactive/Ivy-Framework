@@ -1,4 +1,4 @@
-# Tabs
+﻿# Tabs
 
 A tabbed interface for organizing content into switchable panels. In Lovable apps, this is the shadcn/ui Tabs component.
 

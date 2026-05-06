@@ -1,4 +1,4 @@
-# Select (Low Level)
+﻿# Select (Low Level)
 
 Displays a list of options for the user to pick from, triggered by a button. The low-level API provides granular control through composable sub-components (`root`, `trigger`, `content`, `item`, `group`, `label`, `separator`) for building custom select dropdowns with option grouping, individual item disabling, and full state control.
 

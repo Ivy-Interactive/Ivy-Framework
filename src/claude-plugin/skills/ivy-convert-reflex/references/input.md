@@ -1,4 +1,4 @@
-# Input
+﻿# Input
 
 A text field that users can type into. Captures user text input with support for placeholder text, validation, different input types, and event handling.
 

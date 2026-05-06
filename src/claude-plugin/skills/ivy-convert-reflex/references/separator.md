@@ -1,4 +1,4 @@
-# Separator
+﻿# Separator
 
 Visually or semantically separates content. Creates a divider line between sections to organize information and improve readability.
 

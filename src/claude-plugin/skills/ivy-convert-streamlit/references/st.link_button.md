@@ -1,4 +1,4 @@
-# st.link_button
+﻿# st.link_button
 
 Displays a link button that opens a specified URL in a new tab when clicked.
 

@@ -1,4 +1,4 @@
-# Alert (Legacy)
+﻿# Alert (Legacy)
 
 A message box to display important information with optional title, description, and clickable action button. Supports info, success, error, and warning styles.
 

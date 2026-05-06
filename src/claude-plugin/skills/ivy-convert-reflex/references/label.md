@@ -1,4 +1,4 @@
-# Label
+﻿# Label
 
 Label is a component used to display a single label at a specific position within a chart or axis. LabelList automatically renders a list of labels for each data point in a chart series, providing a convenient way to display multiple labels without manually positioning each one.
 

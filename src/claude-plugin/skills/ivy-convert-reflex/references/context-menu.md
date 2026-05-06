@@ -1,4 +1,4 @@
-# Context Menu
+﻿# Context Menu
 
 A popup menu that appears on right-click (or long-press), typically used to offer contextual actions related to the element the user interacted with. It supports nested submenus, separators, keyboard shortcuts, and item-level styling.
 

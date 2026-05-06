@@ -1,4 +1,4 @@
-# Toast (sonner)
+﻿# Toast (sonner)
 
 Toast notifications for feedback messages. Lovable apps use the `sonner` library (often via shadcn/ui's toast setup).
 

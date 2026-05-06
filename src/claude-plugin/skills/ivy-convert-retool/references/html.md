@@ -1,4 +1,4 @@
-# HTML
+﻿# HTML
 
 Renders raw HTML and CSS markup for displaying formatted content, custom layouts, and embedded markup within the application. Script execution is blocked for security; event handlers are available in Retool.
 

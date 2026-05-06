@@ -1,4 +1,4 @@
-# JSON Schema Form
+﻿# JSON Schema Form
 
 A JSON-defined form component that generates input fields from a JSON schema and UI schema. Built on react-jsonschema-form, it allows programmatic form definition, dynamic schema changes, default data population, and input validation -- all configured through JSON rather than a visual editor.
 

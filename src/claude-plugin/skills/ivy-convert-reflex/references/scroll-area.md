@@ -1,4 +1,4 @@
-# Scroll Area
+﻿# Scroll Area
 
 Custom styled, cross-browser scrollable area using native functionality. Provides a container that displays scrollbars when content overflows, with control over which axes are scrollable and how scrollbars appear.
 

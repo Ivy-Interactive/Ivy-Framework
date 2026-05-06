@@ -1,4 +1,4 @@
-# Status
+﻿# Status
 
 A content area to display a status indicator. Shows labeled status values with colored dots or icons, useful for representing workflow states, service health, or record status.
 

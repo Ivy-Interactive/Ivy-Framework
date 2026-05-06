@@ -19,6 +19,11 @@ If the file `.ivy/learnings/ivy-convert-streamlit.md` exists in the project dire
 
 ## Reference Files
 
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
+## Reference Files
+
 The [references/](references/) folder contains 105 reference files with Streamlit-to-Ivy component mappings (one `.md` per `st.*` widget). Read the relevant reference files before implementing the conversion to understand how to map Streamlit features to Ivy features.
 
 ## Step 1: Locate the Streamlit Application

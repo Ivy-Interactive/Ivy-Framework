@@ -1,4 +1,4 @@
-# Waterfall Chart
+﻿# Waterfall Chart
 
 Displays data as a series of steps with sequential positive and negative values, visualizing how incremental amounts contribute to a total (e.g. revenue breakdowns, profit analysis).
 

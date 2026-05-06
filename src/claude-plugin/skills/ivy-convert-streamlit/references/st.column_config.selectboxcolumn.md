@@ -1,4 +1,4 @@
-# SelectboxColumn
+﻿# SelectboxColumn
 
 Configure a selectbox column in `st.dataframe` or `st.data_editor`. This column type renders a dropdown menu for selecting from a predefined list of options, and is the default for Pandas categorical values. When used with `st.data_editor`, it enables inline dropdown editing.
 

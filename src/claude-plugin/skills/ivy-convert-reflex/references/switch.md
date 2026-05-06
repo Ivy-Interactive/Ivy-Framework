@@ -1,4 +1,4 @@
-# Switch
+﻿# Switch
 
 A toggle switch alternative to the checkbox, allowing users to switch between two states (on/off). Commonly used for settings and boolean preferences.
 

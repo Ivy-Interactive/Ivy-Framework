@@ -1,4 +1,4 @@
-# Auto Scroll
+﻿# Auto Scroll
 
 A container div that automatically scrolls to the bottom when new content is added. Useful for chat interfaces, log viewers, or any dynamically updating feed where the most recent content should stay visible.
 

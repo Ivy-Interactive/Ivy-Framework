@@ -1,4 +1,4 @@
-# Sparkline
+﻿# Sparkline
 
 A simplified line chart component for visualizing data trends over time. Renders data as a line on an x-axis and y-axis, useful for compact trend displays. It is a streamlined version of the full Line Chart component.
 

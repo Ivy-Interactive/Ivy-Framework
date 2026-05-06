@@ -1,4 +1,4 @@
-# Navigation (react-router-dom)
+﻿# Navigation (react-router-dom)
 
 Routing and navigation patterns. Lovable apps use `react-router-dom` for client-side routing.
 

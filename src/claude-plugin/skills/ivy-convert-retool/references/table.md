@@ -1,4 +1,4 @@
-# Table
+﻿# Table
 
 A table to display data that can be sorted, filtered, paginated, and edited. Retool's Table component renders an array of data as a tabulated list with support for inline editing, row selection, search, grouping, and export.
 

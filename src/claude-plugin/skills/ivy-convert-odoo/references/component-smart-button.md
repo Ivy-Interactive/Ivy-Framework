@@ -1,4 +1,4 @@
-# Component: Smart Button (Stat Button)
+﻿# Component: Smart Button (Stat Button)
 
 Odoo's stat/smart buttons displayed at the top of form views inside the sheet. Show key metrics with icons and navigate to related records on click. Commonly used to display counts of related records (invoices, deliveries, tasks, etc.).
 

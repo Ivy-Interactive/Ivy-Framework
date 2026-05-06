@@ -1,4 +1,4 @@
-# Breadcrumbs
+﻿# Breadcrumbs
 
 A secondary navigation menu that displays a trail of links representing the user's location within a hierarchy. Each item can trigger actions on click, display icons, tooltips, and link to other apps or screens.
 

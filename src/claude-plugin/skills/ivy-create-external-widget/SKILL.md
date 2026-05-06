@@ -19,6 +19,11 @@ If the file `.ivy/learnings/ivy-create-external-widget.md` exists in the project
 
 ## Reference Files
 
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
+## Reference Files
+
 Before implementing, fetch the external widgets documentation using `ivy docs` with the query: "external widgets".
 
 ## Workflow

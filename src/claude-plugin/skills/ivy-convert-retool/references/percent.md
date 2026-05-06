@@ -1,4 +1,4 @@
-# Percent
+﻿# Percent
 
 An input field to enter a percentage number value. Retool's Percent is a preset version of Number Input, preconfigured with common options for percentage input (format set to `percent`).
 

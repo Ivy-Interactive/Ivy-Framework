@@ -1,4 +1,4 @@
-# Listbox
+﻿# Listbox
 
 An input field to select one or more options from a visible list. Displays all options inline (not as a dropdown) with support for search filtering, multi-select, and deselection.
 

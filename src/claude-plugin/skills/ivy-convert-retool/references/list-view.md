@@ -1,4 +1,4 @@
-# List View
+﻿# List View
 
 A repeatable list of components with values that map to a list of data. Renders a collection of items in a scrollable, configurable layout supporting both horizontal and vertical orientations, pagination, and virtualization.
 

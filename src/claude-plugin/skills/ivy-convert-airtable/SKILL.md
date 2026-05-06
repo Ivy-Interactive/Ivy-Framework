@@ -18,6 +18,11 @@ Convert an Airtable base to an Ivy project.
 
 If the file `.ivy/learnings/ivy-convert-airtable.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
 
+## Reference Files
+
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
 ## Step 1: Gather Credentials
 
 You need an Airtable Base ID (e.g. `appXXXXXXXXXXXXXX`) and a Personal Access Token (PAT). Check if these were provided as arguments via `$ARGUMENTS`. If not, ask the user to provide them.

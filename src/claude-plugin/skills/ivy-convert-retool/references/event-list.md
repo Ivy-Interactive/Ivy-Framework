@@ -1,4 +1,4 @@
-# Event List
+﻿# Event List
 
 A content area to display a list of events. Supports grouping by day, sorting, timestamps, and custom date/time formatting. Useful for timelines, activity feeds, and scheduled event displays.
 

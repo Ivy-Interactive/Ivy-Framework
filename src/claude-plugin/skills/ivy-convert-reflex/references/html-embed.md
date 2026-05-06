@@ -1,4 +1,4 @@
-# HTML Embed
+﻿# HTML Embed
 
 Renders raw HTML content directly within the application. Useful for displaying formatted markup, external content, or custom HTML that doesn't have a dedicated component equivalent.
 

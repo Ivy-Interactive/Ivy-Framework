@@ -1,4 +1,4 @@
-# Button Group
+﻿# Button Group
 
 A group of buttons displayed together to trigger actions when clicked. Supports overflow handling, wrapping, and per-button click events.
 

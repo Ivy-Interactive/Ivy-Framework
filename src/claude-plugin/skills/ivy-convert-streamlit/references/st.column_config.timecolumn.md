@@ -1,4 +1,4 @@
-# st.column_config.TimeColumn
+﻿# st.column_config.TimeColumn
 
 Configures a time column in `st.dataframe` or `st.data_editor`. This is the default column type for time values. When used with `st.data_editor`, it provides a time picker widget for editing cells.
 

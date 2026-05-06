@@ -1,4 +1,4 @@
-# Badge
+﻿# Badge
 
 A small status indicator label. In Lovable apps, this is the shadcn/ui Badge component.
 

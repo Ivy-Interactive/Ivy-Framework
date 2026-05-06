@@ -1,4 +1,4 @@
-# Video
+﻿# Video
 
 A content area to display a video. Supports YouTube, Vimeo, and direct links to browser-supported video file types with playback controls.
 

@@ -1,4 +1,4 @@
-# Graphing
+﻿# Graphing
 
 Components for creating various types of charts and data visualizations. Reflex wraps the Recharts library (plus Plotly/Matplotlib) to provide area, bar, line, pie, scatter, radar, radial bar, funnel, and composed charts. Ivy provides built-in area, bar, line, and pie charts with a fluent builder API.
 

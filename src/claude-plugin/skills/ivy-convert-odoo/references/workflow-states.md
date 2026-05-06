@@ -1,4 +1,4 @@
-# Workflow States
+﻿# Workflow States
 
 Odoo's `state` field pattern for tracking record lifecycle. Uses a Selection field combined with buttons in the form header to drive transitions between states (e.g., Draft → Confirmed → Done). Buttons call Python methods that update the state.
 

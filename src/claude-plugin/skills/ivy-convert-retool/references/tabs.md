@@ -1,4 +1,4 @@
-# Tabs
+﻿# Tabs
 
 A set of clickable tab items that allow users to switch between different content sections. Can be linked to containers to create tabbed navigation interfaces.
 

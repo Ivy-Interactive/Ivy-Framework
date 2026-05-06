@@ -1,4 +1,4 @@
-# Email
+﻿# Email
 
 A preset version of Text Input preconfigured with common options for email address input, including built-in email pattern validation, a mail icon prefix, and autocomplete hints.
 

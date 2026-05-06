@@ -1,4 +1,4 @@
-# List
+﻿# List
 
 Displays a vertical collection of items. Supports ordered (numbered) and unordered (bulleted) variants, customizable markers, and icon integration.
 

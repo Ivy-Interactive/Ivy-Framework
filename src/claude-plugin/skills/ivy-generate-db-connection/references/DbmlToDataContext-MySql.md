@@ -1,4 +1,4 @@
-# MySQL/MariaDB-Specific Notes
+﻿# MySQL/MariaDB-Specific Notes
 
 The target database is MySQL using Pomelo.EntityFrameworkCore.MySql.
 

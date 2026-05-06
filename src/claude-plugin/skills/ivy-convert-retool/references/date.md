@@ -1,4 +1,4 @@
-# Date
+﻿# Date
 
 An input field enabling users to select or enter a date. Supports customizable formatting, validation, and interaction options.
 

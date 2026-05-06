@@ -1,4 +1,4 @@
-# Dropdown Menu
+﻿# Dropdown Menu
 
 A dropdown menu presents a list of selectable options that appear near a trigger element (typically a button). It supports items, separators, nested submenus, and keyboard shortcut hints.
 

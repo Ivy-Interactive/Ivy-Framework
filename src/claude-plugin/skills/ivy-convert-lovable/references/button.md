@@ -1,4 +1,4 @@
-# Button
+﻿# Button
 
 A clickable button that triggers actions. In Lovable apps, this is the shadcn/ui Button component.
 

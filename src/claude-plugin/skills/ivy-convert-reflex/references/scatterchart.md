@@ -1,4 +1,4 @@
-# Scatter Chart
+﻿# Scatter Chart
 
 A scatter chart displays data points at the intersection of x and y numerical values, combining them into single data points. It always has two value axes — one horizontal and one vertical — making it ideal for visualizing correlations, clusters, and distributions across two (or three, via dot size) dimensions.
 

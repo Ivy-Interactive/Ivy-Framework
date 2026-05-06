@@ -1,4 +1,4 @@
-# DBML Generation Guide
+﻿# DBML Generation Guide
 
 You are generating DBML (Database Markup Language) code as specified by https://dbml.dbdiagram.io/docs/.
 

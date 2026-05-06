@@ -1,4 +1,4 @@
-# Memo
+﻿# Memo
 
 Memoizes components to skip re-rendering when their props have not changed. This improves performance for expensive components that produce the same output given the same inputs.
 

@@ -1,4 +1,4 @@
-# st.user
+﻿# st.user
 
 A read-only, dict-like object for accessing information about the current user. It provides identity claims from parsed OIDC tokens, authentication status, and exposed tokens for API authentication.
 

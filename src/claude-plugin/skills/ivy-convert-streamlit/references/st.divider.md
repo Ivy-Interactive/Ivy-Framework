@@ -1,4 +1,4 @@
-# st.divider
+﻿# st.divider
 
 Displays a horizontal rule in the app, providing a visual separator between content sections. An alternative to `st.write("---")` or using `---` via magic commands.
 

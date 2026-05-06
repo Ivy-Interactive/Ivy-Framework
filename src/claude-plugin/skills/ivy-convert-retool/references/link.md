@@ -1,4 +1,4 @@
-# Link
+﻿# Link
 
 A clickable text link used to trigger actions or navigate to URLs. Displays as styled text with optional icons, underline, and tooltip.
 

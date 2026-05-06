@@ -1,4 +1,4 @@
-# Annotated Text
+﻿# Annotated Text
 
 An interface to display and annotate text. Allows highlighting and labeling specific portions of text content using character-position-based tags.
 

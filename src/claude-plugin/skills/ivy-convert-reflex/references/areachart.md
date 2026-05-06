@@ -1,4 +1,4 @@
-# AreaChart
+﻿# AreaChart
 
 Displays quantitative data using filled areas between a line connecting data points and the axis. Supports stacking, multiple axes, tooltips, legends, and animation.
 

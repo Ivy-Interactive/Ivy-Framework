@@ -1,4 +1,4 @@
-# Theme
+﻿# Theme
 
 Configure the visual appearance of an application including color scheme, light/dark mode, border radius, and scaling. Reflex provides a declarative theme wrapper and a built-in visual theme editor panel. Ivy offers programmatic theming with full custom color schemes and runtime theme switching.
 

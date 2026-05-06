@@ -1,4 +1,4 @@
-# SQLite Seeding Notes
+﻿# SQLite Seeding Notes
 
 The target database is SQLite using Microsoft.EntityFrameworkCore.Sqlite.
 

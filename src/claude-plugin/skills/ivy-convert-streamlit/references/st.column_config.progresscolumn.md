@@ -1,4 +1,4 @@
-# st.column_config.ProgressColumn
+﻿# st.column_config.ProgressColumn
 
 Configures a progress column in `st.dataframe` or `st.data_editor`. It renders numeric values as visual progress bars within table cells. Progress columns are not editable.
 

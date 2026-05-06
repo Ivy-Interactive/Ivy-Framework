@@ -1,4 +1,4 @@
-# Tableau
+﻿# Tableau
 
 A content area to display a Tableau visualization dashboard. Embeds a Tableau dashboard directly within the Retool application with support for reading sheet data and selected marks.
 

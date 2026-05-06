@@ -1,4 +1,4 @@
-# Server Actions & Automated Actions
+﻿# Server Actions & Automated Actions
 
 Odoo's server actions (`ir.actions.server`) execute server-side logic triggered by buttons, menu items, or automated rules. Automated actions (`base.automation`) run on record events (create, write, timed). Used for workflow automation, scheduled tasks, and bulk operations.
 

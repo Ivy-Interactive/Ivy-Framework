@@ -1,4 +1,4 @@
-# Alert Dialog
+﻿# Alert Dialog
 
 A modal confirmation dialog that interrupts the user and expects a response. It overlays the current content and requires the user to confirm or cancel before continuing.
 

@@ -1,4 +1,4 @@
-# Cohort View
+﻿# Cohort View
 
 Odoo's cohort view for analyzing data changes over time, particularly churn and retention rates (Enterprise feature). Displays a matrix where rows represent cohorts (records grouped by start date) and columns show time periods, with each cell indicating the retention or churn percentage.
 

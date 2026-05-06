@@ -18,6 +18,11 @@ Deploy an Ivy project as a standalone desktop application using Ivy.Desktop.
 
 If the file `.ivy/learnings/ivy-deploy-to-desktop.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
 
+## Reference Files
+
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
 ## Workflow
 
 1. **Verify the project** -- Confirm the working directory is a valid Ivy project and that it builds successfully with `dotnet build`. If it does not build, stop and ask the user to fix build errors first.

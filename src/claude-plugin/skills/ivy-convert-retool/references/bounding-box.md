@@ -1,4 +1,4 @@
-# Bounding Box
+﻿# Bounding Box
 
 An interface to display a bounding box and tag areas of an image. Supports annotation modes for bounding boxes and landmarks, allowing users to draw rectangular regions on an image and assign labels to them.
 

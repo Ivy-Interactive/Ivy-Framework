@@ -1,4 +1,4 @@
-# st.checkbox
+﻿# st.checkbox
 
 Display a checkbox widget that returns a boolean value indicating whether the checkbox is checked.
 

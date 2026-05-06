@@ -1,4 +1,4 @@
-# Supabase Auth
+﻿# Supabase Auth
 
 Authentication patterns using Supabase Auth. Lovable apps use `@supabase/supabase-js` for user authentication with email/password, OAuth, and session management.
 

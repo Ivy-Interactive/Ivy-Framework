@@ -1,4 +1,4 @@
-# Code Block
+﻿# Code Block
 
 Displays formatted code snippets with syntax highlighting. Supports multiple programming languages, line numbers, and long-line wrapping.
 

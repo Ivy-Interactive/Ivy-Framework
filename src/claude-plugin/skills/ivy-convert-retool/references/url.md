@@ -1,4 +1,4 @@
-# URL
+﻿# URL
 
 A preset text input preconfigured for URL entry, with built-in validation and browser autofill support for web addresses.
 

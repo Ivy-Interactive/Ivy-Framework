@@ -1,4 +1,4 @@
-# st.number_input
+﻿# st.number_input
 
 Display a numeric input widget. Allows users to enter and adjust numeric values with optional min/max constraints, step increments, and formatting.
 

@@ -1,4 +1,4 @@
-# Agent Chat
+﻿# Agent Chat
 
 A chat component that enables users to interact with an AI agent directly within an application. Supports sending messages, receiving responses, streaming output, loading states, and approval workflows for tool use.
 

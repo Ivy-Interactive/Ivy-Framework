@@ -1,4 +1,4 @@
-# Markdown
+﻿# Markdown
 
 Renders Markdown text as formatted HTML with support for GitHub Flavored Markdown, syntax highlighting, math equations, tables, images, and more.
 

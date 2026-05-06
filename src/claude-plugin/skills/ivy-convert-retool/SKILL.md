@@ -20,6 +20,11 @@ If the file `.ivy/learnings/ivy-convert-retool.md` exists in the project directo
 
 ## Reference Files
 
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
+## Reference Files
+
 The [references/](references/) folder contains 134 reference files with Retool-to-Ivy component mappings (one `.md` per Retool widget). Read the relevant reference files before implementing the conversion to understand how to map Retool features to Ivy features.
 
 ## Step 1: Locate the Retool Export

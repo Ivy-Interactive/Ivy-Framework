@@ -1,4 +1,4 @@
-# Axis
+﻿# Axis
 
 Configure and customize chart axes (X, Y, Z) to control appearance, behavior, and formatting of chart visualizations. Axes define data mapping, labels, tick marks, orientation, and scaling for Cartesian chart types.
 

@@ -18,6 +18,11 @@ Create a connection to an external API or service inside an existing Ivy project
 
 If the file `.ivy/learnings/ivy-create-any-connection.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
 
+## Reference Files
+
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
 ## Step 1: Validate the Project
 
 1. Verify this is a valid Ivy project. Check for a `.csproj` file and `Program.cs` in the working directory. If this is not an Ivy project, tell the user and stop.

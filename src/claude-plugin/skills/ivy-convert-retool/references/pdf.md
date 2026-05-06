@@ -1,4 +1,4 @@
-# PDF
+﻿# PDF
 
 Embeds and displays PDF documents within an application. Supports loading from a URL, file storage, or file object, with optional toolbar, zoom controls, rotation, and page-snapping behavior.
 

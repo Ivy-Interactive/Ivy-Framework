@@ -1,4 +1,4 @@
-# Component: Chatter
+﻿# Component: Chatter
 
 Odoo's activity and messaging panel at the bottom of form views. Combines message threads, activity scheduling, and follower management. Requires the `mail` module and models must inherit from `mail.thread` and optionally `mail.activity.mixin`.
 

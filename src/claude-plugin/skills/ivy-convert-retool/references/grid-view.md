@@ -1,4 +1,4 @@
-# Grid View
+﻿# Grid View
 
 A repeatable grid of components with values that map to a list of data. Grid View is a preset version of List View, preconfigured to use a grid layout. It maps an array of data to repeating instances, where each instance renders a template of child components.
 

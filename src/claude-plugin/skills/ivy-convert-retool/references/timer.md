@@ -1,4 +1,4 @@
-# Timer
+﻿# Timer
 
 A button to record elapsed time. Tracks duration with configurable update intervals and display options, providing read-only elapsed milliseconds and running status.
 

@@ -1,4 +1,4 @@
-# Sheet
+﻿# Sheet
 
 A slide-out panel from the edge of the screen, used for forms, details, or secondary content. In Lovable apps, this is the shadcn/ui Sheet component.
 

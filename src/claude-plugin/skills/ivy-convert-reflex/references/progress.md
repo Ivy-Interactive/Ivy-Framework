@@ -1,4 +1,4 @@
-# Progress
+﻿# Progress
 
 Displays a visual indicator of task completion status, showing how much of a process has been completed.
 

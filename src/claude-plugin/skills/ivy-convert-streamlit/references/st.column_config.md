@@ -1,4 +1,4 @@
-# st.column_config
+﻿# st.column_config
 
 Column configuration for `st.dataframe` and `st.data_editor`. Provides typed column definitions that control how data is displayed, formatted, and edited. Supports 17 column types including text, numbers, checkboxes, select boxes, dates, links, images, charts, and progress bars.
 

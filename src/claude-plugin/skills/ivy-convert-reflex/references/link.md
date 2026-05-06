@@ -1,4 +1,4 @@
-# Link
+﻿# Link
 
 A semantic element for navigation between pages. Renders as an anchor (`<a>`) tag that navigates to internal or external URLs when clicked.
 

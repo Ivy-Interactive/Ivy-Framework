@@ -1,4 +1,4 @@
-# List View (Tree View)
+﻿# List View (Tree View)
 
 Odoo's primary view for displaying multiple records in a tabular format. Supports inline editing, row selection, grouping, and column sorting.
 

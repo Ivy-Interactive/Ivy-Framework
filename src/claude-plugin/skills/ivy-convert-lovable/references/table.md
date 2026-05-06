@@ -1,4 +1,4 @@
-# Table / DataTable
+﻿# Table / DataTable
 
 A data table for displaying tabular data. In Lovable apps, this can be the shadcn/ui Table component or a @tanstack/react-table implementation.
 

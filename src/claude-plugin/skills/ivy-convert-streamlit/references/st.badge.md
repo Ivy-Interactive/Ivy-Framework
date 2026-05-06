@@ -1,4 +1,4 @@
-# st.badge
+﻿# st.badge
 
 Display a colored badge with an icon and label. Useful for showing statuses, counts, or short labels.
 

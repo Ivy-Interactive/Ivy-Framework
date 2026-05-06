@@ -20,6 +20,11 @@ If the file `.ivy/learnings/ivy-convert-lovable.md` exists in the project direct
 
 ## Reference Files
 
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
+## Reference Files
+
 The [references/](references/) folder contains 31 reference files with React/shadcn-to-Ivy component mappings. Read the relevant reference files before implementing the conversion to understand how to map Lovable/React features to Ivy features.
 
 ## Step 1: Locate the Lovable Project

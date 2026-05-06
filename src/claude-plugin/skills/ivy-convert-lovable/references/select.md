@@ -1,4 +1,4 @@
-# Select
+﻿# Select
 
 A dropdown selection control. In Lovable apps, this is the shadcn/ui Select component.
 

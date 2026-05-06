@@ -1,4 +1,4 @@
-# Tags
+﻿# Tags
 
 A content area to display a set of tags. Shows labeled items with optional colors, icons, and images, supporting wrapping and click interactions.
 

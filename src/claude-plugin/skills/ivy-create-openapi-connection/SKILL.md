@@ -23,6 +23,11 @@ This skill creates an OpenAPI/REST API connection in an Ivy project using Refitt
 
 If the file `.ivy/learnings/ivy-create-openapi-connection.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
 
+## Reference Files
+
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
 ## Prerequisites
 
 - The working directory must be a valid Ivy project.

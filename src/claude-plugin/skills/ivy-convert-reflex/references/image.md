@@ -1,4 +1,4 @@
-# Image
+﻿# Image
 
 Displays images from URLs, local assets, or embedded data. Supports responsive sizing and styling.
 

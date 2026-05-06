@@ -1,4 +1,4 @@
-# Drawer
+﻿# Drawer
 
 An overlay panel that slides in from the edge of the screen to display additional content (navigation, forms, details) without navigating away from the current page. The user can dismiss it by clicking outside, pressing Escape, or using a close button.
 

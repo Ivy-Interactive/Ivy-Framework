@@ -1,4 +1,4 @@
-# Stack
+﻿# Stack
 
 A container to group other components together in a flexbox layout. Supports multiple views, header/footer areas, border controls, and event handlers similar to Container but with flexbox-based arrangement.
 

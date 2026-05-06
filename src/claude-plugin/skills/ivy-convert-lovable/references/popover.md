@@ -1,4 +1,4 @@
-# Popover
+﻿# Popover
 
 A floating content panel triggered by a click. In Lovable apps, this is the shadcn/ui Popover component.
 

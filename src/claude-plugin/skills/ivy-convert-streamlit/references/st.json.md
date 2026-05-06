@@ -1,4 +1,4 @@
-# st.json
+﻿# st.json
 
 Display object or string as a pretty-printed, interactive JSON element.
 

@@ -1,4 +1,4 @@
-# st.vega_lite_chart
+﻿# st.vega_lite_chart
 
 Display a chart using the Vega-Lite grammar. Vega-Lite is a high-level grammar of interactive graphics built on top of Vega. It allows you to define charts using a declarative JSON spec, supporting many chart types (scatter, bar, line, area, pie, etc.) with encoding channels for x, y, color, size, and more. Streamlit wraps this into a single function that accepts a dataframe and a Vega-Lite specification dict.
 

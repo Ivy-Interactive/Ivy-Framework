@@ -1,4 +1,4 @@
-# Component: Header
+﻿# Component: Header
 
 Odoo's form header bar containing action buttons and the status bar widget. Appears at the top of a form view, above the sheet. Contains workflow action buttons (Confirm, Cancel, etc.) and the `statusbar` widget.
 

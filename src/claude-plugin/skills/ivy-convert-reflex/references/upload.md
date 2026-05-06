@@ -1,4 +1,4 @@
-# Upload
+﻿# Upload
 
 File upload component that allows users to select files via click or drag-and-drop, upload them to the server, and track upload progress. Supports file type filtering, size limits, and multiple file selection.
 

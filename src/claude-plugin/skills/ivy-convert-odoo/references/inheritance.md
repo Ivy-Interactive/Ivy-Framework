@@ -1,4 +1,4 @@
-# Model & View Inheritance
+﻿# Model & View Inheritance
 
 Odoo's inheritance mechanisms for extending existing models and views without modifying the original. Supports three types: class inheritance (`_inherit` same model), prototype inheritance (`_inherit` + `_name`), and delegation inheritance (`_inherits`). Views can be extended via `inherit_id` with XPath expressions.
 

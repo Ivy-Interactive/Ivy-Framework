@@ -1,4 +1,4 @@
-# st.error
+﻿# st.error
 
 Display an error message in a styled alert box. Used to communicate error states to the user.
 

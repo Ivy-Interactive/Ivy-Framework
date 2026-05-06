@@ -1,4 +1,4 @@
-# Data Table
+﻿# Data Table
 
 Displays static data in a tabular format with built-in search, sorting, pagination, and column resizing. Ideal for read-only datasets like CSVs or dataframes.
 

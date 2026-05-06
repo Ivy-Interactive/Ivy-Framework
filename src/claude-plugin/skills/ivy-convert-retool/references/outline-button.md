@@ -1,4 +1,4 @@
-# Outline Button
+﻿# Outline Button
 
 A button to trigger actions when clicked, preconfigured with an outline style variant (border only, no filled background). In Retool this is a preset of the Button component with `styleVariant` set to `outline`. In Ivy, this maps to `Button` with `ButtonVariant.Outline`.
 

@@ -1,4 +1,4 @@
-# Pie Chart
+﻿# Pie Chart
 
 Renders data in a circle with percentage-based slices, useful for visualizing how different parts make up a whole. Supports donut charts, custom labels, tooltips, and legend positioning.
 

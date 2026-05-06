@@ -1,4 +1,4 @@
-# st.header
+﻿# st.header
 
 Display text in header formatting. Streamlit renders `st.header` as an `<h2>` element with optional divider, tooltip, and anchor support.
 

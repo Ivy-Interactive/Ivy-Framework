@@ -1,4 +1,4 @@
-# Moment
+﻿# Moment
 
 Displays dates and relative timestamps with automatic formatting, humanized intervals (e.g. "5 minutes ago"), timezone support, and periodic client-side refresh. Wraps the `react-moment` library.
 

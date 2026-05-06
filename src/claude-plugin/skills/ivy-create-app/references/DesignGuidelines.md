@@ -1,4 +1,4 @@
-# Design Guidelines
+﻿# Design Guidelines
 
 ## 1. Page Layout
 

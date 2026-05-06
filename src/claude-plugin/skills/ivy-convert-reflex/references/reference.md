@@ -1,4 +1,4 @@
-# Reference (ReferenceLine, ReferenceDot, ReferenceArea)
+﻿# Reference (ReferenceLine, ReferenceDot, ReferenceArea)
 
 Visual aids and annotations for charts that highlight specific data points, ranges, or thresholds. Includes ReferenceLine (horizontal/vertical lines at specified positions), ReferenceDot (markers at specific coordinates), and ReferenceArea (highlighted rectangular regions).
 

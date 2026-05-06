@@ -1,4 +1,4 @@
-# Component: Group
+﻿# Component: Group
 
 Odoo's field grouping container within form views. A single `<group>` creates a two-column label-field layout. Nested `<group>` elements create side-by-side column sections. Used to organize form fields into logical visual groups.
 

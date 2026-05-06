@@ -1,4 +1,4 @@
-# st.markdown
+﻿# st.markdown
 
 Display string formatted as Markdown with support for GitHub-flavored Markdown, emoji shortcodes, LaTeX expressions, colored text, and Material Symbols.
 

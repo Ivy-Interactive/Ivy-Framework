@@ -1,4 +1,4 @@
-# Brush
+﻿# Brush
 
 A slider overlay for charts that lets users select a visible range of data points, enabling interactive exploration of large datasets. It renders two draggable handles on the chart axis so the viewer can zoom into a specific region.
 

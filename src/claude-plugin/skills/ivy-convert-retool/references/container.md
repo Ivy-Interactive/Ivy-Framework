@@ -1,4 +1,4 @@
-# Container
+﻿# Container
 
 A container to group other components together with flexible layout controls. Supports header, body, and footer sections, multiple switchable views, click events, loading states, and visibility toggling.
 

@@ -1,4 +1,4 @@
-# Divider
+﻿# Divider
 
 Display a dividing line with an optional label to organize content sections and improve readability.
 

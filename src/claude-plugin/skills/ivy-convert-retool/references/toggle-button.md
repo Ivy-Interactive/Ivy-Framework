@@ -1,4 +1,4 @@
-# Toggle Button
+﻿# Toggle Button
 
 A binary state button that can be toggled between true and false values, used to trigger different actions or represent on/off settings.
 

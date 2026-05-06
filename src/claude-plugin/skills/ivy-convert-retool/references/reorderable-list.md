@@ -1,4 +1,4 @@
-# Reorderable List
+﻿# Reorderable List
 
 A content area to display a list of text items that can be reordered when dragged. Displays items in a vertical list and allows users to rearrange them via drag-and-drop interactions. A `Change` event fires when the order changes.
 

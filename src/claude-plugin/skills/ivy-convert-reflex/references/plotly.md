@@ -1,4 +1,4 @@
-# Plotly
+﻿# Plotly
 
 Plotly is a graphing library wrapper (`rx.plotly`) that renders interactive Plotly figures directly in the UI. It supports any Plotly figure type (line, bar, 3D surface, etc.) via the `data` prop, with built-in responsive resizing and rich event handling (click, hover, select, relayout, etc.). Figures can be static or driven by state for dynamic updates at runtime.
 

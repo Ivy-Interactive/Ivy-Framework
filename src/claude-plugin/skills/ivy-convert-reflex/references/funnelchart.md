@@ -1,4 +1,4 @@
-# FunnelChart
+﻿# FunnelChart
 
 A funnel chart is a graphical representation used to visualize how data moves through a process. The dependent variable's value diminishes in subsequent stages, making it useful to demonstrate the flow of users through a business or sales process.
 

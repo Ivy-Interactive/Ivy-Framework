@@ -1,4 +1,4 @@
-# st.file_uploader
+﻿# st.file_uploader
 
 Displays a file uploader widget that enables users to upload files. Supports single file, multiple files, and directory uploads with configurable file type filtering and size limits.
 

@@ -1,4 +1,4 @@
-# Sunburst Chart
+﻿# Sunburst Chart
 
 Renders hierarchical data in a series of concentric rings. Useful for visualizing parent-child relationships and how parts make up a whole. Built on Plotly.
 

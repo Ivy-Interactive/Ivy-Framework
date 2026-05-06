@@ -1,4 +1,4 @@
-# Search View
+﻿# Search View
 
 Odoo's search view defines filters, search fields, and group-by options that control how records are filtered in other views (list, kanban, graph, etc.). It appears as a search bar with filter dropdowns and grouping menus.
 

@@ -1,4 +1,4 @@
-# st.audio
+﻿# st.audio
 
 Display an audio player. Supports URLs, local file paths, raw bytes, and NumPy arrays as audio sources.
 

@@ -1,4 +1,4 @@
-# st.popover
+﻿# st.popover
 
 Insert a multi-element popover container that opens when a button is clicked. The popover can contain any content including interactive widgets. Clicking outside the popover closes it.
 

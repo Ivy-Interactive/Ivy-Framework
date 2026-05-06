@@ -1,4 +1,4 @@
-# Field: Statusbar
+﻿# Field: Statusbar
 
 Odoo's status bar widget for displaying workflow state progression. Shows stages as clickable pills in a horizontal bar, typically placed in the form header. Works with both Selection and Many2one fields.
 

@@ -1,4 +1,4 @@
-# Graphing Tooltip
+﻿# Graphing Tooltip
 
 A tooltip component for charts that displays contextual popup information when hovering over data points, bars, lines, or other chart elements. In Reflex this is `rx.recharts.graphing_tooltip()`, added as a child of a chart component. In Ivy this is the `.Tooltip()` builder method chained onto a chart.
 

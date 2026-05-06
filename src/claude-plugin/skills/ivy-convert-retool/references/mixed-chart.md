@@ -1,4 +1,4 @@
-# Mixed Chart
+﻿# Mixed Chart
 
 Renders data on an x-axis and multiple y-axes, combining several different chart types (bar, line, area, scatter, etc.) into a single visualization. Useful for visualizing the relationship between different datasets.
 

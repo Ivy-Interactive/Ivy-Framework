@@ -1,4 +1,4 @@
-# Icons (lucide-react)
+﻿# Icons (lucide-react)
 
 Icon components. Lovable apps use `lucide-react` for icons throughout the UI.
 

@@ -1,4 +1,4 @@
-# st.latex
+﻿# st.latex
 
 Display mathematical expressions formatted as LaTeX. Supports LaTeX functions from KaTeX.
 

@@ -1,4 +1,4 @@
-# BarChart
+﻿# BarChart
 
 A bar chart presents categorical data with rectangular bars whose heights or lengths are proportional to the values they represent. Supports multiple bars, stacked bars, ranged data, vertical/horizontal layout, and stateful interactivity.
 

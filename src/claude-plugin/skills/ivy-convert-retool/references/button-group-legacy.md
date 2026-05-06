@@ -1,4 +1,4 @@
-# Button Group (Legacy)
+﻿# Button Group (Legacy)
 
 A group of buttons to trigger actions when clicked. This is a deprecated Retool component that has been superseded by the newer Button Group component. In Ivy, the equivalent is achieved by combining a horizontal `StackLayout` with multiple `Button` widgets, or by using a `SelectInput` with the `Toggle` variant for selection-style button groups.
 

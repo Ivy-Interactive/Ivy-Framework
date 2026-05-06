@@ -1,4 +1,4 @@
-# st.space
+﻿# st.space
 
 Adds vertical or horizontal spacing to a layout. The direction of the space depends on its parent container — vertical layouts receive vertical space, while horizontal layouts receive horizontal space.
 

@@ -1,4 +1,4 @@
-# st.column_config.Column
+﻿# st.column_config.Column
 
 Configure a generic column in `st.dataframe` or `st.data_editor`. The column type is automatically inferred from the data types. This must be used within the `column_config` parameter of `st.dataframe` or `st.data_editor`.
 

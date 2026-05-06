@@ -1,4 +1,4 @@
-# st.column_config.BarChartColumn
+﻿# st.column_config.BarChartColumn
 
 Configures a bar chart column in `st.dataframe` or `st.data_editor`, rendering inline sparkline-style bar charts from list data within table cells. Cells must contain lists of numbers. The column is read-only.
 

@@ -1,4 +1,4 @@
-# st.container
+﻿# st.container
 
 Insert a multi-element container that can hold multiple elements. Elements can be added out of order using the returned container object, or inline using `with` notation. Supports vertical and horizontal layouts, fixed-height scrolling, and alignment options.
 

@@ -1,4 +1,4 @@
-# st.snow
+﻿# st.snow
 
 Draws celebratory snowfall across the app. A fun, visual-only effect with no configuration options. Ivy has no direct snow equivalent, but the `Confetti` effect serves the same celebratory purpose with more control over triggering.
 

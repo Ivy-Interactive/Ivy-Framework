@@ -1,4 +1,4 @@
-# Wizard
+﻿# Wizard
 
 A container for a series of steps with multiple branches and outcomes. Supports running queries on step change or reset, virtual steps that display a loading screen, and setting the initial step dynamically.
 

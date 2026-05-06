@@ -1,4 +1,4 @@
-# st.caption
+﻿# st.caption
 
 Display text in small font. Used for captions, asides, footnotes, sidenotes, and other explanatory text. Supports GitHub-flavored Markdown including italics, colors, and emojis.
 

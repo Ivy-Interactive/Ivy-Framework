@@ -1,4 +1,4 @@
-# Navigational
+﻿# Navigational
 
 Navigational menus and UI elements for web apps. Retool provides six navigational components: Breadcrumbs, Navigation, Page Input, Pagination, Steps, and Tabs. These components handle primary/secondary nav menus, paginated data navigation, stepped workflows, and tabbed interfaces.
 

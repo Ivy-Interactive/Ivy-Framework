@@ -1,4 +1,4 @@
-# st.column_config.ListColumn
+﻿# st.column_config.ListColumn
 
 Configures a list column in `st.dataframe` or `st.data_editor`. This is the default column type for list-like values. When used with `st.data_editor`, users can add new options and remove existing ones.
 

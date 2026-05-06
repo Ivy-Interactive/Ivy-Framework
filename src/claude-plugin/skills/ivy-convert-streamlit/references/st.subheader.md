@@ -1,4 +1,4 @@
-# st.subheader
+﻿# st.subheader
 
 Display text in subheader formatting. Supports GitHub-flavored Markdown, optional tooltips, colored dividers, and text alignment.
 

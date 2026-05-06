@@ -1,4 +1,4 @@
-# Color Input
+﻿# Color Input
 
 An input field that lets users select a color value through a color picker interface, with support for various display formats.
 

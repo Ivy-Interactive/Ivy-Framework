@@ -1,4 +1,4 @@
-# st.bokeh_chart
+﻿# st.bokeh_chart
 
 Displays an interactive Bokeh chart. Deprecated in Streamlit 1.49.0 and removed in 1.52.0 in favor of the `streamlit-bokeh` custom component.
 

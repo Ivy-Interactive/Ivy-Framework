@@ -1,4 +1,4 @@
-# Range Slider
+﻿# Range Slider
 
 An input field to select a range of number values. Users can define minimum and maximum values within a specified range by dragging two handles on a slider track.
 

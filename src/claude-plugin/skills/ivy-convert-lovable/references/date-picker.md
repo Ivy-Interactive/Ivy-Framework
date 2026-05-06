@@ -1,4 +1,4 @@
-# Date Picker
+﻿# Date Picker
 
 A date selection input. Lovable apps typically use a custom DatePicker built on shadcn/ui Popover + Calendar components.
 

@@ -1,4 +1,4 @@
-# st.toast
+﻿# st.toast
 
 Display a short message, known as a notification "toast". The notification appears in the app's top-right corner and disappears after a set duration.
 

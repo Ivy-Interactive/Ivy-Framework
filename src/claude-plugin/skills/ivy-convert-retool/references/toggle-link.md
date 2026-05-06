@@ -1,4 +1,4 @@
-# Toggle Link
+﻿# Toggle Link
 
 A toggle link to trigger different actions when clicked. It displays as a styled hyperlink that toggles between `true` and `false` states, supporting custom text, icons, underline styles, and event handlers for state changes.
 

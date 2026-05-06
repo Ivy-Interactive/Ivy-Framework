@@ -1,4 +1,4 @@
-# Activity View
+﻿# Activity View
 
 Odoo's activity view displays scheduled activities for records in a matrix format, with records as rows and activity types as columns. Requires the `mail` module and model must inherit from `mail.activity.mixin`.
 

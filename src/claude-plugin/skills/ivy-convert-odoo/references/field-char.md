@@ -1,4 +1,4 @@
-# Field: Char / Text
+﻿# Field: Char / Text
 
 Odoo's basic string fields. `fields.Char` for single-line text, `fields.Text` for multi-line, and `fields.Html` for rich text.
 

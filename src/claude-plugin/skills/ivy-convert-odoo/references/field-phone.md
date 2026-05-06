@@ -1,4 +1,4 @@
-# Field: Phone
+﻿# Field: Phone
 
 Odoo's phone widget for telephone number fields. Displays as a clickable `tel:` link in read mode and a text input in edit mode. Enables one-tap dialing on mobile devices.
 

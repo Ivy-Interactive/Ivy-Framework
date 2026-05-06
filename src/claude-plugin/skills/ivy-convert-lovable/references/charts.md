@@ -1,4 +1,4 @@
-# Charts (Recharts)
+﻿# Charts (Recharts)
 
 Charts for data visualization. Lovable apps use Recharts (often wrapped via shadcn/ui chart components).
 

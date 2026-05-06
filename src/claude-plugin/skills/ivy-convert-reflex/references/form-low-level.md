@@ -1,4 +1,4 @@
-# Form (Low Level)
+﻿# Form (Low Level)
 
 Reflex's low-level form API provides granular control over form structure, validation, and submission. It uses composable primitives (`form.root`, `form.field`, `form.control`, `form.label`, `form.message`, `form.submit`) to build forms piece by piece, with built-in client-side and server-side validation wired to accessibility-friendly error messages.
 

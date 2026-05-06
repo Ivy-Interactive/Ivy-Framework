@@ -1,4 +1,4 @@
-# Looker
+﻿# Looker
 
 A content area to display a Looker visualization dashboard. Embeds a Looker dashboard directly within the Retool application.
 

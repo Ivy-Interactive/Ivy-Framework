@@ -1,4 +1,4 @@
-# Legend
+﻿# Legend
 
 A legend displays labels for each data series in a chart, helping readers understand what each line, bar, or area represents. In Reflex it is a standalone `rx.recharts.legend()` component placed inside a chart. In Ivy it is a configuration method `.Legend()` chained onto a chart builder.
 

@@ -1,4 +1,4 @@
-# st.table
+﻿# st.table
 
 Display a static table. Designed for small, styled tables without interactive features like sorting or scrolling. Ideal for displaying matrices, leaderboards, and supports Markdown formatting in all cells.
 

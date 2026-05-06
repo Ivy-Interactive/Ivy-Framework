@@ -1,4 +1,4 @@
-# Field: Signature
+﻿# Field: Signature
 
 Odoo's digital signature capture widget. Opens a signature pad dialog for drawing signatures, stores the result as a base64-encoded PNG image. Used for approvals, contracts, and delivery confirmations.
 

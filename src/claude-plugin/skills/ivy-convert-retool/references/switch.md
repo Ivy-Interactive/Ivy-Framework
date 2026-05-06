@@ -1,4 +1,4 @@
-# Switch
+﻿# Switch
 
 An input field to toggle a boolean value. Allows users to switch between true and false states.
 

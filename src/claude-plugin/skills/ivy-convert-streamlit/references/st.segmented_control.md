@@ -1,4 +1,4 @@
-# st.segmented_control
+﻿# st.segmented_control
 
 A segmented control widget that displays a linear set of segments where each option functions like a toggle button. Supports single and multi-selection modes.
 

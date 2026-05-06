@@ -1,4 +1,4 @@
-# TextArea
+﻿# TextArea
 
 A multi-line text input field that allows users to enter extended text content across multiple lines. In Ivy, this is handled by the `TextInput` widget with the `TextInputVariants.Textarea` variant.
 

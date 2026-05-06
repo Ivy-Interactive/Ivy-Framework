@@ -1,4 +1,4 @@
-# Entity Framework Core Code First Generation Guide
+﻿# Entity Framework Core Code First Generation Guide
 
 Convert DBML specifications into EF Core Code First entities with data annotations and Fluent API.
 

@@ -1,4 +1,4 @@
-# Quote
+﻿# Quote
 
 Displays short inline quotations. In Reflex this renders as an HTML `<q>` element (inline quote with automatic quotation marks). The closest Ivy equivalent is `Text.Blockquote()`, which renders a block-level quotation.
 

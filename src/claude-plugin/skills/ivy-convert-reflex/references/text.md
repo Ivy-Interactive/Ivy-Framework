@@ -1,4 +1,4 @@
-# Text
+﻿# Text
 
 A foundational text primitive for displaying text content. In Reflex it renders a `<p>` element with corrective line height and letter spacing. In Ivy the equivalent is `TextBlock`, accessed via the `Text` helper class.
 

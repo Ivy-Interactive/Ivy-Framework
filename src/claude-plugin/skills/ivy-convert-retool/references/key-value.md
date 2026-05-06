@@ -1,4 +1,4 @@
-# Key-Value
+﻿# Key-Value
 
 A content area for viewing and editing key-value data. Displays paired data entries in an organized label-value format with support for multiple layout options and built-in editing capabilities.
 

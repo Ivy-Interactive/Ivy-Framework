@@ -1,4 +1,4 @@
-# Textarea
+﻿# Textarea
 
 A multi-line text input. In Lovable apps, this is the shadcn/ui Textarea component.
 

@@ -1,4 +1,4 @@
-# st.video
+﻿# st.video
 
 Display a video player. Supports URLs (including YouTube), local file paths, and raw video data. The player includes native browser controls for playback.
 

@@ -1,4 +1,4 @@
-# ScrollArea
+﻿# ScrollArea
 
 A scrollable container with custom scrollbars. In Lovable apps, this is the shadcn/ui ScrollArea component.
 

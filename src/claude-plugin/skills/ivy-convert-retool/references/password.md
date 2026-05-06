@@ -1,4 +1,4 @@
-# Password
+﻿# Password
 
 An input field for secure password entry that masks the entered text. In Retool this is a dedicated component; in Ivy it is the `TextInput` widget with the `Password` variant.
 

@@ -1,4 +1,4 @@
-# st.column_config.DateColumn
+﻿# st.column_config.DateColumn
 
 Configure a date column in `st.dataframe` or `st.data_editor`. This is the default column type for date values. When used with `st.data_editor`, editing is enabled via a date picker widget.
 

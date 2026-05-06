@@ -1,4 +1,4 @@
-# st.altair_chart
+﻿# st.altair_chart
 
 Display a chart using the Vega-Altair library, a declarative statistical visualization library for Python based on Vega and Vega-Lite. Supports interactive selection events and theming.
 

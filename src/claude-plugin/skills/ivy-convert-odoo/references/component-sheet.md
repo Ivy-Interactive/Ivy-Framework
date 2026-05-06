@@ -1,4 +1,4 @@
-# Component: Sheet
+﻿# Component: Sheet
 
 Odoo's main content area within a form view. The `<sheet>` element creates a centered, white card-like container that holds the primary form content. It sits between the `<header>` (status bar) and the `<div class="oe_chatter">` (activity log).
 

@@ -1,4 +1,4 @@
-# Center
+﻿# Center
 
 A layout component that centers its children both horizontally and vertically. In Reflex it is built on the `Flex` component with centering defaults applied. In Ivy, the closest equivalents are `StackLayout` with `Align.Center` or `Box` with `ContentAlign`.
 

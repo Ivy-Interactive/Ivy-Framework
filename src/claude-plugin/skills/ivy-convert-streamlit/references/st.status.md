@@ -1,4 +1,4 @@
-# st.status
+﻿# st.status
 
 Insert a status container to display output from long-running tasks. The container is expandable/collapsible (similar to `st.expander`) and shows a status icon (spinner, checkmark, or error) alongside a label. Content inside remains computed even when collapsed.
 

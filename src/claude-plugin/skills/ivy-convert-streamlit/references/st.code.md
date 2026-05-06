@@ -1,4 +1,4 @@
-# st.code
+﻿# st.code
 
 Display a code block with optional syntax highlighting.
 

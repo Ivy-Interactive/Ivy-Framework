@@ -1,4 +1,4 @@
-# Avatar Group
+﻿# Avatar Group
 
 Displays a group of avatars to represent users or entities. Shows profile images with automatic fallback to initials or placeholders. Automatically adjusts the number of visible avatars based on available width or a specified maximum, displaying a count badge for additional avatars that cannot be shown.
 

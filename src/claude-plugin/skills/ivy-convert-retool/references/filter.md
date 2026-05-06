@@ -1,4 +1,4 @@
-# Filter
+﻿# Filter
 
 An interface to define filters for Table components. Provides a standalone UI for users to build filter conditions (column, operator, value) that link to and control a connected Table.
 

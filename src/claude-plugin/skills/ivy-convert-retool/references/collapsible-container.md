@@ -1,4 +1,4 @@
-# Collapsible Container
+﻿# Collapsible Container
 
 A container that groups other components together with a preconfigured collapsible body area and toggle button. It is a preset version of the Container component.
 

@@ -1,4 +1,4 @@
-# Steps
+﻿# Steps
 
 A group of sequential step indicators that display progress through a multi-step workflow. Steps can be clicked to navigate between stages and can be linked to a container to create a stepped container experience.
 

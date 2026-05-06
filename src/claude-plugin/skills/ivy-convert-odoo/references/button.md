@@ -1,4 +1,4 @@
-# Button
+﻿# Button
 
 Odoo buttons trigger server-side actions, client-side actions, or URL navigation. Used in form headers, tree views, and kanban cards.
 

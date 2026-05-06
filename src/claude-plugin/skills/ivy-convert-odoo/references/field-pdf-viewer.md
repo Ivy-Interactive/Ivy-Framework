@@ -1,4 +1,4 @@
-# Field: PDF Viewer
+﻿# Field: PDF Viewer
 
 Odoo's PDF document viewer widget. Displays PDF files inline using PDF.js, with upload capability. Used for viewing invoices, reports, and document attachments directly within the form.
 

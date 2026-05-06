@@ -1,4 +1,4 @@
-# Link Card
+﻿# Link Card
 
 A container preconfigured with an icon and text. It is a preset version of the Container component, designed for quick navigation or action links with visual appeal.
 

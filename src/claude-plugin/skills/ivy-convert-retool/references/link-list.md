@@ -1,4 +1,4 @@
-# Link List
+﻿# Link List
 
 A group of links to trigger actions when clicked. Displays a list of labeled, clickable links with optional icons, captions, tooltips, and configurable layout (single column, multi-column, or wrap). Commonly used for navigation menus and action lists.
 

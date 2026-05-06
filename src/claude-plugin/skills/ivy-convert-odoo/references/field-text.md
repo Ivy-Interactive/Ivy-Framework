@@ -1,4 +1,4 @@
-# Field: Text
+﻿# Field: Text
 
 Odoo's multi-line text field for longer content like descriptions, notes, and comments. Renders as a `<textarea>` in edit mode.
 

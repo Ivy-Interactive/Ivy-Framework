@@ -1,4 +1,4 @@
-# Pyplot
+﻿# Pyplot
 
 A graphing component that wraps Matplotlib, allowing any Matplotlib plot (contour, scatter, bar, etc.) to be rendered directly inside a web application. Requires installing the `reflex-pyplot` package. The figure must be closed after creation.
 

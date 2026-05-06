@@ -1,4 +1,4 @@
-# QWeb Reports
+﻿# QWeb Reports
 
 Odoo's QWeb template engine for generating PDF reports. Reports combine a QWeb XML/HTML template with a report action definition. Used for invoices, sales orders, delivery slips, and any printable document. Rendered server-side using wkhtmltopdf.
 

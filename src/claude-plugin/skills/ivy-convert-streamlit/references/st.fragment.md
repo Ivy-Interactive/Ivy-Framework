@@ -1,4 +1,4 @@
-# st.fragment
+﻿# st.fragment
 
 Decorator that turns a function into a **fragment** — a section of the app that can rerun independently from the full page. When a user interacts with a widget inside a fragment, only that fragment re-executes instead of the entire app. Supports automatic periodic reruns via `run_every`.
 

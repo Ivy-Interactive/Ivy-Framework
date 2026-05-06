@@ -1,4 +1,4 @@
-# Radar Chart
+﻿# Radar Chart
 
 A radar chart displays multivariate data of three or more quantitative variables mapped onto axes radiating from a central point, allowing comparison of multiple data series in a polar coordinate system.
 

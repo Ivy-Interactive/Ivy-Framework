@@ -1,4 +1,4 @@
-# Comment Thread
+﻿# Comment Thread
 
 An interface to display and enter comments or messages within an application. Retool provides a dedicated `CommentThread` component for threaded comments with avatars, timestamps, and empty states. Ivy covers similar functionality through its `Chat` widget, which renders conversations between users and assistants using `ChatMessage` objects.
 

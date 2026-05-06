@@ -1,4 +1,4 @@
-# Field: Boolean
+﻿# Field: Boolean
 
 Odoo's boolean field for true/false values. Renders as a checkbox by default, with toggle/switch widget variants.
 

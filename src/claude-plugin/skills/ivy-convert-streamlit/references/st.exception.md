@@ -1,4 +1,4 @@
-# st.exception
+﻿# st.exception
 
 Display an exception in the app. Shows the exception type, message, and traceback information.
 

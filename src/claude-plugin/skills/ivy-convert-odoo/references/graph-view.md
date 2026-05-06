@@ -1,4 +1,4 @@
-# Graph View
+﻿# Graph View
 
 Odoo's visualization view for displaying aggregated data as bar charts, line charts, or pie charts. Used for reporting and analytics dashboards.
 

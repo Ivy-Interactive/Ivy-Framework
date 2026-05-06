@@ -1,4 +1,4 @@
-# Field: Monetary
+﻿# Field: Monetary
 
 Odoo's currency-aware field for financial amounts. Automatically displays the appropriate currency symbol and formatting based on a linked currency field. Used for prices, totals, balances, and financial calculations.
 

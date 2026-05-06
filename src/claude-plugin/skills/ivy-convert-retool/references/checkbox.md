@@ -1,4 +1,4 @@
-# Checkbox
+﻿# Checkbox
 
 An input field to toggle a boolean value. Retool provides a single Checkbox component, while Ivy offers a `BoolInput` widget with three visual variants: Checkbox, Switch, and Toggle.
 

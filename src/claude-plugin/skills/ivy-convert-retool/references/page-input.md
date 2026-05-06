@@ -1,4 +1,4 @@
-# Page Input
+﻿# Page Input
 
 An input field to jump to a specific page of data. Displays the total number of pages and automatically updates to reflect the currently selected page. Unlike numbered pagination links, Page Input allows direct numeric entry for page navigation.
 

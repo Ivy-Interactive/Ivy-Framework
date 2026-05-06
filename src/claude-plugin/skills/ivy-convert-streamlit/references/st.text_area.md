@@ -1,4 +1,4 @@
-# st.text_area
+﻿# st.text_area
 
 Display a multi-line text input widget. The user can type in text spanning multiple lines.
 

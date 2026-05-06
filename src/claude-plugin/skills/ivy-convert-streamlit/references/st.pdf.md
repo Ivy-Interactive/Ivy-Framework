@@ -1,4 +1,4 @@
-# st.pdf
+﻿# st.pdf
 
 Displays an embedded PDF viewer in the app. Supports URLs, file paths, file-like objects, and raw bytes. Requires the `streamlit[pdf]` extra package.
 

@@ -1,4 +1,4 @@
-# Icon
+﻿# Icon
 
 Displays a vector icon within a content area. Used for visual communication, decoration, and interactive icon buttons.
 

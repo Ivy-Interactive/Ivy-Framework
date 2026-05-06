@@ -1,4 +1,4 @@
-# Field: Gauge
+﻿# Field: Gauge
 
 Odoo's gauge/doughnut chart widget for displaying a value relative to a maximum. Renders as a semi-circular gauge chart using Chart.js. Used in dashboards and reports for KPI visualization.
 

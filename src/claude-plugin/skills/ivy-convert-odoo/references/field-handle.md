@@ -1,4 +1,4 @@
-# Field: Handle
+﻿# Field: Handle
 
 Odoo's drag handle widget for reordering records in list views. Renders as a drag grip icon (≡) that enables drag-and-drop row reordering. Typically bound to a `sequence` integer field.
 

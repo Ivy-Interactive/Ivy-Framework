@@ -1,4 +1,4 @@
-# Charts
+﻿# Charts
 
 Charts and graphs to represent data in web apps. Retool provides 15 chart types built on Plotly.js. Ivy provides 4 chart builders (LineChart, BarChart, AreaChart, PieChart) with a fluent C# API built on Recharts.
 

@@ -1,4 +1,4 @@
-# Image Grid
+﻿# Image Grid
 
 A content area to display images in a grid layout. Retool provides this as a single dedicated component, while Ivy achieves the same result by composing a `GridLayout` (or `WrapLayout`) with `Image` widgets.
 

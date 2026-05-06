@@ -1,4 +1,4 @@
-# st.text_input
+﻿# st.text_input
 
 Display a single-line text input widget. Returns the current value as a string.
 

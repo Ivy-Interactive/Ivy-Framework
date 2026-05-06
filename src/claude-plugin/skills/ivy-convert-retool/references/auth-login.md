@@ -1,4 +1,4 @@
-# Auth Login
+﻿# Auth Login
 
 A button that performs custom authentication for an API resource. In Retool this is a dedicated component that connects to a pre-configured resource with custom authentication. In Ivy, authentication is handled through the `IAuthService` / `IAuthProvider` services combined with standard UI widgets (buttons, forms).
 

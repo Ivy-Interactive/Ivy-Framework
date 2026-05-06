@@ -1,4 +1,4 @@
-# st.echo
+﻿# st.echo
 
 Use in a `with` block to draw some code on the app, then execute it. This makes applications self-explanatory by displaying the source code alongside its output.
 

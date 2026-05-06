@@ -1,4 +1,4 @@
-# Field: Many2many Tags
+﻿# Field: Many2many Tags
 
 Odoo's tag chip display widget for Many2many relational fields. Shows selected records as colored pill/tag chips with add and remove capabilities. Commonly used for categories, labels, skills, and other tagging scenarios.
 

@@ -1,4 +1,4 @@
-# Onchange Logic
+﻿# Onchange Logic
 
 Odoo's `@api.onchange` decorator for dynamic form behavior. Triggers client-side RPC calls when a field value changes, allowing other fields to update in real-time without saving. Used for cascading selections, auto-filling fields, showing warnings, and dynamic price calculations.
 

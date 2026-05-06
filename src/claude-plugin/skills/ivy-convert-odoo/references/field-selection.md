@@ -1,4 +1,4 @@
-# Field: Selection
+﻿# Field: Selection
 
 Odoo's enumeration field for predefined choices. Renders as dropdown by default, with widget variants for radio buttons, badges, and status bars.
 

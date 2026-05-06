@@ -1,4 +1,4 @@
-# Treemap
+﻿# Treemap
 
 Displays hierarchical data as nested rectangles, useful for visualizing data with many categories and comparing the size and relationship of those categories. Built on Plotly.
 

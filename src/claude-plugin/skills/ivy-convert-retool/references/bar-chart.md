@@ -1,4 +1,4 @@
-# Bar Chart
+﻿# Bar Chart
 
 A chart component that renders data as vertical (or horizontal) rectangular bars, useful for comparing values across categories.
 

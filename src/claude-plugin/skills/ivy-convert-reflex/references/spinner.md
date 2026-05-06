@@ -1,4 +1,4 @@
-# Spinner
+﻿# Spinner
 
 Displays an animated loading indicator to provide visual feedback while a task is in progress.
 

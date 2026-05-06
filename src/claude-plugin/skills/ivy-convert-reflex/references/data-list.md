@@ -1,4 +1,4 @@
-# DataList
+﻿# DataList
 
 Displays label-value pairs, typically used for showing metadata or key-value information such as user profiles, order details, or configuration summaries.
 

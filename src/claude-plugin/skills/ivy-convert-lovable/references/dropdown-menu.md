@@ -1,4 +1,4 @@
-# DropdownMenu
+﻿# DropdownMenu
 
 A contextual menu triggered by a button click. In Lovable apps, this is the shadcn/ui DropdownMenu component.
 

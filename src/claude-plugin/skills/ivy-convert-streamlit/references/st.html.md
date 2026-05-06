@@ -1,4 +1,4 @@
-# st.html
+﻿# st.html
 
 Display custom HTML content in your app. The HTML is sanitized by default and JavaScript is ignored unless explicitly allowed.
 

@@ -1,4 +1,4 @@
-# Timeline
+﻿# Timeline
 
 Display a Gantt chart of events. Visualizes events over time with configurable timescales, milestones, and color-coded entries.
 

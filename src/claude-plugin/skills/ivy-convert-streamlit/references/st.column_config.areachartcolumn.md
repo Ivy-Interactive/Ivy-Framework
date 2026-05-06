@@ -1,4 +1,4 @@
-# st.column_config.AreaChartColumn
+﻿# st.column_config.AreaChartColumn
 
 Configures an area chart column in `st.dataframe` or `st.data_editor`. Each cell renders an inline area chart from a list of numbers, useful for showing trends like sparklines directly inside a table.
 

@@ -1,4 +1,4 @@
-# Editable Text
+﻿# Editable Text
 
 A click-to-edit single-line input field for text values. It renders as plain text until clicked, at which point it becomes an editable input field. Functions similarly to a Text Input but with an inline-editing UX.
 

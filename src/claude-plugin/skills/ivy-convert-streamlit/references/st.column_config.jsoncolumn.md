@@ -1,4 +1,4 @@
-# st.column_config.JsonColumn
+﻿# st.column_config.JsonColumn
 
 Configure a JSON column in `st.dataframe` or `st.data_editor`. Cells display JSON strings or JSON-compatible objects in a formatted view. These columns are currently read-only.
 

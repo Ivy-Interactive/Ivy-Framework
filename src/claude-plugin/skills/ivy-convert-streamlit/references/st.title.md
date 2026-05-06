@@ -1,4 +1,4 @@
-# st.title
+﻿# st.title
 
 Display text in title formatting. Each document should ideally contain a single `st.title()`.
 

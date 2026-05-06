@@ -1,4 +1,4 @@
-# CartesianGrid
+﻿# CartesianGrid
 
 A visual grid overlay for Cartesian charts (line, bar, area, scatter) that renders horizontal and vertical reference lines across the chart area, improving data readability and interpretation.
 

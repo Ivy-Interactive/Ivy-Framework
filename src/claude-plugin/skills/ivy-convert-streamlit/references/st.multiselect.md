@@ -1,4 +1,4 @@
-# st.multiselect
+﻿# st.multiselect
 
 Display a multiselect widget. The widget allows users to select multiple options from a provided list and returns a list of the selected values.
 

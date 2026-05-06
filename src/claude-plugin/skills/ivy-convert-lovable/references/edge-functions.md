@@ -1,4 +1,4 @@
-# Supabase Edge Functions
+﻿# Supabase Edge Functions
 
 Serverless backend functions. Lovable apps use Supabase Edge Functions (Deno/TypeScript) for server-side logic, external API calls, and webhook handling.
 

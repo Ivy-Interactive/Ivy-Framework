@@ -1,4 +1,4 @@
-# st.navigation
+﻿# st.navigation
 
 Configure the available pages in a multipage app. Returns the current page selected by the user, which must be executed with `.run()`.
 

@@ -1,4 +1,4 @@
-# Clipboard
+﻿# Clipboard
 
 Handles clipboard paste events containing complex data (text, images, files). Can listen globally on the document or be scoped to specific elements. Pasted data is received as a list of `(mime_type, data)` tuples, with binary data base64-encoded as data URIs.
 

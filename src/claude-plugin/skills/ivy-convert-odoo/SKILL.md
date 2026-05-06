@@ -19,6 +19,11 @@ If the file `.ivy/learnings/ivy-convert-odoo.md` exists in the project directory
 
 ## Reference Files
 
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
+## Reference Files
+
 The [references/](references/) folder contains 60 reference files with Odoo-to-Ivy component mappings (fields, views, components). Read the relevant reference files before implementing the conversion to understand how to map Odoo features to Ivy features.
 
 ## Step 1: Locate the Odoo Module

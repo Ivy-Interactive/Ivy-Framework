@@ -1,4 +1,4 @@
-# Pagination
+﻿# Pagination
 
 A navigation menu to jump to a specific page of data. Displays page links, previous/next buttons, and optional ellipsis for skipped ranges. Automatically adjusts visible pages to fit available width.
 

@@ -1,4 +1,4 @@
-# Fragment
+﻿# Fragment
 
 Groups multiple components without rendering a wrapper node in the DOM. Useful for returning multiple elements from a function, conditional rendering, and avoiding unnecessary DOM nesting.
 

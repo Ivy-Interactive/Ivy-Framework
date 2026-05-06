@@ -1,4 +1,4 @@
-# st.audio_input
+﻿# st.audio_input
 
 Display a widget that records audio from the user's microphone and returns the recording.
 

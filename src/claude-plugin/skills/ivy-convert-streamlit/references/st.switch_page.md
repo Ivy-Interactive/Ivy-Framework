@@ -1,4 +1,4 @@
-# st.switch_page
+﻿# st.switch_page
 
 Programmatically switch the current page in a multipage app. When called, the current page stops execution and the target page runs instead.
 

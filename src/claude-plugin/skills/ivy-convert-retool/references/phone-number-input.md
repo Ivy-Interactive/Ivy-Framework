@@ -1,4 +1,4 @@
-# Phone Number Input
+﻿# Phone Number Input
 
 An input field designed to accept phone number entries. Supports country code selection, formatting, and validation of phone numbers.
 

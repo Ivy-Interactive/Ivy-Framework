@@ -1,4 +1,4 @@
-# Select
+﻿# Select
 
 An input field to select an option using a dropdown menu or manually enter a value.
 

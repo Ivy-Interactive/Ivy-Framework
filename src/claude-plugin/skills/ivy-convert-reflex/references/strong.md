@@ -1,4 +1,4 @@
-# Strong
+﻿# Strong
 
 Marks text to signify strong importance (bold emphasis).
 

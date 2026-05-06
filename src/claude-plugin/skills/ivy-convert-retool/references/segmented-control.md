@@ -1,4 +1,4 @@
-# Segmented Control
+﻿# Segmented Control
 
 A segmented button to select an option from a list. Displays a horizontal set of mutually exclusive options as clickable segments, allowing users to pick one value at a time.
 

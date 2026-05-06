@@ -1,4 +1,4 @@
-# Signature
+﻿# Signature
 
 An input field to digitally capture a signature as an image. Users can draw their signature within the application, with optional clearing functionality and validation support.
 

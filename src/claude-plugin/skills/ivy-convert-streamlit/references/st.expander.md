@@ -1,4 +1,4 @@
-# st.expander
+﻿# st.expander
 
 A container that can be expanded or collapsed. When collapsed, only the label is visible. All content inside is still computed and sent to the frontend even when closed.
 

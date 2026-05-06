@@ -1,4 +1,4 @@
-# st.camera_input
+﻿# st.camera_input
 
 Displays a widget that captures pictures from the user's webcam. Returns an `UploadedFile` (a `BytesIO` subclass) or `None`.
 

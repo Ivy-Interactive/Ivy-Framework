@@ -1,4 +1,4 @@
-# JSON Editor
+﻿# JSON Editor
 
 An interface to edit and validate JSON data. Provides syntax highlighting, formatting, and validation feedback.
 

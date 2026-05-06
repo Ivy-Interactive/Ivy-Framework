@@ -1,4 +1,4 @@
-# Kbd
+﻿# Kbd
 
 Represents keyboard input or a hotkey. Displays keyboard shortcuts or key combinations with proper styling to help users identify commands.
 

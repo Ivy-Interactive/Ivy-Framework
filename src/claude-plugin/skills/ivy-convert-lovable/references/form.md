@@ -1,4 +1,4 @@
-# Form (react-hook-form + zod)
+﻿# Form (react-hook-form + zod)
 
 Form handling with validation. Lovable apps use react-hook-form with zod schema validation, wrapped in shadcn/ui Form components.
 

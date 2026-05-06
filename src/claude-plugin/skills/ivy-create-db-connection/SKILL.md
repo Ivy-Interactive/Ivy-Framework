@@ -18,6 +18,11 @@ Add a database connection to an existing Ivy project. This skill guides you thro
 
 If the file `.ivy/learnings/ivy-create-db-connection.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
 
+## Reference Files
+
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
 ## Step 1: Validate the Project
 
 1. Verify this is a valid Ivy project. Check for a `.csproj` file and `Program.cs` in the working directory. If this is not an Ivy project, tell the user and stop.

@@ -1,4 +1,4 @@
-# QR Code
+﻿# QR Code
 
 A content area to display a QR code. Encodes URLs, text, or other data as a scannable QR code.
 

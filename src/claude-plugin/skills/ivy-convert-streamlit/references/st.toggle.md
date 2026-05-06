@@ -1,4 +1,4 @@
-# st.toggle
+﻿# st.toggle
 
 Displays a toggle widget that allows users to switch between two states (on/off). Returns a `bool` indicating the current state.
 

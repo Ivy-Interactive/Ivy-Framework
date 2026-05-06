@@ -1,4 +1,4 @@
-# st.dialog
+﻿# st.dialog
 
 A decorator that turns a function into a modal dialog. When the decorated function is called, a modal window appears overlaying the app. Widgets rendered inside the function appear within the modal. Dialog functions behave like fragments — widget interactions rerun only the dialog, not the full script.
 

@@ -1,4 +1,4 @@
-# st.plotly_chart
+﻿# st.plotly_chart
 
 Display an interactive Plotly chart. Renders Plotly figures within an application, functioning as a replacement for Plotly's native `py.plot()` or `py.iplot()`. Supports interactive selection events (points, box, lasso) and Plotly configuration options.
 

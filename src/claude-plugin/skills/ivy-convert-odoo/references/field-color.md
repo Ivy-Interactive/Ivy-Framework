@@ -1,4 +1,4 @@
-# Field: Color
+﻿# Field: Color
 
 Odoo's color picker widget for selecting colors. Uses the native HTML5 color input. Stores colors as hex strings (e.g., `#ff0000`).
 

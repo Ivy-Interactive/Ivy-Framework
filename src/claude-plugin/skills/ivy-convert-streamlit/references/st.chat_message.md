@@ -1,4 +1,4 @@
-# st.chat_message
+﻿# st.chat_message
 
 Insert a chat message container. Displays a single message with an avatar indicating the author (user or assistant). The container can hold multiple Streamlit elements like text, charts, and images.
 

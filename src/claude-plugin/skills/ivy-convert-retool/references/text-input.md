@@ -1,4 +1,4 @@
-# Text Input
+﻿# Text Input
 
 An input field to enter a single line of text. Supports variants like password, email, telephone, URL, search, and multi-line textarea.
 

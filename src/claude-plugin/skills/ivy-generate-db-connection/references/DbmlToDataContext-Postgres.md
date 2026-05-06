@@ -1,4 +1,4 @@
-# PostgreSQL-Specific Notes
+﻿# PostgreSQL-Specific Notes
 
 The target database is PostgreSQL using Npgsql.EntityFrameworkCore.PostgreSQL.
 

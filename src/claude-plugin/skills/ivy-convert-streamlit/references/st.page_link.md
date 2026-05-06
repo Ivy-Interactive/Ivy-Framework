@@ -1,4 +1,4 @@
-# st.page_link
+﻿# st.page_link
 
 Display a link to another page in a multipage app or to an external page. When clicking a link to another app page, execution stops and runs the specified page. External links open in a new tab.
 

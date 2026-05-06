@@ -1,4 +1,4 @@
-# Slider
+﻿# Slider
 
 A slider to select a numeric value within a defined range.
 

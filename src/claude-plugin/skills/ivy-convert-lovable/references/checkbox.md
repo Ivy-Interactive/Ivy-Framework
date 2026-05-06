@@ -1,4 +1,4 @@
-# Checkbox
+﻿# Checkbox
 
 A toggle control for boolean values. In Lovable apps, this is the shadcn/ui Checkbox component.
 

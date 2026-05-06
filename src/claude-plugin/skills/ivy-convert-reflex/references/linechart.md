@@ -1,4 +1,4 @@
-# Line Chart
+﻿# Line Chart
 
 A line chart visualization component used to display information that changes over time by plotting a series of data points connected with lines. Supports multiple data series, customizable styling, tooltips, legends, and reference annotations.
 

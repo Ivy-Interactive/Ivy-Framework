@@ -1,4 +1,4 @@
-# Form
+﻿# Form
 
 Forms are used to collect user input, group multiple input controls together, validate the data, and submit it as a unit. In Reflex this is `rx.form`; in Ivy the equivalent is the `ToForm()` API which auto-scaffolds a form from a state model.
 

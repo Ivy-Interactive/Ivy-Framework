@@ -1,4 +1,4 @@
-# Calendar Input
+﻿# Calendar Input
 
 An input field to select a specific date on a calendar. In Retool this is the `CalendarInput` component; in Ivy the closest equivalent is the `DateTimeInput` widget (specifically the `ToDateInput()` variant for date-only selection, or `ToDateTimeInput()` for date+time).
 

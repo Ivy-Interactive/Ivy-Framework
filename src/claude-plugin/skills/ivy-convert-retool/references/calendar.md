@@ -1,4 +1,4 @@
-# Calendar
+﻿# Calendar
 
 A content area to display calendar events. Retool's Calendar uses the [FullCalendar](https://fullcalendar.io/docs/event-object) library and supports day, week, month, year, and list views. Events can be created, edited, clicked, and removed interactively.
 

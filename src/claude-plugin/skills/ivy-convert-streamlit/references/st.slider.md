@@ -1,4 +1,4 @@
-# st.slider
+﻿# st.slider
 
 Display a slider widget for selecting numeric values, dates, times, or ranges. Supports int, float, date, time, and datetime types. Passing a two-element tuple as the value creates a range slider.
 

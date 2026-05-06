@@ -1,4 +1,4 @@
-# TextArea
+﻿# TextArea
 
 A multi-line text input field that allows users to enter and edit larger amounts of text. In Retool this is a dedicated `TextArea` component; in Ivy it is a `TextInput` with the `Textarea` variant.
 

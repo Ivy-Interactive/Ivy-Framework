@@ -1,4 +1,4 @@
-# Day
+﻿# Day
 
 A dropdown menu and input field to select or enter a day. In Retool this is a preset version of the Select component preconfigured with day values (Monday–Sunday).
 

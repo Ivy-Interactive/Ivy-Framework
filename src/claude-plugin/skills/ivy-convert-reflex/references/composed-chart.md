@@ -1,4 +1,4 @@
-# ComposedChart
+﻿# ComposedChart
 
 A higher-level charting component that layers multiple chart types (Area, Bar, Line) on top of each other within a single coordinated visualization. Children are rendered in the order they are provided, allowing combinations like a bar chart with an overlaid line trend.
 

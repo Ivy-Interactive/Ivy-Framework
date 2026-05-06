@@ -18,6 +18,11 @@ Convert an Excel (.xlsx) document to an Ivy project.
 
 If the file `.ivy/learnings/ivy-convert-excel.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
 
+## Reference Files
+
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
 ## Step 1: Locate the Excel File
 
 You need a path to a `.xlsx` file. Check if a path was provided as arguments via `$ARGUMENTS`. If not, ask the user to provide one.

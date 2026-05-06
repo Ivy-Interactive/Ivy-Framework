@@ -1,4 +1,4 @@
-# Bubble Chart
+﻿# Bubble Chart
 
 A data visualization component that plots data points using x-axis and y-axis positions, with bubble size representing a third data dimension. Useful for visually identifying relationships between three numeric variables.
 

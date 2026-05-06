@@ -1,4 +1,4 @@
-# Card
+﻿# Card
 
 A container component used for grouping related content and actions. It provides a bordered, themed surface with consistent spacing and border radius.
 

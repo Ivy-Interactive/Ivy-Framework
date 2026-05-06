@@ -1,4 +1,4 @@
-# File Input
+﻿# File Input
 
 An input field to select single or multiple files. Supports file type filtering, size validation, drag-and-drop, and progress tracking.
 

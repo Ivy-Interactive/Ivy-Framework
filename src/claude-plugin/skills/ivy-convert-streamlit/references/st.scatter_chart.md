@@ -1,4 +1,4 @@
-# st.scatter_chart
+﻿# st.scatter_chart
 
 Displays a scatterplot chart. This is a simplified wrapper around `st.altair_chart` that automatically determines the chart's Altair specification from the data's columns and indices, making it ideal for quick plotting with minimal configuration.
 

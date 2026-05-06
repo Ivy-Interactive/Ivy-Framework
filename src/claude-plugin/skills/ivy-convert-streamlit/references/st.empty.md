@@ -1,4 +1,4 @@
-# st.empty
+﻿# st.empty
 
 Inserts a single-element container that can be used to hold a placeholder and replace or clear its content dynamically. Each new element written to the empty container replaces the previous one. Calling `.empty()` on the returned object clears the content entirely.
 

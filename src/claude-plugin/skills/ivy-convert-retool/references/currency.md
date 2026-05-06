@@ -1,4 +1,4 @@
-# Currency
+﻿# Currency
 
 A preset version of Number Input that is preconfigured with common options for currency input, including currency code, decimal places, separators, and prefix/suffix text.
 

@@ -1,4 +1,4 @@
-# SQL Server-Specific Notes
+﻿# SQL Server-Specific Notes
 
 The target database is SQL Server using Microsoft.EntityFrameworkCore.SqlServer.
 

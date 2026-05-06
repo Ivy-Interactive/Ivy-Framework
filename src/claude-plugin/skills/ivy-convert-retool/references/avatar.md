@@ -1,4 +1,4 @@
-# Avatar
+﻿# Avatar
 
 A content area to display user information and profile image. Displays an image if available or falls back to initials or a placeholder when no image is provided.
 

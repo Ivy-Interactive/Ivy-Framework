@@ -1,4 +1,4 @@
-# Progress Bar
+﻿# Progress Bar
 
 A horizontal progress bar that visually represents the completion status of a task or process.
 

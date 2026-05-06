@@ -1,4 +1,4 @@
-# Popover
+﻿# Popover
 
 A popover displays rich content in an overlay positioned relative to a trigger element, toggled by clicking the trigger. It consists of a root container, a trigger button, a content area, and an optional close button.
 

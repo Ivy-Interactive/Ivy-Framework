@@ -1,4 +1,4 @@
-# st.sidebar
+﻿# st.sidebar
 
 Adds a sidebar to the app pinned to the left side. Widgets and content placed in the sidebar help organize interactive elements, letting users focus on the main content area. The sidebar is resizable and supports most Streamlit elements using either object notation (`st.sidebar.selectbox(...)`) or context manager notation (`with st.sidebar:`).
 

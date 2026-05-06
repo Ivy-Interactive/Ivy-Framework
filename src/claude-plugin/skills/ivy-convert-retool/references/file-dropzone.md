@@ -1,4 +1,4 @@
-# File Dropzone
+﻿# File Dropzone
 
 A drag-and-drop area to select single or multiple files with built-in validation, progress tracking, and file parsing support.
 

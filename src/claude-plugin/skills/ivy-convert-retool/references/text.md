@@ -1,4 +1,4 @@
-# Text
+﻿# Text
 
 A content area to display Markdown text or HTML content. Supports GitHub Flavored Markdown with images, links, and text formatting.
 

@@ -1,4 +1,4 @@
-# Card
+﻿# Card
 
 A container with a border and padding for grouping related content. In Lovable apps, this is the shadcn/ui Card component.
 

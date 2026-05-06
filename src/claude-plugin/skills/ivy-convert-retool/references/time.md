@@ -1,4 +1,4 @@
-# Time
+﻿# Time
 
 An input field to select or enter a time value. Supports time zone display and automatic adjustment for time differences.
 

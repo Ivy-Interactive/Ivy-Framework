@@ -1,4 +1,4 @@
-# Spacer
+﻿# Spacer
 
 An empty area to add space between components. Preserves white space in layouts when surrounding components are collapsed, hidden, or resized.
 

@@ -1,4 +1,4 @@
-# ErrorBar
+﻿# ErrorBar
 
 An error bar is a graphical representation of the uncertainty or variability of a data point in a chart, depicted as a line extending from the data point parallel to one of the axes. In Reflex it is used as a child of scatter charts (via Recharts) to show error ranges on both X and Y axes.
 

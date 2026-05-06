@@ -1,4 +1,4 @@
-# Field: JSON
+﻿# Field: JSON
 
 Odoo's JSON field for storing and displaying structured JSON data. Read-only formatted display by default. Used for configuration data, API responses, and dynamic property storage.
 

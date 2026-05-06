@@ -1,4 +1,4 @@
-# st.line_chart
+﻿# st.line_chart
 
 Displays a line chart. This is syntax-sugar around `st.altair_chart` that uses the data's own columns and indices to figure out the chart's Altair spec. Useful for quick visualizations at the cost of customization.
 

@@ -1,4 +1,4 @@
-# st.metric
+﻿# st.metric
 
 Display a metric in big bold font, with an optional indicator of how the metric changed.
 

@@ -1,4 +1,4 @@
-# st.image
+﻿# st.image
 
 Displays one or more images on the page, supporting URLs, file paths, numpy arrays, byte arrays, and SVG strings.
 

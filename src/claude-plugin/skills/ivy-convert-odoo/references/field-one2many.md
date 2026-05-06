@@ -1,4 +1,4 @@
-# Field: One2many
+﻿# Field: One2many
 
 Odoo's one-to-many relational field for displaying and editing child records inline. The reverse side of a Many2one relationship. Typically renders as an embedded list/tree view within a form, supporting inline editing, row addition, and deletion.
 

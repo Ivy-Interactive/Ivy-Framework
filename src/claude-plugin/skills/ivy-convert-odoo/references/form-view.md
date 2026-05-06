@@ -1,4 +1,4 @@
-# Form View
+﻿# Form View
 
 Odoo's primary view for displaying and editing a single record. Contains fields, buttons, notebooks (tabs), groups, and status bars arranged in a structured XML layout.
 

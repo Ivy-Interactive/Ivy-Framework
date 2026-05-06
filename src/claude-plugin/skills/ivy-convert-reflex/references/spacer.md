@@ -1,4 +1,4 @@
-# Spacer
+﻿# Spacer
 
 Creates an adjustable, empty space that can be used to tune the spacing between child elements within a flex layout. Useful for pushing elements apart or creating consistent gaps in `flex`, `stack`, `vstack`, and `hstack` containers.
 

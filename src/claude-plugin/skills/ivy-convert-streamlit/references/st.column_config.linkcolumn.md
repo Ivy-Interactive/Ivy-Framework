@@ -1,4 +1,4 @@
-# st.column_config.LinkColumn
+﻿# st.column_config.LinkColumn
 
 Configures a link column in `st.dataframe` or `st.data_editor`. Cell values are strings displayed as clickable links. In `st.data_editor`, the column is editable via a text input widget. Supports regex-based display text, validation, and Material icons.
 

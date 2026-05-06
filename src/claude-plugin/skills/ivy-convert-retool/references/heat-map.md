@@ -1,4 +1,4 @@
-# Heat Map
+﻿# Heat Map
 
 Renders data on an x-axis and y-axis with a value for each point on the map. Useful for visualizing intensity and identifying patterns or correlations.
 

@@ -1,4 +1,4 @@
-# st.data_editor
+﻿# st.data_editor
 
 Displays an interactive data editor widget that allows users to view and modify tabular data (DataFrames, dicts, lists, etc.) through a spreadsheet-like interface with support for adding/deleting rows, column configuration, and type-aware editing.
 

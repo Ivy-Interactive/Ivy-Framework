@@ -1,4 +1,4 @@
-# Cascader
+﻿# Cascader
 
 A hierarchical selection input that lets users pick options through a multi-level tree structure. Commonly used for location selection (Country > State > City), category browsing, or any nested taxonomy. Supports single and multiple selection, search, and various layout modes (multi-column, single-column, tree).
 

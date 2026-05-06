@@ -1,4 +1,4 @@
-# MultiselectColumn
+﻿# MultiselectColumn
 
 Configures a multiselect column in `st.dataframe` or `st.data_editor`. Users can select multiple options from a dropdown menu, with support for colored labels and freely typed options.
 

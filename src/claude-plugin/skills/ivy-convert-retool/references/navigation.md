@@ -1,4 +1,4 @@
-# Navigation
+﻿# Navigation
 
 A primary navigation menu with nested items to trigger actions. Supports horizontal and vertical orientations, logo display, icons, captions, and automatic highlighting of active items. Hides items from users without access.
 

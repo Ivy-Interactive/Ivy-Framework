@@ -1,4 +1,4 @@
-# st.logo
+﻿# st.logo
 
 Renders a logo in the upper-left corner of the app and its sidebar. When using `icon_image`, a smaller icon replaces the full logo when the sidebar is collapsed.
 

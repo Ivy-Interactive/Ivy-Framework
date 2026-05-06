@@ -1,4 +1,4 @@
-# st.column_config.DatetimeColumn
+﻿# st.column_config.DatetimeColumn
 
 Configure a datetime column in `st.dataframe` or `st.data_editor`. This is the default column type for datetime values. When used with `st.data_editor`, edited cells display a datetime picker widget.
 

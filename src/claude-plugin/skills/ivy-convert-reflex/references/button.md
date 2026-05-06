@@ -1,4 +1,4 @@
-# Button
+﻿# Button
 
 Triggers an action or event when clicked, such as submitting a form or calling an event handler. Supports loading and disabled states for user feedback.
 

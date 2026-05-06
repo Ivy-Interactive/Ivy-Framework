@@ -1,4 +1,4 @@
-# Computed Fields
+﻿# Computed Fields
 
 Odoo's computed field system for deriving values from other fields. Uses `@api.depends` to declare dependencies and `_compute_*` methods to calculate values. Supports stored (persisted) and non-stored (on-the-fly) computation, with `@api.onchange` for real-time form updates.
 

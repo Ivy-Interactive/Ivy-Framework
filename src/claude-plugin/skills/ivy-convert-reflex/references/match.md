@@ -1,4 +1,4 @@
-# Match (Dynamic Rendering)
+﻿# Match (Dynamic Rendering)
 
 `rx.match` is Reflex's pattern-matching component for conditional rendering. It takes a reactive value and a series of `(case, component)` tuples, rendering the component whose case matches the current value. It supports multiple cases per branch, a default fallback, and can be used inline as a prop value. It is the multi-branch alternative to `rx.cond`.
 

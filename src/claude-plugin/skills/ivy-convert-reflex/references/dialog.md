@@ -1,4 +1,4 @@
-# Dialog
+﻿# Dialog
 
 A modal overlay that interrupts the current workflow to display focused content, request information, or ask for confirmation. The dialog appears on top of the page content and typically includes a title, description, body content, and action buttons.
 

@@ -1,4 +1,4 @@
-# Form
+﻿# Form
 
 A form to group and submit input fields. Can automatically generate input fields from a database or Table component, and populate nested input field values using default data. Supports validation, reset after submit, and event handling.
 

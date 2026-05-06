@@ -1,4 +1,4 @@
-# Key Value (Legacy)
+﻿# Key Value (Legacy)
 
 Displays key-value information as a two-column layout with labeled rows. This is a legacy Retool component for presenting structured data as property/value pairs. Retool recommends using the newer [Key Value](https://docs.retool.com/apps/reference/components/key-value) component instead.
 

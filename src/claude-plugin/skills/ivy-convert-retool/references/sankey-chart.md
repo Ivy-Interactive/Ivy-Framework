@@ -1,4 +1,4 @@
-# Sankey Chart
+﻿# Sankey Chart
 
 Renders data as links between nodes, useful for visualizing how data moves between different stages or categories (e.g., budget allocation, user flow, energy distribution).
 

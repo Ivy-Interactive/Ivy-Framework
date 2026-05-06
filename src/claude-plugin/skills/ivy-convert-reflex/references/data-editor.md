@@ -1,4 +1,4 @@
-# Data Editor
+﻿# Data Editor
 
 A datagrid editor component for displaying and editing tabular data. In Reflex it is based on [Glide Data Grid](https://grid.glideapps.com/); in Ivy the equivalent is the **DataTable** widget built on Apache Arrow.
 

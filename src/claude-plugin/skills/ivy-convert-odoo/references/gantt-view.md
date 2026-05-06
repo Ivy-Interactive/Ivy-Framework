@@ -1,4 +1,4 @@
-# Gantt View
+﻿# Gantt View
 
 Odoo's Gantt chart view for scheduling and project management (Enterprise feature). Displays records as horizontal bars on a timeline, grouped by resource. Supports drag-and-drop rescheduling, dependencies, and progress indicators.
 

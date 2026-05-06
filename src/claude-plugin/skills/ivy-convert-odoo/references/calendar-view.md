@@ -1,4 +1,4 @@
-# Calendar View
+﻿# Calendar View
 
 Odoo's calendar view for displaying records as events on a daily, weekly, monthly, or yearly calendar. Supports drag-and-drop rescheduling, quick event creation, and color coding by field values.
 

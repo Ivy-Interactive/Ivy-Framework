@@ -1,4 +1,4 @@
-# RadialBarChart
+﻿# RadialBarChart
 
 A circular visualization where data categories are represented by bars extending outward from a central point, with the length of each bar proportional to its value. Part of the Recharts integration in Reflex.
 

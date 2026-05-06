@@ -1,4 +1,4 @@
-# Component: Notebook (Tabs)
+﻿# Component: Notebook (Tabs)
 
 Odoo's tabbed section container within form views. Organizes related fields into separate tab pages, reducing visual complexity of dense forms. Each `<page>` becomes a clickable tab.
 

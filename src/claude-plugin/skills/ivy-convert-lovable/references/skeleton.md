@@ -1,4 +1,4 @@
-# Skeleton / Loading
+﻿# Skeleton / Loading
 
 A placeholder animation shown while content is loading. In Lovable apps, this is the shadcn/ui Skeleton component.
 

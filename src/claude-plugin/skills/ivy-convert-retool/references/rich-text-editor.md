@@ -1,4 +1,4 @@
-# Rich Text Editor
+﻿# Rich Text Editor
 
 An input field to enter text with rich formatting (bold, italic, headings, lists, links, etc.). Retool provides a full WYSIWYG rich text editor component that outputs HTML.
 

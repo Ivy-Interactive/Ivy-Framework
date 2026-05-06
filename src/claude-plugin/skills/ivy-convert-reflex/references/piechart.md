@@ -1,4 +1,4 @@
-# PieChart
+﻿# PieChart
 
 A circular statistical graphic divided into slices to illustrate numerical proportion. Supports pie and donut styles, custom labels, tooltips, legends, animations, and dynamic data binding.
 

@@ -1,4 +1,4 @@
-# Scanner
+﻿# Scanner
 
 An interface to scan a barcode or QR code using the device's camera. Enables users to capture and process barcode/QR code data within an application.
 

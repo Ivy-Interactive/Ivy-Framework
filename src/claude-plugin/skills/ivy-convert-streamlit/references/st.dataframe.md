@@ -1,4 +1,4 @@
-# st.dataframe
+﻿# st.dataframe
 
 Display data as an interactive table with sorting, filtering, and selection support. Accepts dataframe-like and collection-like objects.
 

@@ -1,4 +1,4 @@
-# Em (Emphasis)
+﻿# Em (Emphasis)
 
 Marks text to stress emphasis. Renders as italic (`<em>`) HTML element to indicate stressed text within a sentence.
 

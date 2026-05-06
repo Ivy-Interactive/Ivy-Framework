@@ -1,4 +1,4 @@
-# Month
+﻿# Month
 
 A dropdown menu and input field to select or enter a month. It is a preset version of Select, preconfigured with a list of month values (January through December).
 

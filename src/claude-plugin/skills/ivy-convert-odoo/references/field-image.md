@@ -1,4 +1,4 @@
-# Field: Image
+﻿# Field: Image
 
 Odoo's image field for uploading, storing, and displaying images. Based on Binary field with automatic resizing and format conversion. Used for product images, user avatars, and company logos.
 

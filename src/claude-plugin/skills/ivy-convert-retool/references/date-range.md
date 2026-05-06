@@ -1,4 +1,4 @@
-# Date Range
+﻿# Date Range
 
 An input field to select or enter a date range. Provides a calendar interface for selecting start and end dates, commonly used for filtering data by date ranges or scheduling events.
 

@@ -1,4 +1,4 @@
-# Field: Properties
+﻿# Field: Properties
 
 Odoo's dynamic property definition and value editor. Allows users to define custom fields at runtime without modifying the model. Supports various property types (char, integer, float, boolean, datetime, selection, many2one, tags). Used for flexible custom attributes on records.
 

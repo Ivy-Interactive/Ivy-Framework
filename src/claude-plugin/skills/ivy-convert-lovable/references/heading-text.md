@@ -1,4 +1,4 @@
-# Heading & Text
+﻿# Heading & Text
 
 Typography elements. Lovable apps use HTML heading tags and paragraphs styled with Tailwind classes.
 

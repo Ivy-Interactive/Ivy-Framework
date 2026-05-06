@@ -1,4 +1,4 @@
-# Tabbed Container
+﻿# Tabbed Container
 
 A container component that organizes child components into multiple tabbed views, allowing users to switch between content sections. In Retool this is a preset version of Container preconfigured with multiple views and the Tabs component. In Ivy the equivalent is `TabsLayout`.
 

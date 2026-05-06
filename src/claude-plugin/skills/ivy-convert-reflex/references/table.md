@@ -1,4 +1,4 @@
-# Table
+﻿# Table
 
 A semantic table component for presenting structured tabular data, supporting headers, rows, cells, sorting, filtering, and various layout options.
 

@@ -1,4 +1,4 @@
-# Field: Remaining Days
+﻿# Field: Remaining Days
 
 Odoo's remaining days widget for date fields. Displays the number of days until or since a date using relative language ("In 3 days", "Today", "2 days ago"). Automatically applies color coding: red for overdue, yellow for today, green for future.
 

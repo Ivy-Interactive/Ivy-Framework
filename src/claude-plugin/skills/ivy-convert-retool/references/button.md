@@ -1,4 +1,4 @@
-# Button
+﻿# Button
 
 A button to trigger actions when clicked. Supports customizable text, icons, loading states, variants, and event handlers.
 

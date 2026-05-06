@@ -1,4 +1,4 @@
-# Field: Html
+﻿# Field: Html
 
 Odoo's rich text HTML editor field. Provides a WYSIWYG editor for formatted content including bold, italic, lists, images, tables, and embedded media. Used for website content, email templates, and formatted descriptions.
 

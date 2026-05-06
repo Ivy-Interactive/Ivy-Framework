@@ -1,4 +1,4 @@
-# st.column_config.TextColumn
+﻿# st.column_config.TextColumn
 
 Configures a text column in `st.dataframe` or `st.data_editor`. This is the default column type for string values. When used with `st.data_editor`, editing is done via a text input widget.
 

@@ -1,4 +1,4 @@
-# Data Seeder Generation Guide
+﻿# Data Seeder Generation Guide
 
 Generate a data seeder class using the Bogus library for Entity Framework Core.
 

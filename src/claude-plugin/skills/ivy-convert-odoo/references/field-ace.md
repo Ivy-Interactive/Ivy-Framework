@@ -1,4 +1,4 @@
-# Field: Ace (Code Editor)
+﻿# Field: Ace (Code Editor)
 
 Odoo's code editor widget using the Ace Editor library. Provides syntax highlighting, line numbers, and theme support for editing code, XML templates, and Python expressions.
 

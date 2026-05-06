@@ -1,4 +1,4 @@
-# st.pyplot
+﻿# st.pyplot
 
 Display a matplotlib.pyplot figure. Requires `matplotlib>=3.0.0` to be installed. Ivy does not support matplotlib directly but provides native chart widgets (BarChart, LineChart, AreaChart, PieChart) with a fluent builder API.
 

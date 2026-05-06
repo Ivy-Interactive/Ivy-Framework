@@ -1,4 +1,4 @@
-# Progress Circle
+﻿# Progress Circle
 
 A content area to display a circular progress bar. Visualizes progress with a circular indicator and optional caption.
 

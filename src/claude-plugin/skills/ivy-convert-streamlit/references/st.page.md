@@ -1,4 +1,4 @@
-# st.Page
+﻿# st.Page
 
 Configures a page in a multipage app. Each `st.Page` defines a page source (a Python file or callable), along with display metadata like title, icon, and URL path. Pages are passed to `st.navigation` to declare the app's page structure.
 

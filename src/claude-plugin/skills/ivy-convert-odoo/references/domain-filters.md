@@ -1,4 +1,4 @@
-# Domain Filters
+﻿# Domain Filters
 
 Odoo's domain expression syntax for filtering records. Domains are lists of tuples `[('field', 'operator', value)]` combined with `'&'`, `'|'`, `'!'` operators (Polish notation). Used everywhere: view filters, record rules, action domains, field domains, and search views.
 

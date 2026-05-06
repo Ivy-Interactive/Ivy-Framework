@@ -1,4 +1,4 @@
-# Stacked Bar Chart
+﻿# Stacked Bar Chart
 
 Renders data in vertical or horizontal bars, with stacked segments representing different groups or subcategories. Useful for comparing categorical data across multiple groups.
 

@@ -1,4 +1,4 @@
-# Cond (Conditional Rendering)
+﻿# Cond (Conditional Rendering)
 
 Conditionally renders components based on a boolean condition. If the condition is `True`, the first component is rendered, otherwise the second component is rendered. If the second component is omitted, nothing is rendered when the condition is `False`.
 

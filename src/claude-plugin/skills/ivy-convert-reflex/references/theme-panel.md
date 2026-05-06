@@ -1,4 +1,4 @@
-# Theme Panel
+﻿# Theme Panel
 
 A visual editor component for creating and editing application themes at runtime. In Reflex, `rx.theme_panel()` renders an interactive UI panel that lets developers tweak appearance settings (accent color, gray color, radius, scaling, light/dark mode) directly in the browser. Ivy does not have a built-in visual theme panel component but provides programmatic theming through `IThemeService` and `IClientProvider`.
 

@@ -1,4 +1,4 @@
-# ImageColumn
+﻿# ImageColumn
 
 Configures an image column in `st.dataframe` or `st.data_editor`. Displays images from URLs, SVG data URIs, or base64 data URIs within table cells. The column is not editable.
 

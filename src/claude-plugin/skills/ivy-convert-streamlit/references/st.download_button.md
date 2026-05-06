@@ -1,4 +1,4 @@
-# st.download_button
+﻿# st.download_button
 
 Displays a download button that allows users to download files directly from the app. Data can be passed directly or via a callable for deferred generation of large files.
 

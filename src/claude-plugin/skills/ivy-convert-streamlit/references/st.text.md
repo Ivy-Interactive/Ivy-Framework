@@ -1,4 +1,4 @@
-# st.text
+﻿# st.text
 
 Write fixed-width, pre-formatted text without Markdown or HTML parsing.
 

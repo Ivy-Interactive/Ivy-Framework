@@ -1,4 +1,4 @@
-# Chart
+﻿# Chart
 
 A content area to display charts. Supports datasets with x/y values, axis labels, and chart type configuration including cutout percentages for donut-style charts. This component is considered legacy in Retool and will be deprecated in favor of newer Chart components.
 

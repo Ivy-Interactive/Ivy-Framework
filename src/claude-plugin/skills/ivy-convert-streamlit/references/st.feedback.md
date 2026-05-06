@@ -1,4 +1,4 @@
-# st.feedback
+﻿# st.feedback
 
 Display an icon-based button group for collecting user feedback. Commonly used in chat and AI applications to let users rate responses. Returns an integer index (0-based) or None if unselected.
 

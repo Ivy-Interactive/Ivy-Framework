@@ -1,4 +1,4 @@
-# Funnel Chart
+﻿# Funnel Chart
 
 Renders data in a funnel shape with sections of decreasing size. Useful for visualizing data flowing through sequential stages of a process (e.g., sales pipeline, conversion funnel).
 

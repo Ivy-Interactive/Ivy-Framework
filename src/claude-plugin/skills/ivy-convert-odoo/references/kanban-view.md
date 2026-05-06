@@ -1,4 +1,4 @@
-# Kanban View
+﻿# Kanban View
 
 Odoo's card-based view for displaying records in columns, often used for pipeline/workflow stages. Supports drag-and-drop between stages, quick create, and custom card templates.
 

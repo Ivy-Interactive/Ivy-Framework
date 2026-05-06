@@ -1,4 +1,4 @@
-# Flex
+﻿# Flex
 
 The Flex component creates flexbox layouts, arranging child components in horizontal or vertical directions. It supports wrapping, content justification and alignment, spacing, and automatic sizing based on available space — ideal for responsive layouts. By default, children arrange horizontally without wrapping.
 

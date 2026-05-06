@@ -1,4 +1,4 @@
-# st.pills
+﻿# st.pills
 
 Displays selection options as pill-shaped buttons instead of a dropdown list. Supports single and multi-select modes. The Ivy equivalent is `SelectInput` with the `SelectInputs.Toggle` variant, which renders options as toggle buttons.
 

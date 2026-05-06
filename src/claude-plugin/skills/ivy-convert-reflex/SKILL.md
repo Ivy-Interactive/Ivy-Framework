@@ -19,6 +19,11 @@ If the file `.ivy/learnings/ivy-convert-reflex.md` exists in the project directo
 
 ## Reference Files
 
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
+## Reference Files
+
 The [references/](references/) folder contains 94 reference files with Reflex-to-Ivy component mappings (one `.md` per `rx.*` component). Read the relevant reference files before implementing the conversion to understand how to map Reflex features to Ivy features.
 
 ## Step 1: Locate the Reflex Application

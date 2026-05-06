@@ -1,4 +1,4 @@
-# Rating
+﻿# Rating
 
 An input field to select a rating. Allows users to provide feedback through a visual rating interface using stars, hearts, or faces.
 

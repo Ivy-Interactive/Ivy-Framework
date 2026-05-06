@@ -1,4 +1,4 @@
-# Field: Priority
+﻿# Field: Priority
 
 Odoo's star rating widget for Selection fields. Displays clickable stars to set priority levels. Commonly used for urgent/normal priority or star ratings on leads, tasks, and tickets.
 

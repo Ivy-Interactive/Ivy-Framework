@@ -1,4 +1,4 @@
-# Foreach
+﻿# Foreach
 
 Iterates over a collection (list, tuple, or dictionary) and renders each item using a provided function. Used for dynamically rendering lists of items from application state.
 

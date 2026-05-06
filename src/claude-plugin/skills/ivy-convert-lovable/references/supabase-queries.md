@@ -1,4 +1,4 @@
-# Supabase Queries
+﻿# Supabase Queries
 
 Data fetching patterns using the Supabase client. Lovable apps use `@supabase/supabase-js` for database queries, often wrapped in `@tanstack/react-query` hooks.
 

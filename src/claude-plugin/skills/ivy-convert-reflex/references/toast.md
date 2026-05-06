@@ -1,4 +1,4 @@
-# Toast
+﻿# Toast
 
 Non-blocking notification that appears temporarily and disappears automatically. Used to provide quick feedback about user actions without interrupting workflow.
 

@@ -1,4 +1,4 @@
-# Year
+﻿# Year
 
 A dropdown menu and input field to select or enter a year. It is a preset version of Select, preconfigured with a list of year values.
 

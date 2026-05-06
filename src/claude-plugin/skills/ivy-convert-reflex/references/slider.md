@@ -1,4 +1,4 @@
-# Slider
+﻿# Slider
 
 A slider provides user selection of a numeric value from a range by dragging a thumb along a track. Supports single-value and range selection with customizable min, max, and step.
 

@@ -1,4 +1,4 @@
-# Menu Navigation & Routing
+﻿# Menu Navigation & Routing
 
 Odoo's menu system using `ir.ui.menu` records linked to window actions (`ir.actions.act_window`). Defines the sidebar navigation hierarchy, with each menu item opening a specific view (list, form, kanban, etc.) filtered by domain.
 

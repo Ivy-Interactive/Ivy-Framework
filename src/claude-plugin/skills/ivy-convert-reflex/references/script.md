@@ -1,4 +1,4 @@
-# Script
+﻿# Script
 
 The `rx.script` component enables inclusion of inline JavaScript or external JavaScript files via URL in a Reflex application. It wraps Next.js's `next/script` component and supports conditional rendering for controlled script side effects. Typical use cases include tracking/analytics scripts, social media embeds, and third-party service integrations.
 

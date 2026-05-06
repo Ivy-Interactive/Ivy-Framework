@@ -1,4 +1,4 @@
-# Mapbox Map
+﻿# Mapbox Map
 
 An embedded map using [Mapbox](https://www.mapbox.com/) to display latitude and longitude coordinates as points of interest. Supports custom markers using emoji and symbols, default coordinates and zoom level, and GeoJSON to render custom shapes for highlighting locations. Triggers queries on pan, zoom, and point hover/select events.
 

@@ -1,4 +1,4 @@
-# Multiselect
+﻿# Multiselect
 
 An input field to select multiple options using a dropdown menu or manually enter values.
 

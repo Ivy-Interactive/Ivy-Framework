@@ -1,4 +1,4 @@
-# st.tabs
+﻿# st.tabs
 
 Insert containers separated into tabs. Tabs allow users to navigate between groups of related content. All tab content is sent to the frontend regardless of which tab is selected.
 

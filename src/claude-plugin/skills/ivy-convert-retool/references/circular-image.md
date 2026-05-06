@@ -1,4 +1,4 @@
-# Circular Image
+﻿# Circular Image
 
 A content area to display a circular image. Circular Image is a preset version of Retool's Image component, preconfigured with a 50% border radius. It is typically used for profile pictures and user avatars.
 

@@ -1,4 +1,4 @@
-# Section
+﻿# Section
 
 A semantic container that groups related content vertically with configurable padding. In Reflex this renders as an HTML `<section>` element with vertical spacing controlled by a `size` prop.
 

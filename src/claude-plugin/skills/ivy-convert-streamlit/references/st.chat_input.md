@@ -1,4 +1,4 @@
-# st.chat_input
+﻿# st.chat_input
 
 Display a chat input widget that allows users to type and submit messages, optionally with file attachments and audio recordings.
 

@@ -1,4 +1,4 @@
-# Alert / Callout
+﻿# Alert / Callout
 
 An inline alert message for important information. In Lovable apps, this is the shadcn/ui Alert component.
 

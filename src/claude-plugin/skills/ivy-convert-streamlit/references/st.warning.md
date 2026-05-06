@@ -1,4 +1,4 @@
-# st.warning
+﻿# st.warning
 
 Display a warning message. Renders styled alert box with an optional icon, supporting GitHub-flavored Markdown in the body text.
 

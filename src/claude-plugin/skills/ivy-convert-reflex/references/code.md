@@ -1,4 +1,4 @@
-# Code
+﻿# Code
 
 Displays formatted code snippets. Reflex renders inline code with styling options, while Ivy provides a block-level code display with syntax highlighting, line numbers, and a copy button.
 

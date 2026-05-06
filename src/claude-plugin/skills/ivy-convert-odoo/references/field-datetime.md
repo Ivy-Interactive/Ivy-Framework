@@ -1,4 +1,4 @@
-# Field: Date / Datetime
+﻿# Field: Date / Datetime
 
 Odoo's date and datetime fields for temporal values. `fields.Date` stores date only, `fields.Datetime` includes time. Supports min/max constraints, date ranges, and various picker modes.
 

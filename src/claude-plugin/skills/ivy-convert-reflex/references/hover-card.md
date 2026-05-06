@@ -1,4 +1,4 @@
-# Hover Card
+﻿# Hover Card
 
 Displays rich preview content when a user hovers over a trigger element (typically a link). Useful for showing supplementary information without requiring a click.
 

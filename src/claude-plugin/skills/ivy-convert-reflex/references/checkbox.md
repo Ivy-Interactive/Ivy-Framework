@@ -1,4 +1,4 @@
-# Checkbox
+﻿# Checkbox
 
 A boolean input component that allows users to toggle between checked and unchecked states. Commonly used in forms for accepting terms, enabling options, or selecting multiple items from a list.
 

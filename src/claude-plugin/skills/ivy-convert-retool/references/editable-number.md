@@ -1,4 +1,4 @@
-# Editable Number
+﻿# Editable Number
 
 A click-to-edit input field for entering a number. Functions similarly to a standard Number Input but renders as plain text until clicked, then reveals the input field for editing.
 

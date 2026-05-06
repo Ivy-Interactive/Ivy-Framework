@@ -1,4 +1,4 @@
-# st.form
+﻿# st.form
 
 Creates a container that groups input widgets together with a Submit button. When submitted, all widget values inside the form are sent as a batch rather than individually.
 

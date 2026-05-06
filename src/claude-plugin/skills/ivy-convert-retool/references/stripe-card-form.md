@@ -1,4 +1,4 @@
-# Stripe Card Form
+﻿# Stripe Card Form
 
 An embedded payment form to securely collect and submit card information to Stripe. A token is returned that can be used to charge the card.
 

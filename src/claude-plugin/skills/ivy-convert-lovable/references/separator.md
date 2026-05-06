@@ -1,4 +1,4 @@
-# Separator / Divider
+﻿# Separator / Divider
 
 A visual divider between content sections. In Lovable apps, this is the shadcn/ui Separator component.
 

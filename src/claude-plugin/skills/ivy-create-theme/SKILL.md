@@ -17,6 +17,11 @@ Create or modify a custom theme in an Ivy project.
 
 If the file `.ivy/learnings/ivy-create-theme.md` exists in the project directory, read it first and apply any lessons learned from previous runs of this skill.
 
+## Reference Files
+
+Read before implementing:
+- [references/AGENTS.md](references/AGENTS.md) -- Ivy framework API reference (widgets, hooks, layouts, inputs, colors)
+
 ## Getting Started
 
 1. Use `ivy docs` to read about theming (query: "theming" or "custom theme").

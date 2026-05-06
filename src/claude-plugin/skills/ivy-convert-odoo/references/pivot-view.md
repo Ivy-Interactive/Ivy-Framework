@@ -1,4 +1,4 @@
-# Pivot View
+﻿# Pivot View
 
 Odoo's pivot table view for multi-dimensional data analysis. Displays aggregated values in rows and columns with drill-down capabilities, similar to Excel pivot tables.
 

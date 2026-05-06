@@ -1,4 +1,4 @@
-# JSON Explorer
+﻿# JSON Explorer
 
 A content area to display JSON data with collapsible nodes and syntax highlighting.
 

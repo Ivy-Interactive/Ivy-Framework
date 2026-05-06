@@ -1,4 +1,4 @@
-# Field: Many2one / Many2many / One2many
+﻿# Field: Many2one / Many2many / One2many
 
 Odoo's relational fields for linking records between models. `Many2one` is a foreign key, `Many2many` is a join table, and `One2many` is the reverse of Many2one.
 

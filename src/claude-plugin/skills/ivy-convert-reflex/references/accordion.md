@@ -1,4 +1,4 @@
-# Accordion
+﻿# Accordion
 
 Vertically stacked interactive headings that reveal associated content sections. Composed of a root container and collapsible items.
 

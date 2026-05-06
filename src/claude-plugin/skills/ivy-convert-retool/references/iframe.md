@@ -1,4 +1,4 @@
-# IFrame
+﻿# IFrame
 
 A content area to embed an external web page. Supports permissions for downloads, form submissions, microphone/camera access, and popups. Common use cases include embedding dashboards (Grafana, Kibana), third-party tools, documentation sites, media content, and legacy web applications.
 

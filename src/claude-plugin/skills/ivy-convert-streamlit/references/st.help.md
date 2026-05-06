@@ -1,4 +1,4 @@
-# st.help
+﻿# st.help
 
 Displays help and other information for a given object, including its name, type, value, signature, docstring, and member variables/methods. Useful for debugging and inspecting objects at runtime.
 

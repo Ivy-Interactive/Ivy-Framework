@@ -1,4 +1,4 @@
-# LLM Chat
+﻿# LLM Chat
 
 An interface for AI chat conversations. Displays a message thread between a user and an AI assistant, with an input field for sending new messages. Supports message history, streaming responses, and customizable assistant branding.
 

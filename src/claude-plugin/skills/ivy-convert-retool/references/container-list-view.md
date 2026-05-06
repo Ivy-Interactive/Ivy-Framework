@@ -1,4 +1,4 @@
-# Container List View
+﻿# Container List View
 
 A flexible list of repeated components with containers. The Container List View is a preset version of List View that comes preconfigured with a nested Container component. It maps an array of data to repeating instances — you configure the layout once and it repeats for every item in the data source. Each instance exposes an `item` variable (the current data entry) and an `i` variable (the index).
 

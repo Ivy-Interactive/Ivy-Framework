@@ -1,4 +1,4 @@
-# Close Button
+﻿# Close Button
 
 A preset button with a preconfigured close/X icon designed to trigger dismiss actions when clicked. Commonly used to close modals, panels, or dialogs.
 

@@ -1,4 +1,4 @@
-# Line Chart
+﻿# Line Chart
 
 Renders data as lines on x/y axes, useful for visualizing trends over time. Supports multiple data series, interactive toolbars, legends, tooltips, and customizable axis configuration.
 

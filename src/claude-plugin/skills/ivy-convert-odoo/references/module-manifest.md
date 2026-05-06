@@ -1,4 +1,4 @@
-# Module Manifest
+﻿# Module Manifest
 
 Odoo's `__manifest__.py` file defines module metadata, dependencies, data files, and assets. Every Odoo module requires this file to declare what models, views, security rules, and demo data the module provides.
 

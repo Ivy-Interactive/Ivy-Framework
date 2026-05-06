@@ -1,4 +1,4 @@
-# Field: Progressbar
+﻿# Field: Progressbar
 
 Odoo's progress bar widget for displaying completion percentages. Shows a horizontal bar with optional text showing current/max values. Used for task completion, project progress, and capacity indicators.
 

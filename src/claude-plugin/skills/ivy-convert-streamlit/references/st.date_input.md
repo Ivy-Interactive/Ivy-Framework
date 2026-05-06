@@ -1,4 +1,4 @@
-# st.date_input
+﻿# st.date_input
 
 Display a date input widget. Supports single date selection and date range selection. The first day of the week is determined by the user's browser locale.
 

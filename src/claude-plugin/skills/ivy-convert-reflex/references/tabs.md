@@ -1,4 +1,4 @@
-# Tabs
+﻿# Tabs
 
 A tabbed interface that organizes content into layered sections (tab panels), displayed one at a time. Users switch between related content groups via clickable tab triggers.
 

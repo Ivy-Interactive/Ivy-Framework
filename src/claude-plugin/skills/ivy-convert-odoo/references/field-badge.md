@@ -1,4 +1,4 @@
-# Field: Badge
+﻿# Field: Badge
 
 Odoo's badge widget for displaying field values as colored pill/label indicators. Works with Selection, Many2one, and Char fields. Supports conditional coloring via decoration attributes.
 

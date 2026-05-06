@@ -1,4 +1,4 @@
-# Grid
+﻿# Grid
 
 Component for creating two-dimensional grid layouts. Allows arranging child elements into rows and columns with control over spacing, alignment, and flow direction.
 

@@ -1,4 +1,4 @@
-# Field: Binary
+﻿# Field: Binary
 
 Odoo's binary field for generic file uploads and downloads. Stores file data as base64-encoded content. Used for attachments, documents, templates, and any non-image file storage.
 

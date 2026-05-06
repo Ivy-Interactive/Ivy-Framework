@@ -1,4 +1,4 @@
-# st.column_config.LineChartColumn
+﻿# st.column_config.LineChartColumn
 
 Configure a line chart column in `st.dataframe` or `st.data_editor`. Renders a sparkline (inline mini line chart) inside each table cell. Each cell must contain a list of numbers.
 

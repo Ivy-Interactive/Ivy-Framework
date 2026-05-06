@@ -1,4 +1,4 @@
-# React State & Hooks
+﻿# React State & Hooks
 
 React state management and hooks patterns. Lovable apps use React hooks for state, effects, and custom data fetching.
 

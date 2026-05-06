@@ -1,4 +1,4 @@
-# Editable Text Area
+﻿# Editable Text Area
 
 A click-to-edit input field for entering multiple lines of text. Displays as plain text until the user clicks to edit it, then behaves like a standard text area.
 

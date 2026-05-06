@@ -1,4 +1,4 @@
-# Heading
+﻿# Heading
 
 Displays a heading element (`<h1>` through `<h6>`) with configurable size, weight, alignment, and color. Used for semantic section titles and visual hierarchy.
 

@@ -1,4 +1,4 @@
-# Icon Text
+﻿# Icon Text
 
 A content area to display an icon with accompanying text. Retool's IconText is a presentation component that pairs an icon (from 3,000+ built-in icons) with a text label. In Ivy, the closest equivalent is the `Badge` widget, which combines an icon with text in a single component.
 

@@ -1,4 +1,4 @@
-# Statistic
+﻿# Statistic
 
 A content area to display primary and secondary number values with optional trend indicators, formatting, and prefix/suffix labels.
 

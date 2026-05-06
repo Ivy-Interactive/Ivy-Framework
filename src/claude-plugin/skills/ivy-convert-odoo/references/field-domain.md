@@ -1,4 +1,4 @@
-# Field: Domain
+﻿# Field: Domain
 
 Odoo's domain builder widget for constructing record filter expressions. Provides a visual query builder interface for creating Odoo domain tuples (e.g., `[('state', '=', 'draft')]`). Used in automation rules, email templates, and dynamic filters.
 

@@ -1,4 +1,4 @@
-# NumberColumn
+﻿# NumberColumn
 
 Configure a number column in a data table. This is the default column type for integer and float values. It supports numeric formatting (currency, percent, scientific, etc.) and constraining input with min/max/step values.
 

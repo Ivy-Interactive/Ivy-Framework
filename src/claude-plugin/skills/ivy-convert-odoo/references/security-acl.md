@@ -1,4 +1,4 @@
-# Security & ACL
+﻿# Security & ACL
 
 Odoo's access control system using model-level ACLs (`ir.model.access.csv`), record-level rules (`ir.rule`), and field-level group restrictions. Controls who can create, read, update, or delete records, and which records are visible to which users.
 

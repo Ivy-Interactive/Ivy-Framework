@@ -1,4 +1,4 @@
-# Icon
+﻿# Icon
 
 Displays a vector icon from the Lucide icon library. Both Reflex and Ivy use the same underlying Lucide icon set (1000+ icons).
 

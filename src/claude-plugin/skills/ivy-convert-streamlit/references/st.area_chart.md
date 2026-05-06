@@ -1,4 +1,4 @@
-# st.area_chart
+﻿# st.area_chart
 
 Display an area chart. A simplified charting function that plots quantitative data with filled areas, supporting stacking, color mapping, and multiple data series.
 

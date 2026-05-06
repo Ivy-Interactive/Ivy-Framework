@@ -1,4 +1,4 @@
-# Field: Percentage
+﻿# Field: Percentage
 
 Odoo's percentage widget for displaying numeric values as percentages. The stored value is a decimal (e.g., 0.75 = 75%) and the widget handles the conversion for display and input.
 

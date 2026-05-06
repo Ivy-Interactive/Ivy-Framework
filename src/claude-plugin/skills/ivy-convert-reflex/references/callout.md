@@ -1,4 +1,4 @@
-# Callout
+﻿# Callout
 
 A callout displays a short, prominent message designed to capture user attention. It is typically used for informational notices, warnings, errors, and success confirmations.
 

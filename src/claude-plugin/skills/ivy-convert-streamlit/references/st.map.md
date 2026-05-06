@@ -1,4 +1,4 @@
-# st.map
+﻿# st.map
 
 Displays an interactive scatterplot map using OpenStreetMap tiles. Wraps `st.pydeck_chart` to quickly plot geographic coordinate data with automatic centering and zooming.
 

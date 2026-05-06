@@ -1,4 +1,4 @@
-# Container
+﻿# Container
 
 Constrains the maximum width of page content while keeping flexible margins for responsive layouts. Typically used to wrap the main content of a page.
 

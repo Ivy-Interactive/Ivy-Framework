@@ -1,4 +1,4 @@
-# Image
+﻿# Image
 
 A content area to display an image. Supports URLs, file objects, base64 data, and storage references with options for sizing, alignment, and interaction.
 
