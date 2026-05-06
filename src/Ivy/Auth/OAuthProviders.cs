@@ -17,4 +17,7 @@ public static class OAuthProviders
     public const string GitLab = "gitlab";
     public const string Bitbucket = "bitbucket";
     public const string Sliplane = "sliplane";
+
+    /// <summary>Anthropic Claude (claude.ai) OAuth</summary>
+    public const string Claude = "claude";
 }

@@ -34,6 +34,7 @@ public class ConnectedAccountButtonTests
     [InlineData(OAuthProviders.Twitter, Icons.XTwitter)]
     [InlineData(OAuthProviders.Figma, Icons.Figma)]
     [InlineData(OAuthProviders.Notion, Icons.Notion)]
+    [InlineData(OAuthProviders.Claude, Icons.ClaudeCode)]
     public void GetProviderIcon_ReturnsCorrectIcon(string provider, Icons expected)
     {
         Assert.Equal(expected, ConnectedAccountButton.GetProviderIcon(provider));

@@ -21,6 +21,7 @@ public class OAuthProviderTestView : ViewBase
         {
             OAuthProviders.Google => new GoogleOAuthTestView(_session),
             OAuthProviders.GitHub => new GitHubOAuthTestView(_session),
+            OAuthProviders.Claude => new ClaudeOAuthTestView(_session),
             OAuthProviders.Microsoft => new MicrosoftGraphOAuthTestView(_session),
             OAuthProviders.Apple => UnsupportedProviderView("Apple"),
             OAuthProviders.Twitter => UnsupportedProviderView("Twitter"),

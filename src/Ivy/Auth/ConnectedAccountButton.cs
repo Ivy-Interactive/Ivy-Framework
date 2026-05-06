@@ -54,6 +54,7 @@ public class ConnectedAccountButton(string provider, string? displayName = null,
         OAuthProviders.Twitter => Icons.XTwitter,
         OAuthProviders.Figma => Icons.Figma,
         OAuthProviders.Notion => Icons.Notion,
+        OAuthProviders.Claude => Icons.ClaudeCode,
         _ => Icons.Link,
     };
 }
