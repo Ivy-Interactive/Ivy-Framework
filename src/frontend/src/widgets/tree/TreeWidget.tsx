@@ -59,7 +59,6 @@ export const TreeWidget: React.FC<TreeWidgetProps> = ({
           density={density}
           onItemClick={onItemClick}
           rowActions={rowActions}
-          hasSiblingWithChildren={items.some((i) => i.children && i.children.length > 0)}
           onRowActionClick={onRowActionClick}
         />
       ))}

@@ -101,7 +101,8 @@ public class DataTableScaffoldTests
     {
         var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
         var field = builder.GetType().GetField("_density", flags)!;
-        return (Density)field.GetValue(builder)!;
+        var responsive = (Responsive<Density?>)field.GetValue(builder)!;
+        return responsive.Default ?? Density.Medium;
     }
 
     [Fact]

@@ -8,7 +8,6 @@ import React, {
   ChangeEvent,
   FocusEvent,
   WheelEvent,
-  MouseEvent as ReactMouseEvent,
 } from "react";
 import { formatBytes } from "@/lib/formatters";
 
@@ -29,13 +28,6 @@ interface NumberInputProps {
   className?: string;
   density?: Densities;
   "data-testid"?: string;
-}
-
-interface DragState {
-  isDragging: boolean;
-  startX: number;
-  startValue: number;
-  lastValue: number;
 }
 
 const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
@@ -69,7 +61,6 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     const [displayValue, setDisplayValue] = useState<string>("");
     const [isFocused, setIsFocused] = useState(false);
     const [isValid, setIsValid] = useState(true);
-    const [dragState, setDragState] = useState<DragState | null>(null);
     const inputRef = React.useRef<HTMLInputElement | null>(null);
 
     const formatter = useMemo(() => new Intl.NumberFormat(undefined, format), [format]);
@@ -129,76 +120,6 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       },
       [value, step, parseValue, onChange, formatValue, disabled, min, max],
     );
-
-    const calculateDragValue = useCallback(
-      (currentX: number, startX: number, startValue: number) => {
-        const distance = currentX - startX;
-        const direction = distance >= 0 ? 1 : -1;
-        const absoluteDistance = Math.abs(distance);
-
-        let multiplier = 1;
-        if (absoluteDistance > 100) multiplier = 5;
-        if (absoluteDistance > 200) multiplier = 10;
-        if (absoluteDistance > 300) multiplier = 20;
-
-        const stepChange = Math.floor(absoluteDistance / 5) * direction * step * multiplier;
-        return parseValue((startValue + stepChange).toString(), true);
-      },
-      [parseValue, step],
-    );
-
-    const handleMouseDown = useCallback(
-      (e: ReactMouseEvent<HTMLInputElement>) => {
-        if (disabled || !inputRef.current) return;
-
-        const startValue = value ?? 0;
-        setDragState({
-          isDragging: true,
-          startX: e.clientX,
-          startValue,
-          lastValue: startValue,
-        });
-
-        e.preventDefault();
-
-        document.body.style.cursor = "ew-resize";
-
-        inputRef.current.focus();
-      },
-      [disabled, value],
-    );
-
-    useEffect(() => {
-      if (!dragState?.isDragging) return;
-
-      const handleMouseMove = (e: globalThis.MouseEvent) => {
-        if (!dragState) return;
-
-        const newValue = calculateDragValue(e.clientX, dragState.startX, dragState.startValue);
-
-        if (newValue !== null && newValue !== dragState.lastValue) {
-          setDisplayValue(formatValue(newValue));
-          setDragState((prev) => (prev ? { ...prev, lastValue: newValue } : null));
-        }
-      };
-
-      const handleMouseUp = () => {
-        // Call onChange only when mouse is released
-        if (dragState && dragState.lastValue !== dragState.startValue) {
-          onChange?.(dragState.lastValue);
-        }
-        setDragState(null);
-        document.body.style.cursor = "";
-      };
-
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-    }, [dragState, calculateDragValue, onChange, formatValue]);
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -301,16 +222,13 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           onWheel={handleWheel}
-          onMouseDown={handleMouseDown}
           min={min}
           max={max}
           step={step}
           disabled={disabled}
           placeholder={placeholder}
           density={density}
-          className={`${className} ${
-            !isValid ? "border-[var(--color-destructive)]" : ""
-          } ${dragState?.isDragging ? "select-none" : ""} cursor-pointer`}
+          className={`${className} ${!isValid ? "border-[var(--color-destructive)]" : ""}`}
           data-testid={dataTestId}
           {...props}
         />

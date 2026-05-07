@@ -48,7 +48,8 @@ public class PluginLoader : IPluginManager
         _logger = logger;
         _sharedAssemblyNames = new HashSet<string>(sharedAssemblyNames ?? [])
         {
-            "Ivy.Plugin.Abstractions"
+            "Ivy.Plugin.Abstractions",
+            "Ivy"
         };
     }
 
@@ -154,7 +155,7 @@ public class PluginLoader : IPluginManager
             return null;
         }
 
-        // Shadow-copy all DLLs so the runtime loads fresh bytes on reload
+        // Shadow-copy all DLLs and deps.json so the runtime loads fresh bytes on reload
         var shadowDir = Path.Combine(Path.GetTempPath(), "ivy-plugins", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(shadowDir);
         var shadowFiles = new List<string>();
@@ -163,13 +164,40 @@ public class PluginLoader : IPluginManager
             var dest = Path.Combine(shadowDir, Path.GetFileName(src));
             File.Copy(src, dest, overwrite: true);
             shadowFiles.Add(dest);
+
+            // Also copy the .deps.json if one exists next to this DLL
+            var depsFile = Path.ChangeExtension(src, ".deps.json");
+            if (File.Exists(depsFile))
+            {
+                File.Copy(depsFile, Path.Combine(shadowDir, Path.GetFileName(depsFile)), overwrite: true);
+            }
         }
 
-        var found = new List<(Type PluginType, Assembly Assembly, AssemblyLoadContext Context)>();
+        // Determine the main plugin DLL (matches directory name) for the AssemblyDependencyResolver
+        var dirName = Path.GetFileName(directory);
+        var mainDllPath = shadowFiles.FirstOrDefault(f =>
+            Path.GetFileNameWithoutExtension(f).Equals(dirName, StringComparison.OrdinalIgnoreCase));
+
+        // Fall back to first DLL that has a matching .deps.json in the shadow directory
+        mainDllPath ??= shadowFiles.FirstOrDefault(f =>
+            File.Exists(Path.ChangeExtension(f, ".deps.json")));
+
+        // Final fallback: first DLL
+        mainDllPath ??= shadowFiles[0];
+
+        // Create a single load context for the entire plugin
+        var loadContext = new PluginAssemblyLoadContext(mainDllPath, _sharedAssemblyNames);
+
+        // Load non-shared DLLs into the context and look for the [IvyPlugin] attribute
+        var found = new List<(Type PluginType, Assembly Assembly)>();
 
         foreach (var dllPath in shadowFiles)
         {
-            var loadContext = new PluginAssemblyLoadContext(dllPath, _sharedAssemblyNames);
+            // Skip DLLs that match shared assemblies — they come from the host
+            var assemblyName = Path.GetFileNameWithoutExtension(dllPath);
+            if (_sharedAssemblyNames.Contains(assemblyName))
+                continue;
+
             Assembly assembly;
             try
             {
@@ -192,7 +220,7 @@ public class PluginLoader : IPluginManager
                 return null;
             }
 
-            found.Add((attr.PluginType, assembly, loadContext));
+            found.Add((attr.PluginType, assembly));
         }
 
         if (found.Count == 0)
@@ -209,9 +237,9 @@ public class PluginLoader : IPluginManager
             return null;
         }
 
-        var (pluginType, pluginAssembly, context) = found[0];
+        var (pluginType, pluginAssembly) = found[0];
         var instance = (IIvyPlugin)ActivatorUtilities.CreateInstance(serviceProvider, pluginType);
-        return (instance, pluginAssembly, context, directory);
+        return (instance, pluginAssembly, loadContext, directory);
     }
 
     private List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)> TopologicalSort(
@@ -507,6 +535,16 @@ public class PluginLoader : IPluginManager
         finally
         {
             _lock.ExitWriteLock();
+        }
+
+        // Reload app repository so newly added apps appear in the UI
+        if (loadedPluginId is not null)
+        {
+            _pluginContext?.ReloadApps();
+            // Refresh any open tabs showing apps from this plugin (e.g. after reload)
+            var appIds = _pluginContext?.GetPluginAppIds(loadedPluginId!);
+            if (appIds is { Count: > 0 })
+                _pluginContext!.RefreshApps(appIds);
         }
 
         // Fire event outside the lock to avoid deadlocks — subscribers may call

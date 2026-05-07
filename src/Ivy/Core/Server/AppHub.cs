@@ -19,7 +19,8 @@ public class AppHub(
     IContentBuilder contentBuilder,
     AppSessionStore sessionStore,
     ILogger<AppHub> logger,
-    IQueryableRegistry queryableRegistry
+    IQueryableRegistry queryableRegistry,
+    IOAuthCallbackRegistry callbackRegistry
     ) : Hub
 {
     private static readonly HashSet<string> ReservedQueryParams = new(StringComparer.OrdinalIgnoreCase)
@@ -284,6 +285,12 @@ public class AppHub(
 
             sessionStore.Sessions[Context.ConnectionId] = appState;
 
+            // Cancel any deferred removal scheduled for this connection (e.g. reconnect after OAuth redirect)
+            if (sessionStore.CancelDeferredRemoval(Context.ConnectionId))
+            {
+                logger.LogInformation("Cancelled deferred session removal for reconnecting client {ConnectionId}", Context.ConnectionId);
+            }
+
             // Trigger reload for other tabs on this machine after OAuth login
             if (parentId == null &&
                 httpContext.Request.Query.ContainsKey("oauthLogin") &&
@@ -493,103 +500,26 @@ public class AppHub(
             // Cancel all pending HTTP tunnel requests for this connection
             HttpTunnelingController.CancelRequestsForConnection(Context.ConnectionId, "SignalR connection closed");
 
+            if (callbackRegistry.HasPendingForConnection(Context.ConnectionId))
+            {
+                // OAuth flow in progress — defer session removal to allow the callback to complete
+                var connectionId = Context.ConnectionId;
+                logger.LogInformation("Deferring session removal for {ConnectionId} — OAuth callback pending", connectionId);
+                sessionStore.ScheduleDeferredRemoval(connectionId, TimeSpan.FromMinutes(2), async connId =>
+                {
+                    logger.LogInformation("Deferred removal executing for {ConnectionId}", connId);
+                    if (sessionStore.Sessions.TryRemove(connId, out var deferredAppState))
+                    {
+                        await CleanupSessionAsync(deferredAppState, connId);
+                    }
+                });
+                await base.OnDisconnectedAsync(exception);
+                return;
+            }
+
             if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
             {
-                try
-                {
-                    // Clean up brokered session event subscriptions
-                    if (appState.BrokeredTokenAddedHandler != null || appState.BrokeredTokenRemovedHandler != null)
-                    {
-                        var authService = appState.AppServices.GetService<IAuthService>();
-                        if (authService != null)
-                        {
-                            var authSession = authService.GetAuthSession();
-                            if (appState.BrokeredTokenAddedHandler != null)
-                            {
-                                authSession.BrokeredSessionAdded -= appState.BrokeredTokenAddedHandler;
-                            }
-                            if (appState.BrokeredTokenRemovedHandler != null)
-                            {
-                                authSession.BrokeredSessionRemoved -= appState.BrokeredTokenRemovedHandler;
-                            }
-                        }
-                    }
-
-                    // Cancel and dispose all brokered token refresh loop cancellation tokens
-                    if (appState.BrokeredRefreshCancellations != null)
-                    {
-                        foreach (var kvp in appState.BrokeredRefreshCancellations)
-                        {
-                            try
-                            {
-                                kvp.Value.Cancel();
-                                kvp.Value.Dispose();
-                            }
-                            catch (ObjectDisposedException) { }
-                            catch (Exception ex)
-                            {
-                                logger.LogWarning(ex, "Error cancelling brokered token refresh loop for provider {Provider} on connection {ConnectionId}", kvp.Key, Context.ConnectionId);
-                            }
-                        }
-                    }
-
-                    // Clean up connected account event subscriptions
-                    if (appState.ConnectedAccountAddedHandler != null || appState.ConnectedAccountRemovedHandler != null)
-                    {
-                        var authService2 = appState.AppServices.GetService<IAuthService>();
-                        if (authService2 != null)
-                        {
-                            var authSession2 = authService2.GetAuthSession();
-                            if (appState.ConnectedAccountAddedHandler != null)
-                            {
-                                authSession2.ConnectedAccountAdded -= appState.ConnectedAccountAddedHandler;
-                            }
-                            if (appState.ConnectedAccountRemovedHandler != null)
-                            {
-                                authSession2.ConnectedAccountRemoved -= appState.ConnectedAccountRemovedHandler;
-                            }
-                        }
-                    }
-
-                    // Cancel and dispose all connected account refresh loop cancellation tokens
-                    if (appState.ConnectedAccountRefreshCancellations != null)
-                    {
-                        foreach (var kvp in appState.ConnectedAccountRefreshCancellations)
-                        {
-                            try
-                            {
-                                kvp.Value.Cancel();
-                                kvp.Value.Dispose();
-                            }
-                            catch (ObjectDisposedException) { }
-                            catch (Exception ex)
-                            {
-                                logger.LogWarning(ex, "Error cancelling connected account refresh loop for provider {Provider} on connection {ConnectionId}", kvp.Key, Context.ConnectionId);
-                            }
-                        }
-                    }
-
-                    // Dispose app state (stops EventDispatchQueue, cleans up widget tree)
-                    // so in-flight event handlers finish before the sender is torn down.
-                    await appState.DisposeAsync();
-
-                    try
-                    {
-                        var cp = appState.AppServices.GetService<IClientProvider>();
-                        if (cp?.Sender is ClientSender cs)
-                        {
-                            cs.Dispose();
-                        }
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Error disposing app state for {ConnectionId}", Context.ConnectionId);
-                }
+                await CleanupSessionAsync(appState, Context.ConnectionId);
             }
 
             await base.OnDisconnectedAsync(exception);
@@ -597,6 +527,105 @@ public class AppHub(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error during disconnection for {ConnectionId}", Context.ConnectionId);
+        }
+    }
+
+    private async Task CleanupSessionAsync(AppSession appState, string connectionId)
+    {
+        try
+        {
+            // Clean up brokered session event subscriptions
+            if (appState.BrokeredTokenAddedHandler != null || appState.BrokeredTokenRemovedHandler != null)
+            {
+                var authService = appState.AppServices.GetService<IAuthService>();
+                if (authService != null)
+                {
+                    var authSession = authService.GetAuthSession();
+                    if (appState.BrokeredTokenAddedHandler != null)
+                    {
+                        authSession.BrokeredSessionAdded -= appState.BrokeredTokenAddedHandler;
+                    }
+                    if (appState.BrokeredTokenRemovedHandler != null)
+                    {
+                        authSession.BrokeredSessionRemoved -= appState.BrokeredTokenRemovedHandler;
+                    }
+                }
+            }
+
+            // Cancel and dispose all brokered token refresh loop cancellation tokens
+            if (appState.BrokeredRefreshCancellations != null)
+            {
+                foreach (var kvp in appState.BrokeredRefreshCancellations)
+                {
+                    try
+                    {
+                        kvp.Value.Cancel();
+                        kvp.Value.Dispose();
+                    }
+                    catch (ObjectDisposedException) { }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Error cancelling brokered token refresh loop for provider {Provider} on connection {ConnectionId}", kvp.Key, connectionId);
+                    }
+                }
+            }
+
+            // Clean up connected account event subscriptions
+            if (appState.ConnectedAccountAddedHandler != null || appState.ConnectedAccountRemovedHandler != null)
+            {
+                var authService2 = appState.AppServices.GetService<IAuthService>();
+                if (authService2 != null)
+                {
+                    var authSession2 = authService2.GetAuthSession();
+                    if (appState.ConnectedAccountAddedHandler != null)
+                    {
+                        authSession2.ConnectedAccountAdded -= appState.ConnectedAccountAddedHandler;
+                    }
+                    if (appState.ConnectedAccountRemovedHandler != null)
+                    {
+                        authSession2.ConnectedAccountRemoved -= appState.ConnectedAccountRemovedHandler;
+                    }
+                }
+            }
+
+            // Cancel and dispose all connected account refresh loop cancellation tokens
+            if (appState.ConnectedAccountRefreshCancellations != null)
+            {
+                foreach (var kvp in appState.ConnectedAccountRefreshCancellations)
+                {
+                    try
+                    {
+                        kvp.Value.Cancel();
+                        kvp.Value.Dispose();
+                    }
+                    catch (ObjectDisposedException) { }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Error cancelling connected account refresh loop for provider {Provider} on connection {ConnectionId}", kvp.Key, connectionId);
+                    }
+                }
+            }
+
+            // Dispose app state (stops EventDispatchQueue, cleans up widget tree)
+            // so in-flight event handlers finish before the sender is torn down.
+            await appState.DisposeAsync();
+
+            try
+            {
+                var cp = appState.AppServices.GetService<IClientProvider>();
+                if (cp?.Sender is ClientSender cs)
+                {
+                    cs.Dispose();
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error disposing app state for {ConnectionId}", connectionId);
         }
     }
 

@@ -145,6 +145,18 @@ export function validateRedirectUrl(
   // Trim whitespace
   url = url.trim();
 
+  // Allow anchor links (starting with #)
+  if (url.startsWith("#")) {
+    if (!/^#[^?&]*$/.test(url)) {
+      return null;
+    }
+    const afterHash = extractAnchorId(url);
+    if (afterHash.includes("://")) {
+      return null;
+    }
+    return url;
+  }
+
   // Allow relative paths (starting with /)
   if (url.startsWith("/")) {
     // Validate it's a safe relative path (no protocol, no javascript:, etc.)

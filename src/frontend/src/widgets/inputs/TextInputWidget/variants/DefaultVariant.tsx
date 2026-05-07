@@ -4,7 +4,11 @@ import { cn } from "@/lib/utils";
 import { getWidth, inputStyles } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
-import { textInputSizeVariant, xIconVariant } from "@/components/ui/input/text-input-variant";
+import {
+  textInputAffixCellClasses,
+  textInputSizeVariant,
+  xIconVariant,
+} from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import {
   useCursorPosition,
@@ -69,7 +73,9 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
+  const ghostAffixChrome = Boolean(props.ghost && hasAffixes);
   const showClear = props.nullable && !props.disabled && hasValue;
+  const ghostTrailingTight = Boolean(props.ghost && hasSuffix);
 
   return (
     <div className="relative w-full select-none" style={styles}>
@@ -87,12 +93,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
       >
         {/* Prefix with background and separator */}
         {hasPrefix && (
-          <div
-            className={cn(
-              "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)] [&_button]:rounded [&_button]:px-1 [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors",
-              !isFocused && "border-r border-input",
-            )}
-          >
+          <div className={textInputAffixCellClasses("prefix", isFocused, ghostAffixChrome)}>
             {prefixContent}
           </div>
         )}
@@ -135,7 +136,12 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
 
           {/* Right side container: shortcut (if any), clear (if nullable), then invalid (if any) */}
           {(props.shortcutKey || showClear || props.invalid) && (
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 pointer-events-none">
+            <div
+              className={cn(
+                "pointer-events-none absolute top-1/2 flex -translate-y-1/2 flex-row items-center",
+                ghostTrailingTight ? "right-0 gap-0 pr-0" : "right-2 gap-1",
+              )}
+            >
               {props.shortcutKey && !isFocused && !hasValue && !showClear && !props.invalid && (
                 <div className="pointer-events-auto flex items-center h-6">
                   <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-selector">
@@ -176,7 +182,8 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
               props.onDictationToggle?.();
             }}
             className={cn(
-              "flex items-center justify-center px-2 border-l border-input hover:bg-accent focus:outline-none cursor-pointer transition-colors",
+              "flex items-center justify-center px-2 border-l hover:bg-accent focus:outline-none cursor-pointer transition-colors",
+              props.ghost ? "border-border/30" : "border-input",
               props.isRecording && "bg-destructive/10 text-destructive",
             )}
           >
@@ -186,12 +193,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
 
         {/* Suffix with background and separator */}
         {hasSuffix && (
-          <div
-            className={cn(
-              "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)] [&_button]:rounded [&_button]:px-1 [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors",
-              !isFocused && "border-l border-input",
-            )}
-          >
+          <div className={textInputAffixCellClasses("suffix", isFocused, ghostAffixChrome)}>
             {suffixContent}
           </div>
         )}

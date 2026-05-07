@@ -21,26 +21,22 @@ export const AppHostWidget: React.FC<AppHostWidgetProps> = ({ appId, appArgs, pa
     false,
   );
   const containerRef = useRef<HTMLDivElement>(null);
-  const previousAppIdRef = useRef<string>(appId);
-  const hasResetForCurrentApp = useRef<boolean>(false);
+  const previousAppIdRef = useRef(appId);
 
   useEffect(() => {
-    // Reset scroll only once when navigating to a new app and content is loaded
-    if (
-      containerRef.current &&
-      widgetTree &&
-      previousAppIdRef.current !== appId &&
-      !hasResetForCurrentApp.current
-    ) {
-      containerRef.current.scrollTop = 0;
-      previousAppIdRef.current = appId;
-      hasResetForCurrentApp.current = true;
-    }
+    if (!containerRef.current || widgetTree == null) return;
+    if (previousAppIdRef.current === appId) return;
 
-    // Reset the flag when appId changes (for next navigation)
-    if (previousAppIdRef.current !== appId) {
-      hasResetForCurrentApp.current = false;
+    const el = containerRef.current;
+    el.scrollTop = 0;
+    const parent = el.parentElement;
+    if (parent) {
+      const { overflowY } = getComputedStyle(parent);
+      if (overflowY === "auto" || overflowY === "scroll") {
+        parent.scrollTop = 0;
+      }
     }
+    previousAppIdRef.current = appId;
   }, [widgetTree, appId]);
 
   return (

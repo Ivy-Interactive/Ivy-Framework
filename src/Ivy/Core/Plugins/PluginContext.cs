@@ -35,6 +35,7 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
     public abstract IConfiguration Configuration { get; }
 
     protected abstract AppRepository AppRepository { get; }
+    protected abstract IReadOnlySet<string> ReservedPaths { get; }
     protected abstract WebApplicationBuilder Builder { get; }
 
     public IReadOnlyList<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers => _menuTransformers;
@@ -173,10 +174,15 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
 
     internal void RemovePluginContributions(string pluginId)
     {
+        HashSet<string> affectedAppIds;
+
         _lock.EnterWriteLock();
         try
         {
             if (!_pluginStates.TryGetValue(pluginId, out var state)) return;
+
+            // Collect app IDs before removing factories so we can reload affected sessions
+            affectedAppIds = GetAppIdsFromFactories(state.AppFactories);
 
             foreach (var t in state.MenuTransformers)
                 _menuTransformers.Remove(t);
@@ -201,6 +207,56 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
         {
             _lock.ExitWriteLock();
         }
+
+        // Reload the app repository so removed apps are reflected in the UI
+        ReloadApps();
+
+        // Request refresh for any open tabs showing apps from this plugin
+        RefreshApps(affectedAppIds);
+    }
+
+    internal void ReloadApps()
+    {
+        AppRepository.Reload(ReservedPaths);
+    }
+
+    internal void RefreshApps(IReadOnlySet<string> appIds)
+    {
+        if (appIds.Count == 0) return;
+        AppRepository.RequestAppRefresh(appIds);
+    }
+
+    internal HashSet<string> GetPluginAppIds(string pluginId)
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            if (!_pluginStates.TryGetValue(pluginId, out var state))
+                return [];
+            return GetAppIdsFromFactories(state.AppFactories);
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    private static HashSet<string> GetAppIdsFromFactories(List<Func<AppDescriptor[]>> factories)
+    {
+        var ids = new HashSet<string>();
+        foreach (var factory in factories)
+        {
+            try
+            {
+                foreach (var app in factory())
+                    ids.Add(app.Id);
+            }
+            catch
+            {
+                // Factory may fail if plugin is partially unloaded; ignore
+            }
+        }
+        return ids;
     }
 
     internal IReadOnlyDictionary<string, PluginState> PluginStates => _pluginStates;
@@ -216,5 +272,6 @@ internal class PluginContext(Ivy.Server server, WebApplicationBuilder builder) :
 {
     public override IConfiguration Configuration => server.Configuration;
     protected override AppRepository AppRepository => server.AppRepository;
+    protected override IReadOnlySet<string> ReservedPaths => server.ReservedPaths;
     protected override WebApplicationBuilder Builder => builder;
 }

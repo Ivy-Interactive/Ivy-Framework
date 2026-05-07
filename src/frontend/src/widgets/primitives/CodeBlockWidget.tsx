@@ -8,7 +8,12 @@ import { createPrismTheme } from "@/lib/prismTheme";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
-import { codeCopyButtonVariant } from "@/components/ui/code-variant";
+import {
+  codeCopyButtonVariant,
+  codeCopyGutterLength,
+  codeCopyViewportInsetStyle,
+  codeScrollPaddingForDensity,
+} from "@/components/ui/code-variant";
 
 interface CodeWidgetProps {
   id: string;
@@ -165,6 +170,12 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         }
       : { ...getWidth(width) };
 
+    const copyViewportInset = useMemo(
+      () =>
+        showCopyButton ? codeCopyViewportInsetStyle(codeCopyGutterLength(density)) : undefined,
+      [density, showCopyButton],
+    );
+
     return (
       <div className="relative" style={containerStyles}>
         {showCopyButton && <MemoizedCopyButton textToCopy={content} density={density} />}
@@ -172,47 +183,51 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
           className={cn(
             "w-full",
             isFull ? "flex-1 min-h-0" : "h-full",
-            showBorder && "border border-border rounded-md",
+            showBorder && "rounded-md border border-border",
           )}
+          viewportClassName="min-w-0"
+          viewportStyle={copyViewportInset}
         >
-          <Suspense
-            fallback={
-              <pre
-                className={cn("p-4 bg-muted rounded-md font-mono text-sm")}
-                style={isFull ? { ...preStyle, height: "auto" } : preStyle}
-              >
-                {content}
-              </pre>
-            }
-          >
-            <SyntaxHighlighter
-              language={mapLanguageToPrism(language)}
-              customStyle={isFull ? { ...preStyle, height: "auto" } : preStyle}
-              style={dynamicTheme}
-              showLineNumbers={showLineNumbers}
-              startingLineNumber={startingLineNumber}
-              wrapLines={true}
-              wrapLongLines={wrapLines}
-              key={highlighterKey}
-              codeTagProps={{ style: codeTagStyle }}
-              lineProps={showLineNumbers ? { style: { display: "table-row" } } : undefined}
-              lineNumberStyle={
-                showLineNumbers
-                  ? {
-                      display: "table-cell",
-                      paddingRight: currentScale.lineNumberPaddingRight,
-                      minWidth: currentScale.lineNumberMinWidth,
-                      textAlign: "right",
-                      userSelect: "none",
-                      color: "var(--muted-foreground)",
-                      opacity: 0.5,
-                    }
-                  : undefined
+          <div className={showCopyButton ? codeScrollPaddingForDensity(density) : undefined}>
+            <Suspense
+              fallback={
+                <pre
+                  className={cn("rounded-md bg-muted p-4 font-mono text-sm")}
+                  style={isFull ? { ...preStyle, height: "auto" } : preStyle}
+                >
+                  {content}
+                </pre>
               }
             >
-              {content}
-            </SyntaxHighlighter>
-          </Suspense>
+              <SyntaxHighlighter
+                language={mapLanguageToPrism(language)}
+                customStyle={isFull ? { ...preStyle, height: "auto" } : preStyle}
+                style={dynamicTheme}
+                showLineNumbers={showLineNumbers}
+                startingLineNumber={startingLineNumber}
+                wrapLines={true}
+                wrapLongLines={wrapLines}
+                key={highlighterKey}
+                codeTagProps={{ style: codeTagStyle }}
+                lineProps={showLineNumbers ? { style: { display: "table-row" } } : undefined}
+                lineNumberStyle={
+                  showLineNumbers
+                    ? {
+                        display: "table-cell",
+                        paddingRight: currentScale.lineNumberPaddingRight,
+                        minWidth: currentScale.lineNumberMinWidth,
+                        textAlign: "right",
+                        userSelect: "none",
+                        color: "var(--muted-foreground)",
+                        opacity: 0.5,
+                      }
+                    : undefined
+                }
+              >
+                {content}
+              </SyntaxHighlighter>
+            </Suspense>
+          </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>

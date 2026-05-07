@@ -210,6 +210,9 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
         onPointerDownOutside={(e: Event) => {
           if (isResizingRef.current) e.preventDefault();
         }}
+        onFocusOutside={(e: Event) => {
+          e.preventDefault();
+        }}
         onOpenAutoFocus={(e: Event) => {
           const container = e.currentTarget as HTMLElement | null;
           const target = container?.querySelector<HTMLElement>("[autofocus]");
@@ -273,7 +276,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
           />
         )}
         <SheetHeader className={cn("p-4 pb-0", !title && !description && "sr-only")}>
-          <SheetTitle className={cn(!title && "sr-only")}>{title || "Sheet"}</SheetTitle>
+          <SheetTitle className={cn("pr-10", !title && "sr-only")}>{title || "Sheet"}</SheetTitle>
           <SheetDescription className={cn(!description && "sr-only")}>
             {description || "Sheet content"}
           </SheetDescription>

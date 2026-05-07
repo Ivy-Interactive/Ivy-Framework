@@ -1,0 +1,12 @@
+{
+  "name": "ivy",
+  "owner": {
+    "name": "Ivy Interactive"
+  },
+  "plugins": [
+    {
+      "name": "ivy-framework",
+      "source": "./claude-plugin"
+    }
+  ]
+}

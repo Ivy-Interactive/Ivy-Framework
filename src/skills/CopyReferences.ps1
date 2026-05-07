@@ -23,7 +23,7 @@ param(
     [string]$GenDbRoot     = (Join-Path $PSScriptRoot '..\..\..\Ivy\Ivy.Internals\Workflows\Connections\GenerateDbConnection'),
     [string]$ConvRoot      = (Join-Path $PSScriptRoot '..\..\..\Ivy\Ivy.Internals\Workflows\Conversion'),
     [string]$FrameworkRoot = (Join-Path $PSScriptRoot '..\..'),
-    [string]$SkillsRoot    = $PSScriptRoot
+    [string]$SkillsRoot    = (Join-Path $PSScriptRoot '..\claude-plugin\skills')
 )
 
 $RefsRoot      = (Resolve-Path $RefsRoot).Path
@@ -113,10 +113,28 @@ $ConversionSkills = @(
 
 # Framework-level files (source is $FrameworkRoot) — copied into each skill's references
 $FrameworkCopies = @(
-    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-dashboard\references\AGENTS.md' }
-    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-crud\references\AGENTS.md' }
-    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-app\references\AGENTS.md' }
     @{ Src = 'AGENTS.md'; Dst = 'ivy\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-convert-airtable\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-convert-excel\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-convert-lovable\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-convert-odoo\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-convert-reflex\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-convert-retool\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-convert-streamlit\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-any-connection\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-app\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-auth-connection\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-crud\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-dashboard\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-db-connection\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-external-widget\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-graphql-connection\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-openapi-connection\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-soap-connection\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-theme\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-create-using-reference-connection\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-deploy-to-desktop\references\AGENTS.md' }
+    @{ Src = 'AGENTS.md'; Dst = 'ivy-generate-db-connection\references\AGENTS.md' }
 )
 
 function Copy-WithRewrite {

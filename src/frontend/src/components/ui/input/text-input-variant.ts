@@ -1,5 +1,31 @@
 import { cva } from "class-variance-authority";
 
+import { cn } from "@/lib/utils";
+
+/** Affix cells: muted box by default; ghost uses transparent chrome with tight padding toward the input. */
+export function textInputAffixCellClasses(
+  side: "prefix" | "suffix",
+  isFocused: boolean,
+  ghostWithAffixes: boolean,
+): string {
+  return cn(
+    "flex items-center text-muted-foreground [&_button]:rounded [&_button]:px-1 [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors",
+    ghostWithAffixes
+      ? side === "suffix"
+        ? "shrink-0 bg-transparent pl-0 pr-1.5"
+        : "shrink-0 bg-transparent pl-2 pr-0.5"
+      : cn(
+          "px-3 bg-muted",
+          side === "prefix"
+            ? "rounded-tl-fields rounded-bl-fields"
+            : "rounded-tr-fields rounded-br-fields",
+        ),
+    side === "prefix"
+      ? !ghostWithAffixes && !isFocused && "border-r border-input"
+      : !ghostWithAffixes && !isFocused && "border-l border-input",
+  );
+}
+
 // Size variants for TextInputWidget
 export const textInputSizeVariant = cva("w-full", {
   variants: {

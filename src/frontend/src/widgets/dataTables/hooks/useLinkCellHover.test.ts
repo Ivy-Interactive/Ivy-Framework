@@ -49,4 +49,8 @@ describe("useLinkCellHover", () => {
     expect(hookSource).toContain("args.bounds.x + args.bounds.width / 2");
     expect(hookSource).toContain("y: args.bounds.y");
   });
+
+  it("should expose clearLinkCellHover for scroll-driven dismissal", () => {
+    expect(hookSource).toContain("clearLinkCellHover");
+  });
 });

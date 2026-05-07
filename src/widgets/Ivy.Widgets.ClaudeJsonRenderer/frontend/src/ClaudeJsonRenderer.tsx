@@ -269,6 +269,9 @@ export const ClaudeJsonRenderer: React.FC<ClaudeJsonRendererProps> = ({
   }, [parsedEvents, handleComplete]);
 
   const style: React.CSSProperties = {
+    width: "100%",
+    boxSizing: "border-box",
+    minWidth: 0,
     ...getWidth(width),
     ...getHeight(height),
     overflow: "auto",

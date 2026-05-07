@@ -1,0 +1,12 @@
+{
+  "name": "ivy-framework",
+  "version": "1.0.0",
+  "description": "Skills for building applications with the Ivy Framework — CRUD apps, dashboards, connections, conversions, themes, widgets, and deployment.",
+  "author": {
+    "name": "Ivy Interactive"
+  },
+  "repository": "https://github.com/Ivy-Interactive/Ivy-Framework",
+  "license": "MIT",
+  "keywords": ["ivy", "framework", "dotnet", "csharp", "low-code", "crud", "dashboard"],
+  "skills": "./skills/"
+}

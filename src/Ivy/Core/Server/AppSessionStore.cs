@@ -19,6 +19,7 @@ public class AppSessionStore : IDisposable
 {
     public readonly ConcurrentDictionary<string, AppSession> Sessions = new();
     private readonly ConcurrentDictionary<string, CookieJarEntry> _cookieJarEntries = new();
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _deferredRemovals = new();
     private readonly TimeSpan _cookieJarLifetime = TimeSpan.FromMinutes(1);
     private readonly Timer _cookieJarCleanupTimer;
 
@@ -81,9 +82,62 @@ public class AppSessionStore : IDisposable
         }
     }
 
+    public void ScheduleDeferredRemoval(string connectionId, TimeSpan delay, Func<string, Task> cleanupAction)
+    {
+        var cts = new CancellationTokenSource();
+        if (!_deferredRemovals.TryAdd(connectionId, cts))
+        {
+            // Already has a deferred removal scheduled — cancel old one and replace
+            if (_deferredRemovals.TryRemove(connectionId, out var oldCts))
+            {
+                oldCts.Cancel();
+                oldCts.Dispose();
+            }
+            _deferredRemovals[connectionId] = cts;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(delay, cts.Token);
+                _deferredRemovals.TryRemove(connectionId, out _);
+                await cleanupAction(connectionId);
+            }
+            catch (OperationCanceledException)
+            {
+                // Deferred removal was cancelled (session reconnected or cleaned up)
+            }
+            finally
+            {
+                cts.Dispose();
+            }
+        });
+    }
+
+    public bool CancelDeferredRemoval(string connectionId)
+    {
+        if (_deferredRemovals.TryRemove(connectionId, out var cts))
+        {
+            cts.Cancel();
+            cts.Dispose();
+            return true;
+        }
+        return false;
+    }
+
+    public bool HasDeferredRemoval(string connectionId)
+        => _deferredRemovals.ContainsKey(connectionId);
+
     public void Dispose()
     {
         _cookieJarCleanupTimer?.Dispose();
+        foreach (var kvp in _deferredRemovals)
+        {
+            kvp.Value.Cancel();
+            kvp.Value.Dispose();
+        }
+        _deferredRemovals.Clear();
     }
 
     public AppSession? FindAppShell(AppSession session)

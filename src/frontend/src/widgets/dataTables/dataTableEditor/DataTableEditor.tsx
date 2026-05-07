@@ -3,7 +3,9 @@ import {
   CompactSelection,
   CustomRenderer,
   DataEditorRef,
+  GridMouseCellEventArgs,
   GridMouseEventArgs,
+  Item,
 } from "@glideapps/glide-data-grid";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTable } from "../dataTableContext";
@@ -116,6 +118,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
   // Grid ref
   const gridRef = useRef<DataEditorRef | null>(null);
+  const prevVisibleScrollOriginRef = useRef<{ x: number; y: number } | null>(null);
 
   // Cell content
   const { getCellContent } = useCellContent({
@@ -151,6 +154,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     onItemHovered,
     handleRowActionClick,
     resolvedRowActions,
+    clearRowHover,
+    syncRowChromeFromCellArgs,
   } = useRowHover({
     widgetId,
     events,
@@ -169,6 +174,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     onItemHovered: onLinkCellHovered,
     linkTooltipPos,
     supportsHoverTooltip,
+    clearLinkCellHover,
   } = useLinkCellHover({
     getCellContent,
     visibleRows,
@@ -263,6 +269,20 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     width: number;
   } | null>(null);
 
+  const handleVisibleRegionChangedForGrid = useCallback(
+    (range: { x: number; y: number; width: number; height: number }) => {
+      handleVisibleRegionChanged(range);
+      const prev = prevVisibleScrollOriginRef.current;
+      const verticalScrolled = prev !== null && prev.y !== range.y;
+      prevVisibleScrollOriginRef.current = { x: range.x, y: range.y };
+      if (!verticalScrolled) return;
+      clearRowHover();
+      clearLinkCellHover();
+      setCellActionIndicator(null);
+    },
+    [handleVisibleRegionChanged, clearRowHover, clearLinkCellHover],
+  );
+
   // Compose onItemHovered: keep existing hover behavior and track actionable-cell affordance.
   const handleItemHovered = useCallback(
     (args: GridMouseEventArgs) => {
@@ -293,6 +313,19 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       });
     },
     [onLinkCellHovered, onItemHovered, orderedDataColumns, visibleRows],
+  );
+
+  const handleCellClickedForGrid = useCallback(
+    (cell: Item, args: GridMouseEventArgs) => {
+      handleCellClicked(cell, args);
+      if ((enableRowHover ?? false) && args.kind === "cell") {
+        const [, row] = cell;
+        if (row < visibleRows) {
+          syncRowChromeFromCellArgs(args as GridMouseCellEventArgs);
+        }
+      }
+    },
+    [handleCellClicked, enableRowHover, visibleRows, syncRowChromeFromCellArgs],
   );
 
   const wantAggregateFooter =
@@ -407,7 +440,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         }
         headerIcons={headerIcons}
         onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
-        onVisibleRegionChanged={handleVisibleRegionChanged}
+        onVisibleRegionChanged={handleVisibleRegionChangedForGrid}
         onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}
         theme={tableTheme}
         rowHeight={effectiveRowHeight}
@@ -425,7 +458,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         rowMarkers={showIndexColumn ? "number" : "none"}
         onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
         groupHeaderHeight={showGroups ? densityConfig.groupHeaderHeight : undefined}
-        onCellClicked={handleCellClicked}
+        onCellClicked={handleCellClickedForGrid}
         onCellActivated={handleCellActivated}
         onGroupHeaderClicked={shouldUseColumnGroups ? onGroupHeaderClicked : undefined}
         showSearch={showSearchConfig ? showSearch : false}

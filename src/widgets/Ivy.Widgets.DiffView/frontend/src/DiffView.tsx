@@ -65,20 +65,32 @@ export const DiffView: React.FC<DiffViewProps> = ({
   return (
     <div style={style} className={`ivy-diff-view text-xs${wordWrap ? " diff-wrap" : ""}`}>
       {files.map((file, fileIndex) => {
-        const hasHeader = oldRevision || newRevision || file.oldPath || file.newPath;
+        const rawOld = oldRevision || file.oldPath || "";
+        const rawNew = newRevision || file.newPath || "";
+        const oldName = rawOld === "/dev/null" ? "" : rawOld;
+        const newName = rawNew === "/dev/null" ? "" : rawNew;
+        const isRename = oldName !== newName && oldName !== "" && newName !== "";
+        const hasHeader = oldName || newName;
+        const fileId = file.newPath || file.oldPath || `diff-${fileIndex}`;
+
+        const getBasename = (path: string) => {
+          const parts = path.split("/");
+          return parts[parts.length - 1] || path;
+        };
+
         return (
-          <div key={fileIndex}>
+          <div key={fileIndex} id={fileId}>
             {hasHeader && (
-              <div className="flex items-center gap-4 px-3 py-2 text-[10px] font-mono bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)] sticky top-0 z-10">
-                <div className="flex items-center gap-2">
-                  <span className="opacity-50">OLD:</span>
-                  <span className="font-bold">{oldRevision || file.oldPath || "none"}</span>
-                </div>
-                <span className="opacity-30">&rarr;</span>
-                <div className="flex items-center gap-2">
-                  <span className="opacity-50">NEW:</span>
-                  <span className="font-bold">{newRevision || file.newPath || "none"}</span>
-                </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)] sticky top-0 z-10" style={{ fontFamily: 'var(--font-sans, sans-serif)' }}>
+                {isRename ? (
+                  <>
+                    <span className="font-semibold">{getBasename(oldName)}</span>
+                    <span className="opacity-40">&rarr;</span>
+                    <span className="font-semibold">{getBasename(newName)}</span>
+                  </>
+                ) : (
+                  <span className="font-semibold">{getBasename(newName || oldName)}</span>
+                )}
               </div>
             )}
             <Diff

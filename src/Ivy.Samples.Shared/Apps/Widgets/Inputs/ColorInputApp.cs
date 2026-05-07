@@ -65,11 +65,13 @@ public class ColorInputVariantTests : ViewBase
         var pickerState = UseState("#dd5860");
         var bothState = UseState("#6637d1");
         var swatchState = UseState("blue");
+        var swatchPickerState = UseState("green");
         var ghostState = UseState("#9b59b6");
         var nullTextState = UseState((string?)null);
         var nullPickerState = UseState((string?)null);
         var nullBothState = UseState((string?)null);
         var nullSwatchState = UseState((string?)null);
+        var nullSwatchPickerState = UseState((string?)null);
 
         return Layout.Grid().Columns(6)
             | Text.Monospaced("")
@@ -106,6 +108,13 @@ public class ColorInputVariantTests : ViewBase
             | swatchState.ToColorInput().Variant(ColorInputVariant.Swatch).Disabled()
             | nullSwatchState.ToColorInput().Variant(ColorInputVariant.Swatch)
             | nullSwatchState.ToColorInput().Variant(ColorInputVariant.Swatch).Invalid("Invalid color")
+
+            | Text.Monospaced("Swatch Picker")
+            | swatchPickerState.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
+            | swatchPickerState.ToColorInput().Variant(ColorInputVariant.SwatchPicker).Invalid("Invalid color")
+            | swatchPickerState.ToColorInput().Variant(ColorInputVariant.SwatchPicker).Disabled()
+            | nullSwatchPickerState.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
+            | nullSwatchPickerState.ToColorInput().Variant(ColorInputVariant.SwatchPicker).Invalid("Invalid color")
             | Text.Monospaced("Ghost")
             | ghostState.ToColorInput().Variant(ColorInputVariant.TextAndPicker).Ghost()
             | ghostState.ToColorInput().Variant(ColorInputVariant.TextAndPicker).Ghost().Invalid("Invalid color")

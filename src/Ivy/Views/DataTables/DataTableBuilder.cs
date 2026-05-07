@@ -23,12 +23,13 @@ public class DataTableBuilder<TModel>(
     private Func<TModel, MenuItem[]>? _rowActionsFactory;
     private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
     private readonly Dictionary<string, EventHandler<object>> _cellActions = [];
+    private readonly Dictionary<string, Func<Event<DataTable, CellClickEventArgs>, ValueTask>> _cellActionsFull = [];
     private RefreshToken? _refreshToken;
     private FuncViewBuilder? _emptyViewFactory;
     private FuncViewBuilder? _headerLeftFactory;
     private FuncViewBuilder? _headerRightFactory;
     private Dictionary<string, object>? _footerValuesByColumn;
-    private Density _density = Ivy.Density.Medium;
+    private Responsive<Density?> _density = (Responsive<Density?>)(Density?)Ivy.Density.Medium;
     private IWriteStream<DataTableCellUpdate>? _updateStream;
 
     private readonly string? _idColumnName =
@@ -466,6 +467,15 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
+    public DataTableBuilder<TModel> OnCellAction(Expression<Func<TModel, object>> field, Func<Event<DataTable, CellClickEventArgs>, ValueTask> action)
+    {
+        var column = GetColumn(field);
+        var columnName = column.Column.Name;
+        column.Column.HasCellAction = true;
+        _cellActionsFull[columnName] = action;
+        return this;
+    }
+
     public DataTableBuilder<TModel> UpdateStream(IWriteStream<DataTableCellUpdate> stream)
     {
         _updateStream = stream;
@@ -496,27 +506,33 @@ public class DataTableBuilder<TModel>(
         return this;
     }
 
-    public DataTableBuilder<TModel> Density(Ivy.Density density)
+    public DataTableBuilder<TModel> Density(Responsive<Density?> density)
     {
         _density = density;
         return this;
     }
 
+    public DataTableBuilder<TModel> Density(Ivy.Density density)
+    {
+        _density = (Responsive<Density?>)(Density?)density;
+        return this;
+    }
+
     public DataTableBuilder<TModel> Small()
     {
-        _density = Ivy.Density.Small;
+        _density = (Responsive<Density?>)(Density?)Ivy.Density.Small;
         return this;
     }
 
     public DataTableBuilder<TModel> Medium()
     {
-        _density = Ivy.Density.Medium;
+        _density = (Responsive<Density?>)(Density?)Ivy.Density.Medium;
         return this;
     }
 
     public DataTableBuilder<TModel> Large()
     {
-        _density = Ivy.Density.Large;
+        _density = (Responsive<Density?>)(Density?)Ivy.Density.Large;
         return this;
     }
 
@@ -539,7 +555,7 @@ public class DataTableBuilder<TModel>(
         }
 
         // Automatically enable cell click events if handlers are provided
-        if (_onCellClick != null || _onCellActivated != null || _cellActions.Count > 0)
+        if (_onCellClick != null || _onCellActivated != null || _cellActions.Count > 0 || _cellActionsFull.Count > 0)
         {
             configuration = configuration with { EnableCellClickEvents = true };
         }
@@ -552,7 +568,7 @@ public class DataTableBuilder<TModel>(
 
         // Wire up cell actions to OnCellClick
         var onCellClick = _onCellClick;
-        if (_cellActions.Count > 0)
+        if (_cellActions.Count > 0 || _cellActionsFull.Count > 0)
         {
             var originalHandler = _onCellClick;
             onCellClick = async e =>
@@ -561,6 +577,11 @@ public class DataTableBuilder<TModel>(
                 if (_cellActions.TryGetValue(args.ColumnName, out var action))
                 {
                     await action.Invoke(args.CellValue!);
+                }
+
+                if (_cellActionsFull.TryGetValue(args.ColumnName, out var fullAction))
+                {
+                    await fullAction.Invoke(e);
                 }
 
                 // Call original handler if it exists
