@@ -106,20 +106,23 @@ public class ActivityHeatmapTests
     [Fact]
     public void BuildGrid_AllDaysPresent_CountsPreserved()
     {
-        // Provide a full week of data
-        var monday = new DateOnly(2024, 3, 11); // Monday
-        var data = Enumerable.Range(0, 7)
+        // Provide data for Mon–Sat of one week (stays within a single Sunday-start week)
+        var monday = new DateOnly(2024, 3, 11); // Monday, DayOfWeek = 1
+        var data = Enumerable.Range(0, 6) // Mon through Sat
             .Select(i => new ContributionDay { Date = monday.AddDays(i), Count = i + 1 })
             .ToArray();
 
         var weeks = ActivityHeatmapGrid.BuildGrid(data);
 
-        // Find the week containing Monday March 11
-        var targetWeek = weeks.FirstOrDefault(w => w.Any(d => d.Date == monday));
+        // Find the week whose Sunday precedes Monday March 11 (i.e. Sunday March 10)
+        var targetWeek = weeks.FirstOrDefault(w => w[0].Date == new DateOnly(2024, 3, 10));
         Assert.NotNull(targetWeek);
-        for (int i = 0; i < 7; i++)
+        // Sunday (index 0) has Count=0 (not in data)
+        Assert.Equal(0, targetWeek[0].Count);
+        // Monday–Saturday (indices 1–6) have counts 1–6
+        for (int i = 0; i < 6; i++)
         {
-            Assert.Equal(i + 1, targetWeek[i + (int)monday.DayOfWeek].Count);
+            Assert.Equal(i + 1, targetWeek[1 + i].Count);
         }
     }
 }
