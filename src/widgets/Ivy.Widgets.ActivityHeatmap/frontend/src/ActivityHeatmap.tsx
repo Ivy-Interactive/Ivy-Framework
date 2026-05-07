@@ -128,7 +128,7 @@ export function ActivityHeatmap({
           {weeks.map((_, wi) => (
             <div
               key={wi}
-              className="text-center overflow-hidden"
+              className="text-center"
               style={{ width: "11px", fontSize: "10px" }}
             >
               {monthLabels[wi]}
