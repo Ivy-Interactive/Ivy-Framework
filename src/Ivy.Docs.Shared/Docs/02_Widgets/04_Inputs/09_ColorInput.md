@@ -54,14 +54,15 @@ var colorInputFull = colorState.ToColorInput()
 
 ## Variants
 
-`ColorInput` has four variants:
+`ColorInput` has five variants:
 
-| Variant                           | Description                                  |
-| --------------------------------- | -------------------------------------------- |
-| `ColorInputVariant.Text`          | Text input for entering hex codes manually   |
-| `ColorInputVariant.Picker`        | Color picker only                            |
-| `ColorInputVariant.TextAndPicker` | Text input with color picker (default)       |
-| `ColorInputVariant.Swatch`        | Grid of predefined colors from `Colors` enum |
+| Variant                           | Description                                                          |
+| --------------------------------- | -------------------------------------------------------------------- |
+| `ColorInputVariant.Text`          | Text input for entering hex codes manually                           |
+| `ColorInputVariant.Picker`        | Color picker only (opens the native RGB picker)                      |
+| `ColorInputVariant.TextAndPicker` | Text input with color picker (default)                               |
+| `ColorInputVariant.Swatch`        | Inline grid of predefined colors from `Colors` enum                  |
+| `ColorInputVariant.SwatchPicker`  | Compact swatch — opens the `Colors` enum grid in a popover on click  |
 
 The following code shows all variants in action:
 
@@ -75,7 +76,8 @@ public class ColorVariantsDemo : ViewBase
             | Text.P("Just Text").Small() | colorState.ToColorInput().Variant(ColorInputVariant.Text)
             | Text.P("Just Picker").Small() | colorState.ToColorInput().Variant(ColorInputVariant.Picker)
             | Text.P("Text and Picker").Small() | colorState.ToColorInput().Variant(ColorInputVariant.TextAndPicker)
-            | Text.P("Swatch").Small() | colorState.ToColorInput().Variant(ColorInputVariant.Swatch);
+            | Text.P("Swatch").Small() | colorState.ToColorInput().Variant(ColorInputVariant.Swatch)
+            | Text.P("Swatch Picker").Small() | colorState.ToColorInput().Variant(ColorInputVariant.SwatchPicker);
     }
 }
 ```
@@ -92,6 +94,23 @@ public class ColorSwatchDemo : ViewBase
         var colorState = UseState(Colors.Blue);
         return Layout.Vertical()
             | colorState.ToColorInput().Variant(ColorInputVariant.Swatch)
+            | Text.P($"Selected: {colorState.Value}");
+    }
+}
+```
+
+### SwatchPicker Variant
+
+The `SwatchPicker` variant has the same compact footprint as `Picker` — a single colored square — but clicking it opens a popover containing the `Colors` enum grid instead of the native RGB picker. Use this when you want the space efficiency of `Picker` together with the constrained palette of `Swatch`.
+
+```csharp demo-below
+public class ColorSwatchPickerDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var colorState = UseState(Colors.Green);
+        return Layout.Horizontal().Gap(2)
+            | colorState.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
             | Text.P($"Selected: {colorState.Value}");
     }
 }

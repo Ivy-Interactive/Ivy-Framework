@@ -12,7 +12,8 @@ public enum ColorInputVariant
     Text,
     Picker,
     TextAndPicker,
-    Swatch
+    Swatch,
+    SwatchPicker
 }
 
 public interface IAnyColorInput : IAnyInput
