@@ -18,7 +18,7 @@ class ActivityHeatmapDemo : ViewBase
             .Range(0, 365)
             .Select(i => start.AddDays(i))
             .Where(_ => rng.NextDouble() > 0.4)
-            .Select(d => new ContributionDay { Date = d, Count = rng.Next(1, 20) })
+            .Select(d => new Activity { Date = d, Count = rng.Next(1, 20) })
             .ToArray();
 
         return new ActivityHeatmap()

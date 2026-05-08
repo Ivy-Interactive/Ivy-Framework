@@ -7,7 +7,7 @@ public static class ActivityHeatmapGrid
     /// Builds a weeks × 7-days matrix. Pads left to the preceding Sunday of the earliest date,
     /// pads right to the following Saturday of the latest date. Empty days get Count = 0.
     /// </summary>
-    public static ContributionDay[][] BuildGrid(ContributionDay[] data)
+    public static Activity[][] BuildGrid(Activity[] data)
     {
         if (data.Length == 0)
         {
@@ -24,7 +24,7 @@ public static class ActivityHeatmapGrid
     /// <summary>
     /// Builds a grid between two dates (inclusive), padded to week boundaries.
     /// </summary>
-    public static ContributionDay[][] BuildGridFromRange(ContributionDay[] data, DateOnly first, DateOnly last)
+    public static Activity[][] BuildGridFromRange(Activity[] data, DateOnly first, DateOnly last)
     {
         // Pad left to Sunday (DayOfWeek.Sunday == 0)
         var start = first.AddDays(-(int)first.DayOfWeek);
@@ -33,16 +33,16 @@ public static class ActivityHeatmapGrid
 
         var dataMap = data.ToDictionary(d => d.Date);
 
-        var weeks = new List<ContributionDay[]>();
+        var weeks = new List<Activity[]>();
         var current = start;
         while (current <= end)
         {
-            var week = new ContributionDay[7];
+            var week = new Activity[7];
             for (int d = 0; d < 7; d++)
             {
                 week[d] = dataMap.TryGetValue(current, out var day)
                     ? day
-                    : new ContributionDay { Date = current, Count = 0 };
+                    : new Activity { Date = current, Count = 0 };
                 current = current.AddDays(1);
             }
             weeks.Add(week);
@@ -62,7 +62,7 @@ public static class ActivityHeatmapGrid
     }
 }
 
-public record ContributionDay
+public record Activity
 {
     public DateOnly Date { get; init; }
     public int Count { get; init; }
@@ -76,8 +76,8 @@ public record ContributionDay
 )]
 public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
 {
-    /// <summary>Daily contribution data. One entry per active day — missing days are rendered as zero.</summary>
-    [Prop] public ContributionDay[] Data { get; init; } = [];
+    /// <summary>Daily activity data. One entry per active day — missing days are rendered as zero.</summary>
+    [Prop] public Activity[] Data { get; init; } = [];
 
     /// <summary>Color scheme for activity levels. One of: "primary" (default), "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose".</summary>
     [Prop] public string ColorScheme { get; init; } = "primary";
@@ -92,12 +92,12 @@ public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
     [Prop] public bool ShowDayLabels { get; init; } = true;
 
     /// <summary>Fired when the user clicks a day cell.</summary>
-    [Event] public EventHandler<Event<ActivityHeatmap, ContributionDay>>? OnDayClick { get; init; }
+    [Event] public EventHandler<Event<ActivityHeatmap, Activity>>? OnDayClick { get; init; }
 }
 
 public static class ActivityHeatmapExtensions
 {
-    public static ActivityHeatmap Data(this ActivityHeatmap w, ContributionDay[] data) =>
+    public static ActivityHeatmap Data(this ActivityHeatmap w, Activity[] data) =>
         w with { Data = data };
 
     public static ActivityHeatmap ColorScheme(this ActivityHeatmap w, Colors scheme) =>
@@ -114,12 +114,12 @@ public static class ActivityHeatmapExtensions
 
     public static ActivityHeatmap OnDayClick(
         this ActivityHeatmap w,
-        Func<Event<ActivityHeatmap, ContributionDay>, ValueTask> handler
+        Func<Event<ActivityHeatmap, Activity>, ValueTask> handler
     ) => w with { OnDayClick = new(handler) };
 
     public static ActivityHeatmap OnDayClick(
         this ActivityHeatmap w,
-        Action<ContributionDay> handler
+        Action<Activity> handler
     ) => w with
     {
         OnDayClick = new(e =>
