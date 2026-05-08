@@ -9,10 +9,13 @@ const COLOR_SCHEMES: Record<string, string[]> = {
   pink: ["#ebedf0", "#fbcfe8", "#f472b6", "#db2777", "#9d174d"],
 };
 
-const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
+const formatter = new Intl.DateTimeFormat("sv-SE", { month: "short" });
+const MONTH_NAMES = Array.from({ length: 12 }, (_, i) => formatter.format(new Date(2021, i)));
+
+// const MONTH_NAMES = [
+//   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+//   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+// ];
 
 function getLevel(count: number, maxCount: number): number {
   if (count === 0 || maxCount === 0) return 0;
