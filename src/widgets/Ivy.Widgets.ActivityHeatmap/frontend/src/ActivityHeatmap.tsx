@@ -150,62 +150,65 @@ export function ActivityHeatmap({
   };
 
   return (
-    <div className="inline-flex flex-col gap-1 font-sans text-xs">
-      {showMonthLabels && (
-        <div className="flex gap-0.5 text-[#57606a]">
-          {showDayLabels && <div style={{ width: "28px" }} />}
-          {weeks.map((_, wi) => (
-            <div
-              key={wi}
-              className="text-center"
-              style={{ width: "11px", fontSize: "10px" }}
-            >
-              {monthLabels[wi]}
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="flex gap-1">
-        {showDayLabels && (
-          <div
-            className="grid gap-0.5 text-[#57606a] pt-0.5"
-            style={{ gridTemplateRows: "repeat(7, 11px)", width: "24px" }}
-          >
-            <div />
-            <div style={{ fontSize: "9px", lineHeight: "11px" }}>{MONDAY}</div>
-            <div />
-            <div style={{ fontSize: "9px", lineHeight: "11px" }}>{WEDNESDAY}</div>
-            <div />
-            <div style={{ fontSize: "9px", lineHeight: "11px" }}>{FRIDAY}</div>
-            <div />
+    <div className="flex w-full  relative">
+      <div className="inline-flex flex-col gap-1 font-sans overflow-x-auto p-0">
+        {showMonthLabels && (
+          <div className="flex gap-0.5 text-[#57606a] w-fit">
+            {showDayLabels && <div style={{ width: "28px" }} />}
+            {weeks.map((_, wi) => (
+              <div
+                key={wi}
+                className="text-center flex"
+                style={{ width: "11px", fontSize: "10px" }}
+              >
+                {monthLabels[wi]}
+              </div>
+            ))}
           </div>
         )}
 
-        <div className="flex gap-0.5">
-          {weeks.map((week, wi) => (
+        <div className="flex gap-2">
+          {showDayLabels && (
             <div
-              key={wi}
-              className="grid gap-0.5"
-              style={{ gridTemplateRows: "repeat(7, 11px)" }}
+              className="grid gap-0.5 text-[#57606a] pt-0.5 left-0 absolute bg-background"
+              style={{ gridTemplateRows: "repeat(7, 11px)", width: "24px" }}
             >
-              {week.map((day, di) => {
-                const level = day ? getLevel(day.count, maxCount) : 0;
-                const bg = colors[level] ?? colors[0]!;
-                const title =
-                  showTooltip && day ? formatTooltip(day) : undefined;
-                return (
-                  <div
-                    key={di}
-                    className={`w-[11px] h-[11px] rounded-sm ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
-                    style={{ backgroundColor: bg }}
-                    title={title}
-                    onClick={day ? () => handleClick(day) : undefined}
-                  />
-                );
-              })}
+              <div />
+              <div style={{ fontSize: "10px", lineHeight: "11px" }}>{MONDAY}</div>
+              <div />
+              <div style={{ fontSize: "10px", lineHeight: "11px" }}>{WEDNESDAY}</div>
+              <div />
+              <div style={{ fontSize: "10px", lineHeight: "11px" }}>{FRIDAY}</div>
+              <div />
             </div>
-          ))}
+          )}
+
+          <div className="flex gap-0.5 "
+            style={{ paddingLeft: showDayLabels ? 24 : 0 }}>
+            {weeks.map((week, wi) => (
+              <div
+                key={wi}
+                className="grid gap-0.5"
+                style={{ gridTemplateRows: "repeat(7, 11px)" }}
+              >
+                {week.map((day, di) => {
+                  const level = day ? getLevel(day.count, maxCount) : 0;
+                  const bg = colors[level] ?? colors[0]!;
+                  const title =
+                    showTooltip && day ? formatTooltip(day) : undefined;
+                  return (
+                    <div
+                      key={di}
+                      className={`w-[11px] h-[11px] rounded-sm ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
+                      style={{ backgroundColor: bg }}
+                      title={title}
+                      onClick={day ? () => handleClick(day) : undefined}
+                    />
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
