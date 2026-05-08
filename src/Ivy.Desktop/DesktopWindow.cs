@@ -6,9 +6,8 @@ using Rustino.NET;
 
 namespace Ivy.Desktop;
 
-public class DesktopWindow
+public class DesktopWindow(Server server)
 {
-    private readonly Server server;
     private string _title = Assembly.GetEntryAssembly()?.GetName().Name ?? "Ivy App";
     private int _width = 1280;
     private int _height = 800;
@@ -42,13 +41,6 @@ public class DesktopWindow
     private int _splashWidth = 400;
     private int _splashHeight = 300;
     private string? _appId;
-
-    public DesktopWindow(Server server)
-    {
-        this.server = server;
-        // Ensure auth cookies work over HTTP in desktop mode
-        server.SetForceNonSecureCookies(true);
-    }
 
     public DesktopWindow Title(string title) { _title = title; return this; }
     public DesktopWindow Size(int width, int height) { _width = width; _height = height; return this; }
@@ -254,9 +246,6 @@ public class DesktopWindow
     {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
-        // Force HTTP for all desktop apps (WKWebView doesn't trust dev certs)
-        Environment.SetEnvironmentVariable("IVY_TLS", "false");
-
         server.Services.AddSingleton(this);
 
         var cts = new CancellationTokenSource();
@@ -266,7 +255,11 @@ public class DesktopWindow
         // FindAvailablePort) completes before the first await, so Args.Port is
         // already updated to the actual port the server will bind to.
         var port = server.Args.Port;
-        var url = $"http://localhost:{port}";  // Always HTTP in desktop mode
+        var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
+        var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
+            ? ivyTlsEnv.ToLowerInvariant() is "1" or "true" or "yes" or "on"
+            : true; // Default to true if not overridden
+        var url = $"{(useTls ? "https" : "http")}://localhost:{port}";
 
         // Show splash while the server starts
         RustinoSplashscreen? splash = null;
