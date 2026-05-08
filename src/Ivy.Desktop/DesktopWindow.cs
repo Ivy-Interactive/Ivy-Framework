@@ -257,7 +257,7 @@ public class DesktopWindow(Server server)
         var port = server.Args.Port;
         var ivyTlsEnv = Environment.GetEnvironmentVariable("IVY_TLS");
         var useTls = !string.IsNullOrEmpty(ivyTlsEnv)
-            ? ivyTlsEnv?.ToLowerInvariant() is "1" or "true" or "yes" or "on"
+            ? ivyTlsEnv.ToLowerInvariant() is "1" or "true" or "yes" or "on"
             : true; // Default to true if not overridden
         var url = $"{(useTls ? "https" : "http")}://localhost:{port}";
 
