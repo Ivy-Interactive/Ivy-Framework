@@ -79,8 +79,8 @@ public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
     /// <summary>Daily contribution data. One entry per active day — missing days are rendered as zero.</summary>
     [Prop] public ContributionDay[] Data { get; init; } = [];
 
-    /// <summary>Color scheme: "green" (default), "blue", "purple", "orange", "pink".</summary>
-    [Prop] public string ColorScheme { get; init; } = "green";
+    /// <summary>Color scheme for activity levels. One of: "primary" (default), "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose".</summary>
+    [Prop] public string ColorScheme { get; init; } = "primary";
 
     /// <summary>Show date and count tooltip on hover.</summary>
     [Prop] public bool ShowTooltip { get; init; } = true;

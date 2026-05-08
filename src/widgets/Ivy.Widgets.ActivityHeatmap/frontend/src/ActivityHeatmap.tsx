@@ -1,12 +1,36 @@
 import "./style.css";
+import { tokens } from "@ivy-interactive/ivy-design-system";
 import { ActivityHeatmapProps, ContributionDay } from "./types";
 
+function buildColorScheme(baseToken: string): string[] {
+  return [
+    tokens["color-border"],
+    `color-mix(in srgb, ${baseToken} 25%, white)`,
+    `color-mix(in srgb, ${baseToken} 50%, white)`,
+    `color-mix(in srgb, ${baseToken} 75%, white)`,
+    baseToken,
+  ];
+}
+
 const COLOR_SCHEMES: Record<string, string[]> = {
-  green: ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"],
-  blue: ["#ebedf0", "#b6d6f7", "#64a4e4", "#2c7fcc", "#1553a0"],
-  purple: ["#ebedf0", "#d8b4fe", "#a855f7", "#7c3aed", "#4c1d95"],
-  orange: ["#ebedf0", "#fed7aa", "#fb923c", "#ea580c", "#9a3412"],
-  pink: ["#ebedf0", "#fbcfe8", "#f472b6", "#db2777", "#9d174d"],
+  primary:  buildColorScheme(tokens["color-primary"]),
+  red:      buildColorScheme(tokens["color-red"]),
+  orange:   buildColorScheme(tokens["color-orange"]),
+  amber:    buildColorScheme(tokens["color-amber"]),
+  yellow:   buildColorScheme(tokens["color-yellow"]),
+  lime:     buildColorScheme(tokens["color-lime"]),
+  green:    buildColorScheme(tokens["color-green"]),
+  emerald:  buildColorScheme(tokens["color-emerald"]),
+  teal:     buildColorScheme(tokens["color-teal"]),
+  cyan:     buildColorScheme(tokens["color-cyan"]),
+  sky:      buildColorScheme(tokens["color-sky"]),
+  blue:     buildColorScheme(tokens["color-blue"]),
+  indigo:   buildColorScheme(tokens["color-indigo"]),
+  violet:   buildColorScheme(tokens["color-violet"]),
+  purple:   buildColorScheme(tokens["color-purple"]),
+  fuchsia:  buildColorScheme(tokens["color-fuchsia"]),
+  pink:     buildColorScheme(tokens["color-pink"]),
+  rose:     buildColorScheme(tokens["color-rose"]),
 };
 
 const formatter = new Intl.DateTimeFormat("sv-SE", { month: "short" });
@@ -90,14 +114,14 @@ export function ActivityHeatmap({
   events = [],
   eventHandler,
   data = [],
-  colorScheme = "green",
+  colorScheme = "primary",
   showTooltip = true,
   showMonthLabels = true,
   showDayLabels = true,
 }: ActivityHeatmapProps) {
   const weeks = buildGrid(data);
   const maxCount = Math.max(0, ...data.map((d) => d.count));
-  const colors = COLOR_SCHEMES[colorScheme] ?? COLOR_SCHEMES["green"]!;
+  const colors = COLOR_SCHEMES[colorScheme] ?? COLOR_SCHEMES["primary"]!;
   const clickable = events.includes("OnDayClick");
 
   // Compute month labels: for each week, check if the first non-null day is the first occurrence of a new month

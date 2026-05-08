@@ -14,6 +14,9 @@ importers:
 
   .:
     dependencies:
+      '@ivy-interactive/ivy-design-system':
+        specifier: 1.1.18
+        version: 1.1.18
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -54,6 +57,9 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@ivy-interactive/ivy-design-system@1.1.18':
+    resolution: {integrity: sha512-bkfnLdTodu67hP6OJCy7LCgoIfCwf8Wnw3dRtSU6PIDAp/1jlPajPAiSPb3Im6LcRPVsalt9YLBh582JcKVyzQ==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1034,6 +1040,8 @@ packages:
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
+
+  '@ivy-interactive/ivy-design-system@1.1.18': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
