@@ -80,7 +80,7 @@ public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
     [Prop] public Activity[] Data { get; init; } = [];
 
     /// <summary>Color scheme for activity levels. One of: "primary" (default), "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose".</summary>
-    [Prop] public string ColorScheme { get; init; } = "primary";
+    [Prop] public Colors ColorScheme { get; init; } = Colors.Primary;
 
     /// <summary>Show date and count tooltip on hover.</summary>
     [Prop] public bool ShowTooltip { get; init; } = true;
@@ -101,7 +101,7 @@ public static class ActivityHeatmapExtensions
         w with { Data = data };
 
     public static ActivityHeatmap ColorScheme(this ActivityHeatmap w, Colors scheme) =>
-        w with { ColorScheme = scheme.ToString().ToLower() };
+        w with { ColorScheme = scheme };
 
     public static ActivityHeatmap ShowTooltip(this ActivityHeatmap w, bool show = true) =>
         w with { ShowTooltip = show };

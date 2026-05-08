@@ -13,33 +13,28 @@ function buildColorScheme(baseToken: string): string[] {
 }
 
 const COLOR_SCHEMES: Record<string, string[]> = {
-  primary:  buildColorScheme(tokens["color-primary"]),
-  red:      buildColorScheme(tokens["color-red"]),
-  orange:   buildColorScheme(tokens["color-orange"]),
-  amber:    buildColorScheme(tokens["color-amber"]),
-  yellow:   buildColorScheme(tokens["color-yellow"]),
-  lime:     buildColorScheme(tokens["color-lime"]),
-  green:    buildColorScheme(tokens["color-green"]),
-  emerald:  buildColorScheme(tokens["color-emerald"]),
-  teal:     buildColorScheme(tokens["color-teal"]),
-  cyan:     buildColorScheme(tokens["color-cyan"]),
-  sky:      buildColorScheme(tokens["color-sky"]),
-  blue:     buildColorScheme(tokens["color-blue"]),
-  indigo:   buildColorScheme(tokens["color-indigo"]),
-  violet:   buildColorScheme(tokens["color-violet"]),
-  purple:   buildColorScheme(tokens["color-purple"]),
-  fuchsia:  buildColorScheme(tokens["color-fuchsia"]),
-  pink:     buildColorScheme(tokens["color-pink"]),
-  rose:     buildColorScheme(tokens["color-rose"]),
+  primary: buildColorScheme(tokens["color-primary"]),
+  red: buildColorScheme(tokens["color-red"]),
+  orange: buildColorScheme(tokens["color-orange"]),
+  amber: buildColorScheme(tokens["color-amber"]),
+  yellow: buildColorScheme(tokens["color-yellow"]),
+  lime: buildColorScheme(tokens["color-lime"]),
+  green: buildColorScheme(tokens["color-green"]),
+  emerald: buildColorScheme(tokens["color-emerald"]),
+  teal: buildColorScheme(tokens["color-teal"]),
+  cyan: buildColorScheme(tokens["color-cyan"]),
+  sky: buildColorScheme(tokens["color-sky"]),
+  blue: buildColorScheme(tokens["color-blue"]),
+  indigo: buildColorScheme(tokens["color-indigo"]),
+  violet: buildColorScheme(tokens["color-violet"]),
+  purple: buildColorScheme(tokens["color-purple"]),
+  fuchsia: buildColorScheme(tokens["color-fuchsia"]),
+  pink: buildColorScheme(tokens["color-pink"]),
+  rose: buildColorScheme(tokens["color-rose"]),
 };
 
 const formatter = new Intl.DateTimeFormat("sv-SE", { month: "short" });
-const MONTH_NAMES = Array.from({ length: 12 }, (_, i) => formatter.format(new Date(2021, i)));
-
-// const MONTH_NAMES = [
-//   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-//   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-// ];
+const MONTH_NAMES = Array.from({ length: 12 }, (_, i) => formatter.format(new Date(0, i)));
 
 function getLevel(count: number, maxCount: number): number {
   if (count === 0 || maxCount === 0) return 0;
@@ -121,7 +116,7 @@ export function ActivityHeatmap({
 }: ActivityHeatmapProps) {
   const weeks = buildGrid(data);
   const maxCount = Math.max(0, ...data.map((d) => d.count));
-  const colors = COLOR_SCHEMES[colorScheme] ?? COLOR_SCHEMES["primary"]!;
+  const colors = COLOR_SCHEMES[colorScheme.toLowerCase()] ?? COLOR_SCHEMES["primary"]!;
   const clickable = events.includes("OnDayClick");
 
   // Compute month labels: for each week, check if the first non-null day is the first occurrence of a new month
