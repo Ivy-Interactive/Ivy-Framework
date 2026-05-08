@@ -8,7 +8,9 @@
     "build": "tsc && vp build",
     "preview": "vp preview"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@ivy-interactive/ivy-design-system": "1.1.18"
+  },
   "devDependencies": {
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
