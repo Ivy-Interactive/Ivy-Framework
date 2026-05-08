@@ -41,6 +41,7 @@
 
   <ItemGroup>
     <Compile Remove=".samples\**\*.cs" />
+    <Compile Remove="frontend\node_modules\**" />
     <None Include=".samples\**\*" CopyToOutputDirectory="Never" />
   </ItemGroup>
 
