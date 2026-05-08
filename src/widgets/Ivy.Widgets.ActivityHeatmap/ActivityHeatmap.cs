@@ -92,7 +92,7 @@ public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
     [Prop] public bool ShowDayLabels { get; init; } = true;
 
     /// <summary>Fired when the user clicks a day cell.</summary>
-    [Event] public Func<Event<ActivityHeatmap, ContributionDay>, ValueTask>? OnDayClick { get; init; }
+    [Event] public EventHandler<Event<ActivityHeatmap, ContributionDay>>? OnDayClick { get; init; }
 }
 
 public static class ActivityHeatmapExtensions
@@ -115,17 +115,17 @@ public static class ActivityHeatmapExtensions
     public static ActivityHeatmap OnDayClick(
         this ActivityHeatmap w,
         Func<Event<ActivityHeatmap, ContributionDay>, ValueTask> handler
-    ) => w with { OnDayClick = handler };
+    ) => w with { OnDayClick = new(handler) };
 
     public static ActivityHeatmap OnDayClick(
         this ActivityHeatmap w,
         Action<ContributionDay> handler
     ) => w with
     {
-        OnDayClick = e =>
-        {
-            handler(e.Value);
-            return ValueTask.CompletedTask;
-        }
+        OnDayClick = new(e =>
+            {
+                handler(e.Value);
+                return ValueTask.CompletedTask;
+            })
     };
 }

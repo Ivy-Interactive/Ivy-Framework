@@ -20,6 +20,7 @@ import {
 import { Densities } from "@/types/density";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface ColorInputWidgetProps {
   id: string;
@@ -30,7 +31,7 @@ interface ColorInputWidgetProps {
   placeholder?: string;
   nullable?: boolean;
   events?: string[];
-  variant?: "Text" | "Picker" | "TextAndPicker" | "Swatch";
+  variant?: "Text" | "Picker" | "TextAndPicker" | "Swatch" | "SwatchPicker";
   density?: Densities;
   foreground?: boolean;
   ghost?: boolean;
@@ -411,6 +412,54 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           onColorSelect={handleSwatchSelect}
           disabled={disabled}
         />
+        {invalid && <InvalidIcon message={invalid} />}
+      </div>
+    );
+  }
+
+  if (variant === "SwatchPicker") {
+    const handleSwatchSelect = (colorName: string) => {
+      fireColorChange(colorName);
+    };
+
+    return (
+      <div className="flex items-center space-x-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              disabled={disabled}
+              aria-label="Choose color"
+              title="Choose color"
+              className={cn(
+                colorInputPickerVariant({ density }),
+                "relative shrink-0 rounded-md overflow-hidden bg-transparent border",
+                disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                invalid ? inputStyles.invalidInput : "border-input shadow-sm",
+              )}
+            >
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage:
+                    "repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%)",
+                  backgroundSize: "12px 12px",
+                }}
+              />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ backgroundColor: convertToHex(displayValue) || "transparent" }}
+              />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <ColorSwatchGrid
+              selectedColor={localValue}
+              onColorSelect={handleSwatchSelect}
+              disabled={disabled}
+            />
+          </PopoverContent>
+        </Popover>
         {invalid && <InvalidIcon message={invalid} />}
       </div>
     );
