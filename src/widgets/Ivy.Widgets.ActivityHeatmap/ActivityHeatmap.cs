@@ -100,8 +100,8 @@ public static class ActivityHeatmapExtensions
     public static ActivityHeatmap Data(this ActivityHeatmap w, ContributionDay[] data) =>
         w with { Data = data };
 
-    public static ActivityHeatmap ColorScheme(this ActivityHeatmap w, string scheme) =>
-        w with { ColorScheme = scheme };
+    public static ActivityHeatmap ColorScheme(this ActivityHeatmap w, Colors scheme) =>
+        w with { ColorScheme = scheme.ToString().ToLower() };
 
     public static ActivityHeatmap ShowTooltip(this ActivityHeatmap w, bool show = true) =>
         w with { ShowTooltip = show };

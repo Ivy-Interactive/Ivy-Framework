@@ -23,7 +23,7 @@ class ActivityHeatmapDemo : ViewBase
 
         return new ActivityHeatmap()
             .Data(data)
-            .ColorScheme("green")
+            .ColorScheme(Colors.Emerald)
             .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}"));
     }
 }
