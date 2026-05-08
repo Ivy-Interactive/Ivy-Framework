@@ -33,8 +33,15 @@ const COLOR_SCHEMES: Record<string, string[]> = {
   rose: buildColorScheme(tokens["color-rose"]),
 };
 
-const formatter = new Intl.DateTimeFormat("sv-SE", { month: "short" });
-const MONTH_NAMES = Array.from({ length: 12 }, (_, i) => formatter.format(new Date(0, i)));
+const preferredLanguage = navigator.languages.length ? navigator.languages : navigator.language;
+const monthFormatter = new Intl.DateTimeFormat(preferredLanguage, { month: "short" });
+const weekdayFormatter = new Intl.DateTimeFormat(preferredLanguage, { weekday: "short" });
+const MONTH_NAMES = Array.from({ length: 12 }, (_, i) => monthFormatter.format(new Date(0, i)));
+
+const mondayDate = new Date('2025-01-06');
+const MONDAY = weekdayFormatter.format(mondayDate);
+const WEDNESDAY = weekdayFormatter.format(mondayDate.setDate(mondayDate.getDate() + 2));
+const FRIDAY = weekdayFormatter.format(mondayDate.setDate(mondayDate.getDate() + 2));
 
 function getLevel(count: number, maxCount: number): number {
   if (count === 0 || maxCount === 0) return 0;
@@ -166,11 +173,11 @@ export function ActivityHeatmap({
             style={{ gridTemplateRows: "repeat(7, 11px)", width: "24px" }}
           >
             <div />
-            <div style={{ fontSize: "9px", lineHeight: "11px" }}>Mon</div>
+            <div style={{ fontSize: "9px", lineHeight: "11px" }}>{MONDAY}</div>
             <div />
-            <div style={{ fontSize: "9px", lineHeight: "11px" }}>Wed</div>
+            <div style={{ fontSize: "9px", lineHeight: "11px" }}>{WEDNESDAY}</div>
             <div />
-            <div style={{ fontSize: "9px", lineHeight: "11px" }}>Fri</div>
+            <div style={{ fontSize: "9px", lineHeight: "11px" }}>{FRIDAY}</div>
             <div />
           </div>
         )}
