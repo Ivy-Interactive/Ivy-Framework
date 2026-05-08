@@ -29,8 +29,11 @@ class ActivityHeatmapDemo : ViewBase
                         .Data(data)
                         .ColorScheme(Colors.Primary)
                         .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
-                .Density(Density.Small)
-                .WithBox().Padding(2, 0, 0, 0)
+                // ToDo: Find out why setting Density overrides font size set in inline-styles in ActivityHeatMap.tsx
+                // .Density(Density.Small)
+                .WithBox()
+                    .Padding(2, 0, 0, 0)
+
             | new ActivityHeatmap()
                         .Data(data)
                         .ColorScheme(Colors.Emerald)
