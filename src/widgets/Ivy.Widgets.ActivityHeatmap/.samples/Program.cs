@@ -21,9 +21,26 @@ class ActivityHeatmapDemo : ViewBase
             .Select(d => new Activity { Date = d, Count = rng.Next(1, 20) })
             .ToArray();
 
-        return new ActivityHeatmap()
-            .Data(data)
-            .ColorScheme(Colors.Emerald)
-            .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}"));
+        return Layout.Vertical().Gap(16)
+            | new Card()
+                .Header(Text.H4("Daily Downloads"))
+                .Content(
+                    new ActivityHeatmap()
+                        .Data(data)
+                        .ColorScheme(Colors.Primary)
+                        .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
+                .Density(Density.Small)
+                .WithBox().Padding(2, 0, 0, 0)
+            | new ActivityHeatmap()
+                        .Data(data)
+                        .ColorScheme(Colors.Emerald)
+                        .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}"))
+
+            | new ActivityHeatmap()
+                        .Data(data)
+                        .ColorScheme(Colors.Blue)
+                        .ShowDayLabels(false)
+                        .ShowMonthLabels(false)
+                        .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}"));
     }
 }
