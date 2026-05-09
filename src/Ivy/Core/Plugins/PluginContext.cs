@@ -1,7 +1,6 @@
 using System.Reflection;
 using Ivy.Core.Apps;
 using Ivy.Plugins;
-using Ivy.Plugins.Messaging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,7 +31,14 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
     // Fallback service collection for non-plugin code
     private readonly ServiceCollection _fallbackServices = new();
 
-    public abstract IConfiguration Configuration { get; }
+    private IConfiguration? _configurationOverride;
+
+    public IConfiguration Configuration => _configurationOverride ?? BaseConfiguration;
+
+    protected abstract IConfiguration BaseConfiguration { get; }
+
+    internal void PushConfiguration(IConfiguration configuration) => _configurationOverride = configuration;
+    internal void PopConfiguration() => _configurationOverride = null;
 
     protected abstract AppRepository AppRepository { get; }
     protected abstract IReadOnlySet<string> ReservedPaths { get; }
@@ -99,11 +105,6 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
 
         if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
             state.BadgeProviders.Add((menuTag, countProvider));
-    }
-
-    public void RegisterMessagingChannel(IMessagingChannel channel)
-    {
-        Services.AddSingleton<IMessagingChannel>(channel);
     }
 
     public void UseWebApplication(Action<WebApplication> configure)
@@ -270,7 +271,7 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
 
 internal class PluginContext(Ivy.Server server, WebApplicationBuilder builder) : PluginContextBase
 {
-    public override IConfiguration Configuration => server.Configuration;
+    protected override IConfiguration BaseConfiguration => server.Configuration;
     protected override AppRepository AppRepository => server.AppRepository;
     protected override IReadOnlySet<string> ReservedPaths => server.ReservedPaths;
     protected override WebApplicationBuilder Builder => builder;

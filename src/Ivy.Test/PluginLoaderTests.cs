@@ -670,6 +670,5 @@ public class PluginLoaderTests
     {
         public IServiceCollection Services => new ServiceCollection();
         public IConfiguration Configuration => new ConfigurationBuilder().Build();
-        public void RegisterMessagingChannel(Ivy.Plugins.Messaging.IMessagingChannel channel) { }
     }
 }
