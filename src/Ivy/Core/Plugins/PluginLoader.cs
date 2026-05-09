@@ -1,28 +1,12 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using Ivy.Plugins;
-using Ivy.Plugins.Messaging;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Ivy.Core.Plugins;
 
-internal class PluginContextWithConfiguration(PluginContextBase inner, IConfiguration configuration) : IIvyPluginContext
-{
-    public IServiceCollection Services => inner.Services;
-    public IConfiguration Configuration => configuration;
-
-    public void AddApp(AppDescriptor descriptor) => inner.AddApp(descriptor);
-    public void AddAppsFromAssembly(Assembly assembly) => inner.AddAppsFromAssembly(assembly);
-    public void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer) => inner.AddMenuItems(transformer);
-    public void AddFooterMenuItems(Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer) => inner.AddFooterMenuItems(transformer);
-    public void AddBadgeProvider(string menuTag, Func<IServiceProvider, int> countProvider) => inner.AddBadgeProvider(menuTag, countProvider);
-    public void RegisterMessagingChannel(IMessagingChannel channel) => inner.RegisterMessagingChannel(channel);
-    public void UseWebApplication(Action<WebApplication> configure) => inner.UseWebApplication(configure);
-    public void UseWebApplicationBuilder(Action<WebApplicationBuilder> configure) => inner.UseWebApplicationBuilder(configure);
-}
 
 public class PluginLoader : IPluginManager
 {
@@ -317,8 +301,6 @@ public class PluginLoader : IPluginManager
         {
             foreach (var plugin in _plugins)
             {
-                IIvyPluginContext contextToUse = context;
-
                 if (plugin.Instance.ConfigurationSchema is { } schema)
                 {
                     var errors = ValidatePluginConfiguration(
@@ -342,13 +324,13 @@ public class PluginLoader : IPluginManager
                         schema,
                         context.Configuration);
 
-                    // Create context wrapper with defaults applied
-                    contextToUse = new PluginContextWithConfiguration(context, configWithDefaults);
+                    context.PushConfiguration(configWithDefaults);
                 }
 
                 context.SetCurrentPlugin(plugin.Instance.Manifest.Id, plugin.Directory);
-                plugin.Instance.Configure(contextToUse);
+                plugin.Instance.Configure(context);
                 context.ClearCurrentPlugin();
+                context.PopConfiguration();
             }
         }
         finally
@@ -502,8 +484,6 @@ public class PluginLoader : IPluginManager
             // Configure context
             if (_pluginContext is not null)
             {
-                IIvyPluginContext contextToUse = _pluginContext;
-
                 // Apply defaults if schema exists
                 if (plugin.Instance.ConfigurationSchema is { } configSchema && _configuration is not null)
                 {
@@ -512,12 +492,13 @@ public class PluginLoader : IPluginManager
                         configSchema,
                         _configuration);
 
-                    contextToUse = new PluginContextWithConfiguration(_pluginContext, configWithDefaults);
+                    _pluginContext.PushConfiguration(configWithDefaults);
                 }
 
                 _pluginContext.SetCurrentPlugin(manifest.Id, pluginPath);
-                plugin.Instance.Configure(contextToUse);
+                plugin.Instance.Configure(_pluginContext);
                 _pluginContext.ClearCurrentPlugin();
+                _pluginContext.PopConfiguration();
                 _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
                 plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             }
