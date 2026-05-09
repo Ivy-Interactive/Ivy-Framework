@@ -74,13 +74,6 @@ public record ServerArgs
     /// that needs DI but should not bind a real port.
     /// </summary>
     public bool IsCliCommand => Describe || DescribeConnection != null || TestConnection != null;
-
-    /// <summary>
-    /// When true, forces all authentication cookies to have Secure=false.
-    /// This is applied AFTER ConfigureAuthCookieOptions callback to ensure
-    /// cookies work over HTTP in desktop environments.
-    /// </summary>
-    public bool ForceNonSecureCookies { get; set; } = false;
 }
 
 public class Server
@@ -100,7 +93,6 @@ public class Server
     public ServerArgs Args => _args;
     public static Action<CookieOptions>? ConfigureAuthCookieOptions { get; set; }
     public static string? AuthCookiePrefix { get; set; }
-    internal static bool ForceNonSecureCookies { get; set; }
     private IContentBuilder? _contentBuilder;
     private bool _useHotReload;
     private bool _useHttpRedirection;
@@ -151,12 +143,6 @@ public class Server
         Services.AddSingleton<IConfiguration>(_ => Configuration);
 
         AddDefaultApps();
-    }
-
-    public void SetForceNonSecureCookies(bool force)
-    {
-        _args = _args with { ForceNonSecureCookies = force };
-        ForceNonSecureCookies = force;
     }
 
     private void AddDefaultApps()
