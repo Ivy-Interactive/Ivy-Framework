@@ -9,6 +9,26 @@ namespace Ivy.Core.Plugins;
 
 public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvider
 {
+    protected IConfiguration BaseConfiguration { get; }
+    protected AppRepository AppRepository { get; }
+    protected IReadOnlySet<string> ReservedPaths { get; }
+    protected WebApplicationBuilder Builder { get; }
+
+    public PluginContextBase(Ivy.Server server, WebApplicationBuilder builder)
+    {
+        BaseConfiguration = server.Configuration;
+        AppRepository = server.AppRepository;
+        ReservedPaths = server.ReservedPaths;
+        Builder = builder;
+    }
+
+    protected PluginContextBase(IConfiguration configuration, AppRepository appRepository, IReadOnlySet<string> reservedPaths, WebApplicationBuilder builder)
+    {
+        BaseConfiguration = configuration;
+        AppRepository = appRepository;
+        ReservedPaths = reservedPaths;
+        Builder = builder;
+    }
     private readonly List<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> _menuTransformers = [];
     private readonly List<Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>> _footerMenuTransformers = [];
     private readonly List<(string Tag, Func<IServiceProvider, int> CountProvider)> _badgeProviders = [];
@@ -35,14 +55,8 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
 
     public IConfiguration Configuration => _configurationOverride ?? BaseConfiguration;
 
-    protected abstract IConfiguration BaseConfiguration { get; }
-
     internal void PushConfiguration(IConfiguration configuration) => _configurationOverride = configuration;
     internal void PopConfiguration() => _configurationOverride = null;
-
-    protected abstract AppRepository AppRepository { get; }
-    protected abstract IReadOnlySet<string> ReservedPaths { get; }
-    protected abstract WebApplicationBuilder Builder { get; }
 
     public IReadOnlyList<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers => _menuTransformers;
     public IReadOnlyList<Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>> FooterMenuTransformers => _footerMenuTransformers;
@@ -269,10 +283,6 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
     }
 }
 
-internal class PluginContext(Ivy.Server server, WebApplicationBuilder builder) : PluginContextBase
-{
-    protected override IConfiguration BaseConfiguration => server.Configuration;
-    protected override AppRepository AppRepository => server.AppRepository;
-    protected override IReadOnlySet<string> ReservedPaths => server.ReservedPaths;
-    protected override WebApplicationBuilder Builder => builder;
-}
+internal class PluginContext(Ivy.Server server, WebApplicationBuilder builder) : PluginContextBase(server, builder);
+
+

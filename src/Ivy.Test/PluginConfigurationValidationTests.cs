@@ -316,25 +316,13 @@ public class PluginConfigurationValidationTests
         Assert.Equal("3", receivedMaxRetries);
     }
 
-    private class TestPluginContext : PluginContextBase
-    {
-        private readonly AppRepository _appRepository = new();
-        private readonly WebApplicationBuilder _builder;
-        private readonly IConfiguration _configuration;
+    private class TestPluginContext(Dictionary<string, string?> configValues)
+        : PluginContextBase(
+            new ConfigurationBuilder().AddInMemoryCollection(configValues).Build(),
+            new AppRepository(),
+            new HashSet<string>(),
+            WebApplication.CreateBuilder());
 
-        public TestPluginContext(Dictionary<string, string?> configValues)
-        {
-            _builder = WebApplication.CreateBuilder();
-            _configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(configValues)
-                .Build();
-        }
-
-        protected override IConfiguration BaseConfiguration => _configuration;
-        protected override AppRepository AppRepository => _appRepository;
-        protected override IReadOnlySet<string> ReservedPaths => new HashSet<string>();
-        protected override WebApplicationBuilder Builder => _builder;
-    }
 
     private class FakePlugin : IIvyPlugin
     {

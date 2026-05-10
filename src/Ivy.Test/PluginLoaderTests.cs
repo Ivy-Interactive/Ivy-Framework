@@ -17,22 +17,12 @@ public class PluginLoaderTests
 
     private class TestPluginContext : PluginContextBase
     {
-        private readonly AppRepository _appRepository = new();
-        private readonly WebApplicationBuilder _builder;
-        private readonly IConfiguration _configuration;
-
         public TestPluginContext()
+            : base(new ConfigurationBuilder().Build(), new AppRepository(), new HashSet<string>(), WebApplication.CreateBuilder())
         {
-            _builder = WebApplication.CreateBuilder();
-            _configuration = new ConfigurationBuilder().Build();
         }
 
-        protected override IConfiguration BaseConfiguration => _configuration;
-        protected override AppRepository AppRepository => _appRepository;
-        protected override IReadOnlySet<string> ReservedPaths => new HashSet<string>();
-        protected override WebApplicationBuilder Builder => _builder;
-
-        public AppRepository GetAppRepository() => _appRepository;
+        public AppRepository GetAppRepository() => AppRepository;
     }
 
     [Fact]
