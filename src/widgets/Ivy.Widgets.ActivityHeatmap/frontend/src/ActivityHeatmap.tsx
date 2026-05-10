@@ -5,9 +5,9 @@ import { ActivityHeatmapProps, ContributionDay } from "./types";
 function buildColorScheme(baseToken: string): string[] {
   return [
     tokens["color-border"],
-    `color-mix(in srgb, ${baseToken} 25%, white)`,
-    `color-mix(in srgb, ${baseToken} 50%, white)`,
-    `color-mix(in srgb, ${baseToken} 75%, white)`,
+    `color-mix(in srgb, ${baseToken} 25%, transparent)`,
+    `color-mix(in srgb, ${baseToken} 50%, transparent)`,
+    `color-mix(in srgb, ${baseToken} 75%, transparent)`,
     baseToken,
   ];
 }
@@ -150,7 +150,7 @@ export function ActivityHeatmap({
   };
 
   return (
-    <div className="flex w-full relative">
+    <div className="flex w-full relative bg-background rounded border-secondary">
       <div className=" overflow-x-auto p-0"
         style={{ direction: "rtl" }}>
         <div className="inline-flex flex-col gap-1 font-sans"
@@ -170,12 +170,12 @@ export function ActivityHeatmap({
             </div>
           )}
 
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             {showDayLabels && (
               <div className="flex flex-col justify-end absolute left-0 top-0 bottom-0 bg-background">
                 <div
                   className="grid gap-0.5 text-[#57606a] pt-0.5 *:pr-2 *:text-right"
-                  style={{ gridTemplateRows: "repeat(7, 11px)", width: "24px" }}
+                  style={{ gridTemplateRows: "repeat(7, 11px)", width: "28px" }}
                 >
                   <div />
                   <div style={{ fontSize: "10px", lineHeight: "11px" }}>{MONDAY}</div>
