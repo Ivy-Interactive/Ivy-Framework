@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Plugins;
 
-public interface IPluginContext
+public interface IIvyPluginContext
 {
     IServiceCollection Services { get; }
     IConfiguration Configuration { get; }

@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Core.Plugins;
 
-public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvider
+public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServiceProvider
 {
     protected IConfiguration BaseConfiguration { get; }
     protected AppRepository AppRepository { get; }

@@ -568,74 +568,74 @@ public class PluginLoaderTests
 
         public void ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration) { }
 
-        public void Configure(Ivy.Plugins.IPluginContext context) { }
+        public void Configure(Ivy.Plugins.IIvyPluginContext context) { }
     }
 
     [Fact]
-    public void PluginCanCastContextToIIvyPluginContext()
+    public void PluginCanCastContextToIIvyExtendedPluginContext()
     {
         var context = new TestPluginContext();
-        Ivy.Plugins.IPluginContext pluginContext = context;
+        Ivy.Plugins.IIvyPluginContext pluginContext = context;
 
         // Verify the cast succeeds
-        var ivyContext = pluginContext as Ivy.Plugins.IIvyPluginContext;
+        var ivyContext = pluginContext as Ivy.Plugins.IIvyExtendedPluginContext;
         Assert.NotNull(ivyContext);
         Assert.Same(context, ivyContext);
     }
 
     [Fact]
-    public void AsIvyContextReturnsIIvyPluginContext()
+    public void AsExtendedContextReturnsIIvyExtendedPluginContext()
     {
         var context = new TestPluginContext();
-        Ivy.Plugins.IPluginContext pluginContext = context;
+        Ivy.Plugins.IIvyPluginContext pluginContext = context;
 
         // Use the extension method
-        var ivyContext = pluginContext.AsIvyContext();
+        var ivyContext = pluginContext.AsExtendedContext();
         Assert.NotNull(ivyContext);
         Assert.Same(context, ivyContext);
     }
 
     [Fact]
-    public void AsIvyContextThrowsForNonIvyContext()
+    public void AsExtendedContextThrowsForNonIvyContext()
     {
         // Create a mock non-Ivy context
         var mockContext = new MockNonIvyPluginContext();
 
-        var exception = Assert.Throws<InvalidOperationException>(() => mockContext.AsIvyContext());
+        var exception = Assert.Throws<InvalidOperationException>(() => mockContext.AsExtendedContext());
         Assert.Contains("This plugin requires Ivy framework features", exception.Message);
         Assert.Contains("Ensure the plugin is loaded in an Ivy host application", exception.Message);
     }
 
     [Fact]
-    public void TryGetIvyContextReturnsContextForIvyContext()
+    public void TryGetExtendedContextReturnsContextForIvyContext()
     {
         var context = new TestPluginContext();
-        Ivy.Plugins.IPluginContext pluginContext = context;
+        Ivy.Plugins.IIvyPluginContext pluginContext = context;
 
-        var ivyContext = pluginContext.TryGetIvyContext();
+        var ivyContext = pluginContext.TryGetExtendedContext();
         Assert.NotNull(ivyContext);
         Assert.Same(context, ivyContext);
     }
 
     [Fact]
-    public void TryGetIvyContextReturnsNullForNonIvyContext()
+    public void TryGetExtendedContextReturnsNullForNonIvyContext()
     {
         var mockContext = new MockNonIvyPluginContext();
 
-        var ivyContext = mockContext.TryGetIvyContext();
+        var ivyContext = mockContext.TryGetExtendedContext();
         Assert.Null(ivyContext);
     }
 
     [Fact]
-    public void PluginCanAddAppViaIIvyPluginContext()
+    public void PluginCanAddAppViaIIvyExtendedPluginContext()
     {
         var context = new TestPluginContext();
 
         context.SetCurrentPlugin("test-plugin", "/plugins/test");
 
         // Plugin casts and adds app
-        Ivy.Plugins.IPluginContext pluginContext = context;
-        var ivyContext = pluginContext.AsIvyContext();
+        Ivy.Plugins.IIvyPluginContext pluginContext = context;
+        var ivyContext = pluginContext.AsExtendedContext();
 
         ivyContext.AddApp(new AppDescriptor
         {
@@ -656,7 +656,7 @@ public class PluginLoaderTests
         Assert.Equal("Test App", app.Title);
     }
 
-    private class MockNonIvyPluginContext : Ivy.Plugins.IPluginContext
+    private class MockNonIvyPluginContext : Ivy.Plugins.IIvyPluginContext
     {
         public IServiceCollection Services => new ServiceCollection();
         public IConfiguration Configuration => new ConfigurationBuilder().Build();

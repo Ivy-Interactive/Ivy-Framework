@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Builder;
 
 namespace Ivy.Plugins;
 
-public interface IIvyPluginContext : IPluginContext
+public interface IIvyExtendedPluginContext : IIvyPluginContext
 {
     // App registration
     void AddApp(AppDescriptor descriptor);

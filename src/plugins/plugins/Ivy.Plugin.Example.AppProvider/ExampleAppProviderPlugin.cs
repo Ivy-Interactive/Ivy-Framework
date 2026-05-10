@@ -8,8 +8,8 @@ namespace Ivy.Plugin.Example.AppProvider;
 
 /// <summary>
 /// Example plugin demonstrating how plugins can add apps to the Ivy host application.
-/// This plugin uses the AsIvyContext() extension method to cast IPluginContext to IIvyPluginContext,
-/// enabling access to Ivy-specific features like app registration.
+/// This plugin uses the AsExtendedContext() extension method to cast IIvyPluginContext to IIvyExtendedPluginContext,
+/// enabling access to extended features like app registration.
 /// </summary>
 public class ExampleAppProviderPlugin : IIvyPlugin
 {
@@ -27,10 +27,10 @@ public class ExampleAppProviderPlugin : IIvyPlugin
     {
     }
 
-    public void Configure(IPluginContext context)
+    public void Configure(IIvyPluginContext context)
     {
-        // Use the AsIvyContext() extension method to access Ivy-specific features
-        var ivyContext = context.AsIvyContext();
+        // Use the AsExtendedContext() extension method to access Ivy-specific features
+        var ivyContext = context.AsExtendedContext();
 
         // Add an app to the host application
         ivyContext.AddApp(new AppDescriptor

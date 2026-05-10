@@ -326,9 +326,9 @@ public class PluginConfigurationValidationTests
 
     private class FakePlugin : IIvyPlugin
     {
-        private readonly Action<IPluginContext>? _onConfigure;
+        private readonly Action<IIvyPluginContext>? _onConfigure;
 
-        public FakePlugin(PluginConfigurationSchema? schema, Action<IPluginContext>? onConfigure = null)
+        public FakePlugin(PluginConfigurationSchema? schema, Action<IIvyPluginContext>? onConfigure = null)
         {
             ConfigurationSchema = schema;
             _onConfigure = onConfigure;
@@ -346,6 +346,6 @@ public class PluginConfigurationValidationTests
 
         public void ConfigureServices(IServiceCollection services, IConfiguration configuration) { }
 
-        public void Configure(IPluginContext context) => _onConfigure?.Invoke(context);
+        public void Configure(IIvyPluginContext context) => _onConfigure?.Invoke(context);
     }
 }
