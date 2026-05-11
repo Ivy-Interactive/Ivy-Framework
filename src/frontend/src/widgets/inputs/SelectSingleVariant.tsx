@@ -30,7 +30,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   options = EMPTY_ARRAY,
   eventHandler,
   nullable = false,
-  searchable = false,
+  searchable,
   searchMode = "CaseInsensitive",
   emptyMessage,
   loading = false,
@@ -95,8 +95,15 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, [selectedLabel]);
 
+  const SEARCH_THRESHOLD = 7;
+  // null/undefined = auto (show search when options >= threshold)
+  // true  = always show search
+  // false = never show search
+  const isSearchEnabled =
+    searchable === true || (searchable !== false && validOptions.length >= SEARCH_THRESHOLD);
+
   const filteredOptions = useMemo(() => {
-    if (!searchable || !searchTerm) return validOptions;
+    if (!isSearchEnabled || !searchTerm) return validOptions;
     return validOptions.filter((option) => {
       const term = searchMode === "CaseInsensitive" ? searchTerm.toLowerCase() : searchTerm;
       const label = (option.label || "").toLowerCase();
@@ -111,7 +118,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       }
       return label.includes(term);
     });
-  }, [validOptions, searchable, searchTerm, searchMode]);
+  }, [validOptions, isSearchEnabled, searchTerm, searchMode]);
 
   const groupedOptions = filteredOptions.reduce<Record<string, typeof validOptions>>(
     (acc, option) => {
@@ -233,7 +240,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
         selectTriggerElement
       )}
       <SelectContent density={density}>
-        {searchable && (
+        {isSearchEnabled && (
           <div className="p-2 border-b">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
