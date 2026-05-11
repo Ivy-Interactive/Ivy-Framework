@@ -14,7 +14,7 @@ var data = new[]
 
 new ActivityHeatmap()
     .Data(data)
-    .ColorScheme("green")
+    .ColorScheme(Colors.Green)
     .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}"));
 ```
 
@@ -23,7 +23,7 @@ new ActivityHeatmap()
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `Data` | `Activity[]` | `[]` | Daily activity data |
-| `ColorScheme` | `string` | `"green"` | Color scheme: green, blue, purple, orange, pink |
+| `ColorScheme` | `Ivy.Colors` | `Colors.Primary` | Color scheme supports semantic and chromatic and neutral color tokens |
 | `ShowTooltip` | `bool` | `true` | Show date/count tooltip on hover |
 | `ShowMonthLabels` | `bool` | `true` | Show month labels along the top |
 | `ShowDayLabels` | `bool` | `true` | Show Mon/Wed/Fri labels on the left |
