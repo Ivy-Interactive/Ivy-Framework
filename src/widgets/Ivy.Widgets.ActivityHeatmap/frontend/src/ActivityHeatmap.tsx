@@ -161,7 +161,7 @@ export function ActivityHeatmap({
               {weeks.map((_, wi) => (
                 <div
                   key={wi}
-                  className="text-center flex last:hidden"
+                  className="text-center flex text-secondary-foreground opacity-50 last:hidden"
                   style={{ width: "11px", fontSize: "10px" }}
                 >
                   {monthLabels[wi]}
@@ -174,7 +174,7 @@ export function ActivityHeatmap({
             {showDayLabels && (
               <div className="flex flex-col justify-end absolute left-0 top-0 bottom-0 bg-background">
                 <div
-                  className="grid gap-0.5 text-[#57606a] pt-0.5 *:pr-2 *:text-right"
+                  className="grid gap-0.5 text-secondary-foreground opacity-50 pt-0.5 *:pr-2 *:text-right"
                   style={{ gridTemplateRows: "repeat(7, 11px)", width: "28px" }}
                 >
                   <div />
