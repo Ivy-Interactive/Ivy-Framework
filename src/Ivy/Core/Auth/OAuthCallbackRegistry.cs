@@ -7,6 +7,8 @@ public interface IOAuthCallbackRegistry
     string RegisterPending(string connectionId, string optionId, string? provider = null);
 
     PendingOAuthCallback? GetAndRemove(string state);
+
+    bool HasPendingForConnection(string connectionId);
 }
 
 public record PendingOAuthCallback(string ConnectionId, string OptionId, DateTime CreatedAt, string? Provider = null);
@@ -26,6 +28,9 @@ public class OAuthCallbackRegistry : IOAuthCallbackRegistry
         _pending[state] = new PendingOAuthCallback(connectionId, optionId, DateTime.UtcNow, provider);
         return state;
     }
+
+    public bool HasPendingForConnection(string connectionId)
+        => _pending.Values.Any(p => p.ConnectionId == connectionId);
 
     public PendingOAuthCallback? GetAndRemove(string state)
     {

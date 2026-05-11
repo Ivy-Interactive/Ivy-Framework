@@ -36,7 +36,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Identity.Client" Version="4.79.2" />
-    <PackageReference Include="Microsoft.Graph" Version="5.98.0" />
+    <PackageReference Include="Microsoft.Graph" Version="5.105.0" />
+    <PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.22.2" />
     <PackageReference Include="Azure.Identity" Version="1.17.1" />
   </ItemGroup>
 

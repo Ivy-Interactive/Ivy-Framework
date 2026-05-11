@@ -3,6 +3,7 @@
 internal class ScopedAppRepository(IAppRepository inner, string targetId, AppDescriptor? overrideApp) : IAppRepository
 {
     public IObservable<Unit> Reloaded => inner.Reloaded;
+    public IObservable<IReadOnlySet<string>> AppsRefreshRequested => inner.AppsRefreshRequested;
 
     public MenuItem[] GetMenuItems() => inner.GetMenuItems();
 

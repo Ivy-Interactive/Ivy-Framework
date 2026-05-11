@@ -82,6 +82,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.toString().trim() !== "";
   const showClear = props.nullable && !props.disabled && hasValue;
+  const ghostTight = Boolean(props.ghost);
 
   return (
     <div className="relative w-full select-none" style={styles} ref={containerRef}>
@@ -127,11 +128,19 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
         />
       </div>
       {!hasLastPass && (
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 pointer-events-none h-6">
+        <div
+          className={cn(
+            "pointer-events-none absolute top-1/2 flex h-6 -translate-y-1/2 flex-row items-center",
+            ghostTight ? "right-0 gap-1 pr-0.5" : "right-2 gap-1",
+          )}
+        >
           <div className="pointer-events-auto flex items-center h-6">
             <button
               type="button"
-              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center"
+              className={cn(
+                "flex items-center rounded hover:bg-accent focus:outline-none cursor-pointer",
+                ghostTight ? "p-0.5" : "p-1",
+              )}
               onClick={togglePassword}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
@@ -154,15 +163,19 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
             </button>
           )}
           {props.shortcutKey && !hasValue && !showClear && !props.invalid && (
-            <div className="pointer-events-auto flex items-center h-6">
-              <kbd className="ml-2 px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-field">
+            <div className="pointer-events-auto flex h-6 items-center">
+              <kbd
+                className={cn(
+                  "rounded-field border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground",
+                  !ghostTight && "ml-2",
+                )}
+              >
                 {shortcutDisplay}
               </kbd>
             </div>
           )}
-          {/* Invalid icon - rightmost */}
           {props.invalid && (
-            <div className="flex items-center h-6 ml-2">
+            <div className={cn("flex h-6 items-center", !ghostTight && "ml-2")}>
               <InvalidIcon message={props.invalid} />
             </div>
           )}

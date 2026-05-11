@@ -10,7 +10,7 @@ RUN for i in 1 2 3; do apt-get update && break || sleep 10; done && \
     curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     for i in 1 2 3; do apt-get update && break || sleep 10; done && \
     apt-get install -y --fix-missing nodejs && \
-    npm install -g pnpm@10.33.0 vite-plus@0.1.14 && \
+    npm install -g pnpm@10.33.0 vite-plus@0.1.20 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 FROM toolchain AS build

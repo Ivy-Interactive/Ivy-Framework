@@ -1,9 +1,23 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { GridMouseCellEventArgs, GridMouseEventArgs } from "@glideapps/glide-data-grid";
 import { useEventHandler } from "@/components/event-handler";
 import { MenuItem } from "@/types/widgets";
 import { getHiddenKeyValue } from "../utils/arrowUtils";
 import * as arrow from "apache-arrow";
+
+function subscribeHoverNone(onStoreChange: () => void) {
+  const mq = window.matchMedia("(hover: none)");
+  mq.addEventListener("change", onStoreChange);
+  return () => mq.removeEventListener("change", onStoreChange);
+}
+
+function getHoverNoneSnapshot() {
+  return window.matchMedia("(hover: none)").matches;
+}
+
+function getServerHoverNoneSnapshot() {
+  return false;
+}
 
 interface UseRowHoverProps {
   widgetId: string;
@@ -17,7 +31,8 @@ interface UseRowHoverProps {
 }
 
 /**
- * Hook to manage row hover state and action button positioning
+ * Row hover + RowActions overlay. On touch / `(hover: none)` UIs, pointer "hover" is
+ * sticky and must not drive the bar — use `syncRowChromeFromCellArgs` from `onCellClicked`.
  */
 export const useRowHover = ({
   widgetId,
@@ -34,57 +49,92 @@ export const useRowHover = ({
   const [actionButtonsHeight, setActionButtonsHeight] = useState<number>(0);
   const eventHandler = useEventHandler();
 
-  // Handle row hover
+  const primaryInputCannotHover = useSyncExternalStore(
+    subscribeHoverNone,
+    getHoverNoneSnapshot,
+    getServerHoverNoneSnapshot,
+  );
+
+  const layoutActionButtonsFromCellArgs = useCallback(
+    (args: GridMouseCellEventArgs) => {
+      if (!(rowActions?.length || perRowActions) || !containerRef.current) {
+        setActionButtonsTop(0);
+        setActionButtonsHeight(0);
+        return;
+      }
+      const { bounds } = args;
+      const container = containerRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const style = window.getComputedStyle(container);
+      const borderTop = parseFloat(style.borderTopWidth) || 0;
+      const overlayTop = bounds.y - containerRect.top - borderTop;
+      const overlayHeight = bounds.height;
+      const dpr = window.devicePixelRatio;
+      const snap = (val: number) => Math.round(val * dpr) / dpr;
+      setActionButtonsTop(snap(overlayTop));
+      setActionButtonsHeight(snap(overlayHeight));
+    },
+    [rowActions, perRowActions, containerRef],
+  );
+
+  const syncRowChromeFromCellArgs = useCallback(
+    (args: GridMouseCellEventArgs) => {
+      if (!(enableRowHover ?? false)) return;
+      const [, row] = args.location;
+      if (row >= visibleRows) {
+        setHoverRow(undefined);
+        setActionButtonsTop(0);
+        setActionButtonsHeight(0);
+        return;
+      }
+      setHoverRow(row);
+      layoutActionButtonsFromCellArgs(args);
+    },
+    [enableRowHover, visibleRows, layoutActionButtonsFromCellArgs],
+  );
+
+  const clearRowHover = useCallback(() => {
+    setHoverRow(undefined);
+    setActionButtonsTop(0);
+    setActionButtonsHeight(0);
+  }, []);
+
   const onItemHovered = useCallback(
     (args: GridMouseEventArgs) => {
       if (!(enableRowHover ?? false)) return;
+
       const [, row] = args.location;
-      // Don't allow hover on empty filler rows
+
       if (args.kind === "cell" && row >= visibleRows) {
         setHoverRow(undefined);
+        setActionButtonsTop(0);
+        setActionButtonsHeight(0);
         return;
       }
-      const newHoverRow = args.kind !== "cell" ? undefined : row;
-      setHoverRow(newHoverRow);
 
-      if (
-        (rowActions?.length || perRowActions) &&
-        newHoverRow !== undefined &&
-        containerRef.current
-      ) {
-        const { bounds } = args as GridMouseCellEventArgs;
-        const container = containerRef.current;
-        const containerRect = container.getBoundingClientRect();
-
-        // Get precision border width (clientTop is always an integer, which is inaccurate at zoom)
-        const style = window.getComputedStyle(container);
-        const borderTop = parseFloat(style.borderTopWidth) || 0;
-
-        // Convert grid viewport coords -> overlay container padding-box coords.
-        const overlayTop = bounds.y - containerRect.top - borderTop;
-        const overlayHeight = bounds.height;
-
-        // Pixel-perfect snapping using devicePixelRatio.
-        // This ensures the overlay aligns perfectly with physical pixels even at non-standard zoom levels.
-        const dpr = window.devicePixelRatio;
-        const snap = (val: number) => Math.round(val * dpr) / dpr;
-
-        setActionButtonsTop(snap(overlayTop));
-        setActionButtonsHeight(snap(overlayHeight));
+      if (args.kind !== "cell") {
+        setHoverRow(undefined);
+        setActionButtonsTop(0);
+        setActionButtonsHeight(0);
+        return;
       }
+
+      if (args.isTouch || primaryInputCannotHover) {
+        return;
+      }
+
+      setHoverRow(row);
+      layoutActionButtonsFromCellArgs(args as GridMouseCellEventArgs);
     },
-    [enableRowHover, rowActions, perRowActions, visibleRows, containerRef],
+    [enableRowHover, primaryInputCannotHover, layoutActionButtonsFromCellArgs, visibleRows],
   );
 
-  // Handle row action button click
   const handleRowActionClick = useCallback(
     (action: MenuItem) => {
       if (hoverRow === undefined) return;
 
-      // Extract _hiddenKey directly from Arrow table
       const rowId = getHiddenKeyValue(arrowTableRef.current, hoverRow);
 
-      // Send event to backend's OnRowAction event with row ID and menu item tag
       if (events.includes("OnRowAction"))
         eventHandler("OnRowAction", widgetId, [
           {
@@ -96,7 +146,6 @@ export const useRowHover = ({
     [hoverRow, events, eventHandler, widgetId, arrowTableRef],
   );
 
-  // Resolve per-row actions for the currently hovered row
   const resolvedRowActions = useMemo(() => {
     if (!perRowActions || hoverRow === undefined) return rowActions;
     const rowId = getHiddenKeyValue(arrowTableRef.current, hoverRow);
@@ -113,5 +162,7 @@ export const useRowHover = ({
     onItemHovered,
     handleRowActionClick,
     resolvedRowActions,
+    clearRowHover,
+    syncRowChromeFromCellArgs,
   };
 };

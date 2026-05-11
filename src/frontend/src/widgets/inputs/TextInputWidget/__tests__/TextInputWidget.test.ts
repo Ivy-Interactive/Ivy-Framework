@@ -38,6 +38,7 @@ vi.mock("@/components/ui/input", () => {
 
 vi.mock("@/components/ui/input/text-input-variant", () => ({
   textInputSizeVariant: () => "",
+  textInputAffixCellClasses: () => "",
   searchIconVariant: () => "",
   xIconVariant: () => "",
 }));

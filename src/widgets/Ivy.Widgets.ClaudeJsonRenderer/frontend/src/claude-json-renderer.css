@@ -5,6 +5,12 @@
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-size: 0.875rem;
   color: var(--foreground);
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.claude-renderer * {
+  box-sizing: border-box;
 }
 
 .claude-renderer pre {

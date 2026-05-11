@@ -54,9 +54,17 @@ public class AppRepositoryGroup(string title) : IAppRepositoryGroup
 public class AppRepository : IAppRepository
 {
     private readonly Subject<Unit> _reloaded = new();
+    private readonly Subject<IReadOnlySet<string>> _appsRefreshRequested = new();
     private readonly List<Func<AppDescriptor[]>> _factories = [];
 
     public IObservable<Unit> Reloaded => _reloaded;
+    public IObservable<IReadOnlySet<string>> AppsRefreshRequested => _appsRefreshRequested;
+
+    public void RequestAppRefresh(IReadOnlySet<string> appIds)
+    {
+        if (appIds.Count > 0)
+            _appsRefreshRequested.OnNext(appIds);
+    }
 
     private IAppRepositoryNode? Root { get; set; }
 

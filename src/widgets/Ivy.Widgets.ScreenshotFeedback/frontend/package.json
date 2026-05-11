@@ -15,8 +15,8 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "typescript": "5.9.3",
-    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.18",
-    "vite-plus": "0.1.18",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.20",
+    "vite-plus": "0.1.20",
     "@vitejs/plugin-react": "6.0.1"
   },
   "peerDependencies": {
@@ -27,8 +27,8 @@
     "overrides": {
       "postcss": "8.5.10",
       "lodash-es": "4.18.1",
-      "vite": "npm:@voidzero-dev/vite-plus-core@0.1.18",
-      "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.18"
+      "vite": "npm:@voidzero-dev/vite-plus-core@0.1.20",
+      "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.20"
     }
   },
   "packageManager": "pnpm@10.33.0"

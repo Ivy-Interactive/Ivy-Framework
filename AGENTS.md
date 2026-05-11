@@ -348,3 +348,14 @@ Prefer using `ivy cli explain` for command discovery over MCP server tools as it
 
 All Ivy documentation pages are listed on: <https://docs.ivy.app/sitemap.xml>.
 Add ".md" to the end of any URL to go directly to the Markdown version of the doc.
+
+## Ivy CLI
+
+Use the `ivy` CLI for documentation lookups and framework questions:
+
+| Scenario | Command |
+|---|---|
+| You know the topic and want the full reference page | `ivy docs <path>` |
+| You need to browse what documentation exists | `ivy docs list` |
+| You have a "how do I..." question and need a synthesized answer | `ivy ask "your question"` |
+| You need to understand an existing connection's schema | `ivy cli explain connections/<ConnectionName>` |

@@ -418,51 +418,55 @@ export function getCellContent(
   const columnType = column.type?.toLowerCase() || "text";
   const align = column.alignContent;
 
-  // Handle null/undefined values
-  if (cellValue === null || cellValue === undefined) {
-    return createNullCell(editable);
-  }
-
-  // Handle explicit icon type from backend metadata
-  if (column.type === "Icon" && typeof cellValue === "string") {
-    return createIconCell(cellValue, align);
-  }
-
-  // Handle Labels type - supports arrays or comma-separated strings
-  if (column.type === "Labels") {
-    return createLabelsCell(cellValue, align, column.color, column.badgeColorMapping);
-  }
-
-  // Handle explicit link type from backend metadata
-  if (column.type === "Link" && typeof cellValue === "string") {
-    const linkType = column.linkType?.toLowerCase();
-    return createLinkCell(cellValue, editable, align, linkType);
-  }
-
-  // Handle Date and DateTime types
-  if (isDateColumnType(columnType)) {
-    const dateCell = createDateCell(cellValue, columnType, editable, align, column.wrapText);
-    if (dateCell) {
-      return dateCell;
+  const createCell = (): GridCell => {
+    // Handle null/undefined values
+    if (cellValue === null || cellValue === undefined) {
+      return createNullCell(editable);
     }
+
+    // Handle explicit icon type from backend metadata
+    if (column.type === "Icon" && typeof cellValue === "string") {
+      return createIconCell(cellValue, align);
+    }
+
+    // Handle Labels type - supports arrays or comma-separated strings
+    if (column.type === "Labels") {
+      return createLabelsCell(cellValue, align, column.color, column.badgeColorMapping);
+    }
+
+    // Handle explicit link type from backend metadata
+    if (column.type === "Link" && typeof cellValue === "string") {
+      const linkType = column.linkType?.toLowerCase();
+      return createLinkCell(cellValue, editable, align, linkType);
+    }
+
+    // Handle Date and DateTime types
+    if (isDateColumnType(columnType)) {
+      const dateCell = createDateCell(cellValue, columnType, editable, align, column.wrapText);
+      if (dateCell) {
+        return dateCell;
+      }
+    }
+
+    // Handle numeric types
+    if (typeof cellValue === "number" && isNumericColumnType(columnType)) {
+      return createNumberCell(cellValue, editable, align);
+    }
+
+    // Handle boolean types
+    if (typeof cellValue === "boolean") {
+      return createBooleanCell(cellValue, editable, align);
+    }
+
+    // Default to text
+    return createTextCell(cellValue, editable, align, column.wrapText);
+  };
+
+  const gridCell = createCell();
+  if (column.hasCellAction) {
+    return { ...gridCell, cursor: "pointer" };
   }
-
-  // Handle numeric types
-  if (typeof cellValue === "number" && isNumericColumnType(columnType)) {
-    return createNumberCell(cellValue, editable, align);
-  }
-
-  // Handle boolean types
-  if (typeof cellValue === "boolean") {
-    return createBooleanCell(cellValue, editable, align);
-  }
-
-  // REMOVED: Heuristic icon detection (now that we have proper type metadata from backend)
-  // The heuristic was causing false positives for PascalCase text like "Active", "EMP0001", etc.
-  // Now that column.type is properly preserved from backend (#1273), we don't need this fallback
-
-  // Default to text
-  return createTextCell(cellValue, editable, align, column.wrapText);
+  return gridCell;
 }
 
 /**

@@ -19,7 +19,7 @@ const copyIconVariant = cva("", {
 });
 
 const copyButtonSizeVariant = cva(
-  "p-2 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center",
+  "p-2 rounded bg-transparent hover:bg-accent focus:outline-none cursor-pointer flex items-center",
   {
     variants: {
       density: {
@@ -65,20 +65,22 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
 
   return (
     <button
+      type="button"
       onClick={handleCopy}
       aria-label={ariaLabel || "Copy to clipboard"}
       className={cn(
         isIconOnly
-          ? cn(copyButtonSizeVariant({ density }), copied && "bg-primary text-primary-foreground")
+          ? cn(
+              copyButtonSizeVariant({ density }),
+              !copied && "text-muted-foreground hover:text-foreground",
+              copied &&
+                "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus-visible:ring-primary",
+            )
           : "flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer hover:bg-accent hover:shadow-sm border-0",
         !isIconOnly &&
           (copied
             ? "bg-primary text-primary-foreground"
             : "bg-transparent text-muted-foreground hover:text-foreground"),
-        isIconOnly && !copied && "bg-background hover:bg-accent",
-        copied &&
-          isIconOnly &&
-          "hover:bg-primary hover:text-primary-foreground focus-visible:ring-primary",
         className,
       )}
     >

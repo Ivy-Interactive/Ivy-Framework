@@ -37,8 +37,7 @@ public class ConnectedAccountButton(string provider, string? displayName = null,
         return new Button($"Connect {name}")
             .Icon(resolvedIcon)
             .Variant(ButtonVariant.Outline)
-            .Url(connectUrl)
-            .OpenInNewTab();
+            .Url(connectUrl);
     }
 
     internal static string FormatProviderName(string provider) =>

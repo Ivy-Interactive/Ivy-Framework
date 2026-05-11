@@ -9,7 +9,7 @@ public class DataTableView(
     Size? height,
     DataTableColumn[] columns,
     DataTableConfig config,
-    Density density = Density.Medium,
+    Responsive<Density?>? density = null,
     Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellClick = null,
     Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = null,
     MenuItem[]? rowActions = null,
@@ -61,6 +61,6 @@ public class DataTableView(
         // Memoize based on queryable and configuration
         // Don't include the queryable itself as it might change reference
         // Only memoize if all inputs are stable
-        return [(object?)width!, (object?)height!, columns, config, refreshToken?.Token!, density];
+        return [(object?)width!, (object?)height!, columns, config, refreshToken?.Token!, (object?)density!];
     }
 }

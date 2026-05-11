@@ -26,11 +26,16 @@ import { PopoverLink } from "./markdown/PopoverLink";
 import Icon from "@/components/Icon";
 import { Components } from "react-markdown";
 import { parseGitHubAlert, githubAlertStyles } from "@/lib/markdown-utils";
+import yaml from "js-yaml";
 
 interface MarkdownRendererProps {
   content: string;
   onLinkClick?: (url: string) => void;
   dangerouslyAllowLocalFiles?: boolean;
+}
+
+interface FrontmatterData {
+  [key: string]: any;
 }
 
 interface FenceBlock {
@@ -40,6 +45,72 @@ interface FenceBlock {
   infoString: string;
   children: FenceBlock[];
 }
+
+/**
+ * Parses YAML frontmatter from markdown content.
+ * Returns the frontmatter data and the content without frontmatter.
+ */
+function parseFrontmatter(content: string): {
+  frontmatter: FrontmatterData | null;
+  content: string;
+} {
+  const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
+  const match = content.match(frontmatterRegex);
+
+  if (!match) {
+    return { frontmatter: null, content };
+  }
+
+  try {
+    const frontmatterYaml = match[1];
+    const mainContent = match[2];
+    const frontmatter = yaml.load(frontmatterYaml) as FrontmatterData;
+    return { frontmatter, content: mainContent };
+  } catch (error) {
+    // If YAML parsing fails, return content as-is
+    console.warn("Failed to parse frontmatter:", error);
+    return { frontmatter: null, content };
+  }
+}
+
+/**
+ * Component to display frontmatter metadata in a styled card.
+ */
+const FrontmatterDisplay: React.FC<{ data: FrontmatterData }> = memo(({ data }) => {
+  const formatValue = (value: any): string => {
+    if (value === null || value === undefined) return "null";
+    if (typeof value === "boolean") return value ? "true" : "false";
+    if (typeof value === "string") {
+      // Format ISO dates nicely
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
+        try {
+          const date = new Date(value);
+          return date.toLocaleString();
+        } catch {
+          return value;
+        }
+      }
+      return value;
+    }
+    if (typeof value === "object") return JSON.stringify(value, null, 2);
+    return String(value);
+  };
+
+  return (
+    <div className="mb-6 rounded-lg border border-border bg-muted/30 p-4">
+      <div className="grid gap-2">
+        {Object.entries(data).map(([key, value]) => (
+          <div key={key} className="flex items-start gap-3">
+            <span className="font-medium text-muted-foreground text-sm min-w-[100px]">{key}:</span>
+            <span className="text-sm flex-1">{formatValue(value)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+FrontmatterDisplay.displayName = "FrontmatterDisplay";
 
 /**
  * Normalizes nested fenced code blocks so that outer fences use more backticks
@@ -524,7 +595,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     emoji: ({ name }: { name: string }) => <CustomEmoji name={name} />,
   };
 
-  const normalizedContent = useMemo(() => normalizeNestedFences(content), [content]);
+  const { frontmatter, content: contentWithoutFrontmatter } = useMemo(
+    () => parseFrontmatter(content),
+    [content],
+  );
+
+  const normalizedContent = useMemo(
+    () => normalizeNestedFences(contentWithoutFrontmatter),
+    [contentWithoutFrontmatter],
+  );
 
   const urlTransform = useCallback(
     (url: string, key: string) => {
@@ -579,6 +658,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
   return (
     <>
+      {frontmatter && <FrontmatterDisplay data={frontmatter} />}
       <ReactMarkdown
         components={{
           ...componentsParams,

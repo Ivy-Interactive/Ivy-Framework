@@ -246,7 +246,7 @@ public static class CookieRegistryExtensions
         return string.IsNullOrEmpty(prefix) ? name : $"{prefix}__{name}";
     }
 
-    private static CookieOptions CreateAuthCookieOptions(ServerArgs? serverArgs = null, bool forceLaxSameSite = false)
+    private static CookieOptions CreateAuthCookieOptions(bool forceLaxSameSite = false)
     {
         var cookieOptions = new CookieOptions
         {
@@ -257,14 +257,8 @@ public static class CookieRegistryExtensions
             Path = "/",
         };
 
-        // Apply custom configuration if provided (allows apps to customize)
+        // Apply custom configuration if provided
         global::Ivy.Server.ConfigureAuthCookieOptions?.Invoke(cookieOptions);
-
-        // Force non-secure cookies AFTER callback when running in desktop mode
-        if (serverArgs?.ForceNonSecureCookies == true || global::Ivy.Server.ForceNonSecureCookies)
-        {
-            cookieOptions.Secure = false;
-        }
 
         return cookieOptions;
     }

@@ -210,6 +210,9 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
         onPointerDownOutside={(e: Event) => {
           if (isResizingRef.current) e.preventDefault();
         }}
+        onFocusOutside={(e: Event) => {
+          e.preventDefault();
+        }}
         onOpenAutoFocus={(e: Event) => {
           const container = e.currentTarget as HTMLElement | null;
           const target = container?.querySelector<HTMLElement>("[autofocus]");

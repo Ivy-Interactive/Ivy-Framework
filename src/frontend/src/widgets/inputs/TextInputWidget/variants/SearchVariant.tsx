@@ -8,6 +8,7 @@ import { useFocusable } from "@/hooks/use-focus-management";
 import { sidebarMenuRef } from "@/widgets/layouts/sidebar";
 import { Densities } from "@/types/density";
 import {
+  textInputAffixCellClasses,
   textInputSizeVariant,
   searchIconVariant,
   xIconVariant,
@@ -82,28 +83,64 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
-  const hasValue = props.value && props.value.trim() !== "";
-  const showClear = props.nullable && !props.disabled && hasValue;
-
+  const hasValue = Boolean(props.value && String(props.value).trim() !== "");
   const prefixContent = props.slots?.Prefix;
   const suffixContent = props.slots?.Suffix;
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
+  const ghostAffixChrome = Boolean(props.ghost && hasAffixes);
+  const ghostSuffixLayout = Boolean(props.ghost && hasSuffix);
+  const showClear = ghostSuffixLayout
+    ? !props.disabled && hasValue
+    : props.nullable && !props.disabled && hasValue;
+  const showShortcut =
+    Boolean(props.shortcutKey) && !isFocused && !hasValue && !showClear && !props.invalid;
+  const showTrailing = showClear || showShortcut || Boolean(props.invalid);
 
-  // Merge focusRef and inputRef
   const mergedRef = useCallback(
     (element: HTMLInputElement | null) => {
-      // Set focusRef for focus management
       focusRef(element);
-      // Set inputRef for keyboard shortcut handler
-      // Refs are mutable objects by design, so this assignment is safe
       if (inputRef && "current" in inputRef) {
-        // Use Reflect.set to bypass linter
         Reflect.set(inputRef, "current", element);
       }
     },
     [focusRef, inputRef],
+  );
+
+  const kbd = (
+    <kbd className="rounded-selector border border-border bg-muted px-1 py-0.25 text-xs text-foreground">
+      {shortcutDisplay}
+    </kbd>
+  );
+
+  const trailingCluster = (overlay: boolean) => (
+    <>
+      {showClear && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Clear search"
+          onClick={onClear}
+          className={cn(
+            "flex h-6 shrink-0 items-center rounded hover:bg-accent focus:outline-none cursor-pointer",
+            overlay ? "p-1 pointer-events-auto" : "p-0.5",
+          )}
+        >
+          <X className={xIconVariant({ density })} />
+        </button>
+      )}
+      {showShortcut && (
+        <div className={cn("flex h-4 shrink-0 items-center", overlay && "pointer-events-auto")}>
+          {kbd}
+        </div>
+      )}
+      {props.invalid && (
+        <div className={cn("flex h-6 shrink-0 items-center", overlay && "pointer-events-auto")}>
+          <InvalidIcon message={props.invalid} />
+        </div>
+      )}
+    </>
   );
 
   return (
@@ -121,17 +158,12 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
       >
         {hasPrefix && (
-          <div
-            className={cn(
-              "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)] [&_button]:rounded [&_button]:px-1 [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors",
-              !isFocused && "border-r border-input",
-            )}
-          >
+          <div className={textInputAffixCellClasses("prefix", isFocused, ghostAffixChrome)}>
             {prefixContent}
           </div>
         )}
 
-        <div className="relative flex-1">
+        <div className={cn("relative flex-1", ghostSuffixLayout && "min-w-0")}>
           <Search className={searchIconVariant({ density })} />
           <Input
             ref={mergedRef}
@@ -153,14 +185,16 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
               textInputSizeVariant({ density }),
               "pl-8 cursor-pointer border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
               props.invalid && inputStyles.invalidInput,
-              (props.invalid || showClear) && "pr-8",
-              props.shortcutKey &&
+              ghostSuffixLayout && showTrailing && "pr-2",
+              !ghostSuffixLayout && (props.invalid || showClear) && "pr-8",
+              !ghostSuffixLayout &&
+                props.shortcutKey &&
                 !isFocused &&
                 !hasValue &&
                 !showClear &&
                 !props.invalid &&
                 "pr-16",
-              showClear && props.invalid && "pr-16",
+              !ghostSuffixLayout && showClear && props.invalid && "pr-16",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
               "[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden",
               hasPrefix && "rounded-l-none",
@@ -169,41 +203,21 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             )}
             data-testid={props["data-testid"]}
           />
-          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
-            {hasValue && !props.disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear search"
-                onClick={onClear}
-                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
-                style={{ pointerEvents: "auto" }}
-              >
-                <X className={xIconVariant({ density })} />
-              </button>
-            )}
-            {props.shortcutKey && !isFocused && !hasValue && (
-              <div className="pointer-events-auto flex items-center h-4">
-                <kbd className="text-xs text-foreground bg-muted border border-border rounded-selector px-1 py-0.25">
-                  {shortcutDisplay}
-                </kbd>
-              </div>
-            )}
-            {props.invalid && (
-              <div className="flex items-center h-6">
-                <InvalidIcon message={props.invalid} />
-              </div>
-            )}
-          </div>
+          {!ghostSuffixLayout && showTrailing && (
+            <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-10 flex items-center justify-end gap-2 pr-2.5">
+              {trailingCluster(true)}
+            </div>
+          )}
         </div>
 
+        {ghostSuffixLayout && showTrailing && (
+          <div className="relative z-10 flex shrink-0 items-center gap-0 self-stretch bg-transparent px-0 text-muted-foreground">
+            {trailingCluster(false)}
+          </div>
+        )}
+
         {hasSuffix && (
-          <div
-            className={cn(
-              "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)] [&_button]:rounded [&_button]:px-1 [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors",
-              !isFocused && "border-l border-input",
-            )}
-          >
+          <div className={textInputAffixCellClasses("suffix", isFocused, ghostAffixChrome)}>
             {suffixContent}
           </div>
         )}

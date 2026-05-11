@@ -11,18 +11,7 @@ interface TextShimmerProps {
   spread?: number;
 }
 
-// Use component properties instead of string factory (avoids deprecation warnings)
-const motionComponents = {
-  p: m.p,
-  span: m.span,
-  div: m.div,
-  h1: m.h1,
-  h2: m.h2,
-  h3: m.h3,
-  h4: m.h4,
-  h5: m.h5,
-  h6: m.h6,
-} as const;
+// Removed motionComponents to avoid module-level evaluation of 'm' which can be undefined during import
 
 export function TextShimmer({
   children,
@@ -32,8 +21,7 @@ export function TextShimmer({
   spread = 2,
 }: TextShimmerProps) {
   const MotionComponent =
-    (motionComponents as Record<string, typeof m.div>)[(Component as unknown as string) || "p"] ??
-    m.p;
+    (m as unknown as Record<string, typeof m.div>)[Component as unknown as string] ?? m.p;
 
   const dynamicSpread = children.length * spread;
 

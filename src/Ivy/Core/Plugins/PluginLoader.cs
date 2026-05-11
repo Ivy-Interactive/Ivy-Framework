@@ -1,28 +1,12 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using Ivy.Plugins;
-using Ivy.Plugins.Messaging;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Ivy.Core.Plugins;
 
-internal class PluginContextWithConfiguration(PluginContextBase inner, IConfiguration configuration) : IIvyPluginContext
-{
-    public IServiceCollection Services => inner.Services;
-    public IConfiguration Configuration => configuration;
-
-    public void AddApp(AppDescriptor descriptor) => inner.AddApp(descriptor);
-    public void AddAppsFromAssembly(Assembly assembly) => inner.AddAppsFromAssembly(assembly);
-    public void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer) => inner.AddMenuItems(transformer);
-    public void AddFooterMenuItems(Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer) => inner.AddFooterMenuItems(transformer);
-    public void AddBadgeProvider(string menuTag, Func<IServiceProvider, int> countProvider) => inner.AddBadgeProvider(menuTag, countProvider);
-    public void RegisterMessagingChannel(IMessagingChannel channel) => inner.RegisterMessagingChannel(channel);
-    public void UseWebApplication(Action<WebApplication> configure) => inner.UseWebApplication(configure);
-    public void UseWebApplicationBuilder(Action<WebApplicationBuilder> configure) => inner.UseWebApplicationBuilder(configure);
-}
 
 public class PluginLoader : IPluginManager
 {
@@ -48,7 +32,8 @@ public class PluginLoader : IPluginManager
         _logger = logger;
         _sharedAssemblyNames = new HashSet<string>(sharedAssemblyNames ?? [])
         {
-            "Ivy.Plugin.Abstractions"
+            "Ivy.Plugin.Abstractions",
+            "Ivy"
         };
     }
 
@@ -154,7 +139,7 @@ public class PluginLoader : IPluginManager
             return null;
         }
 
-        // Shadow-copy all DLLs so the runtime loads fresh bytes on reload
+        // Shadow-copy all DLLs and deps.json so the runtime loads fresh bytes on reload
         var shadowDir = Path.Combine(Path.GetTempPath(), "ivy-plugins", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(shadowDir);
         var shadowFiles = new List<string>();
@@ -163,13 +148,40 @@ public class PluginLoader : IPluginManager
             var dest = Path.Combine(shadowDir, Path.GetFileName(src));
             File.Copy(src, dest, overwrite: true);
             shadowFiles.Add(dest);
+
+            // Also copy the .deps.json if one exists next to this DLL
+            var depsFile = Path.ChangeExtension(src, ".deps.json");
+            if (File.Exists(depsFile))
+            {
+                File.Copy(depsFile, Path.Combine(shadowDir, Path.GetFileName(depsFile)), overwrite: true);
+            }
         }
 
-        var found = new List<(Type PluginType, Assembly Assembly, AssemblyLoadContext Context)>();
+        // Determine the main plugin DLL (matches directory name) for the AssemblyDependencyResolver
+        var dirName = Path.GetFileName(directory);
+        var mainDllPath = shadowFiles.FirstOrDefault(f =>
+            Path.GetFileNameWithoutExtension(f).Equals(dirName, StringComparison.OrdinalIgnoreCase));
+
+        // Fall back to first DLL that has a matching .deps.json in the shadow directory
+        mainDllPath ??= shadowFiles.FirstOrDefault(f =>
+            File.Exists(Path.ChangeExtension(f, ".deps.json")));
+
+        // Final fallback: first DLL
+        mainDllPath ??= shadowFiles[0];
+
+        // Create a single load context for the entire plugin
+        var loadContext = new PluginAssemblyLoadContext(mainDllPath, _sharedAssemblyNames);
+
+        // Load non-shared DLLs into the context and look for the [IvyPlugin] attribute
+        var found = new List<(Type PluginType, Assembly Assembly)>();
 
         foreach (var dllPath in shadowFiles)
         {
-            var loadContext = new PluginAssemblyLoadContext(dllPath, _sharedAssemblyNames);
+            // Skip DLLs that match shared assemblies — they come from the host
+            var assemblyName = Path.GetFileNameWithoutExtension(dllPath);
+            if (_sharedAssemblyNames.Contains(assemblyName))
+                continue;
+
             Assembly assembly;
             try
             {
@@ -192,7 +204,7 @@ public class PluginLoader : IPluginManager
                 return null;
             }
 
-            found.Add((attr.PluginType, assembly, loadContext));
+            found.Add((attr.PluginType, assembly));
         }
 
         if (found.Count == 0)
@@ -209,9 +221,9 @@ public class PluginLoader : IPluginManager
             return null;
         }
 
-        var (pluginType, pluginAssembly, context) = found[0];
+        var (pluginType, pluginAssembly) = found[0];
         var instance = (IIvyPlugin)ActivatorUtilities.CreateInstance(serviceProvider, pluginType);
-        return (instance, pluginAssembly, context, directory);
+        return (instance, pluginAssembly, loadContext, directory);
     }
 
     private List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)> TopologicalSort(
@@ -289,8 +301,6 @@ public class PluginLoader : IPluginManager
         {
             foreach (var plugin in _plugins)
             {
-                IIvyPluginContext contextToUse = context;
-
                 if (plugin.Instance.ConfigurationSchema is { } schema)
                 {
                     var errors = ValidatePluginConfiguration(
@@ -314,13 +324,13 @@ public class PluginLoader : IPluginManager
                         schema,
                         context.Configuration);
 
-                    // Create context wrapper with defaults applied
-                    contextToUse = new PluginContextWithConfiguration(context, configWithDefaults);
+                    context.PushConfiguration(configWithDefaults);
                 }
 
                 context.SetCurrentPlugin(plugin.Instance.Manifest.Id, plugin.Directory);
-                plugin.Instance.Configure(contextToUse);
+                plugin.Instance.Configure(context);
                 context.ClearCurrentPlugin();
+                context.PopConfiguration();
             }
         }
         finally
@@ -474,8 +484,6 @@ public class PluginLoader : IPluginManager
             // Configure context
             if (_pluginContext is not null)
             {
-                IIvyPluginContext contextToUse = _pluginContext;
-
                 // Apply defaults if schema exists
                 if (plugin.Instance.ConfigurationSchema is { } configSchema && _configuration is not null)
                 {
@@ -484,12 +492,13 @@ public class PluginLoader : IPluginManager
                         configSchema,
                         _configuration);
 
-                    contextToUse = new PluginContextWithConfiguration(_pluginContext, configWithDefaults);
+                    _pluginContext.PushConfiguration(configWithDefaults);
                 }
 
                 _pluginContext.SetCurrentPlugin(manifest.Id, pluginPath);
-                plugin.Instance.Configure(contextToUse);
+                plugin.Instance.Configure(_pluginContext);
                 _pluginContext.ClearCurrentPlugin();
+                _pluginContext.PopConfiguration();
                 _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
                 plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             }
@@ -507,6 +516,16 @@ public class PluginLoader : IPluginManager
         finally
         {
             _lock.ExitWriteLock();
+        }
+
+        // Reload app repository so newly added apps appear in the UI
+        if (loadedPluginId is not null)
+        {
+            _pluginContext?.ReloadApps();
+            // Refresh any open tabs showing apps from this plugin (e.g. after reload)
+            var appIds = _pluginContext?.GetPluginAppIds(loadedPluginId!);
+            if (appIds is { Count: > 0 })
+                _pluginContext!.RefreshApps(appIds);
         }
 
         // Fire event outside the lock to avoid deadlocks — subscribers may call

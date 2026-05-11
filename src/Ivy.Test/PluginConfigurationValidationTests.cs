@@ -330,8 +330,9 @@ public class PluginConfigurationValidationTests
                 .Build();
         }
 
-        public override IConfiguration Configuration => _configuration;
+        protected override IConfiguration BaseConfiguration => _configuration;
         protected override AppRepository AppRepository => _appRepository;
+        protected override IReadOnlySet<string> ReservedPaths => new HashSet<string>();
         protected override WebApplicationBuilder Builder => _builder;
     }
 

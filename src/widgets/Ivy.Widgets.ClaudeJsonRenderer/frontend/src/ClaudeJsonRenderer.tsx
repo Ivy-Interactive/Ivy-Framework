@@ -166,10 +166,12 @@ function AssistantMessage({
   event,
   showThinking,
   toolResults,
+  skipTextBlocks = false,
 }: {
   event: AssistantEvent;
   showThinking: boolean;
   toolResults: Map<string, string>;
+  skipTextBlocks?: boolean;
 }) {
   const content = event.message?.content;
   if (!Array.isArray(content)) return null;
@@ -178,6 +180,7 @@ function AssistantMessage({
     <div className="my-3">
       {content.map((block: ContentBlock, i: number) => {
         if (block.type === "text" && block.text) {
+          if (skipTextBlocks) return null;
           return (
             <div key={i} className="claude-renderer">
               <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
@@ -269,6 +272,9 @@ export const ClaudeJsonRenderer: React.FC<ClaudeJsonRendererProps> = ({
   }, [parsedEvents, handleComplete]);
 
   const style: React.CSSProperties = {
+    width: "100%",
+    boxSizing: "border-box",
+    minWidth: 0,
     ...getWidth(width),
     ...getHeight(height),
     overflow: "auto",
@@ -298,12 +304,23 @@ export const ClaudeJsonRenderer: React.FC<ClaudeJsonRendererProps> = ({
         }
 
         if (event.type === "assistant") {
+          const nextEvent = parsedEvents[index + 1];
+          const isLastBeforeResult = nextEvent?.type === "result";
+          const assistantText = event.message?.content
+            ?.filter((b: ContentBlock) => b.type === "text")
+            .map((b: ContentBlock) => b.text)
+            .join("\n")
+            .trim();
+          const skipText = isLastBeforeResult && !!assistantText &&
+            (nextEvent as ResultEvent).result?.trim() === assistantText;
+
           return (
             <AssistantMessage
               key={index}
               event={event}
               showThinking={showThinking}
               toolResults={toolResults}
+              skipTextBlocks={skipText}
             />
           );
         }

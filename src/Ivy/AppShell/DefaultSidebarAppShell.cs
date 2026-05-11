@@ -92,6 +92,48 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
             }
         }, search, appRepository.Reloaded.ToTrigger());
 
+        // Refresh tabs/pages when a plugin's apps are reloaded
+        UseEffect(() =>
+        {
+            var subscription = appRepository.AppsRefreshRequested.Subscribe(appIds =>
+            {
+                if (settings.Navigation == AppShellNavigation.Pages)
+                {
+                    // Pages mode: re-open the current app if it's affected
+                    if (currentApp.Value is { } host && appIds.Contains(host.AppId))
+                    {
+                        currentApp.Set(new NavigateArgs(host.AppId).ToAppHost(args.ConnectionId));
+                    }
+                }
+                else
+                {
+                    // Tabs mode: refresh affected tabs by changing their RefreshToken
+                    var updated = tabs.Value;
+                    var changed = false;
+                    for (int i = 0; i < updated.Length; i++)
+                    {
+                        if (appIds.Contains(updated[i].AppId))
+                        {
+                            var tab = updated[i];
+                            var app = appRepository.GetApp(tab.AppId);
+                            var appHost = new NavigateArgs(tab.AppId).ToAppHost(args.ConnectionId);
+                            updated = updated.SetItem(i, tab with
+                            {
+                                RefreshToken = Guid.NewGuid().ToString(),
+                                AppHost = appHost,
+                                Title = app?.Title ?? tab.Title,
+                                Icon = app?.Icon ?? tab.Icon
+                            });
+                            changed = true;
+                        }
+                    }
+                    if (changed)
+                        tabs.Set(updated);
+                }
+            });
+            return System.Reactive.Disposables.Disposable.Create(() => subscription.Dispose());
+        }, [EffectTrigger.OnMount()]);
+
         bool IsErrorApp(string? appId) =>
             appId != null && appRepository.GetAppOrDefault(appId).Id == AppIds.ErrorNotFound;
 

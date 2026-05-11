@@ -58,6 +58,28 @@ public static class ValidationHelper
             return url;
         }
 
+        // Allow anchor links (starting with #)
+        if (url.StartsWith('#'))
+        {
+            if (url.Contains('?') || url.Contains('&'))
+            {
+                return null; // Query parameters not allowed in anchor links
+            }
+
+            var afterHash = url.Substring(1);
+            if (afterHash.Contains("://"))
+            {
+                return null; // Protocol injection attempt
+            }
+
+            if (!Regex.IsMatch(url, @"^#[^?&]*$"))
+            {
+                return null;
+            }
+
+            return url;
+        }
+
         // For external URLs, validate protocol and optionally origin
         try
         {

@@ -79,6 +79,7 @@
     "filter-query-editor": "2.2.0",
     "framer-motion": "12.23.24",
     "jose": "6.1.0",
+    "js-yaml": "^4.1.1",
     "katex": "0.16.25",
     "lodash": "4.18.1",
     "lucide-react": "0.562.0",
@@ -108,6 +109,7 @@
     "@playwright/test": "1.56.1",
     "@swc/helpers": "0.5.17",
     "@types/canvas-confetti": "1.9.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/lodash": "4.17.20",
     "@types/mdast": "^4.0.4",
     "@types/node": "24.10.0",
@@ -122,10 +124,10 @@
     "lint-staged": "^16.4.0",
     "tailwindcss": "4.1.16",
     "typescript": "5.9.3",
-    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.18",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.20",
     "vite-plugin-mkcert": "^1.17.10",
-    "vite-plus": "0.1.18",
-    "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.18"
+    "vite-plus": "0.1.20",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.20"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx}": [
@@ -142,15 +144,15 @@
       "postcss": "8.5.10",
       "uuid": "14.0.0",
       "@swc/helpers": "0.5.17",
-      "axios": "1.15.0",
+      "axios": "1.15.2",
       "dompurify": "3.4.0",
       "follow-redirects": ">=1.16.0",
       "lodash-es": "4.18.1",
       "minimatch": "9.0.7",
       "remark-mermaid-plugin>mermaid": "11.12.1",
       "rollup": ">=4.59.0",
-      "vite": "npm:@voidzero-dev/vite-plus-core@0.1.18",
-      "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.18"
+      "vite": "npm:@voidzero-dev/vite-plus-core@0.1.20",
+      "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.20"
     }
   }
 }
