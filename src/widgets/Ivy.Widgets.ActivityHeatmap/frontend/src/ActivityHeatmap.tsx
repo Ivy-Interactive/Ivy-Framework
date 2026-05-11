@@ -1,14 +1,63 @@
 import "./style.css";
-import { tokens } from "@ivy-interactive/ivy-design-system";
-import { ActivityHeatmapProps, ContributionDay } from "./types";
+import { ActivityHeatmapProps, ContributionDay, HeatmapSupportedColor } from "./types";
 
-function buildColorScheme(baseToken: string): string[] {
+const HEATMAP_SUPPORTED_COLORS = [
+  "black",
+  "white",
+  "slate",
+  "gray",
+  "zinc",
+  "neutral",
+  "stone",
+  "red",
+  "orange",
+  "amber",
+  "yellow",
+  "lime",
+  "green",
+  "emerald",
+  "teal",
+  "cyan",
+  "sky",
+  "blue",
+  "indigo",
+  "violet",
+  "purple",
+  "fuchsia",
+  "pink",
+  "rose",
+  "primary",
+  "secondary",
+  "destructive",
+  "success",
+  "warning",
+  "info",
+  "muted"
+] as const;
+
+function normalizeColorScheme(value: string): string {
+  return value.split(/(?=[A-Z])/).join("-").toLowerCase();
+}
+
+function resolveHeatmapColor(value: string): HeatmapSupportedColor {
+  const normalized = normalizeColorScheme(value);
+  return HEATMAP_SUPPORTED_COLORS.includes(normalized as HeatmapSupportedColor)
+    ? (normalized as HeatmapSupportedColor)
+    : "primary";
+}
+
+function resolveHeatmapBaseColor(colorScheme: string): string {
+  const safeColor = resolveHeatmapColor(colorScheme);
+  return `var(--color-${safeColor})`;
+}
+
+function buildColorScheme(baseColor: string): string[] {
   return [
-    tokens["color-border"],
-    `color-mix(in srgb, ${baseToken} 25%, transparent)`,
-    `color-mix(in srgb, ${baseToken} 50%, transparent)`,
-    `color-mix(in srgb, ${baseToken} 75%, transparent)`,
-    baseToken,
+    "color-mix(in srgb, var(--color-neutral) 15%, transparent)",
+    `color-mix(in srgb, ${baseColor} 25%, transparent)`,
+    `color-mix(in srgb, ${baseColor} 50%, transparent)`,
+    `color-mix(in srgb, ${baseColor} 75%, transparent)`,
+    baseColor,
   ];
 }
 
@@ -121,10 +170,7 @@ export function ActivityHeatmap({
 }: ActivityHeatmapProps) {
   const weeks = buildGrid(data, startDate, endDate);
   const maxCount = Math.max(0, ...data.map((d) => d.count));
-  const colorTokenName = colorScheme.split(/(?=[A-Z])/).join("-").toLowerCase();
-  // ToDo: check why `ColorInputVariant.Swatch` renders `secondary` and `muted` as `var(--border)` in frontend
-  const colorToken = `color-${["secondary", "muted"].includes(colorTokenName) ? "border" : colorTokenName}` as keyof typeof tokens;
-  const colors = buildColorScheme(tokens[colorToken]);
+  const colors = buildColorScheme(resolveHeatmapBaseColor(colorScheme));
   const clickable = events.includes("OnDayClick");
 
   // Compute month labels: for each week, check if the first non-null day is the first occurrence of a new month
