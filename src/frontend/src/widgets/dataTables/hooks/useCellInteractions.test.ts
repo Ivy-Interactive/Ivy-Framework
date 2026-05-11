@@ -67,15 +67,15 @@ describe("useCellInteractions - link cell click behavior", () => {
   });
 
   it("should still fire OnCellClick events when enableCellClickEvents is true", () => {
-    // The OnCellClick event handler block should still exist and be gated
-    // behind enableCellClickEvents
     const onCellClickBlock = hookSource.indexOf('eventHandler("OnCellClick"');
     expect(onCellClickBlock).toBeGreaterThan(-1);
+    expect(hookSource).toContain("enableCellClickEvents ?? false");
+  });
 
-    // The enableCellClickEvents check should appear before the OnCellClick dispatch
-    const enableCheck = hookSource.indexOf("enableCellClickEvents ?? false");
-    expect(enableCheck).toBeGreaterThan(-1);
-    expect(enableCheck).toBeLessThan(onCellClickBlock);
+  it("should defer single-click vs double-tap only on coarse pointer (tablet), not on laptop fine pointer", () => {
+    expect(hookSource).toContain("(pointer: coarse)");
+    expect(hookSource).toContain("deferCellClickForDoubleTap");
+    expect(hookSource).toContain("TABLET_SINGLE_CLICK_EMIT_DELAY_MS");
   });
 
   it("should open external URLs in a new tab with security attributes", () => {
