@@ -73,6 +73,9 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
 
   const selectedLabel = selectedOption?.label;
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  /** True after the user edits the panel search field; reset when the dropdown closes. */
+  const userFilteringRef = useRef(false);
   const [isEllipsed, setIsEllipsed] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -119,6 +122,26 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
     });
   }, [validOptions, isSearchEnabled, searchTerm, searchMode]);
 
+  // Radix Select runs focusSelectedItem in a child useEffect: it focuses the selected item, or the
+  // listbox when there are no items — which steals focus from the header search field whenever the
+  // filtered item set changes (0 matches, 1 match, after clearing text, etc.). Parent useEffect runs
+  // after the child's; a macrotask catches deferred focus work inside Radix.
+  useEffect(() => {
+    if (!isOpen || !isSearchEnabled || !userFilteringRef.current) return;
+    const input = searchInputRef.current;
+    if (!input) return;
+
+    const restore = () => {
+      const active = document.activeElement;
+      if (active === input || active === triggerRef.current) return;
+      input.focus({ preventScroll: true });
+    };
+
+    restore();
+    const t = window.setTimeout(restore, 0);
+    return () => clearTimeout(t);
+  }, [filteredOptions.length, isOpen, isSearchEnabled, searchTerm]);
+
   const groupedOptions = filteredOptions.reduce<Record<string, typeof validOptions>>(
     (acc, option) => {
       const key = option.group || "default";
@@ -140,6 +163,9 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
 
   const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen);
+    if (!newOpen) {
+      userFilteringRef.current = false;
+    }
     if (newOpen) {
       if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
     } else {
@@ -253,10 +279,14 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
+                  ref={searchInputRef}
                   type="text"
                   placeholder="Search..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    userFilteringRef.current = true;
+                    setSearchTerm(e.target.value);
+                  }}
                   onKeyDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                   className="pl-9 h-9"
