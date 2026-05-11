@@ -1,6 +1,6 @@
 # Ivy.Widgets.ActivityHeatmap
 
-GitHub-style activity heatmap widget for Ivy Framework. Renders a 52-week × 7-day contribution graph grid.
+GitHub-style activity heatmap widget for Ivy Framework. Renders a 52-week × 7-day activity graph grid.
 
 ## Usage
 
@@ -9,7 +9,7 @@ using Ivy.Widgets.ActivityHeatmap;
 
 var data = new[]
 {
-    new ContributionDay { Date = DateOnly.FromDateTime(DateTime.Today), Count = 5 },
+    new Activity { Date = DateOnly.FromDateTime(DateTime.Today), Count = 5 },
 };
 
 new ActivityHeatmap()
@@ -22,7 +22,7 @@ new ActivityHeatmap()
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `Data` | `ContributionDay[]` | `[]` | Daily contribution data |
+| `Data` | `Activity[]` | `[]` | Daily activity data |
 | `ColorScheme` | `string` | `"green"` | Color scheme: green, blue, purple, orange, pink |
 | `ShowTooltip` | `bool` | `true` | Show date/count tooltip on hover |
 | `ShowMonthLabels` | `bool` | `true` | Show month labels along the top |
@@ -32,4 +32,4 @@ new ActivityHeatmap()
 
 | Event | Args | Description |
 |-------|------|-------------|
-| `OnDayClick` | `ContributionDay` | Fired when user clicks a day cell |
+| `OnDayClick` | `Activity` | Fired when user clicks a day cell |
