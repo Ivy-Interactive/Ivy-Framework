@@ -37,9 +37,20 @@ class ActivityHeatmapDemo : ViewBase
 
             | Text.H1("ActivityHeatmap")
             | Text.H2("Basic Usage")
-            | new CodeBlock(@$"new ActivityHeatmap()
+            | new CodeBlock(@$"
+Activity[] data = 
+[
+    {{
+        Date = DateOnly.FromDateTime(DateTime.Today),
+        Count = 16
+    }}
+];
+
+new ActivityHeatmap()
     .Data(data)
-    .ColorScheme(Colors.{selectedColor.Value})y
+    .StartDate({startDate.Value})
+    .EndDate({endDate.Value})
+    .ColorScheme(Colors.{selectedColor.Value})
     .ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
     .ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
     .OnDayClick(day => Console.WriteLine(...));", Languages.Csharp)
@@ -57,10 +68,14 @@ class ActivityHeatmapDemo : ViewBase
                     | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
                     | Text.P(selectedColor.Value.ToString())
                     | showDayLabels.ToBoolInput().Label("Show day labels")
-                    | showMonthLabels.ToBoolInput().Label("Show month labels"))
+                    | showMonthLabels.ToBoolInput().Label("Show month labels")
+                    | startDate.ToDateInput().WithLabel("Start date")
+                    | endDate.ToDateInput().WithLabel("End date"))
 
                 | new ActivityHeatmap()
                     .Data(data)
+                    .StartDate(startDate.Value)
+                    .EndDate(endDate.Value)
                     .ColorScheme(selectedColor.Value)
                     .ShowDayLabels(showDayLabels.Value)
                     .ShowMonthLabels(showMonthLabels.Value)
