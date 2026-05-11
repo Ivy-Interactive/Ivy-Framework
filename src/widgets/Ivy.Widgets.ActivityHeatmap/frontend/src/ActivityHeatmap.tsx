@@ -51,9 +51,14 @@ function getLevel(count: number, maxCount: number): number {
   return 4;
 }
 
-function buildGrid(data: ContributionDay[]): (ContributionDay | null)[][] {
-  if (data.length === 0) {
-    // Default to last 52 weeks ending today
+function buildGrid(
+  data: ContributionDay[],
+  startDate?: string,
+  endDate?: string
+): (ContributionDay | null)[][] {
+  const hasOverride = startDate || endDate;
+
+  if (data.length === 0 && !hasOverride) {
     const today = new Date();
     const end = new Date(today);
     const start = new Date(today);
@@ -62,8 +67,13 @@ function buildGrid(data: ContributionDay[]): (ContributionDay | null)[][] {
   }
 
   const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
-  const firstDate = new Date(sorted[0].date + "T00:00:00");
-  const lastDate = new Date(sorted[sorted.length - 1].date + "T00:00:00");
+
+  const firstStr = startDate ?? (sorted.length > 0 ? sorted[0].date : null);
+  const lastStr  = endDate   ?? (sorted.length > 0 ? sorted[sorted.length - 1].date : null);
+
+  const today = new Date();
+  const firstDate = firstStr ? new Date(firstStr + "T00:00:00") : new Date(new Date().setDate(today.getDate() - 364));
+  const lastDate  = lastStr  ? new Date(lastStr  + "T00:00:00") : new Date();
 
   return buildGridFromRange(data, firstDate, lastDate);
 }
@@ -120,8 +130,10 @@ export function ActivityHeatmap({
   showTooltip = true,
   showMonthLabels = true,
   showDayLabels = true,
+  startDate,
+  endDate,
 }: ActivityHeatmapProps) {
-  const weeks = buildGrid(data);
+  const weeks = buildGrid(data, startDate, endDate);
   const maxCount = Math.max(0, ...data.map((d) => d.count));
   const colors = COLOR_SCHEMES[colorScheme.toLowerCase()] ?? COLOR_SCHEMES["primary"]!;
   const clickable = events.includes("OnDayClick");

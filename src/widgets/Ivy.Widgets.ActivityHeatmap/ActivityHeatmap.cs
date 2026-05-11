@@ -6,19 +6,20 @@ public static class ActivityHeatmapGrid
     /// <summary>
     /// Builds a weeks × 7-days matrix. Pads left to the preceding Sunday of the earliest date,
     /// pads right to the following Saturday of the latest date. Empty days get Count = 0.
+    /// When startDate or endDate is provided, they override the data-derived bounds.
     /// </summary>
-    public static Activity[][] BuildGrid(Activity[] data)
+    public static Activity[][] BuildGrid(Activity[] data, DateOnly? startDate = null, DateOnly? endDate = null)
     {
-        if (data.Length == 0)
+        if (data.Length == 0 && startDate == null && endDate == null)
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
-            var end = today;
-            var start = today.AddDays(-364);
-            return BuildGridFromRange(data, start, end);
+            return BuildGridFromRange(data, today.AddDays(-364), today);
         }
 
         var sorted = data.OrderBy(d => d.Date).ToArray();
-        return BuildGridFromRange(data, sorted[0].Date, sorted[^1].Date);
+        var first = startDate ?? (sorted.Length > 0 ? sorted[0].Date : DateOnly.FromDateTime(DateTime.Today).AddDays(-364));
+        var last  = endDate  ?? (sorted.Length > 0 ? sorted[^1].Date : DateOnly.FromDateTime(DateTime.Today));
+        return BuildGridFromRange(data, first, last);
     }
 
     /// <summary>
@@ -91,6 +92,12 @@ public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
     /// <summary>Show weekday labels on the left (Mon, Wed, Fri).</summary>
     [Prop] public bool ShowDayLabels { get; init; } = true;
 
+    /// <summary>Pins the start of the visible range, overriding the data-derived minimum date.</summary>
+    [Prop] public DateOnly? StartDate { get; init; }
+
+    /// <summary>Pins the end of the visible range, overriding the data-derived maximum date.</summary>
+    [Prop] public DateOnly? EndDate { get; init; }
+
     /// <summary>Fired when the user clicks a day cell.</summary>
     [Event] public EventHandler<Event<ActivityHeatmap, Activity>>? OnDayClick { get; init; }
 }
@@ -111,6 +118,12 @@ public static class ActivityHeatmapExtensions
 
     public static ActivityHeatmap ShowDayLabels(this ActivityHeatmap w, bool show = true) =>
         w with { ShowDayLabels = show };
+
+    public static ActivityHeatmap StartDate(this ActivityHeatmap w, DateOnly? date) =>
+        w with { StartDate = date };
+
+    public static ActivityHeatmap EndDate(this ActivityHeatmap w, DateOnly? date) =>
+        w with { EndDate = date };
 
     public static ActivityHeatmap OnDayClick(
         this ActivityHeatmap w,
