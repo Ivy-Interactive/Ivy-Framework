@@ -103,6 +103,8 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
 
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     if (value) {
       const img = new Image();
       img.onload = () => {
@@ -117,9 +119,13 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
       img.src = value.startsWith("data:") ? value : `data:image/png;base64,${value}`;
     } else {
       clearCanvas();
-      setTimeout(() => setHasDrawn(false), 0);
+      timeoutId = setTimeout(() => setHasDrawn(false), 0);
       pathsRef.current = [];
     }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [value, bgColor, clearCanvas]);
 
   const getCanvasPoint = (e: React.MouseEvent | React.TouchEvent): Point | null => {

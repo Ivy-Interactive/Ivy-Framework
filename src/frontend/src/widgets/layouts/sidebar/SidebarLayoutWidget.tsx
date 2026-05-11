@@ -743,6 +743,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
 
     // Find the path to the active item
     const path = findPathToTag(items, activeTag);
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     if (path && path.length > 0) {
       // Always expand parent sections
@@ -753,7 +754,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       if (isInitialMount.current) {
         // Wait for the DOM to update, then scroll to the active item
         // Use a longer timeout to ensure collapsibles have fully expanded
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           try {
             const activeElement = containerRef.current?.querySelector(
               `[data-menu-item="${activeTag}"]`,
@@ -775,6 +776,10 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     }
 
     prevActiveTagRef.current = activeTag;
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [activeTag, items, searchActive, findPathToTag]);
 
   const handleExpandChange = useCallback((pathKey: string, expanded: boolean) => {
