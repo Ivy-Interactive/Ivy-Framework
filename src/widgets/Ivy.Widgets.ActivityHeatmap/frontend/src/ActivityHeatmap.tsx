@@ -51,6 +51,13 @@ function getLevel(count: number, maxCount: number): number {
   return 4;
 }
 
+function formatLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function buildGrid(
   data: ContributionDay[],
   startDate?: string,
@@ -102,7 +109,7 @@ function buildGridFromRange(
   while (current <= end) {
     const week: (ContributionDay | null)[] = [];
     for (let d = 0; d < 7; d++) {
-      const dateStr = current.toISOString().slice(0, 10);
+      const dateStr = formatLocalDateKey(current);
       week.push(dataMap.get(dateStr) ?? { date: dateStr, count: 0 });
       current.setDate(current.getDate() + 1);
     }
