@@ -8,7 +8,6 @@ import {
   SelectLabel,
   SelectSeparator,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
@@ -173,7 +172,14 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       onBlur={handleTriggerBlur}
       onFocus={handleTriggerFocus}
     >
-      <SelectValue placeholder={placeholder} />
+      <span
+        className={cn(
+          "flex-1 truncate text-left pointer-events-none",
+          !hasValue && "text-muted-foreground",
+        )}
+      >
+        {hasValue ? (selectedLabel ?? stringValue) : placeholder}
+      </span>
       {((nullable && hasValue && !disabled) || invalid || loading) && (
         <div className="flex items-center gap-1 px-1 ml-auto shrink-0 pointer-events-none">
           {loading && (
