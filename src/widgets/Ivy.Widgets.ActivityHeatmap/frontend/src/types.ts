@@ -1,4 +1,4 @@
-export interface ContributionDay {
+export interface Activity {
   date: string; // "YYYY-MM-DD"
   count: number;
 }
@@ -15,7 +15,7 @@ export interface ActivityHeatmapProps {
   height?: string;
   events?: string[];
   eventHandler: IvyEventHandler;
-  data?: ContributionDay[];
+  data?: Activity[];
   colorScheme?: string;
   showTooltip?: boolean;
   showMonthLabels?: boolean;

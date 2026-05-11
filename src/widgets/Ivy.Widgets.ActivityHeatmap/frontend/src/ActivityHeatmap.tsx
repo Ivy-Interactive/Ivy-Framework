@@ -1,5 +1,5 @@
 import "./style.css";
-import { ActivityHeatmapProps, ContributionDay, HeatmapSupportedColor } from "./types";
+import { ActivityHeatmapProps, Activity, HeatmapSupportedColor } from "./types";
 
 const HEATMAP_SUPPORTED_COLORS = [
   "black",
@@ -87,10 +87,10 @@ function formatLocalDateKey(date: Date): string {
 }
 
 function buildGrid(
-  data: ContributionDay[],
+  data: Activity[],
   startDate?: string,
   endDate?: string
-): (ContributionDay | null)[][] {
+): (Activity | null)[][] {
   const hasOverride = startDate || endDate;
 
   if (data.length === 0 && !hasOverride) {
@@ -114,10 +114,10 @@ function buildGrid(
 }
 
 function buildGridFromRange(
-  data: ContributionDay[],
+  data: Activity[],
   firstDate: Date,
   lastDate: Date
-): (ContributionDay | null)[][] {
+): (Activity | null)[][] {
   // Pad left to preceding Sunday
   const start = new Date(firstDate);
   start.setDate(start.getDate() - start.getDay());
@@ -126,16 +126,16 @@ function buildGridFromRange(
   const end = new Date(lastDate);
   end.setDate(end.getDate() + (6 - end.getDay()));
 
-  const dataMap = new Map<string, ContributionDay>();
+  const dataMap = new Map<string, Activity>();
   for (const day of data) {
     dataMap.set(day.date, day);
   }
 
-  const weeks: (ContributionDay | null)[][] = [];
+  const weeks: (Activity | null)[][] = [];
   const current = new Date(start);
 
   while (current <= end) {
-    const week: (ContributionDay | null)[] = [];
+    const week: (Activity | null)[] = [];
     for (let d = 0; d < 7; d++) {
       const dateStr = formatLocalDateKey(current);
       week.push(dataMap.get(dateStr) ?? { date: dateStr, count: 0 });
@@ -147,7 +147,7 @@ function buildGridFromRange(
   return weeks;
 }
 
-function formatTooltip(day: ContributionDay): string {
+function formatTooltip(day: Activity): string {
   const date = new Date(day.date + "T00:00:00");
   const month = MONTH_NAMES[date.getMonth()];
   const dayNum = date.getDate();
@@ -190,7 +190,7 @@ export function ActivityHeatmap({
     return "";
   });
 
-  const handleClick = (day: ContributionDay) => {
+  const handleClick = (day: Activity) => {
     if (clickable) {
       eventHandler("OnDayClick", id, [day]);
     }
