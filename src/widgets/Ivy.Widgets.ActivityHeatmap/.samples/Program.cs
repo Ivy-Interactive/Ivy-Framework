@@ -55,8 +55,7 @@ class ActivityHeatmapDemo : ViewBase
                     | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
                     | Text.P(selectedColor.Value.ToString())
                     | showDayLabels.ToBoolInput().Label("Show day labels")
-                    | showMonthLabels.ToBoolInput().Label("Show month labels")
-                    )
+                    | showMonthLabels.ToBoolInput().Label("Show month labels"))
 
                 | new ActivityHeatmap()
                     .Data(data)
