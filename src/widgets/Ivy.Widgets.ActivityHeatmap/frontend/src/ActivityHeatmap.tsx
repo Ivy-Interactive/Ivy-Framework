@@ -66,10 +66,9 @@ const monthFormatter = new Intl.DateTimeFormat(preferredLanguage, { month: "shor
 const weekdayFormatter = new Intl.DateTimeFormat(preferredLanguage, { weekday: "short" });
 const MONTH_NAMES = Array.from({ length: 12 }, (_, i) => monthFormatter.format(new Date(0, i)));
 
-const mondayDate = new Date('2025-01-06');
-const MONDAY = weekdayFormatter.format(mondayDate);
-const WEDNESDAY = weekdayFormatter.format(mondayDate.setDate(mondayDate.getDate() + 2));
-const FRIDAY = weekdayFormatter.format(mondayDate.setDate(mondayDate.getDate() + 2));
+const MONDAY = weekdayFormatter.format(new Date('2025-01-06'));
+const WEDNESDAY = weekdayFormatter.format(new Date('2025-01-08'));
+const FRIDAY = weekdayFormatter.format(new Date('2025-01-10'));
 
 function getLevel(count: number, maxCount: number): number {
   if (count === 0 || maxCount === 0) return 0;
