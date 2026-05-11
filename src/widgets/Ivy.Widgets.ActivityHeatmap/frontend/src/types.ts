@@ -11,8 +11,6 @@ export type IvyEventHandler = (
 
 export interface ActivityHeatmapProps {
   id: string;
-  width?: string;
-  height?: string;
   events?: string[];
   eventHandler: IvyEventHandler;
   data?: Activity[];
