@@ -21,7 +21,7 @@ import {
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { IconType } from "react-icons";
-import { VscAzure, VscCode } from "react-icons/vsc";
+import { VscAzure } from "react-icons/vsc";
 import { SiNotion, SiGithubcopilot, SiOpenai, SiAnthropic, SiGooglegemini } from "react-icons/si";
 
 interface IconProps {
@@ -31,6 +31,21 @@ interface IconProps {
   className?: string;
   style?: React.CSSProperties;
 }
+
+const OpenCodeIcon = ({ size, color, style, className }: IconProps) => (
+  <svg
+    width={size || 24}
+    height={size || 24}
+    viewBox="0 0 300 300"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={style}
+    className={className}
+  >
+    <path d="M210 240H90V120H210V240Z" fill={color || "currentColor"} fillOpacity="0.35" />
+    <path d="M210 60H90V240H210V60ZM270 300H30V0H270V300Z" fill={color || "currentColor"} />
+  </svg>
+);
 
 const IvyCornerIcon = ({ size, color, style, className }: IconProps) => (
   <svg
@@ -53,6 +68,10 @@ const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
 
   if (name === "IvyCorner") {
     return <IvyCornerIcon size={size} color={color} style={style} className={cn(className)} />;
+  }
+
+  if (name === "OpenCode") {
+    return <OpenCodeIcon size={size} color={color} style={style} className={cn(className)} />;
   }
 
   // Handle react-icons
@@ -81,7 +100,6 @@ const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
     OpenAI: SiOpenai,
     ClaudeCode: SiAnthropic,
     Gemini: SiGooglegemini,
-    OpenCode: VscCode,
   };
 
   if (name && name in reactIcons) {

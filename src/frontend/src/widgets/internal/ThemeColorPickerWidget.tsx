@@ -112,6 +112,8 @@ const ThemeColorGrid: React.FC<{
       return;
     }
 
+    let observerTimeout: ReturnType<typeof setTimeout> | undefined;
+
     // Observe changes to the html element (for class/style) and head (for style tag injection)
     const observer = new MutationObserver((mutations) => {
       let shouldUpdate = false;
@@ -145,7 +147,8 @@ const ThemeColorGrid: React.FC<{
 
       if (shouldUpdate) {
         // Small delay to ensure styles are computed by browser
-        setTimeout(updateThemeColors, 10);
+        if (observerTimeout) clearTimeout(observerTimeout);
+        observerTimeout = setTimeout(updateThemeColors, 10);
       }
     });
 
@@ -161,6 +164,7 @@ const ThemeColorGrid: React.FC<{
     return () => {
       observer.disconnect();
       retryTimers.forEach(clearTimeout);
+      if (observerTimeout) clearTimeout(observerTimeout);
     };
   }, [updateThemeColors]);
 
