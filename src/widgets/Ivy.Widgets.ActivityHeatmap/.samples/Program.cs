@@ -17,6 +17,8 @@ class ActivityHeatmapDemo : ViewBase
         var selectedColor = UseState(Colors.Primary);
         var showDayLabels = UseState(true);
         var showMonthLabels = UseState(true);
+        var endDate = UseState(DateOnly.FromDateTime(DateTime.Today));
+        var startDate = UseState(endDate.Value.AddDays(-364));
 
         var rng = new Random(42);
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -37,7 +39,7 @@ class ActivityHeatmapDemo : ViewBase
             | Text.H2("Basic Usage")
             | new CodeBlock(@$"new ActivityHeatmap()
     .Data(data)
-    .ColorScheme(Colors.{selectedColor.Value})
+    .ColorScheme(Colors.{selectedColor.Value})y
     .ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
     .ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
     .OnDayClick(day => Console.WriteLine(...));", Languages.Csharp)
