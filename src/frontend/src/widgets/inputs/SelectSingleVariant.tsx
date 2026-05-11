@@ -239,24 +239,28 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       ) : (
         selectTriggerElement
       )}
-      <SelectContent density={density}>
-        {isSearchEnabled && (
-          <div className="p-2 border-b">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
-                className="pl-9 h-9"
-                disabled={disabled || loading}
-              />
+      <SelectContent
+        density={density}
+        header={
+          isSearchEnabled ? (
+            <div className="p-2 border-b">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  className="pl-9 h-9"
+                  disabled={disabled || loading}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          ) : undefined
+        }
+      >
         {loading ? (
           <div className="flex justify-center p-4">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
