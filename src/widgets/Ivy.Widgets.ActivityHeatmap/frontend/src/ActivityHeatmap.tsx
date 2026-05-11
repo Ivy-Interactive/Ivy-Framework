@@ -12,27 +12,6 @@ function buildColorScheme(baseToken: string): string[] {
   ];
 }
 
-const COLOR_SCHEMES: Record<string, string[]> = {
-  primary: buildColorScheme(tokens["color-primary"]),
-  red: buildColorScheme(tokens["color-red"]),
-  orange: buildColorScheme(tokens["color-orange"]),
-  amber: buildColorScheme(tokens["color-amber"]),
-  yellow: buildColorScheme(tokens["color-yellow"]),
-  lime: buildColorScheme(tokens["color-lime"]),
-  green: buildColorScheme(tokens["color-green"]),
-  emerald: buildColorScheme(tokens["color-emerald"]),
-  teal: buildColorScheme(tokens["color-teal"]),
-  cyan: buildColorScheme(tokens["color-cyan"]),
-  sky: buildColorScheme(tokens["color-sky"]),
-  blue: buildColorScheme(tokens["color-blue"]),
-  indigo: buildColorScheme(tokens["color-indigo"]),
-  violet: buildColorScheme(tokens["color-violet"]),
-  purple: buildColorScheme(tokens["color-purple"]),
-  fuchsia: buildColorScheme(tokens["color-fuchsia"]),
-  pink: buildColorScheme(tokens["color-pink"]),
-  rose: buildColorScheme(tokens["color-rose"]),
-};
-
 const preferredLanguage = navigator.languages.length ? navigator.languages : navigator.language;
 const monthFormatter = new Intl.DateTimeFormat(preferredLanguage, { month: "short" });
 const weekdayFormatter = new Intl.DateTimeFormat(preferredLanguage, { weekday: "short" });
@@ -76,11 +55,11 @@ function buildGrid(
   const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
 
   const firstStr = startDate ?? (sorted.length > 0 ? sorted[0].date : null);
-  const lastStr  = endDate   ?? (sorted.length > 0 ? sorted[sorted.length - 1].date : null);
+  const lastStr = endDate ?? (sorted.length > 0 ? sorted[sorted.length - 1].date : null);
 
   const today = new Date();
   const firstDate = firstStr ? new Date(firstStr + "T00:00:00") : new Date(new Date().setDate(today.getDate() - 364));
-  const lastDate  = lastStr  ? new Date(lastStr  + "T00:00:00") : new Date();
+  const lastDate = lastStr ? new Date(lastStr + "T00:00:00") : new Date();
 
   return buildGridFromRange(data, firstDate, lastDate);
 }
@@ -142,7 +121,10 @@ export function ActivityHeatmap({
 }: ActivityHeatmapProps) {
   const weeks = buildGrid(data, startDate, endDate);
   const maxCount = Math.max(0, ...data.map((d) => d.count));
-  const colors = COLOR_SCHEMES[colorScheme.toLowerCase()] ?? COLOR_SCHEMES["primary"]!;
+  const colorTokenName = colorScheme.split(/(?=[A-Z])/).join("-").toLowerCase();
+  // ToDo: check why `ColorInputVariant.Swatch` renders `secondary` and `muted` as `var(--border)` in frontend
+  const colorToken = `color-${["secondary", "muted"].includes(colorTokenName) ? "border" : colorTokenName}` as keyof typeof tokens;
+  const colors = buildColorScheme(tokens[colorToken]);
   const clickable = events.includes("OnDayClick");
 
   // Compute month labels: for each week, check if the first non-null day is the first occurrence of a new month
