@@ -28,6 +28,12 @@ new ActivityHeatmap()
 | `ShowMonthLabels` | `bool` | `true` | Show month labels along the top |
 | `ShowDayLabels` | `bool` | `true` | Show Mon/Wed/Fri labels on the left |
 
+## Data Constraints
+
+- Duplicate dates in `Data` are not supported.
+- Provide at most one `Activity` entry per `DateOnly` day.
+- If your source can produce duplicates, aggregate them first (for example by summing counts per date) before passing data to `ActivityHeatmap`.
+
 ## Events
 
 | Event | Args | Description |
