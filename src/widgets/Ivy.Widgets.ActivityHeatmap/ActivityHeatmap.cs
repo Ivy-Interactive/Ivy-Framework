@@ -18,7 +18,7 @@ public static class ActivityHeatmapGrid
 
         var sorted = data.OrderBy(d => d.Date).ToArray();
         var first = startDate ?? (sorted.Length > 0 ? sorted[0].Date : DateOnly.FromDateTime(DateTime.Today).AddDays(-364));
-        var last  = endDate  ?? (sorted.Length > 0 ? sorted[^1].Date : DateOnly.FromDateTime(DateTime.Today));
+        var last = endDate ?? (sorted.Length > 0 ? sorted[^1].Date : DateOnly.FromDateTime(DateTime.Today));
         return BuildGridFromRange(data, first, last);
     }
 
