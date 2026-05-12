@@ -31,6 +31,8 @@ new ActivityHeatmap()
 | `ShowTooltip` | `bool` | `true` | Show date/count tooltip on hover |
 | `ShowMonthLabels` | `bool` | `true` | Show month labels along the top |
 | `ShowDayLabels` | `bool` | `true` | Show Mon/Wed/Fri labels on the left |
+| `StartDate` | `DateOnly?` | `null` | Pins the start of the visible range; when set, overrides the minimum date derived from `Data` |
+| `EndDate` | `DateOnly?` | `null` | Pins the end of the visible range; when set, overrides the maximum date derived from `Data` |
 
 ## Data Constraints
 
@@ -43,3 +45,44 @@ new ActivityHeatmap()
 | Event | Args | Description |
 |-------|------|-------------|
 | `OnDayClick` | `Activity` | Fired when user clicks a day cell |
+
+## Development
+
+### Building
+
+1. Install frontend dependencies:
+
+   ```bash
+   cd frontend
+   pnpm install
+   ```
+
+2. Build the frontend:
+
+   ```bash
+   pnpm build
+   ```
+
+3. Build the widget (repository root, or any path that builds `Ivy.Widgets.ActivityHeatmap.csproj`):
+
+   ```bash
+   dotnet build
+   ```
+
+   The widget project uses Ivy’s external-widget MSBuild targets: `dotnet build` runs `vp install` / `vp build` in `frontend` when needed, so after dependencies exist you can rely on that instead of repeating steps 1–2.
+
+### Frontend watch
+
+While changing React/TypeScript under `frontend/src`, run a watch build in another terminal:
+
+```bash
+cd frontend
+pnpm exec vp build --watch
+```
+
+### Sample app
+
+```bash
+cd .samples
+dotnet run
+```
