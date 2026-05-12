@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { ReactNode, useState } from "react";
 
 interface ToolCall {
   name: string;
@@ -8,6 +8,7 @@ interface ToolCall {
 
 interface ToolUseCardProps {
   tools: ToolCall[];
+  children?: ReactNode;
 }
 
 function displayInput(name: string, input: Record<string, unknown>): string {
@@ -37,26 +38,11 @@ function basename(p: string): string {
   return i >= 0 ? p.slice(i + 1) : p;
 }
 
-export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tools }) => {
+export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tools, children }) => {
   const active = tools.some((t) => t.result === undefined);
-  const [open, setOpen] = useState(active);
-  const userToggled = useRef(false);
-  const prevActive = useRef(active);
+  const [open, setOpen] = useState(true);
 
-  // Auto-expand on entering active, auto-collapse on leaving — unless the user has
-  // manually toggled the card.
-  useEffect(() => {
-    if (userToggled.current) return;
-    if (prevActive.current !== active) {
-      setOpen(active);
-      prevActive.current = active;
-    }
-  }, [active]);
-
-  const handleToggle = () => {
-    userToggled.current = true;
-    setOpen((o) => !o);
-  };
+  const handleToggle = () => setOpen((o) => !o);
 
   const name = tools[0].name;
   const count = tools.length;
@@ -96,6 +82,7 @@ export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tools }) => {
           {tools.map((t, i) => (
             <ToolEntry key={i} index={i} total={count} tool={t} />
           ))}
+          {children}
         </div>
       )}
     </div>
