@@ -59,6 +59,7 @@ public class PluginLoader : IPluginManager
 
         var candidates = new List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)>();
 
+        // Load plugins from subdirectories of the plugins directory
         foreach (var directory in Directory.GetDirectories(_pluginsDirectory))
         {
             try
@@ -97,6 +98,78 @@ public class PluginLoader : IPluginManager
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to load plugin from {Directory}. Skipping.", directory);
+
+                _lock.EnterWriteLock();
+                try
+                {
+                    _failedPlugins[directory] = (
+                        $"Exception during load: {ex.Message}",
+                        DateTime.UtcNow);
+                }
+                finally
+                {
+                    _lock.ExitWriteLock();
+                }
+            }
+        }
+
+        // Load plugins from the references file
+        var referencesFilePath = Path.Combine(_pluginsDirectory, PluginReferencesWatcher.FileName);
+        var referencedPaths = PluginReferencesWatcher.ParseReferencesFile(referencesFilePath, _pluginsDirectory, _logger);
+        foreach (var directory in referencedPaths)
+        {
+            if (!Directory.Exists(directory))
+            {
+                _logger.LogWarning("Referenced plugin directory does not exist: {Directory}", directory);
+                _lock.EnterWriteLock();
+                try
+                {
+                    _failedPlugins[directory] = (
+                        $"Directory does not exist: {directory}",
+                        DateTime.UtcNow);
+                }
+                finally
+                {
+                    _lock.ExitWriteLock();
+                }
+                continue;
+            }
+
+            try
+            {
+                var loaded = LoadPluginFromDirectory(directory, serviceProvider);
+                if (loaded is null)
+                {
+                    _lock.EnterWriteLock();
+                    try
+                    {
+                        _failedPlugins[directory] = (
+                            "No valid plugin found (no DLLs, no [IvyPlugin] attribute, or multiple attributes)",
+                            DateTime.UtcNow);
+                    }
+                    finally
+                    {
+                        _lock.ExitWriteLock();
+                    }
+                    continue;
+                }
+
+                var manifest = loaded.Value.Instance.Manifest;
+
+                if (manifest.MinimumHostVersion is { } minVersion && hostVersion < minVersion)
+                {
+                    _logger.LogError(
+                        "Plugin '{Id}' requires host version {Required} but current is {Current}. Skipping.",
+                        manifest.Id, minVersion, hostVersion);
+                    continue;
+                }
+
+                _knownPlugins[manifest.Id] = directory;
+                candidates.Add(loaded.Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load referenced plugin from {Directory}. Skipping.", directory);
 
                 _lock.EnterWriteLock();
                 try
