@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { parseDiff, Diff, Hunk, type ChangeData } from "react-diff-view";
 import "react-diff-view/style/index.css";
 import "./custom-diff.css";
@@ -17,6 +17,8 @@ interface DiffViewProps {
   oldRevision?: string;
   newRevision?: string;
   wordWrap?: boolean;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
 }
 
 function getLineNumber(change: ChangeData | null): number {
@@ -36,6 +38,8 @@ export const DiffView: React.FC<DiffViewProps> = ({
   oldRevision,
   newRevision,
   wordWrap,
+  collapsible = false,
+  defaultCollapsed = false,
 }) => {
   const files = useMemo(() => {
     if (!diff) return [];
@@ -45,6 +49,8 @@ export const DiffView: React.FC<DiffViewProps> = ({
       return [];
     }
   }, [diff]);
+
+  const [collapsedState, setCollapsedState] = useState<Record<number, boolean>>({});
 
   const diffViewType = viewType === "Split" ? "split" : "unified";
 
@@ -78,10 +84,37 @@ export const DiffView: React.FC<DiffViewProps> = ({
           return parts[parts.length - 1] || path;
         };
 
+        const isCollapsed = collapsible
+          ? (collapsedState[fileIndex] ?? defaultCollapsed)
+          : false;
+
+        const toggleCollapsed = () => {
+          if (!collapsible) return;
+          setCollapsedState((prev) => ({
+            ...prev,
+            [fileIndex]: !isCollapsed,
+          }));
+        };
+
         return (
           <div key={fileIndex} id={fileId}>
             {hasHeader && (
-              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)] sticky top-0 z-10" style={{ fontFamily: 'var(--font-sans, sans-serif)' }}>
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 text-[11px] bg-[var(--muted)] text-[var(--muted-foreground)] border-b border-[var(--border)] sticky top-0 z-10${collapsible ? " cursor-pointer select-none" : ""}`}
+                style={{ fontFamily: 'var(--font-sans, sans-serif)' }}
+                onClick={collapsible ? toggleCollapsed : undefined}
+              >
+                {collapsible && (
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    className="shrink-0 transition-transform duration-150"
+                    style={{ transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
+                  >
+                    <path d="M3 4.5L6 7.5L9 4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
                 {isRename ? (
                   <>
                     <span className="font-semibold">{getBasename(oldName)}</span>
@@ -93,24 +126,26 @@ export const DiffView: React.FC<DiffViewProps> = ({
                 )}
               </div>
             )}
-            <Diff
-              viewType={diffViewType}
-              diffType={file.type}
-              hunks={file.hunks}
-              gutterEvents={{
-                onClick: ({ change }) => {
-                  if (events.includes("OnLineClick")) {
-                    onIvyEvent("OnLineClick", id, [getLineNumber(change)]);
-                  }
-                },
-              }}
-            >
-              {(hunks) =>
-                hunks.map((hunk) => (
-                  <Hunk key={hunk.content} hunk={hunk} />
-                ))
-              }
-            </Diff>
+            {!isCollapsed && (
+              <Diff
+                viewType={diffViewType}
+                diffType={file.type}
+                hunks={file.hunks}
+                gutterEvents={{
+                  onClick: ({ change }) => {
+                    if (events.includes("OnLineClick")) {
+                      onIvyEvent("OnLineClick", id, [getLineNumber(change)]);
+                    }
+                  },
+                }}
+              >
+                {(hunks) =>
+                  hunks.map((hunk) => (
+                    <Hunk key={hunk.content} hunk={hunk} />
+                  ))
+                }
+              </Diff>
+            )}
           </div>
         );
       })}
