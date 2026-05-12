@@ -57,7 +57,7 @@ function buildGrid(
 
   const today = new Date();
   const firstDate = firstStr ? new Date(firstStr + "T00:00:00") : new Date(new Date().setDate(today.getDate() - 364));
-  const lastDate = lastStr ? new Date(lastStr + "T00:00:00") : new Date();
+  const lastDate = lastStr ? new Date(lastStr + "T00:00:00") : today;
 
   return buildGridFromRange(data, firstDate, lastDate);
 }
