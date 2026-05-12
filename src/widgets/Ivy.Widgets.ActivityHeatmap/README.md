@@ -2,10 +2,6 @@
 
 GitHub-style activity heatmap widget for Ivy Framework. Renders a 52-week × 7-day activity graph grid.
 
-<img alt="Screenshot displaying the ActivityHeatmap widget rendered in the sample app" src="ActivityHeatmap sample app.png" width="600"></img>
-<br/>
- _ActivityHeatmap rendered in the sample app_
-
 ## Usage
 
 ```csharp
