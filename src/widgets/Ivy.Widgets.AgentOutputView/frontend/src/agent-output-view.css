@@ -340,8 +340,6 @@
 .aov-tool-body {
   border-top: 1px solid var(--aov-border);
   padding: 8px 10px 10px;
-  max-height: 24rem;
-  overflow: auto;
 }
 
 .aov-tool-section-label {
