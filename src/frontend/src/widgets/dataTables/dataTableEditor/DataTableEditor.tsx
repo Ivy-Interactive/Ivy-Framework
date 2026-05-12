@@ -27,6 +27,7 @@ import {
   useEmptyRows,
   useDataLoading,
   useLinkCellHover,
+  useDoubleTapLink,
 } from "../hooks";
 import { useFooterColumnLayout } from "../hooks/useFooterColumnLayout";
 import { GridContainer } from "../components/GridContainer";
@@ -172,6 +173,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     virtualRef,
     onItemHovered: onLinkCellHovered,
     linkTooltipPos,
+    supportsHoverTooltip,
     clearLinkCellHover,
   } = useLinkCellHover({
     getCellContent,
@@ -243,6 +245,17 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showGroups: showGroups ?? false,
     showColumnTypeIcons: showColumnTypeIcons ?? true,
     activeSort,
+  });
+
+  // Double-tap link cells on touch (desktop uses ⌘/Ctrl+click via useCellInteractions)
+  useDoubleTapLink({
+    containerRef,
+    gridRef,
+    getCellContent,
+    columns: finalColumns,
+    headerHeight: densityConfig.rowHeight,
+    rowHeight: effectiveRowHeight,
+    visibleRows,
   });
 
   const orderedDataColumns = useMemo(
@@ -462,7 +475,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         footer={footerNode}
         hasEmptyRows={emptyRowsCount > 0}
       />
-      {linkTooltipNode}
+      {supportsHoverTooltip ? linkTooltipNode : null}
       {cellActionIndicatorNode}
     </>
   );

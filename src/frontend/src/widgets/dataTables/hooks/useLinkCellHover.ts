@@ -7,13 +7,27 @@ interface UseLinkCellHoverProps {
   visibleRows: number;
 }
 
+/** Tooltip hover relies on real hover; skip on touch / coarse pointers where it mispositions */
+function canShowLinkHoverTooltip(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(hover: hover)").matches && window.matchMedia("(pointer: fine)").matches
+  );
+}
+
 export const useLinkCellHover = ({ getCellContent, visibleRows }: UseLinkCellHoverProps) => {
+  const linkTooltipSupported = useMemo(() => canShowLinkHoverTooltip(), []);
+
   const [linkTooltipPos, setLinkTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const posRef = useRef(linkTooltipPos);
   posRef.current = linkTooltipPos;
 
   const onItemHovered = useCallback(
     (args: GridMouseEventArgs) => {
+      if (!linkTooltipSupported) {
+        setLinkTooltipPos(null);
+        return;
+      }
       if (args.kind !== "cell") {
         setLinkTooltipPos(null);
         return;
@@ -36,7 +50,7 @@ export const useLinkCellHover = ({ getCellContent, visibleRows }: UseLinkCellHov
         setLinkTooltipPos(null);
       }
     },
-    [getCellContent, visibleRows],
+    [getCellContent, visibleRows, linkTooltipSupported],
   );
 
   const virtualRef = useMemo(
@@ -56,7 +70,8 @@ export const useLinkCellHover = ({ getCellContent, visibleRows }: UseLinkCellHov
   }, []);
 
   return {
-    isLinkHovered: linkTooltipPos !== null,
+    isLinkHovered: linkTooltipSupported && linkTooltipPos !== null,
+    supportsHoverTooltip: linkTooltipSupported,
     virtualRef,
     onItemHovered,
     linkTooltipPos,
