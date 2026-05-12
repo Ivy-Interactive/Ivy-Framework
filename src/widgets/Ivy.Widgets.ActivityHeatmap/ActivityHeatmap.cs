@@ -23,10 +23,10 @@ public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
     /// <summary>Show weekday labels on the left (Mon, Wed, Fri).</summary>
     [Prop] public bool ShowDayLabels { get; init; } = true;
 
-    /// <summary>Pins the start of the visible range, overriding the data-derived minimum date.</summary>
+    /// <summary>Pins the start of the visible range, overriding the data-derived minimum date. If <see cref="EndDate"/> is earlier, bounds are treated in chronological order (same as swapping).</summary>
     [Prop] public DateOnly? StartDate { get; init; }
 
-    /// <summary>Pins the end of the visible range, overriding the data-derived maximum date.</summary>
+    /// <summary>Pins the end of the visible range, overriding the data-derived maximum date. If earlier than <see cref="StartDate"/>, bounds are normalized to chronological order.</summary>
     [Prop] public DateOnly? EndDate { get; init; }
 
     /// <summary>Fired when the user clicks a day cell.</summary>
@@ -81,6 +81,7 @@ public static class ActivityHeatmapGrid
     /// Builds a weeks × 7-days matrix. Pads left to the preceding Sunday of the earliest date,
     /// pads right to the following Saturday of the latest date. Empty days get Count = 0.
     /// When startDate or endDate is provided, they override the data-derived bounds.
+    /// If both are set and endDate is before startDate, the range is normalized to chronological order.
     /// </summary>
     public static Activity[][] BuildGrid(Activity[] data, DateOnly? startDate = null, DateOnly? endDate = null)
     {
@@ -98,9 +99,13 @@ public static class ActivityHeatmapGrid
 
     /// <summary>
     /// Builds a grid between two dates (inclusive), padded to week boundaries.
+    /// If <paramref name="first"/> is after <paramref name="last"/>, the arguments are treated as reversed.
     /// </summary>
     public static Activity[][] BuildGridFromRange(Activity[] data, DateOnly first, DateOnly last)
     {
+        if (first > last)
+            (first, last) = (last, first);
+
         // Pad left to Sunday (DayOfWeek.Sunday == 0)
         var start = first.AddDays(-(int)first.DayOfWeek);
         // Pad right to Saturday (DayOfWeek.Saturday == 6)
