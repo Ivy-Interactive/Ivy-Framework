@@ -1,20 +1,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Terminal palette (dark theme defaults; overridden under .light) ─────── */
+/* ─── Terminal palette (uses framework CSS variables, adapts to light/dark) ─ */
 .aov-shell {
-  --aov-bg: #0d1117;
-  --aov-bg-elev: #161b22;
-  --aov-bg-deep: #010409;
-  --aov-border: #21262d;
-  --aov-border-strong: #30363d;
-  --aov-fg: #c9d1d9;
-  --aov-fg-muted: #8b949e;
-  --aov-fg-faint: #6e7681;
-  --aov-accent: #7ee787;
-  --aov-accent-soft: rgba(126, 231, 135, 0.15);
-  --aov-danger: #ff7b72;
-  --aov-warn: #d29922;
+  --aov-bg: var(--background);
+  --aov-bg-elev: var(--card);
+  --aov-bg-deep: var(--popover);
+  --aov-border: var(--border);
+  --aov-border-strong: var(--input);
+  --aov-fg: var(--foreground);
+  --aov-fg-muted: var(--muted-foreground);
+  --aov-fg-faint: color-mix(in srgb, var(--muted-foreground) 70%, transparent);
+  --aov-accent: var(--foreground);
+  --aov-accent-soft: color-mix(in srgb, var(--muted-foreground) 10%, transparent);
+  --aov-danger: var(--destructive);
+  --aov-warn: var(--warning);
   --aov-mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
     Consolas, monospace;
 
@@ -26,21 +26,6 @@
   border: 1px solid var(--aov-border);
   border-radius: 8px;
   position: relative;
-}
-
-.light .aov-shell {
-  --aov-bg: #fafafa;
-  --aov-bg-elev: #f0f0f0;
-  --aov-bg-deep: #ffffff;
-  --aov-border: #d0d7de;
-  --aov-border-strong: #afb8c1;
-  --aov-fg: #1f2328;
-  --aov-fg-muted: #57606a;
-  --aov-fg-faint: #6e7781;
-  --aov-accent: #1a7f37;
-  --aov-accent-soft: rgba(26, 127, 55, 0.1);
-  --aov-danger: #cf222e;
-  --aov-warn: #9a6700;
 }
 
 .aov-shell * {
@@ -129,25 +114,12 @@
 .aov-status-shimmer {
   background: linear-gradient(
     90deg,
-    rgba(139, 148, 158, 0.45) 0%,
-    rgba(230, 237, 243, 0.95) 50%,
-    rgba(139, 148, 158, 0.45) 100%
+    color-mix(in srgb, var(--muted-foreground) 45%, transparent) 0%,
+    color-mix(in srgb, var(--foreground) 95%, transparent) 50%,
+    color-mix(in srgb, var(--muted-foreground) 45%, transparent) 100%
   );
   background-size: 200% 100%;
   color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: aov-shine 2.5s ease-in-out infinite;
-}
-
-.light .aov-status-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(80, 80, 80, 0.55) 0%,
-    rgba(20, 20, 20, 0.95) 50%,
-    rgba(80, 80, 80, 0.55) 100%
-  );
-  background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   animation: aov-shine 2.5s ease-in-out infinite;
@@ -259,11 +231,7 @@
 }
 
 .aov-tool-header:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.light .aov-tool-header:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: color-mix(in srgb, var(--muted-foreground) 5%, transparent);
 }
 
 .aov-tool-chevron {
@@ -285,16 +253,12 @@
 .aov-tool-count {
   color: var(--aov-fg-muted);
   font-variant-numeric: tabular-nums;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--muted-foreground) 10%, transparent);
   border: 1px solid var(--aov-border);
   border-radius: 4px;
   padding: 0 5px;
   font-size: 11px;
   line-height: 1.6;
-}
-
-.light .aov-tool-count {
-  background: rgba(0, 0, 0, 0.04);
 }
 
 .aov-tool-preview {
@@ -378,13 +342,8 @@
 }
 
 .aov-result.error {
-  background: rgba(255, 123, 114, 0.1);
-  border-color: rgba(255, 123, 114, 0.4);
-}
-
-.light .aov-result.error {
-  background: rgba(207, 34, 46, 0.08);
-  border-color: rgba(207, 34, 46, 0.35);
+  background: color-mix(in srgb, var(--destructive) 10%, transparent);
+  border-color: color-mix(in srgb, var(--destructive) 40%, transparent);
 }
 
 .aov-result-header {
