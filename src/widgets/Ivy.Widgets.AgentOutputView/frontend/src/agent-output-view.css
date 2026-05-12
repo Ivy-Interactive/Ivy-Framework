@@ -166,7 +166,7 @@
 
 /* ─── Assistant text (markdown) ─────────────────────────────────────────── */
 .aov-assistant {
-  margin: 8px 0;
+  margin: 16px 0;
 }
 
 .aov-markdown {
@@ -243,7 +243,7 @@
   border: 1px solid var(--aov-border);
   background: var(--aov-bg-elev);
   border-radius: 6px;
-  margin: 6px 0;
+  margin: 14px 0;
   overflow: hidden;
 }
 
