@@ -408,9 +408,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         height: cellActionIndicator.height,
         pointerEvents: "none",
         zIndex: 20,
-        backgroundColor: isDark
-          ? "rgba(59, 130, 246, 0.08)"
-          : "rgba(59, 130, 246, 0.06)",
+        backgroundColor: isDark ? "rgba(59, 130, 246, 0.08)" : "rgba(59, 130, 246, 0.06)",
         border: `1px solid ${isDark ? "rgba(59, 130, 246, 0.3)" : "rgba(59, 130, 246, 0.2)"}`,
         borderRadius: "2px",
         boxSizing: "border-box",
