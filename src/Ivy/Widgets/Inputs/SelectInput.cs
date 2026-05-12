@@ -51,7 +51,7 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public int? MinSelections { get; set; }
 
-    [Prop] public bool Searchable { get; set; }
+    [Prop] public bool? Searchable { get; set; }
 
     [Prop] public bool ShowActions { get; set; }
 
@@ -181,7 +181,7 @@ public static class SelectInputExtensions
 
     public static SelectInputBase MinSelections(this SelectInputBase widget, int min) => widget with { MinSelections = min };
 
-    public static SelectInputBase Searchable(this SelectInputBase widget, bool searchable = true) => widget with { Searchable = searchable };
+    public static SelectInputBase Searchable(this SelectInputBase widget, bool? searchable = true) => widget with { Searchable = searchable };
 
     public static SelectInputBase ShowActions(this SelectInputBase widget, bool showActions = true) => widget with { ShowActions = showActions };
 

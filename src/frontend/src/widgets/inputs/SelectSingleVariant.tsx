@@ -8,7 +8,6 @@ import {
   SelectLabel,
   SelectSeparator,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
@@ -30,7 +29,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   options = EMPTY_ARRAY,
   eventHandler,
   nullable = false,
-  searchable = false,
+  searchable,
   searchMode = "CaseInsensitive",
   emptyMessage,
   loading = false,
@@ -74,6 +73,9 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
 
   const selectedLabel = selectedOption?.label;
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  /** True after the user edits the panel search field; reset when the dropdown closes. */
+  const userFilteringRef = useRef(false);
   const [isEllipsed, setIsEllipsed] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -95,8 +97,15 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, [selectedLabel]);
 
+  const SEARCH_THRESHOLD = 7;
+  // null/undefined = auto (show search when options >= threshold)
+  // true  = always show search
+  // false = never show search
+  const isSearchEnabled =
+    searchable === true || (searchable !== false && validOptions.length >= SEARCH_THRESHOLD);
+
   const filteredOptions = useMemo(() => {
-    if (!searchable || !searchTerm) return validOptions;
+    if (!isSearchEnabled || !searchTerm) return validOptions;
     return validOptions.filter((option) => {
       const term = searchMode === "CaseInsensitive" ? searchTerm.toLowerCase() : searchTerm;
       const label = (option.label || "").toLowerCase();
@@ -111,7 +120,38 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       }
       return label.includes(term);
     });
-  }, [validOptions, searchable, searchTerm, searchMode]);
+  }, [validOptions, isSearchEnabled, searchTerm, searchMode]);
+
+  // Radix Select runs focusSelectedItem in a child useEffect: it focuses the selected item, or the
+  // listbox when there are no items — which steals focus from the header search field whenever the
+  // filtered item set changes (0 matches, 1 match, after clearing text, etc.). Parent useEffect runs
+  // after the child's; a macrotask catches deferred focus work inside Radix.
+  useEffect(() => {
+    if (!isOpen || !isSearchEnabled || !userFilteringRef.current) return;
+    const input = searchInputRef.current;
+    if (!input) return;
+
+    const restore = () => {
+      const active = document.activeElement;
+      if (active === input || active === triggerRef.current) return;
+      input.focus({ preventScroll: true });
+    };
+
+    restore();
+    const t = window.setTimeout(restore, 0);
+    return () => clearTimeout(t);
+  }, [filteredOptions.length, isOpen, isSearchEnabled, searchTerm]);
+
+  useEffect(() => {
+    if (!isOpen || !isSearchEnabled) return;
+    requestAnimationFrame(() => {
+      const viewport = document.querySelector<HTMLElement>("[data-radix-select-viewport]");
+      if (viewport) {
+        viewport.scrollTop = 0;
+        viewport.dispatchEvent(new Event("scroll"));
+      }
+    });
+  }, [searchTerm, isOpen, isSearchEnabled]);
 
   const groupedOptions = filteredOptions.reduce<Record<string, typeof validOptions>>(
     (acc, option) => {
@@ -134,6 +174,9 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
 
   const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen);
+    if (!newOpen) {
+      userFilteringRef.current = false;
+    }
     if (newOpen) {
       if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
     } else {
@@ -171,7 +214,14 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       onBlur={handleTriggerBlur}
       onFocus={handleTriggerFocus}
     >
-      <SelectValue placeholder={placeholder} />
+      <span
+        className={cn(
+          "flex-1 truncate text-left pointer-events-none",
+          !hasValue && "text-muted-foreground",
+        )}
+      >
+        {hasValue ? (selectedLabel ?? stringValue) : placeholder}
+      </span>
       {((nullable && hasValue && !disabled) || invalid || loading) && (
         <div className="flex items-center gap-1 px-1 ml-auto shrink-0 pointer-events-none">
           {loading && (
@@ -257,24 +307,32 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
           <div className="relative min-w-0 flex-1">{selectTriggerBranch}</div>
         </div>
       )}
-      <SelectContent density={density}>
-        {searchable && (
-          <div className="p-2 border-b">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
-                className="pl-9 h-9"
-                disabled={disabled || loading}
-              />
+      <SelectContent
+        density={density}
+        header={
+          isSearchEnabled ? (
+            <div className="p-2 border-b">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    userFilteringRef.current = true;
+                    setSearchTerm(e.target.value);
+                  }}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  className="pl-9 h-9"
+                  disabled={disabled || loading}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          ) : undefined
+        }
+      >
         {loading ? (
           <div className="flex justify-center p-4">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
