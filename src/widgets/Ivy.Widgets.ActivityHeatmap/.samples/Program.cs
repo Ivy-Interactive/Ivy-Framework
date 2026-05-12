@@ -40,18 +40,24 @@ class ActivityHeatmapDemo : ViewBase
 
             | Text.H1("ActivityHeatmap")
             | Text.H2("Basic Usage")
-            | new CodeBlock(@$"var rng = new Random(42);
-var today = DateOnly.FromDateTime(DateTime.Today);
-var start = today.AddDays(-364);
+            | new CodeBlock(@$"public class ActivityHeatmapDemo : ViewBase
+{{
+    public override object Build()
+    {{
+        var rng = new Random(42);
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var start = today.AddDays(-364);
 
-Activity[] data = Enumerable
-    .Range(0, 365)
-    .Select(start.AddDays)
-    .Where(_ => rng.NextDouble() > 0.4)
-    .Select(d => new Activity {{ Date = d, Count = rng.Next(1, 20) }})
-    .ToArray();
+        Activity[] data = Enumerable
+            .Range(0, 365)
+            .Select(start.AddDays)
+            .Where(_ => rng.NextDouble() > 0.4)
+            .Select(d => new Activity {{ Date = d, Count = rng.Next(1, 20) }})
+            .ToArray();
 
-new ActivityHeatmap().Data(data);", Languages.Csharp)
+        return new ActivityHeatmap().Data(data);
+    }}
+}}", Languages.Csharp)
             | (Layout
                 .Vertical()
                 .Gap(2)
