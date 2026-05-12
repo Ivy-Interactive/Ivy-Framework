@@ -17,8 +17,8 @@ class ActivityHeatmapDemo : ViewBase
         var selectedColor = UseState(Colors.Primary);
         var showDayLabels = UseState(true);
         var showMonthLabels = UseState(true);
+        var startDate = UseState(DateOnly.FromDateTime(DateTime.Today).AddDays(-364));
         var endDate = UseState(DateOnly.FromDateTime(DateTime.Today));
-        var startDate = UseState(endDate.Value.AddDays(-364));
 
         var rng = new Random(42);
         var today = DateOnly.FromDateTime(DateTime.Today);
