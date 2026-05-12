@@ -1,55 +1,5 @@
 import "./style.css";
-import { ActivityHeatmapProps, Activity, HeatmapSupportedColor } from "./types";
-
-const HEATMAP_SUPPORTED_COLORS = [
-  "black",
-  "white",
-  "slate",
-  "gray",
-  "zinc",
-  "neutral",
-  "stone",
-  "red",
-  "orange",
-  "amber",
-  "yellow",
-  "lime",
-  "green",
-  "emerald",
-  "teal",
-  "cyan",
-  "sky",
-  "blue",
-  "indigo",
-  "violet",
-  "purple",
-  "fuchsia",
-  "pink",
-  "rose",
-  "primary",
-  "secondary",
-  "destructive",
-  "success",
-  "warning",
-  "info",
-  "muted"
-] as const;
-
-function normalizeColorScheme(value: string): string {
-  return value.split(/(?=[A-Z])/).join("-").toLowerCase();
-}
-
-function resolveHeatmapColor(value: string): HeatmapSupportedColor {
-  const normalized = normalizeColorScheme(value);
-  return HEATMAP_SUPPORTED_COLORS.includes(normalized as HeatmapSupportedColor)
-    ? (normalized as HeatmapSupportedColor)
-    : "primary";
-}
-
-function resolveHeatmapBaseColor(colorScheme: string): string {
-  const safeColor = resolveHeatmapColor(colorScheme);
-  return `var(--color-${safeColor})`;
-}
+import { ActivityHeatmapProps, Activity } from "./types";
 
 function buildColorScheme(baseColor: string): string[] {
   return [
@@ -169,7 +119,7 @@ export function ActivityHeatmap({
 }: ActivityHeatmapProps) {
   const weeks = buildGrid(data, startDate, endDate);
   const maxCount = Math.max(0, ...data.map((d) => d.count));
-  const colors = buildColorScheme(resolveHeatmapBaseColor(colorScheme));
+  const colors = buildColorScheme(`var(--color-${colorScheme.toLowerCase()})`);
   const clickable = events.includes("OnDayClick");
 
   // Compute month labels: for each week, check if the first non-null day is the first occurrence of a new month
