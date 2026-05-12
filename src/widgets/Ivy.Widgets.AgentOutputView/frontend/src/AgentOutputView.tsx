@@ -125,28 +125,34 @@ export const AgentOutputView: React.FC<AgentOutputViewProps> = ({
     }
   }
 
-  // Build a render list that folds runs of adjacent same-name tool-use events into one card.
+  // Build a render list that folds adjacent tool-use events into one card.
+  // Any tool-use kind starts/extends a run; only an assistant-text or result event breaks it.
+  // (system/thinking events are normally hidden and don't break the run either.)
   type RenderItem =
     | { kind: "event"; index: number; event: NormalizedEvent }
     | { kind: "tool-group"; key: string; tools: Array<{ name: string; input: Record<string, unknown>; result?: string }> };
+
+  const isGroupBreaker = (e: NormalizedEvent) => e.kind === "assistant-text" || e.kind === "result";
 
   const renderItems: RenderItem[] = [];
   for (let i = 0; i < parsedEvents.length; i++) {
     if (suppressIndices.has(i)) continue;
     const e = parsedEvents[i];
     if (e.kind === "tool-use") {
-      let j = i;
+      const start = i;
       const tools: Array<{ name: string; input: Record<string, unknown>; result?: string }> = [];
-      while (
-        j < parsedEvents.length &&
-        parsedEvents[j].kind === "tool-use" &&
-        (parsedEvents[j] as Extract<NormalizedEvent, { kind: "tool-use" }>).name === e.name
-      ) {
-        const t = parsedEvents[j] as Extract<NormalizedEvent, { kind: "tool-use" }>;
-        tools.push({ name: t.name, input: t.input, result: t.result });
+      let j = i;
+      while (j < parsedEvents.length && !isGroupBreaker(parsedEvents[j])) {
+        const cur = parsedEvents[j];
+        if (cur.kind === "tool-use") {
+          tools.push({ name: cur.name, input: cur.input, result: cur.result });
+        }
+        // system/thinking inside a run are absorbed silently (default-hidden anyway)
         j++;
       }
-      renderItems.push({ kind: "tool-group", key: `tg-${i}-${e.name}`, tools });
+      if (tools.length > 0) {
+        renderItems.push({ kind: "tool-group", key: `tg-${start}`, tools });
+      }
       i = j - 1;
     } else {
       renderItems.push({ kind: "event", index: i, event: e });
