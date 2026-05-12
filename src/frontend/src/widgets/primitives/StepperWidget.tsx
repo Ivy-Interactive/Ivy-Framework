@@ -72,7 +72,11 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
   };
 
   return (
-    <div key={id} style={styles} className={cn("flex flex-col w-full", disabled && "opacity-50 pointer-events-none")}>
+    <div
+      key={id}
+      style={styles}
+      className={cn("flex flex-col w-full", disabled && "opacity-50 pointer-events-none")}
+    >
       {/* Row 1: Circles and lines */}
       <div className="flex items-center w-full">
         {items.map((item, index) => {
