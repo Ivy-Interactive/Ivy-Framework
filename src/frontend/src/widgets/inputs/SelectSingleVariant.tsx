@@ -142,6 +142,17 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
     return () => clearTimeout(t);
   }, [filteredOptions.length, isOpen, isSearchEnabled, searchTerm]);
 
+  useEffect(() => {
+    if (!isOpen || !isSearchEnabled) return;
+    requestAnimationFrame(() => {
+      const viewport = document.querySelector<HTMLElement>("[data-radix-select-viewport]");
+      if (viewport) {
+        viewport.scrollTop = 0;
+        viewport.dispatchEvent(new Event("scroll"));
+      }
+    });
+  }, [searchTerm, isOpen, isSearchEnabled]);
+
   const groupedOptions = filteredOptions.reduce<Record<string, typeof validOptions>>(
     (acc, option) => {
       const key = option.group || "default";
