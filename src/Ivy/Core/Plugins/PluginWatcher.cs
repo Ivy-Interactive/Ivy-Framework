@@ -9,18 +9,22 @@ internal class PluginWatcher : IDisposable
     private readonly string _pluginsDirectory;
     private readonly IPluginManager _pluginManager;
     private readonly ILogger _logger;
+    private readonly bool _buildSourcePlugins;
     private readonly FileSystemWatcher _watcher;
+    private readonly SourcePluginBuilder? _sourceBuilder;
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _pendingReloads = new();
     private readonly ConcurrentDictionary<string, DateTime> _reloadCooldowns = new();
     private readonly TimeSpan _debounceDelay = TimeSpan.FromMilliseconds(500);
     private readonly TimeSpan _cooldownPeriod = TimeSpan.FromSeconds(2);
     private bool _disposed;
 
-    public PluginWatcher(string pluginsDirectory, IPluginManager pluginManager, ILogger logger)
+    public PluginWatcher(string pluginsDirectory, IPluginManager pluginManager, ILogger logger, bool buildSourcePlugins = false)
     {
         _pluginsDirectory = pluginsDirectory;
         _pluginManager = pluginManager;
         _logger = logger;
+        _buildSourcePlugins = buildSourcePlugins;
+        _sourceBuilder = buildSourcePlugins ? new SourcePluginBuilder(logger) : null;
 
         _watcher = new FileSystemWatcher(pluginsDirectory)
         {
@@ -66,6 +70,13 @@ internal class PluginWatcher : IDisposable
         if (e.FullPath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
         {
             OnDllChanged(e.FullPath);
+            return;
+        }
+
+        // Handle new source files
+        if (_buildSourcePlugins && SourcePluginBuilder.IsSourceFile(e.FullPath))
+        {
+            OnSourceFileChanged(e.FullPath);
             return;
         }
 
@@ -129,10 +140,16 @@ internal class PluginWatcher : IDisposable
 
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
-        if (!e.FullPath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+        if (e.FullPath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+        {
+            OnDllChanged(e.FullPath);
             return;
+        }
 
-        OnDllChanged(e.FullPath);
+        if (_buildSourcePlugins && SourcePluginBuilder.IsSourceFile(e.FullPath))
+        {
+            OnSourceFileChanged(e.FullPath);
+        }
     }
 
     private void OnDllChanged(string fullPath)
@@ -152,6 +169,29 @@ internal class PluginWatcher : IDisposable
             {
                 _logger.LogInformation("DLL changed in plugin: {Path}", fullPath);
                 ScheduleReload(current);
+                return;
+            }
+            current = parent;
+        }
+    }
+
+    private void OnSourceFileChanged(string fullPath)
+    {
+        // Ignore files in obj/ and bin/ directories
+        if (fullPath.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}") ||
+            fullPath.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
+            return;
+
+        // Walk up to find the top-level plugin directory
+        var normalizedPluginsDir = Path.GetFullPath(_pluginsDirectory);
+        var current = Path.GetDirectoryName(fullPath);
+        while (current != null)
+        {
+            var parent = Path.GetDirectoryName(current);
+            if (parent != null && string.Equals(Path.GetFullPath(parent), normalizedPluginsDir, StringComparison.OrdinalIgnoreCase))
+            {
+                if (SourcePluginBuilder.IsSourcePlugin(current))
+                    _sourceBuilder?.ScheduleBuild(current);
                 return;
             }
             current = parent;
@@ -281,5 +321,6 @@ internal class PluginWatcher : IDisposable
         _watcher.Deleted -= OnDeleted;
         _watcher.Changed -= OnChanged;
         _watcher.Dispose();
+        _sourceBuilder?.Dispose();
     }
 }

@@ -26,10 +26,13 @@ public class PluginLoader : IPluginManager
     public event Action<string>? PluginUnloaded;
     public event Action<string>? PluginReloaded;
 
-    internal PluginLoader(string pluginsDirectory, ILogger<PluginLoader> logger, IEnumerable<string>? sharedAssemblyNames = null)
+    internal bool BuildSourcePlugins { get; }
+
+    internal PluginLoader(string pluginsDirectory, ILogger<PluginLoader> logger, IEnumerable<string>? sharedAssemblyNames = null, bool buildSourcePlugins = false)
     {
         _pluginsDirectory = pluginsDirectory;
         _logger = logger;
+        BuildSourcePlugins = buildSourcePlugins;
         _sharedAssemblyNames = new HashSet<string>(sharedAssemblyNames ?? [])
         {
             "Ivy.Plugin.Abstractions",
@@ -64,6 +67,9 @@ public class PluginLoader : IPluginManager
         {
             try
             {
+                if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
+                    SourcePluginBuilder.BuildSync(directory, _logger);
+
                 var loaded = LoadPluginFromDirectory(directory, serviceProvider);
                 if (loaded is null)
                 {
@@ -137,6 +143,9 @@ public class PluginLoader : IPluginManager
 
             try
             {
+                if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
+                    SourcePluginBuilder.BuildSync(directory, _logger);
+
                 var loaded = LoadPluginFromDirectory(directory, serviceProvider);
                 if (loaded is null)
                 {
@@ -490,6 +499,9 @@ public class PluginLoader : IPluginManager
             return false;
         }
 
+        if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(pluginPath))
+            SourcePluginBuilder.BuildSync(pluginPath, _logger);
+
         string? loadedPluginId = null;
         _lock.EnterWriteLock();
         try
@@ -611,8 +623,14 @@ public class PluginLoader : IPluginManager
 
     public bool ReloadPlugin(string pluginId)
     {
-        _lock.EnterReadLock();
+        if (_serviceProviderFactory is null || _hostVersion is null)
+        {
+            _logger.LogError("Cannot reload plugin: PluginLoader has not been initialized.");
+            return false;
+        }
+
         string? directory;
+        _lock.EnterReadLock();
         try
         {
             var plugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
@@ -628,13 +646,81 @@ public class PluginLoader : IPluginManager
             _lock.ExitReadLock();
         }
 
-        if (!UnloadPlugin(pluginId)) return false;
-        var loaded = LoadPlugin(directory);
-        if (loaded)
+        // Build source plugins before attempting reload
+        if (BuildSourcePlugins && SourcePluginBuilder.IsSourcePlugin(directory))
+            SourcePluginBuilder.BuildSync(directory, _logger);
+
+        // Load the new plugin assembly first, before unloading the old one
+        var loaded = LoadPluginFromDirectory(directory, _serviceProviderFactory!());
+        if (loaded is null)
         {
-            PluginReloaded?.Invoke(pluginId);
+            _logger.LogError("Failed to reload plugin '{Id}': new version could not be loaded.", pluginId);
+            return false;
         }
-        return loaded;
+
+        var manifest = loaded.Value.Instance.Manifest;
+        if (manifest.MinimumHostVersion is { } minVersion && _hostVersion < minVersion)
+        {
+            _logger.LogError(
+                "Plugin '{Id}' requires host version {Required} but current is {Current}.",
+                manifest.Id, minVersion, _hostVersion);
+            return false;
+        }
+
+        // Now atomically swap: unload old, insert new
+        _lock.EnterWriteLock();
+        try
+        {
+            var oldPlugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
+            if (oldPlugin is not null)
+            {
+                _pluginContext?.RemovePluginContributions(pluginId);
+                (oldPlugin.ServiceProvider as IDisposable)?.Dispose();
+                oldPlugin.LoadContext.Unload();
+                _plugins.Remove(oldPlugin);
+            }
+
+            var newPlugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory);
+
+            if (_configuration is not null)
+                newPlugin.Instance.ConfigureServices(newPlugin.Services, _configuration);
+
+            if (_pluginContext is not null)
+            {
+                if (newPlugin.Instance.ConfigurationSchema is { } schema && _configuration is not null)
+                {
+                    var configWithDefaults = ApplyConfigurationDefaults(
+                        manifest.ConfigSectionName, schema, _configuration);
+                    _pluginContext.PushConfiguration(configWithDefaults);
+                }
+
+                _pluginContext.SetCurrentPlugin(manifest.Id, directory);
+                newPlugin.Instance.Configure(_pluginContext);
+                _pluginContext.ClearCurrentPlugin();
+                _pluginContext.PopConfiguration();
+                _pluginContext.BuildPluginServiceProvider(manifest.Id, newPlugin.Services);
+                newPlugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
+            }
+
+            _knownPlugins[manifest.Id] = directory;
+            _plugins.Add(newPlugin);
+            _failedPlugins.Remove(directory);
+
+            _logger.LogInformation("Reloaded plugin: {Id} v{Version}", manifest.Id, manifest.Version);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+
+        // Refresh UI after the swap is complete
+        _pluginContext?.ReloadApps();
+        var appIds = _pluginContext?.GetPluginAppIds(pluginId);
+        if (appIds is { Count: > 0 })
+            _pluginContext!.RefreshApps(appIds);
+
+        PluginReloaded?.Invoke(pluginId);
+        return true;
     }
 
     public IReadOnlyList<string> GetLoadedPluginIds()

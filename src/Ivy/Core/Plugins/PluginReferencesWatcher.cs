@@ -12,6 +12,8 @@ internal class PluginReferencesWatcher : IDisposable
     private readonly string _referencesFilePath;
     private readonly IPluginManager _pluginManager;
     private readonly ILogger _logger;
+    private readonly bool _buildSourcePlugins;
+    private readonly SourcePluginBuilder? _sourceBuilder;
     private FileSystemWatcher? _fileWatcher;
     private readonly ConcurrentDictionary<string, FileSystemWatcher> _directoryWatchers = new();
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _pendingReloads = new();
@@ -27,12 +29,15 @@ internal class PluginReferencesWatcher : IDisposable
     public PluginReferencesWatcher(
         string pluginsDirectory,
         IPluginManager pluginManager,
-        ILogger logger)
+        ILogger logger,
+        bool buildSourcePlugins = false)
     {
         _pluginsDirectory = pluginsDirectory;
         _referencesFilePath = Path.Combine(pluginsDirectory, FileName);
         _pluginManager = pluginManager;
         _logger = logger;
+        _buildSourcePlugins = buildSourcePlugins;
+        _sourceBuilder = buildSourcePlugins ? new SourcePluginBuilder(logger) : null;
     }
 
     public void Start()
@@ -135,12 +140,11 @@ internal class PluginReferencesWatcher : IDisposable
         {
             NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
             IncludeSubdirectories = true,
-            Filter = "*.dll",
             EnableRaisingEvents = true
         };
 
-        watcher.Changed += (_, e) => OnDllChanged(e.FullPath, directory);
-        watcher.Created += (_, e) => OnDllChanged(e.FullPath, directory);
+        watcher.Changed += (_, e) => OnFileChanged(e.FullPath, directory);
+        watcher.Created += (_, e) => OnFileChanged(e.FullPath, directory);
 
         _directoryWatchers[directory] = watcher;
         _logger.LogDebug("Watching referenced plugin directory: {Directory}", directory);
@@ -161,13 +165,27 @@ internal class PluginReferencesWatcher : IDisposable
         }
     }
 
-    private void OnDllChanged(string fullPath, string pluginDirectory)
+    private void OnFileChanged(string fullPath, string pluginDirectory)
     {
         if (fullPath.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
             return;
 
-        _logger.LogInformation("DLL changed in referenced plugin: {Path}", fullPath);
-        ScheduleReload(pluginDirectory);
+        if (fullPath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+        {
+            if (fullPath.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
+            {
+                _logger.LogInformation("DLL changed in referenced plugin: {Path}", fullPath);
+                ScheduleReload(pluginDirectory);
+            }
+            return;
+        }
+
+        if (_buildSourcePlugins && SourcePluginBuilder.IsSourceFile(fullPath) &&
+            !fullPath.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
+        {
+            if (SourcePluginBuilder.IsSourcePlugin(pluginDirectory))
+                _sourceBuilder?.ScheduleBuild(pluginDirectory);
+        }
     }
 
     private void ScheduleLoad(string pluginDirectory)
@@ -321,5 +339,6 @@ internal class PluginReferencesWatcher : IDisposable
             cts.Dispose();
         }
         _pendingReloads.Clear();
+        _sourceBuilder?.Dispose();
     }
 }
