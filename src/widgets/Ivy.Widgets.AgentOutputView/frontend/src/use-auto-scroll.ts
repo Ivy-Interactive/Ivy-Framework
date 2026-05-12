@@ -105,12 +105,34 @@ export function useAutoScroll(options: UseAutoScrollOptions = {}) {
 
     resizeObserver.observe(element);
 
-    const contentChild = element.firstElementChild;
-    if (contentChild) {
-      resizeObserver.observe(contentChild);
-    }
+    // Observe every descendant whose size could push scrollHeight: any element
+    // expanding inside the body (a tool card opening, an image loading, streaming
+    // output) should trigger a re-pin to the bottom while the user is at the bottom.
+    const observed = new WeakSet<Element>();
+    const observeAll = (root: Element) => {
+      for (const child of Array.from(root.children)) {
+        if (!observed.has(child)) {
+          resizeObserver.observe(child);
+          observed.add(child);
+        }
+        observeAll(child);
+      }
+    };
+    observeAll(element);
 
-    return () => resizeObserver.disconnect();
+    const mutationObserver = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        m.addedNodes.forEach((n) => {
+          if (n.nodeType === Node.ELEMENT_NODE) observeAll(n as Element);
+        });
+      }
+    });
+    mutationObserver.observe(element, { childList: true, subtree: true });
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
   }, [scrollState.autoScrollEnabled, scrollToBottom, enabled]);
 
   useEffect(() => {
