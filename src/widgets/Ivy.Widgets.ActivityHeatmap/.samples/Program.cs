@@ -48,11 +48,7 @@ Activity[] data =
 
 new ActivityHeatmap()
     .Data(data)
-    .StartDate({startDate.Value})
-    .EndDate({endDate.Value})
     .ColorScheme(Colors.{selectedColor.Value})
-    .ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
-    .ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
     .OnDayClick(day => Console.WriteLine(...));", Languages.Csharp)
 
             | (Layout
