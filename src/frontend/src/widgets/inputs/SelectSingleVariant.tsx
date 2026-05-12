@@ -154,11 +154,16 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       ref={triggerRef}
       className={cn(
         "relative",
-        invalid && inputStyles.invalidInput,
+        invalid &&
+          (hasAffixes
+            ? inputStyles.invalidInput
+            : "text-destructive-foreground placeholder-destructive-foreground"),
         !hasValue && "text-muted-foreground",
         ghost &&
           "border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground",
         hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
+        !hasAffixes &&
+          "border-0 shadow-none rounded-field focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 dark:bg-transparent",
         hasPrefix && "rounded-l-none",
         hasSuffix && "rounded-r-none",
       )}
@@ -210,6 +215,20 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
     </SelectTrigger>
   );
 
+  const selectTriggerBranch =
+    isEllipsed && selectedLabel ? (
+      <TooltipProvider>
+        <Tooltip delayDuration={300} open={isOpen ? false : undefined}>
+          <TooltipTrigger asChild>{selectTriggerElement}</TooltipTrigger>
+          <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
+            <div className="whitespace-pre-wrap break-words">{selectedLabel}</div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    ) : (
+      selectTriggerElement
+    );
+
   const selectContent = (
     <Select
       key={`${id}-${stringValue ?? "null"}`}
@@ -220,17 +239,23 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       onOpenChange={handleOpenChange}
       data-testid={dataTestId}
     >
-      {isEllipsed && selectedLabel ? (
-        <TooltipProvider>
-          <Tooltip delayDuration={300} open={isOpen ? false : undefined}>
-            <TooltipTrigger asChild>{selectTriggerElement}</TooltipTrigger>
-            <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-              <div className="whitespace-pre-wrap break-words">{selectedLabel}</div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+      {hasAffixes ? (
+        selectTriggerBranch
       ) : (
-        selectTriggerElement
+        <div
+          className={cn(
+            "relative flex w-full min-w-0 select-none items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+            isOpen
+              ? "border-ring outline-none dark:border-ring"
+              : "border-input outline-none dark:border-white/10 focus-within:border-ring dark:focus-within:border-ring",
+            invalid && "border-destructive",
+            disabled && "cursor-not-allowed opacity-50",
+            ghost &&
+              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+          )}
+        >
+          <div className="relative min-w-0 flex-1">{selectTriggerBranch}</div>
+        </div>
       )}
       <SelectContent density={density}>
         {searchable && (

@@ -168,6 +168,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           <Input
             ref={mergedRef}
             id={props.id}
+            density={density}
             type="search"
             placeholder={props.placeholder}
             value={props.value}

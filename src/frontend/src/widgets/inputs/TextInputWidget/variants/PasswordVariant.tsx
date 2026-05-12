@@ -96,6 +96,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
         <Input
           ref={elementRef}
           id={props.id}
+          density={density}
           placeholder={props.placeholder}
           value={props.value}
           type={showPassword ? "text" : "password"}
