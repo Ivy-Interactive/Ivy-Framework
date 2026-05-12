@@ -282,6 +282,21 @@
   font-weight: 600;
 }
 
+.aov-tool-count {
+  color: var(--aov-fg-muted);
+  font-variant-numeric: tabular-nums;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--aov-border);
+  border-radius: 4px;
+  padding: 0 5px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.light .aov-tool-count {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .aov-tool-preview {
   color: var(--aov-fg-muted);
   overflow: hidden;
@@ -294,6 +309,32 @@
 .aov-tool-running {
   color: var(--aov-fg-faint);
   font-style: italic;
+}
+
+.aov-tool-entry {
+  padding: 4px 0;
+}
+
+.aov-tool-entry + .aov-tool-entry {
+  border-top: 1px dashed var(--aov-border);
+  margin-top: 8px;
+  padding-top: 10px;
+}
+
+.aov-tool-entry-marker {
+  color: var(--aov-fg-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.aov-tool-entry-pending {
+  color: var(--aov-warn);
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .aov-tool-body {

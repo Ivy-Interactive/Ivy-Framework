@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-interface ToolUseCardProps {
+interface ToolCall {
   name: string;
   input: Record<string, unknown>;
   result?: string;
+}
+
+interface ToolUseCardProps {
+  tools: ToolCall[];
 }
 
 function displayInput(name: string, input: Record<string, unknown>): string {
@@ -19,46 +23,111 @@ function displayInput(name: string, input: Record<string, unknown>): string {
   return JSON.stringify(input, null, 2);
 }
 
-export const ToolUseCard: React.FC<ToolUseCardProps> = ({ name, input, result }) => {
-  const [open, setOpen] = useState(false);
-  const inputDisplay = displayInput(name, input);
-  const resultPreview =
-    result != null ? (result.length > 120 ? result.slice(0, 120) + "…" : result) : null;
+function inputSummary(name: string, input: Record<string, unknown>): string {
+  if (name === "Bash" && typeof input.command === "string") return input.command;
+  if (typeof input.file_path === "string") return input.file_path;
+  if (typeof input.path === "string") return input.path;
+  if (typeof input.pattern === "string") return input.pattern;
+  return "";
+}
+
+function basename(p: string): string {
+  if (!p) return p;
+  const i = Math.max(p.lastIndexOf("/"), p.lastIndexOf("\\"));
+  return i >= 0 ? p.slice(i + 1) : p;
+}
+
+export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tools }) => {
+  const active = tools.some((t) => t.result === undefined);
+  const [open, setOpen] = useState(active);
+  const userToggled = useRef(false);
+  const prevActive = useRef(active);
+
+  // Auto-expand on entering active, auto-collapse on leaving — unless the user has
+  // manually toggled the card.
+  useEffect(() => {
+    if (userToggled.current) return;
+    if (prevActive.current !== active) {
+      setOpen(active);
+      prevActive.current = active;
+    }
+  }, [active]);
+
+  const handleToggle = () => {
+    userToggled.current = true;
+    setOpen((o) => !o);
+  };
+
+  const name = tools[0].name;
+  const count = tools.length;
+  const last = tools[tools.length - 1];
+
+  // Header preview: prefer the last tool's result, else its input summary
+  let headerPreview = "";
+  if (last.result != null) {
+    headerPreview = last.result.length > 120 ? last.result.slice(0, 120) + "…" : last.result;
+  } else {
+    const s = inputSummary(last.name, last.input);
+    if (s) headerPreview = basename(s);
+  }
 
   return (
     <div className="aov-tool">
       <div
         className="aov-tool-header"
-        onClick={() => setOpen((o) => !o)}
+        onClick={handleToggle}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            setOpen((o) => !o);
+            handleToggle();
           }
         }}
       >
         <span className={`aov-tool-chevron ${open ? "open" : ""}`}>▸</span>
         <span className="aov-tool-name">{name}</span>
-        {resultPreview != null && <span className="aov-tool-preview">{resultPreview}</span>}
-        {result == null && <span className="aov-tool-running">running…</span>}
+        {count > 1 && <span className="aov-tool-count">×{count}</span>}
+        {headerPreview && <span className="aov-tool-preview">{headerPreview}</span>}
+        {active && <span className="aov-tool-running">running…</span>}
       </div>
       {open && (
         <div className="aov-tool-body">
-          <div className="aov-tool-section-label">$ input</div>
-          <pre className="aov-tool-pre">
-            <code>{inputDisplay}</code>
-          </pre>
-          {result != null && (
-            <>
-              <div className="aov-tool-section-label">› output</div>
-              <pre className="aov-tool-pre">
-                <code>{result}</code>
-              </pre>
-            </>
-          )}
+          {tools.map((t, i) => (
+            <ToolEntry key={i} index={i} total={count} tool={t} />
+          ))}
         </div>
+      )}
+    </div>
+  );
+};
+
+const ToolEntry: React.FC<{ index: number; total: number; tool: ToolCall }> = ({
+  index,
+  total,
+  tool,
+}) => {
+  const inputDisplay = displayInput(tool.name, tool.input);
+  const pending = tool.result === undefined;
+  return (
+    <div className={`aov-tool-entry ${pending ? "pending" : ""}`}>
+      {total > 1 && (
+        <div className="aov-tool-entry-marker">
+          {tool.name} {index + 1}/{total}
+          {pending && <span className="aov-tool-entry-pending"> · running…</span>}
+        </div>
+      )}
+      <div className="aov-tool-section-label">$ input</div>
+      <pre className="aov-tool-pre">
+        <code>{inputDisplay}</code>
+      </pre>
+      {tool.result != null && (
+        <>
+          <div className="aov-tool-section-label">› output</div>
+          <pre className="aov-tool-pre">
+            <code>{tool.result}</code>
+          </pre>
+        </>
       )}
     </div>
   );

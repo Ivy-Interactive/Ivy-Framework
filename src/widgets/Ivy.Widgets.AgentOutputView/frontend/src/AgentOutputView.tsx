@@ -125,6 +125,34 @@ export const AgentOutputView: React.FC<AgentOutputViewProps> = ({
     }
   }
 
+  // Build a render list that folds runs of adjacent same-name tool-use events into one card.
+  type RenderItem =
+    | { kind: "event"; index: number; event: NormalizedEvent }
+    | { kind: "tool-group"; key: string; tools: Array<{ name: string; input: Record<string, unknown>; result?: string }> };
+
+  const renderItems: RenderItem[] = [];
+  for (let i = 0; i < parsedEvents.length; i++) {
+    if (suppressIndices.has(i)) continue;
+    const e = parsedEvents[i];
+    if (e.kind === "tool-use") {
+      let j = i;
+      const tools: Array<{ name: string; input: Record<string, unknown>; result?: string }> = [];
+      while (
+        j < parsedEvents.length &&
+        parsedEvents[j].kind === "tool-use" &&
+        (parsedEvents[j] as Extract<NormalizedEvent, { kind: "tool-use" }>).name === e.name
+      ) {
+        const t = parsedEvents[j] as Extract<NormalizedEvent, { kind: "tool-use" }>;
+        tools.push({ name: t.name, input: t.input, result: t.result });
+        j++;
+      }
+      renderItems.push({ kind: "tool-group", key: `tg-${i}-${e.name}`, tools });
+      i = j - 1;
+    } else {
+      renderItems.push({ kind: "event", index: i, event: e });
+    }
+  }
+
   return (
     <div style={shellStyle} className="aov-shell">
       <div
@@ -133,8 +161,12 @@ export const AgentOutputView: React.FC<AgentOutputViewProps> = ({
         onWheel={autoScroll ? disableAutoScroll : undefined}
         onTouchMove={autoScroll ? disableAutoScroll : undefined}
       >
-        {parsedEvents.map((event, idx) => {
-          if (suppressIndices.has(idx)) return null;
+        {renderItems.map((item) => {
+          if (item.kind === "tool-group") {
+            return <ToolUseCard key={item.key} tools={item.tools} />;
+          }
+          const event = item.event;
+          const idx = item.index;
           switch (event.kind) {
             case "system":
               if (!showSystemEvents) return null;
@@ -158,15 +190,6 @@ export const AgentOutputView: React.FC<AgentOutputViewProps> = ({
                     {event.text}
                   </Markdown>
                 </div>
-              );
-            case "tool-use":
-              return (
-                <ToolUseCard
-                  key={idx}
-                  name={event.name}
-                  input={event.input}
-                  result={event.result}
-                />
               );
             case "result":
               return <ResultSummary key={idx} event={event} />;
