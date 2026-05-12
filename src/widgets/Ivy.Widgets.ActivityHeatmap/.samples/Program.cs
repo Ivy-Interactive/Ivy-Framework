@@ -17,8 +17,11 @@ class ActivityHeatmapDemo : ViewBase
         var selectedColor = UseState(Colors.Primary);
         var showDayLabels = UseState(true);
         var showMonthLabels = UseState(true);
-        var startDate = UseState(DateOnly.FromDateTime(DateTime.Today).AddDays(-364));
-        var endDate = UseState(DateOnly.FromDateTime(DateTime.Today));
+        var nullableRange = UseState<(DateOnly?, DateOnly?)>(() =>
+            (DateOnly.FromDateTime(DateTime.Today.AddDays(-364)),
+             DateOnly.FromDateTime(DateTime.Today)));
+        var startDate = nullableRange.Value.Item1;
+        var endDate = nullableRange.Value.Item2;
 
         var rng = new Random(42);
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -61,17 +64,18 @@ new ActivityHeatmap()
                 | (Layout
                     .Horizontal()
                     .Gap(2)
-                    | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
-                    | Text.P(selectedColor.Value.ToString())
-                    | showDayLabels.ToBoolInput().Label("Show day labels")
-                    | showMonthLabels.ToBoolInput().Label("Show month labels")
-                    | startDate.ToDateInput().WithLabel("Start date")
-                    | endDate.ToDateInput().WithLabel("End date"))
+                    | (Layout.Horizontal().Gap(2).Width(Size.Fit())
+                        | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
+                        | Text.P(selectedColor.Value.ToString()))
+                    | (Layout.Horizontal().Gap(2).Width(Size.Grow())
+                        | showDayLabels.ToBoolInput().Label("Show day labels")
+                        | showMonthLabels.ToBoolInput().Label("Show month labels"))
+                    | nullableRange.ToDateRangeInput())
 
                 | new ActivityHeatmap()
                     .Data(data)
-                    .StartDate(startDate.Value)
-                    .EndDate(endDate.Value)
+                    .StartDate(startDate)
+                    .EndDate(endDate)
                     .ColorScheme(selectedColor.Value)
                     .ShowDayLabels(showDayLabels.Value)
                     .ShowMonthLabels(showMonthLabels.Value)
