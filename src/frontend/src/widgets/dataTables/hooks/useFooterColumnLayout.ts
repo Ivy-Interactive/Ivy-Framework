@@ -14,6 +14,7 @@ import {
   type Theme,
 } from "@glideapps/glide-data-grid";
 import {
+  animatedStatusCellRenderer,
   iconCellRenderer,
   labelsBadgesCellRenderer,
   linkCellRenderer,
@@ -165,6 +166,7 @@ export function useFooterColumnLayout(
       if (iconCellRenderer.isMatch(c)) return iconCellRenderer;
       if (linkCellRenderer.isMatch(c)) return linkCellRenderer;
       if (labelsBadgesCellRenderer.isMatch(c)) return labelsBadgesCellRenderer;
+      if (animatedStatusCellRenderer.isMatch(c)) return animatedStatusCellRenderer;
       return undefined;
     },
     [rendererMap],

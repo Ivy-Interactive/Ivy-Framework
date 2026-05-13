@@ -70,7 +70,8 @@ public enum ColType
     DateTime,
     Icon,
     Labels,
-    Link
+    Link,
+    AnimatedStatus
 }
 
 public interface IDataTableColumnRenderer
@@ -153,5 +154,38 @@ public class LabelsDisplayRenderer : IDataTableColumnRenderer
     public Dictionary<string, string>? BadgeColorMapping { get; set; }
     public bool IsEditable => false;
     public ColType ColType => ColType.Labels;
+}
+
+/// <summary>
+/// Renders the cell as an animated status label: a spinner + shimmering status text while running,
+/// and a check icon + static text when complete. The cell value must be encoded as
+/// "running:&lt;text&gt;", "done:&lt;text&gt;" or "idle:&lt;text&gt;" — use <see cref="AnimatedStatusValue"/>
+/// to build it. An optional right-aligned secondary label can be appended after a tab character.
+/// </summary>
+public class AnimatedStatusLabelDisplayRenderer : IDataTableColumnRenderer
+{
+    public bool IsEditable => false;
+    public ColType ColType => ColType.AnimatedStatus;
+}
+
+/// <summary>
+/// Helper for producing the string value expected by <see cref="AnimatedStatusLabelDisplayRenderer"/>.
+/// </summary>
+public static class AnimatedStatusValue
+{
+    public static string Running(string statusText, string? rightLabel = null) =>
+        Encode("running", statusText, rightLabel);
+
+    public static string Done(string statusText = "Done", string? rightLabel = null) =>
+        Encode("done", statusText, rightLabel);
+
+    public static string Idle(string statusText = "-", string? rightLabel = null) =>
+        Encode("idle", statusText, rightLabel);
+
+    private static string Encode(string state, string text, string? rightLabel)
+    {
+        var body = $"{state}:{text ?? string.Empty}";
+        return string.IsNullOrEmpty(rightLabel) ? body : $"{body}\t{rightLabel}";
+    }
 }
 

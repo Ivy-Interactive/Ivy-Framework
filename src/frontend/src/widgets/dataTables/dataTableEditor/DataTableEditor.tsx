@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useTable } from "../dataTableContext";
 import { getSelectionProps } from "../utils/selectionModes";
 import {
+  animatedStatusCellRenderer,
   iconCellRenderer,
   labelsBadgesCellRenderer,
   linkCellRenderer,
@@ -37,7 +38,6 @@ import { DENSITY_CONFIG } from "./constants";
 import { useCellContent, useGridColumns, useHeaderMenu } from "./hooks";
 import { getOrderedVisibleDataColumns } from "../utils/columnHelpers";
 import type { SpriteMap } from "@glideapps/glide-data-grid";
-import { ExternalLink } from "lucide-react";
 
 interface TableEditorProps {
   widgetId: string;
@@ -80,11 +80,6 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   } = useTable();
 
   const densityConfig = DENSITY_CONFIG[density];
-  const actionIndicatorStyle = useMemo(() => {
-    if (density === "Small") return { iconSize: 10, top: 1, right: 2 };
-    if (density === "Large") return { iconSize: 14, top: 3, right: 4 };
-    return { iconSize: 12, top: 2, right: 3 };
-  }, [density]);
 
   const hasWrappingColumns = columns.some((c) => c.wrapText && !c.hidden);
   const effectiveRowHeight = hasWrappingColumns
@@ -267,6 +262,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     x: number;
     y: number;
     width: number;
+    height: number;
   } | null>(null);
 
   const handleVisibleRegionChangedForGrid = useCallback(
@@ -310,6 +306,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         x: args.bounds.x,
         y: args.bounds.y,
         width: args.bounds.width,
+        height: args.bounds.height,
       });
     },
     [onLinkCellHovered, onItemHovered, orderedDataColumns, visibleRows],
@@ -406,20 +403,19 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     <div
       style={{
         position: "fixed",
-        left:
-          cellActionIndicator.x +
-          cellActionIndicator.width -
-          actionIndicatorStyle.iconSize -
-          actionIndicatorStyle.right,
-        top: cellActionIndicator.y + actionIndicatorStyle.top,
+        left: cellActionIndicator.x,
+        top: cellActionIndicator.y,
+        width: cellActionIndicator.width,
+        height: cellActionIndicator.height,
         pointerEvents: "none",
         zIndex: 20,
-        opacity: 0.7,
+        backgroundColor: isDark ? "rgba(59, 130, 246, 0.08)" : "rgba(59, 130, 246, 0.06)",
+        border: `1px solid ${isDark ? "rgba(59, 130, 246, 0.3)" : "rgba(59, 130, 246, 0.2)"}`,
+        borderRadius: "2px",
+        boxSizing: "border-box",
       }}
       aria-hidden
-    >
-      <ExternalLink size={actionIndicatorStyle.iconSize} />
-    </div>
+    />
   ) : null;
 
   return (
@@ -436,6 +432,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
             iconCellRenderer,
             linkCellRenderer,
             labelsBadgesCellRenderer,
+            animatedStatusCellRenderer,
           ] as unknown as readonly CustomRenderer[]
         }
         headerIcons={headerIcons}
