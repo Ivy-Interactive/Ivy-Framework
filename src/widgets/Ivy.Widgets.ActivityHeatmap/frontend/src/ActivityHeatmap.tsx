@@ -57,7 +57,7 @@ function buildGrid(
 
   const today = new Date();
   const firstDate = firstStr ? new Date(firstStr + "T00:00:00") : new Date(new Date().setDate(today.getDate() - 364));
-  const lastDate = lastStr ? new Date(lastStr + "T00:00:00") : new Date();
+  const lastDate = lastStr ? new Date(lastStr + "T00:00:00") : today;
 
   return buildGridFromRange(data, firstDate, lastDate);
 }
@@ -67,12 +67,24 @@ function buildGridFromRange(
   firstDate: Date,
   lastDate: Date
 ): (Activity | null)[][] {
+  let rangeStart = firstDate;
+  let rangeEnd = lastDate;
+  if (
+    !Number.isNaN(rangeStart.getTime()) &&
+    !Number.isNaN(rangeEnd.getTime()) &&
+    rangeStart > rangeEnd
+  ) {
+    const t = rangeStart;
+    rangeStart = rangeEnd;
+    rangeEnd = t;
+  }
+
   // Pad left to preceding Sunday
-  const start = new Date(firstDate);
+  const start = new Date(rangeStart);
   start.setDate(start.getDate() - start.getDay());
 
   // Pad right to following Saturday
-  const end = new Date(lastDate);
+  const end = new Date(rangeEnd);
   end.setDate(end.getDate() + (6 - end.getDay()));
 
   const dataMap = new Map<string, Activity>();

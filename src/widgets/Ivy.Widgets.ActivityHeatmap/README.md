@@ -30,6 +30,8 @@ new ActivityHeatmap()
 | `StartDate` | `DateOnly?` | `null` | Pins the start of the visible range; when set, overrides the minimum date derived from `Data` |
 | `EndDate` | `DateOnly?` | `null` | Pins the end of the visible range; when set, overrides the maximum date derived from `Data` |
 
+If both `StartDate` and `EndDate` are set and `EndDate` is before `StartDate`, the widget treats the range in chronological order (same as swapping the two values), so the grid still renders instead of collapsing to zero weeks.
+
 ## Data Constraints
 
 - Duplicate dates in `Data` are not supported.

@@ -198,4 +198,38 @@ public class ActivityHeatmapTests
         Assert.True(weeks.Length <= 54);
         Assert.All(weeks, week => Assert.Equal(7, week.Length));
     }
+
+    [Fact]
+    public void BuildGrid_InvertedStartEnd_NormalizesToChronologicalRange()
+    {
+        var startDate = new DateOnly(2024, 3, 31);
+        var endDate = new DateOnly(2024, 3, 1);
+        var data = new[]
+        {
+            new Activity { Date = new DateOnly(2024, 3, 15), Count = 5 },
+        };
+
+        var weeks = ActivityHeatmapGrid.BuildGrid(data, startDate: startDate, endDate: endDate);
+
+        Assert.NotEmpty(weeks);
+        Assert.All(weeks, week => Assert.Equal(7, week.Length));
+        Assert.Equal(DayOfWeek.Sunday, weeks[0][0].Date.DayOfWeek);
+        Assert.Equal(DayOfWeek.Saturday, weeks[^1][6].Date.DayOfWeek);
+        Assert.True(weeks[0][0].Date <= endDate);
+        Assert.True(weeks[^1][6].Date >= startDate);
+        var midWeek = weeks.SelectMany(w => w).Single(d => d.Date == new DateOnly(2024, 3, 15));
+        Assert.Equal(5, midWeek.Count);
+    }
+
+    [Fact]
+    public void BuildGridFromRange_InvertedFirstLast_SwapsToOrderedRange()
+    {
+        var first = new DateOnly(2024, 3, 20);
+        var last = new DateOnly(2024, 3, 1);
+        var weeks = ActivityHeatmapGrid.BuildGridFromRange([], first, last);
+
+        Assert.NotEmpty(weeks);
+        Assert.True(weeks[0][0].Date <= last);
+        Assert.True(weeks[^1][6].Date >= first);
+    }
 }
