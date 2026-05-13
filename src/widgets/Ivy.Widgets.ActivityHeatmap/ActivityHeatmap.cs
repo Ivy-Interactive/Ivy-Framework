@@ -11,25 +11,18 @@ public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
     /// <summary>Daily activity data. One entry per active day — missing days are rendered as zero.</summary>
     [Prop] public Activity[] Data { get; init; } = [];
 
-    /// <summary>Color scheme for activity levels. One of: "primary" (default), "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose".</summary>
     [Prop] public Colors ColorScheme { get; init; } = Colors.Primary;
 
-    /// <summary>Show date and count tooltip on hover.</summary>
     [Prop] public bool ShowTooltip { get; init; } = true;
 
-    /// <summary>Show month labels along the top.</summary>
     [Prop] public bool ShowMonthLabels { get; init; } = true;
 
-    /// <summary>Show weekday labels on the left (Mon, Wed, Fri).</summary>
     [Prop] public bool ShowDayLabels { get; init; } = true;
 
-    /// <summary>Pins the start of the visible range, overriding the data-derived minimum date. If <see cref="EndDate"/> is earlier, bounds are treated in chronological order (same as swapping).</summary>
     [Prop] public DateOnly? StartDate { get; init; }
 
-    /// <summary>Pins the end of the visible range, overriding the data-derived maximum date. If earlier than <see cref="StartDate"/>, bounds are normalized to chronological order.</summary>
     [Prop] public DateOnly? EndDate { get; init; }
 
-    /// <summary>Fired when the user clicks a day cell.</summary>
     [Event] public EventHandler<Event<ActivityHeatmap, Activity>>? OnDayClick { get; init; }
 }
 
@@ -74,15 +67,8 @@ public static class ActivityHeatmapExtensions
     };
 }
 
-/// <summary>Pure helper for computing grid layout and level assignments.</summary>
 public static class ActivityHeatmapGrid
 {
-    /// <summary>
-    /// Builds a weeks × 7-days matrix. Pads left to the preceding Sunday of the earliest date,
-    /// pads right to the following Saturday of the latest date. Empty days get Count = 0.
-    /// When startDate or endDate is provided, they override the data-derived bounds.
-    /// If both are set and endDate is before startDate, the range is normalized to chronological order.
-    /// </summary>
     public static Activity[][] BuildGrid(Activity[] data, DateOnly? startDate = null, DateOnly? endDate = null)
     {
         if (data.Length == 0 && startDate == null && endDate == null)
@@ -97,10 +83,6 @@ public static class ActivityHeatmapGrid
         return BuildGridFromRange(data, first, last);
     }
 
-    /// <summary>
-    /// Builds a grid between two dates (inclusive), padded to week boundaries.
-    /// If <paramref name="first"/> is after <paramref name="last"/>, the arguments are treated as reversed.
-    /// </summary>
     public static Activity[][] BuildGridFromRange(Activity[] data, DateOnly first, DateOnly last)
     {
         if (first > last)
@@ -131,7 +113,6 @@ public static class ActivityHeatmapGrid
         return [.. weeks];
     }
 
-    /// <summary>Maps a count to a level 0–4 using quartile thresholds.</summary>
     public static int GetLevel(int count, int maxCount)
     {
         if (count == 0 || maxCount == 0) return 0;
