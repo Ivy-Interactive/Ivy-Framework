@@ -10,6 +10,7 @@ class QRCodeDemo : ViewBase
 {
     public override object Build()
     {
+        var client = UseService<IClientProvider>();
         var state = UseState("https://tendril.ivy.app/");
         return Layout.Vertical().Width(Size.Fit())
             | Text.H1("QRCode")
@@ -20,22 +21,30 @@ class QRCodeDemo : ViewBase
     {{
         var state = UseState({"\"https://tendril.ivy.app/\""});
         return Layout.Vertical()
-            | new QRCode()
-                .Value(state.Value)
-                .PixelSize(256)
-                .Foreground(Colors.Primary)
-                .Background(Colors.White)
+            | new QRCode().Value(state.Value)
             | state.ToTextInput();
     }}
 }}")
             | (Layout.Vertical()
                 | new QRCode()
                     .Value(state.Value)
-                    .PixelSize(256)
-                    .Foreground(Colors.Primary)
-                    .Background(Colors.White)
                     .AlignSelf(Align.Center)
                 | state.ToTextInput())
-            .WithBox();
+            .WithBox()
+
+            | new DropDownMenu(@evt =>
+                {
+                    ThemeMode selectedTheme = @evt.Value switch
+                    {
+                        "Light" => ThemeMode.Light,
+                        "Dark" => ThemeMode.Dark,
+                        _ => ThemeMode.System,
+                    };
+                    client.SetThemeMode(selectedTheme);
+                },
+                new Button("Theme").Variant(ButtonVariant.Link).Icon(Icons.SunMoon),
+                MenuItem.Default("Light").Icon(Icons.Sun),
+                MenuItem.Default("Dark").Icon(Icons.Moon),
+                MenuItem.Default("System").Icon(Icons.Computer));
     }
 }
