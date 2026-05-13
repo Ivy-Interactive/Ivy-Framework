@@ -14,11 +14,14 @@ class ActivityHeatmapDemo : ViewBase
     {
         var client = UseService<IClientProvider>();
 
-        var selectedColor = UseState(Colors.Primary);
-        var showDayLabels = UseState(true);
-        var showMonthLabels = UseState(true);
-        var endDate = UseState(DateOnly.FromDateTime(DateTime.Today));
-        var startDate = UseState(endDate.Value.AddDays(-364));
+        var selectedColor = UseState(Colors.Emerald);
+        var showDayLabels = UseState(false);
+        var showMonthLabels = UseState(false);
+        var nullableRange = UseState<(DateOnly?, DateOnly?)>(() =>
+            (DateOnly.FromDateTime(DateTime.Today.AddDays(-364)),
+             DateOnly.FromDateTime(DateTime.Today)));
+        var startDate = nullableRange.Value.Item1;
+        var endDate = nullableRange.Value.Item2;
 
         var rng = new Random(42);
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -37,23 +40,53 @@ class ActivityHeatmapDemo : ViewBase
 
             | Text.H1("ActivityHeatmap")
             | Text.H2("Basic Usage")
-            | new CodeBlock(@$"
-Activity[] data = 
-[
+            | new CodeBlock(@$"public class ActivityHeatmapDemo : ViewBase
+{{
+    public override object Build()
     {{
-        Date = DateOnly.FromDateTime(DateTime.Today),
-        Count = 16
-    }}
-];
+        var rng = new Random(42);
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var start = today.AddDays(-364);
 
-new ActivityHeatmap()
+        Activity[] data = Enumerable
+            .Range(0, 365)
+            .Select(start.AddDays)
+            .Where(_ => rng.NextDouble() > 0.4)
+            .Select(d => new Activity {{ Date = d, Count = rng.Next(1, 20) }})
+            .ToArray();
+
+        return new ActivityHeatmap().Data(data);
+    }}
+}}", Languages.Csharp)
+            | (Layout
+                .Vertical()
+                .Gap(2)
+                .Padding(4)
+                .BottomMargin(16)
+                .BorderThickness(1)
+                .BorderRadius(BorderRadius.Rounded)
+                | new ActivityHeatmap().Data(data))
+
+            | Text.H2("With Optional Properties:")
+            | new CodeBlock(@$"new ActivityHeatmap()
     .Data(data)
-    .StartDate({startDate.Value})
-    .EndDate({endDate.Value})
-    .ColorScheme(Colors.{selectedColor.Value})
     .ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
     .ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
+    .StartDate(DateOnly.Parse({$"\"{startDate}\""}))
+    .EndDate(DateOnly.Parse({$"\"{endDate}\""}))
+    .ColorScheme(Colors.{selectedColor.Value})
     .OnDayClick(day => Console.WriteLine(...));", Languages.Csharp)
+
+            | (Layout
+                    .Horizontal()
+                    .Gap(2)
+                    | (Layout.Horizontal().Gap(2).Width(Size.Fit())
+                        | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
+                        | Text.P(selectedColor.Value.ToString()))
+                    | (Layout.Horizontal().Gap(2).Width(Size.Grow())
+                        | showDayLabels.ToBoolInput().Label("Show day labels")
+                        | showMonthLabels.ToBoolInput().Label("Show month labels"))
+                    | nullableRange.ToDateRangeInput())
 
             | (Layout
                 .Vertical()
@@ -61,25 +94,15 @@ new ActivityHeatmap()
                 .Padding(4)
                 .BorderThickness(1)
                 .BorderRadius(BorderRadius.Rounded)
-
-                | (Layout
-                    .Horizontal()
-                    .Gap(2)
-                    | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
-                    | Text.P(selectedColor.Value.ToString())
-                    | showDayLabels.ToBoolInput().Label("Show day labels")
-                    | showMonthLabels.ToBoolInput().Label("Show month labels")
-                    | startDate.ToDateInput().WithLabel("Start date")
-                    | endDate.ToDateInput().WithLabel("End date"))
-
                 | new ActivityHeatmap()
                     .Data(data)
-                    .StartDate(startDate.Value)
-                    .EndDate(endDate.Value)
+                    .StartDate(startDate)
+                    .EndDate(endDate)
                     .ColorScheme(selectedColor.Value)
                     .ShowDayLabels(showDayLabels.Value)
                     .ShowMonthLabels(showMonthLabels.Value)
-                    .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
+                    .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}"))
+                    )
 
                 | new DropDownMenu(@evt =>
                     {
