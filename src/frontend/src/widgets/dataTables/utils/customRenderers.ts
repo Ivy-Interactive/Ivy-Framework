@@ -252,15 +252,22 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
 
 /**
  * Data structure for animated-status cells.
- * Mirrors the look of the `AnimatedStatusLabel` external widget: a spinner + shimmering
- * status text while running, and a check icon + static text when complete.
+ *
+ * Three visual modes:
+ * - "label": spinner + shimmering text while running; plain text otherwise.
+ * - "badge": rounded pill whose text shimmers while running; static pill otherwise.
+ * - "spinner-timer": small spinner + plain text. The text briefly fades in whenever
+ *   the value changes (e.g. when an elapsed-time timer resets to 0).
  */
 export interface AnimatedStatusCellData {
   kind: "animated-status-cell";
+  mode: "label" | "badge" | "spinner-timer";
   state: "running" | "done" | "idle";
   statusText: string;
   rightLabel?: string;
   align?: "left" | "center" | "right";
+  badgeBg?: string;
+  badgeFg?: string;
 }
 
 export type AnimatedStatusCell = CustomCell<AnimatedStatusCellData>;
@@ -269,6 +276,51 @@ const SPINNER_RADIUS = 6;
 const ICON_TEXT_GAP = 6;
 const SHIMMER_PERIOD_MS = 1400;
 const SPINNER_PERIOD_MS = 900;
+const FADE_IN_MS = 400;
+
+// Track the previous statusText per cell key so we can fade in on change for
+// spinner-timer cells. Keyed by the cell's drawn rect — rect identity is stable
+// for a given (col,row) within a viewport, which is good enough for a transient
+// transition.
+const fadeStartByKey = new Map<string, { text: string; startedAt: number }>();
+const MAX_FADE_KEYS = 256;
+function cellKey(rect: { x: number; y: number; width: number }) {
+  return `${rect.x}:${rect.y}:${rect.width}`;
+}
+function trackFade(key: string, text: string, now: number): number {
+  const prev = fadeStartByKey.get(key);
+  if (!prev || prev.text !== text) {
+    if (fadeStartByKey.size > MAX_FADE_KEYS) {
+      const oldest = fadeStartByKey.keys().next().value;
+      if (oldest !== undefined) fadeStartByKey.delete(oldest);
+    }
+    fadeStartByKey.set(key, { text, startedAt: now });
+    return 0;
+  }
+  return now - prev.startedAt;
+}
+
+function drawRoundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  const radius = Math.min(r, h / 2, w / 2);
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(x, y, w, h, radius);
+  } else {
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + w, y, x + w, y + h, radius);
+    ctx.arcTo(x + w, y + h, x, y + h, radius);
+    ctx.arcTo(x, y + h, x, y, radius);
+    ctx.arcTo(x, y, x + w, y, radius);
+    ctx.closePath();
+  }
+}
 
 function drawSpinner(
   ctx: CanvasRenderingContext2D,
@@ -276,6 +328,7 @@ function drawSpinner(
   cy: number,
   color: string,
   t: number,
+  radius: number = SPINNER_RADIUS,
 ) {
   const start = (t / SPINNER_PERIOD_MS) * Math.PI * 2;
   ctx.save();
@@ -283,24 +336,7 @@ function drawSpinner(
   ctx.lineWidth = 1.5;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.arc(cx, cy, SPINNER_RADIUS, start, start + Math.PI * 1.4);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawCheck(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string) {
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.beginPath();
-  ctx.arc(cx, cy, SPINNER_RADIUS, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(cx - 3, cy);
-  ctx.lineTo(cx - 1, cy + 2.5);
-  ctx.lineTo(cx + 3, cy - 2);
+  ctx.arc(cx, cy, radius, start, start + Math.PI * 1.4);
   ctx.stroke();
   ctx.restore();
 }
@@ -334,14 +370,133 @@ function drawShimmerText(
   ctx.restore();
 }
 
+type AnimatedDrawArgs = Parameters<CustomRenderer<AnimatedStatusCell>["draw"]>[0];
+
+function drawLabelMode(args: AnimatedDrawArgs, cell: AnimatedStatusCell, t: number, hPad: number) {
+  const { ctx, rect, theme } = args;
+  const { state, statusText, rightLabel, align = "left" } = cell.data;
+
+  const baseColor = theme.textDark;
+  const dimColor = theme.textMedium;
+  const accentColor = theme.accentColor ?? baseColor;
+  const cy = rect.y + rect.height / 2;
+
+  let cursorX = rect.x + hPad;
+  if (state === "running") {
+    drawSpinner(ctx, cursorX + SPINNER_RADIUS, cy, accentColor, t);
+    cursorX += SPINNER_RADIUS * 2 + ICON_TEXT_GAP;
+    args.requestAnimationFrame();
+  }
+
+  let rightX = rect.x + rect.width - hPad;
+  if (rightLabel) {
+    const rw = ctx.measureText(rightLabel).width;
+    ctx.fillStyle = dimColor;
+    ctx.fillText(rightLabel, rightX - rw, cy);
+    rightX -= rw + ICON_TEXT_GAP;
+  }
+
+  let textX = cursorX;
+  if (align === "center") {
+    const textW = ctx.measureText(statusText).width;
+    textX = Math.max(cursorX, rect.x + (rect.width - textW) / 2);
+  } else if (align === "right") {
+    const textW = ctx.measureText(statusText).width;
+    textX = Math.max(cursorX, rightX - textW);
+  }
+
+  if (state === "running") {
+    drawShimmerText(ctx, statusText, textX, cy, dimColor, baseColor, t);
+  } else {
+    ctx.fillStyle = state === "done" ? baseColor : dimColor;
+    ctx.fillText(statusText, textX, cy);
+  }
+}
+
+function drawBadgeMode(args: AnimatedDrawArgs, cell: AnimatedStatusCell, t: number, hPad: number) {
+  const { ctx, rect, theme } = args;
+  const { state, statusText, align = "left", badgeBg, badgeFg } = cell.data;
+
+  const bg = badgeBg ?? theme.bgBubble;
+  const fg = badgeFg ?? theme.textBubble;
+  const bubbleH = theme.bubbleHeight;
+  const pad = theme.bubblePadding;
+  const radius = theme.roundingRadius ?? bubbleH / 2;
+  const textW = ctx.measureText(statusText).width;
+  const boxW = textW + pad * 2;
+
+  let bx = rect.x + hPad;
+  if (align === "center") bx = rect.x + (rect.width - boxW) / 2;
+  else if (align === "right") bx = rect.x + rect.width - boxW - hPad;
+  const by = rect.y + (rect.height - bubbleH) / 2;
+  const cy = by + bubbleH / 2;
+
+  ctx.save();
+  ctx.fillStyle = bg;
+  drawRoundRect(ctx, bx, by, boxW, bubbleH, radius);
+  ctx.fill();
+  ctx.restore();
+
+  if (state === "running") {
+    drawShimmerText(ctx, statusText, bx + pad, cy, fg, "#ffffff", t);
+    args.requestAnimationFrame();
+  } else {
+    ctx.fillStyle = fg;
+    ctx.fillText(statusText, bx + pad, cy);
+  }
+}
+
+function drawSpinnerTimerMode(
+  args: AnimatedDrawArgs,
+  cell: AnimatedStatusCell,
+  t: number,
+  hPad: number,
+) {
+  const { ctx, rect, theme } = args;
+  const { state, statusText, align = "left" } = cell.data;
+
+  const baseColor = theme.textDark;
+  const dimColor = theme.textMedium;
+  const accentColor = theme.accentColor ?? baseColor;
+  const cy = rect.y + rect.height / 2;
+  const r = SPINNER_RADIUS - 1;
+
+  let cursorX = rect.x + hPad;
+  if (state === "running") {
+    drawSpinner(ctx, cursorX + r, cy, accentColor, t, r);
+    cursorX += r * 2 + ICON_TEXT_GAP;
+    args.requestAnimationFrame();
+  }
+
+  let alpha = 1;
+  if (state === "running") {
+    const key = cellKey(rect);
+    const sinceChange = trackFade(key, statusText, t);
+    if (sinceChange < FADE_IN_MS) {
+      alpha = sinceChange / FADE_IN_MS;
+      args.requestAnimationFrame();
+    }
+  }
+
+  const textW = ctx.measureText(statusText).width;
+  let textX = cursorX;
+  if (align === "center") textX = Math.max(cursorX, rect.x + (rect.width - textW) / 2);
+  else if (align === "right") textX = Math.max(cursorX, rect.x + rect.width - hPad - textW);
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = state === "idle" ? dimColor : baseColor;
+  ctx.fillText(statusText, textX, cy);
+  ctx.restore();
+}
+
 export const animatedStatusCellRenderer: CustomRenderer<AnimatedStatusCell> = {
   kind: GridCellKind.Custom,
   isMatch: (cell: CustomCell): cell is AnimatedStatusCell =>
     cell.kind === GridCellKind.Custom &&
     (cell.data as AnimatedStatusCellData | undefined)?.kind === "animated-status-cell",
   draw: (args, cell) => {
-    const { ctx, rect, theme } = args;
-    const { state, statusText, rightLabel, align = "left" } = cell.data;
+    const { ctx, theme } = args;
     const t = (args as unknown as { frameTime?: number }).frameTime ?? performance.now();
     const hPad = theme.cellHorizontalPadding ?? 8;
 
@@ -349,48 +504,10 @@ export const animatedStatusCellRenderer: CustomRenderer<AnimatedStatusCell> = {
     ctx.font = (theme as GridDrawTheme).baseFontFull;
     ctx.textBaseline = "middle";
 
-    const baseColor = theme.textDark;
-    const dimColor = theme.textMedium;
-    const accentColor = theme.accentColor ?? baseColor;
-    const cy = rect.y + rect.height / 2;
-
-    const showIcon = state !== "idle";
-    let cursorX = rect.x + hPad;
-    if (showIcon) {
-      const ix = cursorX + SPINNER_RADIUS;
-      if (state === "running") {
-        drawSpinner(ctx, ix, cy, accentColor, t);
-      } else {
-        drawCheck(ctx, ix, cy, accentColor);
-      }
-      cursorX += SPINNER_RADIUS * 2 + ICON_TEXT_GAP;
-    }
-
-    // Reserve room for right label on the right edge.
-    let rightX = rect.x + rect.width - hPad;
-    if (rightLabel) {
-      const rw = ctx.measureText(rightLabel).width;
-      ctx.fillStyle = dimColor;
-      ctx.fillText(rightLabel, rightX - rw, cy);
-      rightX -= rw + ICON_TEXT_GAP;
-    }
-
-    let textX = cursorX;
-    if (align === "center") {
-      const textW = ctx.measureText(statusText).width;
-      textX = Math.max(cursorX, rect.x + (rect.width - textW) / 2);
-    } else if (align === "right") {
-      const textW = ctx.measureText(statusText).width;
-      textX = Math.max(cursorX, rightX - textW);
-    }
-
-    if (state === "running") {
-      drawShimmerText(ctx, statusText, textX, cy, dimColor, baseColor, t);
-      args.requestAnimationFrame();
-    } else {
-      ctx.fillStyle = state === "done" ? baseColor : dimColor;
-      ctx.fillText(statusText, textX, cy);
-    }
+    const mode = cell.data.mode ?? "label";
+    if (mode === "badge") drawBadgeMode(args, cell, t, hPad);
+    else if (mode === "spinner-timer") drawSpinnerTimerMode(args, cell, t, hPad);
+    else drawLabelMode(args, cell, t, hPad);
 
     ctx.restore();
     return true;

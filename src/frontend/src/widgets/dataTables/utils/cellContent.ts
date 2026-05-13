@@ -332,9 +332,15 @@ export function createLabelsCell(
 /**
  * Parses the encoded value emitted by AnimatedStatusValue (C#) into cell data.
  * Format: "<state>:<text>[\t<rightLabel>]" where state is "running" | "done" | "idle".
- * Falls back to an idle cell on any malformed input.
+ * Plain unencoded strings are accepted too and treated as idle (e.g. for
+ * SpinnerTimer cells where the C# side may emit raw timer text).
  */
-export function createAnimatedStatusCell(cellValue: unknown, align?: Align): GridCell {
+export function createAnimatedStatusCell(
+  cellValue: unknown,
+  align?: Align,
+  mode?: AnimatedStatusCellData["mode"],
+  badgeColorMapping?: Record<string, string> | null,
+): GridCell {
   const raw = cellValue == null ? "" : String(cellValue);
   const [body, rightLabel] = raw.split("\t", 2);
   const colonIdx = body.indexOf(":");
@@ -347,6 +353,16 @@ export function createAnimatedStatusCell(cellValue: unknown, align?: Align): Gri
       statusText = body.slice(colonIdx + 1);
     }
   }
+  let badgeBg: string | undefined;
+  let badgeFg: string | undefined;
+  if (mode === "badge" && badgeColorMapping) {
+    const color = lookupBadgeColorMapping(badgeColorMapping, statusText);
+    if (color) {
+      const resolved = resolveBadgeColor(color);
+      badgeBg = resolved.bg;
+      badgeFg = resolved.text;
+    }
+  }
   return {
     kind: GridCellKind.Custom,
     allowOverlay: false,
@@ -354,10 +370,13 @@ export function createAnimatedStatusCell(cellValue: unknown, align?: Align): Gri
     copyData: statusText,
     data: {
       kind: "animated-status-cell",
+      mode: mode ?? "label",
       state,
       statusText,
       rightLabel: rightLabel || undefined,
       align: align ? getContentAlign(align) : undefined,
+      badgeBg,
+      badgeFg,
     },
   };
 }
@@ -467,9 +486,14 @@ export function getCellContent(
       return createLabelsCell(cellValue, align, column.color, column.badgeColorMapping);
     }
 
-    // Handle AnimatedStatus type - spinner + shimmering text while running, check + text when done
+    // Handle AnimatedStatus type - spinner + shimmer label, animated badge, or spinner+timer
     if (column.type === "AnimatedStatus") {
-      return createAnimatedStatusCell(cellValue, align);
+      const mode = column.animatedStatusMode
+        ? (column.animatedStatusMode.toLowerCase() as "label" | "badge" | "spinnertimer")
+        : "label";
+      const normalizedMode =
+        mode === "spinnertimer" ? "spinner-timer" : (mode as "label" | "badge");
+      return createAnimatedStatusCell(cellValue, align, normalizedMode, column.badgeColorMapping);
     }
 
     // Handle explicit link type from backend metadata

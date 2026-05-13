@@ -48,6 +48,12 @@ public class DataTableColumn
     public string? LinkType { get; set; } = null;
 
     /// <summary>
+    /// Visual mode for <see cref="AnimatedStatusLabelDisplayRenderer"/> ("Label", "Badge", "SpinnerTimer").
+    /// Null for non-AnimatedStatus columns.
+    /// </summary>
+    public AnimatedStatusMode? AnimatedStatusMode { get; set; } = null;
+
+    /// <summary>
     /// True when this column has a dedicated OnCellAction handler and should show
     /// a visual affordance for clickability in the frontend.
     /// </summary>
@@ -156,14 +162,30 @@ public class LabelsDisplayRenderer : IDataTableColumnRenderer
     public ColType ColType => ColType.Labels;
 }
 
+public enum AnimatedStatusMode
+{
+    /// <summary>Spinner icon + status text. Text shimmers while running, plain text when done/idle.</summary>
+    Label,
+    /// <summary>Rounded pill (like Labels) with the text inside. Pill text shimmers while running.</summary>
+    Badge,
+    /// <summary>Small spinner + plain timer text. The text fades in briefly whenever the cell value changes.</summary>
+    SpinnerTimer
+}
+
 /// <summary>
-/// Renders the cell as an animated status label: a spinner + shimmering status text while running,
-/// and a check icon + static text when complete. The cell value must be encoded as
-/// "running:&lt;text&gt;", "done:&lt;text&gt;" or "idle:&lt;text&gt;" — use <see cref="AnimatedStatusValue"/>
-/// to build it. An optional right-aligned secondary label can be appended after a tab character.
+/// Renders the cell with one of three animation styles selected by <see cref="Mode"/>:
+/// <list type="bullet">
+///   <item><see cref="AnimatedStatusMode.Label"/>: spinner + shimmering text while running, plain text when not.</item>
+///   <item><see cref="AnimatedStatusMode.Badge"/>: rounded pill whose text shimmers while running, using <see cref="BadgeColorMapping"/> for per-value colors.</item>
+///   <item><see cref="AnimatedStatusMode.SpinnerTimer"/>: small spinner + plain text that fades in on value change. Use for elapsed-time cells.</item>
+/// </list>
+/// The cell value must be encoded as "running:&lt;text&gt;", "done:&lt;text&gt;" or "idle:&lt;text&gt;" — use
+/// <see cref="AnimatedStatusValue"/> to build it. An optional right-aligned secondary label can be appended after a tab character.
 /// </summary>
 public class AnimatedStatusLabelDisplayRenderer : IDataTableColumnRenderer
 {
+    public AnimatedStatusMode Mode { get; set; } = AnimatedStatusMode.Label;
+    public Dictionary<string, string>? BadgeColorMapping { get; set; }
     public bool IsEditable => false;
     public ColType ColType => ColType.AnimatedStatus;
 }

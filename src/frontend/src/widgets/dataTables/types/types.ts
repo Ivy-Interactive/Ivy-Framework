@@ -25,6 +25,8 @@ export enum SortDirection {
   None = "None",
 }
 
+export type AnimatedStatusMode = "Label" | "Badge" | "SpinnerTimer";
+
 export interface DataColumn {
   name: string;
   header?: string;
@@ -45,6 +47,7 @@ export interface DataColumn {
   color?: string | null;
   badgeColorMapping?: Record<string, string> | null;
   linkType?: string | null; // Link type for LinkDisplayRenderer ("url", "email", "phone")
+  animatedStatusMode?: AnimatedStatusMode | null;
   wrapText?: boolean;
   hasCellAction?: boolean;
 }
