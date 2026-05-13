@@ -11,7 +11,7 @@ class QRCodeApp : ViewBase
     public override object Build()
     {
         var state = UseState("https://tendril.ivy.app/");
-        return Layout.Vertical()
+        return Layout.Vertical().Width(Size.Fit())
             | new QRCode()
                 .Value(state.Value)
                 .PixelSize(256)
