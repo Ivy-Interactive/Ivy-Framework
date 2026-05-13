@@ -91,9 +91,12 @@ export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tool }) => {
             <code>{displayInput(tool.name, tool.input)}</code>
           </pre>
           {tool.result != null && (
-            <pre className="aov-tool-pre">
-              <code>{tool.result}</code>
-            </pre>
+            <>
+              <hr className="aov-tool-separator" />
+              <pre className="aov-tool-pre">
+                <code>{tool.result}</code>
+              </pre>
+            </>
           )}
         </div>
       )}
