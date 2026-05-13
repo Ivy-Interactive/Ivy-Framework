@@ -1,7 +1,7 @@
 import { GridCell, GridCellKind, Item, Theme } from "@glideapps/glide-data-grid";
 import { Align, DataColumn, DataRow } from "../types/types";
 import { getCSSVariable, isDarkMode } from "@/lib/theme";
-import type { LabelsBadgesCellData } from "./customRenderers";
+import type { AnimatedStatusCellData, LabelsBadgesCellData } from "./customRenderers";
 
 /**
  * Converts Align enum to contentAlign value for GridCell
@@ -330,6 +330,58 @@ export function createLabelsCell(
 }
 
 /**
+ * Parses the encoded value emitted by AnimatedStatusValue (C#) into cell data.
+ * Format: "<state>:<text>[\t<rightLabel>]" where state is "running" | "done" | "idle".
+ * Plain unencoded strings are accepted too and treated as idle (e.g. for
+ * SpinnerTimer cells where the C# side may emit raw timer text).
+ */
+export function createAnimatedStatusCell(
+  cellValue: unknown,
+  align?: Align,
+  mode?: AnimatedStatusCellData["mode"],
+  badgeColorMapping?: Record<string, string> | null,
+): GridCell {
+  const raw = cellValue == null ? "" : String(cellValue);
+  const [body, rightLabel] = raw.split("\t", 2);
+  const colonIdx = body.indexOf(":");
+  let state: AnimatedStatusCellData["state"] = "idle";
+  let statusText = body;
+  if (colonIdx >= 0) {
+    const head = body.slice(0, colonIdx);
+    if (head === "running" || head === "done" || head === "idle") {
+      state = head;
+      statusText = body.slice(colonIdx + 1);
+    }
+  }
+  let badgeBg: string | undefined;
+  let badgeFg: string | undefined;
+  if (mode === "badge" && badgeColorMapping) {
+    const color = lookupBadgeColorMapping(badgeColorMapping, statusText);
+    if (color) {
+      const resolved = resolveBadgeColor(color);
+      badgeBg = resolved.bg;
+      badgeFg = resolved.text;
+    }
+  }
+  return {
+    kind: GridCellKind.Custom,
+    allowOverlay: false,
+    readonly: true,
+    copyData: statusText,
+    data: {
+      kind: "animated-status-cell",
+      mode: mode ?? "label",
+      state,
+      statusText,
+      rightLabel: rightLabel || undefined,
+      align: align ? getContentAlign(align) : undefined,
+      badgeBg,
+      badgeFg,
+    },
+  };
+}
+
+/**
  * Creates a link cell with custom renderer (blue text + underline)
  */
 export function createLinkCell(
@@ -432,6 +484,16 @@ export function getCellContent(
     // Handle Labels type - supports arrays or comma-separated strings
     if (column.type === "Labels") {
       return createLabelsCell(cellValue, align, column.color, column.badgeColorMapping);
+    }
+
+    // Handle AnimatedStatus type - spinner + shimmer label, animated badge, or spinner+timer
+    if (column.type === "AnimatedStatus") {
+      const mode = column.animatedStatusMode
+        ? (column.animatedStatusMode.toLowerCase() as "label" | "badge" | "spinnertimer")
+        : "label";
+      const normalizedMode =
+        mode === "spinnertimer" ? "spinner-timer" : (mode as "label" | "badge");
+      return createAnimatedStatusCell(cellValue, align, normalizedMode, column.badgeColorMapping);
     }
 
     // Handle explicit link type from backend metadata

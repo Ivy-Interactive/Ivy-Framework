@@ -27,7 +27,7 @@ export interface SelectInputWidgetProps {
   separator: string;
   maxSelections?: number;
   minSelections?: number;
-  searchable?: boolean;
+  searchable?: boolean | null;
   showActions?: boolean;
   searchMode?: "CaseInsensitive" | "CaseSensitive" | "Fuzzy";
   emptyMessage?: string;

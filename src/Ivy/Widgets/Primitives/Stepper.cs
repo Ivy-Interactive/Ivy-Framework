@@ -29,6 +29,8 @@ public record Stepper : WidgetBase<Stepper>
 
     [Prop] public bool AllowSelectForward { get; set; } = false;
 
+    [Prop] public bool Disabled { get; set; }
+
     [Event] public EventHandler<Event<Stepper, int>>? OnSelect { get; set; }
 }
 
@@ -36,6 +38,7 @@ public static class StepperExtensions
 {
     public static Stepper OnSelect(this Stepper stepper, Func<Event<Stepper, int>, ValueTask> onSelect) => stepper with { OnSelect = new(onSelect) };
     public static Stepper AllowSelectForward(this Stepper stepper, bool allowSelectForward = true) => stepper with { AllowSelectForward = allowSelectForward };
+    public static Stepper Disabled(this Stepper stepper, bool disabled = true) => stepper with { Disabled = disabled };
 }
 
 

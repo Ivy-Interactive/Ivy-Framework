@@ -102,6 +102,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
           <Input
             ref={elementRef as React.RefObject<HTMLInputElement>}
             id={props.id}
+            density={density}
             placeholder={props.placeholder}
             value={props.value}
             type={type}

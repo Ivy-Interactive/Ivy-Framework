@@ -23,7 +23,7 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = (props) => {
     selectMany: props.selectMany ?? false,
     maxSelections: props.maxSelections,
     minSelections: props.minSelections,
-    searchable: props.searchable ?? false,
+    searchable: props.searchable,
     searchMode: props.searchMode ?? "CaseInsensitive",
     emptyMessage: props.emptyMessage,
     loading: props.loading ?? false,
