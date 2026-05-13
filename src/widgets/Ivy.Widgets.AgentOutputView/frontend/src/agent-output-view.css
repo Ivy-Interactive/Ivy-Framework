@@ -19,7 +19,7 @@
     Consolas, monospace;
 
   color: var(--aov-fg);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.55;
   position: relative;
   container-type: size;
@@ -68,7 +68,7 @@
   display: flex;
   align-items: center;
   padding: 8px 0;
-  font-size: 12px;
+  font-size: 14px;
   min-height: 32px;
 }
 
@@ -171,7 +171,7 @@
   border: 1px solid var(--aov-border);
   border-radius: 4px;
   padding: 1px 5px;
-  font-size: 12.5px;
+  font-size: 14px;
 }
 
 .aov-markdown pre {
@@ -181,7 +181,7 @@
   border-radius: 6px;
   padding: 10px 12px;
   overflow-x: auto;
-  font-size: 12.5px;
+  font-size: 14px;
 }
 
 .aov-markdown pre code {
@@ -207,7 +207,7 @@
 .aov-markdown h4 {
   margin: 0.75rem 0 0.375rem;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .aov-markdown blockquote {
@@ -240,7 +240,7 @@
   padding: 2px 0;
   cursor: pointer;
   user-select: none;
-  font-size: 12.5px;
+  font-size: 14px;
   outline: none;
 }
 
@@ -297,7 +297,7 @@
   border-radius: 4px;
   padding: 8px 10px;
   overflow-x: auto;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--aov-fg);
   white-space: pre-wrap;
   word-break: break-word;
@@ -348,7 +348,7 @@
 
 .aov-result-meta {
   color: var(--aov-fg-muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .aov-result-body {
@@ -360,14 +360,14 @@
   flex-wrap: wrap;
   gap: 12px;
   color: var(--aov-fg-muted);
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 4px;
 }
 
 /* ─── System & thinking blocks ──────────────────────────────────────────── */
 .aov-system {
   color: var(--aov-fg-faint);
-  font-size: 12px;
+  font-size: 14px;
   padding: 2px 0;
 }
 
