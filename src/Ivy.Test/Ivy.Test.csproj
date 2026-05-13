@@ -33,6 +33,7 @@
   <ItemGroup>
     <ProjectReference Include="../Ivy/Ivy.csproj" />
     <ProjectReference Include="../widgets/Ivy.Widgets.ActivityHeatmap/Ivy.Widgets.ActivityHeatmap.csproj" />
+    <ProjectReference Include="../widgets/Ivy.Widgets.QRCode/Ivy.Widgets.QRCode.csproj" />
   </ItemGroup>
 
 </Project>
