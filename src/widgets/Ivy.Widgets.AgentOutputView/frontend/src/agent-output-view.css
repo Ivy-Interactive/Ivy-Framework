@@ -221,6 +221,16 @@
 .aov-tool {
   font-family: var(--aov-mono);
   margin: 4px 0;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.aov-tool:hover {
+  background: color-mix(in srgb, var(--muted-foreground) 4%, var(--aov-bg-elev));
+}
+
+.aov-tool.open {
+  background: color-mix(in srgb, var(--muted-foreground) 4%, var(--aov-bg-elev));
 }
 
 .aov-tool-header {

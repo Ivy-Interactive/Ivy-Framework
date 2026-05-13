@@ -64,7 +64,7 @@ export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tool }) => {
   const headerPreview = summary ? basename(summary) : "";
 
   return (
-    <div className="aov-tool">
+    <div className={`aov-tool ${open ? "open" : ""}`}>
       <div
         className="aov-tool-header"
         onClick={handleToggle}
