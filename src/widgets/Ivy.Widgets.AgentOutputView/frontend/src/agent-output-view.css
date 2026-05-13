@@ -18,13 +18,9 @@
   --aov-mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
     Consolas, monospace;
 
-  background: var(--aov-bg);
   color: var(--aov-fg);
-  font-family: var(--aov-mono);
   font-size: 13px;
   line-height: 1.55;
-  border: 1px solid var(--aov-border);
-  border-radius: 8px;
   position: relative;
   container-type: size;
 }
@@ -38,7 +34,21 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  padding: 14px 16px;
+}
+
+.aov-body > * {
+  animation: aov-stream-in 0.25s ease-out both;
+}
+
+@keyframes aov-stream-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .aov-body::-webkit-scrollbar {
@@ -53,14 +63,11 @@
   border-radius: 4px;
 }
 
-/* ─── Status row (sticky bottom) ────────────────────────────────────────── */
+/* ─── Status row (inline, flows after content) ──────────────────────────── */
 .aov-status-row {
-  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  padding: 8px 14px;
-  border-top: 1px solid var(--aov-border);
-  background: var(--aov-bg-elev);
+  padding: 8px 0;
   font-size: 12px;
   min-height: 32px;
 }
@@ -144,8 +151,7 @@
 
 .aov-markdown {
   color: var(--aov-fg);
-  font-family: var(--aov-mono);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -211,58 +217,38 @@
   color: var(--aov-fg-muted);
 }
 
-/* ─── Tool use card (always-collapsed default) ──────────────────────────── */
+/* ─── Tool use card (collapsed by default, no outer chrome) ─────────────── */
 .aov-tool {
-  border: 1px solid var(--aov-border);
-  background: var(--aov-bg-elev);
-  border-radius: 6px;
-  margin: 14px 0;
-  overflow: hidden;
-  max-height: 50cqh;
-  display: flex;
-  flex-direction: column;
+  font-family: var(--aov-mono);
+  margin: 4px 0;
 }
 
 .aov-tool-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
+  padding: 2px 0;
   cursor: pointer;
   user-select: none;
   font-size: 12.5px;
   outline: none;
 }
 
-.aov-tool-header:hover {
-  background: color-mix(in srgb, var(--muted-foreground) 5%, transparent);
-}
-
 .aov-tool-chevron {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--aov-fg-faint);
-  font-size: 10px;
   transition: transform 0.15s ease;
 }
 
 .aov-tool-chevron.open {
-  transform: rotate(90deg);
+  transform: rotate(180deg);
 }
 
 .aov-tool-name {
   color: var(--aov-accent);
   font-weight: 600;
-}
-
-.aov-tool-count {
-  color: var(--aov-fg-muted);
-  font-variant-numeric: tabular-nums;
-  background: color-mix(in srgb, var(--muted-foreground) 10%, transparent);
-  border: 1px solid var(--aov-border);
-  border-radius: 4px;
-  padding: 0 5px;
-  font-size: 11px;
-  line-height: 1.6;
 }
 
 .aov-tool-preview {
@@ -279,49 +265,25 @@
   font-style: italic;
 }
 
-.aov-tool-entry {
-  padding: 4px 0;
-}
-
-.aov-tool-entry + .aov-tool-entry {
-  border-top: 1px dashed var(--aov-border);
-  margin-top: 8px;
-  padding-top: 10px;
-}
-
-.aov-tool-entry-marker {
-  color: var(--aov-fg-faint);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.aov-tool-entry-pending {
-  color: var(--aov-warn);
-  font-style: italic;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
 .aov-tool-body {
-  border-top: 1px solid var(--aov-border);
-  padding: 8px 10px 10px;
-  overflow-y: auto;
-  min-height: 0;
+  padding: 4px 0 4px 22px;
+  animation: aov-tool-expand 0.2s ease-out both;
 }
 
-.aov-tool-section-label {
-  color: var(--aov-fg-faint);
-  font-size: 11px;
-  margin: 4px 0 2px;
+@keyframes aov-tool-expand {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .aov-tool-pre {
   margin: 0 0 6px;
   background: var(--aov-bg-deep);
-  border: 1px solid var(--aov-border);
   border-radius: 4px;
   padding: 8px 10px;
   overflow-x: auto;

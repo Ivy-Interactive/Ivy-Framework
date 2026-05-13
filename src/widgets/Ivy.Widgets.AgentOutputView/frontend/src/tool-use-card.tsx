@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { useState } from "react";
 
 interface ToolCall {
   name: string;
@@ -7,8 +7,7 @@ interface ToolCall {
 }
 
 interface ToolUseCardProps {
-  tools: ToolCall[];
-  children?: ReactNode;
+  tool: ToolCall;
 }
 
 function displayInput(name: string, input: Record<string, unknown>): string {
@@ -38,24 +37,31 @@ function basename(p: string): string {
   return i >= 0 ? p.slice(i + 1) : p;
 }
 
-export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tools, children }) => {
-  const active = tools.some((t) => t.result === undefined);
-  const [open, setOpen] = useState(true);
+const ChevronDownIcon: React.FC = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width="14"
+    height="14"
+    aria-hidden="true"
+  >
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);
+
+export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tool }) => {
+  const pending = tool.result === undefined;
+  const [open, setOpen] = useState(false);
 
   const handleToggle = () => setOpen((o) => !o);
 
-  const name = tools[0].name;
-  const count = tools.length;
-  const last = tools[tools.length - 1];
-
-  // Header preview: prefer the last tool's result, else its input summary
-  let headerPreview = "";
-  if (last.result != null) {
-    headerPreview = last.result.length > 120 ? last.result.slice(0, 120) + "…" : last.result;
-  } else {
-    const s = inputSummary(last.name, last.input);
-    if (s) headerPreview = basename(s);
-  }
+  const summary = inputSummary(tool.name, tool.input);
+  const headerPreview = summary ? basename(summary) : "";
 
   return (
     <div className="aov-tool">
@@ -64,6 +70,7 @@ export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tools, children }) => 
         onClick={handleToggle}
         role="button"
         tabIndex={0}
+        aria-expanded={open}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -71,50 +78,24 @@ export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tools, children }) => 
           }
         }}
       >
-        <span className={`aov-tool-chevron ${open ? "open" : ""}`}>▸</span>
-        <span className="aov-tool-name">{name}</span>
-        {count > 1 && <span className="aov-tool-count">×{count}</span>}
+        <span className={`aov-tool-chevron ${open ? "open" : ""}`}>
+          <ChevronDownIcon />
+        </span>
+        <span className="aov-tool-name">{tool.name}</span>
         {headerPreview && <span className="aov-tool-preview">{headerPreview}</span>}
-        {active && <span className="aov-tool-running">running…</span>}
+        {pending && <span className="aov-tool-running">running…</span>}
       </div>
       {open && (
         <div className="aov-tool-body">
-          {tools.map((t, i) => (
-            <ToolEntry key={i} index={i} total={count} tool={t} />
-          ))}
-          {children}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ToolEntry: React.FC<{ index: number; total: number; tool: ToolCall }> = ({
-  index,
-  total,
-  tool,
-}) => {
-  const inputDisplay = displayInput(tool.name, tool.input);
-  const pending = tool.result === undefined;
-  return (
-    <div className={`aov-tool-entry ${pending ? "pending" : ""}`}>
-      {total > 1 && (
-        <div className="aov-tool-entry-marker">
-          {tool.name} {index + 1}/{total}
-          {pending && <span className="aov-tool-entry-pending"> · running…</span>}
-        </div>
-      )}
-      <div className="aov-tool-section-label">$ input</div>
-      <pre className="aov-tool-pre">
-        <code>{inputDisplay}</code>
-      </pre>
-      {tool.result != null && (
-        <>
-          <div className="aov-tool-section-label">› output</div>
           <pre className="aov-tool-pre">
-            <code>{tool.result}</code>
+            <code>{displayInput(tool.name, tool.input)}</code>
           </pre>
-        </>
+          {tool.result != null && (
+            <pre className="aov-tool-pre">
+              <code>{tool.result}</code>
+            </pre>
+          )}
+        </div>
       )}
     </div>
   );

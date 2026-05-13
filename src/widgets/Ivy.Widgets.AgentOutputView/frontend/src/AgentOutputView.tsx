@@ -125,54 +125,6 @@ export const AgentOutputView: React.FC<AgentOutputViewProps> = ({
     }
   }
 
-  // Build a render list that folds adjacent tool-use events into one card.
-  // A tool group only ever closes when an assistant-text event appears. Every other
-  // event kind (system, thinking, result, more tool-use) is absorbed into the active group.
-  // result/system/thinking still render inside the group's slot.
-  type RenderItem =
-    | { kind: "event"; index: number; event: NormalizedEvent }
-    | {
-        kind: "tool-group";
-        key: string;
-        tools: Array<{ name: string; input: Record<string, unknown>; result?: string }>;
-        embeddedEvents: Array<{ index: number; event: NormalizedEvent }>;
-      };
-
-  const renderItems: RenderItem[] = [];
-  for (let i = 0; i < parsedEvents.length; i++) {
-    if (suppressIndices.has(i)) continue;
-    const e = parsedEvents[i];
-    if (e.kind === "tool-use") {
-      const start = i;
-      const tools: Array<{ name: string; input: Record<string, unknown>; result?: string }> = [];
-      const embeddedEvents: Array<{ index: number; event: NormalizedEvent }> = [];
-      let j = i;
-      while (j < parsedEvents.length && parsedEvents[j].kind !== "assistant-text") {
-        if (suppressIndices.has(j)) {
-          j++;
-          continue;
-        }
-        const cur = parsedEvents[j];
-        if (cur.kind === "tool-use") {
-          tools.push({ name: cur.name, input: cur.input, result: cur.result });
-        } else {
-          embeddedEvents.push({ index: j, event: cur });
-        }
-        j++;
-      }
-      if (tools.length > 0) {
-        renderItems.push({ kind: "tool-group", key: `tg-${start}`, tools, embeddedEvents });
-      } else {
-        for (const ev of embeddedEvents) {
-          renderItems.push({ kind: "event", index: ev.index, event: ev.event });
-        }
-      }
-      i = j - 1;
-    } else {
-      renderItems.push({ kind: "event", index: i, event: e });
-    }
-  }
-
   return (
     <div style={shellStyle} className="aov-shell">
       <div
@@ -181,37 +133,16 @@ export const AgentOutputView: React.FC<AgentOutputViewProps> = ({
         onWheel={autoScroll ? disableAutoScroll : undefined}
         onTouchMove={autoScroll ? disableAutoScroll : undefined}
       >
-        {renderItems.map((item) => {
-          if (item.kind === "tool-group") {
-            return (
-              <ToolUseCard key={item.key} tools={item.tools}>
-                {item.embeddedEvents.map(({ index: ei, event: ev }) => {
-                  if (ev.kind === "result") {
-                    return <ResultSummary key={`emb-${ei}`} event={ev} />;
-                  }
-                  if (ev.kind === "thinking" && showThinking) {
-                    return (
-                      <div key={`emb-${ei}`} className="aov-thinking">
-                        {ev.text}
-                      </div>
-                    );
-                  }
-                  if (ev.kind === "system" && showSystemEvents) {
-                    return (
-                      <div key={`emb-${ei}`} className="aov-system">
-                        system: {ev.subtype}
-                        {ev.model ? ` (${ev.model})` : ""}
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
-              </ToolUseCard>
-            );
-          }
-          const event = item.event;
-          const idx = item.index;
+        {parsedEvents.map((event, idx) => {
+          if (suppressIndices.has(idx)) return null;
           switch (event.kind) {
+            case "tool-use":
+              return (
+                <ToolUseCard
+                  key={idx}
+                  tool={{ name: event.name, input: event.input, result: event.result }}
+                />
+              );
             case "system":
               if (!showSystemEvents) return null;
               return (
@@ -241,12 +172,12 @@ export const AgentOutputView: React.FC<AgentOutputViewProps> = ({
               return null;
           }
         })}
+        {showStatusLabel && (
+          <div className="aov-status-row">
+            <AnimatedStatus statusText={statusText} isComplete={isComplete} />
+          </div>
+        )}
       </div>
-      {showStatusLabel && (
-        <div className="aov-status-row">
-          <AnimatedStatus statusText={statusText} isComplete={isComplete} />
-        </div>
-      )}
     </div>
   );
 };
