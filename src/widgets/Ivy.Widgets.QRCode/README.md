@@ -7,11 +7,11 @@ A QR code widget for the Ivy Framework, powered by [`qrcode.react`](https://gith
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `Value` | `string` | `""` | The data to encode as a QR code |
-| `PixelSize` | `int?` | `256` | Size of the QR code in pixels |
-| `Level` | `string` | `"L"` | Error correction level: `"L"`, `"M"`, `"Q"`, or `"H"` |
+| `PixelSize` | `int?` | *(client default 256)* | Size of the QR code in pixels |
+| `ErrorCorrectionLevel` | `QrErrorCorrectionLevel` | `Low` | Error correction: `Low` (L), `Medium` (M), `Quartile` (Q), `High` (H) |
 | `IncludeMargin` | `bool` | `true` | Whether to include a quiet zone margin |
-| `BgColor` | `string?` | `null` | Background color (CSS color string) |
-| `FgColor` | `string?` | `null` | Foreground color (CSS color string) |
+| `Background` | `Colors?` | `null` | Module background (resolved from the active Ivy theme) |
+| `Foreground` | `Colors?` | `null` | Module foreground (resolved from the active Ivy theme) |
 
 ## Usage
 
@@ -26,7 +26,7 @@ new QRCode().Value("https://ivy-interactive.com")
 new QRCode()
     .Value("https://ivy-interactive.com")
     .PixelSize(300)
-    .Level("H")
-    .FgColor("#1a1a2e")
-    .BgColor("#ffffff")
+    .ErrorCorrectionLevel(QrErrorCorrectionLevel.High)
+    .Foreground(Colors.Primary)
+    .Background(Colors.White)
 ```

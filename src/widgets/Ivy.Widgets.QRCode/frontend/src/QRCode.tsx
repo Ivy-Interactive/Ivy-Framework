@@ -1,16 +1,26 @@
 import React from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { resolveIvyColorForSvg } from "./ivyColor";
 
 type EventHandler = (eventName: string, widgetId: string, args: unknown[]) => void;
+
+type QrErrorCorrectionLevel = "Low" | "Medium" | "Quartile" | "High";
+
+const correctionToLibraryLevel: Record<QrErrorCorrectionLevel, "L" | "M" | "Q" | "H"> = {
+  Low: "L",
+  Medium: "M",
+  Quartile: "Q",
+  High: "H",
+};
 
 interface QRCodeProps {
   id: string;
   value?: string;
   pixelSize?: number;
-  level?: "L" | "M" | "Q" | "H";
+  errorCorrectionLevel?: QrErrorCorrectionLevel;
   includeMargin?: boolean;
-  bgColor?: string;
-  fgColor?: string;
+  background?: string;
+  foreground?: string;
   eventHandler?: EventHandler;
   onIvyEvent?: EventHandler;
   events?: string[];
@@ -19,19 +29,23 @@ interface QRCodeProps {
 export const QRCode: React.FC<QRCodeProps> = ({
   value = "",
   pixelSize = 256,
-  level = "L",
+  errorCorrectionLevel = "Low",
   includeMargin = true,
-  bgColor,
-  fgColor,
+  background,
+  foreground,
 }) => {
+  const level = correctionToLibraryLevel[errorCorrectionLevel] ?? "L";
+  const bgColor = resolveIvyColorForSvg(background);
+  const fgColor = resolveIvyColorForSvg(foreground);
+
   return (
     <QRCodeSVG
       value={value || " "}
       size={pixelSize}
       level={level}
       marginSize={includeMargin ? 4 : 0}
-      bgColor={bgColor}
-      fgColor={fgColor}
+      {...(bgColor !== undefined ? { bgColor } : {})}
+      {...(fgColor !== undefined ? { fgColor } : {})}
     />
   );
 };

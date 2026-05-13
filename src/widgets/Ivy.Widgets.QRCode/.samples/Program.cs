@@ -12,7 +12,11 @@ class QRCodeApp : ViewBase
     {
         var state = UseState("https://tendril.ivy.app/");
         return Layout.Vertical()
-            | new QRCode().Value(state.Value).PixelSize(256)
+            | new QRCode()
+                .Value(state.Value)
+                .PixelSize(256)
+                .Foreground(Colors.Primary)
+                .Background(Colors.White)
             | state.ToTextInput();
     }
 }
