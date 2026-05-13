@@ -256,8 +256,7 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
  * Three visual modes:
  * - "label": spinner + shimmering text while running; plain text otherwise.
  * - "badge": rounded pill whose text shimmers while running; static pill otherwise.
- * - "spinner-timer": small spinner + plain text. The text briefly fades in whenever
- *   the value changes (e.g. when an elapsed-time timer resets to 0).
+ * - "spinner-timer": small spinner + plain text. No transition on value change.
  */
 export interface AnimatedStatusCellData {
   kind: "animated-status-cell";
@@ -274,31 +273,10 @@ export type AnimatedStatusCell = CustomCell<AnimatedStatusCellData>;
 
 const SPINNER_RADIUS = 6;
 const ICON_TEXT_GAP = 6;
-const SHIMMER_PERIOD_MS = 1400;
-const SPINNER_PERIOD_MS = 900;
-const FADE_IN_MS = 400;
-
-// Track the previous statusText per cell key so we can fade in on change for
-// spinner-timer cells. Keyed by the cell's drawn rect — rect identity is stable
-// for a given (col,row) within a viewport, which is good enough for a transient
-// transition.
-const fadeStartByKey = new Map<string, { text: string; startedAt: number }>();
-const MAX_FADE_KEYS = 256;
-function cellKey(rect: { x: number; y: number; width: number }) {
-  return `${rect.x}:${rect.y}:${rect.width}`;
-}
-function trackFade(key: string, text: string, now: number): number {
-  const prev = fadeStartByKey.get(key);
-  if (!prev || prev.text !== text) {
-    if (fadeStartByKey.size > MAX_FADE_KEYS) {
-      const oldest = fadeStartByKey.keys().next().value;
-      if (oldest !== undefined) fadeStartByKey.delete(oldest);
-    }
-    fadeStartByKey.set(key, { text, startedAt: now });
-    return 0;
-  }
-  return now - prev.startedAt;
-}
+// Slow, subtle shimmer — a single highlight pass takes ~2.4s and the highlight
+// band is narrow so the text reads as gently breathing rather than scrolling.
+const SHIMMER_PERIOD_MS = 2400;
+const SPINNER_PERIOD_MS = 1400;
 
 function drawRoundRect(
   ctx: CanvasRenderingContext2D,
@@ -353,12 +331,13 @@ function drawShimmerText(
   const width = ctx.measureText(text).width;
   if (width <= 0) return;
   const phase = (t % SHIMMER_PERIOD_MS) / SHIMMER_PERIOD_MS;
-  // Sweep the highlight from -0.3 to 1.3 (so it enters/leaves the text smoothly).
-  const center = phase * 1.6 - 0.3;
+  // Sweep the highlight from -0.2 to 1.2 (so it enters/leaves the text smoothly).
+  const center = phase * 1.4 - 0.2;
   const gradient = ctx.createLinearGradient(x, 0, x + width, 0);
   const clamp = (v: number) => Math.max(0, Math.min(1, v));
-  const left = clamp(center - 0.25);
-  const right = clamp(center + 0.25);
+  // Narrower band (~0.18 wide) for a subtler sweep.
+  const left = clamp(center - 0.18);
+  const right = clamp(center + 0.18);
   gradient.addColorStop(0, baseColor);
   gradient.addColorStop(left, baseColor);
   gradient.addColorStop(clamp(center), highlightColor);
@@ -438,7 +417,7 @@ function drawBadgeMode(args: AnimatedDrawArgs, cell: AnimatedStatusCell, t: numb
   ctx.restore();
 
   if (state === "running") {
-    drawShimmerText(ctx, statusText, bx + pad, cy, fg, "#ffffff", t);
+    drawShimmerText(ctx, statusText, bx + pad, cy, fg, "rgba(255,255,255,0.55)", t);
     args.requestAnimationFrame();
   } else {
     ctx.fillStyle = fg;
@@ -468,26 +447,13 @@ function drawSpinnerTimerMode(
     args.requestAnimationFrame();
   }
 
-  let alpha = 1;
-  if (state === "running") {
-    const key = cellKey(rect);
-    const sinceChange = trackFade(key, statusText, t);
-    if (sinceChange < FADE_IN_MS) {
-      alpha = sinceChange / FADE_IN_MS;
-      args.requestAnimationFrame();
-    }
-  }
-
   const textW = ctx.measureText(statusText).width;
   let textX = cursorX;
   if (align === "center") textX = Math.max(cursorX, rect.x + (rect.width - textW) / 2);
   else if (align === "right") textX = Math.max(cursorX, rect.x + rect.width - hPad - textW);
 
-  ctx.save();
-  ctx.globalAlpha = alpha;
   ctx.fillStyle = state === "idle" ? dimColor : baseColor;
   ctx.fillText(statusText, textX, cy);
-  ctx.restore();
 }
 
 export const animatedStatusCellRenderer: CustomRenderer<AnimatedStatusCell> = {
