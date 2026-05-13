@@ -69,7 +69,17 @@ internal class SourcePluginBuilder : IDisposable
             logger.LogInformation("Source plugin built successfully: {Directory}", directory);
             return true;
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            logger.LogError(ex, "Exception running dotnet build for {Directory}", directory);
+            return false;
+        }
+        catch (IOException ex)
+        {
+            logger.LogError(ex, "Exception running dotnet build for {Directory}", directory);
+            return false;
+        }
+        catch (System.ComponentModel.Win32Exception ex)
         {
             logger.LogError(ex, "Exception running dotnet build for {Directory}", directory);
             return false;
@@ -106,7 +116,10 @@ internal class SourcePluginBuilder : IDisposable
 
                 _buildCooldowns[pluginDirectory] = DateTime.UtcNow + _cooldownPeriod;
             }
-            catch (OperationCanceledException) { }
+            catch (OperationCanceledException)
+            {
+                _logger.LogDebug("Build cancelled for {Directory}", pluginDirectory);
+            }
             finally
             {
                 _pendingBuilds.TryRemove(pluginDirectory, out _);
@@ -180,7 +193,17 @@ internal class SourcePluginBuilder : IDisposable
             logger.LogError("dotnet build timed out for {Directory}", directory);
             return false;
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            logger.LogError(ex, "Exception running dotnet build for {Directory}", directory);
+            return false;
+        }
+        catch (IOException ex)
+        {
+            logger.LogError(ex, "Exception running dotnet build for {Directory}", directory);
+            return false;
+        }
+        catch (System.ComponentModel.Win32Exception ex)
         {
             logger.LogError(ex, "Exception running dotnet build for {Directory}", directory);
             return false;

@@ -101,21 +101,25 @@ public class PluginLoader : IPluginManager
                 _knownPlugins[manifest.Id] = directory;
                 candidates.Add(loaded.Value);
             }
-            catch (Exception ex)
+            catch (IOException ex)
             {
-                _logger.LogError(ex, "Failed to load plugin from {Directory}. Skipping.", directory);
-
-                _lock.EnterWriteLock();
-                try
-                {
-                    _failedPlugins[directory] = (
-                        $"Exception during load: {ex.Message}",
-                        DateTime.UtcNow);
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
+                LogPluginLoadFailure(directory, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogPluginLoadFailure(directory, ex);
+            }
+            catch (BadImageFormatException ex)
+            {
+                LogPluginLoadFailure(directory, ex);
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                LogPluginLoadFailure(directory, ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                LogPluginLoadFailure(directory, ex);
             }
         }
 
@@ -176,21 +180,25 @@ public class PluginLoader : IPluginManager
                 _knownPlugins[manifest.Id] = directory;
                 candidates.Add(loaded.Value);
             }
-            catch (Exception ex)
+            catch (IOException ex)
             {
-                _logger.LogError(ex, "Failed to load referenced plugin from {Directory}. Skipping.", directory);
-
-                _lock.EnterWriteLock();
-                try
-                {
-                    _failedPlugins[directory] = (
-                        $"Exception during load: {ex.Message}",
-                        DateTime.UtcNow);
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
+                LogPluginLoadFailure(directory, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogPluginLoadFailure(directory, ex);
+            }
+            catch (BadImageFormatException ex)
+            {
+                LogPluginLoadFailure(directory, ex);
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                LogPluginLoadFailure(directory, ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                LogPluginLoadFailure(directory, ex);
             }
         }
 
@@ -269,7 +277,12 @@ public class PluginLoader : IPluginManager
             {
                 assembly = loadContext.LoadFromAssemblyPath(dllPath);
             }
-            catch (Exception ex)
+            catch (BadImageFormatException ex)
+            {
+                _logger.LogDebug(ex, "Could not load {Dll}, skipping.", dllPath);
+                continue;
+            }
+            catch (IOException ex)
             {
                 _logger.LogDebug(ex, "Could not load {Dll}, skipping.", dllPath);
                 continue;
@@ -779,6 +792,23 @@ public class PluginLoader : IPluginManager
         finally
         {
             _lock.ExitReadLock();
+        }
+    }
+
+    private void LogPluginLoadFailure(string directory, Exception ex)
+    {
+        _logger.LogError(ex, "Failed to load plugin from {Directory}. Skipping.", directory);
+
+        _lock.EnterWriteLock();
+        try
+        {
+            _failedPlugins[directory] = (
+                $"Exception during load: {ex.Message}",
+                DateTime.UtcNow);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
         }
     }
 

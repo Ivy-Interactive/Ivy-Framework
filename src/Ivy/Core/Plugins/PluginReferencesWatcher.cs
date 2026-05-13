@@ -81,7 +81,10 @@ internal class PluginReferencesWatcher : IDisposable
                 await Task.Delay(_debounceDelay, cts.Token);
                 ProcessReferencesFileChange();
             }
-            catch (OperationCanceledException) { }
+            catch (OperationCanceledException)
+            {
+                _logger.LogDebug("References file change debounce was cancelled");
+            }
         }, cts.Token);
     }
 
@@ -109,7 +112,7 @@ internal class PluginReferencesWatcher : IDisposable
                     {
                         _pluginManager.UnloadPlugin(pluginId);
                     }
-                    catch (Exception ex)
+                    catch (InvalidOperationException ex)
                     {
                         _logger.LogError(ex, "Failed to unload plugin {PluginId}", pluginId);
                     }
@@ -181,24 +184,27 @@ internal class PluginReferencesWatcher : IDisposable
         }
 
         if (_buildSourcePlugins && SourcePluginBuilder.IsSourceFile(fullPath) &&
-            !fullPath.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
+            !fullPath.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}") &&
+            SourcePluginBuilder.IsSourcePlugin(pluginDirectory))
         {
-            if (SourcePluginBuilder.IsSourcePlugin(pluginDirectory))
-                _sourceBuilder?.ScheduleBuild(pluginDirectory);
+            _sourceBuilder?.ScheduleBuild(pluginDirectory);
         }
     }
 
     private void ScheduleLoad(string pluginDirectory)
     {
         if (_pendingReloads.TryRemove(pluginDirectory, out var existingCts))
+        {
             existingCts.Cancel();
-
-        var cts = new CancellationTokenSource();
-        _pendingReloads[pluginDirectory] = cts;
-        var token = cts.Token;
+            existingCts.Dispose();
+        }
 
         _ = Task.Run(async () =>
         {
+            using var cts = new CancellationTokenSource();
+            _pendingReloads[pluginDirectory] = cts;
+            var token = cts.Token;
+
             try
             {
                 await Task.Delay(_debounceDelay, token);
@@ -208,18 +214,24 @@ internal class PluginReferencesWatcher : IDisposable
                 {
                     _pluginManager.LoadPlugin(pluginDirectory);
                 }
-                catch (Exception ex)
+                catch (InvalidOperationException ex)
+                {
+                    _logger.LogError(ex, "Failed to load referenced plugin from {Directory}", pluginDirectory);
+                }
+                catch (IOException ex)
                 {
                     _logger.LogError(ex, "Failed to load referenced plugin from {Directory}", pluginDirectory);
                 }
             }
-            catch (OperationCanceledException) { }
+            catch (OperationCanceledException)
+            {
+                _logger.LogDebug("Plugin load cancelled for {Directory}", pluginDirectory);
+            }
             finally
             {
                 _pendingReloads.TryRemove(pluginDirectory, out _);
-                cts.Dispose();
             }
-        }, token);
+        });
     }
 
     private void ScheduleReload(string pluginDirectory)
@@ -228,14 +240,17 @@ internal class PluginReferencesWatcher : IDisposable
             return;
 
         if (_pendingReloads.TryRemove(pluginDirectory, out var existingCts))
+        {
             existingCts.Cancel();
-
-        var cts = new CancellationTokenSource();
-        _pendingReloads[pluginDirectory] = cts;
-        var token = cts.Token;
+            existingCts.Dispose();
+        }
 
         _ = Task.Run(async () =>
         {
+            using var cts = new CancellationTokenSource();
+            _pendingReloads[pluginDirectory] = cts;
+            var token = cts.Token;
+
             try
             {
                 await Task.Delay(_debounceDelay, token);
@@ -253,7 +268,11 @@ internal class PluginReferencesWatcher : IDisposable
                         {
                             _pluginManager.ReloadPlugin(pluginId);
                         }
-                        catch (Exception ex)
+                        catch (InvalidOperationException ex)
+                        {
+                            _logger.LogError(ex, "Failed to reload referenced plugin {PluginId}", pluginId);
+                        }
+                        catch (IOException ex)
                         {
                             _logger.LogError(ex, "Failed to reload referenced plugin {PluginId}", pluginId);
                         }
@@ -265,7 +284,11 @@ internal class PluginReferencesWatcher : IDisposable
                         {
                             _pluginManager.LoadPlugin(pluginDirectory);
                         }
-                        catch (Exception ex)
+                        catch (InvalidOperationException ex)
+                        {
+                            _logger.LogError(ex, "Failed to load referenced plugin from {Directory}", pluginDirectory);
+                        }
+                        catch (IOException ex)
                         {
                             _logger.LogError(ex, "Failed to load referenced plugin from {Directory}", pluginDirectory);
                         }
@@ -274,13 +297,15 @@ internal class PluginReferencesWatcher : IDisposable
 
                 _reloadCooldowns[pluginDirectory] = DateTime.UtcNow + _cooldownPeriod;
             }
-            catch (OperationCanceledException) { }
+            catch (OperationCanceledException)
+            {
+                _logger.LogDebug("Plugin reload cancelled for {Directory}", pluginDirectory);
+            }
             finally
             {
                 _pendingReloads.TryRemove(pluginDirectory, out _);
-                cts.Dispose();
             }
-        }, token);
+        });
     }
 
     internal static List<string> ParseReferencesFile(string filePath, string pluginsDirectory, ILogger? logger = null)
@@ -307,7 +332,17 @@ internal class PluginReferencesWatcher : IDisposable
                 .Select(p => Path.IsPathRooted(p) ? Path.GetFullPath(p) : Path.GetFullPath(Path.Combine(pluginsDirectory, p)))
                 .ToList();
         }
-        catch (Exception ex)
+        catch (IOException ex)
+        {
+            logger?.LogError(ex, "Failed to parse plugin references file: {Path}", filePath);
+            return [];
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            logger?.LogError(ex, "Failed to parse plugin references file: {Path}", filePath);
+            return [];
+        }
+        catch (YamlDotNet.Core.YamlException ex)
         {
             logger?.LogError(ex, "Failed to parse plugin references file: {Path}", filePath);
             return [];
