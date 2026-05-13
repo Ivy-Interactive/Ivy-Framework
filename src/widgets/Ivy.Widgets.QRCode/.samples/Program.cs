@@ -10,10 +10,9 @@ class QRCodeApp : ViewBase
 {
     public override object Build()
     {
-        var state = UseState("https://ivy-interactive.com");
-        return Layout.Vertical().Children(
-            new QRCode().Value(state.Value).PixelSize(256),
-            Input.Text(state, "URL")
-        );
+        var state = UseState("https://tendril.ivy.app/");
+        return Layout.Vertical()
+            | new QRCode().Value(state.Value).PixelSize(256)
+            | state.ToTextInput();
     }
 }

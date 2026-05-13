@@ -3,8 +3,6 @@ namespace Ivy.Widgets.QRCode;
 [ExternalWidget("frontend/dist/Ivy_Widgets_QRCode.js", ExportName = "QRCode")]
 public record QRCode : WidgetBase<QRCode>
 {
-    internal QRCode() { }
-
     [Prop] public string Value { get; init; } = "";
     [Prop] public int? PixelSize { get; init; }
     [Prop] public string Level { get; init; } = "L";
