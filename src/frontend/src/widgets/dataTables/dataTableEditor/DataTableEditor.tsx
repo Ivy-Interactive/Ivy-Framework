@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useTable } from "../dataTableContext";
 import { getSelectionProps } from "../utils/selectionModes";
 import {
+  animatedStatusCellRenderer,
   iconCellRenderer,
   labelsBadgesCellRenderer,
   linkCellRenderer,
@@ -431,6 +432,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
             iconCellRenderer,
             linkCellRenderer,
             labelsBadgesCellRenderer,
+            animatedStatusCellRenderer,
           ] as unknown as readonly CustomRenderer[]
         }
         headerIcons={headerIcons}

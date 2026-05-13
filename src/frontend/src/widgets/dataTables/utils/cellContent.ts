@@ -1,7 +1,7 @@
 import { GridCell, GridCellKind, Item, Theme } from "@glideapps/glide-data-grid";
 import { Align, DataColumn, DataRow } from "../types/types";
 import { getCSSVariable, isDarkMode } from "@/lib/theme";
-import type { LabelsBadgesCellData } from "./customRenderers";
+import type { AnimatedStatusCellData, LabelsBadgesCellData } from "./customRenderers";
 
 /**
  * Converts Align enum to contentAlign value for GridCell
@@ -330,6 +330,39 @@ export function createLabelsCell(
 }
 
 /**
+ * Parses the encoded value emitted by AnimatedStatusValue (C#) into cell data.
+ * Format: "<state>:<text>[\t<rightLabel>]" where state is "running" | "done" | "idle".
+ * Falls back to an idle cell on any malformed input.
+ */
+export function createAnimatedStatusCell(cellValue: unknown, align?: Align): GridCell {
+  const raw = cellValue == null ? "" : String(cellValue);
+  const [body, rightLabel] = raw.split("\t", 2);
+  const colonIdx = body.indexOf(":");
+  let state: AnimatedStatusCellData["state"] = "idle";
+  let statusText = body;
+  if (colonIdx >= 0) {
+    const head = body.slice(0, colonIdx);
+    if (head === "running" || head === "done" || head === "idle") {
+      state = head;
+      statusText = body.slice(colonIdx + 1);
+    }
+  }
+  return {
+    kind: GridCellKind.Custom,
+    allowOverlay: false,
+    readonly: true,
+    copyData: statusText,
+    data: {
+      kind: "animated-status-cell",
+      state,
+      statusText,
+      rightLabel: rightLabel || undefined,
+      align: align ? getContentAlign(align) : undefined,
+    },
+  };
+}
+
+/**
  * Creates a link cell with custom renderer (blue text + underline)
  */
 export function createLinkCell(
@@ -432,6 +465,11 @@ export function getCellContent(
     // Handle Labels type - supports arrays or comma-separated strings
     if (column.type === "Labels") {
       return createLabelsCell(cellValue, align, column.color, column.badgeColorMapping);
+    }
+
+    // Handle AnimatedStatus type - spinner + shimmering text while running, check + text when done
+    if (column.type === "AnimatedStatus") {
+      return createAnimatedStatusCell(cellValue, align);
     }
 
     // Handle explicit link type from backend metadata

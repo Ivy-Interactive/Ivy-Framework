@@ -16,6 +16,7 @@ export enum ColType {
   Icon = "Icon",
   Labels = "Labels",
   Link = "Link",
+  AnimatedStatus = "AnimatedStatus",
 }
 
 export enum SortDirection {
