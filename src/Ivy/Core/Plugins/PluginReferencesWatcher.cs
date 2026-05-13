@@ -329,7 +329,7 @@ internal class PluginReferencesWatcher : IDisposable
 
             return paths
                 .Where(p => !string.IsNullOrWhiteSpace(p))
-                .Select(p => Path.IsPathRooted(p) ? Path.GetFullPath(p) : Path.GetFullPath(Path.Combine(pluginsDirectory, p)))
+                .Select(p => Path.IsPathRooted(p) ? Path.GetFullPath(p) : Path.GetFullPath(p, pluginsDirectory))
                 .ToList();
         }
         catch (IOException ex)

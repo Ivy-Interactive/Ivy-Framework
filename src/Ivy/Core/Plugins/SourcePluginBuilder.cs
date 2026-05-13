@@ -94,14 +94,17 @@ internal class SourcePluginBuilder : IDisposable
             return;
 
         if (_pendingBuilds.TryRemove(pluginDirectory, out var existingCts))
+        {
             existingCts.Cancel();
-
-        var cts = new CancellationTokenSource();
-        _pendingBuilds[pluginDirectory] = cts;
-        var token = cts.Token;
+            existingCts.Dispose();
+        }
 
         _ = Task.Run(async () =>
         {
+            using var cts = new CancellationTokenSource();
+            _pendingBuilds[pluginDirectory] = cts;
+            var token = cts.Token;
+
             try
             {
                 await Task.Delay(_debounceDelay, token);
@@ -123,9 +126,8 @@ internal class SourcePluginBuilder : IDisposable
             finally
             {
                 _pendingBuilds.TryRemove(pluginDirectory, out _);
-                cts.Dispose();
             }
-        }, token);
+        });
     }
 
     private static Process? StartBuildProcess(string directory)
