@@ -3,14 +3,14 @@ using static Ivy.Layout;
 
 namespace Ivy.Apps;
 
-public class PluginConfigurationView(UnconfiguredPlugin plugin, IIvyPluginConfigFactory configWriterFactory) : ViewBase
+public class PluginConfigurationView(UnconfiguredPlugin plugin, IIvyPluginConfigFactory configFactory) : ViewBase
 {
     public override object? Build()
     {
-        var configWriter = configWriterFactory.Create(plugin.Id);
+        var config = configFactory.Create(plugin.Id);
         var fields = plugin.Schema.Fields;
         var states = fields.Select(f =>
-            UseState(configWriter.GetValue(f.Key) ?? f.DefaultValue ?? "")
+            UseState(config.GetValue(f.Key) ?? f.DefaultValue ?? "")
         ).ToArray();
         var statusMessage = UseState<string?>(null);
 
@@ -30,11 +30,11 @@ public class PluginConfigurationView(UnconfiguredPlugin plugin, IIvyPluginConfig
                     {
                         var value = states[i].Value;
                         if (!string.IsNullOrEmpty(value))
-                            configWriter.SetValue(fields[i].Key, value);
+                            config.SetValue(fields[i].Key, value);
                         else
-                            configWriter.RemoveValue(fields[i].Key);
+                            config.RemoveValue(fields[i].Key);
                     }
-                    configWriter.Save();
+                    config.Save();
                     statusMessage.Set("Configuration saved.");
                     return ValueTask.CompletedTask;
                 }, icon: Icons.Save))

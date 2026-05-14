@@ -1,7 +1,7 @@
 using Ivy.Core.Apps;
 using Ivy.Core.Plugins;
+using Ivy.Plugins;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -18,7 +18,7 @@ public class PluginLoaderTests
     private class TestPluginContext : PluginContextBase
     {
         public TestPluginContext()
-            : base(new ConfigurationBuilder().Build(), new AppRepository(), new HashSet<string>(), WebApplication.CreateBuilder())
+            : base(new AppRepository(), new HashSet<string>(), WebApplication.CreateBuilder())
         {
         }
 
@@ -657,6 +657,6 @@ public class PluginLoaderTests
     private class MockNonIvyPluginContext : Ivy.Plugins.IIvyPluginContext
     {
         public IServiceCollection Services => new ServiceCollection();
-        public IConfiguration Configuration => new ConfigurationBuilder().Build();
+        public IIvyPluginConfig Config => throw new NotImplementedException();
     }
 }

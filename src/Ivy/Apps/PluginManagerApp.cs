@@ -14,7 +14,7 @@ public class PluginManagerApp : ViewBase
     public override object? Build()
     {
         var pluginManager = this.UseService<IPluginManager>();
-        var configWriterFactory = UseService<IIvyPluginConfigFactory>();
+        var configFactory = UseService<IIvyPluginConfigFactory>();
         var activePlugins = pluginManager.GetActivePluginIds();
         var unconfiguredPlugins = pluginManager.GetUnconfiguredPlugins();
         var unloadedPlugins = pluginManager.GetUnloadedPlugins();
@@ -53,7 +53,7 @@ public class PluginManagerApp : ViewBase
                     | (Horizontal().Gap(4)
                         | new Badge(p.Name, BadgeVariant.Warning)
                         | Muted(string.Join(", ", p.ValidationErrors)))
-                    | new PluginConfigurationView(p, configWriterFactory)
+                    | new PluginConfigurationView(p, configFactory)
                 )).ToArray())
             | new Separator()
             | H2("Unloaded Plugins")

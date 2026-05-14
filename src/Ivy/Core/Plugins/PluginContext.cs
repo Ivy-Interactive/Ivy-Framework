@@ -2,29 +2,25 @@ using System.Reflection;
 using Ivy.Core.Apps;
 using Ivy.Plugins;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Core.Plugins;
 
 public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServiceProvider
 {
-    protected IConfiguration BaseConfiguration { get; }
     protected AppRepository AppRepository { get; }
     protected IReadOnlySet<string> ReservedPaths { get; }
     protected WebApplicationBuilder Builder { get; }
 
     public PluginContextBase(Ivy.Server server, WebApplicationBuilder builder)
     {
-        BaseConfiguration = server.Configuration;
         AppRepository = server.AppRepository;
         ReservedPaths = server.ReservedPaths;
         Builder = builder;
     }
 
-    protected PluginContextBase(IConfiguration configuration, AppRepository appRepository, IReadOnlySet<string> reservedPaths, WebApplicationBuilder builder)
+    protected PluginContextBase(AppRepository appRepository, IReadOnlySet<string> reservedPaths, WebApplicationBuilder builder)
     {
-        BaseConfiguration = configuration;
         AppRepository = appRepository;
         ReservedPaths = reservedPaths;
         Builder = builder;
@@ -51,12 +47,12 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
     // Fallback service collection for non-plugin code
     private readonly ServiceCollection _fallbackServices = new();
 
-    private IConfiguration? _configurationOverride;
+    private IIvyPluginConfig? _currentPluginConfig;
 
-    public IConfiguration Configuration => _configurationOverride ?? BaseConfiguration;
+    public IIvyPluginConfig Config => _currentPluginConfig ?? throw new InvalidOperationException("No plugin config is currently active.");
 
-    internal void PushConfiguration(IConfiguration configuration) => _configurationOverride = configuration;
-    internal void PopConfiguration() => _configurationOverride = null;
+    internal void SetPluginConfig(IIvyPluginConfig config) => _currentPluginConfig = config;
+    internal void ClearPluginConfig() => _currentPluginConfig = null;
 
     public IReadOnlyList<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers => _menuTransformers;
     public IReadOnlyList<Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>> FooterMenuTransformers => _footerMenuTransformers;

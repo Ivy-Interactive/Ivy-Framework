@@ -551,6 +551,7 @@ public class Server
 
     public Server UsePlugins(
         string pluginsDirectory,
+        IIvyPluginConfigFactory configFactory,
         Version? hostVersion = null,
         Func<Server, WebApplicationBuilder, PluginContextBase>? contextFactory = null,
         IEnumerable<string>? sharedAssemblyNames = null,
@@ -566,7 +567,8 @@ public class Server
             hostVersion ?? Assembly.GetEntryAssembly()!.GetName().Version!,
             bootstrapProvider);
 
-        loader.SetConfiguration(Configuration);
+        loader.SetPluginConfigFactory(configFactory);
+        Services.AddSingleton(configFactory);
 
         _pluginLoader = loader;
         _pluginContextFactory = contextFactory;

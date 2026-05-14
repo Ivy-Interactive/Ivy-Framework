@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using Ivy.Plugins;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -18,7 +17,7 @@ public class PluginLoader : IPluginManager
     private readonly Dictionary<string, (string Reason, DateTime FailedAt)> _failedPlugins = new(); // directory -> failure info
     private readonly ReaderWriterLockSlim _lock = new();
     private PluginContextBase? _pluginContext;
-    private IConfiguration? _configuration;
+    private IIvyPluginConfigFactory? _configFactory;
     private Func<IServiceProvider>? _serviceProviderFactory;
     private Version? _hostVersion;
 
@@ -368,9 +367,9 @@ public class PluginLoader : IPluginManager
         }
     }
 
-    public void SetConfiguration(IConfiguration configuration)
+    internal void SetPluginConfigFactory(IIvyPluginConfigFactory factory)
     {
-        _configuration = configuration;
+        _configFactory = factory;
     }
 
     internal void SetServiceProviderFactory(Func<IServiceProvider> factory)
@@ -390,9 +389,8 @@ public class PluginLoader : IPluginManager
                 if (plugin.Instance.ConfigurationSchema is { } schema)
                 {
                     var errors = ValidatePluginConfiguration(
-                        plugin.Instance.Manifest.ConfigSectionName,
                         schema,
-                        context.Configuration);
+                        CreatePluginConfig(plugin.Instance));
 
                     if (errors.Count > 0)
                     {
@@ -403,20 +401,13 @@ public class PluginLoader : IPluginManager
                         plugin.Status = PluginStatus.Unconfigured;
                         continue;
                     }
-
-                    // Apply defaults before calling Configure
-                    var configWithDefaults = ApplyConfigurationDefaults(
-                        plugin.Instance.Manifest.ConfigSectionName,
-                        schema,
-                        context.Configuration);
-
-                    context.PushConfiguration(configWithDefaults);
                 }
 
                 context.SetCurrentPlugin(plugin.Instance.Manifest.Id, plugin.Directory);
+                context.SetPluginConfig(CreatePluginConfig(plugin.Instance));
                 plugin.Instance.Configure(context);
                 context.ClearCurrentPlugin();
-                context.PopConfiguration();
+                context.ClearPluginConfig();
                 plugin.Status = PluginStatus.Active;
             }
         }
@@ -530,12 +521,11 @@ public class PluginLoader : IPluginManager
             var plugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory);
 
             // Validate configuration
-            if (plugin.Instance.ConfigurationSchema is { } schema && _configuration is not null)
+            if (plugin.Instance.ConfigurationSchema is { } schema)
             {
                 var errors = ValidatePluginConfiguration(
-                    manifest.ConfigSectionName,
                     schema,
-                    _configuration);
+                    CreatePluginConfig(plugin.Instance));
 
                 if (errors.Count > 0)
                 {
@@ -560,20 +550,11 @@ public class PluginLoader : IPluginManager
             // Configure context — plugin has valid config
             if (_pluginContext is not null)
             {
-                if (plugin.Instance.ConfigurationSchema is { } configSchema && _configuration is not null)
-                {
-                    var configWithDefaults = ApplyConfigurationDefaults(
-                        manifest.ConfigSectionName,
-                        configSchema,
-                        _configuration);
-
-                    _pluginContext.PushConfiguration(configWithDefaults);
-                }
-
                 _pluginContext.SetCurrentPlugin(manifest.Id, pluginPath);
+                _pluginContext.SetPluginConfig(CreatePluginConfig(plugin.Instance));
                 plugin.Instance.Configure(_pluginContext);
                 _pluginContext.ClearCurrentPlugin();
-                _pluginContext.PopConfiguration();
+                _pluginContext.ClearPluginConfig();
                 _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
                 plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             }
@@ -679,10 +660,10 @@ public class PluginLoader : IPluginManager
             var newPlugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory);
 
             // Validate configuration
-            if (newPlugin.Instance.ConfigurationSchema is { } schema && _configuration is not null)
+            if (newPlugin.Instance.ConfigurationSchema is { } schema)
             {
                 var errors = ValidatePluginConfiguration(
-                    manifest.ConfigSectionName, schema, _configuration);
+                    schema, CreatePluginConfig(newPlugin.Instance));
 
                 if (errors.Count > 0)
                 {
@@ -704,17 +685,11 @@ public class PluginLoader : IPluginManager
 
             if (_pluginContext is not null)
             {
-                if (newPlugin.Instance.ConfigurationSchema is { } configSchema && _configuration is not null)
-                {
-                    var configWithDefaults = ApplyConfigurationDefaults(
-                        manifest.ConfigSectionName, configSchema, _configuration);
-                    _pluginContext.PushConfiguration(configWithDefaults);
-                }
-
                 _pluginContext.SetCurrentPlugin(manifest.Id, directory);
+                _pluginContext.SetPluginConfig(CreatePluginConfig(newPlugin.Instance));
                 newPlugin.Instance.Configure(_pluginContext);
                 _pluginContext.ClearCurrentPlugin();
-                _pluginContext.PopConfiguration();
+                _pluginContext.ClearPluginConfig();
                 _pluginContext.BuildPluginServiceProvider(manifest.Id, newPlugin.Services);
                 newPlugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             }
@@ -754,7 +729,7 @@ public class PluginLoader : IPluginManager
 
     public bool ReconfigurePlugin(string pluginId)
     {
-        if (_configuration is null || _pluginContext is null)
+        if (_configFactory is null || _pluginContext is null)
         {
             _logger.LogError("Cannot reconfigure plugin: PluginLoader has not been initialized.");
             return false;
@@ -784,9 +759,8 @@ public class PluginLoader : IPluginManager
         if (plugin.Instance.ConfigurationSchema is { } schema)
         {
             errors = ValidatePluginConfiguration(
-                manifest.ConfigSectionName,
                 schema,
-                _configuration);
+                CreatePluginConfig(plugin.Instance));
         }
 
         if (errors.Count > 0)
@@ -830,18 +804,11 @@ public class PluginLoader : IPluginManager
                 plugin.ServiceProvider = null;
             }
 
-            // Apply defaults and call Configure
-            if (plugin.Instance.ConfigurationSchema is { } configSchema)
-            {
-                var configWithDefaults = ApplyConfigurationDefaults(
-                    manifest.ConfigSectionName, configSchema, _configuration);
-                _pluginContext.PushConfiguration(configWithDefaults);
-            }
-
             _pluginContext.SetCurrentPlugin(manifest.Id, plugin.Directory);
+            _pluginContext.SetPluginConfig(CreatePluginConfig(plugin.Instance));
             plugin.Instance.Configure(_pluginContext);
             _pluginContext.ClearCurrentPlugin();
-            _pluginContext.PopConfiguration();
+            _pluginContext.ClearPluginConfig();
             _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
             plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             plugin.Status = PluginStatus.Active;
@@ -892,8 +859,8 @@ public class PluginLoader : IPluginManager
                 var schema = plugin.Instance.ConfigurationSchema;
                 if (schema is null) continue;
 
-                var errors = _configuration is not null
-                    ? ValidatePluginConfiguration(manifest.ConfigSectionName, schema, _configuration)
+                var errors = _configFactory is not null
+                    ? ValidatePluginConfiguration(schema, CreatePluginConfig(plugin.Instance))
                     : ["No configuration available"];
 
                 result.Add(new UnconfiguredPlugin(
@@ -988,16 +955,14 @@ public class PluginLoader : IPluginManager
     }
 
     internal List<string> ValidatePluginConfiguration(
-        string configSectionName,
         PluginConfigurationSchema schema,
-        IConfiguration config)
+        IIvyPluginConfig config)
     {
         var errors = new List<string>();
-        var section = config.GetSection($"Plugins:{configSectionName}");
 
         foreach (var field in schema.Fields)
         {
-            var value = section[field.Key];
+            var value = config.GetValue(field.Key);
 
             if (field.IsRequired && string.IsNullOrEmpty(value))
             {
@@ -1024,31 +989,40 @@ public class PluginLoader : IPluginManager
         };
     }
 
-    internal IConfiguration ApplyConfigurationDefaults(
-        string configSectionName,
-        PluginConfigurationSchema schema,
-        IConfiguration config)
+    private IIvyPluginConfig CreatePluginConfig(IIvyPlugin plugin)
     {
-        var defaults = new Dictionary<string, string?>();
-        var section = config.GetSection($"Plugins:{configSectionName}");
+        if (_configFactory is null)
+            throw new InvalidOperationException(
+                $"No IIvyPluginConfigFactory has been set. Cannot create config for plugin '{plugin.Manifest.Id}'.");
 
-        foreach (var field in schema.Fields.Where(f => f.DefaultValue is not null))
+        var config = _configFactory.Create(plugin.Manifest.Id);
+
+        if (plugin.ConfigurationSchema is { } schema)
         {
-            var value = section[field.Key];
+            var defaults = schema.Fields
+                .Where(f => f.DefaultValue is not null)
+                .ToDictionary(f => f.Key, f => f.DefaultValue!);
 
-            // Only inject default if field is missing or empty
-            if (string.IsNullOrEmpty(value))
-            {
-                defaults[$"Plugins:{configSectionName}:{field.Key}"] = field.DefaultValue;
-            }
+            if (defaults.Count > 0)
+                return new PluginConfigWithDefaults(config, defaults);
         }
 
-        // Create a configuration that layers defaults under the actual config
-        // Actual config takes precedence over defaults
-        return new ConfigurationBuilder()
-            .AddInMemoryCollection(defaults)
-            .AddConfiguration(config)
-            .Build();
+        return config;
+    }
+
+    private sealed class PluginConfigWithDefaults(IIvyPluginConfig inner, IReadOnlyDictionary<string, string> defaults) : IIvyPluginConfig
+    {
+        public string? GetValue(string key)
+        {
+            var value = inner.GetValue(key);
+            if (string.IsNullOrEmpty(value) && defaults.TryGetValue(key, out var defaultValue))
+                return defaultValue;
+            return value;
+        }
+
+        public void SetValue(string key, string value) => inner.SetValue(key, value);
+        public void RemoveValue(string key) => inner.RemoveValue(key);
+        public void Save() => inner.Save();
     }
 }
 
