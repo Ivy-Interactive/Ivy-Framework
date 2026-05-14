@@ -5,4 +5,5 @@ public interface IIvyPlugin
     PluginManifest Manifest { get; }
     PluginConfigurationSchema? ConfigurationSchema { get; }
     void Configure(IIvyPluginContext context);
+    object? BuildConfigurationView(IPluginConfigWriter configWriter) => null;
 }
