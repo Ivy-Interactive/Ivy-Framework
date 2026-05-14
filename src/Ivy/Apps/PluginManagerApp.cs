@@ -33,7 +33,7 @@ public class PluginManagerApp : ViewBase
                     var schema = pluginManager.GetPluginSchema(id);
                     var config = configFactory.Create(id);
                     var customView = pluginManager.BuildPluginConfigurationView(id, config);
-                    return (object)(Vertical().Gap(3)
+                    return (object)new Card(content: Vertical().Gap(3)
                         | (Horizontal().Gap(4)
                             | new Badge(id, BadgeVariant.Secondary)
                             | new Button("Reload", onClick: _ =>
@@ -63,7 +63,7 @@ public class PluginManagerApp : ViewBase
                 {
                     var config = configFactory.Create(p.Id);
                     var customView = pluginManager.BuildPluginConfigurationView(p.Id, config);
-                    return (object)(Vertical().Gap(3)
+                    return (object)new Card(content: Vertical().Gap(3)
                         | (Horizontal().Gap(4)
                             | new Badge(p.Name, BadgeVariant.Warning)
                             | Muted(string.Join(", ", p.ValidationErrors)))
