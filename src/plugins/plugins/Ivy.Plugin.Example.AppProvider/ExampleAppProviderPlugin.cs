@@ -1,6 +1,4 @@
 using Ivy.Plugins;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 [assembly: IvyPlugin(typeof(Ivy.Plugin.Example.AppProvider.ExampleAppProviderPlugin))]
 
@@ -22,10 +20,6 @@ public class ExampleAppProviderPlugin : IIvyPlugin
     };
 
     public PluginConfigurationSchema? ConfigurationSchema => null;
-
-    public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
-    {
-    }
 
     public void Configure(IIvyPluginContext context)
     {
