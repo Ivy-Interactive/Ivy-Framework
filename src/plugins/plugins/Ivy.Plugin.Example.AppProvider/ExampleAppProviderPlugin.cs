@@ -37,6 +37,8 @@ public class ExampleAppProviderPlugin : IIvyPlugin
     public void Configure(IIvyPluginContext context)
     {
         var appTitle = context.Config.GetValue("AppTitle") ?? "Example App";
+        var appIconName = context.Config.GetValue("AppIcon") ?? "Star";
+        var appIcon = Enum.TryParse<Icons>(appIconName, ignoreCase: true, out var parsed) ? parsed : Icons.Star;
 
         // Use the AsExtendedContext() extension method to access Ivy-specific features
         var ivyContext = context.AsExtendedContext();
@@ -46,7 +48,7 @@ public class ExampleAppProviderPlugin : IIvyPlugin
         {
             Id = "example-app",
             Title = appTitle,
-            Icon = Icons.Star,
+            Icon = appIcon,
             Description = "Example app added by plugin",
             Type = typeof(ExampleApp),
             Group = ["Examples"],
@@ -98,7 +100,16 @@ public class ExampleAppProviderConfigView(IIvyPluginConfig config) : Ivy.ViewBas
             | Muted("Choose a title and icon that will appear in the sidebar navigation.")
             | new Ivy.Field(appTitle.ToTextInput(placeholder: "My Awesome App"), label: "App Title", required: true)
             | new Ivy.Field(appIcon.ToSelectInput(
-                ["Star", "Home", "Settings", "Database", "Globe", "Zap", "Heart", "Rocket"],
+                new Ivy.Option<string>[] {
+                    new("Star", "Star", icon: Ivy.Icons.Star),
+                    new("House", "House", icon: Ivy.Icons.House),
+                    new("Settings", "Settings", icon: Ivy.Icons.Settings),
+                    new("Database", "Database", icon: Ivy.Icons.Database),
+                    new("Globe", "Globe", icon: Ivy.Icons.Globe),
+                    new("Zap", "Zap", icon: Ivy.Icons.Zap),
+                    new("Heart", "Heart", icon: Ivy.Icons.Heart),
+                    new("Rocket", "Rocket", icon: Ivy.Icons.Rocket),
+                },
                 placeholder: "Pick an icon..."), label: "Icon")
             | Horizontal()
                 | new Ivy.Button("Next →", onClick: _ => { step.Set(1); return ValueTask.CompletedTask; });
