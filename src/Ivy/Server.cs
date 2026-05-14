@@ -566,7 +566,7 @@ public class Server
             hostVersion ?? Assembly.GetEntryAssembly()!.GetName().Version!,
             bootstrapProvider);
 
-        loader.ConfigureServices(Services, Configuration);
+        loader.SetConfiguration(Configuration);
 
         _pluginLoader = loader;
         _pluginContextFactory = contextFactory;

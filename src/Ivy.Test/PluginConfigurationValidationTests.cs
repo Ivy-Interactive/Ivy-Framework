@@ -3,7 +3,6 @@ using Ivy.Core.Plugins;
 using Ivy.Plugins;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Ivy.Test.Plugins;
@@ -343,8 +342,6 @@ public class PluginConfigurationValidationTests
         };
 
         public PluginConfigurationSchema? ConfigurationSchema { get; }
-
-        public void ConfigureServices(IServiceCollection services, IConfiguration configuration) { }
 
         public void Configure(IIvyPluginContext context) => _onConfigure?.Invoke(context);
     }

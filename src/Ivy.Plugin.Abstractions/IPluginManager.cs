@@ -8,13 +8,17 @@ public record PluginCandidate(
 
 public interface IPluginManager
 {
-    IReadOnlyList<string> GetLoadedPluginIds();
+    IReadOnlyList<string> GetActivePluginIds();
     IReadOnlyList<PluginCandidate> GetUnloadedPlugins();
+    IReadOnlyList<UnconfiguredPlugin> GetUnconfiguredPlugins();
     bool UnloadPlugin(string pluginId);
     bool LoadPlugin(string pluginPath);
     bool ReloadPlugin(string pluginId);
+    bool ReconfigurePlugin(string pluginId);
 
     event Action<string>? PluginLoaded;
     event Action<string>? PluginUnloaded;
     event Action<string>? PluginReloaded;
+    event Action<string>? PluginActivated;
+    event Action<string>? PluginDeactivated;
 }

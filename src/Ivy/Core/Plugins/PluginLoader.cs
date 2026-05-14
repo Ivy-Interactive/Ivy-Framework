@@ -25,6 +25,8 @@ public class PluginLoader : IPluginManager
     public event Action<string>? PluginLoaded;
     public event Action<string>? PluginUnloaded;
     public event Action<string>? PluginReloaded;
+    public event Action<string>? PluginActivated;
+    public event Action<string>? PluginDeactivated;
 
     internal bool BuildSourcePlugins { get; }
 
@@ -366,19 +368,9 @@ public class PluginLoader : IPluginManager
         }
     }
 
-    public void ConfigureServices(IServiceCollection hostServices, IConfiguration configuration)
+    public void SetConfiguration(IConfiguration configuration)
     {
         _configuration = configuration;
-        _lock.EnterReadLock();
-        try
-        {
-            foreach (var plugin in _plugins)
-                plugin.Instance.ConfigureServices(plugin.Services, configuration);
-        }
-        finally
-        {
-            _lock.ExitReadLock();
-        }
     }
 
     internal void SetServiceProviderFactory(Func<IServiceProvider> factory)
@@ -389,7 +381,6 @@ public class PluginLoader : IPluginManager
     public void Configure(PluginContextBase context)
     {
         _pluginContext = context;
-        var invalidPlugins = new List<LoadedPlugin>();
 
         _lock.EnterReadLock();
         try
@@ -405,11 +396,11 @@ public class PluginLoader : IPluginManager
 
                     if (errors.Count > 0)
                     {
-                        _logger.LogError(
-                            "Plugin '{Id}' configuration is invalid: {Errors}",
+                        _logger.LogWarning(
+                            "Plugin '{Id}' configuration is incomplete: {Errors}. Plugin loaded as unconfigured.",
                             plugin.Instance.Manifest.Id,
                             string.Join(", ", errors));
-                        invalidPlugins.Add(plugin);
+                        plugin.Status = PluginStatus.Unconfigured;
                         continue;
                     }
 
@@ -426,30 +417,12 @@ public class PluginLoader : IPluginManager
                 plugin.Instance.Configure(context);
                 context.ClearCurrentPlugin();
                 context.PopConfiguration();
+                plugin.Status = PluginStatus.Active;
             }
         }
         finally
         {
             _lock.ExitReadLock();
-        }
-
-        if (invalidPlugins.Count > 0)
-        {
-            _lock.EnterWriteLock();
-            try
-            {
-                foreach (var plugin in invalidPlugins)
-                {
-                    _plugins.Remove(plugin);
-                    _failedPlugins[plugin.Directory] = (
-                        $"Configuration invalid for '{plugin.Instance.Manifest.Id}'",
-                        DateTime.UtcNow);
-                }
-            }
-            finally
-            {
-                _lock.ExitWriteLock();
-            }
         }
     }
 
@@ -480,8 +453,9 @@ public class PluginLoader : IPluginManager
                 return false;
             }
 
-            // Remove contributions from context
-            _pluginContext?.RemovePluginContributions(pluginId);
+            // Remove contributions from context (only if it was active)
+            if (plugin.Status == PluginStatus.Active)
+                _pluginContext?.RemovePluginContributions(pluginId);
 
             // Dispose the plugin's service provider
             (plugin.ServiceProvider as IDisposable)?.Dispose();
@@ -498,7 +472,7 @@ public class PluginLoader : IPluginManager
         }
 
         // Fire event outside the lock to avoid deadlocks — subscribers may call
-        // GetLoadedPluginIds() which needs a read lock.
+        // GetActivePluginIds() which needs a read lock.
         PluginUnloaded?.Invoke(pluginId);
 
         return true;
@@ -516,6 +490,7 @@ public class PluginLoader : IPluginManager
             SourcePluginBuilder.BuildSync(pluginPath, _logger);
 
         string? loadedPluginId = null;
+        PluginStatus loadedStatus = PluginStatus.Active;
         _lock.EnterWriteLock();
         try
         {
@@ -554,11 +529,7 @@ public class PluginLoader : IPluginManager
 
             var plugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory);
 
-            // Configure services
-            if (_configuration is not null)
-                plugin.Instance.ConfigureServices(plugin.Services, _configuration);
-
-            // Validate configuration before Configure
+            // Validate configuration
             if (plugin.Instance.ConfigurationSchema is { } schema && _configuration is not null)
             {
                 var errors = ValidatePluginConfiguration(
@@ -568,21 +539,27 @@ public class PluginLoader : IPluginManager
 
                 if (errors.Count > 0)
                 {
-                    _logger.LogError(
-                        "Plugin '{Id}' configuration is invalid: {Errors}. Plugin load failed.",
+                    _logger.LogWarning(
+                        "Plugin '{Id}' configuration is incomplete: {Errors}. Plugin loaded as unconfigured.",
                         manifest.Id,
                         string.Join(", ", errors));
+                    plugin.Status = PluginStatus.Unconfigured;
+                    loadedStatus = PluginStatus.Unconfigured;
 
-                    (plugin.ServiceProvider as IDisposable)?.Dispose();
-                    plugin.LoadContext.Unload();
-                    return false;
+                    _knownPlugins[manifest.Id] = pluginPath;
+                    _plugins.Add(plugin);
+                    _failedPlugins.Remove(pluginPath);
+
+                    _logger.LogInformation("Loaded plugin (unconfigured): {Id} v{Version}", manifest.Id, manifest.Version);
+                    loadedPluginId = manifest.Id;
+
+                    return true;
                 }
             }
 
-            // Configure context
+            // Configure context — plugin has valid config
             if (_pluginContext is not null)
             {
-                // Apply defaults if schema exists
                 if (plugin.Instance.ConfigurationSchema is { } configSchema && _configuration is not null)
                 {
                     var configWithDefaults = ApplyConfigurationDefaults(
@@ -601,6 +578,7 @@ public class PluginLoader : IPluginManager
                 plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             }
 
+            plugin.Status = PluginStatus.Active;
             _knownPlugins[manifest.Id] = pluginPath;
             _plugins.Add(plugin);
 
@@ -617,7 +595,7 @@ public class PluginLoader : IPluginManager
         }
 
         // Reload app repository so newly added apps appear in the UI
-        if (loadedPluginId is not null)
+        if (loadedPluginId is not null && loadedStatus == PluginStatus.Active)
         {
             _pluginContext?.ReloadApps();
             // Refresh any open tabs showing apps from this plugin (e.g. after reload)
@@ -627,7 +605,7 @@ public class PluginLoader : IPluginManager
         }
 
         // Fire event outside the lock to avoid deadlocks — subscribers may call
-        // GetLoadedPluginIds() which needs a read lock.
+        // GetActivePluginIds() which needs a read lock.
         if (loadedPluginId is not null)
             PluginLoaded?.Invoke(loadedPluginId);
 
@@ -643,6 +621,7 @@ public class PluginLoader : IPluginManager
         }
 
         string? directory;
+        PluginStatus oldStatus;
         _lock.EnterReadLock();
         try
         {
@@ -653,6 +632,7 @@ public class PluginLoader : IPluginManager
                 return false;
             }
             directory = plugin.Directory;
+            oldStatus = plugin.Status;
         }
         finally
         {
@@ -680,6 +660,8 @@ public class PluginLoader : IPluginManager
             return false;
         }
 
+        PluginStatus newStatus;
+
         // Now atomically swap: unload old, insert new
         _lock.EnterWriteLock();
         try
@@ -687,7 +669,8 @@ public class PluginLoader : IPluginManager
             var oldPlugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
             if (oldPlugin is not null)
             {
-                _pluginContext?.RemovePluginContributions(pluginId);
+                if (oldPlugin.Status == PluginStatus.Active)
+                    _pluginContext?.RemovePluginContributions(pluginId);
                 (oldPlugin.ServiceProvider as IDisposable)?.Dispose();
                 oldPlugin.LoadContext.Unload();
                 _plugins.Remove(oldPlugin);
@@ -695,15 +678,36 @@ public class PluginLoader : IPluginManager
 
             var newPlugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory);
 
-            if (_configuration is not null)
-                newPlugin.Instance.ConfigureServices(newPlugin.Services, _configuration);
+            // Validate configuration
+            if (newPlugin.Instance.ConfigurationSchema is { } schema && _configuration is not null)
+            {
+                var errors = ValidatePluginConfiguration(
+                    manifest.ConfigSectionName, schema, _configuration);
+
+                if (errors.Count > 0)
+                {
+                    _logger.LogWarning(
+                        "Plugin '{Id}' configuration is incomplete after reload: {Errors}. Plugin loaded as unconfigured.",
+                        manifest.Id, string.Join(", ", errors));
+                    newPlugin.Status = PluginStatus.Unconfigured;
+                    newStatus = PluginStatus.Unconfigured;
+
+                    _knownPlugins[manifest.Id] = directory;
+                    _plugins.Add(newPlugin);
+                    _failedPlugins.Remove(directory);
+
+                    _logger.LogInformation("Reloaded plugin (unconfigured): {Id} v{Version}", manifest.Id, manifest.Version);
+
+                    return true;
+                }
+            }
 
             if (_pluginContext is not null)
             {
-                if (newPlugin.Instance.ConfigurationSchema is { } schema && _configuration is not null)
+                if (newPlugin.Instance.ConfigurationSchema is { } configSchema && _configuration is not null)
                 {
                     var configWithDefaults = ApplyConfigurationDefaults(
-                        manifest.ConfigSectionName, schema, _configuration);
+                        manifest.ConfigSectionName, configSchema, _configuration);
                     _pluginContext.PushConfiguration(configWithDefaults);
                 }
 
@@ -715,6 +719,8 @@ public class PluginLoader : IPluginManager
                 newPlugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
             }
 
+            newPlugin.Status = PluginStatus.Active;
+            newStatus = PluginStatus.Active;
             _knownPlugins[manifest.Id] = directory;
             _plugins.Add(newPlugin);
             _failedPlugins.Remove(directory);
@@ -727,21 +733,177 @@ public class PluginLoader : IPluginManager
         }
 
         // Refresh UI after the swap is complete
-        _pluginContext?.ReloadApps();
-        var appIds = _pluginContext?.GetPluginAppIds(pluginId);
-        if (appIds is { Count: > 0 })
-            _pluginContext!.RefreshApps(appIds);
+        if (newStatus == PluginStatus.Active)
+        {
+            _pluginContext?.ReloadApps();
+            var appIds = _pluginContext?.GetPluginAppIds(pluginId);
+            if (appIds is { Count: > 0 })
+                _pluginContext!.RefreshApps(appIds);
+        }
 
         PluginReloaded?.Invoke(pluginId);
+
+        // Fire activation/deactivation events based on state transitions
+        if (oldStatus == PluginStatus.Unconfigured && newStatus == PluginStatus.Active)
+            PluginActivated?.Invoke(pluginId);
+        else if (oldStatus == PluginStatus.Active && newStatus == PluginStatus.Unconfigured)
+            PluginDeactivated?.Invoke(pluginId);
+
         return true;
     }
 
-    public IReadOnlyList<string> GetLoadedPluginIds()
+    public bool ReconfigurePlugin(string pluginId)
+    {
+        if (_configuration is null || _pluginContext is null)
+        {
+            _logger.LogError("Cannot reconfigure plugin: PluginLoader has not been initialized.");
+            return false;
+        }
+
+        LoadedPlugin? plugin;
+        _lock.EnterReadLock();
+        try
+        {
+            plugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
+            if (plugin is null)
+            {
+                _logger.LogWarning("Plugin '{Id}' not found for reconfiguration.", pluginId);
+                return false;
+            }
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+
+        var manifest = plugin.Instance.Manifest;
+        var oldStatus = plugin.Status;
+
+        // Validate the current configuration
+        List<string> errors = [];
+        if (plugin.Instance.ConfigurationSchema is { } schema)
+        {
+            errors = ValidatePluginConfiguration(
+                manifest.ConfigSectionName,
+                schema,
+                _configuration);
+        }
+
+        if (errors.Count > 0)
+        {
+            // Configuration is invalid
+            if (oldStatus == PluginStatus.Active)
+            {
+                // Deactivate: remove contributions
+                _lock.EnterWriteLock();
+                try
+                {
+                    _pluginContext.RemovePluginContributions(pluginId);
+                    (plugin.ServiceProvider as IDisposable)?.Dispose();
+                    plugin.ServiceProvider = null;
+                    plugin.Status = PluginStatus.Unconfigured;
+                }
+                finally
+                {
+                    _lock.ExitWriteLock();
+                }
+
+                _logger.LogWarning(
+                    "Plugin '{Id}' deactivated due to invalid configuration: {Errors}",
+                    pluginId, string.Join(", ", errors));
+
+                _pluginContext.ReloadApps();
+                PluginDeactivated?.Invoke(pluginId);
+            }
+            return false;
+        }
+
+        // Configuration is valid — activate or reconfigure
+        _lock.EnterWriteLock();
+        try
+        {
+            // If already active, remove old contributions first
+            if (oldStatus == PluginStatus.Active)
+            {
+                _pluginContext.RemovePluginContributions(pluginId);
+                (plugin.ServiceProvider as IDisposable)?.Dispose();
+                plugin.ServiceProvider = null;
+            }
+
+            // Apply defaults and call Configure
+            if (plugin.Instance.ConfigurationSchema is { } configSchema)
+            {
+                var configWithDefaults = ApplyConfigurationDefaults(
+                    manifest.ConfigSectionName, configSchema, _configuration);
+                _pluginContext.PushConfiguration(configWithDefaults);
+            }
+
+            _pluginContext.SetCurrentPlugin(manifest.Id, plugin.Directory);
+            plugin.Instance.Configure(_pluginContext);
+            _pluginContext.ClearCurrentPlugin();
+            _pluginContext.PopConfiguration();
+            _pluginContext.BuildPluginServiceProvider(manifest.Id, plugin.Services);
+            plugin.ServiceProvider = _pluginContext.GetPluginServiceProvider(manifest.Id);
+            plugin.Status = PluginStatus.Active;
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+
+        _logger.LogInformation("Reconfigured plugin: {Id}", pluginId);
+
+        _pluginContext.ReloadApps();
+        var appIds = _pluginContext.GetPluginAppIds(pluginId);
+        if (appIds is { Count: > 0 })
+            _pluginContext.RefreshApps(appIds);
+
+        if (oldStatus == PluginStatus.Unconfigured)
+            PluginActivated?.Invoke(pluginId);
+
+        return true;
+    }
+
+    public IReadOnlyList<string> GetActivePluginIds()
     {
         _lock.EnterReadLock();
         try
         {
-            return _plugins.Select(p => p.Instance.Manifest.Id).ToList();
+            return _plugins
+                .Where(p => p.Status == PluginStatus.Active)
+                .Select(p => p.Instance.Manifest.Id)
+                .ToList();
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    public IReadOnlyList<UnconfiguredPlugin> GetUnconfiguredPlugins()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            var result = new List<UnconfiguredPlugin>();
+            foreach (var plugin in _plugins.Where(p => p.Status == PluginStatus.Unconfigured))
+            {
+                var manifest = plugin.Instance.Manifest;
+                var schema = plugin.Instance.ConfigurationSchema;
+                if (schema is null) continue;
+
+                var errors = _configuration is not null
+                    ? ValidatePluginConfiguration(manifest.ConfigSectionName, schema, _configuration)
+                    : ["No configuration available"];
+
+                result.Add(new UnconfiguredPlugin(
+                    manifest.Id,
+                    manifest.Name,
+                    plugin.Directory,
+                    schema,
+                    errors));
+            }
+            return result;
         }
         finally
         {
@@ -896,6 +1058,7 @@ public record LoadedPlugin(
     AssemblyLoadContext LoadContext,
     string Directory)
 {
+    public PluginStatus Status { get; internal set; } = PluginStatus.Active;
     public ServiceCollection Services { get; } = new();
     public IServiceProvider? ServiceProvider { get; internal set; }
 }
