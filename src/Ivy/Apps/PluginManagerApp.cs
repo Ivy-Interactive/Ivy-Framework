@@ -14,6 +14,7 @@ public class PluginManagerApp : ViewBase
     public override object? Build()
     {
         var pluginManager = this.UseService<IPluginManager>();
+        var configWriterFactory = UseService<IIvyPluginConfigFactory>();
         var activePlugins = pluginManager.GetActivePluginIds();
         var unconfiguredPlugins = pluginManager.GetUnconfiguredPlugins();
         var unloadedPlugins = pluginManager.GetUnloadedPlugins();
@@ -48,17 +49,11 @@ public class PluginManagerApp : ViewBase
             | H2("Unconfigured Plugins")
             | (unconfiguredPlugins.Count == 0
                 ? Muted("No unconfigured plugins")
-                : unconfiguredPlugins.Select(p => (object)(Vertical().Gap(2)
+                : unconfiguredPlugins.Select(p => (object)(Vertical().Gap(3)
                     | (Horizontal().Gap(4)
-                        | new Badge(p.Id, BadgeVariant.Warning)
+                        | new Badge(p.Name, BadgeVariant.Warning)
                         | Muted(string.Join(", ", p.ValidationErrors)))
-                    | new Button("Reconfigure", onClick: _ =>
-                    {
-                        pluginStatus.Set(pluginManager.ReconfigurePlugin(p.Id)
-                            ? $"Activated '{p.Id}'"
-                            : $"Configuration still invalid for '{p.Id}'");
-                        return ValueTask.CompletedTask;
-                    }, variant: ButtonVariant.Outline, icon: Icons.Settings)
+                    | new PluginConfigurationView(p, configWriterFactory)
                 )).ToArray())
             | new Separator()
             | H2("Unloaded Plugins")
