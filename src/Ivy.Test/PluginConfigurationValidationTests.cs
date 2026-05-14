@@ -3,7 +3,6 @@ using Ivy.Core.Plugins;
 using Ivy.Plugins;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Ivy.Test.Plugins;
