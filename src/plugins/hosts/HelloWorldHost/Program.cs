@@ -8,7 +8,8 @@ server.AddAppsFromAssembly(typeof(Program).Assembly);
 var pluginsDir = Path.GetFullPath(
     Path.Combine(System.AppContext.BaseDirectory, "..", "..", "..", "..", "..", "plugins"));
 
-server.UsePlugins(pluginsDir, new InMemoryPluginConfigFactory(),
+var configFactory = new InMemoryPluginConfigFactory();
+server.UsePlugins(pluginsDir, configFactory,
     sharedAssemblyNames: ["Ivy.Plugin.HelloWorld.Abstractions"],
     buildSourcePlugins: true);
 
@@ -17,10 +18,14 @@ await server.RunAsync();
 internal class InMemoryPluginConfigFactory : IIvyPluginConfigFactory
 {
     private readonly Dictionary<string, string> _store = new();
-    public IIvyPluginConfig Create(string pluginId) => new InMemoryPluginConfig(_store, pluginId);
+    private IPluginManager? _pluginManager;
+
+    public void SetPluginManager(IPluginManager pluginManager) => _pluginManager = pluginManager;
+    public IIvyPluginConfig Create(string pluginId) => new InMemoryPluginConfig(_store, pluginId, this);
+    internal IPluginManager? PluginManager => _pluginManager;
 }
 
-internal class InMemoryPluginConfig(Dictionary<string, string> store, string pluginId) : IIvyPluginConfig
+internal class InMemoryPluginConfig(Dictionary<string, string> store, string pluginId, InMemoryPluginConfigFactory factory) : IIvyPluginConfig
 {
     private string FullKey(string key) => $"{pluginId}:{key}";
 
@@ -29,5 +34,6 @@ internal class InMemoryPluginConfig(Dictionary<string, string> store, string plu
 
     public void SetValue(string key, string value) => store[FullKey(key)] = value;
     public void RemoveValue(string key) => store.Remove(FullKey(key));
-    public void Save() { }
+
+    public void Save() => factory.PluginManager?.ReconfigurePlugin(pluginId);
 }

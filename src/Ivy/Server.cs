@@ -568,6 +568,7 @@ public class Server
             bootstrapProvider);
 
         loader.SetPluginConfigFactory(configFactory);
+        configFactory.SetPluginManager(loader);
         Services.AddSingleton(configFactory);
 
         _pluginLoader = loader;
