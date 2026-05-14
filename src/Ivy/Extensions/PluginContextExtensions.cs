@@ -3,25 +3,25 @@ using Ivy.Plugins;
 namespace Ivy;
 
 /// <summary>
-/// Extension methods for IPluginContext to simplify working with Ivy-specific plugin features.
+/// Extension methods for IIvyPluginContext to simplify working with Ivy-specific plugin features.
 /// </summary>
 public static class PluginContextExtensions
 {
     /// <summary>
-    /// Converts an IPluginContext to IIvyPluginContext, enabling access to Ivy-specific features
+    /// Converts an IIvyPluginContext to IIvyExtendedPluginContext, enabling access to extended features
     /// such as app registration, menu customization, and badge providers.
     /// </summary>
     /// <param name="context">The plugin context to convert.</param>
-    /// <returns>The context as IIvyPluginContext.</returns>
+    /// <returns>The context as IIvyExtendedPluginContext.</returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the context is not an IIvyPluginContext instance,
+    /// Thrown when the context is not an IIvyExtendedPluginContext instance,
     /// indicating the plugin is not running in an Ivy host application.
     /// </exception>
     /// <example>
     /// <code>
-    /// public void Configure(IPluginContext context)
+    /// public void Configure(IIvyPluginContext context)
     /// {
-    ///     var ivyContext = context.AsIvyContext();
+    ///     var ivyContext = context.AsExtendedContext();
     ///     ivyContext.AddApp(new AppDescriptor
     ///     {
     ///         Id = "MyApp",
@@ -31,25 +31,25 @@ public static class PluginContextExtensions
     /// }
     /// </code>
     /// </example>
-    public static IIvyPluginContext AsIvyContext(this IPluginContext context)
+    public static IIvyExtendedPluginContext AsExtendedContext(this IIvyPluginContext context)
     {
-        return context as IIvyPluginContext
+        return context as IIvyExtendedPluginContext
             ?? throw new InvalidOperationException(
                 "This plugin requires Ivy framework features. " +
                 "Ensure the plugin is loaded in an Ivy host application.");
     }
 
     /// <summary>
-    /// Attempts to convert an IPluginContext to IIvyPluginContext.
-    /// Returns null if the context is not an Ivy context.
+    /// Attempts to convert an IIvyPluginContext to IIvyExtendedPluginContext.
+    /// Returns null if the context is not an extended Ivy context.
     /// </summary>
     /// <param name="context">The plugin context to convert.</param>
-    /// <returns>The context as IIvyPluginContext, or null if not an Ivy context.</returns>
+    /// <returns>The context as IIvyExtendedPluginContext, or null if not an extended context.</returns>
     /// <example>
     /// <code>
-    /// public void Configure(IPluginContext context)
+    /// public void Configure(IIvyPluginContext context)
     /// {
-    ///     var ivyContext = context.TryGetIvyContext();
+    ///     var ivyContext = context.TryGetExtendedContext();
     ///     if (ivyContext != null)
     ///     {
     ///         ivyContext.AddApp(new AppDescriptor { ... });
@@ -57,13 +57,13 @@ public static class PluginContextExtensions
     ///     else
     ///     {
     ///         // Plugin is running in a non-Ivy host
-    ///         // Use only IPluginContext features
+    ///         // Use only IIvyPluginContext features
     ///     }
     /// }
     /// </code>
     /// </example>
-    public static IIvyPluginContext? TryGetIvyContext(this IPluginContext context)
+    public static IIvyExtendedPluginContext? TryGetExtendedContext(this IIvyPluginContext context)
     {
-        return context as IIvyPluginContext;
+        return context as IIvyExtendedPluginContext;
     }
 }

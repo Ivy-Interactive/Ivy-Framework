@@ -8,6 +8,7 @@ var pluginsDir = Path.GetFullPath(
     Path.Combine(System.AppContext.BaseDirectory, "..", "..", "..", "..", "..", "plugins"));
 
 server.UsePlugins(pluginsDir,
-    sharedAssemblyNames: ["Ivy.Plugin.HelloWorld.Abstractions"]);
+    sharedAssemblyNames: ["Ivy.Plugin.HelloWorld.Abstractions"],
+    buildSourcePlugins: true);
 
 await server.RunAsync();

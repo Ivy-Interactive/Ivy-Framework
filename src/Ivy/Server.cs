@@ -105,6 +105,7 @@ public class Server
     private Action<HtmlPipeline>? _pipelineConfigurator;
     private PluginLoader? _pluginLoader;
     private PluginWatcher? _pluginWatcher;
+    private PluginReferencesWatcher? _pluginReferencesWatcher;
     private Func<Server, WebApplicationBuilder, PluginContextBase>? _pluginContextFactory;
     private ManifestOptions? _manifestOptions;
     private ServerArgs _args;
@@ -553,11 +554,12 @@ public class Server
         Version? hostVersion = null,
         Func<Server, WebApplicationBuilder, PluginContextBase>? contextFactory = null,
         IEnumerable<string>? sharedAssemblyNames = null,
-        bool enableHotReload = true)
+        bool enableHotReload = true,
+        bool buildSourcePlugins = false)
     {
         using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
         var logger = loggerFactory.CreateLogger<PluginLoader>();
-        var loader = new PluginLoader(pluginsDirectory, logger, sharedAssemblyNames);
+        var loader = new PluginLoader(pluginsDirectory, logger, sharedAssemblyNames, buildSourcePlugins);
 
         using var bootstrapProvider = Services.BuildServiceProvider();
         loader.DiscoverAndLoad(
@@ -576,8 +578,15 @@ public class Server
         if (enableHotReload)
         {
             var watcherLogger = loggerFactory.CreateLogger<PluginWatcher>();
-            _pluginWatcher = new PluginWatcher(pluginsDirectory, loader, watcherLogger);
+            _pluginWatcher = new PluginWatcher(pluginsDirectory, loader, watcherLogger, buildSourcePlugins);
             _pluginWatcher.Start();
+
+            var refsWatcherLogger = loggerFactory.CreateLogger<PluginReferencesWatcher>();
+            var referencesFilePath = Path.Combine(pluginsDirectory, PluginReferencesWatcher.FileName);
+            var initialRefs = PluginReferencesWatcher.ParseReferencesFile(referencesFilePath, pluginsDirectory, refsWatcherLogger);
+            _pluginReferencesWatcher = new PluginReferencesWatcher(pluginsDirectory, loader, refsWatcherLogger, buildSourcePlugins);
+            _pluginReferencesWatcher.SetInitialReferences(initialRefs);
+            _pluginReferencesWatcher.Start();
         }
 
         return this;
@@ -1008,6 +1017,7 @@ public class Server
         app.Lifetime.ApplicationStopping.Register(() =>
         {
             _pluginWatcher?.Dispose();
+            _pluginReferencesWatcher?.Dispose();
         });
 
         if (_args.Describe)

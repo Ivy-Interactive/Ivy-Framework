@@ -5,7 +5,7 @@ namespace Ivy.Plugin.HelloWorld;
 
 public static class PluginContextExtensions
 {
-    public static void RegisterGreeter(this IPluginContext context, IGreeter greeter)
+    public static void RegisterGreeter(this IIvyPluginContext context, IGreeter greeter)
     {
         context.Services.AddSingleton<IGreeter>(greeter);
     }
