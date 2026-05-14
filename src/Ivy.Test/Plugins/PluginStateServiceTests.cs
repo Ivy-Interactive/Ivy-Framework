@@ -48,14 +48,42 @@ public class PluginStateServiceTests
     }
 
     [Fact]
-    public void GetLoadedPluginIds_ReturnsPluginManagerList()
+    public void PluginStateChanged_FiresWhenPluginActivated()
     {
         var fakeManager = new FakePluginManager();
-        fakeManager.LoadedPluginIds = new List<string> { "plugin1", "plugin2" };
+        var service = new PluginStateService(fakeManager);
+
+        var eventFired = false;
+        service.PluginStateChanged += () => eventFired = true;
+
+        fakeManager.RaisePluginActivated("test-plugin");
+
+        Assert.True(eventFired);
+    }
+
+    [Fact]
+    public void PluginStateChanged_FiresWhenPluginDeactivated()
+    {
+        var fakeManager = new FakePluginManager();
+        var service = new PluginStateService(fakeManager);
+
+        var eventFired = false;
+        service.PluginStateChanged += () => eventFired = true;
+
+        fakeManager.RaisePluginDeactivated("test-plugin");
+
+        Assert.True(eventFired);
+    }
+
+    [Fact]
+    public void GetActivePluginIds_ReturnsPluginManagerList()
+    {
+        var fakeManager = new FakePluginManager();
+        fakeManager.ActivePluginIds = new List<string> { "plugin1", "plugin2" };
 
         var service = new PluginStateService(fakeManager);
 
-        var result = service.GetLoadedPluginIds();
+        var result = service.GetActivePluginIds();
 
         Assert.Equal(2, result.Count);
         Assert.Contains("plugin1", result);
@@ -64,13 +92,17 @@ public class PluginStateServiceTests
 
     private class FakePluginManager : IPluginManager
     {
-        public List<string> LoadedPluginIds { get; set; } = [];
+        public List<string> ActivePluginIds { get; set; } = [];
 
         public event Action<string>? PluginLoaded;
         public event Action<string>? PluginUnloaded;
         public event Action<string>? PluginReloaded;
+        public event Action<string>? PluginActivated;
+        public event Action<string>? PluginDeactivated;
 
-        public IReadOnlyList<string> GetLoadedPluginIds() => LoadedPluginIds;
+        public IReadOnlyList<string> GetActivePluginIds() => ActivePluginIds;
+
+        public IReadOnlyList<UnconfiguredPlugin> GetUnconfiguredPlugins() => [];
 
         public IReadOnlyList<PluginCandidate> GetUnloadedPlugins() => [];
 
@@ -80,8 +112,12 @@ public class PluginStateServiceTests
 
         public bool ReloadPlugin(string pluginId) => throw new NotImplementedException();
 
+        public bool ReconfigurePlugin(string pluginId) => throw new NotImplementedException();
+
         public void RaisePluginLoaded(string pluginId) => PluginLoaded?.Invoke(pluginId);
         public void RaisePluginUnloaded(string pluginId) => PluginUnloaded?.Invoke(pluginId);
         public void RaisePluginReloaded(string pluginId) => PluginReloaded?.Invoke(pluginId);
+        public void RaisePluginActivated(string pluginId) => PluginActivated?.Invoke(pluginId);
+        public void RaisePluginDeactivated(string pluginId) => PluginDeactivated?.Invoke(pluginId);
     }
 }

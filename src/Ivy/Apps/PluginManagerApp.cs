@@ -14,19 +14,20 @@ public class PluginManagerApp : ViewBase
     public override object? Build()
     {
         var pluginManager = this.UseService<IPluginManager>();
-        var loadedPlugins = pluginManager.GetLoadedPluginIds();
+        var activePlugins = pluginManager.GetActivePluginIds();
+        var unconfiguredPlugins = pluginManager.GetUnconfiguredPlugins();
         var unloadedPlugins = pluginManager.GetUnloadedPlugins();
         var pluginStatus = UseState("");
         UsePluginState();
 
         return Vertical().Gap(6).Padding(4)
             | H1("Plugin Manager")
-            | new Badge($"{loadedPlugins.Count} loaded, {unloadedPlugins.Count} unloaded", BadgeVariant.Info)
+            | new Badge($"{activePlugins.Count} active, {unconfiguredPlugins.Count} unconfigured, {unloadedPlugins.Count} unloaded", BadgeVariant.Info)
             | new Separator()
-            | H2("Loaded Plugins")
-            | (loadedPlugins.Count == 0
-                ? Muted("No plugins currently loaded")
-                : loadedPlugins.Select(id => (object)(Horizontal().Gap(4)
+            | H2("Active Plugins")
+            | (activePlugins.Count == 0
+                ? Muted("No plugins currently active")
+                : activePlugins.Select(id => (object)(Horizontal().Gap(4)
                     | new Badge(id, BadgeVariant.Secondary)
                     | new Button("Reload", onClick: _ =>
                     {
@@ -42,6 +43,22 @@ public class PluginManagerApp : ViewBase
                             : $"Failed to unload '{id}'");
                         return ValueTask.CompletedTask;
                     }, variant: ButtonVariant.Outline, icon: Icons.Power)
+                )).ToArray())
+            | new Separator()
+            | H2("Unconfigured Plugins")
+            | (unconfiguredPlugins.Count == 0
+                ? Muted("No unconfigured plugins")
+                : unconfiguredPlugins.Select(p => (object)(Vertical().Gap(2)
+                    | (Horizontal().Gap(4)
+                        | new Badge(p.Id, BadgeVariant.Warning)
+                        | Muted(string.Join(", ", p.ValidationErrors)))
+                    | new Button("Reconfigure", onClick: _ =>
+                    {
+                        pluginStatus.Set(pluginManager.ReconfigurePlugin(p.Id)
+                            ? $"Activated '{p.Id}'"
+                            : $"Configuration still invalid for '{p.Id}'");
+                        return ValueTask.CompletedTask;
+                    }, variant: ButtonVariant.Outline, icon: Icons.Settings)
                 )).ToArray())
             | new Separator()
             | H2("Unloaded Plugins")
@@ -60,7 +77,7 @@ public class PluginManagerApp : ViewBase
                 )).ToArray())
             | (string.IsNullOrEmpty(pluginStatus.Value)
                 ? null
-                : pluginStatus.Value.StartsWith("Failed") || pluginStatus.Value.Contains("Error")
+                : pluginStatus.Value.StartsWith("Failed") || pluginStatus.Value.Contains("Error") || pluginStatus.Value.Contains("invalid")
                     ? new Badge(pluginStatus.Value, BadgeVariant.Destructive)
                     : new Badge(pluginStatus.Value, BadgeVariant.Success));
     }

@@ -165,11 +165,11 @@ public class PluginLoaderTests
             var loader = new PluginLoader(tempDir, logger);
 
             // We can't easily test this through the full PluginLoader without real DLLs,
-            // but we can verify GetLoadedPluginIds returns empty for a directory with no plugins
+            // but we can verify GetActivePluginIds returns empty for a directory with no plugins
             using var sp = new ServiceCollection().BuildServiceProvider();
             loader.DiscoverAndLoad(new Version(1, 0), sp);
 
-            Assert.Empty(loader.GetLoadedPluginIds());
+            Assert.Empty(loader.GetActivePluginIds());
             Assert.False(loader.UnloadPlugin("nonexistent"));
         }
         finally
@@ -288,7 +288,7 @@ public class PluginLoaderTests
             loader.DiscoverAndLoad(new Version(1, 0), sp);
 
             // Should have no loaded plugins
-            Assert.Empty(loader.GetLoadedPluginIds());
+            Assert.Empty(loader.GetActivePluginIds());
 
             // Should have one unloaded plugin with failure info
             var unloadedPlugins = loader.GetUnloadedPlugins();
@@ -438,7 +438,7 @@ public class PluginLoaderTests
             var testPlugin = new TestPlugin { Id = "test-plugin-id" };
             loader.AddTestPlugin(testPlugin, pluginDir);
 
-            var loadedIdsBefore = loader.GetLoadedPluginIds();
+            var loadedIdsBefore = loader.GetActivePluginIds();
             Assert.Contains("test-plugin-id", loadedIdsBefore);
 
             var watcher = new PluginWatcher(tempDir, loader, watcherLogger);
@@ -451,7 +451,7 @@ public class PluginLoaderTests
             await Task.Delay(500);
 
             // Verify the plugin was unloaded
-            var loadedIdsAfter = loader.GetLoadedPluginIds();
+            var loadedIdsAfter = loader.GetActivePluginIds();
             Assert.DoesNotContain("test-plugin-id", loadedIdsAfter);
 
             watcher.Dispose();
@@ -541,7 +541,7 @@ public class PluginLoaderTests
             await Task.Delay(400);
 
             // Plugin should still be loaded (not reloaded/unloaded)
-            var loadedIds = loader.GetLoadedPluginIds();
+            var loadedIds = loader.GetActivePluginIds();
             Assert.Contains("test-plugin-id", loadedIds);
 
             watcher.Dispose();
@@ -565,8 +565,6 @@ public class PluginLoaderTests
         };
 
         public Ivy.Plugins.PluginConfigurationSchema? ConfigurationSchema => null;
-
-        public void ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration) { }
 
         public void Configure(Ivy.Plugins.IIvyPluginContext context) { }
     }

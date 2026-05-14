@@ -344,8 +344,6 @@ public class PluginConfigurationValidationTests
 
         public PluginConfigurationSchema? ConfigurationSchema { get; }
 
-        public void ConfigureServices(IServiceCollection services, IConfiguration configuration) { }
-
         public void Configure(IIvyPluginContext context) => _onConfigure?.Invoke(context);
     }
 }
