@@ -114,6 +114,8 @@ public class PluginStateServiceTests
 
         public bool ReconfigurePlugin(string pluginId) => throw new NotImplementedException();
 
+        public PluginConfigurationSchema? GetPluginSchema(string pluginId) => null;
+
         public void RaisePluginLoaded(string pluginId) => PluginLoaded?.Invoke(pluginId);
         public void RaisePluginUnloaded(string pluginId) => PluginUnloaded?.Invoke(pluginId);
         public void RaisePluginReloaded(string pluginId) => PluginReloaded?.Invoke(pluginId);

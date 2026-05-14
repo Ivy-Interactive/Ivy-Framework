@@ -847,6 +847,21 @@ public class PluginLoader : IPluginManager
         }
     }
 
+    public PluginConfigurationSchema? GetPluginSchema(string pluginId)
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            return _plugins
+                .FirstOrDefault(p => p.Instance.Manifest.Id == pluginId)
+                ?.Instance.ConfigurationSchema;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
     public IReadOnlyList<UnconfiguredPlugin> GetUnconfiguredPlugins()
     {
         _lock.EnterReadLock();

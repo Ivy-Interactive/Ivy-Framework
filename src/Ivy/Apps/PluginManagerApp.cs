@@ -28,23 +28,30 @@ public class PluginManagerApp : ViewBase
             | H2("Active Plugins")
             | (activePlugins.Count == 0
                 ? Muted("No plugins currently active")
-                : activePlugins.Select(id => (object)(Horizontal().Gap(4)
-                    | new Badge(id, BadgeVariant.Secondary)
-                    | new Button("Reload", onClick: _ =>
-                    {
-                        pluginStatus.Set(pluginManager.ReloadPlugin(id)
-                            ? $"Reloaded '{id}'"
-                            : $"Failed to reload '{id}'");
-                        return ValueTask.CompletedTask;
-                    }, variant: ButtonVariant.Outline, icon: Icons.RefreshCw)
-                    | new Button("Unload", onClick: _ =>
-                    {
-                        pluginStatus.Set(pluginManager.UnloadPlugin(id)
-                            ? $"Unloaded '{id}'"
-                            : $"Failed to unload '{id}'");
-                        return ValueTask.CompletedTask;
-                    }, variant: ButtonVariant.Outline, icon: Icons.Power)
-                )).ToArray())
+                : activePlugins.Select(id =>
+                {
+                    var schema = pluginManager.GetPluginSchema(id);
+                    return (object)(Vertical().Gap(3)
+                        | (Horizontal().Gap(4)
+                            | new Badge(id, BadgeVariant.Secondary)
+                            | new Button("Reload", onClick: _ =>
+                            {
+                                pluginStatus.Set(pluginManager.ReloadPlugin(id)
+                                    ? $"Reloaded '{id}'"
+                                    : $"Failed to reload '{id}'");
+                                return ValueTask.CompletedTask;
+                            }, variant: ButtonVariant.Outline, icon: Icons.RefreshCw)
+                            | new Button("Unload", onClick: _ =>
+                            {
+                                pluginStatus.Set(pluginManager.UnloadPlugin(id)
+                                    ? $"Unloaded '{id}'"
+                                    : $"Failed to unload '{id}'");
+                                return ValueTask.CompletedTask;
+                            }, variant: ButtonVariant.Outline, icon: Icons.Power))
+                        | (schema is not null
+                            ? new PluginConfigurationView(id, schema, configFactory)
+                            : null));
+                }).ToArray())
             | new Separator()
             | H2("Unconfigured Plugins")
             | (unconfiguredPlugins.Count == 0
@@ -53,7 +60,7 @@ public class PluginManagerApp : ViewBase
                     | (Horizontal().Gap(4)
                         | new Badge(p.Name, BadgeVariant.Warning)
                         | Muted(string.Join(", ", p.ValidationErrors)))
-                    | new PluginConfigurationView(p, configFactory)
+                    | new PluginConfigurationView(p.Id, p.Schema, configFactory)
                 )).ToArray())
             | new Separator()
             | H2("Unloaded Plugins")

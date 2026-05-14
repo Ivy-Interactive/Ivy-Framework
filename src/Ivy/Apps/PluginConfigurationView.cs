@@ -3,12 +3,12 @@ using static Ivy.Layout;
 
 namespace Ivy.Apps;
 
-public class PluginConfigurationView(UnconfiguredPlugin plugin, IIvyPluginConfigFactory configFactory) : ViewBase
+public class PluginConfigurationView(string pluginId, PluginConfigurationSchema schema, IIvyPluginConfigFactory configFactory) : ViewBase
 {
     public override object? Build()
     {
-        var config = configFactory.Create(plugin.Id);
-        var fields = plugin.Schema.Fields;
+        var config = configFactory.Create(pluginId);
+        var fields = schema.Fields;
         var states = fields.Select(f =>
             UseState(config.GetValue(f.Key) ?? f.DefaultValue ?? "")
         ).ToArray();
