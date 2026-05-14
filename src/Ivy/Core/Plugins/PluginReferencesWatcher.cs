@@ -50,10 +50,11 @@ internal class PluginReferencesWatcher : IDisposable
             EnableRaisingEvents = true
         };
         _fileWatcher.Changed += OnReferencesFileChanged;
-        _fileWatcher.Created += OnReferencesFileChanged;
+        _fileWatcher.Created += OnReferencesFileCreatedOrChanged;
         _fileWatcher.Deleted += OnReferencesFileChanged;
 
-        _logger.LogInformation("Watching plugin references file: {Path}", _referencesFilePath);
+        if (File.Exists(_referencesFilePath))
+            _logger.LogInformation("Watching plugin references file: {Path}", _referencesFilePath);
 
         foreach (var dir in _currentReferences)
             StartWatchingDirectory(dir);
@@ -62,6 +63,12 @@ internal class PluginReferencesWatcher : IDisposable
     public void SetInitialReferences(IEnumerable<string> resolvedPaths)
     {
         _currentReferences = new HashSet<string>(resolvedPaths, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private void OnReferencesFileCreatedOrChanged(object sender, FileSystemEventArgs e)
+    {
+        _logger.LogInformation("Plugin references file created: {Path}", _referencesFilePath);
+        OnReferencesFileChanged(sender, e);
     }
 
     private void OnReferencesFileChanged(object sender, FileSystemEventArgs e)
