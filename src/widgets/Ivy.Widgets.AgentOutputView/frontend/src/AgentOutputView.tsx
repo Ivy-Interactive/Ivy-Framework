@@ -140,7 +140,7 @@ export const AgentOutputView: React.FC<AgentOutputViewProps> = ({
               return (
                 <ToolUseCard
                   key={idx}
-                  tool={{ name: event.name, input: event.input, result: event.result }}
+                  tool={{ name: event.name, input: event.input, result: event.result, isError: event.isError }}
                 />
               );
             case "system":

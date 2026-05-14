@@ -4,6 +4,7 @@ interface ToolCall {
   name: string;
   input: Record<string, unknown>;
   result?: string;
+  isError?: boolean;
 }
 
 interface ToolUseCardProps {
@@ -54,8 +55,17 @@ const ChevronDownIcon: React.FC = () => (
   </svg>
 );
 
+type ToolStatus = "running" | "success" | "error";
+
+function getToolStatus(tool: ToolCall): ToolStatus {
+  if (tool.result === undefined) return "running";
+  if (tool.isError) return "error";
+  return "success";
+}
+
 export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tool }) => {
   const pending = tool.result === undefined;
+  const status = getToolStatus(tool);
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => setOpen((o) => !o);
@@ -81,6 +91,7 @@ export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tool }) => {
         <span className={`aov-tool-chevron ${open ? "open" : ""}`}>
           <ChevronDownIcon />
         </span>
+        <span className={`aov-tool-status aov-tool-status--${status}`} />
         <span className="aov-tool-name">{tool.name}</span>
         {headerPreview && <span className="aov-tool-preview">{headerPreview}</span>}
         {pending && <span className="aov-tool-running">running…</span>}
