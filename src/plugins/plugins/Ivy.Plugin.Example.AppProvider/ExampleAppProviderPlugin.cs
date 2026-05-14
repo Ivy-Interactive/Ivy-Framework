@@ -56,38 +56,87 @@ public class ExampleAppProviderPlugin : IIvyPlugin
 }
 
 /// <summary>
-/// Custom configuration view that demonstrates how plugins can provide their own UI
-/// instead of relying on the default schema-driven form.
+/// Custom configuration view demonstrating a multi-step wizard UI.
+/// This looks radically different from the default schema-driven form.
 /// </summary>
 public class ExampleAppProviderConfigView(IIvyPluginConfig config) : Ivy.ViewBase
 {
     public override object? Build()
     {
-        var appTitle = UseState(config.GetValue("AppTitle") ?? "");
+        var step = UseState(0);
+        var appTitle = UseState(config.GetValue("AppTitle") ?? "Example App");
         var appIcon = UseState(config.GetValue("AppIcon") ?? "Star");
         var apiKey = UseState(config.GetValue("ApiKey") ?? "");
         var status = UseState<string?>(null);
 
-        return Vertical().Gap(4)
-            | H3("App Provider Settings")
-            | Muted("Configure how the example app appears in your application.")
-            | new Ivy.Field(appTitle.ToTextInput(placeholder: "My Custom App"), label: "App Title", required: true)
-            | new Ivy.Field(appIcon.ToTextInput(placeholder: "Star, Home, Settings..."), label: "Icon Name", description: "Use any icon name from the Icons enum")
-            | new Ivy.Field(apiKey.ToTextInput(variant: Ivy.TextInputVariant.Password, placeholder: "sk-..."), label: "API Key", required: true)
-            | new Ivy.Button("Save Configuration", onClick: _ =>
-            {
-                if (!string.IsNullOrEmpty(appTitle.Value))
-                    config.SetValue("AppTitle", appTitle.Value);
-                if (!string.IsNullOrEmpty(appIcon.Value))
-                    config.SetValue("AppIcon", appIcon.Value);
-                if (!string.IsNullOrEmpty(apiKey.Value))
-                    config.SetValue("ApiKey", apiKey.Value);
-                config.Save();
-                status.Set("Configuration saved successfully!");
-                return ValueTask.CompletedTask;
-            }, icon: Ivy.Icons.Save)
+        var stepper = new Ivy.Stepper(
+            onSelect: e => { step.Set(e.Value); return ValueTask.CompletedTask; },
+            selectedIndex: step.Value,
+            new Ivy.StepperItem("1", Icon: Ivy.Icons.Palette, Label: "Appearance"),
+            new Ivy.StepperItem("2", Icon: Ivy.Icons.Key, Label: "Authentication"),
+            new Ivy.StepperItem("3", Icon: Ivy.Icons.Check, Label: "Confirm"));
+
+        object stepContent = step.Value switch
+        {
+            0 => BuildAppearanceStep(appTitle, appIcon, step),
+            1 => BuildAuthStep(apiKey, step),
+            _ => BuildConfirmStep(appTitle, appIcon, apiKey, config, status, step)
+        };
+
+        return Vertical().Gap(5)
+            | stepper
+            | new Ivy.Card(content: stepContent)
             | (status.Value is not null
-                ? new Ivy.Badge(status.Value, Ivy.BadgeVariant.Success)
+                ? Ivy.Callout.Success(status.Value, title: "Done")
                 : null);
+    }
+
+    private static object BuildAppearanceStep(Ivy.IState<string> appTitle, Ivy.IState<string> appIcon, Ivy.IState<int> step)
+    {
+        return Vertical().Gap(4)
+            | H2("How should your app look?")
+            | Muted("Choose a title and icon that will appear in the sidebar navigation.")
+            | new Ivy.Field(appTitle.ToTextInput(placeholder: "My Awesome App"), label: "App Title", required: true)
+            | new Ivy.Field(appIcon.ToSelectInput(
+                ["Star", "Home", "Settings", "Database", "Globe", "Zap", "Heart", "Rocket"],
+                placeholder: "Pick an icon..."), label: "Icon")
+            | Horizontal()
+                | new Ivy.Button("Next →", onClick: _ => { step.Set(1); return ValueTask.CompletedTask; });
+    }
+
+    private static object BuildAuthStep(Ivy.IState<string> apiKey, Ivy.IState<int> step)
+    {
+        return Vertical().Gap(4)
+            | H2("Connect your backend")
+            | Ivy.Callout.Info("Your API key is stored securely and never exposed to the browser.", title: "Security")
+            | new Ivy.Field(apiKey.ToTextInput(variant: Ivy.TextInputVariant.Password, placeholder: "sk-..."), label: "API Key", required: true)
+            | (Horizontal().Gap(2)
+                | new Ivy.Button("← Back", onClick: _ => { step.Set(0); return ValueTask.CompletedTask; }, variant: Ivy.ButtonVariant.Outline)
+                | new Ivy.Button("Next →", onClick: _ => { step.Set(2); return ValueTask.CompletedTask; }));
+    }
+
+    private static object BuildConfirmStep(
+        Ivy.IState<string> appTitle, Ivy.IState<string> appIcon, Ivy.IState<string> apiKey,
+        IIvyPluginConfig config, Ivy.IState<string?> status, Ivy.IState<int> step)
+    {
+        return Vertical().Gap(4)
+            | H2("Review & Save")
+            | Muted("Confirm your settings below.")
+            | (Vertical().Gap(2)
+                | (Horizontal().Gap(2) | Bold("Title:") | P(appTitle.Value))
+                | (Horizontal().Gap(2) | Bold("Icon:") | P(appIcon.Value))
+                | (Horizontal().Gap(2) | Bold("API Key:") | P(string.IsNullOrEmpty(apiKey.Value) ? "not set" : "••••••••")))
+            | (Horizontal().Gap(2)
+                | new Ivy.Button("← Back", onClick: _ => { step.Set(1); return ValueTask.CompletedTask; }, variant: Ivy.ButtonVariant.Outline)
+                | new Ivy.Button("Save & Activate", onClick: _ =>
+                {
+                    config.SetValue("AppTitle", appTitle.Value);
+                    config.SetValue("AppIcon", appIcon.Value);
+                    if (!string.IsNullOrEmpty(apiKey.Value))
+                        config.SetValue("ApiKey", apiKey.Value);
+                    config.Save();
+                    status.Set("Plugin configured and activated!");
+                    return ValueTask.CompletedTask;
+                }, icon: Ivy.Icons.Check));
     }
 }
