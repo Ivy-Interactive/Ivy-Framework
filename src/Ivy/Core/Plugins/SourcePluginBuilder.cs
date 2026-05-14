@@ -15,7 +15,7 @@ internal class SourcePluginBuilder : IDisposable
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _pendingBuilds = new();
     private readonly ConcurrentDictionary<string, DateTime> _buildCooldowns = new();
     private readonly TimeSpan _debounceDelay = TimeSpan.FromMilliseconds(800);
-    private readonly TimeSpan _cooldownPeriod = TimeSpan.FromSeconds(5);
+    private readonly TimeSpan _cooldownPeriod = TimeSpan.FromSeconds(1);
     private bool _disposed;
 
     public SourcePluginBuilder(ILogger logger)
