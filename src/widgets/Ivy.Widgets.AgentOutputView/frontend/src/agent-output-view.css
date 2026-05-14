@@ -295,11 +295,6 @@
   min-width: 0;
 }
 
-.aov-tool-running {
-  color: var(--aov-fg-faint);
-  font-style: italic;
-}
-
 .aov-tool-body {
   padding: 4px 0 4px 22px;
   animation: aov-tool-expand 0.2s ease-out both;
