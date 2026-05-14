@@ -64,7 +64,6 @@ function getToolStatus(tool: ToolCall): ToolStatus {
 }
 
 export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tool }) => {
-  const pending = tool.result === undefined;
   const status = getToolStatus(tool);
   const [open, setOpen] = useState(false);
 
@@ -94,7 +93,6 @@ export const ToolUseCard: React.FC<ToolUseCardProps> = ({ tool }) => {
         <span className={`aov-tool-status aov-tool-status--${status}`} />
         <span className="aov-tool-name">{tool.name}</span>
         {headerPreview && <span className="aov-tool-preview">{headerPreview}</span>}
-        {pending && <span className="aov-tool-running">running…</span>}
       </div>
       {open && (
         <div className="aov-tool-body">
