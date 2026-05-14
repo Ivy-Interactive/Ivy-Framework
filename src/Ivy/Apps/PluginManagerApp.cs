@@ -31,6 +31,8 @@ public class PluginManagerApp : ViewBase
                 : activePlugins.Select(id =>
                 {
                     var schema = pluginManager.GetPluginSchema(id);
+                    var config = configFactory.Create(id);
+                    var customView = pluginManager.BuildPluginConfigurationView(id, config);
                     return (object)(Vertical().Gap(3)
                         | (Horizontal().Gap(4)
                             | new Badge(id, BadgeVariant.Secondary)
@@ -48,20 +50,25 @@ public class PluginManagerApp : ViewBase
                                     : $"Failed to unload '{id}'");
                                 return ValueTask.CompletedTask;
                             }, variant: ButtonVariant.Outline, icon: Icons.Power))
-                        | (schema is not null
-                            ? new PluginConfigurationView(id, schema, configFactory)
-                            : null));
+                        | (customView
+                            ?? (schema is not null
+                                ? new PluginConfigurationView(id, schema, configFactory)
+                                : null)));
                 }).ToArray())
             | new Separator()
             | H2("Unconfigured Plugins")
             | (unconfiguredPlugins.Count == 0
                 ? Muted("No unconfigured plugins")
-                : unconfiguredPlugins.Select(p => (object)(Vertical().Gap(3)
-                    | (Horizontal().Gap(4)
-                        | new Badge(p.Name, BadgeVariant.Warning)
-                        | Muted(string.Join(", ", p.ValidationErrors)))
-                    | new PluginConfigurationView(p.Id, p.Schema, configFactory)
-                )).ToArray())
+                : unconfiguredPlugins.Select(p =>
+                {
+                    var config = configFactory.Create(p.Id);
+                    var customView = pluginManager.BuildPluginConfigurationView(p.Id, config);
+                    return (object)(Vertical().Gap(3)
+                        | (Horizontal().Gap(4)
+                            | new Badge(p.Name, BadgeVariant.Warning)
+                            | Muted(string.Join(", ", p.ValidationErrors)))
+                        | (customView ?? new PluginConfigurationView(p.Id, p.Schema, configFactory)));
+                }).ToArray())
             | new Separator()
             | H2("Unloaded Plugins")
             | (unloadedPlugins.Count == 0

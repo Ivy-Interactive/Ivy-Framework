@@ -862,6 +862,20 @@ public class PluginLoader : IPluginManager
         }
     }
 
+    public object? BuildPluginConfigurationView(string pluginId, IIvyPluginConfig config)
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            var plugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
+            return plugin?.Instance.BuildConfigurationView(config);
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
     public IReadOnlyList<UnconfiguredPlugin> GetUnconfiguredPlugins()
     {
         _lock.EnterReadLock();

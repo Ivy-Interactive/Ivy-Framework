@@ -10,6 +10,7 @@ public interface IPluginManager
 {
     IReadOnlyList<string> GetActivePluginIds();
     PluginConfigurationSchema? GetPluginSchema(string pluginId);
+    object? BuildPluginConfigurationView(string pluginId, IIvyPluginConfig config);
     IReadOnlyList<PluginCandidate> GetUnloadedPlugins();
     IReadOnlyList<UnconfiguredPlugin> GetUnconfiguredPlugins();
     bool UnloadPlugin(string pluginId);

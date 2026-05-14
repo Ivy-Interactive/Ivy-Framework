@@ -18,7 +18,7 @@ public class HelloWorldPlugin : IIvyPlugin
     {
         Fields =
         [
-            new() { Key = "Greeting", Type = ConfigFieldType.String, IsRequired = true, Description = "The greeting prefix" },
+            new() { Key = "Greeting", Type = ConfigFieldType.String, IsRequired = true, DefaultValue = "Hello", Description = "The greeting prefix" },
             new() { Key = "Enthusiastic", Type = ConfigFieldType.Boolean, IsRequired = false, DefaultValue = "false", Description = "Add exclamation marks" }
         ]
     };

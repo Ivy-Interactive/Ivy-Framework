@@ -116,6 +116,8 @@ public class PluginStateServiceTests
 
         public PluginConfigurationSchema? GetPluginSchema(string pluginId) => null;
 
+        public object? BuildPluginConfigurationView(string pluginId, IIvyPluginConfig config) => null;
+
         public void RaisePluginLoaded(string pluginId) => PluginLoaded?.Invoke(pluginId);
         public void RaisePluginUnloaded(string pluginId) => PluginUnloaded?.Invoke(pluginId);
         public void RaisePluginReloaded(string pluginId) => PluginReloaded?.Invoke(pluginId);
