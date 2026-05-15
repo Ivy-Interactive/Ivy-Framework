@@ -27,11 +27,12 @@
 }
 
 /* When a heading immediately follows another heading (e.g. an h2 directly
-   followed by an h3 with no body text between), collapse the following
-   heading's large top margin to almost nothing so the pair reads as one
-   group. This rule is INTENTIONALLY NOT :where()-wrapped: it must out-rank
-   the heading's own `mt-*` utility (specificity 0,1,0). The selector below
-   is 0,1,2 (.markdown-widget class + two :is() type matches), so it wins. */
+   followed by an h3 with no body text between), reduce the following
+   heading's large top margin to 1rem so the pair reads as one group while
+   still keeping a small visual gap. This rule is INTENTIONALLY NOT
+   :where()-wrapped: it must out-rank the heading's own `mt-*` utility
+   (specificity 0,1,0). The selector below is 0,1,2 (.markdown-widget class +
+   two :is() type matches), so it wins. */
 .markdown-widget > :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
-  margin-top: 0.125rem;
+  margin-top: 1rem;
 }
