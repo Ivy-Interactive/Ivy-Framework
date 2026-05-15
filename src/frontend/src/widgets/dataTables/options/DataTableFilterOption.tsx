@@ -24,12 +24,22 @@ export const DataTableFilterOption: React.FC<{
   isExpanded?: boolean;
 }> = ({ allowLlmFiltering = true, isExpanded = true }) => {
   const [query, setQuery] = useState<string>("");
-  const [pendingFilter, setPendingFilter] = useState<Filter | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [isQueryValid, setIsQueryValid] = useState(true);
   const dropdownState = useDropdownState();
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const autocompleteOpenRef = useRef(false);
+  // Latest validation result, written synchronously on every editor change.
+  // handleEnterKey reads this instead of the async isQueryValid/pendingFilter
+  // state: pressing Enter immediately after the last keystroke would otherwise
+  // run before React committed setIsQueryValid(true), so a valid query
+  // (e.g. "[Age] = 32") still saw isQueryValid === false and was sent to the
+  // LLM ParseFilter fallback.
+  const latestValidationRef = useRef<{
+    text: string;
+    isValid: boolean;
+    filter: Filter | null;
+  }>({ text: "", isValid: true, filter: null });
 
   const { columns, setActiveFilter, connection } = useTable();
   const { isDark } = useThemeWithMonitoring({ monitorDOM: true });
@@ -94,16 +104,26 @@ export const DataTableFilterOption: React.FC<{
    */
   const handleQueryChange = useCallback(
     (event: QueryEditorChangeEvent) => {
+      const filter = event.isValid && event.filters ? { group: event.filters } : null;
+
+      // Synchronous source of truth read by handleEnterKey (see ref comment).
+      latestValidationRef.current = {
+        text: event.text,
+        isValid: event.isValid,
+        filter,
+      };
+
+      // eslint-disable-next-line no-console
+      console.log("[FQE handleQueryChange]", {
+        text: event.text,
+        isValid: event.isValid,
+        errors: event.errors,
+      });
       setQuery(event.text);
       setIsQueryValid(event.isValid);
 
       if (event.text.trim() === "") {
-        setPendingFilter(null);
         setActiveFilter(null);
-      } else if (event.isValid && event.filters) {
-        setPendingFilter({ group: event.filters });
-      } else {
-        setPendingFilter(null);
       }
     },
     [setActiveFilter],
@@ -119,7 +139,7 @@ export const DataTableFilterOption: React.FC<{
 
     setIsParsing(true);
     try {
-      const result = await parseInvalidQuery(query, connection);
+      const result = await parseInvalidQuery(latestValidationRef.current.text, connection);
 
       if (result.filterExpression) {
         const correctedQuery = result.filterExpression;
@@ -130,10 +150,14 @@ export const DataTableFilterOption: React.FC<{
           parsedResult.filters &&
           (!parsedResult.errors || parsedResult.errors.length === 0);
 
-        if (isValid) {
+        if (isValid && parsedResult.filters) {
           const newFilter = { group: parsedResult.filters };
+          latestValidationRef.current = {
+            text: correctedQuery,
+            isValid: true,
+            filter: newFilter,
+          };
           setQuery(correctedQuery);
-          setPendingFilter(newFilter);
           setIsQueryValid(true);
           setActiveFilter(newFilter);
         }
@@ -143,34 +167,47 @@ export const DataTableFilterOption: React.FC<{
     } finally {
       setIsParsing(false);
     }
-  }, [query, isParsing, connection, queryEditorColumns, setActiveFilter]);
+  }, [isParsing, connection, queryEditorColumns, setActiveFilter]);
 
   /**
    * Handle Enter key press
    */
   const handleEnterKey = useCallback(async () => {
-    if (query.trim() === "") {
+    // Read the synchronous validation snapshot, not the async React state,
+    // so Enter pressed right after the last keystroke uses the up-to-date
+    // result instead of a stale closure.
+    const { text, isValid, filter } = latestValidationRef.current;
+
+    // eslint-disable-next-line no-console
+    console.log("[FQE handleEnterKey]", {
+      text,
+      isValid,
+      hasFilter: !!filter,
+      allowLlmFiltering,
+    });
+
+    if (text.trim() === "") {
       setActiveFilter(null);
       return;
     }
 
-    if (isQueryValid && pendingFilter) {
-      setActiveFilter(pendingFilter);
+    if (isValid && filter) {
+      setActiveFilter(filter);
       return;
     }
 
-    if (!isQueryValid && allowLlmFiltering) {
+    if (!isValid && allowLlmFiltering) {
       await handleInvalidQuery();
       return;
     }
-  }, [query, isQueryValid, pendingFilter, setActiveFilter, allowLlmFiltering, handleInvalidQuery]);
+  }, [setActiveFilter, allowLlmFiltering, handleInvalidQuery]);
 
   /**
    * Handle clear filter
    */
   const handleClearFilter = useCallback(() => {
+    latestValidationRef.current = { text: "", isValid: true, filter: null };
     setQuery("");
-    setPendingFilter(null);
     setIsQueryValid(true);
     setActiveFilter(null);
   }, [setActiveFilter]);
