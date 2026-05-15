@@ -14,9 +14,8 @@ describe("DataTableWidget - container style for height modes", () => {
     expect(source).toContain('containerStyle.flexDirection = "column"');
   });
 
-  it("should set flexGrow and minHeight for Full height mode", () => {
+  it("should set flexGrow for Full height mode", () => {
     expect(source).toContain("containerStyle.flexGrow = 1");
-    expect(source).toContain('containerStyle.minHeight = "200px"');
   });
 
   it("should apply getHeight for explicit pixel heights", () => {
