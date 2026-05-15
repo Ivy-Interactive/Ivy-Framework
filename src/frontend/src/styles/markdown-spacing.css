@@ -1,24 +1,38 @@
 /* Element-specific spacing for markdown widget content.
-   Replaces the uniform flex gap with contextual margins based on adjacent elements. */
+   Replaces the uniform flex gap with contextual margins based on adjacent elements.
 
-.markdown-widget > * + * {
-  margin-top: 0.5rem; /* Default spacing between elements */
+   Headings are deliberately excluded from every rule here: their top margin is
+   owned by the `articleTypography` Tailwind classes (h1..h6 `mt-*`). These
+   selectors are wrapped in :where() so they have zero specificity and can never
+   override a heading's utility margin even if a future rule forgets to exclude
+   headings. */
+
+:where(.markdown-widget > *:not(:is(h1, h2, h3, h4, h5, h6)) + *:not(:is(h1, h2, h3, h4, h5, h6))) {
+  margin-top: 0.5rem; /* Default spacing between non-heading elements */
 }
 
 /* Tighter spacing between consecutive details blocks */
-.markdown-widget > details + details {
+:where(.markdown-widget > details + details) {
   margin-top: 0.25rem;
 }
 
-/* Larger spacing after headings for visual hierarchy */
-.markdown-widget > h1 + *,
-.markdown-widget > h2 + *,
-.markdown-widget > h3 + * {
+/* Larger spacing for a non-heading element that follows a heading */
+:where(.markdown-widget > :is(h1, h2, h3) + *:not(:is(h1, h2, h3, h4, h5, h6))) {
   margin-top: 0.75rem;
 }
 
 /* Tighter spacing around code blocks */
-.markdown-widget > pre + p,
-.markdown-widget > p + pre {
+:where(.markdown-widget > pre + p, .markdown-widget > p + pre) {
   margin-top: 0.375rem;
+}
+
+/* When a heading immediately follows another heading (e.g. an h2 directly
+   followed by an h3 with no body text between), reduce the following
+   heading's large top margin to 1rem so the pair reads as one group while
+   still keeping a small visual gap. This rule is INTENTIONALLY NOT
+   :where()-wrapped: it must out-rank the heading's own `mt-*` utility
+   (specificity 0,1,0). The selector below is 0,1,2 (.markdown-widget class +
+   two :is() type matches), so it wins. */
+.markdown-widget > :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: 1rem;
 }
