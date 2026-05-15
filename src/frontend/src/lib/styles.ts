@@ -794,4 +794,9 @@ export const articleTypography: Record<string, string> = {
   // h5/h6 top margin must stay >= the Article flex gap (Gap prop default 5 = 1.25rem)
   h5: `text-lg font-medium scroll-m-20 mt-6`,
   h6: `text-base font-medium scroll-m-20 mt-6`,
+
+  // Slightly increased line height for article body text (readability)
+  p: `${typography.p} leading-relaxed`,
+  li: `${typography.li} leading-relaxed`,
+  blockquote: `${typography.blockquote} leading-relaxed`,
 };
