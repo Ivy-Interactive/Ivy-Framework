@@ -46,7 +46,12 @@ interface DropDownMenuItemGroupProps {
   stayOpen?: boolean;
 }
 
-const DropDownMenuItemGroup = ({ items, onItemClick, iconSize, stayOpen }: DropDownMenuItemGroupProps) => {
+const DropDownMenuItemGroup = ({
+  items,
+  onItemClick,
+  iconSize,
+  stayOpen,
+}: DropDownMenuItemGroupProps) => {
   return items.map((item, i) => {
     const colorStyle = item.color ? getColor(item.color, "color") : {};
 
@@ -211,7 +216,12 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
         alignOffset={alignOffset}
       >
         {slots.Header && <DropdownMenuLabel>{slots.Header}</DropdownMenuLabel>}
-        <DropDownMenuItemGroup items={items} onItemClick={onItemClick} iconSize={iconSize} stayOpen={stayOpen} />
+        <DropDownMenuItemGroup
+          items={items}
+          onItemClick={onItemClick}
+          iconSize={iconSize}
+          stayOpen={stayOpen}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
