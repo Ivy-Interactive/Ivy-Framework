@@ -29,6 +29,13 @@ public record Markdown : WidgetBase<Markdown>
 
     [Prop] public bool DangerouslyAllowLocalFiles { get; set; }
 
+    /// <summary>
+    /// Applies article-grade typography (heading top-margins, h2 divider, relaxed
+    /// body line-height) so standalone markdown matches the spacing used inside
+    /// the <see cref="Ivy.Article"/> widget without pulling in its TOC/footer chrome.
+    /// </summary>
+    [Prop] public bool Article { get; set; }
+
     [Prop] public TextAlignment? TextAlignment { get; set; }
 
     [Event] public EventHandler<Event<Markdown, string>>? OnLinkClick { get; set; }
@@ -81,5 +88,15 @@ public static class MarkdownExtensions
     public static Markdown DangerouslyAllowLocalFiles(this Markdown markdown, bool allow = true)
     {
         return markdown with { DangerouslyAllowLocalFiles = allow };
+    }
+
+    /// <summary>
+    /// Renders with article-grade typography so standalone markdown matches the
+    /// heading spacing and h2 divider used inside the <see cref="Ivy.Article"/>
+    /// widget, without its TOC/footer chrome.
+    /// </summary>
+    public static Markdown Article(this Markdown markdown, bool article = true)
+    {
+        return markdown with { Article = article };
     }
 }
