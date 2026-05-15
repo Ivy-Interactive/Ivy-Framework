@@ -37,11 +37,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
     );
   }
 
-  return (
-    <div style={{ ...tableStyles.table.container }}>
-      {children}
-    </div>
-  );
+  return <div style={{ ...tableStyles.table.container }}>{children}</div>;
 };
 
 interface DataTableWidgetProps extends TableProps {
