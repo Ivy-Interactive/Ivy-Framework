@@ -21,11 +21,9 @@ export const useEmptyRows = ({
   rowHeight,
 }: UseEmptyRowsProps) => {
   const whitespaceHeight = useMemo(() => {
-    // visibleRows === 0 is intentionally NOT short-circuited: a loaded but
-    // empty result (e.g. a filter that matched nothing) still needs filler
-    // rows so the grid keeps its header and a full-height empty body.
-    // Without this the grid collapses to ~0 height and the whole table
-    // appears to be removed from the page.
+    // When there are no visible rows, collapse — don't fill with empty rows.
+    // The "no rows to display" message is shown separately below the grid.
+    if (visibleRows === 0) return 0;
     if (hasMore || scrollContainerHeight === 0) return 0;
 
     const totalHeaderHeight = rowHeight + (showGroups ? GROUP_HEADER_HEIGHT : 0);

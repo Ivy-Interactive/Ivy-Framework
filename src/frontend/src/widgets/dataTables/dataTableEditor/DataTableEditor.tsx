@@ -472,6 +472,20 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         footer={footerNode}
         hasEmptyRows={emptyRowsCount > 0}
       />
+      {visibleRows === 0 && !isLoading && (
+        <div
+          style={{
+            padding: "12px 16px",
+            textAlign: "center",
+            color: "var(--muted-foreground)",
+            fontSize: "0.875rem",
+            borderTop: "1px solid var(--border)",
+          }}
+          data-testid="datatable-no-rows-message"
+        >
+          No rows to display
+        </div>
+      )}
       {supportsHoverTooltip ? linkTooltipNode : null}
       {cellActionIndicatorNode}
     </>
