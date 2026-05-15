@@ -272,7 +272,7 @@ export const DataTableFilterOption: React.FC<{
       <div
         className={cn(
           "query-editor-wrapper relative cursor-text",
-          "flex h-full min-h-9 w-full max-w-full min-w-0 flex-col",
+          "flex h-full w-full max-w-full min-w-0 flex-col",
           "min-h-0 overflow-hidden bg-background text-sm",
         )}
         data-query-valid={isQueryValid}
@@ -293,7 +293,7 @@ export const DataTableFilterOption: React.FC<{
         <style>{tableStyles.queryEditor.css}</style>
 
         {isParsing ? (
-          <div className="absolute right-0 top-1/2 z-10 flex h-9 -translate-y-1/2 items-center border-l border-input bg-background px-2.5">
+          <div className="absolute right-0 top-0 z-10 flex h-9 items-center border-l border-input bg-background px-2.5">
             <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
           </div>
         ) : (
@@ -303,7 +303,7 @@ export const DataTableFilterOption: React.FC<{
             onClick={handleClearFilter}
             disabled={!query}
             className={cn(
-              "absolute right-0 top-1/2 z-10 h-9 -translate-y-1/2 shrink-0 border-l border-input bg-background px-3 text-sm shadow-none hover:bg-muted hover:text-accent-foreground focus-visible:ring-0 focus-visible:ring-offset-0",
+              "absolute right-0 top-0 z-10 h-9 shrink-0 border-l border-input bg-background px-3 text-sm shadow-none hover:bg-muted hover:text-accent-foreground focus-visible:ring-0 focus-visible:ring-offset-0",
               query ? "" : "hidden",
             )}
           >
