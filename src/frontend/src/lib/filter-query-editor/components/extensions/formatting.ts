@@ -72,7 +72,7 @@ function formatDocument(view: EditorView, columns: ColumnDef[]): boolean {
     }
 
     return true;
-  } catch (error) {
+  } catch {
     // Silently ignore formatting errors
     // The validation extension will show the actual errors
     return false;
