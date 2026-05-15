@@ -78,25 +78,30 @@ export function useCodeMirror({
       // Basic setup
       history(),
       keymap.of([
-        // Custom keymaps for applying filter
+        // Custom keymaps for applying filter. Enter is always consumed so a
+        // newline is never inserted into this single-line editor: the host
+        // component handles Enter (submitting the filter) at the React level.
+        // Returning false here would let defaultKeymap insert "\n", which the
+        // transaction filter then turned into a stray trailing space.
         {
           key: "Enter",
           run: () => {
-            if (onApplyRef.current) {
-              onApplyRef.current();
-              return true;
-            }
-            return false;
+            onApplyRef.current?.();
+            return true;
           },
         },
         {
           key: "Mod-Enter", // Cmd+Enter on Mac, Ctrl+Enter on Windows/Linux
           run: () => {
-            if (onApplyRef.current) {
-              onApplyRef.current();
-              return true;
-            }
-            return false;
+            onApplyRef.current?.();
+            return true;
+          },
+        },
+        {
+          key: "Shift-Enter",
+          run: () => {
+            onApplyRef.current?.();
+            return true;
           },
         },
         ...defaultKeymap,
@@ -136,31 +141,44 @@ export function useCodeMirror({
         }
       }),
 
-      // Prevent line breaks - make it single line
+      // Keep this a single-line editor.
       EditorState.transactionFilter.of((tr) => {
         if (!tr.docChanged) return tr;
 
-        let text = tr.newDoc.toString();
-        if (text.includes("\n")) {
-          // Remove all line breaks. The replacement change applies against the
-          // transaction's start state, so the range must span the *old*
-          // document length (tr.startState.doc.length). Using tr.newDoc.length
-          // here builds a range past the end of the start-state doc and throws
-          // a RangeError whenever a change both grows the doc and adds a newline
-          // (e.g. pasting multi-line text).
-          text = text.replace(/\n/g, " ");
-          return [
-            {
-              changes: {
-                from: 0,
-                to: tr.startState.doc.length,
-                insert: text,
-              },
-              selection: tr.selection,
-            },
-          ];
+        const newText = tr.newDoc.toString();
+        if (!newText.includes("\n")) return tr;
+
+        // Strip carriage returns, then collapse newlines. If removing the
+        // newline(s) yields exactly the previous document, the only thing the
+        // change added was a line break (e.g. pressing Enter) — drop the
+        // transaction entirely so no character (not even a space) is inserted.
+        // Pressing Enter previously fell through to defaultKeymap, inserting
+        // "\n", which this filter turned into a stray trailing space.
+        const oldText = tr.startState.doc.toString();
+        const withoutNewlines = newText.replace(/\r/g, "").replace(/\n/g, "");
+        if (withoutNewlines === oldText) {
+          // No-op transaction: keep the document and selection unchanged.
+          return [];
         }
-        return tr;
+
+        // Otherwise this is real multi-line content (e.g. a paste): flatten it
+        // to a single line, using a space so adjacent line tokens stay
+        // separated, and collapse the runs that creates.
+        const flattened = newText.replace(/\r/g, "").replace(/\n+/g, " ").replace(/ {2,}/g, " ");
+        return [
+          {
+            // The replacement change applies against the transaction's start
+            // state, so the range spans the *old* document length. Using
+            // tr.newDoc.length would build a range past the end of the
+            // start-state doc and throw a RangeError on growing pastes.
+            changes: {
+              from: 0,
+              to: tr.startState.doc.length,
+              insert: flattened,
+            },
+            selection: { anchor: flattened.length },
+          },
+        ];
       }),
 
       // Theme

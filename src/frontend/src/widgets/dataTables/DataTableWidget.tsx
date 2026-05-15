@@ -30,12 +30,44 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children, emptyView }) => {
     return <ErrorDisplay title="Table Error" message={error} />;
   }
 
-  // Show empty view when data has loaded, there are no rows, and an empty view slot was provided
-  if (showTableEditor && !isLoading && visibleRows === 0 && emptyView && emptyView.length > 0) {
-    return <div style={tableStyles.table.container}>{emptyView}</div>;
+  if (!showTableEditor) {
+    return (
+      <div style={tableStyles.table.container}>
+        <Loading />
+      </div>
+    );
   }
 
-  return <div style={tableStyles.table.container}>{showTableEditor ? children : <Loading />}</div>;
+  // When the table has loaded but holds no rows (e.g. a filter matched
+  // nothing) keep the full table chrome — header, filter bar, borders —
+  // rendered, and overlay the empty-view slot on top of the (now empty)
+  // grid body instead of replacing the whole component with it. Replacing
+  // it removed the filter input, so the user could no longer change or
+  // clear the filter that produced the empty result.
+  const showEmptyOverlay = !isLoading && visibleRows === 0 && !!emptyView && emptyView.length > 0;
+
+  return (
+    <div style={{ ...tableStyles.table.container, position: "relative" }}>
+      {children}
+      {showEmptyOverlay && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            // Let the header / filter bar above stay interactive; only the
+            // grid body region is covered by this overlay.
+            pointerEvents: "none",
+          }}
+          data-testid="datatable-empty-overlay"
+        >
+          <div style={{ pointerEvents: "auto" }}>{emptyView}</div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 interface DataTableWidgetProps extends TableProps {
