@@ -5,7 +5,7 @@ using Ivy.Core;
 using Ivy.Widgets.QRCode;
 using Xunit.Abstractions;
 
-namespace Ivy.Test;
+namespace Ivy.Widgets.QRCode.Tests;
 
 public class QRCodeTests(ITestOutputHelper output)
 {

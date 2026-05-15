@@ -1,13 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="../../../Ivy/Directory.Build.props" Condition="Exists('../../../Ivy/Directory.Build.props')" />
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <NoWarn>CS1591</NoWarn>
-
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
@@ -27,11 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../Ivy/Ivy.csproj" />
+    <ProjectReference Include="..\Ivy.Widgets.QRCode.csproj" />
   </ItemGroup>
 
 </Project>
