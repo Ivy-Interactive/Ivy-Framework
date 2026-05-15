@@ -787,10 +787,10 @@ export const typography: Record<string, string> = {
 export const articleTypography: Record<string, string> = {
   ...typography,
   // Headings with specific margins for Articles
-  h1: `text-4xl font-semibold scroll-m-20 mt-6`,
-  h2: `text-3xl font-medium scroll-m-20 mt-6`,
-  h3: `text-2xl font-medium scroll-m-20 mt-4`,
-  h4: `text-xl font-medium scroll-m-20 mt-2`,
+  h1: `text-4xl font-semibold scroll-m-20 mt-8`,
+  h2: `text-3xl font-medium scroll-m-20 mt-10 pb-2 border-b border-border`,
+  h3: `text-2xl font-medium scroll-m-20 mt-6`,
+  h4: `text-xl font-medium scroll-m-20 mt-4`,
   h5: `text-lg font-medium scroll-m-20`,
   h6: `text-base font-medium scroll-m-20`,
 };

@@ -29,7 +29,7 @@ public record Article : WidgetBase<Article>
 
     [Prop] public List<ArticleHeading> Headings { get; set; } = [];
 
-    [Prop] public int Gap { get; set; } = 4;
+    [Prop] public int Gap { get; set; } = 5;
 
     [Event] public EventHandler<Event<Article, string>>? OnLinkClick { get; set; }
 }
