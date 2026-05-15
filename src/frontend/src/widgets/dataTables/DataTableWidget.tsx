@@ -19,11 +19,10 @@ import type { SpriteMap } from "@glideapps/glide-data-grid";
 
 interface TableLayoutProps {
   children?: React.ReactNode;
-  emptyView?: React.ReactNode[];
 }
 
-const TableLayout: React.FC<TableLayoutProps> = ({ children, emptyView }) => {
-  const { error, columns, visibleRows, isLoading } = useTable();
+const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
+  const { error, columns } = useTable();
   const showTableEditor = columns.length > 0;
 
   if (error) {
@@ -38,36 +37,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children, emptyView }) => {
     );
   }
 
-  // When the table has loaded but holds no rows (e.g. a filter matched
-  // nothing) keep the full table chrome — header, filter bar, borders —
-  // rendered, and overlay the empty-view slot on top of the (now empty)
-  // grid body instead of replacing the whole component with it. Replacing
-  // it removed the filter input, so the user could no longer change or
-  // clear the filter that produced the empty result.
-  const showEmptyOverlay = !isLoading && visibleRows === 0 && !!emptyView && emptyView.length > 0;
-
-  return (
-    <div style={{ ...tableStyles.table.container, position: "relative" }}>
-      {children}
-      {showEmptyOverlay && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            // Let the header / filter bar above stay interactive; only the
-            // grid body region is covered by this overlay.
-            pointerEvents: "none",
-          }}
-          data-testid="datatable-empty-overlay"
-        >
-          <div style={{ pointerEvents: "auto" }}>{emptyView}</div>
-        </div>
-      )}
-    </div>
-  );
+  return <div style={{ ...tableStyles.table.container }}>{children}</div>;
 };
 
 interface DataTableWidgetProps extends TableProps {
@@ -126,14 +96,13 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
   // If height is Full, use flex-based sizing instead of height: 100%.
   // In unconstrained parents (e.g. Layout.Vertical() with no explicit height),
   // height: 100% resolves to 0 because the parent has no definite height.
-  // flexGrow fills available space in flex parents, while minHeight ensures
-  // at least ~5 rows are visible in unconstrained parents.
+  // flexGrow fills available space in flex parents. When empty, the table
+  // collapses to just headers + "no rows" message with no forced min height.
   if (height === "Full") {
     delete containerStyle.height;
     containerStyle.display = "flex";
     containerStyle.flexDirection = "column";
     containerStyle.flexGrow = 1;
-    containerStyle.minHeight = "200px";
   }
 
   return (
@@ -146,7 +115,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
         density={density}
         updateStream={updateStream}
       >
-        <TableLayout emptyView={slots?.EmptyView}>
+        <TableLayout>
           <DataTableHeader>
             <div className="flex items-center gap-2 w-full">
               <div className="flex items-center gap-1">
