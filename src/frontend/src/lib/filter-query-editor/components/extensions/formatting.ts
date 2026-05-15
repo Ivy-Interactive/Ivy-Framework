@@ -88,7 +88,7 @@ class FormattingPlugin {
 
   constructor(
     _view: EditorView,
-    private columns: ColumnDef[],
+    private getColumns: () => ColumnDef[],
     options: { formatOnBlur?: boolean } = {},
   ) {
     this.formatOnBlur = options.formatOnBlur !== false; // Default to true
@@ -101,7 +101,7 @@ class FormattingPlugin {
 
       // Only format if text changed since last format
       if (currentText !== this.lastFormattedText) {
-        if (formatDocument(update.view, this.columns)) {
+        if (formatDocument(update.view, this.getColumns())) {
           this.lastFormattedText = update.view.state.doc.toString();
         }
       }
@@ -116,14 +116,14 @@ class FormattingPlugin {
 /**
  * Create keyboard shortcuts for formatting
  */
-function createFormatKeymap(columns: ColumnDef[]) {
+function createFormatKeymap(getColumns: () => ColumnDef[]) {
   return keymap.of([
     {
       // Cmd/Ctrl + Shift + F to format
       key: "Mod-Shift-f",
       preventDefault: true,
       run: (view) => {
-        formatDocument(view, columns);
+        formatDocument(view, getColumns());
         return true;
       },
     },
@@ -132,7 +132,7 @@ function createFormatKeymap(columns: ColumnDef[]) {
       key: "Alt-Shift-f",
       preventDefault: true,
       run: (view) => {
-        formatDocument(view, columns);
+        formatDocument(view, getColumns());
         return true;
       },
     },
@@ -144,15 +144,15 @@ function createFormatKeymap(columns: ColumnDef[]) {
  * Formats on blur and provides keyboard shortcuts
  */
 export function createFormattingExtension(
-  columns: ColumnDef[],
+  getColumns: () => ColumnDef[],
   options: { formatOnBlur?: boolean } = {},
 ): Extension {
   return [
     // ViewPlugin for auto-format on blur
-    ViewPlugin.define((view) => new FormattingPlugin(view, columns, options)),
+    ViewPlugin.define((view) => new FormattingPlugin(view, getColumns, options)),
 
     // Keyboard shortcuts for manual formatting
-    createFormatKeymap(columns),
+    createFormatKeymap(getColumns),
 
     // Visual feedback for formatting
     EditorView.domEventHandlers({

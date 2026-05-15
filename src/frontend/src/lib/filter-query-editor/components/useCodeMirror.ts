@@ -44,6 +44,16 @@ export function useCodeMirror({
   const [containerEl, setContainerEl] = useState<HTMLElement | null>(null);
   const onChangeRef = useRef(onChange);
   const onApplyRef = useRef(onApply);
+  const columnsRef = useRef(columns);
+
+  // Keep columns ref up to date. The editor reads columns through this ref
+  // (not a closure) so that column loads/changes do NOT recreate the editor.
+  // Recreating it mid-typing was resetting validation state and made valid
+  // queries (e.g. "[Age] = 32") momentarily parse against an empty column
+  // set, falsely reporting them invalid and triggering the LLM fallback.
+  useEffect(() => {
+    columnsRef.current = columns;
+  }, [columns]);
 
   // Keep onChange ref up to date
   useEffect(() => {
@@ -104,10 +114,10 @@ export function useCodeMirror({
       createValidationExtension(columns),
 
       // Auto-formatting
-      createFormattingExtension(columns),
+      createFormattingExtension(() => columnsRef.current),
 
       // Autocomplete
-      createAutocompleteExtension(columns),
+      createAutocompleteExtension(() => columnsRef.current),
 
       // Update listener for onChange
       EditorView.updateListener.of((update: ViewUpdate) => {
@@ -225,7 +235,11 @@ export function useCodeMirror({
       setView(null);
       setContainerEl(null);
     };
-  }, [container, theme, readOnly, placeholder, autoFocus, columns]); // Note: value and onChange are not dependencies here
+    // `columns`, `value` and `onChange` are intentionally NOT dependencies:
+    // they are read through refs so the editor is created once and is not
+    // torn down when columns load or the parent re-renders.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [container, theme, readOnly, placeholder, autoFocus]);
 
   // Handle external value changes
   useEffect(() => {

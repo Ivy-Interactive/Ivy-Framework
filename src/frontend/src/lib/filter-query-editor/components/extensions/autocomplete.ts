@@ -245,9 +245,14 @@ function createLogicalCompletions(textBefore: string): Completion[] {
 
 /**
  * Main completion function
+ *
+ * `getColumns` is resolved on every invocation so the live column set is
+ * always used — the editor is created once and not rebuilt when columns
+ * load/change, so a stale closure here would otherwise suggest old columns.
  */
-function completeQuery(columns: ColumnDef[]) {
+function completeQuery(getColumns: () => ColumnDef[]) {
   return (context: CompletionContext): CompletionResult | null => {
+    const columns = getColumns();
     const textBefore = getTextBeforeCursor(context);
 
     // Show column suggestions at the start or when empty
@@ -326,9 +331,9 @@ function completeQuery(columns: ColumnDef[]) {
 /**
  * Create autocomplete extension
  */
-export function createAutocompleteExtension(columns: ColumnDef[]): Extension {
+export function createAutocompleteExtension(getColumns: () => ColumnDef[]): Extension {
   return autocompletion({
-    override: [completeQuery(columns)],
+    override: [completeQuery(getColumns)],
     activateOnTyping: true,
     maxRenderedOptions: 20,
     closeOnBlur: true,

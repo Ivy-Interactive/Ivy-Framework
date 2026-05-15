@@ -114,6 +114,24 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
     [columns],
   );
 
+  // Re-validate the current text when the column set changes. CodeMirror's
+  // onChange only fires on document edits, so a query typed before columns
+  // finished loading would otherwise stay flagged invalid (parsed against an
+  // empty column set) until the next keystroke — which made valid queries
+  // like "[Age] = 32" fall through to the LLM fallback on Enter.
+  useEffect(() => {
+    if (!onChangeRef.current) return;
+    if (!value || value.trim() === "") return;
+
+    const parseResult = parseQuery(value, columns);
+    onChangeRef.current({
+      text: value,
+      isValid: !parseResult.errors || parseResult.errors.length === 0,
+      filters: parseResult.filters,
+      errors: parseResult.errors,
+    });
+  }, [columns, value]);
+
   // Initialize CodeMirror
   useCodeMirror({
     container: container,
