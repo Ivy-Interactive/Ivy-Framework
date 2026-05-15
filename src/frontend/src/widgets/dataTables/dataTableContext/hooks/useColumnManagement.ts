@@ -22,6 +22,15 @@ export const useColumnManagement = ({
   allowColumnResizing,
 }: UseColumnManagementProps) => {
   const [columns, setColumns] = useState<DataColumn[]>(columnsProp);
+
+  // eslint-disable-next-line no-console
+  console.log(
+    "[FQE useColumnManagement] columnsProp=",
+    (columnsProp ?? []).map((c) => `${c.name}:${c.type}`),
+    " state=",
+    (columns ?? []).map((c) => `${c.name}:${c.type}`),
+  );
+
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [columnOrder, setColumnOrder] = useState<number[]>([]);
   const isReorderingRef = useRef(false);
