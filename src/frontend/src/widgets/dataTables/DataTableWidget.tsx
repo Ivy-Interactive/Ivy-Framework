@@ -97,7 +97,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
   // In unconstrained parents (e.g. Layout.Vertical() with no explicit height),
   // height: 100% resolves to 0 because the parent has no definite height.
   // flexGrow fills available space in flex parents. When empty, the table
-  // collapses to just headers + "no rows" message with no forced min height.
+  // collapses to just headers with no forced min height.
   if (height === "Full") {
     delete containerStyle.height;
     containerStyle.display = "flex";
