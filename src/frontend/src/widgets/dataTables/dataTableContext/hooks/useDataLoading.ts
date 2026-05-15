@@ -112,6 +112,16 @@ export const useDataLoading = ({
           setVisibleRows(rowCount);
           currentRowCountRef.current = rowCount;
           hasLoadedOnceRef.current = true;
+        } else {
+          // The query matched no rows (server returned no Arrow stream).
+          // Clear any stale table and report zero rows instead of leaving the
+          // previous result in place — otherwise the grid either shows stale
+          // rows or the layout falls back to the loading/placeholder state and
+          // the whole table appears to vanish.
+          arrowTableRef.current = null;
+          setVisibleRows(0);
+          currentRowCountRef.current = 0;
+          hasLoadedOnceRef.current = true;
         }
         setHasMoreState(result.hasMore);
 
