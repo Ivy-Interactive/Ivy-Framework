@@ -6,7 +6,7 @@ import {
   QueryEditorChangeEvent,
   parseQuery,
   useDropdownState,
-} from "filter-query-editor";
+} from "@/lib/filter-query-editor";
 import { Filter } from "@/services/grpcTableService";
 import { parseInvalidQuery } from "../utils/tableDataFetcher";
 import { Loader2 } from "lucide-react";
