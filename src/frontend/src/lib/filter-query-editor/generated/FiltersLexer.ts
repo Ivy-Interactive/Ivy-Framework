@@ -2,7 +2,6 @@
 /* eslint-disable */
 
 import * as antlr from "antlr4ng";
-import { Token } from "antlr4ng";
 
 export class FiltersLexer extends antlr.Lexer {
   public static readonly FIELD = 1;

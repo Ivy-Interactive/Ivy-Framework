@@ -59,6 +59,10 @@ export function useCodeMirror({
   useEffect(() => {
     if (!container) return;
 
+    // Pending autocomplete timer, cleared when the view is torn down so it
+    // can't fire startCompletion() against a destroyed EditorView.
+    let completionTimer: ReturnType<typeof setTimeout> | undefined;
+
     // Create extensions array
     const extensions: Extension[] = [
       // Basic setup
@@ -115,7 +119,8 @@ export function useCodeMirror({
         // Trigger autocomplete on focus
         if (update.focusChanged && update.view.hasFocus) {
           // Use setTimeout to ensure focus is complete before triggering
-          setTimeout(() => {
+          clearTimeout(completionTimer);
+          completionTimer = setTimeout(() => {
             startCompletion(update.view);
           }, 10);
         }
@@ -215,6 +220,7 @@ export function useCodeMirror({
 
     // Cleanup on unmount
     return () => {
+      clearTimeout(completionTimer);
       editorView.destroy();
       setView(null);
       setContainerEl(null);

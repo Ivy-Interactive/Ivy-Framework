@@ -2,7 +2,6 @@
 /* eslint-disable */
 
 import * as antlr from "antlr4ng";
-import { Token } from "antlr4ng";
 
 import { FiltersListener } from "./FiltersListener.js";
 import { FiltersVisitor } from "./FiltersVisitor.js";
