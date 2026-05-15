@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Ivy;
 using Ivy.Core;
 using Xunit.Abstractions;
 
@@ -148,5 +149,33 @@ public class WidgetSerializerTests(ITestOutputHelper output)
         // Columns should be serialized since it's non-default (null)
         Assert.NotNull(props["columns"]);
         Assert.Equal(2, props["columns"]!.GetValue<int>());
+    }
+
+    [Fact]
+    public void Serialize_RequiredEnumProperty_AtZeroValue_IsNotOmitted()
+    {
+        // Regression: ColType.Number is the first enum member (== 0), so a
+        // default-constructed DataTableColumn has ColType == Number. The
+        // default-value-omission modifier used to drop any property equal to
+        // the constructor default, silently stripping `type` from every
+        // numeric column. The client then treated those columns as text and
+        // valid numeric filters (e.g. "[Age] < 45") were rejected and routed
+        // to the LLM fallback. `required` properties must always serialize.
+        var numberColumn = new DataTableColumn
+        {
+            Name = "Age",
+            Header = "Age",
+            ColType = ColType.Number,
+        };
+
+        var node = System.Text.Json.JsonSerializer.SerializeToNode(
+            numberColumn,
+            WidgetSerializer.SerializerOptions
+        )!.AsObject();
+
+        output.WriteLine(node.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+
+        Assert.NotNull(node["type"]);
+        Assert.Equal("Number", node["type"]!.GetValue<string>());
     }
 }

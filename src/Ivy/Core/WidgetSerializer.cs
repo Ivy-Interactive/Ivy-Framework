@@ -79,6 +79,16 @@ public static class WidgetSerializer
             if (property.Get == null)
                 continue;
 
+            // Never omit a `required` property. Its "default" is whatever the
+            // parameterless constructor happens to leave behind, which for a
+            // value/enum type is the zero value — e.g. DataTableColumn.ColType
+            // defaults to (ColType)0 == ColType.Number, so every numeric column
+            // would silently drop its `type` and the client would treat it as
+            // text. A required member is mandatory by declaration; always emit
+            // it.
+            if (property.IsRequired)
+                continue;
+
             var defaultValue = property.Get(defaultInstance);
             property.ShouldSerialize = (_, currentValue) => !ValuesAreEqual(currentValue, defaultValue);
         }

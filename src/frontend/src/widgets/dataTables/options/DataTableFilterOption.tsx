@@ -113,12 +113,6 @@ export const DataTableFilterOption: React.FC<{
         filter,
       };
 
-      // eslint-disable-next-line no-console
-      console.log("[FQE handleQueryChange]", {
-        text: event.text,
-        isValid: event.isValid,
-        errors: event.errors,
-      });
       setQuery(event.text);
       setIsQueryValid(event.isValid);
 
@@ -177,14 +171,6 @@ export const DataTableFilterOption: React.FC<{
     // so Enter pressed right after the last keystroke uses the up-to-date
     // result instead of a stale closure.
     const { text, isValid, filter } = latestValidationRef.current;
-
-    // eslint-disable-next-line no-console
-    console.log("[FQE handleEnterKey]", {
-      text,
-      isValid,
-      hasFilter: !!filter,
-      allowLlmFiltering,
-    });
 
     if (text.trim() === "") {
       setActiveFilter(null);

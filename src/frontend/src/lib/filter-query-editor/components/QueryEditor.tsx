@@ -109,14 +109,6 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
         errors: parseResult.errors,
       };
 
-      // eslint-disable-next-line no-console
-      console.log("[FQE handleChange]", {
-        text,
-        cols: columns.map((c) => `${c.name}:${c.type}`),
-        isValid: event.isValid,
-        errors: parseResult.errors,
-      });
-
       onChangeRef.current(event);
     },
     [columns],

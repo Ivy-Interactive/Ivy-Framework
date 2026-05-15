@@ -80,12 +80,6 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
 
   const finalColumns = useMemo(() => applyColumnsDefaults(columns), [columns]);
 
-  // eslint-disable-next-line no-console
-  console.log(
-    "[FQE DataTableWidget raw columns prop]",
-    (columns ?? []).map((c) => `${c.name}:${c.type}`),
-  );
-
   const hasFooter = useMemo(
     () => finalColumns.some((col) => col.footer && col.footer.length > 0),
     [finalColumns],
