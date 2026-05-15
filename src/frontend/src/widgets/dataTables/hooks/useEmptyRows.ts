@@ -22,7 +22,6 @@ export const useEmptyRows = ({
 }: UseEmptyRowsProps) => {
   const whitespaceHeight = useMemo(() => {
     // When there are no visible rows, collapse — don't fill with empty rows.
-    // The "no rows to display" message is shown separately below the grid.
     if (visibleRows === 0) return 0;
     if (hasMore || scrollContainerHeight === 0) return 0;
 
