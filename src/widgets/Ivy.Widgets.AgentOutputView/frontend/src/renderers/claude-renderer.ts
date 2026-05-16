@@ -10,6 +10,7 @@ interface ClaudeContentBlock {
   input?: Record<string, unknown>;
   tool_use_id?: string;
   content?: unknown;
+  is_error?: boolean;
 }
 
 interface ClaudeMessage {
@@ -40,6 +41,7 @@ export const claudeRenderer: JsonStreamRenderer = {
 
     // First pass: collect tool results keyed by tool_use_id
     const toolResults = new Map<string, string>();
+    const toolErrors = new Set<string>();
     for (const e of raw) {
       if (e.type !== "user") continue;
       const blocks = e.message?.content ?? [];
@@ -51,6 +53,7 @@ export const claudeRenderer: JsonStreamRenderer = {
             contentToString(e.tool_use_result?.content) ||
             "";
           toolResults.set(b.tool_use_id, text);
+          if (b.is_error) toolErrors.add(b.tool_use_id);
         }
       }
     }
@@ -78,6 +81,7 @@ export const claudeRenderer: JsonStreamRenderer = {
               name: b.name,
               input: b.input ?? {},
               result: id ? toolResults.get(id) : undefined,
+              isError: id ? toolErrors.has(id) : undefined,
             });
           }
         }

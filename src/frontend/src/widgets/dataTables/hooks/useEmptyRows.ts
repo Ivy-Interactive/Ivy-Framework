@@ -21,7 +21,9 @@ export const useEmptyRows = ({
   rowHeight,
 }: UseEmptyRowsProps) => {
   const whitespaceHeight = useMemo(() => {
-    if (hasMore || scrollContainerHeight === 0 || visibleRows === 0) return 0;
+    // When there are no visible rows, collapse — don't fill with empty rows.
+    if (visibleRows === 0) return 0;
+    if (hasMore || scrollContainerHeight === 0) return 0;
 
     const totalHeaderHeight = rowHeight + (showGroups ? GROUP_HEADER_HEIGHT : 0);
     const rowsHeight = visibleRows * rowHeight;
