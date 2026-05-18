@@ -3,6 +3,7 @@ import {
   CompactSelection,
   CustomRenderer,
   DataEditorRef,
+  getDefaultTheme,
   GridMouseCellEventArgs,
   GridMouseEventArgs,
   Item,
@@ -27,7 +28,7 @@ import {
   useRowHover,
   useEmptyRows,
   useDataLoading,
-  useLinkCellHover,
+  useCellHoverTooltip,
   useDoubleTapLink,
 } from "../hooks";
 import { useFooterColumnLayout } from "../hooks/useFooterColumnLayout";
@@ -119,6 +120,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const { getCellContent } = useCellContent({
     columns,
     columnOrder,
+    columnWidths,
+    density,
     editable,
     visibleRows,
     getRowData,
@@ -162,17 +165,27 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     arrowTableRef,
   });
 
-  // Link cell hover tooltip
+  const headerFont = useMemo(() => {
+    const t = getDefaultTheme();
+    return `${t.headerFontStyle} ${t.fontFamily}`;
+  }, []);
+
+  // Cell hover tooltips (truncated text + link hint)
   const {
-    isLinkHovered,
+    cellTooltip,
+    isCellTooltipOpen,
     virtualRef,
-    onItemHovered: onLinkCellHovered,
-    linkTooltipPos,
+    onItemHovered: onCellTooltipHovered,
     supportsHoverTooltip,
-    clearLinkCellHover,
-  } = useLinkCellHover({
+    clearCellHoverTooltip,
+  } = useCellHoverTooltip({
+    columns,
+    columnOrder,
+    columnWidths,
+    density,
     getCellContent,
     visibleRows,
+    headerFont,
   });
 
   // Table theme
@@ -273,16 +286,16 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       prevVisibleScrollOriginRef.current = { x: range.x, y: range.y };
       if (!verticalScrolled) return;
       clearRowHover();
-      clearLinkCellHover();
+      clearCellHoverTooltip();
       setCellActionIndicator(null);
     },
-    [handleVisibleRegionChanged, clearRowHover, clearLinkCellHover],
+    [handleVisibleRegionChanged, clearRowHover, clearCellHoverTooltip],
   );
 
   // Compose onItemHovered: keep existing hover behavior and track actionable-cell affordance.
   const handleItemHovered = useCallback(
     (args: GridMouseEventArgs) => {
-      onLinkCellHovered(args);
+      onCellTooltipHovered(args);
       onItemHovered(args);
 
       if (args.kind !== "cell") {
@@ -309,7 +322,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         height: args.bounds.height,
       });
     },
-    [onLinkCellHovered, onItemHovered, orderedDataColumns, visibleRows],
+    [onCellTooltipHovered, onItemHovered, orderedDataColumns, visibleRows],
   );
 
   const handleCellClickedForGrid = useCallback(
@@ -373,15 +386,12 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     footer
   );
 
-  const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
-  const tooltipLabel = isMac ? "\u2318+click to open link" : "Ctrl+click to open link";
-
-  const linkTooltipNode = (
+  const cellTooltipNode = (
     <TooltipProvider
-      key={linkTooltipPos ? `${linkTooltipPos.x},${linkTooltipPos.y}` : "hidden"}
-      delayDuration={0}
+      key={cellTooltip ? `${cellTooltip.x},${cellTooltip.y},${cellTooltip.content}` : "hidden"}
+      delayDuration={300}
     >
-      <Tooltip open={isLinkHovered}>
+      <Tooltip open={isCellTooltipOpen}>
         <TooltipTrigger asChild>
           <div
             ref={(node) => {
@@ -392,8 +402,14 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
             style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
           />
         </TooltipTrigger>
-        <TooltipContent side="top" className="pointer-events-none">
-          {tooltipLabel}
+        <TooltipContent
+          side="top"
+          className="pointer-events-none max-w-sm whitespace-pre-wrap break-words"
+        >
+          <div>{cellTooltip?.content}</div>
+          {cellTooltip?.hint ? (
+            <div className="mt-1 text-xs text-muted-foreground">{cellTooltip.hint}</div>
+          ) : null}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -472,7 +488,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         footer={footerNode}
         hasEmptyRows={emptyRowsCount > 0}
       />
-      {supportsHoverTooltip ? linkTooltipNode : null}
+      {supportsHoverTooltip ? cellTooltipNode : null}
       {cellActionIndicatorNode}
     </>
   );

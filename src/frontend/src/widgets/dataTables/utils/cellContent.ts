@@ -2,6 +2,7 @@ import { GridCell, GridCellKind, Item, Theme } from "@glideapps/glide-data-grid"
 import { Align, DataColumn, DataRow } from "../types/types";
 import { getCSSVariable, isDarkMode } from "@/lib/theme";
 import type { AnimatedStatusCellData, LabelsBadgesCellData } from "./customRenderers";
+import { getMaxTextWidth, truncateTextWithEllipsis } from "./canvasText";
 
 /**
  * Converts Align enum to contentAlign value for GridCell
@@ -132,6 +133,28 @@ export function parseDateValue(cellValue: unknown): Date | null {
   }
 
   return null;
+}
+
+function truncateCellDisplayData(
+  cell: GridCell,
+  columnWidth: number | undefined,
+  cellHorizontalPadding: number,
+  cellFont: string,
+  wrapText?: boolean,
+): GridCell {
+  if (wrapText || columnWidth === undefined) return cell;
+
+  const maxWidth = getMaxTextWidth(columnWidth, cellHorizontalPadding);
+  if (maxWidth <= 0) return cell;
+
+  if (cell.kind === GridCellKind.Text || cell.kind === GridCellKind.Number) {
+    const displayData = cell.displayData;
+    const truncated = truncateTextWithEllipsis(displayData, maxWidth, cellFont);
+    if (truncated === displayData) return cell;
+    return { ...cell, displayData: truncated };
+  }
+
+  return cell;
 }
 
 /**
@@ -446,12 +469,19 @@ export function getOrderedColumns(columns: DataColumn[], columnOrder: number[]):
  * Filters out hidden columns and applies column ordering
  * Uses Arrow table via getRowData for efficient access to gRPC data
  */
+export interface GetCellContentOptions {
+  columnWidth?: number;
+  cellHorizontalPadding?: number;
+  cellFont?: string;
+}
+
 export function getCellContent(
   cell: Item,
   columns: DataColumn[],
   columnOrder: number[],
   editable: boolean,
   getRowData: (rowIndex: number) => DataRow | null,
+  options: GetCellContentOptions = {},
 ): GridCell {
   const [col, row] = cell;
 
@@ -537,10 +567,17 @@ export function getCellContent(
   };
 
   const gridCell = createCell();
+  const withTruncation = truncateCellDisplayData(
+    gridCell,
+    options.columnWidth,
+    options.cellHorizontalPadding ?? 8,
+    options.cellFont ?? "13px sans-serif",
+    column.wrapText,
+  );
   if (column.hasCellAction) {
-    return { ...gridCell, cursor: "pointer" };
+    return { ...withTruncation, cursor: "pointer" };
   }
-  return gridCell;
+  return withTruncation;
 }
 
 /**

@@ -2,6 +2,7 @@ import { CustomRenderer, GridCellKind, CustomCell, type Theme } from "@glideapps
 import { icons } from "lucide-react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { drawTruncatedText, truncateTextWithEllipsis } from "./canvasText";
 import { LruMap } from "./lruMap";
 
 const MAX_ICON_IMAGE_CACHE = 128;
@@ -359,36 +360,64 @@ function drawLabelMode(args: AnimatedDrawArgs, cell: AnimatedStatusCell, t: numb
   const dimColor = theme.textMedium;
   const accentColor = theme.accentColor ?? baseColor;
   const cy = rect.y + rect.height / 2;
+  const font = (theme as GridDrawTheme).baseFontFull;
 
-  let cursorX = rect.x + hPad;
+  let left = rect.x + hPad;
   if (state === "running") {
-    drawSpinner(ctx, cursorX + SPINNER_RADIUS, cy, accentColor, t);
-    cursorX += SPINNER_RADIUS * 2 + ICON_TEXT_GAP;
+    drawSpinner(ctx, left + SPINNER_RADIUS, cy, accentColor, t);
+    left += SPINNER_RADIUS * 2 + ICON_TEXT_GAP;
     args.requestAnimationFrame();
   }
 
-  let rightX = rect.x + rect.width - hPad;
+  let right = rect.x + rect.width - hPad;
   if (rightLabel) {
-    const rw = ctx.measureText(rightLabel).width;
-    ctx.fillStyle = dimColor;
-    ctx.fillText(rightLabel, rightX - rw, cy);
-    rightX -= rw + ICON_TEXT_GAP;
+    const rightRect = { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+    const drawn = drawTruncatedText(ctx, {
+      text: rightLabel,
+      rect: rightRect,
+      font,
+      color: dimColor,
+      align: "right",
+      padding: hPad,
+    });
+    ctx.font = font;
+    right -= ctx.measureText(drawn).width + ICON_TEXT_GAP;
   }
 
-  let textX = cursorX;
-  if (align === "center") {
-    const textW = ctx.measureText(statusText).width;
-    textX = Math.max(cursorX, rect.x + (rect.width - textW) / 2);
-  } else if (align === "right") {
-    const textW = ctx.measureText(statusText).width;
-    textX = Math.max(cursorX, rightX - textW);
-  }
+  const textRect = {
+    x: left,
+    y: rect.y,
+    width: Math.max(0, right - left),
+    height: rect.height,
+  };
+  if (textRect.width <= 0) return;
 
   if (state === "running") {
-    drawShimmerText(ctx, statusText, textX, cy, dimColor, baseColor, t);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(textRect.x, textRect.y, textRect.width, textRect.height);
+    ctx.clip();
+    ctx.font = font;
+    ctx.textBaseline = "middle";
+    const truncated = truncateTextWithEllipsis(statusText, textRect.width, font);
+    const textW = ctx.measureText(truncated).width;
+    const textX =
+      align === "center"
+        ? textRect.x + (textRect.width - textW) / 2
+        : align === "right"
+          ? textRect.x + textRect.width - textW
+          : textRect.x;
+    drawShimmerText(ctx, truncated, textX, cy, dimColor, baseColor, t);
+    ctx.restore();
   } else {
-    ctx.fillStyle = state === "done" ? baseColor : dimColor;
-    ctx.fillText(statusText, textX, cy);
+    drawTruncatedText(ctx, {
+      text: statusText,
+      rect: textRect,
+      font,
+      color: state === "done" ? baseColor : dimColor,
+      align,
+      padding: 0,
+    });
   }
 }
 
@@ -401,7 +430,10 @@ function drawBadgeMode(args: AnimatedDrawArgs, cell: AnimatedStatusCell, t: numb
   const bubbleH = theme.bubbleHeight;
   const pad = theme.bubblePadding;
   const radius = theme.roundingRadius ?? bubbleH / 2;
-  const textW = ctx.measureText(statusText).width;
+  const font = (theme as GridDrawTheme).baseFontFull;
+  const maxBadgeTextWidth = Math.max(0, rect.width - hPad * 2 - pad * 2);
+  const displayText = truncateTextWithEllipsis(statusText, maxBadgeTextWidth, font);
+  const textW = ctx.measureText(displayText).width;
   const boxW = textW + pad * 2;
 
   let bx = rect.x + hPad;
@@ -417,11 +449,11 @@ function drawBadgeMode(args: AnimatedDrawArgs, cell: AnimatedStatusCell, t: numb
   ctx.restore();
 
   if (state === "running") {
-    drawShimmerText(ctx, statusText, bx + pad, cy, fg, "rgba(255,255,255,0.55)", t);
+    drawShimmerText(ctx, displayText, bx + pad, cy, fg, "rgba(255,255,255,0.55)", t);
     args.requestAnimationFrame();
   } else {
     ctx.fillStyle = fg;
-    ctx.fillText(statusText, bx + pad, cy);
+    ctx.fillText(displayText, bx + pad, cy);
   }
 }
 
@@ -439,21 +471,31 @@ function drawSpinnerTimerMode(
   const accentColor = theme.accentColor ?? baseColor;
   const cy = rect.y + rect.height / 2;
   const r = SPINNER_RADIUS - 1;
+  const font = (theme as GridDrawTheme).baseFontFull;
 
-  let cursorX = rect.x + hPad;
+  let left = rect.x + hPad;
   if (state === "running") {
-    drawSpinner(ctx, cursorX + r, cy, accentColor, t, r);
-    cursorX += r * 2 + ICON_TEXT_GAP;
+    drawSpinner(ctx, left + r, cy, accentColor, t, r);
+    left += r * 2 + ICON_TEXT_GAP;
     args.requestAnimationFrame();
   }
 
-  const textW = ctx.measureText(statusText).width;
-  let textX = cursorX;
-  if (align === "center") textX = Math.max(cursorX, rect.x + (rect.width - textW) / 2);
-  else if (align === "right") textX = Math.max(cursorX, rect.x + rect.width - hPad - textW);
+  const textRect = {
+    x: left,
+    y: rect.y,
+    width: Math.max(0, rect.x + rect.width - hPad - left),
+    height: rect.height,
+  };
+  if (textRect.width <= 0) return;
 
-  ctx.fillStyle = state === "idle" ? dimColor : baseColor;
-  ctx.fillText(statusText, textX, cy);
+  drawTruncatedText(ctx, {
+    text: statusText,
+    rect: textRect,
+    font,
+    color: state === "idle" ? dimColor : baseColor,
+    align,
+    padding: 0,
+  });
 }
 
 export const animatedStatusCellRenderer: CustomRenderer<AnimatedStatusCell> = {
@@ -498,46 +540,19 @@ export const linkCellRenderer: CustomRenderer<LinkCell> = {
 
     if (!url || !text) return false;
 
-    // Use linkColor from theme (should be blue)
     const linkColor = theme.linkColor || theme.accentColor || "#2563eb";
     const padding = theme.cellHorizontalPadding ?? 8;
+    const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
 
-    ctx.save();
-    ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
-    ctx.fillStyle = linkColor;
-    ctx.textBaseline = "middle";
-
-    // Calculate text position based on alignment
-    const textMetrics = ctx.measureText(text); // Measure text, not URL
-    let textX: number;
-
-    switch (align) {
-      case "center":
-        textX = rect.x + (rect.width - textMetrics.width) / 2;
-        break;
-      case "right":
-        textX = rect.x + rect.width - textMetrics.width - padding;
-        break;
-      case "left":
-      default:
-        textX = rect.x + padding;
-    }
-
-    const textY = rect.y + rect.height / 2;
-
-    // Draw the text
-    ctx.fillText(text, textX, textY); // Draw text, not URL
-
-    // Draw underline
-    const underlineY = textY + 8;
-    ctx.strokeStyle = linkColor;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(textX, underlineY);
-    ctx.lineTo(textX + textMetrics.width, underlineY);
-    ctx.stroke();
-
-    ctx.restore();
+    drawTruncatedText(ctx, {
+      text,
+      rect,
+      font,
+      color: linkColor,
+      align,
+      padding,
+      underline: true,
+    });
 
     return true;
   },
