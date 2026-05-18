@@ -29,9 +29,12 @@ import {
   useDataLoading,
   useLinkCellHover,
   useDoubleTapLink,
+  useMobileColumnResize,
+  getActiveColumnIndex,
 } from "../hooks";
 import { useFooterColumnLayout } from "../hooks/useFooterColumnLayout";
 import { GridContainer } from "../components/GridContainer";
+import { MobileColumnResizeOverlay } from "../components/MobileColumnResizeOverlay";
 import { AggregateFooter } from "../DataTableFooter";
 import { MenuItem } from "@/types/widgets";
 import { DENSITY_CONFIG } from "./constants";
@@ -114,6 +117,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Grid ref
   const gridRef = useRef<DataEditorRef | null>(null);
   const prevVisibleScrollOriginRef = useRef<{ x: number; y: number } | null>(null);
+  const [visibleScrollX, setVisibleScrollX] = React.useState(0);
 
   // Cell content
   const { getCellContent } = useCellContent({
@@ -242,6 +246,27 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     activeSort,
   });
 
+  const groupHeaderHeight = showGroups ? densityConfig.groupHeaderHeight : 0;
+
+  const selectedColIndex = useMemo(() => getActiveColumnIndex(gridSelection), [gridSelection]);
+
+  const mobileColumnResizeLayoutKey = `${visibleScrollX}:${JSON.stringify(columnWidths)}:${finalColumns.length}:${selectedColIndex ?? ""}`;
+
+  const {
+    useMobileHandles: useMobileColumnResizeHandles,
+    handles: mobileResizeHandles,
+    onHandlePointerDown: onMobileResizeHandlePointerDown,
+  } = useMobileColumnResize({
+    enabled: allowColumnResizing ?? true,
+    gridRef,
+    containerRef,
+    columns: finalColumns,
+    groupHeaderHeight,
+    selectedColIndex,
+    onColumnResize: handleColumnResize,
+    layoutKey: mobileColumnResizeLayoutKey,
+  });
+
   // Double-tap link cells on touch (desktop uses ⌘/Ctrl+click via useCellInteractions)
   useDoubleTapLink({
     containerRef,
@@ -268,6 +293,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const handleVisibleRegionChangedForGrid = useCallback(
     (range: { x: number; y: number; width: number; height: number }) => {
       handleVisibleRegionChanged(range);
+      setVisibleScrollX(range.x);
       const prev = prevVisibleScrollOriginRef.current;
       const verticalScrolled = prev !== null && prev.y !== range.y;
       prevVisibleScrollOriginRef.current = { x: range.x, y: range.y };
@@ -436,7 +462,17 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           ] as unknown as readonly CustomRenderer[]
         }
         headerIcons={headerIcons}
-        onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
+        onColumnResize={
+          allowColumnResizing && !useMobileColumnResizeHandles ? handleColumnResize : undefined
+        }
+        columnResizeOverlay={
+          useMobileColumnResizeHandles ? (
+            <MobileColumnResizeOverlay
+              handles={mobileResizeHandles}
+              onHandlePointerDown={onMobileResizeHandlePointerDown}
+            />
+          ) : undefined
+        }
         onVisibleRegionChanged={handleVisibleRegionChangedForGrid}
         onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}
         theme={tableTheme}

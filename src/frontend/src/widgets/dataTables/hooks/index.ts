@@ -10,3 +10,4 @@ export { useEmptyRows } from "./useEmptyRows";
 export { useDataLoading } from "./useDataLoading";
 export { useLinkCellHover } from "./useLinkCellHover";
 export { useDoubleTapLink } from "./useDoubleTapLink";
+export { useMobileColumnResize, getActiveColumnIndex } from "./useMobileColumnResize";

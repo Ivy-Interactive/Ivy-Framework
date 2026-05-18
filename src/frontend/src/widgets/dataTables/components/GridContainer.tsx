@@ -58,6 +58,7 @@ interface GridContainerProps {
   footer?: React.ReactNode;
   height?: number;
   hasEmptyRows?: boolean;
+  columnResizeOverlay?: React.ReactNode;
 }
 
 /**
@@ -105,6 +106,7 @@ export const GridContainer: React.FC<GridContainerProps> = ({
   footer,
   height,
   hasEmptyRows = false,
+  columnResizeOverlay,
 }) => {
   const containerStyle = hasOptions
     ? tableStyles.tableEditor.gridContainerWithOptions
@@ -164,6 +166,8 @@ export const GridContainer: React.FC<GridContainerProps> = ({
           onItemHovered={onItemHovered}
           getRowThemeOverride={getRowThemeOverride}
         />
+
+        {columnResizeOverlay}
 
         {rowActions && rowActions.length > 0 && (
           <RowActionButtons
