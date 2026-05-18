@@ -259,6 +259,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   }, [autoFocus, disabled]);
 
   const [localValue, setLocalColorValue] = useOptimisticValue(value, false);
+  const [swatchPickerOpen, setSwatchPickerOpen] = useState(false);
 
   // Use derived state for display and input values
   const displayValue = localValue ?? "";
@@ -418,7 +419,6 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   }
 
   if (variant === "SwatchPicker") {
-    const [swatchPickerOpen, setSwatchPickerOpen] = useState(false);
     const handleSwatchSelect = (colorName: string) => {
       fireColorChange(colorName);
       setSwatchPickerOpen(false);
