@@ -348,6 +348,13 @@ public class DataTableBuilder<TModel>(
             column.Column.LinkType = linkRenderer.Type.ToString().ToLower();
         }
 
+        if (renderer is AnimatedStatusLabelDisplayRenderer animatedRenderer)
+        {
+            column.Column.AnimatedStatusMode = animatedRenderer.Mode;
+            if (animatedRenderer.BadgeColorMapping != null)
+                column.Column.BadgeColorMapping = animatedRenderer.BadgeColorMapping;
+        }
+
         return this;
     }
 

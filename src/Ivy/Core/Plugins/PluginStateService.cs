@@ -16,10 +16,12 @@ internal class PluginStateService : IPluginStateService
         _pluginManager.PluginLoaded += OnPluginChanged;
         _pluginManager.PluginUnloaded += OnPluginChanged;
         _pluginManager.PluginReloaded += OnPluginChanged;
+        _pluginManager.PluginActivated += OnPluginChanged;
+        _pluginManager.PluginDeactivated += OnPluginChanged;
     }
 
     private void OnPluginChanged(string pluginId) => PluginStateChanged?.Invoke();
 
-    public IReadOnlyList<string> GetLoadedPluginIds() =>
-        _pluginManager.GetLoadedPluginIds();
+    public IReadOnlyList<string> GetActivePluginIds() =>
+        _pluginManager.GetActivePluginIds();
 }

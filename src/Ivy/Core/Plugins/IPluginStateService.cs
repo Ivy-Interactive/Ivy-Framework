@@ -2,6 +2,6 @@ namespace Ivy.Core.Plugins;
 
 public interface IPluginStateService
 {
-    IReadOnlyList<string> GetLoadedPluginIds();
+    IReadOnlyList<string> GetActivePluginIds();
     event Action? PluginStateChanged;
 }

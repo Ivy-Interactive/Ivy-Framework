@@ -59,6 +59,8 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
 
     [Prop] public int AlignOffset { get; set; } = 0;
 
+    [Prop] public bool StayOpen { get; set; } = false;
+
     [Event] public EventHandler<Event<DropDownMenu, object>>? OnSelect { get; set; }
 
     public static DropDownMenu operator |(DropDownMenu widget, object child)
@@ -121,6 +123,11 @@ public static class DropDownMenuExtensions
     public static DropDownMenu Left(this DropDownMenu dropDownMenu)
     {
         return dropDownMenu with { Side = DropDownMenu.SideOptions.Left };
+    }
+
+    public static DropDownMenu StayOpen(this DropDownMenu dropDownMenu, bool stayOpen = true)
+    {
+        return dropDownMenu with { StayOpen = stayOpen };
     }
 
     public static DropDownMenu Items(this DropDownMenu dropDownMenu, IEnumerable<MenuItem> items)

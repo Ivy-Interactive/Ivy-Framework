@@ -1,6 +1,7 @@
 import { useEventHandler } from "@/components/event-handler";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
-import { getWidth, getHeight } from "@/lib/styles";
+import { TypographyContext } from "@/contexts/TypographyContext";
+import { getWidth, getHeight, articleTypography } from "@/lib/styles";
 import React, { useCallback, useState, useEffect } from "react";
 import { widgetContentOverrides, subscribeToContentOverride } from "@/widgets/widgetRenderer";
 
@@ -15,6 +16,7 @@ interface MarkdownWidgetProps {
   density?: Densities;
   textAlignment?: TextAlignment;
   dangerouslyAllowLocalFiles?: boolean;
+  article?: boolean;
   width?: string;
   height?: string;
   events?: string[];
@@ -28,6 +30,7 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   density = Densities.Medium,
   textAlignment,
   dangerouslyAllowLocalFiles = false,
+  article = false,
   width,
   height,
   events = EMPTY_EVENTS,
@@ -82,14 +85,24 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
     ...getHeight(height),
   };
 
+  const renderer = (
+    <MarkdownRenderer
+      key={id}
+      content={displayContent}
+      onLinkClick={events.includes("OnLinkClick") ? handleLinkClick : undefined}
+      dangerouslyAllowLocalFiles={dangerouslyAllowLocalFiles}
+    />
+  );
+
   return (
     <div className="markdown-widget w-full" style={styles}>
-      <MarkdownRenderer
-        key={id}
-        content={displayContent}
-        onLinkClick={events.includes("OnLinkClick") ? handleLinkClick : undefined}
-        dangerouslyAllowLocalFiles={dangerouslyAllowLocalFiles}
-      />
+      {article ? (
+        <TypographyContext.Provider value={articleTypography}>
+          {renderer}
+        </TypographyContext.Provider>
+      ) : (
+        renderer
+      )}
     </div>
   );
 };

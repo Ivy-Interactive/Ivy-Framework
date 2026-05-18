@@ -418,13 +418,15 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   }
 
   if (variant === "SwatchPicker") {
+    const [swatchPickerOpen, setSwatchPickerOpen] = useState(false);
     const handleSwatchSelect = (colorName: string) => {
       fireColorChange(colorName);
+      setSwatchPickerOpen(false);
     };
 
     return (
       <div className="flex items-center gap-x-2">
-        <Popover>
+        <Popover open={swatchPickerOpen} onOpenChange={setSwatchPickerOpen}>
           <PopoverTrigger asChild>
             <button
               type="button"

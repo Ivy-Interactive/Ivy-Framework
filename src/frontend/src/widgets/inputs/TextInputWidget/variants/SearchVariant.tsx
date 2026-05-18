@@ -91,9 +91,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   const hasAffixes = hasPrefix || hasSuffix;
   const ghostAffixChrome = Boolean(props.ghost && hasAffixes);
   const ghostSuffixLayout = Boolean(props.ghost && hasSuffix);
-  const showClear = ghostSuffixLayout
-    ? !props.disabled && hasValue
-    : props.nullable && !props.disabled && hasValue;
+  const showClear = !props.disabled && hasValue;
   const showShortcut =
     Boolean(props.shortcutKey) && !isFocused && !hasValue && !showClear && !props.invalid;
   const showTrailing = showClear || showShortcut || Boolean(props.invalid);
@@ -168,6 +166,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           <Input
             ref={mergedRef}
             id={props.id}
+            density={density}
             type="search"
             placeholder={props.placeholder}
             value={props.value}

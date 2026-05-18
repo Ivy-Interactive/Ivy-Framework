@@ -251,6 +251,236 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
 };
 
 /**
+ * Data structure for animated-status cells.
+ *
+ * Three visual modes:
+ * - "label": spinner + shimmering text while running; plain text otherwise.
+ * - "badge": rounded pill whose text shimmers while running; static pill otherwise.
+ * - "spinner-timer": small spinner + plain text. No transition on value change.
+ */
+export interface AnimatedStatusCellData {
+  kind: "animated-status-cell";
+  mode: "label" | "badge" | "spinner-timer";
+  state: "running" | "done" | "idle";
+  statusText: string;
+  rightLabel?: string;
+  align?: "left" | "center" | "right";
+  badgeBg?: string;
+  badgeFg?: string;
+}
+
+export type AnimatedStatusCell = CustomCell<AnimatedStatusCellData>;
+
+const SPINNER_RADIUS = 6;
+const ICON_TEXT_GAP = 6;
+// Slow, subtle shimmer — a single highlight pass takes ~2.4s and the highlight
+// band is narrow so the text reads as gently breathing rather than scrolling.
+const SHIMMER_PERIOD_MS = 2400;
+const SPINNER_PERIOD_MS = 1400;
+
+function drawRoundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  const radius = Math.min(r, h / 2, w / 2);
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(x, y, w, h, radius);
+  } else {
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + w, y, x + w, y + h, radius);
+    ctx.arcTo(x + w, y + h, x, y + h, radius);
+    ctx.arcTo(x, y + h, x, y, radius);
+    ctx.arcTo(x, y, x + w, y, radius);
+    ctx.closePath();
+  }
+}
+
+function drawSpinner(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  color: string,
+  t: number,
+  radius: number = SPINNER_RADIUS,
+) {
+  const start = (t / SPINNER_PERIOD_MS) * Math.PI * 2;
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, start, start + Math.PI * 1.4);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawShimmerText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  baseColor: string,
+  highlightColor: string,
+  t: number,
+) {
+  const width = ctx.measureText(text).width;
+  if (width <= 0) return;
+  const phase = (t % SHIMMER_PERIOD_MS) / SHIMMER_PERIOD_MS;
+  // Sweep the highlight from -0.2 to 1.2 (so it enters/leaves the text smoothly).
+  const center = phase * 1.4 - 0.2;
+  const gradient = ctx.createLinearGradient(x, 0, x + width, 0);
+  const clamp = (v: number) => Math.max(0, Math.min(1, v));
+  // Narrower band (~0.18 wide) for a subtler sweep.
+  const left = clamp(center - 0.18);
+  const right = clamp(center + 0.18);
+  gradient.addColorStop(0, baseColor);
+  gradient.addColorStop(left, baseColor);
+  gradient.addColorStop(clamp(center), highlightColor);
+  gradient.addColorStop(right, baseColor);
+  gradient.addColorStop(1, baseColor);
+  ctx.save();
+  ctx.fillStyle = gradient;
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+type AnimatedDrawArgs = Parameters<CustomRenderer<AnimatedStatusCell>["draw"]>[0];
+
+function drawLabelMode(args: AnimatedDrawArgs, cell: AnimatedStatusCell, t: number, hPad: number) {
+  const { ctx, rect, theme } = args;
+  const { state, statusText, rightLabel, align = "left" } = cell.data;
+
+  const baseColor = theme.textDark;
+  const dimColor = theme.textMedium;
+  const accentColor = theme.accentColor ?? baseColor;
+  const cy = rect.y + rect.height / 2;
+
+  let cursorX = rect.x + hPad;
+  if (state === "running") {
+    drawSpinner(ctx, cursorX + SPINNER_RADIUS, cy, accentColor, t);
+    cursorX += SPINNER_RADIUS * 2 + ICON_TEXT_GAP;
+    args.requestAnimationFrame();
+  }
+
+  let rightX = rect.x + rect.width - hPad;
+  if (rightLabel) {
+    const rw = ctx.measureText(rightLabel).width;
+    ctx.fillStyle = dimColor;
+    ctx.fillText(rightLabel, rightX - rw, cy);
+    rightX -= rw + ICON_TEXT_GAP;
+  }
+
+  let textX = cursorX;
+  if (align === "center") {
+    const textW = ctx.measureText(statusText).width;
+    textX = Math.max(cursorX, rect.x + (rect.width - textW) / 2);
+  } else if (align === "right") {
+    const textW = ctx.measureText(statusText).width;
+    textX = Math.max(cursorX, rightX - textW);
+  }
+
+  if (state === "running") {
+    drawShimmerText(ctx, statusText, textX, cy, dimColor, baseColor, t);
+  } else {
+    ctx.fillStyle = state === "done" ? baseColor : dimColor;
+    ctx.fillText(statusText, textX, cy);
+  }
+}
+
+function drawBadgeMode(args: AnimatedDrawArgs, cell: AnimatedStatusCell, t: number, hPad: number) {
+  const { ctx, rect, theme } = args;
+  const { state, statusText, align = "left", badgeBg, badgeFg } = cell.data;
+
+  const bg = badgeBg ?? theme.bgBubble;
+  const fg = badgeFg ?? theme.textBubble;
+  const bubbleH = theme.bubbleHeight;
+  const pad = theme.bubblePadding;
+  const radius = theme.roundingRadius ?? bubbleH / 2;
+  const textW = ctx.measureText(statusText).width;
+  const boxW = textW + pad * 2;
+
+  let bx = rect.x + hPad;
+  if (align === "center") bx = rect.x + (rect.width - boxW) / 2;
+  else if (align === "right") bx = rect.x + rect.width - boxW - hPad;
+  const by = rect.y + (rect.height - bubbleH) / 2;
+  const cy = by + bubbleH / 2;
+
+  ctx.save();
+  ctx.fillStyle = bg;
+  drawRoundRect(ctx, bx, by, boxW, bubbleH, radius);
+  ctx.fill();
+  ctx.restore();
+
+  if (state === "running") {
+    drawShimmerText(ctx, statusText, bx + pad, cy, fg, "rgba(255,255,255,0.55)", t);
+    args.requestAnimationFrame();
+  } else {
+    ctx.fillStyle = fg;
+    ctx.fillText(statusText, bx + pad, cy);
+  }
+}
+
+function drawSpinnerTimerMode(
+  args: AnimatedDrawArgs,
+  cell: AnimatedStatusCell,
+  t: number,
+  hPad: number,
+) {
+  const { ctx, rect, theme } = args;
+  const { state, statusText, align = "left" } = cell.data;
+
+  const baseColor = theme.textDark;
+  const dimColor = theme.textMedium;
+  const accentColor = theme.accentColor ?? baseColor;
+  const cy = rect.y + rect.height / 2;
+  const r = SPINNER_RADIUS - 1;
+
+  let cursorX = rect.x + hPad;
+  if (state === "running") {
+    drawSpinner(ctx, cursorX + r, cy, accentColor, t, r);
+    cursorX += r * 2 + ICON_TEXT_GAP;
+    args.requestAnimationFrame();
+  }
+
+  const textW = ctx.measureText(statusText).width;
+  let textX = cursorX;
+  if (align === "center") textX = Math.max(cursorX, rect.x + (rect.width - textW) / 2);
+  else if (align === "right") textX = Math.max(cursorX, rect.x + rect.width - hPad - textW);
+
+  ctx.fillStyle = state === "idle" ? dimColor : baseColor;
+  ctx.fillText(statusText, textX, cy);
+}
+
+export const animatedStatusCellRenderer: CustomRenderer<AnimatedStatusCell> = {
+  kind: GridCellKind.Custom,
+  isMatch: (cell: CustomCell): cell is AnimatedStatusCell =>
+    cell.kind === GridCellKind.Custom &&
+    (cell.data as AnimatedStatusCellData | undefined)?.kind === "animated-status-cell",
+  draw: (args, cell) => {
+    const { ctx, theme } = args;
+    const t = (args as unknown as { frameTime?: number }).frameTime ?? performance.now();
+    const hPad = theme.cellHorizontalPadding ?? 8;
+
+    ctx.save();
+    ctx.font = (theme as GridDrawTheme).baseFontFull;
+    ctx.textBaseline = "middle";
+
+    const mode = cell.data.mode ?? "label";
+    if (mode === "badge") drawBadgeMode(args, cell, t, hPad);
+    else if (mode === "spinner-timer") drawSpinnerTimerMode(args, cell, t, hPad);
+    else drawLabelMode(args, cell, t, hPad);
+
+    ctx.restore();
+    return true;
+  },
+};
+
+/**
  * Custom cell renderer for displaying links with underline in table cells
  */
 export const linkCellRenderer: CustomRenderer<LinkCell> = {

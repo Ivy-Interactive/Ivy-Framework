@@ -125,9 +125,15 @@ namespace Ivy.Analyser.Analyzers
 
         private static bool IsHookName(string methodName)
         {
-            return methodName.Length > 3
-                && methodName.StartsWith("Use")
-                && char.IsUpper(methodName[3]);
+            if (methodName.Length > 3 && methodName.StartsWith("Use") && char.IsUpper(methodName[3]))
+                return true;
+
+            return false;
+        }
+
+        private static bool IsTryHookName(string methodName)
+        {
+            return methodName.Length > 6 && methodName.StartsWith("TryUse") && char.IsUpper(methodName[6]);
         }
 
         private static bool IsHookInvocation(InvocationExpressionSyntax invocation)
@@ -138,10 +144,34 @@ namespace Ivy.Analyser.Analyzers
                 return true;
             }
 
-            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-                memberAccess.Expression is ThisExpressionSyntax)
+            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
             {
-                return true;
+                if (memberAccess.Expression is ThisExpressionSyntax)
+                    return true;
+
+                if (memberAccess.Expression is IdentifierNameSyntax receiver)
+                {
+                    if (receiver.Identifier.Text == "Context")
+                        return true;
+
+                    if (char.IsUpper(receiver.Identifier.Text[0]))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsTryHookInvocation(InvocationExpressionSyntax invocation)
+        {
+            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
+            {
+                if (memberAccess.Expression is ThisExpressionSyntax)
+                    return true;
+
+                if (memberAccess.Expression is IdentifierNameSyntax receiver &&
+                    receiver.Identifier.Text == "Context")
+                    return true;
             }
 
             return false;
@@ -170,10 +200,13 @@ namespace Ivy.Analyser.Analyzers
             var invocation = (InvocationExpressionSyntax)context.Node;
 
             var methodName = GetMethodName(invocation);
-            if (methodName == null || !IsHookName(methodName))
+            if (methodName == null)
                 return;
 
-            if (!IsHookInvocation(invocation))
+            var isHook = IsHookName(methodName) && IsHookInvocation(invocation);
+            var isTryHook = !isHook && IsTryHookName(methodName) && IsTryHookInvocation(invocation);
+
+            if (!isHook && !isTryHook)
                 return;
 
             var hookUsage = CheckHookUsage(invocation);
@@ -237,8 +270,13 @@ namespace Ivy.Analyser.Analyzers
             if (IsInlineExpression(invocation))
                 context.ReportDiagnostic(Diagnostic.Create(RuleInlineExpression, invocation.GetLocation(), methodName));
 
-            if (IsNotAtTopOfMethod(invocation))
+            if (!IsEffectHook(methodName) && IsNotAtTopOfMethod(invocation))
                 context.ReportDiagnostic(Diagnostic.Create(RuleNotAtTop, invocation.GetLocation(), methodName));
+        }
+
+        private static bool IsEffectHook(string methodName)
+        {
+            return methodName == "UseEffect" || methodName == "UseInterval";
         }
 
         private static string? GetMethodName(InvocationExpressionSyntax invocation)
@@ -461,7 +499,13 @@ namespace Ivy.Analyser.Analyzers
         private static bool IsHookCall(InvocationExpressionSyntax invocation)
         {
             var methodName = GetMethodName(invocation);
-            return methodName != null && IsHookName(methodName);
+            if (methodName == null)
+                return false;
+            if (IsHookName(methodName) && IsHookInvocation(invocation))
+                return true;
+            if (IsTryHookName(methodName) && IsTryHookInvocation(invocation))
+                return true;
+            return false;
         }
 
         private static bool IsStoredInClassMember(InvocationExpressionSyntax invocation, SyntaxNodeAnalysisContext context)
