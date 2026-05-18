@@ -7,6 +7,7 @@ import DataEditor, {
   GridMouseEventArgs,
   GridSelection,
   GroupHeaderClickedEventArgs,
+  HeaderClickedEventArgs,
   Highlight,
   Item,
   SpriteMap,
@@ -27,7 +28,7 @@ interface GridContainerProps {
   headerIcons: SpriteMap;
   onColumnResize?: (column: GridColumn, newSize: number) => void;
   onVisibleRegionChanged: (range: { x: number; y: number; width: number; height: number }) => void;
-  onHeaderClicked?: (col: number) => void;
+  onHeaderClicked?: (col: number, event: HeaderClickedEventArgs) => void;
   theme: Partial<Theme> | undefined;
   rowHeight: number;
   headerHeight: number;

@@ -108,13 +108,14 @@ export function convertToGridColumns(
     const effectiveGrow = grow !== undefined ? grow : isLastColumn ? 1 : undefined;
 
     const shouldShowIcon = Boolean(col.icon) || showColumnTypeIcons;
-    let columnIcon = shouldShowIcon ? mapColumnIcon(col) : undefined;
-    if (activeSort && activeSort.length > 0) {
-      const sortForColumn = activeSort.find((sort) => sort.column === col.name);
-      if (sortForColumn) {
-        columnIcon = sortForColumn.direction === "ASC" ? "ArrowUp" : "ArrowDown";
-      }
-    }
+    const columnIcon = shouldShowIcon ? mapColumnIcon(col) : undefined;
+    const sortForColumn = activeSort?.find((sort) => sort.column === col.name);
+    const indicatorIcon =
+      sortForColumn !== undefined
+        ? sortForColumn.direction === "ASC"
+          ? "ArrowUp"
+          : "ArrowDown"
+        : undefined;
 
     return {
       title: col.header || col.name,
@@ -122,6 +123,7 @@ export function convertToGridColumns(
       ...(effectiveGrow !== undefined && { grow: effectiveGrow }),
       group: showGroups ? col.group : undefined,
       icon: columnIcon,
+      ...(indicatorIcon !== undefined && { indicatorIcon }),
     };
   });
 }
