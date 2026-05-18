@@ -1,6 +1,6 @@
 using Ivy.Widgets.ActivityHeatmap;
 
-namespace Ivy.Test;
+namespace Ivy.Widgets.ActivityHeatmap.Tests;
 
 public class ActivityHeatmapTests
 {
