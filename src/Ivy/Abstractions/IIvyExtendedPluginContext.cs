@@ -11,7 +11,6 @@ public interface IIvyExtendedPluginContext : IIvyPluginContext
 
     // Menu hooks
     void AddMenuItems(Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>> transformer);
-    void AddFooterMenuItems(Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer);
 
     // Sidebar badge providers
     void AddBadgeProvider(string menuTag, Func<IServiceProvider, int> countProvider);

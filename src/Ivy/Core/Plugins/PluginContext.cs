@@ -26,7 +26,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         Builder = builder;
     }
     private readonly List<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> _menuTransformers = [];
-    private readonly List<Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>> _footerMenuTransformers = [];
     private readonly List<(string Tag, Func<IServiceProvider, int> CountProvider)> _badgeProviders = [];
     private readonly List<Action<WebApplication>> _appActions = [];
     private readonly AggregatePluginServiceProvider _aggregateProvider = new();
@@ -55,7 +54,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
     internal void ClearPluginConfig() => _currentPluginConfig = null;
 
     public IReadOnlyList<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers => _menuTransformers;
-    public IReadOnlyList<Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>> FooterMenuTransformers => _footerMenuTransformers;
     public IReadOnlyList<(string Tag, Func<IServiceProvider, int> CountProvider)> BadgeProviders => _badgeProviders;
 
     internal void SetCurrentPlugin(string pluginId, string directory)
@@ -99,14 +97,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
         if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
             state.MenuTransformers.Add(transformer);
-    }
-
-    public void AddFooterMenuItems(Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer)
-    {
-        _footerMenuTransformers.Add(transformer);
-
-        if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
-            state.FooterMenuTransformers.Add(transformer);
     }
 
     public void AddBadgeProvider(string menuTag, Func<IServiceProvider, int> countProvider)
@@ -197,9 +187,6 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
 
             foreach (var t in state.MenuTransformers)
                 _menuTransformers.Remove(t);
-
-            foreach (var t in state.FooterMenuTransformers)
-                _footerMenuTransformers.Remove(t);
 
             foreach (var b in state.BadgeProviders)
                 _badgeProviders.Remove(b);

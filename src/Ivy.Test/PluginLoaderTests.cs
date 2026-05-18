@@ -200,26 +200,6 @@ public class PluginLoaderTests
     }
 
     [Fact]
-    public void FooterMenuTransformersAreTrackedPerPlugin()
-    {
-        var context = new TestPluginContext();
-
-        context.SetCurrentPlugin("plugin-a", "/plugins/a");
-        context.AddFooterMenuItems((items, nav) => items.Append(new MenuItem("A")));
-        context.ClearCurrentPlugin();
-
-        context.SetCurrentPlugin("plugin-b", "/plugins/b");
-        context.AddFooterMenuItems((items, nav) => items.Append(new MenuItem("B")));
-        context.ClearCurrentPlugin();
-
-        Assert.Equal(2, context.FooterMenuTransformers.Count);
-
-        context.RemovePluginContributions("plugin-b");
-
-        Assert.Single(context.FooterMenuTransformers);
-    }
-
-    [Fact]
     public void BadgeProvidersAreTrackedPerPlugin()
     {
         var context = new TestPluginContext();

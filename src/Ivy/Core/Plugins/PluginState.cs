@@ -10,7 +10,6 @@ internal class PluginState
     public ServiceCollection PluginServices { get; } = new();
 
     public List<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers { get; } = [];
-    public List<Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>> FooterMenuTransformers { get; } = [];
     public List<(string Tag, Func<IServiceProvider, int> CountProvider)> BadgeProviders { get; } = [];
     public List<Action<WebApplication>> AppActions { get; } = [];
     public List<Func<AppDescriptor[]>> AppFactories { get; } = [];
