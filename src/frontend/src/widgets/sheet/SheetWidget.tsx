@@ -13,6 +13,8 @@ import "./sheet.css";
 
 type SheetSide = "left" | "right" | "top" | "bottom";
 
+const EMPTY_ARRAY: never[] = [];
+
 const normalizeSide = (side?: string): SheetSide => {
   if (!side) return "right";
   return side.toLowerCase() as SheetSide;
@@ -92,7 +94,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
   height,
   side = "right",
   resizable: resizableProp = false,
-  events = [],
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
   const [isOpen, setIsOpen] = useState(true);

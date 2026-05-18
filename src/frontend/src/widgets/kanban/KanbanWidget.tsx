@@ -28,7 +28,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   const { handleCardMove } = useKanbanHandlers(id, events);
 
   const sortedColumns = React.useMemo(() => {
-    return [...extractedData.columns].sort((a, b) => {
+    return extractedData.columns.toSorted((a, b) => {
       const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
       const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
       return orderA - orderB;

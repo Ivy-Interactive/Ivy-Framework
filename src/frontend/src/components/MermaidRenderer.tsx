@@ -88,8 +88,10 @@ const sanitizeSvg = (svg: string): string => {
 
 const MermaidRenderer = memo(({ content }: MermaidRendererProps) => {
   const elementRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<{ isLoading: boolean; error: string | null }>({
+    isLoading: true,
+    error: null,
+  });
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
   const themeRef = useRef<"light" | "dark">("light");
   const renderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -156,15 +158,12 @@ const MermaidRenderer = memo(({ content }: MermaidRendererProps) => {
     };
   }, [detectTheme, debouncedRender]);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const renderDiagram = async () => {
+  const renderDiagram = useCallback(
+    async (mountedObj: { current: boolean }) => {
       if (!elementRef.current) return;
 
       try {
-        setIsLoading(true);
-        setError(null);
+        setState({ isLoading: true, error: null });
 
         // Dynamically import mermaid
         const mermaid = (await import("mermaid")).default;
@@ -210,29 +209,35 @@ const MermaidRenderer = memo(({ content }: MermaidRendererProps) => {
         const { svg } = await mermaid.render(id, content.trim());
         logger.debug("Mermaid rendered", { svg });
 
-        if (mounted && elementRef.current) {
+        if (mountedObj.current && elementRef.current) {
           // Sanitize SVG content before setting innerHTML
           const sanitizedSvg = sanitizeSvg(svg);
           elementRef.current.innerHTML = sanitizedSvg;
-          setIsLoading(false);
+          setState((prev) => ({ ...prev, isLoading: false }));
         }
       } catch (err) {
         logger.error("Mermaid rendering error:", err);
-        if (mounted) {
-          setError(err instanceof Error ? err.message : "Failed to render diagram");
-          setIsLoading(false);
+        if (mountedObj.current) {
+          setState({
+            isLoading: false,
+            error: err instanceof Error ? err.message : "Failed to render diagram",
+          });
         }
       }
-    };
+    },
+    [content],
+  );
 
-    renderDiagram();
+  useEffect(() => {
+    const mountedObj = { current: true };
+    renderDiagram(mountedObj);
 
     return () => {
-      mounted = false;
+      mountedObj.current = false;
     };
-  }, [content, currentTheme]); // Re-render when content or theme changes
+  }, [renderDiagram, currentTheme]); // Re-render when content or theme changes
 
-  if (error) {
+  if (state.error) {
     return (
       <div className="rounded-md border border-destructive bg-destructive/10 p-3">
         <div className="flex items-center gap-2 text-destructive text-sm font-medium">
@@ -261,7 +266,7 @@ const MermaidRenderer = memo(({ content }: MermaidRendererProps) => {
         <CopyToClipboardButton textToCopy={content} />
       </div>
       <div className="mermaid-container rounded-md border bg-background p-4 overflow-x-auto slim-scrollbar">
-        {isLoading && (
+        {state.isLoading && (
           <div className="flex items-center justify-center p-8 text-muted-foreground">
             <div className="animate-spin rounded-full size-6 border-b-2 border-primary"></div>
             <span className="ml-2 text-sm">Loading diagram...</span>
@@ -270,7 +275,7 @@ const MermaidRenderer = memo(({ content }: MermaidRendererProps) => {
         <div
           ref={elementRef}
           className="mermaid-diagram"
-          style={{ minHeight: isLoading ? "100px" : "auto" }}
+          style={{ minHeight: state.isLoading ? "100px" : "auto" }}
         />
       </div>
     </div>

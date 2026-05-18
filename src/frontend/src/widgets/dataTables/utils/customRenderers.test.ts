@@ -11,9 +11,7 @@ class MockImage {
 }
 
 beforeAll(() => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   global.Image = MockImage as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   global.HTMLImageElement = MockImage as any;
 });
 
@@ -41,7 +39,6 @@ describe("customRenderers", () => {
           displayData: "test",
           allowOverlay: false,
           copyData: "test",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
 
         expect(iconCellRenderer.isMatch(textCell)).toBe(false);
@@ -56,7 +53,6 @@ describe("customRenderers", () => {
             kind: "other-cell",
             value: "test",
           },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any;
 
         expect(iconCellRenderer.isMatch(customCell)).toBe(false);
@@ -92,7 +88,6 @@ describe("customRenderers", () => {
         rect: mockRect,
         col: 0,
         row: 0,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       beforeEach(() => {
@@ -182,7 +177,6 @@ describe("customRenderers", () => {
           iconName: "Activity",
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = iconCellRenderer.onPaste?.(123 as any, data);
 
         expect(result).toBeUndefined();

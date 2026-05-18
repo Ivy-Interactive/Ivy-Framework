@@ -63,7 +63,7 @@ const headingClasses: Record<number, string> = {
 
 function renderInlineContent(
   run: TextRun,
-  index: number,
+  runId: number,
   events: string[],
   eventHandler: ReturnType<typeof useEventHandler>,
   widgetId: string,
@@ -81,7 +81,7 @@ function renderInlineContent(
 
   const content = (
     <>
-      {run.word && index > 0 ? " " : ""}
+      {run.word && runId > 0 ? " " : ""}
       {run.content}
     </>
   );
@@ -91,7 +91,7 @@ function renderInlineContent(
     if (events.includes("OnLinkClick")) {
       return (
         <button
-          key={`run-${index}`}
+          key={`run-${runId}`}
           type="button"
           className={cn(className, "underline cursor-pointer text-left")}
           style={runStyles}
@@ -106,7 +106,7 @@ function renderInlineContent(
 
     return (
       <a
-        key={`run-${index}`}
+        key={`run-${runId}`}
         href={run.link}
         target={isBlank ? "_blank" : "_self"}
         rel={isBlank ? "noopener noreferrer" : undefined}
@@ -120,7 +120,7 @@ function renderInlineContent(
 
   if (run.code) {
     return (
-      <code key={`run-${index}`} className={typography.code} style={runStyles}>
+      <code key={`run-${runId}`} className={typography.code} style={runStyles}>
         {run.content}
       </code>
     );
@@ -132,18 +132,11 @@ function renderInlineContent(
         throwOnError: false,
         displayMode: run.math === "display",
       });
-      return (
-        <span
-          key={`run-${index}`}
-          className={className}
-          style={runStyles}
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      );
+      return <HtmlSpan key={`run-${runId}`} className={className} style={runStyles} html={html} />;
     } catch {
       // If KaTeX rendering fails, display raw content
       return (
-        <span key={`run-${index}`} className={className} style={runStyles}>
+        <span key={`run-${runId}`} className={className} style={runStyles}>
           {run.content}
         </span>
       );
@@ -151,7 +144,7 @@ function renderInlineContent(
   }
 
   return (
-    <span key={`run-${index}`} className={className} style={runStyles}>
+    <span key={`run-${runId}`} className={className} style={runStyles}>
       {content}
     </span>
   );
@@ -172,12 +165,12 @@ function renderGroup(
   if (group.type === "bullet") {
     return (
       <ul key={`ul-${groupIndex}`} className={typography.ul}>
-        {group.runs.map(({ run, index }) => (
+        {group.runs.map((item) => (
           <li
-            key={`li-${index}-${run.content.length}`}
-            className={run.bulletItem && run.bulletItem > 1 ? "ml-4" : undefined}
+            key={`li-${item.index}-${item.run.content.length}`}
+            className={item.run.bulletItem && item.run.bulletItem > 1 ? "ml-4" : undefined}
           >
-            {renderInlineContent(run, index, events, eventHandler, id)}
+            {renderInlineContent(item.run, item.index, events, eventHandler, id)}
           </li>
         ))}
       </ul>
@@ -187,9 +180,9 @@ function renderGroup(
   if (group.type === "ordered") {
     return (
       <ol key={`ol-${groupIndex}`} className={typography.ol}>
-        {group.runs.map(({ run, index }) => (
-          <li key={`li-${index}-${run.content.length}`}>
-            {renderInlineContent(run, index, events, eventHandler, id)}
+        {group.runs.map((item) => (
+          <li key={`li-${item.index}-${item.run.content.length}`}>
+            {renderInlineContent(item.run, item.index, events, eventHandler, id)}
           </li>
         ))}
       </ol>
@@ -197,7 +190,9 @@ function renderGroup(
   }
 
   // Inline group — render each run individually with block-level wrappers
-  return group.runs.map(({ run, index }) => {
+  return group.runs.map((item) => {
+    const run = item.run;
+    const index = item.index;
     const key = `run-${index}-${run.content.length}`;
     if (run.lineBreak) {
       return <br key={key} />;
@@ -245,7 +240,7 @@ function renderGroup(
           throwOnError: false,
           displayMode: true,
         });
-        return <div key={key} className="my-4" dangerouslySetInnerHTML={{ __html: html }} />;
+        return <HtmlDiv key={key} className="my-4" html={html} />;
       } catch {
         // If KaTeX rendering fails, display raw content
         return (
@@ -347,7 +342,10 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
         style={styles}
         className={cn(noWrap && "whitespace-nowrap", density && scaleClasses[density])}
       >
-        {allRuns.map((run, index) => renderInlineContent(run, index, events, eventHandler, id))}
+        {allRuns.map((run) => {
+          const runIdx = allRuns.indexOf(run);
+          return renderInlineContent(run, runIdx, events, eventHandler, id);
+        })}
       </span>
     );
   }
@@ -360,11 +358,14 @@ export const RichTextBlockWidget: React.FC<RichTextBlockWidgetProps> = ({
       style={styles}
       className={cn(noWrap && "whitespace-nowrap", density && scaleClasses[density])}
     >
-      {groups.map((group, groupIndex) => (
-        <React.Fragment key={`group-${groupIndex}`}>
-          {renderGroup(group, groupIndex, events, eventHandler, id)}
-        </React.Fragment>
-      ))}
+      {groups.map((group) => {
+        const groupIdx = groups.indexOf(group);
+        return (
+          <React.Fragment key={`group-${groupIdx}`}>
+            {renderGroup(group, groupIdx, events, eventHandler, id)}
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 };

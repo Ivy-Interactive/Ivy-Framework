@@ -17,13 +17,15 @@ interface BladeWidgetProps {
   };
 }
 
+const EMPTY_EVENTS: string[] = [];
+
 export function BladeWidget({
   index,
   title,
   children,
   id,
   width,
-  events = [],
+  events = EMPTY_EVENTS,
   slots,
 }: BladeWidgetProps) {
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

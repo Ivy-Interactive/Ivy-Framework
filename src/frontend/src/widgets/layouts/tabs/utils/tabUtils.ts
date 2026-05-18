@@ -75,14 +75,14 @@ export function orderTabWidgets(
   tabOrder: string[],
   tabWidgets: React.ReactElement<TabWidgetProps>[],
 ): React.ReactElement<TabWidgetProps>[] {
-  return tabOrder
-    .map((id) =>
-      tabWidgets.find((tab) => {
-        const props = getTabProps(tab);
-        return props?.id === id;
-      }),
-    )
-    .filter(Boolean) as React.ReactElement<TabWidgetProps>[];
+  return tabOrder.reduce<React.ReactElement<TabWidgetProps>[]>((acc, id) => {
+    const found = tabWidgets.find((tab) => {
+      const props = getTabProps(tab);
+      return props?.id === id;
+    });
+    if (found) acc.push(found);
+    return acc;
+  }, []);
 }
 
 /**
@@ -91,9 +91,11 @@ export function orderTabWidgets(
  * @returns Array of tab IDs
  */
 export function extractTabIds(tabWidgets: React.ReactElement<TabWidgetProps>[]): string[] {
-  return tabWidgets
-    .map((tab) => getTabProps(tab)?.id)
-    .filter((id): id is string => id !== undefined);
+  return tabWidgets.reduce<string[]>((acc, tab) => {
+    const id = getTabProps(tab)?.id;
+    if (id !== undefined) acc.push(id);
+    return acc;
+  }, []);
 }
 
 /**
@@ -254,14 +256,19 @@ export function estimateUnrenderedTabWidths(
   const estimatedWidths = new Map<string, number>();
   const hasButtons = events.includes("OnClose") || events.includes("OnRefresh");
 
+  const tabWidgetMap = new Map<string, React.ReactElement<TabWidgetProps>>();
+  for (const tab of tabWidgets) {
+    const props = getTabProps(tab);
+    if (props?.id) {
+      tabWidgetMap.set(props.id, tab);
+    }
+  }
+
   for (const tabId of tabOrder) {
     // Skip if we already have a measurement
     if (measurements.has(tabId)) continue;
 
-    const tabWidget = tabWidgets.find((tab) => {
-      const props = getTabProps(tab);
-      return props?.id === tabId;
-    });
+    const tabWidget = tabWidgetMap.get(tabId);
     if (!tabWidget || !React.isValidElement(tabWidget)) continue;
 
     const tabProps = getTabProps(tabWidget);

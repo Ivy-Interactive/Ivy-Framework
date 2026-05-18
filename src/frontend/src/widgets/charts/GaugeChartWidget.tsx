@@ -21,6 +21,8 @@ const GAUGE_DEFAULTS = {
   },
 };
 
+const EMPTY_THRESHOLDS: never[] = [];
+
 const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
   value = 0,
   min = GAUGE_DEFAULTS.min,
@@ -28,7 +30,7 @@ const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
   label,
   startAngle = GAUGE_DEFAULTS.startAngle,
   endAngle = GAUGE_DEFAULTS.endAngle,
-  thresholds = [],
+  thresholds = EMPTY_THRESHOLDS,
   pointer,
   animated = GAUGE_DEFAULTS.animated,
   colorScheme = "Default",
@@ -70,7 +72,7 @@ const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
     const range = max - min;
     if (range <= 0) return [[1, chartColors[0] ?? "#5470c6"]];
 
-    const sorted = [...thresholds].sort((a, b) => a.value - b.value);
+    const sorted = thresholds.toSorted((a, b) => a.value - b.value);
     return sorted.map((t) => [Math.min(Math.max((t.value - min) / range, 0), 1), t.color]);
   }, [thresholds, min, max, chartColors]);
 

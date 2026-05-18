@@ -7,6 +7,7 @@ interface LoadingProps {
 }
 
 interface SkeletonLine {
+  id: string;
   widthPercent: number;
   heightPx: number;
 }
@@ -27,6 +28,7 @@ function generateSkeletonLayout(): SkeletonLine[] {
   const lines: SkeletonLine[] = [];
   for (let i = 0; i < count; i++) {
     lines.push({
+      id: crypto.randomUUID(),
       widthPercent: randomBetween(SKELETON_LINE_MIN_WIDTH, SKELETON_LINE_MAX_WIDTH),
       heightPx: randomBetween(SKELETON_LINE_MIN_HEIGHT, SKELETON_LINE_MAX_HEIGHT),
     });
@@ -42,9 +44,9 @@ export function Loading({ type = "Spinner" }: LoadingProps) {
     return (
       <div className="flex flex-col gap-2 w-full max-w-sm" role="status" aria-label="Loading">
         <Skeleton className="h-5 rounded-md bg-muted" style={{ width: `${titleBarWidth}%` }} />
-        {skeletonLines.map((line, index) => (
+        {skeletonLines.map((line) => (
           <Skeleton
-            key={`loading-skeleton-line-${index}`}
+            key={line.id}
             className="rounded bg-muted"
             style={{
               width: `${line.widthPercent}%`,

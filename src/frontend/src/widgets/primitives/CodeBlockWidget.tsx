@@ -152,11 +152,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       [currentScale, wrapLines, showLineNumbers],
     );
 
-    const highlighterKey = useMemo(
-      () =>
-        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}-${wrapLines}`,
-      [id, language, showLineNumbers, showBorder, startingLineNumber, wrapLines],
-    );
+    const highlighterKey = `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}-${wrapLines}`;
 
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
 

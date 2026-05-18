@@ -69,9 +69,8 @@ export const DataTableFilterOption: React.FC<{
   // Filter columns to only include filterable ones
   const queryEditorColumns = useMemo(
     () =>
-      columns
-        .filter((col) => col.filterable ?? true)
-        .map((col) => {
+      columns.reduce<{ name: string; type: string; width: number }>((acc, col) => {
+        if (col.filterable ?? true) {
           // Map column types to filter-query-editor supported types
           // Default to 'text' if type is undefined (shouldn't happen but defensive)
           let editorType = (col.type ?? ColType.Text).toLowerCase();
@@ -80,12 +79,14 @@ export const DataTableFilterOption: React.FC<{
             editorType = "date";
           }
 
-          return {
+          acc.push({
             name: col.name,
             type: editorType,
             width: typeof col.width === "number" ? col.width : 150,
-          };
-        }),
+          });
+        }
+        return acc;
+      }, []),
     [columns],
   );
 

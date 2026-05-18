@@ -9,7 +9,7 @@ function toGitHubUrl(value: string): string {
 
 export default function MadeWithIvy() {
   const [isHovered, setIsHovered] = useState(false);
-  const [shouldShow, setShouldShow] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [gitHubUrl] = useState<string | null>(() => {
     if (typeof document === "undefined") return null;
     const meta = document.querySelector('meta[name="github-url"]');
@@ -18,7 +18,7 @@ export default function MadeWithIvy() {
 
   useEffect(() => {
     const checkWindowSize = () => {
-      setShouldShow(window.innerWidth >= 600 && window.innerHeight >= 600);
+      setIsVisible(window.innerWidth >= 600 && window.innerHeight >= 600);
     };
 
     checkWindowSize();
@@ -26,8 +26,6 @@ export default function MadeWithIvy() {
 
     return () => window.removeEventListener("resize", checkWindowSize);
   }, []);
-
-  if (!shouldShow) return null;
 
   const linkUrl = gitHubUrl
     ? toGitHubUrl(gitHubUrl)
@@ -44,7 +42,7 @@ export default function MadeWithIvy() {
     }
   };
 
-  return (
+  return isVisible ? (
     <div
       className="fixed bottom-0 right-0 z-100 overflow-hidden rounded-tl-full "
       onPointerEnter={() => setIsHovered(true)}
@@ -87,5 +85,5 @@ export default function MadeWithIvy() {
         </div>
       </div>
     </div>
-  );
+  ) : null;
 }

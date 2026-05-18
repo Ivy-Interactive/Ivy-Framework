@@ -195,10 +195,12 @@ function clonePathToTarget(
       return null;
     }
 
-    if (index >= current.children.length) {
+    const childrenLength = current.children.length;
+
+    if (index >= childrenLength) {
       logger.error("Index out of bounds while cloning path", {
         index,
-        childrenLength: current.children.length,
+        childrenLength,
         pathIndex: i,
         indices,
       });
@@ -209,7 +211,7 @@ function clonePathToTarget(
     if (!child) {
       logger.error("Child at index is null/undefined", {
         index,
-        childrenLength: current.children.length,
+        childrenLength,
         parentType: current.type,
         parentId: current.id,
       });
@@ -271,7 +273,10 @@ function applyUpdateMessage(tree: WidgetNode, updates: UpdateMessage): WidgetNod
         const result = clonePathToTarget(newTree, update.indices);
         if (!result) continue;
         newTree = result.newTree;
-        result.parent.children![result.targetIndex] = newValue;
+        const children = result.parent.children;
+        if (children) {
+          children[result.targetIndex] = newValue;
+        }
       }
     } else {
       // Patch operation - need to clone target before mutating
@@ -285,10 +290,16 @@ function applyUpdateMessage(tree: WidgetNode, updates: UpdateMessage): WidgetNod
         if (!result) continue;
         newTree = result.newTree;
 
-        // Deep clone the target node before applying patch (patch mutates in place)
-        const targetClone = deepCloneNode(result.parent.children![result.targetIndex]);
-        result.parent.children![result.targetIndex] = targetClone;
-        applyPatch(targetClone, update.patch);
+        const children = result.parent.children;
+        if (children) {
+          // Deep clone the target node before applying patch (patch mutates in place)
+          const targetNode = children[result.targetIndex];
+          const clonedTarget = deepCloneNode(targetNode);
+          applyPatch(clonedTarget, update.patch);
+
+          // Replace target with patched clone
+          children[result.targetIndex] = clonedTarget;
+        }
       }
     }
 
@@ -382,9 +393,8 @@ export const useBackend = (
 
   const isRootConnection = parentId === null;
 
-  useEffect(() => {
+  const syncStableAppValues = useCallback(() => {
     if (!isRootConnection) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStableAppId(appId);
       setStableAppShell(appShell);
       return;
@@ -399,6 +409,10 @@ export const useBackend = (
       setStableAppShell(appShell);
     }
   }, [appId, appShell, isRootConnection]);
+
+  useEffect(() => {
+    syncStableAppValues();
+  }, [syncStableAppValues]);
 
   useEffect(() => {
     if (import.meta.env.DEV && widgetTree) {
@@ -690,32 +704,29 @@ export const useBackend = (
     [connection],
   );
 
-  const handleError = useCallback(
-    (error: ErrorMessage) => {
-      toast({
-        title: error.title,
-        description: error.description,
-        variant: "destructive",
-        action: (
-          <ToastAction
-            altText="View error details"
-            onClick={() => {
-              showError({
-                title: error.title,
-                message: error.description,
-                stackTrace: error.stackTrace,
-              });
-            }}
-          >
-            Details
-          </ToastAction>
-        ),
-      });
-    },
-    [toast],
-  );
+  const handleError = useCallback((error: ErrorMessage) => {
+    toast({
+      title: error.title,
+      description: error.description,
+      variant: "destructive",
+      action: (
+        <ToastAction
+          altText="View error details"
+          onClick={() => {
+            showError({
+              title: error.title,
+              message: error.description,
+              stackTrace: error.stackTrace,
+            });
+          }}
+        >
+          Details
+        </ToastAction>
+      ),
+    });
+  });
 
-  useEffect(() => {
+  const setupConnection = useCallback(() => {
     if (currentConnectionRef.current) {
       currentConnectionRef.current.stop().catch((err) => {
         logger.warn("Error stopping previous SignalR connection:", err);
@@ -792,6 +803,10 @@ export const useBackend = (
   }, [appArgs, stableAppId, machineId, parentId, stableAppShell, isRootConnection]);
 
   useEffect(() => {
+    return setupConnection();
+  }, [setupConnection]);
+
+  const startConnection = useCallback(() => {
     if (connection && connection.state === signalR.HubConnectionState.Disconnected) {
       isStoppingRef.current = false;
       connection
@@ -1017,6 +1032,10 @@ export const useBackend = (
     stableAppId,
     parentId,
   ]);
+
+  useEffect(() => {
+    return startConnection();
+  }, [startConnection]);
 
   const eventHandler: WidgetEventHandlerType = useCallback(
     (eventName, widgetId, args) => {

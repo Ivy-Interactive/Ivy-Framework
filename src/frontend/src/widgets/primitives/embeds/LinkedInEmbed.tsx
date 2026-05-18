@@ -7,7 +7,7 @@ interface LinkedInEmbedProps {
 }
 
 const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
-  const [scriptError, setScriptError] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const postId = React.useMemo(() => {
     // First try to find activity ID in the URL
@@ -31,24 +31,23 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
     return null;
   }, [url]);
 
-  useEffect(() => {
+  const loadWidgetScript = React.useCallback(() => {
     if (postId) {
-      loadScript("https://platform.linkedin.com/in.js")
-        .then(() => {
-          // LinkedIn script loaded
-        })
-        .catch(() => {
-          setScriptError(true);
-        });
+      loadScript("https://platform.linkedin.com/in.js").catch(() => {
+        setHasError(true);
+      });
     }
   }, [postId]);
 
-  const sanitizedUrl = sanitizeUrl(url);
-  if (!postId || scriptError || !sanitizedUrl) {
-    return <EmbedErrorFallback url={url} platform="LinkedIn" />;
-  }
+  useEffect(() => {
+    loadWidgetScript();
+  }, [loadWidgetScript]);
 
-  return (
+  const sanitizedUrl = sanitizeUrl(url);
+
+  return !postId || hasError || !sanitizedUrl ? (
+    <EmbedErrorFallback url={url} platform="LinkedIn" />
+  ) : (
     <div className="linkedin-embed w-full">
       <div className="linkedin-embed-container w-full">
         <iframe

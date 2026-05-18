@@ -168,20 +168,6 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
   // Validate poster URL if provided
   const validatedPoster = poster ? validateImageUrl(poster) : null;
 
-  if (hasError) {
-    return (
-      <div
-        id={id}
-        style={styles}
-        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
-        role="alert"
-        aria-label="Video loading error"
-      >
-        <span className="text-sm">Failed to load video file</span>
-      </div>
-    );
-  }
-
   if (isYouTube(validatedVideoSrc)) {
     const url = new URL(validatedVideoSrc);
     const videoId = url.searchParams.get("v") ?? url.pathname.split("/").filter(Boolean).pop();
@@ -197,7 +183,17 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
     params.append("loop", loop ? "1" : "0");
     params.append("muted", muted ? "1" : "0");
     params.append("controls", controls ? "1" : "0");
-    return (
+    return hasError ? (
+      <div
+        id={id}
+        style={styles}
+        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
+        role="alert"
+        aria-label="Video loading error"
+      >
+        <span className="text-sm">Failed to load video file</span>
+      </div>
+    ) : (
       <iframe
         id={id}
         style={styles}
@@ -247,7 +243,7 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
       {hasSubtitles &&
         subtitles.map((track, i) => (
           <track
-            key={i}
+            key={track.source || i}
             kind="subtitles"
             src={getSubtitleUrl(track.source)}
             label={track.label || `Track ${i + 1}`}

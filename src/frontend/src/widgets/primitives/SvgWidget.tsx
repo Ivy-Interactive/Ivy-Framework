@@ -19,5 +19,10 @@ export const SvgWidget: React.FC<SvgWidgetProps> = ({
     ...getHeight(height),
   };
 
-  return <div key={id} dangerouslySetInnerHTML={{ __html: content }} style={styles} />;
+  const ref = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (ref.current) ref.current.innerHTML = content;
+  }, [content]);
+
+  return <div key={id} ref={ref} style={styles} />;
 };

@@ -125,7 +125,7 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   const valueTextRef = useRef<HTMLSpanElement>(null);
   const [isEllipsed, setIsEllipsed] = useState(false);
 
-  useEffect(() => {
+  const updateEllipsis = useCallback(() => {
     if (!hasValue || !localValue) {
       requestAnimationFrame(() => setIsEllipsed(false));
       return;
@@ -150,6 +150,10 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
       window.removeEventListener("resize", handleResize);
     };
   }, [hasValue, localValue]);
+
+  useEffect(() => {
+    return updateEllipsis();
+  }, [updateEllipsis]);
 
   const valueTextSpan = hasValue ? (
     <span

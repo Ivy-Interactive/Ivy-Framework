@@ -46,7 +46,7 @@ function buildColumnNameMap(cards: CardData[]): Map<string, string> {
 }
 
 function sortColumnKeysByBackendOrder(columnKeys: string[]): string[] {
-  return [...columnKeys].sort((a, b) => {
+  return columnKeys.toSorted((a, b) => {
     return getStatusOrder(a) - getStatusOrder(b);
   });
 }
@@ -144,18 +144,13 @@ export function useKanbanData(
         cardToTaskMap.set(task.id, task);
       });
 
-      const extractedTasks: TaskWithWidgetId[] = extractedCards
-        .map((card) => {
-          const task = cardToTaskMap.get(card.cardId);
-          if (task) {
-            return {
-              ...task,
-              widgetId: card.widgetId,
-            };
-          }
-          return null;
-        })
-        .filter((task): task is TaskWithWidgetId => task !== null);
+      const extractedTasks = extractedCards.reduce<TaskWithWidgetId[]>((acc, card) => {
+        const task = cardToTaskMap.get(card.cardId);
+        if (task) {
+          acc.push({ ...task, widgetId: card.widgetId });
+        }
+        return acc;
+      }, []);
 
       return {
         tasks: extractedTasks,

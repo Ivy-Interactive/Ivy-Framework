@@ -15,7 +15,7 @@ export const useContainerSize = () => {
   const hasAppliedInitialRef = useRef<boolean>(false);
   const scrollObserverRef = useRef<ResizeObserver | null>(null);
 
-  useEffect(() => {
+  const setupObservers = useCallback(() => {
     if (!containerRef.current) return;
 
     const observeScrollArea = () => {
@@ -90,6 +90,10 @@ export const useContainerSize = () => {
       resizeObserver.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    return setupObservers();
+  }, [setupObservers]);
 
   return {
     containerRef,

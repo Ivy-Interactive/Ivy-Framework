@@ -184,9 +184,11 @@ export const XmlRenderer = ({ data, initialExpanded }: XmlRendererProps) => {
             attributes[attr] = element.getAttribute(attr) || "";
           });
 
-          const children = Array.from(element.childNodes)
-            .map((child) => convertDomToNode(child))
-            .filter((node): node is XmlNode => node !== null);
+          const children = Array.from(element.childNodes).reduce<XmlNode[]>((acc, child) => {
+            const node = convertDomToNode(child);
+            if (node !== null) acc.push(node);
+            return acc;
+          }, []);
 
           return {
             type: "element",

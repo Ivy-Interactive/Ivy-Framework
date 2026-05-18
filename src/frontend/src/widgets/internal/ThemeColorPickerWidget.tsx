@@ -304,7 +304,7 @@ const EMPTY_ARRAY: never[] = [];
 
 export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   id,
-  value,
+  value: propValue,
   disabled = false,
   invalid,
   placeholder,
@@ -314,10 +314,8 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
-  const displayValue = value ?? "";
+  const displayValue = propValue ?? "";
   const [activeTab, setActiveTab] = React.useState("palette");
-  const [localInputValue, setLocalInputValue] = React.useState("");
-  const [colorFormat] = React.useState<"HEX">("HEX");
 
   const parseAlpha = (hex: string): number => {
     if (!hex || !hex.startsWith("#")) return 255;
@@ -325,12 +323,6 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     if (clean.length === 8) return parseInt(clean.slice(6, 8), 16);
     return 255;
   };
-
-  const [alphaValue, setAlphaValue] = React.useState(() => parseAlpha(value ?? ""));
-
-  React.useEffect(() => {
-    setAlphaValue(parseAlpha(value ?? ""));
-  }, [value]);
 
   const combineWithAlpha = (hex6: string, alpha: number): string => {
     const base = hex6.startsWith("#") ? hex6 : "#" + hex6;
@@ -346,6 +338,38 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     if (displayValue.length === 9) return displayValue.slice(0, 7);
     return displayValue;
   }, [displayValue]);
+
+  const [alphaValue, setAlphaValue] = React.useState(() => parseAlpha(propValue ?? ""));
+
+  const [localInputValue, setLocalInputValue] = React.useState(() => {
+    const initialAlpha = parseAlpha(propValue ?? "");
+    const initialDisplayColor = propValue
+      ? propValue.length === 9
+        ? propValue.slice(0, 7)
+        : propValue
+      : "#000000";
+    if (allowAlpha && initialAlpha < 255) {
+      return combineWithAlpha(initialDisplayColor, initialAlpha);
+    }
+    return initialDisplayColor;
+  });
+
+  const prevPropValueRef = React.useRef(propValue);
+  if (propValue !== prevPropValueRef.current) {
+    const newAlpha = parseAlpha(propValue ?? "");
+    setAlphaValue(newAlpha);
+    const displayColor = propValue
+      ? propValue.length === 9
+        ? propValue.slice(0, 7)
+        : propValue
+      : "#000000";
+    if (allowAlpha && newAlpha < 255) {
+      setLocalInputValue(combineWithAlpha(displayColor, newAlpha));
+    } else {
+      setLocalInputValue(displayColor);
+    }
+    prevPropValueRef.current = propValue;
+  }
 
   // Helper to determine contrast color for the "A"
   const getContrastColor = (hex: string): string => {
@@ -378,18 +402,12 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   };
 
-  const [rgbValues, setRgbValues] = React.useState({ r: 0, g: 0, b: 0 });
-
-  React.useEffect(() => {
-    if (activeTab === "picker") {
-      const rgb = hexToRgb(getDisplayColor());
-      setRgbValues(rgb);
-    }
-  }, [displayValue, activeTab, getDisplayColor]);
+  const rgbValues = React.useMemo(() => {
+    return hexToRgb(getDisplayColor());
+  }, [getDisplayColor]);
 
   const handleRgbSliderChange = (type: "r" | "g" | "b", value: number) => {
     const newRgb = { ...rgbValues, [type]: value };
-    setRgbValues(newRgb);
     const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
     if (events.includes("OnChange")) {
       if (allowAlpha) {
@@ -479,20 +497,6 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
       />
     </div>
   );
-
-  // Helper to convert hex to other formats
-  const formatColor = React.useCallback((hex: string): string => {
-    // simplified for brevity as we forced HEX
-    return hex;
-  }, []);
-
-  React.useEffect(() => {
-    if (allowAlpha && alphaValue < 255) {
-      setLocalInputValue(combineWithAlpha(getDisplayColor(), alphaValue));
-    } else {
-      setLocalInputValue(formatColor(getDisplayColor()));
-    }
-  }, [displayValue, colorFormat, getDisplayColor, formatColor, allowAlpha, alphaValue]);
 
   const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalInputValue(e.target.value);

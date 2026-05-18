@@ -11,7 +11,14 @@ interface DialogWidgetProps {
   events?: string[];
 }
 
-export const DialogWidget: React.FC<DialogWidgetProps> = ({ id, children, width, events = [] }) => {
+const EMPTY_EVENTS: string[] = [];
+
+export const DialogWidget: React.FC<DialogWidgetProps> = ({
+  id,
+  children,
+  width,
+  events = EMPTY_EVENTS,
+}) => {
   const eventHandler = useEventHandler();
   const isVisible = true;
 

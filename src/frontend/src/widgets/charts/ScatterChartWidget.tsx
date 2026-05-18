@@ -244,12 +244,12 @@ const generateScatterSeries = (
         const rangeMax = zAxisConfig.rangeMax || 400;
 
         // Extract all z values to find min/max
-        const zValues = data
-          .map((d) => {
-            const v = zAxisDataKey ? resolveValue(d, zAxisDataKey) : undefined;
-            return v !== undefined ? (typeof v === "number" ? v : parseFloat(String(v || 0))) : 0;
-          })
-          .filter((z) => z > 0);
+        const zValues = data.reduce<number[]>((acc, d) => {
+          const v = zAxisDataKey ? resolveValue(d, zAxisDataKey) : undefined;
+          const z = v !== undefined ? (typeof v === "number" ? v : parseFloat(String(v || 0))) : 0;
+          if (z > 0) acc.push(z);
+          return acc;
+        }, []);
 
         const minZ = Math.min(...zValues);
         const maxZ = Math.max(...zValues);

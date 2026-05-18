@@ -66,6 +66,8 @@ interface ChatWidgetProps {
   events?: string[];
 }
 
+const EMPTY_EVENTS: string[] = [];
+
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
   id,
   children,
@@ -74,7 +76,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   width = "Full",
   height = "Full",
   density = Densities.Medium,
-  events = [],
+  events = EMPTY_EVENTS,
 }) => {
   const inputMinHeightClass =
     density === Densities.Small

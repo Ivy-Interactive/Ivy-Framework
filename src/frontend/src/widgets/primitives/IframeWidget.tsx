@@ -35,8 +35,9 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
     maxWidth: "100%",
   };
 
-  const handleMessage = useCallback(
-    (event: MessageEvent) => {
+  const handleMessageRef = useRef((_event: MessageEvent) => {});
+  useEffect(() => {
+    handleMessageRef.current = (event: MessageEvent) => {
       if (!events.includes("OnMessageReceived")) return;
       if (iframeRef.current?.contentWindow !== event.source) return;
 
@@ -44,14 +45,14 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
       if (typeof type === "string") {
         eventHandler("OnMessageReceived", id, [type, payload]);
       }
-    },
-    [id, events, eventHandler],
-  );
+    };
+  }, [events, id, eventHandler]);
 
   useEffect(() => {
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [handleMessage]);
+    const listener = (event: MessageEvent) => handleMessageRef.current(event);
+    window.addEventListener("message", listener);
+    return () => window.removeEventListener("message", listener);
+  }, []);
 
   const iframeLoadedRef = useRef(false);
   const pendingMessageRef = useRef<{ type: string; token: string } | null>(null);

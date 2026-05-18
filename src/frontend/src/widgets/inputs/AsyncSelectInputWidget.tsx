@@ -91,7 +91,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   // Detect ellipsis on the display value span
   const [isEllipsed, setIsEllipsed] = useState(false);
 
-  useEffect(() => {
+  const updateEllipsisState = React.useCallback(() => {
     // Skip ellipsis check when no display value
     if (!displayValue) {
       requestAnimationFrame(() => setIsEllipsed(false));
@@ -121,6 +121,10 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
       window.removeEventListener("resize", handleResize);
     };
   }, [displayValue]);
+
+  useEffect(() => {
+    return updateEllipsisState();
+  }, [updateEllipsisState]);
 
   const displayValueSpan = displayValue ? (
     <span

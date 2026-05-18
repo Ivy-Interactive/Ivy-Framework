@@ -78,6 +78,18 @@ const validateAndCapValue = (value: number | null, targetType?: string): number 
   return cappedValue;
 };
 
+const numberFormatCache = new Map<string, Intl.NumberFormat>();
+
+const getNumberFormatter = (config: Intl.NumberFormatOptions) => {
+  const cacheKey = JSON.stringify(config);
+  let formatter = numberFormatCache.get(cacheKey);
+  if (!formatter) {
+    formatter = Intl.NumberFormat("en-US", config);
+    numberFormatCache.set(cacheKey, formatter);
+  }
+  return formatter;
+};
+
 // Format a number according to the specified format style
 const formatNumber = (
   value: number | null,
@@ -118,7 +130,7 @@ const formatNumber = (
       }
     }
 
-    return new Intl.NumberFormat("en-US", config).format(value);
+    return getNumberFormatter(config).format(value);
   } catch {
     return String(value);
   }

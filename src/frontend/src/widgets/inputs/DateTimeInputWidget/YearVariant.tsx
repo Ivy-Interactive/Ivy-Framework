@@ -61,10 +61,10 @@ export const YearVariant: React.FC<YearVariantProps> = ({
   const [decadeStart, setDecadeStart] = useState(() =>
     getDecadeStart(date ? date.getFullYear() : new Date().getFullYear()),
   );
-  const [prevYear, setPrevYear] = useState(date?.getFullYear());
+  const prevYearRef = useRef(date?.getFullYear());
 
-  if (date?.getFullYear() !== prevYear) {
-    setPrevYear(date?.getFullYear());
+  if (date?.getFullYear() !== prevYearRef.current) {
+    prevYearRef.current = date?.getFullYear();
     if (date) {
       setDecadeStart(getDecadeStart(date.getFullYear()));
     }

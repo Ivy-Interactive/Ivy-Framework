@@ -148,7 +148,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   // When explicit series are configured, only plot those data keys
   // Use case-insensitive matching because backend serializes data keys as camelCase
   // but Bar.dataKey preserves the original PascalCase measure name
-  const configuredBarKeys = (bars || []).map((b) => b.dataKey).filter(Boolean);
+  const configuredBarKeys = (bars || []).flatMap((b) => (b.dataKey ? [b.dataKey] : []));
   const barKeysToPlot =
     configuredBarKeys.length > 0
       ? valueKeys.filter((k) =>

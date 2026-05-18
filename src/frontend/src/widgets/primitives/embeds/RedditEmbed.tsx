@@ -7,28 +7,31 @@ interface RedditEmbedProps {
 }
 
 const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [scriptError, setScriptError] = useState(false);
+  const [scriptState, setScriptState] = useState<"loading" | "loaded" | "error">("loading");
 
   const postId = React.useMemo(() => {
     const match = url.match(/reddit\.com\/r\/[^/]+\/comments\/([^/]+)/);
     return match ? sanitizeId(match[1]) : null;
   }, [url]);
 
-  useEffect(() => {
+  const loadWidgetScript = React.useCallback(() => {
     if (postId) {
       loadScript("https://embed.redditmedia.com/widgets/platform.js")
         .then(() => {
-          setScriptLoaded(true);
+          setScriptState("loaded");
         })
         .catch(() => {
-          setScriptError(true);
+          setScriptState("error");
         });
     }
   }, [postId]);
 
+  useEffect(() => {
+    loadWidgetScript();
+  }, [loadWidgetScript]);
+
   const sanitizedUrl = sanitizeUrl(url);
-  if (!postId || scriptError || !sanitizedUrl) {
+  if (!postId || scriptState === "error" || !sanitizedUrl) {
     return <EmbedErrorFallback url={url} platform="Reddit" />;
   }
 
@@ -37,7 +40,7 @@ const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
       <blockquote className="reddit-card">
         <a href={sanitizedUrl}>
           <p>Posted by u/reddit</p>
-          <p>{scriptLoaded ? "Loading Reddit post..." : "Loading script..."}</p>
+          <p>{scriptState === "loaded" ? "Loading Reddit post..." : "Loading script..."}</p>
         </a>
       </blockquote>
     </div>

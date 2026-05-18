@@ -160,7 +160,7 @@ const MultipleSelector = React.forwardRef<
       }
     }, [open]);
 
-    React.useEffect(() => {
+    const setupBadgeCalculation = React.useCallback(() => {
       if (maxVisibleBadges !== undefined) {
         setVisibleCount(maxVisibleBadges);
         return;
@@ -226,7 +226,11 @@ const MultipleSelector = React.forwardRef<
       observer.observe(container);
 
       return () => observer.disconnect();
-    }, [value, maxVisibleBadges, density]);
+    }, [value, maxVisibleBadges]);
+
+    React.useEffect(() => {
+      return setupBadgeCalculation();
+    }, [setupBadgeCalculation, density]);
 
     const handleUnselect = React.useCallback(
       (option: Option) => {

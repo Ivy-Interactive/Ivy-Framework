@@ -124,8 +124,10 @@ const applyFontToSvg = (svgString: string): string => {
 
 const GraphvizRenderer = memo(({ content }: GraphvizRendererProps) => {
   const elementRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<{ isLoading: boolean; error: string | null }>({
+    isLoading: true,
+    error: null,
+  });
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
   const themeRef = useRef<"light" | "dark">("light");
   const renderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -185,44 +187,47 @@ const GraphvizRenderer = memo(({ content }: GraphvizRendererProps) => {
     };
   }, [detectTheme, debouncedRender]);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const renderDiagram = async () => {
+  const renderDiagram = useCallback(
+    async (mountedObj: { current: boolean }) => {
       if (!elementRef.current) return;
 
       try {
-        setIsLoading(true);
-        setError(null);
+        setState({ isLoading: true, error: null });
 
         const { Graphviz } = await import("@hpcc-js/wasm-graphviz");
         const graphviz = await Graphviz.load();
 
         const svg = graphviz.dot(content.trim());
 
-        if (mounted && elementRef.current) {
+        if (mountedObj.current && elementRef.current) {
           const fontApplied = applyFontToSvg(svg);
           const sanitized = sanitizeSvg(fontApplied);
           elementRef.current.innerHTML = sanitized;
-          setIsLoading(false);
+          setState((prev) => ({ ...prev, isLoading: false }));
         }
       } catch (err) {
         logger.error("Graphviz rendering error:", err);
-        if (mounted) {
-          setError(err instanceof Error ? err.message : "Failed to render diagram");
-          setIsLoading(false);
+        if (mountedObj.current) {
+          setState({
+            isLoading: false,
+            error: err instanceof Error ? err.message : "Failed to render diagram",
+          });
         }
       }
-    };
+    },
+    [content],
+  );
 
-    renderDiagram();
+  useEffect(() => {
+    const mountedObj = { current: true };
+    renderDiagram(mountedObj);
 
     return () => {
-      mounted = false;
+      mountedObj.current = false;
     };
-  }, [content, currentTheme]);
+  }, [renderDiagram, currentTheme]);
 
-  if (error) {
+  if (state.error) {
     return (
       <div className="rounded-md border border-destructive bg-destructive/10 p-3">
         <div className="flex items-center gap-2 text-destructive text-sm font-medium">
@@ -251,7 +256,7 @@ const GraphvizRenderer = memo(({ content }: GraphvizRendererProps) => {
         <CopyToClipboardButton textToCopy={content} />
       </div>
       <div className="graphviz-container rounded-md border bg-background p-4 overflow-x-auto slim-scrollbar">
-        {isLoading && (
+        {state.isLoading && (
           <div className="flex items-center justify-center p-8 text-muted-foreground">
             <div className="animate-spin rounded-full size-6 border-b-2 border-primary"></div>
             <span className="ml-2 text-sm">Loading diagram...</span>
@@ -260,7 +265,7 @@ const GraphvizRenderer = memo(({ content }: GraphvizRendererProps) => {
         <div
           ref={elementRef}
           className="graphviz-diagram"
-          style={{ minHeight: isLoading ? "100px" : "auto" }}
+          style={{ minHeight: state.isLoading ? "100px" : "auto" }}
         />
       </div>
     </div>

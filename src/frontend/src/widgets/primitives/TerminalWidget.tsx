@@ -26,8 +26,10 @@ const TerminalWidget = ({
   const outputColor = "text-muted-foreground";
 
   const commandsText = lines
-    .filter((line) => line.isCommand)
-    .map((line) => line.content)
+    .reduce<string[]>((acc, line) => {
+      if (line.isCommand) acc.push(line.content);
+      return acc;
+    }, [])
     .join("\n");
   const hasCommands = commandsText.length > 0;
 

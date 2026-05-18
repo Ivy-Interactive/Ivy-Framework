@@ -82,7 +82,7 @@ export function useThemeWithMonitoring<T = Partial<Theme>>(
   } = options;
 
   const { theme, setTheme } = useTheme();
-  const [isDark, setIsDark] = useState(isDarkMode());
+  const [isDark, setIsDark] = useState(() => isDarkMode());
   const [colors, setColors] = useState<ThemeColors>(() => getThemeColors());
 
   // Generate custom theme if generator provided

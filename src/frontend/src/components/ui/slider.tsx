@@ -29,20 +29,25 @@ const Slider = React.forwardRef<
   ) => {
     const currentValue = props.value?.[0] ?? props.defaultValue?.[0] ?? 0;
 
-    const formattedValue = React.useMemo(() => {
-      if (isBytesFormat) return formatBytes(currentValue, 2);
-      if (!currency) return currentValue;
+    const formatter = React.useMemo(() => {
+      if (!currency) return null;
       try {
-        return new Intl.NumberFormat("en-US", {
+        return Intl.NumberFormat("en-US", {
           style: "currency",
           currency,
           minimumFractionDigits: 0,
           maximumFractionDigits: 2,
-        }).format(currentValue);
+        });
       } catch {
-        return currentValue;
+        return null;
       }
-    }, [currentValue, currency, isBytesFormat]);
+    }, [currency]);
+
+    const formattedValue = React.useMemo(() => {
+      if (isBytesFormat) return formatBytes(currentValue, 2);
+      if (formatter) return formatter.format(currentValue);
+      return currentValue;
+    }, [currentValue, isBytesFormat, formatter]);
 
     // Size variants for track and thumb
     const sizeVariant: Record<string, { track: string; thumb: string; tooltip: string }> = {

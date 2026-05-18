@@ -65,9 +65,11 @@ export function useDrag(
         setTabOrder(newOrder);
 
         // Send reorder event to backend with mapping from new order to original backend indices
-        const originalTabOrder = tabWidgets
-          .map((tab) => getTabProps(tab)?.id)
-          .filter((id): id is string => id !== undefined);
+        const originalTabOrder = tabWidgets.reduce<string[]>((acc, tab) => {
+          const id = getTabProps(tab)?.id;
+          if (id !== undefined) acc.push(id);
+          return acc;
+        }, []);
         const reorderMapping = newOrder.map((tabId) => {
           const index = originalTabOrder.indexOf(tabId);
           if (index === -1) {

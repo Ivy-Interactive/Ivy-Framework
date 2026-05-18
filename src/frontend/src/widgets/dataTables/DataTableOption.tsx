@@ -54,15 +54,15 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   sideOffset = 8,
   contentWidth = "w-[400px]",
   inlineDirection = "right",
-  defaultExpanded = false,
+  defaultExpanded: propDefaultExpanded = false,
   showLabel = true,
 }) => {
-  const [expanded, setExpanded] = useState(defaultExpanded);
-  const [prevDefaultExpanded, setPrevDefaultExpanded] = useState(defaultExpanded);
+  const [expanded, setExpanded] = useState(() => propDefaultExpanded);
+  const prevDefaultExpandedRef = useRef(propDefaultExpanded);
 
-  if (defaultExpanded !== prevDefaultExpanded) {
-    setPrevDefaultExpanded(defaultExpanded);
-    setExpanded(defaultExpanded);
+  if (propDefaultExpanded !== prevDefaultExpandedRef.current) {
+    prevDefaultExpandedRef.current = propDefaultExpanded;
+    setExpanded(propDefaultExpanded);
   }
   const containerRef = useRef<HTMLDivElement>(null);
 

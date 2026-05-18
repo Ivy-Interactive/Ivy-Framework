@@ -88,6 +88,8 @@ const getUrl = (url: string): { url: string; isValid: boolean; isAnchorLink: boo
   };
 };
 
+const EMPTY_EVENTS: string[] = [];
+
 export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   id,
   title,
@@ -107,7 +109,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   children,
   borderRadius = "Rounded",
   density = Densities.Medium,
-  events = [],
+  events = EMPTY_EVENTS,
   "data-testid": dataTestId,
 }) => {
   const eventHandler = useEventHandler();

@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
 
+const EMPTY_ARRAY: never[] = [];
+
 interface ListItemWidgetProps {
   id: string;
   title?: string;
@@ -56,7 +58,7 @@ export const ListItemWidget: React.FC<ListItemWidgetProps> = ({
   disabled,
   children,
   density = Densities.Medium,
-  events = [],
+  events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
 

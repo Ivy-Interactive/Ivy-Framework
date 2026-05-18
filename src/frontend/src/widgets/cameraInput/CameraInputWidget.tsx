@@ -122,14 +122,14 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
     }
   }, [autoFocus, disabled, startCamera]);
 
-  const onFocus = useCallback(() => {
+  const handleFocus = useCallback(() => {
     if (disabled) return;
     if (isFocusedRef.current) return;
     if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
     isFocusedRef.current = true;
   }, [disabled, events, eventHandler, id]);
 
-  const onBlur = useCallback(() => {
+  const handleBlur = useCallback(() => {
     if (disabled) return;
     if (!isFocusedRef.current) return;
     if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
@@ -141,7 +141,7 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
   useEffect(() => {
     if (!events?.includes("OnBlur") && !events?.includes("OnFocus")) return;
 
-    const onPointerDown = (e: PointerEvent) => {
+    const handlePointerDown = (e: PointerEvent) => {
       const el = containerRef.current;
       if (!el) return;
 
@@ -151,20 +151,27 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
       if (clickedInside) {
         // Make sure wrapper gets focus immediately.
         el.focus();
+        if (!disabled && !isFocusedRef.current) {
+          if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+          isFocusedRef.current = true;
+        }
         return;
       }
 
       // Clicked outside
       if (isFocusedRef.current) {
-        onBlur();
+        if (!disabled && isFocusedRef.current) {
+          if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+          isFocusedRef.current = false;
+        }
       }
     };
 
-    window.addEventListener("pointerdown", onPointerDown, true);
+    window.addEventListener("pointerdown", handlePointerDown, true);
     return () => {
-      window.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("pointerdown", handlePointerDown, true);
     };
-  }, [events, onBlur]);
+  }, [events, disabled, eventHandler, id]);
 
   const capture = useCallback(async () => {
     const video = videoRef.current;
@@ -227,12 +234,12 @@ const CameraInputWidget: React.FC<CameraInputWidgetProps> = ({
         tabIndex={disabled ? -1 : 0}
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget)) {
-            onBlur();
+            handleBlur();
           }
         }}
         onFocus={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget)) {
-            onFocus();
+            handleFocus();
           }
         }}
         onPointerDown={() => {

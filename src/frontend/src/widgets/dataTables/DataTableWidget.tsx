@@ -50,12 +50,13 @@ interface DataTableWidgetProps extends TableProps {
 }
 
 const EMPTY_EVENTS: string[] = [];
+const EMPTY_CONFIG = {};
 
 export const DataTable: React.FC<DataTableWidgetProps> = ({
   id,
   columns,
   connection,
-  config = {},
+  config = EMPTY_CONFIG,
   editable = false,
   width = "Full",
   height = "Full",

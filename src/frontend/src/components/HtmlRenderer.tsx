@@ -51,11 +51,13 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
     // Remove all tags that are not in allowedTags
     const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_ELEMENT, null);
 
+    const allowedTagsSet = new Set(allowedTags);
+
     const nodesToRemove: Element[] = [];
     let node;
     while ((node = walker.nextNode())) {
       const element = node as Element;
-      if (!allowedTags.includes(element.tagName.toLowerCase())) {
+      if (!allowedTagsSet.has(element.tagName.toLowerCase())) {
         nodesToRemove.push(element);
       }
     }
@@ -127,19 +129,27 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
           case "a": {
             const href = element.getAttribute("href");
             const safeHref = validateLinkUrl(href, { allowCustomProtocols: !!onLinkClick });
+            if (onLinkClick) {
+              return (
+                <button
+                  type="button"
+                  className={typography.a}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    font: "inherit",
+                    cursor: "pointer",
+                    display: "inline",
+                  }}
+                  onClick={() => onLinkClick(safeHref)}
+                >
+                  {children}
+                </button>
+              );
+            }
             return (
-              <a
-                className={typography.a}
-                href={safeHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => {
-                  if (onLinkClick) {
-                    e.preventDefault();
-                    onLinkClick(safeHref);
-                  }
-                }}
-              >
+              <a className={typography.a} href={safeHref} target="_blank" rel="noopener noreferrer">
                 {children}
               </a>
             );

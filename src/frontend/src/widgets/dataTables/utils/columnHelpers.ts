@@ -60,11 +60,15 @@ export function getOrderedVisibleDataColumns(
   let orderedColumns = visibleColumns;
 
   if (columnOrder.length === columns.length) {
-    orderedColumns = columnOrder.map((idx) => columns[idx]).filter((col) => !col.hidden);
+    orderedColumns = columnOrder.reduce<DataColumn[]>((acc, idx) => {
+      const col = columns[idx];
+      if (col && !col.hidden) acc.push(col);
+      return acc;
+    }, []);
   } else {
     const hasOrderProperty = visibleColumns.some((col) => col.order !== undefined);
     if (hasOrderProperty) {
-      orderedColumns = [...visibleColumns].sort((a, b) => {
+      orderedColumns = visibleColumns.toSorted((a, b) => {
         const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
         const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
         return orderA - orderB;

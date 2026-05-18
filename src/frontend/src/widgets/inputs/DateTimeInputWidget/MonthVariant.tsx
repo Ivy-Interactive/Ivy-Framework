@@ -59,10 +59,10 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   const [viewYear, setViewYear] = useState(() =>
     date ? date.getFullYear() : new Date().getFullYear(),
   );
-  const [prevYear, setPrevYear] = useState(date?.getFullYear());
+  const prevYearRef = useRef(date?.getFullYear());
 
-  if (date?.getFullYear() !== prevYear) {
-    setPrevYear(date?.getFullYear());
+  if (date?.getFullYear() !== prevYearRef.current) {
+    prevYearRef.current = date?.getFullYear();
     if (date) {
       setViewYear(date.getFullYear());
     }

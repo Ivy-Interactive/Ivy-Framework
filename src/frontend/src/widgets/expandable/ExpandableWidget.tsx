@@ -28,7 +28,7 @@ interface ExpandableWidgetProps {
 export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   id,
   disabled = false,
-  open = false,
+  open: propOpen = false,
   density = Densities.Medium,
   icon = undefined,
   ghost = false,
@@ -53,12 +53,12 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
     flexShrink: 0,
   };
 
-  const [isOpen, setIsOpen] = React.useState(open);
-  const [prevOpen, setPrevOpen] = React.useState(open);
+  const [isOpen, setIsOpen] = React.useState(() => propOpen);
+  const prevOpenRef = React.useRef(propOpen);
 
-  if (open !== prevOpen) {
-    setIsOpen(open);
-    setPrevOpen(open);
+  if (propOpen !== prevOpenRef.current) {
+    setIsOpen(propOpen);
+    prevOpenRef.current = propOpen;
   }
 
   if (disabled && isOpen) {
