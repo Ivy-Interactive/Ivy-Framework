@@ -704,27 +704,30 @@ export const useBackend = (
     [connection],
   );
 
-  const handleError = useCallback((error: ErrorMessage) => {
-    toast({
-      title: error.title,
-      description: error.description,
-      variant: "destructive",
-      action: (
-        <ToastAction
-          altText="View error details"
-          onClick={() => {
-            showError({
-              title: error.title,
-              message: error.description,
-              stackTrace: error.stackTrace,
-            });
-          }}
-        >
-          Details
-        </ToastAction>
-      ),
-    });
-  });
+  const handleError = useCallback(
+    (error: ErrorMessage) => {
+      toast({
+        title: error.title,
+        description: error.description,
+        variant: "destructive",
+        action: (
+          <ToastAction
+            altText="View error details"
+            onClick={() => {
+              showError({
+                title: error.title,
+                message: error.description,
+                stackTrace: error.stackTrace,
+              });
+            }}
+          >
+            Details
+          </ToastAction>
+        ),
+      });
+    },
+    [toast],
+  );
 
   const setupConnection = useCallback(() => {
     if (currentConnectionRef.current) {

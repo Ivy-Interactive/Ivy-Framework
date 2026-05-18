@@ -6,6 +6,7 @@ import {
   QueryEditorChangeEvent,
   parseQuery,
   useDropdownState,
+  ColumnDef,
 } from "@/lib/filter-query-editor";
 import { Filter } from "@/services/grpcTableService";
 import { parseInvalidQuery } from "../utils/tableDataFetcher";
@@ -79,7 +80,7 @@ export const DataTableFilterOption: React.FC<{
   // Filter columns to only include filterable ones
   const queryEditorColumns = useMemo(
     () =>
-      columns.reduce<{ name: string; type: string; width: number }>((acc, col) => {
+      columns.reduce<ColumnDef[]>((acc, col) => {
         if (col.filterable ?? true) {
           // Map column types to filter-query-editor supported types
           // Default to 'text' if type is undefined (shouldn't happen but defensive)

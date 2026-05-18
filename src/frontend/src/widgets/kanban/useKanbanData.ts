@@ -46,7 +46,7 @@ function buildColumnNameMap(cards: CardData[]): Map<string, string> {
 }
 
 function sortColumnKeysByBackendOrder(columnKeys: string[]): string[] {
-  return columnKeys.toSorted((a, b) => {
+  return [...columnKeys].sort((a, b) => {
     return getStatusOrder(a) - getStatusOrder(b);
   });
 }

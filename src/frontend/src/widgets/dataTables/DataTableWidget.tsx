@@ -12,7 +12,7 @@ import { DataTableFilterOption } from "./options/DataTableFilterOption";
 import { Filter as FilterIcon } from "lucide-react";
 import { tableStyles } from "./styles/style";
 import { Densities } from "@/types/density";
-import { TableProps } from "./types/types";
+import { TableProps, DataTableConfig } from "./types/types";
 import { getWidth, getHeight } from "@/lib/styles";
 import { applyConfigDefaults, applyColumnsDefaults } from "./DataTableDefaults";
 import type { SpriteMap } from "@glideapps/glide-data-grid";
@@ -52,7 +52,7 @@ interface DataTableWidgetProps extends TableProps {
 }
 
 const EMPTY_EVENTS: string[] = [];
-const EMPTY_CONFIG = {};
+const EMPTY_CONFIG: DataTableConfig = {};
 
 export const DataTable: React.FC<DataTableWidgetProps> = ({
   id,

@@ -72,7 +72,7 @@ const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
     const range = max - min;
     if (range <= 0) return [[1, chartColors[0] ?? "#5470c6"]];
 
-    const sorted = thresholds.toSorted((a, b) => a.value - b.value);
+    const sorted = [...thresholds].sort((a, b) => a.value - b.value);
     return sorted.map((t) => [Math.min(Math.max((t.value - min) / range, 0), 1), t.color]);
   }, [thresholds, min, max, chartColors]);
 

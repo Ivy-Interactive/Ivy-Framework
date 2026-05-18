@@ -14,14 +14,14 @@ interface ImageOverlayProps {
 export const ImageOverlay: React.FC<ImageOverlayProps> = ({
   src,
   alt,
-  onClose: handleClose,
+  onClose,
   images,
   currentIndex = 0,
-  onNavigate: handleNavigate,
+  onNavigate,
 }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const hasNavigation = images && images.length > 1 && handleNavigate;
+  const hasNavigation = images && images.length > 1 && onNavigate;
 
   useEffect(() => {
     const overlay = overlayRef.current;
@@ -55,16 +55,16 @@ export const ImageOverlay: React.FC<ImageOverlayProps> = ({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        handleClose();
+        onClose();
       }
-      if (hasNavigation && handleNavigate) {
+      if (hasNavigation && onNavigate) {
         if (e.key === "ArrowLeft") {
           e.preventDefault();
           const len = images.length;
-          handleNavigate((((currentIndex - 1) % len) + len) % len);
+          onNavigate((((currentIndex - 1) % len) + len) % len);
         } else if (e.key === "ArrowRight") {
           e.preventDefault();
-          handleNavigate((currentIndex + 1) % images.length);
+          onNavigate((currentIndex + 1) % images.length);
         }
       }
       handleTabKey(e);
@@ -74,7 +74,7 @@ export const ImageOverlay: React.FC<ImageOverlayProps> = ({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleClose, hasNavigation, images, currentIndex, handleNavigate]);
+  }, [onClose, hasNavigation, images, currentIndex, onNavigate]);
 
   // Validate and sanitize image URL to prevent open redirect vulnerabilities
   const validatedSrc = src ? validateImageUrl(src) : null;

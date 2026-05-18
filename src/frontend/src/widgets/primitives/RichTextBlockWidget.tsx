@@ -132,7 +132,14 @@ function renderInlineContent(
         throwOnError: false,
         displayMode: run.math === "display",
       });
-      return <HtmlSpan key={`run-${runId}`} className={className} style={runStyles} html={html} />;
+      return (
+        <span
+          key={`run-${runId}`}
+          className={className}
+          style={runStyles}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      );
     } catch {
       // If KaTeX rendering fails, display raw content
       return (
@@ -240,7 +247,7 @@ function renderGroup(
           throwOnError: false,
           displayMode: true,
         });
-        return <HtmlDiv key={key} className="my-4" html={html} />;
+        return <div key={key} className="my-4" dangerouslySetInnerHTML={{ __html: html }} />;
       } catch {
         // If KaTeX rendering fails, display raw content
         return (

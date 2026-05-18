@@ -68,7 +68,7 @@ export function getOrderedVisibleDataColumns(
   } else {
     const hasOrderProperty = visibleColumns.some((col) => col.order !== undefined);
     if (hasOrderProperty) {
-      orderedColumns = visibleColumns.toSorted((a, b) => {
+      orderedColumns = [...visibleColumns].sort((a, b) => {
         const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
         const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
         return orderA - orderB;

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Tracks container dimensions. Uses dvn-scroller.clientHeight for scroll area

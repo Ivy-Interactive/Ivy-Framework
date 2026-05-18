@@ -178,6 +178,18 @@ export function useTabManagement(
     loadActiveTab();
   }, [loadActiveTab]);
 
+  const addToLoadedTabs = React.useCallback(
+    (tabId: string) => {
+      setLoadedTabs((prev) => {
+        if (prev.has(tabId)) return prev;
+        const newSet = new Set(prev);
+        newSet.add(tabId);
+        return newSet;
+      });
+    },
+    [setLoadedTabs],
+  );
+
   return {
     // State
     dropdownOpen,
