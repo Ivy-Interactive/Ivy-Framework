@@ -131,10 +131,10 @@ export const SliderVariant: React.FC<SelectInputWidgetProps & { eventHandler: Ev
                   "rounded-full",
                   i === sliderValue ? "bg-transparent" : "bg-muted-foreground/40",
                   density === Densities.Small
-                    ? "w-1 h-1"
+                    ? "size-1"
                     : density === Densities.Large
                       ? "w-1.5 h-1.5"
-                      : "w-1 h-1",
+                      : "size-1",
                 )}
               />
             ))}

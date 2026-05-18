@@ -163,6 +163,8 @@ const DropDownMenuItemGroup = ({
   });
 };
 
+const EMPTY_EVENTS: string[] = [];
+
 export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   slots,
   id,
@@ -172,7 +174,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   alignOffset = 0,
   stayOpen = false,
   density = Densities.Medium,
-  events = [],
+  events = EMPTY_EVENTS,
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);

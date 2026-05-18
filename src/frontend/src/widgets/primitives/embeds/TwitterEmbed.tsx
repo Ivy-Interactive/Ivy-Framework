@@ -7,8 +7,7 @@ interface TwitterEmbedProps {
 }
 
 const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [scriptError, setScriptError] = useState(false);
+  const [scriptState, setScriptState] = useState<"loading" | "loaded" | "error">("loading");
 
   const tweetId = React.useMemo(() => {
     // Support both twitter.com and x.com URLs, with or without @ prefix
@@ -16,20 +15,24 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
     return match ? sanitizeId(match[1]) : null;
   }, [url]);
 
-  useEffect(() => {
+  const loadWidgetScript = React.useCallback(() => {
     if (tweetId) {
       loadScript("https://platform.twitter.com/widgets.js")
         .then(() => {
-          setScriptLoaded(true);
+          setScriptState("loaded");
         })
         .catch(() => {
-          setScriptError(true);
+          setScriptState("error");
         });
     }
   }, [tweetId]);
 
+  useEffect(() => {
+    loadWidgetScript();
+  }, [loadWidgetScript]);
+
   const sanitizedUrl = sanitizeUrl(url);
-  if (!tweetId || scriptError || !sanitizedUrl) {
+  if (!tweetId || scriptState === "error" || !sanitizedUrl) {
     return <EmbedErrorFallback url={url} platform="Twitter" />;
   }
 
@@ -37,7 +40,7 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
     <div className="twitter-embed w-full">
       <blockquote className="twitter-tweet w-full" data-tweet-id={tweetId} data-theme="light">
         <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer">
-          {scriptLoaded ? "Loading Twitter post..." : "Loading script..."}
+          {scriptState === "loaded" ? "Loading Twitter post..." : "Loading script..."}
         </a>
       </blockquote>
     </div>

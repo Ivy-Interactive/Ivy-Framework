@@ -173,7 +173,7 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
           onClick={copyTextContent}
           className="h-8 px-2 flex items-center gap-1 rounded-r-none border-r border-border/50"
         >
-          <Copy className="w-4 h-4" />
+          <Copy className="size-4" />
           <span className="text-xs">Copy Page</span>
         </Button>
 
@@ -184,12 +184,12 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
               size="sm"
               className="h-8 px-1 flex items-center gap-1 rounded-l-none"
             >
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={saveAsMarkdown}>
-              <Download className="w-4 h-4 mr-2" />
+              <Download className="size-4 mr-2" />
               Download as Markdown
             </DropdownMenuItem>
           </DropdownMenuContent>

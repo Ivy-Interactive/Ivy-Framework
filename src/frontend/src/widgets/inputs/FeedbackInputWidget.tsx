@@ -71,46 +71,39 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
       if (!events.includes("OnChange")) return;
       if (disabled) return;
 
-      // Convert number back to original type
-      let convertedValue: number | boolean | null;
-      if (isBooleanType) {
-        if (variant === "Thumbs") {
-          if (nullable) {
-            // For nullable boolean types
-            if (e === ThumbsEnum.None) {
-              convertedValue = null;
-            } else if (e === ThumbsEnum.Down) {
-              convertedValue = false;
-            } else if (e === ThumbsEnum.Up) {
-              convertedValue = true;
-            } else {
-              // Fallback - shouldn't happen
-              convertedValue = e === ThumbsEnum.Up;
-            }
-          } else {
-            // For non-nullable boolean types
-            if (e === ThumbsEnum.None) {
-              // For non-nullable types, toggle to the opposite value
-              convertedValue = !localValue;
-            } else if (e === numericValue) {
-              // Clicking the same thumb - toggle to the opposite value
-              convertedValue = !localValue;
-            } else {
-              // Clicking different thumb - set new value
-              convertedValue = e === ThumbsEnum.Up;
-            }
-          }
-        } else {
-          convertedValue = e === 1;
-        }
-      } else {
-        // Numeric type handling (including nullable numeric types)
-        if (e === ThumbsEnum.None) {
-          convertedValue = nullable ? null : ThumbsEnum.None;
-        } else {
-          convertedValue = e;
-        }
+      let convertedValue: number | boolean | null = null;
+
+      if (!isBooleanType) {
+        convertedValue = e === ThumbsEnum.None && nullable ? null : e;
+        setLocalValue(convertedValue);
+        eventHandler("OnChange", id, [convertedValue]);
+        return;
       }
+
+      if (variant !== "Thumbs") {
+        convertedValue = e === 1;
+        setLocalValue(convertedValue);
+        eventHandler("OnChange", id, [convertedValue]);
+        return;
+      }
+
+      if (nullable) {
+        if (e === ThumbsEnum.None) convertedValue = null;
+        else if (e === ThumbsEnum.Down) convertedValue = false;
+        else convertedValue = true;
+
+        setLocalValue(convertedValue);
+        eventHandler("OnChange", id, [convertedValue]);
+        return;
+      }
+
+      // For non-nullable boolean types
+      if (e === ThumbsEnum.None || e === numericValue) {
+        convertedValue = !localValue;
+      } else {
+        convertedValue = e === ThumbsEnum.Up;
+      }
+
       setLocalValue(convertedValue);
       eventHandler("OnChange", id, [convertedValue]);
     },

@@ -152,26 +152,33 @@ export function Calendar({
 }
 
 function MonthYearInput({ displayMonth, title }: { displayMonth?: Date; title?: React.ReactNode }) {
-  const [monthStr, setMonthStr] = React.useState("");
-  const [yearStr, setYearStr] = React.useState("");
+  const [state, setState] = React.useState({ monthStr: "", yearStr: "" });
   const { goToMonth } = useDayPicker();
 
-  React.useEffect(() => {
+  const syncState = React.useCallback(() => {
     if (displayMonth) {
-      setMonthStr(String(displayMonth.getMonth() + 1));
-      setYearStr(String(displayMonth.getFullYear()));
+      setState({
+        monthStr: String(displayMonth.getMonth() + 1),
+        yearStr: String(displayMonth.getFullYear()),
+      });
     } else if (typeof title === "string") {
       const parsed = parse(title, "MMMM yyyy", new Date());
       if (!isNaN(parsed.getTime())) {
-        setMonthStr(String(parsed.getMonth() + 1));
-        setYearStr(String(parsed.getFullYear()));
+        setState({
+          monthStr: String(parsed.getMonth() + 1),
+          yearStr: String(parsed.getFullYear()),
+        });
       }
     }
   }, [displayMonth, title]);
 
+  React.useEffect(() => {
+    syncState();
+  }, [syncState]);
+
   const handleCommit = () => {
-    const m = parseInt(monthStr, 10);
-    const y = parseInt(yearStr, 10);
+    const m = parseInt(state.monthStr, 10);
+    const y = parseInt(state.yearStr, 10);
     if (!isNaN(m) && !isNaN(y) && m >= 1 && m <= 12 && y >= 1900 && y <= 2100) {
       goToMonth(new Date(y, m - 1, 1));
     }
@@ -196,8 +203,10 @@ function MonthYearInput({ displayMonth, title }: { displayMonth?: Date; title?: 
       role="presentation"
     >
       <input
-        value={monthStr}
-        onChange={(e) => setMonthStr(e.target.value.replace(/\D/g, "").slice(0, 2))}
+        value={state.monthStr}
+        onChange={(e) =>
+          setState((s) => ({ ...s, monthStr: e.target.value.replace(/\D/g, "").slice(0, 2) }))
+        }
         onBlur={handleCommit}
         onKeyDown={onKeyDown}
         className={inputClass}
@@ -205,8 +214,10 @@ function MonthYearInput({ displayMonth, title }: { displayMonth?: Date; title?: 
       />
       <span className="text-muted-foreground text-xs">/</span>
       <input
-        value={yearStr}
-        onChange={(e) => setYearStr(e.target.value.replace(/\D/g, "").slice(0, 4))}
+        value={state.yearStr}
+        onChange={(e) =>
+          setState((s) => ({ ...s, yearStr: e.target.value.replace(/\D/g, "").slice(0, 4) }))
+        }
         onBlur={handleCommit}
         onKeyDown={onKeyDown}
         className={cn(inputClass, "w-10")}

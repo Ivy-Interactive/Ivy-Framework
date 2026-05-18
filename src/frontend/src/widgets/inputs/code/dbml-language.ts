@@ -2,7 +2,6 @@ import { StreamLanguage } from "@codemirror/language";
 
 const dbmlMode = {
   startState: () => ({}),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,
   token: (stream: any) => {
     if (stream.match(/\/\//)) {
       stream.skipToEnd();

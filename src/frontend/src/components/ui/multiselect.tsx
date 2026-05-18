@@ -160,7 +160,7 @@ const MultipleSelector = React.forwardRef<
       }
     }, [open]);
 
-    React.useEffect(() => {
+    const setupBadgeCalculation = React.useCallback(() => {
       if (maxVisibleBadges !== undefined) {
         setVisibleCount(maxVisibleBadges);
         return;
@@ -226,7 +226,11 @@ const MultipleSelector = React.forwardRef<
       observer.observe(container);
 
       return () => observer.disconnect();
-    }, [value, maxVisibleBadges, density]);
+    }, [value, maxVisibleBadges]);
+
+    React.useEffect(() => {
+      return setupBadgeCalculation();
+    }, [setupBadgeCalculation, density]);
 
     const handleUnselect = React.useCallback(
       (option: Option) => {
@@ -469,7 +473,7 @@ const MultipleSelector = React.forwardRef<
             </span>
             <ChevronDown
               className={cn(
-                "h-4 w-4 ml-2 opacity-50 shrink-0 cursor-pointer",
+                "size-4 ml-2 opacity-50 shrink-0 cursor-pointer",
                 disabled && "cursor-not-allowed opacity-50",
               )}
               onClick={(e) => {
@@ -571,7 +575,7 @@ const MultipleSelector = React.forwardRef<
                   </CommandGroup>
                   {showActions && (
                     <div
-                      className="border-t border-border px-2 py-2 flex justify-between items-center gap-2 text-sm shrink-0"
+                      className="border-t border-border p-2 flex justify-between items-center gap-2 text-sm shrink-0"
                       role="group"
                       aria-label="Bulk selection"
                     >

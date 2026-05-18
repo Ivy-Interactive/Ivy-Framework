@@ -225,7 +225,7 @@ export function KanbanColumn({ id, name, color, width, children, className }: Ka
     >
       <div className="px-2">
         <h3 className="font-semibold text-foreground flex items-center gap-2">
-          {color && <div className="h-3 w-3 rounded-full" style={{ backgroundColor: color }} />}
+          {color && <div className="size-3 rounded-full" style={{ backgroundColor: color }} />}
           {name || id}
           {showCounts && (
             <span className="text-muted-foreground text-sm font-normal">({columnTaskCount})</span>

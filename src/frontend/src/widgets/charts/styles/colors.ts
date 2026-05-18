@@ -72,11 +72,10 @@ export const getChartColors = (scheme: ColorScheme, themeColors: ThemeColors): s
       colorVars = defaultColorVars;
     }
 
-    const colors = colorVars
-      .map((name) =>
-        getComputedStyle(document.documentElement).getPropertyValue(`--${name}`).trim(),
-      )
-      .filter(Boolean);
+    const colors = colorVars.flatMap((name) => {
+      const value = getComputedStyle(document.documentElement).getPropertyValue(`--${name}`).trim();
+      return value ? [value] : [];
+    });
 
     // Fallback to primary color if no chart colors found
     return colors.length > 0 ? colors : [themeColors.primary];

@@ -142,7 +142,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   );
 
   // When explicit series are configured, only plot those data keys
-  const configuredAreaKeys = (areas || []).map((a) => a.dataKey).filter(Boolean);
+  const configuredAreaKeys = (areas || []).flatMap((a) => (a.dataKey ? [a.dataKey] : []));
   const areaKeysToPlot =
     configuredAreaKeys.length > 0
       ? valueKeys.filter((k) =>

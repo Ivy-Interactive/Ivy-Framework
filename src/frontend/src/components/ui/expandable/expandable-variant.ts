@@ -54,9 +54,9 @@ export const expandableChevronVariant = cva(
   {
     variants: {
       density: {
-        Small: "h-3 w-3",
-        Medium: "h-4 w-4",
-        Large: "h-5 w-5",
+        Small: "size-3",
+        Medium: "size-4",
+        Large: "size-5",
       },
     },
     defaultVariants: {
@@ -68,9 +68,9 @@ export const expandableChevronVariant = cva(
 export const expandableContentVariant = cva("overflow-hidden transition-all", {
   variants: {
     density: {
-      Small: "pl-3 pr-2 py-1.5 space-y-1.5 [&_*]:text-xs",
-      Medium: "pl-3 pr-3 py-2 space-y-2 [&_*]:text-sm",
-      Large: "pl-3 pr-4 py-3 space-y-3 [&_*]:text-base",
+      Small: "pl-3 pr-2 py-1.5 gap-y-1.5 [&_*]:text-xs",
+      Medium: "pl-3 pr-3 py-2 gap-y-2 [&_*]:text-sm",
+      Large: "pl-3 pr-4 py-3 gap-y-3 [&_*]:text-base",
     },
   },
   defaultVariants: {

@@ -84,7 +84,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   const isLarge = density === Densities.Large;
 
   const iconSize = isSmall ? "20" : isLarge ? "28" : "24";
-  const paddingClass = isSmall ? "py-2.5 px-3" : isLarge ? "py-6 px-6" : "py-4 px-4";
+  const paddingClass = isSmall ? "py-2.5 px-3" : isLarge ? "p-6" : "p-4";
 
   // Title line heights match icon sizes for perfect titled alignment
   const titleLeadingClass = isSmall ? "leading-5" : isLarge ? "leading-7" : "leading-6";
@@ -131,7 +131,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
           className="absolute top-3 right-3 p-1 rounded-md opacity-70 hover:opacity-100"
           aria-label="Dismiss"
         >
-          <X className="h-4 w-4" />
+          <X className="size-4" />
         </button>
       )}
     </div>

@@ -241,7 +241,7 @@ const ThemeColorGrid: React.FC<{
             key={`${r}-${c}`}
             type="button"
             className={cn(
-              "w-7 h-7 shrink-0 rounded-full hover:density-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5 relative flex items-center justify-center",
+              "size-7 shrink-0 rounded-full hover:density-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5 relative flex items-center justify-center",
               isSelected && "ring-1 ring-offset-1 ring-black/50 z-20 density-110",
             )}
             style={{ backgroundColor: hexColor }}
@@ -295,7 +295,7 @@ const ColorSlider = React.forwardRef<
     <SliderPrimitive.Track className="relative h-6 w-full grow overflow-hidden rounded-full cursor-pointer">
       <SliderPrimitive.Range className="absolute h-full bg-transparent" />
     </SliderPrimitive.Track>
-    <SliderPrimitive.Thumb className="block h-6 w-6 rounded-full border-2 border-white bg-transparent shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing hover:bg-white/10" />
+    <SliderPrimitive.Thumb className="block size-6 rounded-full border-2 border-white bg-transparent shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing hover:bg-white/10" />
   </SliderPrimitive.Root>
 ));
 ColorSlider.displayName = SliderPrimitive.Root.displayName;
@@ -304,7 +304,7 @@ const EMPTY_ARRAY: never[] = [];
 
 export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   id,
-  value,
+  value: propValue,
   disabled = false,
   invalid,
   placeholder,
@@ -314,10 +314,8 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   events = EMPTY_ARRAY,
 }) => {
   const eventHandler = useEventHandler();
-  const displayValue = value ?? "";
+  const displayValue = propValue ?? "";
   const [activeTab, setActiveTab] = React.useState("palette");
-  const [localInputValue, setLocalInputValue] = React.useState("");
-  const [colorFormat] = React.useState<"HEX">("HEX");
 
   const parseAlpha = (hex: string): number => {
     if (!hex || !hex.startsWith("#")) return 255;
@@ -325,12 +323,6 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     if (clean.length === 8) return parseInt(clean.slice(6, 8), 16);
     return 255;
   };
-
-  const [alphaValue, setAlphaValue] = React.useState(() => parseAlpha(value ?? ""));
-
-  React.useEffect(() => {
-    setAlphaValue(parseAlpha(value ?? ""));
-  }, [value]);
 
   const combineWithAlpha = (hex6: string, alpha: number): string => {
     const base = hex6.startsWith("#") ? hex6 : "#" + hex6;
@@ -346,6 +338,38 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     if (displayValue.length === 9) return displayValue.slice(0, 7);
     return displayValue;
   }, [displayValue]);
+
+  const [alphaValue, setAlphaValue] = React.useState(() => parseAlpha(propValue ?? ""));
+
+  const [localInputValue, setLocalInputValue] = React.useState(() => {
+    const initialAlpha = parseAlpha(propValue ?? "");
+    const initialDisplayColor = propValue
+      ? propValue.length === 9
+        ? propValue.slice(0, 7)
+        : propValue
+      : "#000000";
+    if (allowAlpha && initialAlpha < 255) {
+      return combineWithAlpha(initialDisplayColor, initialAlpha);
+    }
+    return initialDisplayColor;
+  });
+
+  const prevPropValueRef = React.useRef(propValue);
+  if (propValue !== prevPropValueRef.current) {
+    const newAlpha = parseAlpha(propValue ?? "");
+    setAlphaValue(newAlpha);
+    const displayColor = propValue
+      ? propValue.length === 9
+        ? propValue.slice(0, 7)
+        : propValue
+      : "#000000";
+    if (allowAlpha && newAlpha < 255) {
+      setLocalInputValue(combineWithAlpha(displayColor, newAlpha));
+    } else {
+      setLocalInputValue(displayColor);
+    }
+    prevPropValueRef.current = propValue;
+  }
 
   // Helper to determine contrast color for the "A"
   const getContrastColor = (hex: string): string => {
@@ -378,18 +402,12 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   };
 
-  const [rgbValues, setRgbValues] = React.useState({ r: 0, g: 0, b: 0 });
-
-  React.useEffect(() => {
-    if (activeTab === "picker") {
-      const rgb = hexToRgb(getDisplayColor());
-      setRgbValues(rgb);
-    }
-  }, [displayValue, activeTab, getDisplayColor]);
+  const rgbValues = React.useMemo(() => {
+    return hexToRgb(getDisplayColor());
+  }, [getDisplayColor]);
 
   const handleRgbSliderChange = (type: "r" | "g" | "b", value: number) => {
     const newRgb = { ...rgbValues, [type]: value };
-    setRgbValues(newRgb);
     const newHex = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
     if (events.includes("OnChange")) {
       if (allowAlpha) {
@@ -469,9 +487,9 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
           {Math.round((displayAlpha / 255) * 100)}%
         </span>
       )}
-      <CopyToClipboardButton textToCopy={localInputValue} className="h-8 w-8 px-0" />
+      <CopyToClipboardButton textToCopy={localInputValue} className="size-8 px-0" />
       <div
-        className="w-8 h-8 rounded-md border border-input shadow-sm shrink-0"
+        className="size-8 rounded-md border border-input shadow-sm shrink-0"
         style={{
           backgroundColor: getDisplayColor(),
           opacity: displayAlpha / 255,
@@ -479,20 +497,6 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
       />
     </div>
   );
-
-  // Helper to convert hex to other formats
-  const formatColor = React.useCallback((hex: string): string => {
-    // simplified for brevity as we forced HEX
-    return hex;
-  }, []);
-
-  React.useEffect(() => {
-    if (allowAlpha && alphaValue < 255) {
-      setLocalInputValue(combineWithAlpha(getDisplayColor(), alphaValue));
-    } else {
-      setLocalInputValue(formatColor(getDisplayColor()));
-    }
-  }, [displayValue, colorFormat, getDisplayColor, formatColor, allowAlpha, alphaValue]);
 
   const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalInputValue(e.target.value);
@@ -517,7 +521,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   const contrastColor = getContrastColor(getDisplayColor());
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center gap-x-2">
       <Popover>
         <PopoverTrigger asChild>
           <button
@@ -595,7 +599,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
               <div className="h-[300px] p-6 flex flex-col justify-center gap-6">
                 {/* RGB Sliders */}
                 <>
-                  <div className="space-y-2">
+                  <div className="gap-y-2">
                     <div className="flex justify-between text-xs font-medium">
                       <span>Red</span>
                       <span>{rgbValues.r.toString(16).toUpperCase().padStart(2, "0")}</span>
@@ -617,7 +621,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="gap-y-2">
                     <div className="flex justify-between text-xs font-medium">
                       <span>Green</span>
                       <span>{rgbValues.g.toString(16).toUpperCase().padStart(2, "0")}</span>
@@ -639,7 +643,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="gap-y-2">
                     <div className="flex justify-between text-xs font-medium">
                       <span>Blue</span>
                       <span>{rgbValues.b.toString(16).toUpperCase().padStart(2, "0")}</span>

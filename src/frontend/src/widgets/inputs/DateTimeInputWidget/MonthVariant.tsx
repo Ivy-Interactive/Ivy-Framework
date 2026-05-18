@@ -59,10 +59,10 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   const [viewYear, setViewYear] = useState(() =>
     date ? date.getFullYear() : new Date().getFullYear(),
   );
-  const [prevYear, setPrevYear] = useState(date?.getFullYear());
+  const prevYearRef = useRef(date?.getFullYear());
 
-  if (date?.getFullYear() !== prevYear) {
-    setPrevYear(date?.getFullYear());
+  if (date?.getFullYear() !== prevYearRef.current) {
+    prevYearRef.current = date?.getFullYear();
     if (date) {
       setViewYear(date.getFullYear());
     }
@@ -141,21 +141,21 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="size-7"
                 aria-label="Previous year"
                 onClick={() => setViewYear((y) => y - 1)}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="size-4" />
               </Button>
               <span className="text-sm font-medium select-none">{viewYear}</span>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="size-7"
                 aria-label="Next year"
                 onClick={() => setViewYear((y) => y + 1)}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="size-4" />
               </Button>
             </div>
             <div className="grid grid-cols-4 gap-1">

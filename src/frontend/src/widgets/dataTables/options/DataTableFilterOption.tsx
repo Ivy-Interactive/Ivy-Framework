@@ -6,6 +6,7 @@ import {
   QueryEditorChangeEvent,
   parseQuery,
   useDropdownState,
+  ColumnDef,
 } from "@/lib/filter-query-editor";
 import { Filter } from "@/services/grpcTableService";
 import { parseInvalidQuery } from "../utils/tableDataFetcher";
@@ -79,9 +80,8 @@ export const DataTableFilterOption: React.FC<{
   // Filter columns to only include filterable ones
   const queryEditorColumns = useMemo(
     () =>
-      columns
-        .filter((col) => col.filterable ?? true)
-        .map((col) => {
+      columns.reduce<ColumnDef[]>((acc, col) => {
+        if (col.filterable ?? true) {
           // Map column types to filter-query-editor supported types
           // Default to 'text' if type is undefined (shouldn't happen but defensive)
           let editorType = (col.type ?? ColType.Text).toLowerCase();
@@ -90,12 +90,14 @@ export const DataTableFilterOption: React.FC<{
             editorType = "date";
           }
 
-          return {
+          acc.push({
             name: col.name,
             type: editorType,
             width: typeof col.width === "number" ? col.width : 150,
-          };
-        }),
+          });
+        }
+        return acc;
+      }, []),
     [columns],
   );
 
@@ -316,8 +318,8 @@ export const DataTableFilterOption: React.FC<{
         <style>{tableStyles.queryEditor.css}</style>
 
         {isParsing ? (
-          <div className="absolute right-0 top-0 z-10 flex h-9 items-center border-l border-input bg-background px-2.5">
-            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
+          <div className="absolute right-0 top-1/2 z-10 flex h-9 -translate-y-1/2 items-center border-l border-input bg-background px-2.5">
+            <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <Button

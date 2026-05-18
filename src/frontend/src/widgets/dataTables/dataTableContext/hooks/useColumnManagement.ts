@@ -26,8 +26,7 @@ export const useColumnManagement = ({
   const [columnOrder, setColumnOrder] = useState<number[]>([]);
   const isReorderingRef = useRef(false);
 
-  // Update columns when columnsProp changes
-  useEffect(() => {
+  const syncColumns = useCallback(() => {
     // Don't update columns during reordering
     if (isReorderingRef.current) return;
 
@@ -45,8 +44,13 @@ export const useColumnManagement = ({
       // Same structure, just update metadata without resetting order
       setColumns(columnsProp);
     }
+  }, [columnsProp, columns]);
+
+  // Update columns when columnsProp changes
+  useEffect(() => {
+    syncColumns();
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnsProp]);
+  }, [columnsProp, syncColumns]);
 
   // Reset column widths when connection changes
   const resetColumnWidths = useCallback(() => {

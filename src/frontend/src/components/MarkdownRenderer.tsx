@@ -311,7 +311,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             <div
               className={cn(
                 "flex items-start text-large-body rounded-box border transition-colors relative",
-                "py-4 px-4 my-4",
+                "p-4 my-4",
                 style.className,
               )}
               role="alert"
@@ -419,7 +419,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         <summary className={typography.summary} {...props}>
           <div className="flex items-center gap-2">
             <svg
-              className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90"
+              className="size-4 shrink-0 transition-transform group-open:rotate-90"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

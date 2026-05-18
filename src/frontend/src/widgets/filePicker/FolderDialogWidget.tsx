@@ -31,7 +31,6 @@ export const FolderDialogWidget: React.FC<FolderDialogWidgetProps> = ({
 
   const openModernDialog = useCallback(async () => {
     // Try desktop bridge first — it returns the full path but not directory entries
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const hasDesktopBridge =
       typeof window !== "undefined" &&
       typeof (window as any).__ivy_desktop?.showDirectoryPicker === "function";

@@ -226,7 +226,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
         <div className="flex items-center gap-1 px-1 ml-auto shrink-0 pointer-events-none">
           {loading && (
             <div className="flex items-center h-6 pointer-events-auto">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
+              <Loader2 className="size-4 animate-spin text-muted-foreground text-opacity-50" />
             </div>
           )}
           {nullable && hasValue && !disabled && (
@@ -313,7 +313,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
           isSearchEnabled ? (
             <div className="p-2 border-b">
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                 <Input
                   ref={searchInputRef}
                   type="text"
@@ -335,7 +335,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       >
         {loading ? (
           <div className="flex justify-center p-4">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <Loader2 className="size-5 animate-spin text-muted-foreground" />
           </div>
         ) : filteredOptions.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
@@ -361,7 +361,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
                           <TooltipTrigger asChild>
                             <div className="flex items-center gap-2">
                               {option.icon && (
-                                <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                                <Icon name={option.icon} className="size-4 flex-shrink-0" />
                               )}
                               {option.label}
                             </div>
@@ -372,7 +372,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
                     ) : (
                       <div className="flex items-center gap-2">
                         {option.icon && (
-                          <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                          <Icon name={option.icon} className="size-4 flex-shrink-0" />
                         )}
                         {option.label}
                       </div>

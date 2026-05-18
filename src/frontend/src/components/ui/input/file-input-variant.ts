@@ -48,9 +48,9 @@ export const fileInputVariant = cva(
 export const uploadIconVariant = cva("text-primary", {
   variants: {
     density: {
-      Small: "h-4 w-4 mb-1",
-      Medium: "h-6 w-6 mb-2",
-      Large: "h-8 w-8 mb-3",
+      Small: "size-4 mb-1",
+      Medium: "size-6 mb-2",
+      Large: "size-8 mb-3",
     },
   },
   defaultVariants: {

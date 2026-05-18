@@ -39,9 +39,9 @@ const asyncSelectIconContainerVariant = {
 };
 
 const asyncSelectIconVariant = {
-  Small: "h-3 w-3",
-  Medium: "h-4 w-4",
-  Large: "h-5 w-5",
+  Small: "size-3",
+  Medium: "size-4",
+  Large: "size-5",
 };
 
 interface AsyncSelectInputWidgetProps {
@@ -91,7 +91,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   // Detect ellipsis on the display value span
   const [isEllipsed, setIsEllipsed] = useState(false);
 
-  useEffect(() => {
+  const updateEllipsisState = React.useCallback(() => {
     // Skip ellipsis check when no display value
     if (!displayValue) {
       requestAnimationFrame(() => setIsEllipsed(false));
@@ -121,6 +121,10 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
       window.removeEventListener("resize", handleResize);
     };
   }, [displayValue]);
+
+  useEffect(() => {
+    return updateEllipsisState();
+  }, [updateEllipsisState]);
 
   const displayValueSpan = displayValue ? (
     <span

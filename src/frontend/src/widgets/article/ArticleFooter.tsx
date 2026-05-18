@@ -66,7 +66,7 @@ export const ArticleFooter: React.FC<ArticleFooterProps> = ({
               rel="noopener noreferrer"
               className="group flex items-center gap-2 text-body text-muted-foreground hover:text-primary transition-colors"
             >
-              <Github className="w-4 h-4" />
+              <Github className="size-4" />
               Edit this document
             </a>
           </div>

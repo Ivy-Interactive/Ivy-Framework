@@ -30,7 +30,7 @@ export function useScrollShadow(
 
     handleScroll();
 
-    viewport.addEventListener("scroll", handleScroll);
+    viewport.addEventListener("scroll", handleScroll, { passive: true });
 
     const resizeObserver = direction === "top" ? new ResizeObserver(handleScroll) : null;
 

@@ -113,6 +113,5 @@ export function useDoubleTapLink({
     return () => {
       container.removeEventListener("pointerup", onPointerUp);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, gridRef]);
 }

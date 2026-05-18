@@ -84,7 +84,7 @@ export function useTabCalculation(
     if (needsDropdown) {
       availableWidth -= dropdownButtonWidth;
     }
-    for (const tabId of tabOrder) {
+    for (const [index, tabId] of tabOrder.entries()) {
       const tabWidth = measurements.get(tabId) || estimatedWidths.get(tabId) || 0;
 
       // Check if this tab fits in the remaining space
@@ -95,7 +95,7 @@ export function useTabCalculation(
         // This tab doesn't fit, so it and all remaining tabs go to dropdown
         newHiddenTabs.push(tabId);
         // Add all remaining tabs to hidden list
-        const remainingIndex = tabOrder.indexOf(tabId) + 1;
+        const remainingIndex = index + 1;
         if (remainingIndex < tabOrder.length) {
           newHiddenTabs.push(...tabOrder.slice(remainingIndex));
         }
@@ -104,12 +104,14 @@ export function useTabCalculation(
     }
 
     // Only update state if there's an actual change
-    const visibleChanged =
-      newVisibleTabs.length !== visibleTabs.length ||
-      !newVisibleTabs.every((id, index) => id === visibleTabs[index]);
-    const hiddenChanged =
-      newHiddenTabs.length !== hiddenTabs.length ||
-      !newHiddenTabs.every((id, index) => id === hiddenTabs[index]);
+    const visibleChanged = !(
+      newVisibleTabs.length === visibleTabs.length &&
+      newVisibleTabs.every((id, index) => id === visibleTabs[index])
+    );
+    const hiddenChanged = !(
+      newHiddenTabs.length === hiddenTabs.length &&
+      newHiddenTabs.every((id, index) => id === hiddenTabs[index])
+    );
 
     if (visibleChanged || hiddenChanged) {
       setVisibleTabs(newVisibleTabs);
@@ -184,13 +186,17 @@ export function useTabCalculation(
     return () => clearTimeout(timer);
   }, [tabWidgets]);
 
-  // Force initial calculation
-  React.useEffect(() => {
+  const initializeTabs = React.useCallback(() => {
     // Only set initial state if we haven't calculated yet
     if (visibleTabs.length === 0 && hiddenTabs.length === 0 && tabOrder.length > 0) {
       setVisibleTabs(tabOrder);
       setHiddenTabs([]);
     }
+  }, [hiddenTabs.length, tabOrder, visibleTabs.length, setVisibleTabs, setHiddenTabs]);
+
+  // Force initial calculation
+  React.useEffect(() => {
+    initializeTabs();
 
     // Then calculate actual visibility after a brief delay
     const timer = setTimeout(() => {
@@ -198,7 +204,7 @@ export function useTabCalculation(
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [hiddenTabs.length, tabOrder, visibleTabs.length, setVisibleTabs, setHiddenTabs]);
+  }, [initializeTabs]);
 
   // MutationObserver for dynamic content changes
   React.useEffect(() => {

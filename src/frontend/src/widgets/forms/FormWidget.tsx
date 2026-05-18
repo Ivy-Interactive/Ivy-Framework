@@ -7,7 +7,9 @@ interface FormWidgetProps {
   events?: string[];
 }
 
-export const FormWidget: React.FC<FormWidgetProps> = ({ id, children, events = [] }) => {
+const EMPTY_EVENTS: string[] = [];
+
+export const FormWidget: React.FC<FormWidgetProps> = ({ id, children, events = EMPTY_EVENTS }) => {
   const formRef = useRef<HTMLDivElement>(null);
   const eventHandler = useEventHandler();
 

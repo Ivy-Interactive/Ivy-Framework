@@ -21,7 +21,11 @@ export function useTabManagement(
 
   const initialTabOrder = React.useMemo(
     () =>
-      tabWidgets.map((tab) => getTabProps(tab)?.id).filter((id): id is string => id !== undefined),
+      tabWidgets.reduce<string[]>((acc, tab) => {
+        const id = getTabProps(tab)?.id;
+        if (id !== undefined) acc.push(id);
+        return acc;
+      }, []),
     // oxlint-disable-next-line react-hooks/exhaustive-deps
     [], // Only run on mount
   );
@@ -76,21 +80,6 @@ export function useTabManagement(
   // Synchronization Logic
   // ====================
 
-  // Helper function to efficiently add tab to loaded tabs
-  const addToLoadedTabs = React.useCallback(
-    (tabId: string) => {
-      setLoadedTabs((prev) => {
-        if (prev.has(tabId)) {
-          return prev; // Return the same Set if tab is already loaded
-        }
-        const newSet = new Set(prev);
-        newSet.add(tabId);
-        return newSet;
-      });
-    },
-    [setLoadedTabs],
-  );
-
   // Update refs when they change
   React.useEffect(() => {
     activeTabIdRef.current = activeTabId;
@@ -110,7 +99,11 @@ export function useTabManagement(
 
   const currentTabIds = React.useMemo(
     () =>
-      tabWidgets.map((tab) => getTabProps(tab)?.id).filter((id): id is string => id !== undefined),
+      tabWidgets.reduce<string[]>((acc, tab) => {
+        const id = getTabProps(tab)?.id;
+        if (id !== undefined) acc.push(id);
+        return acc;
+      }, []),
     [tabWidgets],
   );
 
@@ -133,43 +126,69 @@ export function useTabManagement(
     setTabOrder(currentTabIds);
   }
 
-  // Sync activeTabId with selectedIndex prop from backend (only when not user-initiated)
-  React.useEffect(() => {
+  const syncActiveTabId = React.useCallback(() => {
     if (selectedIndex != null && tabOrder[selectedIndex]) {
       const targetTabId = tabOrder[selectedIndex];
       // Only sync if it's not user-initiated OR if the current activeTabId is invalid
       if (!isUserInitiatedChangeRef.current || !activeTabId || !tabOrder.includes(activeTabId)) {
         if (targetTabId !== activeTabId) {
-          addToLoadedTabs(targetTabId);
+          setLoadedTabs((prev) => {
+            if (prev.has(targetTabId)) return prev;
+            const newSet = new Set(prev);
+            newSet.add(targetTabId);
+            return newSet;
+          });
           setActiveTabId(targetTabId);
           // Update activeIndex for Content variant animation
           setActiveIndex(selectedIndex);
         }
       }
     }
-  }, [
-    selectedIndex,
-    tabOrder,
-    activeTabId,
-    addToLoadedTabs,
-    isUserInitiatedChangeRef,
-    setActiveTabId,
-    setActiveIndex,
-  ]);
+  }, [selectedIndex, tabOrder, activeTabId, setActiveTabId, setActiveIndex]);
 
-  // Reset user-initiated flag when tabWidgets changes (backend response received)
+  // Sync activeTabId with selectedIndex prop from backend (only when not user-initiated)
   React.useEffect(() => {
+    syncActiveTabId();
+  }, [syncActiveTabId]);
+
+  const resetUserInitiatedFlag = React.useCallback(() => {
     if (isUserInitiatedChangeRef.current) {
       isUserInitiatedChangeRef.current = false;
     }
-  }, [tabWidgets, isUserInitiatedChangeRef]);
+  }, []);
+
+  // Reset user-initiated flag when tabWidgets changes (backend response received)
+  React.useEffect(() => {
+    resetUserInitiatedFlag();
+  }, [tabWidgets, resetUserInitiatedFlag]);
+
+  const loadActiveTab = React.useCallback(() => {
+    if (activeTabId) {
+      setLoadedTabs((prev) => {
+        if (prev.has(activeTabId)) return prev;
+        const newSet = new Set(prev);
+        newSet.add(activeTabId);
+        return newSet;
+      });
+    }
+  }, [activeTabId]);
 
   // Load active tab only when it becomes active
   React.useEffect(() => {
-    if (activeTabId) {
-      addToLoadedTabs(activeTabId);
-    }
-  }, [activeTabId, addToLoadedTabs]);
+    loadActiveTab();
+  }, [loadActiveTab]);
+
+  const addToLoadedTabs = React.useCallback(
+    (tabId: string) => {
+      setLoadedTabs((prev) => {
+        if (prev.has(tabId)) return prev;
+        const newSet = new Set(prev);
+        newSet.add(tabId);
+        return newSet;
+      });
+    },
+    [setLoadedTabs],
+  );
 
   return {
     // State

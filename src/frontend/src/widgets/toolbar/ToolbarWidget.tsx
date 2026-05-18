@@ -102,12 +102,14 @@ const ToolbarItemGroup: React.FC<ToolbarItemGroupProps> = ({
   });
 };
 
+const EMPTY_EVENTS: string[] = [];
+
 export const ToolbarWidget: React.FC<ToolbarWidgetProps> = ({
   id,
   items = EMPTY_ITEMS,
   disabled = false,
   density = Densities.Medium,
-  events = [],
+  events = EMPTY_EVENTS,
 }) => {
   const eventHandler = useEventHandler();
 
