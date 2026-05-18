@@ -1,0 +1,400 @@
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Terminal palette (uses framework CSS variables, adapts to light/dark) ─ */
+.aov-shell {
+  --aov-bg: var(--background);
+  --aov-bg-elev: var(--card);
+  --aov-bg-deep: var(--popover);
+  --aov-border: var(--border);
+  --aov-border-strong: var(--input);
+  --aov-fg: var(--foreground);
+  --aov-fg-muted: var(--muted-foreground);
+  --aov-fg-faint: color-mix(in srgb, var(--muted-foreground) 70%, transparent);
+  --aov-accent: var(--foreground);
+  --aov-accent-soft: color-mix(in srgb, var(--muted-foreground) 10%, transparent);
+  --aov-danger: var(--destructive);
+  --aov-warn: var(--warning);
+  --aov-mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+    Consolas, monospace;
+
+  color: var(--aov-fg);
+  font-size: 14px;
+  line-height: 1.55;
+  position: relative;
+  container-type: size;
+}
+
+.aov-shell * {
+  box-sizing: border-box;
+}
+
+/* ─── Scrollable body ───────────────────────────────────────────────────── */
+.aov-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.aov-body > * {
+  animation: aov-stream-in 0.25s ease-out both;
+}
+
+@keyframes aov-stream-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.aov-body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.aov-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.aov-body::-webkit-scrollbar-thumb {
+  background: var(--aov-border-strong);
+  border-radius: 4px;
+}
+
+/* ─── Status row (inline, flows after content) ──────────────────────────── */
+.aov-status-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+  min-height: 32px;
+}
+
+.aov-status-running,
+.aov-status-done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--aov-fg-muted);
+  min-width: 0;
+}
+
+.aov-status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--aov-fg-muted);
+}
+
+.aov-status-icon-spin {
+  animation: aov-spin 1.5s linear infinite;
+}
+
+@keyframes aov-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.aov-status-reveal {
+  display: inline-block;
+  animation: aov-reveal 0.3s ease-out forwards;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+@keyframes aov-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.aov-status-shimmer {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--muted-foreground) 45%, transparent) 0%,
+    color-mix(in srgb, var(--foreground) 95%, transparent) 50%,
+    color-mix(in srgb, var(--muted-foreground) 45%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: aov-shine 2.5s ease-in-out infinite;
+}
+
+@keyframes aov-shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.aov-status-done-label {
+  font-variant-numeric: tabular-nums;
+  color: var(--aov-fg);
+}
+
+/* ─── Assistant text (markdown) ─────────────────────────────────────────── */
+.aov-assistant {
+  margin: 16px 0;
+}
+
+.aov-markdown {
+  color: var(--aov-fg);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.aov-markdown p {
+  margin: 0.5rem 0;
+}
+.aov-markdown p:first-child {
+  margin-top: 0;
+}
+.aov-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.aov-markdown code {
+  font-family: var(--aov-mono);
+  background: var(--aov-bg-elev);
+  border: 1px solid var(--aov-border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 14px;
+}
+
+.aov-markdown pre {
+  margin: 8px 0;
+  background: var(--aov-bg-deep);
+  border: 1px solid var(--aov-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  font-size: 14px;
+}
+
+.aov-markdown pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.aov-markdown ul,
+.aov-markdown ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.aov-markdown a {
+  color: var(--aov-accent);
+  text-decoration: underline;
+}
+
+.aov-markdown h1,
+.aov-markdown h2,
+.aov-markdown h3,
+.aov-markdown h4 {
+  margin: 0.75rem 0 0.375rem;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.aov-markdown blockquote {
+  margin: 0.5rem 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--aov-border-strong);
+  color: var(--aov-fg-muted);
+}
+
+/* ─── Tool use card (collapsed by default, no outer chrome) ─────────────── */
+.aov-tool {
+  font-family: var(--aov-mono);
+  margin: 4px 0;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.aov-tool:hover {
+  background: color-mix(in srgb, var(--muted-foreground) 4%, var(--aov-bg-elev));
+}
+
+.aov-tool.open {
+  background: color-mix(in srgb, var(--muted-foreground) 4%, var(--aov-bg-elev));
+}
+
+.aov-tool-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  outline: none;
+}
+
+.aov-tool-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--aov-fg-faint);
+  transition: transform 0.15s ease;
+}
+
+.aov-tool-chevron.open {
+  transform: rotate(180deg);
+}
+
+.aov-tool-status {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.aov-tool-status--success {
+  background: #22c55e;
+}
+
+.aov-tool-status--error {
+  background: #ef4444;
+}
+
+.aov-tool-status--running {
+  background: #3b82f6;
+  animation: aov-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes aov-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.aov-tool-name {
+  color: var(--aov-accent);
+  font-weight: 600;
+}
+
+.aov-tool-preview {
+  color: var(--aov-fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.aov-tool-body {
+  padding: 4px 0 4px 22px;
+  animation: aov-tool-expand 0.2s ease-out both;
+}
+
+@keyframes aov-tool-expand {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.aov-tool-pre {
+  margin: 0 0 6px;
+  background: var(--aov-bg-deep);
+  border-radius: 4px;
+  padding: 8px 10px;
+  overflow-x: auto;
+  font-size: 12px;
+  color: var(--aov-fg);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.aov-tool-pre code {
+  font-family: var(--aov-mono);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.aov-tool-separator {
+  border: none;
+  border-top: 1px solid var(--aov-border);
+  margin: 8px 0 4px;
+}
+
+/* ─── Result summary ────────────────────────────────────────────────────── */
+.aov-result {
+  border: 1px solid var(--aov-border);
+  background: var(--aov-accent-soft);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 10px 0;
+}
+
+.aov-result.error {
+  background: color-mix(in srgb, var(--destructive) 10%, transparent);
+  border-color: color-mix(in srgb, var(--destructive) 40%, transparent);
+}
+
+.aov-result-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.aov-result-title {
+  font-weight: 600;
+  color: var(--aov-accent);
+}
+
+.aov-result.error .aov-result-title {
+  color: var(--aov-danger);
+}
+
+.aov-result-meta {
+  color: var(--aov-fg-muted);
+  font-size: 14px;
+}
+
+.aov-result-body {
+  margin: 6px 0;
+}
+
+.aov-result-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--aov-fg-muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* ─── System & thinking blocks ──────────────────────────────────────────── */
+.aov-system {
+  color: var(--aov-fg-faint);
+  font-size: 14px;
+  padding: 2px 0;
+}
+
+.aov-thinking {
+  color: var(--aov-fg-muted);
+  font-style: italic;
+  margin: 6px 0;
+  padding-left: 8px;
+  border-left: 2px solid var(--aov-border-strong);
+}

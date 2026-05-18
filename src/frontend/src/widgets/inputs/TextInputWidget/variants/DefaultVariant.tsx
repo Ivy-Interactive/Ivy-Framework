@@ -102,6 +102,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
           <Input
             ref={elementRef as React.RefObject<HTMLInputElement>}
             id={props.id}
+            density={density}
             placeholder={props.placeholder}
             value={props.value}
             type={type}
@@ -187,7 +188,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
               props.isRecording && "bg-destructive/10 text-destructive",
             )}
           >
-            <Mic className={cn("h-4 w-4", props.isRecording && "animate-pulse text-destructive")} />
+            <Mic className={cn("size-4", props.isRecording && "animate-pulse text-destructive")} />
           </button>
         )}
 

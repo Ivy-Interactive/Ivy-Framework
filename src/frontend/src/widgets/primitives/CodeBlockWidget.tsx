@@ -152,11 +152,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       [currentScale, wrapLines, showLineNumbers],
     );
 
-    const highlighterKey = useMemo(
-      () =>
-        `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}-${wrapLines}`,
-      [id, language, showLineNumbers, showBorder, startingLineNumber, wrapLines],
-    );
+    const highlighterKey = `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}-${startingLineNumber}-${wrapLines}`;
 
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
 
@@ -183,7 +179,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
           className={cn(
             "w-full",
             isFull ? "flex-1 min-h-0" : "h-full",
-            showBorder && "rounded-md border border-border",
+            showBorder && "overflow-hidden rounded-md border border-border",
           )}
           viewportClassName="min-w-0"
           viewportStyle={copyViewportInset}

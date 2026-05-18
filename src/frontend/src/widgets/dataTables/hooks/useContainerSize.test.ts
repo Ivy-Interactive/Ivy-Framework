@@ -73,19 +73,13 @@ describe("useContainerSize - synchronous initial measurement", () => {
 });
 
 /**
- * Tests for DataTableWidget min-height fallback.
+ * Tests for DataTableWidget flex sizing in unconstrained parents.
  *
- * When height="Full", the container must have a non-zero min-height
- * so that useContainerSize can measure something even in unconstrained parents.
+ * When height="Full", the container uses flex-based sizing instead of
+ * height: 100% (which resolves to 0 in unconstrained parents).
  */
-describe("DataTableWidget - min-height fallback for unconstrained parents", () => {
+describe("DataTableWidget - flex sizing for unconstrained parents", () => {
   const widgetSource = fs.readFileSync(path.resolve(__dirname, "../DataTableWidget.tsx"), "utf-8");
-
-  it('should set minHeight to "200px" when height is "Full"', () => {
-    // The fix adds minHeight: "200px" to ensure the container has a
-    // non-zero height for measurement in unconstrained flex parents
-    expect(widgetSource).toContain('minHeight = "200px"');
-  });
 
   it('should remove height: 100% when height is "Full"', () => {
     // height: 100% doesn't work in unconstrained parents (resolves to 0)

@@ -41,9 +41,9 @@ const clearButtonMap: Record<Densities, string> = {
 };
 
 const clearIconMap: Record<Densities, string> = {
-  [Densities.Small]: "h-3 w-3",
-  [Densities.Medium]: "h-4 w-4",
-  [Densities.Large]: "h-5 w-5",
+  [Densities.Small]: "size-3",
+  [Densities.Medium]: "size-4",
+  [Densities.Large]: "size-5",
 };
 
 export function resolveColor(color: string | undefined, fallback: string): string {
@@ -94,14 +94,15 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, [bgColor]);
 
-  // Initialize canvas and load existing value
-  useEffect(() => {
+  const setupCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     if (value) {
       const img = new Image();
@@ -117,10 +118,19 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
       img.src = value.startsWith("data:") ? value : `data:image/png;base64,${value}`;
     } else {
       clearCanvas();
-      setTimeout(() => setHasDrawn(false), 0);
+      timeoutId = setTimeout(() => setHasDrawn(false), 0);
       pathsRef.current = [];
     }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [value, bgColor, clearCanvas]);
+
+  // Initialize canvas and load existing value
+  useEffect(() => {
+    return setupCanvas();
+  }, [setupCanvas]);
 
   const getCanvasPoint = (e: React.MouseEvent | React.TouchEvent): Point | null => {
     const canvas = canvasRef.current;
@@ -208,14 +218,14 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
     if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
   };
 
-  const handleBlur = useCallback(() => {
+  const blurInput = useCallback(() => {
     if (disabled) return;
     if (!isFocusedRef.current) return;
     if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
     isFocusedRef.current = false;
   }, [disabled, events, eventHandler, id]);
 
-  const handleFocus = useCallback(() => {
+  const focusInput = useCallback(() => {
     if (disabled) return;
     if (isFocusedRef.current) return;
     if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
@@ -226,7 +236,7 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
   useEffect(() => {
     if (!events?.includes("OnBlur") && !events?.includes("OnFocus")) return;
 
-    const onPointerDown = (e: PointerEvent) => {
+    const handlePointerDown = (e: PointerEvent) => {
       const el = containerRef.current;
       if (!el) return;
 
@@ -235,19 +245,25 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
 
       if (clickedInside) {
         el.focus();
-        handleFocus();
+        if (!disabled && !isFocusedRef.current) {
+          if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
+          isFocusedRef.current = true;
+        }
         return;
       }
 
       // Clicked outside
       if (isFocusedRef.current) {
-        handleBlur();
+        if (!disabled && isFocusedRef.current) {
+          if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
+          isFocusedRef.current = false;
+        }
       }
     };
 
-    window.addEventListener("pointerdown", onPointerDown, true);
-    return () => window.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, handleBlur, handleFocus]);
+    window.addEventListener("pointerdown", handlePointerDown, true);
+    return () => window.removeEventListener("pointerdown", handlePointerDown, true);
+  }, [events, disabled, eventHandler, id]);
 
   return (
     <div
@@ -257,13 +273,13 @@ export const SignatureInputWidget: React.FC<SignatureInputWidgetProps> = ({
         disabled && "opacity-50 cursor-not-allowed",
         invalid && inputStyles.invalidInput,
       )}
-      onBlur={handleBlur}
-      onFocus={handleFocus}
+      onBlur={blurInput}
+      onFocus={focusInput}
       tabIndex={disabled ? -1 : 0}
       onPointerDown={() => {
         if (disabled) return;
         containerRef.current?.focus();
-        handleFocus();
+        focusInput();
       }}
       data-testid={dataTestId}
     >

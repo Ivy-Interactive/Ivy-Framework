@@ -74,13 +74,6 @@ public record ServerArgs
     /// that needs DI but should not bind a real port.
     /// </summary>
     public bool IsCliCommand => Describe || DescribeConnection != null || TestConnection != null;
-
-    /// <summary>
-    /// When true, forces all authentication cookies to have Secure=false.
-    /// This is applied AFTER ConfigureAuthCookieOptions callback to ensure
-    /// cookies work over HTTP in desktop environments.
-    /// </summary>
-    public bool ForceNonSecureCookies { get; set; } = false;
 }
 
 public class Server
@@ -100,7 +93,6 @@ public class Server
     public ServerArgs Args => _args;
     public static Action<CookieOptions>? ConfigureAuthCookieOptions { get; set; }
     public static string? AuthCookiePrefix { get; set; }
-    internal static bool ForceNonSecureCookies { get; set; }
     private IContentBuilder? _contentBuilder;
     private bool _useHotReload;
     private bool _useHttpRedirection;
@@ -113,6 +105,7 @@ public class Server
     private Action<HtmlPipeline>? _pipelineConfigurator;
     private PluginLoader? _pluginLoader;
     private PluginWatcher? _pluginWatcher;
+    private PluginReferencesWatcher? _pluginReferencesWatcher;
     private Func<Server, WebApplicationBuilder, PluginContextBase>? _pluginContextFactory;
     private ManifestOptions? _manifestOptions;
     private ServerArgs _args;
@@ -151,12 +144,6 @@ public class Server
         Services.AddSingleton<IConfiguration>(_ => Configuration);
 
         AddDefaultApps();
-    }
-
-    public void SetForceNonSecureCookies(bool force)
-    {
-        _args = _args with { ForceNonSecureCookies = force };
-        ForceNonSecureCookies = force;
     }
 
     private void AddDefaultApps()
@@ -567,18 +554,19 @@ public class Server
         Version? hostVersion = null,
         Func<Server, WebApplicationBuilder, PluginContextBase>? contextFactory = null,
         IEnumerable<string>? sharedAssemblyNames = null,
-        bool enableHotReload = true)
+        bool enableHotReload = true,
+        bool buildSourcePlugins = false)
     {
         using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
         var logger = loggerFactory.CreateLogger<PluginLoader>();
-        var loader = new PluginLoader(pluginsDirectory, logger, sharedAssemblyNames);
+        var loader = new PluginLoader(pluginsDirectory, logger, sharedAssemblyNames, buildSourcePlugins);
 
         using var bootstrapProvider = Services.BuildServiceProvider();
         loader.DiscoverAndLoad(
             hostVersion ?? Assembly.GetEntryAssembly()!.GetName().Version!,
             bootstrapProvider);
 
-        loader.ConfigureServices(Services, Configuration);
+        loader.SetConfiguration(Configuration);
 
         _pluginLoader = loader;
         _pluginContextFactory = contextFactory;
@@ -590,8 +578,15 @@ public class Server
         if (enableHotReload)
         {
             var watcherLogger = loggerFactory.CreateLogger<PluginWatcher>();
-            _pluginWatcher = new PluginWatcher(pluginsDirectory, loader, watcherLogger);
+            _pluginWatcher = new PluginWatcher(pluginsDirectory, loader, watcherLogger, buildSourcePlugins);
             _pluginWatcher.Start();
+
+            var refsWatcherLogger = loggerFactory.CreateLogger<PluginReferencesWatcher>();
+            var referencesFilePath = Path.Combine(pluginsDirectory, PluginReferencesWatcher.FileName);
+            var initialRefs = PluginReferencesWatcher.ParseReferencesFile(referencesFilePath, pluginsDirectory, refsWatcherLogger);
+            _pluginReferencesWatcher = new PluginReferencesWatcher(pluginsDirectory, loader, refsWatcherLogger, buildSourcePlugins);
+            _pluginReferencesWatcher.SetInitialReferences(initialRefs);
+            _pluginReferencesWatcher.Start();
         }
 
         return this;
@@ -1022,6 +1017,7 @@ public class Server
         app.Lifetime.ApplicationStopping.Register(() =>
         {
             _pluginWatcher?.Dispose();
+            _pluginReferencesWatcher?.Dispose();
         });
 
         if (_args.Describe)

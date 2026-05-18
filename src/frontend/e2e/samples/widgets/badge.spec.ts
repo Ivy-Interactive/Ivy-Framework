@@ -26,6 +26,7 @@ const getBadgeLocator = (page: Page, text: string) =>
 const verifyBadgesWithIcons = async (page: Page, items: readonly string[]) => {
   for (const item of items) {
     const firstBadge = getBadgeLocator(page, item).first();
+    // eslint-disable-next-line
     await firstBadge.scrollIntoViewIfNeeded();
     await page.waitForTimeout(150);
     await expect(firstBadge).toBeVisible();
@@ -75,6 +76,7 @@ test.describe("Badge Widget Tests", () => {
     test("should verify all variants with styling", async ({ page }) => {
       for (const variant of BADGE_VARIANTS) {
         const badge = getBadgeLocator(page, variant).first();
+        // eslint-disable-next-line
         await expect(badge).toBeVisible();
         expect(await badge.getAttribute("class")).toContain("inline-flex");
       }
@@ -86,6 +88,7 @@ test.describe("Badge Widget Tests", () => {
       );
 
       for (const badge of badges) {
+        // eslint-disable-next-line
         await badge.scrollIntoViewIfNeeded();
         await page.waitForTimeout(100);
         await expect(badge).toBeVisible();
@@ -100,6 +103,7 @@ test.describe("Badge Widget Tests", () => {
 
       // Verify there are multiple size instances for different variants
       for (const size of BADGE_SIZES) {
+        // eslint-disable-next-line
         expect(await getBadgeLocator(page, size).count()).toBeGreaterThanOrEqual(3);
       }
     });

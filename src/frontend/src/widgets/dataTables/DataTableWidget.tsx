@@ -12,30 +12,32 @@ import { DataTableFilterOption } from "./options/DataTableFilterOption";
 import { Filter as FilterIcon } from "lucide-react";
 import { tableStyles } from "./styles/style";
 import { Densities } from "@/types/density";
-import { TableProps } from "./types/types";
+import { TableProps, DataTableConfig } from "./types/types";
 import { getWidth, getHeight } from "@/lib/styles";
 import { applyConfigDefaults, applyColumnsDefaults } from "./DataTableDefaults";
 import type { SpriteMap } from "@glideapps/glide-data-grid";
 
 interface TableLayoutProps {
   children?: React.ReactNode;
-  emptyView?: React.ReactNode[];
 }
 
-const TableLayout: React.FC<TableLayoutProps> = ({ children, emptyView }) => {
-  const { error, columns, visibleRows, isLoading } = useTable();
+const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
+  const { error, columns } = useTable();
   const showTableEditor = columns.length > 0;
 
   if (error) {
     return <ErrorDisplay title="Table Error" message={error} />;
   }
 
-  // Show empty view when data has loaded, there are no rows, and an empty view slot was provided
-  if (showTableEditor && !isLoading && visibleRows === 0 && emptyView && emptyView.length > 0) {
-    return <div style={tableStyles.table.container}>{emptyView}</div>;
+  if (!showTableEditor) {
+    return (
+      <div style={tableStyles.table.container}>
+        <Loading />
+      </div>
+    );
   }
 
-  return <div style={tableStyles.table.container}>{showTableEditor ? children : <Loading />}</div>;
+  return <div style={{ ...tableStyles.table.container }}>{children}</div>;
 };
 
 interface DataTableWidgetProps extends TableProps {
@@ -50,12 +52,13 @@ interface DataTableWidgetProps extends TableProps {
 }
 
 const EMPTY_EVENTS: string[] = [];
+const EMPTY_CONFIG: DataTableConfig = {};
 
 export const DataTable: React.FC<DataTableWidgetProps> = ({
   id,
   columns,
   connection,
-  config = {},
+  config = EMPTY_CONFIG,
   editable = false,
   width = "Full",
   height = "Full",
@@ -94,14 +97,13 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
   // If height is Full, use flex-based sizing instead of height: 100%.
   // In unconstrained parents (e.g. Layout.Vertical() with no explicit height),
   // height: 100% resolves to 0 because the parent has no definite height.
-  // flexGrow fills available space in flex parents, while minHeight ensures
-  // at least ~5 rows are visible in unconstrained parents.
+  // flexGrow fills available space in flex parents. When empty, the table
+  // collapses to just headers with no forced min height.
   if (height === "Full") {
     delete containerStyle.height;
     containerStyle.display = "flex";
     containerStyle.flexDirection = "column";
     containerStyle.flexGrow = 1;
-    containerStyle.minHeight = "200px";
   }
 
   return (
@@ -114,7 +116,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
         density={density}
         updateStream={updateStream}
       >
-        <TableLayout emptyView={slots?.EmptyView}>
+        <TableLayout>
           <DataTableHeader>
             <div className="flex items-center gap-2 w-full">
               <div className="flex items-center gap-1">

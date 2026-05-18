@@ -1,7 +1,7 @@
 import { GridCell, GridCellKind, Item, Theme } from "@glideapps/glide-data-grid";
 import { Align, DataColumn, DataRow } from "../types/types";
 import { getCSSVariable, isDarkMode } from "@/lib/theme";
-import type { LabelsBadgesCellData } from "./customRenderers";
+import type { AnimatedStatusCellData, LabelsBadgesCellData } from "./customRenderers";
 
 /**
  * Converts Align enum to contentAlign value for GridCell
@@ -57,7 +57,7 @@ export function isProbablyIconValue(value: unknown): boolean {
     typeof value === "string" &&
     /^[A-Z][a-zA-Z0-9]*$/.test(value) &&
     value.length > 2 &&
-    !value.includes(" ")
+    value.indexOf(" ") === -1
   );
 }
 
@@ -82,7 +82,7 @@ export function createIconCell(iconName: string, align?: Align): GridCell {
  * Checks if a column type represents a date/timestamp
  */
 export function isDateColumnType(columnType: string): boolean {
-  return columnType.includes("date") || columnType.includes("timestamp");
+  return columnType.indexOf("date") !== -1 || columnType.indexOf("timestamp") !== -1;
 }
 
 /**
@@ -90,11 +90,11 @@ export function isDateColumnType(columnType: string): boolean {
  */
 export function isNumericColumnType(columnType: string): boolean {
   return (
-    columnType.includes("int") ||
-    columnType.includes("float") ||
-    columnType.includes("double") ||
-    columnType.includes("decimal") ||
-    columnType.includes("number")
+    columnType.indexOf("int") !== -1 ||
+    columnType.indexOf("float") !== -1 ||
+    columnType.indexOf("double") !== -1 ||
+    columnType.indexOf("decimal") !== -1 ||
+    columnType.indexOf("number") !== -1
   );
 }
 
@@ -103,8 +103,8 @@ export function isNumericColumnType(columnType: string): boolean {
  */
 export function formatDateValue(dateValue: Date, columnType: string): string {
   const hasTime =
-    columnType.includes("datetime") ||
-    columnType.includes("timestamp") ||
+    columnType.indexOf("datetime") !== -1 ||
+    columnType.indexOf("timestamp") !== -1 ||
     dateValue.getHours() !== 0 ||
     dateValue.getMinutes() !== 0 ||
     dateValue.getSeconds() !== 0;
@@ -247,26 +247,34 @@ export function createLabelsCell(
   let labels: readonly string[];
 
   if (Array.isArray(cellValue)) {
-    labels = cellValue.filter((item) => item != null).map(String);
+    labels = cellValue.reduce<string[]>((acc, item) => {
+      if (item != null) acc.push(String(item));
+      return acc;
+    }, []);
   } else if (typeof cellValue === "string") {
     // Try to parse as JSON first (from backend serialization)
     try {
       const parsed = JSON.parse(cellValue);
       if (Array.isArray(parsed)) {
-        labels = parsed.filter((item) => item != null).map(String);
+        labels = parsed.reduce<string[]>((acc, item) => {
+          if (item != null) acc.push(String(item));
+          return acc;
+        }, []);
       } else {
         // Fallback to comma-separated if JSON parsing doesn't yield an array
-        labels = cellValue
-          .split(",")
-          .map((s) => s.trim())
-          .filter((s) => s.length > 0);
+        labels = cellValue.split(",").reduce<string[]>((acc, s) => {
+          const trimmed = s.trim();
+          if (trimmed.length > 0) acc.push(trimmed);
+          return acc;
+        }, []);
       }
     } catch {
       // Not JSON, treat as comma-separated string
-      labels = cellValue
-        .split(",")
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+      labels = cellValue.split(",").reduce<string[]>((acc, s) => {
+        const trimmed = s.trim();
+        if (trimmed.length > 0) acc.push(trimmed);
+        return acc;
+      }, []);
     }
   } else if (cellValue != null) {
     labels = [String(cellValue)];
@@ -326,6 +334,58 @@ export function createLabelsCell(
     allowOverlay: false,
     themeOverride,
     contentAlign,
+  };
+}
+
+/**
+ * Parses the encoded value emitted by AnimatedStatusValue (C#) into cell data.
+ * Format: "<state>:<text>[\t<rightLabel>]" where state is "running" | "done" | "idle".
+ * Plain unencoded strings are accepted too and treated as idle (e.g. for
+ * SpinnerTimer cells where the C# side may emit raw timer text).
+ */
+export function createAnimatedStatusCell(
+  cellValue: unknown,
+  align?: Align,
+  mode?: AnimatedStatusCellData["mode"],
+  badgeColorMapping?: Record<string, string> | null,
+): GridCell {
+  const raw = cellValue == null ? "" : String(cellValue);
+  const [body, rightLabel] = raw.split("\t", 2);
+  const colonIdx = body.indexOf(":");
+  let state: AnimatedStatusCellData["state"] = "idle";
+  let statusText = body;
+  if (colonIdx >= 0) {
+    const head = body.slice(0, colonIdx);
+    if (head === "running" || head === "done" || head === "idle") {
+      state = head;
+      statusText = body.slice(colonIdx + 1);
+    }
+  }
+  let badgeBg: string | undefined;
+  let badgeFg: string | undefined;
+  if (mode === "badge" && badgeColorMapping) {
+    const color = lookupBadgeColorMapping(badgeColorMapping, statusText);
+    if (color) {
+      const resolved = resolveBadgeColor(color);
+      badgeBg = resolved.bg;
+      badgeFg = resolved.text;
+    }
+  }
+  return {
+    kind: GridCellKind.Custom,
+    allowOverlay: false,
+    readonly: true,
+    copyData: statusText,
+    data: {
+      kind: "animated-status-cell",
+      mode: mode ?? "label",
+      state,
+      statusText,
+      rightLabel: rightLabel || undefined,
+      align: align ? getContentAlign(align) : undefined,
+      badgeBg,
+      badgeFg,
+    },
   };
 }
 
@@ -399,7 +459,11 @@ export function getCellContent(
   let orderedCols: DataColumn[];
   if (columnOrder.length === columns.length) {
     // Map using columnOrder indices, then filter hidden
-    orderedCols = columnOrder.map((idx) => columns[idx]).filter((col) => !col.hidden);
+    orderedCols = columnOrder.reduce<DataColumn[]>((acc, idx) => {
+      const col = columns[idx];
+      if (col && !col.hidden) acc.push(col);
+      return acc;
+    }, []);
   } else {
     // No reordering, just filter hidden columns
     orderedCols = columns.filter((col) => !col.hidden);
@@ -432,6 +496,16 @@ export function getCellContent(
     // Handle Labels type - supports arrays or comma-separated strings
     if (column.type === "Labels") {
       return createLabelsCell(cellValue, align, column.color, column.badgeColorMapping);
+    }
+
+    // Handle AnimatedStatus type - spinner + shimmer label, animated badge, or spinner+timer
+    if (column.type === "AnimatedStatus") {
+      const mode = column.animatedStatusMode
+        ? (column.animatedStatusMode.toLowerCase() as "label" | "badge" | "spinnertimer")
+        : "label";
+      const normalizedMode =
+        mode === "spinnertimer" ? "spinner-timer" : (mode as "label" | "badge");
+      return createAnimatedStatusCell(cellValue, align, normalizedMode, column.badgeColorMapping);
     }
 
     // Handle explicit link type from backend metadata
@@ -482,7 +556,7 @@ export function resolveBadgeColor(colorValue: string | null | undefined): {
     colorValue.startsWith("#") ||
     colorValue.startsWith("rgb") ||
     colorValue.startsWith("hsl") ||
-    colorValue.includes("(");
+    colorValue.indexOf("(") !== -1;
 
   if (isDirectColor) {
     return { bg: colorValue, text: undefined };
@@ -494,7 +568,12 @@ export function resolveBadgeColor(colorValue: string | null | undefined): {
   // Shadcn/Tailwind often use raw HSL components in variables
   const wrapInHsl = (val: string) => {
     if (!val) return val;
-    if (val.startsWith("#") || val.startsWith("rgb") || val.startsWith("hsl") || val.includes("("))
+    if (
+      val.startsWith("#") ||
+      val.startsWith("rgb") ||
+      val.startsWith("hsl") ||
+      val.indexOf("(") !== -1
+    )
       return val;
     if (val.split(/[\s,]+/).filter(Boolean).length >= 3) return `hsl(${val})`;
     return val;

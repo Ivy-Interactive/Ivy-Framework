@@ -30,6 +30,7 @@ interface DropDownMenuWidgetProps {
   align?: "Start" | "Center" | "End";
   side?: "Top" | "Right" | "Bottom" | "Left";
   alignOffset?: number;
+  stayOpen?: boolean;
   density?: Densities;
   events?: string[];
   slots?: {
@@ -42,9 +43,15 @@ interface DropDownMenuItemGroupProps {
   items: MenuItem[];
   onItemClick: (item: MenuItem) => void;
   iconSize: number;
+  stayOpen?: boolean;
 }
 
-const DropDownMenuItemGroup = ({ items, onItemClick, iconSize }: DropDownMenuItemGroupProps) => {
+const DropDownMenuItemGroup = ({
+  items,
+  onItemClick,
+  iconSize,
+  stayOpen,
+}: DropDownMenuItemGroupProps) => {
   return items.map((item, i) => {
     const colorStyle = item.color ? getColor(item.color, "color") : {};
 
@@ -59,6 +66,7 @@ const DropDownMenuItemGroup = ({ items, onItemClick, iconSize }: DropDownMenuIte
               items={item.children}
               onItemClick={onItemClick}
               iconSize={iconSize}
+              stayOpen={stayOpen}
             />
           </DropdownMenuGroup>
         </React.Fragment>
@@ -76,6 +84,7 @@ const DropDownMenuItemGroup = ({ items, onItemClick, iconSize }: DropDownMenuIte
         <DropdownMenuItem
           key={item.label}
           onClick={() => onItemClick(item)}
+          onSelect={stayOpen ? (e) => e.preventDefault() : undefined}
           disabled={item.disabled}
           style={colorStyle}
           className={item.checked ? "bg-accent" : ""}
@@ -95,6 +104,7 @@ const DropDownMenuItemGroup = ({ items, onItemClick, iconSize }: DropDownMenuIte
         <DropdownMenuItem
           key={item.label}
           onClick={() => onItemClick(item)}
+          onSelect={stayOpen ? (e) => e.preventDefault() : undefined}
           disabled={item.disabled}
           style={colorStyle}
           className={item.checked ? "bg-accent" : ""}
@@ -126,6 +136,7 @@ const DropDownMenuItemGroup = ({ items, onItemClick, iconSize }: DropDownMenuIte
                 items={item.children}
                 onItemClick={onItemClick}
                 iconSize={iconSize}
+                stayOpen={stayOpen}
               />
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
@@ -138,6 +149,7 @@ const DropDownMenuItemGroup = ({ items, onItemClick, iconSize }: DropDownMenuIte
       <DropdownMenuItem
         key={item.label}
         onClick={() => onItemClick(item)}
+        onSelect={stayOpen ? (e) => e.preventDefault() : undefined}
         disabled={item.disabled}
         style={colorStyle}
       >
@@ -151,6 +163,8 @@ const DropDownMenuItemGroup = ({ items, onItemClick, iconSize }: DropDownMenuIte
   });
 };
 
+const EMPTY_EVENTS: string[] = [];
+
 export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   slots,
   id,
@@ -158,8 +172,9 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   align = "Start",
   side = "Bottom",
   alignOffset = 0,
+  stayOpen = false,
   density = Densities.Medium,
-  events = [],
+  events = EMPTY_EVENTS,
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
@@ -203,7 +218,12 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
         alignOffset={alignOffset}
       >
         {slots.Header && <DropdownMenuLabel>{slots.Header}</DropdownMenuLabel>}
-        <DropDownMenuItemGroup items={items} onItemClick={onItemClick} iconSize={iconSize} />
+        <DropDownMenuItemGroup
+          items={items}
+          onItemClick={onItemClick}
+          iconSize={iconSize}
+          stayOpen={stayOpen}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );

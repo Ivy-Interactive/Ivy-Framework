@@ -39,7 +39,7 @@ export const useDataLoading = ({
   initializeColumnWidths,
   initializeSortFromColumns,
 }: UseDataLoadingProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(false);
   const [hasMore, setHasMoreState] = useState(true);
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
@@ -59,91 +59,96 @@ export const useDataLoading = ({
     hasLoadedOnceRef.current = false;
   }, [dataIdentityKey]);
 
-  useEffect(() => {
-    const loadInitialData = async () => {
-      if (!connection.port || !connection.path) {
-        setError("Connection configuration is required");
+  const loadInitialData = useCallback(async () => {
+    if (!connection.port || !connection.path) {
+      setError("Connection configuration is required");
+      return;
+    }
+
+    if (
+      (!arrowTableRef.current || arrowTableRef.current.numRows === 0) &&
+      !hasLoadedOnceRef.current
+    ) {
+      setIsFetchingData(true);
+    }
+    setError(null);
+
+    try {
+      // When sorting/filtering changes, currentRowCountRef is reset to 0
+      // so we always start fresh with batchSize rows, or all rows if loadAllRows is true
+      const rowsToFetch = config.loadAllRows
+        ? 1000000 // Large number to fetch all rows
+        : currentRowCountRef.current > 0
+          ? currentRowCountRef.current
+          : batchSize;
+
+      const result = await fetchTableData(connection, 0, rowsToFetch, activeFilter, activeSort);
+
+      // Merge Arrow results with columnsProp (columnsProp has all metadata).
+      // Arrow's inferred metadata is unreliable, so we keep the prop metadata and
+      // compute display widths from the column's configured width/header text.
+      const mergedColumns = columnsProp.map((propCol) => {
+        const arrowCol = result.columns.find((ac) => ac.name === propCol.name);
+        // Parse width from Size string format to numeric pixels
+        const parsedWidth = parseSize(propCol.width);
+        return {
+          ...propCol,
+          // Preserve original Size string for grow factor extraction in convertToGridColumns
+          originalWidth: typeof propCol.width === "string" ? propCol.width : undefined,
+          // Use parsed width from prop, or calculated width from Arrow, or default
+          width: parsedWidth || parseSize(arrowCol?.width) || 150,
+          // IMPORTANT: Keep type from propCol, never override with Arrow's inferred type
+          type: propCol.type,
+        };
+      });
+
+      setColumns(mergedColumns);
+      // Store Arrow table in ref for efficient access (columnar, memory-efficient)
+      // This avoids storing millions of rows in React state - data is accessed directly from Arrow table
+      if (result.arrowTable) {
+        arrowTableRef.current = result.arrowTable;
+        const rowCount = result.arrowTable.numRows;
+        setVisibleRows(rowCount);
+        currentRowCountRef.current = rowCount;
+        hasLoadedOnceRef.current = true;
+      } else {
+        // The query matched no rows (server returned no Arrow stream).
+        // Clear any stale table and report zero rows instead of leaving the
+        // previous result in place — otherwise the grid either shows stale
+        // rows or the layout falls back to the loading/placeholder state and
+        // the whole table appears to vanish.
+        arrowTableRef.current = null;
+        setVisibleRows(0);
+        currentRowCountRef.current = 0;
+        hasLoadedOnceRef.current = true;
+      }
+      setHasMoreState(result.hasMore);
+
+      // Initialize column order when columns are first loaded
+      initializeColumnOrder(mergedColumns);
+
+      // Initialize sort from column metadata (only on first load)
+      const sortInitialized = initializeSortFromColumns(mergedColumns);
+      if (sortInitialized) {
+        // Don't fetch data again, this will trigger the effect
         return;
       }
 
-      if (
-        (!arrowTableRef.current || arrowTableRef.current.numRows === 0) &&
-        !hasLoadedOnceRef.current
-      ) {
-        setIsLoading(true);
-      }
-      setError(null);
-
-      try {
-        // When sorting/filtering changes, currentRowCountRef is reset to 0
-        // so we always start fresh with batchSize rows, or all rows if loadAllRows is true
-        const rowsToFetch = config.loadAllRows
-          ? 1000000 // Large number to fetch all rows
-          : currentRowCountRef.current > 0
-            ? currentRowCountRef.current
-            : batchSize;
-
-        const result = await fetchTableData(connection, 0, rowsToFetch, activeFilter, activeSort);
-
-        // Merge Arrow results with columnsProp (columnsProp has all metadata).
-        // Arrow's inferred metadata is unreliable, so we keep the prop metadata and
-        // compute display widths from the column's configured width/header text.
-        const mergedColumns = columnsProp.map((propCol) => {
-          const arrowCol = result.columns.find((ac) => ac.name === propCol.name);
-          // Parse width from Size string format to numeric pixels
-          const parsedWidth = parseSize(propCol.width);
-          return {
-            ...propCol,
-            // Preserve original Size string for grow factor extraction in convertToGridColumns
-            originalWidth: typeof propCol.width === "string" ? propCol.width : undefined,
-            // Use parsed width from prop, or calculated width from Arrow, or default
-            width: parsedWidth || parseSize(arrowCol?.width) || 150,
-            // IMPORTANT: Keep type from propCol, never override with Arrow's inferred type
-            type: propCol.type,
-          };
-        });
-
-        setColumns(mergedColumns);
-        // Store Arrow table in ref for efficient access (columnar, memory-efficient)
-        // This avoids storing millions of rows in React state - data is accessed directly from Arrow table
-        if (result.arrowTable) {
-          arrowTableRef.current = result.arrowTable;
-          const rowCount = result.arrowTable.numRows;
-          setVisibleRows(rowCount);
-          currentRowCountRef.current = rowCount;
-          hasLoadedOnceRef.current = true;
-        }
-        setHasMoreState(result.hasMore);
-
-        // Initialize column order when columns are first loaded
-        initializeColumnOrder(mergedColumns);
-
-        // Initialize sort from column metadata (only on first load)
-        const sortInitialized = initializeSortFromColumns(mergedColumns);
-        if (sortInitialized) {
-          // Don't fetch data again, this will trigger the effect
-          return;
-        }
-
-        // Initialize column widths, passing Arrow data for content-based sizing
-        initializeColumnWidths(mergedColumns, result.arrowTable);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to load data";
-        setError(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadInitialData();
+      // Initialize column widths, passing Arrow data for content-based sizing
+      initializeColumnWidths(mergedColumns, result.arrowTable);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to load data";
+      setError(errorMessage);
+    } finally {
+      setIsFetchingData(false);
+    }
   }, [
     connection,
-    connectionKey,
     activeFilter,
     activeSort,
-    columnOrderLength,
-    columnsProp,
     batchSize,
     config.loadAllRows,
+    columnsProp,
     setColumns,
     setVisibleRows,
     setError,
@@ -153,12 +158,16 @@ export const useDataLoading = ({
     arrowTableRef,
   ]);
 
+  useEffect(() => {
+    loadInitialData();
+  }, [connectionKey, columnOrderLength, loadInitialData]);
+
   // Load more data
   const loadMoreData = useCallback(async () => {
     if (loadingRef.current || !hasMore || config.loadAllRows) return;
 
     loadingRef.current = true;
-    setIsLoading(true);
+    setIsFetchingData(true);
 
     try {
       const currentRowCount = arrowTableRef.current?.numRows ?? 0;
@@ -189,7 +198,7 @@ export const useDataLoading = ({
       const errorMessage = err instanceof Error ? err.message : "Failed to load more data";
       setError(errorMessage);
     } finally {
-      setIsLoading(false);
+      setIsFetchingData(false);
       loadingRef.current = false;
     }
   }, [
@@ -206,7 +215,7 @@ export const useDataLoading = ({
   ]);
 
   return {
-    isLoading,
+    isLoading: isFetchingData,
     hasMore,
     loadMoreData,
   };

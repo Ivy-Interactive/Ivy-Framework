@@ -71,7 +71,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ currentDate, view, onNavigate, onView
   ];
 
   return (
-    <div className="flex items-center justify-between px-2 py-2 border-b border-border">
+    <div className="flex items-center justify-between p-2 border-b border-border">
       <div className="flex items-center gap-1">
         <button
           onClick={() => onNavigate("today")}
@@ -303,9 +303,9 @@ const MonthDayCell: React.FC<MonthDayCellProps> = ({
                 const droppedEvent = events.find((ev) => ev.id === eventId);
                 if (droppedEvent) {
                   const duration = droppedEvent.end.getTime() - droppedEvent.start.getTime();
-                  const newStart = new Date(day);
+                  const newStart = new globalThis.Date(day);
                   newStart.setHours(droppedEvent.start.getHours(), droppedEvent.start.getMinutes());
-                  const newEnd = new Date(newStart.getTime() + duration);
+                  const newEnd = new globalThis.Date(newStart.getTime() + duration);
                   onEventMove(eventId, newStart.toISOString(), newEnd.toISOString());
                 }
               }
@@ -408,7 +408,7 @@ const MonthView: React.FC<MonthViewProps> = ({
   }, [events]);
 
   const dayNames = useMemo(() => {
-    const start = startOfWeek(new Date(), { weekStartsOn: 1 });
+    const start = startOfWeek(new globalThis.Date(), { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) => format(addDays(start, i), "EEE"));
   }, []);
 
@@ -535,25 +535,25 @@ const TimeGridDayColumn: React.FC<TimeGridDayColumnProps> = ({
           key={hour}
           role="button"
           tabIndex={0}
-          aria-label={`${format(day, "EEEE, MMMM d")} at ${format(new Date(2000, 0, 1, hour), "HH:mm")}`}
+          aria-label={`${format(day, "EEEE, MMMM d")} at ${format(new globalThis.Date(2000, 0, 1, hour), "HH:mm")}`}
           className="absolute w-full border-t border-border/50 cursor-pointer hover:bg-accent/20"
           style={{
             top: hour * dc.hourHeight,
             height: dc.hourHeight,
           }}
           onClick={() => {
-            const slotStart = new Date(day);
+            const slotStart = new globalThis.Date(day);
             slotStart.setHours(hour, 0, 0, 0);
-            const slotEnd = new Date(day);
+            const slotEnd = new globalThis.Date(day);
             slotEnd.setHours(hour + 1, 0, 0, 0);
             onSelectSlot(slotStart.toISOString(), slotEnd.toISOString());
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              const slotStart = new Date(day);
+              const slotStart = new globalThis.Date(day);
               slotStart.setHours(hour, 0, 0, 0);
-              const slotEnd = new Date(day);
+              const slotEnd = new globalThis.Date(day);
               slotEnd.setHours(hour + 1, 0, 0, 0);
               onSelectSlot(slotStart.toISOString(), slotEnd.toISOString());
             }
@@ -583,9 +583,9 @@ const TimeGridDayColumn: React.FC<TimeGridDayColumnProps> = ({
                     const droppedEvent = events.find((ev) => ev.id === eventId);
                     if (droppedEvent) {
                       const duration = droppedEvent.end.getTime() - droppedEvent.start.getTime();
-                      const newStart = new Date(day);
+                      const newStart = new globalThis.Date(day);
                       newStart.setHours(hour, 0, 0, 0);
-                      const newEnd = new Date(newStart.getTime() + duration);
+                      const newEnd = new globalThis.Date(newStart.getTime() + duration);
                       onEventMove(eventId, newStart.toISOString(), newEnd.toISOString());
                     }
                   }
@@ -764,7 +764,7 @@ const TimeGrid: React.FC<TimeGridProps> = ({
                 className="absolute right-2 text-xs text-muted-foreground"
                 style={{ top: hour * dc.hourHeight - 6 }}
               >
-                {hour === 0 ? "" : format(new Date(2000, 0, 1, hour), "HH:mm")}
+                {hour === 0 ? "" : format(new globalThis.Date(2000, 0, 1, hour), "HH:mm")}
               </div>
             ))}
           </div>
@@ -867,7 +867,7 @@ const AgendaDateGroup: React.FC<AgendaDateGroupProps> = ({ dayEvents, onEventCli
     <div className="border-b border-border">
       <div className="flex">
         {/* Date column */}
-        <div className={cn(dc.agendaDateWidth, "flex-shrink-0 py-3 px-3 border-r border-border")}>
+        <div className={cn(dc.agendaDateWidth, "flex-shrink-0 p-3 border-r border-border")}>
           <div className="text-sm font-semibold">{format(date, "EEE")}</div>
           <div className={cn("text-2xl font-bold", isToday(date) && "text-primary")}>
             {format(date, "d")}
@@ -876,7 +876,7 @@ const AgendaDateGroup: React.FC<AgendaDateGroupProps> = ({ dayEvents, onEventCli
         </div>
 
         {/* Events column */}
-        <div className="flex-1 py-2 px-2 flex flex-col gap-1">
+        <div className="flex-1 p-2 flex flex-col gap-1">
           {dayEvents.map((event, idx) => {
             const bgColor = event.color
               ? `var(--${event.color.toLowerCase()}, var(--primary))`
@@ -984,13 +984,13 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   const [currentDate, setCurrentDate] = useState(() => {
     if (defaultDate) {
       try {
-        const d = new Date(defaultDate);
+        const d = new globalThis.Date(defaultDate);
         if (!isNaN(d.getTime())) return d;
       } catch {
         // fall through
       }
     }
-    return new Date();
+    return new globalThis.Date();
   });
   const [view, setView] = useState<CalendarView>(
     (defaultView?.toLowerCase() as CalendarView) || "month",
@@ -1002,7 +1002,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   const onNavigate = useCallback(
     (action: "prev" | "next" | "today") => {
       setCurrentDate((prev) => {
-        if (action === "today") return new Date();
+        if (action === "today") return new globalThis.Date();
         const delta = action === "next" ? 1 : -1;
         switch (view) {
           case "month":

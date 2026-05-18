@@ -257,50 +257,63 @@ export function DevTools() {
     [dialogWidget, closeDialog, handleSend, handleAdd],
   );
 
+  const handleMouseOverRef = useRef(handleMouseOver);
+  const handleClickRef = useRef(handleClick);
+  const handleWheelRef = useRef(handleWheel);
+  const handleKeyDownRef = useRef(handleKeyDown);
+
+  useEffect(() => {
+    handleMouseOverRef.current = handleMouseOver;
+    handleClickRef.current = handleClick;
+    handleWheelRef.current = handleWheel;
+    handleKeyDownRef.current = handleKeyDown;
+  }, [handleMouseOver, handleClick, handleWheel, handleKeyDown]);
+
   useEffect(() => {
     if (!enabled) return;
 
+    const onMouseOver = (e: MouseEvent) => handleMouseOverRef.current(e);
+    const onClick = (e: MouseEvent) => handleClickRef.current(e);
+    const onWheel = (e: WheelEvent) => handleWheelRef.current(e);
+    const onKeyDown = (e: KeyboardEvent) => handleKeyDownRef.current(e);
+
     if (!dialogWidget) {
-      document.addEventListener("mouseover", handleMouseOver, true);
-      document.addEventListener("click", handleClick, true);
-      document.addEventListener("wheel", handleWheel, {
+      document.addEventListener("mouseover", onMouseOver, true);
+      document.addEventListener("click", onClick, true);
+      document.addEventListener("wheel", onWheel, {
         passive: true,
         capture: true,
       });
       document.body.style.cursor = "crosshair";
 
-      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keydown", onKeyDown);
 
       return () => {
-        document.removeEventListener("mouseover", handleMouseOver, true);
-        document.removeEventListener("click", handleClick, true);
-        document.removeEventListener("keydown", handleKeyDown);
-        document.removeEventListener("wheel", handleWheel, true);
+        document.removeEventListener("mouseover", onMouseOver, true);
+        document.removeEventListener("click", onClick, true);
+        document.removeEventListener("keydown", onKeyDown);
+        document.removeEventListener("wheel", onWheel, true);
         document.body.style.cursor = "";
       };
     } else {
       const handleClickOutside = (e: MouseEvent) => {
         if (dialogRef.current && !dialogRef.current.contains(e.target as Node)) {
-          closeDialog();
+          dispatchDev({
+            dialogWidget: null,
+            dialogText: "",
+            highlightedWidget: null,
+          });
         }
       };
       document.addEventListener("mousedown", handleClickOutside, true);
-      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keydown", onKeyDown);
 
       return () => {
         document.removeEventListener("mousedown", handleClickOutside, true);
-        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("keydown", onKeyDown);
       };
     }
-  }, [
-    enabled,
-    dialogWidget,
-    handleMouseOver,
-    handleClick,
-    handleKeyDown,
-    handleWheel,
-    closeDialog,
-  ]);
+  }, [enabled, dialogWidget, dispatchDev]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -330,9 +343,7 @@ export function DevTools() {
     return () => overlay.remove();
   }, [enabled, highlightedWidget, dialogWidget]);
 
-  if (!enabled) return null;
-
-  return (
+  return enabled ? (
     <div className="ivy-devtools-container">
       {dialogWidget && (
         <div
@@ -364,5 +375,5 @@ export function DevTools() {
         </div>
       )}
     </div>
-  );
+  ) : null;
 }

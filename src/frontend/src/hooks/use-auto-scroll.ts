@@ -70,13 +70,19 @@ export function useAutoScroll(options: UseAutoScrollOptions = {}) {
     }));
   }, [checkIsAtBottom]);
 
+  const handleScrollRef = useRef(handleScroll);
+  useEffect(() => {
+    handleScrollRef.current = handleScroll;
+  }, [handleScroll]);
+
   useEffect(() => {
     const element = scrollRef.current;
     if (!element) return;
 
-    element.addEventListener("scroll", handleScroll, { passive: true });
-    return () => element.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+    const listener = () => handleScrollRef.current();
+    element.addEventListener("scroll", listener, { passive: true });
+    return () => element.removeEventListener("scroll", listener);
+  }, []);
 
   useEffect(() => {
     const scrollElement = scrollRef.current;

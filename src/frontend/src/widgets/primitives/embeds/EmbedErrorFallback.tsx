@@ -35,7 +35,7 @@ const EmbedErrorFallback: React.FC<EmbedErrorFallbackProps> = ({ url, platform }
       {/* Button layout - shown when container is wide enough */}
       <div className="@[30rem]:flex hidden items-center gap-3 p-2">
         <div className="flex-shrink-0">
-          <div className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center">
+          <div className="size-8 rounded-full bg-destructive flex items-center justify-center">
             <span className="text-destructive-foreground text-sm font-bold">!</span>
           </div>
         </div>
@@ -65,7 +65,7 @@ const EmbedErrorFallback: React.FC<EmbedErrorFallbackProps> = ({ url, platform }
         className="@[30rem]:hidden flex items-center gap-3 p-2 hover:bg-accent/5 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
       >
         <div className="flex-shrink-0">
-          <div className="w-6 h-6 rounded-full bg-destructive flex items-center justify-center">
+          <div className="size-6 rounded-full bg-destructive flex items-center justify-center">
             <span className="text-destructive-foreground text-xs font-bold">!</span>
           </div>
         </div>

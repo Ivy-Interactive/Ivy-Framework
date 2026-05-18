@@ -77,10 +77,9 @@ function News({ articles }: { articles: NewsArticle[] }) {
   }, [cardCount]);
 
   if (dismissedNews === null) return null;
-  if (cards.length === 0 && !hasDismissedNews) return null;
   if (cards.length === 0 && showCompleted) return null;
 
-  return cards.length > 0 ? (
+  return cards.length > 0 || hasDismissedNews ? (
     <div className="group overflow-hidden px-2" data-active={cardCount !== 0}>
       <div className="relative size-full">
         {[...cards].reverse().map(({ id, href, title, summary, image }, idx) => (

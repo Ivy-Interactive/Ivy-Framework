@@ -1,15 +1,34 @@
 using System.Reflection;
 using Ivy.Core.Apps;
 using Ivy.Plugins;
-using Ivy.Plugins.Messaging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Core.Plugins;
 
-public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvider
+public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServiceProvider
 {
+    protected IConfiguration BaseConfiguration { get; }
+    protected AppRepository AppRepository { get; }
+    protected IReadOnlySet<string> ReservedPaths { get; }
+    protected WebApplicationBuilder Builder { get; }
+
+    public PluginContextBase(Ivy.Server server, WebApplicationBuilder builder)
+    {
+        BaseConfiguration = server.Configuration;
+        AppRepository = server.AppRepository;
+        ReservedPaths = server.ReservedPaths;
+        Builder = builder;
+    }
+
+    protected PluginContextBase(IConfiguration configuration, AppRepository appRepository, IReadOnlySet<string> reservedPaths, WebApplicationBuilder builder)
+    {
+        BaseConfiguration = configuration;
+        AppRepository = appRepository;
+        ReservedPaths = reservedPaths;
+        Builder = builder;
+    }
     private readonly List<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> _menuTransformers = [];
     private readonly List<Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>> _footerMenuTransformers = [];
     private readonly List<(string Tag, Func<IServiceProvider, int> CountProvider)> _badgeProviders = [];
@@ -32,11 +51,12 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
     // Fallback service collection for non-plugin code
     private readonly ServiceCollection _fallbackServices = new();
 
-    public abstract IConfiguration Configuration { get; }
+    private IConfiguration? _configurationOverride;
 
-    protected abstract AppRepository AppRepository { get; }
-    protected abstract IReadOnlySet<string> ReservedPaths { get; }
-    protected abstract WebApplicationBuilder Builder { get; }
+    public IConfiguration Configuration => _configurationOverride ?? BaseConfiguration;
+
+    internal void PushConfiguration(IConfiguration configuration) => _configurationOverride = configuration;
+    internal void PopConfiguration() => _configurationOverride = null;
 
     public IReadOnlyList<Func<IEnumerable<MenuItem>, IEnumerable<MenuItem>>> MenuTransformers => _menuTransformers;
     public IReadOnlyList<Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>> FooterMenuTransformers => _footerMenuTransformers;
@@ -99,11 +119,6 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
 
         if (_currentPluginId is not null && _pluginStates.TryGetValue(_currentPluginId, out var state))
             state.BadgeProviders.Add((menuTag, countProvider));
-    }
-
-    public void RegisterMessagingChannel(IMessagingChannel channel)
-    {
-        Services.AddSingleton<IMessagingChannel>(channel);
     }
 
     public void UseWebApplication(Action<WebApplication> configure)
@@ -268,10 +283,6 @@ public abstract class PluginContextBase : IIvyPluginContext, IPluginServiceProvi
     }
 }
 
-internal class PluginContext(Ivy.Server server, WebApplicationBuilder builder) : PluginContextBase
-{
-    public override IConfiguration Configuration => server.Configuration;
-    protected override AppRepository AppRepository => server.AppRepository;
-    protected override IReadOnlySet<string> ReservedPaths => server.ReservedPaths;
-    protected override WebApplicationBuilder Builder => builder;
-}
+internal class PluginContext(Ivy.Server server, WebApplicationBuilder builder) : PluginContextBase(server, builder);
+
+

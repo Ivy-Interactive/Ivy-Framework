@@ -75,21 +75,17 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
     );
   }
 
-  if (hasError) {
-    return (
-      <div
-        key={id}
-        style={styles}
-        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
-        role="alert"
-        aria-label="Audio loading error"
-      >
-        <span className="text-sm">Failed to load audio file</span>
-      </div>
-    );
-  }
-
-  return (
+  return hasError ? (
+    <div
+      key={id}
+      style={styles}
+      className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
+      role="alert"
+      aria-label="Audio loading error"
+    >
+      <span className="text-sm">Failed to load audio file</span>
+    </div>
+  ) : (
     <audio
       key={id}
       src={validatedAudioSrc}

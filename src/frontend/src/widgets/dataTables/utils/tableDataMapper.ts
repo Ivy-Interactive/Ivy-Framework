@@ -40,18 +40,18 @@ function calculateColumnWidth(
 function mapArrowTypeToColType(arrowType: string): ColType {
   const lowerType = arrowType.toLowerCase();
   if (
-    lowerType.includes("int") ||
-    lowerType.includes("float") ||
-    lowerType.includes("double") ||
-    lowerType.includes("decimal")
+    lowerType.indexOf("int") !== -1 ||
+    lowerType.indexOf("float") !== -1 ||
+    lowerType.indexOf("double") !== -1 ||
+    lowerType.indexOf("decimal") !== -1
   ) {
     return ColType.Number;
   }
-  if (lowerType.includes("bool")) {
+  if (lowerType.indexOf("bool") !== -1) {
     return ColType.Boolean;
   }
-  if (lowerType.includes("date") || lowerType.includes("timestamp")) {
-    return lowerType.includes("timestamp") ? ColType.DateTime : ColType.Date;
+  if (lowerType.indexOf("date") !== -1 || lowerType.indexOf("timestamp") !== -1) {
+    return lowerType.indexOf("timestamp") !== -1 ? ColType.DateTime : ColType.Date;
   }
   // Default to Text for strings and unknown types
   return ColType.Text;
@@ -89,30 +89,34 @@ export function convertArrowTableToData(
   rows: DataRow[];
   hasMore: boolean;
 } {
-  const columns: DataColumn[] = table.schema.fields
-    .filter((field: arrow.Field) => field.name !== "_hiddenKey")
-    .map((field: arrow.Field) => {
-      // Find the actual index in the original table (accounting for filtered _hiddenKey)
-      const originalIndex = table.schema.fields.findIndex((f) => f.name === field.name);
-      const columnData = table.getChildAt(originalIndex);
-      const width = columnData ? calculateColumnWidth(field.name, columnData, field) : 150;
+  const columns: DataColumn[] = table.schema.fields.reduce<DataColumn[]>(
+    (acc, field: arrow.Field) => {
+      if (field.name !== "_hiddenKey") {
+        // Find the actual index in the original table (accounting for filtered _hiddenKey)
+        const originalIndex = table.schema.fields.findIndex((f) => f.name === field.name);
+        const columnData = table.getChildAt(originalIndex);
+        const width = columnData ? calculateColumnWidth(field.name, columnData, field) : 150;
 
-      // Infer type from Arrow field type (no metadata parsing)
-      const type = mapArrowTypeToColType(field.type.toString());
+        // Infer type from Arrow field type (no metadata parsing)
+        const type = mapArrowTypeToColType(field.type.toString());
 
-      return {
-        name: field.name,
-        type,
-        width,
-      };
-    });
+        acc.push({
+          name: field.name,
+          type,
+          width,
+        });
+      }
+      return acc;
+    },
+    [],
+  );
 
   // Precompute decimal column scales for proper Decimal128 → JS number conversion.
   // Arrow's DecimalBigNum.valueOf(scale) needs the scale to divide the unscaled integer.
   const decimalScales = new Map<number, number>();
   for (let j = 0; j < table.schema.fields.length; j++) {
     const field = table.schema.fields[j];
-    if (field.type.toString().toLowerCase().includes("decimal")) {
+    if (/decimal/.test(field.type.toString().toLowerCase())) {
       const scale = (field.type as arrow.Decimal).scale;
       decimalScales.set(j, scale);
     }

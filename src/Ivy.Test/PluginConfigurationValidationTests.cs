@@ -3,7 +3,6 @@ using Ivy.Core.Plugins;
 using Ivy.Plugins;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Ivy.Test.Plugins;
@@ -316,31 +315,19 @@ public class PluginConfigurationValidationTests
         Assert.Equal("3", receivedMaxRetries);
     }
 
-    private class TestPluginContext : PluginContextBase
-    {
-        private readonly AppRepository _appRepository = new();
-        private readonly WebApplicationBuilder _builder;
-        private readonly IConfiguration _configuration;
+    private class TestPluginContext(Dictionary<string, string?> configValues)
+        : PluginContextBase(
+            new ConfigurationBuilder().AddInMemoryCollection(configValues).Build(),
+            new AppRepository(),
+            new HashSet<string>(),
+            WebApplication.CreateBuilder());
 
-        public TestPluginContext(Dictionary<string, string?> configValues)
-        {
-            _builder = WebApplication.CreateBuilder();
-            _configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(configValues)
-                .Build();
-        }
-
-        public override IConfiguration Configuration => _configuration;
-        protected override AppRepository AppRepository => _appRepository;
-        protected override IReadOnlySet<string> ReservedPaths => new HashSet<string>();
-        protected override WebApplicationBuilder Builder => _builder;
-    }
 
     private class FakePlugin : IIvyPlugin
     {
-        private readonly Action<IPluginContext>? _onConfigure;
+        private readonly Action<IIvyPluginContext>? _onConfigure;
 
-        public FakePlugin(PluginConfigurationSchema? schema, Action<IPluginContext>? onConfigure = null)
+        public FakePlugin(PluginConfigurationSchema? schema, Action<IIvyPluginContext>? onConfigure = null)
         {
             ConfigurationSchema = schema;
             _onConfigure = onConfigure;
@@ -356,8 +343,6 @@ public class PluginConfigurationValidationTests
 
         public PluginConfigurationSchema? ConfigurationSchema { get; }
 
-        public void ConfigureServices(IServiceCollection services, IConfiguration configuration) { }
-
-        public void Configure(IPluginContext context) => _onConfigure?.Invoke(context);
+        public void Configure(IIvyPluginContext context) => _onConfigure?.Invoke(context);
     }
 }

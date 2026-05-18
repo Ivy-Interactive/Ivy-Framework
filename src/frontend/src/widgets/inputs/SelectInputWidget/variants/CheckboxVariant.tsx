@@ -202,7 +202,7 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
         <div className="flex-1 min-w-0">
           {searchable && (
             <div className="relative mb-3">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search..."
@@ -215,7 +215,7 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
           )}
           {loading ? (
             <div className="flex justify-center p-4">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
             </div>
           ) : filteredOptions.length === 0 ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
@@ -241,7 +241,7 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                     (isSelected && minSelections != null && selectedValues.length <= minSelections);
 
                   return (
-                    <div key={option.value} className="flex items-center space-x-2">
+                    <div key={option.value} className="flex items-center gap-x-2">
                       {isInvalid ? (
                         <TooltipProvider>
                           <Tooltip>
@@ -296,7 +296,7 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                                 )}
                               >
                                 {option.icon && (
-                                  <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                                  <Icon name={option.icon} className="size-4 flex-shrink-0" />
                                 )}
                                 {option.description ? (
                                   <div className="flex flex-col">
@@ -324,7 +324,7 @@ export const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                           )}
                         >
                           {option.icon && (
-                            <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                            <Icon name={option.icon} className="size-4 flex-shrink-0" />
                           )}
                           {option.description ? (
                             <div className="flex flex-col">

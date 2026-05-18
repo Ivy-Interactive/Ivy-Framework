@@ -94,7 +94,7 @@ export function EmojiRating({
 
           return (
             <button
-              key={index}
+              key={rating}
               type="button"
               className={cn(
                 "relative focus-visible:outline-none focus-visible:ring-2",

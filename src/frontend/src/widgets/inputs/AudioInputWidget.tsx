@@ -331,9 +331,11 @@ export const AudioInputWidget: React.FC<AudioInputWidgetProps> = ({
           className="absolute bottom-0 left-0 w-full transition-all duration-100 ease-linear"
           style={{
             backgroundColor: "rgba(255,0,0,0.075)",
-            height: `${volumePercent}%`,
+            height: "100%",
+            transform: `scaleY(${volumePercent / 100})`,
+            transformOrigin: "bottom",
             pointerEvents: "none",
-            transition: "height 50ms",
+            transition: "transform 50ms",
           }}
         />
         <Button
@@ -372,23 +374,19 @@ function SecondsCounter(props: {
   density?: Densities;
 }) {
   const [seconds, setSeconds] = useState(0);
-  const prevStart = useRef(props.start);
-  const prevStopped = useRef(props.stopped);
+  const syncSecondsState = useCallback(() => {
+    if (typeof props.start !== "number") {
+      setSeconds(0);
+      return;
+    }
+    if (typeof props.stopped === "number" && typeof props.start === "number") {
+      setSeconds(Math.floor((props.stopped - props.start) / 1000));
+      return;
+    }
+  }, [props.start, props.stopped]);
 
   useEffect(() => {
-    if (props.start !== prevStart.current || props.stopped !== prevStopped.current) {
-      prevStart.current = props.start;
-      prevStopped.current = props.stopped;
-
-      if (typeof props.start !== "number") {
-        setSeconds(0);
-        return;
-      }
-      if (typeof props.stopped === "number" && typeof props.start === "number") {
-        setSeconds(Math.floor((props.stopped - props.start) / 1000));
-        return;
-      }
-    }
+    syncSecondsState();
 
     if (typeof props.start === "number" && typeof props.stopped !== "number") {
       const start = props.start;
@@ -397,7 +395,7 @@ function SecondsCounter(props: {
       }, 100);
       return () => clearInterval(interval);
     }
-  }, [props.start, props.stopped]);
+  }, [props.start, props.stopped, syncSecondsState]);
 
   return (
     <p className={cn("text-center", timerSizeVariant({ density: props.density }))}>

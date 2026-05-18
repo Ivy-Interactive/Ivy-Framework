@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useMemo } from "react";
 import { useStream } from "@/components/stream-handler/hooks";
 import { DataColumn, DataTableCellUpdate, DataRow } from "../../types/types";
 
@@ -41,13 +41,19 @@ export const useCellUpdates = ({
 
   useStream<DataTableCellUpdate>(streamId, onStreamData);
 
+  const colIndexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    columns.forEach((col, idx) => map.set(col.name, idx));
+    return map;
+  }, [columns]);
+
   const getRowData = useCallback(
     (rowIndex: number): DataRow | null => {
       const baseRow = getBaseRowData(rowIndex);
       if (!baseRow || !idColumnName) return baseRow;
 
-      const idColIdx = columns.findIndex((c) => c.name === idColumnName);
-      if (idColIdx === -1) return baseRow;
+      const idColIdx = colIndexMap.get(idColumnName);
+      if (idColIdx === undefined) return baseRow;
 
       const rowId = baseRow.values[idColIdx];
       if (rowId == null) return baseRow;
@@ -57,15 +63,14 @@ export const useCellUpdates = ({
 
       const newValues = [...baseRow.values];
       for (const [colName, value] of rowOverrides) {
-        const colIdx = columns.findIndex((c) => c.name === colName);
-        if (colIdx !== -1) {
+        const colIdx = colIndexMap.get(colName);
+        if (colIdx !== undefined) {
           newValues[colIdx] = value as DataRow["values"][number];
         }
       }
       return { values: newValues };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getBaseRowData, columns, idColumnName, version],
+    [getBaseRowData, colIndexMap, idColumnName, version],
   );
 
   return { getRowData };

@@ -21,6 +21,7 @@ interface StepperWidgetProps {
   items: StepperItem[];
   width?: string;
   allowSelectForward?: boolean;
+  disabled?: boolean;
   events?: string[];
   density?: Densities;
 }
@@ -31,6 +32,7 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
   items = EMPTY_ARRAY,
   width,
   allowSelectForward = false,
+  disabled = false,
   events = EMPTY_ARRAY,
   density = Densities.Medium,
 }) => {
@@ -39,10 +41,10 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
 
   const circleClass =
     density === Densities.Small
-      ? "w-6 h-6 text-xs"
+      ? "size-6 text-xs"
       : density === Densities.Large
-        ? "w-10 h-10 text-base"
-        : "w-8 h-8 text-sm";
+        ? "size-10 text-base"
+        : "size-8 text-sm";
   const iconSize = density === Densities.Small ? 14 : density === Densities.Large ? 18 : 16;
   const connectorClass =
     density === Densities.Small ? "mx-1" : density === Densities.Large ? "mx-3" : "mx-2";
@@ -70,7 +72,11 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
   };
 
   return (
-    <div key={id} style={styles} className="flex flex-col w-full">
+    <div
+      key={id}
+      style={styles}
+      className={cn("flex flex-col w-full", disabled && "opacity-50 pointer-events-none")}
+    >
       {/* Row 1: Circles and lines */}
       <div className="flex items-center w-full">
         {items.map((item, index) => {
@@ -78,6 +84,7 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
           const isLast = index === items.length - 1;
           const isLineCompleted = index < selectedIndex;
           const isClickable =
+            !disabled &&
             hasSelectHandler &&
             (state === "completed" || (state === "upcoming" && allowSelectForward));
 

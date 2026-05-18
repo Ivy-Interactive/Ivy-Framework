@@ -28,6 +28,12 @@ public record DiffView : WidgetBase<DiffView>
     /// <summary>Whether to wrap long lines instead of scrolling horizontally</summary>
     [Prop] public bool WordWrap { get; init; } = false;
 
+    /// <summary>Whether the file header is clickable to collapse/expand the diff content</summary>
+    [Prop] public bool Collapsible { get; init; } = false;
+
+    /// <summary>Whether the diff starts in a collapsed state (only applies when Collapsible is true)</summary>
+    [Prop] public bool DefaultCollapsed { get; init; } = false;
+
     [Event] public Func<Event<DiffView, int>, ValueTask>? OnLineClick { get; init; }
 }
 
@@ -53,6 +59,12 @@ public static class DiffViewExtensions
 
     public static DiffView WordWrap(this DiffView w, bool wordWrap = true) =>
         w with { WordWrap = wordWrap };
+
+    public static DiffView Collapsible(this DiffView w, bool collapsible = true) =>
+        w with { Collapsible = collapsible };
+
+    public static DiffView DefaultCollapsed(this DiffView w, bool collapsed = true) =>
+        w with { DefaultCollapsed = collapsed };
 
     public static DiffView OnLineClick(
         this DiffView w,

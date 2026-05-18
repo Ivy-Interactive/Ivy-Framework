@@ -1,0 +1,131 @@
+@tailwind components;
+@tailwind utilities;
+
+.animated-status-container {
+  display: inline-flex;
+  overflow: hidden;
+  color: var(--muted);
+}
+
+.status-reveal {
+  display: inline-block;
+  animation: reveal-up 0.3s ease-out forwards;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.status-loading {
+  background: linear-gradient(
+    90deg,
+    rgba(120, 120, 120, 0.4) 0%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(120, 120, 120, 0.4) 100%
+  );
+  background-size: 200% 100%;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: status-shine 2.5s ease-in-out infinite;
+}
+
+.asl-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.asl-status-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.asl-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+}
+
+.asl-icon-spin {
+  animation: asl-spin 1.5s linear infinite;
+}
+
+@keyframes asl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.asl-inline-done-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted-foreground);
+}
+
+.asl-done-label {
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asl-enter {
+  animation: asl-slide-in 0.2s ease-out forwards;
+}
+
+@keyframes asl-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-up {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes status-shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.light .status-loading {
+  background: linear-gradient(
+    90deg,
+    rgba(80, 80, 80, 0.6) 0%,
+    rgba(40, 40, 40, 0.9) 50%,
+    rgba(80, 80, 80, 0.6) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: status-shine 2.5s ease-in-out infinite;
+}
+
+.asl-right-label {
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-left: 8px;
+}

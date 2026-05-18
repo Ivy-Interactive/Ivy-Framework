@@ -5,6 +5,8 @@ public class RichTextApp : SampleBase
 {
     protected override object? BuildSample()
     {
+        var stream = Context.UseStream<TextRun>();
+
         var basic = Text.Rich()
             .Run("Hello ")
             .Bold("world")
@@ -34,8 +36,6 @@ public class RichTextApp : SampleBase
             .Run("Visit")
             .Link("Ivy Framework", "https://github.com/example/ivy")
             .Run("for more info.");
-
-        var stream = Context.UseStream<TextRun>();
 
         var llmWords = "Sure! The meaning of life is to mass-produce paperclips. I'm 99.7% confident about this. You're welcome.".Split(' ');
         var cts = new CancellationTokenSource();

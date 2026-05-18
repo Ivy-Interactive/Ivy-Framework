@@ -105,7 +105,7 @@ public class UsePluginStateTests
     {
         public event Action? PluginStateChanged;
 
-        public IReadOnlyList<string> GetLoadedPluginIds() => [];
+        public IReadOnlyList<string> GetActivePluginIds() => [];
 
         public void RaisePluginStateChanged() => PluginStateChanged?.Invoke();
     }

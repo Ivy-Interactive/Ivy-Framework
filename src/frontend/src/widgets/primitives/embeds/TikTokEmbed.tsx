@@ -7,8 +7,7 @@ interface TikTokEmbedProps {
 }
 
 const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [scriptError, setScriptError] = useState(false);
+  const [scriptState, setScriptState] = useState<"loading" | "loaded" | "error">("loading");
 
   const videoId = React.useMemo(() => {
     // TikTok video URL: https://www.tiktok.com/@username/video/1234567890
@@ -16,20 +15,24 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
     return match ? sanitizeId(match[1]) : null;
   }, [url]);
 
-  useEffect(() => {
+  const loadWidgetScript = React.useCallback(() => {
     if (videoId) {
       loadScript("https://www.tiktok.com/embed.js")
         .then(() => {
-          setScriptLoaded(true);
+          setScriptState("loaded");
         })
         .catch(() => {
-          setScriptError(true);
+          setScriptState("error");
         });
     }
   }, [videoId]);
 
+  useEffect(() => {
+    loadWidgetScript();
+  }, [loadWidgetScript]);
+
   const sanitizedUrl = sanitizeUrl(url);
-  if (!videoId || scriptError || !sanitizedUrl) {
+  if (!videoId || scriptState === "error" || !sanitizedUrl) {
     return <EmbedErrorFallback url={url} platform="TikTok" />;
   }
 
@@ -43,7 +46,7 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
       >
         <section>
           <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer" title="@tiktok">
-            {scriptLoaded ? "Loading TikTok video..." : "Loading script..."}
+            {scriptState === "loaded" ? "Loading TikTok video..." : "Loading script..."}
           </a>
         </section>
       </blockquote>

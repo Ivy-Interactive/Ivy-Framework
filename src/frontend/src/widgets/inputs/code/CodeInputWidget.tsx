@@ -213,7 +213,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       <Suspense
         fallback={
           <div className="h-full flex items-center justify-center bg-muted/20 animate-pulse rounded-field border border-input">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
         }
       >

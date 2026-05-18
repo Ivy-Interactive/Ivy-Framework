@@ -11,6 +11,8 @@ import React, {
 } from "react";
 import { formatBytes } from "@/lib/formatters";
 
+const numberFormatCache = new Map<string, Intl.NumberFormat>();
+
 interface NumberInputProps {
   min?: number;
   max?: number;
@@ -63,7 +65,15 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     const [isValid, setIsValid] = useState(true);
     const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-    const formatter = useMemo(() => new Intl.NumberFormat(undefined, format), [format]);
+    const formatter = useMemo(() => {
+      const key = JSON.stringify(format);
+      let fmt = numberFormatCache.get(key);
+      if (!fmt) {
+        fmt = Intl.NumberFormat(undefined, format);
+        numberFormatCache.set(key, fmt);
+      }
+      return fmt;
+    }, [format]);
 
     const formatValue = useCallback(
       (num: number | null): string => {

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { ChevronRight, ChevronDown } from "lucide-react";
 
 interface JsonRendererProps {
@@ -45,7 +45,7 @@ const JsonNode = ({
         }}
         className="flex items-center cursor-pointer hover:bg-accent rounded px-1 transition-colors"
       >
-        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        {isExpanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         <span className="text-muted-foreground">{isArray ? "[" : "{"}</span>
       </div>
 
@@ -134,9 +134,9 @@ export const JsonRenderer = ({ data, initialExpanded }: JsonRendererProps) => {
   );
 
   // Reset expansion state when data or initialExpanded changes
-  const [prevId, setPrevId] = useState({ data, initialExpanded });
-  if (data !== prevId.data || initialExpanded !== prevId.initialExpanded) {
-    setPrevId({ data, initialExpanded });
+  const prevIdRef = useRef({ data, initialExpanded });
+  if (data !== prevIdRef.current.data || initialExpanded !== prevIdRef.current.initialExpanded) {
+    prevIdRef.current = { data, initialExpanded };
     setExpanded(computeExpandedPaths(parsedData, initialExpanded));
   }
 

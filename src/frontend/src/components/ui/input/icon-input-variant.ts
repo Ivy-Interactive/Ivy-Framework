@@ -19,9 +19,9 @@ export const iconInputTriggerVariant = cva(
 export const iconInputIconVariant = cva("", {
   variants: {
     density: {
-      Small: "h-3 w-3",
-      Medium: "h-4 w-4",
-      Large: "h-5 w-5",
+      Small: "size-3",
+      Medium: "size-4",
+      Large: "size-5",
     },
   },
   defaultVariants: {
@@ -112,9 +112,9 @@ export const iconInputSearchIconVariant = cva(
   {
     variants: {
       density: {
-        Small: "left-3 h-3 w-3",
-        Medium: "left-2.5 h-4 w-4",
-        Large: "left-3 h-5 w-5",
+        Small: "left-3 size-3",
+        Medium: "left-2.5 size-4",
+        Large: "left-3 size-5",
       },
     },
     defaultVariants: {

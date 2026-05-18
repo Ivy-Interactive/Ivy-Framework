@@ -19,9 +19,9 @@ export const colorInputVariant = cva(
 export const colorInputPickerVariant = cva("", {
   variants: {
     density: {
-      Small: "w-7 h-7",
-      Medium: "w-9 h-9",
-      Large: "w-11 h-11",
+      Small: "size-7",
+      Medium: "size-9",
+      Large: "size-11",
     },
   },
   defaultVariants: {

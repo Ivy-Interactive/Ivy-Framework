@@ -51,11 +51,13 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
     // Remove all tags that are not in allowedTags
     const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_ELEMENT, null);
 
+    const allowedTagsSet = new Set(allowedTags);
+
     const nodesToRemove: Element[] = [];
     let node;
     while ((node = walker.nextNode())) {
       const element = node as Element;
-      if (!allowedTags.includes(element.tagName.toLowerCase())) {
+      if (!allowedTagsSet.has(element.tagName.toLowerCase())) {
         nodesToRemove.push(element);
       }
     }

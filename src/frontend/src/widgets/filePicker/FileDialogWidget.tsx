@@ -56,10 +56,12 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
       if (mode === "Upload" && uploadUrl) {
         // Upload files then fire event
         try {
-          for (const file of validFiles) {
-            const { promise } = uploadFileWithProgress(uploadUrl, file);
-            await promise;
-          }
+          await Promise.all(
+            validFiles.map((file) => {
+              const { promise } = uploadFileWithProgress(uploadUrl, file);
+              return promise;
+            }),
+          );
           if (hasOnFilesSelected) {
             handleEvent("OnFilesSelected", id, [validFiles.map(fileToInfo)]);
           }
@@ -86,11 +88,7 @@ export const FileDialogWidget: React.FC<FileDialogWidgetProps> = ({
         options.types = types;
       }
       const handles = await showOpenFilePicker(options);
-      const files: File[] = [];
-      for (const handle of handles) {
-        const file = await handle.getFile();
-        files.push(file);
-      }
+      const files = await Promise.all(handles.map((handle) => handle.getFile()));
       if (files.length > 0) {
         await handleFiles(files);
       }

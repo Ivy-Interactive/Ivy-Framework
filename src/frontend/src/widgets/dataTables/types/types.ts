@@ -16,6 +16,7 @@ export enum ColType {
   Icon = "Icon",
   Labels = "Labels",
   Link = "Link",
+  AnimatedStatus = "AnimatedStatus",
 }
 
 export enum SortDirection {
@@ -23,6 +24,8 @@ export enum SortDirection {
   Descending = "Descending",
   None = "None",
 }
+
+export type AnimatedStatusMode = "Label" | "Badge" | "SpinnerTimer";
 
 export interface DataColumn {
   name: string;
@@ -44,6 +47,7 @@ export interface DataColumn {
   color?: string | null;
   badgeColorMapping?: Record<string, string> | null;
   linkType?: string | null; // Link type for LinkDisplayRenderer ("url", "email", "phone")
+  animatedStatusMode?: AnimatedStatusMode | null;
   wrapText?: boolean;
   hasCellAction?: boolean;
 }

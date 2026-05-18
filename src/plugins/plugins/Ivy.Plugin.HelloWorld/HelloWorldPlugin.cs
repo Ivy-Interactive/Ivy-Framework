@@ -1,6 +1,4 @@
 using Ivy.Plugins;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 [assembly: IvyPlugin(typeof(Ivy.Plugin.HelloWorld.HelloWorldPlugin))]
 
@@ -18,11 +16,7 @@ public class HelloWorldPlugin : IIvyPlugin
 
     public PluginConfigurationSchema? ConfigurationSchema => null;
 
-    public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
-    {
-    }
-
-    public void Configure(IPluginContext context)
+    public void Configure(IIvyPluginContext context)
     {
         context.RegisterGreeter(new HelloWorldGreeter());
     }

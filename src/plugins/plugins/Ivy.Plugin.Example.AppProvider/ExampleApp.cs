@@ -12,6 +12,6 @@ public class ExampleApp : ViewBase
         return Layout.Vertical()
                | Text.H1("Example App")
                | Text.P("This app was added by the Ivy.Plugin.Example.AppProvider plugin.")
-               | Text.Muted("Plugins can add apps to the host application by casting IPluginContext to IIvyPluginContext.");
+               | Text.Muted("Plugins can add apps to the host application by casting IIvyPluginContext to IIvyExtendedPluginContext.");
     }
 }

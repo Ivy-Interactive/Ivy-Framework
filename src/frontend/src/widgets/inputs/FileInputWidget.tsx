@@ -344,7 +344,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
                 onClick={handleButtonClick}
                 title={hasFiles ? fileList.map((f) => f.fileName).join(", ") : undefined}
               >
-                <Upload className="h-4 w-4 shrink-0" />
+                <Upload className="size-4 shrink-0" />
                 <span className="truncate">
                   {hasFiles
                     ? fileList.length === 1

@@ -56,7 +56,10 @@ export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
   useEffect(() => {
     if (!dangerouslyAllowScripts || !containerRef.current) return;
 
-    // Find all script tags and execute them
+    // Inject HTML content directly
+    containerRef.current.innerHTML = content;
+
+    // We must manually re-create script tags to ensure the browser executes them
     const scripts = containerRef.current.querySelectorAll("script");
     scripts.forEach((oldScript) => {
       const newScript = document.createElement("script");
@@ -72,14 +75,7 @@ export const HtmlWidget: React.FC<HtmlWidgetProps> = ({
   }, [dangerouslyAllowScripts, content]);
 
   if (dangerouslyAllowScripts) {
-    return (
-      <div
-        ref={containerRef}
-        style={styles}
-        className="w-full"
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
-    );
+    return <div ref={containerRef} style={styles} className="w-full" />;
   }
 
   return (

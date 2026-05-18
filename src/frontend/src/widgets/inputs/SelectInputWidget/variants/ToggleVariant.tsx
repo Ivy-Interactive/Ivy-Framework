@@ -199,7 +199,7 @@ export const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
         <div className="flex-1">
           {searchable && (
             <div className="relative mb-3">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search..."
@@ -212,7 +212,7 @@ export const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
           )}
           {loading ? (
             <div className="flex justify-center p-2">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
             </div>
           ) : filteredOptions.length === 0 ? (
             <div className="p-2 text-center text-sm text-muted-foreground">

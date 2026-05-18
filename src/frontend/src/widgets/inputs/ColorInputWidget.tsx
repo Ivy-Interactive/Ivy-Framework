@@ -67,7 +67,7 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
             disabled={disabled}
             onClick={() => onColorSelect(colorName)}
             className={cn(
-              "w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center",
+              "size-6 rounded-full border-2 transition-all flex items-center justify-center",
               "hover:scale-110 hover:z-10",
               isSelected ? "border-foreground ring-2 ring-foreground/30" : "border-transparent",
               disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
@@ -79,7 +79,7 @@ const ColorSwatchGrid: React.FC<ColorSwatchGridProps> = ({
             {isSelected && (
               <Check
                 className={cn(
-                  "w-4 h-4",
+                  "size-4",
                   ["white", "yellow", "lime", "amber", "cyan"].includes(colorName)
                     ? "text-black"
                     : "text-white",
@@ -259,6 +259,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   }, [autoFocus, disabled]);
 
   const [localValue, setLocalColorValue] = useOptimisticValue(value, false);
+  const [swatchPickerOpen, setSwatchPickerOpen] = useState(false);
 
   // Use derived state for display and input values
   const displayValue = localValue ?? "";
@@ -352,7 +353,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                 onClick={handleClear}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className="size-4 text-muted-foreground hover:text-foreground" />
               </button>
             )}
           </div>
@@ -361,7 +362,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     );
 
     return (
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-x-2">
         {hasAffixes ? (
           <div
             className={cn(
@@ -406,7 +407,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     };
 
     return (
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-x-2">
         <ColorSwatchGrid
           selectedColor={localValue}
           onColorSelect={handleSwatchSelect}
@@ -420,11 +421,12 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   if (variant === "SwatchPicker") {
     const handleSwatchSelect = (colorName: string) => {
       fireColorChange(colorName);
+      setSwatchPickerOpen(false);
     };
 
     return (
-      <div className="flex items-center space-x-2">
-        <Popover>
+      <div className="flex items-center gap-x-2">
+        <Popover open={swatchPickerOpen} onOpenChange={setSwatchPickerOpen}>
           <PopoverTrigger asChild>
             <button
               type="button"
@@ -467,7 +469,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
 
   if (variant === "Picker") {
     return (
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-x-2">
         <CustomColorPicker
           density={density}
           disabled={disabled}
@@ -549,7 +551,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   );
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center gap-x-2">
       {hasAffixes ? (
         <div
           className={cn(

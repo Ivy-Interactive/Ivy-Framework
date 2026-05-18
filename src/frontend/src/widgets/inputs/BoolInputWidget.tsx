@@ -99,7 +99,7 @@ const LoadingOverlay: React.FC<{
   "data-testid"?: string;
 }> = ({ density = Densities.Medium, "data-testid": dataTestId }) => {
   const sizeClass =
-    density === Densities.Small ? "h-4 w-4" : density === Densities.Large ? "h-5 w-5" : "h-4 w-4";
+    density === Densities.Small ? "size-4" : density === Densities.Large ? "size-5" : "size-4";
   return (
     <div
       className="absolute inset-0 flex items-center justify-center rounded-md bg-background/80"
@@ -257,7 +257,7 @@ const VariantComponents = {
       const content = (
         <div
           className={cn(
-            "flex space-x-2 items-center",
+            "flex gap-x-2 items-center",
             boolInputRowMinHeightVariant({ density }),
             description && "items-start",
           )}

@@ -247,15 +247,21 @@ export const SmartSearch: React.FC<SmartSearchProps> = ({
   const isClosingRef = useRef(false);
 
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     if (overlayPanel && overlayPanel.length > 0) {
       isClosingRef.current = false;
       return () => {
         isClosingRef.current = true;
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           isClosingRef.current = false;
         }, 200);
       };
     }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [overlayPanel]);
 
   useEffect(() => {

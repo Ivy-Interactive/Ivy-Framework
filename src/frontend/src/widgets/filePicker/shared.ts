@@ -89,7 +89,7 @@ export function acceptToPickerTypes(accept?: string): FilePickerAcceptType[] | u
   const parts = accept.split(",").map((s) => s.trim());
 
   for (const part of parts) {
-    if (part.includes("/")) {
+    if (/\//.test(part)) {
       // MIME type like "image/*" or "application/pdf"
       if (!acceptMap[part]) {
         acceptMap[part] = [];
