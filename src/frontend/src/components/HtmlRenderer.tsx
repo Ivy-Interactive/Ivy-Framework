@@ -129,27 +129,19 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
           case "a": {
             const href = element.getAttribute("href");
             const safeHref = validateLinkUrl(href, { allowCustomProtocols: !!onLinkClick });
-            if (onLinkClick) {
-              return (
-                <button
-                  type="button"
-                  className={typography.a}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    font: "inherit",
-                    cursor: "pointer",
-                    display: "inline",
-                  }}
-                  onClick={() => onLinkClick(safeHref)}
-                >
-                  {children}
-                </button>
-              );
-            }
             return (
-              <a className={typography.a} href={safeHref} target="_blank" rel="noopener noreferrer">
+              <a
+                className={typography.a}
+                href={safeHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (onLinkClick) {
+                    e.preventDefault();
+                    onLinkClick(safeHref);
+                  }
+                }}
+              >
                 {children}
               </a>
             );
