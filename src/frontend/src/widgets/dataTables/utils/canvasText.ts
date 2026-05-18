@@ -17,10 +17,11 @@ function getMeasureContext(): CanvasRenderingContext2D {
   return ctx;
 }
 
+/** Canvas font string aligned with glide grid theme and table density. */
 export function getCellFont(density: Densities = Densities.Medium): string {
   const theme = getDefaultTheme();
   const { fontSize } = DENSITY_CONFIG[density];
-  return `${theme.baseFontStyle} ${fontSize} ${theme.fontFamily}`;
+  return `${fontSize} ${theme.fontFamily}`;
 }
 
 /**

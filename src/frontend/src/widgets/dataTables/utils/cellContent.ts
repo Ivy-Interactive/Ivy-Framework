@@ -2,7 +2,9 @@ import { GridCell, GridCellKind, Item, Theme } from "@glideapps/glide-data-grid"
 import { Align, DataColumn, DataRow } from "../types/types";
 import { getCSSVariable, isDarkMode } from "@/lib/theme";
 import type { AnimatedStatusCellData, LabelsBadgesCellData } from "./customRenderers";
-import { getMaxTextWidth, truncateTextWithEllipsis } from "./canvasText";
+import { getCellFont, getMaxTextWidth, truncateTextWithEllipsis } from "./canvasText";
+import { DENSITY_CONFIG } from "../dataTableEditor/constants";
+import { Densities } from "@/types/density";
 
 /**
  * Converts Align enum to contentAlign value for GridCell
@@ -570,8 +572,8 @@ export function getCellContent(
   const withTruncation = truncateCellDisplayData(
     gridCell,
     options.columnWidth,
-    options.cellHorizontalPadding ?? 8,
-    options.cellFont ?? "13px sans-serif",
+    options.cellHorizontalPadding ?? DENSITY_CONFIG[Densities.Medium].cellHorizontalPadding,
+    options.cellFont ?? getCellFont(),
     column.wrapText,
   );
   if (column.hasCellAction) {

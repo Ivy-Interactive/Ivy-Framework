@@ -542,7 +542,7 @@ export const linkCellRenderer: CustomRenderer<LinkCell> = {
 
     const linkColor = theme.linkColor || theme.accentColor || "#2563eb";
     const padding = theme.cellHorizontalPadding ?? 8;
-    const font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+    const font = (theme as GridDrawTheme).baseFontFull;
 
     drawTruncatedText(ctx, {
       text,
