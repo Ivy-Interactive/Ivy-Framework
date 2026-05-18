@@ -187,7 +187,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
   return (
     <div>
       <div className="text-body mb-4 flex items-center gap-2">
-        <Users className="w-4 h-4" />
+        <Users className="size-4" />
         Contributors
       </div>
 
@@ -203,7 +203,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
         <div className="flex-shrink-0 min-h-40 overflow-hidden">
           {/* Contributors list*/}
           <div className="h-full pr-2">
-            <div className="space-y-3">
+            <div className="gap-y-3">
               {displayedContributors.map((contributor) => (
                 <a
                   key={contributor.login}
@@ -215,7 +215,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
                   <img
                     src={contributor.avatar_url}
                     alt={contributor.login}
-                    className="w-8 h-8 rounded-full flex-shrink-0"
+                    className="size-8 rounded-full flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate group-hover:text-primary transition-colors">
@@ -223,7 +223,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
                     </div>
                     <div className="text-xs text-muted-foreground">{contributor.role}</div>
                   </div>
-                  <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                  <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                 </a>
               ))}
             </div>
@@ -239,7 +239,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
                 className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
               >
                 and {remainingCount} more
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="size-3" />
               </a>
             </div>
           )}

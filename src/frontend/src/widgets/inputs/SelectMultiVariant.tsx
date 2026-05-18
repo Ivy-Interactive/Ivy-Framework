@@ -172,7 +172,7 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
         <div className={selectIconContainerVariant({ density })} style={{ zIndex: 2 }}>
           {loading && (
             <div className="pointer-events-auto flex items-center h-6 p-1">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground text-opacity-50" />
+              <Loader2 className="size-4 animate-spin text-muted-foreground text-opacity-50" />
             </div>
           )}
           {selectedMultiSelectOptions.length > 0 && !disabled && (

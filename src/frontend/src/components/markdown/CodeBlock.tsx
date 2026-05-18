@@ -78,7 +78,7 @@ export const CodeBlock = memo(
               fallback={
                 <div className="rounded-md border bg-background p-4">
                   <div className="flex items-center justify-center p-8 text-muted-foreground">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <div className="animate-spin rounded-full size-6 border-b-2 border-primary"></div>
                     <span className="ml-2 text-sm">Loading Mermaid...</span>
                   </div>
                 </div>
@@ -98,7 +98,7 @@ export const CodeBlock = memo(
               fallback={
                 <div className="rounded-md border bg-background p-4">
                   <div className="flex items-center justify-center p-8 text-muted-foreground">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <div className="animate-spin rounded-full size-6 border-b-2 border-primary"></div>
                     <span className="ml-2 text-sm">Loading Graphviz...</span>
                   </div>
                 </div>

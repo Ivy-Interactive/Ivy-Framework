@@ -9,11 +9,11 @@ export type NullableBoolean = boolean | null | undefined;
 const getSizeClasses = (density?: Densities): string => {
   switch (density) {
     case Densities.Small:
-      return "h-3 w-3";
+      return "size-3";
     case Densities.Large:
-      return "h-5 w-5";
+      return "size-5";
     default:
-      return "h-4 w-4";
+      return "size-4";
   }
 };
 

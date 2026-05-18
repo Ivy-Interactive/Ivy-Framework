@@ -48,7 +48,7 @@ export function ChatBubbleMessage({
       )}
     >
       {isLoading ? (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-x-2">
           <MessageLoading />
         </div>
       ) : (
@@ -66,7 +66,7 @@ interface ChatBubbleActionProps {
 
 export function ChatBubbleAction({ icon, onClick, className }: ChatBubbleActionProps) {
   return (
-    <Button variant="ghost" size="icon" className={cn("h-6 w-6", className)} onClick={onClick}>
+    <Button variant="ghost" size="icon" className={cn("size-6", className)} onClick={onClick}>
       {icon}
     </Button>
   );

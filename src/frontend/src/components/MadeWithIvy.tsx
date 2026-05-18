@@ -61,7 +61,7 @@ export default function MadeWithIvy() {
           ease-in-out
           origin-bottom-right
           cursor-pointer
-          ${isHovered ? "w-48 h-48" : "w-16 h-16"}
+          ${isHovered ? "size-48" : "size-16"}
           bg-ivy-green
         `}
         onClick={handleClick}

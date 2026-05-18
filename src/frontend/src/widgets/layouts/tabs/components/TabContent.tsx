@@ -60,7 +60,7 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
             }}
             className="opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
           >
-            <RotateCw className="w-3 h-3" />
+            <RotateCw className="size-3" />
           </button>
         )}
         {showClose && (
@@ -77,7 +77,7 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
               !isActive && "invisible group-hover:visible",
             )}
           >
-            <X className="w-3 h-3" />
+            <X className="size-3" />
           </button>
         )}
       </div>

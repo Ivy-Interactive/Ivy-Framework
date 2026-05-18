@@ -71,7 +71,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ currentDate, view, onNavigate, onView
   ];
 
   return (
-    <div className="flex items-center justify-between px-2 py-2 border-b border-border">
+    <div className="flex items-center justify-between p-2 border-b border-border">
       <div className="flex items-center gap-1">
         <button
           onClick={() => onNavigate("today")}
@@ -867,7 +867,7 @@ const AgendaDateGroup: React.FC<AgendaDateGroupProps> = ({ dayEvents, onEventCli
     <div className="border-b border-border">
       <div className="flex">
         {/* Date column */}
-        <div className={cn(dc.agendaDateWidth, "flex-shrink-0 py-3 px-3 border-r border-border")}>
+        <div className={cn(dc.agendaDateWidth, "flex-shrink-0 p-3 border-r border-border")}>
           <div className="text-sm font-semibold">{format(date, "EEE")}</div>
           <div className={cn("text-2xl font-bold", isToday(date) && "text-primary")}>
             {format(date, "d")}
@@ -876,7 +876,7 @@ const AgendaDateGroup: React.FC<AgendaDateGroupProps> = ({ dayEvents, onEventCli
         </div>
 
         {/* Events column */}
-        <div className="flex-1 py-2 px-2 flex flex-col gap-1">
+        <div className="flex-1 p-2 flex flex-col gap-1">
           {dayEvents.map((event, idx) => {
             const bgColor = event.color
               ? `var(--${event.color.toLowerCase()}, var(--primary))`

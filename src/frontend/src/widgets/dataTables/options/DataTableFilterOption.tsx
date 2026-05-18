@@ -294,7 +294,7 @@ export const DataTableFilterOption: React.FC<{
 
         {isParsing ? (
           <div className="absolute right-0 top-1/2 z-10 flex h-9 -translate-y-1/2 items-center border-l border-input bg-background px-2.5">
-            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
+            <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <Button

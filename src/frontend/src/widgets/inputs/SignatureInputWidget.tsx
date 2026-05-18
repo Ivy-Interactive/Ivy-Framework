@@ -41,9 +41,9 @@ const clearButtonMap: Record<Densities, string> = {
 };
 
 const clearIconMap: Record<Densities, string> = {
-  [Densities.Small]: "h-3 w-3",
-  [Densities.Medium]: "h-4 w-4",
-  [Densities.Large]: "h-5 w-5",
+  [Densities.Small]: "size-3",
+  [Densities.Medium]: "size-4",
+  [Densities.Large]: "size-5",
 };
 
 export function resolveColor(color: string | undefined, fallback: string): string {

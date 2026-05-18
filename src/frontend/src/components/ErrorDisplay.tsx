@@ -65,9 +65,9 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ title, message, stac
       <div className="shrink-0 pt-4 border-t">
         <Button onClick={handleCopy} className="flex items-center gap-2" variant="outline">
           {copied ? (
-            <Check className="h-4 w-4 text-primary animate-in fade-in duration-500" />
+            <Check className="size-4 text-primary animate-in fade-in duration-500" />
           ) : (
-            <ClipboardCopy className="h-4 w-4" />
+            <ClipboardCopy className="size-4" />
           )}
           Copy Details
         </Button>

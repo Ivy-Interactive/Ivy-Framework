@@ -68,7 +68,7 @@ const XmlNodeComponent = ({
             }
           }}
         >
-          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          {isExpanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
           <span className="text-muted-foreground">{"<"}</span>
           <span className="text-cyan">{node.name}</span>
           {node.attributes && renderAttributes(node.attributes)}

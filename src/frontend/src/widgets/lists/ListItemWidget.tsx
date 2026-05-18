@@ -36,9 +36,9 @@ const gapMap: Record<Densities, string> = {
 };
 
 const iconSizeMap: Record<Densities, string> = {
-  [Densities.Small]: "h-5 w-5",
-  [Densities.Medium]: "h-6 w-6",
-  [Densities.Large]: "h-7 w-7",
+  [Densities.Small]: "size-5",
+  [Densities.Medium]: "size-6",
+  [Densities.Large]: "size-7",
 };
 
 const subtitleSizeMap: Record<Densities, string> = {

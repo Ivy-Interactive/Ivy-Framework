@@ -64,7 +64,7 @@ export function BladeWidget({
             }}
             className={buttonVariant({ variant: "ghost", size: "icon" })}
           >
-            <RotateCw className="h-4 w-4" />
+            <RotateCw className="size-4" />
           </button>
           {index > 0 && (
             <button
@@ -74,7 +74,7 @@ export function BladeWidget({
               }}
               className={buttonVariant({ variant: "ghost", size: "icon" })}
             >
-              <X className="h-4 w-4" />
+              <X className="size-4" />
             </button>
           )}
         </div>

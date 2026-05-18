@@ -25,15 +25,15 @@ export const ToggleOptionItem: React.FC<ToggleOptionItemProps> = ({
   const isInvalid = !!invalid && isSelected;
 
   const sizeClasses = {
-    Small: "px-1 py-1 text-xs",
+    Small: "p-1 text-xs",
     Medium: "px-3 py-2 text-sm",
     Large: "px-5 py-3 text-base",
   };
 
   const iconClasses = {
-    Small: "h-3 w-3",
-    Medium: "h-4 w-4",
-    Large: "h-5 w-5",
+    Small: "size-3",
+    Medium: "size-4",
+    Large: "size-5",
   };
 
   const toggleItem = (

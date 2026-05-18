@@ -21,9 +21,9 @@ export const switchThumbVariant = cva(
   {
     variants: {
       density: {
-        Small: "h-3 w-3 data-[state=checked]:translate-x-3",
-        Medium: "h-4 w-4 data-[state=checked]:translate-x-4",
-        Large: "h-5 w-5 data-[state=checked]:translate-x-5",
+        Small: "size-3 data-[state=checked]:translate-x-3",
+        Medium: "size-4 data-[state=checked]:translate-x-4",
+        Large: "size-5 data-[state=checked]:translate-x-5",
       },
     },
     defaultVariants: {

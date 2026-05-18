@@ -227,7 +227,7 @@ const GraphvizRenderer = memo(({ content }: GraphvizRendererProps) => {
       <div className="rounded-md border border-destructive bg-destructive/10 p-3">
         <div className="flex items-center gap-2 text-destructive text-sm font-medium">
           <svg
-            className="h-4 w-4 flex-shrink-0"
+            className="size-4 flex-shrink-0"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
@@ -253,7 +253,7 @@ const GraphvizRenderer = memo(({ content }: GraphvizRendererProps) => {
       <div className="graphviz-container rounded-md border bg-background p-4 overflow-x-auto slim-scrollbar">
         {isLoading && (
           <div className="flex items-center justify-center p-8 text-muted-foreground">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full size-6 border-b-2 border-primary"></div>
             <span className="ml-2 text-sm">Loading diagram...</span>
           </div>
         )}

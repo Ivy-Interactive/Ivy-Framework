@@ -65,7 +65,7 @@ const DialogHeader = ({ className, children, hideCloseButton, ...props }: Dialog
     <div className="flex-1">{children}</div>
     {!hideCloseButton && (
       <DialogPrimitive.Close className="p-1 rounded-selector hover:bg-accent focus:outline-none cursor-pointer">
-        <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+        <X className="size-4 text-muted-foreground hover:text-foreground" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     )}

@@ -116,7 +116,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
           className={cn(
             expandableTriggerVariant({ density }),
             "relative cursor-pointer data-[disabled=true]:cursor-not-allowed",
-            ghost && "px-0 py-0 h-auto hover:bg-transparent",
+            ghost && "p-0 h-auto hover:bg-transparent",
           )}
           onClick={handleTriggerClick}
           data-collapsible-trigger

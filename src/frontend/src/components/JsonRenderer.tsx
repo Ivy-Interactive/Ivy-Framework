@@ -45,7 +45,7 @@ const JsonNode = ({
         }}
         className="flex items-center cursor-pointer hover:bg-accent rounded px-1 transition-colors"
       >
-        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        {isExpanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         <span className="text-muted-foreground">{isArray ? "[" : "{"}</span>
       </div>
 

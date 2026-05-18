@@ -62,7 +62,7 @@ export function Loading({ type = "Spinner" }: LoadingProps) {
       role="status"
       aria-label="Loading"
     >
-      <Loader2 className="animate-spin h-4 w-4" />
+      <Loader2 className="animate-spin size-4" />
       <p className="text-sm">Loading...</p>
     </div>
   );

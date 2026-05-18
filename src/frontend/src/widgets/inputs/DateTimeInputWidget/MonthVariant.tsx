@@ -141,21 +141,21 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="size-7"
                 aria-label="Previous year"
                 onClick={() => setViewYear((y) => y - 1)}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="size-4" />
               </Button>
               <span className="text-sm font-medium select-none">{viewYear}</span>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="size-7"
                 aria-label="Next year"
                 onClick={() => setViewYear((y) => y + 1)}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="size-4" />
               </Button>
             </div>
             <div className="grid grid-cols-4 gap-1">

@@ -101,7 +101,7 @@ export function SortableDropdownMenuItem({
             window.dispatchEvent(new CustomEvent("tab-close", { detail: { id } }));
           }}
         >
-          <X className="w-3 h-3" />
+          <X className="size-3" />
         </button>
       )}
     </div>

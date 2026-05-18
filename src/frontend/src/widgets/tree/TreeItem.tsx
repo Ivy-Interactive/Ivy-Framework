@@ -129,7 +129,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
           {item.icon && item.icon !== "None" ? (
             <CollapsibleTrigger asChild>
               <button
-                className="flex items-center justify-center h-5 w-5 shrink-0 rounded-sm hover:bg-accent transition-colors"
+                className="flex items-center justify-center size-5 shrink-0 rounded-sm hover:bg-accent transition-colors"
                 onClick={handleToggle}
                 tabIndex={-1}
                 disabled={item.disabled}
@@ -143,14 +143,14 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
                   />
                 </span>
                 <span style={{ display: hovered ? "none" : "inline-flex" }}>
-                  <Icon className="h-4 w-4 shrink-0 text-muted-foreground" name={item.icon} />
+                  <Icon className="size-4 shrink-0 text-muted-foreground" name={item.icon} />
                 </span>
               </button>
             </CollapsibleTrigger>
           ) : (
             <CollapsibleTrigger asChild>
               <button
-                className="flex items-center justify-center h-5 w-5 shrink-0 rounded-sm hover:bg-accent transition-colors"
+                className="flex items-center justify-center size-5 shrink-0 rounded-sm hover:bg-accent transition-colors"
                 onClick={handleToggle}
                 tabIndex={-1}
                 disabled={item.disabled}
@@ -223,7 +223,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
       onClick={handleClick}
     >
       {item.icon && item.icon !== "None" && (
-        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" name={item.icon} />
+        <Icon className="size-4 shrink-0 text-muted-foreground" name={item.icon} />
       )}
       <TreeItemLabel label={item.label} tooltip={item.tooltip} />
 

@@ -48,17 +48,17 @@ const Slider = React.forwardRef<
     const sizeVariant: Record<string, { track: string; thumb: string; tooltip: string }> = {
       Small: {
         track: "h-1",
-        thumb: "h-3 w-3",
+        thumb: "size-3",
         tooltip: "text-xs -top-6",
       },
       Medium: {
         track: "h-1.5",
-        thumb: "h-4 w-4",
+        thumb: "size-4",
         tooltip: "text-sm -top-7",
       },
       Large: {
         track: "h-2",
-        thumb: "h-5 w-5",
+        thumb: "size-5",
         tooltip: "text-ml -top-8",
       },
     };

@@ -81,7 +81,7 @@ export const RadioVariant: React.FC<SelectInputWidgetProps> = ({
             {validOptions.map((option) => {
               const isOptionDisabled = disabled || option.disabled;
               return (
-                <div key={option.value} className="flex items-center space-x-2">
+                <div key={option.value} className="flex items-center gap-x-2">
                   <RadioGroupItem
                     value={option.value.toString()}
                     id={`${id}-${option.value}`}
@@ -114,7 +114,7 @@ export const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                             )}
                           >
                             {option.icon && (
-                              <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />
+                              <Icon name={option.icon} className="size-4 flex-shrink-0" />
                             )}
                             {option.description ? (
                               <div className="flex flex-col">
@@ -143,7 +143,7 @@ export const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                         isOptionDisabled && "opacity-50 cursor-not-allowed",
                       )}
                     >
-                      {option.icon && <Icon name={option.icon} className="h-4 w-4 flex-shrink-0" />}
+                      {option.icon && <Icon name={option.icon} className="size-4 flex-shrink-0" />}
                       {option.description ? (
                         <div className="flex flex-col">
                           <span>{option.label}</span>

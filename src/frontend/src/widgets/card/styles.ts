@@ -55,7 +55,7 @@ export const getSizeClasses = (density?: Densities): CardSizeClasses => {
         footer: "p-3 pt-0",
         title: "text-sm",
         description: "text-xs mt-1",
-        icon: "h-4 w-4",
+        icon: "size-4",
       };
     case Densities.Large:
       return {
@@ -65,7 +65,7 @@ export const getSizeClasses = (density?: Densities): CardSizeClasses => {
         footer: "p-8 pt-0",
         title: "text-lg",
         description: "text-base mt-3",
-        icon: "h-6 w-6",
+        icon: "size-6",
       };
     default:
       return {
@@ -75,7 +75,7 @@ export const getSizeClasses = (density?: Densities): CardSizeClasses => {
         footer: "p-6 pt-0",
         title: "text-base",
         description: "text-sm",
-        icon: "h-5 w-5",
+        icon: "size-5",
       };
   }
 };

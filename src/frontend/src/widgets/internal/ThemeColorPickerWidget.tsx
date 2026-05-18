@@ -241,7 +241,7 @@ const ThemeColorGrid: React.FC<{
             key={`${r}-${c}`}
             type="button"
             className={cn(
-              "w-7 h-7 shrink-0 rounded-full hover:density-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5 relative flex items-center justify-center",
+              "size-7 shrink-0 rounded-full hover:density-125 transition-transform hover:z-10 hover:shadow-sm border border-black/5 relative flex items-center justify-center",
               isSelected && "ring-1 ring-offset-1 ring-black/50 z-20 density-110",
             )}
             style={{ backgroundColor: hexColor }}
@@ -295,7 +295,7 @@ const ColorSlider = React.forwardRef<
     <SliderPrimitive.Track className="relative h-6 w-full grow overflow-hidden rounded-full cursor-pointer">
       <SliderPrimitive.Range className="absolute h-full bg-transparent" />
     </SliderPrimitive.Track>
-    <SliderPrimitive.Thumb className="block h-6 w-6 rounded-full border-2 border-white bg-transparent shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing hover:bg-white/10" />
+    <SliderPrimitive.Thumb className="block size-6 rounded-full border-2 border-white bg-transparent shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing hover:bg-white/10" />
   </SliderPrimitive.Root>
 ));
 ColorSlider.displayName = SliderPrimitive.Root.displayName;
@@ -469,9 +469,9 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
           {Math.round((displayAlpha / 255) * 100)}%
         </span>
       )}
-      <CopyToClipboardButton textToCopy={localInputValue} className="h-8 w-8 px-0" />
+      <CopyToClipboardButton textToCopy={localInputValue} className="size-8 px-0" />
       <div
-        className="w-8 h-8 rounded-md border border-input shadow-sm shrink-0"
+        className="size-8 rounded-md border border-input shadow-sm shrink-0"
         style={{
           backgroundColor: getDisplayColor(),
           opacity: displayAlpha / 255,
@@ -517,7 +517,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
   const contrastColor = getContrastColor(getDisplayColor());
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center gap-x-2">
       <Popover>
         <PopoverTrigger asChild>
           <button
@@ -595,7 +595,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
               <div className="h-[300px] p-6 flex flex-col justify-center gap-6">
                 {/* RGB Sliders */}
                 <>
-                  <div className="space-y-2">
+                  <div className="gap-y-2">
                     <div className="flex justify-between text-xs font-medium">
                       <span>Red</span>
                       <span>{rgbValues.r.toString(16).toUpperCase().padStart(2, "0")}</span>
@@ -617,7 +617,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="gap-y-2">
                     <div className="flex justify-between text-xs font-medium">
                       <span>Green</span>
                       <span>{rgbValues.g.toString(16).toUpperCase().padStart(2, "0")}</span>
@@ -639,7 +639,7 @@ export const ThemeColorPickerWidget: React.FC<ThemeColorPickerWidgetProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="gap-y-2">
                     <div className="flex justify-between text-xs font-medium">
                       <span>Blue</span>
                       <span>{rgbValues.b.toString(16).toUpperCase().padStart(2, "0")}</span>

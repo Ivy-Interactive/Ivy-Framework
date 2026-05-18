@@ -101,7 +101,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
             )}
             title={tooltip || label}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="size-4" />
             {showLabel && <span className="text-sm">{label}</span>}
           </button>
         </PopoverTrigger>
@@ -120,7 +120,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   // Inline expansion mode with unified border
   const buttonContent = (
     <>
-      <Icon className="h-4 w-4" />
+      <Icon className="size-4" />
       {showLabel && <span className="text-sm">{label}</span>}
     </>
   );
@@ -141,7 +141,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         <button
           className={cn(
             "inline-flex items-center justify-center text-sm font-medium",
-            "h-9 w-9 shrink-0 gap-2 cursor-pointer",
+            "size-9 shrink-0 gap-2 cursor-pointer",
             "bg-transparent rounded-l-fields",
             "transition-colors focus-visible:outline-none",
             expanded
