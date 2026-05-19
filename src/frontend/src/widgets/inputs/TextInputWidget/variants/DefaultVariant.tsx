@@ -93,7 +93,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
       >
         {/* Prefix with background and separator */}
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", isFocused, ghostAffixChrome)}>
+          <div className={textInputAffixCellClasses("prefix", ghostAffixChrome)}>
             {prefixContent}
           </div>
         )}
@@ -194,7 +194,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
 
         {/* Suffix with background and separator */}
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", isFocused, ghostAffixChrome)}>
+          <div className={textInputAffixCellClasses("suffix", ghostAffixChrome)}>
             {suffixContent}
           </div>
         )}
