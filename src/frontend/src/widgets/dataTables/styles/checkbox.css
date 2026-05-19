@@ -102,6 +102,20 @@
   display: none;
 }
 
+/* Mobile column resize: grip handles + block horizontal scroll while dragging */
+.ivy-datatable-column-resize-handle {
+  touch-action: none;
+}
+
+.ivy-datatable-column-resize-handle--active span {
+  background-color: hsl(var(--background));
+}
+
+body.ivy-datatable-column-resize-active .dvn-scroller {
+  touch-action: pan-y !important;
+  overscroll-behavior-x: none;
+}
+
 .gdg-search-bar::after {
   content: "";
   position: absolute;
