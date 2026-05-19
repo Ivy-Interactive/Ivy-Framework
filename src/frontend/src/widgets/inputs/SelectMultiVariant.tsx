@@ -134,78 +134,79 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
 
-  const multiSelectorContent = (
-    <>
-      <MultipleSelector
-        value={selectedMultiSelectOptions}
-        defaultOptions={multiSelectOptions}
-        onValueChange={handleMultiSelectChange}
-        placeholder={placeholder}
-        disabled={disabled || loading}
-        className={cn(
-          "w-full",
-          ghost && "ghost",
-          hasAffixes && "border-0 shadow-none",
-          hasPrefix && "rounded-l-none",
-          hasSuffix && "rounded-r-none",
+  const rightSlot =
+    loading || (selectedMultiSelectOptions.length > 0 && !disabled) || invalid ? (
+      <>
+        {loading && (
+          <div className="pointer-events-auto flex items-center h-6 p-1">
+            <Loader2 className="size-4 animate-spin text-muted-foreground text-opacity-50" />
+          </div>
         )}
-        invalid={!!invalid}
-        hidePlaceholderWhenSelected
-        density={density}
-        ghost={ghost}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-        data-testid={dataTestId}
-        showActions={showActions && selectMany}
-        maxSelections={maxSelections}
-        minSelections={minSelections}
-        onNullableClear={
-          nullable
-            ? () => {
-                if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
-              }
-            : undefined
-        }
-        autoFocus={autoFocus}
-      />
-      {(selectedMultiSelectOptions.length > 0 && !disabled) || invalid || loading ? (
-        <div className={selectIconContainerVariant({ density })} style={{ zIndex: 2 }}>
-          {loading && (
-            <div className="pointer-events-auto flex items-center h-6 p-1">
-              <Loader2 className="size-4 animate-spin text-muted-foreground text-opacity-50" />
-            </div>
-          )}
-          {selectedMultiSelectOptions.length > 0 && !disabled && (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label="Clear All"
-              onClick={(e) => {
+        {selectedMultiSelectOptions.length > 0 && !disabled && (
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label="Clear All"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              logger.debug("Select input clear button clicked (MultiSelect)", { id });
+              if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
                 e.stopPropagation();
-                logger.debug("Select input clear button clicked (MultiSelect)", { id });
                 if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
-                }
-              }}
-              className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
-            >
-              <X className={xIconVariant({ density })} />
-            </button>
-          )}
-          {invalid && (
-            <div className="pointer-events-auto flex items-center h-6 p-1">
-              <InvalidIcon message={invalid} />
-            </div>
-          )}
-        </div>
-      ) : null}
-    </>
+              }
+            }}
+            className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
+          >
+            <X className={xIconVariant({ density })} />
+          </button>
+        )}
+        {invalid && (
+          <div className="pointer-events-auto flex items-center h-6 p-1">
+            <InvalidIcon message={invalid} />
+          </div>
+        )}
+      </>
+    ) : undefined;
+
+  const multiSelectorContent = (
+    <MultipleSelector
+      value={selectedMultiSelectOptions}
+      defaultOptions={multiSelectOptions}
+      onValueChange={handleMultiSelectChange}
+      placeholder={placeholder}
+      disabled={disabled || loading}
+      className={cn(
+        "w-full",
+        ghost && "ghost",
+        hasAffixes && "border-0 shadow-none",
+        hasPrefix && "rounded-l-none",
+        hasSuffix && "rounded-r-none",
+      )}
+      invalid={!!invalid}
+      hidePlaceholderWhenSelected
+      density={density}
+      ghost={ghost}
+      onBlur={handleBlur}
+      onFocus={handleFocus}
+      data-testid={dataTestId}
+      showActions={showActions && selectMany}
+      maxSelections={maxSelections}
+      minSelections={minSelections}
+      onNullableClear={
+        nullable
+          ? () => {
+              if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+            }
+          : undefined
+      }
+      autoFocus={autoFocus}
+      rightSlot={rightSlot}
+    />
   );
 
   return (

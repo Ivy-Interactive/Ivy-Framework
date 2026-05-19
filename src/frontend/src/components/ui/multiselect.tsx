@@ -76,6 +76,7 @@ interface MultipleSelectorProps {
   minSelections?: number;
   onNullableClear?: () => void;
   autoFocus?: boolean;
+  rightSlot?: React.ReactNode;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -104,6 +105,7 @@ const MultipleSelector = React.forwardRef<
       minSelections,
       onNullableClear,
       autoFocus = false,
+      rightSlot,
     },
     ref,
   ) => {
@@ -480,9 +482,14 @@ const MultipleSelector = React.forwardRef<
                 className="ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1 min-w-[120px] cursor-pointer"
               />
             </span>
+            {rightSlot && (
+              <div className="flex items-center gap-1 shrink-0 pointer-events-none">
+                {rightSlot}
+              </div>
+            )}
             <ChevronDown
               className={cn(
-                "size-4 ml-2 opacity-50 shrink-0 cursor-pointer",
+                "size-4 ml-1 opacity-50 shrink-0 cursor-pointer",
                 disabled && "cursor-not-allowed opacity-50",
               )}
               onClick={(e) => {
