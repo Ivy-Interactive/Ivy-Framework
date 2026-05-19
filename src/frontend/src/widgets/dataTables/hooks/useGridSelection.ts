@@ -10,12 +10,17 @@ import {
 interface UseGridSelectionProps {
   visibleRows: number;
   getCellContent: (cell: Item) => GridCell;
+  allowSorting?: boolean;
 }
 
 /**
  * Hook to manage grid selection state and changes
  */
-export const useGridSelection = ({ visibleRows, getCellContent }: UseGridSelectionProps) => {
+export const useGridSelection = ({
+  visibleRows,
+  getCellContent,
+  allowSorting = false,
+}: UseGridSelectionProps) => {
   const [gridSelection, setGridSelection] = useState<GridSelection>({
     columns: CompactSelection.empty(),
     rows: CompactSelection.empty(),
@@ -23,6 +28,14 @@ export const useGridSelection = ({ visibleRows, getCellContent }: UseGridSelecti
 
   const handleGridSelectionChange = useCallback(
     (newSelection: GridSelection) => {
+      if (allowSorting && newSelection.columns.length > 0) {
+        setGridSelection({
+          ...newSelection,
+          columns: CompactSelection.empty(),
+        });
+        return;
+      }
+
       // Consolidate check for newSelection.current
       if (newSelection.current !== undefined) {
         const [col, row] = newSelection.current.cell;
@@ -53,7 +66,7 @@ export const useGridSelection = ({ visibleRows, getCellContent }: UseGridSelecti
 
       setGridSelection(newSelection);
     },
-    [getCellContent, visibleRows],
+    [getCellContent, visibleRows, allowSorting],
   );
 
   return {

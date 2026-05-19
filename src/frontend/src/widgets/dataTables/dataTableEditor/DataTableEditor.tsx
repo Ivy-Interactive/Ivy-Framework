@@ -3,6 +3,7 @@ import {
   CompactSelection,
   CustomRenderer,
   DataEditorRef,
+  getDefaultTheme,
   GridMouseCellEventArgs,
   GridMouseEventArgs,
   Item,
@@ -27,11 +28,14 @@ import {
   useRowHover,
   useEmptyRows,
   useDataLoading,
-  useLinkCellHover,
+  useCellHoverTooltip,
   useDoubleTapLink,
+  useMobileColumnResize,
+  getActiveColumnIndex,
 } from "../hooks";
 import { useFooterColumnLayout } from "../hooks/useFooterColumnLayout";
 import { GridContainer } from "../components/GridContainer";
+import { MobileColumnResizeOverlay } from "../components/MobileColumnResizeOverlay";
 import { AggregateFooter } from "../DataTableFooter";
 import { MenuItem } from "@/types/widgets";
 import { DENSITY_CONFIG } from "./constants";
@@ -114,11 +118,18 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Grid ref
   const gridRef = useRef<DataEditorRef | null>(null);
   const prevVisibleScrollOriginRef = useRef<{ x: number; y: number } | null>(null);
+  const [visibleScrollX, setVisibleScrollX] = React.useState(0);
+
+  const sortingEnabled = allowSorting ?? true;
+  // Header clicks sort columns; column-select on mousedown would paint accentColor headers.
+  const columnSelect = sortingEnabled ? "none" : selectionProps.columnSelect;
 
   // Cell content
   const { getCellContent } = useCellContent({
     columns,
     columnOrder,
+    columnWidths,
+    density,
     editable,
     visibleRows,
     getRowData,
@@ -128,6 +139,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const { gridSelection, handleGridSelectionChange, setGridSelection } = useGridSelection({
     visibleRows,
     getCellContent,
+    allowSorting: sortingEnabled,
   });
 
   // Cell interactions
@@ -162,17 +174,27 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     arrowTableRef,
   });
 
-  // Link cell hover tooltip
+  const headerFont = useMemo(() => {
+    const t = getDefaultTheme();
+    return `${t.headerFontStyle} ${t.fontFamily}`;
+  }, []);
+
+  // Cell hover tooltips (truncated text + link hint)
   const {
-    isLinkHovered,
+    cellTooltip,
+    isCellTooltipOpen,
     virtualRef,
-    onItemHovered: onLinkCellHovered,
-    linkTooltipPos,
+    onItemHovered: onCellTooltipHovered,
     supportsHoverTooltip,
-    clearLinkCellHover,
-  } = useLinkCellHover({
+    clearCellHoverTooltip,
+  } = useCellHoverTooltip({
+    columns,
+    columnOrder,
+    columnWidths,
+    density,
     getCellContent,
     visibleRows,
+    headerFont,
   });
 
   // Table theme
@@ -182,6 +204,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     visibleRows,
     hoverRow,
     density,
+    suppressHeaderHoverHighlight: sortingEnabled,
   });
 
   const { onSearchResultsChanged, onSearchClose, highlightRegions } = useSearchNavigation(
@@ -223,8 +246,10 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Header menu handling
   const { handleHeaderMenuClick } = useHeaderMenu({
     columns,
-    allowSorting: allowSorting ?? true,
+    columnOrder,
+    allowSorting: sortingEnabled,
     handleSort,
+    setGridSelection,
   });
 
   // Grid columns configuration (last column uses grow:1 to fill space; no manual
@@ -240,6 +265,27 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showGroups: showGroups ?? false,
     showColumnTypeIcons: showColumnTypeIcons ?? true,
     activeSort,
+  });
+
+  const groupHeaderHeight = showGroups ? densityConfig.groupHeaderHeight : 0;
+
+  const selectedColIndex = useMemo(() => getActiveColumnIndex(gridSelection), [gridSelection]);
+
+  const mobileColumnResizeLayoutKey = `${visibleScrollX}:${JSON.stringify(columnWidths)}:${finalColumns.length}:${selectedColIndex ?? ""}`;
+
+  const {
+    useMobileHandles: useMobileColumnResizeHandles,
+    handles: mobileResizeHandles,
+    onHandlePointerDown: onMobileResizeHandlePointerDown,
+  } = useMobileColumnResize({
+    enabled: allowColumnResizing ?? true,
+    gridRef,
+    containerRef,
+    columns: finalColumns,
+    groupHeaderHeight,
+    selectedColIndex,
+    onColumnResize: handleColumnResize,
+    layoutKey: mobileColumnResizeLayoutKey,
   });
 
   // Double-tap link cells on touch (desktop uses ⌘/Ctrl+click via useCellInteractions)
@@ -268,21 +314,22 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const handleVisibleRegionChangedForGrid = useCallback(
     (range: { x: number; y: number; width: number; height: number }) => {
       handleVisibleRegionChanged(range);
+      setVisibleScrollX(range.x);
       const prev = prevVisibleScrollOriginRef.current;
       const verticalScrolled = prev !== null && prev.y !== range.y;
       prevVisibleScrollOriginRef.current = { x: range.x, y: range.y };
       if (!verticalScrolled) return;
       clearRowHover();
-      clearLinkCellHover();
+      clearCellHoverTooltip();
       setCellActionIndicator(null);
     },
-    [handleVisibleRegionChanged, clearRowHover, clearLinkCellHover],
+    [handleVisibleRegionChanged, clearRowHover, clearCellHoverTooltip],
   );
 
   // Compose onItemHovered: keep existing hover behavior and track actionable-cell affordance.
   const handleItemHovered = useCallback(
     (args: GridMouseEventArgs) => {
-      onLinkCellHovered(args);
+      onCellTooltipHovered(args);
       onItemHovered(args);
 
       if (args.kind !== "cell") {
@@ -309,7 +356,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         height: args.bounds.height,
       });
     },
-    [onLinkCellHovered, onItemHovered, orderedDataColumns, visibleRows],
+    [onCellTooltipHovered, onItemHovered, orderedDataColumns, visibleRows],
   );
 
   const handleCellClickedForGrid = useCallback(
@@ -373,15 +420,12 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     footer
   );
 
-  const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
-  const tooltipLabel = isMac ? "\u2318+click to open link" : "Ctrl+click to open link";
-
-  const linkTooltipNode = (
+  const cellTooltipNode = (
     <TooltipProvider
-      key={linkTooltipPos ? `${linkTooltipPos.x},${linkTooltipPos.y}` : "hidden"}
-      delayDuration={0}
+      key={cellTooltip ? `${cellTooltip.x},${cellTooltip.y},${cellTooltip.content}` : "hidden"}
+      delayDuration={300}
     >
-      <Tooltip open={isLinkHovered}>
+      <Tooltip open={isCellTooltipOpen}>
         <TooltipTrigger asChild>
           <div
             ref={(node) => {
@@ -392,8 +436,14 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
             style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
           />
         </TooltipTrigger>
-        <TooltipContent side="top" className="pointer-events-none">
-          {tooltipLabel}
+        <TooltipContent
+          side="top"
+          className="pointer-events-none max-w-sm whitespace-pre-wrap break-words"
+        >
+          <div>{cellTooltip?.content}</div>
+          {cellTooltip?.hint ? (
+            <div className="mt-1 text-xs text-muted-foreground">{cellTooltip.hint}</div>
+          ) : null}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -436,7 +486,17 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           ] as unknown as readonly CustomRenderer[]
         }
         headerIcons={headerIcons}
-        onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
+        onColumnResize={
+          allowColumnResizing && !useMobileColumnResizeHandles ? handleColumnResize : undefined
+        }
+        columnResizeOverlay={
+          useMobileColumnResizeHandles ? (
+            <MobileColumnResizeOverlay
+              handles={mobileResizeHandles}
+              onHandlePointerDown={onMobileResizeHandlePointerDown}
+            />
+          ) : undefined
+        }
         onVisibleRegionChanged={handleVisibleRegionChangedForGrid}
         onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}
         theme={tableTheme}
@@ -445,7 +505,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         freezeColumns={freezeColumns ?? 0}
         getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
         rowSelect={selectionProps.rowSelect}
-        columnSelect={selectionProps.columnSelect}
+        columnSelect={columnSelect}
         rangeSelect={selectionProps.rangeSelect}
         gridSelection={gridSelection}
         onGridSelectionChange={handleGridSelectionChange}
@@ -472,7 +532,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         footer={footerNode}
         hasEmptyRows={emptyRowsCount > 0}
       />
-      {supportsHoverTooltip ? linkTooltipNode : null}
+      {supportsHoverTooltip ? cellTooltipNode : null}
       {cellActionIndicatorNode}
     </>
   );

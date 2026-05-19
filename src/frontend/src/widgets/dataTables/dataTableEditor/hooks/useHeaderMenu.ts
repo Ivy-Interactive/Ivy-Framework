@@ -1,31 +1,50 @@
-import { useCallback } from "react";
+import { useCallback, type Dispatch, type SetStateAction } from "react";
+import {
+  CompactSelection,
+  GridSelection,
+  HeaderClickedEventArgs,
+} from "@glideapps/glide-data-grid";
+import { getOrderedVisibleDataColumns } from "../../utils/columnHelpers";
 import { DataColumn } from "../../types/types";
 
 interface UseHeaderMenuProps {
   columns: DataColumn[];
+  columnOrder: number[];
   allowSorting: boolean;
   handleSort: (columnName: string) => void;
+  setGridSelection: Dispatch<SetStateAction<GridSelection>>;
 }
 
 /**
  * Hook for handling header menu interactions (e.g., sorting)
  */
-export const useHeaderMenu = ({ columns, allowSorting, handleSort }: UseHeaderMenuProps) => {
+export const useHeaderMenu = ({
+  columns,
+  columnOrder,
+  allowSorting,
+  handleSort,
+  setGridSelection,
+}: UseHeaderMenuProps) => {
   const handleHeaderMenuClick = useCallback(
-    (col: number) => {
-      // Only handle sorting if it's enabled globally
+    (col: number, event: HeaderClickedEventArgs) => {
       if (!allowSorting) return;
+      // Modifier clicks are for column selection, not sorting.
+      if (event.ctrlKey || event.metaKey || event.shiftKey) return;
 
-      // Get visible columns to map the correct column index
-      const visibleColumns = columns.filter((c) => !c.hidden);
+      event.preventDefault();
+
+      const visibleColumns = getOrderedVisibleDataColumns(columns, columnOrder);
       const column = visibleColumns[col];
 
-      // Check if this specific column is sortable (defaults to true if not specified)
       if (column && (column.sortable ?? true)) {
         handleSort(column.name);
+        setGridSelection((prev) => ({
+          ...prev,
+          columns: CompactSelection.empty(),
+        }));
       }
     },
-    [columns, handleSort, allowSorting],
+    [columns, columnOrder, handleSort, allowSorting, setGridSelection],
   );
 
   return { handleHeaderMenuClick };
