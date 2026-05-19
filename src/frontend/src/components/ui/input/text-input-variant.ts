@@ -2,13 +2,18 @@ import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+/** Ivy.Button in affix: cell provides px-3; strip Button sm horizontal padding. */
+export const affixEmbeddedButtonClasses =
+  "[&_button]:!px-0 [&_button]:shadow-none [&_button]:rounded [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors";
+
 /** Affix cells: muted box by default; ghost uses transparent chrome with tight padding toward the input. */
 export function textInputAffixCellClasses(
   side: "prefix" | "suffix",
   ghostWithAffixes: boolean,
 ): string {
   return cn(
-    "flex items-center text-muted-foreground [&_button]:rounded [&_button]:px-1 [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors",
+    "flex items-center text-muted-foreground",
+    affixEmbeddedButtonClasses,
     ghostWithAffixes
       ? side === "suffix"
         ? "shrink-0 bg-transparent pl-0 pr-1.5"

@@ -19,6 +19,7 @@ import { WeekVariant } from "./WeekVariant";
 import { YearVariant } from "./YearVariant";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { affixEmbeddedButtonClasses } from "@/components/ui/input/text-input-variant";
 
 const VariantComponents: Record<
   VariantType,
@@ -169,7 +170,12 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       )}
     >
       {hasPrefix && (
-        <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+        <div
+          className={cn(
+            "flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]",
+            affixEmbeddedButtonClasses,
+          )}
+        >
           {prefixContent}
         </div>
       )}
@@ -183,7 +189,12 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
         {variantElement}
       </div>
       {hasSuffix && (
-        <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+        <div
+          className={cn(
+            "flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]",
+            affixEmbeddedButtonClasses,
+          )}
+        >
           {suffixContent}
         </div>
       )}

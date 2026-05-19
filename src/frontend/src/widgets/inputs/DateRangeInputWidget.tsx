@@ -23,6 +23,7 @@ import {
   dateRangeInputIconVariant,
   dateRangeInputTextVariant,
 } from "@/components/ui/input/date-range-input-variant";
+import { affixEmbeddedButtonClasses } from "@/components/ui/input/text-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { DateRangePresets } from "./DateRangePresets";
 
@@ -329,6 +330,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             <div
               className={cn(
                 "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]",
+                affixEmbeddedButtonClasses,
                 !isOpen && "border-r border-input",
               )}
             >
@@ -340,6 +342,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             <div
               className={cn(
                 "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]",
+                affixEmbeddedButtonClasses,
                 !isOpen && "border-l border-input",
               )}
             >
