@@ -415,7 +415,7 @@ describe("columnHelpers", () => {
       expect(result[1].icon).toBe("User");
     });
 
-    it("should use ArrowUp / ArrowDown when column is actively sorted", () => {
+    it("should use indicatorIcon ArrowUp / ArrowDown when column is actively sorted", () => {
       const columns: DataColumn[] = [
         { name: "Name", type: ColType.Text, width: 150, icon: "User" },
         { name: "Score", type: ColType.Number, width: 80 },
@@ -424,10 +424,13 @@ describe("columnHelpers", () => {
       const desc: SortOrder[] = [{ column: "Score", direction: "DESC" }];
       const ascResult = convertToGridColumns(columns, [], {}, false, true, undefined, asc);
       const descResult = convertToGridColumns(columns, [], {}, false, true, undefined, desc);
-      expect(ascResult[0].icon).toBe("ArrowUp");
+      expect(ascResult[0].icon).toBe("User");
+      expect(ascResult[0].indicatorIcon).toBe("ArrowUp");
       expect(ascResult[1].icon).toBe("headerNumber");
+      expect(ascResult[1].indicatorIcon).toBeUndefined();
       expect(descResult[0].icon).toBe("User");
-      expect(descResult[1].icon).toBe("ArrowDown");
+      expect(descResult[1].icon).toBe("headerNumber");
+      expect(descResult[1].indicatorIcon).toBe("ArrowDown");
     });
   });
 });

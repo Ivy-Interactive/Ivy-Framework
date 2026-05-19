@@ -115,6 +115,10 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const gridRef = useRef<DataEditorRef | null>(null);
   const prevVisibleScrollOriginRef = useRef<{ x: number; y: number } | null>(null);
 
+  const sortingEnabled = allowSorting ?? true;
+  // Header clicks sort columns; column-select on mousedown would paint accentColor headers.
+  const columnSelect = sortingEnabled ? "none" : selectionProps.columnSelect;
+
   // Cell content
   const { getCellContent } = useCellContent({
     columns,
@@ -128,6 +132,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const { gridSelection, handleGridSelectionChange, setGridSelection } = useGridSelection({
     visibleRows,
     getCellContent,
+    allowSorting: sortingEnabled,
   });
 
   // Cell interactions
@@ -182,6 +187,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     visibleRows,
     hoverRow,
     density,
+    suppressHeaderHoverHighlight: sortingEnabled,
   });
 
   const { onSearchResultsChanged, onSearchClose, highlightRegions } = useSearchNavigation(
@@ -223,8 +229,10 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Header menu handling
   const { handleHeaderMenuClick } = useHeaderMenu({
     columns,
-    allowSorting: allowSorting ?? true,
+    columnOrder,
+    allowSorting: sortingEnabled,
     handleSort,
+    setGridSelection,
   });
 
   // Grid columns configuration (last column uses grow:1 to fill space; no manual
@@ -445,7 +453,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         freezeColumns={freezeColumns ?? 0}
         getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
         rowSelect={selectionProps.rowSelect}
-        columnSelect={selectionProps.columnSelect}
+        columnSelect={columnSelect}
         rangeSelect={selectionProps.rangeSelect}
         gridSelection={gridSelection}
         onGridSelectionChange={handleGridSelectionChange}
