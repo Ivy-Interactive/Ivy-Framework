@@ -1,11 +1,18 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
+import { getDefaultTheme } from "@glideapps/glide-data-grid";
 import { GridCell, GridCellKind, Item } from "@glideapps/glide-data-grid";
+import { Densities } from "@/types/density";
 import { getCellContent as getCellContentUtil } from "../../utils/cellContent";
+import { getCellFont } from "../../utils/canvasText";
+import { getVisibleColumnWidthAt } from "../../utils/columnHelpers";
+import { DENSITY_CONFIG } from "../constants";
 import { DataColumn, DataRow } from "../../types/types";
 
 interface UseCellContentProps {
   columns: DataColumn[];
   columnOrder: number[];
+  columnWidths: Record<string, number>;
+  density: Densities;
   editable: boolean;
   visibleRows: number;
   getRowData: (rowIndex: number) => DataRow | null;
@@ -17,13 +24,23 @@ interface UseCellContentProps {
 export const useCellContent = ({
   columns,
   columnOrder,
+  columnWidths,
+  density,
   editable,
   visibleRows,
   getRowData,
 }: UseCellContentProps) => {
+  const headerFont = useMemo(() => {
+    const t = getDefaultTheme();
+    return `${t.headerFontStyle} ${t.fontFamily}`;
+  }, []);
+
+  const cellFont = useMemo(() => getCellFont(density), [density]);
+  const cellHorizontalPadding = DENSITY_CONFIG[density].cellHorizontalPadding;
+
   const getCellContent = useCallback(
     (cell: Item): GridCell => {
-      const [, row] = cell;
+      const [col, row] = cell;
       // If this is an empty filler row, return empty text cell
       if (row >= visibleRows) {
         return {
@@ -33,9 +50,23 @@ export const useCellContent = ({
           allowOverlay: false,
         };
       }
-      return getCellContentUtil(cell, columns, columnOrder, editable, getRowData);
+      return getCellContentUtil(cell, columns, columnOrder, editable, getRowData, {
+        columnWidth: getVisibleColumnWidthAt(col, columns, columnOrder, columnWidths, headerFont),
+        cellHorizontalPadding,
+        cellFont,
+      });
     },
-    [columns, columnOrder, editable, visibleRows, getRowData],
+    [
+      columns,
+      columnOrder,
+      columnWidths,
+      headerFont,
+      cellFont,
+      cellHorizontalPadding,
+      editable,
+      visibleRows,
+      getRowData,
+    ],
   );
 
   return { getCellContent };
