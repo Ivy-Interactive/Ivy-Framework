@@ -133,10 +133,12 @@ const MultipleSelector = React.forwardRef<
       const triggerRect = trigger.getBoundingClientRect();
       const dropdownHeight = dropdownRef.current?.offsetHeight ?? 0;
 
+      const sectionBoundary = trigger.closest<HTMLElement>("[role='document']");
       const dialogBoundary = trigger.closest<HTMLElement>("[role='dialog']");
-      const dialogRect = dialogBoundary?.getBoundingClientRect();
-      const boundaryTop = dialogRect?.top ?? 0;
-      const boundaryBottom = dialogRect?.bottom ?? window.innerHeight;
+      const boundaryEl = sectionBoundary ?? dialogBoundary;
+      const boundaryRect = boundaryEl?.getBoundingClientRect();
+      const boundaryTop = boundaryRect?.top ?? 0;
+      const boundaryBottom = boundaryRect?.bottom ?? window.innerHeight;
 
       const spaceBelow = Math.max(0, boundaryBottom - triggerRect.bottom - 8);
       const spaceAbove = Math.max(0, triggerRect.top - boundaryTop - 8);
