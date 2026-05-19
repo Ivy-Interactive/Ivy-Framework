@@ -4,7 +4,11 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import type { VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { selectTriggerVariant, selectContentVariant, selectItemVariant } from "./select/variant";
+import {
+  selectSingleTriggerVariant,
+  selectContentVariant,
+  selectItemVariant,
+} from "./select/variant";
 
 const Select = SelectPrimitive.Root;
 
@@ -15,11 +19,11 @@ const SelectValue = SelectPrimitive.Value;
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> &
-    VariantProps<typeof selectTriggerVariant>
+    VariantProps<typeof selectSingleTriggerVariant>
 >(({ className, density, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(selectTriggerVariant({ density, className }))}
+    className={cn(selectSingleTriggerVariant({ density, className }))}
     {...props}
   >
     {children}

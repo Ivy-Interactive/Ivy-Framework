@@ -1,20 +1,38 @@
 import { cva } from "class-variance-authority";
 
-export const selectTriggerVariant = cva(
-  "box-border flex w-full items-center justify-between whitespace-nowrap rounded-field border border-input bg-transparent shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span:first-child]:flex-1 [&>span:first-child]:min-w-0 [&>span:first-child]:truncate [&>span:first-child]:text-left cursor-pointer dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
-  {
-    variants: {
-      density: {
-        Small: "h-7 px-2 py-1 text-xs",
-        Medium: "h-9 px-3 py-2 text-sm",
-        Large: "h-11 px-4 py-3 text-base",
-      },
-    },
-    defaultVariants: {
-      density: "Medium",
+const selectTriggerBase =
+  "box-border flex w-full items-center justify-between whitespace-nowrap rounded-field border border-input bg-transparent shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span:first-child]:flex-1 [&>span:first-child]:min-w-0 [&>span:first-child]:truncate [&>span:first-child]:text-left cursor-pointer dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10";
+
+/** Single-value select trigger (e.g. Assignee). */
+export const selectSingleTriggerVariant = cva(selectTriggerBase, {
+  variants: {
+    density: {
+      Small: "h-7 px-2 py-1 text-xs",
+      Medium: "h-9 px-3 py-2 text-sm",
+      Large: "h-11 px-4 py-3 text-base",
     },
   },
-);
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
+/** Multi-value select trigger with badge chips (e.g. Labels). */
+export const selectMultiTriggerVariant = cva(selectTriggerBase, {
+  variants: {
+    density: {
+      Small: "h-7 px-0 py-1 text-xs",
+      Medium: "h-9 px-1 py-2 text-sm",
+      Large: "h-11 px-2 py-3 text-base",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
+/** @deprecated Prefer {@link selectSingleTriggerVariant}. */
+export const selectTriggerVariant = selectSingleTriggerVariant;
 
 export const selectContentVariant = cva(
   "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-box border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",

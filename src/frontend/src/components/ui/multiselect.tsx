@@ -13,10 +13,7 @@ import {
 import { cva } from "class-variance-authority";
 import { Densities } from "@/types/density";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
-import { selectTriggerVariant } from "@/components/ui/select/variant";
-
-// Variants for MultipleSelector - matches selectTriggerVariant exactly
-const multipleSelectorVariant = selectTriggerVariant;
+import { selectMultiTriggerVariant } from "@/components/ui/select/variant";
 
 // Variants for menu items
 const menuItemVariant = cva("cursor-pointer", {
@@ -392,7 +389,7 @@ const MultipleSelector = React.forwardRef<
           )}
           <div
             className={cn(
-              multipleSelectorVariant({ density }),
+              selectMultiTriggerVariant({ density }),
               disabled && "cursor-not-allowed opacity-50",
               (!value || value.length === 0) && "text-muted-foreground",
               invalid
