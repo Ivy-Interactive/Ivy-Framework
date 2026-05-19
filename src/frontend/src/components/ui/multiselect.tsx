@@ -113,6 +113,7 @@ const MultipleSelector = React.forwardRef<
     const dropdownRef = React.useRef<HTMLDivElement>(null);
     const [open, setOpen] = React.useState(false);
     const [openUpward, setOpenUpward] = React.useState(false);
+    const [dropdownMaxHeight, setDropdownMaxHeight] = React.useState(300);
     const [inputValue, setInputValue] = React.useState("");
     const measureRef = React.useRef<HTMLDivElement>(null);
     const [visibleCount, setVisibleCount] = React.useState(maxVisibleBadges ?? 1);
@@ -133,10 +134,16 @@ const MultipleSelector = React.forwardRef<
       const dropdownHeight = dropdownRef.current?.offsetHeight ?? 0;
 
       const dialogBoundary = trigger.closest<HTMLElement>("[role='dialog']");
-      const boundaryBottom = dialogBoundary?.getBoundingClientRect().bottom ?? window.innerHeight;
-      const spaceBelow = Math.max(0, boundaryBottom - triggerRect.bottom);
+      const dialogRect = dialogBoundary?.getBoundingClientRect();
+      const boundaryTop = dialogRect?.top ?? 0;
+      const boundaryBottom = dialogRect?.bottom ?? window.innerHeight;
 
-      setOpenUpward(spaceBelow < dropdownHeight + 8);
+      const spaceBelow = Math.max(0, boundaryBottom - triggerRect.bottom - 8);
+      const spaceAbove = Math.max(0, triggerRect.top - boundaryTop - 8);
+
+      const shouldOpenUpward = spaceBelow < dropdownHeight + 8;
+      setOpenUpward(shouldOpenUpward);
+      setDropdownMaxHeight(Math.min(300, shouldOpenUpward ? spaceAbove : spaceBelow));
     }, []);
 
     React.useLayoutEffect(() => {
@@ -517,7 +524,10 @@ const MultipleSelector = React.forwardRef<
             >
               {defaultOptions.length > 0 ? (
                 <>
-                  <CommandGroup className="h-full overflow-auto max-h-[300px] slim-scrollbar">
+                  <CommandGroup
+                    className="h-full overflow-auto slim-scrollbar"
+                    style={{ maxHeight: dropdownMaxHeight }}
+                  >
                     {defaultOptions.map((option) => {
                       const selected = isSelected(option);
                       return (
