@@ -2,9 +2,17 @@ import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
-/** Ivy.Button in affix: cell provides px-3; strip Button sm horizontal padding. */
+/**
+ * Ivy.Button in affix: outer cell owns spacing (`px-3` or tighter for icon-only).
+ * Text buttons: strip `sm` px. Icon-only (`icon-sm` / `icon`): shrink hit box — the
+ * `size-6`/`size-8` target is larger than the glyph, which reads as extra padding.
+ */
 export const affixEmbeddedButtonClasses =
-  "[&_button]:!px-0 [&_button]:shadow-none [&_button]:rounded [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors";
+  "[&_button]:!px-0 [&_button]:shadow-none [&_button]:rounded [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors [&_button.size-6]:!size-4 [&_button.size-8]:!size-6";
+
+/** Tighter affix cell padding when the slot only contains an icon-sized button. */
+export const affixIconOnlyCellPaddingClasses =
+  "has-[button.size-6]:px-1.5 has-[button.size-8]:px-2";
 
 /** Affix cells: muted box by default; ghost uses transparent chrome with tight padding toward the input. */
 export function textInputAffixCellClasses(
@@ -20,6 +28,7 @@ export function textInputAffixCellClasses(
         : "shrink-0 bg-transparent pl-2 pr-0.5"
       : cn(
           "px-3 bg-muted",
+          affixIconOnlyCellPaddingClasses,
           side === "prefix"
             ? "rounded-tl-fields rounded-bl-fields"
             : "rounded-tr-fields rounded-br-fields",
