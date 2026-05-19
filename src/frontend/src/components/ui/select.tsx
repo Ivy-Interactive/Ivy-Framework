@@ -8,6 +8,7 @@ import {
   selectSingleTriggerVariant,
   selectContentVariant,
   selectItemVariant,
+  selectTriggerEndActionsVariant,
 } from "./select/variant";
 
 const Select = SelectPrimitive.Root;
@@ -27,12 +28,25 @@ const SelectTrigger = React.forwardRef<
     {...props}
   >
     {children}
-    <SelectPrimitive.Icon asChild>
-      <ChevronDown className="size-4 opacity-50 flex-shrink-0" />
-    </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
+
+const SelectTriggerEndActions = ({
+  children,
+  className,
+}: {
+  children?: React.ReactNode;
+  className?: string;
+}) => (
+  <div className={cn(selectTriggerEndActionsVariant(), className)}>
+    {children}
+    <SelectPrimitive.Icon asChild>
+      <ChevronDown className="size-4 opacity-50 flex-shrink-0" />
+    </SelectPrimitive.Icon>
+  </div>
+);
+SelectTriggerEndActions.displayName = "SelectTriggerEndActions";
 
 const SelectScrollUpButton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
@@ -145,6 +159,7 @@ export {
   SelectGroup,
   SelectValue,
   SelectTrigger,
+  SelectTriggerEndActions,
   SelectContent,
   SelectLabel,
   SelectItem,

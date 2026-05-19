@@ -4,7 +4,6 @@ import { MultipleSelector, Option as MultiSelectOption } from "@/components/ui/m
 import { Loader2, X } from "lucide-react";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { logger } from "@/lib/logger";
-import { selectIconContainerVariant } from "@/components/ui/select/variant";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
 import { SelectInputWidgetProps, Option } from "./select-types";
 import { convertValuesToOriginalType } from "./select-utils";

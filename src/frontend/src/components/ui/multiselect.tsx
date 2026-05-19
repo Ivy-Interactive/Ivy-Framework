@@ -13,7 +13,10 @@ import {
 import { cva } from "class-variance-authority";
 import { Densities } from "@/types/density";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
-import { selectMultiTriggerVariant } from "@/components/ui/select/variant";
+import {
+  selectMultiTriggerVariant,
+  selectTriggerEndActionsVariant,
+} from "@/components/ui/select/variant";
 
 // Variants for menu items
 const menuItemVariant = cva("cursor-pointer", {
@@ -479,31 +482,15 @@ const MultipleSelector = React.forwardRef<
                 className="ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1 min-w-[120px] cursor-pointer"
               />
             </span>
-            {rightSlot && (
-              <div className="flex items-center gap-1 shrink-0 pointer-events-none">
-                {rightSlot}
-              </div>
-            )}
-            <ChevronDown
-              className={cn(
-                "size-4 ml-1 opacity-50 shrink-0 cursor-pointer",
-                disabled && "cursor-not-allowed opacity-50",
-              )}
-              onClick={(e) => {
-                if (disabled) return;
-                e.preventDefault();
-                e.stopPropagation();
-                if (inputRef.current) {
-                  if (open) {
-                    inputRef.current.blur();
-                  } else {
-                    inputRef.current.focus();
-                  }
-                }
-              }}
-              onKeyDown={(e) => {
-                if (disabled) return;
-                if (e.key === "Enter" || e.key === " ") {
+            <div className={selectTriggerEndActionsVariant()}>
+              {rightSlot}
+              <ChevronDown
+                className={cn(
+                  "size-4 opacity-50 shrink-0 cursor-pointer pointer-events-auto",
+                  disabled && "cursor-not-allowed opacity-50",
+                )}
+                onClick={(e) => {
+                  if (disabled) return;
                   e.preventDefault();
                   e.stopPropagation();
                   if (inputRef.current) {
@@ -513,12 +500,26 @@ const MultipleSelector = React.forwardRef<
                       inputRef.current.focus();
                     }
                   }
-                }
-              }}
-              role="button"
-              tabIndex={disabled ? -1 : 0}
-              aria-label="Toggle dropdown"
-            />
+                }}
+                onKeyDown={(e) => {
+                  if (disabled) return;
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (inputRef.current) {
+                      if (open) {
+                        inputRef.current.blur();
+                      } else {
+                        inputRef.current.focus();
+                      }
+                    }
+                  }
+                }}
+                role="button"
+                tabIndex={disabled ? -1 : 0}
+                aria-label="Toggle dropdown"
+              />
+            </div>
           </div>
           {open && (
             <div

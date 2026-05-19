@@ -21,15 +21,21 @@ export const selectSingleTriggerVariant = cva(selectTriggerBase, {
 export const selectMultiTriggerVariant = cva(selectTriggerBase, {
   variants: {
     density: {
-      Small: "h-7 px-0 py-1 text-xs",
-      Medium: "h-9 px-1 py-2 text-sm",
-      Large: "h-11 px-2 py-3 text-base",
+      // Match single-select right padding so clear + chevron align across variants.
+      Small: "h-7 pl-0 pr-2 py-1 text-xs",
+      Medium: "h-9 pl-1 pr-3 py-2 text-sm",
+      Large: "h-11 pl-2 pr-4 py-3 text-base",
     },
   },
   defaultVariants: {
     density: "Medium",
   },
 });
+
+/** Clear, loading, invalid, and chevron cluster at the end of select triggers. */
+export const selectTriggerEndActionsVariant = cva(
+  "flex items-center gap-1 shrink-0 ml-auto px-1 pointer-events-none",
+);
 
 /** @deprecated Prefer {@link selectSingleTriggerVariant}. */
 export const selectTriggerVariant = selectSingleTriggerVariant;
@@ -66,18 +72,5 @@ export const selectItemVariant = cva(
   },
 );
 
-export const selectIconContainerVariant = cva(
-  "absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 p-1 pointer-events-none h-6",
-  {
-    variants: {
-      density: {
-        Small: "right-5",
-        Medium: "right-6",
-        Large: "right-8",
-      },
-    },
-    defaultVariants: {
-      density: "Medium",
-    },
-  },
-);
+/** @deprecated Use {@link selectTriggerEndActionsVariant} inside the trigger flex row. */
+export const selectIconContainerVariant = selectTriggerEndActionsVariant;
