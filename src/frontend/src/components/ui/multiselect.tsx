@@ -13,10 +13,10 @@ import {
 import { cva } from "class-variance-authority";
 import { Densities } from "@/types/density";
 import { xIconVariant } from "@/components/ui/input/text-input-variant";
-import { selectTriggerVariant } from "@/components/ui/select/variant";
-
-// Variants for MultipleSelector - matches selectTriggerVariant exactly
-const multipleSelectorVariant = selectTriggerVariant;
+import {
+  selectMultiTriggerVariant,
+  selectTriggerEndActionsVariant,
+} from "@/components/ui/select/variant";
 
 // Variants for menu items
 const menuItemVariant = cva("cursor-pointer", {
@@ -76,6 +76,7 @@ interface MultipleSelectorProps {
   minSelections?: number;
   onNullableClear?: () => void;
   autoFocus?: boolean;
+  rightSlot?: React.ReactNode;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -104,6 +105,7 @@ const MultipleSelector = React.forwardRef<
       minSelections,
       onNullableClear,
       autoFocus = false,
+      rightSlot,
     },
     ref,
   ) => {
@@ -113,10 +115,19 @@ const MultipleSelector = React.forwardRef<
     const dropdownRef = React.useRef<HTMLDivElement>(null);
     const [open, setOpen] = React.useState(false);
     const [openUpward, setOpenUpward] = React.useState(false);
+    const [dropdownMaxHeight, setDropdownMaxHeight] = React.useState(300);
     const [inputValue, setInputValue] = React.useState("");
     const measureRef = React.useRef<HTMLDivElement>(null);
     const [visibleCount, setVisibleCount] = React.useState(maxVisibleBadges ?? 1);
     const hasAutoFocusedRef = React.useRef(false);
+
+    const closeDropdown = React.useCallback(() => {
+      setOpen(false);
+      setInputValue("");
+      if (containerRef.current) {
+        containerRef.current.scrollLeft = 0;
+      }
+    }, []);
 
     React.useEffect(() => {
       if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
@@ -125,6 +136,20 @@ const MultipleSelector = React.forwardRef<
       }
     }, [autoFocus, disabled]);
 
+    React.useEffect(() => {
+      if (!open) return;
+
+      const handlePointerDownOutside = (event: MouseEvent) => {
+        const target = event.target as Node;
+        if (triggerWrapperRef.current?.contains(target)) return;
+        closeDropdown();
+        inputRef.current?.blur();
+      };
+
+      document.addEventListener("mousedown", handlePointerDownOutside, true);
+      return () => document.removeEventListener("mousedown", handlePointerDownOutside, true);
+    }, [open, closeDropdown]);
+
     const updateOpenDirection = React.useCallback(() => {
       const trigger = triggerWrapperRef.current;
       if (!trigger) return;
@@ -132,11 +157,19 @@ const MultipleSelector = React.forwardRef<
       const triggerRect = trigger.getBoundingClientRect();
       const dropdownHeight = dropdownRef.current?.offsetHeight ?? 0;
 
+      const sectionBoundary = trigger.closest<HTMLElement>("[role='document']");
       const dialogBoundary = trigger.closest<HTMLElement>("[role='dialog']");
-      const boundaryBottom = dialogBoundary?.getBoundingClientRect().bottom ?? window.innerHeight;
-      const spaceBelow = Math.max(0, boundaryBottom - triggerRect.bottom);
+      const boundaryEl = sectionBoundary ?? dialogBoundary;
+      const boundaryRect = boundaryEl?.getBoundingClientRect();
+      const boundaryTop = boundaryRect?.top ?? 0;
+      const boundaryBottom = boundaryRect?.bottom ?? window.innerHeight;
 
-      setOpenUpward(spaceBelow < dropdownHeight + 8);
+      const spaceBelow = Math.max(0, boundaryBottom - triggerRect.bottom - 8);
+      const spaceAbove = Math.max(0, triggerRect.top - boundaryTop - 8);
+
+      const shouldOpenUpward = spaceBelow < dropdownHeight + 8;
+      setOpenUpward(shouldOpenUpward);
+      setDropdownMaxHeight(Math.min(300, shouldOpenUpward ? spaceAbove : spaceBelow));
     }, []);
 
     React.useLayoutEffect(() => {
@@ -250,11 +283,12 @@ const MultipleSelector = React.forwardRef<
             }
           }
           if (e.key === "Escape") {
+            closeDropdown();
             input.blur();
           }
         }
       },
-      [value, handleUnselect],
+      [value, handleUnselect, closeDropdown],
     );
 
     const isSelected = React.useCallback(
@@ -381,7 +415,7 @@ const MultipleSelector = React.forwardRef<
           )}
           <div
             className={cn(
-              multipleSelectorVariant({ density }),
+              selectMultiTriggerVariant({ density }),
               disabled && "cursor-not-allowed opacity-50",
               (!value || value.length === 0) && "text-muted-foreground",
               invalid
@@ -446,11 +480,7 @@ const MultipleSelector = React.forwardRef<
                   window.requestAnimationFrame(() => {
                     window.requestAnimationFrame(() => {
                       if (triggerWrapperRef.current?.contains(document.activeElement)) return;
-                      setOpen(false);
-                      setInputValue("");
-                      if (containerRef.current) {
-                        containerRef.current.scrollLeft = 0;
-                      }
+                      closeDropdown();
                       onBlur?.(e);
                     });
                   });
@@ -471,26 +501,15 @@ const MultipleSelector = React.forwardRef<
                 className="ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1 min-w-[120px] cursor-pointer"
               />
             </span>
-            <ChevronDown
-              className={cn(
-                "size-4 ml-2 opacity-50 shrink-0 cursor-pointer",
-                disabled && "cursor-not-allowed opacity-50",
-              )}
-              onClick={(e) => {
-                if (disabled) return;
-                e.preventDefault();
-                e.stopPropagation();
-                if (inputRef.current) {
-                  if (open) {
-                    inputRef.current.blur();
-                  } else {
-                    inputRef.current.focus();
-                  }
-                }
-              }}
-              onKeyDown={(e) => {
-                if (disabled) return;
-                if (e.key === "Enter" || e.key === " ") {
+            <div className={selectTriggerEndActionsVariant()}>
+              {rightSlot}
+              <ChevronDown
+                className={cn(
+                  "size-4 opacity-50 shrink-0 cursor-pointer pointer-events-auto",
+                  disabled && "cursor-not-allowed opacity-50",
+                )}
+                onClick={(e) => {
+                  if (disabled) return;
                   e.preventDefault();
                   e.stopPropagation();
                   if (inputRef.current) {
@@ -500,12 +519,26 @@ const MultipleSelector = React.forwardRef<
                       inputRef.current.focus();
                     }
                   }
-                }
-              }}
-              role="button"
-              tabIndex={disabled ? -1 : 0}
-              aria-label="Toggle dropdown"
-            />
+                }}
+                onKeyDown={(e) => {
+                  if (disabled) return;
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (inputRef.current) {
+                      if (open) {
+                        inputRef.current.blur();
+                      } else {
+                        inputRef.current.focus();
+                      }
+                    }
+                  }
+                }}
+                role="button"
+                tabIndex={disabled ? -1 : 0}
+                aria-label="Toggle dropdown"
+              />
+            </div>
           </div>
           {open && (
             <div
@@ -517,7 +550,10 @@ const MultipleSelector = React.forwardRef<
             >
               {defaultOptions.length > 0 ? (
                 <>
-                  <CommandGroup className="h-full overflow-auto max-h-[300px] slim-scrollbar">
+                  <CommandGroup
+                    className="h-full overflow-auto slim-scrollbar"
+                    style={{ maxHeight: dropdownMaxHeight }}
+                  >
                     {defaultOptions.map((option) => {
                       const selected = isSelected(option);
                       return (
