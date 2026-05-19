@@ -146,6 +146,11 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
             type="button"
             tabIndex={-1}
             aria-label="Clear All"
+            onMouseDown={(e) => {
+              // Keep focus on the input so blur/outside-close still works after clearing.
+              e.preventDefault();
+              e.stopPropagation();
+            }}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

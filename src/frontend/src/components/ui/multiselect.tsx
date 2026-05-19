@@ -121,12 +121,34 @@ const MultipleSelector = React.forwardRef<
     const [visibleCount, setVisibleCount] = React.useState(maxVisibleBadges ?? 1);
     const hasAutoFocusedRef = React.useRef(false);
 
+    const closeDropdown = React.useCallback(() => {
+      setOpen(false);
+      setInputValue("");
+      if (containerRef.current) {
+        containerRef.current.scrollLeft = 0;
+      }
+    }, []);
+
     React.useEffect(() => {
       if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
         hasAutoFocusedRef.current = true;
         inputRef.current?.focus();
       }
     }, [autoFocus, disabled]);
+
+    React.useEffect(() => {
+      if (!open) return;
+
+      const handlePointerDownOutside = (event: MouseEvent) => {
+        const target = event.target as Node;
+        if (triggerWrapperRef.current?.contains(target)) return;
+        closeDropdown();
+        inputRef.current?.blur();
+      };
+
+      document.addEventListener("mousedown", handlePointerDownOutside, true);
+      return () => document.removeEventListener("mousedown", handlePointerDownOutside, true);
+    }, [open, closeDropdown]);
 
     const updateOpenDirection = React.useCallback(() => {
       const trigger = triggerWrapperRef.current;
@@ -261,11 +283,12 @@ const MultipleSelector = React.forwardRef<
             }
           }
           if (e.key === "Escape") {
+            closeDropdown();
             input.blur();
           }
         }
       },
-      [value, handleUnselect],
+      [value, handleUnselect, closeDropdown],
     );
 
     const isSelected = React.useCallback(
@@ -457,11 +480,7 @@ const MultipleSelector = React.forwardRef<
                   window.requestAnimationFrame(() => {
                     window.requestAnimationFrame(() => {
                       if (triggerWrapperRef.current?.contains(document.activeElement)) return;
-                      setOpen(false);
-                      setInputValue("");
-                      if (containerRef.current) {
-                        containerRef.current.scrollLeft = 0;
-                      }
+                      closeDropdown();
                       onBlur?.(e);
                     });
                   });
