@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 /** Affix cells: muted box by default; ghost uses transparent chrome with tight padding toward the input. */
 export function textInputAffixCellClasses(
   side: "prefix" | "suffix",
-  isFocused: boolean,
   ghostWithAffixes: boolean,
 ): string {
   return cn(
@@ -20,9 +19,6 @@ export function textInputAffixCellClasses(
             ? "rounded-tl-fields rounded-bl-fields"
             : "rounded-tr-fields rounded-br-fields",
         ),
-    side === "prefix"
-      ? !ghostWithAffixes && !isFocused && "border-r border-input"
-      : !ghostWithAffixes && !isFocused && "border-l border-input",
   );
 }
 
