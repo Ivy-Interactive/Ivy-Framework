@@ -83,10 +83,17 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
     }
   };
 
-  // Map from filtered label index back to the original segment index
-  const labelSegments = segments
-    .map((segment, index) => ({ segment, originalIndex: index }))
-    .filter(({ segment }) => segment.label);
+  interface LabelSegment {
+    segment: (typeof segments)[number];
+    originalIndex: number;
+  }
+
+  const labelSegments = segments.reduce<LabelSegment[]>((acc, segment, index) => {
+    if (segment.label) {
+      acc.push({ segment, originalIndex: index });
+    }
+    return acc;
+  }, []);
 
   return (
     <TooltipProvider>
@@ -101,26 +108,26 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
         }}
       >
         <div className="bg-neutral/10" style={containerStyles}>
-          {segments.map((segment, index) => {
+          {segments.map((segment, segmentIdx) => {
             const percentage = (segment.value / total) * 100;
             const color = segment.color
               ? `var(--${segment.color.toLowerCase()})`
               : "var(--primary)";
-            const isSelected = selected === index;
+            const isSelected = selected === segmentIdx;
 
             const segmentEl = (
               <div
-                key={index}
+                key={`${segment.label || ""}-${segment.color || ""}-${segmentIdx}`}
                 role={hasSelectHandler ? "button" : undefined}
-                aria-label={hasSelectHandler ? `Select segment ${index + 1}` : undefined}
+                aria-label={hasSelectHandler ? `Select segment ${segmentIdx + 1}` : undefined}
                 tabIndex={hasSelectHandler ? 0 : undefined}
-                onClick={hasSelectHandler ? () => handleSelect(index) : undefined}
+                onClick={hasSelectHandler ? () => handleSelect(segmentIdx) : undefined}
                 onKeyDown={
                   hasSelectHandler
                     ? (e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          handleSelect(index);
+                          handleSelect(segmentIdx);
                         }
                       }
                     : undefined
@@ -142,7 +149,9 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
 
             if (segment.label || segment.value > 0) {
               return (
-                <Tooltip key={index}>
+                <Tooltip
+                  key={`tooltip-${segment.label || ""}-${segment.color || ""}-${segmentIdx}`}
+                >
                   <TooltipTrigger asChild>{segmentEl}</TooltipTrigger>
                   <TooltipContent>
                     <span>
@@ -165,7 +174,7 @@ export const StackedProgressWidget: React.FC<StackedProgressWidgetProps> = ({
               const isSelected = selected === originalIndex;
               return (
                 <div
-                  key={originalIndex}
+                  key={`label-${segment.label || ""}-${segment.color || ""}-${originalIndex}`}
                   role={hasSelectHandler ? "button" : undefined}
                   aria-label={hasSelectHandler ? `Select segment ${originalIndex + 1}` : undefined}
                   tabIndex={hasSelectHandler ? 0 : undefined}

@@ -27,10 +27,10 @@ export const ChatMessageWidget: React.FC<ChatMessageWidgetProps> = ({
 }) => {
   const avatarClass =
     density === Densities.Small
-      ? "h-7 w-7 p-1.5"
+      ? "size-7 p-1.5"
       : density === Densities.Large
-        ? "h-11 w-11 p-2.5"
-        : "h-9 w-9 p-2";
+        ? "size-11 p-2.5"
+        : "size-9 p-2";
 
   return (
     <ChatBubble key={id} variant={sender === "User" ? "sent" : "received"}>
@@ -66,6 +66,8 @@ interface ChatWidgetProps {
   events?: string[];
 }
 
+const EMPTY_EVENTS: string[] = [];
+
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
   id,
   children,
@@ -74,7 +76,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   width = "Full",
   height = "Full",
   density = Densities.Medium,
-  events = [],
+  events = EMPTY_EVENTS,
 }) => {
   const inputMinHeightClass =
     density === Densities.Small

@@ -78,6 +78,18 @@ const validateAndCapValue = (value: number | null, targetType?: string): number 
   return cappedValue;
 };
 
+const numberFormatCache = new Map<string, Intl.NumberFormat>();
+
+const getNumberFormatter = (config: Intl.NumberFormatOptions) => {
+  const cacheKey = JSON.stringify(config);
+  let formatter = numberFormatCache.get(cacheKey);
+  if (!formatter) {
+    formatter = Intl.NumberFormat("en-US", config);
+    numberFormatCache.set(cacheKey, formatter);
+  }
+  return formatter;
+};
+
 // Format a number according to the specified format style
 const formatNumber = (
   value: number | null,
@@ -118,7 +130,7 @@ const formatNumber = (
       }
     }
 
-    return new Intl.NumberFormat("en-US", config).format(value);
+    return getNumberFormatter(config).format(value);
   } catch {
     return String(value);
   }
@@ -129,19 +141,19 @@ const sizeVariant: Record<string, { track: string; thumb: string; tooltip: strin
   {
     Small: {
       track: "h-1",
-      thumb: "h-3 w-3",
+      thumb: "size-3",
       tooltip: "text-xs -top-6",
       text: "text-xs",
     },
     Medium: {
       track: "h-1.5",
-      thumb: "h-4 w-4",
+      thumb: "size-4",
       tooltip: "text-sm -top-7",
       text: "text-sm font-normal",
     },
     Large: {
       track: "h-2",
-      thumb: "h-5 w-5",
+      thumb: "size-5",
       tooltip: "text-ml -top-8",
       text: "text-ml font-medium",
     },
@@ -386,7 +398,7 @@ export const NumberRangeInputWidget = memo(
                   onClick={handleClear}
                   className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
                 >
-                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                  <X className="size-4 text-muted-foreground hover:text-foreground" />
                 </button>
               )}
               {invalid && <InvalidIcon message={invalid} />}

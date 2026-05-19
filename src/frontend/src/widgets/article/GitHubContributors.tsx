@@ -109,10 +109,12 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
   onLoadingChange,
   show = true,
 }) => {
-  const [contributors, setContributors] = useState<Contributor[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<{ contributors: Contributor[]; error: string | null }>({
+    contributors: [],
+    error: null,
+  });
 
-  useEffect(() => {
+  const loadContributors = React.useCallback(() => {
     if (!documentSource) {
       onLoadingChange?.(false);
       return;
@@ -128,7 +130,6 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
 
     fetchGitHubCommits(apiUrl)
       .then((commits: GitHubCommit[]) => {
-        setError(null);
         const contributorMap = new Map<string, Contributor>();
 
         commits.forEach((commit) => {
@@ -157,17 +158,20 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
           }
         });
 
-        setContributors(
-          Array.from(contributorMap.values()).sort((a, b) => b.contributions - a.contributions),
-        );
+        setState({
+          error: null,
+          contributors: Array.from(contributorMap.values()).sort(
+            (a, b) => b.contributions - a.contributions,
+          ),
+        });
       })
       .catch((err) => {
         console.error("Failed to fetch contributors:", err);
         // Don't show error for rate limiting - just hide the component
         if (err.message && err.message.includes("rate limit exceeded")) {
-          setError(null);
+          setState((prev) => ({ ...prev, error: null }));
         } else {
-          setError(err.message || "Failed to load contributors");
+          setState((prev) => ({ ...prev, error: err.message || "Failed to load contributors" }));
         }
       })
       .finally(() => {
@@ -175,35 +179,39 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
       });
   }, [documentSource, onLoadingChange]);
 
+  useEffect(() => {
+    loadContributors();
+  }, [loadContributors]);
+
   if (!documentSource || !show) return null;
 
   // Don't render anything if we have no contributors and no error (likely rate limited)
-  if (!error && contributors.length === 0) return null;
+  if (!state.error && state.contributors.length === 0) return null;
 
-  const displayedContributors = contributors.slice(0, 3);
-  const remainingCount = contributors.length - 3;
+  const displayedContributors = state.contributors.slice(0, 3);
+  const remainingCount = state.contributors.length - 3;
   const hasMoreContributors = remainingCount > 0;
 
   return (
     <div>
       <div className="text-body mb-4 flex items-center gap-2">
-        <Users className="w-4 h-4" />
+        <Users className="size-4" />
         Contributors
       </div>
 
-      {error && (
+      {state.error && (
         <div className="flex-shrink-0 min-h-40">
           <div className="pr-2">
-            <div className="text-sm text-muted-foreground">{error}</div>
+            <div className="text-sm text-muted-foreground">{state.error}</div>
           </div>
         </div>
       )}
 
-      {!error && contributors.length > 0 && (
+      {!state.error && state.contributors.length > 0 && (
         <div className="flex-shrink-0 min-h-40 overflow-hidden">
           {/* Contributors list*/}
           <div className="h-full pr-2">
-            <div className="space-y-3">
+            <div className="gap-y-3">
               {displayedContributors.map((contributor) => (
                 <a
                   key={contributor.login}
@@ -215,7 +223,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
                   <img
                     src={contributor.avatar_url}
                     alt={contributor.login}
-                    className="w-8 h-8 rounded-full flex-shrink-0"
+                    className="size-8 rounded-full flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate group-hover:text-primary transition-colors">
@@ -223,7 +231,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
                     </div>
                     <div className="text-xs text-muted-foreground">{contributor.role}</div>
                   </div>
-                  <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                  <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                 </a>
               ))}
             </div>
@@ -239,7 +247,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
                 className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
               >
                 and {remainingCount} more
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="size-3" />
               </a>
             </div>
           )}

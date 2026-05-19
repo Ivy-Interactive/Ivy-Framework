@@ -20,11 +20,11 @@ const getInitials = (name: string): string => {
 const getSizeClass = (density?: Densities): string => {
   switch (density) {
     case Densities.Small:
-      return "h-6 w-6 text-xs";
+      return "size-6 text-xs";
     case Densities.Large:
-      return "h-12 w-12 text-lg";
+      return "size-12 text-lg";
     default:
-      return "h-10 w-10";
+      return "size-10";
   }
 };
 

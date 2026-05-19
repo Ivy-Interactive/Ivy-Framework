@@ -18,7 +18,6 @@ export const ListWidget = ({ children, density = Densities.Medium }: ListWidgetP
   const parentRef = useRef<HTMLDivElement | null>(null);
   const childArray = React.Children.toArray(children);
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: childArray.length,
     getScrollElement: () => parentRef.current,

@@ -41,10 +41,10 @@ export const StepperWidget: React.FC<StepperWidgetProps> = ({
 
   const circleClass =
     density === Densities.Small
-      ? "w-6 h-6 text-xs"
+      ? "size-6 text-xs"
       : density === Densities.Large
-        ? "w-10 h-10 text-base"
-        : "w-8 h-8 text-sm";
+        ? "size-10 text-base"
+        : "size-8 text-sm";
   const iconSize = density === Densities.Small ? 14 : density === Densities.Large ? 18 : 16;
   const connectorClass =
     density === Densities.Small ? "mx-1" : density === Densities.Large ? "mx-3" : "mx-2";

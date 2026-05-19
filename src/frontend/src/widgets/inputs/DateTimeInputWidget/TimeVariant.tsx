@@ -15,7 +15,7 @@ import { ClearAndInvalidIcons } from "./shared";
 import { useTimeConstraints } from "./useTimeConstraints";
 
 export const TimeVariant: React.FC<TimeVariantProps> = ({
-  value,
+  value: propValue,
   placeholder,
   disabled,
   nullable,
@@ -56,17 +56,17 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     [nullable],
   );
 
-  const [localTimeValue, setLocalTimeValue] = useState(() => deriveTimeValue(value));
-  const [prevValue, setPrevValue] = useState(value);
+  const [localTimeValue, setLocalTimeValue] = useState(() => deriveTimeValue(propValue));
+  const prevValueRef = React.useRef(propValue);
 
-  if (value !== prevValue) {
-    setPrevValue(value);
-    setLocalTimeValue(deriveTimeValue(value));
+  if (propValue !== prevValueRef.current) {
+    prevValueRef.current = propValue;
+    setLocalTimeValue(deriveTimeValue(propValue));
   }
 
   const { timeStepSeconds, timeMin, timeMax, getSnappedTime } = useTimeConstraints(min, max, step);
 
-  const showClear = nullable && !disabled && value != null && value !== "";
+  const showClear = nullable && !disabled && propValue != null && propValue !== "";
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();

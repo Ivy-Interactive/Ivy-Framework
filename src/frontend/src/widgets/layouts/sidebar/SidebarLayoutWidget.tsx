@@ -236,7 +236,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         style={{ width: effectiveSidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
-          <div className="flex flex-col shrink-0 p-2 space-y-4">{slots?.SidebarHeader}</div>
+          <div className="flex flex-col shrink-0 p-2 gap-y-4">{slots?.SidebarHeader}</div>
         )}
         {slots?.SidebarContent &&
           (sidebarContentScroll === "None" ? (
@@ -244,7 +244,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           ) : (
             <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
               <ScrollArea className="h-full w-full">
-                <div className="p-2 space-y-2">{slots.SidebarContent}</div>
+                <div className="p-2 gap-y-2">{slots.SidebarContent}</div>
               </ScrollArea>
             </div>
           ))}
@@ -305,9 +305,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
                   aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
                 >
                   {isSidebarOpen ? (
-                    <PanelLeftClose className="h-4 w-4" />
+                    <PanelLeftClose className="size-4" />
                   ) : (
-                    <PanelLeftOpen className="h-4 w-4" />
+                    <PanelLeftOpen className="size-4" />
                   )}
                 </button>
               </TooltipTrigger>
@@ -379,13 +379,13 @@ const CollapsibleMenuItem: React.FC<{
   // Derive the open state from expandedSections or item.expanded
   const shouldBeOpen = expandedSections.has(pathKey) || (item.expanded ?? false);
   const [isOpen, setIsOpen] = useState(shouldBeOpen);
-  const [prevShouldBeOpen, setPrevShouldBeOpen] = useState(shouldBeOpen);
+  const prevShouldBeOpenRef = useRef(shouldBeOpen);
   const [isPenHovered, setIsPenHovered] = useState(false);
   const itemRef = useRef<HTMLLIElement>(null);
 
   // Sync local state with derived state
-  if (shouldBeOpen !== prevShouldBeOpen) {
-    setPrevShouldBeOpen(shouldBeOpen);
+  if (shouldBeOpen !== prevShouldBeOpenRef.current) {
+    prevShouldBeOpenRef.current = shouldBeOpen;
     setIsOpen(shouldBeOpen);
   }
 
@@ -441,11 +441,11 @@ const CollapsibleMenuItem: React.FC<{
             >
               <Icon name={item.icon} size={16} />
               <span className="text-sm">{item.label}</span>
-              <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
+              <ChevronRight className="ml-auto size-4 transition-transform group-data-[state=open]:rotate-90" />
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <ul className="mt-1 space-y-1 px-3">
+            <ul className="mt-1 gap-y-1 px-3">
               {item.children &&
                 renderMenuItems(
                   item.children!,
@@ -566,11 +566,11 @@ const renderMenuItems = (
     if ("children" in item) {
       if (level === 0) {
         return (
-          <div key={itemPathKey} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="sticky top-0 z-10 bg-card px-2 py-2 text-small-label text-muted-foreground mb-0">
+          <div key={itemPathKey} className="gap-y-1 mt-6 first:mt-0">
+            <h4 className="sticky top-0 z-10 bg-card p-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
-            <ul className="space-y-1">
+            <ul className="gap-y-1">
               {item.children &&
                 renderMenuItems(
                   item.children!,
@@ -881,11 +881,11 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         });
 
         return (
-          <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="sticky top-0 z-10 bg-card px-2 py-2 text-small-label text-muted-foreground mb-0">
+          <div key={item.label} className="gap-y-1 mt-6 first:mt-0">
+            <h4 className="sticky top-0 z-10 bg-card p-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
-            <ul className="space-y-1">
+            <ul className="gap-y-1">
               {groupsOrdered.map(([path, pathItems], index) => (
                 <React.Fragment key={path || "__none__"}>
                   {index > 0 && (
@@ -899,7 +899,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
                         {path}
                       </div>
                     )}
-                    <ul className="space-y-1">
+                    <ul className="gap-y-1">
                       {pathItems.map((child) => renderResultItem(child, false))}
                     </ul>
                   </li>

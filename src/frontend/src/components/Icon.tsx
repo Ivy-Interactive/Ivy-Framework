@@ -57,7 +57,7 @@ const IvyCornerIcon = ({ size, color, style, className }: IconProps) => (
     style={style}
     className={className}
   >
-    <path d="M11 1H1V11C6.47368 11 11 6.47368 11 1Z" fill={color || "currentColor"} />
+    <path d="M11 1H1V11C6.47 11 11 6.47 11 1Z" fill={color || "currentColor"} />
   </svg>
 );
 

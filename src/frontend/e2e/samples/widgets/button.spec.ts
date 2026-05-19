@@ -46,6 +46,7 @@ test.describe("Button Widget Tests", () => {
 
     for (const variant of variants) {
       const button = page.getByRole("button", { name: variant, exact: true }).first();
+      // eslint-disable-next-line
       await expect(button).toBeVisible();
       await expect(button).toBeEnabled();
       await button.click();
@@ -62,6 +63,7 @@ test.describe("Button Widget Tests", () => {
 
     for (const { name, className } of variantsToCheck) {
       const button = page.getByRole("button", { name, exact: true }).first();
+      // eslint-disable-next-line
       const buttonClass = await button.getAttribute("class");
       expect(buttonClass).toContain(className);
     }
@@ -72,6 +74,7 @@ test.describe("Button Widget Tests", () => {
 
     // Verify all sizes are visible
     for (const size of sizes) {
+      // eslint-disable-next-line
       await expect(page.getByRole("button", { name: size }).first()).toBeVisible();
     }
 
@@ -137,6 +140,7 @@ test.describe("Button Widget Tests", () => {
     const buttonCount = await allButtons.count();
 
     for (let i = 0; i < Math.min(buttonCount, 50); i++) {
+      // eslint-disable-next-line
       const box = await allButtons.nth(i).boundingBox();
       if (box && box.width > 0 && box.height > 0) {
         const aspectRatio = box.width / box.height;
@@ -154,6 +158,7 @@ test.describe("Button Widget Tests", () => {
 
     for (const { name } of stylingButtons) {
       const buttons = page.getByRole("button", { name });
+      // eslint-disable-next-line
       if ((await buttons.count()) > 0) {
         const button = buttons.first();
         await button.scrollIntoViewIfNeeded();

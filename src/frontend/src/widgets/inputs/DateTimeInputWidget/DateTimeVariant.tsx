@@ -77,12 +77,12 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   });
 
   // Track if user is actively editing the time input
-  const [isEditingTime, setIsEditingTime] = useState(false);
+  const isEditingTimeRef = React.useRef(false);
 
   // Update local time when date changes, but only if user is not actively editing
-  const [prevDate, setPrevDate] = useState(date);
-  if (date !== prevDate && !isEditingTime) {
-    setPrevDate(date);
+  const prevDateRef = React.useRef(date);
+  if (date !== prevDateRef.current && !isEditingTimeRef.current) {
+    prevDateRef.current = date;
     if (date) {
       const newTimeValue = format(date, formatProp || "HH:mm:ss");
       setLocalTimeValue(newTimeValue);
@@ -116,7 +116,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   const handleTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newTimeValue = e.target.value;
     setLocalTimeValue(newTimeValue);
-    setIsEditingTime(true);
+    isEditingTimeRef.current = true;
   }, []);
 
   const commitSnappedTime = useCallback(() => {
@@ -137,7 +137,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   }, [getSnappedTime, localTimeValue, date, onDateChange, onTimeChange]);
 
   const flushTimeInput = useCallback(() => {
-    setIsEditingTime(false);
+    isEditingTimeRef.current = false;
     if (!localTimeValue?.trim()) {
       onTimeChange(localTimeValue ?? "");
       return;
@@ -169,7 +169,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   }, []);
 
   const handleTimeFocus = useCallback(() => {
-    setIsEditingTime(true);
+    isEditingTimeRef.current = true;
   }, []);
 
   return (

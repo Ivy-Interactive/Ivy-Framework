@@ -336,6 +336,7 @@ test.describe("Tabs Layout Widget Tests", () => {
       // Get initial order of tabs
       const tabs = page.locator('[role="tab"]');
       const firstTabText = await tabs.first().textContent();
+      // eslint-disable-next-line
       const secondTabText = await tabs.nth(1).textContent();
 
       expect(firstTabText).toBeTruthy();

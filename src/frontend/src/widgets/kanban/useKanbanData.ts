@@ -144,18 +144,13 @@ export function useKanbanData(
         cardToTaskMap.set(task.id, task);
       });
 
-      const extractedTasks: TaskWithWidgetId[] = extractedCards
-        .map((card) => {
-          const task = cardToTaskMap.get(card.cardId);
-          if (task) {
-            return {
-              ...task,
-              widgetId: card.widgetId,
-            };
-          }
-          return null;
-        })
-        .filter((task): task is TaskWithWidgetId => task !== null);
+      const extractedTasks = extractedCards.reduce<TaskWithWidgetId[]>((acc, card) => {
+        const task = cardToTaskMap.get(card.cardId);
+        if (task) {
+          acc.push({ ...task, widgetId: card.widgetId });
+        }
+        return acc;
+      }, []);
 
       return {
         tasks: extractedTasks,

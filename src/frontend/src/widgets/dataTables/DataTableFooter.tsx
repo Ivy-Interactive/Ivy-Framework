@@ -87,7 +87,7 @@ const FooterCell: React.FC<{
 
   const textAlign = align === "Right" ? "right" : align === "Center" ? "center" : "left";
 
-  const updateMenuPosition = useCallback(() => {
+  const syncMenuPosition = useCallback(() => {
     const el = triggerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -107,34 +107,37 @@ const FooterCell: React.FC<{
     }
   }, [textAlign]);
 
+  const syncRef = useRef(syncMenuPosition);
+  syncRef.current = syncMenuPosition;
+
   useLayoutEffect(() => {
     if (!open) {
       setMenuPos(null);
       return;
     }
-    updateMenuPosition();
-  }, [open, updateMenuPosition, selectedIndex, values, layoutSyncKey]);
+    syncRef.current();
+  }, [open, selectedIndex, values, layoutSyncKey]);
 
   useEffect(() => {
     if (!open) return;
-    const onScrollOrResize = () => updateMenuPosition();
-    window.addEventListener("resize", onScrollOrResize);
-    window.addEventListener("scroll", onScrollOrResize, true);
+    const handleScrollOrResize = () => syncRef.current();
+    window.addEventListener("resize", handleScrollOrResize);
+    window.addEventListener("scroll", handleScrollOrResize, true);
     return () => {
-      window.removeEventListener("resize", onScrollOrResize);
-      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+      window.removeEventListener("scroll", handleScrollOrResize, true);
     };
-  }, [open, updateMenuPosition]);
+  }, [open]);
 
   /** Footer strip scroll (synced to grid) moves cells without window scroll — reposition menu. */
   useEffect(() => {
     if (!open) return;
     const scrollRoot = triggerRef.current?.closest("[data-footer-scroll]");
     if (!scrollRoot) return;
-    const onScroll = () => updateMenuPosition();
-    scrollRoot.addEventListener("scroll", onScroll, { passive: true });
-    return () => scrollRoot.removeEventListener("scroll", onScroll);
-  }, [open, updateMenuPosition, layoutSyncKey]);
+    const handleScroll = () => syncRef.current();
+    scrollRoot.addEventListener("scroll", handleScroll, { passive: true });
+    return () => scrollRoot.removeEventListener("scroll", handleScroll);
+  }, [open, layoutSyncKey]);
 
   useEffect(() => {
     if (!open) return;
@@ -174,32 +177,35 @@ const FooterCell: React.FC<{
           transform: "translateY(calc(-100% - 2px))",
         }}
       >
-        {values.map((value, i) => (
-          <div
-            key={i}
-            role="option"
-            aria-selected={i === selectedIndex}
-            tabIndex={0}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              setSelectedIndex(i);
-              setOpen(false);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
+        {values.map((value) => {
+          const i = values.indexOf(value);
+          return (
+            <div
+              key={value}
+              role="option"
+              aria-selected={i === selectedIndex}
+              tabIndex={0}
+              onMouseDown={(e) => {
                 e.preventDefault();
                 setSelectedIndex(i);
                 setOpen(false);
-              }
-            }}
-            className={cn(
-              "px-2 py-1 text-xs cursor-pointer whitespace-nowrap transition-colors",
-              i === selectedIndex ? "bg-accent font-bold" : "font-normal hover:bg-accent",
-            )}
-          >
-            {value}
-          </div>
-        ))}
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedIndex(i);
+                  setOpen(false);
+                }
+              }}
+              className={cn(
+                "px-2 py-1 text-xs cursor-pointer whitespace-nowrap transition-colors",
+                i === selectedIndex ? "bg-accent font-bold" : "font-normal hover:bg-accent",
+              )}
+            >
+              {value}
+            </div>
+          );
+        })}
       </div>,
       document.body,
     );

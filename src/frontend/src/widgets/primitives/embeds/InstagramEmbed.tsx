@@ -7,8 +7,7 @@ interface InstagramEmbedProps {
 }
 
 const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [scriptError, setScriptError] = useState(false);
+  const [scriptState, setScriptState] = useState<"loading" | "loaded" | "error">("loading");
 
   const postId = React.useMemo(() => {
     // Instagram post URL: https://www.instagram.com/p/ABC123/
@@ -16,20 +15,24 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
     return match ? sanitizeId(match[1]) : null;
   }, [url]);
 
-  useEffect(() => {
+  const loadWidgetScript = React.useCallback(() => {
     if (postId) {
       loadScript("https://www.instagram.com/embed.js")
         .then(() => {
-          setScriptLoaded(true);
+          setScriptState("loaded");
         })
         .catch(() => {
-          setScriptError(true);
+          setScriptState("error");
         });
     }
   }, [postId]);
 
+  useEffect(() => {
+    loadWidgetScript();
+  }, [loadWidgetScript]);
+
   const sanitizedUrl = sanitizeUrl(url);
-  if (!postId || scriptError || !sanitizedUrl) {
+  if (!postId || scriptState === "error" || !sanitizedUrl) {
     return <EmbedErrorFallback url={url} platform="Instagram" />;
   }
 
@@ -42,7 +45,7 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
         data-instgrm-version="14"
       >
         <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer">
-          {scriptLoaded ? "Loading Instagram post..." : "Loading script..."}
+          {scriptState === "loaded" ? "Loading Instagram post..." : "Loading script..."}
         </a>
       </blockquote>
     </div>

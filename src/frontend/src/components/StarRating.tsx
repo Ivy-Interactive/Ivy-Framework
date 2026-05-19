@@ -58,9 +58,9 @@ export function StarRating({
   );
 
   const starSizes = {
-    Small: "h-4 w-4",
-    Medium: "h-6 w-6",
-    Large: "h-8 w-8",
+    Small: "size-4",
+    Medium: "size-6",
+    Large: "size-8",
   };
 
   const displayValue = hover || value;

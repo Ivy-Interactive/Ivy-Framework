@@ -74,13 +74,12 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 }) => {
   const [navState, dispatchNav] = React.useReducer(
     (
-      state: { activeId: string; isUserNavigating: boolean },
-      action: Partial<{ activeId: string; isUserNavigating: boolean }>,
+      state: { activeId: string; isUserNavigating: boolean; hashSyncUnlocked: boolean },
+      action: Partial<{ activeId: string; isUserNavigating: boolean; hashSyncUnlocked: boolean }>,
     ) => ({ ...state, ...action }),
-    { activeId: "", isUserNavigating: false },
+    { activeId: "", isUserNavigating: false, hashSyncUnlocked: !getLocationHashId() },
   );
-  const { activeId, isUserNavigating } = navState;
-  const [hashSyncUnlocked, setHashSyncUnlocked] = React.useState(() => !getLocationHashId());
+  const { activeId, isUserNavigating, hashSyncUnlocked } = navState;
   const hashSyncUnlockedRef = useRef(hashSyncUnlocked);
   const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const scrollUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -94,15 +93,19 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     hashSyncUnlockedRef.current = hashSyncUnlocked;
   }, [hashSyncUnlocked]);
 
-  useLayoutEffect(() => {
+  const handleHashSync = React.useCallback(() => {
     if (!getLocationHashId()) {
-      setHashSyncUnlocked(true);
+      dispatchNav({ hashSyncUnlocked: true });
       return;
     }
-    setHashSyncUnlocked(false);
-    const t = window.setTimeout(() => setHashSyncUnlocked(true), 500);
+    dispatchNav({ hashSyncUnlocked: false });
+    const t = window.setTimeout(() => dispatchNav({ hashSyncUnlocked: true }), 500);
     return () => clearTimeout(t);
   }, [headingIdsKey]);
+
+  useLayoutEffect(() => {
+    return handleHashSync();
+  }, [handleHashSync]);
 
   useEffect(() => {
     onLoadingChange?.(false);
@@ -146,7 +149,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     computeActiveIdRef.current = computeActiveId;
   }, [computeActiveId]);
 
-  useEffect(() => {
+  const handleActiveIdSync = React.useCallback(() => {
     if (!hashSyncUnlocked || activeId) return;
     const frag = getLocationHashId();
     if (frag && document.getElementById(frag)) {
@@ -156,6 +159,10 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     const id = computeActiveIdRef.current();
     if (id) dispatchNav({ activeId: id });
   }, [hashSyncUnlocked, activeId]);
+
+  useEffect(() => {
+    handleActiveIdSync();
+  }, [handleActiveIdSync]);
 
   useEffect(() => {
     if (!activeId || isUserNavigating || !hashSyncUnlocked) return;

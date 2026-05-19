@@ -123,12 +123,12 @@ export const TabsDropdownMenu: React.FC<TabsDropdownMenuProps> = ({
           variant="ghost"
           size="icon"
           className={cn(
-            "h-7 w-7 bg-transparent transition-opacity flex-shrink-0 flex items-center justify-center ml-2",
+            "size-7 bg-transparent transition-opacity flex-shrink-0 flex items-center justify-center ml-2",
             hiddenTabs.length > 0 ? "opacity-100" : "opacity-0 pointer-events-none",
           )}
           aria-label="Show more tabs"
         >
-          <ChevronDown className="w-5 h-5" />
+          <ChevronDown className="size-5" />
         </Button>
       </DropdownMenuTrigger>
       {menuContent}

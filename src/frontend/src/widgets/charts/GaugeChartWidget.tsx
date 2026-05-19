@@ -21,6 +21,8 @@ const GAUGE_DEFAULTS = {
   },
 };
 
+const EMPTY_THRESHOLDS: never[] = [];
+
 const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
   value = 0,
   min = GAUGE_DEFAULTS.min,
@@ -28,7 +30,7 @@ const GaugeChartWidget: React.FC<GaugeChartWidgetProps> = ({
   label,
   startAngle = GAUGE_DEFAULTS.startAngle,
   endAngle = GAUGE_DEFAULTS.endAngle,
-  thresholds = [],
+  thresholds = EMPTY_THRESHOLDS,
   pointer,
   animated = GAUGE_DEFAULTS.animated,
   colorScheme = "Default",

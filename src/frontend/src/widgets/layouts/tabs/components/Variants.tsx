@@ -120,7 +120,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
         {/* Tabs */}
         <div
           ref={tabsListRef}
-          className={"relative flex space-x-[6px] gap-y-[20px] items-center"}
+          className={"relative flex gap-x-[6px] gap-y-[20px] items-center"}
           role="tablist"
         >
           {orderedTabWidgets.map((tabWidget, index) => {

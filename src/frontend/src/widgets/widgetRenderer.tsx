@@ -134,7 +134,7 @@ export const MemoizedWidget = React.memo(
         <Suspense
           fallback={
             <div className="flex items-center justify-center p-8 text-muted-foreground">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <div className="animate-spin rounded-full size-8 border-b-2 border-primary"></div>
               <span className="ml-2">Loading chart...</span>
             </div>
           }

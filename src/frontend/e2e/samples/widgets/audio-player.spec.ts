@@ -191,6 +191,7 @@ test.describe("Audio Player Tests", () => {
 
       for (const testId of testIds) {
         const audio = page.getByTestId(testId);
+        // eslint-disable-next-line
         await expect(audio).toBeAttached();
       }
 
@@ -270,6 +271,7 @@ test.describe("Audio Player Tests", () => {
 
       for (let i = 0; i < count; i++) {
         const audio = audioElements.nth(i);
+        // eslint-disable-next-line
         const src = await audio.getAttribute("src");
         expect(src).toBeTruthy();
         expect(src).toContain(EXPECTED_VALUES.AUDIO_URL_PROTOCOL);
@@ -472,6 +474,7 @@ test.describe("Audio Player Tests", () => {
 
       for (let i = 0; i < count; i++) {
         const audio = audioElements.nth(i);
+        // eslint-disable-next-line
         const ariaLabel = await audio.getAttribute("aria-label");
         expect(ariaLabel).toBeTruthy();
       }

@@ -86,6 +86,17 @@ export const getAxisDomainBound = (
   };
 };
 
+const numberFormatCache = new Map<string, Intl.NumberFormat>();
+const getNumberFormatter = (options: Intl.NumberFormatOptions) => {
+  const key = JSON.stringify(options);
+  let formatter = numberFormatCache.get(key);
+  if (!formatter) {
+    formatter = Intl.NumberFormat(undefined, options);
+    numberFormatCache.set(key, formatter);
+  }
+  return formatter;
+};
+
 export const formatTickLabel = (
   value: number | string,
   formatter?: string | null,
@@ -102,7 +113,7 @@ export const formatTickLabel = (
       const parts = formatter.split(":");
       const currency = parts.length > 1 ? parts[1] : "USD";
       const fractionDigits = parseInt(parts[0].substring(1));
-      return new Intl.NumberFormat(undefined, {
+      return getNumberFormatter({
         style: "currency",
         currency,
         maximumFractionDigits: isNaN(fractionDigits) ? 0 : fractionDigits,
@@ -110,14 +121,14 @@ export const formatTickLabel = (
     }
     if (formatter.startsWith("P")) {
       const fractionDigits = parseInt(formatter.substring(1));
-      return new Intl.NumberFormat(undefined, {
+      return getNumberFormatter({
         style: "percent",
         maximumFractionDigits: isNaN(fractionDigits) ? 0 : fractionDigits,
       }).format(Number(value) / 100);
     }
     if (formatter.startsWith("N") || formatter.startsWith("F")) {
       const fractionDigits = parseInt(formatter.substring(1));
-      return new Intl.NumberFormat(undefined, {
+      return getNumberFormatter({
         maximumFractionDigits: isNaN(fractionDigits) ? 2 : fractionDigits,
       }).format(Number(value));
     }
@@ -408,7 +419,7 @@ export const generateSeries = (
   // When explicit series are configured, only plot those data keys
   // Use case-insensitive matching because backend serializes data keys as camelCase
   // but Line.dataKey preserves the original PascalCase measure name
-  const configuredKeys = (lines || []).map((l) => l.dataKey).filter(Boolean);
+  const configuredKeys = (lines || []).flatMap((l) => (l.dataKey ? [l.dataKey] : []));
   const configuredKeysLower = configuredKeys.map((k) => k.toLowerCase());
   const keysToPlot =
     configuredKeysLower.length > 0

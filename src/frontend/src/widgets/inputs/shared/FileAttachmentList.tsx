@@ -37,9 +37,9 @@ const compactItemVariant = cva(
 const compactCancelVariant = cva("shrink-0 p-0", {
   variants: {
     density: {
-      Small: "h-4 w-4",
-      Medium: "h-5 w-5",
-      Large: "h-6 w-6",
+      Small: "size-4",
+      Medium: "size-5",
+      Large: "size-6",
     },
   },
   defaultVariants: { density: "Medium" },
@@ -49,8 +49,8 @@ const compactCancelIconVariant = cva("", {
   variants: {
     density: {
       Small: "h-2.5 w-2.5",
-      Medium: "h-3 w-3",
-      Large: "h-4 w-4",
+      Medium: "size-3",
+      Large: "size-4",
     },
   },
   defaultVariants: { density: "Medium" },
@@ -89,17 +89,9 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
             ? "text-base"
             : "text-sm";
       const cancelBtnSize =
-        density === Densities.Small
-          ? "h-6 w-6"
-          : density === Densities.Large
-            ? "h-10 w-10"
-            : "h-8 w-8";
+        density === Densities.Small ? "size-6" : density === Densities.Large ? "size-10" : "size-8";
       const cancelIconSize =
-        density === Densities.Small
-          ? "h-3 w-3"
-          : density === Densities.Large
-            ? "h-5 w-5"
-            : "h-4 w-4";
+        density === Densities.Small ? "size-3" : density === Densities.Large ? "size-5" : "size-4";
 
       return (
         <div
@@ -175,16 +167,12 @@ export const FileAttachmentList: React.FC<FileAttachmentListProps> = ({
           ? "text-base"
           : "text-sm";
     const cancelBtnSize =
-      density === Densities.Small
-        ? "h-6 w-6"
-        : density === Densities.Large
-          ? "h-10 w-10"
-          : "h-8 w-8";
+      density === Densities.Small ? "size-6" : density === Densities.Large ? "size-10" : "size-8";
     const cancelIconSize =
-      density === Densities.Small ? "h-3 w-3" : density === Densities.Large ? "h-5 w-5" : "h-4 w-4";
+      density === Densities.Small ? "size-3" : density === Densities.Large ? "size-5" : "size-4";
 
     return (
-      <div className="space-y-2 slim-scrollbar">
+      <div className="gap-y-2 slim-scrollbar">
         {/* Client-side uploading files */}
         {uploadProgress &&
           Array.from(uploadProgress.entries()).map(([clientId, progress]) =>
