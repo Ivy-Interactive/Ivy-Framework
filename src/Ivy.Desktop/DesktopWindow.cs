@@ -21,7 +21,7 @@ public class DesktopWindow(Server server)
     private bool _iconSet = false;
     private string? _iconFilePath = null;
     private (int X, int Y)? _position;
-    private (int W, int H)? _minSize;
+    private (int W, int H)? _minSize = (600, 400);
     private (int W, int H)? _maxSize;
     private bool _chromeless;
     private bool _transparent;
