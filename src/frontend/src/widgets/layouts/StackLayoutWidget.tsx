@@ -157,6 +157,9 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
       ...getHeight(height),
     };
 
+    const scrollOrientation =
+      scroll === "Horizontal" ? "horizontal" : scroll === "Both" ? "both" : "vertical";
+
     return (
       <ImageOverlayProvider>
         <ScrollArea
@@ -164,6 +167,7 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
           style={outerStyles}
           type="scroll"
           scrollHideDelay={600}
+          orientation={scrollOrientation}
         >
           <div style={flexStyles}>{wrappedChildren}</div>
         </ScrollArea>

@@ -8,10 +8,19 @@ const ScrollArea = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
     viewportClassName?: string;
     viewportStyle?: React.CSSProperties;
+    orientation?: "vertical" | "horizontal" | "both";
   }
 >(
   (
-    { className, children, scrollHideDelay = 0, viewportClassName, viewportStyle, ...props },
+    {
+      className,
+      children,
+      scrollHideDelay = 0,
+      viewportClassName,
+      viewportStyle,
+      orientation = "vertical",
+      ...props
+    },
     ref,
   ) => (
     <ScrollAreaPrimitive.Root
@@ -26,7 +35,12 @@ const ScrollArea = React.forwardRef<
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
+      {(orientation === "vertical" || orientation === "both") && (
+        <ScrollBar orientation="vertical" />
+      )}
+      {(orientation === "horizontal" || orientation === "both") && (
+        <ScrollBar orientation="horizontal" />
+      )}
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
   ),

@@ -180,10 +180,34 @@ Layout.Vertical().Gap(4)
 
 ### Scroll
 
-Add scrollable behavior to layouts with constrained height using `.Scroll()`:
+Add scrollable behavior to layouts using `.Scroll()`. The available modes are:
+
+| Mode | Description |
+|------|-------------|
+| `Scroll.Vertical` | Scrolls vertically when content overflows the height |
+| `Scroll.Horizontal` | Scrolls horizontally when content overflows the width |
+| `Scroll.Both` | Scrolls in both directions |
+| `Scroll.Auto` | Same as `Scroll.Vertical` — scrolls vertically when needed |
+| `Scroll.None` | No scrolling (default) |
+
+Vertical scroll — constrain the height and let content overflow downward:
 
 ```csharp demo-tabs
 Layout.Vertical().Height(Size.Units(30)).Scroll(Scroll.Vertical).Gap(2)
+    | new Badge("Item 1") | new Badge("Item 2") | new Badge("Item 3")
+    | new Badge("Item 4") | new Badge("Item 5") | new Badge("Item 6")
+    | new Badge("Item 7") | new Badge("Item 8") | new Badge("Item 9")
+    | new Badge("Item 10") | new Badge("Item 11") | new Badge("Item 12")
+```
+
+Horizontal scroll — constrain the width and let content overflow sideways. Useful for action bars, button rows, or any wide content in a narrow container:
+
+```csharp demo-tabs
+Layout.Horizontal()
+    .Width(Size.Units(60))
+    .Height(Size.Units(10))
+    .Scroll(Scroll.Horizontal)
+    .Gap(2)
     | new Badge("Item 1") | new Badge("Item 2") | new Badge("Item 3")
     | new Badge("Item 4") | new Badge("Item 5") | new Badge("Item 6")
     | new Badge("Item 7") | new Badge("Item 8") | new Badge("Item 9")
