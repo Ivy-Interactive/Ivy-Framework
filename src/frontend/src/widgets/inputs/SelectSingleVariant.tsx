@@ -280,7 +280,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
 
   const selectContent = (
     <Select
-      key={`${id}-${stringValue ?? "null"}`}
+      key={id}
       disabled={disabled}
       value={stringValue}
       onValueChange={handleValueChange}
