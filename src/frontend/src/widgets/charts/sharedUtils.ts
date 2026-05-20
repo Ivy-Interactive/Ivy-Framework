@@ -808,3 +808,22 @@ export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
     },
   };
 };
+
+export const formatTooltipHeader = (
+  value: number | string | undefined | null,
+  xAxis?: XAxisProps[],
+  yAxis?: YAxisProps[],
+  isVertical?: boolean,
+) => {
+  if (value == null) return "";
+  const categoryAxis = isVertical ? xAxis?.[0] : yAxis?.[0];
+  if (!categoryAxis || !categoryAxis.tickFormatter) {
+    return String(value);
+  }
+  return formatTickLabel(
+    value,
+    categoryAxis.tickFormatter,
+    categoryAxis.timeZone,
+    categoryAxis.tickFormatterType,
+  );
+};

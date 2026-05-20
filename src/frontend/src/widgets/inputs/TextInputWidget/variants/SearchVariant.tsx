@@ -156,7 +156,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", isFocused, ghostAffixChrome)}>
+          <div className={textInputAffixCellClasses("prefix", ghostAffixChrome)}>
             {prefixContent}
           </div>
         )}
@@ -216,7 +216,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
 
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", isFocused, ghostAffixChrome)}>
+          <div className={textInputAffixCellClasses("suffix", ghostAffixChrome)}>
             {suffixContent}
           </div>
         )}
