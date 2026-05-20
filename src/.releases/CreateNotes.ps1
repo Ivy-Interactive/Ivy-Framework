@@ -1,4 +1,4 @@
-﻿param(
+param(
     [switch]$SkipDownloads
 )
 
@@ -52,5 +52,22 @@ if (-not $SkipDownloads) {
 }
 
 $promptFile = Join-Path $scriptDir "prompt.md"
+$tempPromptFile = Join-Path $scriptDir "temp-prompt.md"
 $commitFiles = Join-Path $commitsFolder "*.md"
-./LlmEach.ps1 $commitFiles -PromptFile $promptFile -Parallel 1 -YesToAll
+
+# Load the prompt template and dynamically replace {{NotesFile}} with the absolute path of the notes file
+$promptContent = Get-Content $promptFile -Raw
+# Using literal string .Replace to avoid regex escaping issues
+$customPrompt = $promptContent.Replace('{{NotesFile}}', $filePath)
+$customPrompt | Out-File -FilePath $tempPromptFile -Encoding UTF8
+
+try {
+    # Run the LLM notes generator on each commit file
+    & "$scriptDir\LlmEach.ps1" $commitFiles -PromptFile $tempPromptFile -Parallel 1 -YesToAll
+}
+finally {
+    # Ensure temporary prompt file is cleaned up
+    if (Test-Path $tempPromptFile) {
+        Remove-Item -Path $tempPromptFile -Force
+    }
+}
