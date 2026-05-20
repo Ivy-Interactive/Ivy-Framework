@@ -8,6 +8,7 @@ import {
   SelectLabel,
   SelectSeparator,
   SelectTrigger,
+  SelectTriggerEndActions,
 } from "@/components/ui/select";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
@@ -222,46 +223,44 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       >
         {hasValue ? (selectedLabel ?? stringValue) : placeholder}
       </span>
-      {((nullable && hasValue && !disabled) || invalid || loading) && (
-        <div className="flex items-center gap-1 px-1 ml-auto shrink-0 pointer-events-none">
-          {loading && (
-            <div className="flex items-center h-6 pointer-events-auto">
-              <Loader2 className="size-4 animate-spin text-muted-foreground text-opacity-50" />
-            </div>
-          )}
-          {nullable && hasValue && !disabled && (
-            <div
-              role="button"
-              tabIndex={-1}
-              aria-label="Clear"
-              onClick={(e) => {
+      <SelectTriggerEndActions>
+        {loading && (
+          <div className="flex items-center h-6 pointer-events-auto">
+            <Loader2 className="size-4 animate-spin text-muted-foreground text-opacity-50" />
+          </div>
+        )}
+        {nullable && hasValue && !disabled && (
+          <div
+            role="button"
+            tabIndex={-1}
+            aria-label="Clear"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
                 e.stopPropagation();
                 if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
-              }}
-              onPointerDown={(e) => e.stopPropagation()}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
-                }
-              }}
-              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6 pointer-events-auto"
-            >
-              <X className={xIconVariant({ density })} />
-            </div>
-          )}
-          {invalid && (
-            <div
-              className="flex items-center h-6 cursor-default pointer-events-auto"
-              onPointerDown={(e) => e.stopPropagation()}
-            >
-              <InvalidIcon message={invalid} />
-            </div>
-          )}
-        </div>
-      )}
+              }
+            }}
+            className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6 pointer-events-auto"
+          >
+            <X className={xIconVariant({ density })} />
+          </div>
+        )}
+        {invalid && (
+          <div
+            className="flex items-center h-6 cursor-default pointer-events-auto"
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <InvalidIcon message={invalid} />
+          </div>
+        )}
+      </SelectTriggerEndActions>
     </SelectTrigger>
   );
 

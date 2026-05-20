@@ -15,6 +15,7 @@ import {
   getTransformValueFn,
   generateEChartToolbox,
   formatTooltipValue,
+  formatTooltipHeader,
 } from "./sharedUtils";
 import { getChartThemeColors } from "./styles";
 import { LineChartWidgetProps, ChartType } from "./chartTypes";
@@ -114,7 +115,9 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
             Array.isArray(p.value) ? p.value[isVertical ? 1 : 0] : p.value;
           if (Array.isArray(params)) {
             // Multi-series: add category header from first param
-            const header = params[0]?.name ? `<strong>${params[0].name}</strong><br/>` : "";
+            const header = params[0]?.name
+              ? `<strong>${formatTooltipHeader(params[0].name, xAxis, yAxis, isVertical)}</strong><br/>`
+              : "";
             const lines = params
               .map((p) => {
                 const value = formatTooltipValue(extractValue(p), tooltip);
@@ -124,7 +127,9 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
             return header + lines;
           }
           // Single series: add category header
-          const header = params.name ? `<strong>${params.name}</strong><br/>` : "";
+          const header = params.name
+            ? `<strong>${formatTooltipHeader(params.name, xAxis, yAxis, isVertical)}</strong><br/>`
+            : "";
           const value = formatTooltipValue(extractValue(params), tooltip);
           return `${header}${params.marker} ${params.seriesName}: <strong>${value}</strong>`;
         },
