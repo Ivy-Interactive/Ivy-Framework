@@ -80,6 +80,12 @@ When the user's request matches a specialized task, delegate to the appropriate 
 | Create a custom React-backed widget (wrap npm package) | `/ivy-create-external-widget` |
 | Deploy as a desktop application (.exe) | `/ivy-deploy-to-desktop` |
 
+### Releases and Maintenance
+
+| User wants... | Skill |
+|---|---|
+| Generate release/patch notes by analyzing code changes since the last release | `/ivy-create-release-notes` |
+
 ## Direct Implementation
 
 If the user's request does not match any specialized skill above -- for example, modifying existing views, fixing bugs, adding features to existing apps, or general Ivy development -- implement it directly using the AGENTS.md reference and the `ivy` CLI for documentation.
