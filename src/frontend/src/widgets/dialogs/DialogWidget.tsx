@@ -50,6 +50,18 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({
           }
         }}
         onCloseAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => {
+          const target = e.target as HTMLElement | null;
+          if (target && !document.body.contains(target)) {
+            e.preventDefault();
+          }
+        }}
+        onInteractOutside={(e) => {
+          const target = e.target as HTMLElement | null;
+          if (target && !document.body.contains(target)) {
+            e.preventDefault();
+          }
+        }}
       >
         {children}
       </DialogContent>
