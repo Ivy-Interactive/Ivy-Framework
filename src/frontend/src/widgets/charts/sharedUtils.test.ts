@@ -176,9 +176,11 @@ describe("generateYAxis", () => {
         /* transformValue */ (v) => Math.sign(v) * Math.log10(Math.abs(v) + 1),
         /* minValue */ 0,
         /* maxValue */ 80_000_000,
+        undefined,
+        /* isVertical */ true,
       );
 
-      // Single axis should have min/max set from largeSpread transform
+      // Value Y-axis (vertical bar chart) should have min/max set from largeSpread transform
       const axis = result as Record<string, unknown>;
       expect(axis).toHaveProperty("min");
       expect(axis).toHaveProperty("max");
@@ -190,6 +192,8 @@ describe("generateYAxis", () => {
         (v) => Math.sign(v) * Math.log10(Math.abs(v) + 1),
         0,
         80_000_000,
+        undefined,
+        true,
       );
 
       const axis = result as { axisLabel: { formatter: (v: number) => string | number } };
