@@ -232,4 +232,27 @@ public class ActivityHeatmapTests
         Assert.True(weeks[0][0].Date <= last);
         Assert.True(weeks[^1][6].Date >= first);
     }
+
+    [Fact]
+    public void ToDateOnly_DateOnly_ReturnsAsIs()
+    {
+        var expected = new DateOnly(2024, 6, 15);
+        var result = ActivityHeatmapBuilder<object>.ToDateOnly(expected);
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void ToDateOnly_DateTime_ConvertsCorrectly()
+    {
+        var dt = new DateTime(2024, 6, 15, 10, 30, 0);
+        var result = ActivityHeatmapBuilder<object>.ToDateOnly(dt);
+        Assert.Equal(new DateOnly(2024, 6, 15), result);
+    }
+
+    [Fact]
+    public void ToDateOnly_String_ParsesCorrectly()
+    {
+        var result = ActivityHeatmapBuilder<object>.ToDateOnly("2024-06-15");
+        Assert.Equal(new DateOnly(2024, 6, 15), result);
+    }
 }
