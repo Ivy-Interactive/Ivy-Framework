@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.Loader;
 using Ivy.Plugins;
@@ -16,6 +17,7 @@ public class PluginLoader : IPluginManager
     private readonly Dictionary<string, string> _knownPlugins = new(); // id -> directory
     private readonly Dictionary<string, (string Reason, DateTime FailedAt)> _failedPlugins = new(); // directory -> failure info
     private readonly ReaderWriterLockSlim _lock = new();
+    private readonly ConcurrentDictionary<string, object> _reloadLocks = new();
     private PluginContextBase? _pluginContext;
     private IIvyPluginConfigFactory? _configFactory;
     private Func<IServiceProvider>? _serviceProviderFactory;
@@ -601,6 +603,15 @@ public class PluginLoader : IPluginManager
             return false;
         }
 
+        var reloadLock = _reloadLocks.GetOrAdd(pluginId, _ => new object());
+        lock (reloadLock)
+        {
+            return ReloadPluginCore(pluginId);
+        }
+    }
+
+    private bool ReloadPluginCore(string pluginId)
+    {
         string? directory;
         PluginStatus oldStatus;
         _lock.EnterReadLock();

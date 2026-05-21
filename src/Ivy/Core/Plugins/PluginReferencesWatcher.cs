@@ -52,6 +52,7 @@ internal class PluginReferencesWatcher : IDisposable
         _fileWatcher.Changed += OnReferencesFileChanged;
         _fileWatcher.Created += OnReferencesFileCreatedOrChanged;
         _fileWatcher.Deleted += OnReferencesFileChanged;
+        _fileWatcher.Renamed += OnReferencesFileRenamed;
 
         if (File.Exists(_referencesFilePath))
             _logger.LogInformation("Watching plugin references file: {Path}", _referencesFilePath);
@@ -69,6 +70,15 @@ internal class PluginReferencesWatcher : IDisposable
     {
         _logger.LogInformation("Plugin references file created: {Path}", _referencesFilePath);
         OnReferencesFileChanged(sender, e);
+    }
+
+    private void OnReferencesFileRenamed(object sender, RenamedEventArgs e)
+    {
+        if (string.Equals(e.Name, FileName, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogInformation("Plugin references file renamed into place: {Path}", _referencesFilePath);
+            OnReferencesFileChanged(sender, e);
+        }
     }
 
     private void OnReferencesFileChanged(object sender, FileSystemEventArgs e)
@@ -149,6 +159,7 @@ internal class PluginReferencesWatcher : IDisposable
 
         watcher.Changed += (_, e) => OnFileChanged(e.FullPath, directory);
         watcher.Created += (_, e) => OnFileChanged(e.FullPath, directory);
+        watcher.Renamed += (_, e) => OnFileChanged(e.FullPath, directory);
 
         _directoryWatchers[directory] = watcher;
         _logger.LogDebug("Watching referenced plugin directory: {Directory}", directory);

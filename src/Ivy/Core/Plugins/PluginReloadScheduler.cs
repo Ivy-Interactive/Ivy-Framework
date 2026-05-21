@@ -22,6 +22,9 @@ internal class PluginReloadScheduler : IDisposable
 
     public void ScheduleLoad(string pluginDirectory)
     {
+        if (_reloadCooldowns.TryGetValue(pluginDirectory, out var cooldownUntil) && DateTime.UtcNow < cooldownUntil)
+            return;
+
         if (_pendingReloads.TryRemove(pluginDirectory, out var existingCts))
         {
             existingCts.Cancel();
@@ -42,6 +45,7 @@ internal class PluginReloadScheduler : IDisposable
                 try
                 {
                     _pluginManager.LoadPlugin(pluginDirectory);
+                    _reloadCooldowns[pluginDirectory] = DateTime.UtcNow + _cooldownPeriod;
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -68,11 +72,8 @@ internal class PluginReloadScheduler : IDisposable
         if (_reloadCooldowns.TryGetValue(pluginDirectory, out var cooldownUntil) && DateTime.UtcNow < cooldownUntil)
             return;
 
-        if (_pendingReloads.TryRemove(pluginDirectory, out var existingCts))
-        {
-            existingCts.Cancel();
-            existingCts.Dispose();
-        }
+        if (_pendingReloads.ContainsKey(pluginDirectory))
+            return;
 
         _ = Task.Run(async () =>
         {
