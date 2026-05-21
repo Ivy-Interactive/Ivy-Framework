@@ -187,14 +187,18 @@ public class BarChart6 : ViewBase
 
         return new Card().Title("TickFormatter (Currency Format)")
             | new BarChart(data)
+                .Vertical()
                 .ColorScheme(ColorScheme.Default)
                 .Bar(new Bar("Revenue", 1).Radius(0, 8, 8, 0))
-                .CartesianGrid(new CartesianGrid().Vertical())
+                .CartesianGrid(new CartesianGrid())
                 .Tooltip()
-                .XAxis(new XAxis("Revenue").TickFormatter("C0", TickFormatterType.Number).Domain(0, 80000))
-                .YAxis(new YAxis("Month").TickLine(false).AxisLine(false))
-                .Legend()
-        ;
+                .XAxis(new XAxis("Month"))
+                .YAxis(
+                    new YAxis("Revenue")
+                        .TickFormatter("C0", TickFormatterType.Number)
+                        .Domain(0, 80000)
+                )
+                .Legend();
     }
 }
 
