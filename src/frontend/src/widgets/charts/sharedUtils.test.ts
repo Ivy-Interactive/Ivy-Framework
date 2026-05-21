@@ -346,6 +346,11 @@ describe("generateXAxis", () => {
     expect(formatted).toBe("500kg");
   });
 
+  it("should show all category labels (not map minTickGap to label index interval)", () => {
+    const result = generateXAxis("bar", ["Q1", "Q2", "Q3", "Q4"], [{ minTickGap: 5 }], true);
+    expect(result.axisLabel).toMatchObject({ interval: 0, hideOverlap: true });
+  });
+
   describe("axisPointer.label.formatter", () => {
     it("should set axisPointer.label.formatter when tickFormatter is configured", () => {
       const result = callGenerateXAxis({ tickFormatter: "N2" });

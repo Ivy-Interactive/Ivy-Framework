@@ -478,11 +478,13 @@ export const generateXAxis = (
 
   // Map scale to ECharts axis type when explicitly set
   const scaleType = axis.scale && axis.scale !== "Auto" ? axis.scale.toLowerCase() : undefined;
+  const axisType = scaleType ?? (isVertical ? "category" : "value");
+  const isCategoryAxis = axisType === "category";
 
   return {
     show: !axis.hide,
     position: axis.orientation?.toLowerCase() === "top" ? "top" : "bottom",
-    type: scaleType ?? (isVertical ? "category" : "value"),
+    type: axisType,
     boundaryGap: chartType === "bar" ? true : false,
     data: isVertical ? categories : undefined,
     inverse: axis.reversed ?? false,
@@ -522,8 +524,9 @@ export const generateXAxis = (
             }
             return axis.unit ? `${formatted}${axis.unit}` : formatted;
           },
-      ...(axis.minTickGap != null && { interval: axis.minTickGap }),
-      ...(!axis.minTickGap && { interval: "auto" as const }),
+      // Ivy MinTickGap is a pixel gap (Recharts-style), not ECharts label index interval.
+      // Mapping it to interval: 5 hid every 6th category — only the first bar label appeared.
+      ...(isCategoryAxis ? { interval: 0, hideOverlap: true } : { interval: "auto" as const }),
       ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
     },
     axisLine: {
@@ -593,10 +596,12 @@ export const generateYAxis = (
 
     // Map scale to ECharts axis type when explicitly set
     const scaleType = axis.scale && axis.scale !== "Auto" ? axis.scale.toLowerCase() : undefined;
+    const axisType = scaleType ?? (isVertical ? "value" : "category");
+    const isCategoryAxis = axisType === "category";
 
     return {
       show: axis.hide ? false : true,
-      type: scaleType ?? (isVertical ? "value" : "category"),
+      type: axisType,
       data: isVertical ? undefined : categories,
       inverse: axis.reversed ?? false,
       ...(axis.name != null && { name: axis.name }),
@@ -628,8 +633,7 @@ export const generateYAxis = (
           }
           return axis.unit ? `${formatted}${axis.unit}` : formatted;
         },
-        ...(axis.minTickGap != null && { interval: axis.minTickGap }),
-        ...(!axis.minTickGap && {}),
+        ...(isCategoryAxis ? { interval: 0, hideOverlap: true } : { interval: "auto" as const }),
         ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
       },
       splitNumber: axis.tickCount ?? (effectiveLargeSpread ? 3 : 5),
