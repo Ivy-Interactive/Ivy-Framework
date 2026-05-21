@@ -620,15 +620,29 @@ public class PluginLoader : IPluginManager
             var plugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
             if (plugin is null)
             {
-                _logger.LogWarning("Plugin '{Id}' not found for reload.", pluginId);
-                return false;
+                // Plugin was discovered but failed to load previously — try a fresh load
+                if (_knownPlugins.TryGetValue(pluginId, out var knownDir))
+                {
+                    _logger.LogInformation("Plugin '{Id}' previously failed to load, attempting fresh load.", pluginId);
+                    directory = knownDir;
+                }
+                else
+                {
+                    _logger.LogWarning("Plugin '{Id}' not found for reload.", pluginId);
+                    return false;
+                }
+
+                // Release lock before attempting load
+                _lock.ExitReadLock();
+                return LoadPlugin(directory);
             }
             directory = plugin.Directory;
             oldStatus = plugin.Status;
         }
         finally
         {
-            _lock.ExitReadLock();
+            if (_lock.IsReadLockHeld)
+                _lock.ExitReadLock();
         }
 
         // Build source plugins before attempting reload

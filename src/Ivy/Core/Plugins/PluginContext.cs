@@ -32,6 +32,7 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
     private readonly Dictionary<string, PluginState> _pluginStates = new();
     private readonly ReaderWriterLockSlim _lock = new();
     private string? _currentPluginId;
+    protected string? CurrentPluginId => _currentPluginId;
 
     public IServiceCollection Services
     {
@@ -173,7 +174,7 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
         return _aggregateProvider.GetServices<T>();
     }
 
-    internal void RemovePluginContributions(string pluginId)
+    internal virtual void RemovePluginContributions(string pluginId)
     {
         HashSet<string> affectedAppIds;
 
