@@ -109,7 +109,7 @@ public class BarChart3 : ViewBase
 
         return new Card().Title("Horizontal Desktop Usage")
             | new BarChart(data)
-                .Vertical()
+                .Horizontal()
                 .ColorScheme(ColorScheme.Default)
                 .Bar(new Bar("Desktop", 1).Radius(4).LegendType(LegendTypes.Square)
                     .LabelList(new LabelList("Month").Fill(Colors.White).Position(Positions.InsideLeft).Offset(8).FontSize(12))
@@ -119,6 +119,7 @@ public class BarChart3 : ViewBase
                 .Tooltip()
                 .YAxis(new YAxis("Month").TickLine(false).AxisLine(false).Type(AxisTypes.Category).Hide())
                 .XAxis(new XAxis("Desktop").Type(AxisTypes.Number).Hide())
+                .Legend()
                 .Toolbox()
         ;
     }
