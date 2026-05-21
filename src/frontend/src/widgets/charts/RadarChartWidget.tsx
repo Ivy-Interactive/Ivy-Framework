@@ -13,6 +13,7 @@ import {
 import { RadarChartWidgetProps, RadarProps, RadarIndicatorProps } from "./chartTypes";
 import { getChartThemeColors } from "./styles";
 import { RADAR_DEFAULTS, applyDefaults } from "./chartDefaults";
+import { computeRadarLayout } from "./radarLayout";
 import { Densities } from "@/types/density";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
@@ -139,13 +140,26 @@ const RadarChartWidget: React.FC<RadarChartWidgetProps> = ({
     });
   }, [radars, data, radarIndicators]);
 
+  const radarLayout = useMemo(
+    () =>
+      computeRadarLayout({
+        cx,
+        cy,
+        radius,
+        hasLegend: !!legend,
+        hasToolbox: !!toolbox,
+        indicators: radarIndicators,
+      }),
+    [cx, cy, radius, legend, toolbox, radarIndicators],
+  );
+
   // Memoize option configuration
   const option = useMemo(
     () => ({
       color: chartColors,
       radar: {
-        center: [cx, legend ? "45%" : cy],
-        radius: legend ? "65%" : radius,
+        center: radarLayout.center,
+        radius: radarLayout.radius,
         startAngle: startAngle,
         shape: shape.toLowerCase(),
         indicator: radarIndicators,
@@ -174,6 +188,7 @@ const RadarChartWidget: React.FC<RadarChartWidgetProps> = ({
           color: themeColors.foreground,
           fontFamily: themeColors.fontSans,
         },
+        nameGap: 10,
         name: {
           textStyle: {
             color: themeColors.foreground,
@@ -201,9 +216,7 @@ const RadarChartWidget: React.FC<RadarChartWidgetProps> = ({
     }),
     [
       chartColors,
-      cx,
-      cy,
-      radius,
+      radarLayout,
       startAngle,
       shape,
       radarIndicators,

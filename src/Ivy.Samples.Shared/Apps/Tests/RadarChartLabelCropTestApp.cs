@@ -7,7 +7,7 @@ namespace Ivy.Samples.Shared.Apps.Tests;
 [App(
     icon: Icons.Radar,
     group: ["Tests"],
-    isVisible: false,
+    isVisible: true,
     searchHints: ["radar", "chart", "label", "crop", "clip", "overflow", "axis"]
 )]
 public class RadarChartLabelCropTestApp : SampleBase
