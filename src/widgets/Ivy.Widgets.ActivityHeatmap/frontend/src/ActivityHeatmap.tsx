@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import "./style.css";
 import { ActivityHeatmapProps, Activity } from "./types";
 import { MONTH_NAMES, formatTooltipHeader, formatTooltipValue } from "./tooltipUtils";
@@ -126,6 +126,7 @@ export function ActivityHeatmap({
   const maxCount = Math.max(0, ...data.map((d) => d.count));
   const colors = buildColorScheme(`var(--color-${colorScheme.toLowerCase()})`);
   const clickable = events.includes("OnDayClick");
+  const gridContainer = useRef<HTMLDivElement>(null);
 
   const [tooltip, setTooltip] = useState<{ day: Activity; x: number; y: number } | null>(null);
 
@@ -153,7 +154,7 @@ export function ActivityHeatmap({
   };
 
   return (
-    <div className="flex w-full relative bg-background rounded border-secondary">
+    <div className="flex w-full relative rounded border-secondary bg-card">
       <div className=" overflow-x-auto p-0"
         style={{ direction: "rtl" }}>
         <div className="inline-flex flex-col gap-1 font-sans"
@@ -175,7 +176,7 @@ export function ActivityHeatmap({
 
           <div className="flex gap-1">
             {showDayLabels && (
-              <div className="flex flex-col justify-end absolute left-0 top-0 bottom-0 bg-background">
+              <div className="flex flex-col justify-end absolute left-0 top-0 bottom-0 bg-card">
                 <div
                   className="grid gap-0.5 text-secondary-foreground opacity-50 pt-0.5 *:pr-2 *:text-right"
                   style={{ gridTemplateRows: "repeat(7, 11px)", width: "28px" }}
@@ -191,8 +192,12 @@ export function ActivityHeatmap({
               </div>
             )}
 
-            <div className="flex gap-0.5 "
+            <div className="flex gap-0.5"
+              ref={gridContainer}
               style={{ paddingLeft: showDayLabels ? 28 : 0 }}
+              onMouseMove={(e) => {
+                if (tooltip) setTooltip((t) => t && { ...t, x: e.clientX, y: e.clientY });
+              }}
               onMouseLeave={() => setTooltip(null)}>
               {weeks.map((week, wi) => (
                 <div
@@ -206,15 +211,12 @@ export function ActivityHeatmap({
                     return (
                       <div
                         key={di}
-                        className={`w-[11px] h-[11px] rounded-sm ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
+                        className={`w-[11px] h-[11px] rounded-sm hover:rounded-none hover:scale-110 transition-transform duration-300 ease-in-out ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
                         style={{ backgroundColor: bg }}
                         onMouseEnter={(e) => {
                           if (showTooltip && day) {
                             setTooltip({ day, x: e.clientX, y: e.clientY });
                           }
-                        }}
-                        onMouseMove={(e) => {
-                          if (tooltip) setTooltip((t) => t && { ...t, x: e.clientX, y: e.clientY });
                         }}
                         onClick={day ? () => handleClick(day) : undefined}
                       />
@@ -229,25 +231,22 @@ export function ActivityHeatmap({
 
       {tooltip && (
         <div
+          className="fixed z-50 bg-card text-xs text-foreground pointer-events-none rounded-[4px] px-2 py-3 transition-transform duration-300 ease-in-out"
           style={{
-            position: "fixed",
-            left: tooltip.x + 12,
-            top: tooltip.y + 12,
-            backgroundColor: "var(--card, var(--background))",
-            color: "var(--foreground)",
-            fontFamily: "var(--font-sans)",
-            fontSize: "12px",
-            borderWidth: 0,
-            borderRadius: "4px",
-            padding: "8px 12px",
+            left: tooltip.x,
+            transform: `translate(${((tooltip.x > (gridContainer.current?.getBoundingClientRect().right ?? 0) / 2) ? -200 : 12)}px, ${tooltip.y > (window.innerHeight / 2) ? -80 : 12}px)`,
+            top: tooltip.y,
             minWidth: "180px",
             boxShadow: "0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1)",
-            pointerEvents: "none",
-            zIndex: 9999,
           }}
         >
-          <div><strong>{formatTooltipHeader(tooltip.day)}</strong></div>
-          <div>{formatTooltipValue(tooltip.day)}</div>
+          <div className="font-bold">
+            {formatTooltipHeader(tooltip.day)}
+          </div>
+          <div className="flex gap-2 align-middle">
+            <div className="w-[11px] h-[11px] my-auto rounded-full" style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]! }}></div>
+            <div>{formatTooltipValue(tooltip.day)}</div>
+          </div>
         </div>
       )}
     </div>
