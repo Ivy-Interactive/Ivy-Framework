@@ -57,7 +57,7 @@ class ActivityHeatmapDemo : ViewBase
 
         return new ActivityHeatmap().Data(data);
     }}
-}}", Languages.Csharp)
+}}")
             | new Card(new ActivityHeatmap().Data(data))
                 .WithMargin(0, 0, 0, 16)
 
@@ -69,7 +69,7 @@ class ActivityHeatmapDemo : ViewBase
     .StartDate(DateOnly.Parse({$"\"{startDate}\""}))
     .EndDate(DateOnly.Parse({$"\"{endDate}\""}))
     .ColorScheme(Colors.{selectedColor.Value})
-    .OnDayClick(day => Console.WriteLine(...));", Languages.Csharp)
+    .OnDayClick(day => Console.WriteLine(...));")
 
             | (Layout
                     .Horizontal()
