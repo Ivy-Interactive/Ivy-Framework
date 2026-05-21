@@ -192,7 +192,8 @@ export function ActivityHeatmap({
             )}
 
             <div className="flex gap-0.5 "
-              style={{ paddingLeft: showDayLabels ? 28 : 0 }}>
+              style={{ paddingLeft: showDayLabels ? 28 : 0 }}
+              onMouseLeave={() => setTooltip(null)}>
               {weeks.map((week, wi) => (
                 <div
                   key={wi}
@@ -215,7 +216,6 @@ export function ActivityHeatmap({
                         onMouseMove={(e) => {
                           if (tooltip) setTooltip((t) => t && { ...t, x: e.clientX, y: e.clientY });
                         }}
-                        onMouseLeave={() => setTooltip(null)}
                         onClick={day ? () => handleClick(day) : undefined}
                       />
                     );
