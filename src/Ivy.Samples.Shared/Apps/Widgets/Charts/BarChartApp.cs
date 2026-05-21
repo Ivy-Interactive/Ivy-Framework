@@ -217,12 +217,13 @@ public class BarChart7 : ViewBase
 
         return new Card().Title("Domain & AllowDataOverflow (Clip Outlier)")
             | new BarChart(data)
+                .Horizontal()
                 .ColorScheme(ColorScheme.Default)
                 .Bar(new Bar("Sales", 1).Radius(0, 8, 8, 0))
-                .CartesianGrid(new CartesianGrid().Vertical())
+                .CartesianGrid(new CartesianGrid())
                 .Tooltip()
                 .XAxis(new XAxis("Sales")
-                    .Domain(0, 200) // Explicitly set max to 200 to clip the outlier
+                    .Domain(0, 200) // Clip Mouse (850) — bar draws past axis but scale stops at 200
                     .AllowDataOverflow(true))
                 .YAxis(new YAxis("Product").TickLine(false).AxisLine(false))
                 .Legend()
@@ -252,8 +253,8 @@ public class BarChart8 : ViewBase
                 .CartesianGrid(new CartesianGrid().Vertical())
                 .Tooltip()
                 // Keep the visual structure (lines) but remove cluttered text
-                .XAxis(new XAxis("Users").HideTickLabels())
-                .YAxis(new YAxis("Day").HideTickLabels())
+                .XAxis(new XAxis("Day").HideTickLabels())
+                .YAxis(new YAxis("Users").HideTickLabels())
                 .Legend()
         ;
     }

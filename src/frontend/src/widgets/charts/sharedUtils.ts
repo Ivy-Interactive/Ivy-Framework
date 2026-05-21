@@ -489,8 +489,8 @@ export const generateXAxis = (
     data: isVertical ? categories : undefined,
     inverse: axis.reversed ?? false,
     ...(axis.name != null && { name: axis.name }),
-    ...(minOpt !== undefined && { min: minOpt }),
-    ...(maxOpt !== undefined && { max: maxOpt }),
+    ...(!isCategoryAxis && minOpt !== undefined && { min: minOpt }),
+    ...(!isCategoryAxis && maxOpt !== undefined && { max: maxOpt }),
     ...(axis.tickCount != null && { splitNumber: axis.tickCount }),
     axisLabel: {
       show: axis.hideTickLabels ? false : true,
@@ -605,8 +605,8 @@ export const generateYAxis = (
       data: isVertical ? undefined : categories,
       inverse: axis.reversed ?? false,
       ...(axis.name != null && { name: axis.name }),
-      ...(minOpt !== undefined && { min: minOpt }),
-      ...(maxOpt !== undefined && { max: maxOpt }),
+      ...(!isCategoryAxis && minOpt !== undefined && { min: minOpt }),
+      ...(!isCategoryAxis && maxOpt !== undefined && { max: maxOpt }),
       axisLabel: {
         show: axis.hideTickLabels ? false : true,
         rotate: axis.angle ?? 0,
