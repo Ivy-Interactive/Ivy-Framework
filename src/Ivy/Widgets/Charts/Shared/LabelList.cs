@@ -21,7 +21,7 @@ public record LabelList
 
     public Positions? Position { get; set; } = Positions.Outside;
 
-    public Colors? Fill { get; set; } = Colors.Black;
+    public Colors? Fill { get; set; } = Colors.Green;
 
     public double? FillOpacity { get; set; } = null;
 
