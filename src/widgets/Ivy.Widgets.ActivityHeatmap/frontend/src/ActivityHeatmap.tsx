@@ -1,5 +1,7 @@
+import { useState } from "react";
 import "./style.css";
 import { ActivityHeatmapProps, Activity } from "./types";
+import { MONTH_NAMES, formatTooltipHeader, formatTooltipValue } from "./tooltipUtils";
 
 function buildColorScheme(baseColor: string): string[] {
   return [
@@ -11,10 +13,10 @@ function buildColorScheme(baseColor: string): string[] {
   ];
 }
 
-const preferredLanguage = navigator.languages.length ? navigator.languages : navigator.language;
-const monthFormatter = new Intl.DateTimeFormat(preferredLanguage, { month: "short" });
-const weekdayFormatter = new Intl.DateTimeFormat(preferredLanguage, { weekday: "short" });
-const MONTH_NAMES = Array.from({ length: 12 }, (_, i) => monthFormatter.format(new Date(0, i)));
+const weekdayFormatter = new Intl.DateTimeFormat(
+  navigator.languages.length ? navigator.languages : navigator.language,
+  { weekday: "short" }
+);
 
 const MONDAY = weekdayFormatter.format(new Date('2025-01-06'));
 const WEDNESDAY = weekdayFormatter.format(new Date('2025-01-08'));
@@ -108,15 +110,6 @@ function buildGridFromRange(
   return weeks;
 }
 
-function formatTooltip(day: Activity): string {
-  const date = new Date(day.date + "T00:00:00");
-  const month = MONTH_NAMES[date.getMonth()];
-  const dayNum = date.getDate();
-  const year = date.getFullYear();
-  const label = day.count === 1 ? "contribution" : "contributions";
-  return `${month} ${dayNum}, ${year} — ${day.count} ${label}`;
-}
-
 export function ActivityHeatmap({
   id,
   events = [],
@@ -133,6 +126,8 @@ export function ActivityHeatmap({
   const maxCount = Math.max(0, ...data.map((d) => d.count));
   const colors = buildColorScheme(`var(--color-${colorScheme.toLowerCase()})`);
   const clickable = events.includes("OnDayClick");
+
+  const [tooltip, setTooltip] = useState<{ day: Activity; x: number; y: number } | null>(null);
 
   // Compute month labels: for each week, check if the first non-null day is the first occurrence of a new month
   const monthLabels: string[] = weeks.map((week, wi) => {
@@ -207,14 +202,20 @@ export function ActivityHeatmap({
                   {week.map((day, di) => {
                     const level = day ? getLevel(day.count, maxCount) : 0;
                     const bg = colors[level] ?? colors[0]!;
-                    const title =
-                      showTooltip && day ? formatTooltip(day) : undefined;
                     return (
                       <div
                         key={di}
                         className={`w-[11px] h-[11px] rounded-sm ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
                         style={{ backgroundColor: bg }}
-                        title={title}
+                        onMouseEnter={(e) => {
+                          if (showTooltip && day) {
+                            setTooltip({ day, x: e.clientX, y: e.clientY });
+                          }
+                        }}
+                        onMouseMove={(e) => {
+                          if (tooltip) setTooltip((t) => t && { ...t, x: e.clientX, y: e.clientY });
+                        }}
+                        onMouseLeave={() => setTooltip(null)}
                         onClick={day ? () => handleClick(day) : undefined}
                       />
                     );
@@ -225,6 +226,30 @@ export function ActivityHeatmap({
           </div>
         </div>
       </div>
+
+      {tooltip && (
+        <div
+          style={{
+            position: "fixed",
+            left: tooltip.x + 12,
+            top: tooltip.y + 12,
+            backgroundColor: "var(--card, var(--background))",
+            color: "var(--foreground)",
+            fontFamily: "var(--font-sans)",
+            fontSize: "12px",
+            borderWidth: 0,
+            borderRadius: "4px",
+            padding: "8px 12px",
+            minWidth: "180px",
+            boxShadow: "0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1)",
+            pointerEvents: "none",
+            zIndex: 9999,
+          }}
+        >
+          <div><strong>{formatTooltipHeader(tooltip.day)}</strong></div>
+          <div>{formatTooltipValue(tooltip.day)}</div>
+        </div>
+      )}
     </div>
   );
 }
