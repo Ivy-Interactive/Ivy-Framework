@@ -187,17 +187,13 @@ public class BarChart6 : ViewBase
 
         return new Card().Title("TickFormatter (Currency Format)")
             | new BarChart(data)
-                .Vertical()
+                .Horizontal()
                 .ColorScheme(ColorScheme.Default)
                 .Bar(new Bar("Revenue", 1).Radius(0, 8, 8, 0))
                 .CartesianGrid(new CartesianGrid())
                 .Tooltip()
-                .XAxis(new XAxis("Month"))
-                .YAxis(
-                    new YAxis("Revenue")
-                        .TickFormatter("C0", TickFormatterType.Number)
-                        .Domain(0, 80000)
-                )
+                .YAxis(new YAxis("Month"))
+                .XAxis(new XAxis("Revenue").TickFormatter("C0", TickFormatterType.Number).Domain(0, 80000))
                 .Legend();
     }
 }
@@ -248,9 +244,10 @@ public class BarChart8 : ViewBase
 
         return new Card().Title("HideTickLabels (Clean Look)")
             | new BarChart(data)
+                .Horizontal()
                 .ColorScheme(ColorScheme.Default)
                 .Bar(new Bar("Users", 1).Radius(0, 8, 8, 0))
-                .CartesianGrid(new CartesianGrid().Vertical())
+                .CartesianGrid(new CartesianGrid())
                 .Tooltip()
                 // Keep the visual structure (lines) but remove cluttered text
                 .XAxis(new XAxis("Day").HideTickLabels())
