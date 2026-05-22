@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import "./style.css";
 import { ActivityHeatmapProps, Activity } from "./types";
-import { MONTH_NAMES, formatTooltipHeader, formatTooltipValue } from "./tooltipUtils";
+import { MONTH_NAMES, formatTooltipHeader, formatTooltipValue, getTooltipTransform } from "./tooltipUtils";
 
 function buildColorScheme(baseColor: string): string[] {
   return [
@@ -279,12 +279,4 @@ export function ActivityHeatmap({
       </div>}
     </div>
   );
-}
-
-function getTooltipTransform(tooltipDiv: HTMLDivElement | null, tooltipCoordinates: { x: number; y: number }, gridContainer: HTMLDivElement | null): string {
-  if (!tooltipDiv || !gridContainer) return "translate(0px, 0px)";
-  const gridRect = gridContainer.getBoundingClientRect();
-  const xOffset = tooltipCoordinates.x > gridRect.left + gridRect.width / 2 ? -(tooltipDiv.offsetWidth + 20) : 20;
-  const yOffset = tooltipCoordinates.y > window.innerHeight / 2 ? -(tooltipDiv.offsetHeight + 20) : 20;
-  return `translate(${xOffset}px, ${yOffset}px)`;
 }
