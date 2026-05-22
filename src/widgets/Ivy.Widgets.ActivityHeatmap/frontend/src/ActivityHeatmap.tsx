@@ -239,7 +239,7 @@ export function ActivityHeatmap({
                     return (
                       <div
                         key={di}
-                        className={`w-[11px] h-[11px] rounded-sm hover:rounded-none hover:scale-110 transition-all duration-300 ease-in-out ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
+                        className={`w-[11px] h-[11px] rounded-sm hover:rounded-none hover:scale-110 ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
                         style={{ backgroundColor: bg }}
                         onMouseEnter={() => {
                           if (showTooltip && day) {
