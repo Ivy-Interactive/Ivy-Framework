@@ -22,8 +22,8 @@ const MONDAY = weekdayFormatter.format(new Date('2025-01-06'));
 const WEDNESDAY = weekdayFormatter.format(new Date('2025-01-08'));
 const FRIDAY = weekdayFormatter.format(new Date('2025-01-10'));
 
-function getLevel(count: number, maxCount: number): number {
-  if (count === 0 || maxCount === 0) return 0;
+function getLevel(count: number | undefined, maxCount: number): number {
+  if (count === undefined || count === 0 || maxCount === 0) return 0;
   if (count <= maxCount * 0.25) return 1;
   if (count <= maxCount * 0.5) return 2;
   if (count <= maxCount * 0.75) return 3;
@@ -123,7 +123,7 @@ export function ActivityHeatmap({
   endDate,
 }: ActivityHeatmapProps) {
   const weeks = buildGrid(data, startDate, endDate);
-  const maxCount = Math.max(0, ...data.map((d) => d.count));
+  const maxCount = Math.max(0, ...data.map((d) => d.count ?? 0));
   const colors = buildColorScheme(`var(--color-${colorScheme.toLowerCase()})`);
   const clickable = events.includes("OnDayClick");
   const gridContainer = useRef<HTMLDivElement>(null);
