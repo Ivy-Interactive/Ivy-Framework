@@ -3,9 +3,9 @@ export const RADAR_DEFAULT_CY = "50%";
 export const RADAR_DEFAULT_RADIUS = "75%";
 
 export interface RadarLayoutInput {
-  cx: string;
-  cy: string;
-  radius: string;
+  cx: string | number;
+  cy: string | number;
+  radius: string | number;
   hasLegend: boolean;
   hasToolbox: boolean;
   indicators: { name: string }[];
@@ -16,8 +16,10 @@ export interface RadarLayout {
   radius: string;
 }
 
-const isDefaultPercent = (value: string, defaultValue: string) =>
-  value === defaultValue || value === defaultValue.replace("%", "");
+/** Normalize C# object? props (string or int radius) for ECharts. */
+export function toRadarAxisValue(value: string | number): string {
+  return typeof value === "number" ? `${value}%` : value;
+}
 
 /**
  * Computes radar center and radius so axis names (especially at 12 o'clock with
@@ -33,11 +35,15 @@ export function computeRadarLayout({
   hasToolbox,
   indicators,
 }: RadarLayoutInput): RadarLayout {
-  const usingDefaultCy = cy === RADAR_DEFAULT_CY;
-  const usingDefaultRadius = radius === RADAR_DEFAULT_RADIUS;
+  const cxStr = toRadarAxisValue(cx);
+  const cyStr = toRadarAxisValue(cy);
+  const radiusStr = toRadarAxisValue(radius);
+
+  const usingDefaultCy = cyStr === RADAR_DEFAULT_CY;
+  const usingDefaultRadius = radiusStr === RADAR_DEFAULT_RADIUS;
 
   if (!usingDefaultCy && !usingDefaultRadius) {
-    return { center: [cx, cy], radius };
+    return { center: [cxStr, cyStr], radius: radiusStr };
   }
 
   const maxLabelLen = indicators.reduce((max, ind) => Math.max(max, ind.name?.length ?? 0), 0);
@@ -60,7 +66,7 @@ export function computeRadarLayout({
   }
 
   return {
-    center: [cx, usingDefaultCy ? `${centerY}%` : cy],
-    radius: usingDefaultRadius ? `${radiusPct}%` : radius,
+    center: [cxStr, usingDefaultCy ? `${centerY}%` : cyStr],
+    radius: usingDefaultRadius ? `${radiusPct}%` : radiusStr,
   };
 }
