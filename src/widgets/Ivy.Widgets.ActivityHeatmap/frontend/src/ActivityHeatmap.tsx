@@ -264,7 +264,6 @@ export function ActivityHeatmap({
         ref={tooltipDiv}
         className="fixed opacity-0 z-50 bg-card text-xs text-foreground pointer-events-none rounded-[4px] px-2 py-3 min-w-40 max-w-64"
         style={{
-          // minWidth: "180px",
           boxShadow: "0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1)",
           transition: "opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, transform 0.3s ease-in-out",
         }}
