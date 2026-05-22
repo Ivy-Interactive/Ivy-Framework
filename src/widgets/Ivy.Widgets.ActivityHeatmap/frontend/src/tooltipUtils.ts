@@ -12,11 +12,6 @@ export function formatTooltipHeader(day: Activity): string {
   return `${month} ${dayNum}, ${year}`;
 }
 
-export function formatTooltipValue(day: Activity): string {
-  const label = day.count === 1 ? "contribution" : "contributions";
-  return `${day.count} ${label}`;
-}
-
 export function getTooltipTransform(tooltipDiv: HTMLDivElement | null, tooltipCoordinates: { x: number; y: number }, gridContainer: HTMLDivElement | null): string {
   if (!tooltipDiv || !gridContainer) return "translate(0px, 0px)";
   const gridRect = gridContainer.getBoundingClientRect();

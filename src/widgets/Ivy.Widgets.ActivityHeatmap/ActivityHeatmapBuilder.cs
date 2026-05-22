@@ -17,12 +17,14 @@ public class ActivityHeatmapBuilder<TSource>(
     private DateOnly? _startDate;
     private DateOnly? _endDate;
     private EventHandler<Event<ActivityHeatmap, Activity>>? _onDayClick;
+    private Dimension<TSource>? _dimension = dimension;
+    private Measure<TSource>? _measure = measure;
 
-    public override object? Build()
+    public override object Build()
     {
-        if (dimension is null)
+        if (_dimension is null)
             throw new InvalidOperationException("A dimension is required.");
-        if (measure is null)
+        if (_measure is null)
             throw new InvalidOperationException("A measure is required.");
 
         var activityData = UseState(Array.Empty<Activity>());
@@ -34,15 +36,15 @@ public class ActivityHeatmapBuilder<TSource>(
             {
                 var results = await data
                     .ToPivotTable()
-                    .Dimension(dimension)
-                    .Measure(measure)
+                    .Dimension(_dimension)
+                    .Measure(_measure)
                     .ExecuteAsync();
 
                 var activities = results
                     .Select(row => new Activity
                     {
-                        Date = ToDateOnly(row[dimension.Name]),
-                        Count = Convert.ToInt32(row[measure.Name])
+                        Date = ToDateOnly(row[_dimension.Name]),
+                        Count = Convert.ToInt32(row[_measure.Name])
                     })
                     .ToArray();
 
@@ -63,6 +65,7 @@ public class ActivityHeatmapBuilder<TSource>(
             .ShowTooltip(_showTooltip)
             .ShowMonthLabels(_showMonthLabels)
             .ShowDayLabels(_showDayLabels)
+            .ValueLabel(_measure.Name)
             .StartDate(_startDate)
             .EndDate(_endDate);
 
@@ -74,13 +77,13 @@ public class ActivityHeatmapBuilder<TSource>(
 
     public ActivityHeatmapBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
     {
-        dimension = new Dimension<TSource>(name, selector);
+        _dimension = new Dimension<TSource>(name, selector);
         return this;
     }
 
     public ActivityHeatmapBuilder<TSource> Measure(string name, Expression<Func<IQueryable<TSource>, object>> aggregator)
     {
-        measure = new Measure<TSource>(name, aggregator);
+        _measure = new Measure<TSource>(name, aggregator);
         return this;
     }
 

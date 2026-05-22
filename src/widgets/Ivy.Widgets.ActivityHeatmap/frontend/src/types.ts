@@ -14,6 +14,7 @@ export interface ActivityHeatmapProps {
   events?: string[];
   eventHandler: IvyEventHandler;
   data?: Activity[];
+  valueLabel?: string;
   colorScheme?: string;
   showTooltip?: boolean;
   showMonthLabels?: boolean;

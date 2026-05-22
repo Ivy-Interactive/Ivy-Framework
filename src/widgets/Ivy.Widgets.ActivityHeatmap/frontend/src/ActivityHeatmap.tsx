@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import "./style.css";
 import { ActivityHeatmapProps, Activity } from "./types";
-import { MONTH_NAMES, formatTooltipHeader, formatTooltipValue, getTooltipTransform } from "./tooltipUtils";
+import { MONTH_NAMES, formatTooltipHeader, getTooltipTransform } from "./tooltipUtils";
 
 function buildColorScheme(baseColor: string): string[] {
   return [
@@ -119,6 +119,7 @@ export function ActivityHeatmap({
   showTooltip = true,
   showMonthLabels = true,
   showDayLabels = true,
+  valueLabel,
   startDate,
   endDate,
 }: ActivityHeatmapProps) {
@@ -261,9 +262,9 @@ export function ActivityHeatmap({
 
       {showTooltip && <div
         ref={tooltipDiv}
-        className="fixed opacity-0 z-50 bg-card text-xs text-foreground pointer-events-none rounded-[4px] px-2 py-3"
+        className="fixed opacity-0 z-50 bg-card text-xs text-foreground pointer-events-none rounded-[4px] px-2 py-3 min-w-40 max-w-64"
         style={{
-          minWidth: "180px",
+          // minWidth: "180px",
           boxShadow: "0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1)",
           transition: "opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, transform 0.3s ease-in-out",
         }}
@@ -271,10 +272,12 @@ export function ActivityHeatmap({
         {tooltip &&
           <>
             <div className="font-bold">{formatTooltipHeader(tooltip.day)}</div>
-            <div className="flex gap-2 align-middle">
-              <div className="w-[11px] h-[11px] my-auto rounded-full" style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]! }}></div>
-              <div>{formatTooltipValue(tooltip.day)}</div>
-            </div>
+            <p>
+              <span className="relative w-[11px] h-[11px] pr-4 inline-flex">
+                <span className="absolute top-[2px] left-0 w-[11px] h-[11px] rounded-full self-center" style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]! }}></span>
+              </span>
+              {`${valueLabel ?? "Count"}: ${tooltip.day.count}`}
+            </p>
           </>}
       </div>}
     </div>

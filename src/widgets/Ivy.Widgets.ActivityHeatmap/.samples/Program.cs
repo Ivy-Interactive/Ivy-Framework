@@ -22,6 +22,7 @@ class ActivityHeatmapDemo : ViewBase
              DateOnly.FromDateTime(DateTime.Today)));
         var startDate = nullableRange.Value.Item1;
         var endDate = nullableRange.Value.Item2;
+        var valueLabel = UseState("My custom value label");
 
         var rng = new Random(42);
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -66,10 +67,11 @@ class ActivityHeatmapDemo : ViewBase
     .Data(data)
     .ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
     .ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
+    .ValueLabel(""{valueLabel.Value}"")
     .StartDate(DateOnly.Parse({$"\"{startDate}\""}))
     .EndDate(DateOnly.Parse({$"\"{endDate}\""}))
     .ColorScheme(Colors.{selectedColor.Value})
-    .OnDayClick(day => Console.WriteLine(...));")
+    .OnDayClick(day => Console.WriteLine(...)); ")
 
             | (Layout
                 .Horizontal()
@@ -80,17 +82,27 @@ class ActivityHeatmapDemo : ViewBase
                 | (Layout.Horizontal().Gap(2).Width(Size.Grow())
                     | showDayLabels.ToBoolInput().Label("Show day labels")
                     | showMonthLabels.ToBoolInput().Label("Show month labels"))
-                | nullableRange.ToDateRangeInput())
+                | nullableRange.ToDateRangeInput()
+                | valueLabel.ToTextInput())
 
-            | new Card(data.ToActivityHeatmap()
-                .Dimension("Days", d => d.Date)
-                .Measure("Downloads", e => e.Sum(d => d.Count))
+            | new Card(new ActivityHeatmap()
+                .Data(data)
                 .StartDate(startDate)
                 .EndDate(endDate)
                 .ColorScheme(selectedColor.Value)
                 .ShowDayLabels(showDayLabels.Value)
                 .ShowMonthLabels(showMonthLabels.Value)
+                .ValueLabel(valueLabel.Value)
                 .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
+
+            | Text.H2("With Builder:")
+            | new CodeBlock(@"data.ToActivityHeatmap()
+    .Dimension(""Days"", d => d.Date)
+    .Measure(""Downloads"", e => e.Sum(d => d.Count));")
+
+            | new Card(data.ToActivityHeatmap()
+                .Dimension("Days", d => d.Date)
+                .Measure("Downloads", e => e.Sum(d => d.Count)))
 
             | new DropDownMenu(@evt =>
                 {

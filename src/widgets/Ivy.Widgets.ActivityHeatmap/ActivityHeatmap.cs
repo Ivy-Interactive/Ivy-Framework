@@ -19,6 +19,8 @@ public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
 
     [Prop] public bool ShowDayLabels { get; init; } = true;
 
+    [Prop] public string ValueLabel { get; init; } = string.Empty;
+
     [Prop] public DateOnly? StartDate { get; init; }
 
     [Prop] public DateOnly? EndDate { get; init; }
@@ -39,6 +41,9 @@ public static class ActivityHeatmapExtensions
 
     public static ActivityHeatmap ShowMonthLabels(this ActivityHeatmap w, bool show = true) =>
         w with { ShowMonthLabels = show };
+
+    public static ActivityHeatmap ValueLabel(this ActivityHeatmap w, string valueLabel) =>
+        w with { ValueLabel = valueLabel };
 
     public static ActivityHeatmap ShowDayLabels(this ActivityHeatmap w, bool show = true) =>
         w with { ShowDayLabels = show };
