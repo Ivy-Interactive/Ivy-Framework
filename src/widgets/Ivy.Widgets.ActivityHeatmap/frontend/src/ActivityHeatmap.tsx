@@ -202,6 +202,8 @@ export function ActivityHeatmap({
 
                 tooltipCoordinates.current = { x: e.clientX, y: e.clientY };
                 if (tooltipDiv.current) {
+                  tooltipDiv.current.style.left = e.clientX + "px";
+                  tooltipDiv.current.style.top = e.clientY + "px";
                   tooltipDiv.current.style.opacity = "1";
                   tooltipDiv.current.style.visibility = "visible";
                 }
