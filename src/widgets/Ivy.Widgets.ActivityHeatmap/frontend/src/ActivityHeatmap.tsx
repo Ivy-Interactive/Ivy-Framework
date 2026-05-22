@@ -1,5 +1,7 @@
+import { useRef, useState } from "react";
 import "./style.css";
 import { ActivityHeatmapProps, Activity } from "./types";
+import { MONTH_NAMES, formatTooltipHeader, formatTooltipValue, getTooltipTransform } from "./tooltipUtils";
 
 function buildColorScheme(baseColor: string): string[] {
   return [
@@ -11,10 +13,10 @@ function buildColorScheme(baseColor: string): string[] {
   ];
 }
 
-const preferredLanguage = navigator.languages.length ? navigator.languages : navigator.language;
-const monthFormatter = new Intl.DateTimeFormat(preferredLanguage, { month: "short" });
-const weekdayFormatter = new Intl.DateTimeFormat(preferredLanguage, { weekday: "short" });
-const MONTH_NAMES = Array.from({ length: 12 }, (_, i) => monthFormatter.format(new Date(0, i)));
+const weekdayFormatter = new Intl.DateTimeFormat(
+  navigator.languages.length ? navigator.languages : navigator.language,
+  { weekday: "short" }
+);
 
 const MONDAY = weekdayFormatter.format(new Date('2025-01-06'));
 const WEDNESDAY = weekdayFormatter.format(new Date('2025-01-08'));
@@ -108,15 +110,6 @@ function buildGridFromRange(
   return weeks;
 }
 
-function formatTooltip(day: Activity): string {
-  const date = new Date(day.date + "T00:00:00");
-  const month = MONTH_NAMES[date.getMonth()];
-  const dayNum = date.getDate();
-  const year = date.getFullYear();
-  const label = day.count === 1 ? "contribution" : "contributions";
-  return `${month} ${dayNum}, ${year} — ${day.count} ${label}`;
-}
-
 export function ActivityHeatmap({
   id,
   events = [],
@@ -133,6 +126,11 @@ export function ActivityHeatmap({
   const maxCount = Math.max(0, ...data.map((d) => d.count));
   const colors = buildColorScheme(`var(--color-${colorScheme.toLowerCase()})`);
   const clickable = events.includes("OnDayClick");
+  const gridContainer = useRef<HTMLDivElement>(null);
+
+  const [tooltip, setTooltip] = useState<{ day: Activity; } | null>(null);
+  const tooltipCoordinates = useRef<{ x: number; y: number } | null>(null);
+  const tooltipDiv = useRef<HTMLDivElement>(null);
 
   // Compute month labels: for each week, check if the first non-null day is the first occurrence of a new month
   const monthLabels: string[] = weeks.map((week, wi) => {
@@ -158,7 +156,7 @@ export function ActivityHeatmap({
   };
 
   return (
-    <div className="flex w-full relative bg-background rounded border-secondary">
+    <div className="flex w-full relative rounded border-secondary bg-card">
       <div className=" overflow-x-auto p-0"
         style={{ direction: "rtl" }}>
         <div className="inline-flex flex-col gap-1 font-sans"
@@ -180,7 +178,7 @@ export function ActivityHeatmap({
 
           <div className="flex gap-1">
             {showDayLabels && (
-              <div className="flex flex-col justify-end absolute left-0 top-0 bottom-0 bg-background">
+              <div className="flex flex-col justify-end absolute left-0 top-0 bottom-0 bg-card">
                 <div
                   className="grid gap-0.5 text-secondary-foreground opacity-50 pt-0.5 *:pr-2 *:text-right"
                   style={{ gridTemplateRows: "repeat(7, 11px)", width: "28px" }}
@@ -196,8 +194,41 @@ export function ActivityHeatmap({
               </div>
             )}
 
-            <div className="flex gap-0.5 "
-              style={{ paddingLeft: showDayLabels ? 28 : 0 }}>
+            <div className="flex gap-0.5"
+              ref={gridContainer}
+              style={{ paddingLeft: showDayLabels ? 28 : 0 }}
+              onMouseEnter={(e) => {
+                if (!showTooltip) return;
+
+                tooltipCoordinates.current = { x: e.clientX, y: e.clientY };
+                if (tooltipDiv.current) {
+                  tooltipDiv.current.style.left = e.clientX + "px";
+                  tooltipDiv.current.style.top = e.clientY + "px";
+                  tooltipDiv.current.style.opacity = "1";
+                  tooltipDiv.current.style.visibility = "visible";
+                }
+              }}
+              onMouseMove={(e) => {
+                if (!showTooltip) return;
+
+                tooltipCoordinates.current = { x: e.clientX, y: e.clientY };
+                if (tooltipDiv.current) {
+                  tooltipDiv.current.style.left = e.clientX + "px";
+                  tooltipDiv.current.style.top = e.clientY + "px";
+                  tooltipDiv.current.style.transform = getTooltipTransform(tooltipDiv.current, tooltipCoordinates.current, gridContainer.current);
+                }
+              }}
+              onMouseLeave={() => {
+                if (!showTooltip) return;
+
+                tooltipCoordinates.current = null;
+                if (tooltipDiv.current) {
+                  tooltipDiv.current.style.opacity = "0";
+                  tooltipDiv.current.style.visibility = "hidden";
+                }
+                setTooltip(null);
+              }}
+            >
               {weeks.map((week, wi) => (
                 <div
                   key={wi}
@@ -207,14 +238,16 @@ export function ActivityHeatmap({
                   {week.map((day, di) => {
                     const level = day ? getLevel(day.count, maxCount) : 0;
                     const bg = colors[level] ?? colors[0]!;
-                    const title =
-                      showTooltip && day ? formatTooltip(day) : undefined;
                     return (
                       <div
-                        key={di}
-                        className={`w-[11px] h-[11px] rounded-sm ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
+                        key={day?.date ?? `${di}-${wi}`}
+                        className={`w-[11px] h-[11px] rounded-sm hover:rounded-none hover:scale-110 ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
                         style={{ backgroundColor: bg }}
-                        title={title}
+                        onMouseEnter={() => {
+                          if (showTooltip && day) {
+                            setTooltip({ day });
+                          }
+                        }}
                         onClick={day ? () => handleClick(day) : undefined}
                       />
                     );
@@ -225,6 +258,25 @@ export function ActivityHeatmap({
           </div>
         </div>
       </div>
+
+      {showTooltip && <div
+        ref={tooltipDiv}
+        className="fixed opacity-0 z-50 bg-card text-xs text-foreground pointer-events-none rounded-[4px] px-2 py-3"
+        style={{
+          minWidth: "180px",
+          boxShadow: "0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1)",
+          transition: "opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, transform 0.3s ease-in-out",
+        }}
+      >
+        {tooltip &&
+          <>
+            <div className="font-bold">{formatTooltipHeader(tooltip.day)}</div>
+            <div className="flex gap-2 align-middle">
+              <div className="w-[11px] h-[11px] my-auto rounded-full" style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]! }}></div>
+              <div>{formatTooltipValue(tooltip.day)}</div>
+            </div>
+          </>}
+      </div>}
     </div>
   );
 }

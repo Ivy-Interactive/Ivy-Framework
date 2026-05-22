@@ -57,15 +57,9 @@ class ActivityHeatmapDemo : ViewBase
 
         return new ActivityHeatmap().Data(data);
     }}
-}}", Languages.Csharp)
-            | (Layout
-                .Vertical()
-                .Gap(2)
-                .Padding(4)
-                .BottomMargin(16)
-                .BorderThickness(1)
-                .BorderRadius(BorderRadius.Rounded)
-                | new ActivityHeatmap().Data(data))
+}}")
+            | new Card(new ActivityHeatmap().Data(data))
+                .WithMargin(0, 0, 0, 16)
 
             | Text.H2("With Optional Properties:")
             | new CodeBlock(@$"new ActivityHeatmap()
@@ -75,7 +69,7 @@ class ActivityHeatmapDemo : ViewBase
     .StartDate(DateOnly.Parse({$"\"{startDate}\""}))
     .EndDate(DateOnly.Parse({$"\"{endDate}\""}))
     .ColorScheme(Colors.{selectedColor.Value})
-    .OnDayClick(day => Console.WriteLine(...));", Languages.Csharp)
+    .OnDayClick(day => Console.WriteLine(...));")
 
             | (Layout
                     .Horizontal()
@@ -88,21 +82,14 @@ class ActivityHeatmapDemo : ViewBase
                         | showMonthLabels.ToBoolInput().Label("Show month labels"))
                     | nullableRange.ToDateRangeInput())
 
-            | (Layout
-                .Vertical()
-                .Gap(2)
-                .Padding(4)
-                .BorderThickness(1)
-                .BorderRadius(BorderRadius.Rounded)
-                | new ActivityHeatmap()
+            | new Card(new ActivityHeatmap()
                     .Data(data)
                     .StartDate(startDate)
                     .EndDate(endDate)
                     .ColorScheme(selectedColor.Value)
                     .ShowDayLabels(showDayLabels.Value)
                     .ShowMonthLabels(showMonthLabels.Value)
-                    .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}"))
-                    )
+                    .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
 
                 | new DropDownMenu(@evt =>
                     {
