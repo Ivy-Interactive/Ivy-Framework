@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import "./style.css";
 import { ActivityHeatmapProps, Activity } from "./types";
+import { computeMaxCount, getLevel } from "./levelUtils";
 import { MONTH_NAMES, formatTooltipHeader, formatTooltipValue, getTooltipTransform } from "./tooltipUtils";
 
 function buildColorScheme(baseColor: string): string[] {
@@ -21,15 +22,6 @@ const weekdayFormatter = new Intl.DateTimeFormat(
 const MONDAY = weekdayFormatter.format(new Date('2025-01-06'));
 const WEDNESDAY = weekdayFormatter.format(new Date('2025-01-08'));
 const FRIDAY = weekdayFormatter.format(new Date('2025-01-10'));
-
-function getLevel(count: number | undefined, maxCount: number): number {
-  const normalizedCount = count ?? 0;
-  if (normalizedCount === 0 || maxCount === 0) return 0;
-  if (normalizedCount <= maxCount * 0.25) return 1;
-  if (normalizedCount <= maxCount * 0.5) return 2;
-  if (normalizedCount <= maxCount * 0.75) return 3;
-  return 4;
-}
 
 function formatLocalDateKey(date: Date): string {
   const year = date.getFullYear();
@@ -124,7 +116,7 @@ export function ActivityHeatmap({
   endDate,
 }: ActivityHeatmapProps) {
   const weeks = buildGrid(data, startDate, endDate);
-  const maxCount = Math.max(0, ...data.map((d) => d.count ?? 0));
+  const maxCount = computeMaxCount(data);
   const colors = buildColorScheme(`var(--color-${colorScheme.toLowerCase()})`);
   const clickable = events.includes("OnDayClick");
   const gridContainer = useRef<HTMLDivElement>(null);
