@@ -132,19 +132,7 @@ export function LogoLoading() {
         }
       }
     }
-  }, [
-    isReverting,
-    forwardStepCount,
-    history,
-    mutableCellIndices,
-    lastMutatedIndices,
-    setIsReverting,
-    setForwardStepCount,
-    setIsPaused,
-    setHistory,
-    setCurrent,
-    setLastMutatedIndices,
-  ]);
+  }, [isReverting, forwardStepCount, history, mutableCellIndices, lastMutatedIndices]);
 
   useEffect(() => {
     if (isPaused) {
@@ -159,7 +147,7 @@ export function LogoLoading() {
   }, [isPaused, performStep]); // STEP_INTERVAL_MS is a const, not needed here if defined outside component scope
 
   return (
-    <div className="grid grid-cols-5 gap-0 w-fit">
+    <div className="grid grid-cols-5 gap-0 w-fit" role="status" aria-label="Loading">
       {current.map((item, index) => {
         const [shapeIndex, colorIndex, rotation] = item;
         const shape = SHAPES[shapeIndex];
