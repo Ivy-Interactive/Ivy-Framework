@@ -72,38 +72,39 @@ class ActivityHeatmapDemo : ViewBase
     .OnDayClick(day => Console.WriteLine(...));")
 
             | (Layout
-                    .Horizontal()
-                    .Gap(2)
-                    | (Layout.Horizontal().Gap(2).Width(Size.Fit())
-                        | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
-                        | Text.P(selectedColor.Value.ToString()))
-                    | (Layout.Horizontal().Gap(2).Width(Size.Grow())
-                        | showDayLabels.ToBoolInput().Label("Show day labels")
-                        | showMonthLabels.ToBoolInput().Label("Show month labels"))
-                    | nullableRange.ToDateRangeInput())
+                .Horizontal()
+                .Gap(2)
+                | (Layout.Horizontal().Gap(2).Width(Size.Fit())
+                    | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
+                    | Text.P(selectedColor.Value.ToString()))
+                | (Layout.Horizontal().Gap(2).Width(Size.Grow())
+                    | showDayLabels.ToBoolInput().Label("Show day labels")
+                    | showMonthLabels.ToBoolInput().Label("Show month labels"))
+                | nullableRange.ToDateRangeInput())
 
-            | new Card(new ActivityHeatmap()
-                    .Data(data)
-                    .StartDate(startDate)
-                    .EndDate(endDate)
-                    .ColorScheme(selectedColor.Value)
-                    .ShowDayLabels(showDayLabels.Value)
-                    .ShowMonthLabels(showMonthLabels.Value)
-                    .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
+            | new Card(data.ToActivityHeatmap()
+                .Dimension("Days", d => d.Date)
+                .Measure("Downloads", e => e.Sum(d => d.Count))
+                .StartDate(startDate)
+                .EndDate(endDate)
+                .ColorScheme(selectedColor.Value)
+                .ShowDayLabels(showDayLabels.Value)
+                .ShowMonthLabels(showMonthLabels.Value)
+                .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
 
-                | new DropDownMenu(@evt =>
+            | new DropDownMenu(@evt =>
+                {
+                    ThemeMode selectedTheme = @evt.Value switch
                     {
-                        ThemeMode selectedTheme = @evt.Value switch
-                        {
-                            "Light" => ThemeMode.Light,
-                            "Dark" => ThemeMode.Dark,
-                            _ => ThemeMode.System,
-                        };
-                        client.SetThemeMode(selectedTheme);
-                    },
-                    new Button("Theme").Variant(ButtonVariant.Link).Icon(Icons.SunMoon),
-                    MenuItem.Default("Light").Icon(Icons.Sun),
-                    MenuItem.Default("Dark").Icon(Icons.Moon),
-                    MenuItem.Default("System").Icon(Icons.Computer));
+                        "Light" => ThemeMode.Light,
+                        "Dark" => ThemeMode.Dark,
+                        _ => ThemeMode.System,
+                    };
+                    client.SetThemeMode(selectedTheme);
+                },
+                new Button("Theme").Variant(ButtonVariant.Link).Icon(Icons.SunMoon),
+                MenuItem.Default("Light").Icon(Icons.Sun),
+                MenuItem.Default("Dark").Icon(Icons.Moon),
+                MenuItem.Default("System").Icon(Icons.Computer));
     }
 }
