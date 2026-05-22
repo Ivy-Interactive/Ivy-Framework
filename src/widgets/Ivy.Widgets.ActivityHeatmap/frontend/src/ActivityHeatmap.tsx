@@ -284,7 +284,7 @@ export function ActivityHeatmap({
 function getTooltipTransform(tooltipDiv: HTMLDivElement | null, tooltipCoordinates: { x: number; y: number }, gridContainer: HTMLDivElement | null): string {
   if (!tooltipDiv || !gridContainer) return "translate(0px, 0px)";
   const gridRect = gridContainer.getBoundingClientRect();
-  const xOffset = tooltipCoordinates.x > gridRect.left + gridRect.width / 2 ? -200 : 12;
-  const yOffset = tooltipCoordinates.y > window.innerHeight / 2 ? -80 : 12;
+  const xOffset = tooltipCoordinates.x > gridRect.left + gridRect.width / 2 ? -(tooltipDiv.offsetWidth + 20) : 20;
+  const yOffset = tooltipCoordinates.y > window.innerHeight / 2 ? -(tooltipDiv.offsetHeight + 20) : 20;
   return `translate(${xOffset}px, ${yOffset}px)`;
 }
