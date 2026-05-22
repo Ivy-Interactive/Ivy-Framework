@@ -35,16 +35,32 @@ jobs:
       - name: Build backend
         run: dotnet build src/Ivy.Docs/Ivy.Docs.csproj
 
+      # Only Chromium is used (see playwright.config.ts). Cache browsers to avoid
+      # re-downloading ~500MB and slow apt installs on every run.
+      - name: Get Playwright version
+        id: playwright-version
+        working-directory: ./src/frontend
+        run: echo "version=$(node -p "require('./package.json').devDependencies['@playwright/test']")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-chromium-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 15
+        working-directory: ./src/frontend
+        run: pnpm exec playwright install chromium --with-deps
+
       - name: Start backend server
         run: |
           dotnet run --project src/Ivy.Docs/Ivy.Docs.csproj -- --port 5010 --silent &
           echo $! > backend.pid
           # Wait for server to be ready
           timeout 30 bash -c 'until curl -fk https://localhost:5010/ > /dev/null 2>&1; do sleep 1; done'
-
-      - name: Install Playwright Browsers
-        working-directory: ./src/frontend
-        run: npx playwright install --with-deps
 
       - name: Run Playwright tests for Docs
         working-directory: ./src/frontend
