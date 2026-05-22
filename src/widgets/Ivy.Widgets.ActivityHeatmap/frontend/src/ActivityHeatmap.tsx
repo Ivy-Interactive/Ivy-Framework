@@ -240,7 +240,7 @@ export function ActivityHeatmap({
                     const bg = colors[level] ?? colors[0]!;
                     return (
                       <div
-                        key={di}
+                        key={day?.date ?? `${di}-${wi}`}
                         className={`w-[11px] h-[11px] rounded-sm hover:rounded-none hover:scale-110 ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
                         style={{ backgroundColor: bg }}
                         onMouseEnter={() => {
