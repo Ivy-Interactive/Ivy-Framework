@@ -1,5 +1,7 @@
 import { cva } from "class-variance-authority";
 
+import { controlHeight, controlSize, densityText } from "../density-scale";
+
 export const buttonVariant = cva(
   "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-field font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
   {
@@ -19,11 +21,11 @@ export const buttonVariant = cva(
         ai: "bg-background  hover:bg-accent hover:text-accent-foreground",
       },
       size: {
-        default: "h-8 px-4 py-2 text-sm",
-        sm: "h-6 rounded-field px-3 text-xs",
-        lg: "h-10 rounded-field px-8 text-base",
-        icon: "size-8 shrink-0",
-        "icon-sm": "size-6 shrink-0",
+        default: `${controlHeight.Medium} px-4 ${densityText.Medium}`,
+        sm: `${controlHeight.Small} rounded-field px-3 ${densityText.Small}`,
+        lg: `${controlHeight.Large} rounded-field px-8 ${densityText.Large}`,
+        icon: `${controlSize.Medium} shrink-0`,
+        "icon-sm": `${controlSize.Small} shrink-0`,
       },
     },
     defaultVariants: {
