@@ -128,7 +128,9 @@ export function ActivityHeatmap({
   const clickable = events.includes("OnDayClick");
   const gridContainer = useRef<HTMLDivElement>(null);
 
-  const [tooltip, setTooltip] = useState<{ day: Activity; x: number; y: number } | null>(null);
+  const [tooltip, setTooltip] = useState<{ day: Activity; } | null>(null);
+  const tooltipCoordinates = useRef<{ x: number; y: number } | null>(null);
+  const tooltipDiv = useRef<HTMLDivElement>(null);
 
   // Compute month labels: for each week, check if the first non-null day is the first occurrence of a new month
   const monthLabels: string[] = weeks.map((week, wi) => {
@@ -195,10 +197,36 @@ export function ActivityHeatmap({
             <div className="flex gap-0.5"
               ref={gridContainer}
               style={{ paddingLeft: showDayLabels ? 28 : 0 }}
-              onMouseMove={(e) => {
-                if (tooltip) setTooltip((t) => t && { ...t, x: e.clientX, y: e.clientY });
+              onMouseEnter={(e) => {
+                if (!showTooltip) return;
+
+                tooltipCoordinates.current = { x: e.clientX, y: e.clientY };
+                if (tooltipDiv.current) {
+                  tooltipDiv.current.style.opacity = "1";
+                  tooltipDiv.current.style.visibility = "visible";
+                }
               }}
-              onMouseLeave={() => setTooltip(null)}>
+              onMouseMove={(e) => {
+                if (!showTooltip) return;
+
+                tooltipCoordinates.current = { x: e.clientX, y: e.clientY };
+                if (tooltipDiv.current) {
+                  tooltipDiv.current.style.left = e.clientX + "px";
+                  tooltipDiv.current.style.top = e.clientY + "px";
+                  tooltipDiv.current.style.transform = getTooltipTransform(tooltipDiv.current, tooltipCoordinates.current, gridContainer.current);
+                }
+              }}
+              onMouseLeave={() => {
+                if (!showTooltip) return;
+
+                tooltipCoordinates.current = null;
+                if (tooltipDiv.current) {
+                  tooltipDiv.current.style.opacity = "0";
+                  tooltipDiv.current.style.visibility = "hidden";
+                }
+                setTooltip(null);
+              }}
+            >
               {weeks.map((week, wi) => (
                 <div
                   key={wi}
@@ -211,11 +239,11 @@ export function ActivityHeatmap({
                     return (
                       <div
                         key={di}
-                        className={`w-[11px] h-[11px] rounded-sm hover:rounded-none hover:scale-110 transition-transform duration-300 ease-in-out ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
+                        className={`w-[11px] h-[11px] rounded-sm hover:rounded-none hover:scale-110 transition-all duration-300 ease-in-out ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
                         style={{ backgroundColor: bg }}
-                        onMouseEnter={(e) => {
+                        onMouseEnter={() => {
                           if (showTooltip && day) {
-                            setTooltip({ day, x: e.clientX, y: e.clientY });
+                            setTooltip({ day });
                           }
                         }}
                         onClick={day ? () => handleClick(day) : undefined}
@@ -229,26 +257,32 @@ export function ActivityHeatmap({
         </div>
       </div>
 
-      {tooltip && (
-        <div
-          className="fixed z-50 bg-card text-xs text-foreground pointer-events-none rounded-[4px] px-2 py-3 transition-transform duration-300 ease-in-out"
-          style={{
-            left: tooltip.x,
-            transform: `translate(${((tooltip.x > (gridContainer.current?.getBoundingClientRect().right ?? 0) / 2) ? -200 : 12)}px, ${tooltip.y > (window.innerHeight / 2) ? -80 : 12}px)`,
-            top: tooltip.y,
-            minWidth: "180px",
-            boxShadow: "0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1)",
-          }}
-        >
-          <div className="font-bold">
-            {formatTooltipHeader(tooltip.day)}
-          </div>
-          <div className="flex gap-2 align-middle">
-            <div className="w-[11px] h-[11px] my-auto rounded-full" style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]! }}></div>
-            <div>{formatTooltipValue(tooltip.day)}</div>
-          </div>
-        </div>
-      )}
+      {showTooltip && <div
+        ref={tooltipDiv}
+        className="fixed opacity-0 visibility-hidden z-50 bg-card text-xs text-foreground pointer-events-none rounded-[4px] px-2 py-3"
+        style={{
+          minWidth: "180px",
+          boxShadow: "0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1)",
+          transition: "opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, transform 0.3s ease-in-out",
+        }}
+      >
+        {tooltip &&
+          <>
+            <div className="font-bold">{formatTooltipHeader(tooltip.day)}</div>
+            <div className="flex gap-2 align-middle">
+              <div className="w-[11px] h-[11px] my-auto rounded-full" style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]! }}></div>
+              <div>{formatTooltipValue(tooltip.day)}</div>
+            </div>
+          </>}
+      </div>}
     </div>
   );
+}
+
+function getTooltipTransform(tooltipDiv: HTMLDivElement | null, tooltipCoordinates: { x: number; y: number }, gridContainer: HTMLDivElement | null): string {
+  if (!tooltipDiv || !gridContainer) return "translate(0px, 0px)";
+  const gridRect = gridContainer.getBoundingClientRect();
+  const xOffset = tooltipCoordinates.x > gridRect.left + gridRect.width / 2 ? -200 : 12;
+  const yOffset = tooltipCoordinates.y > window.innerHeight / 2 ? -80 : 12;
+  return `translate(${xOffset}px, ${yOffset}px)`;
 }
