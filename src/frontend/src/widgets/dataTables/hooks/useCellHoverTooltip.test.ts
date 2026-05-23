@@ -25,14 +25,13 @@ describe("useCellHoverTooltip", () => {
     expect(kindCheck).not.toBeNull();
   });
 
-  it("should expose virtualRef and clearCellHoverTooltip", () => {
-    expect(hookSource).toContain("virtualRef");
+  it("should expose clearCellHoverTooltip", () => {
     expect(hookSource).toContain("clearCellHoverTooltip");
-    expect(hookSource).toContain("getBoundingClientRect");
   });
 
-  it("should position tooltip at the center-top of the hovered cell", () => {
+  it("should position tooltip anchor at the center-top of the hovered cell", () => {
     expect(hookSource).toContain("args.bounds.x + args.bounds.width / 2");
     expect(hookSource).toContain("y: args.bounds.y");
+    expect(hookSource).not.toContain("args.bounds.y + args.bounds.height");
   });
 });

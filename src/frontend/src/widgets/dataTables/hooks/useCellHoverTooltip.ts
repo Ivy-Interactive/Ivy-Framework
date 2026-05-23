@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { GridCellKind, GridMouseEventArgs, Item } from "@glideapps/glide-data-grid";
 import { GridCell } from "@glideapps/glide-data-grid";
 import { Densities } from "@/types/density";
@@ -48,8 +48,6 @@ export const useCellHoverTooltip = ({
   const cellHorizontalPadding = DENSITY_CONFIG[density].cellHorizontalPadding;
 
   const [tooltip, setTooltip] = useState<CellHoverTooltipState | null>(null);
-  const tooltipRef = useRef(tooltip);
-  tooltipRef.current = tooltip;
 
   const onItemHovered = useCallback(
     (args: GridMouseEventArgs) => {
@@ -129,27 +127,13 @@ export const useCellHoverTooltip = ({
     ],
   );
 
-  const virtualRef = useMemo(
-    () => ({
-      getBoundingClientRect: () => {
-        const pos = tooltipRef.current;
-        const x = pos?.x ?? 0;
-        const y = pos?.y ?? 0;
-        return new DOMRect(x, y, 0, 0);
-      },
-    }),
-    [],
-  );
-
   const clearCellHoverTooltip = useCallback(() => {
     setTooltip(null);
   }, []);
 
   return {
     cellTooltip: tooltip,
-    isCellTooltipOpen: tooltipSupported && tooltip !== null,
     supportsHoverTooltip: tooltipSupported,
-    virtualRef,
     onItemHovered,
     clearCellHoverTooltip,
   };
