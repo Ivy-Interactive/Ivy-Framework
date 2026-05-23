@@ -18,6 +18,7 @@ public class BarChartApp : SampleBase
             | new BarChart8()
             | new BarChart9()
             | new BarChart10()
+            | new BarChart11()
         ;
     }
 }
@@ -315,5 +316,36 @@ public class BarChart10 : ViewBase
                     .Domain(-0.1, 0.2))
                 .Legend()
         ;
+    }
+}
+
+public class BarChart11 : ViewBase
+{
+    public override object? Build()
+    {
+        var start = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-179));
+        var data = Enumerable.Range(0, 180)
+            .Select(i =>
+            {
+                var day = start.AddDays(i);
+                var wave = (int)(35 * Math.Sin(i / 12.0));
+                var trend = i / 3;
+                return new
+                {
+                    Day = day.ToString("MMM dd"),
+                    Downloads = 90 + wave + trend + (i % 7),
+                };
+            })
+            .ToArray();
+
+        return new Card().Title("High Density (180 Days)")
+            | new BarChart(data)
+                .ColorScheme(ColorScheme.Default)
+                .Bar(new Bar("Downloads", 1).Radius(2))
+                .CartesianGrid(new CartesianGrid().Horizontal())
+                .Tooltip()
+                .XAxis(new XAxis("Day").TickLine(false).AxisLine(false).MinTickGap(10))
+                .YAxis(new YAxis("Downloads").TickLine(false).AxisLine(false))
+                .Toolbox();
     }
 }

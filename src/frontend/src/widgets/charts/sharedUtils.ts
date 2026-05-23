@@ -471,6 +471,7 @@ export const generateXAxis = (
   cartesianGrid?: CartesianGridProps,
 ) => {
   const axis = xAxis?.[0] || ({} as XAxisProps);
+  const grid = cartesianGrid ? applyDefaults(cartesianGrid, CARTESIAN_GRID_DEFAULTS) : null;
   const allowDataOverflow = axis.allowDataOverflow ?? false;
 
   const minOpt = getAxisDomainBound("min", axis.domainMin, allowDataOverflow);
@@ -524,9 +525,13 @@ export const generateXAxis = (
             }
             return axis.unit ? `${formatted}${axis.unit}` : formatted;
           },
-      // Ivy MinTickGap is a pixel gap (Recharts-style), not ECharts label index interval.
-      // Mapping it to interval: 5 hid every 6th category — only the first bar label appeared.
-      ...(isCategoryAxis ? { interval: 0, hideOverlap: true } : { interval: "auto" as const }),
+      ...(isCategoryAxis
+        ? {
+            interval: "auto" as const,
+            hideOverlap: true,
+            ...(axis.minTickGap != null ? { minTickGap: axis.minTickGap } : {}),
+          }
+        : { interval: "auto" as const }),
       ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
     },
     axisLine: {
@@ -546,7 +551,8 @@ export const generateXAxis = (
       },
     },
     splitLine: {
-      show: true,
+      show: isCategoryAxis || !!grid?.vertical,
+      ...(isCategoryAxis && { interval: "auto" as const }),
       lineStyle: {
         type: "dashed",
         color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
@@ -581,6 +587,7 @@ export const generateYAxis = (
   cartesianGrid?: CartesianGridProps,
 ) => {
   const safeTransform = transformValue ?? ((v: number) => v);
+  const grid = cartesianGrid ? applyDefaults(cartesianGrid, CARTESIAN_GRID_DEFAULTS) : null;
 
   const buildAxisConfig = (axis: YAxisProps, skipLargeSpread: boolean = false) => {
     const effectiveLargeSpread = largeSpread && !skipLargeSpread;
@@ -655,7 +662,7 @@ export const generateYAxis = (
         },
       },
       splitLine: {
-        show: true,
+        show: axis.orientation !== "Right" && (grid?.horizontal ?? true),
         lineStyle: {
           type: "dashed",
           color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,

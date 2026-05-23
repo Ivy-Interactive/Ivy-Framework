@@ -350,9 +350,10 @@ describe("generateXAxis", () => {
     expect(formatted).toBe("500kg");
   });
 
-  it("should show all category labels (not map minTickGap to label index interval)", () => {
+  it("uses minTickGap as pixel gap and auto interval on category axes (not index step)", () => {
     const result = generateXAxis("bar", ["Q1", "Q2", "Q3", "Q4"], [{ minTickGap: 5 }], true);
-    expect(result.axisLabel).toMatchObject({ interval: 0, hideOverlap: true });
+    expect(result.axisLabel).toMatchObject({ interval: "auto", hideOverlap: true, minTickGap: 5 });
+    expect(result.splitLine).toMatchObject({ interval: "auto" });
   });
 
   describe("axisPointer.label.formatter", () => {
