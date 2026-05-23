@@ -11,7 +11,11 @@ export interface DataTableHeaderProps {
 }
 
 export const DataTableHeader: React.FC<DataTableHeaderProps> = ({ children, className }) => {
-  return <div className={cn("w-full", className)}>{children}</div>;
+  return (
+    <div className={cn("w-full shrink-0", className)} style={{ flexShrink: 0 }}>
+      {children}
+    </div>
+  );
 };
 
 /**

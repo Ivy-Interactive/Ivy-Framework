@@ -132,6 +132,12 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
     baseStyles.flexWrap = "wrap";
   }
 
+  const primaryHeight = height?.split(",")[0]?.toLowerCase();
+  if (primaryHeight?.startsWith("full")) {
+    baseStyles.minHeight = 0;
+    baseStyles.maxHeight = "100%";
+  }
+
   if (!visible) {
     return null;
   }

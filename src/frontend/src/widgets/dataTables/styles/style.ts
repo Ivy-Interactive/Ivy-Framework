@@ -38,7 +38,6 @@ export const tableStyles = {
     gridContainer: {
       flex: 1,
       minHeight: 0,
-      height: "100%",
       width: "100%",
       border: "1px solid var(--border)",
       borderRadius: "var(--radius-boxes)",
@@ -47,7 +46,6 @@ export const tableStyles = {
     gridContainerWithOptions: {
       flex: 1,
       minHeight: 0,
-      height: "100%",
       width: "100%",
       border: "1px solid var(--border)",
       borderRadius: "var(--radius-boxes)",
