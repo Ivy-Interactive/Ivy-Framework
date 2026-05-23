@@ -188,13 +188,12 @@ public class BarChart6 : ViewBase
 
         return new Card().Title("TickFormatter (Currency Format)")
             | new BarChart(data)
-                .Horizontal()
                 .ColorScheme(ColorScheme.Default)
-                .Bar(new Bar("Revenue", 1).Radius(0, 8, 8, 0))
+                .Bar(new Bar("Revenue", 1).Radius(8))
                 .CartesianGrid(new CartesianGrid())
                 .Tooltip()
-                .YAxis(new YAxis("Month"))
-                .XAxis(new XAxis("Revenue").TickFormatter("C0", TickFormatterType.Number).Domain(0, 80000))
+                .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
+                .YAxis(new YAxis("Revenue").TickFormatter("C0", TickFormatterType.Number).Domain(0, 80000))
                 .Legend();
     }
 }
