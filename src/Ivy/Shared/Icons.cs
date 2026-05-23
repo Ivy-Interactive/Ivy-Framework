@@ -36,6 +36,7 @@ public enum Icons
     OpenAI,    // OpenAI / Codex
     ClaudeCode, // Anthropic Claude
     Gemini,    // Google Gemini
+    Antigravity, // Google AI coder (Jules)
     OpenCode,  // Generic open-source coding
 
     // Lucide Icons (1000+ scalable vector icons):

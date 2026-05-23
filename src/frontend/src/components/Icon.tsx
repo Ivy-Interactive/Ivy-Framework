@@ -32,6 +32,23 @@ interface IconProps {
   style?: React.CSSProperties;
 }
 
+const AntigravityIcon = ({ size, color, style, className }: IconProps) => (
+  <svg
+    width={size || 24}
+    height={size || 24}
+    viewBox="-4 -4.5 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={style}
+    className={className}
+  >
+    <path
+      d="M14.0777 13.984C14.945 14.6345 16.2458 14.2008 15.0533 13.0084C11.476 9.53949 12.2349 0 7.79033 0C3.34579 0 4.10461 9.53949 0.527295 13.0084C-0.773543 14.3092 0.635692 14.6345 1.50293 13.984C4.86344 11.7076 4.64663 7.69664 7.79033 7.69664C10.934 7.69664 10.7172 11.7076 14.0777 13.984Z"
+      fill={color || "currentColor"}
+    />
+  </svg>
+);
+
 const OpenCodeIcon = ({ size, color, style, className }: IconProps) => (
   <svg
     width={size || 24}
@@ -68,6 +85,10 @@ const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
 
   if (name === "IvyCorner") {
     return <IvyCornerIcon size={size} color={color} style={style} className={cn(className)} />;
+  }
+
+  if (name === "Antigravity") {
+    return <AntigravityIcon size={size} color={color} style={style} className={cn(className)} />;
   }
 
   if (name === "OpenCode") {
