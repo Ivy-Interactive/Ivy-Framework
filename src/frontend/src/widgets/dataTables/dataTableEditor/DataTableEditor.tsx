@@ -182,6 +182,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Cell hover tooltips (truncated text + link hint)
   const {
     cellTooltip,
+    cellTooltipStyle,
     onItemHovered: onCellTooltipHovered,
     supportsHoverTooltip,
     clearCellHoverTooltip,
@@ -418,19 +419,13 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     footer
   );
 
-  const cellTooltipGap = 8;
   const cellTooltipNode =
-    supportsHoverTooltip && cellTooltip
+    supportsHoverTooltip && cellTooltip && cellTooltipStyle
       ? createPortal(
           <div
             role="tooltip"
             className="pointer-events-none fixed z-50 max-w-sm overflow-hidden rounded-selector border border-border bg-popover px-3 py-1.5 text-xs text-popover-foreground shadow-md whitespace-pre-wrap break-words"
-            style={{
-              left: cellTooltip.x,
-              top: cellTooltip.y - cellTooltipGap,
-              transform: "translate(-50%, -100%)",
-              maxHeight: Math.max(0, cellTooltip.y - cellTooltipGap),
-            }}
+            style={cellTooltipStyle}
           >
             <div className="overflow-y-auto break-words">{cellTooltip.content}</div>
             {cellTooltip.hint ? (
