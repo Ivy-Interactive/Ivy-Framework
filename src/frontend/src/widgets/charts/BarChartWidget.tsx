@@ -100,6 +100,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   const styles: React.CSSProperties = {
     ...getWidth(width),
     position: "relative",
+    overflow: "hidden",
     ...(isFull ? { display: "flex", flexDirection: "column", height: "100%" } : {}),
   };
 
@@ -205,11 +206,28 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   );
 
   const isVertical = layout?.toLowerCase() === "vertical";
+  const hasToolbox = !!toolbox && toolbox.enabled !== false;
 
   // Memoize option configuration
-  const option = useMemo(
-    () => ({
-      grid: generateEChartGrid(cartesianGrid, !!toolbox && toolbox.enabled !== false, yAxis, xAxis),
+  const option = useMemo(() => {
+    const legendOption = generateEChartLegend(legend, {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+    });
+    const showLegend = legend != null;
+    const legendConfig = showLegend
+      ? { ...legendOption, show: true }
+      : { ...legendOption, show: false };
+
+    const grid = generateEChartGrid(cartesianGrid, hasToolbox, yAxis, xAxis);
+    const gridBottom = typeof grid.bottom === "number" ? grid.bottom : 50;
+    const gridConfig =
+      showLegend && legendConfig.top === "bottom"
+        ? { ...grid, bottom: Math.max(gridBottom, 40) }
+        : grid;
+
+    return {
+      grid: gridConfig,
       color: chartColors,
       textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
       xAxis: generateXAxis(
@@ -238,10 +256,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         cartesianGrid,
       ),
       series,
-      legend: generateEChartLegend(legend, {
-        foreground: themeColors.foreground,
-        fontSans: themeColors.fontSans,
-      }),
+      legend: legendConfig,
       tooltip: {
         ...generateTooltip(tooltip, "shadow", {
           foreground: themeColors.foreground,
@@ -275,25 +290,25 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         },
       },
       toolbox: generateEChartToolbox(toolbox),
-    }),
-    [
-      cartesianGrid,
-      chartColors,
-      themeColors,
-      categories,
-      xAxis,
-      isVertical,
-      largeSpread,
-      transform,
-      minValue,
-      maxValue,
-      yAxis,
-      series,
-      legend,
-      tooltip,
-      toolbox,
-    ],
-  );
+    };
+  }, [
+    cartesianGrid,
+    hasToolbox,
+    chartColors,
+    themeColors,
+    categories,
+    xAxis,
+    isVertical,
+    largeSpread,
+    transform,
+    minValue,
+    maxValue,
+    yAxis,
+    series,
+    legend,
+    tooltip,
+    toolbox,
+  ]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const handleChartReady = useCallback(() => {
