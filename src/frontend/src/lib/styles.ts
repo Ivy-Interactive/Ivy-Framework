@@ -123,6 +123,20 @@ export const getAspectRatio = (aspectRatio?: number): React.CSSProperties => {
   return { aspectRatio: aspectRatio };
 };
 
+/** Primary size token (before comma), type segment only (before colon). Matches getHeight/getWidth. */
+export function getWantedSizeType(size?: string): string | undefined {
+  if (!size) return undefined;
+  const [primary] = size.split(",");
+  const trimmed = primary?.trim();
+  if (!trimmed) return undefined;
+  const [sizeType] = trimmed.split(":");
+  return sizeType?.toLowerCase();
+}
+
+export function isFullSize(size?: string): boolean {
+  return getWantedSizeType(size) === "full";
+}
+
 export const getHeight = (height?: string): React.CSSProperties => {
   if (!height) return {};
 
