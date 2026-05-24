@@ -11,7 +11,6 @@ public class DataTableApp : SampleBase
             new Tab("Footer", new DataTableFooterSample()),
             new Tab("Multi Agg", new DataTableMultiAggSample()),
             new Tab("Density", new DataTableDensitySample()),
-            new Tab("Cell Tooltip", new DataTableCellTooltipSample()),
             new Tab("Million Rows", new DataTablesMillionRowsSample())
         ).Variant(TabsVariant.Content);
     }
@@ -394,74 +393,6 @@ public class DataTableDensitySample : ViewBase
                 | new Button("Large").OnClick(_ => density.Set(Density.Large))
                     .Variant(density.Value == Density.Large ? ButtonVariant.Primary : ButtonVariant.Outline).Small()
             | table;
-    }
-}
-
-public record CellTooltipRow(
-    string Status,
-    string Plan,
-    string Prompt,
-    string Type,
-    string Project,
-    string Timer,
-    string DocsLink
-);
-
-public class DataTableCellTooltipSample : ViewBase
-{
-    private const string LongPrompt =
-        "You are an expert assistant. Summarize the following in three bullet points, cite sources, "
-        + "and keep the tone professional. Do not invent facts. If context is missing, ask clarifying "
-        + "questions before answering. Prefer concise paragraphs over walls of text.";
-
-    private const string LongPlan =
-        "Enterprise tier — unlimited seats, SSO, audit logs, dedicated support SLA, custom retention policies";
-
-    public override object? Build()
-    {
-        var rows = Enumerable.Range(1, 40)
-            .Select(i => new CellTooltipRow(
-                Status: i % 3 == 0 ? "In progress" : i % 3 == 1 ? "Done" : "Blocked",
-                Plan: LongPlan,
-                Prompt: $"{LongPrompt} (row {i})",
-                Type: i % 2 == 0 ? "Completion" : "Chat",
-                Project: $"Project {(char)('A' + (i % 5))} — quarterly rollout and migration checklist",
-                Timer: $"{(i * 3) % 60:D2}:{(i * 7) % 60:D2}",
-                DocsLink: "https://docs.ivy.app/widgets/advanced/data-table"
-            ))
-            .AsQueryable();
-
-        return Layout.Vertical().Width(Size.Full()).Height(Size.Full()).Gap(3)
-            | Text.P(
-                "Hover truncated cells to preview the full value. Tooltips flip based on viewport space: "
-                    + "cells near the top of the window show the tooltip below the cell; cells near the bottom show it above. "
-                    + "Scroll the table and try both areas — the cell stays clickable in either case.")
-                .Muted()
-            | rows.ToDataTable()
-                .Header(x => x.Status, "Status")
-                .Header(x => x.Plan, "Plan")
-                .Header(x => x.Prompt, "Prompt")
-                .Header(x => x.Type, "Type")
-                .Header(x => x.Project, "Project")
-                .Header(x => x.Timer, "Timer")
-                .Header(x => x.DocsLink, "Docs")
-                .Width(x => x.Status, Size.Px(90))
-                .Width(x => x.Plan, Size.Px(140))
-                .Width(x => x.Prompt, Size.Px(160))
-                .Width(x => x.Type, Size.Px(100))
-                .Width(x => x.Project, Size.Px(180))
-                .Width(x => x.Timer, Size.Px(70))
-                .Width(x => x.DocsLink, Size.Px(120))
-                .Renderer(x => x.DocsLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
-                .Config(config =>
-                {
-                    config.AllowColumnResizing = true;
-                    config.ShowSearch = false;
-                    config.ShowGroups = false;
-                    config.ShowIndexColumn = true;
-                })
-                .Width(Size.Full())
-                .Height(Size.Full());
     }
 }
 
