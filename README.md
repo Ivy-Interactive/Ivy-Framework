@@ -20,6 +20,10 @@ No frontend/backend split, no HTML/CSS/JS - just write type-safe C# code and shi
 We use Ivy internally to build our products:
 
 * [Ivy Tendril - AI Coding Orchestration for Happy Developers](https://tendril.ivy.app)
+  * [Getting Started](https://tendril.ivy.app/getting-started/introduction) — Installation and first steps
+  * [Concepts](https://tendril.ivy.app/concepts/plans) — Plans, Promptwares, and Lifecycle
+  * [Configuration](https://tendril.ivy.app/configuration/setup) — Setup and project configuration
+  * [Integrations](https://tendril.ivy.app/integrations/github) — GitHub, Claude Code, Codex, and more
 
 ## Simple Example
 
