@@ -150,8 +150,8 @@ export function ActivityHeatmap({
   };
 
   return (
-    <div className="flex w-full relative rounded border-secondary bg-card">
-      <div className=" overflow-x-auto p-0"
+    <div className="ivy-activity-heatmap-container">
+      <div className="overflow-x-auto p-0"
         style={{ direction: "rtl" }}>
         <div className="inline-flex flex-col gap-1 font-sans"
           style={{ direction: "ltr" }}>
