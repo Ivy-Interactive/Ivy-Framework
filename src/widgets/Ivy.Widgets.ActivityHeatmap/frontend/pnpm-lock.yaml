@@ -51,6 +51,9 @@ importers:
       vite-plus:
         specifier: 0.1.20
         version: 0.1.20(@voidzero-dev/vite-plus-core@0.1.20(jiti@1.21.7)(typescript@5.9.3))(jiti@1.21.7)(typescript@5.9.3)
+      vitest:
+        specifier: npm:@voidzero-dev/vite-plus-test@0.1.20
+        version: '@voidzero-dev/vite-plus-test@0.1.20(@voidzero-dev/vite-plus-core@0.1.20(jiti@1.21.7)(typescript@5.9.3))(jiti@1.21.7)(typescript@5.9.3)'
 
 packages:
 
