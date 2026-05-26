@@ -123,6 +123,20 @@ export const getAspectRatio = (aspectRatio?: number): React.CSSProperties => {
   return { aspectRatio: aspectRatio };
 };
 
+/** Primary size token (before comma), type segment only (before colon). Matches getHeight/getWidth. */
+export function getWantedSizeType(size?: string): string | undefined {
+  if (!size) return undefined;
+  const [primary] = size.split(",");
+  const trimmed = primary?.trim();
+  if (!trimmed) return undefined;
+  const [sizeType] = trimmed.split(":");
+  return sizeType?.toLowerCase();
+}
+
+export function isFullSize(size?: string): boolean {
+  return getWantedSizeType(size) === "full";
+}
+
 export const getHeight = (height?: string): React.CSSProperties => {
   if (!height) return {};
 
@@ -786,14 +800,13 @@ export const typography: Record<string, string> = {
 
 export const articleTypography: Record<string, string> = {
   ...typography,
-  // Headings with specific margins for Articles
-  h1: `text-4xl font-semibold scroll-m-20 mt-12`,
-  h2: `text-3xl font-medium scroll-m-20 mt-10 pb-2 border-b border-border`,
-  h3: `text-2xl font-medium scroll-m-20 mt-7`,
-  h4: `text-xl font-medium scroll-m-20 mt-8`,
+  h1: `text-4xl font-semibold scroll-m-20 mt-6`,
+  h2: `text-3xl font-medium scroll-m-20 mt-5 pb-2 border-b border-border`,
+  h3: `text-2xl font-medium scroll-m-20 mt-4`,
+  h4: `text-xl font-medium scroll-m-20 mt-3`,
   // h5/h6 top margin must stay >= the Article flex gap (Gap prop default 5 = 1.25rem)
-  h5: `text-lg font-medium scroll-m-20 mt-6`,
-  h6: `text-base font-medium scroll-m-20 mt-6`,
+  h5: `text-lg font-medium scroll-m-20 mt-3`,
+  h6: `text-base font-medium scroll-m-20 mt-3`,
 
   // Slightly increased line height for article body text (readability)
   p: `${typography.p} leading-relaxed`,

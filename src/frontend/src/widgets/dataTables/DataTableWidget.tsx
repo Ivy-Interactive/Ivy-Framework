@@ -15,6 +15,7 @@ import { Densities } from "@/types/density";
 import { TableProps, DataTableConfig } from "./types/types";
 import { getWidth, getHeight } from "@/lib/styles";
 import { applyConfigDefaults, applyColumnsDefaults } from "./DataTableDefaults";
+import { getDataTableMinHeight } from "./dataTableLayout";
 import type { SpriteMap } from "@glideapps/glide-data-grid";
 
 interface TableLayoutProps {
@@ -94,16 +95,31 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
     ...getHeight(height),
   };
 
-  // If height is Full, use flex-based sizing instead of height: 100%.
-  // In unconstrained parents (e.g. Layout.Vertical() with no explicit height),
-  // height: 100% resolves to 0 because the parent has no definite height.
-  // flexGrow fills available space in flex parents. When empty, the table
-  // collapses to just headers with no forced min height.
+  // Shrink with the viewport down to a usable minimum, then let the page scroll.
+  const minHeight = getDataTableMinHeight({
+    density: density ?? Densities.Medium,
+    hasFilter: finalConfig.allowFiltering,
+    hasGroups: finalConfig.showGroups,
+    hasAggregateFooter: hasFooter,
+  });
+
   if (height === "Full") {
     delete containerStyle.height;
     containerStyle.display = "flex";
     containerStyle.flexDirection = "column";
     containerStyle.flexGrow = 1;
+    containerStyle.flexShrink = 1;
+    containerStyle.minHeight = minHeight;
+    containerStyle.maxHeight = "100%";
+  } else {
+    containerStyle.display = "flex";
+    containerStyle.flexDirection = "column";
+    containerStyle.flexShrink = 1;
+    containerStyle.minHeight = minHeight;
+    containerStyle.maxHeight = "100%";
+    if (containerStyle.height) {
+      containerStyle.height = `min(${containerStyle.height}, 100%)`;
+    }
   }
 
   return (

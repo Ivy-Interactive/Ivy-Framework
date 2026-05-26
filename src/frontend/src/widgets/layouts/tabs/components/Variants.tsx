@@ -185,7 +185,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
           {dropdownMenu}
         </div>
       </div>
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 min-h-0 overflow-hidden relative">
         {orderedTabWidgets.map((tabWidget) => {
           if (!React.isValidElement(tabWidget)) return null;
           const props = getTabProps(tabWidget);
@@ -201,7 +201,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
               aria-labelledby={`tab-${id}`}
               aria-hidden={!isActive}
               className={cn(
-                "overflow-auto border-none",
+                "overflow-auto border-none min-h-0 flex flex-col",
                 isActive
                   ? "relative h-full visible z-[1]"
                   : "absolute inset-0 invisible opacity-0 z-0",
@@ -337,7 +337,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 min-h-0 overflow-hidden relative">
         {React.useMemo(() => {
           return tabWidgets.map((tabWidget) => {
             if (!React.isValidElement(tabWidget)) return null;

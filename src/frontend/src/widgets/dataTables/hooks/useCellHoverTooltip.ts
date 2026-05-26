@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState, type CSSProperties } from "react";
 import { GridCellKind, GridMouseEventArgs, Item } from "@glideapps/glide-data-grid";
 import { GridCell } from "@glideapps/glide-data-grid";
 import { Densities } from "@/types/density";
@@ -21,9 +21,52 @@ interface UseCellHoverTooltipProps {
 export interface CellHoverTooltipState {
   x: number;
   y: number;
+  cellHeight: number;
   content: string;
   /** Secondary line (e.g. link open hint) */
   hint?: string;
+}
+
+type CellTooltipPlacement = "above" | "below";
+
+interface CellTooltipLayout {
+  cellGap: number;
+  viewportInset: number;
+}
+
+const defaultTooltipLayout: CellTooltipLayout = {
+  cellGap: 8,
+  viewportInset: 8,
+};
+
+/** Positions tooltip above or below the cell based on available viewport space. */
+export function getCellTooltipPlacementStyle(
+  tooltip: CellHoverTooltipState,
+  viewportHeight: number,
+  layout: CellTooltipLayout = defaultTooltipLayout,
+): CSSProperties {
+  const { cellGap, viewportInset } = layout;
+  const cellBottom = tooltip.y + tooltip.cellHeight;
+  const availableAbove = tooltip.y - cellGap - viewportInset;
+  const availableBelow = viewportHeight - cellBottom - cellGap - viewportInset;
+
+  const placement: CellTooltipPlacement = availableAbove >= availableBelow ? "above" : "below";
+
+  if (placement === "above") {
+    return {
+      left: tooltip.x,
+      top: tooltip.y - cellGap,
+      transform: "translate(-50%, -100%)",
+      maxHeight: Math.max(0, availableAbove),
+    };
+  }
+
+  return {
+    left: tooltip.x,
+    top: cellBottom + cellGap,
+    transform: "translate(-50%, 0)",
+    maxHeight: Math.max(0, availableBelow),
+  };
 }
 
 /** Tooltip hover relies on real hover; skip on touch / coarse pointers where it mispositions */
@@ -48,8 +91,12 @@ export const useCellHoverTooltip = ({
   const cellHorizontalPadding = DENSITY_CONFIG[density].cellHorizontalPadding;
 
   const [tooltip, setTooltip] = useState<CellHoverTooltipState | null>(null);
-  const tooltipRef = useRef(tooltip);
-  tooltipRef.current = tooltip;
+
+  const cellTooltipStyle = useMemo(() => {
+    if (!tooltip) return null;
+    const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 0;
+    return getCellTooltipPlacementStyle(tooltip, viewportHeight);
+  }, [tooltip]);
 
   const onItemHovered = useCallback(
     (args: GridMouseEventArgs) => {
@@ -112,6 +159,7 @@ export const useCellHoverTooltip = ({
       setTooltip({
         x: args.bounds.x + args.bounds.width / 2,
         y: args.bounds.y,
+        cellHeight: args.bounds.height,
         content: truncatedText ?? (isLinkCell ? linkHint : ""),
         hint: truncatedText && isLinkCell ? linkHint : undefined,
       });
@@ -129,27 +177,14 @@ export const useCellHoverTooltip = ({
     ],
   );
 
-  const virtualRef = useMemo(
-    () => ({
-      getBoundingClientRect: () => {
-        const pos = tooltipRef.current;
-        const x = pos?.x ?? 0;
-        const y = pos?.y ?? 0;
-        return new DOMRect(x, y, 0, 0);
-      },
-    }),
-    [],
-  );
-
   const clearCellHoverTooltip = useCallback(() => {
     setTooltip(null);
   }, []);
 
   return {
     cellTooltip: tooltip,
-    isCellTooltipOpen: tooltipSupported && tooltip !== null,
+    cellTooltipStyle,
     supportsHoverTooltip: tooltipSupported,
-    virtualRef,
     onItemHovered,
     clearCellHoverTooltip,
   };

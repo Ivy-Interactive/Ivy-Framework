@@ -1,3 +1,5 @@
+using Ivy;
+
 namespace Ivy.Widgets.Xterm;
 
 public record TerminalSize(int Cols, int Rows);
@@ -26,9 +28,9 @@ public record Terminal : WidgetBase<Terminal>
 
     [Prop] public IWriteStream<byte[]>? Stream { get; init; }
 
-    [Event] public Func<Event<Terminal, string>, ValueTask>? OnInput { get; init; }
-    [Event] public Func<Event<Terminal, TerminalSize>, ValueTask>? OnResize { get; init; }
-    [Event] public Func<Event<Terminal, string>, ValueTask>? OnLinkClick { get; init; }
+    [Event] public EventHandler<Event<Terminal, string>>? OnInput { get; init; }
+    [Event] public EventHandler<Event<Terminal, TerminalSize>>? OnResize { get; init; }
+    [Event] public EventHandler<Event<Terminal, string>>? OnLinkClick { get; init; }
 }
 
 public static class TerminalExtensions
@@ -67,23 +69,23 @@ public static class TerminalExtensions
         widget with { Stream = stream };
 
     public static Terminal OnInput(this Terminal widget, Func<Event<Terminal, string>, ValueTask> handler) =>
-        widget with { OnInput = handler };
+        widget with { OnInput = new(handler) };
 
     public static Terminal OnInput(this Terminal widget, Action<string> handler) =>
-        widget with { OnInput = e => { handler(e.Value); return ValueTask.CompletedTask; } };
+        widget with { OnInput = new(e => { handler(e.Value); return ValueTask.CompletedTask; }) };
 
     public static Terminal OnResize(this Terminal widget, Func<Event<Terminal, TerminalSize>, ValueTask> handler) =>
-        widget with { OnResize = handler };
+        widget with { OnResize = new(handler) };
 
     public static Terminal OnResize(this Terminal widget, Action<TerminalSize> handler) =>
-        widget with { OnResize = e => { handler(e.Value); return ValueTask.CompletedTask; } };
+        widget with { OnResize = new(e => { handler(e.Value); return ValueTask.CompletedTask; }) };
 
     public static Terminal OnResize(this Terminal widget, Action<int, int> handler) =>
-        widget with { OnResize = e => { handler(e.Value.Cols, e.Value.Rows); return ValueTask.CompletedTask; } };
+        widget with { OnResize = new(e => { handler(e.Value.Cols, e.Value.Rows); return ValueTask.CompletedTask; }) };
 
     public static Terminal OnLinkClick(this Terminal widget, Func<Event<Terminal, string>, ValueTask> handler) =>
-        widget with { OnLinkClick = handler };
+        widget with { OnLinkClick = new(handler) };
 
     public static Terminal OnLinkClick(this Terminal widget, Action<string> handler) =>
-        widget with { OnLinkClick = e => { handler(e.Value); return ValueTask.CompletedTask; } };
+        widget with { OnLinkClick = new(e => { handler(e.Value); return ValueTask.CompletedTask; }) };
 }

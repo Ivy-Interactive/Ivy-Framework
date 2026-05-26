@@ -17,13 +17,26 @@ public static class SamplesServer
         server.AddAppsFromAssembly(typeof(SamplesServer).Assembly);
 
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
-        server.SetMetaTitle($"Ivy Samples {version}");
+
+        // For staging deployments (version = "0"): show build date from DLL timestamp
+        string versionLabel;
+        if (version == "0")
+        {
+            var buildDate = DateTime.UtcNow.ToString("MMM d · HH:mm UTC");
+            versionLabel = $"Deployed {buildDate}";
+        }
+        else
+        {
+            versionLabel = $"Version {version}";
+        }
+
+        server.SetMetaTitle($"Ivy Samples {versionLabel}");
 
         var appShellSettings = new AppShellSettings()
             .Header(
                 Layout.Vertical().Padding(2)
                 | new IvyLogo()
-                | Text.Muted($"Version {version}")
+                | Text.Muted(versionLabel)
             )
             .DefaultApp<HelloApp>()
             .UseTabs(preventDuplicates: true);
