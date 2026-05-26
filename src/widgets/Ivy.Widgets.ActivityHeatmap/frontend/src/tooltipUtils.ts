@@ -14,7 +14,7 @@ export function formatTooltipHeader(day: Activity): string {
 
 export function formatTooltipValue(day: Activity): string {
   const label = day.count === 1 ? "contribution" : "contributions";
-  return `${day.count} ${label}`;
+  return `${day.count ?? 0} ${label}`;
 }
 
 export function getTooltipTransform(tooltipDiv: HTMLDivElement | null, tooltipCoordinates: { x: number; y: number }, gridContainer: HTMLDivElement | null): string {

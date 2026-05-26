@@ -1,6 +1,6 @@
 export interface Activity {
   date: string; // "YYYY-MM-DD"
-  count: number;
+  count: number | undefined;
 }
 
 export type IvyEventHandler = (
