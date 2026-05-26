@@ -135,6 +135,12 @@ public class DesktopShowcaseApp : ViewBase
                       window.SetBadgeCount(99);
                       Log("Badge set to 99");
                   })
+                  | new Button("Custom Colors", () =>
+                  {
+                      badgeCount.Set(5);
+                      window.SetBadgeCount(5, background: "#4A154B", foreground: "#FFFFFF");
+                      Log("Badge set to 5 with custom colors (Slack purple)");
+                  })
                   | new Button("Clear Badge", () =>
                   {
                       badgeCount.Set(0);

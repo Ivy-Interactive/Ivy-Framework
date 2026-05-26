@@ -166,7 +166,7 @@ public class DesktopWindow(Server server)
 
     // ── Post-run badge ───────────────────────────────────────────────────
 
-    public void SetBadgeCount(int? count) => _window?.SetBadgeCount(count);
+    public void SetBadgeCount(int? count, string? background = null, string? foreground = null) => _window?.SetBadgeCount(count, background, foreground);
     public void ClearBadge() => _window?.ClearBadge();
 
     // ── Post-run dialogs ─────────────────────────────────────────────────
