@@ -16,14 +16,12 @@ class QRCodeDemo : ViewBase
         var pixelSize = UseState(300);
         var foregroundColor = UseState(Colors.Emerald);
         var backgroundColor = UseState(Colors.White);
-        var includeMargin = UseState(false);
         var errorCorrectionLevel = UseState(QrErrorCorrectionLevel.Low);
 
         var fullExampleToolbar = Layout.Horizontal().Gap(2).Width(Size.Fit())
             | foregroundColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker).WithLabel("Foreground")
             | backgroundColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker).WithLabel("Background")
             | pixelSize.ToNumberInput().Min(100).Max(1000).WithLabel("PixelSize")
-            | includeMargin.ToBoolInput().WithLabel("IncludeMargin")
             | errorCorrectionLevel.ToSelectInput().WithLabel("ErrorCorrectionLevel");
 
         return Layout.Vertical().Gap(16).Width(Size.Auto())
@@ -59,7 +57,6 @@ class QRCodeDemo : ViewBase
             .PixelSize({pixelSize.Value})
             .Foreground(Colors.{foregroundColor.Value})
             .Background(Colors.{backgroundColor.Value})
-            .IncludeMargin({includeMargin.Value.ToString().ToLower()})
             .ErrorCorrectionLevel(QrErrorCorrectionLevel.{errorCorrectionLevel.Value});
     }}
 }}")
@@ -69,7 +66,6 @@ class QRCodeDemo : ViewBase
                         .PixelSize(pixelSize.Value)
                         .Foreground(foregroundColor.Value)
                         .Background(backgroundColor.Value)
-                        .IncludeMargin(includeMargin.Value)
                         .ErrorCorrectionLevel(errorCorrectionLevel.Value)
                         .AlignSelf(Align.Center)
                     | fullExampleContent.ToTextInput()
