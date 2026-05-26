@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   CompactSelection,
   CustomRenderer,
@@ -8,7 +9,6 @@ import {
   GridMouseEventArgs,
   Item,
 } from "@glideapps/glide-data-grid";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTable } from "../dataTableContext";
 import { getSelectionProps } from "../utils/selectionModes";
 import {
@@ -184,8 +184,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Cell hover tooltips (truncated text + link hint)
   const {
     cellTooltip,
-    isCellTooltipOpen,
-    virtualRef,
+    cellTooltipStyle,
     onItemHovered: onCellTooltipHovered,
     supportsHoverTooltip,
     clearCellHoverTooltip,
@@ -422,34 +421,22 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     footer
   );
 
-  const cellTooltipNode = (
-    <TooltipProvider
-      key={cellTooltip ? `${cellTooltip.x},${cellTooltip.y},${cellTooltip.content}` : "hidden"}
-      delayDuration={300}
-    >
-      <Tooltip open={isCellTooltipOpen}>
-        <TooltipTrigger asChild>
+  const cellTooltipNode =
+    supportsHoverTooltip && cellTooltip && cellTooltipStyle
+      ? createPortal(
           <div
-            ref={(node) => {
-              if (node) {
-                node.getBoundingClientRect = virtualRef.getBoundingClientRect;
-              }
-            }}
-            style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
-          />
-        </TooltipTrigger>
-        <TooltipContent
-          side="top"
-          className="pointer-events-none max-w-sm whitespace-pre-wrap break-words"
-        >
-          <div>{cellTooltip?.content}</div>
-          {cellTooltip?.hint ? (
-            <div className="mt-1 text-xs text-muted-foreground">{cellTooltip.hint}</div>
-          ) : null}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
+            role="tooltip"
+            className="pointer-events-none fixed z-50 max-w-sm overflow-hidden rounded-selector border border-border bg-popover px-3 py-1.5 text-xs text-popover-foreground shadow-md whitespace-pre-wrap break-words"
+            style={cellTooltipStyle}
+          >
+            <div className="overflow-y-auto break-words">{cellTooltip.content}</div>
+            {cellTooltip.hint ? (
+              <div className="mt-1 text-xs text-muted-foreground">{cellTooltip.hint}</div>
+            ) : null}
+          </div>,
+          document.body,
+        )
+      : null;
 
   const cellActionIndicatorNode = cellActionIndicator ? (
     <div
@@ -532,7 +519,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         footer={footerNode}
         hasEmptyRows={emptyRowsCount > 0}
       />
-      {supportsHoverTooltip ? cellTooltipNode : null}
+      {cellTooltipNode}
       {cellActionIndicatorNode}
     </>
   );
