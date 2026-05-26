@@ -57,51 +57,51 @@ class ActivityHeatmapDemo : ViewBase
 }}").Width(Size.Full())
             | new Card(new ActivityHeatmap().Data(data)).Width(Size.Full());
                
-    var optionalPropsUsageHeading = new ArticleHeading("optional-props", "With Optional Properties", 1);// .WithMargin(0, 0, 0, 16);
-    var optionalPropsExample = Layout.Vertical()
-        | Text.H2(optionalPropsUsageHeading.Text).Anchor(optionalPropsUsageHeading.Id)
-        | new CodeBlock(@$"new ActivityHeatmap()
-.Data(data)
-.ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
-.ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
-.ValueLabel(""{valueLabel.Value}"")
-.StartDate(DateOnly.Parse({$"\"{startDate}\""}))
-.EndDate(DateOnly.Parse({$"\"{endDate}\""}))
-.ColorScheme(Colors.{selectedColor.Value})
-.OnDayClick(day => Console.WriteLine(...)); ")
+        var optionalPropsUsageHeading = new ArticleHeading("optional-props", "With Optional Properties", 1);// .WithMargin(0, 0, 0, 16);
+        var optionalPropsExample = Layout.Vertical()
+            | Text.H2(optionalPropsUsageHeading.Text).Anchor(optionalPropsUsageHeading.Id)
+            | new CodeBlock(@$"new ActivityHeatmap()
+    .Data(data)
+    .ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
+    .ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
+    .ValueLabel(""{valueLabel.Value}"")
+    .StartDate(DateOnly.Parse({$"\"{startDate}\""}))
+    .EndDate(DateOnly.Parse({$"\"{endDate}\""}))
+    .ColorScheme(Colors.{selectedColor.Value})
+    .OnDayClick(day => Console.WriteLine(...)); ")
 
-        | (Layout
-            .Grid()
-            .Columns(1.At(Breakpoint.Mobile).And(Breakpoint.Desktop, 3))
-            .Width(Size.Full())            
-            | (Layout.Grid().AutoFlow(AutoFlow.Column).Width(Size.Fit())
-                | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker).WithField().Label("Color").Width(Size.MinContent())   
-                | showDayLabels.ToBoolInput().WithField().Label("Show days").Width(Size.MaxContent())
-                | showMonthLabels.ToBoolInput().WithField().Label("Show months").Width(Size.MaxContent()))
-            | nullableRange.ToDateRangeInput().WithField().Label("Time period").Width(Size.Full())
-            | valueLabel.ToTextInput().WithField().Label("Value label")).Width(Size.Full())
+            | (Layout
+                .Grid()
+                .Columns(1.At(Breakpoint.Mobile).And(Breakpoint.Desktop, 3))
+                .Width(Size.Full())            
+                | (Layout.Grid().AutoFlow(AutoFlow.Column).Width(Size.Fit())
+                    | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker).WithField().Label("Color").Width(Size.MinContent())   
+                    | showDayLabels.ToBoolInput().WithField().Label("Show days").Width(Size.MaxContent())
+                    | showMonthLabels.ToBoolInput().WithField().Label("Show months").Width(Size.MaxContent()))
+                | nullableRange.ToDateRangeInput().WithField().Label("Time period").Width(Size.Full())
+                | valueLabel.ToTextInput().WithField().Label("Value label")).Width(Size.Full())
 
-        | new Card(new ActivityHeatmap()
-            .Data(data)
-            .StartDate(startDate)
-            .EndDate(endDate)
-            .ColorScheme(selectedColor.Value)
-            .ShowDayLabels(showDayLabels.Value)
-            .ShowMonthLabels(showMonthLabels.Value)
-            .ValueLabel(valueLabel.Value)
-            .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
-            .Width(Size.Full()).WithLayout().Horizontal();
+            | new Card(new ActivityHeatmap()
+                .Data(data)
+                .StartDate(startDate)
+                .EndDate(endDate)
+                .ColorScheme(selectedColor.Value)
+                .ShowDayLabels(showDayLabels.Value)
+                .ShowMonthLabels(showMonthLabels.Value)
+                .ValueLabel(valueLabel.Value)
+                .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
+                .Width(Size.Full()).WithLayout().Horizontal();
 
-    var builderUsageHeading = new ArticleHeading("builder-example", "With Builder", 1);// .WithMargin(0, 0, 0, 16);
-    var builderExample = Layout.Vertical()
-        | Text.H2(builderUsageHeading.Text).Anchor(builderUsageHeading.Id)
-        | new CodeBlock(@"data.ToActivityHeatmap()
-.Dimension(""Days"", d => d.Date)
-.Measure(""Downloads"", e => e.Sum(d => d.Count));")
+        var builderUsageHeading = new ArticleHeading("builder-example", "With Builder", 1);// .WithMargin(0, 0, 0, 16);
+        var builderExample = Layout.Vertical()
+            | Text.H2(builderUsageHeading.Text).Anchor(builderUsageHeading.Id)
+            | new CodeBlock(@"data.ToActivityHeatmap()
+    .Dimension(""Days"", d => d.Date)
+    .Measure(""Downloads"", e => e.Sum(d => d.Count));")
 
-        | new Card(data.ToActivityHeatmap()
-            .Dimension("Days", d => d.Date)
-            .Measure("Downloads", e => e.Sum(d => d.Count)));
+            | new Card(data.ToActivityHeatmap()
+                .Dimension("Days", d => d.Date)
+                .Measure("Downloads", e => e.Sum(d => d.Count)));
 
         var themeSelector = new DropDownMenu(@evt =>
             {
@@ -118,14 +118,13 @@ class ActivityHeatmapDemo : ViewBase
             MenuItem.Default("Dark").Icon(Icons.Moon),
             MenuItem.Default("System").Icon(Icons.Computer));
 
-
         var mainContent = Layout.Vertical().Width(Size.Full())
-                              .Gap(20)
-                          | Text.H1("ActivityHeatmap")
-                          | basicUsageExample
-                          | optionalPropsExample
-                          | builderExample
-                          | new FloatingPanel(themeSelector).AlignSelf(Align.BottomRight);
+            .Gap(20)
+            | Text.H1("ActivityHeatmap")
+            | basicUsageExample
+            | optionalPropsExample
+            | builderExample
+            | new FloatingPanel(themeSelector).AlignSelf(Align.BottomRight);
 
         var article = new Article(
             new object[] { mainContent })
