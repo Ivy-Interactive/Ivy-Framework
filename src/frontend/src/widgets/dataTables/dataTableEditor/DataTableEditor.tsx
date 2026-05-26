@@ -112,6 +112,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const { containerRef, containerWidth, containerHeight, scrollContainerHeight } =
     useContainerSize();
 
+  const gridHeight = containerHeight > 0 ? containerHeight : undefined;
+
   // Search functionality
   const { showSearch, setShowSearch } = useSearch(showSearchConfig ?? false);
 
@@ -509,9 +511,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         rangeSelect={selectionProps.rangeSelect}
         gridSelection={gridSelection}
         onGridSelectionChange={handleGridSelectionChange}
-        height={
-          containerHeight > 0 ? containerHeight : containerRef.current?.clientHeight || undefined
-        }
+        height={gridHeight}
         rowMarkers={showIndexColumn ? "number" : "none"}
         onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
         groupHeaderHeight={showGroups ? densityConfig.groupHeaderHeight : undefined}
