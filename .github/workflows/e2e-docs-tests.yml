@@ -44,7 +44,7 @@ jobs:
 
       - name: Install Playwright Browsers
         working-directory: ./src/frontend
-        run: npx playwright install --with-deps
+        run: npx playwright install chromium --with-deps
 
       - name: Run Playwright tests for Docs
         working-directory: ./src/frontend
