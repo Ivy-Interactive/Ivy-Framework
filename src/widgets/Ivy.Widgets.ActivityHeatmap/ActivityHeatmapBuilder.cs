@@ -46,6 +46,8 @@ public class ActivityHeatmapBuilder<TSource>(
                         Date = ToDateOnly(row[_dimension.Name]),
                         Count = Convert.ToInt32(row[_measure.Name])
                     })
+                    .GroupBy(a => a.Date)
+                    .Select(g => new Activity { Date = g.Key, Count = g.Sum(a => a.Count) })
                     .ToArray();
 
                 activityData.Set(activities);
