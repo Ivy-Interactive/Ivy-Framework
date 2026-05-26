@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Ivy.Helpers;
 using Ivy.Samples.Shared.Helpers;
 using Ivy.Samples.Shared.Apps.Demos;
 using Microsoft.Extensions.AI;
