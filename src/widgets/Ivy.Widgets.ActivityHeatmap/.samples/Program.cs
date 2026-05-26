@@ -34,13 +34,9 @@ class ActivityHeatmapDemo : ViewBase
             .Select(d => new Activity { Date = d, Count = rng.Next(1, 20) })
             .ToArray();
 
-        return Layout
-            .Vertical()
-            .Gap(4)
-            .Width(Size.Auto().At(Breakpoint.Tablet).And(Breakpoint.Desktop, Size.Fit()))
-
-            | Text.H1("ActivityHeatmap")
-            | Text.H2("Basic Usage")
+        var basicUsageHeading = new ArticleHeading("basic-usage", "Basic Usage", 1);
+        var basicUsageExample = Layout.Vertical().Width(Size.Full())
+            | Text.H2(basicUsageHeading.Text).Anchor(basicUsageHeading.Id)
             | new CodeBlock(@$"public class ActivityHeatmapDemo : ViewBase
 {{
     public override object Build()
@@ -58,65 +54,83 @@ class ActivityHeatmapDemo : ViewBase
 
         return new ActivityHeatmap().Data(data);
     }}
-}}")
-            | new Card(new ActivityHeatmap().Data(data))
-                .WithMargin(0, 0, 0, 16)
+}}").Width(Size.Full())
+            | new Card(new ActivityHeatmap().Data(data)).Width(Size.Full());
+               
+    var optionalPropsUsageHeading = new ArticleHeading("optional-props", "With Optional Properties", 1);// .WithMargin(0, 0, 0, 16);
+    var optionalPropsExample = Layout.Vertical()
+        | Text.H2(optionalPropsUsageHeading.Text).Anchor(optionalPropsUsageHeading.Id)
+        | new CodeBlock(@$"new ActivityHeatmap()
+.Data(data)
+.ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
+.ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
+.ValueLabel(""{valueLabel.Value}"")
+.StartDate(DateOnly.Parse({$"\"{startDate}\""}))
+.EndDate(DateOnly.Parse({$"\"{endDate}\""}))
+.ColorScheme(Colors.{selectedColor.Value})
+.OnDayClick(day => Console.WriteLine(...)); ")
 
-            | Text.H2("With Optional Properties:")
-            | new CodeBlock(@$"new ActivityHeatmap()
-    .Data(data)
-    .ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
-    .ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
-    .ValueLabel(""{valueLabel.Value}"")
-    .StartDate(DateOnly.Parse({$"\"{startDate}\""}))
-    .EndDate(DateOnly.Parse({$"\"{endDate}\""}))
-    .ColorScheme(Colors.{selectedColor.Value})
-    .OnDayClick(day => Console.WriteLine(...)); ")
+        | (Layout
+            .Grid()
+            .Columns(1.At(Breakpoint.Mobile).And(Breakpoint.Desktop, 3))
+            .Width(Size.Full())            
+            | (Layout.Grid().AutoFlow(AutoFlow.Column).Width(Size.Fit())
+                | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker).WithField().Label("Color").Width(Size.MinContent())   
+                | showDayLabels.ToBoolInput().WithField().Label("Show days").Width(Size.MaxContent())
+                | showMonthLabels.ToBoolInput().WithField().Label("Show months").Width(Size.MaxContent()))
+            | nullableRange.ToDateRangeInput().WithField().Label("Time period").Width(Size.Full())
+            | valueLabel.ToTextInput().WithField().Label("Value label")).Width(Size.Full())
 
-            | (Layout
-                .Horizontal()
-                .Gap(2)
-                | (Layout.Horizontal().Gap(2).Width(Size.Fit())
-                    | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
-                    | Text.P(selectedColor.Value.ToString()))
-                | (Layout.Horizontal().Gap(2).Width(Size.Grow())
-                    | showDayLabels.ToBoolInput().Label("Show day labels")
-                    | showMonthLabels.ToBoolInput().Label("Show month labels"))
-                | nullableRange.ToDateRangeInput()
-                | valueLabel.ToTextInput())
+        | new Card(new ActivityHeatmap()
+            .Data(data)
+            .StartDate(startDate)
+            .EndDate(endDate)
+            .ColorScheme(selectedColor.Value)
+            .ShowDayLabels(showDayLabels.Value)
+            .ShowMonthLabels(showMonthLabels.Value)
+            .ValueLabel(valueLabel.Value)
+            .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
+            .Width(Size.Full()).WithLayout().Horizontal();
 
-            | new Card(new ActivityHeatmap()
-                .Data(data)
-                .StartDate(startDate)
-                .EndDate(endDate)
-                .ColorScheme(selectedColor.Value)
-                .ShowDayLabels(showDayLabels.Value)
-                .ShowMonthLabels(showMonthLabels.Value)
-                .ValueLabel(valueLabel.Value)
-                .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
+    var builderUsageHeading = new ArticleHeading("builder-example", "With Builder", 1);// .WithMargin(0, 0, 0, 16);
+    var builderExample = Layout.Vertical()
+        | Text.H2(builderUsageHeading.Text).Anchor(builderUsageHeading.Id)
+        | new CodeBlock(@"data.ToActivityHeatmap()
+.Dimension(""Days"", d => d.Date)
+.Measure(""Downloads"", e => e.Sum(d => d.Count));")
 
-            | Text.H2("With Builder:")
-            | new CodeBlock(@"data.ToActivityHeatmap()
-    .Dimension(""Days"", d => d.Date)
-    .Measure(""Downloads"", e => e.Sum(d => d.Count));")
+        | new Card(data.ToActivityHeatmap()
+            .Dimension("Days", d => d.Date)
+            .Measure("Downloads", e => e.Sum(d => d.Count)));
 
-            | new Card(data.ToActivityHeatmap()
-                .Dimension("Days", d => d.Date)
-                .Measure("Downloads", e => e.Sum(d => d.Count)))
-
-            | new DropDownMenu(@evt =>
+        var themeSelector = new DropDownMenu(@evt =>
+            {
+                ThemeMode selectedTheme = @evt.Value switch
                 {
-                    ThemeMode selectedTheme = @evt.Value switch
-                    {
-                        "Light" => ThemeMode.Light,
-                        "Dark" => ThemeMode.Dark,
-                        _ => ThemeMode.System,
-                    };
-                    client.SetThemeMode(selectedTheme);
-                },
-                new Button("Theme").Variant(ButtonVariant.Link).Icon(Icons.SunMoon),
-                MenuItem.Default("Light").Icon(Icons.Sun),
-                MenuItem.Default("Dark").Icon(Icons.Moon),
-                MenuItem.Default("System").Icon(Icons.Computer));
+                    "Light" => ThemeMode.Light,
+                    "Dark" => ThemeMode.Dark,
+                    _ => ThemeMode.System,
+                };
+                client.SetThemeMode(selectedTheme);
+            },
+            new Button("Theme").Variant(ButtonVariant.Link).Icon(Icons.SunMoon),
+            MenuItem.Default("Light").Icon(Icons.Sun),
+            MenuItem.Default("Dark").Icon(Icons.Moon),
+            MenuItem.Default("System").Icon(Icons.Computer));
+
+
+        var mainContent = Layout.Vertical().Width(Size.Full())
+                              .Gap(20)
+                          | Text.H1("ActivityHeatmap")
+                          | basicUsageExample
+                          | optionalPropsExample
+                          | builderExample
+                          | new FloatingPanel(themeSelector).AlignSelf(Align.BottomRight);
+
+        var article = new Article(
+            new object[] { mainContent })
+            .Headings([basicUsageHeading, optionalPropsUsageHeading, builderUsageHeading]);
+
+        return article;
     }
 }
