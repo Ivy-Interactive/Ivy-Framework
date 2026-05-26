@@ -23,7 +23,7 @@ const TerminalWidget = ({
   showCopyButton = true,
 }: TerminalWidgetProps) => {
   const commandColor = "text-white";
-  const outputColor = "text-muted-foreground";
+  const outputColor = "text-zinc-400";
 
   const commandsText = lines
     .reduce<string[]>((acc, line) => {
@@ -70,11 +70,11 @@ const TerminalWidget = ({
                 <div className="flex">
                   <div className="w-8 flex-shrink-0 relative flex items-start mt-1">
                     {line.isCommand ? (
-                      <span className="text-primary select-none pointer-events-none w-full text-center leading-none -mt-0.5">
+                      <span className="text-ivy-green select-none pointer-events-none w-full text-center leading-none -mt-0.5">
                         {">"}
                       </span>
                     ) : (
-                      <span className="text-primary select-none pointer-events-none w-full text-center leading-none">
+                      <span className="text-ivy-green select-none pointer-events-none w-full text-center leading-none">
                         {" "}
                       </span>
                     )}
