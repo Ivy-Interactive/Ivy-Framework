@@ -1,3 +1,8 @@
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Ivy.Samples.Shared")]
+[assembly: InternalsVisibleTo("Ivy.Docs.Shared")]
+
 namespace Ivy.Helpers;
 
 internal static class ServerVersionHelper
