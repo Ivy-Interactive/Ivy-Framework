@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
 // ReSharper disable once CheckNamespace
@@ -89,44 +88,19 @@ public class ChordChartBuilder<TSource>(
 
     public override object? Build()
     {
-        var chartData = UseState(ImmutableArray.Create<ChordChartInput>);
-        var loading = UseState(true);
-        var exception = UseState<Exception?>((Exception?)null);
-
-        UseEffect(async () =>
+        ChordChartInput[] inputs;
+        try
         {
-            try
-            {
-                var inputs = await Task.Run(() =>
-                    data.Select(item => new ChordChartInput(
-                        sourceSelector(item),
-                        targetSelector(item),
-                        valueSelector(item)
-                    )).ToArray()
-                );
-                chartData.Set([.. inputs]);
-            }
-            catch (Exception e)
-            {
-                exception.Set(e);
-            }
-            finally
-            {
-                loading.Set(false);
-            }
-        }, [EffectTrigger.OnMount()]);
-
-        if (exception.Value is not null)
-        {
-            return new ErrorTeaserView(exception.Value);
+            inputs = data.Select(item => new ChordChartInput(
+                sourceSelector(item),
+                targetSelector(item),
+                valueSelector(item)
+            )).ToArray();
         }
-
-        if (loading.Value)
+        catch (Exception e)
         {
-            return new ChatLoading();
+            return new ErrorTeaserView(e);
         }
-
-        var inputs = chartData.Value;
 
         var nodeNames = inputs
             .SelectMany(i => new[] { i.Source, i.Target })
