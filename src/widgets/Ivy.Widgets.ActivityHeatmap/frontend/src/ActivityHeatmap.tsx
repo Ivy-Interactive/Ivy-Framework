@@ -268,7 +268,7 @@ export function ActivityHeatmap({
               <span className="relative w-[11px] h-[11px] pr-4 inline-flex">
                 <span className="absolute top-[2px] left-0 w-[11px] h-[11px] rounded-full self-center" style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]! }}></span>
               </span>
-              {`${valueLabel ?? "Count"}: ${tooltip.day.count}`}
+              {`${valueLabel ?? "Count"}: ${tooltip.day.count ?? 0}`}
             </p>
           </>}
       </div>}
