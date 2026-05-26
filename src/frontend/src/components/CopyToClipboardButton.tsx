@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { copyToClipboard } from "@/lib/clipboard";
 import { Densities } from "@/types/density";
 import { cva } from "class-variance-authority";
+import { controlHeight } from "@/components/ui/density-scale";
 
 const copyIconVariant = cva("", {
   variants: {
@@ -23,9 +24,9 @@ const copyButtonSizeVariant = cva(
   {
     variants: {
       density: {
-        Small: "h-6",
-        Medium: "h-8",
-        Large: "h-9",
+        Small: controlHeight.Small,
+        Medium: controlHeight.Medium,
+        Large: controlHeight.Large,
       },
     },
     defaultVariants: {

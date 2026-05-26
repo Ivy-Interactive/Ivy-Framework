@@ -18,6 +18,7 @@ public class BarChartApp : SampleBase
             | new BarChart8()
             | new BarChart9()
             | new BarChart10()
+            | new BarChart11()
         ;
     }
 }
@@ -109,7 +110,7 @@ public class BarChart3 : ViewBase
 
         return new Card().Title("Horizontal Desktop Usage")
             | new BarChart(data)
-                .Vertical()
+                .Horizontal()
                 .ColorScheme(ColorScheme.Default)
                 .Bar(new Bar("Desktop", 1).Radius(4).LegendType(LegendTypes.Square)
                     .LabelList(new LabelList("Month").Fill(Colors.White).Position(Positions.InsideLeft).Offset(8).FontSize(12))
@@ -119,6 +120,7 @@ public class BarChart3 : ViewBase
                 .Tooltip()
                 .YAxis(new YAxis("Month").TickLine(false).AxisLine(false).Type(AxisTypes.Category).Hide())
                 .XAxis(new XAxis("Desktop").Type(AxisTypes.Number).Hide())
+                .Legend()
                 .Toolbox()
         ;
     }
@@ -188,13 +190,12 @@ public class BarChart6 : ViewBase
         return new Card().Title("TickFormatter (Currency Format)")
             | new BarChart(data)
                 .ColorScheme(ColorScheme.Default)
-                .Bar(new Bar("Revenue", 1).Radius(0, 8, 8, 0))
-                .CartesianGrid(new CartesianGrid().Vertical())
+                .Bar(new Bar("Revenue", 1).Radius(8))
+                .CartesianGrid(new CartesianGrid())
                 .Tooltip()
-                .XAxis(new XAxis("Revenue").TickFormatter("C0", TickFormatterType.Number).Domain(0, 80000))
-                .YAxis(new YAxis("Month").TickLine(false).AxisLine(false))
-                .Legend()
-        ;
+                .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
+                .YAxis(new YAxis("Revenue").TickFormatter("C0", TickFormatterType.Number).Domain(0, 80000))
+                .Legend();
     }
 }
 
@@ -213,12 +214,13 @@ public class BarChart7 : ViewBase
 
         return new Card().Title("Domain & AllowDataOverflow (Clip Outlier)")
             | new BarChart(data)
+                .Horizontal()
                 .ColorScheme(ColorScheme.Default)
                 .Bar(new Bar("Sales", 1).Radius(0, 8, 8, 0))
-                .CartesianGrid(new CartesianGrid().Vertical())
+                .CartesianGrid(new CartesianGrid())
                 .Tooltip()
                 .XAxis(new XAxis("Sales")
-                    .Domain(0, 200) // Explicitly set max to 200 to clip the outlier
+                    .Domain(0, 200) // Clip Mouse (850) — bar draws past axis but scale stops at 200
                     .AllowDataOverflow(true))
                 .YAxis(new YAxis("Product").TickLine(false).AxisLine(false))
                 .Legend()
@@ -243,13 +245,14 @@ public class BarChart8 : ViewBase
 
         return new Card().Title("HideTickLabels (Clean Look)")
             | new BarChart(data)
+                .Horizontal()
                 .ColorScheme(ColorScheme.Default)
                 .Bar(new Bar("Users", 1).Radius(0, 8, 8, 0))
-                .CartesianGrid(new CartesianGrid().Vertical())
+                .CartesianGrid(new CartesianGrid())
                 .Tooltip()
                 // Keep the visual structure (lines) but remove cluttered text
-                .XAxis(new XAxis("Users").HideTickLabels())
-                .YAxis(new YAxis("Day").HideTickLabels())
+                .XAxis(new XAxis("Day").HideTickLabels())
+                .YAxis(new YAxis("Users").HideTickLabels())
                 .Legend()
         ;
     }
@@ -313,5 +316,36 @@ public class BarChart10 : ViewBase
                     .Domain(-0.1, 0.2))
                 .Legend()
         ;
+    }
+}
+
+public class BarChart11 : ViewBase
+{
+    public override object? Build()
+    {
+        var start = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-179));
+        var data = Enumerable.Range(0, 180)
+            .Select(i =>
+            {
+                var day = start.AddDays(i);
+                var wave = (int)(35 * Math.Sin(i / 12.0));
+                var trend = i / 3;
+                return new
+                {
+                    Day = day.ToString("MMM dd"),
+                    Downloads = 90 + wave + trend + (i % 7),
+                };
+            })
+            .ToArray();
+
+        return new Card().Title("High Density (180 Days)")
+            | new BarChart(data)
+                .ColorScheme(ColorScheme.Default)
+                .Bar(new Bar("Downloads", 1).Radius(2))
+                .CartesianGrid(new CartesianGrid().Horizontal())
+                .Tooltip()
+                .XAxis(new XAxis("Day").TickLine(false).AxisLine(false).MinTickGap(10))
+                .YAxis(new YAxis("Downloads").TickLine(false).AxisLine(false))
+                .Toolbox();
     }
 }

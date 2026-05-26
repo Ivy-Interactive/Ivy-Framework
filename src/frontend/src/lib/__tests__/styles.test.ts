@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getColor } from "../styles";
+import { getColor, getWantedSizeType, isFullSize } from "../styles";
 
 describe("getColor", () => {
   it("resolves IvyGreen to var(--ivy-green)", () => {
@@ -28,5 +28,22 @@ describe("getColor", () => {
 
   it("returns empty object for undefined color", () => {
     expect(getColor(undefined)).toEqual({});
+  });
+});
+
+describe("getWantedSizeType / isFullSize", () => {
+  it("parses Ivy Full size strings", () => {
+    expect(getWantedSizeType("Full")).toBe("full");
+    expect(isFullSize("Full")).toBe(true);
+  });
+
+  it("parses only the wanted segment before comma", () => {
+    expect(getWantedSizeType("units:80,full:")).toBe("units");
+    expect(isFullSize("units:80,full:")).toBe(false);
+  });
+
+  it("parses type before colon", () => {
+    expect(getWantedSizeType("full:")).toBe("full");
+    expect(isFullSize("full:")).toBe(true);
   });
 });

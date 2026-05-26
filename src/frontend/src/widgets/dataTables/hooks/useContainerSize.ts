@@ -1,99 +1,75 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCurrentBreakpoint } from "@/hooks/use-breakpoint-context";
+
+const RESIZE_DEBOUNCE_MS = 100;
 
 /**
- * Tracks container dimensions. Uses dvn-scroller.clientHeight for scroll area
- * (excludes scrollbar, padding; correct across zoom/OS/browser). No magic offset.
+ * Tracks container dimensions for the glide grid.
+ * Uses layout measurement + window resize (same pattern as useBreakpoint) — no ResizeObserver.
  */
 export const useContainerSize = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState<number>(0);
-  const [containerHeight, setContainerHeight] = useState<number>(0);
-  const [scrollAreaHeight, setScrollAreaHeight] = useState<number>(0);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastWidthRef = useRef<number>(0);
-  const lastHeightRef = useRef<number>(0);
-  const hasAppliedInitialRef = useRef<boolean>(false);
-  const scrollObserverRef = useRef<ResizeObserver | null>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
+  const [scrollAreaHeight, setScrollAreaHeight] = useState(0);
+  const lastWidthRef = useRef(0);
+  const lastHeightRef = useRef(0);
+  const breakpoint = useCurrentBreakpoint();
 
-  const setupObservers = useCallback(() => {
-    if (!containerRef.current) return;
+  const measure = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
 
-    const observeScrollArea = () => {
-      const scroller = containerRef.current?.querySelector(".dvn-scroller");
-      if (!scroller || scrollObserverRef.current) return;
+    const width = el.clientWidth;
+    const height = el.clientHeight;
+    if (width <= 0 && height <= 0) return;
 
-      const update = () => setScrollAreaHeight(scroller.clientHeight);
-      update();
-      scrollObserverRef.current = new ResizeObserver(update);
-      scrollObserverRef.current.observe(scroller);
-    };
+    const widthChanged = Math.abs(width - lastWidthRef.current) > 1;
+    const heightChanged = Math.abs(height - lastHeightRef.current) > 1;
+    if (!widthChanged && !heightChanged) return;
 
-    const apply = (width: number, height: number) => {
-      hasAppliedInitialRef.current = true;
-      lastWidthRef.current = width;
-      lastHeightRef.current = height;
-      setContainerWidth(width);
-      setContainerHeight(height);
-      requestAnimationFrame(observeScrollArea);
-    };
+    lastWidthRef.current = width;
+    lastHeightRef.current = height;
+    setContainerWidth(width);
+    setContainerHeight(height);
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        const widthChanged = Math.abs(width - lastWidthRef.current) > 1;
-        const heightChanged = Math.abs(height - lastHeightRef.current) > 1;
-
-        if (widthChanged || heightChanged) {
-          const isInitial = !hasAppliedInitialRef.current;
-          if (isInitial) {
-            // Defer to next frame so layout (e.g. tab/modal transition) can settle
-            requestAnimationFrame(() => apply(width, height));
-          } else {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            timeoutRef.current = setTimeout(() => apply(width, height), 50);
-          }
-        }
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    // Retry initial measurement until layout settles (max ~100ms).
-    // In nested flex layouts (e.g. HeaderLayout → Vertical → DataTable), the container
-    // may still have height=0 at mount time. Retrying across animation frames ensures
-    // we catch the moment the layout resolves.
-    let retries = 0;
-    const tryInit = () => {
-      if (hasAppliedInitialRef.current || !containerRef.current) return;
-      const { width, height } = containerRef.current.getBoundingClientRect();
-      if (width > 0 || height > 0) {
-        apply(width, height);
-      } else if (retries++ < 10) {
-        requestAnimationFrame(tryInit);
-      } else {
-        // Final fallback: schedule one more check after layout paint
-        setTimeout(() => {
-          if (hasAppliedInitialRef.current || !containerRef.current) return;
-          const { width, height } = containerRef.current.getBoundingClientRect();
-          if (width > 0 || height > 0) apply(width, height);
-        }, 100);
-      }
-    };
-    tryInit();
-
-    requestAnimationFrame(observeScrollArea);
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      scrollObserverRef.current?.disconnect();
-      scrollObserverRef.current = null;
-      resizeObserver.disconnect();
-    };
+    const scroller = el.querySelector(".dvn-scroller");
+    if (scroller instanceof HTMLElement && scroller.clientHeight > 0) {
+      setScrollAreaHeight(scroller.clientHeight);
+    } else if (height > 0) {
+      setScrollAreaHeight(height);
+    }
   }, []);
 
-  useEffect(() => {
-    return setupObservers();
-  }, [setupObservers]);
+  useLayoutEffect(() => {
+    measure();
+
+    let rafId = 0;
+    let retries = 0;
+    const tryInit = () => {
+      measure();
+      const el = containerRef.current;
+      if (el && el.clientHeight === 0 && retries++ < 10) {
+        rafId = requestAnimationFrame(tryInit);
+      }
+    };
+    rafId = requestAnimationFrame(tryInit);
+
+    let resizeTimeoutId: number | undefined;
+    const onWindowResize = () => {
+      if (resizeTimeoutId !== undefined) clearTimeout(resizeTimeoutId);
+      resizeTimeoutId = window.setTimeout(() => {
+        requestAnimationFrame(measure);
+      }, RESIZE_DEBOUNCE_MS);
+    };
+    window.addEventListener("resize", onWindowResize);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", onWindowResize);
+      if (resizeTimeoutId !== undefined) clearTimeout(resizeTimeoutId);
+    };
+  }, [measure, breakpoint]);
 
   return {
     containerRef,

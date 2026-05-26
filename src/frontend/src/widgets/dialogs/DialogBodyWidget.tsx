@@ -15,7 +15,7 @@ export const DialogBodyWidget: React.FC<DialogBodyWidgetProps> = ({ id, children
       role="document"
       aria-describedby={descriptionId}
     >
-      <div className="flex-1 min-h-0" id={descriptionId}>
+      <div className="flex-1 min-h-0 overflow-y-auto" id={descriptionId}>
         {children}
       </div>
     </section>

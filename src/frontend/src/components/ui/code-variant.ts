@@ -41,6 +41,20 @@ export const codeContainerVariant = cva("", {
  */
 export const markdownCodeCopyScrollPaddingClass = "pr-[3rem]";
 
+/** Scroll chrome for markdown fenced code blocks (matches CodeBlockWidget border stack). */
+export const markdownCodeBlockScrollClass =
+  "w-full overflow-hidden rounded-md border border-border bg-muted";
+
+/** Terminal-style markdown blocks: muted fill, no border. */
+export const markdownTerminalBlockScrollClass = "w-full overflow-hidden rounded-md bg-muted";
+
+/** Inner pre/highlighter must not round; clipping is owned by the scroll container. */
+export const markdownCodeBlockPreStyle: CSSProperties = {
+  margin: 0,
+  borderRadius: 0,
+  background: "transparent",
+};
+
 /** Same reserved band as `markdownCodeCopyScrollPaddingClass`, adjusted per widget density */
 export function codeScrollPaddingForDensity(density: Densities): string {
   switch (density) {

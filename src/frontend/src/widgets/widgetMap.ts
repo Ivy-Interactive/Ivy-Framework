@@ -59,6 +59,7 @@ import { SpacerWidget } from "@/widgets/primitives/SpacerWidget";
 import { WireframeNoteWidget } from "@/widgets/wireframe/WireframeNoteWidget";
 import { WireframeCalloutWidget } from "@/widgets/wireframe/WireframeCalloutWidget";
 import { LoadingWidget } from "@/widgets/primitives/LoadingWidget";
+import { LogoLoadingWidget } from "@/widgets/primitives/LogoLoadingWidget";
 import { AppHostWidget } from "@/widgets/primitives/AppHostWidget";
 import { AutoScrollWidget } from "@/widgets/primitives/AutoScrollWidget";
 import { TableWidget, TableRowWidget, TableCellWidget } from "@/widgets/tables";
@@ -98,6 +99,7 @@ export const widgetMap = {
   "Ivy.IvyLogo": IvyLogoWidget,
   "Ivy.Spacer": SpacerWidget,
   "Ivy.Loading": LoadingWidget,
+  "Ivy.LogoLoading": LogoLoadingWidget,
   "Ivy.AppHost": AppHostWidget,
   "Ivy.AutoScroll": AutoScrollWidget,
   "Ivy.AudioPlayer": lazyWithRetry(() =>
