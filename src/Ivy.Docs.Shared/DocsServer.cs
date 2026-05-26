@@ -24,13 +24,26 @@ public static class DocsServer
         server.Services.AddTransient<IIvyDocsQuestionsClient>(sp => sp.GetRequiredService<IvyDocsQuestionsClient>());
 
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
-        server.SetMetaTitle($"Ivy Docs {version}");
+
+        // For staging deployments (version = "0"): show build date from DLL timestamp
+        string versionLabel;
+        if (version == "0")
+        {
+            var buildDate = DateTime.UtcNow.ToString("MMM d · HH:mm UTC");
+            versionLabel = $"Deployed {buildDate}";
+        }
+        else
+        {
+            versionLabel = $"Version {version}";
+        }
+
+        server.SetMetaTitle($"Ivy Docs {versionLabel}");
 
         var appShellSettings = new AppShellSettings()
             .Header(
                 Layout.Vertical().Padding(2)
                 | new IvyLogo()
-                | Text.Muted($"Version {version}")
+                | Text.Muted(versionLabel)
             )
             .DefaultApp<Apps.Onboarding.GettingStarted.IntroductionApp>()
             .UsePages();
