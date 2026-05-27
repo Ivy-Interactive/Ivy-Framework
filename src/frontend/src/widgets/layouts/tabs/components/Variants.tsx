@@ -101,7 +101,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
     >
       <div
         ref={containerRef}
-        className="relative pl-6 pt-3 pb-[6px] w-full"
+        className="relative pl-2 pt-2 pb-[6px] w-full"
         style={getWidth(width)}
       >
         {/* Tabs */}
@@ -121,7 +121,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
           {/* Active Indicator */}
           <div
             className={cn(
-              "absolute bottom-[2px] h-[2px] bg-foreground",
+              "absolute bottom-[0px] h-[2px] bg-foreground",
               !isInitialRender && "transition-all duration-300 ease-out",
               activeTabId && !visibleTabs.includes(activeTabId) && "opacity-0",
             )}
