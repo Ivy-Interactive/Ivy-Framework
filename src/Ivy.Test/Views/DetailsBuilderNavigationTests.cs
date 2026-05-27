@@ -122,4 +122,36 @@ public class DetailsBuilderNavigationTests
         Assert.Equal("hello", defaultBuilder.Build("hello", new Product()));
         Assert.Equal(3.14m, defaultBuilder.Build(3.14m, new Product()));
     }
+
+    [Fact]
+    public void NavigationPropertyBuilder_Build_NestedDetailsBuilder_ReturnsView()
+    {
+        var address = new { Street = "123 Elm St", City = "Springfield" }.ToDetails();
+        var builder = new NavigationPropertyBuilder<object>();
+        var result = builder.Build(address, new object());
+        Assert.Same(address, result);
+    }
+
+    [Fact]
+    public void ToDetails_WithNestedToDetails_BuildsWithoutThrowing()
+    {
+        var record = new
+        {
+            FirstName = "John",
+            Address = new { Street = "123 Elm St", City = "Springfield" }.ToDetails(),
+            Employment = new { Company = "Acme" }.ToDetails(),
+        };
+
+        var details = record.ToDetails().RemoveEmpty().Build();
+
+        Assert.IsType<Details>(details);
+    }
+
+    [Fact]
+    public void ResolveDisplayValue_OnUninitializedViewBase_DoesNotThrow()
+    {
+        var builder = new DetailsBuilder<TestModel>(new TestModel());
+        var result = NavigationPropertyBuilder<object>.ResolveDisplayValue(builder);
+        Assert.Null(result);
+    }
 }
