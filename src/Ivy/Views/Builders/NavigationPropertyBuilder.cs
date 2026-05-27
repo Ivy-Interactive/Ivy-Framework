@@ -1,4 +1,5 @@
 using System.Reflection;
+using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy.Views.Builders;
@@ -7,12 +8,19 @@ public class NavigationPropertyBuilder<TModel> : IBuilder<TModel>
 {
     public object? Build(object? value, TModel record)
     {
+        // Nested ToDetails() stores a DetailsBuilder in the model; render it as a view, not as text.
+        if (value is IView)
+            return value;
+
         return ResolveDisplayValue(value);
     }
 
     public static string? ResolveDisplayValue(object? value)
     {
         if (value == null) return null;
+
+        if (value is IView)
+            return null;
 
         var type = value.GetType();
 
@@ -34,12 +42,15 @@ public class NavigationPropertyBuilder<TModel> : IBuilder<TModel>
             return value.ToString();
         }
 
-        // Look for an Id property
-        var idProp = type.GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
-        if (idProp != null)
+        // Look for an Id property (skip ViewBase — Id is the runtime widget id, not a display key)
+        if (!typeof(ViewBase).IsAssignableFrom(type))
         {
-            var idValue = idProp.GetValue(value);
-            if (idValue != null) return $"Entity #{idValue}";
+            var idProp = type.GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
+            if (idProp != null)
+            {
+                var idValue = idProp.GetValue(value);
+                if (idValue != null) return $"Entity #{idValue}";
+            }
         }
 
         return value.ToString();
