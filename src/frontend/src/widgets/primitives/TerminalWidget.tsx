@@ -23,7 +23,7 @@ const TerminalWidget = ({
   showCopyButton = true,
 }: TerminalWidgetProps) => {
   const commandColor = "text-white";
-  const outputColor = "text-zinc-400";
+  const outputColor = "text-muted-foreground";
 
   const commandsText = lines
     .reduce<string[]>((acc, line) => {
