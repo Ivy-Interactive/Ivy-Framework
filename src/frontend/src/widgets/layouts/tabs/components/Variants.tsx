@@ -121,7 +121,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
           {/* Active Indicator */}
           <div
             className={cn(
-              "absolute bottom-[2px] h-[2px] bg-foreground",
+              "absolute bottom-[-4px] h-[2px] bg-foreground",
               !isInitialRender && "transition-all duration-300 ease-out",
               activeTabId && !visibleTabs.includes(activeTabId) && "opacity-0",
             )}
