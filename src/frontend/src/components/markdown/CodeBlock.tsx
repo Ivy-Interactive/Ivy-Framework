@@ -5,8 +5,11 @@ import { useTypography } from "@/contexts/TypographyContext";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   codeCopyViewportInsetStyle,
+  markdownCodeBlockPreStyle,
+  markdownCodeBlockScrollClass,
   markdownCodeCopyScrollPaddingClass,
   markdownCodeCopyGutterLength,
+  markdownTerminalBlockScrollClass,
 } from "@/components/ui/code-variant";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -19,22 +22,20 @@ const SyntaxHighlighter = lazyWithRetry(() =>
 /** Copy stays transparent/floating; scroll content gets right inset so lines never run under the control. */
 function CodeBlockChromeWithCopy({
   textToCopy,
-  outerClassName,
-  scrollAreaClassName,
+  scrollClassName = markdownCodeBlockScrollClass,
   children,
 }: {
   textToCopy: string;
-  outerClassName: string;
-  scrollAreaClassName?: string;
+  scrollClassName?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className={cn("relative w-full", outerClassName)}>
+    <div className="relative w-full">
       <div className="absolute top-2 right-2 z-30">
         <CopyToClipboardButton textToCopy={textToCopy} />
       </div>
       <ScrollArea
-        className={cn("w-full", scrollAreaClassName)}
+        className={scrollClassName}
         viewportClassName="min-w-0"
         viewportStyle={codeCopyViewportInsetStyle(markdownCodeCopyGutterLength)}
       >
@@ -118,10 +119,12 @@ export const CodeBlock = memo(
         return (
           <CodeBlockChromeWithCopy
             textToCopy={cleanContent}
-            outerClassName="rounded-md bg-muted"
-            scrollAreaClassName="w-full"
+            scrollClassName={markdownTerminalBlockScrollClass}
           >
-            <pre className="p-4 font-mono text-sm" style={{ overflowX: "auto" }}>
+            <pre
+              className="p-4 font-mono text-sm"
+              style={{ ...markdownCodeBlockPreStyle, overflowX: "auto" }}
+            >
               {lines.map((line, i) => {
                 const lineKey = `md-term-line-${i}`;
                 return (
@@ -143,14 +146,10 @@ export const CodeBlock = memo(
 
       if (!useHighlighter) {
         return (
-          <CodeBlockChromeWithCopy
-            textToCopy={content}
-            outerClassName="rounded-md border border-border"
-            scrollAreaClassName="w-full bg-muted"
-          >
+          <CodeBlockChromeWithCopy textToCopy={content}>
             <pre
               className="p-4 font-mono text-sm"
-              style={{ margin: 0, whiteSpace: "pre", overflowX: "auto" }}
+              style={{ ...markdownCodeBlockPreStyle, whiteSpace: "pre", overflowX: "auto" }}
             >
               {content}
             </pre>
@@ -161,27 +160,22 @@ export const CodeBlock = memo(
       return (
         <Suspense
           fallback={
-            <CodeBlockChromeWithCopy
-              textToCopy={content}
-              outerClassName="rounded-md border border-border"
-              scrollAreaClassName="w-full bg-muted"
-            >
-              <pre className="p-4 font-mono text-sm" style={{ overflowX: "auto" }}>
+            <CodeBlockChromeWithCopy textToCopy={content}>
+              <pre
+                className="p-4 font-mono text-sm"
+                style={{ ...markdownCodeBlockPreStyle, overflowX: "auto" }}
+              >
                 {content}
               </pre>
             </CodeBlockChromeWithCopy>
           }
         >
-          <CodeBlockChromeWithCopy
-            textToCopy={content}
-            outerClassName="rounded-md border border-border"
-            scrollAreaClassName="w-full bg-muted"
-          >
+          <CodeBlockChromeWithCopy textToCopy={content}>
             <SyntaxHighlighter
               language={language}
               style={dynamicTheme}
               customStyle={{
-                margin: 0,
+                ...markdownCodeBlockPreStyle,
                 wordBreak: "normal",
                 overflowWrap: "break-word",
               }}

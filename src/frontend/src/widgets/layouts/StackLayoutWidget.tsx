@@ -7,6 +7,7 @@ import {
   getRowGap,
   getColumnGap,
   getHeight,
+  isFullSize,
   getAlign,
   getPadding,
   getWidth,
@@ -130,6 +131,11 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
   // Override flexWrap if wrap is enabled
   if (wrap) {
     baseStyles.flexWrap = "wrap";
+  }
+
+  if (isFullSize(height)) {
+    baseStyles.minHeight = 0;
+    baseStyles.maxHeight = "100%";
   }
 
   if (!visible) {

@@ -471,6 +471,7 @@ export const generateXAxis = (
   cartesianGrid?: CartesianGridProps,
 ) => {
   const axis = xAxis?.[0] || ({} as XAxisProps);
+  const grid = cartesianGrid ? applyDefaults(cartesianGrid, CARTESIAN_GRID_DEFAULTS) : null;
   const allowDataOverflow = axis.allowDataOverflow ?? false;
 
   const minOpt = getAxisDomainBound("min", axis.domainMin, allowDataOverflow);
@@ -478,17 +479,19 @@ export const generateXAxis = (
 
   // Map scale to ECharts axis type when explicitly set
   const scaleType = axis.scale && axis.scale !== "Auto" ? axis.scale.toLowerCase() : undefined;
+  const axisType = scaleType ?? (isVertical ? "category" : "value");
+  const isCategoryAxis = axisType === "category";
 
   return {
     show: !axis.hide,
     position: axis.orientation?.toLowerCase() === "top" ? "top" : "bottom",
-    type: scaleType ?? (isVertical ? "category" : "value"),
+    type: axisType,
     boundaryGap: chartType === "bar" ? true : false,
     data: isVertical ? categories : undefined,
     inverse: axis.reversed ?? false,
     ...(axis.name != null && { name: axis.name }),
-    ...(minOpt !== undefined && { min: minOpt }),
-    ...(maxOpt !== undefined && { max: maxOpt }),
+    ...(!isCategoryAxis && minOpt !== undefined && { min: minOpt }),
+    ...(!isCategoryAxis && maxOpt !== undefined && { max: maxOpt }),
     ...(axis.tickCount != null && { splitNumber: axis.tickCount }),
     axisLabel: {
       show: axis.hideTickLabels ? false : true,
@@ -522,8 +525,13 @@ export const generateXAxis = (
             }
             return axis.unit ? `${formatted}${axis.unit}` : formatted;
           },
-      ...(axis.minTickGap != null && { interval: axis.minTickGap }),
-      ...(!axis.minTickGap && { interval: "auto" as const }),
+      ...(isCategoryAxis
+        ? {
+            interval: "auto" as const,
+            hideOverlap: true,
+            ...(axis.minTickGap != null ? { minTickGap: axis.minTickGap } : {}),
+          }
+        : { interval: "auto" as const }),
       ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
     },
     axisLine: {
@@ -543,7 +551,8 @@ export const generateXAxis = (
       },
     },
     splitLine: {
-      show: true,
+      show: isCategoryAxis || !!grid?.vertical,
+      ...(isCategoryAxis && { interval: "auto" as const }),
       lineStyle: {
         type: "dashed",
         color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,
@@ -578,6 +587,7 @@ export const generateYAxis = (
   cartesianGrid?: CartesianGridProps,
 ) => {
   const safeTransform = transformValue ?? ((v: number) => v);
+  const grid = cartesianGrid ? applyDefaults(cartesianGrid, CARTESIAN_GRID_DEFAULTS) : null;
 
   const buildAxisConfig = (axis: YAxisProps, skipLargeSpread: boolean = false) => {
     const effectiveLargeSpread = largeSpread && !skipLargeSpread;
@@ -593,15 +603,17 @@ export const generateYAxis = (
 
     // Map scale to ECharts axis type when explicitly set
     const scaleType = axis.scale && axis.scale !== "Auto" ? axis.scale.toLowerCase() : undefined;
+    const axisType = scaleType ?? (isVertical ? "value" : "category");
+    const isCategoryAxis = axisType === "category";
 
     return {
       show: axis.hide ? false : true,
-      type: scaleType ?? (isVertical ? "value" : "category"),
+      type: axisType,
       data: isVertical ? undefined : categories,
       inverse: axis.reversed ?? false,
       ...(axis.name != null && { name: axis.name }),
-      ...(minOpt !== undefined && { min: minOpt }),
-      ...(maxOpt !== undefined && { max: maxOpt }),
+      ...(!isCategoryAxis && minOpt !== undefined && { min: minOpt }),
+      ...(!isCategoryAxis && maxOpt !== undefined && { max: maxOpt }),
       axisLabel: {
         show: axis.hideTickLabels ? false : true,
         rotate: axis.angle ?? 0,
@@ -628,8 +640,7 @@ export const generateYAxis = (
           }
           return axis.unit ? `${formatted}${axis.unit}` : formatted;
         },
-        ...(axis.minTickGap != null && { interval: axis.minTickGap }),
-        ...(!axis.minTickGap && {}),
+        ...(isCategoryAxis ? { interval: 0, hideOverlap: true } : { interval: "auto" as const }),
         ...generateAxisLabelStyle(themeColors?.mutedForeground, themeColors?.fontSans),
       },
       splitNumber: axis.tickCount ?? (effectiveLargeSpread ? 3 : 5),
@@ -651,7 +662,7 @@ export const generateYAxis = (
         },
       },
       splitLine: {
-        show: true,
+        show: axis.orientation !== "Right" && (grid?.horizontal ?? true),
         lineStyle: {
           type: "dashed",
           color: cartesianGrid?.stroke ?? themeColors?.mutedForeground,

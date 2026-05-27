@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vp dev",
     "build": "tsc && vp build",
-    "preview": "vp preview"
+    "preview": "vp preview",
+    "test": "vp test"
   },
   "dependencies": {
     "@ivy-interactive/ivy-design-system": "1.1.18"
@@ -20,6 +21,7 @@
     "typescript": "5.9.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.1.20",
     "vite-plus": "0.1.20",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.20",
     "@vitejs/plugin-react": "6.0.1"
   },
   "peerDependencies": {
