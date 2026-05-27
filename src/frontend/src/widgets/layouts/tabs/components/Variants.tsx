@@ -101,7 +101,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
     >
       <div
         ref={containerRef}
-        className="relative pl-6 pt-3 pb-[6px] w-full"
+        className="relative pl-3 pt-2 pb-[6px] w-full"
         style={getWidth(width)}
       >
         {/* Tabs */}
