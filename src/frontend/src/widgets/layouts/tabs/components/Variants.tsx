@@ -1,6 +1,6 @@
 import React from "react";
 import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
-import { cn, getIvyBasePath } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { getPadding, getWidth } from "@/lib/styles";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
@@ -193,12 +193,6 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
           const { id } = props;
           if (!loadedTabs.has(id)) return null;
           const paddingStyle = getPadding(padding);
-          const isTendril =
-            getIvyBasePath() === "/tendril" || window.location.pathname.startsWith("/tendril");
-          const finalPaddingStyle = {
-            ...paddingStyle,
-            ...(isTendril && { paddingLeft: "1.5rem" }),
-          };
           const isActive = activeTabId === id;
           return (
             <div
@@ -212,7 +206,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
                   ? "relative h-full visible z-[1]"
                   : "absolute inset-0 invisible opacity-0 z-0",
               )}
-              style={finalPaddingStyle}
+              style={paddingStyle}
             >
               {tabWidget}
             </div>
