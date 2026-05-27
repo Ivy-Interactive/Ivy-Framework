@@ -24,7 +24,7 @@ export const TabsLayoutWidget = ({
   selectedIndex,
   removeParentPadding = false,
   variant = "Content",
-  padding = "4,4,4,4",
+  padding,
   width = "Full",
   addButtonText,
 }: TabsLayoutWidgetProps) => {
