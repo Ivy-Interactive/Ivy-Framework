@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Ivy.Helpers;
 using Ivy.Samples.Shared.Helpers;
 using Ivy.Samples.Shared.Apps.Demos;
 using Microsoft.Extensions.AI;
@@ -16,19 +17,7 @@ public static class SamplesServer
         server.UseHotReload();
         server.AddAppsFromAssembly(typeof(SamplesServer).Assembly);
 
-        var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
-
-        // For staging deployments (version = "0"): show build date from DLL timestamp
-        string versionLabel;
-        if (version == "0")
-        {
-            var buildDate = DateTime.UtcNow.ToString("MMM d · HH:mm UTC");
-            versionLabel = $"Deployed {buildDate}";
-        }
-        else
-        {
-            versionLabel = $"Version {version}";
-        }
+        var versionLabel = ServerVersionHelper.GetVersionLabel();
 
         server.SetMetaTitle($"Ivy Samples {versionLabel}");
 

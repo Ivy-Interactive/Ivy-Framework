@@ -9,7 +9,6 @@ A QR code widget for the Ivy Framework, powered by [`qrcode.react`](https://gith
 | `Value` | `string` | `""` | The data to encode as a QR code |
 | `PixelSize` | `int?` | *(client default 256)* | Size of the QR code in pixels |
 | `ErrorCorrectionLevel` | `QrErrorCorrectionLevel` | `Low` | Error correction: `Low` (L), `Medium` (M), `Quartile` (Q), `High` (H) |
-| `IncludeMargin` | `bool` | `true` | Whether to include a quiet zone margin |
 | `Background` | `Colors?` | `null` | Module background (resolved from the active Ivy theme) |
 | `Foreground` | `Colors?` | `null` | Module foreground (resolved from the active Ivy theme) |
 
