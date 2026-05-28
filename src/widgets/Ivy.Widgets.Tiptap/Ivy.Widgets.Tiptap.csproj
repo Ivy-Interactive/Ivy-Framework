@@ -43,11 +43,11 @@
     <ProjectReference Include="..\..\Ivy\Ivy.csproj" />
   </ItemGroup>
 
-  <Import Project="..\..\Ivy\Build\Ivy.ExternalWidget.targets" />
+  <Import Project="../../Ivy/Build/Ivy.ExternalWidget.targets" />
 
   <ItemGroup>
-    <Compile Remove=".samples\**\*.cs" />
-    <None Include=".samples\**\*" CopyToOutputDirectory="Never" />
+    <Compile Remove=".samples/**/*.cs" />
+    <None Include=".samples/**/*" CopyToOutputDirectory="Never" />
   </ItemGroup>
   
 </Project>

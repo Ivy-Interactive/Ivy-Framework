@@ -40,11 +40,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove=".samples\**\*.cs" />
-    <Compile Remove="Tests\**\*.cs" />
-    <None Include=".samples\**\*" CopyToOutputDirectory="Never" />
+    <Compile Remove=".samples/**/*.cs" />
+    <Compile Remove="Tests/**/*.cs" />
+    <None Include=".samples/**/*" CopyToOutputDirectory="Never" />
   </ItemGroup>
 
-  <Import Project="..\..\Ivy\Build\Ivy.ExternalWidget.targets" />
+  <Import Project="../../Ivy/Build/Ivy.ExternalWidget.targets" />
 
 </Project>
