@@ -89,7 +89,8 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
-  const ghostAffixChrome = Boolean(props.ghost && hasAffixes);
+  // Search inputs always use transparent affix cells (no muted background on prefix/suffix).
+  const transparentAffixChrome = hasAffixes;
   const ghostSuffixLayout = Boolean(props.ghost && hasSuffix);
   const showClear = !props.disabled && hasValue;
   const showShortcut =
@@ -156,7 +157,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", ghostAffixChrome)}>
+          <div className={textInputAffixCellClasses("prefix", transparentAffixChrome)}>
             {prefixContent}
           </div>
         )}
@@ -216,7 +217,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
 
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", ghostAffixChrome)}>
+          <div className={textInputAffixCellClasses("suffix", transparentAffixChrome)}>
             {suffixContent}
           </div>
         )}
