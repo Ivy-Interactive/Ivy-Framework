@@ -1,27 +1,32 @@
 ---
 name: git-diff-patch-notes
 description: >-
-  Generates release patch notes from git diffs/commits between two tags or refs, excluding any frontend changes.
+  Generates release patch notes from git diffs/commits between two tags or refs, excluding any frontend changes, and updates the corresponding GitHub release.
 ---
 
 # Git Diff Patch Notes Generator
 
 ## Overview
-This skill helps generate release patch notes by extracting commits between two git tags or refs, automatically excluding any frontend changes (such as updates to TSX/TS components under `src/frontend/` or any widget `frontend/` subdirectories).
+This skill helps generate release patch notes by extracting commits between two git tags or refs, automatically excluding any frontend changes (such as updates to TSX/TS components under `src/frontend/` or any widget `frontend/` subdirectories), and updating the corresponding GitHub release.
 
 ## Dependencies
 None.
 
 ## Quick Start
 
-To generate patch notes between two versions:
+To generate and publish patch notes between two versions:
 
 1. Identify the starting tag (e.g., `v1.2.59`) and ending tag (e.g., `v1.2.60`).
 2. Run the `GeneratePatchNotes.ps1` PowerShell script located in `src/.releases/` to extract and filter the relevant commits:
    ```powershell
    pwsh src/.releases/GeneratePatchNotes.ps1 -FromRef v1.2.59 -ToRef v1.2.60 -Output src/.releases/non_fe_commits.json
    ```
-3. Use the contents of the generated JSON file to summarize and draft a beautiful release notes list focusing entirely on backend C#, assembly, and framework core changes.
+3. Draft a beautiful release notes list focusing entirely on backend C#, assembly, and framework core changes.
+4. Save the drafted notes to `src/.releases/weekly-notes-YYYY-MM-DD.md`.
+5. Update the corresponding GitHub release with the notes:
+   ```powershell
+   gh release edit v1.2.60 --notes-file src/.releases/weekly-notes-YYYY-MM-DD.md
+   ```
 
 ## Utility Scripts
 
@@ -52,7 +57,13 @@ pwsh src/.releases/GeneratePatchNotes.ps1 `
    - Organize the changes into categories such as `Features & Enhancements`, `Bug Fixes`, `Performance`, and `Miscellaneous`.
    - **CRITICAL**: Do NOT include any styling, layout, components, or other frontend-only changes (anything under paths containing `frontend/`) in the patch notes. If a commit touched both backend and frontend, only mention the backend effects.
    - Link back to PRs or issues if mentioned in the commit message (e.g., `#4500`).
-4. **Output to User**: Display the compiled patch notes in markdown.
+   - Save the drafted notes to `src/.releases/weekly-notes-YYYY-MM-DD.md`.
+4. **Update GitHub Release**:
+   - Run the `gh` CLI to update the GitHub release notes for the target tag:
+     ```powershell
+     gh release edit <tag> --notes-file src/.releases/weekly-notes-YYYY-MM-DD.md
+     ```
+5. **Commit & Pull Request**: Create a feature branch, commit the markdown notes file, push it, and open a PR into `development`.
 
 ## Common Mistakes
 
