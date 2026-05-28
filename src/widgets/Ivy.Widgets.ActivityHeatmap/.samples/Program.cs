@@ -52,7 +52,7 @@ class ActivityHeatmapDemo : ViewBase
 
         return Layout.Vertical()
             | data.ToActivityHeatmap()
-                .Dimension(""Days"", d => d.Date)
+                .Dimension(ActivityDimension.Days, d => d.Date)
                 .Measure(""Count"", e => e.Sum(d => d.Count));
     }}
 }}").Width(Size.Full())
@@ -60,7 +60,7 @@ class ActivityHeatmapDemo : ViewBase
         |new Card(    
         Layout.Vertical() 
                 | data.ToActivityHeatmap()
-                    .Dimension("Days", d => d.Date)
+                    .Dimension(ActivityDimension.Days, d => d.Date)
                     .Measure("Count", e => e.Sum(d => d.Count))
         );
                
@@ -74,7 +74,7 @@ class ActivityHeatmapDemo : ViewBase
         return Layout.Vertical()
             | data
                 .ToActivityHeatmap()
-                .Dimension(""Days"", d => d.Date)
+                .Dimension(ActivityDimension.Days, d => d.Date)
                 .Measure(""Downloads"", e => e.Sum(d => d.Count))
                 .ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
                 .ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
@@ -92,7 +92,7 @@ class ActivityHeatmapDemo : ViewBase
 
             | new Card(data
                 .ToActivityHeatmap()
-                .Dimension("Days", d => d.Date)
+                .Dimension(ActivityDimension.Days, d => d.Date)
                 .Measure("Downloads", e => e.Sum(d => d.Count))
                 .StartDate(startDate)
                 .EndDate(endDate)

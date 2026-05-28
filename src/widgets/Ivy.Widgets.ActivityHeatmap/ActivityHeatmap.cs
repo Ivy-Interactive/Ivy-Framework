@@ -133,3 +133,8 @@ public record Activity
     public DateOnly Date { get; init; }
     public int Count { get; init; }
 }
+
+public enum ActivityDimension
+{
+    Days
+}

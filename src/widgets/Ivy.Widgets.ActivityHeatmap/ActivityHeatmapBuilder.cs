@@ -77,9 +77,9 @@ public class ActivityHeatmapBuilder<TSource>(
         return polish?.Invoke(widget) ?? widget;
     }
 
-    public ActivityHeatmapBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
+    public ActivityHeatmapBuilder<TSource> Dimension(ActivityDimension name, Expression<Func<TSource, object>> selector)
     {
-        _dimension = new Dimension<TSource>(name, selector);
+        _dimension = new Dimension<TSource>(name.ToString(), selector);
         return this;
     }
 
