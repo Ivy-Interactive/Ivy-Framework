@@ -104,20 +104,18 @@ class ActivityHeatmapDemo : ViewBase
                 .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
                 .Width(Size.Full()).WithLayout().Horizontal();
 
-        var themeSelector = new DropDownMenu(@evt =>
+        var themeSelector = new Button("Theme")
+            .Icon(Icons.SunMoon)
+            .Ghost()
+            .WithDropDown(
+                MenuItem.Default(nameof(ThemeMode.Light)).Icon(Icons.Sun),
+                MenuItem.Default(nameof(ThemeMode.Dark)).Icon(Icons.Moon),
+                MenuItem.Default(nameof(ThemeMode.System)).Icon(Icons.Computer))
+            .OnSelect(@evt =>
             {
-                ThemeMode selectedTheme = @evt.Value switch
-                {
-                    "Light" => ThemeMode.Light,
-                    "Dark" => ThemeMode.Dark,
-                    _ => ThemeMode.System,
-                };
-                client.SetThemeMode(selectedTheme);
-            },
-            new Button("Theme").Variant(ButtonVariant.Link).Icon(Icons.SunMoon),
-            MenuItem.Default("Light").Icon(Icons.Sun),
-            MenuItem.Default("Dark").Icon(Icons.Moon),
-            MenuItem.Default("System").Icon(Icons.Computer));
+                if (Enum.TryParse<ThemeMode>(@evt.Value.ToString(), out var theme))
+                    client.SetThemeMode(theme);
+            });
 
         var mainContent = Layout.Vertical().Width(Size.Full())
             .Gap(20)
