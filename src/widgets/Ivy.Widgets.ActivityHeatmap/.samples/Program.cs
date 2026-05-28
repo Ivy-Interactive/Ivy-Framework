@@ -31,7 +31,8 @@ class ActivityHeatmapDemo : ViewBase
             .Range(0, 365)
             .Select(start.AddDays)
             .Where(_ => rng.NextDouble() > 0.4)
-            .Select(d => new { Date = d, Count = rng.Next(1, 20) });
+            .Select(d => new { Date = d, Count = rng.Next(1, 20) })
+            .ToList();
 
         var basicUsageHeading = new ArticleHeading("basic-usage", "Basic Usage", 1);
         var basicUsageExample = Layout.Vertical().Width(Size.Full())
@@ -48,7 +49,8 @@ class ActivityHeatmapDemo : ViewBase
             .Range(0, 365)
             .Select(start.AddDays)
             .Where(_ => rng.NextDouble() > 0.4)
-            .Select(d => new Activity {{ Date = d, Count = rng.Next(1, 20) }});
+            .Select(d => new Activity {{ Date = d, Count = rng.Next(1, 20) }})
+            .ToList();
 
         return Layout.Vertical()
             | data.ToActivityHeatmap()
