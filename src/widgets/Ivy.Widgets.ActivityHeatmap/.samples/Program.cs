@@ -118,7 +118,6 @@ class ActivityHeatmapDemo : ViewBase
             });
 
         var mainContent = Layout.Vertical().Width(Size.Full())
-            .Gap(20)
             | Text.H1("ActivityHeatmap")
             | basicUsageExample
             | optionalPropsExample
