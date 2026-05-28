@@ -19,7 +19,7 @@ public record ActivityHeatmap : WidgetBase<ActivityHeatmap>
 
     [Prop] public bool ShowDayLabels { get; init; } = true;
 
-    [Prop] public string ValueLabel { get; init; } = string.Empty;
+    [Prop] public string ValueLabel { get; init; } = "Count";
 
     [Prop] public DateOnly? StartDate { get; init; }
 
