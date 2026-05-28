@@ -9,6 +9,9 @@ description: >-
 ## Overview
 This skill helps generate release patch notes by extracting commits between two git tags or refs, automatically excluding any frontend changes (such as updates to TSX/TS components under `src/frontend/` or any widget `frontend/` subdirectories), and updating the corresponding GitHub release.
 
+> [!IMPORTANT]
+> Always use the pre-authenticated `gh` CLI for all GitHub interactions (such as retrieving release details or publishing/editing release notes). Do not attempt to use browser tools or standard HTTP request tools to access `github.com` directly, as network request permissions may be restricted.
+
 ## Dependencies
 None.
 
