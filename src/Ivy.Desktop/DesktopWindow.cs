@@ -549,10 +549,16 @@ public class DesktopWindow(Server server)
 
     private static string? ExtractEmbeddedIcon(Assembly assembly, string resourceName)
     {
+        Console.Error.WriteLine($"[Ivy.Desktop] Attempting to extract embedded icon: {resourceName} from assembly: {assembly.FullName}");
         using var stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream == null) return null;
+        if (stream == null)
+        {
+            Console.Error.WriteLine($"[Ivy.Desktop] Manifest resource '{resourceName}' was NOT found in assembly {assembly.FullName}!");
+            return null;
+        }
 
         var tempPath = Path.Combine(Path.GetTempPath(), $"ivy_icon_{Path.GetFileName(resourceName)}");
+        Console.Error.WriteLine($"[Ivy.Desktop] Successfully found resource. Extracting to: {tempPath}");
         using var fileStream = File.Create(tempPath);
         stream.CopyTo(fileStream);
         return tempPath;
