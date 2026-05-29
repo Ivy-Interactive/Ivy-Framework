@@ -26,7 +26,7 @@ public class ResponsiveDesignApp : SampleBase
                 .Columns(1.At(Breakpoint.Mobile)
                     .And(Breakpoint.Tablet, 2)
                     .And(Breakpoint.Desktop, 3))
-                
+
                 | new Card("Card 1")
                 | new Card("Card 2")
                 | new Card("Card 3")
