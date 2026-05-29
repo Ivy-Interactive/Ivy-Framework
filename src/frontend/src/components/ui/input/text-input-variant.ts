@@ -14,7 +14,7 @@ export const affixEmbeddedButtonClasses =
 export const affixIconOnlyCellPaddingClasses =
   "has-[button.size-7]:px-1.5 has-[button.size-9]:px-2";
 
-/** Affix cells: muted box by default; ghost uses transparent chrome with tight padding toward the input. */
+/** Affix cells: transparent by default; ghost uses tighter padding toward the input. */
 export function textInputAffixCellClasses(
   side: "prefix" | "suffix",
   ghostWithAffixes: boolean,
@@ -27,7 +27,7 @@ export function textInputAffixCellClasses(
         ? "shrink-0 bg-transparent pl-0 pr-1.5"
         : "shrink-0 bg-transparent pl-2 pr-0.5"
       : cn(
-          "px-3 bg-muted",
+          "px-3 bg-transparent",
           affixIconOnlyCellPaddingClasses,
           side === "prefix"
             ? "rounded-tl-fields rounded-bl-fields"

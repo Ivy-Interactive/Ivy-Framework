@@ -17,6 +17,7 @@ import {
   boolInputRowMinHeightVariant,
 } from "@/components/ui/input/bool-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
+import { textInputAffixCellClasses } from "@/components/ui/input/text-input-variant";
 
 type VariantType = "Checkbox" | "Switch" | "Toggle";
 
@@ -361,15 +362,11 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
-              {prefixContent}
-            </div>
+            <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
           )}
           <div className="flex-1 px-3 py-2">{variantContent}</div>
           {hasSuffix && (
-            <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
-              {suffixContent}
-            </div>
+            <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
           )}
         </div>
       ) : (

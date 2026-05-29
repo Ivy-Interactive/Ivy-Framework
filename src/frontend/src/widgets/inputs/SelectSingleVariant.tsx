@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Loader2, X } from "lucide-react";
 import Icon from "@/components/Icon";
 import { InvalidIcon } from "@/components/InvalidIcon";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import { textInputAffixCellClasses, xIconVariant } from "@/components/ui/input/text-input-variant";
 import { getWidth, inputStyles } from "@/lib/styles";
 import { SelectInputWidgetProps } from "./select-types";
 import { useSelectValueHandler } from "./select-utils";
@@ -400,23 +400,13 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div
-              className={cn(
-                "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]",
-                !isOpen && "border-r border-input",
-              )}
-            >
+            <div className={textInputAffixCellClasses("prefix", Boolean(ghost))}>
               {prefixContent}
             </div>
           )}
           <div className="flex-1 relative w-full">{selectContent}</div>
           {hasSuffix && (
-            <div
-              className={cn(
-                "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]",
-                !isOpen && "border-l border-input",
-              )}
-            >
+            <div className={textInputAffixCellClasses("suffix", Boolean(ghost))}>
               {suffixContent}
             </div>
           )}

@@ -4,7 +4,7 @@ import { MultipleSelector, Option as MultiSelectOption } from "@/components/ui/m
 import { Loader2, X } from "lucide-react";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { logger } from "@/lib/logger";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import { textInputAffixCellClasses, xIconVariant } from "@/components/ui/input/text-input-variant";
 import { SelectInputWidgetProps, Option } from "./select-types";
 import { convertValuesToOriginalType } from "./select-utils";
 import { getWidth } from "@/lib/styles";
@@ -226,13 +226,13 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+            <div className={textInputAffixCellClasses("prefix", Boolean(ghost))}>
               {prefixContent}
             </div>
           )}
           <div className="flex-1 relative w-full">{multiSelectorContent}</div>
           {hasSuffix && (
-            <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+            <div className={textInputAffixCellClasses("suffix", Boolean(ghost))}>
               {suffixContent}
             </div>
           )}

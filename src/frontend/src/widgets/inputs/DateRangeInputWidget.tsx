@@ -23,10 +23,7 @@ import {
   dateRangeInputIconVariant,
   dateRangeInputTextVariant,
 } from "@/components/ui/input/date-range-input-variant";
-import {
-  affixEmbeddedButtonClasses,
-  affixIconOnlyCellPaddingClasses,
-} from "@/components/ui/input/text-input-variant";
+import { textInputAffixCellClasses } from "@/components/ui/input/text-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { DateRangePresets } from "./DateRangePresets";
 
@@ -330,29 +327,11 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div
-              className={cn(
-                "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]",
-                affixEmbeddedButtonClasses,
-                affixIconOnlyCellPaddingClasses,
-                !isOpen && "border-r border-input",
-              )}
-            >
-              {prefixContent}
-            </div>
+            <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
           )}
           <div className="flex-1 relative w-full">{triggerContent}</div>
           {hasSuffix && (
-            <div
-              className={cn(
-                "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]",
-                affixEmbeddedButtonClasses,
-                affixIconOnlyCellPaddingClasses,
-                !isOpen && "border-l border-input",
-              )}
-            >
-              {suffixContent}
-            </div>
+            <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
           )}
         </div>
       ) : (

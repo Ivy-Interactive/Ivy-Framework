@@ -18,7 +18,7 @@ import {
   colorInputPickerVariant,
 } from "@/components/ui/input/color-input-variant";
 import { Densities } from "@/types/density";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import { textInputAffixCellClasses, xIconVariant } from "@/components/ui/input/text-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -374,13 +374,13 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             )}
           >
             {hasPrefix && (
-              <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+              <div className={textInputAffixCellClasses("prefix", Boolean(ghost))}>
                 {prefixContent}
               </div>
             )}
             {textContent}
             {hasSuffix && (
-              <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+              <div className={textInputAffixCellClasses("suffix", Boolean(ghost))}>
                 {suffixContent}
               </div>
             )}
@@ -563,13 +563,13 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+            <div className={textInputAffixCellClasses("prefix", Boolean(ghost))}>
               {prefixContent}
             </div>
           )}
           <div className="flex flex-1 items-center">{defaultContent}</div>
           {hasSuffix && (
-            <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
+            <div className={textInputAffixCellClasses("suffix", Boolean(ghost))}>
               {suffixContent}
             </div>
           )}

@@ -7,7 +7,7 @@ import { getHeight, getWidth, inputStyles } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import { X, Copy, Loader2 } from "lucide-react";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import { textInputAffixCellClasses, xIconVariant } from "@/components/ui/input/text-input-variant";
 import {
   keymap,
   EditorView,
@@ -253,15 +253,11 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       )}
     >
       {hasPrefix && (
-        <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
-          {prefixContent}
-        </div>
+        <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
       )}
       <div className="flex-1 min-w-0">{codeEditor}</div>
       {hasSuffix && (
-        <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
-          {suffixContent}
-        </div>
+        <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
       )}
     </div>
   );

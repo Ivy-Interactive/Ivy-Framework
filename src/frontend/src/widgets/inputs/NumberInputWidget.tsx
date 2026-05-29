@@ -8,7 +8,7 @@ import { inputStyles, getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { X } from "lucide-react";
 import { Densities } from "@/types/density";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import { textInputAffixCellClasses, xIconVariant } from "@/components/ui/input/text-input-variant";
 import { formatBytes } from "@/lib/formatters";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
@@ -220,15 +220,11 @@ const SliderVariant = memo(
         )}
       >
         {hasPrefix && (
-          <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
-            {prefixContent}
-          </div>
+          <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
         )}
         <div className="flex-1 px-3">{sliderContent}</div>
         {hasSuffix && (
-          <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
-            {suffixContent}
-          </div>
+          <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
         )}
       </div>
     );
@@ -340,14 +336,7 @@ const NumberVariant = memo(
       >
         {/* Prefix with background and separator */}
         {hasPrefix && (
-          <div
-            className={cn(
-              "flex items-center px-3 bg-muted text-muted-foreground rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]",
-              !isFocused && "border-r border-input",
-            )}
-          >
-            {prefixContent}
-          </div>
+          <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
         )}
 
         <div className="relative flex-1">
@@ -398,14 +387,7 @@ const NumberVariant = memo(
 
         {/* Suffix with background and separator */}
         {hasSuffix && (
-          <div
-            className={cn(
-              "flex items-center px-3 bg-muted text-muted-foreground rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]",
-              !isFocused && "border-l border-input",
-            )}
-          >
-            {suffixContent}
-          </div>
+          <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
         )}
       </div>
     );
