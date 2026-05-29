@@ -11,11 +11,6 @@ public record PluginIcon
     public static PluginIcon Named(string name) => new() { Kind = PluginIconKind.Named, Value = name };
 
     /// <summary>
-    /// Creates an icon from raw SVG markup.
-    /// </summary>
-    public static PluginIcon Svg(string svg) => new() { Kind = PluginIconKind.Svg, Value = svg };
-
-    /// <summary>
     /// Creates an icon from a URL (e.g. PNG, SVG, or any image URL).
     /// </summary>
     public static PluginIcon Url(string url) => new() { Kind = PluginIconKind.Url, Value = url };
@@ -29,7 +24,6 @@ public record PluginIcon
 public enum PluginIconKind
 {
     Named,
-    Svg,
     Url,
     File
 }
