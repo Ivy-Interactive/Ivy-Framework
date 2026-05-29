@@ -69,7 +69,7 @@ public class ToolsDashboardView : ViewBase
             _ => Text.H3("Please select a tool")
         };
         
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Text.P("Ivy Framework Pages")
             | (Layout.Horizontal().Gap(2)
                 | new Button("Ivy Docs", onClick: _ => selectedTool.Set("docs"))
@@ -90,7 +90,7 @@ public class RefreshableIframeView : ViewBase
         var refreshToken = UseRefreshToken();
         var url = UseState("https://httpbin.org/uuid");
         
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Layout.Horizontal().Gap(2)
                 | url.ToTextInput(placeholder: "Enter URL...")
                 | new Button("Refresh", onClick: _ => refreshToken.Refresh())
@@ -122,7 +122,7 @@ public class ResponsiveIframeView : ViewBase
             _ => Size.Units(baseWidth * 9 / 16)       // Default to 16:9
         };
         
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | (Layout.Horizontal().Gap(2)
                 | Text.Label("Aspect Ratio:")
                 | new Button("16:9", onClick: _ => aspectRatio.Set("16:9"))

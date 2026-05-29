@@ -72,7 +72,7 @@ public class CounterView : ViewBase
         var count = UseState(0);
         
         return new Card(
-            Layout.Vertical().AlignContent(Align.Center)
+            Layout.Vertical().AlignContent(Align.Center).Gap(4)
                 | Text.P($"{count.Value}")
                 | (Layout.Horizontal().Gap(2).AlignContent(Align.Center)
                     | new Button("-", onClick: _ => count.Set(count.Value - 1))

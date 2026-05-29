@@ -48,7 +48,7 @@ Layout.Horizontal()
 The Layout class supports the pipe operator `|` for adding children, enabling a clean and readable composition syntax:
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | Text.Label("User Profile")
     | (Layout.Horizontal().Gap(2)
         | new Badge("Active").Primary()
@@ -79,7 +79,7 @@ Layout.Vertical()
 Use `.Gap(rowGap, columnGap)` to control vertical and horizontal spacing independently:
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | Text.Label("RowGap=8, ColumnGap=2:")
     | (Layout.Wrap().Gap(8, 2).Width(Size.Units(60))
         | new Badge("A") | new Badge("B") | new Badge("C")
@@ -99,7 +99,7 @@ Layout.Vertical()
 Add internal and external spacing:
 
 ```csharp demo-tabs
-Layout.Vertical().Background(Colors.Muted)
+Layout.Vertical().Padding(4).Background(Colors.Muted)
     | Text.Label("This layout has padding and background")
     | new Badge("Example")
 ```
@@ -109,7 +109,7 @@ Layout.Vertical().Background(Colors.Muted)
 Control layout dimensions:
 
 ```csharp demo-tabs
-Layout.Horizontal()
+Layout.Horizontal().Gap(4)
     | (Layout.Vertical().Width(Size.Units(50)).Height(Size.Units(20)).Background(Colors.Muted).Center()
         | Text.Label("50 units wide"))
     | (Layout.Vertical().Width(Size.Units(30)).Height(Size.Units(20)).Background(Colors.Muted).Center()
@@ -121,7 +121,7 @@ Layout.Horizontal()
 Align content within the layout:
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | (Layout.Horizontal().Left()
         | new Badge("Left aligned"))
     | (Layout.Horizontal().Center()
@@ -135,7 +135,7 @@ Layout.Vertical()
 Distribute space between elements using `SpaceBetween`, `SpaceAround`, or `SpaceEvenly`:
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | Text.Label("SpaceBetween — items pushed to edges:")
     | (Layout.Horizontal().AlignContent(Align.SpaceBetween).Width(Size.Full())
         | new Badge("A") | new Badge("B") | new Badge("C"))
@@ -171,7 +171,7 @@ Layout.Wrap().Gap(2)
 Override alignment for individual children using `.AlignSelf()`. In a horizontal layout, this controls vertical positioning of each child independently:
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | new Badge("Top").Primary().AlignSelf(Align.TopLeft)
     | new Badge("Center").Primary().AlignSelf(Align.Center)
     | new Badge("Bottom").Primary().AlignSelf(Align.BottomRight)
@@ -195,9 +195,9 @@ Layout.Vertical().Height(Size.Units(30)).Scroll(Scroll.Vertical).Gap(2)
 The Layout methods integrate seamlessly with specialized layout [widgets](../../02_Widgets/02_Layouts/_Index.md) and [Card](../../02_Widgets/03_Common/04_Card.md):
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | Text.Label("Dashboard")
-    | (Layout.Grid().Columns(2)
+    | (Layout.Grid().Columns(2).Gap(4)
         | new Card("Sales").Title("$12,450")
         | new Card("Users").Title("1,234")
         | new Card("Orders").Title("89")

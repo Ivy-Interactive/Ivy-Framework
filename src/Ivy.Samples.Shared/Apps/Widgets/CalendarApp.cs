@@ -271,7 +271,7 @@ public class CalendarDensityExample : ViewBase
                 .Color("Purple"),
         ];
 
-        return Layout.Horizontal()
+        return Layout.Horizontal().Gap(4)
             | (Layout.Vertical().Width(Size.Full())
                 | Text.H4("Small")
                 | new Calendar(MakeEvents()).Small())

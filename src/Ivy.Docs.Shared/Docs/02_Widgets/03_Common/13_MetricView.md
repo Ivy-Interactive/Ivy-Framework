@@ -228,7 +228,7 @@ public class ECommerceDashboard : ViewBase
 
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Text.H2("E-Commerce Dashboard")
             | (Layout.Grid().Columns(2).Gap(3)
                 | new MetricView("Total Revenue", Icons.DollarSign, UseRevenueMetric)
@@ -335,7 +335,7 @@ public class SaaSDashboard : ViewBase
 
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Text.H2("SaaS Metrics Dashboard")
             | Text.Muted("Real-time business metrics and KPIs")
             | (Layout.Grid().Columns(2).Gap(3)

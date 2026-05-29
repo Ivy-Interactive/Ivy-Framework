@@ -31,7 +31,7 @@ public class StackLayoutApp : SampleBase
             ).Gap(0);
 
         var horizontalAlign =
-            Layout.Grid().Columns(3).Width(Size.Fit())
+            Layout.Grid().Columns(3).Width(Size.Fit()).Gap(4)
             | AlignHorizontalTest(Align.TopLeft)
             | AlignHorizontalTest(Align.TopCenter)
             | AlignHorizontalTest(Align.TopRight)
@@ -43,7 +43,7 @@ public class StackLayoutApp : SampleBase
             | AlignHorizontalTest(Align.BottomRight);
 
         var verticalAlign =
-            Layout.Grid().Columns(3).Width(Size.Fit())
+            Layout.Grid().Columns(3).Width(Size.Fit()).Gap(4)
             | AlignVerticalTest(Align.TopLeft)
             | AlignVerticalTest(Align.TopCenter)
             | AlignVerticalTest(Align.TopRight)

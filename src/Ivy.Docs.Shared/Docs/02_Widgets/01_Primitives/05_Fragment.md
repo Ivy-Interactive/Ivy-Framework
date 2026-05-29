@@ -45,7 +45,7 @@ public class ConditionalRenderingView : ViewBase
         var client = UseService<IClientProvider>();
         var viewMode = UseState("user"); 
         
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Text.P("User Dashboard")
             | (Layout.Horizontal().Gap(2)
                 | new Button("User View", _ => {
@@ -115,7 +115,7 @@ public class MultipleElementsView : ViewBase
             ).Title("Content"),
             new Spacer().Height(Size.Units(4)),
             // Header section
-            Layout.Horizontal()
+            Layout.Horizontal().Gap(4)
                 | new Button("Save", _ => client.Toast("Changes saved successfully!"))
                 | new Button("Cancel", _ => client.Toast("Changes cancelled"))
         );
@@ -143,7 +143,7 @@ public class DynamicContentView : ViewBase
         var items = UseState(() => new string[] { "Item 1", "Item 2" });
         var showDetails = UseState(false);
         
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Text.P("Dynamic Content")
             | new Fragment(
                 // Static controls

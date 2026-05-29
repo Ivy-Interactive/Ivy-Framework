@@ -38,7 +38,7 @@ public class ProfileDetailView : ViewBase
             }
         };
         
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Text.H1("User Profile")
             
             | Layout.Vertical().Gap(2)
@@ -91,7 +91,7 @@ public class SeparatorTextAlignView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | new Separator("Left Aligned").TextAlign(TextAlignment.Left)
             | new Separator("Center Aligned").TextAlign(TextAlignment.Center)
             | new Separator("Right Aligned").TextAlign(TextAlignment.Right);

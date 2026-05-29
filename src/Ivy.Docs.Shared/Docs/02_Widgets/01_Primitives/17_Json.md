@@ -29,7 +29,7 @@ public class BasicJsonExample : ViewBase
             tags = new[] { "developer", "designer", "architect" }
         };
         
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | new Json(System.Text.Json.JsonSerializer.Serialize(simpleData));
     }
 }
@@ -66,7 +66,7 @@ public class ExpandedJsonExample : ViewBase
             tags = new[] { "developer", "designer" }
         });
 
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Text.P("Collapsed (default):")
             | new Json(data)
             | Text.P("Expanded 1 level:")

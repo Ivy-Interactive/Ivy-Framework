@@ -62,7 +62,7 @@ public class DateRangeVariantsDemo : ViewBase
             (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)),
              DateOnly.FromDateTime(DateTime.Today)));
 
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Text.P("Disabled State").Small()
             | dateRange.ToDateRangeInput().Disabled()
             | Text.P("Invalid State").Small()
@@ -105,7 +105,7 @@ public class DateRangeConstraintsDemo : ViewBase
         var minDate = new DateOnly(2026, 1, 1);
         var maxDate = new DateOnly(2026, 12, 31);
 
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Text.P("Select vacation dates for 2026").Small()
             | bookingRange.ToDateRangeInput()
                 .Min(minDate)
@@ -185,7 +185,7 @@ public class HotelBookingDemo : ViewBase
         var errorMessage = !isValid && from.HasValue ? "Minimum stay is 1 night" : "";
         var totalPrice = nights * PricePerNight;
 
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Text.P("Book Your Stay").Large().Bold()
             | bookingRange.ToDateRangeInput()
                 .Min(DateOnly.FromDateTime(DateTime.Today))

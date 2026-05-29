@@ -6,7 +6,7 @@ public class WireframeCalloutApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var colors = Layout.Horizontal()
+        var colors = Layout.Horizontal().Gap(4)
             | new WireframeCallout("1")
             | new WireframeCallout("2", Colors.Blue)
             | new WireframeCallout("3", Colors.Green)

@@ -30,7 +30,7 @@ public class BasicHeaderExample : ViewBase
         return new HeaderLayout(
             header: new Card("Fixed Header Content")
                 .Title("Header Area"),
-            content: Layout.Vertical()
+            content: Layout.Vertical().Gap(4)
                 | Text.P("The header above remains fixed while content scrolls.")
                 | Text.P("Add as much content as needed.")
         );
@@ -57,7 +57,7 @@ public class ToolbarExample : ViewBase
         var searchText = UseState("");
         
         var toolbar = new Card(
-            Layout.Horizontal()
+            Layout.Horizontal().Gap(4)
                 | searchText.ToTextInput()
                     .Placeholder("Search items...")
                     .Variant(TextInputVariant.Search)
@@ -75,7 +75,7 @@ public class ToolbarExample : ViewBase
                     .OnClick(_ => client.Toast("Export clicked"))
         );
 
-        var content = Layout.Vertical()
+        var content = Layout.Vertical().Gap(4)
             | new Card("Item 1 - This is some sample content")
             | new Card("Item 2 - More content that will scroll");
         return new HeaderLayout(toolbar, content);
@@ -95,7 +95,7 @@ public class DashboardHeaderExample : ViewBase
         var client = UseService<IClientProvider>();
         
         var dashboardHeader = new Card(
-            Layout.Horizontal()
+            Layout.Horizontal().Gap(4)
                 | Text.P("Analytics Dashboard")
                 | new Spacer()
                 | Layout.Horizontal().Gap(3)
@@ -106,7 +106,7 @@ public class DashboardHeaderExample : ViewBase
                         .OnClick(_ => client.Toast("Refreshing data..."))
         );
 
-        var dashboardContent = Layout.Grid().Columns(3).Rows(2)
+        var dashboardContent = Layout.Grid().Columns(3).Rows(2).Gap(4)
             | new Card(
                 Layout.Vertical().Gap(2)
                     | Text.P("Users").Small()
@@ -172,7 +172,7 @@ public class NavigationHeaderExample : ViewBase
         {
             return currentSection.Value switch
             {
-                "introduction" => Layout.Vertical()
+                "introduction" => Layout.Vertical().Gap(4)
                     | Text.Label("Introduction")
                     | Text.P("Welcome to our comprehensive guide. This section covers the fundamental concepts you need to understand.")
                     | new Card("Key concepts highlighted here")
@@ -180,7 +180,7 @@ public class NavigationHeaderExample : ViewBase
                     | new Card("Understanding core principles")
                     | Text.P("Continue reading to learn more about the framework's capabilities."),
                 
-                "getting-started" => Layout.Vertical()
+                "getting-started" => Layout.Vertical().Gap(4)
                     | Text.Label("Getting Started")
                     | Text.P("Follow these steps to get started quickly with your first project.")
                     | new Card("Step 1: Install the framework")
@@ -189,7 +189,7 @@ public class NavigationHeaderExample : ViewBase
                     | Text.Code("npm install ivy-framework")
                     | Text.P("Once installed, you can start building amazing applications."),
                 
-                "advanced" => Layout.Vertical()
+                "advanced" => Layout.Vertical().Gap(4)
                     | Text.Label("Advanced Topics")
                     | Text.P("Advanced usage patterns and techniques for experienced developers.")
                     | new Card("Custom components and widgets")
@@ -222,7 +222,7 @@ public class FormHeaderExample : ViewBase
         var bio = UseState("Software developer with 5 years of experience...");
 
         var formHeader = new Card(
-            Layout.Horizontal()
+            Layout.Horizontal().Gap(4)
                 | Text.Label("Edit Profile")
                 | new Spacer().Width(Size.Grow())
                 | new Button("Cancel").Variant(ButtonVariant.Ghost)
@@ -230,7 +230,7 @@ public class FormHeaderExample : ViewBase
                         .OnClick(_ => client.Toast("Profile saved!"))
         );
 
-        var formContent = Layout.Vertical()
+        var formContent = Layout.Vertical().Gap(4)
             | new Card(
                 Layout.Vertical().Gap(3)
                     | Text.P("Personal Information").Small()

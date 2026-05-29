@@ -47,25 +47,25 @@ public class AudioPlayerApp : SampleBase
                | Text.P("Demonstrates various configurations of the Audio widget for playing audio content. This widget is for audio playback, not recording. The audio player is theme-aware and adapts to light/dark themes.")
                | Layout.Vertical().Gap(6)
                    | (new Card(
-                       Layout.Vertical()
+                       Layout.Vertical().Gap(4)
                        | Text.H4("Basic Audio Player")
                        | Text.P("Default audio player with standard browser controls.").Small()
                        | basicAudio
                    ).Title("Basic Usage"))
                    | (new Card(
-                       Layout.Vertical()
+                       Layout.Vertical().Gap(4)
                        | Text.H4("Looping Audio with Preload")
                        | Text.P("Audio player configured to loop continuously with auto preload.").Small()
                        | customAudio
                    ).Title("Custom Configuration"))
                    | (new Card(
-                       Layout.Vertical()
+                       Layout.Vertical().Gap(4)
                        | Text.H4("Muted Autoplay Audio")
                        | Text.P("Muted audio that starts playing automatically and loops. Muted autoplay is more likely to be allowed by browsers.").Small()
                        | mutedAudio
                    ).Title("Autoplay Example"))
                    | (new Card(
-                       Layout.Vertical()
+                       Layout.Vertical().Gap(4)
                        | Text.H4("Audio Without Controls")
                        | Text.P("Audio element without browser controls for programmatic control scenarios.").Small()
                        | noControlsAudio
@@ -74,13 +74,13 @@ public class AudioPlayerApp : SampleBase
                            .TestId("toggle-play-pause-button")
                    ).Title("Programmatic Control"))
                    | (new Card(
-                       Layout.Vertical()
+                       Layout.Vertical().Gap(4)
                        | Text.H4("Custom Sized Audio Player")
                        | Text.P("Audio player with custom width and height dimensions.").Small()
                        | customSizedAudio
                    ).Title("Custom Sizing"))
                   | (new Card(
-                      Layout.Vertical()
+                      Layout.Vertical().Gap(4)
                       | Text.H4("Theme Awareness")
                       | Text.P("The audio player automatically adapts to your current theme (light/dark mode). The controls, background, and text colors adjust accordingly.").Small()
                       | themeAudio

@@ -47,7 +47,7 @@ public class CameraInputBasic : ViewBase
             }
         }, photo);
 
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
                | Text.P("Basic CameraInput example. Captures a photo from your webcam and uploads it.")
                | new CameraInput(upload.Value, "Take a photo")
                | (photo.Value != null
@@ -87,7 +87,7 @@ public class CameraInputValidation : ViewBase
             defaultContentType: CameraInputHelpers.DefaultImageContentType
         );
 
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
                | Text.P("Demonstrates CameraInput with validation error state.")
                | new CameraInput(dummyUpload.Value, "Take a photo")
                    .Invalid("Camera input is invalid");

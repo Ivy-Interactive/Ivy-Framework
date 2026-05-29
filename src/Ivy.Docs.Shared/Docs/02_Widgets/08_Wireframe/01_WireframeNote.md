@@ -29,7 +29,7 @@ new WireframeNote("Remember to add validation")
 Six color variants are available to categorize and distinguish notes:
 
 ```csharp demo
-Layout.Horizontal()
+Layout.Horizontal().Gap(4)
     | new WireframeNote("Yellow (default)")
     | new WireframeNote("Blue note", Colors.Blue)
     | new WireframeNote("Green note", Colors.Green)
@@ -52,7 +52,7 @@ Layout.Horizontal()
 Use newlines in the text string to create multi-line notes:
 
 ```csharp demo
-Layout.Horizontal()
+Layout.Horizontal().Gap(4)
     | new WireframeNote("Step 1:\nUser signs up")
     | new WireframeNote("Step 2:\nVerify email", Colors.Blue)
     | new WireframeNote("Step 3:\nOnboarding flow", Colors.Green)
@@ -63,7 +63,7 @@ Layout.Horizontal()
 Control the note dimensions with `Width` and `Height`:
 
 ```csharp demo
-Layout.Horizontal()
+Layout.Horizontal().Gap(4)
     | new WireframeNote("Small").Width(Size.Px(120))
     | new WireframeNote("Full width note").Width(Size.Full())
 ```
@@ -89,9 +89,9 @@ Layout.Canvas().Width(Size.Full()).Height(Size.Px(300))
 Use with `StackLayout` for structured kanban-style boards:
 
 ```csharp demo
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | Text.H3("Sprint Board")
-    | (Layout.Horizontal()
+    | (Layout.Horizontal().Gap(4)
         | (Layout.Vertical().Gap(3).Width(Size.Units(40))
             | Text.Strong("To Do")
             | new WireframeNote("Design login page").Width(Size.Full())

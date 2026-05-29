@@ -142,7 +142,7 @@ The fluent API provides a clean way to build grids:
 ```csharp
 Layout.Grid()
     .Columns(2)
-    
+    .Gap(4)
     .Padding(8)
     | content1
     | content2
@@ -188,7 +188,7 @@ Dashboard Layout
 Layout.Grid()
     .Columns(4)
     .Rows(3)
-    
+    .Gap(4)
     | new Card("Header").GridColumn(1).GridRow(1).GridColumnSpan(4)
     | new Card("Nav").GridColumn(1).GridRow(2).GridRowSpan(2)
     | new Card("Main Content").GridColumn(2).GridRow(2).GridColumnSpan(2).GridRowSpan(2)

@@ -32,7 +32,7 @@ public class UsernamePrompt(Action<string> onUsernameSet) : ViewBase
         }
 
         return Layout.Center().Padding(10)
-               | (Layout.Vertical().Width(Size.Units(80))
+               | (Layout.Vertical().Gap(4).Width(Size.Units(80))
                   | Text.H1("Welcome to Chat")
                   | Text.Muted("Enter your username to join the conversation.")
                   | inputValue.ToTextInput()

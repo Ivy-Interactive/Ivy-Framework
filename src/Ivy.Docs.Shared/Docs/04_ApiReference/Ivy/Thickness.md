@@ -137,7 +137,7 @@ You can apply both padding and margin to control the internal space of a compone
 ```csharp demo-tabs 
 Layout.Vertical()
     .Padding(8)
-      
+    .Margin(4)  
     | new Box("Content")
 ```
 

@@ -31,7 +31,7 @@ new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Ka
 Configure automatic playback and looping:
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
 | Text.H4("Muted Autoplay (browsers allow this)")
 | new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
     .Autoplay(true)
@@ -46,7 +46,7 @@ Layout.Vertical()
 Control how much audio data is loaded:
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
 | Text.P("Preload: None (no data loaded)").Small()
 | new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
     .Preload(AudioPreload.None)

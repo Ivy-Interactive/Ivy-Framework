@@ -19,7 +19,7 @@ public class HelloWorldApp : ViewBase
             ? greeters[0].Greet(string.IsNullOrWhiteSpace(nameState.Value) ? "World" : nameState.Value)
             : "No greeter plugin loaded.";
 
-        return Vertical().Gap(6)
+        return Vertical().Gap(6).Padding(4)
             | H1(greeting)
             | new Field(
                 nameState.ToTextInput().Placeholder("Enter a name")

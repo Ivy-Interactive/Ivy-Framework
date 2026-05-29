@@ -341,7 +341,7 @@ public class ColorInputEvents : ViewBase
 
         return Layout.Vertical().Gap(6)
             | Layout.Tabs(
-                new Tab("OnFocus", Layout.Vertical()
+                new Tab("OnFocus", Layout.Vertical().Gap(4)
                     | Text.P("The **OnFocus** event fires when the ColorInput gains focus (via mouse or keyboard tab).")
                     | new Card(
                         Layout.Vertical().Center().Gap(6)
@@ -351,7 +351,7 @@ public class ColorInputEvents : ViewBase
                                 | Text.Muted("Focus Count")
                       ).Width(Size.Units(120))
                 ),
-                new Tab("OnBlur", Layout.Vertical()
+                new Tab("OnBlur", Layout.Vertical().Gap(4)
                     | Text.P("The **OnBlur** event fires when the ColorInput loses focus.")
                     | new Card(
                         Layout.Vertical().Center().Gap(6)
@@ -361,7 +361,7 @@ public class ColorInputEvents : ViewBase
                                 | Text.Muted("Blur Count")
                       ).Width(Size.Units(120))
                 ),
-                new Tab("AutoFocus", Layout.Vertical()
+                new Tab("AutoFocus", Layout.Vertical().Gap(4)
                     | Text.P("The **AutoFocus** property should automatically focus the ColorInput when it is mounted.")
                     | new Card(
                         Layout.Vertical().Center().Gap(6)

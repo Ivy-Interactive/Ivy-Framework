@@ -120,7 +120,7 @@ public class SimpleSortDemo : ViewBase
             new { Label = "Banana", Value = 20 }
         };
 
-        return Layout.Horizontal()
+        return Layout.Horizontal().Gap(4)
             | (Layout.Vertical()
                 | Text.P("No Sorting").Small()
                 | data.ToBarChart()
@@ -152,7 +152,7 @@ public class CustomSortDemo : ViewBase
             new { Label = "2", Value = 20 }
         };
 
-        return Layout.Horizontal()
+        return Layout.Horizontal().Gap(4)
             | (Layout.Vertical()
                 | Text.P("Lexicographic: 1, 10, 2").Small()
                 | data.ToLineChart()
@@ -196,7 +196,7 @@ public class ColorSchemeDemo : ViewBase
             new { Month = "Mar", A = 140, B = 100, C = 80 }
         };
 
-        return Layout.Horizontal()
+        return Layout.Horizontal().Gap(4)
             | (Layout.Vertical()
                 | Text.P("Default").Small()
                 | new BarChart(data)

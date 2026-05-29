@@ -40,7 +40,7 @@ public class TitledCalloutView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Callout.Info("This feature requires admin privileges.", "Access Note")
             | Callout.Success("Your settings have been saved successfully!", "Success")
             | Callout.Warning("Changes made here cannot be automatically undone.", "Caution")
@@ -58,7 +58,7 @@ public class ConstructorCalloutView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | new Callout("This is a basic info callout")
             | new Callout("Success message with title", "Operation Complete", CalloutVariant.Success)
             | new Callout("Warning with custom icon", "Important Notice", CalloutVariant.Warning, Icons.TriangleAlert)
@@ -78,7 +78,7 @@ public class InfoCalloutView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Callout.Info("Welcome to the new dashboard! Here you can monitor all your system metrics in real-time.")
             | Callout.Info("Pro tip: Use the search bar to quickly find what you're looking for.", "Quick Tip")
             | Callout.Info("This feature is currently in beta. Please report any issues you encounter.", "Beta Feature")
@@ -96,7 +96,7 @@ public class SuccessCalloutView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Callout.Success("Your profile has been updated successfully!")
             | Callout.Success("File uploaded successfully. You can now share it with your team.", "Upload Complete")
             | Callout.Success("Payment processed successfully. A confirmation email has been sent.", "Payment Confirmed")
@@ -114,7 +114,7 @@ public class WarningCalloutView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Callout.Warning("This action cannot be undone. Please confirm before proceeding.")
             | Callout.Warning("Your session will expire in 5 minutes. Please save your work.", "Session Expiry")
             | Callout.Warning("Some features may not work properly in older browsers.", "Browser Compatibility")
@@ -132,7 +132,7 @@ public class ErrorCalloutView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Callout.Error("Failed to connect to the server. Please check your internet connection.")
             | Callout.Error("Invalid email format. Please enter a valid email address.", "Validation Error")
             | Callout.Error("Access denied. You don't have permission to perform this action.", "Permission Error")
@@ -150,7 +150,7 @@ public class ComplexContentCalloutView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | new Callout(
                 Layout.Vertical().Gap(2)
                     | Text.P("This callout contains multiple elements including badges and rich content. You can include any widgets as children!")
@@ -214,7 +214,7 @@ public class FormCalloutView : ViewBase
     {
         var loginModel = UseState(() => new LoginModel());
         
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | new Callout(
                 Layout.Vertical().Gap(2)
                     | Text.P("All fields marked with * are required. Your information will be kept secure.")
@@ -251,7 +251,7 @@ public class DashboardCalloutView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Callout.Success("Revenue increased by 15% this month", "Financial Update").Icon(Icons.TrendingUp)
             | Callout.Info("3 new team members joined this week", "Team Update").Icon(Icons.Users)
             | Callout.Warning("Server maintenance scheduled for 2:00 AM", "System Notice").Icon(Icons.Server)
@@ -277,7 +277,7 @@ public class CustomIconCalloutView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
             | Callout.Info("New features available!", "What's New").Icon(Icons.Sparkles)
             | Callout.Success("Backup completed successfully!", "Backup Status").Icon(Icons.Database)
             | Callout.Warning("Maintenance scheduled for tonight", "System Notice").Icon(Icons.Wrench)

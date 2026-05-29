@@ -51,7 +51,7 @@ public class PaginationDensitySample : ViewBase
             page.Set(e.Value);
         };
 
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(4)
                | Layout.Horizontal().Gap(2)
                    | new Button("Small").OnClick(_ => density.Set(Density.Small))
                        .Variant(density.Value == Density.Small ? ButtonVariant.Primary : ButtonVariant.Outline).Small()

@@ -33,7 +33,7 @@ Layout.Vertical()
 You can customize the terminal appearance and behavior:
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | Text.P("With Title").Large()
     | new Terminal()
         .Title("My Terminal")

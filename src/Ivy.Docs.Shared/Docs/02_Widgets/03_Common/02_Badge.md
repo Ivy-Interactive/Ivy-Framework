@@ -59,18 +59,18 @@ Layout.Horizontal()
 `Badge`s can include icons to enhance their visual appearance and meaning. See [Icon](../01_Primitives/02_Icon.md) for more details. Use [Align](../../04_ApiReference/Ivy/Align.md) for icon position (e.g. `Align.Right`).
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | Text.P("Icons on the Left").Large()
-    | (Layout.Horizontal()
+    | (Layout.Horizontal().Gap(4)
         | new Badge("Notification", icon:Icons.Bell)
         | new Badge("Success", icon:Icons.Check).Secondary()
         | new Badge("Error", icon:Icons.X).Destructive())
     | Text.P("Icons on the Right").Large()
-    | (Layout.Horizontal()
+    | (Layout.Horizontal().Gap(4)
         | new Badge("Download").Icon(Icons.Download, Align.Right)
         | new Badge("Next").Icon(Icons.ChevronRight, Align.Right).Secondary())
     | Text.P("Icon-Only").Large()
-    | (Layout.Horizontal()
+    | (Layout.Horizontal().Gap(4)
         | new Badge(null, icon:Icons.Bell)
         | new Badge(null, icon:Icons.X, variant:BadgeVariant.Destructive))
 ```
@@ -95,17 +95,17 @@ Badge usage examples
 <Body>
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | Text.P("Status").Large()
-    | (Layout.Horizontal()
+    | (Layout.Horizontal().Gap(4)
         | new Badge("Online", icon:Icons.Circle, variant:BadgeVariant.Secondary)
         | new Badge("Offline", icon:Icons.Circle, variant:BadgeVariant.Destructive))
     | Text.P("Counters").Large()
-    | (Layout.Horizontal()
+    | (Layout.Horizontal().Gap(4)
         | new Badge("4").Large()
         | new Badge("12", icon:Icons.Mail).Large())
     | Text.P("Tags").Large()
-    | (Layout.Horizontal()
+    | (Layout.Horizontal().Gap(4)
         | new Badge("Design", icon:Icons.Palette)
         | new Badge("Development", icon:Icons.Code))
 ```

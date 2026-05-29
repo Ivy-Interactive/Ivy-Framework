@@ -172,7 +172,7 @@ public class MainAppSidebarExample : ViewBase
         var client = UseService<IClientProvider>();
 
         return new SidebarLayout(
-            mainContent: Layout.Vertical()
+            mainContent: Layout.Vertical().Gap(4)
                 | new Card(
                     Layout.Vertical().Gap(2)
                         | Text.P("Main Application").Large()

@@ -27,7 +27,7 @@ new Embed("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
 ### Social Media Posts
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | Text.H4("Twitter Tweet")
     | new Embed("https://publish.twitter.com/?url=https://twitter.com/_devJNS/status/1969643853691949555#")
     | Text.H4("Instagram Post")
@@ -47,7 +47,7 @@ Layout.Vertical()
 ### GitHub Content
 
 ```csharp demo-tabs
-Layout.Vertical()
+Layout.Vertical().Gap(4)
     | Text.H4("Repository")
     | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
     | Text.H4("Issue")
