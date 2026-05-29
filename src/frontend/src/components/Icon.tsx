@@ -22,7 +22,14 @@ import {
 import { FaXTwitter } from "react-icons/fa6";
 import { IconType } from "react-icons";
 import { VscAzure } from "react-icons/vsc";
-import { SiNotion, SiGithubcopilot, SiOpenai, SiAnthropic, SiGooglegemini } from "react-icons/si";
+import {
+  SiNotion,
+  SiGithubcopilot,
+  SiOpenai,
+  SiAnthropic,
+  SiGooglegemini,
+  SiLinear,
+} from "react-icons/si";
 
 interface IconProps {
   name?: string;
@@ -121,6 +128,7 @@ const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
     OpenAI: SiOpenai,
     ClaudeCode: SiAnthropic,
     Gemini: SiGooglegemini,
+    Linear: SiLinear,
   };
 
   if (name && name in reactIcons) {
