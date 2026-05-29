@@ -34,30 +34,31 @@ class ActivityHeatmapDemo : ViewBase
             .Select(d => new { Date = d, Count = rng.Next(1, 20) })
             .ToList();
 
-        var basicUsageHeading = new ArticleHeading("basic-usage", "Basic Usage", 1);
         var basicUsageExample = Layout.Vertical().Width(Size.Full())
-            | Text.H2(basicUsageHeading.Text).Anchor(basicUsageHeading.Id)
-            | new CodeBlock(@$"public class ActivityHeatmapDemo : ViewBase
-{{
-    public override object Build()
-    {{
-        var rng = new Random(42);
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        var start = today.AddDays(-364);
+            | Text.H2("Basic Usage").Anchor("basic-usage")
+            | new CodeBlock($$"""
+                public class ActivityHeatmapDemo : ViewBase
+                {
+                    public override object Build()
+                    {
+                        var rng = new Random(42);
+                        var today = DateOnly.FromDateTime(DateTime.Today);
+                        var start = today.AddDays(-364);
 
-        var data = Enumerable
-            .Range(0, 365)
-            .Select(start.AddDays)
-            .Where(_ => rng.NextDouble() > 0.4)
-            .Select(d => new Activity {{ Date = d, Count = rng.Next(1, 20) }})
-            .ToList();
+                        var data = Enumerable
+                            .Range(0, 365)
+                            .Select(start.AddDays)
+                            .Where(_ => rng.NextDouble() > 0.4)
+                            .Select(d => new Activity { Date = d, Count = rng.Next(1, 20) })
+                            .ToList();
 
-        return Layout.Vertical()
-            | data.ToActivityHeatmap()
-                .Dimension(ActivityDimension.Days, d => d.Date)
-                .Measure(""Count"", e => e.Sum(d => d.Count));
-    }}
-}}").Width(Size.Full())
+                        return Layout.Vertical()
+                            | data.ToActivityHeatmap()
+                                .Dimension(ActivityDimension.Days, d => d.Date)
+                                .Measure("Count", e => e.Sum(d => d.Count));
+                    }
+                }
+                """)
             
         |new Card(    
         Layout.Vertical() 
@@ -66,31 +67,32 @@ class ActivityHeatmapDemo : ViewBase
                     .Measure("Count", e => e.Sum(d => d.Count))
         );
                
-        var optionalPropsUsageHeading = new ArticleHeading("optional-props", "With Optional Properties", 1);// .WithMargin(0, 0, 0, 16);
         var optionalPropsExample = Layout.Vertical()
-            | Text.H2(optionalPropsUsageHeading.Text).Anchor(optionalPropsUsageHeading.Id)
-            | new CodeBlock(@$"public class ActivityHeatmapOptionalProps : ViewBase
-{{
-    public override object Build()
-    {{
-        return Layout.Vertical()
-            | data
-                .ToActivityHeatmap()
-                .Dimension(ActivityDimension.Days, d => d.Date)
-                .Measure(""Downloads"", e => e.Sum(d => d.Count))
-                .ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
-                .ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
-                .StartDate(DateOnly.Parse({$"\"{startDate}\""}))
-                .EndDate(DateOnly.Parse({$"\"{endDate}\""}))
-                .ColorScheme(Colors.{selectedColor.Value})
-                .OnDayClick(day => Console.WriteLine(...));
-}}")
+            | Text.H2("With Optional Properties").Anchor("optional-props")
+            | new CodeBlock($$"""
+                public class ActivityHeatmapOptionalProps : ViewBase
+                {
+                    public override object Build()
+                    {
+                        return Layout.Vertical()
+                            | data
+                                .ToActivityHeatmap()
+                                .Dimension(ActivityDimension.Days, d => d.Date)
+                                .Measure("Downloads", e => e.Sum(d => d.Count))
+                                .ShowMonthLabels({{showMonthLabels.Value.ToString().ToLower()}})
+                                .ShowDayLabels({{showDayLabels.Value.ToString().ToLower()}})
+                                .StartDate(DateOnly.Parse({{$"\"{startDate}\""}}))
+                                .EndDate(DateOnly.Parse({{$"\"{endDate}\""}}))
+                                .ColorScheme(Colors.{{selectedColor.Value}})
+                                .OnDayClick(day => Console.WriteLine(...));
+                }
+                """)
          
-                | (Layout.Horizontal().Width(Size.Full())
-                    | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker).WithField().Label("Color").Width(Size.MinContent())   
-                    | showDayLabels.ToBoolInput().WithField().Label("Show days").Width(Size.MaxContent())
-                    | showMonthLabels.ToBoolInput().WithField().Label("Show months").Width(Size.MaxContent())
-                    | nullableRange.ToDateRangeInput().WithField().Label("Time period").Width(Size.Fit()))
+            | (Layout.Horizontal().Width(Size.Full())
+                | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker).WithField().Label("Color").Width(Size.MinContent())   
+                | showDayLabels.ToBoolInput().WithField().Label("Show days").Width(Size.MaxContent())
+                | showMonthLabels.ToBoolInput().WithField().Label("Show months").Width(Size.MaxContent())
+                | nullableRange.ToDateRangeInput().WithField().Label("Time period").Width(Size.Fit()))
 
             | new Card(data
                 .ToActivityHeatmap()
@@ -123,10 +125,8 @@ class ActivityHeatmapDemo : ViewBase
             | optionalPropsExample
             | new FloatingPanel(themeSelector).AlignSelf(Align.BottomRight);
 
-        var article = new Article(
-            new object[] { mainContent })
-            .Headings([basicUsageHeading, optionalPropsUsageHeading]);
-
-        return article;
+        return Layout.Vertical().AlignContent(Align.Center)
+            | (Layout.Vertical().Width(Size.Units(200).At(Breakpoint.Desktop))
+                | mainContent);
     }
 }
