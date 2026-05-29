@@ -118,6 +118,15 @@ public class ActivityHeatmapBuilder<TSource>(
     };
 }
 
+public enum ActivityAggregation
+{
+    Sum,
+    Count,
+    Average,
+    Min,
+    Max
+}
+
 public static class ActivityHeatmapBuilderExtensions
 {
     public static ActivityHeatmapBuilder<TSource> ToActivityHeatmap<TSource>(
@@ -139,5 +148,121 @@ public static class ActivityHeatmapBuilderExtensions
             dimension != null ? new Dimension<TSource>(ExpressionNameHelper.SuggestName(dimension) ?? "Dimension", dimension) : null,
             measure != null ? new Measure<TSource>(ExpressionNameHelper.SuggestName(measure) ?? "Measure", measure) : null
         );
+    }
+
+    public static ActivityHeatmapBuilder<TSource> ToActivityHeatmap<TSource, TDimension, TMeasure>(
+        this IEnumerable<TSource> data,
+        Expression<Func<TSource, TDimension>> dimension,
+        Expression<Func<TSource, TMeasure>> measure,
+        ActivityAggregation aggregation = ActivityAggregation.Sum)
+    {
+        return data.AsQueryable().ToActivityHeatmap(dimension, measure, aggregation);
+    }
+
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ActivityHeatmapBuilder<TSource> ToActivityHeatmap<TSource, TDimension, TMeasure>(
+        this IQueryable<TSource> data,
+        Expression<Func<TSource, TDimension>> dimension,
+        Expression<Func<TSource, TMeasure>> measure,
+        ActivityAggregation aggregation = ActivityAggregation.Sum)
+    {
+        var boxedDimension = BoxSelector(dimension);
+        var aggregator = BuildAggregator(measure, aggregation);
+
+        return new ActivityHeatmapBuilder<TSource>(
+            data,
+            new Dimension<TSource>(ExpressionNameHelper.SuggestName(boxedDimension) ?? "Dimension", boxedDimension),
+            new Measure<TSource>(MeasureName(measure, aggregation), aggregator)
+        );
+    }
+
+    private static Expression<Func<TSource, object>> BoxSelector<TSource, TValue>(
+        Expression<Func<TSource, TValue>> selector)
+    {
+        var body = Expression.Convert(selector.Body, typeof(object));
+        return Expression.Lambda<Func<TSource, object>>(body, selector.Parameters);
+    }
+
+    private static string MeasureName<TSource, TMeasure>(
+        Expression<Func<TSource, TMeasure>> selector,
+        ActivityAggregation aggregation)
+    {
+        return ExpressionNameHelper.SuggestName(BoxSelector(selector)) ?? aggregation.ToString();
+    }
+
+    private static Expression<Func<IQueryable<TSource>, object>> BuildAggregator<TSource, TMeasure>(
+        Expression<Func<TSource, TMeasure>> selector,
+        ActivityAggregation aggregation)
+    {
+        var source = Expression.Parameter(typeof(IQueryable<TSource>), "q");
+
+        Expression call = aggregation switch
+        {
+            ActivityAggregation.Count => Expression.Call(
+                CountMethod<TSource>(),
+                source),
+            ActivityAggregation.Min => Expression.Call(
+                MinMaxMethod<TSource, TMeasure>(nameof(Queryable.Min)),
+                source, selector),
+            ActivityAggregation.Max => Expression.Call(
+                MinMaxMethod<TSource, TMeasure>(nameof(Queryable.Max)),
+                source, selector),
+            ActivityAggregation.Sum => Expression.Call(
+                NumericMethod<TSource, TMeasure>(nameof(Queryable.Sum)),
+                source, selector),
+            ActivityAggregation.Average => Expression.Call(
+                NumericMethod<TSource, TMeasure>(nameof(Queryable.Average)),
+                source, selector),
+            _ => throw new ArgumentOutOfRangeException(nameof(aggregation), aggregation, null)
+        };
+
+        var body = Expression.Convert(call, typeof(object));
+        return Expression.Lambda<Func<IQueryable<TSource>, object>>(body, source);
+    }
+
+    private static System.Reflection.MethodInfo CountMethod<TSource>()
+    {
+        return typeof(Queryable).GetMethods()
+            .First(m => m.Name == nameof(Queryable.Count)
+                        && m.IsGenericMethodDefinition
+                        && m.GetGenericArguments().Length == 1
+                        && m.GetParameters().Length == 1)
+            .MakeGenericMethod(typeof(TSource));
+    }
+
+    private static System.Reflection.MethodInfo MinMaxMethod<TSource, TMeasure>(string name)
+    {
+        return typeof(Queryable).GetMethods()
+            .First(m => m.Name == name
+                        && m.IsGenericMethodDefinition
+                        && m.GetGenericArguments().Length == 2
+                        && m.GetParameters().Length == 2)
+            .MakeGenericMethod(typeof(TSource), typeof(TMeasure));
+    }
+
+    private static System.Reflection.MethodInfo NumericMethod<TSource, TMeasure>(string name)
+    {
+        var method = typeof(Queryable).GetMethods()
+            .Where(m => m.Name == name
+                        && m.IsGenericMethodDefinition
+                        && m.GetGenericArguments().Length == 1
+                        && m.GetParameters().Length == 2)
+            .Select(m => m.MakeGenericMethod(typeof(TSource)))
+            .FirstOrDefault(m =>
+            {
+                var selectorParam = m.GetParameters()[1].ParameterType; // Expression<Func<TSource, X>>
+                var funcType = selectorParam.GetGenericArguments()[0];   // Func<TSource, X>
+                var returnType = funcType.GetGenericArguments()[1];      // X
+                return returnType == typeof(TMeasure);
+            });
+
+        if (method is null)
+        {
+            throw new NotSupportedException(
+                $"Queryable.{name} does not support a measure of type '{typeof(TMeasure).Name}'. " +
+                "Supported types are int, long, float, double, decimal and their nullable variants.");
+        }
+
+        return method;
     }
 }
