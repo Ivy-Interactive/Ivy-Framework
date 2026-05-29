@@ -771,7 +771,7 @@ export const typography: Record<string, string> = {
   ul: "list-disc list-outside ps-8 flex flex-col gap-y-4",
   ol: "list-decimal list-outside ps-8 flex flex-col gap-y-4",
   li: "list-item",
-  liContent: "flex flex-col gap-y-3.5 [&>p]:my-0",
+  liContent: "flex flex-col gap-y-4 [&>p]:my-0",
 
   // Links
   a: "text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100",
@@ -811,9 +811,8 @@ export const articleTypography: Record<string, string> = {
 
   // Slightly increased line height for article body text (readability)
   p: `${typography.p} leading-relaxed`,
-  ul: "list-disc list-outside ps-9 flex flex-col gap-y-5",
-  ol: "list-decimal list-outside ps-9 flex flex-col gap-y-5",
+  ul: "list-disc list-outside ps-9 flex flex-col gap-y-4",
+  ol: "list-decimal list-outside ps-9 flex flex-col gap-y-4",
   li: "list-item leading-relaxed",
-  liContent: "flex flex-col gap-y-4 [&>p]:my-0",
   blockquote: `${typography.blockquote} leading-relaxed`,
 };
