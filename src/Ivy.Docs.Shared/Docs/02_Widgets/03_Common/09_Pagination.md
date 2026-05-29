@@ -44,7 +44,7 @@ public class PaginationConfigurationApp : ViewBase
     public override object? Build() {
         var page = UseState(5);
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("Siblings").Large()
             | (Layout.Vertical()
                 | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(1)

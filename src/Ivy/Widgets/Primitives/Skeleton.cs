@@ -19,7 +19,7 @@ public record Skeleton : WidgetBase<Skeleton>
             new Skeleton().Height(Size.Units(10))
         );
 
-    public static object Feed(int items = 3) => Layout.Vertical().Gap(4)
+    public static object Feed(int items = 3) => Layout.Vertical()
         | Enumerable.Range(0, items).Select(_ =>
             Layout.Vertical().Gap(2)
             | (Layout.Horizontal().Gap(2)
@@ -31,7 +31,7 @@ public record Skeleton : WidgetBase<Skeleton>
             | new Skeleton().Height(Size.Units(16))
         );
 
-    public static object Form() => Layout.Vertical().Gap(4)
+    public static object Form() => Layout.Vertical()
         | Enumerable.Range(0, 4).Select(_ =>
             Layout.Vertical().Gap(1)
             | new Skeleton().Height(Size.Units(4)).Width(Size.Units(20))

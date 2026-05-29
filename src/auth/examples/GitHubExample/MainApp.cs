@@ -34,7 +34,7 @@ public class MainApp : ViewBase
                  Layout.Vertical(
                      Text.H3(user.FullName ?? "User"),
                      Text.Muted(user.Email)
-                 ).Gap(4).AlignContent(Align.Center)
+                 ).AlignContent(Align.Center)
             ).Gap(20).AlignContent(Align.Center),
 
             new OAuthProviderTestView(OAuthProviders.GitHub, auth.GetAuthSession())

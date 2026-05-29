@@ -384,7 +384,7 @@ public class DataTableDensitySample : ViewBase
             .Density(density.Value)
             .Height(Size.Units(60));
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Layout.Horizontal().Gap(2)
                 | new Button("Small").OnClick(_ => density.Set(Density.Small))
                     .Variant(density.Value == Density.Small ? ButtonVariant.Primary : ButtonVariant.Outline).Small()
