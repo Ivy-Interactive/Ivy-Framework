@@ -102,6 +102,8 @@ public class PluginStateServiceTests
 
         public IReadOnlyList<string> GetActivePluginIds() => ActivePluginIds;
 
+        public PluginManifest? GetPluginManifest(string pluginId) => null;
+
         public IReadOnlyList<UnconfiguredPlugin> GetUnconfiguredPlugins() => [];
 
         public IReadOnlyList<PluginCandidate> GetUnloadedPlugins() => [];

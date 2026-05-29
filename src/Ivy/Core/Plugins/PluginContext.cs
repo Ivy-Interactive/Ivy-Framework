@@ -2,6 +2,7 @@ using System.Reflection;
 using Ivy.Core.Apps;
 using Ivy.Plugins;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Core.Plugins;
@@ -264,6 +265,41 @@ public abstract class PluginContextBase : IIvyExtendedPluginContext, IPluginServ
     {
         foreach (var action in _appActions)
             action(app);
+
+        app.MapGet("/ivy/plugins/{pluginId}/assets/{**filePath}", (string pluginId, string filePath) =>
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                if (!_pluginStates.TryGetValue(pluginId, out var state))
+                    return Results.NotFound();
+
+                var pluginDir = Path.GetFullPath(state.Directory);
+                var fullPath = Path.GetFullPath(Path.Combine(pluginDir, filePath));
+
+                if (!fullPath.StartsWith(pluginDir + Path.DirectorySeparatorChar))
+                    return Results.NotFound();
+
+                if (!File.Exists(fullPath))
+                    return Results.NotFound();
+
+                var contentType = Path.GetExtension(fullPath).ToLowerInvariant() switch
+                {
+                    ".svg" => "image/svg+xml",
+                    ".png" => "image/png",
+                    ".jpg" or ".jpeg" => "image/jpeg",
+                    ".gif" => "image/gif",
+                    ".webp" => "image/webp",
+                    ".ico" => "image/x-icon",
+                    _ => "application/octet-stream"
+                };
+                return Results.File(fullPath, contentType);
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        });
     }
 }
 

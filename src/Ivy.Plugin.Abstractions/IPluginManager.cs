@@ -9,6 +9,7 @@ public record PluginCandidate(
 public interface IPluginManager
 {
     IReadOnlyList<string> GetActivePluginIds();
+    PluginManifest? GetPluginManifest(string pluginId);
     PluginConfigurationSchema? GetPluginSchema(string pluginId);
     object? BuildPluginConfigurationView(string pluginId, IIvyPluginConfig config);
     IReadOnlyList<PluginCandidate> GetUnloadedPlugins();

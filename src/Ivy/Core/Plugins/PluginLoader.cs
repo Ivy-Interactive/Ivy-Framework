@@ -101,6 +101,8 @@ public class PluginLoader : IPluginManager
                     continue;
                 }
 
+                ValidatePluginIcon(manifest, directory);
+
                 _knownPlugins[manifest.Id] = directory;
                 candidates.Add(loaded.Value);
             }
@@ -179,6 +181,8 @@ public class PluginLoader : IPluginManager
                         manifest.Id, minVersion, hostVersion);
                     continue;
                 }
+
+                ValidatePluginIcon(manifest, directory);
 
                 _knownPlugins[manifest.Id] = directory;
                 candidates.Add(loaded.Value);
@@ -872,6 +876,21 @@ public class PluginLoader : IPluginManager
         }
     }
 
+    public PluginManifest? GetPluginManifest(string pluginId)
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            return _plugins
+                .FirstOrDefault(p => p.Instance.Manifest.Id == pluginId)
+                ?.Instance.Manifest;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
     public PluginConfigurationSchema? GetPluginSchema(string pluginId)
     {
         _lock.EnterReadLock();
@@ -1005,6 +1024,20 @@ public class PluginLoader : IPluginManager
         finally
         {
             _lock.ExitWriteLock();
+        }
+    }
+
+    private void ValidatePluginIcon(PluginManifest manifest, string directory)
+    {
+        if (manifest.Icon is { Kind: PluginIconKind.File } icon)
+        {
+            var fullPath = Path.GetFullPath(Path.Combine(directory, icon.Value));
+            if (!File.Exists(fullPath))
+            {
+                _logger.LogWarning(
+                    "Plugin '{Id}' references icon file '{Path}' which does not exist in '{Directory}'.",
+                    manifest.Id, icon.Value, directory);
+            }
         }
     }
 
