@@ -99,11 +99,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
     <div
       className={cn("flex flex-col h-full w-full", removeParentPadding && "remove-parent-padding")}
     >
-      <div
-        ref={containerRef}
-        className="relative pl-2 pt-2 pb-[6px] w-full"
-        style={getWidth(width)}
-      >
+      <div ref={containerRef} className="relative pl-2 pt-2 pb-4 w-full" style={getWidth(width)}>
         {/* Tabs */}
         <div
           ref={tabsListRef}
@@ -118,10 +114,9 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
               pointerEvents: "none",
             }}
           />
-          {/* Active Indicator */}
           <div
             className={cn(
-              "absolute bottom-[0px] h-[2px] bg-foreground",
+              "absolute bottom-[-6px] h-[2px] bg-foreground",
               !isInitialRender && "transition-all duration-300 ease-out",
               activeTabId && !visibleTabs.includes(activeTabId) && "opacity-0",
             )}
