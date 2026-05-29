@@ -226,15 +226,11 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div className={textInputAffixCellClasses("prefix", Boolean(ghost))}>
-              {prefixContent}
-            </div>
+            <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
           )}
           <div className="flex-1 relative w-full">{multiSelectorContent}</div>
           {hasSuffix && (
-            <div className={textInputAffixCellClasses("suffix", Boolean(ghost))}>
-              {suffixContent}
-            </div>
+            <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
           )}
         </div>
       ) : (

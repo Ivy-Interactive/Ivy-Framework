@@ -327,11 +327,11 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
+            <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
           )}
           <div className="flex-1 relative w-full">{triggerContent}</div>
           {hasSuffix && (
-            <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
+            <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
           )}
         </div>
       ) : (

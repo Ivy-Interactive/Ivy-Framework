@@ -181,8 +181,8 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
 
-  const codeEditor = (
-    <div style={styles} className="relative w-full h-full overflow-hidden">
+  const codeMirror = (
+    <>
       {(showCopy || showClear || invalid) && (
         <div className="absolute top-2 right-2 z-50 flex items-center">
           {showCopy && (
@@ -206,13 +206,17 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
               <X className={xIconVariant({ density })} />
             </button>
           )}
-          {/* Invalid icon - rightmost */}
           {invalid && <InvalidIcon message={invalid} className="pointer-events-auto p-1" />}
         </div>
       )}
       <Suspense
         fallback={
-          <div className="h-full flex items-center justify-center bg-muted/20 animate-pulse rounded-field border border-input">
+          <div
+            className={cn(
+              "h-full flex items-center justify-center bg-muted/20 animate-pulse",
+              !hasAffixes && "rounded-field border border-input",
+            )}
+          >
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
         }
@@ -230,8 +234,12 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           className={cn(
             "h-full overflow-hidden",
             "[&_.cm-editor]:bg-transparent",
-            "border border-input shadow-sm rounded-field",
-            "dark:bg-white/5 dark:border-white/10",
+            !hasAffixes &&
+              "border border-input shadow-sm rounded-field dark:bg-white/5 dark:border-white/10",
+            hasAffixes &&
+              "[&_.cm-editor]:border-0 [&_.cm-editor]:shadow-none [&_.cm-editor]:rounded-none",
+            hasAffixes && hasPrefix && "[&_.cm-editor]:rounded-l-none",
+            hasAffixes && hasSuffix && "[&_.cm-editor]:rounded-r-none",
             invalid && inputStyles.invalid,
             disabled && "opacity-50 cursor-not-allowed",
           )}
@@ -239,25 +247,32 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           basicSetup={false}
         />
       </Suspense>
-    </div>
+    </>
   );
 
-  if (!hasAffixes) return codeEditor;
+  if (!hasAffixes) {
+    return (
+      <div style={styles} className="relative w-full h-full overflow-hidden">
+        {codeMirror}
+      </div>
+    );
+  }
 
   return (
     <div
+      style={styles}
       className={cn(
-        "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+        "relative flex w-full items-stretch overflow-hidden rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
         invalid && "border-destructive",
         disabled && "cursor-not-allowed opacity-50",
       )}
     >
       {hasPrefix && (
-        <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
+        <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
       )}
-      <div className="flex-1 min-w-0">{codeEditor}</div>
+      <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">{codeMirror}</div>
       {hasSuffix && (
-        <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
+        <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
       )}
     </div>
   );

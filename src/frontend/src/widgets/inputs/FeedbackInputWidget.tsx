@@ -215,11 +215,11 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
       )}
     >
       {hasPrefix && (
-        <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
+        <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
       )}
       <div className="flex-1 px-3 py-2">{feedbackContent}</div>
       {hasSuffix && (
-        <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
+        <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
       )}
     </div>
   );

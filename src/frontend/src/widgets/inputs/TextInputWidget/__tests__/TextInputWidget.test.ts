@@ -37,9 +37,9 @@ vi.mock("@/components/ui/input", () => {
 });
 
 const { mockTextInputAffixCellClasses } = vi.hoisted(() => ({
-  mockTextInputAffixCellClasses: vi.fn<
-    (side: "prefix" | "suffix", ghostWithAffixes: boolean) => string
-  >(() => ""),
+  mockTextInputAffixCellClasses: vi.fn<(side: "prefix" | "suffix", density?: string) => string>(
+    () => "",
+  ),
 }));
 
 vi.mock("@/components/ui/input/text-input-variant", () => ({
@@ -549,7 +549,7 @@ describe("SearchVariant disabled/invalid container styles", () => {
     expect(borderedContainer.className).not.toContain("border-destructive");
   });
 
-  it("uses transparent affix chrome for prefix and suffix slots", () => {
+  it("uses shared affix cell classes with field density for prefix and suffix slots", () => {
     mockTextInputAffixCellClasses.mockClear();
     renderSearchVariant({
       slots: {
@@ -558,7 +558,17 @@ describe("SearchVariant disabled/invalid container styles", () => {
       },
     });
 
-    expect(mockTextInputAffixCellClasses).toHaveBeenCalledWith("prefix", true);
-    expect(mockTextInputAffixCellClasses).toHaveBeenCalledWith("suffix", true);
+    expect(mockTextInputAffixCellClasses).toHaveBeenCalledWith("prefix", "Medium");
+    expect(mockTextInputAffixCellClasses).toHaveBeenCalledWith("suffix", "Medium");
+  });
+
+  it("omits the built-in search icon when a prefix slot is present", () => {
+    renderSearchVariant({
+      slots: {
+        Prefix: [React.createElement("span", { key: "prefix" }, "in:")],
+      },
+    });
+
+    expect(container.querySelectorAll("svg")).toHaveLength(0);
   });
 });

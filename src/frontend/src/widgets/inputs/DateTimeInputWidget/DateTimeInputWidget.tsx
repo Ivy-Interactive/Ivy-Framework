@@ -170,7 +170,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       )}
     >
       {hasPrefix && (
-        <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
+        <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
       )}
       <div
         className={cn(
@@ -182,7 +182,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
         {variantElement}
       </div>
       {hasSuffix && (
-        <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
+        <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
       )}
     </div>
   );

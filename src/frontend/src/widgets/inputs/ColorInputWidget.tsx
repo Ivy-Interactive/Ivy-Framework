@@ -374,15 +374,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             )}
           >
             {hasPrefix && (
-              <div className={textInputAffixCellClasses("prefix", Boolean(ghost))}>
-                {prefixContent}
-              </div>
+              <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
             )}
             {textContent}
             {hasSuffix && (
-              <div className={textInputAffixCellClasses("suffix", Boolean(ghost))}>
-                {suffixContent}
-              </div>
+              <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
             )}
           </div>
         ) : (
@@ -563,15 +559,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div className={textInputAffixCellClasses("prefix", Boolean(ghost))}>
-              {prefixContent}
-            </div>
+            <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
           )}
           <div className="flex flex-1 items-center">{defaultContent}</div>
           {hasSuffix && (
-            <div className={textInputAffixCellClasses("suffix", Boolean(ghost))}>
-              {suffixContent}
-            </div>
+            <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
           )}
         </div>
       ) : (

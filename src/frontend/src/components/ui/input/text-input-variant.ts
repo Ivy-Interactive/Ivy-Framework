@@ -1,6 +1,7 @@
 import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
+import { Densities } from "@/types/density";
 
 /**
  * Ivy.Button in affix: outer cell owns spacing (`px-3` or tighter for icon-only).
@@ -14,26 +15,50 @@ export const affixEmbeddedButtonClasses =
 export const affixIconOnlyCellPaddingClasses =
   "has-[button.size-7]:px-1.5 has-[button.size-9]:px-2";
 
-/** Affix cells: transparent by default; ghost uses tighter padding toward the input. */
+/** Center icon glyphs (non-button) in affix cells for even visual weight. */
+export const affixIconGlyphCellClasses =
+  "[&:not(:has(button))]:justify-center [&:not(:has(button))]:min-w-9";
+
+/** Shared transparent affix chrome — no muted background; padding scales with field density. */
+export const textInputAffixCellVariant = cva(
+  cn(
+    "flex shrink-0 items-center bg-transparent text-muted-foreground",
+    affixEmbeddedButtonClasses,
+    affixIconOnlyCellPaddingClasses,
+    affixIconGlyphCellClasses,
+  ),
+  {
+    variants: {
+      side: {
+        prefix: "rounded-tl-fields rounded-bl-fields",
+        suffix: "rounded-tr-fields rounded-br-fields",
+      },
+      density: {
+        Small: "",
+        Medium: "",
+        Large: "",
+      },
+    },
+    compoundVariants: [
+      { side: "prefix", density: "Small", class: "pl-2 pr-1 text-xs" },
+      { side: "prefix", density: "Medium", class: "pl-3 pr-1.5 text-sm" },
+      { side: "prefix", density: "Large", class: "pl-4 pr-2 text-base" },
+      { side: "suffix", density: "Small", class: "pl-1 pr-2 text-xs" },
+      { side: "suffix", density: "Medium", class: "pl-1.5 pr-3 text-sm" },
+      { side: "suffix", density: "Large", class: "pl-2 pr-4 text-base" },
+    ],
+    defaultVariants: {
+      side: "prefix",
+      density: "Medium",
+    },
+  },
+);
+
 export function textInputAffixCellClasses(
   side: "prefix" | "suffix",
-  ghostWithAffixes: boolean,
+  density: Densities = Densities.Medium,
 ): string {
-  return cn(
-    "flex items-center text-muted-foreground",
-    affixEmbeddedButtonClasses,
-    ghostWithAffixes
-      ? side === "suffix"
-        ? "shrink-0 bg-transparent pl-0 pr-1.5"
-        : "shrink-0 bg-transparent pl-2 pr-0.5"
-      : cn(
-          "px-3 bg-transparent",
-          affixIconOnlyCellPaddingClasses,
-          side === "prefix"
-            ? "rounded-tl-fields rounded-bl-fields"
-            : "rounded-tr-fields rounded-br-fields",
-        ),
-  );
+  return textInputAffixCellVariant({ side, density });
 }
 
 // Size variants for TextInputWidget

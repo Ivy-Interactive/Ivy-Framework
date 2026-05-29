@@ -356,17 +356,36 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       {hasAffixes ? (
         <div
           className={cn(
-            "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+            "relative inline-flex max-w-full items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
             invalid && "border-destructive",
             disabled && "cursor-not-allowed opacity-50",
           )}
         >
           {hasPrefix && (
-            <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
+            <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
           )}
-          <div className="flex-1 px-3 py-2">{variantContent}</div>
+          <div
+            className={cn(
+              "flex min-w-0 items-center gap-2 py-2",
+              boolInputRowMinHeightVariant({ density }),
+              !hasPrefix &&
+                (density === Densities.Small
+                  ? "pl-2"
+                  : density === Densities.Large
+                    ? "pl-4"
+                    : "pl-3"),
+              !hasSuffix &&
+                (density === Densities.Small
+                  ? "pr-2"
+                  : density === Densities.Large
+                    ? "pr-4"
+                    : "pr-3"),
+            )}
+          >
+            {variantContent}
+          </div>
           {hasSuffix && (
-            <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
+            <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
           )}
         </div>
       ) : (

@@ -73,9 +73,12 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
-  const ghostAffixChrome = Boolean(props.ghost && hasAffixes);
   const showClear = props.nullable && !props.disabled && hasValue;
-  const ghostTrailingTight = Boolean(props.ghost && hasSuffix);
+  const trailingBesideSuffix = hasSuffix;
+  const showShortcut = Boolean(
+    props.shortcutKey && !isFocused && !hasValue && !showClear && !props.invalid,
+  );
+  const showTrailing = showShortcut || showClear || Boolean(props.invalid);
 
   return (
     <div className="relative w-full select-none" style={styles}>
@@ -91,14 +94,11 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
         )}
       >
-        {/* Prefix with background and separator */}
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", ghostAffixChrome)}>
-            {prefixContent}
-          </div>
+          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
         )}
 
-        <div className="relative flex-1">
+        <div className={cn("relative flex-1", trailingBesideSuffix && "min-w-0")}>
           <Input
             ref={elementRef as React.RefObject<HTMLInputElement>}
             id={props.id}
@@ -118,14 +118,10 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             className={cn(
               textInputSizeVariant({ density }),
               props.invalid && inputStyles.invalidInput,
-              (props.invalid || showClear) && "pr-8",
-              props.shortcutKey &&
-                !isFocused &&
-                !hasValue &&
-                !showClear &&
-                !props.invalid &&
-                "pr-16",
-              showClear && props.invalid && "pr-16",
+              trailingBesideSuffix && showTrailing && "pr-2",
+              !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
+              !trailingBesideSuffix && showShortcut && "pr-16",
+              !trailingBesideSuffix && showClear && props.invalid && "pr-16",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
               "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
               hasPrefix && "rounded-l-none",
@@ -135,17 +131,11 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             data-testid={props["data-testid"]}
           />
 
-          {/* Right side container: shortcut (if any), clear (if nullable), then invalid (if any) */}
-          {(props.shortcutKey || showClear || props.invalid) && (
-            <div
-              className={cn(
-                "pointer-events-none absolute top-1/2 flex -translate-y-1/2 flex-row items-center",
-                ghostTrailingTight ? "right-0 gap-0 pr-0" : "right-2 gap-1",
-              )}
-            >
-              {props.shortcutKey && !isFocused && !hasValue && !showClear && !props.invalid && (
-                <div className="pointer-events-auto flex items-center h-6">
-                  <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-selector">
+          {!trailingBesideSuffix && showTrailing && (
+            <div className="pointer-events-none absolute top-1/2 right-2 flex -translate-y-1/2 flex-row items-center gap-1">
+              {showShortcut && (
+                <div className="pointer-events-auto flex h-6 items-center">
+                  <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
                     {shortcutDisplay}
                   </kbd>
                 </div>
@@ -156,20 +146,41 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                   tabIndex={-1}
                   aria-label="Clear"
                   onClick={onClear}
-                  className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+                  className="pointer-events-auto cursor-pointer rounded p-1 hover:bg-accent focus:outline-none"
                 >
                   <X className={xIconVariant({ density })} />
                 </button>
               )}
-              {/* Invalid icon - rightmost */}
               {props.invalid && (
-                <div className="flex items-center h-6">
+                <div className="flex h-6 items-center">
                   <InvalidIcon message={props.invalid} />
                 </div>
               )}
             </div>
           )}
         </div>
+
+        {trailingBesideSuffix && showTrailing && (
+          <div className="relative z-10 flex shrink-0 items-center gap-1 self-stretch text-muted-foreground">
+            {showShortcut && (
+              <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
+                {shortcutDisplay}
+              </kbd>
+            )}
+            {showClear && (
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label="Clear"
+                onClick={onClear}
+                className="cursor-pointer rounded p-0.5 hover:bg-accent focus:outline-none"
+              >
+                <X className={xIconVariant({ density })} />
+              </button>
+            )}
+            {props.invalid && <InvalidIcon message={props.invalid} />}
+          </div>
+        )}
 
         {/* Dictation mic button */}
         {props.dictation && !props.disabled && (
@@ -192,11 +203,8 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
           </button>
         )}
 
-        {/* Suffix with background and separator */}
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", ghostAffixChrome)}>
-            {suffixContent}
-          </div>
+          <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
         )}
       </div>
     </div>

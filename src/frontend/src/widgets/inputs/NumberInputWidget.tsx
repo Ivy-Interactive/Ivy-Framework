@@ -220,11 +220,11 @@ const SliderVariant = memo(
         )}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
+          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
         )}
-        <div className="flex-1 px-3">{sliderContent}</div>
+        <div className="flex min-w-0 flex-1 px-3">{sliderContent}</div>
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
+          <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
         )}
       </div>
     );
@@ -322,6 +322,9 @@ const NumberVariant = memo(
     const suffixContent = slots?.Suffix;
     const hasPrefix = (prefixContent?.length ?? 0) > 0;
     const hasSuffix = (suffixContent?.length ?? 0) > 0;
+    const showClear = nullable && value !== null && !disabled;
+    const trailingBesideSuffix = hasSuffix;
+    const showTrailing = showClear || Boolean(invalid);
 
     return (
       <div
@@ -334,12 +337,11 @@ const NumberVariant = memo(
           disabled && "cursor-not-allowed opacity-50",
         )}
       >
-        {/* Prefix with background and separator */}
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", false)}>{prefixContent}</div>
+          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
         )}
 
-        <div className="relative flex-1">
+        <div className={cn("relative flex-1", trailingBesideSuffix && "min-w-0")}>
           <NumberInput
             min={min}
             max={max}
@@ -357,37 +359,51 @@ const NumberVariant = memo(
             className={cn(
               "border-0 shadow-none",
               invalid && inputStyles.invalidInput,
-              (invalid || (nullable && value !== null && !disabled)) && "pr-8",
-              nullable && value !== null && !disabled && invalid && "pr-16",
+              trailingBesideSuffix && showTrailing && "pr-2",
+              !trailingBesideSuffix && (invalid || showClear) && "pr-8",
+              !trailingBesideSuffix && showClear && invalid && "pr-16",
               hasPrefix && "rounded-l-none",
               hasSuffix && "rounded-r-none",
             )}
             data-testid={dataTestId}
           />
-          {/* Icon container - flex row aligned to right */}
-          {((nullable && value !== null && !disabled) || invalid) && (
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
-              {/* Clear (X) button - leftmost */}
-              {nullable && value !== null && !disabled && (
+          {!trailingBesideSuffix && showTrailing && (
+            <div className="absolute right-2 top-1/2 flex -translate-y-1/2 flex-row items-center gap-1">
+              {showClear && (
                 <button
                   type="button"
                   tabIndex={-1}
                   aria-label="Clear"
                   onClick={() => onValueChange(null)}
-                  className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+                  className="cursor-pointer rounded p-1 hover:bg-accent focus:outline-none"
                 >
                   <X className={xIconVariant({ density })} />
                 </button>
               )}
-              {/* Invalid icon - rightmost */}
               {invalid && <InvalidIcon message={invalid} className="pointer-events-auto" />}
             </div>
           )}
         </div>
 
-        {/* Suffix with background and separator */}
+        {trailingBesideSuffix && showTrailing && (
+          <div className="relative z-10 flex shrink-0 items-center gap-1 self-stretch text-muted-foreground">
+            {showClear && (
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label="Clear"
+                onClick={() => onValueChange(null)}
+                className="cursor-pointer rounded p-0.5 hover:bg-accent focus:outline-none"
+              >
+                <X className={xIconVariant({ density })} />
+              </button>
+            )}
+            {invalid && <InvalidIcon message={invalid} />}
+          </div>
+        )}
+
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", false)}>{suffixContent}</div>
+          <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
         )}
       </div>
     );

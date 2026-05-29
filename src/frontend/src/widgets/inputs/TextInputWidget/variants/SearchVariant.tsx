@@ -89,9 +89,9 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
-  // Search inputs always use transparent affix cells (no muted background on prefix/suffix).
-  const transparentAffixChrome = hasAffixes;
-  const ghostSuffixLayout = Boolean(props.ghost && hasSuffix);
+  /** Trailing controls sit beside the suffix affix, not inside padded input text. */
+  const trailingBesideSuffix = hasSuffix;
+  const showBuiltinSearchIcon = !hasPrefix;
   const showClear = !props.disabled && hasValue;
   const showShortcut =
     Boolean(props.shortcutKey) && !isFocused && !hasValue && !showClear && !props.invalid;
@@ -157,13 +157,11 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", transparentAffixChrome)}>
-            {prefixContent}
-          </div>
+          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
         )}
 
-        <div className={cn("relative flex-1", ghostSuffixLayout && "min-w-0")}>
-          <Search className={searchIconVariant({ density })} />
+        <div className={cn("relative flex-1", trailingBesideSuffix && "min-w-0")}>
+          {showBuiltinSearchIcon && <Search className={searchIconVariant({ density })} />}
           <Input
             ref={mergedRef}
             id={props.id}
@@ -183,18 +181,13 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             autoComplete="off"
             className={cn(
               textInputSizeVariant({ density }),
-              "pl-8 cursor-pointer border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+              "cursor-pointer border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+              showBuiltinSearchIcon && "pl-8",
               props.invalid && inputStyles.invalidInput,
-              ghostSuffixLayout && showTrailing && "pr-2",
-              !ghostSuffixLayout && (props.invalid || showClear) && "pr-8",
-              !ghostSuffixLayout &&
-                props.shortcutKey &&
-                !isFocused &&
-                !hasValue &&
-                !showClear &&
-                !props.invalid &&
-                "pr-16",
-              !ghostSuffixLayout && showClear && props.invalid && "pr-16",
+              trailingBesideSuffix && showTrailing && "pr-2",
+              !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
+              !trailingBesideSuffix && showShortcut && "pr-16",
+              !trailingBesideSuffix && showClear && props.invalid && "pr-16",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
               "[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden",
               hasPrefix && "rounded-l-none",
@@ -203,23 +196,21 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             )}
             data-testid={props["data-testid"]}
           />
-          {!ghostSuffixLayout && showTrailing && (
+          {!trailingBesideSuffix && showTrailing && (
             <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-10 flex items-center justify-end gap-2 pr-2.5">
               {trailingCluster(true)}
             </div>
           )}
         </div>
 
-        {ghostSuffixLayout && showTrailing && (
-          <div className="relative z-10 flex shrink-0 items-center gap-0 self-stretch bg-transparent px-0 text-muted-foreground">
+        {trailingBesideSuffix && showTrailing && (
+          <div className="relative z-10 flex shrink-0 items-center gap-1 self-stretch bg-transparent px-0 text-muted-foreground">
             {trailingCluster(false)}
           </div>
         )}
 
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", transparentAffixChrome)}>
-            {suffixContent}
-          </div>
+          <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
         )}
       </div>
     </div>
