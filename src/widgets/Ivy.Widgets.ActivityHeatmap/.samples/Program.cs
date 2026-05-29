@@ -35,7 +35,7 @@ class ActivityHeatmapDemo : ViewBase
 
         return Layout
             .Vertical()
-            .Gap(4)
+            
             .Width(Size.Auto().At(Breakpoint.Tablet).And(Breakpoint.Desktop, Size.Fit()))
 
             | Text.H1("ActivityHeatmap")

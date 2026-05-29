@@ -59,7 +59,7 @@ public class ChunkedUploadDemo : ViewBase
             defaultContentType: "audio/webm"
         );
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | Text.P("Records audio and uploads in 2-second chunks while recording. Each chunk is accumulated into a single file.")
                | new AudioInput(upload.Value, "Start chunked recording", "Recording (uploading every 2s)...")
                    .ChunkInterval(2000)

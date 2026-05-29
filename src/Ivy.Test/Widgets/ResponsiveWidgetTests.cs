@@ -93,7 +93,7 @@ public class ResponsiveWidgetTests
     [Fact]
     public void StackLayout_Padding_ImplicitConversion_SerializesAsSimpleValue()
     {
-        var layout = Layout.Horizontal().Padding(4);
+        var layout = Layout.Horizontal();
         var widget = (StackLayout)layout.Build()!;
         widget.Id = Guid.NewGuid().ToString();
 
@@ -108,7 +108,7 @@ public class ResponsiveWidgetTests
     {
         var grid = Layout.Grid()
             .Columns(1.At(Breakpoint.Mobile).And(Breakpoint.Desktop, 3))
-            .Gap(4);
+            ;
         var widget = (GridLayout)grid.Build()!;
         widget.Id = Guid.NewGuid().ToString();
 

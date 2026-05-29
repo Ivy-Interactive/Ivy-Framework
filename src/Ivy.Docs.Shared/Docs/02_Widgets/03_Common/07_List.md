@@ -67,7 +67,7 @@ public class ListConfigDemo : ViewBase
         var notifications = UseState(false);
         var searchPattern = UseState("");
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("Title and Subtitle").Large()
             | new List(new[]
             {
@@ -307,7 +307,7 @@ public class ExamplesListDemo : ViewBase
         var timeItem = new ListItem("Task created")
             .Subtitle($"Created at {DateTime.Now:HH:mm:ss}");
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("Custom Item Rendering").Large()
             | new List(customItems)
             | Text.P("Time Rendering").Large()

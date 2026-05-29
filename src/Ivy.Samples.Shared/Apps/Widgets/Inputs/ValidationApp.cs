@@ -30,7 +30,7 @@ public class TextInputVariantsTab : ViewBase
         var password = UseState("");
 
         return new Card(
-            Layout.Vertical().Gap(4)
+            Layout.Vertical()
                 | Text.H3("TextInput variants (no Field)")
                 | Text.P("Email, Tel, Url, and Password variants.")
                 | email.ToEmailInput().Placeholder("e.g. user@example.com")
@@ -86,7 +86,7 @@ public class FormFieldsTab : ViewBase
             .Builder(m => m.Website, s => s.ToUrlInput());
 
         return new Card(
-            Layout.Vertical().Gap(4)
+            Layout.Vertical()
                 | Text.H3("Form with validated fields")
                 | Text.P("Email, password, phone, and URL are validated on blur and before submit.")
                 | form
@@ -129,7 +129,7 @@ public class ManualFieldTab : ViewBase
             .Label("Website");
 
         return new Card(
-            Layout.Vertical().Gap(4)
+            Layout.Vertical()
                 | Text.H3("Manual TextInput + Field")
                 | Text.P("name.ToTextInput().Variant(...).WithField() — same blur validation as To*Input().")
                 | emailInput

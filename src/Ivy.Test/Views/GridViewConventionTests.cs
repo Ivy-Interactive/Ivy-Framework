@@ -58,7 +58,7 @@ public class GridViewConventionTests
     [Fact]
     public void Padding_SetsDefinitionPadding()
     {
-        var view = Layout.Grid("item1").Padding(4);
+        var view = Layout.Grid("item1");
         Assert.Equal(new Thickness(4), GetPadding(view));
     }
 

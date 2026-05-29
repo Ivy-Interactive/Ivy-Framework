@@ -63,7 +63,7 @@ public class CommonWidgetsDemo : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        return Layout.Grid().Columns(2).Gap(4)
+        return Layout.Grid().Columns(2)
             | new Card(
                 Layout.Horizontal().Gap(2)
                     | new Button("Click Me", onClick: _ => client.Toast("Hello!"))
@@ -182,7 +182,7 @@ public class InputWidgetsDemo : ViewBase
                 fetcher: ct => Task.FromResult(category != null ? new Option<string>(category) : null));
         }
 
-        return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+        return Layout.Grid().Columns(2).Width(Size.Full())
             | new Card(
                 Layout.Vertical().Gap(2)
                     | textState.ToTextInput().Placeholder("Enter text...")
@@ -250,7 +250,7 @@ public class PrimitiveWidgetsDemo : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+        return Layout.Grid().Columns(2).Width(Size.Full())
             | new Card(
                 Layout.Vertical().Gap(2)
                     | Text.H3("Heading 3")
@@ -264,7 +264,7 @@ public class PrimitiveWidgetsDemo : ViewBase
                     | new Image("https://api.images.cat/150/150")
             ).Title("Image").Description("Image display").Height(Size.Units(75))
             | new Card(
-                Layout.Horizontal().Gap(4)
+                Layout.Horizontal()
                     | new Icon(Icons.Heart, Colors.Red)
                     | new Icon(Icons.Star, Colors.Yellow)
                     | new Icon(Icons.Check, Colors.Green)
@@ -356,7 +356,7 @@ public class LayoutWidgetsDemo : ViewBase
     public override object? Build()
     {
         var showPanel = UseState(false);
-        var singleColumnExamples = Layout.Vertical().Gap(4).Width(Size.Full())
+        var singleColumnExamples = Layout.Vertical().Width(Size.Full())
             | new Card(
                 Layout.Grid().Columns(2).Width(Size.Full()).Gap(2)
                     | new Box("1").Width(Size.Full())
@@ -381,7 +381,7 @@ public class LayoutWidgetsDemo : ViewBase
                 )
             ).Title("Footer").Description("Fixed footer").Height(Size.Units(60));
         
-        var twoColumnExamples = Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+        var twoColumnExamples = Layout.Grid().Columns(2).Width(Size.Full())
             | new Card(
                 Layout.Horizontal().Gap(2)
                     | new Box("Item 1").Width(Size.Fraction(1/3f))
@@ -411,7 +411,7 @@ public class LayoutWidgetsDemo : ViewBase
                 )
             ).Title("TabsLayout").Description("Tabbed interface").Height(Size.Units(50))
             | new Card(
-                Layout.Vertical().Gap(4)
+                Layout.Vertical()
                 | new Card(
                     Layout.Horizontal().Gap(2).AlignContent(Align.Center)
                         | new Button("Show Panel", onClick: _ => showPanel.Set(true))
@@ -433,7 +433,7 @@ public class LayoutWidgetsDemo : ViewBase
                 )
             ).Title("ResizablePanelGroup").Description("Resizable panels").Height(Size.Units(60));
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | twoColumnExamples
             | singleColumnExamples;
     }
@@ -465,7 +465,7 @@ public class ChartWidgetsDemo : ViewBase
             new { Month = "Apr", Desktop = 186, Mobile = 100 }
         };
         
-        return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+        return Layout.Grid().Columns(2).Width(Size.Full())
             | new Card(
                 data.ToLineChart()
                     .Dimension("Month", e => e.Month)
@@ -500,14 +500,14 @@ public class EffectWidgetsDemo : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+        return Layout.Grid().Columns(2).Width(Size.Full())
             | new Card(
                 Layout.Horizontal().AlignContent(Align.Center).Gap(2)
                     | new Button("Click Confetti").WithConfetti(AnimationTrigger.Click)
                     | new Button("Hover Confetti").WithConfetti(AnimationTrigger.Hover)
             ).Title("Confetti").Description("Celebration effects").Height(Size.Units(40))
             | new Card(
-                Layout.Horizontal().Gap(4)
+                Layout.Horizontal()
                     | Icons.Heart.ToIcon().Color(Colors.Red).WithAnimation(AnimationType.Pulse).Trigger(AnimationTrigger.Click)
                     | Icons.Bell.ToIcon().Color(Colors.Orange).WithAnimation(AnimationType.Shake).Trigger(AnimationTrigger.Click)
                     | Icons.Star.ToIcon().Color(Colors.Yellow).WithAnimation(AnimationType.Bounce).Trigger(AnimationTrigger.Click)
@@ -541,7 +541,7 @@ public class AdvancedWidgetsDemo : ViewBase
             messages.Set(currentMessages.Add(new ChatMessage(ChatSender.Assistant, $"You said: {@event.Value}")));
         }
         
-        return Layout.Vertical().Gap(4).Width(Size.Full())
+        return Layout.Vertical().Width(Size.Full())
             | new Card(
                 new Button("Open Sheet").WithSheet(
                     () => Layout.Vertical()

@@ -5,10 +5,10 @@ public class DialogApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | Text.H1("Dialog")
                | Text.P("Modal windows with Header, Body, and Footer sections. Each example demonstrates different use cases.")
-               | Layout.Grid().Columns(2).Gap(4)
+               | Layout.Grid().Columns(2)
                    | new CreateDialogExample()
                    | new DeleteDialogExample()
                    | new ExitCommentDialogExample()

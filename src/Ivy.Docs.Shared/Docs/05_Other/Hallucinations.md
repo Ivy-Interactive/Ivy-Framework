@@ -2570,7 +2570,7 @@ Layout.Vertical(Align.Center) | new Card(content)
 
 ```csharp
 Layout.Vertical()
-    | Layout.Horizontal().Gap(4)
+    | Layout.Horizontal()
         | child1
         | child2
     | otherContent;
@@ -2582,7 +2582,7 @@ Layout.Vertical()
 
 ```csharp
 Layout.Vertical()
-    | (Layout.Horizontal().Gap(4)
+    | (Layout.Horizontal()
         | child1
         | child2)
     | otherContent;
@@ -2630,7 +2630,7 @@ layout.Margin(new Thickness(0, 4, 0, 0))
 
 ```csharp
 // Margin() takes int parameters directly:
-layout.Margin(4)              // uniform
+layout              // uniform
 layout.Margin(4, 2)           // horizontal, vertical
 layout.Margin(0, 4, 0, 0)    // left, top, right, bottom
 ```
@@ -3445,7 +3445,7 @@ DecisionMatrixApp.cs (two occurrences of `Align.End`)
 
 ```csharp
 Text.Block(content).Padding(16)
-Text.P(content).Padding(4)
+Text.P(content)
 ```
 
 **Error:** `CS1929: 'TextBuilder' does not contain a definition for 'Padding'`

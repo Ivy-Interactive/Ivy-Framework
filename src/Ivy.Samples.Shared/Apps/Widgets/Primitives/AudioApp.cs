@@ -37,25 +37,25 @@ public class AudioApp : SampleBase
             | Text.P("Demonstrates various configurations of the Audio widget for playing audio content.")
             | Layout.Vertical().Gap(6)
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Basic Audio Player")
                     | Text.P("Default audio player with standard browser controls.")
                     | basicAudio
                 ).Title("Basic Usage"))
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Looping Audio with Preload")
                     | Text.P("Audio player configured to loop continuously with auto preload.")
                     | customAudio
                 ).Title("Custom Configuration"))
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Muted Autoplay Audio")
                     | Text.P("Muted audio that starts playing automatically and loops. Muted autoplay is more likely to be allowed by browsers.")
                     | mutedAudio
                 ).Title("Autoplay Example"))
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Audio Without Controls")
                     | Text.P("Audio element without browser controls for programmatic control scenarios.")
                     | noControlsAudio
@@ -63,12 +63,12 @@ public class AudioApp : SampleBase
                         .Variant(ButtonVariant.Outline)
                 ).Title("Programmatic Control"))
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Custom Sized Audio Player")
                     | Text.P("Audio player with custom width and height dimensions.")
                     | customSizedAudio
                 ).Title("Custom Sizing"))
-            | Layout.Vertical().Gap(4)
+            | Layout.Vertical()
                 | Text.H3("Usage Examples")
                 | new CodeBlock("""
                     // Basic audio player

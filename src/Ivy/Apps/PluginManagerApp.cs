@@ -20,14 +20,14 @@ public class PluginManagerApp : ViewBase
         var pluginStatus = UseState("");
         UsePluginState();
 
-        return Vertical().Gap(6).Padding(4)
+        return Vertical().Gap(6)
             | H1("Plugin Manager")
             | new Badge($"{activePlugins.Count} active, {unconfiguredPlugins.Count} unconfigured, {unloadedPlugins.Count} unloaded", BadgeVariant.Info)
             | new Separator()
             | H2("Active Plugins")
             | (activePlugins.Count == 0
                 ? Muted("No plugins currently active")
-                : activePlugins.Select(id => (object)(Horizontal().Gap(4)
+                : activePlugins.Select(id => (object)(Horizontal()
                     | new Badge(id, BadgeVariant.Secondary)
                     | new Button("Reload", onClick: _ =>
                     {
@@ -49,7 +49,7 @@ public class PluginManagerApp : ViewBase
             | (unconfiguredPlugins.Count == 0
                 ? Muted("No unconfigured plugins")
                 : unconfiguredPlugins.Select(p => (object)(Vertical().Gap(2)
-                    | (Horizontal().Gap(4)
+                    | (Horizontal()
                         | new Badge(p.Id, BadgeVariant.Warning)
                         | Muted(string.Join(", ", p.ValidationErrors)))
                     | new Button("Reconfigure", onClick: _ =>
@@ -64,7 +64,7 @@ public class PluginManagerApp : ViewBase
             | H2("Unloaded Plugins")
             | (unloadedPlugins.Count == 0
                 ? Muted("No unloaded plugins found")
-                : unloadedPlugins.Select(p => (object)(Horizontal().Gap(4)
+                : unloadedPlugins.Select(p => (object)(Horizontal()
                     | new Badge(p.Id, p.FailureReason is not null ? BadgeVariant.Destructive : BadgeVariant.Outline)
                     | (p.FailureReason is not null ? Muted(p.FailureReason) : Muted("unloaded"))
                     | new Button(p.FailureReason is not null ? "Retry" : "Load", onClick: _ =>

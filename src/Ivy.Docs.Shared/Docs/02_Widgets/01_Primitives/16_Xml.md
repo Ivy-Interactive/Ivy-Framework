@@ -33,7 +33,7 @@ public class BasicXmlExample : ViewBase
             </person>
             """;
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | new Xml(simpleXml);
     }
 }
@@ -50,7 +50,7 @@ public class TextHelperExample : ViewBase
     {
         var dynamicXml = UseState("<root><item>dynamic</item></root>");
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("Here's an example XML configuration:")
             | Text.Xml("<config><setting>value</setting></config>")
             | Text.P("You can also use it with state variables:")
@@ -87,7 +87,7 @@ public class XObjectXmlExample : ViewBase
             )
         );
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | new Xml(xml);
     }
 }
@@ -114,7 +114,7 @@ public class ExpandedXmlExample : ViewBase
             )
         );
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("Collapsed (default):")
             | new Xml(xml)
             | Text.P("Expanded 1 level:")
@@ -176,7 +176,7 @@ public class InteractiveXmlEditor : ViewBase
             }
         }
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.Label("XML Editor")
             | xmlContent.ToTextareaInput(placeholder: "Enter XML content here...")
                 .Height(Size.Units(50))
