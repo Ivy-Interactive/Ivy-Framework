@@ -339,6 +339,8 @@ public class DesktopWindow(Server server)
         if (!_mediaAutoplay) window.SetMediaAutoplayEnabled(false);
         foreach (var script in _initScripts) window.AddInitScript(script);
 
+        if (_appId != null) window.SetApplicationId(_appId);
+
         if (_iconFilePath != null)
         {
             window.SetIconFile(_iconFilePath);
