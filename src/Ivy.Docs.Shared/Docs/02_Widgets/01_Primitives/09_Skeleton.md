@@ -64,7 +64,7 @@ public class ProductCardView : ViewBase
             loadTrigger.Set(t => t + 1);
         }
         
-        return Layout.Vertical().Gap(4).Padding(4)
+        return Layout.Vertical().Padding(4)
             | new Button(
                 isLoading.Value ? "Loading..." : "Load Product Data", 
                 onClick: _ => LoadProduct()

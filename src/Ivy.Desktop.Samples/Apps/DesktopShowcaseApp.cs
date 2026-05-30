@@ -21,7 +21,7 @@ public class DesktopShowcaseApp : ViewBase
             return string.IsNullOrEmpty(s) ? line : $"{line}\n{s}";
         });
 
-        return Layout.Vertical().Gap(4).Padding(4)
+        return Layout.Vertical().Padding(4)
                | Text.H1("Ivy Desktop Showcase")
                | Text.Markdown("This app demonstrates all `DesktopWindow` capabilities. " +
                                "Each section exercises a different Rustino feature through the Ivy.Desktop API.")

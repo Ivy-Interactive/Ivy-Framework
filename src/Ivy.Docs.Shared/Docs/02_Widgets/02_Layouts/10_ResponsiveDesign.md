@@ -34,7 +34,7 @@ Layout.Grid()
 ```csharp demo
 Layout.Grid()
     .Columns(1.At(Breakpoint.Mobile).And(Breakpoint.Desktop, 3))
-    .Gap(4)
+    
     | new Card("A")
     | new Card("B")
     | new Card("C")

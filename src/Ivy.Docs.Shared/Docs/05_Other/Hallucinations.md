@@ -2570,7 +2570,7 @@ Layout.Vertical(Align.Center) | new Card(content)
 
 ```csharp
 Layout.Vertical()
-    | Layout.Horizontal().Gap(4)
+    | Layout.Horizontal()
         | child1
         | child2
     | otherContent;
@@ -2582,7 +2582,7 @@ Layout.Vertical()
 
 ```csharp
 Layout.Vertical()
-    | (Layout.Horizontal().Gap(4)
+    | (Layout.Horizontal()
         | child1
         | child2)
     | otherContent;

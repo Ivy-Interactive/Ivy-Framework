@@ -230,7 +230,7 @@ public class HandleVisibilityView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | new Box(Text.Block("With Handles (Default)")).Padding(2)
             | new ResizablePanelGroup(
                 new ResizablePanel(Size.Fraction(0.5f), 

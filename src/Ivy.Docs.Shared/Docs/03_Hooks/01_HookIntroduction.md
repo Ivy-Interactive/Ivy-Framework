@@ -748,7 +748,7 @@ public class FormDemo : ViewBase
                 Console.WriteLine($"Submitted: {user.Value.Name}, {user.Value.Email}, {user.Value.Age}");
             }
         }
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | formView
             | validationView
             | new Button("Submit", _ => HandleSubmit())
