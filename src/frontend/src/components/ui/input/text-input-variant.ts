@@ -61,15 +61,56 @@ export function textInputAffixCellClasses(
   return textInputAffixCellVariant({ side, density });
 }
 
-/** Suffix glyph in a trailing cluster — same hit target; cap Lucide default 24px icons. */
-export const textInputSuffixGlyphSlotVariant = cva(
-  "inline-flex size-6 shrink-0 items-center justify-center [&_svg]:block [&_svg]:shrink-0",
+/** Horizontal gap between trailing icons — scales with field density. */
+export const textInputTrailingClusterGapVariant = cva("", {
+  variants: {
+    density: {
+      Small: "gap-0.5",
+      Medium: "gap-1.5",
+      Large: "gap-2.5",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
+export function textInputTrailingClusterGapClasses(density: Densities = Densities.Medium): string {
+  return textInputTrailingClusterGapVariant({ density });
+}
+
+/** Trailing icon hit target — scales with field height (Large keeps Medium width to avoid overlap). */
+export const textInputTrailingHitTargetVariant = cva(
+  "inline-flex shrink-0 items-center justify-center overflow-hidden leading-none",
   {
     variants: {
       density: {
-        Small: "[&_svg]:size-3",
-        Medium: "[&_svg]:size-4",
-        Large: "[&_svg]:size-5",
+        Small: "size-5",
+        Medium: "size-6",
+        Large: "size-6",
+      },
+    },
+    defaultVariants: {
+      density: "Medium",
+    },
+  },
+);
+
+export function textInputTrailingShortcutWrapperClasses(
+  density: Densities = Densities.Medium,
+): string {
+  return cn(textInputTrailingHitTargetVariant({ density }), "w-auto px-0");
+}
+
+/** Suffix glyph in a trailing cluster — same hit target; cap Lucide default 24px icons. */
+export const textInputSuffixGlyphSlotVariant = cva(
+  "inline-flex shrink-0 items-center justify-center overflow-hidden leading-none [&_svg]:block [&_svg]:shrink-0",
+  {
+    variants: {
+      density: {
+        Small: "size-5 [&_svg]:size-3",
+        Medium: "size-6 [&_svg]:size-4",
+        Large: "size-6 [&_svg]:size-5",
       },
     },
     defaultVariants: {
@@ -83,53 +124,44 @@ export function textInputSuffixGlyphSlotClasses(density: Densities = Densities.M
 }
 
 /** Trailing icons + suffix glyph in one affix cell — single gap between all icons. */
-export const textInputSuffixWithTrailingClusterClasses =
-  "relative z-10 flex shrink-0 items-center gap-1.5 self-stretch";
-
-/** Textarea: trailing stack + suffix icon, same horizontal gap to suffix glyph. */
-export const textareaSuffixWithTrailingClusterClasses = cn(
-  textInputSuffixWithTrailingClusterClasses,
-  "items-start self-start pt-2",
-);
-
-/** Standalone trailing cluster (no suffix affix content in the same cell). */
-export const textInputTrailingBesideSuffixClasses =
-  "relative z-10 flex shrink-0 items-center gap-1.5 self-stretch text-muted-foreground";
-
-/** Multiline fields: trailing stack top-aligned when not merged into suffix cell. */
-export const textareaTrailingBesideSuffixClasses = cn(
-  textInputTrailingBesideSuffixClasses,
-  "flex-col items-center self-start pt-2",
-);
-
-/** Clear / shortcut / invalid / password-eye cluster overlaid inside the field. */
-export const textInputTrailingOverlayClasses =
-  "pointer-events-none absolute top-1/2 right-2 flex -translate-y-1/2 flex-row items-center gap-1.5";
-
-/** Multiline overlay controls (top-right). */
-export const textareaTrailingOverlayClasses =
-  "pointer-events-none absolute right-2.5 top-2 z-10 flex flex-col items-center gap-1.5";
-
-/** Uniform trailing icon button — fixed hit target keeps eye/clear aligned beside suffix. */
-export function textInputTrailingIconButtonClasses(overlay = false): string {
+export function textInputSuffixWithTrailingClusterClasses(
+  density: Densities = Densities.Medium,
+): string {
   return cn(
-    "inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground focus:outline-none",
-    overlay && "pointer-events-auto",
+    "relative z-10 flex shrink-0 flex-nowrap items-center self-stretch",
+    textInputTrailingClusterGapVariant({ density }),
   );
 }
 
-/** Invalid icon slot — same 24px footprint as eye/clear so cluster gaps stay even. */
-export function textInputTrailingInvalidSlotClasses(overlay = false): string {
-  return cn(textInputTrailingIconButtonClasses(overlay), "hover:bg-transparent hover:text-inherit");
+/** Textarea: trailing stack + suffix icon, same horizontal gap to suffix glyph. */
+export function textareaSuffixWithTrailingClusterClasses(
+  density: Densities = Densities.Medium,
+): string {
+  return cn(textInputSuffixWithTrailingClusterClasses(density), "items-start self-start pt-2");
 }
 
-/** Icon glyph size inside trailing buttons (no absolute top offsets). */
-export const textInputTrailingIconSizeVariant = cva("block shrink-0", {
+/** Standalone trailing cluster (no suffix affix content in the same cell). */
+export function textInputTrailingBesideSuffixClasses(
+  density: Densities = Densities.Medium,
+): string {
+  return cn(
+    "relative z-10 flex shrink-0 items-center self-stretch text-muted-foreground",
+    textInputTrailingClusterGapVariant({ density }),
+  );
+}
+
+/** Multiline fields: trailing stack top-aligned when not merged into suffix cell. */
+export function textareaTrailingBesideSuffixClasses(density: Densities = Densities.Medium): string {
+  return cn(textInputTrailingBesideSuffixClasses(density), "flex-col items-center self-start pt-2");
+}
+
+/** Clear / shortcut / invalid / password-eye cluster overlaid inside the field. */
+export const textInputTrailingOverlayPositionVariant = cva("", {
   variants: {
     density: {
-      Small: "size-3",
-      Medium: "size-4",
-      Large: "size-5",
+      Small: "right-1.5",
+      Medium: "right-2",
+      Large: "right-2.5",
     },
   },
   defaultVariants: {
@@ -137,12 +169,72 @@ export const textInputTrailingIconSizeVariant = cva("block shrink-0", {
   },
 });
 
-/** Eye outline is optically smaller than filled icons at the same box size. */
-export const textInputTrailingEyeGlyphVariant = cva("block shrink-0", {
+export function textInputTrailingOverlayClasses(density: Densities = Densities.Medium): string {
+  return cn(
+    "pointer-events-none absolute top-1/2 flex -translate-y-1/2 flex-row flex-nowrap items-center",
+    textInputTrailingOverlayPositionVariant({ density }),
+    textInputTrailingClusterGapVariant({ density }),
+  );
+}
+
+/** Multiline overlay controls (top-right). */
+export const textareaTrailingOverlayPositionVariant = cva(
+  "pointer-events-none absolute z-10 flex flex-col items-center",
+  {
+    variants: {
+      density: {
+        Small: "right-2 top-1.5",
+        Medium: "right-2.5 top-2",
+        Large: "right-3 top-2.5",
+      },
+    },
+    defaultVariants: {
+      density: "Medium",
+    },
+  },
+);
+
+export function textareaTrailingOverlayClasses(density: Densities = Densities.Medium): string {
+  return cn(
+    textareaTrailingOverlayPositionVariant({ density }),
+    textInputTrailingClusterGapVariant({ density }),
+  );
+}
+
+/** Vertical trailing stack beside textarea suffix. */
+export function textareaTrailingStackClasses(density: Densities = Densities.Medium): string {
+  return cn("flex flex-col items-center", textInputTrailingClusterGapVariant({ density }));
+}
+
+/** Uniform trailing icon button — fixed hit target keeps eye/clear aligned beside suffix. */
+export function textInputTrailingIconButtonClasses(
+  overlay = false,
+  density: Densities = Densities.Medium,
+): string {
+  return cn(
+    textInputTrailingHitTargetVariant({ density }),
+    "cursor-pointer rounded text-muted-foreground hover:bg-accent hover:text-foreground focus:outline-none",
+    overlay && "pointer-events-auto",
+  );
+}
+
+/** Invalid icon slot — same footprint as eye/clear so cluster gaps stay even. */
+export function textInputTrailingInvalidSlotClasses(
+  overlay = false,
+  density: Densities = Densities.Medium,
+): string {
+  return cn(
+    textInputTrailingIconButtonClasses(overlay, density),
+    "hover:bg-transparent hover:text-inherit",
+  );
+}
+
+/** Icon glyph size inside trailing buttons (no absolute top offsets). */
+export const textInputTrailingIconSizeVariant = cva("block shrink-0 leading-none", {
   variants: {
     density: {
-      Small: "size-3.5",
-      Medium: "size-[1.125rem]",
+      Small: "size-3",
+      Medium: "size-4",
       Large: "size-5",
     },
   },

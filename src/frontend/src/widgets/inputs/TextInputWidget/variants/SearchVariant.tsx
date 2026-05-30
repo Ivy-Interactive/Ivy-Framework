@@ -15,6 +15,7 @@ import {
   textInputTrailingInvalidSlotClasses,
   textInputSuffixWithTrailingClusterClasses,
   textInputSuffixGlyphSlotClasses,
+  textInputTrailingShortcutWrapperClasses,
   searchIconVariant,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
@@ -125,20 +126,25 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           tabIndex={-1}
           aria-label="Clear search"
           onClick={onClear}
-          className={textInputTrailingIconButtonClasses(overlay)}
+          className={textInputTrailingIconButtonClasses(overlay, density)}
         >
           <X className={textInputTrailingIconSizeVariant({ density })} />
         </button>
       )}
       {showShortcut && (
-        <div className={cn("flex h-4 shrink-0 items-center", overlay && "pointer-events-auto")}>
+        <div
+          className={cn(
+            textInputTrailingShortcutWrapperClasses(density),
+            overlay && "pointer-events-auto",
+          )}
+        >
           {kbd}
         </div>
       )}
       {props.invalid && (
         <InvalidIcon
           message={props.invalid}
-          className={textInputTrailingInvalidSlotClasses(overlay)}
+          className={textInputTrailingInvalidSlotClasses(overlay, density)}
           iconClassName={textInputTrailingIconSizeVariant({ density })}
         />
       )}
@@ -210,7 +216,9 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           <div
             className={cn(
               textInputAffixCellClasses("suffix", density),
-              trailingBesideSuffix && showTrailing && textInputSuffixWithTrailingClusterClasses,
+              trailingBesideSuffix &&
+                showTrailing &&
+                textInputSuffixWithTrailingClusterClasses(density),
             )}
           >
             {trailingBesideSuffix && showTrailing && trailingCluster(false)}

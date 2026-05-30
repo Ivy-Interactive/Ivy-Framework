@@ -10,11 +10,11 @@ import {
   textInputSizeVariant,
   textInputSuffixWithTrailingClusterClasses,
   textInputSuffixGlyphSlotClasses,
-  textInputTrailingEyeGlyphVariant,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
   textInputTrailingOverlayClasses,
+  textInputTrailingShortcutWrapperClasses,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import {
@@ -104,14 +104,14 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
       {showPasswordToggle && (
         <button
           type="button"
-          className={textInputTrailingIconButtonClasses(overlay)}
+          className={textInputTrailingIconButtonClasses(overlay, density)}
           onClick={togglePassword}
           aria-label={showPassword ? "Hide password" : "Show password"}
         >
           {showPassword ? (
-            <EyeOffIcon className={textInputTrailingEyeGlyphVariant({ density })} />
+            <EyeOffIcon className={textInputTrailingIconSizeVariant({ density })} />
           ) : (
-            <EyeIcon className={textInputTrailingEyeGlyphVariant({ density })} />
+            <EyeIcon className={textInputTrailingIconSizeVariant({ density })} />
           )}
         </button>
       )}
@@ -121,13 +121,18 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           tabIndex={-1}
           aria-label="Clear"
           onClick={onClear}
-          className={textInputTrailingIconButtonClasses(overlay)}
+          className={textInputTrailingIconButtonClasses(overlay, density)}
         >
           <X className={textInputTrailingIconSizeVariant({ density })} />
         </button>
       )}
       {showShortcut && (
-        <div className={cn("flex h-6 shrink-0 items-center", overlay && "pointer-events-auto")}>
+        <div
+          className={cn(
+            textInputTrailingShortcutWrapperClasses(density),
+            overlay && "pointer-events-auto",
+          )}
+        >
           <kbd
             className={cn(
               "rounded-field border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground",
@@ -141,7 +146,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
       {props.invalid && (
         <InvalidIcon
           message={props.invalid}
-          className={textInputTrailingInvalidSlotClasses(overlay)}
+          className={textInputTrailingInvalidSlotClasses(overlay, density)}
           iconClassName={textInputTrailingIconSizeVariant({ density })}
         />
       )}
@@ -205,7 +210,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
         {inputElement}
       </div>
       {!trailingBesideSuffix && showTrailing && (
-        <div className={textInputTrailingOverlayClasses}>{trailingCluster(true)}</div>
+        <div className={textInputTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
       )}
     </div>
   );
@@ -231,7 +236,9 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
             <div
               className={cn(
                 textInputAffixCellClasses("suffix", density),
-                trailingBesideSuffix && showTrailing && textInputSuffixWithTrailingClusterClasses,
+                trailingBesideSuffix &&
+                  showTrailing &&
+                  textInputSuffixWithTrailingClusterClasses(density),
               )}
             >
               {trailingBesideSuffix && showTrailing && trailingCluster(false)}

@@ -13,6 +13,7 @@ import {
   textInputSuffixWithTrailingClusterClasses,
   textInputSuffixGlyphSlotClasses,
   textInputTrailingOverlayClasses,
+  textInputTrailingShortcutWrapperClasses,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import {
@@ -137,9 +138,14 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
           />
 
           {!trailingBesideSuffix && showTrailing && (
-            <div className={textInputTrailingOverlayClasses}>
+            <div className={textInputTrailingOverlayClasses(density)}>
               {showShortcut && (
-                <div className="pointer-events-auto flex h-6 items-center">
+                <div
+                  className={cn(
+                    "pointer-events-auto",
+                    textInputTrailingShortcutWrapperClasses(density),
+                  )}
+                >
                   <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
                     {shortcutDisplay}
                   </kbd>
@@ -151,7 +157,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                   tabIndex={-1}
                   aria-label="Clear"
                   onClick={onClear}
-                  className={textInputTrailingIconButtonClasses(true)}
+                  className={textInputTrailingIconButtonClasses(true, density)}
                 >
                   <X className={textInputTrailingIconSizeVariant({ density })} />
                 </button>
@@ -159,7 +165,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
               {props.invalid && (
                 <InvalidIcon
                   message={props.invalid}
-                  className={textInputTrailingInvalidSlotClasses(true)}
+                  className={textInputTrailingInvalidSlotClasses(true, density)}
                   iconClassName={textInputTrailingIconSizeVariant({ density })}
                 />
               )}
@@ -192,7 +198,9 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
           <div
             className={cn(
               textInputAffixCellClasses("suffix", density),
-              trailingBesideSuffix && showTrailing && textInputSuffixWithTrailingClusterClasses,
+              trailingBesideSuffix &&
+                showTrailing &&
+                textInputSuffixWithTrailingClusterClasses(density),
             )}
           >
             {trailingBesideSuffix && showTrailing && (
@@ -208,7 +216,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                     tabIndex={-1}
                     aria-label="Clear"
                     onClick={onClear}
-                    className={textInputTrailingIconButtonClasses(false)}
+                    className={textInputTrailingIconButtonClasses(false, density)}
                   >
                     <X className={textInputTrailingIconSizeVariant({ density })} />
                   </button>
@@ -216,7 +224,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                 {props.invalid && (
                   <InvalidIcon
                     message={props.invalid}
-                    className={textInputTrailingInvalidSlotClasses(false)}
+                    className={textInputTrailingInvalidSlotClasses(false, density)}
                     iconClassName={textInputTrailingIconSizeVariant({ density })}
                   />
                 )}

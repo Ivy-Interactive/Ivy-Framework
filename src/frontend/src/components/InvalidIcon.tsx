@@ -13,7 +13,7 @@ export const InvalidIcon: React.FC<{
         <TooltipTrigger
           type="button"
           className={cn(
-            "inline-flex cursor-pointer items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none",
+            "inline-flex shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none leading-none",
             "pointer-events-auto focus-visible:ring-1 focus-visible:ring-ring",
             className,
           )}

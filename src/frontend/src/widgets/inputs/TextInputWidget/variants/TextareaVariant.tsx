@@ -8,6 +8,7 @@ import {
   textareaSizeVariant,
   textareaTrailingOverlayClasses,
   textareaSuffixWithTrailingClusterClasses,
+  textareaTrailingStackClasses,
   textInputAffixCellClasses,
   textInputSuffixGlyphSlotClasses,
   textInputTrailingIconButtonClasses,
@@ -113,7 +114,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
             props.onDictationToggle?.();
           }}
           className={cn(
-            textInputTrailingIconButtonClasses(overlay),
+            textInputTrailingIconButtonClasses(overlay, density),
             props.isRecording && "bg-destructive/10 text-destructive",
           )}
         >
@@ -126,7 +127,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           tabIndex={-1}
           aria-label="Clear text"
           onClick={onClear}
-          className={textInputTrailingIconButtonClasses(overlay)}
+          className={textInputTrailingIconButtonClasses(overlay, density)}
         >
           <X className={textInputTrailingIconSizeVariant({ density })} />
         </button>
@@ -141,7 +142,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
       {props.invalid && (
         <InvalidIcon
           message={props.invalid}
-          className={textInputTrailingInvalidSlotClasses(overlay)}
+          className={textInputTrailingInvalidSlotClasses(overlay, density)}
           iconClassName={textInputTrailingIconSizeVariant({ density })}
         />
       )}
@@ -196,7 +197,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         {textareaElement}
       </div>
       {!trailingBesideSuffix && showTrailing && (
-        <div className={textareaTrailingOverlayClasses}>{trailingCluster(true)}</div>
+        <div className={textareaTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
       )}
     </div>
   );
@@ -236,11 +237,13 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
             className={cn(
               textInputAffixCellClasses("suffix", density),
               textareaAffixAlignClasses(density),
-              trailingBesideSuffix && showTrailing && textareaSuffixWithTrailingClusterClasses,
+              trailingBesideSuffix &&
+                showTrailing &&
+                textareaSuffixWithTrailingClusterClasses(density),
             )}
           >
             {trailingBesideSuffix && showTrailing && (
-              <div className="flex flex-col items-center gap-1.5">{trailingCluster(false)}</div>
+              <div className={textareaTrailingStackClasses(density)}>{trailingCluster(false)}</div>
             )}
             {trailingBesideSuffix && showTrailing ? (
               <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
