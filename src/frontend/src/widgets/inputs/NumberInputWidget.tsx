@@ -8,7 +8,16 @@ import { inputStyles, getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { X } from "lucide-react";
 import { Densities } from "@/types/density";
-import { textInputAffixCellClasses, xIconVariant } from "@/components/ui/input/text-input-variant";
+import {
+  textInputAffixCellClasses,
+  textInputAffixIconOnlyPaddingVariant,
+  textInputSuffixGlyphSlotClasses,
+  textInputSuffixWithTrailingClusterClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  textInputTrailingOverlayClasses,
+} from "@/components/ui/input/text-input-variant";
 import { formatBytes } from "@/lib/formatters";
 import { EMPTY_ARRAY } from "@/lib/constants";
 
@@ -338,7 +347,14 @@ const NumberVariant = memo(
         )}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+          <div
+            className={cn(
+              textInputAffixCellClasses("prefix", density),
+              textInputAffixIconOnlyPaddingVariant({ density }),
+            )}
+          >
+            {prefixContent}
+          </div>
         )}
 
         <div className={cn("relative flex-1", trailingBesideSuffix && "min-w-0")}>
@@ -368,42 +384,67 @@ const NumberVariant = memo(
             data-testid={dataTestId}
           />
           {!trailingBesideSuffix && showTrailing && (
-            <div className="absolute right-2 top-1/2 flex -translate-y-1/2 flex-row items-center gap-1">
+            <div className={textInputTrailingOverlayClasses(density)}>
               {showClear && (
                 <button
                   type="button"
                   tabIndex={-1}
                   aria-label="Clear"
                   onClick={() => onValueChange(null)}
-                  className="cursor-pointer rounded p-1 hover:bg-accent focus:outline-none"
+                  className={textInputTrailingIconButtonClasses(true, density)}
                 >
-                  <X className={xIconVariant({ density })} />
+                  <X className={textInputTrailingIconSizeVariant({ density })} />
                 </button>
               )}
-              {invalid && <InvalidIcon message={invalid} className="pointer-events-auto" />}
+              {invalid && (
+                <InvalidIcon
+                  message={invalid}
+                  className={textInputTrailingInvalidSlotClasses(true, density)}
+                  iconClassName={textInputTrailingIconSizeVariant({ density })}
+                />
+              )}
             </div>
           )}
         </div>
 
-        {trailingBesideSuffix && showTrailing && (
-          <div className="relative z-10 flex shrink-0 items-center gap-1 self-stretch text-muted-foreground">
-            {showClear && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={() => onValueChange(null)}
-                className="cursor-pointer rounded p-0.5 hover:bg-accent focus:outline-none"
-              >
-                <X className={xIconVariant({ density })} />
-              </button>
-            )}
-            {invalid && <InvalidIcon message={invalid} />}
-          </div>
-        )}
-
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
+          <div
+            className={cn(
+              textInputAffixCellClasses("suffix", density),
+              trailingBesideSuffix &&
+                showTrailing &&
+                textInputSuffixWithTrailingClusterClasses(density),
+              !showTrailing && textInputAffixIconOnlyPaddingVariant({ density }),
+            )}
+          >
+            {trailingBesideSuffix && showTrailing && (
+              <>
+                {showClear && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Clear"
+                    onClick={() => onValueChange(null)}
+                    className={textInputTrailingIconButtonClasses(false, density)}
+                  >
+                    <X className={textInputTrailingIconSizeVariant({ density })} />
+                  </button>
+                )}
+                {invalid && (
+                  <InvalidIcon
+                    message={invalid}
+                    className={textInputTrailingInvalidSlotClasses(false, density)}
+                    iconClassName={textInputTrailingIconSizeVariant({ density })}
+                  />
+                )}
+              </>
+            )}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
+          </div>
         )}
       </div>
     );

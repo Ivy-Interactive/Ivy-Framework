@@ -150,12 +150,41 @@ export function textInputSuffixGlyphSlotClasses(density: Densities = Densities.M
 }
 
 /** Trailing icons + suffix glyph in one affix cell — single gap between all icons. */
+/** Symmetric padding when suffix holds icon + trailing (overrides asymmetric pl/pr). */
+export const textInputAffixSuffixWithTrailingPaddingVariant = cva("!px-1.5", {
+  variants: {
+    density: {
+      Small: "!px-1",
+      Medium: "!px-1.5",
+      Large: "!px-2",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
+/** Symmetric padding for suffix/prefix cells that only contain an icon glyph. */
+export const textInputAffixIconOnlyPaddingVariant = cva("!px-2", {
+  variants: {
+    density: {
+      Small: "!px-1.5",
+      Medium: "!px-2",
+      Large: "!px-2.5",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
 export function textInputSuffixWithTrailingClusterClasses(
   density: Densities = Densities.Medium,
 ): string {
   return cn(
     "relative z-10 flex shrink-0 flex-nowrap items-center self-stretch",
     textInputTrailingClusterGapVariant({ density }),
+    textInputAffixSuffixWithTrailingPaddingVariant({ density }),
   );
 }
 

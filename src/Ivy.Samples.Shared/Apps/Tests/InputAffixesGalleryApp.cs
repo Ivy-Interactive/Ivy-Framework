@@ -15,7 +15,8 @@ public class InputAffixesGalleryApp : SampleBase
                | Layout.Tabs(
                    new Tab("All inputs", new InputAffixesAllInputsView()),
                    new Tab("Text variants", new InputAffixesTextVariantsView()),
-                   new Tab("Densities", new InputAffixesDensitiesView())
+                   new Tab("Densities", new InputAffixesDensitiesView()),
+                   new Tab("Number inputs", new InputAffixesNumberView())
                ).Variant(TabsVariant.Content);
 }
 
@@ -172,6 +173,68 @@ public class InputAffixesTextVariantsView : ViewBase
     }
 }
 
+public class InputAffixesNumberView : ViewBase
+{
+    public override object Build()
+    {
+        var numberState = UseState(42.5m);
+        var nullableState = UseState<decimal?>(() => null);
+        var invalidState = UseState(-5m);
+
+        return Layout.Vertical()
+               | Callout.Info(
+                   "Number input affixes: icon size matches trailing invalid/clear controls; symmetric padding around prefix/suffix icons.")
+               | Text.H2("Affix layouts")
+               | AffixHeaderRow()
+               | AffixRow(
+                   "Number",
+                   numberState.ToNumberInput().Precision(1).Prefix(Icons.DollarSign),
+                   numberState.ToNumberInput().Precision(1).Suffix(Icons.Percent),
+                   numberState.ToNumberInput().Precision(1).Prefix(Icons.DollarSign).Suffix(Icons.Coins))
+               | AffixRow(
+                   "Nullable",
+                   nullableState.ToNumberInput().Nullable().Precision(1).Prefix(Icons.DollarSign),
+                   nullableState.ToNumberInput().Nullable().Precision(1).Suffix(Icons.Percent),
+                   nullableState.ToNumberInput().Nullable().Precision(1).Prefix(Icons.DollarSign).Suffix(Icons.Coins))
+               | AffixRow(
+                   "Invalid",
+                   invalidState.ToNumberInput().Precision(0).Prefix(Icons.DollarSign).Invalid("Must be positive"),
+                   invalidState.ToNumberInput().Precision(0).Suffix(Icons.Percent).Invalid("Must be positive"),
+                   invalidState
+                     .ToNumberInput()
+                     .Precision(0)
+                     .Prefix(Icons.DollarSign)
+                     .Suffix(Icons.Coins)
+                     .Invalid("Must be positive"))
+               | AffixRow(
+                   "Nullable + invalid",
+                   nullableState.ToNumberInput().Nullable().Precision(1).Prefix(Icons.DollarSign).Invalid("Required"),
+                   nullableState.ToNumberInput().Nullable().Precision(1).Suffix(Icons.Percent).Invalid("Required"),
+                   nullableState
+                     .ToNumberInput()
+                     .Nullable()
+                     .Precision(1)
+                     .Prefix(Icons.DollarSign)
+                     .Suffix(Icons.Coins)
+                     .Invalid("Required"))
+               | Text.H2("Densities")
+               | Callout.Info("Both prefix and suffix with nullable clear at Small, Medium, and Large density.")
+               | DensityHeaderRow()
+               | NumberDensityRow(
+                   "Number",
+                   numberState.ToNumberInput().Nullable().Precision(1).Prefix(Icons.DollarSign).Suffix(Icons.Percent))
+               | NumberDensityRow(
+                   "Both + invalid",
+                   invalidState
+                     .ToNumberInput()
+                     .Nullable()
+                     .Precision(0)
+                     .Prefix(Icons.DollarSign)
+                     .Suffix(Icons.Coins)
+                     .Invalid("Must be positive"));
+    }
+}
+
 public class InputAffixesDensitiesView : ViewBase
 {
     public override object Build()
@@ -221,6 +284,13 @@ static class InputAffixesGalleryHelpers
                | Text.Monospaced("Large");
 
     internal static GridView DensityRow(string label, TextInputBase input) =>
+        Layout.Grid().Columns(4)
+               | Text.Monospaced(label)
+               | input.Small()
+               | input
+               | input.Large();
+
+    internal static GridView NumberDensityRow(string label, NumberInputBase input) =>
         Layout.Grid().Columns(4)
                | Text.Monospaced(label)
                | input.Small()
