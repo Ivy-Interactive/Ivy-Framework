@@ -16,7 +16,8 @@ public class InputAffixesGalleryApp : SampleBase
                    new Tab("All inputs", new InputAffixesAllInputsView()),
                    new Tab("Text variants", new InputAffixesTextVariantsView()),
                    new Tab("Densities", new InputAffixesDensitiesView()),
-                   new Tab("Number inputs", new InputAffixesNumberView())
+                   new Tab("Number inputs", new InputAffixesNumberView()),
+                   new Tab("Select inputs", new InputAffixesSelectView())
                ).Variant(TabsVariant.Content);
 }
 
@@ -235,6 +236,76 @@ public class InputAffixesNumberView : ViewBase
     }
 }
 
+public class InputAffixesSelectView : ViewBase
+{
+    public override object Build()
+    {
+        var currencyState = UseState(Currency.USD);
+        var nullableState = UseState<Currency?>(() => null);
+        var currencyOptions = typeof(Currency).ToOptions();
+
+        return Layout.Vertical()
+               | Callout.Info(
+                   "Select affixes: clear and invalid sit beside the suffix icon (not inside the trigger); icon glyphs match trailing control size.")
+               | Text.H2("Affix layouts")
+               | AffixHeaderRow()
+               | AffixRow(
+                   "Select",
+                   currencyState.ToSelectInput(currencyOptions).Prefix(Icons.DollarSign),
+                   currencyState.ToSelectInput(currencyOptions).Suffix(Icons.BadgeDollarSign),
+                   currencyState.ToSelectInput(currencyOptions).Prefix(Icons.DollarSign).Suffix(Icons.BadgeDollarSign))
+               | AffixRow(
+                   "Nullable",
+                   nullableState.ToSelectInput(currencyOptions).Nullable().Prefix(Icons.DollarSign),
+                   nullableState.ToSelectInput(currencyOptions).Nullable().Suffix(Icons.BadgeDollarSign),
+                   nullableState
+                     .ToSelectInput(currencyOptions)
+                     .Nullable()
+                     .Prefix(Icons.DollarSign)
+                     .Suffix(Icons.BadgeDollarSign))
+               | AffixRow(
+                   "Invalid",
+                   currencyState.ToSelectInput(currencyOptions).Prefix(Icons.DollarSign).Invalid("Required"),
+                   currencyState.ToSelectInput(currencyOptions).Suffix(Icons.BadgeDollarSign).Invalid("Required"),
+                   currencyState
+                     .ToSelectInput(currencyOptions)
+                     .Prefix(Icons.DollarSign)
+                     .Suffix(Icons.BadgeDollarSign)
+                     .Invalid("Required"))
+               | AffixRow(
+                   "Nullable + invalid",
+                   nullableState.ToSelectInput(currencyOptions).Nullable().Prefix(Icons.DollarSign).Invalid("Required"),
+                   nullableState.ToSelectInput(currencyOptions).Nullable().Suffix(Icons.BadgeDollarSign).Invalid("Required"),
+                   nullableState
+                     .ToSelectInput(currencyOptions)
+                     .Nullable()
+                     .Prefix(Icons.DollarSign)
+                     .Suffix(Icons.BadgeDollarSign)
+                     .Invalid("Required"))
+               | Text.H2("Densities")
+               | Callout.Info("Both prefix and suffix with nullable clear at Small, Medium, and Large density.")
+               | DensityHeaderRow()
+               | SelectDensityRow(
+                   "Select",
+                   currencyState.ToSelectInput(currencyOptions).Nullable().Prefix(Icons.DollarSign).Suffix(Icons.BadgeDollarSign))
+               | SelectDensityRow(
+                   "Both + invalid",
+                   currencyState
+                     .ToSelectInput(currencyOptions)
+                     .Nullable()
+                     .Prefix(Icons.DollarSign)
+                     .Suffix(Icons.BadgeDollarSign)
+                     .Invalid("Required"));
+    }
+
+    private enum Currency
+    {
+        USD,
+        EUR,
+        GBP,
+    }
+}
+
 public class InputAffixesDensitiesView : ViewBase
 {
     public override object Build()
@@ -291,6 +362,13 @@ static class InputAffixesGalleryHelpers
                | input.Large();
 
     internal static GridView NumberDensityRow(string label, NumberInputBase input) =>
+        Layout.Grid().Columns(4)
+               | Text.Monospaced(label)
+               | input.Small()
+               | input
+               | input.Large();
+
+    internal static GridView SelectDensityRow(string label, SelectInputBase input) =>
         Layout.Grid().Columns(4)
                | Text.Monospaced(label)
                | input.Small()

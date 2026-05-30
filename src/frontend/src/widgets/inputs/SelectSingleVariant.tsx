@@ -15,7 +15,16 @@ import { Input } from "@/components/ui/input";
 import { Search, Loader2, X } from "lucide-react";
 import Icon from "@/components/Icon";
 import { InvalidIcon } from "@/components/InvalidIcon";
-import { textInputAffixCellClasses, xIconVariant } from "@/components/ui/input/text-input-variant";
+import {
+  textInputAffixCellClasses,
+  textInputAffixIconOnlyPaddingVariant,
+  textInputSuffixGlyphSlotClasses,
+  textInputSuffixWithTrailingClusterClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  xIconVariant,
+} from "@/components/ui/input/text-input-variant";
 import { getWidth, inputStyles } from "@/lib/styles";
 import { SelectInputWidgetProps } from "./select-types";
 import { useSelectValueHandler } from "./select-utils";
@@ -172,6 +181,15 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const showClear = nullable && hasValue && !disabled;
+  const showTrailing = showClear || Boolean(invalid);
+
+  const handleClear = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+  };
 
   const handleOpenChange = (newOpen: boolean) => {
     setIsOpen(newOpen);
@@ -225,36 +243,30 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       </span>
       <SelectTriggerEndActions>
         {loading && (
-          <div className="flex items-center h-6 pointer-events-auto">
-            <Loader2 className="size-4 animate-spin text-muted-foreground text-opacity-50" />
+          <div className="pointer-events-auto flex h-6 items-center">
+            <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground text-opacity-50" />
           </div>
         )}
-        {nullable && hasValue && !disabled && (
+        {!trailingBesideSuffix && showClear && (
           <div
             role="button"
             tabIndex={-1}
             aria-label="Clear"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
-            }}
+            onClick={handleClear}
             onPointerDown={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.stopPropagation();
-                if (events.includes("OnChange")) eventHandler("OnChange", id, [null]);
+                handleClear(e);
               }
             }}
-            className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6 pointer-events-auto"
+            className="pointer-events-auto flex h-6 cursor-pointer items-center rounded p-1 hover:bg-accent focus:outline-none"
           >
             <X className={xIconVariant({ density })} />
           </div>
         )}
-        {invalid && (
+        {!trailingBesideSuffix && invalid && (
           <div
-            className="flex items-center h-6 cursor-default pointer-events-auto"
+            className="pointer-events-auto flex h-6 cursor-default items-center"
             onPointerDown={(e) => e.stopPropagation()}
           >
             <InvalidIcon message={invalid} />
@@ -391,8 +403,10 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       {hasAffixes ? (
         <div
           className={cn(
-            "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-            isOpen && "ring-1 ring-ring",
+            "relative flex flex-1 items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+            isOpen
+              ? "border-ring outline-none dark:border-ring"
+              : "border-input dark:border-white/10",
             invalid && "border-destructive",
             disabled && "cursor-not-allowed opacity-50",
             ghost &&
@@ -400,11 +414,55 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+            <div
+              className={cn(
+                textInputAffixCellClasses("prefix", density),
+                textInputAffixIconOnlyPaddingVariant({ density }),
+              )}
+            >
+              {prefixContent}
+            </div>
           )}
-          <div className="flex-1 relative w-full">{selectContent}</div>
+          <div className="relative w-full min-w-0 flex-1">{selectContent}</div>
           {hasSuffix && (
-            <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
+            <div
+              className={cn(
+                textInputAffixCellClasses("suffix", density),
+                trailingBesideSuffix &&
+                  showTrailing &&
+                  textInputSuffixWithTrailingClusterClasses(density),
+                !showTrailing && textInputAffixIconOnlyPaddingVariant({ density }),
+              )}
+            >
+              {trailingBesideSuffix && showTrailing && (
+                <>
+                  {showClear && (
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      aria-label="Clear"
+                      onClick={handleClear}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      className={textInputTrailingIconButtonClasses(false, density)}
+                    >
+                      <X className={textInputTrailingIconSizeVariant({ density })} />
+                    </button>
+                  )}
+                  {invalid && (
+                    <InvalidIcon
+                      message={invalid}
+                      className={textInputTrailingInvalidSlotClasses(false, density)}
+                      iconClassName={textInputTrailingIconSizeVariant({ density })}
+                    />
+                  )}
+                </>
+              )}
+              {trailingBesideSuffix && showTrailing ? (
+                <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+              ) : (
+                suffixContent
+              )}
+            </div>
           )}
         </div>
       ) : (
