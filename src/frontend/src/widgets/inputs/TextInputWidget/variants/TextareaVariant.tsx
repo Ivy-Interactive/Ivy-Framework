@@ -149,76 +149,19 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
     </>
   );
 
-  const textareaElement = (
-    <Textarea
-      ref={elementRef as React.RefObject<HTMLTextAreaElement>}
-      id={props.id}
-      placeholder={props.placeholder}
-      value={props.value}
-      disabled={props.disabled}
-      maxLength={props.maxLength}
-      minLength={props.minLength}
-      rows={props.rows}
-      onChange={handleChange}
-      onBlur={onBlur}
-      onFocus={onFocus}
-      onKeyDown={handleKeyDown}
-      onPaste={handlePaste}
-      style={textareaStyles}
-      className={cn(
-        textareaSizeVariant({ density }),
-        "border-0 shadow-none dark:bg-transparent",
-        !props.height && "h-full",
-        props.invalid && inputStyles.invalidInput,
-        !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
-        !trailingBesideSuffix && showShortcut && "pr-16",
-        !trailingBesideSuffix && showClear && props.invalid && "pr-16",
-        trailingBesideSuffix && showTrailing && "pr-2",
-        !hasValue && props.nullable && "placeholder:text-muted-foreground",
-        hasPrefix && "rounded-l-none",
-        hasSuffix && "rounded-r-none",
-        hasAffixes && "rounded-none",
-        !hasAffixes && "rounded-field",
-      )}
-      data-testid={props["data-testid"]}
-    />
-  );
-
-  const fieldShell = (
-    <div className={cn("relative min-w-0 flex-1", trailingBesideSuffix && "min-w-0")}>
-      <div
-        className={cn(
-          !hasAffixes &&
-            "rounded-field border border-input bg-transparent shadow-sm dark:border-white/10 dark:bg-white/5",
-          props.ghost &&
-            "border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent",
-        )}
-      >
-        {textareaElement}
-      </div>
-      {!trailingBesideSuffix && showTrailing && (
-        <div className={textareaTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
-      )}
-    </div>
-  );
-
-  if (!hasAffixes) {
-    return (
-      <div className="relative w-full select-none" style={wrapperStyles}>
-        {fieldShell}
-      </div>
-    );
-  }
-
   return (
     <div className="relative w-full select-none" style={wrapperStyles}>
       <div
         className={cn(
-          "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:border-white/10 dark:bg-white/5",
+          "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+          isFocused
+            ? "border-ring outline-none dark:border-ring"
+            : "border-input dark:border-white/10",
           props.invalid && "border-destructive",
           props.disabled && "cursor-not-allowed opacity-50",
           props.ghost &&
             "border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent",
+          hasAffixes && "ivy-textarea-affixed-shell",
         )}
       >
         {hasPrefix && (
@@ -231,7 +174,46 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
             {prefixContent}
           </div>
         )}
-        {fieldShell}
+
+        <div className={cn("relative min-w-0 flex-1", hasAffixes && "flex flex-col")}>
+          <Textarea
+            ref={elementRef as React.RefObject<HTMLTextAreaElement>}
+            id={props.id}
+            placeholder={props.placeholder}
+            value={props.value}
+            disabled={props.disabled}
+            maxLength={props.maxLength}
+            minLength={props.minLength}
+            rows={props.rows}
+            onChange={handleChange}
+            onBlur={onBlur}
+            onFocus={onFocus}
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            style={textareaStyles}
+            className={cn(
+              textareaSizeVariant({ density }),
+              "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+              !props.height && "h-full min-h-0",
+              hasAffixes && "resize-y rounded-none",
+              props.invalid && inputStyles.invalidInput,
+              !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
+              !trailingBesideSuffix && showShortcut && "pr-16",
+              !trailingBesideSuffix && showClear && props.invalid && "pr-16",
+              trailingBesideSuffix && showTrailing && "pr-2",
+              !hasValue && props.nullable && "placeholder:text-muted-foreground",
+              hasPrefix && "rounded-l-none",
+              hasSuffix && "rounded-r-none",
+              !hasAffixes && "rounded-field",
+            )}
+            data-testid={props["data-testid"]}
+          />
+
+          {!trailingBesideSuffix && showTrailing && (
+            <div className={textareaTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
+          )}
+        </div>
+
         {hasSuffix && (
           <div
             className={cn(

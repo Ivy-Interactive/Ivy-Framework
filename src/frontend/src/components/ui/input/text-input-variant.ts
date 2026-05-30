@@ -19,6 +19,26 @@ export const affixIconOnlyCellPaddingClasses =
 export const affixIconGlyphCellClasses =
   "[&:not(:has(button))]:justify-center [&:not(:has(button))]:min-w-9";
 
+/**
+ * Affix / suffix slot icons (Ivy.Icon) — match trailing invalid icon size per density.
+ * !important overrides Lucide width/height attributes (default 24px).
+ */
+export const textInputAffixIconGlyphSizeVariant = cva(
+  "[&_svg]:block [&_svg]:shrink-0 [&_svg]:leading-none",
+  {
+    variants: {
+      density: {
+        Small: "[&_svg]:!size-3",
+        Medium: "[&_svg]:!size-4",
+        Large: "[&_svg]:!size-5",
+      },
+    },
+    defaultVariants: {
+      density: "Medium",
+    },
+  },
+);
+
 /** Shared transparent affix chrome — no muted background; padding scales with field density. */
 export const textInputAffixCellVariant = cva(
   cn(
@@ -58,7 +78,10 @@ export function textInputAffixCellClasses(
   side: "prefix" | "suffix",
   density: Densities = Densities.Medium,
 ): string {
-  return textInputAffixCellVariant({ side, density });
+  return cn(
+    textInputAffixCellVariant({ side, density }),
+    textInputAffixIconGlyphSizeVariant({ density }),
+  );
 }
 
 /** Horizontal gap between trailing icons — scales with field density. */
@@ -102,15 +125,15 @@ export function textInputTrailingShortcutWrapperClasses(
   return cn(textInputTrailingHitTargetVariant({ density }), "w-auto px-0");
 }
 
-/** Suffix glyph in a trailing cluster — same hit target; cap Lucide default 24px icons. */
+/** Suffix glyph in a trailing cluster — same hit target as trailing controls. */
 export const textInputSuffixGlyphSlotVariant = cva(
-  "inline-flex shrink-0 items-center justify-center overflow-hidden leading-none [&_svg]:block [&_svg]:shrink-0",
+  "inline-flex shrink-0 items-center justify-center overflow-hidden leading-none",
   {
     variants: {
       density: {
-        Small: "size-5 [&_svg]:size-3",
-        Medium: "size-6 [&_svg]:size-4",
-        Large: "size-6 [&_svg]:size-5",
+        Small: "size-5",
+        Medium: "size-6",
+        Large: "size-6",
       },
     },
     defaultVariants: {
@@ -120,7 +143,10 @@ export const textInputSuffixGlyphSlotVariant = cva(
 );
 
 export function textInputSuffixGlyphSlotClasses(density: Densities = Densities.Medium): string {
-  return textInputSuffixGlyphSlotVariant({ density });
+  return cn(
+    textInputSuffixGlyphSlotVariant({ density }),
+    textInputAffixIconGlyphSizeVariant({ density }),
+  );
 }
 
 /** Trailing icons + suffix glyph in one affix cell — single gap between all icons. */

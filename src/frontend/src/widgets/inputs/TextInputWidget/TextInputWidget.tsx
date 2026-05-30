@@ -230,6 +230,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onClear={handleClear}
           onSubmit={handleSubmit}
           inputRef={inputRef}
+          isFocused={isFocused}
           density={density}
         />
       );

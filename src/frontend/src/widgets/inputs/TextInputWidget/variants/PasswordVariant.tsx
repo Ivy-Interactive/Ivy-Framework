@@ -33,6 +33,7 @@ interface PasswordVariantProps {
   onSubmit?: () => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+  isFocused: boolean;
   density?: Densities;
 }
 
@@ -44,6 +45,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
   onClear,
   onSubmit,
   inputRef,
+  isFocused,
   density = Densities.Medium,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -153,106 +155,89 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
     </>
   );
 
-  const inputElement = (
-    <Input
-      ref={elementRef}
-      id={props.id}
-      density={density}
-      placeholder={props.placeholder}
-      value={props.value}
-      type={showPassword ? "text" : "password"}
-      disabled={props.disabled}
-      maxLength={props.maxLength}
-      minLength={props.minLength}
-      pattern={props.pattern}
-      onChange={handleChange}
-      onBlur={onBlur}
-      onFocus={onFocus}
-      onKeyDown={handleKeyDown}
-      onPaste={handlePaste}
-      className={cn(
-        textInputSizeVariant({ density }),
-        "border-0 shadow-none dark:bg-transparent",
-        "[&::-ms-reveal]:hidden [&::-ms-clear]:hidden",
-        props.invalid && inputStyles.invalidInput,
-        trailingBesideSuffix && showTrailing && "pr-2",
-        !trailingBesideSuffix && (props.invalid || showClear) && "pr-14",
-        !trailingBesideSuffix && !props.invalid && !showClear && showPasswordToggle && "pr-8",
-        hasLastPass && "pr-3",
-        !trailingBesideSuffix &&
-          showShortcut &&
-          !hasLastPass &&
-          !hasValue &&
-          !showClear &&
-          !props.invalid &&
-          "pr-24",
-        !trailingBesideSuffix && showClear && props.invalid && !hasLastPass && "pr-20",
-        !hasValue && props.nullable && "placeholder:text-muted-foreground",
-        hasPrefix && "rounded-l-none",
-        hasSuffix && "rounded-r-none",
-        hasAffixes && "rounded-none",
-        !hasAffixes && "rounded-field",
-      )}
-      data-testid={props["data-testid"]}
-    />
-  );
-
-  const fieldShell = (
-    <div className={cn("relative flex-1", trailingBesideSuffix && "min-w-0")}>
+  return (
+    <div className="relative w-full select-none" style={styles} ref={containerRef}>
       <div
         className={cn(
-          !hasAffixes &&
-            "rounded-field border border-input bg-transparent shadow-sm dark:border-white/10 dark:bg-white/5",
+          "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+          isFocused
+            ? "border-ring outline-none dark:border-ring"
+            : "border-input dark:border-white/10",
+          props.invalid && "border-destructive",
+          props.disabled && "cursor-not-allowed opacity-50",
           props.ghost &&
             "border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent",
         )}
       >
-        {inputElement}
-      </div>
-      {!trailingBesideSuffix && showTrailing && (
-        <div className={textInputTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
-      )}
-    </div>
-  );
+        {hasPrefix && (
+          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+        )}
 
-  return (
-    <div className="relative w-full select-none" style={styles} ref={containerRef}>
-      {hasAffixes ? (
-        <div
-          className={cn(
-            "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-            "border-input dark:border-white/10",
-            props.invalid && "border-destructive",
-            props.disabled && "cursor-not-allowed opacity-50",
-            props.ghost &&
-              "border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent",
-          )}
-        >
-          {hasPrefix && (
-            <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
-          )}
-          {fieldShell}
-          {hasSuffix && (
-            <div
-              className={cn(
-                textInputAffixCellClasses("suffix", density),
-                trailingBesideSuffix &&
-                  showTrailing &&
-                  textInputSuffixWithTrailingClusterClasses(density),
-              )}
-            >
-              {trailingBesideSuffix && showTrailing && trailingCluster(false)}
-              {trailingBesideSuffix && showTrailing ? (
-                <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
-              ) : (
-                suffixContent
-              )}
-            </div>
+        <div className={cn("relative flex-1", trailingBesideSuffix && "min-w-0")}>
+          <Input
+            ref={elementRef}
+            id={props.id}
+            density={density}
+            placeholder={props.placeholder}
+            value={props.value}
+            type={showPassword ? "text" : "password"}
+            disabled={props.disabled}
+            maxLength={props.maxLength}
+            minLength={props.minLength}
+            pattern={props.pattern}
+            onChange={handleChange}
+            onBlur={onBlur}
+            onFocus={onFocus}
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            className={cn(
+              textInputSizeVariant({ density }),
+              props.invalid && inputStyles.invalidInput,
+              trailingBesideSuffix && showTrailing && "pr-2",
+              !trailingBesideSuffix && (props.invalid || showClear) && "pr-14",
+              !trailingBesideSuffix && !props.invalid && !showClear && showPasswordToggle && "pr-8",
+              hasLastPass && "pr-3",
+              !trailingBesideSuffix &&
+                showShortcut &&
+                !hasLastPass &&
+                !hasValue &&
+                !showClear &&
+                !props.invalid &&
+                "pr-24",
+              !trailingBesideSuffix && showClear && props.invalid && !hasLastPass && "pr-20",
+              !hasValue && props.nullable && "placeholder:text-muted-foreground",
+              "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+              "[&::-ms-reveal]:hidden [&::-ms-clear]:hidden",
+              hasPrefix && "rounded-l-none",
+              hasSuffix && "rounded-r-none",
+              !hasAffixes && "rounded-field",
+            )}
+            data-testid={props["data-testid"]}
+          />
+
+          {!trailingBesideSuffix && showTrailing && (
+            <div className={textInputTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
           )}
         </div>
-      ) : (
-        fieldShell
-      )}
+
+        {hasSuffix && (
+          <div
+            className={cn(
+              textInputAffixCellClasses("suffix", density),
+              trailingBesideSuffix &&
+                showTrailing &&
+                textInputSuffixWithTrailingClusterClasses(density),
+            )}
+          >
+            {trailingBesideSuffix && showTrailing && trailingCluster(false)}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

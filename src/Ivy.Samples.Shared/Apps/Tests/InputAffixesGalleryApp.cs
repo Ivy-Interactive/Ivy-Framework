@@ -185,15 +185,15 @@ public class InputAffixesDensitiesView : ViewBase
         var textareaState = UseState("Notes");
 
         return Layout.Vertical()
-               | Callout.Info("Suffix affixes with trailing controls at Small, Medium, and Large density.")
+               | Callout.Info("Both prefix and suffix affixes with trailing controls at Small, Medium, and Large density.")
                | DensityHeaderRow()
-               | DensityRow("Text", textState.ToTextInput().Nullable().Suffix(Icons.Globe))
-               | DensityRow("Password", passwordState.ToPasswordInput().Suffix(Icons.Key))
-               | DensityRow("Search", searchState.ToSearchInput().Suffix(Icons.Tag).Placeholder("Search..."))
-               | DensityRow("Email", emailState.ToEmailInput().Suffix(Icons.AtSign))
-               | DensityRow("Tel", telState.ToTelInput().Suffix(Icons.Hash))
-               | DensityRow("Url", urlState.ToUrlInput().Suffix(Icons.ExternalLink))
-               | DensityRow("Textarea", textareaState.ToTextareaInput().Nullable().Suffix(Icons.Type));
+               | DensityRow("Text", textState.ToTextInput().Nullable().Prefix(Icons.Link).Suffix(Icons.Globe))
+               | DensityRow("Password", passwordState.ToPasswordInput().Prefix(Icons.Lock).Suffix(Icons.Key))
+               | DensityRow("Search", searchState.ToSearchInput().Prefix(Icons.ListFilterPlus).Suffix(Icons.Tag).Placeholder("Search..."))
+               | DensityRow("Email", emailState.ToEmailInput().Prefix(Icons.Mail).Suffix(Icons.AtSign))
+               | DensityRow("Tel", telState.ToTelInput().Prefix(Icons.Phone).Suffix(Icons.Hash))
+               | DensityRow("Url", urlState.ToUrlInput().Prefix(Icons.Link).Suffix(Icons.ExternalLink))
+               | DensityRow("Textarea", textareaState.ToTextareaInput().Nullable().Prefix(Icons.FileText).Suffix(Icons.Type));
     }
 }
 
