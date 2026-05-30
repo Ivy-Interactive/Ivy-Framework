@@ -7,7 +7,10 @@ import { Densities } from "@/types/density";
 import {
   textareaSizeVariant,
   textInputAffixCellClasses,
-  xIconVariant,
+  textareaTrailingBesideSuffixClasses,
+  textareaTrailingOverlayClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import { useCursorPosition, usePasteHandler, formatShortcutForDisplay } from "../hooks";
@@ -95,15 +98,8 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   const showTrailing =
     showShortcut || showClear || Boolean(props.invalid) || Boolean(props.dictation);
 
-  const trailingControls = showTrailing && (
-    <div
-      className={cn(
-        "flex items-start gap-2",
-        trailingBesideSuffix
-          ? "shrink-0 flex-col pt-2"
-          : "pointer-events-none absolute right-2.5 top-2 z-10",
-      )}
-    >
+  const trailingCluster = (overlay: boolean) => (
+    <>
       {props.dictation && !props.disabled && (
         <button
           type="button"
@@ -115,7 +111,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
             props.onDictationToggle?.();
           }}
           className={cn(
-            "pointer-events-auto flex items-center rounded p-1 transition-colors hover:bg-accent focus:outline-none",
+            textInputTrailingIconButtonClasses(overlay),
             props.isRecording && "bg-destructive/10 text-destructive",
           )}
         >
@@ -128,77 +124,83 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           tabIndex={-1}
           aria-label="Clear text"
           onClick={onClear}
-          className="pointer-events-auto flex items-center rounded p-1 hover:bg-accent focus:outline-none"
+          className={textInputTrailingIconButtonClasses(overlay)}
         >
-          <X className={xIconVariant({ density })} />
+          <X className={textInputTrailingIconSizeVariant({ density })} />
         </button>
       )}
       {showShortcut && (
-        <div className="pointer-events-auto flex items-center">
+        <div className={cn("flex shrink-0 items-center", overlay && "pointer-events-auto")}>
           <kbd className="rounded-field border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
             {shortcutDisplay}
           </kbd>
         </div>
       )}
       {props.invalid && (
-        <div className="flex items-center">
+        <div className={cn("flex shrink-0 items-center", overlay && "pointer-events-auto")}>
           <InvalidIcon message={props.invalid} />
         </div>
       )}
-    </div>
+    </>
   );
 
-  const textareaField = (
-    <div className={cn("relative min-w-0 flex-1", trailingBesideSuffix && "flex min-w-0 gap-1")}>
+  const textareaElement = (
+    <Textarea
+      ref={elementRef as React.RefObject<HTMLTextAreaElement>}
+      id={props.id}
+      placeholder={props.placeholder}
+      value={props.value}
+      disabled={props.disabled}
+      maxLength={props.maxLength}
+      minLength={props.minLength}
+      rows={props.rows}
+      onChange={handleChange}
+      onBlur={onBlur}
+      onFocus={onFocus}
+      onKeyDown={handleKeyDown}
+      onPaste={handlePaste}
+      style={textareaStyles}
+      className={cn(
+        textareaSizeVariant({ density }),
+        "border-0 shadow-none dark:bg-transparent",
+        !props.height && "h-full",
+        props.invalid && inputStyles.invalidInput,
+        !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
+        !trailingBesideSuffix && showShortcut && "pr-16",
+        !trailingBesideSuffix && showClear && props.invalid && "pr-16",
+        trailingBesideSuffix && showTrailing && "pr-2",
+        !hasValue && props.nullable && "placeholder:text-muted-foreground",
+        hasPrefix && "rounded-l-none",
+        hasSuffix && "rounded-r-none",
+        hasAffixes && "rounded-none",
+        !hasAffixes && "rounded-field",
+      )}
+      data-testid={props["data-testid"]}
+    />
+  );
+
+  const fieldShell = (
+    <div className={cn("relative min-w-0 flex-1", trailingBesideSuffix && "min-w-0")}>
       <div
         className={cn(
-          "min-w-0 flex-1",
           !hasAffixes &&
             "rounded-field border border-input bg-transparent shadow-sm dark:border-white/10 dark:bg-white/5",
           props.ghost &&
             "border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent",
         )}
       >
-        <Textarea
-          ref={elementRef as React.RefObject<HTMLTextAreaElement>}
-          id={props.id}
-          placeholder={props.placeholder}
-          value={props.value}
-          disabled={props.disabled}
-          maxLength={props.maxLength}
-          minLength={props.minLength}
-          rows={props.rows}
-          onChange={handleChange}
-          onBlur={onBlur}
-          onFocus={onFocus}
-          onKeyDown={handleKeyDown}
-          onPaste={handlePaste}
-          style={textareaStyles}
-          className={cn(
-            textareaSizeVariant({ density }),
-            "border-0 shadow-none dark:bg-transparent",
-            !props.height && "h-full",
-            props.invalid && inputStyles.invalidInput,
-            !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
-            !trailingBesideSuffix && showShortcut && "pr-16",
-            !trailingBesideSuffix && showClear && props.invalid && "pr-16",
-            trailingBesideSuffix && showTrailing && "pr-2",
-            !hasValue && props.nullable && "placeholder:text-muted-foreground",
-            hasPrefix && "rounded-l-none",
-            hasSuffix && "rounded-r-none",
-            hasAffixes && "rounded-none",
-          )}
-          data-testid={props["data-testid"]}
-        />
+        {textareaElement}
       </div>
-      {trailingControls}
+      {!trailingBesideSuffix && showTrailing && (
+        <div className={textareaTrailingOverlayClasses}>{trailingCluster(true)}</div>
+      )}
     </div>
   );
 
   if (!hasAffixes) {
     return (
       <div className="relative w-full select-none" style={wrapperStyles}>
-        {textareaField}
+        {fieldShell}
       </div>
     );
   }
@@ -224,7 +226,10 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
             {prefixContent}
           </div>
         )}
-        {textareaField}
+        {fieldShell}
+        {trailingBesideSuffix && showTrailing && (
+          <div className={textareaTrailingBesideSuffixClasses}>{trailingCluster(false)}</div>
+        )}
         {hasSuffix && (
           <div
             className={cn(

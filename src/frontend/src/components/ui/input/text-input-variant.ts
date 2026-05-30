@@ -61,6 +61,46 @@ export function textInputAffixCellClasses(
   return textInputAffixCellVariant({ side, density });
 }
 
+/** Clear / shortcut / invalid / password-eye cluster between field and suffix affix. */
+export const textInputTrailingBesideSuffixClasses =
+  "relative z-10 flex shrink-0 items-center gap-1 self-stretch text-muted-foreground";
+
+/** Multiline fields: same horizontal rhythm, controls top-aligned beside suffix. */
+export const textareaTrailingBesideSuffixClasses = cn(
+  textInputTrailingBesideSuffixClasses,
+  "flex-col items-center self-start pt-2",
+);
+
+/** Clear / shortcut / invalid / password-eye cluster overlaid inside the field. */
+export const textInputTrailingOverlayClasses =
+  "pointer-events-none absolute top-1/2 right-2 flex -translate-y-1/2 flex-row items-center gap-1";
+
+/** Multiline overlay controls (top-right). */
+export const textareaTrailingOverlayClasses =
+  "pointer-events-none absolute right-2.5 top-2 z-10 flex flex-col items-center gap-1";
+
+/** Uniform trailing icon button — fixed hit target keeps eye/clear aligned beside suffix. */
+export function textInputTrailingIconButtonClasses(overlay = false): string {
+  return cn(
+    "inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground focus:outline-none",
+    overlay && "pointer-events-auto",
+  );
+}
+
+/** Icon glyph size inside trailing buttons (no absolute top offsets). */
+export const textInputTrailingIconSizeVariant = cva("shrink-0", {
+  variants: {
+    density: {
+      Small: "size-3",
+      Medium: "size-4",
+      Large: "size-5",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
 // Size variants for TextInputWidget
 export const textInputSizeVariant = cva("w-full", {
   variants: {
@@ -117,8 +157,8 @@ export const xIconVariant = cva("text-muted-foreground hover:text-foreground", {
   },
 });
 
-// Size variants for eye icons (password toggle)
-export const eyeIconVariant = cva("", {
+// Size variants for eye icons (password toggle) — nudge left to match clear icon optical center
+export const eyeIconVariant = cva("-translate-x-px", {
   variants: {
     density: {
       Small: "size-3",

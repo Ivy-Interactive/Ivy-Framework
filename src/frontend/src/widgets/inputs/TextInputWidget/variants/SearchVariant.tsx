@@ -10,8 +10,10 @@ import { Densities } from "@/types/density";
 import {
   textInputAffixCellClasses,
   textInputSizeVariant,
+  textInputTrailingBesideSuffixClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
   searchIconVariant,
-  xIconVariant,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import { useCursorPosition, usePasteHandler, formatShortcutForDisplay } from "../hooks";
@@ -121,12 +123,9 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           tabIndex={-1}
           aria-label="Clear search"
           onClick={onClear}
-          className={cn(
-            "flex h-6 shrink-0 items-center rounded hover:bg-accent focus:outline-none cursor-pointer",
-            overlay ? "p-1 pointer-events-auto" : "p-0.5",
-          )}
+          className={textInputTrailingIconButtonClasses(overlay)}
         >
-          <X className={xIconVariant({ density })} />
+          <X className={textInputTrailingIconSizeVariant({ density })} />
         </button>
       )}
       {showShortcut && (
@@ -204,9 +203,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         </div>
 
         {trailingBesideSuffix && showTrailing && (
-          <div className="relative z-10 flex shrink-0 items-center gap-1 self-stretch bg-transparent px-0 text-muted-foreground">
-            {trailingCluster(false)}
-          </div>
+          <div className={textInputTrailingBesideSuffixClasses}>{trailingCluster(false)}</div>
         )}
 
         {hasSuffix && (

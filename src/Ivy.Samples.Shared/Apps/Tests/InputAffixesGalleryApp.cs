@@ -1,13 +1,27 @@
 namespace Ivy.Samples.Shared.Apps.Tests;
 
+using static InputAffixesGalleryHelpers;
+
 [App(
     icon: Icons.TextCursorInput,
     group: ["Tests"],
     isVisible: true,
-    searchHints: ["affix", "prefix", "suffix", "input", "kbd", "shortcut"])]
+    searchHints: ["affix", "prefix", "suffix", "input", "kbd", "shortcut", "density"])]
 public class InputAffixesGalleryApp : SampleBase
 {
-    protected override object? BuildSample()
+    protected override object? BuildSample() =>
+        Layout.Vertical()
+               | Text.H1("Input Affixes Gallery")
+               | Layout.Tabs(
+                   new Tab("All inputs", new InputAffixesAllInputsView()),
+                   new Tab("Text variants", new InputAffixesTextVariantsView()),
+                   new Tab("Densities", new InputAffixesDensitiesView())
+               ).Variant(TabsVariant.Content);
+}
+
+public class InputAffixesAllInputsView : ViewBase
+{
+    public override object Build()
     {
         var textState = UseState("ivy.app");
         var passwordState = UseState("secret");
@@ -35,9 +49,8 @@ public class InputAffixesGalleryApp : SampleBase
         var currencyOptions = typeof(Currency).ToOptions();
 
         return Layout.Vertical()
-               | Text.H1("Input Affixes Gallery")
                | Callout.Info(
-                   "Compare prefix, suffix, and both affixes across inputs with transparent affix chrome. Each row is its own four-column grid so columns stay aligned. Shortcut-key rows use empty nullable fields so the kbd hint is visible; with a suffix affix it sits between the field and the suffix.")
+                   "Compare prefix, suffix, and both affixes across inputs with transparent affix chrome. Shortcut-key rows use empty nullable fields so the kbd hint is visible beside suffix affixes.")
                | Text.H2("Text inputs")
                | AffixHeaderRow()
                | AffixRow("Text", textState.ToTextInput().Prefix(Icons.Link), textState.ToTextInput().Suffix(Icons.Globe), textState.ToTextInput().Prefix(Icons.Link).Suffix(Icons.Globe))
@@ -103,18 +116,114 @@ public class InputAffixesGalleryApp : SampleBase
         EUR,
         GBP,
     }
+}
 
-    private static GridView AffixHeaderRow() =>
+public class InputAffixesTextVariantsView : ViewBase
+{
+    public override object Build()
+    {
+        var textState = UseState("ivy.app");
+        var passwordState = UseState("secret");
+        var searchState = UseState("ivy.app");
+        var emailState = UseState("user@ivy.app");
+        var telState = UseState("5550100");
+        var urlState = UseState("ivy.app");
+        var textareaState = UseState("Notes");
+
+        return Layout.Vertical()
+               | Callout.Info(
+                   "Compare trailing controls (password eye, search clear, nullable clear) with suffix affixes. Eye and clear buttons should sit in the same column between field and suffix across variants.")
+               | AffixHeaderRow()
+               | AffixRow(
+                   "Text",
+                   textState.ToTextInput().Nullable().Prefix(Icons.Link),
+                   textState.ToTextInput().Nullable().Suffix(Icons.Globe),
+                   textState.ToTextInput().Nullable().Prefix(Icons.Link).Suffix(Icons.Globe))
+               | AffixRow(
+                   "Password",
+                   passwordState.ToPasswordInput().Prefix(Icons.Lock),
+                   passwordState.ToPasswordInput().Suffix(Icons.Key),
+                   passwordState.ToPasswordInput().Prefix(Icons.Lock).Suffix(Icons.Shield))
+               | AffixRow(
+                   "Search",
+                   searchState.ToSearchInput().Prefix(Icons.ListFilterPlus).Placeholder("Search..."),
+                   searchState.ToSearchInput().Suffix(Icons.Tag).Placeholder("Search..."),
+                   searchState.ToSearchInput().Prefix(Icons.Folder).Suffix(Icons.Globe).Placeholder("Search..."))
+               | AffixRow(
+                   "Email",
+                   emailState.ToEmailInput().Prefix(Icons.Mail),
+                   emailState.ToEmailInput().Suffix(Icons.AtSign),
+                   emailState.ToEmailInput().Prefix(Icons.Mail).Suffix(Icons.AtSign))
+               | AffixRow(
+                   "Tel",
+                   telState.ToTelInput().Prefix(Icons.Phone),
+                   telState.ToTelInput().Suffix(Icons.Hash),
+                   telState.ToTelInput().Prefix(Icons.Phone).Suffix(Icons.Hash))
+               | AffixRow(
+                   "Url",
+                   urlState.ToUrlInput().Prefix(Icons.Link),
+                   urlState.ToUrlInput().Suffix(Icons.ExternalLink),
+                   urlState.ToUrlInput().Prefix(Icons.Link).Suffix(Icons.ExternalLink))
+               | AffixRow(
+                   "Textarea",
+                   textareaState.ToTextareaInput().Nullable().Prefix(Icons.FileText),
+                   textareaState.ToTextareaInput().Nullable().Suffix(Icons.Type),
+                   textareaState.ToTextareaInput().Nullable().Prefix(Icons.FileText).Suffix(Icons.Type));
+    }
+}
+
+public class InputAffixesDensitiesView : ViewBase
+{
+    public override object Build()
+    {
+        var textState = UseState("ivy.app");
+        var passwordState = UseState("secret");
+        var searchState = UseState("ivy.app");
+        var emailState = UseState("user@ivy.app");
+        var telState = UseState("5550100");
+        var urlState = UseState("ivy.app");
+        var textareaState = UseState("Notes");
+
+        return Layout.Vertical()
+               | Callout.Info("Suffix affixes with trailing controls at Small, Medium, and Large density.")
+               | DensityHeaderRow()
+               | DensityRow("Text", textState.ToTextInput().Nullable().Suffix(Icons.Globe))
+               | DensityRow("Password", passwordState.ToPasswordInput().Suffix(Icons.Key))
+               | DensityRow("Search", searchState.ToSearchInput().Suffix(Icons.Tag).Placeholder("Search..."))
+               | DensityRow("Email", emailState.ToEmailInput().Suffix(Icons.AtSign))
+               | DensityRow("Tel", telState.ToTelInput().Suffix(Icons.Hash))
+               | DensityRow("Url", urlState.ToUrlInput().Suffix(Icons.ExternalLink))
+               | DensityRow("Textarea", textareaState.ToTextareaInput().Nullable().Suffix(Icons.Type));
+    }
+}
+
+static class InputAffixesGalleryHelpers
+{
+    internal static GridView AffixHeaderRow() =>
         Layout.Grid().Columns(4)
                | null!
                | Text.Monospaced("Prefix only")
                | Text.Monospaced("Suffix only")
                | Text.Monospaced("Both");
 
-    private static GridView AffixRow(string label, object prefixOnly, object suffixOnly, object both) =>
+    internal static GridView AffixRow(string label, object prefixOnly, object suffixOnly, object both) =>
         Layout.Grid().Columns(4)
                | Text.Monospaced(label)
                | prefixOnly
                | suffixOnly
                | both;
+
+    internal static GridView DensityHeaderRow() =>
+        Layout.Grid().Columns(4)
+               | null!
+               | Text.Monospaced("Small")
+               | Text.Monospaced("Medium")
+               | Text.Monospaced("Large");
+
+    internal static GridView DensityRow(string label, TextInputBase input) =>
+        Layout.Grid().Columns(4)
+               | Text.Monospaced(label)
+               | input.Small()
+               | input
+               | input.Large();
 }

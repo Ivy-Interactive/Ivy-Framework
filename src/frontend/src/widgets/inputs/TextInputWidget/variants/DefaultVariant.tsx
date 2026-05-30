@@ -7,7 +7,10 @@ import { Densities } from "@/types/density";
 import {
   textInputAffixCellClasses,
   textInputSizeVariant,
-  xIconVariant,
+  textInputTrailingBesideSuffixClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingOverlayClasses,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import {
@@ -132,7 +135,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
           />
 
           {!trailingBesideSuffix && showTrailing && (
-            <div className="pointer-events-none absolute top-1/2 right-2 flex -translate-y-1/2 flex-row items-center gap-1">
+            <div className={textInputTrailingOverlayClasses}>
               {showShortcut && (
                 <div className="pointer-events-auto flex h-6 items-center">
                   <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
@@ -146,9 +149,9 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                   tabIndex={-1}
                   aria-label="Clear"
                   onClick={onClear}
-                  className="pointer-events-auto cursor-pointer rounded p-1 hover:bg-accent focus:outline-none"
+                  className={textInputTrailingIconButtonClasses(true)}
                 >
-                  <X className={xIconVariant({ density })} />
+                  <X className={textInputTrailingIconSizeVariant({ density })} />
                 </button>
               )}
               {props.invalid && (
@@ -161,7 +164,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
         </div>
 
         {trailingBesideSuffix && showTrailing && (
-          <div className="relative z-10 flex shrink-0 items-center gap-1 self-stretch text-muted-foreground">
+          <div className={textInputTrailingBesideSuffixClasses}>
             {showShortcut && (
               <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
                 {shortcutDisplay}
@@ -173,9 +176,9 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                 tabIndex={-1}
                 aria-label="Clear"
                 onClick={onClear}
-                className="cursor-pointer rounded p-0.5 hover:bg-accent focus:outline-none"
+                className={textInputTrailingIconButtonClasses(false)}
               >
-                <X className={xIconVariant({ density })} />
+                <X className={textInputTrailingIconSizeVariant({ density })} />
               </button>
             )}
             {props.invalid && <InvalidIcon message={props.invalid} />}
