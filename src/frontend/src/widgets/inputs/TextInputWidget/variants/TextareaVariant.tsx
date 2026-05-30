@@ -6,11 +6,13 @@ import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import {
   textareaSizeVariant,
-  textInputAffixCellClasses,
-  textareaTrailingBesideSuffixClasses,
   textareaTrailingOverlayClasses,
+  textareaSuffixWithTrailingClusterClasses,
+  textInputAffixCellClasses,
+  textInputSuffixGlyphSlotClasses,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import { useCursorPosition, usePasteHandler, formatShortcutForDisplay } from "../hooks";
@@ -137,9 +139,11 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         </div>
       )}
       {props.invalid && (
-        <div className={cn("flex shrink-0 items-center", overlay && "pointer-events-auto")}>
-          <InvalidIcon message={props.invalid} />
-        </div>
+        <InvalidIcon
+          message={props.invalid}
+          className={textInputTrailingInvalidSlotClasses(overlay)}
+          iconClassName={textInputTrailingIconSizeVariant({ density })}
+        />
       )}
     </>
   );
@@ -227,17 +231,22 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           </div>
         )}
         {fieldShell}
-        {trailingBesideSuffix && showTrailing && (
-          <div className={textareaTrailingBesideSuffixClasses}>{trailingCluster(false)}</div>
-        )}
         {hasSuffix && (
           <div
             className={cn(
               textInputAffixCellClasses("suffix", density),
               textareaAffixAlignClasses(density),
+              trailingBesideSuffix && showTrailing && textareaSuffixWithTrailingClusterClasses,
             )}
           >
-            {suffixContent}
+            {trailingBesideSuffix && showTrailing && (
+              <div className="flex flex-col items-center gap-1.5">{trailingCluster(false)}</div>
+            )}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
           </div>
         )}
       </div>

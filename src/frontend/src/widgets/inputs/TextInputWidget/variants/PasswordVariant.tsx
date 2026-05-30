@@ -8,11 +8,13 @@ import { Densities } from "@/types/density";
 import {
   textInputAffixCellClasses,
   textInputSizeVariant,
-  textInputTrailingBesideSuffixClasses,
+  textInputSuffixWithTrailingClusterClasses,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingEyeGlyphVariant,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
   textInputTrailingOverlayClasses,
-  eyeIconVariant,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import {
@@ -107,9 +109,9 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           aria-label={showPassword ? "Hide password" : "Show password"}
         >
           {showPassword ? (
-            <EyeOffIcon className={eyeIconVariant({ density })} />
+            <EyeOffIcon className={textInputTrailingEyeGlyphVariant({ density })} />
           ) : (
-            <EyeIcon className={eyeIconVariant({ density })} />
+            <EyeIcon className={textInputTrailingEyeGlyphVariant({ density })} />
           )}
         </button>
       )}
@@ -137,9 +139,11 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
         </div>
       )}
       {props.invalid && (
-        <div className={cn("flex h-6 shrink-0 items-center", overlay && "pointer-events-auto")}>
-          <InvalidIcon message={props.invalid} />
-        </div>
+        <InvalidIcon
+          message={props.invalid}
+          className={textInputTrailingInvalidSlotClasses(overlay)}
+          iconClassName={textInputTrailingIconSizeVariant({ density })}
+        />
       )}
     </>
   );
@@ -223,11 +227,20 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
             <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
           )}
           {fieldShell}
-          {trailingBesideSuffix && showTrailing && (
-            <div className={textInputTrailingBesideSuffixClasses}>{trailingCluster(false)}</div>
-          )}
           {hasSuffix && (
-            <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
+            <div
+              className={cn(
+                textInputAffixCellClasses("suffix", density),
+                trailingBesideSuffix && showTrailing && textInputSuffixWithTrailingClusterClasses,
+              )}
+            >
+              {trailingBesideSuffix && showTrailing && trailingCluster(false)}
+              {trailingBesideSuffix && showTrailing ? (
+                <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+              ) : (
+                suffixContent
+              )}
+            </div>
           )}
         </div>
       ) : (

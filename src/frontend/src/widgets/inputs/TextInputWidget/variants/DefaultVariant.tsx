@@ -7,9 +7,11 @@ import { Densities } from "@/types/density";
 import {
   textInputAffixCellClasses,
   textInputSizeVariant,
-  textInputTrailingBesideSuffixClasses,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  textInputSuffixWithTrailingClusterClasses,
+  textInputSuffixGlyphSlotClasses,
   textInputTrailingOverlayClasses,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
@@ -155,35 +157,15 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                 </button>
               )}
               {props.invalid && (
-                <div className="flex h-6 items-center">
-                  <InvalidIcon message={props.invalid} />
-                </div>
+                <InvalidIcon
+                  message={props.invalid}
+                  className={textInputTrailingInvalidSlotClasses(true)}
+                  iconClassName={textInputTrailingIconSizeVariant({ density })}
+                />
               )}
             </div>
           )}
         </div>
-
-        {trailingBesideSuffix && showTrailing && (
-          <div className={textInputTrailingBesideSuffixClasses}>
-            {showShortcut && (
-              <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
-                {shortcutDisplay}
-              </kbd>
-            )}
-            {showClear && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={onClear}
-                className={textInputTrailingIconButtonClasses(false)}
-              >
-                <X className={textInputTrailingIconSizeVariant({ density })} />
-              </button>
-            )}
-            {props.invalid && <InvalidIcon message={props.invalid} />}
-          </div>
-        )}
 
         {/* Dictation mic button */}
         {props.dictation && !props.disabled && (
@@ -207,7 +189,45 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
         )}
 
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
+          <div
+            className={cn(
+              textInputAffixCellClasses("suffix", density),
+              trailingBesideSuffix && showTrailing && textInputSuffixWithTrailingClusterClasses,
+            )}
+          >
+            {trailingBesideSuffix && showTrailing && (
+              <>
+                {showShortcut && (
+                  <kbd className="rounded-selector border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground">
+                    {shortcutDisplay}
+                  </kbd>
+                )}
+                {showClear && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Clear"
+                    onClick={onClear}
+                    className={textInputTrailingIconButtonClasses(false)}
+                  >
+                    <X className={textInputTrailingIconSizeVariant({ density })} />
+                  </button>
+                )}
+                {props.invalid && (
+                  <InvalidIcon
+                    message={props.invalid}
+                    className={textInputTrailingInvalidSlotClasses(false)}
+                    iconClassName={textInputTrailingIconSizeVariant({ density })}
+                  />
+                )}
+              </>
+            )}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
+          </div>
         )}
       </div>
     </div>

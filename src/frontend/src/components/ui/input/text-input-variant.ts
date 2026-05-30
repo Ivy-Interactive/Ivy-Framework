@@ -61,11 +61,42 @@ export function textInputAffixCellClasses(
   return textInputAffixCellVariant({ side, density });
 }
 
-/** Clear / shortcut / invalid / password-eye cluster between field and suffix affix. */
-export const textInputTrailingBesideSuffixClasses =
-  "relative z-10 flex shrink-0 items-center gap-1 self-stretch text-muted-foreground";
+/** Suffix glyph in a trailing cluster — same hit target; cap Lucide default 24px icons. */
+export const textInputSuffixGlyphSlotVariant = cva(
+  "inline-flex size-6 shrink-0 items-center justify-center [&_svg]:block [&_svg]:shrink-0",
+  {
+    variants: {
+      density: {
+        Small: "[&_svg]:size-3",
+        Medium: "[&_svg]:size-4",
+        Large: "[&_svg]:size-5",
+      },
+    },
+    defaultVariants: {
+      density: "Medium",
+    },
+  },
+);
 
-/** Multiline fields: same horizontal rhythm, controls top-aligned beside suffix. */
+export function textInputSuffixGlyphSlotClasses(density: Densities = Densities.Medium): string {
+  return textInputSuffixGlyphSlotVariant({ density });
+}
+
+/** Trailing icons + suffix glyph in one affix cell — single gap between all icons. */
+export const textInputSuffixWithTrailingClusterClasses =
+  "relative z-10 flex shrink-0 items-center gap-1.5 self-stretch";
+
+/** Textarea: trailing stack + suffix icon, same horizontal gap to suffix glyph. */
+export const textareaSuffixWithTrailingClusterClasses = cn(
+  textInputSuffixWithTrailingClusterClasses,
+  "items-start self-start pt-2",
+);
+
+/** Standalone trailing cluster (no suffix affix content in the same cell). */
+export const textInputTrailingBesideSuffixClasses =
+  "relative z-10 flex shrink-0 items-center gap-1.5 self-stretch text-muted-foreground";
+
+/** Multiline fields: trailing stack top-aligned when not merged into suffix cell. */
 export const textareaTrailingBesideSuffixClasses = cn(
   textInputTrailingBesideSuffixClasses,
   "flex-col items-center self-start pt-2",
@@ -73,11 +104,11 @@ export const textareaTrailingBesideSuffixClasses = cn(
 
 /** Clear / shortcut / invalid / password-eye cluster overlaid inside the field. */
 export const textInputTrailingOverlayClasses =
-  "pointer-events-none absolute top-1/2 right-2 flex -translate-y-1/2 flex-row items-center gap-1";
+  "pointer-events-none absolute top-1/2 right-2 flex -translate-y-1/2 flex-row items-center gap-1.5";
 
 /** Multiline overlay controls (top-right). */
 export const textareaTrailingOverlayClasses =
-  "pointer-events-none absolute right-2.5 top-2 z-10 flex flex-col items-center gap-1";
+  "pointer-events-none absolute right-2.5 top-2 z-10 flex flex-col items-center gap-1.5";
 
 /** Uniform trailing icon button — fixed hit target keeps eye/clear aligned beside suffix. */
 export function textInputTrailingIconButtonClasses(overlay = false): string {
@@ -87,12 +118,31 @@ export function textInputTrailingIconButtonClasses(overlay = false): string {
   );
 }
 
+/** Invalid icon slot — same 24px footprint as eye/clear so cluster gaps stay even. */
+export function textInputTrailingInvalidSlotClasses(overlay = false): string {
+  return cn(textInputTrailingIconButtonClasses(overlay), "hover:bg-transparent hover:text-inherit");
+}
+
 /** Icon glyph size inside trailing buttons (no absolute top offsets). */
-export const textInputTrailingIconSizeVariant = cva("shrink-0", {
+export const textInputTrailingIconSizeVariant = cva("block shrink-0", {
   variants: {
     density: {
       Small: "size-3",
       Medium: "size-4",
+      Large: "size-5",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
+/** Eye outline is optically smaller than filled icons at the same box size. */
+export const textInputTrailingEyeGlyphVariant = cva("block shrink-0", {
+  variants: {
+    density: {
+      Small: "size-3.5",
+      Medium: "size-[1.125rem]",
       Large: "size-5",
     },
   },
@@ -150,20 +200,6 @@ export const xIconVariant = cva("text-muted-foreground hover:text-foreground", {
       Small: "top-2 size-3",
       Medium: "top-2.5 size-4",
       Large: "top-3 size-5",
-    },
-  },
-  defaultVariants: {
-    density: "Medium",
-  },
-});
-
-// Size variants for eye icons (password toggle) — nudge left to match clear icon optical center
-export const eyeIconVariant = cva("-translate-x-px", {
-  variants: {
-    density: {
-      Small: "size-3",
-      Medium: "size-4",
-      Large: "size-5",
     },
   },
   defaultVariants: {
