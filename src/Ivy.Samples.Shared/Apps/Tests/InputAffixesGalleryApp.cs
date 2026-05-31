@@ -6,7 +6,7 @@ using static InputAffixesGalleryHelpers;
     icon: Icons.TextCursorInput,
     group: ["Tests"],
     isVisible: true,
-    searchHints: ["affix", "prefix", "suffix", "input", "kbd", "shortcut", "density"])]
+    searchHints: ["affix", "prefix", "suffix", "input", "bool", "kbd", "shortcut", "density"])]
 public class InputAffixesGalleryApp : SampleBase
 {
     protected override object? BuildSample() =>
@@ -17,7 +17,8 @@ public class InputAffixesGalleryApp : SampleBase
                    new Tab("Text variants", new InputAffixesTextVariantsView()),
                    new Tab("Densities", new InputAffixesDensitiesView()),
                    new Tab("Number inputs", new InputAffixesNumberView()),
-                   new Tab("Select inputs", new InputAffixesSelectView())
+                   new Tab("Select inputs", new InputAffixesSelectView()),
+                   new Tab("Bool inputs", new InputAffixesBoolView())
                ).Variant(TabsVariant.Content);
 }
 
@@ -105,7 +106,7 @@ public class InputAffixesAllInputsView : ViewBase
                | AffixRow("Select", currencyState.ToSelectInput(currencyOptions).Prefix(Icons.DollarSign), currencyState.ToSelectInput(currencyOptions).Suffix(Icons.BadgeDollarSign), currencyState.ToSelectInput(currencyOptions).Prefix(Icons.DollarSign).Suffix(Icons.BadgeDollarSign))
                | AffixRow("DateTime", dateState.ToDateTimeInput().Prefix(Icons.Calendar), dateState.ToDateTimeInput().Suffix(Icons.Clock), dateState.ToDateTimeInput().Prefix(Icons.Calendar).Suffix(Icons.Clock))
                | AffixRow("Date range", rangeState.ToDateRangeInput().Prefix(Icons.CalendarRange), rangeState.ToDateRangeInput().Suffix(Icons.CalendarDays), rangeState.ToDateRangeInput().Prefix(Icons.CalendarRange).Suffix(Icons.CalendarDays))
-               | AffixRow("Bool", boolState.ToBoolInput().Label("Enable").Prefix(Icons.Bell), boolState.ToBoolInput().Label("Enable").Suffix(Icons.Info), boolState.ToBoolInput().Label("Enable").Prefix(Icons.Bell).Suffix(Icons.Info))
+               | AffixRow("Bool", boolState.ToBoolInput().Label("Enable").Prefix(Icons.Bell), boolState.ToBoolInput().Label("Enable").Suffix(Icons.BadgeQuestionMark), boolState.ToBoolInput().Label("Enable").Prefix(Icons.Bell).Suffix(Icons.BadgeQuestionMark))
                | AffixRow("Color", colorState.ToColorInput().Prefix(Icons.Palette), colorState.ToColorInput().Suffix(Icons.Pipette), colorState.ToColorInput().Prefix(Icons.Palette).Suffix(Icons.Pipette))
                | AffixRow("Feedback", feedbackState.ToFeedbackInput().Stars().Prefix(Icons.Star), feedbackState.ToFeedbackInput().Stars().Suffix(Icons.MessageSquare), feedbackState.ToFeedbackInput().Stars().Prefix(Icons.Star).Suffix(Icons.MessageSquare))
                | AffixRow("Icon", iconState.ToIconInput().Prefix(Icons.Search), iconState.ToIconInput().Suffix(Icons.Sparkles), iconState.ToIconInput().Prefix(Icons.Search).Suffix(Icons.Sparkles))
@@ -306,6 +307,85 @@ public class InputAffixesSelectView : ViewBase
     }
 }
 
+public class InputAffixesBoolView : ViewBase
+{
+    public override object Build()
+    {
+        var boolState = UseState(true);
+        var nullableState = UseState<bool?>(() => null);
+
+        return Layout.Vertical()
+               | Callout.Info(
+                   "Bool affixes: prefix/suffix icon scale matches number/select; invalid sits in the suffix cluster beside the suffix glyph (not on the checkbox). Use this tab to verify gaps, density, and invalid+suffix layout.")
+               | Text.H2("Affix layouts")
+               | AffixHeaderRow()
+               | AffixRow(
+                   "Checkbox",
+                   boolState.ToBoolInput().Label("Enable").Prefix(Icons.Bell),
+                   boolState.ToBoolInput().Label("Enable").Suffix(Icons.BadgeQuestionMark),
+                   boolState.ToBoolInput().Label("Enable").Prefix(Icons.Bell).Suffix(Icons.BadgeQuestionMark))
+               | AffixRow(
+                   "Switch",
+                   boolState.ToSwitchInput().Label("Enable").Prefix(Icons.Bell),
+                   boolState.ToSwitchInput().Label("Enable").Suffix(Icons.BadgeQuestionMark),
+                   boolState.ToSwitchInput().Label("Enable").Prefix(Icons.Bell).Suffix(Icons.BadgeQuestionMark))
+               | AffixRow(
+                   "Toggle",
+                   boolState.ToToggleInput(Icons.Star).Label("Enable").Prefix(Icons.Bell),
+                   boolState.ToToggleInput(Icons.Star).Label("Enable").Suffix(Icons.BadgeQuestionMark),
+                   boolState
+                     .ToToggleInput(Icons.Star)
+                     .Label("Enable")
+                     .Prefix(Icons.Bell)
+                     .Suffix(Icons.BadgeQuestionMark))
+               | AffixRow(
+                   "Nullable",
+                   nullableState.ToBoolInput().Label("Enable").Nullable().Prefix(Icons.Bell),
+                   nullableState.ToBoolInput().Label("Enable").Nullable().Suffix(Icons.BadgeQuestionMark),
+                   nullableState
+                     .ToBoolInput()
+                     .Label("Enable")
+                     .Nullable()
+                     .Prefix(Icons.Bell)
+                     .Suffix(Icons.BadgeQuestionMark))
+               | AffixRow(
+                   "Invalid",
+                   boolState.ToBoolInput().Label("Enable").Prefix(Icons.Bell).Invalid("Must be enabled"),
+                   boolState.ToBoolInput().Label("Enable").Suffix(Icons.BadgeQuestionMark).Invalid("Must be enabled"),
+                   boolState
+                     .ToBoolInput()
+                     .Label("Enable")
+                     .Prefix(Icons.Bell)
+                     .Suffix(Icons.BadgeQuestionMark)
+                     .Invalid("Must be enabled"))
+               | AffixRow(
+                   "Nullable + invalid",
+                   nullableState.ToBoolInput().Label("Enable").Nullable().Prefix(Icons.Bell).Invalid("Required"),
+                   nullableState.ToBoolInput().Label("Enable").Nullable().Suffix(Icons.BadgeQuestionMark).Invalid("Required"),
+                   nullableState
+                     .ToBoolInput()
+                     .Label("Enable")
+                     .Nullable()
+                     .Prefix(Icons.Bell)
+                     .Suffix(Icons.BadgeQuestionMark)
+                     .Invalid("Required"))
+               | Text.H2("Densities")
+               | Callout.Info("Both prefix and suffix at Small, Medium, and Large — compare row height and icon gaps to the Number/Select tabs.")
+               | DensityHeaderRow()
+               | BoolDensityRow(
+                   "Checkbox",
+                   boolState.ToBoolInput().Label("Enable").Prefix(Icons.Bell).Suffix(Icons.BadgeQuestionMark))
+               | BoolDensityRow(
+                   "Both + invalid",
+                   boolState
+                     .ToBoolInput()
+                     .Label("Enable")
+                     .Prefix(Icons.Bell)
+                     .Suffix(Icons.BadgeQuestionMark)
+                     .Invalid("Must be enabled"));
+    }
+}
+
 public class InputAffixesDensitiesView : ViewBase
 {
     public override object Build()
@@ -369,6 +449,13 @@ static class InputAffixesGalleryHelpers
                | input.Large();
 
     internal static GridView SelectDensityRow(string label, SelectInputBase input) =>
+        Layout.Grid().Columns(4)
+               | Text.Monospaced(label)
+               | input.Small()
+               | input
+               | input.Large();
+
+    internal static GridView BoolDensityRow(string label, BoolInputBase input) =>
         Layout.Grid().Columns(4)
                | Text.Monospaced(label)
                | input.Small()

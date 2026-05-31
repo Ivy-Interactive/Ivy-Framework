@@ -3,17 +3,27 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
 
+export type InputDensityVariant = "Small" | "Medium" | "Large";
+
+/** Normalize widget density for cva (handles enum, string, and responsive fallbacks). */
+export function normalizeInputDensity(density?: Densities | string | null): InputDensityVariant {
+  const value = density?.toString();
+  if (value === Densities.Small || value === "Small") return "Small";
+  if (value === Densities.Large || value === "Large") return "Large";
+  return "Medium";
+}
+
 /**
  * Ivy.Button in affix: outer cell owns spacing (`px-3` or tighter for icon-only).
  * Text buttons: strip `sm` px. Icon-only (`icon-sm` / `icon`): shrink hit box — the
  * `size-7`/`size-9` target is larger than the glyph, which reads as extra padding.
  */
 export const affixEmbeddedButtonClasses =
-  "[&_button]:!px-0 [&_button]:shadow-none [&_button]:rounded [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors [&_button.size-7]:!size-4 [&_button.size-9]:!size-6";
+  "[&_button:not([data-invalid-icon])]:!px-0 [&_button:not([data-invalid-icon])]:shadow-none [&_button:not([data-invalid-icon])]:rounded [&_button:not([data-invalid-icon])]:hover:bg-accent [&_button:not([data-invalid-icon])]:cursor-pointer [&_button:not([data-invalid-icon])]:transition-colors [&_button:not([data-invalid-icon]).size-7]:!size-4 [&_button:not([data-invalid-icon]).size-9]:!size-6";
 
-/** Tighter affix cell padding when the slot only contains an icon-sized button. */
+/** Tighter affix cell padding when the slot only contains an icon-sized Ivy button (not trailing invalid). */
 export const affixIconOnlyCellPaddingClasses =
-  "has-[button.size-7]:px-1.5 has-[button.size-9]:px-2";
+  "has-[button.size-7:not([data-invalid-icon])]:px-1.5 has-[button.size-9:not([data-invalid-icon])]:px-2";
 
 /** Center icon glyphs (non-button) in affix cells for even visual weight. */
 export const affixIconGlyphCellClasses =
@@ -78,9 +88,10 @@ export function textInputAffixCellClasses(
   side: "prefix" | "suffix",
   density: Densities = Densities.Medium,
 ): string {
+  const d = normalizeInputDensity(density);
   return cn(
-    textInputAffixCellVariant({ side, density }),
-    textInputAffixIconGlyphSizeVariant({ density }),
+    textInputAffixCellVariant({ side, density: d }),
+    textInputAffixIconGlyphSizeVariant({ density: d }),
   );
 }
 
@@ -99,10 +110,10 @@ export const textInputTrailingClusterGapVariant = cva("", {
 });
 
 export function textInputTrailingClusterGapClasses(density: Densities = Densities.Medium): string {
-  return textInputTrailingClusterGapVariant({ density });
+  return textInputTrailingClusterGapVariant({ density: normalizeInputDensity(density) });
 }
 
-/** Trailing icon hit target — scales with field height (Large keeps Medium width to avoid overlap). */
+/** Trailing icon hit target — scales with field height at each density. */
 export const textInputTrailingHitTargetVariant = cva(
   "inline-flex shrink-0 items-center justify-center overflow-hidden leading-none",
   {
@@ -110,7 +121,7 @@ export const textInputTrailingHitTargetVariant = cva(
       density: {
         Small: "size-5",
         Medium: "size-6",
-        Large: "size-6",
+        Large: "size-7",
       },
     },
     defaultVariants: {
@@ -133,7 +144,7 @@ export const textInputSuffixGlyphSlotVariant = cva(
       density: {
         Small: "size-5",
         Medium: "size-6",
-        Large: "size-6",
+        Large: "size-7",
       },
     },
     defaultVariants: {
@@ -143,9 +154,10 @@ export const textInputSuffixGlyphSlotVariant = cva(
 );
 
 export function textInputSuffixGlyphSlotClasses(density: Densities = Densities.Medium): string {
+  const d = normalizeInputDensity(density);
   return cn(
-    textInputSuffixGlyphSlotVariant({ density }),
-    textInputAffixIconGlyphSizeVariant({ density }),
+    textInputSuffixGlyphSlotVariant({ density: d }),
+    textInputAffixIconGlyphSizeVariant({ density: d }),
   );
 }
 
@@ -181,10 +193,43 @@ export const textInputAffixIconOnlyPaddingVariant = cva("!px-2", {
 export function textInputSuffixWithTrailingClusterClasses(
   density: Densities = Densities.Medium,
 ): string {
+  const d = normalizeInputDensity(density);
   return cn(
-    "relative z-10 flex shrink-0 flex-nowrap items-center self-stretch",
-    textInputTrailingClusterGapVariant({ density }),
-    textInputAffixSuffixWithTrailingPaddingVariant({ density }),
+    "relative z-10 flex w-max max-w-full shrink-0 flex-nowrap items-center justify-start",
+    textInputTrailingClusterGapVariant({ density: d }),
+    textInputAffixSuffixWithTrailingPaddingVariant({ density: d }),
+  );
+}
+
+/** Suffix affix shell (invalid/clear + suffix glyph) — no asymmetric pl/pr. */
+export function textInputAffixSuffixTrailingShellClasses(
+  density: Densities = Densities.Medium,
+): string {
+  const d = normalizeInputDensity(density);
+  return cn(
+    "flex shrink-0 items-center self-center rounded-tr-fields rounded-br-fields bg-transparent text-muted-foreground",
+    affixEmbeddedButtonClasses,
+    textInputAffixIconGlyphSizeVariant({ density: d }),
+  );
+}
+
+/** Suffix cell with invalid/clear + suffix glyph — shell + cluster helpers. */
+export function textInputAffixSuffixTrailingCellClasses(
+  density: Densities = Densities.Medium,
+): string {
+  return cn(
+    textInputAffixSuffixTrailingShellClasses(density),
+    textInputSuffixWithTrailingClusterClasses(density),
+  );
+}
+
+/** Invalid icon in an affix trailing cluster — glyph-sized only (no size-7 hit box). */
+export function textInputAffixInvalidIconClasses(): string {
+  return cn(
+    "inline-flex shrink-0 grow-0 basis-auto items-center justify-center self-center",
+    "size-auto min-h-0 min-w-0 p-0 m-0 border-0 bg-transparent shadow-none rounded-none",
+    "cursor-pointer hover:bg-transparent hover:text-inherit",
+    "focus-visible:ring-1 focus-visible:ring-ring",
   );
 }
 
@@ -266,8 +311,9 @@ export function textInputTrailingIconButtonClasses(
   overlay = false,
   density: Densities = Densities.Medium,
 ): string {
+  const d = normalizeInputDensity(density);
   return cn(
-    textInputTrailingHitTargetVariant({ density }),
+    textInputTrailingHitTargetVariant({ density: d }),
     "cursor-pointer rounded text-muted-foreground hover:bg-accent hover:text-foreground focus:outline-none",
     overlay && "pointer-events-auto",
   );
@@ -280,7 +326,7 @@ export function textInputTrailingInvalidSlotClasses(
 ): string {
   return cn(
     textInputTrailingIconButtonClasses(overlay, density),
-    "hover:bg-transparent hover:text-inherit",
+    "w-max shrink-0 grow-0 basis-auto hover:bg-transparent hover:text-inherit",
   );
 }
 
