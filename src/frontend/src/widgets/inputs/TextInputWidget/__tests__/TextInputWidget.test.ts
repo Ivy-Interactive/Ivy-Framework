@@ -42,12 +42,13 @@ const { mockTextInputAffixCellClasses } = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock("@/components/ui/input/text-input-variant", () => ({
-  textInputSizeVariant: () => "",
-  textInputAffixCellClasses: mockTextInputAffixCellClasses,
-  searchIconVariant: () => "",
-  xIconVariant: () => "",
-}));
+vi.mock("@/components/ui/input/text-input-variant", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/ui/input/text-input-variant")>();
+  return {
+    ...actual,
+    textInputAffixCellClasses: mockTextInputAffixCellClasses,
+  };
+});
 
 vi.mock("@/lib/styles", () => ({
   getWidth: () => ({}),
