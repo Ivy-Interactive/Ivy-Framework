@@ -122,6 +122,13 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
     }
   }
 
+  const densityMode = density ?? Densities.Medium;
+  const spacing = {
+    [Densities.Small]: { mb: "mb-1", gapOuter: "gap-1", gapInner: "gap-1" },
+    [Densities.Medium]: { mb: "mb-2", gapOuter: "gap-2", gapInner: "gap-2" },
+    [Densities.Large]: { mb: "mb-4", gapOuter: "gap-4", gapInner: "gap-3" },
+  }[densityMode];
+
   return (
     <div style={containerStyle} data-testid={dataTestId}>
       <TableProvider
@@ -133,9 +140,9 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
         updateStream={updateStream}
       >
         <TableLayout>
-          <DataTableHeader>
-            <div className="flex items-center gap-2 w-full">
-              <div className="flex items-center gap-1">
+          <DataTableHeader className={spacing.mb}>
+            <div className={`flex items-center w-full ${spacing.gapOuter}`}>
+              <div className={`flex items-center ${spacing.gapInner}`}>
                 {finalConfig.allowFiltering && (
                   <DataTableOption
                     icon={FilterIcon}
@@ -144,6 +151,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
                     displayMode="inline"
                     inlineDirection="right"
                     showLabel={false}
+                    density={densityMode}
                   >
                     <DataTableFilterOption allowLlmFiltering={finalConfig.allowLlmFiltering} />
                   </DataTableOption>
@@ -151,7 +159,7 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
                 {slots?.HeaderLeft}
               </div>
               <div className="flex-1" />
-              <div className="flex items-center gap-1">{slots?.HeaderRight}</div>
+              <div className={`flex items-center ${spacing.gapInner}`}>{slots?.HeaderRight}</div>
             </div>
           </DataTableHeader>
 
