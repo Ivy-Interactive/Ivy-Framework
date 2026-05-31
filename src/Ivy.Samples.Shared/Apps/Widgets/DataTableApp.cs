@@ -254,10 +254,10 @@ public class DataTableHeaderSlotsSample : ViewBase
                 .Icon(x => x.Team, Icons.Layers)
                 .Icon(x => x.Priority, Icons.Flag)
                 .Icon(x => x.LastUpdate, Icons.Clock)
-                .HeaderLeft(_ => Layout.Horizontal().Gap(2)
+                .HeaderLeft(_ => new Fragment()
                     | new Button("Export", icon: Icons.Download).Small()
                     | new Badge("Live").Color(Colors.Blue).Small())
-                .HeaderRight(_ => Layout.Horizontal().Gap(2)
+                .HeaderRight(_ => new Fragment()
                     | new Badge($"{data.Count()} rows").Color(Colors.Green).Small()
                     | new Button("Settings", icon: Icons.Settings).Primary().Small())
                 .Config(config =>
