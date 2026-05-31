@@ -6,7 +6,7 @@ using static InputAffixesGalleryHelpers;
     icon: Icons.TextCursorInput,
     group: ["Tests"],
     isVisible: true,
-    searchHints: ["affix", "prefix", "suffix", "input", "bool", "color", "kbd", "shortcut", "density"])]
+    searchHints: ["affix", "prefix", "suffix", "input", "bool", "color", "feedback", "kbd", "shortcut", "density"])]
 public class InputAffixesGalleryApp : SampleBase
 {
     protected override object? BuildSample() =>
@@ -19,7 +19,8 @@ public class InputAffixesGalleryApp : SampleBase
                    new Tab("Number inputs", new InputAffixesNumberView()),
                    new Tab("Select inputs", new InputAffixesSelectView()),
                    new Tab("Bool inputs", new InputAffixesBoolView()),
-                   new Tab("Color inputs", new InputAffixesColorView())
+                   new Tab("Color inputs", new InputAffixesColorView()),
+                   new Tab("Feedback inputs", new InputAffixesFeedbackView())
                ).Variant(TabsVariant.Content);
 }
 
@@ -452,6 +453,72 @@ public class InputAffixesColorView : ViewBase
     }
 }
 
+public class InputAffixesFeedbackView : ViewBase
+{
+    public override object Build()
+    {
+        var starsState = UseState(3);
+        var emojisState = UseState(3);
+        var thumbsState = UseState(true);
+        var nullableThumbsState = UseState<bool?>(() => null);
+
+        return Layout.Vertical()
+               | Callout.Info(
+                   "Feedback affixes match bool/color: shrink-to-fit shell, text field padding, invalid in suffix cluster when suffix is present.")
+               | Text.H2("Affix layouts")
+               | AffixHeaderRow()
+               | AffixRow(
+                   "Stars",
+                   starsState.ToFeedbackInput().Stars().Prefix(Icons.Star),
+                   starsState.ToFeedbackInput().Stars().Suffix(Icons.MessageSquare),
+                   starsState.ToFeedbackInput().Stars().Prefix(Icons.Star).Suffix(Icons.MessageSquare))
+               | AffixRow(
+                   "Emojis",
+                   emojisState.ToFeedbackInput().Emojis().Prefix(Icons.Smile),
+                   emojisState.ToFeedbackInput().Emojis().Suffix(Icons.MessageSquare),
+                   emojisState.ToFeedbackInput().Emojis().Prefix(Icons.Smile).Suffix(Icons.MessageSquare))
+               | AffixRow(
+                   "Thumbs",
+                   thumbsState.ToFeedbackInput().Thumbs().Prefix(Icons.ThumbsUp),
+                   thumbsState.ToFeedbackInput().Thumbs().Suffix(Icons.MessageSquare),
+                   thumbsState.ToFeedbackInput().Thumbs().Prefix(Icons.ThumbsUp).Suffix(Icons.MessageSquare))
+               | AffixRow(
+                   "Invalid",
+                   starsState.ToFeedbackInput().Stars().Prefix(Icons.Star).Invalid("Required"),
+                   starsState.ToFeedbackInput().Stars().Suffix(Icons.MessageSquare).Invalid("Required"),
+                   starsState
+                     .ToFeedbackInput()
+                     .Stars()
+                     .Prefix(Icons.Star)
+                     .Suffix(Icons.MessageSquare)
+                     .Invalid("Required"))
+               | AffixRow(
+                   "Nullable thumbs",
+                   nullableThumbsState.ToFeedbackInput().Thumbs().Nullable().Prefix(Icons.ThumbsUp),
+                   nullableThumbsState.ToFeedbackInput().Thumbs().Nullable().Suffix(Icons.MessageSquare),
+                   nullableThumbsState
+                     .ToFeedbackInput()
+                     .Thumbs()
+                     .Nullable()
+                     .Prefix(Icons.ThumbsUp)
+                     .Suffix(Icons.MessageSquare))
+               | Text.H2("Densities")
+               | Callout.Info("Stars with both affixes at Small, Medium, and Large.")
+               | DensityHeaderRow()
+               | FeedbackDensityRow(
+                   "Both",
+                   starsState.ToFeedbackInput().Stars().Prefix(Icons.Star).Suffix(Icons.MessageSquare))
+               | FeedbackDensityRow(
+                   "Both + invalid",
+                   starsState
+                     .ToFeedbackInput()
+                     .Stars()
+                     .Prefix(Icons.Star)
+                     .Suffix(Icons.MessageSquare)
+                     .Invalid("Required"));
+    }
+}
+
 public class InputAffixesDensitiesView : ViewBase
 {
     public override object Build()
@@ -529,6 +596,13 @@ static class InputAffixesGalleryHelpers
                | input.Large();
 
     internal static GridView ColorDensityRow(string label, ColorInputBase input) =>
+        Layout.Grid().Columns(4)
+               | Text.Monospaced(label)
+               | input.Small()
+               | input
+               | input.Large();
+
+    internal static GridView FeedbackDensityRow(string label, FeedbackInputBase input) =>
         Layout.Grid().Columns(4)
                | Text.Monospaced(label)
                | input.Small()

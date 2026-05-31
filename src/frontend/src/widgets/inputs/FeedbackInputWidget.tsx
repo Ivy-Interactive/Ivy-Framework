@@ -1,14 +1,23 @@
 import { EmojiRating } from "@/components/EmojiRating";
 import { useEventHandler } from "@/components/event-handler";
+import { InvalidIcon } from "@/components/InvalidIcon";
 import { StarRating } from "@/components/StarRating";
 import { ThumbsEnum, ThumbsRating } from "@/components/ui/thumbs-rating";
 import React, { useCallback, useMemo } from "react";
-import { inputStyles } from "@/lib/styles";
 import { cn } from "@/lib/utils";
 import { useOptimisticValue } from "./shared/useOptimisticValue";
 import { Densities } from "@/types/density";
 import { EMPTY_ARRAY } from "@/lib/constants";
-import { textInputAffixCellClasses } from "@/components/ui/input/text-input-variant";
+import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
+import {
+  normalizeInputDensity,
+  textInputAffixCellClasses,
+  textInputAffixInvalidIconClasses,
+  textInputSizeVariant,
+  textInputSuffixGlyphSlotClasses,
+  textInputSuffixWithTrailingClusterClasses,
+  textInputTrailingIconSizeVariant,
+} from "@/components/ui/input/text-input-variant";
 
 interface FeedbackInputWidgetProps {
   id: string;
@@ -43,24 +52,29 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
 
   const [localValue, setLocalValue] = useOptimisticValue<FeedbackValue>(value, false);
 
+  const prefixContent = slots?.Prefix;
+  const suffixContent = slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const showTrailing = Boolean(invalid);
+  const controlInvalid = trailingBesideSuffix && showTrailing ? undefined : invalid;
+  const densityKey = normalizeInputDensity(density);
+
   const isBooleanType = useMemo(() => {
-    // If variant is Thumbs and nullable is true, treat as bool?
     if (variant === "Thumbs" && nullable) return true;
     return typeof value === "boolean";
   }, [value, variant, nullable]);
 
-  // Convert value to number for rating components
   const numericValue = useMemo(() => {
     if (localValue === null || localValue === undefined) return ThumbsEnum.None;
     if (isBooleanType) {
       if (variant === "Thumbs") {
         if (nullable) {
-          // For nullable boolean types: null -> None(0), false -> Down(1), true -> Up(2)
-          return localValue ? ThumbsEnum.Up : ThumbsEnum.Down;
-        } else {
-          // For non-nullable boolean types: false -> Down(1), true -> Up(2)
           return localValue ? ThumbsEnum.Up : ThumbsEnum.Down;
         }
+        return localValue ? ThumbsEnum.Up : ThumbsEnum.Down;
       }
       return localValue ? 1 : 0;
     }
@@ -98,7 +112,6 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
         return;
       }
 
-      // For non-nullable boolean types
       if (e === ThumbsEnum.None || e === numericValue) {
         convertedValue = !localValue;
       } else {
@@ -139,7 +152,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
           disabled={disabled}
           value={numericValue}
           onRate={handleChange}
-          invalid={invalid}
+          invalid={controlInvalid}
           density={density}
         />
       );
@@ -151,7 +164,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
           disabled={disabled}
           value={numericValue}
           onRate={handleChange}
-          invalid={invalid}
+          invalid={controlInvalid}
           allowHalf={allowHalf}
           totalEmojis={max}
           density={density}
@@ -165,7 +178,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
           disabled={disabled}
           value={numericValue}
           onRate={handleChange}
-          invalid={invalid}
+          invalid={controlInvalid}
           allowHalf={allowHalf}
           totalStars={max}
           density={density}
@@ -173,15 +186,9 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
       );
     }
     return null;
-  }, [variant, disabled, numericValue, handleChange, invalid, allowHalf, max, density]);
+  }, [variant, disabled, numericValue, handleChange, controlInvalid, allowHalf, max, density]);
 
-  const prefixContent = slots?.Prefix;
-  const suffixContent = slots?.Suffix;
-  const hasPrefix = (prefixContent?.length ?? 0) > 0;
-  const hasSuffix = (suffixContent?.length ?? 0) > 0;
-  const hasAffixes = hasPrefix || hasSuffix;
-
-  const feedbackContent = (
+  const feedbackControl = (inAffixShell: boolean) => (
     <div
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
@@ -195,32 +202,76 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
       }}
       tabIndex={disabled ? -1 : 0}
       className={cn(
-        "outline-none focus:outline-none focus:ring-1 focus:ring-ring rounded-md p-1",
+        "outline-none focus:outline-none focus:ring-1 focus:ring-ring",
+        !inAffixShell && "rounded-md p-1",
         disabled && "opacity-50 cursor-not-allowed",
-        invalid && inputStyles.invalidInput,
       )}
     >
       {ratingComponent}
     </div>
   );
 
-  if (!hasAffixes) return feedbackContent;
+  if (!hasAffixes) {
+    return feedbackControl(false);
+  }
 
   return (
     <div
-      className={cn(
-        "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-        invalid && "border-destructive",
-        disabled && "cursor-not-allowed opacity-50",
-      )}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          handleBlur();
+        }
+      }}
+      onFocus={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          handleFocus();
+        }
+      }}
     >
-      {hasPrefix && (
-        <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
-      )}
-      <div className="flex-1 px-3 py-2">{feedbackContent}</div>
-      {hasSuffix && (
-        <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
-      )}
+      <div
+        className={cn(
+          "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+          invalid ? "border-destructive" : "border-input dark:border-white/10",
+          disabled && "cursor-not-allowed opacity-50",
+        )}
+      >
+        {hasPrefix && (
+          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+        )}
+        <div
+          className={cn(
+            "relative flex min-w-0 flex-1 items-center",
+            textInputSizeVariant({ density: densityKey }),
+            boolInputRowMinHeightVariant({ density: densityKey }),
+            "w-auto",
+          )}
+        >
+          {feedbackControl(true)}
+        </div>
+        {hasSuffix && (
+          <div
+            className={cn(
+              textInputAffixCellClasses("suffix", density),
+              trailingBesideSuffix &&
+                showTrailing &&
+                textInputSuffixWithTrailingClusterClasses(density),
+            )}
+          >
+            {trailingBesideSuffix && showTrailing && invalid && (
+              <InvalidIcon
+                message={invalid}
+                className={textInputAffixInvalidIconClasses()}
+                iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
+              />
+            )}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
