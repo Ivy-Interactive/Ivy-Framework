@@ -42,7 +42,7 @@ new Script().InlineCode("console.log('Hello from Ivy!');")
 Control script loading behavior:
 
 ```csharp demo-tabs
-Layout.Vertical().Gap(4)
+Layout.Vertical()
     | Text.H4("Async Loading")
     | new Script("https://example.com/analytics.js").Async()
     | Text.H4("Deferred Execution")

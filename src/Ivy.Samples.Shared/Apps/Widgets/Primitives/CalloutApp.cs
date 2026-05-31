@@ -48,7 +48,7 @@ public class CalloutClosableExample : ViewBase
                 : null)
             | (showUpdateBanner.Value || showTrialBanner.Value
                 ? null
-                : Layout.Vertical().Gap(4)
+                : Layout.Vertical()
                     | Text.P("All banners dismissed.").Muted()
                     | new Button("Show callouts again", () =>
                         {

@@ -103,7 +103,7 @@ public class DetailsMultilineExample : ViewBase
                | Text.H2("Multiline Fields")
                | Text.P("Compare the difference: without Multiline() text is truncated, with Multiline() it wraps across multiple lines.")
                | new Spacer().Height(Size.Units(10))
-               | (Layout.Grid().Columns(2).Gap(4)
+               | (Layout.Grid().Columns(2)
                    | (Layout.Vertical().Height(Size.Full())
                        | Text.Label("With Multiline()").Bold()
                        | new Card(

@@ -236,7 +236,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         style={{ width: effectiveSidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
-          <div className="flex flex-col shrink-0 p-2 gap-y-4">{slots?.SidebarHeader}</div>
+          <div className="flex flex-col shrink-0 p-2 gap-y-4 h-fit">{slots?.SidebarHeader}</div>
         )}
         {slots?.SidebarContent &&
           (sidebarContentScroll === "None" ? (

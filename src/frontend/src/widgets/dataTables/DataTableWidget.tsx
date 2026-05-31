@@ -116,9 +116,9 @@ export const DataTable: React.FC<DataTableWidgetProps> = ({
     containerStyle.flexDirection = "column";
     containerStyle.flexShrink = 1;
     containerStyle.minHeight = minHeight;
-    containerStyle.maxHeight = "100%";
     if (containerStyle.height) {
-      containerStyle.height = `min(${containerStyle.height}, 100%)`;
+      containerStyle.flexBasis = containerStyle.height;
+      delete containerStyle.height;
     }
   }
 

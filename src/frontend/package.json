@@ -146,7 +146,7 @@
       "postcss": "8.5.10",
       "uuid": "14.0.0",
       "@swc/helpers": "0.5.17",
-      "axios": "1.15.2",
+      "axios": "1.16.1",
       "dompurify": "3.4.0",
       "follow-redirects": ">=1.16.0",
       "lodash-es": "4.18.1",

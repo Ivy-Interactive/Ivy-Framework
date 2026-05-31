@@ -257,7 +257,7 @@ public class IconTextShowcaseWidget : ViewBase
     {
         return new Card()
             .Header(Text.H4("Social Engagement"), icon: Icons.Star.ToIcon().Color(Colors.Neutral))
-            .Content(Layout.Vertical().Gap(4)
+            .Content(Layout.Vertical()
                 | (Layout.Horizontal().AlignContent(Align.Left).Gap(3)
                     | Icons.Heart.ToIcon().Color(Colors.Red)
                     | Text.P("Likes").Large().Color(Colors.Gray)
@@ -283,7 +283,7 @@ public class ProgressBarVariationsWidget : ViewBase
     {
         return new Card()
             .Header(Text.H4("Progress Variations"), icon: Icons.Star.ToIcon().Color(Colors.Neutral))
-            .Content(Layout.Vertical().Gap(4)
+            .Content(Layout.Vertical()
                 | (Layout.Vertical().Gap(1)
                     | Text.P("Low Progress").Small().Color(Colors.Gray)
                     | new Progress(25).Goal("25%"))
@@ -331,7 +331,7 @@ public class MixedContentWidget : ViewBase
     {
         return new Card()
             .Header(Text.H4("Download Analytics"), icon: Icons.Download.ToIcon().Color(Colors.Neutral))
-            .Content(Layout.Vertical().Gap(4)
+            .Content(Layout.Vertical()
                 | (Layout.Horizontal().AlignContent(Align.Left).Gap(3)
                     | Icons.Download.ToIcon().Color(Colors.Blue)
                     | Text.P("Downloads").Large().Color(Colors.Blue)
@@ -356,7 +356,7 @@ public class ResponsiveLayoutWidget : ViewBase
     {
         return new Card()
             .Header(Text.H4("Global Distribution"), icon: Icons.Globe.ToIcon().Color(Colors.Neutral))
-            .Content(Layout.Vertical().Gap(4)
+            .Content(Layout.Vertical()
                 | (Layout.Horizontal().AlignContent(Align.Left)
                     | (Layout.Vertical().Gap(1)
                         | Icons.Globe.ToIcon().Color(Colors.Blue)

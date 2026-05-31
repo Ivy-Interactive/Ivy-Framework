@@ -135,7 +135,7 @@ public class XamlBuilderApp : ViewBase
             preview = Callout.Error(ex.Message);
         }
 
-        return Layout.Horizontal().Gap(4)
+        return Layout.Horizontal()
                | (Layout.Vertical().Gap(2).Width(Size.Half())
                   | selectedExample.ToSelectInput(ExampleNames)
                   | xml.ToCodeInput().Language(Languages.Xml).Height(Size.Full()))

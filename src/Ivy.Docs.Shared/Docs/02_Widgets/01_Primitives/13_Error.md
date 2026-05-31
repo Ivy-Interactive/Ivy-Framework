@@ -43,7 +43,7 @@ public class ErrorTitleView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | new Error().Title("Authentication Failed")
             | new Error().Title("Network Error")
             | new Error().Title("Validation Error");
@@ -60,7 +60,7 @@ public class ErrorMessageView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | new Error()
                 .Title("Login Failed")
                 .Message("Invalid username or password. Please try again.")
@@ -108,7 +108,7 @@ public class ErrorCalloutExamplesView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Callout.Error("Failed to connect to the server. Please check your internet connection.")
             | Callout.Error("Invalid email format. Please enter a valid email address.", "Validation Error");
     }
@@ -196,7 +196,7 @@ public class FormValidationErrorExamplesView : ViewBase
             }
         }
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.H3("Form Validation Errors")
             | Layout.Vertical().Gap(3)
                 | Text.Label("Email")
@@ -237,10 +237,10 @@ public class ExceptionHandlingView : ViewBase
             showError.Set(true);
         }
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | new Button("Simulate Error").OnClick(SimulateError).Destructive()
             | (showError.Value 
-                ? Layout.Vertical().Gap(4)
+                ? Layout.Vertical()
                     | new Error()
                         .Title("Simulated Error")
                         .Message("This is a simulated error for demonstration purposes")
@@ -264,7 +264,7 @@ public class EffectErrorView : ViewBase
     {
         var showError = UseState(false);
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | new Button("Show Error")
                 .OnClick(_ => showError.Set(true))
             | (showError.Value 
@@ -320,7 +320,7 @@ public class DataLoadingView : ViewBase
             _ = LoadData();
         }, []);
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Layout.Horizontal().Gap(2)
                 | new Button("Reload Data").OnClick(async _ => await LoadData())
             | (isLoading.Value 
@@ -379,7 +379,7 @@ public class ErrorRecoveryExamplesView : ViewBase
             recoveryStep.Set(0);
         }
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | (Layout.Horizontal().Gap(2)
                 | new Button("Simulate Error").Destructive()
                     .OnClick(SimulateRecoverableError)

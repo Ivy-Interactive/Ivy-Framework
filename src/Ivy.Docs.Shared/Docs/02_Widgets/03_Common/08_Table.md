@@ -211,7 +211,7 @@ public class PivotTableExample : ViewBase
             typedResults.Add(item);
         }
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.H3("Raw Data")
             | rawData.ToTable().Width(Size.Full())
             | pivotByBrowser.ToExpando().ToTable().Width(Size.Full())

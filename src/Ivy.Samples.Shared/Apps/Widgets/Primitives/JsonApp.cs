@@ -27,7 +27,7 @@ public class JsonApp : SampleBase
         };
         var dog = new { Breed = "Poodle", Color = "White", Age = 3 };
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("From JsonNode:")
             | new Json(json)
             | Text.P("From object (auto-serialized):")

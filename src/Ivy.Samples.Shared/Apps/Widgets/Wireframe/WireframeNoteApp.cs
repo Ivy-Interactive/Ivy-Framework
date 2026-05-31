@@ -6,7 +6,7 @@ public class WireframeNoteApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var colors = Layout.Horizontal().Gap(4)
+        var colors = Layout.Horizontal()
             | new WireframeNote("Yellow (default)")
             | new WireframeNote("Blue", Colors.Blue)
             | new WireframeNote("Green", Colors.Green)
@@ -14,12 +14,12 @@ public class WireframeNoteApp : SampleBase
             | new WireframeNote("Orange", Colors.Orange)
             | new WireframeNote("Purple", Colors.Purple);
 
-        var multiline = Layout.Horizontal().Gap(4)
+        var multiline = Layout.Horizontal()
             | new WireframeNote("Step 1:\nUser signs up")
             | new WireframeNote("Step 2:\nVerify email", Colors.Blue)
             | new WireframeNote("Step 3:\nOnboarding", Colors.Green);
 
-        var board = Layout.Horizontal().Gap(4)
+        var board = Layout.Horizontal()
             | (Layout.Vertical().Gap(3).Width(Size.Units(40))
                 | Text.Strong("To Do")
                 | new WireframeNote("Design login page").Width(Size.Full())
