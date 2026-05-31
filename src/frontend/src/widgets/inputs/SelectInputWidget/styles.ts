@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const selectContainerVariant = cva(
-  "relative border border-input bg-transparent rounded-box shadow-sm focus-within:ring-1 focus-within:ring-ring dark:border-white/10",
+  "relative border border-input bg-transparent rounded-box focus-within:outline-none focus-within:border-ring dark:border-white/10",
   {
     variants: {
       density: {
