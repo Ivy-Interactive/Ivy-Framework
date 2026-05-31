@@ -6,7 +6,7 @@ using static InputAffixesGalleryHelpers;
     icon: Icons.TextCursorInput,
     group: ["Tests"],
     isVisible: true,
-    searchHints: ["affix", "prefix", "suffix", "input", "bool", "color", "feedback", "icon", "kbd", "shortcut", "density"])]
+    searchHints: ["affix", "prefix", "suffix", "input", "bool", "color", "code", "feedback", "icon", "kbd", "shortcut", "density"])]
 public class InputAffixesGalleryApp : SampleBase
 {
     protected override object? BuildSample() =>
@@ -21,7 +21,8 @@ public class InputAffixesGalleryApp : SampleBase
                    new Tab("Bool inputs", new InputAffixesBoolView()),
                    new Tab("Color inputs", new InputAffixesColorView()),
                    new Tab("Feedback inputs", new InputAffixesFeedbackView()),
-                   new Tab("Icon inputs", new InputAffixesIconView())
+                   new Tab("Icon inputs", new InputAffixesIconView()),
+                   new Tab("Code inputs", new InputAffixesCodeView())
                ).Variant(TabsVariant.Content);
 }
 
@@ -113,7 +114,11 @@ public class InputAffixesAllInputsView : ViewBase
                | AffixRow("Color", colorState.ToColorInput().Prefix(Icons.Palette), colorState.ToColorInput().Suffix(Icons.Pipette), colorState.ToColorInput().Prefix(Icons.Palette).Suffix(Icons.Pipette))
                | AffixRow("Feedback", feedbackState.ToFeedbackInput().Stars().Prefix(Icons.Star), feedbackState.ToFeedbackInput().Stars().Suffix(Icons.MessageSquare), feedbackState.ToFeedbackInput().Stars().Prefix(Icons.Star).Suffix(Icons.MessageSquare))
                | AffixRow("Icon", iconState.ToIconInput().Prefix(Icons.Search), iconState.ToIconInput().Suffix(Icons.Sparkles), iconState.ToIconInput().Prefix(Icons.Search).Suffix(Icons.Sparkles))
-               | AffixRow("Code", codeState.ToCodeInput().Prefix(Icons.Code), codeState.ToCodeInput().Suffix(Icons.Braces), codeState.ToCodeInput().Prefix(Icons.Code).Suffix(Icons.Braces));
+               | AffixRow(
+                   "Code",
+                   CodeAffixDemo(codeState).Prefix(Icons.Code),
+                   CodeAffixDemo(codeState).Suffix(Icons.Braces),
+                   CodeAffixDemo(codeState).Prefix(Icons.Code).Suffix(Icons.Braces));
     }
 
     private enum Currency
@@ -581,6 +586,64 @@ public class InputAffixesIconView : ViewBase
     }
 }
 
+public class InputAffixesCodeView : ViewBase
+{
+    public override object Build()
+    {
+        var codeState = UseState("console.log('ivy');");
+        var nullableState = UseState<string?>(() => null);
+        var invalidState = UseState("console.log('ivy');");
+
+        return Layout.Vertical()
+               | Callout.Info(
+                   "Code affixes: prefix/suffix icons share one row with the copy control; copy sits in a trailing affix column when no suffix slot. Compare prefix alignment and right inset to Icon/Feedback tabs.")
+               | Text.H2("Affix layouts")
+               | AffixHeaderRow()
+               | AffixRow(
+                   "Code",
+                   CodeAffixDemo(codeState).Prefix(Icons.Code),
+                   CodeAffixDemo(codeState).Suffix(Icons.Braces),
+                   CodeAffixDemo(codeState).Prefix(Icons.Code).Suffix(Icons.Braces))
+               | AffixRow(
+                   "Nullable",
+                   CodeAffixDemo(nullableState).Nullable().Prefix(Icons.Code),
+                   CodeAffixDemo(nullableState).Nullable().Suffix(Icons.Braces),
+                   CodeAffixDemo(nullableState)
+                     .Nullable()
+                     .Prefix(Icons.Code)
+                     .Suffix(Icons.Braces))
+               | AffixRow(
+                   "Invalid",
+                   CodeAffixDemo(invalidState).Prefix(Icons.Code).Invalid("Invalid snippet"),
+                   CodeAffixDemo(invalidState).Suffix(Icons.Braces).Invalid("Invalid snippet"),
+                   CodeAffixDemo(invalidState)
+                     .Prefix(Icons.Code)
+                     .Suffix(Icons.Braces)
+                     .Invalid("Invalid snippet"))
+               | AffixRow(
+                   "Nullable + invalid",
+                   CodeAffixDemo(nullableState).Nullable().Prefix(Icons.Code).Invalid("Required"),
+                   CodeAffixDemo(nullableState).Nullable().Suffix(Icons.Braces).Invalid("Required"),
+                   CodeAffixDemo(nullableState)
+                     .Nullable()
+                     .Prefix(Icons.Code)
+                     .Suffix(Icons.Braces)
+                     .Invalid("Required"))
+               | Text.H2("Densities")
+               | Callout.Info("Both affixes at Small, Medium, and Large — compare affix row height, icon gaps, and copy placement.")
+               | DensityHeaderRow()
+               | CodeDensityRow(
+                   "Both",
+                   CodeAffixDemo(codeState).Prefix(Icons.Code).Suffix(Icons.Braces))
+               | CodeDensityRow(
+                   "Both + invalid",
+                   CodeAffixDemo(invalidState)
+                     .Prefix(Icons.Code)
+                     .Suffix(Icons.Braces)
+                     .Invalid("Invalid snippet"));
+    }
+}
+
 public class InputAffixesDensitiesView : ViewBase
 {
     public override object Build()
@@ -608,6 +671,9 @@ public class InputAffixesDensitiesView : ViewBase
 
 static class InputAffixesGalleryHelpers
 {
+    internal static CodeInputBase CodeAffixDemo(IAnyState state) =>
+        state.ToCodeInput().Language(Languages.Javascript).Height(Size.Units(24));
+
     internal static GridView AffixHeaderRow() =>
         Layout.Grid().Columns(4)
                | null!
@@ -672,6 +738,13 @@ static class InputAffixesGalleryHelpers
                | input.Large();
 
     internal static GridView IconDensityRow(string label, IconInputBase input) =>
+        Layout.Grid().Columns(4)
+               | Text.Monospaced(label)
+               | input.Small()
+               | input
+               | input.Large();
+
+    internal static GridView CodeDensityRow(string label, CodeInputBase input) =>
         Layout.Grid().Columns(4)
                | Text.Monospaced(label)
                | input.Small()
