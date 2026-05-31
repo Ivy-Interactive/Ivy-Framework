@@ -14,11 +14,23 @@ import {
   combineHexAlpha,
 } from "./color-utils";
 import {
+  colorInputRowMinHeightVariant,
   colorInputVariant,
   colorInputPickerVariant,
 } from "@/components/ui/input/color-input-variant";
 import { Densities } from "@/types/density";
-import { textInputAffixCellClasses, xIconVariant } from "@/components/ui/input/text-input-variant";
+import {
+  normalizeInputDensity,
+  textInputAffixCellClasses,
+  textInputAffixInvalidIconClasses,
+  textInputSizeVariant,
+  textInputSuffixGlyphSlotClasses,
+  textInputSuffixWithTrailingClusterClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  textInputTrailingOverlayClasses,
+} from "@/components/ui/input/text-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -184,6 +196,109 @@ interface CustomColorPickerProps {
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
+interface ColorInputAffixLayoutProps {
+  density: Densities;
+  invalid?: string;
+  ghost?: boolean;
+  disabled?: boolean;
+  nullable: boolean;
+  hasValue: boolean;
+  prefixContent?: React.ReactNode[];
+  suffixContent?: React.ReactNode[];
+  onClear: () => void;
+  children: (ctx: {
+    trailingBesideSuffix: boolean;
+    showTrailing: boolean;
+    showClear: boolean;
+    fieldInvalid: string | undefined;
+  }) => React.ReactNode;
+}
+
+const ColorInputAffixLayout: React.FC<ColorInputAffixLayoutProps> = ({
+  density,
+  invalid,
+  ghost,
+  disabled,
+  nullable,
+  hasValue,
+  prefixContent,
+  suffixContent,
+  onClear,
+  children,
+}) => {
+  const densityKey = normalizeInputDensity(density);
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const trailingBesideSuffix = hasSuffix;
+  const showClear = nullable && hasValue && !disabled;
+  const showTrailing = showClear || Boolean(invalid);
+  const fieldInvalid = trailingBesideSuffix && invalid ? undefined : invalid;
+
+  return (
+    <div
+      className={cn(
+        "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+        invalid ? "border-destructive" : "border-input dark:border-white/10",
+        disabled && "cursor-not-allowed opacity-50",
+        ghost &&
+          "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+      )}
+    >
+      {hasPrefix && (
+        <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+      )}
+      <div
+        className={cn(
+          "relative flex min-w-0 flex-1 items-center gap-2",
+          textInputSizeVariant({ density: densityKey }),
+          colorInputRowMinHeightVariant({ density: densityKey }),
+          "w-auto",
+        )}
+      >
+        {children({ trailingBesideSuffix, showTrailing, showClear, fieldInvalid })}
+      </div>
+      {hasSuffix && (
+        <div
+          className={cn(
+            textInputAffixCellClasses("suffix", density),
+            trailingBesideSuffix &&
+              showTrailing &&
+              textInputSuffixWithTrailingClusterClasses(density),
+          )}
+        >
+          {trailingBesideSuffix && showTrailing && (
+            <>
+              {showClear && (
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-label="Clear"
+                  onClick={onClear}
+                  className={textInputTrailingIconButtonClasses(false, density)}
+                >
+                  <X className={textInputTrailingIconSizeVariant({ density })} />
+                </button>
+              )}
+              {invalid && (
+                <InvalidIcon
+                  message={invalid}
+                  className={textInputAffixInvalidIconClasses()}
+                  iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
+                />
+              )}
+            </>
+          )}
+          {trailingBesideSuffix && showTrailing ? (
+            <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+          ) : (
+            suffixContent
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CustomColorPicker: React.FC<CustomColorPickerProps> = ({
   density,
   disabled,
@@ -310,80 +425,112 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     fireColorChange(null);
   };
 
+  const hasValue = localValue !== null && localValue !== "";
+  const densityKey = normalizeInputDensity(density);
+  const placeholderText =
+    placeholder || (allowAlpha ? "Enter color (e.g. #FF0000CC)" : "Enter color");
+
+  const renderColorTextField = (
+    ctx: {
+      trailingBesideSuffix: boolean;
+      showTrailing: boolean;
+      showClear: boolean;
+      fieldInvalid: string | undefined;
+    },
+    inAffixShell: boolean,
+  ) => (
+    <div className={cn("relative shrink-0", !inAffixShell && "flex-1")}>
+      <Input
+        ref={inputRef}
+        type="text"
+        value={inputValue}
+        onChange={handleInputChange}
+        onBlur={handleInputBlur}
+        onFocus={handleInputFocus}
+        onKeyDown={handleInputKeyDown}
+        placeholder={placeholderText}
+        disabled={disabled}
+        density={density}
+        className={cn(
+          colorInputVariant({ density }),
+          inAffixShell && "w-auto min-w-0 max-w-full",
+          inAffixShell &&
+            "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+          !inAffixShell &&
+            ghost &&
+            "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+          ctx.fieldInvalid && inputStyles.invalidInput,
+          inAffixShell && hasPrefix && "rounded-l-none",
+          inAffixShell && hasSuffix && "rounded-r-none",
+          ctx.trailingBesideSuffix && ctx.showTrailing && "pr-2",
+          !ctx.trailingBesideSuffix && ctx.showTrailing && "pr-8",
+          !ctx.trailingBesideSuffix && ctx.showClear && invalid && "pr-16",
+        )}
+      />
+      {!ctx.trailingBesideSuffix && ctx.showTrailing && (
+        <div className={textInputTrailingOverlayClasses(density)}>
+          {ctx.showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={handleClear}
+              className={textInputTrailingIconButtonClasses(true, density)}
+            >
+              <X className={textInputTrailingIconSizeVariant({ density })} />
+            </button>
+          )}
+          {invalid && (
+            <InvalidIcon
+              message={invalid}
+              className={textInputTrailingInvalidSlotClasses(true, density)}
+              iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  const wrapWithAffixes = (
+    field: (ctx: {
+      trailingBesideSuffix: boolean;
+      showTrailing: boolean;
+      showClear: boolean;
+      fieldInvalid: string | undefined;
+    }) => React.ReactNode,
+  ) => {
+    if (!hasAffixes) {
+      const showClearStandalone = nullable && hasValue && !disabled;
+      return field({
+        trailingBesideSuffix: false,
+        showTrailing: showClearStandalone || Boolean(invalid),
+        showClear: showClearStandalone,
+        fieldInvalid: invalid,
+      });
+    }
+    return (
+      <ColorInputAffixLayout
+        density={density}
+        invalid={invalid}
+        ghost={ghost}
+        disabled={disabled}
+        nullable={nullable}
+        hasValue={hasValue}
+        prefixContent={prefixContent}
+        suffixContent={suffixContent}
+        onClear={handleClear}
+      >
+        {(ctx) => field(ctx)}
+      </ColorInputAffixLayout>
+    );
+  };
+
   // --- Variant rendering logic ---
   if (variant === "Text") {
-    const textContent = (
-      <div className="relative flex-1">
-        <Input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onBlur={handleInputBlur}
-          onFocus={handleInputFocus}
-          onKeyDown={handleInputKeyDown}
-          placeholder={placeholder || (allowAlpha ? "Enter color (e.g. #FF0000CC)" : "Enter color")}
-          disabled={disabled}
-          className={cn(
-            colorInputVariant({ density }),
-            hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
-            hasPrefix && "rounded-l-none",
-            hasSuffix && "rounded-r-none",
-            ghost &&
-              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
-            invalid && inputStyles.invalidInput,
-            (invalid || (nullable && localValue !== null && !disabled)) && "pr-8",
-          )}
-        />
-        {(invalid || (nullable && localValue !== null && !disabled)) && (
-          <div
-            className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
-            style={{ zIndex: 2 }}
-          >
-            {invalid && (
-              <span className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </span>
-            )}
-            {nullable && localValue !== null && !disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={handleClear}
-                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-              >
-                <X className="size-4 text-muted-foreground hover:text-foreground" />
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    );
-
     return (
       <div className="flex items-center gap-x-2">
-        {hasAffixes ? (
-          <div
-            className={cn(
-              "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-              invalid && "border-destructive",
-              disabled && "cursor-not-allowed opacity-50",
-              ghost &&
-                "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
-            )}
-          >
-            {hasPrefix && (
-              <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
-            )}
-            {textContent}
-            {hasSuffix && (
-              <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
-            )}
-          </div>
-        ) : (
-          textContent
-        )}
+        {wrapWithAffixes((ctx) => renderColorTextField(ctx, hasAffixes))}
         {allowAlpha && (
           <AlphaSlider
             color={getDisplayColor(displayValue)}
@@ -490,85 +637,23 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   }
 
   // Default: TextAndPicker
-  const defaultContent = (
-    <>
-      <CustomColorPicker
-        density={density}
-        disabled={disabled}
-        invalid={invalid}
-        displayColor={getDisplayColor(displayValue)}
-        actualColor={convertToHex(displayValue)}
-        onChange={handleColorChange}
-      />
-      <div className="relative flex-1">
-        <Input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onBlur={handleInputBlur}
-          onFocus={handleInputFocus}
-          onKeyDown={handleInputKeyDown}
-          placeholder={placeholder || (allowAlpha ? "Enter color (e.g. #FF0000CC)" : "Enter color")}
-          disabled={disabled}
-          className={cn(
-            colorInputVariant({ density }),
-            hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
-            hasPrefix && "rounded-l-none",
-            hasSuffix && "rounded-r-none",
-            ghost &&
-              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
-            invalid && inputStyles.invalidInput,
-            (invalid || (nullable && localValue !== null && !disabled)) && "pr-8",
-          )}
-        />
-        {(invalid || (nullable && localValue !== null && !disabled)) && (
-          <div
-            className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
-            style={{ zIndex: 2 }}
-          >
-            {/* Invalid icon - rightmost */}
-            {invalid && <InvalidIcon message={invalid} className="pointer-events-auto" />}
-            {nullable && localValue !== null && !disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={handleClear}
-                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-              >
-                <X className={xIconVariant({ density })} />
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    </>
-  );
-
   return (
     <div className="flex items-center gap-x-2">
-      {hasAffixes ? (
-        <div
-          className={cn(
-            "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-            invalid && "border-destructive",
-            disabled && "cursor-not-allowed opacity-50",
-            ghost &&
-              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
-          )}
-        >
-          {hasPrefix && (
-            <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
-          )}
-          <div className="flex flex-1 items-center">{defaultContent}</div>
-          {hasSuffix && (
-            <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
-          )}
-        </div>
-      ) : (
-        <>{defaultContent}</>
-      )}
+      {wrapWithAffixes((ctx) => (
+        <>
+          <CustomColorPicker
+            density={density}
+            disabled={disabled}
+            invalid={ctx.fieldInvalid}
+            displayColor={getDisplayColor(displayValue)}
+            actualColor={convertToHex(displayValue)}
+            onChange={handleColorChange}
+            onBlur={handleInputBlur}
+            onFocus={handleInputFocus}
+          />
+          {renderColorTextField(ctx, hasAffixes)}
+        </>
+      ))}
       {allowAlpha && (
         <AlphaSlider
           color={getDisplayColor(displayValue)}

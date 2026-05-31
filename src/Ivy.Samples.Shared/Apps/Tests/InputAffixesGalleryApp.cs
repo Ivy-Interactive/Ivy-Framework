@@ -6,7 +6,7 @@ using static InputAffixesGalleryHelpers;
     icon: Icons.TextCursorInput,
     group: ["Tests"],
     isVisible: true,
-    searchHints: ["affix", "prefix", "suffix", "input", "bool", "kbd", "shortcut", "density"])]
+    searchHints: ["affix", "prefix", "suffix", "input", "bool", "color", "kbd", "shortcut", "density"])]
 public class InputAffixesGalleryApp : SampleBase
 {
     protected override object? BuildSample() =>
@@ -18,7 +18,8 @@ public class InputAffixesGalleryApp : SampleBase
                    new Tab("Densities", new InputAffixesDensitiesView()),
                    new Tab("Number inputs", new InputAffixesNumberView()),
                    new Tab("Select inputs", new InputAffixesSelectView()),
-                   new Tab("Bool inputs", new InputAffixesBoolView())
+                   new Tab("Bool inputs", new InputAffixesBoolView()),
+                   new Tab("Color inputs", new InputAffixesColorView())
                ).Variant(TabsVariant.Content);
 }
 
@@ -386,6 +387,71 @@ public class InputAffixesBoolView : ViewBase
     }
 }
 
+public class InputAffixesColorView : ViewBase
+{
+    public override object Build()
+    {
+        var colorState = UseState("#6366f1");
+        var nullableState = UseState<string?>(() => null);
+
+        ColorInputBase TextAffix(ColorInputBase input) => input.Variant(ColorInputVariant.Text);
+        ColorInputBase PickerAffix(ColorInputBase input) => input;
+
+        return Layout.Vertical()
+               | Callout.Info(
+                   "Color affixes match text/bool: same affix shell, field padding, and invalid/clear in the suffix cluster when suffix is present.")
+               | Text.H2("Affix layouts")
+               | AffixHeaderRow()
+               | AffixRow(
+                   "Text",
+                   TextAffix(colorState.ToColorInput()).Prefix(Icons.Palette),
+                   TextAffix(colorState.ToColorInput()).Suffix(Icons.Pipette),
+                   TextAffix(colorState.ToColorInput()).Prefix(Icons.Palette).Suffix(Icons.Pipette))
+               | AffixRow(
+                   "Text + picker",
+                   PickerAffix(colorState.ToColorInput()).Prefix(Icons.Palette),
+                   PickerAffix(colorState.ToColorInput()).Suffix(Icons.Pipette),
+                   PickerAffix(colorState.ToColorInput()).Prefix(Icons.Palette).Suffix(Icons.Pipette))
+               | AffixRow(
+                   "Nullable",
+                   TextAffix(nullableState.ToColorInput()).Nullable().Prefix(Icons.Palette),
+                   TextAffix(nullableState.ToColorInput()).Nullable().Suffix(Icons.Pipette),
+                   TextAffix(nullableState.ToColorInput())
+                     .Nullable()
+                     .Prefix(Icons.Palette)
+                     .Suffix(Icons.Pipette))
+               | AffixRow(
+                   "Invalid",
+                   TextAffix(colorState.ToColorInput()).Prefix(Icons.Palette).Invalid("Invalid color"),
+                   TextAffix(colorState.ToColorInput()).Suffix(Icons.Pipette).Invalid("Invalid color"),
+                   TextAffix(colorState.ToColorInput())
+                     .Prefix(Icons.Palette)
+                     .Suffix(Icons.Pipette)
+                     .Invalid("Invalid color"))
+               | AffixRow(
+                   "Nullable + invalid",
+                   TextAffix(nullableState.ToColorInput()).Nullable().Prefix(Icons.Palette).Invalid("Required"),
+                   TextAffix(nullableState.ToColorInput()).Nullable().Suffix(Icons.Pipette).Invalid("Required"),
+                   TextAffix(nullableState.ToColorInput())
+                     .Nullable()
+                     .Prefix(Icons.Palette)
+                     .Suffix(Icons.Pipette)
+                     .Invalid("Required"))
+               | Text.H2("Densities")
+               | Callout.Info("Text + picker with both affixes at Small, Medium, and Large.")
+               | DensityHeaderRow()
+               | ColorDensityRow(
+                   "Both",
+                   PickerAffix(colorState.ToColorInput()).Prefix(Icons.Palette).Suffix(Icons.Pipette))
+               | ColorDensityRow(
+                   "Both + invalid",
+                   PickerAffix(colorState.ToColorInput())
+                     .Prefix(Icons.Palette)
+                     .Suffix(Icons.Pipette)
+                     .Invalid("Invalid color"));
+    }
+}
+
 public class InputAffixesDensitiesView : ViewBase
 {
     public override object Build()
@@ -456,6 +522,13 @@ static class InputAffixesGalleryHelpers
                | input.Large();
 
     internal static GridView BoolDensityRow(string label, BoolInputBase input) =>
+        Layout.Grid().Columns(4)
+               | Text.Monospaced(label)
+               | input.Small()
+               | input
+               | input.Large();
+
+    internal static GridView ColorDensityRow(string label, ColorInputBase input) =>
         Layout.Grid().Columns(4)
                | Text.Monospaced(label)
                | input.Small()
