@@ -18,8 +18,9 @@ describe("DataTableWidget - container style for height modes", () => {
     expect(source).toContain("containerStyle.flexGrow = 1");
   });
 
-  it("should cap explicit heights with min(preferred, 100%) so tables shrink in tabs", () => {
-    expect(source).toContain("containerStyle.height = `min(${containerStyle.height}, 100%)`");
+  it("should move explicit heights to flex-basis so tables shrink in tabs", () => {
+    expect(source).toContain("containerStyle.flexBasis = containerStyle.height");
+    expect(source).toContain("delete containerStyle.height");
   });
 
   it("should compute a density-aware minimum height before page scroll", () => {
