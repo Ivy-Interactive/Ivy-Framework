@@ -53,8 +53,9 @@ describe("DataTableWidget - flex sizing for unconstrained parents", () => {
     expect(widgetSource).toContain("flexGrow = 1");
   });
 
-  it("should cap explicit heights with min(preferred, 100%)", () => {
-    expect(widgetSource).toContain("containerStyle.height = `min(${containerStyle.height}, 100%)`");
+  it("should move explicit height to flexBasis for proportional shrinking", () => {
+    expect(widgetSource).toContain("containerStyle.flexBasis = containerStyle.height");
+    expect(widgetSource).toContain("delete containerStyle.height");
   });
 
   it("should compute min height from density and table chrome via getDataTableMinHeight", () => {

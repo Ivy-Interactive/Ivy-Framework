@@ -3,6 +3,7 @@ import { GridColumn, getDefaultTheme } from "@glideapps/glide-data-grid";
 import { DataColumn } from "../../types/types";
 import {
   parseSize,
+  parseSizeGrow,
   estimateHeaderWidth,
   estimateContentWidth,
   getSizeMode,
@@ -81,6 +82,10 @@ export const useColumnManagement = ({
         const headerFont = `${defaultTheme.headerFontStyle} ${defaultTheme.fontFamily}`;
         const contentFont = `${defaultTheme.baseFontStyle} ${defaultTheme.fontFamily}`;
         const widths: Record<string, number> = {};
+
+        const growColumnIndices: number[] = [];
+        let maxGrowBaseWidth = 0;
+
         mergedColumns.forEach((col, index) => {
           const explicitWidth = parseSize(col.width);
           const headerMinWidth = estimateHeaderWidth(col.header || col.name, headerFont);
@@ -96,9 +101,25 @@ export const useColumnManagement = ({
             }
           }
 
-          // For grow/fraction/auto/etc types, parseSize returns 0 — use header width as minimum
+          // Check if this column uses grow/fraction sizing
+          const sizeStr =
+            col.originalWidth ?? (typeof col.width === "string" ? col.width : undefined);
+          const growFactor = parseSizeGrow(sizeStr);
+          if (growFactor !== undefined) {
+            const baseWidth = Math.max(explicitWidth, headerMinWidth);
+            growColumnIndices.push(index);
+            maxGrowBaseWidth = Math.max(maxGrowBaseWidth, baseWidth);
+            widths[index.toString()] = baseWidth;
+            return;
+          }
+
+          // For fixed-width types, use explicit width or header width as minimum
           widths[index.toString()] = Math.max(explicitWidth, headerMinWidth);
         });
+
+        for (const idx of growColumnIndices) {
+          widths[idx.toString()] = maxGrowBaseWidth;
+        }
         return widths;
       });
     },
