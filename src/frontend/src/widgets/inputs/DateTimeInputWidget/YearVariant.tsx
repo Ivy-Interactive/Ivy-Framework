@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/input/date-time-input-variant";
 import { YearVariantProps } from "./types";
 import { ClearAndInvalidIcons } from "./shared";
+import { dateInputControlInvalid, dateInputTriggerTrailingPadding } from "./affix";
 
 function getDecadeStart(year: number): number {
   return Math.floor(year / 10) * 10;
@@ -33,6 +34,8 @@ export const YearVariant: React.FC<YearVariantProps> = ({
   autoFocus,
   "data-testid": dataTestId,
   onFocusChange,
+  inAffixShell,
+  trailingBesideSuffix,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -71,6 +74,18 @@ export const YearVariant: React.FC<YearVariantProps> = ({
   }
 
   const showClear = nullable && !disabled && value != null && value !== "";
+  const controlInvalid = dateInputControlInvalid(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
+  const trailingPadding = dateInputTriggerTrailingPadding(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -116,9 +131,11 @@ export const YearVariant: React.FC<YearVariantProps> = ({
               dateTimeInputVariant({ density }),
               "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
               !date && "text-muted-foreground",
-              invalid && inputStyles.invalidInput,
+              controlInvalid && inputStyles.invalidInput,
               disabled && "cursor-not-allowed",
-              showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
+              trailingPadding,
+              inAffixShell &&
+                "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
             )}
             data-testid={dataTestId}
             onFocus={() => {
@@ -195,12 +212,14 @@ export const YearVariant: React.FC<YearVariantProps> = ({
           </div>
         </PopoverContent>
       </Popover>
-      <ClearAndInvalidIcons
-        showClear={showClear}
-        invalid={invalid}
-        density={density}
-        onClear={handleClear}
-      />
+      {!inAffixShell && (
+        <ClearAndInvalidIcons
+          showClear={showClear}
+          invalid={invalid}
+          density={density}
+          onClear={handleClear}
+        />
+      )}
     </div>
   );
 };

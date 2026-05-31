@@ -326,7 +326,7 @@ export function textInputTrailingInvalidSlotClasses(
 ): string {
   return cn(
     textInputTrailingIconButtonClasses(overlay, density),
-    "w-max shrink-0 grow-0 basis-auto hover:bg-transparent hover:text-inherit",
+    "shrink-0 grow-0 basis-auto hover:bg-transparent hover:text-inherit",
   );
 }
 

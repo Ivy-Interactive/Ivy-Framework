@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/input/date-time-input-variant";
 import { TimeVariantProps } from "./types";
 import { ClearAndInvalidIcons } from "./shared";
+import { dateInputControlInvalid, dateInputTriggerTrailingPadding } from "./affix";
 import { useTimeConstraints } from "./useTimeConstraints";
 
 export const TimeVariant: React.FC<TimeVariantProps> = ({
@@ -28,6 +29,8 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
   autoFocus,
   "data-testid": dataTestId,
   onFocusChange,
+  inAffixShell,
+  trailingBesideSuffix,
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = React.useRef(false);
@@ -67,6 +70,18 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
   const { timeStepSeconds, timeMin, timeMax, getSnappedTime } = useTimeConstraints(min, max, step);
 
   const showClear = nullable && !disabled && propValue != null && propValue !== "";
+  const controlInvalid = dateInputControlInvalid(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
+  const trailingPadding = dateInputTriggerTrailingPadding(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -107,7 +122,8 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
       <div
         className={cn(
           "relative flex items-center rounded-md border border-input bg-transparent shadow-sm focus-within:ring-1 focus-within:ring-ring dark:bg-white/5 dark:border-white/10",
-          invalid && inputStyles.invalidInput,
+          controlInvalid && inputStyles.invalidInput,
+          inAffixShell && "border-0 shadow-none focus-within:ring-0",
         )}
       >
         <Clock
@@ -134,18 +150,20 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
           className={cn(
             "bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0",
             dateTimeInputTextVariant({ density }),
-            invalid && inputStyles.invalidInput,
+            controlInvalid && inputStyles.invalidInput,
             disabled && "cursor-not-allowed opacity-50 text-muted-foreground",
-            showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
+            trailingPadding,
           )}
         />
       </div>
-      <ClearAndInvalidIcons
-        showClear={showClear}
-        invalid={invalid}
-        density={density}
-        onClear={handleClear}
-      />
+      {!inAffixShell && (
+        <ClearAndInvalidIcons
+          showClear={showClear}
+          invalid={invalid}
+          density={density}
+          onClear={handleClear}
+        />
+      )}
     </div>
   );
 };

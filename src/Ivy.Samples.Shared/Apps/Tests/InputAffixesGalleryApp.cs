@@ -6,7 +6,7 @@ using static InputAffixesGalleryHelpers;
     icon: Icons.TextCursorInput,
     group: ["Tests"],
     isVisible: true,
-    searchHints: ["affix", "prefix", "suffix", "input", "bool", "color", "code", "feedback", "icon", "kbd", "shortcut", "density"])]
+    searchHints: ["affix", "prefix", "suffix", "input", "bool", "color", "code", "date", "datetime", "feedback", "icon", "kbd", "shortcut", "density"])]
 public class InputAffixesGalleryApp : SampleBase
 {
     protected override object? BuildSample() =>
@@ -22,7 +22,9 @@ public class InputAffixesGalleryApp : SampleBase
                    new Tab("Color inputs", new InputAffixesColorView()),
                    new Tab("Feedback inputs", new InputAffixesFeedbackView()),
                    new Tab("Icon inputs", new InputAffixesIconView()),
-                   new Tab("Code inputs", new InputAffixesCodeView())
+                   new Tab("Code inputs", new InputAffixesCodeView()),
+                   new Tab("DateTime inputs", new InputAffixesDateTimeView()),
+                   new Tab("Date range inputs", new InputAffixesDateRangeView())
                ).Variant(TabsVariant.Content);
 }
 
@@ -108,8 +110,16 @@ public class InputAffixesAllInputsView : ViewBase
                | AffixHeaderRow()
                | AffixRow("Number", numberState.ToNumberInput().Prefix(Icons.DollarSign).Precision(1), numberState.ToNumberInput().Suffix(Icons.Percent).Precision(1), numberState.ToNumberInput().Prefix(Icons.DollarSign).Suffix(Icons.Coins).Precision(1))
                | AffixRow("Select", currencyState.ToSelectInput(currencyOptions).Prefix(Icons.DollarSign), currencyState.ToSelectInput(currencyOptions).Suffix(Icons.BadgeDollarSign), currencyState.ToSelectInput(currencyOptions).Prefix(Icons.DollarSign).Suffix(Icons.BadgeDollarSign))
-               | AffixRow("DateTime", dateState.ToDateTimeInput().Prefix(Icons.Calendar), dateState.ToDateTimeInput().Suffix(Icons.Clock), dateState.ToDateTimeInput().Prefix(Icons.Calendar).Suffix(Icons.Clock))
-               | AffixRow("Date range", rangeState.ToDateRangeInput().Prefix(Icons.CalendarRange), rangeState.ToDateRangeInput().Suffix(Icons.CalendarDays), rangeState.ToDateRangeInput().Prefix(Icons.CalendarRange).Suffix(Icons.CalendarDays))
+               | AffixRow(
+                   "DateTime",
+                   DateAffixDemo(dateState).Prefix(Icons.Calendar),
+                   DateAffixDemo(dateState).Suffix(Icons.Clock),
+                   DateAffixDemo(dateState).Prefix(Icons.Calendar).Suffix(Icons.Clock))
+               | AffixRow(
+                   "Date range",
+                   DateRangeAffixDemo(rangeState).Prefix(Icons.CalendarRange),
+                   DateRangeAffixDemo(rangeState).Suffix(Icons.CalendarDays),
+                   DateRangeAffixDemo(rangeState).Prefix(Icons.CalendarRange).Suffix(Icons.CalendarDays))
                | AffixRow("Bool", boolState.ToBoolInput().Label("Enable").Prefix(Icons.Bell), boolState.ToBoolInput().Label("Enable").Suffix(Icons.BadgeQuestionMark), boolState.ToBoolInput().Label("Enable").Prefix(Icons.Bell).Suffix(Icons.BadgeQuestionMark))
                | AffixRow("Color", colorState.ToColorInput().Prefix(Icons.Palette), colorState.ToColorInput().Suffix(Icons.Pipette), colorState.ToColorInput().Prefix(Icons.Palette).Suffix(Icons.Pipette))
                | AffixRow("Feedback", feedbackState.ToFeedbackInput().Stars().Prefix(Icons.Star), feedbackState.ToFeedbackInput().Stars().Suffix(Icons.MessageSquare), feedbackState.ToFeedbackInput().Stars().Prefix(Icons.Star).Suffix(Icons.MessageSquare))
@@ -644,6 +654,124 @@ public class InputAffixesCodeView : ViewBase
     }
 }
 
+public class InputAffixesDateTimeView : ViewBase
+{
+    public override object Build()
+    {
+        var dateState = UseState(DateTime.Now);
+        var nullableState = UseState<DateTime?>(() => null);
+        var invalidState = UseState(DateTime.Now);
+
+        return Layout.Vertical()
+               | Callout.Info(
+                   "DateTime affixes: same shell as number/select — centered prefix/suffix row, clear/invalid in suffix cluster or trailing affix column when only prefix is set.")
+               | Text.H2("Affix layouts")
+               | AffixHeaderRow()
+               | AffixRow(
+                   "DateTime",
+                   DateAffixDemo(dateState).Prefix(Icons.Calendar),
+                   DateAffixDemo(dateState).Suffix(Icons.Clock),
+                   DateAffixDemo(dateState).Prefix(Icons.Calendar).Suffix(Icons.Clock))
+               | AffixRow(
+                   "Nullable",
+                   DateAffixDemo(nullableState).Nullable().Prefix(Icons.Calendar),
+                   DateAffixDemo(nullableState).Nullable().Suffix(Icons.Clock),
+                   DateAffixDemo(nullableState)
+                     .Nullable()
+                     .Prefix(Icons.Calendar)
+                     .Suffix(Icons.Clock))
+               | AffixRow(
+                   "Invalid",
+                   DateAffixDemo(invalidState).Prefix(Icons.Calendar).Invalid("Required"),
+                   DateAffixDemo(invalidState).Suffix(Icons.Clock).Invalid("Required"),
+                   DateAffixDemo(invalidState)
+                     .Prefix(Icons.Calendar)
+                     .Suffix(Icons.Clock)
+                     .Invalid("Required"))
+               | AffixRow(
+                   "Nullable + invalid",
+                   DateAffixDemo(nullableState).Nullable().Prefix(Icons.Calendar).Invalid("Required"),
+                   DateAffixDemo(nullableState).Nullable().Suffix(Icons.Clock).Invalid("Required"),
+                   DateAffixDemo(nullableState)
+                     .Nullable()
+                     .Prefix(Icons.Calendar)
+                     .Suffix(Icons.Clock)
+                     .Invalid("Required"))
+               | Text.H2("Densities")
+               | Callout.Info("Both affixes at Small, Medium, and Large — compare row height and trailing clear beside suffix glyph.")
+               | DensityHeaderRow()
+               | DateTimeDensityRow(
+                   "Both",
+                   DateAffixDemo(dateState).Prefix(Icons.Calendar).Suffix(Icons.Clock))
+               | DateTimeDensityRow(
+                   "Both + invalid",
+                   DateAffixDemo(invalidState)
+                     .Prefix(Icons.Calendar)
+                     .Suffix(Icons.Clock)
+                     .Invalid("Required"));
+    }
+}
+
+public class InputAffixesDateRangeView : ViewBase
+{
+    public override object Build()
+    {
+        var rangeState = UseState(
+            (DateOnly.FromDateTime(DateTime.Today), DateOnly.FromDateTime(DateTime.Today.AddDays(7))));
+        var nullableState = UseState<(DateOnly?, DateOnly?)>(() => (null, null));
+        var invalidState = UseState(
+            (DateOnly.FromDateTime(DateTime.Today), DateOnly.FromDateTime(DateTime.Today.AddDays(7))));
+
+        return Layout.Vertical()
+               | Callout.Info(
+                   "Date range affixes: prefix/suffix icons align with other inputs; nullable clear and invalid use the shared trailing cluster beside the suffix glyph.")
+               | Text.H2("Affix layouts")
+               | AffixHeaderRow()
+               | AffixRow(
+                   "Date range",
+                   DateRangeAffixDemo(rangeState).Prefix(Icons.CalendarRange),
+                   DateRangeAffixDemo(rangeState).Suffix(Icons.CalendarDays),
+                   DateRangeAffixDemo(rangeState).Prefix(Icons.CalendarRange).Suffix(Icons.CalendarDays))
+               | AffixRow(
+                   "Nullable",
+                   DateRangeAffixDemo(nullableState).Nullable().Prefix(Icons.CalendarRange),
+                   DateRangeAffixDemo(nullableState).Nullable().Suffix(Icons.CalendarDays),
+                   DateRangeAffixDemo(nullableState)
+                     .Nullable()
+                     .Prefix(Icons.CalendarRange)
+                     .Suffix(Icons.CalendarDays))
+               | AffixRow(
+                   "Invalid",
+                   DateRangeAffixDemo(invalidState).Prefix(Icons.CalendarRange).Invalid("Required"),
+                   DateRangeAffixDemo(invalidState).Suffix(Icons.CalendarDays).Invalid("Required"),
+                   DateRangeAffixDemo(invalidState)
+                     .Prefix(Icons.CalendarRange)
+                     .Suffix(Icons.CalendarDays)
+                     .Invalid("Required"))
+               | AffixRow(
+                   "Nullable + invalid",
+                   DateRangeAffixDemo(nullableState).Nullable().Prefix(Icons.CalendarRange).Invalid("Required"),
+                   DateRangeAffixDemo(nullableState).Nullable().Suffix(Icons.CalendarDays).Invalid("Required"),
+                   DateRangeAffixDemo(nullableState)
+                     .Nullable()
+                     .Prefix(Icons.CalendarRange)
+                     .Suffix(Icons.CalendarDays)
+                     .Invalid("Required"))
+               | Text.H2("Densities")
+               | Callout.Info("Both affixes at Small, Medium, and Large.")
+               | DensityHeaderRow()
+               | DateRangeDensityRow(
+                   "Both",
+                   DateRangeAffixDemo(rangeState).Prefix(Icons.CalendarRange).Suffix(Icons.CalendarDays))
+               | DateRangeDensityRow(
+                   "Both + invalid",
+                   DateRangeAffixDemo(invalidState)
+                     .Prefix(Icons.CalendarRange)
+                     .Suffix(Icons.CalendarDays)
+                     .Invalid("Required"));
+    }
+}
+
 public class InputAffixesDensitiesView : ViewBase
 {
     public override object Build()
@@ -673,6 +801,12 @@ static class InputAffixesGalleryHelpers
 {
     internal static CodeInputBase CodeAffixDemo(IAnyState state) =>
         state.ToCodeInput().Language(Languages.Javascript).Height(Size.Units(24));
+
+    internal static DateTimeInputBase DateAffixDemo(IAnyState state) =>
+        state.ToDateTimeInput();
+
+    internal static DateRangeInputBase DateRangeAffixDemo(IAnyState state) =>
+        state.ToDateRangeInput();
 
     internal static GridView AffixHeaderRow() =>
         Layout.Grid().Columns(4)
@@ -745,6 +879,20 @@ static class InputAffixesGalleryHelpers
                | input.Large();
 
     internal static GridView CodeDensityRow(string label, CodeInputBase input) =>
+        Layout.Grid().Columns(4)
+               | Text.Monospaced(label)
+               | input.Small()
+               | input
+               | input.Large();
+
+    internal static GridView DateTimeDensityRow(string label, DateTimeInputBase input) =>
+        Layout.Grid().Columns(4)
+               | Text.Monospaced(label)
+               | input.Small()
+               | input
+               | input.Large();
+
+    internal static GridView DateRangeDensityRow(string label, DateRangeInputBase input) =>
         Layout.Grid().Columns(4)
                | Text.Monospaced(label)
                | input.Small()

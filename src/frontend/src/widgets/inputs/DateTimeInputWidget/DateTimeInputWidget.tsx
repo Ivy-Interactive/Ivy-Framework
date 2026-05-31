@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useEventHandler } from "@/components/event-handler";
 import { useOptimisticValue } from "../shared/useOptimisticValue";
 import { Densities } from "@/types/density";
@@ -19,7 +19,7 @@ import { WeekVariant } from "./WeekVariant";
 import { YearVariant } from "./YearVariant";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { textInputAffixCellClasses } from "@/components/ui/input/text-input-variant";
+import { DateInputAffixShell } from "./affix";
 
 const VariantComponents: Record<
   VariantType,
@@ -70,8 +70,8 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
   const firstDayOfWeek = resolveDayOfWeek(firstDayOfWeekRaw);
+  const [affixFocused, setAffixFocused] = useState(false);
 
-  // Normalize undefined to null when nullable
   const normalizedValue = nullable && value === undefined ? undefined : value;
 
   const [localValue, setLocalValue] = useOptimisticValue(normalizedValue, false);
@@ -90,12 +90,10 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
     (time: string) => {
       if (disabled) return;
 
-      // For Time variant, send the time string directly
       if (variant === "Time") {
         setLocalValue(time);
         if (events.includes("OnChange")) eventHandler("OnChange", id, [time]);
       } else {
-        // DateTime variant: merge time into current date so we don't overwrite with today
         if (!time?.trim()) return;
         const parts = time.split(":").map(Number);
         const [hours, minutes, seconds] = [parts[0] || 0, parts[1] || 0, parts[2] || 0];
@@ -120,6 +118,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   const handleFocusChange = useCallback(
     (focused: boolean) => {
       if (disabled) return;
+      setAffixFocused(focused);
       if (focused) {
         if (events.includes("OnFocus")) eventHandler("OnFocus", id, []);
       } else {
@@ -134,6 +133,26 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const showClear = nullable && !disabled && localValue != null && localValue !== "";
+  const showTrailing = showClear || Boolean(invalid);
+  const trailingInAffixCell = hasAffixes && !trailingBesideSuffix && showTrailing;
+
+  const handleAffixClear = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.preventDefault();
+      e?.stopPropagation();
+      if (disabled) return;
+      if (variant === "Time") {
+        const clearedValue = nullable ? undefined : "";
+        setLocalValue(clearedValue);
+        if (events.includes("OnChange")) eventHandler("OnChange", id, [nullable ? null : ""]);
+      } else {
+        handleDateChange(undefined);
+      }
+    },
+    [disabled, variant, nullable, setLocalValue, events, eventHandler, id, handleDateChange],
+  );
 
   const variantElement = (
     <VariantComponent
@@ -154,6 +173,8 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       onTimeChange={handleTimeChange}
       onFocusChange={handleFocusChange}
       data-testid={dataTestId}
+      inAffixShell={hasAffixes}
+      trailingBesideSuffix={trailingBesideSuffix}
     />
   );
 
@@ -162,28 +183,28 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   }
 
   return (
-    <div
-      className={cn(
-        "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-        invalid && "border-destructive",
-        disabled && "opacity-50 cursor-not-allowed",
-      )}
+    <DateInputAffixShell
+      density={density}
+      invalid={invalid}
+      disabled={disabled}
+      focused={affixFocused}
+      hasPrefix={hasPrefix}
+      hasSuffix={hasSuffix}
+      prefixContent={prefixContent}
+      suffixContent={suffixContent}
+      showClear={showClear}
+      onClear={handleAffixClear}
     >
-      {hasPrefix && (
-        <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
-      )}
       <div
         className={cn(
-          "flex-1 relative w-full [&_button]:border-0 [&_button]:shadow-none [&_input]:border-0 [&_input]:shadow-none",
+          "w-full [&_button]:border-0 [&_button]:shadow-none [&_input]:border-0 [&_input]:shadow-none",
           hasPrefix && "[&_button]:rounded-l-none [&_input]:rounded-l-none",
-          hasSuffix && "[&_button]:rounded-r-none [&_input]:rounded-r-none",
+          (hasSuffix || trailingInAffixCell) &&
+            "[&_button]:rounded-r-none [&_input]:rounded-r-none",
         )}
       >
         {variantElement}
       </div>
-      {hasSuffix && (
-        <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
-      )}
-    </div>
+    </DateInputAffixShell>
   );
 };

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/input/date-time-input-variant";
 import { MonthVariantProps } from "./types";
 import { ClearAndInvalidIcons } from "./shared";
+import { dateInputControlInvalid, dateInputTriggerTrailingPadding } from "./affix";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -31,6 +32,8 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   autoFocus,
   "data-testid": dataTestId,
   onFocusChange,
+  inAffixShell,
+  trailingBesideSuffix,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -69,6 +72,18 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
   }
 
   const showClear = nullable && !disabled && value != null && value !== "";
+  const controlInvalid = dateInputControlInvalid(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
+  const trailingPadding = dateInputTriggerTrailingPadding(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
 
   const isMonthDisabled = (monthIndex: number) => {
     if (minDate && new Date(viewYear, monthIndex + 1, 0) < minDate) return true;
@@ -111,9 +126,11 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
               dateTimeInputVariant({ density }),
               "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
               !date && "text-muted-foreground",
-              invalid && inputStyles.invalidInput,
+              controlInvalid && inputStyles.invalidInput,
               disabled && "cursor-not-allowed",
-              showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
+              trailingPadding,
+              inAffixShell &&
+                "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
             )}
             data-testid={dataTestId}
             onFocus={() => {
@@ -184,12 +201,14 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
           </div>
         </PopoverContent>
       </Popover>
-      <ClearAndInvalidIcons
-        showClear={showClear}
-        invalid={invalid}
-        density={density}
-        onClear={handleClear}
-      />
+      {!inAffixShell && (
+        <ClearAndInvalidIcons
+          showClear={showClear}
+          invalid={invalid}
+          density={density}
+          onClear={handleClear}
+        />
+      )}
     </div>
   );
 };
