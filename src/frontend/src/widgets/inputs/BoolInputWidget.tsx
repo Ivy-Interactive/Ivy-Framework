@@ -15,7 +15,6 @@ import {
   labelSizeVariant,
   descriptionSizeVariant,
   boolInputControlGapVariant,
-  boolInputAffixEdgePaddingVariant,
   boolInputRowMinHeightVariant,
 } from "@/components/ui/input/bool-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
@@ -23,11 +22,10 @@ import { InvalidIcon } from "@/components/InvalidIcon";
 import {
   normalizeInputDensity,
   textInputAffixCellClasses,
-  textInputAffixIconOnlyPaddingVariant,
   textInputAffixInvalidIconClasses,
-  textInputAffixSuffixTrailingShellClasses,
   textInputSuffixGlyphSlotClasses,
   textInputSuffixWithTrailingClusterClasses,
+  textInputSizeVariant,
   textInputTrailingIconSizeVariant,
 } from "@/components/ui/input/text-input-variant";
 
@@ -380,47 +378,35 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       {hasAffixes ? (
         <div
           className={cn(
-            "relative flex w-full min-w-0 max-w-full items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+            "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
             invalid ? "border-destructive" : "border-input dark:border-white/10",
             disabled && "cursor-not-allowed opacity-50",
           )}
         >
           {hasPrefix && (
-            <div
-              className={cn(
-                textInputAffixCellClasses("prefix", density),
-                textInputAffixIconOnlyPaddingVariant({ density: densityKey }),
-                "min-w-0!",
-              )}
-            >
-              {prefixContent}
-            </div>
+            <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
           )}
           <div
             className={cn(
-              "flex min-w-0 flex-1 items-center",
+              "relative flex min-w-0 flex-1 items-center",
+              textInputSizeVariant({ density: densityKey }),
               boolInputRowMinHeightVariant({ density: densityKey }),
-              !hasPrefix &&
-                boolInputAffixEdgePaddingVariant({ side: "start", density: densityKey }),
-              !hasSuffix && boolInputAffixEdgePaddingVariant({ side: "end", density: densityKey }),
+              "w-auto",
             )}
           >
             {variantContent}
           </div>
           {hasSuffix && (
             <div
-              className={
-                trailingBesideSuffix && showTrailing
-                  ? textInputAffixSuffixTrailingShellClasses(density)
-                  : cn(
-                      textInputAffixCellClasses("suffix", density),
-                      textInputAffixIconOnlyPaddingVariant({ density: densityKey }),
-                      "min-w-0!",
-                    )
-              }
+              className={cn(
+                textInputAffixCellClasses("suffix", density),
+                trailingBesideSuffix &&
+                  showTrailing &&
+                  textInputSuffixWithTrailingClusterClasses(density),
+              )}
             >
-              {trailingBesideSuffix && showTrailing ? (
-                <div className={textInputSuffixWithTrailingClusterClasses(density)}>
+              {trailingBesideSuffix && showTrailing && (
+                <>
                   {invalid && (
                     <InvalidIcon
                       message={invalid}
@@ -428,8 +414,10 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
                       iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
                     />
                   )}
-                  <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
-                </div>
+                </>
+              )}
+              {trailingBesideSuffix && showTrailing ? (
+                <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
               ) : (
                 suffixContent
               )}
