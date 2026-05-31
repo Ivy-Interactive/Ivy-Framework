@@ -12,9 +12,21 @@ import { icons } from "lucide-react";
 import { X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
-import { textInputAffixCellClasses, xIconVariant } from "@/components/ui/input/text-input-variant";
+import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
+import {
+  normalizeInputDensity,
+  textInputAffixCellClasses,
+  textInputAffixInvalidIconClasses,
+  textInputSizeVariant,
+  textInputSuffixGlyphSlotClasses,
+  textInputSuffixWithTrailingClusterClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+} from "@/components/ui/input/text-input-variant";
 import {
   iconInputTriggerVariant,
+  iconInputAffixTriggerVariant,
   iconInputIconVariant,
   iconInputTextVariant,
   iconInputPopoverVariant,
@@ -119,8 +131,12 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const densityKey = normalizeInputDensity(density);
 
   const hasValue = localValue != null && localValue !== "" && localValue !== "None";
+  const showClear = nullable && hasValue && !disabled;
+  const showTrailing = showClear || Boolean(invalid);
 
   const valueTextRef = useRef<HTMLSpanElement>(null);
   const [isEllipsed, setIsEllipsed] = useState(false);
@@ -181,8 +197,35 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
       valueTextSpan
     );
 
-  const iconContent = (
-    <div className="flex items-center gap-2 min-w-0">
+  const trailingCluster = (inSuffixCluster: boolean) => (
+    <>
+      {showClear && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Clear"
+          onClick={handleClear}
+          className={textInputTrailingIconButtonClasses(!inSuffixCluster, density)}
+        >
+          <X className={textInputTrailingIconSizeVariant({ density: densityKey })} />
+        </button>
+      )}
+      {invalid && (
+        <InvalidIcon
+          message={invalid}
+          className={
+            inSuffixCluster
+              ? textInputAffixInvalidIconClasses()
+              : textInputTrailingInvalidSlotClasses(false, density)
+          }
+          iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
+        />
+      )}
+    </>
+  );
+
+  const iconField = (inAffixShell: boolean) => (
+    <div className={cn("flex min-w-0 items-center gap-2", inAffixShell && "shrink-0")}>
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
@@ -191,9 +234,11 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
             variant="outline"
             disabled={disabled}
             className={cn(
-              iconInputTriggerVariant({ density }),
+              inAffixShell
+                ? iconInputAffixTriggerVariant({ density })
+                : iconInputTriggerVariant({ density }),
               !hasValue && "text-muted-foreground",
-              invalid && inputStyles.invalidInput,
+              !inAffixShell && invalid && inputStyles.invalidInput,
             )}
             onBlur={() => {
               if (events.includes("OnBlur") && !open) eventHandler("OnBlur", id, []);
@@ -287,45 +332,53 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
           )}
         </PopoverContent>
       </Popover>
-      {(invalid || (nullable && hasValue && !disabled)) && (
-        <div className="flex items-center gap-1 shrink-0">
-          {invalid && (
-            <span className="flex items-center">
-              <InvalidIcon message={invalid} />
-            </span>
-          )}
-          {nullable && hasValue && !disabled && (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label="Clear"
-              onClick={handleClear}
-              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-            >
-              <X className={xIconVariant({ density })} />
-            </button>
-          )}
-        </div>
+      {!inAffixShell && showTrailing && (
+        <div className="flex shrink-0 items-center gap-1">{trailingCluster(false)}</div>
       )}
     </div>
   );
 
-  if (!hasAffixes) return iconContent;
+  if (!hasAffixes) {
+    return iconField(false);
+  }
 
   return (
     <div
       className={cn(
-        "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-        invalid && "border-destructive",
+        "relative flex items-stretch overflow-hidden rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+        invalid ? "border-destructive" : "border-input dark:border-white/10",
         disabled && "cursor-not-allowed opacity-50",
       )}
     >
       {hasPrefix && (
         <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
       )}
-      <div className="flex-1 px-3 py-2">{iconContent}</div>
+      <div
+        className={cn(
+          "relative flex min-w-0 flex-1 items-stretch overflow-hidden",
+          textInputSizeVariant({ density: densityKey }),
+          boolInputRowMinHeightVariant({ density: densityKey }),
+          "w-auto",
+        )}
+      >
+        {iconField(true)}
+      </div>
       {hasSuffix && (
-        <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
+        <div
+          className={cn(
+            textInputAffixCellClasses("suffix", density),
+            trailingBesideSuffix &&
+              showTrailing &&
+              textInputSuffixWithTrailingClusterClasses(density),
+          )}
+        >
+          {trailingBesideSuffix && showTrailing && trailingCluster(true)}
+          {trailingBesideSuffix && showTrailing ? (
+            <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+          ) : (
+            suffixContent
+          )}
+        </div>
       )}
     </div>
   );

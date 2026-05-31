@@ -6,7 +6,7 @@ using static InputAffixesGalleryHelpers;
     icon: Icons.TextCursorInput,
     group: ["Tests"],
     isVisible: true,
-    searchHints: ["affix", "prefix", "suffix", "input", "bool", "color", "feedback", "kbd", "shortcut", "density"])]
+    searchHints: ["affix", "prefix", "suffix", "input", "bool", "color", "feedback", "icon", "kbd", "shortcut", "density"])]
 public class InputAffixesGalleryApp : SampleBase
 {
     protected override object? BuildSample() =>
@@ -20,7 +20,8 @@ public class InputAffixesGalleryApp : SampleBase
                    new Tab("Select inputs", new InputAffixesSelectView()),
                    new Tab("Bool inputs", new InputAffixesBoolView()),
                    new Tab("Color inputs", new InputAffixesColorView()),
-                   new Tab("Feedback inputs", new InputAffixesFeedbackView())
+                   new Tab("Feedback inputs", new InputAffixesFeedbackView()),
+                   new Tab("Icon inputs", new InputAffixesIconView())
                ).Variant(TabsVariant.Content);
 }
 
@@ -519,6 +520,67 @@ public class InputAffixesFeedbackView : ViewBase
     }
 }
 
+public class InputAffixesIconView : ViewBase
+{
+    public override object Build()
+    {
+        var iconState = UseState(Icons.Heart);
+        var nullableState = UseState<Icons?>(() => null);
+
+        return Layout.Vertical()
+               | Callout.Info(
+                   "Icon affixes match feedback: same affix shell and content padding; prefix icon aligns with other shrink-to-fit inputs. Compare prefix column to Feedback tab.")
+               | Text.H2("Affix layouts")
+               | AffixHeaderRow()
+               | AffixRow(
+                   "Icon",
+                   iconState.ToIconInput().Prefix(Icons.Search),
+                   iconState.ToIconInput().Suffix(Icons.Sparkles),
+                   iconState.ToIconInput().Prefix(Icons.Search).Suffix(Icons.Sparkles))
+               | AffixRow(
+                   "Nullable",
+                   nullableState.ToIconInput().Nullable().Prefix(Icons.Search),
+                   nullableState.ToIconInput().Nullable().Suffix(Icons.Sparkles),
+                   nullableState
+                     .ToIconInput()
+                     .Nullable()
+                     .Prefix(Icons.Search)
+                     .Suffix(Icons.Sparkles))
+               | AffixRow(
+                   "Invalid",
+                   iconState.ToIconInput().Prefix(Icons.Search).Invalid("Required"),
+                   iconState.ToIconInput().Suffix(Icons.Sparkles).Invalid("Required"),
+                   iconState
+                     .ToIconInput()
+                     .Prefix(Icons.Search)
+                     .Suffix(Icons.Sparkles)
+                     .Invalid("Required"))
+               | AffixRow(
+                   "Nullable + invalid",
+                   nullableState.ToIconInput().Nullable().Prefix(Icons.Search).Invalid("Required"),
+                   nullableState.ToIconInput().Nullable().Suffix(Icons.Sparkles).Invalid("Required"),
+                   nullableState
+                     .ToIconInput()
+                     .Nullable()
+                     .Prefix(Icons.Search)
+                     .Suffix(Icons.Sparkles)
+                     .Invalid("Required"))
+               | Text.H2("Densities")
+               | Callout.Info("Both affixes at Small, Medium, and Large — compare prefix alignment to Feedback row above.")
+               | DensityHeaderRow()
+               | IconDensityRow(
+                   "Both",
+                   iconState.ToIconInput().Prefix(Icons.Search).Suffix(Icons.Sparkles))
+               | IconDensityRow(
+                   "Both + invalid",
+                   iconState
+                     .ToIconInput()
+                     .Prefix(Icons.Search)
+                     .Suffix(Icons.Sparkles)
+                     .Invalid("Required"));
+    }
+}
+
 public class InputAffixesDensitiesView : ViewBase
 {
     public override object Build()
@@ -603,6 +665,13 @@ static class InputAffixesGalleryHelpers
                | input.Large();
 
     internal static GridView FeedbackDensityRow(string label, FeedbackInputBase input) =>
+        Layout.Grid().Columns(4)
+               | Text.Monospaced(label)
+               | input.Small()
+               | input
+               | input.Large();
+
+    internal static GridView IconDensityRow(string label, IconInputBase input) =>
         Layout.Grid().Columns(4)
                | Text.Monospaced(label)
                | input.Small()
