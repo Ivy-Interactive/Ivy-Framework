@@ -9,9 +9,6 @@ export const SpacerWidget: React.FC<SpacerWidgetProps> = ({ width, height }) => 
   return (
     <div
       style={{
-        flexGrow: 1,
-        flexShrink: 1,
-        flexBasis: "0%",
         ...getWidth(width),
         ...getHeight(height),
       }}

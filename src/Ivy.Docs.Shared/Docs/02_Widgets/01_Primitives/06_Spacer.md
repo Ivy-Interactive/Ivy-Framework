@@ -44,7 +44,7 @@ public class FlexibleSpacerView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Horizontal().Gap(4)
+        return Layout.Horizontal()
             | new Button("Left Button").Variant(ButtonVariant.Outline)
             | new Spacer()
             | new Button("Right Button").Variant(ButtonVariant.Primary);
@@ -77,12 +77,12 @@ public class HeaderSpacerView : ViewBase
                 | new Button("Sign Up").Variant(ButtonVariant.Primary)
         );
         
-        var content = Layout.Vertical().Gap(4)
+        var content = Layout.Vertical()
             | new Card("Welcome to our application")
             | new Card("This demonstrates how Spacer creates balanced layouts")
             | new Card("Elements are properly distributed across the available space");
             
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | header
             | content;
     }
@@ -165,7 +165,7 @@ public class DashboardSpacerView : ViewBase
     {
         var client = UseService<IClientProvider>();
         
-        var statsRow = Layout.Horizontal().Gap(4)
+        var statsRow = Layout.Horizontal()
             | new Card(
                 Layout.Vertical().Gap(2)
                     | Text.P("Total Users").Small()
@@ -190,7 +190,7 @@ public class DashboardSpacerView : ViewBase
             | new Button("Refresh").Icon(Icons.RefreshCw).Variant(ButtonVariant.Ghost)
             | new Button("Settings").Icon(Icons.Settings).Variant(ButtonVariant.Ghost);
             
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | statsRow
             | new Spacer().Height(Size.Units(2))
             | actionBar

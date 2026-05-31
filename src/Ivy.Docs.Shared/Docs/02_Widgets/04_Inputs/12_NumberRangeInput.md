@@ -68,7 +68,7 @@ public class NumberRangeVariantsDemo : ViewBase
         var range = UseState<(int, int)>(() => (30, 70));
         var nullableRange = UseState<(int?, int?)>(() => (30, 70));
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("Normal State").Small()
             | range.ToNumberRangeInput().Min(0).Max(100)
             | Text.P("Disabled State").Small()
@@ -94,7 +94,7 @@ public class NumberRangeFormatDemo : ViewBase
         var priceRange = UseState<(decimal, decimal)>(() => (50.0m, 200.0m));
         var percentRange = UseState<(double, double)>(() => (0.25, 0.75));
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("Decimal Format").Small()
             | decimalRange.ToNumberRangeInput()
                           .Min(0)
@@ -150,7 +150,7 @@ public class NumberRangePrefixSuffixDemo : ViewBase
         var percentRange = UseState<(double, double)>(() => (0.25, 0.75));
         var tempRange = UseState<(int, int)>(() => (18, 24));
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("Text Prefix ($)").Small()
             | priceRange.ToNumberRangeInput()
                         .Min(0)
@@ -187,7 +187,7 @@ public class NumberRangeStepDemo : ViewBase
     {
         var range = UseState<(int, int)>(() => (20, 80));
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("Step: 10 (snaps to multiples of 10)").Small()
             | range.ToNumberRangeInput()
                    .Min(0)
@@ -268,7 +268,7 @@ public class PriceFilterDemo : ViewBase
             .Where(p => p.Item2 >= lower && p.Item2 <= upper)
             .ToArray();
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.P("Filter by Price").Large().Bold()
             | priceRange.ToMoneyRangeInput()
                         .Currency("USD")

@@ -45,7 +45,7 @@ public static class PersonExtensions
         return new Card(
             Layout.Vertical().Gap(2)
             | Text.Label(person.Name)
-            | Layout.Horizontal().Gap(4)
+            | Layout.Horizontal()
             | new Badge($"Age: {person.Age}")
             | Text.P(person.Email).Small()
         );

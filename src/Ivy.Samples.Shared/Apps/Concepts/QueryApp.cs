@@ -146,7 +146,7 @@ public class TagInvalidationExample : ViewBase
             },
             tags: ["dashboard", "revenue"]);
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | Text.H3("Revalidate by Tag")
                | (Layout.Horizontal().Gap(2)
                   | new Button("Revalidate All (dashboard)", _ => queryManager.RevalidateByTag("dashboard"))
@@ -664,7 +664,7 @@ public class PaginationExample : ViewBase
             | Text.Literal(item)
         ).ToArray() ?? [];
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                // Header with status
                | (Layout.Vertical()
                   | Text.H4($"Page {page.Value} of {totalPages}")
@@ -693,14 +693,14 @@ public class PaginationComparisonExample : ViewBase
     {
         var page = UseState(1);
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | (Layout.Horizontal().Gap(2)
                   | new Button("â† Prev", _ => page.Set(p => Math.Max(1, p - 1)))
                         .Variant(ButtonVariant.Outline)
                   | Text.Literal($"Page {page.Value}")
                   | new Button("Next â†’", _ => page.Set(p => Math.Min(5, p + 1)))
                         .Variant(ButtonVariant.Outline))
-               | (Layout.Grid(2).Gap(4)
+               | (Layout.Grid(2)
                   | new Card(new ComparisonPanelWithKeepPrevious(page.Value)).Title("With KeepPrevious")
                   | new Card(new ComparisonPanelWithoutKeepPrevious(page.Value)).Title("Without KeepPrevious"))
             ;
@@ -813,9 +813,9 @@ public class CacheClearExample : ViewBase
             },
             tags: ["cache-demo", "settings"]);
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | Text.H3("Cached Queries")
-               | (Layout.Grid(3).Gap(4)
+               | (Layout.Grid(3)
                   | QueryStatusCard("Users", usersQuery, "users")
                   | QueryStatusCard("Orders", ordersQuery, "orders")
                   | QueryStatusCard("Settings", settingsQuery, "settings"))
@@ -916,10 +916,10 @@ public class PredicateInvalidationExample : ViewBase
                 return $"{key.Category}/{key.Id}: Pants - ${Random.Shared.Next(30, 100)}";
             });
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | Text.H3("Queries with Structured Keys")
                | Text.Muted("Each query uses a ProductKey(Category, Id) as its key.")
-               | (Layout.Grid(2).Gap(4)
+               | (Layout.Grid(2)
                   | ProductCard("Electronics #1", electronics1)
                   | ProductCard("Electronics #2", electronics2)
                   | ProductCard("Clothing #1", clothing1)
@@ -1008,11 +1008,11 @@ public class RefreshIntervalExample : ViewBase
                 ? new Badge("Refreshing...").Warning()
                 : new Badge("Live").Success();
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | Text.H3("Auto-Refreshing Query")
                | Text.Muted("This query automatically revalidates every 5 seconds while there are active subscribers.")
 
-               | (Layout.Horizontal().Gap(4)
+               | (Layout.Horizontal()
                   | (Layout.Vertical().Gap(2)
                      | statusBadge
                      | (liveData.Loading
@@ -1067,7 +1067,7 @@ public class QueryEffectTriggerExample : ViewBase
             .Select(entry => Text.Muted(entry))
             .ToArray();
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | Text.H3("Query State")
                | query
                | Text.Literal(query.Value ?? "No data")

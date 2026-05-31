@@ -74,7 +74,7 @@ public class DashboardFunnelChartStyle<TSource> : IFunnelChartStyle<TSource>
             .Funnel(nameof(FunnelChartData.Value), nameof(FunnelChartData.Stage))
             .Tooltip(new ChartTooltip().Animated(true))
             .Sort(FunnelSort.Descending)
-            .Gap(4);
+            ;
     }
 }
 
