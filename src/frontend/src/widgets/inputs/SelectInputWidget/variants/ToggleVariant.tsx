@@ -179,7 +179,7 @@ export const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
     <div
       className={cn(
         selectContainerVariant({ density }),
-        invalid && "border-destructive focus-within:ring-destructive",
+        invalid && "border-destructive focus-within:border-destructive",
         ghost &&
           "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
       )}
