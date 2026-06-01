@@ -19,6 +19,7 @@ public class ActivityHeatmapBuilder<TSource>(
     private EventHandler<Event<ActivityHeatmap, Activity>>? _onDayClick;
     private Dimension<TSource>? _dimension = dimension;
     private Measure<TSource>? _measure = measure;
+    private ActivityInterval? _interval;
 
     public override object Build()
     {
@@ -28,6 +29,7 @@ public class ActivityHeatmapBuilder<TSource>(
             throw new InvalidOperationException("A measure is required.");
 
         var activityData = UseState(Array.Empty<Activity>());
+        var resolvedInterval = UseState(ActivityInterval.Daily);
         var loading = UseState(true);
 
         UseEffect(async () =>
@@ -40,16 +42,20 @@ public class ActivityHeatmapBuilder<TSource>(
                     .Measure(_measure)
                     .ExecuteAsync();
 
+                var effectiveInterval = ResolveInterval(results);
+
                 var activities = results
-                    .Select(row => new Activity
+                    .Select(row => new
                     {
                         Date = ToDateOnly(row[_dimension.Name]),
+                        Hour = effectiveInterval == ActivityInterval.Hourly ? ToHour(row[_dimension.Name]) : null,
                         Count = Convert.ToInt32(row[_measure.Name])
                     })
-                    .GroupBy(a => a.Date)
-                    .Select(g => new Activity { Date = g.Key, Count = g.Sum(a => a.Count) })
+                    .GroupBy(x => (x.Date, x.Hour))
+                    .Select(g => new Activity { Date = g.Key.Date, Hour = g.Key.Hour, Count = g.Sum(x => x.Count) })
                     .ToArray();
 
+                resolvedInterval.Set(effectiveInterval);
                 activityData.Set(activities);
             }
             finally
@@ -67,6 +73,7 @@ public class ActivityHeatmapBuilder<TSource>(
             .ShowTooltip(_showTooltip)
             .ShowMonthLabels(_showMonthLabels)
             .ShowDayLabels(_showDayLabels)
+            .Interval(resolvedInterval.Value)
             .ValueLabel(_measure.Name)
             .StartDate(_startDate)
             .EndDate(_endDate);
@@ -89,6 +96,7 @@ public class ActivityHeatmapBuilder<TSource>(
         return this;
     }
 
+    public ActivityHeatmapBuilder<TSource> Interval(ActivityInterval interval) { _interval = interval; return this; }
     public ActivityHeatmapBuilder<TSource> ColorScheme(Colors scheme) { _colorScheme = scheme; return this; }
     public ActivityHeatmapBuilder<TSource> ShowTooltip(bool show = true) { _showTooltip = show; return this; }
     public ActivityHeatmapBuilder<TSource> ShowMonthLabels(bool show = true) { _showMonthLabels = show; return this; }
@@ -108,6 +116,22 @@ public class ActivityHeatmapBuilder<TSource>(
         return this;
     }
 
+    private ActivityInterval ResolveInterval(Dictionary<string, object>[] results)
+    {
+        if (_interval is { } explicitInterval)
+            return explicitInterval;
+
+        var hasIntraDay = results.Any(row => HasTimeComponent(row[_dimension!.Name]));
+        return hasIntraDay ? ActivityInterval.Hourly : ActivityInterval.Daily;
+    }
+
+    private static bool HasTimeComponent(object value) => value switch
+    {
+        DateTime dt => dt.TimeOfDay != TimeSpan.Zero,
+        DateTimeOffset dto => dto.TimeOfDay != TimeSpan.Zero,
+        _ => false
+    };
+
     internal static DateOnly ToDateOnly(object value) => value switch
     {
         DateOnly d => d,
@@ -115,6 +139,14 @@ public class ActivityHeatmapBuilder<TSource>(
         DateTimeOffset dto => DateOnly.FromDateTime(dto.DateTime),
         string s => DateOnly.Parse(s),
         _ => DateOnly.Parse(value.ToString()!)
+    };
+
+    internal static int? ToHour(object value) => value switch
+    {
+        DateTime dt => dt.Hour,
+        DateTimeOffset dto => dto.Hour,
+        string s when DateTime.TryParse(s, out var dt) => dt.Hour,
+        _ => null
     };
 }
 

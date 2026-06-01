@@ -1,7 +1,10 @@
 export interface Activity {
   date: string; // "YYYY-MM-DD"
+  hour?: number | null; // 0-23 for hourly; null/undefined for daily
   count: number | undefined;
 }
+
+export type ActivityInterval = "Daily" | "Hourly";
 
 export type IvyEventHandler = (
   eventName: string,
@@ -19,6 +22,9 @@ export interface ActivityHeatmapProps {
   showTooltip?: boolean;
   showMonthLabels?: boolean;
   showDayLabels?: boolean;
+  interval?: ActivityInterval;
   startDate?: string; // "YYYY-MM-DD"
   endDate?: string;   // "YYYY-MM-DD"
+  width?: string;
+  height?: string;
 }

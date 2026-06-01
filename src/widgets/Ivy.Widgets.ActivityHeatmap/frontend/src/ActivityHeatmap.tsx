@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./style.css";
 import { ActivityHeatmapProps, Activity } from "./types";
 import { computeMaxCount, getLevel } from "./levelUtils";
@@ -103,6 +103,56 @@ function buildGridFromRange(
   return weeks;
 }
 
+// Hourly "punchcard" grid: one column per day, 24 rows (hours 0-23).
+function buildHourlyGrid(
+  data: Activity[],
+  startDate?: string,
+  endDate?: string
+): (Activity | null)[][] {
+  const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
+  const today = new Date();
+
+  const firstStr = startDate ?? (sorted.length > 0 ? sorted[0].date : null);
+  const lastStr = endDate ?? (sorted.length > 0 ? sorted[sorted.length - 1].date : null);
+
+  // Default window for hourly is the last 7 days (24 * 365 would be unusable).
+  let rangeStart = firstStr ? new Date(firstStr + "T00:00:00") : new Date(new Date().setDate(today.getDate() - 6));
+  let rangeEnd = lastStr ? new Date(lastStr + "T00:00:00") : today;
+
+  if (
+    !Number.isNaN(rangeStart.getTime()) &&
+    !Number.isNaN(rangeEnd.getTime()) &&
+    rangeStart > rangeEnd
+  ) {
+    const t = rangeStart;
+    rangeStart = rangeEnd;
+    rangeEnd = t;
+  }
+
+  const dataMap = new Map<string, Activity>();
+  for (const cell of data) {
+    if (cell.hour != null && cell.hour >= 0 && cell.hour <= 23) {
+      dataMap.set(`${cell.date}T${cell.hour}`, cell);
+    }
+  }
+
+  const columns: (Activity | null)[][] = [];
+  const current = new Date(rangeStart);
+  current.setHours(0, 0, 0, 0);
+
+  while (current <= rangeEnd) {
+    const dateStr = formatLocalDateKey(current);
+    const column: (Activity | null)[] = [];
+    for (let h = 0; h < 24; h++) {
+      column.push(dataMap.get(`${dateStr}T${h}`) ?? { date: dateStr, hour: h, count: 0 });
+    }
+    columns.push(column);
+    current.setDate(current.getDate() + 1);
+  }
+
+  return columns;
+}
+
 export function ActivityHeatmap({
   id,
   events = [],
@@ -112,30 +162,52 @@ export function ActivityHeatmap({
   showTooltip = true,
   showMonthLabels = true,
   showDayLabels = true,
+  interval = "Daily",
   valueLabel,
   startDate,
   endDate,
 }: ActivityHeatmapProps) {
-  const weeks = buildGrid(data, startDate, endDate);
+  const isHourly = interval === "Hourly";
+  const rowCount = isHourly ? 24 : 7;
+  const labelWidth = isHourly ? 34 : 28;
+
+  const columns = isHourly
+    ? buildHourlyGrid(data, startDate, endDate)
+    : buildGrid(data, startDate, endDate);
   const maxCount = computeMaxCount(data);
   const colors = buildColorScheme(`var(--color-${colorScheme.toLowerCase()})`);
   const clickable = events.includes("OnDayClick");
   const gridContainer = useRef<HTMLDivElement>(null);
+  const scrollXContainer = useRef<HTMLDivElement>(null);
 
   const [tooltip, setTooltip] = useState<{ day: Activity; } | null>(null);
   const tooltipCoordinates = useRef<{ x: number; y: number } | null>(null);
   const tooltipDiv = useRef<HTMLDivElement>(null);
 
-  // Compute month labels: for each week, check if the first non-null day is the first occurrence of a new month
-  const monthLabels: string[] = weeks.map((week, wi) => {
-    const firstDay = week[0];
-    if (!firstDay) return "";
-    const date = new Date(firstDay.date + "T00:00:00");
+  // Row (y-axis) labels: weekdays for daily, hours for hourly.
+  const rowLabels: string[] = isHourly
+    ? Array.from({ length: 24 }, (_, h) => (h % 6 === 0 ? `${String(h).padStart(2, "0")}:00` : ""))
+    : ["", MONDAY, "", WEDNESDAY, "", FRIDAY, ""];
+
+  // Column (x-axis) labels: month name on month boundaries (daily) or a short date
+  // on the first column / month boundaries (hourly).
+  const columnLabels: string[] = columns.map((column, ci) => {
+    const firstCell = column[0];
+    if (!firstCell) return "";
+    const date = new Date(firstCell.date + "T00:00:00");
+
+    if (isHourly) {
+      if (ci === 0 || date.getDate() === 1) {
+        return `${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`;
+      }
+      return "";
+    }
+
     if (date.getDate() <= 7) {
       // First week of the month
-      const prevWeekFirstDay = wi > 0 ? weeks[wi - 1]?.[0] : null;
-      if (!prevWeekFirstDay) return MONTH_NAMES[date.getMonth()] ?? "";
-      const prevDate = new Date(prevWeekFirstDay.date + "T00:00:00");
+      const prevColumnFirst = ci > 0 ? columns[ci - 1]?.[0] : null;
+      if (!prevColumnFirst) return MONTH_NAMES[date.getMonth()] ?? "";
+      const prevDate = new Date(prevColumnFirst.date + "T00:00:00");
       if (prevDate.getMonth() !== date.getMonth()) {
         return MONTH_NAMES[date.getMonth()] ?? "";
       }
@@ -149,22 +221,27 @@ export function ActivityHeatmap({
     }
   };
 
+  useEffect(() => {
+    if (scrollXContainer.current) {
+      scrollXContainer.current.scrollLeft = scrollXContainer.current!.scrollWidth;
+    }
+  }, [])
+
   return (
     <div className="ivy-activity-heatmap-container">
-      <div className="overflow-x-auto p-0"
-        style={{ direction: "rtl" }}>
-        <div className="inline-flex flex-col gap-1 font-sans"
-          style={{ direction: "ltr" }}>
+      <div className="overflow-x-auto snap-x h-100 p-0 bg-card"
+        ref={scrollXContainer}>
+        <div className="inline-flex flex-col gap-1 font-sans h-100">
           {showMonthLabels && (
-            <div className="flex gap-0.5 text-[#57606a] w-fit">
-              {showDayLabels && <div style={{ width: "28px" }} />}
-              {weeks.map((_, wi) => (
+            <div className="sticky top-0 flex gap-0.5 text-[#57606a] w-full bg-card">
+              {showDayLabels && <div style={{ width: `${labelWidth}px` }} />}
+              {columns.map((_, ci) => (
                 <div
-                  key={wi}
+                  key={ci}
                   className="text-center flex text-secondary-foreground opacity-50 last:hidden"
                   style={{ width: "11px", fontSize: "10px" }}
                 >
-                  {monthLabels[wi]}
+                  {columnLabels[ci]}
                 </div>
               ))}
             </div>
@@ -172,25 +249,22 @@ export function ActivityHeatmap({
 
           <div className="flex gap-1">
             {showDayLabels && (
-              <div className="flex flex-col justify-end absolute left-0 top-0 bottom-0 bg-card">
+              <div className="flex flex-col justify-end sticky left-0 top-0 bottom-0 bg-card">
                 <div
-                  className="grid gap-0.5 text-secondary-foreground opacity-50 pt-0.5 *:pr-2 *:text-right"
-                  style={{ gridTemplateRows: "repeat(7, 11px)", width: "28px" }}
+                  className="grid gap-0.5 text-secondary-foreground opacity-50 *:pr-2 *:text-right"
+                  style={{ gridTemplateRows: `repeat(${rowCount}, 11px)`, width: `${labelWidth}px` }}
                 >
-                  <div />
-                  <div style={{ fontSize: "10px", lineHeight: "11px" }}>{MONDAY}</div>
-                  <div />
-                  <div style={{ fontSize: "10px", lineHeight: "11px" }}>{WEDNESDAY}</div>
-                  <div />
-                  <div style={{ fontSize: "10px", lineHeight: "11px" }}>{FRIDAY}</div>
-                  <div />
+                  {rowLabels.map((label, ri) => (
+                    <div key={ri} style={{ fontSize: "10px", lineHeight: "11px" }}>
+                      {label}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
 
             <div className="flex gap-0.5"
               ref={gridContainer}
-              style={{ paddingLeft: showDayLabels ? 28 : 0 }}
               onMouseEnter={(e) => {
                 if (!showTooltip) return;
 
@@ -223,18 +297,18 @@ export function ActivityHeatmap({
                 setTooltip(null);
               }}
             >
-              {weeks.map((week, wi) => (
+              {columns.map((column, ci) => (
                 <div
-                  key={wi}
+                  key={ci}
                   className="grid gap-0.5"
-                  style={{ gridTemplateRows: "repeat(7, 11px)" }}
+                  style={{ gridTemplateRows: `repeat(${rowCount}, 11px)` }}
                 >
-                  {week.map((day, di) => {
+                  {column.map((day, di) => {
                     const level = day ? getLevel(day.count, maxCount) : 0;
                     const bg = colors[level] ?? colors[0]!;
                     return (
                       <div
-                        key={day?.date ?? `${di}-${wi}`}
+                        key={day ? `${day.date}T${day.hour ?? "d"}` : `${di}-${ci}`}
                         className={`w-[11px] h-[11px] rounded-sm hover:rounded-none hover:scale-110 ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
                         style={{ backgroundColor: bg }}
                         onMouseEnter={() => {
