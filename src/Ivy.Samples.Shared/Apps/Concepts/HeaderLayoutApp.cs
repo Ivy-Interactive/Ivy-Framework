@@ -37,7 +37,7 @@ public class HeaderLayoutView : ViewBase
 
         // Create the fixed header/toolbar
         var toolbar = new Card(
-            Layout.Horizontal().Gap(4)
+            Layout.Horizontal()
                 | searchText.ToTextInput()
                     .Placeholder("Search items...")
                     .Variant(TextInputVariant.Search)
@@ -93,7 +93,7 @@ public class HeaderLayoutView : ViewBase
                 .Description("HeaderLayout is commonly used for admin panels, data management interfaces, content browsers, and any interface where you need persistent controls.")
         });
 
-        var content = Layout.Vertical().Gap(4) | contentItems.ToArray();
+        var content = Layout.Vertical() | contentItems.ToArray();
 
         // Use HeaderLayout with constrained height to demonstrate scrolling
         return new HeaderLayout(toolbar, content).Height(Size.Units(500));

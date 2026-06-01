@@ -99,30 +99,29 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
     <div
       className={cn("flex flex-col h-full w-full", removeParentPadding && "remove-parent-padding")}
     >
-      <div ref={containerRef} className="relative pb-[6px] w-full" style={getWidth(width)}>
-        {/* Hover Highlight */}
-        <div
-          className="absolute h-[26px] transition-all duration-300 ease-out bg-accent/20 rounded-[6px] flex items-center"
-          style={{
-            opacity: activeIndex !== null ? 1 : 0,
-            pointerEvents: "none",
-          }}
-        />
-        {/* Active Indicator */}
-        <div
-          className={cn(
-            "absolute bottom-0 h-[2px] bg-foreground",
-            !isInitialRender && "transition-all duration-300 ease-out",
-            activeTabId && !visibleTabs.includes(activeTabId) && "opacity-0",
-          )}
-          style={activeStyle}
-        />
+      <div ref={containerRef} className="relative pl-2 pt-2 pb-4 w-full" style={getWidth(width)}>
         {/* Tabs */}
         <div
           ref={tabsListRef}
           className={"relative flex gap-x-[6px] gap-y-[20px] items-center"}
           role="tablist"
         >
+          {/* Hover Highlight */}
+          <div
+            className="absolute h-[26px] transition-all duration-300 ease-out bg-accent/20 rounded-[6px] flex items-center"
+            style={{
+              opacity: activeIndex !== null ? 1 : 0,
+              pointerEvents: "none",
+            }}
+          />
+          <div
+            className={cn(
+              "absolute bottom-[-6px] h-[2px] bg-foreground",
+              !isInitialRender && "transition-all duration-300 ease-out",
+              activeTabId && !visibleTabs.includes(activeTabId) && "opacity-0",
+            )}
+            style={activeStyle}
+          />
           {orderedTabWidgets.map((tabWidget, index) => {
             if (!React.isValidElement(tabWidget)) return null;
             const props = getTabProps(tabWidget);

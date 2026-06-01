@@ -6,7 +6,7 @@ public class ScriptApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.H4("Inline JavaScript")
             | new Script().InlineCode("console.log('Hello from Ivy Script widget!');")
             | Text.H4("External Script (async)")

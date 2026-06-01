@@ -21,7 +21,7 @@ public class DesktopShowcaseApp : ViewBase
             return string.IsNullOrEmpty(s) ? line : $"{line}\n{s}";
         });
 
-        return Layout.Vertical().Gap(4).Padding(4)
+        return Layout.Vertical().Padding(4)
                | Text.H1("Ivy Desktop Showcase")
                | Text.Markdown("This app demonstrates all `DesktopWindow` capabilities. " +
                                "Each section exercises a different Rustino feature through the Ivy.Desktop API.")
@@ -134,6 +134,12 @@ public class DesktopShowcaseApp : ViewBase
                       badgeCount.Set(99);
                       window.SetBadgeCount(99);
                       Log("Badge set to 99");
+                  })
+                  | new Button("Custom Colors", () =>
+                  {
+                      badgeCount.Set(5);
+                      window.SetBadgeCount(5, background: "#4A154B", foreground: "#FFFFFF");
+                      Log("Badge set to 5 with custom colors (Slack purple)");
                   })
                   | new Button("Clear Badge", () =>
                   {

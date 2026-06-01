@@ -2,6 +2,8 @@ import React, { ReactNode, useState, useRef } from "react";
 import { LucideIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Densities } from "@/types/density";
+import { controlHeight, controlSize } from "@/components/ui/density-scale";
 
 /**
  * Display modes for DataTableOption
@@ -35,6 +37,7 @@ export interface DataTableOptionProps {
 
   // Button configuration
   showLabel?: boolean;
+  density?: Densities;
 }
 
 /**
@@ -56,6 +59,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   inlineDirection = "right",
   defaultExpanded: propDefaultExpanded = false,
   showLabel = true,
+  density = Densities.Medium,
 }) => {
   const [expanded, setExpanded] = useState(() => propDefaultExpanded);
   const prevDefaultExpandedRef = useRef(propDefaultExpanded);
@@ -65,6 +69,11 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
     setExpanded(propDefaultExpanded);
   }
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const heightClass = controlHeight[density] || controlHeight.Medium;
+  const sizeClass = controlSize[density] || controlSize.Medium;
+  const pxClass =
+    density === Densities.Small ? "px-2" : density === Densities.Large ? "px-4" : "px-3";
 
   // Handle click outside to collapse
   // useEffect(() => {
@@ -93,7 +102,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
           <button
             className={cn(
               "inline-flex items-center justify-center rounded-md text-sm font-medium",
-              "h-9 px-3 gap-2 cursor-pointer",
+              `${heightClass} ${pxClass} gap-2 cursor-pointer`,
               "bg-transparent hover:bg-accent hover:text-accent-foreground",
               "border border-input",
               "transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
@@ -130,7 +139,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
       <div
         ref={containerRef}
         className={cn(
-          "inline-flex items-center mb-3",
+          "inline-flex items-center",
           "rounded-field border border-input bg-transparent shadow-sm",
           "dark:border-white/10 dark:bg-white/5",
           "focus-within:outline-none focus-within:ring-1 focus-within:ring-ring",
@@ -141,7 +150,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         <button
           className={cn(
             "inline-flex items-center justify-center text-sm font-medium",
-            "size-9 shrink-0 gap-2 cursor-pointer",
+            `${sizeClass} shrink-0 gap-2 cursor-pointer`,
             "bg-transparent rounded-l-fields",
             "transition-colors focus-visible:outline-none",
             expanded
@@ -157,7 +166,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         {/* Content container - fixed dimensions when expanded */}
         <div
           className={cn(
-            "border-l h-9",
+            `border-l ${heightClass}`,
             "transition-all duration-300 ease-in-out",
             expanded ? "w-[450px] opacity-100 border-input" : "w-0 opacity-0 border-transparent",
           )}
@@ -185,7 +194,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
       <div
         ref={containerRef}
         className={cn(
-          "inline-flex items-center mb-3",
+          "inline-flex items-center",
           "border rounded-field",
           "transition-all duration-300 ease-in-out",
           "bg-transparent",
@@ -203,7 +212,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
               : "max-w-0 opacity-0 border-transparent",
           )}
         >
-          <div className={cn("h-9 flex items-center", contentClassName)}>
+          <div className={cn(`${heightClass} flex items-center`, contentClassName)}>
             {React.isValidElement(children)
               ? React.cloneElement(children as React.ReactElement<{ isExpanded?: boolean }>, {
                   isExpanded: expanded,
@@ -215,7 +224,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         <button
           className={cn(
             "inline-flex items-center justify-center text-sm font-medium",
-            "h-9 px-3 gap-2 cursor-pointer",
+            `${heightClass} ${pxClass} gap-2 cursor-pointer`,
             "bg-transparent hover:bg-accent hover:text-accent-foreground rounded-r-md",
             "transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
             expanded && "bg-accent",
@@ -234,7 +243,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
     <div
       ref={containerRef}
       className={cn(
-        "inline-flex flex-col mb-3",
+        "inline-flex flex-col",
         "border rounded-field",
         "transition-all duration-300 ease-in-out",
         "bg-transparent",
@@ -245,7 +254,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
       <button
         className={cn(
           "inline-flex items-center justify-center text-sm font-medium",
-          "h-9 px-3 gap-2 w-full cursor-pointer",
+          `${heightClass} ${pxClass} gap-2 w-full cursor-pointer`,
           "bg-transparent hover:bg-accent hover:text-accent-foreground",
           "transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
           expanded && "bg-accent border-b border-input/30 rounded-t-md",

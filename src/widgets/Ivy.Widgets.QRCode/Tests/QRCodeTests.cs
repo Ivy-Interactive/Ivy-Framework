@@ -16,14 +16,13 @@ public class QRCodeTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void Defaults_ValueEmpty_LowCorrection_IncludeMarginTrue_OptionalNull()
+    public void Defaults_ValueEmpty_LowCorrection_OptionalNull()
     {
         var qr = new QRCode();
 
         Assert.Equal("", qr.Value);
         Assert.Null(qr.PixelSize);
         Assert.Equal(QrErrorCorrectionLevel.Low, qr.ErrorCorrectionLevel);
-        Assert.True(qr.IncludeMargin);
         Assert.Null(qr.Background);
         Assert.Null(qr.Foreground);
     }
@@ -53,14 +52,6 @@ public class QRCodeTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void IncludeMargin_Extension_SetsIncludeMargin()
-    {
-        var qr = new QRCode().IncludeMargin(false);
-
-        Assert.False(qr.IncludeMargin);
-    }
-
-    [Fact]
     public void Background_Foreground_Extensions_SetColors()
     {
         var qr = new QRCode()
@@ -78,18 +69,15 @@ public class QRCodeTests(ITestOutputHelper output)
         var chained = original
             .Value("x")
             .PixelSize(64)
-            .ErrorCorrectionLevel(QrErrorCorrectionLevel.Medium)
-            .IncludeMargin(false);
+            .ErrorCorrectionLevel(QrErrorCorrectionLevel.Medium);
 
         Assert.Equal("", original.Value);
         Assert.Null(original.PixelSize);
         Assert.Equal(QrErrorCorrectionLevel.Low, original.ErrorCorrectionLevel);
-        Assert.True(original.IncludeMargin);
 
         Assert.Equal("x", chained.Value);
         Assert.Equal(64, chained.PixelSize);
         Assert.Equal(QrErrorCorrectionLevel.Medium, chained.ErrorCorrectionLevel);
-        Assert.False(chained.IncludeMargin);
         Assert.NotSame(original, chained);
     }
 
@@ -116,7 +104,6 @@ public class QRCodeTests(ITestOutputHelper output)
         Assert.Null(props["value"]);
         Assert.Null(props["pixelSize"]);
         Assert.Null(props["errorCorrectionLevel"]);
-        Assert.Null(props["includeMargin"]);
         Assert.Null(props["background"]);
         Assert.Null(props["foreground"]);
     }
@@ -128,7 +115,6 @@ public class QRCodeTests(ITestOutputHelper output)
             .Value("https://example.com")
             .PixelSize(96)
             .ErrorCorrectionLevel(QrErrorCorrectionLevel.Quartile)
-            .IncludeMargin(false)
             .Background(Colors.Slate)
             .Foreground(Colors.Rose);
 
@@ -140,7 +126,6 @@ public class QRCodeTests(ITestOutputHelper output)
         Assert.Equal("https://example.com", props["value"]!.GetValue<string>());
         Assert.Equal(96, props["pixelSize"]!.GetValue<int>());
         Assert.Equal("Quartile", props["errorCorrectionLevel"]!.GetValue<string>());
-        Assert.False(props["includeMargin"]!.GetValue<bool>());
         Assert.Equal("Slate", props["background"]!.GetValue<string>());
         Assert.Equal("Rose", props["foreground"]!.GetValue<string>());
     }

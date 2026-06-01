@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rustino.NET" Version="0.3.3" />
+    <PackageReference Include="Rustino.NET" Version="0.3.7" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,7 +46,7 @@
   <Import Project="build/Ivy.Desktop.targets" />
 
   <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
 </Project>

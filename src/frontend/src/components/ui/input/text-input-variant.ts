@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
  * `size-7`/`size-9` target is larger than the glyph, which reads as extra padding.
  */
 export const affixEmbeddedButtonClasses =
-  "[&_button]:!px-0 [&_button]:shadow-none [&_button]:rounded [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors [&_button.size-7]:!size-4 [&_button.size-9]:!size-6";
+  "[&_button]:!px-0 [&_button]:text-foreground [&_button]:shadow-none [&_button]:rounded [&_button]:hover:bg-accent [&_button]:cursor-pointer [&_button]:transition-colors [&_button.size-7]:!size-4 [&_button.size-9]:!size-6";
 
 /** Tighter affix cell padding when the slot only contains an icon-sized button. */
 export const affixIconOnlyCellPaddingClasses =

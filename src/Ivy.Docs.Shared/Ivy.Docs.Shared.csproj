@@ -42,7 +42,7 @@
 
 
 
-  <Target Name="TransformMarkdown" BeforeTargets="CoreCompile">
+  <Target Name="TransformMarkdown" AfterTargets="ResolveProjectReferences" BeforeTargets="CoreCompile">
     <PropertyGroup>
       <DocsInputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Docs'))</DocsInputPath>
       <DocsOutputPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'Generated'))</DocsOutputPath>

@@ -128,7 +128,9 @@ export function convertToGridColumns(
     const originalIndex = columns.indexOf(col);
     const numericBaseWidth = resolveColumnWidth(col, originalIndex, columnWidths, headerFont);
 
-    const grow = parseSizeGrow(col.originalWidth);
+    const grow = parseSizeGrow(
+      col.originalWidth ?? (typeof col.width === "string" ? col.width : undefined),
+    );
     const isLastColumn = index === orderedColumns.length - 1;
     const effectiveGrow = grow !== undefined ? grow : isLastColumn ? 1 : undefined;
 

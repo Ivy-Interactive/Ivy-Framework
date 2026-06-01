@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <RootNamespace>Ivy.Benchmarks.E2E</RootNamespace>
-    <DefaultItemExcludes>$(DefaultItemExcludes);Host.Native\**;Host.Legacy\**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Host.Native/**;Host.Legacy/**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>

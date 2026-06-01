@@ -18,7 +18,6 @@ interface QRCodeProps {
   value?: string;
   pixelSize?: number;
   errorCorrectionLevel?: QrErrorCorrectionLevel;
-  includeMargin?: boolean;
   background?: string;
   foreground?: string;
   eventHandler?: EventHandler;
@@ -30,7 +29,6 @@ export const QRCode: React.FC<QRCodeProps> = ({
   value = "",
   pixelSize = 256,
   errorCorrectionLevel = "Low",
-  includeMargin = true,
   background,
   foreground,
 }) => {
@@ -43,7 +41,7 @@ export const QRCode: React.FC<QRCodeProps> = ({
       value={value || " "}
       size={pixelSize}
       level={level}
-      marginSize={includeMargin ? 4 : 0}
+      marginSize={0}
       {...(bgColor !== undefined ? { bgColor } : {})}
       {...(fgColor !== undefined ? { fgColor } : {})}
     />

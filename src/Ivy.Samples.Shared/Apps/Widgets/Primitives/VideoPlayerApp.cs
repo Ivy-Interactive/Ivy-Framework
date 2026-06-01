@@ -79,7 +79,7 @@ public class VideoPlayerApp : SampleBase
 
                 // Basic Usage
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Basic Video Player")
                     | Text.P("Default video player with standard browser controls.").Small()
                     | basicVideo
@@ -87,7 +87,7 @@ public class VideoPlayerApp : SampleBase
 
                 // Autoplay & Looping
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Muted Autoplay Video")
                     | Text.P("Muted autoplay video (browsers usually allow muted autoplay).").Small()
                     | autoplayMutedVideo
@@ -97,7 +97,7 @@ public class VideoPlayerApp : SampleBase
 
                 // Controls Toggle
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Controls Toggle")
                     | Text.P("Video with controls enabled.").Small()
                     | withControls
@@ -109,7 +109,7 @@ public class VideoPlayerApp : SampleBase
 
                 // Volume Control
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("50% Volume")
                     | Text.P("Video player set to 50% volume.").Small()
                     | halfVolumeVideo
@@ -120,7 +120,7 @@ public class VideoPlayerApp : SampleBase
 
                 // Custom Sizing
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Custom Sized Video Player")
                     | Text.P("Video player with 50% width and fixed height.").Small()
                     | customSizedVideo
@@ -128,7 +128,7 @@ public class VideoPlayerApp : SampleBase
 
                 // Poster
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Poster Image")
                     | Text.P("Video player with a preview image before playback.").Small()
                     | posterVideo
@@ -136,7 +136,7 @@ public class VideoPlayerApp : SampleBase
 
                 // Time Range
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Start Time")
                     | Text.P("Video starts at 5 seconds.").Small()
                     | startTimeVideo
@@ -150,11 +150,11 @@ public class VideoPlayerApp : SampleBase
 
                 // Event Callbacks
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Event Callbacks")
                     | Text.P("Track video playback events for analytics, sequential content, or coordinated UI.").Small()
                     | eventVideo
-                    | (Layout.Horizontal().Gap(4)
+                    | (Layout.Horizontal()
                         | new Badge($"Play: {playCount.Value}").Variant(BadgeVariant.Secondary)
                         | new Badge($"Pause: {pauseCount.Value}").Variant(BadgeVariant.Secondary)
                         | new Badge(completedState.Value ? "Completed" : "Not completed")
@@ -165,7 +165,7 @@ public class VideoPlayerApp : SampleBase
 
                 // Playback Rate
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("1.5x Speed (Fast)")
                     | Text.P("Play tutorial or lecture at increased speed.").Small()
                     | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
@@ -182,7 +182,7 @@ public class VideoPlayerApp : SampleBase
 
                 // Subtitles
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("Single Subtitle Track")
                     | Text.P("Video with a single English subtitle track.").Small()
                     | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
@@ -197,7 +197,7 @@ public class VideoPlayerApp : SampleBase
 
                 // YouTube
                 | (new Card(
-                    Layout.Vertical().Gap(4)
+                    Layout.Vertical()
                     | Text.H4("YouTube Video Embed")
                     | Text.P("Embed YouTube videos directly by URL. Supports normal videos, Shorts, and timecodes.").Small()
                         | new VideoPlayer("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=100s")

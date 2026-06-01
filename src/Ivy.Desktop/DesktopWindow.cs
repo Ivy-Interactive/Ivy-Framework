@@ -166,7 +166,7 @@ public class DesktopWindow(Server server)
 
     // ── Post-run badge ───────────────────────────────────────────────────
 
-    public void SetBadgeCount(int? count) => _window?.SetBadgeCount(count);
+    public void SetBadgeCount(int? count, string? background = null, string? foreground = null) => _window?.SetBadgeCount(count, background, foreground);
     public void ClearBadge() => _window?.ClearBadge();
 
     // ── Post-run dialogs ─────────────────────────────────────────────────
@@ -338,6 +338,8 @@ public class DesktopWindow(Server server)
         if (_zoomHotkeys) window.SetZoomHotkeysEnabled(true);
         if (!_mediaAutoplay) window.SetMediaAutoplayEnabled(false);
         foreach (var script in _initScripts) window.AddInitScript(script);
+
+        if (_appId != null) window.SetApplicationId(_appId);
 
         if (_iconFilePath != null)
         {
@@ -549,10 +551,16 @@ public class DesktopWindow(Server server)
 
     private static string? ExtractEmbeddedIcon(Assembly assembly, string resourceName)
     {
+        Console.Error.WriteLine($"[Ivy.Desktop] Attempting to extract embedded icon: {resourceName} from assembly: {assembly.FullName}");
         using var stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream == null) return null;
+        if (stream == null)
+        {
+            Console.Error.WriteLine($"[Ivy.Desktop] Manifest resource '{resourceName}' was NOT found in assembly {assembly.FullName}!");
+            return null;
+        }
 
         var tempPath = Path.Combine(Path.GetTempPath(), $"ivy_icon_{Path.GetFileName(resourceName)}");
+        Console.Error.WriteLine($"[Ivy.Desktop] Successfully found resource. Extracting to: {tempPath}");
         using var fileStream = File.Create(tempPath);
         stream.CopyTo(fileStream);
         return tempPath;

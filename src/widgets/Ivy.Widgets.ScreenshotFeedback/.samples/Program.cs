@@ -14,7 +14,7 @@ class ScreenshotFeedbackApp : ViewBase
         var uploadCtx = UseUpload(MemoryStreamUploadHandler.Create(screenshot));
         var isOpen = UseState(false);
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | Text.H1("Screenshot Feedback Demo")
                | Text.P("Click the button below to capture a screenshot, annotate it, and upload.")
                | new Button("Take Screenshot", () => isOpen.Set(true), icon: Icons.Camera)
