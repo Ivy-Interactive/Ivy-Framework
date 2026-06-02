@@ -44,7 +44,7 @@ class ActivityHeatmapDemo : ViewBase
             .ToList();
 
         var basicUsageExample = Layout.Vertical().Width(Size.Full())
-            | Text.H2("Basic Usage").Anchor("basic-usage")
+            | Text.H3("Basic Usage").Anchor("basic-usage")
             | new CodeBlock("""
                 public record RepoStats(
                     DateTime Timestamp,
@@ -80,7 +80,7 @@ class ActivityHeatmapDemo : ViewBase
         );
 
         var optionalPropsExample = Layout.Vertical()
-            | Text.H2("With Optional Properties").Anchor("optional-props")
+            | Text.H3("With Optional Properties").Anchor("optional-props")
             | new CodeBlock($$"""
                 public class ActivityHeatmapOptionalProps : ViewBase
                 {
@@ -131,7 +131,7 @@ class ActivityHeatmapDemo : ViewBase
             .ToList();
 
         var hourlyIntervalExample = Layout.Vertical()
-            | Text.H2("With Hourly Interval")
+            | Text.H3("With Hourly Interval")
             | new CodeBlock("""
                         public class HourlyIntervalExample
                         {
@@ -174,7 +174,7 @@ class ActivityHeatmapDemo : ViewBase
             });
 
         var mainContent = Layout.Vertical().Width(Size.Full())
-            | Text.H1("ActivityHeatmap")
+            | Text.H2("ActivityHeatmap")
             | basicUsageExample
             | optionalPropsExample
             | hourlyIntervalExample
