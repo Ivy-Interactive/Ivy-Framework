@@ -229,7 +229,7 @@ export function ActivityHeatmap({
 
   return (
     <div className="ivy-activity-heatmap-container">
-      <div className="overflow-x-auto h-100 p-0 bg-card"
+      <div className="overflow-x-auto h-100 bg-card ivy-activity-heatmap-scroll"
         ref={scrollXContainer}>
         <div className="inline-flex flex-col gap-1 font-sans h-100">
           {showMonthLabels && (

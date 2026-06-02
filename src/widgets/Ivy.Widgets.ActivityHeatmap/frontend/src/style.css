@@ -10,3 +10,9 @@
     display: flex;
     background-color: var(--card);
 }
+
+.ivy-activity-heatmap-scroll {
+    /* room for the auto-hiding overlay scrollbar so it doesn't cover the last row/col */
+    padding-bottom: 14px;
+    padding-right: 14px;
+}
