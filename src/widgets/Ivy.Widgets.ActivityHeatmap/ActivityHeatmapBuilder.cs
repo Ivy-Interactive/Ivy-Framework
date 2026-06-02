@@ -31,6 +31,7 @@ public class ActivityHeatmapBuilder<TSource>(
         var activityData = UseState(Array.Empty<Activity>());
         var resolvedInterval = UseState(ActivityInterval.Daily);
         var loading = UseState(true);
+        var error = UseState<Exception?>();
 
         UseEffect(async () =>
         {
@@ -58,6 +59,10 @@ public class ActivityHeatmapBuilder<TSource>(
                 resolvedInterval.Set(effectiveInterval);
                 activityData.Set(activities);
             }
+            catch (Exception ex)
+            {
+                error.Set(ex);
+            }
             finally
             {
                 loading.Set(false);
@@ -66,6 +71,9 @@ public class ActivityHeatmapBuilder<TSource>(
 
         if (loading.Value)
             return new ChatLoading();
+
+        if (error.Value is { } loadError)
+            return Callout.Error(loadError.Message);
 
         var widget = new ActivityHeatmap()
             .Data(activityData.Value)
