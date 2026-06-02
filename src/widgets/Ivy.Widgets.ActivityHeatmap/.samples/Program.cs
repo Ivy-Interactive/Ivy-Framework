@@ -10,6 +10,11 @@ await server.RunAsync();
 [App]
 class ActivityHeatmapDemo : ViewBase
 {
+    private record RepoStats(
+        DateOnly Date,
+        DateTime Timestamp,
+        int Downloads,
+        int Stars);
     public override object Build()
     {
         var client = UseService<IClientProvider>();
@@ -27,44 +32,51 @@ class ActivityHeatmapDemo : ViewBase
         var today = DateOnly.FromDateTime(DateTime.Today);
         var start = today.AddDays(-364);
 
-        var data = Enumerable
+        var dailyData = Enumerable
             .Range(0, 365)
             .Select(start.AddDays)
             .Where(_ => rng.NextDouble() > 0.4)
-            .Select(d => new { Date = d, Count = rng.Next(1, 20) })
+            .Select(d => new RepoStats(
+                Date: d,
+                Timestamp: d.ToDateTime(new TimeOnly()),
+                Downloads: rng.Next(1, 20),
+                Stars: 0))
             .ToList();
 
         var basicUsageExample = Layout.Vertical().Width(Size.Full())
             | Text.H2("Basic Usage").Anchor("basic-usage")
-            | new CodeBlock($$"""
+            | new CodeBlock("""
+                public record RepoStats(
+                    DateTime Timestamp,
+                    int Stars,
+                    int Downloads);
+
+                public interface IMyRepoService
+                {
+                    IEnumerable<RepoStats> GetDailyStats(),
+                    IEnumerable<RepoStats> GetHourlyStats()
+                }
+
                 public class ActivityHeatmapDemo : ViewBase
                 {
                     public override object Build()
                     {
-                        var rng = new Random(42);
-                        var today = DateOnly.FromDateTime(DateTime.Today);
-                        var start = today.AddDays(-364);
-
-                        var data = Enumerable
-                            .Range(0, 365)
-                            .Select(start.AddDays)
-                            .Where(_ => rng.NextDouble() > 0.4)
-                            .Select(d => new Activity { Date = d, Count = rng.Next(1, 20) })
-                            .ToList();
+                        var repoService = UseService<IMyRepoService>();
+                        var dailyRepoStats = repoService.GetDailyStats().ToList();
 
                         return Layout.Vertical()
-                            | data.ToActivityHeatmap()
+                            | dailyRepoStats.ToActivityHeatmap()
                                 .Dimension(ActivityDimension.Days, d => d.Date)
-                                .Measure("Count", e => e.Sum(d => d.Count));
+                                .Measure("Stars", e => e.Sum(d => d.Stars));
                     }
                 }
                 """)
 
         | new Card(
         Layout.Vertical()
-                | data.ToActivityHeatmap()
+                | dailyData.ToActivityHeatmap()
                     .Dimension(ActivityDimension.Days, d => d.Date)
-                    .Measure("Count", e => e.Sum(d => d.Count))
+                    .Measure("Stars", e => e.Sum(d => d.Downloads))
         );
 
         var optionalPropsExample = Layout.Vertical()
@@ -74,17 +86,21 @@ class ActivityHeatmapDemo : ViewBase
                 {
                     public override object Build()
                     {
+                        var repoService = UseService<IMyRepoService>();
+                        var dailyRepoStats = repoService.GetDailyStats().ToList();
+
                         return Layout.Vertical()
-                            | data
+                            | dailyRepoStats
                                 .ToActivityHeatmap()
                                 .Dimension(ActivityDimension.Days, d => d.Date)
-                                .Measure("Downloads", e => e.Sum(d => d.Count))
+                                .Measure("Downloads", e => e.Sum(d => d.Downloads))
                                 .ShowMonthLabels({{showMonthLabels.Value.ToString().ToLower()}})
                                 .ShowDayLabels({{showDayLabels.Value.ToString().ToLower()}})
                                 .StartDate(DateOnly.Parse({{$"\"{startDate}\""}}))
                                 .EndDate(DateOnly.Parse({{$"\"{endDate}\""}}))
                                 .ColorScheme(Colors.{{selectedColor.Value}})
-                                .OnDayClick(day => Console.WriteLine(...));
+                                .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Downloads}"));
+                    }
                 }
                 """)
 
@@ -94,10 +110,10 @@ class ActivityHeatmapDemo : ViewBase
                 | showMonthLabels.ToBoolInput().WithField().Label("Show months").Width(Size.MaxContent())
                 | nullableRange.ToDateRangeInput().WithField().Label("Time period").Width(Size.Fit()))
 
-            | new Card(data
+            | new Card(dailyData
                 .ToActivityHeatmap()
                 .Dimension(ActivityDimension.Days, d => d.Date)
-                .Measure("Downloads", e => e.Sum(d => d.Count))
+                .Measure("Downloads", e => e.Sum(d => d.Downloads))
                 .StartDate(startDate)
                 .EndDate(endDate)
                 .ColorScheme(selectedColor.Value)
@@ -111,7 +127,7 @@ class ActivityHeatmapDemo : ViewBase
             .Range(0, 24 * 30)
             .Select(d => start2.AddHours(d))
             .Where(_ => rng.NextDouble() > 0.2)
-            .Select(d => new { Timestamp = d, Value = GenerateDailyActivity(d) })
+            .Select(d => new RepoStats(Timestamp: d, Date: DateOnly.FromDateTime(d), Downloads: GenerateDailyActivity(d), Stars: 0))
             .ToList();
 
         var hourlyIntervalExample = Layout.Vertical()
@@ -121,21 +137,15 @@ class ActivityHeatmapDemo : ViewBase
                         {
                             public override object Build()
                             {
-                                var start2 = DateTime.Now.AddDays(-30);
-                                var hourlyData = Enumerable
-                                    .Range(0, 24)
-                                    .Select(d => start2.AddHours(d))
-                                    .Where(_ => rng.NextDouble() > 0.4)
-                                    .Select(d => new { Timestamp = d, Value = rng.Next(1, 20) })
-                                    .ToList();
+                                var repoService = UseService<IMyRepoService>();
+                                var hourlyRepoStats = repoService.GetHourlyStats().ToList();
                         
                                 return Layout.Vertical()
-                                    | hourlyData
+                                    | hourlyRepoStats
                                     .ToActivityHeatmap(
                                         dimension: e => e.Timestamp,
-                                        measure: e => e.Value,
+                                        measure: e => e.Downloads,
                                         aggregation: ActivityAggregation.Average)
-                                    .Interval(ActivityInterval.Hourly)
                                     .ColorScheme(Colors.Emerald)
                                     .Height(Size.Units(40))
                             }
@@ -144,9 +154,8 @@ class ActivityHeatmapDemo : ViewBase
             | new Card(hourlyData
                 .ToActivityHeatmap(
                     dimension: e => e.Timestamp,
-                    measure: e => e.Value,
+                    measure: e => e.Downloads,
                     aggregation: ActivityAggregation.Sum)
-                .Interval(ActivityInterval.Hourly)
                 .ColorScheme(Colors.Emerald)
                 .Height(Size.Units(40))
             );
