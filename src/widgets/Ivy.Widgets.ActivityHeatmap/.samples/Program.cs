@@ -65,18 +65,18 @@ class ActivityHeatmapDemo : ViewBase
                         var dailyRepoStats = repoService.GetDailyStats().ToList();
 
                         return Layout.Vertical()
-                            | dailyRepoStats.ToActivityHeatmap()
-                                .Dimension(ActivityDimension.Days, d => d.Date)
-                                .Measure("Downloads", e => e.Sum(d => d.Downloads));
+                            | dailyRepoStats.ToActivityHeatmap(
+                                dimension: e => e.Date,
+                                measure: e => e.Downloads);
                     }
                 }
                 """)
 
         | new Card(
         Layout.Vertical()
-                | dailyData.ToActivityHeatmap()
-                    .Dimension(ActivityDimension.Days, d => d.Date)
-                    .Measure("Downloads", e => e.Sum(d => d.Downloads))
+                | dailyData.ToActivityHeatmap(
+                    dimension: e => e.Date,
+                    measure: e => e.Downloads)
         );
 
         var optionalPropsExample = Layout.Vertical()
@@ -91,15 +91,15 @@ class ActivityHeatmapDemo : ViewBase
 
                         return Layout.Vertical()
                             | dailyRepoStats
-                                .ToActivityHeatmap()
-                                .Dimension(ActivityDimension.Days, d => d.Date)
-                                .Measure("Downloads", e => e.Sum(d => d.Downloads))
+                                .ToActivityHeatmap(
+                                    dimension: e => e.Date,
+                                    measure: e => e.Downloads)
                                 .ShowMonthLabels({{showMonthLabels.Value.ToString().ToLower()}})
                                 .ShowDayLabels({{showDayLabels.Value.ToString().ToLower()}})
                                 .StartDate(DateOnly.Parse({{$"\"{startDate}\""}}))
                                 .EndDate(DateOnly.Parse({{$"\"{endDate}\""}}))
                                 .ColorScheme(Colors.{{selectedColor.Value}})
-                                .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Downloads}"));
+                                .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}"));
                     }
                 }
                 """)
@@ -111,9 +111,9 @@ class ActivityHeatmapDemo : ViewBase
                 | nullableRange.ToDateRangeInput().WithField().Label("Time period").Width(Size.Fit()))
 
             | new Card(dailyData
-                .ToActivityHeatmap()
-                .Dimension(ActivityDimension.Days, d => d.Date)
-                .Measure("Downloads", e => e.Sum(d => d.Downloads))
+                .ToActivityHeatmap(
+                    dimension: e => e.Date,
+                    measure: e => e.Downloads)
                 .StartDate(startDate)
                 .EndDate(endDate)
                 .ColorScheme(selectedColor.Value)
@@ -144,8 +144,7 @@ class ActivityHeatmapDemo : ViewBase
                                     | hourlyRepoStats
                                     .ToActivityHeatmap(
                                         dimension: e => e.Timestamp,
-                                        measure: e => e.Stars,
-                                        aggregation: ActivityAggregation.Average)
+                                        measure: e => e.Stars)
                                     .ColorScheme(Colors.Emerald)
                                     .Height(Size.Units(40))
                             }
@@ -154,8 +153,7 @@ class ActivityHeatmapDemo : ViewBase
             | new Card(hourlyData
                 .ToActivityHeatmap(
                     dimension: e => e.Timestamp,
-                    measure: e => e.Stars,
-                    aggregation: ActivityAggregation.Average)
+                    measure: e => e.Stars)
                 .ColorScheme(Colors.Emerald)
                 .Height(Size.Units(40))
             );

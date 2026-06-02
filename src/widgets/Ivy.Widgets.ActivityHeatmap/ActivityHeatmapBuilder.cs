@@ -5,8 +5,8 @@ namespace Ivy.Widgets.ActivityHeatmap;
 
 public class ActivityHeatmapBuilder<TSource>(
     IQueryable<TSource> data,
-    Dimension<TSource>? dimension = null,
-    Measure<TSource>? measure = null,
+    Dimension<TSource> dimension,
+    Measure<TSource> measure,
     Func<ActivityHeatmap, ActivityHeatmap>? polish = null
 ) : ViewBase
 {
@@ -17,13 +17,14 @@ public class ActivityHeatmapBuilder<TSource>(
     private DateOnly? _startDate;
     private DateOnly? _endDate;
     private EventHandler<Event<ActivityHeatmap, Activity>>? _onDayClick;
-    private Dimension<TSource>? _dimension = dimension;
-    private Measure<TSource>? _measure = measure;
+    private Measure<TSource> _measure = measure;
+
+    // ToDo: remove this
     private ActivityInterval? _interval;
 
     public override object Build()
     {
-        if (_dimension is null)
+        if (dimension is null)
             throw new InvalidOperationException("A dimension is required.");
         if (_measure is null)
             throw new InvalidOperationException("A measure is required.");
@@ -44,7 +45,7 @@ public class ActivityHeatmapBuilder<TSource>(
                 // groups all rows belonging to a cell together. Without this, a dimension that
                 // carries minutes/seconds (e.g. a raw timestamp) lands every row in its own
                 // single-element group, which would make Average/Min/Max/Count degenerate into Sum.
-                var pivotDimension = BuildTruncatedDimension(effectiveInterval);
+                var pivotDimension = BuildTruncatedDimension(dimension, effectiveInterval);
 
                 var results = await data
                     .ToPivotTable()
@@ -99,12 +100,6 @@ public class ActivityHeatmapBuilder<TSource>(
         return polish?.Invoke(widget) ?? widget;
     }
 
-    public ActivityHeatmapBuilder<TSource> Dimension(ActivityDimension name, Expression<Func<TSource, object>> selector)
-    {
-        _dimension = new Dimension<TSource>(name.ToString(), selector);
-        return this;
-    }
-
     public ActivityHeatmapBuilder<TSource> Measure(string name, Expression<Func<IQueryable<TSource>, object>> aggregator)
     {
         _measure = new Measure<TSource>(name, aggregator);
@@ -121,7 +116,7 @@ public class ActivityHeatmapBuilder<TSource>(
 
     public ActivityHeatmapBuilder<TSource> OnDayClick(Func<Event<ActivityHeatmap, Activity>, ValueTask> handler)
     {
-        _onDayClick = new(handler);
+        _onDayClick = new EventHandler<Event<ActivityHeatmap, Activity>>(handler);
         return this;
     }
 
@@ -136,20 +131,20 @@ public class ActivityHeatmapBuilder<TSource>(
         if (_interval is { } explicitInterval)
             return explicitInterval;
 
-        var dimensionValues = await data.Select(_dimension!.Selector).ToListAsync2();
+        var dimensionValues = await data.Select(dimension.Selector).ToListAsync2();
         var hasIntraDay = dimensionValues.Any(HasTimeComponent);
         return hasIntraDay ? ActivityInterval.Hourly : ActivityInterval.Daily;
     }
 
-    private Dimension<TSource> BuildTruncatedDimension(ActivityInterval interval)
+    private static Dimension<TSource> BuildTruncatedDimension(Dimension<TSource> dimension, ActivityInterval interval)
     {
-        var selector = _dimension!.Selector;
+        var selector = dimension.Selector;
         var truncated = Expression.Call(
             TruncateMethod,
             selector.Body,
             Expression.Constant(interval));
         var lambda = Expression.Lambda<Func<TSource, object>>(truncated, selector.Parameters);
-        return new Dimension<TSource>(_dimension.Name, lambda);
+        return dimension with { Selector = lambda };
     }
 
     private static readonly System.Reflection.MethodInfo TruncateMethod =
@@ -212,27 +207,6 @@ public enum ActivityAggregation
 
 public static class ActivityHeatmapBuilderExtensions
 {
-    public static ActivityHeatmapBuilder<TSource> ToActivityHeatmap<TSource>(
-        this IEnumerable<TSource> data,
-        Expression<Func<TSource, object>>? dimension = null,
-        Expression<Func<IQueryable<TSource>, object>>? measure = null)
-    {
-        return data.AsQueryable().ToActivityHeatmap(dimension, measure);
-    }
-
-    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
-    public static ActivityHeatmapBuilder<TSource> ToActivityHeatmap<TSource>(
-        this IQueryable<TSource> data,
-        Expression<Func<TSource, object>>? dimension = null,
-        Expression<Func<IQueryable<TSource>, object>>? measure = null)
-    {
-        return new ActivityHeatmapBuilder<TSource>(
-            data,
-            dimension != null ? new Dimension<TSource>(ExpressionNameHelper.SuggestName(dimension) ?? "Dimension", dimension) : null,
-            measure != null ? new Measure<TSource>(ExpressionNameHelper.SuggestName(measure) ?? "Measure", measure) : null
-        );
-    }
-
     public static ActivityHeatmapBuilder<TSource> ToActivityHeatmap<TSource, TDimension, TMeasure>(
         this IEnumerable<TSource> data,
         Expression<Func<TSource, TDimension>> dimension,

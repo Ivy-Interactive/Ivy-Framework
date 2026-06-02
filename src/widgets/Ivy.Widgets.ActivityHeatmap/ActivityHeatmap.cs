@@ -84,11 +84,6 @@ public record Activity
     public int Count { get; init; }
 }
 
-public enum ActivityDimension
-{
-    Days
-}
-
 public enum ActivityInterval
 {
     Daily,
