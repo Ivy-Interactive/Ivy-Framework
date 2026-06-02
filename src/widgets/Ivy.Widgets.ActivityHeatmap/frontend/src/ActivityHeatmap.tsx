@@ -340,19 +340,10 @@ export function ActivityHeatmap({
             <div className="font-bold">{formatTooltipHeader(tooltip.day)}</div>
             <p>
               <span className="relative w-[11px] h-[11px] pr-4 inline-flex">
-                <span className="absolute top-[2px] left-0 w-[11px] h-[11px] rounded-full self-center"
-                  style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]! }}>
-                  {tooltip.day.count ? (
-                    <span
-                      className="absolute top-[2px] left-0 w-[11px] h-[11px] rounded-full self-center text-center"
-                      style={{
-                        backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]!,
-                        color: "white"
-                      }}>
-                      {tooltip.day.count}
-                    </span>
-                  ) : null}
-                </span>
+                <span
+                  className="absolute top-[2px] left-0 w-[11px] h-[11px] rounded-full self-center"
+                  style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]! }}
+                />
               </span>
               <span>{`${valueLabel ?? "Count"}: `}</span>
               <span className="font-bold">{`${tooltip.day.count ?? 0}`}</span>
