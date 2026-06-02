@@ -155,7 +155,7 @@ class ActivityHeatmapDemo : ViewBase
                 .ToActivityHeatmap(
                     dimension: e => e.Timestamp,
                     measure: e => e.Stars,
-                    aggregation: ActivityAggregation.Sum)
+                    aggregation: ActivityAggregation.Average)
                 .ColorScheme(Colors.Emerald)
                 .Height(Size.Units(40))
             );

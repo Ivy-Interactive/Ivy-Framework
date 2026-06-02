@@ -37,23 +37,30 @@ public class ActivityHeatmapBuilder<TSource>(
         {
             try
             {
+                // Resolve the interval from the *raw* dimension values before we truncate.
+                var effectiveInterval = await ResolveIntervalAsync();
+
+                // Truncate the dimension to the cell granularity (day or hour) so the pivot
+                // groups all rows belonging to a cell together. Without this, a dimension that
+                // carries minutes/seconds (e.g. a raw timestamp) lands every row in its own
+                // single-element group, which would make Average/Min/Max/Count degenerate into Sum.
+                var pivotDimension = BuildTruncatedDimension(effectiveInterval);
+
                 var results = await data
                     .ToPivotTable()
-                    .Dimension(_dimension)
+                    .Dimension(pivotDimension)
                     .Measure(_measure)
                     .ExecuteAsync();
 
-                var effectiveInterval = ResolveInterval(results);
-
+                // Each result row is now exactly one cell, so the aggregated measure value is used
+                // directly — no re-grouping (which would re-sum) is required.
                 var activities = results
-                    .Select(row => new
+                    .Select(row => new Activity
                     {
-                        Date = ToDateOnly(row[_dimension.Name]),
-                        Hour = effectiveInterval == ActivityInterval.Hourly ? ToHour(row[_dimension.Name]) : null,
+                        Date = ToDateOnly(row[pivotDimension.Name]),
+                        Hour = effectiveInterval == ActivityInterval.Hourly ? ToHour(row[pivotDimension.Name]) : null,
                         Count = Convert.ToInt32(row[_measure.Name])
                     })
-                    .GroupBy(x => (x.Date, x.Hour))
-                    .Select(g => new Activity { Date = g.Key.Date, Hour = g.Key.Hour, Count = g.Sum(x => x.Count) })
                     .ToArray();
 
                 resolvedInterval.Set(effectiveInterval);
@@ -124,20 +131,56 @@ public class ActivityHeatmapBuilder<TSource>(
         return this;
     }
 
-    private ActivityInterval ResolveInterval(Dictionary<string, object>[] results)
+    private async Task<ActivityInterval> ResolveIntervalAsync()
     {
         if (_interval is { } explicitInterval)
             return explicitInterval;
 
-        var hasIntraDay = results.Any(row => HasTimeComponent(row[_dimension!.Name]));
+        var dimensionValues = await data.Select(_dimension!.Selector).ToListAsync2();
+        var hasIntraDay = dimensionValues.Any(HasTimeComponent);
         return hasIntraDay ? ActivityInterval.Hourly : ActivityInterval.Daily;
     }
+
+    private Dimension<TSource> BuildTruncatedDimension(ActivityInterval interval)
+    {
+        var selector = _dimension!.Selector;
+        var truncated = Expression.Call(
+            TruncateMethod,
+            selector.Body,
+            Expression.Constant(interval));
+        var lambda = Expression.Lambda<Func<TSource, object>>(truncated, selector.Parameters);
+        return new Dimension<TSource>(_dimension.Name, lambda);
+    }
+
+    private static readonly System.Reflection.MethodInfo TruncateMethod =
+        typeof(ActivityHeatmapBuilder<TSource>).GetMethod(
+            nameof(TruncateDimensionValue),
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
 
     private static bool HasTimeComponent(object value) => value switch
     {
         DateTime dt => dt.TimeOfDay != TimeSpan.Zero,
         DateTimeOffset dto => dto.TimeOfDay != TimeSpan.Zero,
         _ => false
+    };
+
+    /// <summary>
+    /// Truncates a dimension value to the cell granularity so that all rows belonging to the same
+    /// day (daily) or hour (hourly) collapse into a single pivot group. This lets the chosen
+    /// aggregation (Sum, Average, Min, Max, Count) see every row for the cell.
+    /// </summary>
+    internal static object TruncateDimensionValue(object value, ActivityInterval interval) => value switch
+    {
+        DateTime dt => interval == ActivityInterval.Hourly
+            ? new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0, dt.Kind)
+            : dt.Date,
+        DateTimeOffset dto => interval == ActivityInterval.Hourly
+            ? new DateTimeOffset(dto.Year, dto.Month, dto.Day, dto.Hour, 0, 0, dto.Offset)
+            : new DateTimeOffset(dto.Date, dto.Offset),
+        string s when DateTime.TryParse(s, out var parsed) => interval == ActivityInterval.Hourly
+            ? new DateTime(parsed.Year, parsed.Month, parsed.Day, parsed.Hour, 0, 0)
+            : parsed.Date,
+        _ => value
     };
 
     internal static DateOnly ToDateOnly(object value) => value switch

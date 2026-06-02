@@ -1,3 +1,4 @@
+using Ivy;
 using Ivy.Widgets.ActivityHeatmap;
 
 namespace Ivy.Widgets.ActivityHeatmap.Tests;
@@ -40,26 +41,53 @@ public class ActivityHeatmapTests
     }
 
     [Fact]
-    public void ToDateOnly_DateTime_SameDaySumsCorrectly()
+    public void TruncateDimensionValue_DateTime_Daily_StripsTime()
     {
-        // Simulate the grouping logic: two DateTime timestamps on the same day
-        // should produce a single Activity with summed Count.
-        var dt1 = new DateTime(2024, 6, 15, 9, 0, 0);
-        var dt2 = new DateTime(2024, 6, 15, 17, 30, 0);
+        var dt = new DateTime(2024, 6, 15, 17, 30, 45);
+        var result = ActivityHeatmapBuilder<object>.TruncateDimensionValue(dt, ActivityInterval.Daily);
+        Assert.Equal(new DateTime(2024, 6, 15, 0, 0, 0), result);
+    }
 
-        var rows = new[]
+    [Fact]
+    public void TruncateDimensionValue_DateTime_Hourly_StripsMinutesAndSeconds()
+    {
+        var dt = new DateTime(2024, 6, 15, 17, 30, 45);
+        var result = ActivityHeatmapBuilder<object>.TruncateDimensionValue(dt, ActivityInterval.Hourly);
+        Assert.Equal(new DateTime(2024, 6, 15, 17, 0, 0), result);
+    }
+
+    [Fact]
+    public void TruncateDimensionValue_String_Hourly_ParsesAndTruncates()
+    {
+        var result = ActivityHeatmapBuilder<object>.TruncateDimensionValue("2024-06-15T17:30:45", ActivityInterval.Hourly);
+        Assert.Equal(new DateTime(2024, 6, 15, 17, 0, 0), result);
+    }
+
+    private record Sample(DateTime Timestamp, int Value);
+
+    [Fact]
+    public async Task TruncatedHourlyPivot_Average_DoesNotCollapseIntoSum()
+    {
+        // Three records inside the same hour with different minutes; values 2, 4, 6.
+        // Truncating the dimension to the hour must collapse them into a single group so that
+        // Average reflects the true per-hour aggregate rather than re-summing to 12.
+        var data = new[]
         {
-            new Activity { Date = ActivityHeatmapBuilder<object>.ToDateOnly(dt1), Count = 3 },
-            new Activity { Date = ActivityHeatmapBuilder<object>.ToDateOnly(dt2), Count = 7 },
+            new Sample(new DateTime(2024, 6, 15, 9, 5, 0), 2),
+            new Sample(new DateTime(2024, 6, 15, 9, 25, 0), 4),
+            new Sample(new DateTime(2024, 6, 15, 9, 55, 0), 6),
         };
 
-        var merged = rows
-            .GroupBy(a => a.Date)
-            .Select(g => new Activity { Date = g.Key, Count = g.Sum(a => a.Count) })
-            .ToArray();
+        var results = await data.AsQueryable()
+            .ToPivotTable()
+            .Dimension(new Dimension<Sample>(
+                "Hour",
+                s => ActivityHeatmapBuilder<Sample>.TruncateDimensionValue(s.Timestamp, ActivityInterval.Hourly)))
+            .Measure(new Measure<Sample>("Value", q => q.Average(s => s.Value)))
+            .ExecuteAsync();
 
-        Assert.Single(merged);
-        Assert.Equal(new DateOnly(2024, 6, 15), merged[0].Date);
-        Assert.Equal(10, merged[0].Count);
+        var row = Assert.Single(results);
+        Assert.Equal(new DateTime(2024, 6, 15, 9, 0, 0), row["Hour"]);
+        Assert.Equal(4d, Convert.ToDouble(row["Value"]));
     }
 }
