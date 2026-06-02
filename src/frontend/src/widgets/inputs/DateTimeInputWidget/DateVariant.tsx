@@ -42,7 +42,7 @@ export const DateVariant: React.FC<DateVariantProps> = ({
       buttonRef.current?.focus();
       setOpen(true);
     }
-  }, [autoFocus, disabled]);
+  }, []);
 
   const date = value ? new Date(value) : undefined;
   const showClear = nullable && !disabled && value != null && value !== "";

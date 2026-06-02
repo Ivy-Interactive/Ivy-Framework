@@ -42,7 +42,7 @@ export const MonthVariant: React.FC<MonthVariantProps> = ({
       buttonRef.current?.focus();
       setOpen(true);
     }
-  }, [autoFocus, disabled]);
+  }, []);
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
 
   const handleOpenChange = useCallback(

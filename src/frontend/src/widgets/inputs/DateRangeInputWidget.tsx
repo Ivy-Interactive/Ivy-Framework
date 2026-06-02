@@ -159,7 +159,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
       hasAutoFocusedRef.current = true;
       setIsOpen(true);
     }
-  }, [autoFocus, disabled]);
+  }, []);
 
   const handleLeftMonthChange = (newLeft: Date) => {
     setLeftMonth(newLeft);

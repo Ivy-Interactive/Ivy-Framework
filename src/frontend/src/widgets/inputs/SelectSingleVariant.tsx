@@ -49,7 +49,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
       triggerRef.current?.focus();
       setIsOpen(true);
     }
-  }, [autoFocus, disabled]);
+  }, []);
   const validOptions = options.filter(
     (option) => option.value != null && option.value.toString().trim() !== "",
   );

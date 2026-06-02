@@ -48,7 +48,7 @@ export const WeekVariant: React.FC<WeekVariantProps> = ({
       buttonRef.current?.focus();
       setOpen(true);
     }
-  }, [autoFocus, disabled]);
+  }, []);
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
 
   const handleOpenChange = useCallback(

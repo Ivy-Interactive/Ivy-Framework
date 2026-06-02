@@ -44,7 +44,7 @@ export const YearVariant: React.FC<YearVariantProps> = ({
       buttonRef.current?.focus();
       setOpen(true);
     }
-  }, [autoFocus, disabled]);
+  }, []);
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
 
   const handleOpenChange = useCallback(

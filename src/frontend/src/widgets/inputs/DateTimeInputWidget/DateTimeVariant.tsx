@@ -46,7 +46,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
       buttonRef.current?.focus();
       setOpen(true);
     }
-  }, [autoFocus, disabled]);
+  }, []);
 
   const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
   const minDate = useMemo(() => (min ? new Date(min) : undefined), [min]);
