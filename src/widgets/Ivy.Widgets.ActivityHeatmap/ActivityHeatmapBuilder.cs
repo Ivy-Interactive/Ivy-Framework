@@ -41,7 +41,7 @@ public class ActivityHeatmapBuilder<TSource>(
                 // Truncate the dimension to the cell granularity (day or hour) so the pivot
                 // groups all rows belonging to a cell together. Without this, a dimension that
                 // carries minutes/seconds (e.g. a raw timestamp) lands every row in its own
-                // single-element group, which would make Average/Min/Max/Count degenerate into Sum.
+                // single-element group, which would incorrectly sum only one row per cell.
                 var pivotDimension = BuildTruncatedDimension(dimension, effectiveInterval);
 
                 var results = await data
@@ -155,7 +155,7 @@ public class ActivityHeatmapBuilder<TSource>(
     /// <summary>
     /// Truncates a dimension value to the cell granularity so that all rows belonging to the same
     /// day (daily) or hour (hourly) collapse into a single pivot group. This lets the chosen
-    /// aggregation (Sum, Average, Min, Max, Count) see every row for the cell.
+    /// aggregation see every row for the cell.
     /// </summary>
     internal static object TruncateDimensionValue(object value, ActivityInterval interval) => value switch
     {
@@ -189,40 +189,29 @@ public class ActivityHeatmapBuilder<TSource>(
     };
 }
 
-public enum ActivityAggregation
-{
-    Sum,
-    Count,
-    Average,
-    Min,
-    Max
-}
-
 public static class ActivityHeatmapBuilderExtensions
 {
     public static ActivityHeatmapBuilder<TSource> ToActivityHeatmap<TSource, TDimension, TMeasure>(
         this IEnumerable<TSource> data,
         Expression<Func<TSource, TDimension>> dimension,
-        Expression<Func<TSource, TMeasure>> measure,
-        ActivityAggregation aggregation = ActivityAggregation.Sum)
+        Expression<Func<TSource, TMeasure>> measure)
     {
-        return data.AsQueryable().ToActivityHeatmap(dimension, measure, aggregation);
+        return data.AsQueryable().ToActivityHeatmap(dimension, measure);
     }
 
     [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
     public static ActivityHeatmapBuilder<TSource> ToActivityHeatmap<TSource, TDimension, TMeasure>(
         this IQueryable<TSource> data,
         Expression<Func<TSource, TDimension>> dimension,
-        Expression<Func<TSource, TMeasure>> measure,
-        ActivityAggregation aggregation = ActivityAggregation.Sum)
+        Expression<Func<TSource, TMeasure>> measure)
     {
         var boxedDimension = BoxSelector(dimension);
-        var aggregator = BuildAggregator(measure, aggregation);
+        var aggregator = BuildSumAggregator(measure);
 
         return new ActivityHeatmapBuilder<TSource>(
             data,
             new Dimension<TSource>(ExpressionNameHelper.SuggestName(boxedDimension) ?? "Dimension", boxedDimension),
-            new Measure<TSource>(MeasureName(measure, aggregation), aggregator)
+            new Measure<TSource>(MeasureName(measure), aggregator)
         );
     }
 
@@ -233,83 +222,38 @@ public static class ActivityHeatmapBuilderExtensions
         return Expression.Lambda<Func<TSource, object>>(body, selector.Parameters);
     }
 
-    private static string MeasureName<TSource, TMeasure>(
-        Expression<Func<TSource, TMeasure>> selector,
-        ActivityAggregation aggregation)
-    {
-        return ExpressionNameHelper.SuggestName(BoxSelector(selector)) ?? aggregation.ToString();
-    }
+    private static string MeasureName<TSource, TMeasure>(Expression<Func<TSource, TMeasure>> selector) =>
+        ExpressionNameHelper.SuggestName(BoxSelector(selector)) ?? "Value";
 
-    private static Expression<Func<IQueryable<TSource>, object>> BuildAggregator<TSource, TMeasure>(
-        Expression<Func<TSource, TMeasure>> selector,
-        ActivityAggregation aggregation)
+    private static Expression<Func<IQueryable<TSource>, object>> BuildSumAggregator<TSource, TMeasure>(
+        Expression<Func<TSource, TMeasure>> selector)
     {
         var source = Expression.Parameter(typeof(IQueryable<TSource>), "q");
-
-        Expression call = aggregation switch
-        {
-            ActivityAggregation.Count => Expression.Call(
-                CountMethod<TSource>(),
-                source),
-            ActivityAggregation.Min => Expression.Call(
-                MinMaxMethod<TSource, TMeasure>(nameof(Queryable.Min)),
-                source, selector),
-            ActivityAggregation.Max => Expression.Call(
-                MinMaxMethod<TSource, TMeasure>(nameof(Queryable.Max)),
-                source, selector),
-            ActivityAggregation.Sum => Expression.Call(
-                NumericMethod<TSource, TMeasure>(nameof(Queryable.Sum)),
-                source, selector),
-            ActivityAggregation.Average => Expression.Call(
-                NumericMethod<TSource, TMeasure>(nameof(Queryable.Average)),
-                source, selector),
-            _ => throw new ArgumentOutOfRangeException(nameof(aggregation), aggregation, null)
-        };
-
+        var call = Expression.Call(SumMethod<TSource, TMeasure>(), source, selector);
         var body = Expression.Convert(call, typeof(object));
         return Expression.Lambda<Func<IQueryable<TSource>, object>>(body, source);
     }
 
-    private static System.Reflection.MethodInfo CountMethod<TSource>()
-    {
-        return typeof(Queryable).GetMethods()
-            .First(m => m.Name == nameof(Queryable.Count)
-                        && m.IsGenericMethodDefinition
-                        && m.GetGenericArguments().Length == 1
-                        && m.GetParameters().Length == 1)
-            .MakeGenericMethod(typeof(TSource));
-    }
-
-    private static System.Reflection.MethodInfo MinMaxMethod<TSource, TMeasure>(string name)
-    {
-        return typeof(Queryable).GetMethods()
-            .First(m => m.Name == name
-                        && m.IsGenericMethodDefinition
-                        && m.GetGenericArguments().Length == 2
-                        && m.GetParameters().Length == 2)
-            .MakeGenericMethod(typeof(TSource), typeof(TMeasure));
-    }
-
-    private static System.Reflection.MethodInfo NumericMethod<TSource, TMeasure>(string name)
+    private static System.Reflection.MethodInfo SumMethod<TSource, TMeasure>()
     {
         var method = typeof(Queryable).GetMethods()
-            .Where(m => m.Name == name
+            .Where(m => m.Name == nameof(Queryable.Sum)
                         && m.IsGenericMethodDefinition
                         && m.GetGenericArguments().Length == 1
                         && m.GetParameters().Length == 2)
             .Select(m => m.MakeGenericMethod(typeof(TSource)))
             .FirstOrDefault(m =>
             {
-                var selectorParam = m.GetParameters()[1].ParameterType; // Expression<Func<TSource, X>>
-                var funcType = selectorParam.GetGenericArguments()[0];   // Func<TSource, X>
-                var returnType = funcType.GetGenericArguments()[1];      // X
+                var selectorParam = m.GetParameters()[1].ParameterType;
+                var funcType = selectorParam.GetGenericArguments()[0];
+                var returnType = funcType.GetGenericArguments()[1];
                 return returnType == typeof(TMeasure);
             });
 
         if (method is null)
         {
             throw new NotSupportedException(
-                $"Queryable.{name} does not support a measure of type '{typeof(TMeasure).Name}'. " +
+                $"Queryable.Sum does not support a measure of type '{typeof(TMeasure).Name}'. " +
                 "Supported types are int, long, float, double, decimal and their nullable variants.");
         }
 

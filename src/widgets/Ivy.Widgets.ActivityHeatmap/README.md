@@ -11,7 +11,7 @@ The recommended way to build a heatmap is the `ToActivityHeatmap()` builder, whi
 ```csharp
 using Ivy.Widgets.ActivityHeatmap;
 
-public record RepoStats(DateOnly Date, int Stars, int Downloads);
+public record RepoStats(DateOnly Date, DateTime Timestamp, int Stars, int Downloads);
 
 public class ActivityHeatmapDemo : ViewBase
 {
@@ -20,29 +20,17 @@ public class ActivityHeatmapDemo : ViewBase
         var repoService = UseService<IMyRepoService>();
         var dailyStats = repoService.GetDailyStats().ToList();
 
-        return dailyStats.ToActivityHeatmap()
-            .Dimension(ActivityDimension.Days, d => d.Date)
-            .Measure("Stars", e => e.Sum(d => d.Stars));
+        return dailyStats.ToActivityHeatmap(
+            dimension: e => e.Date,
+            measure: e => e.Downloads);
     }
 }
 ```
 
-### Simplified overload with aggregation
+Values are summed per cell. The measure supports `int`, `long`, `float`, `double`, `decimal`, and
+their nullable variants. To count events per cell, use a constant measure such as `measure: _ => 1`.
 
-When the measure is a single column, use the overload that takes a dimension selector, a measure
-selector, and an `ActivityAggregation`. The widget builds the aggregator for you:
-
-```csharp
-hourlyStats.ToActivityHeatmap(
-    dimension: e => e.Timestamp,
-    measure: e => e.Downloads,
-    aggregation: ActivityAggregation.Average)
-    .ColorScheme(Colors.Emerald)
-    .Height(Size.Units(40));
-```
-
-`ActivityAggregation` supports `Sum` (default), `Count`, `Average`, `Min`, and `Max`. Numeric
-aggregations support `int`, `long`, `float`, `double`, `decimal`, and their nullable variants.
+For a custom aggregator, call `.Measure(name, q => ...)` on the returned builder.
 
 ### Daily vs. hourly intervals
 
@@ -78,8 +66,8 @@ The builder (`ToActivityHeatmap()`) exposes the configuration below in addition 
 
 | Method | Description |
 |--------|-------------|
-| `Dimension(ActivityDimension, selector)` | Sets the date/time axis. Required (or supply via the `ToActivityHeatmap` overload). |
-| `Measure(name, aggregator)` | Sets the aggregated value per cell. Required (or supply via the overload). `name` is also used as the value label. |
+| `ToActivityHeatmap(dimension, measure)` | Projects data into the grid; sums the measure per cell. |
+| `Measure(name, aggregator)` | Overrides the default sum with a custom pivot aggregator. `name` is used as the value label. |
 | `Interval(ActivityInterval)` | Forces `Daily` or `Hourly`; otherwise auto-detected from the data. |
 | `ColorScheme(Colors)` | See props below. |
 | `ShowTooltip(bool)` / `ShowMonthLabels(bool)` / `ShowDayLabels(bool)` | See props below. |
