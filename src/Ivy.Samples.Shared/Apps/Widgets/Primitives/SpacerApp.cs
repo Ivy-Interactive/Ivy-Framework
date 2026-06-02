@@ -1,5 +1,3 @@
-using Ivy.Samples.Shared.Helpers;
-
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.Expand, group: ["Widgets", "Primitives"], searchHints: ["spacer", "grow", "layout", "flex", "fill", "spacing"])]
