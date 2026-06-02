@@ -19,9 +19,6 @@ public class ActivityHeatmapBuilder<TSource>(
     private EventHandler<Event<ActivityHeatmap, Activity>>? _onDayClick;
     private Measure<TSource> _measure = measure;
 
-    // ToDo: remove this
-    private ActivityInterval? _interval;
-
     public override object Build()
     {
         if (dimension is null)
@@ -39,7 +36,7 @@ public class ActivityHeatmapBuilder<TSource>(
             try
             {
                 // Resolve the interval from the *raw* dimension values before we truncate.
-                var effectiveInterval = await ResolveIntervalAsync();
+                var effectiveInterval = await ResolveIntervalAsync(dimension, data);
 
                 // Truncate the dimension to the cell granularity (day or hour) so the pivot
                 // groups all rows belonging to a cell together. Without this, a dimension that
@@ -106,7 +103,6 @@ public class ActivityHeatmapBuilder<TSource>(
         return this;
     }
 
-    public ActivityHeatmapBuilder<TSource> Interval(ActivityInterval interval) { _interval = interval; return this; }
     public ActivityHeatmapBuilder<TSource> ColorScheme(Colors scheme) { _colorScheme = scheme; return this; }
     public ActivityHeatmapBuilder<TSource> ShowTooltip(bool show = true) { _showTooltip = show; return this; }
     public ActivityHeatmapBuilder<TSource> ShowMonthLabels(bool show = true) { _showMonthLabels = show; return this; }
@@ -126,11 +122,8 @@ public class ActivityHeatmapBuilder<TSource>(
         return this;
     }
 
-    private async Task<ActivityInterval> ResolveIntervalAsync()
+    private static async Task<ActivityInterval> ResolveIntervalAsync(Dimension<TSource> dimension, IQueryable<TSource> data)
     {
-        if (_interval is { } explicitInterval)
-            return explicitInterval;
-
         var dimensionValues = await data.Select(dimension.Selector).ToListAsync2();
         var hasIntraDay = dimensionValues.Any(HasTimeComponent);
         return hasIntraDay ? ActivityInterval.Hourly : ActivityInterval.Daily;
