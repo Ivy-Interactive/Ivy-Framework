@@ -127,7 +127,7 @@ class ActivityHeatmapDemo : ViewBase
             .Range(0, 24 * 30)
             .Select(d => start2.AddHours(d))
             .Where(_ => rng.NextDouble() > 0.2)
-            .Select(d => new RepoStats(Timestamp: d, Date: DateOnly.FromDateTime(d), Downloads: GenerateDailyActivity(d), Stars: 0))
+            .Select(d => new RepoStats(Timestamp: d, Date: DateOnly.FromDateTime(d), Stars: GenerateDailyActivity(d), Downloads: 0))
             .ToList();
 
         var hourlyIntervalExample = Layout.Vertical()
@@ -144,7 +144,7 @@ class ActivityHeatmapDemo : ViewBase
                                     | hourlyRepoStats
                                     .ToActivityHeatmap(
                                         dimension: e => e.Timestamp,
-                                        measure: e => e.Downloads,
+                                        measure: e => e.Stars,
                                         aggregation: ActivityAggregation.Average)
                                     .ColorScheme(Colors.Emerald)
                                     .Height(Size.Units(40))
@@ -154,7 +154,7 @@ class ActivityHeatmapDemo : ViewBase
             | new Card(hourlyData
                 .ToActivityHeatmap(
                     dimension: e => e.Timestamp,
-                    measure: e => e.Downloads,
+                    measure: e => e.Stars,
                     aggregation: ActivityAggregation.Sum)
                 .ColorScheme(Colors.Emerald)
                 .Height(Size.Units(40))
