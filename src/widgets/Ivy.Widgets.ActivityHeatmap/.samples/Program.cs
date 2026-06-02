@@ -67,7 +67,7 @@ class ActivityHeatmapDemo : ViewBase
                         return Layout.Vertical()
                             | dailyRepoStats.ToActivityHeatmap()
                                 .Dimension(ActivityDimension.Days, d => d.Date)
-                                .Measure("Stars", e => e.Sum(d => d.Stars));
+                                .Measure("Downloads", e => e.Sum(d => d.Downloads));
                     }
                 }
                 """)
@@ -76,7 +76,7 @@ class ActivityHeatmapDemo : ViewBase
         Layout.Vertical()
                 | dailyData.ToActivityHeatmap()
                     .Dimension(ActivityDimension.Days, d => d.Date)
-                    .Measure("Stars", e => e.Sum(d => d.Downloads))
+                    .Measure("Downloads", e => e.Sum(d => d.Downloads))
         );
 
         var optionalPropsExample = Layout.Vertical()
