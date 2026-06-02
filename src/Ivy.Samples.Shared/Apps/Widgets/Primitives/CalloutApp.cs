@@ -11,7 +11,7 @@ public class CalloutApp : SampleBase
             new Tab("Closable", new CalloutClosableExample()),
             new Tab("Multi-line", new CalloutMultiLineExample()),
             new Tab("Density", new CalloutDensityExample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

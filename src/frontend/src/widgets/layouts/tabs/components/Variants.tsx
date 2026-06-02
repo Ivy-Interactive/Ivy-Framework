@@ -202,7 +202,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
               className={cn(
                 "overflow-auto border-none min-h-0 flex flex-col",
                 isActive
-                  ? "relative h-full visible z-[1]"
+                  ? "relative h-full visible z-[1] p-2"
                   : "absolute inset-0 invisible opacity-0 z-0",
               )}
               style={paddingStyle}
@@ -355,7 +355,10 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                   key={id}
                   value={id}
                   useRadix={useRadix}
-                  className={cn("h-full overflow-auto border-none mt-0")}
+                  className={cn(
+                    "h-full overflow-auto border-none mt-0",
+                    activeTabId === id && "p-2",
+                  )}
                   style={paddingStyle}
                 >
                   {tabWidget}
@@ -370,7 +373,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                 className={cn(
                   "overflow-auto",
                   activeTabId === id
-                    ? "relative h-full visible z-[1]"
+                    ? "relative h-full visible z-[1] p-2"
                     : "absolute inset-0 invisible opacity-0 z-0",
                 )}
                 style={paddingStyle}

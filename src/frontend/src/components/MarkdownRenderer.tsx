@@ -294,9 +294,57 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       )),
       li: memo(({ children, className }: { children: React.ReactNode; className?: string }) => {
         const isTaskItem = className?.includes("task-list-item");
+        if (isTaskItem) {
+          return <li className={cn(typography.li, "list-none")}>{children}</li>;
+        }
+
+        const hasBlock = React.Children.toArray(children).some((child) => {
+          if (!React.isValidElement(child)) return false;
+          const type = child.type;
+          if (typeof type === "string") {
+            return [
+              "p",
+              "ul",
+              "ol",
+              "pre",
+              "blockquote",
+              "table",
+              "div",
+              "h1",
+              "h2",
+              "h3",
+              "h4",
+              "h5",
+              "h6",
+            ].includes(type);
+          }
+          const node = (child.props as any)?.node;
+          if (node) {
+            const tagName = node.tagName || (node.type === "paragraph" ? "p" : null);
+            if (tagName) {
+              return [
+                "p",
+                "ul",
+                "ol",
+                "pre",
+                "blockquote",
+                "table",
+                "div",
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+              ].includes(tagName);
+            }
+          }
+          return false;
+        });
+
         return (
-          <li className={cn(typography.li, isTaskItem && "list-none")}>
-            {isTaskItem ? children : <div className={typography.liContent}>{children}</div>}
+          <li className={typography.li}>
+            {hasBlock ? <div className={typography.liContent}>{children}</div> : children}
           </li>
         );
       }),

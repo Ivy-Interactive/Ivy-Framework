@@ -22,7 +22,7 @@ public class KanbanApp : SampleBase
             new Tab("Builder with Click", new KanbanBuilderWithClickExample()),
             new Tab("Width Examples", new KanbanWidthExamples()),
             new Tab("Header Layout Example", new KanbanHeaderLayoutExample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

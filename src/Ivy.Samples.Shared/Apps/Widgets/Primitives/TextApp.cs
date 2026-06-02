@@ -56,6 +56,6 @@ public class TextApp : SampleBase
             new Tab("Headings & basics", headingsAndBasics).Icon(Icons.Type),
             new Tab("Styles", styles).Icon(Icons.Palette),
             new Tab("Alignment", alignment).Icon(Icons.TextAlignCenter)
-        );
+        ).RemoveParentPadding();
     }
 }

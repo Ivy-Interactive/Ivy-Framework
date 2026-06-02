@@ -9,7 +9,7 @@ public class FieldApp : SampleBase
             new Tab("Field", new FieldBasicSample()),
             new Tab("Horizontal Labels", new FieldHorizontalLabelsSample()),
             new Tab("Events", new FieldEventsSample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

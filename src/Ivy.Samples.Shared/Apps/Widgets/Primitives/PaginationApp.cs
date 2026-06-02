@@ -9,7 +9,7 @@ public class PaginationApp() : SampleBase
         return Layout.Tabs(
             new Tab("Overview", new PaginationOverviewSample()),
             new Tab("Density", new PaginationDensitySample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

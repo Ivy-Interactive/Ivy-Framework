@@ -16,7 +16,7 @@ public class MarkdownApp : SampleBase
             new Tab("Math", new MathTab()),
             new Tab("Diagrams", new DiagramsTab()),
             new Tab("Media", new MediaTab())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

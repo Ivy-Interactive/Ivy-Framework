@@ -12,7 +12,7 @@ public class DataTableApp : SampleBase
             new Tab("Multi Agg", new DataTableMultiAggSample()),
             new Tab("Density", new DataTableDensitySample()),
             new Tab("Million Rows", new DataTablesMillionRowsSample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

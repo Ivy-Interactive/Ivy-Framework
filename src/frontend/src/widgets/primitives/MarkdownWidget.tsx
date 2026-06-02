@@ -95,7 +95,7 @@ const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({
   );
 
   return (
-    <div className="markdown-widget w-full" style={styles}>
+    <div className="markdown-widget w-full pl-2" style={styles}>
       {article ? (
         <TypographyContext.Provider value={articleTypography}>
           {renderer}
