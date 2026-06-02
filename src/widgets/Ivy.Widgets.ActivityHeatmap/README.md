@@ -98,7 +98,7 @@ These props apply to the `ActivityHeatmap` widget (the builder forwards most of 
 | `ShowMonthLabels` | `bool` | `true` | Show month labels along the top |
 | `ShowDayLabels` | `bool` | `true` | Show Mon/Wed/Fri labels on the left |
 | `Interval` | `ActivityInterval` | `Daily` | `Daily` or `Hourly` cell granularity |
-| `ValueLabel` | `string` | `"Count"` | Label used for the value in the tooltip (the builder sets this to the measure name) |
+| `ValueLabel` | `string?` | `null` | Label used for the value in the tooltip; when unset the tooltip falls back to `"Count"` (the builder sets this to the measure name) |
 | `StartDate` | `DateOnly?` | `null` | Pins the start of the visible range; when set, overrides the minimum date derived from `Data` |
 | `EndDate` | `DateOnly?` | `null` | Pins the end of the visible range; when set, overrides the maximum date derived from `Data` |
 
