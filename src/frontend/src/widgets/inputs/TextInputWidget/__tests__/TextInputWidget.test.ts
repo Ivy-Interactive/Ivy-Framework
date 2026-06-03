@@ -387,9 +387,11 @@ describe("SearchVariant keyboard handling", () => {
 describe("useCursorPosition", () => {
   function CursorWrapper({
     value,
+    type = "text",
     onRef,
   }: {
     value?: string;
+    type?: string;
     onRef?: (ref: {
       savePosition: () => void;
       elementRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
@@ -404,6 +406,7 @@ describe("useCursorPosition", () => {
     return React.createElement("input", {
       ref: elementRef as React.RefObject<HTMLInputElement>,
       "data-testid": "cursor-input",
+      type,
       value: value ?? "",
       onChange: () => {},
     });
@@ -484,6 +487,51 @@ describe("useCursorPosition", () => {
     });
 
     expect(input.selectionStart).toBe(2);
+  });
+
+  it("does not throw when restoring cursor on email inputs", () => {
+    let hookRef: {
+      savePosition: () => void;
+      elementRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+    } | null = null;
+
+    mount(
+      React.createElement(CursorWrapper, {
+        type: "email",
+        value: "hello@",
+        onRef: (ref) => {
+          hookRef = ref;
+        },
+      }),
+    );
+
+    const input = container.querySelector('[data-testid="cursor-input"]') as HTMLInputElement;
+    input.focus();
+    if (typeof input.setSelectionRange === "function") {
+      try {
+        input.setSelectionRange(6, 6);
+      } catch {
+        // Some environments reject selection on email inputs — still exercise restore path.
+      }
+    }
+
+    act(() => {
+      hookRef!.savePosition();
+    });
+
+    expect(() => {
+      act(() => {
+        root.render(
+          React.createElement(CursorWrapper, {
+            type: "email",
+            value: "hello@ivy.app",
+            onRef: (ref) => {
+              hookRef = ref;
+            },
+          }),
+        );
+      });
+    }).not.toThrow();
   });
 });
 

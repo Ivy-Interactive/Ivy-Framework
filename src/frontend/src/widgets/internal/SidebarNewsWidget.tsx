@@ -64,11 +64,13 @@ function News({ articles }: { articles: NewsArticle[] }) {
     dismissedNews === null ? [] : articles.filter(({ id }) => !dismissedNews.includes(id));
   const cardCount = cards.length;
 
-  React.useEffect(() => {
-    if (dismissedNews !== null && cardCount > 0) {
+  const [prevCardCount, setPrevCardCount] = React.useState(cardCount);
+  if (cardCount !== prevCardCount) {
+    setPrevCardCount(cardCount);
+    if (cardCount > 0) {
       setShowCompleted(true);
     }
-  }, [dismissedNews, cardCount]);
+  }
 
   React.useEffect(() => {
     let timeout: NodeJS.Timeout | undefined = undefined;
