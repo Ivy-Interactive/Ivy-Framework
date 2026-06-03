@@ -19,7 +19,7 @@ export function normalizeInputDensity(density?: Densities | string | null): Inpu
  * `size-7`/`size-9` target is larger than the glyph, which reads as extra padding.
  */
 export const affixEmbeddedButtonClasses =
-  "[&_button:not([data-invalid-icon])]:!px-0 [&_button:not([data-invalid-icon])]:shadow-none [&_button:not([data-invalid-icon])]:rounded [&_button:not([data-invalid-icon])]:hover:bg-accent [&_button:not([data-invalid-icon])]:cursor-pointer [&_button:not([data-invalid-icon])]:transition-colors [&_button:not([data-invalid-icon]).size-7]:!size-4 [&_button:not([data-invalid-icon]).size-9]:!size-6";
+  "[&_button:not([data-invalid-icon])]:!px-0 [&_button:not([data-invalid-icon])]:shadow-none [&_button:not([data-invalid-icon])]:rounded-none [&_button:not([data-invalid-icon])]:hover:bg-accent [&_button:not([data-invalid-icon])]:cursor-pointer [&_button:not([data-invalid-icon])]:transition-colors [&_button:not([data-invalid-icon]).size-7]:!size-4 [&_button:not([data-invalid-icon]).size-9]:!size-6";
 
 /** Tighter affix cell padding when the slot only contains an icon-sized Ivy button (not trailing invalid). */
 export const affixIconOnlyCellPaddingClasses =
@@ -92,6 +92,33 @@ export function textInputAffixCellClasses(
   return cn(
     textInputAffixCellVariant({ side, density: d }),
     textInputAffixIconGlyphSizeVariant({ density: d }),
+  );
+}
+
+/** Bordered field shell for inputs with optional prefix/suffix slots. */
+export function textInputFieldShellClasses(options: {
+  focused?: boolean;
+  invalid?: string;
+  disabled?: boolean;
+  ghost?: boolean;
+}): string {
+  return cn(
+    "relative flex w-full min-w-0 items-stretch overflow-hidden rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+    options.focused
+      ? "border-ring outline-none dark:border-ring"
+      : "border-input dark:border-white/10",
+    options.invalid && "border-destructive",
+    options.disabled && "cursor-not-allowed opacity-50",
+    options.ghost &&
+      "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+  );
+}
+
+/** Inner control nested inside {@link textInputFieldShellClasses} — square seams at affix joins. */
+export function textInputEmbeddedInputClasses(hasAffixes: boolean): string {
+  return cn(
+    "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+    hasAffixes ? "rounded-none" : "rounded-field",
   );
 }
 

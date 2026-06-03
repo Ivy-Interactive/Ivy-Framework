@@ -11,6 +11,9 @@ import { Densities } from "@/types/density";
 import {
   textInputAffixCellClasses,
   textInputAffixIconOnlyPaddingVariant,
+  textInputEmbeddedInputClasses,
+  textInputFieldShellClasses,
+  textInputSizeVariant,
   textInputSuffixGlyphSlotClasses,
   textInputSuffixWithTrailingClusterClasses,
   textInputTrailingIconButtonClasses,
@@ -223,10 +226,9 @@ const SliderVariant = memo(
 
     return (
       <div
-        className={cn(
-          "flex items-stretch w-full flex-1 rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
-          disabled && "cursor-not-allowed opacity-50",
-        )}
+        className={textInputFieldShellClasses({
+          disabled,
+        })}
       >
         {hasPrefix && (
           <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
@@ -331,20 +333,18 @@ const NumberVariant = memo(
     const suffixContent = slots?.Suffix;
     const hasPrefix = (prefixContent?.length ?? 0) > 0;
     const hasSuffix = (suffixContent?.length ?? 0) > 0;
+    const hasAffixes = hasPrefix || hasSuffix;
     const showClear = nullable && value !== null && !disabled;
     const trailingBesideSuffix = hasSuffix;
     const showTrailing = showClear || Boolean(invalid);
 
     return (
       <div
-        className={cn(
-          "relative flex items-stretch w-full flex-1 rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-          isFocused
-            ? "border-ring outline-none dark:border-ring"
-            : "border-input dark:border-white/10",
-          invalid && "border-destructive",
-          disabled && "cursor-not-allowed opacity-50",
-        )}
+        className={textInputFieldShellClasses({
+          focused: isFocused,
+          invalid,
+          disabled,
+        })}
       >
         {hasPrefix && (
           <div
@@ -373,13 +373,12 @@ const NumberVariant = memo(
             onBlur={handleBlur}
             onFocus={handleFocus}
             className={cn(
-              "border-0 shadow-none",
+              textInputSizeVariant({ density }),
+              textInputEmbeddedInputClasses(hasAffixes),
               invalid && inputStyles.invalidInput,
               trailingBesideSuffix && showTrailing && "pr-2",
               !trailingBesideSuffix && (invalid || showClear) && "pr-8",
               !trailingBesideSuffix && showClear && invalid && "pr-16",
-              hasPrefix && "rounded-l-none",
-              hasSuffix && "rounded-r-none",
             )}
             data-testid={dataTestId}
           />

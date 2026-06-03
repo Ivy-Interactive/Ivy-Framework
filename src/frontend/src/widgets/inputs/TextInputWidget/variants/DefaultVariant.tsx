@@ -6,6 +6,8 @@ import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import {
   textInputAffixCellClasses,
+  textInputEmbeddedInputClasses,
+  textInputFieldShellClasses,
   textInputSizeVariant,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
@@ -89,16 +91,12 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
   return (
     <div className="relative w-full select-none" style={styles}>
       <div
-        className={cn(
-          "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-          isFocused
-            ? "border-ring outline-none dark:border-ring"
-            : "border-input dark:border-white/10",
-          props.invalid && "border-destructive",
-          props.disabled && "cursor-not-allowed opacity-50",
-          props.ghost &&
-            "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
-        )}
+        className={textInputFieldShellClasses({
+          focused: isFocused,
+          invalid: props.invalid,
+          disabled: props.disabled,
+          ghost: props.ghost,
+        })}
       >
         {hasPrefix && (
           <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
@@ -129,10 +127,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
               !trailingBesideSuffix && showShortcut && "pr-16",
               !trailingBesideSuffix && showClear && props.invalid && "pr-16",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
-              "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
-              hasPrefix && "rounded-l-none",
-              hasSuffix && "rounded-r-none",
-              !hasAffixes && "rounded-field",
+              textInputEmbeddedInputClasses(hasAffixes),
             )}
             data-testid={props["data-testid"]}
           />
