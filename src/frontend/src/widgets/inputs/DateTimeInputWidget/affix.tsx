@@ -64,6 +64,26 @@ export interface DateInputAffixLayoutProps {
   trailingBesideSuffix?: boolean;
 }
 
+/** Outer field chrome — background fill lives here, not on inner trigger/input. */
+export function dateInputFieldShellClasses(options: {
+  focused?: boolean;
+  invalid?: string;
+  disabled?: boolean;
+}): string {
+  return cn(
+    "relative flex w-full min-w-0 select-none items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+    options.focused
+      ? "border-ring outline-none dark:border-ring"
+      : "border-input dark:border-white/10",
+    options.invalid && "border-destructive",
+    options.disabled && "cursor-not-allowed opacity-50",
+  );
+}
+
+/** Strip inner control chrome so the shell owns border and fill. */
+export const dateInputEmbeddedControlClasses =
+  "[&_button]:border-0 [&_button]:bg-transparent [&_button]:shadow-none [&_button]:dark:bg-transparent [&_button]:hover:bg-transparent [&_button]:dark:hover:bg-transparent [&_button]:focus-visible:ring-0 [&_button]:focus-visible:ring-offset-0 [&_input]:border-0 [&_input]:bg-transparent [&_input]:shadow-none [&_input]:dark:bg-transparent [&_input]:focus-visible:ring-0";
+
 interface DateInputAffixShellProps {
   density: Densities;
   invalid?: string;

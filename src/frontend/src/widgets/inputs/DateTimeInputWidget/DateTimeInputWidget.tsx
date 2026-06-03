@@ -19,7 +19,11 @@ import { WeekVariant } from "./WeekVariant";
 import { YearVariant } from "./YearVariant";
 import { EMPTY_ARRAY } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { DateInputAffixShell } from "./affix";
+import {
+  DateInputAffixShell,
+  dateInputEmbeddedControlClasses,
+  dateInputFieldShellClasses,
+} from "./affix";
 
 const VariantComponents: Record<
   VariantType,
@@ -179,7 +183,21 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   );
 
   if (!hasAffixes) {
-    return <div className="relative w-full">{variantElement}</div>;
+    return (
+      <div className="relative w-full select-none">
+        <div
+          className={dateInputFieldShellClasses({
+            focused: affixFocused,
+            invalid,
+            disabled,
+          })}
+        >
+          <div className={cn("min-w-0 flex-1", dateInputEmbeddedControlClasses)}>
+            {variantElement}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -197,7 +215,8 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
     >
       <div
         className={cn(
-          "w-full [&_button]:border-0 [&_button]:shadow-none [&_input]:border-0 [&_input]:shadow-none",
+          "w-full",
+          dateInputEmbeddedControlClasses,
           "[&_button]:rounded-l-none [&_input]:rounded-l-none",
           (hasSuffix || trailingInAffixCell) &&
             "[&_button]:rounded-r-none [&_input]:rounded-r-none",

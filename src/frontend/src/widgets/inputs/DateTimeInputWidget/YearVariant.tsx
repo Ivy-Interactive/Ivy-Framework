@@ -128,13 +128,11 @@ export const YearVariant: React.FC<YearVariantProps> = ({
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),
-              "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
               !date && "text-muted-foreground",
               controlInvalid && inputStyles.invalidInput,
               disabled && "cursor-not-allowed",
               trailingPadding,
-              inAffixShell &&
-                "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
+              "border-0 bg-transparent shadow-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-transparent dark:bg-transparent dark:hover:bg-transparent",
             )}
             data-testid={dataTestId}
             onFocus={() => {

@@ -223,9 +223,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
         !hasValue && "text-muted-foreground",
         ghost &&
           "border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground",
-        hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
-        !hasAffixes &&
-          "border-0 shadow-none rounded-field focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 dark:bg-transparent",
+        "border-0 bg-transparent shadow-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
         hasPrefix && "rounded-l-none",
         hasSuffix && "rounded-r-none",
       )}

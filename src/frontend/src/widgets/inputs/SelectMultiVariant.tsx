@@ -198,7 +198,7 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
       className={cn(
         "w-full",
         ghost && "ghost",
-        hasAffixes && "border-0 shadow-none",
+        "border-0 bg-transparent shadow-none dark:bg-transparent",
         hasPrefix && "rounded-l-none",
         hasSuffix && "rounded-r-none",
       )}
@@ -229,7 +229,8 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
       {hasAffixes ? (
         <div
           className={cn(
-            "relative flex flex-1 items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
+            "relative flex flex-1 items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+            "border-input dark:border-white/10 focus-within:border-ring dark:focus-within:border-ring",
             invalid && "border-destructive",
             (disabled || loading) && "cursor-not-allowed opacity-50",
             ghost &&
@@ -292,7 +293,18 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
           )}
         </div>
       ) : (
-        <div className="flex-1 relative w-full">{multiSelectorContent}</div>
+        <div
+          className={cn(
+            "relative flex w-full min-w-0 flex-1 select-none items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+            "border-input outline-none dark:border-white/10 focus-within:border-ring dark:focus-within:border-ring",
+            invalid && "border-destructive",
+            (disabled || loading) && "cursor-not-allowed opacity-50",
+            ghost &&
+              "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+          )}
+        >
+          <div className="relative min-w-0 flex-1">{multiSelectorContent}</div>
+        </div>
       )}
     </div>
   );

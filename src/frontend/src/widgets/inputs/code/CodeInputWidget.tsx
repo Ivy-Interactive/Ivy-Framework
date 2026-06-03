@@ -7,6 +7,7 @@ import { getHeight, getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
+import { dateInputFieldShellClasses } from "../DateTimeInputWidget/affix";
 import { X, Copy, Loader2 } from "lucide-react";
 import {
   normalizeInputDensity,
@@ -279,6 +280,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         <CodeMirror
           value={localValue}
           extensions={extensions}
+          theme="none"
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
@@ -288,12 +290,9 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           data-gramm="false"
           className={cn(
             "h-full overflow-hidden",
-            "[&_.cm-editor]:bg-transparent",
-            !hasAffixes &&
-              "rounded-field border border-input shadow-sm dark:border-white/10 dark:bg-white/5",
-            !hasAffixes && invalid && "border-destructive",
-            hasAffixes &&
-              "[&_.cm-editor]:border-0 [&_.cm-editor]:shadow-none [&_.cm-editor]:rounded-none",
+            "[&_.cm-editor]:border-0 [&_.cm-editor]:bg-transparent! [&_.cm-editor]:shadow-none",
+            "[&_.cm-scroller]:bg-transparent! [&_.cm-content]:bg-transparent! [&_.cm-gutters]:bg-transparent!",
+            hasAffixes && "[&_.cm-editor]:rounded-none",
             hasAffixes && hasPrefix && "[&_.cm-editor]:rounded-l-none",
             hasAffixes && (hasSuffix || trailingInAffixCell) && "[&_.cm-editor]:rounded-r-none",
             disabled && "opacity-50 cursor-not-allowed",
@@ -307,8 +306,14 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
 
   if (!hasAffixes) {
     return (
-      <div style={styles} className="relative w-full overflow-hidden">
-        {codeEditor()}
+      <div
+        style={styles}
+        className={cn(
+          "relative flex w-full flex-col overflow-hidden",
+          dateInputFieldShellClasses({ focused: isFocused, invalid, disabled }),
+        )}
+      >
+        <div className="min-h-0 min-w-0 flex-1 overflow-hidden">{codeEditor()}</div>
       </div>
     );
   }
@@ -316,11 +321,11 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   return (
     <div
       style={styles}
-      className={cn(
-        "relative flex w-full items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-        invalid ? "border-destructive" : "border-input dark:border-white/10",
-        disabled && "cursor-not-allowed opacity-50",
-      )}
+      className={dateInputFieldShellClasses({
+        focused: isFocused,
+        invalid,
+        disabled,
+      })}
     >
       {hasPrefix && (
         <div

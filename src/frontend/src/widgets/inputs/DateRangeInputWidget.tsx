@@ -25,6 +25,8 @@ import { DateRangePresets } from "./DateRangePresets";
 import {
   DateInputAffixShell,
   dateInputControlInvalid,
+  dateInputEmbeddedControlClasses,
+  dateInputFieldShellClasses,
   dateInputTriggerTrailingPadding,
 } from "./DateTimeInputWidget/affix";
 import { ClearAndInvalidIcons } from "./DateTimeInputWidget/shared";
@@ -227,11 +229,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
           className={cn(
             dateRangeInputVariant({ density }),
             "inline-flex items-center",
-            "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
             !date && "text-muted-foreground",
             controlInvalid && "border-destructive focus-visible:ring-destructive",
             trailingPadding,
-            hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
+            "border-0 bg-transparent shadow-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-transparent dark:bg-transparent dark:hover:bg-transparent",
             hasAffixes && "rounded-l-none",
             (hasSuffix || (showTrailing && !trailingBesideSuffix)) && "rounded-r-none",
           )}
@@ -334,7 +335,17 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   if (!hasAffixes) {
     return (
       <div className="relative w-full select-none">
-        {triggerContent}
+        <div
+          className={dateInputFieldShellClasses({
+            focused: isOpen,
+            invalid,
+            disabled,
+          })}
+        >
+          <div className={cn("relative min-w-0 flex-1", dateInputEmbeddedControlClasses)}>
+            {triggerContent}
+          </div>
+        </div>
         {showTrailing && (
           <ClearAndInvalidIcons
             showClear={showClear}
@@ -361,7 +372,9 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
         showClear={showClear}
         onClear={handleClear}
       >
-        <div className="w-full min-w-0">{triggerContent}</div>
+        <div className={cn("w-full min-w-0", dateInputEmbeddedControlClasses)}>
+          {triggerContent}
+        </div>
       </DateInputAffixShell>
     </div>
   );
