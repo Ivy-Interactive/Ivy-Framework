@@ -78,11 +78,7 @@ const InputLabel: React.FC<{
 }> = React.memo(({ id, label, description, density = Densities.Medium, onClick, disabled }) => {
   if (!label && !description) return null;
 
-  const cursorClass = onClick
-    ? disabled
-      ? "cursor-not-allowed"
-      : "cursor-pointer"
-    : undefined;
+  const cursorClass = onClick ? (disabled ? "cursor-not-allowed" : "cursor-pointer") : undefined;
 
   return (
     <div onClick={onClick} className={cursorClass}>
