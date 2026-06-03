@@ -79,6 +79,8 @@ class ActivityHeatmapDemo : ViewBase
                     measure: e => e.Downloads)
         );
 
+        var showMonthLabelsValue = !showMonthLabels.Value ? "\n\t\t\t\t.showMonthLabels(false)" : "";
+        var showDayLabelsValue = !showDayLabels.Value ? "\n\t\t\t\t.showDayLabels(false)" : "";
         var optionalPropsExample = Layout.Vertical()
             | Text.H3("With Optional Properties").Anchor("optional-props")
             | new CodeBlock($$"""
@@ -93,9 +95,7 @@ class ActivityHeatmapDemo : ViewBase
                                             | dailyRepoStats
                                                 .ToActivityHeatmap(
                                                     dimension: e => e.Date,
-                                                    measure: e => e.Downloads)
-                                                .ShowMonthLabels({{showMonthLabels.Value.ToString().ToLower()}})
-                                                .ShowDayLabels({{showDayLabels.Value.ToString().ToLower()}})
+                                                    measure: e => e.Downloads){{showDayLabelsValue}}{{showMonthLabelsValue}}
                                                 .StartDate(DateOnly.Parse({{$"\"{startDate}\""}}))
                                                 .EndDate(DateOnly.Parse({{$"\"{endDate}\""}}))
                                                 .ColorScheme(Colors.{{selectedColor.Value}})
