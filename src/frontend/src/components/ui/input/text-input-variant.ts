@@ -60,8 +60,8 @@ export const textInputAffixCellVariant = cva(
   {
     variants: {
       side: {
-        prefix: "rounded-tl-fields rounded-bl-fields",
-        suffix: "rounded-tr-fields rounded-br-fields",
+        prefix: "rounded-none",
+        suffix: "rounded-none",
       },
       density: {
         Small: "",
@@ -207,7 +207,7 @@ export function textInputAffixSuffixTrailingShellClasses(
 ): string {
   const d = normalizeInputDensity(density);
   return cn(
-    "flex shrink-0 items-center self-center rounded-tr-fields rounded-br-fields bg-transparent text-muted-foreground",
+    "flex shrink-0 items-center self-center rounded-none bg-transparent text-muted-foreground",
     affixEmbeddedButtonClasses,
     textInputAffixIconGlyphSizeVariant({ density: d }),
   );

@@ -198,7 +198,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       <div
         className={cn(
           "w-full [&_button]:border-0 [&_button]:shadow-none [&_input]:border-0 [&_input]:shadow-none",
-          hasPrefix && "[&_button]:rounded-l-none [&_input]:rounded-l-none",
+          "[&_button]:rounded-l-none [&_input]:rounded-l-none",
           (hasSuffix || trailingInAffixCell) &&
             "[&_button]:rounded-r-none [&_input]:rounded-r-none",
         )}

@@ -5,7 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { inputStyles } from "@/lib/styles";
 import { Densities } from "@/types/density";
@@ -214,8 +214,6 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               if (!open) onFocusChange?.(false);
             }}
           >
-            <CalendarIcon className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
-            <Clock className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
             <span
               className={cn(
                 "truncate",

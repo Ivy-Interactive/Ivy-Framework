@@ -2,14 +2,10 @@ import * as React from "react";
 import { useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { inputStyles } from "@/lib/styles";
 import { Densities } from "@/types/density";
-import {
-  dateTimeInputIconVariant,
-  dateTimeInputTextVariant,
-} from "@/components/ui/input/date-time-input-variant";
+import { dateTimeInputTextVariant } from "@/components/ui/input/date-time-input-variant";
 import { TimeVariantProps } from "./types";
 import { ClearAndInvalidIcons } from "./shared";
 import { dateInputControlInvalid, dateInputTriggerTrailingPadding } from "./affix";
@@ -123,16 +119,9 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
         className={cn(
           "relative flex items-center rounded-md border border-input bg-transparent shadow-sm focus-within:ring-1 focus-within:ring-ring dark:bg-white/5 dark:border-white/10",
           controlInvalid && inputStyles.invalidInput,
-          inAffixShell && "border-0 shadow-none focus-within:ring-0",
+          inAffixShell && "rounded-none border-0 shadow-none focus-within:ring-0",
         )}
       >
-        <Clock
-          className={cn(
-            "ml-3 shrink-0",
-            dateTimeInputIconVariant({ density }),
-            disabled && "opacity-50",
-          )}
-        />
         <Input
           type="time"
           step={timeStepSeconds}

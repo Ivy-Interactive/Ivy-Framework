@@ -4,13 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, startOfISOWeek, getISOWeek } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { inputStyles } from "@/lib/styles";
 import { Densities } from "@/types/density";
 import {
   dateTimeInputVariant,
-  dateTimeInputIconVariant,
   dateTimeInputTextVariant,
 } from "@/components/ui/input/date-time-input-variant";
 import { WeekVariantProps } from "./types";
@@ -152,7 +150,6 @@ export const WeekVariant: React.FC<WeekVariantProps> = ({
               if (!open) onFocusChange?.(false);
             }}
           >
-            <CalendarIcon className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
             <span
               className={cn(
                 "truncate",

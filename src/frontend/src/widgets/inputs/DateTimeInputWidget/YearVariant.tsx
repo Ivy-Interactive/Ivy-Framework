@@ -3,13 +3,12 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { inputStyles } from "@/lib/styles";
 import { Densities } from "@/types/density";
 import {
   dateTimeInputVariant,
-  dateTimeInputIconVariant,
   dateTimeInputTextVariant,
 } from "@/components/ui/input/date-time-input-variant";
 import { YearVariantProps } from "./types";
@@ -145,7 +144,6 @@ export const YearVariant: React.FC<YearVariantProps> = ({
               if (!open) onFocusChange?.(false);
             }}
           >
-            <CalendarIcon className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
             <span
               className={cn(
                 "truncate",

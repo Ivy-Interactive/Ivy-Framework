@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
 import {
   addMonths,
   format,
@@ -19,7 +18,6 @@ import { useEventHandler } from "@/components/event-handler";
 import { Densities } from "@/types/density";
 import {
   dateRangeInputVariant,
-  dateRangeInputIconVariant,
   dateRangeInputTextVariant,
 } from "@/components/ui/input/date-range-input-variant";
 import { EMPTY_ARRAY } from "@/lib/constants";
@@ -234,8 +232,8 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             controlInvalid && "border-destructive focus-visible:ring-destructive",
             trailingPadding,
             hasAffixes && "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
-            hasPrefix && "rounded-l-none",
-            hasSuffix && "rounded-r-none",
+            hasAffixes && "rounded-l-none",
+            (hasSuffix || (showTrailing && !trailingBesideSuffix)) && "rounded-r-none",
           )}
           onBlur={() => {
             if (disabled) return;
@@ -246,7 +244,6 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             if (events.includes("OnFocus") && !isOpen) eventHandler("OnFocus", id, []);
           }}
         >
-          <CalendarIcon className={cn("mr-2 shrink-0", dateRangeInputIconVariant({ density }))} />
           {date?.from ? (
             date.to ? (
               <span className={cn("truncate", dateRangeInputTextVariant({ density }))}>
