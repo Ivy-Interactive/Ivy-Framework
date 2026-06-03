@@ -790,7 +790,7 @@ export const typography: Record<string, string> = {
   td: "border border-border px-4 py-2 text-[0.875em]",
 
   // Media
-  img: "max-w-full h-auto cursor-zoom-in border border-border rounded-md",
+  img: "block max-w-full h-auto cursor-zoom-in border border-border rounded-md my-4",
   hr: "border-t border-border",
 
   // Expandable sections

@@ -191,6 +191,73 @@ const hasContentFeature = (content: string, feature: RegExp): boolean => {
   return feature.test(content);
 };
 
+/**
+ * Component to render images inside markdown, with zoom overlay support.
+ */
+interface MarkdownImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  dangerouslyAllowLocalFiles?: boolean;
+}
+
+const MarkdownImage: React.FC<MarkdownImageProps> = memo(
+  ({ dangerouslyAllowLocalFiles = false, ...props }) => {
+    const typography = useTypography();
+    const [showOverlay, setShowOverlay] = React.useState(false);
+    const src = props.src;
+
+    // Early validation: if src is missing or invalid, don't render anything
+    if (!src || typeof src !== "string") {
+      return null;
+    }
+
+    // Validate and sanitize image URL with optional local file support
+    const validatedSrc = validateMediaUrl(src, {
+      mediaType: "image",
+      dangerouslyAllowLocalFiles,
+    });
+    if (!validatedSrc) {
+      // Invalid URL, don't render image
+      return null;
+    }
+
+    // Construct the final image source URL
+    // For file:// URLs, use them directly (no Ivy host prefix)
+    const imageSrc = validatedSrc.match(/^(https?:\/\/|data:|blob:|app:)/i)
+      ? validatedSrc
+      : (() => {
+          const normalizedSrc = validatedSrc.startsWith("/") ? validatedSrc : `/${validatedSrc}`;
+          const prefixedSrc = normalizedSrc.startsWith("/ivy/")
+            ? normalizedSrc
+            : `/ivy${normalizedSrc}`;
+          return `${getIvyHost()}${prefixedSrc}`;
+        })();
+
+    return (
+      <>
+        <img
+          {...props}
+          src={imageSrc}
+          alt={props.alt || ""}
+          className={cn(typography.img, "cursor-zoom-in")}
+          loading="lazy"
+          onClick={() => setShowOverlay(true)}
+          onKeyDown={(e) => e.key === "Enter" && setShowOverlay(true)}
+          role="button"
+          tabIndex={0}
+        />
+        {showOverlay && (
+          <ImageOverlay src={imageSrc} alt={props.alt} onClose={() => setShowOverlay(false)} />
+        )}
+      </>
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.src === nextProps.src &&
+    prevProps.alt === nextProps.alt &&
+    prevProps.dangerouslyAllowLocalFiles === nextProps.dangerouslyAllowLocalFiles,
+);
+
+MarkdownImage.displayName = "MarkdownImage";
+
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   content,
   onLinkClick,
@@ -399,66 +466,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       td: memo(({ children }: { children: React.ReactNode }) => (
         <td className={typography.td}>{children}</td>
       )),
-      img: memo(
-        (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
-          const [showOverlay, setShowOverlay] = React.useState(false);
-          const src = props.src;
-
-          // Early validation: if src is missing or invalid, don't render anything
-          if (!src || typeof src !== "string") {
-            return null;
-          }
-
-          // Validate and sanitize image URL with optional local file support
-          const validatedSrc = validateMediaUrl(src, {
-            mediaType: "image",
-            dangerouslyAllowLocalFiles,
-          });
-          if (!validatedSrc) {
-            // Invalid URL, don't render image
-            return null;
-          }
-
-          // Construct the final image source URL
-          // For file:// URLs, use them directly (no Ivy host prefix)
-          const imageSrc = validatedSrc.match(/^(https?:\/\/|data:|blob:|app:)/i)
-            ? validatedSrc
-            : (() => {
-                const normalizedSrc = validatedSrc.startsWith("/")
-                  ? validatedSrc
-                  : `/${validatedSrc}`;
-                const prefixedSrc = normalizedSrc.startsWith("/ivy/")
-                  ? normalizedSrc
-                  : `/ivy${normalizedSrc}`;
-                return `${getIvyHost()}${prefixedSrc}`;
-              })();
-
-          return (
-            <>
-              <img
-                {...props}
-                src={imageSrc}
-                alt={props.alt || ""}
-                className={cn(typography.img, "cursor-zoom-in")}
-                loading="lazy"
-                onClick={() => setShowOverlay(true)}
-                onKeyDown={(e) => e.key === "Enter" && setShowOverlay(true)}
-                role="button"
-                tabIndex={0}
-              />
-              {showOverlay && (
-                <ImageOverlay
-                  src={imageSrc}
-                  alt={props.alt}
-                  onClose={() => setShowOverlay(false)}
-                />
-              )}
-            </>
-          );
-        },
-        (prevProps, nextProps) =>
-          prevProps.src === nextProps.src && prevProps.alt === nextProps.alt,
-      ),
+      img: memo((props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+        <MarkdownImage {...props} dangerouslyAllowLocalFiles={dangerouslyAllowLocalFiles} />
+      )),
       hr: memo((props: React.HTMLAttributes<HTMLHRElement>) => (
         <hr className={typography.hr} {...props} />
       )),

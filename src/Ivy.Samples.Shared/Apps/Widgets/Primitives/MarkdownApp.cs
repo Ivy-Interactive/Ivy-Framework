@@ -421,6 +421,13 @@ public class MediaTab : ViewBase
                        
                        ![Cat Image](https://placecats.com/300/200 "A cute cat")
                        
+                       ### Consecutive Images
+                       
+                       Two images placed directly next to each other in markdown render with a vertical gap:
+                       
+                       ![Consecutive Cat 1](https://placecats.com/300/200)
+                       ![Consecutive Cat 2](https://placecats.com/300/200)
+                       
                        ## Footnotes
                        
                        Here's some text with a footnote[^1] and another reference[^2].
