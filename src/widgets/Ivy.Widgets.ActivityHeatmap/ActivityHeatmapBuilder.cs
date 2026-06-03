@@ -177,7 +177,7 @@ public class ActivityHeatmapBuilder<TSource>(
         DateTime dt => DateOnly.FromDateTime(dt),
         DateTimeOffset dto => DateOnly.FromDateTime(dto.DateTime),
         string s => DateOnly.Parse(s),
-        _ => DateOnly.Parse(value.ToString()!)
+        _ => DateOnly.Parse(value.ToString() ?? "")
     };
 
     internal static int? ToHour(object value) => value switch
