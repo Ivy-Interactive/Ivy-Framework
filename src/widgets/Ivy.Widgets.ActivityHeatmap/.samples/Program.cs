@@ -82,33 +82,37 @@ class ActivityHeatmapDemo : ViewBase
         var optionalPropsExample = Layout.Vertical()
             | Text.H3("With Optional Properties").Anchor("optional-props")
             | new CodeBlock($$"""
-                public class ActivityHeatmapOptionalProps : ViewBase
-                {
-                    public override object Build()
-                    {
-                        var repoService = UseService<IMyRepoService>();
-                        var dailyRepoStats = repoService.GetDailyStats().ToList();
+                                public class ActivityHeatmapOptionalProps : ViewBase
+                                {
+                                    public override object Build()
+                                    {
+                                        var repoService = UseService<IMyRepoService>();
+                                        var dailyRepoStats = repoService.GetDailyStats().ToList();
 
-                        return Layout.Vertical()
-                            | dailyRepoStats
-                                .ToActivityHeatmap(
-                                    dimension: e => e.Date,
-                                    measure: e => e.Downloads)
-                                .ShowMonthLabels({{showMonthLabels.Value.ToString().ToLower()}})
-                                .ShowDayLabels({{showDayLabels.Value.ToString().ToLower()}})
-                                .StartDate(DateOnly.Parse({{$"\"{startDate}\""}}))
-                                .EndDate(DateOnly.Parse({{$"\"{endDate}\""}}))
-                                .ColorScheme(Colors.{{selectedColor.Value}})
-                                .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}"));
-                    }
-                }
-                """)
+                                        return Layout.Vertical()
+                                            | dailyRepoStats
+                                                .ToActivityHeatmap(
+                                                    dimension: e => e.Date,
+                                                    measure: e => e.Downloads)
+                                                .ShowMonthLabels({{showMonthLabels.Value.ToString().ToLower()}})
+                                                .ShowDayLabels({{showDayLabels.Value.ToString().ToLower()}})
+                                                .StartDate(DateOnly.Parse({{$"\"{startDate}\""}}))
+                                                .EndDate(DateOnly.Parse({{$"\"{endDate}\""}}))
+                                                .ColorScheme(Colors.{{selectedColor.Value}})
+                                                .OnDayClick(day => client.Toast($"Clicked {day.Date}: {day.Count} downloads"));
+                                    }
+                                }
+                                """)
 
             | (Layout.Horizontal().Width(Size.Full())
-                | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker).WithField().Label("Color").Width(Size.MinContent())
-                | showDayLabels.ToBoolInput().WithField().Label("Show days").Width(Size.MaxContent())
-                | showMonthLabels.ToBoolInput().WithField().Label("Show months").Width(Size.MaxContent())
-                | nullableRange.ToDateRangeInput().WithField().Label("Time period").Width(Size.Fit()))
+                | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker).WithField()
+                    .Label("Color").Width(Size.MinContent())
+                | showDayLabels.ToBoolInput().WithField().Label("Show days")
+                    .Width(Size.MaxContent())
+                | showMonthLabels.ToBoolInput().WithField().Label("Show months")
+                    .Width(Size.MaxContent())
+                | nullableRange.ToDateRangeInput().WithField().Label("Time period")
+                    .Width(Size.Fit()))
 
             | new Card(dailyData
                 .ToActivityHeatmap(
@@ -119,8 +123,7 @@ class ActivityHeatmapDemo : ViewBase
                 .ColorScheme(selectedColor.Value)
                 .ShowDayLabels(showDayLabels.Value)
                 .ShowMonthLabels(showMonthLabels.Value)
-                .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
-                .Width(Size.Full()).WithLayout().Horizontal();
+                .OnDayClick(day => client.Toast($"Clicked {day.Date}: {day.Count} downloads")));
 
         var start2 = DateTime.Now.AddDays(-30);
         var hourlyData = Enumerable
