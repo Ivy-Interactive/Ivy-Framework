@@ -71,9 +71,9 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
 
-  const handleSelect = () => {
+  const handleSelect = React.useCallback(() => {
     if (events.includes("OnSelect")) eventHandler("OnSelect", id, []);
-  };
+  }, [events, eventHandler, id]);
 
   const buttonRef = useRef<HTMLButtonElement>(null);
   const hasAutoFocusedRef = useRef(false);

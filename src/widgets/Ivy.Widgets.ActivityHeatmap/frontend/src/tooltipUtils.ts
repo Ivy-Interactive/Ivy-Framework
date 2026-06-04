@@ -9,7 +9,11 @@ export function formatTooltipHeader(day: Activity): string {
   const month = MONTH_NAMES[date.getMonth()];
   const dayNum = date.getDate();
   const year = date.getFullYear();
-  return `${month} ${dayNum}, ${year}`;
+  const header = `${month} ${dayNum}, ${year}`;
+  if (day.hour != null) {
+    return `${header}, ${String(day.hour).padStart(2, "0")}:00`;
+  }
+  return header;
 }
 
 export function formatTooltipValue(day: Activity): string {

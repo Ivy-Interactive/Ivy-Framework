@@ -767,10 +767,11 @@ export const typography: Record<string, string> = {
   label: "text-large-label font-medium leading-none flex items-center",
   block: "flex items-center min-w-0",
 
-  // Lists
-  ul: "list-disc ml-6 gap-y-1.5 [&_li>ul]:mt-1.5 [&_li>ol]:mt-1.5",
-  ol: "list-decimal ml-6 gap-y-1.5 [&_li>ul]:mt-1.5 [&_li>ol]:mt-1.5",
-  li: "",
+  // Lists — gap on ol/ul; markers need list-item on li (flex on li hides numbers/bullets)
+  ul: "list-disc list-outside ps-8 flex flex-col gap-y-2",
+  ol: "list-decimal list-outside ps-8 flex flex-col gap-y-2",
+  li: "list-item",
+  liContent: "flex flex-col gap-y-2 [&>p]:my-0",
 
   // Links
   a: "text-primary underline underline-offset-[3px] brightness-90 hover:brightness-100",
@@ -789,7 +790,7 @@ export const typography: Record<string, string> = {
   td: "border border-border px-4 py-2 text-[0.875em]",
 
   // Media
-  img: "max-w-full h-auto cursor-zoom-in border border-border rounded-md",
+  img: "block max-w-full h-auto cursor-zoom-in border border-border rounded-md my-4",
   hr: "border-t border-border",
 
   // Expandable sections
@@ -810,6 +811,8 @@ export const articleTypography: Record<string, string> = {
 
   // Slightly increased line height for article body text (readability)
   p: `${typography.p} leading-relaxed`,
-  li: `${typography.li} leading-relaxed`,
+  ul: "list-disc list-outside ps-9 flex flex-col gap-y-2",
+  ol: "list-decimal list-outside ps-9 flex flex-col gap-y-2",
+  li: "list-item leading-relaxed",
   blockquote: `${typography.blockquote} leading-relaxed`,
 };

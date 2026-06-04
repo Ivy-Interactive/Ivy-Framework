@@ -31,7 +31,7 @@ new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
 Configure automatic playback and looping (muted autoplay is more likely to be allowed by browsers):
 
 ```csharp demo-tabs
-Layout.Vertical().Gap(4)
+Layout.Vertical()
 | Text.H4("Muted Autoplay Video")
 | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .Autoplay(true)
@@ -46,7 +46,7 @@ Layout.Vertical().Gap(4)
 Enable or disable browser playback controls:
 
 ```csharp demo-tabs
-Layout.Vertical().Gap(4)
+Layout.Vertical()
 | Text.P("With Controls (default)").Small()
 | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .Controls(true)
@@ -60,7 +60,7 @@ Layout.Vertical().Gap(4)
 Control width and height of the video player:
 
 ```csharp demo-tabs
-Layout.Vertical().Gap(4)
+Layout.Vertical()
 | Text.P("50% width, fixed height").Small()
 | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .Width(Size.Fraction(0.5f))
@@ -81,7 +81,7 @@ new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
 Play a specific segment of a video by setting start and end times (in seconds):
 
 ```csharp demo-tabs
-Layout.Vertical().Gap(4)
+Layout.Vertical()
 | Text.P("Start at 5 seconds").Small()
 | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .StartTime(5)
@@ -101,7 +101,7 @@ Layout.Vertical().Gap(4)
 Control video playback speed (0.25x to higher speeds, where 1.0 is normal):
 
 ```csharp demo-tabs
-Layout.Vertical().Gap(4)
+Layout.Vertical()
 | Text.P("1.5x speed (faster lectures/tutorials)").Small()
 | new VideoPlayer("https://www.w3schools.com/html/mov_bbb.mp4")
     .PlaybackRate(1.5)

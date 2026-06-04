@@ -72,7 +72,7 @@ public class NavigationBeaconDemoApp : ViewBase
         return Layout.Tabs(
             new Tab("Interactive Demo", new BeaconInteractiveDemo()),
             new Tab("Overview", new BeaconOverview())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

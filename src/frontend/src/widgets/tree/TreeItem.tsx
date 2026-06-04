@@ -24,7 +24,7 @@ const TreeItemLabel: React.FC<{ label: string; tooltip?: string }> = ({ label, t
     checkTruncation();
     window.addEventListener("resize", checkTruncation);
     return () => window.removeEventListener("resize", checkTruncation);
-  }, [label]);
+  }, []);
 
   return (
     <TooltipProvider>
@@ -69,9 +69,11 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
   const hasChildren = item.children && item.children.length > 0;
   const gapClass = densityTreeGap[density ?? Densities.Medium];
 
-  React.useEffect(() => {
+  const [prevExpanded, setPrevExpanded] = React.useState(item.expanded);
+  if (item.expanded !== prevExpanded) {
+    setPrevExpanded(item.expanded);
     setIsOpen(item.expanded ?? false);
-  }, [item.expanded]);
+  }
 
   const handleToggle = (e: React.MouseEvent) => {
     if (item.disabled) return;
@@ -164,7 +166,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
               </button>
             </CollapsibleTrigger>
           )}
-          <TreeItemLabel label={item.label} tooltip={item.tooltip} />
+          <TreeItemLabel key={item.label} label={item.label} tooltip={item.tooltip} />
 
           {rowActions && rowActions.length > 0 && onRowActionClick && (
             <div
@@ -225,7 +227,7 @@ export const TreeItem: React.FC<TreeItemWidgetProps> = ({
       {item.icon && item.icon !== "None" && (
         <Icon className="size-4 shrink-0 text-muted-foreground" name={item.icon} />
       )}
-      <TreeItemLabel label={item.label} tooltip={item.tooltip} />
+      <TreeItemLabel key={item.label} label={item.label} tooltip={item.tooltip} />
 
       {rowActions && rowActions.length > 0 && onRowActionClick && (
         <div

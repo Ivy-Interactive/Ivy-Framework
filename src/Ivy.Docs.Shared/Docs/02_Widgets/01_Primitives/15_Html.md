@@ -186,7 +186,7 @@ public class ComplexLayoutView : ViewBase
             </div>
             """;
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.H1("HTML Widget Demo")
             | new Html(complexHtml);
     }
@@ -312,7 +312,7 @@ public class LongContentView : ViewBase
     {
         var longContent = GetLongHtmlContent();
         
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Text.H2("Article")
             | new Html($"<div style='max-height: 400px; overflow-y: auto;'>{longContent}</div>");
     }

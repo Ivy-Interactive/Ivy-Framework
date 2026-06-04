@@ -12,7 +12,7 @@ public class DataTableApp : SampleBase
             new Tab("Multi Agg", new DataTableMultiAggSample()),
             new Tab("Density", new DataTableDensitySample()),
             new Tab("Million Rows", new DataTablesMillionRowsSample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 
@@ -254,10 +254,10 @@ public class DataTableHeaderSlotsSample : ViewBase
                 .Icon(x => x.Team, Icons.Layers)
                 .Icon(x => x.Priority, Icons.Flag)
                 .Icon(x => x.LastUpdate, Icons.Clock)
-                .HeaderLeft(_ => Layout.Horizontal().Gap(2)
+                .HeaderLeft(_ => new Fragment()
                     | new Button("Export", icon: Icons.Download).Small()
                     | new Badge("Live").Color(Colors.Blue).Small())
-                .HeaderRight(_ => Layout.Horizontal().Gap(2)
+                .HeaderRight(_ => new Fragment()
                     | new Badge($"{data.Count()} rows").Color(Colors.Green).Small()
                     | new Button("Settings", icon: Icons.Settings).Primary().Small())
                 .Config(config =>
@@ -384,7 +384,7 @@ public class DataTableDensitySample : ViewBase
             .Density(density.Value)
             .Height(Size.Units(60));
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | Layout.Horizontal().Gap(2)
                 | new Button("Small").OnClick(_ => density.Set(Density.Small))
                     .Variant(density.Value == Density.Small ? ButtonVariant.Primary : ButtonVariant.Outline).Small()

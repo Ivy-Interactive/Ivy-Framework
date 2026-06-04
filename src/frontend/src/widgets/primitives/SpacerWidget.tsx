@@ -6,14 +6,30 @@ interface SpacerWidgetProps {
 }
 
 export const SpacerWidget: React.FC<SpacerWidgetProps> = ({ width, height }) => {
+  const widthStyle = getWidth(width);
+  const heightStyle = getHeight(height);
+
+  if (heightStyle.height) {
+    heightStyle.maxHeight = heightStyle.height;
+  }
+
+  const defaultStyle: React.CSSProperties = {};
+
+  if (!width) {
+    defaultStyle.flexGrow = 1;
+    defaultStyle.minWidth = 0;
+  }
+
+  if (!height) {
+    defaultStyle.flexGrow = 1;
+  }
+
   return (
     <div
       style={{
-        flexGrow: 1,
-        flexShrink: 1,
-        flexBasis: "0%",
-        ...getWidth(width),
-        ...getHeight(height),
+        ...defaultStyle,
+        ...widthStyle,
+        ...heightStyle,
       }}
     />
   );

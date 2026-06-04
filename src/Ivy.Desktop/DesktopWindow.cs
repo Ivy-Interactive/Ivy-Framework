@@ -339,6 +339,8 @@ public class DesktopWindow(Server server)
         if (!_mediaAutoplay) window.SetMediaAutoplayEnabled(false);
         foreach (var script in _initScripts) window.AddInitScript(script);
 
+        if (_appId != null) window.SetApplicationId(_appId);
+
         if (_iconFilePath != null)
         {
             window.SetIconFile(_iconFilePath);
@@ -550,7 +552,11 @@ public class DesktopWindow(Server server)
     private static string? ExtractEmbeddedIcon(Assembly assembly, string resourceName)
     {
         using var stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream == null) return null;
+        if (stream == null)
+        {
+            Console.Error.WriteLine($"[Ivy.Desktop] Manifest resource '{resourceName}' was NOT found in assembly {assembly.FullName}!");
+            return null;
+        }
 
         var tempPath = Path.Combine(Path.GetTempPath(), $"ivy_icon_{Path.GetFileName(resourceName)}");
         using var fileStream = File.Create(tempPath);

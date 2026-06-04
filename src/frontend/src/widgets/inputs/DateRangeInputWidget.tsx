@@ -153,11 +153,21 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   const [rightMonth, setRightMonth] = useState(() => addMonths(new Date(), 1));
   const [isOpen, setIsOpen] = useState(false);
 
+  const [prevDisabled, setPrevDisabled] = React.useState(disabled);
+  const [prevAutoFocus, setPrevAutoFocus] = React.useState(autoFocus);
   const hasAutoFocusedRef = React.useRef(false);
+
+  if (disabled !== prevDisabled || autoFocus !== prevAutoFocus) {
+    setPrevDisabled(disabled);
+    setPrevAutoFocus(autoFocus);
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      setIsOpen(true);
+    }
+  }
+
   React.useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
-      setIsOpen(true);
     }
   }, [autoFocus, disabled]);
 

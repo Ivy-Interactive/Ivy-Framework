@@ -124,7 +124,7 @@ public class SmartSearchView : ViewBase
             }
             else if (!query.Loading && !query.Validating && query.Error is null)
             {
-                resultsContent = Layout.Vertical().Gap(4).Center()
+                resultsContent = Layout.Vertical().Center()
                         | Text.H1("No answer found :|").Bold()
                         | Text.Muted("We couldn't find an answer to your question in the Ivy docs. Try rephrasing or browse the documentation.");
             }
@@ -180,7 +180,7 @@ public class SmartSearchView : ViewBase
             ? Layout.Vertical(suggestionListItems.ToArray()).Gap(0)
             : Text.Muted("Type to search or pick a suggestion above.");
 
-        var overlayContent = Layout.Vertical().Gap(4)
+        var overlayContent = Layout.Vertical()
             | overlayListOrPlaceholder;
 
         var footer = new DialogFooter(askButton);
@@ -221,8 +221,8 @@ public class SmartSearchView : ViewBase
         }
 
         var sheetContent = resultsHeader != null
-            ? (object)(Layout.Vertical().Gap(4) | resultsHeader | resultsContent)
-            : (object)(Layout.Vertical().Gap(4) | resultsContent);
+            ? (object)(Layout.Vertical() | resultsHeader | resultsContent)
+            : (object)(Layout.Vertical() | resultsContent);
 
         var answerSheet = new Sheet(
             _ => { ClearResults(); return ValueTask.CompletedTask; },

@@ -328,7 +328,7 @@ public class FormApp : SampleBase
             new Tab("Scaffolding", new FormScaffoldingExample()),
             new Tab("Validation", new FormValidationExample()),
             new Tab("Allowed Values", new AllowedValuesFormApp())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

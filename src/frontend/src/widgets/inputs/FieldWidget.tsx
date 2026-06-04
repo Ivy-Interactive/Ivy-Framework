@@ -30,11 +30,21 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
 }) => {
   const childrenRef = React.useRef<HTMLDivElement>(null);
   const [inputId, setInputId] = React.useState<string | undefined>(undefined);
+  const [prevChildren, setPrevChildren] = React.useState(children);
+  const [shouldCheckId, setShouldCheckId] = React.useState(true);
+
+  if (children !== prevChildren) {
+    setPrevChildren(children);
+    setShouldCheckId(true);
+  }
 
   React.useEffect(() => {
-    const el = childrenRef.current?.querySelector("input, select, textarea");
-    if (el?.id) setInputId(el.id);
-  }, [children]);
+    if (shouldCheckId) {
+      const el = childrenRef.current?.querySelector("input, select, textarea");
+      if (el?.id) setInputId(el.id);
+      setShouldCheckId(false);
+    }
+  }, [shouldCheckId]);
 
   const labelSizeClass =
     density === Densities.Small ? "text-xs" : density === Densities.Large ? "text-base" : "text-sm";

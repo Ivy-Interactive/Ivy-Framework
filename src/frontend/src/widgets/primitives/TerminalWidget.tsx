@@ -34,10 +34,7 @@ const TerminalWidget = ({
   const hasCommands = commandsText.length > 0;
 
   return (
-    <div
-      role="terminal"
-      className={cn("rounded-lg overflow-hidden border border-border shadow-md")}
-    >
+    <div className={cn("rounded-lg overflow-hidden border border-border shadow-md")}>
       {showHeader && (
         <div className="bg-zinc-800 px-4 py-2 flex items-center">
           <div className="flex gap-1">
@@ -79,10 +76,7 @@ const TerminalWidget = ({
                       </span>
                     )}
                   </div>
-                  <span
-                    role="terminal-text"
-                    className={cn("text-sm", line.isCommand ? commandColor : outputColor)}
-                  >
+                  <span className={cn("text-sm", line.isCommand ? commandColor : outputColor)}>
                     {line.content}
                   </span>
                 </div>

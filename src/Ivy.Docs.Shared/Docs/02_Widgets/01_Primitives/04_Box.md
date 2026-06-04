@@ -44,7 +44,7 @@ public class BorderStyleExamplesView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | new Box("Solid Border").BorderStyle(BorderStyle.Solid).Padding(8)
             | new Box("Dashed Border").BorderStyle(BorderStyle.Dashed).Padding(8)
             | new Box("Dotted Border").BorderStyle(BorderStyle.Dotted).Padding(8)
@@ -62,7 +62,7 @@ public class BorderThicknessExamplesView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Horizontal().Gap(4)
+        return Layout.Horizontal()
             | new Box("Thin Border")
                 .BorderThickness(1)
                 .Padding(8)
@@ -88,7 +88,7 @@ public class BorderRadiusExamplesView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Horizontal().Gap(4)
+        return Layout.Horizontal()
             | new Box("No Radius")
                 .BorderRadius(BorderRadius.None)
                 .Padding(8)
@@ -114,7 +114,7 @@ public class SpacingExamplesView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | new Box("No Padding").Padding(0)
             | new Box("Small Padding").Padding(4)
             | new Box("Large Padding").Padding(10)
@@ -132,7 +132,7 @@ public class AspectRatioExamplesView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Horizontal().Gap(4)
+        return Layout.Horizontal()
             | new Box("16:9").Width(Size.Units(80)).AspectRatio(16f / 9f).Background(Colors.Primary)
             | new Box("4:3").Width(Size.Units(80)).AspectRatio(4f / 3f).Background(Colors.Secondary)
             | new Box("1:1").Width(Size.Units(40)).AspectRatio(1f).Background(Colors.Warning);
@@ -183,7 +183,7 @@ public class InteractiveBoxView : ViewBase
                 .Hover(HoverEffect.PointerAndTranslate)
                 .OnClick(_ => client.Toast("Box clicked!"))
                 .Padding(8)
-            | Layout.Horizontal().Gap(4)
+            | Layout.Horizontal()
                 | CreateOption("Option A", selected, client)
                 | CreateOption("Option B", selected, client);
     }
@@ -214,7 +214,7 @@ public class ColorExamplesView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
             | new Box("Primary Color").Background(Colors.Primary).Padding(8);
     }
 }
@@ -236,7 +236,7 @@ public class StatusDashboardView : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Horizontal().Gap(4)
+        return Layout.Horizontal()
             | new Box("System Online")
                 .Background(Colors.Green)
                 .BorderRadius(BorderRadius.Rounded)

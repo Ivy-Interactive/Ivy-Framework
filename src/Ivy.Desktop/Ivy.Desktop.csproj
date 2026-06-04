@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rustino.NET" Version="0.3.6" />
+    <PackageReference Include="Rustino.NET" Version="0.3.7" />
   </ItemGroup>
 
   <ItemGroup>

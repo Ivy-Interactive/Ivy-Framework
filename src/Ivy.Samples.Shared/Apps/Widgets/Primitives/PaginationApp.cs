@@ -9,7 +9,7 @@ public class PaginationApp() : SampleBase
         return Layout.Tabs(
             new Tab("Overview", new PaginationOverviewSample()),
             new Tab("Density", new PaginationDensitySample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 
@@ -51,7 +51,7 @@ public class PaginationDensitySample : ViewBase
             page.Set(e.Value);
         };
 
-        return Layout.Vertical().Gap(4)
+        return Layout.Vertical()
                | Layout.Horizontal().Gap(2)
                    | new Button("Small").OnClick(_ => density.Set(Density.Small))
                        .Variant(density.Value == Density.Small ? ButtonVariant.Primary : ButtonVariant.Outline).Small()

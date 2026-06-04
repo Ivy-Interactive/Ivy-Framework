@@ -73,7 +73,7 @@ public class PluginManagerApp : ViewBase
             | H2("Unloaded Plugins")
             | (unloadedPlugins.Count == 0
                 ? Muted("No unloaded plugins found")
-                : unloadedPlugins.Select(p => (object)(Horizontal().Gap(4)
+                : unloadedPlugins.Select(p => (object)(Horizontal()
                     | new Badge(p.Id, p.FailureReason is not null ? BadgeVariant.Destructive : BadgeVariant.Outline)
                     | (p.FailureReason is not null ? Muted(p.FailureReason) : Muted("unloaded"))
                     | new Button(p.FailureReason is not null ? "Retry" : "Load", onClick: _ =>

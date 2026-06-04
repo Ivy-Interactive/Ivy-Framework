@@ -11,7 +11,7 @@ public class CalloutApp : SampleBase
             new Tab("Closable", new CalloutClosableExample()),
             new Tab("Multi-line", new CalloutMultiLineExample()),
             new Tab("Density", new CalloutDensityExample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 
@@ -48,7 +48,7 @@ public class CalloutClosableExample : ViewBase
                 : null)
             | (showUpdateBanner.Value || showTrialBanner.Value
                 ? null
-                : Layout.Vertical().Gap(4)
+                : Layout.Vertical()
                     | Text.P("All banners dismissed.").Muted()
                     | new Button("Show callouts again", () =>
                         {

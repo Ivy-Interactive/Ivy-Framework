@@ -13,7 +13,7 @@ public class AudioInputApp() : SampleBase
             new Tab("Validation", new AudioInputValidationSample()),
             new Tab("Sizes", new AudioInputSizesSample()),
             new Tab("Events", new AudioInputEventsSample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

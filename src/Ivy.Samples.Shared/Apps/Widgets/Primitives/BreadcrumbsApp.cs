@@ -10,7 +10,7 @@ public class BreadcrumbsApp : SampleBase
             new Tab("Separator", new BreadcrumbsSeparatorExample()),
             new Tab("Icons", new BreadcrumbsIconsExample()),
             new Tab("Disabled", new BreadcrumbsDisabledExample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

@@ -10,6 +10,11 @@ await server.RunAsync();
 [App]
 class ActivityHeatmapDemo : ViewBase
 {
+    private record RepoStats(
+        DateOnly Date,
+        DateTime Timestamp,
+        int Downloads,
+        int Stars);
     public override object Build()
     {
         var client = UseService<IClientProvider>();
@@ -26,84 +31,193 @@ class ActivityHeatmapDemo : ViewBase
         var rng = new Random(42);
         var today = DateOnly.FromDateTime(DateTime.Today);
         var start = today.AddDays(-364);
-        var data = Enumerable
+
+        var dailyData = Enumerable
             .Range(0, 365)
             .Select(start.AddDays)
             .Where(_ => rng.NextDouble() > 0.4)
-            .Select(d => new Activity { Date = d, Count = rng.Next(1, 20) })
-            .ToArray();
+            .Select(d => new RepoStats(
+                Date: d,
+                Timestamp: d.ToDateTime(new TimeOnly()),
+                Downloads: rng.Next(1, 20),
+                Stars: 0))
+            .ToList();
 
-        return Layout
-            .Vertical()
-            .Gap(4)
-            .Width(Size.Auto().At(Breakpoint.Tablet).And(Breakpoint.Desktop, Size.Fit()))
+        var basicUsageExample = Layout.Vertical().Width(Size.Full())
+            | Text.H3("Basic Usage").Anchor("basic-usage")
+            | new CodeBlock("""
+                public record RepoStats(
+                    DateTime Timestamp,
+                    int Stars,
+                    int Downloads);
 
-            | Text.H1("ActivityHeatmap")
-            | Text.H2("Basic Usage")
-            | new CodeBlock(@$"public class ActivityHeatmapDemo : ViewBase
-{{
-    public override object Build()
-    {{
-        var rng = new Random(42);
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        var start = today.AddDays(-364);
+                public interface IMyRepoService
+                {
+                    IEnumerable<RepoStats> GetDailyStats(),
+                    IEnumerable<RepoStats> GetHourlyStats()
+                }
 
-        Activity[] data = Enumerable
-            .Range(0, 365)
-            .Select(start.AddDays)
-            .Where(_ => rng.NextDouble() > 0.4)
-            .Select(d => new Activity {{ Date = d, Count = rng.Next(1, 20) }})
-            .ToArray();
-
-        return new ActivityHeatmap().Data(data);
-    }}
-}}")
-            | new Card(new ActivityHeatmap().Data(data))
-                .WithMargin(0, 0, 0, 16)
-
-            | Text.H2("With Optional Properties:")
-            | new CodeBlock(@$"new ActivityHeatmap()
-    .Data(data)
-    .ShowDayLabels({showDayLabels.Value.ToString().ToLower()})
-    .ShowMonthLabels({showMonthLabels.Value.ToString().ToLower()})
-    .StartDate(DateOnly.Parse({$"\"{startDate}\""}))
-    .EndDate(DateOnly.Parse({$"\"{endDate}\""}))
-    .ColorScheme(Colors.{selectedColor.Value})
-    .OnDayClick(day => Console.WriteLine(...));")
-
-            | (Layout
-                    .Horizontal()
-                    .Gap(2)
-                    | (Layout.Horizontal().Gap(2).Width(Size.Fit())
-                        | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker)
-                        | Text.P(selectedColor.Value.ToString()))
-                    | (Layout.Horizontal().Gap(2).Width(Size.Grow())
-                        | showDayLabels.ToBoolInput().Label("Show day labels")
-                        | showMonthLabels.ToBoolInput().Label("Show month labels"))
-                    | nullableRange.ToDateRangeInput())
-
-            | new Card(new ActivityHeatmap()
-                    .Data(data)
-                    .StartDate(startDate)
-                    .EndDate(endDate)
-                    .ColorScheme(selectedColor.Value)
-                    .ShowDayLabels(showDayLabels.Value)
-                    .ShowMonthLabels(showMonthLabels.Value)
-                    .OnDayClick(day => Console.WriteLine($"Clicked {day.Date}: {day.Count}")))
-
-                | new DropDownMenu(@evt =>
+                public class ActivityHeatmapDemo : ViewBase
+                {
+                    public override object Build()
                     {
-                        ThemeMode selectedTheme = @evt.Value switch
+                        var repoService = UseService<IMyRepoService>();
+                        var dailyRepoStats = repoService.GetDailyStats().ToList();
+
+                        return Layout.Vertical()
+                            | dailyRepoStats.ToActivityHeatmap(
+                                dimension: e => e.Date,
+                                measure: e => e.Downloads);
+                    }
+                }
+                """)
+
+        | new Card(
+        Layout.Vertical()
+                | dailyData.ToActivityHeatmap(
+                    dimension: e => e.Date,
+                    measure: e => e.Downloads)
+        );
+
+        var showMonthLabelsValue = !showMonthLabels.Value ? "\n\t\t\t\t.showMonthLabels(false)" : "";
+        var showDayLabelsValue = !showDayLabels.Value ? "\n\t\t\t\t.showDayLabels(false)" : "";
+        var optionalPropsExample = Layout.Vertical()
+            | Text.H3("With Optional Properties").Anchor("optional-props")
+            | new CodeBlock($$"""
+                                public class ActivityHeatmapOptionalProps : ViewBase
+                                {
+                                    public override object Build()
+                                    {
+                                        var repoService = UseService<IMyRepoService>();
+                                        var dailyRepoStats = repoService.GetDailyStats().ToList();
+
+                                        return Layout.Vertical()
+                                            | dailyRepoStats
+                                                .ToActivityHeatmap(
+                                                    dimension: e => e.Date,
+                                                    measure: e => e.Downloads){{showDayLabelsValue}}{{showMonthLabelsValue}}
+                                                .StartDate(DateOnly.Parse({{$"\"{startDate}\""}}))
+                                                .EndDate(DateOnly.Parse({{$"\"{endDate}\""}}))
+                                                .ColorScheme(Colors.{{selectedColor.Value}})
+                                                .OnDayClick(day => client.Toast($"Clicked {day.Date}: {day.Count} downloads"));
+                                    }
+                                }
+                                """)
+
+            | (Layout.Horizontal().Width(Size.Full())
+                | selectedColor.ToColorInput().Variant(ColorInputVariant.SwatchPicker).WithField()
+                    .Label("Color").Width(Size.MinContent())
+                | showDayLabels.ToBoolInput().WithField().Label("Show days")
+                    .Width(Size.MaxContent())
+                | showMonthLabels.ToBoolInput().WithField().Label("Show months")
+                    .Width(Size.MaxContent())
+                | nullableRange.ToDateRangeInput().WithField().Label("Time period")
+                    .Width(Size.Fit()))
+
+            | new Card(dailyData
+                .ToActivityHeatmap(
+                    dimension: e => e.Date,
+                    measure: e => e.Downloads)
+                .StartDate(startDate)
+                .EndDate(endDate)
+                .ColorScheme(selectedColor.Value)
+                .ShowDayLabels(showDayLabels.Value)
+                .ShowMonthLabels(showMonthLabels.Value)
+                .OnDayClick(day => client.Toast($"Clicked {day.Date}: {day.Count} downloads")));
+
+        var start2 = DateTime.Now.AddDays(-30);
+        var hourlyData = Enumerable
+            .Range(0, 24 * 30)
+            .Select(d => start2.AddHours(d))
+            .Where(_ => rng.NextDouble() > 0.2)
+            .Select(d => new RepoStats(Timestamp: d, Date: DateOnly.FromDateTime(d), Stars: GenerateDailyActivity(d), Downloads: 0))
+            .ToList();
+
+        var hourlyIntervalExample = Layout.Vertical()
+            | Text.H3("With Hourly Interval")
+            | new CodeBlock("""
+                        public class HourlyIntervalExample
                         {
-                            "Light" => ThemeMode.Light,
-                            "Dark" => ThemeMode.Dark,
-                            _ => ThemeMode.System,
-                        };
-                        client.SetThemeMode(selectedTheme);
-                    },
-                    new Button("Theme").Variant(ButtonVariant.Link).Icon(Icons.SunMoon),
-                    MenuItem.Default("Light").Icon(Icons.Sun),
-                    MenuItem.Default("Dark").Icon(Icons.Moon),
-                    MenuItem.Default("System").Icon(Icons.Computer));
+                            public override object Build()
+                            {
+                                var repoService = UseService<IMyRepoService>();
+                                var hourlyRepoStats = repoService.GetHourlyStats().ToList();
+                        
+                                return Layout.Vertical()
+                                    | hourlyRepoStats
+                                    .ToActivityHeatmap(
+                                        dimension: e => e.Timestamp,
+                                        measure: e => e.Stars)
+                                    .ColorScheme(Colors.Emerald)
+                                    .Height(Size.Units(40))
+                            }
+                        }
+                        """)
+            | new Card(hourlyData
+                .ToActivityHeatmap(
+                    dimension: e => e.Timestamp,
+                    measure: e => e.Stars)
+                .ColorScheme(Colors.Emerald)
+                .Height(Size.Units(40))
+            );
+
+        var themeSelector = new Button("Theme")
+            .Icon(Icons.SunMoon)
+            .Ghost()
+            .WithDropDown(
+                MenuItem.Default(nameof(ThemeMode.Light)).Icon(Icons.Sun),
+                MenuItem.Default(nameof(ThemeMode.Dark)).Icon(Icons.Moon),
+                MenuItem.Default(nameof(ThemeMode.System)).Icon(Icons.Computer))
+            .OnSelect(@evt =>
+            {
+                if (Enum.TryParse<ThemeMode>(@evt.Value.ToString(), out var theme))
+                    client.SetThemeMode(theme);
+            });
+
+        var mainContent = Layout.Vertical().Width(Size.Full())
+            | Text.H2("ActivityHeatmap")
+            | basicUsageExample
+            | optionalPropsExample
+            | hourlyIntervalExample
+            | new FloatingPanel(themeSelector).AlignSelf(Align.BottomRight);
+
+        return Layout.Vertical().AlignContent(Align.Center)
+            | (Layout.Vertical().Width(Size.Units(200).At(Breakpoint.Desktop))
+                | mainContent);
+    }
+
+    /// <summary>
+    /// Generates an activity value between 1 and 10 based on the time of day.
+    /// Activity peaks during typical office hours (~9 AM–5 PM) and bottoms out overnight.
+    /// </summary>
+    private static int GenerateDailyActivity(DateTime timestamp)
+    {
+        // Seed from the timestamp so each cell gets its own random draw while staying
+        // stable across rebuilds. A fixed seed here would make every cell identical.
+        var rng = new Random(timestamp.GetHashCode());
+
+        // Hour as a continuous value (e.g. 13.5 for 1:30 PM) for smoother curves.
+        double hour = timestamp.Hour + timestamp.Minute / 60.0;
+
+        // Gaussian "bell curve" centered on 1 PM (13:00), the busiest part of the day.
+        // sigma controls how quickly activity falls off away from the peak.
+        const double peakHour = 13.0;
+        const double sigma = 4.0;
+        double bell = Math.Exp(-Math.Pow(hour - peakHour, 2) / (2 * sigma * sigma));
+
+        // Weekends are much quieter than weekdays.
+        double weekendFactor = timestamp.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? 0.35 : 1.0;
+
+        // Probability that any single "activity unit" fires this hour.
+        double p = Math.Clamp(bell * weekendFactor, 0.0, 1.0);
+
+        int value = 0;
+        for (int i = 0; i < 10; i++)
+        {
+            if (rng.NextDouble() < p)
+                value++;
+        }
+
+        return value;
     }
 }

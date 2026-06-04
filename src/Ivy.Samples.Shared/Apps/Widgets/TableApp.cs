@@ -27,7 +27,7 @@ public class TableApp : SampleBase
             new Tab("Alignment", new AlignmentExample()),
             new Tab("Progress Builder", new ProgressBuilderExample()),
             new Tab("Image Builder", new ImageBuilderExample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

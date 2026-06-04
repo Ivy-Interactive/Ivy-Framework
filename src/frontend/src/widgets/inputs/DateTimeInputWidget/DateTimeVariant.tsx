@@ -37,14 +37,24 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   onFocusChange,
 }) => {
   const [open, setOpen] = useState(false);
+  const [prevDisabled, setPrevDisabled] = React.useState(disabled);
+  const [prevAutoFocus, setPrevAutoFocus] = React.useState(autoFocus);
 
   const hasAutoFocusedRef = React.useRef(false);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
+
+  if (disabled !== prevDisabled || autoFocus !== prevAutoFocus) {
+    setPrevDisabled(disabled);
+    setPrevAutoFocus(autoFocus);
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      setOpen(true);
+    }
+  }
+
   React.useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
       buttonRef.current?.focus();
-      setOpen(true);
     }
   }, [autoFocus, disabled]);
 

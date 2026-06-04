@@ -23,7 +23,7 @@ public class CalendarApp : SampleBase
             new Tab("Agenda View", new CalendarAgendaExample()),
             new Tab("Event Handlers", new CalendarEventHandlerExample()),
             new Tab("Density", new CalendarDensityExample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 
@@ -271,7 +271,7 @@ public class CalendarDensityExample : ViewBase
                 .Color("Purple"),
         ];
 
-        return Layout.Horizontal().Gap(4)
+        return Layout.Horizontal()
             | (Layout.Vertical().Width(Size.Full())
                 | Text.H4("Small")
                 | new Calendar(MakeEvents()).Small())
