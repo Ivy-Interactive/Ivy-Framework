@@ -741,7 +741,7 @@ export const typography: Record<string, string> = {
   // Headings
   h1: `text-4xl font-semibold scroll-m-20 mb-3`,
   h2: `text-3xl font-medium scroll-m-20`,
-  h3: `text-2xl font-medium scroll-m-20`,
+  h3: `text-2xl font-medium scroll-m-20 pb-1`,
   h4: `text-xl font-medium scroll-m-20`,
   h5: `text-lg font-medium scroll-m-20`,
   h6: `text-base font-medium scroll-m-20`,
@@ -803,7 +803,7 @@ export const articleTypography: Record<string, string> = {
   ...typography,
   h1: `text-4xl font-semibold scroll-m-20 mt-6 mb-3`,
   h2: `text-3xl font-medium scroll-m-20 mt-5 pb-2 border-b border-border`,
-  h3: `text-2xl font-medium scroll-m-20 mt-4`,
+  h3: `text-2xl font-medium scroll-m-20 mt-4 pb-1`,
   h4: `text-xl font-medium scroll-m-20 mt-3`,
   // h5/h6 top margin must stay >= the Article flex gap (Gap prop default 5 = 1.25rem)
   h5: `text-lg font-medium scroll-m-20 mt-3`,
