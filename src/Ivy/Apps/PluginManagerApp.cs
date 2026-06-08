@@ -65,7 +65,7 @@ public class PluginManagerApp : ViewBase
                     var customView = pluginManager.BuildPluginConfigurationView(p.Id, config);
                     return (object)new Card(content: Vertical().Gap(3)
                         | (Horizontal().Gap(4)
-                            | new Badge(p.Name, BadgeVariant.Warning)
+                            | new Badge(p.Title, BadgeVariant.Warning)
                             | Muted(string.Join(", ", p.ValidationErrors)))
                         | (customView ?? new PluginConfigurationView(p.Id, p.Schema, configFactory)));
                 }).ToArray())

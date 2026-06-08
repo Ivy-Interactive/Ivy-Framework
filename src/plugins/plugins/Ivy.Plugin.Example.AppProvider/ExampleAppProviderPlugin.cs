@@ -16,7 +16,7 @@ public class ExampleAppProviderPlugin : IIvyPlugin
     public PluginManifest Manifest { get; } = new()
     {
         Id = "Ivy.Plugin.Example.AppProvider",
-        Name = "Example App Provider",
+        Title = "Example App Provider",
         ConfigSectionName = "ExampleAppProvider",
         Version = new Version(1, 0, 0),
     };

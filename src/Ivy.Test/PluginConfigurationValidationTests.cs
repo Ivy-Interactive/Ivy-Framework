@@ -285,7 +285,7 @@ public class PluginConfigurationValidationTests
         public PluginManifest Manifest { get; } = new()
         {
             Id = "Ivy.Plugin.Fake",
-            Name = "Fake",
+            Title = "Fake",
             ConfigSectionName = "Fake",
             Version = new Version(1, 0, 0),
         };

@@ -539,7 +539,7 @@ public class PluginLoaderTests
         public Ivy.Plugins.PluginManifest Manifest => new()
         {
             Id = Id,
-            Name = "Test Plugin",
+            Title = "Test Plugin",
             ConfigSectionName = "TestPlugin",
             Version = new Version(1, 0)
         };

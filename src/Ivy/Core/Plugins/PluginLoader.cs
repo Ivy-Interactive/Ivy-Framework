@@ -938,7 +938,7 @@ public class PluginLoader : IPluginManager
 
                 result.Add(new UnconfiguredPlugin(
                     manifest.Id,
-                    manifest.Name,
+                    manifest.Title,
                     plugin.Directory,
                     schema,
                     errors));

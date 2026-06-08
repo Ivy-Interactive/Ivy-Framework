@@ -9,7 +9,7 @@ public class HelloWorldPlugin : IIvyPlugin
     public PluginManifest Manifest { get; } = new()
     {
         Id = "Ivy.Plugin.HelloWorld",
-        Name = "Hello World Plugin",
+        Title = "Hello World Plugin",
         ConfigSectionName = "HelloWorld",
         Version = new Version(1, 0, 0),
     };
