@@ -191,11 +191,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   } = useCellHoverTooltip({
     columns,
     columnOrder,
-    columnWidths,
     density,
     getCellContent,
     visibleRows,
-    headerFont,
   });
 
   // Table theme
