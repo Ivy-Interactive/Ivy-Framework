@@ -18,7 +18,7 @@
 
 /* Larger spacing for a non-heading element that follows a heading */
 :where(.markdown-widget > :is(h1, h2, h3) + *:not(:is(h1, h2, h3, h4, h5, h6))) {
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 
 /* Tighter spacing around code blocks */
