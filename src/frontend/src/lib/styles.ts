@@ -739,7 +739,7 @@ export const convertSizeToGridValue = (size?: string): string => {
 // Typography classes - shadcn typography with Ivy spacing
 export const typography: Record<string, string> = {
   // Headings
-  h1: `text-4xl font-semibold scroll-m-20`,
+  h1: `text-4xl font-semibold scroll-m-20 mb-3`,
   h2: `text-3xl font-medium scroll-m-20`,
   h3: `text-2xl font-medium scroll-m-20`,
   h4: `text-xl font-medium scroll-m-20`,
@@ -801,7 +801,7 @@ export const typography: Record<string, string> = {
 
 export const articleTypography: Record<string, string> = {
   ...typography,
-  h1: `text-4xl font-semibold scroll-m-20 mt-6`,
+  h1: `text-4xl font-semibold scroll-m-20 mt-6 mb-3`,
   h2: `text-3xl font-medium scroll-m-20 mt-5 pb-2 border-b border-border`,
   h3: `text-2xl font-medium scroll-m-20 mt-4`,
   h4: `text-xl font-medium scroll-m-20 mt-3`,
