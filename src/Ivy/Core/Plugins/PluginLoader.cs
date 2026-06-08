@@ -209,11 +209,10 @@ public class PluginLoader : IPluginManager
             }
         }
 
-        var sorted = TopologicalSort(candidates);
         _lock.EnterWriteLock();
         try
         {
-            _plugins.AddRange(sorted.Select(c => new LoadedPlugin(c.Instance, c.Assembly, c.Context, c.Directory)));
+            _plugins.AddRange(candidates.Select(c => new LoadedPlugin(c.Instance, c.Assembly, c.Context, c.Directory)));
         }
         finally
         {
@@ -328,51 +327,6 @@ public class PluginLoader : IPluginManager
         return (instance, pluginAssembly, loadContext, directory);
     }
 
-    private List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)> TopologicalSort(
-        List<(IIvyPlugin Instance, Assembly Assembly, AssemblyLoadContext Context, string Directory)> candidates)
-    {
-        var byId = candidates.ToDictionary(c => c.Instance.Manifest.Id);
-        var visited = new HashSet<string>();
-        var visiting = new HashSet<string>(); // cycle detection
-        var sorted = new List<(IIvyPlugin, Assembly, AssemblyLoadContext, string)>();
-
-        foreach (var candidate in candidates)
-        {
-            Visit(candidate.Instance.Manifest.Id);
-        }
-
-        return sorted;
-
-        void Visit(string id)
-        {
-            if (visited.Contains(id)) return;
-
-            if (!visiting.Add(id))
-            {
-                _logger.LogError("Circular dependency detected involving plugin '{Id}'. Skipping.", id);
-                return;
-            }
-
-            if (byId.TryGetValue(id, out var candidate))
-            {
-                foreach (var dep in candidate.Instance.Manifest.Dependencies)
-                {
-                    if (!byId.ContainsKey(dep))
-                    {
-                        _logger.LogWarning("Plugin '{Id}' depends on '{Dep}' which is not loaded.", id, dep);
-                        continue;
-                    }
-                    Visit(dep);
-                }
-
-                sorted.Add(candidate);
-            }
-
-            visiting.Remove(id);
-            visited.Add(id);
-        }
-    }
-
     internal void SetPluginConfigFactory(IIvyPluginConfigFactory factory)
     {
         _configFactory = factory;
@@ -432,21 +386,6 @@ public class PluginLoader : IPluginManager
             if (plugin is null)
             {
                 _logger.LogWarning("Plugin '{Id}' not found for unload.", pluginId);
-                return false;
-            }
-
-            // Check if other loaded plugins depend on this one
-            var dependents = _plugins
-                .Where(p => p.Instance.Manifest.Id != pluginId &&
-                            p.Instance.Manifest.Dependencies.Contains(pluginId))
-                .Select(p => p.Instance.Manifest.Id)
-                .ToList();
-
-            if (dependents.Count > 0)
-            {
-                _logger.LogError(
-                    "Cannot unload plugin '{Id}': plugins [{Dependents}] depend on it.",
-                    pluginId, string.Join(", ", dependents));
                 return false;
             }
 
@@ -512,16 +451,6 @@ public class PluginLoader : IPluginManager
                     "Plugin '{Id}' requires host version {Required} but current is {Current}.",
                     manifest.Id, minVersion, _hostVersion);
                 return false;
-            }
-
-            // Check dependencies are loaded
-            foreach (var dep in manifest.Dependencies)
-            {
-                if (_plugins.All(p => p.Instance.Manifest.Id != dep))
-                {
-                    _logger.LogError("Plugin '{Id}' depends on '{Dep}' which is not loaded.", manifest.Id, dep);
-                    return false;
-                }
             }
 
             var plugin = new LoadedPlugin(loaded.Value.Instance, loaded.Value.Assembly, loaded.Value.Context, loaded.Value.Directory);

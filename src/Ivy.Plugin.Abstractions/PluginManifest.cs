@@ -7,6 +7,5 @@ public record PluginManifest
     public required string ConfigSectionName { get; init; }
     public required Version Version { get; init; }
     public Version? MinimumHostVersion { get; init; }
-    public string[] Dependencies { get; init; } = [];
     public PluginIcon? Icon { get; init; }
 }
