@@ -80,6 +80,9 @@ const FrontmatterDisplay: React.FC<{ data: FrontmatterData }> = memo(({ data }) 
   const formatValue = (value: any): string => {
     if (value === null || value === undefined) return "null";
     if (typeof value === "boolean") return value ? "true" : "false";
+    if (value instanceof Date) {
+      return value.toLocaleString();
+    }
     if (typeof value === "string") {
       // Format ISO dates nicely
       if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
