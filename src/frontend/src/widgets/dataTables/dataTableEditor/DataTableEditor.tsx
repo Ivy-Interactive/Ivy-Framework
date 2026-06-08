@@ -4,7 +4,6 @@ import {
   CompactSelection,
   CustomRenderer,
   DataEditorRef,
-  getDefaultTheme,
   GridMouseCellEventArgs,
   GridMouseEventArgs,
   Item,
@@ -175,11 +174,6 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     containerRef,
     arrowTableRef,
   });
-
-  const headerFont = useMemo(() => {
-    const t = getDefaultTheme();
-    return `${t.headerFontStyle} ${t.fontFamily}`;
-  }, []);
 
   // Cell hover tooltips (truncated text + link hint)
   const {
