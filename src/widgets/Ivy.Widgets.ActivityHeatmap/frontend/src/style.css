@@ -4,7 +4,6 @@
 .ivy-activity-heatmap-container {
     height: 100%;
     overflow-y: auto;
-    direction: ltr;
     position: relative;
     display: flex;
     background-color: var(--card);
