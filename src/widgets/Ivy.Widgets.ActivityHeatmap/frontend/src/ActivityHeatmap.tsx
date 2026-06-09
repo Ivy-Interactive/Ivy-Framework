@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./style.css";
 import { ActivityHeatmapProps, Activity } from "./types";
 import { computeMaxCount, getLevel } from "./levelUtils";
-import { MONTH_NAMES, formatTooltipHeader, getTooltipTransform } from "./tooltipUtils";
+import { formatDimensionLabel, formatTooltipHeader, getTooltipTransform } from "./tooltipUtils";
 
 function buildColorScheme(baseColor: string): string[] {
   return [
@@ -197,19 +197,19 @@ export function ActivityHeatmap({
     const date = new Date(firstCell.date + "T00:00:00");
 
     if (isHourly) {
-      if (ci === 0 || date.getDate() === 1) {
-        return `${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`;
-      }
-      return "";
+      // First column or first day of the month
+      return ci === 0 || date.getDate() === 1
+        ? formatDimensionLabel(date, isHourly)
+        : "";
     }
 
     if (date.getDate() <= 7) {
       // First week of the month
       const prevColumnFirst = ci > 0 ? columns[ci - 1]?.[0] : null;
-      if (!prevColumnFirst) return MONTH_NAMES[date.getMonth()] ?? "";
+      if (!prevColumnFirst) return formatDimensionLabel(date, isHourly);
       const prevDate = new Date(prevColumnFirst.date + "T00:00:00");
       if (prevDate.getMonth() !== date.getMonth()) {
-        return MONTH_NAMES[date.getMonth()] ?? "";
+        return formatDimensionLabel(date, isHourly);
       }
     }
     return "";
@@ -238,7 +238,7 @@ export function ActivityHeatmap({
               {columns.map((_, ci) => (
                 <div
                   key={ci}
-                  className="text-center flex text-secondary-foreground opacity-50 last:hidden"
+                  className="text-center text-nowrap flex text-secondary-foreground opacity-50 last:hidden"
                   style={{ width: "11px", fontSize: "10px" }}
                 >
                   {columnLabels[ci]}
