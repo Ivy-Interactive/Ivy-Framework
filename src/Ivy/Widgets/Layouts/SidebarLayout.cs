@@ -33,6 +33,14 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
 
     [Prop] public bool MainAppSidebar { get; set; } = false;
 
+    /// <summary>
+    /// When true, the sidebar auto-collapses below the mobile breakpoint and shows an in-pane
+    /// toggle button, without turning the sidebar into the main application chrome. Use this for
+    /// nested master-detail layouts (a list sidebar next to a content pane) so the list collapses
+    /// on small screens. Has no effect when <see cref="MainAppSidebar"/> is already true.
+    /// </summary>
+    [Prop] public bool CollapsibleOnMobile { get; set; } = false;
+
     [Prop] public bool Open { get; set; } = true;
 
     [Prop] public int MainContentPadding { get; set; } = 2;
@@ -52,6 +60,16 @@ public static class SidebarLayoutExtensions
     public static SidebarLayout MainAppSidebar(this SidebarLayout sidebar, bool isMainApp = true)
     {
         return sidebar with { MainAppSidebar = isMainApp };
+    }
+
+    /// <summary>
+    /// Enables mobile auto-collapse and an in-pane toggle button for a nested (non-main) sidebar,
+    /// so master-detail list/content layouts collapse the list on small screens. See
+    /// <see cref="SidebarLayout.CollapsibleOnMobile"/>.
+    /// </summary>
+    public static SidebarLayout CollapsibleOnMobile(this SidebarLayout sidebar, bool collapsible = true)
+    {
+        return sidebar with { CollapsibleOnMobile = collapsible };
     }
 
     public static SidebarLayout Open(this SidebarLayout sidebar, bool open = true)

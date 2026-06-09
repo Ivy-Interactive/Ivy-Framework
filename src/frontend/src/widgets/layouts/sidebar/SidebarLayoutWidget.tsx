@@ -25,6 +25,7 @@ interface SidebarLayoutWidgetProps {
   showToggleButton?: boolean;
   autoCollapseThreshold?: number; // Width threshold for auto-collapse (default: 768px)
   mainAppSidebar?: boolean;
+  collapsibleOnMobile?: boolean; // Auto-collapse + in-pane toggle for nested (non-main) sidebars
   mainContentPadding?: number; // Padding for main content area (default: 2)
   width?: string; // Width of the sidebar (Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue")
   open?: boolean; // Whether the sidebar starts open (default: true)
@@ -86,12 +87,17 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   showToggleButton = true,
   autoCollapseThreshold = 768,
   mainAppSidebar = false,
+  collapsibleOnMobile = false,
   mainContentPadding,
   width,
   open: openProp = true,
   resizable = false,
   sidebarContentScroll = "Auto",
 }) => {
+  // Both the main app sidebar and nested "collapsible on mobile" sidebars participate in
+  // viewport-driven auto-collapse and expose a toggle. The main app sidebar additionally
+  // owns the Ctrl+B shortcut and the special main-content toggle placement.
+  const collapseEnabled = mainAppSidebar || collapsibleOnMobile;
   // Parse Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue"
   const [wantedWidth, minWidthStr, maxWidthStr] = (width ?? "").split(",");
 
@@ -103,9 +109,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   const minWidthPx = parseSizeToPixels(minWidthStr, 200);
   const maxWidthPx = parseSizeToPixels(maxWidthStr, 600);
 
-  // Initialize sidebar state based on current window width (only for main app sidebar)
+  // Initialize sidebar state based on current window width (when collapse is enabled)
   const getInitialSidebarState = () => {
-    if (!mainAppSidebar) return true;
+    if (!collapseEnabled) return true;
     if (!openProp) return false;
 
     // Check if we're in a browser environment
@@ -200,9 +206,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     disabled: !mainAppSidebar,
   });
 
-  // Auto-collapse/expand based on width (only for main app sidebar)
+  // Auto-collapse/expand based on width (when collapse is enabled)
   useEffect(() => {
-    if (!mainAppSidebar) return;
+    if (!collapseEnabled) return;
 
     const mql = window.matchMedia(`(min-width: ${autoCollapseThreshold}px)`);
 
@@ -216,7 +222,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     mql.addEventListener("change", handleMediaChange);
     return () => mql.removeEventListener("change", handleMediaChange);
-  }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar, openProp, dispatchSidebar]);
+  }, [autoCollapseThreshold, isManuallyToggled, collapseEnabled, openProp, dispatchSidebar]);
 
   return (
     <div
@@ -293,7 +299,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : "",
         )}
       >
-        {/* Toggle Button - Only show for main app sidebar */}
+        {/* Toggle Button - only the main app sidebar shows an in-pane toggle. Nested
+            collapsible-on-mobile sidebars auto-collapse on small screens and rely on the
+            hosting app to provide its own navigation (e.g. a header dropdown). */}
         {showToggleButton && mainAppSidebar && (
           <TooltipProvider delayDuration={300}>
             <Tooltip>
