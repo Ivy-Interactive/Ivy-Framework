@@ -241,6 +241,31 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     return () => mql.removeEventListener("change", handleMediaChange);
   }, [autoCollapseThreshold, isManuallyToggled, collapseEnabled, openProp, dispatchSidebar]);
 
+  // On mobile, collapse the main app sidebar after a navigable menu item is selected, so the
+  // chosen page is revealed instead of staying behind the open drawer. Leaf menu items render a
+  // [data-menu-item] element without a nested submenu; clicking a collapsible group (which has a
+  // nested <ul>) only expands it and must not collapse the drawer.
+  useEffect(() => {
+    if (!mainAppSidebar) return;
+    const sidebarEl = sidebarRef.current;
+    if (!sidebarEl) return;
+
+    const handleClick = (e: MouseEvent) => {
+      if (!isMobileViewport) return;
+      const target = e.target as HTMLElement | null;
+      const menuItem = target?.closest<HTMLElement>("[data-menu-item]");
+      if (!menuItem) return;
+      // Skip group headers (they only toggle their own submenu).
+      if (menuItem.querySelector("ul")) return;
+      // Do not set isManuallyToggled: the media-query effect should still auto-reopen the
+      // sidebar when the viewport later grows back to desktop width.
+      dispatchSidebar({ isSidebarOpen: false });
+    };
+
+    sidebarEl.addEventListener("click", handleClick);
+    return () => sidebarEl.removeEventListener("click", handleClick);
+  }, [mainAppSidebar, isMobileViewport, dispatchSidebar]);
+
   return (
     <div
       ref={containerRef}
