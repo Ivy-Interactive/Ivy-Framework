@@ -23,9 +23,9 @@ public static class BuilderFactoryExtensions
         return new TextBuilder<TModel>();
     }
 
-    public static IBuilder<TModel> Link<TModel>(this IBuilderFactory<TModel> factory, string? url = null, string? label = null)
+    public static IBuilder<TModel> Link<TModel>(this IBuilderFactory<TModel> factory, string? url = null, string? label = null, LinkTarget target = LinkTarget.Self)
     {
-        return new LinkBuilder<TModel>(url, label);
+        return new LinkBuilder<TModel>(url, label, target);
     }
 
     public static IBuilder<TModel> CopyToClipboard<TModel>(this IBuilderFactory<TModel> factory)

@@ -169,7 +169,8 @@ export function ActivityHeatmap({
 }: ActivityHeatmapProps) {
   const isHourly = interval === "Hourly";
   const rowCount = isHourly ? 24 : 7;
-  const labelWidth = isHourly ? 34 : 28;
+  const cellSize = 16; // 50% larger than original 11px (11 * 1.5 ≈ 16)
+  const labelWidth = isHourly ? 50 : 42;
 
   const columns = isHourly
     ? buildHourlyGrid(data, startDate, endDate)
@@ -252,10 +253,10 @@ export function ActivityHeatmap({
               <div className="flex flex-col justify-end sticky left-0 top-0 bottom-0 bg-card">
                 <div
                   className="grid gap-0.5 text-secondary-foreground opacity-50 *:pr-2 *:text-right"
-                  style={{ gridTemplateRows: `repeat(${rowCount}, 11px)`, width: `${labelWidth}px` }}
+                  style={{ gridTemplateRows: `repeat(${rowCount}, ${cellSize}px)`, width: `${labelWidth}px` }}
                 >
                   {rowLabels.map((label, ri) => (
-                    <div key={ri} style={{ fontSize: "10px", lineHeight: "11px" }}>
+                    <div key={ri} style={{ fontSize: "10px", lineHeight: `${cellSize}px` }}>
                       {label}
                     </div>
                   ))}
@@ -301,7 +302,7 @@ export function ActivityHeatmap({
                 <div
                   key={ci}
                   className="grid gap-0.5"
-                  style={{ gridTemplateRows: `repeat(${rowCount}, 11px)` }}
+                  style={{ gridTemplateRows: `repeat(${rowCount}, ${cellSize}px)` }}
                 >
                   {column.map((day, di) => {
                     const level = day ? getLevel(day.count, maxCount) : 0;
@@ -309,8 +310,8 @@ export function ActivityHeatmap({
                     return (
                       <div
                         key={day ? `${day.date}T${day.hour ?? "d"}` : `${di}-${ci}`}
-                        className={`w-[11px] h-[11px] rounded-sm hover:rounded-none hover:scale-110 ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
-                        style={{ backgroundColor: bg }}
+                        className={`rounded-sm hover:rounded-none hover:scale-110 ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
+                        style={{ backgroundColor: bg, width: `${cellSize}px`, height: `${cellSize}px` }}
                         onMouseEnter={() => {
                           if (showTooltip && day) {
                             setTooltip({ day });
@@ -335,10 +336,10 @@ export function ActivityHeatmap({
           <>
             <div className="font-bold">{formatTooltipHeader(tooltip.day)}</div>
             <p>
-              <span className="relative w-[11px] h-[11px] pr-4 inline-flex">
+              <span className="relative pr-4 inline-flex" style={{ width: `${cellSize}px`, height: `${cellSize}px` }}>
                 <span
-                  className="absolute top-[2px] left-0 w-[11px] h-[11px] rounded-full self-center"
-                  style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]! }}
+                  className="absolute top-[2px] left-0 rounded-full self-center"
+                  style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]!, width: `${cellSize}px`, height: `${cellSize}px` }}
                 />
               </span>
               <span>{`${valueLabel ?? "Count"}: `}</span>

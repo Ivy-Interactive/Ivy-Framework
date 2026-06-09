@@ -46,6 +46,11 @@ describe("useCellHoverTooltip", () => {
     expect(hookSource).toContain("cellTooltipStyle");
     expect(hookSource).toContain("getCellTooltipPlacementStyle");
   });
+
+  it("should use args.bounds.width for truncation detection instead of base column width", () => {
+    expect(hookSource).toContain("const columnWidth = args.bounds.width");
+    expect(hookSource).not.toContain("getVisibleColumnWidthAt");
+  });
 });
 
 describe("getCellTooltipPlacementStyle", () => {
