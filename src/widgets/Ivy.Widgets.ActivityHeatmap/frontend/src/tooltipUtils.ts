@@ -5,15 +5,13 @@ const monthFormatter = new Intl.DateTimeFormat(preferredLanguage, { month: "shor
 export const MONTH_NAMES = Array.from({ length: 12 }, (_, i) => monthFormatter.format(new Date(0, i)));
 
 export function formatTooltipHeader(day: Activity): string {
-  const date = new Date(day.date + "T00:00:00");
-  const month = MONTH_NAMES[date.getMonth()];
-  const dayNum = date.getDate();
-  const year = date.getFullYear();
-  const header = `${month} ${dayNum}, ${year}`;
+  const dateString = new Date(day.date)
+    .toLocaleDateString(preferredLanguage, { month: "short", day: "numeric", year: "numeric" });
+
   if (day.hour != null) {
-    return `${header}, ${String(day.hour).padStart(2, "0")}:00`;
+    return `${dateString}, ${String(day.hour).padStart(2, "0")}:00`;
   }
-  return header;
+  return dateString;
 }
 
 export function formatTooltipValue(day: Activity): string {
