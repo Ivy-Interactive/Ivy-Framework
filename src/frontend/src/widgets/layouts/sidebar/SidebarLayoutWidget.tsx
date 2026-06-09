@@ -147,6 +147,15 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   const { isSidebarOpen, isManuallyToggled, currentWidth, isResizing, prevInitialWidthPx } =
     sidebarState;
 
+  // Track whether the viewport is below the auto-collapse threshold so the main app sidebar
+  // can expand to a near-full-width drawer on mobile (see effectiveSidebarWidth below).
+  const [isMobileViewport, setIsMobileViewport] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < autoCollapseThreshold : false,
+  );
+
+  // Width of the content sliver left visible to the right of an open mobile drawer.
+  const MOBILE_DRAWER_CONTENT_PEEK_PX = 48;
+
   const containerRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -191,8 +200,15 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     [resizable, isSidebarOpen, currentWidth, minWidthPx, maxWidthPx, dispatchSidebar],
   );
 
-  // Get the effective sidebar width (use currentWidth when resizable)
-  const effectiveSidebarWidth = resizable ? `${currentWidth}px` : sidebarWidth;
+  // Get the effective sidebar width (use currentWidth when resizable).
+  // On mobile, the main app sidebar expands to a near-full-width drawer, leaving a small
+  // sliver of content visible on the right so it reads as an overlay over the content.
+  const effectiveSidebarWidth =
+    mainAppSidebar && isMobileViewport
+      ? `calc(100vw - ${MOBILE_DRAWER_CONTENT_PEEK_PX}px)`
+      : resizable
+        ? `${currentWidth}px`
+        : sidebarWidth;
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
@@ -213,6 +229,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     const mql = window.matchMedia(`(min-width: ${autoCollapseThreshold}px)`);
 
     const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobileViewport(!e.matches);
       if (!isManuallyToggled) {
         dispatchSidebar({ isSidebarOpen: openProp && e.matches });
       }
