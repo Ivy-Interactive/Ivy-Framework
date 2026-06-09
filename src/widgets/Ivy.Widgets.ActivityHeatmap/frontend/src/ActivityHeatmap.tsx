@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./style.css";
 import { ActivityHeatmapProps, Activity } from "./types";
 import { computeMaxCount, getLevel } from "./levelUtils";
-import { MONTH_NAMES, formatTooltipHeader, getTooltipTransform } from "./tooltipUtils";
+import { formatDimensionLabel, formatTooltipHeader, getTooltipTransform } from "./tooltipUtils";
 
 function buildColorScheme(baseColor: string): string[] {
   return [
@@ -170,6 +170,7 @@ export function ActivityHeatmap({
   const isHourly = interval === "Hourly";
   const rowCount = isHourly ? 24 : 7;
   const cellSize = 16; // 50% larger than original 11px (11 * 1.5 ≈ 16)
+  const cellGapSize = 3;
   const labelWidth = isHourly ? 50 : 42;
 
   const columns = isHourly
@@ -198,19 +199,19 @@ export function ActivityHeatmap({
     const date = new Date(firstCell.date + "T00:00:00");
 
     if (isHourly) {
-      if (ci === 0 || date.getDate() === 1) {
-        return `${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`;
-      }
-      return "";
+      // First column or first day of the month
+      return ci === 0 || date.getDate() === 1
+        ? formatDimensionLabel(date, isHourly)
+        : "";
     }
 
     if (date.getDate() <= 7) {
       // First week of the month
       const prevColumnFirst = ci > 0 ? columns[ci - 1]?.[0] : null;
-      if (!prevColumnFirst) return MONTH_NAMES[date.getMonth()] ?? "";
+      if (!prevColumnFirst) return formatDimensionLabel(date, isHourly);
       const prevDate = new Date(prevColumnFirst.date + "T00:00:00");
       if (prevDate.getMonth() !== date.getMonth()) {
-        return MONTH_NAMES[date.getMonth()] ?? "";
+        return formatDimensionLabel(date, isHourly);
       }
     }
     return "";
@@ -232,14 +233,14 @@ export function ActivityHeatmap({
     <div className="ivy-activity-heatmap-container">
       <div className="overflow-x-auto h-100 bg-card ivy-activity-heatmap-scroll"
         ref={scrollXContainer}>
-        <div className="inline-flex flex-col gap-1 font-sans h-100">
+        <div className={`inline-flex flex-col gap-[${cellGapSize}px] font-sans h-100`}>
           {showMonthLabels && (
-            <div className="sticky top-0 flex gap-0.5 text-[#57606a] w-full bg-card">
+            <div className="sticky top-0 flex gap-1 text-[#57606a] w-full bg-card">
               {showDayLabels && <div style={{ width: `${labelWidth}px` }} />}
               {columns.map((_, ci) => (
                 <div
                   key={ci}
-                  className="text-center flex text-secondary-foreground opacity-50 last:hidden"
+                  className="text-center text-nowrap flex text-secondary-foreground opacity-50 last:hidden"
                   style={{ width: `${cellSize}px`, fontSize: "10px" }}
                 >
                   {columnLabels[ci]}
@@ -248,15 +249,28 @@ export function ActivityHeatmap({
             </div>
           )}
 
-          <div className="flex gap-1">
+          <div
+            className="flex"
+            style={{ gap: `${cellGapSize}px` }}
+          >
             {showDayLabels && (
               <div className="flex flex-col justify-end sticky left-0 top-0 bottom-0 bg-card">
                 <div
-                  className="grid gap-0.5 text-secondary-foreground opacity-50 *:pr-2 *:text-right"
-                  style={{ gridTemplateRows: `repeat(${rowCount}, ${cellSize}px)`, width: `${labelWidth}px` }}
+                  className="grid text-secondary-foreground opacity-50 *:pr-2 *:text-right"
+                  style={{
+                    gridTemplateRows: `repeat(${rowCount}, ${cellSize}px)`, width: `${labelWidth}px`,
+                    gap: `${cellGapSize}px`
+                  }}
                 >
                   {rowLabels.map((label, ri) => (
-                    <div key={ri} style={{ fontSize: "10px", lineHeight: `${cellSize}px` }}>
+                    <div
+                      key={ri}
+                      style={{
+                        fontSize: "10px",
+                        lineHeight: `${cellSize}px`,
+                        height: `${cellSize}px`
+                      }}
+                    >
                       {label}
                     </div>
                   ))}
@@ -264,7 +278,8 @@ export function ActivityHeatmap({
               </div>
             )}
 
-            <div className="flex gap-0.5"
+            <div className="flex"
+              style={{ gap: `${cellGapSize}px` }}
               ref={gridContainer}
               onMouseEnter={(e) => {
                 if (!showTooltip) return;
@@ -301,8 +316,11 @@ export function ActivityHeatmap({
               {columns.map((column, ci) => (
                 <div
                   key={ci}
-                  className="grid gap-0.5"
-                  style={{ gridTemplateRows: `repeat(${rowCount}, ${cellSize}px)` }}
+                  className="grid"
+                  style={{
+                    gridTemplateRows: `repeat(${rowCount}, ${cellSize}px)`,
+                    gap: `${cellGapSize}px`
+                  }}
                 >
                   {column.map((day, di) => {
                     const level = day ? getLevel(day.count, maxCount) : 0;
@@ -310,7 +328,7 @@ export function ActivityHeatmap({
                     return (
                       <div
                         key={day ? `${day.date}T${day.hour ?? "d"}` : `${di}-${ci}`}
-                        className={`rounded-sm hover:rounded-none hover:scale-110 ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
+                        className={`rounded-sm hover:rounded-xs hover:scale-110 ${clickable && day?.count ? "cursor-pointer" : "cursor-default"}`}
                         style={{ backgroundColor: bg, width: `${cellSize}px`, height: `${cellSize}px` }}
                         onMouseEnter={() => {
                           if (showTooltip && day) {
@@ -336,10 +354,21 @@ export function ActivityHeatmap({
           <>
             <div className="font-bold">{formatTooltipHeader(tooltip.day)}</div>
             <p>
-              <span className="relative pr-4 inline-flex" style={{ width: `${cellSize}px`, height: `${cellSize}px` }}>
+              <span
+                className="relative inline-flex"
+                style={{
+                  width: `${cellSize + cellGapSize}px`,
+                  height: `${cellSize}px`,
+                  gap: `${cellGapSize}px`,
+                }}
+              >
                 <span
-                  className="absolute top-[2px] left-0 rounded-full self-center"
-                  style={{ backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]!, width: `${cellSize}px`, height: `${cellSize}px` }}
+                  className="absolute left-0 rounded-sm self-center"
+                  style={{
+                    top: `${cellGapSize}px`,
+                    backgroundColor: colors[getLevel(tooltip.day.count, maxCount)] ?? colors[0]!,
+                    width: `${cellSize}px`, height: `${cellSize}px`
+                  }}
                 />
               </span>
               <span>{`${valueLabel ?? "Count"}: `}</span>
