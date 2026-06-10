@@ -139,10 +139,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     ...borderRadiusStyle,
   };
 
-  // When the caller sets an explicit width, the button must be able to shrink below its
-  // content's intrinsic width so child text can truncate. The default `w-min`/`inline-block`
-  // shrink-to-fit layout floors at min-content and clips instead; swap it for a shrinkable
-  // block so `width: 100%` + a child `min-w-0` ellipsis actually engage.
+  // With an explicit width, drop the default w-min/inline-block shrink-to-fit so child text can truncate.
   const hasExplicitWidth = width != null && width !== "";
 
   let buttonSize: "icon" | "icon-sm" | "default" | "sm" | "lg" | null | undefined = "default";

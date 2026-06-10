@@ -14,13 +14,8 @@ ivy-widget {
   display: contents;
 }
 
-/* Radix ScrollArea wraps viewport children in an internal
-   `<div style="min-width:100%; display:table">`. The `display: table` sizes to the
-   widest descendant's intrinsic width and ignores the 100% as a cap, so a wide child
-   (e.g. a code block) expands it past the viewport and the content clips on the right —
-   the vertical scroll area can't contain horizontal overflow. On mobile, force that
-   wrapper to a block that stays within the viewport; wide descendants (code blocks) keep
-   their own inner horizontal scroll, while prose wraps instead of overflowing. */
+/* Radix ScrollArea's internal display:table viewport wrapper sizes to its widest descendant
+   and overflows the viewport on mobile; force it to a capped block so content doesn't clip. */
 @media (max-width: 639.98px) {
   [data-radix-scroll-area-viewport] > div[style*="display: table"] {
     display: block !important;

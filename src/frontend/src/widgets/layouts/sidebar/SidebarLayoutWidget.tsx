@@ -25,7 +25,6 @@ interface SidebarLayoutWidgetProps {
   showToggleButton?: boolean;
   autoCollapseThreshold?: number; // Width threshold for auto-collapse (default: 768px)
   mainAppSidebar?: boolean;
-  collapsibleOnMobile?: boolean; // Auto-collapse + in-pane toggle for nested (non-main) sidebars
   mainContentPadding?: number; // Padding for main content area (default: 2)
   width?: string; // Width of the sidebar (Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue")
   open?: boolean; // Whether the sidebar starts open (default: true)
@@ -87,17 +86,13 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   showToggleButton = true,
   autoCollapseThreshold = 768,
   mainAppSidebar = false,
-  collapsibleOnMobile = false,
   mainContentPadding,
   width,
   open: openProp = true,
   resizable = false,
   sidebarContentScroll = "Auto",
 }) => {
-  // Both the main app sidebar and nested "collapsible on mobile" sidebars participate in
-  // viewport-driven auto-collapse and expose a toggle. The main app sidebar additionally
-  // owns the Ctrl+B shortcut and the special main-content toggle placement.
-  const collapseEnabled = mainAppSidebar || collapsibleOnMobile;
+  const collapseEnabled = true;
   // Parse Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue"
   const [wantedWidth, minWidthStr, maxWidthStr] = (width ?? "").split(",");
 
@@ -147,13 +142,10 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   const { isSidebarOpen, isManuallyToggled, currentWidth, isResizing, prevInitialWidthPx } =
     sidebarState;
 
-  // Track whether the viewport is below the auto-collapse threshold so the main app sidebar
-  // can expand to a near-full-width drawer on mobile (see effectiveSidebarWidth below).
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < autoCollapseThreshold : false,
   );
 
-  // Width of the content sliver left visible to the right of an open mobile drawer.
   const MOBILE_DRAWER_CONTENT_PEEK_PX = 48;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -200,9 +192,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     [resizable, isSidebarOpen, currentWidth, minWidthPx, maxWidthPx, dispatchSidebar],
   );
 
-  // Get the effective sidebar width (use currentWidth when resizable).
-  // On mobile, the main app sidebar expands to a near-full-width drawer, leaving a small
-  // sliver of content visible on the right so it reads as an overlay over the content.
+  // On mobile, the main app sidebar expands to a near-full-width drawer over the content.
   const effectiveSidebarWidth =
     mainAppSidebar && isMobileViewport
       ? `calc(100vw - ${MOBILE_DRAWER_CONTENT_PEEK_PX}px)`
@@ -241,10 +231,8 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     return () => mql.removeEventListener("change", handleMediaChange);
   }, [autoCollapseThreshold, isManuallyToggled, collapseEnabled, openProp, dispatchSidebar]);
 
-  // On mobile, collapse the main app sidebar after a navigable menu item is selected, so the
-  // chosen page is revealed instead of staying behind the open drawer. Leaf menu items render a
-  // [data-menu-item] element without a nested submenu; clicking a collapsible group (which has a
-  // nested <ul>) only expands it and must not collapse the drawer.
+  // On mobile, collapse the main app sidebar after a leaf menu item is selected so the chosen
+  // page is revealed instead of staying behind the open drawer.
   useEffect(() => {
     if (!mainAppSidebar) return;
     const sidebarEl = sidebarRef.current;
@@ -255,10 +243,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       const target = e.target as HTMLElement | null;
       const menuItem = target?.closest<HTMLElement>("[data-menu-item]");
       if (!menuItem) return;
-      // Skip group headers (they only toggle their own submenu).
-      if (menuItem.querySelector("ul")) return;
-      // Do not set isManuallyToggled: the media-query effect should still auto-reopen the
-      // sidebar when the viewport later grows back to desktop width.
+      if (menuItem.querySelector("ul")) return; // group header: only toggles its own submenu
       dispatchSidebar({ isSidebarOpen: false });
     };
 
@@ -334,18 +319,13 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         )}
       </div>
 
-      {/* Main Content - Always takes full remaining width. min-w-0 keeps the 1fr grid track from
-          growing past the viewport when content (wide text, long titles) has a large min-content
-          width; without it the whole pane overflows horizontally on narrow screens. */}
+      {/* min-w-0 keeps the 1fr grid track from overflowing the viewport on narrow screens. */}
       <div
         className={cn(
           `relative h-full overflow-auto min-w-0`,
           !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : "",
         )}
       >
-        {/* Toggle Button - only the main app sidebar shows an in-pane toggle. Nested
-            collapsible-on-mobile sidebars auto-collapse on small screens and rely on the
-            hosting app to provide its own navigation (e.g. a header dropdown). */}
         {showToggleButton && mainAppSidebar && (
           <TooltipProvider delayDuration={300}>
             <Tooltip>
@@ -367,9 +347,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             </Tooltip>
           </TooltipProvider>
         )}
-        {/* On mobile, while the main app sidebar is open as a drawer, the visible sliver of
-            content is a tap target to close the drawer, not an interactive surface. This overlay
-            swallows clicks (so buttons behind it don't fire) and closes the drawer instead. */}
+        {/* On mobile, the content sliver beside the open drawer closes it instead of being interactive. */}
         {mainAppSidebar && isMobileViewport && isSidebarOpen && (
           <div
             className="absolute inset-0 z-40 cursor-pointer"

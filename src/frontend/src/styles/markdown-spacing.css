@@ -38,11 +38,7 @@
   margin-top: 1rem;
 }
 
-/* On mobile (< Mobile breakpoint = 640px) a `display: table` element takes its
-   intrinsic min-content width from the columns and refuses to shrink, so wide
-   markdown tables overflow the viewport and the rightmost columns get clipped.
-   Drop the rigid table layout here: make the table a block box that scrolls
-   horizontally within the content pane instead of pushing past its right edge. */
+/* On mobile, let wide markdown tables scroll horizontally instead of clipping off the right edge. */
 @media (max-width: 639.98px) {
   .markdown-widget table {
     display: block;
