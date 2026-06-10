@@ -12,14 +12,14 @@ import { icons } from "lucide-react";
 import { X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
-import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
 import {
   normalizeInputDensity,
-  textInputAffixCellClasses,
+  textInputAffixControlColumnClasses,
   textInputAffixInvalidIconClasses,
-  textInputSizeVariant,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputFieldShellClasses,
   textInputSuffixGlyphSlotClasses,
-  textInputSuffixWithTrailingClusterClasses,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
@@ -225,7 +225,9 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   );
 
   const iconField = (inAffixShell: boolean) => (
-    <div className={cn("flex min-w-0 items-center gap-2", inAffixShell && "shrink-0")}>
+    <div
+      className={cn("flex min-w-0 w-full items-center gap-2", inAffixShell && "overflow-hidden")}
+    >
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
@@ -344,33 +346,22 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
 
   return (
     <div
-      className={cn(
-        "relative flex items-stretch overflow-hidden rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-        invalid ? "border-destructive" : "border-input dark:border-white/10",
-        disabled && "cursor-not-allowed opacity-50",
-      )}
+      className={textInputFieldShellClasses({
+        invalid,
+        disabled,
+      })}
     >
       {hasPrefix && (
-        <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+        <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
+          {prefixContent}
+        </div>
       )}
-      <div
-        className={cn(
-          "relative flex min-w-0 flex-1 items-stretch overflow-hidden",
-          textInputSizeVariant({ density: densityKey }),
-          boolInputRowMinHeightVariant({ density: densityKey }),
-          "w-auto",
-        )}
-      >
-        {iconField(true)}
-      </div>
+      <div className={textInputAffixControlColumnClasses(density)}>{iconField(true)}</div>
       {hasSuffix && (
         <div
-          className={cn(
-            textInputAffixCellClasses("suffix", density),
-            trailingBesideSuffix &&
-              showTrailing &&
-              textInputSuffixWithTrailingClusterClasses(density),
-          )}
+          className={textInputAffixSuffixCellClasses(density, suffixContent, {
+            showTrailing: trailingBesideSuffix && showTrailing,
+          })}
         >
           {trailingBesideSuffix && showTrailing && trailingCluster(true)}
           {trailingBesideSuffix && showTrailing ? (

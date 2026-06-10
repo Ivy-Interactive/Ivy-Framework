@@ -5,14 +5,15 @@ import { getWidth, inputStyles } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import {
-  textInputAffixCellClasses,
+  textInputAffixInputColumnClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
   textInputEmbeddedInputClasses,
   textInputFieldShellClasses,
   textInputSizeVariant,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
-  textInputSuffixWithTrailingClusterClasses,
   textInputSuffixGlyphSlotClasses,
   textInputTrailingOverlayClasses,
   textInputTrailingShortcutWrapperClasses,
@@ -99,10 +100,12 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
         })}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
+            {prefixContent}
+          </div>
         )}
 
-        <div className={cn("relative flex-1", trailingBesideSuffix && "min-w-0")}>
+        <div className={textInputAffixInputColumnClasses({ trailingBesideSuffix })}>
           <Input
             ref={elementRef as React.RefObject<HTMLInputElement>}
             id={props.id}
@@ -191,12 +194,9 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
 
         {hasSuffix && (
           <div
-            className={cn(
-              textInputAffixCellClasses("suffix", density),
-              trailingBesideSuffix &&
-                showTrailing &&
-                textInputSuffixWithTrailingClusterClasses(density),
-            )}
+            className={textInputAffixSuffixCellClasses(density, suffixContent, {
+              showTrailing: trailingBesideSuffix && showTrailing,
+            })}
           >
             {trailingBesideSuffix && showTrailing && (
               <>

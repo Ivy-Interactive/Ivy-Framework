@@ -21,13 +21,13 @@ import {
 import { Densities } from "@/types/density";
 import {
   normalizeInputDensity,
-  textInputAffixCellClasses,
   textInputAffixInvalidIconClasses,
-  textInputEmbeddedInputClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputEmbeddedContentPaddingClasses,
   textInputFieldShellClasses,
   textInputSizeVariant,
   textInputSuffixGlyphSlotClasses,
-  textInputSuffixWithTrailingClusterClasses,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
@@ -246,13 +246,16 @@ const ColorInputAffixLayout: React.FC<ColorInputAffixLayoutProps> = ({
         })}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
+            {prefixContent}
+          </div>
         )}
         <div
           className={cn(
-            "relative flex min-w-0 flex-1 items-stretch overflow-hidden",
+            "relative z-0 isolate flex min-w-0 flex-1 items-stretch overflow-hidden",
             textInputSizeVariant({ density: densityKey }),
             colorInputRowMinHeightVariant({ density: densityKey }),
+            textInputEmbeddedContentPaddingClasses(density),
             "w-auto",
           )}
         >
@@ -262,12 +265,9 @@ const ColorInputAffixLayout: React.FC<ColorInputAffixLayoutProps> = ({
         </div>
         {hasSuffix && (
           <div
-            className={cn(
-              textInputAffixCellClasses("suffix", density),
-              trailingBesideSuffix &&
-                showTrailing &&
-                textInputSuffixWithTrailingClusterClasses(density),
-            )}
+            className={textInputAffixSuffixCellClasses(density, suffixContent, {
+              showTrailing: trailingBesideSuffix && showTrailing,
+            })}
           >
             {trailingBesideSuffix && showTrailing && (
               <>
@@ -457,7 +457,8 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
         density={density}
         className={cn(
           colorInputVariant({ density }),
-          inAffixShell && textInputEmbeddedInputClasses(true, density),
+          inAffixShell &&
+            "rounded-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
           !inAffixShell &&
             ghost &&
             "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",

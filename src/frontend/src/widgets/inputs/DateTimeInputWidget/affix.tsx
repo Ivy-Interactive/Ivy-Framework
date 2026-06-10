@@ -3,31 +3,35 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
-import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
 import {
   normalizeInputDensity,
   textInputAffixCellClasses,
-  textInputAffixIconOnlyPaddingVariant,
-  textInputEmbeddedContentPaddingClasses,
-  textInputSuffixGlyphSlotClasses,
+  textInputAffixControlColumnClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
   textInputSuffixWithTrailingClusterClasses,
+  textInputFieldShellClasses,
+  textInputSuffixGlyphSlotClasses,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
 } from "@/components/ui/input/text-input-variant";
 
-/** Affix strip aligned with number/select/icon inputs. */
+const dateAffixCellChrome = "relative z-10 shrink-0 overflow-visible";
+
+/** Affix strip aligned with shared input affix helpers. */
 export function dateInputAffixCellClasses(
   side: "prefix" | "suffix",
   density: Densities,
-  densityKey: ReturnType<typeof normalizeInputDensity>,
-  options: { withTrailingCluster: boolean; iconOnlyPadding: boolean },
+  content?: React.ReactNode[],
+  options: { showTrailing?: boolean } = {},
 ): string {
+  if (side === "prefix") {
+    return cn(textInputAffixPrefixCellClasses(density, content), dateAffixCellChrome);
+  }
   return cn(
-    textInputAffixCellClasses(side, density),
-    "relative z-10 shrink-0 overflow-visible",
-    options.withTrailingCluster && textInputSuffixWithTrailingClusterClasses(density),
-    options.iconOnlyPadding && textInputAffixIconOnlyPaddingVariant({ density: densityKey }),
+    textInputAffixSuffixCellClasses(density, content, { showTrailing: options.showTrailing }),
+    dateAffixCellChrome,
   );
 }
 
@@ -72,18 +76,18 @@ export function dateInputFieldShellClasses(options: {
   disabled?: boolean;
 }): string {
   return cn(
-    "relative flex w-full min-w-0 select-none items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-    options.focused
-      ? "border-ring outline-none dark:border-ring"
-      : "border-input dark:border-white/10",
-    options.invalid && "border-destructive",
-    options.disabled && "cursor-not-allowed opacity-50",
+    textInputFieldShellClasses({
+      focused: options.focused,
+      invalid: options.invalid,
+      disabled: options.disabled,
+    }),
+    options.focused && "ring-1 ring-ring",
   );
 }
 
-/** Strip inner control chrome so the shell owns border and fill. */
+/** Strip inner control chrome; zero horizontal padding when the affix column owns the seam gap. */
 export const dateInputEmbeddedControlClasses =
-  "[&_button]:border-0 [&_button]:bg-transparent [&_button]:shadow-none [&_button]:dark:bg-transparent [&_button]:hover:bg-transparent [&_button]:dark:hover:bg-transparent [&_button]:focus-visible:ring-0 [&_button]:focus-visible:ring-offset-0 [&_input]:border-0 [&_input]:bg-transparent [&_input]:shadow-none [&_input]:dark:bg-transparent [&_input]:focus-visible:ring-0";
+  "[&_button]:border-0 [&_button]:bg-transparent [&_button]:!px-0 [&_button]:shadow-none [&_button]:dark:bg-transparent [&_button]:hover:bg-transparent [&_button]:dark:hover:bg-transparent [&_button]:focus-visible:ring-0 [&_button]:focus-visible:ring-offset-0 [&_input]:border-0 [&_input]:bg-transparent [&_input]:!px-0 [&_input]:shadow-none [&_input]:dark:bg-transparent [&_input]:focus-visible:ring-0";
 
 interface DateInputAffixShellProps {
   density: Densities;
@@ -92,8 +96,8 @@ interface DateInputAffixShellProps {
   focused?: boolean;
   hasPrefix: boolean;
   hasSuffix: boolean;
-  prefixContent?: React.ReactNode;
-  suffixContent?: React.ReactNode;
+  prefixContent?: React.ReactNode[];
+  suffixContent?: React.ReactNode[];
   showClear: boolean;
   onClear: (e?: React.MouseEvent) => void;
   children: React.ReactNode;
@@ -144,39 +148,22 @@ export function DateInputAffixShell({
 
   return (
     <div
-      className={cn(
-        "relative flex w-full items-center rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-        focused
-          ? "border-ring ring-1 ring-ring dark:border-ring"
-          : "border-input dark:border-white/10",
-        invalid && "border-destructive",
-        disabled && "cursor-not-allowed opacity-50",
-      )}
+      className={dateInputFieldShellClasses({
+        focused,
+        invalid,
+        disabled,
+      })}
     >
       {hasPrefix && (
-        <div
-          className={dateInputAffixCellClasses("prefix", density, densityKey, {
-            withTrailingCluster: false,
-            iconOnlyPadding: true,
-          })}
-        >
+        <div className={dateInputAffixCellClasses("prefix", density, prefixContent)}>
           {prefixContent}
         </div>
       )}
-      <div
-        className={cn(
-          "relative z-0 isolate flex min-w-0 flex-1 items-center",
-          boolInputRowMinHeightVariant({ density: densityKey }),
-          textInputEmbeddedContentPaddingClasses(density),
-        )}
-      >
-        {children}
-      </div>
+      <div className={textInputAffixControlColumnClasses(density)}>{children}</div>
       {hasSuffix && (
         <div
-          className={dateInputAffixCellClasses("suffix", density, densityKey, {
-            withTrailingCluster: trailingBesideSuffix && showTrailing,
-            iconOnlyPadding: !showTrailing,
+          className={dateInputAffixCellClasses("suffix", density, suffixContent, {
+            showTrailing: trailingBesideSuffix && showTrailing,
           })}
         >
           {trailingBesideSuffix && showTrailing && trailingCluster()}
@@ -189,10 +176,11 @@ export function DateInputAffixShell({
       )}
       {trailingInAffixCell && (
         <div
-          className={dateInputAffixCellClasses("suffix", density, densityKey, {
-            withTrailingCluster: trailingControlCount > 1,
-            iconOnlyPadding: trailingControlCount === 1,
-          })}
+          className={cn(
+            textInputAffixCellClasses("suffix", density),
+            dateAffixCellChrome,
+            trailingControlCount > 1 && textInputSuffixWithTrailingClusterClasses(density),
+          )}
         >
           {trailingCluster()}
         </div>

@@ -6,10 +6,11 @@ import { getWidth, inputStyles } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import {
-  textInputAffixCellClasses,
+  textInputAffixInputColumnClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
   textInputEmbeddedInputClasses,
   textInputSizeVariant,
-  textInputSuffixWithTrailingClusterClasses,
   textInputSuffixGlyphSlotClasses,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
@@ -171,10 +172,12 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
         )}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
+            {prefixContent}
+          </div>
         )}
 
-        <div className={cn("relative flex-1", trailingBesideSuffix && "min-w-0")}>
+        <div className={textInputAffixInputColumnClasses({ trailingBesideSuffix })}>
           <Input
             ref={elementRef}
             id={props.id}
@@ -220,12 +223,9 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
 
         {hasSuffix && (
           <div
-            className={cn(
-              textInputAffixCellClasses("suffix", density),
-              trailingBesideSuffix &&
-                showTrailing &&
-                textInputSuffixWithTrailingClusterClasses(density),
-            )}
+            className={textInputAffixSuffixCellClasses(density, suffixContent, {
+              showTrailing: trailingBesideSuffix && showTrailing,
+            })}
           >
             {trailingBesideSuffix && showTrailing && trailingCluster(false)}
             {trailingBesideSuffix && showTrailing ? (

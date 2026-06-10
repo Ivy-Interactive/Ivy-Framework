@@ -7,9 +7,9 @@ import { Densities } from "@/types/density";
 import {
   textareaSizeVariant,
   textareaTrailingOverlayClasses,
-  textareaSuffixWithTrailingClusterClasses,
   textareaTrailingStackClasses,
-  textInputAffixCellClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
   textInputEmbeddedInputClasses,
   textInputSuffixGlyphSlotClasses,
   textInputTrailingIconButtonClasses,
@@ -168,7 +168,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         {hasPrefix && (
           <div
             className={cn(
-              textInputAffixCellClasses("prefix", density),
+              textInputAffixPrefixCellClasses(density, prefixContent),
               textareaAffixAlignClasses(density),
             )}
           >
@@ -215,11 +215,10 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         {hasSuffix && (
           <div
             className={cn(
-              textInputAffixCellClasses("suffix", density),
+              textInputAffixSuffixCellClasses(density, suffixContent, {
+                showTrailing: trailingBesideSuffix && showTrailing,
+              }),
               textareaAffixAlignClasses(density),
-              trailingBesideSuffix &&
-                showTrailing &&
-                textareaSuffixWithTrailingClusterClasses(density),
             )}
           >
             {trailingBesideSuffix && showTrailing && (

@@ -21,11 +21,12 @@ import { EMPTY_ARRAY } from "@/lib/constants";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import {
   normalizeInputDensity,
-  textInputAffixCellClasses,
+  textInputAffixControlColumnClasses,
   textInputAffixInvalidIconClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputFieldShellClasses,
   textInputSuffixGlyphSlotClasses,
-  textInputSuffixWithTrailingClusterClasses,
-  textInputSizeVariant,
   textInputTrailingIconSizeVariant,
 } from "@/components/ui/input/text-input-variant";
 
@@ -424,33 +425,22 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
     >
       {hasAffixes ? (
         <div
-          className={cn(
-            "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-            invalid ? "border-destructive" : "border-input dark:border-white/10",
-            disabled && "cursor-not-allowed opacity-50",
-          )}
+          className={textInputFieldShellClasses({
+            invalid,
+            disabled,
+          })}
         >
           {hasPrefix && (
-            <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+            <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
+              {prefixContent}
+            </div>
           )}
-          <div
-            className={cn(
-              "relative flex min-w-0 flex-1 items-center",
-              textInputSizeVariant({ density: densityKey }),
-              boolInputRowMinHeightVariant({ density: densityKey }),
-              "w-auto",
-            )}
-          >
-            {variantContent}
-          </div>
+          <div className={textInputAffixControlColumnClasses(density)}>{variantContent}</div>
           {hasSuffix && (
             <div
-              className={cn(
-                textInputAffixCellClasses("suffix", density),
-                trailingBesideSuffix &&
-                  showTrailing &&
-                  textInputSuffixWithTrailingClusterClasses(density),
-              )}
+              className={textInputAffixSuffixCellClasses(density, suffixContent, {
+                showTrailing: trailingBesideSuffix && showTrailing,
+              })}
             >
               {trailingBesideSuffix && showTrailing && (
                 <>

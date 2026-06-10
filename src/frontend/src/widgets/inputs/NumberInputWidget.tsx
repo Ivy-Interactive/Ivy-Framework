@@ -9,13 +9,13 @@ import { InvalidIcon } from "@/components/InvalidIcon";
 import { X } from "lucide-react";
 import { Densities } from "@/types/density";
 import {
-  textInputAffixCellClasses,
-  textInputAffixIconOnlyPaddingVariant,
+  textInputAffixInputColumnClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
   textInputEmbeddedInputClasses,
   textInputFieldShellClasses,
   textInputSizeVariant,
   textInputSuffixGlyphSlotClasses,
-  textInputSuffixWithTrailingClusterClasses,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
@@ -231,11 +231,15 @@ const SliderVariant = memo(
         })}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
+            {prefixContent}
+          </div>
         )}
         <div className="flex min-w-0 flex-1 px-3">{sliderContent}</div>
         {hasSuffix && (
-          <div className={textInputAffixCellClasses("suffix", density)}>{suffixContent}</div>
+          <div className={textInputAffixSuffixCellClasses(density, suffixContent)}>
+            {suffixContent}
+          </div>
         )}
       </div>
     );
@@ -347,17 +351,12 @@ const NumberVariant = memo(
         })}
       >
         {hasPrefix && (
-          <div
-            className={cn(
-              textInputAffixCellClasses("prefix", density),
-              textInputAffixIconOnlyPaddingVariant({ density }),
-            )}
-          >
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
             {prefixContent}
           </div>
         )}
 
-        <div className={cn("relative flex-1", trailingBesideSuffix && "min-w-0")}>
+        <div className={textInputAffixInputColumnClasses({ trailingBesideSuffix })}>
           <NumberInput
             min={min}
             max={max}
@@ -408,13 +407,9 @@ const NumberVariant = memo(
 
         {hasSuffix && (
           <div
-            className={cn(
-              textInputAffixCellClasses("suffix", density),
-              trailingBesideSuffix &&
-                showTrailing &&
-                textInputSuffixWithTrailingClusterClasses(density),
-              !showTrailing && textInputAffixIconOnlyPaddingVariant({ density }),
-            )}
+            className={textInputAffixSuffixCellClasses(density, suffixContent, {
+              showTrailing: trailingBesideSuffix && showTrailing,
+            })}
           >
             {trailingBesideSuffix && showTrailing && (
               <>

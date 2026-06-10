@@ -1,7 +1,9 @@
 import { cva } from "class-variance-authority";
+import React from "react";
 
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
+import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
 
 export type InputDensityVariant = "Small" | "Medium" | "Large";
 
@@ -103,6 +105,116 @@ export function textInputAffixCellClasses(
     textInputAffixCellVariant({ side, density: d }),
     textInputAffixIconGlyphCellVariant({ density: d }),
     textInputAffixIconGlyphSizeVariant({ density: d }),
+  );
+}
+
+function unwrapIvyWidget(node: React.ReactNode): React.ReactElement | null {
+  if (!React.isValidElement(node)) return null;
+  if (node.type === "ivy-widget") return node;
+  if (node.type === React.Suspense) {
+    for (const child of React.Children.toArray(
+      (node.props as { children?: React.ReactNode }).children,
+    )) {
+      const unwrapped = unwrapIvyWidget(child);
+      if (unwrapped) return unwrapped;
+    }
+    return null;
+  }
+  for (const child of React.Children.toArray(
+    (node.props as { children?: React.ReactNode }).children,
+  )) {
+    const unwrapped = unwrapIvyWidget(child);
+    if (unwrapped) return unwrapped;
+  }
+  return null;
+}
+
+function getWidgetPropsFromIvyElement(ivyWidget: React.ReactElement): Record<string, unknown> {
+  const child = (ivyWidget.props as { children?: React.ReactNode }).children;
+  if (React.isValidElement(child)) {
+    return (child.props as Record<string, unknown>) ?? {};
+  }
+  return {};
+}
+
+function isAffixIconOnlyNode(node: React.ReactNode): boolean {
+  const ivyWidget = unwrapIvyWidget(node);
+  if (!ivyWidget) return false;
+  const widgetType = (ivyWidget.props as { type?: string }).type;
+  if (!widgetType) return false;
+  if (widgetType === "Ivy.Icon") return true;
+  if (widgetType === "Ivy.Button") {
+    const props = getWidgetPropsFromIvyElement(ivyWidget);
+    const icon = props.icon as string | undefined;
+    const title = props.title as string | undefined;
+    return Boolean(icon && icon !== "None" && !title);
+  }
+  return false;
+}
+
+/** True when every affix slot child is an icon (or icon-only button). */
+export function isAffixSlotIconOnly(content?: React.ReactNode[]): boolean {
+  if (!content?.length) return false;
+  return content.every(isAffixIconOnlyNode);
+}
+
+/** Prefix affix cell — icon-only padding only when the slot content warrants it. */
+export function textInputAffixPrefixCellClasses(
+  density: Densities = Densities.Medium,
+  content?: React.ReactNode[],
+): string {
+  const d = normalizeInputDensity(density);
+  return cn(
+    textInputAffixCellClasses("prefix", density),
+    isAffixSlotIconOnly(content) && textInputAffixIconOnlyPaddingVariant({ density: d }),
+  );
+}
+
+/** Suffix affix cell — trailing cluster + conditional icon-only padding. */
+export function textInputAffixSuffixCellClasses(
+  density: Densities = Densities.Medium,
+  content?: React.ReactNode[],
+  options: { showTrailing?: boolean } = {},
+): string {
+  const d = normalizeInputDensity(density);
+  const hasSuffix = (content?.length ?? 0) > 0;
+  const showTrailing = options.showTrailing ?? false;
+  return cn(
+    textInputAffixCellClasses("suffix", density),
+    hasSuffix && showTrailing && textInputSuffixWithTrailingClusterClasses(density),
+    hasSuffix &&
+      !showTrailing &&
+      isAffixSlotIconOnly(content) &&
+      textInputAffixIconOnlyPaddingVariant({ density: d }),
+  );
+}
+
+/** Column for native inputs — padding lives on the input via {@link textInputEmbeddedInputClasses}. */
+export function textInputAffixInputColumnClasses(
+  options: { trailingBesideSuffix?: boolean } = {},
+): string {
+  return cn("relative flex-1", options.trailingBesideSuffix && "min-w-0");
+}
+
+/** Column for single-row custom controls (bool, feedback, icon, date trigger). */
+export function textInputAffixControlColumnClasses(density: Densities = Densities.Medium): string {
+  const d = normalizeInputDensity(density);
+  return cn(
+    "relative z-0 isolate flex min-w-0 flex-1 items-center overflow-hidden",
+    textInputSizeVariant({ density: d }),
+    boolInputRowMinHeightVariant({ density: d }),
+    "w-auto",
+    textInputEmbeddedContentPaddingClasses(density),
+  );
+}
+
+/** Column for growing content (code editor) inside an affix shell. */
+export function textInputAffixGrowContentColumnClasses(
+  density: Densities = Densities.Medium,
+): string {
+  return cn(
+    "relative z-0 isolate flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
+    textInputEmbeddedContentPaddingClasses(density),
   );
 }
 

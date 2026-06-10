@@ -16,11 +16,10 @@ import { Search, Loader2, X } from "lucide-react";
 import Icon from "@/components/Icon";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import {
-  textInputAffixCellClasses,
-  textInputAffixIconOnlyPaddingVariant,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
   textInputEmbeddedContentPaddingClasses,
   textInputSuffixGlyphSlotClasses,
-  textInputSuffixWithTrailingClusterClasses,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
@@ -424,25 +423,16 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
           )}
         >
           {hasPrefix && (
-            <div
-              className={cn(
-                textInputAffixCellClasses("prefix", density),
-                textInputAffixIconOnlyPaddingVariant({ density }),
-              )}
-            >
+            <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
               {prefixContent}
             </div>
           )}
           <div className="relative w-full min-w-0 flex-1">{selectContent}</div>
           {hasSuffix && (
             <div
-              className={cn(
-                textInputAffixCellClasses("suffix", density),
-                trailingBesideSuffix &&
-                  showTrailing &&
-                  textInputSuffixWithTrailingClusterClasses(density),
-                !showTrailing && textInputAffixIconOnlyPaddingVariant({ density }),
-              )}
+              className={textInputAffixSuffixCellClasses(density, suffixContent, {
+                showTrailing: trailingBesideSuffix && showTrailing,
+              })}
             >
               {trailingBesideSuffix && showTrailing && (
                 <>

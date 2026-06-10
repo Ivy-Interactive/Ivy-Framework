@@ -8,13 +8,14 @@ import { useFocusable } from "@/hooks/use-focus-management";
 import { sidebarMenuRef } from "@/widgets/layouts/sidebar";
 import { Densities } from "@/types/density";
 import {
-  textInputAffixCellClasses,
+  textInputAffixInputColumnClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
   textInputEmbeddedInputClasses,
   textInputSizeVariant,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
-  textInputSuffixWithTrailingClusterClasses,
   textInputSuffixGlyphSlotClasses,
   textInputTrailingShortcutWrapperClasses,
   searchIconVariant,
@@ -167,10 +168,12 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
+            {prefixContent}
+          </div>
         )}
 
-        <div className={cn("relative flex-1", trailingBesideSuffix && "min-w-0")}>
+        <div className={textInputAffixInputColumnClasses({ trailingBesideSuffix })}>
           {showBuiltinSearchIcon && <Search className={searchIconVariant({ density })} />}
           <Input
             ref={mergedRef}
@@ -213,12 +216,9 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
 
         {hasSuffix && (
           <div
-            className={cn(
-              textInputAffixCellClasses("suffix", density),
-              trailingBesideSuffix &&
-                showTrailing &&
-                textInputSuffixWithTrailingClusterClasses(density),
-            )}
+            className={textInputAffixSuffixCellClasses(density, suffixContent, {
+              showTrailing: trailingBesideSuffix && showTrailing,
+            })}
           >
             {trailingBesideSuffix && showTrailing && trailingCluster(false)}
             {trailingBesideSuffix && showTrailing ? (

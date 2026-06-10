@@ -8,15 +8,14 @@ import { cn } from "@/lib/utils";
 import { useOptimisticValue } from "./shared/useOptimisticValue";
 import { Densities } from "@/types/density";
 import { EMPTY_ARRAY } from "@/lib/constants";
-import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
 import {
   normalizeInputDensity,
-  textInputAffixCellClasses,
+  textInputAffixControlColumnClasses,
   textInputAffixInvalidIconClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
   textInputFieldShellClasses,
-  textInputSizeVariant,
   textInputSuffixGlyphSlotClasses,
-  textInputSuffixWithTrailingClusterClasses,
   textInputTrailingIconSizeVariant,
 } from "@/components/ui/input/text-input-variant";
 
@@ -238,27 +237,16 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
         })}
       >
         {hasPrefix && (
-          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
+            {prefixContent}
+          </div>
         )}
-        <div
-          className={cn(
-            "relative flex-1 overflow-hidden",
-            trailingBesideSuffix && "min-w-0",
-            textInputSizeVariant({ density: densityKey }),
-            boolInputRowMinHeightVariant({ density: densityKey }),
-            "w-auto",
-          )}
-        >
-          {feedbackControl(true)}
-        </div>
+        <div className={textInputAffixControlColumnClasses(density)}>{feedbackControl(true)}</div>
         {hasSuffix && (
           <div
-            className={cn(
-              textInputAffixCellClasses("suffix", density),
-              trailingBesideSuffix &&
-                showTrailing &&
-                textInputSuffixWithTrailingClusterClasses(density),
-            )}
+            className={textInputAffixSuffixCellClasses(density, suffixContent, {
+              showTrailing: trailingBesideSuffix && showTrailing,
+            })}
           >
             {trailingBesideSuffix && showTrailing && invalid && (
               <InvalidIcon

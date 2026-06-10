@@ -7,15 +7,17 @@ import { getHeight, getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
-import { dateInputFieldShellClasses } from "../DateTimeInputWidget/affix";
 import { X, Copy, Loader2 } from "lucide-react";
 import {
   normalizeInputDensity,
   textInputAffixCellClasses,
-  textInputAffixIconOnlyPaddingVariant,
+  textInputAffixGrowContentColumnClasses,
   textInputAffixInvalidIconClasses,
-  textInputSuffixGlyphSlotClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
   textInputSuffixWithTrailingClusterClasses,
+  textInputFieldShellClasses,
+  textInputSuffixGlyphSlotClasses,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
   textInputTrailingInvalidSlotClasses,
@@ -48,22 +50,25 @@ const cpp = () => import("@codemirror/lang-cpp").then((m) => m.cpp());
 import { dbml } from "./dbml-language";
 import { createIvyCodeTheme } from "./theme";
 
-/** Affix strip: one input row tall, vertically centered glyphs — matches icon/number inputs. */
+/** Affix strip for tall editor — top-aligned, density-scaled seam gaps. */
 function codeInputAffixCellClasses(
   side: "prefix" | "suffix",
   density: Densities,
-  densityKey: ReturnType<typeof normalizeInputDensity>,
-  options: { withTrailingCluster: boolean; iconOnlyPadding: boolean },
+  content?: React.ReactNode[],
+  options: { showTrailing?: boolean } = {},
 ): string {
-  return cn(
-    textInputAffixCellClasses(side, density),
+  const densityKey = normalizeInputDensity(density);
+  const chrome = cn(
     "relative z-10 shrink-0 self-start overflow-visible",
     boolInputRowMinHeightVariant({ density: densityKey }),
-    options.withTrailingCluster && textInputSuffixWithTrailingClusterClasses(density),
-    options.iconOnlyPadding && textInputAffixIconOnlyPaddingVariant({ density: densityKey }),
-    // Trailing hit targets use overflow-hidden; keep glyphs visible at Large density.
-    options.withTrailingCluster &&
-      "[&_button]:overflow-visible [&_[data-invalid-icon]]:overflow-visible",
+    options.showTrailing && "[&_button]:overflow-visible [&_[data-invalid-icon]]:overflow-visible",
+  );
+  if (side === "prefix") {
+    return cn(textInputAffixPrefixCellClasses(density, content), chrome);
+  }
+  return cn(
+    textInputAffixSuffixCellClasses(density, content, { showTrailing: options.showTrailing }),
+    chrome,
   );
 }
 
@@ -310,7 +315,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         style={styles}
         className={cn(
           "relative flex w-full flex-col overflow-hidden",
-          dateInputFieldShellClasses({ focused: isFocused, invalid, disabled }),
+          textInputFieldShellClasses({ focused: isFocused, invalid, disabled }),
         )}
       >
         <div className="min-h-0 min-w-0 flex-1 overflow-hidden">{codeEditor()}</div>
@@ -321,30 +326,22 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   return (
     <div
       style={styles}
-      className={dateInputFieldShellClasses({
+      className={textInputFieldShellClasses({
         focused: isFocused,
         invalid,
         disabled,
       })}
     >
       {hasPrefix && (
-        <div
-          className={codeInputAffixCellClasses("prefix", density, densityKey, {
-            withTrailingCluster: false,
-            iconOnlyPadding: true,
-          })}
-        >
+        <div className={codeInputAffixCellClasses("prefix", density, prefixContent)}>
           {prefixContent}
         </div>
       )}
-      <div className="relative z-0 isolate flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        {codeEditor()}
-      </div>
+      <div className={textInputAffixGrowContentColumnClasses(density)}>{codeEditor()}</div>
       {hasSuffix && (
         <div
-          className={codeInputAffixCellClasses("suffix", density, densityKey, {
-            withTrailingCluster: trailingBesideSuffix && showTrailing,
-            iconOnlyPadding: !showTrailing,
+          className={codeInputAffixCellClasses("suffix", density, suffixContent, {
+            showTrailing: trailingBesideSuffix && showTrailing,
           })}
         >
           {trailingBesideSuffix && showTrailing && trailingCluster(false)}
@@ -359,10 +356,13 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       )}
       {trailingInAffixCell && (
         <div
-          className={codeInputAffixCellClasses("suffix", density, densityKey, {
-            withTrailingCluster: trailingControlCount > 1,
-            iconOnlyPadding: trailingControlCount === 1,
-          })}
+          className={cn(
+            textInputAffixCellClasses("suffix", density),
+            "relative z-10 shrink-0 self-start overflow-visible",
+            boolInputRowMinHeightVariant({ density: densityKey }),
+            trailingControlCount > 1 && textInputSuffixWithTrailingClusterClasses(density),
+            "[&_button]:overflow-visible [&_[data-invalid-icon]]:overflow-visible",
+          )}
         >
           {trailingCluster(false)}
         </div>
