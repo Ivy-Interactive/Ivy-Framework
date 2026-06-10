@@ -208,7 +208,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger ref={triggerRef} asChild>
-        <div>{slots.Trigger}</div>
+        <div style={{ width: "100%", minWidth: 0 }}>{slots.Trigger}</div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         onClick={(e) => e.stopPropagation()}

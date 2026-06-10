@@ -139,6 +139,12 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     ...borderRadiusStyle,
   };
 
+  // When the caller sets an explicit width, the button must be able to shrink below its
+  // content's intrinsic width so child text can truncate. The default `w-min`/`inline-block`
+  // shrink-to-fit layout floors at min-content and clips instead; swap it for a shrinkable
+  // block so `width: 100%` + a child `min-w-0` ellipsis actually engage.
+  const hasExplicitWidth = width != null && width !== "";
+
   let buttonSize: "icon" | "icon-sm" | "default" | "sm" | "lg" | null | undefined = "default";
   let iconSize: number = 4;
   const isIconOnly = icon && icon != "None" && !title;
@@ -344,8 +350,12 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
             "relative z-10 flex items-center gap-1",
             getContainerHeight().button,
             borderRadiusClasses.button,
-            buttonSize !== "icon" && "w-min",
-            hasChildren && "p-2 h-auto items-start justify-start text-left inline-block",
+            buttonSize !== "icon" && !hasExplicitWidth && "w-min",
+            hasExplicitWidth && "min-w-0",
+            hasChildren &&
+              (hasExplicitWidth
+                ? "p-2 h-auto items-start justify-start text-left"
+                : "p-2 h-auto items-start justify-start text-left inline-block"),
           )}
           style={borderRadiusClasses.buttonStyle}
           tooltipText={tooltip || undefined}
@@ -391,8 +401,12 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       }
       disabled={disabled}
       className={cn(
-        ["icon", "icon-sm"].includes(buttonSize) ? "" : "w-min",
-        hasChildren && "p-2 h-auto items-start justify-start text-left inline-block",
+        ["icon", "icon-sm"].includes(buttonSize) ? "" : hasExplicitWidth ? "" : "w-min",
+        hasExplicitWidth && "min-w-0",
+        hasChildren &&
+          (hasExplicitWidth
+            ? "p-2 h-auto items-start justify-start text-left"
+            : "p-2 h-auto items-start justify-start text-left inline-block"),
         (variant === "Link" || variant === "Inline") && "min-w-0 max-w-full overflow-hidden",
       )}
       tooltipText={
