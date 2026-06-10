@@ -365,6 +365,16 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
             </Tooltip>
           </TooltipProvider>
         )}
+        {/* On mobile, while the main app sidebar is open as a drawer, the visible sliver of
+            content is a tap target to close the drawer, not an interactive surface. This overlay
+            swallows clicks (so buttons behind it don't fire) and closes the drawer instead. */}
+        {mainAppSidebar && isMobileViewport && isSidebarOpen && (
+          <div
+            className="absolute inset-0 z-40 cursor-pointer"
+            onClick={() => dispatchSidebar({ isSidebarOpen: false })}
+            aria-label="Close sidebar"
+          />
+        )}
         {slots?.MainContent}
       </div>
     </div>
