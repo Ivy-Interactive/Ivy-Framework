@@ -34,14 +34,24 @@ export const DateVariant: React.FC<DateVariantProps> = ({
   trailingBesideSuffix,
 }) => {
   const [open, setOpen] = useState(false);
+  const [prevDisabled, setPrevDisabled] = useState(disabled);
+  const [prevAutoFocus, setPrevAutoFocus] = useState(autoFocus);
 
   const hasAutoFocusedRef = useRef(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  if (disabled !== prevDisabled || autoFocus !== prevAutoFocus) {
+    setPrevDisabled(disabled);
+    setPrevAutoFocus(autoFocus);
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      setOpen(true);
+    }
+  }
+
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
       buttonRef.current?.focus();
-      setOpen(true);
     }
   }, [autoFocus, disabled]);
 

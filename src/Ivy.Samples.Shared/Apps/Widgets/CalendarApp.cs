@@ -23,7 +23,7 @@ public class CalendarApp : SampleBase
             new Tab("Agenda View", new CalendarAgendaExample()),
             new Tab("Event Handlers", new CalendarEventHandlerExample()),
             new Tab("Density", new CalendarDensityExample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

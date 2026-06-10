@@ -12,7 +12,7 @@ public class AvatarApp : SampleBase
             new Tab("Colors", new AvatarColorsExample()),
             new Tab("Team", new AvatarTeamExample()),
             new Tab("Cards", new AvatarCardsExample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

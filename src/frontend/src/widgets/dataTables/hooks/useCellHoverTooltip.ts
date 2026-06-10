@@ -4,18 +4,15 @@ import { GridCell } from "@glideapps/glide-data-grid";
 import { Densities } from "@/types/density";
 import { getCellFont } from "../utils/canvasText";
 import { getTruncatedCellTooltip } from "../utils/cellTooltip";
-import { getVisibleColumnWidthAt } from "../utils/columnHelpers";
 import { DENSITY_CONFIG } from "../dataTableEditor/constants";
 import { DataColumn } from "../types/types";
 
 interface UseCellHoverTooltipProps {
   columns: DataColumn[];
   columnOrder: number[];
-  columnWidths: Record<string, number>;
   density: Densities;
   getCellContent: (cell: Item) => GridCell;
   visibleRows: number;
-  headerFont?: string;
 }
 
 export interface CellHoverTooltipState {
@@ -80,11 +77,9 @@ function canShowCellHoverTooltip(): boolean {
 export const useCellHoverTooltip = ({
   columns,
   columnOrder,
-  columnWidths,
   density,
   getCellContent,
   visibleRows,
-  headerFont,
 }: UseCellHoverTooltipProps) => {
   const tooltipSupported = useMemo(() => canShowCellHoverTooltip(), []);
   const cellFont = useMemo(() => getCellFont(density), [density]);
@@ -126,13 +121,7 @@ export const useCellHoverTooltip = ({
       }
 
       const cell = getCellContent(args.location);
-      const columnWidth = getVisibleColumnWidthAt(
-        col,
-        columns,
-        columnOrder,
-        columnWidths,
-        headerFont,
-      );
+      const columnWidth = args.bounds.width;
 
       const truncatedText = getTruncatedCellTooltip(
         cell,
@@ -168,8 +157,6 @@ export const useCellHoverTooltip = ({
       tooltipSupported,
       columns,
       columnOrder,
-      columnWidths,
-      headerFont,
       cellFont,
       cellHorizontalPadding,
       getCellContent,

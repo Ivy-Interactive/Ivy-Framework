@@ -43,7 +43,7 @@ export const ToggleOptionItem: React.FC<ToggleOptionItemProps> = ({
       aria-label={option.label || option.value.toString()}
       title={option.label}
       className={cn(
-        "hover:text-foreground gap-2",
+        "hover:text-foreground gap-2 shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:ring-offset-0",
         sizeClasses[density],
         isInvalid
           ? cn(inputStyles.invalidInput, "bg-destructive/10 border-destructive text-destructive")

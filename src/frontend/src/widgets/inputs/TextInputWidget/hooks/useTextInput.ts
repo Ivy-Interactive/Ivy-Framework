@@ -2,6 +2,19 @@ import React, { useRef, useEffect, useCallback } from "react";
 
 export { parseShortcut, formatShortcutForDisplay } from "@/lib/shortcut";
 
+/** Some input types (e.g. email, number) reject setSelectionRange. */
+function setSelectionRangeIfSupported(
+  element: HTMLInputElement | HTMLTextAreaElement,
+  start: number,
+  end: number,
+): void {
+  try {
+    element.setSelectionRange(start, end);
+  } catch {
+    // Unsupported for this input type — skip cursor restore.
+  }
+}
+
 export const useCursorPosition = (
   value?: string,
   externalRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>,
@@ -14,14 +27,19 @@ export const useCursorPosition = (
   const cursorPositionRef = useRef<number | null>(null);
 
   const savePosition = () => {
-    if (elementRefRef.current) {
-      cursorPositionRef.current = elementRefRef.current.selectionStart;
+    const start = elementRefRef.current?.selectionStart;
+    if (start !== null && start !== undefined) {
+      cursorPositionRef.current = start;
     }
   };
 
   useEffect(() => {
     if (elementRefRef.current && cursorPositionRef.current !== null) {
-      elementRefRef.current.setSelectionRange(cursorPositionRef.current, cursorPositionRef.current);
+      setSelectionRangeIfSupported(
+        elementRefRef.current,
+        cursorPositionRef.current,
+        cursorPositionRef.current,
+      );
     }
   }, [value, elementRefRef]);
 
@@ -82,7 +100,7 @@ export const usePasteHandler = (
 
         // Set cursor position after the pasted content
         const newCursorPos = beforeSelection.length + truncatedPaste.length;
-        target.setSelectionRange(newCursorPos, newCursorPos);
+        setSelectionRangeIfSupported(target, newCursorPos, newCursorPos);
 
         // Trigger onChange
         if (onChange) {

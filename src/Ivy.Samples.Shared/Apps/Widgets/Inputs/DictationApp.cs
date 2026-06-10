@@ -8,7 +8,7 @@ public class DictationApp : SampleBase
         return Layout.Tabs(
             new Tab("Basic", new DictationBasicSample()),
             new Tab("Multiline", new DictationMultilineSample())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 

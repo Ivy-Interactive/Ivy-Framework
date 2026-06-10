@@ -51,12 +51,25 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   autoFocus,
   slots,
 }) => {
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const [prevDisabled, setPrevDisabled] = useState(disabled);
+  const [prevAutoFocus, setPrevAutoFocus] = useState(autoFocus);
   const hasAutoFocusedRef = useRef(false);
+
+  if (disabled !== prevDisabled || autoFocus !== prevAutoFocus) {
+    setPrevDisabled(disabled);
+    setPrevAutoFocus(autoFocus);
+    if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
+      setIsOpen(true);
+    }
+  }
+
   useEffect(() => {
     if (autoFocus && !disabled && !hasAutoFocusedRef.current) {
       hasAutoFocusedRef.current = true;
       triggerRef.current?.focus();
-      setIsOpen(true);
     }
   }, [autoFocus, disabled]);
   const validOptions = options.filter(
@@ -82,13 +95,10 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
   }, [stringValue, validOptions]);
 
   const selectedLabel = selectedOption?.label;
-  const triggerRef = useRef<HTMLButtonElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   /** True after the user edits the panel search field; reset when the dropdown closes. */
   const userFilteringRef = useRef(false);
   const [isEllipsed, setIsEllipsed] = useState(false);
-
-  const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {

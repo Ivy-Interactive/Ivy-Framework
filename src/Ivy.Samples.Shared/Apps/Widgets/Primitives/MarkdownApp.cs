@@ -16,7 +16,7 @@ public class MarkdownApp : SampleBase
             new Tab("Math", new MathTab()),
             new Tab("Diagrams", new DiagramsTab()),
             new Tab("Media", new MediaTab())
-        ).Variant(TabsVariant.Content);
+        ).Variant(TabsVariant.Content).RemoveParentPadding();
     }
 }
 
@@ -420,6 +420,13 @@ public class MediaTab : ViewBase
                        Images can have alt text and titles:
                        
                        ![Cat Image](https://placecats.com/300/200 "A cute cat")
+                       
+                       ### Consecutive Images
+                       
+                       Two images placed directly next to each other in markdown render with a vertical gap:
+                       
+                       ![Consecutive Cat 1](https://placecats.com/300/200)
+                       ![Consecutive Cat 2](https://placecats.com/300/200)
                        
                        ## Footnotes
                        

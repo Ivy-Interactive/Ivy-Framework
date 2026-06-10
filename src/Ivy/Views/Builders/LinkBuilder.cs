@@ -1,7 +1,7 @@
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public class LinkBuilder<TModel>(string? url = null, string? label = null) : IBuilder<TModel>
+public class LinkBuilder<TModel>(string? url = null, string? label = null, LinkTarget target = LinkTarget.Self) : IBuilder<TModel>
 {
     public object? Build(object? value, TModel record)
     {
@@ -18,9 +18,9 @@ public class LinkBuilder<TModel>(string? url = null, string? label = null) : IBu
         {
             // Invalid URL, return button with disabled state
             // Always use safe default label for invalid URLs to avoid displaying potentially dangerous content
-            return new Button(label ?? "Invalid Link", variant: ButtonVariant.Inline).Disabled(true);
+            return new Button(label ?? "Invalid Link", variant: ButtonVariant.Inline).Disabled(true).Target(target);
         }
 
-        return new Button(label ?? validatedUrl, variant: ButtonVariant.Inline).Url(validatedUrl);
+        return new Button(label ?? validatedUrl, variant: ButtonVariant.Inline).Url(validatedUrl).Target(target);
     }
 }

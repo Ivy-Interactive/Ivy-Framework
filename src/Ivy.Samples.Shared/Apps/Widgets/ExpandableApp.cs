@@ -140,6 +140,6 @@ public class ExpandableApp : SampleBase
                 | ghostExpandable
                 | ghostWithIconExpandable
             )
-        );
+        ).RemoveParentPadding();
     }
 }

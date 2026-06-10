@@ -85,12 +85,16 @@ const InputLabel: React.FC<{
   label?: string;
   description?: string;
   density?: Densities;
-}> = React.memo(({ id, label, description, density = Densities.Medium }) => {
+  onClick?: () => void;
+  disabled?: boolean;
+}> = React.memo(({ id, label, description, density = Densities.Medium, onClick, disabled }) => {
   if (!label && !description) return null;
   const d = normalizeInputDensity(density);
 
+  const cursorClass = onClick ? (disabled ? "cursor-not-allowed" : "cursor-pointer") : undefined;
+
   return (
-    <div>
+    <div onClick={onClick} className={cursorClass}>
       {label && (
         <Label htmlFor={id} className={labelSizeVariant({ density: d })}>
           {label}
@@ -141,6 +145,18 @@ const VariantComponents = {
       "data-testid": dataTestId,
     }: CheckboxVariantProps) => {
       const d = normalizeInputDensity(density);
+      // Toggle cycle for label clicks: null → true → false → null (if nullable)
+      const handleLabelClick = () => {
+        if (disabled || loading) return;
+        if (nullable) {
+          if (value === null) onCheckedChange(true);
+          else if (value === true) onCheckedChange(false);
+          else onCheckedChange(null);
+        } else {
+          onCheckedChange(!value);
+        }
+      };
+
       const checkboxElement = (
         <div className="relative flex shrink-0">
           <Checkbox
@@ -175,7 +191,14 @@ const VariantComponents = {
           >
             {checkboxElement}
           </DivWithTooltip>
-          <InputLabel id={id} label={label} description={description} density={density} />
+          <InputLabel
+            id={id}
+            label={label}
+            description={description}
+            density={density}
+            onClick={handleLabelClick}
+            disabled={disabled || loading}
+          />
         </div>
       );
     },
@@ -198,6 +221,11 @@ const VariantComponents = {
       "data-testid": dataTestId,
     }: SwitchVariantProps) => {
       const d = normalizeInputDensity(density);
+      const handleLabelClick = () => {
+        if (disabled || loading) return;
+        onCheckedChange(!value);
+      };
+
       const switchElement = (
         <div className="relative flex shrink-0">
           <Switch
@@ -232,7 +260,14 @@ const VariantComponents = {
           >
             {switchElement}
           </DivWithTooltip>
-          <InputLabel id={id} label={label} description={description} density={density} />
+          <InputLabel
+            id={id}
+            label={label}
+            description={description}
+            density={density}
+            onClick={handleLabelClick}
+            disabled={disabled || loading}
+          />
         </div>
       );
     },
@@ -255,6 +290,11 @@ const VariantComponents = {
       "data-testid": dataTestId,
     }: ToggleVariantProps) => {
       const d = normalizeInputDensity(density);
+      const handleLabelClick = () => {
+        if (disabled || loading) return;
+        onPressedChange(!value);
+      };
+
       const toggleElement = (
         <div className="relative flex shrink-0">
           <Toggle
@@ -291,7 +331,14 @@ const VariantComponents = {
           >
             {toggleElement}
           </DivWithTooltip>
-          <InputLabel id={id} label={label} description={description} density={density} />
+          <InputLabel
+            id={id}
+            label={label}
+            description={description}
+            density={density}
+            onClick={handleLabelClick}
+            disabled={disabled || loading}
+          />
         </div>
       );
     },
