@@ -23,6 +23,8 @@ import {
   normalizeInputDensity,
   textInputAffixCellClasses,
   textInputAffixInvalidIconClasses,
+  textInputEmbeddedInputClasses,
+  textInputFieldShellClasses,
   textInputSizeVariant,
   textInputSuffixGlyphSlotClasses,
   textInputSuffixWithTrailingClusterClasses,
@@ -235,66 +237,68 @@ const ColorInputAffixLayout: React.FC<ColorInputAffixLayoutProps> = ({
   const fieldInvalid = trailingBesideSuffix && invalid ? undefined : invalid;
 
   return (
-    <div
-      className={cn(
-        "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-        invalid ? "border-destructive" : "border-input dark:border-white/10",
-        disabled && "cursor-not-allowed opacity-50",
-        ghost &&
-          "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
-      )}
-    >
-      {hasPrefix && (
-        <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
-      )}
+    <div className="relative w-full select-none">
       <div
-        className={cn(
-          "relative flex min-w-0 flex-1 items-center gap-2",
-          textInputSizeVariant({ density: densityKey }),
-          colorInputRowMinHeightVariant({ density: densityKey }),
-          "w-auto",
-        )}
+        className={textInputFieldShellClasses({
+          invalid,
+          disabled,
+          ghost,
+        })}
       >
-        {children({ trailingBesideSuffix, showTrailing, showClear, fieldInvalid })}
-      </div>
-      {hasSuffix && (
+        {hasPrefix && (
+          <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
+        )}
         <div
           className={cn(
-            textInputAffixCellClasses("suffix", density),
-            trailingBesideSuffix &&
-              showTrailing &&
-              textInputSuffixWithTrailingClusterClasses(density),
+            "relative flex min-w-0 flex-1 items-stretch overflow-hidden",
+            textInputSizeVariant({ density: densityKey }),
+            colorInputRowMinHeightVariant({ density: densityKey }),
+            "w-auto",
           )}
         >
-          {trailingBesideSuffix && showTrailing && (
-            <>
-              {showClear && (
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  aria-label="Clear"
-                  onClick={onClear}
-                  className={textInputTrailingIconButtonClasses(false, density)}
-                >
-                  <X className={textInputTrailingIconSizeVariant({ density })} />
-                </button>
-              )}
-              {invalid && (
-                <InvalidIcon
-                  message={invalid}
-                  className={textInputAffixInvalidIconClasses()}
-                  iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
-                />
-              )}
-            </>
-          )}
-          {trailingBesideSuffix && showTrailing ? (
-            <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
-          ) : (
-            suffixContent
-          )}
+          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+            {children({ trailingBesideSuffix, showTrailing, showClear, fieldInvalid })}
+          </div>
         </div>
-      )}
+        {hasSuffix && (
+          <div
+            className={cn(
+              textInputAffixCellClasses("suffix", density),
+              trailingBesideSuffix &&
+                showTrailing &&
+                textInputSuffixWithTrailingClusterClasses(density),
+            )}
+          >
+            {trailingBesideSuffix && showTrailing && (
+              <>
+                {showClear && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Clear"
+                    onClick={onClear}
+                    className={textInputTrailingIconButtonClasses(false, density)}
+                  >
+                    <X className={textInputTrailingIconSizeVariant({ density })} />
+                  </button>
+                )}
+                {invalid && (
+                  <InvalidIcon
+                    message={invalid}
+                    className={textInputAffixInvalidIconClasses()}
+                    iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
+                  />
+                )}
+              </>
+            )}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -439,7 +443,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     },
     inAffixShell: boolean,
   ) => (
-    <div className={cn("relative shrink-0", !inAffixShell && "flex-1")}>
+    <div className={cn("relative min-w-0", inAffixShell ? "flex-1" : "w-full flex-1")}>
       <Input
         ref={inputRef}
         type="text"
@@ -453,15 +457,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
         density={density}
         className={cn(
           colorInputVariant({ density }),
-          inAffixShell && "w-auto min-w-0 max-w-full",
-          inAffixShell &&
-            "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+          inAffixShell && textInputEmbeddedInputClasses(true),
           !inAffixShell &&
             ghost &&
             "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
           ctx.fieldInvalid && inputStyles.invalidInput,
-          inAffixShell && hasPrefix && "rounded-l-none",
-          inAffixShell && hasSuffix && "rounded-r-none",
           ctx.trailingBesideSuffix && ctx.showTrailing && "pr-2",
           !ctx.trailingBesideSuffix && ctx.showTrailing && "pr-8",
           !ctx.trailingBesideSuffix && ctx.showClear && invalid && "pr-16",

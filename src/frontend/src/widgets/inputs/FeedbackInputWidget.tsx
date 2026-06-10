@@ -13,6 +13,7 @@ import {
   normalizeInputDensity,
   textInputAffixCellClasses,
   textInputAffixInvalidIconClasses,
+  textInputFieldShellClasses,
   textInputSizeVariant,
   textInputSuffixGlyphSlotClasses,
   textInputSuffixWithTrailingClusterClasses,
@@ -203,6 +204,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
       tabIndex={disabled ? -1 : 0}
       className={cn(
         "outline-none focus:outline-none focus:ring-1 focus:ring-ring",
+        inAffixShell && "min-w-0 w-full overflow-hidden",
         !inAffixShell && "rounded-md p-1",
         disabled && "opacity-50 cursor-not-allowed",
       )}
@@ -217,6 +219,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
 
   return (
     <div
+      className="relative w-full select-none"
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
           handleBlur();
@@ -229,18 +232,18 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
       }}
     >
       <div
-        className={cn(
-          "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
-          invalid ? "border-destructive" : "border-input dark:border-white/10",
-          disabled && "cursor-not-allowed opacity-50",
-        )}
+        className={textInputFieldShellClasses({
+          invalid,
+          disabled,
+        })}
       >
         {hasPrefix && (
           <div className={textInputAffixCellClasses("prefix", density)}>{prefixContent}</div>
         )}
         <div
           className={cn(
-            "relative flex min-w-0 flex-1 items-center",
+            "relative flex-1 overflow-hidden",
+            trailingBesideSuffix && "min-w-0",
             textInputSizeVariant({ density: densityKey }),
             boolInputRowMinHeightVariant({ density: densityKey }),
             "w-auto",
