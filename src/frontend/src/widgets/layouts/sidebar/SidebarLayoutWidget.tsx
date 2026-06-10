@@ -334,10 +334,12 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         )}
       </div>
 
-      {/* Main Content - Always takes full remaining width */}
+      {/* Main Content - Always takes full remaining width. min-w-0 keeps the 1fr grid track from
+          growing past the viewport when content (wide text, long titles) has a large min-content
+          width; without it the whole pane overflows horizontally on narrow screens. */}
       <div
         className={cn(
-          `relative h-full overflow-auto`,
+          `relative h-full overflow-auto min-w-0`,
           !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : "",
         )}
       >
