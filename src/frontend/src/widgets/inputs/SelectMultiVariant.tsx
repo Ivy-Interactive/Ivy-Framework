@@ -7,6 +7,7 @@ import { logger } from "@/lib/logger";
 import {
   textInputAffixCellClasses,
   textInputAffixIconOnlyPaddingVariant,
+  textInputEmbeddedContentPaddingClasses,
   textInputSuffixGlyphSlotClasses,
   textInputSuffixWithTrailingClusterClasses,
   textInputTrailingIconButtonClasses,
@@ -199,6 +200,7 @@ export const SelectMultiVariant: React.FC<SelectInputWidgetProps> = ({
         "w-full",
         ghost && "ghost",
         "border-0 bg-transparent shadow-none dark:bg-transparent",
+        hasAffixes && textInputEmbeddedContentPaddingClasses(density),
         hasPrefix && "rounded-l-none",
         hasSuffix && "rounded-r-none",
       )}

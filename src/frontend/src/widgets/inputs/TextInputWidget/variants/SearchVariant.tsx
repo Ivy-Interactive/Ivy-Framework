@@ -9,6 +9,7 @@ import { sidebarMenuRef } from "@/widgets/layouts/sidebar";
 import { Densities } from "@/types/density";
 import {
   textInputAffixCellClasses,
+  textInputEmbeddedInputClasses,
   textInputSizeVariant,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
@@ -190,7 +191,8 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             autoComplete="off"
             className={cn(
               textInputSizeVariant({ density }),
-              "cursor-pointer border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+              "cursor-pointer",
+              textInputEmbeddedInputClasses(hasAffixes, density),
               showBuiltinSearchIcon && "pl-8",
               props.invalid && inputStyles.invalidInput,
               trailingBesideSuffix && showTrailing && "pr-2",
@@ -199,9 +201,6 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
               !trailingBesideSuffix && showClear && props.invalid && "pr-16",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
               "[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden",
-              hasPrefix && "rounded-l-none",
-              hasSuffix && "rounded-r-none",
-              !hasAffixes && "rounded-field",
             )}
             data-testid={props["data-testid"]}
           />

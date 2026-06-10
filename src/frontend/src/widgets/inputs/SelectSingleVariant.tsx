@@ -18,6 +18,7 @@ import { InvalidIcon } from "@/components/InvalidIcon";
 import {
   textInputAffixCellClasses,
   textInputAffixIconOnlyPaddingVariant,
+  textInputEmbeddedContentPaddingClasses,
   textInputSuffixGlyphSlotClasses,
   textInputSuffixWithTrailingClusterClasses,
   textInputTrailingIconButtonClasses,
@@ -234,6 +235,7 @@ export const SelectSingleVariant: React.FC<SelectInputWidgetProps> = ({
         ghost &&
           "border-transparent shadow-none bg-transparent hover:bg-accent hover:text-accent-foreground dark:border-transparent dark:bg-transparent dark:hover:bg-accent dark:hover:text-accent-foreground",
         "border-0 bg-transparent shadow-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+        hasAffixes && textInputEmbeddedContentPaddingClasses(density),
         hasPrefix && "rounded-l-none",
         hasSuffix && "rounded-r-none",
       )}

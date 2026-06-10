@@ -127,7 +127,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
               !trailingBesideSuffix && showShortcut && "pr-16",
               !trailingBesideSuffix && showClear && props.invalid && "pr-16",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
-              textInputEmbeddedInputClasses(hasAffixes),
+              textInputEmbeddedInputClasses(hasAffixes, density),
             )}
             data-testid={props["data-testid"]}
           />

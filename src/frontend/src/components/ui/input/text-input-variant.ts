@@ -25,9 +25,19 @@ export const affixEmbeddedButtonClasses =
 export const affixIconOnlyCellPaddingClasses =
   "has-[button.size-7:not([data-invalid-icon])]:px-1.5 has-[button.size-9:not([data-invalid-icon])]:px-2";
 
-/** Center icon glyphs (non-button) in affix cells for even visual weight. */
-export const affixIconGlyphCellClasses =
-  "[&:not(:has(button))]:justify-center [&:not(:has(button))]:min-w-9";
+/** Center icon glyphs (non-button) in affix cells — min-width scales with field density. */
+export const textInputAffixIconGlyphCellVariant = cva("[&:not(:has(button))]:justify-center", {
+  variants: {
+    density: {
+      Small: "[&:not(:has(button))]:min-w-6",
+      Medium: "[&:not(:has(button))]:min-w-7",
+      Large: "[&:not(:has(button))]:min-w-9",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
 
 /**
  * Affix / suffix slot icons (Ivy.Icon) — match trailing invalid icon size per density.
@@ -55,7 +65,6 @@ export const textInputAffixCellVariant = cva(
     "flex shrink-0 items-center bg-transparent text-muted-foreground",
     affixEmbeddedButtonClasses,
     affixIconOnlyCellPaddingClasses,
-    affixIconGlyphCellClasses,
   ),
   {
     variants: {
@@ -70,12 +79,13 @@ export const textInputAffixCellVariant = cva(
       },
     },
     compoundVariants: [
-      { side: "prefix", density: "Small", class: "pl-2 pr-1 text-xs" },
-      { side: "prefix", density: "Medium", class: "pl-3 pr-1.5 text-sm" },
-      { side: "prefix", density: "Large", class: "pl-4 pr-2 text-base" },
-      { side: "suffix", density: "Small", class: "pl-1 pr-2 text-xs" },
-      { side: "suffix", density: "Medium", class: "pl-1.5 pr-3 text-sm" },
-      { side: "suffix", density: "Large", class: "pl-2 pr-4 text-base" },
+      // Outer pl tracks standalone field px-*; inner pr/pl is the prefix↔content seam.
+      { side: "prefix", density: "Small", class: "pl-2 pr-0 text-xs" },
+      { side: "prefix", density: "Medium", class: "pl-3 pr-0.5 text-sm" },
+      { side: "prefix", density: "Large", class: "pl-4 pr-1 text-base" },
+      { side: "suffix", density: "Small", class: "pl-0 pr-2 text-xs" },
+      { side: "suffix", density: "Medium", class: "pl-0.5 pr-3 text-sm" },
+      { side: "suffix", density: "Large", class: "pl-1 pr-4 text-base" },
     ],
     defaultVariants: {
       side: "prefix",
@@ -91,6 +101,7 @@ export function textInputAffixCellClasses(
   const d = normalizeInputDensity(density);
   return cn(
     textInputAffixCellVariant({ side, density: d }),
+    textInputAffixIconGlyphCellVariant({ density: d }),
     textInputAffixIconGlyphSizeVariant({ density: d }),
   );
 }
@@ -114,11 +125,35 @@ export function textInputFieldShellClasses(options: {
   );
 }
 
+/** Horizontal padding for embedded controls — same scale as {@link textInputSizeVariant} px-*. */
+export const textInputEmbeddedContentPaddingVariant = cva("", {
+  variants: {
+    density: {
+      Small: "!pl-1 !pr-1",
+      Medium: "!pl-2 !pr-2",
+      Large: "!pl-3 !pr-3",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
+export function textInputEmbeddedContentPaddingClasses(
+  density: Densities = Densities.Medium,
+): string {
+  return textInputEmbeddedContentPaddingVariant({ density: normalizeInputDensity(density) });
+}
+
 /** Inner control nested inside {@link textInputFieldShellClasses} — square seams at affix joins. */
-export function textInputEmbeddedInputClasses(hasAffixes: boolean): string {
+export function textInputEmbeddedInputClasses(
+  hasAffixes: boolean,
+  density: Densities = Densities.Medium,
+): string {
   return cn(
     "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
     hasAffixes ? "rounded-none" : "rounded-field",
+    hasAffixes && textInputEmbeddedContentPaddingClasses(density),
   );
 }
 
@@ -204,11 +239,11 @@ export const textInputAffixSuffixWithTrailingPaddingVariant = cva("!px-1.5", {
 });
 
 /** Symmetric padding for suffix/prefix cells that only contain an icon glyph. */
-export const textInputAffixIconOnlyPaddingVariant = cva("!px-2", {
+export const textInputAffixIconOnlyPaddingVariant = cva("!px-1", {
   variants: {
     density: {
-      Small: "!px-1.5",
-      Medium: "!px-2",
+      Small: "!px-1",
+      Medium: "!px-1.5",
       Large: "!px-2.5",
     },
   },

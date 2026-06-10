@@ -374,7 +374,7 @@ const NumberVariant = memo(
             onFocus={handleFocus}
             className={cn(
               textInputSizeVariant({ density }),
-              textInputEmbeddedInputClasses(hasAffixes),
+              textInputEmbeddedInputClasses(hasAffixes, density),
               invalid && inputStyles.invalidInput,
               trailingBesideSuffix && showTrailing && "pr-2",
               !trailingBesideSuffix && (invalid || showClear) && "pr-8",

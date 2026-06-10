@@ -457,7 +457,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
         density={density}
         className={cn(
           colorInputVariant({ density }),
-          inAffixShell && textInputEmbeddedInputClasses(true),
+          inAffixShell && textInputEmbeddedInputClasses(true, density),
           !inAffixShell &&
             ghost &&
             "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",

@@ -10,6 +10,7 @@ import {
   textareaSuffixWithTrailingClusterClasses,
   textareaTrailingStackClasses,
   textInputAffixCellClasses,
+  textInputEmbeddedInputClasses,
   textInputSuffixGlyphSlotClasses,
   textInputTrailingIconButtonClasses,
   textInputTrailingIconSizeVariant,
@@ -193,18 +194,15 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
             style={textareaStyles}
             className={cn(
               textareaSizeVariant({ density }),
-              "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+              textInputEmbeddedInputClasses(hasAffixes, density),
               !props.height && "h-full min-h-0",
-              hasAffixes && "resize-y rounded-none",
+              hasAffixes && "resize-y",
               props.invalid && inputStyles.invalidInput,
               !trailingBesideSuffix && (props.invalid || showClear) && "pr-8",
               !trailingBesideSuffix && showShortcut && "pr-16",
               !trailingBesideSuffix && showClear && props.invalid && "pr-16",
               trailingBesideSuffix && showTrailing && "pr-2",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
-              hasPrefix && "rounded-l-none",
-              hasSuffix && "rounded-r-none",
-              !hasAffixes && "rounded-field",
             )}
             data-testid={props["data-testid"]}
           />

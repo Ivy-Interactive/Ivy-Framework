@@ -7,6 +7,7 @@ import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import {
   textInputAffixCellClasses,
+  textInputEmbeddedInputClasses,
   textInputSizeVariant,
   textInputSuffixWithTrailingClusterClasses,
   textInputSuffixGlyphSlotClasses,
@@ -206,11 +207,8 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
                 "pr-24",
               !trailingBesideSuffix && showClear && props.invalid && !hasLastPass && "pr-20",
               !hasValue && props.nullable && "placeholder:text-muted-foreground",
-              "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent",
+              textInputEmbeddedInputClasses(hasAffixes, density),
               "[&::-ms-reveal]:hidden [&::-ms-clear]:hidden",
-              hasPrefix && "rounded-l-none",
-              hasSuffix && "rounded-r-none",
-              !hasAffixes && "rounded-field",
             )}
             data-testid={props["data-testid"]}
           />

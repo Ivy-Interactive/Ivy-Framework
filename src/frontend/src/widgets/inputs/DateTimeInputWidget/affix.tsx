@@ -8,6 +8,7 @@ import {
   normalizeInputDensity,
   textInputAffixCellClasses,
   textInputAffixIconOnlyPaddingVariant,
+  textInputEmbeddedContentPaddingClasses,
   textInputSuffixGlyphSlotClasses,
   textInputSuffixWithTrailingClusterClasses,
   textInputTrailingIconButtonClasses,
@@ -166,6 +167,7 @@ export function DateInputAffixShell({
         className={cn(
           "relative z-0 isolate flex min-w-0 flex-1 items-center",
           boolInputRowMinHeightVariant({ density: densityKey }),
+          textInputEmbeddedContentPaddingClasses(density),
         )}
       >
         {children}
