@@ -8,10 +8,19 @@ const ScrollArea = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
     viewportClassName?: string;
     viewportStyle?: React.CSSProperties;
+    hideScrollbar?: boolean;
   }
 >(
   (
-    { className, children, scrollHideDelay = 0, viewportClassName, viewportStyle, ...props },
+    {
+      className,
+      children,
+      scrollHideDelay = 0,
+      viewportClassName,
+      viewportStyle,
+      hideScrollbar,
+      ...props
+    },
     ref,
   ) => (
     <ScrollAreaPrimitive.Root
@@ -26,7 +35,7 @@ const ScrollArea = React.forwardRef<
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
+      <ScrollBar className={hideScrollbar ? "invisible-scrollbar" : undefined} />
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
   ),
