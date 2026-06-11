@@ -27,6 +27,7 @@ public class LayoutView : ViewBase, IStateless
     private Colors? _background = null;
     private Align? _alignment = null;
     private Scroll _scroll = Ivy.Scroll.None;
+    private bool _hideScrollbar = false;
     private bool _removeParentPadding = false;
     private Colors? _borderColor = null;
     private Ivy.BorderRadius _borderRadius = Ivy.BorderRadius.None;
@@ -441,6 +442,12 @@ public class LayoutView : ViewBase, IStateless
         return this;
     }
 
+    public LayoutView HideScrollbar(bool hide = true)
+    {
+        _hideScrollbar = hide;
+        return this;
+    }
+
     public LayoutView ScrollTarget(string? target)
     {
         _scrollTarget = target;
@@ -462,6 +469,7 @@ public class LayoutView : ViewBase, IStateless
             Height = _height
         };
 
+        if (_hideScrollbar) layout.HideScrollbar = true;
         if (_testId != null) layout.TestId = _testId;
         if (_scrollTarget != null) layout.ScrollTarget = _scrollTarget;
 

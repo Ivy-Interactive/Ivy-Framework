@@ -52,6 +52,7 @@ interface StackLayoutWidgetProps {
   responsiveColumnGap?: Responsive<number>;
   responsivePadding?: Responsive<string>;
   scrollTarget?: string | null;
+  hideScrollbar?: boolean;
 }
 
 export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
@@ -80,6 +81,7 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
   responsiveColumnGap,
   responsivePadding,
   scrollTarget,
+  hideScrollbar,
 }) => {
   const bp = useCurrentBreakpoint();
 
@@ -170,6 +172,7 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
           style={outerStyles}
           type="scroll"
           scrollHideDelay={600}
+          hideScrollbar={hideScrollbar}
         >
           <div style={flexStyles}>{wrappedChildren}</div>
         </ScrollArea>
