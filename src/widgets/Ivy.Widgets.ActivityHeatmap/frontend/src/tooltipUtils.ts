@@ -1,19 +1,15 @@
 import { Activity } from "./types";
 
 const preferredLanguage = navigator.languages.length ? navigator.languages : navigator.language;
-const monthFormatter = new Intl.DateTimeFormat(preferredLanguage, { month: "short" });
-export const MONTH_NAMES = Array.from({ length: 12 }, (_, i) => monthFormatter.format(new Date(0, i)));
 
 export function formatTooltipHeader(day: Activity): string {
-  const date = new Date(day.date + "T00:00:00");
-  const month = MONTH_NAMES[date.getMonth()];
-  const dayNum = date.getDate();
-  const year = date.getFullYear();
-  const header = `${month} ${dayNum}, ${year}`;
+  const dateString = new Date(day.date + "T00:00:00")
+    .toLocaleDateString(preferredLanguage, { month: "short", day: "numeric", year: "numeric" });
+
   if (day.hour != null) {
-    return `${header}, ${String(day.hour).padStart(2, "0")}:00`;
+    return `${dateString}, ${String(day.hour).padStart(2, "0")}:00`;
   }
-  return header;
+  return dateString;
 }
 
 export function formatTooltipValue(day: Activity): string {
@@ -27,4 +23,11 @@ export function getTooltipTransform(tooltipDiv: HTMLDivElement | null, tooltipCo
   const xOffset = tooltipCoordinates.x > gridRect.left + gridRect.width / 2 ? -(tooltipDiv.offsetWidth + 20) : 20;
   const yOffset = tooltipCoordinates.y > window.innerHeight / 2 ? -(tooltipDiv.offsetHeight + 20) : 20;
   return `translate(${xOffset}px, ${yOffset}px)`;
+}
+
+export function formatDimensionLabel(date: Date, isHourly?: boolean): string {
+  if (isHourly) {
+    return date.toLocaleDateString(preferredLanguage, { month: "short", day: "numeric" });
+  }
+  return date.toLocaleDateString(preferredLanguage, { month: "short" });
 }

@@ -4,6 +4,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
 import { ClipboardAddon } from "@xterm/addon-clipboard";
 import { Unicode11Addon } from "@xterm/addon-unicode11";
+import { CanvasAddon } from "@xterm/addon-canvas";
 import xtermStyles from "@xterm/xterm/css/xterm.css?inline";
 import { EventHandler, StreamSubscriber } from "./types";
 import { getWidth, getHeight } from "./styles";
@@ -343,11 +344,60 @@ export const Terminal: React.FC<TerminalProps> = ({
 
     let disposed = false;
 
+    // Container padding (see .terminal-container CSS: "10px 0px 10px 10px").
+    const PAD_TOP = 10;
+    const PAD_BOTTOM = 10;
+
+    // FitAddon computes rows from the fractional cell height, but the canvas
+    // renderer rounds each row up to whole pixels. Over many rows that excess
+    // can exceed the bottom padding, pushing the last row past the container
+    // and clipping it. After fitting, if the rendered terminal overflows the
+    // available height, drop one row so the final line stays fully visible.
+    const doFit = () => {
+      const fa = fitAddonRef.current;
+      const t = terminalRef.current;
+      if (!fa || !t) return;
+      fa.fit();
+      const rendered = t.element?.offsetHeight ?? 0;
+      const available = container.clientHeight - PAD_TOP - PAD_BOTTOM;
+      if (rendered > available + 1 && t.rows > 1) {
+        t.resize(t.cols, t.rows - 1);
+      }
+    };
+
     // Defer opening until container has dimensions
     requestAnimationFrame(() => {
       if (disposed) return;
 
       term.open(container);
+
+      // Canvas renderer draws box-drawing and block-element glyphs procedurally
+      // (customGlyphs, on by default), so the Claude logo and other block art
+      // tile seamlessly like Windows Terminal instead of relying on font metrics.
+      // Must be loaded after open(); the canvas renderer works reliably inside
+      // the Shadow DOM (unlike WebGL). Fall back to the DOM renderer on failure.
+      try {
+        const canvasAddon = new CanvasAddon();
+        term.loadAddon(canvasAddon);
+
+        // The canvas renderer caches glyphs in a texture atlas on first paint.
+        // If a webfont (e.g. Geist Mono) hasn't finished loading yet, missing
+        // glyphs get cached as tofu until the cell is invalidated. Once fonts
+        // are ready, drop the atlas and repaint so those glyphs render correctly.
+        if (document.fonts?.ready) {
+          document.fonts.ready.then(() => {
+            if (disposed) return;
+            try {
+              canvasAddon.clearTextureAtlas();
+              term.refresh(0, term.rows - 1);
+            } catch {
+              // Addon disposed or refresh failed — ignore.
+            }
+          });
+        }
+      } catch {
+        // Canvas unsupported — DOM renderer remains in place.
+      }
 
       terminalRef.current = term;
       fitAddonRef.current = fitAddon;
@@ -357,7 +407,7 @@ export const Terminal: React.FC<TerminalProps> = ({
       term.onResize(handleResize);
 
       if (!cols && !rows) {
-        fitAddon.fit();
+        doFit();
         // Fire initial size since fit() may not trigger onResize if size matches default
         handleResize({ cols: term.cols, rows: term.rows });
       }
@@ -373,7 +423,7 @@ export const Terminal: React.FC<TerminalProps> = ({
 
     const handleWindowResize = () => {
       if (!cols && !rows && terminalReadyRef.current && fitAddonRef.current) {
-        fitAddonRef.current.fit();
+        doFit();
       }
     };
 
@@ -381,7 +431,7 @@ export const Terminal: React.FC<TerminalProps> = ({
 
     const resizeObserver = new ResizeObserver(() => {
       if (!cols && !rows && terminalReadyRef.current && fitAddonRef.current) {
-        fitAddonRef.current.fit();
+        doFit();
       }
     });
 

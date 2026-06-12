@@ -66,10 +66,10 @@ public class ResponsiveTests
         var badge = new Badge("test").HideOn(Breakpoint.Mobile, Breakpoint.Tablet);
         var visible = badge.ResponsiveVisible!;
 
-        Assert.True(visible.Default);
         Assert.False(visible.Mobile);
         Assert.False(visible.Tablet);
-        Assert.Null(visible.Desktop);
+        Assert.True(visible.Desktop);
+        Assert.True(visible.Wide);
     }
 
     [Fact]
@@ -78,9 +78,10 @@ public class ResponsiveTests
         var badge = new Badge("test").ShowOn(Breakpoint.Mobile);
         var visible = badge.ResponsiveVisible!;
 
-        Assert.False(visible.Default);
         Assert.True(visible.Mobile);
-        Assert.Null(visible.Desktop);
+        Assert.False(visible.Tablet);
+        Assert.False(visible.Desktop);
+        Assert.False(visible.Wide);
     }
 
     [Theory]

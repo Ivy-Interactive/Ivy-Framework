@@ -92,6 +92,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   resizable = false,
   sidebarContentScroll = "Auto",
 }) => {
+  const collapseEnabled = true;
   // Parse Size format: "Type:Value,MinType:MinValue,MaxType:MaxValue"
   const [wantedWidth, minWidthStr, maxWidthStr] = (width ?? "").split(",");
 
@@ -103,9 +104,9 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   const minWidthPx = parseSizeToPixels(minWidthStr, 200);
   const maxWidthPx = parseSizeToPixels(maxWidthStr, 600);
 
-  // Initialize sidebar state based on current window width (only for main app sidebar)
+  // Initialize sidebar state based on current window width (when collapse is enabled)
   const getInitialSidebarState = () => {
-    if (!mainAppSidebar) return true;
+    if (!collapseEnabled) return true;
     if (!openProp) return false;
 
     // Check if we're in a browser environment
@@ -140,6 +141,12 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   );
   const { isSidebarOpen, isManuallyToggled, currentWidth, isResizing, prevInitialWidthPx } =
     sidebarState;
+
+  const [isMobileViewport, setIsMobileViewport] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < autoCollapseThreshold : false,
+  );
+
+  const MOBILE_DRAWER_CONTENT_PEEK_PX = 48;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -185,8 +192,13 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     [resizable, isSidebarOpen, currentWidth, minWidthPx, maxWidthPx, dispatchSidebar],
   );
 
-  // Get the effective sidebar width (use currentWidth when resizable)
-  const effectiveSidebarWidth = resizable ? `${currentWidth}px` : sidebarWidth;
+  // On mobile, the main app sidebar expands to a near-full-width drawer over the content.
+  const effectiveSidebarWidth =
+    mainAppSidebar && isMobileViewport
+      ? `calc(100vw - ${MOBILE_DRAWER_CONTENT_PEEK_PX}px)`
+      : resizable
+        ? `${currentWidth}px`
+        : sidebarWidth;
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
@@ -200,13 +212,14 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     disabled: !mainAppSidebar,
   });
 
-  // Auto-collapse/expand based on width (only for main app sidebar)
+  // Auto-collapse/expand based on width (when collapse is enabled)
   useEffect(() => {
-    if (!mainAppSidebar) return;
+    if (!collapseEnabled) return;
 
     const mql = window.matchMedia(`(min-width: ${autoCollapseThreshold}px)`);
 
     const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobileViewport(!e.matches);
       if (!isManuallyToggled) {
         dispatchSidebar({ isSidebarOpen: openProp && e.matches });
       }
@@ -216,7 +229,27 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
     mql.addEventListener("change", handleMediaChange);
     return () => mql.removeEventListener("change", handleMediaChange);
-  }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar, openProp, dispatchSidebar]);
+  }, [autoCollapseThreshold, isManuallyToggled, collapseEnabled, openProp, dispatchSidebar]);
+
+  // On mobile, collapse the main app sidebar after a leaf menu item is selected so the chosen
+  // page is revealed instead of staying behind the open drawer.
+  useEffect(() => {
+    if (!mainAppSidebar) return;
+    const sidebarEl = sidebarRef.current;
+    if (!sidebarEl) return;
+
+    const handleClick = (e: MouseEvent) => {
+      if (!isMobileViewport) return;
+      const target = e.target as HTMLElement | null;
+      const menuItem = target?.closest<HTMLElement>("[data-menu-item]");
+      if (!menuItem) return;
+      if (menuItem.querySelector("ul")) return; // group header: only toggles its own submenu
+      dispatchSidebar({ isSidebarOpen: false });
+    };
+
+    sidebarEl.addEventListener("click", handleClick);
+    return () => sidebarEl.removeEventListener("click", handleClick);
+  }, [mainAppSidebar, isMobileViewport, dispatchSidebar]);
 
   return (
     <div
@@ -286,14 +319,13 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         )}
       </div>
 
-      {/* Main Content - Always takes full remaining width */}
+      {/* min-w-0 keeps the 1fr grid track from overflowing the viewport on narrow screens. */}
       <div
         className={cn(
-          `relative h-full overflow-auto`,
+          `relative h-full overflow-auto min-w-0`,
           !mainAppSidebar ? `p-${mainContentPadding ?? 2}` : "",
         )}
       >
-        {/* Toggle Button - Only show for main app sidebar */}
         {showToggleButton && mainAppSidebar && (
           <TooltipProvider delayDuration={300}>
             <Tooltip>
@@ -314,6 +346,14 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
               <TooltipContent side="right">Toggle sidebar (Ctrl+B)</TooltipContent>
             </Tooltip>
           </TooltipProvider>
+        )}
+        {/* On mobile, the content sliver beside the open drawer closes it instead of being interactive. */}
+        {mainAppSidebar && isMobileViewport && isSidebarOpen && (
+          <div
+            className="absolute inset-0 z-40 cursor-pointer"
+            onClick={() => dispatchSidebar({ isSidebarOpen: false })}
+            aria-label="Close sidebar"
+          />
         )}
         {slots?.MainContent}
       </div>

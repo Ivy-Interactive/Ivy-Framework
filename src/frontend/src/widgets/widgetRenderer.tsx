@@ -224,6 +224,7 @@ const renderExternalWidget = (node: WidgetNode, inheritedScale?: Densities): Rea
   const slots = processSlots(children, scaleForChildren);
 
   props.widgetNodeChildren = children;
+  props.slots = slots;
 
   registerCallSite(node);
 

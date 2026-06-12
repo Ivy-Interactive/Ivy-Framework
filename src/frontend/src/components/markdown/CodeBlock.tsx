@@ -30,7 +30,7 @@ function CodeBlockChromeWithCopy({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative w-full">
+    <div className="markdown-code-block relative w-full">
       <div className="absolute top-2 right-2 z-30">
         <CopyToClipboardButton textToCopy={textToCopy} />
       </div>
