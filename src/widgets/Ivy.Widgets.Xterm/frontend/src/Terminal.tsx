@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
@@ -54,6 +54,8 @@ interface TerminalProps {
   stream?: { id: string };
   closed?: boolean;
   allowClipboard?: boolean;
+  loading?: boolean;
+  loadingText?: string;
   background?: string;
   foreground?: string;
 }
@@ -113,6 +115,8 @@ export const Terminal: React.FC<TerminalProps> = ({
   stream,
   closed = false,
   allowClipboard = true,
+  loading = false,
+  loadingText = "Loading...",
   background,
   foreground,
 }) => {
@@ -123,6 +127,28 @@ export const Terminal: React.FC<TerminalProps> = ({
   const fitAddonRef = useRef<FitAddon | null>(null);
   const initialContentWrittenRef = useRef(false);
   const terminalReadyRef = useRef(false);
+
+  // Loading overlay: visible while `loading` is set, auto-hidden once visible
+  // output arrives on the stream. ConPTY and shells emit escape-sequence
+  // preambles (window title, cursor homing, mode sets) within milliseconds of
+  // spawn — long before the process prints anything — so control sequences
+  // and whitespace must not count as output.
+  const streamDataReceivedRef = useRef(false);
+  const [streamDataReceived, setStreamDataReceived] = useState(false);
+
+  const markStreamDataIfVisible = useCallback((text: string) => {
+    if (streamDataReceivedRef.current) return;
+    const visible = text
+      .replace(/\x1b\][\s\S]*?(\x07|\x1b\\|$)/g, "") // OSC (e.g. title set)
+      .replace(/\x1b\[[0-9;?]*[ -/]*[@-~]/g, "") // CSI
+      .replace(/\x1b[\s\S]/g, "") // other ESC sequences
+      .replace(/[\x00-\x1f\x7f]/g, "") // remaining control chars
+      .trim();
+    if (visible.length > 0) {
+      streamDataReceivedRef.current = true;
+      setStreamDataReceived(true);
+    }
+  }, []);
 
   const isReadOnly = closed || !events.includes("OnInput");
 
@@ -232,6 +258,8 @@ export const Terminal: React.FC<TerminalProps> = ({
     container.innerHTML = "";
     initialContentWrittenRef.current = false;
     terminalReadyRef.current = false;
+    streamDataReceivedRef.current = false;
+    setStreamDataReceived(false);
 
     const mergedTheme = { ...defaultTheme, ...theme };
 
@@ -490,12 +518,14 @@ export const Terminal: React.FC<TerminalProps> = ({
               text: text.slice(0, 50),
             });
           }
+          markStreamDataIfVisible(text);
           terminalRef.current.write(text);
         } catch (e) {
           // Fallback for non-base64 data
           console.warn("[Terminal] base64 decode failed, using raw data:", e, {
             data: data.slice(0, 50),
           });
+          markStreamDataIfVisible(data);
           terminalRef.current.write(data);
         }
       } else {
@@ -504,13 +534,59 @@ export const Terminal: React.FC<TerminalProps> = ({
     });
 
     return unsubscribe;
-  }, [stream?.id, subscribeToStream]);
+  }, [stream?.id, subscribeToStream, markStreamDataIfVisible]);
 
   const style: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
     overflow: "hidden",
+    position: "relative",
   };
 
-  return <div ref={hostRef} style={style} />;
+  const showLoading = loading && !streamDataReceived && !closed;
+
+  const overlayForeground = foreground
+    ? `var(--${foreground.toLowerCase()})`
+    : defaultTheme.foreground;
+
+  return (
+    <div style={style}>
+      <div ref={hostRef} style={{ width: "100%", height: "100%" }} />
+      {showLoading && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "12px",
+            pointerEvents: "none",
+          }}
+        >
+          <style>{`@keyframes ivy-xterm-loading-spin { to { transform: rotate(360deg); } }`}</style>
+          <div
+            style={{
+              width: "24px",
+              height: "24px",
+              borderRadius: "50%",
+              border: "3px solid rgba(128, 128, 128, 0.3)",
+              borderTopColor: overlayForeground,
+              animation: "ivy-xterm-loading-spin 0.8s linear infinite",
+            }}
+          />
+          <span
+            style={{
+              color: overlayForeground,
+              fontFamily,
+              fontSize: "13px",
+            }}
+          >
+            {loadingText}
+          </span>
+        </div>
+      )}
+    </div>
+  );
 };
