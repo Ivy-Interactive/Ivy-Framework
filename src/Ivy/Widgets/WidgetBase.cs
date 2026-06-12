@@ -63,19 +63,22 @@ public static class WidgetBaseExtensions
     public static T TestId<T>(this T widget, string testId) where T : WidgetBase => widget with { TestId = testId };
 
     public static T HideOn<T>(this T widget, params Breakpoint[] breakpoints) where T : WidgetBase
-    {
-        var visible = new Responsive<bool?> { Default = true };
-        foreach (var bp in breakpoints)
-            visible = visible.And(bp, false);
-        return widget with { ResponsiveVisible = visible };
-    }
+        => widget with { ResponsiveVisible = BuildVisibility(breakpoints, hiddenAtListed: true) };
 
     public static T ShowOn<T>(this T widget, params Breakpoint[] breakpoints) where T : WidgetBase
+        => widget with { ResponsiveVisible = BuildVisibility(breakpoints, hiddenAtListed: false) };
+
+    // Every breakpoint is set explicitly so the mobile-first cascade can't leak a listed
+    // breakpoint's value up to an unlisted one (e.g. ShowOn(Tablet) must not stay visible on Desktop).
+    private static Responsive<bool?> BuildVisibility(Breakpoint[] breakpoints, bool hiddenAtListed)
     {
-        var visible = new Responsive<bool?> { Default = false };
-        foreach (var bp in breakpoints)
-            visible = visible.And(bp, true);
-        return widget with { ResponsiveVisible = visible };
+        var visible = new Responsive<bool?>();
+        foreach (var bp in new[] { Breakpoint.Mobile, Breakpoint.Tablet, Breakpoint.Desktop, Breakpoint.Wide })
+        {
+            var listed = Array.IndexOf(breakpoints, bp) >= 0;
+            visible = visible.And(bp, listed ? !hiddenAtListed : hiddenAtListed);
+        }
+        return visible;
     }
 
     public static T Density<T>(this T widget, Responsive<Density?> density) where T : WidgetBase
