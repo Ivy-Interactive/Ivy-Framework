@@ -140,7 +140,7 @@ public class DefaultSidebarAppShell(AppShellSettings settings) : ViewBase
         void RedirectToAppIfNotError(NavigateArgs navigateArgs, bool replaceHistory = false, string? tabId = null)
         {
             if (IsErrorApp(navigateArgs.AppId)) return;
-            client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+            client.Redirect(navigateArgs.GetUrl(includeArgs: settings.IncludeArgsInUrl), replaceHistory, tabId: tabId);
         }
 
         void OpenApp(NavigateArgs navigateArgs, bool replaceHistory = false)
