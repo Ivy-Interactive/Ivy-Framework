@@ -9,6 +9,7 @@
     "preview": "vp preview"
   },
   "dependencies": {
+    "@xterm/addon-canvas": "0.7.0",
     "@xterm/addon-clipboard": "0.1.0",
     "@xterm/addon-fit": "0.10.0",
     "@xterm/addon-unicode11": "0.8.0",
@@ -18,13 +19,13 @@
   "devDependencies": {
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.1",
     "autoprefixer": "10.4.23",
     "postcss": "8.5.10",
     "tailwindcss": "3.4.19",
     "typescript": "5.9.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.1.20",
-    "vite-plus": "0.1.20",
-    "@vitejs/plugin-react": "6.0.1"
+    "vite-plus": "0.1.20"
   },
   "peerDependencies": {
     "react": "19.2.3",
