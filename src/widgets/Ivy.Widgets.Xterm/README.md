@@ -122,8 +122,14 @@ All color properties accept CSS color strings (hex, rgb, rgba):
 
 ```bash
 cd .samples
-dotnet run Terminal.cs
+dotnet run
 ```
+
+The sample server uses an app shell with multiple demo apps (in `.samples/Apps/`):
+
+- **Shell** — an interactive system shell (`cmd` on Windows, `bash` otherwise)
+- **Hello Console** — runs the Spectre.Console demo app from `.console/HelloApp`
+- **Claude Code** — runs the `claude` CLI in the terminal (requires Claude Code to be installed and on `PATH`)
 
 ## Creating New Widgets
 
