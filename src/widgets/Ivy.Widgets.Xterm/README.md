@@ -37,6 +37,12 @@ new Terminal()
 new Terminal()
     .InitialContent("Welcome!\r\n$ ")
 
+// Terminal with a loading overlay shown until the attached
+// process writes its first output to the stream
+new Terminal()
+    .Stream(pty.Stream)
+    .Loading("Starting Claude Code...")
+
 // Terminal with event handlers
 new Terminal()
     .HandleData(data => Console.WriteLine($"User typed: {data}"))
@@ -57,6 +63,8 @@ new Terminal()
 | `Scrollback` | `int` | `1000` | Lines to keep in scrollback buffer |
 | `Theme` | `TerminalTheme?` | Dark theme | Terminal color theme |
 | `InitialContent` | `string?` | `null` | Initial content to display |
+| `Loading` | `bool` | `false` | Show a loading overlay (spinner + text) until the first stream data arrives |
+| `LoadingText` | `string?` | `"Loading..."` | Text shown in the loading overlay |
 
 #### Events
 

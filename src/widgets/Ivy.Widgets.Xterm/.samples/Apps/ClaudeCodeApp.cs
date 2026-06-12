@@ -31,6 +31,7 @@ class ClaudeCodeApp : ViewBase
             .OnResize(pty.HandleResize)
             .Closed(pty.Closed)
             .AllowClipboard()
+            .Loading("Starting Claude Code...")
             .WithLayout()
             .Full()
             .RemoveParentPadding();
