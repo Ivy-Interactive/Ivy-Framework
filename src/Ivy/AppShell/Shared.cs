@@ -18,6 +18,14 @@ public record AppShellSettings
     public string? DefaultAppId { get; init; }
     public string? WallpaperAppId { get; init; }
     public bool PreventTabDuplicates { get; init; }
+
+    /// <summary>
+    /// When <c>true</c> (default), navigation args are appended to the browser URL as <c>appArgs=…</c>,
+    /// which lets a full page reload restore them. When <c>false</c>, args are still delivered to the
+    /// target app through its hosting connection but are kept out of the URL.
+    /// </summary>
+    public bool IncludeArgsInUrl { get; init; } = true;
+
     public AppShellNavigation Navigation { get; init; }
     public Size? Width { get; init; }
     public bool SidebarOpen { get; init; } = true;
@@ -54,6 +62,8 @@ public static class AppShellSettingsExtensions
     public static AppShellSettings UseFooterMenuItemsTransformer(this AppShellSettings settings, Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer) => settings with { FooterMenuItemsTransformer = transformer };
     public static AppShellSettings Width(this AppShellSettings settings, Size width) => settings with { Width = width };
     public static AppShellSettings SidebarOpen(this AppShellSettings settings, bool open) => settings with { SidebarOpen = open };
+    public static AppShellSettings IncludeArgsInUrl(this AppShellSettings settings, bool include) => settings with { IncludeArgsInUrl = include };
+    public static AppShellSettings HideArgsInUrl(this AppShellSettings settings) => settings with { IncludeArgsInUrl = false };
 }
 
 [Signal(BroadcastType.AppShell)]
@@ -77,7 +87,7 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
         return new AppHost(this.AppId, this.AppArgs != null ? JsonSerializer.Serialize(this.AppArgs, JsonHelper.DefaultOptions) : null, parentId);
     }
 
-    public string GetUrl(string? parentId = null)
+    public string GetUrl(string? parentId = null, bool includeArgs = true)
     {
         // Validate AppId to prevent injection attacks
         if (!ValidationHelper.IsSafeAppId(this.AppId))
@@ -96,7 +106,7 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
             queryParams.Add($"parentId={parentId}");
         }
 
-        if (this.AppArgs != null)
+        if (includeArgs && this.AppArgs != null)
         {
             var jsonArgs = JsonSerializer.Serialize(this.AppArgs, JsonHelper.DefaultOptions);
             var encodedArgs = System.Web.HttpUtility.UrlEncode(jsonArgs);
