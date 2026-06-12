@@ -37,3 +37,14 @@
 .markdown-widget > :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
   margin-top: 1rem;
 }
+
+/* On mobile, let wide markdown tables scroll horizontally instead of clipping off the right edge. */
+@media (max-width: 639.98px) {
+  .markdown-widget table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
