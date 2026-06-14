@@ -1021,6 +1021,7 @@ public class Server
         {
             _pluginWatcher?.Dispose();
             _pluginReferencesWatcher?.Dispose();
+            _pluginLoader?.ShutdownAllAsync().GetAwaiter().GetResult();
         });
 
         if (_args.Describe)

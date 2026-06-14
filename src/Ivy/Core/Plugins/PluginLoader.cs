@@ -379,7 +379,9 @@ public class PluginLoader : IPluginManager
 
     public bool UnloadPlugin(string pluginId)
     {
-        _lock.EnterWriteLock();
+        // Get the plugin instance under read lock for shutdown hook
+        IIvyPlugin? pluginInstance;
+        _lock.EnterReadLock();
         try
         {
             var plugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
@@ -388,6 +390,23 @@ public class PluginLoader : IPluginManager
                 _logger.LogWarning("Plugin '{Id}' not found for unload.", pluginId);
                 return false;
             }
+            pluginInstance = plugin.Status == PluginStatus.Active ? plugin.Instance : null;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+
+        // Call shutdown hook outside the lock (blocks up to 5s)
+        if (pluginInstance is not null)
+            InvokeShutdownHook(pluginInstance, pluginId, PluginShutdownReason.Unload);
+
+        _lock.EnterWriteLock();
+        try
+        {
+            var plugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
+            if (plugin is null)
+                return false;
 
             // Remove contributions from context (only if it was active)
             if (plugin.Status == PluginStatus.Active)
@@ -601,6 +620,19 @@ public class PluginLoader : IPluginManager
 
         PluginStatus newStatus;
 
+        // Call shutdown hook on old plugin before swapping (blocks up to 5s)
+        _lock.EnterReadLock();
+        try
+        {
+            var oldPlugin = _plugins.FirstOrDefault(p => p.Instance.Manifest.Id == pluginId);
+            if (oldPlugin is not null && oldPlugin.Status == PluginStatus.Active)
+                InvokeShutdownHook(oldPlugin.Instance, pluginId, PluginShutdownReason.Reload);
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+
         // Now atomically swap: unload old, insert new
         _lock.EnterWriteLock();
         try
@@ -726,6 +758,9 @@ public class PluginLoader : IPluginManager
             // Configuration is invalid
             if (oldStatus == PluginStatus.Active)
             {
+                // Call shutdown hook before deactivating
+                InvokeShutdownHook(plugin.Instance, pluginId, PluginShutdownReason.Reconfigure);
+
                 // Deactivate: remove contributions
                 _lock.EnterWriteLock();
                 try
@@ -749,6 +784,10 @@ public class PluginLoader : IPluginManager
             }
             return false;
         }
+
+        // Call shutdown hook before reconfiguring (if already active)
+        if (oldStatus == PluginStatus.Active)
+            InvokeShutdownHook(plugin.Instance, pluginId, PluginShutdownReason.Reconfigure);
 
         // Configuration is valid — activate or reconfigure
         _lock.EnterWriteLock();
@@ -924,6 +963,86 @@ public class PluginLoader : IPluginManager
         {
             _lock.ExitReadLock();
         }
+    }
+
+    private static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(5);
+
+    private void InvokeShutdownHook(IIvyPlugin pluginInstance, string pluginId, PluginShutdownReason reason)
+    {
+        using var cts = new CancellationTokenSource(ShutdownTimeout);
+        var shutdownContext = new PluginShutdownContext
+        {
+            CancellationToken = cts.Token,
+            Reason = reason,
+            Logger = _logger
+        };
+
+        try
+        {
+            pluginInstance.ShutdownAsync(shutdownContext).Wait(cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("Plugin '{Id}' shutdown timed out after {Timeout}s", pluginId, ShutdownTimeout.TotalSeconds);
+        }
+        catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
+        {
+            _logger.LogWarning("Plugin '{Id}' shutdown timed out after {Timeout}s", pluginId, ShutdownTimeout.TotalSeconds);
+        }
+        catch (AggregateException ex)
+        {
+            _logger.LogError(ex.InnerException ?? ex, "Plugin '{Id}' shutdown failed", pluginId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Plugin '{Id}' shutdown failed", pluginId);
+        }
+    }
+
+    public async Task ShutdownAllAsync()
+    {
+        List<(IIvyPlugin Instance, string Id)> activePlugins;
+        _lock.EnterReadLock();
+        try
+        {
+            activePlugins = _plugins
+                .Where(p => p.Status == PluginStatus.Active)
+                .Select(p => (p.Instance, p.Instance.Manifest.Id))
+                .ToList();
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+
+        if (activePlugins.Count == 0)
+            return;
+
+        using var cts = new CancellationTokenSource(ShutdownTimeout);
+        var tasks = activePlugins.Select(async p =>
+        {
+            var shutdownContext = new PluginShutdownContext
+            {
+                CancellationToken = cts.Token,
+                Reason = PluginShutdownReason.HostExit,
+                Logger = _logger
+            };
+
+            try
+            {
+                await p.Instance.ShutdownAsync(shutdownContext).WaitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("Plugin '{Id}' shutdown timed out during host exit", p.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Plugin '{Id}' shutdown failed during host exit", p.Id);
+            }
+        });
+
+        await Task.WhenAll(tasks);
     }
 
     private void LogPluginLoadFailure(string directory, Exception ex)
