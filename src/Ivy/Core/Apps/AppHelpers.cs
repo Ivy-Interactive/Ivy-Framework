@@ -40,8 +40,20 @@ public static class AppHelpers
                 {
                     ns = ns[(Array.IndexOf(ns, "Apps") + 1)..];
                 }
-                ns = [.. ns, type.Name];
-                return string.Join("/", ns.Select(global::Ivy.StringHelper.TitleCaseToFriendlyUrl));
+
+                var segments = ns.Select(global::Ivy.StringHelper.TitleCaseToFriendlyUrl).ToList();
+                var typeSegment = global::Ivy.StringHelper.TitleCaseToFriendlyUrl(type.Name);
+
+                // Drop a trailing folder that just duplicates the type name so an app organized into an
+                // eponymous folder keeps a flat id: Apps/Jobs/JobsApp => "jobs", not "jobs/jobs". Genuine
+                // hierarchy is preserved because the folder differs from the type: Apps/Hooks/CoreApp => "hooks/core".
+                if (segments.Count > 0 && segments[^1] == typeSegment)
+                {
+                    segments.RemoveAt(segments.Count - 1);
+                }
+                segments.Add(typeSegment);
+
+                return string.Join("/", segments);
             }
 
             string GetTitle()
