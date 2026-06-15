@@ -81,7 +81,7 @@ importers:
         specifier: 6.0.4-alpha24
         version: 6.0.4-alpha24(lodash@4.18.1)(marked@16.4.2)(react-dom@19.2.3(react@19.2.3))(react-responsive-carousel@3.2.23)(react@19.2.3)
       '@hpcc-js/wasm-graphviz':
-        specifier: ^1.21.2
+        specifier: 1.21.2
         version: 1.21.2
       '@ivy-interactive/ivy-design-system':
         specifier: 1.1.18
@@ -210,7 +210,7 @@ importers:
         specifier: 6.1.0
         version: 6.1.0
       js-yaml:
-        specifier: ^4.1.1
+        specifier: 4.1.1
         version: 4.1.1
       katex:
         specifier: 0.16.25
@@ -249,7 +249,7 @@ importers:
         specifier: 3.0.6
         version: 3.0.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react-responsive-carousel:
-        specifier: ^3.2.23
+        specifier: 3.2.23
         version: 3.2.23
       react-syntax-highlighter:
         specifier: 16.1.0
@@ -295,13 +295,13 @@ importers:
         specifier: 1.9.0
         version: 1.9.0
       '@types/js-yaml':
-        specifier: ^4.0.9
+        specifier: 4.0.9
         version: 4.0.9
       '@types/lodash':
         specifier: 4.17.20
         version: 4.17.20
       '@types/mdast':
-        specifier: ^4.0.4
+        specifier: 4.0.4
         version: 4.0.4
       '@types/node':
         specifier: 24.10.0
@@ -328,10 +328,10 @@ importers:
         specifier: 20.8.9
         version: 20.8.9
       husky:
-        specifier: ^9.1.7
+        specifier: 9.1.7
         version: 9.1.7
       lint-staged:
-        specifier: ^16.4.0
+        specifier: 16.4.0
         version: 16.4.0
       tailwindcss:
         specifier: 4.1.16
@@ -343,7 +343,7 @@ importers:
         specifier: npm:@voidzero-dev/vite-plus-core@0.1.22
         version: '@voidzero-dev/vite-plus-core@0.1.22(@types/node@24.10.0)(jiti@2.6.1)(typescript@5.9.3)(yaml@2.8.3)'
       vite-plugin-mkcert:
-        specifier: ^1.17.10
+        specifier: 1.17.10
         version: 1.17.10(@voidzero-dev/vite-plus-core@0.1.22(@types/node@24.10.0)(jiti@2.6.1)(typescript@5.9.3)(yaml@2.8.3))
       vite-plus:
         specifier: 0.1.22

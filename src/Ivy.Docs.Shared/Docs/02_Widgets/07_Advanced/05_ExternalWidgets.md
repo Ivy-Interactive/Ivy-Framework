@@ -226,8 +226,8 @@ In the `.csproj`:
 </ItemGroup>
 
 <Target Name="BuildFrontend" BeforeTargets="Build" Condition="Exists('frontend/package.json')">
-  <Exec Command="vp install" WorkingDirectory="frontend" />
-  <Exec Command="vp run build" WorkingDirectory="frontend" />
+  <Exec Command="vp install" WorkingDirectory="frontend" EnvironmentVariables="CI=true" />
+  <Exec Command="vp run build" WorkingDirectory="frontend" EnvironmentVariables="CI=true" />
 </Target>
 ```
 
