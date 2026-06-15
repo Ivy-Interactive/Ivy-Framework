@@ -36,12 +36,19 @@ vi.mock("@/components/ui/input", () => {
   };
 });
 
-vi.mock("@/components/ui/input/text-input-variant", () => ({
-  textInputSizeVariant: () => "",
-  textInputAffixCellClasses: () => "",
-  searchIconVariant: () => "",
-  xIconVariant: () => "",
+const { mockTextInputAffixCellClasses } = vi.hoisted(() => ({
+  mockTextInputAffixCellClasses: vi.fn<(side: "prefix" | "suffix", density?: string) => string>(
+    () => "",
+  ),
 }));
+
+vi.mock("@/components/ui/input/text-input-variant", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/ui/input/text-input-variant")>();
+  return {
+    ...actual,
+    textInputAffixCellClasses: mockTextInputAffixCellClasses,
+  };
+});
 
 vi.mock("@/lib/styles", () => ({
   getWidth: () => ({}),
@@ -589,5 +596,28 @@ describe("SearchVariant disabled/invalid container styles", () => {
     expect(borderedContainer.className).not.toContain("cursor-not-allowed");
     expect(borderedContainer.className).not.toContain("opacity-50");
     expect(borderedContainer.className).not.toContain("border-destructive");
+  });
+
+  it("uses shared affix cell classes with field density for prefix and suffix slots", () => {
+    mockTextInputAffixCellClasses.mockClear();
+    renderSearchVariant({
+      slots: {
+        Prefix: [React.createElement("span", { key: "prefix" }, "in:")],
+        Suffix: [React.createElement("span", { key: "suffix" }, "v")],
+      },
+    });
+
+    expect(mockTextInputAffixCellClasses).toHaveBeenCalledWith("prefix", "Medium");
+    expect(mockTextInputAffixCellClasses).toHaveBeenCalledWith("suffix", "Medium");
+  });
+
+  it("omits the built-in search icon when a prefix slot is present", () => {
+    renderSearchVariant({
+      slots: {
+        Prefix: [React.createElement("span", { key: "prefix" }, "in:")],
+      },
+    });
+
+    expect(container.querySelectorAll("svg")).toHaveLength(0);
   });
 });

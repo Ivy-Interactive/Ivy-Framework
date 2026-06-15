@@ -5,7 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { inputStyles } from "@/lib/styles";
 import { Densities } from "@/types/density";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/input/date-time-input-variant";
 import { DateTimeVariantProps } from "./types";
 import { ClearAndInvalidIcons } from "./shared";
+import { dateInputControlInvalid, dateInputTriggerTrailingPadding } from "./affix";
 import { useTimeConstraints } from "./useTimeConstraints";
 
 export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
@@ -35,6 +36,8 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   autoFocus,
   "data-testid": dataTestId,
   onFocusChange,
+  inAffixShell,
+  trailingBesideSuffix,
 }) => {
   const [open, setOpen] = useState(false);
   const [prevDisabled, setPrevDisabled] = React.useState(disabled);
@@ -62,6 +65,18 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   const minDate = useMemo(() => (min ? new Date(min) : undefined), [min]);
   const maxDate = useMemo(() => (max ? new Date(max) : undefined), [max]);
   const showClear = nullable && !disabled && value != null && value !== "";
+  const controlInvalid = dateInputControlInvalid(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
+  const trailingPadding = dateInputTriggerTrailingPadding(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
 
   const disabledDays = useMemo(() => {
     const matchers: Array<{ before: Date } | { after: Date }> = [];
@@ -193,11 +208,11 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             data-slot="calendar"
             className={cn(
               dateTimeInputVariant({ density }),
-              "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10",
               !date && "text-muted-foreground",
-              invalid && inputStyles.invalidInput,
+              controlInvalid && inputStyles.invalidInput,
               disabled && "cursor-not-allowed",
-              showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
+              trailingPadding,
+              "border-0 bg-transparent shadow-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-transparent dark:bg-transparent dark:hover:bg-transparent",
             )}
             data-testid={dataTestId}
             onFocus={() => {
@@ -207,8 +222,6 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               if (!open) onFocusChange?.(false);
             }}
           >
-            <CalendarIcon className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
-            <Clock className={cn("mr-2 shrink-0", dateTimeInputIconVariant({ density }))} />
             <span
               className={cn(
                 "truncate",
@@ -251,7 +264,7 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                 className={cn(
                   "bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden",
                   dateTimeInputTextVariant({ density }),
-                  invalid && inputStyles.invalidInput,
+                  controlInvalid && inputStyles.invalidInput,
                 )}
                 data-testid={dataTestId ? `${dataTestId}-time` : undefined}
               />
@@ -259,12 +272,14 @@ export const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
           </div>
         </PopoverContent>
       </Popover>
-      <ClearAndInvalidIcons
-        showClear={showClear}
-        invalid={invalid}
-        density={density}
-        onClear={handleClear}
-      />
+      {!inAffixShell && (
+        <ClearAndInvalidIcons
+          showClear={showClear}
+          invalid={invalid}
+          density={density}
+          onClear={handleClear}
+        />
+      )}
     </div>
   );
 };

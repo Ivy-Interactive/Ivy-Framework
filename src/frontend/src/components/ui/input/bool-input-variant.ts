@@ -1,5 +1,19 @@
 import { cva } from "class-variance-authority";
 
+/** Gap between control and label — scales with density. */
+export const boolInputControlGapVariant = cva("", {
+  variants: {
+    density: {
+      Small: "gap-1.5",
+      Medium: "gap-2",
+      Large: "gap-2.5",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
 // Row min-height variants - matches TextInput heights for consistent form field alignment
 export const boolInputRowMinHeightVariant = cva("", {
   variants: {

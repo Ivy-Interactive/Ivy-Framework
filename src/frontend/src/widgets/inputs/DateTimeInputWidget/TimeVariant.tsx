@@ -2,16 +2,13 @@ import * as React from "react";
 import { useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { inputStyles } from "@/lib/styles";
 import { Densities } from "@/types/density";
-import {
-  dateTimeInputIconVariant,
-  dateTimeInputTextVariant,
-} from "@/components/ui/input/date-time-input-variant";
+import { dateTimeInputTextVariant } from "@/components/ui/input/date-time-input-variant";
 import { TimeVariantProps } from "./types";
 import { ClearAndInvalidIcons } from "./shared";
+import { dateInputControlInvalid, dateInputTriggerTrailingPadding } from "./affix";
 import { useTimeConstraints } from "./useTimeConstraints";
 
 export const TimeVariant: React.FC<TimeVariantProps> = ({
@@ -28,6 +25,8 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
   autoFocus,
   "data-testid": dataTestId,
   onFocusChange,
+  inAffixShell,
+  trailingBesideSuffix,
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const hasAutoFocusedRef = React.useRef(false);
@@ -67,6 +66,18 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
   const { timeStepSeconds, timeMin, timeMax, getSnappedTime } = useTimeConstraints(min, max, step);
 
   const showClear = nullable && !disabled && propValue != null && propValue !== "";
+  const controlInvalid = dateInputControlInvalid(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
+  const trailingPadding = dateInputTriggerTrailingPadding(
+    inAffixShell,
+    trailingBesideSuffix,
+    showClear,
+    invalid,
+  );
 
   const handleClear = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -106,17 +117,11 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
     <div className="relative w-full select-none" data-testid={dataTestId}>
       <div
         className={cn(
-          "relative flex items-center rounded-md border border-input bg-transparent shadow-sm focus-within:ring-1 focus-within:ring-ring dark:bg-white/5 dark:border-white/10",
-          invalid && inputStyles.invalidInput,
+          "relative flex w-full min-w-0 flex-1 items-center",
+          controlInvalid && inputStyles.invalidInput,
+          "border-0 bg-transparent shadow-none focus-within:ring-0 dark:bg-transparent",
         )}
       >
-        <Clock
-          className={cn(
-            "ml-3 shrink-0",
-            dateTimeInputIconVariant({ density }),
-            disabled && "opacity-50",
-          )}
-        />
         <Input
           type="time"
           step={timeStepSeconds}
@@ -134,18 +139,20 @@ export const TimeVariant: React.FC<TimeVariantProps> = ({
           className={cn(
             "bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0",
             dateTimeInputTextVariant({ density }),
-            invalid && inputStyles.invalidInput,
+            controlInvalid && inputStyles.invalidInput,
             disabled && "cursor-not-allowed opacity-50 text-muted-foreground",
-            showClear && invalid ? "pr-16" : showClear || invalid ? "pr-8" : "",
+            trailingPadding,
           )}
         />
       </div>
-      <ClearAndInvalidIcons
-        showClear={showClear}
-        invalid={invalid}
-        density={density}
-        onClear={handleClear}
-      />
+      {!inAffixShell && (
+        <ClearAndInvalidIcons
+          showClear={showClear}
+          invalid={invalid}
+          density={density}
+          onClear={handleClear}
+        />
+      )}
     </div>
   );
 };

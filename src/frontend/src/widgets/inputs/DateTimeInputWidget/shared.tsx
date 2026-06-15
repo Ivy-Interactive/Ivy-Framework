@@ -1,9 +1,14 @@
 import * as React from "react";
 import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { InvalidIcon } from "@/components/InvalidIcon";
-import { dateTimeInputIconVariant } from "@/components/ui/input/date-time-input-variant";
 import { Densities } from "@/types/density";
+import {
+  normalizeInputDensity,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  textInputTrailingOverlayClasses,
+} from "@/components/ui/input/text-input-variant";
 
 interface ClearAndInvalidIconsProps {
   showClear?: boolean;
@@ -12,6 +17,7 @@ interface ClearAndInvalidIconsProps {
   onClear: (e?: React.MouseEvent) => void;
 }
 
+/** Standalone date/time field trailing cluster (no affix shell). */
 export const ClearAndInvalidIcons: React.FC<ClearAndInvalidIconsProps> = ({
   showClear = false,
   invalid,
@@ -22,26 +28,28 @@ export const ClearAndInvalidIcons: React.FC<ClearAndInvalidIconsProps> = ({
     return null;
   }
 
+  const densityKey = normalizeInputDensity(density);
+
   return (
-    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
+    <div className={textInputTrailingOverlayClasses(density)}>
       {showClear && (
         <button
           type="button"
           tabIndex={-1}
           aria-label="Clear"
           onClick={onClear}
-          className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+          className={textInputTrailingIconButtonClasses(true, density)}
         >
-          <X
-            className={cn(
-              dateTimeInputIconVariant({ density }),
-              "text-muted-foreground hover:text-foreground",
-            )}
-          />
+          <X className={textInputTrailingIconSizeVariant({ density: densityKey })} />
         </button>
       )}
-      {/* Invalid icon - rightmost */}
-      {invalid && <InvalidIcon message={invalid} className="pointer-events-auto" />}
+      {invalid && (
+        <InvalidIcon
+          message={invalid}
+          className={textInputTrailingInvalidSlotClasses(true, density)}
+          iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
+        />
+      )}
     </div>
   );
 };

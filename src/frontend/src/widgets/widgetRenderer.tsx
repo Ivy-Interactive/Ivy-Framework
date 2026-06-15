@@ -17,7 +17,7 @@ const processWidgetProps = (
     id: node.id,
     events: node.events || [],
   };
-  if (inheritedScale) props.density = inheritedScale;
+  props.density = (props.density as Densities | undefined) ?? inheritedScale;
   if ("testId" in props && props.testId) {
     props["data-testid"] = props.testId;
     delete props.testId;

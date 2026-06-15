@@ -3,11 +3,26 @@ import { useOptimisticValue } from "../shared/useOptimisticValue";
 import { useEventHandler } from "@/components/event-handler";
 import { cn } from "@/lib/utils";
 import { copyToClipboard } from "@/lib/clipboard";
-import { getHeight, getWidth, inputStyles } from "@/lib/styles";
+import { getHeight, getWidth } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
+import { boolInputRowMinHeightVariant } from "@/components/ui/input/bool-input-variant";
 import { X, Copy, Loader2 } from "lucide-react";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import {
+  normalizeInputDensity,
+  textInputAffixCellClasses,
+  textInputAffixGrowContentColumnClasses,
+  textInputAffixInvalidIconClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputSuffixWithTrailingClusterClasses,
+  textInputFieldShellClasses,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  textInputTrailingOverlayClasses,
+} from "@/components/ui/input/text-input-variant";
 import {
   keymap,
   EditorView,
@@ -34,6 +49,29 @@ const yaml = () => import("@codemirror/lang-yaml").then((m) => m.yaml());
 const cpp = () => import("@codemirror/lang-cpp").then((m) => m.cpp());
 import { dbml } from "./dbml-language";
 import { createIvyCodeTheme } from "./theme";
+
+/** Affix strip for tall editor — top-aligned, density-scaled seam gaps. */
+function codeInputAffixCellClasses(
+  side: "prefix" | "suffix",
+  density: Densities,
+  content?: React.ReactNode[],
+  options: { showTrailing?: boolean } = {},
+): string {
+  const densityKey = normalizeInputDensity(density);
+  const chrome = cn(
+    "relative z-10 shrink-0 self-start overflow-visible",
+    boolInputRowMinHeightVariant({ density: densityKey }),
+    options.showTrailing && "[&_button]:overflow-visible [&_[data-invalid-icon]]:overflow-visible",
+  );
+  if (side === "prefix") {
+    return cn(textInputAffixPrefixCellClasses(density, content), chrome);
+  }
+  return cn(
+    textInputAffixSuffixCellClasses(density, content, { showTrailing: options.showTrailing }),
+    chrome,
+  );
+}
+
 interface CodeInputWidgetProps {
   id: string;
   placeholder?: string;
@@ -84,6 +122,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
   const [isFocused, setIsFocused] = useState(false);
+  const densityKey = normalizeInputDensity(density);
 
   const serverValue = value || "";
   const [localValue, setLocalValue] = useOptimisticValue(serverValue, isFocused);
@@ -118,7 +157,6 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       e.stopPropagation();
       if (!events.includes("OnChange")) return;
       if (disabled) return;
-      // For nullable inputs, set to null; otherwise set to empty string
       const clearedValue = nullable ? null : "";
       setLocalValue(clearedValue ?? "");
       eventHandler("OnChange", id, [clearedValue]);
@@ -126,20 +164,29 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     [eventHandler, id, events, disabled, nullable, setLocalValue],
   );
 
+  const prefixContent = slots?.Prefix;
+  const suffixContent = slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+
   const hasValue = localValue && localValue.toString().trim() !== "";
   const showClear = nullable && !disabled && hasValue;
-  // Copy button always shows when there's a value (doesn't depend on showCopyButton prop)
   const showCopy = hasValue;
+  const showTrailing = showCopy || showClear || Boolean(invalid);
+  const trailingControlCount = [showCopy, showClear, Boolean(invalid)].filter(Boolean).length;
+  /** Trailing in its own affix column (aligned with prefix) — not overlaid on tall editor. */
+  const trailingInAffixCell = hasAffixes && !trailingBesideSuffix && showTrailing;
+  const trailingInOverlay = !hasAffixes && showTrailing;
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
   };
 
-  // Create theme extension once and reuse it
   const themeExtension = useMemo(() => createIvyCodeTheme(density), [density]);
 
-  // Minimal setup without search features
   const minimalSetup = useMemo(() => {
     return [
       lineNumbers(),
@@ -175,44 +222,62 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     return [...langExtensions, minimalSetup, themeExtension];
   }, [langExtensions, minimalSetup, themeExtension]);
 
-  const prefixContent = slots?.Prefix;
-  const suffixContent = slots?.Suffix;
-  const hasPrefix = (prefixContent?.length ?? 0) > 0;
-  const hasSuffix = (suffixContent?.length ?? 0) > 0;
-  const hasAffixes = hasPrefix || hasSuffix;
+  const trailingCluster = (overlay: boolean) => (
+    <>
+      {showCopy && (
+        <button
+          type="button"
+          onClick={() => copyToClipboard(localValue)}
+          aria-label="Copy to clipboard"
+          className={textInputTrailingIconButtonClasses(overlay, density)}
+        >
+          <Copy className={textInputTrailingIconSizeVariant({ density: densityKey })} />
+        </button>
+      )}
+      {showClear && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Clear"
+          onClick={handleClear}
+          className={textInputTrailingIconButtonClasses(overlay, density)}
+        >
+          <X className={textInputTrailingIconSizeVariant({ density: densityKey })} />
+        </button>
+      )}
+      {invalid && (
+        <InvalidIcon
+          message={invalid}
+          className={
+            overlay
+              ? textInputTrailingInvalidSlotClasses(true, density)
+              : textInputAffixInvalidIconClasses()
+          }
+          iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
+        />
+      )}
+    </>
+  );
 
-  const codeEditor = (
-    <div style={styles} className="relative w-full h-full overflow-hidden">
-      {(showCopy || showClear || invalid) && (
-        <div className="absolute top-2 right-2 z-50 flex items-center">
-          {showCopy && (
-            <button
-              type="button"
-              onClick={() => copyToClipboard(localValue)}
-              aria-label="Copy to clipboard"
-              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-            >
-              <Copy className={xIconVariant({ density })} />
-            </button>
-          )}
-          {showClear && (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label="Clear"
-              onClick={handleClear}
-              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-            >
-              <X className={xIconVariant({ density })} />
-            </button>
-          )}
-          {/* Invalid icon - rightmost */}
-          {invalid && <InvalidIcon message={invalid} className="pointer-events-auto p-1" />}
-        </div>
+  const codeEditor = () => (
+    <div
+      className={cn(
+        "relative h-full min-h-0 w-full overflow-hidden",
+        trailingInOverlay && "pr-8",
+        trailingInOverlay && (showClear || invalid) && "pr-16",
+      )}
+    >
+      {trailingInOverlay && (
+        <div className={textInputTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
       )}
       <Suspense
         fallback={
-          <div className="h-full flex items-center justify-center bg-muted/20 animate-pulse rounded-field border border-input">
+          <div
+            className={cn(
+              "flex h-full items-center justify-center bg-muted/20 animate-pulse",
+              !hasAffixes && "rounded-field border border-input dark:border-white/10",
+            )}
+          >
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
         }
@@ -220,6 +285,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         <CodeMirror
           value={localValue}
           extensions={extensions}
+          theme="none"
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
@@ -229,10 +295,11 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           data-gramm="false"
           className={cn(
             "h-full overflow-hidden",
-            "[&_.cm-editor]:bg-transparent",
-            "border border-input shadow-sm rounded-field",
-            "dark:bg-white/5 dark:border-white/10",
-            invalid && inputStyles.invalid,
+            "[&_.cm-editor]:border-0 [&_.cm-editor]:bg-transparent! [&_.cm-editor]:shadow-none",
+            "[&_.cm-scroller]:bg-transparent! [&_.cm-content]:bg-transparent! [&_.cm-gutters]:bg-transparent!",
+            hasAffixes && "[&_.cm-editor]:rounded-none",
+            hasAffixes && hasPrefix && "[&_.cm-editor]:rounded-l-none",
+            hasAffixes && (hasSuffix || trailingInAffixCell) && "[&_.cm-editor]:rounded-r-none",
             disabled && "opacity-50 cursor-not-allowed",
           )}
           height="100%"
@@ -242,25 +309,62 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     </div>
   );
 
-  if (!hasAffixes) return codeEditor;
+  if (!hasAffixes) {
+    return (
+      <div
+        style={styles}
+        className={cn(
+          "relative flex w-full flex-col overflow-hidden",
+          textInputFieldShellClasses({ focused: isFocused, invalid, disabled }),
+        )}
+      >
+        <div className="min-h-0 min-w-0 flex-1 overflow-hidden">{codeEditor()}</div>
+      </div>
+    );
+  }
 
   return (
     <div
-      className={cn(
-        "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-        invalid && "border-destructive",
-        disabled && "cursor-not-allowed opacity-50",
-      )}
+      style={styles}
+      className={textInputFieldShellClasses({
+        focused: isFocused,
+        invalid,
+        disabled,
+      })}
     >
       {hasPrefix && (
-        <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+        <div className={codeInputAffixCellClasses("prefix", density, prefixContent)}>
           {prefixContent}
         </div>
       )}
-      <div className="flex-1 min-w-0">{codeEditor}</div>
+      <div className={textInputAffixGrowContentColumnClasses(density)}>{codeEditor()}</div>
       {hasSuffix && (
-        <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
-          {suffixContent}
+        <div
+          className={codeInputAffixCellClasses("suffix", density, suffixContent, {
+            showTrailing: trailingBesideSuffix && showTrailing,
+          })}
+        >
+          {trailingBesideSuffix && showTrailing && trailingCluster(false)}
+          {trailingBesideSuffix && showTrailing ? (
+            <span className={cn(textInputSuffixGlyphSlotClasses(density), "overflow-visible")}>
+              {suffixContent}
+            </span>
+          ) : (
+            suffixContent
+          )}
+        </div>
+      )}
+      {trailingInAffixCell && (
+        <div
+          className={cn(
+            textInputAffixCellClasses("suffix", density),
+            "relative z-10 shrink-0 self-start overflow-visible",
+            boolInputRowMinHeightVariant({ density: densityKey }),
+            trailingControlCount > 1 && textInputSuffixWithTrailingClusterClasses(density),
+            "[&_button]:overflow-visible [&_[data-invalid-icon]]:overflow-visible",
+          )}
+        >
+          {trailingCluster(false)}
         </div>
       )}
     </div>

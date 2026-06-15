@@ -22,12 +22,17 @@ const TooltipContext = React.createContext<TooltipControl | null>(null);
  * never see it on iPad/iPhone. Wrap Root with a small controlled-state shim and
  * let the Trigger toggle it on touch / pen pointerdown without affecting mouse.
  */
+type TooltipProps = React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root> &
+  Pick<React.HTMLAttributes<HTMLDivElement>, "className" | "style">;
+
 const Tooltip = ({
   open: openProp,
   defaultOpen,
   onOpenChange,
+  className,
+  style,
   ...props
-}: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>) => {
+}: TooltipProps) => {
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false);
   const isControlled = openProp !== undefined;
   const open = isControlled ? openProp : internalOpen;
@@ -44,7 +49,12 @@ const Tooltip = ({
 
   return (
     <TooltipContext.Provider value={{ open, setOpen }}>
-      <TooltipPrimitive.Root open={open} onOpenChange={setOpen} {...props} />
+      <TooltipPrimitive.Root
+        open={open}
+        onOpenChange={setOpen}
+        {...props}
+        {...({ className: cn(className), style } as object)}
+      />
     </TooltipContext.Provider>
   );
 };

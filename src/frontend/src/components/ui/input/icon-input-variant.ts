@@ -16,6 +16,23 @@ export const iconInputTriggerVariant = cva(
   },
 );
 
+/** Trigger inside affix shell — heights match textInputSizeVariant (h-7 / h-9 / h-11). */
+export const iconInputAffixTriggerVariant = cva(
+  "justify-start font-normal min-w-0 max-w-none rounded-none border-0 bg-transparent px-0! py-0! shadow-none dark:border-transparent dark:bg-transparent",
+  {
+    variants: {
+      density: {
+        Small: "h-7 text-xs",
+        Medium: "h-9 text-sm",
+        Large: "h-11 text-base",
+      },
+    },
+    defaultVariants: {
+      density: "Medium",
+    },
+  },
+);
+
 export const iconInputIconVariant = cva("", {
   variants: {
     density: {

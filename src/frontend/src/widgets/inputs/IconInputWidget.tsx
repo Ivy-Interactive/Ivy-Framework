@@ -12,9 +12,21 @@ import { icons } from "lucide-react";
 import { X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Densities } from "@/types/density";
-import { xIconVariant } from "@/components/ui/input/text-input-variant";
+import {
+  normalizeInputDensity,
+  textInputAffixControlColumnClasses,
+  textInputAffixInvalidIconClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputFieldShellClasses,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+} from "@/components/ui/input/text-input-variant";
 import {
   iconInputTriggerVariant,
+  iconInputAffixTriggerVariant,
   iconInputIconVariant,
   iconInputTextVariant,
   iconInputPopoverVariant,
@@ -119,8 +131,12 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
   const hasPrefix = (prefixContent?.length ?? 0) > 0;
   const hasSuffix = (suffixContent?.length ?? 0) > 0;
   const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const densityKey = normalizeInputDensity(density);
 
   const hasValue = localValue != null && localValue !== "" && localValue !== "None";
+  const showClear = nullable && hasValue && !disabled;
+  const showTrailing = showClear || Boolean(invalid);
 
   const valueTextRef = useRef<HTMLSpanElement>(null);
   const [isEllipsed, setIsEllipsed] = useState(false);
@@ -181,8 +197,37 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
       valueTextSpan
     );
 
-  const iconContent = (
-    <div className="flex items-center gap-2 min-w-0">
+  const trailingCluster = (inSuffixCluster: boolean) => (
+    <>
+      {showClear && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Clear"
+          onClick={handleClear}
+          className={textInputTrailingIconButtonClasses(!inSuffixCluster, density)}
+        >
+          <X className={textInputTrailingIconSizeVariant({ density: densityKey })} />
+        </button>
+      )}
+      {invalid && (
+        <InvalidIcon
+          message={invalid}
+          className={
+            inSuffixCluster
+              ? textInputAffixInvalidIconClasses()
+              : textInputTrailingInvalidSlotClasses(false, density)
+          }
+          iconClassName={textInputTrailingIconSizeVariant({ density: densityKey })}
+        />
+      )}
+    </>
+  );
+
+  const iconField = (inAffixShell: boolean) => (
+    <div
+      className={cn("flex min-w-0 w-full items-center gap-2", inAffixShell && "overflow-hidden")}
+    >
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
@@ -191,9 +236,11 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
             variant="outline"
             disabled={disabled}
             className={cn(
-              iconInputTriggerVariant({ density }),
+              inAffixShell
+                ? iconInputAffixTriggerVariant({ density })
+                : iconInputTriggerVariant({ density }),
               !hasValue && "text-muted-foreground",
-              invalid && inputStyles.invalidInput,
+              !inAffixShell && invalid && inputStyles.invalidInput,
             )}
             onBlur={() => {
               if (events.includes("OnBlur") && !open) eventHandler("OnBlur", id, []);
@@ -287,48 +334,41 @@ export const IconInputWidget: React.FC<IconInputWidgetProps> = ({
           )}
         </PopoverContent>
       </Popover>
-      {(invalid || (nullable && hasValue && !disabled)) && (
-        <div className="flex items-center gap-1 shrink-0">
-          {invalid && (
-            <span className="flex items-center">
-              <InvalidIcon message={invalid} />
-            </span>
-          )}
-          {nullable && hasValue && !disabled && (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label="Clear"
-              onClick={handleClear}
-              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-            >
-              <X className={xIconVariant({ density })} />
-            </button>
-          )}
-        </div>
+      {!inAffixShell && showTrailing && (
+        <div className="flex shrink-0 items-center gap-1">{trailingCluster(false)}</div>
       )}
     </div>
   );
 
-  if (!hasAffixes) return iconContent;
+  if (!hasAffixes) {
+    return iconField(false);
+  }
 
   return (
     <div
-      className={cn(
-        "relative flex items-stretch rounded-field border border-input bg-transparent shadow-sm transition-colors dark:bg-white/5 dark:border-white/10",
-        invalid && "border-destructive",
-        disabled && "cursor-not-allowed opacity-50",
-      )}
+      className={textInputFieldShellClasses({
+        invalid,
+        disabled,
+      })}
     >
       {hasPrefix && (
-        <div className="flex items-center px-3 bg-muted text-muted-foreground border-r border-input rounded-tl-[var(--radius-fields)] rounded-bl-[var(--radius-fields)]">
+        <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
           {prefixContent}
         </div>
       )}
-      <div className="flex-1 px-3 py-2">{iconContent}</div>
+      <div className={textInputAffixControlColumnClasses(density)}>{iconField(true)}</div>
       {hasSuffix && (
-        <div className="flex items-center px-3 bg-muted text-muted-foreground border-l border-input rounded-tr-[var(--radius-fields)] rounded-br-[var(--radius-fields)]">
-          {suffixContent}
+        <div
+          className={textInputAffixSuffixCellClasses(density, suffixContent, {
+            showTrailing: trailingBesideSuffix && showTrailing,
+          })}
+        >
+          {trailingBesideSuffix && showTrailing && trailingCluster(true)}
+          {trailingBesideSuffix && showTrailing ? (
+            <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+          ) : (
+            suffixContent
+          )}
         </div>
       )}
     </div>

@@ -6,9 +6,17 @@ import { getWidth, inputStyles } from "@/lib/styles";
 import { InvalidIcon } from "@/components/InvalidIcon";
 import { Densities } from "@/types/density";
 import {
+  textInputAffixInputColumnClasses,
+  textInputAffixPrefixCellClasses,
+  textInputAffixSuffixCellClasses,
+  textInputEmbeddedInputClasses,
   textInputSizeVariant,
-  eyeIconVariant,
-  xIconVariant,
+  textInputSuffixGlyphSlotClasses,
+  textInputTrailingIconButtonClasses,
+  textInputTrailingIconSizeVariant,
+  textInputTrailingInvalidSlotClasses,
+  textInputTrailingOverlayClasses,
+  textInputTrailingShortcutWrapperClasses,
 } from "@/components/ui/input/text-input-variant";
 import { TextInputWidgetProps } from "../types";
 import {
@@ -27,6 +35,7 @@ interface PasswordVariantProps {
   onSubmit?: () => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+  isFocused: boolean;
   density?: Densities;
 }
 
@@ -38,6 +47,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
   onClear,
   onSubmit,
   inputRef,
+  isFocused,
   density = Densities.Medium,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -83,105 +93,149 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
   const hasValue = props.value && props.value.toString().trim() !== "";
   const showClear = props.nullable && !props.disabled && hasValue;
   const ghostTight = Boolean(props.ghost);
+  const prefixContent = props.slots?.Prefix;
+  const suffixContent = props.slots?.Suffix;
+  const hasPrefix = (prefixContent?.length ?? 0) > 0;
+  const hasSuffix = (suffixContent?.length ?? 0) > 0;
+  const hasAffixes = hasPrefix || hasSuffix;
+  const trailingBesideSuffix = hasSuffix;
+  const showPasswordToggle = !hasLastPass;
+  const showShortcut = Boolean(props.shortcutKey && !hasValue && !showClear && !props.invalid);
+  const showTrailing = showPasswordToggle || showClear || showShortcut || Boolean(props.invalid);
+
+  const trailingCluster = (overlay: boolean) => (
+    <>
+      {showPasswordToggle && (
+        <button
+          type="button"
+          className={textInputTrailingIconButtonClasses(overlay, density)}
+          onClick={togglePassword}
+          aria-label={showPassword ? "Hide password" : "Show password"}
+        >
+          {showPassword ? (
+            <EyeOffIcon className={textInputTrailingIconSizeVariant({ density })} />
+          ) : (
+            <EyeIcon className={textInputTrailingIconSizeVariant({ density })} />
+          )}
+        </button>
+      )}
+      {showClear && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Clear"
+          onClick={onClear}
+          className={textInputTrailingIconButtonClasses(overlay, density)}
+        >
+          <X className={textInputTrailingIconSizeVariant({ density })} />
+        </button>
+      )}
+      {showShortcut && (
+        <div
+          className={cn(
+            textInputTrailingShortcutWrapperClasses(density),
+            overlay && "pointer-events-auto",
+          )}
+        >
+          <kbd
+            className={cn(
+              "rounded-field border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground",
+              !ghostTight && overlay && "ml-2",
+            )}
+          >
+            {shortcutDisplay}
+          </kbd>
+        </div>
+      )}
+      {props.invalid && (
+        <InvalidIcon
+          message={props.invalid}
+          className={textInputTrailingInvalidSlotClasses(overlay, density)}
+          iconClassName={textInputTrailingIconSizeVariant({ density })}
+        />
+      )}
+    </>
+  );
 
   return (
     <div className="relative w-full select-none" style={styles} ref={containerRef}>
       <div
         className={cn(
-          "rounded-field border border-input bg-transparent shadow-sm dark:bg-white/5 dark:border-white/10",
+          "relative flex items-stretch rounded-field border bg-transparent shadow-sm transition-colors dark:bg-white/5",
+          isFocused
+            ? "border-ring outline-none dark:border-ring"
+            : "border-input dark:border-white/10",
+          props.invalid && "border-destructive",
+          props.disabled && "cursor-not-allowed opacity-50",
           props.ghost &&
-            "border-transparent shadow-none bg-transparent dark:border-transparent dark:bg-transparent",
+            "border-transparent bg-transparent shadow-none dark:border-transparent dark:bg-transparent",
         )}
       >
-        <Input
-          ref={elementRef}
-          id={props.id}
-          density={density}
-          placeholder={props.placeholder}
-          value={props.value}
-          type={showPassword ? "text" : "password"}
-          disabled={props.disabled}
-          maxLength={props.maxLength}
-          minLength={props.minLength}
-          pattern={props.pattern}
-          onChange={handleChange}
-          onBlur={onBlur}
-          onFocus={onFocus}
-          onKeyDown={handleKeyDown}
-          onPaste={handlePaste}
-          className={cn(
-            textInputSizeVariant({ density }),
-            "border-0 shadow-none dark:bg-transparent",
-            "[&::-ms-reveal]:hidden [&::-ms-clear]:hidden",
-            props.invalid && inputStyles.invalidInput,
-            props.invalid || showClear ? "pr-14" : "pr-8",
-            hasLastPass && "pr-3",
-            props.shortcutKey &&
-              !hasLastPass &&
-              !hasValue &&
-              !showClear &&
-              !props.invalid &&
-              "pr-24",
-            showClear && props.invalid && !hasLastPass && "pr-20",
-            !hasValue && props.nullable && "placeholder:text-muted-foreground",
-          )}
-          data-testid={props["data-testid"]}
-        />
-      </div>
-      {!hasLastPass && (
-        <div
-          className={cn(
-            "pointer-events-none absolute top-1/2 flex h-6 -translate-y-1/2 flex-row items-center",
-            ghostTight ? "right-0 gap-1 pr-0.5" : "right-2 gap-1",
-          )}
-        >
-          <div className="pointer-events-auto flex items-center h-6">
-            <button
-              type="button"
-              className={cn(
-                "flex items-center rounded hover:bg-accent focus:outline-none cursor-pointer",
-                ghostTight ? "p-0.5" : "p-1",
-              )}
-              onClick={togglePassword}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? (
-                <EyeOffIcon className={cn("text-muted-foreground", eyeIconVariant({ density }))} />
-              ) : (
-                <EyeIcon className={cn("text-muted-foreground", eyeIconVariant({ density }))} />
-              )}
-            </button>
+        {hasPrefix && (
+          <div className={textInputAffixPrefixCellClasses(density, prefixContent)}>
+            {prefixContent}
           </div>
-          {showClear && (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label="Clear"
-              onClick={onClear}
-              className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
-            >
-              <X className={xIconVariant({ density })} />
-            </button>
-          )}
-          {props.shortcutKey && !hasValue && !showClear && !props.invalid && (
-            <div className="pointer-events-auto flex h-6 items-center">
-              <kbd
-                className={cn(
-                  "rounded-field border border-border bg-muted px-1 py-0.5 text-xs font-medium text-foreground",
-                  !ghostTight && "ml-2",
-                )}
-              >
-                {shortcutDisplay}
-              </kbd>
-            </div>
-          )}
-          {props.invalid && (
-            <div className={cn("flex h-6 items-center", !ghostTight && "ml-2")}>
-              <InvalidIcon message={props.invalid} />
-            </div>
+        )}
+
+        <div className={textInputAffixInputColumnClasses({ trailingBesideSuffix })}>
+          <Input
+            ref={elementRef}
+            id={props.id}
+            density={density}
+            placeholder={props.placeholder}
+            value={props.value}
+            type={showPassword ? "text" : "password"}
+            disabled={props.disabled}
+            maxLength={props.maxLength}
+            minLength={props.minLength}
+            pattern={props.pattern}
+            onChange={handleChange}
+            onBlur={onBlur}
+            onFocus={onFocus}
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            className={cn(
+              textInputSizeVariant({ density }),
+              props.invalid && inputStyles.invalidInput,
+              trailingBesideSuffix && showTrailing && "pr-2",
+              !trailingBesideSuffix && (props.invalid || showClear) && "pr-14",
+              !trailingBesideSuffix && !props.invalid && !showClear && showPasswordToggle && "pr-8",
+              hasLastPass && "pr-3",
+              !trailingBesideSuffix &&
+                showShortcut &&
+                !hasLastPass &&
+                !hasValue &&
+                !showClear &&
+                !props.invalid &&
+                "pr-24",
+              !trailingBesideSuffix && showClear && props.invalid && !hasLastPass && "pr-20",
+              !hasValue && props.nullable && "placeholder:text-muted-foreground",
+              textInputEmbeddedInputClasses(hasAffixes, density),
+              "[&::-ms-reveal]:hidden [&::-ms-clear]:hidden",
+            )}
+            data-testid={props["data-testid"]}
+          />
+
+          {!trailingBesideSuffix && showTrailing && (
+            <div className={textInputTrailingOverlayClasses(density)}>{trailingCluster(true)}</div>
           )}
         </div>
-      )}
+
+        {hasSuffix && (
+          <div
+            className={textInputAffixSuffixCellClasses(density, suffixContent, {
+              showTrailing: trailingBesideSuffix && showTrailing,
+            })}
+          >
+            {trailingBesideSuffix && showTrailing && trailingCluster(false)}
+            {trailingBesideSuffix && showTrailing ? (
+              <span className={textInputSuffixGlyphSlotClasses(density)}>{suffixContent}</span>
+            ) : (
+              suffixContent
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

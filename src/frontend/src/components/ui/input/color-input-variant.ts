@@ -16,6 +16,20 @@ export const colorInputVariant = cva(
   },
 );
 
+/** Affix row min-height — matches bool/text field heights. */
+export const colorInputRowMinHeightVariant = cva("", {
+  variants: {
+    density: {
+      Small: "min-h-7",
+      Medium: "min-h-9",
+      Large: "min-h-11",
+    },
+  },
+  defaultVariants: {
+    density: "Medium",
+  },
+});
+
 export const colorInputPickerVariant = cva("", {
   variants: {
     density: {
