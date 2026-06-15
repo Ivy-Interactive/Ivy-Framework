@@ -104,13 +104,13 @@
   <Target Name="NpmInstall" BeforeTargets="BuildFrontend"
           Inputs="../frontend/package.json;../frontend/pnpm-lock.yaml"
           Outputs="../frontend/node_modules/.modules.yaml">
-    <Exec Command="vp install" WorkingDirectory="../frontend" />
+    <Exec Command="vp install" WorkingDirectory="../frontend" EnvironmentVariables="CI=true" />
   </Target>
 
   <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths"
           Inputs="@(FrontendSourceFiles)"
           Outputs="../frontend/dist/.build-stamp">
-    <Exec Command="vp run build" WorkingDirectory="../frontend" />
+    <Exec Command="vp run build" WorkingDirectory="../frontend" EnvironmentVariables="CI=true" />
     <Touch Files="../frontend/dist/.build-stamp" AlwaysCreate="true" />
   </Target>
 
