@@ -8,16 +8,20 @@
     <FrontendSourceFiles Include="frontend\vite.config.*" Condition="Exists('frontend\vite.config.ts') Or Exists('frontend\vite.config.js')" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <CI Condition="'$(CI)' == '' And '$(GITHUB_ACTIONS)' == 'true'">true</CI>
+  </PropertyGroup>
+
   <Target Name="NpmInstall" BeforeTargets="BuildFrontend" Condition="Exists('frontend/package.json')"
           Inputs="frontend\package.json;frontend\pnpm-lock.yaml"
           Outputs="frontend\node_modules\.package-lock.json">
-    <Exec Command="vp install" WorkingDirectory="frontend" EnvironmentVariables="CI=true" />
+    <Exec Command="vp install -- --config.confirmModulesPurge=false" WorkingDirectory="frontend" EnvironmentVariables="CI=$(CI)" />
   </Target>
 
   <Target Name="BuildFrontend" BeforeTargets="AssignTargetPaths" Condition="Exists('frontend/package.json')"
           Inputs="@(FrontendSourceFiles)"
           Outputs="frontend\dist\.build-stamp">
-    <Exec Command="vp build" WorkingDirectory="frontend" EnvironmentVariables="CI=true" />
+    <Exec Command="vp build" WorkingDirectory="frontend" EnvironmentVariables="CI=$(CI)" />
     <Touch Files="frontend\dist\.build-stamp" AlwaysCreate="true" />
   </Target>
 
