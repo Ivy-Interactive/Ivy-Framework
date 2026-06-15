@@ -47,6 +47,14 @@ vi.mock("@/components/ui/input/text-input-variant", async (importOriginal) => {
   return {
     ...actual,
     textInputAffixCellClasses: mockTextInputAffixCellClasses,
+    textInputAffixPrefixCellClasses: vi.fn((density, content) => {
+      mockTextInputAffixCellClasses("prefix", density);
+      return actual.textInputAffixPrefixCellClasses(density, content);
+    }),
+    textInputAffixSuffixCellClasses: vi.fn((density, content, options) => {
+      mockTextInputAffixCellClasses("suffix", density);
+      return actual.textInputAffixSuffixCellClasses(density, content, options);
+    }),
   };
 });
 
